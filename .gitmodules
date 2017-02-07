@@ -1,0 +1,12 @@
+[submodule "3rdpirty/tinyobjloader"]
+	path = 3rdpirty/tinyobjloader
+	url = https://github.com/syoyo/tinyobjloader.git
+[submodule "3rdpirty/glfw"]
+	path = 3rdpirty/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "3rdpirty/openexr"]
+	path = 3rdpirty/openexr
+	url = https://github.com/openexr/openexr.git
+[submodule "3rdpirty/stb"]
+	path = 3rdpirty/stb
+	url = https://github.com/nothings/stb.git

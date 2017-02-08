@@ -8,7 +8,10 @@
 namespace aten {
 	class PinholeCamera : public camera {
 	public:
-		PinholeCamera(
+		PinholeCamera() {}
+		virtual ~PinholeCamera() {}
+
+		void init(
 			vec3 origin, vec3 lookat, vec3 up,
 			real vfov,
 			uint32_t width, uint32_t height)
@@ -39,8 +42,6 @@ namespace aten {
 			m_u = 2 * half_width * screenDist * m_right;
 			m_v = 2 * half_height * screenDist * m_up;
 		}
-
-		virtual ~PinholeCamera() {}
 
 		virtual ray sample(real s, real t) final
 		{

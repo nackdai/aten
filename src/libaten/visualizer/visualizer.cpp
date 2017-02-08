@@ -1,5 +1,6 @@
 #include <vector>
 #include "visualizer.h"
+#include <GL/glew.h>
 
 #define CALL_GL_API(func)\
     func; \
@@ -9,47 +10,13 @@
     }
 
 namespace aten {
-	visualizer visualizer::s_instance;
+	static GLuint g_program{ 0 };
+	static GLuint g_tex{ 0 };
 
-	bool visualizer::init(
-		int width, int height,
-		const char* pathVS,
-		const char* pathPS)
-	{
-		GLenum result = glewInit();
-		AT_ASSERT(result == GLEW_OK);
+	static int g_width{ 0 };
+	static int g_height{ 0 };
 
-		auto version = ::glGetString(GL_VERSION);
-		AT_PRINTF("GL Version(%s)\n", version);
-
-		CALL_GL_API(::glClipControl(
-			GL_LOWER_LEFT,
-			GL_ZERO_TO_ONE));
-
-		CALL_GL_API(::glFrontFace(GL_CCW));
-
-		CALL_GL_API(::glViewport(0, 0, width, height));
-		CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
-
-		m_tex = createTexture(width, height);
-		AT_VRETURN(m_tex != 0, false);
-
-		auto vs = createShader(pathVS, GL_VERTEX_SHADER);
-		AT_VRETURN(vs != 0, false);
-
-		auto fs = createShader(pathVS, GL_FRAGMENT_SHADER);
-		AT_VRETURN(fs != 0, false);
-
-		m_program = createProgram(vs, fs);
-		AT_VRETURN(m_program != 0, false);
-
-		m_width = width;
-		m_height = height;
-
-		return true;
-	}
-
-	GLuint visualizer::createTexture(int width, int height)
+	GLuint createTexture(int width, int height)
 	{
 		GLuint tex = 0;
 
@@ -79,7 +46,7 @@ namespace aten {
 		return tex;
 	}
 
-	GLuint visualizer::createShader(const char* path, GLenum type)
+	GLuint createShader(const char* path, GLenum type)
 	{
 		FILE* fp = nullptr;
 		fopen_s(&fp, path, "rt");
@@ -111,7 +78,7 @@ namespace aten {
 		return shader;
 	}
 
-	GLuint visualizer::createProgram(GLuint vs, GLuint fs)
+	GLuint createProgram(GLuint vs, GLuint fs)
 	{
 		auto program = ::glCreateProgram();
 		AT_ASSERT(program != 0);
@@ -119,13 +86,51 @@ namespace aten {
 		CALL_GL_API(::glAttachShader(program, vs));
 		CALL_GL_API(::glAttachShader(program, fs));
 
-		CALL_GL_API(::glLinkProgram(m_program));
+		CALL_GL_API(::glLinkProgram(program));
 
 		GLint isLinked = 0;
-		CALL_GL_API(::glGetProgramiv(m_program, GL_LINK_STATUS, &isLinked));
+		CALL_GL_API(::glGetProgramiv(program, GL_LINK_STATUS, &isLinked));
 		AT_ASSERT(isLinked != 0);
 
 		return program;
+	}
+
+	bool visualizer::init(
+		int width, int height,
+		const char* pathVS,
+		const char* pathPS)
+	{
+		GLenum result = glewInit();
+		AT_ASSERT(result == GLEW_OK);
+
+		auto version = ::glGetString(GL_VERSION);
+		AT_PRINTF("GL Version(%s)\n", version);
+
+		CALL_GL_API(::glClipControl(
+			GL_LOWER_LEFT,
+			GL_ZERO_TO_ONE));
+
+		CALL_GL_API(::glFrontFace(GL_CCW));
+
+		CALL_GL_API(::glViewport(0, 0, width, height));
+		CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
+
+		g_tex = createTexture(width, height);
+		AT_VRETURN(g_tex != 0, false);
+
+		auto vs = createShader(pathVS, GL_VERTEX_SHADER);
+		AT_VRETURN(vs != 0, false);
+
+		auto fs = createShader(pathVS, GL_FRAGMENT_SHADER);
+		AT_VRETURN(fs != 0, false);
+
+		g_program = createProgram(vs, fs);
+		AT_VRETURN(g_program != 0, false);
+
+		g_width = width;
+		g_height = height;
+
+		return true;
 	}
 
 	static inline GLint getHandle(GLuint program, const char* name)
@@ -141,19 +146,19 @@ namespace aten {
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
-		CALL_GL_API(::glUseProgram(m_program));
+		CALL_GL_API(::glUseProgram(g_program));
 
-		GLfloat invScreen[4] = { 1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f };
-		auto hInvScreen = getHandle(m_program, "invScreen");
+		GLfloat invScreen[4] = { 1.0f / g_width, 1.0f / g_height, 0.0f, 0.0f };
+		auto hInvScreen = getHandle(g_program, "invScreen");
 		if (hInvScreen >= 0) {
 			CALL_GL_API(::glUniform4fv(hInvScreen, 1, invScreen));
 		}
 
 		CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
-		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, m_tex));
+		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
 
-		auto hImage = getHandle(m_program, "image");
+		auto hImage = getHandle(g_program, "image");
 		if (hImage >= 0) {
 			CALL_GL_API(glUniform1i(hImage, 0));
 		}
@@ -165,7 +170,7 @@ namespace aten {
 			GL_TEXTURE_2D,
 			0,
 			0, 0,
-			m_width, m_height,
+			g_width, g_height,
 			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			pixels));

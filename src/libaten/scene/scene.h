@@ -34,7 +34,7 @@ namespace aten {
 
 			hitrecord tmp;
 
-			for (int i = 0; i < m_objs.size(); i++) {
+			for (size_t i = 0; i < m_objs.size(); i++) {
 				auto s = m_objs[i];
 				if (s->hit(r, t_min, t_max, tmp)) {
 					if (tmp.t < rec.t) {

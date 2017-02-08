@@ -1,7 +1,33 @@
 #include "visualizer/window.h"
+#include <GLFW/glfw3.h>
+#include <Shlwapi.h>
 
 namespace aten {
-	window window::s_instance;
+	static GLFWwindow* g_window{ nullptr };
+
+	static inline bool SetCurrentDirectoryFromExe()
+	{
+		static char buf[_MAX_PATH];
+
+		// 実行プログラムのフルパスを取得
+		{
+			DWORD result = ::GetModuleFileName(
+				NULL,
+				buf,
+				sizeof(buf));
+			AT_ASSERT(result > 0);
+		}
+
+		// ファイル名を取り除く
+		auto result = ::PathRemoveFileSpec(buf);
+		AT_ASSERT(result);
+
+		// カレントディレクトリを設定
+		result = ::SetCurrentDirectory(buf);
+		AT_ASSERT(result);
+
+		return result;
+	}
 
 	bool window::init(int width, int height, const char* title)
 	{
@@ -11,36 +37,38 @@ namespace aten {
 		::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 		::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-		m_window = ::glfwCreateWindow(
+		g_window = ::glfwCreateWindow(
 			width,
 			height,
 			title,
 			NULL, NULL);
 
-		if (!m_window) {
+		if (!g_window) {
 			::glfwTerminate();
 			AT_VRETURN(false, false);
 		}
+
+		SetCurrentDirectoryFromExe();
 
 		return true;
 	}
 
 	void window::run(std::function<void()> func)
 	{
-		AT_ASSERT(m_window);
+		AT_ASSERT(g_window);
 
-		while (!glfwWindowShouldClose(m_window)) {
+		while (!glfwWindowShouldClose(g_window)) {
 			func();
 
-			::glfwSwapBuffers(m_window);
+			::glfwSwapBuffers(g_window);
 			::glfwPollEvents();
 		}
 	}
 
 	void window::terminate()
 	{
-		if (m_window) {
-			::glfwDestroyWindow(m_window);
+		if (g_window) {
+			::glfwDestroyWindow(g_window);
 		}
 		::glfwTerminate();
 	}

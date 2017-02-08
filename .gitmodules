@@ -10,3 +10,6 @@
 [submodule "3rdpirty/stb"]
 	path = 3rdpirty/stb
 	url = https://github.com/nothings/stb.git
+[submodule "3rdpirty/cmdline"]
+	path = 3rdpirty/cmdline
+	url = https://github.com/tanakh/cmdline.git

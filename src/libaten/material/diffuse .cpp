@@ -32,7 +32,12 @@ namespace aten {
 		const real r1 = 2 * AT_MATH_PI * sampler.nextSample();
 		const real r2 = sampler.nextSample();
 		const real r2s = sqrt(r2);
-		vec3 dir = normalize((u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1.0 - r2)));
+
+		const real x = aten::cos(r1) * r2s;
+		const real y = aten::sin(r1) * r2s;
+		const real z = aten::sqrt(CONST_REAL(1.0) - r2);
+
+		vec3 dir = normalize((u * x + v * y + w * z));
 
 		return std::move(dir);
 	}

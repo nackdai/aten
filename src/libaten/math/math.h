@@ -9,9 +9,12 @@
 	#define AT_MATH_INF         (1e64)
 	#define AT_MATH_EPSILON     (1e-6)
 #else
-	#define AT_MATH_INF         (1e32)
-	#define AT_MATH_EPSILON     (1e-6)
+	#define AT_MATH_INF         (float)(1e32)
+	#define AT_MATH_EPSILON     (float)(1e-6)
 #endif
+
+#define Deg2Rad(d)   (AT_MATH_PI * (d) / CONST_REAL(180.0))
+#define Rad2Deg(r)   ((r) * CONST_REAL(180.0) / AT_MATH_PI)
 
 namespace aten {
 	inline real sqrt(real f)
@@ -20,6 +23,33 @@ namespace aten {
 		return ::sqrt(f);
 #else
 		return ::sqrtf(f);
+#endif
+	}
+
+	inline real tan(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::tan(f);
+#else
+		return ::tanf(f);
+#endif
+	}
+
+	inline real cos(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::cos(f);
+#else
+		return ::cosf(f);
+#endif
+	}
+
+	inline real sin(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::sin(f);
+#else
+		return ::sinf(f);
 #endif
 	}
 }

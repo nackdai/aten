@@ -8,7 +8,7 @@
 namespace aten
 {
 	struct hitrecord {
-		real t{ CONST_REAL(0.0) };
+		real t{ AT_MATH_INF };
 
 		vec3 p;
 		vec3 normal;

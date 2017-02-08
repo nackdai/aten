@@ -116,6 +116,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\libaten\camera\camera.h" />
+    <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\material\diffuse.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
@@ -128,6 +130,7 @@
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\UniformDistribtuionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
+    <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\types.h" />
   </ItemGroup>
   <ItemGroup>

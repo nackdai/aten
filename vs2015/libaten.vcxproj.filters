@@ -19,6 +19,12 @@
     <Filter Include="sampler">
       <UniqueIdentifier>{ef5333ac-f243-4f0d-9a28-c91b6c67d3a8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="camera">
+      <UniqueIdentifier>{4b3bd579-26ce-4d61-bc63-be16fbbcbcb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene">
+      <UniqueIdentifier>{3b3be85f-05c1-4b45-8a1c-66aee32105cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -55,6 +61,15 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\sampler.h">
       <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\camera\pinhole.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\camera\camera.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\scene\scene.h">
+      <Filter>scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

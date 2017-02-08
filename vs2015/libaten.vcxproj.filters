@@ -1,8 +1,71 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="NewFilter1">
+    <Filter Include="misc">
       <UniqueIdentifier>{712cf23a-fe12-4477-a552-05740e8b8afa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{b7124d6b-da34-4438-9acc-cfc37e4c8461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer">
+      <UniqueIdentifier>{caaa0556-6ed0-49d3-afb9-eaaaa3cab6d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="primitive">
+      <UniqueIdentifier>{0721ed3f-82f2-4111-8ff3-91a03315e3d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="material">
+      <UniqueIdentifier>{880ffa46-987e-40f3-9e2c-e55e2ff63125}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sampler">
+      <UniqueIdentifier>{ef5333ac-f243-4f0d-9a28-c91b6c67d3a8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\libaten\misc\timer.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\types.h" />
+    <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\math\vec3.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\math.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\ray.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\primitive\sphere.h">
+      <Filter>primitive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\material.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\diffuse.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\emissive.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\xorshift.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\UniformDistribtuionSampler.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\sampler.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\libaten\misc\timer.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\primitive\sphere.cpp">
+      <Filter>primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\diffuse .cpp">
+      <Filter>material</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

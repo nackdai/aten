@@ -35,3 +35,9 @@ namespace aten {
 #else
 	#define AT_ASSERT(b)
 #endif
+
+#define AT_VRETURN(b, ret)\
+	if (!(b)) {\
+		AT_ASSERT(false);\
+		return ret;\
+	}

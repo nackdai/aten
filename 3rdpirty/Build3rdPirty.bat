@@ -39,6 +39,12 @@ if not exist %BUILD_DIR%\GLFW.sln (
 
 %MSBUILD% %BUILD_DIR%\GLFW.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 
+rem glew =============================
+
+set BUILD_DIR=glew\build\vc12
+
+%MSBUILD% %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+
 rem end ==============================
 
 cd /d %CURDIR%
@@ -49,4 +55,4 @@ exit /b 0
 cd /d %CURDIR%
 echo "Error====="
 pause
-exist /b 1
+exit /b 1

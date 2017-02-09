@@ -7,7 +7,9 @@ static const char* TITLE = "app";
 
 static aten::PinholeCamera g_camera;
 static aten::AcceledScene<aten::LinearList> g_scene;
-static aten::RayTracing g_tracer;
+
+//static aten::RayTracing g_tracer;
+static aten::PathTracing g_tracer;
 
 static std::vector<aten::vec3> g_buffer;
 static std::vector<aten::color> g_dst;
@@ -28,6 +30,8 @@ void display()
 	{
 		dst.width = WIDTH;
 		dst.height = HEIGHT;
+		dst.maxDepth = 5;
+		dst.sample = 10;
 		dst.buffer = &g_buffer[0];
 	}
 

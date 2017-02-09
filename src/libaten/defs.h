@@ -42,7 +42,8 @@ namespace aten {
 		return ret;\
 	}
 
-#ifndef __AT_DEBUG__
+//#ifndef __AT_DEBUG__
+#if 1
 #define ENABLE_OMP
 #endif
 

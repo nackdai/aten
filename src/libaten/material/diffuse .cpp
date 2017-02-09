@@ -41,4 +41,10 @@ namespace aten {
 
 		return std::move(dir);
 	}
+
+	vec3 diffuse::brdf(const vec3& normal, const vec3& dir) const
+	{
+		vec3 ret = m_color / AT_MATH_PI;
+		return ret;
+	}
 }

@@ -22,6 +22,8 @@ namespace aten
 
 		virtual vec3 sampleDirection(const vec3& normal, sampler& sampler) const final;
 
+		virtual vec3 brdf(const vec3& normal, const vec3& dir) const final;
+
 	private:
 		vec3 m_color;
 	};

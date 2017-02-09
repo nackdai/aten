@@ -1,4 +1,5 @@
 #include "raytracing.h"
+#include "misc/thread.h"
 #include "sampler/UniformDistributionSampler.h"
 
 namespace aten
@@ -31,33 +32,41 @@ namespace aten
 	{
 		int width = dst.width;
 		int height = dst.height;
-		uint32_t sample = dst.sample;
 		vec3* color = dst.buffer;
 
-		XorShift rnd;
-		UniformDistributionSampler sampler(rnd);
+		uint32_t sample = 1;
 
 #ifdef ENABLE_OMP
-#pragma omp parallel for
+#pragma omp parallel
 #endif
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int pos = y * width + x;
+		{
+			auto idx = thread::getThreadIdx();
 
-				vec3 col;
+			XorShift rnd(idx);
+			UniformDistributionSampler sampler(rnd);
 
-				for (uint32_t i = 0; i < sample; i++) {
-					real u = real(x + sampler.nextSample()) / real(width);
-					real v = real(y + sampler.nextSample()) / real(height);
+#ifdef ENABLE_OMP
+#pragma omp for
+#endif
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					int pos = y * width + x;
 
-					auto ray = camera->sample(u, v);
+					vec3 col;
 
-					col += radiance(ray, scene);
+					for (uint32_t i = 0; i < sample; i++) {
+						real u = real(x + sampler.nextSample()) / real(width);
+						real v = real(y + sampler.nextSample()) / real(height);
+
+						auto ray = camera->sample(u, v);
+
+						col += radiance(ray, scene);
+					}
+
+					col /= (real)sample;
+
+					color[pos] = col;
 				}
-
-				col /= (real)sample;
-
-				color[pos] = col;
 			}
 		}
 	}

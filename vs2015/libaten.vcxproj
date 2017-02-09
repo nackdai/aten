@@ -162,6 +162,8 @@
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
     <ClInclude Include="..\src\libaten\primitive\sphere.h" />
+    <ClInclude Include="..\src\libaten\renderer\destication.h" />
+    <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\ray.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
@@ -179,6 +181,7 @@
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />

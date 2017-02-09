@@ -28,4 +28,7 @@
 #include "primitive/sphere.h"
 
 #include "renderer/ray.h"
+#include "renderer/destication.h"
 #include "renderer/raytracing.h"
+#include "renderer/pathtracing.h"
+

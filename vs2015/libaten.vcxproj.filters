@@ -99,6 +99,12 @@
     <ClInclude Include="..\src\libaten\renderer\raytracing.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\destication.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -126,6 +132,9 @@
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp">
       <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>

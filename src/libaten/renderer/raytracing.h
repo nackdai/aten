@@ -13,10 +13,10 @@ namespace aten
 		vec3* buffer{ nullptr };
 	};
 
-	class RayTracer {
+	class RayTracing {
 	public:
-		RayTracer() {}
-		~RayTracer() {}
+		RayTracing() {}
+		~RayTracing() {}
 
 		void render(
 			Destination& dst,

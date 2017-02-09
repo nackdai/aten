@@ -7,7 +7,7 @@ static const char* TITLE = "app";
 
 static aten::PinholeCamera g_camera;
 static aten::AcceledScene<aten::LinearList> g_scene;
-static aten::RayTracer g_tracer;
+static aten::RayTracing g_tracer;
 
 static std::vector<aten::vec3> g_buffer;
 static std::vector<aten::color> g_dst;

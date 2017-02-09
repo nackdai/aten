@@ -1,4 +1,4 @@
-#include "raytracer.h"
+#include "raytracing.h"
 #include "sampler/UniformDistributionSampler.h"
 
 namespace aten
@@ -24,7 +24,7 @@ namespace aten
 		return vec3();
 	}
 
-	void RayTracer::render(
+	void RayTracing::render(
 		Destination& dst,
 		scene* scene,
 		camera* camera)

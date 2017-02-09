@@ -28,4 +28,4 @@
 #include "primitive/sphere.h"
 
 #include "renderer/ray.h"
-#include "renderer/raytracer.h"
+#include "renderer/raytracing.h"

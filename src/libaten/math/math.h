@@ -52,4 +52,28 @@ namespace aten {
 		return ::sinf(f);
 #endif
 	}
+
+	inline real log(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::log(f);
+#else
+		return ::logf(f);
+#endif
+	}
+
+	inline real exp(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::exp(f);
+#else
+		return ::expf(f);
+#endif
+	}
+
+	template <typename _T>
+	inline _T clamp(_T f, _T a, _T b)
+	{
+		return min(max(f, a), b);
+	}
 }

@@ -12,7 +12,7 @@ namespace aten {
 		static bool init(
 			int width, int height,
 			const char* pathVS,
-			const char* pathPS);
+			const char* pathFS);
 
 		static void beginRender();
 

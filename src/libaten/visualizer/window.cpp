@@ -50,6 +50,9 @@ namespace aten {
 
 		SetCurrentDirectoryFromExe();
 
+		::glfwMakeContextCurrent(g_window);
+		::glfwSwapInterval(1);
+
 		return true;
 	}
 

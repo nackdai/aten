@@ -147,16 +147,20 @@
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\hdr\hdr.h" />
+    <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
     <ClInclude Include="..\src\libaten\material\diffuse.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\math\math.h" />
     <ClInclude Include="..\src\libaten\math\vec3.h" />
+    <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
     <ClInclude Include="..\src\libaten\primitive\sphere.h" />
     <ClInclude Include="..\src\libaten\renderer\ray.h" />
+    <ClInclude Include="..\src\libaten\renderer\raytracer.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
-    <ClInclude Include="..\src\libaten\sampler\UniformDistribtuionSampler.h" />
+    <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\types.h" />
@@ -164,9 +168,12 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
+    <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\material\diffuse .cpp" />
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\raytracer .cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
   </ItemGroup>

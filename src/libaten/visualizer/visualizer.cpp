@@ -98,7 +98,7 @@ namespace aten {
 	bool visualizer::init(
 		int width, int height,
 		const char* pathVS,
-		const char* pathPS)
+		const char* pathFS)
 	{
 		GLenum result = glewInit();
 		AT_ASSERT(result == GLEW_OK);
@@ -121,7 +121,7 @@ namespace aten {
 		auto vs = createShader(pathVS, GL_VERTEX_SHADER);
 		AT_VRETURN(vs != 0, false);
 
-		auto fs = createShader(pathVS, GL_FRAGMENT_SHADER);
+		auto fs = createShader(pathFS, GL_FRAGMENT_SHADER);
 		AT_VRETURN(fs != 0, false);
 
 		g_program = createProgram(vs, fs);

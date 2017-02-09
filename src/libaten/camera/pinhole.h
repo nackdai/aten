@@ -29,25 +29,29 @@ namespace aten {
 			// カメラ座標ベクトル.
 			m_dir = normalize(lookat - origin);
 			m_right = normalize(cross(up, m_dir));
-			m_up = cross(m_right, m_dir);
+			m_up = cross(m_dir, m_right);
 
 			// NOTE
 			// half_width * screenDist = ((w/2)/d) * d = w/2
 			// half_height * screenDist = ((h/2)/d) * d = h/2
 
 			// スクリーンの左下位置.
-			m_LowerLeftCorner = origin - half_width * screenDist * m_right - half_height * screenDist * m_up + screenDist * m_dir;
+			//m_LowerLeftCorner = origin - half_width * screenDist * m_right - half_height * screenDist * m_up + screenDist * m_dir;
+			m_LowerLeftCorner = origin + half_width * screenDist * m_right - half_height * screenDist * m_up + screenDist * m_dir;
 
 			// 左下基準としたスクリーンのUVベクトル.
-			m_u = 2 * half_width * screenDist * m_right;
+			m_u = 2 * half_width * screenDist * -m_right;
 			m_v = 2 * half_height * screenDist * m_up;
 		}
 
 		virtual ray sample(real s, real t) final
 		{
-			ray ret(
-				m_origin,
-				m_LowerLeftCorner + s * m_u + t * m_v - m_origin);
+			auto screenPos = s * m_u + t * m_v;
+			screenPos = screenPos + m_LowerLeftCorner;
+
+			auto dirToScr = screenPos - m_origin;
+
+			ray ret(m_origin, dirToScr);
 
 			return std::move(ret);
 		}

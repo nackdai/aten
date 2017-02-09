@@ -7,27 +7,50 @@
 
 namespace aten
 {
+	class primitive;
+
 	struct hitrecord {
 		real t{ AT_MATH_INF };
 
 		vec3 p;
 		vec3 normal;
 
+		primitive* obj{ nullptr };
+
 		material* mtrl{ nullptr };
 	};
 
-	class sphere {
+	class primitive {
+	protected:
+		primitive() {}
+		virtual ~primitive() {}
+
+	public:
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec) const = 0;
+	};
+
+	class sphere : public primitive {
 	public:
 		sphere() {}
 		sphere(const vec3& c, real r, material* m)
 			: m_center(c), m_radius(r), m_mtrl(m)
 		{};
 
+		virtual ~sphere() {}
+
 	public:
-		bool hit(
+		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const;
+			hitrecord& rec) const final;
+
+		const vec3& center()
+		{
+			return m_center;
+		}
 
 	private:
 		vec3 m_center;

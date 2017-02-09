@@ -6,10 +6,10 @@
 
 namespace aten
 {
-	class RayTracing {
+	class PathTracing {
 	public:
-		RayTracing() {}
-		~RayTracing() {}
+		PathTracing() {}
+		~PathTracing() {}
 
 		void render(
 			Destination& dst,

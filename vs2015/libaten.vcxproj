@@ -84,6 +84,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -98,6 +99,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -113,6 +115,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -132,6 +135,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -155,6 +159,7 @@
     <ClInclude Include="..\src\libaten\math\math.h" />
     <ClInclude Include="..\src\libaten\math\vec3.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
+    <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
     <ClInclude Include="..\src\libaten\primitive\sphere.h" />
     <ClInclude Include="..\src\libaten\renderer\ray.h" />
@@ -171,6 +176,7 @@
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\material\diffuse .cpp" />
+    <ClCompile Include="..\src\libaten\misc\thread.cpp" />
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracer .cpp" />

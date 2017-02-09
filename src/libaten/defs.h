@@ -41,3 +41,11 @@ namespace aten {
 		AT_ASSERT(false);\
 		return ret;\
 	}
+
+#ifndef __AT_DEBUG__
+#define ENABLE_OMP
+#endif
+
+#ifdef ENABLE_OMP
+#include <omp.h>
+#endif

@@ -1,5 +1,7 @@
 #include <tuple>
+#include <vector>
 #include "hdr/tonemap.h"
+#include "misc/thread.h"
 
 namespace aten
 {
@@ -22,39 +24,60 @@ namespace aten
 		int width, int height,
 		const vec3* src)
 	{
-		real sumY = CONST_REAL(0.0);
-		real maxLum = CONST_REAL(0.0);
+		auto threadnum = thread::getThreadNum();
+		std::vector<real> sumY(threadnum);
+		std::vector<real> maxLum(threadnum);
 
-		int cnt = 0;
+#ifdef ENABLE_OMP
+#pragma omp parallel
+#endif
+		{
+			int cnt = 0;
 
-		for(int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				int pos = y * width + x;
+			auto idx = thread::getThreadIdx();
 
-				const vec3& s = src[pos];
+#ifdef ENABLE_OMP
+#pragma omp for
+#endif
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					int pos = y * width + x;
 
-				vec3 col(
-					aten::sqrt(s.r),
-					aten::sqrt(s.g),
-					aten::sqrt(s.b));
+					const vec3& s = src[pos];
 
-				real lum = dot(RGB2Y, col);
+					vec3 col(
+						aten::sqrt(s.r),
+						aten::sqrt(s.g),
+						aten::sqrt(s.b));
 
-				if (lum > CONST_REAL(0.0)) {
-					sumY += aten::log(lum);
+					real lum = dot(RGB2Y, col);
 
-					if (lum > maxLum) {
-						maxLum = lum;
+					if (lum > CONST_REAL(0.0)) {
+						sumY[idx] += aten::log(lum);
+
+						if (lum > maxLum[idx]) {
+							maxLum[idx] = lum;
+						}
+
+						cnt++;
 					}
-
-					cnt++;
 				}
 			}
+
+			sumY[idx] /= cnt;
 		}
 
-		sumY /= cnt;
+		real retSumY = 0;
+		real retMaxLum = 0;
 
-		std::tuple<real, real> result = std::make_tuple(sumY, maxLum);
+		for (int i = 0; i < threadnum; i++) {
+			retSumY += sumY[i];
+			retMaxLum = max(maxLum[i], retMaxLum);
+		}
+
+		retSumY /= threadnum;
+
+		std::tuple<real, real> result = std::make_tuple(retSumY, retMaxLum);
 		return result;
 	}
 
@@ -75,6 +98,9 @@ namespace aten
 		const real coeff = middleGrey / aten::exp(lum);
 		const real l_max = coeff * maxlum;
 
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
 		for (int h = 0; h < height; h++) {
 			for (int w = 0; w < width; w++) {
 				int pos = h * width + w;

@@ -13,6 +13,7 @@
 
 #include "misc/color.h"
 #include "misc/timer.h"
+#include "misc/thread.h"
 
 #include "hdr/hdr.h"
 #include "hdr/tonemap.h"

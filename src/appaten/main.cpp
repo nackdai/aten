@@ -14,6 +14,12 @@ static std::vector<aten::color> g_dst;
 
 static bool isExportedHdr = false;
 
+#ifdef ENABLE_OMP
+static uint32_t g_threadnum = 8;
+#else
+static uint32_t g_threadnum = 1;
+#endif
+
 void display()
 {
 	aten::visualizer::beginRender();
@@ -25,8 +31,14 @@ void display()
 		dst.buffer = &g_buffer[0];
 	}
 
+	aten::timer timer;
+	timer.begin();
+
 	// Trace rays.
 	g_tracer.render(dst, &g_scene, &g_camera);
+
+	auto elapsed = timer.end();
+	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
 
 	if (!isExportedHdr) {
 		isExportedHdr = true;
@@ -93,6 +105,9 @@ void makeScene()
 
 int main(int argc, char* argv[])
 {
+	aten::timer::init();
+	aten::thread::setThreadNum(g_threadnum);
+
 	aten::window::init(WIDTH, HEIGHT, TITLE);
 
 	aten::visualizer::init(

@@ -44,13 +44,14 @@ namespace aten
 		return pdfLight;
 	}
 
-	vec3 radiance(
+	vec3 PathTracing::radiance(
 		sampler& sampler,
 		const ray& inRay,
-		scene& scene,
-		uint32_t maxDepth)
+		scene& scene)
 	{
 		uint32_t depth = 0;
+		uint32_t maxDepth = m_maxDepth;
+		uint32_t rrDepth = m_rrDepth;
 
 		aten::ray ray = inRay;
 
@@ -143,6 +144,22 @@ namespace aten
 					}
 				}
 
+				real russianProb = CONST_REAL(1.0);
+
+				if (depth > rrDepth) {
+					auto t = normalize(throughput);
+					auto p = max(t.r, max(t.g, t.b));
+
+					russianProb = sampler.nextSample();
+
+					if (russianProb >= p) {
+						russianProb = p;
+					}
+					else {
+						break;
+					}
+				}
+
 				// Sample next direction.
 				auto nextDir = rec.mtrl->sampleDirection(orienting_normal, sampler);
 
@@ -153,6 +170,7 @@ namespace aten
 				auto c = max(dot(orienting_normal, nextDir), CONST_REAL(0.0));
 
 				throughput *= brdf * c / pdfb;
+				throughput /= russianProb;
 
 				// Make next ray.
 				ray = aten::ray(rec.p, nextDir);
@@ -176,9 +194,15 @@ namespace aten
 	{
 		int width = dst.width;
 		int height = dst.height;
-		uint32_t maxDepth = dst.maxDepth;
 		uint32_t sample = dst.sample;
 		vec3* color = dst.buffer;
+
+		m_maxDepth = dst.maxDepth;
+		m_rrDepth = dst.russianRouletteDepth;
+
+		if (m_rrDepth > m_maxDepth) {
+			m_rrDepth = m_maxDepth - 1;
+		}
 
 #ifdef ENABLE_OMP
 #pragma omp parallel
@@ -205,7 +229,7 @@ namespace aten
 
 						auto ray = camera->sample(u, v);
 
-						col += radiance(sampler, ray, scene, maxDepth);
+						col += radiance(sampler, ray, scene);
 					}
 
 					col /= (real)sample;

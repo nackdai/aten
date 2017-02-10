@@ -47,9 +47,14 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const final;
 
-		const vec3& center()
+		const vec3& center() const
 		{
 			return m_center;
+		}
+
+		real radius() const
+		{
+			return m_radius;
 		}
 
 	private:

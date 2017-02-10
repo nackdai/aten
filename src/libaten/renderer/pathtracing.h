@@ -13,7 +13,7 @@ namespace aten
 
 		void render(
 			Destination& dst,
-			scene* scene,
+			scene& scene,
 			camera* camera);
 	};
 }

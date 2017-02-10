@@ -39,7 +39,7 @@ void display()
 	timer.begin();
 
 	// Trace rays.
-	g_tracer.render(dst, &g_scene, &g_camera);
+	g_tracer.render(dst, g_scene, &g_camera);
 
 	auto elapsed = timer.end();
 	AT_PRINTF("Elapsed %f[ms]\n", elapsed);

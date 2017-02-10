@@ -96,7 +96,7 @@ namespace aten {
 			return ret;
 		}
 
-		void noramlize()
+		void normalize()
 		{
 			auto l = length();
 			*this /= l;

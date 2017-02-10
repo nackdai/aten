@@ -1,26 +1,26 @@
 #pragma once
 
-#include "renderer/destication.h"
+#include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 
 namespace aten
 {
-	class PathTracing {
+	class PathTracing : public Renderer {
 	public:
 		PathTracing() {}
 		~PathTracing() {}
 
-		void render(
+		virtual void render(
 			Destination& dst,
-			scene& scene,
-			camera* camera);
+			scene* scene,
+			camera* camera) override final;
 
 	private:
 		vec3 radiance(
-			sampler& sampler,
+			sampler* sampler,
 			const ray& inRay,
-			scene& scene);
+			scene* scene);
 
 	private:
 		uint32_t m_maxDepth{ 1 };

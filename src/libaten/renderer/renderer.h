@@ -14,4 +14,19 @@ namespace aten
 		uint32_t mutation{ 1 };
 		vec3* buffer{ nullptr };
 	};
+
+	class scene;
+	class camera;
+
+	class Renderer {
+	protected:
+		Renderer() {}
+		virtual ~Renderer() {}
+
+	public:
+		virtual void render(
+			Destination& dst,
+			scene* scene,
+			camera* camera) = 0;
+	};
 }

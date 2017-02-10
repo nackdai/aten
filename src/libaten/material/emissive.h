@@ -13,17 +13,17 @@ namespace aten
 
 		virtual ~emissive() {}
 
-		virtual bool isEmissive() final
+		virtual bool isEmissive() override final
 		{
 			return true;
 		}
 
-		virtual vec3 color() const final
+		virtual vec3 color() const override final
 		{
 			return m_emit;
 		}
 
-		virtual real pdf(const vec3& normal, const vec3& dir) const final
+		virtual real pdf(const vec3& normal, const vec3& dir) const override final
 		{
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.
@@ -31,7 +31,7 @@ namespace aten
 			return CONST_REAL(1.0);
 		}
 
-		virtual vec3 sampleDirection(const vec3& normal, sampler& sampler) const final
+		virtual vec3 sampleDirection(const vec3& normal, sampler* sampler) const override final
 		{
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.
@@ -39,7 +39,7 @@ namespace aten
 			return std::move(normal);
 		}
 
-		virtual vec3 brdf(const vec3& normal, const vec3& dir) const final
+		virtual vec3 brdf(const vec3& normal, const vec3& dir) const override final
 		{
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.

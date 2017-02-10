@@ -1,19 +1,19 @@
 #pragma once
 
-#include "renderer/destication.h"
+#include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 
 namespace aten
 {
-	class RayTracing {
+	class RayTracing : public Renderer {
 	public:
 		RayTracing() {}
-		~RayTracing() {}
+		virtual ~RayTracing() {}
 
-		void render(
+		virtual void render(
 			Destination& dst,
 			scene* scene,
-			camera* camera);
+			camera* camera) override;
 	};
 }

@@ -45,7 +45,7 @@ namespace aten
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const final;
+			hitrecord& rec) const override final;
 
 		const vec3& center() const
 		{

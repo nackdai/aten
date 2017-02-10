@@ -28,7 +28,7 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const final
+			hitrecord& rec) const override final
 		{
 			bool isHit = false;
 
@@ -99,7 +99,7 @@ namespace aten {
 		virtual ~AcceledScene() {}
 
 	public:
-		virtual void add(primitive* s) final
+		virtual void add(primitive* s) override final
 		{
 			m_accel.add(s);
 		}
@@ -107,7 +107,7 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const final
+			hitrecord& rec) const override final
 		{
 			auto isHit = m_accel.hit(r, t_min, t_max, rec);
 			return isHit;

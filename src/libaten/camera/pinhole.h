@@ -44,7 +44,7 @@ namespace aten {
 			m_v = 2 * half_height * screenDist * m_up;
 		}
 
-		virtual ray sample(real s, real t) final
+		virtual ray sample(real s, real t) override final
 		{
 			auto screenPos = s * m_u + t * m_v;
 			screenPos = screenPos + m_LowerLeftCorner;

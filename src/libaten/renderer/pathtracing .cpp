@@ -6,7 +6,7 @@ namespace aten
 {
 	// TODO
 	void sampleLight(
-		sampler& sampler,
+		sampler* sampler,
 		const sphere& sphere,
 		vec3& posLight, 
 		vec3& nmlLight,
@@ -14,8 +14,8 @@ namespace aten
 	{
 		auto r = sphere.radius();
 
-		auto r1 = sampler.nextSample();
-		auto r2 = sampler.nextSample();
+		auto r1 = sampler->nextSample();
+		auto r2 = sampler->nextSample();
 
 		auto z = 1.0 - 2.0 * r2; // [0,1] -> [-1, 1]
 
@@ -45,9 +45,9 @@ namespace aten
 	}
 
 	vec3 PathTracing::radiance(
-		sampler& sampler,
+		sampler* sampler,
 		const ray& inRay,
-		scene& scene)
+		scene* scene)
 	{
 		uint32_t depth = 0;
 		uint32_t maxDepth = m_maxDepth;
@@ -63,7 +63,7 @@ namespace aten
 		while (depth < maxDepth) {
 			hitrecord rec;
 
-			if (scene.hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
+			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
 				// 交差位置の法線.
 				// 物体からのレイの入出を考慮.
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
@@ -103,7 +103,7 @@ namespace aten
 				// Explicit conection to light.
 				{
 					// TODO
-					auto light = scene.getLight(0);
+					auto light = scene->getLight(0);
 
 					vec3 posLight;
 					vec3 nmlLight;
@@ -115,7 +115,7 @@ namespace aten
 
 					hitrecord tmpRec;
 
-					if (scene.hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+					if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 						if (tmpRec.obj == light) {
 							// Shadow ray hits the light.
 							auto cosShadow = dot(orienting_normal, dirToLight);
@@ -150,7 +150,7 @@ namespace aten
 					auto t = normalize(throughput);
 					auto p = max(t.r, max(t.g, t.b));
 
-					russianProb = sampler.nextSample();
+					russianProb = sampler->nextSample();
 
 					if (russianProb >= p) {
 						russianProb = p;
@@ -189,7 +189,7 @@ namespace aten
 
 	void PathTracing::render(
 		Destination& dst,
-		scene& scene,
+		scene* scene,
 		camera* camera)
 	{
 		int width = dst.width;
@@ -229,7 +229,7 @@ namespace aten
 
 						auto ray = camera->sample(u, v);
 
-						col += radiance(sampler, ray, scene);
+						col += radiance(&sampler, ray, scene);
 					}
 
 					col /= (real)sample;

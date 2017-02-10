@@ -11,7 +11,7 @@ namespace aten {
 		return ret;
 	}
 
-	vec3 diffuse::sampleDirection(const vec3& normal, sampler& sampler) const
+	vec3 diffuse::sampleDirection(const vec3& normal, sampler* sampler) const
 	{
 		// normalの方向を基準とした正規直交基底(w, u, v)を作る.
 		// この基底に対する半球内で次のレイを飛ばす.
@@ -29,8 +29,8 @@ namespace aten {
 		v = cross(w, u);
 
 		// コサイン項を使った重点的サンプリング.
-		const real r1 = 2 * AT_MATH_PI * sampler.nextSample();
-		const real r2 = sampler.nextSample();
+		const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
+		const real r2 = sampler->nextSample();
 		const real r2s = sqrt(r2);
 
 		const real x = aten::cos(r1) * r2s;

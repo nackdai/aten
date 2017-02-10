@@ -4,7 +4,7 @@
 
 namespace aten
 {
-	vec3 radiance(
+	vec3 RayTracing::radiance(
 		const ray& ray,
 		scene* scene)
 	{
@@ -20,9 +20,10 @@ namespace aten
 
 			return std::move(color);
 		}
+		
+		auto bg = sampleBG(ray);
 
-		// TODO
-		return vec3();
+		return std::move(bg);
 	}
 
 	void RayTracing::render(

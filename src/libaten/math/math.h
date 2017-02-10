@@ -53,6 +53,24 @@ namespace aten {
 #endif
 	}
 
+	inline real atan2(real y, real x)
+	{
+#ifdef TYPE_DOUBLE
+		return ::atan2(y, x);
+#else
+		return ::atan2f(y, x);
+#endif
+	}
+
+	inline real acos(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::acos(f);
+#else
+		return ::acosf(f);
+#endif
+	}
+
 	inline real log(real f)
 	{
 #ifdef TYPE_DOUBLE

@@ -16,6 +16,9 @@
 #include "misc/timer.h"
 #include "misc/thread.h"
 
+#include "texture/ImageLoader.h"
+#include "texture/texture.h"
+
 #include "hdr/hdr.h"
 #include "hdr/tonemap.h"
 
@@ -30,6 +33,8 @@
 
 #include "renderer/ray.h"
 #include "renderer/renderer.h"
+#include "renderer/background.h"
+#include "renderer/envmap.h"
 #include "renderer/raytracing.h"
 #include "renderer/pathtracing.h"
 

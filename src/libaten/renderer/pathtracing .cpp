@@ -182,7 +182,8 @@ namespace aten
 			else {
 				// TODO
 				// Background.
-				return vec3();
+				auto bg = sampleBG(ray);
+				return bg;
 			}
 
 			depth++;

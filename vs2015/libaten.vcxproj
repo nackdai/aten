@@ -81,14 +81,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -96,14 +96,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -113,7 +113,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -122,8 +122,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -133,7 +133,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -142,8 +142,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -163,6 +163,8 @@
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
     <ClInclude Include="..\src\libaten\primitive\sphere.h" />
+    <ClInclude Include="..\src\libaten\renderer\background.h" />
+    <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\ray.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
@@ -171,6 +173,8 @@
     <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
+    <ClInclude Include="..\src\libaten\texture\ImageLoader.h" />
+    <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
@@ -183,8 +187,10 @@
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
+    <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
   </ItemGroup>

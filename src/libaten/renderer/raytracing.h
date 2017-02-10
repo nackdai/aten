@@ -15,5 +15,10 @@ namespace aten
 			Destination& dst,
 			scene* scene,
 			camera* camera) override;
+
+	private:
+		vec3 radiance(
+			const ray& ray,
+			scene* scene);
 	};
 }

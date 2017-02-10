@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "math/vec3.h"
+#include "renderer/background.h"
 
 namespace aten
 {
@@ -28,5 +29,22 @@ namespace aten
 			Destination& dst,
 			scene* scene,
 			camera* camera) = 0;
+
+		void setBG(background* bg)
+		{
+			m_bg = bg;
+		}
+
+	protected:
+		virtual vec3 sampleBG(const ray& inRay) const
+		{
+			if (m_bg) {
+				return m_bg->sample(inRay);
+			}
+			return std::move(vec3());
+		}
+
+	private:
+		background* m_bg{ nullptr };
 	};
 }

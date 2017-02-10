@@ -8,6 +8,10 @@ static const char* TITLE = "app";
 static aten::PinholeCamera g_camera;
 static aten::AcceledScene<aten::LinearList> g_scene;
 
+//static aten::StaticColorBG m_bg(aten::vec3(1, 1, 0));
+static aten::envmap m_bg;
+static aten::texture* envmap;
+
 //static aten::RayTracing g_tracer;
 static aten::PathTracing g_tracer;
 
@@ -48,11 +52,20 @@ void display()
 	if (!isExportedHdr) {
 		isExportedHdr = true;
 
+#if 0
 		// Export to hdr format.
 		aten::HDRExporter::save(
 			"result.hdr",
 			&g_buffer[0],
 			WIDTH, HEIGHT);
+#else
+		auto w = envmap->width();
+		auto h = envmap->height();
+		auto c = envmap->colors();
+		aten::HDRExporter::save(
+			"result.hdr",
+			c, w, h);
+#endif
 	}
 
 	// Do tonemap.
@@ -69,7 +82,7 @@ void makeScene()
 	auto light = new aten::sphere(
 		aten::vec3(50.0, 75.0, 81.6),
 		5.0,
-		new aten::emissive(aten::vec3(16.0, 16.0, 16.0)));
+		new aten::emissive(aten::vec3(64.0, 64.0, 64.0)));
 
 	double r = 1e3;
 
@@ -110,6 +123,7 @@ void makeScene()
 		16.5, 
 		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
 
+#if 0
 	g_scene.add(light);
 	g_scene.add(left);
 	g_scene.add(right);
@@ -120,6 +134,7 @@ void makeScene()
 	g_scene.add(mirror);
 
 	g_scene.addLight(light);
+#endif
 }
 
 int main(int argc, char* argv[])
@@ -141,10 +156,15 @@ int main(int argc, char* argv[])
 		lookfrom,
 		lookat,
 		aten::vec3(0, 1, 0),
-		40,
+		30,
 		WIDTH, HEIGHT);
 
 	makeScene();
+
+	envmap = aten::ImageLoader::load("studio015.hdr");
+	m_bg.init(envmap);
+
+	g_tracer.setBG(&m_bg);
 
 	g_buffer.resize(WIDTH * HEIGHT);
 	g_dst.resize(WIDTH * HEIGHT);

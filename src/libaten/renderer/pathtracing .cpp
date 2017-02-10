@@ -68,6 +68,7 @@ namespace aten
 				// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
+				// Implicit conection to light.
 				if (rec.mtrl->isEmissive()) {
 					if (depth == 0) {
 						// Ray hits the light directly.
@@ -75,7 +76,6 @@ namespace aten
 						return std::move(emit);
 					}
 					else {
-						// Implicit conection to light.
 						auto cosLight = dot(orienting_normal, -ray.dir);
 						auto dist2 = (rec.p - ray.org).squared_length();
 
@@ -101,6 +101,7 @@ namespace aten
 				}
 
 				// Explicit conection to light.
+				if (!rec.mtrl->isSingular())
 				{
 					// TODO
 					auto light = scene->getLight(0);
@@ -161,7 +162,10 @@ namespace aten
 				}
 
 				// Sample next direction.
-				auto nextDir = rec.mtrl->sampleDirection(orienting_normal, sampler);
+				auto nextDir = rec.mtrl->sampleDirection(
+					ray.dir,
+					orienting_normal, 
+					sampler);
 
 				pdfb = rec.mtrl->pdf(orienting_normal, nextDir);
 

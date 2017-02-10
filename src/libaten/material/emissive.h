@@ -13,7 +13,7 @@ namespace aten
 
 		virtual ~emissive() {}
 
-		virtual bool isEmissive() override final
+		virtual bool isEmissive() const override final
 		{
 			return true;
 		}
@@ -31,7 +31,10 @@ namespace aten
 			return CONST_REAL(1.0);
 		}
 
-		virtual vec3 sampleDirection(const vec3& normal, sampler* sampler) const override final
+		virtual vec3 sampleDirection(
+			const vec3& in,
+			const vec3& normal, 
+			sampler* sampler) const override final
 		{
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.

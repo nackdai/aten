@@ -105,6 +105,9 @@
     <ClInclude Include="..\src\libaten\renderer\renderer.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\specular.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -136,6 +139,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\specular.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

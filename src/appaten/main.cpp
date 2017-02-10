@@ -69,7 +69,7 @@ void makeScene()
 	auto light = new aten::sphere(
 		aten::vec3(50.0, 75.0, 81.6),
 		5.0,
-		new aten::emissive(aten::vec3(12.0, 12.0, 12.0)));
+		new aten::emissive(aten::vec3(16.0, 16.0, 16.0)));
 
 	double r = 1e3;
 
@@ -98,12 +98,26 @@ void makeScene()
 		r,
 		new aten::diffuse(aten::vec3(0.75, 0.75, 0.75)));
 
+	// —Î‹…
+	auto green = new aten::sphere(
+		aten::vec3(65, 20, 20),
+		20,
+		new aten::diffuse(aten::vec3(0.25, 0.75, 0.25)));
+
+	// ‹¾
+	auto mirror = new aten::sphere(
+		aten::vec3(27, 16.5, 47), 
+		16.5, 
+		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+
 	g_scene.add(light);
 	g_scene.add(left);
 	g_scene.add(right);
 	g_scene.add(wall);
 	g_scene.add(floor);
 	g_scene.add(ceil);
+	g_scene.add(green);
+	g_scene.add(mirror);
 
 	g_scene.addLight(light);
 }

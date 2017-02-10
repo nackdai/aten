@@ -11,7 +11,10 @@ namespace aten {
 		return ret;
 	}
 
-	vec3 diffuse::sampleDirection(const vec3& normal, sampler* sampler) const
+	vec3 diffuse::sampleDirection(
+		const vec3& in,
+		const vec3& normal, 
+		sampler* sampler) const
 	{
 		// normal‚Ì•ûŒü‚ğŠî€‚Æ‚µ‚½³‹K’¼ŒğŠî’ê(w, u, v)‚ğì‚é.
 		// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŸ‚ÌƒŒƒC‚ğ”ò‚Î‚·.

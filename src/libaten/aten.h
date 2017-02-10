@@ -7,6 +7,7 @@
 
 #include "material/emissive.h"
 #include "material/diffuse.h"
+#include "material/specular.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

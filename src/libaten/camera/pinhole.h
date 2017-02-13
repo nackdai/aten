@@ -22,7 +22,8 @@ namespace aten {
 
 			real half_height = aten::tan(theta / 2);	// (h/2)/d
 			real half_width = m_aspect * half_height;	// (h/2)/d * w/h = (w/2)/d
-			real screenDist = (height / CONST_REAL(2.0)) / half_height;		// (h/2) / ((h/2)/d) = d
+
+			real flocalLength = CONST_REAL(1.0);
 
 			m_origin = origin;
 
@@ -37,11 +38,11 @@ namespace aten {
 
 			// スクリーンの左下位置.
 			//m_LowerLeftCorner = origin - half_width * screenDist * m_right - half_height * screenDist * m_up + screenDist * m_dir;
-			m_LowerLeftCorner = origin + half_width * screenDist * m_right - half_height * screenDist * m_up + screenDist * m_dir;
+			m_LowerLeftCorner = origin + half_width * flocalLength * m_right - half_height * flocalLength * m_up + flocalLength * m_dir;
 
 			// 左下基準としたスクリーンのUVベクトル.
-			m_u = 2 * half_width * screenDist * -m_right;
-			m_v = 2 * half_height * screenDist * m_up;
+			m_u = 2 * half_width * flocalLength * -m_right;
+			m_v = 2 * half_height * flocalLength * m_up;
 		}
 
 		virtual ray sample(real s, real t) override final

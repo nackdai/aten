@@ -53,18 +53,12 @@ namespace aten
 				for (int x = 0; x < width; x++) {
 					int pos = y * width + x;
 
-					vec3 col;
+					real u = real(x) / real(width - 1);
+					real v = real(y) / real(height - 1);
 
-					for (uint32_t i = 0; i < sample; i++) {
-						real u = real(x + sampler.nextSample()) / real(width);
-						real v = real(y + sampler.nextSample()) / real(height);
+					auto ray = camera->sample(u, v);
 
-						auto ray = camera->sample(u, v);
-
-						col += radiance(ray, scene);
-					}
-
-					col /= (real)sample;
+					auto col = radiance(ray, scene);
 
 					color[pos] = col;
 				}

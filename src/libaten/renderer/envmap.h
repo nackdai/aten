@@ -20,6 +20,8 @@ namespace aten
 		}
 
 		virtual vec3 sample(const ray& inRay) const override final;
+
+		virtual vec3 sample(real u, real v) const override final;
 		
 	private:
 		texture* m_envmap;

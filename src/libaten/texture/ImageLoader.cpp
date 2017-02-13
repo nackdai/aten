@@ -59,13 +59,20 @@ namespace aten {
 			input->read_image(TypeDesc::FLOAT, &texturedata[0], sizeof(float) * 3);
 
 			// Convert to vec3.
-			for (uint32_t i = 0; i < width * height; i++) {
-				float* s = &texturedata[i * 3];
-				vec3& d = dst[i];
+			for (int y = height - 1; y >= 0; y--) {
+				for (int x = 0; x < width; x++) {
+					// TODO
+					// Invert y coordinate. Why?
+					auto src_i = y * width + x;
+					auto dst_i = ((height - 1) - y) * width + x;
 
-				d.r = s[0];
-				d.g = s[1];
-				d.b = s[2];
+					float* s = &texturedata[src_i * 3];
+					vec3& d = dst[dst_i];
+
+					d.r = s[0];
+					d.g = s[1];
+					d.b = s[2];
+				}
 			}
 		}
 

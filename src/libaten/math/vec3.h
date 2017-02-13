@@ -110,6 +110,12 @@ namespace aten {
 		return std::move(ret);
 	}
 
+	inline vec3 operator+(const vec3& v1, real f)
+	{
+		vec3 ret(v1.x + f, v1.y + f, v1.z + f);
+		return std::move(ret);
+	}
+
 	inline vec3 operator-(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);

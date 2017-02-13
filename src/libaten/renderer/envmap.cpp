@@ -24,4 +24,11 @@ namespace aten
 
 		return std::move(ret);
 	}
+
+	vec3 envmap::sample(real u, real v) const
+	{
+		auto ret = m_envmap->at(u, v);
+
+		return std::move(ret);
+	}
 }

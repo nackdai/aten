@@ -10,7 +10,7 @@ static aten::AcceledScene<aten::LinearList> g_scene;
 
 //static aten::StaticColorBG m_bg(aten::vec3(1, 1, 0));
 static aten::envmap m_bg;
-static aten::texture* envmap;
+static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
 static aten::PathTracing g_tracer;
@@ -52,7 +52,7 @@ void display()
 	if (!isExportedHdr) {
 		isExportedHdr = true;
 
-#if 0
+#if 1
 		// Export to hdr format.
 		aten::HDRExporter::save(
 			"result.hdr",
@@ -123,7 +123,7 @@ void makeScene()
 		16.5, 
 		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
 
-#if 0
+#if 1
 	g_scene.add(light);
 	g_scene.add(left);
 	g_scene.add(right);
@@ -161,8 +161,8 @@ int main(int argc, char* argv[])
 
 	makeScene();
 
-	envmap = aten::ImageLoader::load("studio015.hdr");
-	m_bg.init(envmap);
+	g_envmap = aten::ImageLoader::load("studio015.hdr");
+	m_bg.init(g_envmap);
 
 	g_tracer.setBG(&m_bg);
 

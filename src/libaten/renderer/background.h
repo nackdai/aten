@@ -13,6 +13,7 @@ namespace aten
 
 	public:
 		virtual vec3 sample(const ray& inRay) const = 0;
+		virtual vec3 sample(real u, real v) const = 0;
 	};
 
 	class StaticColorBG : public background {
@@ -24,6 +25,11 @@ namespace aten
 
 	public:
 		virtual vec3 sample(const ray& inRay) const override final
+		{
+			return std::move(m_color);
+		}
+
+		virtual vec3 sample(real u, real v) const override final
 		{
 			return std::move(m_color);
 		}

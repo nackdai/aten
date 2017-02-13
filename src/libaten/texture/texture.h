@@ -24,7 +24,7 @@ namespace aten {
 			uint32_t x = (uint32_t)(min(u, real(1)) * (m_width - 1));
 			uint32_t y = (uint32_t)(min(v, real(1)) * (m_height - 1));
 
-			uint32_t pos = y * m_height + x;
+			uint32_t pos = y * m_width + x;
 
 			const vec3& ret = m_colors[pos];
 

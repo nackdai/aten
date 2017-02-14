@@ -89,6 +89,15 @@ namespace aten {
 #endif
 	}
 
+	inline real pow(real f, real v)
+	{
+#ifdef TYPE_DOUBLE
+		return ::pow(f, v);
+#else
+		return ::powf(f, v);
+#endif
+	}
+
 	template <typename _T>
 	inline _T clamp(_T f, _T a, _T b)
 	{

@@ -36,7 +36,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 10;
+		dst.sample = 16;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -80,9 +80,9 @@ void display()
 void makeScene()
 {
 	auto light = new aten::sphere(
-		aten::vec3(50.0, 75.0, 81.6),
-		5.0,
-		new aten::emissive(aten::vec3(64.0, 64.0, 64.0)));
+		aten::vec3(50.0, 90.0, 81.6),
+		15.0,
+		new aten::emissive(aten::vec3(36.0, 36.0, 36.0)));
 
 	double r = 1e3;
 
@@ -111,17 +111,23 @@ void makeScene()
 		r,
 		new aten::diffuse(aten::vec3(0.75, 0.75, 0.75)));
 
-	// —Î‹…
+	// —Î‹….
 	auto green = new aten::sphere(
 		aten::vec3(65, 20, 20),
 		20,
 		new aten::diffuse(aten::vec3(0.25, 0.75, 0.25)));
 
-	// ‹¾
+	// ‹¾.
 	auto mirror = new aten::sphere(
 		aten::vec3(27, 16.5, 47), 
 		16.5, 
 		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+
+	// ƒKƒ‰ƒX.
+	auto glass = new aten::sphere(
+		aten::vec3(77, 16.5, 78),
+		16.5,
+		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
 
 #if 1
 	g_scene.add(light);
@@ -132,6 +138,7 @@ void makeScene()
 	g_scene.add(ceil);
 	g_scene.add(green);
 	g_scene.add(mirror);
+	g_scene.add(glass);
 
 	g_scene.addLight(light);
 #endif

@@ -50,6 +50,15 @@ namespace aten
 			return std::move(vec3());
 		}
 
+		virtual sampling sample(
+			const vec3& in,
+			const vec3& normal,
+			sampler* sampler) const override final
+		{
+			AT_ASSERT(false);
+			return std::move(sampling(vec3(), vec3(), CONST_REAL(0.0)));
+		}
+
 	private:
 		vec3 m_emit;
 	};

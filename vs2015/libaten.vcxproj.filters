@@ -123,6 +123,9 @@
     <ClInclude Include="..\src\libaten\renderer\envmap.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\refraction.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\refraction.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

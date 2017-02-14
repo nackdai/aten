@@ -21,6 +21,11 @@ namespace aten
 			return false;
 		}
 
+		virtual bool isTranslucent() const
+		{
+			return false;
+		}
+
 		virtual vec3 color() const = 0;
 
 		virtual real pdf(const vec3& normal, const vec3& dir) const = 0;
@@ -31,5 +36,22 @@ namespace aten
 			sampler* sampler) const = 0;
 
 		virtual vec3 brdf(const vec3& normal, const vec3& dir) const = 0;
+
+		struct sampling {
+			vec3 dir;
+			vec3 brdf;
+			real pdf{ CONST_REAL(0.0) };
+			bool into{ false };
+
+			sampling() {}
+			sampling(const vec3& d, const vec3& b, real p)
+				: dir(d), brdf(b), pdf(p)
+			{}
+		};
+
+		virtual sampling sample(
+			const vec3& in,
+			const vec3& normal,
+			sampler* sampler) const = 0;
 	};
 }

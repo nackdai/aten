@@ -4,16 +4,21 @@
 
 namespace aten
 {
-	class specular : public material {
+	class refraction : public material {
 	public:
-		specular() {}
-		specular(const vec3& c)
-			: m_color(c)
+		refraction() {}
+		refraction(const vec3& c, real nt)
+			: m_color(c), m_nt(nt)
 		{}
 
-		virtual ~specular() {}
+		virtual ~refraction() {}
 
 		virtual bool isSingular() const override final
+		{
+			return true;
+		}
+
+		virtual bool isTranslucent() const override final
 		{
 			return true;
 		}
@@ -39,5 +44,8 @@ namespace aten
 
 	private:
 		vec3 m_color;
+
+		// ï®ëÃÇÃã¸ê‹ó¶.
+		real m_nt;
 	};
 }

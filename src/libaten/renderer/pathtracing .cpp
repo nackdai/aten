@@ -154,13 +154,14 @@ namespace aten
 					russianProb = sampler->nextSample();
 
 					if (russianProb >= p) {
-						russianProb = p;
+						break;
 					}
 					else {
-						break;
+						russianProb = p;
 					}
 				}
 
+#if 0
 				// Sample next direction.
 				auto nextDir = rec.mtrl->sampleDirection(
 					ray.dir,
@@ -172,6 +173,17 @@ namespace aten
 				auto brdf = rec.mtrl->brdf(orienting_normal, nextDir);
 
 				auto c = max(dot(orienting_normal, nextDir), CONST_REAL(0.0));
+#else
+				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, sampler);
+
+				auto nextDir = sampling.dir;
+				pdfb = sampling.pdf;
+				auto brdf = sampling.brdf;
+
+				auto c = max(
+					dot(sampling.into ? -orienting_normal : orienting_normal, nextDir), 
+					CONST_REAL(0.0));
+#endif
 
 				throughput *= brdf * c / pdfb;
 				throughput /= russianProb;

@@ -50,4 +50,18 @@ namespace aten {
 		vec3 ret = m_color / AT_MATH_PI;
 		return ret;
 	}
+
+	material::sampling diffuse::sample(
+		const vec3& in,
+		const vec3& normal,
+		sampler* sampler) const
+	{
+		sampling ret;
+
+		ret.dir = sampleDirection(in, normal, sampler);
+		ret.pdf = pdf(normal, ret.dir);
+		ret.brdf = brdf(normal, ret.dir);
+
+		return std::move(ret);
+	}
 }

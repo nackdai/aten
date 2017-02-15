@@ -147,6 +147,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\material\diffuse .cpp" />

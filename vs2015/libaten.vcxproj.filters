@@ -34,6 +34,9 @@
     <Filter Include="texture">
       <UniqueIdentifier>{bff96104-0255-4157-be6a-053f128b2868}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{d02f9897-3ec7-49aa-afe9-076f1ccbfbef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -126,6 +129,9 @@
     <ClInclude Include="..\src\libaten\material\refraction.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\visualizer\shader.h">
+      <Filter>visualizer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -170,5 +176,19 @@
     <ClCompile Include="..\src\libaten\material\refraction.cpp">
       <Filter>material</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\visualizer\shader.cpp">
+      <Filter>visualizer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\shader\tonemapfs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\vs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\fs.glsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

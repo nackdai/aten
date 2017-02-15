@@ -25,6 +25,7 @@
 
 #include "visualizer/visualizer.h"
 #include "visualizer/window.h"
+#include "visualizer/shader.h"
 
 #include "scene/scene.h"
 

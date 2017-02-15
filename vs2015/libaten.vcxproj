@@ -177,6 +177,7 @@
     <ClInclude Include="..\src\libaten\texture\ImageLoader.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
+    <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
@@ -193,8 +194,14 @@
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
     <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
+    <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\shader\fs.glsl" />
+    <None Include="..\src\shader\tonemapfs.glsl" />
+    <None Include="..\src\shader\vs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

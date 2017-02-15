@@ -74,7 +74,7 @@ namespace aten {
 
 		uint32_t lightNum() const
 		{
-			return m_lights.size();
+			return (uint32_t)m_lights.size();
 		}
 
 		// TODO

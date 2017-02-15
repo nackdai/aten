@@ -20,7 +20,7 @@ namespace aten
 	// HDR
 	// http://t-pot.com/program/123_ToneMapping/index.html
 
-	std::tuple<real, real> computeAvgAndMaxLum(
+	std::tuple<real, real> Tonemap::computeAvgAndMaxLum(
 		int width, int height,
 		const vec3* src)
 	{
@@ -70,7 +70,7 @@ namespace aten
 		real retSumY = 0;
 		real retMaxLum = 0;
 
-		for (int i = 0; i < threadnum; i++) {
+		for (uint32_t i = 0; i < threadnum; i++) {
 			retSumY += sumY[i];
 			retMaxLum = max(maxLum[i], retMaxLum);
 		}
@@ -136,5 +136,26 @@ namespace aten
 				d.a = 255;
 			}
 		}
+	}
+
+	void TonemapRender::begin(const void* pixels)
+	{
+		SimpleRender::begin(pixels);
+
+		auto result = Tonemap::computeAvgAndMaxLum(m_width, m_height, (const vec3*)pixels);
+
+		auto lum = std::get<0>(result);
+		auto maxlum = std::get<1>(result);
+
+		static const float middleGrey = 0.18f;
+
+		const float coeff = middleGrey / aten::exp(lum);
+		const float l_max = coeff * maxlum;
+
+		auto hCoeff = getHandle("coeff");
+		CALL_GL_API(::glUniform1f(hCoeff, coeff));
+
+		auto hMaxL = getHandle("l_max");
+		CALL_GL_API(::glUniform1f(hMaxL, l_max));
 	}
 }

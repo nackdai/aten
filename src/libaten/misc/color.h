@@ -3,15 +3,18 @@
 #include "types.h"
 
 namespace aten {
-	struct color {
+	template <typename _T>
+	struct TColor {
 		union {
 			struct {
-				uint8_t r;
-				uint8_t g;
-				uint8_t b;
-				uint8_t a;
+				_T r;
+				_T g;
+				_T b;
+				_T a;
 			};
-			uint8_t c[4];
+			_T c[4];
 		};
 	};
+
+	using color = TColor<uint8_t>;
 }

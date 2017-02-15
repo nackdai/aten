@@ -28,8 +28,6 @@ static uint32_t g_threadnum = 1;
 
 void display()
 {
-	aten::visualizer::beginRender();
-
 	aten::Destination dst;
 	{
 		dst.width = WIDTH;
@@ -52,29 +50,26 @@ void display()
 	if (!isExportedHdr) {
 		isExportedHdr = true;
 
-#if 1
 		// Export to hdr format.
 		aten::HDRExporter::save(
 			"result.hdr",
 			&g_buffer[0],
 			WIDTH, HEIGHT);
-#else
-		auto w = envmap->width();
-		auto h = envmap->height();
-		auto c = envmap->colors();
-		aten::HDRExporter::save(
-			"result.hdr",
-			c, w, h);
-#endif
 	}
 
+#if 0
 	// Do tonemap.
 	aten::Tonemap::doTonemap(
 		WIDTH, HEIGHT,
 		&g_buffer[0],
 		&g_dst[0]);
 
-	aten::visualizer::endRender(&g_dst[0]);
+	aten::visualizer::render(&g_dst[0]);
+#else
+	aten::visualizer::render(&g_buffer[0]);
+#endif
+
+	
 }
 
 void makeScene()
@@ -151,10 +146,22 @@ int main(int argc, char* argv[])
 
 	aten::window::init(WIDTH, HEIGHT, TITLE);
 
-	aten::visualizer::init(
+	aten::visualizer::init(WIDTH, HEIGHT, aten::PixelFormat::rgba32f);
+	//aten::visualizer::init(WIDTH, HEIGHT, aten::PixelFormat::rgba8);
+
+	aten::SimpleRender shader;
+	shader.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
 		"../shader/fs.glsl");
+
+	aten::TonemapRender tonemap;
+	tonemap.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/tonemapfs.glsl");
+
+	aten::visualizer::setShader(&tonemap);
 
 	aten::vec3 lookfrom(50.0, 52.0, 295.6);
 	aten::vec3 lookat(50.0, 40.8, 119.0);

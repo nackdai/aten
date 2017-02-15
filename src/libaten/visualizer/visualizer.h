@@ -1,21 +1,24 @@
 #pragma once
 
 #include "defs.h"
+#include "visualizer/shader.h"
 
 namespace aten {
+	enum PixelFormat {
+		rgba8,
+		rgba32f
+	};
+
 	class visualizer {
 	private:
 		visualizer() {}
 		~visualizer() {}
 
 	public:
-		static bool init(
-			int width, int height,
-			const char* pathVS,
-			const char* pathFS);
+		static bool init(int width, int height, PixelFormat fmt);
 
-		static void beginRender();
+		static void setShader(shader* shader);
 
-		static void endRender(const void* pixels);
+		static void render(const void* pixels);
 	};
 }

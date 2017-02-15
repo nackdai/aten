@@ -34,6 +34,7 @@ namespace aten
 
 		rec.p = r.org + rec.t * r.dir;
 		rec.normal = (rec.p - m_center) / m_radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
+		rec.obj = (hitable*)this;
 		rec.mtrl = m_mtrl;
 
 		return true;

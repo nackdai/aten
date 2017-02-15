@@ -24,6 +24,10 @@ namespace aten {
 			: x(_x), y(_y), z(_z)
 		{
 		}
+		vec3(real f)
+			: x(f), y(f), z(f)
+		{
+		}
 
 		inline const vec3& operator+() const
 		{

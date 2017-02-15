@@ -28,6 +28,7 @@
 #include "visualizer/shader.h"
 
 #include "scene/scene.h"
+#include "scene/bvh.h"
 
 #include "sampler/UniformDistributionSampler.h"
 

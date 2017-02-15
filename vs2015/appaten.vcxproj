@@ -163,6 +163,9 @@ copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
   <ItemGroup>
     <ClCompile Include="..\src\appaten\main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\appaten\scene.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

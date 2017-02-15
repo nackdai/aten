@@ -85,6 +85,10 @@ namespace aten {
 		// TODO
 		sphere* getLight(uint32_t i)
 		{
+			if (m_lights.empty()) {
+				return nullptr;
+			}
+
 			if (i >= lightNum()) {
 				AT_ASSERT(false);
 				return nullptr;
@@ -108,7 +112,7 @@ namespace aten {
 	public:
 		void build()
 		{
-			m_accel.build(&m_tmp[0], m_tmp.size());
+			m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size());
 		}
 
 		virtual bool hit(

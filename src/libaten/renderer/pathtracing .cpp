@@ -106,40 +106,42 @@ namespace aten
 					// TODO
 					auto light = scene->getLight(0);
 
-					vec3 posLight;
-					vec3 nmlLight;
-					real pdfLight;
-					sampleLight(sampler, *light, posLight, nmlLight, pdfLight);
+					if (light) {
+						vec3 posLight;
+						vec3 nmlLight;
+						real pdfLight;
+						sampleLight(sampler, *light, posLight, nmlLight, pdfLight);
 
-					vec3 dirToLight = normalize(posLight - rec.p);
-					aten::ray shadowRay(rec.p, dirToLight);
+						vec3 dirToLight = normalize(posLight - rec.p);
+						aten::ray shadowRay(rec.p, dirToLight);
 
-					hitrecord tmpRec;
+						hitrecord tmpRec;
 
-					if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-						if (tmpRec.obj == light) {
-							// Shadow ray hits the light.
-							auto cosShadow = dot(orienting_normal, dirToLight);
-							auto cosLight = dot(nmlLight, -dirToLight);
-							auto dist2 = (posLight - rec.p).squared_length();
+						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+							if (tmpRec.obj == light) {
+								// Shadow ray hits the light.
+								auto cosShadow = dot(orienting_normal, dirToLight);
+								auto cosLight = dot(nmlLight, -dirToLight);
+								auto dist2 = (posLight - rec.p).squared_length();
 
-							if (cosShadow >= 0 && cosLight >= 0) {
-								auto G = cosShadow * cosLight / dist2;
+								if (cosShadow >= 0 && cosLight >= 0) {
+									auto G = cosShadow * cosLight / dist2;
 
-								auto brdf = rec.mtrl->brdf(orienting_normal, dirToLight);
-								pdfb = rec.mtrl->pdf(orienting_normal, dirToLight);
+									auto brdf = rec.mtrl->brdf(orienting_normal, dirToLight);
+									pdfb = rec.mtrl->pdf(orienting_normal, dirToLight);
 
-								// Convert pdf from steradian to area.
-								// http://www.slideshare.net/h013/edubpt-v100
-								// p31 - p35
-								pdfb = pdfb * cosLight / dist2;
+									// Convert pdf from steradian to area.
+									// http://www.slideshare.net/h013/edubpt-v100
+									// p31 - p35
+									pdfb = pdfb * cosLight / dist2;
 
-								auto misW = pdfLight / (pdfb + pdfLight);
+									auto misW = pdfLight / (pdfb + pdfLight);
 
-								// Get light color.
-								auto emit = tmpRec.mtrl->color();
+									// Get light color.
+									auto emit = tmpRec.mtrl->color();
 
-								contribution += misW * (brdf * emit * G) / pdfLight;
+									contribution += misW * (brdf * emit * G) / pdfLight;
+								}
 							}
 						}
 					}
@@ -195,7 +197,7 @@ namespace aten
 				// TODO
 				// Background.
 				auto bg = sampleBG(ray);
-				return bg;
+				return contribution + throughput * bg;
 			}
 
 			depth++;

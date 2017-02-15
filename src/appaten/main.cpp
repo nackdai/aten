@@ -1,15 +1,17 @@
 #include <vector>
 #include "aten.h"
+#include "scene.h"
 
 static int WIDTH = 640;
 static int HEIGHT = 480;
 static const char* TITLE = "app";
 
 static aten::PinholeCamera g_camera;
-static aten::AcceledScene<aten::LinearList> g_scene;
+//static aten::AcceledScene<aten::LinearList> g_scene;
+static aten::AcceledScene<aten::bvh> g_scene;
 
-//static aten::StaticColorBG m_bg(aten::vec3(1, 1, 0));
-static aten::envmap m_bg;
+//static aten::StaticColorBG g_bg(aten::vec3(1, 1, 0));
+static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
@@ -68,79 +70,13 @@ void display()
 #else
 	aten::visualizer::render(&g_buffer[0]);
 #endif
-
-	
-}
-
-void makeScene()
-{
-	auto light = new aten::sphere(
-		aten::vec3(50.0, 90.0, 81.6),
-		15.0,
-		new aten::emissive(aten::vec3(36.0, 36.0, 36.0)));
-
-	double r = 1e3;
-
-	auto left = new aten::sphere(
-		aten::vec3(r + 1, 40.8, 81.6),
-		r,
-		new aten::diffuse(aten::vec3(0.75f, 0.25f, 0.25f)));
-
-	auto right = new aten::sphere(
-		aten::vec3(-r + 99, 40.8, 81.6),
-		r,
-		new aten::diffuse(aten::vec3(0.25, 0.25, 0.75)));
-
-	auto wall = new aten::sphere(
-		aten::vec3(50, 40.8, r),
-		r,
-		new aten::diffuse(aten::vec3(0.75, 0.75, 0.75)));
-
-	auto floor = new aten::sphere(
-		aten::vec3(50, r, 81.6),
-		r,
-		new aten::diffuse(aten::vec3(0.75, 0.75, 0.75)));
-
-	auto ceil = new aten::sphere(
-		aten::vec3(50, -r + 81.6, 81.6),
-		r,
-		new aten::diffuse(aten::vec3(0.75, 0.75, 0.75)));
-
-	// —Î‹….
-	auto green = new aten::sphere(
-		aten::vec3(65, 20, 20),
-		20,
-		new aten::diffuse(aten::vec3(0.25, 0.75, 0.25)));
-
-	// ‹¾.
-	auto mirror = new aten::sphere(
-		aten::vec3(27, 16.5, 47), 
-		16.5, 
-		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
-
-	// ƒKƒ‰ƒX.
-	auto glass = new aten::sphere(
-		aten::vec3(77, 16.5, 78),
-		16.5,
-		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
-
-#if 1
-	g_scene.add(light);
-	g_scene.add(left);
-	g_scene.add(right);
-	g_scene.add(wall);
-	g_scene.add(floor);
-	g_scene.add(ceil);
-	g_scene.add(green);
-	g_scene.add(mirror);
-	g_scene.add(glass);
-
-	g_scene.addLight(light);
-#endif
 }
 
 int main(int argc, char* argv[])
 {
+	// TODO
+	::srand(0);
+
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
 
@@ -163,8 +99,10 @@ int main(int argc, char* argv[])
 
 	aten::visualizer::setShader(&tonemap);
 
-	aten::vec3 lookfrom(50.0, 52.0, 295.6);
-	aten::vec3 lookat(50.0, 40.8, 119.0);
+	//aten::vec3 lookfrom(50.0, 52.0, 295.6);
+	//aten::vec3 lookat(50.0, 40.8, 119.0);
+	aten::vec3 lookfrom(13, 2, 3);
+	aten::vec3 lookat(0, 0, 0);
 
 	g_camera.init(
 		lookfrom,
@@ -173,14 +111,15 @@ int main(int argc, char* argv[])
 		30,
 		WIDTH, HEIGHT);
 
-	makeScene();
+	//makeCornellBox(&g_scene);
+	makeRandomScene(&g_scene);
 
 	g_scene.build();
 
 	g_envmap = aten::ImageLoader::load("studio015.hdr");
-	m_bg.init(g_envmap);
+	g_bg.init(g_envmap);
 
-	g_tracer.setBG(&m_bg);
+	g_tracer.setBG(&g_bg);
 
 	g_buffer.resize(WIDTH * HEIGHT);
 	g_dst.resize(WIDTH * HEIGHT);

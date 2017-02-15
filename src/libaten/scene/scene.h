@@ -1,28 +1,30 @@
 #pragma once
 
 #include <vector>
+#include "scene/accel.h"
+
 #include "primitive/sphere.h"
 
 namespace aten {
-	class accel {
-	public:
-		accel() {}
-		virtual ~accel() {}
-
-		virtual bool hit(
-			const ray& r,
-			real t_min, real t_max,
-			hitrecord& rec) const = 0;
-	};
-
 	class LinearList : public accel {
 	public:
 		LinearList() {}
 		~LinearList() {}
 
-		void add(primitive* s)
+		virtual void build(
+			hitable** list,
+			uint32_t num) override final
 		{
-			m_objs.push_back(s);
+			for (uint32_t i = 0; i < num; i++) {
+				m_objs.push_back(list[i]);
+			}
+		}
+
+		virtual aabb getBoundingbox() const override final
+		{
+			// TODO
+			AT_ASSERT(false);
+			return std::move(aabb());
 		}
 
 		virtual bool hit(
@@ -52,7 +54,7 @@ namespace aten {
 		}
 
 	private:
-		std::vector<primitive*> m_objs;
+		std::vector<hitable*> m_objs;
 	};
 
 	class scene {
@@ -60,7 +62,10 @@ namespace aten {
 		scene() {}
 		virtual ~scene() {}
 
-		virtual void add(primitive* s) = 0;
+		void add(hitable* s)
+		{
+			m_tmp.push_back(s);
+		}
 
 		virtual bool hit(
 			const ray& r,
@@ -87,7 +92,9 @@ namespace aten {
 			return m_lights[i];
 		}
 
-	private:
+	protected:
+		std::vector<hitable*> m_tmp;
+
 		// TODO
 		std::vector<sphere*> m_lights;
 	};
@@ -99,9 +106,9 @@ namespace aten {
 		virtual ~AcceledScene() {}
 
 	public:
-		virtual void add(primitive* s) override final
+		void build()
 		{
-			m_accel.add(s);
+			m_accel.build(&m_tmp[0], m_tmp.size());
 		}
 
 		virtual bool hit(

@@ -44,7 +44,7 @@ namespace aten
 			auto idx = thread::getThreadIdx();
 
 			XorShift rnd(idx);
-			UniformDistributionSampler sampler(rnd);
+			UniformDistributionSampler sampler(&rnd);
 
 #ifdef ENABLE_OMP
 #pragma omp for

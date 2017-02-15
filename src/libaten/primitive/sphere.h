@@ -1,38 +1,11 @@
 #pragma once
 
 #include "types.h"
-#include "math/vec3.h"
-#include "renderer/ray.h"
-#include "material/material.h"
+#include "scene/hitable.h"
 
 namespace aten
 {
-	class primitive;
-
-	struct hitrecord {
-		real t{ AT_MATH_INF };
-
-		vec3 p;
-		vec3 normal;
-
-		primitive* obj{ nullptr };
-
-		material* mtrl{ nullptr };
-	};
-
-	class primitive {
-	protected:
-		primitive() {}
-		virtual ~primitive() {}
-
-	public:
-		virtual bool hit(
-			const ray& r,
-			real t_min, real t_max,
-			hitrecord& rec) const = 0;
-	};
-
-	class sphere : public primitive {
+	class sphere : public hitable {
 	public:
 		sphere() {}
 		sphere(const vec3& c, real r, material* m)
@@ -46,6 +19,8 @@ namespace aten
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
+
+		virtual aabb getBoundingbox() const override final;
 
 		const vec3& center() const
 		{

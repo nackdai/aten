@@ -34,7 +34,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 16;
+		dst.sample = 100;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -174,6 +174,8 @@ int main(int argc, char* argv[])
 		WIDTH, HEIGHT);
 
 	makeScene();
+
+	g_scene.build();
 
 	g_envmap = aten::ImageLoader::load("studio015.hdr");
 	m_bg.init(g_envmap);

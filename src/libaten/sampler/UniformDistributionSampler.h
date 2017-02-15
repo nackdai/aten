@@ -6,18 +6,18 @@
 namespace aten {
 	class UniformDistributionSampler : public sampler {
 	public:
-		UniformDistributionSampler(XorShift& rnd)
+		UniformDistributionSampler(random* rnd)
 			: m_rnd(rnd)
 		{}
 		~UniformDistributionSampler() {}
 
 		real nextSample()
 		{
-			auto ret = m_rnd.next01();
+			auto ret = m_rnd->next01();
 			return ret;
 		}
 
 	private:
-		XorShift m_rnd;
+		random* m_rnd;
 	};
 }

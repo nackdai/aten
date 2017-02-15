@@ -170,9 +170,14 @@
     <ClInclude Include="..\src\libaten\renderer\ray.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
+    <ClInclude Include="..\src\libaten\sampler\random.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
+    <ClInclude Include="..\src\libaten\scene\aabb.h" />
+    <ClInclude Include="..\src\libaten\scene\accel.h" />
+    <ClInclude Include="..\src\libaten\scene\bvh.h" />
+    <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\texture\ImageLoader.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
@@ -193,6 +198,8 @@
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
+    <ClCompile Include="..\src\libaten\scene\aabb.cpp" />
+    <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
     <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />

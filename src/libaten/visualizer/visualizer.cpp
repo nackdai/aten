@@ -117,9 +117,9 @@ namespace aten {
 
 		const void* textureimage = pixels;
 
-#ifdef TYPE_DOUBLE
 		if (g_fmt == PixelFormat::rgba32f) {
-			// Convert double to float
+			// If type is double, convert double/rgb to float/rgba.
+			// If type is float, convert rgb to rgba.
 			if (g_tmp.empty()) {
 				g_tmp.resize(g_width * g_height);
 			}
@@ -144,7 +144,6 @@ namespace aten {
 
 			textureimage = &g_tmp[0];
 		}
-#endif
 
 		auto pixelfmt = glpixelfmt[g_fmt];
 		auto pixeltype = glpixeltype[g_fmt];

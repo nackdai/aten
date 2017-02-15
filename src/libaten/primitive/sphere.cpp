@@ -38,4 +38,14 @@ namespace aten
 
 		return true;
 	}
+
+	aabb sphere::getBoundingbox() const
+	{
+		vec3 _min = m_center - m_radius;
+		vec3 _max = m_center + m_radius;
+
+		aabb ret(_min, _max);
+
+		return std::move(ret);
+	}
 }

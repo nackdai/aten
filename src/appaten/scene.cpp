@@ -145,6 +145,25 @@ void RandomScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
+void MtrlTestScene::makeScene(aten::scene* scene)
+{
+	auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
+	scene->add(s);
+
+	s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 2, 0.2));
+	scene->add(s);
+}
+
+void MtrlTestScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(13, 2, 3);
+	at = aten::vec3(0, 0, 0);
+}
+
+/////////////////////////////////////////////////////
+
 void ObjectScene::makeScene(aten::scene* scene)
 {
 	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");

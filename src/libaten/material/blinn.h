@@ -14,6 +14,11 @@ namespace aten
 		virtual ~MicrofacetBlinn() {}
 
 	public:
+		virtual vec3 color() const override final
+		{
+			return m_color;
+		}
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

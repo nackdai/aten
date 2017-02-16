@@ -15,7 +15,7 @@ namespace aten
 		// Half-angle based
 
 		// half vector.
-		auto wh = normalize(wi + wo);
+		auto wh = normalize(-wi + wo);
 
 		auto costheta = dot(normal, wh);
 
@@ -43,7 +43,7 @@ namespace aten
 		auto r2 = sampler->nextSample();
 
 		// Sample halfway vector first, then reflect wi around that
-		auto costheta = aten::pow(r1, 1 / (m_shininess + 1));
+		auto costheta = aten::pow(r1, 1 / (m_shininess + 2));
 		auto sintheta = aten::sqrt(1 - costheta * costheta);
 
 		// phi = 2*PI*ksi2
@@ -51,11 +51,26 @@ namespace aten
 		auto sinphi = aten::sqrt(real(1) - cosphi * cosphi);
 
 		// Ortho normal base.
-		auto w = normal;
+		auto n = normal;
+#if 0
 		auto u = getOrthoVector(normal);
-		auto v = normalize(cross(w, u));
+		auto v = normalize(cross(n, u));
+#else
+		vec3 u, v;
 
-		auto dir = u * sintheta * cosphi + v * sintheta * sinphi * w * costheta;
+		// w‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
+		if (fabs(n.x) > 0.1) {
+			u = normalize(cross(vec3(0.0, 1.0, 0.0), n));
+		}
+		else {
+			u = normalize(cross(vec3(1.0, 0.0, 0.0), n));
+		}
+		v = cross(n, u);
+#endif
+
+		auto w = u * sintheta * cosphi + v * sintheta * sinphi + n * costheta;
+
+		auto dir = -in + 2 * dot(in, w) * w;
 
 		return std::move(dir);
 	}
@@ -80,11 +95,11 @@ namespace aten
 
 		// Incident and reflected zenith angles
 		auto costhetao = dot(normal, wo);
-		auto costhetai = dot(normal, wi);
+		auto costhetai = dot(normal, -wi);
 
 		auto denom = 4 * costhetao * costhetai;
 
-		auto wh = normalize(wi + wo);
+		auto wh = normalize(-wi + wo);
 
 		// Compute D.
 		real D(1);
@@ -98,7 +113,7 @@ namespace aten
 		{
 			auto ndotwh = aten::abs(dot(n, wh));
 			auto ndotwo = aten::abs(dot(n, wo));
-			auto ndotwi = aten::abs(dot(n, wi));
+			auto ndotwi = aten::abs(dot(n, -wi));
 			auto wodotwh = aten::abs(dot(wo, wh));
 
 			G = min(

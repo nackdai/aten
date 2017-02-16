@@ -18,6 +18,15 @@ public:
 		aten::vec3& at);
 };
 
+class MtrlTestScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at);
+};
+
 class ObjectScene {
 public:
 	static void makeScene(aten::scene* scene);
@@ -28,5 +37,6 @@ public:
 };
 
 //#define Scene CornellBoxScene
-#define Scene RandomScene
+//#define Scene RandomScene
 //#define Scene ObjectScene
+#define Scene MtrlTestScene

@@ -5,7 +5,7 @@
 #include "object/object.h"
 
 // TODO
-#include "material/diffuse.h"
+#include "material/lambert.h"
 #include "material/specular.h"
 
 namespace aten
@@ -92,7 +92,7 @@ namespace aten
 			}
 
 			// TODO
-			//dstshape->mtrl = new diffuse(vec3(0.75, 0, 0));
+			//dstshape->mtrl = new lambert(vec3(0.75, 0, 0));
 			dstshape->mtrl = new specular(vec3(1, 1, 1));
 
 			vtxnum = shape.mesh.texcoords.size();

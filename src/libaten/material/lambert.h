@@ -4,14 +4,14 @@
 
 namespace aten
 {
-	class diffuse : public material {
+	class lambert : public material {
 	public:
-		diffuse() {}
-		diffuse(const vec3& c)
+		lambert() {}
+		lambert(const vec3& c)
 			: m_color(c)
 		{}
 
-		virtual ~diffuse() {}
+		virtual ~lambert() {}
 
 		virtual vec3 color() const override final
 		{

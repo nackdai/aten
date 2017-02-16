@@ -1,7 +1,7 @@
-#include "material/diffuse.h"
+#include "material/lambert.h"
 
 namespace aten {
-	real diffuse::pdf(const vec3& normal, const vec3& dir) const
+	real lambert::pdf(const vec3& normal, const vec3& dir) const
 	{
 		auto c = dot(normal, dir);
 		AT_ASSERT(c > AT_MATH_EPSILON);
@@ -11,7 +11,7 @@ namespace aten {
 		return ret;
 	}
 
-	vec3 diffuse::sampleDirection(
+	vec3 lambert::sampleDirection(
 		const vec3& in,
 		const vec3& normal, 
 		sampler* sampler) const
@@ -45,13 +45,13 @@ namespace aten {
 		return std::move(dir);
 	}
 
-	vec3 diffuse::brdf(const vec3& normal, const vec3& dir) const
+	vec3 lambert::brdf(const vec3& normal, const vec3& dir) const
 	{
 		vec3 ret = m_color / AT_MATH_PI;
 		return ret;
 	}
 
-	material::sampling diffuse::sample(
+	material::sampling lambert::sample(
 		const vec3& in,
 		const vec3& normal,
 		sampler* sampler) const

@@ -154,8 +154,8 @@
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
-    <ClInclude Include="..\src\libaten\material\diffuse.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
+    <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
@@ -194,7 +194,7 @@
     <ClCompile Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
-    <ClCompile Include="..\src\libaten\material\diffuse .cpp" />
+    <ClCompile Include="..\src\libaten\material\lambert.cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />

@@ -6,7 +6,7 @@
 #include "camera/pinhole.h"
 
 #include "material/emissive.h"
-#include "material/diffuse.h"
+#include "material/lambert.h"
 #include "material/specular.h"
 #include "material/refraction.h"
 

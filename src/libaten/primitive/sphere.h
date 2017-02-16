@@ -34,7 +34,7 @@ namespace aten
 
 	private:
 		vec3 m_center;
-		real m_radius{ CONST_REAL(0.0) };
+		real m_radius{ real(0) };
 		material* m_mtrl{ nullptr };
 	};
 }

@@ -33,7 +33,7 @@ namespace aten {
 			// Read data to storage
 			input->read_image(TypeDesc::UINT8, &texturedata[0], sizeof(uint8_t) * 4);
 
-			static const real div = CONST_REAL(255.0);
+			static const real div = real(255.0);
 
 			// Convert to vec3 and normalize.
 			for (uint32_t i = 0; i < width * height; i++) {

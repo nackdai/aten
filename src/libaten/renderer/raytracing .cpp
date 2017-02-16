@@ -37,7 +37,7 @@ namespace aten
 
 					auto c = max(
 						dot(sampling.into ? -orienting_normal : orienting_normal, nextDir),
-						CONST_REAL(0.0));
+						real(0));
 
 					throughput *= brdf * c;
 

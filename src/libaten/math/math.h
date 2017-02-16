@@ -3,7 +3,7 @@
 #include <math.h>
 #include "types.h"
 
-#define AT_MATH_PI	CONST_REAL(3.14159265358979323846)
+#define AT_MATH_PI	real(3.14159265358979323846)
 
 #ifdef TYPE_DOUBLE
 	#define AT_MATH_INF         (1e64)
@@ -13,8 +13,8 @@
 	#define AT_MATH_EPSILON     (float)(1e-6)
 #endif
 
-#define Deg2Rad(d)   (AT_MATH_PI * (d) / CONST_REAL(180.0))
-#define Rad2Deg(r)   ((r) * CONST_REAL(180.0) / AT_MATH_PI)
+#define Deg2Rad(d)   (AT_MATH_PI * (d) / real(180.0))
+#define Rad2Deg(r)   ((r) * real(180.0) / AT_MATH_PI)
 
 namespace aten {
 	inline real sqrt(real f)

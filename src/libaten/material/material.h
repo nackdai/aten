@@ -40,7 +40,7 @@ namespace aten
 		struct sampling {
 			vec3 dir;
 			vec3 brdf;
-			real pdf{ CONST_REAL(0.0) };
+			real pdf{ real(0) };
 			bool into{ false };
 
 			sampling() {}

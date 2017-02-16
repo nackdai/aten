@@ -147,7 +147,7 @@ namespace aten
 					}
 				}
 
-				real russianProb = CONST_REAL(1.0);
+				real russianProb = real(1);
 
 				if (depth > rrDepth) {
 					auto t = normalize(throughput);
@@ -174,7 +174,7 @@ namespace aten
 
 				auto brdf = rec.mtrl->brdf(orienting_normal, nextDir);
 
-				auto c = max(dot(orienting_normal, nextDir), CONST_REAL(0.0));
+				auto c = max(dot(orienting_normal, nextDir), real(0));
 #else
 				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, sampler);
 
@@ -184,7 +184,7 @@ namespace aten
 
 				auto c = max(
 					dot(sampling.into ? -orienting_normal : orienting_normal, nextDir), 
-					CONST_REAL(0.0));
+					real(0));
 #endif
 
 				throughput *= brdf * c / pdfb;

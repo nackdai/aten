@@ -28,7 +28,7 @@ namespace aten
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.
 			AT_ASSERT(false);
-			return CONST_REAL(1.0);
+			return real(1);
 		}
 
 		virtual vec3 sampleDirection(
@@ -56,7 +56,7 @@ namespace aten
 			sampler* sampler) const override final
 		{
 			AT_ASSERT(false);
-			return std::move(sampling(vec3(), vec3(), CONST_REAL(0.0)));
+			return std::move(sampling(vec3(), vec3(), real(0)));
 		}
 
 	private:

@@ -9,7 +9,8 @@ namespace aten
 	struct vertex {
 		vec3 pos;
 		vec3 nml;
-		real uv[2];
+		real u{ real(0) };
+		real v{ real(0) };
 	};
 
 	class face : public hitable {

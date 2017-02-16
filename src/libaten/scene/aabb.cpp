@@ -34,7 +34,7 @@ namespace aten {
 				continue;
 			}
 
-			auto inv = CONST_REAL(1.0) / r.dir[i];
+			auto inv = real(1) / r.dir[i];
 
 			// NOTE
 			// ray : r = p + t * v
@@ -47,7 +47,7 @@ namespace aten {
 			auto t0 = (m_min[i] - r.org[i]) * inv;
 			auto t1 = (m_max[i] - r.org[i]) * inv;
 
-			if (inv < CONST_REAL(0.0)) {
+			if (inv < real(0)) {
 				std::swap(t0, t1);
 			}
 

@@ -13,7 +13,7 @@ namespace aten
 		// ”»•ÊŽ®.
 		const real D4 = b * b - dot(p_o, p_o) + m_radius * m_radius;
 
-		if (D4 < CONST_REAL(0.0)) {
+		if (D4 < real(0)) {
 			return false;
 		}
 

@@ -14,6 +14,8 @@ namespace aten {
 
 		vec3 p;
 		vec3 normal;
+		vec3 u;
+		vec3 v;
 
 		hitable* obj{ nullptr };
 

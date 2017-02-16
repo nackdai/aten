@@ -13,7 +13,7 @@ namespace aten
 	public:
 		void init(
 			texture* envmap,
-			real mult = CONST_REAL(1.0))
+			real mult = real(1))
 		{
 			m_envmap = envmap;
 			m_mult = mult;
@@ -25,6 +25,6 @@ namespace aten
 		
 	private:
 		texture* m_envmap;
-		real m_mult{ CONST_REAL(1.0) };
+		real m_mult{ real(1) };
 	};
 }

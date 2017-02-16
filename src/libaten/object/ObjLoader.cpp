@@ -102,8 +102,8 @@ namespace aten
 
 				auto& v = dstshape->vertices[vpos];
 
-				v.uv[0] = shape.mesh.texcoords[i + 0];
-				v.uv[1] = shape.mesh.texcoords[i + 1];
+				v.u = shape.mesh.texcoords[i + 0];
+				v.v = shape.mesh.texcoords[i + 1];
 			}
 
 			dstshape->build();

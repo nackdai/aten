@@ -12,5 +12,3 @@ namespace aten {
 	using real = float;
 #endif
 }
-
-#define CONST_REAL(v)	v##f

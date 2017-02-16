@@ -6,7 +6,7 @@ namespace aten
 {
 	real specular::pdf(const vec3& normal, const vec3& dir) const
 	{
-		return CONST_REAL(1.0);
+		return real(1);
 	}
 
 	vec3 specular::sampleDirection(

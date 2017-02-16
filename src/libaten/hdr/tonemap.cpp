@@ -5,12 +5,12 @@
 
 namespace aten
 {
-	static const vec3 RGB2Y(CONST_REAL(0.29900), CONST_REAL(0.58700), CONST_REAL(0.11400));
-	static const vec3 RGB2Cb(CONST_REAL(-0.16874), CONST_REAL(-0.33126), CONST_REAL(0.50000));
-	static const vec3 RGB2Cr(CONST_REAL(0.50000), CONST_REAL(-0.41869), CONST_REAL(-0.08131));
-	static const vec3 YCbCr2R(CONST_REAL(1.00000), CONST_REAL(0.00000), CONST_REAL(1.40200));
-	static const vec3 YCbCr2G(CONST_REAL(1.00000), CONST_REAL(-0.34414), CONST_REAL(-0.71414));
-	static const vec3 YCbCr2B(CONST_REAL(1.00000), CONST_REAL(1.77200), CONST_REAL(0.00000));
+	static const vec3 RGB2Y(0.29900, 0.58700, 0.11400);
+	static const vec3 RGB2Cb(-0.16874, -0.33126, 0.50000);
+	static const vec3 RGB2Cr(0.50000, -0.41869, -0.08131);
+	static const vec3 YCbCr2R(1.00000, 0.00000, 1.40200);
+	static const vec3 YCbCr2G(1.00000, -0.34414, -0.71414);
+	static const vec3 YCbCr2B(1.00000, 1.77200, 0.00000);
 
 	// NOTE
 	// Reinherd ‚Ì•½‹Ï‹P“xŒvŽZ.
@@ -52,7 +52,7 @@ namespace aten
 
 					real lum = dot(RGB2Y, col);
 
-					if (lum > CONST_REAL(0.0)) {
+					if (lum > real(0)) {
 						sumY[idx] += aten::log(lum);
 
 						if (lum > maxLum[idx]) {
@@ -93,7 +93,7 @@ namespace aten
 		auto lum = std::get<0>(result);
 		auto maxlum = std::get<1>(result);
 
-		static const real middleGrey = CONST_REAL(0.18);
+		static const real middleGrey = real(0.18);
 
 		const real coeff = middleGrey / aten::exp(lum);
 		const real l_max = coeff * maxlum;

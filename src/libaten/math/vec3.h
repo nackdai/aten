@@ -18,7 +18,7 @@ namespace aten {
 
 		vec3()
 		{
-			x = y = z = CONST_REAL(0.0);
+			x = y = z = real(0);
 		}
 		vec3(real _x, real _y, real _z)
 			: x(_x), y(_y), z(_z)

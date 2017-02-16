@@ -6,7 +6,7 @@ namespace aten
 	{
 		AT_ASSERT(false);
 
-		auto ret = CONST_REAL(1.0);
+		auto ret = real(1);
 		return ret;
 	}
 
@@ -64,20 +64,20 @@ namespace aten
 		sampling ret;
 
 		// レイが入射してくる側の物体の屈折率.
-		real ni = CONST_REAL(1.0);	// 真空
+		real ni = real(1);	// 真空
 
 		// 物体内部の屈折率.
 		real nt = m_nt;
 
 		real cos_i = dot(in, normal);
 
-		bool isEnter = (cos_i > CONST_REAL(0.0));
+		bool isEnter = (cos_i > real(0));
 
 		vec3 n = normal;
 
 		if (isEnter) {
 			// レイが出ていくので、全部反対.
-			nt = CONST_REAL(1.0);
+			nt = real(1);
 			ni = m_nt;
 
 			cos_i = -cos_i;
@@ -90,17 +90,17 @@ namespace aten
 		// cos_t^2 = 1 - sin_t^2
 		// sin_t^2 = (ni/nt)^2 * sin_i^2 = (ni/nt)^2 * (1 - cos_i^2)
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
-		real cos_t_2 = CONST_REAL(1.0) - (ni_nt * ni_nt) * (CONST_REAL(1.0) - cos_i * cos_i);
+		real cos_t_2 = real(1) - (ni_nt * ni_nt) * (real(1) - cos_i * cos_i);
 
-		if (cos_t_2 < CONST_REAL(0.0)) {
+		if (cos_t_2 < real(0)) {
 			// 全反射.
-			ret.pdf = CONST_REAL(1.0);
+			ret.pdf = real(1);
 
 			ret.dir = in - 2 * dot(normal, in) * normal;
 			ret.dir.normalize();
 
 			auto c = dot(normal, in);
-			if (c > CONST_REAL(0.0)) {
+			if (c > real(0)) {
 				ret.brdf = m_color / c;
 			}
 
@@ -119,14 +119,14 @@ namespace aten
 		auto fresnel = schlick(in, n, ni, nt);
 
 		// 屈折なので.
-		fresnel = CONST_REAL(1.0) - fresnel;
+		fresnel = real(1) - fresnel;
 
 		// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
 		real nn = ni_nt * ni_nt;
 
 		auto cos_t = aten::sqrt(cos_t_2);
 
-		ret.pdf = CONST_REAL(1.0);
+		ret.pdf = real(1);
 		ret.dir = refract;
 		ret.brdf = fresnel * nn * m_color / cos_t;
 		ret.into = true;

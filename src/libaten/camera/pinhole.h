@@ -23,7 +23,7 @@ namespace aten {
 			real half_height = aten::tan(theta / 2);	// (h/2)/d
 			real half_width = m_aspect * half_height;	// (h/2)/d * w/h = (w/2)/d
 
-			real flocalLength = CONST_REAL(1.0);
+			real flocalLength = real(1);
 
 			m_origin = origin;
 

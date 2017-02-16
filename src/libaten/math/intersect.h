@@ -28,7 +28,7 @@ namespace aten {
 		vec3 u = cross(d, e2);
 		vec3 v = cross(r, e1);
 
-		real inv = CONST_REAL(1.0) / dot(u, e1);
+		real inv = real(1) / dot(u, e1);
 
 		real t = dot(v, e2) * inv;
 		real beta = dot(u, r) * inv;
@@ -36,10 +36,10 @@ namespace aten {
 
 		intersectResult result;
 
-		result.isIntersect = ((beta >= CONST_REAL(0.0) && beta <= CONST_REAL(1.0))
-			&& (gamma >= CONST_REAL(0.0) && gamma <= CONST_REAL(1.0))
-			&& (beta + gamma <= CONST_REAL(1.0))
-			&& t >= CONST_REAL(0.0));
+		result.isIntersect = ((beta >= real(0) && beta <= real(1))
+			&& (gamma >= real(0) && gamma <= real(1))
+			&& (beta + gamma <= real(1))
+			&& t >= real(0));
 
 		result.t = t;
 

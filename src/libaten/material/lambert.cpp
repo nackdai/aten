@@ -38,7 +38,7 @@ namespace aten {
 
 		const real x = aten::cos(r1) * r2s;
 		const real y = aten::sin(r1) * r2s;
-		const real z = aten::sqrt(CONST_REAL(1.0) - r2);
+		const real z = aten::sqrt(real(1) - r2);
 
 		vec3 dir = normalize((u * x + v * y + w * z));
 

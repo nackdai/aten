@@ -3,6 +3,10 @@
 namespace aten {
 	void aabb::init(const vec3& _min, const vec3& _max)
 	{
+		AT_ASSERT(_min.x <= _max.x);
+		AT_ASSERT(_min.y <= _max.y);
+		AT_ASSERT(_min.z <= _max.z);
+
 		m_min = _min;
 		m_max = _max;
 	}

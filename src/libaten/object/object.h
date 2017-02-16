@@ -12,29 +12,44 @@ namespace aten
 		real uv[2];
 	};
 
-	struct face {
+	class face : public hitable {
+	public:
+		face() {}
+		virtual ~face() {}
+
+	public:
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec) const override;
+
+		virtual aabb getBoundingbox() const override
+		{
+			return std::move(bbox);
+		}
+
+		void build(vertex* v0, vertex* v1, vertex* v2);
+	
 		uint32_t idx[3];
+		vertex* vtx[3];
+		aabb bbox;
 	};
 
-	class shape : public hitable {
+	class shape : public bvhnode {
 	public:
 		shape() {}
 		virtual ~shape() {}
+
+		void build();
 
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
-
-		virtual aabb getBoundingbox() const override final
-		{
-			return std::move(bbox);
-		}
 		
-		std::vector<face> faces;
+		std::vector<face*> faces;
 		std::vector<vertex> vertices;
 		material* mtrl{ nullptr };
-		aabb bbox;
 	};
 
 	class object {

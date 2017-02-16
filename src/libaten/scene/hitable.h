@@ -15,9 +15,12 @@ namespace aten {
 		vec3 p;
 
 		vec3 normal;
+
+		// tangent coordinate.
 		vec3 du;
 		vec3 dv;
 
+		// texture coordinate.
 		real u{ real(0) };
 		real v{ real(0) };
 

@@ -77,6 +77,8 @@ int main(int argc, char* argv[])
 	// TODO
 	::srand(0);
 
+	float det = 1.0f;
+
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
 

@@ -29,6 +29,21 @@ namespace aten
 				rec.normal = v0->nml;
 				rec.p = r.org + rec.t * r.dir;
 
+				// NOTE
+				// http://d.hatena.ne.jp/Zellij/20131207/p1
+
+				// dSÀ•WŒn(barycentric coordinates).
+				// v0Šî€.
+				// p = (1 - a - b)*v0 + a*v1 + b*v2
+				auto uv = (real(1) - res.a - res.b) * v0->uv + res.a * v1->uv + res.b * v2->uv;
+
+				rec.u = uv.x;
+				rec.v = uv.y;
+
+				// tangent coordinate.
+				rec.du = normalize(getOrthoVector(rec.normal));
+				rec.dv = normalize(cross(rec.normal, rec.du));
+
 				isHit = true;
 			}
 		}

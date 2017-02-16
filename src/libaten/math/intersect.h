@@ -7,6 +7,15 @@
 namespace aten {
 	struct intersectResult {
 		bool isIntersect{ false };
+
+		// NOTE
+		// http://d.hatena.ne.jp/Zellij/20131207/p1
+
+		// dSÀ•WŒn(barycentric coordinates).
+		// v0Šî€.
+		// p = (1 - a - b)*v0 + a*v1 + b*v2
+		real a, b;
+
 		real t;
 	};
 
@@ -41,6 +50,9 @@ namespace aten {
 			&& (beta + gamma <= real(1))
 			&& t >= real(0));
 
+		result.a = beta;
+		result.b = gamma;
+		
 		result.t = t;
 
 		return std::move(result);

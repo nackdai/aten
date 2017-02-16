@@ -45,22 +45,33 @@ namespace aten {
 		return std::move(dir);
 	}
 
-	vec3 lambert::brdf(const vec3& normal, const vec3& dir) const
+	vec3 lambert::brdf(
+		const vec3& normal, const vec3& dir,
+		real u, real v) const
 	{
-		vec3 ret = m_color / AT_MATH_PI;
+		vec3 albedo = m_color;
+
+		auto texture = tex();
+		if (texture) {
+			auto texclr = texture->at(u, v);
+			albedo *= texclr;
+		}
+
+		vec3 ret = albedo / AT_MATH_PI;
 		return ret;
 	}
 
 	material::sampling lambert::sample(
 		const vec3& in,
 		const vec3& normal,
-		sampler* sampler) const
+		sampler* sampler,
+		real u, real v) const
 	{
 		sampling ret;
 
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, ret.dir);
-		ret.brdf = brdf(normal, ret.dir);
+		ret.brdf = brdf(normal, ret.dir, u, v);
 
 		return std::move(ret);
 	}

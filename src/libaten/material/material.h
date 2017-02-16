@@ -3,6 +3,7 @@
 #include "types.h"
 #include "math/vec3.h"
 #include "sampler/sampler.h"
+#include "texture/texture.h"
 
 namespace aten
 {
@@ -35,7 +36,10 @@ namespace aten
 			const vec3& normal, 
 			sampler* sampler) const = 0;
 
-		virtual vec3 brdf(const vec3& normal, const vec3& dir) const = 0;
+		virtual vec3 brdf(
+			const vec3& normal, 
+			const vec3& dir,
+			real u, real v) const = 0;
 
 		struct sampling {
 			vec3 dir;
@@ -52,6 +56,20 @@ namespace aten
 		virtual sampling sample(
 			const vec3& in,
 			const vec3& normal,
-			sampler* sampler) const = 0;
+			sampler* sampler,
+			real u, real v) const = 0;
+
+		void settexture(texture* tex)
+		{
+			m_tex = tex;
+		}
+
+		const texture* tex() const
+		{
+			return m_tex;
+		}
+
+	private:
+		texture* m_tex{ nullptr };
 	};
 }

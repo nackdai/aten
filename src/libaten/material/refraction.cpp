@@ -23,7 +23,10 @@ namespace aten
 		return std::move(reflect);
 	}
 
-	vec3 refraction::brdf(const vec3& normal, const vec3& dir) const
+	vec3 refraction::brdf(
+		const vec3& normal, 
+		const vec3& dir,
+		real u, real v) const
 	{
 		AT_ASSERT(false);
 
@@ -59,7 +62,8 @@ namespace aten
 	material::sampling refraction::sample(
 		const vec3& in,
 		const vec3& normal,
-		sampler* sampler) const
+		sampler* sampler,
+		real u, real v) const
 	{
 		sampling ret;
 

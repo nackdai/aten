@@ -13,9 +13,13 @@ namespace aten {
 		real t{ AT_MATH_INF };
 
 		vec3 p;
+
 		vec3 normal;
-		vec3 u;
-		vec3 v;
+		vec3 du;
+		vec3 dv;
+
+		real u{ real(0) };
+		real v{ real(0) };
 
 		hitable* obj{ nullptr };
 

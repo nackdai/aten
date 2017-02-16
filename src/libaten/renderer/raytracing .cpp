@@ -30,7 +30,7 @@ namespace aten
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 				if (rec.mtrl->isSingular()) {
-					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, nullptr);
+					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, nullptr, rec.u, rec.v);
 
 					auto nextDir = sampling.dir;
 					auto brdf = sampling.brdf;

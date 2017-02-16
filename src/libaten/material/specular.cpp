@@ -20,7 +20,10 @@ namespace aten
 		return std::move(reflect);
 	}
 
-	vec3 specular::brdf(const vec3& normal, const vec3& dir) const
+	vec3 specular::brdf(
+		const vec3& normal, 
+		const vec3& dir,
+		real u, real v) const
 	{
 		auto c = dot(normal, dir);
 
@@ -36,13 +39,14 @@ namespace aten
 	material::sampling specular::sample(
 		const vec3& in,
 		const vec3& normal,
-		sampler* sampler) const
+		sampler* sampler,
+		real u, real v) const
 	{
 		sampling ret;
 
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, ret.dir);
-		ret.brdf = brdf(normal, ret.dir);
+		ret.brdf = brdf(normal, ret.dir, u, v);
 
 		return std::move(ret);
 	}

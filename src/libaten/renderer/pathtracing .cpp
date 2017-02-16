@@ -127,7 +127,7 @@ namespace aten
 								if (cosShadow >= 0 && cosLight >= 0) {
 									auto G = cosShadow * cosLight / dist2;
 
-									auto brdf = rec.mtrl->brdf(orienting_normal, dirToLight);
+									auto brdf = rec.mtrl->brdf(orienting_normal, dirToLight, rec.u, rec.v);
 									pdfb = rec.mtrl->pdf(orienting_normal, dirToLight);
 
 									// Convert pdf from steradian to area.
@@ -176,7 +176,7 @@ namespace aten
 
 				auto c = max(dot(orienting_normal, nextDir), real(0));
 #else
-				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, sampler);
+				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, sampler, rec.u, rec.v);
 
 				auto nextDir = sampling.dir;
 				pdfb = sampling.pdf;

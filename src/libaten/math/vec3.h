@@ -107,7 +107,6 @@ namespace aten {
 		}
 	};
 
-
 	inline vec3 operator+(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
@@ -181,5 +180,29 @@ namespace aten {
 	{
 		auto ret = v / v.length();
 		return std::move(ret);
+	}
+
+	// 直行ベクトルを計算.
+	inline vec3 getOrthoVector(const vec3& n)
+	{
+		vec3 p;
+
+		// NOTE
+		// dotを計算したときにゼロになるようなベクトル.
+
+		if (aten::abs(n.z) > real(0)) {
+			real k = aten::sqrt(n.y * n.y + n.z * n.z);
+			p.x = 0; 
+			p.y = -n.z / k; 
+			p.z = n.y / k;
+		}
+		else {
+			real k = aten::sqrt(n.x * n.x + n.y * n.y);
+			p.x = n.y / k; 
+			p.y = -n.x / k; 
+			p.z = 0;
+		}
+
+		return normalize(p);
 	}
 }

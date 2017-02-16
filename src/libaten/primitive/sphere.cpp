@@ -2,6 +2,15 @@
 
 namespace aten
 {
+	static void getUV(real& u, real& v, const vec3& p)
+	{
+		auto phi = aten::asin(p.y);
+		auto theta = aten::atan(p.x / p.z);
+
+		u = (theta + AT_MATH_PI_HALF) / AT_MATH_PI;
+		v = (phi + AT_MATH_PI_HALF) / AT_MATH_PI;
+	}
+
 	bool sphere::hit(
 		const ray& r, 
 		real t_min, real t_max,
@@ -36,6 +45,8 @@ namespace aten
 		rec.normal = (rec.p - m_center) / m_radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
 		rec.obj = (hitable*)this;
 		rec.mtrl = m_mtrl;
+
+		getUV(rec.u, rec.v, rec.normal);
 
 		return true;
 	}

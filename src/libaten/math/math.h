@@ -3,7 +3,8 @@
 #include <math.h>
 #include "types.h"
 
-#define AT_MATH_PI	real(3.14159265358979323846)
+#define AT_MATH_PI		real(3.14159265358979323846)
+#define AT_MATH_PI_HALF	real(AT_MATH_PI * 0.5)
 
 #ifdef TYPE_DOUBLE
 	#define AT_MATH_INF         (1e64)
@@ -62,6 +63,24 @@ namespace aten {
 #endif
 	}
 
+	inline real atan(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::atan(f);
+#else
+		return ::atanf(f);
+#endif
+	}
+
+	inline real asin(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return ::asin(f);
+#else
+		return ::asinf(f);
+#endif
+	}
+
 	inline real acos(real f)
 	{
 #ifdef TYPE_DOUBLE
@@ -95,6 +114,15 @@ namespace aten {
 		return ::pow(f, v);
 #else
 		return ::powf(f, v);
+#endif
+	}
+
+	inline real abs(real f)
+	{
+#ifdef TYPE_DOUBLE
+		return (f < real(0) ? -f : f);
+#else
+		return ::fabs(f);
 #endif
 	}
 

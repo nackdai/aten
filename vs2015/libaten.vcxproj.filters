@@ -56,9 +56,6 @@
     <ClInclude Include="..\src\libaten\math\math.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\ray.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\primitive\sphere.h">
       <Filter>primitive</Filter>
     </ClInclude>
@@ -162,6 +159,12 @@
     <ClInclude Include="..\src\libaten\object\ObjLoader.h">
       <Filter>object</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\math\intersect.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\ray.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -219,6 +222,9 @@
       <Filter>object\tinyobjloadder</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\object\ObjLoader.cpp">
+      <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\object\object.cpp">
       <Filter>object</Filter>
     </ClCompile>
   </ItemGroup>

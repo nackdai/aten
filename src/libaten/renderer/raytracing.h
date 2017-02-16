@@ -20,5 +20,8 @@ namespace aten
 		vec3 radiance(
 			const ray& ray,
 			scene* scene);
+
+	private:
+		uint32_t m_maxDepth{ 1 };
 	};
 }

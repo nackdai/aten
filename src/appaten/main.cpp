@@ -8,7 +8,7 @@ static const char* TITLE = "app";
 
 static aten::PinholeCamera g_camera;
 //static aten::AcceledScene<aten::LinearList> g_scene;
-static aten::AcceledScene<aten::bvh> g_scene;
+static aten::AcceledScene<aten::bvhnode> g_scene;
 
 //static aten::StaticColorBG g_bg(aten::vec3(1, 1, 0));
 static aten::envmap g_bg;
@@ -99,10 +99,10 @@ int main(int argc, char* argv[])
 
 	aten::visualizer::setShader(&tonemap);
 
-	//aten::vec3 lookfrom(50.0, 52.0, 295.6);
-	//aten::vec3 lookat(50.0, 40.8, 119.0);
-	aten::vec3 lookfrom(13, 2, 3);
-	aten::vec3 lookat(0, 0, 0);
+	aten::vec3 lookfrom;
+	aten::vec3 lookat;
+
+	Scene::getCameraPosAndAt(lookfrom, lookat);
 
 	g_camera.init(
 		lookfrom,
@@ -111,8 +111,7 @@ int main(int argc, char* argv[])
 		30,
 		WIDTH, HEIGHT);
 
-	//makeCornellBox(&g_scene);
-	makeRandomScene(&g_scene);
+	Scene::makeScene(&g_scene);
 
 	g_scene.build();
 

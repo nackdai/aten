@@ -51,7 +51,7 @@ namespace aten {
 		}
 	}
 
-	void bvh::build(
+	void bvhnode::build(
 		hitable** list,
 		uint32_t num)
 	{
@@ -78,8 +78,8 @@ namespace aten {
 			m_right = list[1];
 		}
 		else {
-			m_left = new bvh(list, num / 2);
-			m_right = new bvh(list + num / 2, num - num / 2);
+			m_left = new bvhnode(list, num / 2);
+			m_right = new bvhnode(list + num / 2, num - num / 2);
 		}
 
 		if (m_left && m_right) {
@@ -95,7 +95,7 @@ namespace aten {
 		}
 	}
 
-	bool bvh::hit(
+	bool bvhnode::hit(
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec) const

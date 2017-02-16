@@ -17,6 +17,9 @@
 #include "misc/timer.h"
 #include "misc/thread.h"
 
+#include "object/ObjLoader.h"
+#include "object/object.h"
+
 #include "texture/ImageLoader.h"
 #include "texture/texture.h"
 
@@ -34,7 +37,7 @@
 
 #include "primitive/sphere.h"
 
-#include "renderer/ray.h"
+#include "math/ray.h"
 #include "renderer/renderer.h"
 #include "renderer/background.h"
 #include "renderer/envmap.h"

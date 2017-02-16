@@ -162,6 +162,7 @@ copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\appaten\main.cpp" />
+    <ClCompile Include="..\src\appaten\scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\appaten\scene.h" />

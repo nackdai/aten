@@ -50,7 +50,7 @@ namespace aten
 		aabb m_aabb;
 	};
 
-	class objinstance : public bvh {
+	class objinstance : public bvhnode {
 	public:
 		objinstance() {}
 		objinstance(object* obj);

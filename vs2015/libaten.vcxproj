@@ -159,7 +159,9 @@
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
+    <ClInclude Include="..\src\libaten\math\intersect.h" />
     <ClInclude Include="..\src\libaten\math\math.h" />
+    <ClInclude Include="..\src\libaten\math\ray.h" />
     <ClInclude Include="..\src\libaten\math\vec3.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\thread.h" />
@@ -170,7 +172,6 @@
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
-    <ClInclude Include="..\src\libaten\renderer\ray.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\sampler\random.h" />
@@ -198,6 +199,7 @@
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
+    <ClCompile Include="..\src\libaten\object\object.cpp" />
     <ClCompile Include="..\src\libaten\object\ObjLoader.cpp" />
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />

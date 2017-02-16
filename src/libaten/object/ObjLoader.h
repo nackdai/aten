@@ -12,6 +12,6 @@ namespace aten
 		~ObjLoader() {}
 
 	public:
-		object* load(const char* path);
+		static object* load(const char* path);
 	};
 }

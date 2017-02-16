@@ -1,7 +1,7 @@
 #pragma once
 
 #include "camera/camera.h"
-#include "renderer/ray.h"
+#include "math/ray.h"
 #include "math/vec3.h"
 #include "math/math.h"
 

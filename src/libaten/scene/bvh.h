@@ -5,13 +5,13 @@
 #include "sampler/random.h"
 
 namespace aten {
-	class bvh : public accel {
+	class bvhnode : public accel {
 	public:
-		bvh() {}
-		virtual ~bvh() {}
+		bvhnode() {}
+		virtual ~bvhnode() {}
 
 	private:
-		bvh(
+		bvhnode(
 			hitable** list,
 			uint32_t num)
 		{

@@ -104,5 +104,7 @@ namespace aten
 		}
 
 		obj->m_aabb.init(shapemin, shapemax);
+
+		return obj;
 	}
 }

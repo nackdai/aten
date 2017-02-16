@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "renderer/ray.h"
+#include "math/ray.h"
 
 namespace aten {
 	class camera {

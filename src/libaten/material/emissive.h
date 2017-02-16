@@ -23,7 +23,10 @@ namespace aten
 			return m_emit;
 		}
 
-		virtual real pdf(const vec3& normal, const vec3& dir) const override final
+		virtual real pdf(
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo) const override final
 		{
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.
@@ -43,7 +46,9 @@ namespace aten
 		}
 
 		virtual vec3 brdf(
-			const vec3& normal, const vec3& dir,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
 			real u, real v) const override final
 		{
 			// NOTE

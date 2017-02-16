@@ -4,25 +4,16 @@
 
 namespace aten
 {
-	class specular : public material {
+	class MicrofacetBlinn : public material {
 	public:
-		specular() {}
-		specular(const vec3& c)
-			: m_color(c)
+		MicrofacetBlinn() {}
+		MicrofacetBlinn(const vec3& c, real shininess, real nt)
+			: m_color(c), m_shininess(shininess), m_nt(nt)
 		{}
 
-		virtual ~specular() {}
+		virtual ~MicrofacetBlinn() {}
 
-		virtual bool isSingular() const override final
-		{
-			return true;
-		}
-
-		virtual vec3 color() const override final
-		{
-			return m_color;
-		}
-
+	public:
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,
@@ -46,6 +37,11 @@ namespace aten
 			real u, real v) const override final;
 
 	private:
-		vec3 m_color{ vec3(1, 1, 1) };
+		vec3 m_color;
+		texture* m_tex{ nullptr };
+		real m_shininess{ real(0) };
+
+		// ï®ëÃÇÃã¸ê‹ó¶.
+		real m_nt;
 	};
 }

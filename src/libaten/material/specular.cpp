@@ -4,7 +4,10 @@
 
 namespace aten
 {
-	real specular::pdf(const vec3& normal, const vec3& dir) const
+	real specular::pdf(
+		const vec3& normal, 
+		const vec3& wi,
+		const vec3& wo) const
 	{
 		return real(1);
 	}
@@ -22,10 +25,11 @@ namespace aten
 
 	vec3 specular::brdf(
 		const vec3& normal, 
-		const vec3& dir,
+		const vec3& wi,
+		const vec3& wo,
 		real u, real v) const
 	{
-		auto c = dot(normal, dir);
+		auto c = dot(normal, wo);
 
 		vec3 brdf;
 
@@ -45,8 +49,8 @@ namespace aten
 		sampling ret;
 
 		ret.dir = sampleDirection(in, normal, sampler);
-		ret.pdf = pdf(normal, ret.dir);
-		ret.brdf = brdf(normal, ret.dir, u, v);
+		ret.pdf = pdf(normal, in, ret.dir);
+		ret.brdf = brdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
 	}

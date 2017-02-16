@@ -165,6 +165,9 @@
     <ClInclude Include="..\src\libaten\material\lambert.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\blinn.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -225,6 +228,12 @@
       <Filter>object</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\lambert.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\blinn.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\material .cpp">
       <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>

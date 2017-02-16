@@ -4,6 +4,7 @@
 #include "types.h"
 
 #define AT_MATH_PI		real(3.14159265358979323846)
+#define AT_MATH_PI_2	real(AT_MATH_PI * 2)
 #define AT_MATH_PI_HALF	real(AT_MATH_PI * 0.5)
 
 #ifdef TYPE_DOUBLE

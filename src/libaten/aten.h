@@ -9,9 +9,11 @@
 #include "material/lambert.h"
 #include "material/specular.h"
 #include "material/refraction.h"
+#include "material/blinn.h"
 
 #include "math/math.h"
 #include "math/vec3.h"
+#include "math/ray.h"
 
 #include "misc/color.h"
 #include "misc/timer.h"
@@ -37,7 +39,6 @@
 
 #include "primitive/sphere.h"
 
-#include "math/ray.h"
 #include "renderer/renderer.h"
 #include "renderer/background.h"
 #include "renderer/envmap.h"

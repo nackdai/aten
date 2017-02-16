@@ -2,7 +2,10 @@
 
 namespace aten
 {
-	real refraction::pdf(const vec3& normal, const vec3& dir) const
+	real refraction::pdf(
+		const vec3& normal, 
+		const vec3& wi,
+		const vec3& wo) const
 	{
 		AT_ASSERT(false);
 
@@ -25,38 +28,13 @@ namespace aten
 
 	vec3 refraction::brdf(
 		const vec3& normal, 
-		const vec3& dir,
+		const vec3& wi,
+		const vec3& wo,
 		real u, real v) const
 	{
 		AT_ASSERT(false);
 
 		return std::move(m_color);
-	}
-
-	// NOTE
-	// Schlick によるフレネル反射率の近似.
-	// http://yokotakenji.me/log/math/4501/
-	// https://en.wikipedia.org/wiki/Schlick%27s_approximation
-
-	// NOTE
-	// フレネル反射率について.
-	// http://d.hatena.ne.jp/hanecci/20130525/p3
-
-	real schlick(
-		const vec3& in, 
-		const vec3& normal,
-		real ni, real nt)
-	{
-		// NOTE
-		// Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
-		// R0 = ((n1 - n2) / (n1 + n2))^2
-
-		auto r0 = (ni - nt) / (ni + nt);
-		r0 = r0 * r0;
-
-		auto c = dot(-in, normal);
-
-		return r0 + (1 - r0) * aten::pow((1 - c), 5);
 	}
 
 	material::sampling refraction::sample(

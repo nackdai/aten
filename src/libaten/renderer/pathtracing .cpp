@@ -127,8 +127,8 @@ namespace aten
 								if (cosShadow >= 0 && cosLight >= 0) {
 									auto G = cosShadow * cosLight / dist2;
 
-									auto brdf = rec.mtrl->brdf(orienting_normal, dirToLight, rec.u, rec.v);
-									pdfb = rec.mtrl->pdf(orienting_normal, dirToLight);
+									auto brdf = rec.mtrl->brdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+									pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
 
 									// Convert pdf from steradian to area.
 									// http://www.slideshare.net/h013/edubpt-v100

@@ -28,7 +28,10 @@ namespace aten
 			return m_color;
 		}
 
-		virtual real pdf(const vec3& normal, const vec3& dir) const override final;
+		virtual real pdf(
+			const vec3& normal, 
+			const vec3& wi,
+			const vec3& wo) const override final;
 
 		virtual vec3 sampleDirection(
 			const vec3& in,
@@ -37,7 +40,8 @@ namespace aten
 
 		virtual vec3 brdf(
 			const vec3& normal, 
-			const vec3& dir,
+			const vec3& wi,
+			const vec3& wo,
 			real u, real v) const override final;
 
 		virtual sampling sample(

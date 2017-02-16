@@ -1,9 +1,12 @@
 #include "material/lambert.h"
 
 namespace aten {
-	real lambert::pdf(const vec3& normal, const vec3& dir) const
+	real lambert::pdf(
+		const vec3& normal, 
+		const vec3& wi,
+		const vec3& wo) const
 	{
-		auto c = dot(normal, dir);
+		auto c = dot(normal, wo);
 		AT_ASSERT(c > AT_MATH_EPSILON);
 
 		auto ret = c / AT_MATH_PI;
@@ -46,14 +49,15 @@ namespace aten {
 	}
 
 	vec3 lambert::brdf(
-		const vec3& normal, const vec3& dir,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
 		real u, real v) const
 	{
 		vec3 albedo = m_color;
 
-		auto texture = tex();
-		if (texture) {
-			auto texclr = texture->at(u, v);
+		if (m_tex) {
+			auto texclr = m_tex->at(u, v);
 			albedo *= texclr;
 		}
 
@@ -70,8 +74,8 @@ namespace aten {
 		sampling ret;
 
 		ret.dir = sampleDirection(in, normal, sampler);
-		ret.pdf = pdf(normal, ret.dir);
-		ret.brdf = brdf(normal, ret.dir, u, v);
+		ret.pdf = pdf(normal, in, ret.dir);
+		ret.brdf = brdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
 	}

@@ -29,7 +29,10 @@ namespace aten
 
 		virtual vec3 color() const = 0;
 
-		virtual real pdf(const vec3& normal, const vec3& dir) const = 0;
+		virtual real pdf(
+			const vec3& normal, 
+			const vec3& wi,
+			const vec3& wo) const = 0;
 
 		virtual vec3 sampleDirection(
 			const vec3& in,
@@ -38,7 +41,8 @@ namespace aten
 
 		virtual vec3 brdf(
 			const vec3& normal, 
-			const vec3& dir,
+			const vec3& wi,
+			const vec3& wo,
 			real u, real v) const = 0;
 
 		struct sampling {
@@ -58,18 +62,15 @@ namespace aten
 			const vec3& normal,
 			sampler* sampler,
 			real u, real v) const = 0;
-
-		void settexture(texture* tex)
-		{
-			m_tex = tex;
-		}
-
-		const texture* tex() const
-		{
-			return m_tex;
-		}
-
-	private:
-		texture* m_tex{ nullptr };
 	};
+
+	real schlick(
+		const vec3& in,
+		const vec3& normal,
+		real ni, real nt);
+
+	real computFresnel(
+		const vec3& in,
+		const vec3& normal,
+		real ni, real nt);
 }

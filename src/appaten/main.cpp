@@ -36,7 +36,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 10;
+		dst.sample = 100;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -77,7 +77,24 @@ int main(int argc, char* argv[])
 	// TODO
 	::srand(0);
 
-	float det = 1.0f;
+#if 0
+	aten::MicrofacetBlinn blinn(aten:: vec3(1, 1, 1), 1, 1.5);
+	aten::vec3 normal(0, 1, 0);
+	aten::vec3 in(1, -1, 0);
+	in.normalize();
+
+	aten::XorShift rnd(0);
+	aten::UniformDistributionSampler sampler(&rnd);
+
+	auto ddd = Rad2Deg(acos(dot(normal, -in)));
+	AT_PRINTF("in : %f\n", ddd);
+
+	for (int i = 0; i < 100; i++) {
+		auto wo = blinn.sampleDirection(in, normal, &sampler);
+		auto xxx = Rad2Deg(acos(dot(normal, wo)));
+		AT_PRINTF("out : %f\n", xxx);
+	}
+#endif
 
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
@@ -117,8 +134,8 @@ int main(int argc, char* argv[])
 
 	g_scene.build();
 
-	//g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
-	g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");
+	g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
+	//g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");
 	g_bg.init(g_envmap);
 
 	g_tracer.setBG(&g_bg);

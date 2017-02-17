@@ -39,6 +39,9 @@ namespace aten
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
 		// Lobe Distribution Sampling
 
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// Sampling Blinn
+
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
@@ -69,8 +72,9 @@ namespace aten
 #endif
 
 		auto w = u * sintheta * cosphi + v * sintheta * sinphi + n * costheta;
+		w.normalize();
 
-		auto dir = -in + 2 * dot(in, w) * w;
+		auto dir = in - 2 * dot(in, w) * w;
 
 		return std::move(dir);
 	}
@@ -87,37 +91,37 @@ namespace aten
 		// ï®ëÃì‡ïîÇÃã¸ê‹ó¶.
 		real nt = m_nt;
 
-		auto wh = normalize(-wi + wo);
-		auto n = normal;
+		vec3 V = -wi;
+		vec3 L = wo;
+		vec3 N = normal;
+		vec3 H = normalize(L + V);
 
-		auto a = m_shininess;
+		// TODO
+		// DesneyÇæÇ∆absÇµÇƒÇ»Ç¢Ç™ÅAAMDÇÃÇÕÇµÇƒÇ¢ÇÈ....
+		auto NdotH = aten::abs(dot(N, H));
+		auto VdotH = aten::abs(dot(V, H));
+		auto NdotL = aten::abs(dot(N, L));
+		auto NdotV = aten::abs(dot(N, V));
+
+		auto n = m_shininess;
 
 		auto F = computFresnel(wi, normal, ni, nt);
 
-		// Incident and reflected zenith angles
-		auto costhetao = dot(normal, wo);
-		auto costhetai = dot(normal, -wi);
-
-		auto denom = 4 * costhetao * costhetai;
+		auto denom = 4 * NdotL * NdotV;
 
 		// Compute D.
 		real D(1);
 		{
-			auto c = dot(normal, wh);
-			D = ((a + 2) * aten::pow(c, a)) / (2 * AT_MATH_PI);
+			auto x = aten::acos(NdotH) * n;
+			D = aten::exp(-x * x);
 		}
 
 		// Compute G.
 		real G(1);
 		{
-			auto ndotwh = aten::abs(dot(n, wh));
-			auto ndotwo = aten::abs(dot(n, wo));
-			auto ndotwi = aten::abs(dot(n, -wi));
-			auto wodotwh = aten::abs(dot(wo, wh));
-
-			G = min(
-				1, 
-				min(2 * ndotwh * ndotwo / wodotwh, 2.f * ndotwh * ndotwi / wodotwh));
+			auto G1 = 2 * NdotH * NdotL / VdotH;
+			auto G2 = 2 * NdotH * NdotV / VdotH;
+			G = min(1, min(G1, G2));
 		}
 
 		auto albedo = m_color;
@@ -127,6 +131,7 @@ namespace aten
 		}
 
 		auto brdf = albedo * F * G * D / denom;
+		//auto brdf = albedo * G * D / denom;
 
 		return std::move(brdf);
 	}
@@ -142,6 +147,7 @@ namespace aten
 
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, in, ret.dir);
+
 		ret.brdf = brdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);

@@ -150,7 +150,13 @@ void MtrlTestScene::makeScene(aten::scene* scene)
 	auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
 	scene->add(s);
 
-	s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 2, 0.2));
+	s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 10, 1.5));
+	scene->add(s);
+
+	s = new aten::sphere(aten::vec3(1, 1, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
+	scene->add(s);
+
+	s = new aten::sphere(aten::vec3(-2, 1, 0), 1.0, new aten::lambert(aten::vec3(0.7, 0.6, 0.5)));
 	scene->add(s);
 }
 
@@ -158,7 +164,7 @@ void MtrlTestScene::getCameraPosAndAt(
 	aten::vec3& pos,
 	aten::vec3& at)
 {
-	pos = aten::vec3(13, 2, 3);
+	pos = aten::vec3(6.5, 2, 13);
 	at = aten::vec3(0, 0, 0);
 }
 

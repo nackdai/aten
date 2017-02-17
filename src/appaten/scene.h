@@ -38,5 +38,5 @@ public:
 
 //#define Scene CornellBoxScene
 //#define Scene RandomScene
-#define Scene ObjectScene
-//#define Scene MtrlTestScene
+//#define Scene ObjectScene
+#define Scene MtrlTestScene

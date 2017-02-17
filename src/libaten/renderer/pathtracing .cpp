@@ -160,8 +160,7 @@ namespace aten
 					russianProb = sampler->nextSample();
 
 					if (russianProb >= p) {
-						//break;
-						return vec3();
+						break;
 					}
 					else {
 						russianProb = p;
@@ -196,6 +195,9 @@ namespace aten
 				if (pdfb > 0) {
 					throughput *= brdf * c / pdfb;
 					throughput /= russianProb;
+				}
+				else {
+					break;
 				}
 
 				// Make next ray.

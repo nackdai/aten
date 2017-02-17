@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sampler/xorshift.h"
+#include "sampler/random.h"
 #include "sampler/sampler.h"
 
 namespace aten {

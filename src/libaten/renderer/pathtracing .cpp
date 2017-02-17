@@ -1,5 +1,6 @@
 #include "pathtracing.h"
 #include "misc/thread.h"
+#include "sampler/xorshift.h"
 #include "sampler/UniformDistributionSampler.h"
 
 namespace aten
@@ -255,17 +256,10 @@ namespace aten
 					vec3 col;
 
 					for (uint32_t i = 0; i < sample; i++) {
-						//real u = real(x + sampler.nextSample()) / real(width);
-						//real v = real(y + sampler.nextSample()) / real(height);
+						real u = real(x + sampler.nextSample()) / real(width);
+						real v = real(y + sampler.nextSample()) / real(height);
 
-						//auto ray = camera->sample(u, v);
-
-						const vec3 screen_position =
-							screen_center +
-							screen_x * ((0.5 + x) / width - 0.5) +
-							screen_y * ((0.5 + y) / height - 0.5);
-						const vec3 dir = normalize(screen_position - camera_position);
-						aten::ray ray(camera_position, dir);
+						auto ray = camera->sample(u, v);
 
 						col += radiance(&sampler, ray, scene);
 					}

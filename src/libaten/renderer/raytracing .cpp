@@ -1,5 +1,6 @@
 #include "raytracing.h"
 #include "misc/thread.h"
+#include "sampler/xorshift.h"
 #include "sampler/UniformDistributionSampler.h"
 
 namespace aten

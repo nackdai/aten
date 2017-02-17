@@ -132,17 +132,19 @@ namespace aten
 									auto brdf = rec.mtrl->brdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 									pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
 
-									// Convert pdf from steradian to area.
-									// http://www.slideshare.net/h013/edubpt-v100
-									// p31 - p35
-									pdfb = pdfb * cosLight / dist2;
+									if (pdfb > real(0)) {
+										// Convert pdf from steradian to area.
+										// http://www.slideshare.net/h013/edubpt-v100
+										// p31 - p35
+										pdfb = pdfb * cosLight / dist2;
 
-									auto misW = pdfLight / (pdfb + pdfLight);
+										auto misW = pdfLight / (pdfb + pdfLight);
 
-									// Get light color.
-									auto emit = tmpRec.mtrl->color();
+										// Get light color.
+										auto emit = tmpRec.mtrl->color();
 
-									contribution += misW * (brdf * emit * G) / pdfLight;
+										contribution += misW * (brdf * emit * G) / pdfLight;
+									}
 								}
 							}
 						}
@@ -158,7 +160,8 @@ namespace aten
 					russianProb = sampler->nextSample();
 
 					if (russianProb >= p) {
-						break;
+						//break;
+						return vec3();
 					}
 					else {
 						russianProb = p;
@@ -184,11 +187,16 @@ namespace aten
 				pdfb = sampling.pdf;
 				auto brdf = sampling.brdf;
 
-				auto c = dot(orienting_normal, nextDir);
+				// TODO
+				// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ªA³‚µ‚¢?
+				//auto c = dot(orienting_normal, nextDir);
+				auto c = aten::abs(dot(orienting_normal, nextDir));
 #endif
 
-				throughput *= brdf * c / pdfb;
-				throughput /= russianProb;
+				if (pdfb > 0) {
+					throughput *= brdf * c / pdfb;
+					throughput /= russianProb;
+				}
 
 				// Make next ray.
 				ray = aten::ray(rec.p, nextDir);

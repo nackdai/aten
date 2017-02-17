@@ -30,13 +30,13 @@ namespace aten
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 				if (rec.mtrl->isSingular()) {
-					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, nullptr, rec.u, rec.v);
+					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, nullptr, rec.u, rec.v);
 
 					auto nextDir = sampling.dir;
 					auto brdf = sampling.brdf;
 
 					auto c = max(
-						dot(sampling.into ? -orienting_normal : orienting_normal, nextDir),
+						dot(orienting_normal, nextDir),
 						real(0));
 
 					throughput *= brdf * c;

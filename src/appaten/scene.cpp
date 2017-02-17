@@ -40,8 +40,8 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	auto green = new aten::sphere(
 		aten::vec3(65, 20, 20),
 		20,
-		//new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
-		new aten::lambert(aten::vec3(1, 1, 1), tex));
+		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+		//new aten::lambert(aten::vec3(1, 1, 1), tex));
 
 	// ‹¾.
 	auto mirror = new aten::sphere(
@@ -62,8 +62,8 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(wall);
 	scene->add(floor);
 	scene->add(ceil);
-	scene->add(green);
-	scene->add(mirror);
+	//scene->add(green);
+	//scene->add(mirror);
 	scene->add(glass);
 
 	scene->addLight(light);

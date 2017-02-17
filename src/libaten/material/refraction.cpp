@@ -1,4 +1,5 @@
 #include "material/refraction.h"
+#include "scene/hitable.h"
 
 namespace aten
 {
@@ -40,6 +41,7 @@ namespace aten
 	material::sampling refraction::sample(
 		const vec3& in,
 		const vec3& normal,
+		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v) const
 	{
@@ -51,37 +53,29 @@ namespace aten
 		// •¨‘Ì“à•”‚Ì‹üÜ—¦.
 		real nt = m_nt;
 
-		real cos_i = dot(in, normal);
+		bool into = (dot(hitrec.normal, normal) > real(0));
 
-		bool isEnter = (cos_i > real(0));
+		auto reflect = in - 2 * dot(hitrec.normal, in) * hitrec.normal;
+		reflect.normalize();
 
-		vec3 n = normal;
-
-		if (isEnter) {
-			// ƒŒƒC‚ªo‚Ä‚¢‚­‚Ì‚ÅA‘S•””½‘Î.
-			nt = real(1);
-			ni = m_nt;
-
-			cos_i = -cos_i;
-			n = -n;
-		}
-
-		real ni_nt = ni / nt;
+		real ddn = dot(in, normal);
+		real nnt = into ? ni / nt : nt / ni;
 
 		// NOTE
 		// cos_t^2 = 1 - sin_t^2
 		// sin_t^2 = (ni/nt)^2 * sin_i^2 = (ni/nt)^2 * (1 - cos_i^2)
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
-		real cos_t_2 = real(1) - (ni_nt * ni_nt) * (real(1) - cos_i * cos_i);
+		real cos2t = real(1) - (nnt * nnt) * (real(1) - ddn * ddn);
 
-		if (cos_t_2 < real(0)) {
+		if (cos2t < real(0)) {
+			//AT_PRINTF("Reflection in refraction...\n");
+
 			// ‘S”½ŽË.
 			ret.pdf = real(1);
 
-			ret.dir = in - 2 * dot(normal, in) * normal;
-			ret.dir.normalize();
+			ret.dir = reflect;
 
-			auto c = dot(normal, in);
+			auto c = dot(normal, ret.dir);
 			if (c > real(0)) {
 				ret.brdf = m_color / c;
 			}
@@ -92,26 +86,51 @@ namespace aten
 		// NOTE
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
-		auto nt_ni_2 = (nt / ni) * (nt / ni);
-		auto cos_i_2 = cos_i * cos_i;
-		vec3 refract = ni_nt * in - (aten::sqrt(nt_ni_2 - (1 - cos_i_2)) - cos_i) * n;
+		vec3 n = into ? hitrec.normal : -hitrec.normal;
+		vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (ddn * nnt + sqrt(cos2t));
 		refract.normalize();
 
-		// ”½ŽË•ûŒü‚ÌŒõ‚ª”½ŽË‚µ‚Äray.dir‚Ì•ûŒü‚É‰^‚ÔŠ„‡B“¯Žž‚É‹üÜ•ûŒü‚ÌŒõ‚ª”½ŽË‚·‚é•ûŒü‚É‰^‚ÔŠ„‡.
-		auto fresnel = schlick(in, n, ni, nt);
+		const auto r0 = ((nt - ni) * (nt - ni)) / ((nt + ni) * (nt + ni));
 
-		// ‹üÜ‚È‚Ì‚Å.
-		fresnel = real(1) - fresnel;
+		const auto c = 1 - (into ? -ddn : dot(refract, -normal));
+
+		// ”½ŽË•ûŒü‚ÌŒõ‚ª”½ŽË‚µ‚Äray.dir‚Ì•ûŒü‚É‰^‚ÔŠ„‡B“¯Žž‚É‹üÜ•ûŒü‚ÌŒõ‚ª”½ŽË‚·‚é•ûŒü‚É‰^‚ÔŠ„‡.
+		auto fresnel = r0 + (1 - r0) * aten::pow(c, 5);
 
 		// ƒŒƒC‚Ì‰^‚Ô•úŽË‹P“x‚Í‹üÜ—¦‚ÌˆÙ‚È‚é•¨‘ÌŠÔ‚ðˆÚ“®‚·‚é‚Æ‚«A‹üÜ—¦‚Ì”ä‚Ì“ñæ‚Ì•ª‚¾‚¯•Ï‰»‚·‚é.
-		real nn = ni_nt * ni_nt;
+		real nn = nnt * nnt;
 
-		auto cos_t = aten::sqrt(cos_t_2);
+		auto Re = fresnel;
+		auto Tr = (1 - Re) * nn;
 
-		ret.pdf = real(1);
+		auto r = sampler->nextSample();
+
+#if 0
+		auto prob = 0.25 + 0.5 * Re;
+		if (r < prob) {
+			// ”½ŽË.
+			ret.dir = reflect;
+			
+			auto denom = dot(normal, reflect);
+			ret.brdf = Re * m_color / denom;
+			ret.brdf /= prob;
+		}
+		else {
+			// ‹üÜ.
+			ret.dir = refract;
+
+			auto denom = dot(normal, refract);
+			ret.brdf = Tr * m_color / denom;
+			ret.brdf /= (1 - prob);
+		}
+#else
 		ret.dir = refract;
-		ret.brdf = fresnel * nn * m_color / cos_t;
-		ret.into = true;
+
+		auto denom = dot(normal, refract);
+		ret.brdf = Tr * m_color / denom;
+#endif
+
+		ret.pdf = 1;
 
 		return std::move(ret);
 	}

@@ -36,7 +36,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 100;
+		dst.sample = 16;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -117,7 +117,8 @@ int main(int argc, char* argv[])
 
 	g_scene.build();
 
-	g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
+	//g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
+	g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");
 	g_bg.init(g_envmap);
 
 	g_tracer.setBG(&g_bg);

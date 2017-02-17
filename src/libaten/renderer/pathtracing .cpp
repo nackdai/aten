@@ -176,15 +176,13 @@ namespace aten
 
 				auto c = max(dot(orienting_normal, nextDir), real(0));
 #else
-				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, sampler, rec.u, rec.v);
+				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
 
 				auto nextDir = sampling.dir;
 				pdfb = sampling.pdf;
 				auto brdf = sampling.brdf;
 
-				auto c = max(
-					dot(sampling.into ? -orienting_normal : orienting_normal, nextDir), 
-					real(0));
+				auto c = dot(orienting_normal, nextDir);
 #endif
 
 				throughput *= brdf * c / pdfb;
@@ -216,6 +214,20 @@ namespace aten
 		uint32_t sample = dst.sample;
 		vec3* color = dst.buffer;
 
+		const vec3 camera_position = vec3(50.0, 52.0, 220.0);
+		const vec3 camera_dir = normalize(vec3(0.0, -0.04, -1.0));
+		const vec3 camera_up = vec3(0.0, 1.0, 0.0);
+
+		// ワールド座標系でのスクリーンの大きさ
+		const double screen_width = 30.0 * width / height;
+		const double screen_height = 30.0;
+		// スクリーンまでの距離
+		const double screen_dist = 40.0;
+		// スクリーンを張るベクトル
+		const vec3 screen_x = normalize(cross(camera_dir, camera_up)) * screen_width;
+		const vec3 screen_y = normalize(cross(screen_x, camera_dir)) * screen_height;
+		const vec3 screen_center = camera_position + camera_dir * screen_dist;
+
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
 
@@ -243,10 +255,17 @@ namespace aten
 					vec3 col;
 
 					for (uint32_t i = 0; i < sample; i++) {
-						real u = real(x + sampler.nextSample()) / real(width);
-						real v = real(y + sampler.nextSample()) / real(height);
+						//real u = real(x + sampler.nextSample()) / real(width);
+						//real v = real(y + sampler.nextSample()) / real(height);
 
-						auto ray = camera->sample(u, v);
+						//auto ray = camera->sample(u, v);
+
+						const vec3 screen_position =
+							screen_center +
+							screen_x * ((0.5 + x) / width - 0.5) +
+							screen_y * ((0.5 + y) / height - 0.5);
+						const vec3 dir = normalize(screen_position - camera_position);
+						aten::ray ray(camera_position, dir);
 
 						col += radiance(&sampler, ray, scene);
 					}

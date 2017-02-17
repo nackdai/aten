@@ -60,6 +60,7 @@ namespace aten
 		virtual sampling sample(
 			const vec3& in,
 			const vec3& normal,
+			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const override final
 		{

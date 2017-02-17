@@ -7,6 +7,8 @@
 
 namespace aten
 {
+	struct hitrecord;
+
 	class material {
 	public:
 		material() {}
@@ -49,7 +51,6 @@ namespace aten
 			vec3 dir;
 			vec3 brdf;
 			real pdf{ real(0) };
-			bool into{ false };
 
 			sampling() {}
 			sampling(const vec3& d, const vec3& b, real p)
@@ -60,6 +61,7 @@ namespace aten
 		virtual sampling sample(
 			const vec3& in,
 			const vec3& normal,
+			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const = 0;
 	};

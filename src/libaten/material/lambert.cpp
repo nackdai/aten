@@ -68,6 +68,7 @@ namespace aten {
 	material::sampling lambert::sample(
 		const vec3& in,
 		const vec3& normal,
+		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v) const
 	{

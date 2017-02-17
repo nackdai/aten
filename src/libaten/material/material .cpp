@@ -23,7 +23,7 @@ namespace aten
 		auto r0 = (ni - nt) / (ni + nt);
 		r0 = r0 * r0;
 
-		auto c = dot(-in, normal);
+		auto c = dot(in, normal);
 
 		return r0 + (1 - r0) * aten::pow((1 - c), 5);
 	}
@@ -48,7 +48,14 @@ namespace aten
 			n = -n;
 		}
 
-		auto fresnel = schlick(in, normal, ni, nt);
+		auto eta = ni / nt;
+
+		float sini2 = 1.f - cos_i * cos_i;
+		float sint2 = eta * eta * sini2;
+
+		auto fresnel = schlick(
+			in, 
+			n, ni, nt);
 
 		return fresnel;
 	}

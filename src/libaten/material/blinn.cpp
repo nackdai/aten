@@ -43,7 +43,7 @@ namespace aten
 		auto r2 = sampler->nextSample();
 
 		// Sample halfway vector first, then reflect wi around that
-		auto costheta = aten::pow(r1, 1 / (m_shininess + 2));
+		auto costheta = aten::pow(r1, 1 / (m_shininess + 1));
 		auto sintheta = aten::sqrt(1 - costheta * costheta);
 
 		// phi = 2*PI*ksi2
@@ -87,6 +87,7 @@ namespace aten
 		// ï®ëÃì‡ïîÇÃã¸ê‹ó¶.
 		real nt = m_nt;
 
+		auto wh = normalize(-wi + wo);
 		auto n = normal;
 
 		auto a = m_shininess;
@@ -98,8 +99,6 @@ namespace aten
 		auto costhetai = dot(normal, -wi);
 
 		auto denom = 4 * costhetao * costhetai;
-
-		auto wh = normalize(-wi + wo);
 
 		// Compute D.
 		real D(1);
@@ -135,6 +134,7 @@ namespace aten
 	material::sampling MicrofacetBlinn::sample(
 		const vec3& in,
 		const vec3& normal,
+		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v) const
 	{

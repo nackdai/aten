@@ -7,8 +7,8 @@ namespace aten
 	class MicrofacetBlinn : public material {
 	public:
 		MicrofacetBlinn() {}
-		MicrofacetBlinn(const vec3& c, real shininess, real nt)
-			: m_color(c), m_shininess(shininess), m_nt(nt)
+		MicrofacetBlinn(const vec3& c, real shininess, real ior)
+			: m_color(c), m_shininess(shininess), m_ior(ior)
 		{}
 
 		virtual ~MicrofacetBlinn() {}
@@ -48,6 +48,6 @@ namespace aten
 		real m_shininess{ real(0) };
 
 		// ï®ëÃÇÃã¸ê‹ó¶.
-		real m_nt;
+		real m_ior;
 	};
 }

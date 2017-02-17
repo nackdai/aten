@@ -45,6 +45,7 @@ namespace aten
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
+#if 0
 		// Sample halfway vector first, then reflect wi around that
 		auto costheta = aten::pow(r1, 1 / (m_shininess + 1));
 		auto sintheta = aten::sqrt(1 - costheta * costheta);
@@ -52,6 +53,16 @@ namespace aten
 		// phi = 2*PI*ksi2
 		auto cosphi = aten::cos(AT_MATH_PI_2 * r2);
 		auto sinphi = aten::sqrt(real(1) - cosphi * cosphi);
+#else
+		auto theta = aten::acos(aten::pow(r1, 1 / (m_shininess + 1)));
+		auto phi = AT_MATH_PI_2 * r2;
+
+		auto costheta = aten::cos(theta);
+		auto sintheta = aten::sqrt(1 - costheta * costheta);
+
+		auto cosphi = aten::cos(phi);
+		auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+#endif
 
 		// Ortho normal base.
 		auto n = normal;
@@ -89,7 +100,7 @@ namespace aten
 		real ni = real(1);	// ê^ãÛ
 
 		// ï®ëÃì‡ïîÇÃã¸ê‹ó¶.
-		real nt = m_nt;
+		real nt = m_ior;
 
 		vec3 V = -wi;
 		vec3 L = wo;

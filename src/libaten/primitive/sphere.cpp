@@ -46,6 +46,8 @@ namespace aten
 		rec.obj = (hitable*)this;
 		rec.mtrl = m_mtrl;
 
+		rec.area = 4 * AT_MATH_PI * m_radius * m_radius;
+
 		getUV(rec.u, rec.v, rec.normal);
 
 		return true;

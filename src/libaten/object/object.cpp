@@ -44,6 +44,11 @@ namespace aten
 				rec.du = normalize(getOrthoVector(rec.normal));
 				rec.dv = normalize(cross(rec.normal, rec.du));
 
+				// OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+				auto e0 = v1 - v0;
+				auto e1 = v2 - v0;
+				rec.area = 0.5 * cross(e0, e1).length();
+
 				isHit = true;
 			}
 		}

@@ -24,6 +24,8 @@ namespace aten {
 		real u{ real(0) };
 		real v{ real(0) };
 
+		real area{ real(1) };
+
 		hitable* obj{ nullptr };
 
 		material* mtrl{ nullptr };

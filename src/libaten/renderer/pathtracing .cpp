@@ -82,7 +82,8 @@ namespace aten
 
 						if (cosLight >= 0) {
 							// TODO
-							auto pdfLight = sampleLightPDF(*(const sphere*)rec.obj);
+							//auto pdfLight = sampleLightPDF(*(const sphere*)rec.obj);
+							auto pdfLight = 1 / rec.area;
 
 							// Convert pdf area to sradian.
 							// http://www.slideshare.net/h013/edubpt-v100

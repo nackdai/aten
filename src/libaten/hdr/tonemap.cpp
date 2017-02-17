@@ -77,6 +77,8 @@ namespace aten
 
 		retSumY /= threadnum;
 
+		AT_PRINTF("SumY[%f] MaxLum[%f]\n", retSumY, retMaxLum);
+
 		std::tuple<real, real> result = std::make_tuple(retSumY, retMaxLum);
 		return result;
 	}

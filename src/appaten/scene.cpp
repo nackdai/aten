@@ -166,7 +166,8 @@ void MtrlTestScene::getCameraPosAndAt(
 
 void ObjectScene::makeScene(aten::scene* scene)
 {
-	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	//auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
 	auto instance = new aten::objinstance(obj);
 
@@ -177,6 +178,7 @@ void ObjectScene::getCameraPosAndAt(
 	aten::vec3& pos,
 	aten::vec3& at)
 {
-	pos = aten::vec3(0.0, 0.0, 10.0);
+	//pos = aten::vec3(0.0, 0.0, 10.0);
+	pos = aten::vec3(0.0, 0.0, 60.0);
 	at = aten::vec3(0.0, 0.0, 0.0);
 }

@@ -36,7 +36,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 16;
+		dst.sample = 10;
 		dst.buffer = &g_buffer[0];
 	}
 

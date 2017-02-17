@@ -90,6 +90,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -107,6 +108,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -126,6 +128,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -148,6 +151,7 @@ copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

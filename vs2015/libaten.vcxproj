@@ -85,6 +85,7 @@
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -100,6 +101,7 @@
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -116,6 +118,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;$(ProjectDir)..\3rdpirty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -136,6 +139,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;$(ProjectDir)..\3rdpirty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

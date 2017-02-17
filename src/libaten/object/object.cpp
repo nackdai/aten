@@ -26,8 +26,7 @@ namespace aten
 			if (res.t < rec.t) {
 				rec.t = res.t;
 
-				rec.normal = v0->nml;
-				rec.p = r.org + rec.t * r.dir;
+				auto p = r.org + rec.t * r.dir;
 
 				// NOTE
 				// http://d.hatena.ne.jp/Zellij/20131207/p1
@@ -35,7 +34,9 @@ namespace aten
 				// dSÀ•WŒn(barycentric coordinates).
 				// v0Šî€.
 				// p = (1 - a - b)*v0 + a*v1 + b*v2
-				auto uv = (real(1) - res.a - res.b) * v0->uv + res.a * v1->uv + res.b * v2->uv;
+				rec.p = (1 - res.a - res.b) * v0->pos + res.a * v1->pos + res.b * v2->pos;
+				rec.normal = (1 - res.a - res.b) * v0->nml + res.a * v1->nml + res.b * v2->nml;
+				auto uv = (1 - res.a - res.b) * v0->uv + res.a * v1->uv + res.b * v2->uv;
 
 				rec.u = uv.x;
 				rec.v = uv.y;
@@ -45,8 +46,8 @@ namespace aten
 				rec.dv = normalize(cross(rec.normal, rec.du));
 
 				// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
-				auto e0 = v1 - v0;
-				auto e1 = v2 - v0;
+				auto e0 = v1->pos - v0->pos;
+				auto e1 = v2->pos - v0->pos;
 				rec.area = 0.5 * cross(e0, e1).length();
 
 				isHit = true;

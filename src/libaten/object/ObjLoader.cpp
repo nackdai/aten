@@ -7,6 +7,7 @@
 // TODO
 #include "material/lambert.h"
 #include "material/specular.h"
+#include "material/blinn.h"
 
 namespace aten
 {
@@ -94,6 +95,7 @@ namespace aten
 			// TODO
 			//dstshape->mtrl = new lambert(vec3(0.75, 0, 0));
 			dstshape->mtrl = new specular(vec3(1, 1, 1));
+			//dstshape->mtrl = new MicrofacetBlinn(vec3(1, 1, 1), 1, 1);
 
 			vtxnum = shape.mesh.texcoords.size();
 

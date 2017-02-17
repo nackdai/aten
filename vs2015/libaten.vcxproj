@@ -160,6 +160,7 @@
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
     <ClInclude Include="..\src\libaten\material\blinn.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
+    <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
@@ -200,6 +201,7 @@
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\material\blinn.cpp" />
+    <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\lambert.cpp" />
     <ClCompile Include="..\src\libaten\material\material .cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />

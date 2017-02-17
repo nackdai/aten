@@ -34,7 +34,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 		r,
 		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
 
-	auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
+	//auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
 	// —Î‹….
 	auto green = new aten::sphere(
@@ -62,8 +62,8 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(wall);
 	scene->add(floor);
 	scene->add(ceil);
-	//scene->add(green);
-	//scene->add(mirror);
+	scene->add(green);
+	scene->add(mirror);
 	scene->add(glass);
 
 	scene->addLight(light);

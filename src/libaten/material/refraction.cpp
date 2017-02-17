@@ -58,16 +58,16 @@ namespace aten
 		auto reflect = in - 2 * dot(hitrec.normal, in) * hitrec.normal;
 		reflect.normalize();
 
-		real ddn = dot(in, normal);
+		real cos_i = dot(in, normal);
 		real nnt = into ? ni / nt : nt / ni;
 
 		// NOTE
 		// cos_t^2 = 1 - sin_t^2
 		// sin_t^2 = (ni/nt)^2 * sin_i^2 = (ni/nt)^2 * (1 - cos_i^2)
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
-		real cos2t = real(1) - (nnt * nnt) * (real(1) - ddn * ddn);
+		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
-		if (cos2t < real(0)) {
+		if (cos_t_2 < real(0)) {
 			//AT_PRINTF("Reflection in refraction...\n");
 
 			// ‘S”½ŽË.
@@ -83,16 +83,21 @@ namespace aten
 			return std::move(ret);
 		}
 
+		vec3 n = into ? hitrec.normal : -hitrec.normal;
+#if 0
+		vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
+#else
 		// NOTE
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
-		vec3 n = into ? hitrec.normal : -hitrec.normal;
-		vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (ddn * nnt + sqrt(cos2t));
+		auto invnnt = 1 / nnt;
+		vec3 refract = nnt * (in - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
+#endif
 		refract.normalize();
 
 		const auto r0 = ((nt - ni) * (nt - ni)) / ((nt + ni) * (nt + ni));
 
-		const auto c = 1 - (into ? -ddn : dot(refract, -normal));
+		const auto c = 1 - (into ? -cos_i : dot(refract, -normal));
 
 		// ”½ŽË•ûŒü‚ÌŒõ‚ª”½ŽË‚µ‚Äray.dir‚Ì•ûŒü‚É‰^‚ÔŠ„‡B“¯Žž‚É‹üÜ•ûŒü‚ÌŒõ‚ª”½ŽË‚·‚é•ûŒü‚É‰^‚ÔŠ„‡.
 		auto fresnel = r0 + (1 - r0) * aten::pow(c, 5);
@@ -105,7 +110,7 @@ namespace aten
 
 		auto r = sampler->nextSample();
 
-#if 0
+#if 1
 		auto prob = 0.25 + 0.5 * Re;
 		if (r < prob) {
 			// ”½ŽË.

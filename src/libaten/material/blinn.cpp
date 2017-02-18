@@ -7,8 +7,8 @@ namespace aten
 
 	real MicrofacetBlinn::pdf(
 		const vec3& normal, 
-		const vec3& wi,
-		const vec3& wo) const
+		const vec3& wi,	/* in */
+		const vec3& wo	/* out */ ) const
 	{
 		// NOTE
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
@@ -123,6 +123,9 @@ namespace aten
 		// Compute D.
 		real D(1);
 		{
+			// TODO
+			// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+
 			auto x = aten::acos(NdotH) * n;
 			D = aten::exp(-x * x);
 		}
@@ -130,6 +133,9 @@ namespace aten
 		// Compute G.
 		real G(1);
 		{
+			// Cook-Torrance geometry function.
+			// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+
 			auto G1 = 2 * NdotH * NdotL / VdotH;
 			auto G2 = 2 * NdotH * NdotV / VdotH;
 			G = min(1, min(G1, G2));

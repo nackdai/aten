@@ -30,7 +30,7 @@ namespace aten
 				// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-				if (rec.mtrl->isSingular()) {
+				if (rec.mtrl->isSingular() || rec.mtrl->isTranslucent()) {
 					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, nullptr, rec.u, rec.v);
 
 					auto nextDir = sampling.dir;
@@ -46,35 +46,34 @@ namespace aten
 					ray = aten::ray(rec.p, nextDir);
 				}
 				else {
-#if 0
-					auto lightNum = scene->lightNum();
+					// TODO
+					auto light = scene->getLight(0);
 
-					for (uint32_t i = 0; i < lightNum; i++) {
-						auto light = scene->getLight(i);
+					if (light) {
+						const auto posLight = light->center();
 
-						// TODO
-						auto posLight = light->center();
+						vec3 dirToLight = posLight - rec.p;
+						auto len = dirToLight.length();
 
-						vec3 dirToLight = normalize(posLight - rec.p);
+						dirToLight.normalize();
+
+						auto albedo = rec.mtrl->color();
+
 						aten::ray shadowRay(rec.p, dirToLight);
-
-						auto brdf = rec.mtrl->brdf(orienting_normal, dirToLight);
 
 						hitrecord tmpRec;
 
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							if (tmpRec.obj == light) {
-								// Get light color.
-								auto emit = tmpRec.mtrl->color();
-
-								contribution += brdf * emit;
+								const auto lightColor = tmpRec.mtrl->color();
+								contribution += max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
+								break;
 							}
 						}
+						else {
+							break;
+						}
 					}
-#else
-					auto clr = rec.mtrl->color();
-					contribution += throughput * clr;
-#endif
 				}
 			}
 			else {

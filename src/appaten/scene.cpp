@@ -147,18 +147,14 @@ void RandomScene::getCameraPosAndAt(
 
 void MtrlTestScene::makeScene(aten::scene* scene)
 {
-	auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
-	//scene->add(s);
+	auto s_blinn = new aten::sphere(aten::vec3(0, 0, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+	scene->add(s_blinn);
 
-	//s = new aten::sphere(aten::vec3(0, 0, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
-	s = new aten::sphere(aten::vec3(0, 0, 0), 1.0, new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.1, 0.2));
-	scene->add(s);
+	auto s_ggx = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+	scene->add(s_ggx);
 
-	//s = new aten::sphere(aten::vec3(1, 1, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
-	//scene->add(s);
-
-	//s = new aten::sphere(aten::vec3(-2, 1, 0), 1.0, new aten::lambert(aten::vec3(0.7, 0.6, 0.5)));
-	//scene->add(s);
+	auto s_beckman = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, new aten::MicrofacetBeckman(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+	scene->add(s_beckman);
 }
 
 void MtrlTestScene::getCameraPosAndAt(

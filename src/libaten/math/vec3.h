@@ -189,6 +189,7 @@ namespace aten {
 
 		// NOTE
 		// dot‚ğŒvZ‚µ‚½‚Æ‚«‚Éƒ[ƒ‚É‚È‚é‚æ‚¤‚ÈƒxƒNƒgƒ‹.
+		// k ‚Í normalize ŒvZ—p.
 
 		if (aten::abs(n.z) > real(0)) {
 			real k = aten::sqrt(n.y * n.y + n.z * n.z);

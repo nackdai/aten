@@ -14,6 +14,9 @@ namespace aten
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
 		// Half-angle based
 
+		// NOTE
+		// https://segmentfault.com/a/1190000000432254
+
 		// half vector.
 		auto wh = normalize(-wi + wo);
 
@@ -45,7 +48,7 @@ namespace aten
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
-#if 0
+#if 1
 		// Sample halfway vector first, then reflect wi around that
 		auto costheta = aten::pow(r1, 1 / (m_shininess + 1));
 		auto sintheta = aten::sqrt(1 - costheta * costheta);
@@ -66,21 +69,8 @@ namespace aten
 
 		// Ortho normal base.
 		auto n = normal;
-#if 0
 		auto u = getOrthoVector(normal);
 		auto v = normalize(cross(n, u));
-#else
-		vec3 u, v;
-
-		// w‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
-		if (fabs(n.x) > 0.1) {
-			u = normalize(cross(vec3(0.0, 1.0, 0.0), n));
-		}
-		else {
-			u = normalize(cross(vec3(1.0, 0.0, 0.0), n));
-		}
-		v = cross(n, u);
-#endif
 
 		auto w = u * sintheta * cosphi + v * sintheta * sinphi + n * costheta;
 		w.normalize();
@@ -114,21 +104,38 @@ namespace aten
 		auto NdotL = aten::abs(dot(N, L));
 		auto NdotV = aten::abs(dot(N, V));
 
-		auto n = m_shininess;
+		auto a = m_shininess;
 
-		auto F = computFresnel(wi, normal, ni, nt);
+		real F(1);
+		{
+			// http://d.hatena.ne.jp/hanecci/20130525/p3
+
+			// NOTE
+			// Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+			// R0 = ((n1 - n2) / (n1 + n2))^2
+
+			auto r0 = (ni - nt) / (ni + nt);
+			r0 = r0 * r0;
+
+			auto LdotH = aten::abs(dot(L, H));
+
+			F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
+		}
 
 		auto denom = 4 * NdotL * NdotV;
 
 		// Compute D.
-		real D(1);
-		{
-			// TODO
-			// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
-
-			auto x = aten::acos(NdotH) * n;
-			D = aten::exp(-x * x);
-		}
+#if 0
+		// NOTE
+		// https://www.siggraph.org/education/materials/HyperGraph/illumin/specular_highlights/blinn_model_for_specular_reflect_1.htm
+		auto x = aten::acos(NdotH) * a;
+		real D = aten::exp(-x * x);
+#else
+		// NOTE
+		// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+		real D = (a + 2) / (2 * AT_MATH_PI);
+		D *= aten::pow(max(0, NdotH), a);
+#endif
 
 		// Compute G.
 		real G(1);
@@ -147,8 +154,7 @@ namespace aten
 			albedo *= texclr;
 		}
 
-		auto brdf = albedo * F * G * D / denom;
-		//auto brdf = albedo * G * D / denom;
+		auto brdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
 		return std::move(brdf);
 	}
@@ -163,9 +169,28 @@ namespace aten
 		sampling ret;
 
 		ret.dir = sampleDirection(in, normal, sampler);
-		ret.pdf = pdf(normal, in, ret.dir);
 
+#if 1
+		ret.pdf = pdf(normal, in, ret.dir);
 		ret.brdf = brdf(normal, in, ret.dir, u, v);
+#else
+		vec3 V = -in;
+		vec3 L = ret.dir;
+		vec3 N = normal;
+		vec3 H = normalize(L + V);
+
+		auto NdotL = aten::abs(dot(N, L));
+		auto NdotH = aten::abs(dot(N, H));
+
+		if (NdotL > 0 && NdotH > 0) {
+			ret.pdf = pdf(normal, in, ret.dir);
+
+			ret.brdf = brdf(normal, in, ret.dir, u, v);
+		}
+		else {
+			ret.pdf = 0;
+		}
+#endif
 
 		return std::move(ret);
 	}

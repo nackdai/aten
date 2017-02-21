@@ -8,8 +8,10 @@ namespace aten
 	public:
 		MicrofacetGGX() {}
 		MicrofacetGGX(const vec3& c, real roughness, real ior)
-			: m_color(c), m_roughness(roughness), m_ior(ior)
-		{}
+			: m_color(c), m_ior(ior)
+		{
+			m_roughness = aten::clamp<real>(roughness, 0, 1);
+		}
 
 		virtual ~MicrofacetGGX() {}
 

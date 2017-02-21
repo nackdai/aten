@@ -11,6 +11,9 @@ namespace aten
 		real roughness)
 	{
 		// NOTE
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+
+		// NOTE
 		// ((a^2 - 1) * cos^2 + 1)^2
 		// (-> a^2 = a2, cos^2 = cos2)
 		// ((a2 - 1) * cos2 + 1)^2
@@ -34,11 +37,34 @@ namespace aten
 		return D;
 	}
 
+	real computeGGXSmithG1(real roughness, const vec3& v, const vec3& n)
+	{
+		// NOTE
+		// http://computergraphics.stackexchange.com/questions/2489/correct-form-of-the-ggx-geometry-term
+		// http://gregory-igehy.hatenadiary.com/entry/2015/02/26/154142
+
+		real a = roughness;
+
+		real costheta = aten::abs(dot(v, n));
+
+		real sintheta = aten::sqrt(1 - aten::clamp<real>(costheta, 0, 1));
+		real tan = costheta > 0 ? sintheta / costheta : 0;
+
+		real denom = aten::sqrt(1 + a * a * tan * tan);
+
+		real ret = 2 / (1 + denom);
+
+		return ret;
+	}
+
 	real MicrofacetGGX::pdf(
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo) const
 	{
+		// NOTE
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+
 		auto wh = normalize(-wi + wo);
 
 		auto costheta = aten::abs(dot(wh, normal));
@@ -75,21 +101,8 @@ namespace aten
 
 		// Ortho normal base.
 		auto n = normal;
-#if 0
 		auto u = getOrthoVector(normal);
 		auto v = normalize(cross(n, u));
-#else
-		vec3 u, v;
-
-		// w‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
-		if (fabs(n.x) > 0.1) {
-			u = normalize(cross(vec3(0.0, 1.0, 0.0), n));
-		}
-		else {
-			u = normalize(cross(vec3(1.0, 0.0, 0.0), n));
-		}
-		v = cross(n, u);
-#endif
 
 		auto w = u * sintheta * cosphi + v * sintheta * sinphi + n * costheta;
 		w.normalize();
@@ -108,8 +121,7 @@ namespace aten
 		// ƒŒƒC‚ª“üŽË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó
 
-							// •¨‘Ì“à•”‚Ì‹üÜ—¦.
-		real nt = m_ior;
+		real nt = m_ior;	// •¨‘Ì“à•”‚Ì‹üÜ—¦.
 
 		vec3 V = -wi;
 		vec3 L = wo;
@@ -124,17 +136,15 @@ namespace aten
 		auto NdotV = aten::abs(dot(N, V));
 
 		// Compute D.
-		real D = sampleGGX_D(H, normal, m_roughness);
+		real D = sampleGGX_D(H, N, m_roughness);
 
 		// Compute G.
 		real G(1);
 		{
-			// NOTE
-			// http://computergraphics.stackexchange.com/questions/2489/correct-form-of-the-ggx-geometry-term
-			// http://gregory-igehy.hatenadiary.com/entry/2015/02/26/154142
-			
+			auto G1_lh = computeGGXSmithG1(m_roughness, L, N);
+			auto G1_vh = computeGGXSmithG1(m_roughness, V, N);
 
-
+			G = G1_lh * G1_vh;
 		}
 
 		auto albedo = m_color;
@@ -143,12 +153,25 @@ namespace aten
 			albedo *= texclr;
 		}
 
-		auto F = computFresnel(wi, normal, ni, nt);
+		real F(1);
+		{
+			// http://d.hatena.ne.jp/hanecci/20130525/p3
+
+			// NOTE
+			// Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+			// R0 = ((n1 - n2) / (n1 + n2))^2
+
+			auto r0 = (ni - nt) / (ni + nt);
+			r0 = r0 * r0;
+
+			auto LdotH = aten::abs(dot(L, H));
+
+			F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
+		}
 
 		auto denom = 4 * NdotL * NdotV;
 
-		auto brdf = albedo * F * G * D / denom;
-		//auto brdf = albedo * G * D / denom;
+		auto brdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
 		return std::move(brdf);
 	}

@@ -10,8 +10,9 @@ namespace aten
 		ray() {}
 		ray(const vec3& o, const vec3& d)
 		{
-			org = o;
 			dir = normalize(d);
+			//org = o;
+			org = o + AT_MATH_EPSILON * dir;
 		}
 
 		vec3 org;

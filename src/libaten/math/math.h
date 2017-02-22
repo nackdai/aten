@@ -132,4 +132,20 @@ namespace aten {
 	{
 		return min(max(f, a), b);
 	}
+
+	inline bool isValid(real f)
+	{
+		bool b = isnan(f);
+		if (!b) {
+			b = isinf(f);
+		}
+
+		return !b;
+	}
+
+	inline bool isInvalid(real f)
+	{
+		bool b = !isValid(f);
+		return b;
+	}
 }

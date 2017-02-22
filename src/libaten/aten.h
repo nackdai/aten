@@ -4,6 +4,7 @@
 #include "types.h"
 
 #include "camera/pinhole.h"
+#include "camera/thinlens.h"
 
 #include "material/emissive.h"
 #include "material/lambert.h"

@@ -6,7 +6,14 @@ static int WIDTH = 640;
 static int HEIGHT = 480;
 static const char* TITLE = "app";
 
+#define ENABLE_DOF
+
+#ifdef ENABLE_DOF
+static aten::ThinLensCamera g_camera;
+#else
 static aten::PinholeCamera g_camera;
+#endif
+
 //static aten::AcceledScene<aten::LinearList> g_scene;
 static aten::AcceledScene<aten::bvhnode> g_scene;
 
@@ -68,7 +75,7 @@ void display()
 
 	aten::visualizer::render(&g_dst[0]);
 #else
-	aten::visualizer::render(&g_buffer[0]);
+	aten::visualizer::render(&g_buffer[0], g_camera.needRevert());
 #endif
 }
 
@@ -123,12 +130,24 @@ int main(int argc, char* argv[])
 
 	Scene::getCameraPosAndAt(lookfrom, lookat);
 
+#ifdef ENABLE_DOF
+	g_camera.init(
+		WIDTH, HEIGHT,
+		lookfrom, lookat,
+		aten::vec3(0, 1, 0),
+		30.0,	// image sensor size
+		40.0,	// distance image sensor to lens
+		130.0,	// distance lens to object plane
+		5.0,	// lens radius
+		28.0);	// W scale
+#else
 	g_camera.init(
 		lookfrom,
 		lookat,
 		aten::vec3(0, 1, 0),
 		30,
 		WIDTH, HEIGHT);
+#endif
 
 	Scene::makeScene(&g_scene);
 

@@ -174,6 +174,9 @@
     <ClInclude Include="..\src\libaten\material\beckman.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\camera\thinlens.h">
+      <Filter>camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -247,6 +250,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\beckman.cpp">
       <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\camera\thinlens.cpp">
+      <Filter>camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

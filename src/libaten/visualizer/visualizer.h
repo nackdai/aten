@@ -19,6 +19,8 @@ namespace aten {
 
 		static void setShader(shader* shader);
 
-		static void render(const void* pixels);
+		static void render(
+			const void* pixels,
+			bool revert);
 	};
 }

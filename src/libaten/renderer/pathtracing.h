@@ -20,6 +20,8 @@ namespace aten
 		vec3 radiance(
 			sampler* sampler,
 			const ray& inRay,
+			camera* cam,
+			CameraSampleResult& camsample,
 			scene* scene);
 
 	private:

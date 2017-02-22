@@ -24,6 +24,8 @@ namespace aten
 		virtual ~TonemapRender() {}
 
 	public:
-		virtual void begin(const void* pixels) override final;
+		virtual void begin(
+			const void* pixels,
+			bool revert) override final;
 	};
 }

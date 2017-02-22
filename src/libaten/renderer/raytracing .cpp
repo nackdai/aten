@@ -120,9 +120,9 @@ namespace aten
 					real u = real(x) / real(width - 1);
 					real v = real(y) / real(height - 1);
 
-					auto ray = camera->sample(u, v);
+					auto camsample = camera->sample(u, v, nullptr);
 
-					auto col = radiance(ray, scene);
+					auto col = radiance(camsample.r, scene);
 
 					color[pos] = col;
 				}

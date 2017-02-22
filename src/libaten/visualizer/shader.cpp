@@ -87,7 +87,9 @@ namespace aten {
 		return true;
 	}
 
-	void shader::begin(const void* pixels)
+	void shader::begin(
+		const void* pixels,
+		bool revert)
 	{
 		CALL_GL_API(::glUseProgram(m_program));
 	}
@@ -98,14 +100,21 @@ namespace aten {
 		return handle;
 	}
 
-	void SimpleRender::begin(const void* pixels)
+	void SimpleRender::begin(
+		const void* pixels,
+		bool revert)
 	{
-		shader::begin(pixels);
+		shader::begin(pixels, revert);
 
 		GLfloat invScreen[4] = { 1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f };
 		auto hInvScreen = getHandle("invScreen");
 		if (hInvScreen >= 0) {
 			CALL_GL_API(::glUniform4fv(hInvScreen, 1, invScreen));
+		}
+
+		auto hRevert = getHandle("revert");
+		if (hRevert >= 0) {
+			CALL_GL_API(::glUniform1i(hRevert, revert ? 1 : 0));
 		}
 
 		auto hImage = getHandle("image");

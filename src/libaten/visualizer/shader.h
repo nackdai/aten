@@ -22,7 +22,9 @@ namespace aten {
 			const char* pathVS,
 			const char* pathFS);
 
-		virtual void begin(const void* pixels);
+		virtual void begin(
+			const void* pixels,
+			bool revert);
 
 		GLint getHandle(const char* name);
 
@@ -38,6 +40,8 @@ namespace aten {
 		virtual ~SimpleRender() {}
 
 	public:
-		virtual void begin(const void* pixels) override;
+		virtual void begin(
+			const void* pixels,
+			bool revert) override;
 	};
 }

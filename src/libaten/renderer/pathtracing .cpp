@@ -45,9 +45,14 @@ namespace aten
 		return pdfLight;
 	}
 
+	// NOTE
+	// https://www.slideshare.net/shocker_0x15/ss-52688052
+
 	vec3 PathTracing::radiance(
 		sampler* sampler,
 		const ray& inRay,
+		camera* cam,
+		CameraSampleResult& camsample,
 		scene* scene)
 	{
 		uint32_t depth = 0;
@@ -58,6 +63,11 @@ namespace aten
 
 		vec3 contribution(0, 0, 0);
 		vec3 throughput(1, 1, 1);
+
+		auto Wdash = cam->getWdash(
+			camsample.posOnImageSensor,
+			camsample.posOnLens,
+			camsample.posOnObjectplane);
 
 		real pdfb;
 
@@ -100,6 +110,13 @@ namespace aten
 							break;
 						}
 					}
+				}
+
+				if (depth == 0) {
+					auto areaPdf = cam->getPdfImageSensorArea(rec.p, orienting_normal);
+					
+					//throughput *= Wdash;
+					throughput /= areaPdf;
 				}
 
 				// Explicit conection to light.
@@ -216,6 +233,18 @@ namespace aten
 		return contribution;
 	}
 
+	inline bool isInvalidColor(const vec3& v)
+	{
+		bool b = isInvalid(v);
+		if (!b) {
+			if (v.x < 0 || v.y < 0 || v.z < 0) {
+				b = true;
+			}
+		}
+
+		return b;
+	}
+
 	void PathTracing::render(
 		Destination& dst,
 		scene* scene,
@@ -270,9 +299,29 @@ namespace aten
 						real u = real(x + sampler.nextSample()) / real(width);
 						real v = real(y + sampler.nextSample()) / real(height);
 
-						auto ray = camera->sample(u, v);
+						auto camsample = camera->sample(u, v, &sampler);
 
-						col += radiance(&sampler, ray, scene);
+						auto ray = camsample.r;
+
+						auto L = radiance(
+							&sampler, 
+							ray, 
+							camera,
+							camsample,
+							scene);
+
+						if (isInvalidColor(L)) {
+							AT_PRINTF("Invalid(%d/%d)\n", x, y);
+						}
+
+						auto pdfOnImageSensor = camsample.pdfOnImageSensor;
+						auto pdfOnLens = camsample.pdfOnLens;
+
+						auto s = camera->getSensitivity(
+							camsample.posOnImageSensor,
+							camsample.posOnLens);
+
+						col += L * s / (pdfOnImageSensor * pdfOnLens);
 					}
 
 					col /= (real)sample;

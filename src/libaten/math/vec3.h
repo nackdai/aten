@@ -206,4 +206,13 @@ namespace aten {
 
 		return normalize(p);
 	}
+
+	inline bool isInvalid(const vec3& v)
+	{
+		bool b0 = isInvalid(v.x);
+		bool b1 = isInvalid(v.y);
+		bool b2 = isInvalid(v.z);
+
+		return b0 || b1 || b2;
+	}
 }

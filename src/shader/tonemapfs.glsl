@@ -9,6 +9,8 @@ uniform vec4 invScreen;
 uniform float coeff;
 uniform float l_max;
 
+uniform bool revert;
+
 vec3 RGB2Y   = vec3(+0.29900, +0.58700, +0.11400);
 vec3 RGB2Cb  = vec3(-0.16874, -0.33126, +0.50000);
 vec3 RGB2Cr  = vec3(+0.50000, -0.41869, -0.08131);
@@ -19,7 +21,10 @@ vec3 YCbCr2B = vec3(+1.00000, +1.77200, +0.00000);
 void main()
 {
     vec2 uv = gl_FragCoord.xy * invScreen.xy;
-    //uv.y = 1.0 - uv.y;
+	if (revert) {
+		uv.x = 1.0 - uv.x;
+		uv.y = 1.0 - uv.y;
+	}
 
 	vec4 col = sqrt(texture2D(image, uv));
 

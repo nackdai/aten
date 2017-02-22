@@ -102,7 +102,9 @@ namespace aten {
 		return handle;
 	}
 
-	void visualizer::render(const void* pixels)
+	void visualizer::render(
+		const void* pixels,
+		bool revert)
 	{
 		CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
 		CALL_GL_API(::glClearDepthf(1.0f));
@@ -113,7 +115,7 @@ namespace aten {
 
 		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
 
-		g_shader->begin(pixels);
+		g_shader->begin(pixels, revert);
 
 		const void* textureimage = pixels;
 

@@ -140,9 +140,11 @@ namespace aten
 		}
 	}
 
-	void TonemapRender::begin(const void* pixels)
+	void TonemapRender::begin(
+		const void* pixels,
+		bool revert)
 	{
-		SimpleRender::begin(pixels);
+		SimpleRender::begin(pixels, revert);
 
 		auto result = Tonemap::computeAvgAndMaxLum(m_width, m_height, (const vec3*)pixels);
 

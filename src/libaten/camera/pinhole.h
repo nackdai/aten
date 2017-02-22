@@ -45,16 +45,22 @@ namespace aten {
 			m_v = 2 * half_height * flocalLength * m_up;
 		}
 
-		virtual ray sample(real s, real t) override final
+		virtual CameraSampleResult sample(
+			real s, real t,
+			sampler* sampler) const override final
 		{
+			CameraSampleResult result;
+
 			auto screenPos = s * m_u + t * m_v;
 			screenPos = screenPos + m_LowerLeftCorner;
 
 			auto dirToScr = screenPos - m_origin;
 
-			ray ret(m_origin, dirToScr);
+			result.posOnLens = screenPos;
+			result.posOnImageSensor = m_origin;
+			result.r = ray(m_origin, dirToScr);
 
-			return std::move(ret);
+			return std::move(result);
 		}
 
 	private:

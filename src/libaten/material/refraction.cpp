@@ -108,7 +108,7 @@ namespace aten
 		auto Re = fresnel;
 		auto Tr = (1 - Re) * nn;
 
-		auto r = 1;
+		real r = 1;
 		if (sampler) {
 			r = sampler->nextSample();
 		}

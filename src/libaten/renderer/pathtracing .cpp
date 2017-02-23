@@ -104,27 +104,33 @@ namespace aten
 						auto lightobj = sampleres.obj;
 
 						vec3 dirToLight = normalize(sampleres.dir);
-						aten::ray shadowRay(rec.p, dirToLight);
+						aten::ray shadowRay(rec.p + AT_MATH_EPSILON * dirToLight, dirToLight);
 
 						hitrecord tmpRec;
 
-#if 0
-						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-							if (tmpRec.obj == lightobj) {
-#else
 						if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-							{
-#endif
-								// Shadow ray hits the light.
-								auto cosShadow = dot(orienting_normal, dirToLight);
+							// Shadow ray hits the light.
+							auto cosShadow = dot(orienting_normal, dirToLight);
+							auto dist2 = sampleres.dir.squared_length();
+
+							auto brdf = rec.mtrl->brdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
+
+							// Get light color.
+							auto emit = sampleres.le;
+
+							if (light->isSingular()) {
+								// TODO
+								if (pdfb > real(0)) {
+									auto G = cosShadow / dist2;
+									contribution += brdf * emit * G / pdfb;
+								}
+							}
+							else {
 								auto cosLight = dot(nmlLight, -dirToLight);
-								auto dist2 = sampleres.dir.squared_length();
 
 								if (cosShadow >= 0 && cosLight >= 0) {
 									auto G = cosShadow * cosLight / dist2;
-
-									auto brdf = rec.mtrl->brdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-									pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
 
 									if (pdfb > real(0)) {
 										// Convert pdf from steradian to area.
@@ -133,9 +139,6 @@ namespace aten
 										pdfb = pdfb * cosLight / dist2;
 
 										auto misW = pdfLight / (pdfb + pdfLight);
-
-										// Get light color.
-										auto emit = sampleres.le;
 
 										contribution += misW * (brdf * emit * G) / pdfLight;
 									}
@@ -183,7 +186,7 @@ namespace aten
 				prevMtrl = rec.mtrl;
 
 				// Make next ray.
-				ray = aten::ray(rec.p, nextDir);
+				ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
 			}
 			else {
 				// TODO

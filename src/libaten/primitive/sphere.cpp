@@ -34,15 +34,14 @@ namespace aten
 		const real t1 = b - sqrt_D4;
 		const real t2 = b + sqrt_D4;
 
-		if (t1 < AT_MATH_EPSILON && t2 < AT_MATH_EPSILON) {
-			return false;
-		}
-
 		if (t1 > AT_MATH_EPSILON) {
 			rec.t = t1;
 		}
-		else {
+		else if (t2 > AT_MATH_EPSILON) {
 			rec.t = t2;
+		}
+		else {
+			return false;
 		}
 
 		rec.p = r.org + rec.t * r.dir;

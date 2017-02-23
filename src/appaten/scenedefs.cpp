@@ -187,3 +187,47 @@ void ObjectScene::getCameraPosAndAt(
 	pos = aten::vec3(0.0, 0.0, 60.0);
 	at = aten::vec3(0.0, 0.0, 0.0);
 }
+
+/////////////////////////////////////////////////////
+
+void PointLightScene::makeScene(aten::scene* scene)
+{
+	auto emit = new aten::emissive(aten::vec3(36.0, 36.0, 36.0));
+
+	auto light = new aten::sphere(
+		aten::vec3(50.0, 90.0, 81.6),
+		15.0,
+		emit);
+
+	double r = 1e5;
+
+	auto floor = new aten::sphere(
+		aten::vec3(0, -r, 0),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	// —Î‹….
+	auto green = new aten::sphere(
+		aten::vec3(65, 20, 20),
+		20,
+		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+
+#if 1
+	//scene->add(light);
+	scene->add(floor);
+	scene->add(green);
+
+	aten::Light* l = new aten::PointLight(aten::vec3(50.0, 90.0, 81.6), aten::vec3(36.0, 36.0, 36.0));
+	//aten::Light* l = new aten::AreaLight(light, emit->color());
+
+	scene->addLight(l);
+#endif
+}
+
+void PointLightScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(50.0, 52.0, 295.6);
+	at = aten::vec3(50.0, 40.8, 119.0);
+}

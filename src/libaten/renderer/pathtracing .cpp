@@ -172,7 +172,7 @@ namespace aten
 
 				if (depth > rrDepth) {
 					auto t = normalize(throughput);
-					auto p = max(t.r, max(t.g, t.b));
+					auto p = std::max(t.r, std::max(t.g, t.b));
 
 					russianProb = sampler->nextSample();
 
@@ -195,7 +195,7 @@ namespace aten
 
 				auto brdf = rec.mtrl->brdf(orienting_normal, nextDir);
 
-				auto c = max(dot(orienting_normal, nextDir), real(0));
+				auto c = std::max(dot(orienting_normal, nextDir), real(0));
 #else
 				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
 

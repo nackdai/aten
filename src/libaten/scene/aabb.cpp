@@ -84,14 +84,14 @@ namespace aten {
 	aabb aabb::surrounding_box(const aabb& box0, const aabb& box1)
 	{
 		vec3 _min(
-			min(box0.m_min.x, box1.m_min.x),
-			min(box0.m_min.y, box1.m_min.y),
-			min(box0.m_min.z, box1.m_min.z));
+			std::min(box0.m_min.x, box1.m_min.x),
+			std::min(box0.m_min.y, box1.m_min.y),
+			std::min(box0.m_min.z, box1.m_min.z));
 
 		vec3 _max(
-			max(box0.m_max.x, box1.m_max.x),
-			max(box0.m_max.y, box1.m_max.y),
-			max(box0.m_max.z, box1.m_max.z));
+			std::max(box0.m_max.x, box1.m_max.x),
+			std::max(box0.m_max.y, box1.m_max.y),
+			std::max(box0.m_max.z, box1.m_max.z));
 
 		aabb _aabb(_min, _max);
 

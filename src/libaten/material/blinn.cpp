@@ -1,3 +1,4 @@
+#include "math/math.h"
 #include "material/blinn.h"
 
 namespace aten
@@ -134,7 +135,7 @@ namespace aten
 		// NOTE
 		// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
 		real D = (a + 2) / (2 * AT_MATH_PI);
-		D *= aten::pow(max(0, NdotH), a);
+		D *= aten::pow(std::max((real)0, NdotH), a);
 #endif
 
 		// Compute G.
@@ -145,7 +146,7 @@ namespace aten
 
 			auto G1 = 2 * NdotH * NdotL / VdotH;
 			auto G2 = 2 * NdotH * NdotV / VdotH;
-			G = min(1, min(G1, G2));
+			G = std::min((real)1, std::min(G1, G2));
 		}
 
 		auto albedo = m_color;

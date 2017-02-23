@@ -21,8 +21,8 @@ namespace aten {
 	public:
 		const vec3& at(real u, real v) const
 		{
-			uint32_t x = (uint32_t)(min(u, real(1)) * (m_width - 1));
-			uint32_t y = (uint32_t)(min(v, real(1)) * (m_height - 1));
+			uint32_t x = (uint32_t)(std::min(u, real(1)) * (m_width - 1));
+			uint32_t y = (uint32_t)(std::min(v, real(1)) * (m_height - 1));
 
 			uint32_t pos = y * m_width + x;
 

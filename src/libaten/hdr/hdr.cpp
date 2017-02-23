@@ -21,7 +21,7 @@ namespace aten
 	// doubleのRGB要素を.hdrフォーマット用に変換.
 	static HDRPixel get_hdr_pixel(const vec3& color)
 	{
-		double d = max(color.x, max(color.y, color.z));
+		double d = std::max(color.x, std::max(color.y, color.z));
 
 		if (d <= 1e-32) {
 			return HDRPixel();
@@ -69,7 +69,7 @@ namespace aten
 
 			for (int i = 0; i < 4; i++) {
 				for (int cursor = 0; cursor < width;) {
-					const int cursor_move = min(127, width - cursor);
+					const int cursor_move = std::min(127, width - cursor);
 					fprintf(fp, "%c", cursor_move);
 
 					for (int j = cursor; j < cursor + cursor_move; j++) {

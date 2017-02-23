@@ -56,25 +56,25 @@ namespace aten
 				v.nml.z = shape.mesh.normals[i + 2];
 
 				pmin = vec3(
-					min(pmin.x, v.pos.x),
-					min(pmin.y, v.pos.y),
-					min(pmin.z, v.pos.z));
+					std::min(pmin.x, v.pos.x),
+					std::min(pmin.y, v.pos.y),
+					std::min(pmin.z, v.pos.z));
 				pmax = vec3(
-					max(pmax.x, v.pos.x),
-					max(pmax.y, v.pos.y),
-					max(pmax.z, v.pos.z));
+					std::max(pmax.x, v.pos.x),
+					std::max(pmax.y, v.pos.y),
+					std::max(pmax.z, v.pos.z));
 
 				dstshape->vertices.push_back(v);
 			}
 
 			shapemin = vec3(
-				min(shapemin.x, pmin.x),
-				min(shapemin.y, pmin.y),
-				min(shapemin.z, pmin.z));
+				std::min(shapemin.x, pmin.x),
+				std::min(shapemin.y, pmin.y),
+				std::min(shapemin.z, pmin.z));
 			shapemax = vec3(
-				max(shapemax.x, pmax.x),
-				max(shapemax.y, pmax.y),
-				max(shapemax.z, pmax.z));
+				std::max(shapemax.x, pmax.x),
+				std::max(shapemax.y, pmax.y),
+				std::max(shapemax.z, pmax.z));
 
 			for (uint32_t i = 0; i < idxnum; i += 3) {
 				face* f = new face();

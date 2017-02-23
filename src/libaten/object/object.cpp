@@ -60,14 +60,14 @@ namespace aten
 	void face::build(vertex* v0, vertex* v1, vertex* v2)
 	{
 		vec3 vmax(
-			max(v0->pos.x, max(v1->pos.x, v2->pos.x)),
-			max(v0->pos.y, max(v1->pos.y, v2->pos.y)),
-			max(v0->pos.z, max(v1->pos.z, v2->pos.z)));
+			std::max(v0->pos.x, std::max(v1->pos.x, v2->pos.x)),
+			std::max(v0->pos.y, std::max(v1->pos.y, v2->pos.y)),
+			std::max(v0->pos.z, std::max(v1->pos.z, v2->pos.z)));
 
 		vec3 vmin(
-			min(v0->pos.x, min(v1->pos.x, v2->pos.x)),
-			min(v0->pos.y, min(v1->pos.y, v2->pos.y)),
-			min(v0->pos.z, min(v1->pos.z, v2->pos.z)));
+			std::min(v0->pos.x, std::min(v1->pos.x, v2->pos.x)),
+			std::min(v0->pos.y, std::min(v1->pos.y, v2->pos.y)),
+			std::min(v0->pos.z, std::min(v1->pos.z, v2->pos.z)));
 
 		bbox.init(vmin, vmax);
 

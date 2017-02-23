@@ -36,7 +36,7 @@ namespace aten
 					auto nextDir = sampling.dir;
 					auto brdf = sampling.brdf;
 
-					auto c = max(
+					auto c = std::max(
 						dot(orienting_normal, nextDir),
 						real(0));
 
@@ -66,7 +66,7 @@ namespace aten
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							if (tmpRec.obj == light) {
 								const auto lightColor = tmpRec.mtrl->color();
-								contribution += max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
+								contribution += std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
 								break;
 							}
 						}

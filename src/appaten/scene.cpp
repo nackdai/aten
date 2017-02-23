@@ -80,11 +80,6 @@ void CornellBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-aten::real drand48()
-{
-	return (aten::real)::rand() / RAND_MAX;
-}
-
 void RandomScene::makeScene(aten::scene* scene)
 {
 	auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
@@ -93,12 +88,12 @@ void RandomScene::makeScene(aten::scene* scene)
 	int i = 1;
 	for (int x = -11; x < 11; x++) {
 		for (int z = -11; z < 11; z++) {
-			float choose_mtrl = drand48();
+			auto choose_mtrl = aten::drand48();
 
 			aten::vec3 center(
-				x + 0.9 * drand48(),
+				x + 0.9 * aten::drand48(),
 				0.2,
-				z + 0.9 * drand48());
+				z + 0.9 * aten::drand48());
 
 			if ((center - aten::vec3(4, 0.2, 0)).length() > 0.9) {
 				if (choose_mtrl < 0.8) {
@@ -106,14 +101,14 @@ void RandomScene::makeScene(aten::scene* scene)
 					s = new aten::sphere(
 						center,
 						0.2,
-						new aten::lambert(aten::vec3(drand48() * drand48(), drand48() * drand48(), drand48() * drand48())));
+						new aten::lambert(aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
 				}
 				else if (choose_mtrl < 0.95) {
 					// specular
 					s = new aten::sphere(
 						center,
 						0.2,
-						new aten::specular(aten::vec3(0.5 * (1 + drand48()), 0.5 * (1 + drand48()), 0.5 * (1 + drand48()))));
+						new aten::specular(aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
 				}
 				else {
 					// glass

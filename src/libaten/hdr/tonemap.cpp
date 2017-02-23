@@ -72,7 +72,7 @@ namespace aten
 
 		for (uint32_t i = 0; i < threadnum; i++) {
 			retSumY += sumY[i];
-			retMaxLum = max(maxLum[i], retMaxLum);
+			retMaxLum = std::max(maxLum[i], retMaxLum);
 		}
 
 		retSumY /= threadnum;

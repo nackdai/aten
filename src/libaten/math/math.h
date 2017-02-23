@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math.h>
+#include <algorithm>
 #include "types.h"
 
 #define AT_MATH_PI		aten::real(3.14159265358979323846)
@@ -130,7 +131,7 @@ namespace aten {
 	template <typename _T>
 	inline _T clamp(_T f, _T a, _T b)
 	{
-		return min(max(f, a), b);
+		return std::min(std::max(f, a), b);
 	}
 
 	inline bool isValid(real f)

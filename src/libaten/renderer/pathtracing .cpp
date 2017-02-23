@@ -156,19 +156,6 @@ namespace aten
 					}
 				}
 
-#if 0
-				// Sample next direction.
-				auto nextDir = rec.mtrl->sampleDirection(
-					ray.dir,
-					orienting_normal, 
-					sampler);
-
-				pdfb = rec.mtrl->pdf(orienting_normal, nextDir);
-
-				auto brdf = rec.mtrl->brdf(orienting_normal, nextDir);
-
-				auto c = std::max(dot(orienting_normal, nextDir), real(0));
-#else
 				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
 
 				auto nextDir = sampling.dir;
@@ -179,7 +166,6 @@ namespace aten
 				// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ªA³‚µ‚¢?
 				//auto c = dot(orienting_normal, nextDir);
 				auto c = aten::abs(dot(orienting_normal, nextDir));
-#endif
 
 				if (pdfb > 0) {
 					throughput *= brdf * c / pdfb;

@@ -95,7 +95,7 @@ namespace aten {
 			return m_lights[i];
 		}
 
-		bool isHitLight(
+		bool hitLight(
 			const Light* light,
 			const ray& r,
 			real t_min, real t_max,

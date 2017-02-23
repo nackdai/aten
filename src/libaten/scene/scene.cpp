@@ -1,7 +1,7 @@
 #include "scene/scene.h"
 
 namespace aten {
-	bool scene::isHitLight(
+	bool scene::hitLight(
 		const Light* light,
 		const ray& r,
 		real t_min, real t_max,

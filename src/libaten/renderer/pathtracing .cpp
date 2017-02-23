@@ -112,7 +112,7 @@ namespace aten
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							if (tmpRec.obj == lightobj) {
 #else
-						if (scene->isHitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+						if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							{
 #endif
 								// Shadow ray hits the light.

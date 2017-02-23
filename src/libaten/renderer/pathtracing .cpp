@@ -112,6 +112,7 @@ namespace aten
 							// Shadow ray hits the light.
 							auto cosShadow = dot(orienting_normal, dirToLight);
 							auto dist2 = sampleres.dir.squared_length();
+							auto dist = aten::sqrt(dist2);
 
 							auto brdf = rec.mtrl->brdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
@@ -120,10 +121,8 @@ namespace aten
 							auto emit = sampleres.le;
 
 							if (light->isSingular()) {
-								// TODO
-								if (pdfb > real(0)) {
-									auto G = cosShadow / dist2;
-									contribution += brdf * emit * G / pdfb;
+								if (pdfLight > real(0)) {
+									contribution += brdf * emit * cosShadow / dist2 / pdfLight;
 								}
 							}
 							else {
@@ -132,7 +131,7 @@ namespace aten
 								if (cosShadow >= 0 && cosLight >= 0) {
 									auto G = cosShadow * cosLight / dist2;
 
-									if (pdfb > real(0)) {
+									if (pdfb > real(0) && pdfLight > real(0)) {
 										// Convert pdf from steradian to area.
 										// http://www.slideshare.net/h013/edubpt-v100
 										// p31 - p35

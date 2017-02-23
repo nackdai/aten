@@ -51,6 +51,12 @@ namespace aten {
 			return std::move(vec3());
 		}
 
+		virtual vec3 getRandomPosOn(real r1, real r2) const
+		{
+			AT_ASSERT(false);
+			return std::move(vec3());
+		}
+
 	private:
 		const char* m_name;
 	};

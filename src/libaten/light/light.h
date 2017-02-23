@@ -6,10 +6,14 @@
 
 namespace aten {
 	struct LightSampleResult {
+		vec3 pos;
 		vec3 dir;
 		vec3 nml;
 		vec3 le;
 		real pdf{ real(0) };
+
+		real r1;
+		real r2;
 	};
 
 	class Light : public hitable {
@@ -72,7 +76,15 @@ namespace aten {
 			hitrecord& rec) const override
 		{
 			// Usually, light is not hit.
+			AT_ASSERT(false);
 			return false;
+		}
+
+		virtual aabb getBoundingbox() const
+		{
+			// Most light don't have bounding box...
+			AT_ASSERT(false);
+			return std::move(aabb());
 		}
 
 	protected:

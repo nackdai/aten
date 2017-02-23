@@ -1,84 +1,92 @@
 #pragma once
 
+#include <functional>
 #include "light/light.h"
 
 namespace aten {
 	class AreaLight : public Light {
 	public:
 		AreaLight() {}
-		AreaLight(hitable* obj)
+		AreaLight(hitable* obj, const vec3& le)
 		{
 			m_object = obj;
+			m_le = le;
 		}
 
 		virtual ~AreaLight() {}
 
-	public:
-		virtual real getPdf(const vec3& org, sampler* sampler) const override final
+	private:
+		template <typename _T>
+		_T sample(
+			const vec3& org, 
+			sampler* sampler, 
+			std::function<void(_T&, const vec3&, const hitrecord&)> setter) const
 		{
-			real pdf = 0;
+			_T ret = 0;
 
 			if (m_object) {
 				hitrecord rec;
 
-				auto pos = m_object->getRandomPosOn(sampler);
+				vec3 pos;
+				if (sampler) {
+					pos = m_object->getRandomPosOn(sampler);
+				}
+				else {
+					pos = m_object->getBoundingbox().getCenter();
+				}
+
+				auto dir = pos - org;
+				auto dist = dir.length();
 
 				ray r(
 					org,
-					normalize(pos - org));
+					normalize(dir));
 
 				bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
 				if (isHit) {
-					pdf = 1 / rec.area;
+					/*if (aten::abs(dist - rec.t) < AT_MATH_EPSILON)*/ {
+						setter(ret, pos, rec);
+					}
 				}
 			}
+
+			return ret;
+		}
+
+	public:
+		virtual real getPdf(const vec3& org, sampler* sampler) const override final
+		{
+			real pdf = sample<real>(
+				org,
+				sampler,
+				[](real& result, const vec3& pos, const hitrecord& rec) {
+				result = 1 / rec.area;
+			});
 
 			return pdf;
 		}
 
 		virtual vec3 sampleDirToLight(const vec3& org, sampler* sampler) const override final
 		{
-			vec3 dir;
-
-			if (m_object) {
-				hitrecord rec;
-
-				auto pos = m_object->getRandomPosOn(sampler);
-
-				ray r(
-					org,
-					normalize(pos - org));
-
-				bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
-
-				if (isHit) {
-					dir = rec.p - r.org;
-				}
-			}
+			vec3 dir = sample<vec3>(
+				org,
+				sampler,
+				[&](vec3& result, const vec3& pos, const hitrecord& rec) {
+				result = rec.p - org;
+			});
 
 			return std::move(dir);
 		}
 
 		virtual vec3 sampleNormalOnLight(const vec3& org, sampler* sampler) const override final
 		{
-			vec3 nml;
-
-			if (m_object) {
-				hitrecord rec;
-
-				auto pos = m_object->getRandomPosOn(sampler);
-
-				ray r(
-					org,
-					normalize(pos - org));
-
-				bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
-
-				if (isHit) {
-					nml = rec.normal;
-				}
-			}
+			vec3 nml = sample<vec3>(
+				org,
+				sampler,
+				[&](vec3& result, const vec3& pos, const hitrecord& rec) {
+				result = rec.normal;
+			});
 
 			return std::move(nml);
 		}
@@ -90,19 +98,34 @@ namespace aten {
 			if (m_object) {
 				hitrecord rec;
 
-				auto pos = m_object->getRandomPosOn(sampler);
+				vec3 pos;
+				if (sampler) {
+					result.r1 = sampler->nextSample();
+					result.r2 = sampler->nextSample();
+
+					pos = m_object->getRandomPosOn(result.r1, result.r2);
+				}
+				else {
+					pos = m_object->getBoundingbox().getCenter();
+				}
+
+				auto dir = pos - org;
+				auto dist = dir.length();
 
 				ray r(
 					org,
-					normalize(pos - org));
+					normalize(dir));
 
 				bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
 				if (isHit) {
-					result.pdf = 1 / rec.area;
-					result.dir = rec.p - r.org;
-					result.nml = rec.normal;
-					result.le = m_le;
+					/*if (aten::abs(dist - rec.t) < AT_MATH_EPSILON)*/ {
+						result.pos = pos;
+						result.pdf = 1 / rec.area;
+						result.dir = rec.p - org;
+						result.nml = rec.normal;
+						result.le = m_le;
+					}
 				}
 			}
 
@@ -131,6 +154,16 @@ namespace aten {
 			}
 
 			return isHit;
+		}
+
+		virtual aabb getBoundingbox() const override final
+		{
+			if (m_object) {
+				auto box = m_object->getBoundingbox();
+				return std::move(box);
+			}
+
+			return std::move(aabb());
 		}
 
 	private:

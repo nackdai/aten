@@ -5,32 +5,10 @@
 #include "sampler/sobolproxy.h"
 #include "sampler/UniformDistributionSampler.h"
 
+#include "primitive/sphere.h"
+
 namespace aten
 {
-	// TODO
-	void sampleLight(
-		sampler* sampler,
-		const sphere& sphere,
-		vec3& posLight, 
-		vec3& nmlLight,
-		real& pdfLight)
-	{
-		auto r = sphere.radius();
-
-		posLight = sphere.getRandomPosOn(sampler);
-		nmlLight = normalize(posLight - sphere.center());
-
-		pdfLight = 1.0 / (4.0f * AT_MATH_PI * r * r);
-	}
-
-	real sampleLightPDF(const sphere& sphere)
-	{
-		auto r = sphere.radius();
-		real pdfLight = 1.0 / (4.0f * AT_MATH_PI * r * r);
-
-		return pdfLight;
-	}
-
 	// NOTE
 	// https://www.slideshare.net/shocker_0x15/ss-52688052
 
@@ -78,7 +56,6 @@ namespace aten
 
 						if (cosLight >= 0) {
 							// TODO
-							//auto pdfLight = sampleLightPDF(*(const sphere*)rec.obj);
 							auto pdfLight = 1 / rec.area;
 
 							// Convert pdf area to sradian.
@@ -112,22 +89,25 @@ namespace aten
 					auto light = scene->getLight(0);
 
 					if (light) {
-						vec3 posLight;
-						vec3 nmlLight;
-						real pdfLight;
-						sampleLight(sampler, *light, posLight, nmlLight, pdfLight);
+						auto sampleres = light->sample(rec.p, sampler);
 
-						vec3 dirToLight = normalize(posLight - rec.p);
+						vec3 posLight = sampleres.pos;
+						vec3 nmlLight = sampleres.nml;
+						real pdfLight = sampleres.pdf;
+
+						auto lightobj = light->getLightObject();
+
+						vec3 dirToLight = normalize(sampleres.dir);
 						aten::ray shadowRay(rec.p, dirToLight);
 
 						hitrecord tmpRec;
 
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-							if (tmpRec.obj == light) {
+							if (tmpRec.obj == lightobj) {
 								// Shadow ray hits the light.
 								auto cosShadow = dot(orienting_normal, dirToLight);
 								auto cosLight = dot(nmlLight, -dirToLight);
-								auto dist2 = (posLight - rec.p).squared_length();
+								auto dist2 = sampleres.dir.squared_length();
 
 								if (cosShadow >= 0 && cosLight >= 0) {
 									auto G = cosShadow * cosLight / dist2;

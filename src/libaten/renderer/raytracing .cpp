@@ -50,7 +50,7 @@ namespace aten
 					auto light = scene->getLight(0);
 
 					if (light) {
-						const auto posLight = light->center();
+						const auto posLight = light->getBoundingbox().getCenter();
 
 						vec3 dirToLight = posLight - rec.p;
 						auto len = dirToLight.length();

@@ -2,10 +2,12 @@
 
 void CornellBoxScene::makeScene(aten::scene* scene)
 {
+	auto emit = new aten::emissive(aten::vec3(36.0, 36.0, 36.0));
+
 	auto light = new aten::sphere(
 		aten::vec3(50.0, 90.0, 81.6),
 		15.0,
-		new aten::emissive(aten::vec3(36.0, 36.0, 36.0)));
+		emit);
 
 	double r = 1e3;
 
@@ -66,7 +68,9 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(mirror);
 	scene->add(glass);
 
-	scene->addLight(light);
+	aten::Light* l = new aten::AreaLight(light, emit->color());
+
+	scene->addLight(l);
 #endif
 }
 

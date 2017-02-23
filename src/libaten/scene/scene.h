@@ -2,8 +2,7 @@
 
 #include <vector>
 #include "scene/accel.h"
-
-#include "primitive/sphere.h"
+#include "light/light.h"
 
 namespace aten {
 	class LinearList : public accel {
@@ -72,7 +71,7 @@ namespace aten {
 			real t_min, real t_max,
 			hitrecord& rec) const = 0;
 
-		void addLight(sphere* l)
+		void addLight(Light* l)
 		{
 			m_lights.push_back(l);
 		}
@@ -83,7 +82,7 @@ namespace aten {
 		}
 
 		// TODO
-		sphere* getLight(uint32_t i)
+		Light* getLight(uint32_t i)
 		{
 			if (m_lights.empty()) {
 				return nullptr;
@@ -99,8 +98,7 @@ namespace aten {
 	protected:
 		std::vector<hitable*> m_tmp;
 
-		// TODO
-		std::vector<sphere*> m_lights;
+		std::vector<Light*> m_lights;
 	};
 
 	template <typename ACCEL>

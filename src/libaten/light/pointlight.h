@@ -38,6 +38,7 @@ namespace aten {
 		{
 			LightSampleResult result;
 
+			result.pos = m_pos;
 			result.pdf = getPdf(org, sampler);
 			result.dir = sampleDirToLight(org, sampler);
 			result.nml = sampleNormalOnLight(org, sampler);

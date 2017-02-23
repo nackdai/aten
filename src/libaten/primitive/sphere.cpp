@@ -16,6 +16,10 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
+		// NOTE
+		// https://www.slideshare.net/h013/edupt-kaisetsu-22852235
+		// p52 - p58
+
 		const vec3 p_o = m_center - r.org;
 		const real b = dot(p_o, r.dir);
 

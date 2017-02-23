@@ -1,5 +1,6 @@
 #include "sampler/halton.h"
 #include "math/math.h"
+#include "defs.h"
 
 namespace aten {
 	std::vector<uint32_t> Halton::PrimeNumbers;
@@ -90,6 +91,7 @@ namespace aten {
 
 		if (m_dimension >= PrimeNumbers.size()) {
 			// ŽŸŒ³‚ð’´‚¦‚é‚±‚Æ‚Í‹–‚³‚È‚¢..
+			AT_ASSERT(false);
 			return aten::drand48();
 		}
 

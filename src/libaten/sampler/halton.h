@@ -24,7 +24,7 @@ namespace aten {
 		// [0, 1]
 		virtual real next01() override final;
 
-	public:
+	private:
 		uint32_t m_idx{ 1 };
 		uint32_t m_dimension{ 0 };
 	};

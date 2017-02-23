@@ -180,6 +180,12 @@
     <ClInclude Include="..\src\libaten\sampler\halton.h">
       <Filter>sampler</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\sobol.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\sobolproxy.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -261,6 +267,9 @@
       <Filter>sampler</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\sampler\random.cpp">
+      <Filter>sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
       <Filter>sampler</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,8 @@
 #include "pathtracing.h"
 #include "misc/thread.h"
 #include "sampler/xorshift.h"
+#include "sampler/halton.h"
+#include "sampler/sobolproxy.h"
 #include "sampler/UniformDistributionSampler.h"
 
 namespace aten
@@ -282,8 +284,8 @@ namespace aten
 		{
 			auto idx = thread::getThreadIdx();
 
-			XorShift rnd(idx);
-			UniformDistributionSampler sampler(&rnd);
+			//XorShift rnd(idx);
+			//UniformDistributionSampler sampler(&rnd);
 
 #ifdef ENABLE_OMP
 #pragma omp for
@@ -296,6 +298,11 @@ namespace aten
 					vec3 col;
 
 					for (uint32_t i = 0; i < sample; i++) {
+						XorShift rnd((y * height * 4 + x * 4) * sample + i + 1);
+						//Halton rnd((y * height * 4 + x * 4) * sample + i + 1);
+						//Sobol rnd((y * height * 4 + x * 4) * sample + i + 1);
+						UniformDistributionSampler sampler(&rnd);
+
 						real u = real(x + sampler.nextSample()) / real(width);
 						real v = real(y + sampler.nextSample()) / real(height);
 

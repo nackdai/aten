@@ -6,7 +6,13 @@ namespace aten {
 	
 	void thread::setThreadNum(uint32_t num)
 	{
-		g_threadnum = aten::clamp<uint32_t>(num, 1, 8);
+#ifdef ENABLE_OMP
+		auto maxThreadnum = omp_get_max_threads();
+#else
+		auto maxThreadnum = 8;
+#endif
+
+		g_threadnum = aten::clamp<uint32_t>(num, 1, maxThreadnum);
 
 #ifdef ENABLE_OMP
 		omp_set_num_threads(g_threadnum);

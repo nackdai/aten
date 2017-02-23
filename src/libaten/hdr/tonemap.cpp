@@ -64,18 +64,26 @@ namespace aten
 				}
 			}
 
-			sumY[idx] /= cnt;
+			if (cnt > 0) {
+				sumY[idx] /= cnt;
+			}
 		}
 
+		uint32_t cnt = 0;
 		real retSumY = 0;
 		real retMaxLum = 0;
 
 		for (uint32_t i = 0; i < threadnum; i++) {
-			retSumY += sumY[i];
+			if (sumY[i] > 0) {
+				retSumY += sumY[i];
+				cnt++;
+			}
 			retMaxLum = std::max(maxLum[i], retMaxLum);
 		}
 
-		retSumY /= threadnum;
+		if (cnt > 0) {
+			retSumY /= cnt;
+		}
 
 		AT_PRINTF("SumY[%f] MaxLum[%f]\n", retSumY, retMaxLum);
 

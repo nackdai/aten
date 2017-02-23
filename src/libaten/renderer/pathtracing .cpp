@@ -95,7 +95,7 @@ namespace aten
 						vec3 nmlLight = sampleres.nml;
 						real pdfLight = sampleres.pdf;
 
-						auto lightobj = light->getLightObject();
+						auto lightobj = sampleres.obj;
 
 						vec3 dirToLight = normalize(sampleres.dir);
 						aten::ray shadowRay(rec.p, dirToLight);
@@ -124,7 +124,7 @@ namespace aten
 										auto misW = pdfLight / (pdfb + pdfLight);
 
 										// Get light color.
-										auto emit = tmpRec.mtrl->color();
+										auto emit = sampleres.le;
 
 										contribution += misW * (brdf * emit * G) / pdfLight;
 									}

@@ -50,12 +50,14 @@ namespace aten
 					auto light = scene->getLight(0);
 
 					if (light) {
-						const auto posLight = light->getBoundingbox().getCenter();
+						auto sampleres = light->sample(rec.p, nullptr);
 
-						vec3 dirToLight = posLight - rec.p;
+						vec3 dirToLight = sampleres.dir;
 						auto len = dirToLight.length();
 
 						dirToLight.normalize();
+
+						auto lightobj = sampleres.obj;
 
 						auto albedo = rec.mtrl->color();
 
@@ -64,8 +66,8 @@ namespace aten
 						hitrecord tmpRec;
 
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-							if (tmpRec.obj == light) {
-								const auto lightColor = tmpRec.mtrl->color();
+							if (tmpRec.obj == lightobj) {
+								const auto lightColor = sampleres.le;
 								contribution += std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
 								break;
 							}

@@ -125,6 +125,7 @@ namespace aten {
 						result.dir = rec.p - org;
 						result.nml = rec.normal;
 						result.le = m_le;
+						result.obj = m_object;
 					}
 				}
 			}

@@ -12,6 +12,8 @@ namespace aten {
 		vec3 le;
 		real pdf{ real(0) };
 
+		hitable* obj{ nullptr };
+
 		real r1;
 		real r2;
 	};

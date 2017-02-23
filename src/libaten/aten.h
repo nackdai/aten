@@ -39,6 +39,7 @@
 #include "scene/bvh.h"
 
 #include "sampler/xorshift.h"
+#include "sampler/halton.h"
 #include "sampler/UniformDistributionSampler.h"
 
 #include "primitive/sphere.h"

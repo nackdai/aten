@@ -4,6 +4,9 @@
 #include "sampler/random.h"
 
 namespace aten {
+	// NOTE
+	// The code of sobol is taken from: http://gruenschloss.org/sobol/kuo-2d-proj-single-precision.zip
+
 	class Sobol : public random {
 	public:
 		Sobol(uint32_t idx) {

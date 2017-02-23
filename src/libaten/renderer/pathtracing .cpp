@@ -34,6 +34,7 @@ namespace aten
 			camsample.posOnObjectplane);
 
 		real pdfb;
+		material* prevMtrl = nullptr;
 
 		while (depth < maxDepth) {
 			hitrecord rec;
@@ -49,6 +50,11 @@ namespace aten
 						// Ray hits the light directly.
 						auto emit = rec.mtrl->color();
 						return std::move(emit);
+					}
+					else if (prevMtrl->isSingular()) {
+						auto emit = rec.mtrl->color();
+						contribution += throughput * emit;
+						break;
 					}
 					else {
 						auto cosLight = dot(orienting_normal, -ray.dir);
@@ -182,6 +188,8 @@ namespace aten
 				else {
 					break;
 				}
+
+				prevMtrl = rec.mtrl;
 
 				// Make next ray.
 				ray = aten::ray(rec.p, nextDir);

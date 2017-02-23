@@ -1,9 +1,13 @@
 #pragma once
 
+#include <random>
 #include "types.h"
 
 namespace aten {
 	class random {
+	public:
+		static void init();
+
 	public:
 		random() {}
 		virtual ~random() {}

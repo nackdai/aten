@@ -1,4 +1,4 @@
-#include "scene.h"
+#include "scenedefs.h"
 
 void CornellBoxScene::makeScene(aten::scene* scene)
 {

@@ -2,9 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\src\appaten\main.cpp" />
-    <ClCompile Include="..\src\appaten\scene.cpp" />
+    <ClCompile Include="..\src\appaten\scenedefs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\appaten\scene.h" />
+    <ClInclude Include="..\src\appaten\scenedefs.h" />
   </ItemGroup>
 </Project>

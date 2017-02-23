@@ -1,6 +1,6 @@
 #include <vector>
 #include "aten.h"
-#include "scene.h"
+#include "scenedefs.h"
 
 static int WIDTH = 640;
 static int HEIGHT = 480;

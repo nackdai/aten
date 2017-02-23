@@ -230,6 +230,7 @@
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
     <ClCompile Include="..\src\libaten\scene\aabb.cpp" />
     <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
+    <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />

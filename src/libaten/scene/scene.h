@@ -95,6 +95,12 @@ namespace aten {
 			return m_lights[i];
 		}
 
+		bool isHitLight(
+			const Light* light,
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec);
+
 	protected:
 		std::vector<hitable*> m_tmp;
 

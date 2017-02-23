@@ -287,6 +287,9 @@
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
       <Filter>sampler</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\scene\scene.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemapfs.glsl">

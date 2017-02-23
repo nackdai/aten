@@ -108,8 +108,13 @@ namespace aten
 
 						hitrecord tmpRec;
 
+#if 0
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							if (tmpRec.obj == lightobj) {
+#else
+						if (scene->isHitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+							{
+#endif
 								// Shadow ray hits the light.
 								auto cosShadow = dot(orienting_normal, dirToLight);
 								auto cosLight = dot(nmlLight, -dirToLight);

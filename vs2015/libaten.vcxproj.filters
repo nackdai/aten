@@ -43,6 +43,9 @@
     <Filter Include="object\tinyobjloadder">
       <UniqueIdentifier>{92aad910-a034-48fd-9fa0-e5bb7f302893}</UniqueIdentifier>
     </Filter>
+    <Filter Include="light">
+      <UniqueIdentifier>{73ad43e6-957c-4167-b693-161d560e49e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -185,6 +188,18 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h">
       <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\light.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\pointlight.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\directionallight.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\arealight.h">
+      <Filter>light</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -32,6 +32,8 @@ namespace aten
 			return m_radius;
 		}
 
+		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
+
 	private:
 		vec3 m_center;
 		real m_radius{ real(0) };

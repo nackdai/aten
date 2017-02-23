@@ -5,6 +5,7 @@
 #include "scene/aabb.h"
 #include "math/vec3.h"
 #include "material/material.h"
+#include "sampler/sampler.h"
 
 namespace aten {
 	class hitable;
@@ -43,6 +44,12 @@ namespace aten {
 			hitrecord& rec) const = 0;
 
 		virtual aabb getBoundingbox() const = 0;
+
+		virtual vec3 getRandomPosOn(sampler* sampler) const
+		{
+			AT_ASSERT(false);
+			return std::move(vec3());
+		}
 
 	private:
 		const char* m_name;

@@ -22,6 +22,11 @@
 #include "misc/timer.h"
 #include "misc/thread.h"
 
+#include "light/light.h"
+#include "light/pointlight.h"
+#include "light/directionallight.h"
+#include "light/arealight.h"
+
 #include "object/ObjLoader.h"
 #include "object/object.h"
 

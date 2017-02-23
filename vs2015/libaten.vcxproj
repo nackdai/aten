@@ -159,6 +159,10 @@
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
+    <ClInclude Include="..\src\libaten\light\arealight.h" />
+    <ClInclude Include="..\src\libaten\light\directionallight.h" />
+    <ClInclude Include="..\src\libaten\light\light.h" />
+    <ClInclude Include="..\src\libaten\light\pointlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
     <ClInclude Include="..\src\libaten\material\blinn.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />

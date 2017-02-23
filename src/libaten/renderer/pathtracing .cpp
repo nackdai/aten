@@ -17,23 +17,7 @@ namespace aten
 	{
 		auto r = sphere.radius();
 
-		auto r1 = sampler->nextSample();
-		auto r2 = sampler->nextSample();
-
-		auto z = 1.0 - 2.0 * r2; // [0,1] -> [-1, 1]
-
-		auto sin_theta = aten::sqrt(1 - z * z);
-		auto phi = 2 * AT_MATH_PI * r1;
-
-		auto x = aten::cos(phi) * sin_theta;
-		auto y = aten::sin(phi) * sin_theta;
-
-		vec3 dir(x, y, z);
-		dir.normalize();
-
-		auto p = dir * (r + AT_MATH_EPSILON);
-
-		posLight = sphere.center() + p;
+		posLight = sphere.getRandomPosOn(sampler);
 		nmlLight = normalize(posLight - sphere.center());
 
 		pdfLight = 1.0 / (4.0f * AT_MATH_PI * r * r);

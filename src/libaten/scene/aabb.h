@@ -40,6 +40,12 @@ namespace aten {
 			return m_max;
 		}
 
+		vec3 getCenter() const
+		{
+			vec3 center = (m_min + m_max) * 0.5;
+			return std::move(center);
+		}
+
 		static aabb surrounding_box(const aabb& box0, const aabb& box1);
 
 	private:

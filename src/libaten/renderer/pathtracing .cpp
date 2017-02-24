@@ -237,20 +237,6 @@ namespace aten
 		uint32_t sample = dst.sample;
 		vec3* color = dst.buffer;
 
-		const vec3 camera_position = vec3(50.0, 52.0, 220.0);
-		const vec3 camera_dir = normalize(vec3(0.0, -0.04, -1.0));
-		const vec3 camera_up = vec3(0.0, 1.0, 0.0);
-
-		// ワールド座標系でのスクリーンの大きさ
-		const double screen_width = 30.0 * width / height;
-		const double screen_height = 30.0;
-		// スクリーンまでの距離
-		const double screen_dist = 40.0;
-		// スクリーンを張るベクトル
-		const vec3 screen_x = normalize(cross(camera_dir, camera_up)) * screen_width;
-		const vec3 screen_y = normalize(cross(screen_x, camera_dir)) * screen_height;
-		const vec3 screen_center = camera_position + camera_dir * screen_dist;
-
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
 

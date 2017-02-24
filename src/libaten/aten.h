@@ -43,6 +43,7 @@
 
 #include "scene/scene.h"
 #include "scene/bvh.h"
+#include "scene/MaterialManager.h"
 
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

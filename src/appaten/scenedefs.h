@@ -74,9 +74,9 @@ public:
 
 //#define Scene CornellBoxScene
 //#define Scene RandomScene
-//#define Scene ObjectScene
+#define Scene ObjectScene
 //#define Scene MtrlTestScene
 //#define Scene PointLightScene
 //#define Scene DirectionalLightScene
 //#define Scene SpotLightScene
-#define Scene ManyLightScene
+//#define Scene ManyLightScene

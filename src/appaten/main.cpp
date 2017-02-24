@@ -17,8 +17,8 @@ static aten::PinholeCamera g_camera;
 //static aten::AcceledScene<aten::LinearList> g_scene;
 static aten::AcceledScene<aten::bvhnode> g_scene;
 
-static aten::StaticColorBG g_bg(aten::vec3(0, 0, 0));
-//static aten::envmap g_bg;
+//static aten::StaticColorBG g_bg(aten::vec3(0, 0, 0));
+static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
@@ -148,13 +148,19 @@ int main(int argc, char* argv[])
 		WIDTH, HEIGHT);
 #endif
 
+	// TODO
+	aten::MaterialManager::addMaterial(
+		"m1",
+		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		//new aten::lambert(aten::vec3(0.7, 0.6, 0.5)));
+
 	Scene::makeScene(&g_scene);
 
 	g_scene.build();
 
 	g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	//g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");
-	//g_bg.init(g_envmap);
+	g_bg.init(g_envmap);
 
 	g_tracer.setBG(&g_bg);
 

@@ -4,10 +4,8 @@
 #include "object/ObjLoader.h"
 #include "object/object.h"
 
-// TODO
+#include "scene/MaterialManager.h"
 #include "material/lambert.h"
-#include "material/specular.h"
-#include "material/blinn.h"
 
 namespace aten
 {
@@ -92,10 +90,20 @@ namespace aten
 				dstshape->faces.push_back(f);
 			}
 
-			// TODO
-			//dstshape->mtrl = new lambert(vec3(0.75, 0, 0));
-			//dstshape->mtrl = new specular(vec3(1, 1, 1));
-			dstshape->mtrl = new MicrofacetBlinn(vec3(1, 1, 1), 1, 1);
+			// Assign material.
+			auto mtrlidx = -1;
+			if (shape.mesh.material_ids.size() > 0) {
+				mtrlidx = shape.mesh.material_ids[0];
+			}
+			if (mtrlidx >= 0) {
+				const auto mtrl = mtrls[mtrlidx];
+				dstshape->mtrl = MaterialManager::get(mtrl.name);
+			}
+			if (!dstshape->mtrl){
+				// dummy....
+				AT_ASSERT(false);
+				dstshape->mtrl = new lambert(vec3());
+			}
 
 			vtxnum = shape.mesh.texcoords.size();
 

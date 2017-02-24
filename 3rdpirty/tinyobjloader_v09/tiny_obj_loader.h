@@ -1103,6 +1103,14 @@ bool LoadObj(std::vector<shape_t> &shapes,       // [output]
         newMaterialId = material_map[namebuf];
       } else {
         // { error!! material not found }
+        int id = material_map.size();
+        material_map.insert(std::pair<std::string, int>(namebuf, id));
+        newMaterialId = material_map[namebuf];
+
+		if (materials.size() <= newMaterialId) {
+			materials.resize(newMaterialId + 1);
+			materials[newMaterialId].name = namebuf;
+		}
       }
 
       if (newMaterialId != material) {

@@ -104,7 +104,6 @@ namespace aten {
 			}
 		}
 
-		AT_ASSERT(false);
 		return nullptr;
 #endif
 	}

@@ -198,6 +198,7 @@
     <ClInclude Include="..\src\libaten\scene\accel.h" />
     <ClInclude Include="..\src\libaten\scene\bvh.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
+    <ClInclude Include="..\src\libaten\scene\MaterialManager.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\texture\ImageLoader.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
     <ClCompile Include="..\src\libaten\scene\aabb.cpp" />
     <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
+    <ClCompile Include="..\src\libaten\scene\MaterialManager.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />

@@ -13,3 +13,9 @@
 [submodule "3rdpirty/cmdline"]
 	path = 3rdpirty/cmdline
 	url = https://github.com/tanakh/cmdline.git
+[submodule "3rdpirty/tinyxml2"]
+	path = 3rdpirty/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git
+[submodule "3rdpirty/tinyjson"]
+	path = 3rdpirty/tinyjson
+	url = https://github.com/mendsley/tinyjson.git

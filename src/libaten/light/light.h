@@ -10,6 +10,8 @@ namespace aten {
 		vec3 dir;
 		vec3 nml;
 		vec3 le;
+		vec3 finalColor;	// le * intensity
+		real intensity{ real(1) };
 		real pdf{ real(0) };
 
 		hitable* obj{ nullptr };

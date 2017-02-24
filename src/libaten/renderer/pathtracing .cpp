@@ -61,7 +61,6 @@ namespace aten
 						auto dist2 = (rec.p - ray.org).squared_length();
 
 						if (cosLight >= 0) {
-							// TODO
 							auto pdfLight = 1 / rec.area;
 
 							// Convert pdf area to sradian.
@@ -91,12 +90,26 @@ namespace aten
 				// Explicit conection to light.
 				if (!rec.mtrl->isSingular())
 				{
+#if 0
 					// TODO
 					auto light = scene->getLight(0);
 
 					if (light) {
 						auto sampleres = light->sample(rec.p, sampler);
 
+						real lightSelectPdf = 1;
+#else
+					real lightSelectPdf = 1;
+					LightSampleResult sampleres;
+
+					auto light = scene->sampleLight(
+						rec.p,
+						orienting_normal,
+						sampler,
+						lightSelectPdf, sampleres);
+
+					if (light) {
+#endif
 						vec3 posLight = sampleres.pos;
 						vec3 nmlLight = sampleres.nml;
 						real pdfLight = sampleres.pdf;
@@ -118,11 +131,12 @@ namespace aten
 							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
 
 							// Get light color.
-							auto emit = sampleres.le;
+							auto emit = sampleres.finalColor;
 
 							if (light->isSingular()) {
 								if (pdfLight > real(0)) {
 									contribution += brdf * emit * cosShadow / pdfLight;
+									contribution /= lightSelectPdf;
 								}
 							}
 							else {
@@ -140,6 +154,7 @@ namespace aten
 										auto misW = pdfLight / (pdfb + pdfLight);
 
 										contribution += misW * (brdf * emit * G) / pdfLight;
+										contribution /= lightSelectPdf;
 									}
 								}
 							}

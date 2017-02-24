@@ -124,8 +124,13 @@ namespace aten {
 						result.pdf = 1 / rec.area;
 						result.dir = rec.p - org;
 						result.nml = rec.normal;
+						
 						result.le = m_le;
+						result.intensity = 1;
+						result.finalColor = m_le;
+
 						result.obj = m_object;
+
 					}
 				}
 			}

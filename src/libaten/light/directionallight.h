@@ -41,7 +41,10 @@ namespace aten {
 			result.pdf = getPdf(org, sampler);
 			result.dir = sampleDirToLight(org, sampler);
 			result.nml = sampleNormalOnLight(org, sampler);
+
 			result.le = m_le;
+			result.intensity = real(1);
+			result.finalColor = m_le;
 
 			return std::move(result);
 		}

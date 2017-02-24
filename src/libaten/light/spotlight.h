@@ -114,7 +114,9 @@ namespace aten {
 			// Is it correct?
 			attn = std::max(attn, real(1));
 			
-			result.le = m_le * spot / attn;
+			result.le = m_le;
+			result.intensity = spot / attn;
+			result.finalColor = m_le * spot / attn;
 
 			return std::move(result);
 		}

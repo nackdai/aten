@@ -70,7 +70,9 @@ namespace aten {
 			// Is it correct?
 			attn = std::max(attn, real(1));
 			
-			result.le = m_le / attn;
+			result.le = m_le;
+			result.intensity = 1 / attn;
+			result.finalColor = m_le / attn;
 
 			return std::move(result);
 		}

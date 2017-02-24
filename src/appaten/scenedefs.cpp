@@ -258,7 +258,7 @@ void DirectionalLightScene::makeScene(aten::scene* scene)
 	scene->add(floor);
 	scene->add(green);
 
-	aten::Light* l = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(36.0, 36.0, 36.0));
+	aten::Light* l = new aten::DirectionalLight(aten::vec3(1, -1, 1), aten::vec3(36.0, 36.0, 36.0));
 	//aten::Light* l = new aten::AreaLight(light, emit->color());
 
 	scene->addLight(l);
@@ -289,9 +289,15 @@ void SpotLightScene::makeScene(aten::scene* scene)
 		20,
 		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
 
+	auto red = new aten::sphere(
+		aten::vec3(25, 20, 20),
+		20,
+		new aten::lambert(aten::vec3(0.75, 0.25, 0.25)));
+
 	//scene->add(light);
 	scene->add(floor);
 	scene->add(green);
+	scene->add(red);
 
 	aten::Light* l = new aten::SpotLight(
 		aten::vec3(65, 90, 20),
@@ -312,4 +318,82 @@ void SpotLightScene::getCameraPosAndAt(
 {
 	pos = aten::vec3(50.0, 52.0, 295.6);
 	at = aten::vec3(50.0, 40.8, 119.0);
+}
+
+/////////////////////////////////////////////////////
+
+void ManyLightScene::makeScene(aten::scene* scene)
+{
+	auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
+	scene->add(s);
+
+#if 1
+	int i = 1;
+	for (int x = -5; x < 5; x++) {
+		for (int z = -5; z < 5; z++) {
+			auto choose_mtrl = aten::drand48();
+
+			aten::vec3 center(
+				x + 0.9 * aten::drand48(),
+				0.2,
+				z + 0.9 * aten::drand48());
+
+			if ((center - aten::vec3(4, 0.2, 0)).length() > 0.9) {
+				if (choose_mtrl < 0.8) {
+					// lambert
+					s = new aten::sphere(
+						center,
+						0.2,
+						new aten::lambert(aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
+				}
+				else if (choose_mtrl < 0.95) {
+					// specular
+					s = new aten::sphere(
+						center,
+						0.2,
+						new aten::specular(aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
+				}
+				else {
+					// glass
+					s = new aten::sphere(center, 0.2, new aten::refraction(aten::vec3(1), 1.5));
+				}
+
+				scene->add(s);
+			}
+		}
+	}
+
+	s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::refraction(aten::vec3(1), 1.5));
+	scene->add(s);
+
+	s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, new aten::lambert(aten::vec3(0.4, 0.2, 0.1)));
+	scene->add(s);
+
+	s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
+	scene->add(s);
+#endif
+
+	aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.0, 0.0));
+	aten::Light* point = new aten::PointLight(aten::vec3(-20, 10, -1), aten::vec3(0.0, 0.3, 0.0), 0, 0.5, 0.02);
+	aten::Light* spot = new aten::SpotLight(
+		aten::vec3(0, 5, 0),
+		aten::vec3(0, -1, 0),
+		//aten::vec3(0.2, 0.2, 0.2),
+		aten::vec3(36.0, 36.0, 36.0),
+		0, 0.1, 0,
+		Deg2Rad(30),
+		Deg2Rad(60),
+		1);
+
+	scene->addLight(dir);
+	scene->addLight(spot);
+	scene->addLight(point);
+}
+
+void ManyLightScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(13, 2, 3);
+	at = aten::vec3(0, 0, 0);
 }

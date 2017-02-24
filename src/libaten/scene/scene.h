@@ -101,6 +101,13 @@ namespace aten {
 			real t_min, real t_max,
 			hitrecord& rec);
 
+		Light* sampleLight(
+			const vec3& org,
+			const vec3& nml,
+			sampler* sampler,
+			real& selectPdf,
+			LightSampleResult& sampleRes);
+
 	protected:
 		std::vector<hitable*> m_tmp;
 

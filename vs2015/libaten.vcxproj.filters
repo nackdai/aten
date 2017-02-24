@@ -201,6 +201,9 @@
     <ClInclude Include="..\src\libaten\light\arealight.h">
       <Filter>light</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\light\spotlight.h">
+      <Filter>light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

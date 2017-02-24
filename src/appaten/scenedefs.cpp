@@ -271,3 +271,45 @@ void DirectionalLightScene::getCameraPosAndAt(
 	pos = aten::vec3(50.0, 52.0, 295.6);
 	at = aten::vec3(50.0, 40.8, 119.0);
 }
+
+/////////////////////////////////////////////////////
+
+void SpotLightScene::makeScene(aten::scene* scene)
+{
+	double r = 1e5;
+
+	auto floor = new aten::sphere(
+		aten::vec3(0, -r, 0),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	// —Î‹….
+	auto green = new aten::sphere(
+		aten::vec3(65, 20, 20),
+		20,
+		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+
+	//scene->add(light);
+	scene->add(floor);
+	scene->add(green);
+
+	aten::Light* l = new aten::SpotLight(
+		aten::vec3(65, 90, 20),
+		aten::vec3(0, -1, 0),
+		aten::vec3(36.0, 36.0, 36.0), 
+		0, 0.1, 0,
+		Deg2Rad(30), 
+		Deg2Rad(60),
+		1);
+	//aten::Light* l = new aten::AreaLight(light, emit->color());
+
+	scene->addLight(l);
+}
+
+void SpotLightScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(50.0, 52.0, 295.6);
+	at = aten::vec3(50.0, 40.8, 119.0);
+}

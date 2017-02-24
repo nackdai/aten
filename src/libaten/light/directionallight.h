@@ -8,10 +8,10 @@ namespace aten {
 		DirectionalLight() {}
 		DirectionalLight(
 			const vec3& pos,
-			const vec3& intensity)
+			const vec3& le)
 		{
 			m_pos = pos;
-			m_intensity = intensity;
+			m_le = le;
 		}
 
 		virtual ~DirectionalLight() {}
@@ -41,7 +41,7 @@ namespace aten {
 			result.pdf = getPdf(org, sampler);
 			result.dir = sampleDirToLight(org, sampler);
 			result.nml = sampleNormalOnLight(org, sampler);
-			result.intensity = m_intensity;
+			result.le = m_le;
 
 			return std::move(result);
 		}

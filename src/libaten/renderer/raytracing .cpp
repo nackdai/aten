@@ -67,7 +67,7 @@ namespace aten
 
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							if (tmpRec.obj == lightobj) {
-								const auto lightColor = sampleres.intensity;
+								const auto lightColor = sampleres.le;
 								contribution += std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
 								break;
 							}

@@ -74,7 +74,7 @@ namespace aten
 		real retMaxLum = 0;
 
 		for (uint32_t i = 0; i < threadnum; i++) {
-			if (sumY[i] > 0) {
+			if (sumY[i] != 0) {
 				retSumY += sumY[i];
 				cnt++;
 			}

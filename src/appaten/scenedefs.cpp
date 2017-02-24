@@ -217,7 +217,7 @@ void PointLightScene::makeScene(aten::scene* scene)
 	scene->add(floor);
 	scene->add(green);
 
-	aten::Light* l = new aten::PointLight(aten::vec3(50.0, 90.0, 81.6), aten::vec3(36.0, 36.0, 36.0));
+	aten::Light* l = new aten::PointLight(aten::vec3(50.0, 90.0, 81.6), aten::vec3(36.0, 36.0, 36.0), 0, 0.1, 0);
 	//aten::Light* l = new aten::AreaLight(light, emit->color());
 
 	scene->addLight(l);

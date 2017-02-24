@@ -45,7 +45,7 @@ namespace aten
 			return std::move(normal);
 		}
 
-		virtual vec3 brdf(
+		virtual vec3 bsdf(
 			const vec3& normal,
 			const vec3& wi,
 			const vec3& wo,

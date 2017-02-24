@@ -34,13 +34,13 @@ namespace aten
 					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, nullptr, rec.u, rec.v);
 
 					auto nextDir = sampling.dir;
-					auto brdf = sampling.brdf;
+					auto bsdf = sampling.bsdf;
 
 					auto c = std::max(
 						dot(orienting_normal, nextDir),
 						real(0));
 
-					throughput *= brdf * c;
+					throughput *= bsdf * c;
 
 					// Make next ray.
 					ray = aten::ray(rec.p, nextDir);

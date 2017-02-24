@@ -3,7 +3,7 @@
 namespace aten
 {
 	// NOTE
-	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 	real sampleGGX_D(
 		const vec3& wh,	// half
@@ -11,7 +11,7 @@ namespace aten
 		real roughness)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 		// NOTE
 		// ((a^2 - 1) * cos^2 + 1)^2
@@ -63,7 +63,7 @@ namespace aten
 		const vec3& wo) const
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 		auto wh = normalize(-wi + wo);
 
@@ -112,7 +112,7 @@ namespace aten
 		return std::move(dir);
 	}
 
-	vec3 MicrofacetGGX::brdf(
+	vec3 MicrofacetGGX::bsdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -171,9 +171,9 @@ namespace aten
 
 		auto denom = 4 * NdotL * NdotV;
 
-		auto brdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
+		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
-		return std::move(brdf);
+		return std::move(bsdf);
 	}
 
 	material::sampling MicrofacetGGX::sample(
@@ -188,7 +188,7 @@ namespace aten
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, in, ret.dir);
 
-		ret.brdf = brdf(normal, in, ret.dir, u, v);
+		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
 	}

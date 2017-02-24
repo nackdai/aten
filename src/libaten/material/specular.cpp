@@ -23,7 +23,7 @@ namespace aten
 		return std::move(reflect);
 	}
 
-	vec3 specular::brdf(
+	vec3 specular::bsdf(
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
@@ -31,13 +31,13 @@ namespace aten
 	{
 		auto c = dot(normal, wo);
 
-		vec3 brdf;
+		vec3 bsdf;
 
 		if (c > 0) {
-			brdf = m_color / c;
+			bsdf = m_color / c;
 		}
 
-		return std::move(brdf);
+		return std::move(bsdf);
 	}
 
 	material::sampling specular::sample(
@@ -51,7 +51,7 @@ namespace aten
 
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, in, ret.dir);
-		ret.brdf = brdf(normal, in, ret.dir, u, v);
+		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
 	}

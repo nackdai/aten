@@ -41,7 +41,7 @@ namespace aten
 			const vec3& normal, 
 			sampler* sampler) const = 0;
 
-		virtual vec3 brdf(
+		virtual vec3 bsdf(
 			const vec3& normal, 
 			const vec3& wi,
 			const vec3& wo,
@@ -49,12 +49,12 @@ namespace aten
 
 		struct sampling {
 			vec3 dir;
-			vec3 brdf;
+			vec3 bsdf;
 			real pdf{ real(0) };
 
 			sampling() {}
 			sampling(const vec3& d, const vec3& b, real p)
-				: dir(d), brdf(b), pdf(p)
+				: dir(d), bsdf(b), pdf(p)
 			{}
 		};
 

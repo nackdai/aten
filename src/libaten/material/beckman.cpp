@@ -8,7 +8,7 @@ namespace aten
 		real roughness)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 		auto costheta = dot(wh, n);
 
@@ -37,7 +37,7 @@ namespace aten
 		const vec3& wo) const
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 		auto wh = normalize(-wi + wo);
 
@@ -58,7 +58,7 @@ namespace aten
 		sampler* sampler) const
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
@@ -91,7 +91,7 @@ namespace aten
 		return std::move(dir);
 	}
 
-	vec3 MicrofacetBeckman::brdf(
+	vec3 MicrofacetBeckman::bsdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -123,7 +123,7 @@ namespace aten
 		real G(1);
 		{
 			// NOTE
-			// http://graphicrants.blogspot.jp/2013/08/specular-brdf-reference.html
+			// http://graphicrants.blogspot.jp/2013/08/specular-bsdf-reference.html
 
 			auto c = NdotV < 1 ? NdotV / (a * aten::sqrt(1 - NdotV * NdotV)) : 0;
 			auto c2 = c * c;
@@ -160,9 +160,9 @@ namespace aten
 
 		auto denom = 4 * NdotL * NdotV;
 
-		auto brdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
+		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
-		return std::move(brdf);
+		return std::move(bsdf);
 	}
 
 	material::sampling MicrofacetBeckman::sample(
@@ -177,7 +177,7 @@ namespace aten
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, in, ret.dir);
 
-		ret.brdf = brdf(normal, in, ret.dir, u, v);
+		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
 	}

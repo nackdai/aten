@@ -27,7 +27,7 @@ namespace aten
 		return std::move(reflect);
 	}
 
-	vec3 refraction::brdf(
+	vec3 refraction::bsdf(
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
@@ -77,7 +77,7 @@ namespace aten
 
 			auto c = dot(normal, ret.dir);
 			if (c > real(0)) {
-				ret.brdf = m_color / c;
+				ret.bsdf = m_color / c;
 			}
 
 			return std::move(ret);
@@ -120,22 +120,22 @@ namespace aten
 			ret.dir = reflect;
 			
 			auto denom = dot(normal, reflect);
-			ret.brdf = Re * m_color / denom;
-			ret.brdf /= prob;
+			ret.bsdf = Re * m_color / denom;
+			ret.bsdf /= prob;
 		}
 		else {
 			// ã¸ê‹.
 			ret.dir = refract;
 
 			auto denom = dot(normal, refract);
-			ret.brdf = Tr * m_color / denom;
-			ret.brdf /= (1 - prob);
+			ret.bsdf = Tr * m_color / denom;
+			ret.bsdf /= (1 - prob);
 		}
 #else
 		ret.dir = refract;
 
 		auto denom = dot(normal, refract);
-		ret.brdf = Tr * m_color / denom;
+		ret.bsdf = Tr * m_color / denom;
 #endif
 
 		ret.pdf = 1;

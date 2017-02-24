@@ -48,7 +48,7 @@ namespace aten {
 		return std::move(dir);
 	}
 
-	vec3 lambert::brdf(
+	vec3 lambert::bsdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -76,7 +76,7 @@ namespace aten {
 
 		ret.dir = sampleDirection(in, normal, sampler);
 		ret.pdf = pdf(normal, in, ret.dir);
-		ret.brdf = brdf(normal, in, ret.dir, u, v);
+		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
 	}

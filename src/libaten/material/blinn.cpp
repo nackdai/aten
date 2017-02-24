@@ -4,7 +4,7 @@
 namespace aten
 {
 	// NOTE
-	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 	real MicrofacetBlinn::pdf(
 		const vec3& normal, 
@@ -43,7 +43,7 @@ namespace aten
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
 		// Lobe Distribution Sampling
 
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 		// Sampling Blinn
 
 		auto r1 = sampler->nextSample();
@@ -81,7 +81,7 @@ namespace aten
 		return std::move(dir);
 	}
 
-	vec3 MicrofacetBlinn::brdf(
+	vec3 MicrofacetBlinn::bsdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -133,7 +133,7 @@ namespace aten
 		real D = aten::exp(-x * x);
 #else
 		// NOTE
-		// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+		// http://simonstechblog.blogspot.jp/2011/12/microfacet-bsdf.html
 		real D = (a + 2) / (2 * AT_MATH_PI);
 		D *= aten::pow(std::max((real)0, NdotH), a);
 #endif
@@ -142,7 +142,7 @@ namespace aten
 		real G(1);
 		{
 			// Cook-Torrance geometry function.
-			// http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
+			// http://simonstechblog.blogspot.jp/2011/12/microfacet-bsdf.html
 
 			auto G1 = 2 * NdotH * NdotL / VdotH;
 			auto G2 = 2 * NdotH * NdotV / VdotH;
@@ -155,9 +155,9 @@ namespace aten
 			albedo *= texclr;
 		}
 
-		auto brdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
+		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
-		return std::move(brdf);
+		return std::move(bsdf);
 	}
 
 	material::sampling MicrofacetBlinn::sample(
@@ -173,7 +173,7 @@ namespace aten
 
 #if 1
 		ret.pdf = pdf(normal, in, ret.dir);
-		ret.brdf = brdf(normal, in, ret.dir, u, v);
+		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 #else
 		vec3 V = -in;
 		vec3 L = ret.dir;
@@ -186,7 +186,7 @@ namespace aten
 		if (NdotL > 0 && NdotH > 0) {
 			ret.pdf = pdf(normal, in, ret.dir);
 
-			ret.brdf = brdf(normal, in, ret.dir, u, v);
+			ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 		}
 		else {
 			ret.pdf = 0;

@@ -127,7 +127,7 @@ namespace aten
 							auto dist2 = sampleres.dir.squared_length();
 							auto dist = aten::sqrt(dist2);
 
-							auto brdf = rec.mtrl->brdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+							auto bsdf = rec.mtrl->bsdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
 
 							// Get light color.
@@ -135,7 +135,7 @@ namespace aten
 
 							if (light->isSingular()) {
 								if (pdfLight > real(0)) {
-									contribution += brdf * emit * cosShadow / pdfLight;
+									contribution += bsdf * emit * cosShadow / pdfLight;
 									contribution /= lightSelectPdf;
 								}
 							}
@@ -153,7 +153,7 @@ namespace aten
 
 										auto misW = pdfLight / (pdfb + pdfLight);
 
-										contribution += misW * (brdf * emit * G) / pdfLight;
+										contribution += misW * (bsdf * emit * G) / pdfLight;
 										contribution /= lightSelectPdf;
 									}
 								}
@@ -182,7 +182,7 @@ namespace aten
 
 				auto nextDir = sampling.dir;
 				pdfb = sampling.pdf;
-				auto brdf = sampling.brdf;
+				auto bsdf = sampling.bsdf;
 
 				// TODO
 				// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ªA³‚µ‚¢?
@@ -190,7 +190,7 @@ namespace aten
 				auto c = aten::abs(dot(orienting_normal, nextDir));
 
 				if (pdfb > 0) {
-					throughput *= brdf * c / pdfb;
+					throughput *= bsdf * c / pdfb;
 					throughput /= russianProb;
 				}
 				else {

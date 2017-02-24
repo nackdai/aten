@@ -226,6 +226,7 @@
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
+    <ClCompile Include="..\src\libaten\renderer\pathtracing _opt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\random.cpp" />

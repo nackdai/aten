@@ -7,10 +7,10 @@ namespace aten {
 	public:
 		DirectionalLight() {}
 		DirectionalLight(
-			const vec3& pos,
+			const vec3& dir,
 			const vec3& le)
 		{
-			m_pos = pos;
+			m_dir = normalize(dir);
 			m_le = le;
 		}
 

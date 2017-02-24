@@ -6,18 +6,18 @@
 
 namespace aten {
 	struct LightSampleResult {
-		vec3 pos;
-		vec3 dir;
-		vec3 nml;
-		vec3 le;
-		vec3 finalColor;	// le * intensity
-		real intensity{ real(1) };
-		real pdf{ real(0) };
+		vec3 pos;					// light position.
+		vec3 dir;					// light direction from the position.
+		vec3 nml;					// light object surface normal.
+		vec3 le;					// light color.
+		vec3 finalColor;			// le * intensity
+		real intensity{ real(1) };	// light intensity(include attenuation).
+		real pdf{ real(0) };		// light sampling pdf.
 
-		hitable* obj{ nullptr };
+		hitable* obj{ nullptr };	// light object(only for area light)
 
-		real r1;
-		real r2;
+		real r1;	// random number used in sampling light.
+		real r2;	// random number used in sampling light.
 	};
 
 	class Light : public hitable {

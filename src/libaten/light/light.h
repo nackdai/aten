@@ -9,7 +9,7 @@ namespace aten {
 		vec3 pos;
 		vec3 dir;
 		vec3 nml;
-		vec3 le;
+		vec3 intensity;
 		real pdf{ real(0) };
 
 		hitable* obj{ nullptr };
@@ -34,9 +34,9 @@ namespace aten {
 			m_dir = normalize(dir);
 		}
 
-		void setLe(const vec3& le)
+		void setLe(const vec3& intensity)
 		{
-			m_le = le;
+			m_intensity = intensity;
 		}
 
 		const vec3& getPos() const
@@ -51,7 +51,7 @@ namespace aten {
 
 		const vec3& getLe() const
 		{
-			return m_le;
+			return m_intensity;
 		}
 
 		virtual real getPdf(const vec3& org, sampler* sampler) const = 0;
@@ -92,6 +92,6 @@ namespace aten {
 	protected:
 		vec3 m_pos;
 		vec3 m_dir;
-		vec3 m_le;
+		vec3 m_intensity;
 	};
 }

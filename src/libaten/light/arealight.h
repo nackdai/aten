@@ -7,10 +7,10 @@ namespace aten {
 	class AreaLight : public Light {
 	public:
 		AreaLight() {}
-		AreaLight(hitable* obj, const vec3& le)
+		AreaLight(hitable* obj, const vec3& intensity)
 		{
 			m_object = obj;
-			m_le = le;
+			m_intensity = intensity;
 		}
 
 		virtual ~AreaLight() {}
@@ -124,7 +124,7 @@ namespace aten {
 						result.pdf = 1 / rec.area;
 						result.dir = rec.p - org;
 						result.nml = rec.normal;
-						result.le = m_le;
+						result.intensity = m_intensity;
 						result.obj = m_object;
 					}
 				}

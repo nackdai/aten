@@ -118,7 +118,7 @@ namespace aten
 							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
 
 							// Get light color.
-							auto emit = sampleres.le;
+							auto emit = sampleres.intensity;
 
 							if (light->isSingular()) {
 								if (pdfLight > real(0)) {

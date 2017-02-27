@@ -31,11 +31,16 @@ namespace aten
 	{
 		auto c = dot(normal, wo);
 
+#if 1
+		vec3 bsdf = m_color;
+#else
 		vec3 bsdf;
 
+		// For canceling cosine factor.
 		if (c > 0) {
 			bsdf = m_color / c;
 		}
+#endif
 
 		return std::move(bsdf);
 	}

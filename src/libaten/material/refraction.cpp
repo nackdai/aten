@@ -115,10 +115,25 @@ namespace aten
 
 #if 1
 		auto prob = 0.25 + 0.5 * Re;
+#if 1
+		if (r < prob) {
+			// ”½ŽË.
+			ret.dir = reflect;
+			ret.bsdf = Re * m_color;
+			ret.bsdf /= prob;
+		}
+		else {
+			// ‹üÜ.
+			ret.dir = refract;
+			ret.bsdf = Tr * m_color;
+			ret.bsdf /= (1 - prob);
+		}
+#else
 		if (r < prob) {
 			// ”½ŽË.
 			ret.dir = reflect;
 			
+			// For canceling cosine factor.
 			auto denom = dot(normal, reflect);
 			ret.bsdf = Re * m_color / denom;
 			ret.bsdf /= prob;
@@ -127,10 +142,12 @@ namespace aten
 			// ‹üÜ.
 			ret.dir = refract;
 
+			// For canceling cosine factor.
 			auto denom = dot(normal, refract);
 			ret.bsdf = Tr * m_color / denom;
 			ret.bsdf /= (1 - prob);
 		}
+#endif
 #else
 		ret.dir = refract;
 

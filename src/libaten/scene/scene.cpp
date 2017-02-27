@@ -81,7 +81,7 @@ namespace aten {
 			real pdfLight = lightsample.pdf;
 			vec3 dirToLight = normalize(lightsample.dir);
 
-			auto cosShadow = aten::abs(dot(nml, dirToLight));
+			auto cosShadow = dot(nml, dirToLight);
 			auto dist2 = lightsample.dir.squared_length();
 			auto dist = aten::sqrt(dist2);
 

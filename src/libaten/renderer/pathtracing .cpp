@@ -12,6 +12,18 @@ namespace aten
 	// NOTE
 	// https://www.slideshare.net/shocker_0x15/ss-52688052
 
+	inline bool isInvalidColor(const vec3& v)
+	{
+		bool b = isInvalid(v);
+		if (!b) {
+			if (v.x < 0 || v.y < 0 || v.z < 0) {
+				b = true;
+			}
+		}
+
+		return b;
+	}
+
 	vec3 PathTracing::radiance(
 		sampler* sampler,
 		const ray& inRay,
@@ -90,15 +102,6 @@ namespace aten
 				// Explicit conection to light.
 				if (!rec.mtrl->isSingular())
 				{
-#if 0
-					// TODO
-					auto light = scene->getLight(0);
-
-					if (light) {
-						auto sampleres = light->sample(rec.p, sampler);
-
-						real lightSelectPdf = 1;
-#else
 					real lightSelectPdf = 1;
 					LightSampleResult sampleres;
 
@@ -109,7 +112,6 @@ namespace aten
 						lightSelectPdf, sampleres);
 
 					if (light) {
-#endif
 						vec3 posLight = sampleres.pos;
 						vec3 nmlLight = sampleres.nml;
 						real pdfLight = sampleres.pdf;
@@ -184,10 +186,16 @@ namespace aten
 				pdfb = sampling.pdf;
 				auto bsdf = sampling.bsdf;
 
-				// TODO
-				// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ªA³‚µ‚¢?
-				//auto c = dot(orienting_normal, nextDir);
-				auto c = aten::abs(dot(orienting_normal, nextDir));
+#if 1
+				real c = 1;
+				if (!rec.mtrl->isSingular()) {
+					// TODO
+					// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
+					c = aten::abs(dot(orienting_normal, nextDir));
+				}
+#else
+				auto c = dot(orienting_normal, nextDir);
+#endif
 
 				if (pdfb > 0) {
 					throughput *= bsdf * c / pdfb;
@@ -213,18 +221,6 @@ namespace aten
 		}
 
 		return contribution;
-	}
-
-	inline bool isInvalidColor(const vec3& v)
-	{
-		bool b = isInvalid(v);
-		if (!b) {
-			if (v.x < 0 || v.y < 0 || v.z < 0) {
-				b = true;
-			}
-		}
-
-		return b;
 	}
 
 	void PathTracing::render(
@@ -255,7 +251,6 @@ namespace aten
 
 #ifdef ENABLE_OMP
 #pragma omp for
-//#pragma omp parallel for
 #endif
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
@@ -284,7 +279,8 @@ namespace aten
 							scene);
 
 						if (isInvalidColor(L)) {
-							AT_PRINTF("Invalid(%d/%d)\n", x, y);
+							AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
+							continue;
 						}
 
 						auto pdfOnImageSensor = camsample.pdfOnImageSensor;

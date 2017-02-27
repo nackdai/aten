@@ -7,7 +7,9 @@ namespace aten {
 		const vec3& wo) const
 	{
 		auto c = dot(normal, wo);
-		AT_ASSERT(c > AT_MATH_EPSILON);
+
+		//AT_ASSERT(c > AT_MATH_EPSILON);
+		c = aten::abs(c);
 
 		auto ret = c / AT_MATH_PI;
 		

@@ -23,7 +23,7 @@ static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
 //static aten::PathTracing g_tracer;
-static aten::PathTracingOpt g_tracer;
+static aten::SortedPathTracing g_tracer;
 
 static std::vector<aten::vec3> g_buffer;
 static std::vector<aten::color> g_dst;

@@ -55,18 +55,19 @@ namespace aten
 			
 			struct {
 				uint32_t isHit		: 1;
-				uint32_t isValid	: 1;
+				uint32_t isAlive	: 1;
 			};
 
 			Path()
 			{
 				isHit = false;
-				isValid = false;
+				isAlive = false;
 			}
 		};
 
 		void makePaths(
 			int width, int height,
+			int sample,
 			Path* paths,
 			camera* camera);
 
@@ -89,8 +90,9 @@ namespace aten
 			uint32_t depth,
 			Path* paths,
 			uint32_t* hitIds,
-			int hitNum,
+			int numHit,
 			camera* cam,
+			scene* scene,
 			vec3* dst);
 
 	private:
@@ -98,6 +100,8 @@ namespace aten
 
 		// Depth to compute russinan roulette.
 		uint32_t m_rrDepth{ 1 };
+
+		uint32_t m_samples{ 1 };
 	};
 #endif
 }

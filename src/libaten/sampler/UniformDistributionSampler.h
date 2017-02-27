@@ -11,10 +11,15 @@ namespace aten {
 		{}
 		~UniformDistributionSampler() {}
 
-		real nextSample()
+		virtual real nextSample() override final
 		{
 			auto ret = m_rnd->next01();
 			return ret;
+		}
+
+		virtual random* getRandom() override final
+		{
+			return m_rnd;
 		}
 
 	private:

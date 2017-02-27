@@ -14,6 +14,11 @@ namespace aten {
 		}
 		virtual ~Sobol() {}
 
+		void reset(uint32_t idx) {
+			m_idx = (idx == 0 ? 1 : idx);
+			m_dimension = 0;
+		}
+
 		virtual real next01() override final
 		{
 			if (m_dimension >= sobol::Matrices::num_dimensions) {

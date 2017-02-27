@@ -18,7 +18,15 @@ namespace aten {
 		}
 
 		if (light->isSingular()) {
-			if (!isHit) {
+			const auto& lightpos = light->getPos();
+			auto distToLight = (lightpos - r.org).length();
+
+			if (isHit && rec.t < distToLight) {
+				// Ray hits something, or the distance to the object is near than the distance to the light.
+				return false;
+			}
+			else {
+				// Ray don't hit anything, or the distance to the object is far than the distance to the light.
 				return true;
 			}
 		}
@@ -79,13 +87,18 @@ namespace aten {
 
 			auto y = dot(RGB2Y, lightsample.finalColor);
 
-			if (light->isSingular()) {
-				costs[i] = y * cosShadow / pdfLight;
+			if (cosShadow > 0) {
+				if (light->isSingular()) {
+					costs[i] = y * cosShadow / pdfLight;
+				}
+				else {
+					costs[i] = y * cosShadow / dist2 / pdfLight;
+				}
+				sumCost += costs[i];
 			}
 			else {
-				costs[i] = y * cosShadow / dist2 / pdfLight;
+				costs[i] = 0;
 			}
-			sumCost += costs[i];
 		}
 
 		auto r = sampler->nextSample() * sumCost;

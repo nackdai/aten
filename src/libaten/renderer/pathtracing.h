@@ -32,10 +32,10 @@ namespace aten
 	};
 
 #if 1
-	class PathTracingOpt : public Renderer {
+	class SortedPathTracing : public Renderer {
 	public:
-		PathTracingOpt() {}
-		~PathTracingOpt() {}
+		SortedPathTracing() {}
+		~SortedPathTracing() {}
 
 		virtual void render(
 			Destination& dst,

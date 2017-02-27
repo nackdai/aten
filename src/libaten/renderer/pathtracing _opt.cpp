@@ -7,7 +7,7 @@
 
 namespace aten
 {
-	void PathTracingOpt::makePaths(
+	void SortedPathTracing::makePaths(
 		int width, int height,
 		int sample,
 		Path* paths,
@@ -47,7 +47,7 @@ namespace aten
 		}
 	}
 
-	void PathTracingOpt::hitPaths(
+	void SortedPathTracing::hitPaths(
 		Path* paths,
 		int numPath,
 		scene* scene)
@@ -66,7 +66,7 @@ namespace aten
 		}
 	}
 
-	int PathTracingOpt::compactionPaths(
+	int SortedPathTracing::compactionPaths(
 		Path* paths,
 		int numPath,
 		uint32_t* hitIds)
@@ -83,7 +83,7 @@ namespace aten
 		return cnt;
 	}
 
-	void PathTracingOpt::shadeMiss(
+	void SortedPathTracing::shadeMiss(
 		Path* paths,
 		int numPath,
 		vec3* dst)
@@ -101,7 +101,7 @@ namespace aten
 		}
 	}
 
-	void PathTracingOpt::shade(
+	void SortedPathTracing::shade(
 		uint32_t depth,
 		Path* paths,
 		uint32_t* hitIds,
@@ -200,7 +200,7 @@ namespace aten
 		}
 	}
 
-	void PathTracingOpt::render(
+	void SortedPathTracing::render(
 		Destination& dst,
 		scene* scene,
 		camera* camera)

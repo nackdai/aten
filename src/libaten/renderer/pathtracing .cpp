@@ -182,7 +182,7 @@ namespace aten
 
 				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
 
-				auto nextDir = sampling.dir;
+				auto nextDir = normalize(sampling.dir);
 				pdfb = sampling.pdf;
 				auto bsdf = sampling.bsdf;
 
@@ -191,13 +191,15 @@ namespace aten
 				if (!rec.mtrl->isSingular()) {
 					// TODO
 					// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
-					c = aten::abs(dot(orienting_normal, nextDir));
+					//c = aten::abs(dot(orienting_normal, nextDir));
+					c = dot(orienting_normal, nextDir);
 				}
 #else
 				auto c = dot(orienting_normal, nextDir);
 #endif
 
-				if (pdfb > 0) {
+				//if (pdfb > 0) {
+				if (pdfb > 0 && c > 0) {
 					throughput *= bsdf * c / pdfb;
 					throughput /= russianProb;
 				}

@@ -8,8 +8,9 @@ namespace aten {
 	{
 		auto c = dot(normal, wo);
 
+		// TODO
 		//AT_ASSERT(c > AT_MATH_EPSILON);
-		c = aten::abs(c);
+		//c = aten::abs(c);
 
 		auto ret = c / AT_MATH_PI;
 		

@@ -79,8 +79,17 @@ namespace aten
 				}
 			}
 			else {
-				auto bg = sampleBG(ray);
-				contribution += throughput * bg;
+				auto ibl = scene->getIBL();
+
+				if (ibl) {
+					auto bg = ibl->getEnvMap()->sample(ray);
+					contribution += throughput * bg;
+				}
+				else {
+					auto bg = sampleBG(ray);
+					contribution += throughput * bg;
+				}
+
 				return std::move(contribution);
 			}
 

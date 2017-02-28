@@ -91,46 +91,45 @@ namespace aten {
 		const int width = imgW;
 		const int height = imgH;
 
-#pragma omp parallel
-		{
-#pragma omp for
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					auto dst = imgDst + (y * width + x);
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				auto dst = imgDst + (y * width + x);
 
-					// 注目領域.
-					auto focus = sampleArea(imgSrc, x, y, width, height);
+				// 注目領域.
+				auto focus = sampleArea(imgSrc, x, y, width, height);
 
-					vec3 sum(0, 0, 0);
-					real sum_weight = 0;
+				vec3 sum(0, 0, 0);
+				real sum_weight = 0;
 
-					for (int sx = x - kHalfSupport; sx <= x + kHalfSupport; ++sx) {
-						for (int sy = y - kHalfSupport; sy <= y + kHalfSupport; ++sy) {
-							// 相似度を調べる対象領域.
-							auto target = sampleArea(imgSrc, sx, sy, width, height);
+				for (int sx = x - kHalfSupport; sx <= x + kHalfSupport; ++sx) {
+					for (int sy = y - kHalfSupport; sy <= y + kHalfSupport; ++sy) {
+						// 相似度を調べる対象領域.
+						auto target = sampleArea(imgSrc, sx, sy, width, height);
 
-							// ノルム（相似度）計算.
-							auto dist = computeDistanceSquared(focus, target);
+						// ノルム（相似度）計算.
+						auto dist = computeDistanceSquared(focus, target);
 
-							// NOTE
-							// Z(p) = sum(exp(-max(|v(p) - v(q)|^2 - 2σ^2, 0) / h^2))
-							auto arg = -std::max(dist - 2 * sigma * sigma, real(0)) / (param_h * param_h);
+						// NOTE
+						// Z(p) = sum(exp(-max(|v(p) - v(q)|^2 - 2σ^2, 0) / h^2))
+						auto arg = -std::max(dist - 2 * sigma * sigma, real(0)) / (param_h * param_h);
 
-							auto weight = exp(arg);
+						auto weight = exp(arg);
 
-							auto pixel = samplePixel(imgSrc, sx, sy, width, height);
+						auto pixel = samplePixel(imgSrc, sx, sy, width, height);
 
-							sum += weight * pixel;
-							sum_weight += weight;
-						}
+						sum += weight * pixel;
+						sum_weight += weight;
 					}
-
-					auto color = sum / sum_weight;
-
-					dst->r = color.r;
-					dst->g = color.g;
-					dst->b = color.b;
 				}
+
+				auto color = sum / sum_weight;
+
+				dst->r = color.r;
+				dst->g = color.g;
+				dst->b = color.b;
 			}
 		}
 	}

@@ -7,6 +7,7 @@
 #include "camera/thinlens.h"
 
 #include "denoise/nml.h"
+#include "denoise/bilateral.h"
 
 #include "material/emissive.h"
 #include "material/lambert.h"

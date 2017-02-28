@@ -216,6 +216,9 @@
     <ClInclude Include="..\src\libaten\denoise\nml.h">
       <Filter>denoise</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\bilateral.h">
+      <Filter>denoise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -315,6 +318,9 @@
       <Filter>light</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\denoise\nml.cpp">
+      <Filter>denoise</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\bilateral.cpp">
       <Filter>denoise</Filter>
     </ClCompile>
   </ItemGroup>

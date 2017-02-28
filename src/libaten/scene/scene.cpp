@@ -17,7 +17,17 @@ namespace aten {
 			}
 		}
 
-		if (light->isSingular()) {
+		if (light->isInifinite()) {
+			if (isHit) {
+				// Hit something.
+				return false;
+			}
+			else {
+				// Hit nothing.
+				return true;
+			}
+		}
+		else if (light->isSingular()) {
 			const auto& lightpos = light->getPos();
 			auto distToLight = (lightpos - r.org).length();
 
@@ -88,7 +98,7 @@ namespace aten {
 			auto y = dot(RGB2Y, lightsample.finalColor);
 
 			if (cosShadow > 0) {
-				if (light->isSingular()) {
+				if (light->isSingular() || dist2 == 0) {
 					costs[i] = y * cosShadow / pdfLight;
 				}
 				else {

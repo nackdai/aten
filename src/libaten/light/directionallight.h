@@ -31,5 +31,10 @@ namespace aten {
 
 			return std::move(result);
 		}
+
+		virtual bool isInifinite() const override final
+		{
+			return true;
+		}
 	};
 }

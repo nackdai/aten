@@ -44,6 +44,11 @@ namespace aten
 			return std::move(vec3());
 		}
 
+		bool hasBG() const
+		{
+			return (m_bg != nullptr);
+		}
+
 		background* bg()
 		{
 			return m_bg;

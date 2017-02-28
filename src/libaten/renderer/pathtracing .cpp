@@ -135,9 +135,10 @@ namespace aten
 							// Get light color.
 							auto emit = sampleres.finalColor;
 
-							if (light->isSingular()) {
+							if (light->isSingular() || light->isInifinite()) {
 								if (pdfLight > real(0)) {
-									contribution += bsdf * emit * cosShadow / pdfLight;
+									auto misW = pdfLight / (pdfb + pdfLight);
+									contribution += misW * bsdf * emit * cosShadow / pdfLight;
 									contribution /= lightSelectPdf;
 								}
 							}
@@ -213,10 +214,25 @@ namespace aten
 				ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
 			}
 			else {
-				// TODO
-				// Background.
-				auto bg = sampleBG(ray);
-				return contribution + throughput * bg;
+				auto ibl = scene->getIBL();
+				if (ibl) {
+					if (depth == 0) {
+						auto bg = ibl->getEnvMap()->sample(ray);
+						contribution += throughput * bg;
+					}
+					else {
+						auto pdfLight = ibl->samplePdf(ray);
+						auto misW = pdfb / (pdfLight + pdfb);
+						auto emit = ibl->getEnvMap()->sample(ray);
+						contribution += throughput * misW * emit;
+					}
+				}
+				else {
+					auto bg = sampleBG(ray);
+					contribution += throughput * bg;
+				}
+
+				return contribution;
 			}
 
 			depth++;

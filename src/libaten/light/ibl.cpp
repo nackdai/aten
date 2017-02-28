@@ -152,7 +152,7 @@ namespace aten {
 		// cdf is normalized to [0, 1].
 
 		for (int i = 0; i < cdf.size(); i++) {
-			if (r >= cdf[i]) {
+			if (r <= cdf[i]) {
 				auto idx = i;
 
 				outCdf = cdf[i];

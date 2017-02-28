@@ -14,16 +14,16 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-//static aten::AcceledScene<aten::LinearList> g_scene;
-static aten::AcceledScene<aten::bvhnode> g_scene;
+static aten::AcceledScene<aten::LinearList> g_scene;
+//static aten::AcceledScene<aten::bvhnode> g_scene;
 
 //static aten::StaticColorBG g_bg(aten::vec3(0, 0, 0));
 static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-//static aten::PathTracing g_tracer;
-static aten::SortedPathTracing g_tracer;
+static aten::PathTracing g_tracer;
+//static aten::SortedPathTracing g_tracer;
 
 static std::vector<aten::vec3> g_buffer;
 static std::vector<aten::color> g_dst;
@@ -162,6 +162,9 @@ int main(int argc, char* argv[])
 	g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	//g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");
 	g_bg.init(g_envmap);
+
+	aten::ImageBasedLight ibl(&g_bg);
+	g_scene.addImageBasedLight(&ibl);
 
 	g_tracer.setBG(&g_bg);
 

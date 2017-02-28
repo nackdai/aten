@@ -70,6 +70,11 @@ namespace aten {
 			return true;
 		}
 
+		virtual bool isInifinite() const
+		{
+			return false;
+		}
+
 		virtual const hitable* getLightObject() const
 		{
 			return nullptr;

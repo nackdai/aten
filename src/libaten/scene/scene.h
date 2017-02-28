@@ -3,6 +3,7 @@
 #include <vector>
 #include "scene/accel.h"
 #include "light/light.h"
+#include "light/ibl.h"
 
 namespace aten {
 	class LinearList : public accel {
@@ -76,6 +77,17 @@ namespace aten {
 			m_lights.push_back(l);
 		}
 
+		void addImageBasedLight(ImageBasedLight* l)
+		{
+			if (m_ibl != l) {
+				m_ibl = l;
+
+				// TODO
+				// Remove light, before adding.
+				addLight(l);
+			}
+		}
+
 		uint32_t lightNum() const
 		{
 			return (uint32_t)m_lights.size();
@@ -95,6 +107,11 @@ namespace aten {
 			return m_lights[i];
 		}
 
+		ImageBasedLight* getIBL()
+		{
+			return m_ibl;
+		}
+
 		bool hitLight(
 			const Light* light,
 			const ray& r,
@@ -112,6 +129,7 @@ namespace aten {
 		std::vector<hitable*> m_tmp;
 
 		std::vector<Light*> m_lights;
+		ImageBasedLight* m_ibl{ nullptr };
 	};
 
 	template <typename ACCEL>

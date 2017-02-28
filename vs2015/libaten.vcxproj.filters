@@ -207,6 +207,9 @@
     <ClInclude Include="..\src\libaten\scene\MaterialManager.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\light\ibl.h">
+      <Filter>light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -301,6 +304,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\sorted_pathtracing.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\light\ibl.cpp">
+      <Filter>light</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

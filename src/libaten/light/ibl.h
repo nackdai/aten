@@ -38,6 +38,11 @@ namespace aten {
 			return false;
 		}
 
+		virtual bool isInifinite() const override final
+		{
+			return true;
+		}
+
 	private:
 		void preCompute();
 

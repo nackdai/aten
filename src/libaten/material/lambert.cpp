@@ -7,9 +7,7 @@ namespace aten {
 		const vec3& wo) const
 	{
 		auto c = dot(normal, wo);
-
-		// TODO
-		//AT_ASSERT(c > AT_MATH_EPSILON);
+		AT_ASSERT(c >= 0);
 		//c = aten::abs(c);
 
 		auto ret = c / AT_MATH_PI;
@@ -47,6 +45,7 @@ namespace aten {
 		const real z = aten::sqrt(real(1) - r2);
 
 		vec3 dir = normalize((u * x + v * y + w * z));
+		AT_ASSERT(dot(normal, dir) >= 0);
 
 		return std::move(dir);
 	}

@@ -56,12 +56,6 @@ namespace aten {
 			return m_le;
 		}
 
-		virtual real getPdf(const vec3& org, sampler* sampler) const = 0;
-
-		virtual vec3 sampleDirToLight(const vec3& org, sampler* sampler) const = 0;
-
-		virtual vec3 sampleNormalOnLight(const vec3& org, sampler* sampler) const = 0;
-
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const = 0;
 
 		virtual bool isSingular() const

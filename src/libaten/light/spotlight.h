@@ -48,31 +48,14 @@ namespace aten {
 			m_falloff = falloff;
 		}
 
-		virtual real getPdf(const vec3& org, sampler* sampler) const override final
-		{
-			return real(1);
-		}
-
-		virtual vec3 sampleDirToLight(const vec3& org, sampler* sampler) const override final
-		{
-			vec3 dir = m_pos - org;
-			return std::move(dir);
-		}
-
-		virtual vec3 sampleNormalOnLight(const vec3& org, sampler* sampler) const override final
-		{
-			// Do not use...
-			return std::move(vec3());
-		}
-
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
 		{
 			LightSampleResult result;
 
 			result.pos = m_pos;
-			result.pdf = getPdf(org, sampler);
-			result.dir = sampleDirToLight(org, sampler);
-			result.nml = sampleNormalOnLight(org, sampler);
+			result.pdf = real(1);
+			result.dir = m_pos - org;
+			result.nml = vec3();	// Not used...
 
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx

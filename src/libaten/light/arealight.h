@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 #include "light/light.h"
 
 namespace aten {
@@ -15,82 +14,7 @@ namespace aten {
 
 		virtual ~AreaLight() {}
 
-	private:
-		template <typename _T>
-		_T sample(
-			const vec3& org, 
-			sampler* sampler, 
-			std::function<void(_T&, const vec3&, const hitrecord&)> setter) const
-		{
-			_T ret = 0;
-
-			if (m_object) {
-				hitrecord rec;
-
-				vec3 pos;
-				if (sampler) {
-					pos = m_object->getRandomPosOn(sampler);
-				}
-				else {
-					pos = m_object->getBoundingbox().getCenter();
-				}
-
-				auto dir = pos - org;
-				auto dist = dir.length();
-
-				ray r(
-					org,
-					normalize(dir));
-
-				bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
-
-				if (isHit) {
-					/*if (aten::abs(dist - rec.t) < AT_MATH_EPSILON)*/ {
-						setter(ret, pos, rec);
-					}
-				}
-			}
-
-			return ret;
-		}
-
 	public:
-		virtual real getPdf(const vec3& org, sampler* sampler) const override final
-		{
-			real pdf = sample<real>(
-				org,
-				sampler,
-				[](real& result, const vec3& pos, const hitrecord& rec) {
-				result = 1 / rec.area;
-			});
-
-			return pdf;
-		}
-
-		virtual vec3 sampleDirToLight(const vec3& org, sampler* sampler) const override final
-		{
-			vec3 dir = sample<vec3>(
-				org,
-				sampler,
-				[&](vec3& result, const vec3& pos, const hitrecord& rec) {
-				result = rec.p - org;
-			});
-
-			return std::move(dir);
-		}
-
-		virtual vec3 sampleNormalOnLight(const vec3& org, sampler* sampler) const override final
-		{
-			vec3 nml = sample<vec3>(
-				org,
-				sampler,
-				[&](vec3& result, const vec3& pos, const hitrecord& rec) {
-				result = rec.normal;
-			});
-
-			return std::move(nml);
-		}
-
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
 		{
 			LightSampleResult result;

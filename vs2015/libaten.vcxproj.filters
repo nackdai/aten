@@ -46,6 +46,9 @@
     <Filter Include="light">
       <UniqueIdentifier>{73ad43e6-957c-4167-b693-161d560e49e4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="denoise">
+      <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -210,6 +213,9 @@
     <ClInclude Include="..\src\libaten\light\ibl.h">
       <Filter>light</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\nml.h">
+      <Filter>denoise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -307,6 +313,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\light\ibl.cpp">
       <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\nml.cpp">
+      <Filter>denoise</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

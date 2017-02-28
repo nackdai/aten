@@ -6,6 +6,8 @@
 #include "camera/pinhole.h"
 #include "camera/thinlens.h"
 
+#include "denoise/nml.h"
+
 #include "material/emissive.h"
 #include "material/lambert.h"
 #include "material/specular.h"

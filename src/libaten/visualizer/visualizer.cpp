@@ -14,6 +14,9 @@ namespace aten {
 
 	static PixelFormat g_fmt{ PixelFormat::rgba8 };
 
+	static std::vector<visualizer::PreProc*> g_preprocs;
+	static std::vector<vec3> g_preprocBuffer[2];
+
 	static GLenum glpixelfmt[] = {
 		GL_RGBA,
 		GL_RGBA,
@@ -91,6 +94,11 @@ namespace aten {
 		return true;
 	}
 
+	void visualizer::addPreProc(PreProc* preproc)
+	{
+		g_preprocs.push_back(preproc);
+	}
+
 	void visualizer::setShader(shader* shader)
 	{
 		g_shader = shader;
@@ -103,9 +111,32 @@ namespace aten {
 	}
 
 	void visualizer::render(
-		const void* pixels,
+		const vec3* pixels,
 		bool revert)
 	{
+		const void* textureimage = pixels;
+
+		if (!g_preprocs.empty()) {
+			uint32_t bufpos = 0;
+			const vec3* src = (const vec3*)textureimage;
+			vec3* dst = nullptr;
+
+			for (int i = 0; i < g_preprocs.size(); i++) {
+				auto& buf = g_preprocBuffer[bufpos];
+				if (buf.empty()) {
+					buf.resize(g_width * g_height);
+				}
+				dst = &buf[0];
+
+				(*g_preprocs[i])(src, g_width, g_height, dst);
+
+				src = dst;
+				bufpos = 1 - bufpos;
+			}
+
+			textureimage = src;
+		}
+
 		CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
@@ -117,8 +148,6 @@ namespace aten {
 
 		g_shader->begin(pixels, revert);
 
-		const void* textureimage = pixels;
-
 		if (g_fmt == PixelFormat::rgba32f) {
 			// If type is double, convert double/rgb to float/rgba.
 			// If type is float, convert rgb to rgba.
@@ -126,7 +155,7 @@ namespace aten {
 				g_tmp.resize(g_width * g_height);
 			}
 
-			const vec3* src = (const vec3*)pixels;
+			const vec3* src = (const vec3*)textureimage;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for

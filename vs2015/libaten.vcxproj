@@ -157,6 +157,7 @@
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\denoise\nml.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
@@ -211,6 +212,7 @@
   <ItemGroup>
     <ClCompile Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
+    <ClCompile Include="..\src\libaten\denoise\nml.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />

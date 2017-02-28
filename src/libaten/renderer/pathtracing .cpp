@@ -277,9 +277,9 @@ namespace aten
 					vec3 col;
 
 					for (uint32_t i = 0; i < sample; i++) {
-						XorShift rnd((y * height * 4 + x * 4) * sample + i + 1);
+						//XorShift rnd((y * height * 4 + x * 4) * sample + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * sample + i + 1);
-						//Sobol rnd((y * height * 4 + x * 4) * sample + i + 1);
+						Sobol rnd((y * height * 4 + x * 4) * sample + i + 1);
 						UniformDistributionSampler sampler(&rnd);
 
 						real u = real(x + sampler.nextSample()) / real(width);

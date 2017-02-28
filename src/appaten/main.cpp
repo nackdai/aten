@@ -168,6 +168,9 @@ int main(int argc, char* argv[])
 
 	g_tracer.setBG(&g_bg);
 
+	aten::NonLocalMeanFilter nml;
+	aten::visualizer::addPreProc(&nml);
+
 	g_buffer.resize(WIDTH * HEIGHT);
 	g_dst.resize(WIDTH * HEIGHT);
 

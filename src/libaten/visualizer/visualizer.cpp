@@ -2,6 +2,7 @@
 #include "visualizer.h"
 #include "math/vec3.h"
 #include "misc/color.h"
+#include "visualizer/fbo.h"
 
 namespace aten {
 	static shader* g_shader{ nullptr };
@@ -17,20 +18,8 @@ namespace aten {
 	static std::vector<visualizer::PreProc*> g_preprocs;
 	static std::vector<vec3> g_preprocBuffer[2];
 
-	static GLenum glpixelfmt[] = {
-		GL_RGBA,
-		GL_RGBA,
-	};
-
-	static GLenum glpixeltype[] = {
-		GL_UNSIGNED_BYTE,
-		GL_FLOAT,
-	};
-
-	static GLenum glpixelinternal[] = {
-		GL_RGBA,
-		GL_RGBA32F,
-	};
+	static std::vector<visualizer::PostProc*> g_postprocs;
+	static std::vector<fbo> g_fbos;
 
 	GLuint createTexture(int width, int height, PixelFormat fmt)
 	{
@@ -41,9 +30,13 @@ namespace aten {
 
 		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, tex));
 
-		auto pixelinternal = glpixelinternal[fmt];
-		auto pixelfmt = glpixelfmt[fmt];
-		auto pixeltype = glpixeltype[fmt];
+		GLenum pixelfmt = 0;
+		GLenum pixeltype = 0;
+		GLenum pixelinternal = 0;
+
+		getGLPixelFormat(
+			fmt,
+			pixelfmt, pixeltype, pixelinternal);
 
 		CALL_GL_API(::glTexImage2D(
 			GL_TEXTURE_2D,
@@ -99,6 +92,23 @@ namespace aten {
 		g_preprocs.push_back(preproc);
 	}
 
+	void visualizer::addPostProc(PostProc* postproc)
+	{
+		if (g_postprocs.size() > 0) {
+			// Create fbo to connect between post-processes.
+			auto idx = g_postprocs.size() - 1;
+			const auto* postproc = g_postprocs[idx];
+			auto fmt = postproc->outFormat();
+
+			fbo fbo;
+			fbo.init(g_width, g_height, fmt);
+
+			g_fbos.push_back(fbo);
+		}
+
+		g_postprocs.push_back(postproc);
+	}
+
 	void visualizer::setShader(shader* shader)
 	{
 		g_shader = shader;
@@ -146,8 +156,6 @@ namespace aten {
 
 		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
 
-		g_shader->begin(pixels, revert);
-
 		if (g_fmt == PixelFormat::rgba32f) {
 			// If type is double, convert double/rgb to float/rgba.
 			// If type is float, convert rgb to rgba.
@@ -176,8 +184,13 @@ namespace aten {
 			textureimage = &g_tmp[0];
 		}
 
-		auto pixelfmt = glpixelfmt[g_fmt];
-		auto pixeltype = glpixeltype[g_fmt];
+		GLenum pixelfmt = 0;
+		GLenum pixeltype = 0;
+		GLenum pixelinternal = 0;
+
+		getGLPixelFormat(
+			g_fmt,
+			pixelfmt, pixeltype, pixelinternal);
 
 		CALL_GL_API(::glTexSubImage2D(
 			GL_TEXTURE_2D,
@@ -188,6 +201,18 @@ namespace aten {
 			pixeltype,
 			textureimage));
 
+#if 1
+		g_shader->prepareRender(pixels, revert);
+
 		CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+#else
+		for (int i = 0; i < g_postprocs.size(); i++) {
+			auto* postproc = g_postprocs[i];
+
+			postproc->prepareRender(pixels, revert);
+
+			CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+		}
+#endif
 	}
 }

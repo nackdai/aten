@@ -1,14 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-#include "defs.h"
-
-#define CALL_GL_API(func)\
-    func; \
-    {\
-        GLenum __gl_err__ = ::glGetError();\
-        if (__gl_err__ != GL_NO_ERROR) { aten::OutputDebugString("GL Error[%x](%s[%d])\n", __gl_err__, __FILE__, __LINE__); AT_ASSERT(false); }\
-    }
+#include "visualizer/atengl.h"
 
 namespace aten {
 	class shader {
@@ -17,12 +9,12 @@ namespace aten {
 		virtual ~shader() {}
 
 	public:
-		virtual bool init(
+		bool init(
 			int width, int height,
 			const char* pathVS,
 			const char* pathFS);
 
-		virtual void begin(
+		virtual void prepareRender(
 			const void* pixels,
 			bool revert);
 
@@ -40,7 +32,7 @@ namespace aten {
 		virtual ~SimpleRender() {}
 
 	public:
-		virtual void begin(
+		virtual void prepareRender(
 			const void* pixels,
 			bool revert) override;
 	};

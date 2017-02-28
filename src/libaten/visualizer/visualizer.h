@@ -5,11 +5,6 @@
 #include "visualizer/shader.h"
 
 namespace aten {
-	enum PixelFormat {
-		rgba8,
-		rgba32f
-	};
-
 	class visualizer {
 	private:
 		visualizer() {}
@@ -28,10 +23,29 @@ namespace aten {
 				vec3* dst) = 0;
 		};
 
+		class PostProc : public shader {
+		protected:
+			PostProc() {}
+			virtual ~PostProc() {}
+
+		public:
+			virtual void prepareRender(
+				const void* pixels,
+				bool revert) override
+			{
+				shader::prepareRender(pixels, revert);
+			}
+
+			virtual PixelFormat inFormat() const = 0;
+			virtual PixelFormat outFormat() const = 0;
+		};
+
 	public:
 		static bool init(int width, int height, PixelFormat fmt);
 
 		static void addPreProc(PreProc* preproc);
+
+		static void addPostProc(PostProc* postproc);
 
 		static void setShader(shader* shader);
 

@@ -87,7 +87,7 @@ namespace aten {
 		return true;
 	}
 
-	void shader::begin(
+	void shader::prepareRender(
 		const void* pixels,
 		bool revert)
 	{
@@ -100,11 +100,11 @@ namespace aten {
 		return handle;
 	}
 
-	void SimpleRender::begin(
+	void SimpleRender::prepareRender(
 		const void* pixels,
 		bool revert)
 	{
-		shader::begin(pixels, revert);
+		shader::prepareRender(pixels, revert);
 
 		GLfloat invScreen[4] = { 1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f };
 		auto hInvScreen = getHandle("invScreen");

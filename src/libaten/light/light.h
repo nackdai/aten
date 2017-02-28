@@ -56,6 +56,13 @@ namespace aten {
 			return m_le;
 		}
 
+		virtual real samplePdf(const ray& r) const
+		{
+			// Not used...
+			AT_ASSERT(false);
+			return real(0);
+		}
+
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const = 0;
 
 		virtual bool isSingular() const

@@ -27,6 +27,7 @@
 #include "light/directionallight.h"
 #include "light/spotlight.h"
 #include "light/arealight.h"
+#include "light/ibl.h"
 
 #include "object/ObjLoader.h"
 #include "object/object.h"

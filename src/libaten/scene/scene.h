@@ -123,7 +123,9 @@ namespace aten {
 	public:
 		void build()
 		{
-			m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size());
+			if (!m_tmp.empty()) {
+				m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size());
+			}
 		}
 
 		virtual bool hit(

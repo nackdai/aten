@@ -15,6 +15,20 @@ namespace aten {
 		virtual ~AreaLight() {}
 
 	public:
+		virtual real samplePdf(const ray& r) const override final
+		{
+			hitrecord rec;
+			bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+
+			real pdf = 0;
+
+			if (isHit) {
+				pdf = 1 / rec.area;
+			}
+
+			return pdf;
+		}
+
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
 		{
 			LightSampleResult result;

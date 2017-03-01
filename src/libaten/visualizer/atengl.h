@@ -13,7 +13,8 @@
 namespace aten {
 	enum PixelFormat {
 		rgba8,
-		rgba32f
+		rgba32f,
+		rgba16f,
 	};
 
 	inline void getGLPixelFormat(
@@ -25,16 +26,19 @@ namespace aten {
 		static GLenum glpixelfmt[] = {
 			GL_RGBA,
 			GL_RGBA,
+			GL_RGBA,
 		};
 
 		static GLenum glpixeltype[] = {
 			GL_UNSIGNED_BYTE,
 			GL_FLOAT,
+			GL_HALF_FLOAT,
 		};
 
 		static GLenum glpixelinternal[] = {
 			GL_RGBA,
 			GL_RGBA32F,
+			GL_RGBA16F,
 		};
 
 		glinternal = glpixelinternal[fmt];

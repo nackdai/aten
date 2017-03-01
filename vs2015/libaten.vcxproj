@@ -184,6 +184,7 @@
     <ClInclude Include="..\src\libaten\misc\timer.h" />
     <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\object\ObjLoader.h" />
+    <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\primitive\sphere.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
@@ -209,6 +210,7 @@
     <ClInclude Include="..\src\libaten\visualizer\atengl.h" />
     <ClInclude Include="..\src\libaten\visualizer\blitter.h" />
     <ClInclude Include="..\src\libaten\visualizer\fbo.h" />
+    <ClInclude Include="..\src\libaten\visualizer\MultiPassPostProc.h" />
     <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
@@ -233,6 +235,7 @@
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\object\object.cpp" />
     <ClCompile Include="..\src\libaten\object\ObjLoader.cpp" />
+    <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
@@ -248,6 +251,7 @@
     <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
+    <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />

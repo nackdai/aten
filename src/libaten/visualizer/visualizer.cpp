@@ -18,6 +18,11 @@ namespace aten {
 
 	static std::vector<visualizer::PostProc*> g_postprocs;
 
+	GLuint visualizer::getSrcTexHandle()
+	{
+		return g_tex;
+	}
+
 	GLuint createTexture(int width, int height, PixelFormat fmt)
 	{
 		GLuint tex = 0;
@@ -99,8 +104,10 @@ namespace aten {
 			auto inFmt = postproc->inFormat();
 			AT_VRETURN(inFmt == outFmt, false);
 
+			auto& fbo = prevPostproc->getFbo();
+
 			// Create FBO.
-			AT_VRETURN(prevPostproc->m_fbo.init(g_width, g_height, outFmt), false);
+			AT_VRETURN(fbo.init(g_width, g_height, outFmt), false);
 		}
 
 		g_postprocs.push_back(postproc);
@@ -211,19 +218,24 @@ namespace aten {
 
 		for (int i = 0; i < g_postprocs.size(); i++) {
 			auto* postproc = g_postprocs[i];
+			PostProc* prevPostproc = nullptr;
 
 			if (i > 0) {
-				auto* prevPostproc = g_postprocs[i - 1];
+				prevPostproc = g_postprocs[i - 1];
+				auto& fbo = prevPostproc->getFbo();
+
+				CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
 				// Set FBO as source texture.
-				prevPostproc->m_fbo.setAsTexture();
+				fbo.setAsTexture();
 			}
 
-			postproc->prepareRender(pixels, revert);
+			postproc->prepareRender(prevPostproc, pixels, revert);
+			auto& fbo = postproc->getFbo();
 
-			if (postproc->m_fbo.isValid()) {
+			if (fbo.isValid()) {
 				// Set FBO.
-				postproc->m_fbo.setFBO();
+				fbo.setFBO();
 			}
 			else {
 				// Set default frame buffer.

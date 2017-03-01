@@ -42,11 +42,48 @@ namespace aten {
 			virtual PixelFormat inFormat() const = 0;
 			virtual PixelFormat outFormat() const = 0;
 
+			virtual uint32_t getOutWidth() const
+			{
+				return m_width;
+			}
+			virtual uint32_t getOutHeight() const
+			{
+				return m_height;
+			}
+
+			virtual FBO& getFbo()
+			{
+				return m_fbo;
+			}
+			const FBO& getFbo() const
+			{
+				const FBO& fbo = getFbo();
+				return fbo;
+			}
+
+			PostProc* getPrevPass()
+			{
+				return m_prevPass;
+			}
+
+		private:
+			void prepareRender(
+				PostProc* prevPass,
+				const void* pixels,
+				bool revert)
+			{
+				m_prevPass = prevPass;
+				prepareRender(pixels, revert);
+			}
+
 		private:
 			FBO m_fbo;
+			PostProc* m_prevPass{ nullptr };
 		};
 
 	public:
+		static GLuint getSrcTexHandle();
+
 		static bool init(int width, int height);
 
 		static void addPreProc(PreProc* preproc);

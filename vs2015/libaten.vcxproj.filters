@@ -49,6 +49,9 @@
     <Filter Include="denoise">
       <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
     </Filter>
+    <Filter Include="posteffect">
+      <UniqueIdentifier>{756ad7cc-74d7-4e3b-a087-6d4027c7a541}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -228,6 +231,12 @@
     <ClInclude Include="..\src\libaten\visualizer\blitter.h">
       <Filter>visualizer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\visualizer\MultiPassPostProc.h">
+      <Filter>visualizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h">
+      <Filter>posteffect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -340,6 +349,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp">
       <Filter>visualizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp">
+      <Filter>visualizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp">
+      <Filter>posteffect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 	tonemap.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
-		"../shader/tonemapfs.glsl");
+		"../shader/tonemap_fs.glsl");
 
 	aten::NonLocalMeanFilterShader nmlshd;
 	nmlshd.init(

@@ -343,9 +343,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\shader\tonemapfs.glsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\src\shader\vs.glsl">
       <Filter>shader</Filter>
     </None>
@@ -353,6 +350,9 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\nml_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\tonemap_fs.glsl">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

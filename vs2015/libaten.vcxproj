@@ -255,7 +255,7 @@
   <ItemGroup>
     <None Include="..\src\shader\fs.glsl" />
     <None Include="..\src\shader\nml_fs.glsl" />
-    <None Include="..\src\shader\tonemapfs.glsl" />
+    <None Include="..\src\shader\tonemap_fs.glsl" />
     <None Include="..\src\shader\vs.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

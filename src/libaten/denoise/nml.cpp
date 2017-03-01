@@ -151,4 +151,30 @@ namespace aten {
 		auto elapsed = timer.end();
 		AT_PRINTF("NML %f[ms]\n", elapsed);
 	}
+
+	/////////////////////////////////////////////////////////
+
+	void NonLocalMeanFilterShader::prepareRender(
+		const void* pixels,
+		bool revert)
+	{
+		Blitter::prepareRender(pixels, revert);
+
+		auto hParam_h = getHandle("param_h");
+		if (hParam_h >= 0) {
+			CALL_GL_API(::glUniform1f(hParam_h, (float)m_param_h));
+		}
+
+		auto hSigma = getHandle("sigma");
+		if (hSigma >= 0) {
+			CALL_GL_API(::glUniform1f(hSigma, (float)m_sigma));
+		}
+
+		// TODO
+		// 入力テクスチャのサイズはスクリーンと同じ...
+		auto hTexel = getHandle("texel");
+		if (hTexel >= 0) {
+			CALL_GL_API(glUniform2f(hTexel, 1.0f / m_width, 1.0f / m_height));
+		}
+	}
 }

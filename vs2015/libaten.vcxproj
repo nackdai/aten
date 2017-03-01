@@ -254,6 +254,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\fs.glsl" />
+    <None Include="..\src\shader\nml_fs.glsl" />
     <None Include="..\src\shader\tonemapfs.glsl" />
     <None Include="..\src\shader\vs.glsl" />
   </ItemGroup>

@@ -44,7 +44,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 1;
+		dst.sample = 100;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -67,17 +67,7 @@ void display()
 			WIDTH, HEIGHT);
 	}
 
-#if 0
-	// Do tonemap.
-	aten::Tonemap::doTonemap(
-		WIDTH, HEIGHT,
-		&g_buffer[0],
-		&g_dst[0]);
-
-	aten::visualizer::render(&g_dst[0]);
-#else
 	aten::visualizer::render(&g_buffer[0], g_camera.needRevert());
-#endif
 }
 
 int main(int argc, char* argv[])
@@ -122,6 +112,13 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/tonemapfs.glsl");
 
+	aten::NonLocalMeanFilterShader nmlshd;
+	nmlshd.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/nml_fs.glsl");
+
+	aten::visualizer::addPostProc(&nmlshd);
 	aten::visualizer::addPostProc(&tonemap);
 
 	aten::vec3 lookfrom;
@@ -168,7 +165,7 @@ int main(int argc, char* argv[])
 	g_tracer.setBG(&g_bg);
 
 	//aten::NonLocalMeanFilter filter;
-	aten::BilateralFilter filter;
+	//aten::BilateralFilter filter;
 	//aten::visualizer::addPreProc(&filter);
 
 	g_buffer.resize(WIDTH * HEIGHT);

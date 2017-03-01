@@ -52,6 +52,12 @@
     <Filter Include="posteffect">
       <UniqueIdentifier>{756ad7cc-74d7-4e3b-a087-6d4027c7a541}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\bloomeffect">
+      <UniqueIdentifier>{7d011257-74d3-46a3-b33e-d87cdde6f216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\denoise">
+      <UniqueIdentifier>{c918e933-8b6e-4c2b-bde0-32b7f83c9547}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -364,14 +370,32 @@
     <None Include="..\src\shader\fs.glsl">
       <Filter>shader</Filter>
     </None>
-    <None Include="..\src\shader\nml_fs.glsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\src\shader\tonemap_fs.glsl">
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\bilateral_fs.glsl">
-      <Filter>shader</Filter>
+      <Filter>shader\denoise</Filter>
+    </None>
+    <None Include="..\src\shader\nml_fs.glsl">
+      <Filter>shader\denoise</Filter>
+    </None>
+    <None Include="..\src\shader\bloomeffect_fs_Gauss.glsl">
+      <Filter>shader\bloomeffect</Filter>
+    </None>
+    <None Include="..\src\shader\bloomeffect_fs_HBlur.glsl">
+      <Filter>shader\bloomeffect</Filter>
+    </None>
+    <None Include="..\src\shader\bloomeffect_fs_VBlur.glsl">
+      <Filter>shader\bloomeffect</Filter>
+    </None>
+    <None Include="..\src\shader\bloomeffect_fs_2x2.glsl">
+      <Filter>shader\bloomeffect</Filter>
+    </None>
+    <None Include="..\src\shader\bloomeffect_fs_4x4.glsl">
+      <Filter>shader\bloomeffect</Filter>
+    </None>
+    <None Include="..\src\shader\bloomeffect_fs_Final.glsl">
+      <Filter>shader\bloomeffect</Filter>
     </None>
   </ItemGroup>
 </Project>

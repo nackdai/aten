@@ -44,7 +44,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 10;
+		dst.sample = 100;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -124,8 +124,22 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/bilateral_fs.glsl");
 
+	aten::BloomEffect bloom;
+	bloom.init(
+		WIDTH, HEIGHT,
+		aten::rgba32f, aten::rgba32f,
+		"../shader/vs.glsl",
+		"../shader/bloomeffect_fs_4x4.glsl",
+		"../shader/bloomeffect_fs_2x2.glsl",
+		"../shader/bloomeffect_fs_HBlur.glsl",
+		"../shader/bloomeffect_fs_VBlur.glsl",
+		"../shader/bloomeffect_fs_Gauss.glsl",
+		"../shader/bloomeffect_fs_Final.glsl");
+	bloom.setParam(0.2f, 0.4f);
+
 	aten::visualizer::addPostProc(&nmlshd);
 	aten::visualizer::addPostProc(&tonemap);
+	aten::visualizer::addPostProc(&bloom);
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;

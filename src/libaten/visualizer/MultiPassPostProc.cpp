@@ -7,15 +7,16 @@ namespace aten {
 	{
 		for (int i = 0; i < m_passes.size(); i++) {
 			auto* pass = m_passes[i];
+			visualizer::PostProc* prevPass = nullptr;
 
 			if (i > 0) {
-				auto* prevPass = m_passes[i - 1];
+				prevPass = m_passes[i - 1];
 
 				// Set FBO as source texture.
 				prevPass->getFbo().setAsTexture();
 			}
 
-			pass->prepareRender(pixels, revert);
+			pass->prepareRender(prevPass, pixels, revert);
 
 			if (pass->getFbo().isValid()) {
 				// Set FBO.

@@ -20,6 +20,12 @@ namespace aten {
 			const char* pathFS_GaussBlur,
 			const char* pathFS_Final);
 
+		void setParam(float threshold, float adaptedLum)
+		{
+			m_threshold = std::max(threshold, 0.0f);
+			m_adaptedLum = std::max(adaptedLum, 0.0f);
+		}
+
 		virtual PixelFormat inFormat() const override final
 		{
 			return m_fmtIn;
@@ -48,6 +54,7 @@ namespace aten {
 		class BloomEffectPass : public visualizer::PostProc {
 		public:
 			BloomEffectPass() {}
+			BloomEffectPass(BloomEffect* body) : m_body(body) {}
 			virtual ~BloomEffectPass() {}
 
 		public:
@@ -71,7 +78,8 @@ namespace aten {
 				return m_fmtOut;
 			}
 
-		protected:
+			BloomEffect* m_body;
+
 			int m_srcWidth;
 			int m_srcHeight;
 
@@ -82,24 +90,26 @@ namespace aten {
 		class BloomEffectFinalPass : public BloomEffectPass {
 		public:
 			BloomEffectFinalPass() {}
+			BloomEffectFinalPass(BloomEffect* body) : BloomEffectPass(body) {}
 			virtual ~BloomEffectFinalPass() {}
 
 			virtual void prepareRender(
 				const void* pixels,
 				bool revert) override;
-
-			BloomEffect* m_body;
 		};
 
 		PixelFormat m_fmtIn;
 		PixelFormat m_fmtOut;
 
-		BloomEffectPass m_pass4x4;
-		BloomEffectPass m_pass2x2;
-		BloomEffectPass m_passHBlur;
-		BloomEffectPass m_passVBlur;
-		BloomEffectPass m_passGaussBlur_4x4;
-		BloomEffectPass m_passGaussBlur_2x2;
-		BloomEffectFinalPass m_passFinal;
+		BloomEffectPass m_pass4x4{ BloomEffectPass(this) };
+		BloomEffectPass m_pass2x2{ BloomEffectPass(this) };
+		BloomEffectPass m_passHBlur{ BloomEffectPass(this) };
+		BloomEffectPass m_passVBlur{ BloomEffectPass(this) };
+		BloomEffectPass m_passGaussBlur_4x4{ BloomEffectPass(this) };
+		BloomEffectPass m_passGaussBlur_2x2{ BloomEffectPass(this) };
+		BloomEffectFinalPass m_passFinal{ BloomEffectFinalPass(this) };
+
+		float m_threshold{ 0.15f };
+		float m_adaptedLum{ 0.2f };
 	};
 }

@@ -66,7 +66,6 @@ namespace aten {
 				return m_prevPass;
 			}
 
-		private:
 			void prepareRender(
 				PostProc* prevPass,
 				const void* pixels,

@@ -37,6 +37,21 @@ namespace aten {
 		CALL_GL_API(glUniform2f(
 			getHandle("dstTexel"),
 			dstTexel[0], dstTexel[1]));
+
+		// TODO
+		{
+			auto hThreshold = getHandle("threshold");
+			if (hThreshold >= 0) {
+				auto threshold = m_body->m_threshold;
+				CALL_GL_API(glUniform1f(hThreshold, threshold));
+			}
+
+			auto hAdaptedLum = getHandle("adaptedLum");
+			if (hAdaptedLum >= 0) {
+				auto adaptedLum = m_body->m_adaptedLum;
+				CALL_GL_API(glUniform1f(hThreshold, adaptedLum));
+			}
+		}
 	}
 
 	void BloomEffect::BloomEffectFinalPass::prepareRender(
@@ -85,17 +100,11 @@ namespace aten {
 		CALL_GL_API(glUniform1i(getHandle("image"), 0));
 		CALL_GL_API(glUniform1i(getHandle("bloomtex"), 1));
 
-		float srcTexel[2] = { 1.0f / m_srcWidth, 1.0f / m_srcHeight };
-
-		float dstTexel[2] = { 1.0f / m_width, 1.0f / m_height };
+		float texel[2] = { 1.0f / m_width, 1.0f / m_height };
 
 		CALL_GL_API(glUniform2f(
-			getHandle("srcTexel"),
-			srcTexel[0], srcTexel[1]));
-
-		CALL_GL_API(glUniform2f(
-			getHandle("dstTexel"),
-			dstTexel[0], dstTexel[1]));
+			getHandle("texel"),
+			texel[0], texel[1]));
 	}
 
 	bool BloomEffect::init(
@@ -177,8 +186,6 @@ namespace aten {
 		addPass(&m_passVBlur);
 		addPass(&m_passHBlur);
 		addPass(&m_passFinal);
-
-		m_passFinal.m_body = this;
 
 		return true;
 	}

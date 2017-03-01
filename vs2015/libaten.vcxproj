@@ -258,6 +258,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\bilateral_fs.glsl" />
+    <None Include="..\src\shader\bloomeffect_fs_2x2.glsl" />
+    <None Include="..\src\shader\bloomeffect_fs_4x4.glsl" />
+    <None Include="..\src\shader\bloomeffect_fs_Final.glsl" />
+    <None Include="..\src\shader\bloomeffect_fs_Gauss.glsl" />
+    <None Include="..\src\shader\bloomeffect_fs_HBlur.glsl" />
+    <None Include="..\src\shader\bloomeffect_fs_VBlur.glsl" />
     <None Include="..\src\shader\fs.glsl" />
     <None Include="..\src\shader\nml_fs.glsl" />
     <None Include="..\src\shader\tonemap_fs.glsl" />

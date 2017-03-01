@@ -15,7 +15,7 @@ namespace aten
 		static void doTonemap(
 			int width, int height,
 			const vec3* src,
-			color* dst);
+			TColor<uint8_t>* dst);
 	};
 
 	class TonemapRender : public SimpleRender {

@@ -5,13 +5,6 @@
 
 namespace aten
 {
-	static const vec3 RGB2Y(0.29900, 0.58700, 0.11400);
-	static const vec3 RGB2Cb(-0.16874, -0.33126, 0.50000);
-	static const vec3 RGB2Cr(0.50000, -0.41869, -0.08131);
-	static const vec3 YCbCr2R(1.00000, 0.00000, 1.40200);
-	static const vec3 YCbCr2G(1.00000, -0.34414, -0.71414);
-	static const vec3 YCbCr2B(1.00000, 1.77200, 0.00000);
-
 	// NOTE
 	// Reinherd ‚Ì•½‹Ï‹P“xŒvŽZ.
 	// Lavg = exp(1/N * ƒ°log(ƒÂ + L(x, y)))
@@ -50,7 +43,7 @@ namespace aten
 						aten::sqrt(s.g),
 						aten::sqrt(s.b));
 
-					real lum = dot(RGB2Y, col);
+					real lum = color::RGBtoY(col);
 
 					if (lum > real(0)) {
 						sumY[idx] += aten::log(lum);
@@ -94,7 +87,7 @@ namespace aten
 	void Tonemap::doTonemap(
 		int width, int height,
 		const vec3* src,
-		color* dst)
+		TColor<uint8_t>* dst)
 	{
 		auto result = computeAvgAndMaxLum(
 			width, height,
@@ -116,29 +109,23 @@ namespace aten
 				int pos = h * width + w;
 
 				const vec3& s = src[pos];
-				color& d = dst[pos];
+				auto& d = dst[pos];
 
 				vec3 col(
 					aten::sqrt(s.r),
 					aten::sqrt(s.g),
 					aten::sqrt(s.b));
 
-				real y = dot(RGB2Y, col);
-				real cb = dot(RGB2Cb, col);
-				real cr = dot(RGB2Cr, col);
+				vec3 ycbcr = color::RGBtoYCbCr(col);
 
-				y = coeff * y;
-				y = y * (1.0f + y / (l_max * l_max)) / (1.0f + y);
+				ycbcr.y = coeff * ycbcr.y;
+				ycbcr.y = ycbcr.y * (1.0f + ycbcr.y / (l_max * l_max)) / (1.0f + ycbcr.y);
 
-				vec3 ycbcr(y, cb, cr);
+				vec3 rgb = color::YCbCrtoRGB(ycbcr);
 
-				real r = dot(YCbCr2R, ycbcr);
-				real g = dot(YCbCr2G, ycbcr);
-				real b = dot(YCbCr2B, ycbcr);
-
-				int ir = int(255.9f * r);
-				int ig = int(255.9f * g);
-				int ib = int(255.9f * b);
+				int ir = int(255.9f * rgb.r);
+				int ig = int(255.9f * rgb.g);
+				int ib = int(255.9f * rgb.b);
 
 				d.r = aten::clamp(ir, 0, 255);
 				d.g = aten::clamp(ig, 0, 255);

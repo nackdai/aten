@@ -1,19 +1,13 @@
 #pragma once
 
 #include "light/ibl.h"
+#include "misc/color.h"
 
 // NOTE
 // http://www.cs.virginia.edu/~gfx/courses/2007/ImageSynthesis/assignments/envsample.pdf
 // http://www.igorsklyar.com/system/documents/papers/4/fiscourse.comp.pdf
 
 namespace aten {
-	static real illuminance(const vec3& v)
-	{
-		static const vec3 illum(0.2126, 0.7152, 0.0722);
-		real ret = dot(illum, v);
-		return ret;
-	}
-
 	void ImageBasedLight::preCompute()
 	{
 		AT_ASSERT(m_envmap);
@@ -65,7 +59,7 @@ namespace aten {
 				real v = (real)(y + 0.5) / height;
 
 				auto clr = m_envmap->sample(u, v);
-				const auto illum = illuminance(clr);
+				const auto illum = color::illuminance(clr);
 
 				m_avgIllum += illum * scale;
 				totalWeight += scale;
@@ -128,7 +122,7 @@ namespace aten {
 	real ImageBasedLight::samplePdf(const ray& r) const
 	{
 		auto clr = m_envmap->sample(r);
-		auto illum = illuminance(clr);
+		auto illum = color::illuminance(clr);
 
 		auto pdf = illum / m_avgIllum;
 

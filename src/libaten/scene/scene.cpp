@@ -1,4 +1,5 @@
 #include "scene/scene.h"
+#include "misc/color.h"
 
 namespace aten {
 	bool scene::hitLight(
@@ -72,8 +73,6 @@ namespace aten {
 		// Resampled Importance Sampling.
 		// For reducing variance...maybe...
 
-		static const vec3 RGB2Y(0.29900, 0.58700, 0.11400);
-
 		std::vector<LightSampleResult> samples(m_lights.size());
 		std::vector<real> costs(m_lights.size());
 
@@ -95,14 +94,14 @@ namespace aten {
 			auto dist2 = lightsample.dir.squared_length();
 			auto dist = aten::sqrt(dist2);
 
-			auto y = dot(RGB2Y, lightsample.finalColor);
+			auto illum = color::illuminance(lightsample.finalColor);
 
 			if (cosShadow > 0) {
-				if (light->isSingular() || dist2 == 0) {
-					costs[i] = y * cosShadow / pdfLight;
+				if (light->isSingular() || light->isInifinite()) {
+					costs[i] = illum * cosShadow / pdfLight;
 				}
 				else {
-					costs[i] = y * cosShadow / dist2 / pdfLight;
+					costs[i] = illum * cosShadow / dist2 / pdfLight;
 				}
 				sumCost += costs[i];
 			}

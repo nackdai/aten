@@ -14,8 +14,8 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-static aten::AcceledScene<aten::LinearList> g_scene;
-//static aten::AcceledScene<aten::bvhnode> g_scene;
+//static aten::AcceledScene<aten::LinearList> g_scene;
+static aten::AcceledScene<aten::bvhnode> g_scene;
 
 //static aten::StaticColorBG g_bg(aten::vec3(0, 0, 0));
 static aten::envmap g_bg;
@@ -144,12 +144,6 @@ int main(int argc, char* argv[])
 		30,
 		WIDTH, HEIGHT);
 #endif
-
-	// TODO
-	aten::MaterialManager::addMaterial(
-		"m1",
-		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
-		//new aten::lambert(aten::vec3(0.7, 0.6, 0.5)));
 
 	Scene::makeScene(&g_scene);
 

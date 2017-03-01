@@ -171,8 +171,16 @@ void MtrlTestScene::getCameraPosAndAt(
 
 void ObjectScene::makeScene(aten::scene* scene)
 {
-	//auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
-	auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
+	aten::MaterialManager::addMaterial(
+		"m1",
+		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+
+	aten::MaterialManager::addMaterial(
+		"Material.001",
+		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+
+	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
 	auto instance = new aten::objinstance(obj);
 
@@ -183,8 +191,8 @@ void ObjectScene::getCameraPosAndAt(
 	aten::vec3& pos,
 	aten::vec3& at)
 {
-	//pos = aten::vec3(0.0, 0.0, 10.0);
-	pos = aten::vec3(0.0, 0.0, 60.0);
+	pos = aten::vec3(0.0, 0.0, 10.0);
+	//pos = aten::vec3(0.0, 0.0, 60.0);
 	at = aten::vec3(0.0, 0.0, 0.0);
 }
 

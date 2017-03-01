@@ -137,6 +137,11 @@ namespace aten
 
 							if (light->isSingular() || light->isInifinite()) {
 								if (pdfLight > real(0)) {
+									// TODO
+									// ジオメトリタームの扱いについて.
+									// singular light の場合は、finalColor に距離の除算が含まれている.
+									// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+									// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 									auto misW = pdfLight / (pdfb + pdfLight);
 									contribution += misW * bsdf * emit * cosShadow / pdfLight;
 									contribution /= lightSelectPdf;

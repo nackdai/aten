@@ -2,10 +2,8 @@
 #include "visualizer.h"
 #include "math/vec3.h"
 #include "misc/color.h"
-#include "visualizer/fbo.h"
 
 namespace aten {
-	static shader* g_shader{ nullptr };
 	static GLuint g_tex{ 0 };
 
 	static int g_width{ 0 };
@@ -13,13 +11,12 @@ namespace aten {
 
 	static std::vector<TColor<float>> g_tmp;
 
-	static PixelFormat g_fmt{ PixelFormat::rgba8 };
+	static const PixelFormat g_fmt{ PixelFormat::rgba32f };
 
 	static std::vector<visualizer::PreProc*> g_preprocs;
 	static std::vector<vec3> g_preprocBuffer[2];
 
 	static std::vector<visualizer::PostProc*> g_postprocs;
-	static std::vector<fbo> g_fbos;
 
 	GLuint createTexture(int width, int height, PixelFormat fmt)
 	{
@@ -59,7 +56,7 @@ namespace aten {
 		return tex;
 	}
 
-	bool visualizer::init(int width, int height, PixelFormat fmt)
+	bool visualizer::init(int width, int height)
 	{
 		GLenum result = glewInit();
 		AT_ASSERT(result == GLEW_OK);
@@ -76,13 +73,11 @@ namespace aten {
 		CALL_GL_API(::glViewport(0, 0, width, height));
 		CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
 
-		g_tex = createTexture(width, height, fmt);
+		g_tex = createTexture(width, height, g_fmt);
 		AT_VRETURN(g_tex != 0, false);
 
 		g_width = width;
 		g_height = height;
-
-		g_fmt = fmt;
 
 		return true;
 	}
@@ -92,26 +87,25 @@ namespace aten {
 		g_preprocs.push_back(preproc);
 	}
 
-	void visualizer::addPostProc(PostProc* postproc)
+	bool visualizer::addPostProc(PostProc* postproc)
 	{
 		if (g_postprocs.size() > 0) {
 			// Create fbo to connect between post-processes.
 			auto idx = g_postprocs.size() - 1;
-			const auto* postproc = g_postprocs[idx];
-			auto fmt = postproc->outFormat();
+			auto* prevPostproc = g_postprocs[idx];
+			auto outFmt = prevPostproc->outFormat();
 
-			fbo fbo;
-			fbo.init(g_width, g_height, fmt);
+			// Check in-out format.
+			auto inFmt = postproc->inFormat();
+			AT_VRETURN(inFmt == outFmt, false);
 
-			g_fbos.push_back(fbo);
+			// Create FBO.
+			AT_VRETURN(prevPostproc->m_fbo.init(g_width, g_height, outFmt), false);
 		}
 
 		g_postprocs.push_back(postproc);
-	}
 
-	void visualizer::setShader(shader* shader)
-	{
-		g_shader = shader;
+		return true;
 	}
 
 	static inline GLint getHandle(GLuint program, const char* name)
@@ -120,9 +114,7 @@ namespace aten {
 		return handle;
 	}
 
-	void visualizer::render(
-		const vec3* pixels,
-		bool revert)
+	static const void* doPreProcs(const vec3* pixels)
 	{
 		const void* textureimage = pixels;
 
@@ -147,6 +139,47 @@ namespace aten {
 			textureimage = src;
 		}
 
+		return textureimage;
+	}
+
+	static const void* convertTextureData(const void* textureimage)
+	{
+		// If type is double, convert double/rgb to float/rgba.
+		// If type is float, convert rgb to rgba.
+		if (g_tmp.empty()) {
+			g_tmp.resize(g_width * g_height);
+		}
+
+		const vec3* src = (const vec3*)textureimage;
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < g_height; y++) {
+			for (int x = 0; x < g_width; x++) {
+				int pos = y * g_width + x;
+
+				auto& s = src[pos];
+				auto& d = g_tmp[pos];
+
+				d.r = (float)s.x;
+				d.g = (float)s.y;
+				d.b = (float)s.z;
+			}
+		}
+
+		textureimage = &g_tmp[0];
+
+		return textureimage;
+	}
+
+	void visualizer::render(
+		const vec3* pixels,
+		bool revert)
+	{
+		// Do pre processes.
+		const void* textureimage = doPreProcs(pixels);
+
 		CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
@@ -156,33 +189,8 @@ namespace aten {
 
 		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
 
-		if (g_fmt == PixelFormat::rgba32f) {
-			// If type is double, convert double/rgb to float/rgba.
-			// If type is float, convert rgb to rgba.
-			if (g_tmp.empty()) {
-				g_tmp.resize(g_width * g_height);
-			}
-
-			const vec3* src = (const vec3*)textureimage;
-
-#ifdef ENABLE_OMP
-#pragma omp parallel for
-#endif
-			for (int y = 0; y < g_height; y++) {
-				for (int x = 0; x < g_width; x++) {
-					int pos = y * g_width + x;
-
-					auto& s = src[pos];
-					auto& d = g_tmp[pos];
-
-					d.r = (float)s.x;
-					d.g = (float)s.y;
-					d.b = (float)s.z;
-				}
-			}
-
-			textureimage = &g_tmp[0];
-		}
+		// Converte texture data double->float, rgb->rgba.
+		textureimage = convertTextureData(textureimage);
 
 		GLenum pixelfmt = 0;
 		GLenum pixeltype = 0;
@@ -201,18 +209,28 @@ namespace aten {
 			pixeltype,
 			textureimage));
 
-#if 1
-		g_shader->prepareRender(pixels, revert);
-
-		CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-#else
 		for (int i = 0; i < g_postprocs.size(); i++) {
 			auto* postproc = g_postprocs[i];
 
+			if (i > 0) {
+				auto* prevPostproc = g_postprocs[i - 1];
+
+				// Set FBO as source texture.
+				prevPostproc->m_fbo.setAsTexture();
+			}
+
 			postproc->prepareRender(pixels, revert);
+
+			if (postproc->m_fbo.isValid()) {
+				// Set FBO.
+				postproc->m_fbo.setFBO();
+			}
+			else {
+				// Set default frame buffer.
+				CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+			}
 
 			CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 		}
-#endif
 	}
 }

@@ -139,7 +139,7 @@ namespace aten
 		const void* pixels,
 		bool revert)
 	{
-		SimpleRender::prepareRender(pixels, revert);
+		Blitter::prepareRender(pixels, revert);
 
 		auto result = Tonemap::computeAvgAndMaxLum(m_width, m_height, (const vec3*)pixels);
 

@@ -2,7 +2,7 @@
 
 #include "math/vec3.h"
 #include "misc/color.h"
-#include "visualizer/shader.h"
+#include "visualizer/blitter.h"
 
 namespace aten
 {
@@ -18,7 +18,7 @@ namespace aten
 			TColor<uint8_t>* dst);
 	};
 
-	class TonemapRender : public SimpleRender {
+	class TonemapRender : public Blitter {
 	public:
 		TonemapRender() {}
 		virtual ~TonemapRender() {}

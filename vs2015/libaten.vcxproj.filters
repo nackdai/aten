@@ -225,6 +225,9 @@
     <ClInclude Include="..\src\libaten\visualizer\fbo.h">
       <Filter>visualizer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\visualizer\blitter.h">
+      <Filter>visualizer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -334,6 +337,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\misc\color.cpp">
       <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\visualizer\blitter.cpp">
+      <Filter>visualizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

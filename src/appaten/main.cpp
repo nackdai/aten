@@ -44,7 +44,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 100;
+		dst.sample = 1;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -108,11 +108,10 @@ int main(int argc, char* argv[])
 
 	aten::window::init(WIDTH, HEIGHT, TITLE);
 
-	aten::visualizer::init(WIDTH, HEIGHT, aten::PixelFormat::rgba32f);
-	//aten::visualizer::init(WIDTH, HEIGHT, aten::PixelFormat::rgba8);
+	aten::visualizer::init(WIDTH, HEIGHT);
 
-	aten::SimpleRender shader;
-	shader.init(
+	aten::Blitter blitter;
+	blitter.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
 		"../shader/fs.glsl");
@@ -123,7 +122,7 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/tonemapfs.glsl");
 
-	aten::visualizer::setShader(&tonemap);
+	aten::visualizer::addPostProc(&tonemap);
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;

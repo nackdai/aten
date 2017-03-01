@@ -3,6 +3,7 @@
 #include "defs.h"
 #include "math/vec3.h"
 #include "visualizer/shader.h"
+#include "visualizer/fbo.h"
 
 namespace aten {
 	class visualizer {
@@ -24,6 +25,8 @@ namespace aten {
 		};
 
 		class PostProc : public shader {
+			friend class visualizer;
+
 		protected:
 			PostProc() {}
 			virtual ~PostProc() {}
@@ -38,16 +41,17 @@ namespace aten {
 
 			virtual PixelFormat inFormat() const = 0;
 			virtual PixelFormat outFormat() const = 0;
+
+		private:
+			FBO m_fbo;
 		};
 
 	public:
-		static bool init(int width, int height, PixelFormat fmt);
+		static bool init(int width, int height);
 
 		static void addPreProc(PreProc* preproc);
 
-		static void addPostProc(PostProc* postproc);
-
-		static void setShader(shader* shader);
+		static bool addPostProc(PostProc* postproc);
 
 		static void render(
 			const vec3* pixels,

@@ -4,13 +4,22 @@
 #include "visualizer/atengl.h"
 
 namespace aten {
-	class fbo {
+	class FBO {
 	public:
-		fbo() {}
-		virtual ~fbo() {}
+		FBO() {}
+		virtual ~FBO() {}
 
 	public:
 		bool init(int width, int height, PixelFormat fmt);
+
+		bool isValid() const
+		{
+			return (m_fbo > 0 && m_tex > 0);
+		}
+
+		void setAsTexture();
+
+		void setFBO();
 
 	protected:
 		GLuint m_fbo{ 0 };

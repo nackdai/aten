@@ -44,6 +44,7 @@
 #include "visualizer/visualizer.h"
 #include "visualizer/window.h"
 #include "visualizer/shader.h"
+#include "visualizer/blitter.h"
 
 #include "scene/scene.h"
 #include "scene/bvh.h"

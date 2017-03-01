@@ -25,15 +25,4 @@ namespace aten {
 		uint32_t m_width{ 0 };
 		uint32_t m_height{ 0 };
 	};
-
-	class SimpleRender : public shader {
-	public:
-		SimpleRender() {}
-		virtual ~SimpleRender() {}
-
-	public:
-		virtual void prepareRender(
-			const void* pixels,
-			bool revert) override;
-	};
 }

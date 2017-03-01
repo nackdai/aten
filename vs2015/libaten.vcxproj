@@ -253,6 +253,7 @@
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\src\shader\bilateral_fs.glsl" />
     <None Include="..\src\shader\fs.glsl" />
     <None Include="..\src\shader\nml_fs.glsl" />
     <None Include="..\src\shader\tonemap_fs.glsl" />

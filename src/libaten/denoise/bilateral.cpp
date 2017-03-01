@@ -174,4 +174,54 @@ namespace aten {
 		auto elapsed = timer.end();
 		AT_PRINTF("Bilateral %f[ms]\n", elapsed);
 	}
+
+	/////////////////////////////////////////////////////////
+
+	void BilateralFilterShader::prepareRender(
+		const void* pixels,
+		bool revert)
+	{
+		Blitter::prepareRender(pixels, revert);
+
+		auto hSigmaS = getHandle("sigmaS");
+		if (hSigmaS >= 0) {
+			CALL_GL_API(glUniform1f(hSigmaS, m_sigmaS));
+		}
+
+		auto hSigmaR = getHandle("sigmaR");
+		if (hSigmaR >= 0) {
+			CALL_GL_API(glUniform1f(hSigmaR, m_sigmaR));
+		}
+
+		int radius = (int)::ceilf(4.0 * m_sigmaS);
+
+		auto hRadius = getHandle("radius");
+		if (hRadius >= 0) {
+			CALL_GL_API(glUniform1i(hRadius, radius));
+		}
+
+		if (m_radius != radius) {
+			auto _sigmaS = m_sigmaS * 256;
+
+			for (int v = 0; v <= radius; v++) {
+				for (int u = 0; u <= radius; u++) {
+					distW[v][u] = 1.0f / sqrtf(2.0f * AT_MATH_PI * m_sigmaS) * expf(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
+				}
+			}
+
+			m_radius = radius;
+		}
+
+		auto hDistW = getHandle("distW");
+		if (hDistW >= 0) {
+			CALL_GL_API(glUniform1fv(hDistW, (buffersize + 1) * (buffersize + 1), distW[0]));
+		}
+
+		// TODO
+		// 入力テクスチャのサイズはスクリーンと同じ...
+		auto hTexel = getHandle("texel");
+		if (hTexel >= 0) {
+			CALL_GL_API(glUniform2f(hTexel, 1.0f / m_width, 1.0f / m_height));
+		}
+	}
 }

@@ -2,7 +2,7 @@
 precision highp float;
 precision highp int;
 
-uniform sampler2D s0;
+uniform sampler2D image;
 
 uniform vec4 invScreen;
 
@@ -42,7 +42,7 @@ void sampleArea(
         for (int sy = -kHalfKernel; sy <= kHalfKernel; sy++) {
             vec2 smpluv = computeUV(uv, sx, sy);
 
-            tmpl.a[count++] = texture2D(s0, smpluv);
+            tmpl.a[count++] = texture2D(image, smpluv);
         }
     }
 }
@@ -95,7 +95,7 @@ void main()
 
             float weight = exp(arg);
 
-            vec4 pixel = texture2D(s0, tmpuv);
+            vec4 pixel = texture2D(image, tmpuv);
 
             sum += weight * pixel;
             sum_weight += weight;

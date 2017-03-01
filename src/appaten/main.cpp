@@ -44,7 +44,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 100;
+		dst.sample = 10;
 		dst.buffer = &g_buffer[0];
 	}
 
@@ -117,6 +117,12 @@ int main(int argc, char* argv[])
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
 		"../shader/nml_fs.glsl");
+
+	aten::BilateralFilterShader bishd;
+	bishd.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/bilateral_fs.glsl");
 
 	aten::visualizer::addPostProc(&nmlshd);
 	aten::visualizer::addPostProc(&tonemap);

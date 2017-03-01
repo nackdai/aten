@@ -355,5 +355,8 @@
     <None Include="..\src\shader\tonemap_fs.glsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="..\src\shader\bilateral_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

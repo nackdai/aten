@@ -17,7 +17,12 @@ namespace aten
 			camera* camera) override final;
 
 	private:
-		vec3 radiance(
+		struct Path {
+			vec3 contrib;
+			bool isTerminate{ false };
+		};
+
+		Path radiance(
 			sampler* sampler,
 			const ray& inRay,
 			camera* cam,

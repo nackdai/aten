@@ -24,7 +24,7 @@ namespace aten
 		return b;
 	}
 
-	vec3 PathTracing::radiance(
+	PathTracing::Path PathTracing::radiance(
 		sampler* sampler,
 		const ray& inRay,
 		camera* cam,
@@ -37,7 +37,6 @@ namespace aten
 
 		aten::ray ray = inRay;
 
-		vec3 contribution(0, 0, 0);
 		vec3 throughput(1, 1, 1);
 
 		auto Wdash = cam->getWdash(
@@ -45,8 +44,10 @@ namespace aten
 			camsample.posOnLens,
 			camsample.posOnObjectplane);
 
-		real pdfb;
+		real pdfb = 0;
 		material* prevMtrl = nullptr;
+
+		Path path;
 
 		while (depth < maxDepth) {
 			hitrecord rec;
@@ -60,12 +61,13 @@ namespace aten
 				if (rec.mtrl->isEmissive()) {
 					if (depth == 0) {
 						// Ray hits the light directly.
-						auto emit = rec.mtrl->color();
-						return std::move(emit);
+						path.contrib = rec.mtrl->color();
+						path.isTerminate = true;
+						break;
 					}
 					else if (prevMtrl->isSingular()) {
 						auto emit = rec.mtrl->color();
-						contribution += throughput * emit;
+						path.contrib += throughput * emit;
 						break;
 					}
 					else {
@@ -84,7 +86,7 @@ namespace aten
 
 							auto emit = rec.mtrl->color();
 
-							contribution += throughput * misW * emit;
+							path.contrib += throughput * misW * emit;
 
 							// When ray hit the light, tracing will finish.
 							break;
@@ -143,8 +145,8 @@ namespace aten
 									// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
 									// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 									auto misW = pdfLight / (pdfb + pdfLight);
-									contribution += misW * bsdf * emit * cosShadow / pdfLight;
-									contribution /= lightSelectPdf;
+									path.contrib += misW * bsdf * emit * cosShadow / pdfLight;
+									path.contrib /= lightSelectPdf;
 								}
 							}
 							else {
@@ -161,8 +163,8 @@ namespace aten
 
 										auto misW = pdfLight / (pdfb + pdfLight);
 
-										contribution += misW * (bsdf * emit * G) / pdfLight;
-										contribution /= lightSelectPdf;
+										path.contrib += misW * (bsdf * emit * G) / pdfLight;
+										path.contrib /= lightSelectPdf;
 									}
 								}
 							}
@@ -223,27 +225,28 @@ namespace aten
 				if (ibl) {
 					if (depth == 0) {
 						auto bg = ibl->getEnvMap()->sample(ray);
-						contribution += throughput * bg;
+						path.contrib += throughput * bg;
+						path.isTerminate = true;
 					}
 					else {
 						auto pdfLight = ibl->samplePdf(ray);
 						auto misW = pdfb / (pdfLight + pdfb);
 						auto emit = ibl->getEnvMap()->sample(ray);
-						contribution += throughput * misW * emit;
+						path.contrib += throughput * misW * emit;
 					}
 				}
 				else {
 					auto bg = sampleBG(ray);
-					contribution += throughput * bg;
+					path.contrib += throughput * bg;
 				}
 
-				return contribution;
+				break;
 			}
 
 			depth++;
 		}
 
-		return contribution;
+		return std::move(path);
 	}
 
 	void PathTracing::render(
@@ -280,6 +283,7 @@ namespace aten
 					int pos = y * width + x;
 
 					vec3 col;
+					uint32_t cnt = 0;
 
 					for (uint32_t i = 0; i < sample; i++) {
 						//XorShift rnd((y * height * 4 + x * 4) * sample + i + 1);
@@ -294,14 +298,14 @@ namespace aten
 
 						auto ray = camsample.r;
 
-						auto L = radiance(
+						auto path = radiance(
 							&sampler, 
 							ray, 
 							camera,
 							camsample,
 							scene);
 
-						if (isInvalidColor(L)) {
+						if (isInvalidColor(path.contrib)) {
 							AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
 							continue;
 						}
@@ -313,10 +317,15 @@ namespace aten
 							camsample.posOnImageSensor,
 							camsample.posOnLens);
 
-						col += L * s / (pdfOnImageSensor * pdfOnLens);
+						col += path.contrib * s / (pdfOnImageSensor * pdfOnLens);
+						cnt++;
+
+						if (path.isTerminate) {
+							break;
+						}
 					}
 
-					col /= (real)sample;
+					col /= (real)cnt;
 
 					color[pos] = col;
 				}

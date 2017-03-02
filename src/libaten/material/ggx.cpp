@@ -2,6 +2,36 @@
 
 namespace aten
 {
+	real MicrofacetGGX::pdf(
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		auto ret = pdf(m_roughness, normal, wi, wo, u, v);
+		return ret;
+	}
+
+	vec3 MicrofacetGGX::sampleDirection(
+		const vec3& in,
+		const vec3& normal,
+		real u, real v,
+		sampler* sampler) const
+	{
+		vec3 dir = sampleDirection(m_roughness, in, normal, u, v, sampler);
+		return std::move(dir);
+	}
+
+	vec3 MicrofacetGGX::bsdf(
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		vec3 ret = bsdf(m_roughness, normal, wi, wo, u, v);
+		return std::move(ret);
+	}
+
 	// NOTE
 	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
@@ -58,6 +88,7 @@ namespace aten
 	}
 
 	real MicrofacetGGX::pdf(
+		real roughness,
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
@@ -70,7 +101,7 @@ namespace aten
 
 		auto costheta = aten::abs(dot(wh, normal));
 
-		auto D = sampleGGX_D(wh, normal, m_roughness);
+		auto D = sampleGGX_D(wh, normal, roughness);
 
 		auto denom = 4 * aten::abs(dot(wo, wh));
 
@@ -80,6 +111,7 @@ namespace aten
 	}
 
 	vec3 MicrofacetGGX::sampleDirection(
+		real roughness,
 		const vec3& in,
 		const vec3& normal,
 		real u, real v,
@@ -88,7 +120,7 @@ namespace aten
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
-		auto a = m_roughness;
+		auto a = roughness;
 
 		auto theta = aten::atan(a * aten::sqrt(r1 / (1 - r1)));
 		theta = ((theta >= 0) ? theta : (theta + 2 * AT_MATH_PI));
@@ -115,6 +147,7 @@ namespace aten
 	}
 
 	vec3 MicrofacetGGX::bsdf(
+		real roughness,
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -138,13 +171,13 @@ namespace aten
 		auto NdotV = aten::abs(dot(N, V));
 
 		// Compute D.
-		real D = sampleGGX_D(H, N, m_roughness);
+		real D = sampleGGX_D(H, N, roughness);
 
 		// Compute G.
 		real G(1);
 		{
-			auto G1_lh = computeGGXSmithG1(m_roughness, L, N);
-			auto G1_vh = computeGGXSmithG1(m_roughness, V, N);
+			auto G1_lh = computeGGXSmithG1(roughness, L, N);
+			auto G1_vh = computeGGXSmithG1(roughness, V, N);
 
 			G = G1_lh * G1_vh;
 		}

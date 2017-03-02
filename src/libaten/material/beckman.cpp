@@ -2,6 +2,36 @@
 
 namespace aten
 {
+	real MicrofacetBeckman::pdf(
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		auto ret = pdf(m_roughness, normal, wi, wo, u, v);
+		return ret;
+	}
+
+	vec3 MicrofacetBeckman::sampleDirection(
+		const vec3& in,
+		const vec3& normal,
+		real u, real v,
+		sampler* sampler) const
+	{
+		vec3 dir = sampleDirection(m_roughness, in, normal, u, v, sampler);
+		return std::move(dir);
+	}
+
+	vec3 MicrofacetBeckman::bsdf(
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		vec3 ret = bsdf(m_roughness, normal, wi, wo, u, v);
+		return std::move(ret);
+	}
+
 	real sampleBeckman_D(
 		const vec3& wh,	// half
 		const vec3& n,	// normal
@@ -32,6 +62,7 @@ namespace aten
 	}
 
 	real MicrofacetBeckman::pdf(
+		real roughness,
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
@@ -44,7 +75,7 @@ namespace aten
 
 		auto costheta = aten::abs(dot(wh, normal));
 
-		auto D = sampleBeckman_D(wh, normal, m_roughness);
+		auto D = sampleBeckman_D(wh, normal, roughness);
 
 		auto denom = 4 * aten::abs(dot(wo, wh));
 
@@ -54,6 +85,7 @@ namespace aten
 	}
 
 	vec3 MicrofacetBeckman::sampleDirection(
+		real roughness,
 		const vec3& in,
 		const vec3& normal,
 		real u, real v,
@@ -65,7 +97,7 @@ namespace aten
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
-		auto a = m_roughness;
+		auto a = roughness;
 		auto a2 = a * a;
 
 		auto theta = aten::sqrt(-a2 * aten::log(1 - r1 * 0.99));
@@ -94,6 +126,7 @@ namespace aten
 	}
 
 	vec3 MicrofacetBeckman::bsdf(
+		real roughness,
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -116,7 +149,7 @@ namespace aten
 		auto NdotL = aten::abs(dot(N, L));
 		auto NdotV = aten::abs(dot(N, V));
 
-		auto a = m_roughness;
+		auto a = roughness;
 
 		// Compute D.
 		real D = sampleBeckman_D(H, N, a);

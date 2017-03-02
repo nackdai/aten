@@ -46,6 +46,28 @@ namespace aten
 			real u, real v) const override final;
 
 	private:
+		real pdf(
+			real roughness,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v) const;
+
+		vec3 sampleDirection(
+			real roughness,
+			const vec3& in,
+			const vec3& normal,
+			real u, real v,
+			sampler* sampler) const;
+
+		vec3 bsdf(
+			real roughness,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v) const;
+
+	private:
 		real m_roughness{ real(0) };
 
 		// ï®ëÃÇÃã¸ê‹ó¶.

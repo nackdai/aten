@@ -11,6 +11,9 @@ uniform float l_max;
 
 uniform bool revert;
 
+// output colour for the fragment
+layout(location = 0) out highp vec4 oColour;
+
 vec3 RGB2Y   = vec3(+0.29900, +0.58700, +0.11400);
 vec3 RGB2Cb  = vec3(-0.16874, -0.33126, +0.50000);
 vec3 RGB2Cr  = vec3(+0.50000, -0.41869, -0.08131);
@@ -41,6 +44,6 @@ void main()
 	float g = dot(YCbCr2G, ycbcr);
 	float b = dot(YCbCr2B, ycbcr);
 
-	gl_FragColor.rgb = clamp(vec3(r, g, b), 0, 1);
-	gl_FragColor.a = 1;
+	oColour.rgb = clamp(vec3(r, g, b), 0, 1);
+	oColour.a = 1;
 }

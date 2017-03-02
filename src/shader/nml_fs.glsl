@@ -13,6 +13,9 @@ uniform float sigma;
 
 uniform bool revert;
 
+// output colour for the fragment
+layout(location = 0) out highp vec4 oColour;
+
 #define kKernel 5
 #define kSupport 13
 #define kHalfKernel (kKernel / 2)
@@ -104,6 +107,6 @@ void main()
 
     vec4 color = sum / sum_weight;
 
-    gl_FragColor = color;
-    gl_FragColor.a = 1.0;
+	oColour = color;
+	oColour.a = 1.0;
 }

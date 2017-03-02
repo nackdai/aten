@@ -7,6 +7,9 @@ uniform sampler2D image;
 uniform vec4 invScreen;
 uniform bool revert;
 
+// output colour for the fragment
+layout(location = 0) out highp vec4 oColour;
+
 void main()
 {
     vec2 uv = gl_FragCoord.xy * invScreen.xy;
@@ -17,5 +20,5 @@ void main()
 
     vec4 color = texture2D(image, uv);
 
-    gl_FragColor = color;
+	oColour = color;
 }

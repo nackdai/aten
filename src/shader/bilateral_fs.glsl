@@ -13,6 +13,7 @@ uniform float sigmaR;
 
 uniform bool revert;
 
+// For performace, I should use defined value.
 uniform int radius;
 //#define radius  (1)
 
@@ -20,6 +21,9 @@ uniform int radius;
 uniform float distW[(buffersize + 1) * (buffersize + 1)];
 
 #define PI  3.14159265358979323846
+
+// output colour for the fragment
+layout(location = 0) out highp vec4 oColour;
 
 vec2 computeUV(in vec2 uv, int sx, int sy)
 {
@@ -127,6 +131,6 @@ void main()
 
 	vec3 color = denom / numer;
 
-	gl_FragColor.rgb = color;
-	gl_FragColor.a = 1.0;
+	oColour.rgb = color;
+	oColour.a = 1.0;
 }

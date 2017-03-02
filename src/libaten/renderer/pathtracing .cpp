@@ -135,7 +135,7 @@ namespace aten
 							auto dist = aten::sqrt(dist2);
 
 							auto bsdf = rec.mtrl->bsdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight);
+							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
 							// Get light color.
 							auto emit = sampleres.finalColor;

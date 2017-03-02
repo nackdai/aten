@@ -4,7 +4,8 @@ namespace aten {
 	real lambert::pdf(
 		const vec3& normal, 
 		const vec3& wi,
-		const vec3& wo) const
+		const vec3& wo,
+		real u, real v) const
 	{
 		auto c = dot(normal, wo);
 		AT_ASSERT(c >= 0);
@@ -18,22 +19,23 @@ namespace aten {
 	vec3 lambert::sampleDirection(
 		const vec3& in,
 		const vec3& normal, 
+		real u, real v,
 		sampler* sampler) const
 	{
 		// normalの方向を基準とした正規直交基底(w, u, v)を作る.
 		// この基底に対する半球内で次のレイを飛ばす.
-		vec3 w, u, v;
+		vec3 n, t, b;
 
-		w = normal;
+		n = normal;
 
-		// wと平行にならないようにする.
-		if (fabs(w.x) > 0.1) {
-			u = normalize(cross(vec3(0.0, 1.0, 0.0), w));
+		// nと平行にならないようにする.
+		if (fabs(n.x) > 0.1) {
+			t = normalize(cross(vec3(0.0, 1.0, 0.0), n));
 		}
 		else {
-			u = normalize(cross(vec3(1.0, 0.0, 0.0), w));
+			t = normalize(cross(vec3(1.0, 0.0, 0.0), n));
 		}
-		v = cross(w, u);
+		b = cross(n, t);
 
 		// コサイン項を使った重点的サンプリング.
 		const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
@@ -44,7 +46,7 @@ namespace aten {
 		const real y = aten::sin(r1) * r2s;
 		const real z = aten::sqrt(real(1) - r2);
 
-		vec3 dir = normalize((u * x + v * y + w * z));
+		vec3 dir = normalize((t * x + b * y + n * z));
 		AT_ASSERT(dot(normal, dir) >= 0);
 
 		return std::move(dir);
@@ -73,8 +75,8 @@ namespace aten {
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, sampler);
-		ret.pdf = pdf(normal, in, ret.dir);
+		ret.dir = sampleDirection(in, normal, u, v, sampler);
+		ret.pdf = pdf(normal, in, ret.dir, u, v);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);

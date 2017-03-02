@@ -6,7 +6,8 @@ namespace aten
 	real refraction::pdf(
 		const vec3& normal, 
 		const vec3& wi,
-		const vec3& wo) const
+		const vec3& wo,
+		real u, real v) const
 	{
 		AT_ASSERT(false);
 
@@ -17,6 +18,7 @@ namespace aten
 	vec3 refraction::sampleDirection(
 		const vec3& in,
 		const vec3& normal,
+		real u, real v,
 		sampler* sampler) const
 	{
 		AT_ASSERT(false);

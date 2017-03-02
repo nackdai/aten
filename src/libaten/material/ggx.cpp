@@ -60,7 +60,8 @@ namespace aten
 	real MicrofacetGGX::pdf(
 		const vec3& normal, 
 		const vec3& wi,
-		const vec3& wo) const
+		const vec3& wo,
+		real u, real v) const
 	{
 		// NOTE
 		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
@@ -81,6 +82,7 @@ namespace aten
 	vec3 MicrofacetGGX::sampleDirection(
 		const vec3& in,
 		const vec3& normal,
+		real u, real v,
 		sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();
@@ -182,8 +184,8 @@ namespace aten
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, sampler);
-		ret.pdf = pdf(normal, in, ret.dir);
+		ret.dir = sampleDirection(in, normal, u, v, sampler);
+		ret.pdf = pdf(normal, in, ret.dir, u, v);
 
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 

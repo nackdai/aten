@@ -59,11 +59,13 @@ namespace aten
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,
-			const vec3& wo) const = 0;
+			const vec3& wo,
+			real u, real v) const = 0;
 
 		virtual vec3 sampleDirection(
 			const vec3& in,
 			const vec3& normal, 
+			real u, real v,
 			sampler* sampler) const = 0;
 
 		virtual vec3 bsdf(

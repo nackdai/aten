@@ -9,7 +9,8 @@ namespace aten
 	real MicrofacetBlinn::pdf(
 		const vec3& normal, 
 		const vec3& wi,	/* in */
-		const vec3& wo	/* out */ ) const
+		const vec3& wo,	/* out */
+		real u, real v) const
 	{
 		// NOTE
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
@@ -37,6 +38,7 @@ namespace aten
 	vec3 MicrofacetBlinn::sampleDirection(
 		const vec3& in,
 		const vec3& normal,
+		real u, real v,
 		sampler* sampler) const
 	{
 		// NOTE
@@ -166,10 +168,10 @@ namespace aten
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, sampler);
+		ret.dir = sampleDirection(in, normal, u, v, sampler);
 
 #if 1
-		ret.pdf = pdf(normal, in, ret.dir);
+		ret.pdf = pdf(normal, in, ret.dir, u, v);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 #else
 		vec3 V = -in;
@@ -181,7 +183,7 @@ namespace aten
 		auto NdotH = aten::abs(dot(N, H));
 
 		if (NdotL > 0 && NdotH > 0) {
-			ret.pdf = pdf(normal, in, ret.dir);
+			ret.pdf = pdf(normal, in, ret.dir, u, v);
 
 			ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 		}

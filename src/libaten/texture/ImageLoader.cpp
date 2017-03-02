@@ -3,6 +3,54 @@
 #include "texture/texture.h"
 
 namespace aten {
+	template <typename TYPE>
+	void read(
+		OIIO::ImageInput* input,
+		texture* tex, 
+		OIIO::TypeDesc oioType,
+		uint32_t srcChannels,
+		real normalize)
+	{
+		const auto chn = tex->channels();
+
+		auto width = tex->width();
+		auto height = tex->height();
+
+		auto size = width * height * srcChannels;
+
+		// Resize storage
+		std::vector<TYPE> texturedata(size);
+
+		// Read data to storage
+		input->read_image(oioType, &texturedata[0], sizeof(TYPE) * srcChannels);
+
+		static const real div = real(1) / real(255.0);
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = height - 1; y >= 0; y--) {
+			for (int x = 0; x < width; x++) {
+				// TODO
+				// Invert y coordinate. Why?
+				auto src_i = y * width + x;
+				auto dst_i = ((height - 1) - y) * width + x;
+
+				TYPE* s = &texturedata[src_i * srcChannels];
+
+				switch (chn) {
+				case 3:
+					(*tex)[dst_i * chn + 2] = s[2] * normalize;
+				case 2:
+					(*tex)[dst_i * chn + 1] = s[1] * normalize;
+				case 1:
+					(*tex)[dst_i * chn + 0] = s[0] * normalize;
+					break;
+				}
+			}
+		}
+	}
+
 	texture* ImageLoader::load(const std::string& path)
 	{
 		OIIO_NAMESPACE_USING
@@ -21,59 +69,21 @@ namespace aten {
 
 		AT_ASSERT(spec.depth == 1);
 
-		texture* tex = new texture(width, height);
-		auto dst = tex->colors();
+		// ３チャンネル（RGB）まで.
+		texture* tex = new texture(width, height, std::min(spec.nchannels, 3));
+		const auto chn = tex->channels();
 
 		if (spec.format == TypeDesc::UINT8) {
-			auto size = width * height * 4;
+			static const real div = real(1) / real(255.0);
 
-			// Resize storage
-			std::vector<uint8_t> texturedata(size);
-
-			// Read data to storage
-			input->read_image(TypeDesc::UINT8, &texturedata[0], sizeof(uint8_t) * 4);
-
-			static const real div = real(255.0);
-
-			// Convert to vec3 and normalize.
-			for (uint32_t i = 0; i < width * height; i++) {
-				uint8_t* s = &texturedata[i * 4];
-				vec3& d = dst[i];
-
-				d.r = s[0] / div;
-				d.g = s[1] / div;
-				d.b = s[2] / div;
-			}
+			read<uint8_t>(input, tex, spec.format, spec.nchannels, div);
 		}
 		else if (spec.format == TypeDesc::HALF) {
 			// TODO
 			AT_ASSERT(false);
 		}
 		else {
-			auto size = width * height * 3;
-
-			// Resize storage
-			std::vector<float> texturedata(size);
-
-			// Read data to storage
-			input->read_image(TypeDesc::FLOAT, &texturedata[0], sizeof(float) * 3);
-
-			// Convert to vec3.
-			for (int y = height - 1; y >= 0; y--) {
-				for (int x = 0; x < width; x++) {
-					// TODO
-					// Invert y coordinate. Why?
-					auto src_i = y * width + x;
-					auto dst_i = ((height - 1) - y) * width + x;
-
-					float* s = &texturedata[src_i * 3];
-					vec3& d = dst[dst_i];
-
-					d.r = s[0];
-					d.g = s[1];
-					d.b = s[2];
-				}
-			}
+			read<float>(input, tex, spec.format, spec.nchannels, real(1));
 		}
 
 		// Close handle

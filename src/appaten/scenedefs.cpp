@@ -405,3 +405,33 @@ void ManyLightScene::getCameraPosAndAt(
 	pos = aten::vec3(13, 2, 3);
 	at = aten::vec3(0, 0, 0);
 }
+
+/////////////////////////////////////////////////////
+
+void TexturesScene::makeScene(aten::scene* scene)
+{
+	auto albedo = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_D.tga");
+	auto nml = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_N.tga");
+	//auto nml = aten::ImageLoader::load("../../asset/testnml.png");
+	aten::vec3 clr(1, 1, 1);
+
+	auto s_blinn = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, new aten::MicrofacetBlinn(clr, 200, 0.2, albedo));
+	//scene->add(s_blinn);
+
+	auto s_ggx = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, new aten::MicrofacetGGX(clr, 0.2, 0.2, albedo));
+	//scene->add(s_ggx);
+
+	auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(clr, 0.2, 0.2, albedo));
+	//scene->add(s_beckman);
+
+	auto s_lambert = new aten::sphere(aten::vec3(0, 0, 0), 1.0, new aten::lambert(clr, albedo, nml));
+	scene->add(s_lambert);
+}
+
+void TexturesScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(0, 0, 8);
+	at = aten::vec3(0, 0, 0);
+}

@@ -51,14 +51,10 @@ namespace aten
 			}
 			return std::move(albedo);
 		}
-		vec3 sampleNormalMap(real u, real v) const
-		{
-			vec3 nml(0, 0, 0);
-			if (m_normalMap) {
-				nml = m_normalMap->at(u, v);
-			}
-			return std::move(nml);
-		}
+		void applyNormalMap(
+			const vec3& orgNml,
+			vec3& newNml,
+			real u, real v) const;
 
 		virtual real pdf(
 			const vec3& normal, 

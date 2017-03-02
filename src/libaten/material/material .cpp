@@ -59,4 +59,26 @@ namespace aten
 
 		return fresnel;
 	}
+
+	void material::applyNormalMap(
+		const vec3& orgNml,
+		vec3& newNml,
+		real u, real v) const
+	{
+		if (m_normalMap) {
+			newNml = m_normalMap->at(u, v);
+			newNml = 2 * newNml - vec3(1);
+			newNml.normalize();
+
+			vec3 n = normalize(orgNml);
+			vec3 t = getOrthoVector(n);
+			vec3 b = cross(t, n);
+
+			newNml = newNml.z * n + newNml.x * t + newNml.y * b;
+			newNml.normalize();
+		}
+		else {
+			newNml = normalize(orgNml);
+		}
+	}
 }

@@ -49,6 +49,10 @@ namespace aten
 		rec.obj = (hitable*)this;
 		rec.mtrl = m_mtrl;
 
+		// tangent coordinate.
+		rec.du = normalize(getOrthoVector(rec.normal));
+		rec.dv = normalize(cross(rec.normal, rec.du));
+
 		rec.area = 4 * AT_MATH_PI * m_radius * m_radius;
 
 		getUV(rec.u, rec.v, rec.normal);

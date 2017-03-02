@@ -55,7 +55,7 @@ namespace aten
 			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
 				// 交差位置の法線.
 				// 物体からのレイの入出を考慮.
-				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
+				vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 				// Implicit conection to light.
 				if (rec.mtrl->isEmissive()) {
@@ -100,6 +100,9 @@ namespace aten
 					//throughput *= Wdash;
 					throughput /= areaPdf;
 				}
+
+				// Apply normal map.
+				rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
 
 				// Explicit conection to light.
 				if (!rec.mtrl->isSingular())

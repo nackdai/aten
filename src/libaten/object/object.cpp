@@ -50,6 +50,12 @@ namespace aten
 				auto e1 = v2->pos - v0->pos;
 				rec.area = 0.5 * cross(e0, e1).length();
 
+				rec.obj = parent;
+
+				if (parent) {
+					rec.mtrl = parent->mtrl;
+				}
+
 				isHit = true;
 			}
 		}
@@ -79,7 +85,7 @@ namespace aten
 	void shape::build()
 	{
 		bvhnode::build(
-			(hitable**)&faces[0],
+			(bvhnode**)&faces[0],
 			faces.size());
 	}
 
@@ -103,7 +109,7 @@ namespace aten
 		m_obj = obj;
 
 		build(
-			(hitable**)&m_obj->m_shapes[0], 
+			(bvhnode**)&m_obj->m_shapes[0], 
 			m_obj->m_shapes.size());
 	}
 

@@ -15,7 +15,7 @@ static aten::PinholeCamera g_camera;
 #endif
 
 //static aten::AcceledScene<aten::LinearList> g_scene;
-static aten::AcceledScene<aten::bvhnode> g_scene;
+static aten::AcceledScene<aten::bvh> g_scene;
 
 //static aten::StaticColorBG g_bg(aten::vec3(0, 0, 0));
 static aten::envmap g_bg;

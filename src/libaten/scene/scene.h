@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "scene/accel.h"
+#include "scene/bvh.h"
 #include "light/light.h"
 #include "light/ibl.h"
 
@@ -12,7 +13,7 @@ namespace aten {
 		~LinearList() {}
 
 		virtual void build(
-			hitable** list,
+			bvhnode** list,
 			uint32_t num) override final
 		{
 			for (uint32_t i = 0; i < num; i++) {
@@ -54,7 +55,7 @@ namespace aten {
 		}
 
 	private:
-		std::vector<hitable*> m_objs;
+		std::vector<bvhnode*> m_objs;
 	};
 
 	class scene {
@@ -62,7 +63,7 @@ namespace aten {
 		scene() {}
 		virtual ~scene() {}
 
-		void add(hitable* s)
+		void add(bvhnode* s)
 		{
 			m_tmp.push_back(s);
 		}
@@ -126,7 +127,7 @@ namespace aten {
 			LightSampleResult& sampleRes);
 
 	protected:
-		std::vector<hitable*> m_tmp;
+		std::vector<bvhnode*> m_tmp;
 
 		std::vector<Light*> m_lights;
 		ImageBasedLight* m_ibl{ nullptr };

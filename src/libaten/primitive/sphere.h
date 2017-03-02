@@ -1,11 +1,11 @@
 #pragma once
 
 #include "types.h"
-#include "scene/hitable.h"
+#include "scene/bvh.h"
 
 namespace aten
 {
-	class sphere : public hitable {
+	class sphere : public bvhnode {
 	public:
 		sphere() {}
 		sphere(const vec3& c, real r, material* m)

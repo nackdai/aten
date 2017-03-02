@@ -12,7 +12,9 @@ namespace aten
 		vec3 uv;
 	};
 
-	class face : public hitable {
+	class shape;
+
+	class face : public bvhnode {
 	public:
 		face() {}
 		virtual ~face() {}
@@ -33,6 +35,8 @@ namespace aten
 		uint32_t idx[3];
 		vertex* vtx[3];
 		aabb bbox;
+
+		shape* parent{ nullptr };
 	};
 
 	class shape : public bvhnode {

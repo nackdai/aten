@@ -285,6 +285,10 @@ namespace aten
 				for (int x = 0; x < width; x++) {
 					int pos = y * width + x;
 
+					if (y == 146 && x == 311) {
+						int xxx = 0;
+					}
+
 					vec3 col;
 					uint32_t cnt = 0;
 

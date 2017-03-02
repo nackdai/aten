@@ -87,6 +87,8 @@ namespace aten
 
 				f->build(&v0, &v1, &v2);
 
+				f->parent = dstshape;
+
 				dstshape->faces.push_back(f);
 			}
 

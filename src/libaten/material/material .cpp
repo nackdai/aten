@@ -72,7 +72,7 @@ namespace aten
 
 			vec3 n = normalize(orgNml);
 			vec3 t = getOrthoVector(n);
-			vec3 b = cross(t, n);
+			vec3 b = cross(n, t);
 
 			newNml = newNml.z * n + newNml.x * t + newNml.y * b;
 			newNml.normalize();

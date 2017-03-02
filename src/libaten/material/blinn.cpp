@@ -149,11 +149,8 @@ namespace aten
 			G = std::min((real)1, std::min(G1, G2));
 		}
 
-		auto albedo = m_color;
-		if (m_tex) {
-			auto texclr = m_tex->at(u, v);
-			albedo *= texclr;
-		}
+		auto albedo = color();
+		albedo *= sampleAlbedoMap(u, v);
 
 		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 

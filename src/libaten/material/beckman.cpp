@@ -136,11 +136,8 @@ namespace aten
 			}
 		}
 
-		auto albedo = m_color;
-		if (m_tex) {
-			auto texclr = m_tex->at(u, v);
-			albedo *= texclr;
-		}
+		auto albedo = color();
+		albedo *= sampleAlbedoMap(u, v);
 
 		real F(1);
 		{

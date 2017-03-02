@@ -32,7 +32,7 @@ namespace aten
 		auto c = dot(normal, wo);
 
 #if 1
-		vec3 bsdf = m_color;
+		vec3 bsdf = color();
 #else
 		vec3 bsdf;
 
@@ -41,6 +41,8 @@ namespace aten
 			bsdf = m_color / c;
 		}
 #endif
+
+		bsdf *= sampleAlbedoMap(u, v);
 
 		return std::move(bsdf);
 	}

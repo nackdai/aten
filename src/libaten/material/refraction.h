@@ -7,8 +7,11 @@ namespace aten
 	class refraction : public material {
 	public:
 		refraction() {}
-		refraction(const vec3& c, real nt)
-			: m_color(c), m_nt(nt)
+		refraction(
+			const vec3& albedo,
+			real ior,
+			texture* normalMap = nullptr)
+			: material(albedo, nullptr, normalMap), m_nt(ior)
 		{}
 
 		virtual ~refraction() {}
@@ -21,11 +24,6 @@ namespace aten
 		virtual bool isTranslucent() const override final
 		{
 			return true;
-		}
-
-		virtual vec3 color() const override final
-		{
-			return m_color;
 		}
 
 		virtual real pdf(
@@ -52,8 +50,6 @@ namespace aten
 			real u, real v) const override final;
 
 	private:
-		vec3 m_color;
-
 		// ï®ëÃÇÃã¸ê‹ó¶.
 		real m_nt;
 	};

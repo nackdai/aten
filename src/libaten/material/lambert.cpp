@@ -56,12 +56,9 @@ namespace aten {
 		const vec3& wo,
 		real u, real v) const
 	{
-		vec3 albedo = m_color;
+		vec3 albedo = color();
 
-		if (m_tex) {
-			auto texclr = m_tex->at(u, v);
-			albedo *= texclr;
-		}
+		albedo *= sampleAlbedoMap(u, v);
 
 		vec3 ret = albedo / AT_MATH_PI;
 		return ret;

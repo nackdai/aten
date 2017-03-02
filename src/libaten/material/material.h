@@ -14,6 +14,15 @@ namespace aten
 		material() {}
 		virtual ~material() {}
 
+	protected:
+		material(
+			const vec3& clr, 
+			texture* albedoMap = nullptr, 
+			texture* normalMap = nullptr) 
+			: m_albedo(clr), m_albedoMap(albedoMap), m_normalMap(normalMap)
+		{}
+
+	public:
 		virtual bool isEmissive() const
 		{
 			return false;
@@ -29,7 +38,27 @@ namespace aten
 			return false;
 		}
 
-		virtual vec3 color() const = 0;
+		const vec3& color() const
+		{
+			return m_albedo;
+		}
+
+		vec3 sampleAlbedoMap(real u, real v) const
+		{
+			vec3 albedo(1, 1, 1);
+			if (m_albedoMap) {
+				albedo = m_albedoMap->at(u, v);
+			}
+			return std::move(albedo);
+		}
+		vec3 sampleNormalMap(real u, real v) const
+		{
+			vec3 nml(0, 0, 0);
+			if (m_normalMap) {
+				nml = m_normalMap->at(u, v);
+			}
+			return std::move(nml);
+		}
 
 		virtual real pdf(
 			const vec3& normal, 
@@ -64,6 +93,12 @@ namespace aten
 			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const = 0;
+
+	private:
+		vec3 m_albedo;
+
+		texture* m_albedoMap{ nullptr };
+		texture* m_normalMap{ nullptr };
 	};
 
 	real schlick(

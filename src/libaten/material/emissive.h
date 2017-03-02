@@ -8,7 +8,7 @@ namespace aten
 	public:
 		emissive() {}
 		emissive(const vec3& e)
-			: m_emit(e)
+			: material(e)
 		{}
 
 		virtual ~emissive() {}
@@ -16,11 +16,6 @@ namespace aten
 		virtual bool isEmissive() const override final
 		{
 			return true;
-		}
-
-		virtual vec3 color() const override final
-		{
-			return m_emit;
 		}
 
 		virtual real pdf(
@@ -67,8 +62,5 @@ namespace aten
 			AT_ASSERT(false);
 			return std::move(sampling(vec3(), vec3(), real(0)));
 		}
-
-	private:
-		vec3 m_emit;
 	};
 }

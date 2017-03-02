@@ -7,8 +7,11 @@ namespace aten
 	class specular : public material {
 	public:
 		specular() {}
-		specular(const vec3& c)
-			: m_color(c)
+		specular(
+			const vec3& albedo,
+			texture* albedoMap = nullptr,
+			texture* normalMap = nullptr)
+			: material(albedo, albedoMap, normalMap)
 		{}
 
 		virtual ~specular() {}
@@ -16,11 +19,6 @@ namespace aten
 		virtual bool isSingular() const override final
 		{
 			return true;
-		}
-
-		virtual vec3 color() const override final
-		{
-			return m_color;
 		}
 
 		virtual real pdf(
@@ -45,8 +43,5 @@ namespace aten
 			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const override final;
-
-	private:
-		vec3 m_color{ vec3(1, 1, 1) };
 	};
 }

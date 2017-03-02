@@ -7,8 +7,12 @@ namespace aten
 	class MicrofacetGGX : public material {
 	public:
 		MicrofacetGGX() {}
-		MicrofacetGGX(const vec3& c, real roughness, real ior)
-			: m_color(c), m_ior(ior)
+		MicrofacetGGX(
+			const vec3& albedo,
+			real roughness, real ior,
+			texture* albedoMap = nullptr,
+			texture* normalMap = nullptr)
+			: material(albedo, albedoMap, normalMap), m_ior(ior)
 		{
 			m_roughness = aten::clamp<real>(roughness, 0, 1);
 		}
@@ -16,11 +20,6 @@ namespace aten
 		virtual ~MicrofacetGGX() {}
 
 	public:
-		virtual vec3 color() const override final
-		{
-			return m_color;
-		}
-
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,
@@ -45,8 +44,6 @@ namespace aten
 			real u, real v) const override final;
 
 	private:
-		vec3 m_color;
-		texture* m_tex{ nullptr };
 		real m_roughness{ real(0) };
 
 		// ï®ëÃÇÃã¸ê‹ó¶.

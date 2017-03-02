@@ -35,7 +35,10 @@ namespace aten
 	{
 		AT_ASSERT(false);
 
-		return std::move(m_color);
+		vec3 bsdf = color();
+		bsdf *= sampleAlbedoMap(u, v);
+
+		return std::move(bsdf);
 	}
 
 	material::sampling refraction::sample(
@@ -67,6 +70,8 @@ namespace aten
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
 		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
+		vec3 albedo = color();
+
 		if (cos_t_2 < real(0)) {
 			//AT_PRINTF("Reflection in refraction...\n");
 
@@ -77,7 +82,7 @@ namespace aten
 
 			auto c = dot(normal, ret.dir);
 			if (c > real(0)) {
-				ret.bsdf = m_color / c;
+				ret.bsdf = albedo / c;
 			}
 
 			return std::move(ret);
@@ -119,13 +124,13 @@ namespace aten
 		if (r < prob) {
 			// ”½ŽË.
 			ret.dir = reflect;
-			ret.bsdf = Re * m_color;
+			ret.bsdf = Re * albedo;
 			ret.bsdf /= prob;
 		}
 		else {
 			// ‹üÜ.
 			ret.dir = refract;
-			ret.bsdf = Tr * m_color;
+			ret.bsdf = Tr * albedo;
 			ret.bsdf /= (1 - prob);
 		}
 #else
@@ -135,7 +140,7 @@ namespace aten
 			
 			// For canceling cosine factor.
 			auto denom = dot(normal, reflect);
-			ret.bsdf = Re * m_color / denom;
+			ret.bsdf = Re * albedo / denom;
 			ret.bsdf /= prob;
 		}
 		else {
@@ -144,7 +149,7 @@ namespace aten
 
 			// For canceling cosine factor.
 			auto denom = dot(normal, refract);
-			ret.bsdf = Tr * m_color / denom;
+			ret.bsdf = Tr * albedo / denom;
 			ret.bsdf /= (1 - prob);
 		}
 #endif
@@ -152,7 +157,7 @@ namespace aten
 		ret.dir = refract;
 
 		auto denom = dot(normal, refract);
-		ret.bsdf = Tr * m_color / denom;
+		ret.bsdf = Tr * albedo / denom;
 #endif
 
 		ret.pdf = 1;

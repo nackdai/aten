@@ -70,10 +70,10 @@ namespace aten
 
 		// Ortho normal base.
 		auto n = normal;
-		auto u = getOrthoVector(normal);
-		auto v = normalize(cross(n, u));
+		auto t = getOrthoVector(normal);
+		auto b = normalize(cross(n, t));
 
-		auto w = u * sintheta * cosphi + v * sintheta * sinphi + n * costheta;
+		auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
 		w.normalize();
 
 		auto dir = in - 2 * dot(in, w) * w;

@@ -370,24 +370,24 @@ void ManyLightScene::makeScene(aten::scene* scene)
 			}
 		}
 	}
+#endif
 
 	s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::refraction(aten::vec3(1), 1.5));
 	scene->add(s);
 
-	s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, new aten::lambert(aten::vec3(0.4, 0.2, 0.1)));
+	s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, new aten::lambert(aten::vec3(0.8, 0.2, 0.1)));
 	scene->add(s);
 
 	s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
 	scene->add(s);
-#endif
 
-	aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.0, 0.0));
-	aten::Light* point = new aten::PointLight(aten::vec3(-20, 10, -1), aten::vec3(0.0, 0.3, 0.0), 0, 0.5, 0.02);
+	aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
+	aten::Light* point = new aten::PointLight(aten::vec3(0, 10, -1), aten::vec3(0.0, 0.0, 1.0), 0, 0.5, 0.02);
 	aten::Light* spot = new aten::SpotLight(
 		aten::vec3(0, 5, 0),
 		aten::vec3(0, -1, 0),
 		//aten::vec3(0.2, 0.2, 0.2),
-		aten::vec3(36.0, 36.0, 36.0),
+		aten::vec3(0.0, 1.0, 0.0),
 		0, 0.1, 0,
 		Deg2Rad(30),
 		Deg2Rad(60),

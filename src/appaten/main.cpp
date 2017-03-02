@@ -137,9 +137,9 @@ int main(int argc, char* argv[])
 		"../shader/bloomeffect_fs_Final.glsl");
 	bloom.setParam(0.2f, 0.4f);
 
-	aten::visualizer::addPostProc(&nmlshd);
+	//aten::visualizer::addPostProc(&nmlshd);
 	aten::visualizer::addPostProc(&tonemap);
-	aten::visualizer::addPostProc(&bloom);
+	//aten::visualizer::addPostProc(&bloom);
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;

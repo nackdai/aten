@@ -2,13 +2,20 @@
 
 namespace aten
 {
+	real MicrofacetGGX::sampleRoughness(real u, real v) const
+	{
+		vec3 roughness = material::sampleTexture(m_roughnessMap, u, v, m_roughness);
+		return roughness.r;
+	}
+
 	real MicrofacetGGX::pdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto ret = pdf(m_roughness, normal, wi, wo, u, v);
+		auto roughness = sampleRoughness(u, v);
+		auto ret = pdf(roughness, normal, wi, wo);
 		return ret;
 	}
 
@@ -18,7 +25,8 @@ namespace aten
 		real u, real v,
 		sampler* sampler) const
 	{
-		vec3 dir = sampleDirection(m_roughness, in, normal, u, v, sampler);
+		auto roughness = sampleRoughness(u, v);
+		vec3 dir = sampleDirection(roughness, in, normal, sampler);
 		return std::move(dir);
 	}
 
@@ -28,7 +36,8 @@ namespace aten
 		const vec3& wo,
 		real u, real v) const
 	{
-		vec3 ret = bsdf(m_roughness, normal, wi, wo, u, v);
+		auto roughness = sampleRoughness(u, v);
+		vec3 ret = bsdf(roughness, normal, wi, wo, u, v);
 		return std::move(ret);
 	}
 
@@ -91,8 +100,7 @@ namespace aten
 		real roughness,
 		const vec3& normal, 
 		const vec3& wi,
-		const vec3& wo,
-		real u, real v) const
+		const vec3& wo) const
 	{
 		// NOTE
 		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
@@ -114,7 +122,6 @@ namespace aten
 		real roughness,
 		const vec3& in,
 		const vec3& normal,
-		real u, real v,
 		sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();
@@ -217,8 +224,10 @@ namespace aten
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, u, v, sampler);
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
+		auto roughness = sampleRoughness(u, v);
+
+		ret.dir = sampleDirection(roughness, in, normal, sampler);
+		ret.pdf = pdf(roughness, normal, in, ret.dir);
 
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 

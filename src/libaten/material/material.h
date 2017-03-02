@@ -92,6 +92,22 @@ namespace aten
 			sampler* sampler,
 			real u, real v) const = 0;
 
+	protected:
+		static vec3 sampleTexture(texture* tex, real u, real v, real defaultValue)
+		{
+			auto ret = sampleTexture(tex, u, v, vec3(defaultValue));
+			return std::move(ret);
+		}
+
+		static vec3 sampleTexture(texture* tex, real u, real v, const vec3& defaultValue)
+		{
+			vec3 ret = defaultValue;
+			if (tex) {
+				ret = tex->at(u, v);
+			}
+			return std::move(ret);
+		}
+
 	private:
 		vec3 m_albedo;
 

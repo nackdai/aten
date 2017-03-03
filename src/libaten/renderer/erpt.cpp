@@ -352,7 +352,7 @@ namespace aten
 		}
 
 		if (x < 0 || width <= x || y < 0 || height <= y) {
-			// TODO
+			return std::move(Path());
 		}
 
 		real u = x / (real)width;
@@ -437,9 +437,9 @@ namespace aten
 #pragma omp parallel for
 #endif
 		for (int y = 0; y < height; y++) {
-			//AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
+			AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
 
-			auto idx = omp_get_thread_num();
+			auto idx = thread::getThreadIdx();
 
 			std::vector<vec3>& tmpImage = tmpImageArray[idx];
 			if (tmpImage.empty()) {

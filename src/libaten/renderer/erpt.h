@@ -18,8 +18,8 @@ namespace aten
 
 	private:
 		struct Path {
-			int x;
-			int y;
+			int x{ 0 };
+			int y{ 0 };
 			vec3 contrib;
 			bool isTerminate{ false };
 		};

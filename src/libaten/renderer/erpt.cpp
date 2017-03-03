@@ -1,42 +1,111 @@
-#include "renderer/pathtracing.h"
+#include "renderer/erpt.h"
 #include "misc/thread.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
-#include "sampler/UniformDistributionSampler.h"
-
-//#define Deterministic_Path_Termination
+#include "misc/color.h"
 
 namespace aten
 {
-	// NOTE
-	// https://www.slideshare.net/shocker_0x15/ss-52688052
+	static const real MutateDistance = real(0.05);
 
-	inline bool isInvalidColor(const vec3& v)
+	class ERPTSampler : public sampler {
+	public:
+		ERPTSampler(random* rnd);
+		virtual ~ERPTSampler() {}
+
+	public:
+		virtual real nextSample() override final;
+
+		virtual random* getRandom() override final
+		{
+			return m_rnd;
+		}
+
+		void reset()
+		{
+			m_usedRandCoords = 0;
+		}
+
+		void mutate();
+
+	private:
+		inline real mutate(real value);
+
+	private:
+		random* m_rnd;
+
+		int m_usedRandCoords{ 0 };
+
+		std::vector<real> m_primarySamples;
+	};
+
+	ERPTSampler::ERPTSampler(random* rnd)
+		: m_rnd(rnd)
 	{
-		bool b = isInvalid(v);
-		if (!b) {
-			if (v.x < 0 || v.y < 0 || v.z < 0) {
-				b = true;
+		static const int initsize = 32;
+		m_primarySamples.resize(initsize);
+
+		for (int i = 0; i < m_primarySamples.size(); i++) {
+			m_primarySamples[i] = rnd->next01();
+		}
+	}
+
+	real ERPTSampler::mutate(real value)
+	{
+		// Same as LuxRender?
+
+		auto r = m_rnd->next01();
+
+		double v = MutateDistance * (2.0 * r - 1.0);
+		value += v;
+
+		if (value > 1.0) {
+			value -= 1.0;
+		}
+
+		if (value < 0.0) {
+			value += 1.0;
+		}
+
+		return value;
+	}
+
+	real ERPTSampler::nextSample()
+	{
+		if (m_primarySamples.size() <= m_usedRandCoords) {
+			const int now_max = m_primarySamples.size();
+
+			// 拡張する.
+			m_primarySamples.resize(m_primarySamples.size() * 1.5);
+
+			// 拡張した部分に値を入れる.
+			for (int i = now_max; i < m_primarySamples.size(); i++) {
+				m_primarySamples[i] = m_rnd->next01();
 			}
 		}
 
-		return b;
+		m_usedRandCoords++;
+
+		auto ret = m_primarySamples[m_usedRandCoords - 1];
+
+		return ret;
 	}
 
-	PathTracing::Path PathTracing::radiance(
-		sampler* sampler,
-		const ray& inRay,
-		camera* cam,
-		CameraSampleResult& camsample,
-		scene* scene)
+	void ERPTSampler::mutate()
 	{
-		return radiance(sampler, m_maxDepth, inRay, cam, camsample, scene);
+		for (int i = 0; i < m_primarySamples.size(); i++) {
+			auto prev = m_primarySamples[i];
+			auto mutated = mutate(prev);
+			m_primarySamples[i] = mutated;
+		}
 	}
 
-	PathTracing::Path PathTracing::radiance(
+	///////////////////////////////////////////////////////
+
+
+	ERPT::Path ERPT::radiance(
 		sampler* sampler,
-		uint32_t maxDepth,
 		const ray& inRay,
 		camera* cam,
 		CameraSampleResult& camsample,
@@ -59,7 +128,7 @@ namespace aten
 
 		Path path;
 
-		while (depth < maxDepth) {
+		while (depth < m_maxDepth) {
 			hitrecord rec;
 
 			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
@@ -185,13 +254,6 @@ namespace aten
 					}
 				}
 
-#ifdef Deterministic_Path_Termination
-				real russianProb = real(1);
-
-				if (depth > 1) {
-					russianProb = real(0.5);
-				}
-#else
 				real russianProb = real(1);
 
 				if (depth > rrDepth) {
@@ -207,7 +269,6 @@ namespace aten
 						russianProb = p;
 					}
 				}
-#endif
 
 				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
 
@@ -270,7 +331,55 @@ namespace aten
 		return std::move(path);
 	}
 
-	void PathTracing::render(
+	ERPT::Path ERPT::genPath(
+		scene* scene,
+		sampler* sampler,
+		int x, int y,
+		int width, int height,
+		camera* camera,
+		bool willImagePlaneMutation)
+	{
+		// スクリーン上でのパスの変異量.
+		static const int image_plane_mutation_value = 10;
+
+		// スクリーン上で変異する.
+		auto s1 = sampler->nextSample();
+		auto s2 = sampler->nextSample();
+
+		if (willImagePlaneMutation) {
+			x += int(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
+			y += int(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
+		}
+
+		if (x < 0 || width <= x || y < 0 || height <= y) {
+			// TODO
+		}
+
+		real u = x / (real)width;
+		real v = y / (real)height;
+
+		auto camsample = camera->sample(u, v, sampler);
+
+		auto path = radiance(sampler, camsample.r, camera, camsample, scene);
+
+		auto pdfOnImageSensor = camsample.pdfOnImageSensor;
+		auto pdfOnLens = camsample.pdfOnLens;
+
+		auto s = camera->getSensitivity(
+			camsample.posOnImageSensor,
+			camsample.posOnLens);
+
+		Path retPath;
+
+		retPath.contrib = path.contrib * s / (pdfOnImageSensor * pdfOnLens);
+		retPath.x = x;
+		retPath.y = y;
+		retPath.isTerminate = path.isTerminate;
+
+		return std::move(retPath);
+	}
+
+	void ERPT::render(
 		Destination& dst,
 		scene* scene,
 		camera* camera)
@@ -278,6 +387,7 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 		uint32_t samples = dst.sample;
+		uint32_t mutation = dst.mutation;
 		vec3* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
@@ -287,15 +397,23 @@ namespace aten
 			m_rrDepth = m_maxDepth - 1;
 		}
 
-#ifdef Deterministic_Path_Termination
-		// For DeterministicPathTermination.
-		std::vector<uint32_t> depths;
-		for (uint32_t s = 0; s < samples; s++) {
-			auto maxdepth = (aten::clz((samples - 1) - s) - aten::clz(samples)) + 1;
-			maxdepth = std::min<int>(maxdepth, m_maxDepth);
-			depths.push_back(maxdepth);
+		vec3 sumI(0, 0, 0);
+
+		// edを計算.
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				Sobol rnd((y * height * 4 + x * 4) * samples);
+				ERPTSampler X(&rnd);
+
+				auto path = genPath(scene, &X, x, y, width, height, camera, false);
+
+				sumI += path.contrib;
+			}
 		}
-#endif
+
+		const real ed = color::illuminance(sumI / (width * height)) / mutation;
+
+
 
 #ifdef ENABLE_OMP
 #pragma omp parallel
@@ -303,73 +421,14 @@ namespace aten
 		{
 			auto idx = thread::getThreadIdx();
 
-			//XorShift rnd(idx);
-			//UniformDistributionSampler sampler(&rnd);
-
 #ifdef ENABLE_OMP
 #pragma omp for
 #endif
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
-					int pos = y * width + x;
-
-					vec3 col;
-					uint32_t cnt = 0;
 
 					for (uint32_t i = 0; i < samples; i++) {
-						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
-						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
-						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1);
-						UniformDistributionSampler sampler(&rnd);
-
-						real u = real(x + sampler.nextSample()) / real(width);
-						real v = real(y + sampler.nextSample()) / real(height);
-
-						auto camsample = camera->sample(u, v, &sampler);
-
-						auto ray = camsample.r;
-
-#ifdef Deterministic_Path_Termination
-						auto maxDepth = depths[i];
-						auto path = radiance(
-							&sampler,
-							maxDepth,
-							ray,
-							camera,
-							camsample,
-							scene);
-#else
-						auto path = radiance(
-							&sampler, 
-							ray, 
-							camera,
-							camsample,
-							scene);
-#endif
-
-						if (isInvalidColor(path.contrib)) {
-							AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
-							continue;
-						}
-
-						auto pdfOnImageSensor = camsample.pdfOnImageSensor;
-						auto pdfOnLens = camsample.pdfOnLens;
-
-						auto s = camera->getSensitivity(
-							camsample.posOnImageSensor,
-							camsample.posOnLens);
-
-						col += path.contrib * s / (pdfOnImageSensor * pdfOnLens);
-						cnt++;
-
-						if (path.isTerminate) {
-							break;
-						}
 					}
-
-					col /= (real)cnt;
-
-					color[pos] = col;
 				}
 			}
 		}

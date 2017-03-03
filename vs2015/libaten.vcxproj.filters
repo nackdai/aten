@@ -243,6 +243,9 @@
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h">
       <Filter>posteffect</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\erpt.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -361,6 +364,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp">
       <Filter>posteffect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\erpt.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

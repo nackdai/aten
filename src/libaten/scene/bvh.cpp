@@ -96,7 +96,7 @@ namespace aten {
 			auto boxLeft = m_left->getBoundingbox();
 			auto boxRight = m_right->getBoundingbox();
 
-			m_aabb = aabb::surrounding_box(boxLeft, boxRight);
+			m_aabb = aabb::merge(boxLeft, boxRight);
 		}
 		else {
 			auto boxLeft = m_left->getBoundingbox();
@@ -159,6 +159,9 @@ namespace aten {
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
+		// NOTE
+		// https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-ii-tree-traversal-gpu/
+
 		// TODO
 		// stack size.
 		static const uint32_t stacksize = 64;

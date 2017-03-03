@@ -19,113 +19,78 @@
 #define Deg2Rad(d)   (AT_MATH_PI * (d) / aten::real(180.0))
 #define Rad2Deg(r)   ((r) * aten::real(180.0) / AT_MATH_PI)
 
+#ifdef TYPE_DOUBLE
+	#define AT_MATH_FUNC(func, v)	func(v)
+	#define AT_MATH_FUNC2(func, v0, v1)	func(v0, v1)
+#else
+	#define AT_MATH_FUNC(func, v)	func##f(f)
+	#define AT_MATH_FUNC2(func, v0, v1)	func##f(f0, f1)
+#endif
+
 namespace aten {
 	inline real sqrt(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::sqrt(f);
-#else
-		return ::sqrtf(f);
-#endif
+		return AT_MATH_FUNC(::sqrt, f);
 	}
 
 	inline real tan(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::tan(f);
-#else
-		return ::tanf(f);
-#endif
+		return AT_MATH_FUNC(::tan, f);
 	}
 
 	inline real cos(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::cos(f);
-#else
-		return ::cosf(f);
-#endif
+		return AT_MATH_FUNC(::cos, f);
 	}
 
 	inline real sin(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::sin(f);
-#else
-		return ::sinf(f);
-#endif
+		return AT_MATH_FUNC(::sin, f);
 	}
 
 	inline real atan2(real y, real x)
 	{
-#ifdef TYPE_DOUBLE
-		return ::atan2(y, x);
-#else
-		return ::atan2f(y, x);
-#endif
+		return AT_MATH_FUNC2(::atan2, y, x);
 	}
 
 	inline real atan(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::atan(f);
-#else
-		return ::atanf(f);
-#endif
+		return AT_MATH_FUNC(::atan, f);
 	}
 
 	inline real asin(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::asin(f);
-#else
-		return ::asinf(f);
-#endif
+		return AT_MATH_FUNC(::asin, f);
 	}
 
 	inline real acos(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::acos(f);
-#else
-		return ::acosf(f);
-#endif
+		return AT_MATH_FUNC(::acos, f);
 	}
 
 	inline real log(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::log(f);
-#else
-		return ::logf(f);
-#endif
+		return AT_MATH_FUNC(::log, f);
 	}
 
 	inline real exp(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return ::exp(f);
-#else
-		return ::expf(f);
-#endif
+		return AT_MATH_FUNC(::exp, f);
 	}
 
 	inline real pow(real f, real v)
 	{
-#ifdef TYPE_DOUBLE
-		return ::pow(f, v);
-#else
-		return ::powf(f, v);
-#endif
+		return AT_MATH_FUNC2(::pow, f, v);
 	}
 
 	inline real abs(real f)
 	{
-#ifdef TYPE_DOUBLE
-		return (f < real(0) ? -f : f);
-#else
-		return ::fabs(f);
-#endif
+		return AT_MATH_FUNC(::abs, f);
+	}
+
+	inline real floor(real f)
+	{
+		return AT_MATH_FUNC(::floor, f);
 	}
 
 	template <typename _T>

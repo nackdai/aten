@@ -61,5 +61,6 @@
 #include "renderer/envmap.h"
 #include "renderer/raytracing.h"
 #include "renderer/pathtracing.h"
+#include "renderer/erpt.h"
 
 #include "posteffect/BloomEffect.h"

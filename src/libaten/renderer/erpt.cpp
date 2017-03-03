@@ -402,7 +402,7 @@ namespace aten
 		// edを計算.
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				Sobol rnd((y * height * 4 + x * 4) * samples);
+				XorShift rnd((y * height * 4 + x * 4) * samples);
 				ERPTSampler X(&rnd);
 
 				auto path = genPath(scene, &X, x, y, width, height, camera, false);
@@ -413,23 +413,98 @@ namespace aten
 
 		const real ed = color::illuminance(sumI / (width * height)) / mutation;
 
+		for (int y = 0; y < height; y++) {
+			AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
 
+			std::vector<vec3> tmpImage(width * height);
 
-#ifdef ENABLE_OMP
-#pragma omp parallel
-#endif
-		{
-			auto idx = thread::getThreadIdx();
+			for (int x = 0; x < width; x++) {
+				for (uint32_t i = 0; i < samples; i++) {
+					XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+					ERPTSampler X(&rnd);
 
-#ifdef ENABLE_OMP
-#pragma omp for
-#endif
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
+					// 現在のスクリーン上のある点からのパスによる放射輝度を求める.
+					auto newSample = genPath(scene, &X, x, y, width, height, camera, false);
 
-					for (uint32_t i = 0; i < samples; i++) {
+					// パスが光源に直接ヒットしてた場合、エネルギー分配しないで、そのまま画像に送る.
+					if (newSample.isTerminate) {
+						int pos = newSample.y * width + newSample.x;
+						tmpImage[pos] += newSample.contrib / samples;
+						continue;
+					}
+
+					const vec3 e = newSample.contrib;
+					auto l = color::illuminance(e);
+
+					if (l > 0) {
+						auto r = rnd.next01();
+						auto illum = color::illuminance(e);
+						const int numChains = (int)std::floor(r + illum / (mutation * ed));;
+
+						// 周囲に分配するエネルギー.
+						const vec3 dep_value = (e / illum * ed) / samples;
+
+						for (int nc = 0; nc < numChains; nc++) {
+							ERPTSampler Y = X;
+							Path Ypath = newSample;
+
+							// Consecutive sample filtering.
+							// ある点に極端にエネルギーが分配されると、スポットノイズになってしまう.
+							// Unbiasedにするにはそれも仕方ないが、現実的には見苦しいのである点に対する分配回数を制限することでそのようなノイズを抑える.
+							// Biasedになるが、見た目は良くなる.
+							static const int MaxStack = 10;
+							int stack_num = 0;
+							int now_x = x;
+							int now_y = y;
+
+							for (uint32_t m = 0; m < mutation; m++) {
+								ERPTSampler Z = Y;
+								Z.mutate();
+
+								Path Zpath = genPath(scene, &Z, x, y, width, height, camera, true);
+
+								// いる？
+								Z.reset();
+
+								auto lfz = color::illuminance(Zpath.contrib);
+								auto lfy = color::illuminance(Ypath.contrib);
+
+								auto q = lfz / lfy;
+
+								auto r = rnd.next01();
+
+								if (q > r) {
+									// accept mutation.
+									Y = Z;
+									Ypath = Zpath;
+								}
+
+								// Consecutive sample filtering
+								if (now_x == Ypath.x && now_y == Ypath.y) {
+									// mutationがrejectされた回数をカウント.
+									stack_num++;
+								}
+								else {
+									// mutationがacceptされたのでreject回数をリセット.
+									now_x = Ypath.x;
+									now_y = Ypath.y;
+									stack_num = 0;
+								}
+
+								// エネルギーをRedistributionする.
+								// 同じ個所に分配され続けないように上限を制限.
+								if (stack_num < MaxStack) {
+									int pos = Ypath.y * width + Ypath.x;
+									tmpImage[pos] += dep_value;
+								}
+							}
+						}
 					}
 				}
+			}
+
+			for (int i = 0; i < width * height; i++) {
+				color[i] = color[i] + tmpImage[i];
 			}
 		}
 	}

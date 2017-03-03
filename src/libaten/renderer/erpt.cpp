@@ -397,26 +397,54 @@ namespace aten
 			m_rrDepth = m_maxDepth - 1;
 		}
 
+		auto threadNum = thread::getThreadNum();
+
 		vec3 sumI(0, 0, 0);
 
-		// ed‚ðŒvŽZ.
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				XorShift rnd((y * height * 4 + x * 4) * samples);
-				ERPTSampler X(&rnd);
+#ifdef ENABLE_OMP
+#pragma omp parallel
+#endif
+		{
+			// ed‚ðŒvŽZ.
+			std::vector<vec3> tmpSumI(threadNum);
 
-				auto path = genPath(scene, &X, x, y, width, height, camera, false);
+#ifdef ENABLE_OMP
+#pragma omp for
+#endif
+			for (int y = 0; y < height; y++) {
+				auto idx = thread::getThreadIdx();
 
-				sumI += path.contrib;
+				for (int x = 0; x < width; x++) {
+					XorShift rnd((y * height * 4 + x * 4) * samples);
+					ERPTSampler X(&rnd);
+
+					auto path = genPath(scene, &X, x, y, width, height, camera, false);
+
+					tmpSumI[idx] += path.contrib;
+				}
+			}
+
+			for (int i = 0; i < threadNum; i++) {
+				sumI += tmpSumI[i];
 			}
 		}
 
 		const real ed = color::illuminance(sumI / (width * height)) / mutation;
 
-		for (int y = 0; y < height; y++) {
-			AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
+		std::vector<std::vector<vec3>> tmpImageArray(threadNum);
 
-			std::vector<vec3> tmpImage(width * height);
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < height; y++) {
+			//AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
+
+			auto idx = omp_get_thread_num();
+
+			std::vector<vec3>& tmpImage = tmpImageArray[idx];
+			if (tmpImage.empty()) {
+				tmpImage.resize(width * height);
+			}
 
 			for (int x = 0; x < width; x++) {
 				for (uint32_t i = 0; i < samples; i++) {
@@ -502,6 +530,10 @@ namespace aten
 					}
 				}
 			}
+		}
+
+		for (int n = 0; n < threadNum; n++) {
+			std::vector<vec3>& tmpImage = tmpImageArray[n];
 
 			for (int i = 0; i < width * height; i++) {
 				color[i] = color[i] + tmpImage[i];

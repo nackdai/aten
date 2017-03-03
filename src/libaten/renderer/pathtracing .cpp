@@ -7,6 +7,8 @@
 
 #include "primitive/sphere.h"
 
+//#define Deterministic_Path_Termination
+
 namespace aten
 {
 	// NOTE
@@ -31,8 +33,18 @@ namespace aten
 		CameraSampleResult& camsample,
 		scene* scene)
 	{
+		return radiance(sampler, m_maxDepth, inRay, cam, camsample, scene);
+	}
+
+	PathTracing::Path PathTracing::radiance(
+		sampler* sampler,
+		uint32_t maxDepth,
+		const ray& inRay,
+		camera* cam,
+		CameraSampleResult& camsample,
+		scene* scene)
+	{
 		uint32_t depth = 0;
-		uint32_t maxDepth = m_maxDepth;
 		uint32_t rrDepth = m_rrDepth;
 
 		aten::ray ray = inRay;
@@ -175,6 +187,13 @@ namespace aten
 					}
 				}
 
+#ifdef Deterministic_Path_Termination
+				real russianProb = real(1);
+
+				if (depth > 1) {
+					russianProb = real(0.5);
+				}
+#else
 				real russianProb = real(1);
 
 				if (depth > rrDepth) {
@@ -190,6 +209,7 @@ namespace aten
 						russianProb = p;
 					}
 				}
+#endif
 
 				auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
 
@@ -259,7 +279,7 @@ namespace aten
 	{
 		int width = dst.width;
 		int height = dst.height;
-		uint32_t sample = dst.sample;
+		uint32_t samples = dst.sample;
 		vec3* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
@@ -268,6 +288,16 @@ namespace aten
 		if (m_rrDepth > m_maxDepth) {
 			m_rrDepth = m_maxDepth - 1;
 		}
+
+#ifdef Deterministic_Path_Termination
+		// For DeterministicPathTermination.
+		std::vector<uint32_t> depths;
+		for (uint32_t s = 0; s < samples; s++) {
+			auto maxdepth = (aten::clz((samples - 1) - s) - aten::clz(samples)) + 1;
+			maxdepth = std::min<int>(maxdepth, m_maxDepth);
+			depths.push_back(maxdepth);
+		}
+#endif
 
 #ifdef ENABLE_OMP
 #pragma omp parallel
@@ -285,17 +315,13 @@ namespace aten
 				for (int x = 0; x < width; x++) {
 					int pos = y * width + x;
 
-					if (y == 146 && x == 311) {
-						int xxx = 0;
-					}
-
 					vec3 col;
 					uint32_t cnt = 0;
 
-					for (uint32_t i = 0; i < sample; i++) {
-						//XorShift rnd((y * height * 4 + x * 4) * sample + i + 1);
-						//Halton rnd((y * height * 4 + x * 4) * sample + i + 1);
-						Sobol rnd((y * height * 4 + x * 4) * sample + i + 1);
+					for (uint32_t i = 0; i < samples; i++) {
+						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
+						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1);
 						UniformDistributionSampler sampler(&rnd);
 
 						real u = real(x + sampler.nextSample()) / real(width);
@@ -305,12 +331,23 @@ namespace aten
 
 						auto ray = camsample.r;
 
+#ifdef Deterministic_Path_Termination
+						auto maxDepth = depths[i];
+						auto path = radiance(
+							&sampler,
+							maxDepth,
+							ray,
+							camera,
+							camsample,
+							scene);
+#else
 						auto path = radiance(
 							&sampler, 
 							ray, 
 							camera,
 							camsample,
 							scene);
+#endif
 
 						if (isInvalidColor(path.contrib)) {
 							AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);

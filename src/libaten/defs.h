@@ -28,15 +28,18 @@ namespace aten {
 
 #define DEBUG_BREAK()	__debugbreak()
 
-//#ifdef __AT_DEBUG__
-#if 1
+#ifdef __AT_DEBUG__
 	#define AT_ASSERT(b)\
         if (!(b)) {\
             AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
             DEBUG_BREAK();\
         }
 #else
-	#define AT_ASSERT(b)
+	//#define AT_ASSERT(b)
+	#define AT_ASSERT(b)\
+        if (!(b)) {\
+            AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
+        }
 #endif
 
 #define AT_VRETURN(b, ret)\

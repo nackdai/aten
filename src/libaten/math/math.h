@@ -149,4 +149,38 @@ namespace aten {
 		bool b = !isValid(f);
 		return b;
 	}
+
+	inline int clz(uint32_t x)
+	{
+		// NOTE
+		// NLZ
+		// http://www.nminoru.jp/~nminoru/programming/bitcount.html
+
+		int y, m, n;
+
+		y = -(int)(x >> 16);
+		m = (y >> 16) & 16;
+		n = 16 - m;
+		x = x >> m;
+
+		y = x - 0x100;
+		m = (y >> 16) & 8;
+		n = n + m;
+		x = x << m;
+
+		y = x - 0x1000;
+		m = (y >> 16) & 4;
+		n = n + m;
+		x = x << m;
+
+		y = x - 0x4000;
+		m = (y >> 16) & 2;
+		n = n + m;
+		x = x << m;
+
+		y = x >> 14;
+		m = y & ~(y >> 1);
+
+		return n + 2 - m;
+	}
 }

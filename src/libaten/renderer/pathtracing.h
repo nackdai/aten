@@ -29,6 +29,14 @@ namespace aten
 			CameraSampleResult& camsample,
 			scene* scene);
 
+		Path radiance(
+			sampler* sampler,
+			uint32_t maxDepth,
+			const ray& inRay,
+			camera* cam,
+			CameraSampleResult& camsample,
+			scene* scene);
+
 	private:
 		uint32_t m_maxDepth{ 1 };
 

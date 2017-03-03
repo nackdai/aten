@@ -81,7 +81,28 @@ namespace aten {
 		return b0 & b1;
 	}
 
-	aabb aabb::surrounding_box(const aabb& box0, const aabb& box1)
+	real aabb::cumputeSurfaceArea() const
+	{
+		auto dx = aten::abs(m_max.x - m_min.x);
+		auto dy = aten::abs(m_max.y - m_min.y);
+		auto dz = aten::abs(m_max.z - m_min.z);
+
+		// ‚U–Ê‚Ì–ÊÏ‚ğŒvZ‚·‚é‚ªAAABB‚Í‘ÎÌ‚È‚Ì‚ÅA‚R–Ê‚Ì–ÊÏ‚ğŒvZ‚µ‚Ä‚Q”{‚·‚ê‚Î‚¢‚¢.
+		auto area = dx * dy;
+		area += dy * dz;
+		area += dz * dx;
+		area *= 2;
+
+		return area;
+	}
+
+	void aabb::empty()
+	{
+		m_min.x = m_min.y = m_min.z = AT_MATH_INF;
+		m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
+	}
+
+	aabb aabb::merge(const aabb& box0, const aabb& box1)
 	{
 		vec3 _min(
 			std::min(box0.m_min.x, box1.m_min.x),

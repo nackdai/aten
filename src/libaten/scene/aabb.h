@@ -8,7 +8,10 @@
 namespace aten {
 	class aabb {
 	public:
-		aabb() {}
+		aabb()
+		{
+			empty();
+		}
 		aabb(const vec3& _min, const vec3& _max)
 		{
 			init(_min, _max);
@@ -46,7 +49,11 @@ namespace aten {
 			return std::move(center);
 		}
 
-		static aabb surrounding_box(const aabb& box0, const aabb& box1);
+		real cumputeSurfaceArea() const;
+
+		void empty();
+
+		static aabb merge(const aabb& box0, const aabb& box1);
 
 	private:
 		vec3 m_min;

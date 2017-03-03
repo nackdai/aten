@@ -2,6 +2,8 @@
 
 #include <random>
 
+#define BVH_SAH
+
 namespace aten {
 	int compareX(const void* a, const void* b)
 	{
@@ -51,11 +53,30 @@ namespace aten {
 		}
 	}
 
+	void sortList(bvhnode**& list, uint32_t num, int axis)
+	{
+		switch (axis) {
+		case 0:
+			::qsort(list, num, sizeof(bvhnode*), compareX);
+			break;
+		case 1:
+			::qsort(list, num, sizeof(bvhnode*), compareY);
+			break;
+		default:
+			::qsort(list, num, sizeof(bvhnode*), compareZ);
+			break;
+		}
+	}
+
 	void bvhnode::build(
 		bvhnode** list,
 		uint32_t num)
 	{
+#ifdef BVH_SAH
+		bvh::buildBySAH(this, list, num);
+#else
 		build(list, num, true);
+#endif
 	}
 
 	void bvhnode::build(
@@ -67,17 +88,7 @@ namespace aten {
 			// TODO
 			int axis = (int)(::rand() % 3);
 
-			switch (axis) {
-			case 0:
-				::qsort(list, num, sizeof(hitable*), compareX);
-				break;
-			case 1:
-				::qsort(list, num, sizeof(hitable*), compareY);
-				break;
-			default:
-				::qsort(list, num, sizeof(hitable*), compareZ);
-				break;
-			}
+			sortList(list, num, axis);
 		}
 
 		if (num == 1) {
@@ -128,20 +139,14 @@ namespace aten {
 		// TODO
 		int axis = (int)(::rand() % 3);
 
-		switch (axis) {
-		case 0:
-			::qsort(list, num, sizeof(hitable*), compareX);
-			break;
-		case 1:
-			::qsort(list, num, sizeof(hitable*), compareY);
-			break;
-		default:
-			::qsort(list, num, sizeof(hitable*), compareZ);
-			break;
-		}
+		sortList(list, num, axis);
 
 		m_root = new bvhnode();
+#ifdef BVH_SAH
+		buildBySAH(m_root, list, num);
+#else
 		m_root->build(&list[0], num, false);
+#endif
 	}
 
 	bool bvh::hit(
@@ -232,5 +237,156 @@ namespace aten {
 		} while (node != nullptr);
 
 		return (rec.obj != nullptr);
+	}
+
+	template<typename T>
+	static void pop_front(std::vector<T>& vec)
+	{
+		AT_ASSERT(!vec.empty());
+		vec.erase(vec.begin());
+	}
+
+	void bvh::buildBySAH(
+		bvhnode* root,
+		bvhnode** list,
+		uint32_t num)
+	{
+		// NOTE
+		// http://qiita.com/omochi64/items/9336f57118ba918f82ec
+
+		// ある？
+		AT_ASSERT(num > 0);
+
+		// 全体を覆うAABBを計算.
+		root->m_aabb = list[0]->getBoundingbox();
+		for (uint32_t i = 1; i < num; i++) {
+			auto bbox = list[i]->getBoundingbox();
+			root->m_aabb = aabb::merge(root->m_aabb, bbox);
+		}
+
+		if (num == 1) {
+			// １個しかないので、これだけで終了.
+			root->m_left = list[0];
+			return;
+		}
+		else if (num == 2) {
+			// ２個だけのときは適当にソートして、終了.
+			int axis = (int)(::rand() % 3);
+
+			sortList(list, num, axis);
+
+			root->m_left = list[0];
+			root->m_right = list[1];
+
+			return;
+		}
+
+		// Triangleとrayのヒットにかかる処理時間の見積もり.
+		static const real T_tri = 1;  // 適当.
+
+		// AABBとrayのヒットにかかる処理時間の見積もり.
+		static const real T_aabb = 1;  // 適当.
+
+		// 領域分割をせず、polygons を含む葉ノードを構築する場合を暫定の bestCost にする.
+		//auto bestCost = T_tri * num;
+		uint32_t bestCost = UINT32_MAX;	// 限界まで分割したいので、適当に大きい値にしておく.
+
+		// 分割に最も良い軸 (0:x, 1:y, 2:z)
+		int bestAxis = -1;
+
+		// 最も良い分割場所
+		int bestSplitIndex = -1;
+
+		// ノード全体のAABBの表面積
+		auto rootSurfaceArea = root->m_aabb.computeSurfaceArea();
+
+		for (int axis = 0; axis < 3; axis++) {
+			// ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.
+			sortList(list, num, axis);
+
+			// AABBの表面積リスト。s1SA[i], s2SA[i] は、
+			// 「S1側にi個、S2側に(polygons.size()-i)個ポリゴンがあるように分割」したときの表面積
+			std::vector<real> s1SurfaceArea(num + 1, AT_MATH_INF);
+			std::vector<real> s2SurfaceArea(num + 1, AT_MATH_INF);
+
+			// 分割された2つの領域.
+			std::vector<bvhnode*> s1;					// 右側.
+			std::vector<bvhnode*> s2(list, list + num);	// 左側.
+
+			// NOTE
+			// s2側から取り出して、s1に格納するため、s2にリストを全部入れる.
+
+			aabb s1bbox;
+
+			// 可能な分割方法について、s1側の AABB の表面積を計算.
+			for (uint32_t i = 0; i <= num; i++) {
+				s1SurfaceArea[i] = s1bbox.computeSurfaceArea();
+
+				if (s2.size() > 0) {
+					// s2側で、axis について最左 (最小位置) にいるポリゴンをs1の最右 (最大位置) に移す
+					auto p = s2.front();
+					s1.push_back(p);
+					pop_front(s2);
+
+					// 移したポリゴンのAABBをマージしてs1のAABBとする.
+					auto bbox = p->getBoundingbox();
+					s1bbox = aabb::merge(s1bbox, bbox);
+				}
+			}
+
+			// 逆にs2側のAABBの表面積を計算しつつ、SAH を計算.
+			aabb s2bbox;
+
+			for (int i = num; i >= 0; i--) {
+				s2SurfaceArea[i] = s2bbox.computeSurfaceArea();
+
+				if (s1.size() > 0 && s2.size() > 0) {
+					// SAH-based cost の計算.
+					auto cost =	2 * T_aabb
+						+ (s1SurfaceArea[i] * s1.size() + s2SurfaceArea[i] * s2.size()) * T_tri / rootSurfaceArea;
+
+					// 最良コストが更新されたか.
+					if (cost < bestCost) {
+						bestCost = cost;
+						bestAxis = axis;
+						bestSplitIndex = i;
+					}
+				}
+
+				if (s1.size() > 0) {
+					// s1側で、axis について最右にいるポリゴンをs2の最左に移す.
+					auto p = s1.back();
+					
+					// 先頭に挿入.
+					s2.insert(s2.begin(), p); 
+
+					s1.pop_back();
+
+					// 移したポリゴンのAABBをマージしてS2のAABBとする.
+					auto bbox = p->getBoundingbox();
+					s2bbox = aabb::merge(s2bbox, bbox);
+				}
+			}
+		}
+
+		if (bestAxis >= 0) {
+			// bestAxis に基づき、左右に分割.
+			// bestAxis でソート.
+			sortList(list, num, bestAxis);
+
+			// 左右の子ノードを作成.
+			root->m_left = new bvhnode();
+			root->m_right = new bvhnode();
+
+			// リストを分割.
+			int leftListNum = bestSplitIndex;
+			int rightListNum = num - leftListNum;
+
+			AT_ASSERT(rightListNum > 0);
+
+			// 再帰処理
+			buildBySAH(root->m_left, list, leftListNum);
+			buildBySAH(root->m_right, list + leftListNum, rightListNum);
+		}
 	}
 }

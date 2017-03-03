@@ -81,7 +81,7 @@ namespace aten {
 		return b0 & b1;
 	}
 
-	real aabb::cumputeSurfaceArea() const
+	real aabb::computeSurfaceArea() const
 	{
 		auto dx = aten::abs(m_max.x - m_min.x);
 		auto dy = aten::abs(m_max.y - m_min.y);

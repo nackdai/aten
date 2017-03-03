@@ -82,6 +82,11 @@ namespace aten {
 			real t_min, real t_max,
 			hitrecord& rec);
 
+		static void buildBySAH(
+			bvhnode* root,
+			bvhnode** list,
+			uint32_t num);
+
 	private:
 		bvhnode* m_root{ nullptr };
 	};

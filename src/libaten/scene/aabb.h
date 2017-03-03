@@ -49,7 +49,7 @@ namespace aten {
 			return std::move(center);
 		}
 
-		real cumputeSurfaceArea() const;
+		real computeSurfaceArea() const;
 
 		void empty();
 

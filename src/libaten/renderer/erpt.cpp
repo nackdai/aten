@@ -470,7 +470,7 @@ namespace aten
 						const int numChains = (int)std::floor(r + illum / (mutation * ed));;
 
 						// 周囲に分配するエネルギー.
-						const vec3 dep_value = (e / illum * ed) / samples;
+						const vec3 depositValue = (e / illum * ed) / samples;
 
 						for (int nc = 0; nc < numChains; nc++) {
 							ERPTSampler Y = X;
@@ -522,8 +522,16 @@ namespace aten
 								// エネルギーをRedistributionする.
 								// 同じ個所に分配され続けないように上限を制限.
 								if (stack_num < MaxStack) {
+#if 1
+									if (!Ypath.isTerminate) {
+										// 論文とは異なるが、光源に直接ヒットしたときは分配しないでみる.
+										int pos = Ypath.y * width + Ypath.x;
+										tmpImage[pos] += depositValue;
+									}
+#else
 									int pos = Ypath.y * width + Ypath.x;
-									tmpImage[pos] += dep_value;
+									tmpImage[pos] += depositValue;
+#endif
 								}
 							}
 						}

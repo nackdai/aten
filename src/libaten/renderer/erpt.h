@@ -1,12 +1,12 @@
 #pragma once
 
-#include "renderer/renderer.h"
+#include "renderer/pathtracing.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 
 namespace aten
 {
-	class ERPT : public Renderer {
+	class ERPT : public PathTracing {
 	public:
 		ERPT() {}
 		~ERPT() {}
@@ -31,18 +31,5 @@ namespace aten
 			int width, int height,
 			camera* camera,
 			bool willImagePlaneMutation);
-
-		Path radiance(
-			sampler* sampler,
-			const ray& inRay,
-			camera* cam,
-			CameraSampleResult& camsample,
-			scene* scene);
-
-	private:
-		uint32_t m_maxDepth{ 1 };
-
-		// Depth to compute russinan roulette.
-		uint32_t m_rrDepth{ 1 };
 	};
 }

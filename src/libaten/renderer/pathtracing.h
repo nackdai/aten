@@ -14,9 +14,9 @@ namespace aten
 		virtual void render(
 			Destination& dst,
 			scene* scene,
-			camera* camera) override final;
+			camera* camera) override;
 
-	private:
+	protected:
 		struct Path {
 			vec3 contrib;
 			bool isTerminate{ false };
@@ -37,7 +37,7 @@ namespace aten
 			CameraSampleResult& camsample,
 			scene* scene);
 
-	private:
+	protected:
 		uint32_t m_maxDepth{ 1 };
 
 		// Depth to compute russinan roulette.

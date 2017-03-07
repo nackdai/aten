@@ -81,8 +81,17 @@ public:
 		aten::vec3& at);
 };
 
+class SmallLightScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at);
+};
+
 //#define Scene CornellBoxScene
-#define Scene RandomScene
+//#define Scene RandomScene
 //#define Scene ObjectScene
 //#define Scene MtrlTestScene
 //#define Scene PointLightScene
@@ -90,3 +99,4 @@ public:
 //#define Scene SpotLightScene
 //#define Scene ManyLightScene
 //#define Scene TexturesScene
+#define Scene SmallLightScene

@@ -443,3 +443,87 @@ void TexturesScene::getCameraPosAndAt(
 	pos = aten::vec3(0, 0, 13);
 	at = aten::vec3(0, 0, 0);
 }
+
+/////////////////////////////////////////////////////
+
+void SmallLightScene::makeScene(aten::scene* scene)
+{
+	auto emit = new aten::emissive(aten::vec3(64.0, 64.0, 64.0));
+
+	auto light = new aten::sphere(
+		aten::vec3(1, 1, 1),
+		15.0,
+		emit);
+
+	double r = 1e3;
+
+	auto left = new aten::sphere(
+		aten::vec3(r + 1, 40.8, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.75f, 0.25f, 0.25f)));
+
+	auto right = new aten::sphere(
+		aten::vec3(-r + 99, 40.8, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.25, 0.25, 0.75)));
+
+	auto wall = new aten::sphere(
+		aten::vec3(50, 40.8, r),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	auto floor = new aten::sphere(
+		aten::vec3(50, r, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	auto ceil = new aten::sphere(
+		aten::vec3(50, -r + 81.6, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	//auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
+
+	// —Î‹….
+	auto green = new aten::sphere(
+		aten::vec3(65, 20, 20),
+		20,
+		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+	//new aten::lambert(aten::vec3(1, 1, 1), tex));
+
+	// ‹¾.
+	auto mirror = new aten::sphere(
+		aten::vec3(27, 16.5, 47),
+		16.5,
+		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+
+	// ƒKƒ‰ƒX.
+	auto glass = new aten::sphere(
+		aten::vec3(77, 16.5, 78),
+		16.5,
+		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+
+#if 1
+	scene->add(light);
+	scene->add(left);
+	scene->add(right);
+	scene->add(wall);
+	scene->add(floor);
+	scene->add(ceil);
+	scene->add(green);
+	scene->add(mirror);
+	scene->add(glass);
+
+	aten::Light* l = new aten::AreaLight(light, emit->color());
+
+	scene->addLight(l);
+#endif
+}
+
+void SmallLightScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(50.0, 52.0, 295.6);
+	at = aten::vec3(50.0, 40.8, 119.0);
+}

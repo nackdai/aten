@@ -1,6 +1,7 @@
 #include "scene/bvh.h"
 
 #include <random>
+#include <vector>
 
 #define BVH_SAH
 
@@ -254,6 +255,7 @@ namespace aten {
 		// NOTE
 		// http://qiita.com/omochi64/items/9336f57118ba918f82ec
 
+#if 0
 		// ある？
 		AT_ASSERT(num > 0);
 
@@ -388,5 +390,174 @@ namespace aten {
 			buildBySAH(root->m_left, list, leftListNum);
 			buildBySAH(root->m_right, list + leftListNum, rightListNum);
 		}
+#else
+		struct BuildInfo {
+			bvhnode* node{ nullptr };
+			bvhnode** list{ nullptr };
+			uint32_t num{ 0 };
+
+			BuildInfo() {}
+			BuildInfo(bvhnode* _node, bvhnode** _list, uint32_t _num)
+			{
+				node = _node;
+				list = _list;
+				num = _num;
+			}
+		};
+
+		std::vector<BuildInfo> stacks;
+		stacks.push_back(BuildInfo());
+
+		BuildInfo info(root, list, num);
+
+		while (info.node != nullptr)
+		{
+			// 全体を覆うAABBを計算.
+			info.node->m_aabb = info.list[0]->getBoundingbox();
+			for (uint32_t i = 1; i < info.num; i++) {
+				auto bbox = info.list[i]->getBoundingbox();
+				info.node->m_aabb = aabb::merge(info.node->m_aabb, bbox);
+			}
+
+			if (info.num == 1) {
+				// １個しかないので、これだけで終了.
+				info.node->m_left = info.list[0];
+
+				info = stacks.back();
+				stacks.pop_back();
+				continue;
+			}
+			else if (info.num == 2) {
+				// ２個だけのときは適当にソートして、終了.
+				int axis = (int)(::rand() % 3);
+
+				sortList(info.list, info.num, axis);
+
+				info.node->m_left = info.list[0];
+				info.node->m_right = info.list[1];
+
+				info = stacks.back();
+				stacks.pop_back();
+				continue;
+			}
+
+			// Triangleとrayのヒットにかかる処理時間の見積もり.
+			static const real T_tri = 1;  // 適当.
+
+			// AABBとrayのヒットにかかる処理時間の見積もり.
+			static const real T_aabb = 1;  // 適当.
+
+			// 領域分割をせず、polygons を含む葉ノードを構築する場合を暫定の bestCost にする.
+			//auto bestCost = T_tri * num;
+			uint32_t bestCost = UINT32_MAX;	// 限界まで分割したいので、適当に大きい値にしておく.
+
+			// 分割に最も良い軸 (0:x, 1:y, 2:z)
+			int bestAxis = -1;
+
+			// 最も良い分割場所
+			int bestSplitIndex = -1;
+
+			// ノード全体のAABBの表面積
+			auto rootSurfaceArea = info.node->m_aabb.computeSurfaceArea();
+
+			for (int axis = 0; axis < 3; axis++) {
+				// ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.
+				sortList(info.list, info.num, axis);
+
+				// AABBの表面積リスト。s1SA[i], s2SA[i] は、
+				// 「S1側にi個、S2側に(polygons.size()-i)個ポリゴンがあるように分割」したときの表面積
+				std::vector<real> s1SurfaceArea(info.num + 1, AT_MATH_INF);
+				std::vector<real> s2SurfaceArea(info.num + 1, AT_MATH_INF);
+
+				// 分割された2つの領域.
+				std::vector<bvhnode*> s1;					// 右側.
+				std::vector<bvhnode*> s2(info.list, info.list + info.num);	// 左側.
+
+				// NOTE
+				// s2側から取り出して、s1に格納するため、s2にリストを全部入れる.
+
+				aabb s1bbox;
+
+				// 可能な分割方法について、s1側の AABB の表面積を計算.
+				for (uint32_t i = 0; i <= info.num; i++) {
+					s1SurfaceArea[i] = s1bbox.computeSurfaceArea();
+
+					if (s2.size() > 0) {
+						// s2側で、axis について最左 (最小位置) にいるポリゴンをs1の最右 (最大位置) に移す
+						auto p = s2.front();
+						s1.push_back(p);
+						pop_front(s2);
+
+						// 移したポリゴンのAABBをマージしてs1のAABBとする.
+						auto bbox = p->getBoundingbox();
+						s1bbox = aabb::merge(s1bbox, bbox);
+					}
+				}
+
+				// 逆にs2側のAABBの表面積を計算しつつ、SAH を計算.
+				aabb s2bbox;
+
+				for (int i = info.num; i >= 0; i--) {
+					s2SurfaceArea[i] = s2bbox.computeSurfaceArea();
+
+					if (s1.size() > 0 && s2.size() > 0) {
+						// SAH-based cost の計算.
+						auto cost = 2 * T_aabb
+							+ (s1SurfaceArea[i] * s1.size() + s2SurfaceArea[i] * s2.size()) * T_tri / rootSurfaceArea;
+
+						// 最良コストが更新されたか.
+						if (cost < bestCost) {
+							bestCost = cost;
+							bestAxis = axis;
+							bestSplitIndex = i;
+						}
+					}
+
+					if (s1.size() > 0) {
+						// s1側で、axis について最右にいるポリゴンをs2の最左に移す.
+						auto p = s1.back();
+
+						// 先頭に挿入.
+						s2.insert(s2.begin(), p);
+
+						s1.pop_back();
+
+						// 移したポリゴンのAABBをマージしてS2のAABBとする.
+						auto bbox = p->getBoundingbox();
+						s2bbox = aabb::merge(s2bbox, bbox);
+					}
+				}
+			}
+
+			if (bestAxis >= 0) {
+				// bestAxis に基づき、左右に分割.
+				// bestAxis でソート.
+				sortList(info.list, info.num, bestAxis);
+
+				// 左右の子ノードを作成.
+				info.node->m_left = new bvhnode();
+				info.node->m_right = new bvhnode();
+
+				// リストを分割.
+				int leftListNum = bestSplitIndex;
+				int rightListNum = info.num - leftListNum;
+
+				AT_ASSERT(rightListNum > 0);
+
+				auto _list = info.list;
+
+				auto _left = info.node->m_left;
+				auto _right = info.node->m_right;
+
+				info = BuildInfo(_left, _list, leftListNum);
+				stacks.push_back(BuildInfo(_right, _list + leftListNum, rightListNum));
+			}
+			else {
+				// TODO
+				info = stacks.back();
+				stacks.pop_back();
+			}
+		}
+#endif
 	}
 }

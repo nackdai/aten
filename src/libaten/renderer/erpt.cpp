@@ -212,7 +212,7 @@ namespace aten
 			}
 		}
 
-		const real ed = color::luminance (sumI / (width * height)) / mutation;
+		const real ed = color::luminance(sumI / (width * height)) / mutation;
 
 		std::vector<std::vector<vec3>> acuumImage(threadNum);
 		std::vector<std::vector<vec3>> tmpImageArray(threadNum);
@@ -251,11 +251,11 @@ namespace aten
 					}
 
 					const vec3 e = newSample.contrib;
-					auto l = color::luminance (e);
+					auto l = color::luminance(e);
 
 					if (l > 0) {
 						auto r = rnd.next01();
-						auto illum = color::luminance (e);
+						auto illum = color::luminance(e);
 						const int numChains = (int)std::floor(r + illum / (mutation * ed));;
 
 						// 周囲に分配するエネルギー.
@@ -283,8 +283,8 @@ namespace aten
 								// いる？
 								//Z.reset();
 
-								auto lfz = color::luminance (Zpath.contrib);
-								auto lfy = color::luminance (Ypath.contrib);
+								auto lfz = color::luminance(Zpath.contrib);
+								auto lfy = color::luminance(Ypath.contrib);
 
 								auto q = lfz / lfy;
 

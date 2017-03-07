@@ -268,7 +268,7 @@ namespace aten
 				mlt.clearStack();
 
 				// sum I.
-				sumI += color::luminance (sample.contrib);
+				sumI += color::luminance(sample.contrib);
 			}
 
 			// ç≈èâÇÃÉpÉXÇãÅÇﬂÇÈ.
@@ -280,7 +280,7 @@ namespace aten
 
 				for (int i = 0; i < seedPathMax; i++) {
 					const auto& path = seedPaths[i];
-					accumlatedImportance += color::luminance (path.contrib);
+					accumlatedImportance += color::luminance(path.contrib);
 
 					if (accumlatedImportance >= cost) {
 						selecetdPath = i;
@@ -305,8 +305,8 @@ namespace aten
 				// gen new path
 				Path newPath = genPath(scene, &mlt, -1, -1, width, height, camera);
 
-				real I = color::luminance (newPath.contrib);
-				real oldI = color::luminance (oldPath.contrib);
+				real I = color::luminance(newPath.contrib);
+				real oldI = color::luminance(oldPath.contrib);
 
 				real a = std::min(1.0, I / oldI);
 

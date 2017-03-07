@@ -94,7 +94,7 @@ namespace aten {
 			auto dist2 = lightsample.dir.squared_length();
 			auto dist = aten::sqrt(dist2);
 
-			auto illum = color::luminance (lightsample.finalColor);
+			auto illum = color::luminance(lightsample.finalColor);
 
 			if (cosShadow > 0) {
 				if (light->isSingular() || light->isInifinite()) {

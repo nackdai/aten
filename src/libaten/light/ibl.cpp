@@ -59,7 +59,7 @@ namespace aten {
 				real v = (real)(y + 0.5) / height;
 
 				auto clr = m_envmap->sample(u, v);
-				const auto illum = color::luminance (clr);
+				const auto illum = color::luminance(clr);
 
 				m_avgIllum += illum * scale;
 				totalWeight += scale;
@@ -122,7 +122,7 @@ namespace aten {
 	real ImageBasedLight::samplePdf(const ray& r) const
 	{
 		auto clr = m_envmap->sample(r);
-		auto illum = color::luminance (clr);
+		auto illum = color::luminance(clr);
 
 		auto pdf = illum / m_avgIllum;
 

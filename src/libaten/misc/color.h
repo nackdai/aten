@@ -26,10 +26,10 @@ namespace aten {
 		static const vec3 YCbCr2G;
 		static const vec3 YCbCr2B;
 
-		static real illuminance(const vec3& v)
+		static real luminance(const vec3& v)
 		{
-			static const vec3 illum(0.2126, 0.7152, 0.0722);
-			real ret = dot(illum, v);
+			static const vec3 lum(0.2126, 0.7152, 0.0722);
+			real ret = dot(lum, v);
 			return ret;
 		}
 

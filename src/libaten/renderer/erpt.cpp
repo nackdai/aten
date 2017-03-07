@@ -212,8 +212,9 @@ namespace aten
 			}
 		}
 
-		const real ed = color::illuminance(sumI / (width * height)) / mutation;
+		const real ed = color::luminance (sumI / (width * height)) / mutation;
 
+		std::vector<std::vector<vec3>> acuumImage(threadNum);
 		std::vector<std::vector<vec3>> tmpImageArray(threadNum);
 
 #ifdef ENABLE_OMP
@@ -224,9 +225,12 @@ namespace aten
 
 			auto idx = thread::getThreadIdx();
 
-			std::vector<vec3>& tmpImage = tmpImageArray[idx];
+			auto& tmpImage = tmpImageArray[idx];
 			if (tmpImage.empty()) {
 				tmpImage.resize(width * height);
+			}
+			else {
+				std::fill(tmpImage.begin(), tmpImage.end(), vec3());
 			}
 
 			for (int x = 0; x < width; x++) {
@@ -247,11 +251,11 @@ namespace aten
 					}
 
 					const vec3 e = newSample.contrib;
-					auto l = color::illuminance(e);
+					auto l = color::luminance (e);
 
 					if (l > 0) {
 						auto r = rnd.next01();
-						auto illum = color::illuminance(e);
+						auto illum = color::luminance (e);
 						const int numChains = (int)std::floor(r + illum / (mutation * ed));;
 
 						// 周囲に分配するエネルギー.
@@ -277,10 +281,10 @@ namespace aten
 								Path Zpath = genPath(scene, &Z, x, y, width, height, camera, true);
 
 								// いる？
-								Z.reset();
+								//Z.reset();
 
-								auto lfz = color::illuminance(Zpath.contrib);
-								auto lfy = color::illuminance(Ypath.contrib);
+								auto lfz = color::luminance (Zpath.contrib);
+								auto lfy = color::luminance (Ypath.contrib);
 
 								auto q = lfz / lfy;
 
@@ -323,13 +327,20 @@ namespace aten
 					}
 				}
 			}
+
+			auto& image = acuumImage[idx];
+			if (image.empty()) {
+				image.resize(width * height);
+			}
+			for (int i = 0; i < width * height; i++) {
+				image[i] += tmpImage[i];
+			}
 		}
 
 		for (int n = 0; n < threadNum; n++) {
-			std::vector<vec3>& tmpImage = tmpImageArray[n];
-
+			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				color[i] = color[i] + tmpImage[i];
+				color[i] += image[i];
 			}
 		}
 	}

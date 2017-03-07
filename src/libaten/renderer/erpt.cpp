@@ -33,7 +33,7 @@ namespace aten
 		inline real mutate(real value);
 
 	private:
-		random* m_rnd;
+		random* m_rnd{ nullptr };
 
 		int m_usedRandCoords{ 0 };
 
@@ -114,6 +114,7 @@ namespace aten
 		// スクリーン上でのパスの変異量.
 		static const int image_plane_mutation_value = 10;
 
+#if 0
 		// スクリーン上で変異する.
 		auto s1 = sampler->nextSample();
 		auto s2 = sampler->nextSample();
@@ -122,6 +123,16 @@ namespace aten
 			x += int(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
 			y += int(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
 		}
+#else
+		if (willImagePlaneMutation) {
+			// スクリーン上で変異する.
+			auto s1 = sampler->nextSample();
+			auto s2 = sampler->nextSample();
+
+			x += int(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
+			y += int(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
+		}
+#endif
 
 		if (x < 0 || width <= x || y < 0 || height <= y) {
 			return std::move(Path());
@@ -220,6 +231,8 @@ namespace aten
 
 			for (int x = 0; x < width; x++) {
 				for (uint32_t i = 0; i < samples; i++) {
+					// TODO
+					// sobol や halton sequence はステップ数が多すぎてオーバーフローしてしまう...
 					XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
 					ERPTSampler X(&rnd);
 

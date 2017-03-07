@@ -62,5 +62,6 @@
 #include "renderer/raytracing.h"
 #include "renderer/pathtracing.h"
 #include "renderer/erpt.h"
+#include "renderer/pssmlt.h"
 
 #include "posteffect/BloomEffect.h"

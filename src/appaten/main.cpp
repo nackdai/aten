@@ -24,7 +24,8 @@ static aten::texture* g_envmap;
 //static aten::RayTracing g_tracer;
 //static aten::PathTracing g_tracer;
 //static aten::SortedPathTracing g_tracer;
-static aten::ERPT g_tracer;
+//static aten::ERPT g_tracer;
+static aten::PSSMLT g_tracer;
 
 static std::vector<aten::vec3> g_buffer;
 static std::vector<aten::TColor<uint8_t>> g_dst;
@@ -47,6 +48,7 @@ void display()
 		dst.russianRouletteDepth = 3;
 		dst.sample = 10;
 		dst.mutation = 10;
+		dst.mltNum = 10;
 		dst.buffer = &g_buffer[0];
 	}
 

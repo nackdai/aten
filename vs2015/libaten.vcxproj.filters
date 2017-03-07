@@ -246,6 +246,9 @@
     <ClInclude Include="..\src\libaten\renderer\erpt.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pssmlt.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -366,6 +369,9 @@
       <Filter>posteffect</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>

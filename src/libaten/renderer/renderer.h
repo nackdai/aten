@@ -13,6 +13,7 @@ namespace aten
 		uint32_t russianRouletteDepth{ 1 };
 		uint32_t sample{ 1 };
 		uint32_t mutation{ 1 };
+		uint32_t mltNum{ 1 };
 		vec3* buffer{ nullptr };
 	};
 

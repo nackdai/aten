@@ -190,6 +190,7 @@
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
+    <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\sampler\halton.h" />
@@ -241,6 +242,7 @@
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
+    <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\sorted_pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />

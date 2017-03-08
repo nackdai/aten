@@ -16,6 +16,7 @@
 #include "material/blinn.h"
 #include "material/ggx.h"
 #include "material/beckman.h"
+#include "material/disney_brdf.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

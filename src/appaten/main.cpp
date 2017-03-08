@@ -17,7 +17,7 @@ static aten::PinholeCamera g_camera;
 //static aten::AcceledScene<aten::LinearList> g_scene;
 static aten::AcceledScene<aten::bvh> g_scene;
 
-//static aten::StaticColorBG g_bg(aten::vec3(0, 0, 0));
+static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
@@ -46,7 +46,7 @@ void display()
 		dst.height = HEIGHT;
 		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
-		dst.sample = 10;
+		dst.sample = 32;
 		dst.mutation = 10;
 		dst.mltNum = 10;
 		dst.buffer = &g_buffer[0];
@@ -149,6 +149,7 @@ int main(int argc, char* argv[])
 
 	//aten::visualizer::addPostProc(&nmlshd);
 	aten::visualizer::addPostProc(&gamma);
+	//aten::visualizer::addPostProc(&tonemap);
 	//aten::visualizer::addPostProc(&bloom);
 
 	aten::vec3 lookfrom;
@@ -184,9 +185,9 @@ int main(int argc, char* argv[])
 	g_bg.init(g_envmap);
 
 	aten::ImageBasedLight ibl(&g_bg);
-	g_scene.addImageBasedLight(&ibl);
+	//g_scene.addImageBasedLight(&ibl);
 
-	g_tracer.setBG(&g_bg);
+	g_tracer.setBG(&g_staticbg);
 
 	//aten::NonLocalMeanFilter filter;
 	//aten::BilateralFilter filter;

@@ -527,3 +527,65 @@ void SmallLightScene::getCameraPosAndAt(
 	pos = aten::vec3(50.0, 52.0, 295.6);
 	at = aten::vec3(50.0, 40.8, 119.0);
 }
+
+/////////////////////////////////////////////////////
+
+void DisneyMaterialTestScene::makeScene(aten::scene* scene)
+{
+	{
+		aten::DisneyBRDF::Parameter param;
+		param.roughness = 0.5;
+		param.specular = 1.0;
+		param.metallic = 1.0;
+
+		auto m = new aten::DisneyBRDF(param);
+		auto s = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, m);
+		scene->add(s);
+	}
+
+	{
+		auto m = new aten::lambert(aten::vec3(0.82, 0.67, 0.16));
+		auto s = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, m);
+		scene->add(s);
+	}
+
+	aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
+	scene->addLight(dir);
+
+#if 0
+	{
+		aten::DisneyBRDF::Parameter param;
+		param.sheen = 0.5;
+
+		auto m = new aten::DisneyBRDF(param);
+		auto s = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, m);
+		scene->add(s);
+	}
+
+	{
+		aten::DisneyBRDF::Parameter param;
+		param.anisotropic = 0.5;
+
+		auto m = new aten::DisneyBRDF(param);
+		auto s = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, m);
+		scene->add(s);
+	}
+
+	{
+		aten::DisneyBRDF::Parameter param;
+		param.subsurface = 0.5;
+
+		auto m = new aten::DisneyBRDF(param);
+		auto s = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, m);
+		scene->add(s);
+	}
+#endif
+}
+
+void DisneyMaterialTestScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(0, 0, 13);
+	at = aten::vec3(0, 0, 0);
+}

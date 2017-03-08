@@ -51,7 +51,14 @@ namespace aten
 		// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
 		// p25 equation(13)
 
+#if 0
 		return 1 / (AT_MATH_PI * ax * ay * sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + NdotH * NdotH));
+#else
+		// A trick to avoid fireflies from RadeonRaySDK.
+		auto f = 1 / (AT_MATH_PI * ax * ay * sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + NdotH * NdotH));
+		f = aten::clamp<real>(f, 0, 10);
+		return f;
+#endif
 	}
 
 	inline real smithG_GGX(real NdotV, real alphaG)
@@ -117,8 +124,8 @@ namespace aten
 		const auto roughness = m_roughness;
 		const auto metalic = m_metallic;
 
-		const auto weight1 = metalic;
-		const auto weight2 = 1 - metalic;
+		const auto weight2 = metalic;
+		const auto weight1 = 1 - weight2;
 
 		// diffuse.
 		const real diffusePdf = LdotN / AT_MATH_PI;
@@ -177,8 +184,8 @@ namespace aten
 		const auto roughness = m_roughness;
 		const auto metalic = m_metallic;
 
-		const auto weight1 = metalic;
-		const auto weight2 = 1 - metalic;
+		const auto weight2 = metalic;
+		const auto weight1 = 1 - weight2;
 
 		// specular
 		const auto aspect = aten::sqrt(1 - anisotropic * 0.9);
@@ -222,7 +229,7 @@ namespace aten
 			H = sqrt(r2 / (1 - r2)) * (ax * aten::cos(2 * AT_MATH_PI * r1) + ay * sin(2 * AT_MATH_PI * r1)) + N;
 			H.normalize();
 
-			L = 2 * dot(V, H) - V;
+			L = 2 * dot(V, H) * H - V;
 		}
 
 		return std::move(L);
@@ -285,7 +292,7 @@ namespace aten
 		// and mix in diffuse retro-reflection based on roughness
 		const auto FL = SchlickFresnel(NdotL);
 		const auto FV = SchlickFresnel(NdotV);
-		const auto Fd90 = 0.5 + 2 * LdotH*LdotH * roughness;
+		const auto Fd90 = 0.5 + 2 * LdotH * LdotH * roughness;
 		const auto Fd = aten::mix(real(1), Fd90, FL) * aten::mix(real(1), Fd90, FV);
 
 		// Based on Hanrahan-Krueger brdf approximation of isotropic bssrdf
@@ -298,7 +305,7 @@ namespace aten
 		// specular
 		const auto aspect = aten::sqrt(1 - anisotropic * 0.9);
 		const auto ax = std::max(0.001, sqr(roughness) / aspect);
-		const auto ay = std::max(0.001, sqr(roughness)*aspect);
+		const auto ay = std::max(0.001, sqr(roughness) * aspect);
 		const auto Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
 		const auto FH = SchlickFresnel(LdotH);
 		const vec3 Fs = aten::mix(Cspec0, vec3(1), FH);
@@ -309,13 +316,18 @@ namespace aten
 		vec3 Fsheen = FH * sheen * Csheen;
 
 		// clearcoat (ior = 1.5 -> F0 = 0.04)
-		const auto Dr = GTR1(NdotH, mix(.1, .001, clearcoatGloss));
+		const auto Dr = GTR1(NdotH, aten::mix(0.1, 0.001, clearcoatGloss));
 		const auto Fr = aten::mix(0.04, real(1), FH);
 		const auto Gr = smithG_GGX(NdotL, 0.25) * smithG_GGX(NdotV, 0.25);	// ò_ï∂ì‡Ç≈0.25åàÇﬂÇ§ÇøÇ∆ãLç⁄.
 
 		return ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metallic)	// diffuse
 			+ Gs * Fs * Ds						// specular
+#if 0
 			+ 0.25 * clearcoat * Gr * Fr * Dr;	// clearcoat
+#else
+			// A trick to avoid fireflies from RadeonRaySDK.
+			+ aten::clamp<real>(clearcoat * Gr * Fr * Dr, 0, 0.5);	// clearcoat.
+#endif
 	}
 
 	material::sampling DisneyBRDF::sample(

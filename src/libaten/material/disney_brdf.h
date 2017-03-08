@@ -7,6 +7,20 @@ namespace aten
 {
 	class DisneyBRDF : public material {
 	public:
+		struct Parameter {
+			vec3 baseColor{ vec3(0.82, 0.67, 0.16) };
+			real metallic{ 0 };
+			real subsurface{ 0 };
+			real specular{ 0.5 };
+			real roughness{ 0.5 };
+			real specularTint{ 0 };
+			real anisotropic{ 0 };
+			real sheen{ 0 };
+			real sheenTint{ 0.5 };
+			real clearcoat{ 0 };
+			real clearcoatGloss{ 1 };
+		};
+	public:
 		DisneyBRDF() {}
 		DisneyBRDF(
 			vec3 baseColor,
@@ -36,6 +50,28 @@ namespace aten
 			m_sheenTint = aten::clamp<real>(sheenTint, 0, 1);
 			m_clearcoat = aten::clamp<real>(clearcoat, 0, 1);
 			m_clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
+
+			m_roughnessMap = roughnessMap;
+		}
+
+		DisneyBRDF(
+			const Parameter& param,
+			texture* albedoMap = nullptr,
+			texture* normalMap = nullptr,
+			texture* roughnessMap = nullptr)
+			: material(param.baseColor, albedoMap, normalMap)
+		{
+			m_baseColor = param.baseColor;
+			m_subsurface = aten::clamp<real>(param.subsurface, 0, 1);
+			m_metallic = aten::clamp<real>(param.metallic, 0, 1);
+			m_specular = aten::clamp<real>(param.specular, 0, 1);
+			m_specularTint = aten::clamp<real>(param.specularTint, 0, 1);
+			m_roughness = aten::clamp<real>(param.roughness, 0, 1);
+			m_anisotropic = aten::clamp<real>(param.anisotropic, 0, 1);
+			m_sheen = aten::clamp<real>(param.sheen, 0, 1);
+			m_sheenTint = aten::clamp<real>(param.sheenTint, 0, 1);
+			m_clearcoat = aten::clamp<real>(param.clearcoat, 0, 1);
+			m_clearcoatGloss = aten::clamp<real>(param.clearcoatGloss, 0, 1);
 
 			m_roughnessMap = roughnessMap;
 		}

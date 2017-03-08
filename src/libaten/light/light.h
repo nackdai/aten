@@ -15,9 +15,6 @@ namespace aten {
 		real pdf{ real(0) };		// light sampling pdf.
 
 		hitable* obj{ nullptr };	// light object(only for area light)
-
-		real r1;	// random number used in sampling light.
-		real r2;	// random number used in sampling light.
 	};
 
 	class Light : public hitable {

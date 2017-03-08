@@ -38,10 +38,7 @@ namespace aten {
 
 				vec3 pos;
 				if (sampler) {
-					result.r1 = sampler->nextSample();
-					result.r2 = sampler->nextSample();
-
-					pos = m_object->getRandomPosOn(result.r1, result.r2);
+					pos = m_object->getRandomPosOn(sampler);
 				}
 				else {
 					pos = m_object->getBoundingbox().getCenter();

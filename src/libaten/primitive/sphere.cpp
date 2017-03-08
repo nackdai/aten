@@ -75,13 +75,6 @@ namespace aten
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
-		auto ret = getRandomPosOn(r1, r2);
-
-		return std::move(ret);
-	}
-
-	vec3 sphere::getRandomPosOn(real r1, real r2) const
-	{
 		auto r = m_radius;
 
 		auto z = 1.0 - 2.0 * r2; // [0,1] -> [-1, 1]

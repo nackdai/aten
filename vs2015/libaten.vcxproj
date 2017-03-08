@@ -170,6 +170,7 @@
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
     <ClInclude Include="..\src\libaten\material\blinn.h" />
+    <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />
     <ClCompile Include="..\src\libaten\material\beckman.cpp" />
     <ClCompile Include="..\src\libaten\material\blinn.cpp" />
+    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\lambert.cpp" />
     <ClCompile Include="..\src\libaten\material\material .cpp" />

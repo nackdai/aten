@@ -78,7 +78,7 @@ namespace aten
 		const vec3& wo) const
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 		auto wh = normalize(-wi + wo);
 

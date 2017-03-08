@@ -148,4 +148,12 @@ namespace aten {
 
 		return n + 2 - m;
 	}
+
+	template <typename TYPE>
+	inline TYPE mix(const TYPE& x, const TYPE& y, real a)
+	{
+		// Linear interpolation.
+		// x(1-a)+y*a
+		return x * (1 - a) + y * a;
+	}
 }

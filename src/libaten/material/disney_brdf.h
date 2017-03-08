@@ -1,0 +1,112 @@
+#pragma once
+
+#include "material/material.h"
+#include "texture/texture.h"
+
+namespace aten
+{
+	class DisneyBRDF : public material {
+	public:
+		DisneyBRDF() {}
+		DisneyBRDF(
+			vec3 baseColor,
+			real subsurface,
+			real metallic,
+			real specular,
+			real specularTint,
+			real roughness,
+			real anisotropic,
+			real sheen,
+			real sheenTint,
+			real clearcoat,
+			real clearcoatGloss,
+			texture* albedoMap = nullptr,
+			texture* normalMap = nullptr,
+			texture* roughnessMap = nullptr)
+			: material(baseColor, albedoMap, normalMap)
+		{
+			m_baseColor = baseColor;
+			m_subsurface = aten::clamp<real>(subsurface, 0, 1);
+			m_metallic = aten::clamp<real>(metallic, 0, 1);
+			m_specular = aten::clamp<real>(specular, 0, 1);
+			m_specularTint = aten::clamp<real>(specularTint, 0, 1);
+			m_roughness = aten::clamp<real>(roughness, 0, 1);
+			m_anisotropic = aten::clamp<real>(anisotropic, 0, 1);
+			m_sheen = aten::clamp<real>(sheen, 0, 1);
+			m_sheenTint = aten::clamp<real>(sheenTint, 0, 1);
+			m_clearcoat = aten::clamp<real>(clearcoat, 0, 1);
+			m_clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
+
+			m_roughnessMap = roughnessMap;
+		}
+
+		virtual ~DisneyBRDF() {}
+
+	public:
+		virtual real pdf(
+			const vec3& normal, 
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v,
+			sampler* sampler) const override final;
+
+		virtual vec3 sampleDirection(
+			const vec3& in,
+			const vec3& normal,
+			real u, real v,
+			sampler* sampler) const override final;
+
+		virtual vec3 bsdf(
+			const vec3& normal, 
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v) const override final;
+
+		virtual sampling sample(
+			const vec3& in,
+			const vec3& normal,
+			const hitrecord& hitrec,
+			sampler* sampler,
+			real u, real v) const override final;
+
+	private:
+		real pdf(
+			const vec3& V,
+			const vec3& N,
+			const vec3& L,
+			const vec3& X,
+			const vec3& Y,
+			real u, real v) const;
+
+		vec3 sampleDirection(
+			const vec3& V,
+			const vec3& N,
+			const vec3& X,
+			const vec3& Y,
+			real u, real v,
+			sampler* sampler) const;
+
+		vec3 bsdf(
+			const vec3& V,
+			const vec3& N,
+			const vec3& L,
+			const vec3& X,
+			const vec3& Y,
+			real u, real v) const;
+
+	private:
+		vec3 m_baseColor;		// サーフェイスカラー，通常テクスチャマップによって供給される.
+		real m_subsurface;		// 表面下の近似を用いてディフューズ形状を制御する.
+		real m_metallic;		// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+		real m_specular;		// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+		real m_specularTint;	// 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+		real m_roughness;		// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+		real m_anisotropic;		// 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+		real m_sheen;			// 追加的なグレージングコンポーネント，主に布に対して意図している.
+		real m_sheenTint;		// 基本色に向かう光沢色合いの量.
+		real m_clearcoat;		// 第二の特別な目的のスペキュラーローブ.
+		real m_clearcoatGloss;	// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+
+		texture* m_roughnessMap{ nullptr };
+	};
+}

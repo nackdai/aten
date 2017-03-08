@@ -252,6 +252,9 @@
     <ClInclude Include="..\src\libaten\hdr\gamma.h">
       <Filter>hdr</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\disney_brdf.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -379,6 +382,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp">
       <Filter>hdr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

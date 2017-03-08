@@ -145,6 +145,40 @@ namespace aten {
 		// NOTE
 		// cdf is normalized to [0, 1].
 
+#if 1
+		int idxTop = 0;
+		int idxTail = cdf.size() - 1;
+
+		for (;;) {
+			int idxMid = (idxTop + idxTail) >> 1;
+			auto midCdf = cdf[idxMid];
+
+			if (r < midCdf) {
+				idxTail = idxMid;
+			}
+			else {
+				idxTop = idxMid;
+			}
+
+			if ((idxTail - idxTop) == 1) {
+				auto topCdf = cdf[idxTop];
+				auto tailCdf = cdf[idxTail];
+
+				int idx = 0;
+
+				if (r <= topCdf) {
+					outPdf = topCdf;
+					idx = idxTop;
+				}
+				else {
+					outPdf = tailCdf - topCdf;
+					idx = idxTail;
+				}
+
+				return idx;
+			}
+		}
+#else
 		for (int i = 0; i < cdf.size(); i++) {
 			if (r <= cdf[i]) {
 				auto idx = i;
@@ -161,6 +195,7 @@ namespace aten {
 				return idx;
 			}
 		}
+#endif
 
 		AT_ASSERT(false);
 		return 0;

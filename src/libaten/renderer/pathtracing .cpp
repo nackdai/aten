@@ -147,6 +147,8 @@ namespace aten
 							auto bsdf = rec.mtrl->bsdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 							pdfb = rec.mtrl->pdf(orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
+							bsdf *= throughput;
+
 							// Get light color.
 							auto emit = sampleres.finalColor;
 
@@ -201,6 +203,7 @@ namespace aten
 					russianProb = sampler->nextSample();
 
 					if (russianProb >= p) {
+						path.contrib = vec3();
 						break;
 					}
 					else {

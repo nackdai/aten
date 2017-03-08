@@ -10,7 +10,8 @@ namespace aten
 		const vec3& normal, 
 		const vec3& wi,	/* in */
 		const vec3& wo,	/* out */
-		real u, real v) const
+		real u, real v,
+		sampler* sampler) const
 	{
 		// NOTE
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
@@ -171,7 +172,7 @@ namespace aten
 		ret.dir = sampleDirection(in, normal, u, v, sampler);
 
 #if 1
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
+		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 #else
 		vec3 V = -in;

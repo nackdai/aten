@@ -8,7 +8,8 @@ namespace aten
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v,
+		sampler* sampler) const
 	{
 		return real(1);
 	}
@@ -59,7 +60,7 @@ namespace aten
 		sampling ret;
 
 		ret.dir = sampleDirection(in, normal, u, v, sampler);
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
+		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);

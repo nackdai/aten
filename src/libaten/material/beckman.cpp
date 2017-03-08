@@ -12,7 +12,8 @@ namespace aten
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v,
+		sampler* sampler) const
 	{
 		auto roughness = sampleRoughness(u, v);
 		auto ret = pdf(roughness, normal, wi, wo);

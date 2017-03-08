@@ -22,10 +22,10 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-//static aten::PathTracing g_tracer;
+static aten::PathTracing g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
-static aten::PSSMLT g_tracer;
+//static aten::PSSMLT g_tracer;
 
 static std::vector<aten::vec3> g_buffer;
 static std::vector<aten::TColor<uint8_t>> g_dst;
@@ -141,8 +141,14 @@ int main(int argc, char* argv[])
 		"../shader/bloomeffect_fs_Final.glsl");
 	bloom.setParam(0.2f, 0.4f);
 
+	aten::GammaCorrection gamma;
+	gamma.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/gamma_fs.glsl");
+
 	//aten::visualizer::addPostProc(&nmlshd);
-	aten::visualizer::addPostProc(&tonemap);
+	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&bloom);
 
 	aten::vec3 lookfrom;

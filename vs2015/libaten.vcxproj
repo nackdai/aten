@@ -159,6 +159,7 @@
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\denoise\bilateral.h" />
     <ClInclude Include="..\src\libaten\denoise\nml.h" />
+    <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\denoise\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\denoise\nml.cpp" />
+    <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />
@@ -269,6 +271,7 @@
     <None Include="..\src\shader\bloomeffect_fs_HBlur.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_VBlur.glsl" />
     <None Include="..\src\shader\fs.glsl" />
+    <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\nml_fs.glsl" />
     <None Include="..\src\shader\tonemap_fs.glsl" />
     <None Include="..\src\shader\vs.glsl" />

@@ -13,7 +13,7 @@ namespace aten
 	// HDR
 	// http://t-pot.com/program/123_ToneMapping/index.html
 
-	std::tuple<real, real> Tonemap::computeAvgAndMaxLum(
+	std::tuple<real, real> TonemapPreProc::computeAvgAndMaxLum(
 		int width, int height,
 		const vec3* src)
 	{
@@ -84,10 +84,10 @@ namespace aten
 		return result;
 	}
 
-	void Tonemap::doTonemap(
-		int width, int height,
+	void TonemapPreProc::operator()(
 		const vec3* src,
-		TColor<uint8_t>* dst)
+		uint32_t width, uint32_t height,
+		vec3* dst)
 	{
 		auto result = computeAvgAndMaxLum(
 			width, height,
@@ -123,6 +123,8 @@ namespace aten
 
 				vec3 rgb = color::YCbCrtoRGB(ycbcr);
 
+#if 0
+				// Convert to uint8.
 				int ir = int(255.9f * rgb.r);
 				int ig = int(255.9f * rgb.g);
 				int ib = int(255.9f * rgb.b);
@@ -130,18 +132,22 @@ namespace aten
 				d.r = aten::clamp(ir, 0, 255);
 				d.g = aten::clamp(ig, 0, 255);
 				d.b = aten::clamp(ib, 0, 255);
-				d.a = 255;
+#else
+				d = rgb;
+#endif
 			}
 		}
 	}
 
-	void TonemapRender::prepareRender(
+	//////////////////////////////////////////////////////////
+
+	void TonemapPostProc::prepareRender(
 		const void* pixels,
 		bool revert)
 	{
 		Blitter::prepareRender(pixels, revert);
 
-		auto result = Tonemap::computeAvgAndMaxLum(m_width, m_height, (const vec3*)pixels);
+		auto result = TonemapPreProc::computeAvgAndMaxLum(m_width, m_height, (const vec3*)pixels);
 
 		auto lum = std::get<0>(result);
 		auto maxlum = std::get<1>(result);

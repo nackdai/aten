@@ -6,22 +6,26 @@
 
 namespace aten
 {
-	class Tonemap {
+	class TonemapPreProc : public visualizer::PreProc {
+	public:
+		TonemapPreProc() {}
+		virtual ~TonemapPreProc() {}
+
 	public:
 		static std::tuple<real, real> computeAvgAndMaxLum(
 			int width, int height,
 			const vec3* src);
 
-		static void doTonemap(
-			int width, int height,
+		virtual void operator()(
 			const vec3* src,
-			TColor<uint8_t>* dst);
+			uint32_t width, uint32_t height,
+			vec3* dst) override final;
 	};
 
-	class TonemapRender : public Blitter {
+	class TonemapPostProc : public Blitter {
 	public:
-		TonemapRender() {}
-		virtual ~TonemapRender() {}
+		TonemapPostProc() {}
+		virtual ~TonemapPostProc() {}
 
 	public:
 		virtual void prepareRender(

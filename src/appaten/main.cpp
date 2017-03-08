@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/fs.glsl");
 
-	aten::TonemapRender tonemap;
+	aten::TonemapPostProc tonemap;
 	tonemap.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",

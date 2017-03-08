@@ -57,6 +57,7 @@
 #include "sampler/UniformDistributionSampler.h"
 
 #include "primitive/sphere.h"
+#include "primitive/cube.h"
 
 #include "renderer/renderer.h"
 #include "renderer/background.h"

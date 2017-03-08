@@ -27,7 +27,8 @@ namespace aten {
 
 		bool hit(
 			const ray& r,
-			real t_min, real t_max) const;
+			real t_min, real t_max,
+			real* t_result = nullptr) const;
 
 		bool isIn(const vec3& p) const;
 

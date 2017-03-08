@@ -25,7 +25,8 @@ namespace aten {
 
 	bool aabb::hit(
 		const ray& r,
-		real t_min, real t_max) const
+		real t_min, real t_max,
+		real* t_result/*= nullptr*/) const
 	{
 		bool isHit = false;
 
@@ -56,6 +57,10 @@ namespace aten {
 
 			if (t_max <= t_min) {
 				return false;
+			}
+
+			if (t_result) {
+				*t_result = t0;
 			}
 
 			isHit = true;

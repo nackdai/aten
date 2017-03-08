@@ -216,6 +216,8 @@ namespace aten {
 			pixeltype,
 			textureimage));
 
+		bool willRevert = revert;
+
 		for (int i = 0; i < g_postprocs.size(); i++) {
 			auto* postproc = g_postprocs[i];
 			PostProc* prevPostproc = nullptr;
@@ -230,8 +232,11 @@ namespace aten {
 				fbo.setAsTexture();
 			}
 
-			postproc->prepareRender(prevPostproc, pixels, revert);
+			postproc->prepareRender(prevPostproc, pixels, willRevert);
 			auto& fbo = postproc->getFbo();
+
+			// Å‰‚Ì‚P‰ñ‚¾‚¯”½“]‚·‚ê‚Î‚¢‚¢‚Ì‚Å.
+			willRevert = false;
 
 			if (fbo.isValid()) {
 				// Set FBO.

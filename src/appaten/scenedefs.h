@@ -81,7 +81,7 @@ public:
 		aten::vec3& at);
 };
 
-class SmallLightScene {
+class HideLightScene {
 public:
 	static void makeScene(aten::scene* scene);
 
@@ -108,5 +108,5 @@ public:
 //#define Scene SpotLightScene
 //#define Scene ManyLightScene
 //#define Scene TexturesScene
-//#define Scene SmallLightScene
-#define Scene DisneyMaterialTestScene
+#define Scene HideLightScene
+//#define Scene DisneyMaterialTestScene

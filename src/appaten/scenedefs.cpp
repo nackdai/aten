@@ -446,14 +446,21 @@ void TexturesScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void SmallLightScene::makeScene(aten::scene* scene)
+void HideLightScene::makeScene(aten::scene* scene)
 {
 	auto emit = new aten::emissive(aten::vec3(64.0, 64.0, 64.0));
 
 	auto light = new aten::sphere(
-		aten::vec3(1, 1, 1),
+		aten::vec3(50.0, 90.0, 81.6),
 		15.0,
 		emit);
+
+	aten::real cubeheight = 10;
+
+	auto cube = new aten::cube(
+		aten::vec3(50.0, 75.0 - cubeheight, 81.6),
+		60, cubeheight, 60,
+		new aten::lambert(aten::vec3(0.5, 0.5, 0.5)));
 
 	double r = 1e3;
 
@@ -505,6 +512,8 @@ void SmallLightScene::makeScene(aten::scene* scene)
 
 #if 1
 	scene->add(light);
+	scene->add(cube);
+#if 1
 	scene->add(left);
 	scene->add(right);
 	scene->add(wall);
@@ -513,6 +522,7 @@ void SmallLightScene::makeScene(aten::scene* scene)
 	scene->add(green);
 	scene->add(mirror);
 	scene->add(glass);
+#endif
 
 	aten::Light* l = new aten::AreaLight(light, emit->color());
 
@@ -520,7 +530,7 @@ void SmallLightScene::makeScene(aten::scene* scene)
 #endif
 }
 
-void SmallLightScene::getCameraPosAndAt(
+void HideLightScene::getCameraPosAndAt(
 	aten::vec3& pos,
 	aten::vec3& at)
 {

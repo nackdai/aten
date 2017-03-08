@@ -56,6 +56,8 @@ namespace aten
 		if (isHit) {
 			rec.p = r.org + t * r.dir;
 
+			rec.t = t;
+
 			// ‚Ç‚Ì–Ê‚Éƒqƒbƒg‚µ‚½‚©’T‚·.
 			{
 				auto dir = normalize(rec.p - m_center);

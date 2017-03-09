@@ -109,10 +109,8 @@ namespace aten
 	objinstance::objinstance(object* obj)
 	{
 		m_obj = obj;
-
-		build(
-			(bvhnode**)&m_obj->m_shapes[0], 
-			m_obj->m_shapes.size());
+		m_obj->build();
+		m_aabb = m_obj->m_aabb;
 	}
 
 	bool objinstance::hit(
@@ -120,20 +118,74 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
-		// TODO
-		// Compute ray to objinstance coordinate.
+		vec3 org = r.org;
+		vec3 dir = r.dir;
 
-		auto isHit = bvhnode::hit(r, t_min, t_max, rec);
+		org = m_mtxW2L.apply(org);
+		dir = m_mtxW2L.applyXYZ(dir);
+
+		ray transformdRay(org, dir);
+
+		auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec);
+
+		if (isHit) {
+			// Transform local to world.
+			rec.p = m_mtxL2W.apply(rec.p);
+			rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
+		}
+
 		return isHit;
 	}
 
 	aabb objinstance::getBoundingbox() const
 	{
-		// TODO
-		// Compute by transform matrix;
+		return std::move(m_aabb);
+	}
 
+	aabb objinstance::transformBoundingBox()
+	{
 		auto box = m_obj->m_aabb;
 
-		return std::move(box);
+		vec3 center = box.getCenter();
+
+		vec3 vMin = box.minPos() - center;
+		vec3 vMax = box.maxPos() - center;
+
+		vec3 pts[8] = {
+			vec3(vMin.x, vMin.y, vMin.z),
+			vec3(vMax.x, vMin.y, vMin.z),
+			vec3(vMin.x, vMax.y, vMin.z),
+			vec3(vMax.x, vMax.y, vMin.z),
+			vec3(vMin.x, vMin.y, vMax.z),
+			vec3(vMax.x, vMin.y, vMax.z),
+			vec3(vMin.x, vMax.y, vMax.z),
+			vec3(vMax.x, vMax.y, vMax.z),
+		};
+
+		vec3 newMin(AT_MATH_INF);
+		vec3 newMax(-AT_MATH_INF);
+
+		for (int i = 0; i < 8; i++) {
+			vec3 v = m_mtxL2W.apply(pts[i]);
+
+			newMin.set(
+				std::min(newMin.x, v.x),
+				std::min(newMin.y, v.y),
+				std::min(newMin.z, v.z));
+			newMax.set(
+				std::max(newMax.x, v.x),
+				std::max(newMax.y, v.y),
+				std::max(newMax.z, v.z));
+		}
+
+		// Add only translate factor.
+		vec3 newCenter = center + m_mtxL2W.apply(vec3());
+
+		newMin += newCenter;
+		newMax += newCenter;
+
+		aabb ret(newMin, newMax);
+
+		return std::move(ret);
 	}
 }

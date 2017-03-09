@@ -3,6 +3,7 @@
 #include "types.h"
 #include "scene/bvh.h"
 #include "material/material.h"
+#include "math/mat4.h"
 
 namespace aten
 {
@@ -67,15 +68,42 @@ namespace aten
 		object() {}
 		~object() {}
 
+	public:
+		bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec)
+		{
+			bool isHit = m_node.hit(r, t_min, t_max, rec);
+			return isHit;
+		}
+
+	private:
+		void build()
+		{
+			m_node.build((bvhnode**)&m_shapes[0], m_shapes.size());
+		}
+
 	private:
 		std::vector<shape*> m_shapes;
 		aabb m_aabb;
+		bvhnode m_node;
 	};
 
 	class objinstance : public bvhnode {
 	public:
 		objinstance() {}
 		objinstance(object* obj);
+		objinstance(object* obj, const mat4& mtxL2W)
+			: objinstance(obj)
+		{
+			m_mtxL2W = mtxL2W;
+
+			m_mtxW2L = m_mtxL2W;
+			m_mtxW2L.invert();
+
+			m_aabb = transformBoundingBox();
+		}
 
 		virtual ~objinstance() {}
 
@@ -88,6 +116,11 @@ namespace aten
 		virtual aabb getBoundingbox() const override final;
 
 	private:
+		aabb transformBoundingBox();
+
+	private:
 		object* m_obj{ nullptr };
+		mat4 m_mtxL2W;
+		mat4 m_mtxW2L;	// inverted.
 	};
 }

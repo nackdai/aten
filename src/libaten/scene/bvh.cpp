@@ -122,7 +122,8 @@ namespace aten {
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
-		auto isHit = m_aabb.hit(r, t_min, t_max);
+		auto bbox = getBoundingbox();
+		auto isHit = bbox.hit(r, t_min, t_max);
 
 		if (isHit) {
 			isHit = bvh::hit(this, r, t_min, t_max, rec);

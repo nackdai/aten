@@ -29,6 +29,13 @@ namespace aten {
 		{
 		}
 
+		inline void set(real _x, real _y, real _z)
+		{
+			x = _x;
+			y = _y;
+			z = _z;
+		}
+
 		inline const vec3& operator+() const
 		{
 			return *this;

@@ -81,14 +81,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;$(ProjectDir)..\3rdpirty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -97,14 +97,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;$(ProjectDir)..\3rdpirty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -115,7 +115,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;$(ProjectDir)..\3rdpirty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -125,7 +125,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -136,7 +136,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdpirty\glew\include;$(Projectir)..\3rdpirty\glfw\include;$(ProjectDir)..\3rdpirty\OpenImageIO\include;$(ProjectDir)..\3rdpirty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -146,12 +146,12 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdpirty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdpirty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdpirty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.h" />
+    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
@@ -222,7 +222,7 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.cc" />
+    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\denoise\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\denoise\nml.cpp" />

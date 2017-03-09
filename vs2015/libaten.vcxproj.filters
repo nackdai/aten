@@ -159,9 +159,6 @@
     <ClInclude Include="..\src\libaten\sampler\random.h">
       <Filter>sampler</Filter>
     </ClInclude>
-    <ClInclude Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.h">
-      <Filter>object\tinyobjloadder</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\object\object.h">
       <Filter>object</Filter>
     </ClInclude>
@@ -261,6 +258,9 @@
     <ClInclude Include="..\src\libaten\shape\sphere.h">
       <Filter>shape</Filter>
     </ClInclude>
+    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
+      <Filter>object\tinyobjloadder</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -307,9 +307,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\bvh.cpp">
       <Filter>scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\3rdpirty\tinyobjloader_v09\tiny_obj_loader.cc">
-      <Filter>object\tinyobjloadder</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\object\ObjLoader.cpp">
       <Filter>object</Filter>
@@ -397,6 +394,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\shape\cube.cpp">
       <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
+      <Filter>object\tinyobjloadder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

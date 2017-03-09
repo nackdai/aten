@@ -88,7 +88,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -97,7 +97,8 @@
       <AdditionalDependencies>libaten.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdpirty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,7 +107,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -115,7 +116,8 @@
       <AdditionalDependencies>libaten.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdpirty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -126,7 +128,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -137,8 +139,8 @@
       <AdditionalDependencies>libaten.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdpirty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -149,7 +151,7 @@ copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdpirty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -160,8 +162,8 @@ copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <AdditionalDependencies>libaten.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdpirty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdpirty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
+copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

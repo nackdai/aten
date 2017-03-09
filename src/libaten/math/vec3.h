@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defs.h"
-#include "math.h"
+#include "math/math.h"
 
 namespace aten {
 	class vec3 {
@@ -149,7 +149,8 @@ namespace aten {
 		return std::move(ret);
 	}
 
-	inline vec3 operator*(const vec3& v, real t) {
+	inline vec3 operator*(const vec3& v, real t)
+	{
 		vec3 ret(t * v.x, t * v.y, t * v.z);
 		return std::move(ret);
 	}

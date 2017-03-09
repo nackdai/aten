@@ -258,6 +258,9 @@
     <ClInclude Include="..\src\libaten\primitive\cube.h">
       <Filter>primitive</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\math\mat4.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -391,6 +394,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\primitive\cube.cpp">
       <Filter>primitive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\math\mat4.cpp">
+      <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

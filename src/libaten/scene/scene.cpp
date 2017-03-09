@@ -33,7 +33,7 @@ namespace aten {
 			auto distToLight = (lightpos - r.org).length();
 
 			if (isHit && rec.t < distToLight) {
-				// Ray hits something, or the distance to the object is near than the distance to the light.
+				// Ray hits something, and the distance to the object is near than the distance to the light.
 				return false;
 			}
 			else {

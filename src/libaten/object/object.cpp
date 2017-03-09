@@ -84,9 +84,11 @@ namespace aten
 
 	void shape::build()
 	{
-		bvhnode::build(
+		m_node.build(
 			(bvhnode**)&faces[0],
 			faces.size());
+
+		m_aabb = m_node.getBoundingbox();
 	}
 
 	bool shape::hit(
@@ -94,7 +96,7 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
-		auto isHit = bvhnode::hit(r, t_min, t_max, rec);
+		auto isHit = m_node.hit(r, t_min, t_max, rec);
 
 		if (isHit) {
 			rec.obj = (hitable*)this;

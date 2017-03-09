@@ -54,6 +54,9 @@ namespace aten
 		std::vector<face*> faces;
 		std::vector<vertex> vertices;
 		material* mtrl{ nullptr };
+
+	private:
+		bvhnode m_node;
 	};
 
 	class object {

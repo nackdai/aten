@@ -198,10 +198,6 @@ namespace aten {
 				isHitRight = right->getBoundingbox().hit(r, t_min, t_max);
 			}
 
-			if (isHitLeft || isHitRight) {
-				int xxx = 0;
-			}
-
 			if (isHitLeft && left->isLeaf()) {
 				hitrecord recLeft;
 				if (left->hit(r, t_min, t_max, recLeft)) {
@@ -406,7 +402,7 @@ namespace aten {
 		};
 
 		std::vector<BuildInfo> stacks;
-		stacks.push_back(BuildInfo());
+		stacks.push_back(BuildInfo());	// Add terminator.
 
 		BuildInfo info(root, list, num);
 

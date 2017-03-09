@@ -37,9 +37,9 @@ namespace aten {
 	{
 		vec4 ret = v1;
 		ret[0] -= v2[0];
-		ret[0] -= v2[1];
-		ret[0] -= v2[2];
-		ret[0] -= v2[3];
+		ret[1] -= v2[1];
+		ret[2] -= v2[2];
+		ret[3] -= v2[3];
 
 		return std::move(ret);
 	}
@@ -51,8 +51,8 @@ namespace aten {
 		mat4 dst;
 
 		for (int i = 0; i < 4; ++i) {
-			// ピボット選択
-			// NOTE: 対象となる列中の最大値が対角値になるように行を入れ替える
+			// ピボット選択.
+			// NOTE: 対象となる列中の最大値が対角値になるように行を入れ替える.
 			real f = aten::abs(mtx.m[i][i]);
 			for (int j = i + 1; j < 4; ++j) {
 				if (f < aten::abs(mtx.m[j][i])) {
@@ -62,12 +62,12 @@ namespace aten {
 				}
 			}
 
-			// 対象となる行の対角値を 1 にする
+			// 対象となる行の対角値を 1 にする.
 			f = 1.0f / mtx.m[i][i];
 			mtx.v[i] = scale(mtx.v[i], f);
 			dst.v[i] = scale(dst.v[i], f);
 
-			// 対象とならない列の値を 0 にする
+			// 対象とならない列の値を 0 にする.
 			for (int j = 0; j < 4; ++j) {
 				if (j != i) {
 					real temp = mtx.m[j][i];

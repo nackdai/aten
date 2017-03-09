@@ -10,9 +10,6 @@
     <Filter Include="renderer">
       <UniqueIdentifier>{caaa0556-6ed0-49d3-afb9-eaaaa3cab6d7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="primitive">
-      <UniqueIdentifier>{0721ed3f-82f2-4111-8ff3-91a03315e3d6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="material">
       <UniqueIdentifier>{880ffa46-987e-40f3-9e2c-e55e2ff63125}</UniqueIdentifier>
     </Filter>
@@ -58,6 +55,9 @@
     <Filter Include="shader\denoise">
       <UniqueIdentifier>{c918e933-8b6e-4c2b-bde0-32b7f83c9547}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shape">
+      <UniqueIdentifier>{0721ed3f-82f2-4111-8ff3-91a03315e3d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -70,9 +70,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\math\math.h">
       <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\primitive\sphere.h">
-      <Filter>primitive</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\material.h">
       <Filter>material</Filter>
@@ -255,19 +252,19 @@
     <ClInclude Include="..\src\libaten\material\disney_brdf.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\primitive\cube.h">
-      <Filter>primitive</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\math\mat4.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\cube.h">
+      <Filter>shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\sphere.h">
+      <Filter>shape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
       <Filter>misc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\primitive\sphere.cpp">
-      <Filter>primitive</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
       <Filter>visualizer</Filter>
@@ -392,11 +389,14 @@
     <ClCompile Include="..\src\libaten\material\disney_brdf.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\primitive\cube.cpp">
-      <Filter>primitive</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\math\mat4.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\shape\sphere.cpp">
+      <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\shape\cube.cpp">
+      <Filter>shape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

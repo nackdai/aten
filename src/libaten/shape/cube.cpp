@@ -1,4 +1,4 @@
-#include "primitive/cube.h"
+#include "shape/cube.h"
 
 namespace aten
 {

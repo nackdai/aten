@@ -1,4 +1,4 @@
-#include "primitive/sphere.h"
+#include "shape/sphere.h"
 
 namespace aten
 {

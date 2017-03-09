@@ -57,8 +57,8 @@
 #include "sampler/halton.h"
 #include "sampler/UniformDistributionSampler.h"
 
-#include "primitive/sphere.h"
-#include "primitive/cube.h"
+#include "shape/sphere.h"
+#include "shape/cube.h"
 
 #include "renderer/renderer.h"
 #include "renderer/background.h"

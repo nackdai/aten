@@ -188,8 +188,6 @@
     <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\object\ObjLoader.h" />
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
-    <ClInclude Include="..\src\libaten\primitive\cube.h" />
-    <ClInclude Include="..\src\libaten\primitive\sphere.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
@@ -210,6 +208,8 @@
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\MaterialManager.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
+    <ClInclude Include="..\src\libaten\shape\cube.h" />
+    <ClInclude Include="..\src\libaten\shape\sphere.h" />
     <ClInclude Include="..\src\libaten\texture\ImageLoader.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
@@ -245,8 +245,6 @@
     <ClCompile Include="..\src\libaten\object\object.cpp" />
     <ClCompile Include="..\src\libaten\object\ObjLoader.cpp" />
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
-    <ClCompile Include="..\src\libaten\primitive\cube.cpp" />
-    <ClCompile Include="..\src\libaten\primitive\sphere.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
@@ -260,6 +258,8 @@
     <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
     <ClCompile Include="..\src\libaten\scene\MaterialManager.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
+    <ClCompile Include="..\src\libaten\shape\cube.cpp" />
+    <ClCompile Include="..\src\libaten\shape\sphere.cpp" />
     <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />

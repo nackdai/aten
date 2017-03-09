@@ -1,21 +1,21 @@
-[submodule "3rdpirty/tinyobjloader"]
-	path = 3rdpirty/tinyobjloader
+[submodule "3rdparty/tinyobjloader"]
+	path = 3rdparty/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader.git
-[submodule "3rdpirty/glfw"]
-	path = 3rdpirty/glfw
+[submodule "3rdparty/glfw"]
+	path = 3rdparty/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "3rdpirty/openexr"]
-	path = 3rdpirty/openexr
+[submodule "3rdparty/openexr"]
+	path = 3rdparty/openexr
 	url = https://github.com/openexr/openexr.git
-[submodule "3rdpirty/stb"]
-	path = 3rdpirty/stb
+[submodule "3rdparty/stb"]
+	path = 3rdparty/stb
 	url = https://github.com/nothings/stb.git
-[submodule "3rdpirty/cmdline"]
-	path = 3rdpirty/cmdline
+[submodule "3rdparty/cmdline"]
+	path = 3rdparty/cmdline
 	url = https://github.com/tanakh/cmdline.git
-[submodule "3rdpirty/tinyxml2"]
-	path = 3rdpirty/tinyxml2
+[submodule "3rdparty/tinyxml2"]
+	path = 3rdparty/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
-[submodule "3rdpirty/tinyjson"]
-	path = 3rdpirty/tinyjson
+[submodule "3rdparty/tinyjson"]
+	path = 3rdparty/tinyjson
 	url = https://github.com/mendsley/tinyjson.git

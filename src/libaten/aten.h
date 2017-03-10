@@ -34,7 +34,6 @@
 #include "light/arealight.h"
 #include "light/ibl.h"
 
-#include "object/ObjLoader.h"
 #include "object/object.h"
 
 #include "texture/ImageLoader.h"
@@ -51,7 +50,6 @@
 
 #include "scene/scene.h"
 #include "scene/bvh.h"
-#include "scene/MaterialManager.h"
 
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

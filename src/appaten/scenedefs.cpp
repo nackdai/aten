@@ -182,7 +182,10 @@ void ObjectScene::makeScene(aten::scene* scene)
 	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
-	auto instance = new aten::objinstance(obj);
+	aten::mat4 mtxL2W;
+	mtxL2W.asRotateByZ(Deg2Rad(45));
+
+	auto instance = new aten::objinstance(obj, mtxL2W);
 
 	scene->add(instance);
 }

@@ -1,3 +1,4 @@
+#include "visualizer/atengl.h"
 #include "posteffect/BloomEffect.h"
 
 namespace aten {

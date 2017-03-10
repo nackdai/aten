@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="tinyobjloadder">
+      <UniqueIdentifier>{3433b1f9-39f7-4259-b6e6-d37dcfb10a9c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
+      <Filter>tinyobjloadder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\MaterialManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
+      <Filter>tinyobjloadder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\MaterialManager.h" />
+    <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
+    <ClInclude Include="..\src\libatenscene\atenscene.h" />
+  </ItemGroup>
+</Project>

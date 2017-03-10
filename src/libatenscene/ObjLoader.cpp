@@ -1,11 +1,7 @@
 #include <vector>
 #include "tiny_obj_loader.h"
-#include "defs.h"
-#include "object/ObjLoader.h"
-#include "object/object.h"
-
-#include "scene/MaterialManager.h"
-#include "material/lambert.h"
+#include "ObjLoader.h"
+#include "MaterialManager.h"
 
 namespace aten
 {

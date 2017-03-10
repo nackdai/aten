@@ -1,4 +1,4 @@
-#include "scene/MaterialManager.h"
+#include "MaterialManager.h"
 
 namespace aten {
 	std::map<std::string, MaterialManager::MaterialCreator> MaterialManager::g_creators;

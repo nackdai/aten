@@ -2,7 +2,7 @@
 
 #include <map>
 #include <functional>
-#include "material/material.h"
+#include "aten.h"
 
 namespace aten {
 	class MaterialManager {

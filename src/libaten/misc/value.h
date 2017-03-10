@@ -8,127 +8,136 @@
 namespace aten {
 	class PolymorphicValue {
 	public:
-		union {
+		union _value {
 			real f;
 			int i;
 			bool b;
-			std::string s;
+			std::string* s;
 			vec3 v;
 			void* p;
+
+			_value() {}
+			~_value() {}
 		};
 
-		PolymorphicValue() {}
+		_value val;
+
+		PolymorphicValue()
+		{
+			val.s = new std::string();
+		}
 		PolymorphicValue(const PolymorphicValue& rhs)
 		{
-			
+			val.s = new std::string();
+			memcpy(&val, &rhs.val, sizeof(_value));
 		}
 		~PolymorphicValue() {}
 
 		PolymorphicValue& operator=(real _f)
 		{
-			f = _f;
+			val.f = _f;
 			return *this;
 		}
 		PolymorphicValue& operator=(int _i)
 		{
-			i = _i;
+			val.i = _i;
 			return *this;
 		}
 		PolymorphicValue& operator=(bool _b)
 		{
-			b = _b;
+			val.b = _b;
 			return *this;
 		}
 		PolymorphicValue& operator=(const char* _ch)
 		{
-			s = _ch;
+			*val.s = _ch;
 			return *this;
 		}
 		PolymorphicValue& operator=(const std::string& _s)
 		{
-			s = _s;
+			*val.s = _s;
 			return *this;
 		}
 		PolymorphicValue& operator=(const vec3& _v)
 		{
-			v = _v;
+			val.v = _v;
 			return *this;
 		}
 		PolymorphicValue& operator=(void* _p)
 		{
-			p = _p;
+			val.p = _p;
 			return *this;
 		}
 
 		operator real() const
 		{
-			return f;
+			return val.f;
 		}
 		operator int() const
 		{
-			return i;
+			return val.i;
 		}
 		operator bool() const
 		{
-			return b;
+			return val.b;
 		}
 		operator std::string() const
 		{
-			return s;
+			return *val.s;
 		}
 		operator const char*() const
 		{
-			return s.c_str();
+			return val.s->c_str();
 		}
 		operator vec3() const
 		{
-			return v;
+			return val.v;
 		}
 		operator void*() const
 		{
-			return p;
+			return val.p;
 		}
 
 		template <typename TYPE>
 		TYPE getAs() const
 		{
 			AT_ASSERT(false);
-			return *(TYPE*)p;
+			return *(TYPE*)val.p;
 		}
 		template <>
 		real getAs()const
 		{
-			return f;
+			return val.f;
 		}
 		template <>
 		int getAs() const
 		{
-			return i;
+			return val.i;
 		}
 		template <>
 		bool getAs() const
 		{
-			return b;
+			return val.b;
 		}
 		template <>
 		std::string getAs() const
 		{
-			return s;
+			return *val.s;
 		}
 		template <>
 		const char* getAs() const
 		{
-			return s.c_str();
+			return val.s->c_str();
 		}
 		template <>
 		vec3 getAs() const
 		{
-			return v;
+			return val.v;
 		}
 		template <>
 		void* getAs() const
 		{
-			return p;
+			return val.p;
 		}
 	};
 
@@ -136,6 +145,11 @@ namespace aten {
 	public:
 		Values() {}
 		~Values() {}
+
+		void add(std::string& name, const PolymorphicValue& val)
+		{
+			this->insert(std::pair<std::string, PolymorphicValue>(name, val));
+		}
 
 		template <typename TYPE>
 		TYPE get(std::string s, const TYPE& defaultValue)

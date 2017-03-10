@@ -11,15 +11,17 @@ namespace aten {
 		~MaterialManager();
 
 	public:
-		using MaterialCreator = std::function<material*()>;
+		using MaterialCreator = std::function<material*(Values&)>;
 
-		static bool addCreator(std::string tag, MaterialCreator creator);
+		static bool addCreator(std::string type, MaterialCreator creator);
 		static bool addMaterial(std::string tag, material* mtrl);
+
+		static material* load(std::string path);
+		static material* load(std::string tag, std::string path);
 
 		static material* get(std::string tag);
 
 	private:
-		static std::map<std::string, MaterialCreator> g_creators;
-		static std::map<std::string, material*> g_mtrls;
+		static material* create(std::string type, Values& values);
 	};
 }

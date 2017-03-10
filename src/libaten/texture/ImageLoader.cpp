@@ -3,6 +3,22 @@
 #include "texture/texture.h"
 
 namespace aten {
+	static std::string g_base;
+
+	void ImageLoader::setBasePath(const std::string& base)
+	{
+		g_base = base;
+
+		// Remove tail '\' or '/'.
+
+		auto len = g_base.length();
+		auto ch = g_base[len - 1];
+
+		if (ch == '\\' || ch == '/') {
+			g_base.pop_back();
+		}
+	}
+
 	template <typename TYPE>
 	void read(
 		OIIO::ImageInput* input,
@@ -55,7 +71,12 @@ namespace aten {
 	{
 		OIIO_NAMESPACE_USING
 
-		ImageInput* input = ImageInput::open(path);
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
+		}
+
+		ImageInput* input = ImageInput::open(fullpath);
 
 		if (!input) {
 			AT_ASSERT(false);

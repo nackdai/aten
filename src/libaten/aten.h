@@ -26,6 +26,7 @@
 #include "misc/color.h"
 #include "misc/timer.h"
 #include "misc/thread.h"
+#include "misc/value.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"

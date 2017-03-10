@@ -14,6 +14,12 @@ namespace aten
 			: material(albedo, nullptr, normalMap), m_nt(ior)
 		{}
 
+		refraction(Values& val)
+			: material(val)
+		{
+			m_nt = val.get("ior", m_nt);
+		}
+
 		virtual ~refraction() {}
 
 		virtual bool isSingular() const override final

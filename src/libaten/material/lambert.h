@@ -15,6 +15,10 @@ namespace aten
 			: material(albedo, albedoMap, normalMap)
 		{}
 
+		lambert(Values& val)
+			: material(val)
+		{}
+
 		virtual ~lambert() {}
 
 	public:

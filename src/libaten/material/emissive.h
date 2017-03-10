@@ -11,6 +11,10 @@ namespace aten
 			: material(e)
 		{}
 
+		emissive(Values& val)
+			: material(val)
+		{}
+
 		virtual ~emissive() {}
 
 		virtual bool isEmissive() const override final

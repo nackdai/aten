@@ -48,6 +48,8 @@ namespace aten {
 		return ret;\
 	}
 
+#define AT_COUNTOF(a)	(sizeof(a) / sizeof(a[0]))
+
 #ifndef __AT_DEBUG__
 #define ENABLE_OMP
 #endif

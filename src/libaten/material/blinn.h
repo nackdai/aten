@@ -15,6 +15,13 @@ namespace aten
 			: material(albedo, albedoMap, normalMap), m_shininess(shininess), m_ior(ior)
 		{}
 
+		MicrofacetBlinn(Values& val)
+			: material(val)
+		{
+			m_ior = val.get("ior", m_ior);
+			m_shininess = val.get("shininess", m_shininess);
+		}
+
 		virtual ~MicrofacetBlinn() {}
 
 	public:

@@ -76,6 +76,22 @@ namespace aten
 			m_roughnessMap = roughnessMap;
 		}
 
+		DisneyBRDF(Values& val)
+			: material(val)
+		{
+			m_subsurface = val.get("subsurface", m_subsurface);
+			m_metallic = val.get("metallic", m_metallic);
+			m_specular = val.get("specular", m_specular);
+			m_specularTint = val.get("specularTint", m_specularTint);
+			m_roughness = val.get("roughness", m_roughness);
+			m_anisotropic = val.get("anisotropic", m_anisotropic);
+			m_sheen = val.get("sheen", m_sheen);
+			m_sheenTint = val.get("sheenTint", m_sheenTint);
+			m_clearcoat = val.get("clearcoat", m_clearcoat);
+			m_clearcoatGloss = val.get("clearcoatGloss", m_clearcoatGloss);
+			m_roughnessMap = val.get("roughnessmap", m_roughnessMap);
+		}
+
 		virtual ~DisneyBRDF() {}
 
 	public:

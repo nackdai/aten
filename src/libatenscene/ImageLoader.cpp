@@ -121,7 +121,7 @@ namespace aten {
 		return tex;
 	}
 
-	bool add(const std::string& tag, texture* tex)
+	bool ImageLoader::add(const std::string& tag, texture* tex)
 	{
 		bool isAdded = false;
 

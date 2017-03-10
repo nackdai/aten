@@ -107,7 +107,7 @@ namespace aten {
 	{
 		auto a = val.get<picojson::array>();
 
-		int num = std::min<int>(3, a.size());
+		int num = std::min<int>(3, (int)a.size());
 
 		aten::PolymorphicValue v;
 
@@ -131,9 +131,26 @@ namespace aten {
 	{
 		auto s = val.get< std::string>();
 
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			s,
+			pathname,
+			extname,
+			filename);
+
 		aten::PolymorphicValue v;
 
-		texture* tex = ImageLoader::load(s);
+		// Check if specified texture is registered.
+		texture* tex = ImageLoader::get(filename);
+
+		if (!tex) {
+			// There is no registered texture, so load texture.
+			tex = ImageLoader::load(s);
+		}
+
 		v.val.p = tex;
 
 		return std::move(v);

@@ -16,6 +16,7 @@ namespace aten {
 
 		static texture* load(const std::string& path);
 
+		static bool add(const std::string& tag, texture* tex);
 		static texture* get(const std::string& tag);
 	};
 }

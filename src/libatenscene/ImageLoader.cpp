@@ -2,9 +2,11 @@
 #include "ImageLoader.h"
 #include "texture/texture.h"
 #include "misc/utility.h"
+#include <map>
 
 namespace aten {
 	static std::string g_base;
+	static std::map<std::string, texture*> g_textures;
 
 	void ImageLoader::setBasePath(const std::string& base)
 	{
@@ -102,6 +104,46 @@ namespace aten {
 		// Close handle
 		input->close();
 
+		if (tex) {
+			std::string pathname;
+			std::string extname;
+			std::string filename;
+
+			getStringsFromPath(
+				path,
+				pathname,
+				extname,
+				filename);
+
+			add(filename, tex);
+		}
+
 		return tex;
+	}
+
+	bool add(const std::string& tag, texture* tex)
+	{
+		bool isAdded = false;
+
+		auto it = g_textures.find(tag);
+
+		if (it == g_textures.end()) {
+			g_textures.insert(std::pair<std::string, texture*>(tag, tex));
+			isAdded = true;
+		}
+
+		return isAdded;
+	}
+
+	texture* ImageLoader::get(const std::string& tag)
+	{
+		texture* ret = nullptr;
+
+		auto it = g_textures.find(tag);
+		if (it != g_textures.end()) {
+			ret = it->second;
+		}
+
+		return ret;
 	}
 }

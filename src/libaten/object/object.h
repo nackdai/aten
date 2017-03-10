@@ -61,7 +61,6 @@ namespace aten
 	};
 
 	class object {
-		friend class ObjLoader;
 		friend class objinstance;
 
 	public:
@@ -81,12 +80,14 @@ namespace aten
 	private:
 		void build()
 		{
-			m_node.build((bvhnode**)&m_shapes[0], m_shapes.size());
+			m_node.build((bvhnode**)&shapes[0], shapes.size());
 		}
 
+	public:
+		std::vector<shape*> shapes;
+		aabb bbox;
+
 	private:
-		std::vector<shape*> m_shapes;
-		aabb m_aabb;
 		bvhnode m_node;
 	};
 

@@ -110,7 +110,7 @@ namespace aten
 	{
 		m_obj = obj;
 		m_obj->build();
-		m_aabb = m_obj->m_aabb;
+		m_aabb = m_obj->bbox;
 	}
 
 	bool objinstance::hit(
@@ -144,7 +144,7 @@ namespace aten
 
 	aabb objinstance::transformBoundingBox()
 	{
-		auto box = m_obj->m_aabb;
+		const auto& box = m_aabb;
 
 		vec3 center = box.getCenter();
 

@@ -120,10 +120,10 @@ namespace aten
 
 			dstshape->build();
 
-			obj->m_shapes.push_back(dstshape);
+			obj->shapes.push_back(dstshape);
 		}
 
-		obj->m_aabb.init(shapemin, shapemax);
+		obj->bbox.init(shapemin, shapemax);
 
 		return obj;
 	}

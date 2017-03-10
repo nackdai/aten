@@ -1,5 +1,5 @@
 #include "OpenImageIO/imageio.h"
-#include "texture/ImageLoader.h"
+#include "ImageLoader.h"
 #include "texture/texture.h"
 
 namespace aten {

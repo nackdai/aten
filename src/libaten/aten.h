@@ -37,7 +37,6 @@
 
 #include "object/object.h"
 
-#include "texture/ImageLoader.h"
 #include "texture/texture.h"
 
 #include "hdr/hdr.h"

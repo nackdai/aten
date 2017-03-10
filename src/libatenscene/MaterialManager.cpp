@@ -1,4 +1,5 @@
 #include "MaterialManager.h"
+#include "ImageLoader.h"
 #include "picojson.h"
 
 namespace aten {

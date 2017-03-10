@@ -123,9 +123,6 @@
     <ClInclude Include="..\src\libaten\material\specular.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\texture\ImageLoader.h">
-      <Filter>texture</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\texture\texture.h">
       <Filter>texture</Filter>
     </ClInclude>
@@ -283,9 +280,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\specular.cpp">
       <Filter>material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp">
-      <Filter>texture</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
       <Filter>renderer</Filter>

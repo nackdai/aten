@@ -14,6 +14,7 @@
     </ClCompile>
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\MaterialManager.cpp" />
+    <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
@@ -25,5 +26,6 @@
     <ClInclude Include="..\3rdparty\picojson\picojson.h">
       <Filter>picojson</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
   </ItemGroup>
 </Project>

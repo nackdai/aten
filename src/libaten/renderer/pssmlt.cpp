@@ -219,7 +219,6 @@ namespace aten
 		auto threadNum = thread::getThreadNum();
 
 		std::vector<std::vector<vec3>> acuumImage(threadNum);
-		std::vector<std::vector<vec3>> tmpImageArray(threadNum);
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
@@ -227,12 +226,9 @@ namespace aten
 		for (int mi = 0; mi < mltNum; mi++) {
 			auto idx = thread::getThreadIdx();
 
-			auto& tmpImage = tmpImageArray[idx];
-			if (tmpImage.empty()) {
-				tmpImage.resize(width * height);
-			}
-			else {
-				std::fill(tmpImage.begin(), tmpImage.end(), vec3());
+			auto& image = acuumImage[idx];
+			if (image.empty()) {
+				image.resize(width * height);
 			}
 
 			// TODO
@@ -315,11 +311,11 @@ namespace aten
 
 				int newPos = newPath.y * width + newPath.x;
 				vec3 newV = newPath_W * newPath.contrib * newPath.weight;
-				tmpImage[newPos] += newV;
+				image[newPos] += newV;
 
 				int oldPos = oldPath.y * width + oldPath.x;
 				vec3 oldV = oldPath_W * oldPath.contrib * oldPath.weight;
-				tmpImage[oldPos] += oldV;
+				image[oldPos] += oldV;
 
 				auto r = rnd.next01();
 
@@ -350,20 +346,12 @@ namespace aten
 					}
 				}
 			}
-
-			auto& image = acuumImage[idx];
-			if (image.empty()) {
-				image.resize(width * height);
-			}
-			for (int i = 0; i < width * height; i++) {
-				image[i] += tmpImage[i] / mltNum;
-			}
 		}
 
 		for (int n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				color[i] += image[i];
+				color[i] += image[i] / mltNum;
 			}
 		}
 	}

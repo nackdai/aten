@@ -212,7 +212,7 @@ namespace aten {
 			p.z = 0;
 		}
 
-		return normalize(p);
+		return std::move(p);
 	}
 
 	inline bool isInvalid(const vec3& v)

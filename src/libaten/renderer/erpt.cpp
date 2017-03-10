@@ -215,7 +215,6 @@ namespace aten
 		const real ed = color::luminance(sumI / (width * height)) / mutation;
 
 		std::vector<std::vector<vec3>> acuumImage(threadNum);
-		std::vector<std::vector<vec3>> tmpImageArray(threadNum);
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
@@ -225,12 +224,9 @@ namespace aten
 
 			auto idx = thread::getThreadIdx();
 
-			auto& tmpImage = tmpImageArray[idx];
-			if (tmpImage.empty()) {
-				tmpImage.resize(width * height);
-			}
-			else {
-				std::fill(tmpImage.begin(), tmpImage.end(), vec3());
+			auto& image = acuumImage[idx];
+			if (image.empty()) {
+				image.resize(width * height);
 			}
 
 			for (int x = 0; x < width; x++) {
@@ -246,7 +242,7 @@ namespace aten
 					// パスが光源に直接ヒットしてた場合、エネルギー分配しないで、そのまま画像に送る.
 					if (newSample.isTerminate) {
 						int pos = newSample.y * width + newSample.x;
-						tmpImage[pos] += newSample.contrib / samples;
+						image[pos] += newSample.contrib / samples;
 						continue;
 					}
 
@@ -315,25 +311,17 @@ namespace aten
 									if (!Ypath.isTerminate) {
 										// 論文とは異なるが、光源に直接ヒットしたときは分配しないでみる.
 										int pos = Ypath.y * width + Ypath.x;
-										tmpImage[pos] += depositValue;
+										image[pos] += depositValue;
 									}
 #else
 									int pos = Ypath.y * width + Ypath.x;
-									tmpImage[pos] += depositValue;
+									image[pos] += depositValue;
 #endif
 								}
 							}
 						}
 					}
 				}
-			}
-
-			auto& image = acuumImage[idx];
-			if (image.empty()) {
-				image.resize(width * height);
-			}
-			for (int i = 0; i < width * height; i++) {
-				image[i] += tmpImage[i];
 			}
 		}
 

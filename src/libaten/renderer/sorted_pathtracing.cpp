@@ -1,4 +1,4 @@
-#include "pathtracing.h"
+#include "renderer/sorted_pathtracing.h"
 #include "misc/thread.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

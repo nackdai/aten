@@ -1,22 +1,14 @@
 #include "OpenImageIO/imageio.h"
 #include "ImageLoader.h"
 #include "texture/texture.h"
+#include "misc/utility.h"
 
 namespace aten {
 	static std::string g_base;
 
 	void ImageLoader::setBasePath(const std::string& base)
 	{
-		g_base = base;
-
-		// Remove tail '\' or '/'.
-
-		auto len = g_base.length();
-		auto ch = g_base[len - 1];
-
-		if (ch == '\\' || ch == '/') {
-			g_base.pop_back();
-		}
+		g_base = removeTailPathSeparator(base);
 	}
 
 	template <typename TYPE>
@@ -29,8 +21,8 @@ namespace aten {
 	{
 		const auto chn = tex->channels();
 
-		auto width = tex->width();
-		auto height = tex->height();
+		int width = tex->width();
+		int height = tex->height();
 
 		auto size = width * height * srcChannels;
 

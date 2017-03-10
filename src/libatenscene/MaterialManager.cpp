@@ -1,5 +1,6 @@
 #include "MaterialManager.h"
 #include "ImageLoader.h"
+#include "misc/utility.h"
 #include "picojson.h"
 
 namespace aten {
@@ -52,18 +53,15 @@ namespace aten {
 
 	material* MaterialManager::load(std::string path)
 	{
-		std::string filepath = path;
+		std::string pathname;
+		std::string extname;
+		std::string filename;
 
-		// Get tag from file path.
-		// Replace \\->/
-		std::replace(filepath.begin(), filepath.end(), '\\', '/');
-
-		int pathPos = filepath.find_last_of("/") + 1;
-		int extPos = filepath.find_last_of(".");
-
-		std::string pathname = filepath.substr(0, pathPos + 1);
-		std::string extname = filepath.substr(extPos, filepath.size() - extPos);
-		std::string filename = filepath.substr(pathPos, extPos - pathPos);
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
 
 		auto mtrl = load(filename, path);
 

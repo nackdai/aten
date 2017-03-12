@@ -2,7 +2,7 @@
 #include "ImageLoader.h"
 #include "AssetManager.h"
 #include "texture/texture.h"
-#include "misc/utility.h"
+#include "utility.h"
 #include <map>
 
 namespace aten {

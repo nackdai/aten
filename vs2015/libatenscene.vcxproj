@@ -34,6 +34,7 @@
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
     <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
+    <ClInclude Include="..\src\libatenscene\utility.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0191D96F-E987-4FDD-9D7A-934931E22B43}</ProjectGuid>

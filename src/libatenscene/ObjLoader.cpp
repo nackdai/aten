@@ -2,7 +2,7 @@
 #include "tiny_obj_loader.h"
 #include "ObjLoader.h"
 #include "AssetManager.h"
-#include "misc/utility.h"
+#include "utility.h"
 
 namespace aten
 {

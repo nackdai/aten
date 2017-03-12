@@ -30,5 +30,6 @@
     <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
     <ClInclude Include="..\src\libatenscene\AssetManager.h" />
+    <ClInclude Include="..\src\libatenscene\utility.h" />
   </ItemGroup>
 </Project>

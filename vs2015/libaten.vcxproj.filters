@@ -252,9 +252,6 @@
     <ClInclude Include="..\src\libaten\misc\value.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\misc\utility.h">
-      <Filter>misc</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

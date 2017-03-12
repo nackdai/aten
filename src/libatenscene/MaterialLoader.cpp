@@ -1,7 +1,7 @@
 #include "MaterialLoader.h"
 #include "ImageLoader.h"
 #include "AssetManager.h"
-#include "misc/utility.h"
+#include "utility.h"
 #include "picojson.h"
 
 namespace aten {

@@ -184,7 +184,6 @@
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
-    <ClInclude Include="..\src\libaten\misc\utility.h" />
     <ClInclude Include="..\src\libaten\misc\value.h" />
     <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />

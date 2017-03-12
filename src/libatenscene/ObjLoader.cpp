@@ -1,12 +1,36 @@
 #include <vector>
 #include "tiny_obj_loader.h"
 #include "ObjLoader.h"
-#include "MaterialLoader.h"
+#include "AssetManager.h"
+#include "misc/utility.h"
 
 namespace aten
 {
-	object* ObjLoader::load(const char* path)
+	object* ObjLoader::load(const std::string& path)
 	{
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
+
+		auto obj = load(filename, path);
+
+		return obj;
+	}
+
+	object* ObjLoader::load(const std::string& tag, const std::string& path)
+	{
+		object* obj = AssetManager::getObj(tag);
+		if (obj) {
+			AT_PRINTF("There is same tag object. [%s]\n", tag);
+			return obj;
+		}
+
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> mtrls;
 		std::string err;
@@ -19,11 +43,11 @@ namespace aten
 		auto result = tinyobj::LoadObj(
 			shapes, mtrls,
 			err,
-			path, nullptr,
+			path.c_str(), nullptr,
 			flags);
 		AT_VRETURN(result, nullptr);
 
-		object* obj = new object();
+		obj = new object();
 
 		vec3 shapemin(AT_MATH_INF);
 		vec3 shapemax(-AT_MATH_INF);
@@ -95,7 +119,7 @@ namespace aten
 			}
 			if (mtrlidx >= 0) {
 				const auto mtrl = mtrls[mtrlidx];
-				dstshape->mtrl = MaterialLoader::get(mtrl.name);
+				dstshape->mtrl = AssetManager::getMtrl(mtrl.name);
 			}
 			if (!dstshape->mtrl){
 				// dummy....
@@ -120,6 +144,8 @@ namespace aten
 		}
 
 		obj->bbox.init(shapemin, shapemax);
+
+		AssetManager::registerObj(tag, obj);
 
 		return obj;
 	}

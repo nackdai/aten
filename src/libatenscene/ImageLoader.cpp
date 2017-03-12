@@ -1,12 +1,12 @@
 #include "OpenImageIO/imageio.h"
 #include "ImageLoader.h"
+#include "AssetManager.h"
 #include "texture/texture.h"
 #include "misc/utility.h"
 #include <map>
 
 namespace aten {
 	static std::string g_base;
-	static std::map<std::string, texture*> g_textures;
 
 	void ImageLoader::setBasePath(const std::string& base)
 	{
@@ -63,11 +63,35 @@ namespace aten {
 
 	texture* ImageLoader::load(const std::string& path)
 	{
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
+
+		auto tex = load(filename, path);
+
+		return tex;
+	}
+
+	texture* ImageLoader::load(const std::string& tag, const std::string& path)
+	{
 		OIIO_NAMESPACE_USING
 
 		std::string fullpath = path;
 		if (!g_base.empty()) {
 			fullpath = g_base + "/" + fullpath;
+		}
+
+		texture* tex = AssetManager::getTex(tag);
+
+		if (tex) {
+			AT_PRINTF("There is same tag texture. [%s]\n", tag);
+			return tex;
 		}
 
 		ImageInput* input = ImageInput::open(fullpath);
@@ -85,7 +109,7 @@ namespace aten {
 		AT_ASSERT(spec.depth == 1);
 
 		// ３チャンネル（RGB）まで.
-		texture* tex = new texture(width, height, std::min(spec.nchannels, 3));
+		tex = new texture(width, height, std::min(spec.nchannels, 3));
 		const auto chn = tex->channels();
 
 		if (spec.format == TypeDesc::UINT8) {
@@ -105,45 +129,9 @@ namespace aten {
 		input->close();
 
 		if (tex) {
-			std::string pathname;
-			std::string extname;
-			std::string filename;
-
-			getStringsFromPath(
-				path,
-				pathname,
-				extname,
-				filename);
-
-			add(filename, tex);
+			AssetManager::registerTex(tag, tex);
 		}
 
 		return tex;
-	}
-
-	bool ImageLoader::add(const std::string& tag, texture* tex)
-	{
-		bool isAdded = false;
-
-		auto it = g_textures.find(tag);
-
-		if (it == g_textures.end()) {
-			g_textures.insert(std::pair<std::string, texture*>(tag, tex));
-			isAdded = true;
-		}
-
-		return isAdded;
-	}
-
-	texture* ImageLoader::get(const std::string& tag)
-	{
-		texture* ret = nullptr;
-
-		auto it = g_textures.find(tag);
-		if (it != g_textures.end()) {
-			ret = it->second;
-		}
-
-		return ret;
 	}
 }

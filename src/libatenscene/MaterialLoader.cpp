@@ -1,11 +1,11 @@
 #include "MaterialLoader.h"
 #include "ImageLoader.h"
+#include "AssetManager.h"
 #include "misc/utility.h"
 #include "picojson.h"
 
 namespace aten {
 	std::map<std::string, MaterialLoader::MaterialCreator> g_creators;
-	std::map<std::string, material*> g_mtrls;
 
 	static const char* g_types[] = {
 		"emissive",
@@ -33,18 +33,6 @@ namespace aten {
 
 		if (it == g_creators.end()) {
 			g_creators.insert(std::pair<std::string, MaterialCreator>(type, creator));
-			return true;
-		}
-
-		return false;
-	}
-
-	bool MaterialLoader::addMaterial(std::string tag, material* mtrl)
-	{
-		auto it = g_mtrls.find(tag);
-
-		if (it == g_mtrls.end()) {
-			g_mtrls.insert(std::pair<std::string, material*>(tag, mtrl));
 			return true;
 		}
 
@@ -143,13 +131,7 @@ namespace aten {
 
 		aten::PolymorphicValue v;
 
-		// Check if specified texture is registered.
-		texture* tex = ImageLoader::get(filename);
-
-		if (!tex) {
-			// There is no registered texture, so load texture.
-			tex = ImageLoader::load(s);
-		}
+		auto tex = ImageLoader::load(s);
 
 		v.val.p = tex;
 
@@ -196,9 +178,8 @@ namespace aten {
 	material* MaterialLoader::load(std::string tag, std::string path)
 	{
 		// Check if there is same name material.
-		auto mtrl = get(tag);
+		auto mtrl = AssetManager::getMtrl(tag);
 		if (mtrl) {
-			AT_ASSERT(false);
 			AT_PRINTF("There is same tag material. [%s]\n", tag);
 			return mtrl;
 		}
@@ -260,7 +241,7 @@ namespace aten {
 			mtrl = create(mtrlName, mtrlValues);
 
 			if (mtrl) {
-				addMaterial(tag, mtrl);
+				AssetManager::registerMtrl(tag, mtrl);
 			}
 		}
 		else {
@@ -269,18 +250,6 @@ namespace aten {
 		}
 
 		AT_ASSERT(mtrl);
-		return mtrl;
-	}
-
-	material* MaterialLoader::get(std::string tag)
-	{
-		material* mtrl = nullptr;
-
-		auto itMtrl = g_mtrls.find(tag);
-		if (itMtrl != g_mtrls.end()) {
-			mtrl = itMtrl->second;
-		}
-
 		return mtrl;
 	}
 

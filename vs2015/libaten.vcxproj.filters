@@ -264,6 +264,9 @@
     <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\geominforender.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -400,6 +403,9 @@
     </ClCompile>
     <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
       <Filter>object\tinyobjloadder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\geominforender.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

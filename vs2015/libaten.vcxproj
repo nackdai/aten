@@ -191,6 +191,7 @@
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
+    <ClInclude Include="..\src\libaten\renderer\geominforender.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
@@ -248,6 +249,7 @@
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\geominforender.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />

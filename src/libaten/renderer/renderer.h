@@ -15,6 +15,12 @@ namespace aten
 		uint32_t mutation{ 1 };
 		uint32_t mltNum{ 1 };
 		vec3* buffer{ nullptr };
+
+		struct {
+			vec3* normal{ nullptr };
+			vec3* depth{ nullptr };
+			vec3* albedo{ nullptr };
+		} geominfo;
 	};
 
 	class scene;

@@ -5,10 +5,10 @@
 #include "aten.h"
 
 namespace aten {
-	class MaterialManager {
+	class MaterialLoader {
 	private:
-		MaterialManager();
-		~MaterialManager();
+		MaterialLoader();
+		~MaterialLoader();
 
 	public:
 		using MaterialCreator = std::function<material*(Values&)>;

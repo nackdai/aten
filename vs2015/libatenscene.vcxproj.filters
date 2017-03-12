@@ -13,19 +13,20 @@
       <Filter>tinyobjloadder</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
-    <ClCompile Include="..\src\libatenscene\MaterialManager.cpp" />
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
       <Filter>tinyobjloadder</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libatenscene\MaterialManager.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\3rdparty\picojson\picojson.h">
       <Filter>picojson</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
   </ItemGroup>
 </Project>

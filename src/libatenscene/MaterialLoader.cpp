@@ -1,10 +1,10 @@
-#include "MaterialManager.h"
+#include "MaterialLoader.h"
 #include "ImageLoader.h"
 #include "misc/utility.h"
 #include "picojson.h"
 
 namespace aten {
-	std::map<std::string, MaterialManager::MaterialCreator> g_creators;
+	std::map<std::string, MaterialLoader::MaterialCreator> g_creators;
 	std::map<std::string, material*> g_mtrls;
 
 	static const char* g_types[] = {
@@ -18,7 +18,7 @@ namespace aten {
 		"disney_brdf",
 	};
 
-	bool MaterialManager::addCreator(std::string type, MaterialCreator creator)
+	bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
 	{
 		// Check if type is as same as default type.
 		for (auto t : g_types) {
@@ -39,7 +39,7 @@ namespace aten {
 		return false;
 	}
 
-	bool MaterialManager::addMaterial(std::string tag, material* mtrl)
+	bool MaterialLoader::addMaterial(std::string tag, material* mtrl)
 	{
 		auto it = g_mtrls.find(tag);
 
@@ -51,7 +51,7 @@ namespace aten {
 		return false;
 	}
 
-	material* MaterialManager::load(std::string path)
+	material* MaterialLoader::load(std::string path)
 	{
 		std::string pathname;
 		std::string extname;
@@ -193,7 +193,7 @@ namespace aten {
 		std::pair<std::string, _MtrlParamType>("clearcoatGloss", _MtrlParamType::Double),
 	};
 
-	material* MaterialManager::load(std::string tag, std::string path)
+	material* MaterialLoader::load(std::string tag, std::string path)
 	{
 		// Check if there is same name material.
 		auto mtrl = get(tag);
@@ -272,7 +272,7 @@ namespace aten {
 		return mtrl;
 	}
 
-	material* MaterialManager::get(std::string tag)
+	material* MaterialLoader::get(std::string tag)
 	{
 		material* mtrl = nullptr;
 
@@ -284,7 +284,7 @@ namespace aten {
 		return mtrl;
 	}
 
-	MaterialManager::MaterialCreator g_funcs[] = {
+	MaterialLoader::MaterialCreator g_funcs[] = {
 		[](Values& values) { return new emissive(values); },			// emissive
 		[](Values& values) { return new lambert(values); },				// lambert
 		[](Values& values) { return new specular(values); },			// specular
@@ -297,7 +297,7 @@ namespace aten {
 
 	C_ASSERT(AT_COUNTOF(g_types) == AT_COUNTOF(g_funcs));
 
-	material* MaterialManager::create(std::string type, Values& values)
+	material* MaterialLoader::create(std::string type, Values& values)
 	{
 		// Check if default creators are registered.
 		if (g_creators.find(g_types[0]) == g_creators.end()) {

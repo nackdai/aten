@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
-    <ClCompile Include="..\src\libatenscene\MaterialManager.cpp" />
+    <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -29,7 +29,8 @@
     <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h" />
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
-    <ClInclude Include="..\src\libatenscene\MaterialManager.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

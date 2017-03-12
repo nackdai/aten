@@ -1,7 +1,7 @@
 #include <vector>
 #include "tiny_obj_loader.h"
 #include "ObjLoader.h"
-#include "MaterialManager.h"
+#include "MaterialLoader.h"
 
 namespace aten
 {
@@ -95,7 +95,7 @@ namespace aten
 			}
 			if (mtrlidx >= 0) {
 				const auto mtrl = mtrls[mtrlidx];
-				dstshape->mtrl = MaterialManager::get(mtrl.name);
+				dstshape->mtrl = MaterialLoader::get(mtrl.name);
 			}
 			if (!dstshape->mtrl){
 				// dummy....

@@ -22,6 +22,8 @@ namespace aten
 			rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
 			path.normal = orienting_normal;
 
+			path.depth = rec.t;
+
 			if (rec.mtrl->isEmissive()) {
 				// Ray hits the light directly.
 				path.albedo = rec.mtrl->color();
@@ -54,6 +56,8 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 
+		real depthNorm = 1 / dst.maxDepth;
+
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int pos = y * width + x;
@@ -73,7 +77,8 @@ namespace aten
 					dst.geominfo.normal[pos] = path.normal;
 				}
 				if (dst.geominfo.depth) {
-					dst.geominfo.depth[pos] = vec3(path.depth);
+					real depth = std::min(path.depth, dst.geominfo.depthMax);
+					dst.geominfo.depth[pos] = vec3(path.depth * depthNorm);
 				}
 				if (dst.geominfo.albedo) {
 					dst.geominfo.albedo[pos] = path.albedo;

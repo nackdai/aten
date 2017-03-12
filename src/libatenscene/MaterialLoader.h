@@ -11,6 +11,8 @@ namespace aten {
 	public:
 		using MaterialCreator = std::function<material*(Values&)>;
 
+		static void setBasePath(const std::string& base);
+
 		static bool addCreator(std::string type, MaterialCreator creator);
 
 		static material* load(std::string path);

@@ -7,6 +7,13 @@
 namespace aten {
 	std::map<std::string, MaterialLoader::MaterialCreator> g_creators;
 
+	static std::string g_base;
+
+	void MaterialLoader::setBasePath(const std::string& base)
+	{
+		g_base = removeTailPathSeparator(base);
+	}
+
 	static const char* g_types[] = {
 		"emissive",
 		"lambert",
@@ -51,7 +58,12 @@ namespace aten {
 			extname,
 			filename);
 
-		auto mtrl = load(filename, path);
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
+		}
+
+		auto mtrl = load(filename, fullpath);
 
 		return mtrl;
 	}

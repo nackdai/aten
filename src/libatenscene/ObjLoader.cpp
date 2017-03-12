@@ -6,6 +6,13 @@
 
 namespace aten
 {
+	static std::string g_base;
+
+	void ObjLoader::setBasePath(const std::string& base)
+	{
+		g_base = removeTailPathSeparator(base);
+	}
+
 	object* ObjLoader::load(const std::string& path)
 	{
 		std::string pathname;
@@ -18,7 +25,12 @@ namespace aten
 			extname,
 			filename);
 
-		auto obj = load(filename, path);
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
+		}
+
+		auto obj = load(filename, fullpath);
 
 		return obj;
 	}

@@ -12,6 +12,8 @@ namespace aten
 		~ObjLoader() {}
 
 	public:
+		static void setBasePath(const std::string& base);
+
 		static object* load(const std::string& path);
 		static object* load(const std::string& tag, const std::string& path);
 	};

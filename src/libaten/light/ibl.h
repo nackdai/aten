@@ -43,6 +43,11 @@ namespace aten {
 			return true;
 		}
 
+		virtual bool isIBL() const override final
+		{
+			return true;
+		}
+
 	private:
 		void preCompute();
 

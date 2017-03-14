@@ -72,6 +72,11 @@ namespace aten {
 			return false;
 		}
 
+		virtual bool isIBL() const
+		{
+			return false;
+		}
+
 		virtual const hitable* getLightObject() const
 		{
 			return nullptr;

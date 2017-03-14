@@ -9,8 +9,6 @@ namespace aten
 		const ray& inRay,
 		scene* scene)
 	{
-		hitrecord rec;
-
 		uint32_t depth = 0;
 
 		aten::ray ray = inRay;
@@ -19,6 +17,8 @@ namespace aten
 		vec3 throughput(1, 1, 1);
 
 		while (depth < m_maxDepth) {
+			hitrecord rec;
+
 			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
 				if (rec.mtrl->isEmissive()) {
 					auto emit = rec.mtrl->color();
@@ -33,23 +33,24 @@ namespace aten
 				if (rec.mtrl->isSingular() || rec.mtrl->isTranslucent()) {
 					auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, nullptr, rec.u, rec.v);
 
-					auto nextDir = sampling.dir;
+					auto nextDir = normalize(sampling.dir);
 					auto bsdf = sampling.bsdf;
 
-					auto c = std::max(
-						dot(orienting_normal, nextDir),
-						real(0));
-
-					throughput *= bsdf * c;
+					throughput *= bsdf;
 
 					// Make next ray.
-					ray = aten::ray(rec.p, nextDir);
+					ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
 				}
 				else {
-					// TODO
-					auto light = scene->getLight(0);
+					auto lightNum = scene->lightNum();
 
-					if (light) {
+					for (int i = 0; i < lightNum; i++) {
+						auto light = scene->getLight(i);
+
+						if (light->isIBL()) {
+							continue;
+						}
+
 						auto sampleres = light->sample(rec.p, nullptr);
 
 						vec3 dirToLight = sampleres.dir;
@@ -68,12 +69,8 @@ namespace aten
 						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							if (tmpRec.obj == lightobj) {
 								const auto lightColor = sampleres.le;
-								contribution += std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
-								break;
+								contribution += throughput * std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
 							}
-						}
-						else {
-							break;
 						}
 					}
 				}
@@ -128,8 +125,8 @@ namespace aten
 				for (int x = 0; x < width; x++) {
 					int pos = y * width + x;
 
-					real u = real(x) / real(width - 1);
-					real v = real(y) / real(height - 1);
+					real u = (real(x) + 0.5) / real(width - 1);
+					real v = (real(y) + 0.5) / real(height - 1);
 
 					auto camsample = camera->sample(u, v, nullptr);
 

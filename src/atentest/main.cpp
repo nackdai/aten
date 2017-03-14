@@ -8,9 +8,9 @@ int main(int argc, char* argv[])
 
 	aten::ImageLoader::setBasePath("../../asset/");
 
-	auto mtrl = aten::MaterialManager::load("material.json");
+	auto mtrl = aten::MaterialLoader::load("material.json");
 	AT_ASSERT(mtrl);
 
-	auto mtrl2 = aten::MaterialManager::get("material");
+	auto mtrl2 = aten::AssetManager::getMtrl("material");
 	AT_ASSERT(mtrl == mtrl2);
 }

@@ -67,5 +67,6 @@
 #include "renderer/pathtracing.h"
 #include "renderer/erpt.h"
 #include "renderer/pssmlt.h"
+#include "renderer/geominforender.h"
 
 #include "posteffect/BloomEffect.h"

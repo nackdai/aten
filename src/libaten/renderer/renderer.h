@@ -21,6 +21,7 @@ namespace aten
 			vec3* depth{ nullptr };
 			vec3* albedo{ nullptr };
 			real depthMax{ 1 };
+			bool needNormalize{ true };
 		} geominfo;
 	};
 

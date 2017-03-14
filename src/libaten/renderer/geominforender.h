@@ -26,5 +26,8 @@ namespace aten
 		Path radiance(
 			const ray& inRay,
 			scene* scene);
+
+	private:
+		uint32_t m_maxDepth{ 1 };
 	};
 }

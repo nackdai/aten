@@ -8,41 +8,72 @@ namespace aten
 		const ray& inRay,
 		scene* scene)
 	{
-		hitrecord rec;
 		ray ray = inRay;
+
+		const auto maxDepth = m_maxDepth;
+		uint32_t depth = 0;
+
+		vec3 throughput = vec3(1);
 
 		Path path;
 
-		if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
-			// 交差位置の法線.
-			// 物体からのレイの入出を考慮.
-			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
+		while (depth < maxDepth) {
+			hitrecord rec;
 
-			// Apply normal map.
-			rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
-			path.normal = orienting_normal;
+			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
+				// 交差位置の法線.
+				// 物体からのレイの入出を考慮.
+				vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-			path.depth = rec.t;
+				// Apply normal map.
+				rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
 
-			if (rec.mtrl->isEmissive()) {
-				// Ray hits the light directly.
-				path.albedo = rec.mtrl->color();
+				if (depth == 0) {
+					path.normal = orienting_normal;
+					path.depth = rec.t;
+				}
+
+				if (rec.mtrl->isEmissive()) {
+					path.albedo = rec.mtrl->color();
+					path.albedo *= throughput;
+					break;
+				}
+				else if (rec.mtrl->isSingular()) {
+					auto sample = rec.mtrl->sample(ray.dir, orienting_normal, rec, nullptr, rec.u, rec.v);
+
+					const auto& nextDir = sample.dir;
+					throughput *= sample.bsdf;
+
+					// Make next ray.
+					ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
+				}
+				else {
+					path.albedo = rec.mtrl->color();
+					path.albedo *= rec.mtrl->sampleAlbedoMap(rec.u, rec.v);
+					path.albedo *= throughput;
+					break;
+				}
 			}
 			else {
-				path.albedo = rec.mtrl->color();
-				path.albedo *= rec.mtrl->sampleAlbedoMap(rec.u, rec.v);
+				auto ibl = scene->getIBL();
+				if (ibl) {
+					auto bg = ibl->getEnvMap()->sample(ray);
+					path.albedo = throughput * bg;
+				}
+				else {
+					auto bg = sampleBG(ray);
+					path.albedo = throughput * bg;
+				}
+
+				if (depth == 0) {
+					// Far far away...
+					path.depth = AT_MATH_INF;
+				}
+
+				break;
 			}
-		}
-		else {
-			auto ibl = scene->getIBL();
-			if (ibl) {
-				auto bg = ibl->getEnvMap()->sample(ray);
-				path.albedo = bg;
-			}
-			else {
-				auto bg = sampleBG(ray);
-				path.albedo = bg;
-			}
+
+			depth++;
 		}
 
 		return std::move(path);
@@ -56,7 +87,9 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 
-		real depthNorm = 1 / dst.maxDepth;
+		m_maxDepth = dst.maxDepth;
+
+		real depthNorm = 1 / dst.geominfo.depthMax;
 
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -74,13 +107,38 @@ namespace aten
 				auto path = radiance(camsample.r, scene);
 
 				if (dst.geominfo.normal) {
-					dst.geominfo.normal[pos] = path.normal;
+					if (dst.geominfo.needNormalize) {
+						// [-1, 1] -> [0, 1]
+						auto normal = (path.normal + 1) * 0.5;
+
+						dst.geominfo.normal[pos] = normal;
+					}
+					else {
+						dst.geominfo.normal[pos] = path.normal;
+					}
 				}
 				if (dst.geominfo.depth) {
-					real depth = std::min(path.depth, dst.geominfo.depthMax);
-					dst.geominfo.depth[pos] = vec3(path.depth * depthNorm);
+					// [-∞, ∞] -> [-d, d]
+					real depth = std::min(aten::abs(path.depth), dst.geominfo.depthMax);
+					depth *= path.depth < 0 ? -1 : 1;
+
+					if (dst.geominfo.needNormalize) {
+						// [-d, d] -> [-1, 1]
+						depth *= depthNorm;
+
+						// [-1, 1] -> [0, 1]
+						depth = (depth + 1) * 0.5;
+					}
+					
+					dst.geominfo.depth[pos] = vec3(depth);
 				}
 				if (dst.geominfo.albedo) {
+					if (dst.geominfo.needNormalize) {
+						path.albedo.x = std::min<real>(path.albedo.x, 1);
+						path.albedo.y = std::min<real>(path.albedo.y, 1);
+						path.albedo.z = std::min<real>(path.albedo.z, 1);
+					}
+
 					dst.geominfo.albedo[pos] = path.albedo;
 				}
 			}

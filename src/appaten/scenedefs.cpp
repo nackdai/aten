@@ -171,11 +171,11 @@ void MtrlTestScene::getCameraPosAndAt(
 
 void ObjectScene::makeScene(aten::scene* scene)
 {
-	aten::MaterialManager::addMaterial(
+	aten::AssetManager::registerMtrl(
 		"m1",
 		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
 
-	aten::MaterialManager::addMaterial(
+	aten::AssetManager::registerMtrl(
 		"Material.001",
 		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
 

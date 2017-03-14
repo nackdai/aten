@@ -86,7 +86,7 @@ namespace aten
 	{
 		m_node.build(
 			(bvhnode**)&faces[0],
-			faces.size());
+			(uint32_t)faces.size());
 
 		m_aabb = m_node.getBoundingbox();
 	}

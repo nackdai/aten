@@ -1,22 +1,16 @@
 #include "OpenImageIO/imageio.h"
-#include "texture/ImageLoader.h"
+#include "ImageLoader.h"
+#include "AssetManager.h"
 #include "texture/texture.h"
+#include "utility.h"
+#include <map>
 
 namespace aten {
 	static std::string g_base;
 
 	void ImageLoader::setBasePath(const std::string& base)
 	{
-		g_base = base;
-
-		// Remove tail '\' or '/'.
-
-		auto len = g_base.length();
-		auto ch = g_base[len - 1];
-
-		if (ch == '\\' || ch == '/') {
-			g_base.pop_back();
-		}
+		g_base = removeTailPathSeparator(base);
 	}
 
 	template <typename TYPE>
@@ -29,8 +23,8 @@ namespace aten {
 	{
 		const auto chn = tex->channels();
 
-		auto width = tex->width();
-		auto height = tex->height();
+		int width = tex->width();
+		int height = tex->height();
 
 		auto size = width * height * srcChannels;
 
@@ -69,11 +63,35 @@ namespace aten {
 
 	texture* ImageLoader::load(const std::string& path)
 	{
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
+
+		auto tex = load(filename, path);
+
+		return tex;
+	}
+
+	texture* ImageLoader::load(const std::string& tag, const std::string& path)
+	{
 		OIIO_NAMESPACE_USING
 
 		std::string fullpath = path;
 		if (!g_base.empty()) {
 			fullpath = g_base + "/" + fullpath;
+		}
+
+		texture* tex = AssetManager::getTex(tag);
+
+		if (tex) {
+			AT_PRINTF("There is same tag texture. [%s]\n", tag);
+			return tex;
 		}
 
 		ImageInput* input = ImageInput::open(fullpath);
@@ -91,7 +109,7 @@ namespace aten {
 		AT_ASSERT(spec.depth == 1);
 
 		// ３チャンネル（RGB）まで.
-		texture* tex = new texture(width, height, std::min(spec.nchannels, 3));
+		tex = new texture(width, height, std::min(spec.nchannels, 3));
 		const auto chn = tex->channels();
 
 		if (spec.format == TypeDesc::UINT8) {
@@ -109,6 +127,10 @@ namespace aten {
 
 		// Close handle
 		input->close();
+
+		if (tex) {
+			AssetManager::registerTex(tag, tex);
+		}
 
 		return tex;
 	}

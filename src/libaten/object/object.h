@@ -80,7 +80,7 @@ namespace aten
 	private:
 		void build()
 		{
-			m_node.build((bvhnode**)&shapes[0], shapes.size());
+			m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
 		}
 
 	public:

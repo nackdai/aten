@@ -1,9 +1,18 @@
-#include "MaterialManager.h"
+#include "MaterialLoader.h"
+#include "ImageLoader.h"
+#include "AssetManager.h"
+#include "utility.h"
 #include "picojson.h"
 
 namespace aten {
-	std::map<std::string, MaterialManager::MaterialCreator> g_creators;
-	std::map<std::string, material*> g_mtrls;
+	std::map<std::string, MaterialLoader::MaterialCreator> g_creators;
+
+	static std::string g_base;
+
+	void MaterialLoader::setBasePath(const std::string& base)
+	{
+		g_base = removeTailPathSeparator(base);
+	}
 
 	static const char* g_types[] = {
 		"emissive",
@@ -16,7 +25,7 @@ namespace aten {
 		"disney_brdf",
 	};
 
-	bool MaterialManager::addCreator(std::string type, MaterialCreator creator)
+	bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
 	{
 		// Check if type is as same as default type.
 		for (auto t : g_types) {
@@ -37,34 +46,24 @@ namespace aten {
 		return false;
 	}
 
-	bool MaterialManager::addMaterial(std::string tag, material* mtrl)
+	material* MaterialLoader::load(std::string path)
 	{
-		auto it = g_mtrls.find(tag);
+		std::string pathname;
+		std::string extname;
+		std::string filename;
 
-		if (it == g_mtrls.end()) {
-			g_mtrls.insert(std::pair<std::string, material*>(tag, mtrl));
-			return true;
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
+
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
 		}
 
-		return false;
-	}
-
-	material* MaterialManager::load(std::string path)
-	{
-		std::string filepath = path;
-
-		// Get tag from file path.
-		// Replace \\->/
-		std::replace(filepath.begin(), filepath.end(), '\\', '/');
-
-		int pathPos = filepath.find_last_of("/") + 1;
-		int extPos = filepath.find_last_of(".");
-
-		std::string pathname = filepath.substr(0, pathPos + 1);
-		std::string extname = filepath.substr(extPos, filepath.size() - extPos);
-		std::string filename = filepath.substr(pathPos, extPos - pathPos);
-
-		auto mtrl = load(filename, path);
+		auto mtrl = load(filename, fullpath);
 
 		return mtrl;
 	}
@@ -108,7 +107,7 @@ namespace aten {
 	{
 		auto a = val.get<picojson::array>();
 
-		int num = std::min<int>(3, a.size());
+		int num = std::min<int>(3, (int)a.size());
 
 		aten::PolymorphicValue v;
 
@@ -132,9 +131,20 @@ namespace aten {
 	{
 		auto s = val.get< std::string>();
 
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			s,
+			pathname,
+			extname,
+			filename);
+
 		aten::PolymorphicValue v;
 
-		texture* tex = ImageLoader::load(s);
+		auto tex = ImageLoader::load(s);
+
 		v.val.p = tex;
 
 		return std::move(v);
@@ -177,12 +187,11 @@ namespace aten {
 		std::pair<std::string, _MtrlParamType>("clearcoatGloss", _MtrlParamType::Double),
 	};
 
-	material* MaterialManager::load(std::string tag, std::string path)
+	material* MaterialLoader::load(std::string tag, std::string path)
 	{
 		// Check if there is same name material.
-		auto mtrl = get(tag);
+		auto mtrl = AssetManager::getMtrl(tag);
 		if (mtrl) {
-			AT_ASSERT(false);
 			AT_PRINTF("There is same tag material. [%s]\n", tag);
 			return mtrl;
 		}
@@ -244,7 +253,7 @@ namespace aten {
 			mtrl = create(mtrlName, mtrlValues);
 
 			if (mtrl) {
-				addMaterial(tag, mtrl);
+				AssetManager::registerMtrl(tag, mtrl);
 			}
 		}
 		else {
@@ -256,19 +265,7 @@ namespace aten {
 		return mtrl;
 	}
 
-	material* MaterialManager::get(std::string tag)
-	{
-		material* mtrl = nullptr;
-
-		auto itMtrl = g_mtrls.find(tag);
-		if (itMtrl != g_mtrls.end()) {
-			mtrl = itMtrl->second;
-		}
-
-		return mtrl;
-	}
-
-	MaterialManager::MaterialCreator g_funcs[] = {
+	MaterialLoader::MaterialCreator g_funcs[] = {
 		[](Values& values) { return new emissive(values); },			// emissive
 		[](Values& values) { return new lambert(values); },				// lambert
 		[](Values& values) { return new specular(values); },			// specular
@@ -281,7 +278,7 @@ namespace aten {
 
 	C_ASSERT(AT_COUNTOF(g_types) == AT_COUNTOF(g_funcs));
 
-	material* MaterialManager::create(std::string type, Values& values)
+	material* MaterialLoader::create(std::string type, Values& values)
 	{
 		// Check if default creators are registered.
 		if (g_creators.find(g_types[0]) == g_creators.end()) {

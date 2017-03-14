@@ -20,15 +20,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc" />
-    <ClCompile Include="..\src\libatenscene\MaterialManager.cpp" />
+    <ClCompile Include="..\src\libatenscene\AssetManager.cpp" />
+    <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\picojson\picojson.h" />
     <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h" />
+    <ClInclude Include="..\src\libatenscene\AssetManager.h" />
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
-    <ClInclude Include="..\src\libatenscene\MaterialManager.h" />
+    <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
+    <ClInclude Include="..\src\libatenscene\utility.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0191D96F-E987-4FDD-9D7A-934931E22B43}</ProjectGuid>
@@ -93,7 +99,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -109,7 +115,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -127,7 +133,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -148,7 +154,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>

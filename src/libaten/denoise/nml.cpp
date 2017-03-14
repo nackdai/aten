@@ -75,6 +75,8 @@ namespace aten {
 			sum += aten::pow(a[i] - b[i], 2);
 		}
 
+		sum /= real(a.size());
+
 		return sum;
 	}
 
@@ -110,11 +112,11 @@ namespace aten {
 						auto target = sampleArea(imgSrc, sx, sy, width, height);
 
 						// ノルム（相似度）計算.
-						auto dist = computeDistanceSquared(focus, target);
+						auto dist2 = computeDistanceSquared(focus, target);
 
 						// NOTE
 						// Z(p) = sum(exp(-max(|v(p) - v(q)|^2 - 2σ^2, 0) / h^2))
-						auto arg = -std::max(dist - 2 * sigma * sigma, real(0)) / (param_h * param_h);
+						auto arg = -std::max(dist2 - 2 * sigma * sigma, real(0)) / (param_h * param_h);
 
 						auto weight = exp(arg);
 

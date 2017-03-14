@@ -16,8 +16,11 @@ uniform bool revert;
 // output colour for the fragment
 layout(location = 0) out highp vec4 oColour;
 
-#define kKernel 5
-#define kSupport 13
+#define F	(2)
+#define R	(6)
+
+#define kKernel		(2 * F + 1)
+#define kSupport	(2 * R + 1)
 #define kHalfKernel (kKernel / 2)
 #define kHalfSupport (kSupport / 2)
 
@@ -61,6 +64,8 @@ float computeDistanceSquared(in Template a, in Template b)
     float sum = sumV.r;
     sum += sumV.g;
     sum += sumV.b;
+
+	sum /= (kKernel * kKernel * 3);
 
     return sum;
 }

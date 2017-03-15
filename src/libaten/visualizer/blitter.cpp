@@ -22,5 +22,10 @@ namespace aten {
 		if (hImage >= 0) {
 			CALL_GL_API(glUniform1i(hImage, 0));
 		}
+
+		auto hIsRenderRGB = getHandle("isRenderRGB");
+		if (hIsRenderRGB >= 0) {
+			CALL_GL_API(::glUniform1i(hIsRenderRGB, m_isRenderRGB ? 1 : 0));
+		}
 	}
 }

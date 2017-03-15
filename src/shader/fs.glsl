@@ -6,6 +6,7 @@ uniform sampler2D image;
 
 uniform vec4 invScreen;
 uniform bool revert;
+uniform bool isRenderRGB;
 
 // output colour for the fragment
 layout(location = 0) out highp vec4 oColour;
@@ -20,5 +21,12 @@ void main()
 
     vec4 color = texture2D(image, uv);
 
-	oColour = color;
+	if (isRenderRGB) {
+		oColour.rgb = color.rgb;
+		oColour.a = 1;
+	}
+	else {
+		oColour.rgb = vec3(color.a, color.a, color.a);
+		oColour.a = 1;
+	}
 }

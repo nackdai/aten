@@ -20,6 +20,7 @@
 
 #include "math/math.h"
 #include "math/vec3.h"
+#include "math/vec4.h"
 #include "math/ray.h"
 #include "math/mat4.h"
 

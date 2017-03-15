@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defs.h"
-#include "math/vec3.h"
+#include "math/vec4.h"
 #include "visualizer/shader.h"
 #include "visualizer/fbo.h"
 
@@ -19,9 +19,9 @@ namespace aten {
 
 		public:
 			virtual void operator()(
-				const vec3* src,
+				const vec4* src,
 				uint32_t width, uint32_t height,
-				vec3* dst) = 0;
+				vec4* dst) = 0;
 		};
 
 		class PostProc : public shader {
@@ -90,7 +90,7 @@ namespace aten {
 		static bool addPostProc(PostProc* postproc);
 
 		static void render(
-			const vec3* pixels,
+			const vec4* pixels,
 			bool revert);
 	};
 }

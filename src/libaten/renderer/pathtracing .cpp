@@ -281,7 +281,7 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 		uint32_t samples = dst.sample;
-		vec3* color = dst.buffer;
+		vec4* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
@@ -372,7 +372,7 @@ namespace aten
 
 					col /= (real)cnt;
 
-					color[pos] = col;
+					color[pos] = vec4(col, 1);
 				}
 			}
 		}

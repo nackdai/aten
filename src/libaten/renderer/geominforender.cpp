@@ -6,7 +6,8 @@ namespace aten
 {
 	GeometryInfoRenderer::Path GeometryInfoRenderer::radiance(
 		const ray& inRay,
-		scene* scene)
+		scene* scene,
+		sampler* sampler)
 	{
 		ray ray = inRay;
 
@@ -48,6 +49,34 @@ namespace aten
 					ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
 				}
 				else {
+					{
+						real lightSelectPdf = 1;
+						LightSampleResult sampleres;
+
+						auto light = scene->sampleLight(
+							rec.p,
+							orienting_normal,
+							sampler,
+							lightSelectPdf, sampleres);
+
+						if(light) {
+							vec3 posLight = sampleres.pos;
+							vec3 nmlLight = sampleres.nml;
+							real pdfLight = sampleres.pdf;
+
+							auto lightobj = sampleres.obj;
+
+							vec3 dirToLight = normalize(sampleres.dir);
+							aten::ray shadowRay(rec.p + AT_MATH_EPSILON * dirToLight, dirToLight);
+
+							hitrecord tmpRec;
+
+							if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+								path.visibility = 1;
+							}
+						}
+					}
+
 					path.albedo = rec.mtrl->color();
 					path.albedo *= rec.mtrl->sampleAlbedoMap(rec.u, rec.v);
 					path.albedo *= throughput;
@@ -69,6 +98,8 @@ namespace aten
 					// Far far away...
 					path.depth = AT_MATH_INF;
 				}
+
+				path.visibility = 1;
 
 				break;
 			}
@@ -95,8 +126,7 @@ namespace aten
 			for (int x = 0; x < width; x++) {
 				int pos = y * width + x;
 
-				// Dummy. Not use...
-				XorShift rnd(0);
+				XorShift rnd((y * height * 4 + x * 4) + 1);
 				UniformDistributionSampler sampler(&rnd);
 
 				real u = real(x + 0.5) / real(width);
@@ -104,42 +134,42 @@ namespace aten
 
 				auto camsample = camera->sample(u, v, &sampler);
 
-				auto path = radiance(camsample.r, scene);
+				auto path = radiance(camsample.r, scene, &sampler);
 
-				if (dst.geominfo.normal) {
+				if (dst.geominfo.nml_depth) {
 					if (dst.geominfo.needNormalize) {
 						// [-1, 1] -> [0, 1]
 						auto normal = (path.normal + 1) * 0.5;
 
-						dst.geominfo.normal[pos] = normal;
+						// [-‡, ‡] -> [-d, d]
+						real depth = std::min(aten::abs(path.depth), dst.geominfo.depthMax);
+						depth *= path.depth < 0 ? -1 : 1;
+
+						if (dst.geominfo.needNormalize) {
+							// [-d, d] -> [-1, 1]
+							depth *= depthNorm;
+
+							// [-1, 1] -> [0, 1]
+							depth = (depth + 1) * 0.5;
+						}
+
+						dst.geominfo.nml_depth[pos].set(normal, depth);
 					}
 					else {
-						dst.geominfo.normal[pos] = path.normal;
+						dst.geominfo.nml_depth[pos].set(path.normal, path.depth);
 					}
 				}
-				if (dst.geominfo.depth) {
-					// [-‡, ‡] -> [-d, d]
-					real depth = std::min(aten::abs(path.depth), dst.geominfo.depthMax);
-					depth *= path.depth < 0 ? -1 : 1;
+				if (dst.geominfo.albedo_vis) {
+					auto albedo = path.albedo;
 
 					if (dst.geominfo.needNormalize) {
-						// [-d, d] -> [-1, 1]
-						depth *= depthNorm;
-
-						// [-1, 1] -> [0, 1]
-						depth = (depth + 1) * 0.5;
-					}
-					
-					dst.geominfo.depth[pos] = vec3(depth);
-				}
-				if (dst.geominfo.albedo) {
-					if (dst.geominfo.needNormalize) {
-						path.albedo.x = std::min<real>(path.albedo.x, 1);
-						path.albedo.y = std::min<real>(path.albedo.y, 1);
-						path.albedo.z = std::min<real>(path.albedo.z, 1);
+						// TODO
+						albedo.x = std::min<real>(albedo.x, 1);
+						albedo.y = std::min<real>(albedo.y, 1);
+						albedo.z = std::min<real>(albedo.z, 1);
 					}
 
-					dst.geominfo.albedo[pos] = path.albedo;
+					dst.geominfo.albedo_vis[pos].set(albedo, path.visibility);
 				}
 			}
 		}

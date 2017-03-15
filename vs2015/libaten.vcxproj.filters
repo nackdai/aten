@@ -448,5 +448,8 @@
     <None Include="..\src\shader\gamma_fs.glsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="..\src\shader\separate_fs .glsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

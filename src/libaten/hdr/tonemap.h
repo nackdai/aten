@@ -14,12 +14,12 @@ namespace aten
 	public:
 		static std::tuple<real, real> computeAvgAndMaxLum(
 			int width, int height,
-			const vec3* src);
+			const vec4* src);
 
 		virtual void operator()(
-			const vec3* src,
+			const vec4* src,
 			uint32_t width, uint32_t height,
-			vec3* dst) override final;
+			vec4* dst) override final;
 	};
 
 	class TonemapPostProc : public Blitter {

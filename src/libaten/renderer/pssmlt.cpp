@@ -201,7 +201,7 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 		uint32_t samples = dst.sample;
-		vec3* color = dst.buffer;
+		vec4* color = dst.buffer;
 
 		uint32_t mltNum = dst.mltNum;
 
@@ -351,7 +351,7 @@ namespace aten
 		for (int n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				color[i] += image[i] / mltNum;
+				color[i] += vec4(image[i] / mltNum, 1);
 			}
 		}
 	}

@@ -21,11 +21,13 @@ namespace aten
 			vec3 normal;
 			vec3 albedo;
 			real depth;
+			real visibility{ 0 };
 		};
 
 		Path radiance(
 			const ray& inRay,
-			scene* scene);
+			scene* scene,
+			sampler* sampler);
 
 	private:
 		uint32_t m_maxDepth{ 1 };

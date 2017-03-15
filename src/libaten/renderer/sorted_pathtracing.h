@@ -58,7 +58,7 @@ namespace aten
 		void shadeMiss(
 			Path* paths,
 			int numPath,
-			vec3* dst);
+			vec4* dst);
 
 		void shade(
 			uint32_t depth,
@@ -67,7 +67,7 @@ namespace aten
 			int numHit,
 			camera* cam,
 			scene* scene,
-			vec3* dst);
+			vec4* dst);
 
 	private:
 		uint32_t m_maxDepth{ 1 };

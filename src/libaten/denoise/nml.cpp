@@ -16,7 +16,7 @@ namespace aten {
 	using Template = std::array<real, 3 * kKernel * kKernel>;
 
 	Template sampleArea(
-		const vec3* src,
+		const vec4* src,
 		int x, int y,
 		int width, int height)
 	{
@@ -47,7 +47,7 @@ namespace aten {
 	}
 
 	vec3 samplePixel(
-		const vec3* src,
+		const vec4* src,
 		int x, int y,
 		int width, int height)
 	{
@@ -81,9 +81,9 @@ namespace aten {
 	}
 
 	static void doNonLocalMeanFilter(
-		const vec3* imgSrc,
+		const vec4* imgSrc,
 		int imgW, int imgH,
-		vec3* imgDst,
+		vec4* imgDst,
 		real param_h,
 		real sigma)
 	{
@@ -129,17 +129,15 @@ namespace aten {
 
 				auto color = sum / sum_weight;
 
-				dst->r = color.r;
-				dst->g = color.g;
-				dst->b = color.b;
+				*dst = vec4(color, 1);
 			}
 		}
 	}
 
 	void NonLocalMeanFilter::operator()(
-		const vec3* src,
+		const vec4* src,
 		uint32_t width, uint32_t height,
-		vec3* dst)
+		vec4* dst)
 	{
 		timer timer;
 		timer.begin();

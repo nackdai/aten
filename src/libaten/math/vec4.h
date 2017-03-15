@@ -35,6 +35,11 @@ namespace aten {
 			z = _z;
 			w = _w;
 		}
+		vec4(const vec3& _v, real _w)
+		{
+			v = _v;
+			w = _w;
+		}
 
 		inline operator vec3() const
 		{
@@ -47,6 +52,21 @@ namespace aten {
 		inline real& operator[](int i)
 		{
 			return p[i];
+		}
+
+		inline const vec4& set(real _x, real _y, real _z, real _w)
+		{
+			x = _x;
+			y = _y;
+			z = _z;
+			w = _w;
+			return *this;
+		}
+		inline const vec4& set(const vec3& _v, real _w)
+		{
+			v = _v;
+			w = _w;
+			return *this;
 		}
 
 		inline const vec4& operator+() const

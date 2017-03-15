@@ -86,7 +86,7 @@ namespace aten
 	void SortedPathTracing::shadeMiss(
 		Path* paths,
 		int numPath,
-		vec3* dst)
+		vec4* dst)
 	{
 #ifdef ENABLE_OMP
 #pragma omp parallel for
@@ -95,7 +95,7 @@ namespace aten
 			auto& path = paths[i];
 			if (path.isAlive && !path.isHit) {
 				auto bg = sampleBG(path.r);
-				dst[i] += path.throughput * bg;
+				dst[i] += vec4(path.throughput * bg, 1);
 				path.isAlive = false;
 			}
 		}
@@ -108,7 +108,7 @@ namespace aten
 		int numHit,
 		camera* cam,
 		scene* scene,
-		vec3* dst)
+		vec4* dst)
 	{
 		uint32_t rrDepth = m_rrDepth;
 
@@ -139,12 +139,12 @@ namespace aten
 				if (depth == 0) {
 					// Ray hits the light directly.
 					auto emit = rec.mtrl->color();
-					dst[idx] = emit;
+					dst[idx] = vec4(emit, 1);
 				}
 				else {
 					auto emit = rec.mtrl->color();
 
-					dst[idx] += path.throughput * emit;
+					dst[idx] += vec4(path.throughput * emit, 1);
 				}
 
 				// When ray hit the light, tracing will finish.
@@ -207,7 +207,7 @@ namespace aten
 	{
 		int width = dst.width;
 		int height = dst.height;
-		vec3* color = dst.buffer;
+		vec4* color = dst.buffer;
 
 		// TODO
 		memset(color, 0, sizeof(vec3) * width * height);
@@ -223,7 +223,7 @@ namespace aten
 		std::vector<Path> paths(width * height);
 		std::vector<uint32_t> hitIds(width * height);
 
-		for (int i = 0; i < m_samples; i++) {
+		for (uint32_t i = 0; i < m_samples; i++) {
 			makePaths(
 				width, height, i,
 				&paths[0],
@@ -234,15 +234,15 @@ namespace aten
 			while (depth < m_maxDepth) {
 				hitPaths(
 					&paths[0],
-					paths.size(),
+					(int)paths.size(),
 					scene);
 
 				auto numHit = compactionPaths(
 					&paths[0],
-					paths.size(),
+					(int)paths.size(),
 					&hitIds[0]);
 
-				shadeMiss(&paths[0], paths.size(), color);
+				shadeMiss(&paths[0], (int)paths.size(), color);
 
 				if (numHit == 0) {
 					break;

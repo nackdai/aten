@@ -171,7 +171,7 @@ namespace aten
 		int height = dst.height;
 		uint32_t samples = dst.sample;
 		uint32_t mutation = dst.mutation;
-		vec3* color = dst.buffer;
+		vec4* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
@@ -328,7 +328,7 @@ namespace aten
 		for (int n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				color[i] += image[i];
+				color[i] += vec4(image[i], 1);
 			}
 		}
 	}

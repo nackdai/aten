@@ -16,9 +16,9 @@ namespace aten {
 
 	public:
 		virtual void operator()(
-			const vec3* src,
+			const vec4* src,
 			uint32_t width, uint32_t height,
-			vec3* dst) override final;
+			vec4* dst) override final;
 
 		void setParam(real param_h, real sigma)
 		{

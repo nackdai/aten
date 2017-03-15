@@ -103,7 +103,7 @@ namespace aten
 	{
 		int width = dst.width;
 		int height = dst.height;
-		vec3* color = dst.buffer;
+		vec4* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
 
@@ -132,7 +132,7 @@ namespace aten
 
 					auto col = radiance(camsample.r, scene);
 
-					color[pos] = col;
+					color[pos] = vec4(col, 1);
 				}
 			}
 		}

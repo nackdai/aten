@@ -9,13 +9,13 @@
 namespace aten {
 	class Sampler {
 	public:
-		Sampler(vec3* s, uint32_t w, uint32_t h)
+		Sampler(vec4* s, uint32_t w, uint32_t h)
 			: src(s), width(w), height(h)
 		{}
 		~Sampler() {}
 
 	public:
-		vec3& operator()(int x, int y) const
+		vec4& operator()(int x, int y) const
 		{
 			x = aten::clamp<int>(x, 0, width - 1);
 			y = aten::clamp<int>(y, 0, height - 1);
@@ -25,7 +25,7 @@ namespace aten {
 		}
 
 	private:
-		vec3* src;
+		vec4* src;
 		uint32_t width;
 		uint32_t height;
 	};
@@ -46,10 +46,10 @@ namespace aten {
 	}
 
 	void doBilateralFilter(
-		const vec3* src,
+		const vec4* src,
 		uint32_t width, uint32_t height,
 		real sigmaS, real sigmaR,
-		vec3* dst)
+		vec4* dst)
 	{
 		int r = int(::ceilf(4.0f * sigmaS));
 
@@ -70,8 +70,8 @@ namespace aten {
 			}
 		}
 
-		Sampler srcSampler(const_cast<vec3*>(src), width, height);
-		Sampler dstSampler(const_cast<vec3*>(dst), width, height);
+		Sampler srcSampler(const_cast<vec4*>(src), width, height);
+		Sampler dstSampler(const_cast<vec4*>(dst), width, height);
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
@@ -152,15 +152,15 @@ namespace aten {
 				}
 
 				auto d = denom / numer;
-				dstSampler(x, y) = d;
+				dstSampler(x, y) = vec4(d, 1);
 			}
 		}
 	}
 
 	void BilateralFilter::operator()(
-		const vec3* src,
+		const vec4* src,
 		uint32_t width, uint32_t height,
-		vec3* dst)
+		vec4* dst)
 	{
 		timer timer;
 		timer.begin();

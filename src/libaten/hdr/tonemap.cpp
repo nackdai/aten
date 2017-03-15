@@ -15,7 +15,7 @@ namespace aten
 
 	std::tuple<real, real> TonemapPreProc::computeAvgAndMaxLum(
 		int width, int height,
-		const vec3* src)
+		const vec4* src)
 	{
 		auto threadnum = thread::getThreadNum();
 		std::vector<real> sumY(threadnum);
@@ -85,9 +85,9 @@ namespace aten
 	}
 
 	void TonemapPreProc::operator()(
-		const vec3* src,
+		const vec4* src,
 		uint32_t width, uint32_t height,
-		vec3* dst)
+		vec4* dst)
 	{
 		auto result = computeAvgAndMaxLum(
 			width, height,
@@ -133,7 +133,7 @@ namespace aten
 				d.g = aten::clamp(ig, 0, 255);
 				d.b = aten::clamp(ib, 0, 255);
 #else
-				d = rgb;
+				d = vec4(rgb, 1);
 #endif
 			}
 		}
@@ -147,7 +147,7 @@ namespace aten
 	{
 		Blitter::prepareRender(pixels, revert);
 
-		auto result = TonemapPreProc::computeAvgAndMaxLum(m_width, m_height, (const vec3*)pixels);
+		auto result = TonemapPreProc::computeAvgAndMaxLum(m_width, m_height, (const vec4*)pixels);
 
 		auto lum = std::get<0>(result);
 		auto maxlum = std::get<1>(result);

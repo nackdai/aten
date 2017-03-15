@@ -14,7 +14,7 @@ namespace aten {
 	static const PixelFormat g_fmt{ PixelFormat::rgba32f };
 
 	static std::vector<visualizer::PreProc*> g_preprocs;
-	static std::vector<vec3> g_preprocBuffer[2];
+	static std::vector<vec4> g_preprocBuffer[2];
 
 	static std::vector<visualizer::PostProc*> g_postprocs;
 
@@ -121,14 +121,14 @@ namespace aten {
 		return handle;
 	}
 
-	static const void* doPreProcs(const vec3* pixels)
+	static const void* doPreProcs(const vec4* pixels)
 	{
 		const void* textureimage = pixels;
 
 		if (!g_preprocs.empty()) {
 			uint32_t bufpos = 0;
-			const vec3* src = (const vec3*)textureimage;
-			vec3* dst = nullptr;
+			const vec4* src = (const vec4*)textureimage;
+			vec4* dst = nullptr;
 
 			for (int i = 0; i < g_preprocs.size(); i++) {
 				auto& buf = g_preprocBuffer[bufpos];
@@ -157,7 +157,7 @@ namespace aten {
 			g_tmp.resize(g_width * g_height);
 		}
 
-		const vec3* src = (const vec3*)textureimage;
+		const vec4* src = (const vec4*)textureimage;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
@@ -172,6 +172,7 @@ namespace aten {
 				d.r = (float)s.x;
 				d.g = (float)s.y;
 				d.b = (float)s.z;
+				d.a = (float)s.w;
 			}
 		}
 
@@ -181,7 +182,7 @@ namespace aten {
 	}
 
 	void visualizer::render(
-		const vec3* pixels,
+		const vec4* pixels,
 		bool revert)
 	{
 		// Do pre processes.

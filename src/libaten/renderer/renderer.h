@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "math/vec3.h"
+#include "math/vec4.h"
 #include "renderer/background.h"
 
 namespace aten
@@ -14,12 +15,11 @@ namespace aten
 		uint32_t sample{ 1 };
 		uint32_t mutation{ 1 };
 		uint32_t mltNum{ 1 };
-		vec3* buffer{ nullptr };
+		vec4* buffer{ nullptr };
 
 		struct {
-			vec3* normal{ nullptr };
-			vec3* depth{ nullptr };
-			vec3* albedo{ nullptr };
+			vec4* nml_depth{ nullptr };		///< Normal and Depth / rgb : normal, a : depth
+			vec4* albedo_vis{ nullptr };	///< Albedo and Visibility / rgb : albedo, a : visibility
 			real depthMax{ 1 };
 			bool needNormalize{ true };
 		} geominfo;

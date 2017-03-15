@@ -267,6 +267,9 @@
     <ClInclude Include="..\src\libaten\renderer\geominforender.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\math\vec4.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

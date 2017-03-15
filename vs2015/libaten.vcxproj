@@ -182,6 +182,7 @@
     <ClInclude Include="..\src\libaten\math\math.h" />
     <ClInclude Include="..\src\libaten\math\ray.h" />
     <ClInclude Include="..\src\libaten\math\vec3.h" />
+    <ClInclude Include="..\src\libaten\math\vec4.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />

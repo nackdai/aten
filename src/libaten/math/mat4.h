@@ -3,46 +3,9 @@
 #include "defs.h"
 #include "math/math.h"
 #include "math/vec3.h"
+#include "math/vec4.h"
 
 namespace aten {
-	class vec4 {
-	public:
-		union {
-			struct {
-				real x, y, z, w;
-			};
-			real a[4];
-		};
-		vec4()
-		{
-			x = y = z = 0;
-			w = 1;
-		}
-		vec4(const vec3& v)
-		{
-			*this = v;
-			w = 1;
-		}
-		inline vec4& operator=(const vec3& v)
-		{
-			x = v.x; y = v.y; z = v.z;
-			return *this;
-		}
-		inline operator vec3() const
-		{
-			vec3 v(x, y, z);
-			return std::move(v);
-		}
-		inline real operator[](int i) const
-		{
-			return a[i];
-		}
-		inline real& operator[](int i)
-		{
-			return a[i];
-		}
-	};
-
 	class mat4 {
 	public:
 		static const mat4 Identity;
@@ -169,7 +132,7 @@ namespace aten {
 
 		inline vec3 apply(const vec3& v) const
 		{
-			vec4 t(v);
+			vec4 t(v.x, v.y, v.z, 1);
 			vec4 ret;
 
 			for (int r = 0; r < 4; r++) {

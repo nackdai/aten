@@ -37,7 +37,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(baseColor, albedoMap, normalMap)
+			: material(baseColor, 1, albedoMap, normalMap)
 		{
 			m_baseColor = baseColor;
 			m_subsurface = aten::clamp<real>(subsurface, 0, 1);
@@ -59,7 +59,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(param.baseColor, albedoMap, normalMap)
+			: material(param.baseColor, 1, albedoMap, normalMap)
 		{
 			m_baseColor = param.baseColor;
 			m_subsurface = aten::clamp<real>(param.subsurface, 0, 1);

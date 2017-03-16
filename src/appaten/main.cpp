@@ -22,11 +22,11 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-//static aten::PathTracing g_tracer;
+static aten::PathTracing g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;
-static aten::GeometryInfoRenderer g_tracer;
+//static aten::GeometryInfoRenderer g_tracer;
 
 static std::vector<aten::vec4> g_buffer;
 static std::vector<aten::TColor<uint8_t>> g_dst;
@@ -153,10 +153,10 @@ int main(int argc, char* argv[])
 		"../shader/gamma_fs.glsl");
 
 	//aten::visualizer::addPostProc(&nmlshd);
-	//aten::visualizer::addPostProc(&gamma);
+	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&tonemap);
 	//aten::visualizer::addPostProc(&bloom);
-	aten::visualizer::addPostProc(&blitter);
+	//aten::visualizer::addPostProc(&blitter);
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;
@@ -191,9 +191,9 @@ int main(int argc, char* argv[])
 	g_bg.init(g_envmap);
 
 	aten::ImageBasedLight ibl(&g_bg);
-	//g_scene.addImageBasedLight(&ibl);
+	g_scene.addImageBasedLight(&ibl);
 
-	g_tracer.setBG(&g_staticbg);
+	//g_tracer.setBG(&g_staticbg);
 
 	//aten::NonLocalMeanFilter filter;
 	//aten::BilateralFilter filter;

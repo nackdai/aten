@@ -12,7 +12,7 @@ namespace aten
 			real shininess, real ior,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(albedo, albedoMap, normalMap), m_shininess(shininess), m_ior(ior)
+			: material(albedo, ior, albedoMap, normalMap), m_shininess(shininess)
 		{}
 
 		virtual ~MicrofacetBlinn() {}
@@ -54,8 +54,5 @@ namespace aten
 
 	private:
 		real m_shininess{ real(0) };
-
-		// ï®ëÃÇÃã¸ê‹ó¶.
-		real m_ior;
 	};
 }

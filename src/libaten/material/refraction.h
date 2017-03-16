@@ -11,7 +11,7 @@ namespace aten
 			const vec3& albedo,
 			real ior,
 			texture* normalMap = nullptr)
-			: material(albedo, nullptr, normalMap), m_nt(ior)
+			: material(albedo, ior, nullptr, normalMap)
 		{}
 
 		virtual ~refraction() {}
@@ -52,8 +52,15 @@ namespace aten
 			sampler* sampler,
 			real u, real v) const override final;
 
-	private:
-		// ï®ëÃÇÃã¸ê‹ó¶.
-		real m_nt;
+		virtual real computeFresnel(
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real outsideIor = 1) const override final
+		{
+			// TODO
+			AT_ASSERT(false);
+			return real(0);
+		}
 	};
 }

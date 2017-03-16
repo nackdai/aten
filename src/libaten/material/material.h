@@ -10,6 +10,8 @@ namespace aten
 	struct hitrecord;
 
 	class material {
+		friend class LayeredBSDF;
+
 	public:
 		material() {}
 		virtual ~material() {}
@@ -17,9 +19,10 @@ namespace aten
 	protected:
 		material(
 			const vec3& clr, 
+			real ior = 1,
 			texture* albedoMap = nullptr, 
 			texture* normalMap = nullptr) 
-			: m_albedo(clr), m_albedoMap(albedoMap), m_normalMap(normalMap)
+			: m_albedo(clr), m_ior(ior), m_albedoMap(albedoMap), m_normalMap(normalMap)
 		{}
 
 	public:
@@ -43,10 +46,25 @@ namespace aten
 			return m_albedo;
 		}
 
+		virtual vec3 sampleAlbedoMap(real u, real v) const
+		{
+			vec3 albedo(1, 1, 1);
+			if (m_albedoMap) {
+				albedo = m_albedoMap->at(u, v);
+			}
+			return std::move(albedo);
+		}
+
 		virtual void applyNormalMap(
 			const vec3& orgNml,
 			vec3& newNml,
 			real u, real v) const;
+
+		virtual real computeFresnel(
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real outsideIor = 1) const;
 
 		virtual real pdf(
 			const vec3& normal, 
@@ -87,13 +105,9 @@ namespace aten
 			real u, real v) const = 0;
 
 	protected:
-		vec3 sampleAlbedoMap(real u, real v) const
+		real ior() const
 		{
-			vec3 albedo(1, 1, 1);
-			if (m_albedoMap) {
-				albedo = m_albedoMap->at(u, v);
-			}
-			return std::move(albedo);
+			return m_ior;
 		}
 
 		static vec3 sampleTexture(texture* tex, real u, real v, real defaultValue)
@@ -113,6 +127,8 @@ namespace aten
 
 	private:
 		vec3 m_albedo;
+
+		real m_ior{ 0 };
 
 		texture* m_albedoMap{ nullptr };
 		texture* m_normalMap{ nullptr };

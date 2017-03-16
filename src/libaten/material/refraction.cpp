@@ -57,7 +57,7 @@ namespace aten
 		real ni = real(1);	// ^‹ó
 
 		// •¨‘Ì“à•”‚Ì‹üÜ—¦.
-		real nt = m_nt;
+		real nt = ior();
 
 		bool into = (dot(hitrec.normal, normal) > real(0));
 
@@ -83,10 +83,13 @@ namespace aten
 
 			ret.dir = reflect;
 
+#if 0
+			// For canceling cosine factor.
 			auto c = dot(normal, ret.dir);
 			if (c > real(0)) {
 				ret.bsdf = albedo / c;
 			}
+#endif
 
 			return std::move(ret);
 		}

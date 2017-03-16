@@ -166,7 +166,7 @@ namespace aten
 		// ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó
 
-		real nt = m_ior;	// •¨‘Ì“à•”‚Ì‹üÜ—¦.
+		real nt = ior();	// •¨‘Ì“à•”‚Ì‹üÜ—¦.
 
 		vec3 V = -wi;
 		vec3 L = wo;

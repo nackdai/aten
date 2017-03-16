@@ -13,7 +13,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(albedo, albedoMap, normalMap), m_ior(ior), m_roughnessMap(roughnessMap)
+			: material(albedo, ior, albedoMap, normalMap), m_roughnessMap(roughnessMap)
 		{
 			m_roughness = aten::clamp<real>(roughness, 0, 1);
 		}
@@ -72,9 +72,6 @@ namespace aten
 
 	private:
 		real m_roughness{ real(0) };
-
-		// •¨‘Ì‚Ì‹üÜ—¦.
-		real m_ior;
 
 		texture* m_roughnessMap{ nullptr };
 	};

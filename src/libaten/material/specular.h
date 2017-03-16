@@ -11,7 +11,7 @@ namespace aten
 			const vec3& albedo,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(albedo, albedoMap, normalMap)
+			: material(albedo, 0, albedoMap, normalMap)
 		{}
 
 		virtual ~specular() {}
@@ -46,5 +46,14 @@ namespace aten
 			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const override final;
+
+		virtual real computeFresnel(
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real outsideIor = 1) const override final
+		{
+			return real(1);
+		}
 	};
 }

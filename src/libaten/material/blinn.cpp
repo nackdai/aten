@@ -106,7 +106,7 @@ namespace aten
 		real ni = real(1);	// ^‹ó
 
 		// •¨‘Ì“à•”‚Ì‹üÜ—¦.
-		real nt = m_ior;
+		real nt = ior();
 
 		vec3 V = -wi;
 		vec3 L = wo;

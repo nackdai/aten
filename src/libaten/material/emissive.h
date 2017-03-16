@@ -20,7 +20,6 @@ namespace aten
 
 		virtual real pdf(
 			const vec3& normal,
-			const vec3& orgNml,
 			const vec3& wi,
 			const vec3& wo,
 			real u, real v,
@@ -35,7 +34,6 @@ namespace aten
 		virtual vec3 sampleDirection(
 			const vec3& in,
 			const vec3& normal, 
-			const vec3& orgNml,
 			real u, real v,
 			sampler* sampler) const override final
 		{
@@ -47,7 +45,6 @@ namespace aten
 
 		virtual vec3 bsdf(
 			const vec3& normal,
-			const vec3& orgNml,
 			const vec3& wi,
 			const vec3& wo,
 			real u, real v) const override final
@@ -61,7 +58,7 @@ namespace aten
 		virtual sampling sample(
 			const vec3& in,
 			const vec3& normal,
-			const vec3& orgNml,
+			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const override final
 		{

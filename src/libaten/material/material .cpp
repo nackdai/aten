@@ -81,4 +81,32 @@ namespace aten
 			newNml = normalize(orgNml);
 		}
 	}
+
+	real material::computeFresnel(
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real outsideIor/*= 1*/) const
+	{
+		vec3 V = -wi;
+		vec3 L = wo;
+		vec3 N = normal;
+		vec3 H = normalize(L + V);
+
+		auto ni = outsideIor;
+		auto nt = ior();
+
+		// NOTE
+		// Fschlick(v,h) Å‡ R0 + (1 - R0)(1 - cosÉ¶)^5
+		// R0 = ((n1 - n2) / (n1 + n2))^2
+
+		auto r0 = (ni - nt) / (ni + nt);
+		r0 = r0 * r0;
+
+		auto LdotH = aten::abs(dot(L, H));
+
+		auto F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
+
+		return F;
+	}
 }

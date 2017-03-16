@@ -14,7 +14,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(albedo, albedoMap, normalMap), m_roughnessMap(roughnessMap)
+			: material(albedo, 1, albedoMap, normalMap), m_roughnessMap(roughnessMap)
 		{
 			m_roughness = aten::clamp<real>(roughness, 0, 1);
 		}
@@ -47,6 +47,15 @@ namespace aten
 			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const override final;
+
+		virtual real computeFresnel(
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real outsideIor = 1) const override final
+		{
+			return real(1);
+		}
 
 	private:
 		inline real sampleRoughness(real u, real v) const;

@@ -329,7 +329,6 @@ namespace aten
 			const auto weight1 = 1 - weight2;
 
 			fresnel = weight1 * aten::mix(Fd, ss, subsurface) + weight2 * FH;
-			fresnel = aten::clamp<real>(fresnel, 0, 1);
 		}
 
 		return ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metalic)	// diffuse

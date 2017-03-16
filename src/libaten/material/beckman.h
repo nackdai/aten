@@ -64,6 +64,7 @@ namespace aten
 
 		vec3 bsdf(
 			real roughness,
+			real& fresnel,
 			const vec3& normal,
 			const vec3& wi,
 			const vec3& wo,

@@ -90,6 +90,18 @@ namespace aten
 		const vec3& wo,
 		real u, real v) const
 	{
+		real fresnel = 1;
+		auto ret = bsdf(fresnel, normal, wi, wo, u, v);
+		return std::move(ret);
+	}
+
+	vec3 MicrofacetBlinn::bsdf(
+		real& fresnel,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
 		// ƒŒƒC‚ª“üŽË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó
 
@@ -157,6 +169,8 @@ namespace aten
 
 		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
+		fresnel = F;
+
 		return std::move(bsdf);
 	}
 
@@ -173,7 +187,10 @@ namespace aten
 
 #if 1
 		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
-		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
+
+		real fresnel = 1;
+		ret.bsdf = bsdf(fresnel, normal, in, ret.dir, u, v);
+		ret.fresnel = fresnel;
 #else
 		vec3 V = -in;
 		vec3 L = ret.dir;

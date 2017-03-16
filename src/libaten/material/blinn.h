@@ -45,6 +45,14 @@ namespace aten
 			real u, real v) const override final;
 
 	private:
+		vec3 bsdf(
+			real& fresnel,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v) const;
+
+	private:
 		real m_shininess{ real(0) };
 
 		// •¨‘Ì‚Ì‹üÜ—¦.

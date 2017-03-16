@@ -129,12 +129,16 @@ namespace aten
 			ret.dir = reflect;
 			ret.bsdf = Re * albedo;
 			ret.bsdf /= prob;
+
+			ret.fresnel = Re;
 		}
 		else {
 			// ‹üÜ.
 			ret.dir = refract;
 			ret.bsdf = Tr * albedo;
 			ret.bsdf /= (1 - prob);
+
+			ret.fresnel = 0;
 		}
 #else
 		if (r < prob) {

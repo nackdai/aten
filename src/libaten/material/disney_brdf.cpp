@@ -248,10 +248,13 @@ namespace aten
 		const vec3 X = getOrthoVector(N);
 		const vec3 Y = normalize(cross(N, X));
 
-		return std::move(bsdf(V, N, L, X, Y, u, v));
+		real fresnel = 1;
+
+		return std::move(bsdf(fresnel, V, N, L, X, Y, u, v));
 	}
 
 	vec3 DisneyBRDF::bsdf(
+		real& fresnel,
 		const vec3& V,
 		const vec3& N,
 		const vec3& L,
@@ -261,7 +264,7 @@ namespace aten
 	{
 		const auto baseColor = m_baseColor;
 		const auto subsurface = m_subsurface;
-		const auto metallic = m_metallic;
+		const auto metalic = m_metallic;
 		const auto specular = m_specular;
 		const auto specularTint = m_specularTint;
 		const auto roughness = m_roughness;
@@ -285,7 +288,7 @@ namespace aten
 		const auto Cdlum = 0.3 * Cdlin[0] + 0.6 * Cdlin[1] + 0.1 * Cdlin[2]; // luminance approx.
 
 		const vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : vec3(1); // normalize lum. to isolate hue+sat
-		const vec3 Cspec0 = mix(specular* 0.08 * mix(vec3(1), Ctint, specularTint), Cdlin, metallic);
+		const vec3 Cspec0 = mix(specular* 0.08 * mix(vec3(1), Ctint, specularTint), Cdlin, metalic);
 		const vec3 Csheen = mix(vec3(1), Ctint, sheenTint);
 
 		// Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
@@ -320,7 +323,16 @@ namespace aten
 		const auto Fr = aten::mix(0.04, real(1), FH);
 		const auto Gr = smithG_GGX(NdotL, 0.25) * smithG_GGX(NdotV, 0.25);	// ò_ï∂ì‡Ç≈0.25åàÇﬂÇ§ÇøÇ∆ãLç⁄.
 
-		return ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metallic)	// diffuse
+		// TODO
+		{
+			const auto weight2 = metalic;
+			const auto weight1 = 1 - weight2;
+
+			fresnel = weight1 * aten::mix(Fd, ss, subsurface) + weight2 * FH;
+			fresnel = aten::clamp<real>(fresnel, 0, 1);
+		}
+
+		return ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metalic)	// diffuse
 			+ Gs * Fs * Ds						// specular
 #if 0
 			+ 0.25 * clearcoat * Gr * Fr * Dr;	// clearcoat
@@ -350,7 +362,10 @@ namespace aten
 		const vec3& L = ret.dir;
 
 		ret.pdf = pdf(V, N, L, X, Y, u, v);
-		ret.bsdf = bsdf(V, N, L, X, Y, u, v);
+
+		real fresnel = 1;
+		ret.bsdf = bsdf(fresnel, V, N, L, X, Y, u, v);
+		ret.fresnel = fresnel;
 
 		return std::move(ret);
 	}

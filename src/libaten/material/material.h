@@ -43,15 +43,7 @@ namespace aten
 			return m_albedo;
 		}
 
-		vec3 sampleAlbedoMap(real u, real v) const
-		{
-			vec3 albedo(1, 1, 1);
-			if (m_albedoMap) {
-				albedo = m_albedoMap->at(u, v);
-			}
-			return std::move(albedo);
-		}
-		void applyNormalMap(
+		virtual void applyNormalMap(
 			const vec3& orgNml,
 			vec3& newNml,
 			real u, real v) const;
@@ -79,6 +71,7 @@ namespace aten
 			vec3 dir;
 			vec3 bsdf;
 			real pdf{ real(0) };
+			real fresnel{ real(1) };
 
 			sampling() {}
 			sampling(const vec3& d, const vec3& b, real p)
@@ -94,6 +87,15 @@ namespace aten
 			real u, real v) const = 0;
 
 	protected:
+		vec3 sampleAlbedoMap(real u, real v) const
+		{
+			vec3 albedo(1, 1, 1);
+			if (m_albedoMap) {
+				albedo = m_albedoMap->at(u, v);
+			}
+			return std::move(albedo);
+		}
+
 		static vec3 sampleTexture(texture* tex, real u, real v, real defaultValue)
 		{
 			auto ret = sampleTexture(tex, u, v, vec3(defaultValue));

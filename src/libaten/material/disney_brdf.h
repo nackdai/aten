@@ -123,6 +123,7 @@ namespace aten
 			sampler* sampler) const;
 
 		vec3 bsdf(
+			real& fresnel,
 			const vec3& V,
 			const vec3& N,
 			const vec3& L,

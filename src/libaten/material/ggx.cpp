@@ -38,7 +38,8 @@ namespace aten
 		real u, real v) const
 	{
 		auto roughness = sampleRoughness(u, v);
-		vec3 ret = bsdf(roughness, normal, wi, wo, u, v);
+		real fresnel = 1;
+		vec3 ret = bsdf(roughness, fresnel, normal, wi, wo, u, v);
 		return std::move(ret);
 	}
 
@@ -156,6 +157,7 @@ namespace aten
 
 	vec3 MicrofacetGGX::bsdf(
 		real roughness,
+		real& fresnel,
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -212,6 +214,8 @@ namespace aten
 		auto denom = 4 * NdotL * NdotV;
 
 		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
+		
+		fresnel = F;
 
 		return std::move(bsdf);
 	}
@@ -230,7 +234,9 @@ namespace aten
 		ret.dir = sampleDirection(roughness, in, normal, sampler);
 		ret.pdf = pdf(roughness, normal, in, ret.dir);
 
-		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
+		real fresnel = 1;
+		ret.bsdf = bsdf(roughness, fresnel, normal, in, ret.dir, u, v);
+		ret.fresnel = fresnel;
 
 		return std::move(ret);
 	}

@@ -34,15 +34,17 @@ namespace aten
 				real u = real(x + sampler->nextSample()) / real(width);
 				real v = real(y + sampler->nextSample()) / real(height);
 
-				paths[pos].camsample = camera->sample(u, v, sampler);
-				paths[pos].r = paths[pos].camsample.r;
+				auto& path = paths[pos];
 
-				paths[pos].x = x;
-				paths[pos].y = y;
+				path.camsample = camera->sample(u, v, sampler);
+				path.r = path.camsample.r;
 
-				paths[pos].isAlive = true;
+				path.x = x;
+				path.y = y;
 
-				paths[pos].throughput = vec3(1, 1, 1);
+				path.isAlive = true;
+
+				path.throughput = vec3(1, 1, 1);
 			}
 		}
 	}
@@ -57,6 +59,10 @@ namespace aten
 #endif
 		for (int i = 0; i < numPath; i++) {
 			auto& path = paths[i];
+
+			path.rec.t = AT_MATH_INF;
+			path.rec.obj = nullptr;
+			path.rec.mtrl = nullptr;
 
 			path.isHit = false;
 
@@ -84,6 +90,8 @@ namespace aten
 	}
 
 	void SortedPathTracing::shadeMiss(
+		scene* scene,
+		int depth,
 		Path* paths,
 		int numPath,
 		vec4* dst)
@@ -93,9 +101,29 @@ namespace aten
 #endif
 		for (int i = 0; i < numPath; i++) {
 			auto& path = paths[i];
+
 			if (path.isAlive && !path.isHit) {
-				auto bg = sampleBG(path.r);
-				dst[i] += vec4(path.throughput * bg, 1);
+				auto ibl = scene->getIBL();
+
+				auto pos = path.y * m_width + path.x;
+
+				if (ibl) {
+					if (depth == 0) {
+						auto bg = ibl->getEnvMap()->sample(path.r);
+						dst[pos] += vec4(path.throughput * bg, 1);
+					}
+					else {
+						auto pdfLight = ibl->samplePdf(path.r);
+						auto misW = path.pdfb / (pdfLight + path.pdfb);
+						auto emit = ibl->getEnvMap()->sample(path.r);
+						dst[pos] += vec4(path.throughput * misW * emit, 1);
+					}
+				}
+				else {
+					auto bg = sampleBG(path.r);
+					dst[pos] += vec4(path.throughput * bg, 1);
+				}
+
 				path.isAlive = false;
 			}
 		}
@@ -139,7 +167,7 @@ namespace aten
 				if (depth == 0) {
 					// Ray hits the light directly.
 					auto emit = rec.mtrl->color();
-					dst[idx] = vec4(emit, 1);
+					dst[idx] += vec4(emit, 1);
 				}
 				else {
 					auto emit = rec.mtrl->color();
@@ -147,8 +175,7 @@ namespace aten
 					dst[idx] += vec4(path.throughput * emit, 1);
 				}
 
-				// When ray hit the light, tracing will finish.
-				break;
+				continue;
 			}
 
 			if (depth == 0) {
@@ -195,6 +222,8 @@ namespace aten
 				path.isAlive = false;
 			}
 
+			path.pdfb = pdfb;
+
 			// Make next ray.
 			path.r = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
 		}
@@ -205,12 +234,12 @@ namespace aten
 		scene* scene,
 		camera* camera)
 	{
-		int width = dst.width;
-		int height = dst.height;
+		m_width = dst.width;
+		m_height = dst.height;
 		vec4* color = dst.buffer;
 
 		// TODO
-		memset(color, 0, sizeof(vec3) * width * height);
+		memset(color, 0, sizeof(vec3) * m_width * m_height);
 
 		m_samples = dst.sample;
 		m_maxDepth = dst.maxDepth;
@@ -220,12 +249,12 @@ namespace aten
 			m_rrDepth = m_maxDepth - 1;
 		}
 
-		std::vector<Path> paths(width * height);
-		std::vector<uint32_t> hitIds(width * height);
+		std::vector<Path> paths(m_width * m_height);
+		std::vector<uint32_t> hitIds(m_width * m_height);
 
 		for (uint32_t i = 0; i < m_samples; i++) {
 			makePaths(
-				width, height, i,
+				m_width, m_height, i,
 				&paths[0],
 				camera);
 
@@ -242,12 +271,15 @@ namespace aten
 					(int)paths.size(),
 					&hitIds[0]);
 
-				shadeMiss(&paths[0], (int)paths.size(), color);
+				shadeMiss(
+					scene, depth,
+					&paths[0], (int)paths.size(), color);
 
 				if (numHit == 0) {
 					break;
 				}
 
+#if 1
 				shade(
 					depth,
 					&paths[0],
@@ -256,6 +288,7 @@ namespace aten
 					camera,
 					scene,
 					color);
+#endif
 
 				depth++;
 			}
@@ -265,9 +298,9 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					auto pos = y * width + x;
+			for (int y = 0; y < m_height; y++) {
+				for (int x = 0; x < m_width; x++) {
+					auto pos = y * m_width + x;
 					color[pos] /= m_samples;
 				}
 			}

@@ -21,7 +21,9 @@ namespace aten
 			ray r;
 			CameraSampleResult camsample;
 			hitrecord rec;
+
 			vec3 throughput{ vec3(1, 1, 1) };
+			real pdfb;
 
 			uint32_t x, y;
 
@@ -56,6 +58,8 @@ namespace aten
 			uint32_t* hitIds);
 
 		void shadeMiss(
+			scene* scene,
+			int depth,
 			Path* paths,
 			int numPath,
 			vec4* dst);
@@ -76,5 +80,8 @@ namespace aten
 		uint32_t m_rrDepth{ 1 };
 
 		uint32_t m_samples{ 1 };
+
+		int m_width{ 0 };
+		int m_height{ 0 };
 	};
 }

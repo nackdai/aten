@@ -270,6 +270,9 @@
     <ClInclude Include="..\src\libaten\math\vec4.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\oren_nayar.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -409,6 +412,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\geominforender.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\oren_nayar.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -175,6 +175,7 @@
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
+    <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\math\intersect.h" />
@@ -239,6 +240,7 @@
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\lambert.cpp" />
     <ClCompile Include="..\src\libaten\material\material .cpp" />
+    <ClCompile Include="..\src\libaten\material\oren_nayar.cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />

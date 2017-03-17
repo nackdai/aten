@@ -128,51 +128,56 @@ namespace aten
 			r = sampler->nextSample();
 		}
 
-#if 1
-		auto prob = 0.25 + 0.5 * Re;
-#if 1
-		if (r < prob) {
-			// ”½ŽË.
-			ret.dir = reflect;
-			ret.bsdf = Re * albedo;
-			ret.bsdf /= prob;
-
-			ret.fresnel = Re;
-		}
-		else {
-			// ‹üÜ.
+		if (isIdealRefraction()) {
 			ret.dir = refract;
 			ret.bsdf = Tr * albedo;
-			ret.bsdf /= (1 - prob);
-
 			ret.fresnel = 0;
-		}
-#else
-		if (r < prob) {
-			// ”½ŽË.
-			ret.dir = reflect;
-			
-			// For canceling cosine factor.
-			auto denom = dot(normal, reflect);
-			ret.bsdf = Re * albedo / denom;
-			ret.bsdf /= prob;
-		}
-		else {
-			// ‹üÜ.
-			ret.dir = refract;
-
+#if 0
 			// For canceling cosine factor.
 			auto denom = dot(normal, refract);
-			ret.bsdf = Tr * albedo / denom;
-			ret.bsdf /= (1 - prob);
+			ret.bsdf /= denom;
+#endif
 		}
-#endif
-#else
-		ret.dir = refract;
+		else {
+			auto prob = 0.25 + 0.5 * Re;
+#if 1
+			if (r < prob) {
+				// ”½ŽË.
+				ret.dir = reflect;
+				ret.bsdf = Re * albedo;
+				ret.bsdf /= prob;
 
-		auto denom = dot(normal, refract);
-		ret.bsdf = Tr * albedo / denom;
+				ret.fresnel = Re;
+			}
+			else {
+				// ‹üÜ.
+				ret.dir = refract;
+				ret.bsdf = Tr * albedo;
+				ret.bsdf /= (1 - prob);
+
+				ret.fresnel = 0;
+			}
+#else
+			if (r < prob) {
+				// ”½ŽË.
+				ret.dir = reflect;
+
+				// For canceling cosine factor.
+				auto denom = dot(normal, reflect);
+				ret.bsdf = Re * albedo / denom;
+				ret.bsdf /= prob;
+			}
+			else {
+				// ‹üÜ.
+				ret.dir = refract;
+
+				// For canceling cosine factor.
+				auto denom = dot(normal, refract);
+				ret.bsdf = Tr * albedo / denom;
+				ret.bsdf /= (1 - prob);
+			}
 #endif
+		}
 
 		ret.pdf = 1;
 

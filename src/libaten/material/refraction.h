@@ -10,16 +10,22 @@ namespace aten
 		refraction(
 			const vec3& albedo,
 			real ior,
+			bool isIdealRefraction = false,
 			texture* normalMap = nullptr)
 			: material(albedo, ior, nullptr, normalMap)
-		{}
+		{
+			m_isIdealRefraction = isIdealRefraction;
+		}
 
 		refraction(Values& val)
 			: material(val)
-		{}
+		{
+			m_isIdealRefraction = val.get("isIdealRefraction", m_isIdealRefraction);
+		}
 
 		virtual ~refraction() {}
 
+	public:
 		virtual bool isSingular() const override final
 		{
 			return true;
@@ -28,6 +34,15 @@ namespace aten
 		virtual bool isTranslucent() const override final
 		{
 			return true;
+		}
+
+		bool setIsIdealRefraction(bool f)
+		{
+			m_isIdealRefraction = f;
+		}
+		bool isIdealRefraction() const
+		{
+			return m_isIdealRefraction;
 		}
 
 		virtual real pdf(
@@ -66,5 +81,8 @@ namespace aten
 			AT_ASSERT(false);
 			return real(0);
 		}
+
+	private:
+		bool m_isIdealRefraction{ false };
 	};
 }

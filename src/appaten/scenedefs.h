@@ -1,4 +1,5 @@
 #include "aten.h"
+#include "atenscene.h"
 
 class CornellBoxScene {
 public:

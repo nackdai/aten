@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="tinyobjloadder">
+      <UniqueIdentifier>{3433b1f9-39f7-4259-b6e6-d37dcfb10a9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="picojson">
+      <UniqueIdentifier>{0ff00e85-4cb5-4040-895e-35519496c388}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
+      <Filter>tinyobjloadder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\AssetManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
+      <Filter>tinyobjloadder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
+    <ClInclude Include="..\src\libatenscene\atenscene.h" />
+    <ClInclude Include="..\3rdparty\picojson\picojson.h">
+      <Filter>picojson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
+    <ClInclude Include="..\src\libatenscene\AssetManager.h" />
+    <ClInclude Include="..\src\libatenscene\utility.h" />
+  </ItemGroup>
+</Project>

@@ -1,4 +1,5 @@
 #include <vector>
+#include "visualizer/atengl.h"
 #include "visualizer/shader.h"
 
 namespace aten {

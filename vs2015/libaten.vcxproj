@@ -81,15 +81,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -97,15 +97,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,7 +115,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -125,8 +125,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -136,7 +136,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyobjloader_v09;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjecDir)..\3rdparty\glew\include;$(Projectir)..\3rdparty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -146,12 +146,11 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
@@ -188,8 +187,8 @@
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
+    <ClInclude Include="..\src\libaten\misc\value.h" />
     <ClInclude Include="..\src\libaten\object\object.h" />
-    <ClInclude Include="..\src\libaten\object\ObjLoader.h" />
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
@@ -211,23 +210,21 @@
     <ClInclude Include="..\src\libaten\scene\accel.h" />
     <ClInclude Include="..\src\libaten\scene\bvh.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
-    <ClInclude Include="..\src\libaten\scene\MaterialManager.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\shape\cube.h" />
     <ClInclude Include="..\src\libaten\shape\sphere.h" />
-    <ClInclude Include="..\src\libaten\texture\ImageLoader.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libaten\visualizer\atengl.h" />
     <ClInclude Include="..\src\libaten\visualizer\blitter.h" />
     <ClInclude Include="..\src\libaten\visualizer\fbo.h" />
     <ClInclude Include="..\src\libaten\visualizer\MultiPassPostProc.h" />
+    <ClInclude Include="..\src\libaten\visualizer\pixelformat.h" />
     <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\denoise\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\denoise\nml.cpp" />
@@ -250,7 +247,6 @@
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\object\object.cpp" />
-    <ClCompile Include="..\src\libaten\object\ObjLoader.cpp" />
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
@@ -264,11 +260,9 @@
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
     <ClCompile Include="..\src\libaten\scene\aabb.cpp" />
     <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
-    <ClCompile Include="..\src\libaten\scene\MaterialManager.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />
     <ClCompile Include="..\src\libaten\shape\sphere.cpp" />
-    <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp" />

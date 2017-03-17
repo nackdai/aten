@@ -1,5 +1,6 @@
 #pragma once
 
+#include "visualizer/pixelformat.h"
 #include "visualizer/visualizer.h"
 
 namespace aten {

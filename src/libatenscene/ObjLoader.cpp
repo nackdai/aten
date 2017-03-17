@@ -1,16 +1,48 @@
 #include <vector>
 #include "tiny_obj_loader.h"
-#include "defs.h"
-#include "object/ObjLoader.h"
-#include "object/object.h"
-
-#include "scene/MaterialManager.h"
-#include "material/lambert.h"
+#include "ObjLoader.h"
+#include "AssetManager.h"
+#include "utility.h"
 
 namespace aten
 {
-	object* ObjLoader::load(const char* path)
+	static std::string g_base;
+
+	void ObjLoader::setBasePath(const std::string& base)
 	{
+		g_base = removeTailPathSeparator(base);
+	}
+
+	object* ObjLoader::load(const std::string& path)
+	{
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
+
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
+		}
+
+		auto obj = load(filename, fullpath);
+
+		return obj;
+	}
+
+	object* ObjLoader::load(const std::string& tag, const std::string& path)
+	{
+		object* obj = AssetManager::getObj(tag);
+		if (obj) {
+			AT_PRINTF("There is same tag object. [%s]\n", tag);
+			return obj;
+		}
+
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> mtrls;
 		std::string err;
@@ -23,11 +55,11 @@ namespace aten
 		auto result = tinyobj::LoadObj(
 			shapes, mtrls,
 			err,
-			path, nullptr,
+			path.c_str(), nullptr,
 			flags);
 		AT_VRETURN(result, nullptr);
 
-		object* obj = new object();
+		obj = new object();
 
 		vec3 shapemin(AT_MATH_INF);
 		vec3 shapemax(-AT_MATH_INF);
@@ -99,7 +131,7 @@ namespace aten
 			}
 			if (mtrlidx >= 0) {
 				const auto mtrl = mtrls[mtrlidx];
-				dstshape->mtrl = MaterialManager::get(mtrl.name);
+				dstshape->mtrl = AssetManager::getMtrl(mtrl.name);
 			}
 			if (!dstshape->mtrl){
 				// dummy....
@@ -124,6 +156,8 @@ namespace aten
 		}
 
 		obj->bbox.init(shapemin, shapemax);
+
+		AssetManager::registerObj(tag, obj);
 
 		return obj;
 	}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "visualizer/atengl.h"
+#include "types.h"
 
 namespace aten {
 	class shader {
@@ -18,10 +18,12 @@ namespace aten {
 			const void* pixels,
 			bool revert);
 
-		GLint getHandle(const char* name);
+		//GLint getHandle(const char* name);
+		int getHandle(const char* name);
 
 	protected:
-		GLuint m_program{ 0 };
+		//GLuint m_program{ 0 };
+		uint32_t m_program{ 0 };
 		uint32_t m_width{ 0 };
 		uint32_t m_height{ 0 };
 	};

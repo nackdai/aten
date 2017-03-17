@@ -1,5 +1,6 @@
 #include <vector>
-#include "visualizer.h"
+#include "visualizer/atengl.h"
+#include "visualizer/visualizer.h"
 #include "math/vec3.h"
 #include "misc/color.h"
 

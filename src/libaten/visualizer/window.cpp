@@ -5,7 +5,7 @@
 namespace aten {
 	static GLFWwindow* g_window{ nullptr };
 
-	static inline bool SetCurrentDirectoryFromExe()
+	bool window::SetCurrentDirectoryFromExe()
 	{
 		static char buf[_MAX_PATH];
 

@@ -19,3 +19,6 @@
 [submodule "3rdparty/tinyjson"]
 	path = 3rdparty/tinyjson
 	url = https://github.com/mendsley/tinyjson.git
+[submodule "3rdparty/picojson"]
+	path = 3rdparty/picojson
+	url = https://github.com/kazuho/picojson.git

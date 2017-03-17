@@ -1,4 +1,5 @@
 #include <vector>
+#include "visualizer/atengl.h"
 #include "denoise/bilateral.h"
 #include "misc/timer.h"
 

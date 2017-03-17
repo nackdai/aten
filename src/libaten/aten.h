@@ -29,6 +29,7 @@
 #include "misc/color.h"
 #include "misc/timer.h"
 #include "misc/thread.h"
+#include "misc/value.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"
@@ -37,10 +38,8 @@
 #include "light/arealight.h"
 #include "light/ibl.h"
 
-#include "object/ObjLoader.h"
 #include "object/object.h"
 
-#include "texture/ImageLoader.h"
 #include "texture/texture.h"
 
 #include "hdr/hdr.h"
@@ -54,7 +53,6 @@
 
 #include "scene/scene.h"
 #include "scene/bvh.h"
-#include "scene/MaterialManager.h"
 
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

@@ -1,3 +1,4 @@
+#include "visualizer/atengl.h"
 #include "visualizer/MultiPassPostProc.h"
 
 namespace aten {

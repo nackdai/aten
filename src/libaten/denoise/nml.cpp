@@ -1,4 +1,5 @@
 #include <array>
+#include "visualizer/atengl.h"
 #include "denoise/nml.h"
 #include "misc/timer.h"
 

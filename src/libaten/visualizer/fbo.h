@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "visualizer/atengl.h"
+#include "visualizer/pixelformat.h"
 
 namespace aten {
 	class FBO {
@@ -31,14 +31,17 @@ namespace aten {
 			return m_height;
 		}
 
-		GLuint getTexHandle() const
+		//GLuint getTexHandle() const
+		uint32_t getTexHandle() const
 		{
 			return m_tex;
 		}
 
 	protected:
-		GLuint m_fbo{ 0 };
-		GLuint m_tex{ 0 };
+		//GLuint m_fbo{ 0 };
+		uint32_t m_fbo{ 0 };
+		//GLuint m_tex{ 0 };
+		uint32_t m_tex{ 0 };
 		PixelFormat m_fmt{ PixelFormat::rgba8 };
 		uint32_t m_width{ 0 };
 		uint32_t m_height{ 0 };

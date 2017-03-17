@@ -1,5 +1,6 @@
 #include <tuple>
 #include <vector>
+#include "visualizer/atengl.h"
 #include "hdr/tonemap.h"
 #include "misc/thread.h"
 

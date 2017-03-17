@@ -37,9 +37,6 @@
     <Filter Include="object">
       <UniqueIdentifier>{11aea900-a318-402f-832a-89a669cb7c99}</UniqueIdentifier>
     </Filter>
-    <Filter Include="object\tinyobjloadder">
-      <UniqueIdentifier>{92aad910-a034-48fd-9fa0-e5bb7f302893}</UniqueIdentifier>
-    </Filter>
     <Filter Include="light">
       <UniqueIdentifier>{73ad43e6-957c-4167-b693-161d560e49e4}</UniqueIdentifier>
     </Filter>
@@ -126,9 +123,6 @@
     <ClInclude Include="..\src\libaten\material\specular.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\texture\ImageLoader.h">
-      <Filter>texture</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\texture\texture.h">
       <Filter>texture</Filter>
     </ClInclude>
@@ -160,9 +154,6 @@
       <Filter>sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\object\object.h">
-      <Filter>object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\object\ObjLoader.h">
       <Filter>object</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\math\intersect.h">
@@ -210,9 +201,6 @@
     <ClInclude Include="..\src\libaten\light\spotlight.h">
       <Filter>light</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\scene\MaterialManager.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\light\ibl.h">
       <Filter>light</Filter>
     </ClInclude>
@@ -258,8 +246,11 @@
     <ClInclude Include="..\src\libaten\shape\sphere.h">
       <Filter>shape</Filter>
     </ClInclude>
-    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
-      <Filter>object\tinyobjloadder</Filter>
+    <ClInclude Include="..\src\libaten\visualizer\pixelformat.h">
+      <Filter>visualizer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\value.h">
+      <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h">
       <Filter>renderer</Filter>
@@ -305,9 +296,6 @@
     <ClCompile Include="..\src\libaten\material\specular.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\texture\ImageLoader.cpp">
-      <Filter>texture</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
@@ -322,9 +310,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\bvh.cpp">
       <Filter>scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\object\ObjLoader.cpp">
-      <Filter>object</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\object\object.cpp">
       <Filter>object</Filter>
@@ -357,9 +342,6 @@
       <Filter>sampler</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\scene.cpp">
-      <Filter>scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\scene\MaterialManager.cpp">
       <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\sorted_pathtracing.cpp">

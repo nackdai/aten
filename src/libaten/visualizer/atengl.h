@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include "defs.h"
+#include "visualizer/pixelformat.h"
 
 #define CALL_GL_API(func)\
     func; \
@@ -11,12 +12,6 @@
     }
 
 namespace aten {
-	enum PixelFormat {
-		rgba8,
-		rgba32f,
-		rgba16f,
-	};
-
 	inline void getGLPixelFormat(
 		PixelFormat fmt,
 		GLenum& glfmt,

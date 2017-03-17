@@ -18,6 +18,14 @@ namespace aten
 			m_roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
+		MicrofacetBeckman(Values& val)
+			: material(val)
+		{
+			m_ior = val.get("ior", m_ior);
+			m_roughness = val.get("roughness", m_roughness);
+			m_roughnessMap = val.get("roughnessmap", m_roughnessMap);
+		}
+
 		virtual ~MicrofacetBeckman() {}
 
 	public:

@@ -15,5 +15,7 @@ namespace aten {
 		static void run(std::function<void()> func);
 
 		static void terminate();
+
+		static bool SetCurrentDirectoryFromExe();
 	};
 }

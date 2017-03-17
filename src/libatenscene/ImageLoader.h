@@ -12,6 +12,9 @@ namespace aten {
 		~ImageLoader() {}
 
 	public:
+		static void setBasePath(const std::string& base);
+
 		static texture* load(const std::string& path);
+		static texture* load(const std::string& tag, const std::string& path);
 	};
 }

@@ -1,3 +1,4 @@
+#include "visualizer/atengl.h"
 #include "visualizer/blitter.h"
 
 namespace aten {

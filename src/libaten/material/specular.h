@@ -14,6 +14,10 @@ namespace aten
 			: material(albedo, 0, albedoMap, normalMap)
 		{}
 
+		specular(Values& val)
+			: material(val)
+		{}
+
 		virtual ~specular() {}
 
 		virtual bool isSingular() const override final

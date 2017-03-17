@@ -4,6 +4,7 @@
 #include "math/vec3.h"
 #include "sampler/sampler.h"
 #include "texture/texture.h"
+#include "misc/value.h"
 
 namespace aten
 {
@@ -24,6 +25,12 @@ namespace aten
 			texture* normalMap = nullptr) 
 			: m_albedo(clr), m_ior(ior), m_albedoMap(albedoMap), m_normalMap(normalMap)
 		{}
+		material(Values& val)
+		{
+			m_albedo = val.get("color", m_albedo);
+			m_albedoMap = (texture*)val.get("albedomap", (void*)m_albedoMap);
+			m_normalMap = (texture*)val.get("normalmap", (void*)m_normalMap);
+		}
 
 	public:
 		virtual bool isEmissive() const

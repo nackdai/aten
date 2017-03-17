@@ -171,18 +171,21 @@ void MtrlTestScene::getCameraPosAndAt(
 
 void ObjectScene::makeScene(aten::scene* scene)
 {
-	aten::MaterialManager::addMaterial(
+	aten::AssetManager::registerMtrl(
 		"m1",
 		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
 
-	aten::MaterialManager::addMaterial(
+	aten::AssetManager::registerMtrl(
 		"Material.001",
 		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
 
 	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
-	auto instance = new aten::objinstance(obj);
+	aten::mat4 mtxL2W;
+	mtxL2W.asRotateByZ(Deg2Rad(45));
+
+	auto instance = new aten::objinstance(obj, mtxL2W);
 
 	scene->add(instance);
 }

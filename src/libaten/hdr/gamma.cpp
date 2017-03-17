@@ -1,3 +1,4 @@
+#include "visualizer/atengl.h"
 #include "hdr/gamma.h"
 
 namespace aten

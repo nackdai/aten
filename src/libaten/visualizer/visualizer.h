@@ -2,6 +2,7 @@
 
 #include "defs.h"
 #include "math/vec4.h"
+#include "visualizer/pixelformat.h"
 #include "visualizer/shader.h"
 #include "visualizer/fbo.h"
 
@@ -81,7 +82,8 @@ namespace aten {
 		};
 
 	public:
-		static GLuint getSrcTexHandle();
+		//static GLuint getSrcTexHandle();
+		static uint32_t getSrcTexHandle();
 
 		static bool init(int width, int height);
 

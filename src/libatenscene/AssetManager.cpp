@@ -33,7 +33,7 @@ namespace aten {
 		return true;
 	}
 
-	static Asset& getAsset(
+	static Asset getAsset(
 		const std::string& name,
 		AssetManager::AssetType type)
 	{
@@ -42,7 +42,7 @@ namespace aten {
 		auto it = mapAsset.find(name);
 
 		if (it == mapAsset.end()) {
-			AT_ASSERT(false);
+			//AT_ASSERT(false);
 			AT_PRINTF("Asset is not registered [%s]\n", name);
 			return Asset();
 		}

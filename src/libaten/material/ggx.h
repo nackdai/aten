@@ -21,7 +21,6 @@ namespace aten
 		MicrofacetGGX(Values& val)
 			: material(val)
 		{
-			m_ior = val.get("ior", m_ior);
 			m_roughness = val.get("roughness", m_roughness);
 			m_roughnessMap = val.get("roughnessmap", m_roughnessMap);
 		}

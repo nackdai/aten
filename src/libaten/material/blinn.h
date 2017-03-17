@@ -18,7 +18,6 @@ namespace aten
 		MicrofacetBlinn(Values& val)
 			: material(val)
 		{
-			m_ior = val.get("ior", m_ior);
 			m_shininess = val.get("shininess", m_shininess);
 		}
 

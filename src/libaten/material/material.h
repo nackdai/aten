@@ -28,6 +28,7 @@ namespace aten
 		material(Values& val)
 		{
 			m_albedo = val.get("color", m_albedo);
+			m_ior = val.get("ior", m_ior);
 			m_albedoMap = (texture*)val.get("albedomap", (void*)m_albedoMap);
 			m_normalMap = (texture*)val.get("normalmap", (void*)m_normalMap);
 		}

@@ -632,10 +632,6 @@ namespace aten
 						}
 					}
 
-					if (x == 381 && y == 180) {
-						AT_PRINTF("CNT %d\n", cnt);
-					}
-
 					col /= (real)cnt;
 
 					color[pos] = vec4(col, 1);

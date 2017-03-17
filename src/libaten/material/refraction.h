@@ -16,9 +16,7 @@ namespace aten
 
 		refraction(Values& val)
 			: material(val)
-		{
-			m_nt = val.get("ior", m_nt);
-		}
+		{}
 
 		virtual ~refraction() {}
 

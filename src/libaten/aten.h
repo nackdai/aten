@@ -54,6 +54,9 @@
 
 #include "scene/scene.h"
 #include "scene/bvh.h"
+#include "scene/instance.h"
+#include "scene/aabb.h"
+#include "scene/accel.h"
 
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

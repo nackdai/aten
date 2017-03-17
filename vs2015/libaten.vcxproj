@@ -212,6 +212,7 @@
     <ClInclude Include="..\src\libaten\scene\accel.h" />
     <ClInclude Include="..\src\libaten\scene\bvh.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
+    <ClInclude Include="..\src\libaten\scene\instance.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\shape\cube.h" />
     <ClInclude Include="..\src\libaten\shape\sphere.h" />

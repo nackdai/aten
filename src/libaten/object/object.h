@@ -60,8 +60,10 @@ namespace aten
 		bvhnode m_node;
 	};
 
+	template<typename T> class instance;
+
 	class object {
-		friend class objinstance;
+		friend class instance<object>;
 
 	public:
 		object() {}
@@ -89,39 +91,5 @@ namespace aten
 
 	private:
 		bvhnode m_node;
-	};
-
-	class objinstance : public bvhnode {
-	public:
-		objinstance() {}
-		objinstance(object* obj);
-		objinstance(object* obj, const mat4& mtxL2W)
-			: objinstance(obj)
-		{
-			m_mtxL2W = mtxL2W;
-
-			m_mtxW2L = m_mtxL2W;
-			m_mtxW2L.invert();
-
-			m_aabb = transformBoundingBox();
-		}
-
-		virtual ~objinstance() {}
-
-	public:
-		virtual bool hit(
-			const ray& r,
-			real t_min, real t_max,
-			hitrecord& rec) const override final;
-
-		virtual aabb getBoundingbox() const override final;
-
-	private:
-		aabb transformBoundingBox();
-
-	private:
-		object* m_obj{ nullptr };
-		mat4 m_mtxL2W;
-		mat4 m_mtxW2L;	// inverted.
 	};
 }

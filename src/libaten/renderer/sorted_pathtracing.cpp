@@ -19,32 +19,37 @@ namespace aten
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				uint32_t pos = y * width + x;
-				if (paths[pos].sampler) {
-					auto rnd = (Sobol*)paths[pos].sampler->getRandom();
-					rnd->reset((y * height * 4 + x * 4) * m_samples + sample + 1);
-				}
-				else {
-					auto rnd = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1);
-					auto sampler = new UniformDistributionSampler(rnd);
-					paths[pos].sampler = sampler;
-				}
-
-				sampler* sampler = paths[pos].sampler;
-
-				real u = real(x + sampler->nextSample()) / real(width);
-				real v = real(y + sampler->nextSample()) / real(height);
 
 				auto& path = paths[pos];
 
-				path.camsample = camera->sample(u, v, sampler);
-				path.r = path.camsample.r;
+				if (!path.isTerminate) {
+					if (path.sampler) {
+						auto rnd = (Sobol*)path.sampler->getRandom();
+						rnd->reset((y * height * 4 + x * 4) * m_samples + sample + 1);
+					}
+					else {
+						auto rnd = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1);
+						auto sampler = new UniformDistributionSampler(rnd);
+						path.sampler = sampler;
+					}
 
-				path.x = x;
-				path.y = y;
+					sampler* sampler = path.sampler;
 
-				path.isAlive = true;
+					real u = real(x + sampler->nextSample()) / real(width);
+					real v = real(y + sampler->nextSample()) / real(height);
 
-				path.throughput = vec3(1, 1, 1);
+					path.camsample = camera->sample(u, v, sampler);
+					path.ray = path.camsample.r;
+
+					path.x = x;
+					path.y = y;
+
+					path.isAlive = true;
+					path.needWrite = true;
+
+					path.contrib = vec3(0);
+					path.throughput = vec3(1);
+				}
 			}
 		}
 	}
@@ -60,14 +65,12 @@ namespace aten
 		for (int i = 0; i < numPath; i++) {
 			auto& path = paths[i];
 
-			path.rec.t = AT_MATH_INF;
-			path.rec.obj = nullptr;
-			path.rec.mtrl = nullptr;
-
 			path.isHit = false;
 
 			if (path.isAlive) {
-				path.isHit = scene->hit(path.r, AT_MATH_EPSILON, AT_MATH_INF, path.rec);
+				// 初期化.
+				path.rec = hitrecord();
+				path.isHit = scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec);
 			}
 		}
 	}
@@ -103,40 +106,25 @@ namespace aten
 			auto& path = paths[i];
 
 			if (path.isAlive && !path.isHit) {
-				auto ibl = scene->getIBL();
+				PathTracing::shadeMiss(scene, depth, path);
 
-				auto pos = path.y * m_width + path.x;
-
-				if (ibl) {
-					if (depth == 0) {
-						auto bg = ibl->getEnvMap()->sample(path.r);
-						dst[pos] += vec4(path.throughput * bg, 1);
-					}
-					else {
-						auto pdfLight = ibl->samplePdf(path.r);
-						auto misW = path.pdfb / (pdfLight + path.pdfb);
-						auto emit = ibl->getEnvMap()->sample(path.r);
-						dst[pos] += vec4(path.throughput * misW * emit, 1);
-					}
-				}
-				else {
-					auto bg = sampleBG(path.r);
-					dst[pos] += vec4(path.throughput * bg, 1);
-				}
+				auto idx = path.y * m_width + path.x;
+				dst[idx] += vec4(path.contrib, 1);
 
 				path.isAlive = false;
+				path.needWrite = false;
 			}
 		}
 	}
 
 	void SortedPathTracing::shade(
+		uint32_t sample,
 		uint32_t depth,
 		Path* paths,
 		uint32_t* hitIds,
 		int numHit,
 		camera* cam,
-		scene* scene,
-		vec4* dst)
+		scene* scene)
 	{
 		uint32_t rrDepth = m_rrDepth;
 
@@ -153,79 +141,30 @@ namespace aten
 
 			auto sampler = path.sampler;
 
-			const auto& ray = path.r;
-			const auto& rec = path.rec;
+			bool willContinue = PathTracing::shade(sampler, scene, cam, depth, path);
 
-			// 交差位置の法線.
-			// 物体からのレイの入出を考慮.
-			const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
-
-			// Implicit conection to light.
-			if (rec.mtrl->isEmissive()) {
-				path.isAlive = false;
-
-				if (depth == 0) {
-					// Ray hits the light directly.
-					auto emit = rec.mtrl->color();
-					dst[idx] += vec4(emit, 1);
-				}
-				else {
-					auto emit = rec.mtrl->color();
-
-					dst[idx] += vec4(path.throughput * emit, 1);
-				}
-
-				continue;
-			}
-
-			if (depth == 0) {
-				auto areaPdf = cam->getPdfImageSensorArea(rec.p, orienting_normal);
-
-				//throughput *= Wdash;
-				path.throughput /= areaPdf;
-			}
-
-			real russianProb = real(1);
-
-			if (depth > rrDepth) {
-				auto t = normalize(path.throughput);
-				auto p = std::max(t.r, std::max(t.g, t.b));
-
-				russianProb = sampler->nextSample();
-
-				if (russianProb >= p) {
-					path.isAlive = false;
-				}
-				else {
-					russianProb = p;
-				}
-			}
-
-			auto sampling = rec.mtrl->sample(ray.dir, orienting_normal, rec, sampler, rec.u, rec.v);
-
-			auto nextDir = normalize(sampling.dir);
-			auto pdfb = sampling.pdf;
-			auto bsdf = sampling.bsdf;
-
-			real c = 1;
-			if (!rec.mtrl->isSingular()) {
-				// TODO
-				// AMDのはabsしているが....
-				c = dot(orienting_normal, nextDir);
-			}
-
-			if (pdfb > 0 && c > 0) {
-				path.throughput *= bsdf * c / pdfb;
-				path.throughput /= russianProb;
-			}
-			else {
+			if (!willContinue) {
 				path.isAlive = false;
 			}
+		}
+	}
 
-			path.pdfb = pdfb;
+	void SortedPathTracing::gather(
+		Path* paths,
+		int numPath,
+		vec4* dst)
+	{
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < numPath; i++) {
+			auto& path = paths[i];
 
-			// Make next ray.
-			path.r = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
+			if (path.needWrite) {
+				dst[i] += vec4(path.contrib, 1);
+
+				path.needWrite = false;
+			}
 		}
 	}
 
@@ -239,7 +178,7 @@ namespace aten
 		vec4* color = dst.buffer;
 
 		// TODO
-		memset(color, 0, sizeof(vec3) * m_width * m_height);
+		memset(color, 0, sizeof(vec4) * m_width * m_height);
 
 		m_samples = dst.sample;
 		m_maxDepth = dst.maxDepth;
@@ -279,19 +218,19 @@ namespace aten
 					break;
 				}
 
-#if 1
 				shade(
+					i,
 					depth,
 					&paths[0],
 					&hitIds[0],
 					numHit,
 					camera,
-					scene,
-					color);
-#endif
+					scene);
 
 				depth++;
 			}
+
+			gather(&paths[0], (int)paths.size(), color);
 		}
 
 		if (m_samples > 1) {
@@ -301,7 +240,13 @@ namespace aten
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
 					auto pos = y * m_width + x;
-					color[pos] /= m_samples;
+
+					auto& clr = color[pos];
+
+					clr.r /= clr.w;
+					clr.g /= clr.w;
+					clr.b /= clr.w;
+					clr.w = 1;
 				}
 			}
 		}

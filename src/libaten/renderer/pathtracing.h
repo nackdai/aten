@@ -18,7 +18,15 @@ namespace aten
 
 	protected:
 		struct Path {
-			vec3 contrib;
+			vec3 contrib{ vec3(0) };
+			vec3 throughput{ vec3(1) };
+			real pdfb{ 1 };
+
+			hitrecord rec;
+			material* prevMtrl{ nullptr };
+
+			ray ray;
+
 			bool isTerminate{ false };
 		};
 
@@ -36,6 +44,18 @@ namespace aten
 			camera* cam,
 			CameraSampleResult& camsample,
 			scene* scene);
+
+		bool PathTracing::shade(
+			sampler* sampler,
+			scene* scene,
+			camera* cam,
+			int depth,
+			Path& path);
+
+		void PathTracing::shadeMiss(
+			scene* scene,
+			int depth,
+			Path& path);
 
 	protected:
 		uint32_t m_maxDepth{ 1 };

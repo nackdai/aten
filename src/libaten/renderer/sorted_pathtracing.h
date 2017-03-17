@@ -1,12 +1,10 @@
 #pragma once
 
-#include "renderer/renderer.h"
-#include "scene/scene.h"
-#include "camera/camera.h"
+#include "renderer/pathtracing.h"
 
 namespace aten
 {
-	class SortedPathTracing : public Renderer {
+	class SortedPathTracing : public PathTracing {
 	public:
 		SortedPathTracing() {}
 		~SortedPathTracing() {}
@@ -17,13 +15,8 @@ namespace aten
 			camera* camera) override final;
 
 	private:
-		struct Path {
-			ray r;
+		struct Path : public PathTracing::Path {
 			CameraSampleResult camsample;
-			hitrecord rec;
-
-			vec3 throughput{ vec3(1, 1, 1) };
-			real pdfb;
 
 			uint32_t x, y;
 
@@ -32,12 +25,14 @@ namespace aten
 			struct {
 				uint32_t isHit		: 1;
 				uint32_t isAlive	: 1;
+				uint32_t needWrite	: 1;
 			};
 
 			Path()
 			{
 				isHit = false;
-				isAlive = false;
+				isAlive = true;
+				needWrite = true;
 			}
 		};
 
@@ -65,12 +60,17 @@ namespace aten
 			vec4* dst);
 
 		void shade(
+			uint32_t sample,
 			uint32_t depth,
 			Path* paths,
 			uint32_t* hitIds,
 			int numHit,
 			camera* cam,
-			scene* scene,
+			scene* scene);
+
+		void gather(
+			Path* paths,
+			int numPath,
 			vec4* dst);
 
 	private:

@@ -82,7 +82,7 @@ namespace aten
 			return std::move(ret);
 		}
 
-		real sumW = 0;
+		real weight = 1;
 
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
@@ -97,23 +97,23 @@ namespace aten
 
 			auto sampleres = mtrl->sample(ray, appliedNml, hitrec, sampler, u, v);
 
-			const auto weight = sampleres.fresnel;
+			const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
 
-			ret.pdf += weight * sampleres.pdf;
-			ret.bsdf += weight * sampleres.bsdf;
+			ret.pdf += weight * f * sampleres.pdf;
+			ret.bsdf += weight * f * sampleres.bsdf;
 
 			// TODO
 			// ret.fresnel
 
-			sumW += weight;
+			weight = aten::clamp<real>(weight - f, 0, 1);
+			if (weight <= 0) {
+				break;
+			}
 
 			if (i == 0) {
 				ret.dir = sampleres.dir;
 			}
 		}
-
-		ret.pdf /= sumW;
-		ret.bsdf /= sumW;
 
 		return std::move(ret);
 	}
@@ -129,8 +129,8 @@ namespace aten
 		
 		real pdf = 0;
 
-		real sumW = 0;
-		real ior = 1;
+		real weight = 1;
+		real ior = 1;	// ê^ãÛÇ©ÇÁénÇﬂÇÈ.
 
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
@@ -146,14 +146,18 @@ namespace aten
 			auto p = mtrl->pdf(appliedNml, wi, wo, u, v, sampler);
 			auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
 
+			f = aten::clamp<real>(f, 0, 1);
+
+			pdf += weight * f * p;
+
+			weight = aten::clamp<real>(weight - f, 0, 1);
+			if (weight <= 0) {
+				break;
+			}
+
+			// è„ëwÇÃílÇâ∫ëwÇ…égÇ§.
 			ior = mtrl->ior();
-
-			pdf += f * p;
-
-			sumW += f;
 		}
-
-		pdf /= sumW;
 
 		return pdf;
 	}
@@ -184,8 +188,8 @@ namespace aten
 
 		vec3 bsdf;
 
-		real sumW = 0;
-		real ior = 1;
+		real weight = 1;
+		real ior = 1;	// ê^ãÛÇ©ÇÁénÇﬂÇÈ.
 
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
@@ -201,14 +205,18 @@ namespace aten
 			auto b = mtrl->bsdf(appliedNml, wi, wo, u, v);
 			auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
 
+			f = aten::clamp<real>(f, 0, 1);
+
+			bsdf += weight * f * b;
+
+			weight = aten::clamp<real>(weight - f, 0, 1);
+			if (weight <= 0) {
+				break;
+			}
+
+			// è„ëwÇÃílÇâ∫ëwÇ…égÇ§.
 			ior = mtrl->ior();
-
-			bsdf += f * b;
-
-			sumW += f;
 		}
-
-		bsdf /= sumW;
 
 		return std::move(bsdf);
 	}

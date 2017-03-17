@@ -10,7 +10,10 @@ namespace aten
 		sphere() {}
 		sphere(const vec3& c, real r, material* m)
 			: m_center(c), m_radius(r), m_mtrl(m)
-		{};
+		{}
+		sphere(real r, material* m)
+			: m_radius(r), m_mtrl(m)
+		{}
 
 		virtual ~sphere() {}
 

@@ -185,6 +185,11 @@ void ObjectScene::makeScene(aten::scene* scene)
 	aten::mat4 mtxL2W;
 	mtxL2W.asRotateByZ(Deg2Rad(45));
 
+	aten::mat4 mm;
+	mm.asTrans(aten::vec3(-1, 0, 0));
+
+	mtxL2W = mtxL2W * mm;
+
 	auto instance = new aten::instance<aten::object>(obj, mtxL2W);
 
 	scene->add(instance);
@@ -671,30 +676,35 @@ void ToonShadeTestScene::makeScene(aten::scene* scene)
 
 	scene->add(instance);
 
+	aten::mat4 mtxL2W;
+
 #if 1
+	mtxL2W.asTrans(aten::vec3(-2.5, 0, 0));
+
 	// ‹¾.
 	auto mirror = new aten::sphere(
-		aten::vec3(-2.5, 0, 0),
 		1,
 		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
-	scene->add(mirror);
+	scene->add(new aten::instance<aten::sphere>(mirror, mtxL2W));
 #endif
 
 #if 1
+	mtxL2W.asTrans(aten::vec3(2.5, 0, 0));
+
 	auto s_ggx = new aten::sphere(
-		aten::vec3(2.5, 0, 0), 
 		1.0, 
 		new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
-	scene->add(s_ggx);
+	scene->add(new aten::instance<aten::sphere>(s_ggx, mtxL2W));
 #endif
 
 #if 1
+	mtxL2W.asTrans(aten::vec3(0, -1, 2));
+
 	// ƒKƒ‰ƒX.
 	auto glass = new aten::sphere(
-		aten::vec3(0, -1, 2),
 		0.5,
 		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5, true));
-	scene->add(glass);
+	scene->add(new aten::instance<aten::sphere>(glass, mtxL2W));
 #endif
 
 	scene->addLight(l);

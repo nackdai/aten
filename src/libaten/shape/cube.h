@@ -10,6 +10,10 @@ namespace aten
 		cube() {}
 		cube(const vec3& c, real w, real h, real d, material* m);
 
+		cube(real w, real h, real d, material* m)
+			: cube(vec3(0), w, h, d, m)
+		{}
+
 		virtual ~cube() {}
 
 	public:

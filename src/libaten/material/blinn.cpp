@@ -37,7 +37,7 @@ namespace aten
 	}
 
 	vec3 MicrofacetBlinn::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		real u, real v,
 		sampler* sampler) const
@@ -48,6 +48,8 @@ namespace aten
 
 		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 		// Sampling Blinn
+
+		const vec3& in = ray.dir;
 
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
@@ -175,7 +177,7 @@ namespace aten
 	}
 
 	material::sampling MicrofacetBlinn::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
@@ -183,7 +185,9 @@ namespace aten
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, u, v, sampler);
+		const vec3& in = ray.dir;
+
+		ret.dir = sampleDirection(ray, normal, u, v, sampler);
 
 #if 1
 		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);

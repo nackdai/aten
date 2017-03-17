@@ -36,7 +36,7 @@ namespace aten
 		}
 
 		virtual vec3 sampleDirection(
-			const vec3& in,
+			const ray& ray,
 			const vec3& normal, 
 			real u, real v,
 			sampler* sampler) const override final
@@ -60,7 +60,7 @@ namespace aten
 		}
 
 		virtual sampling sample(
-			const vec3& in,
+			const ray& ray,
 			const vec3& normal,
 			const hitrecord& hitrec,
 			sampler* sampler,

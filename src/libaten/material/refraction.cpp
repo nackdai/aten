@@ -17,12 +17,14 @@ namespace aten
 	}
 
 	vec3 refraction::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		real u, real v,
 		sampler* sampler) const
 	{
 		AT_ASSERT(false);
+
+		const vec3& in = ray.dir;
 
 		auto reflect = in - 2 * dot(normal, in) * normal;
 		reflect.normalize();
@@ -45,13 +47,15 @@ namespace aten
 	}
 
 	material::sampling refraction::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v) const
 	{
 		sampling ret;
+
+		const vec3& in = ray.dir;
 
 		// ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó

@@ -5,6 +5,7 @@
 #include "sampler/sampler.h"
 #include "texture/texture.h"
 #include "misc/value.h"
+#include "math/ray.h"
 
 namespace aten
 {
@@ -82,7 +83,7 @@ namespace aten
 			sampler* sampler) const = 0;
 
 		virtual vec3 sampleDirection(
-			const vec3& in,
+			const ray& ray,
 			const vec3& normal, 
 			real u, real v,
 			sampler* sampler) const = 0;
@@ -106,7 +107,7 @@ namespace aten
 		};
 
 		virtual sampling sample(
-			const vec3& in,
+			const ray& ray,
 			const vec3& normal,
 			const hitrecord& hitrec,
 			sampler* sampler,

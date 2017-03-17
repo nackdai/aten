@@ -31,11 +31,13 @@ namespace aten {
 	}
 
 	vec3 OrenNayar::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal, 
 		real u, real v,
 		sampler* sampler) const
 	{
+		const vec3& in = ray.dir;
+
 		// normal‚Ì•ûŒü‚ğŠî€‚Æ‚µ‚½³‹K’¼ŒğŠî’ê(w, u, v)‚ğì‚é.
 		// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŸ‚ÌƒŒƒC‚ğ”ò‚Î‚·.
 		vec3 n, t, b;
@@ -103,7 +105,7 @@ namespace aten {
 	}
 
 	material::sampling OrenNayar::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
@@ -111,7 +113,9 @@ namespace aten {
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, u, v, sampler);
+		const vec3& in = ray.dir;
+
+		ret.dir = sampleDirection(ray, normal, u, v, sampler);
 		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 

@@ -21,11 +21,13 @@ namespace aten
 	}
 
 	vec3 MicrofacetGGX::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		real u, real v,
 		sampler* sampler) const
 	{
+		const vec3& in = ray.dir;
+
 		auto roughness = sampleRoughness(u, v);
 		vec3 dir = sampleDirection(roughness, in, normal, sampler);
 		return std::move(dir);
@@ -221,13 +223,15 @@ namespace aten
 	}
 
 	material::sampling MicrofacetGGX::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v) const
 	{
 		sampling ret;
+
+		const vec3& in = ray.dir;
 
 		auto roughness = sampleRoughness(u, v);
 

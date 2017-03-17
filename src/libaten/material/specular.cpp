@@ -15,11 +15,13 @@ namespace aten
 	}
 
 	vec3 specular::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		real u, real v,
 		sampler* sampler) const
 	{
+		const vec3& in = ray.dir;
+
 		auto reflect = in - 2 * dot(normal, in) * normal;
 		reflect.normalize();
 
@@ -51,7 +53,7 @@ namespace aten
 	}
 
 	material::sampling specular::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
@@ -59,7 +61,9 @@ namespace aten
 	{
 		sampling ret;
 
-		ret.dir = sampleDirection(in, normal, u, v, sampler);
+		const vec3& in = ray.dir;
+
+		ret.dir = sampleDirection(ray, normal, u, v, sampler);
 		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 

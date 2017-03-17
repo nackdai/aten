@@ -67,7 +67,7 @@ namespace aten
 	}
 
 	material::sampling LayeredBSDF::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
@@ -95,7 +95,7 @@ namespace aten
 				mtrl->applyNormalMap(normal, appliedNml, u, v);
 			}
 
-			auto sampleres = mtrl->sample(in, appliedNml, hitrec, sampler, u, v);
+			auto sampleres = mtrl->sample(ray, appliedNml, hitrec, sampler, u, v);
 
 			const auto weight = sampleres.fresnel;
 
@@ -159,7 +159,7 @@ namespace aten
 	}
 
 	vec3 LayeredBSDF::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		real u, real v,
 		sampler* sampler) const
@@ -169,7 +169,7 @@ namespace aten
 
 		auto mtrl = m_layer[0];
 		
-		auto dir = mtrl->sampleDirection(in, normal, u, v, sampler);
+		auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler);
 
 		return std::move(dir);
 	}

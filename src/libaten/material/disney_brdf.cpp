@@ -158,11 +158,13 @@ namespace aten
 	}
 
 	vec3 DisneyBRDF::sampleDirection(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		real u, real v,
 		sampler* sampler) const
 	{
+		const vec3& in = ray.dir;
+
 		const vec3& N = normal;
 		const vec3& V = -in;
 
@@ -342,12 +344,14 @@ namespace aten
 	}
 
 	material::sampling DisneyBRDF::sample(
-		const vec3& in,
+		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v) const
 	{
+		const vec3& in = ray.dir;
+
 		const vec3& N = normal;
 		const vec3 V = -in;
 

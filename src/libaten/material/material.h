@@ -50,6 +50,11 @@ namespace aten
 			return false;
 		}
 
+		virtual bool isNPR() const
+		{
+			return false;
+		}
+
 		const vec3& color() const
 		{
 			return m_albedo;
@@ -142,6 +147,47 @@ namespace aten
 		texture* m_albedoMap{ nullptr };
 		texture* m_normalMap{ nullptr };
 	};
+
+	class Light;
+
+	class NPRMaterial : public material {
+	protected:
+		NPRMaterial() {}
+		NPRMaterial(const vec3& e, Light* light);
+
+		NPRMaterial(Values& val)
+			: material(val)
+		{}
+
+		virtual ~NPRMaterial() {}
+
+	public:
+		virtual bool isNPR() const override final
+		{
+			return true;
+		}
+
+		virtual real computeFresnel(
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real outsideIor = 1) const override final
+		{
+			return real(1);
+		}
+
+		void setTargetLight(Light* light);
+
+		const Light* getTargetLight() const;
+
+		virtual vec3 bsdf(
+			real cosShadow,
+			real u, real v) const = 0;
+
+	private:
+		Light* m_targetLight{ nullptr };
+	};
+
 
 	real schlick(
 		const vec3& in,

@@ -631,3 +631,80 @@ void LayeredMaterialTestScene::getCameraPosAndAt(
 	pos = aten::vec3(0, 0, 13);
 	at = aten::vec3(0, 0, 0);
 }
+
+/////////////////////////////////////////////////////
+
+void ToonShadeTestScene::makeScene(aten::scene* scene)
+{
+	aten::Light* l = new aten::DirectionalLight(aten::vec3(1, -1, -1), aten::vec3(36.0, 36.0, 36.0));
+	auto toonmtrl = new aten::toon(aten::vec3(0.25, 0.75, 0.25), l);
+
+	toonmtrl->setComputeToonShadeFunc([](aten::real c)->aten::real {
+		aten::real ret = 1;
+		if (c < 0.33) {
+			ret = 0;
+		}
+		else if (c < 0.66) {
+			ret = 0.5;
+		}
+		else if (c < 0.8) {
+			ret = 1;
+		}
+		else {
+			ret = 1.5;
+		}
+		return ret;
+	});
+
+	aten::AssetManager::registerMtrl(
+		"m1",
+		toonmtrl);
+
+	aten::AssetManager::registerMtrl(
+		"Material.001",
+		toonmtrl);
+
+	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
+
+	auto instance = new aten::objinstance(obj);
+
+	scene->add(instance);
+
+#if 1
+	// ‹¾.
+	auto mirror = new aten::sphere(
+		aten::vec3(-2.5, 0, 0),
+		1,
+		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+	scene->add(mirror);
+#endif
+
+#if 1
+	auto s_ggx = new aten::sphere(
+		aten::vec3(2.5, 0, 0), 
+		1.0, 
+		new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+	scene->add(s_ggx);
+#endif
+
+#if 1
+	// ƒKƒ‰ƒX.
+	auto glass = new aten::sphere(
+		aten::vec3(0, -1, 2),
+		0.5,
+		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5, true));
+	scene->add(glass);
+#endif
+
+	scene->addLight(l);
+}
+
+void ToonShadeTestScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at)
+{
+	pos = aten::vec3(0.0, 0.0, 10.0);
+	//pos = aten::vec3(0.0, 0.0, 60.0);
+	at = aten::vec3(0.0, 0.0, 0.0);
+}

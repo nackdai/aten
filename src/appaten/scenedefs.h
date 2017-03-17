@@ -109,6 +109,15 @@ public:
 		aten::vec3& at);
 };
 
+class ToonShadeTestScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at);
+};
+
 //#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
@@ -120,4 +129,5 @@ public:
 //#define Scene TexturesScene
 //#define Scene HideLightScene
 //#define Scene DisneyMaterialTestScene
-#define Scene LayeredMaterialTestScene
+//#define Scene LayeredMaterialTestScene
+#define Scene ToonShadeTestScene

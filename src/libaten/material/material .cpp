@@ -1,7 +1,24 @@
 #include "material/material.h"
+#include "light/light.h"
 
 namespace aten
 {
+	NPRMaterial::NPRMaterial(const vec3& e, Light* light)
+		: material(e)
+	{
+		setTargetLight(light);
+	}
+
+	void NPRMaterial::setTargetLight(Light* light)
+	{
+		m_targetLight = light;
+	}
+
+	const Light* NPRMaterial::getTargetLight() const
+	{
+		return m_targetLight;
+	}
+
 	// NOTE
 	// Schlick ‚É‚æ‚éƒtƒŒƒlƒ‹”½ŽË—¦‚Ì‹ßŽ—.
 	// http://yokotakenji.me/log/math/4501/

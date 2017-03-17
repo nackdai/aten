@@ -1,5 +1,6 @@
 #include "renderer/pathtracing.h"
 #include "misc/thread.h"
+#include "renderer/nonphotoreal.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -375,9 +376,15 @@ namespace aten
 		// Apply normal map.
 		path.rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
-		// Explicit conection to light.
-		if (!path.rec.mtrl->isSingular())
+		if (path.rec.mtrl->isNPR()) {
+			path.contrib = shadeNPR(path.rec.mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
+			path.isTerminate = true;
+			return false;
+		}
+		else if (!path.rec.mtrl->isSingular())
 		{
+			// Explicit conection to light.
+
 			real lightSelectPdf = 1;
 			LightSampleResult sampleres;
 

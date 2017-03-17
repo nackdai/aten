@@ -98,12 +98,6 @@ namespace aten
 					std::max(newMax.z, v.z));
 			}
 
-			// Add only translate factor.
-			vec3 newCenter = center + m_mtxL2W.apply(vec3());
-
-			newMin += newCenter;
-			newMax += newCenter;
-
 			aabb ret(newMin, newMax);
 
 			return std::move(ret);

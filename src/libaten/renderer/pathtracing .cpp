@@ -376,15 +376,16 @@ namespace aten
 		// Apply normal map.
 		path.rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
+		// Non-Photo-Real.
 		if (path.rec.mtrl->isNPR()) {
 			path.contrib = shadeNPR(path.rec.mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
 			path.isTerminate = true;
 			return false;
 		}
-		else if (!path.rec.mtrl->isSingular())
+		
+		// Explicit conection to light.
+		if (!path.rec.mtrl->isSingular())
 		{
-			// Explicit conection to light.
-
 			real lightSelectPdf = 1;
 			LightSampleResult sampleres;
 

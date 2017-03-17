@@ -1,5 +1,6 @@
 #include "raytracing.h"
 #include "misc/thread.h"
+#include "renderer/nonphotoreal.h"
 #include "sampler/xorshift.h"
 #include "sampler/UniformDistributionSampler.h"
 
@@ -41,6 +42,11 @@ namespace aten
 					// Make next ray.
 					ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
 				}
+				else if (rec.mtrl->isNPR()) {
+					// Non-Photo-Real.
+					contribution = shadeNPR(rec.mtrl, rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
+					return std::move(contribution);
+				}
 				else {
 					auto lightNum = scene->lightNum();
 
@@ -56,6 +62,10 @@ namespace aten
 						vec3 dirToLight = sampleres.dir;
 						auto len = dirToLight.length();
 
+						if (light->isInifinite()) {
+							len = real(1);
+						}
+
 						dirToLight.normalize();
 
 						auto lightobj = sampleres.obj;
@@ -66,11 +76,15 @@ namespace aten
 
 						hitrecord tmpRec;
 
-						if (scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-							if (tmpRec.obj == lightobj) {
-								const auto lightColor = sampleres.le;
-								contribution += throughput * std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
-							}
+						bool isHit = scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec);
+
+						if ((isHit && tmpRec.obj == lightobj) || !isHit) {
+							auto lightColor = sampleres.le;
+
+							// TODO
+							lightColor.normalize();
+
+							contribution += throughput * std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
 						}
 					}
 				}
@@ -127,6 +141,10 @@ namespace aten
 
 					real u = (real(x) + 0.5) / real(width - 1);
 					real v = (real(y) + 0.5) / real(height - 1);
+
+					if (x == 320 && y == 240) {
+						int xxx = 0;
+					}
 
 					auto camsample = camera->sample(u, v, nullptr);
 

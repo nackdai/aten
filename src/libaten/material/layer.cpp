@@ -100,7 +100,10 @@ namespace aten
 			const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
 
 			ret.pdf += weight * f * sampleres.pdf;
-			ret.bsdf += weight * f * sampleres.bsdf;
+
+			// bsdf includes fresnale value.
+			ret.bsdf += weight * sampleres.bsdf;
+			//ret.bsdf += weight * f * sampleres.bsdf;
 
 			// TODO
 			// ret.fresnel
@@ -148,7 +151,7 @@ namespace aten
 
 			f = aten::clamp<real>(f, 0, 1);
 
-			pdf += weight * f * p;
+			pdf += weight * p;
 
 			weight = aten::clamp<real>(weight - f, 0, 1);
 			if (weight <= 0) {
@@ -207,7 +210,9 @@ namespace aten
 
 			f = aten::clamp<real>(f, 0, 1);
 
-			bsdf += weight * f * b;
+			// bsdf includes fresnel value.
+			bsdf += weight * b;
+			//bsdf += weight * f * b;
 
 			weight = aten::clamp<real>(weight - f, 0, 1);
 			if (weight <= 0) {

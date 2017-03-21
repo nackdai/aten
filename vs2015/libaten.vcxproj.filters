@@ -276,6 +276,9 @@
     <ClInclude Include="..\src\libaten\scene\instance.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction.h">
+      <Filter>denoise</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -415,6 +418,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction.cpp">
+      <Filter>denoise</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

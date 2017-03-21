@@ -158,6 +158,7 @@
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\denoise\bilateral.h" />
     <ClInclude Include="..\src\libaten\denoise\nml.h" />
+    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction.h" />
     <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\denoise\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\denoise\nml.cpp" />
+    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction.cpp" />
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />

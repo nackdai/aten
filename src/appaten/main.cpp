@@ -22,8 +22,8 @@ static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
-//static aten::RayTracing g_tracer;
-static aten::PathTracing g_tracer;
+static aten::RayTracing g_tracer;
+//static aten::PathTracing g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;
@@ -46,8 +46,9 @@ void display()
 	{
 		dst.width = WIDTH;
 		dst.height = HEIGHT;
-		dst.maxDepth = 5;
+		dst.maxDepth = 1;
 		dst.russianRouletteDepth = 3;
+		dst.startDepth = 1;
 		dst.sample = 10;
 		dst.mutation = 10;
 		dst.mltNum = 10;

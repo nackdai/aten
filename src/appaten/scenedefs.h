@@ -121,7 +121,7 @@ public:
 //#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
-//#define Scene MtrlTestScene
+#define Scene MtrlTestScene
 //#define Scene PointLightScene
 //#define Scene DirectionalLightScene
 //#define Scene SpotLightScene
@@ -130,4 +130,4 @@ public:
 //#define Scene HideLightScene
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
-#define Scene ToonShadeTestScene
+//#define Scene ToonShadeTestScene

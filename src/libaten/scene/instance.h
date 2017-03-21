@@ -40,11 +40,13 @@ namespace aten
 			vec3 org = r.org;
 			vec3 dir = r.dir;
 
+			// Transform world to local.
 			org = m_mtxW2L.apply(org);
 			dir = m_mtxW2L.applyXYZ(dir);
 
 			ray transformdRay(org, dir);
 
+			// Hit test in local coordinate.
 			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec);
 
 			if (isHit) {

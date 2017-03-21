@@ -81,10 +81,9 @@ namespace aten
 						if ((isHit && tmpRec.obj == lightobj) || !isHit) {
 							auto lightColor = sampleres.le;
 
-							// TODO
-							lightColor.normalize();
+							auto G = std::max(0.0, dot(orienting_normal, dirToLight)) / (len * len);
 
-							contribution += throughput * std::max(0.0, dot(orienting_normal, dirToLight)) * (albedo * lightColor) / (len * len);
+							contribution += throughput * (albedo * lightColor) * G;
 						}
 					}
 				}

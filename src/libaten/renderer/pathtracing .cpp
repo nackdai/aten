@@ -297,6 +297,25 @@ namespace aten
 		while (depth < maxDepth) {
 			path.rec = hitrecord();
 
+#if 1
+			bool willContinue = true;
+
+			if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec)) {
+				willContinue = shade(sampler, scene, cam, depth, path);
+			}
+			else {
+				shadeMiss(scene, depth, path);
+				willContinue = false;
+			}
+
+			if (depth < m_startDepth) {
+				path.contrib = vec3(0);
+			}
+
+			if (!willContinue) {
+				break;
+			}
+#else
 			if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec)) {
 				bool willContinue = shade(sampler, scene, cam, depth, path);
 				if (!willContinue) {
@@ -305,9 +324,9 @@ namespace aten
 			}
 			else {
 				shadeMiss(scene, depth, path);
-
 				break;
 			}
+#endif
 
 			depth++;
 		}
@@ -337,7 +356,7 @@ namespace aten
 				path.isTerminate = true;
 				return false;
 			}
-			else if (path.prevMtrl->isSingular()) {
+			else if (path.prevMtrl && path.prevMtrl->isSingular()) {
 				auto emit = path.rec.mtrl->color();
 				path.contrib += path.throughput * emit;
 				return false;
@@ -555,6 +574,7 @@ namespace aten
 
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
+		m_startDepth = dst.startDepth;
 
 		if (m_rrDepth > m_maxDepth) {
 			m_rrDepth = m_maxDepth - 1;

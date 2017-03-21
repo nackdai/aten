@@ -62,5 +62,7 @@ namespace aten
 
 		// Depth to compute russinan roulette.
 		uint32_t m_rrDepth{ 1 };
+
+		uint32_t m_startDepth{ 0 };
 	};
 }

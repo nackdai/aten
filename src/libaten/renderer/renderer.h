@@ -17,6 +17,7 @@ namespace aten
 		uint32_t mutation{ 1 };
 		uint32_t mltNum{ 1 };
 		vec4* buffer{ nullptr };
+		vec4* variance{ nullptr };
 
 		struct {
 			vec4* nml_depth{ nullptr };		///< Normal and Depth / rgb : normal, a : depth

@@ -570,7 +570,9 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 		uint32_t samples = dst.sample;
+
 		vec4* color = dst.buffer;
+		vec4* var = dst.variance;
 
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
@@ -607,6 +609,7 @@ namespace aten
 					int pos = y * width + x;
 
 					vec3 col;
+					vec3 col2;
 					uint32_t cnt = 0;
 
 					for (uint32_t i = 0; i < samples; i++) {
@@ -652,7 +655,10 @@ namespace aten
 							camsample.posOnImageSensor,
 							camsample.posOnLens);
 
-						col += path.contrib * s / (pdfOnImageSensor * pdfOnLens);
+						auto c = path.contrib * s / (pdfOnImageSensor * pdfOnLens);
+
+						col += c;
+						col2 += c * c;
 						cnt++;
 
 						if (path.isTerminate) {
@@ -663,6 +669,11 @@ namespace aten
 					col /= (real)cnt;
 
 					color[pos] = vec4(col, 1);
+
+					if (var) {
+						col2 /= cnt;
+						var[pos] = vec4(col2 - col * col, 1);
+					}
 				}
 			}
 		}

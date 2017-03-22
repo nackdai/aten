@@ -141,10 +141,6 @@ namespace aten
 					real u = (real(x) + 0.5) / real(width - 1);
 					real v = (real(y) + 0.5) / real(height - 1);
 
-					if (x == 320 && y == 240) {
-						int xxx = 0;
-					}
-
 					auto camsample = camera->sample(u, v, nullptr);
 
 					auto col = radiance(camsample.r, scene);

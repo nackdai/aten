@@ -63,6 +63,15 @@ namespace aten {
 			return std::move(result);
 		}
 
+		virtual const vec3& getPos() const override final
+		{
+			return m_origin;
+		}
+		virtual const vec3& getDir() const override final
+		{
+			return m_dir;
+		}
+
 	private:
 		vec3 m_origin;
 

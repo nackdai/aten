@@ -49,5 +49,8 @@ namespace aten {
 		{
 			return false;
 		}
+
+		virtual const vec3& getPos() const = 0;
+		virtual const vec3& getDir() const = 0;
 	};
 }

@@ -204,9 +204,6 @@
     <ClInclude Include="..\src\libaten\light\ibl.h">
       <Filter>light</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\nml.h">
-      <Filter>denoise</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\denoise\bilateral.h">
       <Filter>denoise</Filter>
     </ClInclude>
@@ -277,6 +274,9 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction.h">
+      <Filter>denoise</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\nlm.h">
       <Filter>denoise</Filter>
     </ClInclude>
   </ItemGroup>
@@ -362,9 +362,6 @@
     <ClCompile Include="..\src\libaten\light\ibl.cpp">
       <Filter>light</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\nml.cpp">
-      <Filter>denoise</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\denoise\bilateral.cpp">
       <Filter>denoise</Filter>
     </ClCompile>
@@ -422,6 +419,9 @@
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction.cpp">
       <Filter>denoise</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\nlm.cpp">
+      <Filter>denoise</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">
@@ -434,9 +434,6 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\bilateral_fs.glsl">
-      <Filter>shader\denoise</Filter>
-    </None>
-    <None Include="..\src\shader\nml_fs.glsl">
       <Filter>shader\denoise</Filter>
     </None>
     <None Include="..\src\shader\bloomeffect_fs_Gauss.glsl">
@@ -462,6 +459,9 @@
     </None>
     <None Include="..\src\shader\separate_fs .glsl">
       <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\nlm_fs.glsl">
+      <Filter>shader\denoise</Filter>
     </None>
   </ItemGroup>
 </Project>

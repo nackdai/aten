@@ -124,11 +124,11 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/tonemap_fs.glsl");
 
-	aten::NonLocalMeanFilterShader nmlshd;
+	aten::NonLocalMeanFilterShader nlmshd;
 	nmlshd.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
-		"../shader/nml_fs.glsl");
+		"../shader/nlm_fs.glsl");
 
 	aten::BilateralFilterShader bishd;
 	bishd.init(
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/gamma_fs.glsl");
 
-	//aten::visualizer::addPostProc(&nmlshd);
+	//aten::visualizer::addPostProc(&nlmshd);
 	aten::visualizer::addPostProc(&blitter);
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&tonemap);

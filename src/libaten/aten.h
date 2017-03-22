@@ -6,7 +6,7 @@
 #include "camera/pinhole.h"
 #include "camera/thinlens.h"
 
-#include "denoise/nml.h"
+#include "denoise/nlm.h"
 #include "denoise/bilateral.h"
 #include "denoise/PracticalNoiseReduction.h"
 

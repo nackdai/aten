@@ -25,6 +25,13 @@ namespace aten {
 			return src[pos];
 		}
 
+		void set(int x, int y, const vec4& v)
+		{
+			if (src) {
+				(*this)(x, y) = v;
+			}
+		}
+
 	private:
 		vec4* src;
 		uint32_t width;
@@ -50,7 +57,8 @@ namespace aten {
 		const vec4* src,
 		uint32_t width, uint32_t height,
 		real sigmaS, real sigmaR,
-		vec4* dst)
+		vec4* dst,
+		vec4* variance)
 	{
 		int r = int(::ceilf(4.0f * sigmaS));
 
@@ -74,6 +82,8 @@ namespace aten {
 		Sampler srcSampler(const_cast<vec4*>(src), width, height);
 		Sampler dstSampler(const_cast<vec4*>(dst), width, height);
 
+		Sampler varSampler(const_cast<vec4*>(variance), width, height);
+
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
@@ -84,6 +94,8 @@ namespace aten {
 
 				vec3 numer(1.0f, 1.0f, 1.0f);
 				vec3 denom(p);
+
+				vec3 denom2(p * p);
 
 				// (u, 0)
 				// ‰¡•ûŒü.
@@ -101,7 +113,9 @@ namespace aten {
 						kernelR(abs(p1.b - p.b), sigmaR));
 
 					numer += kernelS(distW, u, 0) * (wr0 + wr1);
-					denom += kernelS(distW, u, 0) * (wr0 * p0 + wr1 * p1);
+					auto d = kernelS(distW, u, 0) * (wr0 * p0 + wr1 * p1);
+					denom += d;
+					denom2 += d * d;
 				}
 
 				// (0, v)
@@ -120,7 +134,9 @@ namespace aten {
 						kernelR(abs(p1.b - p.b), sigmaR));
 
 					numer += kernelS(distW, 0, v) * (wr0 + wr1);
-					denom += kernelS(distW, 0, v) * (wr0 * p0 + wr1 * p1);
+					auto d = kernelS(distW, 0, v) * (wr0 * p0 + wr1 * p1);
+					denom += d;
+					denom2 += d * d;
 				}
 
 				for (int v = 1; v <= r; v++) {
@@ -148,12 +164,18 @@ namespace aten {
 							kernelR(abs(p11.b - p.b), sigmaR));
 
 						numer += kernelS(distW, u, v) * (wr00 + wr01 + wr10 + wr11);
-						denom += kernelS(distW, u, v) * (wr00 * p00 + wr01 * p01 + wr10 * p10 + wr11 * p11);
+						auto d = kernelS(distW, u, v) * (wr00 * p00 + wr01 * p01 + wr10 * p10 + wr11 * p11);
+						denom += d;
+						denom2 += d * d;
 					}
 				}
 
 				auto d = denom / numer;
 				dstSampler(x, y) = vec4(d, 1);
+
+				auto d2 = denom2 / (numer * numer);
+				d2 -= d * d;
+				varSampler.set(x, y, vec4(d2, 1));
 			}
 		}
 	}
@@ -170,7 +192,8 @@ namespace aten {
 			src,
 			width, height,
 			m_sigmaS, m_sigmaR,
-			dst);
+			dst,
+			m_variance);
 
 		auto elapsed = timer.end();
 		AT_PRINTF("Bilateral %f[ms]\n", elapsed);

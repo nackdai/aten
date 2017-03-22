@@ -8,6 +8,7 @@
 
 #include "denoise/nml.h"
 #include "denoise/bilateral.h"
+#include "denoise/PracticalNoiseReduction.h"
 
 #include "material/emissive.h"
 #include "material/lambert.h"

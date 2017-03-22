@@ -28,6 +28,10 @@ namespace aten {
 			v = _v.v;
 			w = _v.w;
 		}
+		vec4(real f)
+		{
+			x = y = z = w = f;
+		}
 		vec4(real _x, real _y, real _z, real _w)
 		{
 			x = _x;

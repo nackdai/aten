@@ -60,5 +60,21 @@ namespace aten {
 
 			return std::move(rgb);
 		}
+
+		// RGB -> sRGB
+		static vec3 RGBtoXYZ(const vec3& rgb)
+		{
+			static const vec3 _RGB2X(0.412391, 0.357584, 0.180481);
+			static const vec3 _RGB2Y(0.212639, 0.715169, 0.072192);
+			static const vec3 _RGB2Z(0.019331, 0.119195, 0.950532);
+
+			auto x = dot(_RGB2X, rgb);
+			auto y = dot(_RGB2Y, rgb);
+			auto z = dot(_RGB2Z, rgb);
+
+			vec3 xyz(x, y, z);
+
+			return std::move(xyz);
+		}
 	};
 }

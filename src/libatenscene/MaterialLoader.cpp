@@ -23,6 +23,8 @@ namespace aten {
 		"beckman",
 		"ggx",
 		"disney_brdf",
+		"oren_nayar",
+		"toon",
 	};
 
 	bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
@@ -274,6 +276,8 @@ namespace aten {
 		[](Values& values) { return new MicrofacetBeckman(values); },	// beckman
 		[](Values& values) { return new MicrofacetGGX(values); },		// ggx
 		[](Values& values) { return new DisneyBRDF(values); },			// disney_brdf
+		[](Values& values) { return new OrenNayar(values); },			// oren_nayar
+		[](Values& values) { return new toon(values); },				// toon
 	};
 
 	C_ASSERT(AT_COUNTOF(g_types) == AT_COUNTOF(g_funcs));

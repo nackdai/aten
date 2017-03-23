@@ -62,10 +62,6 @@ namespace aten
 						vec3 dirToLight = sampleres.dir;
 						auto len = dirToLight.length();
 
-						if (light->isInifinite()) {
-							len = real(1);
-						}
-
 						dirToLight.normalize();
 
 						auto lightobj = sampleres.obj;
@@ -76,10 +72,12 @@ namespace aten
 
 						hitrecord tmpRec;
 
-						bool isHit = scene->hit(shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec);
-
-						if ((isHit && tmpRec.obj == lightobj) || !isHit) {
+						if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							auto lightColor = sampleres.le;
+
+							if (light->isInifinite()) {
+								len = real(1);
+							}
 
 							auto G = std::max(0.0, dot(orienting_normal, dirToLight)) / (len * len);
 

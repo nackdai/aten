@@ -22,6 +22,8 @@ namespace aten
 			: material(val)
 		{
 			m_roughness = val.get("roughness", m_roughness);
+			m_roughness = aten::clamp<real>(m_roughness, 0, 1);
+
 			m_roughnessMap = val.get("roughnessmap", m_roughnessMap);
 		}
 

@@ -79,6 +79,8 @@ namespace aten
 		DisneyBRDF(Values& val)
 			: material(val)
 		{
+			// TODO
+			// Clamp parameters.
 			m_subsurface = val.get("subsurface", m_subsurface);
 			m_metallic = val.get("metallic", m_metallic);
 			m_specular = val.get("specular", m_specular);

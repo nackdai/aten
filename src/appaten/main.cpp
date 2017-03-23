@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
@@ -50,7 +50,7 @@ void display()
 		dst.maxDepth = 6;
 		dst.russianRouletteDepth = 3;
 		dst.startDepth = 0;
-		dst.sample = 100;
+		dst.sample = 10;
 		dst.mutation = 10;
 		dst.mltNum = 10;
 		dst.buffer = &g_buffer[0];
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 		"../shader/tonemap_fs.glsl");
 
 	aten::NonLocalMeanFilterShader nlmshd;
-	nmlshd.init(
+	nlmshd.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
 		"../shader/nlm_fs.glsl");
@@ -155,10 +155,10 @@ int main(int argc, char* argv[])
 		"../shader/vs.glsl",
 		"../shader/gamma_fs.glsl");
 
-	//aten::visualizer::addPostProc(&nlmshd);
-	aten::visualizer::addPostProc(&blitter);
-	aten::visualizer::addPostProc(&gamma);
-	//aten::visualizer::addPostProc(&tonemap);
+	//aten::visualizer::addPostProc(&bishd);
+	//aten::visualizer::addPostProc(&blitter);
+	//aten::visualizer::addPostProc(&gamma);
+	aten::visualizer::addPostProc(&tonemap);
 	//aten::visualizer::addPostProc(&bloom);
 
 	aten::vec3 lookfrom;
@@ -189,12 +189,14 @@ int main(int argc, char* argv[])
 
 	g_scene.build();
 
+	g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
+
 	g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	//g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");
 	g_bg.init(g_envmap);
 
 	aten::ImageBasedLight ibl(&g_bg);
-	g_scene.addImageBasedLight(&ibl);
+	//g_scene.addImageBasedLight(&ibl);
 
 	//g_tracer.setBG(&g_staticbg);
 

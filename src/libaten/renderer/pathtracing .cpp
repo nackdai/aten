@@ -401,6 +401,14 @@ namespace aten
 			path.isTerminate = true;
 			return false;
 		}
+
+		if (m_virtualLight) {
+			if (path.rec.mtrl->isGlossy()
+				&& (path.prevMtrl && !path.prevMtrl->isGlossy()))
+			{
+				return false;
+			}
+		}
 		
 		// Explicit conection to light.
 		if (!path.rec.mtrl->isSingular())
@@ -473,6 +481,46 @@ namespace aten
 					}
 				}
 			}
+
+#if 1
+			if (m_virtualLight)
+			{
+				auto sampleres = m_virtualLight->sample(path.rec.p, nullptr);
+
+				vec3 posLight = sampleres.pos;
+				vec3 nmlLight = sampleres.nml;
+				real pdfLight = sampleres.pdf;
+
+				auto lightobj = sampleres.obj;
+
+				vec3 dirToLight = normalize(sampleres.dir);
+				aten::ray shadowRay(path.rec.p + AT_MATH_EPSILON * dirToLight, dirToLight);
+
+				hitrecord tmpRec;
+
+				if (scene->hitLight(m_virtualLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+					auto cosShadow = dot(orienting_normal, dirToLight);
+					auto dist2 = sampleres.dir.squared_length();
+					auto dist = aten::sqrt(dist2);
+
+					auto bsdf = path.rec.mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, sampler);
+
+					// Get light color.
+					auto emit = sampleres.finalColor;
+
+					auto c = dot(m_lightDir, -dirToLight);
+					real visible = (c > 0 ? 1 : 0);
+
+					auto misW = pdfLight / (pdfb + pdfLight);
+					path.contrib += visible * misW * bsdf * emit * cosShadow / pdfLight;
+				}
+
+				if (!path.rec.mtrl->isGlossy()) {
+					return false;
+				}
+			}
+#endif
 		}
 
 #ifdef Deterministic_Path_Termination

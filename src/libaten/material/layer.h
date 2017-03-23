@@ -15,6 +15,8 @@ namespace aten
 
 		virtual vec3 sampleAlbedoMap(real u, real v) const override final;
 
+		virtual bool isGlossy() const override final;
+
 		virtual void applyNormalMap(
 			const vec3& orgNml,
 			vec3& newNml,

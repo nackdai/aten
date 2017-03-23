@@ -28,6 +28,11 @@ namespace aten
 		virtual ~MicrofacetBeckman() {}
 
 	public:
+		virtual bool isGlossy() const override final
+		{
+			return (m_roughness == 1 ? false : true);
+		}
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

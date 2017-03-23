@@ -24,6 +24,11 @@ namespace aten
 		virtual ~MicrofacetBlinn() {}
 
 	public:
+		virtual bool isGlossy() const override final
+		{
+			return (m_shininess == 0 ? false : true);
+		}
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

@@ -133,20 +133,23 @@ namespace aten {
 	{
 		auto s = val.get< std::string>();
 
-		std::string pathname;
-		std::string extname;
-		std::string filename;
+		auto tex = AssetManager::getTex(s);
 
-		getStringsFromPath(
-			s,
-			pathname,
-			extname,
-			filename);
+		if (!tex) {
+			std::string pathname;
+			std::string extname;
+			std::string filename;
+
+			getStringsFromPath(
+				s,
+				pathname,
+				extname,
+				filename);
+
+			tex = ImageLoader::load(s);
+		}
 
 		aten::PolymorphicValue v;
-
-		auto tex = ImageLoader::load(s);
-
 		v.val.p = tex;
 
 		return std::move(v);

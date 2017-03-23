@@ -1,0 +1,30 @@
+{
+  "textures": {
+    "albedomap": "earth.bmp"
+  },
+  "maetrials": {
+    "test": "material.json"
+  },
+  "objects": {
+    "teapot": "teapot.obj"
+  },
+  "scene": {
+    "config": {
+      "width": 640,
+      "height": 480,
+      "renderer": {
+        "type": "pathtracing",
+        "spp": 10,
+        "depth": 5,
+        "rrdepth": 3
+      }
+    },
+    "teapot": {
+      "obj": "teapot",
+      "trans": [ 1, 1, 1 ],
+      "scale": [ 2, 2, 2 ],
+      "rotate": [ 0, 45, 0 ],
+      "material": "test"
+    }
+  }
+}

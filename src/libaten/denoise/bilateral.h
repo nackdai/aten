@@ -26,16 +26,9 @@ namespace aten {
 			m_sigmaR = sigmaR;
 		}
 
-		void setVarianceBuffer(vec4* v)
-		{
-			m_variance = v;
-		}
-
 	private:
 		real m_sigmaS{ 0.2 };
 		real m_sigmaR{ 0.2 };
-
-		vec4* m_variance{ nullptr };
 	};
 
 	class BilateralFilterShader : public Blitter {

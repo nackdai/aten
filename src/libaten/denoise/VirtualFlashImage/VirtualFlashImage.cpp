@@ -16,6 +16,7 @@
 /////////////////////////////////////////////////////
 // t-distribution value.
 // [0: 80%, 1: 90%, 2: 95%, 3: 98%, 4: 99%, 5: 99.8%]
+// 信頼区間を計算するためのt-分布のテーブル.
 static const aten::real ttable[][6] = {
 #include "denoise/VirtualFlashImage/t_table.dat"
 };
@@ -34,6 +35,9 @@ namespace aten {
 
 		int halfWindowSize = filter_size / 2;
 
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
 		for (int cy = 0; cy < height; cy++) {
 			for (int cx = 0; cx < width; cx++) {
 				int cIdx = cy * width + cx;
@@ -88,6 +92,7 @@ namespace aten {
 	}
 
 #define CI_FOR_FLASH
+#define ADAPTIVE_PATCH
 
 	void filterStep1(
 		const vec4* _in,
@@ -96,9 +101,9 @@ namespace aten {
 		const vec4* _stdFlash,	// Flash画像の標準偏差.
 		vec4* _out, 
 		int width, int height, 
-		int filter_size, float std_d,
+		int filter_size, real std_d,
 		int numSamples, 
-		real* _tvalue, 
+		const real* _tvalue, 
 		vec4* _stdresult)
 	{
 		int halfWindowSize = filter_size / 2;
@@ -116,13 +121,17 @@ namespace aten {
 		// g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
 		real std_d2 = 2 * std_d * std_d;
 
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
 		for (int cy = 0; cy < height; cy++) {
 			for (int cx = 0; cx < width; cx++) {
 				const auto cIdx = cy * width + cx;
 
 				const auto& sf = _stdFlash[cIdx];
+				const auto& std = _std[cIdx];
 
-				auto tmp_adaptiveRange = RANGE_CONSTANCE * aten::sqrt(aten::abs(0.99 * sf * sf + 0.01 * sf * sf));
+				auto tmp_adaptiveRange = RANGE_CONSTANCE * aten::sqrt(aten::abs(0.99 * sf * sf + 0.01 * std * std));
 				auto adaptiveRange2 = 2 * tmp_adaptiveRange * tmp_adaptiveRange;
 
 				auto adaptiveRange = (adaptiveRange2.x + adaptiveRange2.y + adaptiveRange2.z) / 3;
@@ -251,23 +260,155 @@ namespace aten {
 					}
 				}
 
-#if 0
-				vec4 reconVar(0);
-				for (int ii = 0; ii < numNeighboors; ++ii) {
-					reconVar += arrWeights[ii] * arrWeights[ii] * _std[arrIdx[ii]] * _std[arrIdx[ii]];
-				}
+#if 1
+				if (_stdresult) {
+					vec4 reconVar(0);
+					for (int ii = 0; ii < numNeighboors; ++ii) {
+						reconVar += arrWeights[ii] * arrWeights[ii] * _std[arrIdx[ii]] * _std[arrIdx[ii]];
+					}
 
-				static const real COVARIANCE = real(1);
-				for (int ii = 0; ii < numNeighboors; ++ii) {
-					for (int jj = ii + 1; jj < numNeighboors; ++jj) {
-						reconVar += arrWeights[ii] * arrWeights[jj]
-							* COVARIANCE
-							* aten::sqrt(aten::abs(_std[arrIdx[ii]] * _std[arrIdx[ii]] * _std[arrIdx[jj]] * _std[arrIdx[jj]]));
+					static const real COVARIANCE = real(1);
+					for (int ii = 0; ii < numNeighboors; ++ii) {
+						for (int jj = ii + 1; jj < numNeighboors; ++jj) {
+							reconVar += arrWeights[ii] * arrWeights[jj]
+								* COVARIANCE
+								* aten::sqrt(aten::abs(_std[arrIdx[ii]] * _std[arrIdx[ii]] * _std[arrIdx[jj]] * _std[arrIdx[jj]]));
+						}
+					}
+
+					_stdresult[cIdx] = aten::sqrt(aten::abs(reconVar / (sumWeight * sumWeight)));
+				}
+#endif
+				_out[cIdx] /= sumWeight;
+			}
+		}
+	}
+
+	void filterStep2(
+		const vec4* _image,
+		const vec4* _flash,
+		const vec4* _std, 
+		const vec4* _stdFlash, 
+		vec4* _out, 
+		int width, int height, 
+		int filter_size, real std_d, 
+		int numSamples, 
+		const real* _tvalue)
+	{
+		const int halfWindowSize = filter_size / 2;
+		const int _df = std::min<int>(numSamples - 1, MAX_DF);	// 自由度.
+
+		const real RANGE_CONSTANCE = real(2);
+
+		const real std_d2 = 2.0f * std_d * std_d;
+
+		// 信頼区間.
+		vec4 CI;
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int cy = 0; cy < height; cy++) {
+			for (int cx = 0; cx < width; cx++) {
+				const int cIdx = cy * width + cx;
+
+				const auto& sf = _stdFlash[cIdx];
+				const auto& std = _std[cIdx];
+
+				auto tmp_adaptiveRange = RANGE_CONSTANCE * aten::sqrt(aten::abs(0.99f * sf * sf + 0.01f * std * std));
+				const auto adaptiveRange2 = 2 * tmp_adaptiveRange * tmp_adaptiveRange;
+
+				auto adaptiveRange = (adaptiveRange2[0] + adaptiveRange2[1] + adaptiveRange2[2]) / 3.0f;
+				adaptiveRange = std::max<real>(adaptiveRange, AT_MATH_EPSILON);
+
+				const auto tvalue = _tvalue[_df];
+
+				// Flash画像の中心の信頼区間を計算.
+#ifdef CI_FOR_FLASH
+				const auto& curColor = _flash[cIdx];
+				CI = tvalue * vec4(sf.x, sf.y, sf.z, 0);
+				const auto CI_center_low = curColor - CI - AT_MATH_EPSILON;
+				const auto CI_center_high = curColor + CI + AT_MATH_EPSILON;
+#endif
+
+				const auto& curImg = _image[cIdx];
+
+				// 入力画像の中心の信頼区間を計算.
+				CI = tvalue * vec4(std.x, std.y, std.z, 0);
+				const auto CI_min = curImg - CI - AT_MATH_EPSILON;
+				const auto CI_max = curImg + CI + AT_MATH_EPSILON;
+
+#ifdef ADAPTIVE_PATCH	
+				real h = adaptiveRange * 2048.0f;
+				int halfPatchSize = std::min((int)h, MAX_HALF_PATCH_SIZE);
+#else	
+				int halfPatchSize = MAX_HALF_PATCH_SIZE;
+#endif
+
+				// 計算範囲ウインドウ開始位置.
+				int startWindow_x = std::max(0, cx - halfWindowSize);
+				int startWindow_y = std::max(0, cy - halfWindowSize);
+
+				// 計算範囲ウインドウ終了位置.
+				int endWindow_x = std::min(width - 1, cx + halfWindowSize);
+				int endWindow_y = std::min(height - 1, cy + halfWindowSize);
+
+				real sumWeight = 0;
+
+				for (int iy = startWindow_y; iy <= endWindow_y; ++iy) {
+					for (int ix = startWindow_x; ix <= endWindow_x; ++ix) {
+						int idx = iy * width + ix;
+						const auto& tarImg = _image[idx];
+
+						// Check if in CI.
+						if (!isInCI(tarImg, CI_min, CI_max)) {
+							continue;
+						}
+
+						const real imageDist = (real)(cx - ix) * (cx - ix) + (cy - iy) * (cy - iy);
+						real weight = aten::exp(-imageDist / std_d2);
+
+#ifdef CI_FOR_FLASH
+						const auto& tarColor = _flash[idx];
+						CI = tvalue * vec4(_stdFlash[idx].x, _stdFlash[idx].y, _stdFlash[idx].z, 0);
+						const auto CI_target_low = tarColor - CI - AT_MATH_EPSILON;
+						const auto CI_target_high = tarColor + CI + AT_MATH_EPSILON;
+#endif
+
+						real countPass = 0;
+						real colorDist = 0;
+
+						for (int yy = -halfPatchSize; yy <= halfPatchSize; ++yy) {
+							for (int xx = -halfPatchSize; xx <= halfPatchSize; ++xx) {
+								int ccx = aten::clamp(cx + xx, 0, width - 1);
+								int ccy = aten::clamp(cy + yy, 0, height - 1);
+
+								int iix = aten::clamp(ix + xx, 0, width - 1);
+								int iiy = aten::clamp(iy + yy, 0, height - 1);
+
+								int cpos = ccy * width + ccx;
+								int ipos = iiy * width + iix;
+
+								const auto& curPix = _flash[cpos];
+								const auto& tarPix = _flash[ipos];
+
+#ifdef CI_FOR_FLASH
+								if (isInCI(curPix, CI_center_low, CI_center_high) && isInCI(tarPix, CI_target_low, CI_target_high))
+#endif
+								{
+									colorDist += euclideanDist(curPix, tarPix);
+									countPass += real(3);
+								}
+							}
+						}
+
+						weight *= aten::exp(-colorDist / (adaptiveRange * countPass));
+
+						_out[cIdx] += weight * tarImg;
+						sumWeight += weight;
 					}
 				}
 
-				_stdresult[cIdx] = aten::sqrt(aten::abs(reconVar / (sumWeight * sumWeight)));
-#endif
 				_out[cIdx] /= sumWeight;
 			}
 		}
@@ -319,16 +460,36 @@ namespace aten {
 			tvalue2[i] = ttable[i][CONFIDENCE_LEVEL2];
 		}
 
+		std::vector<vec4> tmpStd(width * height);
+		std::vector<vec4> tmpDenoised(width * height);
+
+#if 1
 		filterStep1(
-			src, 
+			src,
 			m_flash,
 			&stdSrc[0],
-			&stdFlash[0], 
-			dst,
-			width, height, 
-			FILTER_SIZE_STEP1, STD_D_STEP1, 
-			numSamples, 
+			&stdFlash[0],
+			&tmpDenoised[0],
+			width, height,
+			FILTER_SIZE_STEP1, STD_D_STEP1,
+			numSamples,
 			&tvalue[0],
-			nullptr);	// TODO
+			&tmpStd[0]);
+#endif
+
+#if 1
+		memcpy(&stdSrc[0], &tmpStd[0], width * height * sizeof(vec4));
+
+		filterStep2(
+			&tmpDenoised[0],
+			m_flash,
+			&stdSrc[0],
+			&stdFlash[0],
+			dst, 
+			width, height,
+			FILTER_SIZE_STEP2, STD_D_STEP2,
+			numSamples,
+			&tvalue2[0]);
+#endif
 	}
 }

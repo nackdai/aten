@@ -2,11 +2,11 @@
 
 void CornellBoxScene::makeScene(aten::scene* scene)
 {
-	auto emit = new aten::emissive(aten::vec3(36.0, 36.0, 36.0));
+	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
 
 	auto light = new aten::sphere(
-		aten::vec3(50.0, 75.0, 81.6),
-		5.0,
+		aten::vec3(50.0, 90.0, 81.6),
+		15.0,
 		emit);
 
 	double r = 1e3;
@@ -38,24 +38,73 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 
 	//auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
+#define DEFALT	(1)
+
+#if DEFALT
 	// —Î‹….
 	auto green = new aten::sphere(
 		aten::vec3(65, 20, 20),
 		20,
 		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
 		//new aten::lambert(aten::vec3(1, 1, 1), tex));
+#else
+	auto green = new aten::sphere(
+		aten::vec3(65, 20, 20),
+		20,
+		new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+#endif
 
+#if DEFALT
 	// ‹¾.
 	auto mirror = new aten::sphere(
 		aten::vec3(27, 16.5, 47),
 		16.5,
 		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+#else
+	auto spec = new aten::MicrofacetBlinn(aten::vec3(1, 1, 1), 200, 0.8);
+	auto diff = new aten::lambert(aten::vec3(0.0, 0.7, 0.0));
 
+	auto layer = new aten::LayeredBSDF();
+	layer->add(spec);
+	layer->add(diff);
+
+	auto mirror = new aten::sphere(
+		aten::vec3(27, 16.5, 47),
+		16.5,
+		layer);
+#endif
+
+#if DEFALT
 	// ƒKƒ‰ƒX.
 	auto glass = new aten::sphere(
 		aten::vec3(77, 16.5, 78),
 		16.5,
 		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+#else
+	aten::AssetManager::registerMtrl(
+		"m1",
+		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+
+	aten::AssetManager::registerMtrl(
+		"Material.001",
+		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+
+	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
+
+	aten::mat4 mtxL2W;
+	mtxL2W.asRotateByY(Deg2Rad(-25));
+
+	aten::mat4 mtxT;
+	mtxT.asTrans(aten::vec3(77, 16.5, 78));
+
+	aten::mat4 mtxS;
+	mtxS.asScale(10);
+
+	mtxL2W = mtxT * mtxL2W * mtxS;
+
+	auto glass = new aten::instance<aten::object>(obj, mtxL2W);
+#endif
 
 #if 1
 	scene->add(light);

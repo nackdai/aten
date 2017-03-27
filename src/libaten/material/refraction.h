@@ -36,6 +36,11 @@ namespace aten
 			return true;
 		}
 
+		virtual bool isGlossy() const override final
+		{
+			return true;
+		}
+
 		bool setIsIdealRefraction(bool f)
 		{
 			m_isIdealRefraction = f;

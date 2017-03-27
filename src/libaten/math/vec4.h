@@ -28,6 +28,10 @@ namespace aten {
 			v = _v.v;
 			w = _v.w;
 		}
+		vec4(real f)
+		{
+			x = y = z = w = f;
+		}
 		vec4(real _x, real _y, real _z, real _w)
 		{
 			x = _x;
@@ -219,6 +223,26 @@ namespace aten {
 	inline vec4 normalize(const vec4& v)
 	{
 		auto ret = v / v.length();
+		return std::move(ret);
+	}
+
+	inline vec4 sqrt(const vec4& v)
+	{
+		vec4 ret(
+			aten::sqrt(v.x),
+			aten::sqrt(v.y),
+			aten::sqrt(v.z),
+			aten::sqrt(v.w));
+		return std::move(ret);
+	}
+
+	inline vec4 abs(const vec4& v)
+	{
+		vec4 ret(
+			aten::abs(v.x),
+			aten::abs(v.y),
+			aten::abs(v.z),
+			aten::abs(v.w));
 		return std::move(ret);
 	}
 }

@@ -50,6 +50,11 @@ namespace aten
 			return false;
 		}
 
+		virtual bool isGlossy() const
+		{
+			return false;
+		}
+
 		virtual bool isNPR() const
 		{
 			return false;

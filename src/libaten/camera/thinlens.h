@@ -49,6 +49,16 @@ namespace aten {
 			return true;
 		}
 
+		virtual const vec3& getPos() const override final
+		{
+			return m_imagesensor.center;
+		}
+		virtual const vec3& getDir() const override final
+		{
+			return m_imagesensor.dir;
+		}
+
+
 	private:
 		// ‰ð‘œ“x.
 		int m_imageWidthPx;

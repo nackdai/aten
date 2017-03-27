@@ -9,9 +9,9 @@ namespace aten {
 		PointLight(
 			const vec3& pos,
 			const vec3& le,
-			real constAttn,
-			real linearAttn,
-			real expAttn)
+			real constAttn = 1,
+			real linearAttn = 0,
+			real expAttn = 0)
 		{
 			m_pos = pos;
 			m_le = le;

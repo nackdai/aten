@@ -22,6 +22,21 @@ namespace aten
 		return std::move(albedo);
 	}
 
+	bool LayeredBSDF::isGlossy() const
+	{
+		auto num = m_layer.size();
+
+		for (int i = 0; i < num; i++) {
+			auto mtrl = m_layer[i];
+
+			if (mtrl->isGlossy()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void LayeredBSDF::applyNormalMap(
 		const vec3& orgNml,
 		vec3& newNml,

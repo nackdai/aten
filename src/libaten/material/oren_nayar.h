@@ -31,6 +31,11 @@ namespace aten
 		virtual ~OrenNayar() {}
 
 	public:
+		virtual bool isGlossy() const override final
+		{
+			return false;
+		}
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

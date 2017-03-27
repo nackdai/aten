@@ -25,6 +25,11 @@ namespace aten
 			return true;
 		}
 
+		virtual bool isGlossy() const override final
+		{
+			return true;
+		}
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

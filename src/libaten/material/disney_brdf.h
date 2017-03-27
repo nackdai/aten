@@ -97,6 +97,11 @@ namespace aten
 		virtual ~DisneyBRDF() {}
 
 	public:
+		virtual bool isGlossy() const override final
+		{
+			return (m_roughness == 1 ? false : true);
+		}
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

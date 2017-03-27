@@ -48,7 +48,7 @@ void display()
 			dst.maxDepth = 6;
 			dst.russianRouletteDepth = 3;
 			dst.startDepth = 1;
-			dst.sample = 10;
+			dst.sample = 40;
 			dst.mutation = 10;
 			dst.mltNum = 10;
 			dst.buffer = &g_indirectBuffer[0];
@@ -79,6 +79,7 @@ void display()
 			dst.height = HEIGHT;
 			dst.geominfo.nml_depth = &g_nml_depth_Buffer[0];
 			dst.geominfo.depthMax = 1000;
+			dst.geominfo.needNormalize = false;
 		}
 
 		g_geotracer.render(dst, &g_scene, &g_camera);

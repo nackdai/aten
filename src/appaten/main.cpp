@@ -50,7 +50,7 @@ void display()
 		dst.maxDepth = 6;
 		dst.russianRouletteDepth = 3;
 		dst.startDepth = 0;
-		dst.sample = 10;
+		dst.sample = 40;
 		dst.mutation = 10;
 		dst.mltNum = 10;
 		dst.buffer = &g_buffer[0];
@@ -157,8 +157,8 @@ int main(int argc, char* argv[])
 
 	//aten::visualizer::addPostProc(&bishd);
 	//aten::visualizer::addPostProc(&blitter);
-	//aten::visualizer::addPostProc(&gamma);
-	aten::visualizer::addPostProc(&tonemap);
+	aten::visualizer::addPostProc(&gamma);
+	//aten::visualizer::addPostProc(&tonemap);
 	//aten::visualizer::addPostProc(&bloom);
 
 	aten::vec3 lookfrom;
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 
 	g_scene.build();
 
-	g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
+	//g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
 
 	g_envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	//g_envmap = aten::ImageLoader::load("../../asset/harbor.hdr");

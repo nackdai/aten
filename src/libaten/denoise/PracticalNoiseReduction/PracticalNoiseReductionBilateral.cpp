@@ -1,5 +1,5 @@
 #include <vector>
-#include "denoise/PracticalNoiseReduction/bilateral.h"
+#include "denoise/PracticalNoiseReduction/PracticalNoiseReductionBilateral.h"
 #include "misc/timer.h"
 
 // NOTE

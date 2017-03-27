@@ -282,7 +282,7 @@
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.h">
       <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\bilateral.h">
+    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h">
       <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClInclude>
   </ItemGroup>
@@ -428,7 +428,7 @@
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.cpp">
       <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\bilateral.cpp">
+    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp">
       <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClCompile>
   </ItemGroup>

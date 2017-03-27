@@ -10,6 +10,80 @@
 #endif
 
 namespace aten {
+	static inline void _swap(real& v0, real& v1)
+	{
+		real vMax = std::max(v0, v1);
+		real vMin = std::min(v0, v1);
+
+		v0 = vMin;
+		v1 = vMax;
+	}
+
+	// Median filter.
+	void medianFilter(
+		const vec4* src,
+		int width, int height,
+		vec4* dst)
+	{
+		// NOTE
+		// https://www.gputechconf.jp/assets/files/1017.pdf
+
+		static const int size = 9;	// 3 x 3.
+		static const int medianPos = size / 2;
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < height; y++) {
+			real bufR[size];
+			real bufG[size];
+			real bufB[size];
+
+			for (int x = 0; x < width; x++) {
+				for (int yy = 0; yy < 3; yy++) {
+					for (int xx = 0; xx < 3; xx++) {
+						int bufPos = yy * 3 + xx;
+						
+						int imgx = aten::clamp<int>(x + xx - 1, 0, width - 1);
+						int imgy = aten::clamp<int>(y + yy - 1, 0, height - 1);
+						int imgPos = imgx + imgy * width;
+
+						bufR[bufPos] = src[imgPos].r;
+						bufG[bufPos] = src[imgPos].g;
+						bufB[bufPos] = src[imgPos].b;
+					}
+				}
+				
+#if 0
+				std::sort(bufR, bufR + size);
+				std::sort(bufG, bufG + size);
+				std::sort(bufB, bufB + size);
+
+				int pos = y * width + x;
+				dst[pos] = vec4(bufR[medianPos], bufG[medianPos], bufB[medianPos], 0);
+#else
+				real maxPixR;
+				real maxPixG;
+				real maxPixB;
+
+				for (int outer = 0; outer <= medianPos; ++outer) {
+					maxPixR = bufR[outer];
+					maxPixG = bufG[outer];
+					maxPixB = bufB[outer];
+
+					for (int inner = outer + 1; inner < size; ++inner) {
+						_swap(bufR[inner], maxPixR);
+						_swap(bufG[inner], maxPixG);
+						_swap(bufB[inner], maxPixB);
+					}	
+				}
+
+				int pos = y * width + x;
+				dst[pos] = vec4(maxPixR, maxPixG, maxPixB, 0);
+#endif
+			}
+		}	}
+
 	void PracticalNoiseReduction::operator()(
 		const vec4* src,
 		uint32_t width, uint32_t height,
@@ -17,15 +91,23 @@ namespace aten {
 	{
 		AT_PRINTF("PracticalNoiseReduction\n");
 
+#if 1
+		std::vector<vec4> median(width * height);
+		medianFilter(m_indirect, width, height, &median[0]);
+		vec4* in = &median[0];
+#else
+		vec4* in = m_indirect;
+#endif
+
 		std::vector<vec4> filtered(width * height);
 		std::vector<vec4> var_filtered(width * height);
 		std::vector<vec4> hv(width * height);
 
-		const real v_p = 8;
-		const real v_c = 0.5;
-		const real v_d = 2;
+		const real stdS = m_stdDevS;
+		const real stdC = m_stdDevC;
+		const real stdD = m_stdDevD;
 
-		const real t = 0.1;
+		const real t = m_threshold;
 
 #if 0
 		for (int y = 0; y < height; y++) {
@@ -35,7 +117,7 @@ namespace aten {
 				int pos = y * width + x;
 
 				const vec3 p0(x, y, 0);
-				vec3 c0 = color::RGBtoXYZ((vec3)m_indirect[pos]);
+				vec3 c0 = color::RGBtoXYZ((vec3)in[pos]);
 				real d0 = m_nml_depth[pos].w;
 
 				vec4 color;
@@ -54,7 +136,7 @@ namespace aten {
 
 						int p = p_y * width + p_x;
 
-						const vec4& ci = m_indirect[p];
+						const vec4& ci = in[p];
 						vec3 cc = color::RGBtoXYZ((vec3)ci);
 						real di = m_nml_depth[p].w;
 
@@ -62,9 +144,9 @@ namespace aten {
 						real l_c = (cc - c0).length();
 						real l_d = di - d0;
 
-						real g_p = aten::exp(-0.5 * l_p * l_p / (v_p * v_p));
-						real g_c = aten::exp(-0.5 * l_c * l_c / (v_c * v_c));
-						real g_d = aten::exp(-0.5 * l_d * l_d / (v_d * v_d));
+						real g_p = aten::exp(-0.5 * l_p * l_p / (stdS * stdS));
+						real g_c = aten::exp(-0.5 * l_c * l_c / (stdC * stdC));
+						real g_d = aten::exp(-0.5 * l_d * l_d / (stdD * stdD));
 
 						real weight = g_p * g_c * g_d;
 
@@ -89,9 +171,9 @@ namespace aten {
 		}
 #else
 		PracticalNoiseReductionBilateralFilter filter;
-		filter.setParam(8, 0.5, 2);
+		filter.setParam(stdS, stdC, stdD);
 		filter(
-			m_indirect, 
+			in, 
 			m_nml_depth,
 			width, height, 
 			&filtered[0],
@@ -153,7 +235,8 @@ namespace aten {
 
 				s.w = 1;
 
-				hv[pos] = s * m_indirect[pos] + (vec4(1) - s) * filtered[pos];
+				//hv[pos] = s * m_indirect[pos] + (vec4(1) - s) * filtered[pos];
+				hv[pos] = s * in[pos] + (vec4(1) - s) * filtered[pos];
 
 #if !defined(TEST_DENOISE)
 				dst[pos] = m_direct[pos] + hv[pos];

@@ -28,6 +28,19 @@ namespace aten {
 			m_nml_depth = nml_depth;
 		}
 
+		void setParams(
+			real std_dev_S,
+			real std_dev_C,
+			real std_dev_D,
+			real threshold)
+		{
+			m_stdDevS = std_dev_S;
+			m_stdDevC = std_dev_S;
+			m_stdDevD = std_dev_S;
+
+			m_threshold = threshold;
+		}
+
 	private:
 		vec4* m_direct{ nullptr };
 
@@ -35,5 +48,10 @@ namespace aten {
 		vec4* m_variance{ nullptr };
 
 		vec4* m_nml_depth{ nullptr };
+
+		real m_stdDevS{ 8 };		// standard deviation for spatial.
+		real m_stdDevC{ 0.5 };		// standard deviation for color.
+		real m_stdDevD{ 2 };		// standard deviation for depth.
+		real m_threshold{ 0.1 };
 	};
 }

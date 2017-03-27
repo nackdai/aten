@@ -1,7 +1,7 @@
 #include <vector>
-#include "denoise/PracticalNoiseReduction.h"
+#include "denoise/PracticalNoiseReduction/PracticalNoiseReduction.h"
 #include "misc/color.h"
-#include "denoise/bilateral.h"
+#include "denoise/PracticalNoiseReduction/bilateral.h"
 
 #pragma optimize( "", off )  
 

@@ -55,6 +55,9 @@
     <Filter Include="shape">
       <UniqueIdentifier>{0721ed3f-82f2-4111-8ff3-91a03315e3d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="denoise\PracticalNoiseReduction">
+      <UniqueIdentifier>{cb807cd1-c9cb-422a-bc38-5a0bda6cdd8c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -273,11 +276,14 @@
     <ClInclude Include="..\src\libaten\scene\instance.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction.h">
-      <Filter>denoise</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\denoise\nlm.h">
       <Filter>denoise</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.h">
+      <Filter>denoise\PracticalNoiseReduction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\bilateral.h">
+      <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -416,11 +422,14 @@
     <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction.cpp">
-      <Filter>denoise</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\denoise\nlm.cpp">
       <Filter>denoise</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.cpp">
+      <Filter>denoise\PracticalNoiseReduction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\bilateral.cpp">
+      <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

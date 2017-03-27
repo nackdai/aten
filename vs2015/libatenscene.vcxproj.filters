@@ -30,6 +30,9 @@
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libatenscene\SceneLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
@@ -55,6 +58,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\utility.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\SceneLoader.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

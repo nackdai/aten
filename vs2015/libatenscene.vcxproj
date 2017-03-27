@@ -24,6 +24,7 @@
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\SceneLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\picojson\picojson.h" />
@@ -34,6 +35,7 @@
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
     <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
+    <ClInclude Include="..\src\libatenscene\SceneLoader.h" />
     <ClInclude Include="..\src\libatenscene\utility.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -23,6 +23,8 @@ namespace aten {
 		"beckman",
 		"ggx",
 		"disney_brdf",
+		"oren_nayar",
+		"toon",
 	};
 
 	bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
@@ -131,20 +133,23 @@ namespace aten {
 	{
 		auto s = val.get< std::string>();
 
-		std::string pathname;
-		std::string extname;
-		std::string filename;
+		auto tex = AssetManager::getTex(s);
 
-		getStringsFromPath(
-			s,
-			pathname,
-			extname,
-			filename);
+		if (!tex) {
+			std::string pathname;
+			std::string extname;
+			std::string filename;
+
+			getStringsFromPath(
+				s,
+				pathname,
+				extname,
+				filename);
+
+			tex = ImageLoader::load(s);
+		}
 
 		aten::PolymorphicValue v;
-
-		auto tex = ImageLoader::load(s);
-
 		v.val.p = tex;
 
 		return std::move(v);
@@ -274,6 +279,8 @@ namespace aten {
 		[](Values& values) { return new MicrofacetBeckman(values); },	// beckman
 		[](Values& values) { return new MicrofacetGGX(values); },		// ggx
 		[](Values& values) { return new DisneyBRDF(values); },			// disney_brdf
+		[](Values& values) { return new OrenNayar(values); },			// oren_nayar
+		[](Values& values) { return new toon(values); },				// toon
 	};
 
 	C_ASSERT(AT_COUNTOF(g_types) == AT_COUNTOF(g_funcs));

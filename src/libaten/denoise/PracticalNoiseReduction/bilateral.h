@@ -4,68 +4,34 @@
 #include "visualizer/blitter.h"
 
 namespace aten {
-	class BilateralFilter: public visualizer::PreProc{
+	class PracticalNoiseReductionBilateralFilter {
 	public:
-		BilateralFilter() {}
-		BilateralFilter(real sigmaS, real sigmaR)
+		PracticalNoiseReductionBilateralFilter() {}
+		PracticalNoiseReductionBilateralFilter(real sigmaS, real sigmaR, real sigmaD)
 		{
-			setParam(sigmaS, sigmaR);
+			setParam(sigmaS, sigmaR, sigmaD);
 		}
 
-		virtual ~BilateralFilter() {}
+		virtual ~PracticalNoiseReductionBilateralFilter() {}
 
 	public:
-		virtual void operator()(
+		void operator()(
 			const vec4* src,
+			const vec4* nml_depth,
 			uint32_t width, uint32_t height,
-			vec4* dst) override final;
+			vec4* dst,
+			vec4* variance);
 
-		void setParam(real sigmaS, real sigmaR)
+		void setParam(real sigmaS, real sigmaR, real sigmaD)
 		{
 			m_sigmaS = sigmaS;
 			m_sigmaR = sigmaR;
-		}
-
-		void setVarianceBuffer(vec4* v)
-		{
-			m_variance = v;
+			m_sigmaD = sigmaD;
 		}
 
 	private:
 		real m_sigmaS{ 0.2 };
 		real m_sigmaR{ 0.2 };
-
-		vec4* m_variance{ nullptr };
-	};
-
-	class BilateralFilterShader : public Blitter {
-	public:
-		BilateralFilterShader() {}
-		BilateralFilterShader(real sigmaS, real sigmaR)
-		{
-			setParam(sigmaS, sigmaR);
-		}
-
-		virtual ~BilateralFilterShader() {}
-
-	public:
-		virtual void prepareRender(
-			const void* pixels,
-			bool revert) override final;
-
-		void setParam(real sigmaS, real sigmaR)
-		{
-			m_sigmaS = sigmaS;
-			m_sigmaR = sigmaR;
-		}
-
-	private:
-		real m_sigmaS{ 0.2 };
-		real m_sigmaR{ 0.2 };
-
-		static const uint32_t buffersize = 10;
-		float distW[buffersize + 1][buffersize + 1];
-
-		int m_radius{ 0 };
+		real m_sigmaD{ 0.02 };
 	};
 }

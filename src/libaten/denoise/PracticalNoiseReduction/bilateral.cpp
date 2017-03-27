@@ -1,11 +1,12 @@
 #include <vector>
-#include "visualizer/atengl.h"
-#include "denoise/bilateral.h"
+#include "denoise/PracticalNoiseReduction/bilateral.h"
 #include "misc/timer.h"
 
 // NOTE
 // https://github.com/wosugi/compressive-bilateral-filter/blob/master/CompressiveBilateralFilter/original_bilateral_filter.hpp
 // http://lcaraffa.net/posts/article-2015TIP-guided-bilateral.html
+
+//#pragma optimize( "", off )
 
 namespace aten {
 	class Sampler {
@@ -41,7 +42,16 @@ namespace aten {
 	// 色距離の重み計算.
 	static inline real kernelR(real cdist, real sigmaR)
 	{
-		auto w = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaR) * exp(-0.5f * (cdist * cdist) / (sigmaR * sigmaR));
+		//auto w = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaR) * exp(-0.5f * (cdist * cdist) / (sigmaR * sigmaR));
+		auto w = exp(-0.5f * (cdist * cdist) / (sigmaR * sigmaR));
+		return w;
+	}
+
+	// 深度の重み計算.
+	static inline real kernelD(real ddist, real sigmaD)
+	{
+		//auto w = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaD) * exp(-0.5f * (ddist * ddist) / (sigmaD * sigmaD));
+		auto w = exp(-0.5f * (ddist * ddist) / (sigmaD * sigmaD));
 		return w;
 	}
 
@@ -55,12 +65,14 @@ namespace aten {
 
 	void doBilateralFilter(
 		const vec4* src,
+		const vec4* nml_depth,
 		uint32_t width, uint32_t height,
-		real sigmaS, real sigmaR,
+		real sigmaS, real sigmaR, real sigmaD,
 		vec4* dst,
 		vec4* variance)
 	{
-		int r = int(::ceilf(4.0f * sigmaS));
+		//int r = int(::ceilf(4.0f * sigmaS));
+		int r = 3;
 
 		// ピクセル距離の重み.
 		std::vector<std::vector<real>> distW;
@@ -68,18 +80,22 @@ namespace aten {
 			distW.resize(1 + r);
 
 			// TODO
-			auto _sigmaS = sigmaS * 256;
+			//auto _sigmaS = sigmaS * 256;
+			auto _sigmaS = sigmaS;
 
 			for (int v = 0; v <= r; v++) {
 				distW[v].resize(1 + r);
 
 				for (int u = 0; u <= r; u++) {
-					distW[v][u] = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaS) * exp(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
+					//distW[v][u] = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaS) * exp(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
+					distW[v][u] = exp(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
 				}
 			}
 		}
 
 		Sampler srcSampler(const_cast<vec4*>(src), width, height);
+		Sampler depthSampler(const_cast<vec4*>(nml_depth), width, height);
+
 		Sampler dstSampler(const_cast<vec4*>(dst), width, height);
 
 		Sampler varSampler(const_cast<vec4*>(variance), width, height);
@@ -91,6 +107,7 @@ namespace aten {
 			for (int x = 0; x < width; x++) {
 				// 中心点.
 				const auto& p = srcSampler(x, y);
+				const real dc = depthSampler(x, y).w;
 
 				vec3 numer(1.0f, 1.0f, 1.0f);
 				vec3 denom(p);
@@ -112,8 +129,14 @@ namespace aten {
 						kernelR(abs(p1.g - p.g), sigmaR),
 						kernelR(abs(p1.b - p.b), sigmaR));
 
-					numer += kernelS(distW, u, 0) * (wr0 + wr1);
-					auto d = kernelS(distW, u, 0) * (wr0 * p0 + wr1 * p1);
+					const auto& d0 = depthSampler(x - u, y);
+					const auto& d1 = depthSampler(x + u, y);
+
+					const real dd0 = kernelD(d0.w - dc, sigmaD);
+					const real dd1 = kernelD(d1.w - dc, sigmaD);
+
+					numer += kernelS(distW, u, 0) * (wr0 * dd0 + wr1 * dd1);
+					auto d = kernelS(distW, u, 0) * (wr0 * p0 * dd0 + wr1 * p1 * dd1);
 					denom += d;
 					denom2 += d * d;
 				}
@@ -133,8 +156,14 @@ namespace aten {
 						kernelR(abs(p1.g - p.g), sigmaR),
 						kernelR(abs(p1.b - p.b), sigmaR));
 
-					numer += kernelS(distW, 0, v) * (wr0 + wr1);
-					auto d = kernelS(distW, 0, v) * (wr0 * p0 + wr1 * p1);
+					const auto& d0 = depthSampler(x, y - v);
+					const auto& d1 = depthSampler(x, y + v);
+
+					const real dd0 = kernelD(d0.w - dc, sigmaD);
+					const real dd1 = kernelD(d1.w - dc, sigmaD);
+
+					numer += kernelS(distW, 0, v) * (wr0 * dd0 + wr1 * dd1);
+					auto d = kernelS(distW, 0, v) * (wr0 * p0 * dd0 + wr1 * p1 * dd1);
 					denom += d;
 					denom2 += d * d;
 				}
@@ -163,89 +192,52 @@ namespace aten {
 							kernelR(abs(p11.g - p.g), sigmaR),
 							kernelR(abs(p11.b - p.b), sigmaR));
 
-						numer += kernelS(distW, u, v) * (wr00 + wr01 + wr10 + wr11);
-						auto d = kernelS(distW, u, v) * (wr00 * p00 + wr01 * p01 + wr10 * p10 + wr11 * p11);
+						const auto& d00 = depthSampler(x - u, y - v);
+						const auto& d01 = depthSampler(x - u, y + v);
+						const auto& d10 = depthSampler(x + u, y - v);
+						const auto& d11 = depthSampler(x + u, y + v);
+
+						const real dd00 = kernelD(d00.w - dc, sigmaD);
+						const real dd01 = kernelD(d01.w - dc, sigmaD);
+						const real dd10 = kernelD(d10.w - dc, sigmaD);
+						const real dd11 = kernelD(d11.w - dc, sigmaD);
+
+						numer += kernelS(distW, u, v) * (wr00 * dd00 + wr01 * dd01 + wr10 * dd10 + wr11 * dd11);
+						auto d = kernelS(distW, u, v) * (wr00 * p00 * dd00 + wr01 * p01 * dd01 + wr10 * p10 * dd10 + wr11 * p11 * dd11);
 						denom += d;
 						denom2 += d * d;
 					}
 				}
 
-				auto d = denom / numer;
-				dstSampler(x, y) = vec4(d, 1);
+				auto v = denom / numer;
+				dstSampler(x, y) = vec4(v, 1);
 
-				auto d2 = denom2 / (numer * numer);
-				d2 -= d * d;
-				varSampler.set(x, y, vec4(d2, 1));
+				auto v2 = denom2 / (numer * numer);
+				v2 -= v * v;
+				varSampler.set(x, y, vec4(v2, 1));
 			}
 		}
 	}
 
-	void BilateralFilter::operator()(
+	void PracticalNoiseReductionBilateralFilter::operator()(
 		const vec4* src,
+		const vec4* nml_depth,
 		uint32_t width, uint32_t height,
-		vec4* dst)
+		vec4* dst,
+		vec4* variance)
 	{
 		timer timer;
 		timer.begin();
 
 		doBilateralFilter(
 			src,
+			nml_depth,
 			width, height,
-			m_sigmaS, m_sigmaR,
+			m_sigmaS, m_sigmaR, m_sigmaD,
 			dst,
-			m_variance);
+			variance);
 
 		auto elapsed = timer.end();
 		AT_PRINTF("Bilateral %f[ms]\n", elapsed);
-	}
-
-	/////////////////////////////////////////////////////////
-
-	void BilateralFilterShader::prepareRender(
-		const void* pixels,
-		bool revert)
-	{
-		Blitter::prepareRender(pixels, revert);
-
-		auto hSigmaS = getHandle("sigmaS");
-		if (hSigmaS >= 0) {
-			CALL_GL_API(glUniform1f(hSigmaS, m_sigmaS));
-		}
-
-		auto hSigmaR = getHandle("sigmaR");
-		if (hSigmaR >= 0) {
-			CALL_GL_API(glUniform1f(hSigmaR, m_sigmaR));
-		}
-
-		int radius = (int)::ceilf(4.0 * m_sigmaS);
-
-		auto hRadius = getHandle("radius");
-		if (hRadius >= 0) {
-			CALL_GL_API(glUniform1i(hRadius, radius));
-		}
-
-		if (m_radius != radius) {
-			auto _sigmaS = m_sigmaS * 256;
-
-			for (int v = 0; v <= radius; v++) {
-				for (int u = 0; u <= radius; u++) {
-					distW[v][u] = 1.0f / sqrtf(2.0f * AT_MATH_PI * m_sigmaS) * expf(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
-				}
-			}
-
-			m_radius = radius;
-		}
-
-		auto hDistW = getHandle("distW");
-		if (hDistW >= 0) {
-			CALL_GL_API(glUniform1fv(hDistW, (buffersize + 1) * (buffersize + 1), distW[0]));
-		}
-
-		// TODO
-		// 入力テクスチャのサイズはスクリーンと同じ...
-		auto hTexel = getHandle("texel");
-		if (hTexel >= 0) {
-			CALL_GL_API(glUniform2f(hTexel, 1.0f / m_width, 1.0f / m_height));
-		}
 	}
 }

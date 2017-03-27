@@ -18,12 +18,12 @@ namespace aten {
 		std::vector<vec4> hv(width * height);
 
 		const real v_p = 8;
-		const real v_c = 0.1;
+		const real v_c = 0.5;
 		const real v_d = 2;
 
 		const real t = 0.1;
 
-#if 1
+#if 0
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				real sumW = 0;
@@ -84,10 +84,14 @@ namespace aten {
 			}
 		}
 #else
-		BilateralFilter filter;
-		filter.setParam(0.3, 0.01);
-		filter.setVarianceBuffer(&var_filtered[0]);
-		filter(m_indirect, width, height, &filtered[0]);
+		PracticalNoiseReductionBilateralFilter filter;
+		filter.setParam(8, 0.5, 2);
+		filter(
+			m_indirect, 
+			m_nml_depth,
+			width, height, 
+			&filtered[0],
+			&var_filtered[0]);
 #endif
 
 		for (int y = 0; y < height; y++) {
@@ -151,6 +155,7 @@ namespace aten {
 				int pos = y * width + x;
 
 				dst[pos] = m_direct[pos] + hv[pos];
+				//dst[pos] = filtered[pos];
 			}
 		}
 	}

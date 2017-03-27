@@ -225,4 +225,24 @@ namespace aten {
 		auto ret = v / v.length();
 		return std::move(ret);
 	}
+
+	inline vec4 sqrt(const vec4& v)
+	{
+		vec4 ret(
+			aten::sqrt(v.x),
+			aten::sqrt(v.y),
+			aten::sqrt(v.z),
+			aten::sqrt(v.w));
+		return std::move(ret);
+	}
+
+	inline vec4 abs(const vec4& v)
+	{
+		vec4 ret(
+			aten::abs(v.x),
+			aten::abs(v.y),
+			aten::abs(v.z),
+			aten::abs(v.w));
+		return std::move(ret);
+	}
 }

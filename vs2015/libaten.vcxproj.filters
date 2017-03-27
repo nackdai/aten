@@ -58,6 +58,9 @@
     <Filter Include="denoise\PracticalNoiseReduction">
       <UniqueIdentifier>{cb807cd1-c9cb-422a-bc38-5a0bda6cdd8c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="denoise\VirtualFlashImage">
+      <UniqueIdentifier>{f98c9a8a-4449-4f7a-8fb7-9137ac70c22d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -285,6 +288,9 @@
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h">
       <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.h">
+      <Filter>denoise\VirtualFlashImage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -431,6 +437,9 @@
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp">
       <Filter>denoise\PracticalNoiseReduction</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.cpp">
+      <Filter>denoise\VirtualFlashImage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">
@@ -471,6 +480,9 @@
     </None>
     <None Include="..\src\shader\nlm_fs.glsl">
       <Filter>shader\denoise</Filter>
+    </None>
+    <None Include="..\src\libaten\denoise\VirtualFlashImage\t_table.dat">
+      <Filter>denoise\VirtualFlashImage</Filter>
     </None>
   </ItemGroup>
 </Project>

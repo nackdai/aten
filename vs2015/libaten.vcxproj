@@ -160,6 +160,7 @@
     <ClInclude Include="..\src\libaten\denoise\nlm.h" />
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.h" />
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h" />
+    <ClInclude Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.h" />
     <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
@@ -235,6 +236,7 @@
     <ClCompile Include="..\src\libaten\denoise\nlm.cpp" />
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.cpp" />
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp" />
+    <ClCompile Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.cpp" />
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
@@ -280,6 +282,7 @@
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\src\libaten\denoise\VirtualFlashImage\t_table.dat" />
     <None Include="..\src\shader\bilateral_fs.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_2x2.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_4x4.glsl" />

@@ -308,7 +308,7 @@ namespace aten
 				willContinue = false;
 			}
 
-			if (depth < m_startDepth) {
+			if (depth < m_startDepth && !path.isTerminate) {
 				path.contrib = vec3(0);
 			}
 

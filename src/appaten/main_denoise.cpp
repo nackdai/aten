@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
@@ -38,8 +38,69 @@ static uint32_t g_threadnum = 8;
 static uint32_t g_threadnum = 1;
 #endif
 
+#define VFI
+static aten::PointLight virtualLight;
+
+#ifdef VFI
+aten::VirtualFlashImage denoiser;
+#else
+aten::PracticalNoiseReduction denoiser;
+#endif
+
 void display()
 {
+#ifdef VFI
+	aten::vec4* image = &g_directBuffer[0];
+	aten::vec4* varImage = &g_indirectBuffer[0];
+	aten::vec4* flash = &g_varIndirectBuffer[0];
+	aten::vec4* varFlash = &g_nml_depth_Buffer[0];
+
+	{
+		aten::Destination dst;
+		{
+			dst.width = WIDTH;
+			dst.height = HEIGHT;
+			dst.maxDepth = 6;
+			dst.russianRouletteDepth = 3;
+			dst.startDepth = 0;
+			dst.sample = 16;
+			dst.mutation = 10;
+			dst.mltNum = 10;
+			dst.buffer = image;
+			dst.variance = varImage;
+		}
+
+		g_pathtracer.setVirtualLight(nullptr, aten::vec3(0));
+		g_pathtracer.render(dst, &g_scene, &g_camera);
+	}
+
+	{
+		aten::Destination dst;
+		{
+			dst.width = WIDTH;
+			dst.height = HEIGHT;
+			dst.maxDepth = 6;
+			dst.russianRouletteDepth = 3;
+			dst.startDepth = 0;
+			dst.sample = 16;
+			dst.mutation = 10;
+			dst.mltNum = 10;
+			dst.buffer = flash;
+			dst.variance = varFlash;
+		}
+
+		virtualLight.setPos(g_camera.getPos());
+		virtualLight.setLe(aten::vec3(36.0, 36.0, 36.0) * 2);
+		g_pathtracer.setVirtualLight(&virtualLight, g_camera.getDir());
+		g_pathtracer.render(dst, &g_scene, &g_camera);
+	}
+
+	denoiser.setParam(
+		16,
+		varImage, flash, varFlash);
+
+	aten::visualizer::render(image, g_camera.needRevert());
+#else
 	{
 		aten::Destination dst;
 		{
@@ -85,7 +146,14 @@ void display()
 		g_geotracer.render(dst, &g_scene, &g_camera);
 	}
 
+	denoiser.setBuffers(
+		&g_directBuffer[0],
+		&g_indirectBuffer[0],
+		&g_varIndirectBuffer[0],
+		&g_nml_depth_Buffer[0]);
+
 	aten::visualizer::render(&g_indirectBuffer[0], g_camera.needRevert());
+#endif
 }
 
 int main(int argc, char* argv[])
@@ -98,13 +166,6 @@ int main(int argc, char* argv[])
 	aten::window::init(WIDTH, HEIGHT, TITLE);
 
 	aten::visualizer::init(WIDTH, HEIGHT);
-
-	aten::PracticalNoiseReduction denoiser;
-	denoiser.setBuffers(
-		&g_directBuffer[0],
-		&g_indirectBuffer[0],
-		&g_varIndirectBuffer[0],
-		&g_nml_depth_Buffer[0]);
 
 	//aten::BilateralFilter filter;
 	//aten::NonLocalMeanFilter filter;

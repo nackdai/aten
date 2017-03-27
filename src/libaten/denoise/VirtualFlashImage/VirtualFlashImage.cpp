@@ -279,6 +279,7 @@ namespace aten {
 		vec4* dst)
 	{
 		AT_ASSERT(m_numSamples > 0);
+		AT_ASSERT(m_variance);
 		AT_ASSERT(m_flash);
 		AT_ASSERT(m_varFlash);
 
@@ -290,7 +291,7 @@ namespace aten {
 			for (int x = 0; x < width; x++) {
 				auto pos = y * width + x;
 
-				stdSrc[pos] = aten::sqrt(aten::abs(src[pos]));
+				stdSrc[pos] = aten::sqrt(aten::abs(m_variance[pos]));
 				stdFlash[pos] = aten::sqrt(aten::abs(m_varFlash[pos]));
 			}
 		}

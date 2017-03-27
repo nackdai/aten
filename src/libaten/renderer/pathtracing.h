@@ -23,6 +23,12 @@ namespace aten
 			m_lightDir = dir;
 		}
 
+		void setVirtualLight(PointLight* light, const vec3& dir)
+		{
+			m_virtualLight = light;
+			m_lightDir = dir;
+		}
+
 	protected:
 		struct Path {
 			vec3 contrib{ vec3(0) };

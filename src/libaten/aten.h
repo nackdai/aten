@@ -10,6 +10,7 @@
 #include "denoise/bilateral.h"
 
 #include "denoise/PracticalNoiseReduction/PracticalNoiseReduction.h"
+#include "denoise/VirtualFlashImage/VirtualFlashImage.h"
 
 #include "material/emissive.h"
 #include "material/lambert.h"

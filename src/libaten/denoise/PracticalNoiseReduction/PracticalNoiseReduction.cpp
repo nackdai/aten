@@ -10,6 +10,7 @@
 #endif
 
 namespace aten {
+#if 0
 	static inline void _swap(real& v0, real& v1)
 	{
 		real vMax = std::max(v0, v1);
@@ -20,7 +21,7 @@ namespace aten {
 	}
 
 	// Median filter.
-	void medianFilter(
+	static void medianFilter(
 		const vec4* src,
 		int width, int height,
 		vec4* dst)
@@ -82,7 +83,61 @@ namespace aten {
 				dst[pos] = vec4(maxPixR, maxPixG, maxPixB, 0);
 #endif
 			}
-		}	}
+		}
+	}
+#else
+	static void gaussianFilter(
+		vec4 *_in,
+		vec4 *_out,
+		int width, int height,
+		int filter_size,
+		real std_d)
+	{
+		// ガウスフィルタ係数.
+		// g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
+		real std_d2 = 2.0f * std_d * std_d;
+
+		int halfWindowSize = filter_size / 2;
+
+		for (int cy = 0; cy < height; cy++) {
+			for (int cx = 0; cx < width; cx++) {
+				int cIdx = cy * width + cx;
+
+				// 計算範囲ウインドウ開始位置.
+				int startWindow_x = std::max(0, cx - halfWindowSize);
+				int startWindow_y = std::max(0, cy - halfWindowSize);
+
+				// 計算範囲ウインドウ終了位置.
+				int endWindow_x = std::min(width - 1, cx + halfWindowSize);
+				int endWindow_y = std::min(height - 1, cy + halfWindowSize);
+
+				real sumWeight = 0.0;
+
+				// 出力バッファ初期化.
+				_out[cIdx] = vec4(0);
+
+				for (int iy = startWindow_y; iy <= endWindow_y; ++iy) {
+					for (int ix = startWindow_x; ix <= endWindow_x; ++ix) {
+						int idx = iy * width + ix;
+
+						// ピクセル距離の２乗.
+						real imageDist = (real)(cx - ix) * (cx - ix) + (cy - iy) * (cy - iy);
+
+						// ガウスフィルタ.
+						// g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
+						real weight = aten::exp(-imageDist / std_d2);
+
+						_out[cIdx] += weight * _in[idx];
+
+						sumWeight += weight;
+					}
+				}
+
+				_out[cIdx] /= sumWeight;
+			}
+		}
+	}
+#endif
 
 	void PracticalNoiseReduction::operator()(
 		const vec4* src,
@@ -91,10 +146,25 @@ namespace aten {
 	{
 		AT_PRINTF("PracticalNoiseReduction\n");
 
+		const real stdS = m_stdDevS;
+		const real stdC = m_stdDevC;
+		const real stdD = m_stdDevD;
+
+		const real t = m_threshold;
+
 #if 1
-		std::vector<vec4> median(width * height);
-		medianFilter(m_indirect, width, height, &median[0]);
-		vec4* in = &median[0];
+		std::vector<vec4> boxfilter(width * height);
+#if 0
+		medianFilter(m_indirect, width, height, &boxfilter[0]);
+#else
+		gaussianFilter(
+			m_indirect,
+			&boxfilter[0],
+			width, height,
+			3,
+			stdS);
+#endif
+		vec4* in = &boxfilter[0];
 #else
 		vec4* in = m_indirect;
 #endif
@@ -102,12 +172,6 @@ namespace aten {
 		std::vector<vec4> filtered(width * height);
 		std::vector<vec4> var_filtered(width * height);
 		std::vector<vec4> hv(width * height);
-
-		const real stdS = m_stdDevS;
-		const real stdC = m_stdDevC;
-		const real stdD = m_stdDevD;
-
-		const real t = m_threshold;
 
 #if 0
 		for (int y = 0; y < height; y++) {

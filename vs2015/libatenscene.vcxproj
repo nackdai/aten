@@ -33,7 +33,6 @@
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
-    <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
     <ClInclude Include="..\src\libatenscene\SceneLoader.h" />
     <ClInclude Include="..\src\libatenscene\utility.h" />

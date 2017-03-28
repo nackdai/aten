@@ -39,7 +39,7 @@ namespace aten
 	{
 		object* obj = AssetManager::getObj(tag);
 		if (obj) {
-			AT_PRINTF("There is same tag object. [%s]\n", tag);
+			AT_PRINTF("There is same tag object. [%s]\n", tag.c_str());
 			return obj;
 		}
 

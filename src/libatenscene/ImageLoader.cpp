@@ -90,7 +90,7 @@ namespace aten {
 		texture* tex = AssetManager::getTex(tag);
 
 		if (tex) {
-			AT_PRINTF("There is same tag texture. [%s]\n", tag);
+			AT_PRINTF("There is same tag texture. [%s]\n", tag.c_str());
 			return tex;
 		}
 

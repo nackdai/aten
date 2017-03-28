@@ -48,36 +48,15 @@ namespace aten {
 		return false;
 	}
 
-	material* MaterialLoader::load(std::string path)
-	{
-		std::string pathname;
-		std::string extname;
-		std::string filename;
-
-		getStringsFromPath(
-			path,
-			pathname,
-			extname,
-			filename);
-
-		std::string fullpath = path;
-		if (!g_base.empty()) {
-			fullpath = g_base + "/" + fullpath;
-		}
-
-		auto mtrl = load(filename, fullpath);
-
-		return mtrl;
-	}
-
 	// NOTE
 	// Format
 	// {
-	//		<material_type> [
+	//		<tag> : {
 	//			<param_name> : <value>
-	//		]
+	//		}
 	// }
 	// param_name
+	//  - type : material type [string]. If type is not specified, default type is "lambert".
 	//  - color : base color, emissive color, albedo color etc... [float3]
 	//	- albedomap : albedo texture [string]
 	//  - normalmap : normal texture [string]
@@ -131,23 +110,19 @@ namespace aten {
 	template <>
 	static aten::PolymorphicValue getValue<texture*>(picojson::value& val)
 	{
-		auto s = val.get< std::string>();
+		auto s = val.get<std::string>();
 
-		auto tex = AssetManager::getTex(s);
+		std::string pathname;
+		std::string extname;
+		std::string filename;
 
-		if (!tex) {
-			std::string pathname;
-			std::string extname;
-			std::string filename;
+		getStringsFromPath(
+			s,
+			pathname,
+			extname,
+			filename);
 
-			getStringsFromPath(
-				s,
-				pathname,
-				extname,
-				filename);
-
-			tex = ImageLoader::load(s);
-		}
+		auto tex = ImageLoader::load(s);
 
 		aten::PolymorphicValue v;
 		v.val.p = tex;
@@ -192,19 +167,17 @@ namespace aten {
 		std::pair<std::string, _MtrlParamType>("clearcoatGloss", _MtrlParamType::Double),
 	};
 
-	material* MaterialLoader::load(std::string tag, std::string path)
+	void MaterialLoader::load(const std::string& path)
 	{
-		// Check if there is same name material.
-		auto mtrl = AssetManager::getMtrl(tag);
-		if (mtrl) {
-			AT_PRINTF("There is same tag material. [%s]\n", tag);
-			return mtrl;
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
 		}
 
 		std::vector<char> filechars;
 
 		// Read json text.
-		FILE* fp = fopen(path.c_str(), "rt");
+		FILE* fp = fopen(fullpath.c_str(), "rt");
 		{
 			fseek(fp, 0, SEEK_END);
 			auto size = ftell(fp);
@@ -216,58 +189,85 @@ namespace aten {
 
 		std::string strJson(&filechars[0]);
 
+		onLoad(strJson);
+	}
+
+	void MaterialLoader::onLoad(const std::string& strJson)
+	{
 		// Parse json.
 		picojson::value json;
 		auto err = picojson::parse(json, strJson);
 
 		if (err.empty()) {
-			auto& obj = json.get<picojson::object>();
+			auto& objs = json.get<picojson::object>();
 
-			auto it = obj.begin();
-			auto mtrlName = it->first;
+			for (auto it = objs.begin(); it != objs.end(); it++) {
+				auto mtrlName = it->first;
 
-			auto& params = obj[mtrlName].get<picojson::object>();
+				// Check if there is same name material.
+				auto mtrl = AssetManager::getMtrl(mtrlName);
 
-			Values mtrlValues;
-			
-			// Traverse parameters.
-			for (auto it = params.begin(); it != params.end(); it++) {
-				auto paramName = it->first;
-				auto& jsonVal = it->second;
-
-				// Get parameter type by parameter name.
-				auto itParamType = g_paramtypes.find(paramName);
-
-				if (itParamType != g_paramtypes.end()) {
-					auto paramType = itParamType->second;
-
-					auto funcGetValue = g_funcGetValueFromJson[paramType];
-
-					// Get value from json.
-					auto value = funcGetValue(jsonVal);
-
-					mtrlValues.add(paramName, value);
+				if (mtrl) {
+					AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
 				}
 				else {
-					AT_ASSERT(false);
-					AT_PRINTF("%s is not suppoorted in %s\n", paramName, mtrlName);
+					auto& params = objs[mtrlName].get<picojson::object>();
+
+					// Search material type.
+					std::string mtrlType;
+					Values mtrlValues;
+
+					// Traverse parameters.
+					for (auto it = params.begin(); it != params.end(); it++) {
+						auto paramName = it->first;
+						auto& jsonVal = it->second;
+
+						if (paramName == "type") {
+							mtrlType = jsonVal.get<std::string>();
+						}
+						else {
+							// Get parameter type by parameter name.
+							auto itParamType = g_paramtypes.find(paramName);
+
+							if (itParamType != g_paramtypes.end()) {
+								auto paramType = itParamType->second;
+
+								auto funcGetValue = g_funcGetValueFromJson[paramType];
+
+								// Get value from json.
+								auto value = funcGetValue(jsonVal);
+
+								mtrlValues.add(paramName, value);
+							}
+							else {
+								AT_ASSERT(false);
+								AT_PRINTF("[%s] is not suppoorted in [%s]\n", paramName.c_str(), mtrlName.c_str());
+							}
+						}
+					}
+
+					if (mtrlType.empty()) {
+						AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
+						mtrlType = "lambert";
+					}
+
+					// Create material;
+					mtrl = create(mtrlType, mtrlValues);
+
+					if (mtrl) {
+						AssetManager::registerMtrl(mtrlName, mtrl);
+					}
+					else {
+						AT_ASSERT(false);
+						AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
+					}
 				}
-			}
-
-			// Create material;
-			mtrl = create(mtrlName, mtrlValues);
-
-			if (mtrl) {
-				AssetManager::registerMtrl(tag, mtrl);
 			}
 		}
 		else {
 			AT_ASSERT(false);
 			AT_PRINTF("Json parse err [%s]\n", err.c_str());
 		}
-
-		AT_ASSERT(mtrl);
-		return mtrl;
 	}
 
 	MaterialLoader::MaterialCreator g_funcs[] = {

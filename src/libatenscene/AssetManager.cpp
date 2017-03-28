@@ -30,7 +30,7 @@ namespace aten {
 
 		auto it = mapAsset.find(name);
 		if (it != mapAsset.end()) {
-			AT_PRINTF("Registered already [%s] (%s)\n", name, AssetTypeName[type]);
+			AT_PRINTF("Registered already [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
 			return false;
 		}
 
@@ -49,7 +49,7 @@ namespace aten {
 
 		if (it == mapAsset.end()) {
 			//AT_ASSERT(false);
-			AT_PRINTF("Asset is not registered [%s] (%s)\n", name, AssetTypeName[type]);
+			AT_PRINTF("Asset is not registered [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
 			return Asset();
 		}
 

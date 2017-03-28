@@ -51,9 +51,6 @@
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libatenscene\MaterialLoaderr.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libatenscene\ObjLoader.h">
       <Filter>include</Filter>
     </ClInclude>

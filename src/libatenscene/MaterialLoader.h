@@ -15,10 +15,10 @@ namespace aten {
 
 		static bool addCreator(std::string type, MaterialCreator creator);
 
-		static material* load(std::string path);
-		static material* load(std::string tag, std::string path);
+		static void load(const std::string& path);
 
 	private:
+		static void onLoad(const std::string& strJson);
 		static material* create(std::string type, Values& values);
 	};
 }

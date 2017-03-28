@@ -22,7 +22,7 @@ static const aten::real ttable[][6] = {
 };
 
 namespace aten {
-	void gaussianFilter(
+	static void gaussianFilter(
 		int cx, int cy,
 		vec4 *_in,
 		vec4 *_out, 

@@ -153,18 +153,18 @@ namespace aten {
 		const real t = m_threshold;
 
 #if 1
-		std::vector<vec4> boxfilter(width * height);
+		std::vector<vec4> prefilter(width * height);
 #if 0
-		medianFilter(m_indirect, width, height, &boxfilter[0]);
+		medianFilter(m_indirect, width, height, &prefilter[0]);
 #else
 		gaussianFilter(
 			m_indirect,
-			&boxfilter[0],
+			&prefilter[0],
 			width, height,
 			3,
 			stdS);
 #endif
-		vec4* in = &boxfilter[0];
+		vec4* in = &prefilter[0];
 #else
 		vec4* in = m_indirect;
 #endif

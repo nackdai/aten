@@ -2,8 +2,8 @@
   "textures": {
     "albedomap": "earth.bmp"
   },
-  "maetrials": {
-    "test": "material.json"
+  "materials": {
+    "path": "material.json"
   },
   "objects": {
     "teapot": "teapot.obj"

@@ -16,65 +16,71 @@ namespace aten
 	// {
 	//		"textures" : {
 	//			<tag> : <path>
-	//		}
+	//		},
 	//		"materials" : {
-	//			<tag> : <path>
-	//		}
+	//			"path" : <path>,
+	//			<tag> : {
+	//				<param_name> : <value>
+	//			}
+	//		},
 	//		"objects" : {
 	//			<tag> : <path>
-	//		}
+	//		},
 	//		"scene" : {
 	//			"config" : {
-	//				"width" : <width_of_resolution>
-	//				"height" : <height_of_resolution>
-	//				"renderer" {
+	//				"width" : <width_of_resolution>,
+	//				"height" : <height_of_resolution>,
+	//				"renderer" : {
 	//					"type" : <renderer_type>
 	//					"spp" : <number_of_samples>
 	//					"mutation" : <number_of_mutation>
 	//					"mlt" : <number_of_mlt>
 	//					"depth" : <max_depth>
 	//					"rrdepth" : <depth_of_russian_roulette>
-	//				}
-	//				"bg" : <envmap_tag> or [<r>, <g>, <b>]
+	//				},
+	//				"bg" : <envmap_tag> or [<r>, <g>, <b>],
 	//				"preproc" : {
-	//					<preproc_tag>
-	//				}
+	//					<preproc_tag>, ...
+	//				},
 	//				"postproc" : {
-	//					<postproc_tag>
-	//				}
-	//			]
+	//					<postproc_tag>, ...
+	//				},
+	//			},
 	//			<object name> : {
-	//				"obj" : <object_tag>
-	//				"trans" : [<x>, <y>, <z>]
-	//				"scale" : <scale>
-	//				"rotate" : [<x>, <y>, <z>]
+	//				"obj" : <object_tag>,
+	//				"trans" : [<x>, <y>, <z>],
+	//				"scale" : <scale>,
+	//				"rotate" : [<x>, <y>, <z>],
 	//				"material" : <material_tag>
 	//			}
 	//		]
 	// }
 
-	using AssetInfoMap = std::map<std::string, std::string>;
+	struct AssetInfo {
+		std::string tag;
+		std::string info;
+	};
 
-	static AssetInfoMap g_matrlpaths;
-	static AssetInfoMap g_objpaths;
-	static AssetInfoMap g_texturepaths;
+	using AssetInfoMap = std::vector<AssetInfo>;
 
-	void readAssetInfo(AssetInfoMap& assetPaths, picojson::object& infos)
+	static AssetInfoMap g_mtrlInfos;
+	static AssetInfoMap g_objInfos;
+	static AssetInfoMap g_textureInfos;
+
+	void readAssetInfo(AssetInfoMap& assetInfos, picojson::object& infos)
 	{	
 		for (auto it = infos.begin(); it != infos.end(); it++) {
-			auto tag = it->first;
+			assetInfos.push_back(AssetInfo());
+			AssetInfo& info = assetInfos[assetInfos.size() - 1];
+
+			info.tag = it->first;
+
 			auto& jsonVal = it->second;
-
-			if (assetPaths.find(tag) != assetPaths.end()) {
-				// Not registered.
-				auto path = jsonVal.get< std::string>();
-
-				assetPaths.insert(std::pair<std::string, std::string>(tag, path));
-			}
+			info.info = jsonVal.get<std::string>();			
 		}
 	}
 
-	struct ScenObjInfo {
+	struct SceneObjInfo {
 		std::string objtag;
 		vec3 trans;
 		vec3 scale;
@@ -82,18 +88,53 @@ namespace aten
 		std::string mtrltag;
 	};
 
-	std::vector<ScenObjInfo> g_sceneObjInfos;
+	std::vector<SceneObjInfo> g_sceneObjInfos;
 
-	void readSceneInfo(picojson::object& infos)
+	void readRendererInfo(
+		SceneLoader::SceneInfo& info,
+		picojson::object& objs)
 	{
-		for (auto it = infos.begin(); it != infos.end(); it++) {
+		for (auto it = objs.begin(); it != objs.end(); it++) {
+			auto name = it->first;
+			auto& jsonVal = it->second;
+
+			// Convert to lower.
+			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+			if (name == "type") {
+				info.rendererType = jsonVal.get<std::string>();
+				std::transform(info.rendererType.begin(), info.rendererType.end(), info.rendererType.begin(), ::tolower);
+			}
+			else if (name == "spp") {
+				info.dst.sample = (int)jsonVal.get<double>();
+			}
+			else if (name == "mutation") {
+				info.dst.mutation = (int)jsonVal.get<double>();
+			}
+			else if (name == "mlt") {
+				info.dst.mltNum = (int)jsonVal.get<double>();
+			}
+			else if (name == "depth") {
+				info.dst.maxDepth = (int)jsonVal.get<double>();
+			}
+			else if (name == "rrdepth") {
+				info.dst.russianRouletteDepth = (int)jsonVal.get<double>();
+			}
+		}
+	}
+
+	void readSceneInfo(
+		SceneLoader::SceneInfo& info,
+		picojson::object& objs)
+	{
+		for (auto it = objs.begin(); it != objs.end(); it++) {
 			auto name = it->first;
 
 			// Convert to lower.
 			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 			if (name == "config") {
-				auto configs = infos["config"].get<picojson::object>();
+				auto configs = objs["config"].get<picojson::object>();
 
 				for (auto it = configs.begin(); it != configs.end(); it++) {
 					auto paramName = it->first;
@@ -103,10 +144,14 @@ namespace aten
 					std::transform(paramName.begin(), paramName.end(), paramName.begin(), ::tolower);
 
 					if (paramName == "width") {
+						info.dst.width = (int)jsonVal.get<double>();
 					}
 					else if (paramName == "height") {
+						info.dst.height = (int)jsonVal.get<double>();
 					}
 					else if (paramName == "renderer") {
+						auto& rendererObjs = jsonVal.get<picojson::object>();
+						readRendererInfo(info, rendererObjs);
 					}
 					else if (paramName == "bg") {
 					}
@@ -122,7 +167,7 @@ namespace aten
 		}
 	}
 
-	scene* SceneLoader::load(const std::string& path)
+	SceneLoader::SceneInfo SceneLoader::load(const std::string& path)
 	{
 		std::string fullpath = path;
 		if (!g_base.empty()) {
@@ -148,6 +193,8 @@ namespace aten
 		picojson::value json;
 		auto err = picojson::parse(json, strJson);
 
+		SceneInfo info;
+
 		if (err.empty()) {
 			auto params = json.get<picojson::object>();
 
@@ -160,16 +207,16 @@ namespace aten
 				std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 				if (name == "materials") {
-					readAssetInfo(g_matrlpaths, values);
+					readAssetInfo(g_mtrlInfos, values);
 				}
 				else if (name == "textures") {
-					readAssetInfo(g_texturepaths, values);
+					readAssetInfo(g_textureInfos, values);
 				}
 				else if (name == "objects") {
-					readAssetInfo(g_objpaths, values);
+					readAssetInfo(g_objInfos, values);
 				}
 				else if (name == "scene") {
-
+					readSceneInfo(info, values);
 				}
 				else {
 					// TODO
@@ -179,8 +226,8 @@ namespace aten
 		}
 
 		// TODO
-		scene* scene = new aten::AcceledScene<aten::bvh>();
+		info.scene = new aten::AcceledScene<aten::bvh>();
 
-		return scene;
+		return std::move(info);
 	}
 }

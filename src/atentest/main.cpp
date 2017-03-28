@@ -18,4 +18,6 @@ int main(int argc, char* argv[])
 
 	auto mtrl2 = aten::AssetManager::getMtrl("test3");
 	AT_ASSERT(mtrl2);
+
+	auto info = aten::SceneLoader::load("scene.json");
 }

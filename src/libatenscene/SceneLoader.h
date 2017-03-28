@@ -12,6 +12,14 @@ namespace aten
 	public:
 		static void setBasePath(const std::string& base);
 
-		static scene* load(const std::string& path);
+		struct SceneInfo {
+			scene* scene{ nullptr };
+			aten::Destination dst;
+			std::string rendererType;
+			std::vector<std::string> preprocs;
+			std::vector<std::string> postprocs;
+		};
+
+		static SceneInfo load(const std::string& path);
 	};
 }

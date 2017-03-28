@@ -4,6 +4,8 @@
 
 namespace aten {
 	class MaterialLoader {
+		friend class SceneLoader;
+
 	private:
 		MaterialLoader();
 		~MaterialLoader();

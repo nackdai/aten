@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
@@ -50,7 +50,7 @@ void display()
 		dst.maxDepth = 6;
 		dst.russianRouletteDepth = 3;
 		dst.startDepth = 0;
-		dst.sample = 40;
+		dst.sample = 10;
 		dst.mutation = 10;
 		dst.mltNum = 10;
 		dst.buffer = &g_buffer[0];

@@ -63,6 +63,11 @@ namespace aten
 			return std::move(m_aabb);
 		}
 
+		virtual vec3 getRandomPosOn(sampler* sampler) const override final
+		{
+			return m_obj->getRandomPosOn(sampler);
+		}
+
 	private:
 		aabb transformBoundingBox()
 		{

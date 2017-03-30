@@ -2,7 +2,8 @@
 
 void CornellBoxScene::makeScene(aten::scene* scene)
 {
-	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
+	//auto emit = new aten::emissive(aten::vec3(36, 36, 36));
+	auto emit = new aten::emissive(aten::vec3(3, 3, 3));
 
 	auto light = new aten::sphere(
 		aten::vec3(50.0, 90.0, 81.6),
@@ -38,7 +39,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 
 	//auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
-#define DEFALT	(1)
+//#define DEFALT	(1)
 
 #if DEFALT
 	// —Î‹….
@@ -83,11 +84,13 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 #else
 	aten::AssetManager::registerMtrl(
 		"m1",
-		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		//new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		emit);
 
 	aten::AssetManager::registerMtrl(
 		"Material.001",
-		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		//new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		emit);
 
 	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
@@ -107,7 +110,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 #endif
 
 #if 1
-	scene->add(light);
+	//scene->add(light);
 	scene->add(left);
 	scene->add(right);
 	scene->add(wall);
@@ -117,7 +120,8 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(mirror);
 	scene->add(glass);
 
-	aten::Light* l = new aten::AreaLight(light, emit->color());
+	//aten::Light* l = new aten::AreaLight(light, emit->color());
+	aten::Light* l = new aten::AreaLight(glass, emit->color());
 
 	scene->addLight(l);
 #endif

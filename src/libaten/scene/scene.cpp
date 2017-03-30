@@ -13,8 +13,14 @@ namespace aten {
 		auto lightobj = light->getLightObject();
 
 		if (lightobj) {
-			if (isHit && rec.obj == lightobj) {
-				return true;
+			// Area Light.
+			if (isHit) {
+				hitrecord tmpRec;
+				if (light->hit(r, t_min, t_max, tmpRec)) {
+					if (rec.obj == tmpRec.obj) {
+						return true;
+					}
+				}
 			}
 		}
 

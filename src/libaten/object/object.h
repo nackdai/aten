@@ -31,11 +31,14 @@ namespace aten
 			return std::move(bbox);
 		}
 
+		virtual vec3 getRandomPosOn(sampler* sampler) const override;
+
 		void build(vertex* v0, vertex* v1, vertex* v2);
 	
 		uint32_t idx[3];
 		vertex* vtx[3];
 		aabb bbox;
+		real area;
 
 		shape* parent{ nullptr };
 	};
@@ -51,10 +54,19 @@ namespace aten
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
+
+		virtual vec3 getRandomPosOn(sampler* sampler) const override final
+		{
+			auto r = sampler->nextSample();
+			int idx = r * faces.size();
+			auto face = faces[idx];
+			return face->getRandomPosOn(sampler);
+		}
 		
 		std::vector<face*> faces;
 		std::vector<vertex> vertices;
 		material* mtrl{ nullptr };
+		real area;
 
 	private:
 		bvhnode m_node;
@@ -73,16 +85,25 @@ namespace aten
 		bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec)
-		{
-			bool isHit = m_node.hit(r, t_min, t_max, rec);
-			return isHit;
-		}
+			hitrecord& rec);
 
 	private:
 		void build()
 		{
 			m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
+
+			m_area = 0;
+			for (const auto s : shapes) {
+				m_area += s->area;
+			}
+		}
+
+		vec3 getRandomPosOn(sampler* sampler) const
+		{
+			auto r = sampler->nextSample();
+			int idx = r * shapes.size();
+			auto shape = shapes[idx];
+			return shape->getRandomPosOn(sampler);
 		}
 
 	public:
@@ -91,5 +112,6 @@ namespace aten
 
 	private:
 		bvhnode m_node;
+		real m_area;
 	};
 }

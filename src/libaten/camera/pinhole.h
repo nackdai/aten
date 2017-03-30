@@ -20,29 +20,21 @@ namespace aten {
 
 			m_aspect = width / (real)height;
 
-			real half_height = aten::tan(theta / 2);	// (h/2)/d
-			real half_width = m_aspect * half_height;	// (h/2)/d * w/h = (w/2)/d
-
-			real flocalLength = real(1);
+			real half_height = aten::tan(theta / 2);
+			real half_width = m_aspect * half_height;
 
 			m_origin = origin;
 
 			// カメラ座標ベクトル.
 			m_dir = normalize(lookat - origin);
-			m_right = normalize(cross(up, m_dir));
-			m_up = cross(m_dir, m_right);
+			m_right = normalize(cross(m_dir, up));
+			m_up = cross(m_right, m_dir);
 
-			// NOTE
-			// half_width * screenDist = ((w/2)/d) * d = w/2
-			// half_height * screenDist = ((h/2)/d) * d = h/2
+			m_center = origin + m_dir;
 
-			// スクリーンの左下位置.
-			//m_LowerLeftCorner = origin - half_width * screenDist * m_right - half_height * screenDist * m_up + screenDist * m_dir;
-			m_LowerLeftCorner = origin + half_width * flocalLength * m_right - half_height * flocalLength * m_up + flocalLength * m_dir;
-
-			// 左下基準としたスクリーンのUVベクトル.
-			m_u = 2 * half_width * flocalLength * -m_right;
-			m_v = 2 * half_height * flocalLength * m_up;
+			// スクリーンのUVベクトル.
+			m_u = half_width * m_right;
+			m_v = half_height * m_up;
 		}
 
 		virtual CameraSampleResult sample(
@@ -51,8 +43,12 @@ namespace aten {
 		{
 			CameraSampleResult result;
 
+			// [0, 1] -> [-1, 1]
+			s = 2 * s - 1;
+			t = 2 * t - 1;
+
 			auto screenPos = s * m_u + t * m_v;
-			screenPos = screenPos + m_LowerLeftCorner;
+			screenPos = screenPos + m_center;
 
 			auto dirToScr = screenPos - m_origin;
 
@@ -76,7 +72,7 @@ namespace aten {
 		vec3 m_origin;
 
 		real m_aspect;
-		vec3 m_LowerLeftCorner;
+		vec3 m_center;
 
 		vec3 m_u;
 		vec3 m_v;

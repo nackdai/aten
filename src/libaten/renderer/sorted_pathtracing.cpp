@@ -39,6 +39,10 @@ namespace aten
 					real v = real(y + sampler->nextSample()) / real(height);
 
 					path.camsample = camera->sample(u, v, sampler);
+					path.camSensitivity = camera->getSensitivity(
+						path.camsample.posOnImageSensor,
+						path.camsample.posOnLens);
+
 					path.ray = path.camsample.r;
 
 					path.x = x;
@@ -109,7 +113,7 @@ namespace aten
 				PathTracing::shadeMiss(scene, depth, path);
 
 				auto idx = path.y * m_width + path.x;
-				dst[idx] += vec4(path.contrib, 1);
+				dst[idx] += path.camSensitivity * vec4(path.contrib, 1);
 
 				path.isAlive = false;
 				path.needWrite = false;
@@ -141,7 +145,7 @@ namespace aten
 
 			auto sampler = path.sampler;
 
-			bool willContinue = PathTracing::shade(sampler, scene, cam, depth, path);
+			bool willContinue = PathTracing::shade(sampler, scene, cam, path.camsample, depth, path);
 
 			if (!willContinue) {
 				path.isAlive = false;
@@ -161,7 +165,7 @@ namespace aten
 			auto& path = paths[i];
 
 			if (path.needWrite) {
-				dst[i] += vec4(path.contrib, 1);
+				dst[i] += path.camSensitivity * vec4(path.contrib, 1);
 
 				path.needWrite = false;
 			}

@@ -32,14 +32,18 @@ namespace aten {
 			int& x, int& y) const;
 
 		virtual real getPdfImageSensorArea(
-			const vec3& hitpoint,
-			const vec3& hitpointNml) const override final;
+			const vec3& hitPoint,
+			const vec3& hitpointNml,
+			const vec3& posOnImageSensor,
+			const vec3& posOnLens,
+			const vec3& posOnObjectPlane) const override final;
 
 		virtual real getSensitivity(
 			const vec3& posOnImagesensor,
 			const vec3& posOnLens) const override final;
 
 		virtual real getWdash(
+			const vec3& hitPoint,
 			const vec3& posOnImageSensor,
 			const vec3& posOnLens,
 			const vec3& posOnObjectPlane) const override final;

@@ -24,8 +24,11 @@ namespace aten {
 			sampler* sampler) const = 0;
 
 		virtual real getPdfImageSensorArea(
-			const vec3& hitpoint,
-			const vec3& hitpointNml) const
+			const vec3& hitPoint,
+			const vec3& hitpointNml,
+			const vec3& posOnImageSensor,
+			const vec3& posOnLens,
+			const vec3& posOnObjectPlane) const
 		{
 			return real(1);
 		}
@@ -38,6 +41,7 @@ namespace aten {
 		}
 
 		virtual real getWdash(
+			const vec3& hitPoint,
 			const vec3& posOnImageSensor,
 			const vec3& posOnLens,
 			const vec3& posOnObjectPlane) const

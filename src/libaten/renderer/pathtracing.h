@@ -62,6 +62,7 @@ namespace aten
 			sampler* sampler,
 			scene* scene,
 			camera* cam,
+			CameraSampleResult& camsample,
 			int depth,
 			Path& path);
 

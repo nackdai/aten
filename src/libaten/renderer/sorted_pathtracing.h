@@ -17,6 +17,7 @@ namespace aten
 	private:
 		struct Path : public PathTracing::Path {
 			CameraSampleResult camsample;
+			real camSensitivity;
 
 			uint32_t x, y;
 

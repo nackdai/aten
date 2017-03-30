@@ -286,11 +286,6 @@ namespace aten
 		uint32_t depth = 0;
 		uint32_t rrDepth = m_rrDepth;
 
-		auto Wdash = cam->getWdash(
-			camsample.posOnImageSensor,
-			camsample.posOnLens,
-			camsample.posOnObjectplane);
-
 		Path path;
 		path.ray = inRay;
 
@@ -301,7 +296,7 @@ namespace aten
 			bool willContinue = true;
 
 			if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec)) {
-				willContinue = shade(sampler, scene, cam, depth, path);
+				willContinue = shade(sampler, scene, cam, camsample, depth, path);
 			}
 			else {
 				shadeMiss(scene, depth, path);
@@ -339,6 +334,7 @@ namespace aten
 		sampler* sampler,
 		scene* scene,
 		camera* cam,
+		CameraSampleResult& camsample,
 		int depth,
 		Path& path)
 	{
@@ -385,12 +381,23 @@ namespace aten
 			}
 		}
 
+#if 0
 		if (depth == 0) {
-			auto areaPdf = cam->getPdfImageSensorArea(path.rec.p, orienting_normal);
+			auto Wdash = cam->getWdash(
+				path.rec.p,
+				camsample.posOnImageSensor,
+				camsample.posOnLens,
+				camsample.posOnObjectplane);
+			auto areaPdf = cam->getPdfImageSensorArea(
+				path.rec.p, orienting_normal,
+				camsample.posOnImageSensor,
+				camsample.posOnLens,
+				camsample.posOnObjectplane);
 
-			//throughput *= Wdash;
+			path.throughput *= Wdash;
 			path.throughput /= areaPdf;
 		}
+#endif
 
 		// Apply normal map.
 		path.rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);

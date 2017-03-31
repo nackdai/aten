@@ -47,7 +47,7 @@ namespace aten
 			ray transformdRay(org, dir);
 
 			// Hit test in local coordinate.
-			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec);
+			auto isHit = m_obj->hit(transformdRay, m_mtxL2W, t_min, t_max, rec);
 
 			if (isHit) {
 				// Transform local to world.

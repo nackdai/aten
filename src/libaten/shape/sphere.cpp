@@ -12,7 +12,16 @@ namespace aten
 	}
 
 	bool sphere::hit(
-		const ray& r, 
+		const ray& r,
+		real t_min, real t_max,
+		hitrecord& rec) const
+	{
+		return hit(r, mat4::Identity, t_min, t_max, rec);
+	}
+
+	bool sphere::hit(
+		const ray& r,
+		const mat4& mtxL2W,
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
@@ -53,7 +62,16 @@ namespace aten
 		rec.du = normalize(getOrthoVector(rec.normal));
 		rec.dv = normalize(cross(rec.normal, rec.du));
 
-		rec.area = 4 * AT_MATH_PI * m_radius * m_radius;
+		{
+			auto tmp = m_center + vec3(m_radius, 0, 0);
+
+			auto center = mtxL2W.apply(m_center);
+			tmp = mtxL2W.apply(tmp);
+
+			auto radius = (tmp - center).length();
+
+			rec.area = 4 * AT_MATH_PI * radius * radius;
+		}
 
 		getUV(rec.u, rec.v, rec.normal);
 

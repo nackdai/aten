@@ -139,25 +139,44 @@ namespace aten
 		return isHit;
 	}
 
+	void object::build()
+	{
+		m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
+
+		m_area = 0;
+		m_triangles = 0;
+
+		for (const auto s : shapes) {
+			m_area += s->area;
+			m_triangles += s->faces.size();
+		}
+	}
+
 	bool object::hit(
 		const ray& r,
+		const mat4& mtxL2W,
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
 		bool isHit = m_node.hit(r, t_min, t_max, rec);
 		if (isHit) {
-			rec.area = m_area;
+			face* f = (face*)rec.obj;
+
+			auto v0 = mtxL2W.apply(f->vtx[0]->pos);
+			auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+			auto v2 = mtxL2W.apply(f->vtx[2]->pos);
+
+			// 三角形の面積 = ２辺の外積の長さ / 2;
+			auto e0 = v1 - v0;
+			auto e1 = v2 - v0;
+			auto area = 0.5 * cross(e0, e1).length();
+
+			rec.area = area;
 
 			// TODO
-			// 面積ではなくなるが、外側ではPDFになるので、ここで選択の確率も掛け合わせておく.
-			// そもそもareaという名前を変えるべきかも...
-			face* f = (face*)rec.obj;
-			shape* s = f->parent;
-
-			real selectShape = shapes.size();
-			real selectFace = s->faces.size();
-
-			rec.area *= selectShape * selectFace;
+			// 外でPDFとして扱われるので、確率を計算してしまう.
+			// 変数名を変えるべきかも...
+			rec.area *= m_triangles;
 		}
 		return isHit;
 	}

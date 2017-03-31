@@ -58,7 +58,7 @@ namespace aten
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final
 		{
 			auto r = sampler->nextSample();
-			int idx = r * faces.size();
+			int idx = (int)(r * (faces.size() - 1));
 			auto face = faces[idx];
 			return face->getRandomPosOn(sampler);
 		}
@@ -84,24 +84,17 @@ namespace aten
 	public:
 		bool hit(
 			const ray& r,
+			const mat4& mtxL2W,
 			real t_min, real t_max,
 			hitrecord& rec);
 
 	private:
-		void build()
-		{
-			m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
-
-			m_area = 0;
-			for (const auto s : shapes) {
-				m_area += s->area;
-			}
-		}
+		void build();
 
 		vec3 getRandomPosOn(sampler* sampler) const
 		{
 			auto r = sampler->nextSample();
-			int idx = r * shapes.size();
+			int idx = (int)(r * (shapes.size() - 1));
 			auto shape = shapes[idx];
 			return shape->getRandomPosOn(sampler);
 		}
@@ -113,5 +106,6 @@ namespace aten
 	private:
 		bvhnode m_node;
 		real m_area;
+		uint32_t m_triangles{ 0 };
 	};
 }

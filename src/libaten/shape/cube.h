@@ -2,10 +2,15 @@
 
 #include "types.h"
 #include "scene/bvh.h"
+#include "math/mat4.h"
 
 namespace aten
 {
+	template<typename T> class instance;
+
 	class cube : public bvhnode {
+		friend class instance<cube>;
+
 	public:
 		cube() {}
 		cube(const vec3& c, real w, real h, real d, material* m);
@@ -35,6 +40,13 @@ namespace aten
 		}
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
+
+	private:
+		bool hit(
+			const ray& r,
+			const mat4& mtxL2W,
+			real t_min, real t_max,
+			hitrecord& rec) const;
 
 	private:
 		enum Face {

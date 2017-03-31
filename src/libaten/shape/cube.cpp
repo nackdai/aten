@@ -84,7 +84,7 @@ namespace aten
 					break;
 				}
 			}
-			
+
 			rec.obj = (hitable*)this;
 			rec.mtrl = m_mtrl;
 
@@ -96,6 +96,16 @@ namespace aten
 		}
 
 		return isHit;
+	}
+
+	bool cube::hit(
+		const ray& r,
+		const mat4& mtxL2W,
+		real t_min, real t_max,
+		hitrecord& rec) const
+	{
+		AT_ASSERT(false);	// Not support.
+		return hit(r, t_min, t_max, rec);
 	}
 
 	aabb cube::getBoundingbox() const

@@ -99,6 +99,9 @@ namespace aten {
 
 		int halfWindowSize = filter_size / 2;
 
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
 		for (int cy = 0; cy < height; cy++) {
 			for (int cx = 0; cx < width; cx++) {
 				int cIdx = cy * width + cx;

@@ -61,6 +61,9 @@
     <Filter Include="denoise\VirtualFlashImage">
       <UniqueIdentifier>{f98c9a8a-4449-4f7a-8fb7-9137ac70c22d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="denoise\GeometryRendering">
+      <UniqueIdentifier>{b9e179d2-f6c3-40a5-b5d8-054e7c1145e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -291,6 +294,9 @@
     <ClInclude Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.h">
       <Filter>denoise\VirtualFlashImage</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.h">
+      <Filter>denoise\GeometryRendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -442,6 +448,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\hitable.cpp">
       <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.cpp">
+      <Filter>denoise\GeometryRendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

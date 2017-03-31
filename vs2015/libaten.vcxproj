@@ -157,6 +157,7 @@
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\denoise\bilateral.h" />
+    <ClInclude Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.h" />
     <ClInclude Include="..\src\libaten\denoise\nlm.h" />
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.h" />
     <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h" />
@@ -233,6 +234,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\denoise\bilateral.cpp" />
+    <ClCompile Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.cpp" />
     <ClCompile Include="..\src\libaten\denoise\nlm.cpp" />
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.cpp" />
     <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp" />

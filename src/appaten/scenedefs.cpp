@@ -2,8 +2,8 @@
 
 void CornellBoxScene::makeScene(aten::scene* scene)
 {
-	//auto emit = new aten::emissive(aten::vec3(36, 36, 36));
-	auto emit = new aten::emissive(aten::vec3(3, 3, 3));
+	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
+	//auto emit = new aten::emissive(aten::vec3(3, 3, 3));
 
 	auto light = new aten::sphere(
 		aten::vec3(50.0, 90.0, 81.6),
@@ -39,7 +39,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 
 	//auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
-//#define DEFALT	(1)
+#define DEFALT	(1)
 
 #if DEFALT
 	// —Î‹….
@@ -81,6 +81,11 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 		aten::vec3(77, 16.5, 78),
 		16.5,
 		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+#elif 0
+	auto glass = new aten::sphere(
+		aten::vec3(77, 16.5, 78),
+		5,
+		emit);
 #else
 	aten::AssetManager::registerMtrl(
 		"m1",
@@ -110,7 +115,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 #endif
 
 #if 1
-	//scene->add(light);
+	scene->add(light);
 	scene->add(left);
 	scene->add(right);
 	scene->add(wall);
@@ -120,8 +125,8 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(mirror);
 	scene->add(glass);
 
-	//aten::Light* l = new aten::AreaLight(light, emit->color());
-	aten::Light* l = new aten::AreaLight(glass, emit->color());
+	aten::Light* l = new aten::AreaLight(light, emit->color());
+	//aten::Light* l = new aten::AreaLight(glass, emit->color());
 
 	scene->addLight(l);
 #endif

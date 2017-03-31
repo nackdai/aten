@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
@@ -27,8 +27,18 @@ static aten::PathTracing g_pathtracer;
 static aten::RayTracing g_raytracer;
 static aten::GeometryInfoRenderer g_geotracer;
 
+//#define VFI
+#define GR
+
 static std::vector<aten::vec4> g_directBuffer(WIDTH * HEIGHT);
+
+#if defined(GR)
+static const int g_ratio = 2;
+static std::vector<aten::vec4> g_indirectBuffer((WIDTH / g_ratio) * (HEIGHT / g_ratio));
+#else
 static std::vector<aten::vec4> g_indirectBuffer(WIDTH * HEIGHT);
+#endif
+
 static std::vector<aten::vec4> g_varIndirectBuffer(WIDTH * HEIGHT);
 static std::vector<aten::vec4> g_nml_depth_Buffer(WIDTH * HEIGHT);
 
@@ -38,18 +48,19 @@ static uint32_t g_threadnum = 8;
 static uint32_t g_threadnum = 1;
 #endif
 
-#define VFI
 static aten::PointLight virtualLight;
 
-#ifdef VFI
+#if defined(VFI)
 aten::VirtualFlashImage denoiser;
+#elif defined(GR)
+aten::GeometryRendering denoiser;
 #else
 aten::PracticalNoiseReduction denoiser;
 #endif
 
 void display()
 {
-#ifdef VFI
+#if defined(VFI)
 	aten::vec4* image = &g_directBuffer[0];
 	aten::vec4* varImage = &g_indirectBuffer[0];
 	aten::vec4* flash = &g_varIndirectBuffer[0];
@@ -100,6 +111,59 @@ void display()
 		varImage, flash, varFlash);
 
 	aten::visualizer::render(image, g_camera.needRevert());
+#elif defined(GR)
+	aten::vec4* direct = &g_directBuffer[0];
+	aten::vec4* indirect = &g_indirectBuffer[0];
+	aten::vec4* idx = &g_varIndirectBuffer[0];
+
+	{
+		aten::Destination dst;
+		{
+			dst.width = WIDTH / g_ratio;
+			dst.height = HEIGHT / g_ratio;
+			dst.maxDepth = 6;
+			dst.russianRouletteDepth = 3;
+			dst.startDepth = 1;
+			dst.sample = 16 * g_ratio * g_ratio;;
+			dst.mutation = 10;
+			dst.mltNum = 10;
+			dst.buffer = indirect;
+		}
+
+		g_pathtracer.render(dst, &g_scene, &g_camera);
+	}
+
+	{
+		aten::Destination dst;
+		{
+			dst.width = WIDTH;
+			dst.height = HEIGHT;
+			dst.maxDepth = 6;
+			dst.buffer = direct;
+		}
+
+		g_raytracer.render(dst, &g_scene, &g_camera);
+		//g_pathtracer.render(dst, &g_scene, &g_camera);
+	}
+
+	{
+		aten::Destination dst;
+		{
+			dst.width = WIDTH;
+			dst.height = HEIGHT;
+			dst.geominfo.ids = idx;
+		}
+
+		g_geotracer.render(dst, &g_scene, &g_camera);
+	}
+
+	denoiser.setParam(
+		g_ratio,
+		direct,
+		indirect,
+		idx);
+
+	aten::visualizer::render(&g_indirectBuffer[0], g_camera.needRevert());
 #else
 	{
 		aten::Destination dst;

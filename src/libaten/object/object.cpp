@@ -132,7 +132,6 @@ namespace aten
 		auto isHit = m_node.hit(r, t_min, t_max, rec);
 
 		if (isHit) {
-			//rec.obj = (hitable*)this;
 			rec.mtrl = mtrl;
 		}
 
@@ -177,6 +176,9 @@ namespace aten
 			// 外でPDFとして扱われるので、確率を計算してしまう.
 			// 変数名を変えるべきかも...
 			rec.area *= m_triangles;
+
+			// 最終的には、やっぱりshapeを渡す.
+			rec.obj = f->parent;
 		}
 		return isHit;
 	}

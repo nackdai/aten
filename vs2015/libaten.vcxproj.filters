@@ -440,6 +440,9 @@
     <ClCompile Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.cpp">
       <Filter>denoise\VirtualFlashImage</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\scene\hitable.cpp">
+      <Filter>scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">

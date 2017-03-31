@@ -15,7 +15,7 @@ namespace aten
 		friend class LayeredBSDF;
 
 	public:
-		material() {}
+		material();
 		virtual ~material() {}
 
 	protected:
@@ -63,6 +63,11 @@ namespace aten
 		const vec3& color() const
 		{
 			return m_albedo;
+		}
+
+		uint32_t id() const
+		{
+			return m_id;
 		}
 
 		virtual vec3 sampleAlbedoMap(real u, real v) const
@@ -145,6 +150,8 @@ namespace aten
 		}
 
 	private:
+		uint32_t m_id{ 0 };
+
 		vec3 m_albedo;
 
 		real m_ior{ 0 };

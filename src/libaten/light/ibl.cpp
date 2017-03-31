@@ -147,7 +147,7 @@ namespace aten {
 
 #if 1
 		int idxTop = 0;
-		int idxTail = cdf.size() - 1;
+		int idxTail = (int)cdf.size() - 1;
 
 		for (;;) {
 			int idxMid = (idxTop + idxTail) >> 1;

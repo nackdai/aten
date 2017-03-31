@@ -34,7 +34,7 @@ namespace aten {
 
 	class hitable {
 	public:
-		hitable(const char* name = nullptr) : m_name(name) {}
+		hitable(const char* name = nullptr);
 		virtual ~hitable() {}
 
 	public:
@@ -51,7 +51,13 @@ namespace aten {
 			return std::move(vec3());
 		}
 
+		uint32_t id() const
+		{
+			return m_id;
+		}
+
 	private:
+		uint32_t m_id{ 0 };
 		const char* m_name;
 	};
 }

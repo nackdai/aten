@@ -1,8 +1,18 @@
+#include <atomic>
 #include "material/material.h"
 #include "light/light.h"
 
 namespace aten
 {
+	// NOTE
+	// 0 ‚Í—\–ñÏ‚İ‚È‚Ì‚ÅA1 ‚©‚çn‚ß‚é.
+	static std::atomic<uint32_t> g_id = 1;
+
+	material::material()
+	{
+		m_id = g_id.fetch_add(1);
+	}
+
 	NPRMaterial::NPRMaterial(const vec3& e, Light* light)
 		: material(e)
 	{
@@ -67,8 +77,8 @@ namespace aten
 
 		auto eta = ni / nt;
 
-		float sini2 = 1.f - cos_i * cos_i;
-		float sint2 = eta * eta * sini2;
+		auto sini2 = 1.f - cos_i * cos_i;
+		auto sint2 = eta * eta * sini2;
 
 		auto fresnel = schlick(
 			in, 

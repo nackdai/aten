@@ -156,12 +156,12 @@
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
-    <ClInclude Include="..\src\libaten\denoise\bilateral.h" />
-    <ClInclude Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.h" />
-    <ClInclude Include="..\src\libaten\denoise\nlm.h" />
-    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.h" />
-    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h" />
-    <ClInclude Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.h" />
+    <ClInclude Include="..\src\libaten\filter\bilateral.h" />
+    <ClInclude Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.h" />
+    <ClInclude Include="..\src\libaten\filter\nlm.h" />
+    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.h" />
+    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h" />
+    <ClInclude Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.h" />
     <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
     <ClInclude Include="..\src\libaten\hdr\tonemap.h" />
@@ -233,12 +233,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
-    <ClCompile Include="..\src\libaten\denoise\bilateral.cpp" />
-    <ClCompile Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.cpp" />
-    <ClCompile Include="..\src\libaten\denoise\nlm.cpp" />
-    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.cpp" />
-    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp" />
-    <ClCompile Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.cpp" />
+    <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
+    <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp" />
+    <ClCompile Include="..\src\libaten\filter\nlm.cpp" />
+    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.cpp" />
+    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp" />
+    <ClCompile Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.cpp" />
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
@@ -285,7 +285,7 @@
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\libaten\denoise\VirtualFlashImage\t_table.dat" />
+    <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat" />
     <None Include="..\src\shader\bilateral_fs.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_2x2.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_4x4.glsl" />

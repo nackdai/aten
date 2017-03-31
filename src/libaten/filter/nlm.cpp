@@ -1,6 +1,6 @@
 #include <array>
 #include "visualizer/atengl.h"
-#include "denoise/nlm.h"
+#include "filter/nlm.h"
 #include "misc/timer.h"
 
 // NOTE

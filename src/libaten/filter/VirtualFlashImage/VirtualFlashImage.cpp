@@ -1,5 +1,5 @@
 #include <vector>
-#include "denoise/VirtualFlashImage/VirtualFlashImage.h"
+#include "filter/VirtualFlashImage/VirtualFlashImage.h"
 
 // filtering parameter for each step!
 #define FILTER_SIZE_STEP1	7
@@ -18,7 +18,7 @@
 // [0: 80%, 1: 90%, 2: 95%, 3: 98%, 4: 99%, 5: 99.8%]
 // 信頼区間を計算するためのt-分布のテーブル.
 static const aten::real ttable[][6] = {
-#include "denoise/VirtualFlashImage/t_table.dat"
+#include "filter/VirtualFlashImage/t_table.dat"
 };
 
 namespace aten {
@@ -452,7 +452,7 @@ namespace aten {
 		}
 
 		std::vector<vec4> tmpStd(width * height);
-		std::vector<vec4> tmpDenoised(width * height);
+		std::vector<vec4> tmpfilterd(width * height);
 
 #if 1
 #ifdef ENABLE_OMP
@@ -466,7 +466,7 @@ namespace aten {
 					m_flash,
 					&stdSrc[0],
 					&stdFlash[0],
-					&tmpDenoised[0],
+					&tmpfilterd[0],
 					width, height,
 					FILTER_SIZE_STEP1, STD_D_STEP1,
 					numSamples,
@@ -486,7 +486,7 @@ namespace aten {
 			for (int cx = 0; cx < width; cx++) {
 				filterStep2(
 					cx, cy,
-					&tmpDenoised[0],
+					&tmpfilterd[0],
 					m_flash,
 					&stdSrc[0],
 					&stdFlash[0],

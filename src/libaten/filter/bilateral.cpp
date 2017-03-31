@@ -1,6 +1,6 @@
 #include <vector>
 #include "visualizer/atengl.h"
-#include "denoise/bilateral.h"
+#include "filter/bilateral.h"
 #include "misc/timer.h"
 
 // NOTE

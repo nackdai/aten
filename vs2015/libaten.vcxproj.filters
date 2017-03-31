@@ -40,29 +40,29 @@
     <Filter Include="light">
       <UniqueIdentifier>{73ad43e6-957c-4167-b693-161d560e49e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="denoise">
-      <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
-    </Filter>
     <Filter Include="posteffect">
       <UniqueIdentifier>{756ad7cc-74d7-4e3b-a087-6d4027c7a541}</UniqueIdentifier>
     </Filter>
     <Filter Include="shader\bloomeffect">
       <UniqueIdentifier>{7d011257-74d3-46a3-b33e-d87cdde6f216}</UniqueIdentifier>
     </Filter>
-    <Filter Include="shader\denoise">
-      <UniqueIdentifier>{c918e933-8b6e-4c2b-bde0-32b7f83c9547}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shape">
       <UniqueIdentifier>{0721ed3f-82f2-4111-8ff3-91a03315e3d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="denoise\PracticalNoiseReduction">
+    <Filter Include="filter">
+      <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="filter\PracticalNoiseReduction">
       <UniqueIdentifier>{cb807cd1-c9cb-422a-bc38-5a0bda6cdd8c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="denoise\VirtualFlashImage">
+    <Filter Include="filter\VirtualFlashImage">
       <UniqueIdentifier>{f98c9a8a-4449-4f7a-8fb7-9137ac70c22d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="denoise\GeometryRendering">
+    <Filter Include="filter\GeometryRendering">
       <UniqueIdentifier>{b9e179d2-f6c3-40a5-b5d8-054e7c1145e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\filter">
+      <UniqueIdentifier>{c918e933-8b6e-4c2b-bde0-32b7f83c9547}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -213,9 +213,6 @@
     <ClInclude Include="..\src\libaten\light\ibl.h">
       <Filter>light</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\bilateral.h">
-      <Filter>denoise</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\visualizer\atengl.h">
       <Filter>visualizer</Filter>
     </ClInclude>
@@ -282,20 +279,23 @@
     <ClInclude Include="..\src\libaten\scene\instance.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\nlm.h">
-      <Filter>denoise</Filter>
+    <ClInclude Include="..\src\libaten\filter\bilateral.h">
+      <Filter>filter</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.h">
-      <Filter>denoise\PracticalNoiseReduction</Filter>
+    <ClInclude Include="..\src\libaten\filter\nlm.h">
+      <Filter>filter</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h">
-      <Filter>denoise\PracticalNoiseReduction</Filter>
+    <ClInclude Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.h">
+      <Filter>filter\VirtualFlashImage</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.h">
-      <Filter>denoise\VirtualFlashImage</Filter>
+    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h">
+      <Filter>filter\PracticalNoiseReduction</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.h">
-      <Filter>denoise\GeometryRendering</Filter>
+    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.h">
+      <Filter>filter\PracticalNoiseReduction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.h">
+      <Filter>filter\GeometryRendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -380,9 +380,6 @@
     <ClCompile Include="..\src\libaten\light\ibl.cpp">
       <Filter>light</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\bilateral.cpp">
-      <Filter>denoise</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp">
       <Filter>visualizer</Filter>
     </ClCompile>
@@ -434,23 +431,26 @@
     <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\nlm.cpp">
-      <Filter>denoise</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReduction.cpp">
-      <Filter>denoise\PracticalNoiseReduction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp">
-      <Filter>denoise\PracticalNoiseReduction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\VirtualFlashImage\VirtualFlashImage.cpp">
-      <Filter>denoise\VirtualFlashImage</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\scene\hitable.cpp">
       <Filter>scene</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoise\GeometryRendering\GeometryRendering.cpp">
-      <Filter>denoise\GeometryRendering</Filter>
+    <ClCompile Include="..\src\libaten\filter\nlm.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\bilateral.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.cpp">
+      <Filter>filter\VirtualFlashImage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp">
+      <Filter>filter\PracticalNoiseReduction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.cpp">
+      <Filter>filter\PracticalNoiseReduction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp">
+      <Filter>filter\GeometryRendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -464,7 +464,7 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\bilateral_fs.glsl">
-      <Filter>shader\denoise</Filter>
+      <Filter>shader\filter</Filter>
     </None>
     <None Include="..\src\shader\bloomeffect_fs_Gauss.glsl">
       <Filter>shader\bloomeffect</Filter>
@@ -491,10 +491,10 @@
       <Filter>shader</Filter>
     </None>
     <None Include="..\src\shader\nlm_fs.glsl">
-      <Filter>shader\denoise</Filter>
+      <Filter>shader\filter</Filter>
     </None>
-    <None Include="..\src\libaten\denoise\VirtualFlashImage\t_table.dat">
-      <Filter>denoise\VirtualFlashImage</Filter>
+    <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat">
+      <Filter>filter\VirtualFlashImage</Filter>
     </None>
   </ItemGroup>
 </Project>

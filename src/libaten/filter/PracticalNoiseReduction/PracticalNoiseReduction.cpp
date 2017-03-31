@@ -1,11 +1,11 @@
 #include <vector>
-#include "denoise/PracticalNoiseReduction/PracticalNoiseReduction.h"
-#include "denoise/PracticalNoiseReduction/PracticalNoiseReductionBilateral.h"
+#include "filter/PracticalNoiseReduction/PracticalNoiseReduction.h"
+#include "filter/PracticalNoiseReduction/PracticalNoiseReductionBilateral.h"
 #include "misc/color.h"
 
-//#define TEST_DENOISE
+//#define TEST_filter
 
-#ifdef TEST_DENOISE
+#ifdef TEST_filter
 #pragma optimize( "", off ) 
 #endif
 
@@ -247,7 +247,7 @@ namespace aten {
 			&var_filtered[0]);
 #endif
 
-#if defined(ENABLE_OMP) && !defined(TEST_DENOISE)
+#if defined(ENABLE_OMP) && !defined(TEST_filter)
 #pragma omp parallel for
 #endif
 		for (int y = 0; y < height; y++) {
@@ -305,13 +305,13 @@ namespace aten {
 				//hv[pos] = s * m_indirect[pos] + (vec4(1) - s) * filtered[pos];
 				hv[pos] = s * in[pos] + (vec4(1) - s) * filtered[pos];
 
-#if !defined(TEST_DENOISE)
+#if !defined(TEST_filter)
 				dst[pos] = m_direct[pos] + hv[pos];
 #endif
 			}
 		}
 
-#ifdef TEST_DENOISE
+#ifdef TEST_filter
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				int pos = y * width + x;

@@ -6,12 +6,12 @@
 #include "camera/pinhole.h"
 #include "camera/thinlens.h"
 
-#include "denoise/nlm.h"
-#include "denoise/bilateral.h"
+#include "filter/nlm.h"
+#include "filter/bilateral.h"
 
-#include "denoise/PracticalNoiseReduction/PracticalNoiseReduction.h"
-#include "denoise/VirtualFlashImage/VirtualFlashImage.h"
-#include "denoise/GeometryRendering/GeometryRendering.h"
+#include "filter/PracticalNoiseReduction/PracticalNoiseReduction.h"
+#include "filter/VirtualFlashImage/VirtualFlashImage.h"
+#include "filter/GeometryRendering/GeometryRendering.h"
 
 #include "material/emissive.h"
 #include "material/lambert.h"

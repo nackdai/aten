@@ -1,5 +1,5 @@
 #include <vector>
-#include "denoise/GeometryRendering/GeometryRendering.h"
+#include "filter/GeometryRendering/GeometryRendering.h"
 
 #pragma optimize( "", off) 
 

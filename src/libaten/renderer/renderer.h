@@ -22,6 +22,7 @@ namespace aten
 		struct {
 			vec4* nml_depth{ nullptr };		///< Normal and Depth / rgb : normal, a : depth
 			vec4* albedo_vis{ nullptr };	///< Albedo and Visibility / rgb : albedo, a : visibility
+			vec4* ids{ nullptr };			///< Geometry Id / r : shape id, g : material id
 			real depthMax{ 1 };
 			bool needNormalize{ true };
 		} geominfo;

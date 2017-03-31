@@ -32,6 +32,9 @@ namespace aten
 				if (depth == 0) {
 					path.normal = orienting_normal;
 					path.depth = rec.t;
+
+					path.shapeid = rec.obj->id();
+					path.mtrlid = rec.mtrl->id();
 				}
 
 				if (rec.mtrl->isEmissive()) {
@@ -170,6 +173,10 @@ namespace aten
 					}
 
 					dst.geominfo.albedo_vis[pos].set(albedo, path.visibility);
+				}
+				if (dst.geominfo.ids) {
+					dst.geominfo.ids[pos].x = path.shapeid;
+					dst.geominfo.ids[pos].y = path.mtrlid;
 				}
 			}
 		}

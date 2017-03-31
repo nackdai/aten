@@ -21,7 +21,9 @@ namespace aten
 			vec3 normal;
 			vec3 albedo;
 			real depth;
-			real visibility{ 0 };
+			uint32_t shapeid{ 0 };
+			uint32_t mtrlid{ 0 };
+			uint32_t visibility{ 0 };
 		};
 
 		Path radiance(

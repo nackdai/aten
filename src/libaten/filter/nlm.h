@@ -26,6 +26,12 @@ namespace aten {
 			m_sigma = sigma;
 		}
 
+		virtual void setParam(Values& values) override final
+		{
+			m_param_h = values.get("h", m_param_h);
+			m_sigma = values.get("sigma", m_sigma);
+		}
+
 	private:
 		real m_param_h{ 0.2 };
 		real m_sigma{ 0.2 };
@@ -50,6 +56,12 @@ namespace aten {
 		{
 			m_param_h = param_h;
 			m_sigma = sigma;
+		}
+
+		virtual void setParam(Values& values) override final
+		{
+			m_param_h = values.get("h", m_param_h);
+			m_sigma = values.get("sigma", m_sigma);
 		}
 
 	private:

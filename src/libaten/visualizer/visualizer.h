@@ -5,6 +5,7 @@
 #include "visualizer/pixelformat.h"
 #include "visualizer/shader.h"
 #include "visualizer/fbo.h"
+#include "misc/value.h"
 
 namespace aten {
 	class visualizer {
@@ -23,6 +24,8 @@ namespace aten {
 				const vec4* src,
 				uint32_t width, uint32_t height,
 				vec4* dst) = 0;
+
+			virtual void setParam(Values& values) {}
 		};
 
 		class PostProc : public shader {
@@ -42,6 +45,8 @@ namespace aten {
 
 			virtual PixelFormat inFormat() const = 0;
 			virtual PixelFormat outFormat() const = 0;
+
+			virtual void setParam(Values& values) {}
 
 			virtual uint32_t getOutWidth() const
 			{

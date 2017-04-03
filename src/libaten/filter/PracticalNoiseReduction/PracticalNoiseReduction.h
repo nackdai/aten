@@ -41,6 +41,15 @@ namespace aten {
 			m_threshold = threshold;
 		}
 
+		virtual void setParam(Values& values) override final
+		{
+			m_stdDevS = values.get("std_dev_s", m_stdDevS);
+			m_stdDevC = values.get("std_dev_c", m_stdDevC);
+			m_stdDevD = values.get("std_dev_d", m_stdDevD);
+
+			m_threshold = values.get("threshold", m_threshold);
+		}
+
 	private:
 		vec4* m_direct{ nullptr };
 

@@ -17,7 +17,27 @@
         "spp": 10,
         "depth": 5,
         "rrdepth": 3
-      }
+      },
+	  "preproc" : {
+		"nlm" : {
+			"h" : 0.2,
+			"sigma" : 0.2
+		},
+		"bilateral" : {
+			"sigmas" : 0.2,
+			"sigmar" : 0.2
+		}
+	  },
+	  "postproc" : {
+		"nlm" : {
+			"h" : 0.2,
+			"sigma" : 0.2
+		},
+		"bilateral" : {
+			"sigmas" : 0.2,
+			"sigmar" : 0.2
+		}
+	  }
     },
     "teapot": {
       "obj": "teapot",

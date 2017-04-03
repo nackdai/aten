@@ -40,10 +40,14 @@ namespace aten
 	//				},
 	//				"bg" : <envmap_tag> or [<r>, <g>, <b>],
 	//				"preproc" : {
-	//					<preproc_tag>, ...
+	//					<preproc_tag> : {
+	//						<param_name> : <value>
+	//					},
 	//				},
 	//				"postproc" : {
-	//					<postproc_tag>, ...
+	//					<preproc_tag> : {
+	//						<param_name> : <value>
+	//					},
 	//				},
 	//			},
 	//			<object name> : {
@@ -123,6 +127,40 @@ namespace aten
 		}
 	}
 
+	void readProcInfo(
+		std::vector<SceneLoader::ProcInfo>& infos,
+		picojson::object& objs)
+	{
+		for (auto it = objs.begin(); it != objs.end(); it++) {
+			SceneLoader::ProcInfo procInfo;
+
+			auto name = it->first;
+			auto& jsonVal = it->second;
+
+			// Convert to lower.
+			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+			procInfo.type = name;
+
+			auto& params = jsonVal.get<picojson::object>();
+
+			for (auto pit = params.begin(); pit != params.end(); pit++) {
+				auto paramName = pit->first;
+				auto& val = pit->second;
+
+				// Convert to lower.
+				std::transform(paramName.begin(), paramName.end(), paramName.begin(), ::tolower);
+
+				aten::PolymorphicValue param;
+				param = val.get<double>();
+
+				procInfo.values.add(paramName, param);
+			}
+
+			infos.push_back(procInfo);
+		}
+	}
+
 	void readSceneInfo(
 		SceneLoader::SceneInfo& info,
 		picojson::object& objs)
@@ -156,8 +194,12 @@ namespace aten
 					else if (paramName == "bg") {
 					}
 					else if (paramName == "preproc") {
+						auto& preprocObjs = jsonVal.get<picojson::object>();
+						readProcInfo(info.preprocs, preprocObjs);
 					}
 					else if (paramName == "postproc") {
+						auto& postprocObjs = jsonVal.get<picojson::object>();
+						readProcInfo(info.postprocs, postprocObjs);
 					}
 				}
 			}
@@ -223,6 +265,10 @@ namespace aten
 					// throw exception.
 				}
 			}
+		}
+		else {
+			// TODO
+			// throw exception.
 		}
 
 		// TODO

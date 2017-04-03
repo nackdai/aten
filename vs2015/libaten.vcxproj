@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
+    <ClInclude Include="..\src\libaten\camera\equirect.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
@@ -232,6 +233,7 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp" />

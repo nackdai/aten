@@ -17,7 +17,11 @@ namespace aten {
 			if (isHit) {
 				hitrecord tmpRec;
 				if (light->hit(r, t_min, t_max, tmpRec)) {
-					if (rec.obj == tmpRec.obj) {
+					auto dist2 = (tmpRec.p - r.org).squared_length();
+
+					if (rec.obj == tmpRec.obj
+						&& aten::abs(dist2 - rec.t * rec.t) < AT_MATH_EPSILON)
+					{
 						return true;
 					}
 				}

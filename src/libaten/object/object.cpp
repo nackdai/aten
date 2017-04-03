@@ -161,21 +161,54 @@ namespace aten
 		if (isHit) {
 			face* f = (face*)rec.obj;
 
-			auto v0 = mtxL2W.apply(f->vtx[0]->pos);
-			auto v1 = mtxL2W.apply(f->vtx[1]->pos);
-			auto v2 = mtxL2W.apply(f->vtx[2]->pos);
+#if 0
+			real originalArea = 0;
+			{
+				const auto& v0 = f->vtx[0]->pos;
+				const auto& v1 = f->vtx[1]->pos;
+				const auto& v2 = f->vtx[2]->pos;
 
-			// OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
-			auto e0 = v1 - v0;
-			auto e1 = v2 - v0;
-			auto area = 0.5 * cross(e0, e1).length();
+				// OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+				auto e0 = v1 - v0;
+				auto e1 = v2 - v0;
+				originalArea = 0.5 * cross(e0, e1).length();
+			}
 
-			rec.area = area;
+			real scaledArea = 0;
+			{
+				auto v0 = mtxL2W.apply(f->vtx[0]->pos);
+				auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+				auto v2 = mtxL2W.apply(f->vtx[2]->pos);
 
-			// TODO
-			// ŠO‚ÅPDF‚Æ‚µ‚Äˆµ‚í‚ê‚é‚Ì‚ÅAŠm—¦‚ğŒvZ‚µ‚Ä‚µ‚Ü‚¤.
-			// •Ï”–¼‚ğ•Ï‚¦‚é‚×‚«‚©‚à...
-			rec.area *= m_triangles;
+				// OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+				auto e0 = v1 - v0;
+				auto e1 = v2 - v0;
+				scaledArea = 0.5 * cross(e0, e1).length();
+			}
+
+			real ratio = scaledArea / originalArea;
+#else
+			real orignalLen = 0;
+			{
+				const auto& v0 = f->vtx[0]->pos;
+				const auto& v1 = f->vtx[1]->pos;
+
+				orignalLen = (v1 - v0).length();
+			}
+
+			real scaledLen = 0;
+			{
+				auto v0 = mtxL2W.apply(f->vtx[0]->pos);
+				auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+
+				scaledLen = (v1 - v0).length();
+			}
+
+			real ratio = scaledLen / orignalLen;
+			ratio = ratio * ratio;
+#endif
+
+			rec.area = m_area * ratio;
 
 			// ÅI“I‚É‚ÍA‚â‚Á‚Ï‚èshape‚ğ“n‚·.
 			rec.obj = f->parent;

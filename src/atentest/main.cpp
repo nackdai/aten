@@ -8,6 +8,7 @@ int main(int argc, char* argv[])
 
 	aten::ImageLoader::setBasePath("../../asset/");
 
+#if 0
 	//aten::MaterialLoader::load("material.json");
 	aten::MaterialLoader::load("material.xml");
 
@@ -19,6 +20,7 @@ int main(int argc, char* argv[])
 
 	auto mtrl2 = aten::AssetManager::getMtrl("test3");
 	AT_ASSERT(mtrl2);
+#endif
 
-	auto info = aten::SceneLoader::load("scene.json");
+	auto info = aten::SceneLoader::load("scene.xml");
 }

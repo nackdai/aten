@@ -4,8 +4,6 @@
 
 namespace aten {
 	class MaterialLoader {
-		friend class SceneLoader;
-
 	private:
 		MaterialLoader();
 		~MaterialLoader();
@@ -19,11 +17,10 @@ namespace aten {
 
 		static void load(const std::string& path);
 
-	private:
 #ifdef USE_JSON
 		static void onLoad(const std::string& strJson);
 #else
-
+		static void onLoad(const void* xmlRoot);
 #endif
 
 		static material* create(std::string type, Values& values);

@@ -27,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\src\atentest\material.xml" />
+    <Xml Include="..\src\atentest\scene.xml" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{21BAF82D-D001-4436-92C3-557950A0B496}</ProjectGuid>

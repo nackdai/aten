@@ -36,6 +36,11 @@ namespace aten {
 			z = _z;
 		}
 
+		inline void set(real f)
+		{
+			x = y = z = f;
+		}
+
 		inline const vec3& operator+() const
 		{
 			return *this;

@@ -380,61 +380,72 @@ namespace aten {
 
 		auto root = xml.FirstChildElement("root");
 		if (root) {
-			for (auto elem = root->FirstChildElement("material"); elem != nullptr; elem = elem->NextSiblingElement("material")) {
-				material* mtrl = nullptr;
-				std::string mtrlName;
-				std::string mtrlType;
-				Values mtrlValues;
+			onLoad(root);
+		}
+		else {
+			// TODO
+			// throw exception.
+		}
+	}
 
-				for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
-					std::string attrName(attr->Name());
+	void MaterialLoader::onLoad(const void* xmlRoot)
+	{
+		const tinyxml2::XMLElement* root = (const tinyxml2::XMLElement*)xmlRoot;
 
-					if (attrName == "name") {
-						mtrlName = attr->Value();
+		for (auto elem = root->FirstChildElement("material"); elem != nullptr; elem = elem->NextSiblingElement("material")) {
+			material* mtrl = nullptr;
+			std::string mtrlName;
+			std::string mtrlType;
+			Values mtrlValues;
 
-						// Check if there is same name material.
-						mtrl = AssetManager::getMtrl(mtrlName);
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
 
-						if (mtrl) {
-							AT_PRINTF("There is same tag material. [%s]\n", mtrlName);
-							break;
-						}
-					}
-					else if (attrName == "type") {
-						mtrlType = attr->Value();
-					}
-					else {
-						// Get parameter type by parameter name.
-						auto itParamType = g_paramtypes.find(attrName);
+				if (attrName == "name") {
+					mtrlName = attr->Value();
 
-						if (itParamType != g_paramtypes.end()) {
-							auto paramType = itParamType->second;
-							auto funcGetValue = g_funcGetValueFromFile[paramType];
-
-							// Get value from json.
-							auto value = funcGetValue(attr);
-
-							mtrlValues.add(attrName, value);
-						}
-					}
-				}
-
-				if (!mtrl) {
-					if (mtrlType.empty()) {
-						AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
-						mtrlType = "lambert";
-					}
-
-					// Create material;
-					mtrl = create(mtrlType, mtrlValues);
+					// Check if there is same name material.
+					mtrl = AssetManager::getMtrl(mtrlName);
 
 					if (mtrl) {
-						AssetManager::registerMtrl(mtrlName, mtrl);
+						AT_PRINTF("There is same tag material. [%s]\n", mtrlName);
+						break;
 					}
-					else {
-						AT_ASSERT(false);
-						AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
+				}
+				else if (attrName == "type") {
+					mtrlType = attr->Value();
+				}
+				else {
+					// Get parameter type by parameter name.
+					auto itParamType = g_paramtypes.find(attrName);
+
+					if (itParamType != g_paramtypes.end()) {
+						auto paramType = itParamType->second;
+						auto funcGetValue = g_funcGetValueFromFile[paramType];
+
+						// Get value from json.
+						auto value = funcGetValue(attr);
+
+						mtrlValues.add(attrName, value);
 					}
+				}
+			}
+
+			if (!mtrl) {
+				if (mtrlType.empty()) {
+					AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
+					mtrlType = "lambert";
+				}
+
+				// Create material;
+				mtrl = create(mtrlType, mtrlValues);
+
+				if (mtrl) {
+					AssetManager::registerMtrl(mtrlName, mtrl);
+				}
+				else {
+					AT_ASSERT(false);
+					AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
 				}
 			}
 		}

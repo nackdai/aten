@@ -1,6 +1,15 @@
 #include "SceneLoader.h"
 #include "utility.h"
+#include "ImageLoader.h"
+#include "MaterialLoader.h"
+#include "ObjLoader.h"
+#include "AssetManager.h"
+
+#ifdef USE_JSON
 #include "picojson.h"
+#else
+#include "tinyxml2.h"
+#endif
 
 namespace aten
 {
@@ -11,6 +20,7 @@ namespace aten
 		g_base = removeTailPathSeparator(base);
 	}
 
+#ifdef USE_JSON
 	// NOTE
 	// Format
 	// {
@@ -276,4 +286,254 @@ namespace aten
 
 		return std::move(info);
 	}
+#else
+	// NOTE
+	// <scene width=<uint> height=<uint>>
+	//		<camera 
+	//			type=<string>
+	//			org=<vec3>
+	//			at=<vec3> 
+	//			fov=<real>
+	//			sensorsize=<real>
+	//			dist_sensor_lens=<real>
+	//			dist_lens_focus=<real> 
+	//			lens_r=<real>
+	//			W_scale=<real>
+	//		/>
+	//		<renderer type=<string> spp=<uint> mutaion=<uint> mlt=<uint> depth=<uint> rrdepth=<uint>/>
+	//		<materials>
+	//			<material path=<string/>
+	//			<material [attributes...]/>
+	//		</materials>
+	//		<textures>
+	//			<texture name=<string> path=<string>/>
+	//		</textures>
+	//		<objects>
+	//			<object name=<string> type=<string> path=<string> trans=<vec3> rotate=<vec3> scale=<float> material=<string>/>
+	//		</objects>
+	//		<lights>
+	//			<light type=<string> color=<vec3> [attributes...]/>
+	//		</lights>
+	//		<preprocs>
+	//			<proc type=<string> [attributes...]/>
+	//		</preprocs>
+	//		<postprocs>
+	//			<proc type=<string> [attributes...]/>
+	//		</postprocs>
+	// </scene>
+
+	void readTextures(const tinyxml2::XMLElement* root)
+	{
+		auto texRoot = root->FirstChildElement("textures");
+
+		if (!texRoot) {
+			return;
+		}
+
+		for (auto elem = texRoot->FirstChildElement("texture"); elem != nullptr; elem = texRoot->NextSiblingElement("texture")) {
+			std::string path;
+			std::string tag;
+
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "path") {
+					path = attr->Value();
+				}
+				else if (attrName == "name") {
+					tag = attr->Value();
+				}
+			}
+
+			if (!tag.empty()) {
+				ImageLoader::load(tag, path);
+			}
+			else {
+				ImageLoader::load(path);
+			}
+		}
+	}
+
+	void readMaterials(const tinyxml2::XMLElement* root)
+	{
+		auto mtrlRoot = root->FirstChildElement("materials");
+		
+		if (!mtrlRoot) {
+			return;
+		}
+
+		for (auto elem = mtrlRoot->FirstChildElement("material"); elem != nullptr; elem = mtrlRoot->NextSiblingElement("material")) {
+			std::string path;
+			std::string tag;
+
+			tinyxml2::XMLDocument xml;
+			tinyxml2::XMLElement* root = nullptr;
+			tinyxml2::XMLElement* mtrlElem = nullptr;
+
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "path") {
+					path = attr->Value();
+				}
+				else {
+					if (attrName == "name") {
+						tag = attr->Value();
+					}
+
+					if (!root) {
+						root = xml.NewElement("root");
+						xml.InsertEndChild(root);
+					}
+
+					if (!mtrlElem) {
+						mtrlElem = xml.NewElement("material");
+						root->InsertEndChild(mtrlElem);
+					}
+
+					mtrlElem->SetAttribute(attr->Name(), attr->Value());
+				}
+			}
+
+			if (mtrlElem) {
+				root->InsertEndChild(mtrlElem);
+				MaterialLoader::onLoad(root);
+			}
+			else if (!path.empty()) {
+				MaterialLoader::load(path);
+			}
+		}
+	}
+
+	void readObjects(
+		const tinyxml2::XMLElement* root,
+		std::vector<hitable*>& objs)
+	{
+		auto objRoot = root->FirstChildElement("objects");
+
+		if (!objRoot) {
+			return;
+		}
+
+		enum Type {
+			Sphere,
+			Cube,
+			Object,
+		};
+
+		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = objRoot->NextSiblingElement("object")) {
+			std::string path;
+			std::string tag;
+
+			vec3 trans(1);
+			vec3 rotate(0);
+			real scale(1);
+
+			Type type = (Type)0;
+
+			material* mtrl = nullptr;
+
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "path") {
+					path = attr->Value();
+				}
+				else if (attrName == "name") {
+					tag = attr->Value();
+				}
+				else if (attrName == "type") {
+					type = (Type)attr->UnsignedValue();
+				}
+				else if (attrName == "trans" || attrName == "rotate") {
+					std::string text(attr->Value());
+
+					std::vector<std::string> values;
+					int num = split(text, values, ' ');
+
+					vec3* v = (attrName == "trans" ? &trans : &rotate);
+
+					for (int i = 0; i < std::min<int>(num, 3); i++) {
+						(*v)[i] = (real)atof(values[i].c_str());
+					}
+				}
+				else if (attrName == "scale") {
+					scale = attr->DoubleValue();
+				}
+				else if (attrName == "material") {
+					mtrl = AssetManager::getMtrl(attr->Value());
+				}
+			}
+
+			object* obj = nullptr;
+
+			if (type == Type::Object) {
+				if (!tag.empty()) {
+					obj = ObjLoader::load(tag, path);
+				}
+				else {
+					obj = ObjLoader::load(path);
+				}
+			}
+
+			mat4 mtxS;
+			mtxS.asScale(scale);
+
+			mat4 mtxRotX, mtxRotY, mtxRotZ;
+			mtxRotX.asRotateByX(rotate.x);
+			mtxRotY.asRotateByX(rotate.x);
+			mtxRotZ.asRotateByX(rotate.x);
+
+			mat4 mtxT;
+			mtxT.asTrans(trans);
+
+			auto mtxL2W = mtxT * mtxRotX * mtxRotY * mtxRotZ * mtxS;
+
+			if (obj) {
+				auto instance = new aten::instance<aten::object>(obj, mtxL2W);
+				objs.push_back(instance);
+			}
+			else {
+				if (type == Type::Cube) {
+					auto cube = new aten::cube(1, 1, 1, mtrl);
+					auto instance = new aten::instance<aten::cube>(cube, mtxL2W);
+					objs.push_back(instance);
+				}
+				else {
+					auto sphere = new aten::sphere(1, mtrl);
+					auto instance = new aten::instance<aten::sphere>(sphere, mtxL2W);
+					objs.push_back(instance);
+				}
+			}
+		}
+	}
+
+	SceneLoader::SceneInfo SceneLoader::load(const std::string& path)
+	{
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
+		}
+
+		tinyxml2::XMLDocument xml;
+		auto err = xml.LoadFile(fullpath.c_str());
+		if (err != tinyxml2::XML_SUCCESS) {
+			// TODO
+			// throw exception.
+		}
+
+		std::vector<hitable*> objs;
+
+		auto root = xml.FirstChildElement("scene");
+		if (root) {
+			readTextures(root);
+			readMaterials(root);
+			readObjects(root, objs);
+		}
+
+		SceneLoader::SceneInfo ret;
+
+		return std::move(ret);
+	}
+#endif
 }

@@ -13,6 +13,9 @@
     <Filter Include="src">
       <UniqueIdentifier>{e56bef65-8f7c-48a9-83c5-9373f76f3b6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tinyxml2">
+      <UniqueIdentifier>{6d0b32f2-36b4-4edf-a447-161149658b39}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libatenscene\SceneLoader.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp">
+      <Filter>tinyxml2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +65,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\SceneLoader.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h">
+      <Filter>tinyxml2</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

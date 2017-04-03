@@ -2,7 +2,12 @@
 #include "ImageLoader.h"
 #include "AssetManager.h"
 #include "utility.h"
+
+#ifdef USE_JSON
 #include "picojson.h"
+#else
+#include "tinyxml2.h"
+#endif
 
 namespace aten {
 	std::map<std::string, MaterialLoader::MaterialCreator> g_creators;
@@ -48,6 +53,7 @@ namespace aten {
 		return false;
 	}
 
+#ifdef USE_JSON
 	// NOTE
 	// Format
 	// {
@@ -130,6 +136,67 @@ namespace aten {
 		return std::move(v);
 	}
 
+	using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
+#else
+	template <typename TYPE>
+	static aten::PolymorphicValue getValue(const tinyxml2::XMLAttribute* a)
+	{
+		AT_ASSERT(false);
+		PolymorphicValue ret;
+		return ret;
+	}
+
+	template <>
+	static aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLAttribute* a)
+	{
+		aten::PolymorphicValue v;
+
+		std::string text(a->Value());
+
+		std::vector<std::string> values;
+		int num = split(text, values, ' ');
+
+		for (int i = 0; i < std::min<int>(num, 3); i++) {
+			v.val.v[i] = (real)atof(values[i].c_str());
+		}
+
+		return std::move(v);
+	}
+
+	template <>
+	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
+	{
+		aten::PolymorphicValue v;
+		v.val.f = a->DoubleValue();
+		return std::move(v);
+	}
+
+	template <>
+	static aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLAttribute* a)
+	{
+		auto s = a->Value();
+
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			s,
+			pathname,
+			extname,
+			filename);
+
+		auto tex = ImageLoader::load(s);
+
+		aten::PolymorphicValue v;
+		v.val.p = tex;
+
+		return std::move(v);
+	}
+
+	using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLAttribute*)>;
+#endif
+
 	enum _MtrlParamType {
 		Vec3,
 		Texture,
@@ -138,14 +205,12 @@ namespace aten {
 		Num,
 	};
 
-	using GetValueFromJson = std::function<aten::PolymorphicValue(picojson::value&)>;
-
-	static GetValueFromJson g_funcGetValueFromJson[] = {
+	static GetValueFromFile g_funcGetValueFromFile[] = {
 		getValue<vec3>,
 		getValue<texture*>,
 		getValue<real>,
 	};
-	C_ASSERT(AT_COUNTOF(g_funcGetValueFromJson) == _MtrlParamType::Num);
+	C_ASSERT(AT_COUNTOF(g_funcGetValueFromFile) == _MtrlParamType::Num);
 
 	std::map<std::string, _MtrlParamType> g_paramtypes = {
 		std::pair<std::string, _MtrlParamType>("color", _MtrlParamType::Vec3),
@@ -167,6 +232,7 @@ namespace aten {
 		std::pair<std::string, _MtrlParamType>("clearcoatGloss", _MtrlParamType::Double),
 	};
 
+#ifdef USE_JSON
 	void MaterialLoader::load(const std::string& path)
 	{
 		std::string fullpath = path;
@@ -232,7 +298,7 @@ namespace aten {
 							if (itParamType != g_paramtypes.end()) {
 								auto paramType = itParamType->second;
 
-								auto funcGetValue = g_funcGetValueFromJson[paramType];
+								auto funcGetValue = g_funcGetValueFromFile[paramType];
 
 								// Get value from json.
 								auto value = funcGetValue(jsonVal);
@@ -269,6 +335,111 @@ namespace aten {
 			AT_PRINTF("Json parse err [%s]\n", err.c_str());
 		}
 	}
+#else
+	// NOTE
+	// Format
+	// <root>
+	//	<material
+	//		<param_name>=<vales>
+	//	/>
+	// </root>
+	// param_name
+	//  - name : material name [string].
+	//  - type : material type [string]. If type is not specified, default type is "lambert".
+	//  - color : base color, emissive color, albedo color etc... [float3]
+	//	- albedomap : albedo texture [string]
+	//  - normalmap : normal texture [string]
+	//  - roughnessmap : roughness texture [string]
+	//  - ior : index of reflaction [float]
+	//  - shininess [float]
+	//  - roughness [float]
+	//  - metallic [float]
+	//  - subsurface [float]
+	//  - specular [float]
+	//  - roughness [float]
+	//  - specularTint [float]
+	//  - anisotropic [float]
+	//  - sheen [float]
+	//  - sheenTint [float]
+	//  - clearcoat [float]
+	//  - clearcoatGloss [float]
+
+	void MaterialLoader::load(const std::string& path)
+	{
+		std::string fullpath = path;
+		if (!g_base.empty()) {
+			fullpath = g_base + "/" + fullpath;
+		}
+
+		tinyxml2::XMLDocument xml;
+		auto err = xml.LoadFile(fullpath.c_str());
+		if (err != tinyxml2::XML_SUCCESS) {
+			// TODO
+			// throw exception.
+		}
+
+		auto root = xml.FirstChildElement("root");
+		if (root) {
+			for (auto elem = root->FirstChildElement("material"); elem != nullptr; elem = elem->NextSiblingElement("material")) {
+				material* mtrl = nullptr;
+				std::string mtrlName;
+				std::string mtrlType;
+				Values mtrlValues;
+
+				for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+					std::string attrName(attr->Name());
+
+					if (attrName == "name") {
+						mtrlName = attr->Value();
+
+						// Check if there is same name material.
+						mtrl = AssetManager::getMtrl(mtrlName);
+
+						if (mtrl) {
+							AT_PRINTF("There is same tag material. [%s]\n", mtrlName);
+							break;
+						}
+					}
+					else if (attrName == "type") {
+						mtrlType = attr->Value();
+					}
+					else {
+						// Get parameter type by parameter name.
+						auto itParamType = g_paramtypes.find(attrName);
+
+						if (itParamType != g_paramtypes.end()) {
+							auto paramType = itParamType->second;
+							auto funcGetValue = g_funcGetValueFromFile[paramType];
+
+							// Get value from json.
+							auto value = funcGetValue(attr);
+
+							mtrlValues.add(attrName, value);
+						}
+					}
+				}
+
+				if (!mtrl) {
+					if (mtrlType.empty()) {
+						AT_PRINTF("Material type is not specified in [%s]\n", mtrlName.c_str());
+						mtrlType = "lambert";
+					}
+
+					// Create material;
+					mtrl = create(mtrlType, mtrlValues);
+
+					if (mtrl) {
+						AssetManager::registerMtrl(mtrlName, mtrl);
+					}
+					else {
+						AT_ASSERT(false);
+						AT_PRINTF("Failed to create material : type[%s] name[%s]\n", mtrlType.c_str(), mtrlName.c_str());
+					}
+				}
+			}
+		}
+	}
+#endif
 
 	MaterialLoader::MaterialCreator g_funcs[] = {
 		[](Values& values) { return new emissive(values); },			// emissive

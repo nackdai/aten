@@ -20,7 +20,12 @@ namespace aten {
 		static void load(const std::string& path);
 
 	private:
+#ifdef USE_JSON
 		static void onLoad(const std::string& strJson);
+#else
+
+#endif
+
 		static material* create(std::string type, Values& values);
 	};
 }

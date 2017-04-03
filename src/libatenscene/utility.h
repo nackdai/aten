@@ -39,4 +39,27 @@ namespace aten {
 
 		return std::move(ret);
 	}
+
+	inline uint32_t split(const std::string& txt, std::vector<std::string>& strs, char ch)
+	{
+		uint32_t pos = txt.find(ch);
+		uint32_t initialPos = 0;
+		strs.clear();
+
+		auto s = txt.size();
+
+		// Decompose statement
+		//while (pos != std::string::npos) {
+		while (pos <= s) {
+			strs.push_back(txt.substr(initialPos, pos - initialPos + 1));
+			initialPos = pos + 1;
+
+			pos = txt.find(ch, initialPos);
+		}
+
+		// Add the last one
+		strs.push_back(txt.substr(initialPos, std::min<uint32_t>(pos, txt.size()) - initialPos + 1));
+
+		return strs.size();
+	}
 }

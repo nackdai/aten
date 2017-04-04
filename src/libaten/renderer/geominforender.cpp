@@ -156,10 +156,10 @@ namespace aten
 							depth = (depth + 1) * 0.5;
 						}
 
-						dst.geominfo.nml_depth[pos].set(normal, depth);
+						dst.geominfo.nml_depth->put(x, y, vec4(normal, depth));
 					}
 					else {
-						dst.geominfo.nml_depth[pos].set(path.normal, path.depth);
+						dst.geominfo.nml_depth->put(x, y, vec4(path.normal, path.depth));
 					}
 				}
 				if (dst.geominfo.albedo_vis) {
@@ -172,11 +172,10 @@ namespace aten
 						albedo.z = std::min<real>(albedo.z, 1);
 					}
 
-					dst.geominfo.albedo_vis[pos].set(albedo, path.visibility);
+					dst.geominfo.albedo_vis->put(x, y, vec4(albedo, path.visibility));
 				}
 				if (dst.geominfo.ids) {
-					dst.geominfo.ids[pos].x = path.shapeid;
-					dst.geominfo.ids[pos].y = path.mtrlid;
+					dst.geominfo.ids->put(x, y, vec4(path.shapeid, path.mtrlid, 0, 0));
 				}
 			}
 		}

@@ -4,6 +4,7 @@
 #include "sampler/xorshift.h"
 #include "misc/color.h"
 #include "misc/thread.h"
+#include "misc/timer.h"
 
 namespace aten
 {
@@ -201,7 +202,6 @@ namespace aten
 		int width = dst.width;
 		int height = dst.height;
 		uint32_t samples = dst.sample;
-		vec4* color = dst.buffer;
 
 		uint32_t mltNum = dst.mltNum;
 
@@ -220,6 +220,8 @@ namespace aten
 
 		std::vector<std::vector<vec3>> acuumImage(threadNum);
 
+		auto time = timer::getSystemTime();
+
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
@@ -233,7 +235,7 @@ namespace aten
 
 			// TODO
 			// sobol や halton sequence はステップ数が多すぎてオーバーフローしてしまう...
-			XorShift rnd(4 * mltNum + mi + 1);
+			XorShift rnd(4 * mltNum + mi + 1 + time.milliSeconds);
 			MLTSampler mlt(&rnd);
 
 			// たくさんパスを生成する.
@@ -351,7 +353,7 @@ namespace aten
 		for (int n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				color[i] += vec4(image[i] / mltNum, 1);
+				dst.buffer->put(i, vec4(image[i] / mltNum, 1));
 			}
 		}
 	}

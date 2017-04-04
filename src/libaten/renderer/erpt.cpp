@@ -4,6 +4,7 @@
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
 #include "misc/color.h"
+#include "misc/timer.h"
 
 namespace aten
 {
@@ -171,7 +172,6 @@ namespace aten
 		int height = dst.height;
 		uint32_t samples = dst.sample;
 		uint32_t mutation = dst.mutation;
-		vec4* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
@@ -183,6 +183,8 @@ namespace aten
 		auto threadNum = thread::getThreadNum();
 
 		vec3 sumI(0, 0, 0);
+
+		auto time = timer::getSystemTime();
 
 #ifdef ENABLE_OMP
 #pragma omp parallel
@@ -198,7 +200,7 @@ namespace aten
 				auto idx = thread::getThreadIdx();
 
 				for (int x = 0; x < width; x++) {
-					XorShift rnd((y * height * 4 + x * 4) * samples);
+					XorShift rnd((y * height * 4 + x * 4) * samples + time.milliSeconds);
 					ERPTSampler X(&rnd);
 
 					auto path = genPath(scene, &X, x, y, width, height, camera, false);
@@ -233,7 +235,7 @@ namespace aten
 				for (uint32_t i = 0; i < samples; i++) {
 					// TODO
 					// sobol や halton sequence はステップ数が多すぎてオーバーフローしてしまう...
-					XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+					XorShift rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 					ERPTSampler X(&rnd);
 
 					// 現在のスクリーン上のある点からのパスによる放射輝度を求める.
@@ -328,7 +330,7 @@ namespace aten
 		for (int n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				color[i] += vec4(image[i], 1);
+				dst.buffer->put(i, vec4(image[i], 1));
 			}
 		}
 	}

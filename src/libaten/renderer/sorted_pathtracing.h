@@ -82,6 +82,7 @@ namespace aten
 
 		uint32_t m_samples{ 1 };
 
+		std::vector<vec4> m_tmpbuffer;
 		int m_width{ 0 };
 		int m_height{ 0 };
 	};

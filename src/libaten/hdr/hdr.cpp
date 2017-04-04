@@ -19,7 +19,7 @@ namespace aten
 	};
 
 	// doubleのRGB要素を.hdrフォーマット用に変換.
-	static HDRPixel get_hdr_pixel(const vec3& color)
+	static HDRPixel get_hdr_pixel(const vec4& color)
 	{
 		double d = std::max(color.x, std::max(color.y, color.z));
 
@@ -36,7 +36,7 @@ namespace aten
 
 	bool HDRExporter::save(
 		const std::string& filename,
-		const vec3* image,
+		const vec4* image,
 		const int width, const int height)
 	{
 		FILE *fp;

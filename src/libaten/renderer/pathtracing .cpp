@@ -1,5 +1,6 @@
 #include "renderer/pathtracing.h"
 #include "misc/thread.h"
+#include "misc/timer.h"
 #include "renderer/nonphotoreal.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
@@ -626,9 +627,6 @@ namespace aten
 		int height = dst.height;
 		uint32_t samples = dst.sample;
 
-		vec4* color = dst.buffer;
-		vec4* var = dst.variance;
-
 		m_maxDepth = dst.maxDepth;
 		m_rrDepth = dst.russianRouletteDepth;
 		m_startDepth = dst.startDepth;
@@ -656,6 +654,8 @@ namespace aten
 			//XorShift rnd(idx);
 			//UniformDistributionSampler sampler(&rnd);
 
+			auto time = timer::getSystemTime();
+
 #ifdef ENABLE_OMP
 #pragma omp for
 #endif
@@ -670,7 +670,7 @@ namespace aten
 					for (uint32_t i = 0; i < samples; i++) {
 						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
-						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1);
+						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 						UniformDistributionSampler sampler(&rnd);
 
 						real u = real(x + sampler.nextSample()) / real(width);
@@ -723,11 +723,11 @@ namespace aten
 
 					col /= (real)cnt;
 
-					color[pos] = vec4(col, 1);
+					dst.buffer->put(x, y, vec4(col, 1));
 
-					if (var) {
+					if (dst.variance) {
 						col2 /= cnt;
-						var[pos] = vec4(col2 - col * col, 1);
+						dst.variance->put(x, y, vec4(col2 - col * col, 1));
 					}
 				}
 			}

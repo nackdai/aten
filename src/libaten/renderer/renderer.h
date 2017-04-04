@@ -4,6 +4,7 @@
 #include "math/vec3.h"
 #include "math/vec4.h"
 #include "renderer/background.h"
+#include "renderer/film.h"
 
 namespace aten
 {
@@ -16,13 +17,13 @@ namespace aten
 		uint32_t sample{ 1 };
 		uint32_t mutation{ 1 };
 		uint32_t mltNum{ 1 };
-		vec4* buffer{ nullptr };
-		vec4* variance{ nullptr };
+		Film* buffer{ nullptr };
+		Film* variance{ nullptr };
 
 		struct {
-			vec4* nml_depth{ nullptr };		///< Normal and Depth / rgb : normal, a : depth
-			vec4* albedo_vis{ nullptr };	///< Albedo and Visibility / rgb : albedo, a : visibility
-			vec4* ids{ nullptr };			///< Geometry Id / r : shape id, g : material id
+			Film* nml_depth{ nullptr };		///< Normal and Depth / rgb : normal, a : depth
+			Film* albedo_vis{ nullptr };	///< Albedo and Visibility / rgb : albedo, a : visibility
+			Film* ids{ nullptr };			///< Geometry Id / r : shape id, g : material id
 			real depthMax{ 1 };
 			bool needNormalize{ true };
 		} geominfo;

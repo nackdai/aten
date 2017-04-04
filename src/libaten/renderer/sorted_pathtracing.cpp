@@ -1,5 +1,6 @@
 #include "renderer/sorted_pathtracing.h"
 #include "misc/thread.h"
+#include "misc/timer.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -13,6 +14,9 @@ namespace aten
 		Path* paths,
 		camera* camera)
 	{
+
+		auto time = timer::getSystemTime();
+
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
@@ -25,10 +29,10 @@ namespace aten
 				if (!path.isTerminate) {
 					if (path.sampler) {
 						auto rnd = (Sobol*)path.sampler->getRandom();
-						rnd->reset((y * height * 4 + x * 4) * m_samples + sample + 1);
+						rnd->reset((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
 					}
 					else {
-						auto rnd = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1);
+						auto rnd = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
 						auto sampler = new UniformDistributionSampler(rnd);
 						path.sampler = sampler;
 					}
@@ -179,10 +183,13 @@ namespace aten
 	{
 		m_width = dst.width;
 		m_height = dst.height;
-		vec4* color = dst.buffer;
 
-		// TODO
-		memset(color, 0, sizeof(vec4) * m_width * m_height);
+		if (m_tmpbuffer.size() == 0) {
+			m_tmpbuffer.resize(m_width * m_height);
+		}
+		
+		vec4* color = &m_tmpbuffer[0];
+		memset(color, 0, m_tmpbuffer.size() * sizeof(vec4));
 
 		m_samples = dst.sample;
 		m_maxDepth = dst.maxDepth;
@@ -237,21 +244,21 @@ namespace aten
 			gather(&paths[0], (int)paths.size(), color);
 		}
 
-		if (m_samples > 1) {
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-			for (int y = 0; y < m_height; y++) {
-				for (int x = 0; x < m_width; x++) {
-					auto pos = y * m_width + x;
+		for (int y = 0; y < m_height; y++) {
+			for (int x = 0; x < m_width; x++) {
+				auto pos = y * m_width + x;
 
-					auto& clr = color[pos];
+				auto& clr = color[pos];
 
-					clr.r /= clr.w;
-					clr.g /= clr.w;
-					clr.b /= clr.w;
-					clr.w = 1;
-				}
+				clr.r /= clr.w;
+				clr.g /= clr.w;
+				clr.b /= clr.w;
+				clr.w = 1;
+
+				dst.buffer->put(x, y, clr);
 			}
 		}
 	}

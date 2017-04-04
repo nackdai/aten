@@ -299,9 +299,10 @@
     <ClInclude Include="..\src\libaten\camera\equirect.h">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\aten.h">
-      <Filter>visualizer</Filter>
+    <ClInclude Include="..\src\libaten\renderer\film.h">
+      <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\aten.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -459,6 +460,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\equirect.cpp">
       <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\film.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

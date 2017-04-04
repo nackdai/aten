@@ -36,4 +36,22 @@ namespace aten {
 		auto time = (cur.QuadPart - m_begin) * 1000.0f / s_freq;
 		return time;
 	}
+
+	SystemTime timer::getSystemTime()
+	{
+		SYSTEMTIME time;
+		::GetSystemTime(&time);
+
+		SystemTime ret;
+		ret.year = time.wYear;
+		ret.month = time.wMonth;
+		ret.dayOfWeek = time.wDayOfWeek;
+		ret.day = time.wDay;
+		ret.hour = time.wHour;
+		ret.minute = time.wMinute;
+		ret.second = time.wSecond;
+		ret.milliSeconds = time.wMilliseconds;
+
+		return std::move(ret);
+	}
 }

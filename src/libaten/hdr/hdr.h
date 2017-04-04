@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "math/vec3.h"
+#include "math/vec4.h"
 
 namespace aten
 {
@@ -10,7 +11,7 @@ namespace aten
 	public:
 		static bool save(
 			const std::string& filename,
-			const vec3* image,
+			const vec4* image,
 			const int width, const int height);
 	};
 }

@@ -30,8 +30,8 @@ static aten::PathTracing g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
 
-static std::vector<aten::vec4> g_buffer;
-static std::vector<aten::TColor<uint8_t>> g_dst;
+//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static bool isExportedHdr = false;
 
@@ -50,13 +50,13 @@ void display()
 		dst.maxDepth = 6;
 		dst.russianRouletteDepth = 3;
 		dst.startDepth = 0;
-		dst.sample = 10;
+		dst.sample = 1;
 		dst.mutation = 10;
 		dst.mltNum = 10;
-		dst.buffer = &g_buffer[0];
+		dst.buffer = &g_buffer;
 	}
 
-	dst.geominfo.albedo_vis = &g_buffer[0];
+	dst.geominfo.albedo_vis = &g_buffer;
 	dst.geominfo.depthMax = 1000;
 
 	aten::timer timer;
@@ -74,11 +74,11 @@ void display()
 		// Export to hdr format.
 		aten::HDRExporter::save(
 			"result.hdr",
-			(aten::vec3*)&g_buffer[0],
+			g_buffer.image(),
 			WIDTH, HEIGHT);
 	}
 
-	aten::visualizer::render(&g_buffer[0], g_camera.needRevert());
+	aten::visualizer::render(g_buffer.image(), g_camera.needRevert());
 }
 
 int main(int argc, char* argv[])
@@ -203,9 +203,6 @@ int main(int argc, char* argv[])
 	//aten::NonLocalMeanFilter filter;
 	//aten::BilateralFilter filter;
 	//aten::visualizer::addPreProc(&filter);
-
-	g_buffer.resize(WIDTH * HEIGHT);
-	g_dst.resize(WIDTH * HEIGHT);
 
 	aten::window::run(display);
 

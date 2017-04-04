@@ -71,6 +71,7 @@
 #include "shape/cube.h"
 
 #include "renderer/renderer.h"
+#include "renderer/film.h"
 #include "renderer/background.h"
 #include "renderer/envmap.h"
 #include "renderer/raytracing.h"

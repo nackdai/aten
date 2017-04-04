@@ -1,8 +1,6 @@
 #include "raytracing.h"
 #include "misc/thread.h"
 #include "renderer/nonphotoreal.h"
-#include "sampler/xorshift.h"
-#include "sampler/UniformDistributionSampler.h"
 
 namespace aten
 {
@@ -114,7 +112,6 @@ namespace aten
 	{
 		int width = dst.width;
 		int height = dst.height;
-		vec4* color = dst.buffer;
 
 		m_maxDepth = dst.maxDepth;
 
@@ -124,11 +121,6 @@ namespace aten
 #pragma omp parallel
 #endif
 		{
-			auto idx = thread::getThreadIdx();
-
-			XorShift rnd(idx);
-			UniformDistributionSampler sampler(&rnd);
-
 #ifdef ENABLE_OMP
 #pragma omp for
 #endif
@@ -143,7 +135,7 @@ namespace aten
 
 					auto col = radiance(camsample.r, scene);
 
-					color[pos] = vec4(col, 1);
+					dst.buffer->put(x, y, vec4(col, 1));
 				}
 			}
 		}

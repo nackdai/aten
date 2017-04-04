@@ -32,8 +32,9 @@ namespace aten
 	{
 		m_image[i] = v;
 	}
-#pragma optimize( "", off ) 
 
+	// NOTE
+	// http://www.flint.jp/blog/?entry=86
 
 	void FilmProgressive::put(int i, const vec4& v)
 	{
@@ -41,9 +42,9 @@ namespace aten
 
 		auto n = curValue.w;
 
-		curValue.v = n * curValue.v + v;
-		curValue.v /= (n + 1);
+		curValue = n * curValue + v;
+		curValue /= (n + 1);
 
-		curValue.w += 1;
+		curValue.w = n + 1;
 	}
 }

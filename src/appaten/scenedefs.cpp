@@ -39,7 +39,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 
 	//auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
-//#define DEFALT	(1)
+#define DEFALT	(1)
 
 #if DEFALT
 	// —Î‹….
@@ -114,8 +114,9 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	auto glass = new aten::instance<aten::object>(obj, mtxL2W);
 #endif
 
-#if 1
-	//scene->add(light);
+#if DEFALT
+	scene->add(light);
+#endif
 	scene->add(left);
 	scene->add(right);
 	scene->add(wall);
@@ -125,11 +126,13 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(mirror);
 	scene->add(glass);
 
-	//aten::Light* l = new aten::AreaLight(light, emit->color());
+#if DEFALT
+	aten::Light* l = new aten::AreaLight(light, emit->color());
+#else
 	aten::Light* l = new aten::AreaLight(glass, emit->color());
+#endif
 
 	scene->addLight(l);
-#endif
 }
 
 void CornellBoxScene::getCameraPosAndAt(

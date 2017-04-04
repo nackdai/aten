@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
@@ -30,17 +30,17 @@ static aten::GeometryInfoRenderer g_geotracer;
 //#define VFI
 #define GR
 
-static std::vector<aten::vec4> g_directBuffer(WIDTH * HEIGHT);
+static aten::Film g_directBuffer(WIDTH, HEIGHT);
 
 #if defined(GR)
 static const int g_ratio = 2;
-static std::vector<aten::vec4> g_indirectBuffer((WIDTH / g_ratio) * (HEIGHT / g_ratio));
+static aten::Film g_indirectBuffer((WIDTH / g_ratio), (HEIGHT / g_ratio));
 #else
-static std::vector<aten::vec4> g_indirectBuffer(WIDTH * HEIGHT);
+static aten::Film g_indirectBuffer(WIDTH, HEIGHT);
 #endif
 
-static std::vector<aten::vec4> g_varIndirectBuffer(WIDTH * HEIGHT);
-static std::vector<aten::vec4> g_nml_depth_Buffer(WIDTH * HEIGHT);
+static aten::Film g_varIndirectBuffer(WIDTH, HEIGHT);
+static aten::Film g_nml_depth_Buffer(WIDTH, HEIGHT);
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -61,10 +61,10 @@ aten::PracticalNoiseReduction denoiser;
 void display()
 {
 #if defined(VFI)
-	aten::vec4* image = &g_directBuffer[0];
-	aten::vec4* varImage = &g_indirectBuffer[0];
-	aten::vec4* flash = &g_varIndirectBuffer[0];
-	aten::vec4* varFlash = &g_nml_depth_Buffer[0];
+	aten::Film* image = &g_directBuffer;
+	aten::Film* varImage = &g_indirectBuffer;
+	aten::Film* flash = &g_varIndirectBuffer;
+	aten::Film* varFlash = &g_nml_depth_Buffer;
 
 	{
 		aten::Destination dst;
@@ -108,13 +108,15 @@ void display()
 
 	denoiser.setParam(
 		16,
-		varImage, flash, varFlash);
+		varImage->image(), 
+		flash->image(),
+		varFlash->image());
 
-	aten::visualizer::render(image, g_camera.needRevert());
+	aten::visualizer::render(image->image(), g_camera.needRevert());
 #elif defined(GR)
-	aten::vec4* direct = &g_directBuffer[0];
-	aten::vec4* indirect = &g_indirectBuffer[0];
-	aten::vec4* idx = &g_varIndirectBuffer[0];
+	aten::Film* direct = &g_directBuffer;
+	aten::Film* indirect = &g_indirectBuffer;
+	aten::Film* idx = &g_varIndirectBuffer;
 
 	{
 		aten::Destination dst;
@@ -159,11 +161,11 @@ void display()
 
 	denoiser.setParam(
 		g_ratio,
-		direct,
-		indirect,
-		idx);
+		direct->image(),
+		indirect->image(),
+		idx->image());
 
-	aten::visualizer::render(&g_indirectBuffer[0], g_camera.needRevert());
+	aten::visualizer::render(g_indirectBuffer.image(), g_camera.needRevert());
 #else
 	{
 		aten::Destination dst;
@@ -176,8 +178,8 @@ void display()
 			dst.sample = 40;
 			dst.mutation = 10;
 			dst.mltNum = 10;
-			dst.buffer = &g_indirectBuffer[0];
-			dst.variance = &g_varIndirectBuffer[0];
+			dst.buffer = &g_indirectBuffer;
+			dst.variance = &g_varIndirectBuffer;
 		}
 
 		g_pathtracer.render(dst, &g_scene, &g_camera);
@@ -189,7 +191,7 @@ void display()
 			dst.width = WIDTH;
 			dst.height = HEIGHT;
 			dst.maxDepth = 6;
-			dst.buffer = &g_directBuffer[0];
+			dst.buffer = &g_directBuffer;
 		}
 
 		g_raytracer.render(dst, &g_scene, &g_camera);
@@ -202,7 +204,7 @@ void display()
 		{
 			dst.width = WIDTH;
 			dst.height = HEIGHT;
-			dst.geominfo.nml_depth = &g_nml_depth_Buffer[0];
+			dst.geominfo.nml_depth = &g_nml_depth_Buffer;
 			dst.geominfo.depthMax = 1000;
 			dst.geominfo.needNormalize = false;
 		}
@@ -211,12 +213,12 @@ void display()
 	}
 
 	denoiser.setBuffers(
-		&g_directBuffer[0],
-		&g_indirectBuffer[0],
-		&g_varIndirectBuffer[0],
-		&g_nml_depth_Buffer[0]);
+		g_directBuffer.image(),
+		g_indirectBuffer.image(),
+		g_varIndirectBuffer.image(),
+		g_nml_depth_Buffer.image());
 
-	aten::visualizer::render(&g_indirectBuffer[0], g_camera.needRevert());
+	aten::visualizer::render(g_indirectBuffer.image(), g_camera.needRevert());
 #endif
 }
 

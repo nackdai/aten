@@ -7,7 +7,12 @@
     <ClCompile Include="..\src\appaten\main_denoise.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\appaten\main_test.cpp" />
+    <ClCompile Include="..\src\appaten\main_test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\appaten\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

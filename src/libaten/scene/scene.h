@@ -63,6 +63,10 @@ namespace aten {
 		scene() {}
 		virtual ~scene() {}
 
+	public:
+		virtual void build()
+		{}
+
 		void add(bvhnode* s)
 		{
 			m_tmp.push_back(s);
@@ -140,7 +144,7 @@ namespace aten {
 		virtual ~AcceledScene() {}
 
 	public:
-		void build()
+		virtual void build() override final
 		{
 			if (!m_tmp.empty()) {
 				m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size());

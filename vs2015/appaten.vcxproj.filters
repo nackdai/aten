@@ -4,12 +4,10 @@
     <ClCompile Include="..\src\appaten\scenedefs.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\appaten\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\appaten\main_denoise.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\appaten\main_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

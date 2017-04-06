@@ -19,6 +19,16 @@ namespace aten {
 			setAttenuation(constAttn, linearAttn, expAttn);
 		}
 
+		PointLight(Values& val)
+			: Light(val)
+		{
+			m_constAttn = val.get("constAttn", m_constAttn);
+			m_linearAttn = val.get("linearAttn", m_linearAttn);
+			m_expAttn = val.get("expAttn", m_expAttn);
+
+			setAttenuation(m_constAttn, m_linearAttn, m_expAttn);
+		}
+
 		virtual ~PointLight() {}
 
 	public:

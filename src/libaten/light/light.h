@@ -3,6 +3,7 @@
 #include "scene/hitable.h"
 #include "math/vec3.h"
 #include "sampler/sampler.h"
+#include "misc/value.h"
 
 namespace aten {
 	struct LightSampleResult {
@@ -20,6 +21,14 @@ namespace aten {
 	class Light : public hitable {
 	protected:
 		Light() {}
+
+		Light(Values& val)
+		{
+			m_pos = val.get("pos", m_pos);
+			m_dir = val.get("dir", m_pos);
+			m_le = val.get("le", m_pos);
+		}
+
 		virtual ~Light() {}
 
 	public:

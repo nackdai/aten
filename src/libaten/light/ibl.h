@@ -13,6 +13,17 @@ namespace aten {
 			setEnvMap(envmap);
 		}
 
+		ImageBasedLight(Values& val)
+			: Light(val)
+		{
+			texture* tex = (texture*)val.get("envmap", nullptr);
+			
+			envmap* bg = new envmap();
+			bg->init(tex);
+
+			setEnvMap(bg);
+		}
+
 		virtual ~ImageBasedLight() {}
 
 	public:

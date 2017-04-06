@@ -25,6 +25,22 @@ namespace aten {
 			setSpotlightFactor(innerAngle, outerAngle, falloff);
 		}
 
+		SpotLight(Values& val)
+			: Light(val)
+		{
+			m_constAttn = val.get("constAttn", m_constAttn);
+			m_linearAttn = val.get("linearAttn", m_linearAttn);
+			m_expAttn = val.get("expAttn", m_expAttn);
+
+			setAttenuation(m_constAttn, m_linearAttn, m_expAttn);
+
+			m_innerAngle = val.get("innerAngle", m_innerAngle);
+			m_outerAngle = val.get("outerAngle", m_outerAngle);
+			m_falloff = val.get("falloff", m_falloff);
+
+			setSpotlightFactor(m_innerAngle, m_outerAngle, m_falloff);
+		}
+
 		virtual ~SpotLight() {}
 
 	public:

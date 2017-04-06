@@ -12,6 +12,13 @@ namespace aten {
 			m_le = le;
 		}
 
+		AreaLight(Values& val)
+			: Light(val)
+		{
+			m_object = (hitable*)val.get("object", m_object);
+			m_le = val.get("color", m_le);
+		}
+
 		virtual ~AreaLight() {}
 
 	public:

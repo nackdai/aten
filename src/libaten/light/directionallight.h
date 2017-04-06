@@ -14,6 +14,10 @@ namespace aten {
 			m_le = le;
 		}
 
+		DirectionalLight(Values& val)
+			: Light(val)
+		{}
+
 		virtual ~DirectionalLight() {}
 
 	public:

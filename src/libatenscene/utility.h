@@ -42,8 +42,8 @@ namespace aten {
 
 	inline uint32_t split(const std::string& txt, std::vector<std::string>& strs, char ch)
 	{
-		uint32_t pos = txt.find(ch);
-		uint32_t initialPos = 0;
+		auto pos = txt.find(ch);
+		size_t initialPos = 0;
 		strs.clear();
 
 		auto s = txt.size();
@@ -58,8 +58,8 @@ namespace aten {
 		}
 
 		// Add the last one
-		strs.push_back(txt.substr(initialPos, std::min<uint32_t>(pos, txt.size()) - initialPos + 1));
+		strs.push_back(txt.substr(initialPos, std::min<size_t>(pos, txt.size()) - initialPos + 1));
 
-		return strs.size();
+		return (uint32_t)strs.size();
 	}
 }

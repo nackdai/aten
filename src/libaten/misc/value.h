@@ -12,7 +12,6 @@ namespace aten {
 			real f;
 			int i;
 			bool b;
-			std::string* s;
 			vec3 v;
 			void* p;
 
@@ -24,11 +23,9 @@ namespace aten {
 
 		PolymorphicValue()
 		{
-			val.s = new std::string();
 		}
 		PolymorphicValue(const PolymorphicValue& rhs)
 		{
-			val.s = new std::string();
 			memcpy(&val, &rhs.val, sizeof(_value));
 		}
 		~PolymorphicValue() {}
@@ -46,16 +43,6 @@ namespace aten {
 		PolymorphicValue& operator=(bool _b)
 		{
 			val.b = _b;
-			return *this;
-		}
-		PolymorphicValue& operator=(const char* _ch)
-		{
-			*val.s = _ch;
-			return *this;
-		}
-		PolymorphicValue& operator=(const std::string& _s)
-		{
-			*val.s = _s;
 			return *this;
 		}
 		PolymorphicValue& operator=(const vec3& _v)
@@ -80,14 +67,6 @@ namespace aten {
 		operator bool() const
 		{
 			return val.b;
-		}
-		operator std::string() const
-		{
-			return *val.s;
-		}
-		operator const char*() const
-		{
-			return val.s->c_str();
 		}
 		operator vec3() const
 		{
@@ -118,16 +97,6 @@ namespace aten {
 		bool getAs() const
 		{
 			return val.b;
-		}
-		template <>
-		std::string getAs() const
-		{
-			return *val.s;
-		}
-		template <>
-		const char* getAs() const
-		{
-			return val.s->c_str();
 		}
 		template <>
 		vec3 getAs() const

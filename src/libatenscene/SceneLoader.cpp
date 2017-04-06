@@ -5,11 +5,7 @@
 #include "ObjLoader.h"
 #include "AssetManager.h"
 
-#ifdef USE_JSON
-#include "picojson.h"
-#else
 #include "tinyxml2.h"
-#endif
 
 namespace aten
 {
@@ -20,273 +16,6 @@ namespace aten
 		g_base = removeTailPathSeparator(base);
 	}
 
-#ifdef USE_JSON
-	// NOTE
-	// Format
-	// {
-	//		"textures" : {
-	//			<tag> : <path>
-	//		},
-	//		"materials" : {
-	//			"path" : <path>,
-	//			<tag> : {
-	//				<param_name> : <value>
-	//			}
-	//		},
-	//		"objects" : {
-	//			<tag> : <path>
-	//		},
-	//		"scene" : {
-	//			"config" : {
-	//				"width" : <width_of_resolution>,
-	//				"height" : <height_of_resolution>,
-	//				"renderer" : {
-	//					"type" : <renderer_type>
-	//					"spp" : <number_of_samples>
-	//					"mutation" : <number_of_mutation>
-	//					"mlt" : <number_of_mlt>
-	//					"depth" : <max_depth>
-	//					"rrdepth" : <depth_of_russian_roulette>
-	//				},
-	//				"bg" : <envmap_tag> or [<r>, <g>, <b>],
-	//				"preproc" : {
-	//					<preproc_tag> : {
-	//						<param_name> : <value>
-	//					},
-	//				},
-	//				"postproc" : {
-	//					<preproc_tag> : {
-	//						<param_name> : <value>
-	//					},
-	//				},
-	//			},
-	//			<object name> : {
-	//				"obj" : <object_tag>,
-	//				"trans" : [<x>, <y>, <z>],
-	//				"scale" : <scale>,
-	//				"rotate" : [<x>, <y>, <z>],
-	//				"material" : <material_tag>
-	//			}
-	//		]
-	// }
-
-	struct AssetInfo {
-		std::string tag;
-		std::string info;
-	};
-
-	using AssetInfoMap = std::vector<AssetInfo>;
-
-	static AssetInfoMap g_mtrlInfos;
-	static AssetInfoMap g_objInfos;
-	static AssetInfoMap g_textureInfos;
-
-	void readAssetInfo(AssetInfoMap& assetInfos, picojson::object& infos)
-	{	
-		for (auto it = infos.begin(); it != infos.end(); it++) {
-			assetInfos.push_back(AssetInfo());
-			AssetInfo& info = assetInfos[assetInfos.size() - 1];
-
-			info.tag = it->first;
-
-			auto& jsonVal = it->second;
-			info.info = jsonVal.get<std::string>();			
-		}
-	}
-
-	struct SceneObjInfo {
-		std::string objtag;
-		vec3 trans;
-		vec3 scale;
-		vec3 rotate;
-		std::string mtrltag;
-	};
-
-	std::vector<SceneObjInfo> g_sceneObjInfos;
-
-	void readRendererInfo(
-		SceneLoader::SceneInfo& info,
-		picojson::object& objs)
-	{
-		for (auto it = objs.begin(); it != objs.end(); it++) {
-			auto name = it->first;
-			auto& jsonVal = it->second;
-
-			// Convert to lower.
-			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-			if (name == "type") {
-				info.rendererType = jsonVal.get<std::string>();
-				std::transform(info.rendererType.begin(), info.rendererType.end(), info.rendererType.begin(), ::tolower);
-			}
-			else if (name == "spp") {
-				info.dst.sample = (int)jsonVal.get<double>();
-			}
-			else if (name == "mutation") {
-				info.dst.mutation = (int)jsonVal.get<double>();
-			}
-			else if (name == "mlt") {
-				info.dst.mltNum = (int)jsonVal.get<double>();
-			}
-			else if (name == "depth") {
-				info.dst.maxDepth = (int)jsonVal.get<double>();
-			}
-			else if (name == "rrdepth") {
-				info.dst.russianRouletteDepth = (int)jsonVal.get<double>();
-			}
-		}
-	}
-
-	void readProcInfo(
-		std::vector<SceneLoader::ProcInfo>& infos,
-		picojson::object& objs)
-	{
-		for (auto it = objs.begin(); it != objs.end(); it++) {
-			SceneLoader::ProcInfo procInfo;
-
-			auto name = it->first;
-			auto& jsonVal = it->second;
-
-			// Convert to lower.
-			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-			procInfo.type = name;
-
-			auto& params = jsonVal.get<picojson::object>();
-
-			for (auto pit = params.begin(); pit != params.end(); pit++) {
-				auto paramName = pit->first;
-				auto& val = pit->second;
-
-				// Convert to lower.
-				std::transform(paramName.begin(), paramName.end(), paramName.begin(), ::tolower);
-
-				aten::PolymorphicValue param;
-				param = val.get<double>();
-
-				procInfo.values.add(paramName, param);
-			}
-
-			infos.push_back(procInfo);
-		}
-	}
-
-	void readSceneInfo(
-		SceneLoader::SceneInfo& info,
-		picojson::object& objs)
-	{
-		for (auto it = objs.begin(); it != objs.end(); it++) {
-			auto name = it->first;
-
-			// Convert to lower.
-			std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-			if (name == "config") {
-				auto configs = objs["config"].get<picojson::object>();
-
-				for (auto it = configs.begin(); it != configs.end(); it++) {
-					auto paramName = it->first;
-					auto& jsonVal = it->second;
-
-					// Convert to lower.
-					std::transform(paramName.begin(), paramName.end(), paramName.begin(), ::tolower);
-
-					if (paramName == "width") {
-						info.dst.width = (int)jsonVal.get<double>();
-					}
-					else if (paramName == "height") {
-						info.dst.height = (int)jsonVal.get<double>();
-					}
-					else if (paramName == "renderer") {
-						auto& rendererObjs = jsonVal.get<picojson::object>();
-						readRendererInfo(info, rendererObjs);
-					}
-					else if (paramName == "bg") {
-					}
-					else if (paramName == "preproc") {
-						auto& preprocObjs = jsonVal.get<picojson::object>();
-						readProcInfo(info.preprocs, preprocObjs);
-					}
-					else if (paramName == "postproc") {
-						auto& postprocObjs = jsonVal.get<picojson::object>();
-						readProcInfo(info.postprocs, postprocObjs);
-					}
-				}
-			}
-			else {
-
-			}
-		}
-	}
-
-	SceneLoader::SceneInfo SceneLoader::load(const std::string& path)
-	{
-		std::string fullpath = path;
-		if (!g_base.empty()) {
-			fullpath = g_base + "/" + fullpath;
-		}
-
-		std::vector<char> filechars;
-
-		// Read json text.
-		FILE* fp = fopen(fullpath.c_str(), "rt");
-		{
-			fseek(fp, 0, SEEK_END);
-			auto size = ftell(fp);
-			fseek(fp, 0, SEEK_SET);
-			filechars.resize(size + 1);
-			fread(&filechars[0], sizeof(char), size, fp);
-			fclose(fp);
-		}
-
-		std::string strJson(&filechars[0]);
-
-		// Parse json.
-		picojson::value json;
-		auto err = picojson::parse(json, strJson);
-
-		SceneInfo info;
-
-		if (err.empty()) {
-			auto params = json.get<picojson::object>();
-
-			for (auto it = params.begin(); it != params.end(); it++) {
-				auto name = it->first;
-
-				auto values = params[name].get<picojson::object>();
-
-				// Convert to lower.
-				std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-				if (name == "materials") {
-					readAssetInfo(g_mtrlInfos, values);
-				}
-				else if (name == "textures") {
-					readAssetInfo(g_textureInfos, values);
-				}
-				else if (name == "objects") {
-					readAssetInfo(g_objInfos, values);
-				}
-				else if (name == "scene") {
-					readSceneInfo(info, values);
-				}
-				else {
-					// TODO
-					// throw exception.
-				}
-			}
-		}
-		else {
-			// TODO
-			// throw exception.
-		}
-
-		// TODO
-		info.scene = new aten::AcceledScene<aten::bvh>();
-
-		return std::move(info);
-	}
-#else
 	// NOTE
 	// <scene width=<uint> height=<uint>>
 	//		<camera 
@@ -309,7 +38,9 @@ namespace aten
 	//			<texture name=<string> path=<string>/>
 	//		</textures>
 	//		<objects>
-	//			<object name=<string> type=<string> path=<string> trans=<vec3> rotate=<vec3> scale=<float> material=<string>/>
+	//			<object name=<string> type="object" path=<string> trans=<vec3> rotate=<vec3> scale=<real> material=<string>/>
+	//			<object name=<string> type="sphere" center=<vec3> radius=<real> material=<string>/>
+	//			<object name=<string> type="cube" center=<vec3> width=<real> height=<real> depth=<real> material=<string>/>
 	//		</objects>
 	//		<lights>
 	//			<light type=<string> color=<vec3> [attributes...]/>
@@ -405,9 +136,85 @@ namespace aten
 		}
 	}
 
+
+	template <typename TYPE>
+	static aten::PolymorphicValue getValue(const tinyxml2::XMLAttribute* a)
+	{
+		AT_ASSERT(false);
+		PolymorphicValue ret;
+		return ret;
+	}
+
+	template <>
+	static aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLAttribute* a)
+	{
+		aten::PolymorphicValue v;
+
+		std::string text(a->Value());
+
+		std::vector<std::string> values;
+		int num = split(text, values, ' ');
+
+		for (int i = 0; i < std::min<int>(num, 3); i++) {
+			v.val.v[i] = (real)atof(values[i].c_str());
+		}
+
+		return std::move(v);
+	}
+
+	template <>
+	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
+	{
+		aten::PolymorphicValue v;
+		v.val.f = a->DoubleValue();
+		return std::move(v);
+	}
+
+	template <>
+	static aten::PolymorphicValue getValue<uint32_t>(const tinyxml2::XMLAttribute* a)
+	{
+		aten::PolymorphicValue v;
+		v.val.i = a->IntValue();
+		return std::move(v);
+	}
+
+	material* findMaterialInObject(
+		const tinyxml2::XMLElement* root,
+		const std::string& objtag)
+	{
+		auto objRoot = root->FirstChildElement("objects");
+
+		if (!objRoot) {
+			return nullptr;
+		}
+
+		material* mtrl = nullptr;
+
+		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = objRoot->NextSiblingElement("object")) {
+			std::string tag;
+
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "name") {
+					tag = attr->Value();		
+				}
+				else if (attrName == "material") {
+					mtrl = AssetManager::getMtrl(attr->Value());
+				}
+			}
+
+			if (objtag != tag) {
+				mtrl = nullptr;
+			}
+		}
+
+		return mtrl;
+	}
+
 	void readObjects(
 		const tinyxml2::XMLElement* root,
-		std::vector<hitable*>& objs)
+		std::map<std::string, bvhnode*>& objs)
 	{
 		auto objRoot = root->FirstChildElement("objects");
 
@@ -415,21 +222,12 @@ namespace aten
 			return;
 		}
 
-		enum Type {
-			Sphere,
-			Cube,
-			Object,
-		};
-
 		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = objRoot->NextSiblingElement("object")) {
 			std::string path;
 			std::string tag;
+			std::string type;
 
-			vec3 trans(1);
-			vec3 rotate(0);
-			real scale(1);
-
-			Type type = (Type)0;
+			Values val;
 
 			material* mtrl = nullptr;
 
@@ -443,69 +241,283 @@ namespace aten
 					tag = attr->Value();
 				}
 				else if (attrName == "type") {
-					type = (Type)attr->UnsignedValue();
+					type = attr->Value();
 				}
-				else if (attrName == "trans" || attrName == "rotate") {
-					std::string text(attr->Value());
-
-					std::vector<std::string> values;
-					int num = split(text, values, ' ');
-
-					vec3* v = (attrName == "trans" ? &trans : &rotate);
-
-					for (int i = 0; i < std::min<int>(num, 3); i++) {
-						(*v)[i] = (real)atof(values[i].c_str());
-					}
+				else if (attrName == "trans" || attrName == "rotate" || attrName == "center") {
+					auto v = getValue<vec3>(attr);
+					val.add(attrName, v);
 				}
-				else if (attrName == "scale") {
-					scale = attr->DoubleValue();
+				else if (attrName == "scale"
+					|| attrName == "radius"
+					|| attrName == "width" 
+					|| attrName == "height" 
+					|| attrName == "depth")
+				{
+					auto v = getValue<real>(attr);
+					val.add(attrName, v);
 				}
 				else if (attrName == "material") {
 					mtrl = AssetManager::getMtrl(attr->Value());
 				}
 			}
 
+			if (tag.empty()) {
+				// TODO
+				// throw exception.
+				return;
+			}
+
 			object* obj = nullptr;
 
-			if (type == Type::Object) {
-				if (!tag.empty()) {
-					obj = ObjLoader::load(tag, path);
-				}
-				else {
-					obj = ObjLoader::load(path);
-				}
+			if (type == "object") {
+				obj = ObjLoader::load(path);
 			}
 
 			mat4 mtxS;
-			mtxS.asScale(scale);
+			mtxS.asScale(val.get("scale", real(1)));
 
 			mat4 mtxRotX, mtxRotY, mtxRotZ;
+			auto rotate = val.get("rotate", vec3(0));
 			mtxRotX.asRotateByX(rotate.x);
-			mtxRotY.asRotateByX(rotate.x);
-			mtxRotZ.asRotateByX(rotate.x);
+			mtxRotY.asRotateByY(rotate.x);
+			mtxRotZ.asRotateByZ(rotate.x);
 
 			mat4 mtxT;
-			mtxT.asTrans(trans);
+			mtxT.asTrans(val.get("trans", vec3(0)));
 
 			auto mtxL2W = mtxT * mtxRotX * mtxRotY * mtxRotZ * mtxS;
 
 			if (obj) {
 				auto instance = new aten::instance<aten::object>(obj, mtxL2W);
-				objs.push_back(instance);
+				objs.insert(std::pair<std::string, bvhnode*>(tag, instance));
 			}
 			else {
-				if (type == Type::Cube) {
-					auto cube = new aten::cube(1, 1, 1, mtrl);
-					auto instance = new aten::instance<aten::cube>(cube, mtxL2W);
-					objs.push_back(instance);
+				if (type == "cube") {
+					auto cube = new aten::cube(
+						val.get("center", vec3(0)),
+						val.get("width", real(1)),
+						val.get("height", real(1)),
+						val.get("depth", real(1)),
+						mtrl);
+					objs.insert(std::pair<std::string, bvhnode*>(tag, cube));
 				}
-				else {
-					auto sphere = new aten::sphere(1, mtrl);
-					auto instance = new aten::instance<aten::sphere>(sphere, mtxL2W);
-					objs.push_back(instance);
+				else if (type == "sphere") {
+					auto sphere = new aten::sphere(
+						val.get("center", vec3(0)),
+						val.get("radius", real(1)),
+						mtrl);
+					objs.insert(std::pair<std::string, bvhnode*>(tag, sphere));
 				}
 			}
 		}
+	}
+
+	void realLights(
+		const tinyxml2::XMLElement* root,
+		const std::map<std::string, bvhnode*>& objs,
+		std::vector<Light*>& lights)
+	{
+		auto lightRoot = root->FirstChildElement("lights");
+
+		if (!lightRoot) {
+			return;
+		}
+
+		for (auto elem = lightRoot->FirstChildElement("light"); elem != nullptr; elem = lightRoot->NextSiblingElement("light")) {
+			std::string type;
+			Values val;
+			std::string objtag;
+
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "type") {
+					type = attr->Value();
+				}
+				else if (attrName == "color" || attrName == "pos" || attrName == "dir") {
+					auto v = getValue<vec3>(attr);
+					val.add(attrName, v);
+				}
+				else if (attrName == "envmap") {
+					auto envmap = AssetManager::getTex(attr->Value());
+					if (envmap) {
+						PolymorphicValue v;
+						v.val.p = envmap;
+						val.add(attrName, v);
+					}
+				}
+				else if (attrName == "object") {
+					objtag = attr->Value();
+				}
+				else {
+					auto v = getValue<real>(attr);
+					val.add(attrName, v);
+				}
+			}
+
+			Light* light = nullptr;
+
+			if (type == "area") {
+				if (!objtag.empty()) {
+					auto it = objs.find(objtag);
+					if (it != objs.end()) {
+						auto mtrl = findMaterialInObject(root, objtag);
+						if (mtrl) {
+							light = new AreaLight(it->second, mtrl->color());
+						}
+					}
+				}
+			}
+			else if (type == "point") {
+				light = new PointLight(val);
+			}
+			else if (type == "spot") {
+				light = new SpotLight(val);
+			}
+			else if (type == "dir") {
+				light = new DirectionalLight(val);
+			}
+			else if (type == "ibl") {
+				light = new ImageBasedLight(val);
+			}
+
+			if (light) {
+				lights.push_back(light);
+			}
+		}
+	}
+
+	void readProcs(
+		const tinyxml2::XMLElement* root,
+		const std::string& elemName,
+		std::vector<SceneLoader::ProcInfo>& infos)
+	{
+		auto procRoot = root->FirstChildElement(elemName.c_str());
+
+		if (!procRoot) {
+			return;
+		}
+
+		for (auto elem = procRoot->FirstChildElement("proc"); elem != nullptr; elem = procRoot->NextSiblingElement("proc")) {
+			infos.push_back(SceneLoader::ProcInfo());
+
+			auto& info = infos[infos.size() - 1];
+
+			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "type") {
+					info.type = attr->Value();
+				}
+				else {
+					auto v = getValue<real>(attr);
+					info.val.add(attrName, v);
+				}
+			}
+		}
+	}
+
+	camera* readCamera(
+		const tinyxml2::XMLElement* root,
+		uint32_t width, uint32_t height)
+	{
+		auto camRoot = root->FirstChildElement("camera");
+
+		if (!camRoot) {
+			// TODO
+			// throw exception.
+			return nullptr;
+		}
+
+		std::string type;
+		Values val;
+
+		for (auto attr = camRoot->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+			std::string attrName(attr->Name());
+
+			if (attrName == "type") {
+				type = attr->Value();
+			}
+			else if (attrName == "pos" || attrName == "at" || attrName == "up") {
+				auto v = getValue<vec3>(attr);
+				val.add(attrName, v);
+			}
+			else {
+				auto v = getValue<real>(attr);
+				val.add(attrName, v);
+			}
+		}
+
+		camera* cam = nullptr;
+
+		if (type == "pinhole") {
+			auto pinhole = new PinholeCamera();
+			pinhole->init(
+				val.get("pos", vec3(0)),
+				val.get("at", vec3(0, 0, -1)),
+				val.get("up", vec3(0, 1, 0)),
+				val.get("vfov", 30),
+				width, height);
+			cam = pinhole;
+		}
+		else if (type == "thinlens") {
+			auto thinlens = new ThinLensCamera();
+			thinlens->init(
+				width, height,
+				val.get("pos", vec3(0)),
+				val.get("at", vec3(0, 0, -1)),
+				val.get("up", vec3(0, 1, 0)),
+				val.get("imageSensorSize", real(30.0)),
+				val.get("imageSensorToLensDistance", real(40.0)),
+				val.get("lensToObjectplaneDistance", real(130.0)),
+				val.get("lens_r", real(1.0)),
+				val.get("w_scale", real(1.0)));
+			cam = thinlens;
+		}
+		else if (type == "equirect") {
+			auto equirect = new EquirectCamera();
+			equirect->init(
+				val.get("pos", vec3(0)),
+				val.get("at", vec3(0, 0, -1)),
+				val.get("up", vec3(0, 1, 0)),
+				width, height);
+			cam = equirect;
+		}
+
+		return cam;
+	}
+
+	void readRenderParams(
+		const tinyxml2::XMLElement* root,
+		SceneLoader::SceneInfo& info)
+	{
+		auto renderRoot = root->FirstChildElement("renderer");
+
+		if (!renderRoot) {
+			// TODO
+			// throw exception.
+			return;
+		}
+
+		Values val;
+
+		for (auto attr = renderRoot->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+			std::string attrName(attr->Name());
+
+			if (attrName == "type") {
+				info.rendererType = attr->Value();
+			}
+			else {
+				auto v = getValue<real>(attr);
+				val.add(attrName, v);
+			}
+		}
+
+		info.dst.sample = val.get("spp", uint32_t(1));
+		info.dst.maxDepth = val.get("depth", uint32_t(5));
+		info.dst.russianRouletteDepth = val.get("rrdepth", uint32_t(3));
+		info.dst.mutation = val.get("mutation", uint32_t(100));
+		info.dst.mltNum = val.get("mlt", uint32_t(100));
 	}
 
 	SceneLoader::SceneInfo SceneLoader::load(const std::string& path)
@@ -522,18 +534,68 @@ namespace aten
 			// throw exception.
 		}
 
-		std::vector<hitable*> objs;
+		SceneLoader::SceneInfo ret;
+		{
+			ret.dst.width = 0;
+			ret.dst.height = 0;
+		}
+
+		std::map<std::string, bvhnode*> objs;
+		std::vector<Light*> lights;
 
 		auto root = xml.FirstChildElement("scene");
 		if (root) {
+			for (auto attr = root->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
+				std::string attrName(attr->Name());
+
+				if (attrName == "width") {
+					auto v = getValue<uint32_t>(attr);
+					ret.dst.width = v.getAs<uint32_t>();
+				}
+				else if (attrName == "height") {
+					auto v = getValue<uint32_t>(attr);
+					ret.dst.height = v.getAs<uint32_t>();
+				}
+			}
+
+			if (ret.dst.width == 0 || ret.dst.height == 0) {
+				// TODO
+				// throw exception.
+				return std::move(ret);
+			}
+
+			readRenderParams(root, ret);
+			
+			ret.camera = readCamera(root, ret.dst.width, ret.dst.height);
+
 			readTextures(root);
 			readMaterials(root);
 			readObjects(root, objs);
+			realLights(root, objs, lights);
+			readProcs(root, "preprocs", ret.preprocs);
+			readProcs(root, "postprocs", ret.postprocs);
 		}
 
-		SceneLoader::SceneInfo ret;
+		// TODO
+		ret.scene = new aten::AcceledScene<aten::bvh>();
+
+		for (auto it = objs.begin(); it != objs.end(); it++) {
+			auto obj = it->second;
+
+			ret.scene->add(obj);
+		}
+
+		for (auto it = lights.begin(); it != lights.end(); it++) {
+			auto light = *it;
+			if (light->isIBL()) {
+				// TODO
+				ret.scene->addImageBasedLight((ImageBasedLight*)light);
+			}
+			else {
+				ret.scene->addLight(light);
+			}
+		}
 
 		return std::move(ret);
 	}
-#endif
 }

@@ -14,13 +14,17 @@ namespace aten
 
 		struct ProcInfo {
 			std::string type;
-			Values values;
+			Values val;
 		};
 
 		struct SceneInfo {
 			scene* scene{ nullptr };
-			aten::Destination dst;
+			
+			camera* camera{ nullptr };
+
 			std::string rendererType;
+			aten::Destination dst;
+
 			std::vector<ProcInfo> preprocs;
 			std::vector<ProcInfo> postprocs;
 		};

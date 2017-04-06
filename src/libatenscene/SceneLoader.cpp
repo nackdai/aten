@@ -426,7 +426,7 @@ namespace aten
 		if (!camRoot) {
 			// TODO
 			// throw exception.
-			return nullptr;
+			throw new std::exception();
 		}
 
 		std::string type;
@@ -496,7 +496,7 @@ namespace aten
 		if (!renderRoot) {
 			// TODO
 			// throw exception.
-			return;
+			throw new std::exception();
 		}
 
 		Values val;
@@ -532,6 +532,7 @@ namespace aten
 		if (err != tinyxml2::XML_SUCCESS) {
 			// TODO
 			// throw exception.
+			throw new std::exception();
 		}
 
 		SceneLoader::SceneInfo ret;
@@ -544,7 +545,12 @@ namespace aten
 		std::vector<Light*> lights;
 
 		auto root = xml.FirstChildElement("scene");
-		if (root) {
+		if (!root) {
+			// TODO
+			// throw exception.
+			throw new std::exception();
+		}
+		else {
 			for (auto attr = root->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
 				std::string attrName(attr->Name());
 
@@ -561,7 +567,7 @@ namespace aten
 			if (ret.dst.width == 0 || ret.dst.height == 0) {
 				// TODO
 				// throw exception.
-				return std::move(ret);
+				throw new std::exception();
 			}
 
 			readRenderParams(root, ret);

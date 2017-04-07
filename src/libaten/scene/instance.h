@@ -70,6 +70,11 @@ namespace aten
 			return m_obj->getRandomPosOn(sampler);
 		}
 
+		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const
+		{
+			return m_obj->getSamplePosAndNormal(sampler);
+		}
+
 	private:
 		aabb transformBoundingBox()
 		{

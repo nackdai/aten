@@ -114,6 +114,11 @@ namespace aten {
 			return std::move(aabb());
 		}
 
+		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const
+		{
+			return m_object->getSamplePosAndNormal(sampler);
+		}
+
 	private:
 		hitable* m_object{ nullptr };
 	};

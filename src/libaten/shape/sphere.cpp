@@ -112,4 +112,12 @@ namespace aten
 
 		return std::move(posOnSphere);
 	}
+
+	std::tuple<vec3, vec3> sphere::getSamplePosAndNormal(sampler* sampler) const
+	{
+		auto p = getRandomPosOn(sampler);
+		auto n = normalize(p - m_center);
+
+		return std::move(std::tuple<vec3, vec3>(p + n * AT_MATH_EPSILON, n));
+	}
 }

@@ -42,6 +42,8 @@ namespace aten
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
 
+		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const override final;
+
 	private:
 		bool hit(
 			const ray& r,

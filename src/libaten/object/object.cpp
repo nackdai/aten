@@ -110,6 +110,34 @@ namespace aten
 		return std::move(p);
 	}
 
+	std::tuple<vec3, vec3> face::getSamplePosAndNormal(sampler* sampler) const
+	{
+		// 0 <= a + b <= 1
+		real a = sampler->nextSample();
+		real b = sampler->nextSample();
+
+		real d = a + b;
+
+		if (d > 1) {
+			a /= d;
+			b /= d;
+		}
+
+		const auto& v0 = vtx[0];
+		const auto& v1 = vtx[1];
+		const auto& v2 = vtx[2];
+
+		// dSÀ•WŒn(barycentric coordinates).
+		// v0Šî€.
+		// p = (1 - a - b)*v0 + a*v1 + b*v2
+		vec3 p = (1 - a - b) * v0->pos + a * v1->pos + b * v2->pos;
+		
+		vec3 n = (1 - a - b) * v0->nml + a * v1->nml + b * v2->nml;
+		n.normalize();
+
+		return std::move(std::tuple<vec3, vec3>(p + n * AT_MATH_EPSILON, n));
+	}
+
 	void shape::build()
 	{
 		m_node.build(
@@ -147,7 +175,7 @@ namespace aten
 
 		for (const auto s : shapes) {
 			m_area += s->area;
-			m_triangles += s->faces.size();
+			m_triangles += (uint32_t)s->faces.size();
 		}
 	}
 

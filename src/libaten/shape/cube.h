@@ -41,6 +41,8 @@ namespace aten
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
 
+		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const override final;
+
 	private:
 		bool hit(
 			const ray& r,
@@ -57,6 +59,8 @@ namespace aten
 			POS_Z,
 			NEG_Z,
 		};
+
+		Face onGetRandomPosOn(vec3& pos, sampler* sampler) const;
 
 		static Face findFace(const vec3& d);
 

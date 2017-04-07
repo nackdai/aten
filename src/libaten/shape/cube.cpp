@@ -115,6 +115,14 @@ namespace aten
 
 	vec3 cube::getRandomPosOn(sampler* sampler) const
 	{
+		vec3 pos;
+		onGetRandomPosOn(pos, sampler);
+
+		return std::move(pos);
+	}
+
+	cube::Face cube::onGetRandomPosOn(vec3& pos, sampler* sampler) const
+	{
 		auto r1 = sampler->nextSample();
 
 		static const auto d = 1.0 / 6.0;
@@ -181,8 +189,38 @@ namespace aten
 		vec3 nx = normalize(x);
 		vec3 ny = normalize(y);
 
-		vec3 pos = leftbottom + r2 * x + r3 * y;
+		pos = leftbottom + r2 * x + r3 * y;
 
-		return std::move(pos);
+		return face;
+	}
+
+	std::tuple<vec3, vec3> cube::getSamplePosAndNormal(sampler* sampler) const
+	{
+		vec3 pos;
+		auto face = onGetRandomPosOn(pos, sampler);
+
+		vec3 nml;
+		switch (face) {
+		case POS_X:
+			nml = vec3(1, 0, 0);
+			break;
+		case NEG_X:
+			nml = vec3(-1, 0, 0);
+			break;
+		case POS_Y:
+			nml = vec3(0, 1, 0);
+			break;
+		case NEG_Y:
+			nml = vec3(0, -1, 0);
+			break;
+		case POS_Z:
+			nml = vec3(0, 0, 1);
+			break;
+		case NEG_Z:
+			nml = vec3(0, 0, -1);
+			break;
+		}
+
+		return std::move(std::tuple<vec3, vec3>(pos + nml * AT_MATH_EPSILON, nml));
 	}
 }

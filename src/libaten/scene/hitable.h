@@ -51,6 +51,12 @@ namespace aten {
 			return std::move(vec3());
 		}
 
+		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const
+		{
+			AT_ASSERT(false);
+			return std::move(std::tuple<vec3, vec3>(vec3(), vec3()));
+		}
+
 		uint32_t id() const
 		{
 			return m_id;

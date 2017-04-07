@@ -14,7 +14,7 @@ namespace aten
 	// NOTE
 	// https://www.slideshare.net/shocker_0x15/ss-52688052
 
-	inline bool isInvalidColor(const vec3& v)
+	static inline bool isInvalidColor(const vec3& v)
 	{
 		bool b = isInvalid(v);
 		if (!b) {
@@ -449,7 +449,7 @@ namespace aten
 					auto dist = aten::sqrt(dist2);
 
 					auto bsdf = path.rec.mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, sampler);
+					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
 					bsdf *= path.throughput;
 
@@ -512,7 +512,7 @@ namespace aten
 					auto dist = aten::sqrt(dist2);
 
 					auto bsdf = path.rec.mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, sampler);
+					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
 					// Get light color.
 					auto emit = sampleres.finalColor;

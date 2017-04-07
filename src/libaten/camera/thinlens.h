@@ -44,6 +44,7 @@ namespace aten {
 
 		virtual real getWdash(
 			const vec3& hitPoint,
+			const vec3& hitpointNml,
 			const vec3& posOnImageSensor,
 			const vec3& posOnLens,
 			const vec3& posOnObjectPlane) const override final;
@@ -62,6 +63,9 @@ namespace aten {
 			return m_imagesensor.dir;
 		}
 
+		void revertRayToPixelPos(
+			const ray& ray,
+			int& px, int& py) const override final;
 
 	private:
 		// ‰ð‘œ“x.

@@ -39,6 +39,14 @@ namespace aten {
 			return m_dir;
 		}
 
+		void revertRayToPixelPos(
+			const ray& ray,
+			int& px, int& py) const override final
+		{
+			// Not supported...
+			AT_ASSERT(false);
+		}
+
 	private:
 		vec3 m_origin;
 

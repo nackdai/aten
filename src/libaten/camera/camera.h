@@ -9,6 +9,7 @@ namespace aten {
 		ray r;
 		vec3 posOnImageSensor;
 		vec3 posOnLens;
+		vec3 nmlOnLens;
 		vec3 posOnObjectplane;
 		real pdfOnImageSensor{ real(1) };
 		real pdfOnLens{ real(1) };
@@ -42,6 +43,7 @@ namespace aten {
 
 		virtual real getWdash(
 			const vec3& hitPoint,
+			const vec3& hitpointNml,
 			const vec3& posOnImageSensor,
 			const vec3& posOnLens,
 			const vec3& posOnObjectPlane) const
@@ -56,5 +58,9 @@ namespace aten {
 
 		virtual const vec3& getPos() const = 0;
 		virtual const vec3& getDir() const = 0;
+
+		virtual void revertRayToPixelPos(
+			const ray& ray,
+			int& px, int& py) const = 0;
 	};
 }

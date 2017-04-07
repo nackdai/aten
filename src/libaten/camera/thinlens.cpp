@@ -121,6 +121,7 @@ namespace aten {
 		real u = r0 * cos(r1);
 		real v = r0 * sin(r1);
 		result.posOnLens = m_lens.center + u * m_lens.u + v * m_lens.v;
+		result.nmlOnLens = m_lens.normal;
 
 		// ピクセル内の一点をサンプリングする確率密度関数（面積測度）
 		result.pdfOnImageSensor = 1.0 / (m_pixelWidth * m_pixelHeight);
@@ -251,6 +252,7 @@ namespace aten {
 
 	real ThinLensCamera::getWdash(
 		const vec3& hitPoint,
+		const vec3& hitpointNml,
 		const vec3& posOnImageSensor,
 		const vec3& posOnLens,
 		const vec3& posOnObjectPlane) const
@@ -263,14 +265,15 @@ namespace aten {
 		const vec3& xV = posOnObjectPlane;
 		const vec3& x1 = hitPoint;
 
-		const vec3 x0_xI = xI - x0;
-		const vec3 x0_xV = xV - x0;
-		const vec3 x0_x1 = x1 - x0;
+		const vec3 x0_xI = xI - x0;	// lens to image sensor.
+		const vec3 x0_xV = xV - x0;	// lens to object plane.
+		const vec3 x0_x1 = x1 - x0;	// lens to hit point.
 
 		// NOTE
 		// B = imagesensor_to_lens_distance
 		// A = lens_to_objectplane(focus distance)
 
+#if 0
 		// B/A
 		const real ba2 = x0_xV.squared_length() / x0_xI.squared_length();
 
@@ -281,7 +284,38 @@ namespace aten {
 		const real c2 = c * c;
 
 		real W_dash = m_W * ba2 * r2 * c2;
+#else
+		// B/A
+		const real ba = m_imageSensorToLensDistance / m_lensToObjectplaneDistance;
+		const real ba2 = ba * ba;
+
+		const real d0 = x0_xI.length();
+		const real c0 = dot(normalize(x0_xI), normalize(-m_imagesensor.dir));
+		const real G0 = c0 / (d0 * d0);
+
+		const real d1 = x0_xV.length();
+		const real c1 = dot(normalize(x0_x1), normalize(m_imagesensor.dir));
+		const real G1 = c1 / (d1 * d1);
+
+		real W_dash = m_W * ba2 / G0 * G1;
+#endif
 
 		return W_dash;
+	}
+
+	void ThinLensCamera::revertRayToPixelPos(
+		const ray& ray,
+		int& px, int& py) const
+	{
+		vec3 posOnLens;
+		vec3 posOnObjectPlane;
+		vec3 posOnImageSensor;
+
+		hitOnLens(
+			ray,
+			posOnLens,
+			posOnObjectPlane,
+			posOnImageSensor,
+			px, py);
 	}
 }

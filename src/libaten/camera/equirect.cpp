@@ -16,6 +16,7 @@ namespace aten {
 
 		CameraSampleResult result;
 		result.posOnLens = m_origin + dir;
+		result.nmlOnLens = dir;
 		result.posOnImageSensor = m_origin;
 		result.r = ray(m_origin, dir);
 

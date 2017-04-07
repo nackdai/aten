@@ -197,6 +197,7 @@
     <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
+    <ClInclude Include="..\src\libaten\renderer\bdpt.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
@@ -235,6 +236,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
+    <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
     <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp" />
@@ -263,6 +265,7 @@
     <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\object\object.cpp" />
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />

@@ -167,7 +167,6 @@ copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\appaten\main.cpp" />
     <ClCompile Include="..\src\appaten\main_denoise.cpp" />
     <ClCompile Include="..\src\appaten\main_test.cpp" />
     <ClCompile Include="..\src\appaten\scenedefs.cpp" />

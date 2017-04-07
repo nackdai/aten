@@ -303,6 +303,9 @@
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\aten.h" />
+    <ClInclude Include="..\src\libaten\renderer\bdpt.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -463,6 +466,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\film.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\camera\pinhole .cpp">
+      <Filter>camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

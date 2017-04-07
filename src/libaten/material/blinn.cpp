@@ -10,8 +10,7 @@ namespace aten
 		const vec3& normal, 
 		const vec3& wi,	/* in */
 		const vec3& wo,	/* out */
-		real u, real v,
-		sampler* sampler) const
+		real u, real v) const
 	{
 		// NOTE
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
@@ -190,7 +189,7 @@ namespace aten
 		ret.dir = sampleDirection(ray, normal, u, v, sampler);
 
 #if 1
-		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
+		ret.pdf = pdf(normal, in, ret.dir, u, v);
 
 		real fresnel = 1;
 		ret.bsdf = bsdf(fresnel, normal, in, ret.dir, u, v);

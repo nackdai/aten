@@ -140,8 +140,7 @@ namespace aten
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v,
-		sampler* sampler) const
+		real u, real v) const
 	{
 		auto num = m_layer.size();
 		
@@ -161,7 +160,7 @@ namespace aten
 				mtrl->applyNormalMap(normal, appliedNml, u, v);
 			}
 
-			auto p = mtrl->pdf(appliedNml, wi, wo, u, v, sampler);
+			auto p = mtrl->pdf(appliedNml, wi, wo, u, v);
 			auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
 
 			f = aten::clamp<real>(f, 0, 1);

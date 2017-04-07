@@ -39,7 +39,7 @@ namespace aten
 		const vec3& in = ray.dir;
 
 		ret.dir = sampleDirection(ray, normal, u, v, sampler);
-		ret.pdf = pdf(normal, in, ret.dir, u, v, sampler);
+		ret.pdf = pdf(normal, in, ret.dir, u, v);
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		ret.fresnel = 1;

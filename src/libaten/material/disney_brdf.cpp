@@ -92,8 +92,7 @@ namespace aten
 		const vec3& normal,
 		const vec3& wi,	/* in */
 		const vec3& wo,	/* out */
-		real u, real v,
-		sampler* sampler) const
+		real u, real v) const
 	{
 		const vec3& N = normal;
 		const vec3& V = -wi;

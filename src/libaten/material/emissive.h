@@ -31,8 +31,7 @@ namespace aten
 			const vec3& normal,
 			const vec3& wi,
 			const vec3& wo,
-			real u, real v,
-			sampler* sampler) const override final
+			real u, real v) const override final
 		{
 			// NOTE
 			// In this renderer, when path hit emissive material, tarcing finish.

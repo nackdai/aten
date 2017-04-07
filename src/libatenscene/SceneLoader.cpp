@@ -61,7 +61,7 @@ namespace aten
 			return;
 		}
 
-		for (auto elem = texRoot->FirstChildElement("texture"); elem != nullptr; elem = texRoot->NextSiblingElement("texture")) {
+		for (auto elem = texRoot->FirstChildElement("texture"); elem != nullptr; elem = elem->NextSiblingElement("texture")) {
 			std::string path;
 			std::string tag;
 
@@ -93,7 +93,7 @@ namespace aten
 			return;
 		}
 
-		for (auto elem = mtrlRoot->FirstChildElement("material"); elem != nullptr; elem = mtrlRoot->NextSiblingElement("material")) {
+		for (auto elem = mtrlRoot->FirstChildElement("material"); elem != nullptr; elem = elem->NextSiblingElement("material")) {
 			std::string path;
 			std::string tag;
 
@@ -171,7 +171,7 @@ namespace aten
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<uint32_t>(const tinyxml2::XMLAttribute* a)
+	static aten::PolymorphicValue getValue<int>(const tinyxml2::XMLAttribute* a)
 	{
 		aten::PolymorphicValue v;
 		v.val.i = a->IntValue();
@@ -190,7 +190,7 @@ namespace aten
 
 		material* mtrl = nullptr;
 
-		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = objRoot->NextSiblingElement("object")) {
+		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = elem->NextSiblingElement("object")) {
 			std::string tag;
 
 			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
@@ -204,7 +204,10 @@ namespace aten
 				}
 			}
 
-			if (objtag != tag) {
+			if (objtag == tag) {
+				break;
+			}
+			else {
 				mtrl = nullptr;
 			}
 		}
@@ -222,7 +225,7 @@ namespace aten
 			return;
 		}
 
-		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = objRoot->NextSiblingElement("object")) {
+		for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = elem->NextSiblingElement("object")) {
 			std::string path;
 			std::string tag;
 			std::string type;
@@ -264,7 +267,7 @@ namespace aten
 			if (tag.empty()) {
 				// TODO
 				// throw exception.
-				return;
+				throw new std::exception();
 			}
 
 			object* obj = nullptr;
@@ -308,11 +311,15 @@ namespace aten
 						mtrl);
 					objs.insert(std::pair<std::string, bvhnode*>(tag, sphere));
 				}
+				else {
+					// TODO
+					// warning.
+				}
 			}
 		}
 	}
 
-	void realLights(
+	void readLights(
 		const tinyxml2::XMLElement* root,
 		const std::map<std::string, bvhnode*>& objs,
 		std::vector<Light*>& lights)
@@ -323,7 +330,7 @@ namespace aten
 			return;
 		}
 
-		for (auto elem = lightRoot->FirstChildElement("light"); elem != nullptr; elem = lightRoot->NextSiblingElement("light")) {
+		for (auto elem = lightRoot->FirstChildElement("light"); elem != nullptr; elem = elem->NextSiblingElement("light")) {
 			std::string type;
 			Values val;
 			std::string objtag;
@@ -398,7 +405,7 @@ namespace aten
 			return;
 		}
 
-		for (auto elem = procRoot->FirstChildElement("proc"); elem != nullptr; elem = procRoot->NextSiblingElement("proc")) {
+		for (auto elem = procRoot->FirstChildElement("proc"); elem != nullptr; elem = elem->NextSiblingElement("proc")) {
 			infos.push_back(SceneLoader::ProcInfo());
 
 			auto& info = infos[infos.size() - 1];
@@ -508,16 +515,16 @@ namespace aten
 				info.rendererType = attr->Value();
 			}
 			else {
-				auto v = getValue<real>(attr);
+				auto v = getValue<int>(attr);
 				val.add(attrName, v);
 			}
 		}
 
-		info.dst.sample = val.get("spp", uint32_t(1));
-		info.dst.maxDepth = val.get("depth", uint32_t(5));
-		info.dst.russianRouletteDepth = val.get("rrdepth", uint32_t(3));
-		info.dst.mutation = val.get("mutation", uint32_t(100));
-		info.dst.mltNum = val.get("mlt", uint32_t(100));
+		info.dst.sample = val.get("spp", int(1));
+		info.dst.maxDepth = val.get("depth", int(5));
+		info.dst.russianRouletteDepth = val.get("rrdepth", int(3));
+		info.dst.mutation = val.get("mutation", int(100));
+		info.dst.mltNum = val.get("mlt", int(100));
 	}
 
 	SceneLoader::SceneInfo SceneLoader::load(const std::string& path)
@@ -555,12 +562,12 @@ namespace aten
 				std::string attrName(attr->Name());
 
 				if (attrName == "width") {
-					auto v = getValue<uint32_t>(attr);
-					ret.dst.width = v.getAs<uint32_t>();
+					auto v = getValue<int>(attr);
+					ret.dst.width = v.getAs<int>();
 				}
 				else if (attrName == "height") {
-					auto v = getValue<uint32_t>(attr);
-					ret.dst.height = v.getAs<uint32_t>();
+					auto v = getValue<int>(attr);
+					ret.dst.height = v.getAs<int>();
 				}
 			}
 
@@ -577,7 +584,7 @@ namespace aten
 			readTextures(root);
 			readMaterials(root);
 			readObjects(root, objs);
-			realLights(root, objs, lights);
+			readLights(root, objs, lights);
 			readProcs(root, "preprocs", ret.preprocs);
 			readProcs(root, "postprocs", ret.postprocs);
 		}

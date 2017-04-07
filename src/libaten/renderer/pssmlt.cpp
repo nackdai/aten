@@ -96,7 +96,7 @@ namespace aten
 	{
 		if (u.size() <= usedRandCoords) {
 			// expand.
-			u.resize(u.size() * 1.5);
+			u.resize((uint32_t)(u.size() * 1.5));
 		}
 
 		if (u[usedRandCoords].modify_time < globalTime) {
@@ -156,14 +156,14 @@ namespace aten
 
 		if (x < 0) {
 			weight *= width;
-			x = sampler->nextSample() * width;
+			x = (int)(sampler->nextSample() * width);
 			if (x == width) {
 				x = 0;
 			}
 		}
 		if (y < 0) {
 			weight *= height;
-			y = sampler->nextSample() * height;
+			y = (int)(sampler->nextSample() * height);
 			if (y == height) {
 				y = 0;
 			}
@@ -203,7 +203,7 @@ namespace aten
 		int height = dst.height;
 		uint32_t samples = dst.sample;
 
-		uint32_t mltNum = dst.mltNum;
+		int mltNum = dst.mltNum;
 
 		// 変異回数.
 		// MLTはピクセル数では回さないので、最低でも画素数以上は回るようにしないと画が埋まらない.
@@ -350,7 +350,7 @@ namespace aten
 			}
 		}
 
-		for (int n = 0; n < threadNum; n++) {
+		for (uint32_t n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
 				dst.buffer->put(i, vec4(image[i] / mltNum, 1));

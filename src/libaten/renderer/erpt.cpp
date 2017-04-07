@@ -75,10 +75,10 @@ namespace aten
 	real ERPTSampler::nextSample()
 	{
 		if (m_primarySamples.size() <= m_usedRandCoords) {
-			const int now_max = m_primarySamples.size();
+			const int now_max = (const int)m_primarySamples.size();
 
 			// Šg’£‚·‚é.
-			m_primarySamples.resize(m_primarySamples.size() * 1.5);
+			m_primarySamples.resize((uint32_t)(m_primarySamples.size() * 1.5));
 
 			// Šg’£‚µ‚½•”•ª‚É’l‚ð“ü‚ê‚é.
 			for (int i = now_max; i < m_primarySamples.size(); i++) {
@@ -209,7 +209,7 @@ namespace aten
 				}
 			}
 
-			for (int i = 0; i < threadNum; i++) {
+			for (uint32_t i = 0; i < threadNum; i++) {
 				sumI += tmpSumI[i];
 			}
 		}
@@ -327,7 +327,7 @@ namespace aten
 			}
 		}
 
-		for (int n = 0; n < threadNum; n++) {
+		for (uint32_t n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
 				dst.buffer->put(i, vec4(image[i], 1));

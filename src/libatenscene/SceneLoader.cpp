@@ -22,12 +22,12 @@ namespace aten
 	//			type=<string>
 	//			org=<vec3>
 	//			at=<vec3> 
-	//			fov=<real>
+	//			vfov=<real>
 	//			sensorsize=<real>
 	//			dist_sensor_lens=<real>
 	//			dist_lens_focus=<real> 
 	//			lens_r=<real>
-	//			W_scale=<real>
+	//			w_scale=<real>
 	//		/>
 	//		<renderer type=<string> spp=<uint> mutaion=<uint> mlt=<uint> depth=<uint> rrdepth=<uint>/>
 	//		<materials>
@@ -445,7 +445,7 @@ namespace aten
 			if (attrName == "type") {
 				type = attr->Value();
 			}
-			else if (attrName == "pos" || attrName == "at" || attrName == "up") {
+			else if (attrName == "org" || attrName == "at" || attrName == "up") {
 				auto v = getValue<vec3>(attr);
 				val.add(attrName, v);
 			}
@@ -460,10 +460,10 @@ namespace aten
 		if (type == "pinhole") {
 			auto pinhole = new PinholeCamera();
 			pinhole->init(
-				val.get("pos", vec3(0)),
+				val.get("org", vec3(0)),
 				val.get("at", vec3(0, 0, -1)),
 				val.get("up", vec3(0, 1, 0)),
-				val.get("vfov", 30),
+				val.get("vfov", real(30)),
 				width, height);
 			cam = pinhole;
 		}
@@ -471,12 +471,12 @@ namespace aten
 			auto thinlens = new ThinLensCamera();
 			thinlens->init(
 				width, height,
-				val.get("pos", vec3(0)),
+				val.get("org", vec3(0)),
 				val.get("at", vec3(0, 0, -1)),
 				val.get("up", vec3(0, 1, 0)),
-				val.get("imageSensorSize", real(30.0)),
-				val.get("imageSensorToLensDistance", real(40.0)),
-				val.get("lensToObjectplaneDistance", real(130.0)),
+				val.get("sensorsize", real(30.0)),
+				val.get("dist_sensor_lens", real(40.0)),
+				val.get("dist_lens_focus", real(130.0)),
 				val.get("lens_r", real(1.0)),
 				val.get("w_scale", real(1.0)));
 			cam = thinlens;
@@ -484,7 +484,7 @@ namespace aten
 		else if (type == "equirect") {
 			auto equirect = new EquirectCamera();
 			equirect->init(
-				val.get("pos", vec3(0)),
+				val.get("org", vec3(0)),
 				val.get("at", vec3(0, 0, -1)),
 				val.get("up", vec3(0, 1, 0)),
 				width, height);

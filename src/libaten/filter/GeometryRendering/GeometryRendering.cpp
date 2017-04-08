@@ -89,8 +89,8 @@ namespace aten {
 
 	void GeometryRendering::getIdx(Idx& idx, const vec4& v)
 	{
-		idx.shapeid = v.x;
-		idx.mtrlid = v.y;
+		idx.shapeid = (uint32_t)v.x;
+		idx.mtrlid = (uint32_t)v.y;
 	}
 
 	void GeometryRendering::operator()(

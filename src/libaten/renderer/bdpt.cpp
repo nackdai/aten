@@ -472,9 +472,9 @@ namespace aten
 		if ((p_i == 0.0) || (p_all == 0.0)) {
 			return 0.0;
 		}
-		else {
-			auto mis = std::max(std::min(p_i / p_all, real(1)), real(0));
-		}
+
+		auto mis = std::max(std::min(p_i / p_all, real(1)), real(0));
+		return mis;
 	}
 
 	void BDPT::contribution(

@@ -59,7 +59,7 @@ namespace aten {
 		real sigmaS, real sigmaR,
 		vec4* dst)
 	{
-		int r = int(::ceilf(4.0f * sigmaS));
+		int r = int(aten::ceil(real(4.0) * sigmaS));
 
 		// ピクセル距離の重み.
 		std::vector<std::vector<real>> distW;
@@ -193,15 +193,15 @@ namespace aten {
 
 		auto hSigmaS = getHandle("sigmaS");
 		if (hSigmaS >= 0) {
-			CALL_GL_API(glUniform1f(hSigmaS, m_sigmaS));
+			CALL_GL_API(glUniform1f(hSigmaS, (GLfloat)m_sigmaS));
 		}
 
 		auto hSigmaR = getHandle("sigmaR");
 		if (hSigmaR >= 0) {
-			CALL_GL_API(glUniform1f(hSigmaR, m_sigmaR));
+			CALL_GL_API(glUniform1f(hSigmaR, (GLfloat)m_sigmaR));
 		}
 
-		int radius = (int)::ceilf(4.0 * m_sigmaS);
+		int radius = (int)aten::ceil(real(4.0) * m_sigmaS);
 
 		auto hRadius = getHandle("radius");
 		if (hRadius >= 0) {

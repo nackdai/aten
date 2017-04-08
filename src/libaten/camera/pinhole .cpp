@@ -82,8 +82,8 @@ namespace aten {
 		u = 0.5 * u + 0.5;
 		v = 0.5 * v + 0.5;
 
-		px = u * m_width;
-		py = v * m_height;
+		px = (int)(u * m_width);
+		py = (int)(v * m_height);
 	}
 
 	real PinholeCamera::getPdfImageSensorArea(
@@ -128,5 +128,7 @@ namespace aten {
 		const real G1 = c1 / (d1 * d1);
 
 		real W_dash = W / G0 * G1;
+
+		return W_dash;
 	}
 }

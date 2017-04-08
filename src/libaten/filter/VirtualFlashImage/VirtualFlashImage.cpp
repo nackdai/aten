@@ -137,7 +137,7 @@ namespace aten {
 #endif
 
 #ifdef ADAPTIVE_PATCH	
-		real h = adaptiveRange * 2048;
+		int h = (int)(adaptiveRange * 2048);
 		int halfPatchSize = std::min<int>(h, MAX_HALF_PATCH_SIZE);
 #else	
 		int halfPatchSize = MAX_HALF_PATCH_SIZE;

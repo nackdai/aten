@@ -93,6 +93,11 @@ namespace aten {
 		return AT_MATH_FUNC(::floor, f);
 	}
 
+	inline real ceil(real f)
+	{
+		return AT_MATH_FUNC(::ceil, f);
+	}
+
 	template <typename _T>
 	inline _T clamp(_T f, _T a, _T b)
 	{

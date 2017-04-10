@@ -13,8 +13,6 @@
 #pragma optimize( "", off) 
 #endif
 
-//#pragma optimize( "", off) 
-
 namespace aten
 {
 	// NOTE
@@ -759,7 +757,9 @@ namespace aten
 			}
 		}
 
-		for (int i = 1; i < threadnum; i++) {
+		std::vector<vec4> tmp(m_width * m_height);
+
+		for (int i = 0; i < threadnum; i++) {
 			auto& img = image[i];
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
@@ -768,7 +768,7 @@ namespace aten
 					auto clr = img[pos] / samples;
 					clr.w = 1;
 
-					image[0][pos] += clr;
+					tmp[pos] += clr;
 				}
 			}
 		}
@@ -780,7 +780,7 @@ namespace aten
 			for (int x = 0; x < m_width; x++) {
 				int pos = y * m_width + x;
 
-				auto clr = image[0][pos];
+				auto clr = tmp[pos];
 				clr.w = 1;
 
 				dst.buffer->put(x, y, clr);

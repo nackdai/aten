@@ -114,9 +114,9 @@ namespace aten {
 			return std::move(aabb());
 		}
 
-		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
 		{
-			return m_object->getSamplePosAndNormal(sampler);
+			return m_object->getSamplePosNormalPdf(sampler);
 		}
 
 	private:

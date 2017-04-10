@@ -27,6 +27,10 @@ namespace aten
 			return false;
 		}
 
+		static real pdf(
+			const vec3& normal,
+			const vec3& wo);
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

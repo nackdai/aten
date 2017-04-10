@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
@@ -24,7 +24,8 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-static aten::PathTracing g_tracer;
+//static aten::PathTracing g_tracer;
+static aten::BDPT g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;
@@ -50,7 +51,7 @@ void display()
 		dst.maxDepth = 6;
 		dst.russianRouletteDepth = 3;
 		dst.startDepth = 0;
-		dst.sample = 1;
+		dst.sample = 5;
 		dst.mutation = 10;
 		dst.mltNum = 10;
 		dst.buffer = &g_buffer;

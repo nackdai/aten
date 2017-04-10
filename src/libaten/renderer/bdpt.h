@@ -7,55 +7,93 @@
 
 namespace aten
 {
-	struct Vertex {
-		vec3 pos;
-		vec3 nml;
-
-		hitable* obj;
-		material* mtrl;
-
-		real u;
-		real v;
-
-		Vertex() {}
-
-		Vertex(
-			vec3 p,
-			vec3 n,
-			hitable* _obj,
-			material* _mtrl,
-			real _u, real _v)
-			: pos(p), nml(n), obj(_obj), mtrl(_mtrl), u(_u), v(_v)
-		{
-		}
-	};
-
-	class BDPT {
-	private:
+	class BDPT : public Renderer {
+	public:
 		BDPT() {}
 		~BDPT() {}
 
+	public:
+		virtual void render(
+			Destination& dst,
+			scene* scene,
+			camera* camera) override;
+
 	private:
+		struct Vertex {
+			vec3 pos;
+			vec3 nml;
+
+			hitable* obj{ nullptr };
+			material* mtrl{ nullptr };
+
+			Light* light{ nullptr };
+			real sampleLightPdf{ real(0) };
+
+			real u;
+			real v;
+
+			int x{ -1 };
+			int y{ -1 };
+
+			Vertex() {}
+
+			Vertex(
+				vec3 p,
+				vec3 n,
+				hitable* _obj,
+				material* _mtrl,
+				real _u, real _v,
+				int _x = -1, int _y = -1)
+				: pos(p), nml(n), obj(_obj), mtrl(_mtrl), u(_u), v(_v), x(_x), y(_y)
+			{}
+
+			Vertex(
+				vec3 p,
+				vec3 n,
+				hitable* _obj,
+				material* _mtrl,
+				Light* _light,
+				real lightPdf,
+				real _u, real _v,
+				int _x = -1, int _y = -1)
+				: pos(p), nml(n), obj(_obj), mtrl(_mtrl), light(_light), sampleLightPdf(lightPdf), u(_u), v(_v), x(_x), y(_y)
+			{}
+		};
+
+		struct Result {
+			vec3 contrib;
+
+			int x{ -1 };
+			int y{ -1 };
+
+			CameraSampleResult camsample;
+
+			Result() {}
+			Result(const vec3& c, int _x, int _y)
+				: contrib(c), x(_x), y(_y)
+			{}
+		};
+
 		vec3 trace(
 			bool isEyePath,
 			std::vector<Vertex>& vs,
 			uint32_t maxDepth,
 			const ray& r,
 			sampler* sampler,
-			scene* scene) const;
+			scene* scene);
 
-		vec3 genEyePath(
+		Result genEyePath(
 			std::vector<Vertex>& vs,
-			real u, real v,
+			int x, int y,
 			sampler* sampler,
 			scene* scene,
-			camera* cam) const;
+			camera* cam);
 
-		void genLightPath(
+		Result genLightPath(
 			std::vector<Vertex>& vs,
 			Light* light,
 			sampler* sampler,
-			scene* scene) const;
+			scene* scene);
 
 		bool isConnectable(
 			scene* scene,
@@ -63,37 +101,39 @@ namespace aten
 			const std::vector<Vertex>& eyepath,
 			const int numEye,
 			const std::vector<Vertex>& lightpath,
-			const int numLight) const;
+			const int numLight,
+			int& px, int& py);
 
-		void BDPT::contribution(
-			std::vector<vec3>& result,
+		vec3 computeThroughput(
+			const std::vector<Vertex>& vs,
+			const CameraSampleResult& camsample,
+			camera* camera);
+
+		real BDPT::computePDF(
+			const std::vector<Vertex>& vs,
+			const CameraSampleResult& camsample,
+			camera* camera,
+			const int pathLenght,
+			const int specNumEye = -1,
+			const int specNumLight = -1);
+
+		real computeMISWeight(
+			const std::vector<Vertex>& vs,
+			const CameraSampleResult& camsample,
+			camera* camera,
+			const int numEyeVertices,
+			const int numLightVertices,
+			const int pathLength);
+
+		void BDPT::combinePath(
+			std::vector<Result>& result,
 			const std::vector<Vertex>& eyepath,
 			const std::vector<Vertex>& lightpath,
 			scene* scene,
 			const CameraSampleResult& camsample,
-			camera* camera) const;
-
-		vec3 render(
-			std::vector<Vertex>& vs,
-			const CameraSampleResult& camsample,
-			sampler* sampler,
-			scene* scene,
 			camera* camera);
 
 	private:
-		struct Path {
-			vec3 contrib{ vec3(0) };
-			vec3 throughput{ vec3(1) };
-			real pdfb{ 1 };
-
-			hitrecord rec;
-			material* prevMtrl{ nullptr };
-
-			ray ray;
-
-			bool isTerminate{ false };
-		};
-
 		uint32_t m_maxDepth{ 1 };
 
 		int m_width;

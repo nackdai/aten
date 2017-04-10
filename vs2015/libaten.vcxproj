@@ -223,6 +223,7 @@
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\shape\cube.h" />
     <ClInclude Include="..\src\libaten\shape\sphere.h" />
+    <ClInclude Include="..\src\libaten\shape\tranfomable.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libaten\visualizer\atengl.h" />
@@ -251,6 +252,7 @@
     <ClCompile Include="..\src\libaten\material\beckman.cpp" />
     <ClCompile Include="..\src\libaten\material\blinn.cpp" />
     <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
+    <ClCompile Include="..\src\libaten\material\emissive.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\lambert.cpp" />
     <ClCompile Include="..\src\libaten\material\layer.cpp" />

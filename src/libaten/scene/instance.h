@@ -70,9 +70,9 @@ namespace aten
 			return m_obj->getRandomPosOn(sampler);
 		}
 
-		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
 		{
-			return m_obj->getSamplePosAndNormal(sampler);
+			return m_obj->getSamplePosNormalPdf(m_mtxL2W, sampler);
 		}
 
 	private:

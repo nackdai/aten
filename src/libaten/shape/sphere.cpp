@@ -113,11 +113,30 @@ namespace aten
 		return std::move(posOnSphere);
 	}
 
-	std::tuple<vec3, vec3> sphere::getSamplePosAndNormal(sampler* sampler) const
+	hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(sampler* sampler) const
+	{
+		return getSamplePosNormalPdf(mat4::Identity, sampler);
+	}
+
+	hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(
+		const mat4& mtxL2W,
+		sampler* sampler) const
 	{
 		auto p = getRandomPosOn(sampler);
 		auto n = normalize(p - m_center);
 
-		return std::move(std::tuple<vec3, vec3>(p + n * AT_MATH_EPSILON, n));
+		real area = real(1);
+		{
+			auto tmp = m_center + vec3(m_radius, 0, 0);
+
+			auto center = mtxL2W.apply(m_center);
+			tmp = mtxL2W.apply(tmp);
+
+			auto radius = (tmp - center).length();
+
+			area = 4 * AT_MATH_PI * radius * radius;
+		}
+
+		return std::move(hitable::SamplingPosNormalPdf(p + n * AT_MATH_EPSILON, n, real(1) / area));
 	}
 }

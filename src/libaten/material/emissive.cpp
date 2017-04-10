@@ -1,32 +1,20 @@
+#include "material/emissive.h"
 #include "material/lambert.h"
 
 namespace aten {
-	real lambert::pdf(
-		const vec3& normal,
-		const vec3& wo)
-	{
-		auto c = dot(normal, wo);
-		//AT_ASSERT(c >= 0);
-		//c = aten::abs(c);
-
-		auto ret = c / AT_MATH_PI;
-
-		return ret;
-	}
-
-	real lambert::pdf(
-		const vec3& normal,
+	real emissive::pdf(
+		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto ret = pdf(normal, wo);
+		auto ret = lambert::pdf(normal, wo);
 		return ret;
 	}
 
-	vec3 lambert::sampleDirection(
+	vec3 emissive::sampleDirection(
 		const ray& ray,
-		const vec3& normal,
+		const vec3& normal, 
 		real u, real v,
 		sampler* sampler) const
 	{
@@ -62,7 +50,7 @@ namespace aten {
 		return std::move(dir);
 	}
 
-	vec3 lambert::bsdf(
+	vec3 emissive::bsdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
@@ -76,7 +64,7 @@ namespace aten {
 		return ret;
 	}
 
-	material::sampling lambert::sample(
+	material::sampling emissive::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,

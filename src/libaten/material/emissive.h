@@ -31,47 +31,25 @@ namespace aten
 			const vec3& normal,
 			const vec3& wi,
 			const vec3& wo,
-			real u, real v) const override final
-		{
-			// NOTE
-			// In this renderer, when path hit emissive material, tarcing finish.
-			AT_ASSERT(false);
-			return real(1);
-		}
+			real u, real v) const override final;
 
 		virtual vec3 sampleDirection(
 			const ray& ray,
-			const vec3& normal, 
+			const vec3& normal,
 			real u, real v,
-			sampler* sampler) const override final
-		{
-			// NOTE
-			// In this renderer, when path hit emissive material, tarcing finish.
-			AT_ASSERT(false);
-			return std::move(normal);
-		}
+			sampler* sampler) const override final;
 
 		virtual vec3 bsdf(
 			const vec3& normal,
 			const vec3& wi,
 			const vec3& wo,
-			real u, real v) const override final
-		{
-			// NOTE
-			// In this renderer, when path hit emissive material, tarcing finish.
-			AT_ASSERT(false);
-			return std::move(vec3());
-		}
+			real u, real v) const override final;
 
 		virtual sampling sample(
 			const ray& ray,
 			const vec3& normal,
 			const hitrecord& hitrec,
 			sampler* sampler,
-			real u, real v) const override final
-		{
-			AT_ASSERT(false);
-			return std::move(sampling(vec3(), vec3(), real(0)));
-		}
+			real u, real v) const override final;
 	};
 }

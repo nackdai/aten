@@ -33,7 +33,7 @@ namespace aten
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override;
 
-		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const override;
+		virtual  SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
 
 		void build(vertex* v0, vertex* v1, vertex* v2);
 	
@@ -65,12 +65,12 @@ namespace aten
 			return face->getRandomPosOn(sampler);
 		}
 
-		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const override final
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final
 		{
 			auto r = sampler->nextSample();
 			int idx = (int)(r * (faces.size() - 1));
 			auto face = faces[idx];
-			return face->getSamplePosAndNormal(sampler);
+			return face->getSamplePosNormalPdf(sampler);
 		}
 		
 		std::vector<face*> faces;
@@ -109,13 +109,7 @@ namespace aten
 			return shape->getRandomPosOn(sampler);
 		}
 
-		std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const
-		{
-			auto r = sampler->nextSample();
-			int idx = (int)(r * (shapes.size() - 1));
-			auto shape = shapes[idx];
-			return shape->getSamplePosAndNormal(sampler);
-		}
+		hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const;
 
 	public:
 		std::vector<shape*> shapes;

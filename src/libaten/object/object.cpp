@@ -110,7 +110,7 @@ namespace aten
 		return std::move(p);
 	}
 
-	std::tuple<vec3, vec3> face::getSamplePosAndNormal(sampler* sampler) const
+	hitable::SamplingPosNormalPdf face::getSamplePosNormalPdf(sampler* sampler) const
 	{
 		// 0 <= a + b <= 1
 		real a = sampler->nextSample();
@@ -135,7 +135,12 @@ namespace aten
 		vec3 n = (1 - a - b) * v0->nml + a * v1->nml + b * v2->nml;
 		n.normalize();
 
-		return std::move(std::tuple<vec3, vec3>(p + n * AT_MATH_EPSILON, n));
+		// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+		auto e0 = v1->pos - v0->pos;
+		auto e1 = v2->pos - v0->pos;
+		auto area = 0.5 * cross(e0, e1).length();
+
+		return std::move(hitable::SamplingPosNormalPdf(p + n * AT_MATH_EPSILON, n, area));
 	}
 
 	void shape::build()
@@ -242,5 +247,46 @@ namespace aten
 			rec.obj = f->parent;
 		}
 		return isHit;
+	}
+
+	hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const
+	{
+		auto r = sampler->nextSample();
+		int shapeidx = (int)(r * (shapes.size() - 1));
+		auto shape = shapes[shapeidx];
+
+		r = sampler->nextSample();
+		int faceidx = (int)(r * (shape->faces.size() - 1));
+		auto f = shape->faces[faceidx];
+
+		real orignalLen = 0;
+		{
+			const auto& v0 = f->vtx[0]->pos;
+			const auto& v1 = f->vtx[1]->pos;
+
+			orignalLen = (v1 - v0).length();
+		}
+
+		real scaledLen = 0;
+		{
+			auto v0 = mtxL2W.apply(f->vtx[0]->pos);
+			auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+
+			scaledLen = (v1 - v0).length();
+		}
+
+		real ratio = scaledLen / orignalLen;
+		ratio = ratio * ratio;
+
+		auto area = m_area * ratio;
+
+		auto tmp = f->getSamplePosNormalPdf(sampler);
+
+		hitable::SamplingPosNormalPdf res(
+			std::get<0>(tmp),
+			std::get<1>(tmp),
+			real(1) / area);
+
+		return std::move(res);
 	}
 }

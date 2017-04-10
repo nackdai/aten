@@ -75,15 +75,11 @@ namespace aten {
 
 		vec3 screenPos = m_origin + ray.dir * dist - m_center;
 
-		real u = dot(screenPos, m_right);
-		real v = dot(screenPos, m_up);
+		real u = dot(screenPos, m_right) + m_width * 0.5;
+		real v = dot(screenPos, m_up) + m_height * 0.5;
 
-		// [-1, 1] -> [0, 1]
-		u = 0.5 * u + 0.5;
-		v = 0.5 * v + 0.5;
-
-		px = (int)(u * m_width);
-		py = (int)(v * m_height);
+		px = (int)u;
+		py = (int)v;
 	}
 
 	real PinholeCamera::getPdfImageSensorArea(
@@ -95,7 +91,7 @@ namespace aten {
 	{
 		real pdf = real(1) / (m_width * m_height);
 
-		vec3 v = hitPoint - m_origin;
+		vec3 v = hitPoint - posOnLens;
 
 		vec3 dir = normalize(v);
 		const real cosTheta = dot(dir, m_dir);
@@ -115,16 +111,18 @@ namespace aten {
 	{
 		const real W = real(1) / (m_width * m_height);
 
-		vec3 v = hitPoint - m_origin;
+		vec3 v = hitPoint - posOnLens;
 		const real dist = v.length();
 		v.normalize();
 
-		const real d0 = m_dist;
-		const real c0 = dot(normalize(hitpointNml), v);
+		// imagesensor -> lens
+		const real c0 = dot(v, m_dir);
+		const real d0 = m_dist / c0;
 		const real G0 = c0 / (d0 * d0);
 
+		// hitpoint -> camera
+		const real c1 = dot(normalize(hitpointNml), -v);
 		const real d1 = dist;
-		const real c1 = dot(v, m_dir);
 		const real G1 = c1 / (d1 * d1);
 
 		real W_dash = W / G0 * G1;

@@ -3,12 +3,13 @@
 #include "types.h"
 #include "scene/bvh.h"
 #include "math/mat4.h"
+#include "shape/tranfomable.h"
 
 namespace aten
 {
 	template<typename T> class instance;
 
-	class sphere : public bvhnode {
+	class sphere : public transformable {
 		friend class instance<sphere>;
 
 	public:
@@ -42,14 +43,18 @@ namespace aten
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
 
-		virtual std::tuple<vec3, vec3> getSamplePosAndNormal(sampler* sampler) const override final;
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final;
 
 	private:
-		bool hit(
+		virtual bool hit(
 			const ray& r,
 			const mat4& mtxL2W,
 			real t_min, real t_max,
-			hitrecord& rec) const;
+			hitrecord& rec) const override final;
+
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
+			const mat4& mtxL2W,
+			sampler* sampler) const override final;
 
 	private:
 		vec3 m_center;

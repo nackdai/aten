@@ -1,6 +1,19 @@
 #include "renderer/bdpt.h"
 #include "misc/thread.h"
 #include "misc/timer.h"
+#include "material/lambert.h"
+#include "sampler/xorshift.h"
+#include "sampler/halton.h"
+#include "sampler/sobolproxy.h"
+#include "sampler/UniformDistributionSampler.h"
+
+//#define BDPT_DEBUG
+
+#ifdef BDPT_DEBUG
+#pragma optimize( "", off) 
+#endif
+
+//#pragma optimize( "", off) 
 
 namespace aten
 {
@@ -13,7 +26,7 @@ namespace aten
 		uint32_t maxDepth,
 		const ray& r,
 		sampler* sampler,
-		scene* scene) const
+		scene* scene)
 	{
 		uint32_t depth = 0;
 
@@ -30,17 +43,31 @@ namespace aten
 
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-			vs.push_back(Vertex(
+
+			Vertex vtx(
 				rec.p,
 				orienting_normal,
 				rec.obj,
 				rec.mtrl,
-				rec.u, rec.v));
+				rec.u, rec.v);
 
 			if (isEyePath && rec.mtrl->isEmissive()) {
 				auto emit = rec.mtrl->color();
 				contrib = throughput * emit;
+
+				if (depth == 0) {
+					// NOTE
+					// Marker which ray hits light directly.
+					vtx.x = 0;
+					vtx.y = 0;
+				}
+
+				vs.push_back(vtx);
+
 				break;
+			}
+			else {
+				vs.push_back(vtx);
 			}
 
 			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
@@ -73,13 +100,16 @@ namespace aten
 		return std::move(contrib);
 	}
 
-	vec3 BDPT::genEyePath(
+	BDPT::Result BDPT::genEyePath(
 		std::vector<Vertex>& vs,
-		real u, real v,
+		int x, int y,
 		sampler* sampler,
 		scene* scene,
-		camera* cam) const
+		camera* cam)
 	{
+		real u = real(x + sampler->nextSample()) / (real)m_width;
+		real v = real(y + sampler->nextSample()) / (real)m_height;
+
 		auto camsample = cam->sample(u, v, sampler);
 
 		// カメラ.
@@ -88,7 +118,8 @@ namespace aten
 			camsample.nmlOnLens,
 			nullptr,
 			nullptr,
-			0, 0));
+			0, 0,
+			x, y));
 
 		auto contrib = trace(
 			true,
@@ -98,28 +129,44 @@ namespace aten
 			sampler,
 			scene);
 
-		return std::move(contrib);
+		Result res;
+
+		res.contrib = contrib;
+		res.camsample = camsample;
+
+		const auto& endEye = vs[vs.size() - 1];
+		if (endEye.x >= 0) {
+			res.x = x;
+			res.y = y;
+		}
+
+		return std::move(res);
 	}
 
-	void BDPT::genLightPath(
+	BDPT::Result BDPT::genLightPath(
 		std::vector<Vertex>& vs,
 		Light* light,
 		sampler* sampler,
-		scene* scene) const
+		scene* scene)
 	{
 		// TODO
 		// Only AreaLight...
 
-		auto res = light->getSamplePosAndNormal(sampler);
+		auto res = light->getSamplePosNormalPdf(sampler);
 		auto pos = std::get<0>(res);
 		auto nml = std::get<1>(res);
+		auto pdf = std::get<2>(res);
+
+		hitable* lightobj = const_cast<hitable*>(light->getLightObject());
 
 		// 光源.
 		vs.push_back(Vertex(
 			pos,
 			nml,
-			light,
+			lightobj,
 			nullptr,
+			light,
+			pdf,
 			0, 0));
 
 		vec3 dir;
@@ -160,6 +207,11 @@ namespace aten
 			r,
 			sampler,
 			scene);
+
+		// TODO
+		Result lightRes;
+
+		return std::move(lightRes);
 	}
 
 	bool BDPT::isConnectable(
@@ -168,12 +220,13 @@ namespace aten
 		const std::vector<Vertex>& eyepath,
 		const int numEye,
 		const std::vector<Vertex>& lightpath,
-		const int numLight) const
+		const int numLight,
+		int& px, int& py)
 	{
 		vec3 firstRayDir; // Direction from camera origin.
 		vec3 eyeOrg;
 
-		bool result;
+		bool result = false;
 
 		if ((numEye == 0) && (numLight >= 2)) {
 			// TODO
@@ -226,11 +279,8 @@ namespace aten
 			else {
 				// shadow ray connection
 
-				AT_ASSERT(endEye.mtrl);
-				AT_ASSERT(endLight.mtrl);
-
-				if (endEye.mtrl->isSingular()
-					|| endLight.mtrl->isSingular())
+				if ((endEye.mtrl && endEye.mtrl->isSingular())
+					|| (endLight.mtrl && endLight.mtrl->isSingular()))
 				{
 					// 端点がスペキュラやレンズだった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
 					return false;
@@ -253,19 +303,19 @@ namespace aten
 			}
 		}
 
-		int x = -1;
-		int y = -1;
+		px = -1;
+		py = -1;
 
 		if (result) {
 			cam->revertRayToPixelPos(
 				ray(eyeOrg, firstRayDir),
-				x, y);
+				px, py);
 		}
 
-		return result && ((x >= 0) && (x < m_width) && (y >= 0) && (y < m_height));
+		return result && ((px >= 0) && (px < m_width) && (py >= 0) && (py < m_height));
 	}
 
-	vec3 computeThroughput(
+	vec3 BDPT::computeThroughput(
 		const std::vector<Vertex>& vs,
 		const CameraSampleResult& camsample,
 		camera* camera)
@@ -286,7 +336,7 @@ namespace aten
 					next.pos,
 					next.nml,
 					camsample.posOnImageSensor,
-					camsample.posOnLens,
+					vtx.pos, //camsample.posOnLens,
 					camsample.posOnObjectplane);
 
 				f *= W;
@@ -295,6 +345,10 @@ namespace aten
 				// 光源.
 				if (vtx.mtrl && vtx.mtrl->isEmissive()) {
 					auto emit = vtx.mtrl->color();
+					f *= emit;
+				}
+				else if (vtx.light) {
+					auto emit = vtx.light->getLe();
 					f *= emit;
 				}
 				else {
@@ -309,11 +363,12 @@ namespace aten
 				const vec3 wo = normalize(toVtx.pos - vtx.pos);
 				
 				vec3 brdf(0);
-
-				AT_ASSERT(vtx.mtrl);
 				
 				if (vtx.mtrl) {
 					brdf = vtx.mtrl->bsdf(vtx.nml, wi, wo, vtx.u, vtx.v);
+				}
+				else {
+					continue;
 				}
 
 				// Geometry term.
@@ -353,21 +408,21 @@ namespace aten
 		}
 	};
 
-	real computePDF(
+	real BDPT::computePDF(
 		const std::vector<Vertex>& vs,
 		const CameraSampleResult& camsample,
 		camera* camera,
-		const int pathLenght,
-		const int specNumEye = -1,
-		const int specNumLight = -1)
+		const int pathLength,
+		const int specNumEye/*= -1*/,
+		const int specNumLight/*= -1*/)
 	{
 		TKahanAdder sumPDFs(0.0);
 		bool isSpecified = ((specNumEye >= 0) && (specNumLight >= 0));
 
 		// number of eye subpath vertices
-		for (int numEyeVertices = 0; numEyeVertices <= pathLenght + 1; numEyeVertices++) {
+		for (int numEyeVertices = 0; numEyeVertices <= pathLength + 1; numEyeVertices++) {
 			// number of light subpath vertices.
-			int numLightVertices = (pathLenght + 1) - numEyeVertices;
+			int numLightVertices = (pathLength + 1) - numEyeVertices;
 
 			// TODO
 			// Only pinhole...
@@ -393,7 +448,7 @@ namespace aten
 					const auto& vtx = vs[i];
 
 					if (i == 0) {
-						// カメラ.
+						// カメラ上の１点をサンプルするPDF.
 
 						const auto& next = vs[i + 1];
 
@@ -404,9 +459,10 @@ namespace aten
 							camsample.posOnLens,
 							camsample.posOnObjectplane);
 						
-						const vec3 dv = next.pos - vtx.pos;
+						vec3 dv = next.pos - vtx.pos;
 						const real dist2 = dv.squared_length();
-						const real c = dot(vtx.nml, dv);
+						dv.normalize();
+						const real c = dot(next.nml, dv);
 
 						totalPdf *= pdf * aten::abs(c / dist2);
 					}
@@ -420,22 +476,93 @@ namespace aten
 
 						real pdf = real(1);
 
-						if (vtx.mtrl->isEmissive()) {
-							
-						}
-						else if (vtx.mtrl->isSingular()) {
-							if (vtx.mtrl->isTranslucent()) {
-								// TODO
+						if (vtx.mtrl) {
+							if (vtx.mtrl->isEmissive()) {
+								// 完全拡散面とする.
+								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
+							}
+							else if (vtx.mtrl->isSingular()) {
+								if (vtx.mtrl->isTranslucent()) {
+									// TODO
+								}
+								else {
+									pdf = real(1);
+								}
 							}
 							else {
-								pdf = real(1);
+								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
 							}
 						}
-						else {
-							pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
+						else if (vtx.light) {
+							// 完全拡散面とする.
+							pdf = lambert::pdf(vtx.nml, wo);
 						}
 
 						const vec3 dv = toVtx.pos - vtx.pos;
+						const real dist2 = dv.squared_length();
+						const real c = dot(vtx.nml, dv);
+
+						totalPdf *= pdf * aten::abs(c / dist2);
+					}
+				}
+			}
+
+			if (totalPdf != 0.0) {
+				// sampling from the light source
+				for (int i = -1; i <= numLightVertices - 2; i++) {
+					if (i == -1) {
+						// ライト上の１点をサンプリングするPDF.
+						// PDF of sampling the light position (assume area-based sampling)
+						const auto& lightSrc = vs[vs.size() - 1];
+						auto sampleLightPdf = lightSrc.sampleLightPdf;
+						totalPdf = totalPdf * sampleLightPdf;
+					}
+					else if (i == 0) {
+						// ライトのマテリアルのPDF.
+						// 完全拡散面とする.
+						auto wo = normalize(vs[pathLength - 1].pos - vs[pathLength].pos);
+
+						const auto& vtx = vs[pathLength];
+						const auto& next = vs[pathLength - 1];
+
+						auto pdf = lambert::pdf(vtx.nml, wo);
+
+						vec3 dv = next.pos - vtx.pos;
+						const real dist2 = dv.squared_length();
+						dv.normalize();
+						const real c = dot(vtx.nml, dv);
+						
+						totalPdf *= pdf * aten::abs(c / dist2);
+					}
+					else {
+						// PDF of sampling (PathLength - i)th vertex
+						auto wi = normalize(vs[pathLength - (i - 1)].pos - vs[pathLength - i].pos);
+						auto wo = normalize(vs[pathLength - (i + 1)].pos - vs[pathLength - i].pos);
+
+						const auto& vtx = vs[pathLength - i];
+						const auto& next = vs[pathLength - (i + 1)];
+
+						real pdf = real(1);
+
+						if (vtx.mtrl) {
+							if (vtx.mtrl->isEmissive()) {
+								// 完全拡散面とする.
+								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
+							}
+							else if (vtx.mtrl->isSingular()) {
+								if (vtx.mtrl->isTranslucent()) {
+									// TODO
+								}
+								else {
+									pdf = real(1);
+								}
+							}
+							else {
+								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
+							}
+						}
+
+						const vec3 dv = next.pos - vtx.pos;
 						const real dist2 = dv.squared_length();
 						const real c = dot(vtx.nml, dv);
 
@@ -458,7 +585,7 @@ namespace aten
 	}
 
 	// balance heuristic
-	real computeMISWeight(
+	real BDPT::computeMISWeight(
 		const std::vector<Vertex>& vs,
 		const CameraSampleResult& camsample,
 		camera* camera,
@@ -477,19 +604,21 @@ namespace aten
 		return mis;
 	}
 
-	void BDPT::contribution(
-		std::vector<vec3>& result,
+	void BDPT::combinePath(
+		std::vector<Result>& result,
 		const std::vector<Vertex>& eyepath,
 		const std::vector<Vertex>& lightpath,
 		scene* scene,
 		const CameraSampleResult& camsample,
-		camera* camera) const
+		camera* camera)
 	{
 		// NOTE
 		// MaxEvents = the maximum number of vertices
 
 		static const int MinPathLength = 3;		// avoid sampling direct illumination
 		static const int MaxPathLength = 20;
+
+		const auto& beginEye = eyepath[0];
 
 		for (int pathLength = MinPathLength; pathLength <= MaxPathLength; pathLength++) {
 			for (int numEyeVertices = 0; numEyeVertices <= pathLength + 1; numEyeVertices++) {
@@ -507,8 +636,11 @@ namespace aten
 					continue;
 				}
 
+				int x = beginEye.x;
+				int y = beginEye.y;
+
 				// check the path visibility
-				if (!isConnectable(scene, camera, eyepath, numEyeVertices, lightpath, numLightVertices)) {
+				if (!isConnectable(scene, camera, eyepath, numEyeVertices, lightpath, numLightVertices, x, y)) {
 					continue;
 				}
 
@@ -533,13 +665,125 @@ namespace aten
 				}
 
 				vec3 c = f / (w * p);
-				auto m = std::max(c.x, std::max(c.y, c.z));
-				if (m < 0.0) {
+				auto _max = std::max(c.x, std::max(c.y, c.z));
+				auto _min = std::min(c.x, std::min(c.y, c.z));
+				if (_max < 0.0 || _min < 0.0) {
 					continue;
 				}
 
 				// store the pixel contribution
-				result.push_back(c);
+				result.push_back(Result(c, x, y));
+			}
+		}
+	}
+
+	void BDPT::render(
+		Destination& dst,
+		scene* scene,
+		camera* camera)
+	{
+		m_width = dst.width;
+		m_height = dst.height;
+		uint32_t samples = dst.sample;
+
+		m_maxDepth = dst.maxDepth;
+
+		// TODO
+		/*
+		m_rrDepth = dst.russianRouletteDepth;
+
+		if (m_rrDepth > m_maxDepth) {
+			m_rrDepth = m_maxDepth - 1;
+		}
+		*/
+
+		auto threadnum = thread::getThreadNum();
+
+		std::vector<std::vector<vec4>> image(threadnum);
+
+		for (int i = 0; i < threadnum; i++) {
+			image[i].resize(m_width * m_height);
+		}
+
+#if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
+#pragma omp parallel
+#endif
+		{
+			auto idx = thread::getThreadIdx();
+
+			auto time = timer::getSystemTime();
+
+#if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
+#pragma omp for
+#endif
+			for (int y = 0; y < m_height; y++) {
+				for (int x = 0; x < m_width; x++) {
+
+					for (uint32_t i = 0; i < samples; i++) {
+						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+						Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						UniformDistributionSampler sampler(&rnd);
+
+						std::vector<Vertex> eyevs;
+						std::vector<Vertex> lightvs;
+
+						auto eyeRes = genEyePath(eyevs, x, y, &sampler, scene, camera);
+
+						if (eyeRes.x >= 0 && eyeRes.y >= 0) {
+							// Hit ray light source directly.
+							auto pos = eyeRes.y * m_width + eyeRes.x;
+							image[idx][pos] += vec4(eyeRes.contrib, 1);
+						}
+						else {
+							auto lightNum = scene->lightNum();
+							for (uint32_t i = 0; i < lightNum; i++) {
+								auto light = scene->getLight(i);
+								auto lightRes = genLightPath(lightvs, light, &sampler, scene);
+
+								std::vector<Result> result;
+
+								combinePath(result, eyevs, lightvs, scene, eyeRes.camsample, camera);
+
+								for (uint32_t n= 0; n < (uint32_t)result.size(); n++) {
+									const auto& res = result[n];
+
+									auto pos = res.y * m_width + res.x;
+									image[idx][pos] += vec4(res.contrib, 1);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (int i = 1; i < threadnum; i++) {
+			auto& img = image[i];
+			for (int y = 0; y < m_height; y++) {
+				for (int x = 0; x < m_width; x++) {
+					int pos = y * m_width + x;
+
+					auto clr = img[pos] / samples;
+					clr.w = 1;
+
+					image[0][pos] += clr;
+				}
+			}
+		}
+
+#if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < m_height; y++) {
+			for (int x = 0; x < m_width; x++) {
+				int pos = y * m_width + x;
+
+				auto clr = image[0][pos];
+				clr.w = 1;
+
+				dst.buffer->put(x, y, clr);
 			}
 		}
 	}

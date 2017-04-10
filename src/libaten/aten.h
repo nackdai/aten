@@ -80,5 +80,6 @@
 #include "renderer/pssmlt.h"
 #include "renderer/geominforender.h"
 #include "renderer/sorted_pathtracing.h"
+#include "renderer/bdpt.h"
 
 #include "posteffect/BloomEffect.h"

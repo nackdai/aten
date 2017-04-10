@@ -194,7 +194,14 @@ namespace aten
 		return face;
 	}
 
-	std::tuple<vec3, vec3> cube::getSamplePosAndNormal(sampler* sampler) const
+	hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(sampler* sampler) const
+	{
+		return getSamplePosNormalPdf(mat4::Identity, sampler);
+	}
+
+	hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(
+		const mat4& mtxL2W,
+		sampler* sampler) const
 	{
 		vec3 pos;
 		auto face = onGetRandomPosOn(pos, sampler);
@@ -221,6 +228,10 @@ namespace aten
 			break;
 		}
 
-		return std::move(std::tuple<vec3, vec3>(pos + nml * AT_MATH_EPSILON, nml));
+		// TODO
+		AT_ASSERT(false);
+		auto area = 1;
+
+		return std::move(hitable::SamplingPosNormalPdf(pos + nml * AT_MATH_EPSILON, nml, real(1) / area));
 	}
 }

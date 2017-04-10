@@ -306,6 +306,9 @@
     <ClInclude Include="..\src\libaten\renderer\bdpt.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\tranfomable.h">
+      <Filter>shape</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -472,6 +475,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp">
       <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\emissive.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

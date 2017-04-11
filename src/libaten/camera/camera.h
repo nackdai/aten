@@ -66,6 +66,11 @@ namespace aten {
 			return false;
 		}
 
+		virtual bool isPinhole() const
+		{
+			return true;
+		}
+
 		virtual const vec3& getPos() const = 0;
 		virtual const vec3& getDir() const = 0;
 

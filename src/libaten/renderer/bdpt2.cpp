@@ -10,7 +10,7 @@
 //#define BDPT_DEBUG
 
 #ifdef BDPT_DEBUG
-#pragma optimize( "", off) 
+#pragma optimize( "", off)
 #endif
 
 namespace aten
@@ -117,12 +117,17 @@ namespace aten
 				totalAreaPdf *= areaPdf;
 			}
 
-			// ジオメトリターム.
-			const real c0 = dot(normalize(toNextVtx), orienting_normal);
-			const real c1 = dot(normalize(-toNextVtx), prevNormal);
-			const real dist2 = toNextVtx.squared_length();
-			const double G = c0 * c1 / dist2;
-			throughput = G * throughput;
+			if (depth == 0 && camera->isPinhole()) {
+				// Nothing is done...
+			}
+			else {
+				// ジオメトリターム.
+				const real c0 = dot(normalize(toNextVtx), orienting_normal);
+				const real c1 = dot(normalize(-toNextVtx), prevNormal);
+				const real dist2 = toNextVtx.squared_length();
+				const double G = c0 * c1 / dist2;
+				throughput = G * throughput;
+			}
 
 			// 光源にヒットしたらそこで追跡終了.
 			if (rec.mtrl->isEmissive()) {
@@ -139,6 +144,14 @@ namespace aten
 					rec.obj,
 					rec.mtrl,
 					rec.u, rec.v));
+
+				sampledPdf = lambert::pdf(orienting_normal, normalize(toNextVtx));
+
+				const real c = dot(normalize(toNextVtx), orienting_normal);
+				const real dist2 = toNextVtx.squared_length();
+				const real areaPdf = sampledPdf * (c / dist2);
+
+				totalAreaPdf *= areaPdf;
 
 				vec3 emit = rec.mtrl->color();
 				vec3 contrib = throughput * emit / totalAreaPdf;
@@ -638,38 +651,43 @@ namespace aten
 				bool isHit = scene->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
 				if (eye_end.objType == ObjectType::Lens) {
-					// lightサブパスを直接レンズにつなげる.
-					vec3 posOnLens;
-					vec3 posOnObjectplane;
-					vec3 posOnImagesensor;
-					int px, py;
-
-					const auto lens_t = camera->hitOnLens(
-						r,
-						posOnLens,
-						posOnObjectplane,
-						posOnImagesensor,
-						px, py);
-
-					if (AT_MATH_EPSILON < lens_t
-						&& lens_t < rec.t)
-					{
-						// レイがレンズにヒット＆イメージセンサにヒット.
-						targetX = aten::clamp(px, 0, m_width - 1);
-						targetY = aten::clamp(px, 0, m_height - 1);
-
-						const real W_dash = camera->getWdash(
-							rec.p,
-							rec.normal,
-							posOnImagesensor,
-							posOnLens,
-							posOnObjectplane);
-
-						throughput *= W_dash;
+					if (camera->isPinhole()) {
+						continue;
 					}
 					else {
-						// lightサブパスを直接レンズにつなげようとしたが、遮蔽されたりイメージセンサにヒットしなかった場合、終わり.
-						continue;
+						// lightサブパスを直接レンズにつなげる.
+						vec3 posOnLens;
+						vec3 posOnObjectplane;
+						vec3 posOnImagesensor;
+						int px, py;
+
+						const auto lens_t = camera->hitOnLens(
+							r,
+							posOnLens,
+							posOnObjectplane,
+							posOnImagesensor,
+							px, py);
+
+						if (AT_MATH_EPSILON < lens_t
+							&& lens_t < rec.t)
+						{
+							// レイがレンズにヒット＆イメージセンサにヒット.
+							targetX = aten::clamp(px, 0, m_width - 1);
+							targetY = aten::clamp(px, 0, m_height - 1);
+
+							const real W_dash = camera->getWdash(
+								rec.p,
+								rec.normal,
+								posOnImagesensor,
+								posOnLens,
+								posOnObjectplane);
+
+							throughput *= W_dash;
+						}
+						else {
+							// lightサブパスを直接レンズにつなげようとしたが、遮蔽されたりイメージセンサにヒットしなかった場合、終わり.
+							continue;
+						}
 					}
 				}
 				else if (eye_end.objType == ObjectType::Light) {

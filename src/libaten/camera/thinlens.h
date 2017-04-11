@@ -54,6 +54,11 @@ namespace aten {
 			return true;
 		}
 
+		virtual bool isPinhole() const
+		{
+			return false;
+		}
+
 		virtual const vec3& getPos() const override final
 		{
 			return m_imagesensor.center;

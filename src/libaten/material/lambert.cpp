@@ -30,8 +30,13 @@ namespace aten {
 		real u, real v,
 		sampler* sampler) const
 	{
-		const vec3& in = ray.dir;
+		return std::move(sampleDirection(normal, sampler));
+	}
 
+	vec3 lambert::sampleDirection(
+		const vec3& normal,
+		sampler* sampler)
+	{
 		// normal‚Ì•ûŒü‚ðŠî€‚Æ‚µ‚½³‹K’¼ŒðŠî’ê(w, u, v)‚ðì‚é.
 		// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŽŸ‚ÌƒŒƒC‚ð”ò‚Î‚·.
 		vec3 n, t, b;
@@ -63,17 +68,25 @@ namespace aten {
 	}
 
 	vec3 lambert::bsdf(
+		material* mtrl,
+		real u, real v)
+	{
+		vec3 albedo = mtrl->color();
+
+		albedo *= mtrl->sampleAlbedoMap(u, v);
+
+		vec3 ret = albedo / AT_MATH_PI;
+		return ret;
+	}
+
+	vec3 lambert::bsdf(
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
 		real u, real v) const
 	{
-		vec3 albedo = color();
-
-		albedo *= sampleAlbedoMap(u, v);
-
-		vec3 ret = albedo / AT_MATH_PI;
-		return ret;
+		auto ret = bsdf((material*)this, u, v);
+		return std::move(ret);
 	}
 
 	material::sampling lambert::sample(

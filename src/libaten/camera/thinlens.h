@@ -24,12 +24,12 @@ namespace aten {
 			real s, real t,
 			sampler* sampler) const override final;
 
-		real hitOnLens(
+		virtual real hitOnLens(
 			const ray& r,
 			vec3& posOnLens,
 			vec3& posOnObjectPlane,
 			vec3& posOnImageSensor,
-			int& x, int& y) const;
+			int& x, int& y) const override final;
 
 		virtual real getPdfImageSensorArea(
 			const vec3& hitPoint,

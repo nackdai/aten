@@ -125,7 +125,7 @@ namespace aten
 			const int numLightVertices,
 			const int pathLength);
 
-		void BDPT::combinePath(
+		void combinePath(
 			std::vector<Result>& result,
 			const std::vector<Vertex>& eyepath,
 			const std::vector<Vertex>& lightpath,

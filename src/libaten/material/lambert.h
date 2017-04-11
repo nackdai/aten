@@ -31,6 +31,14 @@ namespace aten
 			const vec3& normal,
 			const vec3& wo);
 
+		static vec3 sampleDirection(
+			const vec3& normal,
+			sampler* sampler);
+
+		static vec3 bsdf(
+			material* mtrl,
+			real u, real v);
+
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

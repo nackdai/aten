@@ -18,36 +18,7 @@ namespace aten {
 		real u, real v,
 		sampler* sampler) const
 	{
-		const vec3& in = ray.dir;
-
-		// normalの方向を基準とした正規直交基底(w, u, v)を作る.
-		// この基底に対する半球内で次のレイを飛ばす.
-		vec3 n, t, b;
-
-		n = normal;
-
-		// nと平行にならないようにする.
-		if (fabs(n.x) > 0.1) {
-			t = normalize(cross(vec3(0.0, 1.0, 0.0), n));
-		}
-		else {
-			t = normalize(cross(vec3(1.0, 0.0, 0.0), n));
-		}
-		b = cross(n, t);
-
-		// コサイン項を使った重点的サンプリング.
-		const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
-		const real r2 = sampler->nextSample();
-		const real r2s = sqrt(r2);
-
-		const real x = aten::cos(r1) * r2s;
-		const real y = aten::sin(r1) * r2s;
-		const real z = aten::sqrt(real(1) - r2);
-
-		vec3 dir = normalize((t * x + b * y + n * z));
-		AT_ASSERT(dot(normal, dir) >= 0);
-
-		return std::move(dir);
+		return std::move(lambert::sampleDirection(normal, sampler));
 	}
 
 	vec3 emissive::bsdf(
@@ -56,12 +27,8 @@ namespace aten {
 		const vec3& wo,
 		real u, real v) const
 	{
-		vec3 albedo = color();
-
-		albedo *= sampleAlbedoMap(u, v);
-
-		vec3 ret = albedo / AT_MATH_PI;
-		return ret;
+		auto ret = lambert::bsdf((material*)this, u, v);
+		return std::move(ret);
 	}
 
 	material::sampling emissive::sample(

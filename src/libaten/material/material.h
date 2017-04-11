@@ -114,6 +114,8 @@ namespace aten
 			real pdf{ real(0) };
 			real fresnel{ real(1) };
 
+			real subpdf{ real(1) };
+
 			sampling() {}
 			sampling(const vec3& d, const vec3& b, real p)
 				: dir(d), bsdf(b), pdf(p)

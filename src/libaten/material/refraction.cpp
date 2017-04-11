@@ -146,6 +146,8 @@ namespace aten
 				ret.bsdf = Re * albedo;
 				ret.bsdf /= prob;
 
+				ret.subpdf = prob;
+
 				ret.fresnel = Re;
 			}
 			else {
@@ -153,6 +155,8 @@ namespace aten
 				ret.dir = refract;
 				ret.bsdf = Tr * albedo;
 				ret.bsdf /= (1 - prob);
+
+				ret.subpdf = (1 - prob);
 
 				ret.fresnel = 0;
 			}
@@ -165,6 +169,8 @@ namespace aten
 				auto denom = dot(normal, reflect);
 				ret.bsdf = Re * albedo / denom;
 				ret.bsdf /= prob;
+
+				ret.subpdf = prob;
 			}
 			else {
 				// ã¸ê‹.
@@ -174,6 +180,8 @@ namespace aten
 				auto denom = dot(normal, refract);
 				ret.bsdf = Tr * albedo / denom;
 				ret.bsdf /= (1 - prob);
+
+				ret.subpdf = (1 - prob);
 			}
 #endif
 		}

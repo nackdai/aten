@@ -51,6 +51,16 @@ namespace aten {
 			return real(1);
 		}
 
+		virtual real hitOnLens(
+			const ray& r,
+			vec3& posOnLens,
+			vec3& posOnObjectPlane,
+			vec3& posOnImageSensor,
+			int& x, int& y) const
+		{
+			return -AT_MATH_INF;
+		}
+
 		virtual bool needRevert() const
 		{
 			return false;

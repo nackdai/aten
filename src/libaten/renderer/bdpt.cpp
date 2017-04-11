@@ -457,12 +457,7 @@ namespace aten
 							camsample.posOnLens,
 							camsample.posOnObjectplane);
 						
-						vec3 dv = next.pos - vtx.pos;
-						const real dist2 = dv.squared_length();
-						dv.normalize();
-						const real c = dot(next.nml, dv);
-
-						totalPdf *= pdf * aten::abs(c / dist2);
+						totalPdf *= pdf;
 					}
 					else {
 						// PDF of sampling ith vertex.

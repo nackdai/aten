@@ -93,11 +93,22 @@ namespace aten {
 
 		vec3 v = hitPoint - posOnLens;
 
-		vec3 dir = normalize(v);
-		const real cosTheta = dot(dir, m_dir);
-		const real dist = m_dist / (cosTheta + real(0.0001));
-		const real dist2 = dist * dist;
-		pdf = pdf / (cosTheta / dist2);
+		{
+			vec3 dir = normalize(v);
+			const real cosTheta = dot(dir, m_dir);
+			const real dist = m_dist / (cosTheta + real(0.0001));
+			const real dist2 = dist * dist;
+			pdf = pdf / (cosTheta / dist2);
+		}
+
+		{
+			vec3 dv = hitPoint - posOnLens;
+			const real dist2 = dv.squared_length();
+			dv.normalize();
+			const real c = dot(hitpointNml, dv);
+
+			pdf = pdf * aten::abs(c / dist2);
+		}
 
 		return pdf;
 	}

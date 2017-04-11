@@ -273,7 +273,7 @@ namespace aten {
 		// B = imagesensor_to_lens_distance
 		// A = lens_to_objectplane(focus distance)
 
-#if 0
+#if 1
 		// B/A
 		const real ba2 = x0_xV.squared_length() / x0_xI.squared_length();
 
@@ -291,11 +291,11 @@ namespace aten {
 
 		const real d0 = x0_xI.length();
 		const real c0 = dot(normalize(x0_xI), normalize(-m_imagesensor.dir));
-		const real G0 = c0 / (d0 * d0);
+		const real G0 = c0 * c0 / (d0 * d0);
 
 		const real d1 = x0_xV.length();
 		const real c1 = dot(normalize(x0_x1), normalize(m_imagesensor.dir));
-		const real G1 = c1 / (d1 * d1);
+		const real G1 = c1 * c1 / (d1 * d1);
 
 		real W_dash = m_W * ba2 / G0 * G1;
 #endif

@@ -47,6 +47,13 @@ namespace aten {
 			const vec3& posOnLens,
 			const vec3& posOnObjectPlane) const override final;
 
+		virtual real hitOnLens(
+			const ray& r,
+			vec3& posOnLens,
+			vec3& posOnObjectPlane,
+			vec3& posOnImageSensor,
+			int& x, int& y) const override final;
+
 	private:
 		vec3 m_origin;
 

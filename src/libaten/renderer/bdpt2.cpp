@@ -17,8 +17,15 @@ namespace aten
 {
 	static inline real russianRoulette(const vec3& v)
 	{
+		real p = std::max(v.r, std::max(v.g, v.b));
+
+		if (p == real(0)) {
+			return real(1);
+		}
+
 		auto t = normalize(v);
-		auto p = std::max(t.r, std::max(t.g, t.b));
+		p = std::max(t.r, std::max(t.g, t.b));
+
 		return p;
 	}
 
@@ -52,7 +59,7 @@ namespace aten
 		ray ray = camsample.r;
 
 		vec3 throughput(1);
-		real totalAreaPdf = real(1);
+		real totalAreaPdf = camsample.pdfOnLens;
 
 		vec3 prevNormal = camera->getDir();
 		real sampledPdf = real(1);
@@ -134,7 +141,7 @@ namespace aten
 					rec.u, rec.v));
 
 				vec3 emit = rec.mtrl->color();
-				vec3 contrib = throughput * emit;
+				vec3 contrib = throughput * emit / totalAreaPdf;
 
 				return std::move(Result(contrib, x, y, true));
 			}
@@ -245,7 +252,57 @@ namespace aten
 				pixelx, pixely);
 			
 			if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
-				// TODO
+				// レイがレンズにヒット＆イメージセンサにヒット.
+
+				pixelx = aten::clamp(pixelx, 0, m_width - 1);
+				pixelx = aten::clamp(pixelx, 0, m_height - 1);
+
+				vec3 dir = ray.org - posOnLens;
+				const real dist2 = dir.squared_length();
+				dir.normalize();
+
+				const vec3& camnml = camera->getDir();
+
+				// レンズの上の点のサンプリング確率を計算。
+				{
+					const real c = dot(dir, camnml);
+					const real areaPdf = sampledPdf * c / dist2;
+
+					totalAreaPdf *= areaPdf;
+				}
+
+				// ジオメトリターム
+				{
+					const real c0 = dot(dir, camnml);
+					const real c1 = dot(-dir, prevNormal);
+					const real G = c0 * c1 / dist2;
+
+					throughput *= G;
+				}
+
+				// レンズ上に生成された点を頂点リストに追加（基本的に使わない）.
+				vs.push_back(Vertex(
+					posOnLens,
+					camnml,
+					camnml,
+					ObjectType::Lens,
+					totalAreaPdf,
+					throughput,
+					vec3(0),
+					nullptr,
+					nullptr,
+					0, 0));
+
+				const real W_dash = camera->getWdash(
+					ray.org,
+					vec3(0, 1, 0),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+					posOnImageSensor,
+					posOnLens,
+					posOnObjectPlane);
+
+				const vec3 contrib = throughput * W_dash / totalAreaPdf;
+
+				return std::move(Result(contrib, pixelx, pixely, true));
 			}
 
 			if (!isHit) {
@@ -695,7 +752,167 @@ namespace aten
 				result.push_back(Result(
 					contrib,
 					targetX, targetY,
-					false));
+					numEyeVtx <= 1 ? false : true));
+			}
+		}
+	}
+
+	void BDPT2::render(
+		Destination& dst,
+		scene* scene,
+		camera* camera)
+	{
+		m_width = dst.width;
+		m_height = dst.height;
+		uint32_t samples = dst.sample;
+
+		m_maxDepth = dst.maxDepth;
+
+		const real divPixelProb = real(1) / (real)(m_width * m_height);
+
+		// TODO
+		/*
+		m_rrDepth = dst.russianRouletteDepth;
+
+		if (m_rrDepth > m_maxDepth) {
+		m_rrDepth = m_maxDepth - 1;
+		}
+		*/
+
+		auto threadnum = thread::getThreadNum();
+
+		std::vector<std::vector<vec4>> image(threadnum);
+
+		for (int i = 0; i < threadnum; i++) {
+			image[i].resize(m_width * m_height);
+		}
+
+#if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
+#pragma omp parallel
+#endif
+		{
+			auto idx = thread::getThreadIdx();
+
+			auto time = timer::getSystemTime();
+
+#if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
+#pragma omp for
+#endif
+			for (int y = 0; y < m_height; y++) {
+				for (int x = 0; x < m_width; x++) {
+					std::vector<Result> result;
+
+					for (uint32_t i = 0; i < samples; i++) {
+						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+						Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						UniformDistributionSampler sampler(&rnd);
+
+						std::vector<Vertex> eyevs;
+						std::vector<Vertex> lightvs;
+
+						auto eyeRes = genEyePath(eyevs, x, y, &sampler, scene, camera);
+						
+#if 0
+						if (eyeRes.isTerminate) {
+							int pos = eyeRes.y * m_width + eyeRes.x;
+							image[idx][pos] += vec4(eyeRes.contrib, 1);
+						}
+#else
+						auto lightNum = scene->lightNum();
+						for (uint32_t i = 0; i < lightNum; i++) {
+							auto light = scene->getLight(i);
+							auto lightRes = genLightPath(lightvs, light, &sampler, scene, camera);
+
+							if (eyeRes.isTerminate) {
+								const real misWeight = computeMISWeight(
+									camera,
+									eyevs[eyevs.size() - 1].totalAreaPdf,
+									eyevs,
+									(const int)eyevs.size(),   // num_eye_vertex
+									lightvs,
+									0);                         // num_light_vertex
+
+								const vec3 contrib = misWeight * eyeRes.contrib;
+								result.push_back(Result(contrib, eyeRes.x, eyeRes.y, true));
+							}
+
+							if (lightRes.isTerminate) {
+								const real misWeight = computeMISWeight(
+									camera,
+									lightvs[lightvs.size() - 1].totalAreaPdf,
+									eyevs,
+									0,							// num_eye_vertex
+									lightvs,
+									(const int)lightvs.size());	// num_light_vertex
+
+								const vec3 contrib = misWeight * lightRes.contrib;
+								result.push_back(Result(contrib, lightRes.x, lightRes.y, false));
+							}
+
+							combine(
+								x, y,
+								result, 
+								eyevs,
+								lightvs,
+								scene,
+								camera);
+						}
+#endif
+					}
+
+#if 1
+					for (int i = 0; i < (int)result.size(); i++) {
+						const auto& res = result[i];
+
+						const int pos = res.y * m_width + res.x;
+
+						if (res.isStartFromPixel) {
+							image[idx][pos] += vec4(res.contrib, 1);
+						}
+						else {
+							// 得られたサンプルについて、サンプルが現在の画素（x,y)から発射されたeyeサブパスを含むものだった場合
+							// Ixy のモンテカルロ推定値はsamples[i].valueそのものなので、そのまま足す。その後、下の画像出力時に発射された回数の総計（iteration_per_thread * num_threads)で割る.
+							//
+							// 得られたサンプルについて、現在の画素から発射されたeyeサブパスを含むものではなかった場合（lightサブパスが別の画素(x',y')に到達した場合）は
+							// Ix'y' のモンテカルロ推定値を新しく得たわけだが、この場合、画像全体に対して光源側からサンプルを生成し、たまたまx'y'にヒットしたと考えるため
+							// このようなサンプルについては最終的に光源から発射した回数の総計で割って、画素への寄与とする必要がある.
+							image[idx][pos] += vec4(res.contrib * divPixelProb, 1);
+						}
+					}
+#endif
+				}
+			}
+		}
+
+		std::vector<vec4> tmp(m_width * m_height);
+
+		for (int i = 0; i < threadnum; i++) {
+			auto& img = image[i];
+			for (int y = 0; y < m_height; y++) {
+				for (int x = 0; x < m_width; x++) {
+					int pos = y * m_width + x;
+
+					auto clr = img[pos] / samples;
+					clr.w = 1;
+
+					tmp[pos] += clr;
+				}
+			}
+		}
+
+#if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < m_height; y++) {
+			for (int x = 0; x < m_width; x++) {
+				int pos = y * m_width + x;
+
+				auto clr = tmp[pos];
+				clr.w = 1;
+
+				dst.buffer->put(x, y, clr);
 			}
 		}
 	}

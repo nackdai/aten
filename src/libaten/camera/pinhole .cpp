@@ -129,4 +129,36 @@ namespace aten {
 
 		return W_dash;
 	}
+
+	real PinholeCamera::hitOnLens(
+		const ray& r,
+		vec3& posOnLens,
+		vec3& posOnObjectPlane,
+		vec3& posOnImageSensor,
+		int& x, int& y) const
+	{
+		int px;
+		int py;
+
+		revertRayToPixelPos(r, px, py);
+
+		if ((px >= 0) && (px < m_width)
+			&& (py >= 0) && (py < m_height))
+		{
+			x = px;
+			y = py;
+
+			real u = (real)x / (real)m_width;
+			real v = (real)y / (real)m_height;
+
+			auto camsample = sample(u, v, nullptr);
+			posOnLens = camsample.posOnLens;
+
+			real lens_t = (posOnLens - r.org).length();
+
+			return lens_t;
+		}
+
+		return -AT_MATH_INF;
+	}
 }

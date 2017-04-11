@@ -13,8 +13,6 @@ namespace aten
 		~BDPT2() {}
 
 	public:
-		
-
 		virtual void render(
 			Destination& dst,
 			scene* scene,
@@ -42,8 +40,8 @@ namespace aten
 			real u{ real(0) };
 			real v{ real(0) };
 
-			hitable* obj;
-			material* mtrl;
+			hitable* obj{ nullptr };
+			material* mtrl{ nullptr };
 
 			aten::Light* light;
 
@@ -80,7 +78,11 @@ namespace aten
 			vec3 contrib;
 			int x;
 			int y;
-			bool isTerminate;
+
+			union {
+				bool isTerminate;
+				bool isStartFromPixel;
+			};
 
 			Result(vec3 c, int _x, int _y, bool _isTerminate)
 				: contrib(c), x(_x), y(_y), isTerminate(_isTerminate)

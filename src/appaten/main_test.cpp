@@ -8,7 +8,7 @@ static int WIDTH = 640;
 static int HEIGHT = 480;
 static const char* TITLE = "app";
 
-//#define ENABLE_DOF
+#define ENABLE_DOF
 
 #ifdef ENABLE_DOF
 static aten::ThinLensCamera g_camera;
@@ -25,7 +25,8 @@ static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
 //static aten::PathTracing g_tracer;
-static aten::BDPT g_tracer;
+//static aten::BDPT g_tracer;
+static aten::BDPT2 g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;

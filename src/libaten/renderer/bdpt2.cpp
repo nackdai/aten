@@ -865,10 +865,6 @@ namespace aten
 				for (int x = 0; x < m_width; x++) {
 					std::vector<Result> result;
 
-					if (x == 430 && y == 480 - 330) {
-						int xxxx = 0;
-					}
-
 					for (uint32_t i = 0; i < samples; i++) {
 						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);

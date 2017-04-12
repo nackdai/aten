@@ -54,9 +54,8 @@ namespace aten
 				material* _mtrl,
 				Light* _light,
 				real lightPdf,
-				real _u, real _v,
-				int _x = -1, int _y = -1)
-				: pos(p), nml(n), obj(_obj), mtrl(_mtrl), light(_light), sampleLightPdf(lightPdf), u(_u), v(_v), x(_x), y(_y)
+				real _u, real _v)
+				: pos(p), nml(n), obj(_obj), mtrl(_mtrl), light(_light), sampleLightPdf(lightPdf), u(_u), v(_v)
 			{}
 		};
 
@@ -68,9 +67,11 @@ namespace aten
 
 			CameraSampleResult camsample;
 
+			bool isStartFromPixel;
+
 			Result() {}
-			Result(const vec3& c, int _x, int _y)
-				: contrib(c), x(_x), y(_y)
+			Result(const vec3& c, int _x, int _y, bool _isStartFromPixel)
+				: contrib(c), x(_x), y(_y), isStartFromPixel(_isStartFromPixel)
 			{}
 		};
 
@@ -80,20 +81,22 @@ namespace aten
 			uint32_t maxDepth,
 			const ray& r,
 			sampler* sampler,
-			scene* scene);
+			scene* scene,
+			camera* camera);
 
 		Result genEyePath(
 			std::vector<Vertex>& vs,
 			int x, int y,
 			sampler* sampler,
 			scene* scene,
-			camera* cam);
+			camera* camera);
 
 		Result genLightPath(
 			std::vector<Vertex>& vs,
 			Light* light,
 			sampler* sampler,
-			scene* scene);
+			scene* scene,
+			camera* camera);
 
 		bool isConnectable(
 			scene* scene,

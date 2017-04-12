@@ -7,7 +7,7 @@
 #include "sampler/sobolproxy.h"
 #include "sampler/UniformDistributionSampler.h"
 
-//#define BDPT_DEBUG
+#define BDPT_DEBUG
 
 #ifdef BDPT_DEBUG
 #pragma optimize( "", off) 
@@ -24,7 +24,8 @@ namespace aten
 		uint32_t maxDepth,
 		const ray& r,
 		sampler* sampler,
-		scene* scene)
+		scene* scene,
+		camera* camera)
 	{
 		uint32_t depth = 0;
 
@@ -35,37 +36,89 @@ namespace aten
 
 		while (depth < maxDepth) {
 			hitrecord rec;
-			if (!scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
-				return vec3(0);
-			}
+			bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-
-			Vertex vtx(
-				rec.p,
-				orienting_normal,
-				rec.obj,
-				rec.mtrl,
-				rec.u, rec.v);
-
-			if (isEyePath && rec.mtrl->isEmissive()) {
-				auto emit = rec.mtrl->color();
-				contrib = throughput * emit;
-
-				if (depth == 0) {
-					// NOTE
-					// Marker which ray hits light directly.
-					vtx.x = 0;
-					vtx.y = 0;
+			if (isEyePath) {
+				if (!isHit) {
+					break;
 				}
 
-				vs.push_back(vtx);
+				// For eye path.
+				Vertex vtx(
+					rec.p,
+					orienting_normal,
+					rec.obj,
+					rec.mtrl,
+					rec.u, rec.v);
 
-				break;
+				if (rec.mtrl->isEmissive()) {
+					auto emit = rec.mtrl->color();
+					contrib = throughput * emit;
+
+					if (depth == 0) {
+						// NOTE
+						// Marker which ray hits light directly.
+						vtx.x = 0;
+						vtx.y = 0;
+					}
+
+					vs.push_back(vtx);
+
+					break;
+				}
+				else {
+					vs.push_back(vtx);
+				}
 			}
 			else {
-				vs.push_back(vtx);
+				// For light path.
+				vec3 posOnImageSensor;
+				vec3 posOnLens;
+				vec3 posOnObjectPlane;
+				int pixelx;
+				int pixely;
+
+				// レンズと交差判定.
+				auto lens_t = camera->hitOnLens(
+					ray,
+					posOnLens,
+					posOnObjectPlane,
+					posOnImageSensor,
+					pixelx, pixely);
+
+				if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
+					// レイがレンズにヒット＆イメージセンサにヒット.
+					const vec3& camnml = camera->getDir();
+
+					Vertex vtx(
+						rec.p,
+						camnml,
+						nullptr,
+						nullptr,
+						0, 0);
+
+					vtx.x = aten::clamp(pixelx, 0, m_width);
+					vtx.y = aten::clamp(pixely, 0, m_height);
+
+					vs.push_back(vtx);
+
+					contrib = throughput;
+
+					break;
+				}
+
+				if (!isHit) {
+					break;
+				}
+
+				vs.push_back(Vertex(
+					rec.p,
+					orienting_normal,
+					rec.obj,
+					rec.mtrl,
+					rec.u, rec.v));
 			}
 
 			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
@@ -103,12 +156,12 @@ namespace aten
 		int x, int y,
 		sampler* sampler,
 		scene* scene,
-		camera* cam)
+		camera* camera)
 	{
 		real u = real(x + sampler->nextSample()) / (real)m_width;
 		real v = real(y + sampler->nextSample()) / (real)m_height;
 
-		auto camsample = cam->sample(u, v, sampler);
+		auto camsample = camera->sample(u, v, sampler);
 
 		// カメラ.
 		vs.push_back(Vertex(
@@ -125,7 +178,8 @@ namespace aten
 			m_maxDepth,
 			camsample.r,
 			sampler,
-			scene);
+			scene,
+			camera);
 
 		Result res;
 
@@ -145,7 +199,8 @@ namespace aten
 		std::vector<Vertex>& vs,
 		Light* light,
 		sampler* sampler,
-		scene* scene)
+		scene* scene,
+		camera* camera)
 	{
 		// TODO
 		// Only AreaLight...
@@ -198,23 +253,33 @@ namespace aten
 
 		ray r(pos + dir * AT_MATH_EPSILON, dir);
 
-		trace(
+		vec3 contrib = trace(
 			false,
 			vs,
 			m_maxDepth,
 			r,
 			sampler,
-			scene);
+			scene,
+			camera);
 
-		// TODO
+		contrib *= light->getLe();
+
 		Result lightRes;
+
+		lightRes.contrib = contrib;
+
+		const auto& endLight = vs[vs.size() - 1];
+		if (endLight.x >= 0) {
+			lightRes.x = endLight.x;
+			lightRes.y = endLight.y;
+		}
 
 		return std::move(lightRes);
 	}
 
 	bool BDPT::isConnectable(
 		scene* scene,
-		camera* cam,
+		camera* camera,
 		const std::vector<Vertex>& eyepath,
 		const int numEye,
 		const std::vector<Vertex>& lightpath,
@@ -226,14 +291,49 @@ namespace aten
 
 		bool result = false;
 
-		if ((numEye == 0) && (numLight >= 2)) {
-			// TODO
-			// no direct hit to the film (pinhole)
+		px = -1;
+		py = -1;
 
+		if ((numEye == 0) && (numLight >= 2)) {
 			// eyepath は存在しない. lightpath が２つ以上.
 			// => lightpath がカメラに直接ヒットしている可能性.
-			
-			result = false;
+
+			if (camera->isPinhole()) {
+				result = false;
+			}
+			else {
+				const Vertex& eye = eyepath[0];
+				const Vertex& endLight = lightpath[numLight - 1];
+
+				auto dir = normalize(eye.pos - endLight.pos);
+				ray r(endLight.pos + dir * AT_MATH_EPSILON, dir);
+
+				hitrecord rec;
+				bool isHit = scene->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+
+				vec3 posOnLens;
+				vec3 posOnObjectplane;
+				vec3 posOnImagesensor;
+
+				const auto lens_t = camera->hitOnLens(
+					r,
+					posOnLens,
+					posOnObjectplane,
+					posOnImagesensor,
+					px, py);
+
+				if (AT_MATH_EPSILON < lens_t
+					&& lens_t < rec.t)
+				{
+					// レイがレンズにヒット＆イメージセンサにヒット.
+					px = aten::clamp(px, 0, m_width - 1);
+					px = aten::clamp(px, 0, m_height - 1);
+				}
+				else {
+					// lightサブパスを直接レンズにつなげようとしたが、遮蔽されたりイメージセンサにヒットしなかった場合、終わり.
+					result = false;
+				}
+			}
 		}
 		else if ((numEye >= 2) && (numLight == 0)) {
 			// direct hit to the light source
@@ -301,11 +401,9 @@ namespace aten
 			}
 		}
 
-		px = -1;
-		py = -1;
-
-		if (result) {
-			cam->revertRayToPixelPos(
+		if (result && (px < 0 && py < 0))
+		{
+			camera->revertRayToPixelPos(
 				ray(eyeOrg, firstRayDir),
 				px, py);
 		}
@@ -338,6 +436,19 @@ namespace aten
 					camsample.posOnObjectplane);
 
 				f *= W;
+
+				if (!camera->isPinhole()) {
+					// Geometry term.
+					vec3 wo = next.pos - vtx.pos;
+					const auto dist2 = wo.squared_length();
+					wo.normalize();
+
+					const auto cos0 = dot(vtx.nml, wo);
+					const auto cos1 = dot(next.nml, -wo);
+					const auto G = aten::abs(cos0 * cos1 / dist2);
+
+					f *= G;
+				}
 			}
 			else if (i == (num - 1)) {
 				// 光源.
@@ -367,6 +478,10 @@ namespace aten
 				}
 				else {
 					continue;
+				}
+
+				if (vtx.mtrl->isSingular()) {
+					// TODO
 				}
 
 				// Geometry term.
@@ -421,12 +536,6 @@ namespace aten
 		for (int numEyeVertices = 0; numEyeVertices <= pathLength + 1; numEyeVertices++) {
 			// number of light subpath vertices.
 			int numLightVertices = (pathLength + 1) - numEyeVertices;
-
-			// TODO
-			// Only pinhole...
-			if (numEyeVertices == 0) {
-				continue;
-			}
 
 			// add all?
 			if (isSpecified
@@ -553,13 +662,46 @@ namespace aten
 							else {
 								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
 							}
+
+							const vec3 dv = next.pos - vtx.pos;
+							const real dist2 = dv.squared_length();
+							const real c = dot(vtx.nml, dv);
+
+							totalPdf *= pdf * aten::abs(c / dist2);
 						}
+						else {
+							// Hit on lens.
 
-						const vec3 dv = next.pos - vtx.pos;
-						const real dist2 = dv.squared_length();
-						const real c = dot(vtx.nml, dv);
+							// シーン上の点からレンズに入るレイ.
+							ray r(next.pos, -wo);
 
-						totalPdf *= pdf * aten::abs(c / dist2);
+							vec3 posOnLens;
+							vec3 posOnObjectplane;
+							vec3 posOnImagesensor;
+							int x, y;
+
+							auto lens_t = camera->hitOnLens(
+								r,
+								posOnLens,
+								posOnObjectplane,
+								posOnImagesensor,
+								x, y);
+
+							if (lens_t > AT_MATH_EPSILON) {
+								// レイがレンズにヒット＆イメージセンサにヒット.
+
+								// イメージセンサ上のサンプリング確率密度を計算.
+								// イメージセンサの面積測度に関する確率密度をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換されている.
+								const real imageSensorAreaPdf = camera->getPdfImageSensorArea(
+									next.pos,
+									next.nml,
+									posOnImagesensor,
+									posOnLens,
+									posOnObjectplane);
+
+								totalPdf *= imageSensorAreaPdf;
+							}
+						}
 					}
 				}
 			}
@@ -617,15 +759,10 @@ namespace aten
 			for (int numEyeVertices = 0; numEyeVertices <= pathLength + 1; numEyeVertices++) {
 				const int numLightVertices = (pathLength + 1) - numEyeVertices;
 
-				if (numEyeVertices == 0) {
-					// TODO
-					// no direct hit to the film (pinhole)
-					continue;
-				}
 				if (numEyeVertices > eyepath.size()) {
 					continue;
 				}
-				if (numLightVertices > eyepath.size()) {
+				if (numLightVertices > lightpath.size()) {
 					continue;
 				}
 
@@ -665,7 +802,10 @@ namespace aten
 				}
 
 				// store the pixel contribution
-				result.push_back(Result(c, x, y));
+				result.push_back(Result(
+					c, 
+					x, y,
+					numEyeVertices < 1 ? false : true));
 			}
 		}
 	}
@@ -729,22 +869,27 @@ namespace aten
 							auto pos = eyeRes.y * m_width + eyeRes.x;
 							image[idx][pos] += vec4(eyeRes.contrib, 1);
 						}
-						else {
-							auto lightNum = scene->lightNum();
-							for (uint32_t i = 0; i < lightNum; i++) {
-								auto light = scene->getLight(i);
-								auto lightRes = genLightPath(lightvs, light, &sampler, scene);
 
-								std::vector<Result> result;
+						auto lightNum = scene->lightNum();
+						for (uint32_t i = 0; i < lightNum; i++) {
+							auto light = scene->getLight(i);
+							auto lightRes = genLightPath(lightvs, light, &sampler, scene, camera);
 
-								combinePath(result, eyevs, lightvs, scene, eyeRes.camsample, camera);
+							if (lightRes.x >= 0 && lightRes.y >= 0) {
+								// Hit ray camera lens directly.
+								auto pos = lightRes.y * m_width + lightRes.x;
+								image[idx][pos] += vec4(lightRes.contrib / (real)(m_width * m_height), 1);
+							}
 
-								for (uint32_t n= 0; n < (uint32_t)result.size(); n++) {
-									const auto& res = result[n];
+							std::vector<Result> result;
 
-									auto pos = res.y * m_width + res.x;
-									image[idx][pos] += vec4(res.contrib, 1);
-								}
+							combinePath(result, eyevs, lightvs, scene, eyeRes.camsample, camera);
+
+							for (uint32_t n= 0; n < (uint32_t)result.size(); n++) {
+								const auto& res = result[n];
+
+								auto pos = res.y * m_width + res.x;
+								image[idx][pos] += vec4(res.contrib, 1);
 							}
 						}
 					}

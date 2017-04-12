@@ -36,6 +36,7 @@
 #include "misc/timer.h"
 #include "misc/thread.h"
 #include "misc/value.h"
+#include "misc/stream.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"

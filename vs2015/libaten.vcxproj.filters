@@ -302,7 +302,6 @@
     <ClInclude Include="..\src\libaten\renderer\film.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\renderer\bdpt.h">
       <Filter>renderer</Filter>
     </ClInclude>
@@ -311,6 +310,12 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\bdpt2.h">
       <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\stream.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\aten.h">
+      <Filter>visualizer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

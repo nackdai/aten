@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\src\libidaten\cuda\cudainit.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\cuda\cudamemory.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\cuda\cudautil.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\idaten.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="cuda">
+      <UniqueIdentifier>{533e08ed-a259-4818-80ee-be4ac888521b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
+      <Filter>cuda</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

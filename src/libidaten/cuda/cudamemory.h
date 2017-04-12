@@ -40,6 +40,8 @@ namespace aten {
 
 		void free();
 
+		static uint32_t getHeapSize();
+
 	private:
 		void* m_device{ nullptr };
 		uint32_t m_bytes{ 0 };

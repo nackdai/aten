@@ -1,7 +1,10 @@
+#include <atomic>
 #include "cuda/cudamemory.h"
 #include "cuda/cudautil.h"
 
 namespace aten {
+	static std::atomic<uint32_t> g_heapsize(0);
+
 	CudaMemory::CudaMemory(uint32_t bytes)
 	{
 		init(bytes);
@@ -22,6 +25,8 @@ namespace aten {
 	{
 		checkCudaErrors(cudaMalloc((void**)&m_device, bytes));
 		m_bytes = bytes;
+
+		g_heapsize += bytes;
 	}
 
 	__host__ uint32_t CudaMemory::write(void* p, uint32_t size)
@@ -67,8 +72,15 @@ namespace aten {
 	{
 		if (m_device) {
 			checkCudaErrors(cudaFree(m_device));
+
+			g_heapsize -= m_bytes;
 		}
 		m_pos = 0;
 		m_bytes = 0;
+	}
+
+	uint32_t CudaMemory::getHeapSize()
+	{
+		return g_heapsize.load();
 	}
 }

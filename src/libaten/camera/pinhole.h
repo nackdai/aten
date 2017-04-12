@@ -12,7 +12,9 @@ namespace aten {
 		virtual ~PinholeCamera() {}
 
 		void init(
-			vec3 origin, vec3 lookat, vec3 up,
+			const vec3& origin,
+			const vec3& lookat,
+			const vec3& up,
 			real vfov,	// vertical fov.
 			uint32_t width, uint32_t height);
 

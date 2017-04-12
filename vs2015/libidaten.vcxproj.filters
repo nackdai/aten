@@ -11,15 +11,29 @@
       <Filter>cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\idaten.h" />
+    <ClInclude Include="..\src\libidaten\kernel\raytracing.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\cuda\helper_math.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
       <UniqueIdentifier>{533e08ed-a259-4818-80ee-be4ac888521b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="kernel">
+      <UniqueIdentifier>{191682f4-577f-4778-8962-047a627e8058}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

@@ -22,10 +22,15 @@
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
+    <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
+    <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1F65E75-E655-449E-8115-186423D33147}</ProjectGuid>

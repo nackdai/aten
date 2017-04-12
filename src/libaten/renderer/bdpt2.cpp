@@ -2,6 +2,7 @@
 #include "misc/thread.h"
 #include "misc/timer.h"
 #include "material/lambert.h"
+#include "material/refraction.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -18,15 +19,27 @@ namespace aten
 	static inline real russianRoulette(const vec3& v)
 	{
 		real p = std::max(v.r, std::max(v.g, v.b));
+		return p;
+	}
 
-		if (p == real(0)) {
-			return real(1);
+	static inline real russianRoulette(const material* mtrl)
+	{
+		real p = russianRoulette(mtrl->color());
+		return p;
+	}
+
+	real BDPT2::russianRoulette(const Vertex& vtx)
+	{
+		real pdf = real(0);
+
+		if (vtx.mtrl) {
+			pdf = aten::russianRoulette(vtx.mtrl);
+		}
+		else {
+			pdf = aten::russianRoulette(vtx.throughput);
 		}
 
-		auto t = normalize(v);
-		p = std::max(t.r, std::max(t.g, t.b));
-
-		return p;
+		return pdf;
 	}
 
 	BDPT2::Result BDPT2::genEyePath(
@@ -75,7 +88,7 @@ namespace aten
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 			// ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
-			auto rrProb = russianRoulette(throughput);
+			auto rrProb = aten::russianRoulette(rec.mtrl);
 			auto rr = sampler->nextSample();
 			if (rr >= rrProb) {
 				break;
@@ -327,7 +340,7 @@ namespace aten
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 			// ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
-			auto rrProb = russianRoulette(throughput);
+			auto rrProb = aten::russianRoulette(rec.mtrl);
 			auto rr = sampler->nextSample();
 			if (rr >= rrProb) {
 				break;
@@ -470,8 +483,40 @@ namespace aten
 				const vec3 wi = normalize(curVtx.pos - prevVtx->pos);
 				const vec3 wo = normalize(nextVtx.pos - curVtx.pos);
 
-				if (curVtx.mtrl->isTranslucent()) {
-					// TODO
+				if (curVtx.mtrl->isSingular()) {
+					if (curVtx.mtrl->isTranslucent()) {
+						// cur頂点のひとつ前の頂点に基づいて、物体に入り込んでいるのか、それとも出て行くのかを判定する.
+						const vec3 intoCurVtxDir = normalize(curVtx.pos - prevVtx->pos);
+
+						// prevVtx から curVtx へのベクトルが、スペキュラ物体に入るのか、それとも出るのか.
+						const bool into = dot(intoCurVtxDir, curVtx.nml) < real(0);
+
+						const vec3 from_new_orienting_normal = into ? curVtx.nml : -curVtx.nml;
+
+						auto sampling = refraction::check(
+							curVtx.mtrl,
+							intoCurVtxDir,
+							curVtx.nml,
+							from_new_orienting_normal);
+
+						if (sampling.isIdealRefraction) {
+							// 屈折.
+							pdf = real(1);
+						}
+						else if (sampling.isRefraction) {
+							// 反射 or 屈折.
+							pdf = dot(from_new_orienting_normal, normalizedTo) > real(0)
+								? sampling.probReflection				// 反射.
+								: real(1) - sampling.probReflection;	// 屈折.
+						}
+						else {
+							// 全反射.
+							pdf = real(1);
+						}
+					}
+					else {
+						pdf = real(1);
+					}
 				}
 				else {
 					pdf = curVtx.mtrl->pdf(curVtx.orienting_normal, wi, wo, curVtx.u, curVtx.v);
@@ -535,7 +580,7 @@ namespace aten
 		{
 			{
 				const auto* vtx = vs[0];
-				auto rr = russianRoulette(vtx->throughput);
+				auto rr = russianRoulette(*vtx);
 				auto areaPdf_y1 = computAreaPdf(camera, vs, 2, 1, 0);
 				pi1_pi[0] = areaPdf_y0 / (areaPdf_y1 * rr);
 			}
@@ -550,7 +595,7 @@ namespace aten
 
 			{
 				const auto* vtx = vs[k];
-				auto rr = russianRoulette(vtx->throughput);
+				auto rr = russianRoulette(*vtx);
 				auto areaPdf_x1 = computAreaPdf(camera, vs, k - 2, k - 1, k);
 				pi1_pi[k] = (areaPdf_x1 * rr) / areaPdf_x0;
 			}
@@ -819,6 +864,10 @@ namespace aten
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
 					std::vector<Result> result;
+
+					if (x == 430 && y == 480 - 330) {
+						int xxxx = 0;
+					}
 
 					for (uint32_t i = 0; i < samples; i++) {
 						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);

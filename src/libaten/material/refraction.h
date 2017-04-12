@@ -75,6 +75,24 @@ namespace aten
 			sampler* sampler,
 			real u, real v) const override final;
 
+		struct RefractionSampling {
+			bool isRefraction;
+			bool isIdealRefraction;
+			real probReflection;
+			real probRefraction;
+
+			RefractionSampling(bool _isRefraction, real _probReflection, real _probRefraction, bool _isIdealRefraction = false)
+				: isRefraction(_isRefraction), probReflection(_probReflection), probRefraction(_probRefraction),
+				isIdealRefraction(_isIdealRefraction)
+			{}
+		};
+
+		static RefractionSampling check(
+			material* mtrl,
+			const vec3& in,
+			const vec3& normal,
+			const vec3& orienting_normal);
+
 		virtual real computeFresnel(
 			const vec3& normal,
 			const vec3& wi,

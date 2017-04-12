@@ -8,7 +8,7 @@ static int WIDTH = 640;
 static int HEIGHT = 480;
 static const char* TITLE = "app";
 
-#define ENABLE_DOF
+//#define ENABLE_DOF
 
 #ifdef ENABLE_DOF
 static aten::ThinLensCamera g_camera;

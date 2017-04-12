@@ -129,12 +129,12 @@ namespace aten
 			sampler* sampler,
 			real u, real v) const = 0;
 
-	protected:
 		real ior() const
 		{
 			return m_ior;
 		}
 
+	protected:
 		static vec3 sampleTexture(texture* tex, real u, real v, real defaultValue)
 		{
 			auto ret = sampleTexture(tex, u, v, vec3(defaultValue));
@@ -155,7 +155,7 @@ namespace aten
 
 		vec3 m_albedo;
 
-		real m_ior{ 0 };
+		real m_ior{ 1 };
 
 		texture* m_albedoMap{ nullptr };
 		texture* m_normalMap{ nullptr };

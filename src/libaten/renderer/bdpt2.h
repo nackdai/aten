@@ -126,6 +126,8 @@ namespace aten
 			scene* scene,
 			camera* camera) const;
 
+		static inline real russianRoulette(const Vertex& vtx);
+
 	private:
 		int m_maxDepth{ 1 };
 

@@ -122,9 +122,9 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(wall);
 	scene->add(floor);
 	scene->add(ceil);
-	//scene->add(green);
-	//scene->add(mirror);
-	//scene->add(glass);
+	scene->add(green);
+	scene->add(mirror);
+	scene->add(glass);
 
 #if DEFALT
 	aten::Light* l = new aten::AreaLight(light, emit->color());

@@ -77,7 +77,14 @@ namespace aten
 								len = real(1);
 							}
 
-							auto G = std::max(real(0.0), dot(orienting_normal, dirToLight)) / (len * len);
+							const auto c0 = std::max(real(0.0), dot(orienting_normal, dirToLight));
+							real c1 = real(1);
+
+							if (!light->isSingular()) {
+								c1 = std::max(real(0.0), dot(sampleres.nml, -dirToLight));
+							}
+
+							auto G = c0 * c1 / (len * len);
 
 							contribution += throughput * (albedo * lightColor) * G;
 						}

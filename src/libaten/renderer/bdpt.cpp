@@ -905,7 +905,7 @@ namespace aten
 				for (int x = 0; x < m_width; x++) {
 					int pos = y * m_width + x;
 
-					auto clr = img[pos] / samples;
+					auto clr = img[pos] / (real)samples;
 					clr.w = 1;
 
 					tmp[pos] += clr;

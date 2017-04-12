@@ -88,8 +88,8 @@ namespace aten {
 		real param_h,
 		real sigma)
 	{
-		param_h = std::max(0.0001, param_h);
-		sigma = std::max(0.0001, sigma);
+		param_h = std::max(real(0.0001), param_h);
+		sigma = std::max(real(0.0001), sigma);
 
 		const int width = imgW;
 		const int height = imgH;

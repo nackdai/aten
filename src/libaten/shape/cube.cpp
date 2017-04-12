@@ -125,7 +125,7 @@ namespace aten
 	{
 		auto r1 = sampler->nextSample();
 
-		static const auto d = 1.0 / 6.0;
+		static const real d = real(1.0) / real(6.0);
 		real th = 0;
 
 		Face face = Face::POS_X;

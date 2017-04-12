@@ -121,10 +121,10 @@ namespace aten {
 		const auto& sf = _stdFlash[cIdx];
 		const auto& std = _std[cIdx];
 
-		auto tmp_adaptiveRange = RANGE_CONSTANCE * aten::sqrt(aten::abs(0.99 * sf * sf + 0.01 * std * std));
-		auto adaptiveRange2 = 2 * tmp_adaptiveRange * tmp_adaptiveRange;
+		auto tmp_adaptiveRange = RANGE_CONSTANCE * aten::sqrt(aten::abs(real(0.99) * sf * sf + real(0.01) * std * std));
+		auto adaptiveRange2 = real(2) * tmp_adaptiveRange * tmp_adaptiveRange;
 
-		auto adaptiveRange = (adaptiveRange2.x + adaptiveRange2.y + adaptiveRange2.z) / 3;
+		auto adaptiveRange = (adaptiveRange2.x + adaptiveRange2.y + adaptiveRange2.z) / real(3);
 		adaptiveRange = std::max(adaptiveRange, AT_MATH_EPSILON);
 
 		const auto& curFlash = _flash[cIdx];

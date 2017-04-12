@@ -30,8 +30,8 @@ namespace aten {
 		}
 
 	private:
-		real m_sigmaS{ 0.2 };
-		real m_sigmaR{ 0.2 };
-		real m_sigmaD{ 0.02 };
+		real m_sigmaS{ real(0.2) };
+		real m_sigmaR{ real(0.2) };
+		real m_sigmaD{ real(0.02) };
 	};
 }

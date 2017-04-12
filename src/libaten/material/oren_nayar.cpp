@@ -89,8 +89,8 @@ namespace aten {
 			const real a = sampleRoughness(u, v);
 			const real a2 = a * a;
 
-			const real A = 1 - 0.5 * (a2 / (a2 + 0.33));
-			const real B = 0.45 * (a2 / (a2 + 0.09));
+			const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
+			const real B = real(0.45) * (a2 / (a2 + real(0.09)));
 
 			const auto LV = dot(wo, -wi);
 

@@ -110,14 +110,14 @@ namespace aten
 		auto a = roughness;
 		auto a2 = a * a;
 
-		auto theta = aten::sqrt(-a2 * aten::log(1 - r1 * 0.99));
+		auto theta = aten::sqrt(-a2 * aten::log(1 - r1 * real(0.99)));
 		theta = aten::atan(theta);
-		theta = ((theta >= 0) ? theta : (theta + 2 * AT_MATH_PI));
+		theta = ((theta >= real(0)) ? theta : (theta + 2 * AT_MATH_PI));
 
-		auto phi = 2 * AT_MATH_PI * r2;
+		auto phi = real(2) * AT_MATH_PI * r2;
 
 		auto costheta = aten::cos(theta);
-		auto sintheta = aten::sqrt(1 - costheta * costheta);
+		auto sintheta = aten::sqrt(real(1) - costheta * costheta);
 
 		auto cosphi = aten::cos(phi);
 		auto sinphi = aten::sqrt(1 - cosphi * cosphi);
@@ -130,7 +130,7 @@ namespace aten
 		auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
 		w.normalize();
 
-		auto dir = in - 2 * dot(in, w) * w;
+		auto dir = in - real(2) * dot(in, w) * w;
 
 		return std::move(dir);
 	}
@@ -171,14 +171,14 @@ namespace aten
 			// NOTE
 			// http://graphicrants.blogspot.jp/2013/08/specular-bsdf-reference.html
 
-			auto c = NdotV < 1 ? NdotV / (a * aten::sqrt(1 - NdotV * NdotV)) : 0;
+			auto c = NdotV < real(1) ? NdotV / (a * aten::sqrt(real(1) - NdotV * NdotV)) : real(0);
 			auto c2 = c * c;
 
-			if (c < 1.6) {
-				G = (3.535 * c + 2.181 * c2) / (1 + 2.276 * c + 2.577 * c2);
+			if (c < real(1.6)) {
+				G = (real(3.535) * c + real(2.181) * c2) / (real(1) + real(2.276) * c + real(2.577) * c2);
 			}
 			else {
-				G = 1;
+				G = real(1);
 			}
 		}
 
@@ -201,9 +201,9 @@ namespace aten
 			F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
 		}
 
-		auto denom = 4 * NdotL * NdotV;
+		auto denom = real(4) * NdotL * NdotV;
 
-		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
+		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : real(0);
 
 		fresnel = F;
 
@@ -226,7 +226,7 @@ namespace aten
 		ret.dir = sampleDirection(roughness, in, normal, sampler);
 		ret.pdf = pdf(roughness, normal, in, ret.dir);
 
-		real fresnel = 1;
+		real fresnel = real(1);
 		ret.bsdf = bsdf(roughness, fresnel, normal, in, ret.dir, u, v);
 		ret.fresnel = fresnel;
 

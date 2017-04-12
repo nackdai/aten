@@ -518,7 +518,7 @@ namespace aten
 					auto emit = sampleres.finalColor;
 
 					auto c = dot(m_lightDir, -dirToLight);
-					real visible = (c > 0 ? 1 : 0);
+					real visible = (real)(c > real(0) ? 1 : 0);
 
 					auto misW = pdfLight / (pdfb + pdfLight);
 					path.contrib += visible * misW * bsdf * emit * cosShadow / pdfLight;
@@ -726,8 +726,8 @@ namespace aten
 					dst.buffer->put(x, y, vec4(col, 1));
 
 					if (dst.variance) {
-						col2 /= cnt;
-						dst.variance->put(x, y, vec4(col2 - col * col, 1));
+						col2 /= (real)cnt;
+						dst.variance->put(x, y, vec4(col2 - col * col, real(1)));
 					}
 				}
 			}

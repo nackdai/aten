@@ -258,7 +258,7 @@ namespace aten {
 				const vec4& Llv = m_direct[pos];
 
 				const vec4 Lb = Lf + Llv;
-				const vec4 Lb2 = Lb * Lb + vec4(0.0001);
+				const vec4 Lb2 = Lb * Lb + vec4(real(0.0001));
 
 				const vec4& varLu = m_variance[pos];
 				const vec4& varLf = var_filtered[pos];

@@ -73,7 +73,7 @@ namespace aten
 
 		// TODO
 		// Š®‘S‚É‰e‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚µ‚Ä‚Ý‚é.
-		coeff = std::max<real>(coeff, 0.05);
+		coeff = std::max<real>(coeff, real(0.05));
 		//coeff = aten::clamp<real>(coeff, 0.05, 1);
 
 		vec3 bsdf = albedo * coeff;

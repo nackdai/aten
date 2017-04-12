@@ -117,17 +117,17 @@ namespace aten {
 		// NOTE
 		// lens.u、lens.v に lens.radius が含まれているので、レンズの半径について考慮する必要がない.
 		real r0 = sqrt(sampler->nextSample());
-		real r1 = sampler->nextSample() * 2.0 * AT_MATH_PI;
+		real r1 = sampler->nextSample() * real(2.0) * AT_MATH_PI;
 		real u = r0 * cos(r1);
 		real v = r0 * sin(r1);
 		result.posOnLens = m_lens.center + u * m_lens.u + v * m_lens.v;
 		result.nmlOnLens = m_lens.normal;
 
 		// ピクセル内の一点をサンプリングする確率密度関数（面積測度）
-		result.pdfOnImageSensor = 1.0 / (m_pixelWidth * m_pixelHeight);
+		result.pdfOnImageSensor = real(1.0) / (m_pixelWidth * m_pixelHeight);
 
 		// レンズ上の一点をサンプリングする確率密度関数（面積測度）
-		result.pdfOnLens = 1.0 / (AT_MATH_PI * m_lens.radius * m_lens.radius);
+		result.pdfOnLens = real(1.0) / (AT_MATH_PI * m_lens.radius * m_lens.radius);
 
 		result.r = ray(
 			result.posOnLens,
@@ -221,7 +221,7 @@ namespace aten {
 		auto c2 = (dot(normalize(-x0_x1), hitpointNml) / dot(normalize(x0_x1), normalize(m_imagesensor.dir)));
 
 		// ピクセル内の一点をサンプリングする確率密度関数（面積測度）
-		auto pdfOnImageSensor = 1.0 / (m_pixelWidth * m_pixelHeight);
+		auto pdfOnImageSensor = real(1.0) / (m_pixelWidth * m_pixelHeight);
 
 		auto pdf = pdfOnImageSensor * ba2 * r2 * c2;
 

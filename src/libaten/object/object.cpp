@@ -82,7 +82,7 @@ namespace aten
 		// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
 		auto e0 = v1->pos - v0->pos;
 		auto e1 = v2->pos - v0->pos;
-		area = 0.5 * cross(e0, e1).length();
+		area = real(0.5) * cross(e0, e1).length();
 	}
 
 	vec3 face::getRandomPosOn(sampler* sampler) const
@@ -138,7 +138,7 @@ namespace aten
 		// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
 		auto e0 = v1->pos - v0->pos;
 		auto e1 = v2->pos - v0->pos;
-		auto area = 0.5 * cross(e0, e1).length();
+		auto area = real(0.5) * cross(e0, e1).length();
 
 		return std::move(hitable::SamplingPosNormalPdf(p + n * AT_MATH_EPSILON, n, area));
 	}

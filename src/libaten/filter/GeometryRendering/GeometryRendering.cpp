@@ -179,8 +179,8 @@ namespace aten {
 				real u = aten::abs(x - refPos[LOWER_LEFT].x * ratio) / (real)ratio;
 				real v = aten::abs(y - refPos[LOWER_LEFT].y * ratio) / (real)ratio;
 
-				AT_ASSERT(0 <= u && u <= 1);
-				AT_ASSERT(0 <= v && v <= 1);
+				AT_ASSERT(real(0) <= u && u <= real(1));
+				AT_ASSERT(real(0) <= v && v <= real(1));
 
 #if 0
 				// ˆêŽŸ•âŠÔ–@‚ÅŒvŽZ.

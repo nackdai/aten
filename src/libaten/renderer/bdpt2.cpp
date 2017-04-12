@@ -138,7 +138,7 @@ namespace aten
 				const real c0 = dot(normalize(toNextVtx), orienting_normal);
 				const real c1 = dot(normalize(-toNextVtx), prevNormal);
 				const real dist2 = toNextVtx.squared_length();
-				const double G = c0 * c1 / dist2;
+				const real G = c0 * c1 / dist2;
 				throughput = G * throughput;
 			}
 
@@ -232,7 +232,7 @@ namespace aten
 		auto pdfOnLight = std::get<2>(res);
 
 		// 確率密度の積を保持（面積測度に関する確率密度）.
-		double totalAreaPdf = pdfOnLight;
+		real totalAreaPdf = pdfOnLight;
 
 		// 光源上に生成された頂点を頂点リストに追加.
 		vs.push_back(Vertex(
@@ -317,7 +317,7 @@ namespace aten
 					vec3(0),
 					nullptr,
 					nullptr,
-					0, 0));
+					real(0), real(0)));
 
 				const real W_dash = camera->getWdash(
 					ray.org,
@@ -957,7 +957,7 @@ namespace aten
 				for (int x = 0; x < m_width; x++) {
 					int pos = y * m_width + x;
 
-					auto clr = img[pos] / samples;
+					auto clr = img[pos] / (real)samples;
 					clr.w = 1;
 
 					tmp[pos] += clr;

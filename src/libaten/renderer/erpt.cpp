@@ -58,7 +58,7 @@ namespace aten
 
 		auto r = m_rnd->next01();
 
-		double v = MutateDistance * (2.0 * r - 1.0);
+		real v = MutateDistance * (real(2.0) * r - real(1.0));
 		value += v;
 
 		if (value > 1.0) {
@@ -214,7 +214,7 @@ namespace aten
 			}
 		}
 
-		const real ed = color::luminance(sumI / (width * height)) / mutation;
+		const real ed = color::luminance(sumI / (real)(width * height)) / (real)mutation;
 
 		std::vector<std::vector<vec3>> acuumImage(threadNum);
 
@@ -244,7 +244,7 @@ namespace aten
 					// パスが光源に直接ヒットしてた場合、エネルギー分配しないで、そのまま画像に送る.
 					if (newSample.isTerminate) {
 						int pos = newSample.y * width + newSample.x;
-						image[pos] += newSample.contrib / samples;
+						image[pos] += newSample.contrib / (real)samples;
 						continue;
 					}
 
@@ -257,7 +257,7 @@ namespace aten
 						const int numChains = (int)std::floor(r + illum / (mutation * ed));;
 
 						// 周囲に分配するエネルギー.
-						const vec3 depositValue = (e / illum * ed) / samples;
+						const vec3 depositValue = (e / illum * ed) / (real)samples;
 
 						for (int nc = 0; nc < numChains; nc++) {
 							ERPTSampler Y = X;

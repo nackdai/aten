@@ -95,7 +95,7 @@ namespace aten
 
 		auto r = m_radius;
 
-		auto z = 1.0 - 2.0 * r2; // [0,1] -> [-1, 1]
+		auto z = real(1.0) - real(2.0) * r2; // [0,1] -> [-1, 1]
 
 		auto sin_theta = aten::sqrt(1 - z * z);
 		auto phi = 2 * AT_MATH_PI * r1;

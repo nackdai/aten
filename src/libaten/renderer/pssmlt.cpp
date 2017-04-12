@@ -76,18 +76,18 @@ namespace aten
 	{
 		const real r = m_rnd->next01();
 
-		const real s1 = 1.0 / 512.0;
-		const real s2 = 1.0 / 16.0;
-		const real dx = s1 / (s1 / s2 + fabs(2.0 * r - 1.0)) - s1 / (s1 / s2 + 1.0);
+		const real s1 = real(1.0) / real(512.0);
+		const real s2 = real(1.0) / real(16.0);
+		const real dx = s1 / (s1 / s2 + aten::abs(real(2.0) * r - real(1.0))) - s1 / (s1 / s2 + real(1.0));
 
-		if (r < 0.5) {
+		if (r < real(0.5)) {
 			real x1 = x + dx;
-			x1 = (x1 < 1.0) ? x1 : x1 - 1.0;
+			x1 = (x1 < real(1.0)) ? x1 : x1 - real(1.0);
 			return x1;
 		}
 		else {
 			real x1 = x - dx;
-			x1 = (x1 < 0.0) ? x1 + 1.f : x1;
+			x1 = (x1 < real(0.0)) ? x1 + 1.f : x1;
 			return x1;
 		}
 	}
@@ -306,10 +306,10 @@ namespace aten
 				real I = color::luminance(newPath.contrib);
 				real oldI = color::luminance(oldPath.contrib);
 
-				real a = std::min(1.0, I / oldI);
+				real a = std::min(real(1.0), I / oldI);
 
 				const real newPath_W = (a + mlt.largeStep) / (I / b + p_large) / M;
-				const real oldPath_W = (1.0 - a) / (oldI / b + p_large) / M;
+				const real oldPath_W = (real(1.0) - a) / (oldI / b + p_large) / M;
 
 				int newPos = newPath.y * width + newPath.x;
 				vec3 newV = newPath_W * newPath.contrib * newPath.weight;
@@ -353,7 +353,7 @@ namespace aten
 		for (uint32_t n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				dst.buffer->put(i, vec4(image[i] / mltNum, 1));
+				dst.buffer->put(i, vec4(image[i] / mltNum, real(1)));
 			}
 		}
 	}

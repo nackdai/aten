@@ -77,7 +77,7 @@ namespace aten
 								len = real(1);
 							}
 
-							auto G = std::max(0.0, dot(orienting_normal, dirToLight)) / (len * len);
+							auto G = std::max(real(0.0), dot(orienting_normal, dirToLight)) / (len * len);
 
 							contribution += throughput * (albedo * lightColor) * G;
 						}
@@ -128,8 +128,8 @@ namespace aten
 				for (int x = 0; x < width; x++) {
 					int pos = y * width + x;
 
-					real u = (real(x) + 0.5) / real(width - 1);
-					real v = (real(y) + 0.5) / real(height - 1);
+					real u = (real(x) + real(0.5)) / real(width - 1);
+					real v = (real(y) + real(0.5)) / real(height - 1);
 
 					auto camsample = camera->sample(u, v, nullptr);
 

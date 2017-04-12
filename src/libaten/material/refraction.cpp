@@ -143,7 +143,7 @@ namespace aten
 #endif
 		}
 		else {
-			auto prob = 0.25 + 0.5 * Re;
+			auto prob = real(0.25) + real(0.5) * Re;
 #if 1
 			if (r < prob) {
 				// ”½ŽË.
@@ -159,9 +159,9 @@ namespace aten
 				// ‹üÜ.
 				ret.dir = refract;
 				ret.bsdf = Tr * albedo;
-				ret.bsdf /= (1 - prob);
+				ret.bsdf /= (real(1) - prob);
 
-				ret.subpdf = (1 - prob);
+				ret.subpdf = (real(1) - prob);
 
 				ret.fresnel = 0;
 			}

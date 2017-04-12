@@ -27,7 +27,7 @@ namespace aten {
 		m_u = half_width * m_right;
 		m_v = half_height * m_up;
 
-		m_dist = height / (2.0 * aten::tan(theta / 2));
+		m_dist = height / (real(2.0) * aten::tan(theta / 2));
 
 		m_width = width;
 		m_height = height;
@@ -77,8 +77,8 @@ namespace aten {
 
 		vec3 screenPos = m_origin + ray.dir * dist - m_center;
 
-		real u = dot(screenPos, m_right) + m_width * 0.5;
-		real v = dot(screenPos, m_up) + m_height * 0.5;
+		real u = dot(screenPos, m_right) + m_width * real(0.5);
+		real v = dot(screenPos, m_up) + m_height * real(0.5);
 
 		px = (int)u;
 		py = (int)v;

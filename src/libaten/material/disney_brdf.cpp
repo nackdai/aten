@@ -85,7 +85,7 @@ namespace aten
 
 	inline vec3 mon2lin(const vec3& x)
 	{
-		return vec3(aten::pow(x[0], 2.2), aten::pow(x[1], 2.2), aten::pow(x[2], 2.2));
+		return vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
 	}
 
 	real DisneyBRDF::pdf(
@@ -130,9 +130,9 @@ namespace aten
 		const real diffusePdf = LdotN / AT_MATH_PI;
 
 		// specular
-		const auto aspect = aten::sqrt(1 - anisotropic * 0.9);
-		const auto ax = std::max<real>(0.001, sqr(roughness) / aspect);	// roughness for x direction.
-		const auto ay = std::max<real>(0.001, sqr(roughness) * aspect);	// roughness for y direction.
+		const auto aspect = aten::sqrt(real(1) - anisotropic * real(0.9));
+		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
+		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
 
 		vec3 H = normalize(V + L);
 
@@ -189,9 +189,9 @@ namespace aten
 		const auto weight1 = 1 - weight2;
 
 		// specular
-		const auto aspect = aten::sqrt(1 - anisotropic * 0.9);
-		const auto ax = std::max<real>(0.001, sqr(roughness) / aspect);	// roughness for x direction.
-		const auto ay = std::max<real>(0.001, sqr(roughness) * aspect);	// roughness for y direction.
+		const auto aspect = aten::sqrt(1 - anisotropic * real(0.9));
+		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
+		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
 
 		const auto r = sampler->nextSample();
 
@@ -286,17 +286,17 @@ namespace aten
 		const auto LdotH = dot(L, H);
 
 		const vec3 Cdlin = mon2lin(baseColor);
-		const auto Cdlum = 0.3 * Cdlin[0] + 0.6 * Cdlin[1] + 0.1 * Cdlin[2]; // luminance approx.
+		const auto Cdlum = real(0.3) * Cdlin[0] + real(0.6) * Cdlin[1] + real(0.1) * Cdlin[2]; // luminance approx.
 
-		const vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : vec3(1); // normalize lum. to isolate hue+sat
-		const vec3 Cspec0 = mix(specular* 0.08 * mix(vec3(1), Ctint, specularTint), Cdlin, metalic);
+		const vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : vec3(real(1)); // normalize lum. to isolate hue+sat
+		const vec3 Cspec0 = mix(specular* real(0.08) * mix(vec3(real(1)), Ctint, specularTint), Cdlin, metalic);
 		const vec3 Csheen = mix(vec3(1), Ctint, sheenTint);
 
 		// Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
 		// and mix in diffuse retro-reflection based on roughness
 		const auto FL = SchlickFresnel(NdotL);
 		const auto FV = SchlickFresnel(NdotV);
-		const auto Fd90 = 0.5 + 2 * LdotH * LdotH * roughness;
+		const auto Fd90 = real(0.5) + real(2) * LdotH * LdotH * roughness;
 		const auto Fd = aten::mix(real(1), Fd90, FL) * aten::mix(real(1), Fd90, FV);
 
 		// Based on Hanrahan-Krueger brdf approximation of isotropic bssrdf
@@ -304,15 +304,15 @@ namespace aten
 		// Fss90 used to "flatten" retroreflection based on roughness
 		const auto Fss90 = LdotH * LdotH * roughness;
 		const auto Fss = aten::mix(real(1), Fss90, FL) * aten::mix(real(1), Fss90, FV);
-		const auto ss = 1.25 * (Fss * (1 / (NdotL + NdotV) - .5) + .5);
+		const auto ss = real(1.25) * (Fss * (real(1) / (NdotL + NdotV) - real(0.5)) + real(0.5));
 
 		// specular
-		const auto aspect = aten::sqrt(1 - anisotropic * 0.9);
-		const auto ax = std::max(0.001, sqr(roughness) / aspect);
-		const auto ay = std::max(0.001, sqr(roughness) * aspect);
+		const auto aspect = aten::sqrt(1 - anisotropic * real(0.9));
+		const auto ax = std::max(real(0.001), sqr(roughness) / aspect);
+		const auto ay = std::max(real(0.001), sqr(roughness) * aspect);
 		const auto Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
 		const auto FH = SchlickFresnel(LdotH);
-		const vec3 Fs = aten::mix(Cspec0, vec3(1), FH);
+		const vec3 Fs = aten::mix(Cspec0, vec3(real(1)), FH);
 		real Gs = smithG_GGX_aniso(NdotL, dot(L, X), dot(L, Y), ax, ay);
 		Gs *= smithG_GGX_aniso(NdotV, dot(V, X), dot(V, Y), ax, ay);
 
@@ -320,14 +320,14 @@ namespace aten
 		vec3 Fsheen = FH * sheen * Csheen;
 
 		// clearcoat (ior = 1.5 -> F0 = 0.04)
-		const auto Dr = GTR1(NdotH, aten::mix(0.1, 0.001, clearcoatGloss));
-		const auto Fr = aten::mix(0.04, real(1), FH);
-		const auto Gr = smithG_GGX(NdotL, 0.25) * smithG_GGX(NdotV, 0.25);	// 論文内で0.25決めうちと記載.
+		const auto Dr = GTR1(NdotH, aten::mix(real(0.1), real(0.001), clearcoatGloss));
+		const auto Fr = aten::mix(real(0.04), real(real(1)), FH);
+		const auto Gr = smithG_GGX(NdotL, real(0.25)) * smithG_GGX(NdotV, real(0.25));	// 論文内で0.25決めうちと記載.
 
 		// TODO
 		{
 			const auto weight2 = metalic;
-			const auto weight1 = 1 - weight2;
+			const auto weight1 = real(real(1)) - weight2;
 
 			fresnel = weight1 * aten::mix(Fd, ss, subsurface) + weight2 * FH;
 		}
@@ -338,7 +338,7 @@ namespace aten
 			+ 0.25 * clearcoat * Gr * Fr * Dr;	// clearcoat
 #else
 			// A trick to avoid fireflies from RadeonRaySDK.
-			+ aten::clamp<real>(clearcoat * Gr * Fr * Dr, 0, 0.5);	// clearcoat.
+			+ aten::clamp<real>(clearcoat * Gr * Fr * Dr, real(0), real(0.5));	// clearcoat.
 #endif
 	}
 

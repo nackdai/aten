@@ -153,7 +153,7 @@ namespace aten
 							depth *= depthNorm;
 
 							// [-1, 1] -> [0, 1]
-							depth = (depth + 1) * 0.5;
+							depth = (depth + 1) * real(0.5);
 						}
 
 						dst.geominfo.nml_depth->put(x, y, vec4(normal, depth));

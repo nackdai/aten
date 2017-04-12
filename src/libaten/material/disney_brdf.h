@@ -8,7 +8,7 @@ namespace aten
 	class DisneyBRDF : public material {
 	public:
 		struct Parameter {
-			vec3 baseColor{ vec3(0.82, 0.67, 0.16) };
+			vec3 baseColor{ vec3(real(0.82), real(0.67), real(0.16)) };
 			real metallic{ 0 };
 			real subsurface{ 0 };
 			real specular{ 0.5 };

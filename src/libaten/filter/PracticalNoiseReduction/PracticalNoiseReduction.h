@@ -58,9 +58,9 @@ namespace aten {
 
 		vec4* m_nml_depth{ nullptr };
 
-		real m_stdDevS{ 8 };		// standard deviation for spatial.
-		real m_stdDevC{ 0.5 };		// standard deviation for color.
-		real m_stdDevD{ 2 };		// standard deviation for depth.
-		real m_threshold{ 0.1 };
+		real m_stdDevS{ real(8) };		// standard deviation for spatial.
+		real m_stdDevC{ real(0.5) };	// standard deviation for color.
+		real m_stdDevD{ real(2) };		// standard deviation for depth.
+		real m_threshold{ real(0.1) };
 	};
 }

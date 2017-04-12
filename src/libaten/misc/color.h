@@ -28,7 +28,7 @@ namespace aten {
 
 		static real luminance(const vec3& v)
 		{
-			static const vec3 lum(0.2126, 0.7152, 0.0722);
+			static const vec3 lum(real(0.2126), real(0.7152), real(0.0722));
 			real ret = dot(lum, v);
 			return ret;
 		}
@@ -64,9 +64,9 @@ namespace aten {
 		// RGB -> sRGB
 		static vec3 RGBtoXYZ(const vec3& rgb)
 		{
-			static const vec3 _RGB2X(0.412391, 0.357584, 0.180481);
-			static const vec3 _RGB2Y(0.212639, 0.715169, 0.072192);
-			static const vec3 _RGB2Z(0.019331, 0.119195, 0.950532);
+			static const vec3 _RGB2X(real(0.412391), real(0.357584), real(0.180481));
+			static const vec3 _RGB2Y(real(0.212639), real(0.715169), real(0.072192));
+			static const vec3 _RGB2Z(real(0.019331), real(0.119195), real(0.950532));
 
 			auto x = dot(_RGB2X, rgb);
 			auto y = dot(_RGB2Y, rgb);

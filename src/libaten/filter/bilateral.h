@@ -33,8 +33,8 @@ namespace aten {
 		}
 
 	private:
-		real m_sigmaS{ 0.2 };
-		real m_sigmaR{ 0.2 };
+		real m_sigmaS{ real(0.2) };
+		real m_sigmaR{ real(0.2) };
 	};
 
 	class BilateralFilterShader : public Blitter {
@@ -65,8 +65,8 @@ namespace aten {
 		}
 
 	private:
-		real m_sigmaS{ 0.2 };
-		real m_sigmaR{ 0.2 };
+		real m_sigmaS{ real(0.2) };
+		real m_sigmaR{ real(0.2) };
 
 		static const uint32_t buffersize = 10;
 		float distW[buffersize + 1][buffersize + 1];

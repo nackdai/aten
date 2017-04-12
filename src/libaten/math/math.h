@@ -23,8 +23,8 @@
 	#define AT_MATH_FUNC(func, v)	func(v)
 	#define AT_MATH_FUNC2(func, v0, v1)	func(v0, v1)
 #else
-	#define AT_MATH_FUNC(func, v)	func##f(f)
-	#define AT_MATH_FUNC2(func, v0, v1)	func##f(f0, f1)
+	#define AT_MATH_FUNC(func, v)	func##f(v)
+	#define AT_MATH_FUNC2(func, v0, v1)	func##f(v0, v1)
 #endif
 
 namespace aten {
@@ -85,7 +85,11 @@ namespace aten {
 
 	inline real abs(real f)
 	{
-		return AT_MATH_FUNC(::abs, f);
+#ifdef TYPE_DOUBLE
+		return ::abs(f);
+#else
+		return ::fabsf(f);
+#endif
 	}
 
 	inline real floor(real f)

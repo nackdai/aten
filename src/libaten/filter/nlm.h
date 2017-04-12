@@ -33,8 +33,8 @@ namespace aten {
 		}
 
 	private:
-		real m_param_h{ 0.2 };
-		real m_sigma{ 0.2 };
+		real m_param_h{ real(0.2) };
+		real m_sigma{ real(0.2) };
 	};
 
 	class NonLocalMeanFilterShader : public Blitter {
@@ -65,8 +65,8 @@ namespace aten {
 		}
 
 	private:
-		real m_param_h{ 0.2 };
-		real m_sigma{ 0.2 };
+		real m_param_h{ real(0.2) };
+		real m_sigma{ real(0.2) };
 	};
 
 }

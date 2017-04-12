@@ -83,8 +83,8 @@ namespace aten {
 
 			auto rho = dot(-m_dir, lightdir);
 
-			auto cosHalfTheta = aten::cos(m_innerAngle * 0.5);
-			auto cosHalfPhi = aten::cos(m_outerAngle * 0.5);
+			auto cosHalfTheta = aten::cos(m_innerAngle * real(0.5));
+			auto cosHalfPhi = aten::cos(m_outerAngle * real(0.5));
 
 			real spot = 0;
 

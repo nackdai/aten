@@ -85,7 +85,7 @@ namespace aten
 
 			// ‘S”½ŽË.
 			ret.pdf = real(1);
-
+			ret.bsdf = albedo;
 			ret.dir = reflect;
 
 #if 0
@@ -124,7 +124,7 @@ namespace aten
 		auto Re = fresnel;
 		auto Tr = (1 - Re) * nn;
 
-		real r = 1;
+		real r = real(0.5);
 		if (sampler) {
 			r = sampler->nextSample();
 		}

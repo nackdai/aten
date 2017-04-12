@@ -243,4 +243,13 @@ namespace aten
 
 		return std::move(ret);
 	}
+
+	void MicrofacetGGX::serialize(MaterialParam& param) const
+	{
+		material::serialize(this, param);
+
+		param.roughness = (float)m_roughness;
+
+		// TODO
+	}
 }

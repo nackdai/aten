@@ -215,4 +215,13 @@ namespace aten
 
 		return std::move(ret);
 	}
+
+	void MicrofacetBlinn::serialize(MaterialParam& param) const
+	{
+		material::serialize(this, param);
+
+		param.shininess = m_shininess;
+
+		// TODO
+	}
 }

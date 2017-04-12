@@ -51,5 +51,7 @@ namespace aten
 			const hitrecord& hitrec,
 			sampler* sampler,
 			real u, real v) const override final;
+
+		virtual void serialize(MaterialParam& param) const override final;
 	};
 }

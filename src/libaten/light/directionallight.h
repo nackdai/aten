@@ -40,5 +40,10 @@ namespace aten {
 		{
 			return true;
 		}
+
+		virtual void serialize(LightParameter& param) const override final
+		{
+			Light::serialize(this, param);
+		}
 	};
 }

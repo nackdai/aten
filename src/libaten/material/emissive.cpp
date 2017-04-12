@@ -48,4 +48,9 @@ namespace aten {
 
 		return std::move(ret);
 	}
+
+	void emissive::serialize(MaterialParam& param) const
+	{
+		material::serialize(this, param);
+	}
 }

@@ -267,4 +267,16 @@ namespace aten
 			return std::move(RefractionSampling(true, real(prob), real(1 - prob)));
 		}
 	}
+
+	void refraction::serialize(MaterialParam& param) const
+	{
+		material::serialize(this, param);
+
+		// TODO
+#if 0
+		param.isIdealRefraction = m_isIdealRefraction;
+#endif
+
+		// TODO
+	}
 }

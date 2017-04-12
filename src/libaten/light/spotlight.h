@@ -120,6 +120,19 @@ namespace aten {
 			return std::move(result);
 		}
 
+		virtual void serialize(LightParameter& param) const override final
+		{
+			Light::serialize(this, param);
+
+			param.constAttn = (float)m_constAttn;
+			param.linearAttn = (float)m_linearAttn;
+			param.expAttn = (float)m_expAttn;
+
+			param.innerAngle = (float)m_innerAngle;
+			param.outerAngle = (float)m_outerAngle;
+			param.falloff = (float)m_falloff;
+		}
+
 	private:
 		// NOTE
 		// http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html

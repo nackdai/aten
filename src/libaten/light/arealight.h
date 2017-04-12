@@ -119,6 +119,13 @@ namespace aten {
 			return m_object->getSamplePosNormalPdf(sampler);
 		}
 
+		virtual void serialize(LightParameter& param) const override final
+		{
+			Light::serialize(this, param);
+
+			// TODO
+		}
+
 	private:
 		hitable* m_object{ nullptr };
 	};

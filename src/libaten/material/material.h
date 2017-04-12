@@ -11,10 +11,32 @@ namespace aten
 {
 	struct hitrecord;
 
+	struct MaterialParam {
+		float baseColor[3];
+		float ior{ 1.0f };
+		float roughness{ 0.0f };
+		float shininess{ 0.0f };
+#if 0
+		// TODO
+		float subsurface{ 0.0f };
+		float metallic{ 0.0f };
+		float specular{ 0.0f };
+		float specularTint{ 0.0f };
+		float anisotropic{ 0.0f };
+		float sheen{ 0.0f };
+		float sheenTint{ 0.0f };
+		float clearcoat{ 0.0f };
+		float clearcoatGloss{ 0.0f };
+#endif
+		int albedoMap{ -1 };
+		int normalMap{ -1 };
+		int roughnessMap{ -1 };
+	};
+
 	class material {
 		friend class LayeredBSDF;
 
-	public:
+	protected:
 		material();
 		virtual ~material() {}
 
@@ -129,6 +151,8 @@ namespace aten
 			sampler* sampler,
 			real u, real v) const = 0;
 
+		virtual void serialize(MaterialParam& param) const = 0;
+
 		real ior() const
 		{
 			return m_ior;
@@ -149,6 +173,8 @@ namespace aten
 			}
 			return std::move(ret);
 		}
+
+		static void serialize(const material* mtrl, MaterialParam& param);
 
 	private:
 		uint32_t m_id{ 0 };

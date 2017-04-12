@@ -371,4 +371,25 @@ namespace aten
 
 		return std::move(ret);
 	}
+
+	void DisneyBRDF::serialize(MaterialParam& param) const
+	{
+		material::serialize(this, param);
+
+		// TODO
+#if 0
+		param.subsurface = (float)m_subsurface;
+		param.metallic = (float)m_metallic;
+		param.specular = (float)m_specular;
+		param.specularTint = (float)m_specularTint;
+		param.roughness = (float)m_roughness;
+		param.anisotropic = (float)m_anisotropic;
+		param.sheen = (float)m_sheen;
+		param.sheenTint = (float)m_sheenTint;
+		param.clearcoat = (float)m_clearcoat;
+		param.clearcoatGloss = (float)m_clearcoatGloss;
+#endif
+
+		// TODO
+	}
 }

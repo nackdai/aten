@@ -60,6 +60,8 @@ namespace aten
 			sampler* sampler,
 			real u, real v) const override final;
 
+		virtual void serialize(MaterialParam& param) const override final;
+
 	private:
 		inline real sampleRoughness(real u, real v) const;
 

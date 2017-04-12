@@ -18,6 +18,25 @@ namespace aten {
 		hitable* obj{ nullptr };	// light object(only for area light)
 	};
 
+	struct LightParameter {
+		float pos[3];
+		float dir[3];
+		float le[3];
+
+		// For pointlight, spotlight.
+		float constAttn{ 1 };
+		float linearAttn{ 0 };
+		float expAttn{ 0 };
+
+		// For spotlight.
+		float innerAngle;
+		float outerAngle;
+		float falloff{ 0 };
+
+		int object{ -1 };
+		int envmap{ -1 };
+	};
+
 	class Light : public hitable {
 	protected:
 		Light() {}
@@ -107,6 +126,11 @@ namespace aten {
 			AT_ASSERT(false);
 			return std::move(aabb());
 		}
+
+		virtual void serialize(LightParameter& param) const = 0;
+
+	protected:
+		static void serialize(const Light* light, LightParameter& param);
 
 	protected:
 		vec3 m_pos;

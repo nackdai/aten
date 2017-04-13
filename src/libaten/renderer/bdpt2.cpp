@@ -18,8 +18,15 @@ namespace aten
 {
 	static inline real russianRoulette(const vec3& v)
 	{
+#if 0
 		real p = std::max(v.r, std::max(v.g, v.b));
+		p = aten::clamp(p, real(0), real(1));
 		return p;
+#else
+		// TODO
+		// Adhoc fix...
+		return real(1);
+#endif
 	}
 
 	static inline real russianRoulette(const material* mtrl)
@@ -484,6 +491,7 @@ namespace aten
 				const vec3 wo = normalize(nextVtx.pos - curVtx.pos);
 
 				if (curVtx.mtrl->isSingular()) {
+#if 0
 					if (curVtx.mtrl->isTranslucent()) {
 						// cur頂点のひとつ前の頂点に基づいて、物体に入り込んでいるのか、それとも出て行くのかを判定する.
 						const vec3 intoCurVtxDir = normalize(curVtx.pos - prevVtx->pos);
@@ -517,6 +525,9 @@ namespace aten
 					else {
 						pdf = real(1);
 					}
+#else
+					pdf = 1;
+#endif
 				}
 				else {
 					pdf = curVtx.mtrl->pdf(curVtx.orienting_normal, wi, wo, curVtx.u, curVtx.v);

@@ -10,6 +10,7 @@
 #include "aten.h"
 #include "idaten.h"
 
+#if 0
 void sumArrayOnHost(float* A, float* B, float* C, const int N)
 {
 	for (int i = 0; i < N; i++) {
@@ -74,3 +75,46 @@ int main()
 
 	return 0;
 }
+#else
+static int WIDTH = 640;
+static int HEIGHT = 480;
+static const char* TITLE = "app";
+
+#ifdef ENABLE_OMP
+static uint32_t g_threadnum = 8;
+#else
+static uint32_t g_threadnum = 1;
+#endif
+
+static aten::Film g_buffer(WIDTH, HEIGHT);
+
+void display()
+{
+	renderRayTracing(g_buffer.image(), WIDTH, HEIGHT);
+
+	aten::visualizer::render(g_buffer.image(), false);
+}
+
+int main()
+{
+	aten::timer::init();
+	aten::thread::setThreadNum(g_threadnum);
+
+	aten::window::init(WIDTH, HEIGHT, TITLE);
+
+	aten::visualizer::init(WIDTH, HEIGHT);
+
+	aten::Blitter blitter;
+	blitter.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/fs.glsl");
+	blitter.setIsRenderRGB(true);
+
+	aten::visualizer::addPostProc(&blitter);
+
+	aten::window::run(display);
+
+	aten::window::terminate();
+}
+#endif

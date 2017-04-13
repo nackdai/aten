@@ -1,8 +1,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+#include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <utility>
 
 namespace aten {
 	namespace cuda {
@@ -11,6 +13,9 @@ namespace aten {
 		{
 			if (result)
 			{
+				static char buf[2048];
+
+#if 0
 				fprintf(
 					stderr,
 					"CUDA error at %s:%d code=%d(%s) \"%s\" \n",
@@ -20,6 +25,20 @@ namespace aten {
 					//_cudaGetErrorEnum(result),
 					cudaGetErrorString(result),
 					func);
+#else
+				snprintf(
+					buf, 2048,
+					"CUDA error at %s:%d code=%d(%s) \"%s\" \n",
+					file,
+					line,
+					static_cast<unsigned int>(result),
+					//_cudaGetErrorEnum(result),
+					cudaGetErrorString(result),
+					func);
+
+				fprintf(stderr, "%s", buf);
+				::OutputDebugString(buf);
+#endif
 
 				cudaDeviceReset();
 

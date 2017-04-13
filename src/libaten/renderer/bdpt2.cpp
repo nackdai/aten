@@ -18,9 +18,8 @@ namespace aten
 {
 	static inline real russianRoulette(const vec3& v)
 	{
-#if 0
+#if 1
 		real p = std::max(v.r, std::max(v.g, v.b));
-		p = aten::clamp(p, real(0), real(1));
 		return p;
 #else
 		// TODO
@@ -31,6 +30,9 @@ namespace aten
 
 	static inline real russianRoulette(const material* mtrl)
 	{
+		if (mtrl->isEmissive()) {
+			return 1;
+		}
 		real p = russianRoulette(mtrl->color());
 		return p;
 	}
@@ -84,7 +86,8 @@ namespace aten
 		vec3 prevNormal = camera->getDir();
 		real sampledPdf = real(1);
 
-		while (depth < m_maxDepth) {
+		//while (depth < m_maxDepth) {
+		for (;;) {
 			hitrecord rec;
 			if (!scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
 				break;
@@ -266,7 +269,8 @@ namespace aten
 
 		ray ray = aten::ray(posOnLight + dir * AT_MATH_EPSILON, dir);
 
-		while (depth < m_maxDepth) {
+		//while (depth < m_maxDepth) {
+		for (;;) {
 			hitrecord rec;
 			bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
@@ -288,7 +292,7 @@ namespace aten
 				// レイがレンズにヒット＆イメージセンサにヒット.
 
 				pixelx = aten::clamp(pixelx, 0, m_width - 1);
-				pixelx = aten::clamp(pixelx, 0, m_height - 1);
+				pixely = aten::clamp(pixely, 0, m_height - 1);
 
 				vec3 dir = ray.org - posOnLens;
 				const real dist2 = dir.squared_length();
@@ -729,7 +733,7 @@ namespace aten
 						{
 							// レイがレンズにヒット＆イメージセンサにヒット.
 							targetX = aten::clamp(px, 0, m_width - 1);
-							targetY = aten::clamp(px, 0, m_height - 1);
+							targetY = aten::clamp(py, 0, m_height - 1);
 
 							const real W_dash = camera->getWdash(
 								rec.p,
@@ -869,6 +873,8 @@ namespace aten
 
 			auto time = timer::getSystemTime();
 
+			XorShift rnd(idx * 32);
+
 #if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
 #pragma omp for
 #endif
@@ -877,10 +883,10 @@ namespace aten
 					std::vector<Result> result;
 
 					for (uint32_t i = 0; i < samples; i++) {
-						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						//Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
 						UniformDistributionSampler sampler(&rnd);
 
 						std::vector<Vertex> eyevs;

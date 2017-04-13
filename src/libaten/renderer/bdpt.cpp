@@ -231,7 +231,7 @@ namespace aten
 			n = nml;
 
 			// n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
-			if (fabs(n.x) > 0.1) {
+			if (fabs(n.x) > AT_MATH_EPSILON) {
 				t = normalize(cross(vec3(0.0, 1.0, 0.0), n));
 			}
 			else {

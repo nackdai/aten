@@ -458,6 +458,9 @@ namespace aten
 			// イメージセンサ上の点のサンプリング確率密度を元に変換する.
 
 			if (camera->isPinhole()) {
+				// TODO
+				// I don't understand why.
+				// But, it seems that the rendering result is correct...
 				return real(1);
 			}
 
@@ -543,12 +546,6 @@ namespace aten
 					pdf = curVtx.mtrl->pdf(curVtx.orienting_normal, wi, wo, curVtx.u, curVtx.v);
 				}
 			}
-		}
-
-		if (camera->isPinhole()
-			&& nextVtx.objType == ObjectType::Lens)
-		{
-			return pdf;
 		}
 
 		// 次の頂点の法線を、現在の頂点からの方向ベクトルに基づいて改めて求める.

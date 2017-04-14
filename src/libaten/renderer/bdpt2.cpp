@@ -266,72 +266,77 @@ namespace aten
 			hitrecord rec;
 			bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
-			vec3 posOnImageSensor;
-			vec3 posOnLens;
-			vec3 posOnObjectPlane;
-			int pixelx;
-			int pixely;
+			if (!camera->isPinhole()) {
+				// The light will never hit to the pinhole camera.
+				// The pihnole camera lens is tooooooo small.
 
-			// レンズと交差判定.
-			auto lens_t = camera->hitOnLens(
-				ray,
-				posOnLens,
-				posOnObjectPlane,
-				posOnImageSensor,
-				pixelx, pixely);
-			
-			if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
-				// レイがレンズにヒット＆イメージセンサにヒット.
+				vec3 posOnImageSensor;
+				vec3 posOnLens;
+				vec3 posOnObjectPlane;
+				int pixelx;
+				int pixely;
 
-				pixelx = aten::clamp(pixelx, 0, m_width - 1);
-				pixely = aten::clamp(pixely, 0, m_height - 1);
-
-				vec3 dir = ray.org - posOnLens;
-				const real dist2 = dir.squared_length();
-				dir.normalize();
-
-				const vec3& camnml = camera->getDir();
-
-				// レンズの上の点のサンプリング確率を計算。
-				{
-					const real c = dot(dir, camnml);
-					const real areaPdf = sampledPdf * c / dist2;
-
-					totalAreaPdf *= areaPdf;
-				}
-
-				// ジオメトリターム
-				{
-					const real c0 = dot(dir, camnml);
-					const real c1 = dot(-dir, prevNormal);
-					const real G = c0 * c1 / dist2;
-
-					throughput *= G;
-				}
-
-				// レンズ上に生成された点を頂点リストに追加（基本的に使わない）.
-				vs.push_back(Vertex(
+				// レンズと交差判定.
+				auto lens_t = camera->hitOnLens(
+					ray,
 					posOnLens,
-					camnml,
-					camnml,
-					ObjectType::Lens,
-					totalAreaPdf,
-					throughput,
-					vec3(0),
-					nullptr,
-					nullptr,
-					0, 0));
-
-				const real W_dash = camera->getWdash(
-					ray.org,
-					vec3(0, 1, 0),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+					posOnObjectPlane,
 					posOnImageSensor,
-					posOnLens,
-					posOnObjectPlane);
+					pixelx, pixely);
 
-				const vec3 contrib = throughput * W_dash / totalAreaPdf;
+				if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
+					// レイがレンズにヒット＆イメージセンサにヒット.
 
-				return std::move(Result(contrib, pixelx, pixely, true));
+					pixelx = aten::clamp(pixelx, 0, m_width - 1);
+					pixely = aten::clamp(pixely, 0, m_height - 1);
+
+					vec3 dir = ray.org - posOnLens;
+					const real dist2 = dir.squared_length();
+					dir.normalize();
+
+					const vec3& camnml = camera->getDir();
+
+					// レンズの上の点のサンプリング確率を計算。
+					{
+						const real c = dot(dir, camnml);
+						const real areaPdf = sampledPdf * c / dist2;
+
+						totalAreaPdf *= areaPdf;
+					}
+
+					// ジオメトリターム
+					{
+						const real c0 = dot(dir, camnml);
+						const real c1 = dot(-dir, prevNormal);
+						const real G = c0 * c1 / dist2;
+
+						throughput *= G;
+					}
+
+					// レンズ上に生成された点を頂点リストに追加（基本的に使わない）.
+					vs.push_back(Vertex(
+						posOnLens,
+						camnml,
+						camnml,
+						ObjectType::Lens,
+						totalAreaPdf,
+						throughput,
+						vec3(0),
+						nullptr,
+						nullptr,
+						0, 0));
+
+					const real W_dash = camera->getWdash(
+						ray.org,
+						vec3(0, 1, 0),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+						posOnImageSensor,
+						posOnLens,
+						posOnObjectPlane);
+
+					const vec3 contrib = throughput * W_dash / totalAreaPdf;
+
+					return std::move(Result(contrib, pixelx, pixely, true));
+				}
 			}
 
 			if (!isHit) {
@@ -452,6 +457,10 @@ namespace aten
 			// レンズ上の点からシーン上の点をサンプリングするときの面積測度に関する確率密度を計算.
 			// イメージセンサ上の点のサンプリング確率密度を元に変換する.
 
+			if (camera->isPinhole()) {
+				return real(1);
+			}
+
 			// シーン上の点からレンズに入るレイ.
 			ray r(nextVtx.pos, -normalizedTo);
 
@@ -496,7 +505,6 @@ namespace aten
 				const vec3 wo = normalize(nextVtx.pos - curVtx.pos);
 
 				if (curVtx.mtrl->isSingular()) {
-#if 0
 					if (curVtx.mtrl->isTranslucent()) {
 						// cur頂点のひとつ前の頂点に基づいて、物体に入り込んでいるのか、それとも出て行くのかを判定する.
 						const vec3 intoCurVtxDir = normalize(curVtx.pos - prevVtx->pos);
@@ -530,14 +538,17 @@ namespace aten
 					else {
 						pdf = real(1);
 					}
-#else
-					pdf = 1;
-#endif
 				}
 				else {
 					pdf = curVtx.mtrl->pdf(curVtx.orienting_normal, wi, wo, curVtx.u, curVtx.v);
 				}
 			}
+		}
+
+		if (camera->isPinhole()
+			&& nextVtx.objType == ObjectType::Lens)
+		{
+			return pdf;
 		}
 
 		// 次の頂点の法線を、現在の頂点からの方向ベクトルに基づいて改めて求める.
@@ -713,7 +724,7 @@ namespace aten
 
 				if (eye_end.objType == ObjectType::Lens) {
 					if (camera->isPinhole()) {
-						continue;
+						break;
 					}
 					else {
 						// lightサブパスを直接レンズにつなげる.
@@ -774,14 +785,14 @@ namespace aten
 					}
 				}
 
-				if (light_end.objType == ObjectType::Lens
-					|| light_end.objType == ObjectType::Light)
-				{
+				if (light_end.objType == ObjectType::Lens) {
 					// lightサブパスの端点がレンズだった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
 					// レンズ上はスペキュラとみなす.
-
-					// eyeサブパスの端点が光源（反射率0）だった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
-					// 光源は反射率0を想定している.
+					continue;
+				}
+				else if (light_end.objType == ObjectType::Light) {
+					// 光源の反射率0を仮定しているため、ライトトレーシングの時、最初の頂点以外は光源上に頂点生成されない.
+					// num_light_vertex == 1以外でここに入ってくることは無い.
 				}
 				else {
 					if (light_end.mtrl->isSingular()) {
@@ -881,8 +892,6 @@ namespace aten
 #endif
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
-
-					int xxx = 0;
 
 					for (uint32_t i = 0; i < samples; i++) {
 						//XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);

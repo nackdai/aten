@@ -58,7 +58,8 @@ namespace aten
 			const vec3& normal,
 			const hitrecord& hitrec,
 			sampler* sampler,
-			real u, real v) const override final;
+			real u, real v,
+			bool isLightPath = false) const override final;
 
 	private:
 		inline real sampleRoughness(real u, real v) const;

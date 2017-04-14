@@ -167,14 +167,6 @@ namespace aten
 					rec.mtrl,
 					rec.u, rec.v));
 
-				sampledPdf = lambert::pdf(orienting_normal, normalize(toNextVtx));
-
-				const real c = dot(normalize(toNextVtx), orienting_normal);
-				const real dist2 = toNextVtx.squared_length();
-				const real areaPdf = sampledPdf * (c / dist2);
-
-				totalAreaPdf *= areaPdf;
-
 				vec3 emit = rec.mtrl->color();
 				vec3 contrib = throughput * emit / totalAreaPdf;
 
@@ -182,6 +174,15 @@ namespace aten
 			}
 
 			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
+
+			sampledPdf = sampling.pdf;
+			auto sampledBsdf = sampling.bsdf;
+
+			if (rec.mtrl->isSingular()) {
+				// For canceling cosine term.
+				auto costerm = dot(normalize(toNextVtx), orienting_normal);
+				sampledBsdf /= costerm;
+			}
 
 			// 新しい頂点を頂点リストに追加する.
 			vs.push_back(Vertex(
@@ -196,24 +197,13 @@ namespace aten
 				rec.mtrl,
 				rec.u, rec.v));
 
-			sampledPdf = sampling.pdf;
-			throughput *= sampling.bsdf;
-
-			vec3 nextDir = normalize(sampling.dir);
+			throughput *= sampledBsdf;
 			
-			if (rec.mtrl->isSingular()) {
-				// For canceling cosine term.
-				auto costerm = dot(normalize(toNextVtx), orienting_normal);
-				throughput /= costerm;
-
-				// Just only for refraction.
-				// Cancel probability to select reflection or refraction.
-				throughput *= sampling.subpdf;
-			}
-
 			// refractionの反射、屈折の確率を掛け合わせる.
 			// refraction以外では 1 なので影響はない.
 			totalAreaPdf *= sampling.subpdf;
+
+			vec3 nextDir = normalize(sampling.dir);
 
 			ray = aten::ray(rec.p + nextDir * AT_MATH_EPSILON, nextDir);
 
@@ -381,7 +371,19 @@ namespace aten
 				throughput = G * throughput;
 			}
 
-			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
+			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v, true);
+
+			sampledPdf = sampling.pdf;
+			auto sampledBsdf = sampling.bsdf;
+
+			if (rec.mtrl->isSingular()) {
+				// For canceling cosine term.
+				auto costerm = dot(normalize(toNextVtx), orienting_normal);
+				sampledBsdf /= costerm;
+			}
+			else if (rec.mtrl->isEmissive()) {
+				sampledBsdf = vec3(real(0));
+			}
 
 			// 新しい頂点を頂点リストに追加する.
 			vs.push_back(Vertex(
@@ -391,29 +393,18 @@ namespace aten
 				ObjectType::Object,
 				totalAreaPdf,
 				throughput,
-				sampling.bsdf,
+				sampledBsdf,
 				rec.obj,
 				rec.mtrl,
 				rec.u, rec.v));
 
-			sampledPdf = sampling.pdf;
-			throughput *= sampling.bsdf;
-
-			vec3 nextDir = normalize(sampling.dir);
-
-			if (rec.mtrl->isSingular()) {
-				// For canceling cosine term.
-				auto costerm = dot(normalize(toNextVtx), orienting_normal);
-				throughput /= costerm;
-
-				// Just only for refraction.
-				// Cancel probability to select reflection or refraction.
-				throughput *= sampling.subpdf;
-			}
+			throughput *= sampledBsdf;
 
 			// refractionの反射、屈折の確率を掛け合わせる.
 			// refraction以外では 1 なので影響はない.
 			totalAreaPdf *= sampling.subpdf;
+
+			vec3 nextDir = normalize(sampling.dir);
 
 			ray = aten::ray(rec.p + nextDir * AT_MATH_EPSILON, nextDir);
 
@@ -884,7 +875,8 @@ namespace aten
 #endif
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
-					std::vector<Result> result;
+
+					int xxx = 0;
 
 					for (uint32_t i = 0; i < samples; i++) {
 						//XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);
@@ -892,6 +884,8 @@ namespace aten
 						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 						//Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
 						UniformDistributionSampler sampler(&rnd);
+
+						std::vector<Result> result;
 
 						std::vector<Vertex> eyevs;
 						std::vector<Vertex> lightvs;
@@ -905,8 +899,8 @@ namespace aten
 						}
 #else
 						auto lightNum = scene->lightNum();
-						for (uint32_t i = 0; i < lightNum; i++) {
-							auto light = scene->getLight(i);
+						for (uint32_t n = 0; n < lightNum; n++) {
+							auto light = scene->getLight(n);
 							auto lightRes = genLightPath(lightvs, light, &sampler, scene, camera);
 
 							if (eyeRes.isTerminate) {
@@ -942,30 +936,31 @@ namespace aten
 								lightvs,
 								scene,
 								camera);
-						}
-#endif
-					}
 
 #if 1
-					for (int i = 0; i < (int)result.size(); i++) {
-						const auto& res = result[i];
+							for (int i = 0; i < (int)result.size(); i++) {
+								const auto& res = result[i];
 
-						const int pos = res.y * m_width + res.x;
+								const int pos = res.y * m_width + res.x;
 
-						if (res.isStartFromPixel) {
-							image[idx][pos] += vec4(res.contrib, 1);
-						}
-						else {
-							// 得られたサンプルについて、サンプルが現在の画素（x,y)から発射されたeyeサブパスを含むものだった場合
-							// Ixy のモンテカルロ推定値はsamples[i].valueそのものなので、そのまま足す。その後、下の画像出力時に発射された回数の総計（iteration_per_thread * num_threads)で割る.
-							//
-							// 得られたサンプルについて、現在の画素から発射されたeyeサブパスを含むものではなかった場合（lightサブパスが別の画素(x',y')に到達した場合）は
-							// Ix'y' のモンテカルロ推定値を新しく得たわけだが、この場合、画像全体に対して光源側からサンプルを生成し、たまたまx'y'にヒットしたと考えるため
-							// このようなサンプルについては最終的に光源から発射した回数の総計で割って、画素への寄与とする必要がある.
-							image[idx][pos] += vec4(res.contrib * divPixelProb, 1);
-						}
-					}
+								if (res.isStartFromPixel) {
+									image[idx][pos] += vec4(res.contrib, 1);
+								}
+								else {
+									// 得られたサンプルについて、サンプルが現在の画素（x,y)から発射されたeyeサブパスを含むものだった場合
+									// Ixy のモンテカルロ推定値はsamples[i].valueそのものなので、そのまま足す。その後、下の画像出力時に発射された回数の総計（iteration_per_thread * num_threads)で割る.
+									//
+									// 得られたサンプルについて、現在の画素から発射されたeyeサブパスを含むものではなかった場合（lightサブパスが別の画素(x',y')に到達した場合）は
+									// Ix'y' のモンテカルロ推定値を新しく得たわけだが、この場合、画像全体に対して光源側からサンプルを生成し、たまたまx'y'にヒットしたと考えるため
+									// このようなサンプルについては最終的に光源から発射した回数の総計で割って、画素への寄与とする必要がある.
+									image[idx][pos] += vec4(res.contrib * divPixelProb, 1);
+								}
+							}
 #endif
+
+						}
+#endif
+					}
 				}
 			}
 		}

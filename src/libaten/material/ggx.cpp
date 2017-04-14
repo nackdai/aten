@@ -226,7 +226,8 @@ namespace aten
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
-		real u, real v) const
+		real u, real v,
+		bool isLightPath/*= false*/) const
 	{
 		sampling ret;
 

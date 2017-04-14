@@ -18,14 +18,9 @@ namespace aten
 {
 	static inline real russianRoulette(const vec3& v)
 	{
-#if 1
 		real p = std::max(v.r, std::max(v.g, v.b));
+		p = aten::clamp(p, real(0), real(1));
 		return p;
-#else
-		// TODO
-		// Adhoc fix...
-		return real(1);
-#endif
 	}
 
 	static inline real russianRoulette(const material* mtrl)
@@ -44,8 +39,11 @@ namespace aten
 		if (vtx.mtrl) {
 			pdf = aten::russianRoulette(vtx.mtrl);
 		}
+		else if (vtx.light) {
+			pdf = aten::russianRoulette(vtx.light->getLe());
+		}
 		else {
-			pdf = aten::russianRoulette(vtx.throughput);
+			pdf = real(0);
 		}
 
 		return pdf;
@@ -111,7 +109,8 @@ namespace aten
 
 			if (depth == 0) {
 				// x1のサンプリング確率密度はイメージセンサ上のサンプリング確率密度を変換することで求める,
-				auto pdfOnImageSensor = camera->getPdfImageSensorArea(
+				auto pdfOnImageSensor = camera->convertImageSensorPdfToScenePdf(
+					camsample.pdfOnImageSensor,
 					rec.p,
 					orienting_normal,
 					camsample.posOnImageSensor,
@@ -474,9 +473,14 @@ namespace aten
 			if (lens_t > AT_MATH_EPSILON) {
 				// レイがレンズにヒット＆イメージセンサにヒット.
 
+				real imagesensorWidth = camera->getImageSensorWidth();
+				real imagesensorHeight = camera->getImageSensorHeight();
+				real pdfImage = real(1) / (imagesensorWidth * imagesensorHeight);
+
 				// イメージセンサ上のサンプリング確率密度を計算.
 				// イメージセンサの面積測度に関する確率密度をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換されている.
-				const real imageSensorAreaPdf = camera->getPdfImageSensorArea(
+				const real imageSensorAreaPdf = camera->convertImageSensorPdfToScenePdf(
+					pdfImage,
 					nextVtx.pos,
 					nextVtx.orienting_normal,
 					posOnImagesensor,

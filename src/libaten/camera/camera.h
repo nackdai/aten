@@ -24,7 +24,8 @@ namespace aten {
 			real s, real t,
 			sampler* sampler) const = 0;
 
-		virtual real getPdfImageSensorArea(
+		virtual real convertImageSensorPdfToScenePdf(
+			real pdfImage,
 			const vec3& hitPoint,
 			const vec3& hitpointNml,
 			const vec3& posOnImageSensor,
@@ -77,5 +78,15 @@ namespace aten {
 		virtual void revertRayToPixelPos(
 			const ray& ray,
 			int& px, int& py) const = 0;
+
+		virtual real getImageSensorWidth() const
+		{
+			return real(1);
+		}
+
+		virtual real getImageSensorHeight() const
+		{
+			return real(1);
+		}
 	};
 }

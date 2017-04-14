@@ -31,7 +31,8 @@ namespace aten {
 			vec3& posOnImageSensor,
 			int& x, int& y) const override final;
 
-		virtual real getPdfImageSensorArea(
+		virtual real convertImageSensorPdfToScenePdf(
+			real pdfImage,
 			const vec3& hitPoint,
 			const vec3& hitpointNml,
 			const vec3& posOnImageSensor,
@@ -71,6 +72,16 @@ namespace aten {
 		void revertRayToPixelPos(
 			const ray& ray,
 			int& px, int& py) const override final;
+
+		virtual real getImageSensorWidth() const
+		{
+			return m_imagesensor.width;
+		}
+
+		virtual real getImageSensorHeight() const
+		{
+			return m_imagesensor.height;
+		}
 
 	private:
 		// ‰ð‘œ“x.

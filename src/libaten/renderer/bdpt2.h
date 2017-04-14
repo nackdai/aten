@@ -43,7 +43,7 @@ namespace aten
 			hitable* obj{ nullptr };
 			material* mtrl{ nullptr };
 
-			aten::Light* light;
+			aten::Light* light{ nullptr };
 
 			Vertex(
 				const vec3& p,

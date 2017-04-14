@@ -179,6 +179,9 @@ namespace aten
 			auto sampledBsdf = sampling.bsdf;
 
 			if (rec.mtrl->isSingular()) {
+				// For canceling probabaility to select reflection or rafraction.
+				sampledBsdf *= sampling.subpdf;
+
 				// For canceling cosine term.
 				auto costerm = dot(normalize(toNextVtx), orienting_normal);
 				sampledBsdf /= costerm;
@@ -377,6 +380,9 @@ namespace aten
 			auto sampledBsdf = sampling.bsdf;
 
 			if (rec.mtrl->isSingular()) {
+				// For canceling probabaility to select reflection or rafraction.
+				sampledBsdf *= sampling.subpdf;
+
 				// For canceling cosine term.
 				auto costerm = dot(normalize(toNextVtx), orienting_normal);
 				sampledBsdf /= costerm;

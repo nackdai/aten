@@ -123,20 +123,30 @@ namespace aten
 		if (isIdealRefraction()) {
 			ret.dir = refract;
 
-			// TODO
-			ret.bsdf = albedo;
+			// ƒŒƒC‚Ì‰^‚Ô•úË‹P“x‚Í‹üÜ—¦‚ÌˆÙ‚È‚é•¨‘ÌŠÔ‚ğˆÚ“®‚·‚é‚Æ‚«A‹üÜ—¦‚Ì”ä‚Ì“ñæ‚Ì•ª‚¾‚¯•Ï‰»‚·‚é.
+			if (isLightPath) {
+				nnt = into ? ni / nt : nt / ni;
+			}
+			else {
+				nnt = into ? nt / ni : ni / nt;
+			}
+
+			real nnt2 = nnt * nnt;
+
+			ret.bsdf = nnt2 * Tr * albedo;
+
 			ret.fresnel = 0;
 
 			ret.subpdf = real(1);
 		}
 		else {
-			//auto prob = 0.25 + 0.5 * Re;
-			auto prob = 0.5;
+			auto prob = 0.25 + 0.5 * Re;
 
 			if (r < prob) {
 				// ”½Ë.
 				ret.dir = reflect;
 				ret.bsdf = Re * albedo;
+				ret.bsdf /= prob;
 
 				ret.subpdf = prob;
 
@@ -157,6 +167,7 @@ namespace aten
 				real nnt2 = nnt * nnt;
 
 				ret.bsdf = nnt2 * Tr * albedo;
+				ret.bsdf /= (1 - prob);
 
 				ret.subpdf = (1 - prob);
 

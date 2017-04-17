@@ -12,25 +12,42 @@ namespace aten
 	struct hitrecord;
 
 	struct MaterialParam {
-		float baseColor[3];
+		// サーフェイスカラー，通常テクスチャマップによって供給される.
+		union {
+			vec3 baseColor;
+			float baseColorArray[3];
+		};
+
 		float ior{ 1.0f };
-		float roughness{ 0.0f };
+		float roughness{ 0.0f };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 		float shininess{ 0.0f };
-#if 0
-		// TODO
-		float subsurface{ 0.0f };
-		float metallic{ 0.0f };
-		float specular{ 0.0f };
-		float specularTint{ 0.0f };
-		float anisotropic{ 0.0f };
-		float sheen{ 0.0f };
-		float sheenTint{ 0.0f };
-		float clearcoat{ 0.0f };
-		float clearcoatGloss{ 0.0f };
-#endif
-		int albedoMap{ -1 };
-		int normalMap{ -1 };
-		int roughnessMap{ -1 };
+
+		float subsurface{ 0.0f };			// 表面下の近似を用いてディフューズ形状を制御する.
+		float metallic{ 0.0f };				// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+		float specular{ 0.0f };				// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+		float specularTint{ 0.0f };			// 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+		float anisotropic{ 0.0f };			// 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+		float sheen{ 0.0f };				// 追加的なグレージングコンポーネント，主に布に対して意図している.
+		float sheenTint{ 0.0f };			// 基本色に向かう光沢色合いの量.
+		float clearcoat{ 0.0f };			// 第二の特別な目的のスペキュラーローブ.
+		float clearcoatGloss{ 0.0f };		// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+
+		union {								
+			int albedoMapIdx;
+			void* albedoMap{ nullptr };
+		};
+
+		union {
+			int normalMapIdx;
+			void* normalMap{ nullptr };
+		};
+
+		union {
+			int roughnessMapIdx;
+			void* roughnessMap{ nullptr };
+		};
+
+		MaterialParam() {}
 	};
 
 	class material {
@@ -46,14 +63,18 @@ namespace aten
 			real ior = 1,
 			texture* albedoMap = nullptr, 
 			texture* normalMap = nullptr) 
-			: m_albedo(clr), m_ior(ior), m_albedoMap(albedoMap), m_normalMap(normalMap)
-		{}
+		{
+			m_param.baseColor = clr;
+			m_param.ior = ior;
+			m_param.albedoMap = albedoMap;
+			m_param.normalMap = normalMap;
+		}
 		material(Values& val)
 		{
-			m_albedo = val.get("color", m_albedo);
-			m_ior = val.get("ior", m_ior);
-			m_albedoMap = (texture*)val.get("albedomap", (void*)m_albedoMap);
-			m_normalMap = (texture*)val.get("normalmap", (void*)m_normalMap);
+			m_param.baseColor = val.get("color", m_param.baseColor);
+			m_param.ior = val.get("ior", m_param.ior);
+			m_param.albedoMap = (texture*)val.get("albedomap", (void*)m_param.albedoMap);
+			m_param.normalMap = (texture*)val.get("normalmap", (void*)m_param.normalMap);
 		}
 
 	public:
@@ -84,7 +105,7 @@ namespace aten
 
 		const vec3& color() const
 		{
-			return m_albedo;
+			return m_param.baseColor;
 		}
 
 		uint32_t id() const
@@ -95,8 +116,8 @@ namespace aten
 		virtual vec3 sampleAlbedoMap(real u, real v) const
 		{
 			vec3 albedo(1, 1, 1);
-			if (m_albedoMap) {
-				albedo = m_albedoMap->at(u, v);
+			if (m_param.albedoMap) {
+				albedo = ((texture*)m_param.albedoMap)->at(u, v);
 			}
 			return std::move(albedo);
 		}
@@ -152,11 +173,9 @@ namespace aten
 			real u, real v,
 			bool isLightPath = false) const = 0;
 
-		virtual void serialize(MaterialParam& param) const = 0;
-
 		real ior() const
 		{
-			return m_ior;
+			return m_param.ior;
 		}
 
 	protected:
@@ -177,15 +196,10 @@ namespace aten
 
 		static void serialize(const material* mtrl, MaterialParam& param);
 
-	private:
+	protected:
 		uint32_t m_id{ 0 };
 
-		vec3 m_albedo;
-
-		real m_ior{ 1 };
-
-		texture* m_albedoMap{ nullptr };
-		texture* m_normalMap{ nullptr };
+		MaterialParam m_param;
 	};
 
 	class Light;

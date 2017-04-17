@@ -14,18 +14,19 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(albedo, 1, albedoMap, normalMap), m_roughnessMap(roughnessMap)
+			: material(albedo, 1, albedoMap, normalMap)
 		{
-			m_roughness = aten::clamp<real>(roughness, 0, 1);
+			m_param.roughnessMap = roughnessMap;
+			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
 		OrenNayar(Values& val)
 			: material(val)
 		{
-			m_roughness = val.get("roughness", m_roughness);
-			m_roughness = aten::clamp<real>(m_roughness, 0, 1);
+			m_param.roughness = val.get("roughness", m_param.roughness);
+			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
 
-			m_roughnessMap = val.get("roughnessmap", m_roughnessMap);
+			m_param.roughnessMap = val.get("roughnessmap", m_param.roughnessMap);
 		}
 
 		virtual ~OrenNayar() {}
@@ -71,13 +72,7 @@ namespace aten
 			return real(1);
 		}
 
-		virtual void serialize(MaterialParam& param) const override final;
-
 	private:
 		inline real sampleRoughness(real u, real v) const;
-
-	private:
-		real m_roughness{ real(0) };
-		texture* m_roughnessMap{ nullptr };
 	};
 }

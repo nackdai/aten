@@ -69,11 +69,4 @@ namespace aten
 
 		return std::move(ret);
 	}
-
-	void specular::serialize(MaterialParam& param) const
-	{
-		material::serialize(this, param);
-
-		// TODO
-	}
 }

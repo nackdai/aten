@@ -7,7 +7,7 @@ namespace aten {
 
 	real OrenNayar::sampleRoughness(real u, real v) const
 	{
-		vec3 roughness = material::sampleTexture(m_roughnessMap, u, v, m_roughness);
+		vec3 roughness = material::sampleTexture((texture*)m_param.roughnessMap, u, v, m_param.roughness);
 		return roughness.r;
 	}
 
@@ -120,14 +120,5 @@ namespace aten {
 		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
 
 		return std::move(ret);
-	}
-
-	void OrenNayar::serialize(MaterialParam& param) const
-	{
-		material::serialize(this, param);
-
-		param.roughness = (float)m_roughness;
-
-		// TODO
 	}
 }

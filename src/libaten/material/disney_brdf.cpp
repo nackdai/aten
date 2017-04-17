@@ -119,9 +119,9 @@ namespace aten
 			return 0;
 		}
 
-		const auto anisotropic = m_anisotropic;
-		const auto roughness = m_roughness;
-		const auto metalic = m_metallic;
+		const auto anisotropic = m_param.anisotropic;
+		const auto roughness = m_param.roughness;
+		const auto metalic = m_param.metallic;
 
 		const auto weight2 = metalic;
 		const auto weight1 = 1 - weight2;
@@ -181,9 +181,9 @@ namespace aten
 		real u, real v,
 		sampler* sampler) const
 	{
-		const auto anisotropic = m_anisotropic;
-		const auto roughness = m_roughness;
-		const auto metalic = m_metallic;
+		const auto anisotropic = m_param.anisotropic;
+		const auto roughness = m_param.roughness;
+		const auto metalic = m_param.metallic;
 
 		const auto weight2 = metalic;
 		const auto weight1 = 1 - weight2;
@@ -263,17 +263,17 @@ namespace aten
 		const vec3& Y,
 		real u, real v) const
 	{
-		const auto baseColor = m_baseColor;
-		const auto subsurface = m_subsurface;
-		const auto metalic = m_metallic;
-		const auto specular = m_specular;
-		const auto specularTint = m_specularTint;
-		const auto roughness = m_roughness;
-		const auto anisotropic = m_anisotropic;
-		const auto sheen = m_sheen;
-		const auto sheenTint = m_sheenTint;
-		const auto clearcoat = m_clearcoat;
-		const auto clearcoatGloss = m_clearcoatGloss;
+		const auto baseColor = m_param.baseColor;
+		const auto subsurface = m_param.subsurface;
+		const auto metalic = m_param.metallic;
+		const auto specular = m_param.specular;
+		const auto specularTint = m_param.specularTint;
+		const auto roughness = m_param.roughness;
+		const auto anisotropic = m_param.anisotropic;
+		const auto sheen = m_param.sheen;
+		const auto sheenTint = m_param.sheenTint;
+		const auto clearcoat = m_param.clearcoat;
+		const auto clearcoatGloss = m_param.clearcoatGloss;
 
 		const auto NdotL = dot(N, L);
 		const auto NdotV = dot(N, V);
@@ -371,26 +371,5 @@ namespace aten
 		ret.fresnel = fresnel;
 
 		return std::move(ret);
-	}
-
-	void DisneyBRDF::serialize(MaterialParam& param) const
-	{
-		material::serialize(this, param);
-
-		// TODO
-#if 0
-		param.subsurface = (float)m_subsurface;
-		param.metallic = (float)m_metallic;
-		param.specular = (float)m_specular;
-		param.specularTint = (float)m_specularTint;
-		param.roughness = (float)m_roughness;
-		param.anisotropic = (float)m_anisotropic;
-		param.sheen = (float)m_sheen;
-		param.sheenTint = (float)m_sheenTint;
-		param.clearcoat = (float)m_clearcoat;
-		param.clearcoatGloss = (float)m_clearcoatGloss;
-#endif
-
-		// TODO
 	}
 }

@@ -12,13 +12,15 @@ namespace aten
 			real shininess, real ior,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(albedo, ior, albedoMap, normalMap), m_shininess(shininess)
-		{}
+			: material(albedo, ior, albedoMap, normalMap)
+		{
+			m_param.shininess = shininess;
+		}
 
 		MicrofacetBlinn(Values& val)
 			: material(val)
 		{
-			m_shininess = val.get("shininess", m_shininess);
+			m_param.shininess = val.get("shininess", m_param.shininess);
 		}
 
 		virtual ~MicrofacetBlinn() {}
@@ -26,7 +28,7 @@ namespace aten
 	public:
 		virtual bool isGlossy() const override final
 		{
-			return (m_shininess == 0 ? false : true);
+			return (m_param.shininess == 0 ? false : true);
 		}
 
 		virtual real pdf(
@@ -55,8 +57,6 @@ namespace aten
 			real u, real v,
 			bool isLightPath = false) const override final;
 
-		virtual void serialize(MaterialParam& param) const override final;
-
 	private:
 		vec3 bsdf(
 			real& fresnel,
@@ -64,8 +64,5 @@ namespace aten
 			const vec3& wi,
 			const vec3& wo,
 			real u, real v) const;
-
-	private:
-		real m_shininess{ real(0) };
 	};
 }

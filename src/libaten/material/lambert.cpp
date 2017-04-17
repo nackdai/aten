@@ -107,9 +107,4 @@ namespace aten {
 
 		return std::move(ret);
 	}
-
-	void lambert::serialize(MaterialParam& param) const
-	{
-		material::serialize(this, param);
-	}
 }

@@ -24,7 +24,7 @@ namespace aten
 
 		auto costheta = dot(normal, wh);
 
-		auto n = m_shininess;
+		auto n = m_param.shininess;
 
 		auto c = dot(wo, wh);
 
@@ -55,14 +55,14 @@ namespace aten
 
 #if 1
 		// Sample halfway vector first, then reflect wi around that
-		auto costheta = aten::pow(r1, 1 / (m_shininess + 1));
+		auto costheta = aten::pow(r1, 1 / (m_param.shininess + 1));
 		auto sintheta = aten::sqrt(1 - costheta * costheta);
 
 		// phi = 2*PI*ksi2
 		auto cosphi = aten::cos(AT_MATH_PI_2 * r2);
 		auto sinphi = aten::sqrt(real(1) - cosphi * cosphi);
 #else
-		auto theta = aten::acos(aten::pow(r1, 1 / (m_shininess + 1)));
+		auto theta = aten::acos(aten::pow(r1, 1 / (m_param.shininess + 1)));
 		auto phi = AT_MATH_PI_2 * r2;
 
 		auto costheta = aten::cos(theta);
@@ -121,7 +121,7 @@ namespace aten
 		auto NdotL = aten::abs(dot(N, L));
 		auto NdotV = aten::abs(dot(N, V));
 
-		auto a = m_shininess;
+		auto a = m_param.shininess;
 
 		real F(1);
 		{
@@ -215,14 +215,5 @@ namespace aten
 #endif
 
 		return std::move(ret);
-	}
-
-	void MicrofacetBlinn::serialize(MaterialParam& param) const
-	{
-		material::serialize(this, param);
-
-		param.shininess = m_shininess;
-
-		// TODO
 	}
 }

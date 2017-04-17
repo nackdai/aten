@@ -54,13 +54,6 @@ namespace aten
 			real u, real v,
 			bool isLightPath = false) const override final;
 
-		virtual void serialize(MaterialParam& param) const override final
-		{
-			// TODO
-			// Not supported...
-			AT_ASSERT(false);
-		}
-
 	private:
 		std::vector<material*> m_layer;
 	};

@@ -103,8 +103,8 @@ namespace aten
 		vec3& newNml,
 		real u, real v) const
 	{
-		if (m_normalMap) {
-			newNml = m_normalMap->at(u, v);
+		if (m_param.normalMap) {
+			newNml = ((texture*)m_param.normalMap)->at(u, v);
 			newNml = 2 * newNml - vec3(1);
 			newNml.normalize();
 

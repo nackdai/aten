@@ -4,7 +4,7 @@ namespace aten
 {
 	real MicrofacetGGX::sampleRoughness(real u, real v) const
 	{
-		vec3 roughness = material::sampleTexture(m_roughnessMap, u, v, m_roughness);
+		vec3 roughness = material::sampleTexture((texture*)m_param.roughnessMap, u, v, m_param.roughness);
 		return roughness.r;
 	}
 
@@ -243,14 +243,5 @@ namespace aten
 		ret.fresnel = fresnel;
 
 		return std::move(ret);
-	}
-
-	void MicrofacetGGX::serialize(MaterialParam& param) const
-	{
-		material::serialize(this, param);
-
-		param.roughness = (float)m_roughness;
-
-		// TODO
 	}
 }

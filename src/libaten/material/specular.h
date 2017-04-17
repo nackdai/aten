@@ -64,7 +64,5 @@ namespace aten
 		{
 			return real(1);
 		}
-
-		virtual void serialize(MaterialParam& param) const override final;
 	};
 }

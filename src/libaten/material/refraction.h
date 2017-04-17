@@ -105,8 +105,6 @@ namespace aten
 			return real(0);
 		}
 
-		virtual void serialize(MaterialParam& param) const override final;
-
 	private:
 		bool m_isIdealRefraction{ false };
 	};

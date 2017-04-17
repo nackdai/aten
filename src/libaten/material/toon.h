@@ -62,13 +62,6 @@ namespace aten
 			m_func = func;
 		}
 
-		virtual void serialize(MaterialParam& param) const override final
-		{
-			// TODO
-			// Not supported...
-			AT_ASSERT(false);
-		}
-
 	private:
 		virtual vec3 bsdf(
 			real cosShadow,

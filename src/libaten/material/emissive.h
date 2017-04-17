@@ -52,7 +52,5 @@ namespace aten
 			sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const override final;
-
-		virtual void serialize(MaterialParam& param) const override final;
 	};
 }

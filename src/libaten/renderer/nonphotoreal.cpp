@@ -28,7 +28,7 @@ namespace aten
 			auto lightobj = sampleres.obj;
 
 			vec3 dirToLight = normalize(sampleres.dir);
-			aten::ray shadowRay(p + AT_MATH_EPSILON * dirToLight, dirToLight);
+			aten::ray shadowRay(p + dirToLight, dirToLight);
 
 			hitrecord tmpRec;
 

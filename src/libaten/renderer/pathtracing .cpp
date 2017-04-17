@@ -137,7 +137,7 @@ namespace aten
 						auto lightobj = sampleres.obj;
 
 						vec3 dirToLight = normalize(sampleres.dir);
-						aten::ray shadowRay(rec.p + AT_MATH_EPSILON * dirToLight, dirToLight);
+						aten::ray shadowRay(rec.p + dirToLight, dirToLight);
 
 						hitrecord tmpRec;
 
@@ -245,7 +245,7 @@ namespace aten
 				prevMtrl = rec.mtrl;
 
 				// Make next ray.
-				ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
+				ray = aten::ray(rec.p + nextDir, nextDir);
 			}
 			else {
 				auto ibl = scene->getIBL();
@@ -438,7 +438,7 @@ namespace aten
 				auto lightobj = sampleres.obj;
 
 				vec3 dirToLight = normalize(sampleres.dir);
-				aten::ray shadowRay(path.rec.p + AT_MATH_EPSILON * dirToLight, dirToLight);
+				aten::ray shadowRay(path.rec.p + dirToLight, dirToLight);
 
 				hitrecord tmpRec;
 
@@ -501,7 +501,7 @@ namespace aten
 				auto lightobj = sampleres.obj;
 
 				vec3 dirToLight = normalize(sampleres.dir);
-				aten::ray shadowRay(path.rec.p + AT_MATH_EPSILON * dirToLight, dirToLight);
+				aten::ray shadowRay(path.rec.p + dirToLight, dirToLight);
 
 				hitrecord tmpRec;
 
@@ -587,7 +587,7 @@ namespace aten
 		path.pdfb = pdfb;
 
 		// Make next ray.
-		path.ray = aten::ray(path.rec.p + AT_MATH_EPSILON * nextDir, nextDir);
+		path.ray = aten::ray(path.rec.p + nextDir, nextDir);
 
 		return true;
 	}

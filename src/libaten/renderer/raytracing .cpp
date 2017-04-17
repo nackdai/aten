@@ -38,7 +38,7 @@ namespace aten
 					throughput *= bsdf;
 
 					// Make next ray.
-					ray = aten::ray(rec.p + AT_MATH_EPSILON * nextDir, nextDir);
+					ray = aten::ray(rec.p + nextDir, nextDir);
 				}
 				else if (rec.mtrl->isNPR()) {
 					// Non-Photo-Real.
@@ -71,7 +71,7 @@ namespace aten
 						hitrecord tmpRec;
 
 						if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-							auto lightColor = sampleres.le;
+							auto lightColor = sampleres.finalColor;
 
 							if (light->isInifinite()) {
 								len = real(1);

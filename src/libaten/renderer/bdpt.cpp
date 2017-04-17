@@ -231,7 +231,7 @@ namespace aten
 			n = nml;
 
 			// nと平行にならないようにする.
-			if (fabs(n.x) > 0.1) {
+			if (fabs(n.x) > AT_MATH_EPSILON) {
 				t = normalize(cross(vec3(0.0, 1.0, 0.0), n));
 			}
 			else {
@@ -559,7 +559,10 @@ namespace aten
 
 						const auto& next = vs[i + 1];
 
-						const auto pdf = camera->getPdfImageSensorArea(
+						real pdfImage = real(1) / real(m_width * m_height);
+
+						const auto pdf = camera->convertImageSensorPdfToScenePdf(
+							pdfImage,
 							next.pos,
 							next.nml,
 							camsample.posOnImageSensor,
@@ -690,9 +693,14 @@ namespace aten
 							if (lens_t > AT_MATH_EPSILON) {
 								// レイがレンズにヒット＆イメージセンサにヒット.
 
+								real imagesensorWidth = camera->getImageSensorWidth();
+								real imagesensorHeight = camera->getImageSensorHeight();
+								real pdfImage = real(1) / (imagesensorWidth * imagesensorHeight);
+
 								// イメージセンサ上のサンプリング確率密度を計算.
 								// イメージセンサの面積測度に関する確率密度をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換されている.
-								const real imageSensorAreaPdf = camera->getPdfImageSensorArea(
+								const real imageSensorAreaPdf = camera->convertImageSensorPdfToScenePdf(
+									pdfImage,
 									next.pos,
 									next.nml,
 									posOnImagesensor,

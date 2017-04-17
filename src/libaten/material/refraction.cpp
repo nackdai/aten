@@ -52,7 +52,8 @@ namespace aten
 		const vec3& normal,
 		const hitrecord& hitrec,
 		sampler* sampler,
-		real u, real v) const
+		real u, real v,
+		bool isLightPath/*= false*/) const
 	{
 		sampling ret;
 
@@ -87,14 +88,7 @@ namespace aten
 			ret.pdf = real(1);
 			ret.bsdf = albedo;
 			ret.dir = reflect;
-
-#if 0
-			// For canceling cosine factor.
-			auto c = dot(normal, ret.dir);
-			if (c > real(0)) {
-				ret.bsdf = albedo / c;
-			}
-#endif
+			ret.fresnel = real(1);
 
 			return std::move(ret);
 		}
@@ -118,11 +112,8 @@ namespace aten
 		// ”½Ë•ûŒü‚ÌŒõ‚ª”½Ë‚µ‚Äray.dir‚Ì•ûŒü‚É‰^‚ÔŠ„‡B“¯‚É‹üÜ•ûŒü‚ÌŒõ‚ª”½Ë‚·‚é•ûŒü‚É‰^‚ÔŠ„‡.
 		auto fresnel = r0 + (1 - r0) * aten::pow(c, 5);
 
-		// ƒŒƒC‚Ì‰^‚Ô•úË‹P“x‚Í‹üÜ—¦‚ÌˆÙ‚È‚é•¨‘ÌŠÔ‚ğˆÚ“®‚·‚é‚Æ‚«A‹üÜ—¦‚Ì”ä‚Ì“ñæ‚Ì•ª‚¾‚¯•Ï‰»‚·‚é.
-		real nn = nnt * nnt;
-
 		auto Re = fresnel;
-		auto Tr = (1 - Re) * nn;
+		auto Tr = (1 - Re);
 
 		real r = real(0.5);
 		if (sampler) {
@@ -131,20 +122,26 @@ namespace aten
 
 		if (isIdealRefraction()) {
 			ret.dir = refract;
-			ret.bsdf = Tr * albedo;
+
+			// ƒŒƒC‚Ì‰^‚Ô•úË‹P“x‚Í‹üÜ—¦‚ÌˆÙ‚È‚é•¨‘ÌŠÔ‚ğˆÚ“®‚·‚é‚Æ‚«A‹üÜ—¦‚Ì”ä‚Ì“ñæ‚Ì•ª‚¾‚¯•Ï‰»‚·‚é.
+			if (isLightPath) {
+				nnt = into ? ni / nt : nt / ni;
+			}
+			else {
+				nnt = into ? nt / ni : ni / nt;
+			}
+
+			real nnt2 = nnt * nnt;
+
+			ret.bsdf = nnt2 * Tr * albedo;
+
 			ret.fresnel = 0;
 
 			ret.subpdf = real(1);
-
-#if 0
-			// For canceling cosine factor.
-			auto denom = dot(normal, refract);
-			ret.bsdf /= denom;
-#endif
 		}
 		else {
 			auto prob = real(0.25) + real(0.5) * Re;
-#if 1
+
 			if (r < prob) {
 				// ”½Ë.
 				ret.dir = reflect;
@@ -158,37 +155,23 @@ namespace aten
 			else {
 				// ‹üÜ.
 				ret.dir = refract;
-				ret.bsdf = Tr * albedo;
-				ret.bsdf /= (real(1) - prob);
+				// ƒŒƒC‚Ì‰^‚Ô•úË‹P“x‚Í‹üÜ—¦‚ÌˆÙ‚È‚é•¨‘ÌŠÔ‚ğˆÚ“®‚·‚é‚Æ‚«A‹üÜ—¦‚Ì”ä‚Ì“ñæ‚Ì•ª‚¾‚¯•Ï‰»‚·‚é.
+				if (isLightPath) {
+					nnt = into ? ni / nt : nt / ni;
+				}
+				else {
+					nnt = into ? nt / ni : ni / nt;
+				}
 
-				ret.subpdf = (real(1) - prob);
+				real nnt2 = nnt * nnt;
 
-				ret.fresnel = 0;
-			}
-#else
-			if (r < prob) {
-				// ”½Ë.
-				ret.dir = reflect;
-
-				// For canceling cosine factor.
-				auto denom = dot(normal, reflect);
-				ret.bsdf = Re * albedo / denom;
-				ret.bsdf /= prob;
-
-				ret.subpdf = prob;
-			}
-			else {
-				// ‹üÜ.
-				ret.dir = refract;
-
-				// For canceling cosine factor.
-				auto denom = dot(normal, refract);
-				ret.bsdf = Tr * albedo / denom;
+				ret.bsdf = nnt2 * Tr * albedo;
 				ret.bsdf /= (1 - prob);
 
 				ret.subpdf = (1 - prob);
+
+				ret.fresnel = Tr;
 			}
-#endif
 		}
 
 		ret.pdf = 1;

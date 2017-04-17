@@ -19,11 +19,15 @@ namespace aten
 	static inline real russianRoulette(const vec3& v)
 	{
 		real p = std::max(v.r, std::max(v.g, v.b));
+		p = aten::clamp(p, real(0), real(1));
 		return p;
 	}
 
 	static inline real russianRoulette(const material* mtrl)
 	{
+		if (mtrl->isEmissive()) {
+			return 1;
+		}
 		real p = russianRoulette(mtrl->color());
 		return p;
 	}
@@ -35,8 +39,11 @@ namespace aten
 		if (vtx.mtrl) {
 			pdf = aten::russianRoulette(vtx.mtrl);
 		}
+		else if (vtx.light) {
+			pdf = aten::russianRoulette(vtx.light->getLe());
+		}
 		else {
-			pdf = aten::russianRoulette(vtx.throughput);
+			pdf = real(0);
 		}
 
 		return pdf;
@@ -77,7 +84,8 @@ namespace aten
 		vec3 prevNormal = camera->getDir();
 		real sampledPdf = real(1);
 
-		while (depth < m_maxDepth) {
+		//while (depth < m_maxDepth) {
+		for (;;) {
 			hitrecord rec;
 			if (!scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
 				break;
@@ -101,7 +109,8 @@ namespace aten
 
 			if (depth == 0) {
 				// x1のサンプリング確率密度はイメージセンサ上のサンプリング確率密度を変換することで求める,
-				auto pdfOnImageSensor = camera->getPdfImageSensorArea(
+				auto pdfOnImageSensor = camera->convertImageSensorPdfToScenePdf(
+					camsample.pdfOnImageSensor,
 					rec.p,
 					orienting_normal,
 					camsample.posOnImageSensor,
@@ -138,7 +147,7 @@ namespace aten
 				const real c0 = dot(normalize(toNextVtx), orienting_normal);
 				const real c1 = dot(normalize(-toNextVtx), prevNormal);
 				const real dist2 = toNextVtx.squared_length();
-				const real G = c0 * c1 / dist2;
+				const double G = c0 * c1 / dist2;
 				throughput = G * throughput;
 			}
 
@@ -158,14 +167,6 @@ namespace aten
 					rec.mtrl,
 					rec.u, rec.v));
 
-				sampledPdf = lambert::pdf(orienting_normal, normalize(toNextVtx));
-
-				const real c = dot(normalize(toNextVtx), orienting_normal);
-				const real dist2 = toNextVtx.squared_length();
-				const real areaPdf = sampledPdf * (c / dist2);
-
-				totalAreaPdf *= areaPdf;
-
 				vec3 emit = rec.mtrl->color();
 				vec3 contrib = throughput * emit / totalAreaPdf;
 
@@ -173,6 +174,18 @@ namespace aten
 			}
 
 			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
+
+			sampledPdf = sampling.pdf;
+			auto sampledBsdf = sampling.bsdf;
+
+			if (rec.mtrl->isSingular()) {
+				// For canceling probabaility to select reflection or rafraction.
+				sampledBsdf *= sampling.subpdf;
+
+				// For canceling cosine term.
+				auto costerm = dot(normalize(toNextVtx), orienting_normal);
+				sampledBsdf /= costerm;
+			}
 
 			// 新しい頂点を頂点リストに追加する.
 			vs.push_back(Vertex(
@@ -187,24 +200,13 @@ namespace aten
 				rec.mtrl,
 				rec.u, rec.v));
 
-			sampledPdf = sampling.pdf;
-			throughput *= sampling.bsdf;
-
-			vec3 nextDir = normalize(sampling.dir);
+			throughput *= sampledBsdf;
 			
-			if (rec.mtrl->isSingular()) {
-				// For canceling cosine term.
-				auto costerm = dot(normalize(toNextVtx), orienting_normal);
-				throughput /= costerm;
-
-				// Just only for refraction.
-				// Cancel probability to select reflection or refraction.
-				throughput *= sampling.subpdf;
-			}
-
 			// refractionの反射、屈折の確率を掛け合わせる.
 			// refraction以外では 1 なので影響はない.
 			totalAreaPdf *= sampling.subpdf;
+
+			vec3 nextDir = normalize(sampling.dir);
 
 			ray = aten::ray(rec.p + nextDir * AT_MATH_EPSILON, nextDir);
 
@@ -232,7 +234,7 @@ namespace aten
 		auto pdfOnLight = std::get<2>(res);
 
 		// 確率密度の積を保持（面積測度に関する確率密度）.
-		real totalAreaPdf = pdfOnLight;
+		double totalAreaPdf = pdfOnLight;
 
 		// 光源上に生成された頂点を頂点リストに追加.
 		vs.push_back(Vertex(
@@ -259,76 +261,82 @@ namespace aten
 
 		ray ray = aten::ray(posOnLight + dir * AT_MATH_EPSILON, dir);
 
-		while (depth < m_maxDepth) {
+		//while (depth < m_maxDepth) {
+		for (;;) {
 			hitrecord rec;
 			bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
-			vec3 posOnImageSensor;
-			vec3 posOnLens;
-			vec3 posOnObjectPlane;
-			int pixelx;
-			int pixely;
+			if (!camera->isPinhole()) {
+				// The light will never hit to the pinhole camera.
+				// The pihnole camera lens is tooooooo small.
 
-			// レンズと交差判定.
-			auto lens_t = camera->hitOnLens(
-				ray,
-				posOnLens,
-				posOnObjectPlane,
-				posOnImageSensor,
-				pixelx, pixely);
-			
-			if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
-				// レイがレンズにヒット＆イメージセンサにヒット.
+				vec3 posOnImageSensor;
+				vec3 posOnLens;
+				vec3 posOnObjectPlane;
+				int pixelx;
+				int pixely;
 
-				pixelx = aten::clamp(pixelx, 0, m_width - 1);
-				pixelx = aten::clamp(pixelx, 0, m_height - 1);
-
-				vec3 dir = ray.org - posOnLens;
-				const real dist2 = dir.squared_length();
-				dir.normalize();
-
-				const vec3& camnml = camera->getDir();
-
-				// レンズの上の点のサンプリング確率を計算。
-				{
-					const real c = dot(dir, camnml);
-					const real areaPdf = sampledPdf * c / dist2;
-
-					totalAreaPdf *= areaPdf;
-				}
-
-				// ジオメトリターム
-				{
-					const real c0 = dot(dir, camnml);
-					const real c1 = dot(-dir, prevNormal);
-					const real G = c0 * c1 / dist2;
-
-					throughput *= G;
-				}
-
-				// レンズ上に生成された点を頂点リストに追加（基本的に使わない）.
-				vs.push_back(Vertex(
+				// レンズと交差判定.
+				auto lens_t = camera->hitOnLens(
+					ray,
 					posOnLens,
-					camnml,
-					camnml,
-					ObjectType::Lens,
-					totalAreaPdf,
-					throughput,
-					vec3(0),
-					nullptr,
-					nullptr,
-					real(0), real(0)));
-
-				const real W_dash = camera->getWdash(
-					ray.org,
-					vec3(0, 1, 0),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+					posOnObjectPlane,
 					posOnImageSensor,
-					posOnLens,
-					posOnObjectPlane);
+					pixelx, pixely);
 
-				const vec3 contrib = throughput * W_dash / totalAreaPdf;
+				if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
+					// レイがレンズにヒット＆イメージセンサにヒット.
 
-				return std::move(Result(contrib, pixelx, pixely, true));
+					pixelx = aten::clamp(pixelx, 0, m_width - 1);
+					pixely = aten::clamp(pixely, 0, m_height - 1);
+
+					vec3 dir = ray.org - posOnLens;
+					const real dist2 = dir.squared_length();
+					dir.normalize();
+
+					const vec3& camnml = camera->getDir();
+
+					// レンズの上の点のサンプリング確率を計算。
+					{
+						const real c = dot(dir, camnml);
+						const real areaPdf = sampledPdf * c / dist2;
+
+						totalAreaPdf *= areaPdf;
+					}
+
+					// ジオメトリターム
+					{
+						const real c0 = dot(dir, camnml);
+						const real c1 = dot(-dir, prevNormal);
+						const real G = c0 * c1 / dist2;
+
+						throughput *= G;
+					}
+
+					// レンズ上に生成された点を頂点リストに追加（基本的に使わない）.
+					vs.push_back(Vertex(
+						posOnLens,
+						camnml,
+						camnml,
+						ObjectType::Lens,
+						totalAreaPdf,
+						throughput,
+						vec3(0),
+						nullptr,
+						nullptr,
+						0, 0));
+
+					const real W_dash = camera->getWdash(
+						ray.org,
+						vec3(0, 1, 0),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+						posOnImageSensor,
+						posOnLens,
+						posOnObjectPlane);
+
+					const vec3 contrib = throughput * W_dash / totalAreaPdf;
+
+					return std::move(Result(contrib, pixelx, pixely, true));
+				}
 			}
 
 			if (!isHit) {
@@ -371,7 +379,22 @@ namespace aten
 				throughput = G * throughput;
 			}
 
-			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
+			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v, true);
+
+			sampledPdf = sampling.pdf;
+			auto sampledBsdf = sampling.bsdf;
+
+			if (rec.mtrl->isSingular()) {
+				// For canceling probabaility to select reflection or rafraction.
+				sampledBsdf *= sampling.subpdf;
+
+				// For canceling cosine term.
+				auto costerm = dot(normalize(toNextVtx), orienting_normal);
+				sampledBsdf /= costerm;
+			}
+			else if (rec.mtrl->isEmissive()) {
+				sampledBsdf = vec3(real(0));
+			}
 
 			// 新しい頂点を頂点リストに追加する.
 			vs.push_back(Vertex(
@@ -381,29 +404,18 @@ namespace aten
 				ObjectType::Object,
 				totalAreaPdf,
 				throughput,
-				sampling.bsdf,
+				sampledBsdf,
 				rec.obj,
 				rec.mtrl,
 				rec.u, rec.v));
 
-			sampledPdf = sampling.pdf;
-			throughput *= sampling.bsdf;
-
-			vec3 nextDir = normalize(sampling.dir);
-
-			if (rec.mtrl->isSingular()) {
-				// For canceling cosine term.
-				auto costerm = dot(normalize(toNextVtx), orienting_normal);
-				throughput /= costerm;
-
-				// Just only for refraction.
-				// Cancel probability to select reflection or refraction.
-				throughput *= sampling.subpdf;
-			}
+			throughput *= sampledBsdf;
 
 			// refractionの反射、屈折の確率を掛け合わせる.
 			// refraction以外では 1 なので影響はない.
 			totalAreaPdf *= sampling.subpdf;
+
+			vec3 nextDir = normalize(sampling.dir);
 
 			ray = aten::ray(rec.p + nextDir * AT_MATH_EPSILON, nextDir);
 
@@ -445,6 +457,13 @@ namespace aten
 			// レンズ上の点からシーン上の点をサンプリングするときの面積測度に関する確率密度を計算.
 			// イメージセンサ上の点のサンプリング確率密度を元に変換する.
 
+			if (camera->isPinhole()) {
+				// TODO
+				// I don't understand why.
+				// But, it seems that the rendering result is correct...
+				return real(1);
+			}
+
 			// シーン上の点からレンズに入るレイ.
 			ray r(nextVtx.pos, -normalizedTo);
 
@@ -463,9 +482,14 @@ namespace aten
 			if (lens_t > AT_MATH_EPSILON) {
 				// レイがレンズにヒット＆イメージセンサにヒット.
 
+				real imagesensorWidth = camera->getImageSensorWidth();
+				real imagesensorHeight = camera->getImageSensorHeight();
+				real pdfImage = real(1) / (imagesensorWidth * imagesensorHeight);
+
 				// イメージセンサ上のサンプリング確率密度を計算.
 				// イメージセンサの面積測度に関する確率密度をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換されている.
-				const real imageSensorAreaPdf = camera->getPdfImageSensorArea(
+				const real imageSensorAreaPdf = camera->convertImageSensorPdfToScenePdf(
+					pdfImage,
 					nextVtx.pos,
 					nextVtx.orienting_normal,
 					posOnImagesensor,
@@ -697,7 +721,7 @@ namespace aten
 
 				if (eye_end.objType == ObjectType::Lens) {
 					if (camera->isPinhole()) {
-						continue;
+						break;
 					}
 					else {
 						// lightサブパスを直接レンズにつなげる.
@@ -718,7 +742,7 @@ namespace aten
 						{
 							// レイがレンズにヒット＆イメージセンサにヒット.
 							targetX = aten::clamp(px, 0, m_width - 1);
-							targetY = aten::clamp(px, 0, m_height - 1);
+							targetY = aten::clamp(py, 0, m_height - 1);
 
 							const real W_dash = camera->getWdash(
 								rec.p,
@@ -758,14 +782,14 @@ namespace aten
 					}
 				}
 
-				if (light_end.objType == ObjectType::Lens
-					|| light_end.objType == ObjectType::Light)
-				{
+				if (light_end.objType == ObjectType::Lens) {
 					// lightサブパスの端点がレンズだった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
 					// レンズ上はスペキュラとみなす.
-
-					// eyeサブパスの端点が光源（反射率0）だった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
-					// 光源は反射率0を想定している.
+					continue;
+				}
+				else if (light_end.objType == ObjectType::Light) {
+					// 光源の反射率0を仮定しているため、ライトトレーシングの時、最初の頂点以外は光源上に頂点生成されない.
+					// num_light_vertex == 1以外でここに入ってくることは無い.
 				}
 				else {
 					if (light_end.mtrl->isSingular()) {
@@ -858,19 +882,22 @@ namespace aten
 
 			auto time = timer::getSystemTime();
 
+			XorShift rnd(idx * 32);
+
 #if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
 #pragma omp for
 #endif
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
-					std::vector<Result> result;
 
 					for (uint32_t i = 0; i < samples; i++) {
-						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						//Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
 						UniformDistributionSampler sampler(&rnd);
+
+						std::vector<Result> result;
 
 						std::vector<Vertex> eyevs;
 						std::vector<Vertex> lightvs;
@@ -884,8 +911,8 @@ namespace aten
 						}
 #else
 						auto lightNum = scene->lightNum();
-						for (uint32_t i = 0; i < lightNum; i++) {
-							auto light = scene->getLight(i);
+						for (uint32_t n = 0; n < lightNum; n++) {
+							auto light = scene->getLight(n);
 							auto lightRes = genLightPath(lightvs, light, &sampler, scene, camera);
 
 							if (eyeRes.isTerminate) {
@@ -921,30 +948,31 @@ namespace aten
 								lightvs,
 								scene,
 								camera);
-						}
-#endif
-					}
 
 #if 1
-					for (int i = 0; i < (int)result.size(); i++) {
-						const auto& res = result[i];
+							for (int i = 0; i < (int)result.size(); i++) {
+								const auto& res = result[i];
 
-						const int pos = res.y * m_width + res.x;
+								const int pos = res.y * m_width + res.x;
 
-						if (res.isStartFromPixel) {
-							image[idx][pos] += vec4(res.contrib, 1);
-						}
-						else {
-							// 得られたサンプルについて、サンプルが現在の画素（x,y)から発射されたeyeサブパスを含むものだった場合
-							// Ixy のモンテカルロ推定値はsamples[i].valueそのものなので、そのまま足す。その後、下の画像出力時に発射された回数の総計（iteration_per_thread * num_threads)で割る.
-							//
-							// 得られたサンプルについて、現在の画素から発射されたeyeサブパスを含むものではなかった場合（lightサブパスが別の画素(x',y')に到達した場合）は
-							// Ix'y' のモンテカルロ推定値を新しく得たわけだが、この場合、画像全体に対して光源側からサンプルを生成し、たまたまx'y'にヒットしたと考えるため
-							// このようなサンプルについては最終的に光源から発射した回数の総計で割って、画素への寄与とする必要がある.
-							image[idx][pos] += vec4(res.contrib * divPixelProb, 1);
-						}
-					}
+								if (res.isStartFromPixel) {
+									image[idx][pos] += vec4(res.contrib, 1);
+								}
+								else {
+									// 得られたサンプルについて、サンプルが現在の画素（x,y)から発射されたeyeサブパスを含むものだった場合
+									// Ixy のモンテカルロ推定値はsamples[i].valueそのものなので、そのまま足す。その後、下の画像出力時に発射された回数の総計（iteration_per_thread * num_threads)で割る.
+									//
+									// 得られたサンプルについて、現在の画素から発射されたeyeサブパスを含むものではなかった場合（lightサブパスが別の画素(x',y')に到達した場合）は
+									// Ix'y' のモンテカルロ推定値を新しく得たわけだが、この場合、画像全体に対して光源側からサンプルを生成し、たまたまx'y'にヒットしたと考えるため
+									// このようなサンプルについては最終的に光源から発射した回数の総計で割って、画素への寄与とする必要がある.
+									image[idx][pos] += vec4(res.contrib * divPixelProb, 1);
+								}
+							}
 #endif
+
+						}
+#endif
+					}
 				}
 			}
 		}
@@ -957,7 +985,7 @@ namespace aten
 				for (int x = 0; x < m_width; x++) {
 					int pos = y * m_width + x;
 
-					auto clr = img[pos] / (real)samples;
+					auto clr = img[pos] / samples;
 					clr.w = 1;
 
 					tmp[pos] += clr;

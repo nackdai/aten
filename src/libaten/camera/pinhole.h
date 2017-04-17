@@ -35,7 +35,8 @@ namespace aten {
 			const ray& ray,
 			int& px, int& py) const override final;
 
-		virtual real getPdfImageSensorArea(
+		virtual real convertImageSensorPdfToScenePdf(
+			real pdfImage,	// Not used.
 			const vec3& hitPoint,
 			const vec3& hitpointNml,
 			const vec3& posOnImageSensor,

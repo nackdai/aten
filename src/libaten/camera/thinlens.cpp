@@ -182,7 +182,8 @@ namespace aten {
 	}
 
 	// イメージセンサ上のサンプリング確率密度（イメージセンサの面積測度に関する確率密度）をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換する.
-	real ThinLensCamera::getPdfImageSensorArea(
+	real ThinLensCamera::convertImageSensorPdfToScenePdf(
+		real pdfImage,
 		const vec3& hitPoint,
 		const vec3& hitpointNml,
 		const vec3& posOnImageSensor,
@@ -220,10 +221,10 @@ namespace aten {
 		// (cosΘ'/cosΘ'')
 		auto c2 = (dot(normalize(-x0_x1), hitpointNml) / dot(normalize(x0_x1), normalize(m_imagesensor.dir)));
 
-		// ピクセル内の一点をサンプリングする確率密度関数（面積測度）
-		auto pdfOnImageSensor = real(1.0) / (m_pixelWidth * m_pixelHeight);
+		// イメージセンサの面積測度に関する確率密度.
+		//auto pdfOnImageSensor = 1.0 / (m_imagesensor.width * m_imagesensor.height);
 
-		auto pdf = pdfOnImageSensor * ba2 * r2 * c2;
+		auto pdf = pdfImage * ba2 * r2 * c2;
 
 		return pdf;
 	}

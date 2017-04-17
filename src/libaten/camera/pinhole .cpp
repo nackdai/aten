@@ -84,7 +84,8 @@ namespace aten {
 		py = (int)v;
 	}
 
-	real PinholeCamera::getPdfImageSensorArea(
+	real PinholeCamera::convertImageSensorPdfToScenePdf(
+		real pdfImage,	// Not used.
 		const vec3& hitPoint,
 		const vec3& hitpointNml,
 		const vec3& posOnImageSensor,

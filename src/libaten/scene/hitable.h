@@ -51,6 +51,9 @@ namespace aten {
 			return std::move(vec3());
 		}
 
+		// 0 : pos
+		// 1 : normal
+		// 2 : pdf
 		using SamplingPosNormalPdf = std::tuple<vec3, vec3, real>;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const

@@ -26,7 +26,7 @@ namespace aten {
 			LightSampleResult result;
 
 			result.pdf = real(1);
-			result.dir = AT_MATH_INF * 0.5 * -m_dir;
+			result.dir = -normalize(m_dir);
 			result.nml = vec3();	// Not used...
 
 			result.le = m_le;

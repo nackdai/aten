@@ -9,11 +9,11 @@
 #define AT_MATH_PI_HALF	aten::real(AT_MATH_PI * 0.5)
 
 #ifdef TYPE_DOUBLE
-	#define AT_MATH_INF         (1e64)
-	#define AT_MATH_EPSILON     (1e-6)
+	#define AT_MATH_INF         DBL_MAX
+	#define AT_MATH_EPSILON     DBL_EPSILON
 #else
-	#define AT_MATH_INF         (float)(1e32)
-	#define AT_MATH_EPSILON     (float)(1e-6)
+	#define AT_MATH_INF         FLT_MAX
+	#define AT_MATH_EPSILON     FLT_EPSILON
 #endif
 
 #define Deg2Rad(d)   (AT_MATH_PI * (d) / aten::real(180.0))
@@ -165,4 +165,32 @@ namespace aten {
 		// x(1-a)+y*a
 		return x * (1 - a) + y * a;
 	}
+
+	// Neary Equal.
+#if 0
+	// https://github.com/scijs/almost-equal/blob/master/almost_equal.js
+	inline bool isClose(real a, real b, real relativeError = AT_MATH_EPSILON, real absoluteError = AT_MATH_EPSILON)
+	{
+		auto d = abs(a - b);
+
+
+		if (d <= absoluteError) {
+			return true;
+		}
+
+		if (d <= relativeError * std::min(abs(a), abs(b))) {
+			return true;
+		}
+
+		return false;
+	}
+#else
+	// http://stackoverflow.com/questions/5595425/what-is-the-best-way-to-compare-floats-for-almost-equality-in-python
+	inline bool isClose(real a, real b, real relativeError = AT_MATH_EPSILON, real absoluteError = real(0))
+	{
+		auto d = abs(a - b);
+		bool result = d <= std::max(relativeError * std::max(abs(a), abs(b)), absoluteError);
+		return result;
+	}
+#endif
 }

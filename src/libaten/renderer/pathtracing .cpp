@@ -445,8 +445,6 @@ namespace aten
 				if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 					// Shadow ray hits the light.
 					auto cosShadow = dot(orienting_normal, dirToLight);
-					auto dist2 = sampleres.dir.squared_length();
-					auto dist = aten::sqrt(dist2);
 
 					auto bsdf = path.rec.mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
@@ -472,6 +470,7 @@ namespace aten
 						auto cosLight = dot(nmlLight, -dirToLight);
 
 						if (cosShadow >= 0 && cosLight >= 0) {
+							auto dist2 = sampleres.dir.squared_length();
 							auto G = cosShadow * cosLight / dist2;
 
 							if (pdfb > real(0) && pdfLight > real(0)) {

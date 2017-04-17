@@ -46,6 +46,20 @@ namespace aten
 		MaterialParameter() {}
 	};
 
+	struct MaterialSampling {
+		vec3 dir;
+		vec3 bsdf;
+		real pdf{ real(0) };
+		real fresnel{ real(1) };
+
+		real subpdf{ real(1) };
+
+		MaterialSampling() {}
+		MaterialSampling(const vec3& d, const vec3& b, real p)
+			: dir(d), bsdf(b), pdf(p)
+		{}
+	};
+
 	class material {
 		friend class LayeredBSDF;
 
@@ -143,21 +157,7 @@ namespace aten
 			const vec3& wo,
 			real u, real v) const = 0;
 
-		struct sampling {
-			vec3 dir;
-			vec3 bsdf;
-			real pdf{ real(0) };
-			real fresnel{ real(1) };
-
-			real subpdf{ real(1) };
-
-			sampling() {}
-			sampling(const vec3& d, const vec3& b, real p)
-				: dir(d), bsdf(b), pdf(p)
-			{}
-		};
-
-		virtual sampling sample(
+		virtual MaterialSampling sample(
 			const ray& ray,
 			const vec3& normal,
 			const hitrecord& hitrec,

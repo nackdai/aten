@@ -78,7 +78,7 @@ namespace aten
 		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
-	material::sampling refraction::sample(
+	MaterialSampling refraction::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
@@ -98,7 +98,7 @@ namespace aten
 		return std::move(ret);
 	}
 
-	material::sampling refraction::sample(
+	MaterialSampling refraction::sample(
 		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
@@ -107,7 +107,7 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		// ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó

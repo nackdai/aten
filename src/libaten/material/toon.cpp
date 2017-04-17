@@ -27,7 +27,7 @@ namespace aten
 		return std::move(ret);
 	}
 
-	material::sampling toon::sample(
+	MaterialSampling toon::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
@@ -35,7 +35,7 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		const vec3& in = ray.dir;
 

@@ -81,7 +81,7 @@ namespace aten
 		real roughness)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
 
 		auto costheta = dot(wh, n);
 
@@ -111,7 +111,7 @@ namespace aten
 		const vec3& wo)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-brdf/
 
 		auto wh = normalize(-wi + wo);
 
@@ -133,7 +133,7 @@ namespace aten
 		sampler* sampler)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
 
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
@@ -240,7 +240,7 @@ namespace aten
 		return std::move(bsdf);
 	}
 
-	material::sampling MicrofacetBeckman::sample(
+	MaterialSampling MicrofacetBeckman::sample(
 		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
@@ -249,7 +249,7 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		auto roughness = material::sampleTexture(
 			(texture*)param.roughnessMap.tex,
@@ -275,7 +275,7 @@ namespace aten
 		return std::move(ret);
 	}
 
-	material::sampling MicrofacetBeckman::sample(
+	MaterialSampling MicrofacetBeckman::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,

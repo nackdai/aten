@@ -61,7 +61,7 @@ namespace aten {
 		return std::move(emissive::bsdf(m_param, normal, wi, wo, u, v));
 	}
 
-	material::sampling emissive::sample(
+	MaterialSampling emissive::sample(
 		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
@@ -70,7 +70,7 @@ namespace aten {
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
 		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
@@ -79,7 +79,7 @@ namespace aten {
 		return std::move(ret);
 	}
 
-	material::sampling emissive::sample(
+	MaterialSampling emissive::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,

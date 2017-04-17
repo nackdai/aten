@@ -4,7 +4,7 @@
 namespace aten
 {
 	// NOTE
-	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
+	// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
 
 	real MicrofacetBlinn::pdf(
 		const MaterialParameter& param,
@@ -57,7 +57,7 @@ namespace aten
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
 		// Lobe Distribution Sampling
 
-		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
 		// Sampling Blinn
 
 		auto r1 = sampler->nextSample();
@@ -215,7 +215,7 @@ namespace aten
 		return std::move(bsdf);
 	}
 
-	material::sampling MicrofacetBlinn::sample(
+	MaterialSampling MicrofacetBlinn::sample(
 		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
@@ -224,7 +224,7 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
 
@@ -265,7 +265,7 @@ namespace aten
 		return std::move(ret);
 	}
 
-	material::sampling MicrofacetBlinn::sample(
+	MaterialSampling MicrofacetBlinn::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,

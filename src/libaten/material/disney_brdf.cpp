@@ -342,7 +342,7 @@ namespace aten
 #endif
 	}
 
-	material::sampling DisneyBRDF::sample(
+	MaterialSampling DisneyBRDF::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
@@ -358,7 +358,7 @@ namespace aten
 		const vec3 X = getOrthoVector(normal);
 		const vec3 Y = normalize(cross(normal, X));
 
-		sampling ret;
+		MaterialSampling ret;
 
 		ret.dir = sampleDirection(V, N, X, Y, u, v, sampler);
 

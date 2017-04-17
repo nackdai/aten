@@ -121,7 +121,7 @@ namespace aten {
 		return std::move(ret);
 	}
 
-	material::sampling lambert::sample(
+	MaterialSampling lambert::sample(
 		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
@@ -130,7 +130,7 @@ namespace aten {
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
 		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
@@ -139,7 +139,7 @@ namespace aten {
 		return std::move(ret);
 	}
 
-	material::sampling lambert::sample(
+	MaterialSampling lambert::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,

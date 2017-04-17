@@ -46,7 +46,7 @@ namespace aten
 			const vec3& wo,
 			real u, real v) const override final;
 
-		virtual sampling sample(
+		virtual MaterialSampling sample(
 			const ray& ray,
 			const vec3& normal,
 			const hitrecord& hitrec,

@@ -81,7 +81,7 @@ namespace aten
 		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
-	material::sampling specular::sample(
+	MaterialSampling specular::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
@@ -101,7 +101,7 @@ namespace aten
 		return std::move(ret);
 	}
 
-	material::sampling specular::sample(
+	MaterialSampling specular::sample(
 		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
@@ -110,7 +110,7 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
 		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);

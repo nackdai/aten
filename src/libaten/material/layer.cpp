@@ -81,7 +81,7 @@ namespace aten
 		m_layer.push_back(mtrl);
 	}
 
-	material::sampling LayeredBSDF::sample(
+	MaterialSampling LayeredBSDF::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
@@ -89,7 +89,7 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		sampling ret;
+		MaterialSampling ret;
 
 		auto num = m_layer.size();
 

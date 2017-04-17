@@ -29,15 +29,15 @@ namespace aten {
 	public:
 		void setEnvMap(envmap* envmap)
 		{
-			if (m_envmap != envmap) {
-				m_envmap = envmap;
+			if (m_param.envmap.ptr != envmap) {
+				m_param.envmap.ptr = envmap;
 				preCompute();
 			}
 		}
 
-		envmap* getEnvMap()
+		const envmap* getEnvMap() const
 		{
-			return m_envmap;
+			return (envmap*)m_param.envmap.ptr;
 		}
 
 		virtual real samplePdf(const ray& r) const override final;
@@ -59,18 +59,10 @@ namespace aten {
 			return true;
 		}
 
-		virtual void serialize(LightParameter& param) const override final
-		{
-			Light::serialize(this, param);
-			
-			// TODO
-		}
-
 	private:
 		void preCompute();
 
 	private:
-		envmap* m_envmap{ nullptr };
 		real m_avgIllum{ real(0) };
 
 		// v•ûŒü‚Ìcdf(cumulative distribution function = —İÏ•ª•zŠÖ” = sum of pdf).

@@ -10,8 +10,8 @@ namespace aten {
 			const vec3& dir,
 			const vec3& le)
 		{
-			m_dir = normalize(dir);
-			m_le = le;
+			m_param.dir = normalize(dir);
+			m_param.le = le;
 		}
 
 		DirectionalLight(Values& val)
@@ -26,12 +26,12 @@ namespace aten {
 			LightSampleResult result;
 
 			result.pdf = real(1);
-			result.dir = -normalize(m_dir);
+			result.dir = -normalize(m_param.dir);
 			result.nml = vec3();	// Not used...
 
-			result.le = m_le;
+			result.le = m_param.le;
 			result.intensity = real(1);
-			result.finalColor = m_le;
+			result.finalColor = m_param.le;
 
 			return std::move(result);
 		}
@@ -39,11 +39,6 @@ namespace aten {
 		virtual bool isInifinite() const override final
 		{
 			return true;
-		}
-
-		virtual void serialize(LightParameter& param) const override final
-		{
-			Light::serialize(this, param);
 		}
 	};
 }

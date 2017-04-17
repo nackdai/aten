@@ -8,15 +8,15 @@ namespace aten {
 		AreaLight() {}
 		AreaLight(hitable* obj, const vec3& le)
 		{
-			m_object = obj;
-			m_le = le;
+			m_param.object.ptr = obj;
+			m_param.le = le;
 		}
 
 		AreaLight(Values& val)
 			: Light(val)
 		{
-			m_object = (hitable*)val.get("object", m_object);
-			m_le = val.get("color", m_le);
+			m_param.object.ptr = (hitable*)val.get("object", m_param.object.ptr);
+			m_param.le = val.get("color", m_param.le);
 		}
 
 		virtual ~AreaLight() {}
@@ -24,13 +24,17 @@ namespace aten {
 	public:
 		virtual real samplePdf(const ray& r) const override final
 		{
-			hitrecord rec;
-			bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
-
 			real pdf = 0;
 
-			if (isHit) {
-				pdf = 1 / rec.area;
+			auto obj = getLightObject();
+
+			if (obj) {
+				hitrecord rec;
+				bool isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+
+				if (isHit) {
+					pdf = 1 / rec.area;
+				}
 			}
 
 			return pdf;
@@ -40,15 +44,17 @@ namespace aten {
 		{
 			LightSampleResult result;
 
-			if (m_object) {
+			auto obj = getLightObject();
+
+			if (obj) {
 				hitrecord rec;
 
 				vec3 pos;
 				if (sampler) {
-					pos = m_object->getRandomPosOn(sampler);
+					pos = obj->getRandomPosOn(sampler);
 				}
 				else {
-					pos = m_object->getBoundingbox().getCenter();
+					pos = obj->getBoundingbox().getCenter();
 				}
 
 				auto dir = pos - org;
@@ -58,7 +64,7 @@ namespace aten {
 					org,
 					normalize(dir));
 
-				bool isHit = m_object->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+				bool isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
 				if (isHit) {
 					/*if (aten::abs(dist - rec.t) < AT_MATH_EPSILON)*/ {
@@ -67,11 +73,11 @@ namespace aten {
 						result.dir = rec.p - org;
 						result.nml = rec.normal;
 						
-						result.le = m_le;
+						result.le = m_param.le;
 						result.intensity = 1;
-						result.finalColor = m_le;
+						result.finalColor = m_param.le;
 
-						result.obj = m_object;
+						result.obj = const_cast<hitable*>(obj);
 
 					}
 				}
@@ -87,7 +93,7 @@ namespace aten {
 
 		virtual const hitable* getLightObject() const override final
 		{
-			return m_object;
+			return (hitable*)m_param.object.ptr;
 		}
 
 		virtual bool hit(
@@ -97,8 +103,9 @@ namespace aten {
 		{
 			bool isHit = false;
 
-			if (m_object) {
-				isHit = m_object->hit(r, t_min, t_max, rec);
+			if (m_param.object.ptr) {
+				auto obj = getLightObject();
+				isHit = obj->hit(r, t_min, t_max, rec);
 			}
 
 			return isHit;
@@ -106,8 +113,9 @@ namespace aten {
 
 		virtual aabb getBoundingbox() const override final
 		{
-			if (m_object) {
-				auto box = m_object->getBoundingbox();
+			if (m_param.object.ptr) {
+				auto obj = getLightObject();
+				auto box = obj->getBoundingbox();
 				return std::move(box);
 			}
 
@@ -116,17 +124,11 @@ namespace aten {
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
 		{
-			return m_object->getSamplePosNormalPdf(sampler);
+			if (m_param.object.ptr) {
+				auto obj = getLightObject();
+				return obj->getSamplePosNormalPdf(sampler);
+			}
+			return SamplingPosNormalPdf(vec3(0), vec3(1), real(0));
 		}
-
-		virtual void serialize(LightParameter& param) const override final
-		{
-			Light::serialize(this, param);
-
-			// TODO
-		}
-
-	private:
-		hitable* m_object{ nullptr };
 	};
 }

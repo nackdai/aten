@@ -10,10 +10,11 @@
 namespace aten {
 	void ImageBasedLight::preCompute()
 	{
-		AT_ASSERT(m_envmap);
+		auto envmap = getEnvMap();
+		AT_ASSERT(envmap);
 
-		auto width = m_envmap->getTexture()->width();
-		auto height = m_envmap->getTexture()->height();
+		auto width = envmap->getTexture()->width();
+		auto height = envmap->getTexture()->height();
 
 		m_avgIllum = 0;
 
@@ -58,7 +59,7 @@ namespace aten {
 				real u = (real)(x + 0.5) / width;
 				real v = (real)(y + 0.5) / height;
 
-				auto clr = m_envmap->sample(u, v);
+				auto clr = envmap->sample(u, v);
 				const auto illum = color::luminance(clr);
 
 				m_avgIllum += illum * scale;
@@ -121,7 +122,9 @@ namespace aten {
 
 	real ImageBasedLight::samplePdf(const ray& r) const
 	{
-		auto clr = m_envmap->sample(r);
+		auto envmap = getEnvMap();
+
+		auto clr = envmap->sample(r);
 		auto illum = color::luminance(clr);
 
 		auto pdf = illum / m_avgIllum;
@@ -203,6 +206,8 @@ namespace aten {
 
 	LightSampleResult ImageBasedLight::sample(const vec3& org, sampler* sampler) const
 	{
+		auto envmap = getEnvMap();
+
 		const auto r1 = sampler->nextSample();
 		const auto r2 = sampler->nextSample();
 
@@ -212,8 +217,8 @@ namespace aten {
 		int y = samplePdfAndCdf(r1, m_cdfV, pdfV, cdfV);
 		int x = samplePdfAndCdf(r2, m_cdfU[y], pdfU, cdfU);
 
-		auto width = m_envmap->getTexture()->width();
-		auto height = m_envmap->getTexture()->height();
+		auto width = envmap->getTexture()->width();
+		auto height = envmap->getTexture()->height();
 
 		real u = (real)(x + 0.5) / width;
 		real v = (real)(y + 0.5) / height;
@@ -229,7 +234,7 @@ namespace aten {
 		// u, v -> direction.
 		result.dir = envmap::convertUVToDirection(u, v);
 
-		result.le = m_envmap->sample(u, v);
+		result.le = envmap->sample(u, v);
 		result.intensity = real(1);
 		result.finalColor = result.le * result.intensity;
 

@@ -19,22 +19,38 @@ namespace aten {
 	};
 
 	struct LightParameter {
-		float pos[3];
-		float dir[3];
-		float le[3];
+		union {
+			vec3 pos;
+			real posArray[3];
+		};
+		union {
+			vec3 dir;
+			real dirArray[3];
+		};
+		union {
+			vec3 le;
+			real leArray[3];
+		};
 
 		// For pointlight, spotlight.
-		float constAttn{ 1 };
-		float linearAttn{ 0 };
-		float expAttn{ 0 };
+		real constAttn{ 1 };
+		real linearAttn{ 0 };
+		real expAttn{ 0 };
 
 		// For spotlight.
-		float innerAngle;
-		float outerAngle;
-		float falloff{ 0 };
+		real innerAngle;
+		real outerAngle;
+		real falloff{ 0 };
 
-		int object{ -1 };
-		int envmap{ -1 };
+		union UnionIdxPtr {
+			int idx;
+			void* ptr{ nullptr };
+		};
+
+		UnionIdxPtr object;
+		UnionIdxPtr envmap;
+
+		LightParameter() {}
 	};
 
 	class Light : public hitable {
@@ -43,9 +59,9 @@ namespace aten {
 
 		Light(Values& val)
 		{
-			m_pos = val.get("pos", m_pos);
-			m_dir = val.get("dir", m_pos);
-			m_le = val.get("le", m_pos);
+			m_param.pos = val.get("pos", m_param.pos);
+			m_param.dir = val.get("dir", m_param.dir);
+			m_param.le = val.get("le", m_param.le);
 		}
 
 		virtual ~Light() {}
@@ -53,32 +69,32 @@ namespace aten {
 	public:
 		void setPos(const vec3& pos)
 		{
-			m_pos = pos;
+			m_param.pos = pos;
 		}
 
 		void setDir(const vec3& dir)
 		{
-			m_dir = normalize(dir);
+			m_param.dir = normalize(dir);
 		}
 
 		void setLe(const vec3& le)
 		{
-			m_le = le;
+			m_param.le = le;
 		}
 
 		const vec3& getPos() const
 		{
-			return m_pos;
+			return m_param.pos;
 		}
 
 		const vec3& getDir() const
 		{
-			return m_dir;
+			return m_param.dir;
 		}
 
 		const vec3& getLe() const
 		{
-			return m_le;
+			return m_param.le;
 		}
 
 		virtual real samplePdf(const ray& r) const
@@ -127,14 +143,7 @@ namespace aten {
 			return std::move(aabb());
 		}
 
-		virtual void serialize(LightParameter& param) const = 0;
-
 	protected:
-		static void serialize(const Light* light, LightParameter& param);
-
-	protected:
-		vec3 m_pos;
-		vec3 m_dir;
-		vec3 m_le;
+		LightParameter m_param;
 	};
 }

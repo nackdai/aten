@@ -11,7 +11,7 @@ namespace aten
 {
 	struct hitrecord;
 
-	struct MaterialParam {
+	struct MaterialParameter {
 		// サーフェイスカラー，通常テクスチャマップによって供給される.
 		union {
 			vec3 baseColor;
@@ -32,22 +32,18 @@ namespace aten
 		float clearcoat{ 0.0f };			// 第二の特別な目的のスペキュラーローブ.
 		float clearcoatGloss{ 0.0f };		// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
-		union {								
-			int albedoMapIdx;
-			void* albedoMap{ nullptr };
+		union UnionIdxMap {
+			int idx;
+			void* tex{ nullptr };
 		};
+	
+		UnionIdxMap albedoMap;
+		UnionIdxMap normalMap;
+		UnionIdxMap roughnessMap;
 
-		union {
-			int normalMapIdx;
-			void* normalMap{ nullptr };
-		};
+		bool isIdealRefraction{ false };
 
-		union {
-			int roughnessMapIdx;
-			void* roughnessMap{ nullptr };
-		};
-
-		MaterialParam() {}
+		MaterialParameter() {}
 	};
 
 	class material {
@@ -66,15 +62,15 @@ namespace aten
 		{
 			m_param.baseColor = clr;
 			m_param.ior = ior;
-			m_param.albedoMap = albedoMap;
-			m_param.normalMap = normalMap;
+			m_param.albedoMap.tex = albedoMap;
+			m_param.normalMap.tex = normalMap;
 		}
 		material(Values& val)
 		{
 			m_param.baseColor = val.get("color", m_param.baseColor);
 			m_param.ior = val.get("ior", m_param.ior);
-			m_param.albedoMap = (texture*)val.get("albedomap", (void*)m_param.albedoMap);
-			m_param.normalMap = (texture*)val.get("normalmap", (void*)m_param.normalMap);
+			m_param.albedoMap.tex = (texture*)val.get("albedomap", (void*)m_param.albedoMap.tex);
+			m_param.normalMap.tex = (texture*)val.get("normalmap", (void*)m_param.normalMap.tex);
 		}
 
 	public:
@@ -115,11 +111,7 @@ namespace aten
 
 		virtual vec3 sampleAlbedoMap(real u, real v) const
 		{
-			vec3 albedo(1, 1, 1);
-			if (m_param.albedoMap) {
-				albedo = ((texture*)m_param.albedoMap)->at(u, v);
-			}
-			return std::move(albedo);
+			return std::move(sampleTexture((const texture*)m_param.albedoMap.tex, u, v, real(1)));
 		}
 
 		virtual void applyNormalMap(
@@ -178,14 +170,18 @@ namespace aten
 			return m_param.ior;
 		}
 
-	protected:
-		static vec3 sampleTexture(texture* tex, real u, real v, real defaultValue)
+		const MaterialParameter& param() const
+		{
+			return m_param;
+		}
+
+		static vec3 sampleTexture(const texture* tex, real u, real v, real defaultValue)
 		{
 			auto ret = sampleTexture(tex, u, v, vec3(defaultValue));
 			return std::move(ret);
 		}
 
-		static vec3 sampleTexture(texture* tex, real u, real v, const vec3& defaultValue)
+		static vec3 sampleTexture(const texture* tex, real u, real v, const vec3& defaultValue)
 		{
 			vec3 ret = defaultValue;
 			if (tex) {
@@ -194,12 +190,10 @@ namespace aten
 			return std::move(ret);
 		}
 
-		static void serialize(const material* mtrl, MaterialParam& param);
-
 	protected:
 		uint32_t m_id{ 0 };
 
-		MaterialParam m_param;
+		MaterialParameter m_param;
 	};
 
 	class Light;

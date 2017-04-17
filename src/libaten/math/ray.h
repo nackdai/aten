@@ -4,9 +4,8 @@
 
 namespace aten
 {
-	class ray
+	struct ray
 	{
-	public:
 		ray() {}
 		ray(const vec3& o, const vec3& d)
 		{

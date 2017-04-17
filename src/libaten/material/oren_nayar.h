@@ -16,7 +16,7 @@ namespace aten
 			texture* roughnessMap = nullptr)
 			: material(albedo, 1, albedoMap, normalMap)
 		{
-			m_param.roughnessMap = roughnessMap;
+			m_param.roughnessMap.tex = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
@@ -26,12 +26,42 @@ namespace aten
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
 
-			m_param.roughnessMap = val.get("roughnessmap", m_param.roughnessMap);
+			m_param.roughnessMap.tex = val.get("roughnessmap", m_param.roughnessMap.tex);
 		}
 
 		virtual ~OrenNayar() {}
 
 	public:
+		static real pdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static vec3 sampleDirection(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			real u, real v,
+			sampler* sampler);
+
+		static vec3 bsdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static sampling sample(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const hitrecord& hitrec,
+			sampler* sampler,
+			real u, real v,
+			bool isLightPath = false);
+
 		virtual bool isGlossy() const override final
 		{
 			return false;
@@ -71,8 +101,5 @@ namespace aten
 		{
 			return real(1);
 		}
-
-	private:
-		inline real sampleRoughness(real u, real v) const;
 	};
 }

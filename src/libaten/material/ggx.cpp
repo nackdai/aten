@@ -2,10 +2,20 @@
 
 namespace aten
 {
-	real MicrofacetGGX::sampleRoughness(real u, real v) const
+	real MicrofacetGGX::pdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
 	{
-		vec3 roughness = material::sampleTexture((texture*)m_param.roughnessMap, u, v, m_param.roughness);
-		return roughness.r;
+		auto roughness = material::sampleTexture(
+			(texture*)param.roughnessMap.tex,
+			u, v,
+			param.roughness);
+
+		auto ret = pdf(roughness.r, normal, wi, wo);
+		return ret;
 	}
 
 	real MicrofacetGGX::pdf(
@@ -14,9 +24,24 @@ namespace aten
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto roughness = sampleRoughness(u, v);
-		auto ret = pdf(roughness, normal, wi, wo);
-		return ret;
+		return pdf(m_param, normal, wi, wo, u, v);
+	}
+
+	vec3 MicrofacetGGX::sampleDirection(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		real u, real v,
+		sampler* sampler)
+	{
+		auto roughness = material::sampleTexture(
+			(texture*)param.roughnessMap.tex,
+			u, v,
+			param.roughness);
+
+		vec3 dir = sampleDirection(roughness.r, normal, wi, sampler);
+
+		return std::move(dir);
 	}
 
 	vec3 MicrofacetGGX::sampleDirection(
@@ -25,11 +50,29 @@ namespace aten
 		real u, real v,
 		sampler* sampler) const
 	{
-		const vec3& in = ray.dir;
+		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+	}
 
-		auto roughness = sampleRoughness(u, v);
-		vec3 dir = sampleDirection(roughness, in, normal, sampler);
-		return std::move(dir);
+	vec3 MicrofacetGGX::bsdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
+	{
+		auto roughness = material::sampleTexture(
+			(texture*)param.roughnessMap.tex,
+			u, v,
+			param.roughness);
+
+		auto albedo = param.baseColor;
+		albedo *= material::sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+
+		real fresnel = 1;
+		real ior = param.ior;
+
+		vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
+		return std::move(ret);
 	}
 
 	vec3 MicrofacetGGX::bsdf(
@@ -38,16 +81,13 @@ namespace aten
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto roughness = sampleRoughness(u, v);
-		real fresnel = 1;
-		vec3 ret = bsdf(roughness, fresnel, normal, wi, wo, u, v);
-		return std::move(ret);
+		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
 	// NOTE
 	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
-	real sampleGGX_D(
+	static real sampleGGX_D(
 		const vec3& wh,	// half
 		const vec3& n,	// normal
 		real roughness)
@@ -79,7 +119,7 @@ namespace aten
 		return D;
 	}
 
-	real computeGGXSmithG1(real roughness, const vec3& v, const vec3& n)
+	static real computeGGXSmithG1(real roughness, const vec3& v, const vec3& n)
 	{
 		// NOTE
 		// http://computergraphics.stackexchange.com/questions/2489/correct-form-of-the-ggx-geometry-term
@@ -103,7 +143,7 @@ namespace aten
 		real roughness,
 		const vec3& normal, 
 		const vec3& wi,
-		const vec3& wo) const
+		const vec3& wo)
 	{
 		// NOTE
 		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
@@ -125,7 +165,7 @@ namespace aten
 		real roughness,
 		const vec3& in,
 		const vec3& normal,
-		sampler* sampler) const
+		sampler* sampler)
 	{
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
@@ -157,17 +197,19 @@ namespace aten
 	}
 
 	vec3 MicrofacetGGX::bsdf(
-		real roughness,
+		const vec3& albedo,
+		const real roughness,
+		const real ior,
 		real& fresnel,
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v)
 	{
 		// ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó
 
-		real nt = ior();	// •¨‘Ì“à•”‚Ì‹üÜ—¦.
+		real nt = ior;		// •¨‘Ì“à•”‚Ì‹üÜ—¦.
 
 		vec3 V = -wi;
 		vec3 L = wo;
@@ -192,9 +234,6 @@ namespace aten
 
 			G = G1_lh * G1_vh;
 		}
-
-		auto albedo = color();
-		albedo *= sampleAlbedoMap(u, v);
 
 		real F(1);
 		{
@@ -222,6 +261,37 @@ namespace aten
 	}
 
 	material::sampling MicrofacetGGX::sample(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const hitrecord& hitrec,
+		sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/)
+	{
+		sampling ret;
+
+		auto roughness = material::sampleTexture(
+			(texture*)param.roughnessMap.tex,
+			u, v,
+			param.roughness);
+
+		ret.dir = sampleDirection(roughness.r, wi, normal, sampler);
+		ret.pdf = pdf(roughness.r, normal, wi, ret.dir);
+
+		auto albedo = param.baseColor;
+		albedo *= material::sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+
+		real fresnel = 1;
+		real ior = param.ior;
+
+		ret.bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, ret.dir, u, v);
+		ret.fresnel = fresnel;
+
+		return std::move(ret);
+	}
+
+	material::sampling MicrofacetGGX::sample(
 		const ray& ray,
 		const vec3& normal,
 		const hitrecord& hitrec,
@@ -229,18 +299,14 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		sampling ret;
-
-		const vec3& in = ray.dir;
-
-		auto roughness = sampleRoughness(u, v);
-
-		ret.dir = sampleDirection(roughness, in, normal, sampler);
-		ret.pdf = pdf(roughness, normal, in, ret.dir);
-
-		real fresnel = 1;
-		ret.bsdf = bsdf(roughness, fresnel, normal, in, ret.dir, u, v);
-		ret.fresnel = fresnel;
+		auto ret = sample(
+			m_param,
+			normal,
+			ray.dir,
+			hitrec,
+			sampler,
+			u, v,
+			isLightPath);
 
 		return std::move(ret);
 	}

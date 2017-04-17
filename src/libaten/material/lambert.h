@@ -28,16 +28,46 @@ namespace aten
 		}
 
 		static real pdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static real pdf(
 			const vec3& normal,
 			const vec3& wo);
+
+		static vec3 sampleDirection(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			real u, real v,
+			sampler* sampler);
 
 		static vec3 sampleDirection(
 			const vec3& normal,
 			sampler* sampler);
 
 		static vec3 bsdf(
-			material* mtrl,
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
 			real u, real v);
+
+		static vec3 bsdf(
+			const MaterialParameter& param,
+			real u, real v);
+
+		static sampling sample(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const hitrecord& hitrec,
+			sampler* sampler,
+			real u, real v,
+			bool isLightPath = false);
 
 		virtual real pdf(
 			const vec3& normal, 

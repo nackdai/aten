@@ -5,12 +5,35 @@
 namespace aten
 {
 	real specular::pdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
+	{
+		return real(1);
+	}
+
+	real specular::pdf(
 		const vec3& normal, 
 		const vec3& wi,
 		const vec3& wo,
 		real u, real v) const
 	{
-		return real(1);
+		return pdf(m_param, normal, wi, wo, u, v);
+	}
+
+	vec3 specular::sampleDirection(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		real u, real v,
+		sampler* sampler)
+	{
+		auto reflect = wi - 2 * dot(normal, wi) * normal;
+		reflect.normalize();
+
+		return std::move(reflect);
 	}
 
 	vec3 specular::sampleDirection(
@@ -21,22 +44,20 @@ namespace aten
 	{
 		const vec3& in = ray.dir;
 
-		auto reflect = in - 2 * dot(normal, in) * normal;
-		reflect.normalize();
-
-		return std::move(reflect);
+		return std::move(sampleDirection(m_param, normal, in, u, v, sampler));
 	}
 
 	vec3 specular::bsdf(
-		const vec3& normal, 
+		const MaterialParameter& param,
+		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v)
 	{
 		auto c = dot(normal, wo);
 
 #if 1
-		vec3 bsdf = color();
+		vec3 bsdf = param.baseColor;
 #else
 		vec3 bsdf;
 
@@ -46,9 +67,18 @@ namespace aten
 		}
 #endif
 
-		bsdf *= sampleAlbedoMap(u, v);
+		bsdf *= sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
 
 		return std::move(bsdf);
+	}
+
+	vec3 specular::bsdf(
+		const vec3& normal, 
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
 	material::sampling specular::sample(
@@ -59,13 +89,32 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
+		auto ret = sample(
+			m_param,
+			normal,
+			ray.dir,
+			hitrec,
+			sampler,
+			u, v,
+			isLightPath);
+
+		return std::move(ret);
+	}
+
+	material::sampling specular::sample(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const hitrecord& hitrec,
+		sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/)
+	{
 		sampling ret;
 
-		const vec3& in = ray.dir;
-
-		ret.dir = sampleDirection(ray, normal, u, v, sampler);
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
-		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
+		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
+		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
+		ret.bsdf = bsdf(param, normal, wi, ret.dir, u, v);
 
 		return std::move(ret);
 	}

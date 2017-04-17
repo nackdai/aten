@@ -2,6 +2,16 @@
 
 namespace aten {
 	real lambert::pdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
+	{
+		return pdf(normal, wo);
+	}
+
+	real lambert::pdf(
 		const vec3& normal,
 		const vec3& wo)
 	{
@@ -20,15 +30,16 @@ namespace aten {
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto ret = pdf(normal, wo);
+		auto ret = pdf(m_param, normal, wi, wo, u, v);
 		return ret;
 	}
 
 	vec3 lambert::sampleDirection(
-		const ray& ray,
+		const MaterialParameter& param,
 		const vec3& normal,
+		const vec3& wi,
 		real u, real v,
-		sampler* sampler) const
+		sampler* sampler)
 	{
 		return std::move(sampleDirection(normal, sampler));
 	}
@@ -67,13 +78,34 @@ namespace aten {
 		return std::move(dir);
 	}
 
+	vec3 lambert::sampleDirection(
+		const ray& ray,
+		const vec3& normal,
+		real u, real v,
+		sampler* sampler) const
+	{
+		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+	}
+
 	vec3 lambert::bsdf(
-		material* mtrl,
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
 		real u, real v)
 	{
-		vec3 albedo = mtrl->color();
+		return std::move(bsdf(param, u, v));
+	}
 
-		albedo *= mtrl->sampleAlbedoMap(u, v);
+	vec3 lambert::bsdf(
+		const MaterialParameter& param,
+		real u, real v)
+	{
+		vec3 albedo = param.baseColor;
+		albedo *= sampleTexture(
+			(texture*)param.albedoMap.tex,
+			u, v,
+			real(1));
 
 		vec3 ret = albedo / AT_MATH_PI;
 		return ret;
@@ -85,7 +117,25 @@ namespace aten {
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto ret = bsdf((material*)this, u, v);
+		auto ret = bsdf(m_param, normal, wi, wo, u, v);
+		return std::move(ret);
+	}
+
+	material::sampling lambert::sample(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const hitrecord& hitrec,
+		sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/)
+	{
+		sampling ret;
+
+		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
+		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
+		ret.bsdf = bsdf(param, normal, wi, ret.dir, u, v);
+
 		return std::move(ret);
 	}
 
@@ -97,13 +147,14 @@ namespace aten {
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		sampling ret;
-
-		const vec3& in = ray.dir;
-
-		ret.dir = sampleDirection(ray, normal, u, v, sampler);
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
-		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
+		auto ret = sample(
+			m_param,
+			normal,
+			ray.dir,
+			hitrec,
+			sampler,
+			u, v,
+			isLightPath);
 
 		return std::move(ret);
 	}

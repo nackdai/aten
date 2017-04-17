@@ -52,5 +52,35 @@ namespace aten
 			sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const override final;
+
+		static real pdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static vec3 sampleDirection(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			real u, real v,
+			sampler* sampler);
+
+		static vec3 bsdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static sampling sample(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const hitrecord& hitrec,
+			sampler* sampler,
+			real u, real v,
+			bool isLightPath = false);
 	};
 }

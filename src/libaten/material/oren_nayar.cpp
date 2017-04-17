@@ -5,10 +5,23 @@ namespace aten {
 	// https://ja.wikipedia.org/wiki/%E3%82%AA%E3%83%BC%E3%83%AC%E3%83%B3%E3%83%BB%E3%83%8D%E3%82%A4%E3%83%A4%E3%83%BC%E5%8F%8D%E5%B0%84
 	// https://github.com/imageworks/OpenShadingLanguage/blob/master/src/testrender/shading.cpp
 
-	real OrenNayar::sampleRoughness(real u, real v) const
+	real OrenNayar::pdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
 	{
-		vec3 roughness = material::sampleTexture((texture*)m_param.roughnessMap, u, v, m_param.roughness);
-		return roughness.r;
+		auto NL = dot(normal, wo);
+		auto NV = dot(normal, -wi);
+
+		real pdf = 0;
+
+		if (NL > 0 && NV > 0) {
+			pdf = NL / AT_MATH_PI;
+		}
+
+		return pdf;
 	}
 
 	real OrenNayar::pdf(
@@ -17,26 +30,16 @@ namespace aten {
 		const vec3& wo,
 		real u, real v) const
 	{
-		auto NL = dot(normal, wo);
-		auto NV = dot(normal, -wi);
-		
-		real pdf = 0;
-
-		if (NL > 0 && NV > 0) {
-			pdf = NL / AT_MATH_PI;
-		}
-		
-		return pdf;
+		return pdf(m_param, normal, wi, wo, u, v);
 	}
 
 	vec3 OrenNayar::sampleDirection(
-		const ray& ray,
-		const vec3& normal, 
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
 		real u, real v,
-		sampler* sampler) const
+		sampler* sampler)
 	{
-		const vec3& in = ray.dir;
-
 		// normal‚Ì•ûŒü‚ðŠî€‚Æ‚µ‚½³‹K’¼ŒðŠî’ê(w, u, v)‚ðì‚é.
 		// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŽŸ‚ÌƒŒƒC‚ð”ò‚Î‚·.
 		vec3 n, t, b;
@@ -67,11 +70,21 @@ namespace aten {
 		return std::move(dir);
 	}
 
+	vec3 OrenNayar::sampleDirection(
+		const ray& ray,
+		const vec3& normal, 
+		real u, real v,
+		sampler* sampler) const
+	{
+		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+	}
+
 	vec3 OrenNayar::bsdf(
+		const MaterialParameter& param,
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v)
 	{
 		// NOTE
 		// A tiny improvement of Oren-Nayar reflectance model
@@ -83,10 +96,12 @@ namespace aten {
 		const auto NV = dot(normal, -wi);
 
 		if (NL > 0 && NV > 0) {
-			vec3 albedo = color();
-			albedo *= sampleAlbedoMap(u, v);
+			auto roughness = material::sampleTexture((texture*)param.roughnessMap.tex, u, v, param.roughness);
 
-			const real a = sampleRoughness(u, v);
+			auto albedo = param.baseColor;
+			albedo *= material::sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+
+			const real a = roughness.r;
 			const real a2 = a * a;
 
 			const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
@@ -103,6 +118,33 @@ namespace aten {
 		return bsdf;
 	}
 
+	vec3 OrenNayar::bsdf(
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		return std::move(bsdf(m_param, normal, wi, wo, u, v));
+	}
+
+	material::sampling OrenNayar::sample(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const hitrecord& hitrec,
+		sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/)
+	{
+		sampling ret;
+
+		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
+		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
+		ret.bsdf = bsdf(param, normal, wi, ret.dir, u, v);
+
+		return std::move(ret);
+	}
+
 	material::sampling OrenNayar::sample(
 		const ray& ray,
 		const vec3& normal,
@@ -111,13 +153,14 @@ namespace aten {
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		sampling ret;
-
-		const vec3& in = ray.dir;
-
-		ret.dir = sampleDirection(ray, normal, u, v, sampler);
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
-		ret.bsdf = bsdf(normal, in, ret.dir, u, v);
+		auto ret = sample(
+			m_param,
+			normal,
+			ray.dir,
+			hitrec,
+			sampler,
+			u, v,
+			isLightPath);
 
 		return std::move(ret);
 	}

@@ -147,13 +147,13 @@ namespace aten
 				const real c0 = dot(normalize(toNextVtx), orienting_normal);
 				const real c1 = dot(normalize(-toNextVtx), prevNormal);
 				const real dist2 = toNextVtx.squared_length();
-				const double G = c0 * c1 / dist2;
+				const real G = c0 * c1 / dist2;
 				throughput = G * throughput;
 			}
 
 			// 光源にヒットしたらそこで追跡終了.
 			if (rec.mtrl->isEmissive()) {
-				vec3 bsdf = lambert::bsdf(rec.mtrl, rec.u, rec.v);
+				vec3 bsdf = lambert::bsdf(rec.mtrl->param(), rec.u, rec.v);
 
 				vs.push_back(Vertex(
 					rec.p,
@@ -234,7 +234,7 @@ namespace aten
 		auto pdfOnLight = std::get<2>(res);
 
 		// 確率密度の積を保持（面積測度に関する確率密度）.
-		double totalAreaPdf = pdfOnLight;
+		auto totalAreaPdf = pdfOnLight;
 
 		// 光源上に生成された頂点を頂点リストに追加.
 		vs.push_back(Vertex(
@@ -243,7 +243,7 @@ namespace aten
 			nmlOnLight,
 			ObjectType::Light,
 			totalAreaPdf,
-			vec3(0),
+			vec3(real(0)),
 			light->getLe(),
 			light));
 
@@ -321,14 +321,14 @@ namespace aten
 						ObjectType::Lens,
 						totalAreaPdf,
 						throughput,
-						vec3(0),
+						vec3(real(0)),
 						nullptr,
 						nullptr,
-						0, 0));
+						real(0), real(0)));
 
 					const real W_dash = camera->getWdash(
 						ray.org,
-						vec3(0, 1, 0),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+						vec3(real(0), real(1), real(0)),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
 						posOnImageSensor,
 						posOnLens,
 						posOnObjectPlane);

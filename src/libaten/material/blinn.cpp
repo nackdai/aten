@@ -7,10 +7,11 @@ namespace aten
 	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 
 	real MicrofacetBlinn::pdf(
-		const vec3& normal, 
-		const vec3& wi,	/* in */
-		const vec3& wo,	/* out */
-		real u, real v) const
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
 	{
 		// NOTE
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
@@ -24,7 +25,7 @@ namespace aten
 
 		auto costheta = dot(normal, wh);
 
-		auto n = m_param.shininess;
+		auto n = param.shininess;
 
 		auto c = dot(wo, wh);
 
@@ -35,11 +36,22 @@ namespace aten
 		return pdf;
 	}
 
+	real MicrofacetBlinn::pdf(
+		const vec3& normal, 
+		const vec3& wi,	/* in */
+		const vec3& wo,	/* out */
+		real u, real v) const
+	{
+		auto ret = pdf(m_param, normal, wi, wo, u, v);
+		return ret;
+	}
+
 	vec3 MicrofacetBlinn::sampleDirection(
-		const ray& ray,
+		const MaterialParameter& param,
 		const vec3& normal,
+		const vec3& wi,
 		real u, real v,
-		sampler* sampler) const
+		sampler* sampler)
 	{
 		// NOTE
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
@@ -48,14 +60,12 @@ namespace aten
 		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-bsdf/
 		// Sampling Blinn
 
-		const vec3& in = ray.dir;
-
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
 #if 1
 		// Sample halfway vector first, then reflect wi around that
-		auto costheta = aten::pow(r1, 1 / (m_param.shininess + 1));
+		auto costheta = aten::pow(r1, 1 / (param.shininess + 1));
 		auto sintheta = aten::sqrt(1 - costheta * costheta);
 
 		// phi = 2*PI*ksi2
@@ -80,9 +90,40 @@ namespace aten
 		auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
 		w.normalize();
 
-		auto dir = in - 2 * dot(in, w) * w;
+		auto dir = wi - 2 * dot(wi, w) * w;
 
 		return std::move(dir);
+	}
+
+	vec3 MicrofacetBlinn::sampleDirection(
+		const ray& ray,
+		const vec3& normal,
+		real u, real v,
+		sampler* sampler) const
+	{
+		auto dir = sampleDirection(m_param, normal, ray.dir, u, v, sampler);
+		return std::move(dir);
+	}
+
+	vec3 MicrofacetBlinn::bsdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
+	{
+		real fresnel = 1;
+		real ior = param.ior;
+		real shininess = param.shininess;
+
+		auto albedo = param.baseColor;
+		albedo *= sampleTexture(
+			(texture*)param.albedoMap.tex,
+			u, v,
+			real(1));
+
+		auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
+		return std::move(ret);
 	}
 
 	vec3 MicrofacetBlinn::bsdf(
@@ -91,23 +132,25 @@ namespace aten
 		const vec3& wo,
 		real u, real v) const
 	{
-		real fresnel = 1;
-		auto ret = bsdf(fresnel, normal, wi, wo, u, v);
+		auto ret = bsdf(m_param, normal, wi, wo, u, v);
 		return std::move(ret);
 	}
 
 	vec3 MicrofacetBlinn::bsdf(
+		const vec3& albedo,
+		const real shininess,
+		const real ior,
 		real& fresnel,
 		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v)
 	{
 		// ƒŒƒC‚ª“üŽË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
 		real ni = real(1);	// ^‹ó
 
 		// •¨‘Ì“à•”‚Ì‹üÜ—¦.
-		real nt = ior();
+		real nt = ior;
 
 		vec3 V = -wi;
 		vec3 L = wo;
@@ -121,7 +164,7 @@ namespace aten
 		auto NdotL = aten::abs(dot(N, L));
 		auto NdotV = aten::abs(dot(N, V));
 
-		auto a = m_param.shininess;
+		auto a = shininess;
 
 		real F(1);
 		{
@@ -165,9 +208,6 @@ namespace aten
 			G = std::min((real)1, std::min(G1, G2));
 		}
 
-		auto albedo = color();
-		albedo *= sampleAlbedoMap(u, v);
-
 		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
 
 		fresnel = F;
@@ -176,24 +216,32 @@ namespace aten
 	}
 
 	material::sampling MicrofacetBlinn::sample(
-		const ray& ray,
+		const MaterialParameter& param,
 		const vec3& normal,
+		const vec3& wi,
 		const hitrecord& hitrec,
 		sampler* sampler,
 		real u, real v,
-		bool isLightPath/*= false*/) const
+		bool isLightPath/*= false*/)
 	{
 		sampling ret;
 
-		const vec3& in = ray.dir;
-
-		ret.dir = sampleDirection(ray, normal, u, v, sampler);
+		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
 
 #if 1
-		ret.pdf = pdf(normal, in, ret.dir, u, v);
+		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
 
 		real fresnel = 1;
-		ret.bsdf = bsdf(fresnel, normal, in, ret.dir, u, v);
+		real ior = param.ior;
+		real shininess = param.shininess;
+
+		auto albedo = param.baseColor;
+		albedo *= sampleTexture(
+			(texture*)param.albedoMap.tex,
+			u, v,
+			real(1));
+
+		ret.bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, ret.dir, u, v);
 		ret.fresnel = fresnel;
 #else
 		vec3 V = -in;
@@ -214,6 +262,26 @@ namespace aten
 		}
 #endif
 
+		return std::move(ret);
+	}
+
+	material::sampling MicrofacetBlinn::sample(
+		const ray& ray,
+		const vec3& normal,
+		const hitrecord& hitrec,
+		sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/) const
+	{
+		auto ret = sample(
+			m_param,
+			normal,
+			ray.dir,
+			hitrec,
+			sampler,
+			u, v,
+			isLightPath);
+		
 		return std::move(ret);
 	}
 }

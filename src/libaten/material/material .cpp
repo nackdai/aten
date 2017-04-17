@@ -13,17 +13,6 @@ namespace aten
 		m_id = g_id.fetch_add(1);
 	}
 
-	void material::serialize(const material* mtrl, MaterialParam& param)
-	{
-		const auto& baseColor = mtrl->color();
-
-		param.baseColor[0] = (float)baseColor.r;
-		param.baseColor[1] = (float)baseColor.g;
-		param.baseColor[2] = (float)baseColor.b;
-
-		param.ior = (float)mtrl->ior();
-	}
-
 	NPRMaterial::NPRMaterial(const vec3& e, Light* light)
 		: material(e)
 	{
@@ -103,8 +92,8 @@ namespace aten
 		vec3& newNml,
 		real u, real v) const
 	{
-		if (m_param.normalMap) {
-			newNml = ((texture*)m_param.normalMap)->at(u, v);
+		if (m_param.normalMap.tex) {
+			newNml = ((texture*)m_param.normalMap.tex)->at(u, v);
 			newNml = 2 * newNml - vec3(1);
 			newNml.normalize();
 

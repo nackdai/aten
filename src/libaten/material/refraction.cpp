@@ -6,15 +6,40 @@
 namespace aten
 {
 	real refraction::pdf(
-		const vec3& normal, 
+		const MaterialParameter& param,
+		const vec3& normal,
 		const vec3& wi,
 		const vec3& wo,
-		real u, real v) const
+		real u, real v)
 	{
 		AT_ASSERT(false);
 
 		auto ret = real(1);
 		return ret;
+	}
+
+	real refraction::pdf(
+		const vec3& normal, 
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v) const
+	{
+		return pdf(m_param, normal, wi, wo, u, v);
+	}
+
+	vec3 refraction::sampleDirection(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		real u, real v,
+		sampler* sampler)
+	{
+		AT_ASSERT(false);
+
+		auto reflect = wi - 2 * dot(normal, wi) * normal;
+		reflect.normalize();
+
+		return std::move(reflect);
 	}
 
 	vec3 refraction::sampleDirection(
@@ -23,14 +48,25 @@ namespace aten
 		real u, real v,
 		sampler* sampler) const
 	{
+		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+	}
+
+	vec3 refraction::bsdf(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const vec3& wo,
+		real u, real v)
+	{
 		AT_ASSERT(false);
 
-		const vec3& in = ray.dir;
+		vec3 albedo = param.baseColor;
+		albedo *= sampleTexture(
+			(texture*)param.albedoMap.tex,
+			u, v,
+			real(1));
 
-		auto reflect = in - 2 * dot(normal, in) * normal;
-		reflect.normalize();
-
-		return std::move(reflect);
+		return std::move(albedo);
 	}
 
 	vec3 refraction::bsdf(
@@ -39,12 +75,7 @@ namespace aten
 		const vec3& wo,
 		real u, real v) const
 	{
-		AT_ASSERT(false);
-
-		vec3 bsdf = color();
-		bsdf *= sampleAlbedoMap(u, v);
-
-		return std::move(bsdf);
+		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
 	material::sampling refraction::sample(
@@ -55,22 +86,41 @@ namespace aten
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		sampling ret;
+		auto ret = sample(
+			m_param,
+			normal,
+			ray.dir,
+			hitrec,
+			sampler,
+			u, v,
+			isLightPath);
 
-		const vec3& in = ray.dir;
+		return std::move(ret);
+	}
+
+	material::sampling refraction::sample(
+		const MaterialParameter& param,
+		const vec3& normal,
+		const vec3& wi,
+		const hitrecord& hitrec,
+		sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/)
+	{
+		sampling ret;
 
 		// レイが入射してくる側の物体の屈折率.
 		real ni = real(1);	// 真空
 
 		// 物体内部の屈折率.
-		real nt = ior();
+		real nt = param.ior;
 
 		bool into = (dot(hitrec.normal, normal) > real(0));
 
-		auto reflect = in - 2 * dot(hitrec.normal, in) * hitrec.normal;
+		auto reflect = wi - 2 * dot(hitrec.normal, wi) * hitrec.normal;
 		reflect.normalize();
 
-		real cos_i = dot(in, normal);
+		real cos_i = dot(wi, normal);
 		real nnt = into ? ni / nt : nt / ni;
 
 		// NOTE
@@ -79,7 +129,7 @@ namespace aten
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
 		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
-		vec3 albedo = color();
+		vec3 albedo = param.baseColor;
 
 		if (cos_t_2 < real(0)) {
 			//AT_PRINTF("Reflection in refraction...\n");
@@ -101,7 +151,7 @@ namespace aten
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
 		auto invnnt = 1 / nnt;
-		vec3 refract = nnt * (in - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
+		vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
 #endif
 		refract.normalize();
 
@@ -120,7 +170,7 @@ namespace aten
 			r = sampler->nextSample();
 		}
 
-		if (isIdealRefraction()) {
+		if (param.isIdealRefraction) {
 			ret.dir = refract;
 
 			// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.

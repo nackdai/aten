@@ -15,7 +15,7 @@ namespace aten
 			texture* roughnessMap = nullptr)
 			: material(albedo, ior, albedoMap, normalMap)
 		{
-			m_param.roughnessMap = roughnessMap;
+			m_param.roughnessMap.tex = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
@@ -31,6 +31,36 @@ namespace aten
 		virtual ~MicrofacetBeckman() {}
 
 	public:
+		static real pdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static vec3 sampleDirection(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			real u, real v,
+			sampler* sampler);
+
+		static vec3 bsdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static sampling sample(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const hitrecord& hitrec,
+			sampler* sampler,
+			real u, real v,
+			bool isLightPath = false);
+
 		virtual bool isGlossy() const override final
 		{
 			return (m_param.roughness == 1 ? false : true);
@@ -63,26 +93,26 @@ namespace aten
 			bool isLightPath = false) const override final;
 
 	private:
-		inline real sampleRoughness(real u, real v) const;
-
-		real pdf(
-			real roughness,
+		static real pdf(
+			const real roughness,
 			const vec3& normal,
 			const vec3& wi,
-			const vec3& wo) const;
+			const vec3& wo);
 
-		vec3 sampleDirection(
-			real roughness,
+		static vec3 sampleDirection(
+			const real roughness,
 			const vec3& in,
 			const vec3& normal,
-			sampler* sampler) const;
+			sampler* sampler);
 
-		vec3 bsdf(
-			real roughness,
+		static vec3 bsdf(
+			const vec3& albedo,
+			const real roughness,
+			const real ior,
 			real& fresnel,
 			const vec3& normal,
 			const vec3& wi,
 			const vec3& wo,
-			real u, real v) const;
+			real u, real v);
 	};
 }

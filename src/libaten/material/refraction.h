@@ -14,13 +14,13 @@ namespace aten
 			texture* normalMap = nullptr)
 			: material(albedo, ior, nullptr, normalMap)
 		{
-			m_isIdealRefraction = isIdealRefraction;
+			m_param.isIdealRefraction = isIdealRefraction;
 		}
 
 		refraction(Values& val)
 			: material(val)
 		{
-			m_isIdealRefraction = val.get("isIdealRefraction", m_isIdealRefraction);
+			m_param.isIdealRefraction = val.get("isIdealRefraction", m_param.isIdealRefraction);
 		}
 
 		virtual ~refraction() {}
@@ -43,12 +43,42 @@ namespace aten
 
 		bool setIsIdealRefraction(bool f)
 		{
-			m_isIdealRefraction = f;
+			m_param.isIdealRefraction = f;
 		}
 		bool isIdealRefraction() const
 		{
-			return m_isIdealRefraction;
+			return m_param.isIdealRefraction;
 		}
+
+		static real pdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static vec3 sampleDirection(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			real u, real v,
+			sampler* sampler);
+
+		static vec3 bsdf(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const vec3& wo,
+			real u, real v);
+
+		static sampling sample(
+			const MaterialParameter& param,
+			const vec3& normal,
+			const vec3& wi,
+			const hitrecord& hitrec,
+			sampler* sampler,
+			real u, real v,
+			bool isLightPath = false);
 
 		virtual real pdf(
 			const vec3& normal, 
@@ -104,8 +134,5 @@ namespace aten
 			AT_ASSERT(false);
 			return real(0);
 		}
-
-	private:
-		bool m_isIdealRefraction{ false };
 	};
 }

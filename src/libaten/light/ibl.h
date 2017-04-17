@@ -40,7 +40,7 @@ namespace aten {
 			return (envmap*)m_param.envmap.ptr;
 		}
 
-		virtual real samplePdf(const ray& r) const override final;
+		real samplePdf(const ray& r) const;
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
 

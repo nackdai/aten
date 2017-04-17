@@ -44,11 +44,19 @@ namespace aten {
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
 		{
+			return std::move(sample(m_param, org, sampler));
+		}
+
+		static LightSampleResult sample(
+			const LightParameter& param,
+			const vec3& org,
+			sampler* sampler)
+		{
 			LightSampleResult result;
 
-			result.pos = m_param.pos;
+			result.pos = param.pos;
 			result.pdf = real(1);
-			result.dir = m_param.pos - org;
+			result.dir = param.pos - org;
 			result.nml = vec3();	// Not used...
 
 			auto dist2 = result.dir.squared_length();
@@ -57,15 +65,15 @@ namespace aten {
 			// 減衰率.
 			// http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
 			// 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
-			real attn = m_param.constAttn + m_param.linearAttn * dist + m_param.expAttn * dist2;
+			real attn = param.constAttn + param.linearAttn * dist + param.expAttn * dist2;
 
 			// TODO
 			// Is it correct?
 			attn = std::max(attn, real(1));
 			
-			result.le = m_param.le;
+			result.le = param.le;
 			result.intensity = 1 / attn;
-			result.finalColor = m_param.le / attn;
+			result.finalColor = param.le / attn;
 
 			return std::move(result);
 		}

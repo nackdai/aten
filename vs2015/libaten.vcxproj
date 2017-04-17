@@ -250,6 +250,7 @@
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
+    <ClCompile Include="..\src\libaten\light\arealight.cpp" />
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />
     <ClCompile Include="..\src\libaten\light\light.cpp" />
     <ClCompile Include="..\src\libaten\material\beckman.cpp" />

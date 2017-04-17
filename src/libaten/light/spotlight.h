@@ -66,25 +66,33 @@ namespace aten {
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
 		{
+			return std::move(sample(m_param, org, sampler));
+		}
+
+		static LightSampleResult sample(
+			const LightParameter& param,
+			const vec3& org,
+			sampler* sampler)
+		{
 			LightSampleResult result;
 
-			result.pos = m_param.pos;
+			result.pos = param.pos;
 			result.pdf = real(1);
-			result.dir = m_param.pos - org;
+			result.dir = param.pos - org;
 			result.nml = vec3();	// Not used...
 
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx
 
-			auto theta = m_param.innerAngle;
-			auto phi = m_param.outerAngle;
+			auto theta = param.innerAngle;
+			auto phi = param.outerAngle;
 
 			auto lightdir = normalize(result.dir);
 
-			auto rho = dot(-m_param.dir, lightdir);
+			auto rho = dot(-param.dir, lightdir);
 
-			auto cosHalfTheta = aten::cos(m_param.innerAngle * real(0.5));
-			auto cosHalfPhi = aten::cos(m_param.outerAngle * real(0.5));
+			auto cosHalfTheta = aten::cos(param.innerAngle * real(0.5));
+			auto cosHalfPhi = aten::cos(param.outerAngle * real(0.5));
 
 			real spot = 0;
 
@@ -99,7 +107,7 @@ namespace aten {
 			else {
 				// 本影の外、半影の中.
 				spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
-				spot = aten::pow(spot, m_param.falloff);
+				spot = aten::pow(spot, param.falloff);
 			}
 
 			// 減衰率.
@@ -107,15 +115,15 @@ namespace aten {
 			// 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
 			auto dist2 = result.dir.squared_length();
 			auto dist = aten::sqrt(dist2);
-			real attn = m_param.constAttn + m_param.linearAttn * dist + m_param.expAttn * dist2;
+			real attn = param.constAttn + param.linearAttn * dist + param.expAttn * dist2;
 
 			// TODO
 			// Is it correct?
 			attn = std::max(attn, real(1));
 			
-			result.le = m_param.le;
+			result.le = param.le;
 			result.intensity = spot / attn;
-			result.finalColor = m_param.le * spot / attn;
+			result.finalColor = param.le * spot / attn;
 
 			return std::move(result);
 		}

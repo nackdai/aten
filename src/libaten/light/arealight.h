@@ -22,69 +22,18 @@ namespace aten {
 		virtual ~AreaLight() {}
 
 	public:
-		virtual real samplePdf(const ray& r) const override final
-		{
-			real pdf = 0;
+		static LightSampleResult sample(
+			const LightParameter& param,
+			const vec3& org,
+			sampler* sampler);
 
-			auto obj = getLightObject();
+		static bool hit(
+			const LightParameter& param,
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec);
 
-			if (obj) {
-				hitrecord rec;
-				bool isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
-
-				if (isHit) {
-					pdf = 1 / rec.area;
-				}
-			}
-
-			return pdf;
-		}
-
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
-		{
-			LightSampleResult result;
-
-			auto obj = getLightObject();
-
-			if (obj) {
-				hitrecord rec;
-
-				vec3 pos;
-				if (sampler) {
-					pos = obj->getRandomPosOn(sampler);
-				}
-				else {
-					pos = obj->getBoundingbox().getCenter();
-				}
-
-				auto dir = pos - org;
-				auto dist = dir.length();
-
-				ray r(
-					org,
-					normalize(dir));
-
-				bool isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
-
-				if (isHit) {
-					/*if (aten::abs(dist - rec.t) < AT_MATH_EPSILON)*/ {
-						result.pos = pos;
-						result.pdf = 1 / rec.area;
-						result.dir = rec.p - org;
-						result.nml = rec.normal;
-						
-						result.le = m_param.le;
-						result.intensity = 1;
-						result.finalColor = m_param.le;
-
-						result.obj = const_cast<hitable*>(obj);
-
-					}
-				}
-			}
-
-			return std::move(result);
-		}
+		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
 
 		virtual bool isSingular() const override final
 		{
@@ -99,18 +48,8 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override final
-		{
-			bool isHit = false;
-
-			if (m_param.object.ptr) {
-				auto obj = getLightObject();
-				isHit = obj->hit(r, t_min, t_max, rec);
-			}
-
-			return isHit;
-		}
-
+			hitrecord& rec) const override final;
+		
 		virtual aabb getBoundingbox() const override final
 		{
 			if (m_param.object.ptr) {

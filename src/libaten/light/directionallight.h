@@ -23,15 +23,23 @@ namespace aten {
 	public:
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
 		{
+			return std::move(sample(m_param, org, sampler));
+		}
+
+		static LightSampleResult sample(
+			const LightParameter& param,
+			const vec3& org,
+			sampler* sampler)
+		{
 			LightSampleResult result;
 
 			result.pdf = real(1);
-			result.dir = -normalize(m_param.dir);
+			result.dir = -normalize(param.dir);
 			result.nml = vec3();	// Not used...
 
-			result.le = m_param.le;
+			result.le = param.le;
 			result.intensity = real(1);
-			result.finalColor = m_param.le;
+			result.finalColor = param.le;
 
 			return std::move(result);
 		}

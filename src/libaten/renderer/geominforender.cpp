@@ -49,7 +49,7 @@ namespace aten
 					throughput *= sample.bsdf;
 
 					// Make next ray.
-					ray = aten::ray(rec.p + nextDir, nextDir);
+					ray = aten::ray(rec.p, nextDir);
 				}
 				else {
 					{
@@ -70,7 +70,7 @@ namespace aten
 							auto lightobj = sampleres.obj;
 
 							vec3 dirToLight = normalize(sampleres.dir);
-							aten::ray shadowRay(rec.p + dirToLight, dirToLight);
+							aten::ray shadowRay(rec.p, dirToLight);
 
 							hitrecord tmpRec;
 

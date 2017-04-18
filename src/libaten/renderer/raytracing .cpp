@@ -38,7 +38,7 @@ namespace aten
 					throughput *= bsdf;
 
 					// Make next ray.
-					ray = aten::ray(rec.p + nextDir, nextDir);
+					ray = aten::ray(rec.p, nextDir);
 				}
 				else if (rec.mtrl->isNPR()) {
 					// Non-Photo-Real.

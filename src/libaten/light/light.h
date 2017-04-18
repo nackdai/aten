@@ -124,7 +124,7 @@ namespace aten {
 			return m_param.type.isSingular;
 		}
 
-		bool isInifinite() const
+		bool isInfinite() const
 		{
 			return m_param.type.isInfinite;
 		}
@@ -154,6 +154,11 @@ namespace aten {
 			// Most light don't have bounding box...
 			AT_ASSERT(false);
 			return std::move(aabb());
+		}
+
+		const LightParameter& param() const
+		{
+			return m_param;
 		}
 
 		static uint32_t getLightNum();

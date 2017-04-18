@@ -190,8 +190,8 @@ namespace aten
 				lightSelectPdf, sampleres);
 
 			if (light) {
-				vec3 posLight = sampleres.pos;
-				vec3 nmlLight = sampleres.nml;
+				const vec3& posLight = sampleres.pos;
+				const vec3& nmlLight = sampleres.nml;
 				real pdfLight = sampleres.pdf;
 
 				auto lightobj = sampleres.obj;
@@ -201,7 +201,7 @@ namespace aten
 
 				hitrecord tmpRec;
 
-				if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+				if (scene->hitLight(light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 					// Shadow ray hits the light.
 					auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -213,7 +213,7 @@ namespace aten
 					// Get light color.
 					auto emit = sampleres.finalColor;
 
-					if (light->isSingular() || light->isInifinite()) {
+					if (light->isSingular() || light->isInfinite()) {
 						if (pdfLight > real(0)) {
 							// TODO
 							// ジオメトリタームの扱いについて.
@@ -253,8 +253,8 @@ namespace aten
 			{
 				auto sampleres = m_virtualLight->sample(path.rec.p, nullptr);
 
-				vec3 posLight = sampleres.pos;
-				vec3 nmlLight = sampleres.nml;
+				const vec3& posLight = sampleres.pos;
+				const vec3& nmlLight = sampleres.nml;
 				real pdfLight = sampleres.pdf;
 
 				auto lightobj = sampleres.obj;
@@ -264,7 +264,7 @@ namespace aten
 
 				hitrecord tmpRec;
 
-				if (scene->hitLight(m_virtualLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+				if (scene->hitLight(m_virtualLight, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 					auto cosShadow = dot(orienting_normal, dirToLight);
 					auto dist2 = sampleres.dir.squared_length();
 					auto dist = aten::sqrt(dist2);

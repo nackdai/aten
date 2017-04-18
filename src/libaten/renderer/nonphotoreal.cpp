@@ -32,7 +32,7 @@ namespace aten
 
 			hitrecord tmpRec;
 
-			if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+			if (scene->hitLight(light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 				cosShadow = dot(normal, dirToLight);
 			}
 		}

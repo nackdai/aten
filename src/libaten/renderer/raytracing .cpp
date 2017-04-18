@@ -70,10 +70,10 @@ namespace aten
 
 						hitrecord tmpRec;
 
-						if (scene->hitLight(light, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+						if (scene->hitLight(light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 							auto lightColor = sampleres.finalColor;
 
-							if (light->isInifinite()) {
+							if (light->isInfinite()) {
 								len = real(1);
 							}
 

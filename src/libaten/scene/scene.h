@@ -46,7 +46,7 @@ namespace aten {
 
 						t_max = tmp.t;
 
-						isHit = true;
+isHit = true;
 					}
 				}
 			}
@@ -117,8 +117,72 @@ namespace aten {
 			return m_ibl;
 		}
 
+
+		template <typename Func>
+		static bool hitLight(
+			Func funcHitTest,
+			const LightParameter& lightParam,
+			const vec3& lightPos,
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec)
+		{
+			bool isHit = funcHitTest(r, t_min, t_max, rec);
+
+			auto lightobj = lightParam.object.ptr;
+
+			if (lightobj) {
+				// Area Light.
+				if (isHit) {
+#if 0
+					hitrecord tmpRec;
+					if (light->hit(r, t_min, t_max, tmpRec)) {
+						auto dist2 = (tmpRec.p - r.org).squared_length();
+
+						if (rec.obj == tmpRec.obj
+							&& aten::abs(dist2 - rec.t * rec.t) < AT_MATH_EPSILON)
+						{
+							return true;
+						}
+					}
+#else
+					auto dist = (lightPos - r.org).length();
+					if (aten::abs(dist - rec.t) < AT_MATH_EPSILIN_SQRT) {
+						return true;
+					}
+#endif
+				}
+			}
+
+			if (lightParam.type.isInfinite) {
+				if (isHit) {
+					// Hit something.
+					return false;
+				}
+				else {
+					// Hit nothing.
+					return true;
+				}
+			}
+			else if (lightParam.type.isSingular) {
+				auto distToLight = (lightPos - r.org).length();
+
+				if (isHit && rec.t < distToLight) {
+					// Ray hits something, and the distance to the object is near than the distance to the light.
+					return false;
+				}
+				else {
+					// Ray don't hit anything, or the distance to the object is far than the distance to the light.
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		bool hitLight(
 			const Light* light,
+			const vec3& lightPos,
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec);

@@ -4,55 +4,26 @@
 namespace aten {
 	bool scene::hitLight(
 		const Light* light,
+		const vec3& lightPos,
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
-		bool isHit = hit(r, t_min, t_max, rec);
+		auto funcHitTest = [&](const ray& _r, real _t_min, real _t_max, hitrecord& _rec)
+		{
+			auto ret = this->hit(_r, _t_min, _t_max, _rec);
+			return ret;
+		};
 
-		auto lightobj = light->getLightObject();
-
-		if (lightobj) {
-			// Area Light.
-			if (isHit) {
-				hitrecord tmpRec;
-				if (light->hit(r, t_min, t_max, tmpRec)) {
-					auto dist2 = (tmpRec.p - r.org).squared_length();
-
-					if (rec.obj == tmpRec.obj
-						&& aten::abs(dist2 - rec.t * rec.t) < AT_MATH_EPSILON)
-					{
-						return true;
-					}
-				}
-			}
-		}
-
-		if (light->isInifinite()) {
-			if (isHit) {
-				// Hit something.
-				return false;
-			}
-			else {
-				// Hit nothing.
-				return true;
-			}
-		}
-		else if (light->isSingular()) {
-			const auto& lightpos = light->getPos();
-			auto distToLight = (lightpos - r.org).length();
-
-			if (isHit && rec.t < distToLight) {
-				// Ray hits something, and the distance to the object is near than the distance to the light.
-				return false;
-			}
-			else {
-				// Ray don't hit anything, or the distance to the object is far than the distance to the light.
-				return true;
-			}
-		}
-
-		return false;
+		auto isHit = scene::hitLight(
+			funcHitTest,
+			light->param(),
+			lightPos,
+			r,
+			t_min, t_max,
+			rec);
+		
+		return isHit;
 	}
 
 	Light* scene::sampleLight(
@@ -107,7 +78,7 @@ namespace aten {
 			auto illum = color::luminance(lightsample.finalColor);
 
 			if (cosShadow > 0) {
-				if (light->isSingular() || light->isInifinite()) {
+				if (light->isSingular() || light->isInfinite()) {
 					costs[i] = illum * cosShadow / pdfLight;
 				}
 				else {

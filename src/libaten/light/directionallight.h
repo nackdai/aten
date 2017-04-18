@@ -5,17 +5,20 @@
 namespace aten {
 	class DirectionalLight : public Light {
 	public:
-		DirectionalLight() {}
+		DirectionalLight()
+			: Light(LightTypeDirectional)
+		{}
 		DirectionalLight(
 			const vec3& dir,
 			const vec3& le)
+			: Light(LightTypeDirectional)
 		{
 			m_param.dir = normalize(dir);
 			m_param.le = le;
 		}
 
 		DirectionalLight(Values& val)
-			: Light(val)
+			: Light(LightTypeDirectional, val)
 		{}
 
 		virtual ~DirectionalLight() {}
@@ -42,11 +45,6 @@ namespace aten {
 			result.finalColor = param.le;
 
 			return std::move(result);
-		}
-
-		virtual bool isInifinite() const override final
-		{
-			return true;
 		}
 	};
 }

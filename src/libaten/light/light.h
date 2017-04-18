@@ -18,6 +18,26 @@ namespace aten {
 		hitable* obj{ nullptr };	// light object(only for area light)
 	};
 
+	struct LightType {
+		struct {
+			const uint32_t isSingular : 1;
+			const uint32_t isInfinite : 1;
+			const uint32_t isIBL : 1;
+		};
+
+		LightType(
+			bool _isSingular = false,
+			bool _isInfinite = false,
+			bool _isIBL = false)
+			: isSingular(_isSingular), isInfinite(_isInfinite), isIBL(_isIBL)
+		{}
+	};
+
+	#define LightTypeArea			LightType(false, false, false)
+	#define LightTypeSingluar		LightType(true,  false, false)
+	#define LightTypeDirectional	LightType(true,  true,  false)
+	#define LightTypeIBL			LightType(false, true,  true)
+
 	struct LightParameter {
 		union {
 			vec3 pos;
@@ -50,14 +70,21 @@ namespace aten {
 		UnionIdxPtr object;
 		UnionIdxPtr envmap;
 
-		LightParameter() {}
+		LightType type;
+
+		LightParameter(const LightType& _type)
+			: type(_type)
+		{}
 	};
 
 	class Light : public hitable {
 	protected:
-		Light() {}
+		Light(const LightType& type)
+			: m_param(type)
+		{}
 
-		Light(Values& val)
+		Light(const LightType& type, Values& val)
+			: m_param(type)
 		{
 			m_param.pos = val.get("pos", m_param.pos);
 			m_param.dir = val.get("dir", m_param.dir);
@@ -99,19 +126,19 @@ namespace aten {
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const = 0;
 
-		virtual bool isSingular() const
+		bool isSingular() const
 		{
-			return true;
+			return m_param.type.isSingular;
 		}
 
-		virtual bool isInifinite() const
+		bool isInifinite() const
 		{
-			return false;
+			return m_param.type.isInfinite;
 		}
 
-		virtual bool isIBL() const
+		bool isIBL() const
 		{
-			return false;
+			return m_param.type.isIBL;
 		}
 
 		virtual const hitable* getLightObject() const

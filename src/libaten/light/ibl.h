@@ -7,14 +7,17 @@
 namespace aten {
 	class ImageBasedLight : public Light {
 	public:
-		ImageBasedLight() {}
+		ImageBasedLight()
+			: Light(LightTypeIBL)
+		{}
 		ImageBasedLight(envmap* envmap)
+			: Light(LightTypeIBL)
 		{
 			setEnvMap(envmap);
 		}
 
 		ImageBasedLight(Values& val)
-			: Light(val)
+			: Light(LightTypeIBL, val)
 		{
 			texture* tex = (texture*)val.get("envmap", nullptr);
 			
@@ -43,21 +46,6 @@ namespace aten {
 		real samplePdf(const ray& r) const;
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
-
-		virtual bool isSingular() const
-		{
-			return false;
-		}
-
-		virtual bool isInifinite() const override final
-		{
-			return true;
-		}
-
-		virtual bool isIBL() const override final
-		{
-			return true;
-		}
 
 	private:
 		void preCompute();

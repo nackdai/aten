@@ -5,15 +5,18 @@
 namespace aten {
 	class AreaLight : public Light {
 	public:
-		AreaLight() {}
+		AreaLight() 
+			: Light(LightTypeArea)
+		{}
 		AreaLight(hitable* obj, const vec3& le)
+			: Light(LightTypeArea)
 		{
 			m_param.object.ptr = obj;
 			m_param.le = le;
 		}
 
 		AreaLight(Values& val)
-			: Light(val)
+			: Light(LightTypeArea, val)
 		{
 			m_param.object.ptr = (hitable*)val.get("object", m_param.object.ptr);
 			m_param.le = val.get("color", m_param.le);
@@ -34,11 +37,6 @@ namespace aten {
 			hitrecord& rec);
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
-
-		virtual bool isSingular() const override final
-		{
-			return false;
-		}
 
 		virtual const hitable* getLightObject() const override final
 		{

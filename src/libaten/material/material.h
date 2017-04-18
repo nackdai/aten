@@ -98,9 +98,11 @@ namespace aten
 	class material {
 		friend class LayeredBSDF;
 
+		static std::vector<material*> g_materials;
+
 	protected:
 		material();
-		virtual ~material() {}
+		virtual ~material();
 
 		material(
 			const MaterialType& type,
@@ -223,6 +225,11 @@ namespace aten
 			}
 			return std::move(ret);
 		}
+
+		static uint32_t getMaterialNum();
+		static const material* getMaterial(uint32_t idx);
+		static const int findMaterialIdx(material* mtrl);
+		static const std::vector<material*>& getMaterials();
 
 	protected:
 		uint32_t m_id{ 0 };

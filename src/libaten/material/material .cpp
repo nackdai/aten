@@ -4,6 +4,37 @@
 
 namespace aten
 {
+	std::vector<material*> material::g_materials;
+
+	uint32_t material::getMaterialNum()
+	{
+		return (uint32_t)g_materials.size();
+	}
+
+	const material* material::getMaterial(uint32_t idx)
+	{
+		if (idx < g_materials.size()) {
+			return g_materials[idx];
+		}
+		return nullptr;
+	}
+
+	const int material::findMaterialIdx(material* mtrl)
+	{
+		auto found = std::find(g_materials.begin(), g_materials.end(), mtrl);
+		if (found != g_materials.end()) {
+			auto id = std::distance(g_materials.begin(), found);
+			AT_ASSERT(mtrl == g_materials[id]);
+			return id;
+		}
+		return -1;
+	}
+
+	const std::vector<material*>& material::getMaterials()
+	{
+		return g_materials;
+	}
+
 	// NOTE
 	// 0 ÇÕó\ñÒçœÇ›Ç»ÇÃÇ≈ÅA1 Ç©ÇÁénÇﬂÇÈ.
 	static std::atomic<uint32_t> g_id = 1;
@@ -12,6 +43,7 @@ namespace aten
 		: m_param(MaterialType())
 	{
 		m_id = g_id.fetch_add(1);
+		g_materials.push_back(this);
 	}
 
 	material::material(
@@ -23,6 +55,7 @@ namespace aten
 		: m_param(type)
 	{
 		m_id = g_id.fetch_add(1);
+		g_materials.push_back(this);
 
 		m_param.baseColor = clr;
 		m_param.ior = ior;
@@ -34,11 +67,20 @@ namespace aten
 		: m_param(type)
 	{
 		m_id = g_id.fetch_add(1);
+		g_materials.push_back(this);
 
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);
 		m_param.albedoMap.tex = (texture*)val.get("albedomap", (void*)m_param.albedoMap.tex);
 		m_param.normalMap.tex = (texture*)val.get("normalmap", (void*)m_param.normalMap.tex);
+	}
+
+	material::~material()
+	{
+		auto found = std::find(g_materials.begin(), g_materials.end(), this);
+		if (found != g_materials.end()) {
+			g_materials.erase(found);
+		}
 	}
 
 	NPRMaterial::NPRMaterial(const vec3& e, Light* light)

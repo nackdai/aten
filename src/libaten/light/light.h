@@ -78,20 +78,13 @@ namespace aten {
 	};
 
 	class Light : public hitable {
+		static std::vector<Light*> g_lights;
+
 	protected:
-		Light(const LightType& type)
-			: m_param(type)
-		{}
+		Light(const LightType& type);
+		Light(const LightType& type, Values& val);
 
-		Light(const LightType& type, Values& val)
-			: m_param(type)
-		{
-			m_param.pos = val.get("pos", m_param.pos);
-			m_param.dir = val.get("dir", m_param.dir);
-			m_param.le = val.get("le", m_param.le);
-		}
-
-		virtual ~Light() {}
+		virtual ~Light();
 
 	public:
 		void setPos(const vec3& pos)
@@ -162,6 +155,10 @@ namespace aten {
 			AT_ASSERT(false);
 			return std::move(aabb());
 		}
+
+		static uint32_t getLightNum();
+		static const Light* getLight(uint32_t idx);
+		static const std::vector<Light*>& getLights();
 
 	protected:
 		LightParameter m_param;

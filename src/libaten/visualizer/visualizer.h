@@ -63,8 +63,7 @@ namespace aten {
 			}
 			const FBO& getFbo() const
 			{
-				const FBO& fbo = getFbo();
-				return fbo;
+				return m_fbo;
 			}
 
 			PostProc* getPrevPass()

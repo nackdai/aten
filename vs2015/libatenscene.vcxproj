@@ -109,8 +109,8 @@
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -125,8 +125,8 @@
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32d.lib;OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,8 +146,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -167,8 +167,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/glfw/$(Platform)/src/$(Configuration);$(ProjectDir)../3rdparty/glew/lib/$(Configuration)/$(Platform);$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;glew32.lib;OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

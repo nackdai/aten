@@ -8,7 +8,8 @@ extern "C" {
 
 	void renderRayTracing(
 		aten::vec4* image,
-		int width, int height);
+		int width, int height,
+		const std::vector<aten::material*>& mtrls);
 
 #ifdef __cplusplus
 }

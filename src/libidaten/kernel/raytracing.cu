@@ -53,7 +53,7 @@ struct hitrecord {
 
 	float3 normal;
 
-	float3 color;
+	int mtrlid;
 
 	float area{ 1.0f };
 };
@@ -61,15 +61,22 @@ struct hitrecord {
 struct Sphere {
 	float radius;
 	float3 center;
-	float3 color;
+	int mtrlid;
 
 	Sphere() {}
-	Sphere(const float3& c, float r, const float3& clr)
+	Sphere(const float3& c, float r, int id)
 	{
 		radius = r;
 		center = c;
-		color = clr;
+		mtrlid = id;
 	}
+};
+
+struct Context {
+	int geomnum;
+	Sphere* spheres;
+
+	aten::MaterialParameter* mtrls;
 };
 
 __host__ __device__ bool intersectSphere(
@@ -103,7 +110,7 @@ __host__ __device__ bool intersectSphere(
 	rec->p = r->org + rec->t * r->dir;
 	rec->normal = (rec->p - sphere->center) / sphere->radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
 
-	rec->color = sphere->color;
+	rec->mtrlid = sphere->mtrlid;
 
 	rec->area = 4 * AT_MATH_PI * sphere->radius * sphere->radius;
 
@@ -192,14 +199,14 @@ __host__ __device__ void sampleCamera(
 
 __host__ __device__ bool intersect(
 	const Ray* r, hitrecord* rec,
-	const Sphere* spheres, const int num)
+	const Context* ctx)
 {
 	bool isHit = false;
 
 	hitrecord tmp;
 
-	for (int i = 0; i < num; i++) {
-		if (intersectSphere(&spheres[i], r, &tmp)) {
+	for (int i = 0; i < ctx->geomnum; i++) {
+		if (intersectSphere(&ctx->spheres[i], r, &tmp)) {
 			if (tmp.t < rec->t) {
 				*rec = tmp;
 
@@ -216,7 +223,8 @@ __global__ void raytracing(
 	float4* p,
 	int width, int height,
 	Camera* camera,
-	Sphere* spheres, int num)
+	Sphere* spheres, int num,
+	aten::MaterialParameter* mtrls)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -234,6 +242,12 @@ __host__ void raytracing(
 		return;
 	}
 
+	Context ctx;
+	{
+		ctx.geomnum = num;
+		ctx.spheres = spheres;
+	}
+
 	const auto idx = iy * camera->width + ix;
 
 	float s = ix / (float)camera->width;
@@ -244,8 +258,9 @@ __host__ void raytracing(
 
 	hitrecord rec;
 
-	if (intersect(&camsample.r, &rec, spheres, num)) {
-		p[idx] = make_float4(1, 0, 0, 1);
+	if (intersect(&camsample.r, &rec, &ctx)) {
+		const aten::MaterialParameter& m = mtrls[rec.mtrlid];
+		p[idx] = make_float4(m.baseColor.x, m.baseColor.y, m.baseColor.z, 1);
 	}
 	else {
 		p[idx] = make_float4(0, 0, 0, 1);
@@ -253,12 +268,14 @@ __host__ void raytracing(
 }
 
 static Sphere g_spheres[] = {
-	Sphere(make_float3(0, 0, -10), 1.0, make_float3(1, 0, 0)),
+	Sphere(make_float3(0, 0, -10), 1.0, 0),
+	Sphere(make_float3(3, 0, -10), 1.0, 1),
 };
 
 void renderRayTracing(
 	aten::vec4* image,
-	int width, int height)
+	int width, int height,
+	const std::vector<aten::material*>& mtrls)
 {
 	Camera camera;
 	initCamera(
@@ -272,10 +289,18 @@ void renderRayTracing(
 #if 1
 	aten::CudaMemory dst(sizeof(float4) * width * height);
 
-	aten::CudaMemory cam(&camera, sizeof(Camera));
+	aten::TypedCudaMemory<Camera> cam(&camera, 1);
 	
-	aten::CudaMemory spheres(sizeof(Sphere) * AT_COUNTOF(g_spheres));
-	spheres.write(g_spheres, sizeof(g_spheres));
+	aten::TypedCudaMemory<Sphere> spheres(AT_COUNTOF(g_spheres));
+	spheres.writeByNum(g_spheres, AT_COUNTOF(g_spheres));
+
+	std::vector<aten::MaterialParameter> mtrlparams;
+	for (auto m : mtrls) {
+		mtrlparams.push_back(m->param());
+	}
+
+	aten::TypedCudaMemory<aten::MaterialParameter> materials(mtrlparams.size());
+	materials.writeByNum(&mtrlparams[0], mtrlparams.size());
 
 	dim3 block(32, 32);
 	dim3 grid(
@@ -285,8 +310,9 @@ void renderRayTracing(
 	raytracing << <grid, block >> > (
 		(float4*)dst.ptr(), 
 		width, height, 
-		(Camera*)cam.ptr(),
-		(Sphere*)spheres.ptr(), AT_COUNTOF(g_spheres));
+		cam.ptr(),
+		spheres.ptr(), AT_COUNTOF(g_spheres),
+		materials.ptr());
 
 	checkCudaErrors(cudaDeviceSynchronize());
 

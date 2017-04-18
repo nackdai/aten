@@ -88,9 +88,14 @@ static uint32_t g_threadnum = 1;
 
 static aten::Film g_buffer(WIDTH, HEIGHT);
 
+static std::vector<aten::material*> g_mtrls;
+
 void display()
 {
-	renderRayTracing(g_buffer.image(), WIDTH, HEIGHT);
+	renderRayTracing(
+		g_buffer.image(), 
+		WIDTH, HEIGHT,
+		g_mtrls);
 
 	aten::visualizer::render(g_buffer.image(), false);
 }
@@ -112,6 +117,9 @@ int main()
 	blitter.setIsRenderRGB(true);
 
 	aten::visualizer::addPostProc(&blitter);
+
+	g_mtrls.push_back(new aten::lambert(aten::vec3(1, 0, 0)));
+	g_mtrls.push_back(new aten::lambert(aten::vec3(0, 1, 0)));
 
 	aten::window::run(display);
 

@@ -54,29 +54,4 @@ namespace aten {
 
 		return std::move(result);
 	}
-
-	bool AreaLight::hit(
-		const ray& r,
-		real t_min, real t_max,
-		hitrecord& rec) const
-	{
-		return hit(m_param, r, t_min, t_max, rec);
-	}
-
-	bool AreaLight::hit(
-		const LightParameter& param,
-		const ray& r,
-		real t_min, real t_max,
-		hitrecord& rec)
-	{
-		bool isHit = false;
-
-		const hitable* obj = (hitable*)param.object.ptr;
-
-		if (obj) {
-			isHit = obj->hit(r, t_min, t_max, rec);
-		}
-
-		return isHit;
-	}
 }

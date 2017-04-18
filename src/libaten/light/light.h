@@ -77,7 +77,7 @@ namespace aten {
 		{}
 	};
 
-	class Light : public hitable {
+	class Light {
 		static std::vector<Light*> g_lights;
 
 	protected:
@@ -139,26 +139,17 @@ namespace aten {
 			return nullptr;
 		}
 
-		virtual bool hit(
-			const ray& r,
-			real t_min, real t_max,
-			hitrecord& rec) const override
-		{
-			// Usually, light is not hit.
-			AT_ASSERT(false);
-			return false;
-		}
-
-		virtual aabb getBoundingbox() const
-		{
-			// Most light don't have bounding box...
-			AT_ASSERT(false);
-			return std::move(aabb());
-		}
-
 		const LightParameter& param() const
 		{
 			return m_param;
+		}
+
+		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
+		{
+			// TODO
+			// Only for AreaLight...
+			AT_ASSERT(false);
+			return std::move(hitable::SamplingPosNormalPdf(vec3(0), vec3(1, 0, 0), real(0)));
 		}
 
 		static uint32_t getLightNum();

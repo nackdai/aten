@@ -39,18 +39,9 @@ namespace aten {
 	#define LightTypeIBL			LightType(false, true,  true)
 
 	struct LightParameter {
-		union {
-			vec3 pos;
-			real posArray[3];
-		};
-		union {
-			vec3 dir;
-			real dirArray[3];
-		};
-		union {
-			vec3 le;
-			real leArray[3];
-		};
+		vec3 pos;
+		vec3 dir;
+		vec3 le;
 
 		// For pointlight, spotlight.
 		real constAttn{ 1 };
@@ -58,8 +49,8 @@ namespace aten {
 		real expAttn{ 0 };
 
 		// For spotlight.
-		real innerAngle;
-		real outerAngle;
+		real innerAngle{ AT_MATH_PI };
+		real outerAngle{ AT_MATH_PI };
 		real falloff{ 0 };
 
 		union UnionIdxPtr {

@@ -43,11 +43,7 @@ namespace aten
 	#define MaterialTypeNPR			aten::MaterialType(false, false, false, false, true)
 
 	struct MaterialParameter {
-		// サーフェイスカラー，通常テクスチャマップによって供給される.
-		union {
-			vec3 baseColor;
-			real baseColorArray[3];
-		};
+		vec3 baseColor;					// サーフェイスカラー，通常テクスチャマップによって供給される.
 
 		real ior{ 1.0f };
 		real roughness{ 0.0f };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.

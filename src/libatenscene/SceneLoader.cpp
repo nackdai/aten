@@ -166,7 +166,7 @@ namespace aten
 	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
 	{
 		aten::PolymorphicValue v;
-		v.val.f = a->DoubleValue();
+		v.val.f = (real)a->DoubleValue();
 		return std::move(v);
 	}
 

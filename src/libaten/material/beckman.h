@@ -6,21 +6,20 @@ namespace aten
 {
 	class MicrofacetBeckman : public material {
 	public:
-		MicrofacetBeckman() {}
 		MicrofacetBeckman(
 			const vec3& albedo,
 			real roughness, real ior,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(albedo, ior, albedoMap, normalMap)
+			: material(MaterialTypeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
 			m_param.roughnessMap.tex = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
 		MicrofacetBeckman(Values& val)
-			: material(val)
+			: material(MaterialTypeMicrofacet, val)
 		{
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
@@ -60,11 +59,6 @@ namespace aten
 			sampler* sampler,
 			real u, real v,
 			bool isLightPath = false);
-
-		virtual bool isGlossy() const override final
-		{
-			return (m_param.roughness == 1 ? false : true);
-		}
 
 		virtual real pdf(
 			const vec3& normal, 

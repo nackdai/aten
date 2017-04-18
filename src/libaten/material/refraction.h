@@ -6,19 +6,18 @@ namespace aten
 {
 	class refraction : public material {
 	public:
-		refraction() {}
 		refraction(
 			const vec3& albedo,
 			real ior,
 			bool isIdealRefraction = false,
 			texture* normalMap = nullptr)
-			: material(albedo, ior, nullptr, normalMap)
+			: material(MaterialTypeRefraction, albedo, ior, nullptr, normalMap)
 		{
 			m_param.isIdealRefraction = isIdealRefraction;
 		}
 
 		refraction(Values& val)
-			: material(val)
+			: material(MaterialTypeRefraction, val)
 		{
 			m_param.isIdealRefraction = val.get("isIdealRefraction", m_param.isIdealRefraction);
 		}
@@ -26,21 +25,6 @@ namespace aten
 		virtual ~refraction() {}
 
 	public:
-		virtual bool isSingular() const override final
-		{
-			return true;
-		}
-
-		virtual bool isTranslucent() const override final
-		{
-			return true;
-		}
-
-		virtual bool isGlossy() const override final
-		{
-			return true;
-		}
-
 		bool setIsIdealRefraction(bool f)
 		{
 			m_param.isIdealRefraction = f;

@@ -7,21 +7,20 @@ namespace aten
 {
 	class OrenNayar : public material {
 	public:
-		OrenNayar() {}
 		OrenNayar(
 			const vec3& albedo,
 			real roughness,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(albedo, 1, albedoMap, normalMap)
+			: material(MaterialTypeLambert, albedo, 1, albedoMap, normalMap)
 		{
 			m_param.roughnessMap.tex = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
 		OrenNayar(Values& val)
-			: material(val)
+			: material(MaterialTypeLambert, val)
 		{
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
@@ -61,11 +60,6 @@ namespace aten
 			sampler* sampler,
 			real u, real v,
 			bool isLightPath = false);
-
-		virtual bool isGlossy() const override final
-		{
-			return false;
-		}
 
 		virtual real pdf(
 			const vec3& normal, 

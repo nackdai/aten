@@ -6,31 +6,20 @@ namespace aten
 {
 	class specular : public material {
 	public:
-		specular() {}
 		specular(
 			const vec3& albedo,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(albedo, 0, albedoMap, normalMap)
+			: material(MaterialTypeSpecular, albedo, 0, albedoMap, normalMap)
 		{}
 
 		specular(Values& val)
-			: material(val)
+			: material(MaterialTypeSpecular, val)
 		{}
 
 		virtual ~specular() {}
 
 	public:
-		virtual bool isSingular() const override final
-		{
-			return true;
-		}
-
-		virtual bool isGlossy() const override final
-		{
-			return true;
-		}
-
 		static real pdf(
 			const MaterialParameter& param,
 			const vec3& normal,

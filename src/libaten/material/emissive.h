@@ -6,27 +6,17 @@ namespace aten
 {
 	class emissive : public material {
 	public:
-		emissive() {}
 		emissive(const vec3& e)
-			: material(e)
+			: material(MaterialTypeEmissive, e)
 		{}
 
 		emissive(Values& val)
-			: material(val)
+			: material(MaterialTypeEmissive, val)
 		{}
 
 		virtual ~emissive() {}
 
-		virtual bool isEmissive() const override final
-		{
-			return true;
-		}
-
-		virtual bool isGlossy() const override final
-		{
-			return false;
-		}
-
+	public:
 		virtual real pdf(
 			const vec3& normal,
 			const vec3& wi,

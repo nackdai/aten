@@ -6,19 +6,18 @@ namespace aten
 {
 	class MicrofacetBlinn : public material {
 	public:
-		MicrofacetBlinn() {}
 		MicrofacetBlinn(
 			const vec3& albedo,
 			real shininess, real ior,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(albedo, ior, albedoMap, normalMap)
+			: material(MaterialTypeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
 			m_param.shininess = shininess;
 		}
 
 		MicrofacetBlinn(Values& val)
-			: material(val)
+			: material(MaterialTypeMicrofacet, val)
 		{
 			m_param.shininess = val.get("shininess", m_param.shininess);
 		}
@@ -55,11 +54,6 @@ namespace aten
 			sampler* sampler,
 			real u, real v,
 			bool isLightPath = false);
-
-		virtual bool isGlossy() const override final
-		{
-			return (m_param.shininess == 0 ? false : true);
-		}
 
 		virtual real pdf(
 			const vec3& normal, 

@@ -7,26 +7,20 @@ namespace aten
 {
 	class lambert : public material {
 	public:
-		lambert() {}
 		lambert(
 			const vec3& albedo, 
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(albedo, 0, albedoMap, normalMap)
+			: material(MaterialTypeLambert, albedo, 0, albedoMap, normalMap)
 		{}
 
 		lambert(Values& val)
-			: material(val)
+			: material(MaterialTypeLambert, val)
 		{}
 
 		virtual ~lambert() {}
 
 	public:
-		virtual bool isGlossy() const override final
-		{
-			return false;
-		}
-
 		static real pdf(
 			const MaterialParameter& param,
 			const vec3& normal,

@@ -21,7 +21,6 @@ namespace aten
 			real clearcoatGloss{ 1 };
 		};
 	public:
-		DisneyBRDF() {}
 		DisneyBRDF(
 			vec3 baseColor,
 			real subsurface,
@@ -37,7 +36,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(baseColor, 1, albedoMap, normalMap)
+			: material(MaterialTypeMicrofacet, baseColor, 1, albedoMap, normalMap)
 		{
 			m_param.baseColor = baseColor;
 			m_param.subsurface = aten::clamp<real>(subsurface, 0, 1);
@@ -59,7 +58,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(param.baseColor, 1, albedoMap, normalMap)
+			: material(MaterialTypeMicrofacet, param.baseColor, 1, albedoMap, normalMap)
 		{
 			m_param.baseColor = param.baseColor;
 			m_param.subsurface = aten::clamp<real>(param.subsurface, 0, 1);
@@ -77,7 +76,7 @@ namespace aten
 		}
 
 		DisneyBRDF(Values& val)
-			: material(val)
+			: material(MaterialTypeMicrofacet, val)
 		{
 			// TODO
 			// Clamp parameters.
@@ -97,11 +96,6 @@ namespace aten
 		virtual ~DisneyBRDF() {}
 
 	public:
-		virtual bool isGlossy() const override final
-		{
-			return (m_param.roughness == 1 ? false : true);
-		}
-
 		virtual real pdf(
 			const vec3& normal, 
 			const vec3& wi,

@@ -46,7 +46,7 @@ namespace aten {
 
 						t_max = tmp.t;
 
-isHit = true;
+						isHit = true;
 					}
 				}
 			}

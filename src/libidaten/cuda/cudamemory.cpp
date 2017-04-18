@@ -10,7 +10,7 @@ namespace aten {
 		init(bytes);
 	}
 
-	CudaMemory::CudaMemory(void* p, uint32_t bytes)
+	CudaMemory::CudaMemory(const void* p, uint32_t bytes)
 	{
 		init(bytes);
 		write(p, bytes);
@@ -29,7 +29,7 @@ namespace aten {
 		g_heapsize += bytes;
 	}
 
-	__host__ uint32_t CudaMemory::write(void* p, uint32_t size)
+	__host__ uint32_t CudaMemory::write(const void* p, uint32_t size)
 	{
 		if (!m_device) {
 			AT_ASSERT(false);

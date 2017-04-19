@@ -73,7 +73,11 @@ namespace aten {
 	public:
 		__host__ uint32_t writeByNum(const _T* p, uint32_t num)
 		{
-			return CudaMemory::write(p, sizeof(_T) * num);
+			auto ret = CudaMemory::write(p, sizeof(_T) * num);
+			if (ret > 0) {
+				m_cur += num;
+			}
+			return ret;
 		}
 
 		__host__ uint32_t readByNum(void* p, uint32_t num)
@@ -81,9 +85,14 @@ namespace aten {
 			return CudaMemory::read(p, sizeof(_T) * num);
 		}
 
-		uint32_t num() const
+		uint32_t maxNum() const
 		{
 			return m_num;
+		}
+
+		uint32_t num() const
+		{
+			return m_cur;
 		}
 
 		const _T* ptr() const
@@ -97,5 +106,6 @@ namespace aten {
 
 	private:
 		uint32_t m_num{ 0 };
+		uint32_t m_cur{ 0 };
 	};
 }

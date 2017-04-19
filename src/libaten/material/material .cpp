@@ -19,7 +19,7 @@ namespace aten
 		return nullptr;
 	}
 
-	const int material::findMaterialIdx(material* mtrl)
+	int material::findMaterialIdx(material* mtrl)
 	{
 		auto found = std::find(g_materials.begin(), g_materials.end(), mtrl);
 		if (found != g_materials.end()) {

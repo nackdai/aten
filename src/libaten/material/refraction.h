@@ -25,7 +25,7 @@ namespace aten
 		virtual ~refraction() {}
 
 	public:
-		bool setIsIdealRefraction(bool f)
+		void setIsIdealRefraction(bool f)
 		{
 			m_param.isIdealRefraction = f;
 		}

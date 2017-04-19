@@ -224,7 +224,7 @@ namespace aten
 
 		static uint32_t getMaterialNum();
 		static const material* getMaterial(uint32_t idx);
-		static const int findMaterialIdx(material* mtrl);
+		static int findMaterialIdx(material* mtrl);
 		static const std::vector<material*>& getMaterials();
 
 	protected:

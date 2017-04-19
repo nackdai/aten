@@ -76,6 +76,7 @@
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">

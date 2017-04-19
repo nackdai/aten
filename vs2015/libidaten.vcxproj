@@ -74,7 +74,9 @@
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu" />
+    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+    </CudaCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F1F65E75-E655-449E-8115-186423D33147}</ProjectGuid>

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <climits>
 
-#define TYPE_DOUBLE
+//#define TYPE_DOUBLE
 
 namespace aten {
 #ifdef TYPE_DOUBLE

@@ -25,7 +25,7 @@ namespace aten {
 			const uint32_t isIBL : 1;
 		};
 
-		LightType(
+		AT_DEVICE_API LightType(
 			bool _isSingular = false,
 			bool _isInfinite = false,
 			bool _isIBL = false)
@@ -63,7 +63,7 @@ namespace aten {
 
 		LightType type;
 
-		LightParameter(const LightType& _type)
+		AT_DEVICE_API LightParameter(const LightType& _type)
 			: type(_type)
 		{}
 	};

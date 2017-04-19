@@ -91,7 +91,7 @@ static aten::Film g_buffer(WIDTH, HEIGHT);
 void display()
 {
 	renderRayTracing(
-		g_buffer.image(), 
+		g_buffer.image(),
 		WIDTH, HEIGHT,
 		aten::material::getMaterials());
 
@@ -116,7 +116,7 @@ int main()
 
 	aten::visualizer::addPostProc(&blitter);
 
-	new aten::lambert(aten::vec3(1, 0, 0));
+	new aten::emissive(aten::vec3(1, 0, 0));
 	new aten::lambert(aten::vec3(0, 1, 0));
 
 	aten::window::run(display);

@@ -230,16 +230,74 @@ __global__ void raytracing(
 
 	int depth = 0;
 
+	aten::ray ray = camsample.r;
+
 	while (depth < 5) {
 		aten::hitrecord rec;
 
-		if (intersect(&camsample.r, &rec, &ctx)) {
+		if (intersect(&ray, &rec, &ctx)) {
 			const aten::MaterialParameter& m = ctx.mtrls[rec.mtrlid];
 
 			if (m.type.isEmissive) {
 				auto emit = m.baseColor;
 				contrib = throughput * emit;
 				break;
+			}
+
+			// 交差位置の法線.
+			// 物体からのレイの入出を考慮.
+			const aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
+
+			if (m.type.isSingular || m.type.isTranslucent) {
+			}
+			else {
+				// TODO
+				auto* sphere = &ctx.spheres[0];;
+				aten::LightParameter light(aten::LightTypeArea);
+				light.object.ptr = sphere;
+
+				aten::LightSampleResult sampleres;
+				{
+					sampleres.pos = sphere->center;
+					sampleres.dir = sampleres.pos - rec.p;
+					sampleres.nml = normalize(-sampleres.dir);
+					sampleres.le = ctx.mtrls[sphere->mtrlid].baseColor;
+				}
+
+				aten::vec3 dirToLight = sampleres.dir;
+				auto len = dirToLight.length();
+
+				dirToLight.normalize();
+
+				auto albedo = m.baseColor;
+
+				aten::ray shadowRay(rec.p, dirToLight);
+
+				aten::hitrecord tmpRec;
+
+				auto funcHitTest = [&] AT_DEVICE_API (const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
+				{
+					return intersect(&_r, &_rec, &ctx);
+				};
+
+				if (aten::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+					auto lightColor = sampleres.finalColor;
+
+					if (light.type.isInfinite) {
+						len = 1.0f;
+					}
+
+					const auto c0 = max(0.0f, dot(orienting_normal, dirToLight));
+					float c1 = 1.0f;
+
+					if (!light.type.isSingular) {
+						c1 = max(0.0f, dot(sampleres.nml, -dirToLight));
+					}
+
+					auto G = c0 * c1 / (len * len);
+
+					contrib += throughput * (albedo * lightColor) * G;
+				}
 			}
 		}
 		else {

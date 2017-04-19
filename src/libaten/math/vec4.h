@@ -142,7 +142,7 @@ namespace aten {
 			return ret;
 		}
 
-		void normalize()
+		inline AT_DEVICE_API void normalize()
 		{
 			auto invLen = aten::rsqrt(squared_length());
 			*this *= invLen;

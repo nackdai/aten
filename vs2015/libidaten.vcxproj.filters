@@ -17,7 +17,6 @@
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h">
       <Filter>cuda</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h" />
     <ClInclude Include="..\src\libaten\light\directionallight.h">
       <Filter>aten\light</Filter>
     </ClInclude>
@@ -89,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\math\intersect.h">
       <Filter>aten\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\defs.h">
+      <Filter>aten</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\types.h">
+      <Filter>aten</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -168,8 +173,5 @@
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="libidaten.rc" />
   </ItemGroup>
 </Project>

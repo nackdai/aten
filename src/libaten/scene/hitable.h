@@ -28,12 +28,21 @@ namespace aten {
 		real area{ real(1) };
 
 		union {
+			// TODO
+#ifdef __AT_CUDA__
+			void* obj{ nullptr };
+#else
 			hitable* obj{ nullptr };
+#endif
 			int objid;
 		};
 
 		union {
+#ifdef __AT_CUDA__
+			void* mtrl{ nullptr };
+#else
 			material* mtrl{ nullptr };
+#endif
 			int mtrlid;
 		};
 	};

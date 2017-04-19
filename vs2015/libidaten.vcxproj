@@ -19,6 +19,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\libaten\light\arealight.h" />
+    <ClInclude Include="..\src\libaten\light\directionallight.h" />
+    <ClInclude Include="..\src\libaten\light\ibl.h" />
+    <ClInclude Include="..\src\libaten\light\light.h" />
+    <ClInclude Include="..\src\libaten\light\pointlight.h" />
+    <ClInclude Include="..\src\libaten\light\spotlight.h" />
+    <ClInclude Include="..\src\libaten\material\beckman.h" />
+    <ClInclude Include="..\src\libaten\material\blinn.h" />
+    <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
+    <ClInclude Include="..\src\libaten\material\emissive.h" />
+    <ClInclude Include="..\src\libaten\material\ggx.h" />
+    <ClInclude Include="..\src\libaten\material\lambert.h" />
+    <ClInclude Include="..\src\libaten\material\layer.h" />
+    <ClInclude Include="..\src\libaten\material\material.h" />
+    <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
+    <ClInclude Include="..\src\libaten\material\refraction.h" />
+    <ClInclude Include="..\src\libaten\material\specular.h" />
+    <ClInclude Include="..\src\libaten\material\toon.h" />
+    <ClInclude Include="..\src\libaten\math\intersect.h" />
+    <ClInclude Include="..\src\libaten\math\mat4.h" />
+    <ClInclude Include="..\src\libaten\math\math.h" />
+    <ClInclude Include="..\src\libaten\math\ray.h" />
+    <ClInclude Include="..\src\libaten\math\vec3.h" />
+    <ClInclude Include="..\src\libaten\math\vec4.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
@@ -27,6 +51,22 @@
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libaten\light\arealight.cpp" />
+    <ClCompile Include="..\src\libaten\light\ibl.cpp" />
+    <ClCompile Include="..\src\libaten\light\light.cpp" />
+    <ClCompile Include="..\src\libaten\material\beckman.cpp" />
+    <ClCompile Include="..\src\libaten\material\blinn.cpp" />
+    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
+    <ClCompile Include="..\src\libaten\material\emissive.cpp" />
+    <ClCompile Include="..\src\libaten\material\ggx.cpp" />
+    <ClCompile Include="..\src\libaten\material\lambert.cpp" />
+    <ClCompile Include="..\src\libaten\material\layer.cpp" />
+    <ClCompile Include="..\src\libaten\material\material .cpp" />
+    <ClCompile Include="..\src\libaten\material\oren_nayar.cpp" />
+    <ClCompile Include="..\src\libaten\material\refraction.cpp" />
+    <ClCompile Include="..\src\libaten\material\specular.cpp" />
+    <ClCompile Include="..\src\libaten\material\toon.cpp" />
+    <ClCompile Include="..\src\libaten\math\mat4.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,79 @@
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h">
       <Filter>cuda</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="..\src\libaten\light\directionallight.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\ibl.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\light.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\pointlight.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\spotlight.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\light\arealight.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\ggx.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\lambert.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\layer.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\material.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\oren_nayar.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\refraction.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\specular.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\toon.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\beckman.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\blinn.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\disney_brdf.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\emissive.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\mat4.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\math.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\ray.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\vec3.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\vec4.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\math\intersect.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -25,15 +98,78 @@
     <Filter Include="kernel">
       <UniqueIdentifier>{191682f4-577f-4778-8962-047a627e8058}</UniqueIdentifier>
     </Filter>
+    <Filter Include="aten">
+      <UniqueIdentifier>{ba2cb3b8-f63a-4ccd-b936-bcc4cc095c79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\light">
+      <UniqueIdentifier>{4816c81d-e5c4-4038-81d4-36bc0a4b8972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\material">
+      <UniqueIdentifier>{78669d23-3a2d-4c40-b87d-5100aed0136e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\math">
+      <UniqueIdentifier>{524e2d9a-371d-41f3-8180-add753a40a60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
       <Filter>cuda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\light\ibl.cpp">
+      <Filter>aten\light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\light\light.cpp">
+      <Filter>aten\light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\light\arealight.cpp">
+      <Filter>aten\light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\lambert.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\layer.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\material .cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\oren_nayar.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\refraction.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\specular.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\toon.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\beckman.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\blinn.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\emissive.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\ggx.cpp">
+      <Filter>aten\material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\math\mat4.cpp">
+      <Filter>aten\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="libidaten.rc" />
   </ItemGroup>
 </Project>

@@ -16,6 +16,7 @@ namespace aten {
 		if (lightobj) {
 			// Area Light.
 			if (isHit) {
+#if 0
 				hitrecord tmpRec;
 				if (lightobj->hit(r, t_min, t_max, tmpRec)) {
 					auto dist2 = (tmpRec.p - r.org).squared_length();
@@ -26,6 +27,15 @@ namespace aten {
 						return true;
 					}
 				}
+#else
+				auto dist = (rec.p - r.org).length();
+
+				if (rec.obj == lightobj
+					&& aten::abs(dist - rec.t) <= AT_MATH_EPSILON)
+				{
+					return true;
+				}
+#endif
 			}
 		}
 

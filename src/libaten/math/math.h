@@ -14,12 +14,10 @@
 	#define AT_MATH_INF				DBL_MAX
 	//#define AT_MATH_EPSILON		DBL_EPSILON
 	#define AT_MATH_EPSILON			(1e-6)
-	#define AT_MATH_EPSILIN_SQRT	(1e-3)
 #else
 	#define AT_MATH_INF				FLT_MAX
 	//#define AT_MATH_EPSILON		FLT_EPSILON
-	#define AT_MATH_EPSILON			(float)(1e-6)
-	#define AT_MATH_EPSILIN_SQRT	(float)(1e-3)
+	#define AT_MATH_EPSILON			(float)(1e-3)
 #endif
 #else
 #ifdef TYPE_DOUBLE
@@ -28,8 +26,7 @@
 	#define AT_MATH_EPSILIN_SQRT	(1e-3)
 #else
 	#define AT_MATH_INF				(float)(1e32)
-	#define AT_MATH_EPSILON			(float)(1e-6)
-	#define AT_MATH_EPSILIN_SQRT	(float)(1e-3)
+	#define AT_MATH_EPSILON			(float)(1e-3)
 #endif
 #endif
 

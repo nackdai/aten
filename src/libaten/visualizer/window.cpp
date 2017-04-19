@@ -26,7 +26,7 @@ namespace aten {
 		result = ::SetCurrentDirectory(buf);
 		AT_ASSERT(result);
 
-		return result;
+		return result ? true : false;
 	}
 
 	bool window::init(int width, int height, const char* title)

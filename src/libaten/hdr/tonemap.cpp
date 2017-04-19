@@ -155,8 +155,8 @@ namespace aten
 
 		static const float middleGrey = 0.18f;
 
-		const float coeff = middleGrey / aten::exp(lum);
-		const float l_max = coeff * maxlum;
+		const float coeff = (float)(middleGrey / aten::exp(lum));
+		const float l_max = (float)(coeff * maxlum);
 
 		auto hCoeff = getHandle("coeff");
 		CALL_GL_API(::glUniform1f(hCoeff, coeff));

@@ -41,7 +41,7 @@ namespace aten {
 	// F‹——£‚Ìd‚İŒvZ.
 	static inline real kernelR(real cdist, real sigmaR)
 	{
-		auto w = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaR) * exp(-0.5f * (cdist * cdist) / (sigmaR * sigmaR));
+		auto w = real(1) / aten::sqrt(real(2) * AT_MATH_PI * sigmaR) * aten::exp(real(-0.5) * (cdist * cdist) / (sigmaR * sigmaR));
 		return w;
 	}
 
@@ -73,7 +73,7 @@ namespace aten {
 				distW[v].resize(1 + r);
 
 				for (int u = 0; u <= r; u++) {
-					distW[v][u] = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaS) * exp(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
+					distW[v][u] = (float)(real(1) / aten::sqrt(real(2) * AT_MATH_PI * sigmaS) * aten::exp(real(-0.5) * (u * u + v * v) / (_sigmaS * _sigmaS)));
 				}
 			}
 		}
@@ -213,7 +213,7 @@ namespace aten {
 
 			for (int v = 0; v <= radius; v++) {
 				for (int u = 0; u <= radius; u++) {
-					distW[v][u] = 1.0f / sqrtf(2.0f * AT_MATH_PI * m_sigmaS) * expf(-0.5f * (u * u + v * v) / (_sigmaS * _sigmaS));
+					distW[v][u] = (float)(real(1) / aten::sqrt(real(2) * AT_MATH_PI * m_sigmaS) * aten::exp(real(-0.5) * (u * u + v * v) / (_sigmaS * _sigmaS)));
 				}
 			}
 

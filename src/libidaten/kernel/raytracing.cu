@@ -9,22 +9,10 @@
 
 #include "aten.h"
 
-struct Ray {
-	float3 org;
-	float3 dir;
-
-	__host__ __device__ Ray() {}
-	__host__ __device__ Ray(float3 _org, float3 _dir)
-	{
-		org = _org;
-		dir = normalize(_dir);
-	}
-};
-
 // 直行ベクトルを計算.
-__host__ __device__ float3 getOrthoVector(const float3& n)
+__host__ __device__ aten::vec3 getOrthoVector(const aten::vec3& n)
 {
-	float3 p;
+	aten::vec3 p;
 
 	// NOTE
 	// dotを計算したときにゼロになるようなベクトル.
@@ -49,9 +37,9 @@ __host__ __device__ float3 getOrthoVector(const float3& n)
 struct hitrecord {
 	float t{ AT_MATH_INF };
 
-	float3 p;
+	aten::vec3 p;
 
-	float3 normal;
+	aten::vec3 normal;
 
 	int mtrlid;
 
@@ -60,11 +48,11 @@ struct hitrecord {
 
 struct Sphere {
 	float radius;
-	float3 center;
+	aten::vec3 center;
 	int mtrlid;
 
 	Sphere() {}
-	Sphere(const float3& c, float r, int id)
+	Sphere(const aten::vec3& c, float r, int id)
 	{
 		radius = r;
 		center = c;
@@ -81,9 +69,9 @@ struct Context {
 
 __host__ __device__ bool intersectSphere(
 	const Sphere* sphere,
-	const Ray* r, hitrecord* rec)
+	const aten::ray* r, hitrecord* rec)
 {
-	const float3 p_o = sphere->center - r->org;
+	const aten::vec3 p_o = sphere->center - r->org;
 	const float b = dot(p_o, r->dir);
 
 	// 判別式.
@@ -118,25 +106,25 @@ __host__ __device__ bool intersectSphere(
 }
 
 struct CameraSampleResult {
-	Ray r;
-	float3 posOnLens;
-	float3 nmlOnLens;
+	aten::ray r;
+	aten::vec3 posOnLens;
+	aten::vec3 nmlOnLens;
 
 	__host__ __device__ CameraSampleResult() {}
 };
 
 struct Camera {
-	float3 origin;
+	aten::vec3 origin;
 
 	float aspect;
-	float3 center;
+	aten::vec3 center;
 
-	float3 u;
-	float3 v;
+	aten::vec3 u;
+	aten::vec3 v;
 
-	float3 dir;
-	float3 right;
-	float3 up;
+	aten::vec3 dir;
+	aten::vec3 right;
+	aten::vec3 up;
 
 	float dist;
 	int width;
@@ -145,9 +133,9 @@ struct Camera {
 
 __host__ void initCamera(
 	Camera& camera,
-	const float3& origin,
-	const float3& lookat,
-	const float3& up,
+	const aten::vec3& origin,
+	const aten::vec3& lookat,
+	const aten::vec3& up,
 	float vfov,	// vertical fov.
 	uint32_t width, uint32_t height)
 {
@@ -194,11 +182,11 @@ __host__ __device__ void sampleCamera(
 
 	sample->posOnLens = screenPos;
 	sample->nmlOnLens = camera->dir;
-	sample->r = Ray(camera->origin, dirToScr);
+	sample->r = aten::ray(camera->origin, dirToScr);
 }
 
 __host__ __device__ bool intersect(
-	const Ray* r, hitrecord* rec,
+	const aten::ray* r, hitrecord* rec,
 	const Context* ctx)
 {
 	bool isHit = false;
@@ -268,8 +256,8 @@ __host__ void raytracing(
 }
 
 static Sphere g_spheres[] = {
-	Sphere(make_float3(0, 0, -10), 1.0, 0),
-	Sphere(make_float3(3, 0, -10), 1.0, 1),
+	Sphere(aten::vec3(0, 0, -10), 1.0, 0),
+	Sphere(aten::vec3(3, 0, -10), 1.0, 1),
 };
 
 void renderRayTracing(
@@ -280,9 +268,9 @@ void renderRayTracing(
 	Camera camera;
 	initCamera(
 		camera,
-		make_float3(0, 0, 0),
-		make_float3(0, 0, -1),
-		make_float3(0, 1, 0),
+		aten::vec3(0, 0, 0),
+		aten::vec3(0, 0, -1),
+		aten::vec3(0, 1, 0),
 		30,
 		width, height);
 

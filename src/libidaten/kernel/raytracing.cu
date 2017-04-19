@@ -196,7 +196,6 @@ __host__ __device__ bool intersect(
 	return isHit;
 }
 
-#if 1
 __global__ void raytracing(
 	float4* p,
 	int width, int height,
@@ -206,15 +205,6 @@ __global__ void raytracing(
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-#else
-__host__ void raytracing(
-	int ix, int iy,
-	float4* p,
-	int width, int height,
-	Camera* camera,
-	Sphere* spheres, int num)
-{
-#endif
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -224,6 +214,7 @@ __host__ void raytracing(
 	{
 		ctx.geomnum = num;
 		ctx.spheres = spheres;
+		ctx.mtrls = mtrls;
 	}
 
 	const auto idx = iy * camera->width + ix;
@@ -234,15 +225,31 @@ __host__ void raytracing(
 	CameraSampleResult camsample;
 	sampleCamera(&camsample, camera, s, t);
 
-	aten::hitrecord rec;
+	aten::vec3 contrib(0);
+	aten::vec3 throughput(1);
 
-	if (intersect(&camsample.r, &rec, &ctx)) {
-		const aten::MaterialParameter& m = mtrls[rec.mtrlid];
-		p[idx] = make_float4(m.baseColor.x, m.baseColor.y, m.baseColor.z, 1);
+	int depth = 0;
+
+	while (depth < 5) {
+		aten::hitrecord rec;
+
+		if (intersect(&camsample.r, &rec, &ctx)) {
+			const aten::MaterialParameter& m = ctx.mtrls[rec.mtrlid];
+
+			if (m.type.isEmissive) {
+				auto emit = m.baseColor;
+				contrib = throughput * emit;
+				break;
+			}
+		}
+		else {
+			break;
+		}
+
+		depth++;
 	}
-	else {
-		p[idx] = make_float4(0, 0, 0, 1);
-	}
+
+	p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
 }
 
 static Sphere g_spheres[] = {

@@ -9,21 +9,50 @@ namespace aten {
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
-		auto funcHitTest = [&](const ray& _r, real _t_min, real _t_max, hitrecord& _rec)
-		{
-			auto ret = this->hit(_r, _t_min, _t_max, _rec);
-			return ret;
-		};
+		bool isHit = hit(r, t_min, t_max, rec);
 
-		auto isHit = scene::hitLight(
-			funcHitTest,
-			light->param(),
-			lightPos,
-			r,
-			t_min, t_max,
-			rec);
-		
-		return isHit;
+		auto lightobj = light->getLightObject();
+
+		if (lightobj) {
+			// Area Light.
+			if (isHit) {
+				hitrecord tmpRec;
+				if (lightobj->hit(r, t_min, t_max, tmpRec)) {
+					auto dist2 = (tmpRec.p - r.org).squared_length();
+
+					if (rec.obj == tmpRec.obj
+						&& aten::abs(dist2 - rec.t * rec.t) < AT_MATH_EPSILON)
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		if (light->isInfinite()) {
+			if (isHit) {
+				// Hit something.
+				return false;
+			}
+			else {
+				// Hit nothing.
+				return true;
+			}
+		}
+		else if (light->isSingular()) {
+			auto distToLight = (lightPos - r.org).length();
+
+			if (isHit && rec.t < distToLight) {
+				// Ray hits something, and the distance to the object is near than the distance to the light.
+				return false;
+			}
+			else {
+				// Ray don't hit anything, or the distance to the object is far than the distance to the light.
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	Light* scene::sampleLight(

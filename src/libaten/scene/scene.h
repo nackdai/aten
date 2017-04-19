@@ -125,7 +125,7 @@ namespace aten {
 			hitrecord& rec);
 
 		template <typename Func>
-		static bool hitLight(
+		static AT_DEVICE_API bool hitLight(
 			Func funcHitTest,
 			const LightParameter& light,
 			const vec3& lightPos,

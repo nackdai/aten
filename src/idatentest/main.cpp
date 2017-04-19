@@ -117,7 +117,7 @@ int main()
 	aten::visualizer::addPostProc(&blitter);
 
 	new aten::emissive(aten::vec3(1, 0, 0));
-	new aten::lambert(aten::vec3(0, 1, 0));
+	new aten::lambert(aten::vec3(0.5, 0.5, 0.5));
 
 	aten::window::run(display);
 

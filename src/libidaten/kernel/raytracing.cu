@@ -187,6 +187,7 @@ __host__ __device__ bool intersect(
 		if (intersectSphere(&ctx->spheres[i], r, &tmp)) {
 			if (tmp.t < rec->t) {
 				*rec = tmp;
+				rec->obj = (void*)&ctx->spheres[i];
 
 				isHit = true;
 			}
@@ -262,6 +263,7 @@ __global__ void raytracing(
 					sampleres.dir = sampleres.pos - rec.p;
 					sampleres.nml = normalize(-sampleres.dir);
 					sampleres.le = ctx.mtrls[sphere->mtrlid].baseColor;
+					sampleres.finalColor = ctx.mtrls[sphere->mtrlid].baseColor;
 				}
 
 				aten::vec3 dirToLight = sampleres.dir;
@@ -312,7 +314,7 @@ __global__ void raytracing(
 
 static Sphere g_spheres[] = {
 	Sphere(aten::vec3(0, 0, -10), 1.0, 0),
-	Sphere(aten::vec3(3, 0, -10), 1.0, 1),
+	Sphere(aten::vec3(2, 0, -10), 1.0, 1),
 };
 
 void renderRayTracing(

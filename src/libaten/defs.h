@@ -57,3 +57,11 @@ namespace aten {
 #ifdef ENABLE_OMP
 #include <omp.h>
 #endif
+
+#ifdef __AT_CUDA__
+#include "host_defines.h"
+
+#define AT_DEVICE_API	__host__ __device__
+#else
+#define AT_DEVICE_API
+#endif

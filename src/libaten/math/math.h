@@ -3,6 +3,7 @@
 #include <math.h>
 #include <algorithm>
 #include "types.h"
+#include "defs.h"
 
 #define AT_MATH_PI		aten::real(3.14159265358979323846)
 #define AT_MATH_PI_2	aten::real(AT_MATH_PI * 2)
@@ -44,9 +45,18 @@
 #endif
 
 namespace aten {
-	inline real sqrt(real f)
+	inline AT_DEVICE_API real sqrt(real f)
 	{
 		return AT_MATH_FUNC(::sqrt, f);
+	}
+
+	inline AT_DEVICE_API real rsqrt(real f)
+	{
+#ifdef __CUDACC__
+		return rsqrtf(f);
+#else
+		return real(1) / aten::sqrt(f);
+#endif
 	}
 
 	inline real tan(real f)
@@ -99,7 +109,7 @@ namespace aten {
 		return AT_MATH_FUNC2(::pow, f, v);
 	}
 
-	inline real abs(real f)
+	inline AT_DEVICE_API real abs(real f)
 	{
 #ifdef TYPE_DOUBLE
 		return ::abs(f);

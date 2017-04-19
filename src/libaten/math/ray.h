@@ -6,8 +6,8 @@ namespace aten
 {
 	struct ray
 	{
-		ray() {}
-		ray(const vec3& o, const vec3& d)
+		AT_DEVICE_API ray() {}
+		AT_DEVICE_API ray(const vec3& o, const vec3& d)
 		{
 			dir = normalize(d);
 			//org = o;

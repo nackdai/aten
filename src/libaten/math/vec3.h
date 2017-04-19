@@ -16,84 +16,84 @@ namespace aten {
 			real a[3];
 		};
 
-		vec3()
+		AT_DEVICE_API vec3()
 		{
 			x = y = z = real(0);
 		}
-		vec3(real _x, real _y, real _z)
+		AT_DEVICE_API vec3(real _x, real _y, real _z)
 			: x(_x), y(_y), z(_z)
 		{
 		}
-		vec3(real f)
+		AT_DEVICE_API vec3(real f)
 			: x(f), y(f), z(f)
 		{
 		}
 
-		inline void set(real _x, real _y, real _z)
+		inline AT_DEVICE_API void set(real _x, real _y, real _z)
 		{
 			x = _x;
 			y = _y;
 			z = _z;
 		}
 
-		inline void set(real f)
+		inline AT_DEVICE_API void set(real f)
 		{
 			x = y = z = f;
 		}
 
-		inline const vec3& operator+() const
+		inline AT_DEVICE_API const vec3& operator+() const
 		{
 			return *this;
 		}
-		inline vec3 operator-() const
+		inline AT_DEVICE_API vec3 operator-() const
 		{
 			return vec3(-x, -y, -z);
 		}
-		inline real operator[](int i) const
+		inline AT_DEVICE_API real operator[](int i) const
 		{
 			return a[i];
 		}
-		inline real& operator[](int i)
+		inline AT_DEVICE_API real& operator[](int i)
 		{
 			return a[i];
 		};
 
-		inline vec3& operator+=(const vec3& v)
+		inline AT_DEVICE_API vec3& operator+=(const vec3& v)
 		{
 			x += v.x;
 			y += v.y;
 			z += v.z;
 			return *this;
 		}
-		inline vec3& operator-=(const vec3& v)
+		inline AT_DEVICE_API vec3& operator-=(const vec3& v)
 		{
 			x -= v.x;
 			y -= v.y;
 			z -= v.z;
 			return *this;
 		}
-		inline vec3& operator*=(const vec3& v)
+		inline AT_DEVICE_API vec3& operator*=(const vec3& v)
 		{
 			x *= v.x;
 			y *= v.y;
 			z *= v.z;
 			return *this;
 		}
-		inline vec3& operator/=(const vec3& v)
+		inline AT_DEVICE_API vec3& operator/=(const vec3& v)
 		{
 			x /= v.x;
 			y /= v.y;
 			z /= v.z;
 			return *this;
 		}
-		inline vec3& operator*=(const real t)
+		inline AT_DEVICE_API vec3& operator*=(const real t)
 		{
 			x *= t;
 			y *= t;
 			z *= t;
 			return *this;
 		}
-		inline vec3& operator/=(const real t)
+		inline AT_DEVICE_API vec3& operator/=(const real t)
 		{
 			x /= t;
 			y /= t;
@@ -101,12 +101,12 @@ namespace aten {
 			return *this;
 		}
 
-		inline real length() const
+		inline AT_DEVICE_API real length() const
 		{
 			auto ret = aten::sqrt(x * x + y * y + z * z);
 			return ret;
 		}
-		inline real squared_length() const
+		inline AT_DEVICE_API real squared_length() const
 		{
 			auto ret = x * x + y * y + z * z;
 			return ret;
@@ -114,72 +114,72 @@ namespace aten {
 
 		void normalize()
 		{
-			auto l = length();
-			*this /= l;
+			auto invLen = aten::rsqrt(squared_length());
+			*this *= invLen;
 		}
 	};
 
-	inline vec3 operator+(const vec3& v1, const vec3& v2)
+	inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 		return std::move(ret);
 	}
 
-	inline vec3 operator+(const vec3& v1, real f)
+	inline AT_DEVICE_API vec3 operator+(const vec3& v1, real f)
 	{
 		vec3 ret(v1.x + f, v1.y + f, v1.z + f);
 		return std::move(ret);
 	}
 
-	inline vec3 operator-(const vec3& v1, const vec3& v2)
+	inline AT_DEVICE_API vec3 operator-(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 		return std::move(ret);
 	}
 
-	inline vec3 operator-(const vec3& v1, real f)
+	inline AT_DEVICE_API vec3 operator-(const vec3& v1, real f)
 	{
 		vec3 ret(v1.x - f, v1.y - f, v1.z - f);
 		return std::move(ret);
 	}
 
-	inline vec3 operator*(const vec3& v1, const vec3& v2)
+	inline AT_DEVICE_API vec3 operator*(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 		return std::move(ret);
 	}
 
-	inline vec3 operator/(const vec3& v1, const vec3& v2)
+	inline AT_DEVICE_API vec3 operator/(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 		return std::move(ret);
 	}
 
-	inline vec3 operator*(real t, const vec3& v)
+	inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
 	{
 		vec3 ret(t * v.x, t * v.y, t * v.z);
 		return std::move(ret);
 	}
 
-	inline vec3 operator*(const vec3& v, real t)
+	inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
 	{
 		vec3 ret(t * v.x, t * v.y, t * v.z);
 		return std::move(ret);
 	}
 
-	inline vec3 operator/(const vec3& v, real t)
+	inline AT_DEVICE_API vec3 operator/(const vec3& v, real t)
 	{
 		vec3 ret(v.x / t, v.y / t, v.z / t);
 		return std::move(ret);
 	}
 
-	inline real dot(const vec3& v1, const vec3& v2)
+	inline AT_DEVICE_API real dot(const vec3& v1, const vec3& v2)
 	{
 		auto ret = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 		return ret;
 	}
 
-	inline vec3 cross(const vec3& v1, const vec3& v2)
+	inline AT_DEVICE_API vec3 cross(const vec3& v1, const vec3& v2)
 	{
 		vec3 ret(
 			v1.a[1] * v2.a[2] - v1.a[2] * v2.a[1],
@@ -189,14 +189,15 @@ namespace aten {
 		return std::move(ret);
 	}
 
-	inline vec3 normalize(const vec3& v)
+	inline AT_DEVICE_API vec3 normalize(const vec3& v)
 	{
-		auto ret = v / v.length();
+		auto invLen = aten::rsqrt(dot(v, v));
+		auto ret = v * invLen;
 		return std::move(ret);
 	}
 
 	// 直行ベクトルを計算.
-	inline vec3 getOrthoVector(const vec3& n)
+	inline AT_DEVICE_API vec3 getOrthoVector(const vec3& n)
 	{
 		vec3 p;
 

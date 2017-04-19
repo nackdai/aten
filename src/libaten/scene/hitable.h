@@ -27,9 +27,15 @@ namespace aten {
 
 		real area{ real(1) };
 
-		hitable* obj{ nullptr };
+		union {
+			hitable* obj{ nullptr };
+			int objid;
+		};
 
-		material* mtrl{ nullptr };
+		union {
+			material* mtrl{ nullptr };
+			int mtrlid;
+		};
 	};
 
 	class hitable {

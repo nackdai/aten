@@ -34,18 +34,6 @@ __host__ __device__ aten::vec3 getOrthoVector(const aten::vec3& n)
 	return std::move(p);
 }
 
-struct hitrecord {
-	float t{ AT_MATH_INF };
-
-	aten::vec3 p;
-
-	aten::vec3 normal;
-
-	int mtrlid;
-
-	float area{ 1.0f };
-};
-
 struct Sphere {
 	float radius;
 	aten::vec3 center;
@@ -69,7 +57,8 @@ struct Context {
 
 __host__ __device__ bool intersectSphere(
 	const Sphere* sphere,
-	const aten::ray* r, hitrecord* rec)
+	const aten::ray* r,
+	aten::hitrecord* rec)
 {
 	const aten::vec3 p_o = sphere->center - r->org;
 	const float b = dot(p_o, r->dir);
@@ -186,12 +175,13 @@ __host__ __device__ void sampleCamera(
 }
 
 __host__ __device__ bool intersect(
-	const aten::ray* r, hitrecord* rec,
+	const aten::ray* r,
+	aten::hitrecord* rec,
 	const Context* ctx)
 {
 	bool isHit = false;
 
-	hitrecord tmp;
+	aten::hitrecord tmp;
 
 	for (int i = 0; i < ctx->geomnum; i++) {
 		if (intersectSphere(&ctx->spheres[i], r, &tmp)) {
@@ -244,7 +234,7 @@ __host__ void raytracing(
 	CameraSampleResult camsample;
 	sampleCamera(&camsample, camera, s, t);
 
-	hitrecord rec;
+	aten::hitrecord rec;
 
 	if (intersect(&camsample.r, &rec, &ctx)) {
 		const aten::MaterialParameter& m = mtrls[rec.mtrlid];

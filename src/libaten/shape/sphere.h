@@ -29,6 +29,19 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
 
+		static bool hit(
+			const ShapeParameter& param,
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec);
+
+		static bool hit(
+			const ShapeParameter& param,
+			const ray& r,
+			const mat4& mtxL2W,
+			real t_min, real t_max,
+			hitrecord& rec);
+
 		virtual aabb getBoundingbox() const override final;
 
 		const vec3& center() const

@@ -14,7 +14,6 @@ namespace aten
 		friend class instance<cube>;
 
 	public:
-		cube() {}
 		cube::cube(const vec3& c, real w, real h, real d, material* m)
 			: m_param(c, vec3(w, h, d)), m_mtrl(m)
 		{}

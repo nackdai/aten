@@ -21,6 +21,12 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const override;
 
+		static bool hit(
+			const ShapeParameter& param,
+			const ray& r,
+			real t_min, real t_max,
+			hitrecord& rec);
+
 		virtual aabb getBoundingbox() const override
 		{
 			return std::move(param.bbox);
@@ -28,7 +34,7 @@ namespace aten
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override;
 
-		virtual  SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
 
 		void build(vertex* v0, vertex* v1, vertex* v2);
 	

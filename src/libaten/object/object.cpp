@@ -8,6 +8,26 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
+		bool isHit = hit(param, r, t_min, t_max, rec);
+
+		if (isHit) {
+			//rec.obj = parent;
+			rec.obj = (hitable*)this;
+
+			if (parent) {
+				rec.mtrl = parent->mtrl;
+			}
+		}
+
+		return isHit;
+	}
+
+	bool face::hit(
+		const ShapeParameter& param,
+		const ray& r,
+		real t_min, real t_max,
+		hitrecord& rec)
+	{
 		bool isHit = false;
 
 		const auto& v0 = param.vtx[0];
@@ -40,13 +60,6 @@ namespace aten
 				rec.dv = normalize(cross(rec.normal, rec.du));
 
 				rec.area = param.area;
-
-				//rec.obj = parent;
-				rec.obj = (hitable*)this;
-
-				if (parent) {
-					rec.mtrl = parent->mtrl;
-				}
 
 				isHit = true;
 			}

@@ -12,7 +12,16 @@ namespace aten
 		vec3 uv;
 	};
 
+	enum ShapeType {
+		Triangle,
+		Sphere,
+		Cube,
+	};
+
 	struct ShapeParameter {
+		ShapeType type{ ShapeType::Triangle };
+		int mtrlid{ -1 };
+
 		union {
 			// triangle.
 			struct {
@@ -39,7 +48,7 @@ namespace aten
 
 		// sphere.
 		ShapeParameter(const vec3& c, real r)
-			: center(c), radius(r)
+			: center(c), radius(r), type(ShapeType::Sphere)
 		{
 			vec3 _min = center - radius;
 			vec3 _max = center + radius;
@@ -49,7 +58,7 @@ namespace aten
 
 		// cube.
 		ShapeParameter(const vec3& c, const vec3& s)
-			: center(c), size(s)
+			: center(c), size(s), type(ShapeType::Sphere)
 		{
 			bbox.init(
 				center - size * 0.5,

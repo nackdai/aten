@@ -4,6 +4,7 @@
 #include "scene/bvh.h"
 #include "math/mat4.h"
 #include "shape/tranfomable.h"
+#include "shape/shape.h"
 
 namespace aten
 {
@@ -13,12 +14,11 @@ namespace aten
 		friend class instance<sphere>;
 
 	public:
-		sphere() {}
 		sphere(const vec3& c, real r, material* m)
-			: m_center(c), m_radius(r), m_mtrl(m)
+			: m_param(c, r), m_mtrl(m)
 		{}
 		sphere(real r, material* m)
-			: m_radius(r), m_mtrl(m)
+			: sphere(vec3(), r, m)
 		{}
 
 		virtual ~sphere() {}
@@ -33,12 +33,12 @@ namespace aten
 
 		const vec3& center() const
 		{
-			return m_center;
+			return m_param.center;
 		}
 
 		real radius() const
 		{
-			return m_radius;
+			return m_param.radius;
 		}
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
@@ -57,8 +57,7 @@ namespace aten
 			sampler* sampler) const override final;
 
 	private:
-		vec3 m_center;
-		real m_radius{ real(0) };
+		ShapeParameter m_param;
 		material* m_mtrl{ nullptr };
 	};
 }

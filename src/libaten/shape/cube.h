@@ -4,6 +4,7 @@
 #include "scene/bvh.h"
 #include "math/mat4.h"
 #include "shape/tranfomable.h"
+#include "shape/shape.h"
 
 namespace aten
 {
@@ -14,8 +15,9 @@ namespace aten
 
 	public:
 		cube() {}
-		cube(const vec3& c, real w, real h, real d, material* m);
-
+		cube::cube(const vec3& c, real w, real h, real d, material* m)
+			: m_param(c, vec3(w, h, d)), m_mtrl(m)
+		{}
 		cube(real w, real h, real d, material* m)
 			: cube(vec3(0), w, h, d, m)
 		{}
@@ -32,12 +34,12 @@ namespace aten
 
 		const vec3& center() const
 		{
-			return m_center;
+			return m_param.center;
 		}
 
 		const vec3& size() const
 		{
-			return m_size;
+			return m_param.size;
 		}
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
@@ -70,9 +72,7 @@ namespace aten
 		static Face findFace(const vec3& d);
 
 	private:
-		vec3 m_center;
-		vec3 m_size;
-		aabb m_bbox;
+		ShapeParameter m_param;
 		material* m_mtrl{ nullptr };
 	};
 }

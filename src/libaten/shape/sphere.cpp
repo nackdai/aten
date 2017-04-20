@@ -29,11 +29,11 @@ namespace aten
 		// https://www.slideshare.net/h013/edupt-kaisetsu-22852235
 		// p52 - p58
 
-		const vec3 p_o = m_center - r.org;
+		const vec3 p_o = m_param.center - r.org;
 		const real b = dot(p_o, r.dir);
 
 		// ”»•ÊŽ®.
-		const real D4 = b * b - dot(p_o, p_o) + m_radius * m_radius;
+		const real D4 = b * b - dot(p_o, p_o) + m_param.radius * m_param.radius;
 
 		if (D4 < real(0)) {
 			return false;
@@ -54,7 +54,7 @@ namespace aten
 		}
 
 		rec.p = r.org + rec.t * r.dir;
-		rec.normal = (rec.p - m_center) / m_radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
+		rec.normal = (rec.p - m_param.center) / m_param.radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
 		rec.obj = (hitable*)this;
 		rec.mtrl = m_mtrl;
 
@@ -63,9 +63,9 @@ namespace aten
 		rec.dv = normalize(cross(rec.normal, rec.du));
 
 		{
-			auto tmp = m_center + vec3(m_radius, 0, 0);
+			auto tmp = m_param.center + vec3(m_param.radius, 0, 0);
 
-			auto center = mtxL2W.apply(m_center);
+			auto center = mtxL2W.apply(m_param.center);
 			tmp = mtxL2W.apply(tmp);
 
 			auto radius = (tmp - center).length();
@@ -80,12 +80,7 @@ namespace aten
 
 	aabb sphere::getBoundingbox() const
 	{
-		vec3 _min = m_center - m_radius;
-		vec3 _max = m_center + m_radius;
-
-		aabb ret(_min, _max);
-
-		return std::move(ret);
+		return std::move(m_param.bbox);
 	}
 
 	vec3 sphere::getRandomPosOn(sampler* sampler) const
@@ -93,7 +88,7 @@ namespace aten
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
-		auto r = m_radius;
+		auto r = m_param.radius;
 
 		auto z = real(2) * r1 - real(1); // [0,1] -> [-1, 1]
 
@@ -108,7 +103,7 @@ namespace aten
 
 		auto p = dir * (r + AT_MATH_EPSILON);
 
-		vec3 posOnSphere = m_center + p;
+		vec3 posOnSphere = m_param.center + p;
 
 		return std::move(posOnSphere);
 	}
@@ -123,13 +118,13 @@ namespace aten
 		sampler* sampler) const
 	{
 		auto p = getRandomPosOn(sampler);
-		auto n = normalize(p - m_center);
+		auto n = normalize(p - m_param.center);
 
 		real area = real(1);
 		{
-			auto tmp = m_center + vec3(m_radius, 0, 0);
+			auto tmp = m_param.center + vec3(m_param.radius, 0, 0);
 
-			auto center = mtxL2W.apply(m_center);
+			auto center = mtxL2W.apply(m_param.center);
 			tmp = mtxL2W.apply(tmp);
 
 			auto radius = (tmp - center).length();

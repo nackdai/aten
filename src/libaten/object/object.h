@@ -4,15 +4,10 @@
 #include "scene/bvh.h"
 #include "material/material.h"
 #include "math/mat4.h"
+#include "shape/shape.h"
 
 namespace aten
 {
-	struct vertex {
-		vec3 pos;
-		vec3 nml;
-		vec3 uv;
-	};
-
 	class shape;
 
 	class face : public bvhnode {
@@ -28,7 +23,7 @@ namespace aten
 
 		virtual aabb getBoundingbox() const override
 		{
-			return std::move(bbox);
+			return std::move(param.bbox);
 		}
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override;
@@ -37,10 +32,7 @@ namespace aten
 
 		void build(vertex* v0, vertex* v1, vertex* v2);
 	
-		uint32_t idx[3];
-		vertex* vtx[3];
-		aabb bbox;
-		real area;
+		ShapeParameter param;
 
 		shape* parent{ nullptr };
 	};

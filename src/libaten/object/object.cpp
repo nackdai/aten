@@ -10,15 +10,9 @@ namespace aten
 	{
 		bool isHit = false;
 
-#if 0
-		const auto v0 = vtx[idx[0]];
-		const auto v1 = vtx[idx[1]];
-		const auto v2 = vtx[idx[2]];
-#else
-		const auto& v0 = vtx[0];
-		const auto& v1 = vtx[1];
-		const auto& v2 = vtx[2];
-#endif
+		const auto& v0 = param.vtx[0];
+		const auto& v1 = param.vtx[1];
+		const auto& v2 = param.vtx[2];
 
 		const auto res = intersertTriangle(r, v0->pos, v1->pos, v2->pos);
 
@@ -45,7 +39,7 @@ namespace aten
 				rec.du = normalize(getOrthoVector(rec.normal));
 				rec.dv = normalize(cross(rec.normal, rec.du));
 
-				rec.area = area;
+				rec.area = param.area;
 
 				//rec.obj = parent;
 				rec.obj = (hitable*)this;
@@ -73,16 +67,16 @@ namespace aten
 			std::min(v0->pos.y, std::min(v1->pos.y, v2->pos.y)),
 			std::min(v0->pos.z, std::min(v1->pos.z, v2->pos.z)));
 
-		bbox.init(vmin, vmax);
+		param.bbox.init(vmin, vmax);
 
-		vtx[0] = v0;
-		vtx[1] = v1;
-		vtx[2] = v2;
+		param.vtx[0] = v0;
+		param.vtx[1] = v1;
+		param.vtx[2] = v2;
 
 		// 三角形の面積 = ２辺の外積の長さ / 2;
 		auto e0 = v1->pos - v0->pos;
 		auto e1 = v2->pos - v0->pos;
-		area = real(0.5) * cross(e0, e1).length();
+		param.area = real(0.5) * cross(e0, e1).length();
 	}
 
 	vec3 face::getRandomPosOn(sampler* sampler) const
@@ -98,9 +92,9 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = vtx[0];
-		const auto& v1 = vtx[1];
-		const auto& v2 = vtx[2];
+		const auto& v0 = param.vtx[0];
+		const auto& v1 = param.vtx[1];
+		const auto& v2 = param.vtx[2];
 
 		// 重心座標系(barycentric coordinates).
 		// v0基準.
@@ -123,9 +117,9 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = vtx[0];
-		const auto& v1 = vtx[1];
-		const auto& v2 = vtx[2];
+		const auto& v0 = param.vtx[0];
+		const auto& v1 = param.vtx[1];
+		const auto& v2 = param.vtx[2];
 
 		// 重心座標系(barycentric coordinates).
 		// v0基準.
@@ -153,7 +147,7 @@ namespace aten
 
 		area = 0;
 		for (const auto f : faces) {
-			area += f->area;
+			area += f->param.area;
 		}
 	}
 
@@ -223,16 +217,16 @@ namespace aten
 #else
 			real orignalLen = 0;
 			{
-				const auto& v0 = f->vtx[0]->pos;
-				const auto& v1 = f->vtx[1]->pos;
+				const auto& v0 = f->param.vtx[0]->pos;
+				const auto& v1 = f->param.vtx[1]->pos;
 
 				orignalLen = (v1 - v0).length();
 			}
 
 			real scaledLen = 0;
 			{
-				auto v0 = mtxL2W.apply(f->vtx[0]->pos);
-				auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+				auto v0 = mtxL2W.apply(f->param.vtx[0]->pos);
+				auto v1 = mtxL2W.apply(f->param.vtx[1]->pos);
 
 				scaledLen = (v1 - v0).length();
 			}
@@ -261,16 +255,16 @@ namespace aten
 
 		real orignalLen = 0;
 		{
-			const auto& v0 = f->vtx[0]->pos;
-			const auto& v1 = f->vtx[1]->pos;
+			const auto& v0 = f->param.vtx[0]->pos;
+			const auto& v1 = f->param.vtx[1]->pos;
 
 			orignalLen = (v1 - v0).length();
 		}
 
 		real scaledLen = 0;
 		{
-			auto v0 = mtxL2W.apply(f->vtx[0]->pos);
-			auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+			auto v0 = mtxL2W.apply(f->param.vtx[0]->pos);
+			auto v1 = mtxL2W.apply(f->param.vtx[1]->pos);
 
 			scaledLen = (v1 - v0).length();
 		}

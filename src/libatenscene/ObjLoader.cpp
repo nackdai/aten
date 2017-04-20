@@ -109,13 +109,13 @@ namespace aten
 			for (uint32_t i = 0; i < idxnum; i += 3) {
 				face* f = new face();
 
-				f->idx[0] = shape.mesh.indices[i + 0];
-				f->idx[1] = shape.mesh.indices[i + 1];
-				f->idx[2] = shape.mesh.indices[i + 2];
+				f->param.idx[0] = shape.mesh.indices[i + 0];
+				f->param.idx[1] = shape.mesh.indices[i + 1];
+				f->param.idx[2] = shape.mesh.indices[i + 2];
 
-				auto& v0 = dstshape->vertices[f->idx[0]];
-				auto& v1 = dstshape->vertices[f->idx[1]];
-				auto& v2 = dstshape->vertices[f->idx[2]];
+				auto& v0 = dstshape->vertices[f->param.idx[0]];
+				auto& v1 = dstshape->vertices[f->param.idx[1]];
+				auto& v2 = dstshape->vertices[f->param.idx[2]];
 
 				f->build(&v0, &v1, &v2);
 

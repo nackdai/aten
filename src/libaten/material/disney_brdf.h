@@ -50,7 +50,7 @@ namespace aten
 			m_param.clearcoat = aten::clamp<real>(clearcoat, 0, 1);
 			m_param.clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
 
-			m_param.roughnessMap.tex = roughnessMap;
+			m_param.roughnessMap.ptr = roughnessMap;
 		}
 
 		DisneyBRDF(
@@ -72,7 +72,7 @@ namespace aten
 			m_param.clearcoat = aten::clamp<real>(param.clearcoat, 0, 1);
 			m_param.clearcoatGloss = aten::clamp<real>(param.clearcoatGloss, 0, 1);
 
-			m_param.roughnessMap.tex = roughnessMap;
+			m_param.roughnessMap.ptr = roughnessMap;
 		}
 
 		DisneyBRDF(Values& val)

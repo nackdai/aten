@@ -22,6 +22,11 @@ namespace aten {
 		::OutputDebugString(buf);
 		printf("%s", buf);
 	}
+
+	union UnionIdxPtr {
+		int idx;
+		void* ptr{ nullptr };
+	};
 }
 
 #define AT_PRINTF		aten::OutputDebugString

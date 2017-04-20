@@ -10,7 +10,7 @@ namespace aten
 		real u, real v)
 	{
 		auto roughness = material::sampleTexture(
-			(texture*)param.roughnessMap.tex,
+			(texture*)param.roughnessMap.ptr,
 			u, v,
 			param.roughness);
 
@@ -35,7 +35,7 @@ namespace aten
 		sampler* sampler)
 	{
 		auto roughness = material::sampleTexture(
-			(texture*)param.roughnessMap.tex,
+			(texture*)param.roughnessMap.ptr,
 			u, v,
 			param.roughness);
 
@@ -61,12 +61,12 @@ namespace aten
 		real u, real v)
 	{
 		auto roughness = material::sampleTexture(
-			(texture*)param.roughnessMap.tex,
+			(texture*)param.roughnessMap.ptr,
 			u, v,
 			param.roughness);
 
 		auto albedo = param.baseColor;
-		albedo *= material::sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+		albedo *= material::sampleTexture((texture*)param.albedoMap.ptr, u, v, real(1));
 
 		real fresnel = 1;
 		real ior = param.ior;
@@ -272,7 +272,7 @@ namespace aten
 		MaterialSampling ret;
 
 		auto roughness = material::sampleTexture(
-			(texture*)param.roughnessMap.tex,
+			(texture*)param.roughnessMap.ptr,
 			u, v,
 			param.roughness);
 
@@ -280,7 +280,7 @@ namespace aten
 		ret.pdf = pdf(roughness.r, normal, wi, ret.dir);
 
 		auto albedo = param.baseColor;
-		albedo *= material::sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+		albedo *= material::sampleTexture((texture*)param.albedoMap.ptr, u, v, real(1));
 
 		real fresnel = 1;
 		real ior = param.ior;

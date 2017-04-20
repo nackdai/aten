@@ -96,10 +96,10 @@ namespace aten {
 		const auto NV = dot(normal, -wi);
 
 		if (NL > 0 && NV > 0) {
-			auto roughness = material::sampleTexture((texture*)param.roughnessMap.tex, u, v, param.roughness);
+			auto roughness = material::sampleTexture((texture*)param.roughnessMap.ptr, u, v, param.roughness);
 
 			auto albedo = param.baseColor;
-			albedo *= material::sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+			albedo *= material::sampleTexture((texture*)param.albedoMap.ptr, u, v, real(1));
 
 			const real a = roughness.r;
 			const real a2 = a * a;

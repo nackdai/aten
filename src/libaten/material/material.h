@@ -58,15 +58,10 @@ namespace aten
 		real sheenTint{ 0.0f };			// 基本色に向かう光沢色合いの量.
 		real clearcoat{ 0.0f };			// 第二の特別な目的のスペキュラーローブ.
 		real clearcoatGloss{ 0.0f };	// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
-
-		union UnionIdxMap {
-			int idx;
-			void* tex{ nullptr };
-		};
 	
-		UnionIdxMap albedoMap;
-		UnionIdxMap normalMap;
-		UnionIdxMap roughnessMap;
+		UnionIdxPtr albedoMap;
+		UnionIdxPtr normalMap;
+		UnionIdxPtr roughnessMap;
 
 		bool isIdealRefraction{ false };
 
@@ -157,7 +152,7 @@ namespace aten
 
 		virtual vec3 sampleAlbedoMap(real u, real v) const
 		{
-			return std::move(sampleTexture((const texture*)m_param.albedoMap.tex, u, v, real(1)));
+			return std::move(sampleTexture((const texture*)m_param.albedoMap.ptr, u, v, real(1)));
 		}
 
 		virtual void applyNormalMap(

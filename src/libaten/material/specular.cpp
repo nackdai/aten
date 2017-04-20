@@ -67,7 +67,7 @@ namespace aten
 		}
 #endif
 
-		bsdf *= sampleTexture((texture*)param.albedoMap.tex, u, v, real(1));
+		bsdf *= sampleTexture((texture*)param.albedoMap.ptr, u, v, real(1));
 
 		return std::move(bsdf);
 	}

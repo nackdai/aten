@@ -14,7 +14,7 @@ namespace aten
 			texture* roughnessMap = nullptr)
 			: material(MaterialTypeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
-			m_param.roughnessMap.tex = roughnessMap;
+			m_param.roughnessMap.ptr = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 

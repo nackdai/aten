@@ -15,7 +15,7 @@ namespace aten
 			texture* roughnessMap = nullptr)
 			: material(MaterialTypeLambert, albedo, 1, albedoMap, normalMap)
 		{
-			m_param.roughnessMap.tex = roughnessMap;
+			m_param.roughnessMap.ptr = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
@@ -25,7 +25,7 @@ namespace aten
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
 
-			m_param.roughnessMap.tex = val.get("roughnessmap", m_param.roughnessMap.tex);
+			m_param.roughnessMap.ptr = val.get("roughnessmap", m_param.roughnessMap.ptr);
 		}
 
 		virtual ~OrenNayar() {}

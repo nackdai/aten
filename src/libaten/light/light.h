@@ -53,11 +53,6 @@ namespace aten {
 		real outerAngle{ AT_MATH_PI };
 		real falloff{ 0 };
 
-		union UnionIdxPtr {
-			int idx;
-			void* ptr{ nullptr };
-		};
-
 		UnionIdxPtr object;
 		UnionIdxPtr envmap;
 

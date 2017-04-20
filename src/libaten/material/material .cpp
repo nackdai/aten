@@ -59,8 +59,8 @@ namespace aten
 
 		m_param.baseColor = clr;
 		m_param.ior = ior;
-		m_param.albedoMap.tex = albedoMap;
-		m_param.normalMap.tex = normalMap;
+		m_param.albedoMap.ptr = albedoMap;
+		m_param.normalMap.ptr = normalMap;
 	}
 
 	material::material(const MaterialType& type, Values& val)
@@ -71,8 +71,8 @@ namespace aten
 
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);
-		m_param.albedoMap.tex = (texture*)val.get("albedomap", (void*)m_param.albedoMap.tex);
-		m_param.normalMap.tex = (texture*)val.get("normalmap", (void*)m_param.normalMap.tex);
+		m_param.albedoMap.ptr = (texture*)val.get("albedomap", (void*)m_param.albedoMap.ptr);
+		m_param.normalMap.ptr = (texture*)val.get("normalmap", (void*)m_param.normalMap.ptr);
 	}
 
 	material::~material()
@@ -162,8 +162,8 @@ namespace aten
 		vec3& newNml,
 		real u, real v) const
 	{
-		if (m_param.normalMap.tex) {
-			newNml = ((texture*)m_param.normalMap.tex)->at(u, v);
+		if (m_param.normalMap.ptr) {
+			newNml = ((texture*)m_param.normalMap.ptr)->at(u, v);
 			newNml = 2 * newNml - vec3(1);
 			newNml.normalize();
 

@@ -132,7 +132,7 @@ __host__ __device__ bool intersect(
 
 	for (int i = 0; i < ctx->geomnum; i++) {
 		const auto& s = ctx->shapes[i];
-		if (aten::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, *rec)) {
+		if (aten::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, tmp)) {
 			if (tmp.t < rec->t) {
 				*rec = tmp;
 				rec->obj = (void*)&ctx->shapes[i];
@@ -320,6 +320,7 @@ void renderRayTracing(
 		(height + block.y - 1) / block.y);
 
 	raytracing << <grid, block >> > (
+	//raytracing << <dim3(1, 1), block >> > (
 		(float4*)dst.ptr(), 
 		width, height, 
 		cam.ptr(),

@@ -101,6 +101,18 @@
     <ClInclude Include="..\src\libaten\scene\scene.h">
       <Filter>aten\scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\shape.h">
+      <Filter>aten\shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\sphere.h">
+      <Filter>aten\shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\tranfomable.h">
+      <Filter>aten\shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\cube.h">
+      <Filter>aten\shape</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -123,6 +135,9 @@
     </Filter>
     <Filter Include="aten\scene">
       <UniqueIdentifier>{b31615c0-8133-4599-b5a9-7fd52f0d1e34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\shape">
+      <UniqueIdentifier>{06f7c18d-6575-491d-9f22-6a8dc6c848f8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +191,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\math\mat4.cpp">
       <Filter>aten\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\shape\sphere.cpp">
+      <Filter>aten\shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\shape\cube.cpp">
+      <Filter>aten\shape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

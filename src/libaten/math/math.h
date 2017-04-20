@@ -76,12 +76,12 @@ namespace aten {
 		return AT_MATH_FUNC2(::atan2, y, x);
 	}
 
-	inline real atan(real f)
+	inline AT_DEVICE_API real atan(real f)
 	{
 		return AT_MATH_FUNC(::atan, f);
 	}
 
-	inline real asin(real f)
+	inline AT_DEVICE_API real asin(real f)
 	{
 		return AT_MATH_FUNC(::asin, f);
 	}

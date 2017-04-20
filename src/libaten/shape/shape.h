@@ -40,10 +40,10 @@ namespace aten
 			};
 		};
 
-		ShapeParameter() {}
+		AT_DEVICE_API ShapeParameter() {}
 
 		// sphere.
-		ShapeParameter(const vec3& c, real r)
+		AT_DEVICE_API ShapeParameter(const vec3& c, real r)
 			: center(c), radius(r), type(ShapeType::Sphere)
 		{
 			vec3 _min = center - radius;
@@ -53,7 +53,7 @@ namespace aten
 		}
 
 		// cube.
-		ShapeParameter(const vec3& c, const vec3& s)
+		AT_DEVICE_API ShapeParameter(const vec3& c, const vec3& s)
 			: center(c), size(s), type(ShapeType::Sphere)
 		{
 			bbox.init(

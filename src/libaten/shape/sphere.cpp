@@ -2,7 +2,7 @@
 
 namespace aten
 {
-	static void getUV(real& u, real& v, const vec3& p)
+	static AT_DEVICE_API void getUV(real& u, real& v, const vec3& p)
 	{
 		auto phi = aten::asin(p.y);
 		auto theta = aten::atan(p.x / p.z);
@@ -48,7 +48,7 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
-		return hit(param, r, mat4::Identity, t_min, t_max, rec);
+		return hit(param, r, mat4(), t_min, t_max, rec);
 	}
 
 	bool AT_DEVICE_API sphere::hit(

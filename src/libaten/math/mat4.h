@@ -23,15 +23,15 @@ namespace aten {
 			};
 		};
 
-		mat4()
+		AT_DEVICE_API mat4()
 		{
 			identity();
 		}
-		mat4(const mat4& rhs)
+		AT_DEVICE_API mat4(const mat4& rhs)
 		{
 			*this = rhs;
 		}
-		mat4(
+		AT_DEVICE_API mat4(
 			real _m00, real _m01, real _m02, real _m03,
 			real _m10, real _m11, real _m12, real _m13,
 			real _m20, real _m21, real _m22, real _m23,
@@ -45,7 +45,15 @@ namespace aten {
 
 		inline mat4& identity()
 		{
+			// TODO
+#ifdef __AT_CUDA__
+			m00 = 1; m01 = 0; m02 = 0; m03 = 0;
+			m10 = 0; m11 = 1; m12 = 0; m13 = 0;
+			m20 = 0; m21 = 0; m22 = 1; m23 = 0;
+			m30 = 0; m31 = 0; m32 = 0; m33 = 1;
+#else
 			*this = Identity;
+#endif
 			return *this;
 		}
 
@@ -55,12 +63,12 @@ namespace aten {
 			return *this;
 		}
 
-		inline const mat4& operator+() const
+		inline AT_DEVICE_API const mat4& operator+() const
 		{
 			return *this;
 		}
 
-		inline mat4 operator-() const
+		inline AT_DEVICE_API mat4 operator-() const
 		{
 			mat4 ret;
 			ret.m00 = -m00; ret.m01 = -m01; ret.m02 = -m02; ret.m03 = -m03;
@@ -70,20 +78,20 @@ namespace aten {
 			return std::move(ret);
 		}
 
-		inline real* operator[](int i)
+		inline AT_DEVICE_API real* operator[](int i)
 		{
 			return m[i];
 		}
-		inline real operator()(int i, int j) const
+		inline AT_DEVICE_API real operator()(int i, int j) const
 		{
 			return m[i][j];
 		}
-		inline real& operator()(int i, int j)
+		inline AT_DEVICE_API real& operator()(int i, int j)
 		{
 			return m[i][j];
 		}
 
-		inline mat4& operator+=(const mat4& mtx)
+		inline AT_DEVICE_API mat4& operator+=(const mat4& mtx)
 		{
 			m00 += mtx.m00; m01 += mtx.m01; m02 += mtx.m02; m03 += mtx.m03;
 			m10 += mtx.m10; m11 += mtx.m11; m12 += mtx.m12; m13 += mtx.m13;
@@ -91,7 +99,7 @@ namespace aten {
 			m30 += mtx.m30; m31 += mtx.m31; m32 += mtx.m32; m33 += mtx.m33;
 			return *this;
 		}
-		inline mat4& operator-=(const mat4& mtx)
+		inline AT_DEVICE_API mat4& operator-=(const mat4& mtx)
 		{
 			m00 -= mtx.m00; m01 -= mtx.m01; m02 -= mtx.m02; m03 -= mtx.m03;
 			m10 -= mtx.m10; m11 -= mtx.m11; m12 -= mtx.m12; m13 -= mtx.m13;
@@ -99,7 +107,7 @@ namespace aten {
 			m30 -= mtx.m30; m31 -= mtx.m31; m32 -= mtx.m32; m33 -= mtx.m33;
 			return *this;
 		}
-		inline mat4& operator*=(const mat4& mtx)
+		inline AT_DEVICE_API mat4& operator*=(const mat4& mtx)
 		{
 			mat4 tmp;
 			for (int i = 0; i < 4; ++i) {
@@ -116,7 +124,7 @@ namespace aten {
 			return *this;
 		}
 
-		inline mat4& operator*=(const real t)
+		inline AT_DEVICE_API mat4& operator*=(const real t)
 		{
 			m00 *= t; m01 *= t; m02 *= t; m03 *= t;
 			m10 *= t; m11 *= t; m12 *= t; m13 *= t;
@@ -124,13 +132,13 @@ namespace aten {
 			m30 *= t; m31 *= t; m32 *= t; m33 *= t;
 			return *this;
 		}
-		inline mat4& operator/=(const real t)
+		inline AT_DEVICE_API mat4& operator/=(const real t)
 		{
 			*this *= 1 / t;
 			return *this;
 		}
 
-		inline vec3 apply(const vec3& v) const
+		inline AT_DEVICE_API vec3 apply(const vec3& v) const
 		{
 			vec4 t(v.x, v.y, v.z, 1);
 			vec4 ret;
@@ -144,7 +152,7 @@ namespace aten {
 
 			return std::move(ret);
 		}
-		inline vec3 applyXYZ(const vec3& v) const
+		inline AT_DEVICE_API vec3 applyXYZ(const vec3& v) const
 		{
 			vec3 ret;
 
@@ -160,7 +168,7 @@ namespace aten {
 
 		mat4& invert();
 
-		inline mat4& transpose()
+		inline AT_DEVICE_API mat4& transpose()
 		{
 			mat4 tmp;
 			for (int i = 0; i < 4; ++i) {
@@ -174,7 +182,7 @@ namespace aten {
 			return *this;
 		}
 
-		inline mat4& asTrans(const vec3& v)
+		inline AT_DEVICE_API mat4& asTrans(const vec3& v)
 		{
 			identity();
 
@@ -185,7 +193,7 @@ namespace aten {
 			return *this;
 		}
 
-		inline mat4& asScale(real s)
+		inline AT_DEVICE_API mat4& asScale(real s)
 		{
 			identity();
 
@@ -196,7 +204,7 @@ namespace aten {
 			return *this;
 		}
 
-		inline mat4& asRotateByX(real r)
+		inline AT_DEVICE_API mat4& asRotateByX(real r)
 		{
 			const real c = aten::cos(r);
 			const real s = aten::sin(r);
@@ -209,7 +217,7 @@ namespace aten {
 			return *this;
 		}
 
-		inline mat4& asRotateByY(real r)
+		inline AT_DEVICE_API mat4& asRotateByY(real r)
 		{
 			const real c = aten::cos(r);
 			const real s = aten::sin(r);
@@ -222,7 +230,7 @@ namespace aten {
 			return *this;
 		}
 
-		inline mat4& asRotateByZ(real r)
+		inline AT_DEVICE_API mat4& asRotateByZ(real r)
 		{
 			const real c = aten::cos(r);
 			const real s = aten::sin(r);
@@ -238,47 +246,47 @@ namespace aten {
 		mat4& asRotateByAxis(real r, const vec3& axis);
 	};
 
-	inline mat4 operator+(const mat4& m1, const mat4& m2)
+	inline AT_DEVICE_API mat4 operator+(const mat4& m1, const mat4& m2)
 	{
 		mat4 ret = m1;
 		ret += m2;
 		return std::move(ret);
 	}
 
-	inline mat4 operator-(const mat4& m1, const mat4& m2)
+	inline AT_DEVICE_API mat4 operator-(const mat4& m1, const mat4& m2)
 	{
 		mat4 ret = m1;
 		ret -= m2;
 		return std::move(ret);
 	}
 
-	inline mat4 operator*(const mat4& m1, const mat4& m2)
+	inline AT_DEVICE_API mat4 operator*(const mat4& m1, const mat4& m2)
 	{
 		mat4 ret = m1;
 		ret *= m2;
 		return std::move(ret);
 	}
 
-	inline vec3 operator*(const mat4& m, const vec3 v)
+	inline AT_DEVICE_API vec3 operator*(const mat4& m, const vec3 v)
 	{
 		vec3 ret = m.apply(v);
 		return std::move(ret);
 	}
 
-	inline mat4 operator*(real t, const mat4& m)
+	inline AT_DEVICE_API mat4 operator*(real t, const mat4& m)
 	{
 		mat4 ret = m;
 		ret *= t;
 		return std::move(ret);
 	}
 
-	inline mat4 operator*(const mat4& m, real t)
+	inline AT_DEVICE_API mat4 operator*(const mat4& m, real t)
 	{
 		mat4 ret = t * m;
 		return std::move(ret);
 	}
 
-	inline mat4 operator/(const mat4& m, real t)
+	inline AT_DEVICE_API mat4 operator/(const mat4& m, real t)
 	{
 		mat4 ret = m * (1 / t);
 		return std::move(ret);

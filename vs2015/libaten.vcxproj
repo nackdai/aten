@@ -184,6 +184,7 @@
     <ClInclude Include="..\src\libaten\material\refraction.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\material\toon.h" />
+    <ClInclude Include="..\src\libaten\math\aabb.h" />
     <ClInclude Include="..\src\libaten\math\intersect.h" />
     <ClInclude Include="..\src\libaten\math\mat4.h" />
     <ClInclude Include="..\src\libaten\math\math.h" />
@@ -217,7 +218,6 @@
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
     <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
-    <ClInclude Include="..\src\libaten\scene\aabb.h" />
     <ClInclude Include="..\src\libaten\scene\accel.h" />
     <ClInclude Include="..\src\libaten\scene\bvh.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
@@ -265,6 +265,7 @@
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
     <ClCompile Include="..\src\libaten\material\toon.cpp" />
+    <ClCompile Include="..\src\libaten\math\aabb.cpp" />
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />
@@ -285,7 +286,6 @@
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\random.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
-    <ClCompile Include="..\src\libaten\scene\aabb.cpp" />
     <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />

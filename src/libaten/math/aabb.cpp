@@ -1,4 +1,4 @@
-#include "aabb.h"
+#include "math/aabb.h"
 
 namespace aten {
 	void aabb::init(const vec3& _min, const vec3& _max)

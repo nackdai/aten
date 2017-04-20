@@ -31,6 +31,7 @@
 #include "math/vec4.h"
 #include "math/ray.h"
 #include "math/mat4.h"
+#include "math/aabb.h"
 
 #include "misc/color.h"
 #include "misc/timer.h"
@@ -61,7 +62,6 @@
 #include "scene/scene.h"
 #include "scene/bvh.h"
 #include "scene/instance.h"
-#include "scene/aabb.h"
 #include "scene/accel.h"
 
 #include "sampler/xorshift.h"

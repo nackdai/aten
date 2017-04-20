@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "types.h"
-#include "scene/aabb.h"
+#include "math/aabb.h"
 #include "math/vec3.h"
 #include "material/material.h"
 #include "sampler/sampler.h"

@@ -34,65 +34,12 @@ __host__ __device__ aten::vec3 getOrthoVector(const aten::vec3& n)
 	return std::move(p);
 }
 
-struct Sphere {
-	float radius;
-	aten::vec3 center;
-	int mtrlid;
-
-	Sphere() {}
-	Sphere(const aten::vec3& c, float r, int id)
-	{
-		radius = r;
-		center = c;
-		mtrlid = id;
-	}
-};
-
 struct Context {
 	int geomnum;
-	Sphere* spheres;
+	aten::ShapeParameter* shapes;
 
 	aten::MaterialParameter* mtrls;
 };
-
-__host__ __device__ bool intersectSphere(
-	const Sphere* sphere,
-	const aten::ray* r,
-	aten::hitrecord* rec)
-{
-	const aten::vec3 p_o = sphere->center - r->org;
-	const float b = dot(p_o, r->dir);
-
-	// ”»•ÊŽ®.
-	const float D4 = b * b - dot(p_o, p_o) + sphere->radius * sphere->radius;
-
-	if (D4 < 0.0f) {
-		return false;
-	}
-
-	const float sqrt_D4 = sqrtf(D4);
-	const float t1 = b - sqrt_D4;
-	const float t2 = b + sqrt_D4;
-
-	if (t1 > AT_MATH_EPSILON) {
-		rec->t = t1;
-	}
-	else if (t2 > AT_MATH_EPSILON) {
-		rec->t = t2;
-	}
-	else {
-		return false;
-	}
-
-	rec->p = r->org + rec->t * r->dir;
-	rec->normal = (rec->p - sphere->center) / sphere->radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
-
-	rec->mtrlid = sphere->mtrlid;
-
-	rec->area = 4 * AT_MATH_PI * sphere->radius * sphere->radius;
-
-	return true;
-}
 
 struct CameraSampleResult {
 	aten::ray r;
@@ -184,10 +131,12 @@ __host__ __device__ bool intersect(
 	aten::hitrecord tmp;
 
 	for (int i = 0; i < ctx->geomnum; i++) {
-		if (intersectSphere(&ctx->spheres[i], r, &tmp)) {
+		const auto& s = ctx->shapes[i];
+		if (aten::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, *rec)) {
 			if (tmp.t < rec->t) {
 				*rec = tmp;
-				rec->obj = (void*)&ctx->spheres[i];
+				rec->obj = (void*)&ctx->shapes[i];
+				rec->mtrlid = ctx->shapes[i].mtrlid;
 
 				isHit = true;
 			}
@@ -201,7 +150,7 @@ __global__ void raytracing(
 	float4* p,
 	int width, int height,
 	Camera* camera,
-	Sphere* spheres, int num,
+	aten::ShapeParameter* shapes, int num,
 	aten::MaterialParameter* mtrls)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -214,7 +163,7 @@ __global__ void raytracing(
 	Context ctx;
 	{
 		ctx.geomnum = num;
-		ctx.spheres = spheres;
+		ctx.shapes = shapes;
 		ctx.mtrls = mtrls;
 	}
 
@@ -253,14 +202,14 @@ __global__ void raytracing(
 			}
 			else {
 				// TODO
-				auto* sphere = &ctx.spheres[0];;
+				auto* sphere = &ctx.shapes[0];;
 				aten::LightParameter light(aten::LightTypeArea);
 				light.object.ptr = sphere;
 				light.le = ctx.mtrls[sphere->mtrlid].baseColor;
 
 				auto funcHitTestSphere = [] AT_DEVICE_API(const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord& _rec)
 				{
-					Sphere* s = (Sphere*)object.ptr;
+					aten::ShapeParameter* s = (aten::ShapeParameter*)object.ptr;
 
 					pos = s->center;
 
@@ -268,7 +217,7 @@ __global__ void raytracing(
 					auto dist = dir.length();
 
 					aten::ray r(o, normalize(dir));
-					bool isHit = intersectSphere(s, &r, &_rec);
+					bool isHit = aten::sphere::hit(*s, r, AT_MATH_EPSILON, AT_MATH_INF, _rec);
 
 					return isHit;
 				};
@@ -325,15 +274,14 @@ __global__ void raytracing(
 	p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
 }
 
-static Sphere g_spheres[] = {
-	Sphere(aten::vec3(0, 0, -10), 1.0, 0),
-	Sphere(aten::vec3(2, 0, -10), 1.0, 1),
+aten::ShapeParameter g_spheres[] = {
+	aten::ShapeParameter(aten::vec3(0, 0, -10), 1.0f),
+	aten::ShapeParameter(aten::vec3(3, 0, -10), 1.0f),
 };
 
 void renderRayTracing(
 	aten::vec4* image,
-	int width, int height,
-	const std::vector<aten::material*>& mtrls)
+	int width, int height)
 {
 	Camera camera;
 	initCamera(
@@ -344,12 +292,18 @@ void renderRayTracing(
 		30,
 		width, height);
 
+	const std::vector<aten::material*>& mtrls = aten::material::getMaterials();
+
 #if 1
 	aten::CudaMemory dst(sizeof(float4) * width * height);
 
 	aten::TypedCudaMemory<Camera> cam(&camera, 1);
+
+	// Bind material.
+	g_spheres[0].mtrlid = 0;
+	g_spheres[1].mtrlid = 1;
 	
-	aten::TypedCudaMemory<Sphere> spheres(AT_COUNTOF(g_spheres));
+	aten::TypedCudaMemory<aten::ShapeParameter> spheres(AT_COUNTOF(g_spheres));
 	spheres.writeByNum(g_spheres, AT_COUNTOF(g_spheres));
 
 	std::vector<aten::MaterialParameter> mtrlparams;

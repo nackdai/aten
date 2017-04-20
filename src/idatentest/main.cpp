@@ -92,8 +92,7 @@ void display()
 {
 	renderRayTracing(
 		g_buffer.image(),
-		WIDTH, HEIGHT,
-		aten::material::getMaterials());
+		WIDTH, HEIGHT);
 
 	aten::visualizer::render(g_buffer.image(), false);
 }

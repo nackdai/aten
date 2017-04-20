@@ -11,13 +11,13 @@ namespace aten
 			real ior,
 			bool isIdealRefraction = false,
 			texture* normalMap = nullptr)
-			: material(MaterialTypeRefraction, albedo, ior, nullptr, normalMap)
+			: material(MaterialAttributeRefraction, albedo, ior, nullptr, normalMap)
 		{
 			m_param.isIdealRefraction = isIdealRefraction;
 		}
 
 		refraction(Values& val)
-			: material(MaterialTypeRefraction, val)
+			: material(MaterialAttributeRefraction, val)
 		{
 			m_param.isIdealRefraction = val.get("isIdealRefraction", m_param.isIdealRefraction);
 		}

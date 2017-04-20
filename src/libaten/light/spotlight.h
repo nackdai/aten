@@ -6,7 +6,7 @@ namespace aten {
 	class SpotLight : public Light {
 	public:
 		SpotLight()
-			: Light(LightTypeSingluar)
+			: Light(LightAttributeSingluar)
 		{}
 		SpotLight(
 			const vec3& pos,	// light position.
@@ -18,7 +18,7 @@ namespace aten {
 			real innerAngle,	// Umbra angle of spotlight in radians.
 			real outerAngle,	// Penumbra angle of spotlight in radians.
 			real falloff)		// Falloff factor.
-			: Light(LightTypeSingluar)
+			: Light(LightAttributeSingluar)
 		{
 			m_param.pos = pos;
 			m_param.dir = normalize(dir);
@@ -29,7 +29,7 @@ namespace aten {
 		}
 
 		SpotLight(Values& val)
-			: Light(LightTypeSingluar, val)
+			: Light(LightAttributeSingluar, val)
 		{
 			m_param.constAttn = val.get("constAttn", m_param.constAttn);
 			m_param.linearAttn = val.get("linearAttn", m_param.linearAttn);

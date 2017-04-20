@@ -6,19 +6,19 @@ namespace aten {
 	class DirectionalLight : public Light {
 	public:
 		DirectionalLight()
-			: Light(LightTypeDirectional)
+			: Light(LightAttributeDirectional)
 		{}
 		DirectionalLight(
 			const vec3& dir,
 			const vec3& le)
-			: Light(LightTypeDirectional)
+			: Light(LightAttributeDirectional)
 		{
 			m_param.dir = normalize(dir);
 			m_param.le = le;
 		}
 
 		DirectionalLight(Values& val)
-			: Light(LightTypeDirectional, val)
+			: Light(LightAttributeDirectional, val)
 		{}
 
 		virtual ~DirectionalLight() {}

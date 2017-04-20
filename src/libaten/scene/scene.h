@@ -163,7 +163,7 @@ namespace aten {
 				}
 			}
 
-			if (light.type.isInfinite) {
+			if (light.attrib.isInfinite) {
 				if (isHit) {
 					// Hit something.
 					return false;
@@ -173,7 +173,7 @@ namespace aten {
 					return true;
 				}
 			}
-			else if (light.type.isSingular) {
+			else if (light.attrib.isSingular) {
 				auto distToLight = (lightPos - r.org).length();
 
 				if (isHit && rec.t < distToLight) {

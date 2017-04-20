@@ -6,17 +6,17 @@ namespace aten {
 	class AreaLight : public Light {
 	public:
 		AreaLight() 
-			: Light(LightTypeArea)
+			: Light(LightAttributeArea)
 		{}
 		AreaLight(hitable* obj, const vec3& le)
-			: Light(LightTypeArea)
+			: Light(LightAttributeArea)
 		{
 			m_param.object.ptr = obj;
 			m_param.le = le;
 		}
 
 		AreaLight(Values& val)
-			: Light(LightTypeArea, val)
+			: Light(LightAttributeArea, val)
 		{
 			m_param.object.ptr = (hitable*)val.get("object", m_param.object.ptr);
 			m_param.le = val.get("color", m_param.le);

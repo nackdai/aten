@@ -13,14 +13,14 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(MaterialTypeLambert, albedo, 1, albedoMap, normalMap)
+			: material(MaterialAttributeLambert, albedo, 1, albedoMap, normalMap)
 		{
 			m_param.roughnessMap.ptr = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
 		OrenNayar(Values& val)
-			: material(MaterialTypeLambert, val)
+			: material(MaterialAttributeLambert, val)
 		{
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);

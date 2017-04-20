@@ -11,7 +11,7 @@ namespace aten
 {
 	struct hitrecord;
 
-	struct MaterialType {
+	struct MaterialAttribute {
 		struct {
 			const uint32_t isEmissive : 1;
 			const uint32_t isSingular : 1;
@@ -20,7 +20,7 @@ namespace aten
 			const uint32_t isNPR : 1;
 		};
 
-		MaterialType(
+		MaterialAttribute(
 			bool _isEmissive = false,
 			bool _isSingular = false,
 			bool _isTranslucent = false,
@@ -29,18 +29,18 @@ namespace aten
 			: isEmissive(_isEmissive), isSingular(_isSingular), isTranslucent(_isTranslucent),
 			isGlossy(_isGlossy), isNPR(_isNPR)
 		{}
-		MaterialType(const MaterialType& type)
-			: MaterialType(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy, type.isNPR)
+		MaterialAttribute(const MaterialAttribute& type)
+			: MaterialAttribute(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy, type.isNPR)
 		{}
 	};
 	
-	//													Em     Sp      Tr    Gl    NPR
-	#define MaterialTypeMicrofacet	aten::MaterialType(false, false, false, true,  false)
-	#define MaterialTypeLambert		aten::MaterialType(false, false, false, false, false)
-	#define MaterialTypeEmissive	aten::MaterialType(true,  false, false, false, false)
-	#define MaterialTypeSpecular	aten::MaterialType(false, true,  false, true,  false)
-	#define MaterialTypeRefraction	aten::MaterialType(false, true,  true,  true,  false)
-	#define MaterialTypeNPR			aten::MaterialType(false, false, false, false, true)
+	//													          Em     Sp      Tr    Gl    NPR
+	#define MaterialAttributeMicrofacet	aten::MaterialAttribute(false, false, false, true,  false)
+	#define MaterialAttributeLambert	aten::MaterialAttribute(false, false, false, false, false)
+	#define MaterialAttributeEmissive	aten::MaterialAttribute(true,  false, false, false, false)
+	#define MaterialAttributeSpecular	aten::MaterialAttribute(false, true,  false, true,  false)
+	#define MaterialAttributeRefraction	aten::MaterialAttribute(false, true,  true,  true,  false)
+	#define MaterialAttributeNPR		aten::MaterialAttribute(false, false, false, false, true)
 
 	struct MaterialParameter {
 		vec3 baseColor;					// サーフェイスカラー，通常テクスチャマップによって供給される.
@@ -65,10 +65,10 @@ namespace aten
 
 		bool isIdealRefraction{ false };
 
-		const MaterialType type;
+		const MaterialAttribute attrib;
 
-		MaterialParameter(const MaterialType& _type)
-			: type(_type)
+		MaterialParameter(const MaterialAttribute& _attrib)
+			: attrib(_attrib)
 		{}
 	};
 
@@ -96,34 +96,34 @@ namespace aten
 		virtual ~material();
 
 		material(
-			const MaterialType& type,
+			const MaterialAttribute& attrib,
 			const vec3& clr,
 			real ior = 1,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr);
 
-		material(const MaterialType& type, Values& val);
+		material(const MaterialAttribute& attrib, Values& val);
 
 	public:
 		bool isEmissive() const
 		{
-			return m_param.type.isEmissive;
+			return m_param.attrib.isEmissive;
 		}
 
 		bool isSingular() const
 		{
-			return m_param.type.isSingular;
+			return m_param.attrib.isSingular;
 		}
 
 		bool isTranslucent() const
 		{
-			return m_param.type.isTranslucent;
+			return m_param.attrib.isTranslucent;
 		}
 
 		// TODO
 		virtual bool isGlossy() const
 		{
-			bool isGlossy = m_param.type.isGlossy;
+			bool isGlossy = m_param.attrib.isGlossy;
 
 			if (isGlossy) {
 				isGlossy = (m_param.roughness == real(1) ? false : true);
@@ -137,7 +137,7 @@ namespace aten
 
 		bool isNPR() const
 		{
-			return m_param.type.isNPR;
+			return m_param.attrib.isNPR;
 		}
 
 		const vec3& color() const
@@ -235,7 +235,7 @@ namespace aten
 		NPRMaterial(const vec3& e, Light* light);
 
 		NPRMaterial(Values& val)
-			: material(MaterialTypeNPR, val)
+			: material(MaterialAttributeNPR, val)
 		{}
 
 		virtual ~NPRMaterial() {}

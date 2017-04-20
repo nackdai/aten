@@ -188,7 +188,7 @@ __global__ void raytracing(
 		if (intersect(&ray, &rec, &ctx)) {
 			const aten::MaterialParameter& m = ctx.mtrls[rec.mtrlid];
 
-			if (m.type.isEmissive) {
+			if (m.attrib.isEmissive) {
 				auto emit = m.baseColor;
 				contrib = throughput * emit;
 				break;
@@ -198,12 +198,12 @@ __global__ void raytracing(
 			// ï®ëÃÇ©ÇÁÇÃÉåÉCÇÃì¸èoÇçló∂.
 			const aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-			if (m.type.isSingular || m.type.isTranslucent) {
+			if (m.attrib.isSingular || m.attrib.isTranslucent) {
 			}
 			else {
 				// TODO
 				auto* sphere = &ctx.shapes[0];;
-				aten::LightParameter light(aten::LightTypeArea);
+				aten::LightParameter light(aten::LightAttributeArea);
 				light.object.ptr = sphere;
 				light.le = ctx.mtrls[sphere->mtrlid].baseColor;
 
@@ -247,14 +247,14 @@ __global__ void raytracing(
 				if (aten::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 					auto lightColor = sampleres.finalColor;
 
-					if (light.type.isInfinite) {
+					if (light.attrib.isInfinite) {
 						len = 1.0f;
 					}
 
 					const auto c0 = max(0.0f, dot(orienting_normal, dirToLight));
 					float c1 = 1.0f;
 
-					if (!light.type.isSingular) {
+					if (!light.attrib.isSingular) {
 						c1 = max(0.0f, dot(sampleres.nml, -dirToLight));
 					}
 

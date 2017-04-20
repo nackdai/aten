@@ -40,14 +40,14 @@ namespace aten
 	static std::atomic<uint32_t> g_id = 1;
 
 	material::material()
-		: m_param(MaterialType())
+		: m_param(MaterialAttribute())
 	{
 		m_id = g_id.fetch_add(1);
 		g_materials.push_back(this);
 	}
 
 	material::material(
-		const MaterialType& type,
+		const MaterialAttribute& type,
 		const vec3& clr,
 		real ior/*= 1*/,
 		texture* albedoMap/*= nullptr*/,
@@ -63,7 +63,7 @@ namespace aten
 		m_param.normalMap.ptr = normalMap;
 	}
 
-	material::material(const MaterialType& type, Values& val)
+	material::material(const MaterialAttribute& type, Values& val)
 		: m_param(type)
 	{
 		m_id = g_id.fetch_add(1);
@@ -84,7 +84,7 @@ namespace aten
 	}
 
 	NPRMaterial::NPRMaterial(const vec3& e, Light* light)
-		: material(MaterialTypeNPR, e)
+		: material(MaterialAttributeNPR, e)
 	{
 		setTargetLight(light);
 	}

@@ -11,11 +11,11 @@ namespace aten
 			const vec3& albedo, 
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(MaterialTypeLambert, albedo, 0, albedoMap, normalMap)
+			: material(MaterialAttributeLambert, albedo, 0, albedoMap, normalMap)
 		{}
 
 		lambert(Values& val)
-			: material(MaterialTypeLambert, val)
+			: material(MaterialAttributeLambert, val)
 		{}
 
 		virtual ~lambert() {}

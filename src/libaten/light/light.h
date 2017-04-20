@@ -18,14 +18,14 @@ namespace aten {
 		void* obj{ nullptr };	// light object(only for area light)
 	};
 
-	struct LightType {
+	struct LightAttribute {
 		struct {
 			const uint32_t isSingular : 1;
 			const uint32_t isInfinite : 1;
 			const uint32_t isIBL : 1;
 		};
 
-		AT_DEVICE_API LightType(
+		AT_DEVICE_API LightAttribute(
 			bool _isSingular = false,
 			bool _isInfinite = false,
 			bool _isIBL = false)
@@ -33,10 +33,10 @@ namespace aten {
 		{}
 	};
 
-	#define LightTypeArea			LightType(false, false, false)
-	#define LightTypeSingluar		LightType(true,  false, false)
-	#define LightTypeDirectional	LightType(true,  true,  false)
-	#define LightTypeIBL			LightType(false, true,  true)
+	#define LightAttributeArea			LightAttribute(false, false, false)
+	#define LightAttributeSingluar		LightAttribute(true,  false, false)
+	#define LightAttributeDirectional	LightAttribute(true,  true,  false)
+	#define LightAttributeIBL			LightAttribute(false, true,  true)
 
 	struct LightParameter {
 		vec3 pos;
@@ -56,10 +56,10 @@ namespace aten {
 		UnionIdxPtr object;
 		UnionIdxPtr envmap;
 
-		LightType type;
+		LightAttribute attrib;
 
-		AT_DEVICE_API LightParameter(const LightType& _type)
-			: type(_type)
+		AT_DEVICE_API LightParameter(const LightAttribute& _attrib)
+			: attrib(_attrib)
 		{}
 	};
 
@@ -67,8 +67,8 @@ namespace aten {
 		static std::vector<Light*> g_lights;
 
 	protected:
-		Light(const LightType& type);
-		Light(const LightType& type, Values& val);
+		Light(const LightAttribute& attrib);
+		Light(const LightAttribute& attrib, Values& val);
 
 		virtual ~Light();
 
@@ -107,17 +107,17 @@ namespace aten {
 
 		bool isSingular() const
 		{
-			return m_param.type.isSingular;
+			return m_param.attrib.isSingular;
 		}
 
 		bool isInfinite() const
 		{
-			return m_param.type.isInfinite;
+			return m_param.attrib.isInfinite;
 		}
 
 		bool isIBL() const
 		{
-			return m_param.type.isIBL;
+			return m_param.attrib.isIBL;
 		}
 
 		virtual const hitable* getLightObject() const

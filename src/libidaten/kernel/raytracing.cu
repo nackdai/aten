@@ -256,15 +256,28 @@ __global__ void raytracing(
 				auto* sphere = &ctx.spheres[0];;
 				aten::LightParameter light(aten::LightTypeArea);
 				light.object.ptr = sphere;
+				light.le = ctx.mtrls[sphere->mtrlid].baseColor;
 
-				aten::LightSampleResult sampleres;
+				auto funcHitTestSphere = [] AT_DEVICE_API(const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord& _rec)
 				{
-					sampleres.pos = sphere->center;
-					sampleres.dir = sampleres.pos - rec.p;
-					sampleres.nml = normalize(-sampleres.dir);
-					sampleres.le = ctx.mtrls[sphere->mtrlid].baseColor;
-					sampleres.finalColor = ctx.mtrls[sphere->mtrlid].baseColor;
-				}
+					Sphere* s = (Sphere*)object.ptr;
+
+					pos = s->center;
+
+					auto dir = pos - o;
+					auto dist = dir.length();
+
+					aten::ray r(o, normalize(dir));
+					bool isHit = intersectSphere(s, &r, &_rec);
+
+					return isHit;
+				};
+
+				aten::LightSampleResult sampleres = aten::AreaLight::sample(
+					funcHitTestSphere,
+					light,
+					rec.p,
+					nullptr);
 
 				aten::vec3 dirToLight = sampleres.dir;
 				auto len = dirToLight.length();

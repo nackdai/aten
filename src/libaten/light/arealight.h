@@ -26,7 +26,7 @@ namespace aten {
 
 	public:
 		template <typename Func>
-		static LightSampleResult sample(
+		static AT_DEVICE_API LightSampleResult sample(
 			Func funcHitTest,
 			const LightParameter& param,
 			const vec3& org,
@@ -43,7 +43,7 @@ namespace aten {
 				bool isHit = funcHitTest(org, param.object, pos, sampler, rec);
 
 				if (isHit) {
-					result.pos = pos;
+					result.pos = rec.p;
 					result.pdf = 1 / rec.area;
 					result.dir = rec.p - org;
 					result.nml = rec.normal;

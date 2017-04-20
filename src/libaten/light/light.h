@@ -15,7 +15,7 @@ namespace aten {
 		real intensity{ real(1) };	// light intensity(include attenuation).
 		real pdf{ real(0) };		// light sampling pdf.
 
-		hitable* obj{ nullptr };	// light object(only for area light)
+		void* obj{ nullptr };	// light object(only for area light)
 	};
 
 	struct LightType {

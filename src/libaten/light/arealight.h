@@ -25,10 +25,39 @@ namespace aten {
 		virtual ~AreaLight() {}
 
 	public:
+		template <typename Func>
 		static LightSampleResult sample(
+			Func funcHitTest,
 			const LightParameter& param,
 			const vec3& org,
-			sampler* sampler);
+			sampler* sampler)
+		{
+			LightSampleResult result;
+
+			auto obj = param.object.ptr;
+
+			if (obj) {
+				hitrecord rec;
+
+				vec3 pos;
+				bool isHit = funcHitTest(org, param.object, pos, sampler, rec);
+
+				if (isHit) {
+					result.pos = pos;
+					result.pdf = 1 / rec.area;
+					result.dir = rec.p - org;
+					result.nml = rec.normal;
+
+					result.le = param.le;
+					result.intensity = 1;
+					result.finalColor = param.le;
+
+					result.obj = obj;
+				}
+			}
+
+			return std::move(result);
+		}
 
 		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
 

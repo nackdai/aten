@@ -38,7 +38,17 @@ namespace aten {
 	#define LightAttributeDirectional	LightAttribute(true,  true,  false)
 	#define LightAttributeIBL			LightAttribute(false, true,  true)
 
+	enum LightType {
+		Area,
+		IBL,
+		Direction,
+		Point,
+		Spot,
+	};
+
 	struct LightParameter {
+		LightType type;
+
 		vec3 pos;
 		vec3 dir;
 		vec3 le;
@@ -58,8 +68,8 @@ namespace aten {
 
 		LightAttribute attrib;
 
-		AT_DEVICE_API LightParameter(const LightAttribute& _attrib)
-			: attrib(_attrib)
+		AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
+			: attrib(_attrib), type(_type)
 		{}
 	};
 
@@ -67,8 +77,8 @@ namespace aten {
 		static std::vector<Light*> g_lights;
 
 	protected:
-		Light(const LightAttribute& attrib);
-		Light(const LightAttribute& attrib, Values& val);
+		Light(LightType type, const LightAttribute& attrib);
+		Light(LightType type, const LightAttribute& attrib, Values& val);
 
 		virtual ~Light();
 

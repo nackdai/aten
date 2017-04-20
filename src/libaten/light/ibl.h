@@ -8,16 +8,16 @@ namespace aten {
 	class ImageBasedLight : public Light {
 	public:
 		ImageBasedLight()
-			: Light(LightAttributeIBL)
+			: Light(LightType::IBL, LightAttributeIBL)
 		{}
 		ImageBasedLight(envmap* envmap)
-			: Light(LightAttributeIBL)
+			: Light(LightType::IBL, LightAttributeIBL)
 		{
 			setEnvMap(envmap);
 		}
 
 		ImageBasedLight(Values& val)
-			: Light(LightAttributeIBL, val)
+			: Light(LightType::IBL, LightAttributeIBL, val)
 		{
 			texture* tex = (texture*)val.get("envmap", nullptr);
 			

@@ -21,14 +21,14 @@ namespace aten {
 		return g_lights;
 	}
 
-	Light::Light(const LightAttribute& attrib)
-		: m_param(attrib)
+	Light::Light(LightType type, const LightAttribute& attrib)
+		: m_param(type, attrib)
 	{
 		g_lights.push_back(this);
 	}
 
-	Light::Light(const LightAttribute& attrib, Values& val)
-		: m_param(attrib)
+	Light::Light(LightType type, const LightAttribute& attrib, Values& val)
+		: m_param(type, attrib)
 	{
 		g_lights.push_back(this);
 

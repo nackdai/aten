@@ -29,13 +29,13 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
 
-		static bool hit(
+		static AT_DEVICE_API bool hit(
 			const ShapeParameter& param,
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec);
 
-		static bool hit(
+		static AT_DEVICE_API bool hit(
 			const ShapeParameter& param,
 			const ray& r,
 			const mat4& mtxL2W,
@@ -57,6 +57,11 @@ namespace aten
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final;
+
+		virtual const ShapeParameter& getParam() const override final
+		{
+			return m_param;
+		}
 
 	private:
 		virtual bool hit(

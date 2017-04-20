@@ -6,6 +6,7 @@
 #include "math/vec3.h"
 #include "material/material.h"
 #include "sampler/sampler.h"
+#include "shape/shape.h"
 
 namespace aten {
 	class hitable;
@@ -80,6 +81,12 @@ namespace aten {
 		uint32_t id() const
 		{
 			return m_id;
+		}
+
+		virtual const ShapeParameter& getParam() const
+		{
+			AT_ASSERT(false);
+			return std::move(ShapeParameter());
 		}
 
 	private:

@@ -21,26 +21,22 @@ namespace aten
 	struct ShapeParameter {
 		ShapeType type{ ShapeType::Triangle };
 		int mtrlid{ -1 };
+		aabb bbox;
 
 		union {
 			// triangle.
 			struct {
-				aabb bbox;
 				int idx[3];
 				vertex* vtx[3];
 				real area;
 			};
-			// sphere.
+			// sphere / cube.
 			struct {
-				aabb bbox;
 				vec3 center;
-				real radius;
-			};
-			// cube.
-			struct {
-				aabb bbox;
-				vec3 center;
-				vec3 size;
+				union {
+					vec3 size;		// cube.
+					real radius;	// shpere.
+				};
 			};
 		};
 

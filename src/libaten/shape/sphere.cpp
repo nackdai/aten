@@ -42,7 +42,7 @@ namespace aten
 		return isHit;
 	}
 
-	bool sphere::hit(
+	bool AT_DEVICE_API sphere::hit(
 		const ShapeParameter& param,
 		const ray& r,
 		real t_min, real t_max,
@@ -51,7 +51,7 @@ namespace aten
 		return hit(param, r, mat4::Identity, t_min, t_max, rec);
 	}
 
-	bool sphere::hit(
+	bool AT_DEVICE_API sphere::hit(
 		const ShapeParameter& param,
 		const ray& r,
 		const mat4& mtxL2W,

@@ -36,6 +36,11 @@ namespace aten
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
 
+		virtual const ShapeParameter& getParam() const override final
+		{
+			return param;
+		}
+
 		void build(vertex* v0, vertex* v1, vertex* v2);
 	
 		ShapeParameter param;

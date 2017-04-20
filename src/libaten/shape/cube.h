@@ -45,6 +45,11 @@ namespace aten
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final;
 
+		virtual const ShapeParameter& getParam() const override final
+		{
+			return m_param;
+		}
+
 	private:
 		virtual bool hit(
 			const ray& r,

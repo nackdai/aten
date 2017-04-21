@@ -203,7 +203,7 @@ __global__ void raytracing(
 			else {
 				// TODO
 				auto* sphere = &ctx.shapes[0];;
-				aten::LightParameter light(aten::LightAttributeArea);
+				aten::LightParameter light(aten::LightType::Area, aten::LightAttributeArea);
 				light.object.ptr = sphere;
 				light.le = ctx.mtrls[sphere->mtrlid].baseColor;
 

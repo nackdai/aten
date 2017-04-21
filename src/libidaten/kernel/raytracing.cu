@@ -1,4 +1,5 @@
 #include "kernel/raytracing.h"
+#include "kernel/light.cuh"
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
@@ -151,7 +152,8 @@ __global__ void raytracing(
 	int width, int height,
 	Camera* camera,
 	aten::ShapeParameter* shapes, int num,
-	aten::MaterialParameter* mtrls)
+	aten::MaterialParameter* mtrls,
+	aten::LightParameter* lights)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -202,31 +204,11 @@ __global__ void raytracing(
 			}
 			else {
 				// TODO
-				auto* sphere = &ctx.shapes[0];;
-				aten::LightParameter light(aten::LightType::Area, aten::LightAttributeArea);
+				auto light = lights[0];
+				auto* sphere = &ctx.shapes[light.object.idx];
 				light.object.ptr = sphere;
-				light.le = ctx.mtrls[sphere->mtrlid].baseColor;
 
-				auto funcHitTestSphere = [] AT_DEVICE_API(const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord& _rec)
-				{
-					aten::ShapeParameter* s = (aten::ShapeParameter*)object.ptr;
-
-					pos = s->center;
-
-					auto dir = pos - o;
-					auto dist = dir.length();
-
-					aten::ray r(o, normalize(dir));
-					bool isHit = aten::sphere::hit(*s, r, AT_MATH_EPSILON, AT_MATH_INF, _rec);
-
-					return isHit;
-				};
-
-				aten::LightSampleResult sampleres = aten::AreaLight::sample(
-					funcHitTestSphere,
-					light,
-					rec.p,
-					nullptr);
+				aten::LightSampleResult sampleres = sampleLight(light, rec.p, nullptr);
 
 				aten::vec3 dirToLight = sampleres.dir;
 				auto len = dirToLight.length();
@@ -293,6 +275,7 @@ void renderRayTracing(
 		width, height);
 
 	const std::vector<aten::material*>& mtrls = aten::material::getMaterials();
+	const std::vector<aten::Light*>& lights = aten::Light::getLights();
 
 #if 1
 	aten::CudaMemory dst(sizeof(float4) * width * height);
@@ -314,6 +297,16 @@ void renderRayTracing(
 	aten::TypedCudaMemory<aten::MaterialParameter> materials(mtrlparams.size());
 	materials.writeByNum(&mtrlparams[0], mtrlparams.size());
 
+	std::vector<aten::LightParameter> lightparams;
+	for (auto l : lights) {
+		auto lp = l->param();
+		lp.object.idx = 0;
+		lightparams.push_back(lp);
+	}
+
+	aten::TypedCudaMemory<aten::LightParameter> lightmem(lightparams.size());
+	lightmem.writeByNum(&lightparams[0], lightparams.size());
+
 	dim3 block(32, 32);
 	dim3 grid(
 		(width + block.x - 1) / block.x,
@@ -325,7 +318,8 @@ void renderRayTracing(
 		width, height, 
 		cam.ptr(),
 		spheres.ptr(), AT_COUNTOF(g_spheres),
-		materials.ptr());
+		materials.ptr(),
+		lightmem.ptr());
 
 	checkCudaErrors(cudaDeviceSynchronize());
 

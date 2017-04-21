@@ -72,7 +72,7 @@ namespace aten {
 			return std::move(sample(m_param, org, sampler));
 		}
 
-		static LightSampleResult sample(
+		static AT_DEVICE_API LightSampleResult sample(
 			const LightParameter& param,
 			const vec3& org,
 			sampler* sampler)
@@ -122,7 +122,8 @@ namespace aten {
 
 			// TODO
 			// Is it correct?
-			attn = std::max(attn, real(1));
+			//attn = aten::max(attn, real(1));
+			attn = attn > real(1) ? attn : real(1);	// ‚È‚º‚© max ‚ðŽg‚¤‚Æcuda‚ª—Ž‚¿‚é...
 			
 			result.le = param.le;
 			result.intensity = spot / attn;

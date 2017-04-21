@@ -56,6 +56,7 @@
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
+    <ClInclude Include="..\src\libidaten\kernel\light.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
   </ItemGroup>
   <ItemGroup>
@@ -87,6 +88,14 @@
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="..\src\libidaten\kernel\light.cu">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">--expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>

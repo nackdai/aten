@@ -118,6 +118,8 @@ int main()
 	new aten::emissive(aten::vec3(1, 0, 0));
 	new aten::lambert(aten::vec3(0.5, 0.5, 0.5));
 
+	new aten::AreaLight(nullptr, aten::vec3(1, 0, 0));
+
 	aten::window::run(display);
 
 	aten::window::terminate();

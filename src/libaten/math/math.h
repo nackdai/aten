@@ -125,6 +125,16 @@ namespace aten {
 		return AT_MATH_FUNC(::ceil, f);
 	}
 
+	template <typename T>
+	inline AT_DEVICE_API T max(T a, T b)
+	{
+#ifdef __CUDACC__
+		return max(a, b);
+#else
+		return std::max<T>(a, b);
+#endif
+	}
+
 	template <typename _T>
 	inline _T clamp(_T f, _T a, _T b)
 	{

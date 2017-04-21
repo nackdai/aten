@@ -29,7 +29,7 @@ namespace aten {
 			return std::move(sample(m_param, org, sampler));
 		}
 
-		static LightSampleResult sample(
+		static AT_DEVICE_API LightSampleResult sample(
 			const LightParameter& param,
 			const vec3& org,
 			sampler* sampler)

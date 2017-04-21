@@ -40,6 +40,9 @@ struct Context {
 	aten::ShapeParameter* shapes;
 
 	aten::MaterialParameter* mtrls;
+
+	int lightnum;
+	aten::LightParameter* lights;
 };
 
 struct CameraSampleResult {
@@ -151,9 +154,9 @@ __global__ void raytracing(
 	float4* p,
 	int width, int height,
 	Camera* camera,
-	aten::ShapeParameter* shapes, int num,
+	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
-	aten::LightParameter* lights)
+	aten::LightParameter* lights, int lightnum)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -164,9 +167,11 @@ __global__ void raytracing(
 
 	Context ctx;
 	{
-		ctx.geomnum = num;
+		ctx.geomnum = geomnum;
 		ctx.shapes = shapes;
 		ctx.mtrls = mtrls;
+		ctx.lightnum = lightnum;
+		ctx.lights = lights;
 	}
 
 	const auto idx = iy * camera->width + ix;
@@ -203,47 +208,50 @@ __global__ void raytracing(
 			if (m.attrib.isSingular || m.attrib.isTranslucent) {
 			}
 			else {
-				// TODO
-				auto light = lights[0];
-				auto* sphere = &ctx.shapes[light.object.idx];
-				light.object.ptr = sphere;
+				for (int i = 0; i < lightnum; i++) {
+					// TODO
+					auto light = lights[i];
+					auto* sphere = &ctx.shapes[light.object.idx];
+					light.object.ptr = sphere;
 
-				aten::LightSampleResult sampleres = sampleLight(light, rec.p, nullptr);
+					aten::LightSampleResult sampleres = sampleLight(light, rec.p, nullptr);
 
-				aten::vec3 dirToLight = sampleres.dir;
-				auto len = dirToLight.length();
+					aten::vec3 dirToLight = sampleres.dir;
+					auto len = dirToLight.length();
 
-				dirToLight.normalize();
+					dirToLight.normalize();
 
-				auto albedo = m.baseColor;
+					auto albedo = m.baseColor;
 
-				aten::ray shadowRay(rec.p, dirToLight);
+					aten::ray shadowRay(rec.p, dirToLight);
 
-				aten::hitrecord tmpRec;
+					aten::hitrecord tmpRec;
 
-				auto funcHitTest = [&] AT_DEVICE_API (const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
-				{
-					return intersect(&_r, &_rec, &ctx);
-				};
+					auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
+					{
+						return intersect(&_r, &_rec, &ctx);
+					};
 
-				if (aten::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-					auto lightColor = sampleres.finalColor;
+					if (aten::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+						auto lightColor = sampleres.finalColor;
 
-					if (light.attrib.isInfinite) {
-						len = 1.0f;
+						if (light.attrib.isInfinite) {
+							len = 1.0f;
+						}
+
+						const auto c0 = max(0.0f, dot(orienting_normal, dirToLight));
+						float c1 = 1.0f;
+
+						if (!light.attrib.isSingular) {
+							c1 = max(0.0f, dot(sampleres.nml, -dirToLight));
+						}
+
+						auto G = c0 * c1 / (len * len);
+
+						contrib += throughput * (albedo * lightColor) * G;
 					}
-
-					const auto c0 = max(0.0f, dot(orienting_normal, dirToLight));
-					float c1 = 1.0f;
-
-					if (!light.attrib.isSingular) {
-						c1 = max(0.0f, dot(sampleres.nml, -dirToLight));
-					}
-
-					auto G = c0 * c1 / (len * len);
-
-					contrib += throughput * (albedo * lightColor) * G;
 				}
+				break;
 			}
 		}
 		else {
@@ -319,7 +327,7 @@ void renderRayTracing(
 		cam.ptr(),
 		spheres.ptr(), AT_COUNTOF(g_spheres),
 		materials.ptr(),
-		lightmem.ptr());
+		lightmem.ptr(), lightmem.num());
 
 	checkCudaErrors(cudaDeviceSynchronize());
 

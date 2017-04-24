@@ -19,13 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\idatentest\kernel.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\src\idatentest\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="..\src\idatentest\kernel.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8E4E5656-02DA-4013-94C8-671191EB4B87}</ProjectGuid>

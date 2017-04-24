@@ -11,13 +11,13 @@ namespace aten
 			real shininess, real ior,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(MaterialType::MicrofacetBlinn, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
+			: material(MaterialType::Blinn, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
 			m_param.shininess = shininess;
 		}
 
 		MicrofacetBlinn(Values& val)
-			: material(MaterialType::MicrofacetBlinn, MaterialAttributeMicrofacet, val)
+			: material(MaterialType::Blinn, MaterialAttributeMicrofacet, val)
 		{
 			m_param.shininess = val.get("shininess", m_param.shininess);
 		}

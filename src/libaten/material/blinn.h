@@ -2,22 +2,22 @@
 
 #include "material/material.h"
 
-namespace aten
+namespace AT_NAME
 {
 	class MicrofacetBlinn : public material {
 	public:
 		MicrofacetBlinn(
-			const vec3& albedo,
+			const aten::vec3& albedo,
 			real shininess, real ior,
-			texture* albedoMap = nullptr,
-			texture* normalMap = nullptr)
-			: material(MaterialType::Blinn, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
+			aten::texture* albedoMap = nullptr,
+			aten::texture* normalMap = nullptr)
+			: material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
 			m_param.shininess = shininess;
 		}
 
-		MicrofacetBlinn(Values& val)
-			: material(MaterialType::Blinn, MaterialAttributeMicrofacet, val)
+		MicrofacetBlinn(aten::Values& val)
+			: material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, val)
 		{
 			m_param.shininess = val.get("shininess", m_param.shininess);
 		}
@@ -26,70 +26,70 @@ namespace aten
 
 	public:
 		static real pdf(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 
-		static vec3 sampleDirection(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
+		static aten::vec3 sampleDirection(
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
 			real u, real v,
-			sampler* sampler);
+			aten::sampler* sampler);
 
-		static vec3 bsdf(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+		static aten::vec3 bsdf(
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 
 		static MaterialSampling sample(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false);
 
 		virtual real pdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal, 
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
-		virtual vec3 sampleDirection(
-			const ray& ray,
-			const vec3& normal, 
+		virtual aten::vec3 sampleDirection(
+			const aten::ray& ray,
+			const aten::vec3& normal, 
 			real u, real v,
-			sampler* sampler) const override final;
+			aten::sampler* sampler) const override final;
 
-		virtual vec3 bsdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+		virtual aten::vec3 bsdf(
+			const aten::vec3& normal, 
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
 		virtual MaterialSampling sample(
-			const ray& ray,
-			const vec3& normal,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const override final;
 
 	private:
-		static vec3 bsdf(
-			const vec3& albedo,
+		static aten::vec3 bsdf(
+			const aten::vec3& albedo,
 			const real shininess,
 			const real ior,
 			real& fresnel,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 	};
 }

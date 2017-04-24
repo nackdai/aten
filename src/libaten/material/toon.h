@@ -4,55 +4,55 @@
 #include "material/material.h"
 #include "light/light.h"
 
-namespace aten
+namespace AT_NAME
 {
 	class toon : public NPRMaterial {
 	public:
 		using ComputeToonShadeFunc = std::function<real(real)>;
 
-		toon(const vec3& e, AT_NAME::Light* light)
-			: NPRMaterial(MaterialType::Toon, e, light)
+		toon(const aten::vec3& e, AT_NAME::Light* light)
+			: NPRMaterial(aten::MaterialType::Toon, e, light)
 		{
 		}
-		toon(const vec3& e, AT_NAME::Light* light, ComputeToonShadeFunc func)
-			: NPRMaterial(MaterialType::Toon, e, light)
+		toon(const aten::vec3& e, AT_NAME::Light* light, ComputeToonShadeFunc func)
+			: NPRMaterial(aten::MaterialType::Toon, e, light)
 		{
 			setComputeToonShadeFunc(func);
 		}
 
-		toon(Values& val)
-			: NPRMaterial(MaterialType::Toon, val)
+		toon(aten::Values& val)
+			: NPRMaterial(aten::MaterialType::Toon, val)
 		{}
 
 		virtual ~toon() {}
 
 	public:
 		virtual real pdf(
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final
 		{
 			return real(1);
 		}
 
-		virtual vec3 sampleDirection(
-			const ray& ray,
-			const vec3& normal,
+		virtual aten::vec3 sampleDirection(
+			const aten::ray& ray,
+			const aten::vec3& normal,
 			real u, real v,
-			sampler* sampler) const override final;
+			aten::sampler* sampler) const override final;
 
-		virtual vec3 bsdf(
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+		virtual aten::vec3 bsdf(
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
 		virtual MaterialSampling sample(
-			const ray& ray,
-			const vec3& normal,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const override final;
 
@@ -62,7 +62,7 @@ namespace aten
 		}
 
 	private:
-		virtual vec3 bsdf(
+		virtual aten::vec3 bsdf(
 			real cosShadow,
 			real u, real v) const override final;
 

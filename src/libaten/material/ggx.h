@@ -2,24 +2,24 @@
 
 #include "material/material.h"
 
-namespace aten
+namespace AT_NAME
 {
 	class MicrofacetGGX : public material {
 	public:
 		MicrofacetGGX(
-			const vec3& albedo,
+			const aten::vec3& albedo,
 			real roughness, real ior,
-			texture* albedoMap = nullptr,
-			texture* normalMap = nullptr,
-			texture* roughnessMap = nullptr)
-			: material(MaterialType::GGX, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
+			aten::texture* albedoMap = nullptr,
+			aten::texture* normalMap = nullptr,
+			aten::texture* roughnessMap = nullptr)
+			: material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
 			m_param.roughnessMap.ptr = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
-		MicrofacetGGX(Values& val)
-			: material(MaterialType::GGX, MaterialAttributeMicrofacet, val)
+		MicrofacetGGX(aten::Values& val)
+			: material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, val)
 		{
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
@@ -31,82 +31,82 @@ namespace aten
 
 	public:
 		static real pdf(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 
-		static vec3 sampleDirection(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
+		static aten::vec3 sampleDirection(
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
 			real u, real v,
-			sampler* sampler);
+			aten::sampler* sampler);
 
-		static vec3 bsdf(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+		static aten::vec3 bsdf(
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 
 		static MaterialSampling sample(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false);
 
 		virtual real pdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal, 
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
-		virtual vec3 sampleDirection(
-			const ray& ray,
-			const vec3& normal, 
+		virtual aten::vec3 sampleDirection(
+			const aten::ray& ray,
+			const aten::vec3& normal, 
 			real u, real v,
-			sampler* sampler) const override final;
+			aten::sampler* sampler) const override final;
 
-		virtual vec3 bsdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+		virtual aten::vec3 bsdf(
+			const aten::vec3& normal, 
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
 		virtual MaterialSampling sample(
-			const ray& ray,
-			const vec3& normal,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const override final;
 
 	private:
 		static real pdf(
 			const real roughness,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo);
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo);
 
-		static vec3 sampleDirection(
+		static aten::vec3 sampleDirection(
 			const real roughness,
-			const vec3& in,
-			const vec3& normal,
-			sampler* sampler);
+			const aten::vec3& in,
+			const aten::vec3& normal,
+			aten::sampler* sampler);
 
-		static vec3 bsdf(
-			const vec3& albedo,
+		static aten::vec3 bsdf(
+			const aten::vec3& albedo,
 			const real roughness,
 			const real ior,
 			real& fresnel,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 	};
 }

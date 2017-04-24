@@ -1,12 +1,12 @@
 #include "material/toon.h"
 
-namespace aten
+namespace AT_NAME
 {
-	vec3 toon::sampleDirection(
-		const ray& ray,
-		const vec3& normal,
+	aten::vec3 toon::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
 		auto* light = getTargetLight();
 		AT_ASSERT(light);
@@ -16,10 +16,10 @@ namespace aten
 		return std::move(res.dir);
 	}
 
-	vec3 toon::bsdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 toon::bsdf(
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		real cosShadow = dot(normal, wo);
@@ -28,16 +28,16 @@ namespace aten
 	}
 
 	MaterialSampling toon::sample(
-		const ray& ray,
-		const vec3& normal,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
 		MaterialSampling ret;
 
-		const vec3& in = ray.dir;
+		const aten::vec3& in = ray.dir;
 
 		ret.dir = sampleDirection(ray, normal, u, v, sampler);
 		ret.pdf = pdf(normal, in, ret.dir, u, v);
@@ -48,13 +48,13 @@ namespace aten
 		return std::move(ret);
 	}
 
-	vec3 toon::bsdf(
+	aten::vec3 toon::bsdf(
 		real cosShadow,
 		real u, real v) const
 	{
 		const real c = aten::clamp<real>(cosShadow, 0, 1);
 
-		vec3 albedo = color();
+		aten::vec3 albedo = color();
 		albedo *= sampleAlbedoMap(u, v);
 
 		real coeff = 1;
@@ -77,7 +77,7 @@ namespace aten
 		coeff = std::max<real>(coeff, real(0.05));
 		//coeff = aten::clamp<real>(coeff, 0.05, 1);
 
-		vec3 bsdf = albedo * coeff;
+		aten::vec3 bsdf = albedo * coeff;
 
 		return std::move(bsdf);
 	}

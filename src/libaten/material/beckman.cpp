@@ -1,74 +1,74 @@
 #include "material/beckman.h"
 
-namespace aten
+namespace AT_NAME
 {
 	real MicrofacetBeckman::pdf(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
-		auto roughness = material::sampleTexture((texture*)param.roughnessMap.ptr, u, v, param.roughness);
+		auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
 		auto ret = pdf(roughness.r, normal, wi, wo);
 		return ret;
 	}
 
 	real MicrofacetBeckman::pdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		auto ret = pdf(m_param, normal, wi, wo, u, v);
 		return ret;
 	}
 
-	vec3 MicrofacetBeckman::sampleDirection(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
+	aten::vec3 MicrofacetBeckman::sampleDirection(
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
 		real u, real v,
-		sampler* sampler)
+		aten::sampler* sampler)
 	{
-		auto roughness = material::sampleTexture((texture*)param.roughnessMap.ptr, u, v, param.roughness);
-		vec3 dir = sampleDirection(roughness.r, wi, normal, sampler);
+		auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
+		aten::vec3 dir = sampleDirection(roughness.r, wi, normal, sampler);
 		return std::move(dir);
 	}
 
-	vec3 MicrofacetBeckman::sampleDirection(
-		const ray& ray,
-		const vec3& normal,
+	aten::vec3 MicrofacetBeckman::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
 		auto dir = sampleDirection(m_param, normal, ray.dir, u, v, sampler);
 		return std::move(dir);
 	}
 
-	vec3 MicrofacetBeckman::bsdf(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 MicrofacetBeckman::bsdf(
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
-		auto roughness = material::sampleTexture((texture*)param.roughnessMap.ptr, u, v, param.roughness);
+		auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
 
 		auto albedo = param.baseColor;
-		albedo *= material::sampleTexture((texture*)param.albedoMap.ptr, u, v, real(1));
+		albedo *= material::sampleTexture((aten::texture*)param.albedoMap.ptr, u, v, real(1));
 
 		real fresnel = 1;
 		real ior = param.ior;
 
-		vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
+		aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
 		return std::move(ret);
 	}
 
-	vec3 MicrofacetBeckman::bsdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 MicrofacetBeckman::bsdf(
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		auto ret = bsdf(m_param, normal, wi, wo, u, v);
@@ -76,8 +76,8 @@ namespace aten
 	}
 
 	static real sampleBeckman_D(
-		const vec3& wh,	// half
-		const vec3& n,	// normal
+		const aten::vec3& wh,	// half
+		const aten::vec3& n,	// normal
 		real roughness)
 	{
 		// NOTE
@@ -106,9 +106,9 @@ namespace aten
 
 	real MicrofacetBeckman::pdf(
 		const real roughness,
-		const vec3& normal, 
-		const vec3& wi,
-		const vec3& wo)
+		const aten::vec3& normal, 
+		const aten::vec3& wi,
+		const aten::vec3& wo)
 	{
 		// NOTE
 		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-brdf/
@@ -126,11 +126,11 @@ namespace aten
 		return pdf;
 	}
 
-	vec3 MicrofacetBeckman::sampleDirection(
+	aten::vec3 MicrofacetBeckman::sampleDirection(
 		const real roughness,
-		const vec3& in,
-		const vec3& normal,
-		sampler* sampler)
+		const aten::vec3& in,
+		const aten::vec3& normal,
+		aten::sampler* sampler)
 	{
 		// NOTE
 		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
@@ -166,14 +166,14 @@ namespace aten
 		return std::move(dir);
 	}
 
-	vec3 MicrofacetBeckman::bsdf(
-		const vec3& albedo,
+	aten::vec3 MicrofacetBeckman::bsdf(
+		const aten::vec3& albedo,
 		const real roughness,
 		const real ior,
 		real& fresnel,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
 		// ÉåÉCÇ™ì¸éÀÇµÇƒÇ≠ÇÈë§ÇÃï®ëÃÇÃã¸ê‹ó¶.
@@ -181,10 +181,10 @@ namespace aten
 
 		real nt = ior;		// ï®ëÃì‡ïîÇÃã¸ê‹ó¶.
 
-		vec3 V = -wi;
-		vec3 L = wo;
-		vec3 N = normal;
-		vec3 H = normalize(L + V);
+		aten::vec3 V = -wi;
+		aten::vec3 L = wo;
+		aten::vec3 N = normal;
+		aten::vec3 H = normalize(L + V);
 
 		// TODO
 		// DesneyÇæÇ∆absÇµÇƒÇ»Ç¢Ç™ÅAAMDÇÃÇÕÇµÇƒÇ¢ÇÈ....
@@ -241,18 +241,18 @@ namespace aten
 	}
 
 	MaterialSampling MicrofacetBeckman::sample(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
 		MaterialSampling ret;
 
 		auto roughness = material::sampleTexture(
-			(texture*)param.roughnessMap.ptr,
+			(aten::texture*)param.roughnessMap.ptr,
 			u, v,
 			param.roughness);
 
@@ -265,7 +265,7 @@ namespace aten
 
 		auto albedo = param.baseColor;
 		albedo *= sampleTexture(
-			(texture*)param.albedoMap.ptr,
+			(aten::texture*)param.albedoMap.ptr,
 			u, v,
 			real(1));
 
@@ -276,10 +276,10 @@ namespace aten
 	}
 
 	MaterialSampling MicrofacetBeckman::sample(
-		const ray& ray,
-		const vec3& normal,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{

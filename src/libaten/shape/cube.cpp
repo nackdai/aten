@@ -1,8 +1,8 @@
 #include "shape/cube.h"
 
-namespace aten
+namespace AT_NAME
 {
-	cube::Face cube::findFace(const vec3& d)
+	cube::Face cube::findFace(const aten::vec3& d)
 	{
 		auto x = aten::abs(d.x);
 		auto y = aten::abs(d.y);
@@ -38,9 +38,9 @@ namespace aten
 	}
 
 	bool cube::hit(
-		const ray& r, 
+		const aten::ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
 		real t = 0;
 		bool isHit = m_param.bbox.hit(r, t_min, t_max, &t);
@@ -57,22 +57,22 @@ namespace aten
 
 				switch (face) {
 				case POS_X:
-					rec.normal = vec3(1, 0, 0);
+					rec.normal = aten::vec3(1, 0, 0);
 					break;
 				case NEG_X:
-					rec.normal = vec3(-1, 0, 0);
+					rec.normal = aten::vec3(-1, 0, 0);
 					break;
 				case POS_Y:
-					rec.normal = vec3(0, 1, 0);
+					rec.normal = aten::vec3(0, 1, 0);
 					break;
 				case NEG_Y:
-					rec.normal = vec3(0, -1, 0);
+					rec.normal = aten::vec3(0, -1, 0);
 					break;
 				case POS_Z:
-					rec.normal = vec3(0, 0, 1);
+					rec.normal = aten::vec3(0, 0, 1);
 					break;
 				case NEG_Z:
-					rec.normal = vec3(0, 0, -1);
+					rec.normal = aten::vec3(0, 0, -1);
 					break;
 				}
 			}
@@ -91,29 +91,29 @@ namespace aten
 	}
 
 	bool cube::hit(
-		const ray& r,
-		const mat4& mtxL2W,
+		const aten::ray& r,
+		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
 		AT_ASSERT(false);	// Not support.
 		return hit(r, t_min, t_max, rec);
 	}
 
-	aabb cube::getBoundingbox() const
+	aten::aabb cube::getBoundingbox() const
 	{
 		return std::move(m_param.bbox);
 	}
 
-	vec3 cube::getRandomPosOn(sampler* sampler) const
+	aten::vec3 cube::getRandomPosOn(aten::sampler* sampler) const
 	{
-		vec3 pos;
+		aten::vec3 pos;
 		onGetRandomPosOn(pos, sampler);
 
 		return std::move(pos);
 	}
 
-	cube::Face cube::onGetRandomPosOn(vec3& pos, sampler* sampler) const
+	cube::Face cube::onGetRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();
 
@@ -137,86 +137,86 @@ namespace aten
 		auto c = m_param.center;
 		auto s = m_param.size * 0.5;
 
-		vec3 leftbottom;
-		vec3 lefttop;
-		vec3 rightbottom;
+		aten::vec3 leftbottom;
+		aten::vec3 lefttop;
+		aten::vec3 rightbottom;
 
 		switch (face) {
 		case POS_X:
-			leftbottom = c + vec3(s.x, -s.y, s.z);
-			lefttop = leftbottom + vec3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + vec3(0, 0, -2 * s.z);
+			leftbottom = c + aten::vec3(s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(0, 0, -2 * s.z);
 			break;
 		case NEG_X:
-			leftbottom = c + vec3(-s.x, -s.y, s.z);
-			lefttop = leftbottom + vec3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + vec3(0, 0, -2 * s.z);
+			leftbottom = c + aten::vec3(-s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(0, 0, -2 * s.z);
 			break;
 		case POS_Y:
-			leftbottom = c + vec3(-s.x, s.y, s.z);
-			lefttop = leftbottom + vec3(0, 0, -2 * s.z);
-			rightbottom = leftbottom + vec3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(-s.x, s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 0, -2 * s.z);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		case NEG_Y:
-			leftbottom = c + vec3(-s.x, -s.y, s.z);
-			lefttop = leftbottom + vec3(0, 0, -2 * s.z);
-			rightbottom = leftbottom + vec3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(-s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 0, -2 * s.z);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		case POS_Z:
-			leftbottom = c + vec3(s.x, -s.y, s.z);
-			lefttop = leftbottom + vec3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + vec3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		case NEG_Z:
-			leftbottom = c + vec3(s.x, -s.y, -s.z);
-			lefttop = leftbottom + vec3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + vec3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(s.x, -s.y, -s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		}
 
-		vec3 x = rightbottom - leftbottom;
-		vec3 y = lefttop - leftbottom;
+		aten::vec3 x = rightbottom - leftbottom;
+		aten::vec3 y = lefttop - leftbottom;
 
 		// For debug.
-		vec3 nx = normalize(x);
-		vec3 ny = normalize(y);
+		aten::vec3 nx = normalize(x);
+		aten::vec3 ny = normalize(y);
 
 		pos = leftbottom + r2 * x + r3 * y;
 
 		return face;
 	}
 
-	hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(sampler* sampler) const
+	aten::hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(aten::sampler* sampler) const
 	{
-		return getSamplePosNormalPdf(mat4::Identity, sampler);
+		return getSamplePosNormalPdf(aten::mat4::Identity, sampler);
 	}
 
-	hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(
-		const mat4& mtxL2W,
-		sampler* sampler) const
+	aten::hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(
+		const aten::mat4& mtxL2W,
+		aten::sampler* sampler) const
 	{
-		vec3 pos;
+		aten::vec3 pos;
 		auto face = onGetRandomPosOn(pos, sampler);
 
-		vec3 nml;
+		aten::vec3 nml;
 		switch (face) {
 		case POS_X:
-			nml = vec3(1, 0, 0);
+			nml = aten::vec3(1, 0, 0);
 			break;
 		case NEG_X:
-			nml = vec3(-1, 0, 0);
+			nml = aten::vec3(-1, 0, 0);
 			break;
 		case POS_Y:
-			nml = vec3(0, 1, 0);
+			nml = aten::vec3(0, 1, 0);
 			break;
 		case NEG_Y:
-			nml = vec3(0, -1, 0);
+			nml = aten::vec3(0, -1, 0);
 			break;
 		case POS_Z:
-			nml = vec3(0, 0, 1);
+			nml = aten::vec3(0, 0, 1);
 			break;
 		case NEG_Z:
-			nml = vec3(0, 0, -1);
+			nml = aten::vec3(0, 0, -1);
 			break;
 		}
 

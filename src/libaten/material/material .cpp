@@ -2,7 +2,7 @@
 #include "material/material.h"
 #include "light/light.h"
 
-namespace aten
+namespace AT_NAME
 {
 	std::vector<material*> material::g_materials;
 
@@ -39,7 +39,7 @@ namespace aten
 	// 0 は予約済みなので、1 から始める.
 	static std::atomic<uint32_t> g_id = 1;
 
-	material::material(MaterialType type, const MaterialAttribute& attrib)
+	material::material(aten::MaterialType type, const aten::MaterialAttribute& attrib)
 		: m_param(type, attrib)
 	{
 		m_id = g_id.fetch_add(1);
@@ -47,12 +47,12 @@ namespace aten
 	}
 
 	material::material(
-		MaterialType type,
-		const MaterialAttribute& attrib,
-		const vec3& clr,
+		aten::MaterialType type,
+		const aten::MaterialAttribute& attrib,
+		const aten::vec3& clr,
 		real ior/*= 1*/,
-		texture* albedoMap/*= nullptr*/,
-		texture* normalMap/*= nullptr*/)
+		aten::texture* albedoMap/*= nullptr*/,
+		aten::texture* normalMap/*= nullptr*/)
 		: m_param(type, attrib)
 	{
 		m_id = g_id.fetch_add(1);
@@ -64,7 +64,7 @@ namespace aten
 		m_param.normalMap.ptr = normalMap;
 	}
 
-	material::material(MaterialType type, const MaterialAttribute& attrib, Values& val)
+	material::material(aten::MaterialType type, const aten::MaterialAttribute& attrib, aten::Values& val)
 		: m_param(type, attrib)
 	{
 		m_id = g_id.fetch_add(1);
@@ -72,8 +72,8 @@ namespace aten
 
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);
-		m_param.albedoMap.ptr = (texture*)val.get("albedomap", (void*)m_param.albedoMap.ptr);
-		m_param.normalMap.ptr = (texture*)val.get("normalmap", (void*)m_param.normalMap.ptr);
+		m_param.albedoMap.ptr = (aten::texture*)val.get("albedomap", (void*)m_param.albedoMap.ptr);
+		m_param.normalMap.ptr = (aten::texture*)val.get("normalmap", (void*)m_param.normalMap.ptr);
 	}
 
 	material::~material()
@@ -85,8 +85,8 @@ namespace aten
 	}
 
 	NPRMaterial::NPRMaterial(
-		MaterialType type,
-		const vec3& e, AT_NAME::Light* light)
+		aten::MaterialType type,
+		const aten::vec3& e, AT_NAME::Light* light)
 		: material(type, MaterialAttributeNPR, e)
 	{
 		setTargetLight(light);
@@ -112,8 +112,8 @@ namespace aten
 	// http://d.hatena.ne.jp/hanecci/20130525/p3
 
 	real schlick(
-		const vec3& in,
-		const vec3& normal,
+		const aten::vec3& in,
+		const aten::vec3& normal,
 		real ni, real nt)
 	{
 		// NOTE
@@ -129,15 +129,15 @@ namespace aten
 	}
 
 	real computFresnel(
-		const vec3& in,
-		const vec3& normal,
+		const aten::vec3& in,
+		const aten::vec3& normal,
 		real ni, real nt)
 	{
 		real cos_i = dot(in, normal);
 
 		bool isEnter = (cos_i > real(0));
 
-		vec3 n = normal;
+		aten::vec3 n = normal;
 
 		if (isEnter) {
 			// レイが出ていくので、全部反対.
@@ -166,13 +166,13 @@ namespace aten
 		real u, real v) const
 	{
 		if (m_param.normalMap.ptr) {
-			newNml = ((texture*)m_param.normalMap.ptr)->at(u, v);
-			newNml = 2 * newNml - vec3(1);
+			newNml = ((aten::texture*)m_param.normalMap.ptr)->at(u, v);
+			newNml = 2 * newNml - aten::vec3(1);
 			newNml.normalize();
 
-			vec3 n = normalize(orgNml);
-			vec3 t = getOrthoVector(n);
-			vec3 b = cross(n, t);
+			aten::vec3 n = normalize(orgNml);
+			aten::vec3 t = getOrthoVector(n);
+			aten::vec3 b = cross(n, t);
 
 			newNml = newNml.z * n + newNml.x * t + newNml.y * b;
 			newNml.normalize();
@@ -183,15 +183,15 @@ namespace aten
 	}
 
 	real material::computeFresnel(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real outsideIor/*= 1*/) const
 	{
-		vec3 V = -wi;
-		vec3 L = wo;
-		vec3 N = normal;
-		vec3 H = normalize(L + V);
+		aten::vec3 V = -wi;
+		aten::vec3 L = wo;
+		aten::vec3 N = normal;
+		aten::vec3 H = normalize(L + V);
 
 		auto ni = outsideIor;
 		auto nt = ior();

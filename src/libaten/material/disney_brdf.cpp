@@ -1,7 +1,7 @@
 #include "math/math.h"
 #include "material/disney_brdf.h"
 
-namespace aten
+namespace AT_NAME
 {
 	// NOTE
 	// http://project-asura.com/blog/archives/1972
@@ -83,33 +83,33 @@ namespace aten
 		return 1 / (NdotV + sqrt(sqr(VdotX * ax) + sqr(VdotY * ay) + sqr(NdotV)));
 	}
 
-	inline vec3 mon2lin(const vec3& x)
+	inline aten::vec3 mon2lin(const aten::vec3& x)
 	{
-		return vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
+		return aten::vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
 	}
 
 	real DisneyBRDF::pdf(
-		const vec3& normal,
-		const vec3& wi,	/* in */
-		const vec3& wo,	/* out */
+		const aten::vec3& normal,
+		const aten::vec3& wi,	/* in */
+		const aten::vec3& wo,	/* out */
 		real u, real v) const
 	{
-		const vec3& N = normal;
-		const vec3& V = -wi;
-		const vec3& L = wo;
+		const aten::vec3& N = normal;
+		const aten::vec3& V = -wi;
+		const aten::vec3& L = wo;
 		
-		const vec3 X = getOrthoVector(N);
-		const vec3 Y = normalize(cross(N, X));
+		const aten::vec3 X = getOrthoVector(N);
+		const aten::vec3 Y = normalize(cross(N, X));
 
 		return pdf(V, N, L, X, Y, u, v);
 	}
 
 	real DisneyBRDF::pdf(
-		const vec3& V,
-		const vec3& N,
-		const vec3& L,
-		const vec3& X,
-		const vec3& Y,
+		const aten::vec3& V,
+		const aten::vec3& N,
+		const aten::vec3& L,
+		const aten::vec3& X,
+		const aten::vec3& Y,
 		real u, real v) const
 	{
 		const auto VdotN = dot(V, N);
@@ -134,7 +134,7 @@ namespace aten
 		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
 		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
 
-		vec3 H = normalize(V + L);
+		aten::vec3 H = normalize(V + L);
 
 		const auto NdotH = dot(N, H);
 		const auto HdotX = dot(H, X);
@@ -156,30 +156,30 @@ namespace aten
 		return pdf;
 	}
 
-	vec3 DisneyBRDF::sampleDirection(
-		const ray& ray,
-		const vec3& normal,
+	aten::vec3 DisneyBRDF::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
-		const vec3& in = ray.dir;
+		const aten::vec3& in = ray.dir;
 
-		const vec3& N = normal;
-		const vec3& V = -in;
+		const aten::vec3& N = normal;
+		const aten::vec3& V = -in;
 
-		const vec3 X = getOrthoVector(N);
-		const vec3 Y = normalize(cross(N, X));
+		const aten::vec3 X = getOrthoVector(N);
+		const aten::vec3 Y = normalize(cross(N, X));
 
 		return std::move(sampleDirection(V, N, X, Y, u, v, sampler));
 	}
 
-	vec3 DisneyBRDF::sampleDirection(
-		const vec3& V,
-		const vec3& N,
-		const vec3& X,
-		const vec3& Y,
+	aten::vec3 DisneyBRDF::sampleDirection(
+		const aten::vec3& V,
+		const aten::vec3& N,
+		const aten::vec3& X,
+		const aten::vec3& Y,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
 		const auto anisotropic = m_param.anisotropic;
 		const auto roughness = m_param.roughness;
@@ -197,8 +197,8 @@ namespace aten
 
 		bool willSampleDiffuse = r < weight1;
 
-		vec3 H;
-		vec3 L;
+		aten::vec3 H;
+		aten::vec3 L;
 
 		if (willSampleDiffuse) {
 			// Sample diffuse.
@@ -212,9 +212,9 @@ namespace aten
 			const real y = aten::sin(r1) * r2s;
 			const real z = aten::sqrt(real(1) - r2);
 
-			vec3 n = N;
-			vec3 t = X;
-			vec3 b = Y;
+			aten::vec3 n = N;
+			aten::vec3 t = X;
+			aten::vec3 b = Y;
 
 			L = normalize((t * x + b * y + n * z));
 			H = normalize(L + V);
@@ -236,31 +236,31 @@ namespace aten
 		return std::move(L);
 	}
 
-	vec3 DisneyBRDF::bsdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 DisneyBRDF::bsdf(
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
-		const vec3& N = normal;
-		const vec3 V = -wi;
-		const vec3& L = wo;
+		const aten::vec3& N = normal;
+		const aten::vec3 V = -wi;
+		const aten::vec3& L = wo;
 
-		const vec3 X = getOrthoVector(N);
-		const vec3 Y = normalize(cross(N, X));
+		const aten::vec3 X = getOrthoVector(N);
+		const aten::vec3 Y = normalize(cross(N, X));
 
 		real fresnel = 1;
 
 		return std::move(bsdf(fresnel, V, N, L, X, Y, u, v));
 	}
 
-	vec3 DisneyBRDF::bsdf(
+	aten::vec3 DisneyBRDF::bsdf(
 		real& fresnel,
-		const vec3& V,
-		const vec3& N,
-		const vec3& L,
-		const vec3& X,
-		const vec3& Y,
+		const aten::vec3& V,
+		const aten::vec3& N,
+		const aten::vec3& L,
+		const aten::vec3& X,
+		const aten::vec3& Y,
 		real u, real v) const
 	{
 		const auto baseColor = m_param.baseColor;
@@ -278,19 +278,19 @@ namespace aten
 		const auto NdotL = dot(N, L);
 		const auto NdotV = dot(N, V);
 		if (NdotL < 0 || NdotV < 0) {
-			return vec3(0);
+			return aten::vec3(0);
 		}
 
-		const vec3 H = normalize(L + V);
+		const aten::vec3 H = normalize(L + V);
 		const auto NdotH = dot(N, H);
 		const auto LdotH = dot(L, H);
 
-		const vec3 Cdlin = mon2lin(baseColor);
+		const aten::vec3 Cdlin = mon2lin(baseColor);
 		const auto Cdlum = real(0.3) * Cdlin[0] + real(0.6) * Cdlin[1] + real(0.1) * Cdlin[2]; // luminance approx.
 
-		const vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : vec3(real(1)); // normalize lum. to isolate hue+sat
-		const vec3 Cspec0 = mix(specular* real(0.08) * mix(vec3(real(1)), Ctint, specularTint), Cdlin, metalic);
-		const vec3 Csheen = mix(vec3(1), Ctint, sheenTint);
+		const aten::vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : aten::vec3(real(1)); // normalize lum. to isolate hue+sat
+		const aten::vec3 Cspec0 = mix(specular* real(0.08) * mix(aten::vec3(real(1)), Ctint, specularTint), Cdlin, metalic);
+		const aten::vec3 Csheen = mix(aten::vec3(1), Ctint, sheenTint);
 
 		// Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
 		// and mix in diffuse retro-reflection based on roughness
@@ -312,12 +312,12 @@ namespace aten
 		const auto ay = std::max(real(0.001), sqr(roughness) * aspect);
 		const auto Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
 		const auto FH = SchlickFresnel(LdotH);
-		const vec3 Fs = aten::mix(Cspec0, vec3(real(1)), FH);
+		const aten::vec3 Fs = aten::mix(Cspec0, aten::vec3(real(1)), FH);
 		real Gs = smithG_GGX_aniso(NdotL, dot(L, X), dot(L, Y), ax, ay);
 		Gs *= smithG_GGX_aniso(NdotV, dot(V, X), dot(V, Y), ax, ay);
 
 		// sheen
-		vec3 Fsheen = FH * sheen * Csheen;
+		aten::vec3 Fsheen = FH * sheen * Csheen;
 
 		// clearcoat (ior = 1.5 -> F0 = 0.04)
 		const auto Dr = GTR1(NdotH, aten::mix(real(0.1), real(0.001), clearcoatGloss));
@@ -343,26 +343,26 @@ namespace aten
 	}
 
 	MaterialSampling DisneyBRDF::sample(
-		const ray& ray,
-		const vec3& normal,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		const vec3& in = ray.dir;
+		const aten::vec3& in = ray.dir;
 
-		const vec3& N = normal;
-		const vec3 V = -in;
+		const aten::vec3& N = normal;
+		const aten::vec3 V = -in;
 
-		const vec3 X = getOrthoVector(normal);
-		const vec3 Y = normalize(cross(normal, X));
+		const aten::vec3 X = getOrthoVector(normal);
+		const aten::vec3 Y = normalize(cross(normal, X));
 
 		MaterialSampling ret;
 
 		ret.dir = sampleDirection(V, N, X, Y, u, v, sampler);
 
-		const vec3& L = ret.dir;
+		const aten::vec3& L = ret.dir;
 
 		ret.pdf = pdf(V, N, L, X, Y, u, v);
 

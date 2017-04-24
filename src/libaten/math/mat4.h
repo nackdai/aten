@@ -43,7 +43,7 @@ namespace aten {
 			m30 = _m30; m31 = _m31; m32 = _m32; m33 = _m33;
 		}
 
-		inline mat4& identity()
+		inline AT_DEVICE_API mat4& identity()
 		{
 			// TODO
 #ifdef __AT_CUDA__

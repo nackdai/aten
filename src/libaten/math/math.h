@@ -66,7 +66,7 @@ namespace aten {
 		return AT_MATH_FUNC(::cos, f);
 	}
 
-	inline real sin(real f)
+	inline AT_DEVICE_API real sin(real f)
 	{
 		return AT_MATH_FUNC(::sin, f);
 	}

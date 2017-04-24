@@ -136,7 +136,7 @@ __host__ __device__ bool intersect(
 
 	for (int i = 0; i < ctx->geomnum; i++) {
 		const auto& s = ctx->shapes[i];
-		if (aten::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, tmp)) {
+		if (AT_NAME::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, tmp)) {
 			if (tmp.t < rec->t) {
 				*rec = tmp;
 				rec->obj = (void*)&ctx->shapes[i];
@@ -272,7 +272,8 @@ aten::ShapeParameter g_spheres[] = {
 void renderRayTracing(
 	aten::vec4* image,
 	int width, int height,
-	std::vector<aten::LightParameter> lights)
+	std::vector<aten::MaterialParameter>& mtrls,
+	std::vector<aten::LightParameter>& lights)
 {
 	Camera camera;
 	initCamera(
@@ -282,8 +283,6 @@ void renderRayTracing(
 		aten::vec3(0, 1, 0),
 		30,
 		width, height);
-
-	const std::vector<aten::material*>& mtrls = aten::material::getMaterials();
 
 #if 1
 	aten::CudaMemory dst(sizeof(float4) * width * height);
@@ -297,13 +296,8 @@ void renderRayTracing(
 	aten::TypedCudaMemory<aten::ShapeParameter> spheres(AT_COUNTOF(g_spheres));
 	spheres.writeByNum(g_spheres, AT_COUNTOF(g_spheres));
 
-	std::vector<aten::MaterialParameter> mtrlparams;
-	for (auto m : mtrls) {
-		mtrlparams.push_back(m->param());
-	}
-
-	aten::TypedCudaMemory<aten::MaterialParameter> materials(mtrlparams.size());
-	materials.writeByNum(&mtrlparams[0], mtrlparams.size());
+	aten::TypedCudaMemory<aten::MaterialParameter> materials(mtrls.size());
+	materials.writeByNum(&mtrls[0], mtrls.size());
 
 	for (auto l : lights) {
 		l.object.idx = 0;

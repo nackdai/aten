@@ -97,9 +97,17 @@ void display()
 		lightparams.push_back(l->param());
 	}
 
+	const auto& mtrls = aten::material::getMaterials();
+
+	std::vector<aten::MaterialParameter> mtrlparms;
+	for (auto m : mtrls) {
+		mtrlparms.push_back(m->param());
+	}
+
 	renderRayTracing(
 		g_buffer.image(),
 		WIDTH, HEIGHT,
+		mtrlparms,
 		lightparams);
 
 	aten::visualizer::render(g_buffer.image(), false);

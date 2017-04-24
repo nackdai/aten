@@ -7,18 +7,18 @@
 namespace aten {
 	class aabb {
 	public:
-		aabb()
+		AT_DEVICE_API aabb()
 		{
 			empty();
 		}
-		aabb(const vec3& _min, const vec3& _max)
+		AT_DEVICE_API aabb(const vec3& _min, const vec3& _max)
 		{
 			init(_min, _max);
 		}
-		~aabb() {}
+		AT_DEVICE_API ~aabb() {}
 
 	public:
-		void init(const vec3& _min, const vec3& _max)
+		AT_DEVICE_API void init(const vec3& _min, const vec3& _max)
 		{
 			AT_ASSERT(_min.x <= _max.x);
 			AT_ASSERT(_min.y <= _max.y);
@@ -134,7 +134,7 @@ namespace aten {
 			return area;
 		}
 
-		void empty()
+		AT_DEVICE_API void empty()
 		{
 			m_min.x = m_min.y = m_min.z = AT_MATH_INF;
 			m_max.x = m_max.y = m_max.z = -AT_MATH_INF;

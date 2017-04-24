@@ -1,19 +1,19 @@
 #include "material/lambert.h"
 
-namespace aten {
+namespace AT_NAME {
 	real lambert::pdf(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
 		return pdf(normal, wo);
 	}
 
 	real lambert::pdf(
-		const vec3& normal,
-		const vec3& wo)
+		const aten::vec3& normal,
+		const aten::vec3& wo)
 	{
 		auto c = dot(normal, wo);
 		//AT_ASSERT(c >= 0);
@@ -25,41 +25,41 @@ namespace aten {
 	}
 
 	real lambert::pdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		auto ret = pdf(m_param, normal, wi, wo, u, v);
 		return ret;
 	}
 
-	vec3 lambert::sampleDirection(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
+	aten::vec3 lambert::sampleDirection(
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
 		real u, real v,
-		sampler* sampler)
+		aten::sampler* sampler)
 	{
 		return std::move(sampleDirection(normal, sampler));
 	}
 
-	vec3 lambert::sampleDirection(
-		const vec3& normal,
-		sampler* sampler)
+	aten::vec3 lambert::sampleDirection(
+		const aten::vec3& normal,
+		aten::sampler* sampler)
 	{
 		// normal‚Ì•ûŒü‚ðŠî€‚Æ‚µ‚½³‹K’¼ŒðŠî’ê(w, u, v)‚ðì‚é.
 		// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŽŸ‚ÌƒŒƒC‚ð”ò‚Î‚·.
-		vec3 n, t, b;
+		aten::vec3 n, t, b;
 
 		n = normal;
 
 		// n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
 		if (fabs(n.x) > AT_MATH_EPSILON) {
-			t = normalize(cross(vec3(0.0, 1.0, 0.0), n));
+			t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
 		}
 		else {
-			t = normalize(cross(vec3(1.0, 0.0, 0.0), n));
+			t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
 		}
 		b = cross(n, t);
 
@@ -72,49 +72,49 @@ namespace aten {
 		const real y = aten::sin(r1) * r2s;
 		const real z = aten::sqrt(real(1) - r2);
 
-		vec3 dir = normalize((t * x + b * y + n * z));
+		aten::vec3 dir = normalize((t * x + b * y + n * z));
 		AT_ASSERT(dot(normal, dir) >= 0);
 
 		return std::move(dir);
 	}
 
-	vec3 lambert::sampleDirection(
-		const ray& ray,
-		const vec3& normal,
+	aten::vec3 lambert::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
 		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	vec3 lambert::bsdf(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 lambert::bsdf(
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
 		return std::move(bsdf(param, u, v));
 	}
 
-	vec3 lambert::bsdf(
-		const MaterialParameter& param,
+	aten::vec3 lambert::bsdf(
+		const aten::MaterialParameter& param,
 		real u, real v)
 	{
-		vec3 albedo = param.baseColor;
+		aten::vec3 albedo = param.baseColor;
 		albedo *= sampleTexture(
-			(texture*)param.albedoMap.ptr,
+			(aten::texture*)param.albedoMap.ptr,
 			u, v,
 			real(1));
 
-		vec3 ret = albedo / AT_MATH_PI;
+		aten::vec3 ret = albedo / AT_MATH_PI;
 		return ret;
 	}
 
-	vec3 lambert::bsdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 lambert::bsdf(
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		auto ret = bsdf(m_param, normal, wi, wo, u, v);
@@ -122,11 +122,11 @@ namespace aten {
 	}
 
 	MaterialSampling lambert::sample(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
@@ -140,10 +140,10 @@ namespace aten {
 	}
 
 	MaterialSampling lambert::sample(
-		const ray& ray,
-		const vec3& normal,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{

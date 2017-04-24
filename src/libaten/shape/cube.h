@@ -6,60 +6,60 @@
 #include "shape/tranfomable.h"
 #include "shape/shape.h"
 
-namespace aten
+namespace AT_NAME
 {
 	template<typename T> class instance;
 
-	class cube : public transformable {
+	class cube : public aten::transformable {
 		friend class instance<cube>;
 
 	public:
-		cube::cube(const vec3& c, real w, real h, real d, material* m)
-			: m_param(c, vec3(w, h, d)), m_mtrl(m)
+		cube::cube(const aten::vec3& c, real w, real h, real d, material* m)
+			: m_param(c, aten::vec3(w, h, d)), m_mtrl(m)
 		{}
 		cube(real w, real h, real d, material* m)
-			: cube(vec3(0), w, h, d, m)
+			: cube(aten::vec3(0), w, h, d, m)
 		{}
 
 		virtual ~cube() {}
 
 	public:
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override final;
+			aten::hitrecord& rec) const override final;
 
-		virtual aabb getBoundingbox() const override final;
+		virtual aten::aabb getBoundingbox() const override final;
 
-		const vec3& center() const
+		const aten::vec3& center() const
 		{
 			return m_param.center;
 		}
 
-		const vec3& size() const
+		const aten::vec3& size() const
 		{
 			return m_param.size;
 		}
 
-		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
+		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override final;
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final;
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final;
 
-		virtual const ShapeParameter& getParam() const override final
+		virtual const aten::ShapeParameter& getParam() const override final
 		{
 			return m_param;
 		}
 
 	private:
 		virtual bool hit(
-			const ray& r,
-			const mat4& mtxL2W,
+			const aten::ray& r,
+			const aten::mat4& mtxL2W,
 			real t_min, real t_max,
-			hitrecord& rec) const override final;
+			aten::hitrecord& rec) const override final;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
-			const mat4& mtxL2W,
-			sampler* sampler) const override final;
+			const aten::mat4& mtxL2W,
+			aten::sampler* sampler) const override final;
 
 	private:
 		enum Face {
@@ -71,12 +71,12 @@ namespace aten
 			NEG_Z,
 		};
 
-		Face onGetRandomPosOn(vec3& pos, sampler* sampler) const;
+		Face onGetRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const;
 
-		static Face findFace(const vec3& d);
+		static Face findFace(const aten::vec3& d);
 
 	private:
-		ShapeParameter m_param;
+		aten::ShapeParameter m_param;
 		material* m_mtrl{ nullptr };
 	};
 }

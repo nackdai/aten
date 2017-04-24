@@ -3,13 +3,13 @@
 
 #pragma optimize( "", off)
 
-namespace aten
+namespace AT_NAME
 {
 	real refraction::pdf(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
 		AT_ASSERT(false);
@@ -19,20 +19,20 @@ namespace aten
 	}
 
 	real refraction::pdf(
-		const vec3& normal, 
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal, 
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		return pdf(m_param, normal, wi, wo, u, v);
 	}
 
-	vec3 refraction::sampleDirection(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
+	aten::vec3 refraction::sampleDirection(
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
 		real u, real v,
-		sampler* sampler)
+		aten::sampler* sampler)
 	{
 		AT_ASSERT(false);
 
@@ -42,47 +42,47 @@ namespace aten
 		return std::move(reflect);
 	}
 
-	vec3 refraction::sampleDirection(
-		const ray& ray,
-		const vec3& normal,
+	aten::vec3 refraction::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
 		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	vec3 refraction::bsdf(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 refraction::bsdf(
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v)
 	{
 		AT_ASSERT(false);
 
-		vec3 albedo = param.baseColor;
+		aten::vec3 albedo = param.baseColor;
 		albedo *= sampleTexture(
-			(texture*)param.albedoMap.ptr,
+			(aten::texture*)param.albedoMap.ptr,
 			u, v,
 			real(1));
 
 		return std::move(albedo);
 	}
 
-	vec3 refraction::bsdf(
-		const vec3& normal, 
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 refraction::bsdf(
+		const aten::vec3& normal, 
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
 	MaterialSampling refraction::sample(
-		const ray& ray,
-		const vec3& normal,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
@@ -99,11 +99,11 @@ namespace aten
 	}
 
 	MaterialSampling refraction::sample(
-		const MaterialParameter& param,
-		const vec3& normal,
-		const vec3& wi,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::MaterialParameter& param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
@@ -129,7 +129,7 @@ namespace aten
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
 		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
-		vec3 albedo = param.baseColor;
+		aten::vec3 albedo = param.baseColor;
 
 		if (cos_t_2 < real(0)) {
 			//AT_PRINTF("Reflection in refraction...\n");
@@ -143,15 +143,15 @@ namespace aten
 			return std::move(ret);
 		}
 
-		vec3 n = into ? hitrec.normal : -hitrec.normal;
+		aten::vec3 n = into ? hitrec.normal : -hitrec.normal;
 #if 0
-		vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
+		aten::vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
 #else
 		// NOTE
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
 		auto invnnt = 1 / nnt;
-		vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
+		aten::vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
 #endif
 		refract.normalize();
 
@@ -231,9 +231,9 @@ namespace aten
 
 	refraction::RefractionSampling refraction::check(
 		material* mtrl,
-		const vec3& in,
-		const vec3& normal,
-		const vec3& orienting_normal)
+		const aten::vec3& in,
+		const aten::vec3& normal,
+		const aten::vec3& orienting_normal)
 	{
 		if (!mtrl->isSingular() || !mtrl->isTranslucent()) {
 			return std::move(RefractionSampling(false, real(0), real(0)));
@@ -259,21 +259,21 @@ namespace aten
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
 		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
-		vec3 albedo = mtrl->color();
+		aten::vec3 albedo = mtrl->color();
 
 		if (cos_t_2 < real(0)) {
 			return std::move(RefractionSampling(false, real(1), real(0)));
 		}
 
-		vec3 n = into ? normal : -normal;
+		aten::vec3 n = into ? normal : -normal;
 #if 0
-		vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
+		aten::vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
 #else
 		// NOTE
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
 		auto invnnt = 1 / nnt;
-		vec3 refract = nnt * (in - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
+		aten::vec3 refract = nnt * (in - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
 #endif
 		refract.normalize();
 

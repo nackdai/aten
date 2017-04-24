@@ -1,13 +1,13 @@
 #include "material/layer.h"
 #include "scene/hitable.h"
 
-namespace aten
+namespace AT_NAME
 {
-	vec3 LayeredBSDF::sampleAlbedoMap(real u, real v) const
+	aten::vec3 LayeredBSDF::sampleAlbedoMap(real u, real v) const
 	{
 		auto num = m_layer.size();
 
-		vec3 albedo(1);
+		aten::vec3 albedo(1);
 
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
@@ -38,8 +38,8 @@ namespace aten
 	}
 
 	void LayeredBSDF::applyNormalMap(
-		const vec3& orgNml,
-		vec3& newNml,
+		const aten::vec3& orgNml,
+		aten::vec3& newNml,
 		real u, real v) const
 	{
 		auto num = m_layer.size();
@@ -55,9 +55,9 @@ namespace aten
 	}
 
 	real LayeredBSDF::computeFresnel(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real outsideIor/*= 1*/) const
 	{
 		// TODO
@@ -82,10 +82,10 @@ namespace aten
 	}
 
 	MaterialSampling LayeredBSDF::sample(
-		const ray& ray,
-		const vec3& normal,
-		const hitrecord& hitrec,
-		sampler* sampler,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::hitrecord& hitrec,
+		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
@@ -103,7 +103,7 @@ namespace aten
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
 
-			vec3 appliedNml = normal;
+			aten::vec3 appliedNml = normal;
 
 			// NOTE
 			// 外部では最表層の NormalMap が適用されている.
@@ -138,9 +138,9 @@ namespace aten
 	}
 
 	real LayeredBSDF::pdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		auto num = m_layer.size();
@@ -153,7 +153,7 @@ namespace aten
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
 
-			vec3 appliedNml = normal;
+			aten::vec3 appliedNml = normal;
 
 			// NOTE
 			// 外部では最表層の NormalMap が適用されている.
@@ -180,11 +180,11 @@ namespace aten
 		return pdf;
 	}
 
-	vec3 LayeredBSDF::sampleDirection(
-		const ray& ray,
-		const vec3& normal,
+	aten::vec3 LayeredBSDF::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
 		real u, real v,
-		sampler* sampler) const
+		aten::sampler* sampler) const
 	{
 		auto num = m_layer.size();
 		AT_ASSERT(num > 0);
@@ -196,15 +196,15 @@ namespace aten
 		return std::move(dir);
 	}
 
-	vec3 LayeredBSDF::bsdf(
-		const vec3& normal,
-		const vec3& wi,
-		const vec3& wo,
+	aten::vec3 LayeredBSDF::bsdf(
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
 		real u, real v) const
 	{
 		auto num = m_layer.size();
 
-		vec3 bsdf;
+		aten::vec3 bsdf;
 
 		real weight = 1;
 		real ior = 1;	// 真空から始める.
@@ -212,7 +212,7 @@ namespace aten
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];
 
-			vec3 appliedNml = normal;
+			aten::vec3 appliedNml = normal;
 
 			// NOTE
 			// 外部では最表層の NormalMap が適用されている.

@@ -37,7 +37,7 @@ namespace aten
 			: MaterialAttribute(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy, type.isNPR)
 		{}
 	};
-	
+
 	//													          Em     Sp      Tr    Gl    NPR
 	#define MaterialAttributeMicrofacet	aten::MaterialAttribute(false, false, false, true,  false)
 	#define MaterialAttributeLambert	aten::MaterialAttribute(false, false, false, false, false)
@@ -63,7 +63,7 @@ namespace aten
 	struct MaterialParameter {
 		MaterialType type;
 
-		vec3 baseColor;					// サーフェイスカラー，通常テクスチャマップによって供給される.
+		aten::vec3 baseColor;					// サーフェイスカラー，通常テクスチャマップによって供給される.
 
 		real ior{ 1.0f };
 		real roughness{ 0.0f };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
@@ -78,7 +78,7 @@ namespace aten
 		real sheenTint{ 0.0f };			// 基本色に向かう光沢色合いの量.
 		real clearcoat{ 0.0f };			// 第二の特別な目的のスペキュラーローブ.
 		real clearcoatGloss{ 0.0f };	// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
-	
+
 		UnionIdxPtr albedoMap;
 		UnionIdxPtr normalMap;
 		UnionIdxPtr roughnessMap;
@@ -91,17 +91,20 @@ namespace aten
 			: type(_type), attrib(_attrib)
 		{}
 	};
+}
 
+namespace AT_NAME
+{
 	struct MaterialSampling {
-		vec3 dir;
-		vec3 bsdf;
+		aten::vec3 dir;
+		aten::vec3 bsdf;
 		real pdf{ real(0) };
 		real fresnel{ real(1) };
 
 		real subpdf{ real(1) };
 
 		MaterialSampling() {}
-		MaterialSampling(const vec3& d, const vec3& b, real p)
+		MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
 			: dir(d), bsdf(b), pdf(p)
 		{}
 	};
@@ -112,18 +115,18 @@ namespace aten
 		static std::vector<material*> g_materials;
 
 	protected:
-		material(MaterialType type, const MaterialAttribute& attrib);
+		material(aten::MaterialType type, const aten::MaterialAttribute& attrib);
 		virtual ~material();
 
 		material(
-			MaterialType type,
-			const MaterialAttribute& attrib,
-			const vec3& clr,
+			aten::MaterialType type,
+			const aten::MaterialAttribute& attrib,
+			const aten::vec3& clr,
 			real ior = 1,
-			texture* albedoMap = nullptr,
-			texture* normalMap = nullptr);
+			aten::texture* albedoMap = nullptr,
+			aten::texture* normalMap = nullptr);
 
-		material(MaterialType type, const MaterialAttribute& attrib, Values& val);
+		material(aten::MaterialType type, const aten::MaterialAttribute& attrib, aten::Values& val);
 
 	public:
 		bool isEmissive() const
@@ -161,7 +164,7 @@ namespace aten
 			return m_param.attrib.isNPR;
 		}
 
-		const vec3& color() const
+		const aten::vec3& color() const
 		{
 			return m_param.baseColor;
 		}
@@ -171,45 +174,45 @@ namespace aten
 			return m_id;
 		}
 
-		virtual vec3 sampleAlbedoMap(real u, real v) const
+		virtual aten::vec3 sampleAlbedoMap(real u, real v) const
 		{
-			return std::move(sampleTexture((const texture*)m_param.albedoMap.ptr, u, v, real(1)));
+			return std::move(sampleTexture((const aten::texture*)m_param.albedoMap.ptr, u, v, real(1)));
 		}
 
 		virtual void applyNormalMap(
-			const vec3& orgNml,
-			vec3& newNml,
+			const aten::vec3& orgNml,
+			aten::vec3& newNml,
 			real u, real v) const;
 
 		virtual real computeFresnel(
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real outsideIor = 1) const;
 
 		virtual real pdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const = 0;
 
-		virtual vec3 sampleDirection(
-			const ray& ray,
-			const vec3& normal, 
+		virtual aten::vec3 sampleDirection(
+			const aten::ray& ray,
+			const aten::vec3& normal,
 			real u, real v,
-			sampler* sampler) const = 0;
+			aten::sampler* sampler) const = 0;
 
-		virtual vec3 bsdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+		virtual aten::vec3 bsdf(
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const = 0;
 
 		virtual MaterialSampling sample(
-			const ray& ray,
-			const vec3& normal,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const = 0;
 
@@ -218,20 +221,20 @@ namespace aten
 			return m_param.ior;
 		}
 
-		const MaterialParameter& param() const
+		const aten::MaterialParameter& param() const
 		{
 			return m_param;
 		}
 
-		static vec3 sampleTexture(const texture* tex, real u, real v, real defaultValue)
+		static aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, real defaultValue)
 		{
-			auto ret = sampleTexture(tex, u, v, vec3(defaultValue));
+			auto ret = sampleTexture(tex, u, v, aten::vec3(defaultValue));
 			return std::move(ret);
 		}
 
-		static vec3 sampleTexture(const texture* tex, real u, real v, const vec3& defaultValue)
+		static aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, const aten::vec3& defaultValue)
 		{
-			vec3 ret = defaultValue;
+			aten::vec3 ret = defaultValue;
 			if (tex) {
 				ret = tex->at(u, v);
 			}
@@ -246,16 +249,16 @@ namespace aten
 	protected:
 		uint32_t m_id{ 0 };
 
-		MaterialParameter m_param;
+		aten::MaterialParameter m_param;
 	};
 
 	class NPRMaterial : public material {
 	protected:
 		NPRMaterial(
-			MaterialType type,
-			const vec3& e, AT_NAME::Light* light);
+			aten::MaterialType type,
+			const aten::vec3& e, AT_NAME::Light* light);
 
-		NPRMaterial(MaterialType type, Values& val)
+		NPRMaterial(aten::MaterialType type, aten::Values& val)
 			: material(type, MaterialAttributeNPR, val)
 		{}
 
@@ -263,9 +266,9 @@ namespace aten
 
 	public:
 		virtual real computeFresnel(
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real outsideIor = 1) const override final
 		{
 			return real(1);
@@ -275,7 +278,7 @@ namespace aten
 
 		const AT_NAME::Light* getTargetLight() const;
 
-		virtual vec3 bsdf(
+		virtual aten::vec3 bsdf(
 			real cosShadow,
 			real u, real v) const = 0;
 
@@ -285,12 +288,12 @@ namespace aten
 
 
 	real schlick(
-		const vec3& in,
-		const vec3& normal,
+		const aten::vec3& in,
+		const aten::vec3& normal,
 		real ni, real nt);
 
 	real computFresnel(
-		const vec3& in,
-		const vec3& normal,
+		const aten::vec3& in,
+		const aten::vec3& normal,
 		real ni, real nt);
 }

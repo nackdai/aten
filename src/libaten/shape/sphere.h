@@ -6,45 +6,45 @@
 #include "shape/tranfomable.h"
 #include "shape/shape.h"
 
-namespace aten
+namespace AT_NAME
 {
 	template<typename T> class instance;
 
-	class sphere : public transformable {
+	class sphere : public aten::transformable {
 		friend class instance<sphere>;
 
 	public:
-		sphere(const vec3& c, real r, material* m)
+		sphere(const aten::vec3& c, real r, material* m)
 			: m_param(c, r), m_mtrl(m)
 		{}
 		sphere(real r, material* m)
-			: sphere(vec3(), r, m)
+			: sphere(aten::vec3(), r, m)
 		{}
 
 		virtual ~sphere() {}
 
 	public:
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override final;
+			aten::hitrecord& rec) const override final;
 
 		static AT_DEVICE_API bool hit(
-			const ShapeParameter& param,
-			const ray& r,
+			const aten::ShapeParameter& param,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec);
+			aten::hitrecord& rec);
 
 		static AT_DEVICE_API bool hit(
-			const ShapeParameter& param,
-			const ray& r,
-			const mat4& mtxL2W,
+			const aten::ShapeParameter& param,
+			const aten::ray& r,
+			const aten::mat4& mtxL2W,
 			real t_min, real t_max,
-			hitrecord& rec);
+			aten::hitrecord& rec);
 
-		virtual aabb getBoundingbox() const override final;
+		virtual aten::aabb getBoundingbox() const override final;
 
-		const vec3& center() const
+		const aten::vec3& center() const
 		{
 			return m_param.center;
 		}
@@ -54,28 +54,28 @@ namespace aten
 			return m_param.radius;
 		}
 
-		virtual vec3 getRandomPosOn(sampler* sampler) const override final;
+		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override final;
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final;
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final;
 
-		virtual const ShapeParameter& getParam() const override final
+		virtual const aten::ShapeParameter& getParam() const override final
 		{
 			return m_param;
 		}
 
 	private:
 		virtual bool hit(
-			const ray& r,
-			const mat4& mtxL2W,
+			const aten::ray& r,
+			const aten::mat4& mtxL2W,
 			real t_min, real t_max,
-			hitrecord& rec) const override final;
+			aten::hitrecord& rec) const override final;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
-			const mat4& mtxL2W,
-			sampler* sampler) const override final;
+			const aten::mat4& mtxL2W,
+			aten::sampler* sampler) const override final;
 
 	private:
-		ShapeParameter m_param;
+		aten::ShapeParameter m_param;
 		material* m_mtrl{ nullptr };
 	};
 }

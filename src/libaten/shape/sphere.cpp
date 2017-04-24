@@ -1,8 +1,8 @@
 #include "shape/sphere.h"
 
-namespace aten
+namespace AT_NAME
 {
-	static AT_DEVICE_API void getUV(real& u, real& v, const vec3& p)
+	static AT_DEVICE_API void getUV(real& u, real& v, const aten::vec3& p)
 	{
 		auto phi = aten::asin(p.y);
 		auto theta = aten::atan(p.x / p.z);
@@ -12,11 +12,11 @@ namespace aten
 	}
 
 	bool sphere::hit(
-		const ray& r,
+		const aten::ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
-		bool isHit = hit(m_param, r, mat4::Identity, t_min, t_max, rec);
+		bool isHit = hit(m_param, r, aten::mat4::Identity, t_min, t_max, rec);
 
 		if (isHit) {
 			rec.obj = (hitable*)this;
@@ -27,10 +27,10 @@ namespace aten
 	}
 
 	bool sphere::hit(
-		const ray& r,
-		const mat4& mtxL2W,
+		const aten::ray& r,
+		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
 		bool isHit = hit(m_param, r, mtxL2W, t_min, t_max, rec);
 
@@ -43,26 +43,26 @@ namespace aten
 	}
 
 	bool AT_DEVICE_API sphere::hit(
-		const ShapeParameter& param,
-		const ray& r,
+		const aten::ShapeParameter& param,
+		const aten::ray& r,
 		real t_min, real t_max,
-		hitrecord& rec)
+		aten::hitrecord& rec)
 	{
-		return hit(param, r, mat4(), t_min, t_max, rec);
+		return hit(param, r, aten::mat4(), t_min, t_max, rec);
 	}
 
 	bool AT_DEVICE_API sphere::hit(
-		const ShapeParameter& param,
-		const ray& r,
-		const mat4& mtxL2W,
+		const aten::ShapeParameter& param,
+		const aten::ray& r,
+		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
-		hitrecord& rec)
+		aten::hitrecord& rec)
 	{
 		// NOTE
 		// https://www.slideshare.net/h013/edupt-kaisetsu-22852235
 		// p52 - p58
 
-		const vec3 p_o = param.center - r.org;
+		const aten::vec3 p_o = param.center - r.org;
 		const real b = dot(p_o, r.dir);
 
 		// ”»•ÊŽ®.
@@ -94,7 +94,7 @@ namespace aten
 		rec.dv = normalize(cross(rec.normal, rec.du));
 
 		{
-			auto tmp = param.center + vec3(param.radius, 0, 0);
+			auto tmp = param.center + aten::vec3(param.radius, 0, 0);
 
 			auto center = mtxL2W.apply(param.center);
 			tmp = mtxL2W.apply(tmp);
@@ -109,12 +109,12 @@ namespace aten
 		return true;
 	}
 
-	aabb sphere::getBoundingbox() const
+	aten::aabb sphere::getBoundingbox() const
 	{
 		return std::move(m_param.bbox);
 	}
 
-	vec3 sphere::getRandomPosOn(sampler* sampler) const
+	aten::vec3 sphere::getRandomPosOn(aten::sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
@@ -129,31 +129,31 @@ namespace aten
 		auto x = aten::cos(phi) * sin_theta;
 		auto y = aten::sin(phi) * sin_theta;
 
-		vec3 dir(x, y, z);
+		aten::vec3 dir(x, y, z);
 		dir.normalize();
 
 		auto p = dir * (r + AT_MATH_EPSILON);
 
-		vec3 posOnSphere = m_param.center + p;
+		aten::vec3 posOnSphere = m_param.center + p;
 
 		return std::move(posOnSphere);
 	}
 
-	hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(sampler* sampler) const
+	aten::hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(aten::sampler* sampler) const
 	{
-		return getSamplePosNormalPdf(mat4::Identity, sampler);
+		return getSamplePosNormalPdf(aten::mat4::Identity, sampler);
 	}
 
-	hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(
-		const mat4& mtxL2W,
-		sampler* sampler) const
+	aten::hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(
+		const aten::mat4& mtxL2W,
+		aten::sampler* sampler) const
 	{
 		auto p = getRandomPosOn(sampler);
 		auto n = normalize(p - m_param.center);
 
 		real area = real(1);
 		{
-			auto tmp = m_param.center + vec3(m_param.radius, 0, 0);
+			auto tmp = m_param.center + aten::vec3(m_param.radius, 0, 0);
 
 			auto center = mtxL2W.apply(m_param.center);
 			tmp = mtxL2W.apply(tmp);

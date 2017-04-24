@@ -3,24 +3,24 @@
 #include "material/material.h"
 #include "texture/texture.h"
 
-namespace aten
+namespace AT_NAME
 {
 	class OrenNayar : public material {
 	public:
 		OrenNayar(
-			const vec3& albedo,
+			const aten::vec3& albedo,
 			real roughness,
-			texture* albedoMap = nullptr,
-			texture* normalMap = nullptr,
-			texture* roughnessMap = nullptr)
-			: material(MaterialType::OrneNayar, MaterialAttributeLambert, albedo, 1, albedoMap, normalMap)
+			aten::texture* albedoMap = nullptr,
+			aten::texture* normalMap = nullptr,
+			aten::texture* roughnessMap = nullptr)
+			: material(aten::MaterialType::OrneNayar, MaterialAttributeLambert, albedo, 1, albedoMap, normalMap)
 		{
 			m_param.roughnessMap.ptr = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
-		OrenNayar(Values& val)
-			: material(MaterialType::OrneNayar, MaterialAttributeLambert, val)
+		OrenNayar(aten::Values& val)
+			: material(aten::MaterialType::OrneNayar, MaterialAttributeLambert, val)
 		{
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
@@ -32,65 +32,65 @@ namespace aten
 
 	public:
 		static real pdf(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 
-		static vec3 sampleDirection(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
+		static aten::vec3 sampleDirection(
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
 			real u, real v,
-			sampler* sampler);
+			aten::sampler* sampler);
 
-		static vec3 bsdf(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+		static aten::vec3 bsdf(
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v);
 
 		static MaterialSampling sample(
-			const MaterialParameter& param,
-			const vec3& normal,
-			const vec3& wi,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::MaterialParameter& param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false);
 
 		virtual real pdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal, 
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
-		virtual vec3 sampleDirection(
-			const ray& ray,
-			const vec3& normal,
+		virtual aten::vec3 sampleDirection(
+			const aten::ray& ray,
+			const aten::vec3& normal,
 			real u, real v,
-			sampler* sampler) const override final;
+			aten::sampler* sampler) const override final;
 
-		virtual vec3 bsdf(
-			const vec3& normal, 
-			const vec3& wi,
-			const vec3& wo,
+		virtual aten::vec3 bsdf(
+			const aten::vec3& normal, 
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real u, real v) const override final;
 
 		virtual MaterialSampling sample(
-			const ray& ray,
-			const vec3& normal,
-			const hitrecord& hitrec,
-			sampler* sampler,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			const aten::hitrecord& hitrec,
+			aten::sampler* sampler,
 			real u, real v,
 			bool isLightPath = false) const override final;
 
 		virtual real computeFresnel(
-			const vec3& normal,
-			const vec3& wi,
-			const vec3& wo,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
 			real outsideIor = 1) const override final
 		{
 			return real(1);

@@ -31,20 +31,31 @@ namespace aten {
 
 #define AT_PRINTF		aten::OutputDebugString
 
-#define DEBUG_BREAK()	__debugbreak()
-
-#ifdef __AT_DEBUG__
-	#define AT_ASSERT(b)\
-        if (!(b)) {\
-            AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
-            DEBUG_BREAK();\
-        }
+#ifdef __CUDACC__
+	#ifdef __AT_DEBUG__
+		#define AT_ASSERT(b)\
+			if (!(b)) {\
+				printf("assert : %s(%d)\n", __FILE__, __LINE__);\
+			}
+	#else
+		#define AT_ASSERT(b)
+	#endif
 #else
-	//#define AT_ASSERT(b)
-	#define AT_ASSERT(b)\
-        if (!(b)) {\
-            AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
-        }
+	#define DEBUG_BREAK()	__debugbreak()
+
+	#ifdef __AT_DEBUG__
+		#define AT_ASSERT(b)\
+			if (!(b)) {\
+				AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
+				DEBUG_BREAK();\
+			}
+	#else
+		//#define AT_ASSERT(b)
+		#define AT_ASSERT(b)\
+			if (!(b)) {\
+				AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
+			}
+	#endif
 #endif
 
 #define AT_VRETURN(b, ret)\

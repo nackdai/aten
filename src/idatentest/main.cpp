@@ -88,13 +88,109 @@ static uint32_t g_threadnum = 1;
 
 static aten::Film g_buffer(WIDTH, HEIGHT);
 
+void makeScene(aten::scene* scene)
+{
+#if 1
+	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
+	//auto emit = new aten::emissive(aten::vec3(3, 3, 3));
+
+	auto light = new aten::sphere(
+		aten::vec3(50.0, 75.0, 81.6),
+		5.0,
+		emit);
+
+	double r = 1e3;
+
+	auto left = new aten::sphere(
+		aten::vec3(r + 1, 40.8, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.75f, 0.25f, 0.25f)));
+
+	auto right = new aten::sphere(
+		aten::vec3(-r + 99, 40.8, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.25, 0.25, 0.75)));
+
+	auto wall = new aten::sphere(
+		aten::vec3(50, 40.8, r),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	auto floor = new aten::sphere(
+		aten::vec3(50, r, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+	auto ceil = new aten::sphere(
+		aten::vec3(50, -r + 81.6, 81.6),
+		r,
+		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+
+#if 0
+	// —Î‹….
+	auto green = new aten::sphere(
+		aten::vec3(65, 20, 20),
+		20,
+		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+	//new aten::lambert(aten::vec3(1, 1, 1), tex));
+
+	// ‹¾.
+	auto mirror = new aten::sphere(
+		aten::vec3(27, 16.5, 47),
+		16.5,
+		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+
+	// ƒKƒ‰ƒX.
+	auto glass = new aten::sphere(
+		aten::vec3(77, 16.5, 78),
+		16.5,
+		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+#endif
+
+	aten::Light* l = new aten::AreaLight(light, emit->color());
+
+#if 0
+	scene->addLight(l);
+
+	scene->add(light);
+	scene->add(left);
+	scene->add(right);
+	scene->add(wall);
+	scene->add(floor);
+	scene->add(ceil);
+	scene->add(green);
+	scene->add(mirror);
+	scene->add(glass);
+#endif
+#else
+	auto em = new aten::emissive(aten::vec3(1, 0, 0));
+	auto lm = new aten::lambert(aten::vec3(0.5, 0.5, 0.5));
+
+	auto s0 = new aten::sphere(aten::vec3(0, 0, -10), 1.0f, em);
+	auto s1 = new aten::sphere(aten::vec3(3, 0, -10), 1.0f, lm);
+
+	auto area = new aten::AreaLight(s0, em->color());
+#endif
+}
+
 void display()
 {
+	const auto& shapes = aten::transformable::getShapes();
+
+	std::vector<aten::ShapeParameter> shapeparams;
+	for (auto s : shapes) {
+		auto param = s->getParam();
+		param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
+		shapeparams.push_back(param);
+	}
+
 	const auto& lights = aten::Light::getLights();
 
 	std::vector<aten::LightParameter> lightparams;
 	for (auto l : lights) {
-		lightparams.push_back(l->param());
+		auto param = l->param();
+		param.object.idx = aten::transformable::findShapeIdx((aten::transformable*)param.object.ptr);
+		lightparams.push_back(param);
 	}
 
 	const auto& mtrls = aten::material::getMaterials();
@@ -107,6 +203,7 @@ void display()
 	renderRayTracing(
 		g_buffer.image(),
 		WIDTH, HEIGHT,
+		shapeparams,
 		mtrlparms,
 		lightparams);
 
@@ -122,19 +219,15 @@ int main()
 
 	aten::visualizer::init(WIDTH, HEIGHT);
 
-	aten::Blitter blitter;
-	blitter.init(
+	aten::GammaCorrection gamma;
+	gamma.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl",
-		"../shader/fs.glsl");
-	blitter.setIsRenderRGB(true);
+		"../shader/gamma_fs.glsl");
 
-	aten::visualizer::addPostProc(&blitter);
+	aten::visualizer::addPostProc(&gamma);
 
-	new aten::emissive(aten::vec3(1, 0, 0));
-	new aten::lambert(aten::vec3(0.5, 0.5, 0.5));
-
-	new aten::AreaLight(nullptr, aten::vec3(1, 0, 0));
+	makeScene(nullptr);
 
 	aten::window::run(display);
 

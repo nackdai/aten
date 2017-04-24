@@ -11,31 +11,6 @@
 
 #include "aten4idaten.h"
 
-// 直行ベクトルを計算.
-__host__ __device__ aten::vec3 getOrthoVector(const aten::vec3& n)
-{
-	aten::vec3 p;
-
-	// NOTE
-	// dotを計算したときにゼロになるようなベクトル.
-	// k は normalize 計算用.
-
-	if (abs(n.z) > 0.0f) {
-		float k = sqrtf(n.y * n.y + n.z * n.z);
-		p.x = 0;
-		p.y = -n.z / k;
-		p.z = n.y / k;
-	}
-	else {
-		float k = sqrtf(n.x * n.x + n.y * n.y);
-		p.x = n.y / k;
-		p.y = -n.x / k;
-		p.z = 0;
-	}
-
-	return std::move(p);
-}
-
 struct Context {
 	int geomnum;
 	aten::ShapeParameter* shapes;
@@ -141,7 +116,7 @@ __host__ __device__ bool intersect(
 			if (tmp.t < rec->t) {
 				*rec = tmp;
 				rec->obj = (void*)&ctx->shapes[i];
-				rec->mtrlid = ctx->shapes[i].mtrlid;
+				rec->mtrlid = ctx->shapes[i].mtrl.idx;
 
 				isHit = true;
 			}
@@ -280,22 +255,23 @@ __global__ void raytracing(
 	p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
 }
 
-aten::ShapeParameter g_spheres[] = {
-	aten::ShapeParameter(aten::vec3(0, 0, -10), 1.0f),
-	aten::ShapeParameter(aten::vec3(3, 0, -10), 1.0f),
-};
-
 void renderRayTracing(
 	aten::vec4* image,
 	int width, int height,
-	std::vector<aten::MaterialParameter>& mtrls,
-	std::vector<aten::LightParameter>& lights)
+	const std::vector<aten::ShapeParameter>& shapes,
+	const std::vector<aten::MaterialParameter>& mtrls,
+	const std::vector<aten::LightParameter>& lights)
 {
 	Camera camera;
 	initCamera(
 		camera,
+#if 0
 		aten::vec3(0, 0, 0),
 		aten::vec3(0, 0, -1),
+#else
+		aten::vec3(50.0, 52.0, 295.6),
+		aten::vec3(50.0, 40.8, 119.0),
+#endif
 		aten::vec3(0, 1, 0),
 		30,
 		width, height);
@@ -304,23 +280,15 @@ void renderRayTracing(
 	aten::CudaMemory dst(sizeof(float4) * width * height);
 
 	aten::TypedCudaMemory<Camera> cam(&camera, 1);
-
-	// Bind material.
-	g_spheres[0].mtrlid = 0;
-	g_spheres[1].mtrlid = 1;
 	
-	aten::TypedCudaMemory<aten::ShapeParameter> spheres(AT_COUNTOF(g_spheres));
-	spheres.writeByNum(g_spheres, AT_COUNTOF(g_spheres));
+	aten::TypedCudaMemory<aten::ShapeParameter> shapeparam(shapes.size());
+	shapeparam.writeByNum(&shapes[0], shapes.size());
 
-	aten::TypedCudaMemory<aten::MaterialParameter> materials(mtrls.size());
-	materials.writeByNum(&mtrls[0], mtrls.size());
+	aten::TypedCudaMemory<aten::MaterialParameter> mtrlparam(mtrls.size());
+	mtrlparam.writeByNum(&mtrls[0], mtrls.size());
 
-	for (auto l : lights) {
-		l.object.idx = 0;
-	}
-
-	aten::TypedCudaMemory<aten::LightParameter> lightmem(lights.size());
-	lightmem.writeByNum(&lights[0], lights.size());
+	aten::TypedCudaMemory<aten::LightParameter> lightparam(lights.size());
+	lightparam.writeByNum(&lights[0], lights.size());
 
 	dim3 block(32, 32);
 	dim3 grid(
@@ -332,9 +300,9 @@ void renderRayTracing(
 		(float4*)dst.ptr(), 
 		width, height, 
 		cam.ptr(),
-		spheres.ptr(), AT_COUNTOF(g_spheres),
-		materials.ptr(),
-		lightmem.ptr(), lightmem.num());
+		shapeparam.ptr(), shapeparam.num(),
+		mtrlparam.ptr(),
+		lightparam.ptr(), lightparam.num());
 
 	auto err = cudaGetLastError();
 	if (err != cudaSuccess) {

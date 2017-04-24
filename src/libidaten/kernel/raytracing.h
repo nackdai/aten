@@ -9,8 +9,9 @@ extern "C" {
 	void renderRayTracing(
 		aten::vec4* image,
 		int width, int height,
-		std::vector<aten::MaterialParameter>& mtrls,
-		std::vector<aten::LightParameter>& lights);
+		const std::vector<aten::ShapeParameter>& shapes,
+		const std::vector<aten::MaterialParameter>& mtrls,
+		const std::vector<aten::LightParameter>& lights);
 
 #ifdef __cplusplus
 }

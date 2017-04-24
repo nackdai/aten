@@ -520,7 +520,7 @@ void HideLightScene::makeScene(aten::scene* scene)
 		15.0,
 		emit);
 
-	aten::real cubeheight = 10;
+	real cubeheight = 10;
 
 	auto cube = new aten::cube(
 		aten::vec3(50.0, 75.0 - cubeheight, 81.6),
@@ -701,8 +701,8 @@ void ToonShadeTestScene::makeScene(aten::scene* scene)
 	aten::Light* l = new aten::DirectionalLight(aten::vec3(1, -1, -1), aten::vec3(36.0, 36.0, 36.0));
 	auto toonmtrl = new aten::toon(aten::vec3(0.25, 0.75, 0.25), l);
 
-	toonmtrl->setComputeToonShadeFunc([](aten::real c)->aten::real {
-		aten::real ret = 1;
+	toonmtrl->setComputeToonShadeFunc([](real c)->real {
+		real ret = 1;
 		if (c < 0.33) {
 			ret = 0;
 		}

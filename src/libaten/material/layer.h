@@ -7,7 +7,9 @@ namespace aten
 {
 	class LayeredBSDF : public material {
 	public:
-		LayeredBSDF() {}
+		LayeredBSDF()
+			: material(MaterialType::Layer, MaterialAttributeMicrofacet)
+		{}
 		virtual ~LayeredBSDF() {}
 
 	public:

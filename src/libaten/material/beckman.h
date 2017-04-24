@@ -12,14 +12,14 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
+			: material(MaterialType::MicrofacetBeckman, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
 			m_param.roughnessMap.ptr = roughnessMap;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
 		MicrofacetBeckman(Values& val)
-			: material(MaterialAttributeMicrofacet, val)
+			: material(MaterialType::MicrofacetBeckman,  MaterialAttributeMicrofacet, val)
 		{
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);

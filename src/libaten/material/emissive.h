@@ -7,11 +7,11 @@ namespace aten
 	class emissive : public material {
 	public:
 		emissive(const vec3& e)
-			: material(MaterialAttributeEmissive, e)
+			: material(MaterialType::Emissive, MaterialAttributeEmissive, e)
 		{}
 
 		emissive(Values& val)
-			: material(MaterialAttributeEmissive, val)
+			: material(MaterialType::Emissive, MaterialAttributeEmissive, val)
 		{}
 
 		virtual ~emissive() {}

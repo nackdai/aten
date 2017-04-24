@@ -42,7 +42,23 @@ namespace aten
 	#define MaterialAttributeRefraction	aten::MaterialAttribute(false, true,  true,  true,  false)
 	#define MaterialAttributeNPR		aten::MaterialAttribute(false, false, false, false, true)
 
+	enum MaterialType {
+		Emissive,
+		Lambert,
+		OrneNayar,
+		Specular,
+		Refraction,
+		MicrofacetBlinn,
+		MicrofacetGGX,
+		MicrofacetBeckman,
+		DisneyBRDF,
+		Toon,
+		Layer,
+	};
+
 	struct MaterialParameter {
+		MaterialType type;
+
 		vec3 baseColor;					// サーフェイスカラー，通常テクスチャマップによって供給される.
 
 		real ior{ 1.0f };
@@ -67,8 +83,8 @@ namespace aten
 
 		const MaterialAttribute attrib;
 
-		MaterialParameter(const MaterialAttribute& _attrib)
-			: attrib(_attrib)
+		MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
+			: type(_type), attrib(_attrib)
 		{}
 	};
 
@@ -92,17 +108,18 @@ namespace aten
 		static std::vector<material*> g_materials;
 
 	protected:
-		material();
+		material(MaterialType type, const MaterialAttribute& attrib);
 		virtual ~material();
 
 		material(
+			MaterialType type,
 			const MaterialAttribute& attrib,
 			const vec3& clr,
 			real ior = 1,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr);
 
-		material(const MaterialAttribute& attrib, Values& val);
+		material(MaterialType type, const MaterialAttribute& attrib, Values& val);
 
 	public:
 		bool isEmissive() const
@@ -232,10 +249,12 @@ namespace aten
 
 	class NPRMaterial : public material {
 	protected:
-		NPRMaterial(const vec3& e, Light* light);
+		NPRMaterial(
+			MaterialType type,
+			const vec3& e, Light* light);
 
-		NPRMaterial(Values& val)
-			: material(MaterialAttributeNPR, val)
+		NPRMaterial(MaterialType type, Values& val)
+			: material(type, MaterialAttributeNPR, val)
 		{}
 
 		virtual ~NPRMaterial() {}

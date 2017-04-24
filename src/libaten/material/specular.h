@@ -10,11 +10,11 @@ namespace aten
 			const vec3& albedo,
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr)
-			: material(MaterialAttributeSpecular, albedo, 0, albedoMap, normalMap)
+			: material(MaterialType::Specular, MaterialAttributeSpecular, albedo, 0, albedoMap, normalMap)
 		{}
 
 		specular(Values& val)
-			: material(MaterialAttributeSpecular, val)
+			: material(MaterialType::Specular, MaterialAttributeSpecular, val)
 		{}
 
 		virtual ~specular() {}

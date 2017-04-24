@@ -36,7 +36,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(MaterialAttributeMicrofacet, baseColor, 1, albedoMap, normalMap)
+			: material(MaterialType::DisneyBRDF, MaterialAttributeMicrofacet, baseColor, 1, albedoMap, normalMap)
 		{
 			m_param.baseColor = baseColor;
 			m_param.subsurface = aten::clamp<real>(subsurface, 0, 1);
@@ -58,7 +58,7 @@ namespace aten
 			texture* albedoMap = nullptr,
 			texture* normalMap = nullptr,
 			texture* roughnessMap = nullptr)
-			: material(MaterialAttributeMicrofacet, param.baseColor, 1, albedoMap, normalMap)
+			: material(MaterialType::DisneyBRDF, MaterialAttributeMicrofacet, param.baseColor, 1, albedoMap, normalMap)
 		{
 			m_param.baseColor = param.baseColor;
 			m_param.subsurface = aten::clamp<real>(param.subsurface, 0, 1);
@@ -76,7 +76,7 @@ namespace aten
 		}
 
 		DisneyBRDF(Values& val)
-			: material(MaterialAttributeMicrofacet, val)
+			: material(MaterialType::DisneyBRDF, MaterialAttributeMicrofacet, val)
 		{
 			// TODO
 			// Clamp parameters.

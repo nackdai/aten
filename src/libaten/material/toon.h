@@ -11,17 +11,17 @@ namespace aten
 		using ComputeToonShadeFunc = std::function<real(real)>;
 
 		toon(const vec3& e, Light* light)
-			: NPRMaterial(e, light)
+			: NPRMaterial(MaterialType::Toon, e, light)
 		{
 		}
 		toon(const vec3& e, Light* light, ComputeToonShadeFunc func)
-			: NPRMaterial(e, light)
+			: NPRMaterial(MaterialType::Toon, e, light)
 		{
 			setComputeToonShadeFunc(func);
 		}
 
 		toon(Values& val)
-			: NPRMaterial(val)
+			: NPRMaterial(MaterialType::Toon, val)
 		{}
 
 		virtual ~toon() {}

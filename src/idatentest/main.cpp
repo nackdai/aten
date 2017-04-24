@@ -133,12 +133,18 @@ void display()
 		mtrlparms.push_back(m->param());
 	}
 
+	aten::timer timer;
+	timer.begin();
+
 	renderRayTracing(
 		g_buffer.image(),
 		WIDTH, HEIGHT,
 		shapeparams,
 		mtrlparms,
 		lightparams);
+
+	auto elapsed = timer.end();
+	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
 
 	aten::visualizer::render(g_buffer.image(), false);
 }

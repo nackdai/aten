@@ -329,6 +329,11 @@ void renderRayTracing(
 		materials.ptr(),
 		lightmem.ptr(), lightmem.num());
 
+	auto err = cudaGetLastError();
+	if (err != cudaSuccess) {
+		AT_PRINTF("Cuda Kernel Err [%s]\n", cudaGetErrorString(err));
+	}
+
 	checkCudaErrors(cudaDeviceSynchronize());
 
 	dst.read(image, sizeof(aten::vec4) * width * height);

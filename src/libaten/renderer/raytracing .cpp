@@ -89,6 +89,8 @@ namespace aten
 							contribution += throughput * (albedo * lightColor) * G;
 						}
 					}
+
+					break;
 				}
 			}
 			else {

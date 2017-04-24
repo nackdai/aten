@@ -59,7 +59,7 @@ void makeScene(aten::scene* scene)
 		r,
 		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
 
-#if 0
+#if 1
 	// —Î‹….
 	auto green = new aten::sphere(
 		aten::vec3(65, 20, 20),
@@ -166,4 +166,3 @@ int main()
 
 	aten::window::terminate();
 }
-#endif

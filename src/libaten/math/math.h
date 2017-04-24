@@ -61,7 +61,7 @@ namespace aten {
 		return AT_MATH_FUNC(::tan, f);
 	}
 
-	inline real cos(real f)
+	inline AT_DEVICE_API real cos(real f)
 	{
 		return AT_MATH_FUNC(::cos, f);
 	}
@@ -91,17 +91,17 @@ namespace aten {
 		return AT_MATH_FUNC(::acos, f);
 	}
 
-	inline real log(real f)
+	inline AT_DEVICE_API real log(real f)
 	{
 		return AT_MATH_FUNC(::log, f);
 	}
 
-	inline real exp(real f)
+	inline AT_DEVICE_API real exp(real f)
 	{
 		return AT_MATH_FUNC(::exp, f);
 	}
 
-	inline real pow(real f, real v)
+	inline AT_DEVICE_API real pow(real f, real v)
 	{
 		return AT_MATH_FUNC2(::pow, f, v);
 	}
@@ -125,20 +125,63 @@ namespace aten {
 		return AT_MATH_FUNC(::ceil, f);
 	}
 
-	template <typename T>
-	inline AT_DEVICE_API T max(T a, T b)
-	{
 #ifdef __CUDACC__
-		return max(a, b);
-#else
-		return std::max<T>(a, b);
-#endif
+	template <typename T>
+	inline AT_DEVICE_API T cmpMax(T a, T b)
+	{
+		return (a > b ? a : b);
 	}
 
-	template <typename _T>
-	inline _T clamp(_T f, _T a, _T b)
+	template <>
+	inline AT_DEVICE_API float cmpMax(float a, float b)
 	{
-		return std::min(std::max(f, a), b);
+		return fmaxf(a, b);
+	}
+
+	template <>
+	inline AT_DEVICE_API int cmpMax(int a, int b)
+	{
+		return max(a, b);
+	}
+#else
+	template <typename T>
+	inline AT_DEVICE_API T cmpMax(T a, T b)
+	{
+		return std::max<T>(a, b);
+	}
+#endif
+
+#ifdef __CUDACC__
+	template <typename T>
+	inline AT_DEVICE_API T cmpMin(T a, T b)
+	{
+		return (a < b ? a : b);
+	}
+
+	template <>
+	inline AT_DEVICE_API float cmpMin(float a, float b)
+	{
+		return fminf(a, b);
+	}
+
+	template <>
+	inline AT_DEVICE_API int cmpMin(int a, int b)
+	{
+		return min(a, b);
+	}
+#else
+	template <typename T>
+	inline AT_DEVICE_API T cmpMin(T a, T b)
+	{
+		return std::min<T>(a, b);
+	}
+#endif
+
+
+	template <typename _T>
+	inline AT_DEVICE_API _T clamp(_T f, _T a, _T b)
+	{
+		return cmpMin(cmpMax(f, a), b);
 	}
 
 	inline bool isValid(real f)

@@ -72,8 +72,7 @@ namespace aten {
 
 			// TODO
 			// Is it correct?
-			//attn = aten::max(attn, real(1));
-			attn = attn > real(1) ? attn : real(1);	// ‚È‚º‚© max ‚ðŽg‚¤‚Æcuda‚ª—Ž‚¿‚é...
+			attn = aten::cmpMax(attn, real(1));
 			
 			result.le = param.le;
 			result.intensity = 1 / attn;

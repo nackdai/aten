@@ -87,9 +87,6 @@ namespace aten {
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx
 
-			auto theta = param.innerAngle;
-			auto phi = param.outerAngle;
-
 			auto lightdir = normalize(result.dir);
 
 			auto rho = dot(-param.dir, lightdir);
@@ -122,8 +119,7 @@ namespace aten {
 
 			// TODO
 			// Is it correct?
-			//attn = aten::max(attn, real(1));
-			attn = attn > real(1) ? attn : real(1);	// ‚È‚º‚© max ‚ðŽg‚¤‚Æcuda‚ª—Ž‚¿‚é...
+			attn = aten::cmpMax(attn, real(1));
 			
 			result.le = param.le;
 			result.intensity = spot / attn;

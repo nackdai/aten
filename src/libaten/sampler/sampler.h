@@ -10,7 +10,7 @@ namespace aten {
 		sampler() {}
 		virtual ~sampler() {}
 
-		virtual real nextSample() = 0;
+		virtual AT_DEVICE_API real nextSample() = 0;
 
 		virtual random* getRandom()
 		{

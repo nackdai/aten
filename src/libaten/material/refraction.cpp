@@ -5,7 +5,7 @@
 
 namespace AT_NAME
 {
-	real refraction::pdf(
+	AT_DEVICE_API real refraction::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -27,7 +27,7 @@ namespace AT_NAME
 		return pdf(m_param, normal, wi, wo, u, v);
 	}
 
-	aten::vec3 refraction::sampleDirection(
+	AT_DEVICE_API aten::vec3 refraction::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -51,7 +51,7 @@ namespace AT_NAME
 		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	aten::vec3 refraction::bsdf(
+	AT_DEVICE_API aten::vec3 refraction::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -98,7 +98,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	MaterialSampling refraction::sample(
+	AT_DEVICE_API MaterialSampling refraction::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

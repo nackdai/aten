@@ -1,7 +1,7 @@
 #include "material/lambert.h"
 
 namespace AT_NAME {
-	real lambert::pdf(
+	AT_DEVICE_API real lambert::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -11,7 +11,7 @@ namespace AT_NAME {
 		return pdf(normal, wo);
 	}
 
-	real lambert::pdf(
+	AT_DEVICE_API real lambert::pdf(
 		const aten::vec3& normal,
 		const aten::vec3& wo)
 	{
@@ -34,7 +34,7 @@ namespace AT_NAME {
 		return ret;
 	}
 
-	aten::vec3 lambert::sampleDirection(
+	AT_DEVICE_API aten::vec3 lambert::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -44,7 +44,7 @@ namespace AT_NAME {
 		return std::move(sampleDirection(normal, sampler));
 	}
 
-	aten::vec3 lambert::sampleDirection(
+	AT_DEVICE_API aten::vec3 lambert::sampleDirection(
 		const aten::vec3& normal,
 		aten::sampler* sampler)
 	{
@@ -87,7 +87,7 @@ namespace AT_NAME {
 		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	aten::vec3 lambert::bsdf(
+	AT_DEVICE_API aten::vec3 lambert::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -97,7 +97,7 @@ namespace AT_NAME {
 		return std::move(bsdf(param, u, v));
 	}
 
-	aten::vec3 lambert::bsdf(
+	AT_DEVICE_API aten::vec3 lambert::bsdf(
 		const aten::MaterialParameter& param,
 		real u, real v)
 	{
@@ -121,7 +121,7 @@ namespace AT_NAME {
 		return std::move(ret);
 	}
 
-	MaterialSampling lambert::sample(
+	AT_DEVICE_API MaterialSampling lambert::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

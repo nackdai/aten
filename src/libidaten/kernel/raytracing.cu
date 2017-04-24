@@ -1,5 +1,6 @@
 #include "kernel/raytracing.h"
 #include "kernel/light.cuh"
+#include "kernel/material.cuh"
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
@@ -206,6 +207,21 @@ __global__ void raytracing(
 			const aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 			if (m.attrib.isSingular || m.attrib.isTranslucent) {
+				auto sampling = sampleMaterial(
+					m,
+					orienting_normal, 
+					ray.dir,
+					rec,
+					nullptr,
+					rec.u, rec.v);
+
+				auto nextDir = normalize(sampling.dir);
+				auto bsdf = sampling.bsdf;
+
+				throughput *= bsdf;
+
+				// Make next ray.
+				ray = aten::ray(rec.p, nextDir);
 			}
 			else {
 				for (int i = 0; i < lightnum; i++) {

@@ -4,7 +4,7 @@
 
 namespace AT_NAME
 {
-	real specular::pdf(
+	AT_DEVICE_API real specular::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -23,7 +23,7 @@ namespace AT_NAME
 		return pdf(m_param, normal, wi, wo, u, v);
 	}
 
-	aten::vec3 specular::sampleDirection(
+	AT_DEVICE_API aten::vec3 specular::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -47,7 +47,7 @@ namespace AT_NAME
 		return std::move(sampleDirection(m_param, normal, in, u, v, sampler));
 	}
 
-	aten::vec3 specular::bsdf(
+	AT_DEVICE_API aten::vec3 specular::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -101,7 +101,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	MaterialSampling specular::sample(
+	AT_DEVICE_API MaterialSampling specular::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

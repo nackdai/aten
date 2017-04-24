@@ -24,10 +24,10 @@ namespace aten {
 		~texture() {}
 
 	public:
-		vec3 at(real u, real v) const
+		AT_DEVICE_API vec3 at(real u, real v) const
 		{
-			uint32_t x = (uint32_t)(std::min(u, real(1)) * (m_width - 1));
-			uint32_t y = (uint32_t)(std::min(v, real(1)) * (m_height - 1));
+			uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (m_width - 1));
+			uint32_t y = (uint32_t)(aten::cmpMin(v, real(1)) * (m_height - 1));
 
 			uint32_t pos = y * m_pitch + x * m_channels;
 

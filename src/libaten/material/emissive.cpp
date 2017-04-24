@@ -2,7 +2,7 @@
 #include "material/lambert.h"
 
 namespace AT_NAME {
-	real emissive::pdf(
+	AT_DEVICE_API real emissive::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -22,7 +22,7 @@ namespace AT_NAME {
 		return emissive::pdf(m_param, normal, wi, wo, u, v);
 	}
 
-	aten::vec3 emissive::sampleDirection(
+	AT_DEVICE_API aten::vec3 emissive::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -41,7 +41,7 @@ namespace AT_NAME {
 		return std::move(emissive::sampleDirection(m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	aten::vec3 emissive::bsdf(
+	AT_DEVICE_API aten::vec3 emissive::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -61,7 +61,7 @@ namespace AT_NAME {
 		return std::move(emissive::bsdf(m_param, normal, wi, wo, u, v));
 	}
 
-	MaterialSampling emissive::sample(
+	AT_DEVICE_API MaterialSampling emissive::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

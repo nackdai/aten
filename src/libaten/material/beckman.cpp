@@ -2,7 +2,7 @@
 
 namespace AT_NAME
 {
-	real MicrofacetBeckman::pdf(
+	AT_DEVICE_API real MicrofacetBeckman::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -24,7 +24,7 @@ namespace AT_NAME
 		return ret;
 	}
 
-	aten::vec3 MicrofacetBeckman::sampleDirection(
+	AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -46,7 +46,7 @@ namespace AT_NAME
 		return std::move(dir);
 	}
 
-	aten::vec3 MicrofacetBeckman::bsdf(
+	AT_DEVICE_API aten::vec3 MicrofacetBeckman::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -75,7 +75,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	static real sampleBeckman_D(
+	static AT_DEVICE_API real sampleBeckman_D(
 		const aten::vec3& wh,	// half
 		const aten::vec3& n,	// normal
 		real roughness)
@@ -104,7 +104,7 @@ namespace AT_NAME
 		return D;
 	}
 
-	real MicrofacetBeckman::pdf(
+	AT_DEVICE_API real MicrofacetBeckman::pdf(
 		const real roughness,
 		const aten::vec3& normal, 
 		const aten::vec3& wi,
@@ -126,7 +126,7 @@ namespace AT_NAME
 		return pdf;
 	}
 
-	aten::vec3 MicrofacetBeckman::sampleDirection(
+	AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
 		const real roughness,
 		const aten::vec3& in,
 		const aten::vec3& normal,
@@ -166,7 +166,7 @@ namespace AT_NAME
 		return std::move(dir);
 	}
 
-	aten::vec3 MicrofacetBeckman::bsdf(
+	AT_DEVICE_API aten::vec3 MicrofacetBeckman::bsdf(
 		const aten::vec3& albedo,
 		const real roughness,
 		const real ior,
@@ -240,7 +240,7 @@ namespace AT_NAME
 		return std::move(bsdf);
 	}
 
-	MaterialSampling MicrofacetBeckman::sample(
+	AT_DEVICE_API MaterialSampling MicrofacetBeckman::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

@@ -103,8 +103,8 @@ namespace AT_NAME
 
 		real subpdf{ real(1) };
 
-		MaterialSampling() {}
-		MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
+		AT_DEVICE_API MaterialSampling() {}
+		AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
 			: dir(d), bsdf(b), pdf(p)
 		{}
 	};
@@ -226,18 +226,23 @@ namespace AT_NAME
 			return m_param;
 		}
 
-		static aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, real defaultValue)
+		static AT_DEVICE_API aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, real defaultValue)
 		{
 			auto ret = sampleTexture(tex, u, v, aten::vec3(defaultValue));
 			return std::move(ret);
 		}
 
-		static aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, const aten::vec3& defaultValue)
+		static AT_DEVICE_API aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, const aten::vec3& defaultValue)
 		{
 			aten::vec3 ret = defaultValue;
+
+			// TODO
+#ifndef __AT_CUDA__
 			if (tex) {
 				ret = tex->at(u, v);
 			}
+#endif
+
 			return std::move(ret);
 		}
 

@@ -121,6 +121,9 @@
     <ClInclude Include="..\src\libaten\math\aabb.h">
       <Filter>aten\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\material.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -213,6 +216,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\shape\sphere.cpp">
       <Filter>aten\shape</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\material.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

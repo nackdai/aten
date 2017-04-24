@@ -5,7 +5,7 @@ namespace AT_NAME {
 	// https://ja.wikipedia.org/wiki/%E3%82%AA%E3%83%BC%E3%83%AC%E3%83%B3%E3%83%BB%E3%83%8D%E3%82%A4%E3%83%A4%E3%83%BC%E5%8F%8D%E5%B0%84
 	// https://github.com/imageworks/OpenShadingLanguage/blob/master/src/testrender/shading.cpp
 
-	real OrenNayar::pdf(
+	AT_DEVICE_API real OrenNayar::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -33,7 +33,7 @@ namespace AT_NAME {
 		return pdf(m_param, normal, wi, wo, u, v);
 	}
 
-	aten::vec3 OrenNayar::sampleDirection(
+	AT_DEVICE_API aten::vec3 OrenNayar::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -79,7 +79,7 @@ namespace AT_NAME {
 		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	aten::vec3 OrenNayar::bsdf(
+	AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -110,7 +110,7 @@ namespace AT_NAME {
 			const auto LV = dot(wo, -wi);
 
 			const auto s = LV - NL * NV;
-			const auto t = s <= 0 ? 1 : std::max(NL, NV);
+			const auto t = s <= 0 ? 1 : aten::cmpMax(NL, NV);
 
 			bsdf = (albedo / AT_MATH_PI) * (A + B * (s / t));
 		}
@@ -127,7 +127,7 @@ namespace AT_NAME {
 		return std::move(bsdf(m_param, normal, wi, wo, u, v));
 	}
 
-	MaterialSampling OrenNayar::sample(
+	AT_DEVICE_API MaterialSampling OrenNayar::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

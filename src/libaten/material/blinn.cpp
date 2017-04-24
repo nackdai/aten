@@ -6,7 +6,7 @@ namespace AT_NAME
 	// NOTE
 	// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
 
-	real MicrofacetBlinn::pdf(
+	AT_DEVICE_API real MicrofacetBlinn::pdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -46,7 +46,7 @@ namespace AT_NAME
 		return ret;
 	}
 
-	aten::vec3 MicrofacetBlinn::sampleDirection(
+	AT_DEVICE_API aten::vec3 MicrofacetBlinn::sampleDirection(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -105,7 +105,7 @@ namespace AT_NAME
 		return std::move(dir);
 	}
 
-	aten::vec3 MicrofacetBlinn::bsdf(
+	AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -136,7 +136,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	aten::vec3 MicrofacetBlinn::bsdf(
+	AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
 		const aten::vec3& albedo,
 		const real shininess,
 		const real ior,
@@ -194,7 +194,7 @@ namespace AT_NAME
 		// NOTE
 		// http://simonstechblog.blogspot.jp/2011/12/microfacet-bsdf.html
 		real D = (a + 2) / (2 * AT_MATH_PI);
-		D *= aten::pow(std::max((real)0, NdotH), a);
+		D *= aten::pow(aten::cmpMax((real)0, NdotH), a);
 #endif
 
 		// Compute G.
@@ -205,7 +205,7 @@ namespace AT_NAME
 
 			auto G1 = 2 * NdotH * NdotL / VdotH;
 			auto G2 = 2 * NdotH * NdotV / VdotH;
-			G = std::min((real)1, std::min(G1, G2));
+			G = aten::cmpMin((real)1, aten::cmpMin(G1, G2));
 		}
 
 		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
@@ -215,7 +215,7 @@ namespace AT_NAME
 		return std::move(bsdf);
 	}
 
-	MaterialSampling MicrofacetBlinn::sample(
+	AT_DEVICE_API MaterialSampling MicrofacetBlinn::sample(
 		const aten::MaterialParameter& param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,

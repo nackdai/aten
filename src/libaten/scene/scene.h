@@ -6,14 +6,14 @@
 #include "light/light.h"
 #include "light/ibl.h"
 
-namespace aten {
-	class LinearList : public accel {
+namespace AT_NAME {
+	class LinearList : public aten::accel {
 	public:
 		LinearList() {}
 		~LinearList() {}
 
 		virtual void build(
-			bvhnode** list,
+			aten::bvhnode** list,
 			uint32_t num) override final
 		{
 			for (uint32_t i = 0; i < num; i++) {
@@ -21,21 +21,21 @@ namespace aten {
 			}
 		}
 
-		virtual aabb getBoundingbox() const override final
+		virtual aten::aabb getBoundingbox() const override final
 		{
 			// TODO
 			AT_ASSERT(false);
-			return std::move(aabb());
+			return std::move(aten::aabb());
 		}
 
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override final
+			aten::hitrecord& rec) const override final
 		{
 			bool isHit = false;
 
-			hitrecord tmp;
+			aten::hitrecord tmp;
 
 			for (size_t i = 0; i < m_objs.size(); i++) {
 				auto o = m_objs[i];
@@ -55,7 +55,7 @@ namespace aten {
 		}
 
 	private:
-		std::vector<bvhnode*> m_objs;
+		std::vector<aten::bvhnode*> m_objs;
 	};
 
 	class scene {
@@ -67,15 +67,15 @@ namespace aten {
 		virtual void build()
 		{}
 
-		void add(bvhnode* s)
+		void add(aten::bvhnode* s)
 		{
 			m_tmp.push_back(s);
 		}
 
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const = 0;
+			aten::hitrecord& rec) const = 0;
 
 		void addLight(Light* l)
 		{
@@ -119,19 +119,19 @@ namespace aten {
 
 		bool hitLight(
 			const Light* light,
-			const vec3& lightPos,
-			const ray& r,
+			const aten::vec3& lightPos,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec);
+			aten::hitrecord& rec);
 
 		template <typename Func>
 		static AT_DEVICE_API bool hitLight(
 			Func funcHitTest,
-			const LightParameter& light,
-			const vec3& lightPos,
-			const ray& r,
+			const aten::LightParameter& light,
+			const aten::vec3& lightPos,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec)
+			aten::hitrecord& rec)
 		{
 			bool isHit = funcHitTest(r, t_min, t_max, rec);
 
@@ -190,14 +190,14 @@ namespace aten {
 		}
 
 		Light* sampleLight(
-			const vec3& org,
-			const vec3& nml,
-			sampler* sampler,
+			const aten::vec3& org,
+			const aten::vec3& nml,
+			aten::sampler* sampler,
 			real& selectPdf,
-			LightSampleResult& sampleRes);
+			aten::LightSampleResult& sampleRes);
 
 	protected:
-		std::vector<bvhnode*> m_tmp;
+		std::vector<aten::bvhnode*> m_tmp;
 
 		std::vector<Light*> m_lights;
 		ImageBasedLight* m_ibl{ nullptr };
@@ -218,9 +218,9 @@ namespace aten {
 		}
 
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override final
+			aten::hitrecord& rec) const override final
 		{
 			auto isHit = m_accel.hit(r, t_min, t_max, rec);
 			return isHit;

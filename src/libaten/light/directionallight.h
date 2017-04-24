@@ -2,43 +2,43 @@
 
 #include "light/light.h"
 
-namespace aten {
+namespace AT_NAME {
 	class DirectionalLight : public Light {
 	public:
 		DirectionalLight()
-			: Light(LightType::Direction, LightAttributeDirectional)
+			: Light(aten::LightType::Direction, LightAttributeDirectional)
 		{}
 		DirectionalLight(
-			const vec3& dir,
-			const vec3& le)
-			: Light(LightType::Direction, LightAttributeDirectional)
+			const aten::vec3& dir,
+			const aten::vec3& le)
+			: Light(aten::LightType::Direction, LightAttributeDirectional)
 		{
-			m_param.dir = normalize(dir);
+			m_param.dir = aten::normalize(dir);
 			m_param.le = le;
 		}
 
-		DirectionalLight(Values& val)
-			: Light(LightType::Direction, LightAttributeDirectional, val)
+		DirectionalLight(aten::Values& val)
+			: Light(aten::LightType::Direction, LightAttributeDirectional, val)
 		{}
 
 		virtual ~DirectionalLight() {}
 
 	public:
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
+		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
 			return std::move(sample(m_param, org, sampler));
 		}
 
-		static AT_DEVICE_API LightSampleResult sample(
-			const LightParameter& param,
-			const vec3& org,
-			sampler* sampler)
+		static AT_DEVICE_API aten::LightSampleResult sample(
+			const aten::LightParameter& param,
+			const aten::vec3& org,
+			aten::sampler* sampler)
 		{
-			LightSampleResult result;
+			aten::LightSampleResult result;
 
 			result.pdf = real(1);
 			result.dir = -normalize(param.dir);
-			result.nml = vec3();	// Not used...
+			result.nml = aten::vec3();	// Not used...
 
 			result.le = param.le;
 			result.intensity = real(1);

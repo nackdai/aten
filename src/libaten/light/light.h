@@ -33,10 +33,10 @@ namespace aten {
 		{}
 	};
 
-	#define LightAttributeArea			LightAttribute(false, false, false)
-	#define LightAttributeSingluar		LightAttribute(true,  false, false)
-	#define LightAttributeDirectional	LightAttribute(true,  true,  false)
-	#define LightAttributeIBL			LightAttribute(false, true,  true)
+	#define LightAttributeArea			aten::LightAttribute(false, false, false)
+	#define LightAttributeSingluar		aten::LightAttribute(true,  false, false)
+	#define LightAttributeDirectional	aten::LightAttribute(true,  true,  false)
+	#define LightAttributeIBL			aten::LightAttribute(false, true,  true)
 
 	enum LightType {
 		Area,
@@ -72,48 +72,51 @@ namespace aten {
 			: attrib(_attrib), type(_type)
 		{}
 	};
+}
 
+namespace AT_NAME
+{
 	class Light {
 		static std::vector<Light*> g_lights;
 
 	protected:
-		Light(LightType type, const LightAttribute& attrib);
-		Light(LightType type, const LightAttribute& attrib, Values& val);
+		Light(aten::LightType type, const aten::LightAttribute& attrib);
+		Light(aten::LightType type, const aten::LightAttribute& attrib, aten::Values& val);
 
 		virtual ~Light();
 
 	public:
-		void setPos(const vec3& pos)
+		void setPos(const aten::vec3& pos)
 		{
 			m_param.pos = pos;
 		}
 
-		void setDir(const vec3& dir)
+		void setDir(const aten::vec3& dir)
 		{
-			m_param.dir = normalize(dir);
+			m_param.dir = aten::normalize(dir);
 		}
 
-		void setLe(const vec3& le)
+		void setLe(const aten::vec3& le)
 		{
 			m_param.le = le;
 		}
 
-		const vec3& getPos() const
+		const aten::vec3& getPos() const
 		{
 			return m_param.pos;
 		}
 
-		const vec3& getDir() const
+		const aten::vec3& getDir() const
 		{
 			return m_param.dir;
 		}
 
-		const vec3& getLe() const
+		const aten::vec3& getLe() const
 		{
 			return m_param.le;
 		}
 
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const = 0;
+		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const = 0;
 
 		bool isSingular() const
 		{
@@ -130,22 +133,22 @@ namespace aten {
 			return m_param.attrib.isIBL;
 		}
 
-		virtual const hitable* getLightObject() const
+		virtual const aten::hitable* getLightObject() const
 		{
 			return nullptr;
 		}
 
-		const LightParameter& param() const
+		const aten::LightParameter& param() const
 		{
 			return m_param;
 		}
 
-		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
+		virtual aten::hitable::SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const
 		{
 			// TODO
 			// Only for AreaLight...
 			AT_ASSERT(false);
-			return std::move(hitable::SamplingPosNormalPdf(vec3(0), vec3(1, 0, 0), real(0)));
+			return std::move(aten::hitable::SamplingPosNormalPdf(aten::vec3(0), aten::vec3(1, 0, 0), real(0)));
 		}
 
 		static uint32_t getLightNum();
@@ -153,6 +156,6 @@ namespace aten {
 		static const std::vector<Light*>& getLights();
 
 	protected:
-		LightParameter m_param;
+		aten::LightParameter m_param;
 	};
 }

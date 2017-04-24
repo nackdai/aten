@@ -4,10 +4,8 @@
 #include "device_launch_parameters.h"
 
 #include "cuda/helper_math.h"
-#include "cuda/cudautil.h"
-#include "cuda/cudamemory.h"
 
-#include "aten.h"
+#include "aten4idaten.h"
 
 typedef aten::LightSampleResult(*FuncLightSample)(const aten::LightParameter&, const aten::vec3&, aten::sampler*);
 
@@ -19,9 +17,9 @@ __device__ aten::LightSampleResult sampleLight(
 	constexpr FuncLightSample funcs[] = {
 		nullptr,
 		nullptr,
-		aten::DirectionalLight::sample,
-		aten::PointLight::sample,
-		aten::SpotLight::sample,
+		AT_NAME::DirectionalLight::sample,
+		AT_NAME::PointLight::sample,
+		AT_NAME::SpotLight::sample,
 	};
 
 	aten::LightSampleResult ret;
@@ -44,7 +42,7 @@ __device__ aten::LightSampleResult sampleLight(
 
 			return isHit;
 		};
-		ret = aten::AreaLight::sample(funcHitTestSphere, light, org, sampler);
+		ret = AT_NAME::AreaLight::sample(funcHitTestSphere, light, org, sampler);
 	}
 	else {
 		ret = funcs[light.type](light, org, sampler);

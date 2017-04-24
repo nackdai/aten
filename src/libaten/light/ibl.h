@@ -4,24 +4,24 @@
 #include "light/light.h"
 #include "renderer/envmap.h"
 
-namespace aten {
+namespace AT_NAME {
 	class ImageBasedLight : public Light {
 	public:
 		ImageBasedLight()
-			: Light(LightType::IBL, LightAttributeIBL)
+			: Light(aten::LightType::IBL, LightAttributeIBL)
 		{}
-		ImageBasedLight(envmap* envmap)
-			: Light(LightType::IBL, LightAttributeIBL)
+		ImageBasedLight(aten::envmap* envmap)
+			: Light(aten::LightType::IBL, LightAttributeIBL)
 		{
 			setEnvMap(envmap);
 		}
 
-		ImageBasedLight(Values& val)
-			: Light(LightType::IBL, LightAttributeIBL, val)
+		ImageBasedLight(aten::Values& val)
+			: Light(aten::LightType::IBL, LightAttributeIBL, val)
 		{
-			texture* tex = (texture*)val.get("envmap", nullptr);
+			aten::texture* tex = (aten::texture*)val.get("envmap", nullptr);
 			
-			envmap* bg = new envmap();
+			aten::envmap* bg = new aten::envmap();
 			bg->init(tex);
 
 			setEnvMap(bg);
@@ -30,7 +30,7 @@ namespace aten {
 		virtual ~ImageBasedLight() {}
 
 	public:
-		void setEnvMap(envmap* envmap)
+		void setEnvMap(aten::envmap* envmap)
 		{
 			if (m_param.envmap.ptr != envmap) {
 				m_param.envmap.ptr = envmap;
@@ -38,14 +38,14 @@ namespace aten {
 			}
 		}
 
-		const envmap* getEnvMap() const
+		const aten::envmap* getEnvMap() const
 		{
-			return (envmap*)m_param.envmap.ptr;
+			return (aten::envmap*)m_param.envmap.ptr;
 		}
 
-		real samplePdf(const ray& r) const;
+		real samplePdf(const aten::ray& r) const;
 
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
+		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final;
 
 	private:
 		void preCompute();

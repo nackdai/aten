@@ -17,7 +17,7 @@
 // t-distribution value.
 // [0: 80%, 1: 90%, 2: 95%, 3: 98%, 4: 99%, 5: 99.8%]
 // 信頼区間を計算するためのt-分布のテーブル.
-static const aten::real ttable[][6] = {
+static const real ttable[][6] = {
 #include "filter/VirtualFlashImage/t_table.dat"
 };
 

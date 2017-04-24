@@ -1,12 +1,12 @@
 #include "light/arealight.h"
 
-namespace aten {
-	LightSampleResult AreaLight::sample(const vec3& org, sampler* sampler) const
+namespace AT_NAME {
+	aten::LightSampleResult AreaLight::sample(const aten::vec3& org, aten::sampler* sampler) const
 	{
-		auto funcHitTest = [](const vec3& o, const UnionIdxPtr& object, vec3& pos, aten::sampler* smpl, hitrecord& rec)
+		auto funcHitTest = [](const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord& rec)
 		{
 			bool isHit = false;
-			const hitable* obj = (hitable*)object.ptr;
+			const aten::hitable* obj = (aten::hitable*)object.ptr;
 
 			if (obj) {
 				if (smpl) {
@@ -19,7 +19,7 @@ namespace aten {
 				auto dir = pos - o;
 				auto dist = dir.length();
 
-				ray r(o, normalize(dir));
+				aten::ray r(o, aten::normalize(dir));
 
 				isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 			}
@@ -27,7 +27,7 @@ namespace aten {
 			return isHit;
 		};
 
-		LightSampleResult result = sample(
+		auto result = sample(
 			funcHitTest,
 			this->param(),
 			org,

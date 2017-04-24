@@ -16,8 +16,8 @@ namespace aten {
 		virtual real next01() = 0;
 	};
 
-	inline aten::real drand48()
+	inline real drand48()
 	{
-		return (aten::real)::rand() / RAND_MAX;
+		return (real)::rand() / RAND_MAX;
 	}
 }

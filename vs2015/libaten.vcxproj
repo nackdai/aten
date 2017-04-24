@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\aten.h" />
+    <ClInclude Include="..\src\libaten\aten_namespace.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\equirect.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />

@@ -2,34 +2,34 @@
 
 #include "light/light.h"
 
-namespace aten {
+namespace AT_NAME {
 	class SpotLight : public Light {
 	public:
 		SpotLight()
-			: Light(LightType::Spot, LightAttributeSingluar)
+			: Light(aten::LightType::Spot, LightAttributeSingluar)
 		{}
 		SpotLight(
-			const vec3& pos,	// light position.
-			const vec3& dir,	// light direction from the position.
-			const vec3& le,		// light color.
+			const aten::vec3& pos,	// light position.
+			const aten::vec3& dir,	// light direction from the position.
+			const aten::vec3& le,		// light color.
 			real constAttn,
 			real linearAttn,
 			real expAttn,
 			real innerAngle,	// Umbra angle of spotlight in radians.
 			real outerAngle,	// Penumbra angle of spotlight in radians.
 			real falloff)		// Falloff factor.
-			: Light(LightType::Spot, LightAttributeSingluar)
+			: Light(aten::LightType::Spot, LightAttributeSingluar)
 		{
 			m_param.pos = pos;
-			m_param.dir = normalize(dir);
+			m_param.dir = aten::normalize(dir);
 			m_param.le = le;
 
 			setAttenuation(constAttn, linearAttn, expAttn);
 			setSpotlightFactor(innerAngle, outerAngle, falloff);
 		}
 
-		SpotLight(Values& val)
-			: Light(LightType::Spot, LightAttributeSingluar, val)
+		SpotLight(aten::Values& val)
+			: Light(aten::LightType::Spot, LightAttributeSingluar, val)
 		{
 			m_param.constAttn = val.get("constAttn", m_param.constAttn);
 			m_param.linearAttn = val.get("linearAttn", m_param.linearAttn);
@@ -67,22 +67,22 @@ namespace aten {
 			m_param.falloff = falloff;
 		}
 
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
+		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
 			return std::move(sample(m_param, org, sampler));
 		}
 
-		static AT_DEVICE_API LightSampleResult sample(
-			const LightParameter& param,
-			const vec3& org,
-			sampler* sampler)
+		static AT_DEVICE_API aten::LightSampleResult sample(
+			const aten::LightParameter& param,
+			const aten::vec3& org,
+			aten::sampler* sampler)
 		{
-			LightSampleResult result;
+			aten::LightSampleResult result;
 
 			result.pos = param.pos;
 			result.pdf = real(1);
 			result.dir = param.pos - org;
-			result.nml = vec3();	// Not used...
+			result.nml = aten::vec3();	// Not used...
 
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx

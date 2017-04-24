@@ -90,9 +90,17 @@ static aten::Film g_buffer(WIDTH, HEIGHT);
 
 void display()
 {
+	const auto& lights = aten::Light::getLights();
+
+	std::vector<aten::LightParameter> lightparams;
+	for (auto l : lights) {
+		lightparams.push_back(l->param());
+	}
+
 	renderRayTracing(
 		g_buffer.image(),
-		WIDTH, HEIGHT);
+		WIDTH, HEIGHT,
+		lightparams);
 
 	aten::visualizer::render(g_buffer.image(), false);
 }

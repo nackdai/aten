@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aten.h"
+#include "aten4idaten.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +8,8 @@ extern "C" {
 
 	void renderRayTracing(
 		aten::vec4* image,
-		int width, int height);
+		int width, int height,
+		std::vector<aten::LightParameter> lights);
 
 #ifdef __cplusplus
 }

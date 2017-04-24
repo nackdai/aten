@@ -86,18 +86,18 @@ namespace aten
 
 	NPRMaterial::NPRMaterial(
 		MaterialType type,
-		const vec3& e, Light* light)
+		const vec3& e, AT_NAME::Light* light)
 		: material(type, MaterialAttributeNPR, e)
 	{
 		setTargetLight(light);
 	}
 
-	void NPRMaterial::setTargetLight(Light* light)
+	void NPRMaterial::setTargetLight(AT_NAME::Light* light)
 	{
 		m_targetLight = light;
 	}
 
-	const Light* NPRMaterial::getTargetLight() const
+	const AT_NAME::Light* NPRMaterial::getTargetLight() const
 	{
 		return m_targetLight;
 	}
@@ -161,8 +161,8 @@ namespace aten
 	}
 
 	void material::applyNormalMap(
-		const vec3& orgNml,
-		vec3& newNml,
+		const aten::vec3& orgNml,
+		aten::vec3& newNml,
 		real u, real v) const
 	{
 		if (m_param.normalMap.ptr) {

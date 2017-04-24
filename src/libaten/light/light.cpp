@@ -1,6 +1,6 @@
 #include "light/light.h"
 
-namespace aten {
+namespace AT_NAME {
 	std::vector<Light*> Light::g_lights;
 
 	uint32_t Light::getLightNum()
@@ -21,13 +21,13 @@ namespace aten {
 		return g_lights;
 	}
 
-	Light::Light(LightType type, const LightAttribute& attrib)
+	Light::Light(aten::LightType type, const aten::LightAttribute& attrib)
 		: m_param(type, attrib)
 	{
 		g_lights.push_back(this);
 	}
 
-	Light::Light(LightType type, const LightAttribute& attrib, Values& val)
+	Light::Light(aten::LightType type, const aten::LightAttribute& attrib, aten::Values& val)
 		: m_param(type, attrib)
 	{
 		g_lights.push_back(this);

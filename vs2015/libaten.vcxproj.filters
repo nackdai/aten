@@ -318,6 +318,7 @@
     <ClInclude Include="..\src\libaten\shape\shape.h">
       <Filter>shape</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\aten_namespace.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

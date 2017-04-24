@@ -7,7 +7,7 @@
 // http://www.cs.virginia.edu/~gfx/courses/2007/ImageSynthesis/assignments/envsample.pdf
 // http://www.igorsklyar.com/system/documents/papers/4/fiscourse.comp.pdf
 
-namespace aten {
+namespace AT_NAME {
 	void ImageBasedLight::preCompute()
 	{
 		auto envmap = getEnvMap();
@@ -60,7 +60,7 @@ namespace aten {
 				real v = (real)(y + 0.5) / height;
 
 				auto clr = envmap->sample(u, v);
-				const auto illum = color::luminance(clr);
+				const auto illum = aten::color::luminance(clr);
 
 				m_avgIllum += illum * scale;
 				totalWeight += scale;
@@ -120,12 +120,12 @@ namespace aten {
 		m_avgIllum /= totalWeight;
 	}
 
-	real ImageBasedLight::samplePdf(const ray& r) const
+	real ImageBasedLight::samplePdf(const aten::ray& r) const
 	{
 		auto envmap = getEnvMap();
 
 		auto clr = envmap->sample(r);
-		auto illum = color::luminance(clr);
+		auto illum = aten::color::luminance(clr);
 
 		auto pdf = illum / m_avgIllum;
 
@@ -204,7 +204,7 @@ namespace aten {
 		return 0;
 	}
 
-	LightSampleResult ImageBasedLight::sample(const vec3& org, sampler* sampler) const
+	aten::LightSampleResult ImageBasedLight::sample(const aten::vec3& org, aten::sampler* sampler) const
 	{
 		auto envmap = getEnvMap();
 
@@ -223,7 +223,7 @@ namespace aten {
 		real u = (real)(x + 0.5) / width;
 		real v = (real)(y + 0.5) / height;
 
-		LightSampleResult result;
+		aten::LightSampleResult result;
 
 		// NOTE
 		// p(w) = p(u, v) * (w * h) / (2ƒÎ^2 * sin(ƒÆ))
@@ -232,7 +232,7 @@ namespace aten {
 		result.pdf = (pdfU * pdfV) * ((width * height) / (pi2 * aten::sin(theta)));
 
 		// u, v -> direction.
-		result.dir = envmap::convertUVToDirection(u, v);
+		result.dir = aten::envmap::convertUVToDirection(u, v);
 
 		result.le = envmap->sample(u, v);
 		result.intensity = real(1);
@@ -240,8 +240,8 @@ namespace aten {
 
 		// TODO
 		// Currently not used...
-		result.pos = vec3();
-		result.nml = vec3();
+		result.pos = aten::vec3();
+		result.nml = aten::vec3();
 
 		return std::move(result);
 	}

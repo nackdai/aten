@@ -38,6 +38,7 @@
     <ClInclude Include="..\src\libaten\material\refraction.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\material\toon.h" />
+    <ClInclude Include="..\src\libaten\math\aabb.h" />
     <ClInclude Include="..\src\libaten\math\intersect.h" />
     <ClInclude Include="..\src\libaten\math\mat4.h" />
     <ClInclude Include="..\src\libaten\math\math.h" />
@@ -51,11 +52,13 @@
     <ClInclude Include="..\src\libaten\shape\sphere.h" />
     <ClInclude Include="..\src\libaten\shape\tranfomable.h" />
     <ClInclude Include="..\src\libaten\types.h" />
+    <ClInclude Include="..\src\libidaten\aten4idaten.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
+    <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
     <ClInclude Include="..\src\libidaten\kernel\light.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
   </ItemGroup>

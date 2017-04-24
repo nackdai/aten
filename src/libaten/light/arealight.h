@@ -2,23 +2,23 @@
 
 #include "light/light.h"
 
-namespace aten {
+namespace AT_NAME {
 	class AreaLight : public Light {
 	public:
 		AreaLight() 
-			: Light(LightType::Area, LightAttributeArea)
+			: Light(aten::LightType::Area, LightAttributeArea)
 		{}
-		AreaLight(hitable* obj, const vec3& le)
-			: Light(LightType::Area, LightAttributeArea)
+		AreaLight(aten::hitable* obj, const aten::vec3& le)
+			: Light(aten::LightType::Area, LightAttributeArea)
 		{
 			m_param.object.ptr = obj;
 			m_param.le = le;
 		}
 
-		AreaLight(Values& val)
-			: Light(LightType::Area, LightAttributeArea, val)
+		AreaLight(aten::Values& val)
+			: Light(aten::LightType::Area, LightAttributeArea, val)
 		{
-			m_param.object.ptr = (hitable*)val.get("object", m_param.object.ptr);
+			m_param.object.ptr = (aten::hitable*)val.get("object", m_param.object.ptr);
 			m_param.le = val.get("color", m_param.le);
 		}
 
@@ -26,20 +26,20 @@ namespace aten {
 
 	public:
 		template <typename Func>
-		static AT_DEVICE_API LightSampleResult sample(
+		static AT_DEVICE_API aten::LightSampleResult sample(
 			Func funcHitTest,
-			const LightParameter& param,
-			const vec3& org,
-			sampler* sampler)
+			const aten::LightParameter& param,
+			const aten::vec3& org,
+			aten::sampler* sampler)
 		{
-			LightSampleResult result;
+			aten::LightSampleResult result;
 
 			auto obj = param.object.ptr;
 
 			if (obj) {
-				hitrecord rec;
+				aten::hitrecord rec;
 
-				vec3 pos;
+				aten::vec3 pos;
 				bool isHit = funcHitTest(org, param.object, pos, sampler, rec);
 
 				if (isHit) {
@@ -59,20 +59,20 @@ namespace aten {
 			return std::move(result);
 		}
 
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final;
+		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final;
 
-		virtual const hitable* getLightObject() const override final
+		virtual const aten::hitable* getLightObject() const override final
 		{
-			return (hitable*)m_param.object.ptr;
+			return (aten::hitable*)m_param.object.ptr;
 		}
 
-		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final
+		virtual aten::hitable::SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final
 		{
 			if (m_param.object.ptr) {
 				auto obj = getLightObject();
 				return obj->getSamplePosNormalPdf(sampler);
 			}
-			return std::move(hitable::SamplingPosNormalPdf(vec3(0), vec3(1), real(0)));
+			return std::move(aten::hitable::SamplingPosNormalPdf(aten::vec3(0), aten::vec3(1), real(0)));
 		}
 	};
 }

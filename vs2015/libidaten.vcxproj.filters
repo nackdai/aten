@@ -116,6 +116,11 @@
     <ClInclude Include="..\src\libidaten\kernel\light.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
+    <ClInclude Include="..\src\libidaten\aten4idaten.h" />
+    <ClInclude Include="..\src\libaten\math\aabb.h">
+      <Filter>aten\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -203,9 +208,11 @@
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\shape\sphere.cpp" />
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">
       <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\shape\sphere.cpp">
+      <Filter>aten\shape</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

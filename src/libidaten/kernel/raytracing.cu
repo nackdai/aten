@@ -8,7 +8,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
-#include "aten.h"
+#include "aten4idaten.h"
 
 // 直行ベクトルを計算.
 __host__ __device__ aten::vec3 getOrthoVector(const aten::vec3& n)
@@ -232,7 +232,7 @@ __global__ void raytracing(
 						return intersect(&_r, &_rec, &ctx);
 					};
 
-					if (aten::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+					if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
 						auto lightColor = sampleres.finalColor;
 
 						if (light.attrib.isInfinite) {
@@ -271,7 +271,8 @@ aten::ShapeParameter g_spheres[] = {
 
 void renderRayTracing(
 	aten::vec4* image,
-	int width, int height)
+	int width, int height,
+	std::vector<aten::LightParameter> lights)
 {
 	Camera camera;
 	initCamera(
@@ -283,7 +284,6 @@ void renderRayTracing(
 		width, height);
 
 	const std::vector<aten::material*>& mtrls = aten::material::getMaterials();
-	const std::vector<aten::Light*>& lights = aten::Light::getLights();
 
 #if 1
 	aten::CudaMemory dst(sizeof(float4) * width * height);
@@ -305,15 +305,12 @@ void renderRayTracing(
 	aten::TypedCudaMemory<aten::MaterialParameter> materials(mtrlparams.size());
 	materials.writeByNum(&mtrlparams[0], mtrlparams.size());
 
-	std::vector<aten::LightParameter> lightparams;
 	for (auto l : lights) {
-		auto lp = l->param();
-		lp.object.idx = 0;
-		lightparams.push_back(lp);
+		l.object.idx = 0;
 	}
 
-	aten::TypedCudaMemory<aten::LightParameter> lightmem(lightparams.size());
-	lightmem.writeByNum(&lightparams[0], lightparams.size());
+	aten::TypedCudaMemory<aten::LightParameter> lightmem(lights.size());
+	lightmem.writeByNum(&lights[0], lights.size());
 
 	dim3 block(32, 32);
 	dim3 grid(

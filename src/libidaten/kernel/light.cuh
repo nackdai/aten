@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aten.h"
+#include "aten4idaten.h"
 
 __device__ aten::LightSampleResult sampleLight(
 	const aten::LightParameter& light,

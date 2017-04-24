@@ -2,19 +2,19 @@
 
 #include "light/light.h"
 
-namespace aten {
+namespace AT_NAME {
 	class PointLight : public Light {
 	public:
 		PointLight()
-			: Light(LightType::Point, LightAttributeSingluar)
+			: Light(aten::LightType::Point, LightAttributeSingluar)
 		{}
 		PointLight(
-			const vec3& pos,
-			const vec3& le,
+			const aten::vec3& pos,
+			const aten::vec3& le,
 			real constAttn = 1,
 			real linearAttn = 0,
 			real expAttn = 0)
-			: Light(LightType::Point, LightAttributeSingluar)
+			: Light(aten::LightType::Point, LightAttributeSingluar)
 		{
 			m_param.pos = pos;
 			m_param.le = le;
@@ -22,8 +22,8 @@ namespace aten {
 			setAttenuation(constAttn, linearAttn, expAttn);
 		}
 
-		PointLight(Values& val)
-			: Light(LightType::Point, LightAttributeSingluar, val)
+		PointLight(aten::Values& val)
+			: Light(aten::LightType::Point, LightAttributeSingluar, val)
 		{
 			m_param.constAttn = val.get("constAttn", m_param.constAttn);
 			m_param.linearAttn = val.get("linearAttn", m_param.linearAttn);
@@ -45,22 +45,22 @@ namespace aten {
 			m_param.expAttn = std::max(expAttn, real(0));
 		}
 
-		virtual LightSampleResult sample(const vec3& org, sampler* sampler) const override final
+		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
 			return std::move(sample(m_param, org, sampler));
 		}
 
-		static AT_DEVICE_API LightSampleResult sample(
-			const LightParameter& param,
-			const vec3& org,
-			sampler* sampler)
+		static AT_DEVICE_API aten::LightSampleResult sample(
+			const aten::LightParameter& param,
+			const aten::vec3& org,
+			aten::sampler* sampler)
 		{
-			LightSampleResult result;
+			aten::LightSampleResult result;
 
 			result.pos = param.pos;
 			result.pdf = real(1);
 			result.dir = param.pos - org;
-			result.nml = vec3();	// Not used...
+			result.nml = aten::vec3();	// Not used...
 
 			auto dist2 = result.dir.squared_length();
 			auto dist = aten::sqrt(dist2);

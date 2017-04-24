@@ -3,7 +3,7 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#include "aten.h"
+#include "aten4idaten.h"
 
 namespace aten {
 	class CudaMemory : public IStream {

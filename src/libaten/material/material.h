@@ -7,6 +7,10 @@
 #include "misc/value.h"
 #include "math/ray.h"
 
+namespace AT_NAME {
+	class Light;
+}
+
 namespace aten
 {
 	struct hitrecord;
@@ -245,13 +249,11 @@ namespace aten
 		MaterialParameter m_param;
 	};
 
-	class Light;
-
 	class NPRMaterial : public material {
 	protected:
 		NPRMaterial(
 			MaterialType type,
-			const vec3& e, Light* light);
+			const vec3& e, AT_NAME::Light* light);
 
 		NPRMaterial(MaterialType type, Values& val)
 			: material(type, MaterialAttributeNPR, val)
@@ -269,16 +271,16 @@ namespace aten
 			return real(1);
 		}
 
-		void setTargetLight(Light* light);
+		void setTargetLight(AT_NAME::Light* light);
 
-		const Light* getTargetLight() const;
+		const AT_NAME::Light* getTargetLight() const;
 
 		virtual vec3 bsdf(
 			real cosShadow,
 			real u, real v) const = 0;
 
 	private:
-		Light* m_targetLight{ nullptr };
+		AT_NAME::Light* m_targetLight{ nullptr };
 	};
 
 

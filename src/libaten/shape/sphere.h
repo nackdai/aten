@@ -15,7 +15,7 @@ namespace AT_NAME
 
 	public:
 		sphere(const aten::vec3& c, real r, material* m)
-			: m_param(c, r), m_mtrl(m)
+			: transformable(), m_param(c, r, m)
 		{}
 		sphere(real r, material* m)
 			: sphere(aten::vec3(), r, m)
@@ -76,6 +76,5 @@ namespace AT_NAME
 
 	private:
 		aten::ShapeParameter m_param;
-		material* m_mtrl{ nullptr };
 	};
 }

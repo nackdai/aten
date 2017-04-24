@@ -20,7 +20,7 @@ namespace AT_NAME
 
 		if (isHit) {
 			rec.obj = (hitable*)this;
-			rec.mtrl = m_mtrl;
+			rec.mtrl = (material*)m_param.mtrl.ptr;
 		}
 
 		return isHit;
@@ -36,7 +36,7 @@ namespace AT_NAME
 
 		if (isHit) {
 			rec.obj = (hitable*)this;
-			rec.mtrl = m_mtrl;
+			rec.mtrl = (material*)m_param.mtrl.ptr;
 		}
 
 		return isHit;

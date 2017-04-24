@@ -4,12 +4,16 @@
 #include "scene/bvh.h"
 #include "math/mat4.h"
 
+#include <vector>
+
 namespace aten
 {
 	class transformable : public bvhnode {
+		static std::vector<transformable*> g_shapes;
+
 	public:
-		transformable() {}
-		virtual ~transformable() {}
+		transformable();
+		virtual ~transformable();
 
 	public:
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
@@ -21,5 +25,10 @@ namespace aten
 			const mat4& mtxL2W,
 			real t_min, real t_max,
 			hitrecord& rec) const = 0;
+
+		static uint32_t getShapeNum();
+		static const transformable* getShape(uint32_t idx);
+		static int findShapeIdx(transformable* shape);
+		static const std::vector<transformable*>& getShapes();
 	};
 }

@@ -298,6 +298,7 @@
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />
     <ClCompile Include="..\src\libaten\shape\sphere.cpp" />
+    <ClCompile Include="..\src\libaten\shape\tranfomable.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp" />

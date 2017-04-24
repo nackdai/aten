@@ -15,7 +15,7 @@ namespace AT_NAME
 
 	public:
 		cube::cube(const aten::vec3& c, real w, real h, real d, material* m)
-			: m_param(c, aten::vec3(w, h, d)), m_mtrl(m)
+			: transformable(), m_param(c, aten::vec3(w, h, d), m)
 		{}
 		cube(real w, real h, real d, material* m)
 			: cube(aten::vec3(0), w, h, d, m)
@@ -77,6 +77,5 @@ namespace AT_NAME
 
 	private:
 		aten::ShapeParameter m_param;
-		material* m_mtrl{ nullptr };
 	};
 }

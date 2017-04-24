@@ -78,7 +78,7 @@ namespace AT_NAME
 			}
 
 			rec.obj = (hitable*)this;
-			rec.mtrl = m_mtrl;
+			rec.mtrl = (material*)m_param.mtrl.ptr;
 
 			// tangent coordinate.
 			rec.du = normalize(getOrthoVector(rec.normal));

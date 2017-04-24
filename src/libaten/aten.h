@@ -70,6 +70,7 @@
 
 #include "shape/sphere.h"
 #include "shape/cube.h"
+#include "shape/tranfomable.h"
 
 #include "renderer/renderer.h"
 #include "renderer/film.h"

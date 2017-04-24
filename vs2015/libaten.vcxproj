@@ -273,7 +273,6 @@
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
     <ClCompile Include="..\src\libaten\material\toon.cpp" />
-    <ClCompile Include="..\src\libaten\math\aabb.cpp" />
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
     <ClCompile Include="..\src\libaten\misc\thread.cpp" />

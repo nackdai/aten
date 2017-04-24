@@ -495,9 +495,6 @@
     <ClCompile Include="..\src\libaten\light\arealight.cpp">
       <Filter>light</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\math\aabb.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">

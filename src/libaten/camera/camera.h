@@ -5,12 +5,34 @@
 #include "sampler/sampler.h"
 
 namespace aten {
+	// TODO
+	// Only for Pinhole Cmaera...
+	struct CameraParameter {
+		vec3 origin;
+
+		real aspect;
+		vec3 center;
+
+		vec3 u;
+		vec3 v;
+
+		vec3 dir;
+		vec3 right;
+		vec3 up;
+
+		real dist;
+		int width;
+		int height;
+	};
+};
+
+namespace AT_NAME {
 	struct CameraSampleResult {
-		ray r;
-		vec3 posOnImageSensor;
-		vec3 posOnLens;
-		vec3 nmlOnLens;
-		vec3 posOnObjectplane;
+		aten::ray r;
+		aten::vec3 posOnImageSensor;
+		aten::vec3 posOnLens;
+		aten::vec3 nmlOnLens;
+		aten::vec3 posOnObjectplane;
 		real pdfOnImageSensor{ real(1) };
 		real pdfOnLens{ real(1) };
 	};
@@ -22,41 +44,41 @@ namespace aten {
 
 		virtual CameraSampleResult sample(
 			real s, real t,
-			sampler* sampler) const = 0;
+			aten::sampler* sampler) const = 0;
 
 		virtual real convertImageSensorPdfToScenePdf(
 			real pdfImage,
-			const vec3& hitPoint,
-			const vec3& hitpointNml,
-			const vec3& posOnImageSensor,
-			const vec3& posOnLens,
-			const vec3& posOnObjectPlane) const
+			const aten::vec3& hitPoint,
+			const aten::vec3& hitpointNml,
+			const aten::vec3& posOnImageSensor,
+			const aten::vec3& posOnLens,
+			const aten::vec3& posOnObjectPlane) const
 		{
 			return real(1);
 		}
 
 		virtual real getSensitivity(
-			const vec3& posOnImagesensor,
-			const vec3& posOnLens) const
+			const aten::vec3& posOnImagesensor,
+			const aten::vec3& posOnLens) const
 		{
 			return real(1);
 		}
 
 		virtual real getWdash(
-			const vec3& hitPoint,
-			const vec3& hitpointNml,
-			const vec3& posOnImageSensor,
-			const vec3& posOnLens,
-			const vec3& posOnObjectPlane) const
+			const aten::vec3& hitPoint,
+			const aten::vec3& hitpointNml,
+			const aten::vec3& posOnImageSensor,
+			const aten::vec3& posOnLens,
+			const aten::vec3& posOnObjectPlane) const
 		{
 			return real(1);
 		}
 
 		virtual real hitOnLens(
-			const ray& r,
-			vec3& posOnLens,
-			vec3& posOnObjectPlane,
-			vec3& posOnImageSensor,
+			const aten::ray& r,
+			aten::vec3& posOnLens,
+			aten::vec3& posOnObjectPlane,
+			aten::vec3& posOnImageSensor,
 			int& x, int& y) const
 		{
 			return -AT_MATH_INF;
@@ -72,11 +94,11 @@ namespace aten {
 			return true;
 		}
 
-		virtual const vec3& getPos() const = 0;
-		virtual const vec3& getDir() const = 0;
+		virtual const aten::vec3& getPos() const = 0;
+		virtual const aten::vec3& getDir() const = 0;
 
 		virtual void revertRayToPixelPos(
-			const ray& ray,
+			const aten::ray& ray,
 			int& px, int& py) const = 0;
 
 		virtual real getImageSensorWidth() const

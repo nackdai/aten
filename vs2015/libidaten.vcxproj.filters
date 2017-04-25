@@ -124,6 +124,12 @@
     <ClInclude Include="..\src\libidaten\kernel\material.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\camera\camera.h">
+      <Filter>aten\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\camera\pinhole.h">
+      <Filter>aten\camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -149,6 +155,9 @@
     </Filter>
     <Filter Include="aten\shape">
       <UniqueIdentifier>{06f7c18d-6575-491d-9f22-6a8dc6c848f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\camera">
+      <UniqueIdentifier>{acb20f76-8ecc-4139-8957-fa6d24abedd5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -178,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\shape\cube.cpp">
       <Filter>aten\shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\camera\pinhole .cpp">
+      <Filter>aten\camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

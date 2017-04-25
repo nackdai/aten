@@ -5,73 +5,69 @@
 #include "math/vec3.h"
 #include "math/math.h"
 
-namespace aten {
+namespace AT_NAME {
 	class PinholeCamera : public camera {
 	public:
 		PinholeCamera() {}
 		virtual ~PinholeCamera() {}
 
 		void init(
-			const vec3& origin,
-			const vec3& lookat,
-			const vec3& up,
+			const aten::vec3& origin,
+			const aten::vec3& lookat,
+			const aten::vec3& up,
 			real vfov,	// vertical fov.
 			uint32_t width, uint32_t height);
 
 		virtual CameraSampleResult sample(
 			real s, real t,
-			sampler* sampler) const override final;
+			aten::sampler* sampler) const override final;
 
-		virtual const vec3& getPos() const override final
+		static AT_DEVICE_API CameraSampleResult sample(
+			const aten::CameraParameter& param,
+			real s, real t,
+			aten::sampler* sampler);
+
+		virtual const aten::vec3& getPos() const override final
 		{
-			return m_origin;
+			return m_param.origin;
 		}
-		virtual const vec3& getDir() const override final
+		virtual const aten::vec3& getDir() const override final
 		{
-			return m_dir;
+			return m_param.dir;
+		}
+
+		const aten::CameraParameter& param() const
+		{
+			return m_param;
 		}
 
 		void revertRayToPixelPos(
-			const ray& ray,
+			const aten::ray& ray,
 			int& px, int& py) const override final;
 
 		virtual real convertImageSensorPdfToScenePdf(
 			real pdfImage,	// Not used.
-			const vec3& hitPoint,
-			const vec3& hitpointNml,
-			const vec3& posOnImageSensor,
-			const vec3& posOnLens,
-			const vec3& posOnObjectPlane) const override final;
+			const aten::vec3& hitPoint,
+			const aten::vec3& hitpointNml,
+			const aten::vec3& posOnImageSensor,
+			const aten::vec3& posOnLens,
+			const aten::vec3& posOnObjectPlane) const override final;
 
 		virtual real getWdash(
-			const vec3& hitPoint,
-			const vec3& hitpointNml,
-			const vec3& posOnImageSensor,
-			const vec3& posOnLens,
-			const vec3& posOnObjectPlane) const override final;
+			const aten::vec3& hitPoint,
+			const aten::vec3& hitpointNml,
+			const aten::vec3& posOnImageSensor,
+			const aten::vec3& posOnLens,
+			const aten::vec3& posOnObjectPlane) const override final;
 
 		virtual real hitOnLens(
-			const ray& r,
-			vec3& posOnLens,
-			vec3& posOnObjectPlane,
-			vec3& posOnImageSensor,
+			const aten::ray& r,
+			aten::vec3& posOnLens,
+			aten::vec3& posOnObjectPlane,
+			aten::vec3& posOnImageSensor,
 			int& x, int& y) const override final;
 
 	private:
-		vec3 m_origin;
-
-		real m_aspect;
-		vec3 m_center;
-
-		vec3 m_u;
-		vec3 m_v;
-
-		vec3 m_dir;
-		vec3 m_right;
-		vec3 m_up;
-
-		real m_dist;
-		int m_width;
-		int m_height;
+		aten::CameraParameter m_param;
 	};
 }

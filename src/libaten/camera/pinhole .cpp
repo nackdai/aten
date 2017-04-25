@@ -1,41 +1,50 @@
 #include "camera/pinhole.h"
-namespace aten {
+
+namespace AT_NAME {
 	void PinholeCamera::init(
-		const vec3& origin,
-		const vec3& lookat,
-		const vec3& up,
+		const aten::vec3& origin,
+		const aten::vec3& lookat,
+		const aten::vec3& up,
 		real vfov,	// vertical fov.
 		uint32_t width, uint32_t height)
 	{
 		real theta = Deg2Rad(vfov);
 
-		m_aspect = width / (real)height;
+		m_param.aspect = width / (real)height;
 
 		real half_height = aten::tan(theta / 2);
-		real half_width = m_aspect * half_height;
+		real half_width = m_param.aspect * half_height;
 
-		m_origin = origin;
+		m_param.origin = origin;
 
 		// カメラ座標ベクトル.
-		m_dir = normalize(lookat - origin);
-		m_right = normalize(cross(m_dir, up));
-		m_up = cross(m_right, m_dir);
+		m_param.dir = normalize(lookat - origin);
+		m_param.right = normalize(cross(m_param.dir, up));
+		m_param.up = cross(m_param.right, m_param.dir);
 
-		m_center = origin + m_dir;
+		m_param.center = origin + m_param.dir;
 
 		// スクリーンのUVベクトル.
-		m_u = half_width * m_right;
-		m_v = half_height * m_up;
+		m_param.u = half_width * m_param.right;
+		m_param.v = half_height * m_param.up;
 
-		m_dist = height / (real(2.0) * aten::tan(theta / 2));
+		m_param.dist = height / (real(2.0) * aten::tan(theta / 2));
 
-		m_width = width;
-		m_height = height;
+		m_param.width = width;
+		m_param.height = height;
 	}
 
 	CameraSampleResult PinholeCamera::sample(
 		real s, real t,
-		sampler* sampler) const
+		aten::sampler* sampler) const
+	{
+		return std::move(sample(m_param, s, t, sampler));
+	}
+
+	AT_DEVICE_API CameraSampleResult PinholeCamera::sample(
+		const aten::CameraParameter& param,
+		real s, real t,
+		aten::sampler* sampler)
 	{
 		CameraSampleResult result;
 
@@ -43,15 +52,15 @@ namespace aten {
 		s = 2 * s - 1;
 		t = 2 * t - 1;
 
-		auto screenPos = s * m_u + t * m_v;
-		screenPos = screenPos + m_center;
+		auto screenPos = s * param.u + t * param.v;
+		screenPos = screenPos + param.center;
 
-		auto dirToScr = screenPos - m_origin;
+		auto dirToScr = screenPos - param.origin;
 
 		result.posOnLens = screenPos;
-		result.nmlOnLens = m_dir;
-		result.posOnImageSensor = m_origin;
-		result.r = ray(m_origin, dirToScr);
+		result.nmlOnLens = param.dir;
+		result.posOnImageSensor = param.origin;
+		result.r = aten::ray(param.origin, dirToScr);
 
 		result.pdfOnLens = 1;
 		result.pdfOnImageSensor = 1;
@@ -60,7 +69,7 @@ namespace aten {
 	}
 
 	void PinholeCamera::revertRayToPixelPos(
-		const ray& ray,
+		const aten::ray& ray,
 		int& px, int& py) const
 	{
 		// dir 方向へのスクリーン距離.
@@ -72,13 +81,13 @@ namespace aten {
 		//    d
 		// cosθ = x / d => x = d / cosθ
 
-		real c = dot(ray.dir, m_dir);
-		real dist = m_dist / c;
+		real c = dot(ray.dir, m_param.dir);
+		real dist = m_param.dist / c;
 
-		vec3 screenPos = m_origin + ray.dir * dist - m_center;
+		aten::vec3 screenPos = m_param.origin + ray.dir * dist - m_param.center;
 
-		real u = dot(screenPos, m_right) + m_width * real(0.5);
-		real v = dot(screenPos, m_up) + m_height * real(0.5);
+		real u = dot(screenPos, m_param.right) + m_param.width * real(0.5);
+		real v = dot(screenPos, m_param.up) + m_param.height * real(0.5);
 
 		px = (int)u;
 		py = (int)v;
@@ -86,26 +95,26 @@ namespace aten {
 
 	real PinholeCamera::convertImageSensorPdfToScenePdf(
 		real pdfImage,	// Not used.
-		const vec3& hitPoint,
-		const vec3& hitpointNml,
-		const vec3& posOnImageSensor,
-		const vec3& posOnLens,
-		const vec3& posOnObjectPlane) const
+		const aten::vec3& hitPoint,
+		const aten::vec3& hitpointNml,
+		const aten::vec3& posOnImageSensor,
+		const aten::vec3& posOnLens,
+		const aten::vec3& posOnObjectPlane) const
 	{
-		real pdf = real(1) / (m_width * m_height);
+		real pdf = real(1) / (m_param.width * m_param.height);
 
-		vec3 v = hitPoint - posOnLens;
+		aten::vec3 v = hitPoint - posOnLens;
 
 		{
-			vec3 dir = normalize(v);
-			const real cosTheta = dot(dir, m_dir);
-			const real dist = m_dist / (cosTheta + real(0.0001));
+			aten::vec3 dir = normalize(v);
+			const real cosTheta = dot(dir, m_param.dir);
+			const real dist = m_param.dist / (cosTheta + real(0.0001));
 			const real dist2 = dist * dist;
 			pdf = pdf / (cosTheta / dist2);
 		}
 
 		{
-			vec3 dv = hitPoint - posOnLens;
+			aten::vec3 dv = hitPoint - posOnLens;
 			const real dist2 = dv.squared_length();
 			dv.normalize();
 			const real c = dot(hitpointNml, dv);
@@ -117,21 +126,21 @@ namespace aten {
 	}
 
 	real PinholeCamera::getWdash(
-		const vec3& hitPoint,
-		const vec3& hitpointNml,
-		const vec3& posOnImageSensor,
-		const vec3& posOnLens,
-		const vec3& posOnObjectPlane) const
+		const aten::vec3& hitPoint,
+		const aten::vec3& hitpointNml,
+		const aten::vec3& posOnImageSensor,
+		const aten::vec3& posOnLens,
+		const aten::vec3& posOnObjectPlane) const
 	{
-		const real W = real(1) / (m_width * m_height);
+		const real W = real(1) / (m_param.width * m_param.height);
 
-		vec3 v = hitPoint - posOnLens;
+		aten::vec3 v = hitPoint - posOnLens;
 		const real dist = v.length();
 		v.normalize();
 
 		// imagesensor -> lens
-		const real c0 = dot(v, m_dir);
-		const real d0 = m_dist / c0;
+		const real c0 = dot(v, m_param.dir);
+		const real d0 = m_param.dist / c0;
 		const real G0 = c0 / (d0 * d0);
 
 		// hitpoint -> camera
@@ -145,10 +154,10 @@ namespace aten {
 	}
 
 	real PinholeCamera::hitOnLens(
-		const ray& r,
-		vec3& posOnLens,
-		vec3& posOnObjectPlane,
-		vec3& posOnImageSensor,
+		const aten::ray& r,
+		aten::vec3& posOnLens,
+		aten::vec3& posOnObjectPlane,
+		aten::vec3& posOnImageSensor,
 		int& x, int& y) const
 	{
 		int px;
@@ -156,14 +165,14 @@ namespace aten {
 
 		revertRayToPixelPos(r, px, py);
 
-		if ((px >= 0) && (px < m_width)
-			&& (py >= 0) && (py < m_height))
+		if ((px >= 0) && (px < m_param.width)
+			&& (py >= 0) && (py < m_param.height))
 		{
 			x = px;
 			y = py;
 
-			real u = (real)x / (real)m_width;
-			real v = (real)y / (real)m_height;
+			real u = (real)x / (real)m_param.width;
+			real v = (real)y / (real)m_param.height;
 
 			auto camsample = sample(u, v, nullptr);
 			posOnLens = camsample.posOnLens;

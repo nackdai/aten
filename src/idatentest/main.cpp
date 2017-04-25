@@ -21,6 +21,8 @@ static uint32_t g_threadnum = 1;
 
 static aten::Film g_buffer(WIDTH, HEIGHT);
 
+static aten::PinholeCamera g_camera;
+
 void makeScene(aten::scene* scene)
 {
 #if 1
@@ -139,6 +141,7 @@ void display()
 	renderRayTracing(
 		g_buffer.image(),
 		WIDTH, HEIGHT,
+		g_camera.param(),
 		shapeparams,
 		mtrlparms,
 		lightparams);
@@ -165,6 +168,13 @@ int main()
 		"../shader/gamma_fs.glsl");
 
 	aten::visualizer::addPostProc(&gamma);
+
+	g_camera.init(
+		aten::vec3(50.0, 52.0, 295.6),
+		aten::vec3(50.0, 40.8, 119.0),
+		aten::vec3(0, 1, 0),
+		30,
+		WIDTH, HEIGHT);
 
 	makeScene(nullptr);
 

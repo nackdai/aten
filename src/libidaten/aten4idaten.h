@@ -3,6 +3,9 @@
 #include "defs.h"
 #include "types.h"
 
+#include "camera/camera.h"
+#include "camera/pinhole.h"
+
 #include "material/emissive.h"
 #include "material/lambert.h"
 #include "material/specular.h"

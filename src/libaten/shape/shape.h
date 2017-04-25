@@ -29,7 +29,6 @@ namespace aten
 			// triangle.
 			struct {
 				int idx[3];
-				vertex* vtx[3];
 				real area;
 			};
 			// sphere / cube.

@@ -23,6 +23,7 @@ namespace aten
 
 		static bool hit(
 			const ShapeParameter& param,
+			const vertex* const vtx[],
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec);
@@ -44,6 +45,7 @@ namespace aten
 		void build(vertex* v0, vertex* v1, vertex* v2);
 	
 		ShapeParameter param;
+		vertex* vtx[3];
 
 		shape* parent{ nullptr };
 	};

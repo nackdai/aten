@@ -98,6 +98,10 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
 
+		virtual void getShapes(
+			std::vector<ShapeParameter>& shapeparams,
+			std::vector<PrimitiveParamter>& primparams) const override final;
+
 	private:
 		void build();
 

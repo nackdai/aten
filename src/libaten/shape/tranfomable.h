@@ -32,6 +32,13 @@ namespace aten
 			return std::move(ShapeParameter(ShapeType::None));
 		}
 
+		virtual void getShapes(
+			std::vector<ShapeParameter>& shapeparams,
+			std::vector<PrimitiveParamter>& primparams) const
+		{
+			// Default, nothing is done...
+		}
+
 		static uint32_t getShapeNum();
 		static const transformable* getShape(uint32_t idx);
 		static int findShapeIdx(transformable* shape);

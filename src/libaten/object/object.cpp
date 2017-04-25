@@ -1,6 +1,8 @@
 #include "object/object.h"
 #include "math/intersect.h"
 
+//#define ENABLE_LINEAR_HITTEST
+
 namespace aten
 {
 	bool face::hit(
@@ -181,7 +183,27 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
+#ifdef ENABLE_LINEAR_HITTEST
+		bool isHit = false;
+
+		hitrecord tmp;
+
+		for (auto f : faces) {
+			hitrecord tmptmp;
+			if (f->hit(r, t_min, t_max, tmptmp)) {
+				if (tmptmp.t < tmp.t) {
+					tmp = tmptmp;
+					isHit = true;
+				}
+			}
+		}
+
+		if (isHit) {
+			rec = tmp;
+		}
+#else
 		auto isHit = m_node.hit(r, t_min, t_max, rec);
+#endif
 
 		if (isHit) {
 			rec.mtrl = (material*)param.mtrl.ptr;
@@ -209,8 +231,25 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
+#ifdef ENABLE_LINEAR_HITTEST
+		bool isHit = false;
+
+		hitrecord tmp;
+
+		for (auto s : shapes) {
+			hitrecord tmptmp;
+
+			if (s->hit(r, t_min, t_max, tmptmp)) {
+				if (tmptmp.t < tmp.t) {
+					tmp = tmptmp;
+					isHit = true;
+				}
+			}
+		}
+#else
 		hitrecord tmp;
 		bool isHit = m_node.hit(r, t_min, t_max, tmp);
+#endif
 
 		if (isHit) {
 			rec = tmp;
@@ -319,5 +358,24 @@ namespace aten
 			real(1) / area);
 
 		return std::move(res);
+	}
+
+	void object::getShapes(
+		std::vector<ShapeParameter>& shapeparams,
+		std::vector<PrimitiveParamter>& primparams) const
+	{
+		for (auto s : shapes) {
+			auto shapeParam = s->param;
+			shapeParam.primid = primparams.size();
+			shapeParam.primnum = s->faces.size();
+
+			for (auto f : s->faces) {
+				auto faceParam = f->param;
+				faceParam.parent.idx = shapeparams.size();
+				primparams.push_back(faceParam);
+			}
+
+			shapeparams.push_back(shapeParam);
+		}
 	}
 }

@@ -8,9 +8,10 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		vertex v0, v1, v2;
+		VertexManager::getVertex(v0, param.idx[0]);
+		VertexManager::getVertex(v1, param.idx[1]);
+		VertexManager::getVertex(v2, param.idx[2]);
 
 		bool isHit = hit(
 			param, 
@@ -78,9 +79,10 @@ namespace aten
 
 	void face::build()
 	{
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		vertex v0, v1, v2;
+		VertexManager::getVertex(v0, param.idx[0]);
+		VertexManager::getVertex(v1, param.idx[1]);
+		VertexManager::getVertex(v2, param.idx[2]);
 
 		vec3 vmax(
 			std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
@@ -113,9 +115,10 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		vertex v0, v1, v2;
+		VertexManager::getVertex(v0, param.idx[0]);
+		VertexManager::getVertex(v1, param.idx[1]);
+		VertexManager::getVertex(v2, param.idx[2]);
 
 		// 重心座標系(barycentric coordinates).
 		// v0基準.
@@ -138,9 +141,10 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		vertex v0, v1, v2;
+		VertexManager::getVertex(v0, param.idx[0]);
+		VertexManager::getVertex(v1, param.idx[1]);
+		VertexManager::getVertex(v2, param.idx[2]);
 
 		// 重心座標系(barycentric coordinates).
 		// v0基準.
@@ -240,8 +244,9 @@ namespace aten
 
 			real ratio = scaledArea / originalArea;
 #else
-			const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-			const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+			vertex v0, v1;
+			VertexManager::getVertex(v0, f->param.idx[0]);
+			VertexManager::getVertex(v1, f->param.idx[1]);
 
 			real orignalLen = 0;
 			{
@@ -281,8 +286,9 @@ namespace aten
 		int faceidx = (int)(r * (shape->faces.size() - 1));
 		auto f = shape->faces[faceidx];
 
-		const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+		vertex v0, v1;
+		VertexManager::getVertex(v0, f->param.idx[0]);
+		VertexManager::getVertex(v1, f->param.idx[1]);
 
 		real orignalLen = 0;
 		{

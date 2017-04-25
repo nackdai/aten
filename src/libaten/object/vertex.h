@@ -14,7 +14,9 @@ namespace aten
 
 	class VertexManager {
 		static std::vector<int> s_indices;
-		static std::vector<vertex> s_vertices;
+		static std::vector<vec3> s_positions;
+		static std::vector<vec3> s_normals;
+		static std::vector<vec3> s_uvs;
 
 	private:
 		VertexManager() {}
@@ -25,9 +27,17 @@ namespace aten
 		{
 			s_indices.push_back(idx);
 		}
-		static void addVertex(const vertex& vtx)
+		static void addPositon(float x, float y, float z)
 		{
-			s_vertices.push_back(vtx);
+			s_positions.push_back(vec3(x, y, z));
+		}
+		static void addNormal(float x, float y, float z)
+		{
+			s_normals.push_back(vec3(x, y, z));
+		}
+		static void addUV(float u, float v)
+		{
+			s_uvs.push_back(vec3(u, v, 0));
 		}
 
 		static int getIndex(int pos)
@@ -35,28 +45,39 @@ namespace aten
 			AT_ASSERT(pos < s_indices.size());
 			return s_indices[pos];
 		}
-		static const vertex& getVertex(int idx)
+		static void getVertex(vertex& vtx, int idx)
 		{
-			AT_ASSERT(idx < s_vertices.size());
-			return s_vertices[idx];
+			if (idx < s_positions.size()) {
+				vtx.pos = s_positions[idx];
+			}
+			if (idx < s_normals.size()) {
+				vtx.nml = s_normals[idx];
+			}
+			if (idx < s_uvs.size()) {
+				vtx.uv = s_uvs[idx];
+			}
 		}
 
 		static const std::vector<int>& getIndices()
 		{
 			return s_indices;
 		}
-		static const std::vector<vertex>& getVertices()
+		static const std::vector<vec3>& getPositions()
 		{
-			return s_vertices;
+			return s_positions;
+		}
+		static const std::vector<vec3>& getNormals()
+		{
+			return s_normals;
+		}
+		static const std::vector<vec3>& getUVs()
+		{
+			return s_uvs;
 		}
 
-		static uint32_t getIndexNum()
+		static uint32_t getPositionNum()
 		{
-			return (uint32_t)s_indices.size();
-		}
-		static uint32_t getVertexNum()
-		{
-			return (uint32_t)s_vertices.size();
+			return (uint32_t)s_positions.size();
 		}
 	};
 }

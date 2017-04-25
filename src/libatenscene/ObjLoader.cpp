@@ -71,7 +71,7 @@ namespace aten
 			auto idxnum = shape.mesh.indices.size();
 			auto vtxnum = shape.mesh.positions.size();
 
-			auto curVtxPos = VertexManager::getVertexNum();
+			auto curVtxPos = VertexManager::getPositionNum();
 
 			vec3 pmin(AT_MATH_INF);
 			vec3 pmax(-AT_MATH_INF);
@@ -79,13 +79,15 @@ namespace aten
 			for (uint32_t i = 0; i < vtxnum; i += 3) {
 				vertex v;
 
-				v.pos.x = shape.mesh.positions[i + 0];
-				v.pos.y = shape.mesh.positions[i + 1];
-				v.pos.z = shape.mesh.positions[i + 2];
+				VertexManager::addPositon(
+					shape.mesh.positions[i + 0],
+					shape.mesh.positions[i + 1],
+					shape.mesh.positions[i + 2]);
 
-				v.nml.x = shape.mesh.normals[i + 0];
-				v.nml.y = shape.mesh.normals[i + 1];
-				v.nml.z = shape.mesh.normals[i + 2];
+				VertexManager::addNormal(
+					shape.mesh.normals[i + 0],
+					shape.mesh.normals[i + 1],
+					shape.mesh.normals[i + 2]);
 
 				pmin = vec3(
 					std::min(pmin.x, v.pos.x),
@@ -95,8 +97,6 @@ namespace aten
 					std::max(pmax.x, v.pos.x),
 					std::max(pmax.y, v.pos.y),
 					std::max(pmax.z, v.pos.z));
-
-				VertexManager::addVertex(v);
 			}
 
 			shapemin = vec3(
@@ -142,11 +142,9 @@ namespace aten
 			for (uint32_t i = 0; i < vtxnum; i += 2) {
 				uint32_t vpos = i / 2;
 
-				// TODO...
-				auto& v = const_cast<vertex&>(VertexManager::getVertex(vpos + curVtxPos));
-
-				v.uv.x = shape.mesh.texcoords[i + 0];
-				v.uv.y = shape.mesh.texcoords[i + 1];
+				VertexManager::addUV(
+					shape.mesh.texcoords[i + 0],
+					shape.mesh.texcoords[i + 1]);
 			}
 
 			dstshape->build();

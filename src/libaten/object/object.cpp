@@ -366,8 +366,11 @@ namespace aten
 	{
 		for (auto s : shapes) {
 			auto shapeParam = s->param;
+			
 			shapeParam.primid = primparams.size();
 			shapeParam.primnum = s->faces.size();
+
+			shapeParam.mtrl.idx = aten::material::findMaterialIdx((aten::material*)shapeParam.mtrl.ptr);
 
 			for (auto f : s->faces) {
 				auto faceParam = f->param;

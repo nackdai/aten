@@ -14,6 +14,7 @@ namespace aten {
 	public:
 		static void collect(
 			std::vector<aten::ShapeParameter>& shapeparams,
+			std::vector<aten::PrimitiveParamter>& primparams,
 			std::vector<aten::LightParameter>& lightparams,
 			std::vector<aten::MaterialParameter>& mtrlparms);
 	};

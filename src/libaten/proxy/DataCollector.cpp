@@ -4,15 +4,30 @@
 namespace aten {
 	void DataCollector::collect(
 		std::vector<aten::ShapeParameter>& shapeparams,
+		std::vector<aten::PrimitiveParamter>& primparams,
 		std::vector<aten::LightParameter>& lightparams,
 		std::vector<aten::MaterialParameter>& mtrlparms)
 	{
 		const auto& shapes = aten::transformable::getShapes();
 
 		for (auto s : shapes) {
-			auto param = s->getParam();
-			param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
-			shapeparams.push_back(param);
+			auto type = s->getParam().type;
+
+			switch (type) {
+			case ShapeType::Mesh:
+				s->getShapes(shapeparams, primparams);
+				break;
+			case ShapeType::Sphere:
+			case ShapeType::Cube:
+			{
+				auto param = s->getParam();
+				param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
+				shapeparams.push_back(param);
+			}
+				break;
+			default:
+				break;
+			}	
 		}
 
 		const auto& lights = aten::Light::getLights();

@@ -111,11 +111,13 @@ void makeScene(aten::scene* scene)
 void display()
 {
 	std::vector<aten::ShapeParameter> shapeparams;
+	std::vector<aten::PrimitiveParamter> primparams;
 	std::vector<aten::LightParameter> lightparams;
 	std::vector<aten::MaterialParameter> mtrlparms;
 
 	aten::DataCollector::collect(
 		shapeparams,
+		primparams,
 		lightparams,
 		mtrlparms);
 

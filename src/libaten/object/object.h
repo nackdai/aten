@@ -5,6 +5,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "shape/shape.h"
+#include "shape/tranfomable.h"
 #include "object/vertex.h"
 
 namespace aten
@@ -48,7 +49,7 @@ namespace aten
 
 	class shape : public bvhnode {
 	public:
-		shape() {}
+		shape() : param(ShapeType::Mesh) {}
 		virtual ~shape() {}
 
 		void build();
@@ -74,11 +75,6 @@ namespace aten
 			return face->getSamplePosNormalPdf(sampler);
 		}
 
-		virtual const ShapeParameter& getParam() const override final
-		{
-			return param;
-		}
-
 		ShapeParameter param;		
 		std::vector<face*> faces;
 
@@ -88,19 +84,19 @@ namespace aten
 
 	template<typename T> class instance;
 
-	class object {
+	class object : public transformable {
 		friend class instance<object>;
 
 	public:
 		object() {}
-		~object() {}
+		virtual ~object() {}
 
 	public:
-		bool hit(
+		virtual bool hit(
 			const ray& r,
 			const mat4& mtxL2W,
 			real t_min, real t_max,
-			hitrecord& rec);
+			hitrecord& rec) const override final;
 
 	private:
 		void build();
@@ -113,7 +109,7 @@ namespace aten
 			return shape->getRandomPosOn(sampler);
 		}
 
-		hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const;
+		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const override final;
 
 	public:
 		std::vector<shape*> shapes;

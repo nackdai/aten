@@ -207,7 +207,7 @@ namespace aten
 		const ray& r,
 		const mat4& mtxL2W,
 		real t_min, real t_max,
-		hitrecord& rec)
+		hitrecord& rec) const
 	{
 		hitrecord tmp;
 		bool isHit = m_node.hit(r, t_min, t_max, tmp);

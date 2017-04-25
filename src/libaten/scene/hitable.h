@@ -83,12 +83,6 @@ namespace aten {
 			return m_id;
 		}
 
-		virtual const ShapeParameter& getParam() const
-		{
-			AT_ASSERT(false);
-			return std::move(ShapeParameter());
-		}
-
 	private:
 		uint32_t m_id{ 0 };
 		const char* m_name;

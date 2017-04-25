@@ -11,10 +11,11 @@ namespace aten
 		Mesh,
 		Sphere,
 		Cube,
+		None,
 	};
 
 	struct ShapeParameter {
-		ShapeType type{ ShapeType::Mesh };
+		ShapeType type{ ShapeType::None };
 		aabb bbox;
 
 		aten::UnionIdxPtr mtrl;
@@ -36,7 +37,9 @@ namespace aten
 			};
 		};
 
-		AT_DEVICE_API ShapeParameter() {}
+		AT_DEVICE_API ShapeParameter(ShapeType _type)
+			:type(_type)
+		{}
 
 		// sphere.
 		AT_DEVICE_API ShapeParameter(const vec3& c, real r, AT_NAME::material* m)

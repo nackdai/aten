@@ -26,6 +26,12 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const = 0;
 
+		virtual const ShapeParameter& getParam() const
+		{
+			AT_ASSERT(false);
+			return std::move(ShapeParameter(ShapeType::None));
+		}
+
 		static uint32_t getShapeNum();
 		static const transformable* getShape(uint32_t idx);
 		static int findShapeIdx(transformable* shape);

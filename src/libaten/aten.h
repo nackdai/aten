@@ -49,6 +49,8 @@
 #include "object/object.h"
 #include "object/vertex.h"
 
+#include "proxy/DataCollector.h"
+
 #include "texture/texture.h"
 
 #include "hdr/hdr.h"

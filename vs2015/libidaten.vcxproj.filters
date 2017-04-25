@@ -188,9 +188,6 @@
     <ClCompile Include="..\src\libaten\shape\cube.cpp">
       <Filter>aten\shape</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\camera\pinhole .cpp">
-      <Filter>aten\camera</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
@@ -231,6 +228,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\specular.cpp">
       <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\camera\pinhole .cpp">
+      <Filter>aten\camera</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

@@ -110,30 +110,14 @@ void makeScene(aten::scene* scene)
 
 void display()
 {
-	const auto& shapes = aten::transformable::getShapes();
-
 	std::vector<aten::ShapeParameter> shapeparams;
-	for (auto s : shapes) {
-		auto param = s->getParam();
-		param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
-		shapeparams.push_back(param);
-	}
-
-	const auto& lights = aten::Light::getLights();
-
 	std::vector<aten::LightParameter> lightparams;
-	for (auto l : lights) {
-		auto param = l->param();
-		param.object.idx = aten::transformable::findShapeIdx((aten::transformable*)param.object.ptr);
-		lightparams.push_back(param);
-	}
-
-	const auto& mtrls = aten::material::getMaterials();
-
 	std::vector<aten::MaterialParameter> mtrlparms;
-	for (auto m : mtrls) {
-		mtrlparms.push_back(m->param());
-	}
+
+	aten::DataCollector::collect(
+		shapeparams,
+		lightparams,
+		mtrlparms);
 
 	aten::timer timer;
 	timer.begin();

@@ -64,6 +64,9 @@
     <Filter Include="shader\filter">
       <UniqueIdentifier>{c918e933-8b6e-4c2b-bde0-32b7f83c9547}</UniqueIdentifier>
     </Filter>
+    <Filter Include="proxy">
+      <UniqueIdentifier>{e818a79f-f216-4883-a95c-38c597475433}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -322,6 +325,9 @@
     <ClInclude Include="..\src\libaten\object\vertex.h">
       <Filter>object</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\proxy\DataCollector.h">
+      <Filter>proxy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -503,6 +509,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\object\vertex.cpp">
       <Filter>object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp">
+      <Filter>proxy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

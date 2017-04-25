@@ -47,6 +47,7 @@
 #include "light/ibl.h"
 
 #include "object/object.h"
+#include "object/vertex.h"
 
 #include "texture/texture.h"
 

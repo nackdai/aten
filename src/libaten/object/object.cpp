@@ -8,7 +8,16 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
-		bool isHit = hit(param, vtx, r, t_min, t_max, rec);
+		const auto& v0 = VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+
+		bool isHit = hit(
+			param, 
+			v0, v1, v2, 
+			r, 
+			t_min, t_max, 
+			rec);
 
 		if (isHit) {
 			//rec.obj = parent;
@@ -24,18 +33,16 @@ namespace aten
 
 	bool face::hit(
 		const ShapeParameter& param,
-		const vertex* const vtx[],
+		const vertex& v0,
+		const vertex& v1,
+		const vertex& v2,
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
 		bool isHit = false;
 
-		const auto& v0 = vtx[0];
-		const auto& v1 = vtx[1];
-		const auto& v2 = vtx[2];
-
-		const auto res = intersertTriangle(r, v0->pos, v1->pos, v2->pos);
+		const auto res = intersertTriangle(r, v0.pos, v1.pos, v2.pos);
 
 		if (res.isIntersect) {
 			if (res.t < rec.t) {
@@ -49,9 +56,9 @@ namespace aten
 				// dSÀ•WŒn(barycentric coordinates).
 				// v0Šî€.
 				// p = (1 - a - b)*v0 + a*v1 + b*v2
-				rec.p = (1 - res.a - res.b) * v0->pos + res.a * v1->pos + res.b * v2->pos;
-				rec.normal = (1 - res.a - res.b) * v0->nml + res.a * v1->nml + res.b * v2->nml;
-				auto uv = (1 - res.a - res.b) * v0->uv + res.a * v1->uv + res.b * v2->uv;
+				rec.p = (1 - res.a - res.b) * v0.pos + res.a * v1.pos + res.b * v2.pos;
+				rec.normal = (1 - res.a - res.b) * v0.nml + res.a * v1.nml + res.b * v2.nml;
+				auto uv = (1 - res.a - res.b) * v0.uv + res.a * v1.uv + res.b * v2.uv;
 
 				rec.u = uv.x;
 				rec.v = uv.y;
@@ -69,27 +76,27 @@ namespace aten
 		return isHit;
 	}
 
-	void face::build(vertex* v0, vertex* v1, vertex* v2)
+	void face::build()
 	{
+		const auto& v0 = VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+
 		vec3 vmax(
-			std::max(v0->pos.x, std::max(v1->pos.x, v2->pos.x)),
-			std::max(v0->pos.y, std::max(v1->pos.y, v2->pos.y)),
-			std::max(v0->pos.z, std::max(v1->pos.z, v2->pos.z)));
+			std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
+			std::max(v0.pos.y, std::max(v1.pos.y, v2.pos.y)),
+			std::max(v0.pos.z, std::max(v1.pos.z, v2.pos.z)));
 
 		vec3 vmin(
-			std::min(v0->pos.x, std::min(v1->pos.x, v2->pos.x)),
-			std::min(v0->pos.y, std::min(v1->pos.y, v2->pos.y)),
-			std::min(v0->pos.z, std::min(v1->pos.z, v2->pos.z)));
+			std::min(v0.pos.x, std::min(v1.pos.x, v2.pos.x)),
+			std::min(v0.pos.y, std::min(v1.pos.y, v2.pos.y)),
+			std::min(v0.pos.z, std::min(v1.pos.z, v2.pos.z)));
 
 		param.bbox.init(vmin, vmax);
 
-		vtx[0] = v0;
-		vtx[1] = v1;
-		vtx[2] = v2;
-
 		// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
-		auto e0 = v1->pos - v0->pos;
-		auto e1 = v2->pos - v0->pos;
+		auto e0 = v1.pos - v0.pos;
+		auto e1 = v2.pos - v0.pos;
 		param.area = real(0.5) * cross(e0, e1).length();
 	}
 
@@ -106,14 +113,14 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = vtx[0];
-		const auto& v1 = vtx[1];
-		const auto& v2 = vtx[2];
+		const auto& v0 = VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = VertexManager::getVertex(param.idx[2]);
 
 		// dSÀ•WŒn(barycentric coordinates).
 		// v0Šî€.
 		// p = (1 - a - b)*v0 + a*v1 + b*v2
-		vec3 p = (1 - a - b) * v0->pos + a * v1->pos + b * v2->pos;
+		vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
 
 		return std::move(p);
 	}
@@ -131,21 +138,21 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = vtx[0];
-		const auto& v1 = vtx[1];
-		const auto& v2 = vtx[2];
+		const auto& v0 = VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = VertexManager::getVertex(param.idx[2]);
 
 		// dSÀ•WŒn(barycentric coordinates).
 		// v0Šî€.
 		// p = (1 - a - b)*v0 + a*v1 + b*v2
-		vec3 p = (1 - a - b) * v0->pos + a * v1->pos + b * v2->pos;
+		vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
 		
-		vec3 n = (1 - a - b) * v0->nml + a * v1->nml + b * v2->nml;
+		vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
 		n.normalize();
 
 		// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
-		auto e0 = v1->pos - v0->pos;
-		auto e1 = v2->pos - v0->pos;
+		auto e0 = v1.pos - v0.pos;
+		auto e1 = v2.pos - v0.pos;
 		auto area = real(0.5) * cross(e0, e1).length();
 
 		return std::move(hitable::SamplingPosNormalPdf(p + n * AT_MATH_EPSILON, n, area));
@@ -233,20 +240,23 @@ namespace aten
 
 			real ratio = scaledArea / originalArea;
 #else
+			const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+			const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+
 			real orignalLen = 0;
 			{
-				const auto& v0 = f->vtx[0]->pos;
-				const auto& v1 = f->vtx[1]->pos;
+				const auto& p0 = v0.pos;
+				const auto& p1 = v1.pos;
 
-				orignalLen = (v1 - v0).length();
+				orignalLen = (p1 - p0).length();
 			}
 
 			real scaledLen = 0;
 			{
-				auto v0 = mtxL2W.apply(f->vtx[0]->pos);
-				auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+				auto p0 = mtxL2W.apply(v0.pos);
+				auto p1 = mtxL2W.apply(v1.pos);
 
-				scaledLen = (v1 - v0).length();
+				scaledLen = (p1 - p0).length();
 			}
 
 			real ratio = scaledLen / orignalLen;
@@ -271,20 +281,23 @@ namespace aten
 		int faceidx = (int)(r * (shape->faces.size() - 1));
 		auto f = shape->faces[faceidx];
 
+		const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+		const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+
 		real orignalLen = 0;
 		{
-			const auto& v0 = f->vtx[0]->pos;
-			const auto& v1 = f->vtx[1]->pos;
+			const auto& p0 = v0.pos;
+			const auto& p1 = v1.pos;
 
-			orignalLen = (v1 - v0).length();
+			orignalLen = (p1 - p0).length();
 		}
 
 		real scaledLen = 0;
 		{
-			auto v0 = mtxL2W.apply(f->vtx[0]->pos);
-			auto v1 = mtxL2W.apply(f->vtx[1]->pos);
+			auto p0 = mtxL2W.apply(v0.pos);
+			auto p1 = mtxL2W.apply(v1.pos);
 
-			scaledLen = (v1 - v0).length();
+			scaledLen = (p1 - p0).length();
 		}
 
 		real ratio = scaledLen / orignalLen;

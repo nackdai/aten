@@ -7,12 +7,6 @@
 
 namespace aten
 {
-	struct vertex {
-		vec3 pos;
-		vec3 nml;
-		vec3 uv;
-	};
-
 	enum ShapeType {
 		Triangle,
 		Sphere,

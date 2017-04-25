@@ -319,6 +319,9 @@
       <Filter>shape</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
+    <ClInclude Include="..\src\libaten\object\vertex.h">
+      <Filter>object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -497,6 +500,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\shape\tranfomable.cpp">
       <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\object\vertex.cpp">
+      <Filter>object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

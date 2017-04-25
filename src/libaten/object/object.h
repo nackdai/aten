@@ -5,6 +5,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "shape/shape.h"
+#include "object/vertex.h"
 
 namespace aten
 {
@@ -23,7 +24,9 @@ namespace aten
 
 		static bool hit(
 			const ShapeParameter& param,
-			const vertex* const vtx[],
+			const vertex& v0,
+			const vertex& v1,
+			const vertex& v2,
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec);
@@ -42,10 +45,9 @@ namespace aten
 			return param;
 		}
 
-		void build(vertex* v0, vertex* v1, vertex* v2);
+		void build();
 	
 		ShapeParameter param;
-		vertex* vtx[3];
 
 		shape* parent{ nullptr };
 	};
@@ -79,7 +81,6 @@ namespace aten
 		}
 		
 		std::vector<face*> faces;
-		std::vector<vertex> vertices;
 		material* mtrl{ nullptr };
 		real area;
 

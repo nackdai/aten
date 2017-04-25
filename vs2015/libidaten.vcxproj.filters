@@ -193,14 +193,32 @@
     <CudaCompile Include="..\src\libidaten\kernel\material.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\beckman.cpp" />
-    <CudaCompile Include="..\src\libaten\material\blinn.cpp" />
-    <CudaCompile Include="..\src\libaten\material\emissive.cpp" />
-    <CudaCompile Include="..\src\libaten\material\ggx.cpp" />
-    <CudaCompile Include="..\src\libaten\material\lambert.cpp" />
-    <CudaCompile Include="..\src\libaten\material\material .cpp" />
-    <CudaCompile Include="..\src\libaten\material\oren_nayar.cpp" />
-    <CudaCompile Include="..\src\libaten\material\refraction.cpp" />
-    <CudaCompile Include="..\src\libaten\material\specular.cpp" />
+    <CudaCompile Include="..\src\libaten\material\beckman.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\blinn.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\emissive.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\ggx.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\lambert.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\material .cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\oren_nayar.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\refraction.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\specular.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

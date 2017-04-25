@@ -58,6 +58,8 @@ namespace aten
 		Disney,
 		Toon,
 		Layer,
+
+		MaterialTypeMax,
 	};
 
 	struct MaterialParameter {

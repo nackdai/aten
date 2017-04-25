@@ -44,6 +44,8 @@ namespace aten {
 		Direction,
 		Point,
 		Spot,
+
+		LightTypeMax,
 	};
 
 	struct LightParameter {

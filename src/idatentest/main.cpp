@@ -168,6 +168,8 @@ int main()
 
 	makeScene(nullptr);
 
+	prepareRayTracing();
+
 	aten::window::run(display);
 
 	aten::window::terminate();

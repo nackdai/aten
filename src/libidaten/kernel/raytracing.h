@@ -6,6 +6,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+	void prepareRayTracing();
+
 	void renderRayTracing(
 		aten::vec4* image,
 		int width, int height,

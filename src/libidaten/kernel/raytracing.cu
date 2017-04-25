@@ -255,6 +255,17 @@ __global__ void raytracing(
 	p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
 }
 
+__global__ void addFuncs()
+{
+	addLighFuncs();
+	addMaterialFuncs();
+}
+
+void prepareRayTracing()
+{
+	addFuncs << <1, 1 >> > ();
+}
+
 void renderRayTracing(
 	aten::vec4* image,
 	int width, int height,

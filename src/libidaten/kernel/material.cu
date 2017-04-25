@@ -18,6 +18,23 @@ typedef AT_NAME::MaterialSampling(*FuncSampleMaterial)(
 	float, float,
 	bool);
 
+__device__ FuncSampleMaterial funcSampleMaterial[aten::MaterialType::MaterialTypeMax];
+
+__device__ void addMaterialFuncs()
+{
+	funcSampleMaterial[aten::MaterialType::Emissive] = AT_NAME::emissive::sample;			// Emissive
+	funcSampleMaterial[aten::MaterialType::Lambert] = AT_NAME::lambert::sample;				// Lambert
+	funcSampleMaterial[aten::MaterialType::OrneNayar] = AT_NAME::OrenNayar::sample;			// OrneNayar
+	funcSampleMaterial[aten::MaterialType::Specular] = AT_NAME::specular::sample;			// Specular
+	funcSampleMaterial[aten::MaterialType::Refraction] = AT_NAME::refraction::sample;		// Refraction
+	funcSampleMaterial[aten::MaterialType::Blinn] = AT_NAME::MicrofacetBlinn::sample;		// MicrofacetBlinn
+	funcSampleMaterial[aten::MaterialType::GGX] = AT_NAME::MicrofacetGGX::sample;			// MicrofacetGGX
+	funcSampleMaterial[aten::MaterialType::Beckman] = AT_NAME::MicrofacetBeckman::sample;	// MicrofacetBeckman
+	funcSampleMaterial[aten::MaterialType::Disney] = nullptr;	// DisneyBRDF
+	funcSampleMaterial[aten::MaterialType::Toon] = nullptr;		// Toon
+	funcSampleMaterial[aten::MaterialType::Layer] = nullptr;	// Layer
+}
+
 __device__ AT_NAME::MaterialSampling sampleMaterial(
 	const aten::MaterialParameter& mtrl,
 	const aten::vec3& normal,
@@ -26,21 +43,7 @@ __device__ AT_NAME::MaterialSampling sampleMaterial(
 	aten::sampler* sampler,
 	float u, float v)
 {
-	constexpr FuncSampleMaterial funcs[] = {
-		AT_NAME::emissive::sample,			// Emissive
-		AT_NAME::lambert::sample,			// Lambert
-		AT_NAME::OrenNayar::sample,			// OrneNayar
-		AT_NAME::specular::sample,			// Specular
-		AT_NAME::refraction::sample,		// Refraction
-		AT_NAME::MicrofacetBlinn::sample,	// MicrofacetBlinn
-		AT_NAME::MicrofacetGGX::sample,		// MicrofacetGGX
-		AT_NAME::MicrofacetBeckman::sample,	// MicrofacetBeckman
-		nullptr,	// DisneyBRDF
-		nullptr,	// Toon
-		nullptr,	// Layer
-	};
-
-	auto ret = funcs[mtrl.type](mtrl, normal, wi, hitrec, sampler, u, v, false);
+	auto ret = funcSampleMaterial[mtrl.type](mtrl, normal, wi, hitrec, sampler, u, v, false);
 
 	return std::move(ret);
 }

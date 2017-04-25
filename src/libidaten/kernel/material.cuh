@@ -2,6 +2,8 @@
 
 #include "aten4idaten.h"
 
+__device__ void addMaterialFuncs();
+
 __device__ AT_NAME::MaterialSampling sampleMaterial(
 	const aten::MaterialParameter& mtrl,
 	const aten::vec3& normal,

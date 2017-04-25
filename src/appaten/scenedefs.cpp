@@ -75,7 +75,8 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 		layer);
 #endif
 
-#if DEFALT
+//#if DEFALT
+#if 0
 	// ƒKƒ‰ƒX.
 	auto glass = new aten::sphere(
 		aten::vec3(77, 16.5, 78),
@@ -89,11 +90,13 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 #else
 	aten::AssetManager::registerMtrl(
 		"m1",
-		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		//new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
 
 	aten::AssetManager::registerMtrl(
 		"Material.001",
-		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		//new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
 
 	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");

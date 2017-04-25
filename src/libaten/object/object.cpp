@@ -197,8 +197,12 @@ namespace aten
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
-		bool isHit = m_node.hit(r, t_min, t_max, rec);
+		hitrecord tmp;
+		bool isHit = m_node.hit(r, t_min, t_max, tmp);
+
 		if (isHit) {
+			rec = tmp;
+
 			face* f = (face*)rec.obj;
 
 #if 0

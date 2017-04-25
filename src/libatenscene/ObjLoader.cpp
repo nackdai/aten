@@ -129,12 +129,12 @@ namespace aten
 			}
 			if (mtrlidx >= 0) {
 				const auto mtrl = mtrls[mtrlidx];
-				dstshape->mtrl = AssetManager::getMtrl(mtrl.name);
+				dstshape->param.mtrl.ptr = AssetManager::getMtrl(mtrl.name);
 			}
-			if (!dstshape->mtrl){
+			if (!dstshape->param.mtrl.ptr){
 				// dummy....
 				AT_ASSERT(false);
-				dstshape->mtrl = new lambert(vec3());
+				dstshape->param.mtrl.ptr = new lambert(vec3());
 			}
 
 			vtxnum = shape.mesh.texcoords.size();

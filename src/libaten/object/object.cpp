@@ -25,7 +25,7 @@ namespace aten
 			rec.obj = (hitable*)this;
 
 			if (parent) {
-				rec.mtrl = parent->mtrl;
+				rec.mtrl = (material*)parent->param.mtrl.ptr;
 			}
 		}
 
@@ -33,7 +33,7 @@ namespace aten
 	}
 
 	bool face::hit(
-		const ShapeParameter& param,
+		const PrimitiveParamter& param,
 		const vertex& v0,
 		const vertex& v1,
 		const vertex& v2,
@@ -170,9 +170,9 @@ namespace aten
 
 		m_aabb = m_node.getBoundingbox();
 
-		area = 0;
+		param.area = 0;
 		for (const auto f : faces) {
-			area += f->param.area;
+			param.area += f->param.area;
 		}
 	}
 
@@ -184,7 +184,7 @@ namespace aten
 		auto isHit = m_node.hit(r, t_min, t_max, rec);
 
 		if (isHit) {
-			rec.mtrl = mtrl;
+			rec.mtrl = (material*)param.mtrl.ptr;
 		}
 
 		return isHit;
@@ -198,7 +198,7 @@ namespace aten
 		m_triangles = 0;
 
 		for (const auto s : shapes) {
-			m_area += s->area;
+			m_area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();
 		}
 	}

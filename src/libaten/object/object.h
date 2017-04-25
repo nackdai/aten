@@ -23,7 +23,7 @@ namespace aten
 			hitrecord& rec) const override;
 
 		static bool hit(
-			const ShapeParameter& param,
+			const PrimitiveParamter& param,
 			const vertex& v0,
 			const vertex& v1,
 			const vertex& v2,
@@ -40,15 +40,9 @@ namespace aten
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
 
-		virtual const ShapeParameter& getParam() const override final
-		{
-			return param;
-		}
-
 		void build();
 	
-		ShapeParameter param;
-
+		PrimitiveParamter param;
 		shape* parent{ nullptr };
 	};
 
@@ -79,10 +73,14 @@ namespace aten
 			auto face = faces[idx];
 			return face->getSamplePosNormalPdf(sampler);
 		}
-		
+
+		virtual const ShapeParameter& getParam() const override final
+		{
+			return param;
+		}
+
+		ShapeParameter param;		
 		std::vector<face*> faces;
-		material* mtrl{ nullptr };
-		real area;
 
 	private:
 		bvhnode m_node;

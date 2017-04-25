@@ -8,22 +8,23 @@
 namespace aten
 {
 	enum ShapeType {
-		Triangle,
+		Mesh,
 		Sphere,
 		Cube,
 	};
 
 	struct ShapeParameter {
-		ShapeType type{ ShapeType::Triangle };
+		ShapeType type{ ShapeType::Mesh };
 		aabb bbox;
 
 		aten::UnionIdxPtr mtrl;
 
 		union {
-			// triangle.
+			// mesh.
 			struct {
-				int idx[3];
 				real area;
+				int primid;
+				int primnum;
 			};
 			// sphere / cube.
 			struct {
@@ -61,5 +62,12 @@ namespace aten
 		}
 
 		~ShapeParameter() {}
+	};
+
+	struct PrimitiveParamter {
+		int idx[3];
+		aabb bbox;
+		real area;
+		UnionIdxPtr parent;
 	};
 }

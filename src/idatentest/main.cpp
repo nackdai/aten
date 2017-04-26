@@ -25,6 +25,8 @@ static aten::PinholeCamera g_camera;
 
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
+static idaten::RayTracing g_tracer;
+
 void makeScene(aten::scene* scene)
 {
 	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
@@ -103,32 +105,12 @@ void makeScene(aten::scene* scene)
 
 void display()
 {
-	std::vector<aten::ShapeParameter> shapeparams;
-	std::vector<aten::PrimitiveParamter> primparams;
-	std::vector<aten::LightParameter> lightparams;
-	std::vector<aten::MaterialParameter> mtrlparms;
-
-	aten::DataCollector::collect(
-		shapeparams,
-		primparams,
-		lightparams,
-		mtrlparms);
-
-	std::vector<aten::BVHNode> nodes;
-
-	g_scene.getAccel()->collectNodes(nodes);
-
 	aten::timer timer;
 	timer.begin();
 
-	renderRayTracing(
+	g_tracer.render(
 		g_buffer.image(),
-		WIDTH, HEIGHT,
-		g_camera.param(),
-		shapeparams,
-		mtrlparms,
-		lightparams,
-		nodes);
+		WIDTH, HEIGHT);
 
 	auto elapsed = timer.end();
 	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
@@ -163,7 +145,32 @@ int main()
 	makeScene(&g_scene);
 	g_scene.build();
 
-	prepareRayTracing();
+	g_tracer.prepare();
+
+	{
+		std::vector<aten::ShapeParameter> shapeparams;
+		std::vector<aten::PrimitiveParamter> primparams;
+		std::vector<aten::LightParameter> lightparams;
+		std::vector<aten::MaterialParameter> mtrlparms;
+
+		aten::DataCollector::collect(
+			shapeparams,
+			primparams,
+			lightparams,
+			mtrlparms);
+
+		std::vector<aten::BVHNode> nodes;
+
+		g_scene.getAccel()->collectNodes(nodes);
+
+		g_tracer.update(
+			WIDTH, HEIGHT,
+			g_camera.param(),
+			shapeparams,
+			mtrlparms,
+			lightparams,
+			nodes);
+	}
 
 	aten::window::run(display);
 

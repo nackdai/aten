@@ -1,22 +1,36 @@
 #pragma once
 
 #include "aten4idaten.h"
+#include "cuda/cudamemory.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+namespace idaten
+{
+	class RayTracing {
+	public:
+		RayTracing() {}
+		~RayTracing() {}
 
-	void prepareRayTracing();
+	public:
+		void prepare();
 
-	void renderRayTracing(
-		aten::vec4* image,
-		int width, int height,
-		const aten::CameraParameter& camera,
-		const std::vector<aten::ShapeParameter>& shapes,
-		const std::vector<aten::MaterialParameter>& mtrls,
-		const std::vector<aten::LightParameter>& lights,
-		const std::vector<aten::BVHNode>& nodes);
+		void update(
+			int width, int height,
+			const aten::CameraParameter& camera,
+			const std::vector<aten::ShapeParameter>& shapes,
+			const std::vector<aten::MaterialParameter>& mtrls,
+			const std::vector<aten::LightParameter>& lights,
+			const std::vector<aten::BVHNode>& nodes);
 
-#ifdef __cplusplus
+		void render(
+			aten::vec4* image,
+			int width, int height);
+
+	private:
+		aten::CudaMemory dst;
+		aten::TypedCudaMemory<aten::CameraParameter> cam;
+		aten::TypedCudaMemory<aten::ShapeParameter> shapeparam;
+		aten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
+		aten::TypedCudaMemory<aten::LightParameter> lightparam;
+		aten::TypedCudaMemory<aten::BVHNode> nodeparam;
+	};
 }
-#endif /* __cplusplus */

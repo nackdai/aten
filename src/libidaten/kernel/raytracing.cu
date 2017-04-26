@@ -178,57 +178,64 @@ __global__ void addFuncs()
 	addIntersectFuncs();
 }
 
-void prepareRayTracing()
-{
-	addFuncs << <1, 1 >> > ();
-}
-
-void renderRayTracing(
-	aten::vec4* image,
-	int width, int height,
-	const aten::CameraParameter& camera,
-	const std::vector<aten::ShapeParameter>& shapes,
-	const std::vector<aten::MaterialParameter>& mtrls,
-	const std::vector<aten::LightParameter>& lights,
-	const std::vector<aten::BVHNode>& nodes)
-{
-	aten::CudaMemory dst(sizeof(float4) * width * height);
-
-	aten::TypedCudaMemory<aten::CameraParameter> cam(&camera, 1);
-	
-	aten::TypedCudaMemory<aten::ShapeParameter> shapeparam(shapes.size());
-	shapeparam.writeByNum(&shapes[0], shapes.size());
-
-	aten::TypedCudaMemory<aten::MaterialParameter> mtrlparam(mtrls.size());
-	mtrlparam.writeByNum(&mtrls[0], mtrls.size());
-
-	aten::TypedCudaMemory<aten::LightParameter> lightparam(lights.size());
-	lightparam.writeByNum(&lights[0], lights.size());
-
-	aten::TypedCudaMemory<aten::BVHNode> nodeparam(nodes.size());
-	nodeparam.writeByNum(&nodes[0], nodes.size());
-
-	dim3 block(32, 32);
-	dim3 grid(
-		(width + block.x - 1) / block.x,
-		(height + block.y - 1) / block.y);
-
-	raytracing << <grid, block >> > (
-	//raytracing << <dim3(1, 1), block >> > (
-		(float4*)dst.ptr(), 
-		width, height, 
-		cam.ptr(),
-		shapeparam.ptr(), shapeparam.num(),
-		mtrlparam.ptr(),
-		lightparam.ptr(), lightparam.num(),
-		nodeparam.ptr());
-
-	auto err = cudaGetLastError();
-	if (err != cudaSuccess) {
-		AT_PRINTF("Cuda Kernel Err [%s]\n", cudaGetErrorString(err));
+namespace idaten {
+	void RayTracing::prepare()
+	{
+		addFuncs << <1, 1 >> > ();
 	}
 
-	checkCudaErrors(cudaDeviceSynchronize());
+	void RayTracing::update(
+		int width, int height,
+		const aten::CameraParameter& camera,
+		const std::vector<aten::ShapeParameter>& shapes,
+		const std::vector<aten::MaterialParameter>& mtrls,
+		const std::vector<aten::LightParameter>& lights,
+		const std::vector<aten::BVHNode>& nodes)
+	{
+		dst.init(sizeof(float4) * width * height);
 
-	dst.read(image, sizeof(aten::vec4) * width * height);
+		cam.init(sizeof(camera));
+		cam.writeByNum(&camera, 1);
+
+		shapeparam.init(shapes.size());
+		shapeparam.writeByNum(&shapes[0], shapes.size());
+
+		mtrlparam.init(mtrls.size());
+		mtrlparam.writeByNum(&mtrls[0], mtrls.size());
+
+		lightparam.init(lights.size());
+		lightparam.writeByNum(&lights[0], lights.size());
+
+		nodeparam.init(nodes.size());
+		nodeparam.writeByNum(&nodes[0], nodes.size());
+	}
+
+	void RayTracing::render(
+		aten::vec4* image,
+		int width, int height)
+	{
+		dim3 block(32, 32);
+		dim3 grid(
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
+
+		raytracing << <grid, block >> > (
+			//raytracing << <dim3(1, 1), block >> > (
+			(float4*)dst.ptr(),
+			width, height,
+			cam.ptr(),
+			shapeparam.ptr(), shapeparam.num(),
+			mtrlparam.ptr(),
+			lightparam.ptr(), lightparam.num(),
+			nodeparam.ptr());
+
+		auto err = cudaGetLastError();
+		if (err != cudaSuccess) {
+			AT_PRINTF("Cuda Kernel Err [%s]\n", cudaGetErrorString(err));
+		}
+
+		checkCudaErrors(cudaDeviceSynchronize());
+
+		dst.read(image, sizeof(aten::vec4) * width * height);
+	}
 }

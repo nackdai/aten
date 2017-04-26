@@ -71,6 +71,12 @@ namespace aten {
 		virtual ~TypedCudaMemory() {}
 
 	public:
+		void init(uint32_t num)
+		{
+			CudaMemory::init(sizeof(_T) * num);
+			m_num = num;
+		}
+
 		__host__ uint32_t writeByNum(const _T* p, uint32_t num)
 		{
 			auto ret = CudaMemory::write(p, sizeof(_T) * num);

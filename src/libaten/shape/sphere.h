@@ -14,11 +14,9 @@ namespace AT_NAME
 		friend class instance<sphere>;
 
 	public:
-		sphere(const aten::vec3& c, real r, material* m)
-			: transformable(), m_param(c, r, m)
-		{}
-		sphere(real r, material* m)
-			: sphere(aten::vec3(), r, m)
+		sphere(const aten::vec3& center, real radius, material* mtrl);
+		sphere(real radius, material* mtrl)
+			: sphere(aten::vec3(), radius, mtrl)
 		{}
 
 		virtual ~sphere() {}

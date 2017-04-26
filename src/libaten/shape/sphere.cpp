@@ -11,6 +11,15 @@ namespace AT_NAME
 		v = (phi + AT_MATH_PI_HALF) / AT_MATH_PI;
 	}
 
+	sphere::sphere(const aten::vec3& center, real radius, material* mtrl)
+		: transformable(), m_param(center, radius, mtrl)
+	{
+		vec3 _min = center - radius;
+		vec3 _max = center + radius;
+
+		m_aabb.init(_min, _max);
+	}
+
 	bool sphere::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
@@ -111,7 +120,7 @@ namespace AT_NAME
 
 	aten::aabb sphere::getBoundingbox() const
 	{
-		return std::move(m_param.bbox);
+		return std::move(m_aabb);
 	}
 
 	aten::vec3 sphere::getRandomPosOn(aten::sampler* sampler) const

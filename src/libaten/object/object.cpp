@@ -96,7 +96,7 @@ namespace aten
 			std::min(v0.pos.y, std::min(v1.pos.y, v2.pos.y)),
 			std::min(v0.pos.z, std::min(v1.pos.z, v2.pos.z)));
 
-		param.bbox.init(vmin, vmax);
+		m_aabb.init(vmin, vmax);
 
 		// OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
 		auto e0 = v1.pos - v0.pos;

@@ -34,7 +34,7 @@ namespace aten
 
 		virtual aabb getBoundingbox() const override
 		{
-			return std::move(param.bbox);
+			return std::move(m_aabb);
 		}
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override;
@@ -123,6 +123,7 @@ namespace aten
 	public:
 		std::vector<shape*> shapes;
 		ShapeParameter param;
+		aabb bbox;
 
 	private:
 		bvhnode m_node;

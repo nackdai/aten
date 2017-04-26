@@ -2,6 +2,14 @@
 
 namespace AT_NAME
 {
+	cube::cube(const aten::vec3& center, real w, real h, real d, material* mtrl)
+		: transformable(), m_param(center, aten::vec3(w, h, d), mtrl)
+	{
+		m_aabb.init(
+			center - m_param.size * 0.5,
+			center + m_param.size * 0.5);
+	}
+
 	cube::Face cube::findFace(const aten::vec3& d)
 	{
 		auto x = aten::abs(d.x);
@@ -43,7 +51,7 @@ namespace AT_NAME
 		aten::hitrecord& rec) const
 	{
 		real t = 0;
-		bool isHit = m_param.bbox.hit(r, t_min, t_max, &t);
+		bool isHit = m_aabb.hit(r, t_min, t_max, &t);
 
 		if (isHit) {
 			rec.p = r.org + t * r.dir;
@@ -84,7 +92,7 @@ namespace AT_NAME
 			rec.du = normalize(getOrthoVector(rec.normal));
 			rec.dv = normalize(cross(rec.normal, rec.du));
 
-			rec.area = m_param.bbox.computeSurfaceArea();
+			rec.area = m_aabb.computeSurfaceArea();
 		}
 
 		return isHit;
@@ -102,7 +110,7 @@ namespace AT_NAME
 
 	aten::aabb cube::getBoundingbox() const
 	{
-		return std::move(m_param.bbox);
+		return std::move(m_aabb);
 	}
 
 	aten::vec3 cube::getRandomPosOn(aten::sampler* sampler) const

@@ -108,11 +108,6 @@ namespace AT_NAME
 		return hit(r, t_min, t_max, rec);
 	}
 
-	aten::aabb cube::getBoundingbox() const
-	{
-		return std::move(m_aabb);
-	}
-
 	aten::vec3 cube::getRandomPosOn(aten::sampler* sampler) const
 	{
 		aten::vec3 pos;

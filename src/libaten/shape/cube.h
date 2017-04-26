@@ -27,8 +27,6 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final;
 
-		virtual aten::aabb getBoundingbox() const override final;
-
 		const aten::vec3& center() const
 		{
 			return m_param.center;

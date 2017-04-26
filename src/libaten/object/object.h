@@ -32,11 +32,6 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec);
 
-		virtual aabb getBoundingbox() const override
-		{
-			return std::move(m_aabb);
-		}
-
 		virtual vec3 getRandomPosOn(sampler* sampler) const override;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;

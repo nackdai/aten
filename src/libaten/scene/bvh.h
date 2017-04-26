@@ -5,6 +5,11 @@
 #include "sampler/random.h"
 
 namespace aten {
+	struct BVHNode{
+		int left{ -1 };
+		int right{ -1 };
+	};
+
 	class bvhnode : public hitable {
 		friend class bvh;
 
@@ -30,7 +35,7 @@ namespace aten {
 			real t_min, real t_max,
 			hitrecord& rec) const override;
 
-		virtual aabb getBoundingbox() const override
+		virtual aabb getBoundingbox() const override final
 		{
 			return std::move(m_aabb);
 		}

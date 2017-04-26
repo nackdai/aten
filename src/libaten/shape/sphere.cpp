@@ -118,11 +118,6 @@ namespace AT_NAME
 		return true;
 	}
 
-	aten::aabb sphere::getBoundingbox() const
-	{
-		return std::move(m_aabb);
-	}
-
 	aten::vec3 sphere::getRandomPosOn(aten::sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();

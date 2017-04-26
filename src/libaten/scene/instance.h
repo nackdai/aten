@@ -60,11 +60,6 @@ namespace aten
 			return isHit;
 		}
 
-		virtual aabb getBoundingbox() const override final
-		{
-			return std::move(m_aabb);
-		}
-
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final
 		{
 			return m_obj->getRandomPosOn(sampler);

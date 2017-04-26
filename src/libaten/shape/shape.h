@@ -8,6 +8,7 @@
 namespace aten
 {
 	enum ShapeType {
+		Object,
 		Mesh,
 		Sphere,
 		Cube,

@@ -128,6 +128,6 @@ namespace aten
 	{
 		m_obj = obj;
 		m_obj->build();
-		m_aabb = m_obj->bbox;
+		m_aabb = m_obj->param.bbox;
 	}
 }

@@ -88,7 +88,7 @@ namespace aten
 		friend class instance<object>;
 
 	public:
-		object() {}
+		object() : param(ShapeType::Object) {}
 		virtual ~object() {}
 
 	public:
@@ -101,6 +101,11 @@ namespace aten
 		virtual void getShapes(
 			std::vector<ShapeParameter>& shapeparams,
 			std::vector<PrimitiveParamter>& primparams) const override final;
+
+		virtual const ShapeParameter& getParam() const override final
+		{
+			return param;
+		}
 
 	private:
 		void build();
@@ -117,11 +122,10 @@ namespace aten
 
 	public:
 		std::vector<shape*> shapes;
-		aabb bbox;
+		ShapeParameter param;
 
 	private:
 		bvhnode m_node;
-		real m_area;
 		uint32_t m_triangles{ 0 };
 	};
 }

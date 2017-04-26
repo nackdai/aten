@@ -216,11 +216,11 @@ namespace aten
 	{
 		m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
 
-		m_area = 0;
+		param.area = 0;
 		m_triangles = 0;
 
 		for (const auto s : shapes) {
-			m_area += s->param.area;
+			param.area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();
 		}
 	}
@@ -307,7 +307,7 @@ namespace aten
 			ratio = ratio * ratio;
 #endif
 
-			rec.area = m_area * ratio;
+			rec.area = param.area * ratio;
 
 			// ÅI“I‚É‚ÍA‚â‚Á‚Ï‚èshape‚ð“n‚·.
 			rec.obj = f->parent;
@@ -348,7 +348,7 @@ namespace aten
 		real ratio = scaledLen / orignalLen;
 		ratio = ratio * ratio;
 
-		auto area = m_area * ratio;
+		auto area = param.area * ratio;
 
 		auto tmp = f->getSamplePosNormalPdf(sampler);
 

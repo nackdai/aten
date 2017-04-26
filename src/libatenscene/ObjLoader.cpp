@@ -152,7 +152,7 @@ namespace aten
 			obj->shapes.push_back(dstshape);
 		}
 
-		obj->bbox.init(shapemin, shapemax);
+		obj->param.bbox.init(shapemin, shapemax);
 
 		AssetManager::registerObj(tag, obj);
 

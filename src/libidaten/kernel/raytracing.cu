@@ -1,6 +1,9 @@
 #include "kernel/raytracing.h"
+#include "kernel/context.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
+#include "kernel/intersect.cuh"
+#include "kernel/bvh.cuh"
 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
@@ -10,16 +13,6 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
-
-struct Context {
-	int geomnum;
-	aten::ShapeParameter* shapes;
-
-	aten::MaterialParameter* mtrls;
-
-	int lightnum;
-	aten::LightParameter* lights;
-};
 
 __host__ __device__ bool intersect(
 	const aten::ray* r,
@@ -178,6 +171,7 @@ __global__ void addFuncs()
 {
 	addLighFuncs();
 	addMaterialFuncs();
+	addIntersectFuncs();
 }
 
 void prepareRayTracing()

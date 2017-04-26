@@ -130,6 +130,15 @@
     <ClInclude Include="..\src\libaten\camera\pinhole.h">
       <Filter>aten\camera</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\context.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\intersect.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\bvh.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -231,6 +240,12 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\camera\pinhole .cpp">
       <Filter>aten\camera</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\intersect.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

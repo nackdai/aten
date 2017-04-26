@@ -12,11 +12,11 @@ namespace aten
 		Mesh,
 		Sphere,
 		Cube,
-		None,
+		ShapeTypeMax,
 	};
 
 	struct ShapeParameter {
-		ShapeType type{ ShapeType::None };
+		ShapeType type{ ShapeType::ShapeTypeMax };
 
 		aten::UnionIdxPtr mtrl;
 
@@ -38,7 +38,7 @@ namespace aten
 		};
 
 		AT_DEVICE_API ShapeParameter(ShapeType _type)
-			:type(_type)
+			: type(_type)
 		{}
 
 		// sphere.

@@ -29,7 +29,7 @@ namespace aten
 		virtual const ShapeParameter& getParam() const
 		{
 			AT_ASSERT(false);
-			return std::move(ShapeParameter(ShapeType::None));
+			return std::move(ShapeParameter(ShapeType::ShapeTypeMax));
 		}
 
 		virtual void getShapes(

@@ -40,7 +40,7 @@ namespace aten {
 			return std::move(size);
 		}
 
-		bool hit(
+		AT_DEVICE_API bool hit(
 			const ray& r,
 			real t_min, real t_max,
 			real* t_result = nullptr) const
@@ -66,7 +66,13 @@ namespace aten {
 				auto t1 = (m_max[i] - r.org[i]) * inv;
 
 				if (inv < real(0)) {
+#if 0
 					std::swap(t0, t1);
+#else
+					real tmp = t0;
+					t0 = t1;
+					t1 = tmp;
+#endif
 				}
 
 				t_min = (t0 > t_min ? t0 : t_min);

@@ -187,8 +187,7 @@ namespace aten {
 			auto left = node->m_left;
 			auto right = node->m_right;
 
-			hitrecord recRight;
-
+#if 0
 			bool isHitLeft = false;
 			bool isHitRight = false;
 
@@ -218,6 +217,37 @@ namespace aten {
 
 			bool traverseLeft = isHitLeft && !left->isLeaf();
 			bool traverseRight = isHitRight && !right->isLeaf();
+#else
+			bool traverseLeft = false;
+			bool traverseRight = false;
+
+			if (left) {
+				if (left->isLeaf()) {
+					hitrecord recLeft;
+					if (left->hit(r, t_min, t_max, recLeft)) {
+						if (recLeft.t < rec.t) {
+							rec = recLeft;
+						}
+					}
+				}
+				else {
+					traverseLeft = left->getBoundingbox().hit(r, t_min, t_max);
+				}
+			}
+			if (right) {
+				if (right->isLeaf()) {
+					hitrecord recRight;
+					if (right->hit(r, t_min, t_max, recRight)) {
+						if (recRight.t < rec.t) {
+							rec = recRight;
+						}
+					}
+				}
+				else {
+					traverseRight = right->getBoundingbox().hit(r, t_min, t_max);
+				}
+			}
+#endif
 
 			if (!traverseLeft && !traverseRight) {
 				node = *(--stack);

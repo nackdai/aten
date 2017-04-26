@@ -305,9 +305,6 @@
     <ClInclude Include="..\src\libaten\renderer\bdpt.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\tranfomable.h">
-      <Filter>shape</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\bdpt2.h">
       <Filter>renderer</Filter>
     </ClInclude>
@@ -327,6 +324,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h">
       <Filter>proxy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\tranformable.h">
+      <Filter>shape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -504,14 +504,14 @@
     <ClCompile Include="..\src\libaten\light\arealight.cpp">
       <Filter>light</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\shape\tranfomable.cpp">
-      <Filter>shape</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\object\vertex.cpp">
       <Filter>object</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp">
       <Filter>proxy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\shape\tranformable.cpp">
+      <Filter>shape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

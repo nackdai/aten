@@ -1,5 +1,5 @@
 #include "proxy/DataCollector.h"
-#include "shape/tranfomable.h"
+#include "shape/tranformable.h"
 
 namespace aten {
 	void DataCollector::collect(

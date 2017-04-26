@@ -3,7 +3,7 @@
 #include "types.h"
 #include "scene/bvh.h"
 #include "math/mat4.h"
-#include "shape/tranfomable.h"
+#include "shape/tranformable.h"
 #include "shape/shape.h"
 
 namespace AT_NAME

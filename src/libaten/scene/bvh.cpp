@@ -1,5 +1,5 @@
 #include "scene/bvh.h"
-#include "shape/tranfomable.h"
+#include "shape/tranformable.h"
 
 #include <random>
 #include <vector>

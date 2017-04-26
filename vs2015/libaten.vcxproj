@@ -235,7 +235,7 @@
     <ClInclude Include="..\src\libaten\shape\cube.h" />
     <ClInclude Include="..\src\libaten\shape\shape.h" />
     <ClInclude Include="..\src\libaten\shape\sphere.h" />
-    <ClInclude Include="..\src\libaten\shape\tranfomable.h" />
+    <ClInclude Include="..\src\libaten\shape\tranformable.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libaten\visualizer\atengl.h" />
@@ -302,7 +302,7 @@
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />
     <ClCompile Include="..\src\libaten\shape\sphere.cpp" />
-    <ClCompile Include="..\src\libaten\shape\tranfomable.cpp" />
+    <ClCompile Include="..\src\libaten\shape\tranformable.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp" />

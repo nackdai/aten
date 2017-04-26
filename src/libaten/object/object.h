@@ -5,7 +5,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "shape/shape.h"
-#include "shape/tranfomable.h"
+#include "shape/tranformable.h"
 #include "object/vertex.h"
 
 namespace aten

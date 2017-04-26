@@ -14,7 +14,8 @@ extern "C" {
 		const aten::CameraParameter& camera,
 		const std::vector<aten::ShapeParameter>& shapes,
 		const std::vector<aten::MaterialParameter>& mtrls,
-		const std::vector<aten::LightParameter>& lights);
+		const std::vector<aten::LightParameter>& lights,
+		const std::vector<aten::BVHNode>& nodes);
 
 #ifdef __cplusplus
 }

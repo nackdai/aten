@@ -8,7 +8,7 @@
 
 #define STACK_SIZE	(64)
 
-__device__ bool intersectBVH(
+AT_DEVICE_API bool intersectBVH(
 	const Context& ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
@@ -39,6 +39,8 @@ __device__ bool intersectBVH(
 				if (intersectShape(leftobj, r, t_min, t_max, recLeft)) {
 					if (recLeft.t < rec.t) {
 						rec = recLeft;
+						rec.obj = (void*)&leftobj;
+						rec.mtrlid = leftobj.mtrl.idx;
 					}
 				}
 			}
@@ -54,6 +56,8 @@ __device__ bool intersectBVH(
 				if (intersectShape(rightobj, r, t_min, t_max, recRight)) {
 					if (recRight.t < rec.t) {
 						rec = recRight;
+						rec.obj = (void*)&rightobj;
+						rec.mtrlid = rightobj.mtrl.idx;
 					}
 				}
 			}

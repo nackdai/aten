@@ -4,7 +4,7 @@
 
 __device__ void addIntersectFuncs();
 
-__device__ bool intersectShape(
+AT_DEVICE_API bool intersectShape(
 	const aten::ShapeParameter& shape,
 	const aten::ray& r,
 	float t_min, float t_max,

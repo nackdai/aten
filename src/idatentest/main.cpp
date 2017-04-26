@@ -23,9 +23,10 @@ static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static aten::PinholeCamera g_camera;
 
+static aten::AcceleratedScene<aten::bvh> g_scene;
+
 void makeScene(aten::scene* scene)
 {
-#if 1
 	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
 	//auto emit = new aten::emissive(aten::vec3(3, 3, 3));
 
@@ -61,7 +62,6 @@ void makeScene(aten::scene* scene)
 		r,
 		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
 
-#if 1
 	// —Î‹….
 	auto green = new aten::sphere(
 		aten::vec3(65, 20, 20),
@@ -80,13 +80,12 @@ void makeScene(aten::scene* scene)
 		aten::vec3(77, 16.5, 78),
 		16.5,
 		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
-#endif
 
 	aten::Light* l = new aten::AreaLight(light, emit->color());
 
-#if 0
-	scene->addLight(l);
 
+	scene->addLight(l);
+#if 1
 	scene->add(light);
 	scene->add(left);
 	scene->add(right);
@@ -96,15 +95,9 @@ void makeScene(aten::scene* scene)
 	scene->add(green);
 	scene->add(mirror);
 	scene->add(glass);
-#endif
 #else
-	auto em = new aten::emissive(aten::vec3(1, 0, 0));
-	auto lm = new aten::lambert(aten::vec3(0.5, 0.5, 0.5));
-
-	auto s0 = new aten::sphere(aten::vec3(0, 0, -10), 1.0f, em);
-	auto s1 = new aten::sphere(aten::vec3(3, 0, -10), 1.0f, lm);
-
-	auto area = new aten::AreaLight(s0, em->color());
+	scene->add(light);
+	scene->add(floor);
 #endif
 }
 
@@ -121,6 +114,10 @@ void display()
 		lightparams,
 		mtrlparms);
 
+	std::vector<aten::BVHNode> nodes;
+
+	g_scene.getAccel()->collectNodes(nodes);
+
 	aten::timer timer;
 	timer.begin();
 
@@ -130,7 +127,8 @@ void display()
 		g_camera.param(),
 		shapeparams,
 		mtrlparms,
-		lightparams);
+		lightparams,
+		nodes);
 
 	auto elapsed = timer.end();
 	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
@@ -162,7 +160,8 @@ int main()
 		30,
 		WIDTH, HEIGHT);
 
-	makeScene(nullptr);
+	makeScene(&g_scene);
+	g_scene.build();
 
 	prepareRayTracing();
 

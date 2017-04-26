@@ -45,7 +45,8 @@ __global__ void raytracing(
 	aten::CameraParameter* camera,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
-	aten::LightParameter* lights, int lightnum)
+	aten::LightParameter* lights, int lightnum,
+	aten::BVHNode* nodes)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -61,6 +62,7 @@ __global__ void raytracing(
 		ctx.mtrls = mtrls;
 		ctx.lightnum = lightnum;
 		ctx.lights = lights;
+		ctx.nodes = nodes;
 	}
 
 	const auto idx = iy * camera->width + ix;
@@ -80,7 +82,8 @@ __global__ void raytracing(
 	while (depth < 5) {
 		aten::hitrecord rec;
 
-		if (intersect(&ray, &rec, &ctx)) {
+		//if (intersect(&ray, &rec, &ctx)) {
+		if (intersectBVH(ctx, ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
 			const aten::MaterialParameter& m = ctx.mtrls[rec.mtrlid];
 
 			if (m.attrib.isEmissive) {
@@ -132,7 +135,8 @@ __global__ void raytracing(
 
 					auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
 					{
-						return intersect(&_r, &_rec, &ctx);
+						//return intersect(&_r, &_rec, &ctx);
+						return intersectBVH(ctx, _r, t_min, t_max, _rec);
 					};
 
 					if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
@@ -185,7 +189,8 @@ void renderRayTracing(
 	const aten::CameraParameter& camera,
 	const std::vector<aten::ShapeParameter>& shapes,
 	const std::vector<aten::MaterialParameter>& mtrls,
-	const std::vector<aten::LightParameter>& lights)
+	const std::vector<aten::LightParameter>& lights,
+	const std::vector<aten::BVHNode>& nodes)
 {
 	aten::CudaMemory dst(sizeof(float4) * width * height);
 
@@ -200,6 +205,9 @@ void renderRayTracing(
 	aten::TypedCudaMemory<aten::LightParameter> lightparam(lights.size());
 	lightparam.writeByNum(&lights[0], lights.size());
 
+	aten::TypedCudaMemory<aten::BVHNode> nodeparam(nodes.size());
+	nodeparam.writeByNum(&nodes[0], nodes.size());
+
 	dim3 block(32, 32);
 	dim3 grid(
 		(width + block.x - 1) / block.x,
@@ -212,7 +220,8 @@ void renderRayTracing(
 		cam.ptr(),
 		shapeparam.ptr(), shapeparam.num(),
 		mtrlparam.ptr(),
-		lightparam.ptr(), lightparam.num());
+		lightparam.ptr(), lightparam.num(),
+		nodeparam.ptr());
 
 	auto err = cudaGetLastError();
 	if (err != cudaSuccess) {

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
-#include "scene/accel.h"
-#include "scene/bvh.h"
+#include "accelerator/accelerator.h"
+#include "accelerator/bvh.h"
 #include "light/light.h"
 #include "light/ibl.h"
 
 namespace AT_NAME {
-	class LinearList : public aten::accel {
+	class LinearList : public aten::accelerator {
 	public:
 		LinearList() {}
 		~LinearList() {}
@@ -204,10 +204,10 @@ namespace AT_NAME {
 	};
 
 	template <typename ACCEL>
-	class AcceledScene : public scene {
+	class AcceleratedScene : public scene {
 	public:
-		AcceledScene() {}
-		virtual ~AcceledScene() {}
+		AcceleratedScene() {}
+		virtual ~AcceleratedScene() {}
 
 	public:
 		virtual void build() override final
@@ -226,7 +226,7 @@ namespace AT_NAME {
 			return isHit;
 		}
 
-		const accel* getAccel()
+		const aten::accelerator* getAccel()
 		{
 			return &m_accel;
 		}

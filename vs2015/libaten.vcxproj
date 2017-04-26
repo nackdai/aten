@@ -157,6 +157,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\libaten\accelerator\accelerator.h" />
+    <ClInclude Include="..\src\libaten\accelerator\bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
@@ -227,8 +229,6 @@
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
     <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
-    <ClInclude Include="..\src\libaten\scene\accel.h" />
-    <ClInclude Include="..\src\libaten\scene\bvh.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\instance.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
@@ -248,6 +248,7 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
@@ -297,7 +298,6 @@
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\random.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
-    <ClCompile Include="..\src\libaten\scene\bvh.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />

@@ -76,7 +76,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 #endif
 
 //#if DEFALT
-#if 0
+#if 1
 	// ƒKƒ‰ƒX.
 	auto glass = new aten::sphere(
 		aten::vec3(77, 16.5, 78),

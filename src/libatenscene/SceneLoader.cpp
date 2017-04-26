@@ -590,7 +590,7 @@ namespace aten
 		}
 
 		// TODO
-		ret.scene = new aten::AcceledScene<aten::bvh>();
+		ret.scene = new aten::AcceleratedScene<aten::bvh>();
 
 		for (auto it = objs.begin(); it != objs.end(); it++) {
 			auto obj = it->second;

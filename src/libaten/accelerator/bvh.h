@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scene/hitable.h"
-#include "scene/accel.h"
+#include "accelerator/accelerator.h"
 #include "sampler/random.h"
 
 namespace aten {
@@ -61,7 +61,7 @@ namespace aten {
 
 	//////////////////////////////////////////////
 
-	class bvh : public accel {
+	class bvh : public accelerator {
 		friend class bvhnode;
 
 	public:

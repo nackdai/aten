@@ -18,10 +18,10 @@ namespace aten {
 		}
 	};
 
-	class accel : public hitable {
+	class accelerator : public hitable {
 	public:
-		accel() {}
-		virtual ~accel() {}
+		accelerator() {}
+		virtual ~accelerator() {}
 
 	public:
 		virtual void build(

@@ -14,8 +14,8 @@ namespace AT_NAME
 	sphere::sphere(const aten::vec3& center, real radius, material* mtrl)
 		: transformable(), m_param(center, radius, mtrl)
 	{
-		vec3 _min = center - radius;
-		vec3 _max = center + radius;
+		auto _min = center - radius;
+		auto _max = center + radius;
 
 		m_aabb.init(_min, _max);
 	}

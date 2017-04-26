@@ -1,4 +1,4 @@
-#include "scene/bvh.h"
+#include "accelerator/bvh.h"
 #include "shape/tranformable.h"
 
 #include <random>

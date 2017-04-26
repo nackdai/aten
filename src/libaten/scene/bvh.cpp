@@ -590,4 +590,80 @@ namespace aten {
 		}
 #endif
 	}
+
+	void bvh::collectNodes(std::vector<BVHNode>& nodes) const
+	{
+		static const uint32_t stacksize = 64;
+		bvhnode* stackbuf[stacksize] = { nullptr };
+		bvhnode** stack = &stackbuf[0];
+
+		// push terminator.
+		*stack++ = nullptr;
+
+		int stackpos = 1;
+
+		bvhnode* pnode = m_root;
+
+		// TODO
+		// Optimization....
+
+		int order = 0;
+
+		while (pnode != nullptr) {
+			bvhnode* pleft = pnode->m_left;
+			bvhnode* pright = pnode->m_right;
+
+			pnode->m_traverseOrder = order++;
+
+			if (pnode->isLeaf()) {
+				pnode = *(--stack);
+				stackpos -= 1;
+			}
+			else {
+				pnode = pleft;
+
+				if (pright) {
+					*(stack++) = pright;
+					stackpos += 1;
+				}
+			}
+		}
+
+		stack = &stackbuf[0];
+		*stack++ = nullptr;
+		stackpos = 1;
+		pnode = m_root;
+
+		while (pnode != nullptr) {
+			bvhnode* pleft = pnode->m_left;
+			bvhnode* pright = pnode->m_right;
+
+			BVHNode node;
+
+			node.bbox = pnode->getBoundingbox();
+
+			if (pnode->isLeaf()) {
+				// TODO
+			}
+			else {
+				node.left = (pleft ? pleft->m_traverseOrder : -1);
+				node.right = (pright ? pright->m_traverseOrder : -1);
+			}
+
+			nodes.push_back(node);
+
+			if (pnode->isLeaf()) {
+				pnode = *(--stack);
+				stackpos -= 1;
+			}
+			else {
+				pnode = pleft;
+
+				if (pright) {
+					*(stack++) = pright;
+					stackpos += 1;
+				}
+			}
+		}
+	}
 }

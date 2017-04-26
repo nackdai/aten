@@ -226,6 +226,11 @@ namespace AT_NAME {
 			return isHit;
 		}
 
+		const accel* getAccel()
+		{
+			return &m_accel;
+		}
+
 	private:
 		ACCEL m_accel;
 	};

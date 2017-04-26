@@ -5,11 +5,6 @@
 #include "sampler/random.h"
 
 namespace aten {
-	struct BVHNode{
-		int left{ -1 };
-		int right{ -1 };
-	};
-
 	class bvhnode : public hitable {
 		friend class bvh;
 
@@ -55,6 +50,8 @@ namespace aten {
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
 		aabb m_aabb;
+
+		int m_traverseOrder{ -1 };
 	};
 
 	//////////////////////////////////////////////
@@ -79,6 +76,8 @@ namespace aten {
 			}
 			return std::move(aabb());
 		}
+
+		virtual void collectNodes(std::vector<BVHNode>& nodes) const override final;
 
 	private:
 		static bool hit(

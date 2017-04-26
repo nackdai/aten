@@ -2,6 +2,7 @@
 #include "math/intersect.h"
 
 //#define ENABLE_LINEAR_HITTEST
+#define ENABLE_DIRECT_FACE_BVH
 
 namespace aten
 {
@@ -166,11 +167,13 @@ namespace aten
 
 	void shape::build()
 	{
+#ifndef ENABLE_DIRECT_FACE_BVH
 		m_node.build(
 			(bvhnode**)&faces[0],
 			(uint32_t)faces.size());
 
 		m_aabb = m_node.getBoundingbox();
+#endif
 
 		param.area = 0;
 		for (const auto f : faces) {
@@ -214,7 +217,17 @@ namespace aten
 
 	void object::build()
 	{
+#ifdef ENABLE_DIRECT_FACE_BVH
+		std::vector<face*> faces;
+		for (auto s : shapes) {
+			for (auto f : s->faces) {
+				faces.push_back(f);
+			}
+		}
+		m_node.build((bvhnode**)&faces[0], (uint32_t)faces.size());
+#else
 		m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
+#endif
 
 		param.area = 0;
 		m_triangles = 0;

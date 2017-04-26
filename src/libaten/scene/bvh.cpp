@@ -175,10 +175,9 @@ namespace aten {
 		bvhnode* stackbuf[stacksize] = { nullptr };
 		bvhnode** stack = &stackbuf[0];
 
-		// push.
+		// push terminator.
 		*stack++ = nullptr;
 
-		// For debug.
 		int stackpos = 1;
 
 		auto node = root;
@@ -262,6 +261,10 @@ namespace aten {
 				}
 			}
 			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
+
+			if (stackpos >= stacksize) {
+				return false;
+			}
 		} while (node != nullptr);
 
 		return (rec.obj != nullptr);

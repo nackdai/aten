@@ -70,6 +70,11 @@ namespace aten
 			return m_obj->getSamplePosNormalPdf(m_mtxL2W, sampler);
 		}
 
+		virtual const hitable* getHasObject() const override final
+		{
+			return m_obj;
+		}
+
 	private:
 		aabb transformBoundingBox()
 		{

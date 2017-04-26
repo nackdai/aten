@@ -11,6 +11,11 @@ namespace aten {
 		int right{ -1 };
 		int shapeid{ -1 };
 		aabb bbox;
+
+		bool AT_DEVICE_API isLeaf() const
+		{
+			return (left <= 0 && right <= 0);
+		}
 	};
 
 	class accel : public hitable {

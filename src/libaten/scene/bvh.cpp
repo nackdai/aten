@@ -1,9 +1,11 @@
 #include "scene/bvh.h"
+#include "shape/tranfomable.h"
 
 #include <random>
 #include <vector>
 
 #define BVH_SAH
+//#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -156,8 +158,85 @@ namespace aten {
 		real t_min, real t_max,
 		hitrecord& rec) const
 	{
+#ifdef TEST_NODE_LIST
+		std::vector<BVHNode> nodes;
+		collectNodes(nodes);
+
+		static const uint32_t stacksize = 64;
+		BVHNode* stackbuf[stacksize] = { nullptr };
+		BVHNode** stack = &stackbuf[0];
+
+		// push terminator.
+		*stack++ = nullptr;
+
+		int stackpos = 1;
+
+		auto& shapes = transformable::getShapes();
+
+		BVHNode* node = &nodes[0];
+
+		do {
+			BVHNode* left = node->left >= 0 ? &nodes[node->left] : nullptr;
+			BVHNode* right = node->right >= 0 ? &nodes[node->right] : nullptr;
+
+			bool traverseLeft = false;
+			bool traverseRight = false;
+
+			if (left) {
+				if (left->isLeaf()) {
+					hitrecord recLeft;
+					auto leftobj = (hitable*)shapes[left->shapeid];
+
+					if (leftobj->hit(r, t_min, t_max, recLeft)) {
+						if (recLeft.t < rec.t) {
+							rec = recLeft;
+						}
+					}
+				}
+				else {
+					traverseLeft = left->bbox.hit(r, t_min, t_max);
+				}
+			}
+			if (right) {
+				if (right->isLeaf()) {
+					hitrecord recRight;
+					auto rightobj = (hitable*)shapes[right->shapeid];
+
+					if (rightobj->hit(r, t_min, t_max, recRight)) {
+						if (recRight.t < rec.t) {
+							rec = recRight;
+						}
+					}
+				}
+				else {
+					traverseRight = right->bbox.hit(r, t_min, t_max);
+				}
+			}
+
+			if (!traverseLeft && !traverseRight) {
+				node = *(--stack);
+				stackpos -= 1;
+			}
+			else {
+				node = traverseLeft ? left : right;
+
+				if (traverseLeft && traverseRight) {
+					*(stack++) = right;
+					stackpos += 1;
+				}
+			}
+			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
+
+			if (stackpos >= stacksize) {
+				return false;
+			}
+		} while (node != nullptr);
+
+		return (rec.obj != nullptr);
+#else
 		bool isHit = hit(m_root, r, t_min, t_max, rec);
 		return isHit;
+#endif
 	}
 
 	bool bvh::hit(
@@ -643,7 +722,10 @@ namespace aten {
 			node.bbox = pnode->getBoundingbox();
 
 			if (pnode->isLeaf()) {
-				// TODO
+				auto obj = pnode->getHasObject();
+				obj = (obj ? obj : pnode);
+
+				node.shapeid = transformable::findShapeIdxAsHitable(obj);
 			}
 			else {
 				node.left = (pleft ? pleft->m_traverseOrder : -1);

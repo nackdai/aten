@@ -40,6 +40,11 @@ namespace aten {
 			return (!m_left && !m_right);
 		}
 
+		virtual const hitable* getHasObject() const
+		{
+			return nullptr;
+		}
+
 	private:
 		void build(
 			bvhnode** list,

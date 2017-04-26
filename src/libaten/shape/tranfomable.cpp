@@ -30,7 +30,18 @@ namespace aten
 		return nullptr;
 	}
 
-	int transformable::findShapeIdx(transformable* shape)
+	int transformable::findShapeIdx(const transformable* shape)
+	{
+		auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
+		if (found != g_shapes.end()) {
+			auto id = std::distance(g_shapes.begin(), found);
+			AT_ASSERT(shape == g_shapes[id]);
+			return id;
+		}
+		return -1;
+	}
+
+	int transformable::findShapeIdxAsHitable(const hitable* shape)
 	{
 		auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
 		if (found != g_shapes.end()) {

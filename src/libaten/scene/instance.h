@@ -117,6 +117,15 @@ namespace aten
 			return std::move(ret);
 		}
 
+		virtual int setBVHTraverseOrderFotInternalNodes(int curOrder) override final
+		{
+			return m_obj->setBVHTraverseOrderFotInternalNodes(curOrder);
+		}
+		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) const override final
+		{
+			m_obj->collectInternalNodes(nodes);
+		}
+
 	private:
 		OBJ* m_obj{ nullptr };
 		mat4 m_mtxL2W;

@@ -1,5 +1,6 @@
 #include "accelerator/bvh.h"
 #include "shape/tranformable.h"
+#include "object/object.h"
 
 #include <random>
 #include <vector>
@@ -672,6 +673,12 @@ namespace aten {
 
 	void bvh::collectNodes(std::vector<BVHNode>& nodes) const
 	{
+		setTraverseOrder(m_root, 0);
+		collectNodes(m_root, nodes);
+	}
+
+	int bvh::setTraverseOrder(bvhnode* root, int curOrder)
+	{
 		static const uint32_t stacksize = 64;
 		bvhnode* stackbuf[stacksize] = { nullptr };
 		bvhnode** stack = &stackbuf[0];
@@ -681,18 +688,16 @@ namespace aten {
 
 		int stackpos = 1;
 
-		bvhnode* pnode = m_root;
+		bvhnode* pnode = root;
 
-		// TODO
-		// Optimization....
-
-		int order = 0;
+		int order = curOrder;
 
 		while (pnode != nullptr) {
 			bvhnode* pleft = pnode->m_left;
 			bvhnode* pright = pnode->m_right;
 
 			pnode->m_traverseOrder = order++;
+			order = pnode->setBVHTraverseOrderFotInternalNodes(order);
 
 			if (pnode->isLeaf()) {
 				pnode = *(--stack);
@@ -708,14 +713,25 @@ namespace aten {
 			}
 		}
 
-		stack = &stackbuf[0];
+		return order;
+	}
+
+	void bvh::collectNodes(const bvhnode* root, std::vector<BVHNode>& nodes)
+	{
+		static const uint32_t stacksize = 64;
+		const bvhnode* stackbuf[stacksize] = { nullptr };
+		const bvhnode** stack = &stackbuf[0];
+
+		// push terminator.
 		*stack++ = nullptr;
-		stackpos = 1;
-		pnode = m_root;
+
+		int stackpos = 1;
+
+		const bvhnode* pnode = root;
 
 		while (pnode != nullptr) {
-			bvhnode* pleft = pnode->m_left;
-			bvhnode* pright = pnode->m_right;
+			const bvhnode* pleft = pnode->m_left;
+			const bvhnode* pright = pnode->m_right;
 
 			BVHNode node;
 
@@ -726,6 +742,15 @@ namespace aten {
 				obj = (obj ? obj : pnode);
 
 				node.shapeid = transformable::findShapeIdxAsHitable(obj);
+
+				if (node.shapeid < 0) {
+					// TODO
+					// Not safe....
+					face* f = (face*)obj;
+					node.primid = f->id;
+				}
+
+				pnode->collectInternalNodes(nodes);
 			}
 			else {
 				node.left = (pleft ? pleft->m_traverseOrder : -1);

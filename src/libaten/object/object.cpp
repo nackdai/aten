@@ -6,6 +6,13 @@
 
 namespace aten
 {
+	std::atomic<int> face::s_id = 0;
+
+	face::face()
+	{
+		id = s_id.fetch_add(1);
+	}
+
 	bool face::hit(
 		const ray& r,
 		real t_min, real t_max,
@@ -386,11 +393,21 @@ namespace aten
 
 			for (auto f : s->faces) {
 				auto faceParam = f->param;
-				faceParam.parent.idx = shapeparams.size();
+				faceParam.mtrlid = shapeParam.mtrl.idx;
 				primparams.push_back(faceParam);
 			}
 
 			shapeparams.push_back(shapeParam);
 		}
+	}
+
+	int object::setBVHTraverseOrderFotInternalNodes(int curOrder)
+	{
+		return bvh::setTraverseOrder(&m_node, curOrder);
+	}
+
+	void object::collectInternalNodes(std::vector<BVHNode>& nodes) const
+	{
+		bvh::collectNodes(&m_node, nodes);
 	}
 }

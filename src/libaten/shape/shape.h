@@ -60,7 +60,7 @@ namespace aten
 
 	struct PrimitiveParamter {
 		int idx[3];
+		int mtrlid;
 		real area;
-		UnionIdxPtr parent;
 	};
 }

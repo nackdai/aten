@@ -9,7 +9,12 @@ namespace aten {
 	struct BVHNode {
 		int left{ -1 };
 		int right{ -1 };
-		int shapeid{ -1 };
+		
+		union {
+			int shapeid{ -1 };
+			int primid;
+		};
+
 		aabb bbox;
 
 		bool AT_DEVICE_API isLeaf() const

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "types.h"
 #include "accelerator/bvh.h"
 #include "material/material.h"
@@ -13,8 +15,10 @@ namespace aten
 	class shape;
 
 	class face : public bvhnode {
+		static std::atomic<int> s_id;
+
 	public:
-		face() {}
+		face();
 		virtual ~face() {}
 
 	public:
@@ -40,6 +44,7 @@ namespace aten
 	
 		PrimitiveParamter param;
 		shape* parent{ nullptr };
+		int id{ -1 };
 	};
 
 	class shape : public bvhnode {
@@ -114,6 +119,9 @@ namespace aten
 		}
 
 		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const override final;
+
+		virtual int setBVHTraverseOrderFotInternalNodes(int curOrder) override final;
+		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) const override final;
 
 	public:
 		std::vector<shape*> shapes;

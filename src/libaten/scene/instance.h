@@ -8,7 +8,7 @@
 namespace aten
 {
 	template <typename OBJ>
-	class instance : public bvhnode {
+	class instance : public transformable {
 	public:
 		instance() {}
 
@@ -117,11 +117,27 @@ namespace aten
 			return std::move(ret);
 		}
 
-		virtual int setBVHTraverseOrderFotInternalNodes(int curOrder) override final
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
+			const mat4& mtxL2W,
+			sampler* sampler) const override final
 		{
-			return m_obj->setBVHTraverseOrderFotInternalNodes(curOrder);
+			// Not used...
+			AT_ASSERT(false);
+			return std::move(SamplingPosNormalPdf(vec3(), vec3(), real(0)));
 		}
-		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) const override final
+
+		virtual bool hit(
+			const ray& r,
+			const mat4& mtxL2W,
+			real t_min, real t_max,
+			hitrecord& rec) const override final
+		{
+			// Not used...
+			AT_ASSERT(false);
+			return false;
+		}
+
+		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) override final
 		{
 			m_obj->collectInternalNodes(nodes);
 		}

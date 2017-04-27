@@ -120,8 +120,7 @@ namespace aten
 
 		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const override final;
 
-		virtual int setBVHTraverseOrderFotInternalNodes(int curOrder) override final;
-		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) const override final;
+		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) override final;
 
 	public:
 		std::vector<shape*> shapes;

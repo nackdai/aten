@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-//#define TEST_NODE_LIST
+#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -136,6 +136,9 @@ namespace aten {
 	}
 
 	///////////////////////////////////////////////////////
+#ifdef TEST_NODE_LIST
+	static std::vector<BVHNode> snodes;
+#endif
 
 	void bvh::build(
 		bvhnode** list,
@@ -152,17 +155,21 @@ namespace aten {
 #else
 		m_root->build(&list[0], num, false);
 #endif
+
+#ifdef TEST_NODE_LIST
+		if (snodes.empty()) {
+			collectNodes(snodes);
+		}
+#endif
 	}
 
-	bool bvh::hit(
+#ifdef TEST_NODE_LIST
+	static bool _hit(
+		BVHNode* nodes,
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		hitrecord& rec)
 	{
-#ifdef TEST_NODE_LIST
-		std::vector<BVHNode> nodes;
-		collectNodes(nodes);
-
 		static const uint32_t stacksize = 64;
 		BVHNode* stackbuf[stacksize] = { nullptr };
 		BVHNode** stack = &stackbuf[0];
@@ -186,9 +193,16 @@ namespace aten {
 			if (left) {
 				if (left->isLeaf()) {
 					hitrecord recLeft;
-					auto leftobj = (hitable*)shapes[left->shapeid];
+					bool isHitLeft = false;
 
-					if (leftobj->hit(r, t_min, t_max, recLeft)) {
+					if (left->nestid >= 0) {
+						isHitLeft = _hit(&nodes[left->nestid], r, t_min, t_max, recLeft);
+					}
+					else {
+						auto leftobj = (hitable*)shapes[left->shapeid];
+						isHitLeft = leftobj->hit(r, t_min, t_max, recLeft);
+					}
+					if (isHitLeft) {
 						if (recLeft.t < rec.t) {
 							rec = recLeft;
 						}
@@ -201,9 +215,16 @@ namespace aten {
 			if (right) {
 				if (right->isLeaf()) {
 					hitrecord recRight;
-					auto rightobj = (hitable*)shapes[right->shapeid];
+					bool isHitRight = false;
 
-					if (rightobj->hit(r, t_min, t_max, recRight)) {
+					if (right->nestid >= 0) {
+						isHitRight = _hit(&nodes[right->nestid], r, t_min, t_max, recRight);
+					}
+					else {
+						auto rightobj = (hitable*)shapes[right->shapeid];
+						isHitRight = rightobj->hit(r, t_min, t_max, recRight);
+					}
+					if (isHitRight) {
 						if (recRight.t < rec.t) {
 							rec = recRight;
 						}
@@ -234,6 +255,17 @@ namespace aten {
 		} while (node != nullptr);
 
 		return (rec.obj != nullptr);
+	}
+#endif
+
+	bool bvh::hit(
+		const ray& r,
+		real t_min, real t_max,
+		hitrecord& rec) const
+	{
+#ifdef TEST_NODE_LIST
+		bool isHit = _hit(&snodes[0], r, t_min, t_max, rec);
+		return isHit;
 #else
 		bool isHit = hit(m_root, r, t_min, t_max, rec);
 		return isHit;
@@ -674,7 +706,18 @@ namespace aten {
 	void bvh::collectNodes(std::vector<BVHNode>& nodes) const
 	{
 		setTraverseOrder(m_root, 0);
-		collectNodes(m_root, nodes);
+		collecBVHtNodes(m_root, nodes);
+
+		auto shapes = transformable::getShapes();
+		for (auto s : shapes) {
+			const auto idx = s->m_traverseOrder;
+			if (idx >= 0) {
+				auto& node = nodes[idx];
+				node.nestid = nodes.size();
+
+				s->collectInternalNodes(nodes);
+			}
+		}
 	}
 
 	int bvh::setTraverseOrder(bvhnode* root, int curOrder)
@@ -697,7 +740,6 @@ namespace aten {
 			bvhnode* pright = pnode->m_right;
 
 			pnode->m_traverseOrder = order++;
-			order = pnode->setBVHTraverseOrderFotInternalNodes(order);
 
 			if (pnode->isLeaf()) {
 				pnode = *(--stack);
@@ -716,22 +758,22 @@ namespace aten {
 		return order;
 	}
 
-	void bvh::collectNodes(const bvhnode* root, std::vector<BVHNode>& nodes)
+	void bvh::collecBVHtNodes(bvhnode* root, std::vector<BVHNode>& nodes)
 	{
 		static const uint32_t stacksize = 64;
-		const bvhnode* stackbuf[stacksize] = { nullptr };
-		const bvhnode** stack = &stackbuf[0];
+		bvhnode* stackbuf[stacksize] = { nullptr };
+		bvhnode** stack = &stackbuf[0];
 
 		// push terminator.
 		*stack++ = nullptr;
 
 		int stackpos = 1;
 
-		const bvhnode* pnode = root;
+		bvhnode* pnode = root;
 
 		while (pnode != nullptr) {
-			const bvhnode* pleft = pnode->m_left;
-			const bvhnode* pright = pnode->m_right;
+			bvhnode* pleft = pnode->m_left;
+			bvhnode* pright = pnode->m_right;
 
 			BVHNode node;
 
@@ -747,10 +789,8 @@ namespace aten {
 					// TODO
 					// Not safe....
 					face* f = (face*)obj;
-					node.primid = f->id;
+					node.shapeid = f->id;
 				}
-
-				pnode->collectInternalNodes(nodes);
 			}
 			else {
 				node.left = (pleft ? pleft->m_traverseOrder : -1);

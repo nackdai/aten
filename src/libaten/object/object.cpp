@@ -235,6 +235,7 @@ namespace aten
 		m_node.build((bvhnode**)&faces[0], (uint32_t)faces.size());
 #else
 		m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
+		bbox = m_node.getBoundingbox();
 #endif
 
 		param.area = 0;
@@ -401,13 +402,9 @@ namespace aten
 		}
 	}
 
-	int object::setBVHTraverseOrderFotInternalNodes(int curOrder)
+	void object::collectInternalNodes(std::vector<BVHNode>& nodes)
 	{
-		return bvh::setTraverseOrder(&m_node, curOrder);
-	}
-
-	void object::collectInternalNodes(std::vector<BVHNode>& nodes) const
-	{
-		bvh::collectNodes(&m_node, nodes);
+		bvh::setTraverseOrder(&m_node, 0);
+		bvh::collecBVHtNodes(&m_node, nodes);
 	}
 }

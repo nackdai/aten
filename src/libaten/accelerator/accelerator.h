@@ -10,10 +10,8 @@ namespace aten {
 		int left{ -1 };
 		int right{ -1 };
 		
-		union {
-			int shapeid{ -1 };
-			int primid;
-		};
+		int shapeid{ -1 };
+		int nestid{ -1 };
 
 		aabb bbox;
 

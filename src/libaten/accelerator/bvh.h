@@ -45,11 +45,7 @@ namespace aten {
 			return nullptr;
 		}
 
-		virtual int setBVHTraverseOrderFotInternalNodes(int curOrder)
-		{
-			return curOrder;
-		}
-		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) const
+		virtual void collectInternalNodes(std::vector<BVHNode>& nodes)
 		{
 			// Nothing is done...
 		}
@@ -94,7 +90,7 @@ namespace aten {
 		virtual void collectNodes(std::vector<BVHNode>& nodes) const override final;
 
 		static int setTraverseOrder(bvhnode* root, int curOrder);
-		static void collectNodes(const bvhnode* root, std::vector<BVHNode>& nodes);
+		static void collecBVHtNodes(bvhnode* root, std::vector<BVHNode>& nodes);
 
 	private:
 		static bool hit(

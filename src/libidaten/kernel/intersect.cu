@@ -11,8 +11,8 @@ __device__ FuncIntersect funcIntersect[aten::ShapeType::ShapeTypeMax];
 
 __device__ void addIntersectFuncs()
 {
-	funcIntersect[aten::ShapeType::Object] = nullptr;
-	funcIntersect[aten::ShapeType::Mesh] = nullptr;
+	funcIntersect[aten::ShapeType::Polygon] = nullptr;
+	funcIntersect[aten::ShapeType::Instance] = nullptr;
 	funcIntersect[aten::ShapeType::Sphere] = AT_NAME::sphere::hit;
 	funcIntersect[aten::ShapeType::Cube] = nullptr;
 }

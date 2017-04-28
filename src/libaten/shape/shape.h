@@ -3,13 +3,14 @@
 #include "types.h"
 #include "math/vec3.h"
 #include "math/aabb.h"
+#include "math/mat4.h"
 #include "material/material.h"
 
 namespace aten
 {
 	enum ShapeType {
-		Object,
-		Mesh,
+		Polygon,
+		Instance,
 		Sphere,
 		Cube,
 		ShapeTypeMax,
@@ -20,13 +21,20 @@ namespace aten
 
 		aten::UnionIdxPtr mtrl;
 
+		mat4 mtxW2L;
+		mat4 mtxL2W;
+
 		union {
-			// mesh.
+			// polygon.
 			struct {
 				real area;
 				int primid;
-				int primnum;
 			};
+			// instance.
+			struct {
+				int shapeid;
+			};
+			// instance.
 			// sphere / cube.
 			struct {
 				vec3 center;

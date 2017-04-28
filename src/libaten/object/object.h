@@ -16,10 +16,11 @@ namespace aten
 
 	class face : public bvhnode {
 		static std::atomic<int> s_id;
+		static std::vector<face*> s_faces;
 
 	public:
 		face();
-		virtual ~face() {}
+		virtual ~face();
 
 	public:
 		virtual bool hit(
@@ -41,6 +42,11 @@ namespace aten
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
 
 		void build();
+
+		static const std::vector<face*>& faces()
+		{
+			return s_faces;
+		}
 	
 		PrimitiveParamter param;
 		shape* parent{ nullptr };
@@ -49,7 +55,7 @@ namespace aten
 
 	class shape : public bvhnode {
 	public:
-		shape() : param(ShapeType::Mesh) {}
+		shape() : param(ShapeType::Polygon) {}
 		virtual ~shape() {}
 
 		void build();
@@ -88,7 +94,7 @@ namespace aten
 		friend class instance<object>;
 
 	public:
-		object() : param(ShapeType::Object) {}
+		object() : param(ShapeType::Polygon) {}
 		virtual ~object() {}
 
 	public:

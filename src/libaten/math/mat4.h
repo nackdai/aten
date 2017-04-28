@@ -4,6 +4,7 @@
 #include "math/math.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
+#include "math/ray.h"
 
 namespace aten {
 	class mat4 {
@@ -164,6 +165,20 @@ namespace aten {
 			}
 
 			return std::move(ret);
+		}
+
+		inline ray applyRay(const ray& r) const
+		{
+			vec3 org = r.org;
+			vec3 dir = r.dir;
+
+			// Transform world to local.
+			org = apply(org);
+			dir = applyXYZ(dir);
+
+			ray transformdRay(org, dir);
+
+			return std::move(transformdRay);
 		}
 
 		mat4& invert();

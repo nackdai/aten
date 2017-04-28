@@ -180,6 +180,7 @@ namespace aten {
 		int stackpos = 1;
 
 		auto& shapes = transformable::getShapes();
+		auto& prims = face::faces();
 
 		BVHNode* node = &nodes[0];
 
@@ -196,10 +197,22 @@ namespace aten {
 					bool isHitLeft = false;
 
 					if (left->nestid >= 0) {
-						isHitLeft = _hit(&nodes[left->nestid], r, t_min, t_max, recLeft);
+						auto t = shapes[left->shapeid];
+						const auto& param = t->getParam();
+						auto transformedRay = param.mtxW2L.applyRay(r);
+						isHitLeft = _hit(&nodes[left->nestid], transformedRay, t_min, t_max, recLeft);
+
+						if (isHitLeft) {
+							recLeft.p = param.mtxL2W.apply(recLeft.p);
+							recLeft.normal = normalize(param.mtxL2W.applyXYZ(recLeft.normal));
+
+							rec.obj = (hitable*)t;
+						}
 					}
 					else {
-						auto leftobj = (hitable*)shapes[left->shapeid];
+						auto leftobj = left->shapeid >= 0
+							? (hitable*)shapes[left->shapeid]
+							: (hitable*)prims[left->primid];
 						isHitLeft = leftobj->hit(r, t_min, t_max, recLeft);
 					}
 					if (isHitLeft) {
@@ -218,10 +231,22 @@ namespace aten {
 					bool isHitRight = false;
 
 					if (right->nestid >= 0) {
-						isHitRight = _hit(&nodes[right->nestid], r, t_min, t_max, recRight);
+						auto t = shapes[right->shapeid];
+						const auto& param = t->getParam();
+						auto transformedRay = param.mtxW2L.applyRay(r);
+						isHitRight = _hit(&nodes[right->nestid], transformedRay, t_min, t_max, recRight);
+
+						if (isHitRight) {
+							recRight.p = param.mtxL2W.apply(recRight.p);
+							recRight.normal = normalize(param.mtxL2W.applyXYZ(recRight.normal));
+
+							rec.obj = (hitable*)t;
+						}
 					}
 					else {
-						auto rightobj = (hitable*)shapes[right->shapeid];
+						auto rightobj = right->shapeid >= 0
+							? (hitable*)shapes[right->shapeid]
+							: (hitable*)prims[right->primid];
 						isHitRight = rightobj->hit(r, t_min, t_max, recRight);
 					}
 					if (isHitRight) {
@@ -706,16 +731,20 @@ namespace aten {
 	void bvh::collectNodes(std::vector<BVHNode>& nodes) const
 	{
 		setTraverseOrder(m_root, 0);
-		collecBVHtNodes(m_root, nodes);
+		collectNodes(m_root, nodes);
 
 		auto shapes = transformable::getShapes();
 		for (auto s : shapes) {
 			const auto idx = s->m_traverseOrder;
 			if (idx >= 0) {
-				auto& node = nodes[idx];
-				node.nestid = nodes.size();
+				const auto& param = s->getParam();
 
-				s->collectInternalNodes(nodes);
+				if (param.type == ShapeType::Instance) {
+					auto& node = nodes[idx];
+					node.nestid = nodes.size();
+
+					s->collectInternalNodes(nodes);
+				}
 			}
 		}
 	}
@@ -758,7 +787,7 @@ namespace aten {
 		return order;
 	}
 
-	void bvh::collecBVHtNodes(bvhnode* root, std::vector<BVHNode>& nodes)
+	void bvh::collectNodes(bvhnode* root, std::vector<BVHNode>& nodes)
 	{
 		static const uint32_t stacksize = 64;
 		bvhnode* stackbuf[stacksize] = { nullptr };
@@ -780,16 +809,13 @@ namespace aten {
 			node.bbox = pnode->getBoundingbox();
 
 			if (pnode->isLeaf()) {
-				auto obj = pnode->getHasObject();
-				obj = (obj ? obj : pnode);
-
-				node.shapeid = transformable::findShapeIdxAsHitable(obj);
+				node.shapeid = transformable::findShapeIdxAsHitable(pnode);
 
 				if (node.shapeid < 0) {
 					// TODO
 					// Not safe....
-					face* f = (face*)obj;
-					node.shapeid = f->id;
+					face* f = (face*)pnode;
+					node.primid = f->id;
 				}
 			}
 			else {

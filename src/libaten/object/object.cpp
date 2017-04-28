@@ -7,10 +7,20 @@
 namespace aten
 {
 	std::atomic<int> face::s_id = 0;
+	std::vector<face*> face::s_faces;
 
 	face::face()
 	{
 		id = s_id.fetch_add(1);
+		s_faces.push_back(this);
+	}
+
+	face::~face()
+	{
+		auto it = std::find(s_faces.begin(), s_faces.end(), this);
+		if (it != s_faces.end()) {
+			s_faces.erase(it);
+		}
 	}
 
 	bool face::hit(
@@ -388,7 +398,7 @@ namespace aten
 			auto shapeParam = s->param;
 			
 			shapeParam.primid = primparams.size();
-			shapeParam.primnum = s->faces.size();
+			//shapeParam.primnum = s->faces.size();
 
 			shapeParam.mtrl.idx = aten::material::findMaterialIdx((aten::material*)shapeParam.mtrl.ptr);
 
@@ -405,6 +415,6 @@ namespace aten
 	void object::collectInternalNodes(std::vector<BVHNode>& nodes)
 	{
 		bvh::setTraverseOrder(&m_node, 0);
-		bvh::collecBVHtNodes(&m_node, nodes);
+		bvh::collectNodes(&m_node, nodes);
 	}
 }

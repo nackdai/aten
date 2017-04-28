@@ -11,6 +11,7 @@ namespace aten {
 		int right{ -1 };
 		
 		int shapeid{ -1 };
+		int primid{ -1 };
 		int nestid{ -1 };
 
 		aabb bbox;

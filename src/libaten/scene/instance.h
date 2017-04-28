@@ -10,9 +10,12 @@ namespace aten
 	template <typename OBJ>
 	class instance : public transformable {
 	public:
-		instance() {}
+		instance()
+			: m_param(ShapeType::Instance)
+		{}
 
 		instance(OBJ* obj)
+			: m_param(ShapeType::Instance)
 		{
 			m_obj = obj;
 			m_aabb = m_obj->getBoundingbox();
@@ -27,6 +30,9 @@ namespace aten
 			m_mtxW2L.invert();
 
 			m_aabb = transformBoundingBox();
+
+			m_param.mtxL2W = m_mtxL2W;
+			m_param.mtxW2L = m_mtxW2L;
 		}
 
 		virtual ~instance() {}
@@ -137,6 +143,11 @@ namespace aten
 			return false;
 		}
 
+		virtual const ShapeParameter& getParam() const override final
+		{
+			return m_param;
+		}
+
 		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) override final
 		{
 			m_obj->collectInternalNodes(nodes);
@@ -146,13 +157,18 @@ namespace aten
 		OBJ* m_obj{ nullptr };
 		mat4 m_mtxL2W;
 		mat4 m_mtxW2L;	// inverted.
+
+		ShapeParameter m_param;
 	};
 
 	template<>
 	instance<object>::instance(object* obj)
+		: m_param(ShapeType::Instance)
 	{
 		m_obj = obj;
 		m_obj->build();
 		m_aabb = m_obj->bbox;
+
+		m_param.shapeid = transformable::findShapeIdx(obj);
 	}
 }

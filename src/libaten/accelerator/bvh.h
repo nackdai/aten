@@ -90,7 +90,7 @@ namespace aten {
 		virtual void collectNodes(std::vector<BVHNode>& nodes) const override final;
 
 		static int setTraverseOrder(bvhnode* root, int curOrder);
-		static void collecBVHtNodes(bvhnode* root, std::vector<BVHNode>& nodes);
+		static void collectNodes(bvhnode* root, std::vector<BVHNode>& nodes);
 
 	private:
 		static bool hit(

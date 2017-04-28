@@ -14,7 +14,7 @@ namespace aten {
 			auto type = s->getParam().type;
 
 			switch (type) {
-			case ShapeType::Mesh:
+			case ShapeType::Polygon:
 				s->getShapes(shapeparams, primparams);
 				break;
 			case ShapeType::Sphere:

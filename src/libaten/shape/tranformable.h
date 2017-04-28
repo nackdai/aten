@@ -32,11 +32,9 @@ namespace aten
 			return std::move(ShapeParameter(ShapeType::ShapeTypeMax));
 		}
 
-		virtual void getShapes(
-			std::vector<ShapeParameter>& shapeparams,
-			std::vector<PrimitiveParamter>& primparams) const
+		virtual void getPrimitives(std::vector<PrimitiveParamter>& primparams) const
 		{
-			// Default, nothing is done...
+			// Nothing is done...
 		}
 
 		static uint32_t getShapeNum();

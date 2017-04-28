@@ -255,6 +255,8 @@ namespace aten
 			param.area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();
 		}
+
+		param.primid = shapes[0]->faces[0]->id;
 	}
 
 	bool object::hit(
@@ -390,25 +392,18 @@ namespace aten
 		return std::move(res);
 	}
 
-	void object::getShapes(
-		std::vector<ShapeParameter>& shapeparams,
-		std::vector<PrimitiveParamter>& primparams) const
+	void object::getPrimitives(std::vector<PrimitiveParamter>& primparams) const
 	{
 		for (auto s : shapes) {
-			auto shapeParam = s->param;
+			const auto& shapeParam = s->param;
 			
-			shapeParam.primid = primparams.size();
-			//shapeParam.primnum = s->faces.size();
-
-			shapeParam.mtrl.idx = aten::material::findMaterialIdx((aten::material*)shapeParam.mtrl.ptr);
+			auto mtrlid = aten::material::findMaterialIdx((aten::material*)shapeParam.mtrl.ptr);
 
 			for (auto f : s->faces) {
 				auto faceParam = f->param;
-				faceParam.mtrlid = shapeParam.mtrl.idx;
+				faceParam.mtrlid = mtrlid;
 				primparams.push_back(faceParam);
 			}
-
-			shapeparams.push_back(shapeParam);
 		}
 	}
 

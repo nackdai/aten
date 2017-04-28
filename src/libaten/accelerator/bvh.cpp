@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-#define TEST_NODE_LIST
+//#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -206,7 +206,38 @@ namespace aten {
 							recLeft.p = param.mtxL2W.apply(recLeft.p);
 							recLeft.normal = normalize(param.mtxL2W.applyXYZ(recLeft.normal));
 
-							rec.obj = (hitable*)t;
+							recLeft.obj = (hitable*)t;
+
+							// For test. Not safe...
+							auto obj = (object*)t->getHasObject();
+
+							const auto& targetParam = obj->getParam();
+
+							auto f = prims[targetParam.primid];
+
+							const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+							const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+
+							real orignalLen = 0;
+							{
+								const auto& p0 = v0.pos;
+								const auto& p1 = v1.pos;
+
+								orignalLen = (p1 - p0).length();
+							}
+
+							real scaledLen = 0;
+							{
+								auto p0 = param.mtxL2W.apply(v0.pos);
+								auto p1 = param.mtxL2W.apply(v1.pos);
+
+								scaledLen = (p1 - p0).length();
+							}
+
+							real ratio = scaledLen / orignalLen;
+							ratio = ratio * ratio;
+
+							recLeft.area = targetParam.area * ratio;
 						}
 					}
 					else {
@@ -240,7 +271,38 @@ namespace aten {
 							recRight.p = param.mtxL2W.apply(recRight.p);
 							recRight.normal = normalize(param.mtxL2W.applyXYZ(recRight.normal));
 
-							rec.obj = (hitable*)t;
+							recRight.obj = (hitable*)t;
+
+							// For test. Not safe...
+							auto obj = (object*)t->getHasObject();
+
+							const auto& targetParam = obj->getParam();
+
+							auto f = prims[targetParam.primid];
+
+							const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+							const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+
+							real orignalLen = 0;
+							{
+								const auto& p0 = v0.pos;
+								const auto& p1 = v1.pos;
+
+								orignalLen = (p1 - p0).length();
+							}
+
+							real scaledLen = 0;
+							{
+								auto p0 = param.mtxL2W.apply(v0.pos);
+								auto p1 = param.mtxL2W.apply(v1.pos);
+
+								scaledLen = (p1 - p0).length();
+							}
+
+							real ratio = scaledLen / orignalLen;
+							ratio = ratio * ratio;
+
+							recRight.area = targetParam.area * ratio;
 						}
 					}
 					else {

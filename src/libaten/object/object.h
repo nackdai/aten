@@ -104,9 +104,7 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const override final;
 
-		virtual void getShapes(
-			std::vector<ShapeParameter>& shapeparams,
-			std::vector<PrimitiveParamter>& primparams) const override final;
+		virtual void getPrimitives(std::vector<PrimitiveParamter>& primparams) const override final;
 
 		virtual const ShapeParameter& getParam() const override final
 		{

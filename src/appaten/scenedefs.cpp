@@ -611,24 +611,25 @@ void HideLightScene::getCameraPosAndAt(
 void DisneyMaterialTestScene::makeScene(aten::scene* scene)
 {
 	{
-		aten::DisneyBRDF::Parameter param;
-		param.roughness = 0.5;
-		param.specular = 1.0;
-		param.metallic = 1.0;
+		aten::MaterialParameter param;
+		param.baseColor = aten::vec3(0.82, 0.67, 0.16);
+		param.roughness = 0.3;
+		param.specular = 0.5;
+		param.metallic = 0.5;
 
 		auto m = new aten::DisneyBRDF(param);
-		auto s = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, m);
+		auto s = new aten::sphere(aten::vec3(0, 0, 0), 1.0, m);
 		scene->add(s);
 	}
 
 	{
 		auto m = new aten::lambert(aten::vec3(0.82, 0.67, 0.16));
-		auto s = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, m);
+		auto s = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, m);
 		scene->add(s);
 	}
 
 	aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
-	scene->addLight(dir);
+	//scene->addLight(dir);
 
 #if 0
 	{

@@ -65,21 +65,21 @@ namespace aten
 	struct MaterialParameter {
 		MaterialType type;
 
-		aten::vec3 baseColor;					// サーフェイスカラー，通常テクスチャマップによって供給される.
+		aten::vec3 baseColor;			// サーフェイスカラー，通常テクスチャマップによって供給される.
 
-		real ior{ 1.0f };
-		real roughness{ 0.0f };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
-		real shininess{ 1.0f };
+		real ior{ 1.0 };
+		real roughness{ 0.5 };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+		real shininess{ 1.0 };
 
-		real subsurface{ 0.0f };		// 表面下の近似を用いてディフューズ形状を制御する.
-		real metallic{ 0.0f };			// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-		real specular{ 0.0f };			// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-		real specularTint{ 0.0f };		// 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-		real anisotropic{ 0.0f };		// 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-		real sheen{ 0.0f };				// 追加的なグレージングコンポーネント，主に布に対して意図している.
-		real sheenTint{ 0.0f };			// 基本色に向かう光沢色合いの量.
-		real clearcoat{ 0.0f };			// 第二の特別な目的のスペキュラーローブ.
-		real clearcoatGloss{ 0.0f };	// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+		real subsurface{ 0.0 };			// 表面下の近似を用いてディフューズ形状を制御する.
+		real metallic{ 0.0 };			// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+		real specular{ 0.5 };			// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+		real specularTint{ 0.0 };		// 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+		real anisotropic{ 0.0 };		// 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+		real sheen{ 0.0 };				// 追加的なグレージングコンポーネント，主に布に対して意図している.
+		real sheenTint{ 0.5 };			// 基本色に向かう光沢色合いの量.
+		real clearcoat{ 0.0 };			// 第二の特別な目的のスペキュラーローブ.
+		real clearcoatGloss{ 1.0 };		// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
 		UnionIdxPtr albedoMap;
 		UnionIdxPtr normalMap;
@@ -89,6 +89,7 @@ namespace aten
 
 		const MaterialAttribute attrib;
 
+		MaterialParameter() {}
 		MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
 			: type(_type), attrib(_attrib)
 		{}

@@ -7,20 +7,6 @@ namespace AT_NAME
 {
 	class DisneyBRDF : public material {
 	public:
-		struct Parameter {
-			aten::vec3 baseColor{ aten::vec3(real(0.82), real(0.67), real(0.16)) };
-			real metallic{ 0 };
-			real subsurface{ 0 };
-			real specular{ 0.5 };
-			real roughness{ 0.5 };
-			real specularTint{ 0 };
-			real anisotropic{ 0 };
-			real sheen{ 0 };
-			real sheenTint{ 0.5 };
-			real clearcoat{ 0 };
-			real clearcoatGloss{ 1 };
-		};
-	public:
 		DisneyBRDF(
 			aten::vec3 baseColor,
 			real subsurface,
@@ -33,6 +19,7 @@ namespace AT_NAME
 			real sheenTint,
 			real clearcoat,
 			real clearcoatGloss,
+			real ior,
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr,
 			aten::texture* roughnessMap = nullptr)
@@ -50,11 +37,13 @@ namespace AT_NAME
 			m_param.clearcoat = aten::clamp<real>(clearcoat, 0, 1);
 			m_param.clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
 
+			m_param.ior = ior;
+
 			m_param.roughnessMap.ptr = roughnessMap;
 		}
 
 		DisneyBRDF(
-			const Parameter& param,
+			const MaterialParameter& param,
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr,
 			aten::texture* roughnessMap = nullptr)
@@ -71,6 +60,8 @@ namespace AT_NAME
 			m_param.sheenTint = aten::clamp<real>(param.sheenTint, 0, 1);
 			m_param.clearcoat = aten::clamp<real>(param.clearcoat, 0, 1);
 			m_param.clearcoatGloss = aten::clamp<real>(param.clearcoatGloss, 0, 1);
+
+			m_param.ior = param.ior;
 
 			m_param.roughnessMap.ptr = roughnessMap;
 		}
@@ -91,6 +82,8 @@ namespace AT_NAME
 			m_param.clearcoat = val.get("clearcoat", m_param.clearcoat);
 			m_param.clearcoatGloss = val.get("clearcoatGloss", m_param.clearcoatGloss);
 			m_param.roughnessMap = val.get("roughnessmap", m_param.roughnessMap);
+
+			m_param.ior = val.get("ior", m_param.ior);
 		}
 
 		virtual ~DisneyBRDF() {}
@@ -123,15 +116,8 @@ namespace AT_NAME
 			bool isLightPath = false) const override final;
 
 	private:
-		real pdf(
-			const aten::vec3& V,
-			const aten::vec3& N,
-			const aten::vec3& L,
-			const aten::vec3& X,
-			const aten::vec3& Y,
-			real u, real v) const;
-
-		aten::vec3 sampleDirection(
+		aten::vec3 sample(
+			real& pdf,
 			const aten::vec3& V,
 			const aten::vec3& N,
 			const aten::vec3& X,

@@ -118,7 +118,7 @@ public:
 		aten::vec3& at);
 };
 
-#define Scene CornellBoxScene
+//#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
 //#define Scene MtrlTestScene
@@ -128,6 +128,6 @@ public:
 //#define Scene ManyLightScene
 //#define Scene TexturesScene
 //#define Scene HideLightScene
-//#define Scene DisneyMaterialTestScene
+#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene

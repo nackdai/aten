@@ -20,6 +20,14 @@ namespace AT_NAME
 		return m2 * m2 * m; // pow(m,5)
 	}
 
+	inline real SchlickFresnelEta(real eta, real cosi)
+	{
+		const real f = ((real(1) - eta) / (real(1) + eta)) * ((real(1) - eta) / (real(1) + eta));
+		const real m = real(1) - aten::abs(cosi);
+		const real m2 = m * m;
+		return f + (real(1) - f) * m2 * m2 * m;
+	}
+
 	inline real GTR1(real NdotH, real a)
 	{
 		// NOTE
@@ -55,8 +63,11 @@ namespace AT_NAME
 		return 1 / (AT_MATH_PI * ax * ay * sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + NdotH * NdotH));
 #else
 		// A trick to avoid fireflies from RadeonRaySDK.
-		auto f = 1 / (AT_MATH_PI * ax * ay * sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + NdotH * NdotH));
-		f = aten::clamp<real>(f, 0, 10);
+		auto f = sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + NdotH * NdotH);
+		f = AT_MATH_PI * ax * ay * f * f;
+		
+		f = aten::clamp<real>(1 / (f * f), 0, 10);
+
 		return f;
 #endif
 	}
@@ -94,66 +105,10 @@ namespace AT_NAME
 		const aten::vec3& wo,	/* out */
 		real u, real v) const
 	{
-		const aten::vec3& N = normal;
-		const aten::vec3& V = -wi;
-		const aten::vec3& L = wo;
-		
-		const aten::vec3 X = getOrthoVector(N);
-		const aten::vec3 Y = normalize(cross(N, X));
-
-		return pdf(V, N, L, X, Y, u, v);
-	}
-
-	real DisneyBRDF::pdf(
-		const aten::vec3& V,
-		const aten::vec3& N,
-		const aten::vec3& L,
-		const aten::vec3& X,
-		const aten::vec3& Y,
-		real u, real v) const
-	{
-		const auto VdotN = dot(V, N);
-		const auto LdotN = dot(L, N);
-
-		if (VdotN < 0 || LdotN < 0) {
-			return 0;
-		}
-
-		const auto anisotropic = m_param.anisotropic;
-		const auto roughness = m_param.roughness;
-		const auto metalic = m_param.metallic;
-
-		const auto weight2 = metalic;
+		const auto weight2 = m_param.metallic;
 		const auto weight1 = 1 - weight2;
 
-		// diffuse.
-		const real diffusePdf = LdotN / AT_MATH_PI;
-
-		// specular
-		const auto aspect = aten::sqrt(real(1) - anisotropic * real(0.9));
-		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
-		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
-
-		aten::vec3 H = normalize(V + L);
-
-		const auto NdotH = dot(N, H);
-		const auto HdotX = dot(H, X);
-		const auto HdotY = dot(H, Y);
-		const auto LdotH = dot(L, H);
-
-		const auto Ds = GTR2_aniso(NdotH, HdotX, HdotY, ax, ay);
-		const auto costhetah = NdotH;
-
-		// NOTE
-		// pdfl = pdfh / (4 * dot(l, h))
-		// pdfh = D(É∆h) * cos(É∆h)
-		// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
-		// p24
-		const real specularPdf = (Ds * costhetah) / (4 * LdotH);
-
-		real pdf = weight1 * diffusePdf + weight2 * specularPdf;
-
-		return pdf;
+		return weight1;
 	}
 
 	aten::vec3 DisneyBRDF::sampleDirection(
@@ -170,10 +125,12 @@ namespace AT_NAME
 		const aten::vec3 X = getOrthoVector(N);
 		const aten::vec3 Y = normalize(cross(N, X));
 
-		return std::move(sampleDirection(V, N, X, Y, u, v, sampler));
+		real pdf;
+		return std::move(sample(pdf, V, N, X, Y, u, v, sampler));
 	}
 
-	aten::vec3 DisneyBRDF::sampleDirection(
+	aten::vec3 DisneyBRDF::sample(
+		real& pdf,
 		const aten::vec3& V,
 		const aten::vec3& N,
 		const aten::vec3& X,
@@ -200,6 +157,8 @@ namespace AT_NAME
 		aten::vec3 H;
 		aten::vec3 L;
 
+		real diffusePdf, specularPdf;
+
 		if (willSampleDiffuse) {
 			// Sample diffuse.
 
@@ -218,6 +177,15 @@ namespace AT_NAME
 
 			L = normalize((t * x + b * y + n * z));
 			H = normalize(L + V);
+
+			const auto NdotH = dot(N, H);
+			const auto HdotX = dot(H, X);
+			const auto HdotY = dot(H, Y);
+			const auto Ds = GTR2_aniso(NdotH, HdotX, HdotY, ax, ay);
+
+			const auto LdotH = dot(L, H);
+			diffusePdf = dot(L, N) / AT_MATH_PI;
+			specularPdf = (Ds * NdotH) / (real(4) * LdotH);
 		}
 		else {
 			// Sample specular.
@@ -231,7 +199,39 @@ namespace AT_NAME
 			H.normalize();
 
 			L = 2 * dot(V, H) * H - V;
+
+			const auto LdotH = dot(L, H);
+			if (LdotH < 0)
+			{
+				pdf = real(0);
+				return vec3(0, 0, 0);
+			}
+
+			const auto NdotH = dot(N, H);
+			const auto HdotX = dot(H, X);
+			const auto HdotY = dot(H, Y);
+			const auto Ds = GTR2_aniso(NdotH, HdotX, HdotY, ax, ay);
+
+			diffusePdf = dot(L, N) / AT_MATH_PI;
+			specularPdf = (Ds * NdotH) / (real(4) * LdotH);
+
+#if 0
+			// A trick to avoid fireflies 
+			if (specularpdf < 1.f)
+			{
+				pdf = real(0);
+				return vec3(0, 0, 0);
+			}
+#endif
 		}
+
+		// NOTE
+		// pdfl = pdfh / (4 * dot(l, h))
+		// pdfh = D(É∆h) * cos(É∆h)
+		// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
+		// p24
+
+		pdf = weight1 * diffusePdf + weight2 * specularPdf;
 
 		return std::move(L);
 	}
@@ -325,14 +325,14 @@ namespace AT_NAME
 		const auto Gr = smithG_GGX(NdotL, real(0.25)) * smithG_GGX(NdotV, real(0.25));	// ò_ï∂ì‡Ç≈0.25åàÇﬂÇ§ÇøÇ∆ãLç⁄.
 
 		// TODO
+		const real et = 1.f;
+		if (et != 0.f)
 		{
-			const auto weight2 = metalic;
-			const auto weight1 = real(real(1)) - weight2;
-
-			fresnel = weight1 * aten::mix(Fd, ss, subsurface) + weight2 * FH;
+			const real cosi = dot(N, V);
+			fresnel = real(1) - SchlickFresnelEta(et, cosi);
 		}
 
-		return ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metalic)	// diffuse
+		auto ret = ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metalic)	// diffuse
 			+ Gs * Fs * Ds						// specular
 #if 0
 			+ 0.25 * clearcoat * Gr * Fr * Dr;	// clearcoat
@@ -340,6 +340,8 @@ namespace AT_NAME
 			// A trick to avoid fireflies from RadeonRaySDK.
 			+ aten::clamp<real>(clearcoat * Gr * Fr * Dr, real(0), real(0.5));	// clearcoat.
 #endif
+
+		return fresnel * ret;
 	}
 
 	MaterialSampling DisneyBRDF::sample(
@@ -360,11 +362,9 @@ namespace AT_NAME
 
 		MaterialSampling ret;
 
-		ret.dir = sampleDirection(V, N, X, Y, u, v, sampler);
+		ret.dir = sample(ret.pdf, V, N, X, Y, u, v, sampler);
 
 		const aten::vec3& L = ret.dir;
-
-		ret.pdf = pdf(V, N, L, X, Y, u, v);
 
 		real fresnel = 1;
 		ret.bsdf = bsdf(fresnel, V, N, L, X, Y, u, v);

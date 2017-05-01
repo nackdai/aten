@@ -353,7 +353,7 @@ namespace aten
 		for (uint32_t n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				dst.buffer->put(i, vec4(image[i] / mltNum, real(1)));
+				dst.buffer->add(i, vec4(image[i] / mltNum, real(1)));
 			}
 		}
 	}

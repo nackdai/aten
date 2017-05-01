@@ -6,6 +6,10 @@ namespace aten
 		: m_width(w), m_height(h)
 	{
 		m_image.resize(m_width * m_height);
+	}
+
+	void Film::clear()
+	{
 		memset(&m_image[0], 0, m_image.size() * sizeof(vec4));
 	}
 
@@ -31,6 +35,11 @@ namespace aten
 	void Film::put(int i, const vec4& v)
 	{
 		m_image[i] = v;
+	}
+
+	void Film::add(int i, const vec4& v)
+	{
+		m_image[i] += v;
 	}
 
 	// NOTE

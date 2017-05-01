@@ -13,11 +13,15 @@ namespace aten
 		virtual ~Film() {}
 
 	public:
+		virtual void clear();
+
 		void put(int x, int y, const vec3& v);
 		void put(int i, const vec3& v);
 
 		void put(int x, int y, const vec4& v);
 		virtual void put(int i, const vec4& v);
+
+		virtual void add(int i, const vec4& v);
 
 		vec4* image()
 		{
@@ -60,6 +64,16 @@ namespace aten
 		virtual ~FilmProgressive() {}
 
 	public:
+		virtual void clear()
+		{
+			// Nothing is done...
+		}
+
 		virtual void put(int i, const vec4& v) override final;
+
+		virtual void add(int i, const vec4& v) override final
+		{
+			put(i, v);
+		}
 	};
 }

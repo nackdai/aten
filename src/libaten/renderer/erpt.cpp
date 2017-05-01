@@ -186,32 +186,27 @@ namespace aten
 
 		auto time = timer::getSystemTime();
 
-#ifdef ENABLE_OMP
-#pragma omp parallel
-#endif
-		{
-			// ed‚ðŒvŽZ.
-			std::vector<vec3> tmpSumI(threadNum);
+		// ed‚ðŒvŽZ.
+		std::vector<vec3> tmpSumI(threadNum);
 
 #ifdef ENABLE_OMP
-#pragma omp for
+#pragma omp parallel for
 #endif
-			for (int y = 0; y < height; y++) {
-				auto idx = thread::getThreadIdx();
+		for (int y = 0; y < height; y++) {
+			auto idx = thread::getThreadIdx();
 
-				for (int x = 0; x < width; x++) {
-					XorShift rnd((y * height * 4 + x * 4) * samples + time.milliSeconds);
-					ERPTSampler X(&rnd);
+			for (int x = 0; x < width; x++) {
+				XorShift rnd((y * height * 4 + x * 4) * samples + time.milliSeconds);
+				ERPTSampler X(&rnd);
 
-					auto path = genPath(scene, &X, x, y, width, height, camera, false);
+				auto path = genPath(scene, &X, x, y, width, height, camera, false);
 
-					tmpSumI[idx] += path.contrib;
-				}
+				tmpSumI[idx] += path.contrib;
 			}
+		}
 
-			for (uint32_t i = 0; i < threadNum; i++) {
-				sumI += tmpSumI[i];
-			}
+		for (uint32_t i = 0; i < threadNum; i++) {
+			sumI += tmpSumI[i];
 		}
 
 		const real ed = color::luminance(sumI / (real)(width * height)) / (real)mutation;
@@ -330,7 +325,7 @@ namespace aten
 		for (uint32_t n = 0; n < threadNum; n++) {
 			auto& image = acuumImage[n];
 			for (int i = 0; i < width * height; i++) {
-				dst.buffer->put(i, vec4(image[i], 1));
+				dst.buffer->add(i, vec4(image[i], 1));
 			}
 		}
 	}

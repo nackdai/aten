@@ -299,9 +299,6 @@
     <ClInclude Include="..\src\libaten\renderer\film.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\bdpt.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\bdpt2.h">
       <Filter>renderer</Filter>
     </ClInclude>
@@ -484,9 +481,6 @@
       <Filter>camera</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\film.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp">

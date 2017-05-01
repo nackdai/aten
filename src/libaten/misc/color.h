@@ -4,17 +4,44 @@
 #include "math/vec3.h"
 
 namespace aten {
-	template <typename _T>
+	template <typename _T, int N>
 	struct TColor {
-		union {
-			struct {
-				_T r;
-				_T g;
-				_T b;
-				_T a;
-			};
-			_T c[4];
-		};
+		_T c[N];
+
+		_T& r()
+		{
+			return c[0];
+		}
+		_T& g()
+		{
+			return c[1];
+		}
+		_T& b()
+		{
+			return c[2];
+		}
+	};
+
+	template <typename _T>
+	struct TColor<_T, 4> {
+		_T c[4];
+
+		_T& r()
+		{
+			return c[0];
+		}
+		_T& g()
+		{
+			return c[1];
+		}
+		_T& b()
+		{
+			return c[2];
+		}
+		_T& a()
+		{
+			return c[3];
+		}
 	};
 
 	class color {

@@ -98,5 +98,7 @@ namespace aten {
 		static void render(
 			const vec4* pixels,
 			bool revert);
+
+		static void takeScreenshot(const char* filename);
 	};
 }

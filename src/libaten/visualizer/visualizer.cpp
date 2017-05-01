@@ -4,13 +4,16 @@
 #include "math/vec3.h"
 #include "misc/color.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 namespace aten {
 	static GLuint g_tex{ 0 };
 
 	static int g_width{ 0 };
 	static int g_height{ 0 };
 
-	static std::vector<TColor<float>> g_tmp;
+	static std::vector<TColor<float, 4>> g_tmp;
 
 	static const PixelFormat g_fmt{ PixelFormat::rgba32f };
 
@@ -170,10 +173,10 @@ namespace aten {
 				auto& s = src[pos];
 				auto& d = g_tmp[pos];
 
-				d.r = (float)s.x;
-				d.g = (float)s.y;
-				d.b = (float)s.z;
-				d.a = (float)s.w;
+				d.r() = (float)s.x;
+				d.g() = (float)s.y;
+				d.b() = (float)s.z;
+				d.a() = (float)s.w;
 			}
 		}
 
@@ -251,5 +254,40 @@ namespace aten {
 
 			CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 		}
+	}
+
+	void visualizer::takeScreenshot(const char* filename)
+	{
+		CALL_GL_API(::glFlush());
+		CALL_GL_API(::glFinish());
+
+		using ScreenShotImageType = TColor<uint8_t, 3>;
+
+		std::vector<ScreenShotImageType> tmp(g_width * g_height);
+
+		CALL_GL_API(::glReadBuffer(GL_BACK));
+
+		CALL_GL_API(::glReadPixels(0, 0, g_width, g_height, GL_RGB, GL_UNSIGNED_BYTE, &tmp[0]));
+
+		// up-side-down.
+		std::vector<ScreenShotImageType> dst(g_width * g_height);
+
+		static const int bpp = sizeof(ScreenShotImageType);
+		const int pitch = g_width * bpp;
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < g_height; y++) {
+			int yy = g_height - 1 - y;
+
+			memcpy(
+				&dst[yy * g_width],
+				&tmp[y * g_width],
+				pitch);
+		}
+
+		auto ret = ::stbi_write_png(filename, g_width, g_height, bpp, &dst[0], pitch);
+		AT_ASSERT(ret > 0);
 	}
 }

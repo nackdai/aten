@@ -2,7 +2,7 @@
 
 This is easy, simple path tracer.
 
-## features
+## Features
 
 
 - Rendering algorithms
@@ -62,14 +62,19 @@ This is easy, simple path tracer.
   - Not specify all definitions.
 - Only for Windows.
 
-## T.B.D
+## Under Construction Works
 
 - GPGPU
   - idaten is GPGPU project.
+
+## Future Works
+
 - More efficient denoise filter
 - Specify all scene definitions by XML
 - Bi-Directional Path Tracing
   - Use all lights.
+- Sub Surface Scattering
+- Particiate Media
 
 ## Gallery
 

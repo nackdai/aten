@@ -105,10 +105,43 @@ namespace AT_NAME
 		const aten::vec3& wo,	/* out */
 		real u, real v) const
 	{
-		const auto weight2 = m_param.metallic;
+		const aten::vec3& N = normal;
+		const aten::vec3& V = -wi;
+		const aten::vec3& L = wo;
+		
+		const aten::vec3 X = getOrthoVector(N);
+		const aten::vec3 Y = normalize(cross(N, X));
+		
+		// TODO
+		const auto anisotropic = m_param.anisotropic;
+		const auto roughness = m_param.roughness;
+		const auto metalic = m_param.metallic;
+
+		const auto weight2 = metalic;
 		const auto weight1 = 1 - weight2;
 
+#if 0
 		return weight1;
+#else
+		const auto aspect = aten::sqrt(1 - anisotropic * real(0.9));
+		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
+		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
+
+		const auto H = normalize(L + V);
+
+		const auto NdotH = dot(N, H);
+		const auto HdotX = dot(H, X);
+		const auto HdotY = dot(H, Y);
+		const auto Ds = GTR2_aniso(NdotH, HdotX, HdotY, ax, ay);
+
+		const auto LdotH = dot(L, H);
+		const auto diffusePdf = dot(L, N) / AT_MATH_PI;
+		const auto specularPdf = (Ds * NdotH) / (real(4) * LdotH);
+
+		const auto ret = weight1 * diffusePdf + weight2 * specularPdf;
+
+		return ret;
+#endif
 	}
 
 	aten::vec3 DisneyBRDF::sampleDirection(

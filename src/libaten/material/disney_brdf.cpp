@@ -237,7 +237,7 @@ namespace AT_NAME
 			if (LdotH < 0)
 			{
 				pdf = real(0);
-				return vec3(0, 0, 0);
+				return aten::vec3(0, 0, 0);
 			}
 
 			const auto NdotH = dot(N, H);

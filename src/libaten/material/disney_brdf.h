@@ -43,7 +43,7 @@ namespace AT_NAME
 		}
 
 		DisneyBRDF(
-			const MaterialParameter& param,
+			const aten::MaterialParameter& param,
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr,
 			aten::texture* roughnessMap = nullptr)

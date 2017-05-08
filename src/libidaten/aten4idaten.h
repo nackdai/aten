@@ -44,3 +44,5 @@
 
 #include "shape/sphere.h"
 #include "shape/cube.h"
+
+#include "object/vertex.h"

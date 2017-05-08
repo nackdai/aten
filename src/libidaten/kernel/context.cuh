@@ -12,4 +12,7 @@ struct Context {
 	aten::LightParameter* lights;
 
 	aten::BVHNode* nodes;
+
+	aten::PrimitiveParamter* prims;
+	aten::vertex* vertices;
 };

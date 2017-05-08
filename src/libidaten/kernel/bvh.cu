@@ -54,9 +54,43 @@ AT_DEVICE_API bool intersectBVH(
 				}
 				else {
 					if (left->primid >= 0) {
+						// hit test primitive...
+						const auto& prim = ctxt.prims[left->primid];
+						isHitLeft = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, recLeft);
+
+						if (isHitLeft) {
+							recLeft.p = leftobj.mtxL2W.apply(recLeft.p);
+							recLeft.normal = normalize(leftobj.mtxL2W.applyXYZ(recLeft.normal));
+
+							const auto& f = ctxt.prims[leftobj.primid];
+
+							const auto& v0 = ctxt.vertices[f.idx[0]];
+							const auto& v1 = ctxt.vertices[f.idx[1]];
+
+							real orignalLen = 0;
+							{
+								const auto& p0 = v0.pos;
+								const auto& p1 = v1.pos;
+
+								orignalLen = (p1 - p0).length();
+							}
+
+							real scaledLen = 0;
+							{
+								auto p0 = leftobj.mtxL2W.apply(v0.pos);
+								auto p1 = leftobj.mtxL2W.apply(v1.pos);
+
+								scaledLen = (p1 - p0).length();
+							}
+
+							real ratio = scaledLen / orignalLen;
+							ratio = ratio * ratio;
+
+							recLeft.area = leftobj.area * ratio;
+						}
 					}
 					else {
-						isHitLeft = intersectShape(leftobj, isNested ? transformedRay : r, t_min, t_max, recLeft);
+						isHitLeft = intersectShape(leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recLeft);
 					}
 				}
 
@@ -88,10 +122,43 @@ AT_DEVICE_API bool intersectBVH(
 				}
 				else {
 					if (right->primid >= 0) {
+						// hit test primitive...
+						const auto& prim = ctxt.prims[right->primid];
+						isHitRight = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, recRight);
 
+						if (isHitRight) {
+							recRight.p = rightobj.mtxL2W.apply(recRight.p);
+							recRight.normal = normalize(rightobj.mtxL2W.applyXYZ(recRight.normal));
+
+							const auto& f = ctxt.prims[rightobj.primid];
+
+							const auto& v0 = ctxt.vertices[f.idx[0]];
+							const auto& v1 = ctxt.vertices[f.idx[1]];
+
+							real orignalLen = 0;
+							{
+								const auto& p0 = v0.pos;
+								const auto& p1 = v1.pos;
+
+								orignalLen = (p1 - p0).length();
+							}
+
+							real scaledLen = 0;
+							{
+								auto p0 = rightobj.mtxL2W.apply(v0.pos);
+								auto p1 = rightobj.mtxL2W.apply(v1.pos);
+
+								scaledLen = (p1 - p0).length();
+							}
+
+							real ratio = scaledLen / orignalLen;
+							ratio = ratio * ratio;
+
+							recRight.area = rightobj.area * ratio;
+						}
 					}
 					else {
-						isHitRight = intersectShape(rightobj, isNested ? transformedRay : r, t_min, t_max, recRight);
+						isHitRight = intersectShape(rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recRight);
 					}
 				}
 

@@ -124,7 +124,7 @@ namespace aten
 
 		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const override final;
 
-		virtual void collectInternalNodes(std::vector<BVHNode>& nodes) override final;
+		virtual int collectInternalNodes(std::vector<BVHNode>& nodes, int order, bvhnode* parent) override final;
 
 	public:
 		std::vector<shape*> shapes;

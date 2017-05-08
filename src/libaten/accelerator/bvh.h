@@ -45,9 +45,10 @@ namespace aten {
 			return nullptr;
 		}
 
-		virtual void collectInternalNodes(std::vector<BVHNode>& nodes)
+		virtual int collectInternalNodes(std::vector<BVHNode>& nodes, int order, bvhnode* parent)
 		{
 			// Nothing is done...
+			return order;
 		}
 
 	private:
@@ -90,7 +91,7 @@ namespace aten {
 		virtual void collectNodes(std::vector<BVHNode>& nodes) const override final;
 
 		static int setTraverseOrder(bvhnode* root, int curOrder);
-		static void collectNodes(bvhnode* root, std::vector<BVHNode>& nodes);
+		static void collectNodes(bvhnode* root, std::vector<BVHNode>& nodes, bvhnode* parent);
 
 	private:
 		static bool hit(

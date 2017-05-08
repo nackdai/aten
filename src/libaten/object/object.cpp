@@ -407,9 +407,10 @@ namespace aten
 		}
 	}
 
-	void object::collectInternalNodes(std::vector<BVHNode>& nodes)
+	int object::collectInternalNodes(std::vector<BVHNode>& nodes, int order, bvhnode* parent)
 	{
-		bvh::setTraverseOrder(&m_node, 0);
-		bvh::collectNodes(&m_node, nodes);
+		int ret = bvh::setTraverseOrder(&m_node, order);
+		bvh::collectNodes(&m_node, nodes, parent);
+		return ret;
 	}
 }

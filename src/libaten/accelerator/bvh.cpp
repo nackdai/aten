@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-//#define TEST_NODE_LIST
+#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -178,11 +178,15 @@ namespace aten {
 		*stack++ = nullptr;
 
 		int stackpos = 1;
+		int nestedStackPos = -1;
 
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
 
 		BVHNode* node = &nodes[0];
+
+		aten::ray transformedRay = r;
+		bool isNested = false;
 
 		do {
 			BVHNode* left = node->left >= 0 ? &nodes[node->left] : nullptr;
@@ -191,60 +195,71 @@ namespace aten {
 			bool traverseLeft = false;
 			bool traverseRight = false;
 
+			real left_t = AT_MATH_INF;
+			real right_t = AT_MATH_INF;
+
 			if (left) {
 				if (left->isLeaf()) {
 					hitrecord recLeft;
 					bool isHitLeft = false;
 
 					if (left->nestid >= 0) {
-						auto t = shapes[left->shapeid];
-						const auto& param = t->getParam();
-						auto transformedRay = param.mtxW2L.applyRay(r);
-						isHitLeft = _hit(&nodes[left->nestid], transformedRay, t_min, t_max, recLeft);
+						traverseLeft = left->bbox.hit(r, t_min, t_max, &left_t);
 
-						if (isHitLeft) {
-							recLeft.p = param.mtxL2W.apply(recLeft.p);
-							recLeft.normal = normalize(param.mtxL2W.applyXYZ(recLeft.normal));
-
-							recLeft.obj = (hitable*)t;
-
-							// For test. Not safe...
-							auto obj = (object*)t->getHasObject();
-
-							const auto& targetParam = obj->getParam();
-
-							auto f = prims[targetParam.primid];
-
-							const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-							const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
-
-							real orignalLen = 0;
-							{
-								const auto& p0 = v0.pos;
-								const auto& p1 = v1.pos;
-
-								orignalLen = (p1 - p0).length();
-							}
-
-							real scaledLen = 0;
-							{
-								auto p0 = param.mtxL2W.apply(v0.pos);
-								auto p1 = param.mtxL2W.apply(v1.pos);
-
-								scaledLen = (p1 - p0).length();
-							}
-
-							real ratio = scaledLen / orignalLen;
-							ratio = ratio * ratio;
-
-							recLeft.area = targetParam.area * ratio;
+						if (traverseLeft) {
+							left = &nodes[left->nestid];
+							nestedStackPos = stackpos;
 						}
 					}
 					else {
-						auto leftobj = left->shapeid >= 0
-							? (hitable*)shapes[left->shapeid]
-							: (hitable*)prims[left->primid];
-						isHitLeft = leftobj->hit(r, t_min, t_max, recLeft);
+						if (left->primid >= 0) {
+							auto t = shapes[left->shapeid];
+							const auto& leftobj = (hitable*)prims[left->primid];
+							const auto& param = t->getParam();
+							isHitLeft = leftobj->hit(transformedRay, t_min, t_max, recLeft);
+
+							if (isHitLeft) {
+								recLeft.p = param.mtxL2W.apply(recLeft.p);
+								recLeft.normal = normalize(param.mtxL2W.applyXYZ(recLeft.normal));
+
+								recLeft.obj = (hitable*)t;
+
+								// For test. Not safe...
+								auto obj = (object*)t->getHasObject();
+
+								const auto& targetParam = obj->getParam();
+
+								auto f = prims[targetParam.primid];
+
+								const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+								const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+
+								real orignalLen = 0;
+								{
+									const auto& p0 = v0.pos;
+									const auto& p1 = v1.pos;
+
+									orignalLen = (p1 - p0).length();
+								}
+
+								real scaledLen = 0;
+								{
+									auto p0 = param.mtxL2W.apply(v0.pos);
+									auto p1 = param.mtxL2W.apply(v1.pos);
+
+									scaledLen = (p1 - p0).length();
+								}
+
+								real ratio = scaledLen / orignalLen;
+								ratio = ratio * ratio;
+
+								recLeft.area = targetParam.area * ratio;
+							}
+						}
+						else {
+							const auto& leftobj = (hitable*)shapes[left->shapeid];
+							isHitLeft = leftobj->hit(isNested ? transformedRay : r, t_min, t_max, recLeft);
+						}
 					}
 					if (isHitLeft) {
 						if (recLeft.t < rec.t) {
@@ -253,7 +268,7 @@ namespace aten {
 					}
 				}
 				else {
-					traverseLeft = left->bbox.hit(r, t_min, t_max);
+					traverseLeft = left->bbox.hit(isNested ? transformedRay : r, t_min, t_max);
 				}
 			}
 			if (right) {
@@ -262,54 +277,62 @@ namespace aten {
 					bool isHitRight = false;
 
 					if (right->nestid >= 0) {
-						auto t = shapes[right->shapeid];
-						const auto& param = t->getParam();
-						auto transformedRay = param.mtxW2L.applyRay(r);
-						isHitRight = _hit(&nodes[right->nestid], transformedRay, t_min, t_max, recRight);
+						traverseRight = right->bbox.hit(r, t_min, t_max, &right_t);
 
-						if (isHitRight) {
-							recRight.p = param.mtxL2W.apply(recRight.p);
-							recRight.normal = normalize(param.mtxL2W.applyXYZ(recRight.normal));
-
-							recRight.obj = (hitable*)t;
-
-							// For test. Not safe...
-							auto obj = (object*)t->getHasObject();
-
-							const auto& targetParam = obj->getParam();
-
-							auto f = prims[targetParam.primid];
-
-							const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-							const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
-
-							real orignalLen = 0;
-							{
-								const auto& p0 = v0.pos;
-								const auto& p1 = v1.pos;
-
-								orignalLen = (p1 - p0).length();
-							}
-
-							real scaledLen = 0;
-							{
-								auto p0 = param.mtxL2W.apply(v0.pos);
-								auto p1 = param.mtxL2W.apply(v1.pos);
-
-								scaledLen = (p1 - p0).length();
-							}
-
-							real ratio = scaledLen / orignalLen;
-							ratio = ratio * ratio;
-
-							recRight.area = targetParam.area * ratio;
+						if (traverseRight && right_t < left_t) {
+							right = &nodes[right->nestid];
+							nestedStackPos = stackpos;
 						}
 					}
 					else {
-						auto rightobj = right->shapeid >= 0
-							? (hitable*)shapes[right->shapeid]
-							: (hitable*)prims[right->primid];
-						isHitRight = rightobj->hit(r, t_min, t_max, recRight);
+						if (right->primid >= 0) {
+							auto t = shapes[right->shapeid];
+							const auto& param = t->getParam();
+							const auto rightobj = (hitable*)prims[right->primid];
+							isHitRight = rightobj->hit(transformedRay, t_min, t_max, recRight);
+
+							if (isHitRight) {
+								recRight.p = param.mtxL2W.apply(recRight.p);
+								recRight.normal = normalize(param.mtxL2W.applyXYZ(recRight.normal));
+
+								recRight.obj = (hitable*)t;
+
+								// For test. Not safe...
+								auto obj = (object*)t->getHasObject();
+
+								const auto& targetParam = obj->getParam();
+
+								auto f = prims[targetParam.primid];
+
+								const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+								const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+
+								real orignalLen = 0;
+								{
+									const auto& p0 = v0.pos;
+									const auto& p1 = v1.pos;
+
+									orignalLen = (p1 - p0).length();
+								}
+
+								real scaledLen = 0;
+								{
+									auto p0 = param.mtxL2W.apply(v0.pos);
+									auto p1 = param.mtxL2W.apply(v1.pos);
+
+									scaledLen = (p1 - p0).length();
+								}
+
+								real ratio = scaledLen / orignalLen;
+								ratio = ratio * ratio;
+
+								recRight.area = targetParam.area * ratio;
+							}
+						}
+						else {
+							const auto rightobj = (hitable*)shapes[right->shapeid];
+							isHitRight = rightobj->hit(isNested ? transformedRay : r, t_min, t_max, recRight);
+						}
 					}
 					if (isHitRight) {
 						if (recRight.t < rec.t) {
@@ -318,11 +341,16 @@ namespace aten {
 					}
 				}
 				else {
-					traverseRight = right->bbox.hit(r, t_min, t_max);
+					traverseRight = right->bbox.hit(isNested ? transformedRay : r, t_min, t_max);
 				}
 			}
 
 			if (!traverseLeft && !traverseRight) {
+				if (nestedStackPos == stackpos) {
+					nestedStackPos = -1;
+					isNested = false;
+				}
+
 				node = *(--stack);
 				stackpos -= 1;
 			}
@@ -332,6 +360,13 @@ namespace aten {
 				if (traverseLeft && traverseRight) {
 					*(stack++) = right;
 					stackpos += 1;
+				}
+
+				if (!isNested && nestedStackPos >= 0) {
+					auto t = shapes[node->shapeid];
+					const auto& param = t->getParam();
+					transformedRay = param.mtxW2L.applyRay(r);
+					isNested = true;
 				}
 			}
 			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
@@ -792,8 +827,8 @@ namespace aten {
 
 	void bvh::collectNodes(std::vector<BVHNode>& nodes) const
 	{
-		setTraverseOrder(m_root, 0);
-		collectNodes(m_root, nodes);
+		int order = setTraverseOrder(m_root, 0);
+		collectNodes(m_root, nodes, nullptr);
 
 		auto shapes = transformable::getShapes();
 		for (auto s : shapes) {
@@ -805,7 +840,7 @@ namespace aten {
 					auto& node = nodes[idx];
 					node.nestid = nodes.size();
 
-					s->collectInternalNodes(nodes);
+					order = s->collectInternalNodes(nodes, order, nullptr);
 				}
 			}
 		}
@@ -849,7 +884,7 @@ namespace aten {
 		return order;
 	}
 
-	void bvh::collectNodes(bvhnode* root, std::vector<BVHNode>& nodes)
+	void bvh::collectNodes(bvhnode* root, std::vector<BVHNode>& nodes, bvhnode* parent)
 	{
 		static const uint32_t stacksize = 64;
 		bvhnode* stackbuf[stacksize] = { nullptr };
@@ -883,6 +918,11 @@ namespace aten {
 			else {
 				node.left = (pleft ? pleft->m_traverseOrder : -1);
 				node.right = (pright ? pright->m_traverseOrder : -1);
+			}
+
+			if (parent) {
+				AT_ASSERT(node.shapeid < 0);
+				node.shapeid = transformable::findShapeIdxAsHitable(parent);
 			}
 
 			nodes.push_back(node);

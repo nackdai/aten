@@ -13,7 +13,7 @@ namespace aten {
 		const auto& shapes = aten::transformable::getShapes();
 
 		int order = 0;
-		std::map<hitable*, int> orderMap;
+		std::map<transformable*, int> orderMap;
 
 		for (auto s : shapes) {
 			auto type = s->getParam().type;
@@ -53,10 +53,12 @@ namespace aten {
 				auto param = s->getParam();
 				auto obj = s->getHasObject();
 				
-				auto it = orderMap.find(const_cast<hitable*>(obj));
+				auto it = orderMap.find((transformable*)(obj));
 				AT_ASSERT(it != orderMap.end());
 
 				param.shapeid = it->second;
+
+				param.area = it->first->getParam().area;
 
 				shapeparams.push_back(param);
 			}

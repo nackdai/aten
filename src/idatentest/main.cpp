@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "aten.h"
+#include "atenscene.h"
 #include "idaten.h"
 
 static int WIDTH = 640;
@@ -77,17 +78,38 @@ void makeScene(aten::scene* scene)
 		16.5,
 		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
 
+#if 0
 	// ƒKƒ‰ƒX.
 	auto glass = new aten::sphere(
 		aten::vec3(77, 16.5, 78),
 		16.5,
 		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+#else
+	aten::AssetManager::registerMtrl(
+		"Material.001",
+		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
+
+	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+
+	aten::mat4 mtxL2W;
+	mtxL2W.asRotateByY(Deg2Rad(-25));
+
+	aten::mat4 mtxT;
+	mtxT.asTrans(aten::vec3(77, 16.5, 78));
+
+	aten::mat4 mtxS;
+	mtxS.asScale(10);
+
+	mtxL2W = mtxT * mtxL2W * mtxS;
+
+	auto glass = new aten::instance<aten::object>(obj, mtxL2W);
+#endif
 
 	aten::Light* l = new aten::AreaLight(light, emit->color());
 
 
 	scene->addLight(l);
-#if 1
+#if 0
 	scene->add(light);
 	scene->add(left);
 	scene->add(right);
@@ -99,7 +121,7 @@ void makeScene(aten::scene* scene)
 	scene->add(glass);
 #else
 	scene->add(light);
-	scene->add(floor);
+	scene->add(glass);
 #endif
 }
 

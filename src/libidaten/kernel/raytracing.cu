@@ -293,11 +293,15 @@ namespace idaten {
 		nodeparam.init(nodes.size());
 		nodeparam.writeByNum(&nodes[0], nodes.size());
 
-		primparams.init(prims.size());
-		primparams.writeByNum(&prims[0], prims.size());
+		if (!prims.empty()) {
+			primparams.init(prims.size());
+			primparams.writeByNum(&prims[0], prims.size());
+		}
 
-		vtxparams.init(vtxs.size());
-		vtxparams.writeByNum(&vtxs[0], vtxs.size());
+		if (!vtxs.empty()) {
+			vtxparams.init(vtxs.size());
+			vtxparams.writeByNum(&vtxs[0], vtxs.size());
+		}
 	}
 
 	void RayTracing::render(

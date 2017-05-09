@@ -304,7 +304,7 @@ namespace idaten {
 		aten::vec4* image,
 		int width, int height)
 	{
-		dim3 block(32, 32);
+		dim3 block(16, 16);
 		dim3 grid(
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);

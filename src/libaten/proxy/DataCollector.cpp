@@ -1,5 +1,6 @@
 #include "proxy/DataCollector.h"
 #include "shape/tranformable.h"
+#include "object/object.h"
 
 #include <map>
 
@@ -8,7 +9,8 @@ namespace aten {
 		std::vector<aten::ShapeParameter>& shapeparams,
 		std::vector<aten::PrimitiveParamter>& primparams,
 		std::vector<aten::LightParameter>& lightparams,
-		std::vector<aten::MaterialParameter>& mtrlparms)
+		std::vector<aten::MaterialParameter>& mtrlparms,
+		std::vector<aten::vertex>& vtxparams)
 	{
 		const auto& shapes = aten::transformable::getShapes();
 
@@ -76,6 +78,18 @@ namespace aten {
 
 		for (auto m : mtrls) {
 			mtrlparms.push_back(m->param());
+		}
+
+		const auto& faces = aten::face::faces();
+
+		for (auto f : faces) {
+			primparams.push_back(f->param);
+		}
+
+		const auto& vtxs = aten::VertexManager::getVertices();
+
+		for (auto v : vtxs) {
+			vtxparams.push_back(v);
 		}
 	}
 }

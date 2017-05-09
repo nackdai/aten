@@ -47,6 +47,7 @@
     <ClInclude Include="..\src\libaten\math\ray.h" />
     <ClInclude Include="..\src\libaten\math\vec3.h" />
     <ClInclude Include="..\src\libaten\math\vec4.h" />
+    <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\shape\cube.h" />
@@ -154,6 +155,16 @@
     </CudaCompile>
     <ClCompile Include="..\src\libaten\material\toon.cpp" />
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
+    <CudaCompile Include="..\src\libaten\object\object.cpp">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
+    </CudaCompile>
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />
     <CudaCompile Include="..\src\libaten\shape\sphere.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>

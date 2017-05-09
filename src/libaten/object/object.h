@@ -10,11 +10,11 @@
 #include "shape/tranformable.h"
 #include "object/vertex.h"
 
-namespace aten
+namespace AT_NAME
 {
 	class shape;
 
-	class face : public bvhnode {
+	class face : public aten::bvhnode {
 		static std::atomic<int> s_id;
 		static std::vector<face*> s_faces;
 
@@ -24,22 +24,22 @@ namespace aten
 
 	public:
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override;
+			aten::hitrecord& rec) const override;
 
-		static bool hit(
-			const PrimitiveParamter& param,
-			const vertex& v0,
-			const vertex& v1,
-			const vertex& v2,
-			const ray& r,
+		static AT_DEVICE_API bool hit(
+			const aten::PrimitiveParamter& param,
+			const aten::vertex& v0,
+			const aten::vertex& v1,
+			const aten::vertex& v2,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec);
+			aten::hitrecord& rec);
 
-		virtual vec3 getRandomPosOn(sampler* sampler) const override;
+		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override;
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override;
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override;
 
 		void build();
 
@@ -48,24 +48,24 @@ namespace aten
 			return s_faces;
 		}
 	
-		PrimitiveParamter param;
+		aten::PrimitiveParamter param;
 		shape* parent{ nullptr };
 		int id{ -1 };
 	};
 
-	class shape : public bvhnode {
+	class shape : public aten::bvhnode {
 	public:
-		shape() : param(ShapeType::Polygon) {}
+		shape() : param(aten::ShapeType::Polygon) {}
 		virtual ~shape() {}
 
 		void build();
 
 		virtual bool hit(
-			const ray& r,
+			const aten::ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const override final;
+			aten::hitrecord& rec) const override final;
 
-		virtual vec3 getRandomPosOn(sampler* sampler) const override final
+		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override final
 		{
 			auto r = sampler->nextSample();
 			int idx = (int)(r * (faces.size() - 1));
@@ -73,7 +73,7 @@ namespace aten
 			return face->getRandomPosOn(sampler);
 		}
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const override final
+		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final
 		{
 			auto r = sampler->nextSample();
 			int idx = (int)(r * (faces.size() - 1));
@@ -81,7 +81,7 @@ namespace aten
 			return face->getSamplePosNormalPdf(sampler);
 		}
 
-		ShapeParameter param;		
+		aten::ShapeParameter param;
 		std::vector<face*> faces;
 
 	private:
@@ -90,23 +90,23 @@ namespace aten
 
 	template<typename T> class instance;
 
-	class object : public transformable {
+	class object : public aten::transformable {
 		friend class instance<object>;
 
 	public:
-		object() : param(ShapeType::Polygon) {}
+		object() : param(aten::ShapeType::Polygon) {}
 		virtual ~object() {}
 
 	public:
 		virtual bool hit(
-			const ray& r,
-			const mat4& mtxL2W,
+			const aten::ray& r,
+			const aten::mat4& mtxL2W,
 			real t_min, real t_max,
-			hitrecord& rec) const override final;
+			aten::hitrecord& rec) const override final;
 
-		virtual void getPrimitives(std::vector<PrimitiveParamter>& primparams) const override final;
+		virtual void getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const override final;
 
-		virtual const ShapeParameter& getParam() const override final
+		virtual const aten::ShapeParameter& getParam() const override final
 		{
 			return param;
 		}
@@ -114,7 +114,7 @@ namespace aten
 	private:
 		void build();
 
-		vec3 getRandomPosOn(sampler* sampler) const
+		aten::vec3 getRandomPosOn(aten::sampler* sampler) const
 		{
 			auto r = sampler->nextSample();
 			int idx = (int)(r * (shapes.size() - 1));
@@ -122,14 +122,14 @@ namespace aten
 			return shape->getRandomPosOn(sampler);
 		}
 
-		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const override final;
+		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const override final;
 
-		virtual int collectInternalNodes(std::vector<BVHNode>& nodes, int order, bvhnode* parent) override final;
+		virtual int collectInternalNodes(std::vector<aten::BVHNode>& nodes, int order, bvhnode* parent) override final;
 
 	public:
 		std::vector<shape*> shapes;
-		ShapeParameter param;
-		aabb bbox;
+		aten::ShapeParameter param;
+		aten::aabb bbox;
 
 	private:
 		bvhnode m_node;

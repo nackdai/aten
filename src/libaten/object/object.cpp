@@ -4,7 +4,7 @@
 //#define ENABLE_LINEAR_HITTEST
 #define ENABLE_DIRECT_FACE_BVH
 
-namespace aten
+namespace AT_NAME
 {
 	std::atomic<int> face::s_id = 0;
 	std::vector<face*> face::s_faces;
@@ -24,13 +24,13 @@ namespace aten
 	}
 
 	bool face::hit(
-		const ray& r,
+		const aten::ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
 		bool isHit = hit(
 			param, 
@@ -52,17 +52,17 @@ namespace aten
 	}
 
 	bool face::hit(
-		const PrimitiveParamter& param,
-		const vertex& v0,
-		const vertex& v1,
-		const vertex& v2,
-		const ray& r,
+		const aten::PrimitiveParamter& param,
+		const aten::vertex& v0,
+		const aten::vertex& v1,
+		const aten::vertex& v2,
+		const aten::ray& r,
 		real t_min, real t_max,
-		hitrecord& rec)
+		aten::hitrecord& rec)
 	{
 		bool isHit = false;
 
-		const auto res = intersertTriangle(r, v0.pos, v1.pos, v2.pos);
+		const auto res = intersectTriangle(r, v0.pos, v1.pos, v2.pos);
 
 		if (res.isIntersect) {
 			if (res.t < rec.t) {
@@ -98,16 +98,16 @@ namespace aten
 
 	void face::build()
 	{
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
-		vec3 vmax(
+		aten::vec3 vmax(
 			std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
 			std::max(v0.pos.y, std::max(v1.pos.y, v2.pos.y)),
 			std::max(v0.pos.z, std::max(v1.pos.z, v2.pos.z)));
 
-		vec3 vmin(
+		aten::vec3 vmin(
 			std::min(v0.pos.x, std::min(v1.pos.x, v2.pos.x)),
 			std::min(v0.pos.y, std::min(v1.pos.y, v2.pos.y)),
 			std::min(v0.pos.z, std::min(v1.pos.z, v2.pos.z)));
@@ -120,7 +120,7 @@ namespace aten
 		param.area = real(0.5) * cross(e0, e1).length();
 	}
 
-	vec3 face::getRandomPosOn(sampler* sampler) const
+	aten::vec3 face::getRandomPosOn(aten::sampler* sampler) const
 	{
 		// 0 <= a + b <= 1
 		real a = sampler->nextSample();
@@ -133,19 +133,19 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
 		// 重心座標系(barycentric coordinates).
 		// v0基準.
 		// p = (1 - a - b)*v0 + a*v1 + b*v2
-		vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
+		aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
 
 		return std::move(p);
 	}
 
-	hitable::SamplingPosNormalPdf face::getSamplePosNormalPdf(sampler* sampler) const
+	aten::hitable::SamplingPosNormalPdf face::getSamplePosNormalPdf(aten::sampler* sampler) const
 	{
 		// 0 <= a + b <= 1
 		real a = sampler->nextSample();
@@ -158,16 +158,16 @@ namespace aten
 			b /= d;
 		}
 
-		const auto& v0 = VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = VertexManager::getVertex(param.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
 		// 重心座標系(barycentric coordinates).
 		// v0基準.
 		// p = (1 - a - b)*v0 + a*v1 + b*v2
-		vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
+		aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
 		
-		vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
+		aten::vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
 		n.normalize();
 
 		// 三角形の面積 = ２辺の外積の長さ / 2;
@@ -193,15 +193,15 @@ namespace aten
 			param.area += f->param.area;
 
 #ifdef ENABLE_DIRECT_FACE_BVH
-			m_aabb = aabb::merge(m_aabb, f->getBoundingbox());
+			m_aabb = aten::aabb::merge(m_aabb, f->getBoundingbox());
 #endif
 		}
 	}
 
 	bool shape::hit(
-		const ray& r,
+		const aten::ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
 #ifdef ENABLE_LINEAR_HITTEST
 		bool isHit = false;
@@ -237,7 +237,7 @@ namespace aten
 #ifdef ENABLE_DIRECT_FACE_BVH
 		std::vector<face*> faces;
 		for (auto s : shapes) {
-			bbox = aabb::merge(bbox, s->getBoundingbox());
+			bbox = aten::aabb::merge(bbox, s->getBoundingbox());
 			for (auto f : s->faces) {
 				faces.push_back(f);
 			}
@@ -260,10 +260,10 @@ namespace aten
 	}
 
 	bool object::hit(
-		const ray& r,
-		const mat4& mtxL2W,
+		const aten::ray& r,
+		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		aten::hitrecord& rec) const
 	{
 #ifdef ENABLE_LINEAR_HITTEST
 		bool isHit = false;
@@ -281,7 +281,7 @@ namespace aten
 			}
 		}
 #else
-		hitrecord tmp;
+		aten::hitrecord tmp;
 		bool isHit = m_node.hit(r, t_min, t_max, tmp);
 #endif
 
@@ -317,8 +317,8 @@ namespace aten
 
 			real ratio = scaledArea / originalArea;
 #else
-			const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-			const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+			const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
+			const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
 
 			real orignalLen = 0;
 			{
@@ -348,7 +348,7 @@ namespace aten
 		return isHit;
 	}
 
-	hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const mat4& mtxL2W, sampler* sampler) const
+	aten::hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const
 	{
 		auto r = sampler->nextSample();
 		int shapeidx = (int)(r * (shapes.size() - 1));
@@ -358,8 +358,8 @@ namespace aten
 		int faceidx = (int)(r * (shape->faces.size() - 1));
 		auto f = shape->faces[faceidx];
 
-		const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-		const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+		const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
 
 		real orignalLen = 0;
 		{
@@ -392,12 +392,12 @@ namespace aten
 		return std::move(res);
 	}
 
-	void object::getPrimitives(std::vector<PrimitiveParamter>& primparams) const
+	void object::getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const
 	{
 		for (auto s : shapes) {
 			const auto& shapeParam = s->param;
 			
-			auto mtrlid = aten::material::findMaterialIdx((aten::material*)shapeParam.mtrl.ptr);
+			auto mtrlid = material::findMaterialIdx((material*)shapeParam.mtrl.ptr);
 
 			for (auto f : s->faces) {
 				auto faceParam = f->param;
@@ -407,10 +407,10 @@ namespace aten
 		}
 	}
 
-	int object::collectInternalNodes(std::vector<BVHNode>& nodes, int order, bvhnode* parent)
+	int object::collectInternalNodes(std::vector<aten::BVHNode>& nodes, int order, bvhnode* parent)
 	{
-		int ret = bvh::setTraverseOrder(&m_node, order);
-		bvh::collectNodes(&m_node, nodes, parent);
+		int ret = aten::bvh::setTraverseOrder(&m_node, order);
+		aten::bvh::collectNodes(&m_node, nodes, parent);
 		return ret;
 	}
 }

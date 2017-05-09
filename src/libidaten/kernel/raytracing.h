@@ -19,7 +19,9 @@ namespace idaten
 			const std::vector<aten::ShapeParameter>& shapes,
 			const std::vector<aten::MaterialParameter>& mtrls,
 			const std::vector<aten::LightParameter>& lights,
-			const std::vector<aten::BVHNode>& nodes);
+			const std::vector<aten::BVHNode>& nodes,
+			const std::vector<aten::PrimitiveParamter>& prims,
+			const std::vector<aten::vertex>& vtxs);
 
 		void render(
 			aten::vec4* image,
@@ -32,5 +34,7 @@ namespace idaten
 		aten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
 		aten::TypedCudaMemory<aten::LightParameter> lightparam;
 		aten::TypedCudaMemory<aten::BVHNode> nodeparam;
+		aten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
+		aten::TypedCudaMemory<aten::vertex> vtxparams;
 	};
 }

@@ -4,6 +4,7 @@
 #include "shape/shape.h"
 #include "light/light.h"
 #include "material/material.h"
+#include "object/vertex.h"
 
 namespace aten {
 	class DataCollector {
@@ -16,6 +17,7 @@ namespace aten {
 			std::vector<aten::ShapeParameter>& shapeparams,
 			std::vector<aten::PrimitiveParamter>& primparams,
 			std::vector<aten::LightParameter>& lightparams,
-			std::vector<aten::MaterialParameter>& mtrlparms);
+			std::vector<aten::MaterialParameter>& mtrlparms,
+			std::vector<aten::vertex>& vtxparams);
 	};
 }

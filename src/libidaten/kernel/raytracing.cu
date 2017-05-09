@@ -17,19 +17,19 @@
 __host__ __device__ bool intersect(
 	const aten::ray* r,
 	aten::hitrecord* rec,
-	const Context* ctx)
+	const Context* ctxt)
 {
 	bool isHit = false;
 
 	aten::hitrecord tmp;
 
-	for (int i = 0; i < ctx->geomnum; i++) {
-		const auto& s = ctx->shapes[i];
+	for (int i = 0; i < ctxt->geomnum; i++) {
+		const auto& s = ctxt->shapes[i];
 		if (AT_NAME::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, tmp)) {
 			if (tmp.t < rec->t) {
 				*rec = tmp;
-				rec->obj = (void*)&ctx->shapes[i];
-				rec->mtrlid = ctx->shapes[i].mtrl.idx;
+				rec->obj = (void*)&ctxt->shapes[i];
+				rec->mtrlid = ctxt->shapes[i].mtrl.idx;
 
 				isHit = true;
 			}
@@ -80,7 +80,9 @@ __global__ void hitTest(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	aten::BVHNode* nodes)
+	aten::BVHNode* nodes,
+	aten::PrimitiveParamter* prims,
+	aten::vertex* vertices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -98,18 +100,20 @@ __global__ void hitTest(
 		return;
 	}
 
-	Context ctx;
+	Context ctxt;
 	{
-		ctx.geomnum = geomnum;
-		ctx.shapes = shapes;
-		ctx.mtrls = mtrls;
-		ctx.lightnum = lightnum;
-		ctx.lights = lights;
-		ctx.nodes = nodes;
+		ctxt.geomnum = geomnum;
+		ctxt.shapes = shapes;
+		ctxt.mtrls = mtrls;
+		ctxt.lightnum = lightnum;
+		ctxt.lights = lights;
+		ctxt.nodes = nodes;
+		ctxt.prims = prims;
+		ctxt.vertices = vertices;
 	}
 	
 	aten::hitrecord rec;
-	bool isHit = intersectBVH(ctx, path.ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
+	bool isHit = intersectBVH(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
 
 	path.isHit = isHit;
 	path.rec = rec;
@@ -122,7 +126,9 @@ __global__ void raytracing(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	aten::BVHNode* nodes)
+	aten::BVHNode* nodes,
+	aten::PrimitiveParamter* prims,
+	aten::vertex* vertices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -131,14 +137,16 @@ __global__ void raytracing(
 		return;
 	}
 
-	Context ctx;
+	Context ctxt;
 	{
-		ctx.geomnum = geomnum;
-		ctx.shapes = shapes;
-		ctx.mtrls = mtrls;
-		ctx.lightnum = lightnum;
-		ctx.lights = lights;
-		ctx.nodes = nodes;
+		ctxt.geomnum = geomnum;
+		ctxt.shapes = shapes;
+		ctxt.mtrls = mtrls;
+		ctxt.lightnum = lightnum;
+		ctxt.lights = lights;
+		ctxt.nodes = nodes;
+		ctxt.prims = prims;
+		ctxt.vertices = vertices;
 	}
 
 	const auto idx = iy * width + ix;
@@ -154,7 +162,7 @@ __global__ void raytracing(
 
 	aten::vec3 contrib(0);
 
-	const aten::MaterialParameter& m = ctx.mtrls[path.rec.mtrlid];
+	const aten::MaterialParameter& m = ctxt.mtrls[path.rec.mtrlid];
 
 	if (m.attrib.isEmissive) {
 		auto emit = m.baseColor;
@@ -190,7 +198,7 @@ __global__ void raytracing(
 	else {
 		// TODO
 		auto light = lights[0];
-		auto* sphere = &ctx.shapes[light.object.idx];
+		auto* sphere = &ctxt.shapes[light.object.idx];
 		light.object.ptr = sphere;
 
 		aten::LightSampleResult sampleres = sampleLight(light, path.rec.p, nullptr);
@@ -208,8 +216,8 @@ __global__ void raytracing(
 
 		auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
 		{
-			//return intersect(&_r, &_rec, &ctx);
-			return intersectBVH(ctx, _r, t_min, t_max, _rec);
+			//return intersect(&_r, &_rec, &ctxt);
+			return intersectBVH(ctxt, _r, t_min, t_max, _rec);
 		};
 
 		if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
@@ -255,7 +263,9 @@ namespace idaten {
 		const std::vector<aten::ShapeParameter>& shapes,
 		const std::vector<aten::MaterialParameter>& mtrls,
 		const std::vector<aten::LightParameter>& lights,
-		const std::vector<aten::BVHNode>& nodes)
+		const std::vector<aten::BVHNode>& nodes,
+		const std::vector<aten::PrimitiveParamter>& prims,
+		const std::vector<aten::vertex>& vtxs)
 	{
 #if 0
 		size_t size_stack = 0;
@@ -282,6 +292,12 @@ namespace idaten {
 
 		nodeparam.init(nodes.size());
 		nodeparam.writeByNum(&nodes[0], nodes.size());
+
+		primparams.init(prims.size());
+		primparams.writeByNum(&prims[0], prims.size());
+
+		vtxparams.init(vtxs.size());
+		vtxparams.writeByNum(&vtxs[0], vtxs.size());
 	}
 
 	void RayTracing::render(
@@ -312,7 +328,9 @@ namespace idaten {
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
-				nodeparam.ptr());
+				nodeparam.ptr(),
+				primparams.ptr(),
+				vtxparams.ptr());
 
 			auto err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -328,7 +346,9 @@ namespace idaten {
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
-				nodeparam.ptr());
+				nodeparam.ptr(),
+				primparams.ptr(),
+				vtxparams.ptr());
 
 			err = cudaGetLastError();
 			if (err != cudaSuccess) {

@@ -19,7 +19,7 @@ namespace aten {
 		real t;
 	};
 
-	inline intersectResult intersertTriangle(
+	inline AT_DEVICE_API intersectResult intersectTriangle(
 		const ray& ray,
 		const vec3& v0,
 		const vec3& v1,

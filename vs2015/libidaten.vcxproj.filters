@@ -139,6 +139,9 @@
     <ClInclude Include="..\src\libidaten\kernel\bvh.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\object\object.h">
+      <Filter>aten\object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -168,6 +171,9 @@
     <Filter Include="aten\camera">
       <UniqueIdentifier>{acb20f76-8ecc-4139-8957-fa6d24abedd5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="aten\object">
+      <UniqueIdentifier>{6ea18010-7a1d-4ea1-bea9-d8beae7ce9dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
@@ -196,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\shape\cube.cpp">
       <Filter>aten\shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\object\object.cpp">
+      <Filter>aten\object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

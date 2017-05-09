@@ -152,12 +152,14 @@ int main()
 		std::vector<aten::PrimitiveParamter> primparams;
 		std::vector<aten::LightParameter> lightparams;
 		std::vector<aten::MaterialParameter> mtrlparms;
+		std::vector<aten::vertex> vtxparams;
 
 		aten::DataCollector::collect(
 			shapeparams,
 			primparams,
 			lightparams,
-			mtrlparms);
+			mtrlparms,
+			vtxparams);
 
 		std::vector<aten::BVHNode> nodes;
 
@@ -169,7 +171,9 @@ int main()
 			shapeparams,
 			mtrlparms,
 			lightparams,
-			nodes);
+			nodes,
+			primparams,
+			vtxparams);
 	}
 
 	aten::window::run(display);

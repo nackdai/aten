@@ -3,7 +3,7 @@
 
 namespace AT_NAME {
 	AT_DEVICE_API real emissive::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -19,11 +19,11 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return emissive::pdf(m_param, normal, wi, wo, u, v);
+		return emissive::pdf(&m_param, normal, wi, wo, u, v);
 	}
 
 	AT_DEVICE_API aten::vec3 emissive::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
@@ -38,11 +38,11 @@ namespace AT_NAME {
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		return std::move(emissive::sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+		return std::move(emissive::sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 emissive::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -58,11 +58,11 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return std::move(emissive::bsdf(m_param, normal, wi, wo, u, v));
+		return std::move(emissive::bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
 	AT_DEVICE_API MaterialSampling emissive::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,
@@ -88,7 +88,7 @@ namespace AT_NAME {
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,

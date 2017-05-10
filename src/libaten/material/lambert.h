@@ -22,7 +22,7 @@ namespace AT_NAME
 
 	public:
 		static AT_DEVICE_API real pdf(
-			const aten::MaterialParameter& param,
+			const aten::MaterialParameter* param,
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,
@@ -33,7 +33,7 @@ namespace AT_NAME
 			const aten::vec3& wo);
 
 		static AT_DEVICE_API aten::vec3 sampleDirection(
-			const aten::MaterialParameter& param,
+			const aten::MaterialParameter* param,
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			real u, real v,
@@ -44,18 +44,18 @@ namespace AT_NAME
 			aten::sampler* sampler);
 
 		static AT_DEVICE_API aten::vec3 bsdf(
-			const aten::MaterialParameter& param,
+			const aten::MaterialParameter* param,
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,
 			real u, real v);
 
 		static AT_DEVICE_API aten::vec3 bsdf(
-			const aten::MaterialParameter& param,
+			const aten::MaterialParameter* param,
 			real u, real v);
 
 		static AT_DEVICE_API MaterialSampling sample(
-			const aten::MaterialParameter& param,
+			const aten::MaterialParameter* param,
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::hitrecord& hitrec,

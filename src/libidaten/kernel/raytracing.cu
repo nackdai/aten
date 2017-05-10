@@ -137,10 +137,10 @@ __global__ void raytracing(
 
 	aten::vec3 contrib(0);
 
-	const aten::MaterialParameter& m = ctxt.mtrls[path.rec.mtrlid];
+	const aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
 
-	if (m.attrib.isEmissive) {
-		contrib = path.throughput * m.baseColor;
+	if (mtrl->attrib.isEmissive) {
+		contrib = path.throughput * mtrl->baseColor;
 
 		path.isTerminate = true;
 		p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
@@ -152,9 +152,9 @@ __global__ void raytracing(
 	// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
-	if (m.attrib.isSingular || m.attrib.isTranslucent) {
+	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {
 		auto sampling = sampleMaterial(
-			m,
+			mtrl,
 			orienting_normal, 
 			path.ray.dir,
 			path.rec,
@@ -204,7 +204,7 @@ __global__ void raytracing(
 
 			auto G = c0 * c1 / (len * len);
 
-			contrib += path.throughput * (m.baseColor * sampleres.finalColor) * G;
+			contrib += path.throughput * (mtrl->baseColor * sampleres.finalColor) * G;
 		}
 
 		path.isTerminate = true;

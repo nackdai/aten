@@ -54,7 +54,7 @@ AT_DEVICE_API bool intersectBVH(
 			isHit = false;
 
 			if (left->isLeaf()) {
-				const auto& leftobj = ctxt->shapes[left->shapeid];
+				const auto* leftobj = &ctxt->shapes[left->shapeid];
 
 				if (left->nestid >= 0) {
 					traverseLeft = left->bbox.hit(r, t_min, t_max, &left_t);
@@ -68,11 +68,11 @@ AT_DEVICE_API bool intersectBVH(
 					if (left->primid >= 0) {
 						// hit test primitive...
 						const auto& prim = ctxt->prims[left->primid];
-						isHit = intersectShape(&leftobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
+						isHit = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
 
 						if (isHit) {
-							recTmp.p = leftobj.mtxL2W.apply(recTmp.p);
-							recTmp.normal = normalize(leftobj.mtxL2W.applyXYZ(recTmp.normal));
+							recTmp.p = leftobj->mtxL2W.apply(recTmp.p);
+							recTmp.normal = normalize(leftobj->mtxL2W.applyXYZ(recTmp.normal));
 
 							const auto& v0 = ctxt->vertices[prim.idx[0]];
 							const auto& v1 = ctxt->vertices[prim.idx[1]];
@@ -81,8 +81,8 @@ AT_DEVICE_API bool intersectBVH(
 
 							real scaledLen = 0;
 							{
-								auto p0 = leftobj.mtxL2W.apply(v0.pos);
-								auto p1 = leftobj.mtxL2W.apply(v1.pos);
+								auto p0 = leftobj->mtxL2W.apply(v0.pos);
+								auto p1 = leftobj->mtxL2W.apply(v1.pos);
 
 								scaledLen = (p1 - p0).length();
 							}
@@ -90,20 +90,20 @@ AT_DEVICE_API bool intersectBVH(
 							real ratio = scaledLen / orignalLen;
 							ratio = ratio * ratio;
 
-							recTmp.area = leftobj.area * ratio;
+							recTmp.area = leftobj->area * ratio;
 							recTmp.mtrlid = prim.mtrlid;
 						}
 					}
 					else {
-						isHit = intersectShape(&leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
-						recTmp.mtrlid = leftobj.mtrl.idx;
+						isHit = intersectShape(leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
+						recTmp.mtrlid = leftobj->mtrl.idx;
 					}
 				}
 
 				if (isHit) {
 					if (recTmp.t < rec.t) {
 						rec = recTmp;
-						rec.obj = (void*)&leftobj;
+						rec.obj = (void*)leftobj;
 					}
 				}
 			}
@@ -115,7 +115,7 @@ AT_DEVICE_API bool intersectBVH(
 			isHit = false;
 
 			if (right->isLeaf()) {
-				const auto& rightobj = ctxt->shapes[right->shapeid];
+				const auto* rightobj = &ctxt->shapes[right->shapeid];
 
 				if (right->nestid >= 0) {
 					traverseRight = right->bbox.hit(r, t_min, t_max, &right_t);
@@ -129,11 +129,11 @@ AT_DEVICE_API bool intersectBVH(
 					if (right->primid >= 0) {
 						// hit test primitive...
 						const auto& prim = ctxt->prims[right->primid];
-						isHit = intersectShape(&rightobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
+						isHit = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
 
 						if (isHit) {
-							recTmp.p = rightobj.mtxL2W.apply(recTmp.p);
-							recTmp.normal = normalize(rightobj.mtxL2W.applyXYZ(recTmp.normal));
+							recTmp.p = rightobj->mtxL2W.apply(recTmp.p);
+							recTmp.normal = normalize(rightobj->mtxL2W.applyXYZ(recTmp.normal));
 
 							const auto& v0 = ctxt->vertices[prim.idx[0]];
 							const auto& v1 = ctxt->vertices[prim.idx[1]];
@@ -142,8 +142,8 @@ AT_DEVICE_API bool intersectBVH(
 
 							real scaledLen = 0;
 							{
-								auto p0 = rightobj.mtxL2W.apply(v0.pos);
-								auto p1 = rightobj.mtxL2W.apply(v1.pos);
+								auto p0 = rightobj->mtxL2W.apply(v0.pos);
+								auto p1 = rightobj->mtxL2W.apply(v1.pos);
 
 								scaledLen = (p1 - p0).length();
 							}
@@ -151,20 +151,20 @@ AT_DEVICE_API bool intersectBVH(
 							real ratio = scaledLen / orignalLen;
 							ratio = ratio * ratio;
 
-							recTmp.area = rightobj.area * ratio;
+							recTmp.area = rightobj->area * ratio;
 							recTmp.mtrlid = prim.mtrlid;
 						}
 					}
 					else {
-						isHit = intersectShape(&rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
-						recTmp.mtrlid = rightobj.mtrl.idx;
+						isHit = intersectShape(rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
+						recTmp.mtrlid = rightobj->mtrl.idx;
 					}
 				}
 
 				if (isHit) {
 					if (recTmp.t < rec.t) {
 						rec = recTmp;
-						rec.obj = (void*)&rightobj;
+						rec.obj = (void*)rightobj;
 					}
 				}
 			}

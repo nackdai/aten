@@ -5,7 +5,7 @@
 namespace AT_NAME
 {
 	AT_DEVICE_API real specular::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -20,11 +20,11 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return pdf(m_param, normal, wi, wo, u, v);
+		return pdf(&m_param, normal, wi, wo, u, v);
 	}
 
 	AT_DEVICE_API aten::vec3 specular::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
@@ -44,11 +44,11 @@ namespace AT_NAME
 	{
 		const aten::vec3& in = ray.dir;
 
-		return std::move(sampleDirection(m_param, normal, in, u, v, sampler));
+		return std::move(sampleDirection(&m_param, normal, in, u, v, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 specular::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -57,7 +57,7 @@ namespace AT_NAME
 		auto c = dot(normal, wo);
 
 #if 1
-		aten::vec3 bsdf = param.baseColor;
+		aten::vec3 bsdf = param->baseColor;
 #else
 		aten::vec3 bsdf;
 
@@ -67,7 +67,7 @@ namespace AT_NAME
 		}
 #endif
 
-		bsdf *= sampleTexture((aten::texture*)param.albedoMap.ptr, u, v, real(1));
+		bsdf *= sampleTexture((aten::texture*)param->albedoMap.ptr, u, v, real(1));
 
 		return std::move(bsdf);
 	}
@@ -78,7 +78,7 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return std::move(bsdf(m_param, normal, wi, wo, u, v));
+		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
 	MaterialSampling specular::sample(
@@ -90,7 +90,7 @@ namespace AT_NAME
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,
@@ -102,7 +102,7 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_API MaterialSampling specular::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,

@@ -6,7 +6,7 @@ namespace AT_NAME {
 	// https://github.com/imageworks/OpenShadingLanguage/blob/master/src/testrender/shading.cpp
 
 	AT_DEVICE_API real OrenNayar::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -30,11 +30,11 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return pdf(m_param, normal, wi, wo, u, v);
+		return pdf(&m_param, normal, wi, wo, u, v);
 	}
 
 	AT_DEVICE_API aten::vec3 OrenNayar::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
@@ -76,11 +76,11 @@ namespace AT_NAME {
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -96,10 +96,10 @@ namespace AT_NAME {
 		const auto NV = dot(normal, -wi);
 
 		if (NL > 0 && NV > 0) {
-			auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
+			auto roughness = material::sampleTexture((aten::texture*)param->roughnessMap.ptr, u, v, param->roughness);
 
-			auto albedo = param.baseColor;
-			albedo *= material::sampleTexture((aten::texture*)param.albedoMap.ptr, u, v, real(1));
+			auto albedo = param->baseColor;
+			albedo *= material::sampleTexture((aten::texture*)param->albedoMap.ptr, u, v, real(1));
 
 			const real a = roughness.r;
 			const real a2 = a * a;
@@ -124,11 +124,11 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return std::move(bsdf(m_param, normal, wi, wo, u, v));
+		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
 	AT_DEVICE_API MaterialSampling OrenNayar::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,
@@ -154,7 +154,7 @@ namespace AT_NAME {
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,

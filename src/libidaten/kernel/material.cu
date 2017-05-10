@@ -10,7 +10,7 @@
 #include "aten4idaten.h"
 
 typedef AT_NAME::MaterialSampling(*FuncSampleMaterial)(
-	const aten::MaterialParameter&,
+	const aten::MaterialParameter*,
 	const aten::vec3&,
 	const aten::vec3&,
 	const aten::hitrecord&,
@@ -19,7 +19,7 @@ typedef AT_NAME::MaterialSampling(*FuncSampleMaterial)(
 	bool);
 
 __device__ AT_NAME::MaterialSampling sampleMtrlNotSupported(
-	const aten::MaterialParameter& param,
+	const aten::MaterialParameter* param,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
 	const aten::hitrecord& hitrec,
@@ -27,7 +27,7 @@ __device__ AT_NAME::MaterialSampling sampleMtrlNotSupported(
 	real u, real v,
 	bool isLightPath)
 {
-	printf("Sample Material Not Supported[%d]\n", param.type);
+	printf("Sample Material Not Supported[%d]\n", param->type);
 }
 
 __device__ FuncSampleMaterial funcSampleMaterial[aten::MaterialType::MaterialTypeMax];
@@ -48,14 +48,14 @@ __device__ void addMaterialFuncs()
 }
 
 __device__ AT_NAME::MaterialSampling sampleMaterial(
-	const aten::MaterialParameter& mtrl,
+	const aten::MaterialParameter* mtrl,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
 	const aten::hitrecord& hitrec,
 	aten::sampler* sampler,
 	float u, float v)
 {
-	auto ret = funcSampleMaterial[mtrl.type](mtrl, normal, wi, hitrec, sampler, u, v, false);
+	auto ret = funcSampleMaterial[mtrl->type](mtrl, normal, wi, hitrec, sampler, u, v, false);
 
 	return std::move(ret);
 }

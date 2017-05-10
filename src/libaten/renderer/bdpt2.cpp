@@ -153,7 +153,7 @@ namespace aten
 
 			// ŒõŒ¹‚Éƒqƒbƒg‚µ‚½‚ç‚»‚±‚Å’ÇÕI—¹.
 			if (rec.mtrl->isEmissive()) {
-				vec3 bsdf = lambert::bsdf(rec.mtrl->param(), rec.u, rec.v);
+				vec3 bsdf = lambert::bsdf(&rec.mtrl->param(), rec.u, rec.v);
 
 				vs.push_back(Vertex(
 					rec.p,

@@ -2,7 +2,7 @@
 
 namespace AT_NAME {
 	AT_DEVICE_API real lambert::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -30,12 +30,12 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		auto ret = pdf(m_param, normal, wi, wo, u, v);
+		auto ret = pdf(&m_param, normal, wi, wo, u, v);
 		return ret;
 	}
 
 	AT_DEVICE_API aten::vec3 lambert::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
@@ -84,11 +84,11 @@ namespace AT_NAME {
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 lambert::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -98,12 +98,12 @@ namespace AT_NAME {
 	}
 
 	AT_DEVICE_API aten::vec3 lambert::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		real u, real v)
 	{
-		aten::vec3 albedo = param.baseColor;
+		aten::vec3 albedo = param->baseColor;
 		albedo *= sampleTexture(
-			(aten::texture*)param.albedoMap.ptr,
+			(aten::texture*)param->albedoMap.ptr,
 			u, v,
 			real(1));
 
@@ -117,12 +117,12 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		auto ret = bsdf(m_param, normal, wi, wo, u, v);
+		auto ret = bsdf(&m_param, normal, wi, wo, u, v);
 		return std::move(ret);
 	}
 
 	AT_DEVICE_API MaterialSampling lambert::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,
@@ -148,7 +148,7 @@ namespace AT_NAME {
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,

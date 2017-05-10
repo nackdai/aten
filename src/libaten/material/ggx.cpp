@@ -3,16 +3,16 @@
 namespace AT_NAME
 {
 	AT_DEVICE_API real MicrofacetGGX::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
 		real u, real v)
 	{
 		auto roughness = material::sampleTexture(
-			(aten::texture*)param.roughnessMap.ptr,
+			(aten::texture*)param->roughnessMap.ptr,
 			u, v,
-			param.roughness);
+			param->roughness);
 
 		auto ret = pdf(roughness.r, normal, wi, wo);
 		return ret;
@@ -24,20 +24,20 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return pdf(m_param, normal, wi, wo, u, v);
+		return pdf(&m_param, normal, wi, wo, u, v);
 	}
 
 	AT_DEVICE_API aten::vec3 MicrofacetGGX::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
 		aten::sampler* sampler)
 	{
 		auto roughness = material::sampleTexture(
-			(aten::texture*)param.roughnessMap.ptr,
+			(aten::texture*)param->roughnessMap.ptr,
 			u, v,
-			param.roughness);
+			param->roughness);
 
 		aten::vec3 dir = sampleDirection(roughness.r, normal, wi, sampler);
 
@@ -50,26 +50,26 @@ namespace AT_NAME
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 MicrofacetGGX::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
 		real u, real v)
 	{
 		auto roughness = material::sampleTexture(
-			(aten::texture*)param.roughnessMap.ptr,
+			(aten::texture*)param->roughnessMap.ptr,
 			u, v,
-			param.roughness);
+			param->roughness);
 
-		auto albedo = param.baseColor;
-		albedo *= material::sampleTexture((aten::texture*)param.albedoMap.ptr, u, v, real(1));
+		auto albedo = param->baseColor;
+		albedo *= material::sampleTexture((aten::texture*)param->albedoMap.ptr, u, v, real(1));
 
 		real fresnel = 1;
-		real ior = param.ior;
+		real ior = param->ior;
 
 		aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
 		return std::move(ret);
@@ -81,7 +81,7 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return std::move(bsdf(m_param, normal, wi, wo, u, v));
+		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
 	// NOTE
@@ -261,7 +261,7 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_API MaterialSampling MicrofacetGGX::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,
@@ -272,18 +272,18 @@ namespace AT_NAME
 		MaterialSampling ret;
 
 		auto roughness = material::sampleTexture(
-			(aten::texture*)param.roughnessMap.ptr,
+			(aten::texture*)param->roughnessMap.ptr,
 			u, v,
-			param.roughness);
+			param->roughness);
 
 		ret.dir = sampleDirection(roughness.r, wi, normal, sampler);
 		ret.pdf = pdf(roughness.r, normal, wi, ret.dir);
 
-		auto albedo = param.baseColor;
-		albedo *= material::sampleTexture((aten::texture*)param.albedoMap.ptr, u, v, real(1));
+		auto albedo = param->baseColor;
+		albedo *= material::sampleTexture((aten::texture*)param->albedoMap.ptr, u, v, real(1));
 
 		real fresnel = 1;
-		real ior = param.ior;
+		real ior = param->ior;
 
 		ret.bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, ret.dir, u, v);
 		ret.fresnel = fresnel;
@@ -300,7 +300,7 @@ namespace AT_NAME
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,

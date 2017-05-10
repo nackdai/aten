@@ -5,7 +5,7 @@
 __device__ void addMaterialFuncs();
 
 __device__ AT_NAME::MaterialSampling sampleMaterial(
-	const aten::MaterialParameter& mtrl,
+	const aten::MaterialParameter* mtrl,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
 	const aten::hitrecord& hitrec,

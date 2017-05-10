@@ -3,13 +3,13 @@
 namespace AT_NAME
 {
 	AT_DEVICE_API real MicrofacetBeckman::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
 		real u, real v)
 	{
-		auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
+		auto roughness = material::sampleTexture((aten::texture*)param->roughnessMap.ptr, u, v, param->roughness);
 		auto ret = pdf(roughness.r, normal, wi, wo);
 		return ret;
 	}
@@ -20,18 +20,18 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		auto ret = pdf(m_param, normal, wi, wo, u, v);
+		auto ret = pdf(&m_param, normal, wi, wo, u, v);
 		return ret;
 	}
 
 	AT_DEVICE_API aten::vec3 MicrofacetBeckman::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
 		aten::sampler* sampler)
 	{
-		auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
+		auto roughness = material::sampleTexture((aten::texture*)param->roughnessMap.ptr, u, v, param->roughness);
 		aten::vec3 dir = sampleDirection(roughness.r, wi, normal, sampler);
 		return std::move(dir);
 	}
@@ -42,24 +42,24 @@ namespace AT_NAME
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		auto dir = sampleDirection(m_param, normal, ray.dir, u, v, sampler);
+		auto dir = sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
 		return std::move(dir);
 	}
 
 	AT_DEVICE_API aten::vec3 MicrofacetBeckman::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
 		real u, real v)
 	{
-		auto roughness = material::sampleTexture((aten::texture*)param.roughnessMap.ptr, u, v, param.roughness);
+		auto roughness = material::sampleTexture((aten::texture*)param->roughnessMap.ptr, u, v, param->roughness);
 
-		auto albedo = param.baseColor;
-		albedo *= material::sampleTexture((aten::texture*)param.albedoMap.ptr, u, v, real(1));
+		auto albedo = param->baseColor;
+		albedo *= material::sampleTexture((aten::texture*)param->albedoMap.ptr, u, v, real(1));
 
 		real fresnel = 1;
-		real ior = param.ior;
+		real ior = param->ior;
 
 		aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
 		return std::move(ret);
@@ -71,7 +71,7 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		auto ret = bsdf(m_param, normal, wi, wo, u, v);
+		auto ret = bsdf(&m_param, normal, wi, wo, u, v);
 		return std::move(ret);
 	}
 
@@ -241,7 +241,7 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_API MaterialSampling MicrofacetBeckman::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,
@@ -252,20 +252,20 @@ namespace AT_NAME
 		MaterialSampling ret;
 
 		auto roughness = material::sampleTexture(
-			(aten::texture*)param.roughnessMap.ptr,
+			(aten::texture*)param->roughnessMap.ptr,
 			u, v,
-			param.roughness);
+			param->roughness);
 
 		ret.dir = sampleDirection(roughness.r, wi, normal, sampler);
 		ret.pdf = pdf(roughness.r, normal, wi, ret.dir);
 
 		real fresnel = real(1);
 
-		real ior = param.ior;
+		real ior = param->ior;
 
-		auto albedo = param.baseColor;
+		auto albedo = param->baseColor;
 		albedo *= sampleTexture(
-			(aten::texture*)param.albedoMap.ptr,
+			(aten::texture*)param->albedoMap.ptr,
 			u, v,
 			real(1));
 
@@ -284,7 +284,7 @@ namespace AT_NAME
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,

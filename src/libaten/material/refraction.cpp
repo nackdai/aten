@@ -6,7 +6,7 @@
 namespace AT_NAME
 {
 	AT_DEVICE_API real refraction::pdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -24,11 +24,11 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return pdf(m_param, normal, wi, wo, u, v);
+		return pdf(&m_param, normal, wi, wo, u, v);
 	}
 
 	AT_DEVICE_API aten::vec3 refraction::sampleDirection(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		real u, real v,
@@ -48,11 +48,11 @@ namespace AT_NAME
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		return std::move(sampleDirection(m_param, normal, ray.dir, u, v, sampler));
+		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 refraction::bsdf(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -60,9 +60,9 @@ namespace AT_NAME
 	{
 		AT_ASSERT(false);
 
-		aten::vec3 albedo = param.baseColor;
+		aten::vec3 albedo = param->baseColor;
 		albedo *= sampleTexture(
-			(aten::texture*)param.albedoMap.ptr,
+			(aten::texture*)param->albedoMap.ptr,
 			u, v,
 			real(1));
 
@@ -75,7 +75,7 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
-		return std::move(bsdf(m_param, normal, wi, wo, u, v));
+		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
 	MaterialSampling refraction::sample(
@@ -87,7 +87,7 @@ namespace AT_NAME
 		bool isLightPath/*= false*/) const
 	{
 		auto ret = sample(
-			m_param,
+			&m_param,
 			normal,
 			ray.dir,
 			hitrec,
@@ -99,7 +99,7 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_API MaterialSampling refraction::sample(
-		const aten::MaterialParameter& param,
+		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::hitrecord& hitrec,
@@ -113,7 +113,7 @@ namespace AT_NAME
 		real ni = real(1);	// 真空
 
 		// 物体内部の屈折率.
-		real nt = param.ior;
+		real nt = param->ior;
 
 		bool into = (dot(hitrec.normal, normal) > real(0));
 
@@ -129,7 +129,7 @@ namespace AT_NAME
 		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
 		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
-		aten::vec3 albedo = param.baseColor;
+		aten::vec3 albedo = param->baseColor;
 
 		if (cos_t_2 < real(0)) {
 			//AT_PRINTF("Reflection in refraction...\n");
@@ -170,7 +170,7 @@ namespace AT_NAME
 			r = sampler->nextSample();
 		}
 
-		if (param.isIdealRefraction) {
+		if (param->isIdealRefraction) {
 			ret.dir = refract;
 
 			// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.

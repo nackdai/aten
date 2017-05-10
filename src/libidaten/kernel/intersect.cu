@@ -59,6 +59,8 @@ AT_DEVICE_API bool intersectShape(
 	float t_min, float t_max,
 	aten::hitrecord& rec)
 {
-	auto ret = funcIntersect[shape.type](shape, prim, ctxt, r, t_min, t_max, rec);
+	const aten::ShapeParameter* realShape = (shape.shapeid >= 0 ? &ctxt.shapes[shape.shapeid] : &shape);
+
+	auto ret = funcIntersect[realShape->type](*realShape, prim, ctxt, r, t_min, t_max, rec);
 	return ret;
 }

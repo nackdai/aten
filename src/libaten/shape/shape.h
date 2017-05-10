@@ -24,24 +24,16 @@ namespace aten
 		mat4 mtxW2L;
 		mat4 mtxL2W;
 
-		union {
-			// polygon.
-			struct {
-				real area;
-				int primid;
-			};
-			// instance.
-			struct {
-				int shapeid;
-			};
-			// instance.
-			// sphere / cube.
-			struct {
-				vec3 center;
-				union {
-					vec3 size;		// cube.
-					real radius;	// shpere.
-				};
+		real area;
+
+		int primid{ -1 };
+		int shapeid{ -1 };
+
+		struct {
+			vec3 center;
+			union {
+				vec3 size;		// cube.
+				real radius;	// shpere.
 			};
 		};
 

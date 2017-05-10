@@ -60,7 +60,9 @@ namespace AT_NAME {
 		result.posOnLens = screenPos;
 		result.nmlOnLens = param.dir;
 		result.posOnImageSensor = param.origin;
-		result.r = aten::ray(param.origin, dirToScr);
+
+		result.r.org = param.origin;
+		result.r.dir = normalize(dirToScr);
 
 		result.pdfOnLens = 1;
 		result.pdfOnImageSensor = 1;

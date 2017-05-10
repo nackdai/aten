@@ -61,8 +61,8 @@ __global__ void genPath(
 
 	const auto idx = iy * camera->width + ix;
 
-	float s = ix / (float)camera->width;
-	float t = iy / (float)camera->height;
+	float s = (ix + 0.5f) / (float)(camera->width - 1);
+	float t = (iy + 0.5f) / (float)(camera->height - 1);
 
 	auto camsample = AT_NAME::PinholeCamera::sample(*camera, s, t, nullptr);
 
@@ -165,8 +165,7 @@ __global__ void raytracing(
 	const aten::MaterialParameter& m = ctxt.mtrls[path.rec.mtrlid];
 
 	if (m.attrib.isEmissive) {
-		auto emit = m.baseColor;
-		contrib = path.throughput * emit;
+		contrib = path.throughput * m.baseColor;
 
 		path.isTerminate = true;
 		p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
@@ -188,9 +187,8 @@ __global__ void raytracing(
 			path.rec.u, path.rec.v);
 
 		auto nextDir = normalize(sampling.dir);
-		auto bsdf = sampling.bsdf;
 
-		path.throughput *= bsdf;
+		path.throughput *= sampling.bsdf;
 
 		// Make next ray.
 		path.ray = aten::ray(path.rec.p, nextDir);
@@ -208,8 +206,6 @@ __global__ void raytracing(
 
 		dirToLight.normalize();
 
-		auto albedo = m.baseColor;
-
 		aten::ray shadowRay(path.rec.p, dirToLight);
 
 		aten::hitrecord tmpRec;
@@ -221,8 +217,6 @@ __global__ void raytracing(
 		};
 
 		if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-			auto lightColor = sampleres.finalColor;
-
 			if (light.attrib.isInfinite) {
 				len = 1.0f;
 			}
@@ -236,7 +230,7 @@ __global__ void raytracing(
 
 			auto G = c0 * c1 / (len * len);
 
-			contrib += path.throughput * (albedo * lightColor) * G;
+			contrib += path.throughput * (m.baseColor * sampleres.finalColor) * G;
 		}
 
 		path.isTerminate = true;

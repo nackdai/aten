@@ -109,7 +109,7 @@ void makeScene(aten::scene* scene)
 
 
 	scene->addLight(l);
-#if 0
+#if 1
 	scene->add(light);
 	scene->add(left);
 	scene->add(right);

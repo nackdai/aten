@@ -227,6 +227,7 @@
     <ClInclude Include="..\src\libaten\sampler\sobol.h" />
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
     <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
+    <ClInclude Include="..\src\libaten\sampler\wanghash.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\instance.h" />

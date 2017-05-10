@@ -69,6 +69,8 @@
 
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
+#include "sampler/sobol.h"
+#include "sampler/wanghash.h"
 #include "sampler/UniformDistributionSampler.h"
 
 #include "shape/sphere.h"

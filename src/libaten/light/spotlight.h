@@ -69,25 +69,26 @@ namespace AT_NAME {
 
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
-			return std::move(sample(&m_param, org, sampler));
+			aten::LightSampleResult result;
+			sample(&result, &m_param, org, sampler);
+			return std::move(result);
 		}
 
-		static AT_DEVICE_API aten::LightSampleResult sample(
+		static AT_DEVICE_API void sample(
+			aten::LightSampleResult* result,
 			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
 		{
-			aten::LightSampleResult result;
-
-			result.pos = param->pos;
-			result.pdf = real(1);
-			result.dir = param->pos - org;
-			result.nml = aten::vec3();	// Not used...
+			result->pos = param->pos;
+			result->pdf = real(1);
+			result->dir = param->pos - org;
+			result->nml = aten::vec3();	// Not used...
 
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx
 
-			auto lightdir = normalize(result.dir);
+			auto lightdir = normalize(result->dir);
 
 			auto rho = dot(-param->dir, lightdir);
 
@@ -113,7 +114,7 @@ namespace AT_NAME {
 			// 減衰率.
 			// http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
 			// 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
-			auto dist2 = result.dir.squared_length();
+			auto dist2 = result->dir.squared_length();
 			auto dist = aten::sqrt(dist2);
 			real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
 
@@ -121,11 +122,9 @@ namespace AT_NAME {
 			// Is it correct?
 			attn = aten::cmpMax(attn, real(1));
 			
-			result.le = param->le;
-			result.intensity = spot / attn;
-			result.finalColor = param->le * spot / attn;
-
-			return std::move(result);
+			result->le = param->le;
+			result->intensity = spot / attn;
+			result->finalColor = param->le * spot / attn;
 		}
 	};
 }

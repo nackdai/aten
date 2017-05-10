@@ -26,14 +26,13 @@ namespace AT_NAME {
 
 	public:
 		template <typename Func>
-		static AT_DEVICE_API aten::LightSampleResult sample(
+		static AT_DEVICE_API void sample(
 			Func funcHitTest,
+			aten::LightSampleResult* result,
 			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
 		{
-			aten::LightSampleResult result;
-
 			auto obj = param->object.ptr;
 
 			if (obj) {
@@ -43,20 +42,18 @@ namespace AT_NAME {
 				bool isHit = funcHitTest(org, param->object, pos, sampler, rec);
 
 				if (isHit) {
-					result.pos = rec.p;
-					result.pdf = 1 / rec.area;
-					result.dir = rec.p - org;
-					result.nml = rec.normal;
+					result->pos = rec.p;
+					result->pdf = 1 / rec.area;
+					result->dir = rec.p - org;
+					result->nml = rec.normal;
 
-					result.le = param->le;
-					result.intensity = 1;
-					result.finalColor = param->le;
+					result->le = param->le;
+					result->intensity = 1;
+					result->finalColor = param->le;
 
-					result.obj = obj;
+					result->obj = obj;
 				}
 			}
-
-			return std::move(result);
 		}
 
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final;

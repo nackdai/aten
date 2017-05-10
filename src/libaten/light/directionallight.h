@@ -26,25 +26,24 @@ namespace AT_NAME {
 	public:
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
-			return std::move(sample(&m_param, org, sampler));
+			LightSampleResult result;
+			sample(&result, &m_param, org, sampler);
+			return std::move(result);
 		}
 
-		static AT_DEVICE_API aten::LightSampleResult sample(
+		static AT_DEVICE_API void sample(
+			LightSampleResult* result,
 			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
 		{
-			aten::LightSampleResult result;
+			result->pdf = real(1);
+			result->dir = -normalize(param->dir);
+			result->nml = aten::vec3();	// Not used...
 
-			result.pdf = real(1);
-			result.dir = -normalize(param->dir);
-			result.nml = aten::vec3();	// Not used...
-
-			result.le = param->le;
-			result.intensity = real(1);
-			result.finalColor = param->le;
-
-			return std::move(result);
+			result->le = param->le;
+			result->intensity = real(1);
+			result->finalColor = param->le;
 		}
 	};
 }

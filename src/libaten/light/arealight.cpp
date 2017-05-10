@@ -27,8 +27,11 @@ namespace AT_NAME {
 			return isHit;
 		};
 
-		auto result = sample(
+		aten::LightSampleResult result;
+
+		sample(
 			funcHitTest,
+			&result,
 			&this->param(),
 			org,
 			sampler);

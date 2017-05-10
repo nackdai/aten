@@ -69,19 +69,19 @@ namespace AT_NAME {
 
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
-			return std::move(sample(m_param, org, sampler));
+			return std::move(sample(&m_param, org, sampler));
 		}
 
 		static AT_DEVICE_API aten::LightSampleResult sample(
-			const aten::LightParameter& param,
+			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
 		{
 			aten::LightSampleResult result;
 
-			result.pos = param.pos;
+			result.pos = param->pos;
 			result.pdf = real(1);
-			result.dir = param.pos - org;
+			result.dir = param->pos - org;
 			result.nml = aten::vec3();	// Not used...
 
 			// NOTE
@@ -89,10 +89,10 @@ namespace AT_NAME {
 
 			auto lightdir = normalize(result.dir);
 
-			auto rho = dot(-param.dir, lightdir);
+			auto rho = dot(-param->dir, lightdir);
 
-			auto cosHalfTheta = aten::cos(param.innerAngle * real(0.5));
-			auto cosHalfPhi = aten::cos(param.outerAngle * real(0.5));
+			auto cosHalfTheta = aten::cos(param->innerAngle * real(0.5));
+			auto cosHalfPhi = aten::cos(param->outerAngle * real(0.5));
 
 			real spot = 0;
 
@@ -107,7 +107,7 @@ namespace AT_NAME {
 			else {
 				// 本影の外、半影の中.
 				spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
-				spot = aten::pow(spot, param.falloff);
+				spot = aten::pow(spot, param->falloff);
 			}
 
 			// 減衰率.
@@ -115,15 +115,15 @@ namespace AT_NAME {
 			// 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
 			auto dist2 = result.dir.squared_length();
 			auto dist = aten::sqrt(dist2);
-			real attn = param.constAttn + param.linearAttn * dist + param.expAttn * dist2;
+			real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
 
 			// TODO
 			// Is it correct?
 			attn = aten::cmpMax(attn, real(1));
 			
-			result.le = param.le;
+			result.le = param->le;
 			result.intensity = spot / attn;
-			result.finalColor = param.le * spot / attn;
+			result.finalColor = param->le * spot / attn;
 
 			return std::move(result);
 		}

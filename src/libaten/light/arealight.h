@@ -28,19 +28,19 @@ namespace AT_NAME {
 		template <typename Func>
 		static AT_DEVICE_API aten::LightSampleResult sample(
 			Func funcHitTest,
-			const aten::LightParameter& param,
+			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
 		{
 			aten::LightSampleResult result;
 
-			auto obj = param.object.ptr;
+			auto obj = param->object.ptr;
 
 			if (obj) {
 				aten::hitrecord rec;
 
 				aten::vec3 pos;
-				bool isHit = funcHitTest(org, param.object, pos, sampler, rec);
+				bool isHit = funcHitTest(org, param->object, pos, sampler, rec);
 
 				if (isHit) {
 					result.pos = rec.p;
@@ -48,9 +48,9 @@ namespace AT_NAME {
 					result.dir = rec.p - org;
 					result.nml = rec.normal;
 
-					result.le = param.le;
+					result.le = param->le;
 					result.intensity = 1;
-					result.finalColor = param.le;
+					result.finalColor = param->le;
 
 					result.obj = obj;
 				}

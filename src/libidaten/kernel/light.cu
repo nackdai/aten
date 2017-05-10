@@ -7,10 +7,10 @@
 
 #include "aten4idaten.h"
 
-typedef aten::LightSampleResult(*FuncLightSample)(const aten::LightParameter&, const aten::vec3&, aten::sampler*);
+typedef aten::LightSampleResult(*FuncLightSample)(const aten::LightParameter*, const aten::vec3&, aten::sampler*);
 
 __device__ aten::LightSampleResult sampleAreaLight(
-	const aten::LightParameter& light,
+	const aten::LightParameter* light,
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
@@ -33,11 +33,11 @@ __device__ aten::LightSampleResult sampleAreaLight(
 }
 
 __device__ aten::LightSampleResult sampleLightNotSupported(
-	const aten::LightParameter& light,
+	const aten::LightParameter* light,
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
-	printf("Sample Light Not Supported[%d]\n", light.type);
+	printf("Sample Light Not Supported[%d]\n", light->type);
 }
 
 __device__ FuncLightSample funcSampleLight[aten::LightType::LightTypeMax];
@@ -52,17 +52,10 @@ __device__ void addLighFuncs()
 }
 
 __device__ aten::LightSampleResult sampleLight(
-	const aten::LightParameter& light,
+	const aten::LightParameter* light,
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
-	aten::LightSampleResult ret;
-
-	if (light.type == aten::LightType::IBL) {
-		// TODO
-	}
-	else {
-		ret = funcSampleLight[light.type](light, org, sampler);
-	}
+	aten::LightSampleResult ret = funcSampleLight[light->type](light, org, sampler);
 	return std::move(ret);
 }

@@ -29,7 +29,7 @@ namespace AT_NAME {
 
 		auto result = sample(
 			funcHitTest,
-			this->param(),
+			&this->param(),
 			org,
 			sampler);
 

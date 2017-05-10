@@ -174,7 +174,7 @@ __global__ void raytracing(
 		auto* sphere = &ctxt.shapes[light.object.idx];
 		light.object.ptr = sphere;
 
-		aten::LightSampleResult sampleres = sampleLight(light, path.rec.p, nullptr);
+		aten::LightSampleResult sampleres = sampleLight(&light, path.rec.p, nullptr);
 
 		aten::vec3 dirToLight = sampleres.dir;
 		auto len = dirToLight.length();

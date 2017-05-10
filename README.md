@@ -14,7 +14,7 @@ Idaten is Japanese god, it runs fast.
   - Next Event Estimation Path Tracing
   - Bi-Directional Path Tracing
   - Primary Sample Space Metropolis Light Transport
-  - Energy Distribution Path Tracing
+  - Energy Re-distribution Path Tracing
   - AOV
     - albedo, depth, normal, geometry id.
 - Materials

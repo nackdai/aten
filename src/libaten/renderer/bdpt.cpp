@@ -1,4 +1,4 @@
-#include "renderer/bdpt2.h"
+#include "renderer/bdpt.h"
 #include "misc/thread.h"
 #include "misc/timer.h"
 #include "material/lambert.h"
@@ -32,7 +32,7 @@ namespace aten
 		return p;
 	}
 
-	real BDPT2::russianRoulette(const Vertex& vtx)
+	real BDPT::russianRoulette(const Vertex& vtx)
 	{
 		real pdf = real(0);
 
@@ -49,7 +49,7 @@ namespace aten
 		return pdf;
 	}
 
-	BDPT2::Result BDPT2::genEyePath(
+	BDPT::Result BDPT::genEyePath(
 		std::vector<Vertex>& vs,
 		int x, int y,
 		sampler* sampler,
@@ -217,7 +217,7 @@ namespace aten
 		return std::move(Result(vec3(), -1, -1, false));
 	}
 
-	BDPT2::Result BDPT2::genLightPath(
+	BDPT::Result BDPT::genLightPath(
 		std::vector<Vertex>& vs,
 		aten::Light* light,
 		sampler* sampler,
@@ -427,7 +427,7 @@ namespace aten
 	}
 
 	// 頂点fromから頂点nextをサンプリングしたとするとき、面積測度に関するサンプリング確率密度を計算する.
-	real BDPT2::computAreaPdf(
+	real BDPT::computAreaPdf(
 		camera* camera,
 		const std::vector<const Vertex*>& vs,
 		const int prev_idx,			// 頂点curの前の頂点のインデックス.
@@ -561,7 +561,7 @@ namespace aten
 		return pdf;
 	}
 
-	real BDPT2::computeMISWeight(
+	real BDPT::computeMISWeight(
 		camera* camera,
 		real totalAreaPdf,
 		const std::vector<Vertex>& eye_vs,
@@ -668,7 +668,7 @@ namespace aten
 		return misWeight;
 	}
 
-	void BDPT2::combine(
+	void BDPT::combine(
 		const int x, const int y,
 		std::vector<Result>& result,
 		const std::vector<Vertex>& eye_vs,
@@ -844,7 +844,7 @@ namespace aten
 		}
 	}
 
-	void BDPT2::render(
+	void BDPT::render(
 		Destination& dst,
 		scene* scene,
 		camera* camera)

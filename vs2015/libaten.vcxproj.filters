@@ -299,9 +299,6 @@
     <ClInclude Include="..\src\libaten\renderer\film.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\bdpt2.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\stream.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -327,6 +324,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\accelerator\accelerator.h">
       <Filter>accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\bdpt.h">
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -489,9 +489,6 @@
     <ClCompile Include="..\src\libaten\material\emissive.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\bdpt2.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\light\light.cpp">
       <Filter>light</Filter>
     </ClCompile>
@@ -509,6 +506,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp">
       <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

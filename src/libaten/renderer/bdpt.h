@@ -7,10 +7,10 @@
 
 namespace aten
 {
-	class BDPT2 : public Renderer {
+	class BDPT : public Renderer {
 	public:
-		BDPT2() {}
-		~BDPT2() {}
+		BDPT() {}
+		~BDPT() {}
 
 	public:
 		virtual void render(
@@ -96,7 +96,7 @@ namespace aten
 			scene* scene,
 			camera* camera) const;
 
-		Result BDPT2::genLightPath(
+		Result BDPT::genLightPath(
 			std::vector<Vertex>& vs,
 			aten::Light* light,
 			sampler* sampler,
@@ -118,7 +118,7 @@ namespace aten
 			const std::vector<Vertex>& light_vs,
 			int numLightVtx) const;
 
-		void BDPT2::combine(
+		void BDPT::combine(
 			int x, int y,
 			std::vector<Result>& result,
 			const std::vector<Vertex>& eye_vs,

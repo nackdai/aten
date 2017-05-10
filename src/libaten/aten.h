@@ -86,6 +86,5 @@
 #include "renderer/geominforender.h"
 #include "renderer/sorted_pathtracing.h"
 #include "renderer/bdpt.h"
-#include "renderer/bdpt2.h"
 
 #include "posteffect/BloomEffect.h"

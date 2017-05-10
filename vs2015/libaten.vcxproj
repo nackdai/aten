@@ -210,7 +210,7 @@
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
-    <ClInclude Include="..\src\libaten\renderer\bdpt2.h" />
+    <ClInclude Include="..\src\libaten\renderer\bdpt.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
@@ -283,7 +283,7 @@
     <ClCompile Include="..\src\libaten\object\vertex.cpp" />
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\bdpt2.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />

@@ -68,7 +68,7 @@ AT_DEVICE_API bool intersectBVH(
 					if (left->primid >= 0) {
 						// hit test primitive...
 						const auto& prim = ctxt->prims[left->primid];
-						isHit = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
+						isHit = intersectShape(&leftobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
 
 						if (isHit) {
 							recTmp.p = leftobj.mtxL2W.apply(recTmp.p);
@@ -95,7 +95,7 @@ AT_DEVICE_API bool intersectBVH(
 						}
 					}
 					else {
-						isHit = intersectShape(leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
+						isHit = intersectShape(&leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
 						recTmp.mtrlid = leftobj.mtrl.idx;
 					}
 				}
@@ -129,7 +129,7 @@ AT_DEVICE_API bool intersectBVH(
 					if (right->primid >= 0) {
 						// hit test primitive...
 						const auto& prim = ctxt->prims[right->primid];
-						isHit = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
+						isHit = intersectShape(&rightobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
 
 						if (isHit) {
 							recTmp.p = rightobj.mtxL2W.apply(recTmp.p);
@@ -156,7 +156,7 @@ AT_DEVICE_API bool intersectBVH(
 						}
 					}
 					else {
-						isHit = intersectShape(rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
+						isHit = intersectShape(&rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
 						recTmp.mtrlid = rightobj.mtrl.idx;
 					}
 				}

@@ -28,13 +28,13 @@ namespace AT_NAME
 			aten::hitrecord& rec) const override final;
 
 		static AT_DEVICE_API bool hit(
-			const aten::ShapeParameter& param,
+			const aten::ShapeParameter* param,
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::hitrecord& rec);
 
 		static AT_DEVICE_API bool hit(
-			const aten::ShapeParameter& param,
+			const aten::ShapeParameter* param,
 			const aten::ray& r,
 			const aten::mat4& mtxL2W,
 			real t_min, real t_max,

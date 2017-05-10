@@ -14,31 +14,6 @@
 
 #include "aten4idaten.h"
 
-__host__ __device__ bool intersect(
-	const aten::ray* r,
-	aten::hitrecord* rec,
-	const Context* ctxt)
-{
-	bool isHit = false;
-
-	aten::hitrecord tmp;
-
-	for (int i = 0; i < ctxt->geomnum; i++) {
-		const auto& s = ctxt->shapes[i];
-		if (AT_NAME::sphere::hit(s, *r, AT_MATH_EPSILON, AT_MATH_INF, tmp)) {
-			if (tmp.t < rec->t) {
-				*rec = tmp;
-				rec->obj = (void*)&ctxt->shapes[i];
-				rec->mtrlid = ctxt->shapes[i].mtrl.idx;
-
-				isHit = true;
-			}
-		}
-	}
-
-	return isHit;
-}
-
 struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
@@ -212,7 +187,6 @@ __global__ void raytracing(
 
 		auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
 		{
-			//return intersect(&_r, &_rec, &ctxt);
 			return intersectBVH(&ctxt, _r, t_min, t_max, _rec);
 		};
 

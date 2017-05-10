@@ -24,7 +24,7 @@ __device__ aten::LightSampleResult sampleAreaLight(
 		auto dist = dir.length();
 
 		aten::ray r(o, dir);
-		bool isHit = AT_NAME::sphere::hit(*s, r, AT_MATH_EPSILON, AT_MATH_INF, _rec);
+		bool isHit = AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, _rec);
 
 		return isHit;
 	};

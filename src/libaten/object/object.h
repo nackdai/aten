@@ -29,7 +29,7 @@ namespace AT_NAME
 			aten::hitrecord& rec) const override;
 
 		static AT_DEVICE_API bool hit(
-			const aten::PrimitiveParamter& param,
+			const aten::PrimitiveParamter* param,
 			const aten::vertex& v0,
 			const aten::vertex& v1,
 			const aten::vertex& v2,

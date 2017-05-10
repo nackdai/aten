@@ -33,7 +33,7 @@ namespace AT_NAME
 		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
 		bool isHit = hit(
-			param, 
+			&param, 
 			v0, v1, v2, 
 			r, 
 			t_min, t_max, 
@@ -52,7 +52,7 @@ namespace AT_NAME
 	}
 
 	bool face::hit(
-		const aten::PrimitiveParamter& param,
+		const aten::PrimitiveParamter* param,
 		const aten::vertex& v0,
 		const aten::vertex& v1,
 		const aten::vertex& v2,
@@ -87,7 +87,7 @@ namespace AT_NAME
 				rec.du = normalize(getOrthoVector(rec.normal));
 				rec.dv = normalize(cross(rec.normal, rec.du));
 
-				rec.area = param.area;
+				rec.area = param->area;
 
 				isHit = true;
 			}

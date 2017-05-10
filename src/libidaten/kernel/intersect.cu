@@ -6,12 +6,12 @@
 #include "cuda/helper_math.h"
 #include "aten4idaten.h"
 
-typedef bool(*FuncIntersect)(const aten::ShapeParameter&, const aten::PrimitiveParamter*, const Context*, const aten::ray&, float, float, aten::hitrecord&);
+typedef bool(*FuncIntersect)(const aten::ShapeParameter*, const aten::PrimitiveParamter*, const Context*, const aten::ray&, float, float, aten::hitrecord&);
 
 __device__ FuncIntersect funcIntersect[aten::ShapeType::ShapeTypeMax];
 
 __device__ bool hitSphere(
-	const aten::ShapeParameter& shape,
+	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
 	const Context* ctxt,
 	const aten::ray& r,
@@ -22,7 +22,7 @@ __device__ bool hitSphere(
 }
 
 __device__ bool hitTriangle(
-	const aten::ShapeParameter& shape,
+	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
 	const Context* ctxt,
 	const aten::ray& r,
@@ -34,7 +34,7 @@ __device__ bool hitTriangle(
 	const auto& v2 = ctxt->vertices[prim->idx[2]];
 
 	bool isHit = idaten::face::hit(
-		*prim,
+		prim,
 		v0, v1, v2,
 		r,
 		t_min, t_max,
@@ -44,14 +44,14 @@ __device__ bool hitTriangle(
 }
 
 __device__ bool hitNotSupported(
-	const aten::ShapeParameter& shape,
+	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord& rec)
 {
-	printf("Hit Test Not Supoorted[%d]\n", shape.type);
+	printf("Hit Test Not Supoorted[%d]\n", shape->type);
 }
 
 
@@ -64,15 +64,15 @@ __device__ void addIntersectFuncs()
 }
 
 AT_DEVICE_API bool intersectShape(
-	const aten::ShapeParameter& shape,
+	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord& rec)
 {
-	const aten::ShapeParameter* realShape = (shape.shapeid >= 0 ? &ctxt->shapes[shape.shapeid] : &shape);
+	const aten::ShapeParameter* realShape = (shape->shapeid >= 0 ? &ctxt->shapes[shape->shapeid] : shape);
 
-	auto ret = funcIntersect[realShape->type](*realShape, prim, ctxt, r, t_min, t_max, rec);
+	auto ret = funcIntersect[realShape->type](realShape, prim, ctxt, r, t_min, t_max, rec);
 	return ret;
 }

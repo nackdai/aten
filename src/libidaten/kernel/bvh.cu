@@ -9,7 +9,7 @@
 #define STACK_SIZE	(64)
 
 AT_DEVICE_API bool intersectBVH(
-	const Context& ctxt,
+	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord& rec)
@@ -23,7 +23,7 @@ AT_DEVICE_API bool intersectBVH(
 	int stackpos = 1;
 	int nestedStackPos = -1;
 
-	aten::BVHNode* node = &ctxt.nodes[0];
+	aten::BVHNode* node = &ctxt->nodes[0];
 
 	aten::ray transformedRay = r;
 	bool isNested = false;
@@ -41,8 +41,8 @@ AT_DEVICE_API bool intersectBVH(
 	bool isHit = false;
 
 	do {
-		left = node->left >= 0 ? &ctxt.nodes[node->left] : nullptr;
-		right = node->right >= 0 ? &ctxt.nodes[node->right] : nullptr;
+		left = node->left >= 0 ? &ctxt->nodes[node->left] : nullptr;
+		right = node->right >= 0 ? &ctxt->nodes[node->right] : nullptr;
 
 		traverseLeft = false;
 		traverseRight = false;
@@ -54,28 +54,28 @@ AT_DEVICE_API bool intersectBVH(
 			isHit = false;
 
 			if (left->isLeaf()) {
-				const auto& leftobj = ctxt.shapes[left->shapeid];
+				const auto& leftobj = ctxt->shapes[left->shapeid];
 
 				if (left->nestid >= 0) {
 					traverseLeft = left->bbox.hit(r, t_min, t_max, &left_t);
 
 					if (traverseLeft) {
-						left = &ctxt.nodes[left->nestid];
+						left = &ctxt->nodes[left->nestid];
 						nestedStackPos = stackpos;
 					}
 				}
 				else {
 					if (left->primid >= 0) {
 						// hit test primitive...
-						const auto& prim = ctxt.prims[left->primid];
+						const auto& prim = ctxt->prims[left->primid];
 						isHit = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
 
 						if (isHit) {
 							recTmp.p = leftobj.mtxL2W.apply(recTmp.p);
 							recTmp.normal = normalize(leftobj.mtxL2W.applyXYZ(recTmp.normal));
 
-							const auto& v0 = ctxt.vertices[prim.idx[0]];
-							const auto& v1 = ctxt.vertices[prim.idx[1]];
+							const auto& v0 = ctxt->vertices[prim.idx[0]];
+							const auto& v1 = ctxt->vertices[prim.idx[1]];
 
 							real orignalLen = (v1.pos - v0.pos).length();
 
@@ -115,28 +115,28 @@ AT_DEVICE_API bool intersectBVH(
 			isHit = false;
 
 			if (right->isLeaf()) {
-				const auto& rightobj = ctxt.shapes[right->shapeid];
+				const auto& rightobj = ctxt->shapes[right->shapeid];
 
 				if (right->nestid >= 0) {
 					traverseRight = right->bbox.hit(r, t_min, t_max, &right_t);
 
 					if (traverseRight && right_t < left_t) {
-						right = &ctxt.nodes[right->nestid];
+						right = &ctxt->nodes[right->nestid];
 						nestedStackPos = stackpos;
 					}
 				}
 				else {
 					if (right->primid >= 0) {
 						// hit test primitive...
-						const auto& prim = ctxt.prims[right->primid];
+						const auto& prim = ctxt->prims[right->primid];
 						isHit = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
 
 						if (isHit) {
 							recTmp.p = rightobj.mtxL2W.apply(recTmp.p);
 							recTmp.normal = normalize(rightobj.mtxL2W.applyXYZ(recTmp.normal));
 
-							const auto& v0 = ctxt.vertices[prim.idx[0]];
-							const auto& v1 = ctxt.vertices[prim.idx[1]];
+							const auto& v0 = ctxt->vertices[prim.idx[0]];
+							const auto& v1 = ctxt->vertices[prim.idx[1]];
 
 							real orignalLen = (v1.pos - v0.pos).length();
 
@@ -191,7 +191,7 @@ AT_DEVICE_API bool intersectBVH(
 			}
 
 			if (!isNested && nestedStackPos >= 0) {
-				const auto& param = ctxt.shapes[node->shapeid];
+				const auto& param = ctxt->shapes[node->shapeid];
 				transformedRay.org = param.mtxW2L.apply(r.org);
 				transformedRay.dir = param.mtxW2L.applyXYZ(r.dir);
 				transformedRay.dir = normalize(transformedRay.dir);

@@ -18,6 +18,18 @@ typedef AT_NAME::MaterialSampling(*FuncSampleMaterial)(
 	float, float,
 	bool);
 
+__device__ AT_NAME::MaterialSampling sampleMtrlNotSupported(
+	const aten::MaterialParameter& param,
+	const aten::vec3& normal,
+	const aten::vec3& wi,
+	const aten::hitrecord& hitrec,
+	aten::sampler* sampler,
+	real u, real v,
+	bool isLightPath)
+{
+	printf("Sample Material Not Supported[%d]\n", param.type);
+}
+
 __device__ FuncSampleMaterial funcSampleMaterial[aten::MaterialType::MaterialTypeMax];
 
 __device__ void addMaterialFuncs()
@@ -30,9 +42,9 @@ __device__ void addMaterialFuncs()
 	funcSampleMaterial[aten::MaterialType::Blinn] = AT_NAME::MicrofacetBlinn::sample;		// MicrofacetBlinn
 	funcSampleMaterial[aten::MaterialType::GGX] = AT_NAME::MicrofacetGGX::sample;			// MicrofacetGGX
 	funcSampleMaterial[aten::MaterialType::Beckman] = AT_NAME::MicrofacetBeckman::sample;	// MicrofacetBeckman
-	funcSampleMaterial[aten::MaterialType::Disney] = nullptr;	// DisneyBRDF
-	funcSampleMaterial[aten::MaterialType::Toon] = nullptr;		// Toon
-	funcSampleMaterial[aten::MaterialType::Layer] = nullptr;	// Layer
+	funcSampleMaterial[aten::MaterialType::Disney] = sampleMtrlNotSupported;	// DisneyBRDF
+	funcSampleMaterial[aten::MaterialType::Toon] = sampleMtrlNotSupported;		// Toon
+	funcSampleMaterial[aten::MaterialType::Layer] = sampleMtrlNotSupported;		// Layer
 }
 
 __device__ AT_NAME::MaterialSampling sampleMaterial(

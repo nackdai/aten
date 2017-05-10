@@ -23,7 +23,7 @@ __device__ aten::LightSampleResult sampleAreaLight(
 		auto dir = pos - o;
 		auto dist = dir.length();
 
-		aten::ray r(o, normalize(dir));
+		aten::ray r(o, dir);
 		bool isHit = AT_NAME::sphere::hit(*s, r, AT_MATH_EPSILON, AT_MATH_INF, _rec);
 
 		return isHit;
@@ -32,12 +32,20 @@ __device__ aten::LightSampleResult sampleAreaLight(
 	return std::move(ret);
 }
 
+__device__ aten::LightSampleResult sampleLightNotSupported(
+	const aten::LightParameter& light,
+	const aten::vec3& org,
+	aten::sampler* sampler)
+{
+	printf("Sample Light Not Supported[%d]\n", light.type);
+}
+
 __device__ FuncLightSample funcSampleLight[aten::LightType::LightTypeMax];
 
 __device__ void addLighFuncs()
 {
 	funcSampleLight[aten::LightType::Area] = sampleAreaLight;
-	funcSampleLight[aten::LightType::IBL] = nullptr;
+	funcSampleLight[aten::LightType::IBL] = sampleLightNotSupported;
 	funcSampleLight[aten::LightType::Direction] = AT_NAME::DirectionalLight::sample;
 	funcSampleLight[aten::LightType::Point] = AT_NAME::PointLight::sample;
 	funcSampleLight[aten::LightType::Spot] = AT_NAME::SpotLight::sample;

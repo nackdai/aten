@@ -68,8 +68,10 @@ Idaten is Japanese god, it runs fast.
 - Bi-Directional Path Tracing
   - Only Area Light
 - Scene Definition by XML
-  - Not specify all definitions.
+  - Can not specify all definitions.
 - Only for Windows.
+  - Only for Visual Studio 2015.
+- There are some Japanese comments...
 
 ## Under Construction Works
 
@@ -81,13 +83,19 @@ Idaten is Japanese god, it runs fast.
 - More efficient denoise filter
 - Specify all scene definitions by XML
 - Bi-Directional Path Tracing
-  - Use all lights
+  - Enable to use all lights
 - Sub Surface Scattering
 - Particiate Media
 - Rendering algorithms
   - Photon mapping
   - Progressive Photom mapping
   - VCM
+
+## How To Build
+
+1. Run `aten/3rdparty/Build3rdParty.bat`
+2. Launch `aten/vs2015/aten.sln`
+3. Build porjects
 
 ## Gallery
 

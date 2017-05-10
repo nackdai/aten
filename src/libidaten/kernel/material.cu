@@ -9,7 +9,8 @@
 
 #include "aten4idaten.h"
 
-typedef AT_NAME::MaterialSampling(*FuncSampleMaterial)(
+typedef void(*FuncSampleMaterial)(
+	AT_NAME::MaterialSampling*,
 	const aten::MaterialParameter*,
 	const aten::vec3&,
 	const aten::vec3&,
@@ -18,7 +19,8 @@ typedef AT_NAME::MaterialSampling(*FuncSampleMaterial)(
 	float, float,
 	bool);
 
-__device__ AT_NAME::MaterialSampling sampleMtrlNotSupported(
+__device__ void sampleMtrlNotSupported(
+	AT_NAME::MaterialSampling*,
 	const aten::MaterialParameter* param,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
@@ -47,7 +49,8 @@ __device__ void addMaterialFuncs()
 	funcSampleMaterial[aten::MaterialType::Layer] = sampleMtrlNotSupported;		// Layer
 }
 
-__device__ AT_NAME::MaterialSampling sampleMaterial(
+__device__ void sampleMaterial(
+	AT_NAME::MaterialSampling* result,
 	const aten::MaterialParameter* mtrl,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
@@ -55,7 +58,5 @@ __device__ AT_NAME::MaterialSampling sampleMaterial(
 	aten::sampler* sampler,
 	float u, float v)
 {
-	auto ret = funcSampleMaterial[mtrl->type](mtrl, normal, wi, hitrec, sampler, u, v, false);
-
-	return std::move(ret);
+	funcSampleMaterial[mtrl->type](result, mtrl, normal, wi, hitrec, sampler, u, v, false);
 }

@@ -153,7 +153,10 @@ __global__ void raytracing(
 	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
 	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {
-		auto sampling = sampleMaterial(
+		AT_NAME::MaterialSampling sampling;
+			
+		sampleMaterial(
+			&sampling,
 			mtrl,
 			orienting_normal, 
 			path.ray.dir,
@@ -174,7 +177,8 @@ __global__ void raytracing(
 		auto* sphere = &ctxt.shapes[light.object.idx];
 		light.object.ptr = sphere;
 
-		aten::LightSampleResult sampleres = sampleLight(&light, path.rec.p, nullptr);
+		aten::LightSampleResult sampleres;
+		sampleLight(&sampleres, &light, path.rec.p, nullptr);
 
 		aten::vec3 dirToLight = sampleres.dir;
 		auto len = dirToLight.length();

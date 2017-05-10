@@ -4,7 +4,8 @@
 
 __device__ void addMaterialFuncs();
 
-__device__ AT_NAME::MaterialSampling sampleMaterial(
+__device__ void sampleMaterial(
+	AT_NAME::MaterialSampling* result,
 	const aten::MaterialParameter* mtrl,
 	const aten::vec3& normal,
 	const aten::vec3& wi,

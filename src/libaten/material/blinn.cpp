@@ -215,7 +215,8 @@ namespace AT_NAME
 		return std::move(bsdf);
 	}
 
-	AT_DEVICE_API MaterialSampling MicrofacetBlinn::sample(
+	AT_DEVICE_API void MicrofacetBlinn::sample(
+		MaterialSampling* result,
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -224,12 +225,10 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		MaterialSampling ret;
-
-		ret.dir = sampleDirection(param, normal, wi, u, v, sampler);
+		result->dir = sampleDirection(param, normal, wi, u, v, sampler);
 
 #if 1
-		ret.pdf = pdf(param, normal, wi, ret.dir, u, v);
+		result->pdf = pdf(param, normal, wi, result->dir, u, v);
 
 		real fresnel = 1;
 		real ior = param->ior;
@@ -241,8 +240,8 @@ namespace AT_NAME
 			u, v,
 			real(1));
 
-		ret.bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, ret.dir, u, v);
-		ret.fresnel = fresnel;
+		result->bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, result->dir, u, v);
+		result->fresnel = fresnel;
 #else
 		aten::vec3 V = -in;
 		aten::vec3 L = ret.dir;
@@ -261,8 +260,6 @@ namespace AT_NAME
 			ret.pdf = 0;
 		}
 #endif
-
-		return std::move(ret);
 	}
 
 	MaterialSampling MicrofacetBlinn::sample(
@@ -273,7 +270,10 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		auto ret = sample(
+		MaterialSampling ret;
+
+		sample(
+			&ret,
 			&m_param,
 			normal,
 			ray.dir,

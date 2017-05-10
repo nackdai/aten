@@ -26,13 +26,13 @@ namespace AT_NAME {
 	public:
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
 		{
-			LightSampleResult result;
+			aten::LightSampleResult result;
 			sample(&result, &m_param, org, sampler);
 			return std::move(result);
 		}
 
 		static AT_DEVICE_API void sample(
-			LightSampleResult* result,
+			aten::LightSampleResult* result,
 			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)

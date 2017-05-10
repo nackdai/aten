@@ -54,7 +54,8 @@ namespace AT_NAME
 			const aten::MaterialParameter* param,
 			real u, real v);
 
-		static AT_DEVICE_API MaterialSampling sample(
+		static AT_DEVICE_API void sample(
+			MaterialSampling* result,
 			const aten::MaterialParameter* param,
 			const aten::vec3& normal,
 			const aten::vec3& wi,

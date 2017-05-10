@@ -7,9 +7,11 @@
 
 #include "aten4idaten.h"
 
-typedef aten::LightSampleResult(*FuncLightSample)(const aten::LightParameter*, const aten::vec3&, aten::sampler*);
+typedef void(*FuncLightSample)(
+	aten::LightSampleResult*, const aten::LightParameter*, const aten::vec3&, aten::sampler*);
 
-__device__ aten::LightSampleResult sampleAreaLight(
+__device__  void sampleAreaLight(
+	aten::LightSampleResult* result,
 	const aten::LightParameter* light,
 	const aten::vec3& org,
 	aten::sampler* sampler)
@@ -28,11 +30,11 @@ __device__ aten::LightSampleResult sampleAreaLight(
 
 		return isHit;
 	};
-	auto ret = AT_NAME::AreaLight::sample(funcHitTestSphere, light, org, sampler);
-	return std::move(ret);
+	AT_NAME::AreaLight::sample(funcHitTestSphere, result, light, org, sampler);
 }
 
-__device__ aten::LightSampleResult sampleLightNotSupported(
+__device__ void sampleLightNotSupported(
+	aten::LightSampleResult* result,
 	const aten::LightParameter* light,
 	const aten::vec3& org,
 	aten::sampler* sampler)
@@ -51,11 +53,11 @@ __device__ void addLighFuncs()
 	funcSampleLight[aten::LightType::Spot] = AT_NAME::SpotLight::sample;
 }
 
-__device__ aten::LightSampleResult sampleLight(
+__device__ void sampleLight(
+	aten::LightSampleResult* result,
 	const aten::LightParameter* light,
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
-	aten::LightSampleResult ret = funcSampleLight[light->type](light, org, sampler);
-	return std::move(ret);
+	funcSampleLight[light->type](result, light, org, sampler);
 }

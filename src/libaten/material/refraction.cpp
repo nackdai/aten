@@ -86,7 +86,10 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		auto ret = sample(
+		MaterialSampling ret;
+		
+		sample(
+			&ret,
 			&m_param,
 			normal,
 			ray.dir,
@@ -98,7 +101,8 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	AT_DEVICE_API MaterialSampling refraction::sample(
+	AT_DEVICE_API void refraction::sample(
+		MaterialSampling* result,
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -107,8 +111,6 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		MaterialSampling ret;
-
 		// レイが入射してくる側の物体の屈折率.
 		real ni = real(1);	// 真空
 
@@ -135,12 +137,12 @@ namespace AT_NAME
 			//AT_PRINTF("Reflection in refraction...\n");
 
 			// 全反射.
-			ret.pdf = real(1);
-			ret.bsdf = albedo;
-			ret.dir = reflect;
-			ret.fresnel = real(1);
+			result->pdf = real(1);
+			result->bsdf = albedo;
+			result->dir = reflect;
+			result->fresnel = real(1);
 
-			return std::move(ret);
+			return;
 		}
 
 		aten::vec3 n = into ? hitrec.normal : -hitrec.normal;
@@ -171,7 +173,7 @@ namespace AT_NAME
 		}
 
 		if (param->isIdealRefraction) {
-			ret.dir = refract;
+			result->dir = refract;
 
 			// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
 			if (isLightPath) {
@@ -183,28 +185,28 @@ namespace AT_NAME
 
 			real nnt2 = nnt * nnt;
 
-			ret.bsdf = nnt2 * Tr * albedo;
+			result->bsdf = nnt2 * Tr * albedo;
 
-			ret.fresnel = 0;
+			result->fresnel = 0;
 
-			ret.subpdf = real(1);
+			result->subpdf = real(1);
 		}
 		else {
 			auto prob = real(0.25) + real(0.5) * Re;
 
 			if (r < prob) {
 				// 反射.
-				ret.dir = reflect;
-				ret.bsdf = Re * albedo;
-				ret.bsdf /= prob;
+				result->dir = reflect;
+				result->bsdf = Re * albedo;
+				result->bsdf /= prob;
 
-				ret.subpdf = prob;
+				result->subpdf = prob;
 
-				ret.fresnel = Re;
+				result->fresnel = Re;
 			}
 			else {
 				// 屈折.
-				ret.dir = refract;
+				result->dir = refract;
 				// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
 				if (isLightPath) {
 					nnt = into ? ni / nt : nt / ni;
@@ -215,18 +217,16 @@ namespace AT_NAME
 
 				real nnt2 = nnt * nnt;
 
-				ret.bsdf = nnt2 * Tr * albedo;
-				ret.bsdf /= (1 - prob);
+				result->bsdf = nnt2 * Tr * albedo;
+				result->bsdf /= (1 - prob);
 
-				ret.subpdf = (1 - prob);
+				result->subpdf = (1 - prob);
 
-				ret.fresnel = Tr;
+				result->fresnel = Tr;
 			}
 		}
 
-		ret.pdf = 1;
-
-		return std::move(ret);
+		result->pdf = 1;
 	}
 
 	refraction::RefractionSampling refraction::check(

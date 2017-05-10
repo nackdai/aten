@@ -90,6 +90,7 @@ Idaten is Japanese god, it runs fast.
   - Photon mapping
   - Progressive Photom mapping
   - VCM
+- More efficient acceleration algorithms
 
 ## How To Build
 

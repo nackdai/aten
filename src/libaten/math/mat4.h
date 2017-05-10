@@ -139,8 +139,9 @@ namespace aten {
 			return *this;
 		}
 
-		inline AT_DEVICE_API vec3 apply(const vec3& v) const
+		inline AT_DEVICE_API vec3 apply(const vec3& p) const
 		{
+#if 0
 			vec4 t(v.x, v.y, v.z, 1);
 			vec4 ret;
 
@@ -150,19 +151,31 @@ namespace aten {
 					ret[r] += m[r][c] * t[c];
 				}
 			}
+#else
+			vec3 ret;
+			ret.x = v[0].x * p.x + v[0].y * p.y + v[0].z * p.z + v[0].w;
+			ret.y = v[1].x * p.x + v[1].y * p.y + v[1].z * p.z + v[1].w;
+			ret.z = v[2].x * p.x + v[2].y * p.y + v[2].z * p.z + v[2].w;
+#endif
 
 			return std::move(ret);
 		}
-		inline AT_DEVICE_API vec3 applyXYZ(const vec3& v) const
+		inline AT_DEVICE_API vec3 applyXYZ(const vec3& p) const
 		{
 			vec3 ret;
 
+#if 0
 			for (int r = 0; r < 3; r++) {
 				ret[r] = 0;
 				for (int c = 0; c < 3; c++) {
 					ret[r] += m[r][c] * v[c];
 				}
 			}
+#else
+			ret.x = v[0].x * p.x + v[0].y * p.y + v[0].z * p.z;
+			ret.y = v[1].x * p.x + v[1].y * p.y + v[1].z * p.z;
+			ret.z = v[2].x * p.x + v[2].y * p.y + v[2].z * p.z;
+#endif
 
 			return std::move(ret);
 		}

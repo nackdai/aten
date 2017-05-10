@@ -12,7 +12,7 @@ AT_DEVICE_API bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord& rec)
+	aten::hitrecord* rec)
 {
 	aten::BVHNode* stackbuf[STACK_SIZE] = { nullptr };
 	aten::BVHNode** stack = &stackbuf[0];
@@ -68,7 +68,7 @@ AT_DEVICE_API bool intersectBVH(
 					if (left->primid >= 0) {
 						// hit test primitive...
 						const auto& prim = ctxt->prims[left->primid];
-						isHit = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
+						isHit = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
 
 						if (isHit) {
 							recTmp.p = leftobj->mtxL2W.apply(recTmp.p);
@@ -95,15 +95,15 @@ AT_DEVICE_API bool intersectBVH(
 						}
 					}
 					else {
-						isHit = intersectShape(leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
+						isHit = intersectShape(leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, &recTmp);
 						recTmp.mtrlid = leftobj->mtrl.idx;
 					}
 				}
 
 				if (isHit) {
-					if (recTmp.t < rec.t) {
-						rec = recTmp;
-						rec.obj = (void*)leftobj;
+					if (recTmp.t < rec->t) {
+						*rec = recTmp;
+						rec->obj = (void*)leftobj;
 					}
 				}
 			}
@@ -129,7 +129,7 @@ AT_DEVICE_API bool intersectBVH(
 					if (right->primid >= 0) {
 						// hit test primitive...
 						const auto& prim = ctxt->prims[right->primid];
-						isHit = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, recTmp);
+						isHit = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
 
 						if (isHit) {
 							recTmp.p = rightobj->mtxL2W.apply(recTmp.p);
@@ -156,15 +156,15 @@ AT_DEVICE_API bool intersectBVH(
 						}
 					}
 					else {
-						isHit = intersectShape(rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, recTmp);
+						isHit = intersectShape(rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, &recTmp);
 						recTmp.mtrlid = rightobj->mtrl.idx;
 					}
 				}
 
 				if (isHit) {
-					if (recTmp.t < rec.t) {
-						rec = recTmp;
-						rec.obj = (void*)rightobj;
+					if (recTmp.t < rec->t) {
+						*rec = recTmp;
+						rec->obj = (void*)rightobj;
 					}
 				}
 			}
@@ -205,5 +205,5 @@ AT_DEVICE_API bool intersectBVH(
 		}
 	} while (node != nullptr);
 
-	return (rec.obj != nullptr);
+	return (rec->obj != nullptr);
 }

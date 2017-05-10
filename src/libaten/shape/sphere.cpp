@@ -25,7 +25,7 @@ namespace AT_NAME
 		real t_min, real t_max,
 		aten::hitrecord& rec) const
 	{
-		bool isHit = hit(&m_param, r, aten::mat4::Identity, t_min, t_max, rec);
+		bool isHit = hit(&m_param, r, aten::mat4::Identity, t_min, t_max, &rec);
 
 		if (isHit) {
 			rec.obj = (hitable*)this;
@@ -41,7 +41,7 @@ namespace AT_NAME
 		real t_min, real t_max,
 		aten::hitrecord& rec) const
 	{
-		bool isHit = hit(&m_param, r, mtxL2W, t_min, t_max, rec);
+		bool isHit = hit(&m_param, r, mtxL2W, t_min, t_max, &rec);
 
 		if (isHit) {
 			rec.obj = (hitable*)this;
@@ -55,7 +55,7 @@ namespace AT_NAME
 		const aten::ShapeParameter* param,
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec)
+		aten::hitrecord* rec)
 	{
 		return hit(param, r, aten::mat4(), t_min, t_max, rec);
 	}
@@ -65,7 +65,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
-		aten::hitrecord& rec)
+		aten::hitrecord* rec)
 	{
 		// NOTE
 		// https://www.slideshare.net/h013/edupt-kaisetsu-22852235
@@ -86,21 +86,21 @@ namespace AT_NAME
 		const real t2 = b + sqrt_D4;
 
 		if (t1 > AT_MATH_EPSILON) {
-			rec.t = t1;
+			rec->t = t1;
 		}
 		else if (t2 > AT_MATH_EPSILON) {
-			rec.t = t2;
+			rec->t = t2;
 		}
 		else {
 			return false;
 		}
 
-		rec.p = r.org + rec.t * r.dir;
-		rec.normal = (rec.p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
+		rec->p = r.org + rec->t * r.dir;
+		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
 
 		// tangent coordinate.
-		rec.du = normalize(getOrthoVector(rec.normal));
-		rec.dv = normalize(cross(rec.normal, rec.du));
+		rec->du = normalize(getOrthoVector(rec->normal));
+		rec->dv = normalize(cross(rec->normal, rec->du));
 
 		{
 			auto tmp = param->center + aten::vec3(param->radius, 0, 0);
@@ -110,10 +110,10 @@ namespace AT_NAME
 
 			auto radius = (tmp - center).length();
 
-			rec.area = 4 * AT_MATH_PI * radius * radius;
+			rec->area = 4 * AT_MATH_PI * radius * radius;
 		}
 
-		getUV(rec.u, rec.v, rec.normal);
+		getUV(rec->u, rec->v, rec->normal);
 
 		return true;
 	}

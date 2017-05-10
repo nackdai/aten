@@ -7,4 +7,4 @@ AT_DEVICE_API bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord& rec);
+	aten::hitrecord* rec);

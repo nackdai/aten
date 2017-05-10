@@ -16,7 +16,7 @@ __device__  void sampleAreaLight(
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
-	auto funcHitTestSphere = [] AT_DEVICE_API(const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord& _rec)
+	auto funcHitTestSphere = [] AT_DEVICE_API(const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord* _rec)
 	{
 		aten::ShapeParameter* s = (aten::ShapeParameter*)object.ptr;
 

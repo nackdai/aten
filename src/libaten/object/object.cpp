@@ -37,7 +37,7 @@ namespace AT_NAME
 			v0, v1, v2, 
 			r, 
 			t_min, t_max, 
-			rec);
+			&rec);
 
 		if (isHit) {
 			//rec.obj = parent;
@@ -58,17 +58,17 @@ namespace AT_NAME
 		const aten::vertex& v2,
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec)
+		aten::hitrecord* rec)
 	{
 		bool isHit = false;
 
 		const auto res = intersectTriangle(r, v0.pos, v1.pos, v2.pos);
 
 		if (res.isIntersect) {
-			if (res.t < rec.t) {
-				rec.t = res.t;
+			if (res.t < rec->t) {
+				rec->t = res.t;
 
-				auto p = r.org + rec.t * r.dir;
+				auto p = r.org + rec->t * r.dir;
 
 				// NOTE
 				// http://d.hatena.ne.jp/Zellij/20131207/p1
@@ -76,18 +76,18 @@ namespace AT_NAME
 				// dSÀ•WŒn(barycentric coordinates).
 				// v0Šî€.
 				// p = (1 - a - b)*v0 + a*v1 + b*v2
-				rec.p = (1 - res.a - res.b) * v0.pos + res.a * v1.pos + res.b * v2.pos;
-				rec.normal = (1 - res.a - res.b) * v0.nml + res.a * v1.nml + res.b * v2.nml;
+				rec->p = (1 - res.a - res.b) * v0.pos + res.a * v1.pos + res.b * v2.pos;
+				rec->normal = (1 - res.a - res.b) * v0.nml + res.a * v1.nml + res.b * v2.nml;
 				auto uv = (1 - res.a - res.b) * v0.uv + res.a * v1.uv + res.b * v2.uv;
 
-				rec.u = uv.x;
-				rec.v = uv.y;
+				rec->u = uv.x;
+				rec->v = uv.y;
 
 				// tangent coordinate.
-				rec.du = normalize(getOrthoVector(rec.normal));
-				rec.dv = normalize(cross(rec.normal, rec.du));
+				rec->du = normalize(getOrthoVector(rec->normal));
+				rec->dv = normalize(cross(rec->normal, rec->du));
 
-				rec.area = param->area;
+				rec->area = param->area;
 
 				isHit = true;
 			}

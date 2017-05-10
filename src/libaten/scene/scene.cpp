@@ -9,9 +9,9 @@ namespace aten {
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
-		auto funcHitTest = [&](const ray& _r, real _t_min, real _t_max, hitrecord& _rec)
+		auto funcHitTest = [&](const ray& _r, real _t_min, real _t_max, hitrecord* _rec)
 		{
-			return this->hit(_r, _t_min, _t_max, _rec);
+			return this->hit(_r, _t_min, _t_max, *_rec);
 		};
 
 		auto isHit = scene::hitLight(
@@ -20,7 +20,7 @@ namespace aten {
 			lightPos,
 			r,
 			t_min, t_max,
-			rec);
+			&rec);
 
 		return isHit;
 	}

@@ -39,7 +39,7 @@ namespace AT_NAME {
 				aten::hitrecord rec;
 
 				aten::vec3 pos;
-				bool isHit = funcHitTest(org, param->object, pos, sampler, rec);
+				bool isHit = funcHitTest(org, param->object, pos, sampler, &rec);
 
 				if (isHit) {
 					result->pos = rec.p;

@@ -6,7 +6,14 @@
 #include "cuda/helper_math.h"
 #include "aten4idaten.h"
 
-typedef bool(*FuncIntersect)(const aten::ShapeParameter*, const aten::PrimitiveParamter*, const Context*, const aten::ray&, float, float, aten::hitrecord&);
+typedef bool(*FuncIntersect)(
+	const aten::ShapeParameter*, 
+	const aten::PrimitiveParamter*, 
+	const Context*, 
+	const aten::ray&, 
+	float, 
+	float, 
+	aten::hitrecord*);
 
 __device__ FuncIntersect funcIntersect[aten::ShapeType::ShapeTypeMax];
 
@@ -16,7 +23,7 @@ __device__ bool hitSphere(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord& rec)
+	aten::hitrecord* rec)
 {
 	return AT_NAME::sphere::hit(shape, r, t_min, t_max, rec);
 }
@@ -27,7 +34,7 @@ __device__ bool hitTriangle(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord& rec)
+	aten::hitrecord* rec)
 {
 	const auto& v0 = ctxt->vertices[prim->idx[0]];
 	const auto& v1 = ctxt->vertices[prim->idx[1]];
@@ -49,7 +56,7 @@ __device__ bool hitNotSupported(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord& rec)
+	aten::hitrecord* rec)
 {
 	printf("Hit Test Not Supoorted[%d]\n", shape->type);
 }
@@ -69,7 +76,7 @@ AT_DEVICE_API bool intersectShape(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord& rec)
+	aten::hitrecord* rec)
 {
 	const aten::ShapeParameter* realShape = (shape->shapeid >= 0 ? &ctxt->shapes[shape->shapeid] : shape);
 

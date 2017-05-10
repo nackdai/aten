@@ -131,7 +131,7 @@ namespace AT_NAME {
 			const aten::vec3& lightPos,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec)
+			aten::hitrecord* rec)
 		{
 			bool isHit = funcHitTest(r, t_min, t_max, rec);
 
@@ -145,17 +145,17 @@ namespace AT_NAME {
 					if (lightobj->hit(r, t_min, t_max, tmpRec)) {
 						auto dist2 = (tmpRec.p - r.org).squared_length();
 
-						if (rec.obj == tmpRec.obj
-							&& aten::abs(dist2 - rec.t * rec.t) < AT_MATH_EPSILON)
+						if (rec->obj == tmpRec.obj
+							&& aten::abs(dist2 - rec->t * rec->t) < AT_MATH_EPSILON)
 						{
 							return true;
 						}
 					}
 #else
-					auto dist = (rec.p - r.org).length();
+					auto dist = (rec->p - r.org).length();
 
-					if (rec.obj == lightobj
-						&& aten::abs(dist - rec.t) <= AT_MATH_EPSILON)
+					if (rec->obj == lightobj
+						&& aten::abs(dist - rec->t) <= AT_MATH_EPSILON)
 					{
 						return true;
 					}
@@ -176,7 +176,7 @@ namespace AT_NAME {
 			else if (light.attrib.isSingular) {
 				auto distToLight = (lightPos - r.org).length();
 
-				if (isHit && rec.t < distToLight) {
+				if (isHit && rec->t < distToLight) {
 					// Ray hits something, and the distance to the object is near than the distance to the light.
 					return false;
 				}

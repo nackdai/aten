@@ -3,7 +3,7 @@
 namespace AT_NAME {
 	aten::LightSampleResult AreaLight::sample(const aten::vec3& org, aten::sampler* sampler) const
 	{
-		auto funcHitTest = [](const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord& rec)
+		auto funcHitTest = [](const aten::vec3& o, const aten::UnionIdxPtr& object, aten::vec3& pos, aten::sampler* smpl, aten::hitrecord* rec)
 		{
 			bool isHit = false;
 			const aten::hitable* obj = (aten::hitable*)object.ptr;
@@ -21,7 +21,7 @@ namespace AT_NAME {
 
 				aten::ray r(o, aten::normalize(dir));
 
-				isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+				isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, *rec);
 			}
 
 			return isHit;

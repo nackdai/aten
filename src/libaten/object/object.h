@@ -35,7 +35,7 @@ namespace AT_NAME
 			const aten::vertex& v2,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec);
+			aten::hitrecord* rec);
 
 		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override;
 

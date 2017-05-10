@@ -88,7 +88,7 @@ __global__ void hitTest(
 	}
 	
 	aten::hitrecord rec;
-	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
+	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &rec);
 
 	path.isHit = isHit;
 	path.rec = rec;
@@ -189,12 +189,12 @@ __global__ void raytracing(
 
 		aten::hitrecord tmpRec;
 
-		auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord& _rec)
+		auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord* _rec)
 		{
 			return intersectBVH(&ctxt, _r, t_min, t_max, _rec);
 		};
 
-		if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+		if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec)) {
 			if (light.attrib.isInfinite) {
 				len = 1.0f;
 			}

@@ -14,7 +14,7 @@ typedef void(*FuncSampleMaterial)(
 	const aten::MaterialParameter*,
 	const aten::vec3&,
 	const aten::vec3&,
-	const aten::hitrecord&,
+	const aten::vec3&,
 	aten::sampler*,
 	float, float,
 	bool);
@@ -24,7 +24,7 @@ __device__ void sampleMtrlNotSupported(
 	const aten::MaterialParameter* param,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
-	const aten::hitrecord& hitrec,
+	const aten::vec3& orgnormal,
 	aten::sampler* sampler,
 	real u, real v,
 	bool isLightPath)
@@ -54,9 +54,9 @@ __device__ void sampleMaterial(
 	const aten::MaterialParameter* mtrl,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
-	const aten::hitrecord& hitrec,
+	const aten::vec3& orgnormal,
 	aten::sampler* sampler,
 	float u, float v)
 {
-	funcSampleMaterial[mtrl->type](result, mtrl, normal, wi, hitrec, sampler, u, v, false);
+	funcSampleMaterial[mtrl->type](result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
 }

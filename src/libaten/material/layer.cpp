@@ -84,7 +84,7 @@ namespace AT_NAME
 	MaterialSampling LayeredBSDF::sample(
 		const aten::ray& ray,
 		const aten::vec3& normal,
-		const aten::hitrecord& hitrec,
+		const aten::vec3& orgnormal,
 		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
@@ -111,7 +111,7 @@ namespace AT_NAME
 				mtrl->applyNormalMap(normal, appliedNml, u, v);
 			}
 
-			auto sampleres = mtrl->sample(ray, appliedNml, hitrec, sampler, u, v);
+			auto sampleres = mtrl->sample(ray, appliedNml, orgnormal, sampler, u, v);
 
 			const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
 

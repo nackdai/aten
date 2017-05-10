@@ -81,7 +81,7 @@ namespace AT_NAME
 	MaterialSampling refraction::sample(
 		const aten::ray& ray,
 		const aten::vec3& normal,
-		const aten::hitrecord& hitrec,
+		const aten::vec3& orgnormal,
 		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
@@ -93,7 +93,7 @@ namespace AT_NAME
 			&m_param,
 			normal,
 			ray.dir,
-			hitrec,
+			orgnormal,
 			sampler,
 			u, v,
 			isLightPath);
@@ -106,7 +106,7 @@ namespace AT_NAME
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
-		const aten::hitrecord& hitrec,
+		const aten::vec3& orgnormal,
 		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/)
@@ -117,9 +117,9 @@ namespace AT_NAME
 		// •¨‘Ì“à•”‚Ì‹üÜ—¦.
 		real nt = param->ior;
 
-		bool into = (dot(hitrec.normal, normal) > real(0));
+		bool into = (dot(orgnormal, normal) > real(0));
 
-		auto reflect = wi - 2 * dot(hitrec.normal, wi) * hitrec.normal;
+		auto reflect = wi - 2 * dot(orgnormal, wi) * orgnormal;
 		reflect.normalize();
 
 		real cos_i = dot(wi, normal);
@@ -145,7 +145,7 @@ namespace AT_NAME
 			return;
 		}
 
-		aten::vec3 n = into ? hitrec.normal : -hitrec.normal;
+		aten::vec3 n = into ? orgnormal : -orgnormal;
 #if 0
 		aten::vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
 #else

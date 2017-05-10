@@ -43,7 +43,7 @@ namespace aten
 					break;
 				}
 				else if (rec.mtrl->isSingular()) {
-					auto sample = rec.mtrl->sample(ray, orienting_normal, rec, nullptr, rec.u, rec.v);
+					auto sample = rec.mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
 
 					const auto& nextDir = sample.dir;
 					throughput *= sample.bsdf;

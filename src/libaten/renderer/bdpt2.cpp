@@ -173,7 +173,7 @@ namespace aten
 				return std::move(Result(contrib, x, y, true));
 			}
 
-			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v);
+			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v);
 
 			sampledPdf = sampling.pdf;
 			auto sampledBsdf = sampling.bsdf;
@@ -379,7 +379,7 @@ namespace aten
 				throughput = G * throughput;
 			}
 
-			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, sampler, rec.u, rec.v, true);
+			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v, true);
 
 			sampledPdf = sampling.pdf;
 			auto sampledBsdf = sampling.bsdf;

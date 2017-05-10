@@ -9,6 +9,6 @@ __device__ void sampleMaterial(
 	const aten::MaterialParameter* mtrl,
 	const aten::vec3& normal,
 	const aten::vec3& wi,
-	const aten::hitrecord& hitrec,
+	const aten::vec3& orgnormal,
 	aten::sampler* sampler,
 	float u, float v);

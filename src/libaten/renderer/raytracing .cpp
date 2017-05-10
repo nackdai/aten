@@ -30,7 +30,7 @@ namespace aten
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 				if (rec.mtrl->isSingular() || rec.mtrl->isTranslucent()) {
-					auto sampling = rec.mtrl->sample(ray, orienting_normal, rec, nullptr, rec.u, rec.v);
+					auto sampling = rec.mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
 
 					auto nextDir = normalize(sampling.dir);
 					auto bsdf = sampling.bsdf;

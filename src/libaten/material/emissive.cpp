@@ -66,7 +66,7 @@ namespace AT_NAME {
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
-		const aten::hitrecord& hitrec,
+		const aten::vec3& orgnormal,
 		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/)
@@ -79,7 +79,7 @@ namespace AT_NAME {
 	MaterialSampling emissive::sample(
 		const aten::ray& ray,
 		const aten::vec3& normal,
-		const aten::hitrecord& hitrec,
+		const aten::vec3& orgnormal,
 		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath/*= false*/) const
@@ -91,7 +91,7 @@ namespace AT_NAME {
 			&m_param,
 			normal,
 			ray.dir,
-			hitrec,
+			orgnormal,
 			sampler,
 			u, v,
 			isLightPath);

@@ -314,7 +314,7 @@ namespace aten
 		}
 #endif
 
-		auto sampling = path.rec.mtrl->sample(path.ray, orienting_normal, path.rec, sampler, path.rec.u, path.rec.v);
+		auto sampling = path.rec.mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
 
 		auto nextDir = normalize(sampling.dir);
 		auto pdfb = sampling.pdf;

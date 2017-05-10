@@ -160,7 +160,7 @@ __global__ void raytracing(
 			mtrl,
 			orienting_normal, 
 			path.ray.dir,
-			path.rec,
+			path.rec.normal,
 			nullptr,
 			path.rec.u, path.rec.v);
 

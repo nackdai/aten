@@ -186,6 +186,8 @@ namespace aten {
 		BVHNode* node = &nodes[0];
 
 		aten::ray transformedRay = r;
+
+		int nestLevel = 0;
 		bool isNested = false;
 
 		do {
@@ -198,17 +200,19 @@ namespace aten {
 			real left_t = AT_MATH_INF;
 			real right_t = AT_MATH_INF;
 
+			isNested = (nestLevel > 0);
+
 			if (left) {
 				if (left->isLeaf()) {
 					hitrecord recLeft;
 					bool isHitLeft = false;
 
 					if (left->nestid >= 0) {
-						traverseLeft = left->bbox.hit(r, t_min, t_max, &left_t);
+						traverseLeft = left->bbox.hit(isNested ? transformedRay : r, t_min, t_max, &left_t);
 
 						if (traverseLeft) {
 							left = &nodes[left->nestid];
-							nestedStackPos = stackpos;
+							nestedStackPos = isNested ? nestedStackPos : stackpos;
 						}
 					}
 					else {
@@ -277,11 +281,11 @@ namespace aten {
 					bool isHitRight = false;
 
 					if (right->nestid >= 0) {
-						traverseRight = right->bbox.hit(r, t_min, t_max, &right_t);
+						traverseRight = right->bbox.hit(isNested ? transformedRay : r, t_min, t_max, &right_t);
 
 						if (traverseRight && right_t < left_t) {
 							right = &nodes[right->nestid];
-							nestedStackPos = stackpos;
+							nestedStackPos = isNested ? nestedStackPos : stackpos;
 						}
 					}
 					else {
@@ -348,7 +352,7 @@ namespace aten {
 			if (!traverseLeft && !traverseRight) {
 				if (nestedStackPos == stackpos) {
 					nestedStackPos = -1;
-					isNested = false;
+					nestLevel = 0;
 				}
 
 				node = *(--stack);
@@ -362,11 +366,11 @@ namespace aten {
 					stackpos += 1;
 				}
 
-				if (!isNested && nestedStackPos >= 0) {
+				if (nestLevel == 0 && nestedStackPos >= 0) {
 					auto t = shapes[node->shapeid];
 					const auto& param = t->getParam();
 					transformedRay = param.mtxW2L.applyRay(r);
-					isNested = true;
+					nestLevel += 1;
 				}
 			}
 			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
@@ -830,6 +834,8 @@ namespace aten {
 		int order = setTraverseOrder(m_root, 0);
 		collectNodes(m_root, nodes, nullptr);
 
+		std::map<hitable*, int> cache;
+
 		auto shapes = transformable::getShapes();
 		for (auto s : shapes) {
 			const auto idx = s->m_traverseOrder;
@@ -838,9 +844,21 @@ namespace aten {
 
 				if (param.type == ShapeType::Instance) {
 					auto& node = nodes[idx];
-					node.nestid = nodes.size();
 
-					order = s->collectInternalNodes(nodes, order, nullptr);
+					// Search if object which instance has is collected.
+					auto obj = s->getHasObject();
+					auto found = cache.find(const_cast<hitable*>(obj));
+
+					if (found != cache.end()) {
+						// Collected.
+						node.nestid = found->second;
+					}
+					else {
+						// Not collected yet.
+						node.nestid = nodes.size();
+
+						order = s->collectInternalNodes(nodes, order, nullptr);
+					}
 				}
 			}
 		}
@@ -909,10 +927,8 @@ namespace aten {
 				node.shapeid = transformable::findShapeIdxAsHitable(pnode);
 
 				if (node.shapeid < 0) {
-					// TODO
-					// Not safe....
-					face* f = (face*)pnode;
-					node.primid = f->id;
+					// Not find shape.
+					pnode->setBVHNodeParamInCollectNodes(node);
 				}
 			}
 			else {

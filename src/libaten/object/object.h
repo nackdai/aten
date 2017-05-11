@@ -51,9 +51,17 @@ namespace AT_NAME
 		aten::PrimitiveParamter param;
 		shape* parent{ nullptr };
 		int id{ -1 };
+
+	private:
+		virtual void setBVHNodeParamInCollectNodes(BVHNode& param) override final
+		{
+			param.primid = id;
+		}
 	};
 
 	class shape : public aten::bvhnode {
+		friend class object;
+
 	public:
 		shape() : param(aten::ShapeType::Polygon) {}
 		virtual ~shape() {}

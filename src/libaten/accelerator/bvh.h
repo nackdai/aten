@@ -57,6 +57,11 @@ namespace aten {
 			uint32_t num,
 			bool needSort);
 
+		virtual void setBVHNodeParamInCollectNodes(BVHNode& param)
+		{
+			// Nothing is done...
+		}
+
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };

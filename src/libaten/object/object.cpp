@@ -2,7 +2,7 @@
 #include "math/intersect.h"
 
 //#define ENABLE_LINEAR_HITTEST
-#define ENABLE_DIRECT_FACE_BVH
+//#define ENABLE_DIRECT_FACE_BVH
 
 namespace AT_NAME
 {
@@ -409,8 +409,20 @@ namespace AT_NAME
 
 	int object::collectInternalNodes(std::vector<aten::BVHNode>& nodes, int order, bvhnode* parent)
 	{
-		int ret = aten::bvh::setTraverseOrder(&m_node, order);
+		int newOrder = aten::bvh::setTraverseOrder(&m_node, order);
 		aten::bvh::collectNodes(&m_node, nodes, parent);
-		return ret;
+
+#ifndef ENABLE_DIRECT_FACE_BVH
+		for (auto s : shapes) {
+			const auto idx = s->m_traverseOrder;
+			auto& node = nodes[idx];
+			node.nestid = nodes.size();
+
+			newOrder = aten::bvh::setTraverseOrder(&s->m_node, newOrder);
+			aten::bvh::collectNodes(&s->m_node, nodes, parent);
+		}
+#endif
+
+		return newOrder;
 	}
 }

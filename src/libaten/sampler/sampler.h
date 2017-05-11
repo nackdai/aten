@@ -4,6 +4,19 @@
 #include "types.h"
 
 namespace aten {
+	struct SamplerParameter {
+		union {
+			unsigned int seed;
+			struct {
+				unsigned int seed_[4];
+			};
+			struct {
+				uint32_t idx;
+				uint32_t dimension;
+			};
+		};
+	};
+
 	class sampler {
 	public:
 		static void init();

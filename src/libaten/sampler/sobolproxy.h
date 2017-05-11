@@ -17,25 +17,24 @@ namespace aten {
 
 		virtual void init(uint32_t seed) override final
 		{
-			m_idx = (seed == 0 ? 1 : seed);
-			m_dimension = 0;
+			m_param.idx = (seed == 0 ? 1 : seed);
+			m_param.dimension = 0;
 		}
 
 		virtual real nextSample() override final
 		{
-			if (m_dimension >= sobol::Matrices::num_dimensions) {
+			if (m_param.dimension >= sobol::Matrices::num_dimensions) {
 				AT_ASSERT(false);
 				return aten::drand48();
 			}
 
-			auto ret = sobol::sample(m_idx, m_dimension);
-			m_dimension += 1;
+			auto ret = sobol::sample(m_param.idx, m_param.dimension);
+			m_param.dimension += 1;
 
 			return ret;
 		}
 
 	private:
-		uint32_t m_idx{ 1 };
-		uint32_t m_dimension{ 0 };
+		SamplerParameter m_param;
 	};
 }

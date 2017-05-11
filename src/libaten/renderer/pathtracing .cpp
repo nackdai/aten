@@ -5,6 +5,7 @@
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
+#include "sampler/wanghash.h"
 
 //#define Deterministic_Path_Termination
 
@@ -425,9 +426,10 @@ namespace aten
 					uint32_t cnt = 0;
 
 					for (uint32_t i = 0; i < samples; i++) {
-						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
-						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
+						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+						//WangHash rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 
 						real u = real(x + rnd.nextSample()) / real(width);
 						real v = real(y + rnd.nextSample()) / real(height);

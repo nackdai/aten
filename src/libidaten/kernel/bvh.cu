@@ -57,11 +57,11 @@ AT_DEVICE_API bool intersectBVH(
 				const auto* leftobj = &ctxt->shapes[left->shapeid];
 
 				if (left->nestid >= 0) {
-					traverseLeft = left->bbox.hit(r, t_min, t_max, &left_t);
+					traverseLeft = left->bbox.hit(transformedRay, t_min, t_max, &left_t);
 
 					if (traverseLeft) {
 						left = &ctxt->nodes[left->nestid];
-						nestedStackPos = stackpos;
+						nestedStackPos = isNested ? nestedStackPos : stackpos;;
 					}
 				}
 				else {
@@ -95,7 +95,7 @@ AT_DEVICE_API bool intersectBVH(
 						}
 					}
 					else {
-						isHit = intersectShape(leftobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, &recTmp);
+						isHit = intersectShape(leftobj, nullptr, ctxt, transformedRay, t_min, t_max, &recTmp);
 						recTmp.mtrlid = leftobj->mtrl.idx;
 					}
 				}
@@ -108,7 +108,7 @@ AT_DEVICE_API bool intersectBVH(
 				}
 			}
 			else {
-				traverseLeft = left->bbox.hit(isNested ? transformedRay : r, t_min, t_max);
+				traverseLeft = left->bbox.hit(transformedRay, t_min, t_max);
 			}
 		}
 		if (right) {
@@ -118,11 +118,11 @@ AT_DEVICE_API bool intersectBVH(
 				const auto* rightobj = &ctxt->shapes[right->shapeid];
 
 				if (right->nestid >= 0) {
-					traverseRight = right->bbox.hit(r, t_min, t_max, &right_t);
+					traverseRight = right->bbox.hit(transformedRay, t_min, t_max, &right_t);
 
 					if (traverseRight && right_t < left_t) {
 						right = &ctxt->nodes[right->nestid];
-						nestedStackPos = stackpos;
+						nestedStackPos = isNested ? nestedStackPos : stackpos;;
 					}
 				}
 				else {
@@ -156,7 +156,7 @@ AT_DEVICE_API bool intersectBVH(
 						}
 					}
 					else {
-						isHit = intersectShape(rightobj, nullptr, ctxt, isNested ? transformedRay : r, t_min, t_max, &recTmp);
+						isHit = intersectShape(rightobj, nullptr, ctxt, transformedRay, t_min, t_max, &recTmp);
 						recTmp.mtrlid = rightobj->mtrl.idx;
 					}
 				}
@@ -169,7 +169,7 @@ AT_DEVICE_API bool intersectBVH(
 				}
 			}
 			else {
-				traverseRight = right->bbox.hit(isNested ? transformedRay : r, t_min, t_max);
+				traverseRight = right->bbox.hit(transformedRay, t_min, t_max);
 			}
 		}
 
@@ -177,6 +177,7 @@ AT_DEVICE_API bool intersectBVH(
 			if (nestedStackPos == stackpos) {
 				nestedStackPos = -1;
 				isNested = false;
+				transformedRay = r;
 			}
 
 			node = *(--stack);

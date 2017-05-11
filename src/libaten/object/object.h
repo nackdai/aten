@@ -53,7 +53,7 @@ namespace AT_NAME
 		int id{ -1 };
 
 	private:
-		virtual void setBVHNodeParamInCollectNodes(BVHNode& param) override final
+		virtual void setBVHNodeParamInCollectNodes(aten::BVHNode& param) override final
 		{
 			param.primid = id;
 		}

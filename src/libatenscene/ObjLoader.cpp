@@ -150,8 +150,6 @@ namespace aten
 				vtx.uv.y = shape.mesh.texcoords[i + 1];
 			}
 
-			dstshape->build();
-
 			obj->shapes.push_back(dstshape);
 		}
 

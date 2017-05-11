@@ -1,6 +1,8 @@
 #include "object/object.h"
 #include "math/intersect.h"
 
+#include <iterator>
+
 //#define ENABLE_LINEAR_HITTEST
 //#define ENABLE_DIRECT_FACE_BVH
 
@@ -181,9 +183,13 @@ namespace AT_NAME
 	void shape::build()
 	{
 #ifndef ENABLE_DIRECT_FACE_BVH
+		// Avoid sorting face list in bvh::build directly.
+		std::vector<face*> tmp;
+		std::copy(faces.begin(), faces.end(), std::back_inserter(tmp));
+
 		m_node.build(
-			(bvhnode**)&faces[0],
-			(uint32_t)faces.size());
+			(bvhnode**)&tmp[0],
+			(uint32_t)tmp.size());
 
 		m_aabb = m_node.getBoundingbox();
 #endif
@@ -234,6 +240,23 @@ namespace AT_NAME
 
 	void object::build()
 	{
+		if (m_triangles > 0) {
+			// Builded already.
+			return;
+		}
+
+		param.primid = shapes[0]->faces[0]->id;
+
+		param.area = 0;
+		m_triangles = 0;
+
+		for (const auto s : shapes) {
+			s->build();
+
+			param.area += s->param.area;
+			m_triangles += (uint32_t)s->faces.size();
+		}
+
 #ifdef ENABLE_DIRECT_FACE_BVH
 		std::vector<face*> faces;
 		for (auto s : shapes) {
@@ -244,19 +267,13 @@ namespace AT_NAME
 		}
 		m_node.build((bvhnode**)&faces[0], (uint32_t)faces.size());
 #else
-		m_node.build((bvhnode**)&shapes[0], (uint32_t)shapes.size());
+		// Avoid sorting shape list in bvh::build directly.
+		std::vector<shape*> tmp;
+		std::copy(shapes.begin(), shapes.end(), std::back_inserter(tmp));
+
+		m_node.build((bvhnode**)&tmp[0], (uint32_t)tmp.size());
 		bbox = m_node.getBoundingbox();
 #endif
-
-		param.area = 0;
-		m_triangles = 0;
-
-		for (const auto s : shapes) {
-			param.area += s->param.area;
-			m_triangles += (uint32_t)s->faces.size();
-		}
-
-		param.primid = shapes[0]->faces[0]->id;
 	}
 
 	bool object::hit(

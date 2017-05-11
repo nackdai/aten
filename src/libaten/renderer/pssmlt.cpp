@@ -30,7 +30,7 @@ namespace aten
 	// 乱数空間における変異（Mutate()）の結果を使って再び同じようにパストレでパスを生成するとそのパスは自然に変異後のパスになっている.
 	class MLTSampler : public sampler {
 	public:
-		MLTSampler(random* rnd)
+		MLTSampler(sampler* rnd)
 		{
 			m_rnd = rnd;
 			u.resize(128);
@@ -45,18 +45,13 @@ namespace aten
 
 		virtual real nextSample() override final;
 
-		virtual random* getRandom() override final
-		{
-			return m_rnd;
-		}
-
 		void clearStack();
 
 	private:
 		inline real Mutate(const real x);
 
 	public:
-		random* m_rnd{ nullptr };
+		sampler* m_rnd{ nullptr };
 
 		std::vector<PrimarySample> u;
 		std::stack<PrimarySample> stack;
@@ -74,7 +69,7 @@ namespace aten
 
 	real MLTSampler::Mutate(const real x)
 	{
-		const real r = m_rnd->next01();
+		const real r = m_rnd->nextSample();
 
 		const real s1 = real(1.0) / real(512.0);
 		const real s2 = real(1.0) / real(16.0);
@@ -105,14 +100,14 @@ namespace aten
 
 				stack.push(u[usedRandCoords]);    // save state.
 				u[usedRandCoords].modify_time = globalTime;
-				u[usedRandCoords].value = m_rnd->next01();
+				u[usedRandCoords].value = m_rnd->nextSample();
 			}
 			else {
 				// small step,
 
 				if (u[usedRandCoords].modify_time < largeStepTime) {
 					u[usedRandCoords].modify_time = largeStepTime;
-					u[usedRandCoords].value = m_rnd->next01();
+					u[usedRandCoords].value = m_rnd->nextSample();
 				}
 
 				// lazy evaluation of mutations.
@@ -273,7 +268,7 @@ namespace aten
 			// 輝度値に基づく重点サンプリングによって選んでいる.
 			int selecetdPath = 0;
 			{
-				auto cost = rnd.next01() * sumI;
+				auto cost = rnd.nextSample() * sumI;
 				real accumlatedImportance = 0;
 
 				for (int i = 0; i < seedPathMax; i++) {
@@ -296,7 +291,7 @@ namespace aten
 			Path oldPath = seedPaths[selecetdPath];
 
 			for (int i = 0; i < M; i++) {
-				mlt.largeStep = rnd.next01() < p_large ? 1 : 0;
+				mlt.largeStep = rnd.nextSample() < p_large ? 1 : 0;
 
 				mlt.init();
 
@@ -319,7 +314,7 @@ namespace aten
 				vec3 oldV = oldPath_W * oldPath.contrib * oldPath.weight;
 				image[oldPos] += oldV;
 
-				auto r = rnd.next01();
+				auto r = rnd.nextSample();
 
 				if (r < a) {
 					// accept.

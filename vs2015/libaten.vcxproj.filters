@@ -110,9 +110,6 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h">
       <Filter>visualizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h">
-      <Filter>sampler</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\hdr\hdr.h">
       <Filter>hdr</Filter>
     </ClInclude>
@@ -154,9 +151,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\scene\hitable.h">
       <Filter>scene</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\sampler\random.h">
-      <Filter>sampler</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\object\object.h">
       <Filter>object</Filter>
@@ -393,9 +387,6 @@
     <ClCompile Include="..\src\libaten\sampler\halton.cpp">
       <Filter>sampler</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\sampler\random.cpp">
-      <Filter>sampler</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
       <Filter>sampler</Filter>
     </ClCompile>
@@ -512,6 +503,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\bdpt.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\sampler\sampler.cpp">
+      <Filter>sampler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

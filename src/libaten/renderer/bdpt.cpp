@@ -6,7 +6,6 @@
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
-#include "sampler/UniformDistributionSampler.h"
 
 //#define BDPT_DEBUG
 
@@ -891,18 +890,17 @@ namespace aten
 				for (int x = 0; x < m_width; x++) {
 
 					for (uint32_t i = 0; i < samples; i++) {
-						//XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 						//Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
-						UniformDistributionSampler sampler(&rnd);
 
 						std::vector<Result> result;
 
 						std::vector<Vertex> eyevs;
 						std::vector<Vertex> lightvs;
 
-						auto eyeRes = genEyePath(eyevs, x, y, &sampler, scene, camera);
+						auto eyeRes = genEyePath(eyevs, x, y, &rnd, scene, camera);
 						
 #if 0
 						if (eyeRes.isTerminate) {
@@ -913,7 +911,7 @@ namespace aten
 						auto lightNum = scene->lightNum();
 						for (uint32_t n = 0; n < lightNum; n++) {
 							auto light = scene->getLight(n);
-							auto lightRes = genLightPath(lightvs, light, &sampler, scene, camera);
+							auto lightRes = genLightPath(lightvs, light, &rnd, scene, camera);
 
 							if (eyeRes.isTerminate) {
 								const real misWeight = computeMISWeight(

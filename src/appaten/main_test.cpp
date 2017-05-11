@@ -24,8 +24,8 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-//static aten::PathTracing g_tracer;
-static aten::BDPT g_tracer;
+static aten::PathTracing g_tracer;
+//static aten::BDPT g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;
@@ -85,7 +85,7 @@ void display()
 
 int main(int argc, char* argv[])
 {
-	aten::random::init();
+	aten::sampler::init();
 
 #if 0
 	aten::MicrofacetBlinn blinn(aten:: vec3(1, 1, 1), 1, 1.5);

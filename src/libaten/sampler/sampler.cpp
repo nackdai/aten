@@ -1,8 +1,8 @@
-#include "sampler/random.h"
+#include "sampler/sampler.h"
 #include "sampler/halton.h"
 
 namespace aten {
-	void random::init()
+	void sampler::init()
 	{
 		// TODO
 		::srand(0);

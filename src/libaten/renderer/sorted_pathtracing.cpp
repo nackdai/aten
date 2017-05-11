@@ -4,7 +4,6 @@
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
-#include "sampler/UniformDistributionSampler.h"
 
 namespace aten
 {
@@ -28,13 +27,10 @@ namespace aten
 
 				if (!path.isTerminate) {
 					if (path.sampler) {
-						auto rnd = (Sobol*)path.sampler->getRandom();
-						rnd->reset((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
+						path.sampler->init((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
 					}
 					else {
-						auto rnd = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
-						auto sampler = new UniformDistributionSampler(rnd);
-						path.sampler = sampler;
+						path.sampler = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
 					}
 
 					sampler* sampler = path.sampler;

@@ -2,7 +2,6 @@
 
 #include "scene/hitable.h"
 #include "accelerator/accelerator.h"
-#include "sampler/random.h"
 
 namespace aten {
 	class bvhnode : public hitable {

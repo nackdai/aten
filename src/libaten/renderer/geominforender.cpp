@@ -1,6 +1,5 @@
 #include "renderer/geominforender.h"
 #include "sampler/xorshift.h"
-#include "sampler/UniformDistributionSampler.h"
 
 namespace aten
 {
@@ -130,14 +129,13 @@ namespace aten
 				int pos = y * width + x;
 
 				XorShift rnd((y * height * 4 + x * 4) + 1);
-				UniformDistributionSampler sampler(&rnd);
 
 				real u = real(x + 0.5) / real(width);
 				real v = real(y + 0.5) / real(height);
 
-				auto camsample = camera->sample(u, v, &sampler);
+				auto camsample = camera->sample(u, v, &rnd);
 
-				auto path = radiance(camsample.r, scene, &sampler);
+				auto path = radiance(camsample.r, scene, &rnd);
 
 				if (dst.geominfo.nml_depth) {
 					if (dst.geominfo.needNormalize) {

@@ -5,7 +5,6 @@
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
-#include "sampler/UniformDistributionSampler.h"
 
 //#define Deterministic_Path_Termination
 
@@ -429,12 +428,11 @@ namespace aten
 						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
 						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						UniformDistributionSampler sampler(&rnd);
 
-						real u = real(x + sampler.nextSample()) / real(width);
-						real v = real(y + sampler.nextSample()) / real(height);
+						real u = real(x + rnd.nextSample()) / real(width);
+						real v = real(y + rnd.nextSample()) / real(height);
 
-						auto camsample = camera->sample(u, v, &sampler);
+						auto camsample = camera->sample(u, v, &rnd);
 
 						auto ray = camsample.r;
 
@@ -449,7 +447,7 @@ namespace aten
 							scene);
 #else
 						auto path = radiance(
-							&sampler, 
+							&rnd,
 							ray, 
 							camera,
 							camsample,

@@ -1,25 +1,27 @@
 #pragma once
 
 #include "sampler/sobol.h"
-#include "sampler/random.h"
+#include "sampler/sampler.h"
 
 namespace aten {
 	// NOTE
 	// The code of sobol is taken from: http://gruenschloss.org/sobol/kuo-2d-proj-single-precision.zip
 
-	class Sobol : public random {
+	class Sobol : public sampler {
 	public:
-		Sobol(uint32_t idx) {
-			m_idx = (idx == 0 ? 1 : idx);
+		Sobol(uint32_t idx)
+		{
+			init(idx);
 		}
 		virtual ~Sobol() {}
 
-		void reset(uint32_t idx) {
-			m_idx = (idx == 0 ? 1 : idx);
+		virtual void init(uint32_t seed) override final
+		{
+			m_idx = (seed == 0 ? 1 : seed);
 			m_dimension = 0;
 		}
 
-		virtual real next01() override final
+		virtual real nextSample() override final
 		{
 			if (m_dimension >= sobol::Matrices::num_dimensions) {
 				AT_ASSERT(false);

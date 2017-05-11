@@ -12,16 +12,11 @@ namespace aten
 
 	class ERPTSampler : public sampler {
 	public:
-		ERPTSampler(random* rnd);
+		ERPTSampler(sampler* rnd);
 		virtual ~ERPTSampler() {}
 
 	public:
 		virtual real nextSample() override final;
-
-		virtual random* getRandom() override final
-		{
-			return m_rnd;
-		}
 
 		void reset()
 		{
@@ -34,21 +29,21 @@ namespace aten
 		inline real mutate(real value);
 
 	private:
-		random* m_rnd{ nullptr };
+		sampler* m_rnd{ nullptr };
 
 		int m_usedRandCoords{ 0 };
 
 		std::vector<real> m_primarySamples;
 	};
 
-	ERPTSampler::ERPTSampler(random* rnd)
+	ERPTSampler::ERPTSampler(sampler* rnd)
 		: m_rnd(rnd)
 	{
 		static const int initsize = 32;
 		m_primarySamples.resize(initsize);
 
 		for (int i = 0; i < m_primarySamples.size(); i++) {
-			m_primarySamples[i] = rnd->next01();
+			m_primarySamples[i] = rnd->nextSample();
 		}
 	}
 
@@ -56,7 +51,7 @@ namespace aten
 	{
 		// Same as LuxRender?
 
-		auto r = m_rnd->next01();
+		auto r = m_rnd->nextSample();
 
 		real v = MutateDistance * (real(2.0) * r - real(1.0));
 		value += v;
@@ -82,7 +77,7 @@ namespace aten
 
 			// Šg’£‚µ‚½•”•ª‚É’l‚ð“ü‚ê‚é.
 			for (int i = now_max; i < m_primarySamples.size(); i++) {
-				m_primarySamples[i] = m_rnd->next01();
+				m_primarySamples[i] = m_rnd->nextSample();
 			}
 		}
 
@@ -247,7 +242,7 @@ namespace aten
 					auto l = color::luminance(e);
 
 					if (l > 0) {
-						auto r = rnd.next01();
+						auto r = rnd.nextSample();
 						auto illum = color::luminance(e);
 						const int numChains = (int)std::floor(r + illum / (mutation * ed));;
 
@@ -281,7 +276,7 @@ namespace aten
 
 								auto q = lfz / lfy;
 
-								auto r = rnd.next01();
+								auto r = rnd.nextSample();
 
 								if (q > r) {
 									// accept mutation.

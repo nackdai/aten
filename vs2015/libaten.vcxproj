@@ -222,11 +222,9 @@
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h" />
     <ClInclude Include="..\src\libaten\sampler\halton.h" />
-    <ClInclude Include="..\src\libaten\sampler\random.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\sobol.h" />
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
-    <ClInclude Include="..\src\libaten\sampler\UniformDistributionSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\wanghash.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
@@ -295,7 +293,7 @@
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\sorted_pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
-    <ClCompile Include="..\src\libaten\sampler\random.cpp" />
+    <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />

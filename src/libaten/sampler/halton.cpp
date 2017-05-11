@@ -84,7 +84,7 @@ namespace aten {
 		}
 	}
 
-	real Halton::next01()
+	real Halton::nextSample()
 	{
 		// NOTE
 		// https://en.wikipedia.org/wiki/Halton_sequence

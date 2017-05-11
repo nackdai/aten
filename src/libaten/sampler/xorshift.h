@@ -1,11 +1,11 @@
 #pragma once
 
 #include "types.h"
-#include "sampler/random.h"
+#include "sampler/sampler.h"
 
 namespace aten {
-	// Xor-Shiftによる乱数ジェネレータ.
-	class XorShift : public random {
+	// Xor-Shift による乱数ジェネレータ.
+	class XorShift : public sampler {
 		unsigned int seed_[4];
 
 	public:
@@ -27,13 +27,13 @@ namespace aten {
 		}
 
 		// [0, 1]
-		virtual real next01() override final
+		virtual real nextSample() override final
 		{
 			//return (real)next() / (UINT_MAX + 1.0);
 			return (real)next() / UINT_MAX;
 		}
 
-		void init(const unsigned int initial_seed)
+		virtual void init(uint32_t initial_seed) override final
 		{
 			unsigned int s = initial_seed;
 			for (int i = 1; i <= 4; i++) {

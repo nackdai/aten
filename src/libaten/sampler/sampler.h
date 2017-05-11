@@ -1,20 +1,26 @@
 #pragma once
 
+#include "defs.h"
 #include "types.h"
 
 namespace aten {
-	class random;
-
 	class sampler {
+	public:
+		static void init();
+
 	public:
 		sampler() {}
 		virtual ~sampler() {}
 
-		virtual AT_DEVICE_API real nextSample() = 0;
-
-		virtual random* getRandom()
+		virtual void init(uint32_t seed)
 		{
-			return nullptr;
+			// Nothing is done...
 		}
+		virtual AT_DEVICE_API real nextSample() = 0;
 	};
+
+	inline real drand48()
+	{
+		return (real)::rand() / RAND_MAX;
+	}
 }

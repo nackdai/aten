@@ -2,10 +2,10 @@
 
 #include <vector>
 #include "types.h"
-#include "sampler/random.h"
+#include "sampler/sampler.h"
 
 namespace aten {
-	class Halton : public random {
+	class Halton : public sampler {
 	private:
 		static std::vector<uint32_t> PrimeNumbers;
 
@@ -16,13 +16,19 @@ namespace aten {
 		static void makePrimeNumbers(uint32_t maxNumber = MaxPrimeNumbers);
 
 	public:
-		Halton(uint32_t idx) {
-			m_idx = (idx == 0 ? 1 : idx);
+		Halton(uint32_t idx)
+		{
+			init(idx);
 		}
 		virtual ~Halton() {}
 
+		virtual void init(uint32_t seed) override final
+		{
+			m_idx = (seed == 0 ? 1 : seed);
+		}
+
 		// [0, 1]
-		virtual real next01() override final;
+		virtual real nextSample() override final;
 
 	private:
 		uint32_t m_idx{ 1 };

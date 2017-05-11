@@ -21,7 +21,7 @@ namespace aten {
 		}
 
 		// [0, 1]
-		virtual real nextSample() override final
+		virtual AT_DEVICE_API real nextSample() override final
 		{
 			return nextSample(&m_param);
 		}

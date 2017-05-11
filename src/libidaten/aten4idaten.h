@@ -47,3 +47,6 @@
 
 #include "object/vertex.h"
 #include "object/object.h"
+
+#include "sampler/sampler.h"
+#include "sampler/wanghash.h"

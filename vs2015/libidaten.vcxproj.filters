@@ -142,6 +142,12 @@
     <ClInclude Include="..\src\libaten\object\object.h">
       <Filter>aten\object</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\sampler.h">
+      <Filter>aten\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\wanghash.h">
+      <Filter>aten\sampler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -173,6 +179,9 @@
     </Filter>
     <Filter Include="aten\object">
       <UniqueIdentifier>{6ea18010-7a1d-4ea1-bea9-d8beae7ce9dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\sampler">
+      <UniqueIdentifier>{4419bdc9-7db1-48c5-a291-f22a459053e0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

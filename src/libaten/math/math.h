@@ -243,30 +243,37 @@ namespace aten {
 	}
 
 	// Neary Equal.
-#if 0
-	// https://github.com/scijs/almost-equal/blob/master/almost_equal.js
-	inline bool isClose(real a, real b, real relativeError = AT_MATH_EPSILON, real absoluteError = AT_MATH_EPSILON)
+	inline bool isClose(real A, real B, int maxUlps)
 	{
-		auto d = abs(a - b);
+#ifdef TYPE_DOUBLE
+		// TODO
+		return aten::abs(A - B) < AT_MATH_EPSILON;
+#else
+		// NOTE
+		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
 
-
-		if (d <= absoluteError) {
-			return true;
+		// Make sure maxUlps is non-negative and small enough that the
+		// default NAN won't compare as equal to anything.
+		AT_ASSERT(maxUlps > 0 && maxUlps < 4 * 1024 * 1024);
+		
+		// Make aInt lexicographically ordered as a twos-complement int
+		int aInt = *(int*)&A;
+		if (aInt < 0) {
+			aInt = 0x80000000 - aInt;
 		}
 
-		if (d <= relativeError * std::min(abs(a), abs(b))) {
+		// Make bInt lexicographically ordered as a twos-complement int
+		int bInt = *(int*)&B;
+		if (bInt < 0) {
+			bInt = 0x80000000 - bInt;
+		}
+
+		int intDiff = abs(aInt - bInt);
+		if (intDiff <= maxUlps) {
 			return true;
 		}
 
 		return false;
-	}
-#else
-	// http://stackoverflow.com/questions/5595425/what-is-the-best-way-to-compare-floats-for-almost-equality-in-python
-	inline bool isClose(real a, real b, real relativeError = AT_MATH_EPSILON, real absoluteError = real(0))
-	{
-		auto d = abs(a - b);
-		bool result = d <= std::max(relativeError * std::max(abs(a), abs(b)), absoluteError);
-		return result;
-	}
 #endif
+	}
 }

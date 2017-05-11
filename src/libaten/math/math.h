@@ -243,7 +243,7 @@ namespace aten {
 	}
 
 	// Neary Equal.
-	inline bool isClose(real A, real B, int maxUlps)
+	inline AT_DEVICE_API bool isClose(real A, real B, int maxUlps)
 	{
 #ifdef TYPE_DOUBLE
 		// TODO

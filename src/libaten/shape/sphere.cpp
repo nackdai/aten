@@ -96,7 +96,7 @@ namespace AT_NAME
 			return false;
 		}
 #else
-		bool close = isClose(aten::abs(b), sqrt_D4, 100);
+		bool close = aten::isClose(aten::abs(b), sqrt_D4, 100);
 
 		if (t1 > AT_MATH_EPSILON && !close) {
 			rec->t = t1;

@@ -85,6 +85,7 @@ namespace AT_NAME
 		const real t1 = b - sqrt_D4;
 		const real t2 = b + sqrt_D4;
 
+#if 0
 		if (t1 > AT_MATH_EPSILON) {
 			rec->t = t1;
 		}
@@ -94,6 +95,19 @@ namespace AT_NAME
 		else {
 			return false;
 		}
+#else
+		bool close = isClose(aten::abs(b), sqrt_D4, 100);
+
+		if (t1 > AT_MATH_EPSILON && !close) {
+			rec->t = t1;
+		}
+		else if (t2 > AT_MATH_EPSILON && !close) {
+			rec->t = t2;
+		}
+		else {
+			return false;
+		}
+#endif
 
 		rec->p = r.org + rec->t * r.dir;
 		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é

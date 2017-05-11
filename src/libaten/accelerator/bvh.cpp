@@ -187,7 +187,6 @@ namespace aten {
 
 		aten::ray transformedRay = r;
 
-		int nestLevel = 0;
 		bool isNested = false;
 
 		do {
@@ -200,15 +199,13 @@ namespace aten {
 			real left_t = AT_MATH_INF;
 			real right_t = AT_MATH_INF;
 
-			isNested = (nestLevel > 0);
-
 			if (left) {
 				if (left->isLeaf()) {
 					hitrecord recLeft;
 					bool isHitLeft = false;
 
 					if (left->nestid >= 0) {
-						traverseLeft = left->bbox.hit(isNested ? transformedRay : r, t_min, t_max, &left_t);
+						traverseLeft = left->bbox.hit(transformedRay, t_min, t_max, &left_t);
 
 						if (traverseLeft) {
 							left = &nodes[left->nestid];
@@ -262,7 +259,7 @@ namespace aten {
 						}
 						else {
 							const auto& leftobj = (hitable*)shapes[left->shapeid];
-							isHitLeft = leftobj->hit(isNested ? transformedRay : r, t_min, t_max, recLeft);
+							isHitLeft = leftobj->hit(transformedRay, t_min, t_max, recLeft);
 						}
 					}
 					if (isHitLeft) {
@@ -272,7 +269,7 @@ namespace aten {
 					}
 				}
 				else {
-					traverseLeft = left->bbox.hit(isNested ? transformedRay : r, t_min, t_max);
+					traverseLeft = left->bbox.hit(transformedRay, t_min, t_max);
 				}
 			}
 			if (right) {
@@ -281,7 +278,7 @@ namespace aten {
 					bool isHitRight = false;
 
 					if (right->nestid >= 0) {
-						traverseRight = right->bbox.hit(isNested ? transformedRay : r, t_min, t_max, &right_t);
+						traverseRight = right->bbox.hit(transformedRay, t_min, t_max, &right_t);
 
 						if (traverseRight && right_t < left_t) {
 							right = &nodes[right->nestid];
@@ -335,7 +332,7 @@ namespace aten {
 						}
 						else {
 							const auto rightobj = (hitable*)shapes[right->shapeid];
-							isHitRight = rightobj->hit(isNested ? transformedRay : r, t_min, t_max, recRight);
+							isHitRight = rightobj->hit(transformedRay, t_min, t_max, recRight);
 						}
 					}
 					if (isHitRight) {
@@ -345,14 +342,15 @@ namespace aten {
 					}
 				}
 				else {
-					traverseRight = right->bbox.hit(isNested ? transformedRay : r, t_min, t_max);
+					traverseRight = right->bbox.hit(transformedRay, t_min, t_max);
 				}
 			}
 
 			if (!traverseLeft && !traverseRight) {
 				if (nestedStackPos == stackpos) {
 					nestedStackPos = -1;
-					nestLevel = 0;
+					isNested = false;
+					transformedRay = r;
 				}
 
 				node = *(--stack);
@@ -366,11 +364,11 @@ namespace aten {
 					stackpos += 1;
 				}
 
-				if (nestLevel == 0 && nestedStackPos >= 0) {
+				if (!isNested && nestedStackPos >= 0) {
 					auto t = shapes[node->shapeid];
 					const auto& param = t->getParam();
 					transformedRay = param.mtxW2L.applyRay(r);
-					nestLevel += 1;
+					isNested = true;
 				}
 			}
 			AT_ASSERT(0 <= stackpos && stackpos < stacksize);

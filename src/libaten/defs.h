@@ -66,6 +66,8 @@ namespace aten {
 
 #define AT_COUNTOF(a)	(sizeof(a) / sizeof(a[0]))
 
+#include "aten_virtual.h"
+
 #ifndef __AT_DEBUG__
 #define ENABLE_OMP
 #endif

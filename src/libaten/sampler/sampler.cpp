@@ -2,7 +2,7 @@
 #include "sampler/halton.h"
 
 namespace aten {
-	void sampler::init()
+	void initSampler()
 	{
 		// TODO
 		::srand(0);

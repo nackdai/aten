@@ -4,23 +4,8 @@
 #include "types.h"
 
 namespace aten {
-	struct SamplerParameter {
-		union {
-			unsigned int seed;
-			struct {
-				unsigned int seed_[4];
-			};
-			struct {
-				uint32_t idx;
-				uint32_t dimension;
-			};
-		};
-	};
-
+#ifndef __AT_CUDA__
 	class sampler {
-	public:
-		static void init();
-
 	public:
 		sampler() {}
 		virtual ~sampler() {}
@@ -31,6 +16,9 @@ namespace aten {
 		}
 		virtual AT_DEVICE_API real nextSample() = 0;
 	};
+#endif
+
+	void initSampler();
 
 	inline real drand48()
 	{

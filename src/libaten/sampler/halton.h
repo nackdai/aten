@@ -24,14 +24,15 @@ namespace aten {
 
 		virtual void init(uint32_t seed) override final
 		{
-			m_param.idx = (seed == 0 ? 1 : seed);
-			m_param.dimension = 0;
+			m_idx = (seed == 0 ? 1 : seed);
+			m_dimension = 0;
 		}
 
 		// [0, 1]
 		virtual real nextSample() override final;
 
 	private:
-		SamplerParameter m_param;
+		uint32_t m_idx;
+		uint32_t m_dimension;
 	};
 }

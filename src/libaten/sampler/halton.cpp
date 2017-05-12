@@ -89,7 +89,7 @@ namespace aten {
 		// NOTE
 		// https://en.wikipedia.org/wiki/Halton_sequence
 
-		if (m_param.dimension >= PrimeNumbers.size()) {
+		if (m_dimension >= PrimeNumbers.size()) {
 			// ŸŒ³‚ğ’´‚¦‚é‚±‚Æ‚Í‹–‚³‚È‚¢..
 			AT_ASSERT(false);
 			return aten::drand48();
@@ -98,9 +98,9 @@ namespace aten {
 		real f = 1;
 		real r = 0;
 
-		const auto base = PrimeNumbers[m_param.dimension++];
+		const auto base = PrimeNumbers[m_dimension++];
 
-		uint32_t i = m_param.idx;
+		uint32_t i = m_idx;
 
 		while (i > 0) {
 			f = f / (real)base;

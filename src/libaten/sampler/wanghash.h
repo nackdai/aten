@@ -5,7 +5,7 @@
 
 namespace aten {
 	// Wang's hash による乱数ジェネレータ.
-	class WangHash : public sampler {
+	class WangHash AT_INHERIT(sampler) {
 	public:
 		WangHash() {}
 		WangHash(const unsigned int initial_seed)
@@ -13,30 +13,25 @@ namespace aten {
 			init(initial_seed);
 		}
 
-		virtual ~WangHash() {}
+		AT_VIRTUAL(~WangHash() {})
 
-		virtual void init(uint32_t seed) override final
+		AT_VIRTUAL_OVERRIDE_FINAL(void init(uint32_t seed))
 		{
-			m_param.seed = seed;
+			m_seed = seed;
 		}
 
 		// [0, 1]
-		virtual AT_DEVICE_API real nextSample() override final
+		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
 		{
-			return nextSample(&m_param);
-		}
-
-		static AT_DEVICE_API real nextSample(SamplerParameter* param)
-		{
-			return (real)next(param) / UINT_MAX;
+			return (real)next() / UINT_MAX;
 		}
 
 	private:
 		// NOTE
 		// https://gist.github.com/badboy/6267743
-		static uint32_t next(SamplerParameter* param)
+		uint32_t next()
 		{
-			uint32_t key = 1664525U * param->seed + 1013904223U;
+			uint32_t key = 1664525U * m_seed + 1013904223U;
 
 			key = (key ^ 61) ^ (key >> 16);
 			key = key + (key << 3);
@@ -44,11 +39,11 @@ namespace aten {
 			key = key * 0x27d4eb2d;
 			key = key ^ (key >> 15);
 
-			param->seed += 1;
+			m_seed += 1;
 
 			return key;
 		}
 
-		SamplerParameter m_param;
+		unsigned int m_seed;
 	};
 }

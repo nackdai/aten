@@ -56,14 +56,25 @@ namespace aten
 			auto isHit = m_obj->hit(transformdRay, m_mtxL2W, t_min, t_max, rec);
 
 			if (isHit) {
-				// Transform local to world.
-				rec.p = m_mtxL2W.apply(rec.p);
-				rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
-
 				rec.obj = (hitable*)this;
 			}
 
 			return isHit;
+		}
+
+		virtual void evalHitResult(
+			const ray& r,
+			hitrecord& rec) const override final
+		{
+			m_obj->evalHitResult(r, m_mtxL2W, rec);
+
+			// Transform local to world.
+			rec.p = m_mtxL2W.apply(rec.p);
+			rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
+
+			// tangent coordinate.
+			rec.du = normalize(getOrthoVector(rec.normal));
+			rec.dv = normalize(cross(rec.normal, rec.du));
 		}
 
 		virtual vec3 getRandomPosOn(sampler* sampler) const override final
@@ -141,6 +152,15 @@ namespace aten
 			// Not used...
 			AT_ASSERT(false);
 			return false;
+		}
+
+		virtual void evalHitResult(
+			const ray& r,
+			const mat4& mtxL2W,
+			hitrecord& rec) const override final
+		{
+			// Not used...
+			AT_ASSERT(false);
 		}
 
 		virtual const ShapeParameter& getParam() const override final

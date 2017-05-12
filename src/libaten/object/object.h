@@ -112,6 +112,11 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final;
 
+		virtual void evalHitResult(
+			const ray& r,
+			const mat4& mtxL2W,
+			hitrecord& rec) const override final;
+
 		virtual void getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const override final;
 
 		virtual const aten::ShapeParameter& getParam() const override final

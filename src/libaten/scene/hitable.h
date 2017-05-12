@@ -46,6 +46,18 @@ namespace aten {
 #endif
 			int mtrlid;
 		};
+
+		union {
+			// cube.
+			struct {
+				int face;
+			};
+			// triangle.
+			struct {
+				int idx[3];
+				real a, b;	// barycentric
+			};
+		} param;
 	};
 
 	class hitable {
@@ -58,6 +70,11 @@ namespace aten {
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec) const = 0;
+
+		virtual void evalHitResult(const ray& r, hitrecord& rec) const
+		{
+			AT_ASSERT(false);
+		}
 
 		virtual aabb getBoundingbox() const = 0;
 

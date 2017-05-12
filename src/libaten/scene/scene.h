@@ -223,6 +223,9 @@ namespace AT_NAME {
 			aten::hitrecord& rec) const override final
 		{
 			auto isHit = m_accel.hit(r, t_min, t_max, rec);
+			if (isHit) {
+				rec.obj->evalHitResult(r, rec);
+			}
 			return isHit;
 		}
 

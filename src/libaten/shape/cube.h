@@ -53,6 +53,9 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final;
 
+		virtual void evalHitResult(const ray& r, hitrecord& rec) const override final;
+		virtual void evalHitResult(const ray& r, const mat4& mtxL2W, hitrecord& rec) const override final;
+
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
 			const aten::mat4& mtxL2W,
 			aten::sampler* sampler) const override final;

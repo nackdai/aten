@@ -22,6 +22,9 @@ namespace AT_NAME {
 				aten::ray r(o, aten::normalize(dir));
 
 				isHit = obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, *rec);
+				if (isHit) {
+					obj->evalHitResult(r, *rec);
+				}
 			}
 
 			return isHit;

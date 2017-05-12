@@ -26,6 +26,11 @@ namespace aten
 			real t_min, real t_max,
 			hitrecord& rec) const = 0;
 
+		virtual void evalHitResult(
+			const ray& r,
+			const mat4& mtxL2W,
+			hitrecord& rec) const = 0;
+
 		virtual const ShapeParameter& getParam() const
 		{
 			AT_ASSERT(false);

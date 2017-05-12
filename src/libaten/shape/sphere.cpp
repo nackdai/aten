@@ -109,6 +109,33 @@ namespace AT_NAME
 		}
 #endif
 
+		return true;
+	}
+
+	void sphere::evalHitResult(const ray& r, aten::hitrecord& rec) const
+	{
+		evalHitResult(&m_param, r, aten::mat4(), &rec);
+	}
+
+	void sphere::evalHitResult(
+		const ray& r,
+		const mat4& mtxL2W,
+		hitrecord& rec) const
+	{
+		evalHitResult(&m_param, r, mtxL2W, &rec);
+	}
+
+	void sphere::evalHitResult(const aten::ShapeParameter* param, const ray& r, aten::hitrecord* rec)
+	{
+		evalHitResult(param, r, aten::mat4(), rec);
+	}
+
+	void sphere::evalHitResult(
+		const aten::ShapeParameter* param,
+		const ray& r, 
+		const aten::mat4& mtxL2W, 
+		aten::hitrecord* rec)
+	{
 		rec->p = r.org + rec->t * r.dir;
 		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ð“¾‚é
 
@@ -128,8 +155,6 @@ namespace AT_NAME
 		}
 
 		getUV(rec->u, rec->v, rec->normal);
-
-		return true;
 	}
 
 	aten::vec3 sphere::getRandomPosOn(aten::sampler* sampler) const

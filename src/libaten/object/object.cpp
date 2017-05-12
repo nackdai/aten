@@ -45,6 +45,10 @@ namespace AT_NAME
 			//rec.obj = parent;
 			rec.obj = (hitable*)this;
 
+			rec.param.idx[0] = param.idx[0];
+			rec.param.idx[1] = param.idx[1];
+			rec.param.idx[2] = param.idx[2];
+
 			if (parent) {
 				rec.mtrl = (material*)parent->param.mtrl.ptr;
 			}
@@ -70,24 +74,8 @@ namespace AT_NAME
 			if (res.t < rec->t) {
 				rec->t = res.t;
 
-				auto p = r.org + rec->t * r.dir;
-
-				// NOTE
-				// http://d.hatena.ne.jp/Zellij/20131207/p1
-
-				// 重心座標系(barycentric coordinates).
-				// v0基準.
-				// p = (1 - a - b)*v0 + a*v1 + b*v2
-				rec->p = (1 - res.a - res.b) * v0.pos + res.a * v1.pos + res.b * v2.pos;
-				rec->normal = (1 - res.a - res.b) * v0.nml + res.a * v1.nml + res.b * v2.nml;
-				auto uv = (1 - res.a - res.b) * v0.uv + res.a * v1.uv + res.b * v2.uv;
-
-				rec->u = uv.x;
-				rec->v = uv.y;
-
-				// tangent coordinate.
-				rec->du = normalize(getOrthoVector(rec->normal));
-				rec->dv = normalize(cross(rec->normal, rec->du));
+				rec->param.a = res.a;
+				rec->param.b = res.b;
 
 				rec->area = param->area;
 
@@ -363,6 +351,39 @@ namespace AT_NAME
 			rec.obj = f->parent;
 		}
 		return isHit;
+	}
+
+	void object::evalHitResult(
+		const ray& r,
+		const mat4& mtxL2W,
+		hitrecord& rec) const
+	{
+		auto p = r.org + rec.t * r.dir;
+
+		const auto& v0 = aten::VertexManager::getVertex(rec.param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(rec.param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(rec.param.idx[2]);
+
+		// NOTE
+		// http://d.hatena.ne.jp/Zellij/20131207/p1
+
+		real a = rec.param.a;
+		real b = rec.param.b;
+		real c = 1 - a - b;
+
+		// 重心座標系(barycentric coordinates).
+		// v0基準.
+		// p = (1 - a - b)*v0 + a*v1 + b*v2
+		rec.p = c * v0.pos + a * v1.pos + b * v2.pos;
+		rec.normal = c * v0.nml + a * v1.nml + b * v2.nml;
+		auto uv = c * v0.uv + a * v1.uv + b * v2.uv;
+
+		rec.u = uv.x;
+		rec.v = uv.y;
+
+		// tangent coordinate.
+		rec.du = normalize(getOrthoVector(rec.normal));
+		rec.dv = normalize(cross(rec.normal, rec.du));
 	}
 
 	aten::hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const

@@ -104,8 +104,49 @@ namespace AT_NAME
 		real t_min, real t_max,
 		aten::hitrecord& rec) const
 	{
+		// TODO
 		AT_ASSERT(false);	// Not support.
 		return hit(r, t_min, t_max, rec);
+	}
+
+	void cube::evalHitResult(const ray& r, hitrecord& rec) const
+	{
+		evalHitResult(r, aten::mat4(), rec);
+	}
+
+	void cube::evalHitResult(const ray& r, const mat4& mtxL2W, hitrecord& rec) const
+	{
+		// TODO
+		AT_ASSERT(false);	// Not support.
+
+		Face face = (Face)rec.param.face;
+
+		switch (face) {
+		case POS_X:
+			rec.normal = aten::vec3(1, 0, 0);
+			break;
+		case NEG_X:
+			rec.normal = aten::vec3(-1, 0, 0);
+			break;
+		case POS_Y:
+			rec.normal = aten::vec3(0, 1, 0);
+			break;
+		case NEG_Y:
+			rec.normal = aten::vec3(0, -1, 0);
+			break;
+		case POS_Z:
+			rec.normal = aten::vec3(0, 0, 1);
+			break;
+		case NEG_Z:
+			rec.normal = aten::vec3(0, 0, -1);
+			break;
+		}
+
+		// tangent coordinate.
+		rec.du = normalize(getOrthoVector(rec.normal));
+		rec.dv = normalize(cross(rec.normal, rec.du));
+
+		rec.area = m_aabb.computeSurfaceArea();
 	}
 
 	aten::vec3 cube::getRandomPosOn(aten::sampler* sampler) const

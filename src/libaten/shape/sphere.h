@@ -40,6 +40,19 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord* rec);
 
+		virtual void evalHitResult(const ray& r, hitrecord& rec) const override final;
+
+		static AT_DEVICE_API void evalHitResult(
+			const aten::ShapeParameter* param,
+			const ray& r,
+			hitrecord* rec);
+
+		static AT_DEVICE_API void evalHitResult(
+			const aten::ShapeParameter* param,
+			const ray& r, 
+			const aten::mat4& mtxL2W, 
+			hitrecord* rec);
+
 		const aten::vec3& center() const
 		{
 			return m_param.center;
@@ -65,6 +78,11 @@ namespace AT_NAME
 			const aten::mat4& mtxL2W,
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final;
+
+		virtual void evalHitResult(
+			const ray& r,
+			const mat4& mtxL2W,
+			hitrecord& rec) const override final;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
 			const aten::mat4& mtxL2W,

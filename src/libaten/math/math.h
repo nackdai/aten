@@ -106,6 +106,13 @@ namespace aten {
 		return AT_MATH_FUNC2(::pow, f, v);
 	}
 
+	template <typename T>
+	inline AT_DEVICE_API T abs(T f)
+	{
+		return ::abs(f);
+	}
+
+	template <>
 	inline AT_DEVICE_API real abs(real f)
 	{
 #ifdef TYPE_DOUBLE

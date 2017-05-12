@@ -29,8 +29,6 @@ namespace aten {
 		};
 
 		class PostProc : public shader {
-			friend class visualizer;
-
 		protected:
 			PostProc() {}
 			virtual ~PostProc() {}

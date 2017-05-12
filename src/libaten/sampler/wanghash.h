@@ -15,7 +15,7 @@ namespace aten {
 
 		AT_VIRTUAL(~WangHash() {})
 
-		AT_VIRTUAL_OVERRIDE_FINAL(void init(uint32_t seed))
+		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed))
 		{
 			m_seed = seed;
 		}
@@ -29,7 +29,7 @@ namespace aten {
 	private:
 		// NOTE
 		// https://gist.github.com/badboy/6267743
-		uint32_t next()
+		AT_DEVICE_API uint32_t next()
 		{
 			uint32_t key = 1664525U * m_seed + 1013904223U;
 

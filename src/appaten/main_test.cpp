@@ -31,8 +31,8 @@ static aten::PathTracing g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
 
-//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-static aten::Film g_buffer(WIDTH, HEIGHT);
+static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+//static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static bool isExportedHdr = false;
 
@@ -85,7 +85,7 @@ void display()
 
 int main(int argc, char* argv[])
 {
-	aten::sampler::init();
+	aten::initSampler();
 
 #if 0
 	aten::MicrofacetBlinn blinn(aten:: vec3(1, 1, 1), 1, 1.5);

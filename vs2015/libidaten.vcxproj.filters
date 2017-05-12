@@ -151,6 +151,12 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h">
       <Filter>cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\pathtracing.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\common.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -270,6 +276,12 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\object\object.cpp">
       <Filter>aten\object</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\common.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

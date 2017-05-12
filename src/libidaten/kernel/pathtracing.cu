@@ -1,4 +1,4 @@
-#include "kernel/raytracing.h"
+#include "kernel/pathtracing.h"
 #include "kernel/context.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
@@ -19,13 +19,16 @@ struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
 	aten::hitrecord rec;
+	aten::sampler sampler;
 	bool isHit;
 	bool isTerminate;
 };
 
-__global__ void genPathRayTracing(
+__global__ void genPath(
 	Path* paths,
 	int width, int height,
+	int sample, int maxSamples,
+	int seed,
 	aten::CameraParameter* camera)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -37,12 +40,13 @@ __global__ void genPathRayTracing(
 
 	const auto idx = iy * camera->width + ix;
 
-	float s = (ix + 0.5f) / (float)(camera->width - 1);
-	float t = (iy + 0.5f) / (float)(camera->height - 1);
+	auto& path = paths[idx];
+	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
+
+	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
+	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
 
 	auto camsample = AT_NAME::PinholeCamera::sample(*camera, s, t, nullptr);
-
-	auto& path = paths[idx];
 
 	path.ray = camsample.r;
 	path.throughput = aten::vec3(1);
@@ -50,7 +54,7 @@ __global__ void genPathRayTracing(
 	path.isTerminate = false;
 }
 
-__global__ void hitTestRayTracing(
+__global__ void hitTest(
 	Path* paths,
 	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
@@ -95,8 +99,7 @@ __global__ void hitTestRayTracing(
 	path.rec = rec;
 }
 
-__global__ void raytracing(
-	//float4* p,
+__global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
 	int width, int height,
@@ -155,78 +158,32 @@ __global__ void raytracing(
 	// ï®ëÃÇ©ÇÁÇÃÉåÉCÇÃì¸èoÇçló∂.
 	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
-	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {
-		AT_NAME::MaterialSampling sampling;
+	AT_NAME::MaterialSampling sampling;
 			
-		sampleMaterial(
-			&sampling,
-			mtrl,
-			orienting_normal, 
-			path.ray.dir,
-			path.rec.normal,
-			nullptr,
-			path.rec.u, path.rec.v);
+	sampleMaterial(
+		&sampling,
+		mtrl,
+		orienting_normal, 
+		path.ray.dir,
+		path.rec.normal,
+		&path.sampler,
+		path.rec.u, path.rec.v);
 
-		auto nextDir = normalize(sampling.dir);
+	auto nextDir = normalize(sampling.dir);
 
-		path.throughput *= sampling.bsdf;
+	path.throughput *= sampling.bsdf;
 
-		// Make next ray.
-		path.ray = aten::ray(path.rec.p, nextDir);
-	}
-	else {
-		// TODO
-		auto light = lights[0];
-		auto* sphere = &ctxt.shapes[light.object.idx];
-		light.object.ptr = sphere;
-
-		aten::LightSampleResult sampleres;
-		sampleLight(&sampleres, &light, path.rec.p, nullptr);
-
-		aten::vec3 dirToLight = sampleres.dir;
-		auto len = dirToLight.length();
-
-		dirToLight.normalize();
-
-		aten::ray shadowRay(path.rec.p, dirToLight);
-
-		aten::hitrecord tmpRec;
-
-		auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord* _rec)
-		{
-			return intersectBVH(&ctxt, _r, t_min, t_max, _rec);
-		};
-
-		if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec)) {
-			if (light.attrib.isInfinite) {
-				len = 1.0f;
-			}
-
-			const auto c0 = max(0.0f, dot(orienting_normal, dirToLight));
-			float c1 = 1.0f;
-
-			if (!light.attrib.isSingular) {
-				c1 = max(0.0f, dot(sampleres.nml, -dirToLight));
-			}
-
-			auto G = c0 * c1 / (len * len);
-
-			contrib += path.throughput * (mtrl->baseColor * sampleres.finalColor) * G;
-		}
-
-		path.isTerminate = true;
-		//p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
-		surf2Dwrite(make_float4(contrib.x, contrib.y, contrib.z, 1), outSurface, ix * sizeof(float4), iy, cudaBoundaryModeTrap);
-	}
+	// Make next ray.
+	path.ray = aten::ray(path.rec.p, nextDir);
 }
 
 namespace idaten {
-	void RayTracing::prepare()
+	void PathTracing::prepare()
 	{
 		addFuncs();
 	}
 
-	void RayTracing::update(
+	void PathTracing::update(
 		GLuint gltex,
 		int width, int height,
 		const aten::CameraParameter& camera,
@@ -278,7 +235,26 @@ namespace idaten {
 		}
 	}
 
-	void RayTracing::render(
+#include "misc/timer.h"
+	aten::SystemTime getSystemTime()
+	{
+		SYSTEMTIME time;
+		::GetSystemTime(&time);
+
+		aten::SystemTime ret;
+		ret.year = time.wYear;
+		ret.month = time.wMonth;
+		ret.dayOfWeek = time.wDayOfWeek;
+		ret.day = time.wDay;
+		ret.hour = time.wHour;
+		ret.minute = time.wMinute;
+		ret.second = time.wSecond;
+		ret.milliSeconds = time.wMilliseconds;
+
+		return std::move(ret);
+	}
+
+	void PathTracing::render(
 		aten::vec4* image,
 		int width, int height)
 	{
@@ -295,55 +271,62 @@ namespace idaten {
 		CudaGLResourceMap rscmap(&glimg);
 		auto outputSurf = glimg.bindToWrite();
 
-		genPathRayTracing << <grid, block >> > (
-			paths.ptr(),
-			width, height,
-			cam.ptr());
+		static const int maxSamples = 5;
 
-		//checkCudaErrors(cudaDeviceSynchronize());
+		auto time = getSystemTime();
 
-		while (depth < 5) {
-			hitTestRayTracing << <grid, block >> > (
+		for (int i = 0; i < maxSamples; i++) {
+			genPath << <grid, block >> > (
 				paths.ptr(),
 				width, height,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodeparam.ptr(),
-				primparams.ptr(),
-				vtxparams.ptr());
-
-			auto err = cudaGetLastError();
-			if (err != cudaSuccess) {
-				AT_PRINTF("Cuda Kernel Err(hitTest) [%s]\n", cudaGetErrorString(err));
-			}
+				i, maxSamples,
+				time.milliSeconds,
+				cam.ptr());
 
 			//checkCudaErrors(cudaDeviceSynchronize());
 
-			raytracing << <grid, block >> > (
-				//(float4*)dst.ptr(),
-				outputSurf,
-				paths.ptr(),
-				width, height,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodeparam.ptr(),
-				primparams.ptr(),
-				vtxparams.ptr());
+			while (depth < 5) {
+				hitTest << <grid, block >> > (
+					paths.ptr(),
+					width, height,
+					shapeparam.ptr(), shapeparam.num(),
+					mtrlparam.ptr(),
+					lightparam.ptr(), lightparam.num(),
+					nodeparam.ptr(),
+					primparams.ptr(),
+					vtxparams.ptr());
 
-			err = cudaGetLastError();
-			if (err != cudaSuccess) {
-				AT_PRINTF("Cuda Kernel Err(raytracing) [%s]\n", cudaGetErrorString(err));
+				auto err = cudaGetLastError();
+				if (err != cudaSuccess) {
+					AT_PRINTF("Cuda Kernel Err(hitTest) [%s]\n", cudaGetErrorString(err));
+				}
+
+				//checkCudaErrors(cudaDeviceSynchronize());
+
+				shade << <grid, block >> > (
+					//(float4*)dst.ptr(),
+					outputSurf,
+					paths.ptr(),
+					width, height,
+					shapeparam.ptr(), shapeparam.num(),
+					mtrlparam.ptr(),
+					lightparam.ptr(), lightparam.num(),
+					nodeparam.ptr(),
+					primparams.ptr(),
+					vtxparams.ptr());
+
+				err = cudaGetLastError();
+				if (err != cudaSuccess) {
+					AT_PRINTF("Cuda Kernel Err(raytracing) [%s]\n", cudaGetErrorString(err));
+				}
+
+				//checkCudaErrors(cudaDeviceSynchronize());
+
+				depth++;
 			}
 
-			//checkCudaErrors(cudaDeviceSynchronize());
-
-			depth++;
+			checkCudaErrors(cudaDeviceSynchronize());
 		}
-
-		checkCudaErrors(cudaDeviceSynchronize());
-
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}
 }

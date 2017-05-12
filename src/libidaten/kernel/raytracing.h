@@ -28,13 +28,13 @@ namespace idaten
 			int width, int height);
 
 	private:
-		aten::CudaMemory dst;
-		aten::TypedCudaMemory<aten::CameraParameter> cam;
-		aten::TypedCudaMemory<aten::ShapeParameter> shapeparam;
-		aten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
-		aten::TypedCudaMemory<aten::LightParameter> lightparam;
-		aten::TypedCudaMemory<aten::BVHNode> nodeparam;
-		aten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
-		aten::TypedCudaMemory<aten::vertex> vtxparams;
+		idaten::CudaMemory dst;
+		idaten::TypedCudaMemory<aten::CameraParameter> cam;
+		idaten::TypedCudaMemory<aten::ShapeParameter> shapeparam;
+		idaten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
+		idaten::TypedCudaMemory<aten::LightParameter> lightparam;
+		idaten::TypedCudaMemory<aten::BVHNode> nodeparam;
+		idaten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
+		idaten::TypedCudaMemory<aten::vertex> vtxparams;
 	};
 }

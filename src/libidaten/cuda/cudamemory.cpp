@@ -2,7 +2,7 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudautil.h"
 
-namespace aten {
+namespace idaten {
 	static std::atomic<uint32_t> g_heapsize(0);
 
 	CudaMemory::CudaMemory(uint32_t bytes)

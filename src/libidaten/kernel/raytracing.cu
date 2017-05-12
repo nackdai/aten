@@ -287,7 +287,7 @@ namespace idaten {
 
 		int depth = 0;
 
-		aten::TypedCudaMemory<Path> paths;
+		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
 		genPath << <grid, block >> > (

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace aten {
+namespace idaten {
 	void beginCuda();
 
 	void teminateCuda();

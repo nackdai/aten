@@ -5,8 +5,8 @@
 
 #include "aten4idaten.h"
 
-namespace aten {
-	class CudaMemory : public IStream {
+namespace idaten {
+	class CudaMemory : public aten::IStream {
 	public:
 		CudaMemory() {}
 

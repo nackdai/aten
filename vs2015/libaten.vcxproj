@@ -223,7 +223,7 @@
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h" />
     <ClInclude Include="..\src\libaten\sampler\halton.h" />
-    <ClInclude Include="..\src\libaten\sampler\sampler.h" />
+    <ClInclude Include="..\src\libaten\sampler\samplerinterface.h" />
     <ClInclude Include="..\src\libaten\sampler\sobol.h" />
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
     <ClInclude Include="..\src\libaten\sampler\wanghash.h" />

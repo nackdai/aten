@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "types.h"
-#include "sampler/sampler.h"
+#include "sampler/samplerinterface.h"
 
 namespace aten {
 	class Halton : public sampler {

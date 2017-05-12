@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sampler/sobol.h"
-#include "sampler/sampler.h"
+#include "sampler/samplerinterface.h"
 
 namespace aten {
 	// NOTE

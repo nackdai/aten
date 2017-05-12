@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sampler/sampler.h"
+#include "sampler/samplerinterface.h"
 
 namespace aten {
 	// Xor-Shift による乱数ジェネレータ.

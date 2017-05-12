@@ -1,4 +1,4 @@
-#include "sampler/sampler.h"
+#include "sampler/samplerinterface.h"
 #include "sampler/halton.h"
 
 namespace aten {

@@ -58,6 +58,7 @@
     <ClInclude Include="..\src\libaten\shape\tranfomable.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libidaten\aten4idaten.h" />
+    <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
@@ -176,6 +177,7 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -285,7 +287,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -307,7 +309,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;__AT_DEBUG__;__AT_CUDA__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -332,7 +334,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -358,7 +360,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;__AT_CUDA__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
     </ClCompile>
     <Link>

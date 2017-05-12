@@ -50,3 +50,5 @@
 
 #include "sampler/sampler.h"
 #include "sampler/wanghash.h"
+
+#include "visualizer/pixelformat.h"

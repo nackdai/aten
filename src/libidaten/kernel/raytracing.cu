@@ -5,8 +5,8 @@
 #include "kernel/intersect.cuh"
 #include "kernel/bvh.cuh"
 
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
@@ -95,7 +95,8 @@ __global__ void hitTest(
 }
 
 __global__ void raytracing(
-	float4* p,
+	//float4* p,
+	cudaSurfaceObject_t outSurface,
 	Path* paths,
 	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
@@ -143,7 +144,8 @@ __global__ void raytracing(
 		contrib = path.throughput * mtrl->baseColor;
 
 		path.isTerminate = true;
-		p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
+		//p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
+		surf2Dwrite(make_float4(contrib.x, contrib.y, contrib.z, 1), outSurface, ix * sizeof(float4), iy, cudaBoundaryModeTrap);
 		
 		return;
 	}
@@ -212,7 +214,8 @@ __global__ void raytracing(
 		}
 
 		path.isTerminate = true;
-		p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
+		//p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
+		surf2Dwrite(make_float4(contrib.x, contrib.y, contrib.z, 1), outSurface, ix * sizeof(float4), iy, cudaBoundaryModeTrap);
 	}
 }
 
@@ -230,6 +233,7 @@ namespace idaten {
 	}
 
 	void RayTracing::update(
+		GLuint gltex,
 		int width, int height,
 		const aten::CameraParameter& camera,
 		const std::vector<aten::ShapeParameter>& shapes,
@@ -248,7 +252,11 @@ namespace idaten {
 		AT_PRINTF("Stack size %d\n", size_stack);
 #endif
 
+#if 0
 		dst.init(sizeof(float4) * width * height);
+#else
+		glimg.init(gltex, CudaGLRscRegisterType::WriteOnly);
+#endif
 
 		cam.init(sizeof(camera));
 		cam.writeByNum(&camera, 1);
@@ -290,6 +298,9 @@ namespace idaten {
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
+		CudaGLResourceMap rscmap(&glimg);
+		auto outputSurf = glimg.bindToWrite();
+
 		genPath << <grid, block >> > (
 			paths.ptr(),
 			width, height,
@@ -316,7 +327,8 @@ namespace idaten {
 			//checkCudaErrors(cudaDeviceSynchronize());
 
 			raytracing << <grid, block >> > (
-				(float4*)dst.ptr(),
+				//(float4*)dst.ptr(),
+				outputSurf,
 				paths.ptr(),
 				width, height,
 				shapeparam.ptr(), shapeparam.num(),
@@ -338,6 +350,6 @@ namespace idaten {
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
-		dst.read(image, sizeof(aten::vec4) * width * height);
+		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}
 }

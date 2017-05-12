@@ -22,12 +22,17 @@ namespace aten {
 
 	static std::vector<visualizer::PostProc*> g_postprocs;
 
-	GLuint visualizer::getSrcTexHandle()
+	GLuint visualizer::getTexHandle()
 	{
 		return g_tex;
 	}
 
-	GLuint createTexture(int width, int height, PixelFormat fmt)
+	PixelFormat visualizer::getPixelFormat()
+	{
+		return g_fmt;
+	}
+
+	static GLuint createTexture(int width, int height, PixelFormat fmt)
 	{
 		GLuint tex = 0;
 
@@ -238,6 +243,55 @@ namespace aten {
 			}
 
 			postproc->prepareRender(prevPostproc, pixels, willRevert);
+			auto& fbo = postproc->getFbo();
+
+			// ç≈èâÇÃÇPâÒÇæÇØîΩì]Ç∑ÇÍÇŒÇ¢Ç¢ÇÃÇ≈.
+			willRevert = false;
+
+			if (fbo.isValid()) {
+				// Set FBO.
+				fbo.setFBO();
+			}
+			else {
+				// Set default frame buffer.
+				CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+			}
+
+			CALL_GL_API(::glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+		}
+	}
+
+	void visualizer::render(bool revert)
+	{
+		// For using written OpenGL texture resource by GPGPU directly.
+		// So, not handle pixel data pointer directly.
+
+		CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
+		CALL_GL_API(::glClearDepthf(1.0f));
+		CALL_GL_API(::glClearStencil(0));
+		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+		CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
+
+		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
+
+		bool willRevert = revert;
+
+		for (int i = 0; i < g_postprocs.size(); i++) {
+			auto* postproc = g_postprocs[i];
+			PostProc* prevPostproc = nullptr;
+
+			if (i > 0) {
+				prevPostproc = g_postprocs[i - 1];
+				auto& fbo = prevPostproc->getFbo();
+
+				CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
+
+				// Set FBO as source texture.
+				fbo.setAsTexture();
+			}
+
+			postproc->prepareRender(prevPostproc, nullptr, willRevert);
 			auto& fbo = postproc->getFbo();
 
 			// ç≈èâÇÃÇPâÒÇæÇØîΩì]Ç∑ÇÍÇŒÇ¢Ç¢ÇÃÇ≈.

@@ -84,8 +84,8 @@ namespace aten {
 		};
 
 	public:
-		//static GLuint getSrcTexHandle();
-		static uint32_t getSrcTexHandle();
+		static uint32_t getTexHandle();
+		static PixelFormat getPixelFormat();
 
 		static bool init(int width, int height);
 
@@ -96,6 +96,8 @@ namespace aten {
 		static void render(
 			const vec4* pixels,
 			bool revert);
+
+		static void render(bool revert);
 
 		static void takeScreenshot(const char* filename);
 	};

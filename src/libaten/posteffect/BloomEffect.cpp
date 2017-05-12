@@ -63,7 +63,7 @@ namespace aten {
 
 		// Source tex handle.
 		{
-			GLuint srcTexHandle = visualizer::getSrcTexHandle();
+			GLuint srcTexHandle = visualizer::getTexHandle();
 			auto prevEffectPass = m_body->getPrevPass();
 			if (prevEffectPass) {
 				srcTexHandle = prevEffectPass->getFbo().getTexHandle();

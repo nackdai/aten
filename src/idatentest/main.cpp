@@ -137,7 +137,8 @@ void display()
 	auto elapsed = timer.end();
 	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
 
-	aten::visualizer::render(g_buffer.image(), false);
+	//aten::visualizer::render(g_buffer.image(), false);
+	aten::visualizer::render(false);
 }
 
 int main()
@@ -188,6 +189,7 @@ int main()
 		g_scene.getAccel()->collectNodes(nodes);
 
 		g_tracer.update(
+			aten::visualizer::getTexHandle(),
 			WIDTH, HEIGHT,
 			g_camera.param(),
 			shapeparams,

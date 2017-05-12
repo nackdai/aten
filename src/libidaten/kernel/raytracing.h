@@ -2,6 +2,7 @@
 
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
+#include "cuda/cudaGLresource.h"
 
 namespace idaten
 {
@@ -14,6 +15,7 @@ namespace idaten
 		void prepare();
 
 		void update(
+			GLuint gltex,
 			int width, int height,
 			const aten::CameraParameter& camera,
 			const std::vector<aten::ShapeParameter>& shapes,
@@ -36,5 +38,7 @@ namespace idaten
 		idaten::TypedCudaMemory<aten::BVHNode> nodeparam;
 		idaten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
 		idaten::TypedCudaMemory<aten::vertex> vtxparams;
+
+		idaten::CudaGLSurface glimg;
 	};
 }

@@ -37,6 +37,12 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord* rec);
 
+		static AT_DEVICE_API void evalHitResult(
+			const aten::vertex& v0,
+			const aten::vertex& v1,
+			const aten::vertex& v2,
+			aten::hitrecord* rec);
+
 		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override;
 
 		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override;
@@ -113,9 +119,9 @@ namespace AT_NAME
 			aten::hitrecord& rec) const override final;
 
 		virtual void evalHitResult(
-			const ray& r,
-			const mat4& mtxL2W,
-			hitrecord& rec) const override final;
+			const aten::ray& r,
+			const aten::mat4& mtxL2W,
+			aten::hitrecord& rec) const override final;
 
 		virtual void getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const override final;
 

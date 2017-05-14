@@ -112,27 +112,27 @@ namespace AT_NAME
 		return true;
 	}
 
-	void sphere::evalHitResult(const ray& r, aten::hitrecord& rec) const
+	void sphere::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
 	{
 		evalHitResult(&m_param, r, aten::mat4(), &rec);
 	}
 
 	void sphere::evalHitResult(
-		const ray& r,
-		const mat4& mtxL2W,
-		hitrecord& rec) const
+		const aten::ray& r,
+		const aten::mat4& mtxL2W,
+		aten::hitrecord& rec) const
 	{
 		evalHitResult(&m_param, r, mtxL2W, &rec);
 	}
 
-	void sphere::evalHitResult(const aten::ShapeParameter* param, const ray& r, aten::hitrecord* rec)
+	void sphere::evalHitResult(const aten::ShapeParameter* param, const aten::ray& r, aten::hitrecord* rec)
 	{
 		evalHitResult(param, r, aten::mat4(), rec);
 	}
 
 	void sphere::evalHitResult(
 		const aten::ShapeParameter* param,
-		const ray& r, 
+		const aten::ray& r,
 		const aten::mat4& mtxL2W, 
 		aten::hitrecord* rec)
 	{

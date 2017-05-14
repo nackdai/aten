@@ -71,26 +71,6 @@ AT_DEVICE_API bool intersectBVH(
 						isHit = intersectShape(leftobj, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
 
 						if (isHit) {
-							recTmp.p = leftobj->mtxL2W.apply(recTmp.p);
-							recTmp.normal = normalize(leftobj->mtxL2W.applyXYZ(recTmp.normal));
-
-							const auto& v0 = ctxt->vertices[prim.idx[0]];
-							const auto& v1 = ctxt->vertices[prim.idx[1]];
-
-							real orignalLen = (v1.pos - v0.pos).length();
-
-							real scaledLen = 0;
-							{
-								auto p0 = leftobj->mtxL2W.apply(v0.pos);
-								auto p1 = leftobj->mtxL2W.apply(v1.pos);
-
-								scaledLen = (p1 - p0).length();
-							}
-
-							real ratio = scaledLen / orignalLen;
-							ratio = ratio * ratio;
-
-							recTmp.area = leftobj->area * ratio;
 							recTmp.mtrlid = prim.mtrlid;
 						}
 					}
@@ -132,26 +112,6 @@ AT_DEVICE_API bool intersectBVH(
 						isHit = intersectShape(rightobj, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
 
 						if (isHit) {
-							recTmp.p = rightobj->mtxL2W.apply(recTmp.p);
-							recTmp.normal = normalize(rightobj->mtxL2W.applyXYZ(recTmp.normal));
-
-							const auto& v0 = ctxt->vertices[prim.idx[0]];
-							const auto& v1 = ctxt->vertices[prim.idx[1]];
-
-							real orignalLen = (v1.pos - v0.pos).length();
-
-							real scaledLen = 0;
-							{
-								auto p0 = rightobj->mtxL2W.apply(v0.pos);
-								auto p1 = rightobj->mtxL2W.apply(v1.pos);
-
-								scaledLen = (p1 - p0).length();
-							}
-
-							real ratio = scaledLen / orignalLen;
-							ratio = ratio * ratio;
-
-							recTmp.area = rightobj->area * ratio;
 							recTmp.mtrlid = prim.mtrlid;
 						}
 					}
@@ -205,6 +165,12 @@ AT_DEVICE_API bool intersectBVH(
 			return false;
 		}
 	} while (node != nullptr);
+
+	isHit = (rec->obj != nullptr);
+
+	if (isHit) {
+		evalHitResult(ctxt, (aten::ShapeParameter*)rec->obj, r, rec);
+	}
 
 	return (rec->obj != nullptr);
 }

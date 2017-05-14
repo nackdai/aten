@@ -86,6 +86,34 @@ namespace AT_NAME
 		return isHit;
 	}
 
+	AT_DEVICE_API void face::evalHitResult(
+		const aten::vertex& v0,
+		const aten::vertex& v1,
+		const aten::vertex& v2,
+		aten::hitrecord* rec)
+	{
+		// NOTE
+		// http://d.hatena.ne.jp/Zellij/20131207/p1
+
+		real a = rec->param.a;
+		real b = rec->param.b;
+		real c = 1 - a - b;
+
+		// 重心座標系(barycentric coordinates).
+		// v0基準.
+		// p = (1 - a - b)*v0 + a*v1 + b*v2
+		rec->p = c * v0.pos + a * v1.pos + b * v2.pos;
+		rec->normal = c * v0.nml + a * v1.nml + b * v2.nml;
+		auto uv = c * v0.uv + a * v1.uv + b * v2.uv;
+
+		rec->u = uv.x;
+		rec->v = uv.y;
+
+		// tangent coordinate.
+		rec->du = normalize(getOrthoVector(rec->normal));
+		rec->dv = normalize(cross(rec->normal, rec->du));
+	}
+
 	void face::build()
 	{
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
@@ -354,36 +382,15 @@ namespace AT_NAME
 	}
 
 	void object::evalHitResult(
-		const ray& r,
-		const mat4& mtxL2W,
-		hitrecord& rec) const
+		const aten::ray& r,
+		const aten::mat4& mtxL2W,
+		aten::hitrecord& rec) const
 	{
-		auto p = r.org + rec.t * r.dir;
-
 		const auto& v0 = aten::VertexManager::getVertex(rec.param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(rec.param.idx[1]);
 		const auto& v2 = aten::VertexManager::getVertex(rec.param.idx[2]);
 
-		// NOTE
-		// http://d.hatena.ne.jp/Zellij/20131207/p1
-
-		real a = rec.param.a;
-		real b = rec.param.b;
-		real c = 1 - a - b;
-
-		// 重心座標系(barycentric coordinates).
-		// v0基準.
-		// p = (1 - a - b)*v0 + a*v1 + b*v2
-		rec.p = c * v0.pos + a * v1.pos + b * v2.pos;
-		rec.normal = c * v0.nml + a * v1.nml + b * v2.nml;
-		auto uv = c * v0.uv + a * v1.uv + b * v2.uv;
-
-		rec.u = uv.x;
-		rec.v = uv.y;
-
-		// tangent coordinate.
-		rec.du = normalize(getOrthoVector(rec.normal));
-		rec.dv = normalize(cross(rec.normal, rec.du));
+		face::evalHitResult(v0, v1, v2, &rec);
 	}
 
 	aten::hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const

@@ -61,15 +61,6 @@ __device__ bool hitNotSupported(
 	printf("Hit Test Not Supoorted[%d]\n", shape->type);
 }
 
-
-__device__ void addIntersectFuncs()
-{
-	funcIntersect[aten::ShapeType::Polygon] = hitTriangle;
-	funcIntersect[aten::ShapeType::Instance] = hitNotSupported;
-	funcIntersect[aten::ShapeType::Sphere] = hitSphere;
-	funcIntersect[aten::ShapeType::Cube] = hitNotSupported;
-}
-
 AT_DEVICE_API bool intersectShape(
 	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
@@ -82,4 +73,82 @@ AT_DEVICE_API bool intersectShape(
 
 	auto ret = funcIntersect[realShape->type](realShape, prim, ctxt, r, t_min, t_max, rec);
 	return ret;
+}
+
+typedef void(*FuncEvalHitResult)(const Context*, const aten::ShapeParameter*, const aten::ray&, aten::hitrecord*);
+
+__device__ FuncEvalHitResult funcEvalHitResult[aten::ShapeType::ShapeTypeMax];
+
+__device__ void funcEvalHitResultNotSupported(
+	const Context* ctxt,
+	const aten::ShapeParameter* param,
+	const aten::ray& r,
+	aten::hitrecord* rec)
+{
+	printf("Eval Hit Result Not Supoorted[%d]\n", param->type);
+}
+
+__device__ void evalHitResultSphere(
+	const Context* ctxt,
+	const aten::ShapeParameter* param,
+	const aten::ray& r,
+	aten::hitrecord* rec)
+{
+	AT_NAME::sphere::evalHitResult(param, r, rec);
+}
+
+__device__ void evalHitResultTriangle(
+	const Context* ctxt,
+	const aten::ShapeParameter* param,
+	const aten::ray& r,
+	aten::hitrecord* rec)
+{
+	const auto& v0 = ctxt->vertices[rec->param.idx[0]];
+	const auto& v1 = ctxt->vertices[rec->param.idx[1]];
+	const auto& v2 = ctxt->vertices[rec->param.idx[2]];
+
+	AT_NAME::face::evalHitResult(v0, v1, v2, rec);
+
+	rec->p = param->mtxL2W.apply(rec->p);
+	rec->normal = normalize(param->mtxL2W.applyXYZ(rec->normal));
+
+	real orignalLen = (v1.pos - v0.pos).length();
+
+	real scaledLen = 0;
+	{
+		auto p0 = param->mtxL2W.apply(v0.pos);
+		auto p1 = param->mtxL2W.apply(v1.pos);
+
+		scaledLen = (p1 - p0).length();
+	}
+
+	real ratio = scaledLen / orignalLen;
+	ratio = ratio * ratio;
+
+	rec->area = param->area * ratio;
+}
+
+AT_DEVICE_API void evalHitResult(
+	const Context* ctxt,
+	const aten::ShapeParameter* param,
+	const aten::ray& r,
+	aten::hitrecord* rec)
+{
+	const aten::ShapeParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+
+	funcEvalHitResult[realShape->type](ctxt, param, r, rec);
+
+}
+
+__device__ void addIntersectFuncs()
+{
+	funcIntersect[aten::ShapeType::Polygon] = hitTriangle;
+	funcIntersect[aten::ShapeType::Instance] = hitNotSupported;
+	funcIntersect[aten::ShapeType::Sphere] = hitSphere;
+	funcIntersect[aten::ShapeType::Cube] = hitNotSupported;
+
+	funcEvalHitResult[aten::ShapeType::Polygon] = evalHitResultTriangle;
+	funcEvalHitResult[aten::ShapeType::Instance] = funcEvalHitResultNotSupported;
+	funcEvalHitResult[aten::ShapeType::Sphere] = evalHitResultSphere;
+	funcEvalHitResult[aten::ShapeType::Cube] = funcEvalHitResultNotSupported;
 }

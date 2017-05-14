@@ -109,12 +109,12 @@ namespace AT_NAME
 		return hit(r, t_min, t_max, rec);
 	}
 
-	void cube::evalHitResult(const ray& r, hitrecord& rec) const
+	void cube::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
 	{
 		evalHitResult(r, aten::mat4(), rec);
 	}
 
-	void cube::evalHitResult(const ray& r, const mat4& mtxL2W, hitrecord& rec) const
+	void cube::evalHitResult(const aten::ray& r, const aten::mat4& mtxL2W, aten::hitrecord& rec) const
 	{
 		// TODO
 		AT_ASSERT(false);	// Not support.

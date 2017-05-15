@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-#define TEST_NODE_LIST
+//#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -415,100 +415,40 @@ namespace aten {
 		// TODO
 		// stack size.
 		static const uint32_t stacksize = 64;
-		bvhnode* stackbuf[stacksize] = { nullptr };
-		bvhnode** stack = &stackbuf[0];
+		const bvhnode* stackbuf[stacksize];
 
-		// push terminator.
-		*stack++ = nullptr;
-
+		stackbuf[0] = root;
 		int stackpos = 1;
 
-		auto node = root;
+		while (stackpos > 0) {
+			auto node = stackbuf[stackpos - 1];
 
-		do {
-			auto left = node->m_left;
-			auto right = node->m_right;
+			stackpos -= 1;
 
-#if 0
-			bool isHitLeft = false;
-			bool isHitRight = false;
-
-			if (left) {
-				isHitLeft = left->getBoundingbox().hit(r, t_min, t_max);
-			}
-			if (right) {
-				isHitRight = right->getBoundingbox().hit(r, t_min, t_max);
-			}
-
-			if (isHitLeft && left->isLeaf()) {
-				hitrecord recLeft;
-				if (left->hit(r, t_min, t_max, recLeft)) {
-					if (recLeft.t < rec.t) {
-						rec = recLeft;
+			if (node->isLeaf()) {
+				hitrecord recTmp;
+				if (node->hit(r, t_min, t_max, recTmp)) {
+					if (recTmp.t < rec.t) {
+						rec = recTmp;
 					}
 				}
-			}
-			if (isHitRight && right->isLeaf()) {
-				hitrecord recRight;
-				if (right->hit(r, t_min, t_max, recRight)) {
-					if (recRight.t < rec.t) {
-						rec = recRight;
-					}
-				}
-			}
-
-			bool traverseLeft = isHitLeft && !left->isLeaf();
-			bool traverseRight = isHitRight && !right->isLeaf();
-#else
-			bool traverseLeft = false;
-			bool traverseRight = false;
-
-			if (left) {
-				if (left->isLeaf()) {
-					hitrecord recLeft;
-					if (left->hit(r, t_min, t_max, recLeft)) {
-						if (recLeft.t < rec.t) {
-							rec = recLeft;
-						}
-					}
-				}
-				else {
-					traverseLeft = left->getBoundingbox().hit(r, t_min, t_max);
-				}
-			}
-			if (right) {
-				if (right->isLeaf()) {
-					hitrecord recRight;
-					if (right->hit(r, t_min, t_max, recRight)) {
-						if (recRight.t < rec.t) {
-							rec = recRight;
-						}
-					}
-				}
-				else {
-					traverseRight = right->getBoundingbox().hit(r, t_min, t_max);
-				}
-			}
-#endif
-
-			if (!traverseLeft && !traverseRight) {
-				node = *(--stack);
-				stackpos -= 1;
 			}
 			else {
-				node = traverseLeft ? left : right;
+				if (node->getBoundingbox().hit(r, t_min, t_max)) {
+					if (node->m_left) {
+						stackbuf[stackpos++] = node->m_left;
+					}
+					if (node->m_right) {
+						stackbuf[stackpos++] = node->m_right;
+					}
 
-				if (traverseLeft && traverseRight) {
-					*(stack++) = right;
-					stackpos += 1;
+					if (stackpos > stacksize) {
+						AT_ASSERT(false);
+						return false;
+					}
 				}
 			}
-			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
-
-			if (stackpos >= stacksize) {
-				return false;
-			}
-		} while (node != nullptr);
+		}
 
 		return (rec.obj != nullptr);
 	}

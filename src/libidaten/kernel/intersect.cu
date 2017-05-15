@@ -47,6 +47,12 @@ __device__ bool hitTriangle(
 		t_min, t_max,
 		rec);
 
+	if (isHit) {
+		rec->param.idx[0] = prim->idx[0];
+		rec->param.idx[1] = prim->idx[1];
+		rec->param.idx[2] = prim->idx[2];
+	}
+
 	return isHit;
 }
 
@@ -137,7 +143,6 @@ AT_DEVICE_API void evalHitResult(
 	const aten::ShapeParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
 	funcEvalHitResult[realShape->type](ctxt, param, r, rec);
-
 }
 
 __device__ void addIntersectFuncs()

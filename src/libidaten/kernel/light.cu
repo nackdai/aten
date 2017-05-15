@@ -25,8 +25,13 @@ __device__  void sampleAreaLight(
 		auto dir = pos - o;
 		auto dist = dir.length();
 
+		// TODO
 		aten::ray r(o, dir);
 		bool isHit = AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, _rec);
+
+		if (isHit) {
+			AT_NAME::sphere::evalHitResult(s, r, _rec);
+		}
 
 		return isHit;
 	};

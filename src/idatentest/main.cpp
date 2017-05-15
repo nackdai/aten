@@ -26,8 +26,8 @@ static aten::PinholeCamera g_camera;
 
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
-//static idaten::RayTracing g_tracer;
-static idaten::PathTracing g_tracer;
+static idaten::RayTracing g_tracer;
+//static idaten::PathTracing g_tracer;
 
 void makeScene(aten::scene* scene)
 {
@@ -108,8 +108,8 @@ void makeScene(aten::scene* scene)
 
 	aten::Light* l = new aten::AreaLight(light, emit->color());
 
-
 	scene->addLight(l);
+
 #if 1
 	scene->add(light);
 	scene->add(left);
@@ -188,6 +188,7 @@ int main()
 		std::vector<aten::BVHNode> nodes;
 
 		g_scene.getAccel()->collectNodes(nodes);
+		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),

@@ -37,6 +37,8 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord* rec);
 
+		virtual void evalHitResult(const aten::ray& r, aten::hitrecord& rec) const;
+
 		static AT_DEVICE_API void evalHitResult(
 			const aten::vertex& v0,
 			const aten::vertex& v1,

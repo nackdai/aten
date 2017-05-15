@@ -96,6 +96,7 @@ namespace aten {
 
 		static int setTraverseOrder(bvhnode* root, int curOrder);
 		static void collectNodes(bvhnode* root, std::vector<BVHNode>& nodes, bvhnode* parent);
+		static void dumpCollectedNodes(std::vector<BVHNode>& nodes, const char* path);
 
 	private:
 		static bool hit(

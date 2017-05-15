@@ -26,8 +26,10 @@ namespace aten
 
 		real area;
 
-		int primid{ -1 };
 		int shapeid{ -1 };
+
+		int primid{ -1 };
+		int primnum{ 0 };
 
 		struct {
 			vec3 center;

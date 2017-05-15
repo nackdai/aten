@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-//#define TEST_NODE_LIST
+#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -90,7 +90,8 @@ namespace aten {
 	{
 		if (needSort) {
 			// TODO
-			int axis = (int)(::rand() % 3);
+			//int axis = (int)(::rand() % 3);
+			int axis = 0;
 
 			sortList(list, num, axis);
 		}
@@ -145,7 +146,8 @@ namespace aten {
 		uint32_t num)
 	{
 		// TODO
-		int axis = (int)(::rand() % 3);
+		//int axis = (int)(::rand() % 3);
+		int axis = 0;
 
 		sortList(list, num, axis);
 
@@ -159,6 +161,7 @@ namespace aten {
 #ifdef TEST_NODE_LIST
 		if (snodes.empty()) {
 			collectNodes(snodes);
+			//bvh::dumpCollectedNodes(snodes, "_nodes.txt");
 		}
 #endif
 	}
@@ -220,6 +223,8 @@ namespace aten {
 							isHitLeft = leftobj->hit(transformedRay, t_min, t_max, recLeft);
 
 							if (isHitLeft) {
+								leftobj->evalHitResult(transformedRay, recLeft);
+
 								recLeft.p = param.mtxL2W.apply(recLeft.p);
 								recLeft.normal = normalize(param.mtxL2W.applyXYZ(recLeft.normal));
 
@@ -293,6 +298,8 @@ namespace aten {
 							isHitRight = rightobj->hit(transformedRay, t_min, t_max, recRight);
 
 							if (isHitRight) {
+								rightobj->evalHitResult(transformedRay, recRight);
+
 								recRight.p = param.mtxL2W.apply(recRight.p);
 								recRight.normal = normalize(param.mtxL2W.applyXYZ(recRight.normal));
 
@@ -695,7 +702,10 @@ namespace aten {
 			}
 			else if (info.num == 2) {
 				// ２個だけのときは適当にソートして、終了.
-				int axis = (int)(::rand() % 3);
+
+				// TODO
+				//int axis = (int)(::rand() % 3);
+				int axis = 0;
 
 				sortList(info.list, info.num, axis);
 
@@ -955,4 +965,20 @@ namespace aten {
 			}
 		}
 	}
+
+	void bvh::dumpCollectedNodes(std::vector<BVHNode>& nodes, const char* path)
+	{
+		FILE* fp = nullptr;
+		fopen_s(&fp, path, "wt");
+		if (!fp) {
+			AT_ASSERT(false);
+			return;
+		}
+
+		for (const auto& n : nodes) {
+			fprintf(fp, "%d %d %d %d %d\n", n.left, n.right, n.nestid, n.shapeid, n.primid);
+		}
+
+		fclose(fp);
+	} 
 }

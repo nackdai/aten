@@ -86,6 +86,15 @@ namespace AT_NAME
 		return isHit;
 	}
 
+	void face::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
+	{
+		const auto& v0 = aten::VertexManager::getVertex(rec.param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(rec.param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(rec.param.idx[2]);
+
+		evalHitResult(v0, v1, v2, &rec);
+	}
+
 	AT_DEVICE_API void face::evalHitResult(
 		const aten::vertex& v0,
 		const aten::vertex& v1,
@@ -272,6 +281,8 @@ namespace AT_NAME
 			param.area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();
 		}
+
+		param.primnum = m_triangles;
 
 #ifdef ENABLE_DIRECT_FACE_BVH
 		std::vector<face*> faces;

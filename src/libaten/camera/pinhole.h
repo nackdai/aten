@@ -22,10 +22,10 @@ namespace AT_NAME {
 			real s, real t,
 			aten::sampler* sampler) const override final;
 
-		static AT_DEVICE_API CameraSampleResult sample(
-			const aten::CameraParameter& param,
-			real s, real t,
-			aten::sampler* sampler);
+		static AT_DEVICE_API void sample(
+			CameraSampleResult* result,
+			const aten::CameraParameter* param,
+			real s, real t);
 
 		virtual const aten::vec3& getPos() const override final
 		{

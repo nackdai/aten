@@ -38,36 +38,32 @@ namespace AT_NAME {
 		real s, real t,
 		aten::sampler* sampler) const
 	{
-		return std::move(sample(m_param, s, t, sampler));
+		CameraSampleResult result;
+		sample(&result, &m_param, s, t);
+		return std::move(result);
 	}
 
-	AT_DEVICE_API CameraSampleResult PinholeCamera::sample(
-		const aten::CameraParameter& param,
-		real s, real t,
-		aten::sampler* sampler)
+	AT_DEVICE_API void PinholeCamera::sample(
+		CameraSampleResult* result,
+		const aten::CameraParameter* param,
+		real s, real t)
 	{
-		CameraSampleResult result;
-
 		// [0, 1] -> [-1, 1]
 		s = 2 * s - 1;
 		t = 2 * t - 1;
 
-		auto screenPos = s * param.u + t * param.v;
-		screenPos = screenPos + param.center;
+		result->posOnLens = s * param->u + t * param->v;
+		result->posOnLens = result->posOnLens + param->center;
 
-		auto dirToScr = screenPos - param.origin;
+		result->r.dir = normalize(result->posOnLens - param->origin);
 
-		result.posOnLens = screenPos;
-		result.nmlOnLens = param.dir;
-		result.posOnImageSensor = param.origin;
+		result->nmlOnLens = param->dir;
+		result->posOnImageSensor = param->origin;
 
-		result.r.org = param.origin;
-		result.r.dir = normalize(dirToScr);
+		result->r.org = param->origin;
 
-		result.pdfOnLens = 1;
-		result.pdfOnImageSensor = 1;
-
-		return std::move(result);
+		result->pdfOnLens = 1;
+		result->pdfOnImageSensor = 1;
 	}
 
 	void PinholeCamera::revertRayToPixelPos(

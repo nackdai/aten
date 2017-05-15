@@ -46,7 +46,8 @@ __global__ void genPath(
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
 
-	auto camsample = AT_NAME::PinholeCamera::sample(*camera, s, t, nullptr);
+	AT_NAME::CameraSampleResult camsample;
+	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
 
 	path.ray = camsample.r;
 	path.throughput = aten::vec3(1);

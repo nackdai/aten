@@ -40,7 +40,8 @@ __global__ void genPathRayTracing(
 	float s = (ix + 0.5f) / (float)(camera->width - 1);
 	float t = (iy + 0.5f) / (float)(camera->height - 1);
 
-	auto camsample = AT_NAME::PinholeCamera::sample(*camera, s, t, nullptr);
+	AT_NAME::CameraSampleResult camsample;
+	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
 
 	auto& path = paths[idx];
 

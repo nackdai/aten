@@ -59,7 +59,7 @@ __global__ void hitTestRayTracing(
 	aten::LightParameter* lights, int lightnum,
 	aten::BVHNode* nodes,
 	aten::PrimitiveParamter* prims,
-	aten::vertex* vertices)
+	cudaTextureObject_t vertices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -106,7 +106,7 @@ __global__ void raytracing(
 	aten::LightParameter* lights, int lightnum,
 	aten::BVHNode* nodes,
 	aten::PrimitiveParamter* prims,
-	aten::vertex* vertices)
+	cudaTextureObject_t vertices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -273,10 +273,7 @@ namespace idaten {
 			primparams.writeByNum(&prims[0], prims.size());
 		}
 
-		if (!vtxs.empty()) {
-			vtxparams.init(vtxs.size());
-			vtxparams.writeByNum(&vtxs[0], vtxs.size());
-		}
+		vtxparams.init((aten::vec4*)&vtxs[0], 3, vtxs.size());
 	}
 
 	void RayTracing::render(
@@ -296,6 +293,8 @@ namespace idaten {
 		CudaGLResourceMap rscmap(&glimg);
 		auto outputSurf = glimg.bind();
 
+		auto vtxTex = vtxparams.bind();
+
 		genPathRayTracing << <grid, block >> > (
 			paths.ptr(),
 			width, height,
@@ -312,7 +311,7 @@ namespace idaten {
 				lightparam.ptr(), lightparam.num(),
 				nodeparam.ptr(),
 				primparams.ptr(),
-				vtxparams.ptr());
+				vtxTex);
 
 			auto err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -331,7 +330,7 @@ namespace idaten {
 				lightparam.ptr(), lightparam.num(),
 				nodeparam.ptr(),
 				primparams.ptr(),
-				vtxparams.ptr());
+				vtxTex);
 
 			err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -344,6 +343,8 @@ namespace idaten {
 		}
 
 		checkCudaErrors(cudaDeviceSynchronize());
+
+		vtxparams.unbind();
 
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}

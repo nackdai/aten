@@ -30,9 +30,9 @@ namespace AT_NAME
 
 		static AT_DEVICE_API bool hit(
 			const aten::PrimitiveParamter* param,
-			const aten::vertex& v0,
-			const aten::vertex& v1,
-			const aten::vertex& v2,
+			const aten::vec3& v0,
+			const aten::vec3& v1,
+			const aten::vec3& v2,
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::hitrecord* rec);

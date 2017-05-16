@@ -157,6 +157,9 @@
     <ClInclude Include="..\src\libidaten\kernel\common.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -222,6 +225,9 @@
       <Filter>aten\shape</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp">
+      <Filter>cuda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
   </ItemGroup>

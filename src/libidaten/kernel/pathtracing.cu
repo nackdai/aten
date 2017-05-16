@@ -15,6 +15,7 @@
 
 #include "aten4idaten.h"
 
+#if 0
 struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
@@ -343,3 +344,4 @@ namespace idaten {
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}
 }
+#endif

@@ -61,6 +61,7 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />
+    <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
@@ -75,6 +76,7 @@
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp" />
     <CudaCompile Include="..\src\libaten\camera\pinhole .cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>

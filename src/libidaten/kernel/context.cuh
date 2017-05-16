@@ -14,5 +14,5 @@ struct Context {
 	aten::BVHNode* nodes;
 
 	aten::PrimitiveParamter* prims;
-	aten::vertex* vertices;
+	cudaTextureObject_t vertices;
 };

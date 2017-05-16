@@ -3,6 +3,7 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
+#include "cuda/cudaTextureResource.h"
 
 namespace idaten
 {
@@ -37,8 +38,8 @@ namespace idaten
 		idaten::TypedCudaMemory<aten::LightParameter> lightparam;
 		idaten::TypedCudaMemory<aten::BVHNode> nodeparam;
 		idaten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
-		idaten::TypedCudaMemory<aten::vertex> vtxparams;
 
 		idaten::CudaGLSurface glimg;
+		idaten::CudaTextureResource vtxparams;
 	};
 }

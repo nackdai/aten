@@ -2,14 +2,14 @@
 
 #include <vector>
 #include "types.h"
-#include "math/vec3.h"
+#include "math/vec4.h"
 
 namespace aten
 {
 	struct vertex {
-		vec3 pos;
-		vec3 nml;
-		vec3 uv;
+		vec4 pos;
+		vec4 nml;
+		vec4 uv;
 	};
 
 	class VertexManager {

@@ -36,7 +36,7 @@ namespace AT_NAME
 
 		bool isHit = hit(
 			&param, 
-			v0, v1, v2, 
+			v0.pos, v1.pos, v2.pos,
 			r, 
 			t_min, t_max, 
 			&rec);
@@ -59,16 +59,16 @@ namespace AT_NAME
 
 	bool face::hit(
 		const aten::PrimitiveParamter* param,
-		const aten::vertex& v0,
-		const aten::vertex& v1,
-		const aten::vertex& v2,
+		const aten::vec3& v0,
+		const aten::vec3& v1,
+		const aten::vec3& v2,
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord* rec)
 	{
 		bool isHit = false;
 
-		const auto res = intersectTriangle(r, v0.pos, v1.pos, v2.pos);
+		const auto res = intersectTriangle(r, v0, v1, v2);
 
 		if (res.isIntersect) {
 			if (res.t < rec->t) {

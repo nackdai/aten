@@ -175,10 +175,8 @@ namespace aten {
 	{
 		static const uint32_t stacksize = 64;
 		BVHNode* stackbuf[stacksize] = { nullptr };
-		BVHNode** stack = &stackbuf[0];
 
-		// push terminator.
-		*stack++ = nullptr;
+		stackbuf[0] = &nodes[0];
 
 		int stackpos = 1;
 		int nestedStackPos = -1;
@@ -186,204 +184,75 @@ namespace aten {
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
 
-		BVHNode* node = &nodes[0];
-
 		aten::ray transformedRay = r;
 
 		bool isNested = false;
 
-		do {
-			BVHNode* left = node->left >= 0 ? &nodes[node->left] : nullptr;
-			BVHNode* right = node->right >= 0 ? &nodes[node->right] : nullptr;
+		while (stackpos > 0) {
+			if (stackpos == nestedStackPos) {
+				nestedStackPos = -1;
+				isNested = false;
+				transformedRay = r;
+			}
 
-			bool traverseLeft = false;
-			bool traverseRight = false;
+			auto node = stackbuf[stackpos - 1];
 
-			real left_t = AT_MATH_INF;
-			real right_t = AT_MATH_INF;
+			stackpos -= 1;
 
-			if (left) {
-				if (left->isLeaf()) {
-					hitrecord recLeft;
-					bool isHitLeft = false;
+			if (node->isLeaf()) {
+				if (node->nestid >= 0) {
+					if (node->bbox.hit(transformedRay, t_min, t_max)) {
+						nestedStackPos = isNested ? nestedStackPos : stackpos;
+						stackbuf[stackpos++] = &nodes[node->nestid];
 
-					if (left->nestid >= 0) {
-						traverseLeft = left->bbox.hit(transformedRay, t_min, t_max, &left_t);
-
-						if (traverseLeft) {
-							left = &nodes[left->nestid];
-							nestedStackPos = isNested ? nestedStackPos : stackpos;
-						}
-					}
-					else {
-						if (left->primid >= 0) {
-							auto t = shapes[left->shapeid];
-							const auto& leftobj = (hitable*)prims[left->primid];
+						if (!isNested) {
+							auto t = shapes[node->shapeid];
 							const auto& param = t->getParam();
-							isHitLeft = leftobj->hit(transformedRay, t_min, t_max, recLeft);
-
-							if (isHitLeft) {
-								leftobj->evalHitResult(transformedRay, recLeft);
-
-								recLeft.p = param.mtxL2W.apply(recLeft.p);
-								recLeft.normal = normalize(param.mtxL2W.applyXYZ(recLeft.normal));
-
-								recLeft.obj = (hitable*)t;
-
-								// For test. Not safe...
-								auto obj = (object*)t->getHasObject();
-
-								const auto& targetParam = obj->getParam();
-
-								auto f = prims[targetParam.primid];
-
-								const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-								const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
-
-								real orignalLen = 0;
-								{
-									const auto& p0 = v0.pos;
-									const auto& p1 = v1.pos;
-
-									orignalLen = (p1 - p0).length();
-								}
-
-								real scaledLen = 0;
-								{
-									auto p0 = param.mtxL2W.apply(v0.pos);
-									auto p1 = param.mtxL2W.apply(v1.pos);
-
-									scaledLen = (p1 - p0).length();
-								}
-
-								real ratio = scaledLen / orignalLen;
-								ratio = ratio * ratio;
-
-								recLeft.area = targetParam.area * ratio;
-							}
-						}
-						else {
-							const auto& leftobj = (hitable*)shapes[left->shapeid];
-							isHitLeft = leftobj->hit(transformedRay, t_min, t_max, recLeft);
-						}
-					}
-					if (isHitLeft) {
-						if (recLeft.t < rec.t) {
-							rec = recLeft;
+							transformedRay = param.mtxW2L.applyRay(r);
+							isNested = true;
 						}
 					}
 				}
 				else {
-					traverseLeft = left->bbox.hit(transformedRay, t_min, t_max);
-				}
-			}
-			if (right) {
-				if (right->isLeaf()) {
-					hitrecord recRight;
-					bool isHitRight = false;
+					hitrecord recTmp;
+					bool isHit = false;
 
-					if (right->nestid >= 0) {
-						traverseRight = right->bbox.hit(transformedRay, t_min, t_max, &right_t);
+					auto s = (hitable*)shapes[node->shapeid];
 
-						if (traverseRight && right_t < left_t) {
-							right = &nodes[right->nestid];
-							nestedStackPos = isNested ? nestedStackPos : stackpos;
+					if (node->primid >= 0) {
+						auto prim = (hitable*)prims[node->primid];
+						isHit = prim->hit(transformedRay, t_min, t_max, recTmp);
+						if (isHit) {
+							recTmp.obj = s;
 						}
 					}
 					else {
-						if (right->primid >= 0) {
-							auto t = shapes[right->shapeid];
-							const auto& param = t->getParam();
-							const auto rightobj = (hitable*)prims[right->primid];
-							isHitRight = rightobj->hit(transformedRay, t_min, t_max, recRight);
-
-							if (isHitRight) {
-								rightobj->evalHitResult(transformedRay, recRight);
-
-								recRight.p = param.mtxL2W.apply(recRight.p);
-								recRight.normal = normalize(param.mtxL2W.applyXYZ(recRight.normal));
-
-								recRight.obj = (hitable*)t;
-
-								// For test. Not safe...
-								auto obj = (object*)t->getHasObject();
-
-								const auto& targetParam = obj->getParam();
-
-								auto f = prims[targetParam.primid];
-
-								const auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-								const auto& v1 = VertexManager::getVertex(f->param.idx[1]);
-
-								real orignalLen = 0;
-								{
-									const auto& p0 = v0.pos;
-									const auto& p1 = v1.pos;
-
-									orignalLen = (p1 - p0).length();
-								}
-
-								real scaledLen = 0;
-								{
-									auto p0 = param.mtxL2W.apply(v0.pos);
-									auto p1 = param.mtxL2W.apply(v1.pos);
-
-									scaledLen = (p1 - p0).length();
-								}
-
-								real ratio = scaledLen / orignalLen;
-								ratio = ratio * ratio;
-
-								recRight.area = targetParam.area * ratio;
-							}
-						}
-						else {
-							const auto rightobj = (hitable*)shapes[right->shapeid];
-							isHitRight = rightobj->hit(transformedRay, t_min, t_max, recRight);
-						}
+						isHit = s->hit(transformedRay, t_min, t_max, recTmp);
 					}
-					if (isHitRight) {
-						if (recRight.t < rec.t) {
-							rec = recRight;
+
+					if (isHit) {
+						if (recTmp.t < rec.t) {
+							rec = recTmp;
 						}
 					}
 				}
-				else {
-					traverseRight = right->bbox.hit(transformedRay, t_min, t_max);
-				}
-			}
-
-			if (!traverseLeft && !traverseRight) {
-				if (nestedStackPos == stackpos) {
-					nestedStackPos = -1;
-					isNested = false;
-					transformedRay = r;
-				}
-
-				node = *(--stack);
-				stackpos -= 1;
 			}
 			else {
-				node = traverseLeft ? left : right;
+				if (node->bbox.hit(transformedRay, t_min, t_max)) {
+					if (node->left >= 0) {
+						stackbuf[stackpos++] = &nodes[node->left];
+					}
+					if (node->right >= 0) {
+						stackbuf[stackpos++] = &nodes[node->right];
+					}
 
-				if (traverseLeft && traverseRight) {
-					*(stack++) = right;
-					stackpos += 1;
-				}
-
-				if (!isNested && nestedStackPos >= 0) {
-					auto t = shapes[node->shapeid];
-					const auto& param = t->getParam();
-					transformedRay = param.mtxW2L.applyRay(r);
-					isNested = true;
+					if (stackpos > stacksize) {
+						AT_ASSERT(false);
+						return false;
+					}
 				}
 			}
-			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
-
-			if (stackpos >= stacksize) {
-				return false;
-			}
-		} while (node != nullptr);
+		}
 
 		return (rec.obj != nullptr);
 	}
@@ -415,100 +284,40 @@ namespace aten {
 		// TODO
 		// stack size.
 		static const uint32_t stacksize = 64;
-		bvhnode* stackbuf[stacksize] = { nullptr };
-		bvhnode** stack = &stackbuf[0];
+		const bvhnode* stackbuf[stacksize];
 
-		// push terminator.
-		*stack++ = nullptr;
-
+		stackbuf[0] = root;
 		int stackpos = 1;
 
-		auto node = root;
+		while (stackpos > 0) {
+			auto node = stackbuf[stackpos - 1];
 
-		do {
-			auto left = node->m_left;
-			auto right = node->m_right;
+			stackpos -= 1;
 
-#if 0
-			bool isHitLeft = false;
-			bool isHitRight = false;
-
-			if (left) {
-				isHitLeft = left->getBoundingbox().hit(r, t_min, t_max);
-			}
-			if (right) {
-				isHitRight = right->getBoundingbox().hit(r, t_min, t_max);
-			}
-
-			if (isHitLeft && left->isLeaf()) {
-				hitrecord recLeft;
-				if (left->hit(r, t_min, t_max, recLeft)) {
-					if (recLeft.t < rec.t) {
-						rec = recLeft;
+			if (node->isLeaf()) {
+				hitrecord recTmp;
+				if (node->hit(r, t_min, t_max, recTmp)) {
+					if (recTmp.t < rec.t) {
+						rec = recTmp;
 					}
 				}
-			}
-			if (isHitRight && right->isLeaf()) {
-				hitrecord recRight;
-				if (right->hit(r, t_min, t_max, recRight)) {
-					if (recRight.t < rec.t) {
-						rec = recRight;
-					}
-				}
-			}
-
-			bool traverseLeft = isHitLeft && !left->isLeaf();
-			bool traverseRight = isHitRight && !right->isLeaf();
-#else
-			bool traverseLeft = false;
-			bool traverseRight = false;
-
-			if (left) {
-				if (left->isLeaf()) {
-					hitrecord recLeft;
-					if (left->hit(r, t_min, t_max, recLeft)) {
-						if (recLeft.t < rec.t) {
-							rec = recLeft;
-						}
-					}
-				}
-				else {
-					traverseLeft = left->getBoundingbox().hit(r, t_min, t_max);
-				}
-			}
-			if (right) {
-				if (right->isLeaf()) {
-					hitrecord recRight;
-					if (right->hit(r, t_min, t_max, recRight)) {
-						if (recRight.t < rec.t) {
-							rec = recRight;
-						}
-					}
-				}
-				else {
-					traverseRight = right->getBoundingbox().hit(r, t_min, t_max);
-				}
-			}
-#endif
-
-			if (!traverseLeft && !traverseRight) {
-				node = *(--stack);
-				stackpos -= 1;
 			}
 			else {
-				node = traverseLeft ? left : right;
+				if (node->getBoundingbox().hit(r, t_min, t_max)) {
+					if (node->m_left) {
+						stackbuf[stackpos++] = node->m_left;
+					}
+					if (node->m_right) {
+						stackbuf[stackpos++] = node->m_right;
+					}
 
-				if (traverseLeft && traverseRight) {
-					*(stack++) = right;
-					stackpos += 1;
+					if (stackpos > stacksize) {
+						AT_ASSERT(false);
+						return false;
+					}
 				}
 			}
-			AT_ASSERT(0 <= stackpos && stackpos < stacksize);
-
-			if (stackpos >= stacksize) {
-				return false;
-			}
-		} while (node != nullptr);
+		}
 
 		return (rec.obj != nullptr);
 	}

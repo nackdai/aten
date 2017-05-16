@@ -14,9 +14,9 @@ AT_DEVICE_API bool intersectBVH(
 	float t_min, float t_max,
 	aten::hitrecord* rec)
 {
-	aten::BVHNode* stackbuf[STACK_SIZE];
+	int stackbuf[STACK_SIZE];
 
-	stackbuf[0] = &ctxt->nodes[0];
+	stackbuf[0] = 0;
 
 	int stackpos = 1;
 	int nestedStackPos = -1;
@@ -25,6 +25,8 @@ AT_DEVICE_API bool intersectBVH(
 	bool isNested = false;
 	aten::hitrecord recTmp;
 	bool isHit = false;
+
+	int nodeid = -1;
 	aten::BVHNode* node = nullptr;
 
 	while (stackpos > 0) {
@@ -34,59 +36,59 @@ AT_DEVICE_API bool intersectBVH(
 			transformedRay = r;
 		}
 
-		node = stackbuf[stackpos - 1];
+		nodeid = stackbuf[stackpos - 1];
 		stackpos--;
 
-		if (node->isLeaf()) {
-			if (node->nestid >= 0) {
-				if (node->bbox.hit(transformedRay, t_min, t_max)) {
-					nestedStackPos = isNested ? nestedStackPos : stackpos;
-					stackbuf[stackpos++] = &ctxt->nodes[node->nestid];
+		if (nodeid >= 0) {
+			node = &ctxt->nodes[nodeid];
 
-					if (!isNested) {
-						const auto& param = ctxt->shapes[node->shapeid];
-						transformedRay.org = param.mtxW2L.apply(r.org);
-						transformedRay.dir = param.mtxW2L.applyXYZ(r.dir);
-						transformedRay.dir = normalize(transformedRay.dir);
-						isNested = true;
+			if (node->isLeaf()) {
+				if (node->nestid >= 0) {
+					if (aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max)) {
+						nestedStackPos = isNested ? nestedStackPos : stackpos;
+						stackbuf[stackpos++] = (int)node->nestid;
+
+						if (!isNested) {
+							const auto& param = ctxt->shapes[(int)node->shapeid];
+							transformedRay.org = param.mtxW2L.apply(r.org);
+							transformedRay.dir = param.mtxW2L.applyXYZ(r.dir);
+							transformedRay.dir = normalize(transformedRay.dir);
+							isNested = true;
+						}
+					}
+				}
+				else {
+					isHit = false;
+
+					const auto* s = &ctxt->shapes[(int)node->shapeid];
+
+					if (node->primid >= 0) {
+						const auto& prim = ctxt->prims[(int)node->primid];
+						isHit = intersectShape(s, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
+						recTmp.mtrlid = prim.mtrlid;
+					}
+					else {
+						isHit = intersectShape(s, nullptr, ctxt, transformedRay, t_min, t_max, &recTmp);
+						recTmp.mtrlid = s->mtrl.idx;
+					}
+
+					if (isHit) {
+						if (recTmp.t < rec->t) {
+							*rec = recTmp;
+							rec->obj = (void*)s;
+						}
 					}
 				}
 			}
 			else {
-				isHit = false;
+				if (aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max)) {
+					stackbuf[stackpos++] = (int)node->left;
+					stackbuf[stackpos++] = (int)node->right;
 
-				const auto* s = &ctxt->shapes[node->shapeid];
-
-				if (node->primid >= 0) {
-					const auto& prim = ctxt->prims[node->primid];
-					isHit = intersectShape(s, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
-					recTmp.mtrlid = prim.mtrlid;
-				}
-				else {
-					isHit = intersectShape(s, nullptr, ctxt, transformedRay, t_min, t_max, &recTmp);
-					recTmp.mtrlid = s->mtrl.idx;
-				}
-
-				if (isHit) {
-					if (recTmp.t < rec->t) {
-						*rec = recTmp;
-						rec->obj = (void*)s;
+					if (stackpos > STACK_SIZE) {
+						//AT_ASSERT(false);
+						return false;
 					}
-				}
-			}
-		}
-		else {
-			if (node->bbox.hit(transformedRay, t_min, t_max)) {
-				if (node->left >= 0) {
-					stackbuf[stackpos++] = &ctxt->nodes[node->left];
-				}
-				if (node->right >= 0) {
-					stackbuf[stackpos++] = &ctxt->nodes[node->right];
-				}
-
-				if (stackpos > STACK_SIZE) {
-					//AT_ASSERT(false);
-					return false;
 				}
 			}
 		}

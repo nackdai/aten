@@ -7,14 +7,17 @@ namespace aten {
 	class bvhnode;
 
 	struct BVHNode {
-		int left{ -1 };
-		int right{ -1 };
+		float left{ -1 };
+		float right{ -1 };
+		float padding0[2];
 		
-		int shapeid{ -1 };
-		int primid{ -1 };
-		int nestid{ -1 };
+		float shapeid{ -1 };
+		float primid{ -1 };
+		float nestid{ -1 };
+		float padding1;
 
-		aabb bbox;
+		aten::vec4 boxmin;
+		aten::vec4 boxmax;
 
 		bool AT_DEVICE_API isLeaf() const
 		{

@@ -201,12 +201,12 @@ namespace aten {
 
 			if (node->isLeaf()) {
 				if (node->nestid >= 0) {
-					if (node->bbox.hit(transformedRay, t_min, t_max)) {
+					if (aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max)) {
 						nestedStackPos = isNested ? nestedStackPos : stackpos;
-						stackbuf[stackpos++] = &nodes[node->nestid];
+						stackbuf[stackpos++] = &nodes[(int)node->nestid];
 
 						if (!isNested) {
-							auto t = shapes[node->shapeid];
+							auto t = shapes[(int)node->shapeid];
 							const auto& param = t->getParam();
 							transformedRay = param.mtxW2L.applyRay(r);
 							isNested = true;
@@ -217,10 +217,10 @@ namespace aten {
 					hitrecord recTmp;
 					bool isHit = false;
 
-					auto s = (hitable*)shapes[node->shapeid];
+					auto s = (hitable*)shapes[(int)node->shapeid];
 
 					if (node->primid >= 0) {
-						auto prim = (hitable*)prims[node->primid];
+						auto prim = (hitable*)prims[(int)node->primid];
 						isHit = prim->hit(transformedRay, t_min, t_max, recTmp);
 						if (isHit) {
 							recTmp.obj = s;
@@ -238,12 +238,12 @@ namespace aten {
 				}
 			}
 			else {
-				if (node->bbox.hit(transformedRay, t_min, t_max)) {
+				if (aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max)) {
 					if (node->left >= 0) {
-						stackbuf[stackpos++] = &nodes[node->left];
+						stackbuf[stackpos++] = &nodes[(int)node->left];
 					}
 					if (node->right >= 0) {
-						stackbuf[stackpos++] = &nodes[node->right];
+						stackbuf[stackpos++] = &nodes[(int)node->right];
 					}
 
 					if (stackpos > stacksize) {
@@ -738,7 +738,8 @@ namespace aten {
 
 			BVHNode node;
 
-			node.bbox = pnode->getBoundingbox();
+			node.boxmin = aten::vec4(pnode->getBoundingbox().minPos(), 0);
+			node.boxmax = aten::vec4(pnode->getBoundingbox().maxPos(), 0);
 
 			if (pnode->isLeaf()) {
 				node.shapeid = transformable::findShapeIdxAsHitable(pnode);
@@ -785,7 +786,7 @@ namespace aten {
 		}
 
 		for (const auto& n : nodes) {
-			fprintf(fp, "%d %d %d %d %d\n", n.left, n.right, n.nestid, n.shapeid, n.primid);
+			fprintf(fp, "%d %d %d %d %d\n", (int)n.left, (int)n.right, (int)n.nestid, (int)n.shapeid, (int)n.primid);
 		}
 
 		fclose(fp);

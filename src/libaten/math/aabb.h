@@ -1,7 +1,7 @@
 #pragma once
 
 #include "defs.h"
-#include "math/vec3.h"
+#include "math/vec4.h"
 #include "math/ray.h"
 
 namespace aten {
@@ -45,6 +45,20 @@ namespace aten {
 			real t_min, real t_max,
 			real* t_result = nullptr) const
 		{
+			return hit(
+				r, 
+				aten::vec4(m_min, 0), 
+				aten::vec4(m_max, 1), 
+				t_min, t_max, 
+				t_result);
+		}
+
+		static AT_DEVICE_API bool hit(
+			const ray& r,
+			const aten::vec4& _min, const aten::vec4& _max,
+			real t_min, real t_max,
+			real* t_result = nullptr)
+		{
 			bool isHit = false;
 
 			for (uint32_t i = 0; i < 3; i++) {
@@ -62,8 +76,8 @@ namespace aten {
 				// t がx軸の面の手前と奥の x の範囲内であれば、レイがAABBを通る.
 				// これをxyz軸について計算する.
 
-				auto t0 = (m_min[i] - r.org[i]) * inv;
-				auto t1 = (m_max[i] - r.org[i]) * inv;
+				auto t0 = (_min[i] - r.org[i]) * inv;
+				auto t1 = (_max[i] - r.org[i]) * inv;
 
 				if (inv < real(0)) {
 #if 0

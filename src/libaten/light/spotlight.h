@@ -82,21 +82,20 @@ namespace AT_NAME {
 		{
 			result->pos = param->pos;
 			result->pdf = real(1);
-			result->dir = param->pos - org;
+			result->dir = normalize(param->pos - org);
 			result->nml = aten::vec3();	// Not used...
 
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx
 
-			auto lightdir = normalize(result->dir);
-
-			auto rho = dot(-param->dir, lightdir);
+			auto rho = dot(-param->dir, result->dir);
 
 			auto cosHalfTheta = aten::cos(param->innerAngle * real(0.5));
 			auto cosHalfPhi = aten::cos(param->outerAngle * real(0.5));
 
 			real spot = 0;
 
+#if 0
 			if (rho > cosHalfTheta) {
 				// 本影内に入っている -> 最大限ライトの影響を受ける.
 				spot = 1;
@@ -110,6 +109,19 @@ namespace AT_NAME {
 				spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
 				spot = aten::pow(spot, param->falloff);
 			}
+#else
+			if (rho > cosHalfPhi) {
+				// 半影内.
+				if (rho > cosHalfTheta) {
+					// 本影内に入っている -> 最大限ライトの影響を受ける.
+					spot = 1;
+				}
+				else {
+					// 本影の外、半影の中.
+					spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
+				}
+			}
+#endif
 
 			// 減衰率.
 			// http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html

@@ -32,7 +32,7 @@ __device__ bool hitTriangle(
 	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
 	const Context* ctxt,
-	const aten::ray& r,
+	const aten::ray& ray,
 	float t_min, float t_max,
 	aten::hitrecord* rec)
 {
@@ -44,17 +44,42 @@ __device__ bool hitTriangle(
 	aten::vec3 v1 = aten::make_float3(p1.x, p1.y, p1.z);
 	aten::vec3 v2 = aten::make_float3(p2.x, p2.y, p2.z);
 
-	bool isHit = idaten::face::hit(
-		prim,
-		v0, v1, v2,
-		r,
-		t_min, t_max,
-		rec);
+	bool isHit = false;
 
-	if (isHit) {
-		rec->param.idx[0] = prim->idx[0];
-		rec->param.idx[1] = prim->idx[1];
-		rec->param.idx[2] = prim->idx[2];
+	aten::vec3 e1 = v1 - v0;
+	aten::vec3 e2 = v2 - v0;
+	aten::vec3 r = ray.org - v0;
+	aten::vec3 d = ray.dir;
+
+	aten::vec3 u = cross(d, e2);
+	aten::vec3 v = cross(r, e1);
+
+	real inv = real(1) / dot(u, e1);
+
+	real t = dot(v, e2) * inv;
+	real beta = dot(u, r) * inv;
+	real gamma = dot(v, d) * inv;
+
+	bool isIntersect = ((beta >= real(0) && beta <= real(1))
+		&& (gamma >= real(0) && gamma <= real(1))
+		&& (beta + gamma <= real(1))
+		&& t >= real(0));
+
+	if (isIntersect) {
+		if (t < rec->t) {
+			rec->t = t;
+
+			rec->param.a = beta;
+			rec->param.b = gamma;
+
+			rec->area = prim->area;
+
+			rec->param.idx[0] = prim->idx[0];
+			rec->param.idx[1] = prim->idx[1];
+			rec->param.idx[2] = prim->idx[2];
+
+			isHit = true;
+		}
 	}
 
 	return isHit;
@@ -184,12 +209,12 @@ AT_DEVICE_API void evalHitResult(
 __device__ void addIntersectFuncs()
 {
 	funcIntersect[aten::ShapeType::Polygon] = hitTriangle;
-	funcIntersect[aten::ShapeType::Instance] = hitNotSupported;
+	funcIntersect[aten::ShapeType::Instance] = nullptr;
 	funcIntersect[aten::ShapeType::Sphere] = hitSphere;
-	funcIntersect[aten::ShapeType::Cube] = hitNotSupported;
+	funcIntersect[aten::ShapeType::Cube] = nullptr;
 
 	funcEvalHitResult[aten::ShapeType::Polygon] = evalHitResultTriangle;
-	funcEvalHitResult[aten::ShapeType::Instance] = funcEvalHitResultNotSupported;
+	funcEvalHitResult[aten::ShapeType::Instance] = nullptr;
 	funcEvalHitResult[aten::ShapeType::Sphere] = evalHitResultSphere;
-	funcEvalHitResult[aten::ShapeType::Cube] = funcEvalHitResultNotSupported;
+	funcEvalHitResult[aten::ShapeType::Cube] = nullptr;
 }

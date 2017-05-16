@@ -84,10 +84,12 @@ namespace aten
 				vtx.pos.x = shape.mesh.positions[i + 0];
 				vtx.pos.y = shape.mesh.positions[i + 1];
 				vtx.pos.z = shape.mesh.positions[i + 2];
+				vtx.pos.w = real(0);
 
 				vtx.nml.x = shape.mesh.normals[i + 0];
 				vtx.nml.y = shape.mesh.normals[i + 1];
 				vtx.nml.z = shape.mesh.normals[i + 2];
+				vtx.nml.w = real(0);
 
 				VertexManager::addVertex(vtx);
 
@@ -148,6 +150,7 @@ namespace aten
 
 				vtx.uv.x = shape.mesh.texcoords[i + 0];
 				vtx.uv.y = shape.mesh.texcoords[i + 1];
+				vtx.uv.z = vtx.uv.w = real(0);
 			}
 
 			obj->shapes.push_back(dstshape);

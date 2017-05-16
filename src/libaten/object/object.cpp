@@ -305,7 +305,6 @@ namespace AT_NAME
 
 	bool object::hit(
 		const aten::ray& r,
-		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
 		aten::hitrecord& rec) const
 	{
@@ -334,58 +333,6 @@ namespace AT_NAME
 
 			face* f = (face*)rec.obj;
 
-#if 0
-			real originalArea = 0;
-			{
-				const auto& v0 = f->vtx[0]->pos;
-				const auto& v1 = f->vtx[1]->pos;
-				const auto& v2 = f->vtx[2]->pos;
-
-				// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
-				auto e0 = v1 - v0;
-				auto e1 = v2 - v0;
-				originalArea = 0.5 * cross(e0, e1).length();
-			}
-
-			real scaledArea = 0;
-			{
-				auto v0 = mtxL2W.apply(f->vtx[0]->pos);
-				auto v1 = mtxL2W.apply(f->vtx[1]->pos);
-				auto v2 = mtxL2W.apply(f->vtx[2]->pos);
-
-				// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
-				auto e0 = v1 - v0;
-				auto e1 = v2 - v0;
-				scaledArea = 0.5 * cross(e0, e1).length();
-			}
-
-			real ratio = scaledArea / originalArea;
-#else
-			const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
-			const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
-
-			real orignalLen = 0;
-			{
-				const auto& p0 = v0.pos;
-				const auto& p1 = v1.pos;
-
-				orignalLen = (p1 - p0).length();
-			}
-
-			real scaledLen = 0;
-			{
-				auto p0 = mtxL2W.apply(v0.pos);
-				auto p1 = mtxL2W.apply(v1.pos);
-
-				scaledLen = (p1 - p0).length();
-			}
-
-			real ratio = scaledLen / orignalLen;
-			ratio = ratio * ratio;
-#endif
-
-			rec.area = param.area * ratio;
-
 			// ÅI“I‚É‚ÍA‚â‚Á‚Ï‚èshape‚ð“n‚·.
 			rec.obj = f->parent;
 		}
@@ -402,6 +349,27 @@ namespace AT_NAME
 		const auto& v2 = aten::VertexManager::getVertex(rec.param.idx[2]);
 
 		face::evalHitResult(v0, v1, v2, &rec);
+
+		real orignalLen = 0;
+		{
+			const auto& p0 = v0.pos;
+			const auto& p1 = v1.pos;
+
+			orignalLen = (p1 - p0).length();
+		}
+
+		real scaledLen = 0;
+		{
+			auto p0 = mtxL2W.apply(v0.pos);
+			auto p1 = mtxL2W.apply(v1.pos);
+
+			scaledLen = (p1 - p0).length();
+		}
+
+		real ratio = scaledLen / orignalLen;
+		ratio = ratio * ratio;
+
+		rec.area = param.area * ratio;
 	}
 
 	aten::hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const

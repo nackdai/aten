@@ -33,13 +33,6 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord* rec);
 
-		static AT_DEVICE_API bool hit(
-			const aten::ShapeParameter* param,
-			const aten::ray& r,
-			const aten::mat4& mtxL2W,
-			real t_min, real t_max,
-			aten::hitrecord* rec);
-
 		virtual void evalHitResult(const aten::ray& r, aten::hitrecord& rec) const override final;
 
 		static AT_DEVICE_API void evalHitResult(
@@ -73,12 +66,6 @@ namespace AT_NAME
 		}
 
 	private:
-		virtual bool hit(
-			const aten::ray& r,
-			const aten::mat4& mtxL2W,
-			real t_min, real t_max,
-			aten::hitrecord& rec) const override final;
-
 		virtual void evalHitResult(
 			const aten::ray& r,
 			const aten::mat4& mtxL2W,

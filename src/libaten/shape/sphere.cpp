@@ -25,23 +25,7 @@ namespace AT_NAME
 		real t_min, real t_max,
 		aten::hitrecord& rec) const
 	{
-		bool isHit = hit(&m_param, r, aten::mat4::Identity, t_min, t_max, &rec);
-
-		if (isHit) {
-			rec.obj = (hitable*)this;
-			rec.mtrl = (material*)m_param.mtrl.ptr;
-		}
-
-		return isHit;
-	}
-
-	bool sphere::hit(
-		const aten::ray& r,
-		const aten::mat4& mtxL2W,
-		real t_min, real t_max,
-		aten::hitrecord& rec) const
-	{
-		bool isHit = hit(&m_param, r, mtxL2W, t_min, t_max, &rec);
+		bool isHit = hit(&m_param, r, t_min, t_max, &rec);
 
 		if (isHit) {
 			rec.obj = (hitable*)this;
@@ -54,16 +38,6 @@ namespace AT_NAME
 	bool AT_DEVICE_API sphere::hit(
 		const aten::ShapeParameter* param,
 		const aten::ray& r,
-		real t_min, real t_max,
-		aten::hitrecord* rec)
-	{
-		return hit(param, r, aten::mat4(), t_min, t_max, rec);
-	}
-
-	bool AT_DEVICE_API sphere::hit(
-		const aten::ShapeParameter* param,
-		const aten::ray& r,
-		const aten::mat4& mtxL2W,
 		real t_min, real t_max,
 		aten::hitrecord* rec)
 	{
@@ -95,7 +69,7 @@ namespace AT_NAME
 		else {
 			return false;
 		}
-#else
+#elif 0
 		bool close = aten::isClose(aten::abs(b), sqrt_D4, 100);
 
 		if (t1 > AT_MATH_EPSILON && !close) {
@@ -106,6 +80,16 @@ namespace AT_NAME
 		}
 		else {
 			return false;
+		}
+#else
+		if (t1 < 0 && t2 < 0) {
+			return false;
+		}
+		else if (t1 > 0 && t2 > 0) {
+			rec->t = aten::cmpMin(t1, t2);
+		}
+		else {
+			rec->t = aten::cmpMax(t1, t2);
 		}
 #endif
 

@@ -53,7 +53,7 @@ namespace aten
 			ray transformdRay(org, dir);
 
 			// Hit test in local coordinate.
-			auto isHit = m_obj->hit(transformdRay, m_mtxL2W, t_min, t_max, rec);
+			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec);
 
 			if (isHit) {
 				rec.obj = (hitable*)this;
@@ -141,17 +141,6 @@ namespace aten
 			// Not used...
 			AT_ASSERT(false);
 			return std::move(SamplingPosNormalPdf(vec3(), vec3(), real(0)));
-		}
-
-		virtual bool hit(
-			const ray& r,
-			const mat4& mtxL2W,
-			real t_min, real t_max,
-			hitrecord& rec) const override final
-		{
-			// Not used...
-			AT_ASSERT(false);
-			return false;
 		}
 
 		virtual void evalHitResult(

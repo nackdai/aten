@@ -47,12 +47,6 @@ namespace AT_NAME
 		}
 
 	private:
-		virtual bool hit(
-			const aten::ray& r,
-			const aten::mat4& mtxL2W,
-			real t_min, real t_max,
-			aten::hitrecord& rec) const override final;
-
 		virtual void evalHitResult(const aten::ray& r, aten::hitrecord& rec) const override final;
 		virtual void evalHitResult(const aten::ray& r, const aten::mat4& mtxL2W, aten::hitrecord& rec) const override final;
 

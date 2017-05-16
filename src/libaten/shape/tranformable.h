@@ -20,12 +20,6 @@ namespace aten
 			const mat4& mtxL2W,
 			sampler* sampler) const = 0;
 
-		virtual bool hit(
-			const ray& r,
-			const mat4& mtxL2W,
-			real t_min, real t_max,
-			hitrecord& rec) const = 0;
-
 		virtual void evalHitResult(
 			const ray& r,
 			const mat4& mtxL2W,

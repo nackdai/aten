@@ -98,17 +98,6 @@ namespace AT_NAME
 		return isHit;
 	}
 
-	bool cube::hit(
-		const aten::ray& r,
-		const aten::mat4& mtxL2W,
-		real t_min, real t_max,
-		aten::hitrecord& rec) const
-	{
-		// TODO
-		AT_ASSERT(false);	// Not support.
-		return hit(r, t_min, t_max, rec);
-	}
-
 	void cube::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
 	{
 		evalHitResult(r, aten::mat4(), rec);

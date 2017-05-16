@@ -40,9 +40,9 @@ namespace AT_NAME
 		virtual void evalHitResult(const aten::ray& r, aten::hitrecord& rec) const;
 
 		static AT_DEVICE_API void evalHitResult(
-			const aten::vertex* v0,
-			const aten::vertex* v1,
-			const aten::vertex* v2,
+			const aten::vertex& v0,
+			const aten::vertex& v1,
+			const aten::vertex& v2,
 			aten::hitrecord* rec);
 
 		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override;

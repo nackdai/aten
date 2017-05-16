@@ -7,7 +7,7 @@ namespace AT_NAME
 	{
 		auto num = m_layer.size();
 
-		aten::vec3 albedo(1);
+		aten::vec3 albedo = aten::make_float3(1);
 
 		for (int i = 0; i < num; i++) {
 			auto mtrl = m_layer[i];

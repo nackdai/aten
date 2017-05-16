@@ -103,27 +103,27 @@ namespace aten
 			vec3 vMax = box.maxPos() - center;
 
 			vec3 pts[8] = {
-				vec3(vMin.x, vMin.y, vMin.z),
-				vec3(vMax.x, vMin.y, vMin.z),
-				vec3(vMin.x, vMax.y, vMin.z),
-				vec3(vMax.x, vMax.y, vMin.z),
-				vec3(vMin.x, vMin.y, vMax.z),
-				vec3(vMax.x, vMin.y, vMax.z),
-				vec3(vMin.x, vMax.y, vMax.z),
-				vec3(vMax.x, vMax.y, vMax.z),
+				make_float3(vMin.x, vMin.y, vMin.z),
+				make_float3(vMax.x, vMin.y, vMin.z),
+				make_float3(vMin.x, vMax.y, vMin.z),
+				make_float3(vMax.x, vMax.y, vMin.z),
+				make_float3(vMin.x, vMin.y, vMax.z),
+				make_float3(vMax.x, vMin.y, vMax.z),
+				make_float3(vMin.x, vMax.y, vMax.z),
+				make_float3(vMax.x, vMax.y, vMax.z),
 			};
 
-			vec3 newMin(AT_MATH_INF);
-			vec3 newMax(-AT_MATH_INF);
+			vec3 newMin = make_float3(AT_MATH_INF);
+			vec3 newMax = make_float3(-AT_MATH_INF);
 
 			for (int i = 0; i < 8; i++) {
 				vec3 v = m_mtxL2W.apply(pts[i]);
 
-				newMin.set(
+				newMin = make_float3(
 					std::min(newMin.x, v.x),
 					std::min(newMin.y, v.y),
 					std::min(newMin.z, v.z));
-				newMax.set(
+				newMax = make_float3(
 					std::max(newMax.x, v.x),
 					std::max(newMax.y, v.y),
 					std::max(newMax.z, v.z));

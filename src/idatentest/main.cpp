@@ -31,64 +31,64 @@ static idaten::RayTracing g_tracer;
 
 void makeScene(aten::scene* scene)
 {
-	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
-	//auto emit = new aten::emissive(aten::vec3(3, 3, 3));
+	auto emit = new aten::emissive(aten::make_float3(36, 36, 36));
+	//auto emit = new aten::emissive(aten::make_float3(3, 3, 3));
 
 	auto light = new aten::sphere(
-		aten::vec3(50.0, 75.0, 81.6),
+		aten::make_float3(50.0, 75.0, 81.6),
 		5.0,
 		emit);
 
 	double r = 1e3;
 
 	auto left = new aten::sphere(
-		aten::vec3(r + 1, 40.8, 81.6),
+		aten::make_float3(r + 1, 40.8, 81.6),
 		r,
-		new aten::lambert(aten::vec3(0.75f, 0.25f, 0.25f)));
+		new aten::lambert(aten::make_float3(0.75f, 0.25f, 0.25f)));
 
 	auto right = new aten::sphere(
-		aten::vec3(-r + 99, 40.8, 81.6),
+		aten::make_float3(-r + 99, 40.8, 81.6),
 		r,
-		new aten::lambert(aten::vec3(0.25, 0.25, 0.75)));
+		new aten::lambert(aten::make_float3(0.25, 0.25, 0.75)));
 
 	auto wall = new aten::sphere(
-		aten::vec3(50, 40.8, r),
+		aten::make_float3(50, 40.8, r),
 		r,
-		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+		new aten::lambert(aten::make_float3(0.75, 0.75, 0.75)));
 
 	auto floor = new aten::sphere(
-		aten::vec3(50, r, 81.6),
+		aten::make_float3(50, r, 81.6),
 		r,
-		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+		new aten::lambert(aten::make_float3(0.75, 0.75, 0.75)));
 
 	auto ceil = new aten::sphere(
-		aten::vec3(50, -r + 81.6, 81.6),
+		aten::make_float3(50, -r + 81.6, 81.6),
 		r,
-		new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+		new aten::lambert(aten::make_float3(0.75, 0.75, 0.75)));
 
 	// —Î‹….
 	auto green = new aten::sphere(
-		aten::vec3(65, 20, 20),
+		aten::make_float3(65, 20, 20),
 		20,
-		new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
-	//new aten::lambert(aten::vec3(1, 1, 1), tex));
+		new aten::lambert(aten::make_float3(0.25, 0.75, 0.25)));
+	//new aten::lambert(aten::make_float3(1, 1, 1), tex));
 
 	// ‹¾.
 	auto mirror = new aten::sphere(
-		aten::vec3(27, 16.5, 47),
+		aten::make_float3(27, 16.5, 47),
 		16.5,
-		new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+		new aten::specular(aten::make_float3(0.99, 0.99, 0.99)));
 
 #if 0
 	// ƒKƒ‰ƒX.
 	auto glass = new aten::sphere(
-		aten::vec3(77, 16.5, 78),
+		aten::make_float3(77, 16.5, 78),
 		16.5,
-		new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+		new aten::refraction(aten::make_float3(0.99, 0.99, 0.99), 1.5));
 #else
 	aten::AssetManager::registerMtrl(
 		"Material.001",
-		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
+		new aten::lambert(aten::make_float3(0.2, 0.2, 0.7)));
 
 	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
 
@@ -96,7 +96,7 @@ void makeScene(aten::scene* scene)
 	mtxL2W.asRotateByY(Deg2Rad(-25));
 
 	aten::mat4 mtxT;
-	mtxT.asTrans(aten::vec3(77, 16.5, 78));
+	mtxT.asTrans(aten::make_float3(77, 16.5, 78));
 
 	aten::mat4 mtxS;
 	mtxS.asScale(10);
@@ -160,9 +160,9 @@ int main()
 	aten::visualizer::addPostProc(&gamma);
 
 	g_camera.init(
-		aten::vec3(50.0, 52.0, 295.6),
-		aten::vec3(50.0, 40.8, 119.0),
-		aten::vec3(0, 1, 0),
+		aten::make_float3(50.0, 52.0, 295.6),
+		aten::make_float3(50.0, 40.8, 119.0),
+		aten::make_float3(0, 1, 0),
 		30,
 		WIDTH, HEIGHT);
 

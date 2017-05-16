@@ -61,8 +61,8 @@ namespace aten
 
 		obj = new object();
 
-		vec3 shapemin(AT_MATH_INF);
-		vec3 shapemax(-AT_MATH_INF);
+		vec3 shapemin = make_float3(AT_MATH_INF);
+		vec3 shapemax = make_float3(-AT_MATH_INF);
 
 		for (int p = 0; p < shapes.size(); p++) {
 			const auto& shape = shapes[p];
@@ -73,8 +73,8 @@ namespace aten
 
 			auto curVtxPos = VertexManager::getVertexNum();
 
-			vec3 pmin(AT_MATH_INF);
-			vec3 pmax(-AT_MATH_INF);
+			vec3 pmin = make_float3(AT_MATH_INF);
+			vec3 pmax = make_float3(-AT_MATH_INF);
 
 			for (uint32_t i = 0; i < vtxnum; i += 3) {
 				vertex v;
@@ -91,21 +91,21 @@ namespace aten
 
 				VertexManager::addVertex(vtx);
 
-				pmin = vec3(
+				pmin = make_float3(
 					std::min(pmin.x, v.pos.x),
 					std::min(pmin.y, v.pos.y),
 					std::min(pmin.z, v.pos.z));
-				pmax = vec3(
+				pmax = make_float3(
 					std::max(pmax.x, v.pos.x),
 					std::max(pmax.y, v.pos.y),
 					std::max(pmax.z, v.pos.z));
 			}
 
-			shapemin = vec3(
+			shapemin = make_float3(
 				std::min(shapemin.x, pmin.x),
 				std::min(shapemin.y, pmin.y),
 				std::min(shapemin.z, pmin.z));
-			shapemax = vec3(
+			shapemax = make_float3(
 				std::max(shapemax.x, pmax.x),
 				std::max(shapemax.y, pmax.y),
 				std::max(shapemax.z, pmax.z));

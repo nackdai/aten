@@ -31,8 +31,8 @@ namespace aten
 
 	protected:
 		struct Path {
-			vec3 contrib{ vec3(0) };
-			vec3 throughput{ vec3(1) };
+			vec3 contrib;
+			vec3 throughput;
 			real pdfb{ 1 };
 
 			hitrecord rec;
@@ -41,6 +41,12 @@ namespace aten
 			ray ray;
 
 			bool isTerminate{ false };
+
+			Path()
+			{
+				contrib = make_float3(0);
+				throughput = make_float3(1);
+			}
 		};
 
 		Path radiance(

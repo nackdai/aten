@@ -69,7 +69,7 @@ namespace AT_NAME {
 				auto obj = getLightObject();
 				return obj->getSamplePosNormalPdf(sampler);
 			}
-			return std::move(aten::hitable::SamplingPosNormalPdf(aten::vec3(0), aten::vec3(1), real(0)));
+			return std::move(aten::hitable::SamplingPosNormalPdf(aten::make_float3(0), aten::make_float3(1), real(0)));
 		}
 	};
 }

@@ -56,10 +56,10 @@ namespace AT_NAME {
 
 		// n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
 		if (fabs(n.x) > AT_MATH_EPSILON) {
-			t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
+			t = normalize(cross(aten::make_float3(0.0, 1.0, 0.0), n));
 		}
 		else {
-			t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
+			t = normalize(cross(aten::make_float3(1.0, 0.0, 0.0), n));
 		}
 		b = cross(n, t);
 

@@ -16,38 +16,17 @@ namespace aten {
 			real a[3];
 		};
 
-		AT_DEVICE_API vec3()
-		{
-			x = y = z = real(0);
-		}
-		AT_DEVICE_API vec3(real _x, real _y, real _z)
-			: x(_x), y(_y), z(_z)
-		{
-		}
-		AT_DEVICE_API vec3(real f)
-			: x(f), y(f), z(f)
-		{
-		}
-
-		inline AT_DEVICE_API void set(real _x, real _y, real _z)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-		}
-
-		inline AT_DEVICE_API void set(real f)
-		{
-			x = y = z = f;
-		}
-
 		inline AT_DEVICE_API const vec3& operator+() const
 		{
 			return *this;
 		}
 		inline AT_DEVICE_API vec3 operator-() const
 		{
-			return vec3(-x, -y, -z);
+			vec3 ret;
+			ret.x = -x;
+			ret.y = -y;
+			ret.z = -z;
+			return ret;
 		}
 		inline AT_DEVICE_API real operator[](int i) const
 		{
@@ -119,57 +98,75 @@ namespace aten {
 		}
 	};
 
+	inline AT_DEVICE_API aten::vec3 make_float3(real _x, real _y, real _z)
+	{
+		aten::vec3 v;
+		v.x = _x;
+		v.y = _y;
+		v.z = _z;
+		return v;
+	}
+
+	inline AT_DEVICE_API aten::vec3 make_float3(real f)
+	{
+		aten::vec3 v;
+		v.x = f;
+		v.y = f;
+		v.z = f;
+		return v;
+	}
+
 	inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
 	{
-		vec3 ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+		vec3 ret = aten::make_float3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator+(const vec3& v1, real f)
 	{
-		vec3 ret(v1.x + f, v1.y + f, v1.z + f);
+		vec3 ret = aten::make_float3(v1.x + f, v1.y + f, v1.z + f);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator-(const vec3& v1, const vec3& v2)
 	{
-		vec3 ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+		vec3 ret = aten::make_float3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator-(const vec3& v1, real f)
 	{
-		vec3 ret(v1.x - f, v1.y - f, v1.z - f);
+		vec3 ret = aten::make_float3(v1.x - f, v1.y - f, v1.z - f);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator*(const vec3& v1, const vec3& v2)
 	{
-		vec3 ret(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+		vec3 ret = aten::make_float3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator/(const vec3& v1, const vec3& v2)
 	{
-		vec3 ret(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
+		vec3 ret = aten::make_float3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
 	{
-		vec3 ret(t * v.x, t * v.y, t * v.z);
+		vec3 ret = aten::make_float3(t * v.x, t * v.y, t * v.z);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
 	{
-		vec3 ret(t * v.x, t * v.y, t * v.z);
+		vec3 ret = aten::make_float3(t * v.x, t * v.y, t * v.z);
 		return std::move(ret);
 	}
 
 	inline AT_DEVICE_API vec3 operator/(const vec3& v, real t)
 	{
-		vec3 ret(v.x / t, v.y / t, v.z / t);
+		vec3 ret = aten::make_float3(v.x / t, v.y / t, v.z / t);
 		return std::move(ret);
 	}
 
@@ -181,7 +178,7 @@ namespace aten {
 
 	inline AT_DEVICE_API vec3 cross(const vec3& v1, const vec3& v2)
 	{
-		vec3 ret(
+		vec3 ret = aten::make_float3(
 			v1.a[1] * v2.a[2] - v1.a[2] * v2.a[1],
 			v1.a[2] * v2.a[0] - v1.a[0] * v2.a[2],
 			v1.a[0] * v2.a[1] - v1.a[1] * v2.a[0]);

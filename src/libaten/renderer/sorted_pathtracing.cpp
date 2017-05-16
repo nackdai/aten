@@ -51,8 +51,8 @@ namespace aten
 					path.isAlive = true;
 					path.needWrite = true;
 
-					path.contrib = vec3(0);
-					path.throughput = vec3(1);
+					path.contrib = make_float3(0);
+					path.throughput = make_float3(1);
 				}
 			}
 		}

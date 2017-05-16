@@ -226,6 +226,7 @@ namespace aten
 			auto& image = acuumImage[idx];
 			if (image.empty()) {
 				image.resize(width * height);
+				memset(&image[0], 0, sizeof(vec3) * width * height);
 			}
 
 			// TODO

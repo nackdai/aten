@@ -253,7 +253,7 @@ namespace AT_NAME
 
 		auto denom = 4 * NdotL * NdotV;
 
-		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : 0;
+		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : aten::make_float3(0);
 		
 		fresnel = F;
 

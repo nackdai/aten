@@ -50,7 +50,7 @@ __global__ void genPath(
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
 
 	path.ray = camsample.r;
-	path.throughput = aten::vec3(1);
+	path.throughput = aten::make_float3(1);
 	path.isHit = false;
 	path.isTerminate = false;
 }
@@ -141,7 +141,7 @@ __global__ void shade(
 		return;
 	}
 
-	aten::vec3 contrib(0);
+	aten::vec3 contrib = aten::make_float3(0);
 
 	const aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
 

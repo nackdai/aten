@@ -128,7 +128,7 @@ namespace AT_NAME
 		rec->dv = normalize(cross(rec->normal, rec->du));
 
 		{
-			auto tmp = param->center + aten::vec3(param->radius, 0, 0);
+			auto tmp = param->center + aten::make_float3(param->radius, 0, 0);
 
 			auto center = mtxL2W.apply(param->center);
 			tmp = mtxL2W.apply(tmp);
@@ -156,7 +156,7 @@ namespace AT_NAME
 		auto x = aten::cos(phi) * sin_theta;
 		auto y = aten::sin(phi) * sin_theta;
 
-		aten::vec3 dir(x, y, z);
+		aten::vec3 dir = aten::make_float3(x, y, z);
 		dir.normalize();
 
 		auto p = dir * (r + AT_MATH_EPSILON);
@@ -180,7 +180,7 @@ namespace AT_NAME
 
 		real area = real(1);
 		{
-			auto tmp = m_param.center + aten::vec3(m_param.radius, 0, 0);
+			auto tmp = m_param.center + aten::make_float3(m_param.radius, 0, 0);
 
 			auto center = mtxL2W.apply(m_param.center);
 			tmp = mtxL2W.apply(tmp);

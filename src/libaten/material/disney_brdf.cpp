@@ -96,7 +96,7 @@ namespace AT_NAME
 
 	inline aten::vec3 mon2lin(const aten::vec3& x)
 	{
-		return aten::vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
+		return aten::make_float3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
 	}
 
 	real DisneyBRDF::pdf(
@@ -228,7 +228,7 @@ namespace AT_NAME
 			// NOTE
 			// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
 			// p24 - p26 equation(14)
-			H = sqrt(r2 / (1 - r2)) * (ax * aten::cos(2 * AT_MATH_PI * r1) + ay * sin(2 * AT_MATH_PI * r1)) + N;
+			H = N + sqrt(r2 / (1 - r2)) * (ax * aten::cos(2 * AT_MATH_PI * r1) + ay * sin(2 * AT_MATH_PI * r1));
 			H.normalize();
 
 			L = 2 * dot(V, H) * H - V;
@@ -237,7 +237,7 @@ namespace AT_NAME
 			if (LdotH < 0)
 			{
 				pdf = real(0);
-				return aten::vec3(0, 0, 0);
+				return aten::make_float3(0, 0, 0);
 			}
 
 			const auto NdotH = dot(N, H);
@@ -253,7 +253,7 @@ namespace AT_NAME
 			if (specularpdf < 1.f)
 			{
 				pdf = real(0);
-				return vec3(0, 0, 0);
+				return aten::make_float3(0, 0, 0);
 			}
 #endif
 		}
@@ -311,7 +311,7 @@ namespace AT_NAME
 		const auto NdotL = dot(N, L);
 		const auto NdotV = dot(N, V);
 		if (NdotL < 0 || NdotV < 0) {
-			return aten::vec3(0);
+			return aten::make_float3(0);
 		}
 
 		const aten::vec3 H = normalize(L + V);
@@ -321,9 +321,9 @@ namespace AT_NAME
 		const aten::vec3 Cdlin = mon2lin(baseColor);
 		const auto Cdlum = real(0.3) * Cdlin[0] + real(0.6) * Cdlin[1] + real(0.1) * Cdlin[2]; // luminance approx.
 
-		const aten::vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : aten::vec3(real(1)); // normalize lum. to isolate hue+sat
-		const aten::vec3 Cspec0 = mix(specular* real(0.08) * mix(aten::vec3(real(1)), Ctint, specularTint), Cdlin, metalic);
-		const aten::vec3 Csheen = mix(aten::vec3(1), Ctint, sheenTint);
+		const aten::vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : aten::make_float3(real(1)); // normalize lum. to isolate hue+sat
+		const aten::vec3 Cspec0 = mix(specular* real(0.08) * mix(aten::make_float3(real(1)), Ctint, specularTint), Cdlin, metalic);
+		const aten::vec3 Csheen = mix(aten::make_float3(1), Ctint, sheenTint);
 
 		// Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
 		// and mix in diffuse retro-reflection based on roughness
@@ -345,7 +345,7 @@ namespace AT_NAME
 		const auto ay = std::max(real(0.001), sqr(roughness) * aspect);
 		const auto Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
 		const auto FH = SchlickFresnel(LdotH);
-		const aten::vec3 Fs = aten::mix(Cspec0, aten::vec3(real(1)), FH);
+		const aten::vec3 Fs = aten::mix(Cspec0, aten::make_float3(real(1)), FH);
 		real Gs = smithG_GGX_aniso(NdotL, dot(L, X), dot(L, Y), ax, ay);
 		Gs *= smithG_GGX_aniso(NdotV, dot(V, X), dot(V, Y), ax, ay);
 

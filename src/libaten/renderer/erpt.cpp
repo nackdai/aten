@@ -177,7 +177,7 @@ namespace aten
 
 		auto threadNum = thread::getThreadNum();
 
-		vec3 sumI(0, 0, 0);
+		vec3 sumI = make_float3(0, 0, 0);
 
 		auto time = timer::getSystemTime();
 
@@ -219,6 +219,7 @@ namespace aten
 			auto& image = acuumImage[idx];
 			if (image.empty()) {
 				image.resize(width * height);
+				memset(&image[0], 0, sizeof(vec3) * width * height);
 			}
 
 			for (int x = 0; x < width; x++) {

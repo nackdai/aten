@@ -55,7 +55,7 @@ namespace aten {
 
 		static real luminance(const vec3& v)
 		{
-			static const vec3 lum(real(0.2126), real(0.7152), real(0.0722));
+			static const vec3 lum = make_float3(real(0.2126), real(0.7152), real(0.0722));
 			real ret = dot(lum, v);
 			return ret;
 		}
@@ -66,7 +66,7 @@ namespace aten {
 			auto cb = dot(RGB2Cb, rgb);
 			auto cr = dot(RGB2Cr, rgb);
 
-			vec3 ycbcr(y, cb, cr);
+			vec3 ycbcr = make_float3(y, cb, cr);
 
 			return std::move(ycbcr);
 		}
@@ -83,7 +83,7 @@ namespace aten {
 			auto g = dot(YCbCr2G, ycbcr);
 			auto b = dot(YCbCr2B, ycbcr);
 
-			vec3 rgb(r, g, b);
+			vec3 rgb = make_float3(r, g, b);
 
 			return std::move(rgb);
 		}
@@ -91,15 +91,15 @@ namespace aten {
 		// RGB -> sRGB
 		static vec3 RGBtoXYZ(const vec3& rgb)
 		{
-			static const vec3 _RGB2X(real(0.412391), real(0.357584), real(0.180481));
-			static const vec3 _RGB2Y(real(0.212639), real(0.715169), real(0.072192));
-			static const vec3 _RGB2Z(real(0.019331), real(0.119195), real(0.950532));
+			static const vec3 _RGB2X = make_float3(real(0.412391), real(0.357584), real(0.180481));
+			static const vec3 _RGB2Y = make_float3(real(0.212639), real(0.715169), real(0.072192));
+			static const vec3 _RGB2Z = make_float3(real(0.019331), real(0.119195), real(0.950532));
 
 			auto x = dot(_RGB2X, rgb);
 			auto y = dot(_RGB2Y, rgb);
 			auto z = dot(_RGB2Z, rgb);
 
-			vec3 xyz(x, y, z);
+			vec3 xyz = make_float3(x, y, z);
 
 			return std::move(xyz);
 		}

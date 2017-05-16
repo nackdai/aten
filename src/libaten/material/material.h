@@ -231,7 +231,7 @@ namespace AT_NAME
 
 		static AT_DEVICE_API aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, real defaultValue)
 		{
-			auto ret = sampleTexture(tex, u, v, aten::vec3(defaultValue));
+			auto ret = sampleTexture(tex, u, v, aten::make_float3(defaultValue));
 			return std::move(ret);
 		}
 

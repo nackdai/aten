@@ -19,14 +19,14 @@ static aten::PinholeCamera g_camera;
 //static aten::AcceleratedScene<aten::LinearList> g_scene;
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
-static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
+static aten::StaticColorBG g_staticbg(aten::make_float3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
-static aten::RayTracing g_tracer;
+//static aten::RayTracing g_tracer;
 //static aten::PathTracing g_tracer;
 //static aten::BDPT g_tracer;
-//static aten::SortedPathTracing g_tracer;
+static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 	g_camera.init(
 		lookfrom,
 		lookat,
-		aten::vec3(0, 1, 0),
+		aten::make_float3(0, 1, 0),
 		30,
 		WIDTH, HEIGHT);
 #endif

@@ -104,7 +104,7 @@ namespace aten {
 				// ’–Ú—Ìˆæ.
 				auto focus = sampleArea(imgSrc, x, y, width, height);
 
-				vec3 sum(0, 0, 0);
+				vec3 sum = make_float3(0, 0, 0);
 				real sum_weight = 0;
 
 				for (int sx = x - kHalfSupport; sx <= x + kHalfSupport; ++sx) {

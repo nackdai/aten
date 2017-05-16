@@ -62,7 +62,7 @@ namespace idaten
 	public:
 		void init(GLuint gltex, CudaGLRscRegisterType type);
 
-		cudaSurfaceObject_t bindToWrite();
+		cudaSurfaceObject_t bind();
 		void unbind();
 
 		virtual void unmap() override final

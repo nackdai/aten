@@ -294,7 +294,7 @@ namespace idaten {
 		paths.init(width * height);
 
 		CudaGLResourceMap rscmap(&glimg);
-		auto outputSurf = glimg.bindToWrite();
+		auto outputSurf = glimg.bind();
 
 		genPathRayTracing << <grid, block >> > (
 			paths.ptr(),

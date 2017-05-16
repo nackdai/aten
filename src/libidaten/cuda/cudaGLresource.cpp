@@ -24,7 +24,7 @@ namespace idaten
 		}
 	}
 
-	cudaSurfaceObject_t CudaGLSurface::bindToWrite()
+	cudaSurfaceObject_t CudaGLSurface::bind()
 	{
 		AT_ASSERT(m_rsc);
 

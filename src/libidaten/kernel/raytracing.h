@@ -36,10 +36,10 @@ namespace idaten
 		idaten::TypedCudaMemory<aten::ShapeParameter> shapeparam;
 		idaten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
 		idaten::TypedCudaMemory<aten::LightParameter> lightparam;
-		idaten::TypedCudaMemory<aten::BVHNode> nodeparam;
 		idaten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
 
 		idaten::CudaGLSurface glimg;
 		idaten::CudaTextureResource vtxparams;
+		idaten::CudaTextureResource nodeparam;
 	};
 }

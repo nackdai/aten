@@ -57,7 +57,7 @@ __global__ void hitTestRayTracing(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	aten::BVHNode* nodes,
+	cudaTextureObject_t nodes,
 	aten::PrimitiveParamter* prims,
 	cudaTextureObject_t vertices)
 {
@@ -104,7 +104,7 @@ __global__ void raytracing(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	aten::BVHNode* nodes,
+	cudaTextureObject_t nodes,
 	aten::PrimitiveParamter* prims,
 	cudaTextureObject_t vertices)
 {
@@ -193,12 +193,9 @@ __global__ void raytracing(
 
 		aten::hitrecord tmpRec;
 
-		auto funcHitTest = [&] AT_DEVICE_API(const aten::ray& _r, float t_min, float t_max, aten::hitrecord* _rec)
-		{
-			return intersectBVH(&ctxt, _r, t_min, t_max, _rec);
-		};
+		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec);
 
-		if (AT_NAME::scene::hitLight(funcHitTest, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec)) {
+		if (AT_NAME::scene::hitLight(isHit, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec)) {
 			if (light.attrib.isInfinite) {
 				len = 1.0f;
 			}
@@ -265,14 +262,12 @@ namespace idaten {
 		lightparam.init(lights.size());
 		lightparam.writeByNum(&lights[0], lights.size());
 
-		nodeparam.init(nodes.size());
-		nodeparam.writeByNum(&nodes[0], nodes.size());
-
 		if (!prims.empty()) {
 			primparams.init(prims.size());
 			primparams.writeByNum(&prims[0], prims.size());
 		}
 
+		nodeparam.init((aten::vec4*)&nodes[0], 4, nodes.size());
 		vtxparams.init((aten::vec4*)&vtxs[0], 3, vtxs.size());
 	}
 
@@ -294,6 +289,7 @@ namespace idaten {
 		auto outputSurf = glimg.bind();
 
 		auto vtxTex = vtxparams.bind();
+		auto nodeTex = nodeparam.bind();
 
 		genPathRayTracing << <grid, block >> > (
 			paths.ptr(),
@@ -309,7 +305,7 @@ namespace idaten {
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
-				nodeparam.ptr(),
+				nodeTex,
 				primparams.ptr(),
 				vtxTex);
 
@@ -328,7 +324,7 @@ namespace idaten {
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
-				nodeparam.ptr(),
+				nodeTex,
 				primparams.ptr(),
 				vtxTex);
 
@@ -345,6 +341,7 @@ namespace idaten {
 		checkCudaErrors(cudaDeviceSynchronize());
 
 		vtxparams.unbind();
+		nodeparam.unbind();
 
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}

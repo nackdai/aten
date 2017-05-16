@@ -11,7 +11,7 @@ struct Context {
 	int lightnum;
 	aten::LightParameter* lights;
 
-	aten::BVHNode* nodes;
+	cudaTextureObject_t nodes;
 
 	aten::PrimitiveParamter* prims;
 	cudaTextureObject_t vertices;

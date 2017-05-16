@@ -3,7 +3,7 @@
 #include "aten4idaten.h"
 #include "kernel/context.cuh"
 
-AT_DEVICE_API bool intersectBVH(
+__device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,

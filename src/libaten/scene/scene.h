@@ -124,17 +124,14 @@ namespace AT_NAME {
 			real t_min, real t_max,
 			aten::hitrecord& rec);
 
-		template <typename Func>
 		static AT_DEVICE_API bool hitLight(
-			Func funcHitTest,
+			bool isHit,
 			const aten::LightParameter& light,
 			const aten::vec3& lightPos,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord* rec)
+			const aten::hitrecord* rec)
 		{
-			bool isHit = funcHitTest(r, t_min, t_max, rec);
-
 			auto lightobj = light.object.ptr;
 
 			if (lightobj) {

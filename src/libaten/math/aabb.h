@@ -47,15 +47,14 @@ namespace aten {
 		{
 			return hit(
 				r, 
-				aten::vec4(m_min, 0), 
-				aten::vec4(m_max, 1), 
+				m_min, m_max,
 				t_min, t_max, 
 				t_result);
 		}
 
 		static AT_DEVICE_API bool hit(
 			const ray& r,
-			const aten::vec4& _min, const aten::vec4& _max,
+			const aten::vec3& _min, const aten::vec3& _max,
 			real t_min, real t_max,
 			real* t_result = nullptr)
 		{

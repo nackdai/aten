@@ -161,21 +161,33 @@ __global__ void shade(
 
 	AT_NAME::MaterialSampling sampling;
 			
-	sampleMaterial(
-		&sampling,
-		mtrl,
-		orienting_normal, 
-		path.ray.dir,
-		path.rec.normal,
-		&path.sampler,
-		path.rec.u, path.rec.v);
+	if (mtrl->attrib.isSingular) {
+		sampleMaterial(
+			&sampling,
+			mtrl,
+			orienting_normal,
+			path.ray.dir,
+			path.rec.normal,
+			&path.sampler,
+			path.rec.u, path.rec.v);
 
-	auto nextDir = normalize(sampling.dir);
+		auto nextDir = normalize(sampling.dir);
 
-	path.throughput *= sampling.bsdf;
+		path.throughput *= sampling.bsdf;
 
-	// Make next ray.
-	path.ray = aten::ray(path.rec.p, nextDir);
+		// Make next ray.
+		path.ray = aten::ray(path.rec.p, nextDir);
+	}
+	else {
+		auto nextDir = sampleDirection(mtrl, orienting_normal, path.ray.dir, path.rec.u, path.rec.v, &path.sampler);
+		real pdf = samplePDF(mtrl, orienting_normal, path.ray.dir, nextDir, path.rec.u, path.rec.v);
+		auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, nextDir, path.rec.u, path.rec.v);
+
+		path.throughput *= sampling.bsdf / pdf;
+
+		// Make next ray.
+		path.ray = aten::ray(path.rec.p, nextDir);
+	}
 }
 
 namespace idaten {

@@ -267,8 +267,8 @@ namespace idaten {
 			primparams.writeByNum(&prims[0], prims.size());
 		}
 
-		nodeparam.init((aten::vec4*)&nodes[0], 4, nodes.size());
-		vtxparams.init((aten::vec4*)&vtxs[0], 3, vtxs.size());
+		nodeparam.init((aten::vec4*)&nodes[0], sizeof(aten::BVHNode) / sizeof(float4), nodes.size());
+		vtxparams.init((aten::vec4*)&vtxs[0], sizeof(aten::vertex) / sizeof(float4), vtxs.size());
 	}
 
 	void RayTracing::render(

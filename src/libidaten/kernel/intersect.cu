@@ -36,15 +36,13 @@ __device__ bool hitTriangle(
 	float t_min, float t_max,
 	aten::hitrecord* rec)
 {
-	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 3 * prim->idx[0] + 0);
-	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 3 * prim->idx[1] + 0);
-	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 3 * prim->idx[2] + 0);
+	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 0);
+	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 0);
+	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[2] + 0);
 
 	aten::vec3 v0 = aten::make_float3(p0.x, p0.y, p0.z);
 	aten::vec3 v1 = aten::make_float3(p1.x, p1.y, p1.z);
 	aten::vec3 v2 = aten::make_float3(p2.x, p2.y, p2.z);
-
-	bool isHit = false;
 
 	aten::vec3 e1 = v1 - v0;
 	aten::vec3 e2 = v2 - v0;
@@ -78,11 +76,11 @@ __device__ bool hitTriangle(
 			rec->param.idx[1] = prim->idx[1];
 			rec->param.idx[2] = prim->idx[2];
 
-			isHit = true;
+			return true;
 		}
 	}
 
-	return isHit;
+	return false;
 }
 
 __device__ bool hitNotSupported(
@@ -138,17 +136,17 @@ __device__ void evalHitResultTriangle(
 	const aten::ray& r,
 	aten::hitrecord* rec)
 {
-	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[0] + 0);
-	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[1] + 0);
-	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[2] + 0);
+	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[0] + 0);
+	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[1] + 0);
+	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[2] + 0);
 
-	float4 n0 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[0] + 1);
-	float4 n1 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[1] + 1);
-	float4 n2 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[2] + 1);
+	float4 n0 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[0] + 1);
+	float4 n1 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[1] + 1);
+	float4 n2 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[2] + 1);
 
-	float4 u0 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[0] + 2);
-	float4 u1 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[1] + 2);
-	float4 u2 = tex1Dfetch<float4>(ctxt->vertices, 3 * rec->param.idx[2] + 2);
+	float4 u0 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[0] + 2);
+	float4 u1 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[1] + 2);
+	float4 u2 = tex1Dfetch<float4>(ctxt->vertices, 4 * rec->param.idx[2] + 2);
 
 	//AT_NAME::face::evalHitResult(v0, v1, v2, rec);
 

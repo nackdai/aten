@@ -10,6 +10,7 @@ namespace aten
 		vec4 pos;
 		vec4 nml;
 		vec4 uv;
+		vec4 padding;
 	};
 
 	class VertexManager {

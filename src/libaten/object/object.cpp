@@ -4,7 +4,6 @@
 #include <iterator>
 
 //#define ENABLE_LINEAR_HITTEST
-//#define ENABLE_DIRECT_FACE_BVH
 
 namespace AT_NAME
 {
@@ -207,7 +206,6 @@ namespace AT_NAME
 
 	void shape::build()
 	{
-#ifndef ENABLE_DIRECT_FACE_BVH
 		// Avoid sorting face list in bvh::build directly.
 		std::vector<face*> tmp;
 		std::copy(faces.begin(), faces.end(), std::back_inserter(tmp));
@@ -217,15 +215,10 @@ namespace AT_NAME
 			(uint32_t)tmp.size());
 
 		m_aabb = m_node.getBoundingbox();
-#endif
 
 		param.area = 0;
 		for (const auto f : faces) {
 			param.area += f->param.area;
-
-#ifdef ENABLE_DIRECT_FACE_BVH
-			m_aabb = aten::aabb::merge(m_aabb, f->getBoundingbox());
-#endif
 		}
 	}
 
@@ -284,23 +277,12 @@ namespace AT_NAME
 
 		param.primnum = m_triangles;
 
-#ifdef ENABLE_DIRECT_FACE_BVH
-		std::vector<face*> faces;
-		for (auto s : shapes) {
-			bbox = aten::aabb::merge(bbox, s->getBoundingbox());
-			for (auto f : s->faces) {
-				faces.push_back(f);
-			}
-		}
-		m_node.build((bvhnode**)&faces[0], (uint32_t)faces.size());
-#else
 		// Avoid sorting shape list in bvh::build directly.
 		std::vector<shape*> tmp;
 		std::copy(shapes.begin(), shapes.end(), std::back_inserter(tmp));
 
 		m_node.build((bvhnode**)&tmp[0], (uint32_t)tmp.size());
 		bbox = m_node.getBoundingbox();
-#endif
 	}
 
 	bool object::hit(
@@ -436,7 +418,6 @@ namespace AT_NAME
 		int newOrder = aten::bvh::setTraverseOrder(&m_node, order);
 		aten::bvh::collectNodes(&m_node, nodes[0], parent);
 
-#ifndef ENABLE_DIRECT_FACE_BVH
 		for (auto s : shapes) {
 			nodes.push_back(std::vector<aten::BVHNode>());
 
@@ -448,7 +429,6 @@ namespace AT_NAME
 			order = aten::bvh::setTraverseOrder(&s->m_node, order);
 			aten::bvh::collectNodes(&s->m_node, nodes[node.exid], parent);
 		}
-#endif
 
 		return newOrder;
 	}

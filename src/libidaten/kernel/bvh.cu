@@ -136,18 +136,92 @@ __device__ bool intersectBVH(
 }
 
 __device__ bool intersectBVH(
+	cudaTextureObject_t nodes,
+	const Context* ctxt,
+	const aten::ray r,
+	float t_min, float t_max,
+	aten::hitrecord* rec)
+{
+	int stackbuf[STACK_SIZE];
+
+	stackbuf[0] = 0;
+
+	int stackpos = 1;
+	int nestedStackPos = -1;
+
+	aten::hitrecord recTmp;
+	bool isHit = false;
+
+	int nodeid = -1;
+	float4 node;	// x:left, y:right
+	float4 attrib;	// x:shapeid, y:primid, z:nestid
+
+	float4 _boxmin;
+	float4 _boxmax;
+
+	aten::vec3 boxmin;
+	aten::vec3 boxmax;
+
+	while (stackpos > 0) {
+		nodeid = stackbuf[stackpos - 1];
+		stackpos--;
+
+		if (nodeid >= 0) {
+			node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : left, y: right
+			attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : nestid, w : exid
+			_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
+			_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+
+			boxmin = aten::make_float3(_boxmin.x, _boxmin.y, _boxmin.z);
+			boxmax = aten::make_float3(_boxmax.x, _boxmax.y, _boxmax.z);
+
+			if (node.x < 0 && node.y < 0) {
+				isHit = false;
+
+				const auto* s = &ctxt->shapes[(int)attrib.x];
+
+				const auto& prim = ctxt->prims[(int)attrib.y];
+				isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp);
+				recTmp.mtrlid = prim.mtrlid;
+
+				if (isHit) {
+					if (recTmp.t < rec->t) {
+						*rec = recTmp;
+						rec->obj = (void*)s;
+					}
+				}
+			}
+			else {
+				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max)) {
+					stackbuf[stackpos++] = (int)node.x;
+					stackbuf[stackpos++] = (int)node.y;
+
+					if (stackpos > STACK_SIZE) {
+						//AT_ASSERT(false);
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	return (rec->obj != nullptr);
+}
+
+
+__device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord* rec)
 {
 	int exid = -1;
-	aten::ray keepTransformedRay = r;
+	aten::ray transformedRay = r;
 
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
 		&exid,
-		&keepTransformedRay,
+		&transformedRay,
 		ctxt,
 		r,
 		t_min, t_max,
@@ -156,7 +230,7 @@ __device__ bool intersectBVH(
 	if (exid >= 0) {
 		aten::hitrecord recTmp;
 
-		if (intersectBVH(ctxt->nodes[exid], &exid, &keepTransformedRay, ctxt, keepTransformedRay, t_min, t_max, &recTmp)) {
+		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &recTmp)) {
 			if (recTmp.t < rec->t) {
 				*rec = recTmp;
 				isHit = true;

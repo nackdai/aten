@@ -88,7 +88,6 @@ __device__ bool intersectBVH(
 					if (attrib.w >= 0) {	// exid
 						real t = AT_MATH_INF;
 						isHit = aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max, &t);
-						isHit = (t < t_min || t > t_max ? false : isHit);
 						recTmp.t = t;
 						tmpexid = attrib.w;
 					}

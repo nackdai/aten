@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-//#define TEST_NODE_LIST
+#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -228,7 +228,6 @@ namespace aten {
 					if (node->exid >= 0) {
 						real t = AT_MATH_INF;
 						isHit = aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max, &t);
-						isHit = (t < t_min || t > t_max ? false : isHit);
 						recTmp.t = t;
 						tmpexid = node->exid;
 					}

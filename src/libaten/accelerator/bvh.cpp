@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-#define TEST_NODE_LIST
+//#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -138,7 +138,7 @@ namespace aten {
 
 	///////////////////////////////////////////////////////
 #ifdef TEST_NODE_LIST
-	static std::vector<BVHNode> snodes;
+	static std::vector<std::vector<BVHNode>> snodes;
 #endif
 
 	void bvh::build(
@@ -185,8 +185,12 @@ namespace aten {
 		auto& prims = face::faces();
 
 		aten::ray transformedRay = r;
+		aten::ray keepTransformedRay = transformedRay;
 
 		bool isNested = false;
+
+		real hitt = AT_MATH_INF;
+		int exid = -1;
 
 		while (stackpos > 0) {
 			if (stackpos == nestedStackPos) {
@@ -219,7 +223,16 @@ namespace aten {
 
 					auto s = (hitable*)shapes[(int)node->shapeid];
 
-					if (node->primid >= 0) {
+					int tmpexid = -1;
+
+					if (node->exid >= 0) {
+						real t = AT_MATH_INF;
+						isHit = aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max, &t);
+						isHit = (t < t_min || t > t_max ? false : isHit);
+						recTmp.t = t;
+						tmpexid = node->exid;
+					}
+					else if (node->primid >= 0) {
 						auto prim = (hitable*)prims[(int)node->primid];
 						isHit = prim->hit(transformedRay, t_min, t_max, recTmp);
 						if (isHit) {
@@ -228,11 +241,20 @@ namespace aten {
 					}
 					else {
 						isHit = s->hit(transformedRay, t_min, t_max, recTmp);
+						tmpexid = -1;
 					}
 
 					if (isHit) {
-						if (recTmp.t < rec.t) {
-							rec = recTmp;
+						if (recTmp.t < hitt) {
+							hitt = recTmp.t;
+							exid = tmpexid;
+							keepTransformedRay = transformedRay;
+						}
+
+						if (tmpexid < 0) {
+							if (recTmp.t < rec.t) {
+								rec = recTmp;
+							}
 						}
 					}
 				}
@@ -254,6 +276,15 @@ namespace aten {
 			}
 		}
 
+		if (exid >= 0) {
+			hitrecord recTmp;
+			if (_hit(&snodes[exid][0], keepTransformedRay, t_min, t_max, recTmp)) {
+				if (recTmp.t < rec.t) {
+					rec = recTmp;
+				}
+			}
+		}
+
 		return (rec.obj != nullptr);
 	}
 #endif
@@ -264,7 +295,7 @@ namespace aten {
 		hitrecord& rec) const
 	{
 #ifdef TEST_NODE_LIST
-		bool isHit = _hit(&snodes[0], r, t_min, t_max, rec);
+		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, rec);
 		return isHit;
 #else
 		bool isHit = hit(m_root, r, t_min, t_max, rec);
@@ -646,10 +677,13 @@ namespace aten {
 #endif
 	}
 
-	void bvh::collectNodes(std::vector<BVHNode>& nodes) const
+	void bvh::collectNodes(std::vector<std::vector<BVHNode>>& nodes) const
 	{
+		nodes.push_back(std::vector<BVHNode>());
+		auto& rootnode = nodes[0];
+
 		int order = setTraverseOrder(m_root, 0);
-		collectNodes(m_root, nodes, nullptr);
+		collectNodes(m_root, rootnode, nullptr);
 
 		std::map<hitable*, int> cache;
 
@@ -660,7 +694,7 @@ namespace aten {
 				const auto& param = s->getParam();
 
 				if (param.type == ShapeType::Instance) {
-					auto& node = nodes[idx];
+					auto& node = rootnode[idx];
 
 					// Search if object which instance has is collected.
 					auto obj = s->getHasObject();
@@ -672,7 +706,7 @@ namespace aten {
 					}
 					else {
 						// Not collected yet.
-						node.nestid = nodes.size();
+						node.nestid = rootnode.size();
 
 						order = s->collectInternalNodes(nodes, order, nullptr);
 					}

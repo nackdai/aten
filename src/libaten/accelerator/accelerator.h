@@ -14,7 +14,7 @@ namespace aten {
 		float shapeid{ -1 };
 		float primid{ -1 };
 		float nestid{ -1 };
-		float padding1;
+		float exid{ -1 };
 
 		aten::vec4 boxmin;
 		aten::vec4 boxmax;
@@ -35,7 +35,7 @@ namespace aten {
 			bvhnode** list,
 			uint32_t num) = 0;
 
-		virtual void collectNodes(std::vector<BVHNode>& nodes) const
+		virtual void collectNodes(std::vector<std::vector<BVHNode>>& nodes) const
 		{
 			// Nothing is done...
 		}

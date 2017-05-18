@@ -135,7 +135,9 @@ namespace aten
 #endif
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
-					if (x == 419 && y == 107) {
+					//if (x == 419 && y == 107) {
+					//if (x == 408 && y == 112) {
+					if (x == 378 && y == 480 - 355) {
 						int xxx = 0;
 					}
 					int pos = y * width + x;

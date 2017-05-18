@@ -116,6 +116,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 #endif
 
 	scene->add(light);
+#if 1
 	scene->add(left);
 	scene->add(right);
 	scene->add(wall);
@@ -123,6 +124,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 	scene->add(ceil);
 	scene->add(green);
 	scene->add(mirror);
+#endif
 	scene->add(glass);
 
 #if 1

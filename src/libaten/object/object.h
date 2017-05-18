@@ -63,7 +63,7 @@ namespace AT_NAME
 	private:
 		virtual void setBVHNodeParamInCollectNodes(aten::BVHNode& param) override final
 		{
-			param.primid = id;
+			param.primid = (float)id;
 		}
 	};
 
@@ -144,7 +144,7 @@ namespace AT_NAME
 
 		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const override final;
 
-		virtual int collectInternalNodes(std::vector<aten::BVHNode>& nodes, int order, bvhnode* parent) override final;
+		virtual int collectInternalNodes(std::vector<std::vector<aten::BVHNode>>& nodes, int order, bvhnode* parent) override final;
 
 	public:
 		std::vector<shape*> shapes;

@@ -157,7 +157,7 @@ namespace aten
 			return m_param;
 		}
 
-		virtual int collectInternalNodes(std::vector<BVHNode>& nodes, int order, bvhnode* parent) override final
+		virtual int collectInternalNodes(std::vector<std::vector<BVHNode>>& nodes, int order, bvhnode* parent) override final
 		{
 			return m_obj->collectInternalNodes(nodes, order, this);
 		}

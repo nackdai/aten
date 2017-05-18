@@ -431,19 +431,22 @@ namespace AT_NAME
 		}
 	}
 
-	int object::collectInternalNodes(std::vector<aten::BVHNode>& nodes, int order, bvhnode* parent)
+	int object::collectInternalNodes(std::vector<std::vector<aten::BVHNode>>& nodes, int order, bvhnode* parent)
 	{
 		int newOrder = aten::bvh::setTraverseOrder(&m_node, order);
-		aten::bvh::collectNodes(&m_node, nodes, parent);
+		aten::bvh::collectNodes(&m_node, nodes[0], parent);
 
 #ifndef ENABLE_DIRECT_FACE_BVH
 		for (auto s : shapes) {
-			const auto idx = s->m_traverseOrder;
-			auto& node = nodes[idx];
-			node.nestid = nodes.size();
+			nodes.push_back(std::vector<aten::BVHNode>());
 
-			newOrder = aten::bvh::setTraverseOrder(&s->m_node, newOrder);
-			aten::bvh::collectNodes(&s->m_node, nodes, parent);
+			const auto idx = s->m_traverseOrder;
+			auto& node = nodes[0][idx];
+			node.exid = nodes.size() - 1;
+
+			int order = 0;
+			order = aten::bvh::setTraverseOrder(&s->m_node, order);
+			aten::bvh::collectNodes(&s->m_node, nodes[node.exid], parent);
 		}
 #endif
 

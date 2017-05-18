@@ -57,7 +57,7 @@ __global__ void hitTestRayTracing(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	cudaTextureObject_t nodes,
+	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
 	cudaTextureObject_t vertices)
 {
@@ -104,7 +104,7 @@ __global__ void raytracing(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	cudaTextureObject_t nodes,
+	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
 	cudaTextureObject_t vertices)
 {
@@ -231,7 +231,7 @@ namespace idaten {
 		const std::vector<aten::ShapeParameter>& shapes,
 		const std::vector<aten::MaterialParameter>& mtrls,
 		const std::vector<aten::LightParameter>& lights,
-		const std::vector<aten::BVHNode>& nodes,
+		const std::vector<std::vector<aten::BVHNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
 		const std::vector<aten::vertex>& vtxs)
 	{
@@ -267,7 +267,12 @@ namespace idaten {
 			primparams.writeByNum(&prims[0], prims.size());
 		}
 
-		nodeparam.init((aten::vec4*)&nodes[0], sizeof(aten::BVHNode) / sizeof(float4), nodes.size());
+		for (int i = 0; i < nodes.size(); i++) {
+			nodeparam.push_back(idaten::CudaTextureResource());
+			nodeparam[i].init((aten::vec4*)&nodes[i][0], sizeof(aten::BVHNode) / sizeof(float4), nodes[i].size());
+		}
+		nodetex.init(nodes.size());
+
 		vtxparams.init((aten::vec4*)&vtxs[0], sizeof(aten::vertex) / sizeof(float4), vtxs.size());
 	}
 
@@ -289,7 +294,13 @@ namespace idaten {
 		auto outputSurf = glimg.bind();
 
 		auto vtxTex = vtxparams.bind();
-		auto nodeTex = nodeparam.bind();
+
+		std::vector<cudaTextureObject_t> tmp;
+		for (int i = 0; i < nodeparam.size(); i++) {
+			auto nodeTex = nodeparam[i].bind();
+			tmp.push_back(nodeTex);
+		}
+		nodetex.writeByNum(&tmp[0], tmp.size());
 
 		genPathRayTracing << <grid, block >> > (
 			paths.ptr(),
@@ -300,12 +311,13 @@ namespace idaten {
 
 		while (depth < 5) {
 			hitTestRayTracing << <grid, block >> > (
+			//hitTestRayTracing << <1, 1 >> > (
 				paths.ptr(),
 				width, height,
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
-				nodeTex,
+				nodetex.ptr(),
 				primparams.ptr(),
 				vtxTex);
 
@@ -324,7 +336,7 @@ namespace idaten {
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
-				nodeTex,
+				nodetex.ptr(),
 				primparams.ptr(),
 				vtxTex);
 
@@ -341,7 +353,10 @@ namespace idaten {
 		checkCudaErrors(cudaDeviceSynchronize());
 
 		vtxparams.unbind();
-		nodeparam.unbind();
+		for (int i = 0; i < nodeparam.size(); i++) {
+			nodeparam[i].unbind();
+		}
+		nodetex.reset();
 
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}

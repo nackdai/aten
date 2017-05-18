@@ -185,7 +185,7 @@ int main()
 			mtrlparms,
 			vtxparams);
 
-		std::vector<aten::BVHNode> nodes;
+		std::vector<std::vector<aten::BVHNode>> nodes;
 
 		g_scene.getAccel()->collectNodes(nodes);
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");

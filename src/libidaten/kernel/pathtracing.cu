@@ -15,7 +15,6 @@
 
 #include "aten4idaten.h"
 
-#if 0
 struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
@@ -62,9 +61,9 @@ __global__ void hitTest(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	aten::BVHNode* nodes,
+	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	aten::vertex* vertices)
+	cudaTextureObject_t vertices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -108,9 +107,9 @@ __global__ void shade(
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
-	aten::BVHNode* nodes,
+	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	aten::vertex* vertices)
+	cudaTextureObject_t vertices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -197,58 +196,6 @@ namespace idaten {
 		addFuncs();
 	}
 
-	void PathTracing::update(
-		GLuint gltex,
-		int width, int height,
-		const aten::CameraParameter& camera,
-		const std::vector<aten::ShapeParameter>& shapes,
-		const std::vector<aten::MaterialParameter>& mtrls,
-		const std::vector<aten::LightParameter>& lights,
-		const std::vector<aten::BVHNode>& nodes,
-		const std::vector<aten::PrimitiveParamter>& prims,
-		const std::vector<aten::vertex>& vtxs)
-	{
-#if 0
-		size_t size_stack = 0;
-		checkCudaErrors(cudaThreadGetLimit(&size_stack, cudaLimitStackSize));
-		checkCudaErrors(cudaThreadSetLimit(cudaLimitStackSize, 12928));
-		checkCudaErrors(cudaThreadGetLimit(&size_stack, cudaLimitStackSize));
-
-		AT_PRINTF("Stack size %d\n", size_stack);
-#endif
-
-#if 0
-		dst.init(sizeof(float4) * width * height);
-#else
-		glimg.init(gltex, CudaGLRscRegisterType::WriteOnly);
-#endif
-
-		cam.init(sizeof(camera));
-		cam.writeByNum(&camera, 1);
-
-		shapeparam.init(shapes.size());
-		shapeparam.writeByNum(&shapes[0], shapes.size());
-
-		mtrlparam.init(mtrls.size());
-		mtrlparam.writeByNum(&mtrls[0], mtrls.size());
-
-		lightparam.init(lights.size());
-		lightparam.writeByNum(&lights[0], lights.size());
-
-		nodeparam.init(nodes.size());
-		nodeparam.writeByNum(&nodes[0], nodes.size());
-
-		if (!prims.empty()) {
-			primparams.init(prims.size());
-			primparams.writeByNum(&prims[0], prims.size());
-		}
-
-		if (!vtxs.empty()) {
-			vtxparams.init(vtxs.size());
-			vtxparams.writeByNum(&vtxs[0], vtxs.size());
-		}
-	}
-
 #include "misc/timer.h"
 	aten::SystemTime getSystemTime()
 	{
@@ -283,7 +230,16 @@ namespace idaten {
 		paths.init(width * height);
 
 		CudaGLResourceMap rscmap(&glimg);
-		auto outputSurf = glimg.bindToWrite();
+		auto outputSurf = glimg.bind();
+
+		auto vtxTex = vtxparams.bind();
+
+		std::vector<cudaTextureObject_t> tmp;
+		for (int i = 0; i < nodeparam.size(); i++) {
+			auto nodeTex = nodeparam[i].bind();
+			tmp.push_back(nodeTex);
+		}
+		nodetex.writeByNum(&tmp[0], tmp.size());
 
 		static const int maxSamples = 5;
 
@@ -306,9 +262,9 @@ namespace idaten {
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
 					lightparam.ptr(), lightparam.num(),
-					nodeparam.ptr(),
+					nodetex.ptr(),
 					primparams.ptr(),
-					vtxparams.ptr());
+					vtxTex);
 
 				auto err = cudaGetLastError();
 				if (err != cudaSuccess) {
@@ -325,9 +281,9 @@ namespace idaten {
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
 					lightparam.ptr(), lightparam.num(),
-					nodeparam.ptr(),
+					nodetex.ptr(),
 					primparams.ptr(),
-					vtxparams.ptr());
+					vtxTex);
 
 				err = cudaGetLastError();
 				if (err != cudaSuccess) {
@@ -344,4 +300,3 @@ namespace idaten {
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}
 }
-#endif

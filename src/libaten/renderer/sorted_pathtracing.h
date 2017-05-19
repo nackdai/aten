@@ -41,10 +41,12 @@ namespace aten
 			int width, int height,
 			int sample,
 			Path* paths,
+			ray* rays,
 			camera* camera);
 
 		void hitPaths(
 			Path* paths,
+			const ray* rays,
 			int numPath,
 			scene* scene);
 
@@ -64,6 +66,7 @@ namespace aten
 			uint32_t sample,
 			uint32_t depth,
 			Path* paths,
+			ray* rays,
 			uint32_t* hitIds,
 			int numHit,
 			camera* cam,

@@ -11,6 +11,7 @@ namespace aten
 		int width, int height,
 		int sample,
 		Path* paths,
+		ray* rays,
 		camera* camera)
 	{
 
@@ -21,9 +22,9 @@ namespace aten
 #endif
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				uint32_t pos = y * width + x;
+				uint32_t idx = y * width + x;
 
-				auto& path = paths[pos];
+				auto& path = paths[idx];
 
 				if (!path.isTerminate) {
 					if (path.sampler) {
@@ -43,7 +44,7 @@ namespace aten
 						path.camsample.posOnImageSensor,
 						path.camsample.posOnLens);
 
-					path.ray = path.camsample.r;
+					rays[idx] = path.camsample.r;
 
 					path.x = x;
 					path.y = y;
@@ -60,6 +61,7 @@ namespace aten
 
 	void SortedPathTracing::hitPaths(
 		Path* paths,
+		const ray* rays,
 		int numPath,
 		scene* scene)
 	{
@@ -74,7 +76,8 @@ namespace aten
 			if (path.isAlive) {
 				// ‰Šú‰».
 				path.rec = hitrecord();
-				path.isHit = scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec);
+				const auto& ray = rays[i];
+				path.isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec);
 			}
 		}
 	}
@@ -125,6 +128,7 @@ namespace aten
 		uint32_t sample,
 		uint32_t depth,
 		Path* paths,
+		ray* rays,
 		uint32_t* hitIds,
 		int numHit,
 		camera* cam,
@@ -145,7 +149,11 @@ namespace aten
 
 			auto sampler = path.sampler;
 
+			path.ray = rays[idx];
+
 			bool willContinue = PathTracing::shade(sampler, scene, cam, path.camsample, depth, path);
+
+			rays[idx] = path.ray;
 
 			if (!willContinue) {
 				path.isAlive = false;
@@ -196,12 +204,14 @@ namespace aten
 		}
 
 		std::vector<Path> paths(m_width * m_height);
+		std::vector<ray> rays(m_width * m_height);
 		std::vector<uint32_t> hitIds(m_width * m_height);
 
 		for (uint32_t i = 0; i < m_samples; i++) {
 			makePaths(
 				m_width, m_height, i,
 				&paths[0],
+				&rays[0],
 				camera);
 
 			uint32_t depth = 0;
@@ -209,6 +219,7 @@ namespace aten
 			while (depth < m_maxDepth) {
 				hitPaths(
 					&paths[0],
+					&rays[0],
 					(int)paths.size(),
 					scene);
 
@@ -229,6 +240,7 @@ namespace aten
 					i,
 					depth,
 					&paths[0],
+					&rays[0],
 					&hitIds[0],
 					numHit,
 					camera,

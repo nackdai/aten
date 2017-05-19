@@ -26,8 +26,8 @@ static aten::PinholeCamera g_camera;
 
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
-static idaten::RayTracing g_tracer;
-//static idaten::PathTracing g_tracer;
+//static idaten::RayTracing g_tracer;
+static idaten::PathTracing g_tracer;
 
 void makeScene(aten::scene* scene)
 {

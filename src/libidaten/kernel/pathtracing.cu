@@ -148,6 +148,8 @@ __global__ void shade(
 	if (mtrl->attrib.isEmissive) {
 		contrib = path.throughput * mtrl->baseColor;
 
+		contrib = normalize(contrib);
+
 		path.isTerminate = true;
 		//p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
 		surf2Dwrite(make_float4(contrib.x, contrib.y, contrib.z, 1), outSurface, ix * sizeof(float4), iy, cudaBoundaryModeTrap);
@@ -158,10 +160,10 @@ __global__ void shade(
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
 	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
-
-	AT_NAME::MaterialSampling sampling;
 			
 	if (mtrl->attrib.isSingular) {
+		AT_NAME::MaterialSampling sampling;
+
 		sampleMaterial(
 			&sampling,
 			mtrl,
@@ -173,7 +175,7 @@ __global__ void shade(
 
 		auto nextDir = normalize(sampling.dir);
 
-		path.throughput *= sampling.bsdf;
+		path.throughput *= sampling.bsdf / sampling.pdf;;
 
 		// Make next ray.
 		path.ray = aten::ray(path.rec.p, nextDir);
@@ -183,7 +185,14 @@ __global__ void shade(
 		real pdf = samplePDF(mtrl, orienting_normal, path.ray.dir, nextDir, path.rec.u, path.rec.v);
 		auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, nextDir, path.rec.u, path.rec.v);
 
-		path.throughput *= sampling.bsdf / pdf;
+		auto c = dot(orienting_normal, nextDir);
+
+		if (c > 0) {
+			path.throughput *= bsdf * c / pdf;
+		}
+		else {
+			path.isTerminate = true;
+		}
 
 		// Make next ray.
 		path.ray = aten::ray(path.rec.p, nextDir);
@@ -297,6 +306,13 @@ namespace idaten {
 
 			checkCudaErrors(cudaDeviceSynchronize());
 		}
+
+		vtxparams.unbind();
+		for (int i = 0; i < nodeparam.size(); i++) {
+			nodeparam[i].unbind();
+		}
+		nodetex.reset();
+
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}
 }

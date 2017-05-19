@@ -160,6 +160,9 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h">
       <Filter>cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\renderer.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -229,6 +232,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
       <Filter>cuda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\kernel\renderer.cpp">
+      <Filter>kernel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

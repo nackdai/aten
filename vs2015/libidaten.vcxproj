@@ -74,9 +74,11 @@
     <ClInclude Include="..\src\libidaten\kernel\material.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
+    <ClInclude Include="..\src\libidaten\kernel\renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp" />
+    <ClCompile Include="..\src\libidaten\kernel\renderer.cpp" />
     <CudaCompile Include="..\src\libaten\camera\pinhole .cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>

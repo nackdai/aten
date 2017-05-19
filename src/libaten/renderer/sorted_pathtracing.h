@@ -21,17 +21,11 @@ namespace aten
 			real camSensitivity;
 
 			uint32_t x, y;
-
-			vec3 orienting_normal;
-
 			sampler* sampler{ nullptr };
 
-			real pdfLight{ real(0) };
-			real dist2ToLight{ real(0) };
-			real cosLight{ real(0) };
-			real lightSelectPdf{ real(0) };
-			LightAttribute lightAttrib;
-			vec3 lightColor;
+			vec3 lightcontrib;
+			vec3 lightPos;
+			Light* targetLight;
 			
 			struct {
 				uint32_t isHit		: 1;
@@ -47,6 +41,21 @@ namespace aten
 			}
 		};
 
+		struct ShadowRay : aten::ray {
+			ShadowRay() : ray()
+			{
+				isActive = true;
+			}
+			ShadowRay(const vec3& o, const vec3& d) : ray(o, d)
+			{
+				isActive = true;
+			}
+
+			struct {
+				uint32_t isActive : 1;
+			};
+		};
+
 		void makePaths(
 			int width, int height,
 			int sample,
@@ -58,11 +67,6 @@ namespace aten
 			Path* paths,
 			const ray* rays,
 			int numPath,
-			scene* scene);
-
-		void hitRays(
-			ray* rays,
-			int numRay,
 			scene* scene);
 
 		int compactionPaths(
@@ -82,15 +86,21 @@ namespace aten
 			uint32_t depth,
 			Path* paths,
 			ray* rays,
-			ray* shadowRays,
+			ShadowRay* shadowRays,
 			uint32_t* hitIds,
 			int numHit,
 			camera* cam,
 			scene* scene);
 
+		void hitShadowRays(
+			const Path* paths,
+			ShadowRay* shadowrays,
+			int numRay,
+			scene* scene);
+
 		void evalExplicitLight(
 			Path* paths,
-			const ray* shadowRays,
+			const ShadowRay* shadowRays,
 			uint32_t* hitIds,
 			int numHit);
 

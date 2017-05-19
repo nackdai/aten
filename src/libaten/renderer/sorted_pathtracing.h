@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/pathtracing.h"
+#include "math/vec4.h"
 
 namespace aten
 {
@@ -21,7 +22,16 @@ namespace aten
 
 			uint32_t x, y;
 
+			vec3 orienting_normal;
+
 			sampler* sampler{ nullptr };
+
+			real pdfLight{ real(0) };
+			real dist2ToLight{ real(0) };
+			real cosLight{ real(0) };
+			real lightSelectPdf{ real(0) };
+			LightAttribute lightAttrib;
+			vec3 lightColor;
 			
 			struct {
 				uint32_t isHit		: 1;
@@ -50,6 +60,11 @@ namespace aten
 			int numPath,
 			scene* scene);
 
+		void hitRays(
+			ray* rays,
+			int numRay,
+			scene* scene);
+
 		int compactionPaths(
 			Path* paths,
 			int numPath,
@@ -67,10 +82,17 @@ namespace aten
 			uint32_t depth,
 			Path* paths,
 			ray* rays,
+			ray* shadowRays,
 			uint32_t* hitIds,
 			int numHit,
 			camera* cam,
 			scene* scene);
+
+		void evalExplicitLight(
+			Path* paths,
+			const ray* shadowRays,
+			uint32_t* hitIds,
+			int numHit);
 
 		void gather(
 			Path* paths,

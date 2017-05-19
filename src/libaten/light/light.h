@@ -20,9 +20,9 @@ namespace aten {
 
 	struct LightAttribute {
 		struct {
-			const uint32_t isSingular : 1;
-			const uint32_t isInfinite : 1;
-			const uint32_t isIBL : 1;
+			uint32_t isSingular : 1;
+			uint32_t isInfinite : 1;
+			uint32_t isIBL : 1;
 		};
 
 		AT_DEVICE_API LightAttribute(

@@ -70,14 +70,32 @@ namespace aten
 #endif
 		for (int i = 0; i < numPath; i++) {
 			auto& path = paths[i];
+			const auto& ray = rays[i];
 
 			path.isHit = false;
 
-			if (path.isAlive) {
+			if (path.isAlive && ray.isActive) {
 				// 初期化.
 				path.rec = hitrecord();
-				const auto& ray = rays[i];
 				path.isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec);
+			}
+		}
+	}
+
+	void SortedPathTracing::hitRays(
+		ray* rays,
+		int numRay,
+		scene* scene)
+	{
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < numRay; i++) {
+			auto& ray = rays[i];
+
+			if (ray.isActive) {
+				hitrecord rec;
+				ray.isActive = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
 			}
 		}
 	}
@@ -129,6 +147,7 @@ namespace aten
 		uint32_t depth,
 		Path* paths,
 		ray* rays,
+		ray* shadowRays,
 		uint32_t* hitIds,
 		int numHit,
 		camera* cam,
@@ -148,18 +167,203 @@ namespace aten
 			}
 
 			auto sampler = path.sampler;
+			bool willContinue = false;
 
-			path.ray = rays[idx];
+			uint32_t rrDepth = m_rrDepth;
 
-			bool willContinue = PathTracing::shade(sampler, scene, cam, path.camsample, depth, path);
+			// 交差位置の法線.
+			// 物体からのレイの入出を考慮.
+			path.orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
-			rays[idx] = path.ray;
+			// Implicit conection to light.
+			if (path.rec.mtrl->isEmissive()) {
+				if (depth == 0) {
+					// Ray hits the light directly.
+					path.contrib = path.rec.mtrl->color();
+					path.isTerminate = true;
+					willContinue = false;
+				}
+				else if (path.prevMtrl && path.prevMtrl->isSingular()) {
+					auto emit = path.rec.mtrl->color();
+					path.contrib += path.throughput * emit;
+					willContinue = false;
+				}
+				else {
+					auto cosLight = dot(path.orienting_normal, -path.ray.dir);
+					auto dist2 = (path.rec.p - path.ray.org).squared_length();
+
+					if (cosLight >= 0) {
+						auto pdfLight = 1 / path.rec.area;
+
+						// Convert pdf area to sradian.
+						// http://www.slideshare.net/h013/edubpt-v100
+						// p31 - p35
+						pdfLight = pdfLight * dist2 / cosLight;
+
+						auto misW = path.pdfb / (pdfLight + path.pdfb);
+
+						auto emit = path.rec.mtrl->color();
+
+						path.contrib += path.throughput * misW * emit;
+
+						// When ray hit the light, tracing will finish.
+						willContinue = false;
+					}
+				}
+			}
+
+			// Apply normal map.
+			path.rec.mtrl->applyNormalMap(path.orienting_normal, path.orienting_normal, path.rec.u, path.rec.v);
+
+			shadowRays[idx].isActive = false;
+
+			// Explicit conection to light.
+			if (!path.rec.mtrl->isSingular())
+			{
+				real lightSelectPdf = 1;
+				LightSampleResult sampleres;
+
+				auto light = scene->sampleLight(
+					path.rec.p,
+					path.orienting_normal,
+					sampler,
+					lightSelectPdf, sampleres);
+
+				if (light) {
+					const vec3& posLight = sampleres.pos;
+					const vec3& nmlLight = sampleres.nml;
+					real pdfLight = sampleres.pdf;
+
+					auto lightobj = sampleres.obj;
+
+					vec3 dirToLight = normalize(sampleres.dir);
+					shadowRays[idx] = aten::ray(path.rec.p, dirToLight);
+
+					path.pdfLight = sampleres.pdf;
+					path.dist2ToLight = sampleres.dir.squared_length();
+					path.cosLight = dot(nmlLight, -dirToLight);
+					path.lightSelectPdf = lightSelectPdf;
+					path.lightAttrib = light->param().attrib;
+					path.lightColor = sampleres.finalColor;
+				}
+			}
+
+			real russianProb = real(1);
+
+			if (depth > rrDepth) {
+				auto t = normalize(path.throughput);
+				auto p = std::max(t.r, std::max(t.g, t.b));
+
+				russianProb = sampler->nextSample();
+
+				if (russianProb >= p) {
+					path.contrib = vec3();
+					willContinue = false;
+				}
+				else {
+					russianProb = p;
+				}
+			}
+
+			auto sampling = path.rec.mtrl->sample(path.ray, path.orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
+
+			auto nextDir = normalize(sampling.dir);
+			auto pdfb = sampling.pdf;
+			auto bsdf = sampling.bsdf;
+
+			real c = 1;
+			if (!path.rec.mtrl->isSingular()) {
+				// TODO
+				// AMDのはabsしているが....
+				//c = aten::abs(dot(orienting_normal, nextDir));
+				c = dot(path.orienting_normal, nextDir);
+			}
+
+			if (pdfb > 0 && c > 0) {
+				path.throughput *= bsdf * c / pdfb;
+				path.throughput /= russianProb;
+			}
+			else {
+				willContinue = false;
+			}
+
+			path.prevMtrl = path.rec.mtrl;
+
+			path.pdfb = pdfb;
+
+			// Make next ray.
+			rays[idx] = aten::ray(path.rec.p, nextDir);
 
 			if (!willContinue) {
 				path.isAlive = false;
 			}
 		}
 	}
+
+#pragma optimize( "", off)
+
+	void SortedPathTracing::evalExplicitLight(
+		Path* paths,
+		const ray* shadowRays,
+		uint32_t* hitIds,
+		int numHit)
+	{
+#ifdef ENABLE_OMP
+//#pragma omp parallel for
+#endif
+		for (int i = 0; i < numHit; i++) {
+			auto idx = hitIds[i];
+			auto& path = paths[idx];
+			const ray& shadowRay = shadowRays[idx];
+
+			if (shadowRay.isActive) {
+				// Shadow ray hits the light.
+				auto cosShadow = dot(path.orienting_normal, shadowRay.dir);
+
+				auto bsdf = path.rec.mtrl->bsdf(path.orienting_normal, path.ray.dir, shadowRay.dir, path.rec.u, path.rec.v);
+				auto pdfb = path.rec.mtrl->pdf(path.orienting_normal, path.ray.dir, shadowRay.dir, path.rec.u, path.rec.v);
+
+				bsdf *= path.throughput;
+
+				// Get light color.
+				auto emit = path.lightColor;
+				real pdfLight = path.pdfLight;
+				real lightSelectPdf = path.lightSelectPdf;
+
+				if (path.lightAttrib.isSingular || path.lightAttrib.isInfinite) {
+					if (path.pdfLight > real(0)) {
+						// TODO
+						// ジオメトリタームの扱いについて.
+						// singular light の場合は、finalColor に距離の除算が含まれている.
+						// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+						// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
+						auto misW = pdfLight / (pdfb + pdfLight);
+						path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+					}
+				}
+				else {
+					auto cosLight = path.cosLight;;
+
+					if (cosShadow >= 0 && cosLight >= 0) {
+						auto dist2 = path.dist2ToLight;
+						auto G = cosShadow * cosLight / dist2;
+
+						if (pdfb > real(0) && pdfLight > real(0)) {
+							// Convert pdf from steradian to area.
+							// http://www.slideshare.net/h013/edubpt-v100
+							// p31 - p35
+							pdfb = pdfb * cosLight / dist2;
+
+							auto misW = pdfLight / (pdfb + pdfLight);
+
+							path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+						}
+					}
+				}
+			}
+		}
+	}
+#pragma optimize( "", on)
 
 	void SortedPathTracing::gather(
 		Path* paths,
@@ -205,6 +409,7 @@ namespace aten
 
 		std::vector<Path> paths(m_width * m_height);
 		std::vector<ray> rays(m_width * m_height);
+		std::vector<ray> shadowRays(m_width * m_height);
 		std::vector<uint32_t> hitIds(m_width * m_height);
 
 		for (uint32_t i = 0; i < m_samples; i++) {
@@ -241,10 +446,19 @@ namespace aten
 					depth,
 					&paths[0],
 					&rays[0],
+					&shadowRays[0],
 					&hitIds[0],
 					numHit,
 					camera,
 					scene);
+
+				hitRays(&shadowRays[0], shadowRays.size(), scene);
+
+				evalExplicitLight(
+					&paths[0],
+					&shadowRays[0],
+					&hitIds[0],
+					numHit);
 
 				depth++;
 			}

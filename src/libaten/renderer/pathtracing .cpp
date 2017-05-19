@@ -221,8 +221,7 @@ namespace aten
 							// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
 							// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 							auto misW = pdfLight / (pdfb + pdfLight);
-							path.contrib += misW * bsdf * emit * cosShadow / pdfLight;
-							path.contrib /= lightSelectPdf;
+							path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
 						}
 					}
 					else {
@@ -240,8 +239,7 @@ namespace aten
 
 								auto misW = pdfLight / (pdfb + pdfLight);
 
-								path.contrib += misW * (bsdf * emit * G) / pdfLight;
-								path.contrib /= lightSelectPdf;
+								path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
 							}
 						}
 					}

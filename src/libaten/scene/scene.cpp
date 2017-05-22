@@ -13,7 +13,7 @@ namespace aten {
 
 		isHit = scene::hitLight(
 			isHit,
-			light->param(),
+			&light->param(),
 			lightPos,
 			r,
 			t_min, t_max,

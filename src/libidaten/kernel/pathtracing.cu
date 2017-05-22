@@ -15,11 +15,35 @@
 
 #include "aten4idaten.h"
 
+struct ray : public aten::ray {
+	AT_DEVICE_API ray() : aten::ray()
+	{
+		isActive = true;
+	}
+	AT_DEVICE_API ray(const aten::vec3& o, const aten::vec3& d) : aten::ray(o, d)
+	{
+		isActive = true;
+	}
+
+	struct {
+		uint32_t isActive : 1;
+	};
+};
+
 struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
+	aten::vec3 contrib;
 	aten::hitrecord rec;
 	aten::sampler sampler;
+	aten::MaterialParameter* mtrl;
+
+	aten::vec3 lightPos;
+	aten::vec3 lightcontrib;
+	aten::LightParameter* targetLight;
+
+	real pdfb;
+
 	bool isHit;
 	bool isTerminate;
 };
@@ -51,6 +75,11 @@ __global__ void genPath(
 
 	path.ray = camsample.r;
 	path.throughput = aten::make_float3(1);
+	path.contrib = aten::make_float3(0);
+	path.mtrl = nullptr;
+	path.lightcontrib = aten::make_float3(0);
+	path.targetLight = nullptr;
+	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
 }
@@ -100,10 +129,39 @@ __global__ void hitTest(
 	path.rec = rec;
 }
 
+__global__ void shadeMiss(
+	cudaSurfaceObject_t outSurface,
+	Path* paths,
+	int width, int height)
+{
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	const auto idx = iy * width + ix;
+
+	auto& path = paths[idx];
+
+	if (!path.isTerminate && !path.isHit) {
+		surf2Dwrite(
+			make_float4(0, 0, 0, 1),
+			outSurface, 
+			ix * sizeof(float4), iy, 
+			cudaBoundaryModeTrap);
+
+		path.isTerminate = true;
+	}
+}
+
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
+	ray* shadowRays,
 	int width, int height,
+	int depth, int rrDepth,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
@@ -141,61 +199,243 @@ __global__ void shade(
 		return;
 	}
 
-	aten::vec3 contrib = aten::make_float3(0);
-
-	const aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
-
-	if (mtrl->attrib.isEmissive) {
-		contrib = path.throughput * mtrl->baseColor;
-
-		contrib = normalize(contrib);
-
-		path.isTerminate = true;
-		//p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
-		surf2Dwrite(make_float4(contrib.x, contrib.y, contrib.z, 1), outSurface, ix * sizeof(float4), iy, cudaBoundaryModeTrap);
-		
-		return;
-	}
+	aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
 	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
-			
-	if (mtrl->attrib.isSingular) {
-		AT_NAME::MaterialSampling sampling;
 
-		sampleMaterial(
-			&sampling,
-			mtrl,
-			orienting_normal,
-			path.ray.dir,
-			path.rec.normal,
-			&path.sampler,
-			path.rec.u, path.rec.v);
+	// TODO
+	// Apply normal map.
 
-		auto nextDir = normalize(sampling.dir);
+	bool willContinue = true;
 
-		path.throughput *= sampling.bsdf / sampling.pdf;;
-
-		// Make next ray.
-		path.ray = aten::ray(path.rec.p, nextDir);
-	}
-	else {
-		auto nextDir = sampleDirection(mtrl, orienting_normal, path.ray.dir, path.rec.u, path.rec.v, &path.sampler);
-		real pdf = samplePDF(mtrl, orienting_normal, path.ray.dir, nextDir, path.rec.u, path.rec.v);
-		auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, nextDir, path.rec.u, path.rec.v);
-
-		auto c = dot(orienting_normal, nextDir);
-
-		if (c > 0) {
-			path.throughput *= bsdf * c / pdf;
+	// Implicit conection to light.
+	if (mtrl->attrib.isEmissive) {
+		if (depth == 0) {
+			// Ray hits the light directly.
+			path.contrib = mtrl->baseColor;
+			path.isTerminate = true;
+			willContinue = false;
+		}
+		else if (path.mtrl && path.mtrl->attrib.isSingular) {
+			auto emit = path.mtrl->baseColor;
+			path.contrib += path.throughput * emit;
+			willContinue = false;
 		}
 		else {
-			path.isTerminate = true;
-		}
+			auto cosLight = dot(orienting_normal, -path.ray.dir);
+			auto dist2 = (path.rec.p - path.ray.org).squared_length();
 
-		// Make next ray.
-		path.ray = aten::ray(path.rec.p, nextDir);
+			if (cosLight >= 0) {
+				auto pdfLight = 1 / path.rec.area;
+
+				// Convert pdf area to sradian.
+				// http://www.slideshare.net/h013/edubpt-v100
+				// p31 - p35
+				pdfLight = pdfLight * dist2 / cosLight;
+
+				auto misW = path.pdfb / (pdfLight + path.pdfb);
+
+				auto emit = mtrl->baseColor;
+
+				path.contrib += path.throughput * misW * emit;
+
+				// When ray hit the light, tracing will finish.
+				willContinue = false;
+			}
+		}
+	}
+
+	if (!willContinue) {
+		surf2Dwrite(
+			make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 1),
+			outSurface,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+
+		path.isTerminate = true;
+		return;
+	}
+
+	// Explicit conection to light.
+	if (!mtrl->attrib.isSingular)
+	{
+		real lightSelectPdf = 1;
+		aten::LightSampleResult sampleres;
+
+		// TODO
+		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
+		auto light = &ctxt.lights[lightidx];
+
+		if (light) {
+			const auto& posLight = sampleres.pos;
+			const auto& nmlLight = sampleres.nml;
+			real pdfLight = sampleres.pdf;
+
+			auto lightobj = sampleres.obj;
+
+			auto dirToLight = normalize(sampleres.dir);
+			shadowRays[idx] = ray(path.rec.p, dirToLight);
+
+			auto cosShadow = dot(orienting_normal, dirToLight);
+
+			real pdfb = samplePDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+			auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+
+			bsdf *= path.throughput;
+
+			// Get light color.
+			auto emit = sampleres.finalColor;
+
+			path.lightPos = posLight;
+			path.targetLight = light;
+			path.lightcontrib = aten::make_float3(0);
+
+			if (light->attrib.isSingular || light->attrib.isInfinite) {
+				if (pdfLight > real(0)) {
+					// TODO
+					// ジオメトリタームの扱いについて.
+					// singular light の場合は、finalColor に距離の除算が含まれている.
+					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
+					auto misW = pdfLight / (pdfb + pdfLight);
+					path.lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+				}
+			}
+			else {
+				auto cosLight = dot(nmlLight, -dirToLight);
+
+				if (cosShadow >= 0 && cosLight >= 0) {
+					auto dist2 = sampleres.dir.squared_length();
+					auto G = cosShadow * cosLight / dist2;
+
+					if (pdfb > real(0) && pdfLight > real(0)) {
+						// Convert pdf from steradian to area.
+						// http://www.slideshare.net/h013/edubpt-v100
+						// p31 - p35
+						pdfb = pdfb * cosLight / dist2;
+
+						auto misW = pdfLight / (pdfb + pdfLight);
+
+						path.lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+					}
+				}
+			}
+		}
+	}
+
+	real russianProb = real(1);
+
+	if (depth > rrDepth) {
+		auto t = normalize(path.throughput);
+		auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
+
+		russianProb = path.sampler.nextSample();
+
+		if (russianProb >= p) {
+			path.contrib = aten::make_float3(0);
+			willContinue = false;
+		}
+		else {
+			russianProb = p;
+		}
+	}
+			
+	AT_NAME::MaterialSampling sampling;
+
+	sampleMaterial(
+		&sampling,
+		mtrl,
+		orienting_normal,
+		path.ray.dir,
+		path.rec.normal,
+		&path.sampler,
+		path.rec.u, path.rec.v);
+
+	auto nextDir = normalize(sampling.dir);
+	auto pdfb = sampling.pdf;
+	auto bsdf = sampling.bsdf;
+
+	real c = 1;
+	if (!mtrl->attrib.isSingular) {
+		// TODO
+		// AMDのはabsしているが....
+		//c = aten::abs(dot(orienting_normal, nextDir));
+		c = dot(orienting_normal, nextDir);
+	}
+
+	if (pdfb > 0 && c > 0) {
+		path.throughput *= bsdf * c / pdfb;
+		path.throughput /= russianProb;
+	}
+	else {
+		willContinue = false;
+	}
+
+	// Make next ray.
+	path.ray = aten::ray(path.rec.p, nextDir);
+
+	path.mtrl = mtrl;
+	path.pdfb = pdfb;
+
+	if (!willContinue) {
+		path.isTerminate = true;
+	}
+}
+
+__global__ void hitShadowRay(
+	Path* paths,
+	ray* shadowRays,
+	int width, int height,
+	aten::ShapeParameter* shapes, int geomnum,
+	aten::MaterialParameter* mtrls,
+	aten::LightParameter* lights, int lightnum,
+	cudaTextureObject_t* nodes,
+	aten::PrimitiveParamter* prims,
+	cudaTextureObject_t vertices)
+{
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	Context ctxt;
+	{
+		ctxt.geomnum = geomnum;
+		ctxt.shapes = shapes;
+		ctxt.mtrls = mtrls;
+		ctxt.lightnum = lightnum;
+		ctxt.lights = lights;
+		ctxt.nodes = nodes;
+		ctxt.prims = prims;
+		ctxt.vertices = vertices;
+	}
+
+	const auto idx = iy * width + ix;
+
+	auto& shadowRay = shadowRays[idx];
+
+	if (shadowRay.isActive) {
+		auto& path = paths[idx];
+
+		aten::hitrecord rec;
+		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec);
+
+		
+		shadowRay.isActive = AT_NAME::scene::hitLight(
+			isHit, 
+			path.targetLight, 
+			path.lightPos,
+			shadowRay, 
+			AT_MATH_EPSILON, AT_MATH_INF, 
+			&rec);
+
+		if (shadowRay.isActive) {
+			path.contrib += path.lightcontrib;
+		}
 	}
 }
 
@@ -238,6 +478,9 @@ namespace idaten {
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
+		idaten::TypedCudaMemory<ray> shadowRays;
+		shadowRays.init(width * height);
+
 		CudaGLResourceMap rscmap(&glimg);
 		auto outputSurf = glimg.bind();
 
@@ -251,6 +494,8 @@ namespace idaten {
 		nodetex.writeByNum(&tmp[0], tmp.size());
 
 		static const int maxSamples = 5;
+		static const int maxDepth = 5;
+		static const int rrDepth = 3;
 
 		auto time = getSystemTime();
 
@@ -262,9 +507,7 @@ namespace idaten {
 				time.milliSeconds,
 				cam.ptr());
 
-			//checkCudaErrors(cudaDeviceSynchronize());
-
-			while (depth < 5) {
+			while (depth < maxDepth) {
 				hitTest << <grid, block >> > (
 					paths.ptr(),
 					width, height,
@@ -280,12 +523,32 @@ namespace idaten {
 					AT_PRINTF("Cuda Kernel Err(hitTest) [%s]\n", cudaGetErrorString(err));
 				}
 
-				//checkCudaErrors(cudaDeviceSynchronize());
-
-				shade << <grid, block >> > (
-					//(float4*)dst.ptr(),
+				shadeMiss << <grid, block >> > (
 					outputSurf,
 					paths.ptr(),
+					width, height);
+
+				shade << <grid, block >> > (
+					outputSurf,
+					paths.ptr(),
+					shadowRays.ptr(),
+					width, height,
+					depth, rrDepth,
+					shapeparam.ptr(), shapeparam.num(),
+					mtrlparam.ptr(),
+					lightparam.ptr(), lightparam.num(),
+					nodetex.ptr(),
+					primparams.ptr(),
+					vtxTex);
+
+				err = cudaGetLastError();
+				if (err != cudaSuccess) {
+					AT_PRINTF("Cuda Kernel Err(shade) [%s]\n", cudaGetErrorString(err));
+				}
+
+				hitShadowRay << <grid, block >> > (
+					paths.ptr(),
+					shadowRays.ptr(),
 					width, height,
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
@@ -296,10 +559,8 @@ namespace idaten {
 
 				err = cudaGetLastError();
 				if (err != cudaSuccess) {
-					AT_PRINTF("Cuda Kernel Err(raytracing) [%s]\n", cudaGetErrorString(err));
+					AT_PRINTF("Cuda Kernel Err(hitShadowRay) [%s]\n", cudaGetErrorString(err));
 				}
-
-				//checkCudaErrors(cudaDeviceSynchronize());
 
 				depth++;
 			}

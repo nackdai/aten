@@ -93,7 +93,7 @@ __device__ FuncBSDF funcBSDF[aten::MaterialType::MaterialTypeMax];
 
 __device__ void addMaterialFuncs()
 {
-#if 0
+#if 1
 	funcSampleMaterial[aten::MaterialType::Emissive] = AT_NAME::emissive::sample;			// Emissive
 	funcSampleMaterial[aten::MaterialType::Lambert] = AT_NAME::lambert::sample;				// Lambert
 	funcSampleMaterial[aten::MaterialType::OrneNayar] = AT_NAME::OrenNayar::sample;			// OrneNayar

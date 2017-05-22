@@ -163,6 +163,9 @@ namespace aten
 			// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 			vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
+			// Apply normal map.
+			path.rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
+
 			// Implicit conection to light.
 			if (path.rec.mtrl->isEmissive()) {
 				if (depth == 0) {
@@ -204,9 +207,6 @@ namespace aten
 				path.isAlive = false;
 				continue;
 			}
-
-			// Apply normal map.
-			path.rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
 			// Explicit conection to light.
 			if (!path.rec.mtrl->isSingular())

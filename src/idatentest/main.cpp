@@ -140,6 +140,7 @@ void display()
 
 	//aten::visualizer::render(g_buffer.image(), false);
 	aten::visualizer::render(false);
+	aten::visualizer::takeScreenshot("sc.png");
 }
 
 int main()

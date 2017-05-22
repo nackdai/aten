@@ -75,12 +75,14 @@ __global__ void genPath(
 
 	path.ray = camsample.r;
 	path.throughput = aten::make_float3(1);
-	path.contrib = aten::make_float3(0);
 	path.mtrl = nullptr;
 	path.lightcontrib = aten::make_float3(0);
 	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
+
+	// Accumulate value, so do not reset.
+	//path.contrib = aten::make_float3(0);
 }
 
 __global__ void hitTest(
@@ -436,7 +438,8 @@ __global__ void hitShadowRay(
 __global__ void gather(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
-	int width, int height)
+	int width, int height,
+	int sample)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -452,7 +455,7 @@ __global__ void gather(
 	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
 	int n = data.w;
-	data = n * data + make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0);
+	data = n * data + make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
 	data /= (n + 1);
 	data.w = n + 1;
 
@@ -517,7 +520,7 @@ namespace idaten {
 		}
 		nodetex.writeByNum(&tmp[0], tmp.size());
 
-		static const int maxSamples = 5;
+		static const int maxSamples = 1;
 		static const int maxDepth = 5;
 		static const int rrDepth = 3;
 
@@ -595,15 +598,14 @@ namespace idaten {
 				depth++;
 			}
 #endif
-
-			gather << <grid, block >> > (
-			//gather << <1, 1 >> > (
-				outputSurf,
-				paths.ptr(),
-				width, height);
-
-			checkCudaErrors(cudaDeviceSynchronize());
 		}
+
+		gather << <grid, block >> > (
+		//gather << <1, 1 >> > (
+			outputSurf,
+			paths.ptr(),
+			width, height,
+			maxSamples);
 
 		vtxparams.unbind();
 		for (int i = 0; i < nodeparam.size(); i++) {

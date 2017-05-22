@@ -24,7 +24,8 @@ namespace idaten {
 #if 0
 		dst.init(sizeof(float4) * width * height);
 #else
-		glimg.init(gltex, CudaGLRscRegisterType::WriteOnly);
+		//glimg.init(gltex, CudaGLRscRegisterType::WriteOnly);
+		glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
 #endif
 
 		cam.init(sizeof(camera));

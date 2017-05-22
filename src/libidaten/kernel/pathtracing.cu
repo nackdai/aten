@@ -40,7 +40,7 @@ struct Path {
 
 	aten::vec3 lightPos;
 	aten::vec3 lightcontrib;
-	aten::LightParameter* targetLight;
+	aten::LightParameter targetLight;
 
 	real pdfb;
 
@@ -78,7 +78,6 @@ __global__ void genPath(
 	path.contrib = aten::make_float3(0);
 	path.mtrl = nullptr;
 	path.lightcontrib = aten::make_float3(0);
-	path.targetLight = nullptr;
 	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
@@ -146,12 +145,8 @@ __global__ void shadeMiss(
 	auto& path = paths[idx];
 
 	if (!path.isTerminate && !path.isHit) {
-		surf2Dwrite(
-			make_float4(0, 0, 0, 1),
-			outSurface, 
-			ix * sizeof(float4), iy, 
-			cudaBoundaryModeTrap);
-
+		// TODO
+		path.contrib = aten::make_float3(0);
 		path.isTerminate = true;
 	}
 }
@@ -191,6 +186,8 @@ __global__ void shade(
 	const auto idx = iy * width + ix;
 
 	auto& path = paths[idx];
+
+	shadowRays[idx].isActive = false;
 
 	if (!path.isHit) {
 		return;
@@ -248,12 +245,6 @@ __global__ void shade(
 	}
 
 	if (!willContinue) {
-		surf2Dwrite(
-			make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 1),
-			outSurface,
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
-
 		path.isTerminate = true;
 		return;
 	}
@@ -266,60 +257,64 @@ __global__ void shade(
 
 		// TODO
 		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
-		auto light = &ctxt.lights[lightidx];
+		path.targetLight = ctxt.lights[lightidx];
+		lightSelectPdf = 1.0f / lightnum;
 
-		if (light) {
-			const auto& posLight = sampleres.pos;
-			const auto& nmlLight = sampleres.nml;
-			real pdfLight = sampleres.pdf;
+		if (path.targetLight.object.idx >= 0) {
+			path.targetLight.object.ptr = &ctxt.shapes[path.targetLight.object.idx];
+		}
 
-			auto lightobj = sampleres.obj;
+		sampleLight(&sampleres, &path.targetLight, path.rec.p, &path.sampler);
 
-			auto dirToLight = normalize(sampleres.dir);
-			shadowRays[idx] = ray(path.rec.p, dirToLight);
+		const auto& posLight = sampleres.pos;
+		const auto& nmlLight = sampleres.nml;
+		real pdfLight = sampleres.pdf;
 
-			auto cosShadow = dot(orienting_normal, dirToLight);
+		auto lightobj = sampleres.obj;
 
-			real pdfb = samplePDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-			auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+		auto dirToLight = normalize(sampleres.dir);
+		shadowRays[idx] = ray(path.rec.p, dirToLight);
 
-			bsdf *= path.throughput;
+		auto cosShadow = dot(orienting_normal, dirToLight);
 
-			// Get light color.
-			auto emit = sampleres.finalColor;
+		real pdfb = samplePDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+		auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
-			path.lightPos = posLight;
-			path.targetLight = light;
-			path.lightcontrib = aten::make_float3(0);
+		bsdf *= path.throughput;
 
-			if (light->attrib.isSingular || light->attrib.isInfinite) {
-				if (pdfLight > real(0)) {
-					// TODO
-					// ジオメトリタームの扱いについて.
-					// singular light の場合は、finalColor に距離の除算が含まれている.
-					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-					auto misW = pdfLight / (pdfb + pdfLight);
-					path.lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
-				}
+		// Get light color.
+		auto emit = sampleres.finalColor;
+
+		path.lightPos = posLight;
+		path.lightcontrib = aten::make_float3(0);
+
+		if (path.targetLight.attrib.isSingular || path.targetLight.attrib.isInfinite) {
+			if (pdfLight > real(0)) {
+				// TODO
+				// ジオメトリタームの扱いについて.
+				// singular light の場合は、finalColor に距離の除算が含まれている.
+				// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+				// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
+				auto misW = pdfLight / (pdfb + pdfLight);
+				path.lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
 			}
-			else {
-				auto cosLight = dot(nmlLight, -dirToLight);
+		}
+		else {
+			auto cosLight = dot(nmlLight, -dirToLight);
 
-				if (cosShadow >= 0 && cosLight >= 0) {
-					auto dist2 = sampleres.dir.squared_length();
-					auto G = cosShadow * cosLight / dist2;
+			if (cosShadow >= 0 && cosLight >= 0) {
+				auto dist2 = sampleres.dir.squared_length();
+				auto G = cosShadow * cosLight / dist2;
 
-					if (pdfb > real(0) && pdfLight > real(0)) {
-						// Convert pdf from steradian to area.
-						// http://www.slideshare.net/h013/edubpt-v100
-						// p31 - p35
-						pdfb = pdfb * cosLight / dist2;
+				if (pdfb > real(0) && pdfLight > real(0)) {
+					// Convert pdf from steradian to area.
+					// http://www.slideshare.net/h013/edubpt-v100
+					// p31 - p35
+					pdfb = pdfb * cosLight / dist2;
 
-						auto misW = pdfLight / (pdfb + pdfLight);
+					auto misW = pdfLight / (pdfb + pdfLight);
 
-						path.lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
-					}
+					path.lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
 				}
 			}
 		}
@@ -423,11 +418,10 @@ __global__ void hitShadowRay(
 
 		aten::hitrecord rec;
 		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec);
-
 		
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
-			path.targetLight, 
+			&path.targetLight, 
 			path.lightPos,
 			shadowRay, 
 			AT_MATH_EPSILON, AT_MATH_INF, 
@@ -437,6 +431,36 @@ __global__ void hitShadowRay(
 			path.contrib += path.lightcontrib;
 		}
 	}
+}
+
+__global__ void gather(
+	cudaSurfaceObject_t outSurface,
+	Path* paths,
+	int width, int height)
+{
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	const auto idx = iy * width + ix;
+	const auto& path = paths[idx];
+
+	float4 data;
+	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
+
+	int n = data.w;
+	data = n * data + make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0);
+	data /= (n + 1);
+	data.w = n + 1;
+
+	surf2Dwrite(
+		data,
+		outSurface,
+		ix * sizeof(float4), iy,
+		cudaBoundaryModeTrap);
 }
 
 namespace idaten {
@@ -500,7 +524,9 @@ namespace idaten {
 		auto time = getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
+#if 1
 			genPath << <grid, block >> > (
+			//genPath << <1, 1 >> > (
 				paths.ptr(),
 				width, height,
 				i, maxSamples,
@@ -509,6 +535,7 @@ namespace idaten {
 
 			while (depth < maxDepth) {
 				hitTest << <grid, block >> > (
+				//hitTest << <1, 1 >> > (
 					paths.ptr(),
 					width, height,
 					shapeparam.ptr(), shapeparam.num(),
@@ -523,12 +550,14 @@ namespace idaten {
 					AT_PRINTF("Cuda Kernel Err(hitTest) [%s]\n", cudaGetErrorString(err));
 				}
 
-				shadeMiss << <grid, block >> > (
+				//shadeMiss << <grid, block >> > (
+				shadeMiss << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
 					width, height);
 
 				shade << <grid, block >> > (
+				//shade << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
 					shadowRays.ptr(),
@@ -547,6 +576,7 @@ namespace idaten {
 				}
 
 				hitShadowRay << <grid, block >> > (
+				//hitShadowRay << <1, 1 >> > (
 					paths.ptr(),
 					shadowRays.ptr(),
 					width, height,
@@ -564,6 +594,13 @@ namespace idaten {
 
 				depth++;
 			}
+#endif
+
+			gather << <grid, block >> > (
+			//gather << <1, 1 >> > (
+				outputSurf,
+				paths.ptr(),
+				width, height);
 
 			checkCudaErrors(cudaDeviceSynchronize());
 		}

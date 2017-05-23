@@ -148,15 +148,32 @@ namespace AT_NAME
 		return getSamplePosNormalArea(result, aten::mat4::Identity, sampler);
 	}
 
+	AT_DEVICE_API void sphere::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		const aten::ShapeParameter* param,
+		aten::sampler* sampler)
+	{
+		getSamplePosNormalArea(result, param, aten::mat4(), sampler);
+	}
+
 	void sphere::getSamplePosNormalArea(
 		aten::hitable::SamplePosNormalPdfResult* result,
 		const aten::mat4& mtxL2W,
 		aten::sampler* sampler) const
 	{
+		getSamplePosNormalArea(result, &m_param, mtxL2W, sampler);
+	}
+
+	void sphere::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		const aten::ShapeParameter* param,
+		const aten::mat4& mtxL2W,
+		aten::sampler* sampler)
+	{
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
-		auto r = m_param.radius;
+		auto r = param->radius;
 
 		auto z = real(2) * r1 - real(1); // [0,1] -> [-1, 1]
 
@@ -171,15 +188,15 @@ namespace AT_NAME
 
 		auto p = dir * (r + AT_MATH_EPSILON);
 
-		result->pos = m_param.center + p;
+		result->pos = param->center + p;
 
-		result->nml = normalize(result->pos - m_param.center);
+		result->nml = normalize(result->pos - param->center);
 
 		result->area = real(1);
 		{
-			auto tmp = m_param.center + aten::make_float3(m_param.radius, 0, 0);
+			auto tmp = param->center + aten::make_float3(param->radius, 0, 0);
 
-			auto center = mtxL2W.apply(m_param.center);
+			auto center = mtxL2W.apply(param->center);
 			tmp = mtxL2W.apply(tmp);
 
 			auto radius = (tmp - center).length();

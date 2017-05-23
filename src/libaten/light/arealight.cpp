@@ -9,7 +9,7 @@ namespace AT_NAME {
 		aten::LightSampleResult result;
 
 		if (obj) {
-			aten::vec3 pos;
+			aten::ray r;
 			aten::hitrecord rec;
 
 			if (sampler) {
@@ -18,10 +18,9 @@ namespace AT_NAME {
 
 				obj->getSamplePosNormalArea(&result, sampler);
 
-				pos = result.pos;
-
+				auto pos = result.pos;
 				auto dir = pos - org;
-				aten::ray r(org, dir);
+				r = aten::ray(org, dir);
 
 				if (result.idx[0] >= 0) {
 					rec.t = dir.length();
@@ -36,12 +35,17 @@ namespace AT_NAME {
 				else {
 					obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 				}
-
-				obj->evalHitResult(r, rec);
 			}
 			else {
-				pos = obj->getBoundingbox().getCenter();
+				auto pos = obj->getBoundingbox().getCenter();
+
+				auto dir = pos - org;
+				r = aten::ray(org, dir);
+
+				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
 			}
+
+			obj->evalHitResult(r, rec);
 
 			sample(
 				&result,

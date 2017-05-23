@@ -60,6 +60,11 @@ namespace AT_NAME
 			aten::hitable::SamplePosNormalPdfResult* result,
 			aten::sampler* sampler) const override final;
 
+		static AT_DEVICE_API void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			const aten::ShapeParameter* param,
+			aten::sampler* sampler);
+
 		virtual const aten::ShapeParameter& getParam() const override final
 		{
 			return m_param;
@@ -75,6 +80,12 @@ namespace AT_NAME
 			aten::hitable::SamplePosNormalPdfResult* result,
 			const aten::mat4& mtxL2W,
 			aten::sampler* sampler) const override final;
+
+		static AT_DEVICE_API void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			const aten::ShapeParameter* param,
+			const aten::mat4& mtxL2W,
+			aten::sampler* sampler);
 
 	private:
 		aten::ShapeParameter m_param;

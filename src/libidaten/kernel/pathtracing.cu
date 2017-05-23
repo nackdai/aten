@@ -268,7 +268,7 @@ __global__ void shade(
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
 
-		sampleLight(&sampleres, &light, path.rec.p, &path.sampler);
+		sampleLight(&sampleres, &ctxt, &light, path.rec.p, &path.sampler);
 
 		const auto& posLight = sampleres.pos;
 		const auto& nmlLight = sampleres.nml;
@@ -560,8 +560,8 @@ namespace idaten {
 					AT_PRINTF("Cuda Kernel Err(hitTest) [%s]\n", cudaGetErrorString(err));
 				}
 
-				//shadeMiss << <grid, block >> > (
-				shadeMiss << <1, 1 >> > (
+				shadeMiss << <grid, block >> > (
+				//shadeMiss << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
 					width, height);

@@ -182,7 +182,7 @@ __global__ void raytracing(
 		light.object.ptr = sphere;
 
 		aten::LightSampleResult sampleres;
-		sampleLight(&sampleres, &light, path.rec.p, nullptr);
+		sampleLight(&sampleres, &ctxt, &light, path.rec.p, nullptr);
 
 		aten::vec3 dirToLight = sampleres.dir;
 		auto len = dirToLight.length();

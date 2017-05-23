@@ -56,9 +56,9 @@ namespace AT_NAME
 			return m_param.radius;
 		}
 
-		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override final;
-
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final;
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			aten::sampler* sampler) const override final;
 
 		virtual const aten::ShapeParameter& getParam() const override final
 		{
@@ -71,7 +71,8 @@ namespace AT_NAME
 			const aten::mat4& mtxL2W,
 			aten::hitrecord& rec) const override final;
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
 			const aten::mat4& mtxL2W,
 			aten::sampler* sampler) const override final;
 

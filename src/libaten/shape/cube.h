@@ -37,9 +37,9 @@ namespace AT_NAME
 			return m_param.size;
 		}
 
-		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override final;
-
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final;
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			aten::sampler* sampler) const override final;
 
 		virtual const aten::ShapeParameter& getParam() const override final
 		{
@@ -50,7 +50,8 @@ namespace AT_NAME
 		virtual void evalHitResult(const aten::ray& r, aten::hitrecord& rec) const override final;
 		virtual void evalHitResult(const aten::ray& r, const aten::mat4& mtxL2W, aten::hitrecord& rec) const override final;
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
 			const aten::mat4& mtxL2W,
 			aten::sampler* sampler) const override final;
 
@@ -64,7 +65,7 @@ namespace AT_NAME
 			NEG_Z,
 		};
 
-		Face onGetRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const;
+		Face getRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const;
 
 		static Face findFace(const aten::vec3& d);
 

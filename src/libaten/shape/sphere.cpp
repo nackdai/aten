@@ -141,7 +141,17 @@ namespace AT_NAME
 		getUV(rec->u, rec->v, rec->normal);
 	}
 
-	aten::vec3 sphere::getRandomPosOn(aten::sampler* sampler) const
+	void sphere::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		aten::sampler* sampler) const
+	{
+		return getSamplePosNormalArea(result, aten::mat4::Identity, sampler);
+	}
+
+	void sphere::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		const aten::mat4& mtxL2W,
+		aten::sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
@@ -161,24 +171,11 @@ namespace AT_NAME
 
 		auto p = dir * (r + AT_MATH_EPSILON);
 
-		aten::vec3 posOnSphere = m_param.center + p;
+		result->pos = m_param.center + p;
 
-		return std::move(posOnSphere);
-	}
+		result->nml = normalize(result->pos - m_param.center);
 
-	aten::hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(aten::sampler* sampler) const
-	{
-		return getSamplePosNormalPdf(aten::mat4::Identity, sampler);
-	}
-
-	aten::hitable::SamplingPosNormalPdf sphere::getSamplePosNormalPdf(
-		const aten::mat4& mtxL2W,
-		aten::sampler* sampler) const
-	{
-		auto p = getRandomPosOn(sampler);
-		auto n = normalize(p - m_param.center);
-
-		real area = real(1);
+		result->area = real(1);
 		{
 			auto tmp = m_param.center + aten::make_float3(m_param.radius, 0, 0);
 
@@ -187,9 +184,7 @@ namespace AT_NAME
 
 			auto radius = (tmp - center).length();
 
-			area = 4 * AT_MATH_PI * radius * radius;
+			result->area = 4 * AT_MATH_PI * radius * radius;
 		}
-
-		return std::move(hitable::SamplingPosNormalPdf(p + n * AT_MATH_EPSILON, n, real(1) / area));
 	}
 }

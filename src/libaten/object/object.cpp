@@ -146,32 +146,9 @@ namespace AT_NAME
 		param.area = real(0.5) * cross(e0, e1).length();
 	}
 
-	aten::vec3 face::getRandomPosOn(aten::sampler* sampler) const
-	{
-		// 0 <= a + b <= 1
-		real a = sampler->nextSample();
-		real b = sampler->nextSample();
-
-		real d = a + b;
-
-		if (d > 1) {
-			a /= d;
-			b /= d;
-		}
-
-		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
-
-		// èdêSç¿ïWån(barycentric coordinates).
-		// v0äÓèÄ.
-		// p = (1 - a - b)*v0 + a*v1 + b*v2
-		aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
-
-		return std::move(p);
-	}
-
-	aten::hitable::SamplingPosNormalPdf face::getSamplePosNormalPdf(aten::sampler* sampler) const
+	void face::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		aten::sampler* sampler) const
 	{
 		// 0 <= a + b <= 1
 		real a = sampler->nextSample();
@@ -201,7 +178,16 @@ namespace AT_NAME
 		auto e1 = v2.pos - v0.pos;
 		auto area = real(0.5) * cross(e0, e1).length();
 
-		return std::move(hitable::SamplingPosNormalPdf(p + n * AT_MATH_EPSILON, n, area));
+		result->pos = p;
+		result->nml = n;
+		result->area = area;
+
+		result->a = a;
+		result->b = b;
+
+		result->idx[0] = param.idx[0];
+		result->idx[1] = param.idx[1];
+		result->idx[2] = param.idx[2];
 	}
 
 	void shape::build()
@@ -354,7 +340,10 @@ namespace AT_NAME
 		rec.area = param.area * ratio;
 	}
 
-	aten::hitable::SamplingPosNormalPdf object::getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const
+	void object::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		const aten::mat4& mtxL2W, 
+		aten::sampler* sampler) const
 	{
 		auto r = sampler->nextSample();
 		int shapeidx = (int)(r * (shapes.size() - 1));
@@ -388,14 +377,9 @@ namespace AT_NAME
 
 		auto area = param.area * ratio;
 
-		auto tmp = f->getSamplePosNormalPdf(sampler);
+		f->getSamplePosNormalArea(result, sampler);
 
-		hitable::SamplingPosNormalPdf res(
-			std::get<0>(tmp),
-			std::get<1>(tmp),
-			real(1) / area);
-
-		return std::move(res);
+		result->area = area;
 	}
 
 	void object::getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const

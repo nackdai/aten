@@ -45,9 +45,9 @@ namespace AT_NAME
 			const aten::vertex& v2,
 			aten::hitrecord* rec);
 
-		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override;
-
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override;
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			aten::sampler* sampler) const override;
 
 		void build();
 
@@ -81,20 +81,14 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final;
 
-		virtual aten::vec3 getRandomPosOn(aten::sampler* sampler) const override final
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			aten::sampler* sampler) const override final
 		{
 			auto r = sampler->nextSample();
 			int idx = (int)(r * (faces.size() - 1));
 			auto face = faces[idx];
-			return face->getRandomPosOn(sampler);
-		}
-
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final
-		{
-			auto r = sampler->nextSample();
-			int idx = (int)(r * (faces.size() - 1));
-			auto face = faces[idx];
-			return face->getSamplePosNormalPdf(sampler);
+			return face->getSamplePosNormalArea(result, sampler);
 		}
 
 		aten::ShapeParameter param;
@@ -134,15 +128,10 @@ namespace AT_NAME
 	private:
 		void build();
 
-		aten::vec3 getRandomPosOn(aten::sampler* sampler) const
-		{
-			auto r = sampler->nextSample();
-			int idx = (int)(r * (shapes.size() - 1));
-			auto shape = shapes[idx];
-			return shape->getRandomPosOn(sampler);
-		}
-
-		virtual hitable::SamplingPosNormalPdf getSamplePosNormalPdf(const aten::mat4& mtxL2W, aten::sampler* sampler) const override final;
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			const aten::mat4& mtxL2W, 
+			aten::sampler* sampler) const override final;
 
 		virtual int collectInternalNodes(std::vector<std::vector<aten::BVHNode>>& nodes, int order, bvhnode* parent) override final;
 

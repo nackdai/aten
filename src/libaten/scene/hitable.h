@@ -78,21 +78,19 @@ namespace aten {
 
 		virtual aabb getBoundingbox() const = 0;
 
-		virtual vec3 getRandomPosOn(sampler* sampler) const
+		struct SamplePosNormalPdfResult {
+			aten::vec3 pos;
+			aten::vec3 nml;
+			real area;
+
+			real a;
+			real b;
+			int idx[3];
+		};
+
+		virtual void getSamplePosNormalArea(SamplePosNormalPdfResult* result, sampler* sampler) const
 		{
 			AT_ASSERT(false);
-			return std::move(vec3());
-		}
-
-		// 0 : pos
-		// 1 : normal
-		// 2 : pdf
-		using SamplingPosNormalPdf = std::tuple<vec3, vec3, real>;
-
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
-		{
-			AT_ASSERT(false);
-			return std::move(SamplingPosNormalPdf(vec3(), vec3(), real(1)));
 		}
 
 		uint32_t id() const

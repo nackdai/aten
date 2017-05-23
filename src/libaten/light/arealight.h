@@ -55,13 +55,14 @@ namespace AT_NAME {
 			return (aten::hitable*)m_param.object.ptr;
 		}
 
-		virtual aten::hitable::SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const override final
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			aten::sampler* sampler) const override final
 		{
 			if (m_param.object.ptr) {
 				auto obj = getLightObject();
-				return obj->getSamplePosNormalPdf(sampler);
+				return obj->getSamplePosNormalArea(result, sampler);
 			}
-			return std::move(aten::hitable::SamplingPosNormalPdf(aten::make_float3(0), aten::make_float3(1), real(0)));
 		}
 	};
 }

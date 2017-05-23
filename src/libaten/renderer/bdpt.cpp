@@ -227,10 +227,11 @@ namespace aten
 		// Only AreaLight...
 
 		// 光源上にサンプル点生成（y0）.
-		auto res = light->getSamplePosNormalPdf(sampler);
-		auto posOnLight = std::get<0>(res);
-		auto nmlOnLight = std::get<1>(res);
-		auto pdfOnLight = std::get<2>(res);
+		aten::hitable::SamplePosNormalPdfResult res;
+		light->getSamplePosNormalArea(&res, sampler);
+		auto posOnLight = res.pos;
+		auto nmlOnLight = res.nml;
+		auto pdfOnLight = real(1) / res.area;
 
 		// 確率密度の積を保持（面積測度に関する確率密度）.
 		auto totalAreaPdf = pdfOnLight;
@@ -890,7 +891,7 @@ namespace aten
 				for (int x = 0; x < m_width; x++) {
 
 					for (uint32_t i = 0; i < samples; i++) {
-						XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
 						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
 						//Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);

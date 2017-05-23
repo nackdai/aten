@@ -77,14 +77,11 @@ namespace aten
 			rec.dv = normalize(cross(rec.normal, rec.du));
 		}
 
-		virtual vec3 getRandomPosOn(sampler* sampler) const override final
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			sampler* sampler) const
 		{
-			return m_obj->getRandomPosOn(sampler);
-		}
-
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(sampler* sampler) const
-		{
-			return m_obj->getSamplePosNormalPdf(m_mtxL2W, sampler);
+			return m_obj->getSamplePosNormalArea(result, m_mtxL2W, sampler);
 		}
 
 		virtual const hitable* getHasObject() const override final
@@ -134,13 +131,13 @@ namespace aten
 			return std::move(ret);
 		}
 
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
 			const mat4& mtxL2W,
 			sampler* sampler) const override final
 		{
 			// Not used...
 			AT_ASSERT(false);
-			return std::move(SamplingPosNormalPdf(vec3(), vec3(), real(0)));
 		}
 
 		virtual void evalHitResult(

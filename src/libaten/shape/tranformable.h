@@ -16,7 +16,8 @@ namespace aten
 		virtual ~transformable();
 
 	public:
-		virtual SamplingPosNormalPdf getSamplePosNormalPdf(
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
 			const mat4& mtxL2W,
 			sampler* sampler) const = 0;
 

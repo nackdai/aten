@@ -138,15 +138,7 @@ namespace AT_NAME
 		rec.area = m_aabb.computeSurfaceArea();
 	}
 
-	aten::vec3 cube::getRandomPosOn(aten::sampler* sampler) const
-	{
-		aten::vec3 pos;
-		onGetRandomPosOn(pos, sampler);
-
-		return std::move(pos);
-	}
-
-	cube::Face cube::onGetRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const
+	cube::Face cube::getRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const
 	{
 		auto r1 = sampler->nextSample();
 
@@ -219,17 +211,20 @@ namespace AT_NAME
 		return face;
 	}
 
-	aten::hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(aten::sampler* sampler) const
+	void cube::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
+		aten::sampler* sampler) const
 	{
-		return getSamplePosNormalPdf(aten::mat4::Identity, sampler);
+		return getSamplePosNormalArea(result, aten::mat4::Identity, sampler);
 	}
 
-	aten::hitable::SamplingPosNormalPdf cube::getSamplePosNormalPdf(
+	void cube::getSamplePosNormalArea(
+		aten::hitable::SamplePosNormalPdfResult* result,
 		const aten::mat4& mtxL2W,
 		aten::sampler* sampler) const
 	{
 		aten::vec3 pos;
-		auto face = onGetRandomPosOn(pos, sampler);
+		auto face = getRandomPosOn(pos, sampler);
 
 		aten::vec3 nml;
 		switch (face) {
@@ -255,8 +250,9 @@ namespace AT_NAME
 
 		// TODO
 		AT_ASSERT(false);
-		auto area = 1;
+		result->area = 1;
 
-		return std::move(hitable::SamplingPosNormalPdf(pos + nml * AT_MATH_EPSILON, nml, real(1) / area));
+		result->pos = pos;
+		result->nml = nml;
 	}
 }

@@ -145,12 +145,13 @@ namespace AT_NAME
 			return m_param;
 		}
 
-		virtual aten::hitable::SamplingPosNormalPdf getSamplePosNormalPdf(aten::sampler* sampler) const
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			aten::sampler* sampler) const
 		{
 			// TODO
 			// Only for AreaLight...
 			AT_ASSERT(false);
-			return std::move(aten::hitable::SamplingPosNormalPdf(aten::make_float3(0), aten::make_float3(1, 0, 0), real(0)));
 		}
 
 		static uint32_t getLightNum();

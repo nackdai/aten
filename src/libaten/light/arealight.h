@@ -25,10 +25,9 @@ namespace AT_NAME {
 		virtual ~AreaLight() {}
 
 	public:
-		template <typename Func>
 		static AT_DEVICE_API void sample(
-			Func funcHitTest,
 			aten::LightSampleResult* result,
+			const aten::hitrecord* rec,
 			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
@@ -36,23 +35,16 @@ namespace AT_NAME {
 			auto obj = param->object.ptr;
 
 			if (obj) {
-				aten::hitrecord rec;
+				result->pos = rec->p;
+				result->pdf = 1 / rec->area;
+				result->dir = rec->p - org;
+				result->nml = rec->normal;
 
-				aten::vec3 pos;
-				bool isHit = funcHitTest(org, param->object, pos, sampler, &rec);
+				result->le = param->le;
+				result->intensity = 1;
+				result->finalColor = param->le;
 
-				if (isHit) {
-					result->pos = rec.p;
-					result->pdf = 1 / rec.area;
-					result->dir = rec.p - org;
-					result->nml = rec.normal;
-
-					result->le = param->le;
-					result->intensity = 1;
-					result->finalColor = param->le;
-
-					result->obj = obj;
-				}
+				result->obj = obj;
 			}
 		}
 

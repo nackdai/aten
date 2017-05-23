@@ -40,7 +40,7 @@ struct Path {
 
 	aten::vec3 lightPos;
 	aten::vec3 lightcontrib;
-	aten::LightParameter targetLight;
+	int targetLightId;
 
 	real pdfb;
 
@@ -77,6 +77,7 @@ __global__ void genPath(
 	path.throughput = aten::make_float3(1);
 	path.mtrl = nullptr;
 	path.lightcontrib = aten::make_float3(0);
+	path.targetLightId = -1;
 	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
@@ -259,14 +260,15 @@ __global__ void shade(
 
 		// TODO
 		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
-		path.targetLight = ctxt.lights[lightidx];
+		path.targetLightId = lightidx;
 		lightSelectPdf = 1.0f / lightnum;
 
-		if (path.targetLight.object.idx >= 0) {
-			path.targetLight.object.ptr = &ctxt.shapes[path.targetLight.object.idx];
+		auto light = ctxt.lights[lightidx];
+		if (light.object.idx >= 0) {
+			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
 
-		sampleLight(&sampleres, &path.targetLight, path.rec.p, &path.sampler);
+		sampleLight(&sampleres, &light, path.rec.p, &path.sampler);
 
 		const auto& posLight = sampleres.pos;
 		const auto& nmlLight = sampleres.nml;
@@ -290,7 +292,7 @@ __global__ void shade(
 		path.lightPos = posLight;
 		path.lightcontrib = aten::make_float3(0);
 
-		if (path.targetLight.attrib.isSingular || path.targetLight.attrib.isInfinite) {
+		if (light.attrib.isSingular || light.attrib.isInfinite) {
 			if (pdfLight > real(0)) {
 				// TODO
 				// ジオメトリタームの扱いについて.
@@ -420,10 +422,15 @@ __global__ void hitShadowRay(
 
 		aten::hitrecord rec;
 		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec);
+
+		auto light = ctxt.lights[path.targetLightId];
+		if (light.object.idx >= 0) {
+			light.object.ptr = &ctxt.shapes[light.object.idx];
+		}
 		
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
-			&path.targetLight, 
+			&light,
 			path.lightPos,
 			shadowRay, 
 			AT_MATH_EPSILON, AT_MATH_INF, 

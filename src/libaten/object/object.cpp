@@ -419,10 +419,10 @@ namespace AT_NAME
 				auto& node = nodes[0][idx];
 
 				// Compute transformed AABB.
-				aabb box(node.boxmin, node.boxmax);
-				auto transformedBox = aabb::transform(box, mtxL2W);
-				node.boxmin = vec4(transformedBox.minPos(), 0);
-				node.boxmax = vec4(transformedBox.maxPos(), 0);
+				aten::aabb box(node.boxmin, node.boxmax);
+				auto transformedBox = aten::aabb::transform(box, mtxL2W);
+				node.boxmin = aten::vec4(transformedBox.minPos(), 0);
+				node.boxmax = aten::vec4(transformedBox.maxPos(), 0);
 			}
 		}
 

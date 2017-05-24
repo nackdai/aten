@@ -179,12 +179,9 @@ namespace aten {
 		stackbuf[0] = &nodes[0];
 
 		int stackpos = 1;
-		int nestedStackPos = -1;
 
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
-
-		bool isNested = false;
 
 		real hitt = AT_MATH_INF;
 		int exid = -1;
@@ -193,11 +190,6 @@ namespace aten {
 		int tmpShapeid = -1;
 
 		while (stackpos > 0) {
-			if (stackpos == nestedStackPos) {
-				nestedStackPos = -1;
-				isNested = false;
-			}
-
 			auto node = stackbuf[stackpos - 1];
 
 			stackpos -= 1;
@@ -205,13 +197,8 @@ namespace aten {
 			if (node->isLeaf()) {
 				if (node->nestid >= 0) {
 					if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
-						nestedStackPos = isNested ? nestedStackPos : stackpos;
 						stackbuf[stackpos++] = &nodes[(int)node->nestid];
-
-						if (!isNested) {
-							tmpShapeid = (int)node->shapeid;
-							isNested = true;
-						}
+						tmpShapeid = (int)node->shapeid;
 					}
 				}
 				else {

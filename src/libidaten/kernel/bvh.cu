@@ -11,7 +11,7 @@
 __device__ bool intersectBVH(
 	cudaTextureObject_t nodes,
 	int* exid,
-	aten::ray* keepTransformedRay,
+	int* shapeid,
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
@@ -22,18 +22,17 @@ __device__ bool intersectBVH(
 	stackbuf[0] = 0;
 
 	int stackpos = 1;
-	int nestedStackPos = -1;
 
-	aten::ray transformedRay = r;
-	*keepTransformedRay = transformedRay;
-
-	bool isNested = false;
 	aten::hitrecord recTmp;
 	bool isHit = false;
 
 	real hitt = AT_MATH_INF;
+
 	*exid = -1;
 	int tmpexid = -1;
+
+	*shapeid = -1;
+	int tmpshapeid = -1;
 
 	int nodeid = -1;
 	float4 node;	// x:left, y:right
@@ -46,12 +45,6 @@ __device__ bool intersectBVH(
 	aten::vec3 boxmax;
 
 	while (stackpos > 0) {
-		if (stackpos == nestedStackPos) {
-			nestedStackPos = -1;
-			isNested = false;
-			transformedRay = r;
-		}
-
 		nodeid = stackbuf[stackpos - 1];
 		stackpos--;
 
@@ -66,17 +59,9 @@ __device__ bool intersectBVH(
 
 			if (node.x < 0 && node.y < 0) {
 				if (attrib.z >= 0) {
-					if (aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max)) {
-						nestedStackPos = isNested ? nestedStackPos : stackpos;
+					if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max)) {
 						stackbuf[stackpos++] = (int)attrib.z;
-
-						if (!isNested) {
-							const auto& param = ctxt->shapes[(int)attrib.x];
-							transformedRay.org = param.mtxW2L.apply(r.org);
-							transformedRay.dir = param.mtxW2L.applyXYZ(r.dir);
-							transformedRay.dir = normalize(transformedRay.dir);
-							isNested = true;
-						}
+						tmpshapeid = (int)attrib.x;
 					}
 				}
 				else {
@@ -87,17 +72,17 @@ __device__ bool intersectBVH(
 
 					if (attrib.w >= 0) {	// exid
 						real t = AT_MATH_INF;
-						isHit = aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max, &t);
+						isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
 						recTmp.t = t;
 						tmpexid = attrib.w;
 					}
 					else if (attrib.y >= 0) {	// primid
 						const auto& prim = ctxt->prims[(int)attrib.y];
-						isHit = intersectShape(s, &prim, ctxt, transformedRay, t_min, t_max, &recTmp);
+						isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp);
 						recTmp.mtrlid = prim.mtrlid;
 					}
 					else {
-						isHit = intersectShape(s, nullptr, ctxt, transformedRay, t_min, t_max, &recTmp);
+						isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp);
 						recTmp.mtrlid = s->mtrl.idx;
 						tmpexid = -1;
 					}
@@ -106,7 +91,7 @@ __device__ bool intersectBVH(
 						if (recTmp.t < hitt) {
 							hitt = recTmp.t;
 							*exid = tmpexid;
-							*keepTransformedRay = transformedRay;
+							*shapeid = tmpshapeid;
 						}
 						if (tmpexid < 0) {
 							if (recTmp.t < rec->t) {
@@ -118,7 +103,7 @@ __device__ bool intersectBVH(
 				}
 			}
 			else {
-				if (aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max)) {
+				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max)) {
 					stackbuf[stackpos++] = (int)node.x;
 					stackbuf[stackpos++] = (int)node.y;
 
@@ -146,7 +131,6 @@ __device__ bool intersectBVH(
 	stackbuf[0] = 0;
 
 	int stackpos = 1;
-	int nestedStackPos = -1;
 
 	aten::hitrecord recTmp;
 	bool isHit = false;
@@ -215,12 +199,12 @@ __device__ bool intersectBVH(
 	aten::hitrecord* rec)
 {
 	int exid = -1;
-	aten::ray transformedRay = r;
+	int shapeid = -1;
 
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
 		&exid,
-		&transformedRay,
+		&shapeid,
 		ctxt,
 		r,
 		t_min, t_max,
@@ -228,6 +212,13 @@ __device__ bool intersectBVH(
 
 	if (exid >= 0) {
 		aten::hitrecord recTmp;
+
+		const auto& param = ctxt->shapes[shapeid];
+
+		aten::ray transformedRay;
+		transformedRay.org = param.mtxW2L.apply(r.org);
+		transformedRay.dir = param.mtxW2L.applyXYZ(r.dir);
+		transformedRay.dir = normalize(transformedRay.dir);
 
 		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &recTmp)) {
 			if (recTmp.t < rec->t) {

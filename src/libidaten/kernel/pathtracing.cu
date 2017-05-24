@@ -543,6 +543,8 @@ namespace idaten {
 				time.milliSeconds,
 				cam.ptr());
 
+			depth = 0;
+
 			while (depth < maxDepth) {
 				hitTest << <grid, block >> > (
 				//hitTest << <1, 1 >> > (

@@ -139,6 +139,7 @@ namespace aten {
 	///////////////////////////////////////////////////////
 #ifdef TEST_NODE_LIST
 	static std::vector<std::vector<BVHNode>> snodes;
+	static std::vector<aten::mat4> smtxs;
 #endif
 
 	void bvh::build(
@@ -160,7 +161,7 @@ namespace aten {
 
 #ifdef TEST_NODE_LIST
 		if (snodes.empty()) {
-			collectNodes(snodes);
+			collectNodes(snodes, smtxs);
 			//bvh::dumpCollectedNodes(snodes, "_nodes.txt");
 		}
 #endif
@@ -262,7 +263,12 @@ namespace aten {
 		if (exid >= 0) {
 			const auto s = shapes[shapeid];
 			const auto& param = s->getParam();
-			auto transformedRay = param.mtxW2L.applyRay(r);
+
+			int mtxid = param.mtxid;
+
+			const auto& mtxW2L = smtxs[mtxid * 2 + 1];
+
+			auto transformedRay = mtxW2L.applyRay(r);
 
 			hitrecord recTmp;
 			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp)) {
@@ -664,7 +670,9 @@ namespace aten {
 #endif
 	}
 
-	void bvh::collectNodes(std::vector<std::vector<BVHNode>>& nodes) const
+	void bvh::collectNodes(
+		std::vector<std::vector<BVHNode>>& nodes,
+		std::vector<aten::mat4>& mtxs) const
 	{
 		nodes.push_back(std::vector<BVHNode>());
 		auto& rootnode = nodes[0];
@@ -674,11 +682,12 @@ namespace aten {
 
 		std::map<hitable*, int> cache;
 
-		auto shapes = transformable::getShapes();
+		auto& shapes = const_cast<std::vector<transformable*>&>(transformable::getShapes());
+
 		for (auto s : shapes) {
 			const auto idx = s->m_traverseOrder;
 			if (idx >= 0) {
-				const auto& param = s->getParam();
+				auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
 
 				if (param.type == ShapeType::Instance) {
 					auto& node = rootnode[idx];
@@ -697,6 +706,14 @@ namespace aten {
 
 						order = s->collectInternalNodes(nodes, order, nullptr);
 					}
+
+					param.mtxid = smtxs.size() / 2;
+
+					aten::mat4 mtxL2W, mtxW2L;
+					s->getMatrices(mtxL2W, mtxW2L);
+
+					smtxs.push_back(mtxL2W);
+					smtxs.push_back(mtxW2L);
 				}
 			}
 		}

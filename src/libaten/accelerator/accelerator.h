@@ -9,8 +9,8 @@ namespace aten {
 	struct BVHNode {
 		float left{ -1 };
 		float right{ -1 };
-		float padding0[2];
-		
+		float padding[2];
+
 		float shapeid{ -1 };
 		float primid{ -1 };
 		float nestid{ -1 };
@@ -35,7 +35,9 @@ namespace aten {
 			bvhnode** list,
 			uint32_t num) = 0;
 
-		virtual void collectNodes(std::vector<std::vector<BVHNode>>& nodes) const
+		virtual void collectNodes(
+			std::vector<std::vector<BVHNode>>& nodes,
+			std::vector<aten::mat4>& mtxs) const
 		{
 			// Nothing is done...
 		}

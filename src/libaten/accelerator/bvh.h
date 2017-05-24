@@ -44,6 +44,13 @@ namespace aten {
 			return nullptr;
 		}
 
+		virtual void getMatrices(
+			aten::mat4& mtxL2W,
+			aten::mat4& mtxW2L) const
+		{
+			AT_ASSERT(false);
+		}
+
 		virtual int collectInternalNodes(
 			std::vector<std::vector<aten::BVHNode>>& nodes, 
 			int order, 
@@ -96,7 +103,9 @@ namespace aten {
 			return std::move(aabb());
 		}
 
-		virtual void collectNodes(std::vector<std::vector<BVHNode>>& nodes) const override final;
+		virtual void collectNodes(
+			std::vector<std::vector<BVHNode>>& nodes,
+			std::vector<aten::mat4>& mtxs) const override final;
 
 		static int setTraverseOrder(bvhnode* root, int curOrder);
 		static void collectNodes(bvhnode* root, std::vector<BVHNode>& nodes, bvhnode* parent);

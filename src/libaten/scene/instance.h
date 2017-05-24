@@ -30,9 +30,6 @@ namespace aten
 			m_mtxW2L.invert();
 
 			m_aabb = transformBoundingBox();
-
-			m_param.mtxL2W = m_mtxL2W;
-			m_param.mtxW2L = m_mtxW2L;
 		}
 
 		virtual ~instance() {}
@@ -87,6 +84,14 @@ namespace aten
 		virtual const hitable* getHasObject() const override final
 		{
 			return m_obj;
+		}
+
+		virtual void getMatrices(
+			aten::mat4& mtxL2W,
+			aten::mat4& mtxW2L) const override final
+		{
+			mtxL2W = m_mtxL2W;
+			mtxW2L = m_mtxW2L;
 		}
 
 	private:

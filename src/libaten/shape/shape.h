@@ -21,13 +21,10 @@ namespace aten
 
 		aten::UnionIdxPtr mtrl;
 
-		mat4 mtxW2L;
-		mat4 mtxL2W;
-
 		real area;
 
 		int shapeid{ -1 };
-
+		int mtxid{ -1 };
 		int primid{ -1 };
 		int primnum{ 0 };
 

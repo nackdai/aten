@@ -133,7 +133,11 @@ namespace AT_NAME
 			const aten::mat4& mtxL2W, 
 			aten::sampler* sampler) const override final;
 
-		virtual int collectInternalNodes(std::vector<std::vector<aten::BVHNode>>& nodes, int order, bvhnode* parent) override final;
+		virtual int collectInternalNodes(
+			std::vector<std::vector<aten::BVHNode>>& nodes, 
+			int order, 
+			bvhnode* parent,
+			const aten::mat4& mtxL2W = aten::mat4()) override final;
 
 	public:
 		std::vector<shape*> shapes;

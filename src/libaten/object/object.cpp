@@ -397,10 +397,34 @@ namespace AT_NAME
 		}
 	}
 
-	int object::collectInternalNodes(std::vector<std::vector<aten::BVHNode>>& nodes, int order, bvhnode* parent)
+	int object::collectInternalNodes(
+		std::vector<std::vector<aten::BVHNode>>& nodes, 
+		int order, 
+		bvhnode* parent,
+		const aten::mat4& mtxL2W)
 	{
+		bool isIdentityL2W = mtxL2W.isIdentity();
+
+		auto curNodesNum = nodes[0].size();
+
 		int newOrder = aten::bvh::setTraverseOrder(&m_node, order);
 		aten::bvh::collectNodes(&m_node, nodes[0], parent);
+
+		auto collectedNodesNum = nodes[0].size() - curNodesNum;
+
+		if (collectedNodesNum > 0 && !isIdentityL2W) {
+			for (int i = 0; i < collectedNodesNum; i++) {
+				int idx = curNodesNum + i;
+
+				auto& node = nodes[0][idx];
+
+				// Compute transformed AABB.
+				aabb box(node.boxmin, node.boxmax);
+				auto transformedBox = aabb::transform(box, mtxL2W);
+				node.boxmin = vec4(transformedBox.minPos(), 0);
+				node.boxmax = vec4(transformedBox.maxPos(), 0);
+			}
+		}
 
 		for (auto s : shapes) {
 			nodes.push_back(std::vector<aten::BVHNode>());

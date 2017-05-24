@@ -44,7 +44,11 @@ namespace aten {
 			return nullptr;
 		}
 
-		virtual int collectInternalNodes(std::vector<std::vector<aten::BVHNode>>& nodes, int order, bvhnode* parent)
+		virtual int collectInternalNodes(
+			std::vector<std::vector<aten::BVHNode>>& nodes, 
+			int order, 
+			bvhnode* parent,
+			const aten::mat4& mtxL2W = aten::mat4())
 		{
 			// Nothing is done...
 			return order;

@@ -92,43 +92,7 @@ namespace aten
 	private:
 		aabb transformBoundingBox()
 		{
-			const auto& box = m_aabb;
-
-			vec3 center = box.getCenter();
-
-			vec3 vMin = box.minPos() - center;
-			vec3 vMax = box.maxPos() - center;
-
-			vec3 pts[8] = {
-				make_float3(vMin.x, vMin.y, vMin.z),
-				make_float3(vMax.x, vMin.y, vMin.z),
-				make_float3(vMin.x, vMax.y, vMin.z),
-				make_float3(vMax.x, vMax.y, vMin.z),
-				make_float3(vMin.x, vMin.y, vMax.z),
-				make_float3(vMax.x, vMin.y, vMax.z),
-				make_float3(vMin.x, vMax.y, vMax.z),
-				make_float3(vMax.x, vMax.y, vMax.z),
-			};
-
-			vec3 newMin = make_float3(AT_MATH_INF);
-			vec3 newMax = make_float3(-AT_MATH_INF);
-
-			for (int i = 0; i < 8; i++) {
-				vec3 v = m_mtxL2W.apply(pts[i]);
-
-				newMin = make_float3(
-					std::min(newMin.x, v.x),
-					std::min(newMin.y, v.y),
-					std::min(newMin.z, v.z));
-				newMax = make_float3(
-					std::max(newMax.x, v.x),
-					std::max(newMax.y, v.y),
-					std::max(newMax.z, v.z));
-			}
-
-			aabb ret(newMin, newMax);
-
-			return std::move(ret);
+			return std::move(aabb::transform(m_aabb, m_mtxL2W));
 		}
 
 		virtual void getSamplePosNormalArea(
@@ -154,9 +118,13 @@ namespace aten
 			return m_param;
 		}
 
-		virtual int collectInternalNodes(std::vector<std::vector<BVHNode>>& nodes, int order, bvhnode* parent) override final
+		virtual int collectInternalNodes(
+			std::vector<std::vector<BVHNode>>& nodes, 
+			int order, 
+			bvhnode* parent,
+			const aten::mat4& mtxL2W) override final
 		{
-			return m_obj->collectInternalNodes(nodes, order, this);
+			return m_obj->collectInternalNodes(nodes, order, this, m_mtxL2W);
 		}
 
 	private:

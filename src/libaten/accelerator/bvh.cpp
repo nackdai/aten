@@ -184,19 +184,18 @@ namespace aten {
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
 
-		aten::ray transformedRay = r;
-		aten::ray keepTransformedRay = transformedRay;
-
 		bool isNested = false;
 
 		real hitt = AT_MATH_INF;
 		int exid = -1;
 
+		int shapeid = -1;
+		int tmpShapeid = -1;
+
 		while (stackpos > 0) {
 			if (stackpos == nestedStackPos) {
 				nestedStackPos = -1;
 				isNested = false;
-				transformedRay = r;
 			}
 
 			auto node = stackbuf[stackpos - 1];
@@ -205,14 +204,12 @@ namespace aten {
 
 			if (node->isLeaf()) {
 				if (node->nestid >= 0) {
-					if (aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max)) {
+					if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
 						nestedStackPos = isNested ? nestedStackPos : stackpos;
 						stackbuf[stackpos++] = &nodes[(int)node->nestid];
 
 						if (!isNested) {
-							auto t = shapes[(int)node->shapeid];
-							const auto& param = t->getParam();
-							transformedRay = param.mtxW2L.applyRay(r);
+							tmpShapeid = (int)node->shapeid;
 							isNested = true;
 						}
 					}
@@ -227,19 +224,19 @@ namespace aten {
 
 					if (node->exid >= 0) {
 						real t = AT_MATH_INF;
-						isHit = aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max, &t);
+						isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t);
 						recTmp.t = t;
 						tmpexid = node->exid;
 					}
 					else if (node->primid >= 0) {
 						auto prim = (hitable*)prims[(int)node->primid];
-						isHit = prim->hit(transformedRay, t_min, t_max, recTmp);
+						isHit = prim->hit(r, t_min, t_max, recTmp);
 						if (isHit) {
 							recTmp.obj = s;
 						}
 					}
 					else {
-						isHit = s->hit(transformedRay, t_min, t_max, recTmp);
+						isHit = s->hit(r, t_min, t_max, recTmp);
 						tmpexid = -1;
 					}
 
@@ -247,7 +244,7 @@ namespace aten {
 						if (recTmp.t < hitt) {
 							hitt = recTmp.t;
 							exid = tmpexid;
-							keepTransformedRay = transformedRay;
+							shapeid = tmpShapeid;
 						}
 
 						if (tmpexid < 0) {
@@ -259,7 +256,7 @@ namespace aten {
 				}
 			}
 			else {
-				if (aten::aabb::hit(transformedRay, node->boxmin, node->boxmax, t_min, t_max)) {
+				if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
 					if (node->left >= 0) {
 						stackbuf[stackpos++] = &nodes[(int)node->left];
 					}
@@ -276,8 +273,12 @@ namespace aten {
 		}
 
 		if (exid >= 0) {
+			const auto s = shapes[shapeid];
+			const auto& param = s->getParam();
+			auto transformedRay = param.mtxW2L.applyRay(r);
+
 			hitrecord recTmp;
-			if (_hit(&snodes[exid][0], keepTransformedRay, t_min, t_max, recTmp)) {
+			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp)) {
 				if (recTmp.t < rec.t) {
 					rec = recTmp;
 				}

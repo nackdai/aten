@@ -49,7 +49,8 @@ namespace aten
 	{
 		auto& curValue = m_image[i];
 
-		auto n = curValue.w;
+		// First curValue.w is 1, so -1.
+		int n = aten::cmpMax<int>(curValue.w - 1, 0);
 
 		curValue = n * curValue + v;
 		curValue /= (n + 1);

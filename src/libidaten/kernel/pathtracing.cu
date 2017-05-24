@@ -94,7 +94,8 @@ __global__ void hitTest(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices)
+	cudaTextureObject_t vertices,
+	aten::mat4* matrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -122,6 +123,7 @@ __global__ void hitTest(
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vertices = vertices;
+		ctxt.matrices = matrices;
 	}
 	
 	aten::hitrecord rec;
@@ -165,7 +167,8 @@ __global__ void shade(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices)
+	cudaTextureObject_t vertices,
+	aten::mat4* matrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -184,6 +187,7 @@ __global__ void shade(
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vertices = vertices;
+		ctxt.matrices = matrices;
 	}
 
 	const auto idx = iy * width + ix;
@@ -392,7 +396,8 @@ __global__ void hitShadowRay(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices)
+	cudaTextureObject_t vertices,
+	aten::mat4* matrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -411,6 +416,7 @@ __global__ void hitShadowRay(
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vertices = vertices;
+		ctxt.matrices = matrices;
 	}
 
 	const auto idx = iy * width + ix;
@@ -555,7 +561,8 @@ namespace idaten {
 					lightparam.ptr(), lightparam.num(),
 					nodetex.ptr(),
 					primparams.ptr(),
-					vtxTex);
+					vtxTex,
+					mtxparams.ptr());
 
 				auto err = cudaGetLastError();
 				if (err != cudaSuccess) {
@@ -580,7 +587,8 @@ namespace idaten {
 					lightparam.ptr(), lightparam.num(),
 					nodetex.ptr(),
 					primparams.ptr(),
-					vtxTex);
+					vtxTex,
+					mtxparams.ptr());
 
 				err = cudaGetLastError();
 				if (err != cudaSuccess) {
@@ -597,7 +605,8 @@ namespace idaten {
 					lightparam.ptr(), lightparam.num(),
 					nodetex.ptr(),
 					primparams.ptr(),
-					vtxTex);
+					vtxTex,
+					mtxparams.ptr());
 
 				err = cudaGetLastError();
 				if (err != cudaSuccess) {

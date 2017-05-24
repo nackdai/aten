@@ -707,13 +707,13 @@ namespace aten {
 						order = s->collectInternalNodes(nodes, order, nullptr);
 					}
 
-					param.mtxid = smtxs.size() / 2;
+					param.mtxid = mtxs.size() / 2;
 
 					aten::mat4 mtxL2W, mtxW2L;
 					s->getMatrices(mtxL2W, mtxW2L);
 
-					smtxs.push_back(mtxL2W);
-					smtxs.push_back(mtxW2L);
+					mtxs.push_back(mtxL2W);
+					mtxs.push_back(mtxW2L);
 				}
 			}
 		}

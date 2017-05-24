@@ -10,7 +10,8 @@ namespace idaten {
 		const std::vector<aten::LightParameter>& lights,
 		const std::vector<std::vector<aten::BVHNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
-		const std::vector<aten::vertex>& vtxs)
+		const std::vector<aten::vertex>& vtxs,
+		const std::vector<aten::mat4>& mtxs)
 	{
 #if 0
 		size_t size_stack = 0;
@@ -44,6 +45,9 @@ namespace idaten {
 			primparams.init(prims.size());
 			primparams.writeByNum(&prims[0], prims.size());
 		}
+
+		mtxparams.init(mtxs.size());
+		mtxparams.writeByNum(&mtxs[0], mtxs.size());
 
 		for (int i = 0; i < nodes.size(); i++) {
 			nodeparam.push_back(idaten::CudaTextureResource());

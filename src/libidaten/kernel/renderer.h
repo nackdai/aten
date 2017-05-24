@@ -26,7 +26,8 @@ namespace idaten
 			const std::vector<aten::LightParameter>& lights,
 			const std::vector<std::vector<aten::BVHNode>>& nodes,
 			const std::vector<aten::PrimitiveParamter>& prims,
-			const std::vector<aten::vertex>& vtxs);
+			const std::vector<aten::vertex>& vtxs,
+			const std::vector<aten::mat4>& mtxs);
 
 	protected:
 		idaten::CudaMemory dst;
@@ -35,6 +36,8 @@ namespace idaten
 		idaten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
 		idaten::TypedCudaMemory<aten::LightParameter> lightparam;
 		idaten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
+
+		idaten::TypedCudaMemory<aten::mat4> mtxparams;
 		
 		idaten::TypedCudaMemory<cudaTextureObject_t> nodetex;
 

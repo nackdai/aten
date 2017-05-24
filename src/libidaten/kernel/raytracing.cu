@@ -59,7 +59,8 @@ __global__ void hitTestRayTracing(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices)
+	cudaTextureObject_t vertices,
+	aten::mat4* matrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -87,6 +88,7 @@ __global__ void hitTestRayTracing(
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vertices = vertices;
+		ctxt.matrices = matrices;
 	}
 	
 	aten::hitrecord rec;
@@ -106,7 +108,8 @@ __global__ void raytracing(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices)
+	cudaTextureObject_t vertices,
+	aten::mat4* matrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -125,6 +128,7 @@ __global__ void raytracing(
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vertices = vertices;
+		ctxt.matrices = matrices;
 	}
 
 	const auto idx = iy * width + ix;
@@ -267,7 +271,8 @@ namespace idaten {
 				lightparam.ptr(), lightparam.num(),
 				nodetex.ptr(),
 				primparams.ptr(),
-				vtxTex);
+				vtxTex,
+				mtxparams.ptr());
 
 			auto err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -286,7 +291,8 @@ namespace idaten {
 				lightparam.ptr(), lightparam.num(),
 				nodetex.ptr(),
 				primparams.ptr(),
-				vtxTex);
+				vtxTex,
+				mtxparams.ptr());
 
 			err = cudaGetLastError();
 			if (err != cudaSuccess) {

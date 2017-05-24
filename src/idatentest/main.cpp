@@ -187,8 +187,9 @@ int main()
 			vtxparams);
 
 		std::vector<std::vector<aten::BVHNode>> nodes;
+		std::vector<aten::mat4> mtxs;
 
-		g_scene.getAccel()->collectNodes(nodes);
+		g_scene.getAccel()->collectNodes(nodes, mtxs);
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 		g_tracer.update(
@@ -200,7 +201,8 @@ int main()
 			lightparams,
 			nodes,
 			primparams,
-			vtxparams);
+			vtxparams,
+			mtxs);
 	}
 
 	aten::window::run(display);

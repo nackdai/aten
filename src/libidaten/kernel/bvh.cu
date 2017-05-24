@@ -215,9 +215,11 @@ __device__ bool intersectBVH(
 
 		const auto& param = ctxt->shapes[shapeid];
 
+		auto mtxW2L = ctxt->matrices[param.mtxid * 2 + 1];
+
 		aten::ray transformedRay;
-		transformedRay.org = param.mtxW2L.apply(r.org);
-		transformedRay.dir = param.mtxW2L.applyXYZ(r.dir);
+		transformedRay.org = mtxW2L.apply(r.org);
+		transformedRay.dir = mtxW2L.applyXYZ(r.dir);
 		transformedRay.dir = normalize(transformedRay.dir);
 
 		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &recTmp)) {

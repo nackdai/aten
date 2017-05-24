@@ -98,10 +98,12 @@ __device__ void getTriangleSamplePosNormalArea(
 
 	real orignalLen = (p1 - p0).length();
 
+	auto mtxL2W = ctxt->matrices[shape->mtxid * 2 + 0];
+
 	real scaledLen = 0;
 	{
-		auto v0 = shape->mtxL2W.apply(p0);
-		auto v1 = shape->mtxL2W.apply(p1);
+		auto v0 = mtxL2W.apply(p0);
+		auto v1 = mtxL2W.apply(p1);
 
 		scaledLen = (v1 - v0).length();
 	}

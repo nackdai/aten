@@ -8,6 +8,54 @@
 
 #define STACK_SIZE	(64)
 
+struct BVHRay : public aten::ray {
+	aten::vec3 inv;
+	int sign[3];
+
+	__device__ BVHRay(const aten::ray& r)
+	{
+		org = r.org;
+		dir = r.dir;
+
+		inv = real(1) / dir;
+
+		sign[0] = (inv.x < real(0) ? 1 : 0);
+		sign[1] = (inv.y < real(0) ? 1 : 0);
+		sign[2] = (inv.z < real(0) ? 1 : 0);
+	}
+};
+
+__device__ bool intersectAABB(
+	const BVHRay* ray,
+	const float4* aabb,
+	real& t_result)
+{
+	// NOTE
+	// https://github.com/hpicgs/cgsee/wiki/Ray-Box-Intersection-on-the-GPU
+
+	float tmin, tmax, tymin, tymax, tzmin, tzmax;
+
+	tmin = (aabb[ray->sign[0]].x - ray->org.x) * ray->inv.x;
+	tmax = (aabb[1 - ray->sign[0]].x - ray->org.x) * ray->inv.x;
+	
+	tymin = (aabb[ray->sign[1]].y - ray->org.y) * ray->inv.y;
+	tymax = (aabb[1 - ray->sign[1]].y - ray->org.y) * ray->inv.y;
+	
+	tzmin = (aabb[ray->sign[2]].z - ray->org.z) * ray->inv.z;
+	tzmax = (aabb[1 - ray->sign[2]].z - ray->org.z) * ray->inv.z;
+	
+	tmin = max(max(tmin, tymin), tzmin);
+	tmax = min(min(tmax, tymax), tzmax);
+
+	if (tmin > tmax) {
+		return false;
+	}
+
+	t_result = tmin;
+
+	return true;
+}
+
 __device__ bool intersectBVH(
 	cudaTextureObject_t nodes,
 	int* exid,
@@ -38,11 +86,10 @@ __device__ bool intersectBVH(
 	float4 node;	// x:left, y:right
 	float4 attrib;	// x:shapeid, y:primid, z:nestid
 
-	float4 _boxmin;
-	float4 _boxmax;
+	float4 aabb[2];
 
-	aten::vec3 boxmin;
-	aten::vec3 boxmax;
+	BVHRay bvhray(r);
+	real t = AT_MATH_INF;
 
 	while (stackpos > 0) {
 		nodeid = stackbuf[stackpos - 1];
@@ -51,15 +98,12 @@ __device__ bool intersectBVH(
 		if (nodeid >= 0) {
 			node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : left, y: right
 			attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : nestid, w : exid
-			_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-			_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
-
-			boxmin = aten::make_float3(_boxmin.x, _boxmin.y, _boxmin.z);
-			boxmax = aten::make_float3(_boxmax.x, _boxmax.y, _boxmax.z);
+			aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
+			aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
 			if (node.x < 0 && node.y < 0) {
 				if (attrib.z >= 0) {
-					if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max)) {
+					if (intersectAABB(&bvhray, aabb, t)) {
 						stackbuf[stackpos++] = (int)attrib.z;
 						tmpshapeid = (int)attrib.x;
 					}
@@ -71,16 +115,18 @@ __device__ bool intersectBVH(
 					const auto* s = &ctxt->shapes[(int)attrib.x];
 
 					if (attrib.w >= 0) {	// exid
-						real t = AT_MATH_INF;
-						isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+						t = AT_MATH_INF;
+						isHit = intersectAABB(&bvhray, aabb, t);
 						recTmp.t = t;
 						tmpexid = attrib.w;
 					}
+#if 0
 					else if (attrib.y >= 0) {	// primid
 						const auto& prim = ctxt->prims[(int)attrib.y];
 						isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp);
 						recTmp.mtrlid = prim.mtrlid;
 					}
+#endif
 					else {
 						isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp);
 						recTmp.mtrlid = s->mtrl.idx;
@@ -103,7 +149,7 @@ __device__ bool intersectBVH(
 				}
 			}
 			else {
-				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max)) {
+				if (intersectAABB(&bvhray, aabb, t)) {
 					stackbuf[stackpos++] = (int)node.x;
 					stackbuf[stackpos++] = (int)node.y;
 

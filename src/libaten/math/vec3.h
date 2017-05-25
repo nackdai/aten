@@ -170,6 +170,12 @@ namespace aten {
 		return std::move(ret);
 	}
 
+	inline AT_DEVICE_API vec3 operator/(real t, const vec3& v)
+	{
+		vec3 ret = aten::make_float3(t / v.x, t / v.y, t / v.z);
+		return std::move(ret);
+	}
+
 	inline AT_DEVICE_API real dot(const vec3& v1, const vec3& v2)
 	{
 		auto ret = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;

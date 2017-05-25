@@ -21,9 +21,9 @@ namespace aten {
 
 	inline AT_DEVICE_API int maxDim(const vec3& v)
 	{
-		uint32_t x = aten::abs(v.x);
-		uint32_t y = aten::abs(v.y);
-		uint32_t z = aten::abs(v.z);
+		uint32_t x = (uint32_t)aten::abs(v.x);
+		uint32_t y = (uint32_t)aten::abs(v.y);
+		uint32_t z = (uint32_t)aten::abs(v.z);
 
 		if (x > y) {
 			if (x > z) {

@@ -19,7 +19,7 @@ namespace aten {
 		real t;
 	};
 
-	inline int maxDim(const vec3& v)
+	inline AT_DEVICE_API int maxDim(const vec3& v)
 	{
 		uint32_t x = aten::abs(v.x);
 		uint32_t y = aten::abs(v.y);

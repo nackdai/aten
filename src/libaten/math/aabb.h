@@ -62,11 +62,15 @@ namespace aten {
 			bool isHit = false;
 
 			for (uint32_t i = 0; i < 3; i++) {
+#if 0
 				if (r.dir[i] == 0.0f) {
 					continue;
 				}
 
 				auto inv = real(1) / r.dir[i];
+#else
+				auto inv = real(1) / (r.dir[i] + real(1e-6));
+#endif
 
 				// NOTE
 				// ray : r = p + t * v

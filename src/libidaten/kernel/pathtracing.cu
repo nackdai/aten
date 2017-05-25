@@ -16,14 +16,9 @@
 #include "aten4idaten.h"
 
 struct ray : public aten::ray {
-	AT_DEVICE_API ray() : aten::ray()
-	{
-		isActive = true;
-	}
-	AT_DEVICE_API ray(const aten::vec3& o, const aten::vec3& d) : aten::ray(o, d)
-	{
-		isActive = true;
-	}
+	aten::vec3 lightPos;
+	aten::vec3 lightcontrib;
+	int targetLightId;
 
 	struct {
 		uint32_t isActive : 1;
@@ -36,17 +31,15 @@ struct Path {
 	aten::vec3 contrib;
 	aten::hitrecord rec;
 	aten::sampler sampler;
-	aten::MaterialParameter* mtrl;
-
-	aten::vec3 lightPos;
-	aten::vec3 lightcontrib;
-	int targetLightId;
+	
+	int mtrlid;
 
 	real pdfb;
 
 	bool isHit;
 	bool isTerminate;
 };
+//AT_STATICASSERT((sizeof(Path) % 64) == 0);
 
 __global__ void genPath(
 	Path* paths,
@@ -75,9 +68,7 @@ __global__ void genPath(
 
 	path.ray = camsample.r;
 	path.throughput = aten::make_float3(1);
-	path.mtrl = nullptr;
-	path.lightcontrib = aten::make_float3(0);
-	path.targetLightId = -1;
+	path.mtrlid = -1;
 	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
@@ -204,6 +195,7 @@ __global__ void shade(
 	}
 
 	aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
+	aten::MaterialParameter* prevMtrl = (path.mtrlid >= 0 ? &ctxt.mtrls[path.mtrlid] : nullptr);
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
@@ -222,8 +214,8 @@ __global__ void shade(
 			path.isTerminate = true;
 			willContinue = false;
 		}
-		else if (path.mtrl && path.mtrl->attrib.isSingular) {
-			auto emit = path.mtrl->baseColor;
+		else if (prevMtrl && prevMtrl->attrib.isSingular) {
+			auto emit = prevMtrl->baseColor;
 			path.contrib += path.throughput * emit;
 			willContinue = false;
 		}
@@ -264,7 +256,6 @@ __global__ void shade(
 
 		// TODO
 		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
-		path.targetLightId = lightidx;
 		lightSelectPdf = 1.0f / lightnum;
 
 		auto light = ctxt.lights[lightidx];
@@ -281,7 +272,6 @@ __global__ void shade(
 		auto lightobj = sampleres.obj;
 
 		auto dirToLight = normalize(sampleres.dir);
-		shadowRays[idx] = ray(path.rec.p, dirToLight);
 
 		auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -293,8 +283,11 @@ __global__ void shade(
 		// Get light color.
 		auto emit = sampleres.finalColor;
 
-		path.lightPos = posLight;
-		path.lightcontrib = aten::make_float3(0);
+		shadowRays[idx].org = path.rec.p;
+		shadowRays[idx].dir = dirToLight;
+		shadowRays[idx].lightPos = posLight;
+		shadowRays[idx].lightcontrib = aten::make_float3(0);
+		shadowRays[idx].targetLightId = lightidx;
 
 		if (light.attrib.isSingular || light.attrib.isInfinite) {
 			if (pdfLight > real(0)) {
@@ -304,7 +297,8 @@ __global__ void shade(
 				// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
 				// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 				auto misW = pdfLight / (pdfb + pdfLight);
-				path.lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+				shadowRays[idx].lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+				shadowRays[idx].isActive = true;
 			}
 		}
 		else {
@@ -322,7 +316,8 @@ __global__ void shade(
 
 					auto misW = pdfLight / (pdfb + pdfLight);
 
-					path.lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+					shadowRays[idx].lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+					shadowRays[idx].isActive = true;
 				}
 			}
 		}
@@ -379,7 +374,7 @@ __global__ void shade(
 	// Make next ray.
 	path.ray = aten::ray(path.rec.p, nextDir);
 
-	path.mtrl = mtrl;
+	path.mtrlid = path.rec.mtrlid;
 	path.pdfb = pdfb;
 
 	if (!willContinue) {
@@ -429,7 +424,7 @@ __global__ void hitShadowRay(
 		aten::hitrecord rec;
 		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec);
 
-		auto light = ctxt.lights[path.targetLightId];
+		auto light = ctxt.lights[shadowRay.targetLightId];
 		if (light.object.idx >= 0) {
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
@@ -437,13 +432,13 @@ __global__ void hitShadowRay(
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
 			&light,
-			path.lightPos,
+			shadowRay.lightPos,
 			shadowRay, 
 			AT_MATH_EPSILON, AT_MATH_INF, 
 			&rec);
 
 		if (shadowRay.isActive) {
-			path.contrib += path.lightcontrib;
+			path.contrib += shadowRay.lightcontrib;
 		}
 	}
 }
@@ -508,6 +503,8 @@ namespace idaten {
 		aten::vec4* image,
 		int width, int height)
 	{
+		auto x = sizeof(Path);
+
 		dim3 block(16, 16);
 		dim3 grid(
 			(width + block.x - 1) / block.x,

@@ -17,7 +17,9 @@ namespace aten {
 			lightPos,
 			r,
 			t_min, t_max,
-			&rec);
+			rec.p,
+			rec.t,
+			rec.obj);
 
 		return isHit;
 	}

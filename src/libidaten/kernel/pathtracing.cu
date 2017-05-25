@@ -434,7 +434,9 @@ __global__ void hitShadowRay(
 			shadowRay.lightPos,
 			shadowRay, 
 			AT_MATH_EPSILON, AT_MATH_INF, 
-			&rec);
+			rec.p,
+			rec.t,
+			rec.obj);
 
 		if (shadowRay.isActive) {
 			path.contrib += shadowRay.lightcontrib;
@@ -461,6 +463,7 @@ __global__ void gather(
 	float4 data;
 	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
+	// First data.w value is 0.
 	int n = data.w;
 	data = n * data + make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
 	data /= (n + 1);
@@ -527,7 +530,7 @@ namespace idaten {
 		}
 		nodetex.writeByNum(&tmp[0], tmp.size());
 
-		static const int maxSamples = 1;
+		static const int maxSamples = 4;
 		static const int maxDepth = 5;
 		static const int rrDepth = 3;
 

@@ -199,7 +199,16 @@ __global__ void raytracing(
 
 		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec);
 
-		if (AT_NAME::scene::hitLight(isHit, &light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &tmpRec)) {
+		if (AT_NAME::scene::hitLight(
+			isHit, 
+			&light, 
+			sampleres.pos, 
+			shadowRay, 
+			AT_MATH_EPSILON, AT_MATH_INF,
+			tmpRec.p,
+			tmpRec.t,
+			tmpRec.obj))
+		{
 			if (light.attrib.isInfinite) {
 				len = 1.0f;
 			}

@@ -29,18 +29,21 @@ namespace idaten
 
 	cudaTextureObject_t CudaTextureResource::bind()
 	{
-		// TODO
-		// Only for resource array.
+		if (m_buffer) {
+			// TODO
+			// Only for resource array.
 
-		// Make texture description:
-		cudaTextureDesc tex_desc = {};
-		tex_desc.readMode = cudaReadModeElementType;
-		tex_desc.filterMode = cudaFilterModePoint;
-		tex_desc.addressMode[0] = cudaAddressModeClamp;
-		tex_desc.addressMode[1] = cudaAddressModeClamp;
-		tex_desc.normalizedCoords = 0;
+			// Make texture description:
+			cudaTextureDesc tex_desc = {};
+			tex_desc.readMode = cudaReadModeElementType;
+			tex_desc.filterMode = cudaFilterModePoint;
+			tex_desc.addressMode[0] = cudaAddressModeClamp;
+			tex_desc.addressMode[1] = cudaAddressModeClamp;
+			tex_desc.normalizedCoords = 0;
 
-		checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+			checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+		}
+
 		return m_tex;
 	}
 

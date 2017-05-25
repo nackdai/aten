@@ -39,7 +39,6 @@ struct Path {
 	bool isHit;
 	bool isTerminate;
 };
-//AT_STATICASSERT((sizeof(Path) % 64) == 0);
 
 __global__ void genPath(
 	Path* paths,
@@ -503,8 +502,6 @@ namespace idaten {
 		aten::vec4* image,
 		int width, int height)
 	{
-		auto x = sizeof(Path);
-
 		dim3 block(16, 16);
 		dim3 grid(
 			(width + block.x - 1) / block.x,

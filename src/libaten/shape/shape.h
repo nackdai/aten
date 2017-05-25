@@ -8,7 +8,7 @@
 
 namespace aten
 {
-	enum ShapeType {
+	enum ShapeType : int {
 		Polygon,
 		Instance,
 		Sphere,
@@ -18,8 +18,6 @@ namespace aten
 
 	struct ShapeParameter {
 		ShapeType type{ ShapeType::ShapeTypeMax };
-
-		aten::UnionIdxPtr mtrl;
 
 		real area;
 
@@ -35,6 +33,10 @@ namespace aten
 				real radius;	// shpere.
 			};
 		};
+
+		real padding[2];
+
+		aten::UnionIdxPtr mtrl;
 
 		AT_DEVICE_API ShapeParameter(ShapeType _type)
 			: type(_type)
@@ -56,10 +58,13 @@ namespace aten
 
 		~ShapeParameter() {}
 	};
+	AT_STATICASSERT((sizeof(ShapeParameter) % 16) == 0);
 
 	struct PrimitiveParamter {
 		int idx[3];
 		int mtrlid;
 		real area;
+		real padding[3];
 	};
+	AT_STATICASSERT((sizeof(PrimitiveParamter) % 16) == 0);
 }

@@ -38,7 +38,7 @@ namespace aten {
 	#define LightAttributeDirectional	aten::LightAttribute(true,  true,  false)
 	#define LightAttributeIBL			aten::LightAttribute(false, true,  true)
 
-	enum LightType {
+	enum LightType : int {
 		Area,
 		IBL,
 		Direction,
@@ -65,15 +65,18 @@ namespace aten {
 		real outerAngle{ AT_MATH_PI };
 		real falloff{ 0 };
 
+		LightAttribute attrib;
+
+		real padding[11];
+
 		UnionIdxPtr object;
 		UnionIdxPtr envmap;
-
-		LightAttribute attrib;
 
 		AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
 			: attrib(_attrib), type(_type)
 		{}
 	};
+	AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
 }
 
 namespace AT_NAME

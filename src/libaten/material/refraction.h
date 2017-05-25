@@ -31,7 +31,7 @@ namespace AT_NAME
 		}
 		bool isIdealRefraction() const
 		{
-			return m_param.isIdealRefraction;
+			return (m_param.isIdealRefraction > 0);
 		}
 
 		static AT_DEVICE_API real pdf(

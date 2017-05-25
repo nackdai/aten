@@ -46,7 +46,7 @@ namespace aten
 	#define MaterialAttributeRefraction	aten::MaterialAttribute(false, true,  true,  true,  false)
 	#define MaterialAttributeNPR		aten::MaterialAttribute(false, false, false, false, true)
 
-	enum MaterialType {
+	enum MaterialType : int {
 		Emissive,
 		Lambert,
 		OrneNayar,
@@ -81,19 +81,29 @@ namespace aten
 		real clearcoat{ 0.0 };			// 第二の特別な目的のスペキュラーローブ.
 		real clearcoatGloss{ 1.0 };		// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
+		const MaterialAttribute attrib;
+
+		struct {
+			int isIdealRefraction : 1;
+		};
+
+		real padding[8];
+
 		UnionIdxPtr albedoMap;
 		UnionIdxPtr normalMap;
 		UnionIdxPtr roughnessMap;
 
-		bool isIdealRefraction{ false };
-
-		const MaterialAttribute attrib;
-
-		MaterialParameter() {}
+		MaterialParameter()
+		{
+			isIdealRefraction = false;
+		}
 		MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
 			: type(_type), attrib(_attrib)
-		{}
+		{
+			isIdealRefraction = false;
+		}
 	};
+	AT_STATICASSERT((sizeof(MaterialParameter) % 64) == 0);
 }
 
 namespace AT_NAME

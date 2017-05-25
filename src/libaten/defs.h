@@ -66,6 +66,8 @@ namespace aten {
 
 #define AT_COUNTOF(a)	(sizeof(a) / sizeof(a[0]))
 
+#define AT_STATICASSERT(b)	static_assert(b, "")
+
 #include "aten_virtual.h"
 
 #ifndef __AT_DEBUG__

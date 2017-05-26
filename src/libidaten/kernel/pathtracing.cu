@@ -15,7 +15,7 @@
 
 #include "aten4idaten.h"
 
-struct ray : public aten::ray {
+struct ShadowRay : public aten::ray {
 	aten::vec3 lightPos;
 	aten::vec3 lightcontrib;
 	int targetLightId;
@@ -169,7 +169,7 @@ __global__ void shadeMiss(
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
-	ray* shadowRays,
+	ShadowRay* shadowRays,
 	int width, int height,
 	int depth, int rrDepth,
 	aten::ShapeParameter* shapes, int geomnum,
@@ -403,7 +403,7 @@ __global__ void shade(
 
 __global__ void hitShadowRay(
 	Path* paths,
-	ray* shadowRays,
+	ShadowRay* shadowRays,
 	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -536,7 +536,7 @@ namespace idaten {
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
-		idaten::TypedCudaMemory<ray> shadowRays;
+		idaten::TypedCudaMemory<ShadowRay> shadowRays;
 		shadowRays.init(width * height);
 
 		CudaGLResourceMap rscmap(&glimg);

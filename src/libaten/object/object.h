@@ -125,7 +125,7 @@ namespace AT_NAME
 			const aten::ray& r,
 			const aten::mat4& mtxL2W,
 			aten::hitrecord& rec,
-			const hitrecordOption& recOpt) const override final;
+			const aten::hitrecordOption& recOpt) const override final;
 
 		virtual void getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const override final;
 

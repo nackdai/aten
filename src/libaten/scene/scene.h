@@ -225,14 +225,14 @@ namespace AT_NAME {
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final
 		{
-			hitrecordOption recOpt;
+			aten::hitrecordOption recOpt;
 
 			auto isHit = m_accel.hit(r, t_min, t_max, rec, recOpt);
 
 			// TODO
 #ifndef __AT_CUDA__
 			if (isHit) {
-				rec.obj->evalHitResult(r, rec, recOpt);
+				aten::hitable::evalHitResult(rec.obj, r, rec, recOpt);
 			}
 #endif
 

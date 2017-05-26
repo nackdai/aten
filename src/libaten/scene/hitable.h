@@ -8,6 +8,8 @@
 #include "sampler/sampler.h"
 #include "shape/shape.h"
 
+//#define ENABLE_TANGENTCOORD_IN_HITREC
+
 namespace aten {
 	class hitable;
 
@@ -18,9 +20,11 @@ namespace aten {
 
 		vec3 normal;
 
+#ifdef ENABLE_TANGENTCOORD_IN_HITREC
 		// tangent coordinate.
 		vec3 du;
 		vec3 dv;
+#endif
 
 		// texture coordinate.
 		real u{ real(0) };
@@ -74,14 +78,6 @@ namespace aten {
 			hitrecord& rec,
 			hitrecordOption& recOpt) const = 0;
 
-		virtual void evalHitResult(
-			const ray& r, 
-			hitrecord& rec, 
-			const hitrecordOption& recOpt) const
-		{
-			AT_ASSERT(false);
-		}
-
 		virtual aabb getBoundingbox() const = 0;
 
 		struct SamplePosNormalPdfResult {
@@ -102,6 +98,30 @@ namespace aten {
 		uint32_t id() const
 		{
 			return m_id;
+		}
+
+		static void evalHitResult(
+			const hitable* obj,
+			const ray& r,
+			hitrecord& rec,
+			const hitrecordOption& recOpt)
+		{
+			obj->evalHitResult(r, rec, recOpt);
+
+#ifdef ENABLE_TANGENTCOORD_IN_HITREC
+			// tangent coordinate.
+			rec.du = normalize(getOrthoVector(rec.normal));
+			rec.dv = normalize(cross(rec.normal, rec.du));
+#endif
+		}
+
+	private:
+		virtual void evalHitResult(
+			const ray& r,
+			hitrecord& rec,
+			const hitrecordOption& recOpt) const
+		{
+			AT_ASSERT(false);
 		}
 
 	private:

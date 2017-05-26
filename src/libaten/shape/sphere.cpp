@@ -131,10 +131,6 @@ namespace AT_NAME
 		rec->p = r.org + rec->t * r.dir;
 		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
 
-		// tangent coordinate.
-		rec->du = normalize(getOrthoVector(rec->normal));
-		rec->dv = normalize(cross(rec->normal, rec->du));
-
 		{
 			auto tmp = param->center + aten::make_float3(param->radius, 0, 0);
 

@@ -91,10 +91,6 @@ namespace AT_NAME
 			rec.obj = (hitable*)this;
 			rec.mtrl = (material*)m_param.mtrl.ptr;
 
-			// tangent coordinate.
-			rec.du = normalize(getOrthoVector(rec.normal));
-			rec.dv = normalize(cross(rec.normal, rec.du));
-
 			rec.area = m_aabb.computeSurfaceArea();
 		}
 
@@ -140,10 +136,6 @@ namespace AT_NAME
 			rec.normal = aten::make_float3(0, 0, -1);
 			break;
 		}
-
-		// tangent coordinate.
-		rec.du = normalize(getOrthoVector(rec.normal));
-		rec.dv = normalize(cross(rec.normal, rec.du));
 
 		rec.area = m_aabb.computeSurfaceArea();
 	}

@@ -11,10 +11,12 @@ AT_DEVICE_API bool intersectShape(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec);
+	aten::hitrecord* rec,
+	aten::hitrecordOption* recOpt);
 
 AT_DEVICE_API void evalHitResult(
 	const Context* ctxt,
 	const aten::ShapeParameter* param,
 	const aten::ray& r,
-	aten::hitrecord* rec);
+	aten::hitrecord* rec,
+	const aten::hitrecordOption* recOpt);

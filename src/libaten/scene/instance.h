@@ -70,10 +70,6 @@ namespace aten
 			// Transform local to world.
 			rec.p = m_mtxL2W.apply(rec.p);
 			rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
-
-			// tangent coordinate.
-			rec.du = normalize(getOrthoVector(rec.normal));
-			rec.dv = normalize(cross(rec.normal, rec.du));
 		}
 
 		virtual void getSamplePosNormalArea(

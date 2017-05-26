@@ -63,7 +63,8 @@ __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
-	aten::hitrecord* rec)
+	aten::hitrecord* rec,
+	aten::hitrecordOption* recOpt)
 {
 	int stackbuf[STACK_SIZE];
 
@@ -72,6 +73,8 @@ __device__ bool intersectBVH(
 	int stackpos = 1;
 
 	aten::hitrecord recTmp;
+	aten::hitrecordOption recOptTmp;
+
 	bool isHit = false;
 
 	real hitt = AT_MATH_INF;
@@ -123,12 +126,12 @@ __device__ bool intersectBVH(
 #if 0
 					else if (attrib.y >= 0) {	// primid
 						const auto& prim = ctxt->prims[(int)attrib.y];
-						isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp);
+						isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 						recTmp.mtrlid = prim.mtrlid;
 					}
 #endif
 					else {
-						isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp);
+						isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 						recTmp.mtrlid = s->mtrl.idx;
 						tmpexid = -1;
 					}
@@ -142,6 +145,7 @@ __device__ bool intersectBVH(
 						if (tmpexid < 0) {
 							if (recTmp.t < rec->t) {
 								*rec = recTmp;
+								*recOpt = recOptTmp;
 								rec->obj = (void*)s;
 							}
 						}
@@ -170,7 +174,8 @@ __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
-	aten::hitrecord* rec)
+	aten::hitrecord* rec,
+	aten::hitrecordOption* recOpt)
 {
 	int stackbuf[STACK_SIZE];
 
@@ -179,6 +184,8 @@ __device__ bool intersectBVH(
 	int stackpos = 1;
 
 	aten::hitrecord recTmp;
+	aten::hitrecordOption recOptTmp;
+
 	bool isHit = false;
 
 	int nodeid = -1;
@@ -210,12 +217,13 @@ __device__ bool intersectBVH(
 				const auto* s = &ctxt->shapes[(int)attrib.x];
 
 				const auto& prim = ctxt->prims[(int)attrib.y];
-				isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp);
+				isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 				recTmp.mtrlid = prim.mtrlid;
 
 				if (isHit) {
 					if (recTmp.t < rec->t) {
 						*rec = recTmp;
+						*recOpt = recOptTmp;
 						rec->obj = (void*)s;
 					}
 				}
@@ -247,6 +255,8 @@ __device__ bool intersectBVH(
 	int exid = -1;
 	int shapeid = -1;
 
+	aten::hitrecordOption recOpt;
+
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
 		&exid,
@@ -254,7 +264,7 @@ __device__ bool intersectBVH(
 		ctxt,
 		r,
 		t_min, t_max,
-		rec);
+		rec, &recOpt);
 
 	if (exid >= 0) {
 		aten::hitrecord recTmp;
@@ -268,7 +278,7 @@ __device__ bool intersectBVH(
 		transformedRay.dir = mtxW2L.applyXYZ(r.dir);
 		transformedRay.dir = normalize(transformedRay.dir);
 
-		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &recTmp)) {
+		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &recTmp, &recOpt)) {
 			if (recTmp.t < rec->t) {
 				*rec = recTmp;
 				isHit = true;
@@ -277,7 +287,7 @@ __device__ bool intersectBVH(
 	}
 
 	if (isHit) {
-		evalHitResult(ctxt, (aten::ShapeParameter*)rec->obj, r, rec);
+		evalHitResult(ctxt, (aten::ShapeParameter*)rec->obj, r, rec, &recOpt);
 	}
 
 	return isHit;

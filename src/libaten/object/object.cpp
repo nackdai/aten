@@ -122,10 +122,6 @@ namespace AT_NAME
 
 		rec->u = uv.x;
 		rec->v = uv.y;
-
-		// tangent coordinate.
-		rec->du = normalize(getOrthoVector(rec->normal));
-		rec->dv = normalize(cross(rec->normal, rec->du));
 	}
 
 	void face::build()
@@ -319,7 +315,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		const aten::mat4& mtxL2W,
 		aten::hitrecord& rec,
-		const hitrecordOption& recOpt) const
+		const aten::hitrecordOption& recOpt) const
 	{
 		const auto& v0 = aten::VertexManager::getVertex(recOpt.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(recOpt.idx[1]);

@@ -46,7 +46,7 @@ namespace AT_NAME {
 				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, recOpt);
 			}
 
-			obj->evalHitResult(r, rec, recOpt);
+			aten::hitable::evalHitResult(obj, r, rec, recOpt);
 
 			sample(
 				&result,

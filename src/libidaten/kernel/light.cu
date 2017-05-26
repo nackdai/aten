@@ -128,6 +128,7 @@ __device__  void sampleAreaLight(
 
 	aten::ray r;
 	aten::hitrecord rec;
+	aten::hitrecordOption recOpt;
 
 	if (sampler) {
 		aten::hitable::SamplePosNormalPdfResult result;
@@ -143,12 +144,12 @@ __device__  void sampleAreaLight(
 		if (result.idx[0] >= 0) {
 			rec.t = dir.length();
 
-			rec.param.idx[0] = result.idx[0];
-			rec.param.idx[1] = result.idx[1];
-			rec.param.idx[2] = result.idx[2];
+			recOpt.idx[0] = result.idx[0];
+			recOpt.idx[1] = result.idx[1];
+			recOpt.idx[2] = result.idx[2];
 
-			rec.param.a = result.a;
-			rec.param.b = result.b;
+			recOpt.a = result.a;
+			recOpt.b = result.b;
 		}
 		else {
 			// TODO
@@ -165,7 +166,7 @@ __device__  void sampleAreaLight(
 		AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &rec);
 	}
 
-	evalHitResult(ctxt, s, r, &rec);
+	evalHitResult(ctxt, s, r, &rec, &recOpt);
 
 	AT_NAME::AreaLight::sample(result, &rec, light, org, sampler);
 }

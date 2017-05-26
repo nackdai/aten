@@ -24,7 +24,8 @@ namespace aten
 		virtual void evalHitResult(
 			const ray& r,
 			const mat4& mtxL2W,
-			hitrecord& rec) const = 0;
+			hitrecord& rec,
+			const hitrecordOption& recOpt) const = 0;
 
 		virtual const ShapeParameter& getParam() const
 		{

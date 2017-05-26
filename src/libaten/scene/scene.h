@@ -31,18 +31,22 @@ namespace AT_NAME {
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec) const override final
+			aten::hitrecord& rec,
+			aten::hitrecordOption& recOpt) const override final
 		{
 			bool isHit = false;
 
 			aten::hitrecord tmp;
+			aten::hitrecordOption tmpOpt;
 
 			for (size_t i = 0; i < m_objs.size(); i++) {
 				auto o = m_objs[i];
-				if (o->hit(r, t_min, t_max, tmp)) {
+				if (o->hit(r, t_min, t_max, tmp, tmpOpt)) {
 					if (tmp.t < rec.t) {
 						rec = tmp;
 						rec.obj = o;
+
+						recOpt = tmpOpt;
 
 						t_max = tmp.t;
 
@@ -221,13 +225,14 @@ namespace AT_NAME {
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final
 		{
-			auto isHit = m_accel.hit(r, t_min, t_max, rec);
+			hitrecordOption recOpt;
+
+			auto isHit = m_accel.hit(r, t_min, t_max, rec, recOpt);
 
 			// TODO
 #ifndef __AT_CUDA__
-
 			if (isHit) {
-				rec.obj->evalHitResult(r, rec);
+				rec.obj->evalHitResult(r, rec, recOpt);
 			}
 #endif
 

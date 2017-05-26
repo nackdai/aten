@@ -11,6 +11,7 @@ namespace AT_NAME {
 		if (obj) {
 			aten::ray r;
 			aten::hitrecord rec;
+			aten::hitrecordOption recOpt;
 
 			if (sampler) {
 				aten::hitable::SamplePosNormalPdfResult result;
@@ -25,15 +26,15 @@ namespace AT_NAME {
 				if (result.idx[0] >= 0) {
 					rec.t = dir.length();
 
-					rec.param.idx[0] = result.idx[0];
-					rec.param.idx[1] = result.idx[1];
-					rec.param.idx[2] = result.idx[2];
+					recOpt.idx[0] = result.idx[0];
+					recOpt.idx[1] = result.idx[1];
+					recOpt.idx[2] = result.idx[2];
 
-					rec.param.a = result.a;
-					rec.param.b = result.b;
+					recOpt.a = result.a;
+					recOpt.b = result.b;
 				}
 				else {
-					obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+					obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, recOpt);
 				}
 			}
 			else {
@@ -42,10 +43,10 @@ namespace AT_NAME {
 				auto dir = pos - org;
 				r = aten::ray(org, dir);
 
-				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, recOpt);
 			}
 
-			obj->evalHitResult(r, rec);
+			obj->evalHitResult(r, rec, recOpt);
 
 			sample(
 				&result,

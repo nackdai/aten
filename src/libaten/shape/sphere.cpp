@@ -23,7 +23,8 @@ namespace AT_NAME
 	bool sphere::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		aten::hitrecordOption& recOpt) const
 	{
 		bool isHit = hit(&m_param, r, t_min, t_max, &rec);
 
@@ -96,7 +97,10 @@ namespace AT_NAME
 		return true;
 	}
 
-	void sphere::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
+	void sphere::evalHitResult(
+		const aten::ray& r, 
+		aten::hitrecord& rec,
+		const aten::hitrecordOption& recOpt) const
 	{
 		evalHitResult(&m_param, r, aten::mat4(), &rec);
 	}
@@ -104,12 +108,16 @@ namespace AT_NAME
 	void sphere::evalHitResult(
 		const aten::ray& r,
 		const aten::mat4& mtxL2W,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		const aten::hitrecordOption& recOpt) const
 	{
 		evalHitResult(&m_param, r, mtxL2W, &rec);
 	}
 
-	void sphere::evalHitResult(const aten::ShapeParameter* param, const aten::ray& r, aten::hitrecord* rec)
+	void sphere::evalHitResult(
+		const aten::ShapeParameter* param, 
+		const aten::ray& r, 
+		aten::hitrecord* rec)
 	{
 		evalHitResult(param, r, aten::mat4(), rec);
 	}

@@ -26,7 +26,8 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec) const override;
+			aten::hitrecord& rec,
+			aten::hitrecordOption& recOpt) const override;
 
 		static AT_DEVICE_API bool hit(
 			const aten::PrimitiveParamter* param,
@@ -35,15 +36,20 @@ namespace AT_NAME
 			const aten::vec3& v2,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord* rec);
+			aten::hitrecord* rec,
+			aten::hitrecordOption* recOpt);
 
-		virtual void evalHitResult(const aten::ray& r, aten::hitrecord& rec) const;
+		virtual void evalHitResult(
+			const aten::ray& r, 
+			aten::hitrecord& rec,
+			const aten::hitrecordOption& recOpt) const;
 
 		static AT_DEVICE_API void evalHitResult(
 			const aten::vertex& v0,
 			const aten::vertex& v1,
 			const aten::vertex& v2,
-			aten::hitrecord* rec);
+			aten::hitrecord* rec,
+			const aten::hitrecordOption* recOpt);
 
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
@@ -79,7 +85,8 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec) const override final;
+			aten::hitrecord& rec,
+			aten::hitrecordOption& recOpt) const override final;
 
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
@@ -111,12 +118,14 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec) const override final;
+			aten::hitrecord& rec,
+			aten::hitrecordOption& recOpt) const override final;
 
 		virtual void evalHitResult(
 			const aten::ray& r,
 			const aten::mat4& mtxL2W,
-			aten::hitrecord& rec) const override final;
+			aten::hitrecord& rec,
+			const hitrecordOption& recOpt) const override final;
 
 		virtual void getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const override final;
 

@@ -46,7 +46,9 @@ namespace aten {
 #endif
 			int mtrlid;
 		};
+	};
 
+	struct hitrecordOption {
 		union {
 			// cube.
 			struct {
@@ -57,7 +59,7 @@ namespace aten {
 				int idx[3];
 				real a, b;	// barycentric
 			};
-		} param;
+		};
 	};
 
 	class hitable {
@@ -69,9 +71,13 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec) const = 0;
+			hitrecord& rec,
+			hitrecordOption& recOpt) const = 0;
 
-		virtual void evalHitResult(const ray& r, hitrecord& rec) const
+		virtual void evalHitResult(
+			const ray& r, 
+			hitrecord& rec, 
+			const hitrecordOption& recOpt) const
 		{
 			AT_ASSERT(false);
 		}

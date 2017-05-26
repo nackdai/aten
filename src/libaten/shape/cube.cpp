@@ -48,7 +48,8 @@ namespace AT_NAME
 	bool cube::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		aten::hitrecordOption& recOpt) const
 	{
 		real t = 0;
 		bool isHit = m_aabb.hit(r, t_min, t_max, &t);
@@ -83,6 +84,8 @@ namespace AT_NAME
 					rec.normal = aten::make_float3(0, 0, -1);
 					break;
 				}
+
+				recOpt.face = face;
 			}
 
 			rec.obj = (hitable*)this;
@@ -98,17 +101,24 @@ namespace AT_NAME
 		return isHit;
 	}
 
-	void cube::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
+	void cube::evalHitResult(
+		const aten::ray& r, 
+		aten::hitrecord& rec,
+		const aten::hitrecordOption& recOpt) const
 	{
-		evalHitResult(r, aten::mat4(), rec);
+		evalHitResult(r, aten::mat4(), rec, recOpt);
 	}
 
-	void cube::evalHitResult(const aten::ray& r, const aten::mat4& mtxL2W, aten::hitrecord& rec) const
+	void cube::evalHitResult(
+		const aten::ray& r, 
+		const aten::mat4& mtxL2W, 
+		aten::hitrecord& rec,
+		const aten::hitrecordOption& recOpt) const
 	{
 		// TODO
 		AT_ASSERT(false);	// Not support.
 
-		Face face = (Face)rec.param.face;
+		Face face = (Face)recOpt.face;
 
 		switch (face) {
 		case POS_X:

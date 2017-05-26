@@ -124,13 +124,14 @@ namespace aten {
 	bool bvhnode::hit(
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		hitrecord& rec,
+		hitrecordOption& recOpt) const
 	{
 		auto bbox = getBoundingbox();
 		auto isHit = bbox.hit(r, t_min, t_max);
 
 		if (isHit) {
-			isHit = bvh::hit(this, r, t_min, t_max, rec);
+			isHit = bvh::hit(this, r, t_min, t_max, rec, recOpt);
 		}
 
 		return isHit;
@@ -172,7 +173,8 @@ namespace aten {
 		BVHNode* nodes,
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec)
+		hitrecord& rec,
+		hitrecordOption& recOpt)
 	{
 		static const uint32_t stacksize = 64;
 		BVHNode* stackbuf[stacksize] = { nullptr };
@@ -204,6 +206,8 @@ namespace aten {
 				}
 				else {
 					hitrecord recTmp;
+					hitrecordOption recOptTmp;
+
 					bool isHit = false;
 
 					auto s = (hitable*)shapes[(int)node->shapeid];
@@ -218,13 +222,13 @@ namespace aten {
 					}
 					else if (node->primid >= 0) {
 						auto prim = (hitable*)prims[(int)node->primid];
-						isHit = prim->hit(r, t_min, t_max, recTmp);
+						isHit = prim->hit(r, t_min, t_max, recTmp, recOptTmp);
 						if (isHit) {
 							recTmp.obj = s;
 						}
 					}
 					else {
-						isHit = s->hit(r, t_min, t_max, recTmp);
+						isHit = s->hit(r, t_min, t_max, recTmp, recOptTmp);
 						tmpexid = -1;
 					}
 
@@ -238,6 +242,7 @@ namespace aten {
 						if (tmpexid < 0) {
 							if (recTmp.t < rec.t) {
 								rec = recTmp;
+								recOpt = recOptTmp;
 							}
 						}
 					}
@@ -271,9 +276,12 @@ namespace aten {
 			auto transformedRay = mtxW2L.applyRay(r);
 
 			hitrecord recTmp;
-			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp)) {
+			hitrecordOption recOptTmp;
+
+			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp, recOptTmp)) {
 				if (recTmp.t < rec.t) {
 					rec = recTmp;
+					recOpt = recOptTmp;
 				}
 			}
 		}
@@ -285,13 +293,14 @@ namespace aten {
 	bool bvh::hit(
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec) const
+		hitrecord& rec,
+		hitrecordOption& recOpt) const
 	{
 #ifdef TEST_NODE_LIST
-		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, rec);
+		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, rec, recOpt);
 		return isHit;
 #else
-		bool isHit = hit(m_root, r, t_min, t_max, rec);
+		bool isHit = hit(m_root, r, t_min, t_max, rec, recOpt);
 		return isHit;
 #endif
 	}
@@ -300,7 +309,8 @@ namespace aten {
 		const bvhnode* root,
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec)
+		hitrecord& rec,
+		hitrecordOption& recOpt)
 	{
 		// NOTE
 		// https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-ii-tree-traversal-gpu/
@@ -320,9 +330,11 @@ namespace aten {
 
 			if (node->isLeaf()) {
 				hitrecord recTmp;
-				if (node->hit(r, t_min, t_max, recTmp)) {
+				hitrecordOption recOptTmp;
+				if (node->hit(r, t_min, t_max, recTmp, recOptTmp)) {
 					if (recTmp.t < rec.t) {
 						rec = recTmp;
+						recOpt = recOptTmp;
 					}
 				}
 			}

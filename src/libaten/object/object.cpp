@@ -27,7 +27,8 @@ namespace AT_NAME
 	bool face::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		aten::hitrecordOption& recOpt) const
 	{
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
@@ -38,15 +39,15 @@ namespace AT_NAME
 			v0.pos, v1.pos, v2.pos,
 			r, 
 			t_min, t_max, 
-			&rec);
+			&rec, &recOpt);
 
 		if (isHit) {
 			//rec.obj = parent;
 			rec.obj = (hitable*)this;
 
-			rec.param.idx[0] = param.idx[0];
-			rec.param.idx[1] = param.idx[1];
-			rec.param.idx[2] = param.idx[2];
+			recOpt.idx[0] = param.idx[0];
+			recOpt.idx[1] = param.idx[1];
+			recOpt.idx[2] = param.idx[2];
 
 			if (parent) {
 				rec.mtrl = (material*)parent->param.mtrl.ptr;
@@ -63,7 +64,8 @@ namespace AT_NAME
 		const aten::vec3& v2,
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord* rec)
+		aten::hitrecord* rec,
+		aten::hitrecordOption* recOpt)
 	{
 		bool isHit = false;
 
@@ -73,8 +75,8 @@ namespace AT_NAME
 			if (res.t < rec->t) {
 				rec->t = res.t;
 
-				rec->param.a = res.a;
-				rec->param.b = res.b;
+				recOpt->a = res.a;
+				recOpt->b = res.b;
 
 				rec->area = param->area;
 
@@ -85,26 +87,30 @@ namespace AT_NAME
 		return isHit;
 	}
 
-	void face::evalHitResult(const aten::ray& r, aten::hitrecord& rec) const
+	void face::evalHitResult(
+		const aten::ray& r, 
+		aten::hitrecord& rec,
+		const aten::hitrecordOption& recOpt) const
 	{
-		const auto& v0 = aten::VertexManager::getVertex(rec.param.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(rec.param.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(rec.param.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(recOpt.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(recOpt.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(recOpt.idx[2]);
 
-		evalHitResult(v0, v1, v2, &rec);
+		evalHitResult(v0, v1, v2, &rec, &recOpt);
 	}
 
 	AT_DEVICE_API void face::evalHitResult(
 		const aten::vertex& v0,
 		const aten::vertex& v1,
 		const aten::vertex& v2,
-		aten::hitrecord* rec)
+		aten::hitrecord* rec,
+		const aten::hitrecordOption* recOpt)
 	{
 		// NOTE
 		// http://d.hatena.ne.jp/Zellij/20131207/p1
 
-		real a = rec->param.a;
-		real b = rec->param.b;
+		real a = recOpt->a;
+		real b = recOpt->b;
 		real c = 1 - a - b;
 
 		// èdêSç¿ïWån(barycentric coordinates).
@@ -211,7 +217,8 @@ namespace AT_NAME
 	bool shape::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		aten::hitrecordOption& recOpt) const
 	{
 #ifdef ENABLE_LINEAR_HITTEST
 		bool isHit = false;
@@ -232,7 +239,7 @@ namespace AT_NAME
 			rec = tmp;
 		}
 #else
-		auto isHit = m_node.hit(r, t_min, t_max, rec);
+		auto isHit = m_node.hit(r, t_min, t_max, rec, recOpt);
 #endif
 
 		if (isHit) {
@@ -274,7 +281,8 @@ namespace AT_NAME
 	bool object::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		aten::hitrecordOption& recOpt) const
 	{
 #ifdef ENABLE_LINEAR_HITTEST
 		bool isHit = false;
@@ -293,7 +301,7 @@ namespace AT_NAME
 		}
 #else
 		aten::hitrecord tmp;
-		bool isHit = m_node.hit(r, t_min, t_max, tmp);
+		bool isHit = m_node.hit(r, t_min, t_max, tmp, recOpt);
 #endif
 
 		if (isHit) {
@@ -310,13 +318,14 @@ namespace AT_NAME
 	void object::evalHitResult(
 		const aten::ray& r,
 		const aten::mat4& mtxL2W,
-		aten::hitrecord& rec) const
+		aten::hitrecord& rec,
+		const hitrecordOption& recOpt) const
 	{
-		const auto& v0 = aten::VertexManager::getVertex(rec.param.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(rec.param.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(rec.param.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(recOpt.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(recOpt.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(recOpt.idx[2]);
 
-		face::evalHitResult(v0, v1, v2, &rec);
+		face::evalHitResult(v0, v1, v2, &rec, &recOpt);
 
 		real orignalLen = 0;
 		{

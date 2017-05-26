@@ -227,20 +227,19 @@ __global__ void shade(
 	// TODO
 	// Apply normal map.
 
-	bool willContinue = true;
-
 	// Implicit conection to light.
 	if (mtrl->attrib.isEmissive) {
 		if (depth == 0) {
 			// Ray hits the light directly.
 			path.contrib = mtrl->baseColor;
 			path.isTerminate = true;
-			willContinue = false;
+			return;
 		}
 		else if (prevMtrl && prevMtrl->attrib.isSingular) {
 			auto emit = prevMtrl->baseColor;
 			path.contrib += path.throughput * emit;
-			willContinue = false;
+			path.isTerminate = true;
+			return;
 		}
 		else {
 			auto cosLight = dot(orienting_normal, -ray.dir);
@@ -261,14 +260,10 @@ __global__ void shade(
 				path.contrib += path.throughput * misW * emit;
 
 				// When ray hit the light, tracing will finish.
-				willContinue = false;
+				path.isTerminate = true;
+				return;
 			}
 		}
-	}
-
-	if (!willContinue) {
-		path.isTerminate = true;
-		return;
 	}
 
 	// Explicit conection to light.
@@ -356,7 +351,7 @@ __global__ void shade(
 
 		if (russianProb >= p) {
 			path.contrib = aten::make_float3(0);
-			willContinue = false;
+			path.isTerminate = true;
 		}
 		else {
 			russianProb = p;
@@ -391,7 +386,7 @@ __global__ void shade(
 		path.throughput /= russianProb;
 	}
 	else {
-		willContinue = false;
+		path.isTerminate = true;
 	}
 
 	// Make next ray.
@@ -399,10 +394,6 @@ __global__ void shade(
 
 	path.mtrlid = path.rec.mtrlid;
 	path.pdfb = pdfb;
-
-	if (!willContinue) {
-		path.isTerminate = true;
-	}
 }
 
 __global__ void hitShadowRay(

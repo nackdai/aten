@@ -26,7 +26,6 @@ struct ShadowRay : public aten::ray {
 };
 
 struct Path {
-	aten::ray ray;
 	aten::vec3 throughput;
 	aten::vec3 contrib;
 	aten::hitrecord rec;
@@ -62,6 +61,7 @@ inline AT_DEVICE_API int getIdx(int ix, int iy, int width)
 
 __global__ void genPath(
 	Path* paths,
+	aten::ray* rays,
 	int width, int height,
 	int sample, int maxSamples,
 	int seed,
@@ -85,7 +85,8 @@ __global__ void genPath(
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
 
-	path.ray = camsample.r;
+	rays[idx] = camsample.r;
+
 	path.throughput = aten::make_float3(1);
 	path.mtrlid = -1;
 	path.pdfb = 0.0f;
@@ -98,6 +99,7 @@ __global__ void genPath(
 
 __global__ void hitTest(
 	Path* paths,
+	aten::ray* rays,
 	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -137,7 +139,7 @@ __global__ void hitTest(
 	}
 	
 	aten::hitrecord rec;
-	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &rec);
+	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &rec);
 
 	path.isHit = isHit;
 	path.rec = rec;
@@ -169,6 +171,7 @@ __global__ void shadeMiss(
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
+	aten::ray* rays,
 	ShadowRay* shadowRays,
 	int width, int height,
 	int depth, int rrDepth,
@@ -203,6 +206,7 @@ __global__ void shade(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
+	const auto& ray = rays[idx];
 
 	shadowRays[idx].isActive = false;
 
@@ -218,7 +222,7 @@ __global__ void shade(
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
-	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
+	const aten::vec3 orienting_normal = dot(path.rec.normal, ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
 	// TODO
 	// Apply normal map.
@@ -239,8 +243,8 @@ __global__ void shade(
 			willContinue = false;
 		}
 		else {
-			auto cosLight = dot(orienting_normal, -path.ray.dir);
-			auto dist2 = (path.rec.p - path.ray.org).squared_length();
+			auto cosLight = dot(orienting_normal, -ray.dir);
+			auto dist2 = (path.rec.p - ray.org).squared_length();
 
 			if (cosLight >= 0) {
 				auto pdfLight = 1 / path.rec.area;
@@ -294,8 +298,8 @@ __global__ void shade(
 
 		auto cosShadow = dot(orienting_normal, dirToLight);
 
-		real pdfb = samplePDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-		auto bsdf = sampleBSDF(mtrl, orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+		real pdfb = samplePDF(mtrl, orienting_normal, ray.dir, dirToLight, path.rec.u, path.rec.v);
+		auto bsdf = sampleBSDF(mtrl, orienting_normal, ray.dir, dirToLight, path.rec.u, path.rec.v);
 
 		bsdf *= path.throughput;
 
@@ -365,7 +369,7 @@ __global__ void shade(
 		&sampling,
 		mtrl,
 		orienting_normal,
-		path.ray.dir,
+		ray.dir,
 		path.rec.normal,
 		&path.sampler,
 		path.rec.u, path.rec.v);
@@ -391,7 +395,7 @@ __global__ void shade(
 	}
 
 	// Make next ray.
-	path.ray = aten::ray(path.rec.p, nextDir);
+	rays[idx] = aten::ray(path.rec.p, nextDir);
 
 	path.mtrlid = path.rec.mtrlid;
 	path.pdfb = pdfb;
@@ -536,6 +540,9 @@ namespace idaten {
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
+		idaten::TypedCudaMemory<aten::ray> rays;
+		rays.init(width * height);
+
 		idaten::TypedCudaMemory<ShadowRay> shadowRays;
 		shadowRays.init(width * height);
 
@@ -562,6 +569,7 @@ namespace idaten {
 			genPath << <grid, block >> > (
 			//genPath << <1, 1 >> > (
 				paths.ptr(),
+				rays.ptr(),
 				width, height,
 				i, maxSamples,
 				time.milliSeconds,
@@ -573,6 +581,7 @@ namespace idaten {
 				hitTest << <grid, block >> > (
 				//hitTest << <1, 1 >> > (
 					paths.ptr(),
+					rays.ptr(),
 					width, height,
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
@@ -597,6 +606,7 @@ namespace idaten {
 				//shade << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
+					rays.ptr(),
 					shadowRays.ptr(),
 					width, height,
 					depth, rrDepth,

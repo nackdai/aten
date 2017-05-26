@@ -40,6 +40,26 @@ struct Path {
 	bool isTerminate;
 };
 
+#define BLOCK_SIZE	(16)
+#define BLOCK_SIZE2	(BLOCK_SIZE * BLOCK_SIZE)
+
+inline AT_DEVICE_API int getIdx(int ix, int iy, int width)
+{
+	int X = ix / BLOCK_SIZE;
+	int Y = iy / BLOCK_SIZE;
+
+	//int base = Y * BLOCK_SIZE2 * (width / BLOCK_SIZE) + X * BLOCK_SIZE2;
+
+	int XB = X * BLOCK_SIZE;
+	int YB = Y * BLOCK_SIZE;
+
+	int base = YB * width + XB * BLOCK_SIZE;
+
+	const auto idx = base + (iy - YB) * BLOCK_SIZE + (ix - XB);
+
+	return idx;
+}
+
 __global__ void genPath(
 	Path* paths,
 	int width, int height,
@@ -54,7 +74,7 @@ __global__ void genPath(
 		return;
 	}
 
-	const auto idx = iy * camera->width + ix;
+	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
@@ -94,7 +114,7 @@ __global__ void hitTest(
 		return;
 	}
 
-	const auto idx = iy * width + ix;
+	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -135,7 +155,7 @@ __global__ void shadeMiss(
 		return;
 	}
 
-	const auto idx = iy * width + ix;
+	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 
@@ -180,7 +200,7 @@ __global__ void shade(
 		ctxt.matrices = matrices;
 	}
 
-	const auto idx = iy * width + ix;
+	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 
@@ -413,7 +433,7 @@ __global__ void hitShadowRay(
 		ctxt.matrices = matrices;
 	}
 
-	const auto idx = iy * width + ix;
+	const auto idx = getIdx(ix, iy, width);
 
 	auto& shadowRay = shadowRays[idx];
 
@@ -457,7 +477,8 @@ __global__ void gather(
 		return;
 	}
 
-	const auto idx = iy * width + ix;
+	const auto idx = getIdx(ix, iy, width);
+
 	const auto& path = paths[idx];
 
 	float4 data;
@@ -505,7 +526,7 @@ namespace idaten {
 		aten::vec4* image,
 		int width, int height)
 	{
-		dim3 block(16, 16);
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
@@ -530,7 +551,7 @@ namespace idaten {
 		}
 		nodetex.writeByNum(&tmp[0], tmp.size());
 
-		static const int maxSamples = 4;
+		static const int maxSamples = 1;
 		static const int maxDepth = 5;
 		static const int rrDepth = 3;
 

@@ -130,15 +130,14 @@ namespace AT_NAME {
 
 		static AT_DEVICE_API bool hitLight(
 			bool isHit,
-			const aten::LightParameter* light,
-			const aten::vec3& lightPos,
-			const aten::ray& r,
-			real t_min, real t_max,
-			const aten::vec3& hitp,
+			aten::LightAttribute attrib,
+			void* lightobj,
+			real distToLight,
+			real distHitObjToRayOrg,
 			const real hitt,
 			const void* hitobj)
 		{
-			auto lightobj = light->object.ptr;
+			//auto lightobj = light->object.ptr;
 
 			if (lightobj) {
 				// Area Light.
@@ -155,10 +154,10 @@ namespace AT_NAME {
 						}
 					}
 #else
-					auto dist = (hitp - r.org).length();
+					//auto distHitObjToRayOrg = (hitp - r.org).length();
 
 					if (hitobj == lightobj
-						&& aten::abs(dist - hitt) <= AT_MATH_EPSILON)
+						&& aten::abs(distHitObjToRayOrg - hitt) <= AT_MATH_EPSILON)
 					{
 						return true;
 					}
@@ -166,7 +165,7 @@ namespace AT_NAME {
 				}
 			}
 
-			if (light->attrib.isInfinite) {
+			if (attrib.isInfinite) {
 				if (isHit) {
 					// Hit something.
 					return false;
@@ -176,8 +175,8 @@ namespace AT_NAME {
 					return true;
 				}
 			}
-			else if (light->attrib.isSingular) {
-				auto distToLight = (lightPos - r.org).length();
+			else if (attrib.isSingular) {
+				//auto distToLight = (lightPos - r.org).length();
 
 				if (isHit && hitt < distToLight) {
 					// Ray hits something, and the distance to the object is near than the distance to the light.

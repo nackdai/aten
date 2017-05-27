@@ -16,8 +16,8 @@
 #include "aten4idaten.h"
 
 struct ShadowRay : public aten::ray {
-	aten::vec3 lightPos;
 	aten::vec3 lightcontrib;
+	real distToLight;
 	int targetLightId;
 
 	struct {
@@ -303,8 +303,8 @@ __global__ void shade(
 
 		shadowRays[idx].org = path.rec.p;
 		shadowRays[idx].dir = dirToLight;
-		shadowRays[idx].lightPos = posLight;
 		shadowRays[idx].lightcontrib = aten::make_float3(0);
+		shadowRays[idx].distToLight = sampleres.dir.length();
 		shadowRays[idx].targetLightId = lightidx;
 
 		if (light.attrib.isSingular || light.attrib.isInfinite) {
@@ -442,14 +442,15 @@ __global__ void hitShadowRay(
 		if (light.object.idx >= 0) {
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
+
+		real distHitObjToRayOrg = (rec.p - shadowRay.org).length();
 		
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
-			&light,
-			shadowRay.lightPos,
-			shadowRay, 
-			AT_MATH_EPSILON, AT_MATH_INF, 
-			rec.p,
+			light.attrib,
+			light.object.ptr,
+			shadowRay.distToLight,
+			distHitObjToRayOrg,
 			rec.t,
 			rec.obj);
 

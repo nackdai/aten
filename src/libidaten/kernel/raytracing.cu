@@ -16,7 +16,7 @@
 #include "aten4idaten.h"
 
 struct ShadowRay : public aten::ray {
-	aten::vec3 lightPos;
+	real distToLight;
 	int targetLightId;
 
 	struct {
@@ -210,7 +210,7 @@ __global__ void raytracing(
 		shadowRays[idx].isActive = true;
 		shadowRays[idx].org = path.rec.p;
 		shadowRays[idx].dir = dirToLight;
-		shadowRays[idx].lightPos = sampleres.pos;
+		shadowRays[idx].distToLight = len;
 		shadowRays[idx].targetLightId = lightidx;
 
 		aten::hitrecord tmpRec;
@@ -284,13 +284,14 @@ __global__ void hitShadowRay(
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
 
+		real distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit,
-			&light,
-			shadowRay.lightPos,
-			shadowRay,
-			AT_MATH_EPSILON, AT_MATH_INF,
-			rec.p,
+			light.attrib,
+			light.object.ptr,
+			shadowRay.distToLight,
+			distHitObjToRayOrg,
 			rec.t,
 			rec.obj);
 

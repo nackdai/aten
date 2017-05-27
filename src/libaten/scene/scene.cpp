@@ -11,13 +11,17 @@ namespace aten {
 	{
 		bool isHit = this->hit(r, t_min, t_max, rec);
 
+		real distToLight = (lightPos - r.org).length();
+		real distHitObjToRayOrg = (rec.p - r.org).length();
+
+		const auto& param = light->param();
+
 		isHit = scene::hitLight(
 			isHit,
-			&light->param(),
-			lightPos,
-			r,
-			t_min, t_max,
-			rec.p,
+			param.attrib,
+			param.object.ptr,
+			distToLight,
+			distHitObjToRayOrg,
 			rec.t,
 			rec.obj);
 

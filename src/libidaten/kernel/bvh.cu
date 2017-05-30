@@ -131,9 +131,11 @@ __device__ bool intersectBVH(
 					}
 #endif
 					else {
-						isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+						// TODO
+						// Only sphere...
+						//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+						isHit = hitSphere(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 						recTmp.mtrlid = s->mtrl.idx;
-						tmpexid = -1;
 					}
 
 					if (isHit) {
@@ -215,17 +217,17 @@ __device__ bool intersectBVH(
 				isHit = false;
 
 				const auto* s = &ctxt->shapes[(int)attrib.x];
+				const aten::ShapeParameter* realShape = (s->shapeid >= 0 ? &ctxt->shapes[s->shapeid] : s);
 
 				const auto& prim = ctxt->prims[(int)attrib.y];
-				isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+
+				isHit = hitTriangle(realShape, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 				recTmp.mtrlid = prim.mtrlid;
 
-				if (isHit) {
-					if (recTmp.t < rec->t) {
-						*rec = recTmp;
-						*recOpt = recOptTmp;
-						rec->obj = (void*)s;
-					}
+				if (recTmp.t < rec->t) {
+					*rec = recTmp;
+					*recOpt = recOptTmp;
+					rec->obj = (void*)s;
 				}
 			}
 			else {

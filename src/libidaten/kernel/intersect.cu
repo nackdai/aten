@@ -167,7 +167,7 @@ __device__ bool hitNotSupported(
 	printf("Hit Test Not Supoorted[%d]\n", shape->type);
 }
 
-AT_DEVICE_API bool intersectShape(
+__device__ bool intersectShape(
 	const aten::ShapeParameter* shape,
 	const aten::PrimitiveParamter* prim,
 	const Context* ctxt,

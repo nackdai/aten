@@ -47,7 +47,7 @@ namespace aten {
 		const vec3& v1,
 		const vec3& v2)
 	{
-#if 0
+#if 1
 		// NOTE
 		// http://qiita.com/edo_m18/items/2bd885b13bd74803a368
 		// http://kanamori.cs.tsukuba.ac.jp/jikken/inner/triangle_intersection.pdf

@@ -75,8 +75,6 @@ __device__ bool intersectBVH(
 	aten::hitrecord recTmp;
 	aten::hitrecordOption recOptTmp;
 
-	bool isHit = false;
-
 	real hitt = AT_MATH_INF;
 
 	*exid = -1;
@@ -112,15 +110,13 @@ __device__ bool intersectBVH(
 					}
 				}
 				else {
-					isHit = false;
 					tmpexid = -1;
 
 					const auto* s = &ctxt->shapes[(int)attrib.x];
 
 					if (attrib.w >= 0) {	// exid
-						t = AT_MATH_INF;
-						isHit = intersectAABB(&bvhray, aabb, t);
-						recTmp.t = t;
+						recTmp.t = AT_MATH_INF;
+						intersectAABB(&bvhray, aabb, recTmp.t);
 						tmpexid = attrib.w;
 					}
 #if 0
@@ -134,22 +130,21 @@ __device__ bool intersectBVH(
 						// TODO
 						// Only sphere...
 						//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
-						isHit = hitSphere(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+						recTmp.t = AT_MATH_INF;
+						hitSphere(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 						recTmp.mtrlid = s->mtrl.idx;
 					}
 
-					if (isHit) {
-						if (recTmp.t < hitt) {
-							hitt = recTmp.t;
-							*exid = tmpexid;
-							*shapeid = tmpshapeid;
-						}
-						if (tmpexid < 0) {
-							if (recTmp.t < rec->t) {
-								*rec = recTmp;
-								*recOpt = recOptTmp;
-								rec->obj = (void*)s;
-							}
+					if (recTmp.t < hitt) {
+						hitt = recTmp.t;
+						*exid = tmpexid;
+						*shapeid = tmpshapeid;
+					}
+					if (tmpexid < 0) {
+						if (recTmp.t < rec->t) {
+							*rec = recTmp;
+							*recOpt = recOptTmp;
+							rec->obj = (void*)s;
 						}
 					}
 				}
@@ -188,8 +183,6 @@ __device__ bool intersectBVH(
 	aten::hitrecord recTmp;
 	aten::hitrecordOption recOptTmp;
 
-	bool isHit = false;
-
 	int nodeid = -1;
 	float4 node;	// x:left, y:right
 	float4 attrib;	// x:shapeid, y:primid, z:nestid
@@ -214,14 +207,13 @@ __device__ bool intersectBVH(
 			boxmax = aten::make_float3(_boxmax.x, _boxmax.y, _boxmax.z);
 
 			if (node.x < 0 && node.y < 0) {
-				isHit = false;
-
 				const auto* s = &ctxt->shapes[(int)attrib.x];
 				const aten::ShapeParameter* realShape = (s->shapeid >= 0 ? &ctxt->shapes[s->shapeid] : s);
 
 				const auto& prim = ctxt->prims[(int)attrib.y];
 
-				isHit = hitTriangle(realShape, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+				recTmp.t = AT_MATH_INF;
+				hitTriangle(realShape, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 				recTmp.mtrlid = prim.mtrlid;
 
 				if (recTmp.t < rec->t) {

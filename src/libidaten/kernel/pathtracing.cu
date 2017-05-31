@@ -242,19 +242,9 @@ __global__ void shade(
 
 	// Implicit conection to light.
 	if (mtrl->attrib.isEmissive) {
-		if (depth == 0) {
-			// Ray hits the light directly.
-			path.contrib = mtrl->baseColor;
-			path.isTerminate = true;
-			return;
-		}
-		else if (path.isSingular) {
-			auto emit = mtrl->baseColor;
-			path.contrib += path.throughput * emit;
-			path.isTerminate = true;
-			return;
-		}
-		else {
+		float weight = 1.0f;
+
+		if (depth > 0 && !path.isSingular) {
 			auto cosLight = dot(orienting_normal, -ray.dir);
 			auto dist2 = (rec.p - ray.org).squared_length();
 
@@ -266,17 +256,15 @@ __global__ void shade(
 				// p31 - p35
 				pdfLight = pdfLight * dist2 / cosLight;
 
-				auto misW = path.pdfb / (pdfLight + path.pdfb);
-
-				auto emit = mtrl->baseColor;
-
-				path.contrib += path.throughput * misW * emit;
-
-				// When ray hit the light, tracing will finish.
-				path.isTerminate = true;
-				return;
+				weight = path.pdfb / (pdfLight + path.pdfb);
 			}
 		}
+
+		path.contrib += path.throughput * weight * mtrl->baseColor;
+
+		// When ray hit the light, tracing will finish.
+		path.isTerminate = true;
+		return;
 	}
 
 	// Explicit conection to light.

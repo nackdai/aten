@@ -20,7 +20,7 @@ namespace idaten
 		virtual ~CudaGLResource()
 		{
 			if (m_rsc) {
-				checkCudaErrors(cudaGraphicsUnregisterResource(m_rsc));
+				//checkCudaErrors(cudaGraphicsUnregisterResource(m_rsc));
 			}
 		}
 

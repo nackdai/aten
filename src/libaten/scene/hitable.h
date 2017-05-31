@@ -52,7 +52,7 @@ namespace aten {
 		};
 	};
 
-	struct hitrecordOption {
+	struct Intersection {
 		union {
 			// cube.
 			struct {
@@ -76,7 +76,7 @@ namespace aten {
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec,
-			hitrecordOption& recOpt) const = 0;
+			Intersection& isect) const = 0;
 
 		virtual aabb getBoundingbox() const = 0;
 
@@ -104,9 +104,9 @@ namespace aten {
 			const hitable* obj,
 			const ray& r,
 			hitrecord& rec,
-			const hitrecordOption& recOpt)
+			const Intersection& isect)
 		{
-			obj->evalHitResult(r, rec, recOpt);
+			obj->evalHitResult(r, rec, isect);
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
 			// tangent coordinate.
@@ -119,7 +119,7 @@ namespace aten {
 		virtual void evalHitResult(
 			const ray& r,
 			hitrecord& rec,
-			const hitrecordOption& recOpt) const
+			const Intersection& isect) const
 		{
 			AT_ASSERT(false);
 		}

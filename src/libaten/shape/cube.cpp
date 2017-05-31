@@ -49,7 +49,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord& rec,
-		aten::hitrecordOption& recOpt) const
+		aten::Intersection& isect) const
 	{
 		real t = 0;
 		bool isHit = m_aabb.hit(r, t_min, t_max, &t);
@@ -85,7 +85,7 @@ namespace AT_NAME
 					break;
 				}
 
-				recOpt.face = face;
+				isect.face = face;
 			}
 
 			rec.obj = (hitable*)this;
@@ -100,21 +100,21 @@ namespace AT_NAME
 	void cube::evalHitResult(
 		const aten::ray& r, 
 		aten::hitrecord& rec,
-		const aten::hitrecordOption& recOpt) const
+		const aten::Intersection& isect) const
 	{
-		evalHitResult(r, aten::mat4(), rec, recOpt);
+		evalHitResult(r, aten::mat4(), rec, isect);
 	}
 
 	void cube::evalHitResult(
 		const aten::ray& r, 
 		const aten::mat4& mtxL2W, 
 		aten::hitrecord& rec,
-		const aten::hitrecordOption& recOpt) const
+		const aten::Intersection& isect) const
 	{
 		// TODO
 		AT_ASSERT(false);	// Not support.
 
-		Face face = (Face)recOpt.face;
+		Face face = (Face)isect.face;
 
 		switch (face) {
 		case POS_X:

@@ -24,7 +24,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord& rec,
-		aten::hitrecordOption& recOpt) const
+		aten::Intersection& isect) const
 	{
 		bool isHit = hit(&m_param, r, t_min, t_max, &rec);
 
@@ -100,7 +100,7 @@ namespace AT_NAME
 	void sphere::evalHitResult(
 		const aten::ray& r, 
 		aten::hitrecord& rec,
-		const aten::hitrecordOption& recOpt) const
+		const aten::Intersection& isect) const
 	{
 		evalHitResult(&m_param, r, aten::mat4(), &rec);
 	}
@@ -109,7 +109,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		const aten::mat4& mtxL2W,
 		aten::hitrecord& rec,
-		const aten::hitrecordOption& recOpt) const
+		const aten::Intersection& isect) const
 	{
 		evalHitResult(&m_param, r, mtxL2W, &rec);
 	}

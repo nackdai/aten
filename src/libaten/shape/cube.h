@@ -26,7 +26,7 @@ namespace AT_NAME
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::hitrecord& rec,
-			aten::hitrecordOption& recOpt) const override final;
+			aten::Intersection& isect) const override final;
 
 		const aten::vec3& center() const
 		{
@@ -51,13 +51,13 @@ namespace AT_NAME
 		virtual void evalHitResult(
 			const aten::ray& r,
 			aten::hitrecord& rec, 
-			const aten::hitrecordOption& recOpt) const override final;
+			const aten::Intersection& isect) const override final;
 
 		virtual void evalHitResult(
 			const aten::ray& r, 
 			const aten::mat4& mtxL2W, 
 			aten::hitrecord& rec,
-			const aten::hitrecordOption& recOpt) const override final;
+			const aten::Intersection& isect) const override final;
 
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,

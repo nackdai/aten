@@ -25,7 +25,7 @@ namespace aten
 			const ray& r,
 			const mat4& mtxL2W,
 			hitrecord& rec,
-			const hitrecordOption& recOpt) const = 0;
+			const Intersection& isect) const = 0;
 
 		virtual const ShapeParameter& getParam() const
 		{

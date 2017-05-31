@@ -125,13 +125,13 @@ namespace aten {
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec,
-		hitrecordOption& recOpt) const
+		Intersection& isect) const
 	{
 		auto bbox = getBoundingbox();
 		auto isHit = bbox.hit(r, t_min, t_max);
 
 		if (isHit) {
-			isHit = bvh::hit(this, r, t_min, t_max, rec, recOpt);
+			isHit = bvh::hit(this, r, t_min, t_max, rec, isect);
 		}
 
 		return isHit;
@@ -174,7 +174,7 @@ namespace aten {
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec,
-		hitrecordOption& recOpt)
+		Intersection& isect)
 	{
 		static const uint32_t stacksize = 64;
 		BVHNode* stackbuf[stacksize] = { nullptr };
@@ -206,7 +206,7 @@ namespace aten {
 				}
 				else {
 					hitrecord recTmp;
-					hitrecordOption recOptTmp;
+					Intersection recOptTmp;
 
 					bool isHit = false;
 
@@ -242,7 +242,7 @@ namespace aten {
 						if (tmpexid < 0) {
 							if (recTmp.t < rec.t) {
 								rec = recTmp;
-								recOpt = recOptTmp;
+								isect = recOptTmp;
 							}
 						}
 					}
@@ -276,12 +276,12 @@ namespace aten {
 			auto transformedRay = mtxW2L.applyRay(r);
 
 			hitrecord recTmp;
-			hitrecordOption recOptTmp;
+			Intersection isectTmp;
 
-			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp, recOptTmp)) {
+			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp, isectTmp)) {
 				if (recTmp.t < rec.t) {
 					rec = recTmp;
-					recOpt = recOptTmp;
+					isect = isectTmp;
 				}
 			}
 		}
@@ -294,13 +294,13 @@ namespace aten {
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec,
-		hitrecordOption& recOpt) const
+		Intersection& isect) const
 	{
 #ifdef TEST_NODE_LIST
-		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, rec, recOpt);
+		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, rec, isect);
 		return isHit;
 #else
-		bool isHit = hit(m_root, r, t_min, t_max, rec, recOpt);
+		bool isHit = hit(m_root, r, t_min, t_max, rec, isect);
 		return isHit;
 #endif
 	}
@@ -310,7 +310,7 @@ namespace aten {
 		const ray& r,
 		real t_min, real t_max,
 		hitrecord& rec,
-		hitrecordOption& recOpt)
+		Intersection& isect)
 	{
 		// NOTE
 		// https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-ii-tree-traversal-gpu/
@@ -330,11 +330,11 @@ namespace aten {
 
 			if (node->isLeaf()) {
 				hitrecord recTmp;
-				hitrecordOption recOptTmp;
+				Intersection recOptTmp;
 				if (node->hit(r, t_min, t_max, recTmp, recOptTmp)) {
 					if (recTmp.t < rec.t) {
 						rec = recTmp;
-						recOpt = recOptTmp;
+						isect = recOptTmp;
 					}
 				}
 			}

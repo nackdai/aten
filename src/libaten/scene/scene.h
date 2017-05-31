@@ -32,12 +32,12 @@ namespace AT_NAME {
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::hitrecord& rec,
-			aten::hitrecordOption& recOpt) const override final
+			aten::Intersection& isect) const override final
 		{
 			bool isHit = false;
 
 			aten::hitrecord tmp;
-			aten::hitrecordOption tmpOpt;
+			aten::Intersection tmpOpt;
 
 			for (size_t i = 0; i < m_objs.size(); i++) {
 				auto o = m_objs[i];
@@ -46,7 +46,7 @@ namespace AT_NAME {
 						rec = tmp;
 						rec.obj = o;
 
-						recOpt = tmpOpt;
+						isect = tmpOpt;
 
 						t_max = tmp.t;
 
@@ -224,14 +224,14 @@ namespace AT_NAME {
 			real t_min, real t_max,
 			aten::hitrecord& rec) const override final
 		{
-			aten::hitrecordOption recOpt;
+			aten::Intersection isect;
 
-			auto isHit = m_accel.hit(r, t_min, t_max, rec, recOpt);
+			auto isHit = m_accel.hit(r, t_min, t_max, rec, isect);
 
 			// TODO
 #ifndef __AT_CUDA__
 			if (isHit) {
-				aten::hitable::evalHitResult(rec.obj, r, rec, recOpt);
+				aten::hitable::evalHitResult(rec.obj, r, rec, isect);
 			}
 #endif
 

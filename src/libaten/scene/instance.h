@@ -39,7 +39,7 @@ namespace aten
 			const ray& r,
 			real t_min, real t_max,
 			hitrecord& rec,
-			hitrecordOption& recOpt) const override final
+			Intersection& isect) const override final
 		{
 			vec3 org = r.org;
 			vec3 dir = r.dir;
@@ -51,7 +51,7 @@ namespace aten
 			ray transformdRay(org, dir);
 
 			// Hit test in local coordinate.
-			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec, recOpt);
+			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec, isect);
 
 			if (isHit) {
 				rec.obj = (hitable*)this;
@@ -63,9 +63,9 @@ namespace aten
 		virtual void evalHitResult(
 			const ray& r,
 			hitrecord& rec,
-			const hitrecordOption& recOpt) const override final
+			const Intersection& isect) const override final
 		{
-			m_obj->evalHitResult(r, m_mtxL2W, rec, recOpt);
+			m_obj->evalHitResult(r, m_mtxL2W, rec, isect);
 
 			// Transform local to world.
 			rec.p = m_mtxL2W.apply(rec.p);
@@ -111,7 +111,7 @@ namespace aten
 			const ray& r,
 			const mat4& mtxL2W,
 			hitrecord& rec,
-			const hitrecordOption& recOpt) const override final
+			const Intersection& isect) const override final
 		{
 			// Not used...
 			AT_ASSERT(false);

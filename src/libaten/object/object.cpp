@@ -28,7 +28,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord& rec,
-		aten::hitrecordOption& recOpt) const
+		aten::Intersection& isect) const
 	{
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
@@ -39,15 +39,15 @@ namespace AT_NAME
 			v0.pos, v1.pos, v2.pos,
 			r, 
 			t_min, t_max, 
-			&rec, &recOpt);
+			&rec, &isect);
 
 		if (isHit) {
 			//rec.obj = parent;
 			rec.obj = (hitable*)this;
 
-			recOpt.idx[0] = param.idx[0];
-			recOpt.idx[1] = param.idx[1];
-			recOpt.idx[2] = param.idx[2];
+			isect.idx[0] = param.idx[0];
+			isect.idx[1] = param.idx[1];
+			isect.idx[2] = param.idx[2];
 
 			if (parent) {
 				rec.mtrl = (material*)parent->param.mtrl.ptr;
@@ -65,7 +65,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord* rec,
-		aten::hitrecordOption* recOpt)
+		aten::Intersection* isect)
 	{
 		bool isHit = false;
 
@@ -75,8 +75,8 @@ namespace AT_NAME
 			if (res.t < rec->t) {
 				rec->t = res.t;
 
-				recOpt->a = res.a;
-				recOpt->b = res.b;
+				isect->a = res.a;
+				isect->b = res.b;
 
 				rec->area = param->area;
 
@@ -90,13 +90,13 @@ namespace AT_NAME
 	void face::evalHitResult(
 		const aten::ray& r, 
 		aten::hitrecord& rec,
-		const aten::hitrecordOption& recOpt) const
+		const aten::Intersection& isect) const
 	{
-		const auto& v0 = aten::VertexManager::getVertex(recOpt.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(recOpt.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(recOpt.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(isect.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(isect.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(isect.idx[2]);
 
-		evalHitResult(v0, v1, v2, &rec, &recOpt);
+		evalHitResult(v0, v1, v2, &rec, &isect);
 	}
 
 	AT_DEVICE_API void face::evalHitResult(
@@ -104,13 +104,13 @@ namespace AT_NAME
 		const aten::vertex& v1,
 		const aten::vertex& v2,
 		aten::hitrecord* rec,
-		const aten::hitrecordOption* recOpt)
+		const aten::Intersection* isect)
 	{
 		// NOTE
 		// http://d.hatena.ne.jp/Zellij/20131207/p1
 
-		real a = recOpt->a;
-		real b = recOpt->b;
+		real a = isect->a;
+		real b = isect->b;
 		real c = 1 - a - b;
 
 		// èdêSç¿ïWån(barycentric coordinates).
@@ -214,7 +214,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord& rec,
-		aten::hitrecordOption& recOpt) const
+		aten::Intersection& isect) const
 	{
 #ifdef ENABLE_LINEAR_HITTEST
 		bool isHit = false;
@@ -235,7 +235,7 @@ namespace AT_NAME
 			rec = tmp;
 		}
 #else
-		auto isHit = m_node.hit(r, t_min, t_max, rec, recOpt);
+		auto isHit = m_node.hit(r, t_min, t_max, rec, isect);
 #endif
 
 		if (isHit) {
@@ -278,7 +278,7 @@ namespace AT_NAME
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::hitrecord& rec,
-		aten::hitrecordOption& recOpt) const
+		aten::Intersection& isect) const
 	{
 #ifdef ENABLE_LINEAR_HITTEST
 		bool isHit = false;
@@ -297,7 +297,7 @@ namespace AT_NAME
 		}
 #else
 		aten::hitrecord tmp;
-		bool isHit = m_node.hit(r, t_min, t_max, tmp, recOpt);
+		bool isHit = m_node.hit(r, t_min, t_max, tmp, isect);
 #endif
 
 		if (isHit) {
@@ -315,13 +315,13 @@ namespace AT_NAME
 		const aten::ray& r,
 		const aten::mat4& mtxL2W,
 		aten::hitrecord& rec,
-		const aten::hitrecordOption& recOpt) const
+		const aten::Intersection& isect) const
 	{
-		const auto& v0 = aten::VertexManager::getVertex(recOpt.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(recOpt.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(recOpt.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(isect.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(isect.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(isect.idx[2]);
 
-		face::evalHitResult(v0, v1, v2, &rec, &recOpt);
+		face::evalHitResult(v0, v1, v2, &rec, &isect);
 
 		real orignalLen = 0;
 		{

@@ -19,8 +19,10 @@ namespace aten
 			hitrecord rec;
 
 			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
-				if (rec.mtrl->isEmissive()) {
-					auto emit = rec.mtrl->color();
+				auto mtrl = material::getMaterial(rec.mtrlid);
+
+				if (mtrl->isEmissive()) {
+					auto emit = mtrl->color();
 					contribution += throughput * emit;
 					return std::move(contribution);
 				}
@@ -29,8 +31,8 @@ namespace aten
 				// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 				const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-				if (rec.mtrl->isSingular() || rec.mtrl->isTranslucent()) {
-					auto sampling = rec.mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
+				if (mtrl->isSingular() || mtrl->isTranslucent()) {
+					auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
 
 					auto nextDir = normalize(sampling.dir);
 					auto bsdf = sampling.bsdf;
@@ -40,9 +42,9 @@ namespace aten
 					// Make next ray.
 					ray = aten::ray(rec.p, nextDir);
 				}
-				else if (rec.mtrl->isNPR()) {
+				else if (mtrl->isNPR()) {
 					// Non-Photo-Real.
-					contribution = shadeNPR(rec.mtrl, rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
+					contribution = shadeNPR(mtrl, rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
 					return std::move(contribution);
 				}
 				else {
@@ -64,7 +66,7 @@ namespace aten
 
 						auto lightobj = sampleres.obj;
 
-						auto albedo = rec.mtrl->color();
+						auto albedo = mtrl->color();
 
 						aten::ray shadowRay(rec.p, dirToLight);
 

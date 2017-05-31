@@ -11,7 +11,7 @@ namespace AT_NAME
 		return (uint32_t)g_materials.size();
 	}
 
-	const material* material::getMaterial(uint32_t idx)
+	material* material::getMaterial(uint32_t idx)
 	{
 		if (idx < g_materials.size()) {
 			return g_materials[idx];
@@ -35,14 +35,10 @@ namespace AT_NAME
 		return g_materials;
 	}
 
-	// NOTE
-	// 0 ‚Í—\–ñÏ‚Ý‚È‚Ì‚ÅA1 ‚©‚çŽn‚ß‚é.
-	static std::atomic<uint32_t> g_id = 1;
-
 	material::material(aten::MaterialType type, const aten::MaterialAttribute& attrib)
 		: m_param(type, attrib)
 	{
-		m_id = g_id.fetch_add(1);
+		m_id = g_materials.size();
 		g_materials.push_back(this);
 	}
 
@@ -55,7 +51,7 @@ namespace AT_NAME
 		aten::texture* normalMap/*= nullptr*/)
 		: m_param(type, attrib)
 	{
-		m_id = g_id.fetch_add(1);
+		m_id = g_materials.size();
 		g_materials.push_back(this);
 
 		m_param.baseColor = clr;
@@ -67,7 +63,7 @@ namespace AT_NAME
 	material::material(aten::MaterialType type, const aten::MaterialAttribute& attrib, aten::Values& val)
 		: m_param(type, attrib)
 	{
-		m_id = g_id.fetch_add(1);
+		m_id = g_materials.size();
 		g_materials.push_back(this);
 
 		m_param.baseColor = val.get("color", m_param.baseColor);

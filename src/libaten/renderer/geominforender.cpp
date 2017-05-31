@@ -25,24 +25,26 @@ namespace aten
 				// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 				vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
+				auto mtrl = material::getMaterial(rec.mtrlid);
+
 				// Apply normal map.
-				rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
+				mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
 
 				if (depth == 0) {
 					path.normal = orienting_normal;
 					path.depth = rec.t;
 
 					path.shapeid = rec.obj->id();
-					path.mtrlid = rec.mtrl->id();
+					path.mtrlid = mtrl->id();
 				}
 
-				if (rec.mtrl->isEmissive()) {
-					path.albedo = rec.mtrl->color();
+				if (mtrl->isEmissive()) {
+					path.albedo = mtrl->color();
 					path.albedo *= throughput;
 					break;
 				}
-				else if (rec.mtrl->isSingular()) {
-					auto sample = rec.mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
+				else if (mtrl->isSingular()) {
+					auto sample = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
 
 					const auto& nextDir = sample.dir;
 					throughput *= sample.bsdf;
@@ -79,8 +81,8 @@ namespace aten
 						}
 					}
 
-					path.albedo = rec.mtrl->color();
-					path.albedo *= rec.mtrl->sampleAlbedoMap(rec.u, rec.v);
+					path.albedo = mtrl->color();
+					path.albedo *= mtrl->sampleAlbedoMap(rec.u, rec.v);
 					path.albedo *= throughput;
 					break;
 				}

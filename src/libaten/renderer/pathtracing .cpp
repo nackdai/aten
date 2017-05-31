@@ -104,19 +104,21 @@ namespace aten
 		// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
 		vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
+		auto mtrl = material::getMaterial(path.rec.mtrlid);
+
 		// Apply normal map.
-		path.rec.mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
+		mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
 		// Implicit conection to light.
-		if (path.rec.mtrl->isEmissive()) {
+		if (mtrl->isEmissive()) {
 			if (depth == 0) {
 				// Ray hits the light directly.
-				path.contrib = path.rec.mtrl->color();
+				path.contrib = mtrl->color();
 				path.isTerminate = true;
 				return false;
 			}
 			else if (path.prevMtrl && path.prevMtrl->isSingular()) {
-				auto emit = path.rec.mtrl->color();
+				auto emit = mtrl->color();
 				path.contrib += path.throughput * emit;
 				return false;
 			}
@@ -134,7 +136,7 @@ namespace aten
 
 					auto misW = path.pdfb / (pdfLight + path.pdfb);
 
-					auto emit = path.rec.mtrl->color();
+					auto emit = mtrl->color();
 
 					path.contrib += path.throughput * misW * emit;
 
@@ -163,14 +165,14 @@ namespace aten
 #endif
 
 		// Non-Photo-Real.
-		if (path.rec.mtrl->isNPR()) {
-			path.contrib = shadeNPR(path.rec.mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
+		if (mtrl->isNPR()) {
+			path.contrib = shadeNPR(mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
 			path.isTerminate = true;
 			return false;
 		}
 
 		if (m_virtualLight) {
-			if (path.rec.mtrl->isGlossy()
+			if (mtrl->isGlossy()
 				&& (path.prevMtrl && !path.prevMtrl->isGlossy()))
 			{
 				return false;
@@ -178,7 +180,7 @@ namespace aten
 		}
 		
 		// Explicit conection to light.
-		if (!path.rec.mtrl->isSingular())
+		if (!mtrl->isSingular())
 		{
 			real lightSelectPdf = 1;
 			LightSampleResult sampleres;
@@ -205,8 +207,8 @@ namespace aten
 					// Shadow ray hits the light.
 					auto cosShadow = dot(orienting_normal, dirToLight);
 
-					auto bsdf = path.rec.mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+					auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+					auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
 					bsdf *= path.throughput;
 
@@ -267,8 +269,8 @@ namespace aten
 					auto dist2 = sampleres.dir.squared_length();
 					auto dist = aten::sqrt(dist2);
 
-					auto bsdf = path.rec.mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-					auto pdfb = path.rec.mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+					auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+					auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
 					// Get light color.
 					auto emit = sampleres.finalColor;
@@ -280,7 +282,7 @@ namespace aten
 					path.contrib += visible * misW * bsdf * emit * cosShadow / pdfLight;
 				}
 
-				if (!path.rec.mtrl->isGlossy()) {
+				if (!mtrl->isGlossy()) {
 					return false;
 				}
 			}
@@ -312,7 +314,7 @@ namespace aten
 		}
 #endif
 
-		auto sampling = path.rec.mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
+		auto sampling = mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
 
 		auto nextDir = normalize(sampling.dir);
 		auto pdfb = sampling.pdf;
@@ -320,7 +322,7 @@ namespace aten
 
 #if 1
 		real c = 1;
-		if (!path.rec.mtrl->isSingular()) {
+		if (!mtrl->isSingular()) {
 			// TODO
 			// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
 			//c = aten::abs(dot(orienting_normal, nextDir));
@@ -339,7 +341,7 @@ namespace aten
 			return false;
 		}
 
-		path.prevMtrl = path.rec.mtrl;
+		path.prevMtrl = mtrl;
 
 		path.pdfb = pdfb;
 

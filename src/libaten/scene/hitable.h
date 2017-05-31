@@ -42,14 +42,7 @@ namespace aten {
 			int objid;
 		};
 
-		union {
-#ifdef __AT_CUDA__
-			void* mtrl{ nullptr };
-#else
-			material* mtrl{ nullptr };
-#endif
-			int mtrlid;
-		};
+		int mtrlid{ -1 };
 	};
 
 	struct Intersection {

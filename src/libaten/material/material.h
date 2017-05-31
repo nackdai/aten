@@ -182,7 +182,7 @@ namespace AT_NAME
 			return m_param.baseColor;
 		}
 
-		uint32_t id() const
+		int id() const
 		{
 			return m_id;
 		}
@@ -260,12 +260,12 @@ namespace AT_NAME
 		}
 
 		static uint32_t getMaterialNum();
-		static const material* getMaterial(uint32_t idx);
+		static material* getMaterial(uint32_t idx);
 		static int findMaterialIdx(material* mtrl);
 		static const std::vector<material*>& getMaterials();
 
 	protected:
-		uint32_t m_id{ 0 };
+		int m_id{ 0 };
 
 		aten::MaterialParameter m_param;
 	};

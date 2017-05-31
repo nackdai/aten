@@ -50,7 +50,7 @@ namespace AT_NAME
 			isect.idx[2] = param.idx[2];
 
 			if (parent) {
-				rec.mtrl = (material*)parent->param.mtrl.ptr;
+				rec.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
 			}
 		}
 
@@ -239,7 +239,7 @@ namespace AT_NAME
 #endif
 
 		if (isHit) {
-			rec.mtrl = (material*)param.mtrl.ptr;
+			rec.mtrlid = ((material*)param.mtrl.ptr)->id();
 		}
 
 		return isHit;

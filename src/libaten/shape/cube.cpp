@@ -89,7 +89,7 @@ namespace AT_NAME
 			}
 
 			rec.obj = (hitable*)this;
-			rec.mtrl = (material*)m_param.mtrl.ptr;
+			rec.mtrlid = ((material*)m_param.mtrl.ptr)->id();
 
 			rec.area = m_aabb.computeSurfaceArea();
 		}

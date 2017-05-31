@@ -94,8 +94,10 @@ namespace aten
 			// 物体からのレイの入出を考慮.
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
+			auto mtrl = material::getMaterial(rec.mtrlid);
+
 			// ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
-			auto rrProb = aten::russianRoulette(rec.mtrl);
+			auto rrProb = aten::russianRoulette(mtrl);
 			auto rr = sampler->nextSample();
 			if (rr >= rrProb) {
 				break;
@@ -151,8 +153,8 @@ namespace aten
 			}
 
 			// 光源にヒットしたらそこで追跡終了.
-			if (rec.mtrl->isEmissive()) {
-				vec3 bsdf = lambert::bsdf(&rec.mtrl->param(), rec.u, rec.v);
+			if (mtrl->isEmissive()) {
+				vec3 bsdf = lambert::bsdf(&mtrl->param(), rec.u, rec.v);
 
 				vs.push_back(Vertex(
 					rec.p,
@@ -163,21 +165,21 @@ namespace aten
 					throughput,
 					bsdf,
 					rec.obj,
-					rec.mtrl,
+					mtrl,
 					rec.u, rec.v));
 
-				vec3 emit = rec.mtrl->color();
+				vec3 emit = mtrl->color();
 				vec3 contrib = throughput * emit / totalAreaPdf;
 
 				return std::move(Result(contrib, x, y, true));
 			}
 
-			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v);
+			auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v);
 
 			sampledPdf = sampling.pdf;
 			auto sampledBsdf = sampling.bsdf;
 
-			if (rec.mtrl->isSingular()) {
+			if (mtrl->isSingular()) {
 				// For canceling probabaility to select reflection or rafraction.
 				sampledBsdf *= sampling.subpdf;
 
@@ -196,7 +198,7 @@ namespace aten
 				throughput,
 				sampling.bsdf,
 				rec.obj,
-				rec.mtrl,
+				mtrl,
 				rec.u, rec.v));
 
 			throughput *= sampledBsdf;
@@ -347,8 +349,10 @@ namespace aten
 			// 物体からのレイの入出を考慮.
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
+			auto mtrl = material::getMaterial(rec.mtrlid);
+
 			// ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
-			auto rrProb = aten::russianRoulette(rec.mtrl);
+			auto rrProb = aten::russianRoulette(mtrl);
 			auto rr = sampler->nextSample();
 			if (rr >= rrProb) {
 				break;
@@ -379,12 +383,12 @@ namespace aten
 				throughput = G * throughput;
 			}
 
-			auto sampling = rec.mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v, true);
+			auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v, true);
 
 			sampledPdf = sampling.pdf;
 			auto sampledBsdf = sampling.bsdf;
 
-			if (rec.mtrl->isSingular()) {
+			if (mtrl->isSingular()) {
 				// For canceling probabaility to select reflection or rafraction.
 				sampledBsdf *= sampling.subpdf;
 
@@ -392,7 +396,7 @@ namespace aten
 				auto costerm = dot(normalize(toNextVtx), orienting_normal);
 				sampledBsdf /= costerm;
 			}
-			else if (rec.mtrl->isEmissive()) {
+			else if (mtrl->isEmissive()) {
 				sampledBsdf = make_float3(real(0));
 			}
 
@@ -406,7 +410,7 @@ namespace aten
 				throughput,
 				sampledBsdf,
 				rec.obj,
-				rec.mtrl,
+				mtrl,
 				rec.u, rec.v));
 
 			throughput *= sampledBsdf;

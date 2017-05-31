@@ -24,8 +24,8 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-static aten::PathTracing g_tracer;
-//static aten::BDPT g_tracer;
+//static aten::PathTracing g_tracer;
+static aten::BDPT g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
 //static aten::PSSMLT g_tracer;

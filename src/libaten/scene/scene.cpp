@@ -1,5 +1,6 @@
 #include "scene/scene.h"
 #include "misc/color.h"
+#include "shape/tranformable.h"
 
 namespace aten {
 	bool scene::hitLight(
@@ -16,6 +17,8 @@ namespace aten {
 
 		const auto& param = light->param();
 
+		auto obj = transformable::getShape(rec.objid);
+
 		isHit = scene::hitLight(
 			isHit,
 			param.attrib,
@@ -23,7 +26,7 @@ namespace aten {
 			distToLight,
 			distHitObjToRayOrg,
 			rec.t,
-			rec.obj);
+			obj);
 
 		return isHit;
 	}

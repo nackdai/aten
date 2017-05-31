@@ -34,7 +34,7 @@ namespace aten
 					path.normal = orienting_normal;
 					path.depth = rec.t;
 
-					path.shapeid = rec.obj->id();
+					path.shapeid = rec.objid;
 					path.mtrlid = mtrl->id();
 				}
 

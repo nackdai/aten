@@ -6,6 +6,7 @@ namespace aten
 
 	transformable::transformable()
 	{
+		m_id = g_shapes.size();
 		g_shapes.push_back(this);
 	}
 
@@ -22,7 +23,7 @@ namespace aten
 		return (uint32_t)g_shapes.size();
 	}
 
-	const transformable* transformable::getShape(uint32_t idx)
+	transformable* transformable::getShape(uint32_t idx)
 	{
 		if (idx < g_shapes.size()) {
 			return g_shapes[idx];

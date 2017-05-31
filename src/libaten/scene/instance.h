@@ -54,7 +54,7 @@ namespace aten
 			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec, isect);
 
 			if (isHit) {
-				rec.obj = (hitable*)this;
+				rec.objid = id();
 			}
 
 			return isHit;

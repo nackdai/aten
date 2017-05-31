@@ -38,10 +38,18 @@ namespace aten
 			// Nothing is done...
 		}
 
+		int id() const
+		{
+			return m_id;
+		}
+
 		static uint32_t getShapeNum();
-		static const transformable* getShape(uint32_t idx);
+		static transformable* getShape(uint32_t idx);
 		static int findShapeIdx(const transformable* shape);
 		static int findShapeIdxAsHitable(const hitable* shape);
 		static const std::vector<transformable*>& getShapes();
+
+	private:
+		int m_id{ -1 };
 	};
 }

@@ -210,7 +210,7 @@ namespace aten {
 
 					bool isHit = false;
 
-					auto s = (hitable*)shapes[(int)node->shapeid];
+					auto s = shapes[(int)node->shapeid];
 
 					int tmpexid = -1;
 
@@ -224,7 +224,7 @@ namespace aten {
 						auto prim = (hitable*)prims[(int)node->primid];
 						isHit = prim->hit(r, t_min, t_max, recTmp, recOptTmp);
 						if (isHit) {
-							recTmp.obj = s;
+							recTmp.objid = s->id();
 						}
 					}
 					else {
@@ -286,7 +286,7 @@ namespace aten {
 			}
 		}
 
-		return (rec.obj != nullptr);
+		return (rec.objid >= 0);
 	}
 #endif
 
@@ -355,7 +355,7 @@ namespace aten {
 			}
 		}
 
-		return (rec.obj != nullptr);
+		return (rec.objid >= 0);
 	}
 
 	template<typename T>

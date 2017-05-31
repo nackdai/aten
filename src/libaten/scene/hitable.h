@@ -32,16 +32,7 @@ namespace aten {
 
 		real area{ real(1) };
 
-		union {
-			// TODO
-#ifdef __AT_CUDA__
-			void* obj{ nullptr };
-#else
-			hitable* obj{ nullptr };
-#endif
-			int objid;
-		};
-
+		int objid{ -1 };
 		int mtrlid{ -1 };
 	};
 
@@ -61,7 +52,9 @@ namespace aten {
 
 	class hitable {
 	public:
-		hitable(const char* name = nullptr);
+		hitable(const char* name = nullptr)
+			: m_name(name)
+		{}
 		virtual ~hitable() {}
 
 	public:
@@ -86,11 +79,6 @@ namespace aten {
 		virtual void getSamplePosNormalArea(SamplePosNormalPdfResult* result, sampler* sampler) const
 		{
 			AT_ASSERT(false);
-		}
-
-		uint32_t id() const
-		{
-			return m_id;
 		}
 
 		static void evalHitResult(
@@ -118,7 +106,6 @@ namespace aten {
 		}
 
 	private:
-		uint32_t m_id{ 0 };
 		const char* m_name;
 	};
 }

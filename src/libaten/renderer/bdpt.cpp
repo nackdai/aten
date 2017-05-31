@@ -3,6 +3,7 @@
 #include "misc/timer.h"
 #include "material/lambert.h"
 #include "material/refraction.h"
+#include "shape/tranformable.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -95,6 +96,7 @@ namespace aten
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 			auto mtrl = material::getMaterial(rec.mtrlid);
+			auto obj = transformable::getShape(rec.objid);
 
 			// ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
 			auto rrProb = aten::russianRoulette(mtrl);
@@ -164,7 +166,7 @@ namespace aten
 					totalAreaPdf,
 					throughput,
 					bsdf,
-					rec.obj,
+					obj,
 					mtrl,
 					rec.u, rec.v));
 
@@ -197,7 +199,7 @@ namespace aten
 				totalAreaPdf,
 				throughput,
 				sampling.bsdf,
-				rec.obj,
+				obj,
 				mtrl,
 				rec.u, rec.v));
 
@@ -350,6 +352,7 @@ namespace aten
 			vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 			auto mtrl = material::getMaterial(rec.mtrlid);
+			auto obj = transformable::getShape(rec.objid);
 
 			// ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
 			auto rrProb = aten::russianRoulette(mtrl);
@@ -409,7 +412,7 @@ namespace aten
 				totalAreaPdf,
 				throughput,
 				sampledBsdf,
-				rec.obj,
+				obj,
 				mtrl,
 				rec.u, rec.v));
 

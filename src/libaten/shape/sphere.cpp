@@ -29,7 +29,7 @@ namespace AT_NAME
 		bool isHit = hit(&m_param, r, t_min, t_max, &rec);
 
 		if (isHit) {
-			rec.obj = (hitable*)this;
+			rec.objid = id();
 			rec.mtrlid = ((material*)m_param.mtrl.ptr)->id();
 		}
 

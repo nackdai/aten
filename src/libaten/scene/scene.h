@@ -7,6 +7,7 @@
 #include "light/ibl.h"
 
 namespace AT_NAME {
+#if 0
 	class LinearList : public aten::accelerator {
 	public:
 		LinearList() {}
@@ -61,6 +62,7 @@ namespace AT_NAME {
 	private:
 		std::vector<aten::bvhnode*> m_objs;
 	};
+#endif
 
 	class scene {
 	public:
@@ -231,7 +233,8 @@ namespace AT_NAME {
 			// TODO
 #ifndef __AT_CUDA__
 			if (isHit) {
-				aten::hitable::evalHitResult(rec.obj, r, rec, isect);
+				auto obj = transformable::getShape(rec.objid);
+				aten::hitable::evalHitResult(obj, r, rec, isect);
 			}
 #endif
 

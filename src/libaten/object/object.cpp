@@ -42,8 +42,8 @@ namespace AT_NAME
 			&rec, &isect);
 
 		if (isHit) {
-			//rec.obj = parent;
-			rec.obj = (hitable*)this;
+			// Temporary, notify triangle id to the parent object.
+			rec.objid = id;
 
 			isect.idx[0] = param.idx[0];
 			isect.idx[1] = param.idx[1];
@@ -303,10 +303,10 @@ namespace AT_NAME
 		if (isHit) {
 			rec = tmp;
 
-			face* f = (face*)rec.obj;
+			auto f = face::faces()[rec.objid];
 
 			// ÅI“I‚É‚ÍA‚â‚Á‚Ï‚èshape‚ğ“n‚·.
-			rec.obj = f->parent;
+			rec.objid = f->id;
 		}
 		return isHit;
 	}

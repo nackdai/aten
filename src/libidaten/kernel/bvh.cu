@@ -238,13 +238,10 @@ __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
-	float& t_result)
+	aten::Intersection* isect)
 {
 	int exid = -1;
 	int shapeid = -1;
-
-	aten::Intersection isect;
 
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
@@ -253,7 +250,7 @@ __device__ bool intersectBVH(
 		ctxt,
 		r,
 		t_min, t_max,
-		&isect);
+		isect);
 
 	if (exid >= 0) {
 		aten::Intersection isectTmp;
@@ -268,18 +265,11 @@ __device__ bool intersectBVH(
 		transformedRay.dir = normalize(transformedRay.dir);
 
 		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &isectTmp)) {
-			if (isectTmp.t < isect.t) {
-				isect = isectTmp;
+			if (isectTmp.t < isect->t) {
+				*isect = isectTmp;
 				isHit = true;
 			}
 		}
-	}
-
-	if (isHit) {
-		auto obj = &ctxt->shapes[isect.objid];
-		evalHitResult(ctxt, obj, r, rec, &isect);
-
-		t_result = isect.t;
 	}
 
 	return isHit;

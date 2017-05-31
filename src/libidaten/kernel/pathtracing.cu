@@ -28,7 +28,7 @@ struct ShadowRay : public aten::ray {
 struct Path {
 	aten::vec3 throughput;
 	aten::vec3 contrib;
-	aten::hitrecord rec;
+	aten::Intersection isect;
 	aten::sampler sampler;
 	
 	int mtrlid;
@@ -137,13 +137,22 @@ __global__ void hitTest(
 		ctxt.vertices = vertices;
 		ctxt.matrices = matrices;
 	}
+
+	aten::Intersection isect;
 	
-	aten::hitrecord rec;
-	float t = AT_MATH_INF;
-	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &rec, t);
+	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &isect);
+
+	path.isect.t = isect.t;
+	path.isect.objid = isect.objid;
+	path.isect.mtrlid = isect.mtrlid;
+	path.isect.area = isect.area;
+	path.isect.idx[0] = isect.idx[0];
+	path.isect.idx[1] = isect.idx[1];
+	path.isect.idx[2] = isect.idx[2];
+	path.isect.a = isect.a;
+	path.isect.b = isect.b;
 
 	path.isHit = isHit;
-	path.rec = rec;
 }
 
 __global__ void shadeMiss(
@@ -218,12 +227,17 @@ __global__ void shade(
 		return;
 	}
 
-	aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
+	aten::hitrecord rec;
+
+	auto obj = &ctxt.shapes[path.isect.objid];
+	evalHitResult(&ctxt, obj, ray, &rec, &path.isect);
+
+	aten::MaterialParameter* mtrl = &ctxt.mtrls[rec.mtrlid];
 	aten::MaterialParameter* prevMtrl = (path.mtrlid >= 0 ? &ctxt.mtrls[path.mtrlid] : nullptr);
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
-	const aten::vec3 orienting_normal = dot(path.rec.normal, ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
+	const aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 	// TODO
 	// Apply normal map.
@@ -244,10 +258,10 @@ __global__ void shade(
 		}
 		else {
 			auto cosLight = dot(orienting_normal, -ray.dir);
-			auto dist2 = (path.rec.p - ray.org).squared_length();
+			auto dist2 = (rec.p - ray.org).squared_length();
 
 			if (cosLight >= 0) {
-				auto pdfLight = 1 / path.rec.area;
+				auto pdfLight = 1 / rec.area;
 
 				// Convert pdf area to sradian.
 				// http://www.slideshare.net/h013/edubpt-v100
@@ -282,7 +296,7 @@ __global__ void shade(
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
 
-		sampleLight(&sampleres, &ctxt, &light, path.rec.p, &path.sampler);
+		sampleLight(&sampleres, &ctxt, &light, rec.p, &path.sampler);
 
 		const auto& posLight = sampleres.pos;
 		const auto& nmlLight = sampleres.nml;
@@ -294,15 +308,15 @@ __global__ void shade(
 
 		auto cosShadow = dot(orienting_normal, dirToLight);
 
-		real pdfb = samplePDF(mtrl, orienting_normal, ray.dir, dirToLight, path.rec.u, path.rec.v);
-		auto bsdf = sampleBSDF(mtrl, orienting_normal, ray.dir, dirToLight, path.rec.u, path.rec.v);
+		real pdfb = samplePDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+		auto bsdf = sampleBSDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
 		bsdf *= path.throughput;
 
 		// Get light color.
 		auto emit = sampleres.finalColor;
 
-		shadowRays[idx].org = path.rec.p;
+		shadowRays[idx].org = rec.p;
 		shadowRays[idx].dir = dirToLight;
 		shadowRays[idx].lightcontrib = aten::make_float3(0);
 		shadowRays[idx].distToLight = sampleres.dir.length();
@@ -366,9 +380,9 @@ __global__ void shade(
 		mtrl,
 		orienting_normal,
 		ray.dir,
-		path.rec.normal,
+		rec.normal,
 		&path.sampler,
-		path.rec.u, path.rec.v);
+		rec.u, rec.v);
 
 	auto nextDir = normalize(sampling.dir);
 	auto pdfb = sampling.pdf;
@@ -391,9 +405,9 @@ __global__ void shade(
 	}
 
 	// Make next ray.
-	rays[idx] = aten::ray(path.rec.p, nextDir);
+	rays[idx] = aten::ray(rec.p, nextDir);
 
-	path.mtrlid = path.rec.mtrlid;
+	path.mtrlid = rec.mtrlid;
 	path.pdfb = pdfb;
 }
 
@@ -436,18 +450,26 @@ __global__ void hitShadowRay(
 	if (shadowRay.isActive) {
 		auto& path = paths[idx];
 
+		aten::Intersection isect;
+		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+
+		real distHitObjToRayOrg = AT_MATH_INF;
+		aten::ShapeParameter* obj = nullptr;
+
 		aten::hitrecord rec;
-		float t = AT_MATH_INF;
-		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec, t);
+
+		if (isHit) {
+			obj = &ctxt.shapes[isect.objid];
+
+			evalHitResult(&ctxt, obj, shadowRay, &rec, &isect);
+
+			distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+		}
 
 		auto light = ctxt.lights[shadowRay.targetLightId];
 		if (light.object.idx >= 0) {
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
-
-		real distHitObjToRayOrg = (rec.p - shadowRay.org).length();
-
-		auto obj = &ctxt.shapes[rec.objid];
 		
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
@@ -455,7 +477,7 @@ __global__ void hitShadowRay(
 			light.object.ptr,
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
-			t,
+			isect.t,
 			obj);
 
 		if (shadowRay.isActive) {

@@ -27,7 +27,7 @@ struct ShadowRay : public aten::ray {
 struct Path {
 	aten::ray ray;
 	aten::vec3 throughput;
-	aten::hitrecord rec;
+	aten::Intersection isect;
 	bool isHit;
 	bool isTerminate;
 };
@@ -100,12 +100,9 @@ __global__ void hitTestRayTracing(
 		ctxt.matrices = matrices;
 	}
 	
-	aten::hitrecord rec;
-	float t = AT_MATH_INF;
-	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &rec, t);
+	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &path.isect);
 
 	path.isHit = isHit;
-	path.rec = rec;
 }
 
 __global__ void raytracing(
@@ -156,7 +153,7 @@ __global__ void raytracing(
 
 	aten::vec3 contrib = aten::make_float3(0);
 
-	const aten::MaterialParameter* mtrl = &ctxt.mtrls[path.rec.mtrlid];
+	const aten::MaterialParameter* mtrl = &ctxt.mtrls[path.isect.mtrlid];
 
 	if (mtrl->attrib.isEmissive) {
 		contrib = path.throughput * mtrl->baseColor;
@@ -168,9 +165,14 @@ __global__ void raytracing(
 		return;
 	}
 
+	aten::hitrecord rec;
+
+	auto obj = &ctxt.shapes[path.isect.objid];
+	evalHitResult(&ctxt, obj, path.ray, &rec, &path.isect);
+
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
-	const aten::vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
+	const aten::vec3 orienting_normal = dot(rec.normal, path.ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {
 		AT_NAME::MaterialSampling sampling;
@@ -180,16 +182,16 @@ __global__ void raytracing(
 			mtrl,
 			orienting_normal, 
 			path.ray.dir,
-			path.rec.normal,
+			rec.normal,
 			nullptr,
-			path.rec.u, path.rec.v);
+			rec.u, rec.v);
 
 		auto nextDir = normalize(sampling.dir);
 
 		path.throughput *= sampling.bsdf;
 
 		// Make next ray.
-		path.ray = aten::ray(path.rec.p, nextDir);
+		path.ray = aten::ray(rec.p, nextDir);
 	}
 	else {
 		// TODO
@@ -201,7 +203,7 @@ __global__ void raytracing(
 		}
 
 		aten::LightSampleResult sampleres;
-		sampleLight(&sampleres, &ctxt, &light, path.rec.p, nullptr);
+		sampleLight(&sampleres, &ctxt, &light, rec.p, nullptr);
 
 		aten::vec3 dirToLight = sampleres.dir;
 		auto len = dirToLight.length();
@@ -209,7 +211,7 @@ __global__ void raytracing(
 		dirToLight.normalize();
 
 		shadowRays[idx].isActive = true;
-		shadowRays[idx].org = path.rec.p;
+		shadowRays[idx].org = rec.p;
 		shadowRays[idx].dir = dirToLight;
 		shadowRays[idx].distToLight = len;
 		shadowRays[idx].targetLightId = lightidx;
@@ -277,18 +279,28 @@ __global__ void hitShadowRay(
 	auto& shadowRay = shadowRays[idx];
 
 	if (shadowRay.isActive) {
+		auto& path = paths[idx];
+
+		aten::Intersection isect;
+		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+
+		real distHitObjToRayOrg = AT_MATH_INF;
+		aten::ShapeParameter* obj = nullptr;
+
 		aten::hitrecord rec;
-		float t = AT_MATH_INF;
-		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec, t);
+
+		if (isHit) {
+			obj = &ctxt.shapes[isect.objid];
+
+			evalHitResult(&ctxt, obj, shadowRay, &rec, &isect);
+
+			distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+		}
 
 		auto light = ctxt.lights[shadowRay.targetLightId];
 		if (light.object.idx >= 0) {
 			light.object.ptr = &ctxt.shapes[light.object.idx];
 		}
-
-		real distHitObjToRayOrg = (rec.p - shadowRay.org).length();
-
-		auto obj = &ctxt.shapes[rec.objid];
 
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit,
@@ -296,7 +308,7 @@ __global__ void hitShadowRay(
 			light.object.ptr,
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
-			t,
+			isect.t,
 			obj);
 
 		if (shadowRay.isActive) {

@@ -42,17 +42,11 @@ namespace aten {
 
 		real area{ real(1) };
 
-		union {
-			// cube.
-			struct {
-				int face;
-			};
-			// triangle.
-			struct {
-				int idx[3];
-				real a, b;	// barycentric
-			};
-		};
+		// cube.
+		int face;
+
+		int idx[3];
+		real a, b;	// barycentric
 	};
 
 	class hitable {

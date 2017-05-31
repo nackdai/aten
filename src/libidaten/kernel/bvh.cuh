@@ -7,5 +7,4 @@ __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
-	float& t_result);
+	aten::Intersection* isect);

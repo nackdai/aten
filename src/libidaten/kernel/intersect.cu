@@ -27,7 +27,7 @@ __device__ bool hitSphere(
 	aten::hitrecord* rec,
 	aten::Intersection* isect)
 {
-	return AT_NAME::sphere::hit(shape, r, t_min, t_max, rec);
+	return AT_NAME::sphere::hit(shape, r, t_min, t_max, isect);
 }
 
 __device__ bool hitTriangle(
@@ -136,8 +136,8 @@ __device__ bool hitTriangle(
 		&& t >= real(0));
 
 	if (isIntersect) {
-		if (t < rec->t) {
-			rec->t = t;
+		if (t < isect->t) {
+			isect->t = t;
 
 			rec->area = prim->area;
 
@@ -208,7 +208,7 @@ __device__ void evalHitResultSphere(
 	aten::hitrecord* rec,
 	const aten::Intersection* isect)
 {
-	AT_NAME::sphere::evalHitResult(param, r, rec);
+	AT_NAME::sphere::evalHitResult(param, r, rec, isect);
 }
 
 __device__ void evalHitResultTriangle(

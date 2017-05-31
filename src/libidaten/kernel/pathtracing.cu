@@ -139,7 +139,8 @@ __global__ void hitTest(
 	}
 	
 	aten::hitrecord rec;
-	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &rec);
+	float t = AT_MATH_INF;
+	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &rec, t);
 
 	path.isHit = isHit;
 	path.rec = rec;
@@ -436,7 +437,8 @@ __global__ void hitShadowRay(
 		auto& path = paths[idx];
 
 		aten::hitrecord rec;
-		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec);
+		float t = AT_MATH_INF;
+		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &rec, t);
 
 		auto light = ctxt.lights[shadowRay.targetLightId];
 		if (light.object.idx >= 0) {
@@ -453,7 +455,7 @@ __global__ void hitShadowRay(
 			light.object.ptr,
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
-			rec.t,
+			t,
 			obj);
 
 		if (shadowRay.isActive) {

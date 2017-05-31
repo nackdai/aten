@@ -142,7 +142,7 @@ __device__  void sampleAreaLight(
 		r = aten::ray(org, dir);
 
 		if (result.idx[0] >= 0) {
-			rec.t = dir.length();
+			isect.t = dir.length();
 
 			isect.idx[0] = result.idx[0];
 			isect.idx[1] = result.idx[1];
@@ -154,7 +154,7 @@ __device__  void sampleAreaLight(
 		else {
 			// TODO
 			// Only for sphere...
-			AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &rec);
+			AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
 		}
 	}
 	else {
@@ -163,7 +163,7 @@ __device__  void sampleAreaLight(
 		auto pos = s->center;
 		auto dir = pos - org;
 		r = aten::ray(org, dir);
-		AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &rec);
+		AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
 	}
 
 	evalHitResult(ctxt, s, r, &rec, &isect);

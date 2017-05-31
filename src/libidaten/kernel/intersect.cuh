@@ -11,7 +11,6 @@ __device__ bool intersectShape(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
 	aten::Intersection* isect);
 
 __device__ bool hitSphere(
@@ -20,7 +19,6 @@ __device__ bool hitSphere(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
 	aten::Intersection* isect);
 
 __device__ bool hitTriangle(
@@ -29,7 +27,6 @@ __device__ bool hitTriangle(
 	const Context* ctxt,
 	const aten::ray& ray,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
 	aten::Intersection* isect);
 
 AT_DEVICE_API void evalHitResult(

@@ -13,7 +13,6 @@ typedef bool(*FuncIntersect)(
 	const aten::ray&,
 	float,
 	float,
-	aten::hitrecord*,
 	aten::Intersection*);
 
 __device__ FuncIntersect funcIntersect[aten::ShapeType::ShapeTypeMax];
@@ -24,7 +23,6 @@ __device__ bool hitSphere(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
 	aten::Intersection* isect)
 {
 	return AT_NAME::sphere::hit(shape, r, t_min, t_max, isect);
@@ -36,7 +34,6 @@ __device__ bool hitTriangle(
 	const Context* ctxt,
 	const aten::ray& ray,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
 	aten::Intersection* isect)
 {
 	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 0);
@@ -139,7 +136,7 @@ __device__ bool hitTriangle(
 		if (t < isect->t) {
 			isect->t = t;
 
-			rec->area = prim->area;
+			isect->area = prim->area;
 
 			isect->a = beta;
 			isect->b = gamma;
@@ -173,12 +170,11 @@ __device__ bool intersectShape(
 	const Context* ctxt,
 	const aten::ray& r,
 	float t_min, float t_max,
-	aten::hitrecord* rec,
 	aten::Intersection* isect)
 {
 	const aten::ShapeParameter* realShape = (shape->shapeid >= 0 ? &ctxt->shapes[shape->shapeid] : shape);
 
-	auto ret = funcIntersect[realShape->type](realShape, prim, ctxt, r, t_min, t_max, rec, isect);
+	auto ret = funcIntersect[realShape->type](realShape, prim, ctxt, r, t_min, t_max, isect);
 	return ret;
 }
 
@@ -283,6 +279,9 @@ AT_DEVICE_API void evalHitResult(
 	const aten::ShapeParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
 	funcEvalHitResult[realShape->type](ctxt, param, r, rec, isect);
+
+	rec->objid = isect->objid;
+	rec->mtrlid = isect->mtrlid;
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
 	// tangent coordinate.

@@ -31,12 +31,11 @@ struct Path {
 	aten::Intersection isect;
 	aten::sampler sampler;
 	
-	int mtrlid;
-
 	real pdfb;
 
 	bool isHit;
 	bool isTerminate;
+	bool isSingular;
 };
 
 #define BLOCK_SIZE	(16)
@@ -88,10 +87,10 @@ __global__ void genPath(
 	rays[idx] = camsample.r;
 
 	path.throughput = aten::make_float3(1);
-	path.mtrlid = -1;
 	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
+	path.isSingular = false;
 
 	// Accumulate value, so do not reset.
 	//path.contrib = aten::make_float3(0);
@@ -233,7 +232,6 @@ __global__ void shade(
 	evalHitResult(&ctxt, obj, ray, &rec, &path.isect);
 
 	aten::MaterialParameter* mtrl = &ctxt.mtrls[rec.mtrlid];
-	aten::MaterialParameter* prevMtrl = (path.mtrlid >= 0 ? &ctxt.mtrls[path.mtrlid] : nullptr);
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
@@ -250,8 +248,8 @@ __global__ void shade(
 			path.isTerminate = true;
 			return;
 		}
-		else if (prevMtrl && prevMtrl->attrib.isSingular) {
-			auto emit = prevMtrl->baseColor;
+		else if (path.isSingular) {
+			auto emit = mtrl->baseColor;
 			path.contrib += path.throughput * emit;
 			path.isTerminate = true;
 			return;
@@ -407,8 +405,8 @@ __global__ void shade(
 	// Make next ray.
 	rays[idx] = aten::ray(rec.p, nextDir);
 
-	path.mtrlid = rec.mtrlid;
 	path.pdfb = pdfb;
+	path.isSingular = mtrl->attrib.isSingular;
 }
 
 __global__ void hitShadowRay(

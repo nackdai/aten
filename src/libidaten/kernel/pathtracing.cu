@@ -444,6 +444,8 @@ __global__ void hitShadowRay(
 		}
 
 		real distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+
+		auto obj = &ctxt.shapes[rec.objid];
 		
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
@@ -452,7 +454,7 @@ __global__ void hitShadowRay(
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
 			rec.t,
-			rec.obj);
+			obj);
 
 		if (shadowRay.isActive) {
 			path.contrib += shadowRay.lightcontrib;

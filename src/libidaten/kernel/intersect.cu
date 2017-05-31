@@ -14,7 +14,7 @@ typedef bool(*FuncIntersect)(
 	float,
 	float,
 	aten::hitrecord*,
-	aten::hitrecordOption*);
+	aten::Intersection*);
 
 __device__ FuncIntersect funcIntersect[aten::ShapeType::ShapeTypeMax];
 
@@ -25,7 +25,7 @@ __device__ bool hitSphere(
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord* rec,
-	aten::hitrecordOption* recOpt)
+	aten::Intersection* isect)
 {
 	return AT_NAME::sphere::hit(shape, r, t_min, t_max, rec);
 }
@@ -37,7 +37,7 @@ __device__ bool hitTriangle(
 	const aten::ray& ray,
 	float t_min, float t_max,
 	aten::hitrecord* rec,
-	aten::hitrecordOption* recOpt)
+	aten::Intersection* isect)
 {
 	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 0);
 	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 0);
@@ -141,12 +141,12 @@ __device__ bool hitTriangle(
 
 			rec->area = prim->area;
 
-			recOpt->a = beta;
-			recOpt->b = gamma;
+			isect->a = beta;
+			isect->b = gamma;
 
-			recOpt->idx[0] = prim->idx[0];
-			recOpt->idx[1] = prim->idx[1];
-			recOpt->idx[2] = prim->idx[2];
+			isect->idx[0] = prim->idx[0];
+			isect->idx[1] = prim->idx[1];
+			isect->idx[2] = prim->idx[2];
 
 			return true;
 		}
@@ -162,7 +162,7 @@ __device__ bool hitNotSupported(
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord* rec,
-	aten::hitrecordOption* recOpt)
+	aten::Intersection* isect)
 {
 	printf("Hit Test Not Supoorted[%d]\n", shape->type);
 }
@@ -174,11 +174,11 @@ __device__ bool intersectShape(
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::hitrecord* rec,
-	aten::hitrecordOption* recOpt)
+	aten::Intersection* isect)
 {
 	const aten::ShapeParameter* realShape = (shape->shapeid >= 0 ? &ctxt->shapes[shape->shapeid] : shape);
 
-	auto ret = funcIntersect[realShape->type](realShape, prim, ctxt, r, t_min, t_max, rec, recOpt);
+	auto ret = funcIntersect[realShape->type](realShape, prim, ctxt, r, t_min, t_max, rec, isect);
 	return ret;
 }
 
@@ -187,7 +187,7 @@ typedef void(*FuncEvalHitResult)(
 	const aten::ShapeParameter*, 
 	const aten::ray&, 
 	aten::hitrecord*,
-	const aten::hitrecordOption*);
+	const aten::Intersection*);
 
 __device__ FuncEvalHitResult funcEvalHitResult[aten::ShapeType::ShapeTypeMax];
 
@@ -196,7 +196,7 @@ __device__ void funcEvalHitResultNotSupported(
 	const aten::ShapeParameter* param,
 	const aten::ray& r,
 	aten::hitrecord* rec,
-	const aten::hitrecordOption* recOpt)
+	const aten::Intersection* isect)
 {
 	printf("Eval Hit Result Not Supoorted[%d]\n", param->type);
 }
@@ -206,7 +206,7 @@ __device__ void evalHitResultSphere(
 	const aten::ShapeParameter* param,
 	const aten::ray& r,
 	aten::hitrecord* rec,
-	const aten::hitrecordOption* recOpt)
+	const aten::Intersection* isect)
 {
 	AT_NAME::sphere::evalHitResult(param, r, rec);
 }
@@ -216,24 +216,24 @@ __device__ void evalHitResultTriangle(
 	const aten::ShapeParameter* param,
 	const aten::ray& r,
 	aten::hitrecord* rec,
-	const aten::hitrecordOption* recOpt)
+	const aten::Intersection* isect)
 {
-	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[0] + 0);
-	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[1] + 0);
-	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[2] + 0);
+	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[0] + 0);
+	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[1] + 0);
+	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[2] + 0);
 
-	float4 n0 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[0] + 1);
-	float4 n1 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[1] + 1);
-	float4 n2 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[2] + 1);
+	float4 n0 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[0] + 1);
+	float4 n1 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[1] + 1);
+	float4 n2 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[2] + 1);
 
-	float4 u0 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[0] + 2);
-	float4 u1 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[1] + 2);
-	float4 u2 = tex1Dfetch<float4>(ctxt->vertices, 4 * recOpt->idx[2] + 2);
+	float4 u0 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[0] + 2);
+	float4 u1 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[1] + 2);
+	float4 u2 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[2] + 2);
 
 	//AT_NAME::face::evalHitResult(v0, v1, v2, rec);
 
-	real a = recOpt->a;
-	real b = recOpt->b;
+	real a = isect->a;
+	real b = isect->b;
 	real c = 1 - a - b;
 
 	// dSÀ•WŒn(barycentric coordinates).
@@ -278,11 +278,11 @@ AT_DEVICE_API void evalHitResult(
 	const aten::ShapeParameter* param,
 	const aten::ray& r,
 	aten::hitrecord* rec,
-	const aten::hitrecordOption* recOpt)
+	const aten::Intersection* isect)
 {
 	const aten::ShapeParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
-	funcEvalHitResult[realShape->type](ctxt, param, r, rec, recOpt);
+	funcEvalHitResult[realShape->type](ctxt, param, r, rec, isect);
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
 	// tangent coordinate.

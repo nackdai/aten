@@ -48,50 +48,23 @@ namespace AT_NAME
 	bool cube::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec,
 		aten::Intersection& isect) const
 	{
 		real t = 0;
 		bool isHit = m_aabb.hit(r, t_min, t_max, &t);
 
 		if (isHit) {
-			rec.p = r.org + t * r.dir;
+			auto p = r.org + t * r.dir;
 
 			isect.t = t;
 
-			// ‚Ç‚Ì–Ê‚Éƒqƒbƒg‚µ‚½‚©’T‚·.
-			{
-				auto dir = normalize(rec.p - m_param.center);
-				auto face = findFace(dir);
+			auto dir = normalize(p - m_param.center);
+			isect.face = findFace(dir);
 
-				switch (face) {
-				case POS_X:
-					rec.normal = aten::make_float3(1, 0, 0);
-					break;
-				case NEG_X:
-					rec.normal = aten::make_float3(-1, 0, 0);
-					break;
-				case POS_Y:
-					rec.normal = aten::make_float3(0, 1, 0);
-					break;
-				case NEG_Y:
-					rec.normal = aten::make_float3(0, -1, 0);
-					break;
-				case POS_Z:
-					rec.normal = aten::make_float3(0, 0, 1);
-					break;
-				case NEG_Z:
-					rec.normal = aten::make_float3(0, 0, -1);
-					break;
-				}
+			isect.objid = id();
+			isect.mtrlid = ((material*)m_param.mtrl.ptr)->id();
 
-				isect.face = face;
-			}
-
-			rec.objid = id();
-			rec.mtrlid = ((material*)m_param.mtrl.ptr)->id();
-
-			rec.area = m_aabb.computeSurfaceArea();
+			isect.area = m_aabb.computeSurfaceArea();
 		}
 
 		return isHit;
@@ -113,6 +86,8 @@ namespace AT_NAME
 	{
 		// TODO
 		AT_ASSERT(false);	// Not support.
+
+		rec.p = r.org + isect.t * r.dir;
 
 		Face face = (Face)isect.face;
 
@@ -136,6 +111,9 @@ namespace AT_NAME
 			rec.normal = aten::make_float3(0, 0, -1);
 			break;
 		}
+
+		rec.objid = isect.objid;
+		rec.mtrlid = isect.mtrlid;
 
 		rec.area = m_aabb.computeSurfaceArea();
 	}

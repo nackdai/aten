@@ -27,7 +27,6 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec,
 			Intersection& isect) const override;
 
 		virtual aabb getBoundingbox() const override final
@@ -94,7 +93,6 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec,
 			Intersection& isect) const override;
 
 		virtual aabb getBoundingbox() const override
@@ -118,7 +116,6 @@ namespace aten {
 			const bvhnode* root,
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec,
 			Intersection& isect);
 
 		static void buildBySAH(

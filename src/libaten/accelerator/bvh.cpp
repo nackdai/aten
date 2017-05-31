@@ -124,14 +124,13 @@ namespace aten {
 	bool bvhnode::hit(
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec,
 		Intersection& isect) const
 	{
 		auto bbox = getBoundingbox();
 		auto isHit = bbox.hit(r, t_min, t_max);
 
 		if (isHit) {
-			isHit = bvh::hit(this, r, t_min, t_max, rec, isect);
+			isHit = bvh::hit(this, r, t_min, t_max, isect);
 		}
 
 		return isHit;
@@ -173,7 +172,6 @@ namespace aten {
 		BVHNode* nodes,
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec,
 		Intersection& isect)
 	{
 		static const uint32_t stacksize = 64;
@@ -205,7 +203,6 @@ namespace aten {
 					}
 				}
 				else {
-					hitrecord recTmp;
 					Intersection isectTmp;
 
 					bool isHit = false;
@@ -222,13 +219,13 @@ namespace aten {
 					}
 					else if (node->primid >= 0) {
 						auto prim = (hitable*)prims[(int)node->primid];
-						isHit = prim->hit(r, t_min, t_max, recTmp, isectTmp);
+						isHit = prim->hit(r, t_min, t_max, isectTmp);
 						if (isHit) {
-							recTmp.objid = s->id();
+							isectTmp.objid = s->id();
 						}
 					}
 					else {
-						isHit = s->hit(r, t_min, t_max, recTmp, isectTmp);
+						isHit = s->hit(r, t_min, t_max, isectTmp);
 						tmpexid = -1;
 					}
 
@@ -241,7 +238,6 @@ namespace aten {
 
 						if (tmpexid < 0) {
 							if (isectTmp.t < isect.t) {
-								rec = recTmp;
 								isect = isectTmp;
 							}
 						}
@@ -275,32 +271,29 @@ namespace aten {
 
 			auto transformedRay = mtxW2L.applyRay(r);
 
-			hitrecord recTmp;
 			Intersection isectTmp;
 
-			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp, isectTmp)) {
+			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, isectTmp)) {
 				if (isectTmp.t < isect.t) {
-					rec = recTmp;
 					isect = isectTmp;
 				}
 			}
 		}
 
-		return (rec.objid >= 0);
+		return (isect.objid >= 0);
 	}
 #endif
 
 	bool bvh::hit(
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec,
 		Intersection& isect) const
 	{
 #ifdef TEST_NODE_LIST
-		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, rec, isect);
+		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, isect);
 		return isHit;
 #else
-		bool isHit = hit(m_root, r, t_min, t_max, rec, isect);
+		bool isHit = hit(m_root, r, t_min, t_max, isect);
 		return isHit;
 #endif
 	}
@@ -309,7 +302,6 @@ namespace aten {
 		const bvhnode* root,
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec,
 		Intersection& isect)
 	{
 		// NOTE
@@ -329,11 +321,9 @@ namespace aten {
 			stackpos -= 1;
 
 			if (node->isLeaf()) {
-				hitrecord recTmp;
 				Intersection isectTmp;
-				if (node->hit(r, t_min, t_max, recTmp, isectTmp)) {
+				if (node->hit(r, t_min, t_max, isectTmp)) {
 					if (isectTmp.t < isect.t) {
-						rec = recTmp;
 						isect = isectTmp;
 					}
 				}
@@ -355,7 +345,7 @@ namespace aten {
 			}
 		}
 
-		return (rec.objid >= 0);
+		return (isect.objid >= 0);
 	}
 
 	template<typename T>

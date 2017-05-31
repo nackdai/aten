@@ -228,12 +228,12 @@ namespace AT_NAME {
 			aten::hitrecord& rec,
 			aten::Intersection& isect) const override final
 		{
-			auto isHit = m_accel.hit(r, t_min, t_max, rec, isect);
+			auto isHit = m_accel.hit(r, t_min, t_max, isect);
 
 			// TODO
 #ifndef __AT_CUDA__
 			if (isHit) {
-				auto obj = transformable::getShape(rec.objid);
+				auto obj = transformable::getShape(isect.objid);
 				aten::hitable::evalHitResult(obj, r, rec, isect);
 			}
 #endif

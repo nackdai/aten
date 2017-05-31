@@ -25,7 +25,6 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec,
 			aten::Intersection& isect) const override final;
 
 		const aten::vec3& center() const

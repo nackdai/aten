@@ -38,7 +38,6 @@ namespace aten
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec,
 			Intersection& isect) const override final
 		{
 			vec3 org = r.org;
@@ -51,10 +50,10 @@ namespace aten
 			ray transformdRay(org, dir);
 
 			// Hit test in local coordinate.
-			auto isHit = m_obj->hit(transformdRay, t_min, t_max, rec, isect);
+			auto isHit = m_obj->hit(transformdRay, t_min, t_max, isect);
 
 			if (isHit) {
-				rec.objid = id();
+				isect.objid = id();
 			}
 
 			return isHit;
@@ -70,6 +69,9 @@ namespace aten
 			// Transform local to world.
 			rec.p = m_mtxL2W.apply(rec.p);
 			rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
+
+			rec.objid = isect.objid;
+			rec.mtrlid = isect.mtrlid;
 		}
 
 		virtual void getSamplePosNormalArea(

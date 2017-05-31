@@ -27,7 +27,6 @@ namespace AT_NAME
 	bool face::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec,
 		aten::Intersection& isect) const
 	{
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
@@ -39,18 +38,18 @@ namespace AT_NAME
 			v0.pos, v1.pos, v2.pos,
 			r, 
 			t_min, t_max, 
-			&rec, &isect);
+			&isect);
 
 		if (isHit) {
 			// Temporary, notify triangle id to the parent object.
-			rec.objid = id;
+			isect.objid = id;
 
 			isect.idx[0] = param.idx[0];
 			isect.idx[1] = param.idx[1];
 			isect.idx[2] = param.idx[2];
 
 			if (parent) {
-				rec.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
+				isect.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
 			}
 		}
 
@@ -64,7 +63,6 @@ namespace AT_NAME
 		const aten::vec3& v2,
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord* rec,
 		aten::Intersection* isect)
 	{
 		bool isHit = false;
@@ -78,7 +76,7 @@ namespace AT_NAME
 				isect->a = res.a;
 				isect->b = res.b;
 
-				rec->area = param->area;
+				isect->area = param->area;
 
 				isHit = true;
 			}
@@ -213,33 +211,12 @@ namespace AT_NAME
 	bool shape::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec,
 		aten::Intersection& isect) const
 	{
-#ifdef ENABLE_LINEAR_HITTEST
-		bool isHit = false;
-
-		hitrecord tmp;
-
-		for (auto f : faces) {
-			hitrecord tmptmp;
-			if (f->hit(r, t_min, t_max, tmptmp)) {
-				if (tmptmp.t < tmp.t) {
-					tmp = tmptmp;
-					isHit = true;
-				}
-			}
-		}
+		auto isHit = m_node.hit(r, t_min, t_max, isect);
 
 		if (isHit) {
-			rec = tmp;
-		}
-#else
-		auto isHit = m_node.hit(r, t_min, t_max, rec, isect);
-#endif
-
-		if (isHit) {
-			rec.mtrlid = ((material*)param.mtrl.ptr)->id();
+			isect.mtrlid = ((material*)param.mtrl.ptr)->id();
 		}
 
 		return isHit;
@@ -277,36 +254,15 @@ namespace AT_NAME
 	bool object::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec,
 		aten::Intersection& isect) const
 	{
-#ifdef ENABLE_LINEAR_HITTEST
-		bool isHit = false;
-
-		hitrecord tmp;
-
-		for (auto s : shapes) {
-			hitrecord tmptmp;
-
-			if (s->hit(r, t_min, t_max, tmptmp)) {
-				if (tmptmp.t < tmp.t) {
-					tmp = tmptmp;
-					isHit = true;
-				}
-			}
-		}
-#else
-		aten::hitrecord tmp;
-		bool isHit = m_node.hit(r, t_min, t_max, tmp, isect);
-#endif
+		bool isHit = m_node.hit(r, t_min, t_max, isect);
 
 		if (isHit) {
-			rec = tmp;
-
-			auto f = face::faces()[rec.objid];
+			auto f = face::faces()[isect.objid];
 
 			// ÅI“I‚É‚ÍA‚â‚Á‚Ï‚èshape‚ð“n‚·.
-			rec.objid = f->id;
+			isect.objid = f->id;
 		}
 		return isHit;
 	}
@@ -343,6 +299,9 @@ namespace AT_NAME
 		ratio = ratio * ratio;
 
 		rec.area = param.area * ratio;
+
+		rec.objid = isect.objid;
+		rec.mtrlid = isect.mtrlid;
 	}
 
 	void object::getSamplePosNormalArea(

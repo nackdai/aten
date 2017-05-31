@@ -26,7 +26,6 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec,
 			aten::Intersection& isect) const override;
 
 		static AT_DEVICE_API bool hit(
@@ -36,7 +35,6 @@ namespace AT_NAME
 			const aten::vec3& v2,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord* rec,
 			aten::Intersection* isect);
 
 		virtual void evalHitResult(
@@ -85,7 +83,6 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec,
 			aten::Intersection& isect) const override final;
 
 		virtual void getSamplePosNormalArea(
@@ -118,7 +115,6 @@ namespace AT_NAME
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec,
 			aten::Intersection& isect) const override final;
 
 		virtual void evalHitResult(

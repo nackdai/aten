@@ -40,6 +40,8 @@ namespace aten {
 		int objid{ -1 };
 		int mtrlid{ -1 };
 
+		real area{ real(1) };
+
 		union {
 			// cube.
 			struct {
@@ -64,7 +66,6 @@ namespace aten {
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			hitrecord& rec,
 			Intersection& isect) const = 0;
 
 		virtual aabb getBoundingbox() const = 0;
@@ -91,6 +92,9 @@ namespace aten {
 			const Intersection& isect)
 		{
 			obj->evalHitResult(r, rec, isect);
+
+			rec.objid = isect.objid;
+			rec.mtrlid = isect.mtrlid;
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
 			// tangent coordinate.

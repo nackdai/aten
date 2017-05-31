@@ -34,7 +34,7 @@ namespace AT_NAME {
 					isect.b = result.b;
 				}
 				else {
-					obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
+					obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, isect);
 				}
 			}
 			else {
@@ -43,7 +43,7 @@ namespace AT_NAME {
 				auto dir = pos - org;
 				r = aten::ray(org, dir);
 
-				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
+				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, isect);
 			}
 
 			aten::hitable::evalHitResult(obj, r, rec, isect);

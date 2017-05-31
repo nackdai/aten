@@ -23,14 +23,13 @@ namespace AT_NAME
 	bool sphere::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord& rec,
 		aten::Intersection& isect) const
 	{
 		bool isHit = hit(&m_param, r, t_min, t_max, &isect);
 
 		if (isHit) {
-			rec.objid = id();
-			rec.mtrlid = ((material*)m_param.mtrl.ptr)->id();
+			isect.objid = id();
+			isect.mtrlid = ((material*)m_param.mtrl.ptr)->id();
 		}
 
 		return isHit;
@@ -132,6 +131,9 @@ namespace AT_NAME
 	{
 		rec->p = r.org + isect->t * r.dir;
 		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
+
+		rec->objid = isect->objid;
+		rec->mtrlid = isect->mtrlid;
 
 		{
 			auto tmp = param->center + aten::make_float3(param->radius, 0, 0);

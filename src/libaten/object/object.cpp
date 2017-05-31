@@ -44,9 +44,7 @@ namespace AT_NAME
 			// Temporary, notify triangle id to the parent object.
 			isect.objid = id;
 
-			isect.idx[0] = param.idx[0];
-			isect.idx[1] = param.idx[1];
-			isect.idx[2] = param.idx[2];
+			isect.primid = id;
 
 			if (parent) {
 				isect.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
@@ -90,9 +88,9 @@ namespace AT_NAME
 		aten::hitrecord& rec,
 		const aten::Intersection& isect) const
 	{
-		const auto& v0 = aten::VertexManager::getVertex(isect.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(isect.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(isect.idx[2]);
+		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
 		evalHitResult(v0, v1, v2, &rec, &isect);
 	}
@@ -185,9 +183,7 @@ namespace AT_NAME
 		result->a = a;
 		result->b = b;
 
-		result->idx[0] = param.idx[0];
-		result->idx[1] = param.idx[1];
-		result->idx[2] = param.idx[2];
+		result->primid = id;
 	}
 
 	void shape::build()
@@ -273,9 +269,11 @@ namespace AT_NAME
 		aten::hitrecord& rec,
 		const aten::Intersection& isect) const
 	{
-		const auto& v0 = aten::VertexManager::getVertex(isect.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(isect.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(isect.idx[2]);
+		auto f = face::faces()[isect.primid];
+
+		const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(f->param.idx[2]);
 
 		face::evalHitResult(v0, v1, v2, &rec, &isect);
 

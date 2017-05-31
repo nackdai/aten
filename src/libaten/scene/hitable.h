@@ -45,7 +45,7 @@ namespace aten {
 		// cube.
 		int face;
 
-		int idx[3];
+		int primid{ -1 };
 		real a, b;	// barycentric
 	};
 
@@ -71,7 +71,7 @@ namespace aten {
 
 			real a;
 			real b;
-			int idx[3];
+			int primid{ -1 };
 		};
 
 		virtual void getSamplePosNormalArea(SamplePosNormalPdfResult* result, sampler* sampler) const

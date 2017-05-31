@@ -15,7 +15,6 @@ namespace AT_NAME {
 
 			if (sampler) {
 				aten::hitable::SamplePosNormalPdfResult result;
-				result.idx[0] = -1;
 
 				obj->getSamplePosNormalArea(&result, sampler);
 
@@ -23,12 +22,10 @@ namespace AT_NAME {
 				auto dir = pos - org;
 				r = aten::ray(org, dir);
 
-				if (result.idx[0] >= 0) {
+				if (result.primid >= 0) {
 					isect.t = dir.length();
 
-					isect.idx[0] = result.idx[0];
-					isect.idx[1] = result.idx[1];
-					isect.idx[2] = result.idx[2];
+					isect.primid = result.primid;
 
 					isect.a = result.a;
 					isect.b = result.b;

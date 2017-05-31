@@ -518,10 +518,21 @@ namespace idaten {
 		return std::move(ret);
 	}
 
+	static bool doneSetStackSize = false;
+
 	void PathTracing::render(
 		aten::vec4* image,
 		int width, int height)
 	{
+#ifdef __AT_DEBUG__
+		if (!doneSetStackSize) {
+			size_t val = 0;
+			cudaThreadGetLimit(&val, cudaLimitStackSize);
+			cudaThreadSetLimit(cudaLimitStackSize, val * 2);
+			doneSetStackSize = true;
+		}
+#endif
+
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
 			(width + block.x - 1) / block.x,

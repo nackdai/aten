@@ -57,7 +57,7 @@ namespace AT_NAME
 		if (isHit) {
 			rec.p = r.org + t * r.dir;
 
-			rec.t = t;
+			isect.t = t;
 
 			// ‚Ç‚Ì–Ê‚Éƒqƒbƒg‚µ‚½‚©’T‚·.
 			{

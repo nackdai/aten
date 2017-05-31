@@ -81,7 +81,8 @@ namespace AT_NAME {
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec) const = 0;
+			aten::hitrecord& rec,
+			aten::Intersection& isect) const = 0;
 
 		void addLight(Light* l)
 		{
@@ -224,10 +225,9 @@ namespace AT_NAME {
 		virtual bool hit(
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec) const override final
+			aten::hitrecord& rec,
+			aten::Intersection& isect) const override final
 		{
-			aten::Intersection isect;
-
 			auto isHit = m_accel.hit(r, t_min, t_max, rec, isect);
 
 			// TODO

@@ -80,7 +80,9 @@ namespace aten
 				// ‰Šú‰».
 				path.rec = hitrecord();
 				path.ray = ray;
-				path.isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec);
+
+				Intersection isect;
+				path.isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect);
 			}
 		}
 	}

@@ -206,7 +206,7 @@ namespace aten {
 				}
 				else {
 					hitrecord recTmp;
-					Intersection recOptTmp;
+					Intersection isectTmp;
 
 					bool isHit = false;
 
@@ -217,32 +217,32 @@ namespace aten {
 					if (node->exid >= 0) {
 						real t = AT_MATH_INF;
 						isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t);
-						recTmp.t = t;
+						isectTmp.t = t;
 						tmpexid = node->exid;
 					}
 					else if (node->primid >= 0) {
 						auto prim = (hitable*)prims[(int)node->primid];
-						isHit = prim->hit(r, t_min, t_max, recTmp, recOptTmp);
+						isHit = prim->hit(r, t_min, t_max, recTmp, isectTmp);
 						if (isHit) {
 							recTmp.objid = s->id();
 						}
 					}
 					else {
-						isHit = s->hit(r, t_min, t_max, recTmp, recOptTmp);
+						isHit = s->hit(r, t_min, t_max, recTmp, isectTmp);
 						tmpexid = -1;
 					}
 
 					if (isHit) {
-						if (recTmp.t < hitt) {
-							hitt = recTmp.t;
+						if (isectTmp.t < hitt) {
+							hitt = isectTmp.t;
 							exid = tmpexid;
 							shapeid = tmpShapeid;
 						}
 
 						if (tmpexid < 0) {
-							if (recTmp.t < rec.t) {
+							if (isectTmp.t < isect.t) {
 								rec = recTmp;
-								isect = recOptTmp;
+								isect = isectTmp;
 							}
 						}
 					}
@@ -279,7 +279,7 @@ namespace aten {
 			Intersection isectTmp;
 
 			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, recTmp, isectTmp)) {
-				if (recTmp.t < rec.t) {
+				if (isectTmp.t < isect.t) {
 					rec = recTmp;
 					isect = isectTmp;
 				}
@@ -330,11 +330,11 @@ namespace aten {
 
 			if (node->isLeaf()) {
 				hitrecord recTmp;
-				Intersection recOptTmp;
-				if (node->hit(r, t_min, t_max, recTmp, recOptTmp)) {
-					if (recTmp.t < rec.t) {
+				Intersection isectTmp;
+				if (node->hit(r, t_min, t_max, recTmp, isectTmp)) {
+					if (isectTmp.t < isect.t) {
 						rec = recTmp;
-						isect = recOptTmp;
+						isect = isectTmp;
 					}
 				}
 			}

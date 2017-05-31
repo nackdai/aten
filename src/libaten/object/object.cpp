@@ -72,8 +72,8 @@ namespace AT_NAME
 		const auto res = intersectTriangle(r, v0, v1, v2);
 
 		if (res.isIntersect) {
-			if (res.t < rec->t) {
-				rec->t = res.t;
+			if (res.t < isect->t) {
+				isect->t = res.t;
 
 				isect->a = res.a;
 				isect->b = res.b;

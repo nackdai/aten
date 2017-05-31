@@ -32,7 +32,7 @@ namespace AT_NAME
 			const aten::ShapeParameter* param,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord* rec);
+			aten::Intersection* isect);
 
 		virtual void evalHitResult(
 			const aten::ray& r, 
@@ -42,13 +42,15 @@ namespace AT_NAME
 		static AT_DEVICE_API void evalHitResult(
 			const aten::ShapeParameter* param,
 			const aten::ray& r,
-			aten::hitrecord* rec);
+			aten::hitrecord* rec,
+			const aten::Intersection* isect);
 
 		static AT_DEVICE_API void evalHitResult(
 			const aten::ShapeParameter* param,
 			const aten::ray& r,
 			const aten::mat4& mtxL2W, 
-			aten::hitrecord* rec);
+			aten::hitrecord* rec,
+			const aten::Intersection* isect);
 
 		const aten::vec3& center() const
 		{

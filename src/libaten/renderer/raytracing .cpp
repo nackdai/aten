@@ -17,8 +17,9 @@ namespace aten
 
 		while (depth < m_maxDepth) {
 			hitrecord rec;
+			Intersection isect;
 
-			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
+			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
 				auto mtrl = material::getMaterial(rec.mtrlid);
 
 				if (mtrl->isEmissive()) {

@@ -10,7 +10,8 @@ namespace aten {
 		real t_min, real t_max,
 		hitrecord& rec)
 	{
-		bool isHit = this->hit(r, t_min, t_max, rec);
+		Intersection isect;
+		bool isHit = this->hit(r, t_min, t_max, rec, isect);
 
 		real distToLight = (lightPos - r.org).length();
 		real distHitObjToRayOrg = (rec.p - r.org).length();
@@ -25,7 +26,7 @@ namespace aten {
 			param.object.ptr,
 			distToLight,
 			distHitObjToRayOrg,
-			rec.t,
+			isect.t,
 			obj);
 
 		return isHit;

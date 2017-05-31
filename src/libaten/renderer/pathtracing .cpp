@@ -55,8 +55,9 @@ namespace aten
 
 #if 1
 			bool willContinue = true;
+			Intersection isect;
 
-			if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec)) {
+			if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
 				willContinue = shade(sampler, scene, cam, camsample, depth, path);
 			}
 			else {

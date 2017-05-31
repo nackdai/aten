@@ -87,7 +87,8 @@ namespace aten
 		//while (depth < m_maxDepth) {
 		for (;;) {
 			hitrecord rec;
-			if (!scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
+			Intersection isect;
+			if (!scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
 				break;
 			}
 
@@ -268,7 +269,8 @@ namespace aten
 		//while (depth < m_maxDepth) {
 		for (;;) {
 			hitrecord rec;
-			bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec);
+			Intersection isect;
+			bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
 
 			if (!camera->isPinhole()) {
 				// The light will never hit to the pinhole camera.
@@ -288,7 +290,7 @@ namespace aten
 					posOnImageSensor,
 					pixelx, pixely);
 
-				if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
+				if (AT_MATH_EPSILON < lens_t && lens_t < isect.t) {
 					// レイがレンズにヒット＆イメージセンサにヒット.
 
 					pixelx = aten::clamp(pixelx, 0, m_width - 1);
@@ -724,7 +726,8 @@ namespace aten
 				ray r(light_end.pos, normalize(lightEndToEyeEnd));
 
 				hitrecord rec;
-				bool isHit = scene->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec);
+				Intersection isect;
+				bool isHit = scene->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
 
 				if (eye_end.objType == ObjectType::Lens) {
 					if (camera->isPinhole()) {
@@ -745,7 +748,7 @@ namespace aten
 							px, py);
 
 						if (AT_MATH_EPSILON < lens_t
-							&& lens_t < rec.t)
+							&& lens_t < isect.t)
 						{
 							// レイがレンズにヒット＆イメージセンサにヒット.
 							targetX = aten::clamp(px, 0, m_width - 1);

@@ -24,7 +24,7 @@ namespace AT_NAME {
 				r = aten::ray(org, dir);
 
 				if (result.idx[0] >= 0) {
-					rec.t = dir.length();
+					isect.t = dir.length();
 
 					isect.idx[0] = result.idx[0];
 					isect.idx[1] = result.idx[1];

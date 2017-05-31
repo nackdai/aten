@@ -19,8 +19,9 @@ namespace aten
 
 		while (depth < maxDepth) {
 			hitrecord rec;
+			Intersection isect;
 
-			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec)) {
+			if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
 				// 交差位置の法線.
 				// 物体からのレイの入出を考慮.
 				vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
@@ -32,7 +33,7 @@ namespace aten
 
 				if (depth == 0) {
 					path.normal = orienting_normal;
-					path.depth = rec.t;
+					path.depth = isect.t;
 
 					path.shapeid = rec.objid;
 					path.mtrlid = mtrl->id();

@@ -14,8 +14,6 @@ namespace aten {
 	class hitable;
 
 	struct hitrecord {
-		real t{ AT_MATH_INF };
-
 		vec3 p;
 
 		vec3 normal;
@@ -37,6 +35,11 @@ namespace aten {
 	};
 
 	struct Intersection {
+		real t{ AT_MATH_INF };
+
+		int objid{ -1 };
+		int mtrlid{ -1 };
+
 		union {
 			// cube.
 			struct {

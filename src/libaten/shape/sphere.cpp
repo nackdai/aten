@@ -26,7 +26,7 @@ namespace AT_NAME
 		aten::hitrecord& rec,
 		aten::Intersection& isect) const
 	{
-		bool isHit = hit(&m_param, r, t_min, t_max, &rec);
+		bool isHit = hit(&m_param, r, t_min, t_max, &isect);
 
 		if (isHit) {
 			rec.objid = id();
@@ -40,7 +40,7 @@ namespace AT_NAME
 		const aten::ShapeParameter* param,
 		const aten::ray& r,
 		real t_min, real t_max,
-		aten::hitrecord* rec)
+		aten::Intersection* isect)
 	{
 		// NOTE
 		// https://www.slideshare.net/h013/edupt-kaisetsu-22852235
@@ -62,10 +62,10 @@ namespace AT_NAME
 
 #if 0
 		if (t1 > AT_MATH_EPSILON) {
-			rec->t = t1;
+			isect->t = t1;
 		}
 		else if (t2 > AT_MATH_EPSILON) {
-			rec->t = t2;
+			isect->t = t2;
 		}
 		else {
 			return false;
@@ -74,10 +74,10 @@ namespace AT_NAME
 		bool close = aten::isClose(aten::abs(b), sqrt_D4, 25000);
 
 		if (t1 > AT_MATH_EPSILON && !close) {
-			rec->t = t1;
+			isect->t = t1;
 		}
 		else if (t2 > AT_MATH_EPSILON && !close) {
-			rec->t = t2;
+			isect->t = t2;
 		}
 		else {
 			return false;
@@ -87,10 +87,10 @@ namespace AT_NAME
 			return false;
 		}
 		else if (t1 > 0 && t2 > 0) {
-			rec->t = aten::cmpMin(t1, t2);
+			isect->t = aten::cmpMin(t1, t2);
 		}
 		else {
-			rec->t = aten::cmpMax(t1, t2);
+			isect->t = aten::cmpMax(t1, t2);
 		}
 #endif
 
@@ -102,7 +102,7 @@ namespace AT_NAME
 		aten::hitrecord& rec,
 		const aten::Intersection& isect) const
 	{
-		evalHitResult(&m_param, r, aten::mat4(), &rec);
+		evalHitResult(&m_param, r, aten::mat4(), &rec, &isect);
 	}
 
 	void sphere::evalHitResult(
@@ -111,24 +111,26 @@ namespace AT_NAME
 		aten::hitrecord& rec,
 		const aten::Intersection& isect) const
 	{
-		evalHitResult(&m_param, r, mtxL2W, &rec);
+		evalHitResult(&m_param, r, mtxL2W, &rec, &isect);
 	}
 
 	void sphere::evalHitResult(
 		const aten::ShapeParameter* param, 
 		const aten::ray& r, 
-		aten::hitrecord* rec)
+		aten::hitrecord* rec,
+		const aten::Intersection* isect)
 	{
-		evalHitResult(param, r, aten::mat4(), rec);
+		evalHitResult(param, r, aten::mat4(), rec, isect);
 	}
 
 	void sphere::evalHitResult(
 		const aten::ShapeParameter* param,
 		const aten::ray& r,
 		const aten::mat4& mtxL2W, 
-		aten::hitrecord* rec)
+		aten::hitrecord* rec,
+		const aten::Intersection* isect)
 	{
-		rec->p = r.org + rec->t * r.dir;
+		rec->p = r.org + isect->t * r.dir;
 		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
 
 		{

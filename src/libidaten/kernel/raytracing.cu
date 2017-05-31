@@ -100,7 +100,19 @@ __global__ void hitTestRayTracing(
 		ctxt.matrices = matrices;
 	}
 	
-	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &path.isect);
+	aten::Intersection isect;
+
+	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+
+	path.isect.t = isect.t;
+	path.isect.objid = isect.objid;
+	path.isect.mtrlid = isect.mtrlid;
+	path.isect.area = isect.area;
+	path.isect.idx[0] = isect.idx[0];
+	path.isect.idx[1] = isect.idx[1];
+	path.isect.idx[2] = isect.idx[2];
+	path.isect.a = isect.a;
+	path.isect.b = isect.b;
 
 	path.isHit = isHit;
 }

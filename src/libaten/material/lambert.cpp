@@ -50,6 +50,11 @@ namespace AT_NAME {
 	{
 		// normalの方向を基準とした正規直交基底(w, u, v)を作る.
 		// この基底に対する半球内で次のレイを飛ばす.
+#if 1
+		auto n = normal;
+		auto t = getOrthoVector(n);
+		auto b = cross(n, t);
+#else
 		aten::vec3 n, t, b;
 
 		n = normal;
@@ -62,6 +67,7 @@ namespace AT_NAME {
 			t = normalize(cross(aten::make_float3(1.0, 0.0, 0.0), n));
 		}
 		b = cross(n, t);
+#endif
 
 		// コサイン項を使った重点的サンプリング.
 		const real r1 = 2 * AT_MATH_PI * sampler->nextSample();

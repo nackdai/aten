@@ -145,9 +145,7 @@ __global__ void hitTest(
 	path.isect.objid = isect.objid;
 	path.isect.mtrlid = isect.mtrlid;
 	path.isect.area = isect.area;
-	path.isect.idx[0] = isect.idx[0];
-	path.isect.idx[1] = isect.idx[1];
-	path.isect.idx[2] = isect.idx[2];
+	path.isect.primid = isect.primid;
 	path.isect.a = isect.a;
 	path.isect.b = isect.b;
 

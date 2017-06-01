@@ -141,9 +141,8 @@ __device__ bool hitTriangle(
 			isect->a = beta;
 			isect->b = gamma;
 
-			isect->idx[0] = prim->idx[0];
-			isect->idx[1] = prim->idx[1];
-			isect->idx[2] = prim->idx[2];
+			// NOTE
+			// isect->primid value will be set later.
 
 			return true;
 		}
@@ -214,17 +213,19 @@ __device__ void evalHitResultTriangle(
 	aten::hitrecord* rec,
 	const aten::Intersection* isect)
 {
-	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[0] + 0);
-	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[1] + 0);
-	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[2] + 0);
+	auto prim = &ctxt->prims[isect->primid];
 
-	float4 n0 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[0] + 1);
-	float4 n1 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[1] + 1);
-	float4 n2 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[2] + 1);
+	float4 p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 0);
+	float4 p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 0);
+	float4 p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[2] + 0);
 
-	float4 u0 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[0] + 2);
-	float4 u1 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[1] + 2);
-	float4 u2 = tex1Dfetch<float4>(ctxt->vertices, 4 * isect->idx[2] + 2);
+	float4 n0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 1);
+	float4 n1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 1);
+	float4 n2 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[2] + 1);
+
+	float4 u0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 2);
+	float4 u1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 2);
+	float4 u2 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[2] + 2);
 
 	//AT_NAME::face::evalHitResult(v0, v1, v2, rec);
 

@@ -214,6 +214,7 @@ __device__ bool intersectBVH(
 				if (isectTmp.t < isect->t) {
 					*isect = isectTmp;
 					isect->objid = (int)attrib.x;
+					isect->primid = (int)attrib.y;
 				}
 			}
 			else {

@@ -92,9 +92,7 @@ __device__ void getTriangleSamplePosNormalArea(
 	result->a = a;
 	result->b = b;
 
-	result->idx[0] = prim->idx[0];
-	result->idx[1] = prim->idx[1];
-	result->idx[2] = prim->idx[2];
+	result->primid = primidx;
 
 	real orignalLen = (p1 - p0).length();
 
@@ -132,7 +130,6 @@ __device__  void sampleAreaLight(
 
 	if (sampler) {
 		aten::hitable::SamplePosNormalPdfResult result;
-		result.idx[0] = -1;
 
 		const aten::ShapeParameter* realShape = (s->shapeid >= 0 ? &ctxt->shapes[s->shapeid] : s);
 
@@ -141,12 +138,10 @@ __device__  void sampleAreaLight(
 		auto dir = result.pos - org;
 		r = aten::ray(org, dir);
 
-		if (result.idx[0] >= 0) {
+		if (result.primid >= 0) {
 			isect.t = dir.length();
 
-			isect.idx[0] = result.idx[0];
-			isect.idx[1] = result.idx[1];
-			isect.idx[2] = result.idx[2];
+			isect.primid = result.primid;
 
 			isect.a = result.a;
 			isect.b = result.b;

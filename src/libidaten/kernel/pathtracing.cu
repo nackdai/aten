@@ -28,7 +28,6 @@ struct ShadowRay : public aten::ray {
 struct Path {
 	aten::vec3 throughput;
 	aten::vec3 contrib;
-	aten::Intersection isect;
 	aten::sampler sampler;
 	
 	real pdfb;
@@ -98,6 +97,7 @@ __global__ void genPath(
 
 __global__ void hitTest(
 	Path* paths,
+	aten::Intersection* isects,
 	aten::ray* rays,
 	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
@@ -141,13 +141,13 @@ __global__ void hitTest(
 	
 	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &isect);
 
-	path.isect.t = isect.t;
-	path.isect.objid = isect.objid;
-	path.isect.mtrlid = isect.mtrlid;
-	path.isect.area = isect.area;
-	path.isect.primid = isect.primid;
-	path.isect.a = isect.a;
-	path.isect.b = isect.b;
+	isects[idx].t = isect.t;
+	isects[idx].objid = isect.objid;
+	isects[idx].mtrlid = isect.mtrlid;
+	isects[idx].area = isect.area;
+	isects[idx].primid = isect.primid;
+	isects[idx].a = isect.a;
+	isects[idx].b = isect.b;
 
 	path.isHit = isHit;
 }
@@ -178,6 +178,7 @@ __global__ void shadeMiss(
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
+	aten::Intersection* isects,
 	aten::ray* rays,
 	ShadowRay* shadowRays,
 	int width, int height,
@@ -226,8 +227,10 @@ __global__ void shade(
 
 	aten::hitrecord rec;
 
-	auto obj = &ctxt.shapes[path.isect.objid];
-	evalHitResult(&ctxt, obj, ray, &rec, &path.isect);
+	const auto& isect = isects[idx];
+
+	auto obj = &ctxt.shapes[isect.objid];
+	evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
 	aten::MaterialParameter* mtrl = &ctxt.mtrls[rec.mtrlid];
 
@@ -553,6 +556,9 @@ namespace idaten {
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
+		idaten::TypedCudaMemory<aten::Intersection> isects;
+		isects.init(width * height);
+
 		idaten::TypedCudaMemory<aten::ray> rays;
 		rays.init(width * height);
 
@@ -594,6 +600,7 @@ namespace idaten {
 				hitTest << <grid, block >> > (
 				//hitTest << <1, 1 >> > (
 					paths.ptr(),
+					isects.ptr(),
 					rays.ptr(),
 					width, height,
 					shapeparam.ptr(), shapeparam.num(),
@@ -619,6 +626,7 @@ namespace idaten {
 				//shade << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
+					isects.ptr(),
 					rays.ptr(),
 					shadowRays.ptr(),
 					width, height,

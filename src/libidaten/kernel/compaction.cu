@@ -47,7 +47,24 @@ __global__ void incrementBlocks(
 	data[index] += incr[blockIdx.x];
 }
 
-__global__ void exclusiveScan(const int* src, int num, int stride, int* dst)
+__global__ void incrementBlocks2(
+	int* data,
+	int num,
+	const int* incr)	// value to increment for each blocks.
+{
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if (index >= num) {
+		return;
+	}
+
+	printf("%d %d %d(%d)\n", blockIdx.x, blockDim.x, threadIdx.x, index);
+
+	data[index] += incr[blockIdx.x];
+}
+
+
+__global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
 {
 	extern __shared__ int temp[];
 
@@ -98,9 +115,10 @@ __global__ void exclusiveScan(const int* src, int num, int stride, int* dst)
 namespace idaten {
 	void compact()
 	{
-		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
-		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
+		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
+		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
+		//int f[] = { 0, 25, 25, 25 };
 
 		//int c = aten::nextPow2(AT_COUNTOF(f));
 		int c = AT_COUNTOF(f);
@@ -115,17 +133,18 @@ namespace idaten {
 		idaten::TypedCudaMemory<int> dst;
 		dst.init(x.size());
 
+		std::vector<int> buffer(1024);
+
 		int blocksize = 8;
 		int blockPerGrid = (x.size() - 1) / blocksize + 1;
 
 		exclusiveScan<<<blockPerGrid, blocksize / 2, blocksize  * sizeof(int)>>>(
-			src.ptr(), 
-			src.maxNum(),
+			dst.ptr(), 
+			dst.maxNum(),
 			blocksize, 
-			dst.ptr());
+			src.ptr());
 
-		std::vector<int> tmp(src.maxNum());
-		dst.readByNum(&tmp[0], tmp.size());
+		dst.readByNum(&buffer[0]);
 
 		idaten::TypedCudaMemory<int> incr;
 		incr.init(blockPerGrid);
@@ -133,23 +152,103 @@ namespace idaten {
 		int tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
 		int tmpBlockSize = blockPerGrid;
 
-		computeBlockCount << <1, tmpBlockSize >> > (
+		computeBlockCount << <tmpBlockPerGrid, tmpBlockSize >> > (
 			incr.ptr(),
 			incr.maxNum(),
 			blocksize,
 			src.ptr(),
 			dst.ptr());
 
-		std::vector<int> tmp2(incr.maxNum());
-		incr.readByNum(&tmp2[0], tmp2.size());
+		incr.readByNum(&buffer[0]);
+
+		idaten::TypedCudaMemory<int> tmp;
+		tmp.init(blockPerGrid);
+
+		idaten::TypedCudaMemory<int> work;
+		work.init(blockPerGrid);
+
+		idaten::TypedCudaMemory<int>* input = &incr;
+		idaten::TypedCudaMemory<int>* output = &tmp;
+
+		int elementNum = blockPerGrid;
+
+		int count = 1;
+		int innerBlockPerGrid = 0;
+
+		std::vector<int> stackBlockPerGrid;
+
+		for (;;) {
+			innerBlockPerGrid = (elementNum - 1) / blocksize + 1;
+			stackBlockPerGrid.push_back(elementNum);
+
+			exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int) >> >(
+				work.ptr(),
+				work.maxNum(),
+				blocksize,
+				input->ptr());
+
+			work.readByNum(&buffer[0]);
+
+			if (innerBlockPerGrid <= 1) {
+				cudaMemcpy(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyDeviceToDevice);
+				break;
+			}
+
+			int innerTmpBlockPerGrid = (innerBlockPerGrid - 1) / blocksize + 1;
+			int innerTmpBlockSize = innerBlockPerGrid;
+
+			computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize >> > (
+				output->ptr(),
+				output->maxNum(),
+				blocksize,
+				input->ptr(),
+				work.ptr());
+
+			output->readByNum(&buffer[0]);
+
+			auto tmp = input;
+			input = output;
+			output = tmp;
+
+			elementNum = innerBlockPerGrid;
+			count++;
+		}
+
+		tmp.readByNum(&buffer[0]);
+
+#if 1
+		input = &tmp;
+		output = &incr;
+
+		for (int i = count - 1; i >= 0; i--) {
+			auto bpg = stackBlockPerGrid[i];
+
+			auto threadPerBlock = (output->maxNum() + bpg - 1) / bpg;
+
+			incrementBlocks2 << <bpg, threadPerBlock >> > (
+				output->ptr(),
+				output->maxNum(),
+				input->ptr());
+
+			input->readByNum(&buffer[0]);
+			output->readByNum(&buffer[0]);
+
+			auto p = input;
+			input = output;
+			output = p;
+		}
+
+		checkCudaErrors(cudaDeviceSynchronize());
+
+		incr.readByNum(&buffer[0]);
+#endif
 
 		incrementBlocks << <blockPerGrid, blocksize >> > (
 			dst.ptr(),
 			dst.maxNum(),
 			incr.ptr());
 
-		std::vector<int> tmp3(dst.maxNum());
-		dst.readByNum(&tmp3[0], tmp3.size());
+		dst.readByNum(&buffer[0]);
 
 		int xxx = 0;
 	}

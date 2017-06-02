@@ -53,6 +53,10 @@ namespace idaten {
 
 	__host__ uint32_t CudaMemory::read(void* p, uint32_t size)
 	{
+		if (size == 0) {
+			size = m_bytes;
+		}
+
 		if (size > m_bytes) {
 			AT_ASSERT(false);
 			return 0;

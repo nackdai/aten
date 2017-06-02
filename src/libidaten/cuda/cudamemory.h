@@ -86,7 +86,7 @@ namespace idaten {
 			return ret;
 		}
 
-		__host__ uint32_t readByNum(void* p, uint32_t num)
+		__host__ uint32_t readByNum(void* p, uint32_t num = 0)
 		{
 			return CudaMemory::read(p, sizeof(_T) * num);
 		}

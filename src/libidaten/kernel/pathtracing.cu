@@ -170,7 +170,10 @@ __global__ void shadeMiss(
 
 	if (!path.isTerminate && !path.isHit) {
 		// TODO
-		path.contrib = aten::make_float3(0);
+		auto bg = aten::make_float3(0);
+
+		path.contrib += path.throughput * bg;
+
 		path.isTerminate = true;
 	}
 }

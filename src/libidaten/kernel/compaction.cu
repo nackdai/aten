@@ -47,23 +47,6 @@ __global__ void incrementBlocks(
 	data[index] += incr[blockIdx.x];
 }
 
-__global__ void incrementBlocks2(
-	int* data,
-	int num,
-	const int* incr)	// value to increment for each blocks.
-{
-	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
-
-	if (index >= num) {
-		return;
-	}
-
-	printf("%d %d %d(%d)\n", blockIdx.x, blockDim.x, threadIdx.x, index);
-
-	data[index] += incr[blockIdx.x];
-}
-
-
 __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
 {
 	extern __shared__ int temp[];
@@ -113,38 +96,23 @@ __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
 }
 
 namespace idaten {
-	void compact()
+
+	void scan(
+		idaten::TypedCudaMemory<int>& src,
+		idaten::TypedCudaMemory<int>& dst)
 	{
-		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
-		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
-		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
-		//int f[] = { 0, 25, 25, 25 };
-
-		//int c = aten::nextPow2(AT_COUNTOF(f));
-		int c = AT_COUNTOF(f);
-
-		std::vector<int> x(c);
-		memcpy(&x[0], f, sizeof(int) * AT_COUNTOF(f));
-
-		idaten::TypedCudaMemory<int> src;
-		src.init(x.size());
-		src.writeByNum(&x[0], x.size());
-
-		idaten::TypedCudaMemory<int> dst;
-		dst.init(x.size());
-
-		std::vector<int> buffer(1024);
-
 		int blocksize = 8;
-		int blockPerGrid = (x.size() - 1) / blocksize + 1;
+		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
 
-		exclusiveScan<<<blockPerGrid, blocksize / 2, blocksize  * sizeof(int)>>>(
-			dst.ptr(), 
+		exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int) >> > (
+			dst.ptr(),
 			dst.maxNum(),
-			blocksize, 
+			blocksize,
 			src.ptr());
 
-		dst.readByNum(&buffer[0]);
+		if (blockPerGrid <= 1) {
+			return;
+		}
 
 		idaten::TypedCudaMemory<int> incr;
 		incr.init(blockPerGrid);
@@ -158,8 +126,6 @@ namespace idaten {
 			blocksize,
 			src.ptr(),
 			dst.ptr());
-
-		incr.readByNum(&buffer[0]);
 
 		idaten::TypedCudaMemory<int> tmp;
 		tmp.init(blockPerGrid);
@@ -177,6 +143,7 @@ namespace idaten {
 
 		std::vector<int> stackBlockPerGrid;
 
+		// Scan blocks.
 		for (;;) {
 			innerBlockPerGrid = (elementNum - 1) / blocksize + 1;
 			stackBlockPerGrid.push_back(elementNum);
@@ -186,8 +153,6 @@ namespace idaten {
 				work.maxNum(),
 				blocksize,
 				input->ptr());
-
-			work.readByNum(&buffer[0]);
 
 			if (innerBlockPerGrid <= 1) {
 				cudaMemcpy(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyDeviceToDevice);
@@ -204,52 +169,65 @@ namespace idaten {
 				input->ptr(),
 				work.ptr());
 
-			output->readByNum(&buffer[0]);
-
-			auto tmp = input;
+			// swap.
+			auto p = input;
 			input = output;
-			output = tmp;
+			output = p;
 
 			elementNum = innerBlockPerGrid;
 			count++;
 		}
-
-		tmp.readByNum(&buffer[0]);
 
 #if 1
 		input = &tmp;
 		output = &incr;
 
 		for (int i = count - 1; i >= 0; i--) {
+			// blocks per grid.
 			auto bpg = stackBlockPerGrid[i];
 
 			auto threadPerBlock = (output->maxNum() + bpg - 1) / bpg;
 
-			incrementBlocks2 << <bpg, threadPerBlock >> > (
+			incrementBlocks << <bpg, threadPerBlock >> > (
 				output->ptr(),
 				output->maxNum(),
 				input->ptr());
 
-			input->readByNum(&buffer[0]);
-			output->readByNum(&buffer[0]);
-
+			// swap.
 			auto p = input;
 			input = output;
 			output = p;
 		}
 
-		checkCudaErrors(cudaDeviceSynchronize());
-
-		incr.readByNum(&buffer[0]);
+		idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? &tmp : &incr);
 #endif
 
 		incrementBlocks << <blockPerGrid, blocksize >> > (
 			dst.ptr(),
 			dst.maxNum(),
-			incr.ptr());
+			incrResult->ptr());
+	}
 
-		dst.readByNum(&buffer[0]);
+	void compact()
+	{
+		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
+		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
+		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
+		//int f[] = { 0, 25, 25, 25 };
 
-		int xxx = 0;
+		//int c = aten::nextPow2(AT_COUNTOF(f));
+		int c = AT_COUNTOF(f);
+
+		std::vector<int> x(c);
+		memcpy(&x[0], f, sizeof(int) * AT_COUNTOF(f));
+
+		idaten::TypedCudaMemory<int> src;
+		src.init(x.size());
+		src.writeByNum(&x[0], x.size());
+
+		idaten::TypedCudaMemory<int> dst;
+		dst.init(x.size());
+
+		scan(src, dst);
 	}
 }

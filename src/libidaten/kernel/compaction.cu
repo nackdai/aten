@@ -47,24 +47,19 @@ __global__ void incrementBlocks(
 	data[index] += incr[blockIdx.x];
 }
 
-__global__ void exclusiveScan(const int* src, int num, int* dst)
+__global__ void exclusiveScan(const int* src, int num, int stride, int* dst)
 {
 	extern __shared__ int temp[];
 
 	int index = threadIdx.x;
 	int offset = 1;
 
-	int n = blockIdx.x * blockDim.x + threadIdx.x;
-	if (n * 2 >= num) {
-		return;
-	}
-
 	// Copy input data to shared memory
 	temp[2 * index] = src[2 * index + (blockIdx.x * blockDim.x * 2)];
 	temp[2 * index + 1] = src[2 * index + 1 + (blockIdx.x * blockDim.x * 2)];
 
 	// Up sweep
-	for (int d = num >> 1; d > 0; d >>= 1) {
+	for (int d = stride >> 1; d > 0; d >>= 1) {
 		__syncthreads();
 
 		if (index < d) {
@@ -77,11 +72,11 @@ __global__ void exclusiveScan(const int* src, int num, int* dst)
 
 	// Clear the root
 	if (index == 0) {
-		temp[num - 1] = 0;
+		temp[stride - 1] = 0;
 	}
 
 	// Down sweep
-	for (int d = 1; d < num; d *= 2) {
+	for (int d = 1; d < stride; d *= 2) {
 		offset >>= 1;
 		__syncthreads();
 
@@ -105,8 +100,10 @@ namespace idaten {
 	{
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
 		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
+		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
 
-		int c = aten::nextPow2(AT_COUNTOF(f));
+		//int c = aten::nextPow2(AT_COUNTOF(f));
+		int c = AT_COUNTOF(f);
 
 		std::vector<int> x(c);
 		memcpy(&x[0], f, sizeof(int) * AT_COUNTOF(f));
@@ -121,7 +118,11 @@ namespace idaten {
 		int blocksize = 8;
 		int blockPerGrid = (x.size() - 1) / blocksize + 1;
 
-		exclusiveScan<<<blockPerGrid, blocksize / 2, blocksize  * sizeof(int)>>>(src.ptr(), src.maxNum(), dst.ptr());
+		exclusiveScan<<<blockPerGrid, blocksize / 2, blocksize  * sizeof(int)>>>(
+			src.ptr(), 
+			src.maxNum(),
+			blocksize, 
+			dst.ptr());
 
 		std::vector<int> tmp(src.maxNum());
 		dst.readByNum(&tmp[0], tmp.size());

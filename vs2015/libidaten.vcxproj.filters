@@ -163,6 +163,9 @@
     <ClInclude Include="..\src\libidaten\kernel\renderer.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\compaction.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -293,6 +296,9 @@
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\common.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\compaction.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>

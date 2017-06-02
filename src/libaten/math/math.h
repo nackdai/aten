@@ -241,6 +241,22 @@ namespace aten {
 		return n + 2 - m;
 	}
 
+	inline uint32_t nextPow2(uint32_t n)
+	{
+		// NOTE
+		// I think algortihm in http://aggregate.org/MAGIC/#Next%20Largest%20Power%20of%202 is not correct.
+		// I found that 1 is subtracted from argument value in WWW.
+
+		--n;
+		n |= n >> 1;
+		n |= n >> 2;
+		n |= n >> 4;
+		n |= n >> 8;
+		n |= n >> 16;
+
+		return n + 1;
+	}
+
 	template <typename TYPE>
 	inline TYPE mix(const TYPE& x, const TYPE& y, real a)
 	{

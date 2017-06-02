@@ -7,6 +7,45 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+// NOTE
+// https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
+
+// ブロック単位で計算した exclusiveScan の総和値を足したものを計算する.
+__global__ void computeBlockCount(
+	int* dst,
+	int num,	// block count per grid used in exclusiveScan.
+	int stride,	// thread count per block used in exclusiveScan.
+	const int* src0, 
+	const int* src1)
+{
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if (index >= num) {
+		return;
+	}
+
+	dst[index] = src0[(index + 1) * stride - 1] + src1[(index + 1) * stride - 1];
+
+	if (index == 0) {
+		dst[index] = 0;
+	}
+}
+
+// ブロックごとに前のブロックまでの exclusiveScan の総和値を足したものを加算する.
+__global__ void incrementBlocks(
+	int* data,
+	int num,
+	const int* incr)	// value to increment for each blocks.
+{
+	int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if (index >= num) {
+		return;
+	}
+
+	data[index] += incr[blockIdx.x];
+}
+
 __global__ void exclusiveScan(const int* src, int num, int* dst)
 {
 	extern __shared__ int temp[];
@@ -68,11 +107,36 @@ namespace idaten {
 		dst.init(AT_COUNTOF(x));
 
 		int blocksize = 8;
+		int blockPerGrid = (AT_COUNTOF(x) - 1) / blocksize + 1;
 
-		exclusiveScan<<<2, blocksize / 2, blocksize  * sizeof(int)>>>(src.ptr(), src.maxNum(), dst.ptr());
+		exclusiveScan<<<blockPerGrid, blocksize / 2, blocksize  * sizeof(int)>>>(src.ptr(), src.maxNum(), dst.ptr());
 
-		std::vector<int> tmp(16);
-		dst.readByNum(&tmp[0], 16);
+		std::vector<int> tmp(src.maxNum());
+		dst.readByNum(&tmp[0], tmp.size());
+
+		idaten::TypedCudaMemory<int> incr;
+		incr.init(blockPerGrid);
+
+		int tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
+		int tmpBlockSize = blockPerGrid;
+
+		computeBlockCount << <1, tmpBlockSize >> > (
+			incr.ptr(),
+			incr.maxNum(),
+			blocksize,
+			src.ptr(),
+			dst.ptr());
+
+		std::vector<int> tmp2(incr.maxNum());
+		incr.readByNum(&tmp2[0], tmp2.size());
+
+		incrementBlocks << <blockPerGrid, blocksize >> > (
+			dst.ptr(),
+			dst.maxNum(),
+			incr.ptr());
+
+		std::vector<int> tmp3(dst.maxNum());
+		dst.readByNum(&tmp3[0], tmp3.size());
 
 		int xxx = 0;
 	}

@@ -9,6 +9,7 @@
 
 // NOTE
 // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
+// https://github.com/bcrusco/CUDA-Path-Tracer/blob/master/stream_compaction/efficient.cu
 
 // ブロック単位で計算した exclusiveScan の総和値を足したものを計算する.
 __global__ void computeBlockCount(
@@ -54,6 +55,11 @@ __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
 	int index = threadIdx.x;
 	int offset = 1;
 
+	auto n = blockIdx.x * blockDim.x + threadIdx.x;
+	if (n * 2 >= num) {
+		return;
+	}
+
 	// Copy input data to shared memory
 	temp[2 * index] = src[2 * index + (blockIdx.x * blockDim.x * 2)];
 	temp[2 * index + 1] = src[2 * index + 1 + (blockIdx.x * blockDim.x * 2)];
@@ -95,13 +101,39 @@ __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
 	dst[2 * index + 1 + (blockIdx.x * blockDim.x * 2)] = temp[2 * index + 1];
 }
 
+__global__ void scatter(
+	int* dst,
+	int* count,
+	int num,
+	const int* bools,
+	const int* indices,
+	const int* src)
+{
+	int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+	if (idx >= num) {
+		return;
+	}
+
+	if (bools[idx] > 0) {
+		int pos = indices[idx];
+		dst[pos] = src[idx];
+	}
+
+	if (idx == 0) {
+		*count = bools[num - 1] + indices[num - 1];
+	}
+}
+
 namespace idaten {
+
+	// TODO
+	static const int blocksize = 8;
 
 	void scan(
 		idaten::TypedCudaMemory<int>& src,
 		idaten::TypedCudaMemory<int>& dst)
 	{
-		int blocksize = 8;
 		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
 
 		exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int) >> > (
@@ -210,6 +242,7 @@ namespace idaten {
 
 	void compact()
 	{
+#if 0
 		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
@@ -229,5 +262,58 @@ namespace idaten {
 		dst.init(x.size());
 
 		scan(src, dst);
+
+		std::vector<int> buffer(x.size());
+		dst.readByNum(&buffer[0]);
+
+		int xxx = 0;
+#else
+		int b[] = { 1, 0, 1, 0, 1, 0, 1, 0 };
+		int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+
+		AT_ASSERT(AT_COUNTOF(b) == AT_COUNTOF(v));
+
+		int num = AT_COUNTOF(b);
+
+		std::vector<int> buffer(num);
+
+		idaten::TypedCudaMemory<int> bools;
+		bools.init(num);
+		bools.writeByNum(b, num);
+
+		idaten::TypedCudaMemory<int> indices;
+		indices.init(num);
+
+		scan(bools, indices);
+
+		indices.readByNum(&buffer[0]);
+
+		idaten::TypedCudaMemory<int> values;
+		values.init(num);
+		values.writeByNum(v, num);
+
+		idaten::TypedCudaMemory<int> dst;
+		dst.init(num);
+
+		idaten::TypedCudaMemory<int> count;
+		count.init(1);
+
+		int blockPerGrid = (num - 1) / blocksize + 1;
+
+		scatter << <blockPerGrid, blocksize >> > (
+			dst.ptr(),
+			count.ptr(),
+			dst.maxNum(),
+			bools.ptr(),
+			indices.ptr(),
+			values.ptr());
+
+		dst.readByNum(&buffer[0]);
+
+		int _count = -1;
+		count.readByNum(&_count);
+
+		int xxx = 0;
+#endif
 	}
 }

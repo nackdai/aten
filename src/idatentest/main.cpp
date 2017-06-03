@@ -145,8 +145,6 @@ void display()
 
 int main()
 {
-	idaten::compact();
-
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
 

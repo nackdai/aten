@@ -7,6 +7,8 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+#include <numeric>
+
 // NOTE
 // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
 // https://github.com/bcrusco/CUDA-Path-Tracer/blob/master/stream_compaction/efficient.cu
@@ -125,15 +127,68 @@ __global__ void scatter(
 	}
 }
 
-namespace idaten {
+namespace idaten
+{
+	static int g_maxInputNum = 0;
+	static int g_blockSize = 0;
 
-	// TODO
-	static const int blocksize = 8;
+	idaten::TypedCudaMemory<int> g_increments;
+	idaten::TypedCudaMemory<int> g_tmp;
+	idaten::TypedCudaMemory<int> g_work;
+
+	idaten::TypedCudaMemory<int> g_indices;
+	idaten::TypedCudaMemory<int> g_iota;
+	idaten::TypedCudaMemory<int> g_counts;
+
+	void Compaction::init(
+		int maxInputNum,
+		int blockSize)
+	{
+		AT_ASSERT(g_maxInputNum == 0);
+
+		if (g_maxInputNum == 0) {
+			g_maxInputNum = maxInputNum;
+			g_blockSize = blockSize;
+
+			int blockPerGrid = (maxInputNum - 1) / blockSize + 1;
+
+			g_increments.init(blockPerGrid);
+			g_tmp.init(blockPerGrid);
+			g_work.init(blockPerGrid);
+
+			g_indices.init(g_maxInputNum);
+
+			std::vector<int> iota(g_maxInputNum);
+			std::iota(iota.begin(), iota.end(), 0);
+
+			g_iota.init(iota.size());
+			g_iota.writeByNum(&iota[0], iota.size());
+
+			g_counts.init(1);
+		}
+	}
+
+	void Compaction::clear()
+	{
+		g_maxInputNum = 0;
+		g_blockSize = 0;
+
+		g_increments.free();
+		g_tmp.free();
+		g_work.free();
+
+		g_indices.free();
+		g_iota.free();
+		g_counts.free();
+	}
 
 	void scan(
+		const int blocksize,
 		idaten::TypedCudaMemory<int>& src,
 		idaten::TypedCudaMemory<int>& dst)
 	{
+		AT_ASSERT(dst.maxNum() < g_maxInputNum);
+
 		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
 
 		exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int) >> > (
@@ -143,30 +198,24 @@ namespace idaten {
 			src.ptr());
 
 		if (blockPerGrid <= 1) {
+			// If number of block is 1, finish.
 			return;
 		}
-
-		idaten::TypedCudaMemory<int> incr;
-		incr.init(blockPerGrid);
 
 		int tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
 		int tmpBlockSize = blockPerGrid;
 
 		computeBlockCount << <tmpBlockPerGrid, tmpBlockSize >> > (
-			incr.ptr(),
-			incr.maxNum(),
+			g_increments.ptr(),
+			g_increments.maxNum(),
 			blocksize,
 			src.ptr(),
 			dst.ptr());
 
-		idaten::TypedCudaMemory<int> tmp;
-		tmp.init(blockPerGrid);
+		idaten::TypedCudaMemory<int>* input = &g_increments;
+		idaten::TypedCudaMemory<int>* output = &g_tmp;
 
-		idaten::TypedCudaMemory<int> work;
-		work.init(blockPerGrid);
-
-		idaten::TypedCudaMemory<int>* input = &incr;
-		idaten::TypedCudaMemory<int>* output = &tmp;
+		idaten::TypedCudaMemory<int>* tmpptr = &g_tmp;
 
 		int elementNum = blockPerGrid;
 
@@ -181,13 +230,14 @@ namespace idaten {
 			stackBlockPerGrid.push_back(elementNum);
 
 			exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int) >> >(
-				work.ptr(),
-				work.maxNum(),
+				g_work.ptr(),
+				g_work.maxNum(),
 				blocksize,
 				input->ptr());
 
 			if (innerBlockPerGrid <= 1) {
-				cudaMemcpy(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyDeviceToDevice);
+				//cudaMemcpy(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyDeviceToDevice);
+				tmpptr = &g_work;
 				break;
 			}
 
@@ -199,7 +249,7 @@ namespace idaten {
 				output->maxNum(),
 				blocksize,
 				input->ptr(),
-				work.ptr());
+				g_work.ptr());
 
 			// swap.
 			auto p = input;
@@ -211,8 +261,8 @@ namespace idaten {
 		}
 
 #if 1
-		input = &tmp;
-		output = &incr;
+		input = tmpptr;
+		output = &g_increments;
 
 		for (int i = count - 1; i >= 0; i--) {
 			// blocks per grid.
@@ -231,7 +281,7 @@ namespace idaten {
 			output = p;
 		}
 
-		idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? &tmp : &incr);
+		idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? tmpptr : &g_increments);
 #endif
 
 		incrementBlocks << <blockPerGrid, blocksize >> > (
@@ -240,9 +290,36 @@ namespace idaten {
 			incrResult->ptr());
 	}
 
-	void compact()
+	void Compaction::compact(
+		idaten::TypedCudaMemory<int>& dst,
+		idaten::TypedCudaMemory<int>& bools,
+		int* result/*= nullptr*/)
 	{
+		scan(g_blockSize, bools, g_indices);
+
+		int num = dst.maxNum();
+		int blockPerGrid = (num - 1) / g_blockSize + 1;
+
+		scatter << <blockPerGrid, g_blockSize >> > (
+			dst.ptr(),
+			g_counts.ptr(),
+			dst.maxNum(),
+			bools.ptr(),
+			g_indices.ptr(),
+			g_iota.ptr());
+
+		if (result) {
+			g_counts.readByNum(result);
+		}
+	}
+
 #if 0
+	// test implementation.
+	void Compaction::compact()
+	{
+#if 1
+		const int blocksize = g_blockSize;
+
 		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
@@ -261,13 +338,15 @@ namespace idaten {
 		idaten::TypedCudaMemory<int> dst;
 		dst.init(x.size());
 
-		scan(src, dst);
+		scan(blocksize, src, dst);
 
 		std::vector<int> buffer(x.size());
 		dst.readByNum(&buffer[0]);
 
 		int xxx = 0;
 #else
+		const int blocksize = g_blockSize;
+
 		int b[] = { 1, 0, 1, 0, 1, 0, 1, 0 };
 		int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
@@ -284,7 +363,7 @@ namespace idaten {
 		idaten::TypedCudaMemory<int> indices;
 		indices.init(num);
 
-		scan(bools, indices);
+		scan(blocksize, bools, indices);
 
 		indices.readByNum(&buffer[0]);
 
@@ -316,4 +395,5 @@ namespace idaten {
 		int xxx = 0;
 #endif
 	}
+#endif
 }

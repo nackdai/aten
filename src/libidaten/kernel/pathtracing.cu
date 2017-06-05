@@ -187,10 +187,11 @@ __global__ void shadeMiss(
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
+	int* hitindices,
+	int hitnum,
 	aten::Intersection* isects,
 	aten::ray* rays,
 	ShadowRay* shadowRays,
-	int width, int height,
 	int depth, int rrDepth,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -200,10 +201,9 @@ __global__ void shade(
 	cudaTextureObject_t vertices,
 	aten::mat4* matrices)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (ix >= width && iy >= height) {
+	if (idx >= hitnum) {
 		return;
 	}
 
@@ -220,19 +220,12 @@ __global__ void shade(
 		ctxt.matrices = matrices;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	idx = hitindices[idx];
 
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
 
 	shadowRays[idx].isActive = false;
-
-	if (!path.isHit) {
-		return;
-	}
-	if (path.isTerminate) {
-		return;
-	}
 
 	aten::hitrecord rec;
 
@@ -409,8 +402,9 @@ __global__ void shade(
 
 __global__ void hitShadowRay(
 	Path* paths,
+	int* hitindices,
+	int hitnum,
 	ShadowRay* shadowRays,
-	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
@@ -419,10 +413,9 @@ __global__ void hitShadowRay(
 	cudaTextureObject_t vertices,
 	aten::mat4* matrices)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (ix >= width && iy >= height) {
+	if (idx >= hitnum) {
 		return;
 	}
 
@@ -439,7 +432,7 @@ __global__ void hitShadowRay(
 		ctxt.matrices = matrices;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	idx = hitindices[idx];
 
 	auto& shadowRay = shadowRays[idx];
 
@@ -666,16 +659,17 @@ namespace idaten {
 					m_hitbools,
 					&hitcount);
 
-				AT_PRINTF("Hit Count %d\n", hitcount);
+				dim3 blockPerGrid((hitcount + 256 - 1) / 256);
+				dim3 threadPerBlock(256);
 
-				shade << <grid, block >> > (
+				shade << <blockPerGrid, threadPerBlock >> > (
 				//shade << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
+					m_hitidx.ptr(), hitcount,
 					isects.ptr(),
 					rays.ptr(),
 					shadowRays.ptr(),
-					width, height,
 					depth, rrDepth,
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
@@ -690,11 +684,11 @@ namespace idaten {
 					AT_PRINTF("Cuda Kernel Err(shade) [%s]\n", cudaGetErrorString(err));
 				}
 
-				hitShadowRay << <grid, block >> > (
+				hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 				//hitShadowRay << <1, 1 >> > (
 					paths.ptr(),
+					m_hitidx.ptr(), hitcount,
 					shadowRays.ptr(),
-					width, height,
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
 					lightparam.ptr(), lightparam.num(),

@@ -438,7 +438,10 @@ __global__ void hitShadowRay(
 		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
-		aten::ShapeParameter* hitobj = nullptr;
+
+		// Ray aim to the area light.
+		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+		aten::ShapeParameter* hitobj = lightobj;
 
 		aten::Intersection isect;
 
@@ -456,11 +459,6 @@ __global__ void hitShadowRay(
 
 				distHitObjToRayOrg = (rec.p - shadowRay.org).length();
 #endif
-			}
-			else {
-				// Ray aim to the area light.
-				// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-				hitobj = lightobj;
 			}
 		}
 		else {

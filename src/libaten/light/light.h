@@ -67,8 +67,6 @@ namespace aten {
 
 		LightAttribute attrib;
 
-		real padding[11];
-
 		int objid{ -1 };
 		UnionIdxPtr envmap;
 
@@ -76,7 +74,7 @@ namespace aten {
 			: attrib(_attrib), type(_type)
 		{}
 	};
-	AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
+	//AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
 }
 
 namespace AT_NAME

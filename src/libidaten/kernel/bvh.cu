@@ -56,6 +56,12 @@ __device__ bool intersectAABB(
 	return true;
 }
 
+enum IntersectType {
+	Closest,
+	Closer,
+	Any,
+};
+
 __device__ bool intersectBVH(
 	cudaTextureObject_t nodes,
 	int* exid,
@@ -63,7 +69,8 @@ __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	IntersectType type = IntersectType::Closest)
 {
 	int stackbuf[STACK_SIZE];
 
@@ -73,7 +80,8 @@ __device__ bool intersectBVH(
 
 	aten::Intersection isectTmp;
 
-	real hitt = AT_MATH_INF;
+	real hitt = t_max;
+	isect->t = t_max;
 
 	*exid = -1;
 	int tmpexid = -1;
@@ -93,6 +101,8 @@ __device__ bool intersectBVH(
 	while (stackpos > 0) {
 		nodeid = stackbuf[stackpos - 1];
 		stackpos--;
+
+		tmpshapeid = -1;
 
 		if (nodeid >= 0) {
 			node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : left, y: right
@@ -137,11 +147,19 @@ __device__ bool intersectBVH(
 						hitt = isectTmp.t;
 						*exid = tmpexid;
 						*shapeid = tmpshapeid;
+
+						if (tmpshapeid >= 0 && type == IntersectType::Closer) {
+							return false;
+						}
 					}
 					if (tmpexid < 0) {
 						if (isectTmp.t < isect->t) {
 							*isect = isectTmp;
 							isect->objid = (int)attrib.x;
+
+							if (type == IntersectType::Closer) {
+								return true;
+							}
 						}
 					}
 				}
@@ -168,7 +186,8 @@ __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	IntersectType type = IntersectType::Closest)
 {
 	int stackbuf[STACK_SIZE];
 
@@ -187,6 +206,8 @@ __device__ bool intersectBVH(
 
 	aten::vec3 boxmin;
 	aten::vec3 boxmax;
+
+	isect->t = t_max;
 
 	while (stackpos > 0) {
 		nodeid = stackbuf[stackpos - 1];
@@ -215,6 +236,10 @@ __device__ bool intersectBVH(
 					*isect = isectTmp;
 					isect->objid = (int)attrib.x;
 					isect->primid = (int)attrib.y;
+
+					if (type == IntersectType::Closer) {
+						return true;
+					}
 				}
 			}
 			else {
@@ -238,11 +263,13 @@ __device__ bool intersectBVH(
 __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	float t_min, float t_max,
 	aten::Intersection* isect)
 {
 	int exid = -1;
 	int shapeid = -1;
+
+	float t_min = AT_MATH_EPSILON;
+	float t_max = AT_MATH_INF;
 
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
@@ -266,6 +293,50 @@ __device__ bool intersectBVH(
 		transformedRay.dir = normalize(transformedRay.dir);
 
 		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &isectTmp)) {
+			if (isectTmp.t < isect->t) {
+				*isect = isectTmp;
+				isHit = true;
+			}
+		}
+	}
+
+	return isHit;
+}
+
+__device__ bool intersectCloserBVH(
+	const Context* ctxt,
+	const aten::ray& r,
+	aten::Intersection* isect,
+	const float t_max)
+{
+	int exid = -1;
+	int shapeid = -1;
+
+	float t_min = AT_MATH_EPSILON;
+
+	bool isHit = intersectBVH(
+		ctxt->nodes[0],
+		&exid,
+		&shapeid,
+		ctxt,
+		r,
+		t_min, t_max,
+		isect,
+		IntersectType::Closer);
+
+	if (exid >= 0) {
+		aten::Intersection isectTmp;
+
+		const auto& param = ctxt->shapes[shapeid];
+
+		auto mtxW2L = ctxt->matrices[param.mtxid * 2 + 1];
+
+		aten::ray transformedRay;
+		transformedRay.org = mtxW2L.apply(r.org);
+		transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+		transformedRay.dir = normalize(transformedRay.dir);
+
+		if (intersectBVH(ctxt->nodes[exid], ctxt, transformedRay, t_min, t_max, &isectTmp, IntersectType::Closer)) {
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isHit = true;

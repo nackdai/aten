@@ -102,7 +102,7 @@ __global__ void hitTestRayTracing(
 	
 	aten::Intersection isect;
 
-	bool isHit = intersectBVH(&ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+	bool isHit = intersectBVH(&ctxt, path.ray, &isect);
 
 	path.isect.t = isect.t;
 	path.isect.objid = isect.objid;
@@ -289,7 +289,7 @@ __global__ void hitShadowRay(
 		auto& path = paths[idx];
 
 		aten::Intersection isect;
-		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+		bool isHit = intersectBVH(&ctxt, shadowRay, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
 		aten::ShapeParameter* hitobj = nullptr;

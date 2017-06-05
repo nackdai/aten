@@ -6,5 +6,10 @@
 __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	float t_min, float t_max,
 	aten::Intersection* isect);
+
+__device__ bool intersectCloserBVH(
+	const Context* ctxt,
+	const aten::ray& r,
+	aten::Intersection* isect,
+	const float t_max);

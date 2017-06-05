@@ -143,7 +143,7 @@ __global__ void hitTest(
 
 	aten::Intersection isect;
 	
-	bool isHit = intersectBVH(&ctxt, rays[idx], AT_MATH_EPSILON, AT_MATH_INF, &isect);
+	bool isHit = intersectBVH(&ctxt, rays[idx], &isect);
 
 	isects[idx].t = isect.t;
 	isects[idx].objid = isect.objid;
@@ -434,26 +434,33 @@ __global__ void hitShadowRay(
 	auto& shadowRay = shadowRays[idx];
 
 	if (shadowRay.isActive) {
-		auto& path = paths[idx];
-
-		aten::Intersection isect;
-		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &isect);
+		auto light = &ctxt.lights[shadowRay.targetLightId];
 
 		real distHitObjToRayOrg = AT_MATH_INF;
 		aten::ShapeParameter* hitobj = nullptr;
 
-		aten::hitrecord rec;
+		aten::Intersection isect;
 
-		if (isHit) {
-			hitobj = &ctxt.shapes[isect.objid];
+		bool isHit = false;
+
+		if (light->type == aten::LightType::Area) {
+			isHit = intersectCloserBVH(&ctxt, shadowRay, &isect, shadowRay.distToLight + AT_MATH_EPSILON);
+			//isHit = intersectBVH(&ctxt, shadowRay, &isect);
+
+			if (isHit) {
+				hitobj = &ctxt.shapes[isect.objid];
 #if 0
-			evalHitResult(&ctxt, hitobj, shadowRay, &rec, &isect);
+				aten::hitrecord rec;
+				evalHitResult(&ctxt, hitobj, shadowRay, &rec, &isect);
 
-			distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+				distHitObjToRayOrg = (rec.p - shadowRay.org).length();
 #endif
+			}
 		}
-
-		auto light = &ctxt.lights[shadowRay.targetLightId];
+		else {
+			isHit = intersectBVH(&ctxt, shadowRay, &isect);
+		}
+		
 		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 		
 		isHit = AT_NAME::scene::hitLight(
@@ -466,7 +473,7 @@ __global__ void hitShadowRay(
 			hitobj);
 
 		if (isHit) {
-			path.contrib += shadowRay.lightcontrib;
+			paths[idx].contrib += shadowRay.lightcontrib;
 		}
 	}
 }

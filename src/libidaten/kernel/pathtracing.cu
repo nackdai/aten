@@ -458,6 +458,8 @@ __global__ void hitShadowRay(
 #endif
 			}
 			else {
+				// Ray aim to the area light.
+				// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
 				hitobj = lightobj;
 			}
 		}

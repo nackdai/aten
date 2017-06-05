@@ -187,7 +187,8 @@ namespace AT_NAME {
 
 			return false;
 #else
-			if (isHit && hitobj == lightobj) {
+			//if (isHit && hitobj == lightobj) {
+			if (hitobj == lightobj) {
 				return true;
 			}
 

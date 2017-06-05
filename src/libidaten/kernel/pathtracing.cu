@@ -435,6 +435,7 @@ __global__ void hitShadowRay(
 
 	if (shadowRay.isActive) {
 		auto light = &ctxt.lights[shadowRay.targetLightId];
+		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
 		aten::ShapeParameter* hitobj = nullptr;
@@ -444,7 +445,7 @@ __global__ void hitShadowRay(
 		bool isHit = false;
 
 		if (light->type == aten::LightType::Area) {
-			isHit = intersectCloserBVH(&ctxt, shadowRay, &isect, shadowRay.distToLight + AT_MATH_EPSILON);
+			isHit = intersectCloserBVH(&ctxt, shadowRay, &isect, shadowRay.distToLight - AT_MATH_EPSILON);			
 			//isHit = intersectBVH(&ctxt, shadowRay, &isect);
 
 			if (isHit) {
@@ -456,12 +457,13 @@ __global__ void hitShadowRay(
 				distHitObjToRayOrg = (rec.p - shadowRay.org).length();
 #endif
 			}
+			else {
+				hitobj = lightobj;
+			}
 		}
 		else {
 			isHit = intersectBVH(&ctxt, shadowRay, &isect);
 		}
-		
-		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 		
 		isHit = AT_NAME::scene::hitLight(
 			isHit, 

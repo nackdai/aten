@@ -456,7 +456,7 @@ __global__ void hitShadowRay(
 		auto light = &ctxt.lights[shadowRay.targetLightId];
 		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 		
-		shadowRay.isActive = AT_NAME::scene::hitLight(
+		isHit = AT_NAME::scene::hitLight(
 			isHit, 
 			light->attrib,
 			lightobj,
@@ -465,7 +465,7 @@ __global__ void hitShadowRay(
 			isect.t,
 			hitobj);
 
-		if (shadowRay.isActive) {
+		if (isHit) {
 			path.contrib += shadowRay.lightcontrib;
 		}
 	}

@@ -131,7 +131,7 @@ namespace AT_NAME {
 			real t_min, real t_max,
 			aten::hitrecord& rec);
 
-		static AT_DEVICE_API bool hitLight(
+		static inline AT_DEVICE_API bool hitLight(
 			bool isHit,
 			aten::LightAttribute attrib,
 			void* lightobj,
@@ -140,6 +140,7 @@ namespace AT_NAME {
 			const real hitt,
 			const void* hitobj)
 		{
+#if 0
 			//auto lightobj = light->object.ptr;
 
 			if (lightobj) {
@@ -169,14 +170,7 @@ namespace AT_NAME {
 			}
 
 			if (attrib.isInfinite) {
-				if (isHit) {
-					// Hit something.
-					return false;
-				}
-				else {
-					// Hit nothing.
-					return true;
-				}
+				return !isHit;
 			}
 			else if (attrib.isSingular) {
 				//auto distToLight = (lightPos - r.org).length();
@@ -192,6 +186,20 @@ namespace AT_NAME {
 			}
 
 			return false;
+#else
+			if (isHit && hitobj == lightobj) {
+				return true;
+			}
+
+			if (attrib.isInfinite) {
+				return !isHit;
+			}
+			else if (attrib.isSingular) {
+				return hitt > distToLight;
+			}
+
+			return false;
+#endif
 		}
 
 		Light* sampleLight(

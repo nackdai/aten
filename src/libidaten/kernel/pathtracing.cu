@@ -443,16 +443,17 @@ __global__ void hitShadowRay(
 		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
-		aten::ShapeParameter* obj = nullptr;
+		aten::ShapeParameter* hitobj = nullptr;
 
 		aten::hitrecord rec;
 
 		if (isHit) {
-			obj = &ctxt.shapes[isect.objid];
-
-			evalHitResult(&ctxt, obj, shadowRay, &rec, &isect);
+			hitobj = &ctxt.shapes[isect.objid];
+#if 0
+			evalHitResult(&ctxt, hitobj, shadowRay, &rec, &isect);
 
 			distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+#endif
 		}
 
 		auto light = ctxt.lights[shadowRay.targetLightId];
@@ -467,7 +468,7 @@ __global__ void hitShadowRay(
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
 			isect.t,
-			obj);
+			hitobj);
 
 		if (shadowRay.isActive) {
 			path.contrib += shadowRay.lightcontrib;
@@ -609,7 +610,7 @@ namespace idaten {
 
 		static const int maxSamples = 1;
 		static const int maxDepth = 5;
-		static const int rrDepth = 2;
+		static const int rrDepth = 3;
 
 		auto time = getSystemTime();
 

@@ -17,7 +17,7 @@ namespace idaten
 			aten::vec4* image,
 			int width, int height) = 0;
 
-		void update(
+		virtual void update(
 			GLuint gltex,
 			int width, int height,
 			const aten::CameraParameter& camera,

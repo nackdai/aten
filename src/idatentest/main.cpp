@@ -172,6 +172,10 @@ int main()
 
 	g_tracer.prepare();
 
+	idaten::Compaction::init(
+		WIDTH * HEIGHT,
+		1024);
+
 	{
 		std::vector<aten::ShapeParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;

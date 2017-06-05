@@ -5,6 +5,7 @@
 #include "kernel/intersect.cuh"
 #include "kernel/bvh.cuh"
 #include "kernel/common.cuh"
+#include "kernel/compaction.h"
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
@@ -99,6 +100,7 @@ __global__ void hitTest(
 	Path* paths,
 	aten::Intersection* isects,
 	aten::ray* rays,
+	int* hitbools,
 	int width, int height,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -119,6 +121,8 @@ __global__ void hitTest(
 
 	auto& path = paths[idx];
 	path.isHit = false;
+
+	hitbools[idx] = 0;
 
 	if (path.isTerminate) {
 		return;
@@ -150,6 +154,8 @@ __global__ void hitTest(
 	isects[idx].b = isect.b;
 
 	path.isHit = isHit;
+
+	hitbools[idx] = isHit ? 1 : 0;
 }
 
 __global__ void shadeMiss(
@@ -355,7 +361,7 @@ __global__ void shade(
 		russianProb = path.sampler.nextSample();
 
 		if (russianProb >= p) {
-			path.contrib = aten::make_float3(0);
+			//path.contrib = aten::make_float3(0);
 			path.isTerminate = true;
 		}
 		else {
@@ -515,6 +521,34 @@ namespace idaten {
 		addFuncs();
 	}
 
+	void PathTracing::update(
+		GLuint gltex,
+		int width, int height,
+		const aten::CameraParameter& camera,
+		const std::vector<aten::ShapeParameter>& shapes,
+		const std::vector<aten::MaterialParameter>& mtrls,
+		const std::vector<aten::LightParameter>& lights,
+		const std::vector<std::vector<aten::BVHNode>>& nodes,
+		const std::vector<aten::PrimitiveParamter>& prims,
+		const std::vector<aten::vertex>& vtxs,
+		const std::vector<aten::mat4>& mtxs)
+	{
+		idaten::Renderer::update(
+			gltex,
+			width, height,
+			camera,
+			shapes,
+			mtrls,
+			lights,
+			nodes,
+			prims,
+			vtxs,
+			mtxs);
+
+		m_hitbools.init(width * height);
+		m_hitidx.init(width * height);
+	}
+
 #include "misc/timer.h"
 	aten::SystemTime getSystemTime()
 	{
@@ -582,7 +616,7 @@ namespace idaten {
 
 		static const int maxSamples = 1;
 		static const int maxDepth = 5;
-		static const int rrDepth = 3;
+		static const int rrDepth = 2;
 
 		auto time = getSystemTime();
 
@@ -605,6 +639,7 @@ namespace idaten {
 					paths.ptr(),
 					isects.ptr(),
 					rays.ptr(),
+					m_hitbools.ptr(),
 					width, height,
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
@@ -624,6 +659,14 @@ namespace idaten {
 					outputSurf,
 					paths.ptr(),
 					width, height);
+
+				int hitcount = 0;
+				idaten::Compaction::compact(
+					m_hitidx,
+					m_hitbools,
+					&hitcount);
+
+				AT_PRINTF("Hit Count %d\n", hitcount);
 
 				shade << <grid, block >> > (
 				//shade << <1, 1 >> > (

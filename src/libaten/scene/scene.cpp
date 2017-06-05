@@ -18,16 +18,17 @@ namespace aten {
 
 		const auto& param = light->param();
 
-		auto obj = transformable::getShape(rec.objid);
+		auto lightobj = transformable::getShape(param.objid);
+		auto hitobj = transformable::getShape(rec.objid);
 
 		isHit = scene::hitLight(
 			isHit,
 			param.attrib,
-			param.object.ptr,
+			lightobj,
 			distToLight,
 			distHitObjToRayOrg,
 			isect.t,
-			obj);
+			hitobj);
 
 		return isHit;
 	}

@@ -122,7 +122,7 @@ __device__  void sampleAreaLight(
 	aten::sampler* sampler)
 {
 	bool isHit = false;
-	aten::ShapeParameter* s = (aten::ShapeParameter*)light->object.ptr;
+	aten::ShapeParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
 
 	aten::ray r;
 	aten::hitrecord rec;
@@ -164,6 +164,8 @@ __device__  void sampleAreaLight(
 	evalHitResult(ctxt, s, r, &rec, &isect);
 
 	AT_NAME::AreaLight::sample(result, &rec, light, org, sampler);
+
+	result->obj = s;
 }
 
 __device__ void sampleDirectionalLight(

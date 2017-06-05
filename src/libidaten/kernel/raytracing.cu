@@ -208,9 +208,6 @@ __global__ void raytracing(
 		int lightidx = 0;
 
 		auto light = lights[lightidx];
-		if (light.object.idx >= 0) {
-			light.object.ptr = &ctxt.shapes[light.object.idx];
-		}
 
 		aten::LightSampleResult sampleres;
 		sampleLight(&sampleres, &ctxt, &light, rec.p, nullptr);
@@ -295,31 +292,31 @@ __global__ void hitShadowRay(
 		bool isHit = intersectBVH(&ctxt, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
-		aten::ShapeParameter* obj = nullptr;
+		aten::ShapeParameter* hitobj = nullptr;
 
 		aten::hitrecord rec;
 
 		if (isHit) {
-			obj = &ctxt.shapes[isect.objid];
+			hitobj = &ctxt.shapes[isect.objid];
 
-			evalHitResult(&ctxt, obj, shadowRay, &rec, &isect);
+#if 0
+			evalHitResult(&ctxt, hitobj, shadowRay, &rec, &isect);
 
 			distHitObjToRayOrg = (rec.p - shadowRay.org).length();
+#endif
 		}
 
-		auto light = ctxt.lights[shadowRay.targetLightId];
-		if (light.object.idx >= 0) {
-			light.object.ptr = &ctxt.shapes[light.object.idx];
-		}
+		auto light = &ctxt.lights[shadowRay.targetLightId];
+		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit,
-			light.attrib,
-			light.object.ptr,
+			light->attrib,
+			lightobj,
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
 			isect.t,
-			obj);
+			hitobj);
 
 		if (shadowRay.isActive) {
 			path.isTerminate = true;

@@ -70,7 +70,6 @@ namespace aten {
 
 		for (auto l : lights) {
 			auto param = l->param();
-			param.object.idx = aten::transformable::findShapeIdx((aten::transformable*)param.object.ptr);
 			lightparams.push_back(param);
 		}
 

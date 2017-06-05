@@ -217,7 +217,7 @@ namespace aten
 
 	void readObjects(
 		const tinyxml2::XMLElement* root,
-		std::map<std::string, bvhnode*>& objs)
+		std::map<std::string, transformable*>& objs)
 	{
 		auto objRoot = root->FirstChildElement("objects");
 
@@ -292,7 +292,7 @@ namespace aten
 
 			if (obj) {
 				auto instance = new aten::instance<aten::object>(obj, mtxL2W);
-				objs.insert(std::pair<std::string, bvhnode*>(tag, instance));
+				objs.insert(std::pair<std::string, transformable*>(tag, instance));
 			}
 			else {
 				if (type == "cube") {
@@ -302,14 +302,14 @@ namespace aten
 						val.get("height", real(1)),
 						val.get("depth", real(1)),
 						mtrl);
-					objs.insert(std::pair<std::string, bvhnode*>(tag, cube));
+					objs.insert(std::pair<std::string, transformable*>(tag, cube));
 				}
 				else if (type == "sphere") {
 					auto sphere = new aten::sphere(
 						val.get("center", make_float3(0)),
 						val.get("radius", real(1)),
 						mtrl);
-					objs.insert(std::pair<std::string, bvhnode*>(tag, sphere));
+					objs.insert(std::pair<std::string, transformable*>(tag, sphere));
 				}
 				else {
 					// TODO
@@ -321,7 +321,7 @@ namespace aten
 
 	void readLights(
 		const tinyxml2::XMLElement* root,
-		const std::map<std::string, bvhnode*>& objs,
+		const std::map<std::string, transformable*>& objs,
 		std::vector<Light*>& lights)
 	{
 		auto lightRoot = root->FirstChildElement("lights");
@@ -548,7 +548,7 @@ namespace aten
 			ret.dst.height = 0;
 		}
 
-		std::map<std::string, bvhnode*> objs;
+		std::map<std::string, transformable*> objs;
 		std::vector<Light*> lights;
 
 		auto root = xml.FirstChildElement("scene");

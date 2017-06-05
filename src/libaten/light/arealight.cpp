@@ -4,7 +4,7 @@ namespace AT_NAME {
 	aten::LightSampleResult AreaLight::sample(const aten::vec3& org, aten::sampler* sampler) const
 	{
 		bool isHit = false;
-		const aten::hitable* obj = (aten::hitable*)m_param.object.ptr;
+		auto obj = getLightObject();
 
 		aten::LightSampleResult result;
 
@@ -51,6 +51,8 @@ namespace AT_NAME {
 				&this->param(),
 				org,
 				sampler);
+
+			result.obj = m_obj;
 		}
 
 		return std::move(result);

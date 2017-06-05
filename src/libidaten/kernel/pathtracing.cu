@@ -281,9 +281,6 @@ __global__ void shade(
 		lightSelectPdf = 1.0f / lightnum;
 
 		auto light = ctxt.lights[lightidx];
-		if (light.object.idx >= 0) {
-			light.object.ptr = &ctxt.shapes[light.object.idx];
-		}
 
 		sampleLight(&sampleres, &ctxt, &light, rec.p, &path.sampler);
 
@@ -456,15 +453,13 @@ __global__ void hitShadowRay(
 #endif
 		}
 
-		auto light = ctxt.lights[shadowRay.targetLightId];
-		if (light.object.idx >= 0) {
-			light.object.ptr = &ctxt.shapes[light.object.idx];
-		}
+		auto light = &ctxt.lights[shadowRay.targetLightId];
+		auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
 		
 		shadowRay.isActive = AT_NAME::scene::hitLight(
 			isHit, 
-			light.attrib,
-			light.object.ptr,
+			light->attrib,
+			lightobj,
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
 			isect.t,

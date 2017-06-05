@@ -69,7 +69,7 @@ namespace aten {
 
 		real padding[11];
 
-		UnionIdxPtr object;
+		int objid{ -1 };
 		UnionIdxPtr envmap;
 
 		AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)

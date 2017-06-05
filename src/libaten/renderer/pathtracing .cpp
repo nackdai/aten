@@ -9,6 +9,14 @@
 
 //#define Deterministic_Path_Termination
 
+//#define RELEASE_DEBUG
+
+#ifdef RELEASE_DEBUG
+#define BREAK_X	(173)
+#define BREAK_Y	(480 - 360)
+#pragma optimize( "", off)
+#endif
+
 namespace aten
 {
 	// NOTE
@@ -404,7 +412,7 @@ namespace aten
 		}
 #endif
 
-#ifdef ENABLE_OMP
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
 		{
@@ -415,7 +423,7 @@ namespace aten
 
 			auto time = timer::getSystemTime();
 
-#ifdef ENABLE_OMP
+#if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
 			for (int y = 0; y < height; y++) {
@@ -426,11 +434,22 @@ namespace aten
 					vec3 col2 = make_float3(0);
 					uint32_t cnt = 0;
 
+#ifdef RELEASE_DEBUG
+					if (x == BREAK_X && y == BREAK_Y) {
+						int xxx = 0;
+					}
+#endif
+
 					for (uint32_t i = 0; i < samples; i++) {
-						//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						//WangHash rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+						int seed = (y * height * 4 + x * 4) * samples + i + 1;
+#ifndef RELEASE_DEBUG
+						seed += time.milliSeconds;
+#endif
+
+						//XorShift rnd(seed);
+						//Halton rnd(seed);
+						//Sobol rnd(seed);
+						WangHash rnd(seed);
 
 						real u = real(x + rnd.nextSample()) / real(width);
 						real v = real(y + rnd.nextSample()) / real(height);

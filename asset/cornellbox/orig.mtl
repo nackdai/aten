@@ -1,0 +1,19 @@
+# Exported from 3D Builder
+
+newmtl light
+Kd 0.624000 0.624000 0.624000
+
+newmtl leftWall
+Kd 0.504000 0.052000 0.040000
+
+newmtl backWall
+Kd 0.580000 0.568000 0.544000
+
+newmtl rightWall
+Kd 0.112000 0.360000 0.072800
+
+newmtl ceiling
+Kd 0.580000 0.568000 0.544000
+
+newmtl floor
+Kd 0.580000 0.568000 0.544000

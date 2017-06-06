@@ -7,7 +7,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class RandomScene {
@@ -16,7 +17,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class MtrlTestScene {
@@ -25,7 +27,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class ObjectScene {
@@ -34,7 +37,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class PointLightScene {
@@ -43,7 +47,9 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
+
 };
 
 class DirectionalLightScene {
@@ -52,7 +58,9 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
+
 };
 
 class SpotLightScene {
@@ -61,7 +69,9 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
+
 };
 
 class ManyLightScene {
@@ -70,7 +80,9 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
+
 };
 
 class TexturesScene {
@@ -79,7 +91,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class HideLightScene {
@@ -88,7 +101,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class DisneyMaterialTestScene {
@@ -97,7 +111,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class LayeredMaterialTestScene {
@@ -106,7 +121,8 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
 class ToonShadeTestScene {
@@ -115,10 +131,21 @@ public:
 
 	static void getCameraPosAndAt(
 		aten::vec3& pos,
-		aten::vec3& at);
+		aten::vec3& at,
+		real& fov);
 };
 
-#define Scene CornellBoxScene
+class ObjCornellBoxScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at,
+		real& fov);
+};
+
+//#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
 //#define Scene MtrlTestScene
@@ -131,3 +158,4 @@ public:
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
+#define Scene ObjCornellBoxScene

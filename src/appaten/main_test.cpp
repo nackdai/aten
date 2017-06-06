@@ -165,8 +165,9 @@ int main(int argc, char* argv[])
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;
+	real fov;
 
-	Scene::getCameraPosAndAt(lookfrom, lookat);
+	Scene::getCameraPosAndAt(lookfrom, lookat, fov);
 
 #ifdef ENABLE_DOF
 	g_camera.init(
@@ -183,7 +184,7 @@ int main(int argc, char* argv[])
 		lookfrom,
 		lookat,
 		aten::make_float3(0, 1, 0),
-		30,
+		fov,
 		WIDTH, HEIGHT);
 #endif
 

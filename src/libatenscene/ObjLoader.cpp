@@ -15,6 +15,26 @@ namespace aten
 
 	object* ObjLoader::load(const std::string& path)
 	{
+		std::vector<object*> objs;
+		load(objs, path);
+
+		object* ret = (!objs.empty() ? objs[0] : nullptr);
+		return ret;
+	}
+
+	object* ObjLoader::load(const std::string& tag, const std::string& path)
+	{
+		std::vector<object*> objs;
+		load(objs, tag, path);
+
+		object* ret = (!objs.empty() ? objs[0] : nullptr);
+		return ret;
+	}
+
+	void ObjLoader::load(
+		std::vector<object*>& objs,
+		const std::string& path)
+	{
 		std::string pathname;
 		std::string extname;
 		std::string filename;
@@ -30,17 +50,18 @@ namespace aten
 			fullpath = g_base + "/" + fullpath;
 		}
 
-		auto obj = load(filename, fullpath);
-
-		return obj;
+		load(objs, filename, fullpath);
 	}
 
-	object* ObjLoader::load(const std::string& tag, const std::string& path)
+	void ObjLoader::load(
+		std::vector<object*>& objs,
+		const std::string& tag, const std::string& path)
 	{
 		object* obj = AssetManager::getObj(tag);
 		if (obj) {
 			AT_PRINTF("There is same tag object. [%s]\n", tag.c_str());
-			return obj;
+			objs.push_back(obj);
+			return;
 		}
 
 		std::vector<tinyobj::shape_t> shapes;
@@ -57,7 +78,7 @@ namespace aten
 			err,
 			path.c_str(), nullptr,
 			flags);
-		AT_VRETURN(result, nullptr);
+		AT_VRETURN(result, );
 
 		obj = new object();
 
@@ -77,8 +98,6 @@ namespace aten
 			vec3 pmax = make_float3(-AT_MATH_INF);
 
 			for (uint32_t i = 0; i < vtxnum; i += 3) {
-				vertex v;
-
 				vertex vtx;
 
 				vtx.pos.x = shape.mesh.positions[i + 0];
@@ -94,13 +113,13 @@ namespace aten
 				VertexManager::addVertex(vtx);
 
 				pmin = make_float3(
-					std::min(pmin.x, v.pos.x),
-					std::min(pmin.y, v.pos.y),
-					std::min(pmin.z, v.pos.z));
+					std::min(pmin.x, vtx.pos.x),
+					std::min(pmin.y, vtx.pos.y),
+					std::min(pmin.z, vtx.pos.z));
 				pmax = make_float3(
-					std::max(pmax.x, v.pos.x),
-					std::max(pmax.y, v.pos.y),
-					std::max(pmax.z, v.pos.z));
+					std::max(pmax.x, vtx.pos.x),
+					std::max(pmax.y, vtx.pos.y),
+					std::max(pmax.z, vtx.pos.z));
 			}
 
 			shapemin = make_float3(
@@ -133,12 +152,12 @@ namespace aten
 			}
 			if (mtrlidx >= 0) {
 				const auto mtrl = mtrls[mtrlidx];
-				dstshape->param.mtrl.ptr = AssetManager::getMtrl(mtrl.name);
+				dstshape->setMaterial(AssetManager::getMtrl(mtrl.name));
 			}
 			if (!dstshape->param.mtrl.ptr){
 				// dummy....
 				AT_ASSERT(false);
-				dstshape->param.mtrl.ptr = new lambert(vec3());
+				dstshape->setMaterial(new lambert(vec3()));
 			}
 
 			vtxnum = shape.mesh.texcoords.size();
@@ -153,13 +172,22 @@ namespace aten
 				vtx.uv.z = vtx.uv.w = real(0);
 			}
 
-			obj->shapes.push_back(dstshape);
+			auto mtrl = dstshape->getMaterial();
+
+			if (mtrl->param().type == aten::MaterialType::Emissive) {
+				auto emitobj = new object();
+				emitobj->shapes.push_back(dstshape);
+				emitobj->bbox.init(pmin, pmax);
+				objs.push_back(emitobj);
+			}
+			else {
+				obj->shapes.push_back(dstshape);
+			}
 		}
 
 		obj->bbox.init(shapemin, shapemax);
+		objs.push_back(obj);
 
 		AssetManager::registerObj(tag, obj);
-
-		return obj;
 	}
 }

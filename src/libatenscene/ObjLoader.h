@@ -16,5 +16,12 @@ namespace aten
 
 		static object* load(const std::string& path);
 		static object* load(const std::string& tag, const std::string& path);
+
+		static void load(
+			std::vector<object*>& objs,
+			const std::string& path);
+		static void load(
+			std::vector<object*>& objs,
+			const std::string& tag, const std::string& path);
 	};
 }

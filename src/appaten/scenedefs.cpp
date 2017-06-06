@@ -138,10 +138,12 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 
 void CornellBoxScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(50.0, 52.0, 295.6);
 	at = aten::make_float3(50.0, 40.8, 119.0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -198,10 +200,12 @@ void RandomScene::makeScene(aten::scene* scene)
 
 void RandomScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(13, 2, 3);
 	at = aten::make_float3(0, 0, 0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -223,10 +227,12 @@ void MtrlTestScene::makeScene(aten::scene* scene)
 
 void MtrlTestScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(0, 0, 13);
 	at = aten::make_float3(0, 0, 0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -259,11 +265,13 @@ void ObjectScene::makeScene(aten::scene* scene)
 
 void ObjectScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(0.0, 0.0, 10.0);
 	//pos = aten::make_float3(0.0, 0.0, 60.0);
 	at = aten::make_float3(0.0, 0.0, 0.0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -302,10 +310,12 @@ void PointLightScene::makeScene(aten::scene* scene)
 
 void PointLightScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(50.0, 52.0, 295.6);
 	at = aten::make_float3(50.0, 40.8, 119.0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -344,10 +354,12 @@ void DirectionalLightScene::makeScene(aten::scene* scene)
 
 void DirectionalLightScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(50.0, 52.0, 295.6);
 	at = aten::make_float3(50.0, 40.8, 119.0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -392,10 +404,12 @@ void SpotLightScene::makeScene(aten::scene* scene)
 
 void SpotLightScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(50.0, 52.0, 295.6);
 	at = aten::make_float3(50.0, 40.8, 119.0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -470,10 +484,12 @@ void ManyLightScene::makeScene(aten::scene* scene)
 
 void ManyLightScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(13, 2, 3);
 	at = aten::make_float3(0, 0, 0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -508,10 +524,12 @@ void TexturesScene::makeScene(aten::scene* scene)
 
 void TexturesScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(0, 0, 13);
 	at = aten::make_float3(0, 0, 0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -602,10 +620,12 @@ void HideLightScene::makeScene(aten::scene* scene)
 
 void HideLightScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(50.0, 52.0, 295.6);
 	at = aten::make_float3(50.0, 40.8, 119.0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -665,10 +685,12 @@ void DisneyMaterialTestScene::makeScene(aten::scene* scene)
 
 void DisneyMaterialTestScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(0, 0, 13);
 	at = aten::make_float3(0, 0, 0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -694,10 +716,12 @@ void LayeredMaterialTestScene::makeScene(aten::scene* scene)
 
 void LayeredMaterialTestScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(0, 0, 13);
 	at = aten::make_float3(0, 0, 0);
+	fov = 30;
 }
 
 /////////////////////////////////////////////////////
@@ -775,9 +799,66 @@ void ToonShadeTestScene::makeScene(aten::scene* scene)
 
 void ToonShadeTestScene::getCameraPosAndAt(
 	aten::vec3& pos,
-	aten::vec3& at)
+	aten::vec3& at,
+	real& fov)
 {
 	pos = aten::make_float3(0.0, 0.0, 10.0);
 	//pos = aten::make_float3(0.0, 0.0, 60.0);
 	at = aten::make_float3(0.0, 0.0, 0.0);
+	fov = 30;
+}
+
+/////////////////////////////////////////////////////
+
+void ObjCornellBoxScene::makeScene(aten::scene* scene)
+{
+	aten::AssetManager::registerMtrl(
+		"backWall",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"ceiling",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"floor",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"leftWall",
+		new aten::lambert(aten::make_float3(0.504000, 0.052000, 0.040000)));
+
+	auto emit = new aten::emissive(aten::make_float3(36, 33, 24));
+	aten::AssetManager::registerMtrl(
+		"light",
+		emit);
+
+	aten::AssetManager::registerMtrl(
+		"rightWall",
+		new aten::lambert(aten::make_float3(0.112000, 0.360000, 0.072800)));
+	aten::AssetManager::registerMtrl(
+		"shortBox",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"tallBox",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+
+	std::vector<aten::object*> objs;
+	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj");
+
+	auto light = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
+	auto box = new aten::instance<aten::object>(objs[1], aten::mat4::Identity);
+
+	scene->add(light);
+	scene->add(box);
+
+	auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+	scene->addLight(areaLight);
+}
+
+void ObjCornellBoxScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::make_float3(0.f, 1.f, 3.f);
+	at = aten::make_float3(0.f, 1.f, 0.f);
+	fov = 45;
 }

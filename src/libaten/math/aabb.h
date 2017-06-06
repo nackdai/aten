@@ -62,6 +62,10 @@ namespace aten {
 			bool isHit = false;
 
 			for (uint32_t i = 0; i < 3; i++) {
+				if (_min[i] == _max[i]) {
+					continue;
+				}
+
 #if 0
 				if (r.dir[i] == 0.0f) {
 					continue;
@@ -215,7 +219,7 @@ namespace aten {
 					std::max(newMax.z, v.z));
 			}
 
-			aabb ret(newMin, newMax);
+			aabb ret(newMin + center, newMax + center);
 
 			return std::move(ret);
 		}

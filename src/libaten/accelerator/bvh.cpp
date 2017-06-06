@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-#define TEST_NODE_LIST
+//#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)

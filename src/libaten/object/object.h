@@ -95,11 +95,23 @@ namespace AT_NAME
 			return face->getSamplePosNormalArea(result, sampler);
 		}
 
+		void setMaterial(material* mtrl)
+		{
+			param.mtrl.ptr = mtrl;
+			m_mtrl = mtrl;
+		}
+
+		const material* getMaterial() const
+		{
+			return m_mtrl;
+		}
+
 		aten::ShapeParameter param;
 		std::vector<face*> faces;
 
 	private:
 		bvhnode m_node;
+		material* m_mtrl{ nullptr };
 	};
 
 	template<typename T> class instance;

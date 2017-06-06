@@ -6,7 +6,7 @@
 #include <vector>
 
 #define BVH_SAH
-//#define TEST_NODE_LIST
+#define TEST_NODE_LIST
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -689,6 +689,8 @@ namespace aten {
 		for (auto s : shapes) {
 			const auto idx = s->m_traverseOrder;
 			if (idx >= 0) {
+				rootnode = nodes[0];
+
 				auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
 
 				if (param.type == ShapeType::Instance) {

@@ -31,6 +31,7 @@ static idaten::PathTracing g_tracer;
 
 void makeScene(aten::scene* scene)
 {
+#if 0
 	auto emit = new aten::emissive(aten::make_float3(36, 36, 36));
 	//auto emit = new aten::emissive(aten::make_float3(3, 3, 3));
 
@@ -124,6 +125,47 @@ void makeScene(aten::scene* scene)
 	scene->add(light);
 	scene->add(glass);
 #endif
+#else
+	aten::AssetManager::registerMtrl(
+		"backWall",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"ceiling",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"floor",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"leftWall",
+		new aten::lambert(aten::make_float3(0.504000, 0.052000, 0.040000)));
+
+	auto emit = new aten::emissive(aten::make_float3(36, 33, 24));
+	aten::AssetManager::registerMtrl(
+		"light",
+		emit);
+
+	aten::AssetManager::registerMtrl(
+		"rightWall",
+		new aten::lambert(aten::make_float3(0.112000, 0.360000, 0.072800)));
+	aten::AssetManager::registerMtrl(
+		"shortBox",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+	aten::AssetManager::registerMtrl(
+		"tallBox",
+		new aten::lambert(aten::make_float3(0.580000, 0.568000, 0.544000)));
+
+	std::vector<aten::object*> objs;
+	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj");
+
+	auto light = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
+	auto box = new aten::instance<aten::object>(objs[1], aten::mat4::Identity);
+
+	scene->add(light);
+	scene->add(box);
+
+	auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+	scene->addLight(areaLight);
+#endif
 }
 
 void display()
@@ -160,12 +202,21 @@ int main()
 
 	aten::visualizer::addPostProc(&gamma);
 
+#if 0
 	g_camera.init(
 		aten::make_float3(50.0, 52.0, 295.6),
 		aten::make_float3(50.0, 40.8, 119.0),
 		aten::make_float3(0, 1, 0),
 		30,
 		WIDTH, HEIGHT);
+#else
+	g_camera.init(
+		aten::make_float3(0.f, 1.f, 3.f),
+		aten::make_float3(0.f, 1.f, 0.f),
+		aten::make_float3(0, 1, 0),
+		45,
+		WIDTH, HEIGHT);
+#endif
 
 	makeScene(&g_scene);
 	g_scene.build();

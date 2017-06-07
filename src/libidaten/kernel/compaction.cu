@@ -197,6 +197,8 @@ namespace idaten
 			blocksize,
 			src.ptr());
 
+		checkCudaKernel(exclusiveScan);
+
 		if (blockPerGrid <= 1) {
 			// If number of block is 1, finish.
 			return;
@@ -211,6 +213,8 @@ namespace idaten
 			blocksize,
 			src.ptr(),
 			dst.ptr());
+
+		checkCudaKernel(computeBlockCount);
 
 		idaten::TypedCudaMemory<int>* input = &g_increments;
 		idaten::TypedCudaMemory<int>* output = &g_tmp;
@@ -235,6 +239,8 @@ namespace idaten
 				blocksize,
 				input->ptr());
 
+			checkCudaKernel(iterate_exclusiveScan);
+
 			if (innerBlockPerGrid <= 1) {
 				//cudaMemcpy(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyDeviceToDevice);
 				tmpptr = &g_work;
@@ -250,6 +256,8 @@ namespace idaten
 				blocksize,
 				input->ptr(),
 				g_work.ptr());
+
+			checkCudaKernel(iterate_computeBlockCount);
 
 			// swap.
 			auto p = input;
@@ -275,6 +283,8 @@ namespace idaten
 				output->maxNum(),
 				input->ptr());
 
+			checkCudaKernel(iterate_incrementBlocks);
+
 			// swap.
 			auto p = input;
 			input = output;
@@ -288,6 +298,8 @@ namespace idaten
 			dst.ptr(),
 			dst.maxNum(),
 			incrResult->ptr());
+
+		checkCudaKernel(incrementBlocks);
 	}
 
 	void Compaction::compact(

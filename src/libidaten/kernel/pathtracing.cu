@@ -647,16 +647,15 @@ namespace idaten {
 					vtxTex,
 					mtxparams.ptr());
 
-				auto err = cudaGetLastError();
-				if (err != cudaSuccess) {
-					AT_PRINTF("Cuda Kernel Err(hitTest) [%s]\n", cudaGetErrorString(err));
-				}
+				checkCudaKernel(hitTest);
 
 				shadeMiss << <grid, block >> > (
 				//shadeMiss << <1, 1 >> > (
 					outputSurf,
 					paths.ptr(),
 					width, height);
+
+				checkCudaKernel(shadeMiss);
 
 				int hitcount = 0;
 				idaten::Compaction::compact(
@@ -684,10 +683,7 @@ namespace idaten {
 					vtxTex,
 					mtxparams.ptr());
 
-				err = cudaGetLastError();
-				if (err != cudaSuccess) {
-					AT_PRINTF("Cuda Kernel Err(shade) [%s]\n", cudaGetErrorString(err));
-				}
+				checkCudaKernel(shade);
 
 				hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 				//hitShadowRay << <1, 1 >> > (
@@ -702,10 +698,7 @@ namespace idaten {
 					vtxTex,
 					mtxparams.ptr());
 
-				err = cudaGetLastError();
-				if (err != cudaSuccess) {
-					AT_PRINTF("Cuda Kernel Err(hitShadowRay) [%s]\n", cudaGetErrorString(err));
-				}
+				checkCudaKernel(hitShadowRay);
 
 				depth++;
 			}

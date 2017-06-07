@@ -1,7 +1,7 @@
 #include "material/refraction.h"
 #include "scene/hitable.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace AT_NAME
 {

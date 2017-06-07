@@ -12,12 +12,12 @@ typedef void(*FuncLightSample)(
 	aten::LightSampleResult*, Context*, const aten::LightParameter*, const aten::vec3&, aten::sampler*);
 
 typedef void(*FuncGetSamplePosNormalArea)(
-	aten::hitable::SamplePosNormalPdfResult*, Context*, aten::ShapeParameter*, aten::sampler*);
+	aten::hitable::SamplePosNormalPdfResult*, Context*, const aten::ShapeParameter*, aten::sampler*);
 
 __device__ void getSphereSamplePosNormalArea(
 	aten::hitable::SamplePosNormalPdfResult* result,
 	Context* ctxt, 
-	aten::ShapeParameter* shape,
+	const aten::ShapeParameter* shape,
 	aten::sampler* smpl)
 {
 	AT_NAME::sphere::getSamplePosNormalArea(result, shape, smpl);
@@ -26,7 +26,7 @@ __device__ void getSphereSamplePosNormalArea(
 __device__ void getSamplePosNormalAreaNotSupported(
 	aten::hitable::SamplePosNormalPdfResult* result,
 	Context* ctxt, 
-	aten::ShapeParameter* shape,
+	const aten::ShapeParameter* shape,
 	aten::sampler* smpl)
 {
 	printf("Sample PosNormalArea Not Supported[%d]\n", shape->type);
@@ -35,7 +35,7 @@ __device__ void getSamplePosNormalAreaNotSupported(
 __device__ void getTriangleSamplePosNormalArea(
 	aten::hitable::SamplePosNormalPdfResult* result,
 	Context* ctxt, 
-	aten::ShapeParameter* shape,
+	const aten::ShapeParameter* shape,
 	aten::sampler* sampler)
 {
 	int r = sampler->nextSample();
@@ -133,7 +133,7 @@ __device__  void sampleAreaLight(
 
 		const aten::ShapeParameter* realShape = (s->shapeid >= 0 ? &ctxt->shapes[s->shapeid] : s);
 
-		funcGetSamplePosNormalArea[realShape->type](&result, ctxt, s, sampler);
+		funcGetSamplePosNormalArea[realShape->type](&result, ctxt, realShape, sampler);
 
 		auto dir = result.pos - org;
 		r = aten::ray(org, dir);

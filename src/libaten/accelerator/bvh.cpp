@@ -4,6 +4,7 @@
 
 #include <random>
 #include <vector>
+#pragma optimize( "", off)
 
 #define BVH_SAH
 #define TEST_NODE_LIST
@@ -677,10 +678,9 @@ namespace aten {
 		std::vector<aten::mat4>& mtxs) const
 	{
 		nodes.push_back(std::vector<BVHNode>());
-		auto& rootnode = nodes[0];
 
 		int order = setTraverseOrder(m_root, 0);
-		collectNodes(m_root, rootnode, nullptr);
+		collectNodes(m_root, nodes[0], nullptr);
 
 		std::map<hitable*, int> cache;
 
@@ -689,24 +689,20 @@ namespace aten {
 		for (auto s : shapes) {
 			const auto idx = s->m_traverseOrder;
 			if (idx >= 0) {
-				rootnode = nodes[0];
-
 				auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
 
 				if (param.type == ShapeType::Instance) {
-					auto& node = rootnode[idx];
-
 					// Search if object which instance has is collected.
 					auto obj = s->getHasObject();
 					auto found = cache.find(const_cast<hitable*>(obj));
 
 					if (found != cache.end()) {
 						// Collected.
-						node.nestid = found->second;
+						nodes[0][idx].nestid = found->second;
 					}
 					else {
 						// Not collected yet.
-						node.nestid = rootnode.size();
+						nodes[0][idx].nestid = nodes[0].size();
 
 						order = s->collectInternalNodes(nodes, order, nullptr);
 					}

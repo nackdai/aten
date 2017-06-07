@@ -113,9 +113,13 @@ __device__ bool intersectBVH(
 			aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
 			aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
+			auto boxmin = aten::make_float3(aabb[0].x, aabb[0].y, aabb[0].z);
+			auto boxmax = aten::make_float3(aabb[1].x, aabb[1].y, aabb[1].z);
+
 			if (node.x < 0 && node.y < 0) {
 				if (attrib.z >= 0) {
-					if (intersectAABB(&bvhray, aabb, t)) {
+					//if (intersectAABB(&bvhray, aabb, t)) {
+					if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
 						stackbuf[stackpos++] = (int)attrib.z;
 						tmpshapeid = (int)attrib.x;
 					}
@@ -129,7 +133,8 @@ __device__ bool intersectBVH(
 
 					if (attrib.w >= 0) {	// exid
 						isectTmp.t = AT_MATH_INF;
-						isHit = intersectAABB(&bvhray, aabb, isectTmp.t);
+						//isHit = intersectAABB(&bvhray, aabb, isectTmp.t);
+						isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &isectTmp.t);
 						tmpexid = attrib.w;
 					}
 #if 0
@@ -158,7 +163,7 @@ __device__ bool intersectBVH(
 
 						if (tmpexid >= 0) {
 							candidates[candidateNum].exid = tmpexid;
-							candidates[candidateNum].shapeid = tmpshapeid;
+							candidates[candidateNum].shapeid = (int)attrib.x;
 							candidateNum++;
 						}
 					}
@@ -175,7 +180,8 @@ __device__ bool intersectBVH(
 				}
 			}
 			else {
-				if (intersectAABB(&bvhray, aabb, t)) {
+				//if (intersectAABB(&bvhray, aabb, t)) {
+				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
 					stackbuf[stackpos++] = (int)node.x;
 					stackbuf[stackpos++] = (int)node.y;
 
@@ -299,9 +305,9 @@ __device__ bool intersectBVH(
 		auto mtxW2L = ctxt->matrices[param.mtxid * 2 + 1];
 
 		aten::ray transformedRay;
-		transformedRay.org = mtxW2L.apply(r.org);
 		transformedRay.dir = mtxW2L.applyXYZ(r.dir);
 		transformedRay.dir = normalize(transformedRay.dir);
+		transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
 
 		if (intersectBVH(ctxt->nodes[c.exid], ctxt, transformedRay, t_min, t_max, &isectTmp)) {
 			if (isectTmp.t < isect->t) {
@@ -334,6 +340,9 @@ __device__ bool intersectCloserBVH(
 		isect,
 		IntersectType::Closer);
 
+	aten::ray transformedRay;
+	int previd = -1;
+
 	for(int i = 0; i < candidateNum; i++) {
 		const auto& c = candidates[i];
 
@@ -343,10 +352,13 @@ __device__ bool intersectCloserBVH(
 
 		auto mtxW2L = ctxt->matrices[param.mtxid * 2 + 1];
 
-		aten::ray transformedRay;
-		transformedRay.org = mtxW2L.apply(r.org);
-		transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-		transformedRay.dir = normalize(transformedRay.dir);
+		if (c.shapeid != previd)
+		{
+			transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+			transformedRay.dir = normalize(transformedRay.dir);
+			transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+		}
+		previd = c.shapeid;
 
 		if (intersectBVH(ctxt->nodes[c.exid], ctxt, transformedRay, t_min, t_max, &isectTmp, IntersectType::Closer)) {
 			if (isectTmp.t < isect->t) {

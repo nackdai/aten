@@ -58,6 +58,7 @@ namespace aten {
 				auto it = orderMap.find((transformable*)(obj));
 				AT_ASSERT(it != orderMap.end());
 
+				// Specify the index of the object which the instance has.
 				param.shapeid = it->second;
 
 				param.area = it->first->getParam().area;

@@ -137,19 +137,12 @@ __device__ bool intersectBVH(
 						isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &isectTmp.t);
 						tmpexid = attrib.w;
 					}
-#if 0
-					else if (attrib.y >= 0) {	// primid
-						const auto& prim = ctxt->prims[(int)attrib.y];
-						isHit = intersectShape(s, &prim, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
-						recTmp.mtrlid = prim.mtrlid;
-					}
-#endif
 					else {
 						// TODO
 						// Only sphere...
 						//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
 						isectTmp.t = AT_MATH_INF;
-						hitSphere(s, nullptr, ctxt, r, t_min, t_max, &isectTmp);
+						hitSphere(s, r, t_min, t_max, &isectTmp);
 						isectTmp.mtrlid = s->mtrl.idx;
 					}
 
@@ -239,13 +232,10 @@ __device__ bool intersectBVH(
 			boxmax = aten::make_float3(_boxmax.x, _boxmax.y, _boxmax.z);
 
 			if (node.x < 0 && node.y < 0) {
-				const auto* s = &ctxt->shapes[(int)attrib.x];
-				const aten::ShapeParameter* realShape = (s->shapeid >= 0 ? &ctxt->shapes[s->shapeid] : s);
-
 				const auto& prim = ctxt->prims[(int)attrib.y];
 
 				isectTmp.t = AT_MATH_INF;
-				hitTriangle(realShape, &prim, ctxt, r, t_min, t_max, &isectTmp);
+				hitTriangle(&prim, ctxt, r, &isectTmp);
 				isectTmp.mtrlid = prim.mtrlid;
 
 				if (isectTmp.t < isect->t) {

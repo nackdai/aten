@@ -663,6 +663,8 @@ namespace idaten {
 					m_hitbools,
 					&hitcount);
 
+				//AT_PRINTF("%d\n", hitcount);
+
 				dim3 blockPerGrid((hitcount + 256 - 1) / 256);
 				dim3 threadPerBlock(256);
 

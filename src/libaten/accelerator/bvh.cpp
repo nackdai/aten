@@ -4,7 +4,6 @@
 
 #include <random>
 #include <vector>
-#pragma optimize( "", off)
 
 #define BVH_SAH
 #define TEST_NODE_LIST
@@ -186,10 +185,13 @@ namespace aten {
 		auto& prims = face::faces();
 
 		real hitt = AT_MATH_INF;
-		int exid = -1;
-
-		int shapeid = -1;
 		int tmpShapeid = -1;
+
+		struct {
+			int exid{ -1 };
+			int shapeid{ -1 };
+		} candidateExid[stacksize];
+		int candidateExidNum = 0;
 
 		while (stackpos > 0) {
 			auto node = stackbuf[stackpos - 1];
@@ -231,10 +233,17 @@ namespace aten {
 					}
 
 					if (isHit) {
-						if (isectTmp.t < hitt) {
+#if 0
+						if (isectTmp.t <= hitt)
+#endif
+						{
 							hitt = isectTmp.t;
-							exid = tmpexid;
-							shapeid = tmpShapeid;
+
+							if (tmpexid >= 0) {
+								candidateExid[candidateExidNum].exid = tmpexid;
+								candidateExid[candidateExidNum].shapeid = tmpShapeid;
+								candidateExidNum++;
+							}
 						}
 
 						if (tmpexid < 0) {
@@ -262,21 +271,25 @@ namespace aten {
 			}
 		}
 
-		if (exid >= 0) {
-			const auto s = shapes[shapeid];
-			const auto& param = s->getParam();
+		if (candidateExidNum > 0) {
+			for (int i = 0; i < candidateExidNum; i++) {
+				const auto& c = candidateExid[i];
 
-			int mtxid = param.mtxid;
+				const auto s = shapes[c.shapeid];
+				const auto& param = s->getParam();
 
-			const auto& mtxW2L = smtxs[mtxid * 2 + 1];
+				int mtxid = param.mtxid;
 
-			auto transformedRay = mtxW2L.applyRay(r);
+				const auto& mtxW2L = smtxs[mtxid * 2 + 1];
 
-			Intersection isectTmp;
+				auto transformedRay = mtxW2L.applyRay(r);
 
-			if (_hit(&snodes[exid][0], transformedRay, t_min, t_max, isectTmp)) {
-				if (isectTmp.t < isect.t) {
-					isect = isectTmp;
+				Intersection isectTmp;
+
+				if (_hit(&snodes[c.exid][0], transformedRay, t_min, t_max, isectTmp)) {
+					if (isectTmp.t < isect.t) {
+						isect = isectTmp;
+					}
 				}
 			}
 		}

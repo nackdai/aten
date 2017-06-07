@@ -344,8 +344,10 @@ namespace AT_NAME
 		result->area = area;
 	}
 
-	void object::getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const
+	void object::getPrimitives(aten::PrimitiveParamter* primparams) const
 	{
+		int cnt = 0;
+
 		for (auto s : shapes) {
 			const auto& shapeParam = s->param;
 			
@@ -354,7 +356,7 @@ namespace AT_NAME
 			for (auto f : s->faces) {
 				auto faceParam = f->param;
 				faceParam.mtrlid = mtrlid;
-				primparams.push_back(faceParam);
+				primparams[cnt++] = faceParam;
 			}
 		}
 	}

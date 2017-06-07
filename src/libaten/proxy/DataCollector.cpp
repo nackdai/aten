@@ -24,10 +24,15 @@ namespace aten {
 			case ShapeType::Polygon:
 			{
 				auto param = s->getParam();
-				AT_ASSERT(param.primid == primparams.size());
 				shapeparams.push_back(param);
 
-				s->getPrimitives(primparams);
+				const int primcnt = primparams.size();
+
+				if (primcnt <= param.primid) {
+					primparams.resize(primparams.size() + param.primid + param.primnum);
+				}
+
+				s->getPrimitives(&primparams[param.primid]);
 
 				orderMap.insert(std::pair<transformable*, int>(s, order++));
 			}

@@ -135,7 +135,7 @@ namespace AT_NAME
 			aten::hitrecord& rec,
 			const aten::Intersection& isect) const override final;
 
-		virtual void getPrimitives(std::vector<aten::PrimitiveParamter>& primparams) const override final;
+		virtual void getPrimitives(aten::PrimitiveParamter* primparams) const override final;
 
 		virtual const aten::ShapeParameter& getParam() const override final
 		{

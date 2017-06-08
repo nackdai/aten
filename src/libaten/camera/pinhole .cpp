@@ -114,7 +114,7 @@ namespace AT_NAME {
 		{
 			aten::vec3 dv = hitPoint - posOnLens;
 			const real dist2 = dv.squared_length();
-			dv.normalize();
+			dv = normalize(dv);
 			const real c = dot(hitpointNml, dv);
 
 			pdf = pdf * aten::abs(c / dist2);
@@ -134,7 +134,7 @@ namespace AT_NAME {
 
 		aten::vec3 v = hitPoint - posOnLens;
 		const real dist = v.length();
-		v.normalize();
+		v = normalize(v);
 
 		// imagesensor -> lens
 		const real c0 = dot(v, m_param.dir);

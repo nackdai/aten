@@ -22,7 +22,7 @@ namespace aten
 		dir.z = xz * aten::cos(phi);
 
 		// ”O‚Ì‚½‚ß...
-		dir.normalize();
+		dir = normalize(dir);
 
 		return std::move(dir);
 	}

@@ -31,7 +31,7 @@ namespace AT_NAME
 		aten::sampler* sampler)
 	{
 		auto reflect = wi - 2 * dot(normal, wi) * normal;
-		reflect.normalize();
+		reflect = normalize(reflect);
 
 		return std::move(reflect);
 	}

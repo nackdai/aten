@@ -164,14 +164,14 @@ namespace AT_NAME
 		if (m_param.normalMap.ptr) {
 			newNml = ((aten::texture*)m_param.normalMap.ptr)->at(u, v);
 			newNml = 2 * newNml - aten::vec3(1);
-			newNml.normalize();
+			newNml = normalize(newNml);
 
 			aten::vec3 n = normalize(orgNml);
 			aten::vec3 t = getOrthoVector(n);
 			aten::vec3 b = cross(n, t);
 
 			newNml = newNml.z * n + newNml.x * t + newNml.y * b;
-			newNml.normalize();
+			newNml = normalize(newNml);
 		}
 		else {
 			newNml = normalize(orgNml);

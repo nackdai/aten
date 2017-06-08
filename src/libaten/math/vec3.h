@@ -107,12 +107,6 @@ namespace aten {
 			auto ret = x * x + y * y + z * z;
 			return ret;
 		}
-
-		inline AT_DEVICE_API void normalize()
-		{
-			auto invLen = aten::rsqrt(squared_length());
-			*this *= invLen;
-		}
 	};
 
 	inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)

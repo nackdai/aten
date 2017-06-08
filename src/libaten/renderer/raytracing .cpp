@@ -63,7 +63,7 @@ namespace aten
 						vec3 dirToLight = sampleres.dir;
 						auto len = dirToLight.length();
 
-						dirToLight.normalize();
+						dirToLight = normalize(dirToLight);
 
 						auto lightobj = sampleres.obj;
 

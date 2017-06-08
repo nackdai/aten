@@ -169,7 +169,7 @@ namespace AT_NAME
 		aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
 		
 		aten::vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
-		n.normalize();
+		n = normalize(n);
 
 		// éOäpå`ÇÃñ êœ = ÇQï”ÇÃäOêœÇÃí∑Ç≥ / 2;
 		auto e0 = v1.pos - v0.pos;

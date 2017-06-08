@@ -192,7 +192,7 @@ namespace AT_NAME
 		auto y = aten::sin(phi) * sin_theta;
 
 		aten::vec3 dir = aten::vec3(x, y, z);
-		dir.normalize();
+		dir = normalize(dir);
 
 		auto p = dir * (r + AT_MATH_EPSILON);
 

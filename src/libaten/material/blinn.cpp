@@ -88,7 +88,7 @@ namespace AT_NAME
 		auto b = normalize(cross(n, t));
 
 		auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
-		w.normalize();
+		w = normalize(w);
 
 		auto dir = wi - 2 * dot(wi, w) * w;
 

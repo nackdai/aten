@@ -37,7 +37,7 @@ namespace AT_NAME
 		AT_ASSERT(false);
 
 		auto reflect = wi - 2 * dot(normal, wi) * normal;
-		reflect.normalize();
+		reflect = normalize(reflect);
 
 		return std::move(reflect);
 	}
@@ -120,7 +120,7 @@ namespace AT_NAME
 		bool into = (dot(orgnormal, normal) > real(0));
 
 		auto reflect = wi - 2 * dot(orgnormal, wi) * orgnormal;
-		reflect.normalize();
+		reflect = normalize(reflect);
 
 		real cos_i = dot(wi, normal);
 		real nnt = into ? ni / nt : nt / ni;
@@ -155,7 +155,7 @@ namespace AT_NAME
 		auto invnnt = 1 / nnt;
 		aten::vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
 #endif
-		refract.normalize();
+		refract = normalize(refract);
 
 		const auto r0 = ((nt - ni) * (nt - ni)) / ((nt + ni) * (nt + ni));
 
@@ -248,7 +248,7 @@ namespace AT_NAME
 		bool into = (dot(normal, orienting_normal) > real(0));
 
 		auto reflect = in - 2 * dot(normal, in) * normal;
-		reflect.normalize();
+		reflect = normalize(reflect);
 
 		real cos_i = dot(in, normal);
 		real nnt = into ? ni / nt : nt / ni;
@@ -275,7 +275,7 @@ namespace AT_NAME
 		auto invnnt = 1 / nnt;
 		aten::vec3 refract = nnt * (in - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
 #endif
-		refract.normalize();
+		refract = normalize(refract);
 
 		const auto r0 = ((nt - ni) * (nt - ni)) / ((nt + ni) * (nt + ni));
 

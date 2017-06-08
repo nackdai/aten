@@ -229,7 +229,7 @@ namespace AT_NAME
 			// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
 			// p24 - p26 equation(14)
 			H = N + sqrt(r2 / (1 - r2)) * (ax * aten::cos(2 * AT_MATH_PI * r1) + ay * sin(2 * AT_MATH_PI * r1));
-			H.normalize();
+			H = normalize(H);
 
 			L = 2 * dot(V, H) * H - V;
 

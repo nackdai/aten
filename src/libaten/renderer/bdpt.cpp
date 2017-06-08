@@ -298,7 +298,7 @@ namespace aten
 
 					vec3 dir = ray.org - posOnLens;
 					const real dist2 = dir.squared_length();
-					dir.normalize();
+					dir = normalize(dir);
 
 					const vec3& camnml = camera->getDir();
 

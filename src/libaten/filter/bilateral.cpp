@@ -108,7 +108,7 @@ namespace aten {
 						kernelR(abs(p1.b - p.b), sigmaR));
 
 					numer += kernelS(distW, u, 0) * (wr0 + wr1);
-					denom += kernelS(distW, u, 0) * (wr0 * p0 + wr1 * p1);
+					denom += kernelS(distW, u, 0) * (wr0 * vec3(p0) + wr1 * vec3(p1));
 				}
 
 				// (0, v)
@@ -127,7 +127,7 @@ namespace aten {
 						kernelR(abs(p1.b - p.b), sigmaR));
 
 					numer += kernelS(distW, 0, v) * (wr0 + wr1);
-					denom += kernelS(distW, 0, v) * (wr0 * p0 + wr1 * p1);
+					denom += kernelS(distW, 0, v) * (wr0 * vec3(p0) + wr1 * vec3(p1));
 				}
 
 				for (int v = 1; v <= r; v++) {
@@ -155,7 +155,7 @@ namespace aten {
 							kernelR(abs(p11.b - p.b), sigmaR));
 
 						numer += kernelS(distW, u, v) * (wr00 + wr01 + wr10 + wr11);
-						denom += kernelS(distW, u, v) * (wr00 * p00 + wr01 * p01 + wr10 * p10 + wr11 * p11);
+						denom += kernelS(distW, u, v) * (wr00 * vec3(p00) + wr01 * vec3(p01) + wr10 * vec3(p10) + wr11 * vec3(p11));
 					}
 				}
 

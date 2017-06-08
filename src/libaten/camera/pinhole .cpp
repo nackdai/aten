@@ -133,7 +133,7 @@ namespace AT_NAME {
 		const real W = real(1) / (m_param.width * m_param.height);
 
 		aten::vec3 v = hitPoint - posOnLens;
-		const real dist = v.length();
+		const real dist = length(v);
 		v = normalize(v);
 
 		// imagesensor -> lens
@@ -175,7 +175,7 @@ namespace AT_NAME {
 			auto camsample = sample(u, v, nullptr);
 			posOnLens = camsample.posOnLens;
 
-			real lens_t = (posOnLens - r.org).length();
+			real lens_t = length(posOnLens - r.org);
 
 			return lens_t;
 		}

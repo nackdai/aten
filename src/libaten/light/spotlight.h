@@ -21,7 +21,7 @@ namespace AT_NAME {
 			: Light(aten::LightType::Spot, LightAttributeSingluar)
 		{
 			m_param.pos = pos;
-			m_param.dir = aten::normalize(dir);
+			m_param.dir = normalize(dir);
 			m_param.le = le;
 
 			setAttenuation(constAttn, linearAttn, expAttn);

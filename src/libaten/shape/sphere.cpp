@@ -141,7 +141,7 @@ namespace AT_NAME
 			auto center = mtxL2W.apply(param->center);
 			tmp = mtxL2W.apply(tmp);
 
-			auto radius = (tmp - center).length();
+			auto radius = length(tmp - center);
 
 			rec->area = 4 * AT_MATH_PI * radius * radius;
 		}
@@ -207,7 +207,7 @@ namespace AT_NAME
 			auto center = mtxL2W.apply(param->center);
 			tmp = mtxL2W.apply(tmp);
 
-			auto radius = (tmp - center).length();
+			auto radius = length(tmp - center);
 
 			result->area = 4 * AT_MATH_PI * radius * radius;
 		}

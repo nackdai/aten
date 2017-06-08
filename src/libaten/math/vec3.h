@@ -3,7 +3,10 @@
 #include "defs.h"
 #include "math/math.h"
 
+#include "glm/glm.hpp"
+
 namespace aten {
+#if 0
 	class vec3 {
 	public:
 		union {
@@ -96,12 +99,6 @@ namespace aten {
 			z /= t;
 			return *this;
 		}
-
-		inline AT_DEVICE_API real length() const
-		{
-			auto ret = aten::sqrt(x * x + y * y + z * z);
-			return ret;
-		}
 	};
 
 	inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
@@ -186,6 +183,15 @@ namespace aten {
 		auto ret = v * invLen;
 		return std::move(ret);
 	}
+
+	inline AT_DEVICE_API real length(const vec3& v)
+	{
+		auto ret = aten::sqrt(dot(v, v));
+		return ret;
+	}
+#else
+	using vec3 = glm::vec3;
+#endif
 
 	inline AT_DEVICE_API real squared_length(const vec3& v)
 	{

@@ -13,7 +13,7 @@ namespace AT_NAME {
 			const aten::vec3& le)
 			: Light(aten::LightType::Direction, LightAttributeDirectional)
 		{
-			m_param.dir = aten::normalize(dir);
+			m_param.dir = normalize(dir);
 			m_param.le = le;
 		}
 

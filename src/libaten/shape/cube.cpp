@@ -6,8 +6,8 @@ namespace AT_NAME
 		: transformable(), m_param(center, aten::vec3(w, h, d), mtrl)
 	{
 		m_aabb.init(
-			center - m_param.size * 0.5,
-			center + m_param.size * 0.5);
+			center - m_param.size * real(0.5),
+			center + m_param.size * real(0.5));
 	}
 
 	cube::Face cube::findFace(const aten::vec3& d)
@@ -140,7 +140,7 @@ namespace AT_NAME
 		auto r3 = sampler->nextSample();
 
 		auto c = m_param.center;
-		auto s = m_param.size * 0.5;
+		auto s = m_param.size * real(0.5);
 
 		aten::vec3 leftbottom;
 		aten::vec3 lefttop;

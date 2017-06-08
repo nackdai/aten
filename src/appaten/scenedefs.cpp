@@ -163,7 +163,7 @@ void RandomScene::makeScene(aten::scene* scene)
 				0.2,
 				z + 0.9 * aten::drand48());
 
-			if ((center - aten::vec3(4, 0.2, 0)).length() > 0.9) {
+			if (length(center - aten::vec3(4, 0.2, 0)) > 0.9) {
 				if (choose_mtrl < 0.8) {
 					// lambert
 					s = new aten::sphere(
@@ -430,7 +430,7 @@ void ManyLightScene::makeScene(aten::scene* scene)
 				0.2,
 				z + 0.9 * aten::drand48());
 
-			if ((center - aten::vec3(4, 0.2, 0)).length() > 0.9) {
+			if (length(center - aten::vec3(4, 0.2, 0)) > 0.9) {
 				if (choose_mtrl < 0.8) {
 					// lambert
 					s = new aten::sphere(

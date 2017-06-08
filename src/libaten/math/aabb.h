@@ -143,7 +143,7 @@ namespace aten {
 
 		vec3 getCenter() const
 		{
-			vec3 center = (m_min + m_max) * 0.5;
+			vec3 center = (m_min + m_max) * real(0.5);
 			return std::move(center);
 		}
 

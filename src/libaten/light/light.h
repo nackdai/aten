@@ -96,7 +96,7 @@ namespace AT_NAME
 
 		void setDir(const aten::vec3& dir)
 		{
-			m_param.dir = aten::normalize(dir);
+			m_param.dir = normalize(dir);
 		}
 
 		void setLe(const aten::vec3& le)

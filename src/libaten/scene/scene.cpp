@@ -13,8 +13,8 @@ namespace aten {
 		Intersection isect;
 		bool isHit = this->hit(r, t_min, t_max, rec, isect);
 
-		real distToLight = (lightPos - r.org).length();
-		real distHitObjToRayOrg = (rec.p - r.org).length();
+		real distToLight = length(lightPos - r.org);
+		real distHitObjToRayOrg = length(rec.p - r.org);
 
 		const auto& param = light->param();
 

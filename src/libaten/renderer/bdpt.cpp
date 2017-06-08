@@ -782,7 +782,7 @@ namespace aten
 					}
 					else {
 						// 端点同士が別の物体で遮蔽されるかどうかを判定する。遮蔽されていたら処理終わり.
-						const real len = (eye_end.pos - rec.p).length();
+						const real len = length(eye_end.pos - rec.p);
 						if (len >= AT_MATH_EPSILON) {
 							continue;
 						}

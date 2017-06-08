@@ -61,7 +61,7 @@ namespace aten
 						auto sampleres = light->sample(rec.p, nullptr);
 
 						vec3 dirToLight = sampleres.dir;
-						auto len = dirToLight.length();
+						auto len = length(dirToLight);
 
 						dirToLight = normalize(dirToLight);
 

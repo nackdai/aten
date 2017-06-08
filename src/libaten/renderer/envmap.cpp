@@ -30,7 +30,7 @@ namespace aten
 	vec3 envmap::convertDirectionToUV(const vec3& dir)
 	{
 		auto temp = aten::atan2(dir.x, dir.z);
-		auto r = dir.length();
+		auto r = length(dir);
 
 		// Account for discontinuity
 		auto phi = (real)((temp >= 0) ? temp : (temp + 2 * AT_MATH_PI));

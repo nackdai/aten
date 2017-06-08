@@ -290,7 +290,7 @@ namespace AT_NAME
 			auto p0 = mtxL2W.apply(v0.pos);
 			auto p1 = mtxL2W.apply(v1.pos);
 
-			scaledLen = (p1 - p0).length();
+			scaledLen = length(p1 - p0);
 		}
 
 		real ratio = scaledLen / orignalLen;
@@ -331,7 +331,7 @@ namespace AT_NAME
 			auto p0 = mtxL2W.apply(v0.pos);
 			auto p1 = mtxL2W.apply(v1.pos);
 
-			scaledLen = (p1 - p0).length();
+			scaledLen = length(p1 - p0);
 		}
 
 		real ratio = scaledLen / orignalLen;

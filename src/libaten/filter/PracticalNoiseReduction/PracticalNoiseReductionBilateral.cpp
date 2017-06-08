@@ -136,7 +136,7 @@ namespace aten {
 					const real dd1 = kernelD(d1.w - dc, sigmaD);
 
 					numer += kernelS(distW, u, 0) * (wr0 * dd0 + wr1 * dd1);
-					auto d = kernelS(distW, u, 0) * (wr0 * p0 * dd0 + wr1 * p1 * dd1);
+					auto d = kernelS(distW, u, 0) * (wr0 * vec3(p0) * dd0 + wr1 * vec3(p1) * dd1);
 					denom += d;
 					denom2 += d * d;
 				}
@@ -163,7 +163,7 @@ namespace aten {
 					const real dd1 = kernelD(d1.w - dc, sigmaD);
 
 					numer += kernelS(distW, 0, v) * (wr0 * dd0 + wr1 * dd1);
-					auto d = kernelS(distW, 0, v) * (wr0 * p0 * dd0 + wr1 * p1 * dd1);
+					auto d = kernelS(distW, 0, v) * (wr0 * vec3(p0) * dd0 + wr1 * vec3(p1) * dd1);
 					denom += d;
 					denom2 += d * d;
 				}
@@ -203,7 +203,7 @@ namespace aten {
 						const real dd11 = kernelD(d11.w - dc, sigmaD);
 
 						numer += kernelS(distW, u, v) * (wr00 * dd00 + wr01 * dd01 + wr10 * dd10 + wr11 * dd11);
-						auto d = kernelS(distW, u, v) * (wr00 * p00 * dd00 + wr01 * p01 * dd01 + wr10 * p10 * dd10 + wr11 * p11 * dd11);
+						auto d = kernelS(distW, u, v) * (wr00 * vec3(p00) * dd00 + wr01 * vec3(p01) * dd01 + wr10 * vec3(p10) * dd10 + wr11 * vec3(p11) * dd11);
 						denom += d;
 						denom2 += d * d;
 					}

@@ -23,7 +23,7 @@ namespace AT_NAME {
 				r = aten::ray(org, dir);
 
 				if (result.primid >= 0) {
-					isect.t = dir.length();
+					isect.t = length(dir);
 
 					isect.primid = result.primid;
 

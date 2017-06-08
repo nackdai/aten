@@ -143,7 +143,7 @@ namespace aten
 				if (dst.geominfo.nml_depth) {
 					if (dst.geominfo.needNormalize) {
 						// [-1, 1] -> [0, 1]
-						auto normal = (path.normal + 1) * 0.5;
+						auto normal = (path.normal + real(1)) * real(0.5);
 
 						// [-‡, ‡] -> [-d, d]
 						real depth = std::min(aten::abs(path.depth), dst.geominfo.depthMax);

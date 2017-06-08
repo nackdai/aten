@@ -149,7 +149,7 @@ namespace aten {
 		if (AT_MATH_EPSILON < lens_t)
 		{
 			posOnLens = r.org + lens_t * r.dir;
-			auto l = (posOnLens - m_lens.center).length();
+			auto l = length(posOnLens - m_lens.center);
 			auto d = dot(m_lens.normal, r.dir);
 
 			if (l < m_lens.radius && d <= 0.0)
@@ -158,8 +158,8 @@ namespace aten {
 
 				posOnObjectPlane = r.org + objplane_t * r.dir;
 
-				auto u_on_objectplane = dot(posOnObjectPlane - m_objectplane.center, normalize(m_objectplane.u)) / m_objectplane.u.length();
-				auto v_on_objectplane = dot(posOnObjectPlane - m_objectplane.center, normalize(m_objectplane.v)) / m_objectplane.v.length();
+				auto u_on_objectplane = dot(posOnObjectPlane - m_objectplane.center, normalize(m_objectplane.u)) / length(m_objectplane.u);
+				auto v_on_objectplane = dot(posOnObjectPlane - m_objectplane.center, normalize(m_objectplane.v)) / length(m_objectplane.v);
 
 				auto ratio = m_imageSensorToLensDistance / m_lensToObjectplaneDistance;
 				auto u = -ratio * u_on_objectplane;

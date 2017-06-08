@@ -322,8 +322,8 @@ namespace AT_NAME
 		const auto Cdlum = real(0.3) * Cdlin[0] + real(0.6) * Cdlin[1] + real(0.1) * Cdlin[2]; // luminance approx.
 
 		const aten::vec3 Ctint = Cdlum > 0 ? Cdlin / Cdlum : aten::vec3(real(1)); // normalize lum. to isolate hue+sat
-		const aten::vec3 Cspec0 = mix(specular* real(0.08) * mix(aten::vec3(real(1)), Ctint, specularTint), Cdlin, metalic);
-		const aten::vec3 Csheen = mix(aten::vec3(1), Ctint, sheenTint);
+		const aten::vec3 Cspec0 = mix<aten::vec3>(specular* real(0.08) * mix<aten::vec3>(aten::vec3(real(1)), Ctint, specularTint), Cdlin, metalic);
+		const aten::vec3 Csheen = mix<aten::vec3>(aten::vec3(1), Ctint, sheenTint);
 
 		// Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
 		// and mix in diffuse retro-reflection based on roughness

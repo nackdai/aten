@@ -103,7 +103,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>

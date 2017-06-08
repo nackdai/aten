@@ -45,13 +45,13 @@ __device__ void getTriangleSamplePosNormalArea(
 
 	aten::PrimitiveParamter* prim = &ctxt->prims[primidx];
 
-	float4 _p0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 0);
-	float4 _p1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 0);
-	float4 _p2 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[2] + 0);
+	float4 _p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[0]);
+	float4 _p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);
+	float4 _p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
 
-	float4 _n0 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[0] + 1);
-	float4 _n1 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[1] + 1);
-	float4 _n2 = tex1Dfetch<float4>(ctxt->vertices, 4 * prim->idx[2] + 1);
+	float4 _n0 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[0]);
+	float4 _n1 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[1]);
+	float4 _n2 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[2]);
 
 	aten::vec3 p0 = aten::make_float3(_p0.x, _p0.y, _p0.z);
 	aten::vec3 p1 = aten::make_float3(_p1.x, _p1.y, _p1.z);

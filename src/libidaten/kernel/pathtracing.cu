@@ -107,7 +107,7 @@ __global__ void hitTest(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices,
+	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -137,7 +137,7 @@ __global__ void hitTest(
 		ctxt.lights = lights;
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
-		ctxt.vertices = vertices;
+		ctxt.vtxPos = vtxPos;
 		ctxt.matrices = matrices;
 	}
 
@@ -198,7 +198,8 @@ __global__ void shade(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices,
+	cudaTextureObject_t vtxPos,
+	cudaTextureObject_t vtxNml,
 	aten::mat4* matrices)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -216,7 +217,8 @@ __global__ void shade(
 		ctxt.lights = lights;
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
-		ctxt.vertices = vertices;
+		ctxt.vtxPos = vtxPos;
+		ctxt.vtxNml = vtxNml;
 		ctxt.matrices = matrices;
 	}
 
@@ -407,7 +409,7 @@ __global__ void hitShadowRay(
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	aten::PrimitiveParamter* prims,
-	cudaTextureObject_t vertices,
+	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -425,7 +427,7 @@ __global__ void hitShadowRay(
 		ctxt.lights = lights;
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
-		ctxt.vertices = vertices;
+		ctxt.vtxPos = vtxPos;
 		ctxt.matrices = matrices;
 	}
 
@@ -603,7 +605,8 @@ namespace idaten {
 		CudaGLResourceMap rscmap(&glimg);
 		auto outputSurf = glimg.bind();
 
-		auto vtxTex = vtxparams.bind();
+		auto vtxTexPos = vtxparamsPos.bind();
+		auto vtxTexNml = vtxparamsNml.bind();
 
 		std::vector<cudaTextureObject_t> tmp;
 		for (int i = 0; i < nodeparam.size(); i++) {
@@ -644,7 +647,7 @@ namespace idaten {
 					lightparam.ptr(), lightparam.num(),
 					nodetex.ptr(),
 					primparams.ptr(),
-					vtxTex,
+					vtxTexPos,
 					mtxparams.ptr());
 
 				checkCudaKernel(hitTest);
@@ -682,7 +685,7 @@ namespace idaten {
 					lightparam.ptr(), lightparam.num(),
 					nodetex.ptr(),
 					primparams.ptr(),
-					vtxTex,
+					vtxTexPos, vtxTexNml,
 					mtxparams.ptr());
 
 				checkCudaKernel(shade);
@@ -697,7 +700,7 @@ namespace idaten {
 					lightparam.ptr(), lightparam.num(),
 					nodetex.ptr(),
 					primparams.ptr(),
-					vtxTex,
+					vtxTexPos,
 					mtxparams.ptr());
 
 				checkCudaKernel(hitShadowRay);
@@ -714,7 +717,8 @@ namespace idaten {
 			width, height,
 			maxSamples);
 
-		vtxparams.unbind();
+		vtxparamsPos.unbind();
+		vtxparamsNml .unbind();
 		for (int i = 0; i < nodeparam.size(); i++) {
 			nodeparam[i].unbind();
 		}

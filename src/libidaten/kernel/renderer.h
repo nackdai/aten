@@ -42,7 +42,8 @@ namespace idaten
 		idaten::TypedCudaMemory<cudaTextureObject_t> nodetex;
 
 		idaten::CudaGLSurface glimg;
-		idaten::CudaTextureResource vtxparams;
+		idaten::CudaTextureResource vtxparamsPos;
+		idaten::CudaTextureResource vtxparamsNml;
 		std::vector<idaten::CudaTextureResource> nodeparam;
 	};
 }

@@ -14,7 +14,9 @@ struct Context {
 	cudaTextureObject_t* nodes;
 
 	aten::PrimitiveParamter* prims;
-	cudaTextureObject_t vertices;
+
+	cudaTextureObject_t vtxPos;
+	cudaTextureObject_t vtxNml;
 
 	aten::mat4* matrices;
 };

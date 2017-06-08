@@ -58,7 +58,17 @@ namespace idaten {
 		nodetex.init(nodes.size());
 
 		if (!vtxs.empty()) {
-			vtxparams.init((aten::vec4*)&vtxs[0], sizeof(aten::vertex) / sizeof(float4), vtxs.size());
+			// TODO
+			std::vector<aten::vec4> pos;
+			std::vector<aten::vec4> nml;
+
+			for (const auto& v : vtxs) {
+				pos.push_back(aten::vec4(v.pos.x, v.pos.y, v.pos.z, v.uv.x));
+				nml.push_back(aten::vec4(v.nml.x, v.nml.y, v.nml.z, v.uv.y));
+			}
+
+			vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size());
+			vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size());
 		}
 	}
 }

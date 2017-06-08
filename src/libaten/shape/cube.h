@@ -16,7 +16,7 @@ namespace AT_NAME
 	public:
 		cube(const aten::vec3& center, real w, real h, real d, material* mtrl);
 		cube(real w, real h, real d, material* m)
-			: cube(aten::make_float3(0), w, h, d, m)
+			: cube(aten::vec3(0), w, h, d, m)
 		{}
 
 		virtual ~cube() {}

@@ -208,7 +208,7 @@ namespace AT_NAME
 			G = aten::cmpMin((real)1, aten::cmpMin(G1, G2));
 		}
 
-		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : aten::make_float3(0);
+		auto bsdf = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : aten::vec3(0);
 
 		fresnel = F;
 

@@ -126,12 +126,12 @@ namespace AT_NAME
 		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
 		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
-		aten::vec3 vmax = aten::make_float3(
+		aten::vec3 vmax = aten::vec3(
 			std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
 			std::max(v0.pos.y, std::max(v1.pos.y, v2.pos.y)),
 			std::max(v0.pos.z, std::max(v1.pos.z, v2.pos.z)));
 
-		aten::vec3 vmin = aten::make_float3(
+		aten::vec3 vmin = aten::vec3(
 			std::min(v0.pos.x, std::min(v1.pos.x, v2.pos.x)),
 			std::min(v0.pos.y, std::min(v1.pos.y, v2.pos.y)),
 			std::min(v0.pos.z, std::min(v1.pos.z, v2.pos.z)));

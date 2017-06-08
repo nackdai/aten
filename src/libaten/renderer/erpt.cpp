@@ -177,7 +177,7 @@ namespace aten
 
 		auto threadNum = thread::getThreadNum();
 
-		vec3 sumI = make_float3(0, 0, 0);
+		vec3 sumI = vec3(0, 0, 0);
 
 		auto time = timer::getSystemTime();
 

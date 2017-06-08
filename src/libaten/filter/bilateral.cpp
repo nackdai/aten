@@ -89,8 +89,8 @@ namespace aten {
 				// íÜêSì_.
 				const auto& p = srcSampler(x, y);
 
-				vec3 numer = make_float3(1.0f, 1.0f, 1.0f);
-				vec3 denom = make_float3(p.x, p.y, p.z);
+				vec3 numer = vec3(1.0f, 1.0f, 1.0f);
+				vec3 denom = vec3(p.x, p.y, p.z);
 
 				// (u, 0)
 				// â°ï˚å¸.
@@ -98,11 +98,11 @@ namespace aten {
 					const auto& p0 = srcSampler(x - u, y);
 					const auto& p1 = srcSampler(x + u, y);
 
-					vec3 wr0 = make_float3(
+					vec3 wr0 = vec3(
 						kernelR(abs(p0.r - p.r), sigmaR),
 						kernelR(abs(p0.g - p.g), sigmaR),
 						kernelR(abs(p0.b - p.b), sigmaR));
-					vec3 wr1 = make_float3(
+					vec3 wr1 = vec3(
 						kernelR(abs(p1.r - p.r), sigmaR),
 						kernelR(abs(p1.g - p.g), sigmaR),
 						kernelR(abs(p1.b - p.b), sigmaR));
@@ -117,11 +117,11 @@ namespace aten {
 					const auto& p0 = srcSampler(x, y - v);
 					const auto& p1 = srcSampler(x, y + v);
 
-					vec3 wr0 = make_float3(
+					vec3 wr0 = vec3(
 						kernelR(abs(p0.r - p.r), sigmaR),
 						kernelR(abs(p0.g - p.g), sigmaR),
 						kernelR(abs(p0.b - p.b), sigmaR));
-					vec3 wr1 = make_float3(
+					vec3 wr1 = vec3(
 						kernelR(abs(p1.r - p.r), sigmaR),
 						kernelR(abs(p1.g - p.g), sigmaR),
 						kernelR(abs(p1.b - p.b), sigmaR));
@@ -137,19 +137,19 @@ namespace aten {
 						const auto& p10 = srcSampler(x + u, y - v);
 						const auto& p11 = srcSampler(x + u, y + v);
 
-						vec3 wr00 = make_float3(
+						vec3 wr00 = vec3(
 							kernelR(abs(p00.r - p.r), sigmaR),
 							kernelR(abs(p00.g - p.g), sigmaR),
 							kernelR(abs(p00.b - p.b), sigmaR));
-						vec3 wr01 = make_float3(
+						vec3 wr01 = vec3(
 							kernelR(abs(p01.r - p.r), sigmaR),
 							kernelR(abs(p01.g - p.g), sigmaR),
 							kernelR(abs(p01.b - p.b), sigmaR));
-						vec3 wr10 = make_float3(
+						vec3 wr10 = vec3(
 							kernelR(abs(p10.r - p.r), sigmaR),
 							kernelR(abs(p10.g - p.g), sigmaR),
 							kernelR(abs(p10.b - p.b), sigmaR));
-						vec3 wr11 = make_float3(
+						vec3 wr11 = vec3(
 							kernelR(abs(p11.r - p.r), sigmaR),
 							kernelR(abs(p11.g - p.g), sigmaR),
 							kernelR(abs(p11.b - p.b), sigmaR));

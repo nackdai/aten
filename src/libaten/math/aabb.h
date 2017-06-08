@@ -170,12 +170,12 @@ namespace aten {
 
 		static aabb merge(const aabb& box0, const aabb& box1)
 		{
-			vec3 _min = aten::make_float3(
+			vec3 _min = aten::vec3(
 				std::min(box0.m_min.x, box1.m_min.x),
 				std::min(box0.m_min.y, box1.m_min.y),
 				std::min(box0.m_min.z, box1.m_min.z));
 
-			vec3 _max = aten::make_float3(
+			vec3 _max = aten::vec3(
 				std::max(box0.m_max.x, box1.m_max.x),
 				std::max(box0.m_max.y, box1.m_max.y),
 				std::max(box0.m_max.z, box1.m_max.z));
@@ -193,27 +193,27 @@ namespace aten {
 			vec3 vMax = box.maxPos() - center;
 
 			vec3 pts[8] = {
-				make_float3(vMin.x, vMin.y, vMin.z),
-				make_float3(vMax.x, vMin.y, vMin.z),
-				make_float3(vMin.x, vMax.y, vMin.z),
-				make_float3(vMax.x, vMax.y, vMin.z),
-				make_float3(vMin.x, vMin.y, vMax.z),
-				make_float3(vMax.x, vMin.y, vMax.z),
-				make_float3(vMin.x, vMax.y, vMax.z),
-				make_float3(vMax.x, vMax.y, vMax.z),
+				vec3(vMin.x, vMin.y, vMin.z),
+				vec3(vMax.x, vMin.y, vMin.z),
+				vec3(vMin.x, vMax.y, vMin.z),
+				vec3(vMax.x, vMax.y, vMin.z),
+				vec3(vMin.x, vMin.y, vMax.z),
+				vec3(vMax.x, vMin.y, vMax.z),
+				vec3(vMin.x, vMax.y, vMax.z),
+				vec3(vMax.x, vMax.y, vMax.z),
 			};
 
-			vec3 newMin = make_float3(AT_MATH_INF);
-			vec3 newMax = make_float3(-AT_MATH_INF);
+			vec3 newMin = vec3(AT_MATH_INF);
+			vec3 newMax = vec3(-AT_MATH_INF);
 
 			for (int i = 0; i < 8; i++) {
 				vec3 v = mtxL2W.apply(pts[i]);
 
-				newMin = make_float3(
+				newMin = vec3(
 					std::min(newMin.x, v.x),
 					std::min(newMin.y, v.y),
 					std::min(newMin.z, v.z));
-				newMax = make_float3(
+				newMax = vec3(
 					std::max(newMax.x, v.x),
 					std::max(newMax.y, v.y),
 					std::max(newMax.z, v.z));

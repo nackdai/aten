@@ -40,7 +40,7 @@ namespace aten
 		real u = phi / (2 * AT_MATH_PI);
 		real v = 1 - theta / AT_MATH_PI;
 
-		vec3 uv = make_float3(u, v, 0);
+		vec3 uv = vec3(u, v, 0);
 
 		return std::move(uv);
 	}

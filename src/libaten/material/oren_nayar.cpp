@@ -48,10 +48,10 @@ namespace AT_NAME {
 
 		// n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
 		if (fabs(n.x) > AT_MATH_EPSILON) {
-			t = normalize(cross(aten::make_float3(0.0, 1.0, 0.0), n));
+			t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
 		}
 		else {
-			t = normalize(cross(aten::make_float3(1.0, 0.0, 0.0), n));
+			t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
 		}
 		b = cross(n, t);
 
@@ -90,7 +90,7 @@ namespace AT_NAME {
 		// A tiny improvement of Oren-Nayar reflectance model
 		// http://mimosa-pudica.net/improved-oren-nayar.html
 
-		aten::vec3 bsdf = aten::make_float3(0);
+		aten::vec3 bsdf = aten::vec3(0);
 
 		const auto NL = dot(normal, wo);
 		const auto NV = dot(normal, -wi);

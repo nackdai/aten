@@ -136,7 +136,7 @@ namespace AT_NAME
 		rec->mtrlid = isect->mtrlid;
 
 		{
-			auto tmp = param->center + aten::make_float3(param->radius, 0, 0);
+			auto tmp = param->center + aten::vec3(param->radius, 0, 0);
 
 			auto center = mtxL2W.apply(param->center);
 			tmp = mtxL2W.apply(tmp);
@@ -191,7 +191,7 @@ namespace AT_NAME
 		auto x = aten::cos(phi) * sin_theta;
 		auto y = aten::sin(phi) * sin_theta;
 
-		aten::vec3 dir = aten::make_float3(x, y, z);
+		aten::vec3 dir = aten::vec3(x, y, z);
 		dir.normalize();
 
 		auto p = dir * (r + AT_MATH_EPSILON);
@@ -202,7 +202,7 @@ namespace AT_NAME
 
 		result->area = real(1);
 		{
-			auto tmp = param->center + aten::make_float3(param->radius, 0, 0);
+			auto tmp = param->center + aten::vec3(param->radius, 0, 0);
 
 			auto center = mtxL2W.apply(param->center);
 			tmp = mtxL2W.apply(tmp);

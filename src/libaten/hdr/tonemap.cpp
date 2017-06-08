@@ -39,7 +39,7 @@ namespace aten
 
 					const vec3& s = src[pos];
 
-					vec3 col = make_float3(
+					vec3 col = vec3(
 						aten::sqrt(s.r),
 						aten::sqrt(s.g),
 						aten::sqrt(s.b));
@@ -112,7 +112,7 @@ namespace aten
 				const vec3& s = src[pos];
 				auto& d = dst[pos];
 
-				vec3 col = make_float3(
+				vec3 col = vec3(
 					aten::sqrt(s.r),
 					aten::sqrt(s.g),
 					aten::sqrt(s.b));

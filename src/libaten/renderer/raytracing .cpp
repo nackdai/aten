@@ -12,8 +12,8 @@ namespace aten
 
 		aten::ray ray = inRay;
 
-		vec3 contribution = make_float3(0, 0, 0);
-		vec3 throughput = make_float3(1, 1, 1);
+		vec3 contribution = vec3(0, 0, 0);
+		vec3 throughput = vec3(1, 1, 1);
 
 		while (depth < m_maxDepth) {
 			hitrecord rec;

@@ -3,7 +3,7 @@
 namespace AT_NAME
 {
 	cube::cube(const aten::vec3& center, real w, real h, real d, material* mtrl)
-		: transformable(), m_param(center, aten::make_float3(w, h, d), mtrl)
+		: transformable(), m_param(center, aten::vec3(w, h, d), mtrl)
 	{
 		m_aabb.init(
 			center - m_param.size * 0.5,
@@ -93,22 +93,22 @@ namespace AT_NAME
 
 		switch (face) {
 		case POS_X:
-			rec.normal = aten::make_float3(1, 0, 0);
+			rec.normal = aten::vec3(1, 0, 0);
 			break;
 		case NEG_X:
-			rec.normal = aten::make_float3(-1, 0, 0);
+			rec.normal = aten::vec3(-1, 0, 0);
 			break;
 		case POS_Y:
-			rec.normal = aten::make_float3(0, 1, 0);
+			rec.normal = aten::vec3(0, 1, 0);
 			break;
 		case NEG_Y:
-			rec.normal = aten::make_float3(0, -1, 0);
+			rec.normal = aten::vec3(0, -1, 0);
 			break;
 		case POS_Z:
-			rec.normal = aten::make_float3(0, 0, 1);
+			rec.normal = aten::vec3(0, 0, 1);
 			break;
 		case NEG_Z:
-			rec.normal = aten::make_float3(0, 0, -1);
+			rec.normal = aten::vec3(0, 0, -1);
 			break;
 		}
 
@@ -148,34 +148,34 @@ namespace AT_NAME
 
 		switch (face) {
 		case POS_X:
-			leftbottom = c + aten::make_float3(s.x, -s.y, s.z);
-			lefttop = leftbottom + aten::make_float3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + aten::make_float3(0, 0, -2 * s.z);
+			leftbottom = c + aten::vec3(s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(0, 0, -2 * s.z);
 			break;
 		case NEG_X:
-			leftbottom = c + aten::make_float3(-s.x, -s.y, s.z);
-			lefttop = leftbottom + aten::make_float3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + aten::make_float3(0, 0, -2 * s.z);
+			leftbottom = c + aten::vec3(-s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(0, 0, -2 * s.z);
 			break;
 		case POS_Y:
-			leftbottom = c + aten::make_float3(-s.x, s.y, s.z);
-			lefttop = leftbottom + aten::make_float3(0, 0, -2 * s.z);
-			rightbottom = leftbottom + aten::make_float3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(-s.x, s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 0, -2 * s.z);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		case NEG_Y:
-			leftbottom = c + aten::make_float3(-s.x, -s.y, s.z);
-			lefttop = leftbottom + aten::make_float3(0, 0, -2 * s.z);
-			rightbottom = leftbottom + aten::make_float3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(-s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 0, -2 * s.z);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		case POS_Z:
-			leftbottom = c + aten::make_float3(s.x, -s.y, s.z);
-			lefttop = leftbottom + aten::make_float3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + aten::make_float3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(s.x, -s.y, s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		case NEG_Z:
-			leftbottom = c + aten::make_float3(s.x, -s.y, -s.z);
-			lefttop = leftbottom + aten::make_float3(0, 2 * s.y, 0);
-			rightbottom = leftbottom + aten::make_float3(2 * s.x, 0, 0);
+			leftbottom = c + aten::vec3(s.x, -s.y, -s.z);
+			lefttop = leftbottom + aten::vec3(0, 2 * s.y, 0);
+			rightbottom = leftbottom + aten::vec3(2 * s.x, 0, 0);
 			break;
 		}
 
@@ -209,22 +209,22 @@ namespace AT_NAME
 		aten::vec3 nml;
 		switch (face) {
 		case POS_X:
-			nml = aten::make_float3(1, 0, 0);
+			nml = aten::vec3(1, 0, 0);
 			break;
 		case NEG_X:
-			nml = aten::make_float3(-1, 0, 0);
+			nml = aten::vec3(-1, 0, 0);
 			break;
 		case POS_Y:
-			nml = aten::make_float3(0, 1, 0);
+			nml = aten::vec3(0, 1, 0);
 			break;
 		case NEG_Y:
-			nml = aten::make_float3(0, -1, 0);
+			nml = aten::vec3(0, -1, 0);
 			break;
 		case POS_Z:
-			nml = aten::make_float3(0, 0, 1);
+			nml = aten::vec3(0, 0, 1);
 			break;
 		case NEG_Z:
-			nml = aten::make_float3(0, 0, -1);
+			nml = aten::vec3(0, 0, -1);
 			break;
 		}
 

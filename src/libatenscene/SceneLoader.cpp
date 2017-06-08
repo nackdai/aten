@@ -280,13 +280,13 @@ namespace aten
 			mtxS.asScale(val.get("scale", real(1)));
 
 			mat4 mtxRotX, mtxRotY, mtxRotZ;
-			auto rotate = val.get("rotate", make_float3(0));
+			auto rotate = val.get("rotate", vec3(0));
 			mtxRotX.asRotateByX(rotate.x);
 			mtxRotY.asRotateByY(rotate.x);
 			mtxRotZ.asRotateByZ(rotate.x);
 
 			mat4 mtxT;
-			mtxT.asTrans(val.get("trans", make_float3(0)));
+			mtxT.asTrans(val.get("trans", vec3(0)));
 
 			auto mtxL2W = mtxT * mtxRotX * mtxRotY * mtxRotZ * mtxS;
 
@@ -297,7 +297,7 @@ namespace aten
 			else {
 				if (type == "cube") {
 					auto cube = new aten::cube(
-						val.get("center", make_float3(0)),
+						val.get("center", vec3(0)),
 						val.get("width", real(1)),
 						val.get("height", real(1)),
 						val.get("depth", real(1)),
@@ -306,7 +306,7 @@ namespace aten
 				}
 				else if (type == "sphere") {
 					auto sphere = new aten::sphere(
-						val.get("center", make_float3(0)),
+						val.get("center", vec3(0)),
 						val.get("radius", real(1)),
 						mtrl);
 					objs.insert(std::pair<std::string, transformable*>(tag, sphere));
@@ -460,9 +460,9 @@ namespace aten
 		if (type == "pinhole") {
 			auto pinhole = new PinholeCamera();
 			pinhole->init(
-				val.get("org", make_float3(0)),
-				val.get("at", make_float3(0, 0, -1)),
-				val.get("up", make_float3(0, 1, 0)),
+				val.get("org", vec3(0)),
+				val.get("at", vec3(0, 0, -1)),
+				val.get("up", vec3(0, 1, 0)),
 				val.get("vfov", real(30)),
 				width, height);
 			cam = pinhole;
@@ -471,9 +471,9 @@ namespace aten
 			auto thinlens = new ThinLensCamera();
 			thinlens->init(
 				width, height,
-				val.get("org", make_float3(0)),
-				val.get("at", make_float3(0, 0, -1)),
-				val.get("up", make_float3(0, 1, 0)),
+				val.get("org", vec3(0)),
+				val.get("at", vec3(0, 0, -1)),
+				val.get("up", vec3(0, 1, 0)),
 				val.get("sensorsize", real(30.0)),
 				val.get("dist_sensor_lens", real(40.0)),
 				val.get("dist_lens_focus", real(130.0)),
@@ -484,9 +484,9 @@ namespace aten
 		else if (type == "equirect") {
 			auto equirect = new EquirectCamera();
 			equirect->init(
-				val.get("org", make_float3(0)),
-				val.get("at", make_float3(0, 0, -1)),
-				val.get("up", make_float3(0, 1, 0)),
+				val.get("org", vec3(0)),
+				val.get("at", vec3(0, 0, -1)),
+				val.get("up", vec3(0, 1, 0)),
 				width, height);
 			cam = equirect;
 		}

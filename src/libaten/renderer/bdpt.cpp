@@ -68,8 +68,8 @@ namespace aten
 			camsample.nmlOnLens,
 			ObjectType::Lens,
 			camsample.pdfOnLens,
-			make_float3(1),
-			make_float3(0),
+			vec3(1),
+			vec3(0),
 			nullptr,
 			nullptr,
 			0, 0));
@@ -78,7 +78,7 @@ namespace aten
 
 		ray ray = camsample.r;
 
-		vec3 throughput = make_float3(1);
+		vec3 throughput = vec3(1);
 		real totalAreaPdf = camsample.pdfOnLens;
 
 		vec3 prevNormal = camera->getDir();
@@ -248,7 +248,7 @@ namespace aten
 			nmlOnLight,
 			ObjectType::Light,
 			totalAreaPdf,
-			make_float3(real(0)),
+			vec3(real(0)),
 			light->getLe(),
 			light));
 
@@ -327,14 +327,14 @@ namespace aten
 						ObjectType::Lens,
 						totalAreaPdf,
 						throughput,
-						make_float3(real(0)),
+						vec3(real(0)),
 						nullptr,
 						nullptr,
 						real(0), real(0)));
 
 					const real W_dash = camera->getWdash(
 						ray.org,
-						make_float3(real(0), real(1), real(0)),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
+						vec3(real(0), real(1), real(0)),	// pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
 						posOnImageSensor,
 						posOnLens,
 						posOnObjectPlane);
@@ -402,7 +402,7 @@ namespace aten
 				sampledBsdf /= costerm;
 			}
 			else if (mtrl->isEmissive()) {
-				sampledBsdf = make_float3(real(0));
+				sampledBsdf = vec3(real(0));
 			}
 
 			// 新しい頂点を頂点リストに追加する.
@@ -711,7 +711,7 @@ namespace aten
 				vec3 lightThroughput = light_end.throughput;
 
 				// 頂点を接続することで新しく導入される項.
-				vec3 throughput = make_float3(1);
+				vec3 throughput = vec3(1);
 
 				// numLightVtx == 1のとき、非完全拡散光源の場合は相手の頂点の位置次第でMCスループットが変化するため改めて光源からの放射輝度値を計算する.
 				if (numLightVtx == 1) {

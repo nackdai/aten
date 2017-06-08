@@ -74,7 +74,7 @@ namespace aten
 			}
 
 			if (depth < m_startDepth && !path.isTerminate) {
-				path.contrib = make_float3(0);
+				path.contrib = vec3(0);
 			}
 
 			if (!willContinue) {
@@ -430,8 +430,8 @@ namespace aten
 				for (int x = 0; x < width; x++) {
 					int pos = y * width + x;
 
-					vec3 col = make_float3(0);
-					vec3 col2 = make_float3(0);
+					vec3 col = vec3(0);
+					vec3 col2 = vec3(0);
 					uint32_t cnt = 0;
 
 #ifdef RELEASE_DEBUG

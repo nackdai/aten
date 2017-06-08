@@ -44,8 +44,8 @@ namespace aten
 
 			Path()
 			{
-				contrib = make_float3(0);
-				throughput = make_float3(1);
+				contrib = vec3(0);
+				throughput = vec3(1);
 			}
 		};
 

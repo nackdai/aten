@@ -13,7 +13,7 @@ namespace aten
 		const auto maxDepth = m_maxDepth;
 		uint32_t depth = 0;
 
-		vec3 throughput = make_float3(1);
+		vec3 throughput = vec3(1);
 
 		Path path;
 

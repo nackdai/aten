@@ -79,7 +79,7 @@ namespace aten {
 			vec3 dirToLight = normalize(lightsample.dir);
 
 			auto cosShadow = dot(nml, dirToLight);
-			auto dist2 = lightsample.dir.squared_length();
+			auto dist2 = squared_length(lightsample.dir);
 			auto dist = aten::sqrt(dist2);
 
 			auto illum = color::luminance(lightsample.finalColor);

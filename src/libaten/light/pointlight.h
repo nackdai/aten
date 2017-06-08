@@ -63,7 +63,7 @@ namespace AT_NAME {
 			result->dir = param->pos - org;
 			result->nml = aten::vec3();	// Not used...
 
-			auto dist2 = result->dir.squared_length();
+			auto dist2 = squared_length(result->dir);
 			auto dist = aten::sqrt(dist2);
 
 			// Œ¸Š—¦.

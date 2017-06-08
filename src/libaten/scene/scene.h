@@ -149,7 +149,7 @@ namespace AT_NAME {
 #if 0
 					hitrecord tmpRec;
 					if (lightobj->hit(r, t_min, t_max, tmpRec)) {
-						auto dist2 = (tmpRec.p - r.org).squared_length();
+						auto dist2 = squared_length(tmpRec.p - r.org);
 
 						if (rec->obj == tmpRec.obj
 							&& aten::abs(dist2 - rec->t * rec->t) < AT_MATH_EPSILON)

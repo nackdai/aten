@@ -137,7 +137,7 @@ namespace aten
 			else {
 				// 新しい頂点をサンプリングするための確率密度関数は立体角測度に関するものであったため、これを面積速度に関する確率密度関数に変換する.
 				const real c = dot(normalize(toNextVtx), orienting_normal);
-				const real dist2 = toNextVtx.squared_length();
+				const real dist2 = squared_length(toNextVtx);
 				const real areaPdf = sampledPdf * (c / dist2);
 
 				totalAreaPdf *= areaPdf;
@@ -150,7 +150,7 @@ namespace aten
 				// ジオメトリターム.
 				const real c0 = dot(normalize(toNextVtx), orienting_normal);
 				const real c1 = dot(normalize(-toNextVtx), prevNormal);
-				const real dist2 = toNextVtx.squared_length();
+				const real dist2 = squared_length(toNextVtx);
 				const real G = c0 * c1 / dist2;
 				throughput = G * throughput;
 			}
@@ -297,7 +297,7 @@ namespace aten
 					pixely = aten::clamp(pixely, 0, m_height - 1);
 
 					vec3 dir = ray.org - posOnLens;
-					const real dist2 = dir.squared_length();
+					const real dist2 = squared_length(dir);
 					dir = normalize(dir);
 
 					const vec3& camnml = camera->getDir();
@@ -371,7 +371,7 @@ namespace aten
 			{
 				// 新しい頂点をサンプリングするための確率密度関数は立体角測度に関するものであったため、これを面積測度に関する確率密度関数に変換する.
 				const real c = dot(normalize(toNextVtx), orienting_normal);
-				const real dist2 = toNextVtx.squared_length();
+				const real dist2 = squared_length(toNextVtx);
 				const real areaPdf = sampledPdf * (c / dist2);
 
 				// 全ての頂点をサンプリングする確率密度の総計を出す。
@@ -382,7 +382,7 @@ namespace aten
 				// ジオメトリターム.
 				const real c0 = dot(normalize(toNextVtx), orienting_normal);
 				const real c1 = dot(normalize(-toNextVtx), prevNormal);
-				const real dist2 = toNextVtx.squared_length();
+				const real dist2 = squared_length(toNextVtx);
 				const real G = c0 * c1 / dist2;
 
 				throughput = G * throughput;
@@ -564,7 +564,7 @@ namespace aten
 
 		// 立体角測度に関する確率密度を面積測度に関する確率密度に変換.
 		const real c = dot(-normalizedTo, next_new_orienting_normal);
-		const real dist2 = to.squared_length();;
+		const real dist2 = squared_length(to);
 		pdf *= c / dist2;
 
 		return pdf;
@@ -821,7 +821,7 @@ namespace aten
 					real cy = dot(normalize(lightEndToEyeEnd), light_end.orienting_normal);
 					cy = std::max(cy, real(0));
 
-					const real dist2 = lightEndToEyeEnd.squared_length();
+					const real dist2 = squared_length(lightEndToEyeEnd);
 
 					const real G = cx * cy / dist2;
 

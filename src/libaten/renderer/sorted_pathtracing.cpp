@@ -185,7 +185,7 @@ namespace aten
 				}
 				else {
 					auto cosLight = dot(orienting_normal, -path.ray.dir);
-					auto dist2 = (path.rec.p - path.ray.org).squared_length();
+					auto dist2 = squared_length(path.rec.p - path.ray.org);
 
 					if (cosLight >= 0) {
 						auto pdfLight = 1 / path.rec.area;
@@ -263,7 +263,7 @@ namespace aten
 						auto cosLight = dot(nmlLight, -dirToLight);
 
 						if (cosShadow >= 0 && cosLight >= 0) {
-							auto dist2 = sampleres.dir.squared_length();
+							auto dist2 = squared_length(sampleres.dir);
 							auto G = cosShadow * cosLight / dist2;
 
 							if (pdfb > real(0) && pdfLight > real(0)) {

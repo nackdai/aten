@@ -126,7 +126,7 @@ namespace AT_NAME {
 			// 減衰率.
 			// http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
 			// 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
-			auto dist2 = result->dir.squared_length();
+			auto dist2 = squared_length(result->dir);
 			auto dist = aten::sqrt(dist2);
 			real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
 

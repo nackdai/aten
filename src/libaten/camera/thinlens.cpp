@@ -216,7 +216,7 @@ namespace aten {
 		const real ba2 = ba * ba;
 
 		// (r''/r')^2
-		auto r2 = (x0_xV.squared_length() / x0_x1.squared_length());
+		auto r2 = (squared_length(x0_xV) / squared_length(x0_x1));
 
 		// (cosΘ'/cosΘ'')
 		auto c2 = (dot(normalize(-x0_x1), hitpointNml) / dot(normalize(x0_x1), normalize(m_imagesensor.dir)));
@@ -242,7 +242,7 @@ namespace aten {
 		// センサ上の点の半球積分を、レンズ上の点の積分に変数変換した時に導入される係数
 		// (cosΘ)^2/r^2
 		const real cos = dot(normalize(-m_imagesensor.dir), normalize(x0_xI));
-		const real len2 = x0_xI.squared_length();
+		const real len2 = squared_length(x0_xI);
 		
 		const real G = (cos * cos) / len2;
 
@@ -276,7 +276,7 @@ namespace aten {
 
 #if 1
 		// B/A
-		const real ba2 = x0_xV.squared_length() / x0_xI.squared_length();
+		const real ba2 = squared_length(x0_xV) / squared_length(x0_xI);
 
 		const real r = m_imageSensorToLensDistance / m_lensToObjectplaneDistance;
 		const real r2 = r * r;

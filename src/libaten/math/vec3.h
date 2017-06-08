@@ -102,11 +102,6 @@ namespace aten {
 			auto ret = aten::sqrt(x * x + y * y + z * z);
 			return ret;
 		}
-		inline AT_DEVICE_API real squared_length() const
-		{
-			auto ret = x * x + y * y + z * z;
-			return ret;
-		}
 	};
 
 	inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
@@ -190,6 +185,12 @@ namespace aten {
 		auto invLen = aten::rsqrt(dot(v, v));
 		auto ret = v * invLen;
 		return std::move(ret);
+	}
+
+	inline AT_DEVICE_API real squared_length(const vec3& v)
+	{
+		auto ret = dot(v, v);
+		return ret;
 	}
 
 	// 直行ベクトルを計算.

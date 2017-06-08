@@ -113,7 +113,7 @@ namespace AT_NAME {
 
 		{
 			aten::vec3 dv = hitPoint - posOnLens;
-			const real dist2 = dv.squared_length();
+			const real dist2 = squared_length(dv);
 			dv = normalize(dv);
 			const real c = dot(hitpointNml, dv);
 

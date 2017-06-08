@@ -21,13 +21,13 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 	float4 _n1 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[1]);
 	float4 _n2 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[2]);
 
-	aten::vec3 p0 = aten::make_float3(_p0.x, _p0.y, _p0.z);
-	aten::vec3 p1 = aten::make_float3(_p1.x, _p1.y, _p1.z);
-	aten::vec3 p2 = aten::make_float3(_p2.x, _p2.y, _p2.z);
+	aten::vec3 p0 = aten::vec3(_p0.x, _p0.y, _p0.z);
+	aten::vec3 p1 = aten::vec3(_p1.x, _p1.y, _p1.z);
+	aten::vec3 p2 = aten::vec3(_p2.x, _p2.y, _p2.z);
 	
-	aten::vec3 n0 = aten::make_float3(_n0.x, _n0.y, _n0.z);
-	aten::vec3 n1 = aten::make_float3(_n1.x, _n1.y, _n1.z);
-	aten::vec3 n2 = aten::make_float3(_n2.x, _n2.y, _n2.z);
+	aten::vec3 n0 = aten::vec3(_n0.x, _n0.y, _n0.z);
+	aten::vec3 n1 = aten::vec3(_n1.x, _n1.y, _n1.z);
+	aten::vec3 n2 = aten::vec3(_n2.x, _n2.y, _n2.z);
 
 	// 0 <= a + b <= 1
 	real a = sampler->nextSample();
@@ -46,7 +46,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 	aten::vec3 p = (1 - a - b) * p0 + a * p1 + b * p2;
 
 	aten::vec3 n = (1 - a - b) * n0 + a * n1 + b * n2;
-	n.normalize();
+	n = normalize(n);
 
 	// éOäpå`ÇÃñ êœ = ÇQï”ÇÃäOêœÇÃí∑Ç≥ / 2;
 	auto e0 = p1 - p0;

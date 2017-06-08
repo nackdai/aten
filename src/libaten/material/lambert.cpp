@@ -52,7 +52,7 @@ namespace AT_NAME {
 		// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŽŸ‚ÌƒŒƒC‚ð”ò‚Î‚·.
 #if 1
 		auto n = normal;
-		auto t = getOrthoVector(n);
+		auto t = aten::getOrthoVector(n);
 		auto b = cross(n, t);
 #else
 		aten::vec3 n, t, b;
@@ -61,10 +61,10 @@ namespace AT_NAME {
 
 		// n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
 		if (fabs(n.x) > AT_MATH_EPSILON) {
-			t = normalize(cross(aten::make_float3(0.0, 1.0, 0.0), n));
+			t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
 		}
 		else {
-			t = normalize(cross(aten::make_float3(1.0, 0.0, 0.0), n));
+			t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
 		}
 		b = cross(n, t);
 #endif

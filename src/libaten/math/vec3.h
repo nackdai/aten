@@ -190,7 +190,11 @@ namespace aten {
 		return ret;
 	}
 #else
+#ifdef TYPE_DOUBLE
+	using vec3 = glm::dvec3;
+#else
 	using vec3 = glm::vec3;
+#endif
 #endif
 
 	inline AT_DEVICE_API real squared_length(const vec3& v)

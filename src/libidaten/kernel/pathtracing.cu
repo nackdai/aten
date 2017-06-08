@@ -86,14 +86,14 @@ __global__ void genPath(
 
 	rays[idx] = camsample.r;
 
-	path.throughput = aten::make_float3(1);
+	path.throughput = aten::vec3(1);
 	path.pdfb = 0.0f;
 	path.isHit = false;
 	path.isTerminate = false;
 	path.isSingular = false;
 
 	// Accumulate value, so do not reset.
-	//path.contrib = aten::make_float3(0);
+	//path.contrib = aten::vec3(0);
 }
 
 __global__ void hitTest(
@@ -176,7 +176,7 @@ __global__ void shadeMiss(
 
 	if (!path.isTerminate && !path.isHit) {
 		// TODO
-		auto bg = aten::make_float3(0);
+		auto bg = aten::vec3(0);
 
 		path.contrib += path.throughput * bg;
 
@@ -251,7 +251,7 @@ __global__ void shade(
 
 		if (depth > 0 && !path.isSingular) {
 			auto cosLight = dot(orienting_normal, -ray.dir);
-			auto dist2 = (rec.p - ray.org).squared_length();
+			auto dist2 = aten::squared_length(rec.p - ray.org);
 
 			if (cosLight >= 0) {
 				auto pdfLight = 1 / rec.area;
@@ -306,7 +306,7 @@ __global__ void shade(
 
 		shadowRays[idx].org = rec.p;
 		shadowRays[idx].dir = dirToLight;
-		shadowRays[idx].lightcontrib = aten::make_float3(0);
+		shadowRays[idx].lightcontrib = aten::vec3(0);
 		shadowRays[idx].distToLight = sampleres.dir.length();
 		shadowRays[idx].targetLightId = lightidx;
 
@@ -326,7 +326,7 @@ __global__ void shade(
 			auto cosLight = dot(nmlLight, -dirToLight);
 
 			if (cosShadow >= 0 && cosLight >= 0) {
-				auto dist2 = sampleres.dir.squared_length();
+				auto dist2 = aten::squared_length(sampleres.dir);
 				auto G = cosShadow * cosLight / dist2;
 
 				if (pdfb > real(0) && pdfLight > real(0)) {
@@ -353,7 +353,7 @@ __global__ void shade(
 		russianProb = path.sampler.nextSample();
 
 		if (russianProb >= p) {
-			//path.contrib = aten::make_float3(0);
+			//path.contrib = aten::vec3(0);
 			path.isTerminate = true;
 		}
 		else {

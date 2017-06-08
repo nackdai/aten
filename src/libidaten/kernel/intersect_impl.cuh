@@ -19,9 +19,9 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
 	float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);
 	float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
 
-	aten::vec3 v0 = aten::make_float3(p0.x, p0.y, p0.z);
-	aten::vec3 v1 = aten::make_float3(p1.x, p1.y, p1.z);
-	aten::vec3 v2 = aten::make_float3(p2.x, p2.y, p2.z);
+	aten::vec3 v0 = aten::vec3(p0.x, p0.y, p0.z);
+	aten::vec3 v1 = aten::vec3(p1.x, p1.y, p1.z);
+	aten::vec3 v2 = aten::vec3(p2.x, p2.y, p2.z);
 
 #if 1
 	aten::vec3 e1 = v1 - v0;
@@ -164,8 +164,8 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	auto n = c * n0 + a * n1 + b * n2;
 	auto uv = c * u0 + a * u1 + b * u2;
 
-	rec->p = aten::make_float3(p.x, p.y, p.z);
-	rec->normal = aten::make_float3(n.x, n.y, n.z);
+	rec->p = aten::vec3(p.x, p.y, p.z);
+	rec->normal = aten::vec3(n.x, n.y, n.z);
 
 	rec->u = uv.x;
 	rec->v = uv.y;
@@ -175,8 +175,8 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	rec->p = mtxL2W.apply(rec->p);
 	rec->normal = normalize(mtxL2W.applyXYZ(rec->normal));
 
-	aten::vec3 v0 = aten::make_float3(p0.x, p0.y, p0.z);
-	aten::vec3 v1 = aten::make_float3(p1.x, p1.y, p1.z);
+	aten::vec3 v0 = aten::vec3(p0.x, p0.y, p0.z);
+	aten::vec3 v1 = aten::vec3(p1.x, p1.y, p1.z);
 
 	real orignalLen = (v1 - v0).length();
 

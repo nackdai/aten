@@ -55,7 +55,7 @@ __global__ void genPathRayTracing(
 	auto& path = paths[idx];
 
 	path.ray = camsample.r;
-	path.throughput = aten::make_float3(1);
+	path.throughput = aten::vec3(1);
 	path.isHit = false;
 	path.isTerminate = false;
 }
@@ -163,7 +163,7 @@ __global__ void raytracing(
 		return;
 	}
 
-	aten::vec3 contrib = aten::make_float3(0);
+	aten::vec3 contrib = aten::vec3(0);
 
 	const aten::MaterialParameter* mtrl = &ctxt.mtrls[path.isect.mtrlid];
 
@@ -217,7 +217,7 @@ __global__ void raytracing(
 		aten::vec3 dirToLight = sampleres.dir;
 		auto len = dirToLight.length();
 
-		dirToLight.normalize();
+		dirToLight = normalize(dirToLight);
 
 		shadowRays[idx].isActive = true;
 		shadowRays[idx].org = rec.p;

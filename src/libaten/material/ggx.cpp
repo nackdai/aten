@@ -185,7 +185,7 @@ namespace AT_NAME
 
 		// Ortho normal base.
 		auto n = normal;
-		auto t = getOrthoVector(normal);
+		auto t = aten::getOrthoVector(normal);
 		auto b = normalize(cross(n, t));
 
 		auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;

@@ -113,8 +113,8 @@ __device__ bool intersectBVH(
 			aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
 			aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
-			auto boxmin = aten::make_float3(aabb[0].x, aabb[0].y, aabb[0].z);
-			auto boxmax = aten::make_float3(aabb[1].x, aabb[1].y, aabb[1].z);
+			auto boxmin = aten::vec3(aabb[0].x, aabb[0].y, aabb[0].z);
+			auto boxmax = aten::vec3(aabb[1].x, aabb[1].y, aabb[1].z);
 
 			if (node.x < 0 && node.y < 0) {
 				if (attrib.z >= 0) {
@@ -228,8 +228,8 @@ __device__ bool intersectBVH(
 			_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
 			_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
-			boxmin = aten::make_float3(_boxmin.x, _boxmin.y, _boxmin.z);
-			boxmax = aten::make_float3(_boxmax.x, _boxmax.y, _boxmax.z);
+			boxmin = aten::vec3(_boxmin.x, _boxmin.y, _boxmin.z);
+			boxmax = aten::vec3(_boxmax.x, _boxmax.y, _boxmax.z);
 
 			if (node.x < 0 && node.y < 0) {
 				const auto& prim = ctxt->prims[(int)attrib.y];

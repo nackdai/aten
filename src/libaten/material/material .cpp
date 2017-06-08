@@ -167,7 +167,7 @@ namespace AT_NAME
 			newNml = normalize(newNml);
 
 			aten::vec3 n = normalize(orgNml);
-			aten::vec3 t = getOrthoVector(n);
+			aten::vec3 t = aten::getOrthoVector(n);
 			aten::vec3 b = cross(n, t);
 
 			newNml = newNml.z * n + newNml.x * t + newNml.y * b;

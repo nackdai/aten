@@ -22,3 +22,6 @@
 [submodule "3rdparty/picojson"]
 	path = 3rdparty/picojson
 	url = https://github.com/kazuho/picojson.git
+[submodule "3rdparty/glm"]
+	path = 3rdparty/glm
+	url = https://github.com/g-truc/glm.git

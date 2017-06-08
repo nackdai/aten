@@ -9,7 +9,6 @@ __global__ void onAddFuncs()
 {
 	addLighFuncs();
 	addMaterialFuncs();
-	addIntersectFuncs();
 }
 
 void addFuncs()

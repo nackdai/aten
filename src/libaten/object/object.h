@@ -28,7 +28,7 @@ namespace AT_NAME
 			real t_min, real t_max,
 			aten::Intersection& isect) const override;
 
-		static AT_DEVICE_API bool hit(
+		static bool hit(
 			const aten::PrimitiveParamter* param,
 			const aten::vec3& v0,
 			const aten::vec3& v1,
@@ -42,7 +42,7 @@ namespace AT_NAME
 			aten::hitrecord& rec,
 			const aten::Intersection& isect) const;
 
-		static AT_DEVICE_API void evalHitResult(
+		static void evalHitResult(
 			const aten::vertex& v0,
 			const aten::vertex& v1,
 			const aten::vertex& v2,

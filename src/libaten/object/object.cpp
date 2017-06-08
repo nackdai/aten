@@ -95,7 +95,7 @@ namespace AT_NAME
 		evalHitResult(v0, v1, v2, &rec, &isect);
 	}
 
-	AT_DEVICE_API void face::evalHitResult(
+	void face::evalHitResult(
 		const aten::vertex& v0,
 		const aten::vertex& v1,
 		const aten::vertex& v2,

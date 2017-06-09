@@ -166,6 +166,12 @@
     <ClInclude Include="..\src\libidaten\kernel\compaction.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

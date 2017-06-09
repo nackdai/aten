@@ -10,8 +10,8 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-static int WIDTH = 640;
-static int HEIGHT = 480;
+static int WIDTH = 512;
+static int HEIGHT = 512;
 static const char* TITLE = "app";
 
 #ifdef ENABLE_OMP

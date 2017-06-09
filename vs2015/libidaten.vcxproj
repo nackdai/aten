@@ -74,6 +74,7 @@
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\light.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\material.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />

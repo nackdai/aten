@@ -7,7 +7,6 @@
 
 __global__ void onAddFuncs()
 {
-	addLighFuncs();
 	addMaterialFuncs();
 }
 

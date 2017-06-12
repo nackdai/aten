@@ -73,7 +73,9 @@ namespace AT_NAME
 			const aten::transformable* instanceParent,
 			const aten::mat4& mtxL2W) override final
 		{
+			bvhnode::setBVHNodeParam(param, parent, idx, nodes, instanceParent, mtxL2W);
 			param.primid = (float)id;
+			param.exid = -1;
 			return true;
 		}
 	};

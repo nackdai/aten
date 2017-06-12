@@ -371,6 +371,8 @@ namespace AT_NAME
 	{
 		int curPos = nodes[idx].size();
 
+		// NOTE
+		// 最上位レイヤーでは、すべてをワールド座標系で計算するので、L2Wを乗算する.
 		aten::bvh::collectNodes(
 			&m_node,
 			idx,
@@ -383,12 +385,14 @@ namespace AT_NAME
 		}
 
 		for (auto s : shapes) {
+			// NOTE
+			// 下位レイヤーでは、ローカル座標系で計算するので、L2Wを乗算する.
 			aten::bvh::collectNodes(
 				&s->m_node,
 				s->m_externalId,
 				nodes,
 				instanceParent,
-				mtxL2W);
+				mat4::Identity);
 		}
 
 		return false;

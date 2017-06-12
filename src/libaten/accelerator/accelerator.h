@@ -9,13 +9,9 @@ namespace aten {
 	struct BVHNode {
 		float hit{ -1 };
 		float miss{ -1 };
-		
-		// TODO
-		float left, right;
 
 		float shapeid{ -1 };
 		float primid{ -1 };
-		float nestid{ -1 };
 		float exid{ -1 };
 
 		aten::vec4 boxmin;

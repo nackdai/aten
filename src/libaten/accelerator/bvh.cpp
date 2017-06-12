@@ -8,7 +8,7 @@
 #define BVH_SAH
 #define TEST_NODE_LIST
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -215,11 +215,6 @@ namespace aten {
 		Intersection& isect)
 	{
 		static const uint32_t stacksize = 64;
-		BVHNode* stackbuf[stacksize] = { nullptr };
-
-		stackbuf[0] = &nodes[0];
-
-		int stackpos = 1;
 
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
@@ -233,19 +228,21 @@ namespace aten {
 		} candidateExid[stacksize];
 		int candidateExidNum = 0;
 
-		while (stackpos > 0) {
-			auto node = stackbuf[stackpos - 1];
+		int nodeid = 0;
 
-			stackpos -= 1;
+		for (;;) {
+			BVHNode* node = nullptr;
 
-			if (node->isLeaf()) {
-				if (node->nestid >= 0) {
-					if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
-						stackbuf[stackpos++] = &nodes[(int)node->nestid];
-						tmpShapeid = (int)node->shapeid;
-					}
-				}
-				else {
+			if (nodeid >= 0) {
+				node = &nodes[nodeid];
+			}
+
+			if (!node) {
+				break;
+			}
+
+			if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
+				if (node->isLeaf()) {
 					Intersection isectTmp;
 
 					bool isHit = false;
@@ -293,21 +290,10 @@ namespace aten {
 						}
 					}
 				}
+				nodeid = node->hit;
 			}
 			else {
-				if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
-					if (node->left >= 0) {
-						stackbuf[stackpos++] = &nodes[(int)node->left];
-					}
-					if (node->right >= 0) {
-						stackbuf[stackpos++] = &nodes[(int)node->right];
-					}
-
-					if (stackpos > stacksize) {
-						AT_ASSERT(false);
-						return false;
-					}
-				}
+				nodeid = node->miss;
 			}
 		}
 
@@ -960,7 +946,7 @@ namespace aten {
 		}
 
 		for (const auto& n : nodes) {
-			fprintf(fp, "%d %d %d %d %d\n", (int)n.hit, (int)n.miss, (int)n.nestid, (int)n.shapeid, (int)n.primid);
+			fprintf(fp, "%d %d %d %d\n", (int)n.hit, (int)n.miss, (int)n.shapeid, (int)n.primid);
 		}
 
 		fclose(fp);

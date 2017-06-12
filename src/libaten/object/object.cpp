@@ -361,47 +361,57 @@ namespace AT_NAME
 		}
 	}
 
-	int object::collectInternalNodes(
-		std::vector<std::vector<aten::BVHNode>>& nodes, 
-		int order, 
-		bvhnode* parent,
+	bool object::setBVHNodeParam(
+		BVHNode& param,
+		const int idx,
+		std::vector<std::vector<BVHNode>>& nodes,
+		const bvhnode* parent,
 		const aten::mat4& mtxL2W)
 	{
-		bool isIdentityL2W = mtxL2W.isIdentity();
-
-		auto curNodesNum = nodes[0].size();
-
-		int newOrder = aten::bvh::setTraverseOrder(&m_node, order);
-		aten::bvh::collectNodes(&m_node, nodes[0], parent);
-
-		auto collectedNodesNum = nodes[0].size() - curNodesNum;
-
-		if (collectedNodesNum > 0 && !isIdentityL2W) {
-			for (int i = 0; i < collectedNodesNum; i++) {
-				int idx = curNodesNum + i;
-
-				auto& node = nodes[0][idx];
-
-				// Compute transformed AABB.
-				aten::aabb box(node.boxmin, node.boxmax);
-				auto transformedBox = aten::aabb::transform(box, mtxL2W);
-				node.boxmin = aten::vec4(transformedBox.minPos(), 0);
-				node.boxmax = aten::vec4(transformedBox.maxPos(), 0);
-			}
-		}
+		bvh::collectNodes(
+			&m_node,
+			idx,
+			nodes,
+			parent,
+			mtxL2W);
 
 		for (auto s : shapes) {
-			nodes.push_back(std::vector<aten::BVHNode>());
-
-			const auto idx = s->m_traverseOrder;
-			auto& node = nodes[0][idx];
-			node.exid = nodes.size() - 1;
-
-			int order = 0;
-			order = aten::bvh::setTraverseOrder(&s->m_node, order);
-			aten::bvh::collectNodes(&s->m_node, nodes[node.exid], parent);
+			bvh::collectNodes(
+				&s->m_node,
+				s->m_externalId,
+				nodes,
+				parent,
+				mtxL2W);
 		}
 
-		return newOrder;
+		return false;
+	}
+
+	void object::registerToList(
+		const int idx,
+		std::vector<std::vector<bvhnode*>>& nodeList)
+	{
+		bvh::registerToList(
+			&m_node,
+			idx,
+			nodeList);
+
+		auto found = std::find(
+			nodeList[idx].begin(),
+			nodeList[idx].end(),
+			this);
+
+		if (found == nodeList[idx].end()) {
+			for (auto s : shapes) {
+				s->m_externalId = nodeList.size();
+
+				nodeList.push_back(std::vector<bvhnode*>());
+
+				bvh::registerToList(
+					&s->m_node,
+					s->m_externalId,
+					nodeList);
+			}
+		}
 	}
 }

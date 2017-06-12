@@ -65,9 +65,15 @@ namespace AT_NAME
 		int id{ -1 };
 
 	private:
-		virtual void setBVHNodeParamInCollectNodes(aten::BVHNode& param) override final
+		virtual bool setBVHNodeParam(
+			BVHNode& param,
+			const int idx,
+			std::vector<std::vector<BVHNode>>& nodes,
+			const bvhnode* parent,
+			const aten::mat4& mtxL2W) override final
 		{
 			param.primid = (float)id;
+			return true;
 		}
 	};
 
@@ -150,11 +156,16 @@ namespace AT_NAME
 			const aten::mat4& mtxL2W, 
 			aten::sampler* sampler) const override final;
 
-		virtual int collectInternalNodes(
-			std::vector<std::vector<aten::BVHNode>>& nodes, 
-			int order, 
-			bvhnode* parent,
-			const aten::mat4& mtxL2W = aten::mat4()) override final;
+		virtual bool setBVHNodeParam(
+			BVHNode& param,
+			const int idx,
+			std::vector<std::vector<BVHNode>>& nodes,
+			const bvhnode* parent,
+			const aten::mat4& mtxL2W) override final;
+
+		virtual void registerToList(
+			const int idx,
+			std::vector<std::vector<bvhnode*>>& nodeList) override final;
 
 	public:
 		std::vector<shape*> shapes;

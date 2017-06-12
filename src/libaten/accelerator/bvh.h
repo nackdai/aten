@@ -61,16 +61,22 @@ namespace aten {
 			return order;
 		}
 
-	private:
+	protected:
 		void build(
 			bvhnode** list,
 			uint32_t num,
 			bool needSort);
 
-		virtual void setBVHNodeParamInCollectNodes(BVHNode& param)
-		{
-			// Nothing is done...
-		}
+		virtual bool setBVHNodeParam(
+			BVHNode& param,
+			const int idx,
+			std::vector<std::vector<BVHNode>>& nodes,
+			const bvhnode* parent,
+			const aten::mat4& mtxL2W);
+
+		virtual void registerToList(
+			const int idx,
+			std::vector<std::vector<bvhnode*>>& nodeList);
 
 	protected:
 		bvhnode* m_left{ nullptr };
@@ -78,6 +84,7 @@ namespace aten {
 		aabb m_aabb;
 
 		int m_traverseOrder{ -1 };
+		int m_externalId{ -1 };
 	};
 
 	//////////////////////////////////////////////
@@ -107,8 +114,18 @@ namespace aten {
 			std::vector<std::vector<BVHNode>>& nodes,
 			std::vector<aten::mat4>& mtxs) const override final;
 
-		static int setTraverseOrder(bvhnode* root, int curOrder);
-		static void collectNodes(bvhnode* root, std::vector<BVHNode>& nodes, bvhnode* parent);
+		static void registerToList(
+			bvhnode* root,
+			const int idx,
+			std::vector<std::vector<bvhnode*>>& nodeList);
+
+		static void collectNodes(
+			bvhnode* root,
+			const int idx,
+			std::vector<std::vector<BVHNode>>& nodes,
+			const bvhnode* parent,
+			const aten::mat4& mtxL2W);
+
 		static void dumpCollectedNodes(std::vector<BVHNode>& nodes, const char* path);
 
 	private:

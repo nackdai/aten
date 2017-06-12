@@ -125,13 +125,22 @@ namespace aten
 			return m_param;
 		}
 
-		virtual int collectInternalNodes(
-			std::vector<std::vector<BVHNode>>& nodes, 
-			int order, 
-			bvhnode* parent,
+		virtual bool setBVHNodeParam(
+			BVHNode& param,
+			const int idx,
+			std::vector<std::vector<BVHNode>>& nodes,
+			const bvhnode* parent,
 			const aten::mat4& mtxL2W) override final
 		{
-			return m_obj->collectInternalNodes(nodes, order, this, m_mtxL2W);
+			m_obj->setBVHNodeParam(param, idx, nodes, this, m_mtxL2W);
+			return false;
+		}
+
+		virtual void registerToList(
+			const int idx,
+			std::vector<std::vector<bvhnode*>>& nodeList) override final
+		{
+			m_obj->registerToList(idx, nodeList);
 		}
 
 	private:

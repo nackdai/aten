@@ -8,6 +8,8 @@
 #define BVH_SAH
 #define TEST_NODE_LIST
 
+#pragma optimize( "", off)
+
 namespace aten {
 	int compareX(const void* a, const void* b)
 	{
@@ -134,6 +136,39 @@ namespace aten {
 		}
 
 		return isHit;
+	}
+
+	bool bvhnode::setBVHNodeParam(
+		BVHNode& param,
+		const int idx,
+		std::vector<std::vector<BVHNode>>& nodes,
+		const bvhnode* parent,
+		const aten::mat4& mtxL2W)
+	{
+		// Compute transformed AABB.
+		const auto& box = getBoundingbox();
+		auto transformedBox = aten::aabb::transform(box, mtxL2W);
+		param.boxmin = aten::vec4(transformedBox.minPos(), 0);
+		param.boxmax = aten::vec4(transformedBox.maxPos(), 0);
+
+		if (isLeaf()) {
+			param.shapeid = transformable::findShapeIdxAsHitable(this);
+
+			if (parent) {
+				AT_ASSERT(param.shapeid < 0);
+				param.shapeid = transformable::findShapeIdxAsHitable(parent);
+			}
+		}
+
+		return true;
+	}
+
+	void bvhnode::registerToList(
+		const int idx,
+		std::vector<std::vector<bvhnode*>>& nodeList)
+	{
+		m_traverseOrder = nodeList[idx].size();
+		nodeList[idx].push_back(this);
 	}
 
 	///////////////////////////////////////////////////////
@@ -690,49 +725,39 @@ namespace aten {
 		std::vector<std::vector<BVHNode>>& nodes,
 		std::vector<aten::mat4>& mtxs) const
 	{
-		nodes.push_back(std::vector<BVHNode>());
+		std::vector<std::vector<bvhnode*>> nodeList(1);
+		registerToList(m_root, 0, nodeList);
 
-		int order = setTraverseOrder(m_root, 0);
-		collectNodes(m_root, nodes[0], nullptr);
+		nodes.resize(nodeList.size());
 
-		std::map<hitable*, int> cache;
+		collectNodes(
+			m_root,
+			0,
+			nodes,
+			nullptr,
+			mat4::Identity);
 
 		auto& shapes = const_cast<std::vector<transformable*>&>(transformable::getShapes());
 
 		for (auto s : shapes) {
-			const auto idx = s->m_traverseOrder;
-			if (idx >= 0) {
-				auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
+			auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
 
-				if (param.type == ShapeType::Instance) {
-					// Search if object which instance has is collected.
-					auto obj = s->getHasObject();
-					auto found = cache.find(const_cast<hitable*>(obj));
+			if (param.type == ShapeType::Instance) {
+				param.mtxid = mtxs.size() / 2;
 
-					if (found != cache.end()) {
-						// Collected.
-						nodes[0][idx].nestid = found->second;
-					}
-					else {
-						// Not collected yet.
-						nodes[0][idx].nestid = nodes[0].size();
+				aten::mat4 mtxL2W, mtxW2L;
+				s->getMatrices(mtxL2W, mtxW2L);
 
-						order = s->collectInternalNodes(nodes, order, nullptr);
-					}
-
-					param.mtxid = mtxs.size() / 2;
-
-					aten::mat4 mtxL2W, mtxW2L;
-					s->getMatrices(mtxL2W, mtxW2L);
-
-					mtxs.push_back(mtxL2W);
-					mtxs.push_back(mtxW2L);
-				}
+				mtxs.push_back(mtxL2W);
+				mtxs.push_back(mtxW2L);
 			}
 		}
 	}
 
-	int bvh::setTraverseOrder(bvhnode* root, int curOrder)
+	void bvh::registerToList(
+		bvhnode* root,
+		const int idx,
+		std::vector<std::vector<bvhnode*>>& nodeList)
 	{
 		static const uint32_t stacksize = 64;
 		bvhnode* stackbuf[stacksize] = { nullptr };
@@ -745,13 +770,11 @@ namespace aten {
 
 		bvhnode* pnode = root;
 
-		int order = curOrder;
-
 		while (pnode != nullptr) {
 			bvhnode* pleft = pnode->m_left;
 			bvhnode* pright = pnode->m_right;
 
-			pnode->m_traverseOrder = order++;
+			pnode->registerToList(idx, nodeList);
 
 			if (pnode->isLeaf()) {
 				pnode = *(--stack);
@@ -766,11 +789,14 @@ namespace aten {
 				}
 			}
 		}
-
-		return order;
 	}
 
-	void bvh::collectNodes(bvhnode* root, std::vector<BVHNode>& nodes, bvhnode* parent)
+	void bvh::collectNodes(
+		bvhnode* root,
+		const int idx,
+		std::vector<std::vector<BVHNode>>& nodes,
+		const bvhnode* parent,
+		const aten::mat4& mtxL2W)
 	{
 		static const uint32_t stacksize = 64;
 		bvhnode* stackbuf[stacksize] = { nullptr };
@@ -788,29 +814,12 @@ namespace aten {
 			bvhnode* pright = pnode->m_right;
 
 			BVHNode node;
+			if (pnode->setBVHNodeParam(node, idx, nodes, parent, mtxL2W)) {
+				// TODO
+				// hit or miss.
 
-			node.boxmin = aten::vec4(pnode->getBoundingbox().minPos(), 0);
-			node.boxmax = aten::vec4(pnode->getBoundingbox().maxPos(), 0);
-
-			if (pnode->isLeaf()) {
-				node.shapeid = transformable::findShapeIdxAsHitable(pnode);
-
-				if (node.shapeid < 0) {
-					// Not find shape.
-					pnode->setBVHNodeParamInCollectNodes(node);
-				}
+				nodes[idx].push_back(node);
 			}
-			else {
-				node.left = (pleft ? pleft->m_traverseOrder : -1);
-				node.right = (pright ? pright->m_traverseOrder : -1);
-			}
-
-			if (parent) {
-				AT_ASSERT(node.shapeid < 0);
-				node.shapeid = transformable::findShapeIdxAsHitable(parent);
-			}
-
-			nodes.push_back(node);
 
 			if (pnode->isLeaf()) {
 				pnode = *(--stack);

@@ -127,12 +127,13 @@ namespace aten
 
 		virtual bool setBVHNodeParam(
 			BVHNode& param,
+			const bvhnode* parent,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
 			const transformable* instanceParent,
 			const aten::mat4& mtxL2W) override final
 		{
-			m_obj->setBVHNodeParam(param, idx, nodes, this, m_mtxL2W);
+			m_obj->setBVHNodeParam(param, parent, idx, nodes, this, m_mtxL2W);
 			return false;
 		}
 
@@ -141,6 +142,11 @@ namespace aten
 			std::vector<std::vector<bvhnode*>>& nodeList) override final
 		{
 			m_obj->registerToList(idx, nodeList);
+		}
+
+		virtual bvhnode* getNode() override final
+		{
+			return m_obj->getNode();
 		}
 
 	private:

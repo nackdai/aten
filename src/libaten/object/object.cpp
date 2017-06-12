@@ -362,21 +362,28 @@ namespace AT_NAME
 	}
 
 	bool object::setBVHNodeParam(
-		BVHNode& param,
+		aten::BVHNode& param,
+		const bvhnode* parent,
 		const int idx,
-		std::vector<std::vector<BVHNode>>& nodes,
+		std::vector<std::vector<aten::BVHNode>>& nodes,
 		const transformable* instanceParent,
 		const aten::mat4& mtxL2W)
 	{
-		bvh::collectNodes(
+		int curPos = nodes[idx].size();
+
+		aten::bvh::collectNodes(
 			&m_node,
 			idx,
 			nodes,
 			instanceParent,
 			mtxL2W);
 
+		if (parent) {
+			nodes[idx][curPos].parent = parent->getTraversalOrder();
+		}
+
 		for (auto s : shapes) {
-			bvh::collectNodes(
+			aten::bvh::collectNodes(
 				&s->m_node,
 				s->m_externalId,
 				nodes,
@@ -391,7 +398,7 @@ namespace AT_NAME
 		const int idx,
 		std::vector<std::vector<bvhnode*>>& nodeList)
 	{
-		bvh::registerToList(
+		aten::bvh::registerToList(
 			&m_node,
 			idx,
 			nodeList);
@@ -407,11 +414,16 @@ namespace AT_NAME
 
 				nodeList.push_back(std::vector<bvhnode*>());
 
-				bvh::registerToList(
+				aten::bvh::registerToList(
 					&s->m_node,
 					s->m_externalId,
 					nodeList);
 			}
 		}
+	}
+
+	aten::bvhnode* object::getNode()
+	{
+		return &m_node;
 	}
 }

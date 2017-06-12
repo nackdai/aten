@@ -53,6 +53,11 @@ namespace aten {
 			AT_ASSERT(false);
 		}
 
+		int getTraversalOrder() const
+		{
+			return m_traverseOrder;
+		}
+
 	protected:
 		void build(
 			bvhnode** list,
@@ -61,6 +66,7 @@ namespace aten {
 
 		virtual bool setBVHNodeParam(
 			BVHNode& param,
+			const bvhnode* parent,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
 			const transformable* instanceParent,
@@ -70,9 +76,17 @@ namespace aten {
 			const int idx,
 			std::vector<std::vector<bvhnode*>>& nodeList);
 
-	protected:
-		bvhnode* m_parent{ nullptr };
+		virtual void getNodes(
+			bvhnode*& left,
+			bvhnode*& right);
 
+		virtual bvhnode* getNode()
+		{
+			AT_ASSERT(false);
+			return nullptr;
+		}
+
+	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
 		aabb m_aabb;
@@ -133,6 +147,14 @@ namespace aten {
 			bvhnode* root,
 			bvhnode** list,
 			uint32_t num);
+
+		static void collectNodes(
+			bvhnode* node,
+			const bvhnode* parent,
+			const int idx,
+			std::vector<std::vector<BVHNode>>& nodes,
+			const transformable* instanceParent,
+			const aten::mat4& mtxL2W);
 
 	private:
 		bvhnode* m_root{ nullptr };

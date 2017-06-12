@@ -7,7 +7,6 @@
 
 #define BVH_SAH
 #define TEST_NODE_LIST
-
 //#pragma optimize( "", off)
 
 namespace aten {
@@ -155,6 +154,8 @@ namespace aten {
 		if (isLeaf()) {
 			param.shapeid = transformable::findShapeIdxAsHitable(this);
 
+			param.exid = this->m_externalId;
+
 			if (instanceParent) {
 				AT_ASSERT(param.shapeid < 0);
 				param.shapeid = transformable::findShapeIdxAsHitable(instanceParent);
@@ -169,6 +170,11 @@ namespace aten {
 		std::vector<std::vector<bvhnode*>>& nodeList)
 	{
 		m_traverseOrder = nodeList[idx].size();
+
+		if (isLeaf() && idx > 0) {
+			m_externalId = idx;
+		}
+
 		nodeList[idx].push_back(this);
 	}
 
@@ -253,7 +259,6 @@ namespace aten {
 		auto& prims = face::faces();
 
 		real hitt = AT_MATH_INF;
-		int tmpShapeid = -1;
 
 		struct {
 			int exid{ -1 };
@@ -274,55 +279,59 @@ namespace aten {
 				break;
 			}
 
-			if (aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max)) {
-				if (node->isLeaf()) {
-					Intersection isectTmp;
+			bool isHit = false;
+			
+			if (node->isLeaf()) {
+				Intersection isectTmp;
 
-					bool isHit = false;
+				auto s = shapes[(int)node->shapeid];
 
-					auto s = shapes[(int)node->shapeid];
+				int tmpexid = -1;
 
-					int tmpexid = -1;
-
-					if (node->exid >= 0) {
-						real t = AT_MATH_INF;
-						isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t);
-						isectTmp.t = t;
-						tmpexid = node->exid;
-					}
-					else if (node->primid >= 0) {
-						auto prim = (hitable*)prims[(int)node->primid];
-						isHit = prim->hit(r, t_min, t_max, isectTmp);
-						if (isHit) {
-							isectTmp.objid = s->id();
-						}
-					}
-					else {
-						isHit = s->hit(r, t_min, t_max, isectTmp);
-						tmpexid = -1;
-					}
-
+				if (node->exid >= 0) {
+					real t = AT_MATH_INF;
+					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t);
+					isectTmp.t = t;
+					tmpexid = node->exid;
+				}
+				else if (node->primid >= 0) {
+					auto prim = (hitable*)prims[(int)node->primid];
+					isHit = prim->hit(r, t_min, t_max, isectTmp);
 					if (isHit) {
+						isectTmp.objid = s->id();
+					}
+				}
+				else {
+					isHit = s->hit(r, t_min, t_max, isectTmp);
+					tmpexid = -1;
+				}
+
+				if (isHit) {
 #if 0
-						if (isectTmp.t <= hitt)
+					if (isectTmp.t <= hitt)
 #endif
-						{
-							hitt = isectTmp.t;
+					{
+						hitt = isectTmp.t;
 
-							if (tmpexid >= 0) {
-								candidateExid[candidateExidNum].exid = tmpexid;
-								candidateExid[candidateExidNum].shapeid = tmpShapeid;
-								candidateExidNum++;
-							}
+						if (tmpexid >= 0) {
+							candidateExid[candidateExidNum].exid = tmpexid;
+							candidateExid[candidateExidNum].shapeid = (int)node->shapeid;
+							candidateExidNum++;
 						}
+					}
 
-						if (tmpexid < 0) {
-							if (isectTmp.t < isect.t) {
-								isect = isectTmp;
-							}
+					if (tmpexid < 0) {
+						if (isectTmp.t < isect.t) {
+							isect = isectTmp;
 						}
 					}
 				}
+			}
+			else {
+				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+			}
+				
+			if (isHit) {
 				nodeid = node->hit;
 			}
 			else {
@@ -837,11 +846,13 @@ namespace aten {
 							}
 						}
 
+						bvhnode* curParent = parent;
+
 						if (!isLeft) {
 							// Internal, right: parentfs sibling node (until it exists) .
 							for (;;) {
 								// Search the grand parent.
-								const auto& parentNode = nodes[i][parent->m_traverseOrder];
+								const auto& parentNode = nodes[i][curParent->m_traverseOrder];
 								bvhnode* grandParent = (parentNode.parent >= 0
 									? nodeList[i][parentNode.parent]
 									: nullptr);
@@ -854,14 +865,10 @@ namespace aten {
 
 									auto sibling = _right;
 									if (sibling) {
-										if (sibling == parent) {
-											node.miss = -1;
-										}
-										else {
+										if (sibling != curParent) {
 											node.miss = sibling->m_traverseOrder;
+											break;
 										}
-
-										break;
 									}
 								}
 								else {
@@ -869,7 +876,7 @@ namespace aten {
 									break;
 								}
 
-								parent = grandParent;
+								curParent = grandParent;
 							}
 						}
 					}

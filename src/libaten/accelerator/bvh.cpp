@@ -115,11 +115,16 @@ namespace aten {
 			auto boxRight = m_right->getBoundingbox();
 
 			m_aabb = aabb::merge(boxLeft, boxRight);
+
+			m_left->m_parent = this;
+			m_right->m_parent = this;
 		}
 		else {
 			auto boxLeft = m_left->getBoundingbox();
 
 			m_aabb = boxLeft;
+
+			m_left->m_parent = this;
 		}
 	}
 
@@ -142,7 +147,7 @@ namespace aten {
 		BVHNode& param,
 		const int idx,
 		std::vector<std::vector<BVHNode>>& nodes,
-		const bvhnode* parent,
+		const transformable* instanceParent,
 		const aten::mat4& mtxL2W)
 	{
 		// Compute transformed AABB.
@@ -154,9 +159,9 @@ namespace aten {
 		if (isLeaf()) {
 			param.shapeid = transformable::findShapeIdxAsHitable(this);
 
-			if (parent) {
+			if (instanceParent) {
 				AT_ASSERT(param.shapeid < 0);
-				param.shapeid = transformable::findShapeIdxAsHitable(parent);
+				param.shapeid = transformable::findShapeIdxAsHitable(instanceParent);
 			}
 		}
 
@@ -426,6 +431,10 @@ namespace aten {
 		if (num == 1) {
 			// １個しかないので、これだけで終了.
 			root->m_left = list[0];
+
+			// Set parent.
+			root->m_left->m_parent = root;
+
 			return;
 		}
 		else if (num == 2) {
@@ -436,6 +445,10 @@ namespace aten {
 
 			root->m_left = list[0];
 			root->m_right = list[1];
+
+			// Set parent.
+			root->m_left->m_parent = root;
+			root->m_right->m_parent = root;
 
 			return;
 		}
@@ -537,6 +550,10 @@ namespace aten {
 			root->m_left = new bvhnode();
 			root->m_right = new bvhnode();
 
+			// Set parent.
+			root->m_left->m_parent = root;
+			root->m_right->m_parent = root;
+
 			// リストを分割.
 			int leftListNum = bestSplitIndex;
 			int rightListNum = num - leftListNum;
@@ -580,6 +597,9 @@ namespace aten {
 				// １個しかないので、これだけで終了.
 				info.node->m_left = info.list[0];
 
+				// Set parent.
+				info.node->m_left->m_parent = info.node;
+
 				info = stacks.back();
 				stacks.pop_back();
 				continue;
@@ -595,6 +615,10 @@ namespace aten {
 
 				info.node->m_left = info.list[0];
 				info.node->m_right = info.list[1];
+
+				// Set parent.
+				info.node->m_left->m_parent = info.node;
+				info.node->m_right->m_parent = info.node;
 
 				info = stacks.back();
 				stacks.pop_back();
@@ -698,6 +722,10 @@ namespace aten {
 				info.node->m_left = new bvhnode();
 				info.node->m_right = new bvhnode();
 
+				// Set parent.
+				info.node->m_left->m_parent = info.node;
+				info.node->m_right->m_parent = info.node;
+
 				// リストを分割.
 				int leftListNum = bestSplitIndex;
 				int rightListNum = info.num - leftListNum;
@@ -752,6 +780,92 @@ namespace aten {
 				mtxs.push_back(mtxW2L);
 			}
 		}
+
+		// Specify hit/miss link.
+
+		for (int i = 0; i < nodeList.size(); i++) {
+			auto num = nodeList[i].size();
+
+			for (int n = 0; n < num; n++) {
+				auto pnode = nodeList[i][n];
+				auto& node = nodes[i][n];
+
+				bvhnode* next = nullptr;
+				if (n + 1 < num) {
+					next = nodeList[i][n + 1];
+				}
+
+				if (pnode->isLeaf()) {
+					// Hit/Miss.
+					// Always the next node in the array.
+					if (next) {
+						node.hit = next->m_traverseOrder;
+						node.miss = next->m_traverseOrder;
+					}
+					else {
+						node.hit = -1;
+						node.miss = -1;
+					}
+				}
+				else {
+					// Hit.
+					// Always the next node in the array.
+					if (next) {
+						node.hit = next->m_traverseOrder;
+					}
+					else {
+						node.hit = -1;
+					}
+
+					// Miss.
+					auto parent = pnode->m_parent;
+					
+					if (parent) {
+						bool isLeft = (parent->m_left == pnode);
+
+						if (isLeft) {
+							// Internal, left: sibling node.
+							auto sibling = parent->m_right;
+							isLeft = (sibling != nullptr);
+
+							if (isLeft) {
+								node.miss = sibling->m_traverseOrder;
+							}
+						}
+
+						if (!isLeft) {
+							// Internal, right: parent’s sibling node (until it exists) .
+							for (;;) {
+								auto grandParent = parent->m_parent;
+
+								if (grandParent) {
+									auto sibling = grandParent->m_right;
+									if (sibling) {
+										if (sibling == parent) {
+											node.miss = -1;
+										}
+										else {
+											node.miss = sibling->m_traverseOrder;
+										}
+
+										break;
+									}
+								}
+								else {
+									node.miss = -1;
+									break;
+								}
+
+								parent = grandParent;
+							}
+						}
+					}
+					else {
+						node.miss = -1;
+					}
+				}
+			}
+		}
 	}
 
 	void bvh::registerToList(
@@ -795,7 +909,7 @@ namespace aten {
 		bvhnode* root,
 		const int idx,
 		std::vector<std::vector<BVHNode>>& nodes,
-		const bvhnode* parent,
+		const transformable* instanceParent,
 		const aten::mat4& mtxL2W)
 	{
 		static const uint32_t stacksize = 64;
@@ -814,9 +928,9 @@ namespace aten {
 			bvhnode* pright = pnode->m_right;
 
 			BVHNode node;
-			if (pnode->setBVHNodeParam(node, idx, nodes, parent, mtxL2W)) {
-				// TODO
-				// hit or miss.
+			if (pnode->setBVHNodeParam(node, idx, nodes, instanceParent, mtxL2W)) {
+				// NOTE
+				// Differed spcification hit/miss link.
 
 				nodes[idx].push_back(node);
 			}
@@ -846,7 +960,7 @@ namespace aten {
 		}
 
 		for (const auto& n : nodes) {
-			fprintf(fp, "%d %d %d %d %d\n", (int)n.left, (int)n.right, (int)n.nestid, (int)n.shapeid, (int)n.primid);
+			fprintf(fp, "%d %d %d %d %d\n", (int)n.hit, (int)n.miss, (int)n.nestid, (int)n.shapeid, (int)n.primid);
 		}
 
 		fclose(fp);

@@ -69,7 +69,7 @@ namespace AT_NAME
 			BVHNode& param,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
-			const bvhnode* parent,
+			const transformable* instanceParent,
 			const aten::mat4& mtxL2W) override final
 		{
 			param.primid = (float)id;
@@ -160,7 +160,7 @@ namespace AT_NAME
 			BVHNode& param,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
-			const bvhnode* parent,
+			const transformable* instanceParent,
 			const aten::mat4& mtxL2W) override final;
 
 		virtual void registerToList(

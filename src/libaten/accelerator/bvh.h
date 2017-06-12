@@ -4,6 +4,8 @@
 #include "accelerator/accelerator.h"
 
 namespace aten {
+	class transformable;
+
 	class bvhnode : public hitable {
 		friend class bvh;
 
@@ -51,16 +53,6 @@ namespace aten {
 			AT_ASSERT(false);
 		}
 
-		virtual int collectInternalNodes(
-			std::vector<std::vector<aten::BVHNode>>& nodes, 
-			int order, 
-			bvhnode* parent,
-			const aten::mat4& mtxL2W = aten::mat4())
-		{
-			// Nothing is done...
-			return order;
-		}
-
 	protected:
 		void build(
 			bvhnode** list,
@@ -71,7 +63,7 @@ namespace aten {
 			BVHNode& param,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
-			const bvhnode* parent,
+			const transformable* instanceParent,
 			const aten::mat4& mtxL2W);
 
 		virtual void registerToList(
@@ -79,6 +71,8 @@ namespace aten {
 			std::vector<std::vector<bvhnode*>>& nodeList);
 
 	protected:
+		bvhnode* m_parent{ nullptr };
+
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
 		aabb m_aabb;
@@ -123,7 +117,7 @@ namespace aten {
 			bvhnode* root,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
-			const bvhnode* parent,
+			const transformable* instanceParent,
 			const aten::mat4& mtxL2W);
 
 		static void dumpCollectedNodes(std::vector<BVHNode>& nodes, const char* path);

@@ -365,14 +365,14 @@ namespace AT_NAME
 		BVHNode& param,
 		const int idx,
 		std::vector<std::vector<BVHNode>>& nodes,
-		const bvhnode* parent,
+		const transformable* instanceParent,
 		const aten::mat4& mtxL2W)
 	{
 		bvh::collectNodes(
 			&m_node,
 			idx,
 			nodes,
-			parent,
+			instanceParent,
 			mtxL2W);
 
 		for (auto s : shapes) {
@@ -380,7 +380,7 @@ namespace AT_NAME
 				&s->m_node,
 				s->m_externalId,
 				nodes,
-				parent,
+				instanceParent,
 				mtxL2W);
 		}
 

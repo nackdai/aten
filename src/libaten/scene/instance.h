@@ -129,7 +129,7 @@ namespace aten
 			BVHNode& param,
 			const int idx,
 			std::vector<std::vector<BVHNode>>& nodes,
-			const bvhnode* parent,
+			const transformable* instanceParent,
 			const aten::mat4& mtxL2W) override final
 		{
 			m_obj->setBVHNodeParam(param, idx, nodes, this, m_mtxL2W);

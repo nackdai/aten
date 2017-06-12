@@ -7,9 +7,11 @@ namespace aten {
 	class bvhnode;
 
 	struct BVHNode {
-		float left{ -1 };
-		float right{ -1 };
-		float padding[2];
+		float hit{ -1 };
+		float miss{ -1 };
+		
+		// TODO
+		float left, right;
 
 		float shapeid{ -1 };
 		float primid{ -1 };
@@ -19,9 +21,9 @@ namespace aten {
 		aten::vec4 boxmin;
 		aten::vec4 boxmax;
 
-		bool AT_DEVICE_API isLeaf() const
+		bool isLeaf() const
 		{
-			return (left <= 0 && right <= 0);
+			return (shapeid >= 0 || primid >= 0);
 		}
 	};
 

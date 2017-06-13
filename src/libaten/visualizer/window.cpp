@@ -29,7 +29,74 @@ namespace aten {
 		return result ? true : false;
 	}
 
-	bool window::init(int width, int height, const char* title)
+	static int g_mouseX = 0;
+	static int g_mouseY = 0;
+
+	static window::CallbackClose funcClose = nullptr;
+	static window::CallbackMouseBtn funcMouseBtn = nullptr;
+	static window::CallbackMouseMove funcMouseMove = nullptr;
+	static window::CallbackMouseWheel funcMouseWheel = nullptr;
+
+	static void closeCallback(GLFWwindow* window)
+	{
+		if (funcClose) {
+			funcClose();
+		}
+		::glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	{
+		// TODO
+	}
+
+	static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		if (funcMouseBtn) {
+			if (button == GLFW_MOUSE_BUTTON_LEFT) {
+				if (action == GLFW_PRESS) {
+					funcMouseBtn(true, true, g_mouseX, g_mouseY);
+				}
+				else if (action == GLFW_RELEASE) {
+					funcMouseBtn(true, false, g_mouseX, g_mouseY);
+				}
+			}
+			else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+				if (action == GLFW_PRESS) {
+					funcMouseBtn(false, true, g_mouseX, g_mouseY);
+				}
+				else if (action == GLFW_RELEASE) {
+					funcMouseBtn(false, false, g_mouseX, g_mouseY);
+				}
+			}
+		}
+	}
+
+	static void motionCallback(GLFWwindow* window, double xpos, double ypos)
+	{
+		g_mouseX = (int)xpos;
+		g_mouseY = (int)ypos;
+
+		if (funcMouseMove) {
+			funcMouseMove(g_mouseX, g_mouseY);
+		}
+	}
+
+	static void wheelCallback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		auto offset = (int)(yoffset * 10.0f);
+
+		if (funcMouseWheel) {
+			funcMouseWheel(offset);
+		}
+	}
+
+	bool window::init(
+		int width, int height, const char* title,
+		CallbackClose funcClose/*= nullptr*/,
+		CallbackMouseBtn funcMouseBtn/*= nullptr*/,
+		CallbackMouseMove funcMouseMove/*= nullptr*/,
+		CallbackMouseWheel funcMouseWheel/*= nullptr*/)
 	{
 		auto result = ::glfwInit();
 		AT_VRETURN(result, false);
@@ -50,13 +117,33 @@ namespace aten {
 
 		SetCurrentDirectoryFromExe();
 
+		::glfwSetWindowCloseCallback(
+			g_window,
+			closeCallback);
+
+		::glfwSetKeyCallback(
+			g_window,
+			keyCallback);
+
+		::glfwSetMouseButtonCallback(
+			g_window,
+			mouseCallback);
+
+		::glfwSetCursorPosCallback(
+			g_window,
+			motionCallback);
+
+		::glfwSetScrollCallback(
+			g_window,
+			wheelCallback);
+
 		::glfwMakeContextCurrent(g_window);
 		::glfwSwapInterval(1);
 
 		return true;
 	}
 
-	void window::run(std::function<void()> func)
+	void window::run(window::CallbackRun func)
 	{
 		AT_ASSERT(g_window);
 

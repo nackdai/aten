@@ -9,7 +9,7 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v)
 	{
-		auto ret = lambert::pdf(param, normal, wi, wo, u, v);
+		auto ret = lambert::pdf(normal, wo);
 		return ret;
 	}
 
@@ -29,7 +29,7 @@ namespace AT_NAME {
 		real u, real v,
 		aten::sampler* sampler)
 	{
-		return std::move(lambert::sampleDirection(param, normal, wi, u, v, sampler));
+		return std::move(lambert::sampleDirection(normal, sampler));
 	}
 
 	aten::vec3 emissive::sampleDirection(
@@ -48,7 +48,7 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v)
 	{
-		auto ret = lambert::bsdf(param, normal, wi, wo, u, v);
+		auto ret = lambert::bsdf(param, u, v);
 		return std::move(ret);
 	}
 

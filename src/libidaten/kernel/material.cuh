@@ -1,8 +1,13 @@
 #pragma once
 
-#include "aten4idaten.h"
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
-__device__ void addMaterialFuncs();
+#include "cuda/helper_math.h"
+#include "cuda/cudautil.h"
+#include "cuda/cudamemory.h"
+
+#include "aten4idaten.h"
 
 __device__ void sampleMaterial(
 	AT_NAME::MaterialSampling* result,
@@ -33,3 +38,7 @@ __device__ aten::vec3 sampleBSDF(
 	const aten::vec3& wi,
 	const aten::vec3& wo,
 	real u, real v);
+
+#ifndef __AT_DEBUG__
+#include "kernel/material_impl.cuh"
+#endif

@@ -7,10 +7,8 @@
 
 __global__ void onAddFuncs()
 {
-	addMaterialFuncs();
 }
 
 void addFuncs()
 {
-	onAddFuncs << <1, 1 >> > ();
 }

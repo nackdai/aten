@@ -1,14 +1,56 @@
 #include "material/lambert.h"
 
 namespace AT_NAME {
-	AT_DEVICE_API real lambert::pdf(
-		const aten::MaterialParameter* param,
+	real lambert::pdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
-		real u, real v)
+		real u, real v) const
 	{
-		return pdf(normal, wo);
+		auto ret = pdf(normal, wo);
+		return ret;
+	}	
+
+	aten::vec3 lambert::sampleDirection(
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		real u, real v,
+		aten::sampler* sampler) const
+	{
+		return std::move(sampleDirection(normal, sampler));
+	}
+
+	aten::vec3 lambert::bsdf(
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v) const
+	{
+		auto ret = bsdf(&m_param, u, v);
+		return std::move(ret);
+	}
+
+	MaterialSampling lambert::sample(
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::vec3& orgnormal,
+		aten::sampler* sampler,
+		real u, real v,
+		bool isLightPath/*= false*/) const
+	{
+		MaterialSampling ret;
+		
+		sample(
+			&ret,
+			&m_param,
+			normal,
+			ray.dir,
+			orgnormal,
+			sampler,
+			u, v,
+			isLightPath);
+
+		return std::move(ret);
 	}
 
 	AT_DEVICE_API real lambert::pdf(
@@ -22,26 +64,6 @@ namespace AT_NAME {
 		auto ret = c / AT_MATH_PI;
 
 		return ret;
-	}
-
-	real lambert::pdf(
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real u, real v) const
-	{
-		auto ret = pdf(&m_param, normal, wi, wo, u, v);
-		return ret;
-	}
-
-	AT_DEVICE_API aten::vec3 lambert::sampleDirection(
-		const aten::MaterialParameter* param,
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		real u, real v,
-		aten::sampler* sampler)
-	{
-		return std::move(sampleDirection(normal, sampler));
 	}
 
 	AT_DEVICE_API aten::vec3 lambert::sampleDirection(
@@ -84,25 +106,6 @@ namespace AT_NAME {
 		return std::move(dir);
 	}
 
-	aten::vec3 lambert::sampleDirection(
-		const aten::ray& ray,
-		const aten::vec3& normal,
-		real u, real v,
-		aten::sampler* sampler) const
-	{
-		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
-	}
-
-	AT_DEVICE_API aten::vec3 lambert::bsdf(
-		const aten::MaterialParameter* param,
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real u, real v)
-	{
-		return std::move(bsdf(param, u, v));
-	}
-
 	AT_DEVICE_API aten::vec3 lambert::bsdf(
 		const aten::MaterialParameter* param,
 		real u, real v)
@@ -117,16 +120,6 @@ namespace AT_NAME {
 		return ret;
 	}
 
-	aten::vec3 lambert::bsdf(
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real u, real v) const
-	{
-		auto ret = bsdf(&m_param, normal, wi, wo, u, v);
-		return std::move(ret);
-	}
-
 	AT_DEVICE_API void lambert::sample(
 		MaterialSampling* result,
 		const aten::MaterialParameter* param,
@@ -139,31 +132,8 @@ namespace AT_NAME {
 	{
 		MaterialSampling ret;
 
-		result->dir = sampleDirection(param, normal, wi, u, v, sampler);
-		result->pdf = pdf(param, normal, wi, result->dir, u, v);
-		result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
-	}
-
-	MaterialSampling lambert::sample(
-		const aten::ray& ray,
-		const aten::vec3& normal,
-		const aten::vec3& orgnormal,
-		aten::sampler* sampler,
-		real u, real v,
-		bool isLightPath/*= false*/) const
-	{
-		MaterialSampling ret;
-		
-		sample(
-			&ret,
-			&m_param,
-			normal,
-			ray.dir,
-			orgnormal,
-			sampler,
-			u, v,
-			isLightPath);
-
-		return std::move(ret);
+		result->dir = sampleDirection(normal, sampler);
+		result->pdf = pdf(normal, result->dir);
+		result->bsdf = bsdf(param, u, v);
 	}
 }

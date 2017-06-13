@@ -53,13 +53,9 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 
 	isect->t = t_max;
 
-	for (;;) {
-		if (nodeid < 0) {
-			break;
-		}
-
+	while (nodeid >= 0) {
 		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
+		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primid, z : exid
 		_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
 		_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
@@ -68,7 +64,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 
 		bool isHit = false;
 
-		if (attrib.x >= 0 || attrib.y >= 0) {
+		if (attrib.y >= 0) {
 			const auto& prim = ctxt->prims[(int)attrib.y];
 
 			isectTmp.t = AT_MATH_INF;
@@ -123,11 +119,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 
 	real t = AT_MATH_INF;
 
-	for (;;) {
-		if (nodeid < 0) {
-			break;
-		}
-
+	while (nodeid >= 0) {
 		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
 		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
 		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
@@ -138,7 +130,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 
 		bool isHit = false;
 
-		if (attrib.x >= 0 || attrib.y >= 0) {
+		if (attrib.x >= 0) {
 			// Leaf.
 			tmpexid = -1;
 
@@ -168,14 +160,12 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 				isectTmp.mtrlid = s->mtrl.idx;
 			}
 
-			if (isHit) {
-				if (isectTmp.t < isect->t) {
-					*isect = isectTmp;
-					isect->objid = (int)attrib.x;
+			if (isectTmp.t < isect->t) {
+				*isect = isectTmp;
+				isect->objid = (int)attrib.x;
 
-					if (type == IntersectType::Closer) {
-						return true;
-					}
+				if (type == IntersectType::Closer) {
+					return true;
 				}
 			}
 		}

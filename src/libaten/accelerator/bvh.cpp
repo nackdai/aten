@@ -289,10 +289,22 @@ namespace aten {
 				int tmpexid = -1;
 
 				if (node->exid >= 0) {
+#if 0
 					real t = AT_MATH_INF;
 					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t);
 					isectTmp.t = t;
 					tmpexid = node->exid;
+#else
+					const auto& param = s->getParam();
+
+					int mtxid = param.mtxid;
+
+					const auto& mtxW2L = smtxs[mtxid * 2 + 1];
+
+					auto transformedRay = mtxW2L.applyRay(r);
+
+					isHit = _hit(&snodes[(int)node->exid][0], transformedRay, t_min, t_max, isectTmp);
+#endif
 				}
 				else if (node->primid >= 0) {
 					auto prim = (hitable*)prims[(int)node->primid];
@@ -308,6 +320,7 @@ namespace aten {
 
 				if (isHit) {
 #if 0
+#if 0
 					if (isectTmp.t <= hitt)
 #endif
 					{
@@ -320,7 +333,9 @@ namespace aten {
 						}
 					}
 
-					if (tmpexid < 0) {
+					if (tmpexid < 0)
+#endif
+					{
 						if (isectTmp.t < isect.t) {
 							isect = isectTmp;
 						}
@@ -339,6 +354,7 @@ namespace aten {
 			}
 		}
 
+#if 0
 		if (candidateExidNum > 0) {
 			for (int i = 0; i < candidateExidNum; i++) {
 				const auto& c = candidateExid[i];
@@ -361,6 +377,7 @@ namespace aten {
 				}
 			}
 		}
+#endif
 
 		return (isect.objid >= 0);
 	}

@@ -175,6 +175,9 @@
     <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

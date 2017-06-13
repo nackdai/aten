@@ -110,14 +110,11 @@ __global__ void hitTest(
 	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (ix >= width && iy >= height) {
+	if (idx >= width * height) {
 		return;
 	}
-
-	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -588,6 +585,9 @@ namespace idaten {
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
+		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
+		dim3 threadPerBlock_HitTest(128);
+
 		int depth = 0;
 
 		idaten::TypedCudaMemory<Path> paths;
@@ -635,7 +635,7 @@ namespace idaten {
 			depth = 0;
 
 			while (depth < maxDepth) {
-				hitTest << <grid, block >> > (
+				hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
 				//hitTest << <1, 1 >> > (
 					paths.ptr(),
 					isects.ptr(),
@@ -668,8 +668,12 @@ namespace idaten {
 
 				//AT_PRINTF("%d\n", hitcount);
 
-				dim3 blockPerGrid((hitcount + 256 - 1) / 256);
-				dim3 threadPerBlock(256);
+				if (hitcount == 0) {
+					break;
+				}
+
+				dim3 blockPerGrid((hitcount + 64 - 1) / 64);
+				dim3 threadPerBlock(64);
 
 				shade << <blockPerGrid, threadPerBlock >> > (
 				//shade << <1, 1 >> > (

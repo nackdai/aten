@@ -187,7 +187,7 @@ namespace idaten
 		idaten::TypedCudaMemory<int>& src,
 		idaten::TypedCudaMemory<int>& dst)
 	{
-		AT_ASSERT(dst.maxNum() < g_maxInputNum);
+		AT_ASSERT(dst.maxNum() <= g_maxInputNum);
 
 		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
 

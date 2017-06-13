@@ -106,28 +106,26 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
 	const real t = T * rcpDet;
 #endif
 
-	bool isIntersect = ((beta >= real(0) && beta <= real(1))
-		&& (gamma >= real(0) && gamma <= real(1))
-		&& (beta + gamma <= real(1))
-		&& t >= real(0));
+	const real alpha = real(1) - beta - gamma;
+
+	bool isIntersect = (beta >= real(0))
+		&& (gamma >= real(0))
+		&& (alpha >= real(0))
+		&& (t >= real(0));
 
 	if (isIntersect) {
-		if (t < isect->t) {
-			isect->t = t;
+		isect->t = t;
 
-			isect->area = prim->area;
+		isect->area = prim->area;
 
-			isect->a = beta;
-			isect->b = gamma;
+		isect->a = beta;
+		isect->b = gamma;
 
-			// NOTE
-			// isect->primid value will be set later.
-
-			return true;
-		}
+		// NOTE
+		// isect->primid value will be set later.
 	}
 
-	return false;
+	return isIntersect;
 }
 
 AT_CUDA_INLINE __device__ void evalHitResultTriangle(

@@ -392,7 +392,7 @@ namespace AT_NAME
 				s->m_externalId,
 				nodes,
 				instanceParent,
-				mat4::Identity);
+				aten::mat4::Identity);
 		}
 
 		return false;

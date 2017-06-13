@@ -67,109 +67,7 @@ struct BVHCandidate {
 	int shapeid;
 };
 
-__device__ bool intersectBVH(
-	cudaTextureObject_t nodes,
-	BVHCandidate* candidates,
-	int& candidateNum,
-	const Context* ctxt,
-	const aten::ray r,
-	float t_min, float t_max,
-	aten::Intersection* isect,
-	IntersectType type = IntersectType::Closest)
-{
-	aten::Intersection isectTmp;
-
-	real hitt = t_max;
-	isect->t = t_max;
-
-	int tmpexid = -1;
-
-	int nodeid = 0;
-	float4 node;	// x:left, y:right
-	float4 attrib;	// x:shapeid, y:primid, z:nestid
-
-	float4 aabb[2];
-
-	BVHRay bvhray(r);
-	real t = AT_MATH_INF;
-
-	for (;;) {
-		if (nodeid < 0) {
-			break;
-		}
-
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
-		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
-
-		auto boxmin = aten::vec3(aabb[0].x, aabb[0].y, aabb[0].z);
-		auto boxmax = aten::vec3(aabb[1].x, aabb[1].y, aabb[1].z);
-
-		bool isHit = false;
-
-		if (attrib.x >= 0 || attrib.y >= 0) {
-			// Leaf.
-			tmpexid = -1;
-
-			const auto* s = &ctxt->shapes[(int)attrib.x];
-
-			if (attrib.z >= 0) {	// exid
-				isectTmp.t = AT_MATH_INF;
-				//isHit = intersectAABB(&bvhray, aabb, isectTmp.t);
-				isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &isectTmp.t);
-				tmpexid = attrib.z;
-			}
-			else {
-				// TODO
-				// Only sphere...
-				//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
-				isectTmp.t = AT_MATH_INF;
-				hitSphere(s, r, t_min, t_max, &isectTmp);
-				isectTmp.mtrlid = s->mtrl.idx;
-			}
-
-#if 0
-			if (isectTmp.t < hitt)
-#else
-			if (isHit)
-#endif
-			{
-				hitt = isectTmp.t;
-
-				if (tmpexid >= 0) {
-					candidates[candidateNum].exid = tmpexid;
-					candidates[candidateNum].shapeid = (int)attrib.x;
-					candidateNum++;
-				}
-			}
-			if (tmpexid < 0) {
-				if (isectTmp.t < isect->t) {
-					*isect = isectTmp;
-					isect->objid = (int)attrib.x;
-
-					if (type == IntersectType::Closer) {
-						return true;
-					}
-				}
-			}
-		}
-		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-		}
-
-		if (isHit) {
-			nodeid = (int)node.x;
-		}
-		else {
-			nodeid = (int)node.y;
-		}
-	}
-
-	return (isect->objid >= 0);
-}
-
-__device__ bool intersectBVH(
+__device__ bool intersectBVHTriangles(
 	cudaTextureObject_t nodes,
 	const Context* ctxt,
 	const aten::ray r,
@@ -238,6 +136,95 @@ __device__ bool intersectBVH(
 	return (isect->objid >= 0);
 }
 
+__device__ bool intersectBVH(
+	cudaTextureObject_t nodes,
+	const Context* ctxt,
+	const aten::ray r,
+	float t_min, float t_max,
+	aten::Intersection* isect,
+	IntersectType type = IntersectType::Closest)
+{
+	aten::Intersection isectTmp;
+
+	real hitt = t_max;
+	isect->t = t_max;
+
+	int tmpexid = -1;
+
+	int nodeid = 0;
+	float4 node;	// x:left, y:right
+	float4 attrib;	// x:shapeid, y:primid, z:nestid
+
+	float4 aabb[2];
+
+	BVHRay bvhray(r);
+	real t = AT_MATH_INF;
+
+	for (;;) {
+		if (nodeid < 0) {
+			break;
+		}
+
+		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
+		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
+		aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+
+		auto boxmin = aten::vec3(aabb[0].x, aabb[0].y, aabb[0].z);
+		auto boxmax = aten::vec3(aabb[1].x, aabb[1].y, aabb[1].z);
+
+		bool isHit = false;
+
+		if (attrib.x >= 0 || attrib.y >= 0) {
+			// Leaf.
+			tmpexid = -1;
+
+			const auto* s = &ctxt->shapes[(int)attrib.x];
+
+			if (attrib.z >= 0) {	// exid
+				auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+
+				aten::ray transformedRay;
+				transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+				transformedRay.dir = normalize(transformedRay.dir);
+				transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+
+				isHit = intersectBVHTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+			}
+			else {
+				// TODO
+				// Only sphere...
+				//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+				isectTmp.t = AT_MATH_INF;
+				isHit = hitSphere(s, r, t_min, t_max, &isectTmp);
+				isectTmp.mtrlid = s->mtrl.idx;
+			}
+
+			if (isHit) {
+				if (isectTmp.t < isect->t) {
+					*isect = isectTmp;
+					isect->objid = (int)attrib.x;
+
+					if (type == IntersectType::Closer) {
+						return true;
+					}
+				}
+			}
+		}
+		else {
+			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+		}
+
+		if (isHit) {
+			nodeid = (int)node.x;
+		}
+		else {
+			nodeid = (int)node.y;
+		}
+	}
+
+	return (isect->objid >= 0);
+}
 
 __device__ bool intersectBVH(
 	const Context* ctxt,
@@ -247,38 +234,12 @@ __device__ bool intersectBVH(
 	float t_min = AT_MATH_EPSILON;
 	float t_max = AT_MATH_INF;
 
-	BVHCandidate candidates[STACK_SIZE];
-	int candidateNum = 0;
-
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
-		candidates, candidateNum,
 		ctxt,
 		r,
 		t_min, t_max,
 		isect);
-
-	for (int i = 0; i < candidateNum; i++) {
-		const auto& c = candidates[i];
-
-		aten::Intersection isectTmp;
-
-		const auto& param = ctxt->shapes[c.shapeid];
-
-		auto mtxW2L = ctxt->matrices[param.mtxid * 2 + 1];
-
-		aten::ray transformedRay;
-		transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-		transformedRay.dir = normalize(transformedRay.dir);
-		transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
-
-		if (intersectBVH(ctxt->nodes[c.exid], ctxt, transformedRay, t_min, t_max, &isectTmp)) {
-			if (isectTmp.t < isect->t) {
-				*isect = isectTmp;
-				isHit = true;
-			}
-		}
-	}
 
 	return isHit;
 }
@@ -291,45 +252,13 @@ __device__ bool intersectCloserBVH(
 {
 	float t_min = AT_MATH_EPSILON;
 
-	BVHCandidate candidates[STACK_SIZE];
-	int candidateNum = 0;
-
 	bool isHit = intersectBVH(
 		ctxt->nodes[0],
-		candidates, candidateNum,
 		ctxt,
 		r,
 		t_min, t_max,
 		isect,
 		IntersectType::Closer);
-
-	aten::ray transformedRay;
-	int previd = -1;
-
-	for(int i = 0; i < candidateNum; i++) {
-		const auto& c = candidates[i];
-
-		aten::Intersection isectTmp;
-
-		const auto& param = ctxt->shapes[c.shapeid];
-
-		auto mtxW2L = ctxt->matrices[param.mtxid * 2 + 1];
-
-		if (c.shapeid != previd)
-		{
-			transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-			transformedRay.dir = normalize(transformedRay.dir);
-			transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
-		}
-		previd = c.shapeid;
-
-		if (intersectBVH(ctxt->nodes[c.exid], ctxt, transformedRay, t_min, t_max, &isectTmp, IntersectType::Closer)) {
-			if (isectTmp.t < isect->t) {
-				*isect = isectTmp;
-				isHit = true;
-			}
-		}
-	}
 
 	return isHit;
 }

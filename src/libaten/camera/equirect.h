@@ -24,6 +24,18 @@ namespace aten {
 			m_dir = normalize(lookat - origin);
 			m_right = normalize(cross(m_dir, up));
 			m_up = cross(m_right, m_dir);
+
+			// ílÇï€éù.
+			m_at = lookat;
+			m_width = width;
+			m_height = height;
+		}
+
+		virtual void update() override final
+		{
+			init(
+				m_origin, m_at, m_up,
+				m_width, m_height);
 		}
 
 		virtual CameraSampleResult sample(
@@ -37,6 +49,15 @@ namespace aten {
 		virtual const vec3& getDir() const override final
 		{
 			return m_dir;
+		}
+
+		virtual aten::vec3& getPos() override final
+		{
+			return m_origin;
+		}
+		virtual aten::vec3& getAt() override final
+		{
+			return m_at;
 		}
 
 		void revertRayToPixelPos(
@@ -53,5 +74,9 @@ namespace aten {
 		vec3 m_dir;
 		vec3 m_right;
 		vec3 m_up;
+
+		vec3 m_at;
+		real m_width;
+		real m_height;
 	};
 }

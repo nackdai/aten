@@ -18,6 +18,8 @@ namespace AT_NAME {
 			real vfov,	// vertical fov.
 			uint32_t width, uint32_t height);
 
+		virtual void update() override final;
+
 		virtual CameraSampleResult sample(
 			real s, real t,
 			aten::sampler* sampler) const override final;
@@ -34,6 +36,15 @@ namespace AT_NAME {
 		virtual const aten::vec3& getDir() const override final
 		{
 			return m_param.dir;
+		}
+
+		virtual aten::vec3& getPos() override final
+		{
+			return m_param.origin;
+		}
+		virtual aten::vec3& getAt() override final
+		{
+			return m_at;
 		}
 
 		const aten::CameraParameter& param() const
@@ -69,5 +80,7 @@ namespace AT_NAME {
 
 	private:
 		aten::CameraParameter m_param;
+		vec3 m_at;
+		real m_vfov;
 	};
 }

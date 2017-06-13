@@ -20,6 +20,8 @@ namespace aten {
 			real lensRadius,
 			real W_scale);
 
+		virtual void update() override final;
+
 		virtual CameraSampleResult sample(
 			real s, real t,
 			sampler* sampler) const override final;
@@ -67,6 +69,15 @@ namespace aten {
 		virtual const vec3& getDir() const override final
 		{
 			return m_imagesensor.dir;
+		}
+
+		virtual aten::vec3& getPos() override final
+		{
+			return m_imagesensor.center;
+		}
+		virtual aten::vec3& getAt() override final
+		{
+			return m_at;
 		}
 
 		void revertRayToPixelPos(
@@ -126,5 +137,9 @@ namespace aten {
 
 		// イメージセンサの感度
 		real m_W;
+
+		vec3 m_at;	// 注視点.
+		vec3 m_vup;
+		real m_Wscale;
 	};
 }

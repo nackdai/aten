@@ -42,6 +42,8 @@ namespace AT_NAME {
 		camera() {}
 		virtual ~camera() {}
 
+		virtual void update() = 0;
+
 		virtual CameraSampleResult sample(
 			real s, real t,
 			aten::sampler* sampler) const = 0;
@@ -96,6 +98,9 @@ namespace AT_NAME {
 
 		virtual const aten::vec3& getPos() const = 0;
 		virtual const aten::vec3& getDir() const = 0;
+
+		virtual aten::vec3& getPos() = 0;
+		virtual aten::vec3& getAt() = 0;
 
 		virtual void revertRayToPixelPos(
 			const aten::ray& ray,

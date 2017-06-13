@@ -50,6 +50,11 @@ namespace aten {
 		real lensRadius,
 		real W_scale)
 	{
+		// 値を保持.
+		m_at = lookat;
+		m_vup = vup;
+		m_Wscale = W_scale;
+
 		m_imageWidthPx = width;
 		m_imageHeightPx = height;
 
@@ -88,6 +93,18 @@ namespace aten {
 
 		// W(xI <- x0) センサのセンシティビティは簡単のため定数にしておく.
 		m_W = W_scale / (m_pixelWidth * m_pixelHeight);
+	}
+
+	void ThinLensCamera::update()
+	{
+		init(
+			m_imageWidthPx, m_imageHeightPx,
+			m_imagesensor.center, m_at, m_vup,
+			m_imagesensor.height,	// image sensor size.
+			m_imageSensorToLensDistance,
+			m_lensToObjectplaneDistance,
+			m_lens.radius,
+			m_Wscale);
 	}
 
 	CameraSampleResult ThinLensCamera::sample(

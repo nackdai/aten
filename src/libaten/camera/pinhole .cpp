@@ -8,6 +8,10 @@ namespace AT_NAME {
 		real vfov,	// vertical fov.
 		uint32_t width, uint32_t height)
 	{
+		// ílÇï€éù.
+		m_at = lookat;
+		m_vfov = vfov;
+
 		real theta = Deg2Rad(vfov);
 
 		m_param.aspect = width / (real)height;
@@ -32,6 +36,17 @@ namespace AT_NAME {
 
 		m_param.width = width;
 		m_param.height = height;
+	}
+
+	void PinholeCamera::update()
+	{
+		init(
+			m_param.origin,
+			m_at,
+			m_param.up,
+			m_vfov,
+			m_param.width,
+			m_param.height);
 	}
 
 	CameraSampleResult PinholeCamera::sample(

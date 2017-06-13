@@ -23,10 +23,12 @@ namespace idaten {
 
 	void CudaMemory::init(uint32_t bytes)
 	{
-		checkCudaErrors(cudaMalloc((void**)&m_device, bytes));
-		m_bytes = bytes;
+		if (m_bytes == 0) {
+			checkCudaErrors(cudaMalloc((void**)&m_device, bytes));
+			m_bytes = bytes;
 
-		g_heapsize += bytes;
+			g_heapsize += bytes;
+		}
 	}
 
 	__host__ uint32_t CudaMemory::write(const void* p, uint32_t size)

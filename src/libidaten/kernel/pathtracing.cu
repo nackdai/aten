@@ -567,6 +567,11 @@ namespace idaten {
 
 	static bool doneSetStackSize = false;
 
+	static idaten::TypedCudaMemory<Path> paths;
+	static idaten::TypedCudaMemory<aten::Intersection> isects;
+	static idaten::TypedCudaMemory<aten::ray> rays;
+	static idaten::TypedCudaMemory<ShadowRay> shadowRays;
+
 	void PathTracing::render(
 		aten::vec4* image,
 		int width, int height)
@@ -590,17 +595,12 @@ namespace idaten {
 
 		int depth = 0;
 
-		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
-
-		idaten::TypedCudaMemory<aten::Intersection> isects;
 		isects.init(width * height);
-
-		idaten::TypedCudaMemory<aten::ray> rays;
 		rays.init(width * height);
-
-		idaten::TypedCudaMemory<ShadowRay> shadowRays;
 		shadowRays.init(width * height);
+
+		cudaMemset(paths.ptr(), 0, paths.bytes());
 
 		CudaGLResourceMap rscmap(&glimg);
 		auto outputSurf = glimg.bind();

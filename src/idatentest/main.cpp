@@ -10,6 +10,8 @@
 #include "atenscene.h"
 #include "idaten.h"
 
+#define CORNELLBOX_SUZANNE
+
 static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "app";
@@ -31,7 +33,7 @@ static idaten::PathTracing g_tracer;
 
 void makeScene(aten::scene* scene)
 {
-#if 0
+#ifdef CORNELLBOX_SUZANNE
 	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
 	//auto emit = new aten::emissive(aten::vec3(3, 3, 3));
 
@@ -202,7 +204,7 @@ int main()
 
 	aten::visualizer::addPostProc(&gamma);
 
-#if 0
+#ifdef CORNELLBOX_SUZANNE
 	g_camera.init(
 		aten::vec3(50.0, 52.0, 295.6),
 		aten::vec3(50.0, 40.8, 119.0),

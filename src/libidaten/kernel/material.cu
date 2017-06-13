@@ -9,151 +9,8 @@
 
 #include "aten4idaten.h"
 
-typedef void(*FuncSampleMaterial)(
-	AT_NAME::MaterialSampling*,
-	const aten::MaterialParameter*,
-	const aten::vec3&,
-	const aten::vec3&,
-	const aten::vec3&,
-	aten::sampler*,
-	float, float,
-	bool);
-
-typedef real(*FuncPDF)(
-	const aten::MaterialParameter*,
-	const aten::vec3&,
-	const aten::vec3&,
-	const aten::vec3&,
-	real, real);
-
-typedef aten::vec3(*FuncSampleDirection)(
-	const aten::MaterialParameter*,
-	const aten::vec3&,
-	const aten::vec3&,
-	real u, real v,
-	aten::sampler*);
-
-typedef aten::vec3(*FuncBSDF)(
-	const aten::MaterialParameter*,
-	const aten::vec3&,
-	const aten::vec3&,
-	const aten::vec3&,
-	real, real);
-
-__device__ void sampleMtrlNotSupported(
-	AT_NAME::MaterialSampling*,
-	const aten::MaterialParameter* param,
-	const aten::vec3& normal,
-	const aten::vec3& wi,
-	const aten::vec3& orgnormal,
-	aten::sampler* sampler,
-	real u, real v,
-	bool isLightPath)
-{
-	printf("Sample Material Not Supported[%d]\n", param->type);
-}
-
-__device__ real pdfNotSupported(
-	const aten::MaterialParameter* param,
-	const aten::vec3& normal,
-	const aten::vec3& wi,
-	const aten::vec3& wo,
-	real u, real v)
-{
-	printf("Sample PDF Not Supported[%d]\n", param->type);
-	return 0;
-}
-
-__device__ aten::vec3 sampleDirectionNotSupported(
-	const aten::MaterialParameter* param,
-	const aten::vec3& normal,
-	const aten::vec3& wi,
-	real u, real v,
-	aten::sampler* sampler)
-{
-	printf("Sample SampleDirection Not Supported[%d]\n", param->type);
-	return aten::vec3();
-}
-
-__device__ aten::vec3 bsdfNotSupported(
-	const aten::MaterialParameter* param,
-	const aten::vec3& normal,
-	const aten::vec3& wi,
-	const aten::vec3& wo,
-	real u, real v)
-{
-	printf("Sample BSDF Not Supported[%d]\n", param->type);
-	return aten::vec3();
-}
-
-__device__ FuncSampleMaterial funcSampleMaterial[aten::MaterialType::MaterialTypeMax];
-__device__ FuncPDF funcPDF[aten::MaterialType::MaterialTypeMax];
-__device__ FuncSampleDirection funcSampleDirection[aten::MaterialType::MaterialTypeMax];
-__device__ FuncBSDF funcBSDF[aten::MaterialType::MaterialTypeMax];
-
 __device__ void addMaterialFuncs()
 {
-#if 1
-	funcSampleMaterial[aten::MaterialType::Emissive] = AT_NAME::emissive::sample;			// Emissive
-	funcSampleMaterial[aten::MaterialType::Lambert] = AT_NAME::lambert::sample;				// Lambert
-	funcSampleMaterial[aten::MaterialType::OrneNayar] = AT_NAME::OrenNayar::sample;			// OrneNayar
-	funcSampleMaterial[aten::MaterialType::Specular] = AT_NAME::specular::sample;			// Specular
-	funcSampleMaterial[aten::MaterialType::Refraction] = AT_NAME::refraction::sample;		// Refraction
-	funcSampleMaterial[aten::MaterialType::Blinn] = AT_NAME::MicrofacetBlinn::sample;		// MicrofacetBlinn
-	funcSampleMaterial[aten::MaterialType::GGX] = AT_NAME::MicrofacetGGX::sample;			// MicrofacetGGX
-	funcSampleMaterial[aten::MaterialType::Beckman] = AT_NAME::MicrofacetBeckman::sample;	// MicrofacetBeckman
-	funcSampleMaterial[aten::MaterialType::Disney] = sampleMtrlNotSupported;	// DisneyBRDF
-	funcSampleMaterial[aten::MaterialType::Toon] = sampleMtrlNotSupported;		// Toon
-	funcSampleMaterial[aten::MaterialType::Layer] = sampleMtrlNotSupported;		// Layer
-#else
-	funcSampleMaterial[aten::MaterialType::Emissive] = sampleMtrlNotSupported;			// Emissive
-	funcSampleMaterial[aten::MaterialType::Lambert] = sampleMtrlNotSupported;			// Lambert
-	funcSampleMaterial[aten::MaterialType::OrneNayar] = sampleMtrlNotSupported;			// OrneNayar
-	funcSampleMaterial[aten::MaterialType::Specular] = AT_NAME::specular::sample;		// Specular
-	funcSampleMaterial[aten::MaterialType::Refraction] = AT_NAME::refraction::sample;	// Refraction
-	funcSampleMaterial[aten::MaterialType::Blinn] = sampleMtrlNotSupported;		// MicrofacetBlinn
-	funcSampleMaterial[aten::MaterialType::GGX] = sampleMtrlNotSupported;		// MicrofacetGGX
-	funcSampleMaterial[aten::MaterialType::Beckman] = sampleMtrlNotSupported;	// MicrofacetBeckman
-	funcSampleMaterial[aten::MaterialType::Disney] = sampleMtrlNotSupported;	// DisneyBRDF
-	funcSampleMaterial[aten::MaterialType::Toon] = sampleMtrlNotSupported;		// Toon
-	funcSampleMaterial[aten::MaterialType::Layer] = sampleMtrlNotSupported;		// Layer
-#endif
-
-	funcPDF[aten::MaterialType::Emissive] = AT_NAME::emissive::pdf;			// Emissive
-	funcPDF[aten::MaterialType::Lambert] = AT_NAME::lambert::pdf;			// Lambert
-	funcPDF[aten::MaterialType::OrneNayar] = AT_NAME::OrenNayar::pdf;		// OrneNayar
-	funcPDF[aten::MaterialType::Specular] = AT_NAME::specular::pdf;			// Specular
-	funcPDF[aten::MaterialType::Refraction] = AT_NAME::refraction::pdf;		// Refraction
-	funcPDF[aten::MaterialType::Blinn] = AT_NAME::MicrofacetBlinn::pdf;		// MicrofacetBlinn
-	funcPDF[aten::MaterialType::GGX] = AT_NAME::MicrofacetGGX::pdf;			// MicrofacetGGX
-	funcPDF[aten::MaterialType::Beckman] = AT_NAME::MicrofacetBeckman::pdf;	// MicrofacetBeckman
-	funcPDF[aten::MaterialType::Disney] = pdfNotSupported;	// DisneyBRDF
-	funcPDF[aten::MaterialType::Toon] = pdfNotSupported;	// Toon
-	funcPDF[aten::MaterialType::Layer] = pdfNotSupported;	// Layer
-
-	funcSampleDirection[aten::MaterialType::Emissive] = AT_NAME::emissive::sampleDirection;			// Emissive
-	funcSampleDirection[aten::MaterialType::Lambert] = AT_NAME::lambert::sampleDirection;			// Lambert
-	funcSampleDirection[aten::MaterialType::OrneNayar] = AT_NAME::OrenNayar::sampleDirection;		// OrneNayar
-	funcSampleDirection[aten::MaterialType::Specular] = AT_NAME::specular::sampleDirection;			// Specular
-	funcSampleDirection[aten::MaterialType::Refraction] = AT_NAME::refraction::sampleDirection;		// Refraction
-	funcSampleDirection[aten::MaterialType::Blinn] = AT_NAME::MicrofacetBlinn::sampleDirection;		// MicrofacetBlinn
-	funcSampleDirection[aten::MaterialType::GGX] = AT_NAME::MicrofacetGGX::sampleDirection;			// MicrofacetGGX
-	funcSampleDirection[aten::MaterialType::Beckman] = AT_NAME::MicrofacetBeckman::sampleDirection;	// MicrofacetBeckman
-	funcSampleDirection[aten::MaterialType::Disney] = sampleDirectionNotSupported;	// DisneyBRDF
-	funcSampleDirection[aten::MaterialType::Toon] = sampleDirectionNotSupported;	// Toon
-	funcSampleDirection[aten::MaterialType::Layer] = sampleDirectionNotSupported;	// Layer
-
-	funcBSDF[aten::MaterialType::Emissive] = AT_NAME::emissive::bsdf;			// Emissive
-	funcBSDF[aten::MaterialType::Lambert] = AT_NAME::lambert::bsdf;				// Lambert
-	funcBSDF[aten::MaterialType::OrneNayar] = AT_NAME::OrenNayar::bsdf;			// OrneNayar
-	funcBSDF[aten::MaterialType::Specular] = AT_NAME::specular::bsdf;			// Specular
-	funcBSDF[aten::MaterialType::Refraction] = AT_NAME::refraction::bsdf;		// Refraction
-	funcBSDF[aten::MaterialType::Blinn] = AT_NAME::MicrofacetBlinn::bsdf;		// MicrofacetBlinn
-	funcBSDF[aten::MaterialType::GGX] = AT_NAME::MicrofacetGGX::bsdf;			// MicrofacetGGX
-	funcBSDF[aten::MaterialType::Beckman] = AT_NAME::MicrofacetBeckman::bsdf;	// MicrofacetBeckman
-	funcBSDF[aten::MaterialType::Disney] = bsdfNotSupported;	// DisneyBRDF
-	funcBSDF[aten::MaterialType::Toon] = bsdfNotSupported;		// Toon
-	funcBSDF[aten::MaterialType::Layer] = bsdfNotSupported;		// Layer
 }
 
 __device__ void sampleMaterial(
@@ -165,7 +22,36 @@ __device__ void sampleMaterial(
 	aten::sampler* sampler,
 	float u, float v)
 {
-	funcSampleMaterial[mtrl->type](result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+	switch (mtrl->type) {
+	case aten::MaterialType::Emissive:
+		AT_NAME::emissive::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Lambert:
+		AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::OrneNayar:
+		AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Specular:
+		AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Refraction:
+		AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Blinn:
+		AT_NAME::MicrofacetBlinn::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::GGX:
+		AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Beckman:
+		AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Disney:
+	case aten::MaterialType::Toon:
+	case aten::MaterialType::Layer:
+		break;
+	}
 }
 
 __device__ real samplePDF(
@@ -175,7 +61,40 @@ __device__ real samplePDF(
 	const aten::vec3& wo,
 	real u, real v)
 {
-	return funcPDF[mtrl->type](mtrl, normal, wi, wo, u, v);
+	real pdf = real(0);
+
+	switch (mtrl->type) {
+	case aten::MaterialType::Emissive:
+		pdf = AT_NAME::emissive::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::Lambert:
+		pdf = AT_NAME::lambert::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::OrneNayar:
+		pdf = AT_NAME::OrenNayar::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::Specular:
+		pdf = AT_NAME::specular::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::Refraction:
+		pdf = AT_NAME::refraction::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::Blinn:
+		pdf = AT_NAME::MicrofacetBlinn::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::GGX:
+		pdf = AT_NAME::MicrofacetGGX::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::Beckman:
+		pdf = AT_NAME::MicrofacetBeckman::pdf(mtrl, normal, wi, wo, u, v);
+		break;
+	case aten::MaterialType::Disney:
+	case aten::MaterialType::Toon:
+	case aten::MaterialType::Layer:
+		break;
+	}
+
+	return pdf;
 }
 
 __device__ aten::vec3 sampleDirection(
@@ -185,7 +104,31 @@ __device__ aten::vec3 sampleDirection(
 	real u, real v,
 	aten::sampler* sampler)
 {
-	return funcSampleDirection[mtrl->type](mtrl, normal, wi, u, v, sampler);
+	switch (mtrl->type) {
+	case aten::MaterialType::Emissive:
+		return AT_NAME::emissive::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::Lambert:
+		return AT_NAME::lambert::sampleDirection(mtrl, normal, wi, u, v, sampler);
+		break;
+	case aten::MaterialType::OrneNayar:
+		return AT_NAME::OrenNayar::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::Specular:
+		return AT_NAME::specular::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::Refraction:
+		return AT_NAME::refraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::Blinn:
+		return AT_NAME::MicrofacetBlinn::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::GGX:
+		return AT_NAME::MicrofacetGGX::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::Beckman:
+		return AT_NAME::MicrofacetBeckman::sampleDirection(mtrl, normal, wi, u, v, sampler);
+	case aten::MaterialType::Disney:
+	case aten::MaterialType::Toon:
+	case aten::MaterialType::Layer:
+		break;
+	}
+
+	return std::move(aten::vec3(0, 1, 0));
 }
 
 __device__ aten::vec3 sampleBSDF(
@@ -195,5 +138,28 @@ __device__ aten::vec3 sampleBSDF(
 	const aten::vec3& wo,
 	real u, real v)
 {
-	return funcBSDF[mtrl->type](mtrl, normal, wi, wo, u, v);
+	switch (mtrl->type) {
+	case aten::MaterialType::Emissive:
+		return AT_NAME::emissive::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Lambert:
+		return AT_NAME::lambert::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::OrneNayar:
+		return AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Specular:
+		return AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Refraction:
+		return AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Blinn:
+		return AT_NAME::MicrofacetBlinn::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::GGX:
+		return AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Beckman:
+		return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Disney:
+	case aten::MaterialType::Toon:
+	case aten::MaterialType::Layer:
+		break;
+	}
+
+	return std::move(aten::vec3());
 }

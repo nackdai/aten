@@ -98,7 +98,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
 		return AT_NAME::emissive::sampleDirection(mtrl, normal, wi, u, v, sampler);
 	case aten::MaterialType::Lambert:
 		return AT_NAME::lambert::sampleDirection(normal, sampler);
-		break;
 	case aten::MaterialType::OrneNayar:
 		return AT_NAME::OrenNayar::sampleDirection(mtrl, normal, wi, u, v, sampler);
 	case aten::MaterialType::Specular:

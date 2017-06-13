@@ -161,10 +161,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 {
 	aten::Intersection isectTmp;
 
-	real hitt = t_max;
 	isect->t = t_max;
-
-	int tmpexid = -1;
 
 	int nodeid = 0;
 	float4 node;	// x:left, y:right
@@ -187,8 +184,6 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 
 		if (attrib.x >= 0) {
 			// Leaf.
-			tmpexid = -1;
-
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
@@ -244,7 +239,6 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 {
 	aten::Intersection isectTmp;
 
-	real hitt = t_max;
 	isect->t = t_max;
 
 	int tmpexid = -1;

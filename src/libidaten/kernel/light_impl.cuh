@@ -93,7 +93,6 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
-	bool isHit = false;
 	aten::ShapeParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
 
 	aten::ray r;

@@ -68,12 +68,12 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 
 			isectTmp.t = AT_MATH_INF;
 			isHit = hitTriangle(&prim, ctxt, r, &isectTmp);
-			isectTmp.mtrlid = prim.mtrlid;
 
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
+				isect->mtrlid = prim.mtrlid;
 			}
 		}
 		else {
@@ -128,12 +128,12 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloserTriangles(
 
 			isectTmp.t = AT_MATH_INF;
 			isHit = hitTriangle(&prim, ctxt, r, &isectTmp);
-			isectTmp.mtrlid = prim.mtrlid;
 
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
+				isect->mtrlid = prim.mtrlid;
 				return true;
 			}
 		}

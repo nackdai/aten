@@ -188,7 +188,6 @@ __global__ void shade(
 	int hitnum,
 	aten::Intersection* isects,
 	aten::ray* rays,
-	ShadowRay* shadowRays,
 	int depth, int rrDepth,
 	aten::ShapeParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -223,8 +222,6 @@ __global__ void shade(
 
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
-
-	shadowRays[idx].isActive = false;
 
 	aten::hitrecord rec;
 
@@ -290,52 +287,79 @@ __global__ void shade(
 		auto lightobj = sampleres.obj;
 
 		auto dirToLight = normalize(sampleres.dir);
+		auto distToLight = length(sampleres.dir);
 
-		auto cosShadow = dot(orienting_normal, dirToLight);
+		real distHitObjToRayOrg = AT_MATH_INF;
 
-		real pdfb = samplePDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-		auto bsdf = sampleBSDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+		// Ray aim to the area light.
+		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+		auto hitobj = lightobj;
 
-		bsdf *= path.throughput;
+		aten::Intersection isectTmp;
+		aten::ray shadowRay(rec.p, dirToLight);
 
-		// Get light color.
-		auto emit = sampleres.finalColor;
+		bool isHit = false;
 
-		shadowRays[idx].org = rec.p + AT_MATH_EPSILON * dirToLight;
-		shadowRays[idx].dir = dirToLight;
-		shadowRays[idx].lightcontrib = aten::vec3(0);
-		shadowRays[idx].distToLight = length(sampleres.dir);
-		shadowRays[idx].targetLightId = lightidx;
+		if (light.type == aten::LightType::Area) {
+			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
+			//isHit = intersectBVH(&ctxt, shadowRay, &isect);
 
-		if (light.attrib.isSingular || light.attrib.isInfinite) {
-			if (pdfLight > real(0)) {
-				// TODO
-				// ジオメトリタームの扱いについて.
-				// singular light の場合は、finalColor に距離の除算が含まれている.
-				// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-				// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-				auto misW = pdfLight / (pdfb + pdfLight);
-				shadowRays[idx].lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
-				shadowRays[idx].isActive = true;
+			if (isHit) {
+				hitobj = &ctxt.shapes[isectTmp.objid];
 			}
 		}
 		else {
-			auto cosLight = dot(nmlLight, -dirToLight);
+			isHit = intersectBVH(&ctxt, shadowRay, &isectTmp);
+		}
 
-			if (cosShadow >= 0 && cosLight >= 0) {
-				auto dist2 = aten::squared_length(sampleres.dir);
-				auto G = cosShadow * cosLight / dist2;
+		isHit = AT_NAME::scene::hitLight(
+			isHit,
+			light.attrib,
+			lightobj,
+			distToLight,
+			distHitObjToRayOrg,
+			isectTmp.t,
+			hitobj);
 
-				if (pdfb > real(0) && pdfLight > real(0)) {
-					// Convert pdf from steradian to area.
-					// http://www.slideshare.net/h013/edubpt-v100
-					// p31 - p35
-					pdfb = pdfb * cosLight / dist2;
+		if (isHit) {
+			auto cosShadow = dot(orienting_normal, dirToLight);
 
+			real pdfb = samplePDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			auto bsdf = sampleBSDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+
+			bsdf *= path.throughput;
+
+			// Get light color.
+			auto emit = sampleres.finalColor;
+
+			if (light.attrib.isSingular || light.attrib.isInfinite) {
+				if (pdfLight > real(0)) {
+					// TODO
+					// ジオメトリタームの扱いについて.
+					// singular light の場合は、finalColor に距離の除算が含まれている.
+					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 					auto misW = pdfLight / (pdfb + pdfLight);
+					path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+				}
+			}
+			else {
+				auto cosLight = dot(nmlLight, -dirToLight);
 
-					shadowRays[idx].lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
-					shadowRays[idx].isActive = true;
+				if (cosShadow >= 0 && cosLight >= 0) {
+					auto dist2 = aten::squared_length(sampleres.dir);
+					auto G = cosShadow * cosLight / dist2;
+
+					if (pdfb > real(0) && pdfLight > real(0)) {
+						// Convert pdf from steradian to area.
+						// http://www.slideshare.net/h013/edubpt-v100
+						// p31 - p35
+						pdfb = pdfb * cosLight / dist2;
+
+						auto misW = pdfLight / (pdfb + pdfLight);
+
+						path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+					}
 				}
 			}
 		}
@@ -682,7 +706,6 @@ namespace idaten {
 					m_hitidx.ptr(), hitcount,
 					isects.ptr(),
 					rays.ptr(),
-					shadowRays.ptr(),
 					depth, rrDepth,
 					shapeparam.ptr(), shapeparam.num(),
 					mtrlparam.ptr(),
@@ -694,6 +717,7 @@ namespace idaten {
 
 				checkCudaKernel(shade);
 
+#if 0
 				hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 				//hitShadowRay << <1, 1 >> > (
 					paths.ptr(),
@@ -708,6 +732,7 @@ namespace idaten {
 					mtxparams.ptr());
 
 				checkCudaKernel(hitShadowRay);
+#endif
 
 				depth++;
 			}

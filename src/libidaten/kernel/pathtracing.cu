@@ -307,7 +307,7 @@ __global__ void shade(
 		shadowRays[idx].org = rec.p;
 		shadowRays[idx].dir = dirToLight;
 		shadowRays[idx].lightcontrib = aten::vec3(0);
-		shadowRays[idx].distToLight = sampleres.dir.length();
+		shadowRays[idx].distToLight = length(sampleres.dir);
 		shadowRays[idx].targetLightId = lightidx;
 
 		if (light.attrib.isSingular || light.attrib.isInfinite) {

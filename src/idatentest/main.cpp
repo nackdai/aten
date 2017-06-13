@@ -10,7 +10,7 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#define CORNELLBOX_SUZANNE
+//#define CORNELLBOX_SUZANNE
 
 static int WIDTH = 512;
 static int HEIGHT = 512;

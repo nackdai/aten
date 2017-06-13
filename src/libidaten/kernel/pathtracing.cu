@@ -4,7 +4,6 @@
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/bvh.cuh"
-#include "kernel/common.cuh"
 #include "kernel/compaction.h"
 
 #include <cuda_runtime.h>
@@ -539,7 +538,6 @@ __global__ void gather(
 namespace idaten {
 	void PathTracing::prepare()
 	{
-		addFuncs();
 	}
 
 	void PathTracing::update(

@@ -154,9 +154,6 @@
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h">
       <Filter>kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\common.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h">
       <Filter>cuda</Filter>
     </ClInclude>
@@ -308,9 +305,6 @@
       <Filter>aten\object</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\common.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\compaction.cu">

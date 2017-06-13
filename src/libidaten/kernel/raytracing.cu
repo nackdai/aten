@@ -4,7 +4,6 @@
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/bvh.cuh"
-#include "kernel/common.cuh"
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
@@ -336,7 +335,6 @@ __global__ void hitShadowRay(
 namespace idaten {
 	void RayTracing::prepare()
 	{
-		addFuncs();
 	}
 
 	void RayTracing::render(

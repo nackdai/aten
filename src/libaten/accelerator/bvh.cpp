@@ -299,9 +299,16 @@ namespace aten {
 
 					int mtxid = param.mtxid;
 
-					const auto& mtxW2L = smtxs[mtxid * 2 + 1];
+					aten::ray transformedRay;
 
-					auto transformedRay = mtxW2L.applyRay(r);
+					if (mtxid >= 0) {
+						const auto& mtxW2L = smtxs[mtxid * 2 + 1];
+
+						transformedRay = mtxW2L.applyRay(r);
+					}
+					else {
+						transformedRay = r;
+					}
 
 					isHit = _hit(&snodes[(int)node->exid][0], transformedRay, t_min, t_max, isectTmp);
 #endif
@@ -792,13 +799,15 @@ namespace aten {
 			auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
 
 			if (param.type == ShapeType::Instance) {
-				param.mtxid = mtxs.size() / 2;
-
 				aten::mat4 mtxL2W, mtxW2L;
 				s->getMatrices(mtxL2W, mtxW2L);
 
-				mtxs.push_back(mtxL2W);
-				mtxs.push_back(mtxW2L);
+				if (!mtxL2W.isIdentity()) {
+					param.mtxid = mtxs.size() / 2;
+
+					mtxs.push_back(mtxL2W);
+					mtxs.push_back(mtxW2L);
+				}
 			}
 		}
 

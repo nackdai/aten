@@ -182,12 +182,17 @@ __device__ bool intersectBVH(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
-
 				aten::ray transformedRay;
-				transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-				transformedRay.dir = normalize(transformedRay.dir);
-				transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+
+				if (s->mtxid >= 0) {
+					auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+					transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+					transformedRay.dir = normalize(transformedRay.dir);
+					transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+				}
+				else {
+					transformedRay = r;
+				}
 
 				isHit = intersectBVHTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
 			}

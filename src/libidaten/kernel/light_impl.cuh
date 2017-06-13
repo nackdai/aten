@@ -64,14 +64,20 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 
 	real orignalLen = (p1 - p0).length();
 
-	auto mtxL2W = ctxt->matrices[shape->mtxid * 2 + 0];
-
 	real scaledLen = 0;
-	{
-		auto v0 = mtxL2W.apply(p0);
-		auto v1 = mtxL2W.apply(p1);
 
-		scaledLen = (v1 - v0).length();
+	if (shape->mtxid >= 0) {
+		auto mtxL2W = ctxt->matrices[shape->mtxid * 2 + 0];
+
+		{
+			auto v0 = mtxL2W.apply(p0);
+			auto v1 = mtxL2W.apply(p1);
+
+			scaledLen = (v1 - v0).length();
+		}
+	}
+	else {
+		scaledLen = (p1 - p0).length();
 	}
 
 	real ratio = scaledLen / orignalLen;

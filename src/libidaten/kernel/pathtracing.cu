@@ -304,7 +304,7 @@ __global__ void shade(
 		// Get light color.
 		auto emit = sampleres.finalColor;
 
-		shadowRays[idx].org = rec.p;
+		shadowRays[idx].org = rec.p + AT_MATH_EPSILON * dirToLight;
 		shadowRays[idx].dir = dirToLight;
 		shadowRays[idx].lightcontrib = aten::vec3(0);
 		shadowRays[idx].distToLight = length(sampleres.dir);

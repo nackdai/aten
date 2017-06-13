@@ -170,22 +170,28 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	rec->u = uv.x;
 	rec->v = uv.y;
 
-	auto mtxL2W = ctxt->matrices[param->mtxid * 2 + 0];
-
-	rec->p = mtxL2W.apply(rec->p);
-	rec->normal = normalize(mtxL2W.applyXYZ(rec->normal));
-
 	aten::vec3 v0 = aten::vec3(p0.x, p0.y, p0.z);
 	aten::vec3 v1 = aten::vec3(p1.x, p1.y, p1.z);
 
 	real orignalLen = (v1 - v0).length();
 
 	real scaledLen = 0;
-	{
-		auto _p0 = mtxL2W.apply(v0);
-		auto _p1 = mtxL2W.apply(v1);
 
-		scaledLen = (_p1 - _p0).length();
+	if (param->mtxid >= 0) {
+		auto mtxL2W = ctxt->matrices[param->mtxid * 2 + 0];
+
+		rec->p = mtxL2W.apply(rec->p);
+		rec->normal = normalize(mtxL2W.applyXYZ(rec->normal));
+
+		{
+			auto _p0 = mtxL2W.apply(v0);
+			auto _p1 = mtxL2W.apply(v1);
+
+			scaledLen = (_p1 - _p0).length();
+		}
+	}
+	else {
+		scaledLen = (v1 - v0).length();
 	}
 
 	real ratio = scaledLen / orignalLen;

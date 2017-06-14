@@ -52,7 +52,9 @@ void onRun()
 
 	//aten::visualizer::render(g_buffer.image(), false);
 	aten::visualizer::render(false);
+#if 0
 	aten::visualizer::takeScreenshot("sc.png");
+#endif
 }
 
 void onClose()
@@ -64,19 +66,6 @@ bool g_isMouseLBtnDown = false;
 bool g_isMouseRBtnDown = false;
 int g_prevX = 0;
 int g_prevY = 0;
-
-inline real normalizeHorizontal(int x, real width)
-{
-	real ret = (real(2) * x - width) / width;
-	return ret;
-}
-
-inline real normalizeVertical(int y, real height)
-{
-	real ret = (height - real(2) * y) / height;
-	return ret;
-}
-
 
 void onMouseBtn(bool left, bool press, int x, int y)
 {
@@ -95,27 +84,18 @@ void onMouseBtn(bool left, bool press, int x, int y)
 void onMouseMove(int x, int y)
 {
 	if (g_isMouseLBtnDown) {
-		real x1 = normalizeHorizontal(g_prevX, WIDTH);
-		real y1 = normalizeVertical(g_prevY, HEIGHT);
-
-		real x2 = normalizeHorizontal(x, WIDTH);
-		real y2 = normalizeVertical(y, HEIGHT);
-
 		aten::CameraOperator::rotate(
 			g_camera,
-			x1, y1,
-			x2, y2);
+			WIDTH, HEIGHT,
+			g_prevX, g_prevY,
+			x, y);
 	}
 	else if (g_isMouseRBtnDown) {
-		real offsetX = (real)(g_prevX - x);
-		offsetX *= real(0.001);
-
-		real offsetY = (real)(g_prevY - y);
-		offsetY *= real(0.001);
-
 		aten::CameraOperator::move(
 			g_camera,
-			offsetX, offsetY);
+			g_prevX, g_prevY,
+			x, y,
+			real(0.001));
 	}
 
 	g_prevX = x;

@@ -7,13 +7,21 @@
 namespace aten {
 	void CameraOperator::move(
 		camera& camera,
-		real x, real y)
+		int x1, int y1,
+		int x2, int y2,
+		real scale/*= real(1)*/)
 	{
 		auto& pos = camera.getPos();
 		auto& at = camera.getAt();
 
+		real offsetX = (real)(x1 - x2);
+		offsetX *= scale;
+
+		real offsetY = (real)(y1 - y2);
+		offsetY *= scale;
+
 		// 移動ベクトル.
-		aten::vec3 offset(x, y, real(0));
+		aten::vec3 offset(offsetX, offsetY, real(0));
 
 		// カメラの回転を考慮する.
 		aten::vec3 dir = at - pos;
@@ -79,12 +87,31 @@ namespace aten {
 		return z;
 	}
 
+	static inline real normalizeHorizontal(int x, real width)
+	{
+		real ret = (real(2) * x - width) / width;
+		return ret;
+	}
+
+	static inline real normalizeVertical(int y, real height)
+	{
+		real ret = (height - real(2) * y) / height;
+		return ret;
+	}
+
 	void CameraOperator::rotate(
 		camera& camera,
-		real x1, real y1,
-		real x2, real y2)
+		int width, int height,
+		int _x1, int _y1,
+		int _x2, int _y2)
 	{
 		static const real radius = real(0.8);
+
+		real x1 = normalizeHorizontal(_x1, (real)width);
+		real y1 = normalizeVertical(_y1, (real)height);
+
+		real x2 = normalizeHorizontal(_x2, (real)width);
+		real y2 = normalizeVertical(_y2, (real)height);
 
 		// スクリーン上の２点からトラックボール上の点を計算する.
 		// GLUTと同じ方法.

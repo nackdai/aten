@@ -12,7 +12,9 @@ namespace aten {
 	public:
 		static void move(
 			camera& camera,
-			real x, real y);
+			int x1, int y1,
+			int x2, int y2,
+			real scale = real(1));
 
 		static void dolly(
 			camera& camera,
@@ -20,7 +22,8 @@ namespace aten {
 
 		static void rotate(
 			camera& camera,
-			real x1, real y1,
-			real x2, real y2);
+			int width, int height,
+			int _x1, int _y1,
+			int _x2, int _y2);
 	};
 }

@@ -10,7 +10,7 @@ namespace AT_NAME {
 		ImageBasedLight()
 			: Light(aten::LightType::IBL, LightAttributeIBL)
 		{}
-		ImageBasedLight(aten::envmap* envmap)
+		ImageBasedLight(AT_NAME::envmap* envmap)
 			: Light(aten::LightType::IBL, LightAttributeIBL)
 		{
 			setEnvMap(envmap);
@@ -21,7 +21,7 @@ namespace AT_NAME {
 		{
 			aten::texture* tex = (aten::texture*)val.get("envmap", nullptr);
 			
-			aten::envmap* bg = new aten::envmap();
+			AT_NAME::envmap* bg = new AT_NAME::envmap();
 			bg->init(tex);
 
 			setEnvMap(bg);
@@ -30,7 +30,7 @@ namespace AT_NAME {
 		virtual ~ImageBasedLight() {}
 
 	public:
-		void setEnvMap(aten::envmap* envmap)
+		void setEnvMap(AT_NAME::envmap* envmap)
 		{
 			if (m_param.envmap.ptr != envmap) {
 				m_param.envmap.ptr = envmap;
@@ -38,9 +38,9 @@ namespace AT_NAME {
 			}
 		}
 
-		const aten::envmap* getEnvMap() const
+		const AT_NAME::envmap* getEnvMap() const
 		{
-			return (aten::envmap*)m_param.envmap.ptr;
+			return (AT_NAME::envmap*)m_param.envmap.ptr;
 		}
 
 		real samplePdf(const aten::ray& r) const;

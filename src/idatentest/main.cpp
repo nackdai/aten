@@ -189,6 +189,8 @@ int main()
 		WIDTH * HEIGHT,
 		1024);
 
+	auto envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
+
 	{
 		std::vector<aten::ShapeParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
@@ -209,6 +211,9 @@ int main()
 		g_scene.getAccel()->collectNodes(nodes, mtxs);
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
+		std::vector<idaten::TextureResource> tex;
+		tex.push_back(idaten::TextureResource(envmap->colors(), envmap->width(), envmap->height()));
+
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),
 			WIDTH, HEIGHT,
@@ -219,7 +224,8 @@ int main()
 			nodes,
 			primparams,
 			vtxparams,
-			mtxs);
+			mtxs,
+			tex, 0);
 	}
 
 	aten::window::run(onRun);

@@ -155,7 +155,6 @@ __global__ void hitTest(
 }
 
 __global__ void shadeMiss(
-	cudaSurfaceObject_t outSurface,
 	Path* paths,
 	int width, int height)
 {
@@ -175,6 +174,38 @@ __global__ void shadeMiss(
 		auto bg = aten::vec3(0);
 
 		path.contrib += path.throughput * bg;
+
+		path.isTerminate = true;
+	}
+}
+
+__global__ void shadeMissWithEnvmap(
+	cudaTextureObject_t* textures,
+	int envmapIdx,
+	Path* paths,
+	aten::ray* rays,
+	int width, int height)
+{
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	const auto idx = getIdx(ix, iy, width);
+
+	auto& path = paths[idx];
+
+	if (!path.isTerminate && !path.isHit) {
+		auto r = rays[idx];
+
+		auto uv = AT_NAME::envmap::convertDirectionToUV(r.dir);
+
+		// TODO
+		auto bg = tex2D<float4>(textures[envmapIdx], uv.x, uv.y);
+
+		path.contrib += path.throughput * aten::vec3(bg.x, bg.y, bg.z);
 
 		path.isTerminate = true;
 	}
@@ -554,7 +585,9 @@ namespace idaten {
 		const std::vector<std::vector<aten::BVHNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
 		const std::vector<aten::vertex>& vtxs,
-		const std::vector<aten::mat4>& mtxs)
+		const std::vector<aten::mat4>& mtxs,
+		const std::vector<TextureResource>& texs,
+		int envmapIdx)
 	{
 		idaten::Renderer::update(
 			gltex,
@@ -566,7 +599,8 @@ namespace idaten {
 			nodes,
 			prims,
 			vtxs,
-			mtxs);
+			mtxs,
+			texs, envmapIdx);
 
 		m_hitbools.init(width * height);
 		m_hitidx.init(width * height);
@@ -634,12 +668,23 @@ namespace idaten {
 		auto vtxTexPos = vtxparamsPos.bind();
 		auto vtxTexNml = vtxparamsNml.bind();
 
-		std::vector<cudaTextureObject_t> tmp;
-		for (int i = 0; i < nodeparam.size(); i++) {
-			auto nodeTex = nodeparam[i].bind();
-			tmp.push_back(nodeTex);
+		{
+			std::vector<cudaTextureObject_t> tmp;
+			for (int i = 0; i < nodeparam.size(); i++) {
+				auto nodeTex = nodeparam[i].bind();
+				tmp.push_back(nodeTex);
+			}
+			nodetex.writeByNum(&tmp[0], tmp.size());
 		}
-		nodetex.writeByNum(&tmp[0], tmp.size());
+
+		{
+			std::vector<cudaTextureObject_t> tmp;
+			for (int i = 0; i < texRsc.size(); i++) {
+				auto cudaTex = texRsc[i].bind();
+				tmp.push_back(cudaTex);
+			}
+			tex.writeByNum(&tmp[0], tmp.size());
+		}
 
 		static const int maxSamples = 1;
 		static const int maxDepth = 5;
@@ -678,11 +723,21 @@ namespace idaten {
 
 				checkCudaKernel(hitTest);
 
-				shadeMiss << <grid, block >> > (
-				//shadeMiss << <1, 1 >> > (
-					outputSurf,
-					paths.ptr(),
-					width, height);
+				if (m_envmapIdx >= 0) {
+					shadeMissWithEnvmap << <grid, block >> > (
+					//shadeMissWithEnvmap << <1, 1 >> > (
+						tex.ptr(),
+						m_envmapIdx,
+						paths.ptr(),
+						rays.ptr(),
+						width, height);
+				}
+				else {
+					shadeMiss << <grid, block >> > (
+					//shadeMiss << <1, 1 >> > (
+						paths.ptr(),
+						width, height);
+				}
 
 				checkCudaKernel(shadeMiss);
 
@@ -748,12 +803,21 @@ namespace idaten {
 			width, height,
 			maxSamples);
 
-		vtxparamsPos.unbind();
-		vtxparamsNml .unbind();
-		for (int i = 0; i < nodeparam.size(); i++) {
-			nodeparam[i].unbind();
+		{
+			vtxparamsPos.unbind();
+			vtxparamsNml.unbind();
+
+			for (int i = 0; i < nodeparam.size(); i++) {
+				nodeparam[i].unbind();
+			}
+			nodetex.reset();
+
+			for (int i = 0; i < texRsc.size(); i++) {
+				texRsc[i].unbind();
+			}
+			tex.reset();
 		}
-		nodetex.reset();
+
 
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}

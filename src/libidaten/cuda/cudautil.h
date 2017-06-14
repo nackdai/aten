@@ -40,6 +40,8 @@ namespace idaten {
 
 				fprintf(stderr, "%s", buf);
 				::OutputDebugString(buf);
+
+				AT_ASSERT(false);
 #endif
 
 				cudaDeviceReset();

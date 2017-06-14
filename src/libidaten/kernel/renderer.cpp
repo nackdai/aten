@@ -11,7 +11,9 @@ namespace idaten {
 		const std::vector<std::vector<aten::BVHNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
 		const std::vector<aten::vertex>& vtxs,
-		const std::vector<aten::mat4>& mtxs)
+		const std::vector<aten::mat4>& mtxs,
+		const std::vector<TextureResource>& texs,
+		int envmapIdx)
 	{
 #if 0
 		size_t size_stack = 0;
@@ -69,6 +71,19 @@ namespace idaten {
 
 			vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size());
 			vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size());
+		}
+
+		if (!texs.empty()) {
+			for (int i = 0; i < texs.size(); i++) {
+				texRsc.push_back(idaten::CudaTexture());
+				texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
+			}
+			tex.init(texs.size());
+
+			AT_ASSERT(envmapIdx < texs.size());
+			if (envmapIdx < texs.size()) {
+				m_envmapIdx = envmapIdx;
+			}
 		}
 	}
 

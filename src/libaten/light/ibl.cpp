@@ -232,7 +232,7 @@ namespace AT_NAME {
 		result.pdf = (pdfU * pdfV) * ((width * height) / (pi2 * aten::sin(theta)));
 
 		// u, v -> direction.
-		result.dir = aten::envmap::convertUVToDirection(u, v);
+		result.dir = AT_NAME::envmap::convertUVToDirection(u, v);
 
 		result.le = envmap->sample(u, v);
 		result.intensity = real(1);

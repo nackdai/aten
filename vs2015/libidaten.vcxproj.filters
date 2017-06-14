@@ -178,6 +178,9 @@
     <ClInclude Include="..\src\libidaten\kernel\material_impl.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\envmap.h">
+      <Filter>aten\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -212,6 +215,9 @@
     </Filter>
     <Filter Include="aten\sampler">
       <UniqueIdentifier>{4419bdc9-7db1-48c5-a291-f22a459053e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\renderer">
+      <UniqueIdentifier>{c6ab3f50-f917-4d20-8e85-5d0d3482393d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -250,6 +256,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\renderer.cpp">
       <Filter>kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
+      <Filter>aten\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

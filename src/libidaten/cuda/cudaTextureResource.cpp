@@ -6,7 +6,7 @@ namespace idaten
 	// https://devblogs.nvidia.com/parallelforall/cuda-pro-tip-kepler-texture-objects-improve-performance-and-flexibility/
 
 	void CudaTextureResource::init(
-		aten::vec4* p,
+		const aten::vec4* p,
 		uint32_t memberNumInItem,
 		uint32_t numOfContaints)
 	{
@@ -53,5 +53,50 @@ namespace idaten
 			checkCudaErrors(cudaDestroyTextureObject(m_tex));
 			m_tex = 0;
 		}
+	}
+
+	/////////////////////////////////////////////////////
+
+	void CudaTexture::init(
+		const aten::vec4* p,
+		int width, int height)
+	{
+		auto size = sizeof(float4) * width * height;
+
+		checkCudaErrors(cudaMalloc(&m_buffer, size));
+		checkCudaErrors(cudaMemcpy(m_buffer, p, size, cudaMemcpyHostToDevice));
+
+		// Make Resource description:
+		memset(&m_resDesc, 0, sizeof(m_resDesc));
+		m_resDesc.resType = cudaResourceTypePitch2D;
+		m_resDesc.res.pitch2D.devPtr = m_buffer;
+		m_resDesc.res.pitch2D.desc.f = cudaChannelFormatKindFloat;
+		m_resDesc.res.pitch2D.desc.x = 32; // bits per channel
+		m_resDesc.res.pitch2D.desc.y = 32; // bits per channel
+		m_resDesc.res.pitch2D.desc.z = 32; // bits per channel
+		m_resDesc.res.pitch2D.desc.w = 32; // bits per channel
+		m_resDesc.res.pitch2D.width = width;
+		m_resDesc.res.pitch2D.height = height;
+		m_resDesc.res.pitch2D.pitchInBytes = sizeof(float4) * width;
+	}
+
+	cudaTextureObject_t CudaTexture::bind()
+	{
+		if (m_buffer) {
+			// TODO
+			// Only for resource array.
+
+			// Make texture description:
+			cudaTextureDesc tex_desc = {};
+			tex_desc.readMode = cudaReadModeElementType;
+			tex_desc.filterMode = cudaFilterModeLinear;
+			tex_desc.addressMode[0] = cudaAddressModeClamp;
+			tex_desc.addressMode[1] = cudaAddressModeClamp;
+			tex_desc.normalizedCoords = 1;
+
+			checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+		}
+
+		return m_tex;
 	}
 }

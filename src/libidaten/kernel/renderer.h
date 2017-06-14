@@ -27,7 +27,9 @@ namespace idaten
 			const std::vector<std::vector<aten::BVHNode>>& nodes,
 			const std::vector<aten::PrimitiveParamter>& prims,
 			const std::vector<aten::vertex>& vtxs,
-			const std::vector<aten::mat4>& mtxs);
+			const std::vector<aten::mat4>& mtxs,
+			const std::vector<TextureResource>& texs,
+			int envmapIdx);
 
 		void updateCamera(const aten::CameraParameter& camera);
 
@@ -41,11 +43,15 @@ namespace idaten
 
 		idaten::TypedCudaMemory<aten::mat4> mtxparams;
 		
+		std::vector<idaten::CudaTextureResource> nodeparam;
 		idaten::TypedCudaMemory<cudaTextureObject_t> nodetex;
+
+		std::vector<idaten::CudaTexture> texRsc;
+		idaten::TypedCudaMemory<cudaTextureObject_t> tex;
+		int m_envmapIdx{ -1 };
 
 		idaten::CudaGLSurface glimg;
 		idaten::CudaTextureResource vtxparamsPos;
 		idaten::CudaTextureResource vtxparamsNml;
-		std::vector<idaten::CudaTextureResource> nodeparam;
 	};
 }

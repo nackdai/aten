@@ -49,6 +49,8 @@
 #include "object/vertex.h"
 #include "object/object.h"
 
+#include "renderer/envmap.h"
+
 #include "sampler/sampler.h"
 #include "sampler/wanghash.h"
 

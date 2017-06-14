@@ -19,4 +19,7 @@ struct Context {
 	cudaTextureObject_t vtxNml;
 
 	aten::mat4* matrices;
+
+	cudaTextureObject_t* textures;
+	int envmapIdx;
 };

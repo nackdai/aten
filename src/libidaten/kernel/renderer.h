@@ -7,6 +7,17 @@
 
 namespace idaten
 {
+	struct EnvmapResource {
+		int idx{ -1 };
+		real avgIllum;
+
+		EnvmapResource() {}
+
+		EnvmapResource(int i, real illum)
+			: idx(i), avgIllum(illum)
+		{}
+	};
+
 	class Renderer {
 	protected:
 		Renderer() {}
@@ -29,7 +40,7 @@ namespace idaten
 			const std::vector<aten::vertex>& vtxs,
 			const std::vector<aten::mat4>& mtxs,
 			const std::vector<TextureResource>& texs,
-			int envmapIdx);
+			const EnvmapResource& envmapRsc);
 
 		void updateCamera(const aten::CameraParameter& camera);
 
@@ -48,7 +59,7 @@ namespace idaten
 
 		std::vector<idaten::CudaTexture> texRsc;
 		idaten::TypedCudaMemory<cudaTextureObject_t> tex;
-		int m_envmapIdx{ -1 };
+		EnvmapResource m_envmapRsc;
 
 		idaten::CudaGLSurface glimg;
 		idaten::CudaTextureResource vtxparamsPos;

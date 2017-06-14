@@ -13,7 +13,7 @@ namespace idaten {
 		const std::vector<aten::vertex>& vtxs,
 		const std::vector<aten::mat4>& mtxs,
 		const std::vector<TextureResource>& texs,
-		int envmapIdx)
+		const EnvmapResource& envmapRsc)
 	{
 #if 0
 		size_t size_stack = 0;
@@ -80,9 +80,9 @@ namespace idaten {
 			}
 			tex.init(texs.size());
 
-			AT_ASSERT(envmapIdx < texs.size());
-			if (envmapIdx < texs.size()) {
-				m_envmapIdx = envmapIdx;
+			AT_ASSERT(envmapRsc.idx < texs.size());
+			if (envmapRsc.idx < texs.size()) {
+				m_envmapRsc = envmapRsc;
 			}
 		}
 	}

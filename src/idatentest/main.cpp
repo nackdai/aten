@@ -197,6 +197,9 @@ int main()
 		1024);
 
 	auto envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
+	aten::envmap bg;
+	bg.init(envmap);
+	aten::ImageBasedLight ibl(&bg);
 
 	{
 		std::vector<aten::ShapeParameter> shapeparams;
@@ -232,7 +235,7 @@ int main()
 			primparams,
 			vtxparams,
 			mtxs,
-			tex, 0);
+			tex, idaten::EnvmapResource(0, ibl.getAvgIlluminace()));
 	}
 
 	aten::window::run(onRun);

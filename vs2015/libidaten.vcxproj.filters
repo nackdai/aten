@@ -181,6 +181,9 @@
     <ClInclude Include="..\src\libaten\renderer\envmap.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\color.h">
+      <Filter>aten\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -218,6 +221,9 @@
     </Filter>
     <Filter Include="aten\renderer">
       <UniqueIdentifier>{c6ab3f50-f917-4d20-8e85-5d0d3482393d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\misc">
+      <UniqueIdentifier>{958091ea-8a50-46eb-9691-fa6322bb4029}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -259,6 +265,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
       <Filter>aten\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\misc\color.cpp">
+      <Filter>aten\misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

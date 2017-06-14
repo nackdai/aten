@@ -44,6 +44,11 @@ __device__ bool intersectCloserBVH(
 	aten::Intersection* isect,
 	const float t_max);
 
+__device__ bool intersectAnyBVH(
+	const Context* ctxt,
+	const aten::ray& r,
+	aten::Intersection* isect);
+
 #ifndef __AT_DEBUG__
 #include "kernel/bvh_impl.cuh"
 #endif

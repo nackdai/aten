@@ -1,7 +1,6 @@
 #pragma once
 
 #include "light/ibl.h"
-#include "misc/color.h"
 
 // NOTE
 // http://www.cs.virginia.edu/~gfx/courses/2007/ImageSynthesis/assignments/envsample.pdf
@@ -60,7 +59,7 @@ namespace AT_NAME {
 				real v = (real)(y + 0.5) / height;
 
 				auto clr = envmap->sample(u, v);
-				const auto illum = aten::color::luminance(clr);
+				const auto illum = AT_NAME::color::luminance(clr);
 
 				m_avgIllum += illum * scale;
 				totalWeight += scale;
@@ -125,13 +124,8 @@ namespace AT_NAME {
 		auto envmap = getEnvMap();
 
 		auto clr = envmap->sample(r);
-		auto illum = aten::color::luminance(clr);
-
-		auto pdf = illum / m_avgIllum;
-
-		// NOTE
-		// ”¼Œa‚P‚Ì‹…‚Ì–ÊÏ‚ÅŠ„‚é.
-		pdf /= (4 * AT_MATH_PI);
+		
+		auto pdf = samplePdf(clr, m_avgIllum);
 
 		return pdf;
 	}

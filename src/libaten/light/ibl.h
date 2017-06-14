@@ -3,6 +3,7 @@
 #include <vector>
 #include "light/light.h"
 #include "renderer/envmap.h"
+#include "misc/color.h"
 
 namespace AT_NAME {
 	class ImageBasedLight : public Light {
@@ -44,6 +45,24 @@ namespace AT_NAME {
 		}
 
 		real samplePdf(const aten::ray& r) const;
+
+		static AT_DEVICE_API real samplePdf(const aten::vec3& clr, real avgIllum)
+		{
+			auto illum = AT_NAME::color::luminance(clr);
+
+			auto pdf = illum / avgIllum;
+
+			// NOTE
+			// îºåaÇPÇÃãÖÇÃñ êœÇ≈äÑÇÈ.
+			pdf /= (4 * AT_MATH_PI);
+
+			return pdf;
+		}
+
+		real getAvgIlluminace() const
+		{
+			return m_avgIllum;
+		}
 
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final;
 

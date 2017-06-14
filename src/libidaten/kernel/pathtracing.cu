@@ -179,9 +179,11 @@ __global__ void shadeMiss(
 	}
 }
 
+template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
 	cudaTextureObject_t* textures,
 	int envmapIdx,
+	real envmapAvgIllum,
 	Path* paths,
 	aten::ray* rays,
 	int width, int height)
@@ -202,10 +204,16 @@ __global__ void shadeMissWithEnvmap(
 
 		auto uv = AT_NAME::envmap::convertDirectionToUV(r.dir);
 
-		// TODO
 		auto bg = tex2D<float4>(textures[envmapIdx], uv.x, uv.y);
+		auto emit = aten::vec3(bg.x, bg.y, bg.z);
 
-		path.contrib += path.throughput * aten::vec3(bg.x, bg.y, bg.z);
+		float misW = 1.0f;
+		if (!isFirstBounce) {
+			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
+			misW = path.pdfb / (pdfLight + path.pdfb);
+		}
+
+		path.contrib += path.throughput * misW * emit;
 
 		path.isTerminate = true;
 	}
@@ -587,7 +595,7 @@ namespace idaten {
 		const std::vector<aten::vertex>& vtxs,
 		const std::vector<aten::mat4>& mtxs,
 		const std::vector<TextureResource>& texs,
-		int envmapIdx)
+		const EnvmapResource& envmapRsc)
 	{
 		idaten::Renderer::update(
 			gltex,
@@ -600,7 +608,7 @@ namespace idaten {
 			prims,
 			vtxs,
 			mtxs,
-			texs, envmapIdx);
+			texs, envmapRsc);
 
 		m_hitbools.init(width * height);
 		m_hitidx.init(width * height);
@@ -723,14 +731,24 @@ namespace idaten {
 
 				checkCudaKernel(hitTest);
 
-				if (m_envmapIdx >= 0) {
-					shadeMissWithEnvmap << <grid, block >> > (
-					//shadeMissWithEnvmap << <1, 1 >> > (
-						tex.ptr(),
-						m_envmapIdx,
-						paths.ptr(),
-						rays.ptr(),
-						width, height);
+				if (m_envmapRsc.idx >= 0) {
+					if (depth == 0) {
+						shadeMissWithEnvmap<true> << <grid, block >> > (
+						//shadeMissWithEnvmap << <1, 1 >> > (
+							tex.ptr(),
+							m_envmapRsc.idx, m_envmapRsc.avgIllum,
+							paths.ptr(),
+							rays.ptr(),
+							width, height);
+					}
+					else {
+						shadeMissWithEnvmap<false> << <grid, block >> > (
+							tex.ptr(),
+							m_envmapRsc.idx, m_envmapRsc.avgIllum,
+							paths.ptr(),
+							rays.ptr(),
+							width, height);
+					}
 				}
 				else {
 					shadeMiss << <grid, block >> > (

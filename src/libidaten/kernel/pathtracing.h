@@ -32,7 +32,7 @@ namespace idaten
 			const std::vector<aten::vertex>& vtxs,
 			const std::vector<aten::mat4>& mtxs,
 			const std::vector<TextureResource>& texs,
-			int envmapIdx) override final;
+			const EnvmapResource& envmapRsc) override final;
 
 	private:
 		idaten::TypedCudaMemory<int> m_hitbools;

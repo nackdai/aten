@@ -234,7 +234,8 @@ __global__ void shade(
 	aten::PrimitiveParamter* prims,
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml,
-	aten::mat4* matrices)
+	aten::mat4* matrices,
+	cudaTextureObject_t* textures)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -254,6 +255,7 @@ __global__ void shade(
 		ctxt.vtxPos = vtxPos;
 		ctxt.vtxNml = vtxNml;
 		ctxt.matrices = matrices;
+		ctxt.textures = textures;
 	}
 
 	idx = hitindices[idx];
@@ -316,7 +318,7 @@ __global__ void shade(
 
 		auto light = ctxt.lights[lightidx];
 
-		sampleLight(&sampleres, &ctxt, &light, rec.p, &path.sampler);
+		sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &path.sampler);
 
 		const auto& posLight = sampleres.pos;
 		const auto& nmlLight = sampleres.nml;
@@ -341,13 +343,13 @@ __global__ void shade(
 		if (light.type == aten::LightType::Area) {
 			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 			//isHit = intersectBVH(&ctxt, shadowRay, &isect);
-
-			if (isHit) {
-				hitobj = &ctxt.shapes[isectTmp.objid];
-			}
 		}
 		else {
-			isHit = intersectBVH(&ctxt, shadowRay, &isectTmp);
+			isHit = intersectAnyBVH(&ctxt, shadowRay, &isectTmp);
+		}
+
+		if (isHit) {
+			hitobj = &ctxt.shapes[isectTmp.objid];
 		}
 
 		isHit = AT_NAME::scene::hitLight(
@@ -788,7 +790,8 @@ namespace idaten {
 					nodetex.ptr(),
 					primparams.ptr(),
 					vtxTexPos, vtxTexNml,
-					mtxparams.ptr());
+					mtxparams.ptr(),
+					tex.ptr());
 
 				checkCudaKernel(shade);
 

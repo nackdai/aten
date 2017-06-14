@@ -303,8 +303,6 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 
 	isect->t = t_max;
 
-	int tmpexid = -1;
-
 	int nodeid = 0;
 	float4 node;	// x:left, y:right
 	float4 attrib;	// x:shapeid, y:primid, z:nestid
@@ -326,8 +324,6 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 
 		if (attrib.x >= 0) {
 			// Leaf.
-			tmpexid = -1;
-
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
@@ -386,8 +382,6 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 
 	isect->t = t_max;
 
-	int tmpexid = -1;
-
 	int nodeid = 0;
 	float4 node;	// x:left, y:right
 	float4 attrib;	// x:shapeid, y:primid, z:nestid
@@ -409,8 +403,6 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 
 		if (attrib.x >= 0) {
 			// Leaf.
-			tmpexid = -1;
-
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
@@ -495,7 +487,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserBVH(
 	return isHit;
 }
 
-AT_CUDA_INLINE __device__ bool intersectBVHAny(
+AT_CUDA_INLINE __device__ bool intersectAnyBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	aten::Intersection* isect)

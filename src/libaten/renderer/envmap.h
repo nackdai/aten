@@ -28,7 +28,7 @@ namespace AT_NAME
 			return m_envmap;
 		}
 
-		static aten::vec3 envmap::convertUVToDirection(real u, real v)
+		static AT_DEVICE_API aten::vec3 envmap::convertUVToDirection(real u, real v)
 		{
 			// u = phi / 2PI
 			// => phi = 2PI * u;

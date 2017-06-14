@@ -201,6 +201,8 @@ int main()
 	bg.init(envmap);
 	aten::ImageBasedLight ibl(&bg);
 
+	g_scene.addImageBasedLight(&ibl);
+
 	{
 		std::vector<aten::ShapeParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
@@ -223,6 +225,13 @@ int main()
 
 		std::vector<idaten::TextureResource> tex;
 		tex.push_back(idaten::TextureResource(envmap->colors(), envmap->width(), envmap->height()));
+
+		// TODO
+		for (auto& l : lightparams) {
+			if (l.type == aten::LightType::IBL) {
+				l.envmap.idx = 0;
+			}
+		}
 
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),

@@ -211,7 +211,7 @@ __global__ void raytracing(
 		auto light = lights[lightidx];
 
 		aten::LightSampleResult sampleres;
-		sampleLight(&sampleres, &ctxt, &light, rec.p, nullptr);
+		sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, nullptr);
 
 		aten::vec3 dirToLight = sampleres.dir;
 		auto len = dirToLight.length();

@@ -6,6 +6,8 @@
 #include <time.h>
 #include <math.h>
 
+#include <imgui.h>
+
 #include "aten.h"
 #include "atenscene.h"
 #include "idaten.h"
@@ -55,6 +57,11 @@ void onRun()
 #if 0
 	aten::visualizer::takeScreenshot("sc.png");
 #endif
+
+	{
+		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		aten::window::drawImGui(aten::vec4());
+	}
 }
 
 void onClose()

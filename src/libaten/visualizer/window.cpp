@@ -1,6 +1,11 @@
+#include "visualizer/atengl.h"
+
 #include "visualizer/window.h"
 #include <GLFW/glfw3.h>
 #include <Shlwapi.h>
+
+#include <imgui.h>
+#include "ui/imgui_impl_glfw_gl3.h"
 
 namespace aten {
 	static GLFWwindow* g_window{ nullptr };
@@ -128,6 +133,9 @@ namespace aten {
 
 			onKey(press, k);
 		}
+
+		// For imgui.
+		ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
 	}
 
 	static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
@@ -150,6 +158,9 @@ namespace aten {
 				}
 			}
 		}
+
+		// For imgui.
+		ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
 	}
 
 	static void motionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -169,6 +180,9 @@ namespace aten {
 		if (onMouseWheel) {
 			onMouseWheel(offset);
 		}
+
+		// For imgui.
+		ImGui_ImplGlfwGL3_ScrollCallback(window, xoffset, yoffset);
 	}
 
 	bool window::init(
@@ -195,6 +209,10 @@ namespace aten {
 			::glfwTerminate();
 			AT_VRETURN(false, false);
 		}
+
+		// For imgui.
+		bool succeeded = ImGui_ImplGlfwGL3_Init(g_window);
+		AT_ASSERT(succeeded);
 
 		SetCurrentDirectoryFromExe();
 
@@ -224,6 +242,9 @@ namespace aten {
 			g_window,
 			wheelCallback);
 
+		// For imgui.
+		::glfwSetCharCallback(g_window, ImGui_ImplGlfwGL3_CharCallback);
+
 		::glfwMakeContextCurrent(g_window);
 		::glfwSwapInterval(1);
 
@@ -235,18 +256,36 @@ namespace aten {
 		AT_ASSERT(g_window);
 
 		while (!glfwWindowShouldClose(g_window)) {
+			::glfwPollEvents();
+
+			// For imgui.
+			ImGui_ImplGlfwGL3_NewFrame();
+
 			onRun();
 
 			::glfwSwapBuffers(g_window);
-			::glfwPollEvents();
 		}
 	}
 
 	void window::terminate()
 	{
+		// For imgui.
+		ImGui_ImplGlfwGL3_Shutdown();
+
 		if (g_window) {
 			::glfwDestroyWindow(g_window);
 		}
 		::glfwTerminate();
+	}
+
+	void window::drawImGui(const aten::vec4 clearClr)
+	{
+		// Rendering
+		int display_w, display_h;
+		CALL_GL_API(glfwGetFramebufferSize(g_window, &display_w, &display_h));
+		CALL_GL_API(glViewport(0, 0, display_w, display_h));
+		//CALL_GL_API(glClearColor(clearClr.x, clearClr.y, clearClr.z, clearClr.w));
+		//CALL_GL_API(glClear(GL_COLOR_BUFFER_BIT));
+		ImGui::Render();
 	}
 }

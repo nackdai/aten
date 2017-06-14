@@ -103,7 +103,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -142,7 +142,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glfw\include;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -157,6 +157,9 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\3rdparty\imgui\imconfig.h" />
+    <ClInclude Include="..\3rdparty\imgui\imgui.h" />
+    <ClInclude Include="..\3rdparty\imgui\imgui_internal.h" />
     <ClInclude Include="..\src\libaten\accelerator\accelerator.h" />
     <ClInclude Include="..\src\libaten\accelerator\bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
@@ -239,6 +242,7 @@
     <ClInclude Include="..\src\libaten\shape\tranformable.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
+    <ClInclude Include="..\src\libaten\ui\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="..\src\libaten\visualizer\atengl.h" />
     <ClInclude Include="..\src\libaten\visualizer\blitter.h" />
     <ClInclude Include="..\src\libaten\visualizer\fbo.h" />
@@ -249,6 +253,8 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\3rdparty\imgui\imgui.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
@@ -304,6 +310,7 @@
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />
     <ClCompile Include="..\src\libaten\shape\sphere.cpp" />
     <ClCompile Include="..\src\libaten\shape\tranformable.cpp" />
+    <ClCompile Include="..\src\libaten\ui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp" />

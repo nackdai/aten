@@ -70,6 +70,12 @@
     <Filter Include="accelerator">
       <UniqueIdentifier>{a5eb0545-e9e3-4875-bd02-d129b358b899}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{e73dae04-2019-4448-a253-8fdd5eff2458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui\imgui">
+      <UniqueIdentifier>{aa3cb08a-98d0-4aa4-968c-fd2f7291b94d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -332,6 +338,18 @@
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h">
       <Filter>camera</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\ui\imgui_impl_glfw_gl3.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imconfig.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imgui.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\imgui_internal.h">
+      <Filter>ui\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -516,6 +534,15 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp">
       <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\ui\imgui_impl_glfw_gl3.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui.cpp">
+      <Filter>ui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp">
+      <Filter>ui\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

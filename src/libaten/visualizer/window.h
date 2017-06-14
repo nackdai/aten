@@ -3,6 +3,8 @@
 #include <functional>
 #include "defs.h"
 
+#include "math/vec4.h"
+
 namespace aten {
 	enum Key {
 		Key_ESCAPE,
@@ -203,5 +205,7 @@ namespace aten {
 		static void terminate();
 
 		static bool SetCurrentDirectoryFromExe();
+
+		static void drawImGui(const aten::vec4 clearClr);
 	};
 }

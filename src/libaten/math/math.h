@@ -56,7 +56,7 @@ namespace aten {
 #endif
 	}
 
-	inline real tan(real f)
+	inline AT_DEVICE_API real tan(real f)
 	{
 		return AT_MATH_FUNC(::tan, f);
 	}
@@ -71,7 +71,7 @@ namespace aten {
 		return AT_MATH_FUNC(::sin, f);
 	}
 
-	inline real atan2(real y, real x)
+	inline AT_DEVICE_API real atan2(real y, real x)
 	{
 		return AT_MATH_FUNC2(::atan2, y, x);
 	}
@@ -86,7 +86,7 @@ namespace aten {
 		return AT_MATH_FUNC(::asin, f);
 	}
 
-	inline real acos(real f)
+	inline AT_DEVICE_API real acos(real f)
 	{
 		return AT_MATH_FUNC(::acos, f);
 	}
@@ -122,12 +122,12 @@ namespace aten {
 #endif
 	}
 
-	inline real floor(real f)
+	inline AT_DEVICE_API real floor(real f)
 	{
 		return AT_MATH_FUNC(::floor, f);
 	}
 
-	inline real ceil(real f)
+	inline AT_DEVICE_API real ceil(real f)
 	{
 		return AT_MATH_FUNC(::ceil, f);
 	}

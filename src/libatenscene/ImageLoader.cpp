@@ -50,11 +50,11 @@ namespace aten {
 
 				switch (chn) {
 				case 3:
-					(*tex)[dst_i * chn + 2] = s[2] * normalize;
+					(*tex)(x, y, 2) = s[2] * normalize;
 				case 2:
-					(*tex)[dst_i * chn + 1] = s[1] * normalize;
+					(*tex)(x, y, 1) = s[1] * normalize;
 				case 1:
-					(*tex)[dst_i * chn + 0] = s[0] * normalize;
+					(*tex)(x, y, 0) = s[0] * normalize;
 					break;
 				}
 			}

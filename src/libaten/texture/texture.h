@@ -4,6 +4,7 @@
 #include "defs.h"
 #include "types.h"
 #include "math/vec3.h"
+#include "math/vec4.h"
 
 namespace aten {
 	class texture {
@@ -15,10 +16,9 @@ namespace aten {
 			m_height = height;
 			m_channels = channels;
 
-			m_pitch = width * channels;
-			m_size = height * m_pitch;
+			m_size = height * width;
 
-			m_colors.resize(width * height * channels);
+			m_colors.resize(width * height);
 		}
 
 		~texture() {}
@@ -29,9 +29,9 @@ namespace aten {
 			uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (m_width - 1));
 			uint32_t y = (uint32_t)(aten::cmpMin(v, real(1)) * (m_height - 1));
 
-			uint32_t pos = y * m_pitch + x * m_channels;
+			uint32_t pos = y * m_width + x;
 
-			const real* clr = &m_colors[pos];
+			const auto clr = m_colors[pos];
 
 			vec3 ret;
 
@@ -48,24 +48,18 @@ namespace aten {
 			return ret;
 		}
 
-		real& operator[](uint32_t pos)
-		{
-			pos = std::min(pos, m_size - 1);
-			return m_colors[pos];
-		}
-
 		real& operator()(uint32_t x, uint32_t y, uint32_t c)
 		{
 			x = std::min(x, m_width - 1);
 			y = std::min(y, m_height - 1);
 			c = std::min(c, m_channels - 1);
 
-			auto pos = y * m_pitch + x * c;
+			uint32_t pos = ((m_height - 1) - y) * m_width + x;
 
-			return m_colors[pos];
+			return m_colors[pos][c];
 		}
 
-		real* colors()
+		const vec4* colors() const
 		{
 			return &m_colors[0];
 		}
@@ -90,9 +84,8 @@ namespace aten {
 		uint32_t m_height{ 0 };
 		uint32_t m_channels{ 0 };
 
-		uint32_t m_pitch{ 0 };
 		uint32_t m_size{ 0 };
 
-		std::vector<real> m_colors;
+		std::vector<vec4> m_colors;
 	};
 }

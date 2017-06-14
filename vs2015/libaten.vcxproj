@@ -163,6 +163,7 @@
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
     <ClInclude Include="..\src\libaten\aten_virtual.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
+    <ClInclude Include="..\src\libaten\camera\CameraOperator.h" />
     <ClInclude Include="..\src\libaten\camera\equirect.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
@@ -249,6 +250,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
+    <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />

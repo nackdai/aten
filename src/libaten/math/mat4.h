@@ -280,6 +280,8 @@ namespace aten {
 		}
 
 		mat4& asRotateByAxis(real r, const vec3& axis);
+
+		mat4& asRotateFromVector(const vec3& v, const vec3& up);
 	};
 
 	inline AT_DEVICE_API mat4 operator+(const mat4& m1, const mat4& m2)

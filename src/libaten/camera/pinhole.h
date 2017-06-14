@@ -80,7 +80,7 @@ namespace AT_NAME {
 
 	private:
 		aten::CameraParameter m_param;
-		vec3 m_at;
+		aten::vec3 m_at;
 		real m_vfov;
 	};
 }

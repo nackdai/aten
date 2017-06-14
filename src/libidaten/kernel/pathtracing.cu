@@ -520,6 +520,7 @@ __global__ void gather(
 	const auto& path = paths[idx];
 
 	float4 data;
+#if 0
 	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
 	// First data.w value is 0.
@@ -527,6 +528,9 @@ __global__ void gather(
 	data = n * data + make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
 	data /= (n + 1);
 	data.w = n + 1;
+#else
+	data = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
+#endif
 
 	surf2Dwrite(
 		data,

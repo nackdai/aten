@@ -329,6 +329,9 @@
     <ClInclude Include="..\src\libaten\sampler\sampler.h">
       <Filter>sampler</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\camera\CameraOperator.h">
+      <Filter>camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -510,6 +513,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp">
       <Filter>sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp">
+      <Filter>camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

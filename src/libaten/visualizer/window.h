@@ -10,20 +10,20 @@ namespace aten {
 		~window() {}
 
 	public:
-		using CallbackRun = std::function<void()>;
-		using CallbackClose = std::function<void()>;
-		using CallbackMouseBtn = std::function<void(bool left, bool down, int x, int y)>;
-		using CallbackMouseMove = std::function<void(int x, int y)>;
-		using CallbackMouseWheel = std::function<void(int offset)>;
+		using OnRun = std::function<void()>;
+		using OnClose = std::function<void()>;
+		using OnMouseBtn = std::function<void(bool left, bool press, int x, int y)>;
+		using OnMouseMove = std::function<void(int x, int y)>;
+		using OnMouseWheel = std::function<void(int delta)>;
 
 		static bool init(
 			int width, int height, const char* title,
-			CallbackClose funcClose = nullptr,
-			CallbackMouseBtn funcMouseBtn = nullptr,
-			CallbackMouseMove funcMouseMove = nullptr,
-			CallbackMouseWheel funcMouseWheel = nullptr);
+			OnClose _onClose = nullptr,
+			OnMouseBtn _onMouseBtn = nullptr,
+			OnMouseMove _onMouseMove = nullptr,
+			OnMouseWheel _onMouseWheel = nullptr);
 
-		static void run(CallbackRun func);
+		static void run(OnRun onRim);
 
 		static void terminate();
 

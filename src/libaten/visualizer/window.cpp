@@ -32,15 +32,15 @@ namespace aten {
 	static int g_mouseX = 0;
 	static int g_mouseY = 0;
 
-	static window::CallbackClose funcClose = nullptr;
-	static window::CallbackMouseBtn funcMouseBtn = nullptr;
-	static window::CallbackMouseMove funcMouseMove = nullptr;
-	static window::CallbackMouseWheel funcMouseWheel = nullptr;
+	static window::OnClose onClose = nullptr;
+	static window::OnMouseBtn onMouseBtn = nullptr;
+	static window::OnMouseMove onMouseMove = nullptr;
+	static window::OnMouseWheel onMouseWheel = nullptr;
 
 	static void closeCallback(GLFWwindow* window)
 	{
-		if (funcClose) {
-			funcClose();
+		if (onClose) {
+			onClose();
 		}
 		::glfwSetWindowShouldClose(window, GL_TRUE);
 	}
@@ -52,21 +52,21 @@ namespace aten {
 
 	static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		if (funcMouseBtn) {
+		if (onMouseBtn) {
 			if (button == GLFW_MOUSE_BUTTON_LEFT) {
 				if (action == GLFW_PRESS) {
-					funcMouseBtn(true, true, g_mouseX, g_mouseY);
+					onMouseBtn(true, true, g_mouseX, g_mouseY);
 				}
 				else if (action == GLFW_RELEASE) {
-					funcMouseBtn(true, false, g_mouseX, g_mouseY);
+					onMouseBtn(true, false, g_mouseX, g_mouseY);
 				}
 			}
 			else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 				if (action == GLFW_PRESS) {
-					funcMouseBtn(false, true, g_mouseX, g_mouseY);
+					onMouseBtn(false, true, g_mouseX, g_mouseY);
 				}
 				else if (action == GLFW_RELEASE) {
-					funcMouseBtn(false, false, g_mouseX, g_mouseY);
+					onMouseBtn(false, false, g_mouseX, g_mouseY);
 				}
 			}
 		}
@@ -77,8 +77,8 @@ namespace aten {
 		g_mouseX = (int)xpos;
 		g_mouseY = (int)ypos;
 
-		if (funcMouseMove) {
-			funcMouseMove(g_mouseX, g_mouseY);
+		if (onMouseMove) {
+			onMouseMove(g_mouseX, g_mouseY);
 		}
 	}
 
@@ -86,17 +86,17 @@ namespace aten {
 	{
 		auto offset = (int)(yoffset * 10.0f);
 
-		if (funcMouseWheel) {
-			funcMouseWheel(offset);
+		if (onMouseWheel) {
+			onMouseWheel(offset);
 		}
 	}
 
 	bool window::init(
 		int width, int height, const char* title,
-		CallbackClose funcClose/*= nullptr*/,
-		CallbackMouseBtn funcMouseBtn/*= nullptr*/,
-		CallbackMouseMove funcMouseMove/*= nullptr*/,
-		CallbackMouseWheel funcMouseWheel/*= nullptr*/)
+		OnClose _onClose/*= nullptr*/,
+		OnMouseBtn _onMouseBtn/*= nullptr*/,
+		OnMouseMove _onMouseMove/*= nullptr*/,
+		OnMouseWheel _onMouseWheel/*= nullptr*/)
 	{
 		auto result = ::glfwInit();
 		AT_VRETURN(result, false);
@@ -116,6 +116,11 @@ namespace aten {
 		}
 
 		SetCurrentDirectoryFromExe();
+
+		onClose = _onClose;
+		onMouseBtn = _onMouseBtn;
+		onMouseMove = _onMouseMove;
+		onMouseWheel = _onMouseWheel;
 
 		::glfwSetWindowCloseCallback(
 			g_window,
@@ -143,12 +148,12 @@ namespace aten {
 		return true;
 	}
 
-	void window::run(window::CallbackRun func)
+	void window::run(window::OnRun onRun)
 	{
 		AT_ASSERT(g_window);
 
 		while (!glfwWindowShouldClose(g_window)) {
-			func();
+			onRun();
 
 			::glfwSwapBuffers(g_window);
 			::glfwPollEvents();

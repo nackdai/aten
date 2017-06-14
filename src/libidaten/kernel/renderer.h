@@ -29,6 +29,8 @@ namespace idaten
 			const std::vector<aten::vertex>& vtxs,
 			const std::vector<aten::mat4>& mtxs);
 
+		void updateCamera(const aten::CameraParameter& camera);
+
 	protected:
 		idaten::CudaMemory dst;
 		idaten::TypedCudaMemory<aten::CameraParameter> cam;

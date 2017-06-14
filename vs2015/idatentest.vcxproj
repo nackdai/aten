@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\idatentest\main.cpp" />
+    <ClCompile Include="..\src\idatentest\scenedefs.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\idatentest\scenedefs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8E4E5656-02DA-4013-94C8-671191EB4B87}</ProjectGuid>

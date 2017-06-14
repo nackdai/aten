@@ -110,6 +110,12 @@ namespace idaten {
 			return (_T*)CudaMemory::ptr();
 		}
 
+		void reset()
+		{
+			CudaMemory::reset();
+			m_cur = 0;
+		}
+
 	private:
 		uint32_t m_num{ 0 };
 		uint32_t m_cur{ 0 };

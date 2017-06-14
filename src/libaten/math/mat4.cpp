@@ -120,4 +120,48 @@ namespace aten {
 
 		return *this;
 	}
+
+	mat4& mat4::asRotateFromVector(const vec3& v, const vec3& up)
+	{
+		auto vz = normalize(v);
+
+		vec3 vup = up;
+		if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
+			// UPベクトルとの外積を計算できないので、
+			// 新しいUPベクトルをでっちあげる・・・
+			if (up.y > 0.0f) {
+				vup = vec3(real(0), real(0), -vz.y);
+			}
+			else {
+				vup = vec3(real(0), real(0), vz.y);
+			}
+		}
+
+		auto vx = cross(vup, vz);
+		vx = normalize(vx);
+
+		auto vy = cross(vz, vx);
+
+		m00 = vx.x;
+		m01 = vx.y;
+		m02 = vx.z;
+		m03 = real(0);
+
+		m10 = vy.x;
+		m11 = vy.y;
+		m12 = vy.z;
+		m13 = real(0);
+
+		m20 = vz.x;
+		m21 = vz.y;
+		m22 = vz.z;
+		m23 = real(0);
+
+		m30 = real(0);
+		m31 = real(0);
+		m32 = real(0);
+		m33 = real(1);
+
+		return *this;
+	}
 }

@@ -71,4 +71,10 @@ namespace idaten {
 			vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size());
 		}
 	}
+
+	void Renderer::updateCamera(const aten::CameraParameter& camera)
+	{
+		cam.reset();
+		cam.writeByNum(&camera, 1);
+	}
 }

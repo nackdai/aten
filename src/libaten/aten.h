@@ -6,6 +6,7 @@
 #include "camera/pinhole.h"
 #include "camera/thinlens.h"
 #include "camera/equirect.h"
+#include "camera/CameraOperator.h"
 
 #include "filter/nlm.h"
 #include "filter/bilateral.h"

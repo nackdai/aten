@@ -16,6 +16,16 @@ namespace aten {
 			int x2, int y2,
 			real scale = real(1));
 
+		static void moveForward(
+			camera& camera,
+			real offset);
+		static void moveRight(
+			camera& camera,
+			real offset);
+		static void moveUp(
+			camera& camera,
+			real offset);
+
 		static void dolly(
 			camera& camera,
 			real scale);

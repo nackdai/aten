@@ -36,6 +36,7 @@ namespace aten {
 	static window::OnMouseBtn onMouseBtn = nullptr;
 	static window::OnMouseMove onMouseMove = nullptr;
 	static window::OnMouseWheel onMouseWheel = nullptr;
+	static window::OnKey onKey = nullptr;
 
 	static void closeCallback(GLFWwindow* window)
 	{
@@ -45,9 +46,88 @@ namespace aten {
 		::glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
+	static inline Key getKeyMap(int key)
+	{
+		if ('0' <= key && key <= '9') {
+			key = key - '0';
+			return (Key)(Key_0 + key);
+		}
+		else if ('A' <= key && key <= 'Z') {
+			key = key - 'A';
+			return (Key)(Key_A + key);
+		}
+		else {
+			switch (key) {
+			case GLFW_KEY_ESCAPE:
+				return Key_ESCAPE;
+			case GLFW_KEY_ENTER:
+				return Key_RETURN;
+			case GLFW_KEY_TAB:
+				return Key_TAB;
+			case GLFW_KEY_BACKSPACE:
+				return Key_BACKSPACE;
+			case GLFW_KEY_INSERT:
+				return Key_INSERT;
+			case GLFW_KEY_DELETE:
+				return Key_DELETE;
+			case GLFW_KEY_RIGHT:
+				return Key_RIGHT;
+			case GLFW_KEY_LEFT:
+				return Key_LEFT;
+			case GLFW_KEY_DOWN:
+				return Key_DOWN;
+			case GLFW_KEY_UP:
+				return Key_UP;
+			case GLFW_KEY_F1:
+				return Key_F1;
+			case GLFW_KEY_F2:
+				return Key_F2;
+			case GLFW_KEY_F3:
+				return Key_F3;
+			case GLFW_KEY_F4:
+				return Key_F4;
+			case GLFW_KEY_F5:
+				return Key_F5;
+			case GLFW_KEY_F6:
+				return Key_F6;
+			case GLFW_KEY_F7:
+				return Key_F7;
+			case GLFW_KEY_F8:
+				return Key_F8;
+			case GLFW_KEY_F9:
+				return Key_F9;
+			case GLFW_KEY_F10:
+				return Key_F10;
+			case GLFW_KEY_F11:
+				return Key_F11;
+			case GLFW_KEY_F12:
+				return Key_F12;
+			case GLFW_KEY_LEFT_SHIFT:
+				return Key_SHIFT;
+			case GLFW_KEY_LEFT_CONTROL:
+				return Key_CONTROL;
+			case GLFW_KEY_RIGHT_SHIFT:
+				return Key_SHIFT;
+			case GLFW_KEY_RIGHT_CONTROL:
+				return Key_CONTROL;
+			case GLFW_KEY_SPACE:
+				return Key_SPACE;
+			default:
+				break;
+			}
+		}
+
+		return Key_UNDEFINED;
+	}
+
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		// TODO
+		if (onKey) {
+			Key k = getKeyMap(key);
+			bool press = (action == GLFW_PRESS || action == GLFW_REPEAT);
+
+			onKey(press, k);
+		}
 	}
 
 	static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
@@ -96,7 +176,8 @@ namespace aten {
 		OnClose _onClose/*= nullptr*/,
 		OnMouseBtn _onMouseBtn/*= nullptr*/,
 		OnMouseMove _onMouseMove/*= nullptr*/,
-		OnMouseWheel _onMouseWheel/*= nullptr*/)
+		OnMouseWheel _onMouseWheel/*= nullptr*/,
+		OnKey _onKey/*= nullptr*/)
 	{
 		auto result = ::glfwInit();
 		AT_VRETURN(result, false);
@@ -121,6 +202,7 @@ namespace aten {
 		onMouseBtn = _onMouseBtn;
 		onMouseMove = _onMouseMove;
 		onMouseWheel = _onMouseWheel;
+		onKey = _onKey;
 
 		::glfwSetWindowCloseCallback(
 			g_window,

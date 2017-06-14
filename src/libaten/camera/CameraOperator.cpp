@@ -37,6 +37,77 @@ namespace aten {
 		at += offset;
 	}
 
+	void CameraOperator::moveForward(
+		camera& camera,
+		real offset)
+	{
+		// カメラの向いている方向(Z軸)に沿って移動.
+
+		auto& pos = camera.getPos();
+		auto& at = camera.getAt();
+
+		auto dir = camera.getDir();
+		dir *= offset;
+
+		pos += dir;
+		at += dir;
+	}
+
+	void CameraOperator::moveRight(
+		camera& camera,
+		real offset)
+	{
+		// カメラの向いている方向の右軸(-X軸(右手座標なので))に沿って移動.
+		auto vz = camera.getDir();
+
+		vec3 vup(0, 1, 0);
+		if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
+			// UPベクトルとの外積を計算できないので、
+			// 新しいUPベクトルをでっちあげる・・・
+			vup = vec3(real(0), real(0), -vz.y);
+		}
+
+		auto vx = cross(vup, vz);
+		vx = normalize(vx);
+
+		vx *= offset;
+		vx *= real(-1);	// -X軸に変換.
+
+		auto& pos = camera.getPos();
+		auto& at = camera.getAt();
+
+		pos += vx;
+		at += vx;
+	}
+
+	void CameraOperator::moveUp(
+		camera& camera,
+		real offset)
+	{
+		// カメラの向いている方向の右軸(Y軸)に沿って移動.
+		auto vz = camera.getDir();
+
+		vec3 vup(0, 1, 0);
+		if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
+			// UPベクトルとの外積を計算できないので、
+			// 新しいUPベクトルをでっちあげる・・・
+			vup = vec3(real(0), real(0), -vz.y);
+		}
+
+		auto vx = cross(vup, vz);
+		vx = normalize(vx);
+
+		auto vy = cross(vz, vx);
+
+		vy *= offset;
+
+		auto& pos = camera.getPos();
+		auto& at = camera.getAt();
+
+		pos += vy;
+		at += vy;
+	}
+
 	void CameraOperator::dolly(
 		camera& camera,
 		real scale)

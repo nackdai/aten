@@ -110,6 +110,42 @@ void onMouseWheel(int delta)
 	g_isCameraDirty = true;
 }
 
+void onKey(bool press, aten::Key key)
+{
+	static const real offset = real(0.1);
+
+	if (press) {
+		switch (key) {
+		case aten::Key::Key_W:
+		case aten::Key::Key_UP:
+			aten::CameraOperator::moveForward(g_camera, offset);
+			break;
+		case aten::Key::Key_S:
+		case aten::Key::Key_DOWN:
+			aten::CameraOperator::moveForward(g_camera, -offset);
+			break;
+		case aten::Key::Key_D:
+		case aten::Key::Key_RIGHT:
+			aten::CameraOperator::moveRight(g_camera, offset);
+			break;
+		case aten::Key::Key_A:
+		case aten::Key::Key_LEFT:
+			aten::CameraOperator::moveRight(g_camera, -offset);
+			break;
+		case aten::Key::Key_Z:
+			aten::CameraOperator::moveUp(g_camera, offset);
+			break;
+		case aten::Key::Key_X:
+			aten::CameraOperator::moveUp(g_camera, -offset);
+			break;
+		default:
+			break;
+		}
+
+		g_isCameraDirty = true;
+	}
+}
+
 int main()
 {
 	aten::timer::init();
@@ -120,7 +156,8 @@ int main()
 		onClose,
 		onMouseBtn,
 		onMouseMove,
-		onMouseWheel);
+		onMouseWheel,
+		onKey);
 
 	aten::visualizer::init(WIDTH, HEIGHT);
 

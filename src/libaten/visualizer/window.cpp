@@ -278,7 +278,7 @@ namespace aten {
 		::glfwTerminate();
 	}
 
-	void window::drawImGui(const aten::vec4 clearClr)
+	void window::drawImGui()
 	{
 		// Rendering
 		int display_w, display_h;

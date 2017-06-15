@@ -206,6 +206,6 @@ namespace aten {
 
 		static bool SetCurrentDirectoryFromExe();
 
-		static void drawImGui(const aten::vec4 clearClr);
+		static void drawImGui();
 	};
 }

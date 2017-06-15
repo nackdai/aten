@@ -49,8 +49,7 @@ void onRun()
 		g_buffer.image(),
 		WIDTH, HEIGHT);
 
-	auto elapsed = timer.end();
-	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
+	auto cudaelapsed = timer.end();
 
 	//aten::visualizer::render(g_buffer.image(), false);
 	aten::visualizer::render(false);
@@ -60,7 +59,8 @@ void onRun()
 
 	{
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		aten::window::drawImGui(aten::vec4());
+		ImGui::Text("cuda : %.3f ms", cudaelapsed);
+		aten::window::drawImGui();
 	}
 }
 

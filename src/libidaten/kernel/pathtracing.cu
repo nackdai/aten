@@ -31,10 +31,12 @@ struct Path {
 	aten::sampler sampler;
 	
 	real pdfb;
+	int samples;
 
 	bool isHit;
 	bool isTerminate;
 	bool isSingular;
+	bool isKill;
 };
 
 #define BLOCK_SIZE	(16)
@@ -75,6 +77,13 @@ __global__ void genPath(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
+	path.isHit = false;
+
+	if (path.isKill) {
+		path.isTerminate = true;
+		return;
+	}
+
 	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
@@ -87,9 +96,10 @@ __global__ void genPath(
 
 	path.throughput = aten::vec3(1);
 	path.pdfb = 0.0f;
-	path.isHit = false;
 	path.isTerminate = false;
 	path.isSingular = false;
+
+	path.samples += 1;
 
 	// Accumulate value, so do not reset.
 	//path.contrib = aten::vec3(0);
@@ -154,6 +164,7 @@ __global__ void hitTest(
 	hitbools[idx] = isHit ? 1 : 0;
 }
 
+template <bool isFirstBounce>
 __global__ void shadeMiss(
 	Path* paths,
 	int width, int height)
@@ -176,6 +187,10 @@ __global__ void shadeMiss(
 		path.contrib += path.throughput * bg;
 
 		path.isTerminate = true;
+
+		if (isFirstBounce) {
+			path.isKill = true;
+		}
 	}
 }
 
@@ -208,7 +223,10 @@ __global__ void shadeMissWithEnvmap(
 		auto emit = aten::vec3(bg.x, bg.y, bg.z);
 
 		float misW = 1.0f;
-		if (!isFirstBounce) {
+		if (isFirstBounce) {
+			path.isKill = true;
+		}
+		else {
 			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
 			misW = path.pdfb / (pdfLight + path.pdfb);
 		}
@@ -546,8 +564,7 @@ __global__ void hitShadowRay(
 __global__ void gather(
 	cudaSurfaceObject_t outSurface,
 	Path* paths,
-	int width, int height,
-	int sample)
+	int width, int height)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -559,6 +576,8 @@ __global__ void gather(
 	const auto idx = getIdx(ix, iy, width);
 
 	const auto& path = paths[idx];
+
+	int sample = path.samples;
 
 	float4 data;
 #if 0
@@ -736,7 +755,6 @@ namespace idaten {
 				if (m_envmapRsc.idx >= 0) {
 					if (depth == 0) {
 						shadeMissWithEnvmap<true> << <grid, block >> > (
-						//shadeMissWithEnvmap << <1, 1 >> > (
 							tex.ptr(),
 							m_envmapRsc.idx, m_envmapRsc.avgIllum,
 							paths.ptr(),
@@ -753,10 +771,16 @@ namespace idaten {
 					}
 				}
 				else {
-					shadeMiss << <grid, block >> > (
-					//shadeMiss << <1, 1 >> > (
-						paths.ptr(),
-						width, height);
+					if (depth == 0) {
+						shadeMiss<true> << <grid, block >> > (
+							paths.ptr(),
+							width, height);
+					}
+					else {
+						shadeMiss<false> << <grid, block >> > (
+							paths.ptr(),
+							width, height);
+					}
 				}
 
 				checkCudaKernel(shadeMiss);
@@ -821,8 +845,7 @@ namespace idaten {
 		//gather << <1, 1 >> > (
 			outputSurf,
 			paths.ptr(),
-			width, height,
-			maxSamples);
+			width, height);
 
 		{
 			vtxparamsPos.unbind();

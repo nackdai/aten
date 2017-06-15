@@ -414,6 +414,7 @@ __global__ void shade(
 		aten::LightSampleResult sampleres;
 
 		// TODO
+		// Importance sampling.
 		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
 		lightSelectPdf = 1.0f / lightnum;
 
@@ -442,11 +443,16 @@ __global__ void shade(
 		bool isHit = false;
 
 		if (light.type == aten::LightType::Area) {
+			// Area.
 			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
-			//isHit = intersectBVH(&ctxt, shadowRay, &isect);
+		}
+		else if (light.attrib.isInfinite) {
+			// IBL, Directional.
+			isHit = intersectAnyBVH(&ctxt, shadowRay, &isectTmp);
 		}
 		else {
-			isHit = intersectAnyBVH(&ctxt, shadowRay, &isectTmp);
+			// Point, Spot.
+			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 		}
 
 		if (isHit) {

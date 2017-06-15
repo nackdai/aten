@@ -141,9 +141,10 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
 		new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
 
 	std::vector<aten::object*> objs;
-	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj");
 
 #if 0
+	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj");
+
 	auto light = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
 	auto box = new aten::instance<aten::object>(objs[1], aten::mat4::Identity);
 
@@ -153,6 +154,7 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
 	auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
 	scene->addLight(areaLight);
 #else
+	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig_nolight.obj");
 	auto box = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
 	scene->add(box);
 #endif

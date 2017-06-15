@@ -763,14 +763,6 @@ namespace idaten {
 		}
 #endif
 
-		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
-
-		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
-		dim3 threadPerBlock_HitTest(128);
-
 		int depth = 0;
 
 		paths.init(width * height);
@@ -812,72 +804,17 @@ namespace idaten {
 		auto time = getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-#if 1
-			genPath << <grid, block >> > (
-			//genPath << <1, 1 >> > (
-				paths.ptr(),
-				rays.ptr(),
+			onGenPath(
 				width, height,
 				i, maxSamples,
-				time.milliSeconds,
-				cam.ptr());
+				time.milliSeconds);
 
 			depth = 0;
 
 			while (depth < maxDepth) {
-#ifdef ENABLE_PERSISTENT_THREAD
-				hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
-#else
-				hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
-#endif
-				//hitTest << <1, 1 >> > (
-					paths.ptr(),
-					isects.ptr(),
-					rays.ptr(),
-					m_hitbools.ptr(),
-					width, height,
-					shapeparam.ptr(), shapeparam.num(),
-					mtrlparam.ptr(),
-					lightparam.ptr(), lightparam.num(),
-					nodetex.ptr(),
-					primparams.ptr(),
-					vtxTexPos,
-					mtxparams.ptr());
-
-				checkCudaKernel(hitTest);
-
-				if (m_envmapRsc.idx >= 0) {
-					if (depth == 0) {
-						shadeMissWithEnvmap<true> << <grid, block >> > (
-							tex.ptr(),
-							m_envmapRsc.idx, m_envmapRsc.avgIllum,
-							paths.ptr(),
-							rays.ptr(),
-							width, height);
-					}
-					else {
-						shadeMissWithEnvmap<false> << <grid, block >> > (
-							tex.ptr(),
-							m_envmapRsc.idx, m_envmapRsc.avgIllum,
-							paths.ptr(),
-							rays.ptr(),
-							width, height);
-					}
-				}
-				else {
-					if (depth == 0) {
-						shadeMiss<true> << <grid, block >> > (
-							paths.ptr(),
-							width, height);
-					}
-					else {
-						shadeMiss<false> << <grid, block >> > (
-							paths.ptr(),
-							width, height);
-					}
-				}
-
-				checkCudaKernel(shadeMiss);
+				onHitTest(width, height, vtxTexPos);
+				
+				onShadeMiss(width, height, depth);
 
 				int hitcount = 0;
 				idaten::Compaction::compact(
@@ -891,55 +828,17 @@ namespace idaten {
 					break;
 				}
 
-				dim3 blockPerGrid((hitcount + 64 - 1) / 64);
-				dim3 threadPerBlock(64);
-
-				shade << <blockPerGrid, threadPerBlock >> > (
-				//shade << <1, 1 >> > (
+				onShade(
 					outputSurf,
-					paths.ptr(),
-					m_hitidx.ptr(), hitcount,
-					isects.ptr(),
-					rays.ptr(),
+					hitcount,
 					depth, rrDepth,
-					shapeparam.ptr(), shapeparam.num(),
-					mtrlparam.ptr(),
-					lightparam.ptr(), lightparam.num(),
-					nodetex.ptr(),
-					primparams.ptr(),
-					vtxTexPos, vtxTexNml,
-					mtxparams.ptr(),
-					tex.ptr());
-
-				checkCudaKernel(shade);
-
-#if 0
-				hitShadowRay << <blockPerGrid, threadPerBlock >> > (
-				//hitShadowRay << <1, 1 >> > (
-					paths.ptr(),
-					m_hitidx.ptr(), hitcount,
-					shadowRays.ptr(),
-					shapeparam.ptr(), shapeparam.num(),
-					mtrlparam.ptr(),
-					lightparam.ptr(), lightparam.num(),
-					nodetex.ptr(),
-					primparams.ptr(),
-					vtxTexPos,
-					mtxparams.ptr());
-
-				checkCudaKernel(hitShadowRay);
-#endif
+					vtxTexPos, vtxTexNml);
 
 				depth++;
 			}
-#endif
 		}
 
-		gather << <grid, block >> > (
-		//gather << <1, 1 >> > (
-			outputSurf,
-			paths.ptr(),
-			width, height);
+		onGather(outputSurf, width, height);
 
 		{
 			vtxparamsPos.unbind();
@@ -958,5 +857,158 @@ namespace idaten {
 
 
 		//dst.read(image, sizeof(aten::vec4) * width * height);
+	}
+
+	void PathTracing::onGenPath(
+		int width, int height,
+		int sample, int maxSamples,
+		int seed)
+	{
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+		dim3 grid(
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
+
+		genPath << <grid, block >> > (
+			paths.ptr(),
+			rays.ptr(),
+			width, height,
+			sample, maxSamples,
+			seed,
+			cam.ptr());
+	}
+
+	void PathTracing::onHitTest(
+		int width, int height,
+		cudaTextureObject_t texVtxPos)
+	{
+		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
+		dim3 threadPerBlock_HitTest(128);
+
+#ifdef ENABLE_PERSISTENT_THREAD
+		hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
+#else
+		hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
+#endif
+			//hitTest << <1, 1 >> > (
+			paths.ptr(),
+			isects.ptr(),
+			rays.ptr(),
+			m_hitbools.ptr(),
+			width, height,
+			shapeparam.ptr(), shapeparam.num(),
+			mtrlparam.ptr(),
+			lightparam.ptr(), lightparam.num(),
+			nodetex.ptr(),
+			primparams.ptr(),
+			texVtxPos,
+			mtxparams.ptr());
+
+		checkCudaKernel(hitTest);
+	}
+
+	void PathTracing::onShadeMiss(
+		int width, int height,
+		int depth)
+	{
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+		dim3 grid(
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
+
+		if (m_envmapRsc.idx >= 0) {
+			if (depth == 0) {
+				shadeMissWithEnvmap<true> << <grid, block >> > (
+					tex.ptr(),
+					m_envmapRsc.idx, m_envmapRsc.avgIllum,
+					paths.ptr(),
+					rays.ptr(),
+					width, height);
+			}
+			else {
+				shadeMissWithEnvmap<false> << <grid, block >> > (
+					tex.ptr(),
+					m_envmapRsc.idx, m_envmapRsc.avgIllum,
+					paths.ptr(),
+					rays.ptr(),
+					width, height);
+			}
+		}
+		else {
+			if (depth == 0) {
+				shadeMiss<true> << <grid, block >> > (
+					paths.ptr(),
+					width, height);
+			}
+			else {
+				shadeMiss<false> << <grid, block >> > (
+					paths.ptr(),
+					width, height);
+			}
+		}
+
+		checkCudaKernel(shadeMiss);
+	}
+
+	void PathTracing::onShade(
+		cudaSurfaceObject_t outputSurf,
+		int hitcount,
+		int depth, int rrDepth,
+		cudaTextureObject_t texVtxPos,
+		cudaTextureObject_t texVtxNml)
+	{
+		dim3 blockPerGrid((hitcount + 64 - 1) / 64);
+		dim3 threadPerBlock(64);
+
+		shade << <blockPerGrid, threadPerBlock >> > (
+			//shade << <1, 1 >> > (
+			outputSurf,
+			paths.ptr(),
+			m_hitidx.ptr(), hitcount,
+			isects.ptr(),
+			rays.ptr(),
+			depth, rrDepth,
+			shapeparam.ptr(), shapeparam.num(),
+			mtrlparam.ptr(),
+			lightparam.ptr(), lightparam.num(),
+			nodetex.ptr(),
+			primparams.ptr(),
+			texVtxPos, texVtxNml,
+			mtxparams.ptr(),
+			tex.ptr());
+
+		checkCudaKernel(shade);
+
+#if 0
+		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
+			//hitShadowRay << <1, 1 >> > (
+			paths.ptr(),
+			m_hitidx.ptr(), hitcount,
+			shadowRays.ptr(),
+			shapeparam.ptr(), shapeparam.num(),
+			mtrlparam.ptr(),
+			lightparam.ptr(), lightparam.num(),
+			nodetex.ptr(),
+			primparams.ptr(),
+			vtxTexPos,
+			mtxparams.ptr());
+
+		checkCudaKernel(hitShadowRay);
+#endif
+	}
+
+	void PathTracing::onGather(
+		cudaSurfaceObject_t outputSurf,
+		int width, int height)
+	{
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+		dim3 grid(
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
+
+		gather << <grid, block >> > (
+			outputSurf,
+			paths.ptr(),
+			width, height);
 	}
 }

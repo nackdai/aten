@@ -35,6 +35,31 @@ namespace idaten
 			const EnvmapResource& envmapRsc) override final;
 
 	private:
+		inline void onGenPath(
+			int width, int height,
+			int sample, int maxSamples,
+			int seed);
+
+		inline void onHitTest(
+			int width, int height,
+			cudaTextureObject_t texVtxPos);
+
+		inline void onShadeMiss(
+			int width, int height,
+			int depth);
+
+		inline void onShade(
+			cudaSurfaceObject_t outputSurf,
+			int hitcount,
+			int depth, int rrDepth,
+			cudaTextureObject_t texVtxPos,
+			cudaTextureObject_t texVtxNml);
+
+		inline void onGather(
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
+	private:
 		idaten::TypedCudaMemory<int> m_hitbools;
 		idaten::TypedCudaMemory<int> m_hitidx;
 	};

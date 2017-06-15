@@ -34,6 +34,8 @@ static aten::AcceleratedScene<aten::bvh> g_scene;
 //static idaten::RayTracing g_tracer;
 static idaten::PathTracing g_tracer;
 
+static bool g_isShowGUI = true;
+
 void onRun()
 {
 	if (g_isCameraDirty) {
@@ -57,9 +59,11 @@ void onRun()
 	aten::visualizer::takeScreenshot("sc.png");
 #endif
 
+	if (g_isShowGUI)
 	{
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
+		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT) / real(1000 * 1000) * (real(1000) / cudaelapsed));
 		aten::window::drawImGui();
 	}
 }
@@ -120,6 +124,14 @@ void onMouseWheel(int delta)
 void onKey(bool press, aten::Key key)
 {
 	static const real offset = real(0.1);
+
+	if (press) {
+		if (key == aten::Key::Key_F1) {
+			g_isShowGUI = !g_isShowGUI;
+		}
+
+		return;
+	}
 
 	if (press) {
 		switch (key) {

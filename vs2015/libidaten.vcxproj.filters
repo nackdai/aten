@@ -184,6 +184,9 @@
     <ClInclude Include="..\src\libaten\misc\color.h">
       <Filter>aten\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\timer.h">
+      <Filter>aten\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -267,6 +270,9 @@
       <Filter>aten\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\misc\color.cpp">
+      <Filter>aten\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\misc\timer.cpp">
       <Filter>aten\misc</Filter>
     </ClCompile>
   </ItemGroup>

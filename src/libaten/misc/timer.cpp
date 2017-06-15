@@ -1,7 +1,7 @@
 #include "defs.h"
 #include "misc/timer.h"
 
-namespace aten {
+namespace AT_NAME {
 	static int64_t s_freq = 0;
 
 	void timer::init()

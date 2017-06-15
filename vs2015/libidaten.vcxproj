@@ -48,6 +48,7 @@
     <ClInclude Include="..\src\libaten\math\vec3.h" />
     <ClInclude Include="..\src\libaten\math\vec4.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
+    <ClInclude Include="..\src\libaten\misc\timer.h" />
     <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
@@ -85,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
+    <ClCompile Include="..\src\libaten\misc\timer.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\renderer.cpp" />

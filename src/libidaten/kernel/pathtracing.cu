@@ -724,25 +724,6 @@ namespace idaten {
 		m_hitidx.init(width * height);
 	}
 
-#include "misc/timer.h"
-	aten::SystemTime getSystemTime()
-	{
-		SYSTEMTIME time;
-		::GetSystemTime(&time);
-
-		aten::SystemTime ret;
-		ret.year = time.wYear;
-		ret.month = time.wMonth;
-		ret.dayOfWeek = time.wDayOfWeek;
-		ret.day = time.wDay;
-		ret.hour = time.wHour;
-		ret.minute = time.wMinute;
-		ret.second = time.wSecond;
-		ret.milliSeconds = time.wMilliseconds;
-
-		return std::move(ret);
-	}
-
 	static bool doneSetStackSize = false;
 
 	static idaten::TypedCudaMemory<Path> paths;
@@ -801,7 +782,7 @@ namespace idaten {
 		static const int maxDepth = 5;
 		static const int rrDepth = 3;
 
-		auto time = getSystemTime();
+		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
 			onGenPath(
@@ -839,6 +820,8 @@ namespace idaten {
 		}
 
 		onGather(outputSurf, width, height);
+
+		checkCudaErrors(cudaDeviceSynchronize());
 
 		{
 			vtxparamsPos.unbind();

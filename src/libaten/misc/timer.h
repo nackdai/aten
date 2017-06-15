@@ -1,8 +1,9 @@
 #pragma once
 
+#include "defs.h"
 #include "types.h"
 
-namespace aten {
+namespace AT_NAME {
 	struct SystemTime {
 		uint16_t year{ 0 };
 		uint16_t month{ 0 };

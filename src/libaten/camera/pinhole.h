@@ -24,10 +24,28 @@ namespace AT_NAME {
 			real s, real t,
 			aten::sampler* sampler) const override final;
 
-		static AT_DEVICE_API void sample(
+		static inline AT_DEVICE_API void sample(
 			CameraSampleResult* result,
 			const aten::CameraParameter* param,
-			real s, real t);
+			real s, real t)
+		{
+			// [0, 1] -> [-1, 1]
+			s = real(2) * s - real(1);
+			t = real(2) * t - real(1);
+
+			result->posOnLens = s * param->u + t * param->v;
+			result->posOnLens = result->posOnLens + param->center;
+
+			result->r.dir = normalize(result->posOnLens - param->origin);
+
+			result->nmlOnLens = param->dir;
+			result->posOnImageSensor = param->origin;
+
+			result->r.org = param->origin;
+
+			result->pdfOnLens = 1;
+			result->pdfOnImageSensor = 1;
+		}
 
 		virtual const aten::vec3& getPos() const override final
 		{

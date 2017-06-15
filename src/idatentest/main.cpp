@@ -34,7 +34,9 @@ static aten::AcceleratedScene<aten::bvh> g_scene;
 //static idaten::RayTracing g_tracer;
 static idaten::PathTracing g_tracer;
 
-static bool g_isShowGUI = true;
+static bool g_willShowGUI = true;
+static bool g_willTakeScreenShot = false;
+static int g_cntScreenShot = 0;
 
 void onRun()
 {
@@ -55,11 +57,20 @@ void onRun()
 
 	//aten::visualizer::render(g_buffer.image(), false);
 	aten::visualizer::render(false);
-#if 0
-	aten::visualizer::takeScreenshot("sc.png");
-#endif
 
-	if (g_isShowGUI)
+	if (g_willTakeScreenShot) {
+		static char buffer[1024];
+		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
+
+		aten::visualizer::takeScreenshot(buffer);
+
+		g_willTakeScreenShot = false;
+		g_cntScreenShot++;
+
+		AT_PRINTF("Take Screenshot[%s]\n", buffer);
+	}
+
+	if (g_willShowGUI)
 	{
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
@@ -127,7 +138,11 @@ void onKey(bool press, aten::Key key)
 
 	if (press) {
 		if (key == aten::Key::Key_F1) {
-			g_isShowGUI = !g_isShowGUI;
+			g_willShowGUI = !g_willShowGUI;
+			return;
+		}
+		else if (key == aten::Key::Key_F2) {
+			g_willTakeScreenShot = true;
 			return;
 		}
 	}

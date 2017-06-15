@@ -128,9 +128,8 @@ void onKey(bool press, aten::Key key)
 	if (press) {
 		if (key == aten::Key::Key_F1) {
 			g_isShowGUI = !g_isShowGUI;
+			return;
 		}
-
-		return;
 	}
 
 	if (press) {
@@ -222,12 +221,14 @@ int main()
 		WIDTH * HEIGHT,
 		1024);
 
+#if 0
 	auto envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
 	aten::ImageBasedLight ibl(&bg);
 
 	g_scene.addImageBasedLight(&ibl);
+#endif
 
 	{
 		std::vector<aten::ShapeParameter> shapeparams;
@@ -250,6 +251,7 @@ int main()
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 		std::vector<idaten::TextureResource> tex;
+#if 0
 		tex.push_back(idaten::TextureResource(envmap->colors(), envmap->width(), envmap->height()));
 
 		// TODO
@@ -258,6 +260,7 @@ int main()
 				l.envmap.idx = 0;
 			}
 		}
+#endif
 
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),
@@ -270,7 +273,8 @@ int main()
 			primparams,
 			vtxparams,
 			mtxs,
-			tex, idaten::EnvmapResource(0, ibl.getAvgIlluminace()));
+			//tex, idaten::EnvmapResource(0, ibl.getAvgIlluminace()));
+			tex, idaten::EnvmapResource());
 	}
 
 	aten::window::run(onRun);

@@ -795,6 +795,7 @@ namespace idaten {
 			nodetex.writeByNum(&tmp[0], tmp.size());
 		}
 
+		if (!texRsc.empty())
 		{
 			std::vector<cudaTextureObject_t> tmp;
 			for (int i = 0; i < texRsc.size(); i++) {

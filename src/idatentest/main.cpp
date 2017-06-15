@@ -145,6 +145,20 @@ void onKey(bool press, aten::Key key)
 		case aten::Key::Key_X:
 			aten::CameraOperator::moveUp(g_camera, -offset);
 			break;
+		case aten::Key::Key_R:
+		{
+			aten::vec3 pos, at;
+			real vfov;
+			Scene::getCameraPosAndAt(pos, at, vfov);
+
+			g_camera.init(
+				pos,
+				at,
+				aten::vec3(0, 1, 0),
+				vfov,
+				WIDTH, HEIGHT);
+		}
+			break;
 		default:
 			break;
 		}

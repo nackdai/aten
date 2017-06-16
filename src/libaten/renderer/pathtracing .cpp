@@ -9,11 +9,11 @@
 
 //#define Deterministic_Path_Termination
 
-//#define RELEASE_DEBUG
+#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X	(173)
-#define BREAK_Y	(480 - 360)
+#define BREAK_X	(390)
+#define BREAK_Y	(480 - 364)
 #pragma optimize( "", off)
 #endif
 
@@ -225,7 +225,7 @@ namespace aten
 					auto emit = sampleres.finalColor;
 
 					if (light->isSingular() || light->isInfinite()) {
-						if (pdfLight > real(0)) {
+						if (pdfLight > real(0) && cosShadow >= 0) {
 							// TODO
 							// ジオメトリタームの扱いについて.
 							// singular light の場合は、finalColor に距離の除算が含まれている.

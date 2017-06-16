@@ -47,6 +47,13 @@ set BUILD_DIR=glew\build\vc12
 
 rem end ==============================
 
+rem Copy files for Profile configuration ==============================
+if %CONFIG% == Release (
+   cd /d %~dp0
+   xcopy /Y /D glfw\%PLATFORM%\src\Release glfw\%PLATFORM%\src\Profile\
+   xcopy /Y /D glew\lib\Release\%PLATFORM% glew\lib\Profile\%PLATFORM%\
+)
+
 cd /d %CURDIR%
 
 exit /b 0

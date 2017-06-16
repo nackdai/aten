@@ -59,6 +59,29 @@ namespace AT_NAME {
 		return std::move(result);
 	}
 
+	AT_DEVICE_API void PinholeCamera::sample(
+		CameraSampleResult* result,
+		const aten::CameraParameter* param,
+		real s, real t)
+	{
+		// [0, 1] -> [-1, 1]
+		s = real(2) * s - real(1);
+		t = real(2) * t - real(1);
+
+		result->posOnLens = s * param->u + t * param->v;
+		result->posOnLens = result->posOnLens + param->center;
+
+		result->r.dir = normalize(result->posOnLens - param->origin);
+
+		result->nmlOnLens = param->dir;
+		result->posOnImageSensor = param->origin;
+
+		result->r.org = param->origin;
+
+		result->pdfOnLens = 1;
+		result->pdfOnImageSensor = 1;
+	}
+
 	void PinholeCamera::revertRayToPixelPos(
 		const aten::ray& ray,
 		int& px, int& py) const

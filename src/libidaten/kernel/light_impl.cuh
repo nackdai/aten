@@ -167,6 +167,10 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 	// u, v -> direction.
 	result->dir = AT_NAME::envmap::convertUVToDirection(u, v);
 
+	// TODO
+	// シーンのAABBを覆う球上に配置されるようにするべき.
+	result->pos = org + real(100000) * result->dir;
+
 	result->pdf = dot(normal, result->dir) / AT_MATH_PI;
 
 	auto le = tex2D<float4>(ctxt->textures[envmapidx], u, v);

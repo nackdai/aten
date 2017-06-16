@@ -445,6 +445,7 @@ __global__ void shade(
 
 		bool isHit = false;
 
+#if 0
 		if (light.type == aten::LightType::Area) {
 			// Area.
 			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
@@ -457,6 +458,9 @@ __global__ void shade(
 			// Point, Spot.
 			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 		}
+#else
+		isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
+#endif
 
 		if (isHit) {
 			hitobj = &ctxt.shapes[isectTmp.objid];

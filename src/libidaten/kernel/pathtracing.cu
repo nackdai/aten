@@ -361,6 +361,9 @@ __global__ void shade(
 
 	idx = hitindices[idx];
 
+	//idx = (480 - 360) * 640 + 345;
+	//idx = getIdx(43, 5, 640);
+
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
 
@@ -429,7 +432,7 @@ __global__ void shade(
 		auto lightobj = sampleres.obj;
 
 		auto dirToLight = normalize(sampleres.dir);
-		auto distToLight = length(sampleres.dir);
+		auto distToLight = length(posLight - rec.p);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
 
@@ -480,7 +483,7 @@ __global__ void shade(
 			auto emit = sampleres.finalColor;
 
 			if (light.attrib.isSingular || light.attrib.isInfinite) {
-				if (pdfLight > real(0)) {
+				if (pdfLight > real(0) && cosShadow >= 0) {
 					// TODO
 					// ジオメトリタームの扱いについて.
 					// singular light の場合は、finalColor に距離の除算が含まれている.
@@ -681,6 +684,10 @@ __global__ void gather(
 	data = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
 #endif
 
+	if (path.contrib.y < path.contrib.x && (path.contrib.y < path.contrib.z)) {
+		data = make_float4(1, 0, 0, 0) / sample;
+	}
+
 	surf2Dwrite(
 		data,
 		outSurface,
@@ -788,7 +795,8 @@ namespace idaten {
 			onGenPath(
 				width, height,
 				i, maxSamples,
-				time.milliSeconds);
+				//time.milliSeconds);
+				0);
 
 			depth = 0;
 
@@ -944,7 +952,7 @@ namespace idaten {
 		dim3 threadPerBlock(64);
 
 		shade << <blockPerGrid, threadPerBlock >> > (
-			//shade << <1, 1 >> > (
+		//shade << <1, 1 >> > (
 			outputSurf,
 			paths.ptr(),
 			m_hitidx.ptr(), hitcount,

@@ -10,6 +10,16 @@ public:
 		real& fov);
 };
 
+class MtrlTestScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at,
+		real& fov);
+};
+
 class PointLightScene {
 public:
 	static void makeScene(aten::scene* scene);
@@ -54,7 +64,8 @@ public:
 };
 
 //#define Scene CornellBoxScene
+#define Scene MtrlTestScene
 //#define Scene PointLightScene
 //#define Scene DirectionalLightScene
-#define Scene SpotLightScene
+//#define Scene SpotLightScene
 //#define Scene ObjCornellBoxScene

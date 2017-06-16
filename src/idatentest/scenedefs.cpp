@@ -110,6 +110,33 @@ void CornellBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
+void MtrlTestScene::makeScene(aten::scene* scene)
+{
+	auto s_blinn = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+	scene->add(s_blinn);
+
+	auto s_ggx = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+	scene->add(s_ggx);
+
+	auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+	scene->add(s_beckman);
+
+	auto s_glass = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
+	scene->add(s_glass);
+}
+
+void MtrlTestScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0, 0, 13);
+	at = aten::vec3(0, 0, 0);
+	fov = 30;
+}
+
+/////////////////////////////////////////////////////
+
 void PointLightScene::makeScene(aten::scene* scene)
 {
 	auto emit = new aten::emissive(aten::vec3(36.0, 36.0, 36.0));

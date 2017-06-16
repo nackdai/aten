@@ -249,19 +249,21 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				aten::ray transformedRay;
+				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+					aten::ray transformedRay;
 
-				if (s->mtxid >= 0) {
-					auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
-					transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-					transformedRay.dir = normalize(transformedRay.dir);
-					transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
-				}
-				else {
-					transformedRay = r;
-				}
+					if (s->mtxid >= 0) {
+						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+						transformedRay.dir = normalize(transformedRay.dir);
+						transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+					}
+					else {
+						transformedRay = r;
+					}
 
-				isHit = intersectBVHClosestTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+					isHit = intersectBVHClosestTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+				}
 			}
 			else {
 				// TODO
@@ -327,19 +329,21 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				aten::ray transformedRay;
+				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+					aten::ray transformedRay;
 
-				if (s->mtxid >= 0) {
-					auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
-					transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-					transformedRay.dir = normalize(transformedRay.dir);
-					transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
-				}
-				else {
-					transformedRay = r;
-				}
+					if (s->mtxid >= 0) {
+						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+						transformedRay.dir = normalize(transformedRay.dir);
+						transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+					}
+					else {
+						transformedRay = r;
+					}
 
-				isHit = intersectBVHCloserTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+					isHit = intersectBVHCloserTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+				}
 			}
 			else {
 				// TODO
@@ -406,19 +410,21 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				aten::ray transformedRay;
+				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+					aten::ray transformedRay;
 
-				if (s->mtxid >= 0) {
-					auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
-					transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-					transformedRay.dir = normalize(transformedRay.dir);
-					transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
-				}
-				else {
-					transformedRay = r;
-				}
+					if (s->mtxid >= 0) {
+						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+						transformedRay.dir = normalize(transformedRay.dir);
+						transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+					}
+					else {
+						transformedRay = r;
+					}
 
-				isHit = intersectBVHCloserTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+					isHit = intersectBVHCloserTriangles(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+				}
 			}
 			else {
 				// TODO

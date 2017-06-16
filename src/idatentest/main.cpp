@@ -14,9 +14,11 @@
 
 #include "scenedefs.h"
 
-static int WIDTH = 640;
-static int HEIGHT = 480;
-static const char* TITLE = "app";
+//#define ENABLE_ENVMAP
+
+static int WIDTH = 512;
+static int HEIGHT = 512;
+static const char* TITLE = "idaten";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -236,7 +238,7 @@ int main()
 		WIDTH * HEIGHT,
 		1024);
 
-#if 1
+#ifdef ENABLE_ENVMAP
 	auto envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
@@ -266,7 +268,7 @@ int main()
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 		std::vector<idaten::TextureResource> tex;
-#if 1
+#ifdef ENABLE_ENVMAP
 		tex.push_back(idaten::TextureResource(envmap->colors(), envmap->width(), envmap->height()));
 
 		// TODO
@@ -288,8 +290,11 @@ int main()
 			primparams,
 			vtxparams,
 			mtxs,
+#ifdef ENABLE_ENVMAP
 			tex, idaten::EnvmapResource(0, ibl.getAvgIlluminace()));
-			//tex, idaten::EnvmapResource());
+#else
+			tex, idaten::EnvmapResource());
+#endif
 	}
 
 	aten::window::run(onRun);

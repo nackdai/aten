@@ -4,21 +4,21 @@
 
 struct Context {
 	int geomnum;
-	aten::ShapeParameter* shapes;
+	const aten::ShapeParameter* shapes;
 
-	aten::MaterialParameter* mtrls;
+	const aten::MaterialParameter* mtrls;
 
 	int lightnum;
-	aten::LightParameter* lights;
+	const aten::LightParameter* lights;
 
 	cudaTextureObject_t* nodes;
 
-	aten::PrimitiveParamter* prims;
+	const aten::PrimitiveParamter* prims;
 
 	cudaTextureObject_t vtxPos;
 	cudaTextureObject_t vtxNml;
 
-	aten::mat4* matrices;
+	const aten::mat4* matrices;
 
 	cudaTextureObject_t* textures;
 	int envmapIdx;

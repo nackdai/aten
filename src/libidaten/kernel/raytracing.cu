@@ -293,7 +293,7 @@ __global__ void hitShadowRay(
 		bool isHit = intersectBVH(&ctxt, shadowRay, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
-		aten::ShapeParameter* hitobj = nullptr;
+		const aten::ShapeParameter* hitobj = nullptr;
 
 		aten::hitrecord rec;
 

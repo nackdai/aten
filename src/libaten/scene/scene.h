@@ -134,7 +134,7 @@ namespace AT_NAME {
 		static inline AT_DEVICE_API bool hitLight(
 			bool isHit,
 			aten::LightAttribute attrib,
-			void* lightobj,
+			const void* lightobj,
 			real distToLight,
 			real distHitObjToRayOrg,
 			const real hitt,

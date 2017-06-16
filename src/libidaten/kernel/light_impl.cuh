@@ -11,7 +11,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 
 	int primidx = basePrimIdx + shape->primid;
 
-	aten::PrimitiveParamter* prim = &ctxt->prims[primidx];
+	const aten::PrimitiveParamter* prim = &ctxt->prims[primidx];
 
 	float4 _p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[0]);
 	float4 _p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);
@@ -93,7 +93,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 	const aten::vec3& org,
 	aten::sampler* sampler)
 {
-	aten::ShapeParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
+	const aten::ShapeParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
 
 	aten::ray r;
 	aten::hitrecord rec;
@@ -144,7 +144,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 
 	AT_NAME::AreaLight::sample(result, &rec, light, org, sampler);
 
-	result->obj = s;
+	result->obj = (void*)s;
 }
 
 AT_CUDA_INLINE __device__  void sampleImageBasedLight(

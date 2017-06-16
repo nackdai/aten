@@ -131,11 +131,11 @@ __global__ void hitTest(
 	aten::ray* rays,
 	int* hitbools,
 	int width, int height,
-	aten::ShapeParameter* shapes, int geomnum,
-	aten::MaterialParameter* mtrls,
-	aten::LightParameter* lights, int lightnum,
+	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::MaterialParameter* __restrict__ mtrls,
+	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
-	aten::PrimitiveParamter* prims,
+	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
@@ -283,7 +283,7 @@ __global__ void shadeMissWithEnvmap(
 	int envmapIdx,
 	real envmapAvgIllum,
 	Path* paths,
-	aten::ray* rays,
+	const aten::ray* __restrict__ rays,
 	int width, int height)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -325,17 +325,17 @@ __global__ void shade(
 	Path* paths,
 	int* hitindices,
 	int hitnum,
-	aten::Intersection* isects,
+	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
 	int depth, int rrDepth,
-	aten::ShapeParameter* shapes, int geomnum,
-	aten::MaterialParameter* mtrls,
-	aten::LightParameter* lights, int lightnum,
+	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::MaterialParameter* __restrict__ mtrls,
+	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
-	aten::PrimitiveParamter* prims,
+	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml,
-	aten::mat4* matrices,
+	const aten::mat4* __restrict__ matrices,
 	cudaTextureObject_t* textures)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -374,7 +374,7 @@ __global__ void shade(
 	auto obj = &ctxt.shapes[isect.objid];
 	evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
-	aten::MaterialParameter* mtrl = &ctxt.mtrls[rec.mtrlid];
+	const aten::MaterialParameter* mtrl = &ctxt.mtrls[rec.mtrlid];
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
@@ -463,7 +463,7 @@ __global__ void shade(
 #endif
 
 		if (isHit) {
-			hitobj = &ctxt.shapes[isectTmp.objid];
+			hitobj = (void*)&ctxt.shapes[isectTmp.objid];
 		}
 
 		isHit = AT_NAME::scene::hitLight(
@@ -618,7 +618,7 @@ __global__ void hitShadowRay(
 
 		// Ray aim to the area light.
 		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-		aten::ShapeParameter* hitobj = lightobj;
+		const aten::ShapeParameter* hitobj = lightobj;
 
 		aten::Intersection isect;
 
@@ -659,7 +659,7 @@ __global__ void hitShadowRay(
 
 __global__ void gather(
 	cudaSurfaceObject_t outSurface,
-	Path* paths,
+	const Path* __restrict__ paths,
 	int width, int height)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;

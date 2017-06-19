@@ -40,6 +40,9 @@ static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
+static int g_maxSamples = 1;
+static int g_maxDepth = 5;
+
 void onRun()
 {
 	if (g_isCameraDirty) {
@@ -53,7 +56,9 @@ void onRun()
 
 	g_tracer.render(
 		g_buffer.image(),
-		WIDTH, HEIGHT);
+		WIDTH >> 1, HEIGHT >> 1,
+		g_maxSamples,
+		g_maxDepth);
 
 	auto cudaelapsed = timer.end();
 
@@ -77,6 +82,8 @@ void onRun()
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
+		ImGui::SliderInt("Depth", &g_maxDepth, 1, 10);
 		aten::window::drawImGui();
 	}
 }
@@ -184,7 +191,7 @@ void onKey(bool press, aten::Key key)
 				at,
 				aten::vec3(0, 1, 0),
 				vfov,
-				WIDTH, HEIGHT);
+				WIDTH >> 1, HEIGHT >> 1);
 		}
 			break;
 		default:
@@ -227,7 +234,7 @@ int main()
 		at,
 		aten::vec3(0, 1, 0),
 		vfov,
-		WIDTH, HEIGHT);
+		WIDTH >> 1, HEIGHT >> 1);
 
 	Scene::makeScene(&g_scene);
 	g_scene.build();
@@ -235,7 +242,7 @@ int main()
 	g_tracer.prepare();
 
 	idaten::Compaction::init(
-		WIDTH * HEIGHT,
+		(WIDTH >> 1) * (HEIGHT >> 1),
 		1024);
 
 #ifdef ENABLE_ENVMAP
@@ -281,7 +288,7 @@ int main()
 
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),
-			WIDTH, HEIGHT,
+			WIDTH >> 1, HEIGHT >> 1,
 			g_camera.param(),
 			shapeparams,
 			mtrlparms,

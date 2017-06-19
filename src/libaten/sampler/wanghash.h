@@ -7,13 +7,13 @@ namespace aten {
 	// Wang's hash による乱数ジェネレータ.
 	class WangHash AT_INHERIT(sampler) {
 	public:
-		WangHash() {}
+		AT_DEVICE_API WangHash() {}
 		WangHash(const unsigned int initial_seed)
 		{
 			init(initial_seed);
 		}
 
-		AT_VIRTUAL(~WangHash() {})
+		AT_VIRTUAL(AT_DEVICE_API ~WangHash() {})
 
 		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed))
 		{

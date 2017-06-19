@@ -339,7 +339,9 @@ namespace idaten {
 
 	void RayTracing::render(
 		aten::vec4* image,
-		int width, int height)
+		int width, int height,
+		int maxSamples,
+		int maxDepth)
 	{
 		dim3 block(16, 16);
 		dim3 grid(

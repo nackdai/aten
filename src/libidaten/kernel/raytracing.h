@@ -19,6 +19,8 @@ namespace idaten
 
 		virtual void render(
 			aten::vec4* image,
-			int width, int height) override final;
+			int width, int height,
+			int maxSamples,
+			int maxDepth) override final;
 	};
 }

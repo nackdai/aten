@@ -18,7 +18,9 @@ namespace idaten
 
 		virtual void render(
 			aten::vec4* image,
-			int width, int height) override final;
+			int width, int height,
+			int maxSamples,
+			int maxDepth) override final;
 
 		virtual void update(
 			GLuint gltex,
@@ -42,7 +44,10 @@ namespace idaten
 
 		inline void onHitTest(
 			int width, int height,
-			cudaTextureObject_t texVtxPos);
+			cudaTextureObject_t texVtxPos,
+			int depth,
+			int sample, int maxSamples,
+			int seed);
 
 		inline void onShadeMiss(
 			int width, int height,
@@ -62,5 +67,7 @@ namespace idaten
 	private:
 		idaten::TypedCudaMemory<int> m_hitbools;
 		idaten::TypedCudaMemory<int> m_hitidx;
+
+		idaten::TypedCudaMemory<int> m_mtrlIds;
 	};
 }

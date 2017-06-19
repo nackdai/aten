@@ -26,7 +26,9 @@ namespace idaten
 	public:
 		virtual void render(
 			aten::vec4* image,
-			int width, int height) = 0;
+			int width, int height,
+			int maxSamples,
+			int maxDepth) = 0;
 
 		virtual void update(
 			GLuint gltex,

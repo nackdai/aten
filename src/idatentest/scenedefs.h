@@ -64,8 +64,8 @@ public:
 };
 
 //#define Scene CornellBoxScene
-#define Scene MtrlTestScene
+//#define Scene MtrlTestScene
 //#define Scene PointLightScene
 //#define Scene DirectionalLightScene
 //#define Scene SpotLightScene
-//#define Scene ObjCornellBoxScene
+#define Scene ObjCornellBoxScene

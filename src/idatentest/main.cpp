@@ -15,6 +15,7 @@
 #include "scenedefs.h"
 
 //#define ENABLE_ENVMAP
+#define ENABLE_GEOMRENDERING
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -34,7 +35,12 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
 //static idaten::RayTracing g_tracer;
+
+#ifdef ENABLE_GEOMRENDERING
+static idaten::PathTracingGeometryRendering g_tracer;
+#else
 static idaten::PathTracing g_tracer;
+#endif
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -56,7 +62,11 @@ void onRun()
 
 	g_tracer.render(
 		g_buffer.image(),
+#ifdef ENABLE_GEOMRENDERING
 		WIDTH >> 1, HEIGHT >> 1,
+#else
+		WIDTH, HEIGHT,
+#endif
 		g_maxSamples,
 		g_maxDepth);
 
@@ -191,7 +201,11 @@ void onKey(bool press, aten::Key key)
 				at,
 				aten::vec3(0, 1, 0),
 				vfov,
+#ifdef ENABLE_GEOMRENDERING
 				WIDTH >> 1, HEIGHT >> 1);
+#else
+				WIDTH, HEIGHT);
+#endif
 		}
 			break;
 		default:
@@ -234,7 +248,11 @@ int main()
 		at,
 		aten::vec3(0, 1, 0),
 		vfov,
+#ifdef ENABLE_GEOMRENDERING
 		WIDTH >> 1, HEIGHT >> 1);
+#else
+		WIDTH, HEIGHT);
+#endif
 
 	Scene::makeScene(&g_scene);
 	g_scene.build();
@@ -242,7 +260,11 @@ int main()
 	g_tracer.prepare();
 
 	idaten::Compaction::init(
+#ifdef ENABLE_GEOMRENDERING
 		(WIDTH >> 1) * (HEIGHT >> 1),
+#else
+		WIDTH * HEIGHT,
+#endif
 		1024);
 
 #ifdef ENABLE_ENVMAP
@@ -288,7 +310,11 @@ int main()
 
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),
+#ifdef ENABLE_GEOMRENDERING
 			WIDTH >> 1, HEIGHT >> 1,
+#else
+			WIDTH, HEIGHT,
+#endif
 			g_camera.param(),
 			shapeparams,
 			mtrlparms,

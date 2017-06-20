@@ -187,6 +187,9 @@
     <ClInclude Include="..\src\libaten\misc\timer.h">
       <Filter>aten\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -332,6 +335,9 @@
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\compaction.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\pt_geometryrendering.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>

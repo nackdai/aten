@@ -340,5 +340,8 @@
     <CudaCompile Include="..\src\libidaten\kernel\pt_geometryrendering.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\pt_temporarlreprojection.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

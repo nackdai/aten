@@ -147,6 +147,17 @@ namespace aten {
 			return *this;
 		}
 
+		inline AT_DEVICE_API vec4 apply(const vec4& p) const
+		{
+			vec4 ret;
+			ret.x = v[0].x * p.x + v[0].y * p.y + v[0].z * p.z + v[0].w * p.w;
+			ret.y = v[1].x * p.x + v[1].y * p.y + v[1].z * p.z + v[1].w * p.w;
+			ret.z = v[2].x * p.x + v[2].y * p.y + v[2].z * p.z + v[2].w * p.w;
+			ret.w = v[3].x * p.x + v[3].y * p.y + v[3].z * p.z + v[3].w * p.w;
+
+			return std::move(ret);
+		}
+
 		inline AT_DEVICE_API vec3 apply(const vec3& p) const
 		{
 #if 0

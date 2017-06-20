@@ -117,7 +117,7 @@ namespace idaten
 			const std::vector<aten::vertex>& vtxs,
 			const std::vector<aten::mat4>& mtxs,
 			const std::vector<TextureResource>& texs,
-			const EnvmapResource& envmapRsc) override final;
+			const EnvmapResource& envmapRsc) override;
 
 	private:
 		virtual void onHitTest(
@@ -127,12 +127,55 @@ namespace idaten
 			int sample, int maxSamples,
 			int seed) override final;
 
+		virtual void getRenderAOVSize(int& w, int& h)
+		{
+			w <<= 1;
+			h <<= 1;
+		}
+
+		virtual idaten::TypedCudaMemory<float4>& getCurAOVs()
+		{
+			return m_aovs[0];
+		}
+
+		virtual void onGather(
+			cudaSurfaceObject_t outputSurf,
+			Path* path,
+			int width, int height) override;
+
+	protected:
+		idaten::TypedCudaMemory<float4> m_aovs[2];
+	};
+
+	class PathTracingTemporalReprojection : public PathTracingGeometryRendering {
+	public:
+		PathTracingTemporalReprojection() {}
+		virtual ~PathTracingTemporalReprojection() {}
+
+	protected:
+		virtual void getRenderAOVSize(int& w, int& h) override final
+		{
+			w = w;
+			h = h;
+		}
+
+		virtual idaten::TypedCudaMemory<float4>& getCurAOVs() override final
+		{
+			return m_aovs[m_curAOV];
+		}
+
 		virtual void onGather(
 			cudaSurfaceObject_t outputSurf,
 			Path* path,
 			int width, int height) override final;
 
-	private:
-		idaten::TypedCudaMemory<float4> m_aovs;
+	protected:
+		int m_curAOV{ 0 };
+		aten::mat4 m_mtxC2V;		// Clip - View.
+		aten::mat4 m_mtxPrevV2C;	// View - Clip.
+
+		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
+
+		bool m_isFirstRender{ true };
 	};
 }

@@ -282,7 +282,7 @@ namespace AT_NAME
 			const auto& p0 = v0.pos;
 			const auto& p1 = v1.pos;
 
-			orignalLen = (p1 - p0).length();
+			orignalLen = length(p1.v - p0.v);
 		}
 
 		real scaledLen = 0;
@@ -290,7 +290,7 @@ namespace AT_NAME
 			auto p0 = mtxL2W.apply(v0.pos);
 			auto p1 = mtxL2W.apply(v1.pos);
 
-			scaledLen = length(p1 - p0);
+			scaledLen = length(p1.v - p0.v);
 		}
 
 		real ratio = scaledLen / orignalLen;
@@ -331,7 +331,7 @@ namespace AT_NAME
 			auto p0 = mtxL2W.apply(v0.pos);
 			auto p1 = mtxL2W.apply(v1.pos);
 
-			scaledLen = length(p1 - p0);
+			scaledLen = length(p1.v - p0.v);
 		}
 
 		real ratio = scaledLen / orignalLen;

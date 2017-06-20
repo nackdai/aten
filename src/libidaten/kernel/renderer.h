@@ -66,5 +66,7 @@ namespace idaten
 		idaten::CudaGLSurface glimg;
 		idaten::CudaTextureResource vtxparamsPos;
 		idaten::CudaTextureResource vtxparamsNml;
+
+		aten::CameraParameter m_camParam;
 	};
 }

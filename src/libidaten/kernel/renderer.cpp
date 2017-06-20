@@ -33,6 +33,7 @@ namespace idaten {
 
 		cam.init(sizeof(camera));
 		cam.writeByNum(&camera, 1);
+		m_camParam = camera;
 
 		shapeparam.init(shapes.size());
 		shapeparam.writeByNum(&shapes[0], shapes.size());
@@ -91,5 +92,7 @@ namespace idaten {
 	{
 		cam.reset();
 		cam.writeByNum(&camera, 1);
+
+		m_camParam = camera;
 	}
 }

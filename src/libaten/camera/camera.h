@@ -21,6 +21,7 @@ namespace aten {
 		vec3 up;
 
 		real dist;
+		real vfov;
 		int width;
 		int height;
 	};

@@ -196,7 +196,8 @@ namespace idaten
 			texs, envmapRsc);
 
 		// TODO
-		m_aovs.init((width << 1) * (height << 1));
+		m_aovs[0].init((width << 1) * (height << 1));
+		m_aovs[1].init((width << 1) * (height << 1));
 	}
 
 	void PathTracingGeometryRendering::onHitTest(
@@ -207,17 +208,21 @@ namespace idaten
 		int seed)
 	{
 		if (depth == 0 && sample == 0) {
-			int W = width << 1;
-			int H = height << 1;
+			int W = width;
+			int H = height;
+
+			getRenderAOVSize(W, H);
 
 			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 			dim3 grid(
 				(W + block.x - 1) / block.x,
 				(H + block.y - 1) / block.y);
 
+			auto& aovs = getCurAOVs();
+
 			renderAOV << <grid, block >> > (
 			//renderAOV << <1, 1 >> > (
-				m_aovs.ptr(),
+				aovs.ptr(),
 				W, H,
 				sample, maxSamples,
 				seed,
@@ -255,11 +260,13 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
+		auto& aovs = getCurAOVs();
+
 		geometryRender << <grid, block >> > (
 		//geometryRender << <1, 1 >> > (
 			//paths.ptr(),
 			path,
-			m_aovs.ptr(),
+			aovs.ptr(),
 			outputSurf,
 			width, height,
 			mwidth, mheight);

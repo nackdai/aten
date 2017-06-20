@@ -35,6 +35,7 @@ namespace AT_NAME {
 
 		m_param.dist = height / (real(2.0) * aten::tan(theta / 2));
 
+		m_param.vfov = vfov;
 		m_param.width = width;
 		m_param.height = height;
 	}

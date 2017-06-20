@@ -98,7 +98,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 		//new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
 		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
 
-	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
 	aten::mat4 mtxL2W;
@@ -247,7 +247,7 @@ void ObjectScene::makeScene(aten::scene* scene)
 		"Material.001",
 		new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
 
-	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
 	aten::mat4 mtxL2W;
@@ -756,7 +756,7 @@ void ToonShadeTestScene::makeScene(aten::scene* scene)
 		"Material.001",
 		toonmtrl);
 
-	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj");
 	//auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
 
 	auto instance = new aten::instance<aten::object>(obj);

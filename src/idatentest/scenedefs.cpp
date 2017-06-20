@@ -62,7 +62,7 @@ void CornellBoxScene::makeScene(aten::scene* scene)
 		"Material.001",
 		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
 
-	auto obj = aten::ObjLoader::load("../../asset/suzanne.obj");
+	auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj");
 
 	aten::mat4 mtxL2W;
 	mtxL2W.asRotateByY(Deg2Rad(-25));

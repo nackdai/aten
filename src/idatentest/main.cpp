@@ -91,7 +91,7 @@ void onRun()
 	{
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
-		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
 		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
 		ImGui::SliderInt("Depth", &g_maxDepth, 1, 10);
 		aten::window::drawImGui();

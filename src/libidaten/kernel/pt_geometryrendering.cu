@@ -17,7 +17,7 @@
 #include "aten4idaten.h"
 
 __global__ void renderAOV(
-	int* outMtrlIds,
+	float4* aovs,
 	int width, int height,
 	int sample, int maxSamples,
 	int seed,
@@ -60,7 +60,8 @@ __global__ void renderAOV(
 
 	bool isHit = intersectBVH(&ctxt, camsample.r, &isect);
 
-	outMtrlIds[idx] = isHit ? isect.mtrlid : -1;
+	aovs[idx].x = isHit ? isect.mtrlid : -1;		// material id.
+	aovs[idx].y = isHit ? isect.t : AT_MATH_INF;	// depth.
 }
 
 enum ReferPos {
@@ -72,7 +73,7 @@ enum ReferPos {
 
 __global__ void geometryRender(
 	const idaten::PathTracing::Path* __restrict__ paths,
-	const int* __restrict__ mtrlIds,
+	const float4* __restrict__ aovs,
 	cudaSurfaceObject_t outSurface,
 	int width, int height,
 	int mwidth, int mheight)
@@ -117,7 +118,7 @@ __global__ void geometryRender(
 	v = aten::clamp(v, AT_MATH_EPSILON, real(1));
 
 	int refmidx = getIdx(ix, iy, width);
-	const int mtrlIdx = mtrlIds[refmidx];
+	const int mtrlIdx = (int)aovs[refmidx].x;
 
 	real norms[4] = {
 		1 / (u * (1 - v)),
@@ -132,7 +133,7 @@ __global__ void geometryRender(
 	
 	for (int i = 0; i < 4; i++) {
 		auto midx = getIdx(pos[i].x * ratio, pos[i].y * ratio, width);
-		auto refMtrlIdx = mtrlIds[midx];
+		int refMtrlIdx = (int)aovs[midx].x;
 
 		int coeff = (mtrlIdx == refMtrlIdx ? 1 : 0);
 		auto weight = norms[i] * coeff;;
@@ -195,7 +196,7 @@ namespace idaten
 			texs, envmapRsc);
 
 		// TODO
-		m_mtrlIds.init((width << 1) * (height << 1));
+		m_aovs.init((width << 1) * (height << 1));
 	}
 
 	void PathTracingGeometryRendering::onHitTest(
@@ -216,7 +217,7 @@ namespace idaten
 
 			renderAOV << <grid, block >> > (
 			//renderAOV << <1, 1 >> > (
-				m_mtrlIds.ptr(),
+				m_aovs.ptr(),
 				W, H,
 				sample, maxSamples,
 				seed,
@@ -258,7 +259,7 @@ namespace idaten
 		//geometryRender << <1, 1 >> > (
 			//paths.ptr(),
 			path,
-			m_mtrlIds.ptr(),
+			m_aovs.ptr(),
 			outputSurf,
 			width, height,
 			mwidth, mheight);

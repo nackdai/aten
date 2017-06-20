@@ -133,6 +133,6 @@ namespace idaten
 			int width, int height) override final;
 
 	private:
-		idaten::TypedCudaMemory<int> m_mtrlIds;
+		idaten::TypedCudaMemory<float4> m_aovs;
 	};
 }

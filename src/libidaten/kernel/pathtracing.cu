@@ -755,17 +755,15 @@ namespace idaten {
 			onGenPath(
 				width, height,
 				i, maxSamples,
-				seed);
+				seed,
+				vtxTexPos);
 
 			depth = 0;
 
 			while (depth < maxDepth) {
 				onHitTest(
 					width, height,
-					vtxTexPos,
-					depth,
-					i, maxSamples,
-					seed);
+					vtxTexPos);
 				
 				onShadeMiss(width, height, depth);
 
@@ -817,7 +815,8 @@ namespace idaten {
 	void PathTracing::onGenPath(
 		int width, int height,
 		int sample, int maxSamples,
-		int seed)
+		int seed,
+		cudaTextureObject_t texVtxPos)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -837,10 +836,7 @@ namespace idaten {
 
 	void PathTracing::onHitTest(
 		int width, int height,
-		cudaTextureObject_t texVtxPos,
-		int depth,
-		int sample, int maxSamples,
-		int seed)
+		cudaTextureObject_t texVtxPos)
 	{
 		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
 		dim3 threadPerBlock_HitTest(128);

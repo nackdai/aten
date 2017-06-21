@@ -66,17 +66,15 @@ namespace idaten
 			const EnvmapResource& envmapRsc) override;
 
 	protected:
-		inline void onGenPath(
+		virtual void onGenPath(
 			int width, int height,
 			int sample, int maxSamples,
-			int seed);
+			int seed,
+			cudaTextureObject_t texVtxPos);
 
-		virtual void onHitTest(
+		inline void onHitTest(
 			int width, int height,
-			cudaTextureObject_t texVtxPos,
-			int depth,
-			int sample, int maxSamples,
-			int seed);
+			cudaTextureObject_t texVtxPos);
 
 		inline void onShadeMiss(
 			int width, int height,
@@ -120,12 +118,11 @@ namespace idaten
 			const EnvmapResource& envmapRsc) override;
 
 	private:
-		virtual void onHitTest(
+		virtual void onGenPath(
 			int width, int height,
-			cudaTextureObject_t texVtxPos,
-			int depth,
 			int sample, int maxSamples,
-			int seed) override final;
+			int seed,
+			cudaTextureObject_t texVtxPos) override final;
 
 		virtual void getRenderAOVSize(int& w, int& h)
 		{

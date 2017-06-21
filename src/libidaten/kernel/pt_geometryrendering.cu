@@ -200,14 +200,19 @@ namespace idaten
 		m_aovs[1].init((width << 1) * (height << 1));
 	}
 
-	void PathTracingGeometryRendering::onHitTest(
+	void PathTracingGeometryRendering::onGenPath(
 		int width, int height,
-		cudaTextureObject_t texVtxPos,
-		int depth,
 		int sample, int maxSamples,
-		int seed)
+		int seed,
+		cudaTextureObject_t texVtxPos)
 	{
-		if (depth == 0 && sample == 0) {
+		idaten::PathTracing::onGenPath(
+			width, height,
+			sample, maxSamples,
+			seed,
+			texVtxPos);
+
+		if (sample == 0) {
 			int W = width;
 			int H = height;
 
@@ -235,13 +240,6 @@ namespace idaten
 
 			checkCudaKernel(renderAOV);
 		}
-
-		idaten::PathTracing::onHitTest(
-			width, height,
-			texVtxPos,
-			depth,
-			sample, maxSamples,
-			seed);
 	}
 
 	void PathTracingGeometryRendering::onGather(

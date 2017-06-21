@@ -19,8 +19,9 @@
 // TODO
 #define CAMERA_NEAR		(0.001f)
 #define CAMERA_FAR		(10000.0f)
+#define CAMERA_EPSILON	(CAMERA_NEAR / (CAMERA_FAR - CAMERA_NEAR))
 
-__global__ void temporarlReprojection(
+__global__ void temporalReprojection(
 	const idaten::PathTracing::Path* __restrict__ paths,
 	const float4* __restrict__ aovs,
 	const float4* __restrict__ prevAOVs,
@@ -43,6 +44,21 @@ __global__ void temporarlReprojection(
 	const aten::mat4 mtxPrevV2C = mtxs[1];
 
 	const auto aov = aovs[idx];
+
+	if (aov.y > CAMERA_FAR) {
+		// îwåiÇ»ÇÃÇ≈ÅAÇªÇÃÇ‹Ç‹èoóÕÇµÇƒèIÇÌÇË.
+		float4 clr = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
+		clr.w = 1;
+
+		surf2Dwrite(
+			clr,
+			outSurface,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+
+		return;
+	}
+
 	const auto centerDepth = aten::clamp(aov.y, CAMERA_NEAR, CAMERA_FAR);
 
 	// NOTE
@@ -84,23 +100,31 @@ __global__ void temporarlReprojection(
 	cur.w = 1;
 
 	if (isInsideX && isInsideY) {
-		int px = prevPos.x * (width - 1);
-		int py = prevPos.y * (height - 1);
+		int px = (int)(prevPos.x * (width - 1) + 0.5f);
+		int py = (int)(prevPos.y * (height - 1) + 0.5f);
+
+		px = min(px, width - 1);
+		py = min(py, height - 1);
 
 		const auto pidx = getIdx(px, py, width);
 
 		const auto prevAov = prevAOVs[pidx];
 		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
 
-		if (abs(centerDepth - prevDepth) <= 0.5) {
+		if (abs(centerDepth - prevDepth) <= 0.1f
+			&& aov.x == prevAov.x)
+		{
 			float4 prev;
 			surf2Dread(&prev, outSurface, px * sizeof(float4), py);
 
 			int n = (int)prev.w;
 
-			cur = prev * n + cur;
-			cur /= (float)(n + 1);
-			cur.w = n + 1;
+			// TODO
+			n = min(1, n);
+
+			cur = prev * n + cur * path.samples;
+			cur /= (float)(n + path.samples);
+			cur.w = n + path.samples;
 		}
 	}
 
@@ -172,7 +196,7 @@ namespace idaten
 			m_mtxs.init(sizeof(aten::mat4) * AT_COUNTOF(mtxs));
 			m_mtxs.writeByNum(mtxs, AT_COUNTOF(mtxs));
 
-			temporarlReprojection << <grid, block >> > (
+			temporalReprojection << <grid, block >> > (
 			//temporarlReprojection << <1, 1 >> > (
 				path,
 				m_aovs[cur].ptr(),

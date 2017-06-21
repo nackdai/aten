@@ -11,6 +11,7 @@
 
 inline AT_DEVICE_API int getIdx(int ix, int iy, int width)
 {
+#if 0
 	int X = ix / BLOCK_SIZE;
 	int Y = iy / BLOCK_SIZE;
 
@@ -24,5 +25,8 @@ inline AT_DEVICE_API int getIdx(int ix, int iy, int width)
 	const auto idx = base + (iy - YB) * BLOCK_SIZE + (ix - XB);
 
 	return idx;
+#else
+	return iy * width + ix;
+#endif
 }
 

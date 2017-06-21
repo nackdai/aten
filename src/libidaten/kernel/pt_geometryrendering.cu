@@ -245,7 +245,8 @@ namespace idaten
 	void PathTracingGeometryRendering::onGather(
 		cudaSurfaceObject_t outputSurf,
 		Path* path,
-		int width, int height)
+		int width, int height,
+		int maxSamples)
 	{
 		int mwidth = width;
 		int mheight = height;

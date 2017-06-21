@@ -47,7 +47,7 @@ static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
-static int g_maxSamples = 1;
+static int g_maxSamples = 16;
 static int g_maxDepth = 1;
 
 void onRun()
@@ -93,8 +93,17 @@ void onRun()
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+
+		int prevSamples = g_maxSamples;
+		int prevDepth = g_maxDepth;
+
 		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
 		ImGui::SliderInt("Depth", &g_maxDepth, 1, 10);
+
+		if (prevSamples != g_maxSamples || prevDepth != g_maxDepth) {
+			g_tracer.reset();
+		}
+
 		aten::window::drawImGui();
 	}
 }

@@ -44,6 +44,8 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc);
 
+		virtual void reset() {}
+
 		void updateCamera(const aten::CameraParameter& camera);
 
 	protected:

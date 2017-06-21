@@ -690,11 +690,6 @@ namespace idaten {
 
 	static bool doneSetStackSize = false;
 
-	static idaten::TypedCudaMemory<idaten::PathTracing::Path> paths;
-	static idaten::TypedCudaMemory<aten::Intersection> isects;
-	static idaten::TypedCudaMemory<aten::ray> rays;
-	static idaten::TypedCudaMemory<idaten::PathTracing::ShadowRay> shadowRays;
-
 	void PathTracing::render(
 		aten::vec4* image,
 		int width, int height,
@@ -789,7 +784,7 @@ namespace idaten {
 			}
 		}
 
-		onGather(outputSurf, paths.ptr(), width, height);
+		onGather(outputSurf, paths.ptr(), width, height, maxSamples);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
@@ -956,7 +951,8 @@ namespace idaten {
 	void PathTracing::onGather(
 		cudaSurfaceObject_t outputSurf,
 		Path* path,
-		int width, int height)
+		int width, int height,
+		int maxSamples)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(

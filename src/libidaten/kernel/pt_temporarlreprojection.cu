@@ -163,10 +163,10 @@ __global__ void temporalReprojection(
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
+#if 1
 	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 	cur.w = 1;
 
-#if 0
 	if (isInsideX && isInsideY) {
 		int px = (int)(prevPos.x * (width - 1) + 0.5f);
 		int py = (int)(prevPos.y * (height - 1) + 0.5f);
@@ -195,22 +195,93 @@ __global__ void temporalReprojection(
 			cur.w = n + path.samples;
 		}
 	}
-#endif
 
 	surf2Dwrite(
 		cur,
 		outSurface,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
+#else
+	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0);
+
+	if (path.samples > 0) {
+		cur /= path.samples;
+		cur.w = 1;
+
+		if (isInsideX && isInsideY) {
+			int px = (int)(prevPos.x * (width - 1) + 0.5f);
+			int py = (int)(prevPos.y * (height - 1) + 0.5f);
+
+			px = min(px, width - 1);
+			py = min(py, height - 1);
+
+			const auto pidx = getIdx(px, py, width);
+
+			const auto prevAov = prevAOVs[pidx];
+			const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
+
+			if (abs(centerDepth - prevDepth) <= 0.1f
+				&& aov.x == prevAov.x)
+			{
+				float4 prev;
+				surf2Dread(&prev, outSurface, px * sizeof(float4), py);
+
+				int n = (int)prev.w;
+
+				// TODO
+				//n = min(16, n);
+
+				cur = prev * n + cur;
+				cur /= (float)(n + 1);
+				cur.w = n + 1;
+			}
+		}
+	}
+	else {
+		if (isInsideX && isInsideY) {
+			int px = (int)(prevPos.x * (width - 1) + 0.5f);
+			int py = (int)(prevPos.y * (height - 1) + 0.5f);
+
+			px = min(px, width - 1);
+			py = min(py, height - 1);
+
+			const auto pidx = getIdx(px, py, width);
+
+			const auto prevAov = prevAOVs[pidx];
+			const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
+
+			if (abs(centerDepth - prevDepth) <= 0.1f
+				&& aov.x == prevAov.x)
+			{
+				float4 prev;
+				surf2Dread(&prev, outSurface, px * sizeof(float4), py);
+
+				cur = prev;
+			}
+		}
+	}
+
+	surf2Dwrite(
+		cur,
+		outSurface,
+		ix * sizeof(float4), iy,
+		cudaBoundaryModeTrap);
+#endif
+
+	
 }
 #endif
 
 __global__ void makePathMask(
+	idaten::PathTracing::Path* paths,
+	aten::ray* rays,
+	int width, int height,
+	int sample, int maxSamples,
+	int seed,
+	const aten::CameraParameter* __restrict__ camera,
 	const float4* __restrict__ aovs,
 	const float4* __restrict__ prevAOVs,
-	const aten::mat4* __restrict__ mtxs,
-	int* hitbools,
-	int width, int height)
+	const aten::mat4* __restrict__ mtxs)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -221,7 +292,13 @@ __global__ void makePathMask(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	hitbools[idx] = 1;
+	auto& path = paths[idx];
+	path.isHit = false;
+
+	if (path.isKill) {
+		path.isTerminate = true;
+		return;
+	}
 
 	const auto aov = aovs[idx];
 
@@ -253,15 +330,28 @@ __global__ void makePathMask(
 		if (abs(centerDepth - prevDepth) <= 0.1f
 			&& aov.x == prevAov.x)
 		{
-			hitbools[idx] = 0;
-		}
-		else {
-			hitbools[idx] = 1;
+			path.isKill = true;
+			path.isTerminate = true;
+			return;
 		}
 	}
-	else {
-		hitbools[idx] = 1;
-	}
+
+	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
+
+	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
+	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
+
+	AT_NAME::CameraSampleResult camsample;
+	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+
+	rays[idx] = camsample.r;
+
+	path.throughput = aten::vec3(1);
+	path.pdfb = 0.0f;
+	path.isTerminate = false;
+	path.isSingular = false;
+
+	path.samples += 1;
 }
 
 __global__ void genPathTemporalReprojection(
@@ -404,16 +494,27 @@ namespace idaten
 				texVtxPos);
 		}
 		else {
+#if 0
 			if (sample == 0) {
-				// まずは全体にレイを１つ飛ばす.
+				PathTracingGeometryRendering::renderAOVs(
+					width, height,
+					sample, maxSamples,
+					seed,
+					texVtxPos);
+			}
+#else
+			if (sample == 0) {
 				PathTracingGeometryRendering::onGenPath(
 					width, height,
 					sample, maxSamples,
 					seed,
 					texVtxPos);
 			}
-			else {
-				// 2レイ目以降は、テンポラルリプロジェクションの隙間のみに飛ばす.
+			else
+#endif
+
+			{
+				// 2フレーム目以降は、テンポラルリプロジェクションの隙間のみに飛ばす.
 
 				int cur = m_curAOV;
 				int prev = 1 - cur;
@@ -431,6 +532,18 @@ namespace idaten
 					(width + block.x - 1) / block.x,
 					(height + block.y - 1) / block.y);
 
+#if 1
+				makePathMask << <grid, block >> > (
+					paths.ptr(),
+					rays.ptr(),
+					width, height,
+					sample, maxSamples,
+					seed,
+					cam.ptr(),
+					m_aovs[cur].ptr(),
+					m_aovs[prev].ptr(),
+					m_mtxs.ptr());
+#else
 				makePathMask << <grid, block >> > (
 					m_aovs[cur].ptr(),
 					m_aovs[prev].ptr(),
@@ -456,6 +569,7 @@ namespace idaten
 					cam.ptr(),
 					m_hitidxTemporal.ptr(),
 					hitcount);
+#endif
 
 				m_mtxs.reset();
 			}

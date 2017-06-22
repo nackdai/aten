@@ -48,7 +48,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 16;
-static int g_maxDepth = 1;
+static int g_maxDepth = 5;
 
 void onRun()
 {

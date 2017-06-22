@@ -129,6 +129,12 @@ namespace idaten
 			int seed,
 			cudaTextureObject_t texVtxPos) override;
 
+		void renderAOVs(
+			int width, int height,
+			int sample, int maxSamples,
+			int seed,
+			cudaTextureObject_t texVtxPos);
+
 		virtual void getRenderAOVSize(int& w, int& h)
 		{
 			w <<= 1;

@@ -213,33 +213,46 @@ namespace idaten
 			texVtxPos);
 
 		if (sample == 0) {
-			int W = width;
-			int H = height;
-
-			getRenderAOVSize(W, H);
-
-			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-			dim3 grid(
-				(W + block.x - 1) / block.x,
-				(H + block.y - 1) / block.y);
-
-			auto& aovs = getCurAOVs();
-
-			renderAOV << <grid, block >> > (
-			//renderAOV << <1, 1 >> > (
-				aovs.ptr(),
-				W, H,
+			renderAOVs(
+				width, height,
 				sample, maxSamples,
 				seed,
-				cam.ptr(),
-				shapeparam.ptr(), shapeparam.num(),
-				nodetex.ptr(),
-				primparams.ptr(),
-				texVtxPos,
-				mtxparams.ptr());
-
-			checkCudaKernel(renderAOV);
+				texVtxPos);
 		}
+	}
+
+	void PathTracingGeometryRendering::renderAOVs(
+		int width, int height,
+		int sample, int maxSamples,
+		int seed,
+		cudaTextureObject_t texVtxPos)
+	{
+		int W = width;
+		int H = height;
+
+		getRenderAOVSize(W, H);
+
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+		dim3 grid(
+			(W + block.x - 1) / block.x,
+			(H + block.y - 1) / block.y);
+
+		auto& aovs = getCurAOVs();
+
+		renderAOV << <grid, block >> > (
+			//renderAOV << <1, 1 >> > (
+			aovs.ptr(),
+			W, H,
+			sample, maxSamples,
+			seed,
+			cam.ptr(),
+			shapeparam.ptr(), shapeparam.num(),
+			nodetex.ptr(),
+			primparams.ptr(),
+			texVtxPos,
+			mtxparams.ptr());
+
+		checkCudaKernel(renderAOV);
 	}
 
 	void PathTracingGeometryRendering::onGather(

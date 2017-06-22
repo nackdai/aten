@@ -784,7 +784,7 @@ namespace idaten {
 			}
 		}
 
-		onGather(outputSurf, paths.ptr(), width, height, maxSamples);
+		onGather(outputSurf, width, height, maxSamples);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
@@ -950,7 +950,6 @@ namespace idaten {
 
 	void PathTracing::onGather(
 		cudaSurfaceObject_t outputSurf,
-		Path* path,
 		int width, int height,
 		int maxSamples)
 	{
@@ -961,8 +960,7 @@ namespace idaten {
 
 		gather << <grid, block >> > (
 			outputSurf,
-			//paths.ptr(),
-			path,
+			paths.ptr(),
 			width, height);
 	}
 }

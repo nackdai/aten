@@ -505,12 +505,11 @@ namespace idaten
 
 	void PathTracingTemporalReprojection::onGather(
 		cudaSurfaceObject_t outputSurf,
-		Path* path,
 		int width, int height,
 		int maxSamples)
 	{
 		if (m_isFirstRender) {
-			PathTracing::onGather(outputSurf, path, width, height, maxSamples);
+			PathTracing::onGather(outputSurf, width, height, maxSamples);
 		}
 		else {
 			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
@@ -531,7 +530,7 @@ namespace idaten
 
 			temporalReprojection << <grid, block >> > (
 			//temporarlReprojection << <1, 1 >> > (
-				path,
+				paths.ptr(),
 				m_aovs[cur].ptr(),
 				m_aovs[prev].ptr(),
 				m_mtxs.ptr(),

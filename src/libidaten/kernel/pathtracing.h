@@ -89,7 +89,6 @@ namespace idaten
 
 		virtual void onGather(
 			cudaSurfaceObject_t outputSurf,
-			Path* path,
 			int width, int height,
 			int maxSamples);
 
@@ -143,7 +142,6 @@ namespace idaten
 
 		virtual void onGather(
 			cudaSurfaceObject_t outputSurf,
-			Path* path,
 			int width, int height,
 			int maxSamples) override;
 
@@ -213,7 +211,6 @@ namespace idaten
 
 		virtual void onGather(
 			cudaSurfaceObject_t outputSurf,
-			Path* path,
 			int width, int height,
 			int maxSamples) override final;
 

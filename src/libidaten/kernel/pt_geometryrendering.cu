@@ -244,7 +244,6 @@ namespace idaten
 
 	void PathTracingGeometryRendering::onGather(
 		cudaSurfaceObject_t outputSurf,
-		Path* path,
 		int width, int height,
 		int maxSamples)
 	{
@@ -263,8 +262,7 @@ namespace idaten
 
 		geometryRender << <grid, block >> > (
 		//geometryRender << <1, 1 >> > (
-			//paths.ptr(),
-			path,
+			paths.ptr(),
 			aovs.ptr(),
 			outputSurf,
 			width, height,

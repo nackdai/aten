@@ -15,7 +15,8 @@
 #include "scenedefs.h"
 
 //#define ENABLE_ENVMAP
-//#define ENABLE_GEOMRENDERING
+#define ENABLE_GEOMRENDERING
+//#define ENABLE_TEMPORAL
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -36,11 +37,15 @@ static aten::AcceleratedScene<aten::bvh> g_scene;
 
 //static idaten::RayTracing g_tracer;
 
-#ifdef ENABLE_GEOMRENDERING
+#if defined(ENABLE_GEOMRENDERING) && defined(ENABLE_TEMPORAL)
+// TODO
+static idaten::PathTracingTemporalReprojectionGeomtryRendering g_tracer;
+#elif defined(ENABLE_GEOMRENDERING)
 static idaten::PathTracingGeometryRendering g_tracer;
-#else
-//static idaten::PathTracing g_tracer;
+#elif defined(ENABLE_TEMPORAL)
 static idaten::PathTracingTemporalReprojection g_tracer;
+#else
+static idaten::PathTracing g_tracer;
 #endif
 
 static bool g_willShowGUI = true;

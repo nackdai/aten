@@ -643,6 +643,7 @@ __global__ void gather(
 	data.w = n + 1;
 #else
 	data = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
+	data.w = sample;
 #endif
 
 	surf2Dwrite(
@@ -744,8 +745,8 @@ namespace idaten {
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-			//int seed = time.milliSeconds;
-			int seed = 0;
+			int seed = time.milliSeconds;
+			//int seed = 0;
 
 			onGenPath(
 				width, height,

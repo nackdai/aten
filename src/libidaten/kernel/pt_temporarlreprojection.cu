@@ -188,11 +188,11 @@ __global__ void temporalReprojection(
 			int n = (int)prev.w;
 
 			// TODO
-			n = min(1, n);
+			n = min(16, n);
 
-			cur = prev * n + cur * path.samples;
-			cur /= (float)(n + path.samples);
-			cur.w = n + path.samples;
+			cur = prev * n + cur;
+			cur /= (float)(n + 1);
+			cur.w = n + 1;
 		}
 	}
 
@@ -643,7 +643,7 @@ namespace idaten
 			m_mtxs.writeByNum(mtxs, AT_COUNTOF(mtxs));
 
 			temporalReprojection << <grid, block >> > (
-			//temporarlReprojection << <1, 1 >> > (
+			//temporalReprojection << <1, 1 >> > (
 				paths.ptr(),
 				m_aovs[cur].ptr(),
 				m_aovs[prev].ptr(),

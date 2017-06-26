@@ -7,6 +7,8 @@
 #include "misc/value.h"
 #include "math/ray.h"
 
+#include "material/sample_texture.h"
+
 namespace AT_NAME {
 	class Light;
 }
@@ -238,11 +240,9 @@ namespace AT_NAME
 
 		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue)
 		{
-			auto ret = sampleTexture(texid, u, v, aten::vec3(defaultValue));
+			auto ret = AT_NAME::sampleTexture(texid, u, v, aten::vec3(defaultValue));
 			return std::move(ret);
 		}
-
-		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue);
 
 		static uint32_t getMaterialNum();
 		static material* getMaterial(uint32_t idx);

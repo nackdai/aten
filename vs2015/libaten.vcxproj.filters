@@ -350,6 +350,9 @@
     <ClInclude Include="..\3rdparty\imgui\imgui_internal.h">
       <Filter>ui\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\sample_texture.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

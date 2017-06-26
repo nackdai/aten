@@ -273,6 +273,7 @@
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
+    <ClInclude Include="..\src\libaten\material\sample_texture.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\material\toon.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h" />

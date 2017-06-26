@@ -242,22 +242,7 @@ namespace AT_NAME
 			return std::move(ret);
 		}
 
-		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue)
-		{
-			aten::vec3 ret = defaultValue;
-
-			// TODO
-#ifndef __AT_CUDA__
-			if (texid >= 0) {
-				auto tex = aten::texture::getTexture(texid);
-				if (tex) {
-					ret = tex->at(u, v);
-				}
-			}
-#endif
-
-			return std::move(ret);
-		}
+		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue);
 
 		static uint32_t getMaterialNum();
 		static material* getMaterial(uint32_t idx);

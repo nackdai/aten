@@ -14,7 +14,7 @@ namespace AT_NAME
 			aten::texture* roughnessMap = nullptr)
 			: material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
 		{
-			m_param.roughnessMap.ptr = roughnessMap;
+			m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
 			m_param.roughness = aten::clamp<real>(roughness, 0, 1);
 		}
 
@@ -24,7 +24,8 @@ namespace AT_NAME
 			m_param.roughness = val.get("roughness", m_param.roughness);
 			m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
 
-			m_param.roughnessMap.ptr = val.get("roughnessmap", m_param.roughnessMap.ptr);
+			auto roughnessMap = (aten::texture*)val.get("roughnessmap", nullptr);
+			m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
 		}
 
 		virtual ~MicrofacetGGX() {}

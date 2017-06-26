@@ -39,7 +39,7 @@ namespace AT_NAME
 
 			m_param.ior = ior;
 
-			m_param.roughnessMap.ptr = roughnessMap;
+			m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
 		}
 
 		DisneyBRDF(
@@ -63,7 +63,7 @@ namespace AT_NAME
 
 			m_param.ior = param.ior;
 
-			m_param.roughnessMap.ptr = roughnessMap;
+			m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
 		}
 
 		DisneyBRDF(aten::Values& val)

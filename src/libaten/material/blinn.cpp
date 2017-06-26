@@ -118,7 +118,7 @@ namespace AT_NAME
 
 		auto albedo = param->baseColor;
 		albedo *= sampleTexture(
-			(aten::texture*)param->albedoMap.ptr,
+			param->albedoMap,
 			u, v,
 			real(1));
 
@@ -236,7 +236,7 @@ namespace AT_NAME
 
 		auto albedo = param->baseColor;
 		albedo *= sampleTexture(
-			(aten::texture*)param->albedoMap.ptr,
+			param->albedoMap,
 			u, v,
 			real(1));
 

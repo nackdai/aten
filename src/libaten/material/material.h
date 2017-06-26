@@ -87,11 +87,9 @@ namespace aten
 			int isIdealRefraction : 1;
 		};
 
-		real padding[8];
-
-		UnionIdxPtr albedoMap;
-		UnionIdxPtr normalMap;
-		UnionIdxPtr roughnessMap;
+		int albedoMap;
+		int normalMap;
+		int roughnessMap;
 
 		MaterialParameter()
 		{
@@ -103,7 +101,6 @@ namespace aten
 			isIdealRefraction = false;
 		}
 	};
-	AT_STATICASSERT((sizeof(MaterialParameter) % 64) == 0);
 }
 
 namespace AT_NAME
@@ -189,7 +186,7 @@ namespace AT_NAME
 
 		virtual aten::vec3 sampleAlbedoMap(real u, real v) const
 		{
-			return std::move(sampleTexture((const aten::texture*)m_param.albedoMap.ptr, u, v, real(1)));
+			return std::move(sampleTexture(m_param.albedoMap, u, v, real(1)));
 		}
 
 		virtual void applyNormalMap(
@@ -239,20 +236,23 @@ namespace AT_NAME
 			return m_param;
 		}
 
-		static AT_DEVICE_API aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, real defaultValue)
+		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue)
 		{
-			auto ret = sampleTexture(tex, u, v, aten::vec3(defaultValue));
+			auto ret = sampleTexture(texid, u, v, aten::vec3(defaultValue));
 			return std::move(ret);
 		}
 
-		static AT_DEVICE_API aten::vec3 sampleTexture(const aten::texture* tex, real u, real v, const aten::vec3& defaultValue)
+		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue)
 		{
 			aten::vec3 ret = defaultValue;
 
 			// TODO
 #ifndef __AT_CUDA__
-			if (tex) {
-				ret = tex->at(u, v);
+			if (texid >= 0) {
+				auto tex = aten::texture::getTexture(texid);
+				if (tex) {
+					ret = tex->at(u, v);
+				}
 			}
 #endif
 
@@ -261,7 +261,11 @@ namespace AT_NAME
 
 		static uint32_t getMaterialNum();
 		static material* getMaterial(uint32_t idx);
+
+		// TODO
+		// マテリアルにIDを持たせているので、この関数は不要.
 		static int findMaterialIdx(material* mtrl);
+
 		static const std::vector<material*>& getMaterials();
 
 	protected:

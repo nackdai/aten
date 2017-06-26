@@ -62,7 +62,7 @@ namespace AT_NAME
 
 		aten::vec3 albedo = param->baseColor;
 		albedo *= sampleTexture(
-			(aten::texture*)param->albedoMap.ptr,
+			param->albedoMap,
 			u, v,
 			real(1));
 

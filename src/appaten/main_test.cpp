@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
 	g_bg.init(g_envmap);
 
 	aten::ImageBasedLight ibl(&g_bg);
-	//g_scene.addImageBasedLight(&ibl);
+	g_scene.addImageBasedLight(&ibl);
 
 	//g_tracer.setBG(&g_staticbg);
 

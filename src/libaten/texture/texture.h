@@ -8,20 +8,13 @@
 
 namespace aten {
 	class texture {
+		static std::vector<texture*> g_textures;
+
 	public:
-		texture() {}
-		texture(uint32_t width, uint32_t height, uint32_t channels)
-		{
-			m_width = width;
-			m_height = height;
-			m_channels = channels;
+		texture();
+		texture(uint32_t width, uint32_t height, uint32_t channels);
 
-			m_size = height * width;
-
-			m_colors.resize(width * height);
-		}
-
-		~texture() {}
+		~texture();
 
 	public:
 		AT_DEVICE_API vec3 at(real u, real v) const
@@ -79,7 +72,17 @@ namespace aten {
 			return m_channels;
 		}
 
+		int id() const
+		{
+			return m_id;
+		}
+
+		static const texture* getTexture(int id);
+		static const std::vector<texture*>& getTextures();
+
 	private:
+		int m_id{ -1 };
+
 		uint32_t m_width{ 0 };
 		uint32_t m_height{ 0 };
 		uint32_t m_channels{ 0 };

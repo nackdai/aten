@@ -544,6 +544,9 @@
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp">
       <Filter>ui\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\texture\texture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">

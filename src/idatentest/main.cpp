@@ -14,7 +14,7 @@
 
 #include "scenedefs.h"
 
-//#define ENABLE_ENVMAP
+#define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
@@ -312,13 +312,19 @@ int main()
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 		std::vector<idaten::TextureResource> tex;
-#ifdef ENABLE_ENVMAP
-		tex.push_back(idaten::TextureResource(envmap->colors(), envmap->width(), envmap->height()));
+		{
+			auto texs = aten::texture::getTextures();
 
-		// TODO
+			for (const auto t : texs) {
+				tex.push_back(
+					idaten::TextureResource(t->colors(), t->width(), t->height()));
+			}
+		}
+
+#ifdef ENABLE_ENVMAP
 		for (auto& l : lightparams) {
 			if (l.type == aten::LightType::IBL) {
-				l.envmap.idx = 0;
+				l.envmap.idx = envmap->id();
 			}
 		}
 #endif
@@ -339,7 +345,7 @@ int main()
 			vtxparams,
 			mtxs,
 #ifdef ENABLE_ENVMAP
-			tex, idaten::EnvmapResource(0, ibl.getAvgIlluminace()));
+			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace()));
 #else
 			tex, idaten::EnvmapResource());
 #endif

@@ -275,6 +275,46 @@ void DirectionalLightScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
+void TexturesScene::makeScene(aten::scene* scene)
+{
+	auto albedo = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_D.tga");
+	auto nml = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_N.tga");
+	auto rough = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_R.tga");
+	auto nml_2 = aten::ImageLoader::load("../../asset/normalmap.png");
+	aten::vec3 clr = aten::vec3(1, 1, 1);
+
+	auto s_blinn = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, new aten::MicrofacetBlinn(clr, 200, 0.2, albedo, nml));
+	scene->add(s_blinn);
+#if 1
+	auto s_ggx = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, new aten::MicrofacetGGX(clr, 0.2, 0.2, albedo, nml, rough));
+	scene->add(s_ggx);
+
+	auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(clr, 0.2, 0.2, albedo, nml, rough));
+	scene->add(s_beckman);
+
+	auto s_lambert = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, new aten::lambert(clr, albedo, nml));
+	scene->add(s_lambert);
+
+	auto s_spec = new aten::sphere(aten::vec3(-3, +2, 0), 1.0, new aten::specular(clr, nullptr, nml_2));
+	scene->add(s_spec);
+
+	auto s_ref = new aten::sphere(aten::vec3(-1, +2, 0), 1.0, new aten::specular(clr, nullptr, nml_2));
+	scene->add(s_ref);
+#endif
+}
+
+void TexturesScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0, 0, 13);
+	at = aten::vec3(0, 0, 0);
+	fov = 30;
+}
+
+/////////////////////////////////////////////////////
+
 void ObjCornellBoxScene::makeScene(aten::scene* scene)
 {
 	aten::AssetManager::registerMtrl(

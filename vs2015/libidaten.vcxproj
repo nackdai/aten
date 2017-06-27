@@ -38,16 +38,14 @@
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
     <ClInclude Include="..\src\libaten\material\blinn.h" />
-    <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
-    <ClInclude Include="..\src\libaten\material\layer.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
+    <ClInclude Include="..\src\libaten\material\sample_texture.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
-    <ClInclude Include="..\src\libaten\material\toon.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h" />
     <ClInclude Include="..\src\libaten\math\intersect.h" />
     <ClInclude Include="..\src\libaten\math\mat4.h" />
@@ -92,6 +90,7 @@
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h" />
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\renderer.h" />
+    <ClInclude Include="..\src\libidaten\kernel\sample_texture_impl.cuh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
@@ -135,7 +134,6 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
-    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <CudaCompile Include="..\src\libaten\material\emissive.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
@@ -169,7 +167,6 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
-    <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <CudaCompile Include="..\src\libaten\material\material .cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
@@ -212,7 +209,6 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
-    <ClCompile Include="..\src\libaten\material\toon.cpp" />
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
     <CudaCompile Include="..\src\libaten\object\object.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
@@ -242,6 +238,7 @@
     </CudaCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
+    <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">

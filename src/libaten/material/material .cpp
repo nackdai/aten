@@ -161,7 +161,7 @@ namespace AT_NAME
 		return fresnel;
 	}
 
-	void material::applyNormalMap(
+	AT_DEVICE_MTRL_API void material::applyNormalMap(
 		const aten::vec3& orgNml,
 		aten::vec3& newNml,
 		real u, real v) const

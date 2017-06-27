@@ -41,9 +41,6 @@
     <ClInclude Include="..\src\libaten\material\lambert.h">
       <Filter>aten\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\layer.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\material.h">
       <Filter>aten\material</Filter>
     </ClInclude>
@@ -56,16 +53,10 @@
     <ClInclude Include="..\src\libaten\material\specular.h">
       <Filter>aten\material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\toon.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\beckman.h">
       <Filter>aten\material</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\blinn.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\material\disney_brdf.h">
       <Filter>aten\material</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\emissive.h">
@@ -190,6 +181,12 @@
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\sample_texture.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\sample_texture_impl.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -244,15 +241,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\light\arealight.cpp">
       <Filter>aten\light</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\layer.cpp">
-      <Filter>aten\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\toon.cpp">
-      <Filter>aten\material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp">
-      <Filter>aten\material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\math\mat4.cpp">
       <Filter>aten\math</Filter>
@@ -341,6 +329,9 @@
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\pt_temporarlreprojection.cu">
+      <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>

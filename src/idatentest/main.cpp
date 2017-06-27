@@ -15,7 +15,7 @@
 #include "scenedefs.h"
 
 //#define ENABLE_ENVMAP
-#define ENABLE_GEOMRENDERING
+//#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
 static int WIDTH = 512;

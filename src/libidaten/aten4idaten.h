@@ -15,10 +15,7 @@
 #include "material/blinn.h"
 #include "material/ggx.h"
 #include "material/beckman.h"
-#include "material/disney_brdf.h"
 #include "material/oren_nayar.h"
-#include "material/layer.h"
-#include "material/toon.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

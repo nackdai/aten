@@ -115,8 +115,8 @@ namespace AT_NAME
 
 		real subpdf{ real(1) };
 
-		AT_DEVICE_API MaterialSampling() {}
-		AT_DEVICE_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
+		AT_DEVICE_MTRL_API MaterialSampling() {}
+		AT_DEVICE_MTRL_API MaterialSampling(const aten::vec3& d, const aten::vec3& b, real p)
 			: dir(d), bsdf(b), pdf(p)
 		{}
 	};
@@ -186,12 +186,12 @@ namespace AT_NAME
 			return m_id;
 		}
 
-		virtual aten::vec3 sampleAlbedoMap(real u, real v) const
+		virtual AT_DEVICE_MTRL_API aten::vec3 sampleAlbedoMap(real u, real v) const
 		{
 			return std::move(sampleTexture(m_param.albedoMap, u, v, real(1)));
 		}
 
-		virtual void applyNormalMap(
+		virtual AT_DEVICE_MTRL_API void applyNormalMap(
 			const aten::vec3& orgNml,
 			aten::vec3& newNml,
 			real u, real v) const;
@@ -202,25 +202,25 @@ namespace AT_NAME
 			const aten::vec3& wo,
 			real outsideIor = 1) const;
 
-		virtual real pdf(
+		virtual AT_DEVICE_MTRL_API real pdf(
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,
 			real u, real v) const = 0;
 
-		virtual aten::vec3 sampleDirection(
+		virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
 			const aten::ray& ray,
 			const aten::vec3& normal,
 			real u, real v,
 			aten::sampler* sampler) const = 0;
 
-		virtual aten::vec3 bsdf(
+		virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,
 			real u, real v) const = 0;
 
-		virtual MaterialSampling sample(
+		virtual AT_DEVICE_MTRL_API MaterialSampling sample(
 			const aten::ray& ray,
 			const aten::vec3& normal,
 			const aten::vec3& orgnormal,
@@ -238,7 +238,7 @@ namespace AT_NAME
 			return m_param;
 		}
 
-		static AT_DEVICE_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue)
+		static AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue)
 		{
 			auto ret = AT_NAME::sampleTexture(texid, u, v, aten::vec3(defaultValue));
 			return std::move(ret);

@@ -6,7 +6,7 @@ namespace AT_NAME
 	// NOTE
 	// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
 
-	AT_DEVICE_API real MicrofacetBlinn::pdf(
+	AT_DEVICE_MTRL_API real MicrofacetBlinn::pdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -36,7 +36,7 @@ namespace AT_NAME
 		return pdf;
 	}
 
-	real MicrofacetBlinn::pdf(
+	AT_DEVICE_MTRL_API real MicrofacetBlinn::pdf(
 		const aten::vec3& normal, 
 		const aten::vec3& wi,	/* in */
 		const aten::vec3& wo,	/* out */
@@ -46,7 +46,7 @@ namespace AT_NAME
 		return ret;
 	}
 
-	AT_DEVICE_API aten::vec3 MicrofacetBlinn::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::sampleDirection(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -95,7 +95,7 @@ namespace AT_NAME
 		return std::move(dir);
 	}
 
-	aten::vec3 MicrofacetBlinn::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::sampleDirection(
 		const aten::ray& ray,
 		const aten::vec3& normal,
 		real u, real v,
@@ -105,7 +105,7 @@ namespace AT_NAME
 		return std::move(dir);
 	}
 
-	AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -126,7 +126,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	aten::vec3 MicrofacetBlinn::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -136,7 +136,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	AT_DEVICE_API aten::vec3 MicrofacetBlinn::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
 		const aten::vec3& albedo,
 		const real shininess,
 		const real ior,
@@ -215,7 +215,7 @@ namespace AT_NAME
 		return std::move(bsdf);
 	}
 
-	AT_DEVICE_API void MicrofacetBlinn::sample(
+	AT_DEVICE_MTRL_API void MicrofacetBlinn::sample(
 		MaterialSampling* result,
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
@@ -262,7 +262,7 @@ namespace AT_NAME
 #endif
 	}
 
-	MaterialSampling MicrofacetBlinn::sample(
+	AT_DEVICE_MTRL_API MaterialSampling MicrofacetBlinn::sample(
 		const aten::ray& ray,
 		const aten::vec3& normal,
 		const aten::vec3& orgnormal,

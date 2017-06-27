@@ -1,6 +1,6 @@
 #pragma once
 
-#include "aten4idaten.h"
+#include "math/vec4.h"
 #include "cuda/cudautil.h"
 
 #include <cuda_runtime.h>

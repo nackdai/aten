@@ -7,6 +7,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+#include <vector>
 #include <numeric>
 
 // NOTE

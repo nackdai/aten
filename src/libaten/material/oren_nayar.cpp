@@ -5,7 +5,7 @@ namespace AT_NAME {
 	// https://ja.wikipedia.org/wiki/%E3%82%AA%E3%83%BC%E3%83%AC%E3%83%B3%E3%83%BB%E3%83%8D%E3%82%A4%E3%83%A4%E3%83%BC%E5%8F%8D%E5%B0%84
 	// https://github.com/imageworks/OpenShadingLanguage/blob/master/src/testrender/shading.cpp
 
-	AT_DEVICE_API real OrenNayar::pdf(
+	AT_DEVICE_MTRL_API real OrenNayar::pdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -24,7 +24,7 @@ namespace AT_NAME {
 		return pdf;
 	}
 
-	real OrenNayar::pdf(
+	AT_DEVICE_MTRL_API real OrenNayar::pdf(
 		const aten::vec3& normal, 
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -33,7 +33,7 @@ namespace AT_NAME {
 		return pdf(&m_param, normal, wi, wo, u, v);
 	}
 
-	AT_DEVICE_API aten::vec3 OrenNayar::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -70,7 +70,7 @@ namespace AT_NAME {
 		return std::move(dir);
 	}
 
-	aten::vec3 OrenNayar::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
 		const aten::ray& ray,
 		const aten::vec3& normal, 
 		real u, real v,
@@ -79,7 +79,7 @@ namespace AT_NAME {
 		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	AT_DEVICE_API aten::vec3 OrenNayar::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -118,7 +118,7 @@ namespace AT_NAME {
 		return bsdf;
 	}
 
-	aten::vec3 OrenNayar::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -127,7 +127,7 @@ namespace AT_NAME {
 		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
-	AT_DEVICE_API void OrenNayar::sample(
+	AT_DEVICE_MTRL_API void OrenNayar::sample(
 		MaterialSampling* result,
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
@@ -142,7 +142,7 @@ namespace AT_NAME {
 		result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
 	}
 
-	MaterialSampling OrenNayar::sample(
+	AT_DEVICE_MTRL_API MaterialSampling OrenNayar::sample(
 		const aten::ray& ray,
 		const aten::vec3& normal,
 		const aten::vec3& orgnormal,

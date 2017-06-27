@@ -5,7 +5,7 @@
 
 namespace AT_NAME
 {
-	AT_DEVICE_API real refraction::pdf(
+	AT_DEVICE_MTRL_API real refraction::pdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -18,7 +18,7 @@ namespace AT_NAME
 		return ret;
 	}
 
-	real refraction::pdf(
+	AT_DEVICE_MTRL_API real refraction::pdf(
 		const aten::vec3& normal, 
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -27,7 +27,7 @@ namespace AT_NAME
 		return pdf(&m_param, normal, wi, wo, u, v);
 	}
 
-	AT_DEVICE_API aten::vec3 refraction::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 refraction::sampleDirection(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -42,7 +42,7 @@ namespace AT_NAME
 		return std::move(reflect);
 	}
 
-	aten::vec3 refraction::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 refraction::sampleDirection(
 		const aten::ray& ray,
 		const aten::vec3& normal,
 		real u, real v,
@@ -51,7 +51,7 @@ namespace AT_NAME
 		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
-	AT_DEVICE_API aten::vec3 refraction::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
 		const aten::vec3& wi,
@@ -69,7 +69,7 @@ namespace AT_NAME
 		return std::move(albedo);
 	}
 
-	aten::vec3 refraction::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
 		const aten::vec3& normal, 
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -101,7 +101,7 @@ namespace AT_NAME
 		return std::move(ret);
 	}
 
-	AT_DEVICE_API void refraction::sample(
+	AT_DEVICE_MTRL_API void refraction::sample(
 		MaterialSampling* result,
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,

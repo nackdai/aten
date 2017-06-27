@@ -89,7 +89,6 @@ __global__ void hitTest(
 	int* hitbools,
 	int width, int height,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
-	const aten::MaterialParameter* __restrict__ mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -110,7 +109,6 @@ __global__ void hitTest(
 	{
 		ctxt.geomnum = geomnum;
 		ctxt.shapes = shapes;
-		ctxt.mtrls = mtrls;
 		ctxt.lightnum = lightnum;
 		ctxt.lights = lights;
 		ctxt.nodes = nodes;
@@ -286,7 +284,7 @@ __global__ void shade(
 	aten::ray* rays,
 	int depth, int rrDepth,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
-	const aten::MaterialParameter* __restrict__ mtrls,
+	aten::MaterialParameter* mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -318,9 +316,6 @@ __global__ void shade(
 
 	idx = hitindices[idx];
 
-	//idx = (480 - 360) * 640 + 345;
-	//idx = getIdx(43, 5, 640);
-
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
 
@@ -331,17 +326,22 @@ __global__ void shade(
 	auto obj = &ctxt.shapes[isect.objid];
 	evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
-	const aten::MaterialParameter* mtrl = &ctxt.mtrls[rec.mtrlid];
+	aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
+	{
+		mtrl.albedoMap = (int)(mtrl.albedoMap >= 0 ? ctxt.textures[mtrl.albedoMap] : -1);
+		mtrl.normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
+		mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
+	}
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
-	const aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
+	aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-	// TODO
 	// Apply normal map.
+	AT_NAME::material::applyNormalMap(&mtrl, orienting_normal, orienting_normal, rec.u, rec.v);
 
 	// Implicit conection to light.
-	if (mtrl->attrib.isEmissive) {
+	if (mtrl.attrib.isEmissive) {
 		float weight = 1.0f;
 
 		if (depth > 0 && !path.isSingular) {
@@ -360,7 +360,7 @@ __global__ void shade(
 			}
 		}
 
-		path.contrib += path.throughput * weight * mtrl->baseColor;
+		path.contrib += path.throughput * weight * mtrl.baseColor;
 
 		// When ray hit the light, tracing will finish.
 		path.isTerminate = true;
@@ -368,7 +368,7 @@ __global__ void shade(
 	}
 
 	// Explicit conection to light.
-	if (!mtrl->attrib.isSingular)
+	if (!mtrl.attrib.isSingular)
 	{
 		real lightSelectPdf = 1;
 		aten::LightSampleResult sampleres;
@@ -435,8 +435,8 @@ __global__ void shade(
 		if (isHit) {
 			auto cosShadow = dot(orienting_normal, dirToLight);
 
-			real pdfb = samplePDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-			auto bsdf = sampleBSDF(mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			real pdfb = samplePDF(&mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			auto bsdf = sampleBSDF(&mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
 			bsdf *= path.throughput;
 
@@ -497,7 +497,7 @@ __global__ void shade(
 
 	sampleMaterial(
 		&sampling,
-		mtrl,
+		&mtrl,
 		orienting_normal,
 		ray.dir,
 		rec.normal,
@@ -509,7 +509,7 @@ __global__ void shade(
 	auto bsdf = sampling.bsdf;
 
 	real c = 1;
-	if (!mtrl->attrib.isSingular) {
+	if (!mtrl.attrib.isSingular) {
 		// TODO
 		// AMDのはabsしているが....
 		//c = aten::abs(dot(orienting_normal, nextDir));
@@ -528,7 +528,7 @@ __global__ void shade(
 	rays[idx] = aten::ray(rec.p, nextDir);
 
 	path.pdfb = pdfb;
-	path.isSingular = mtrl->attrib.isSingular;
+	path.isSingular = mtrl.attrib.isSingular;
 }
 
 __global__ void hitShadowRay(
@@ -849,7 +849,6 @@ namespace idaten {
 			m_hitbools.ptr(),
 			width, height,
 			shapeparam.ptr(), shapeparam.num(),
-			mtrlparam.ptr(),
 			lightparam.ptr(), lightparam.num(),
 			nodetex.ptr(),
 			primparams.ptr(),

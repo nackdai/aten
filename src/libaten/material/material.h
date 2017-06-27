@@ -26,7 +26,7 @@ namespace aten
 			const uint32_t isNPR : 1;
 		};
 
-		MaterialAttribute(
+		AT_DEVICE_API MaterialAttribute(
 			bool _isEmissive = false,
 			bool _isSingular = false,
 			bool _isTranslucent = false,
@@ -35,7 +35,7 @@ namespace aten
 			: isEmissive(_isEmissive), isSingular(_isSingular), isTranslucent(_isTranslucent),
 			isGlossy(_isGlossy), isNPR(_isNPR)
 		{}
-		MaterialAttribute(const MaterialAttribute& type)
+		AT_DEVICE_API MaterialAttribute(const MaterialAttribute& type)
 			: MaterialAttribute(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy, type.isNPR)
 		{}
 	};
@@ -89,15 +89,15 @@ namespace aten
 			int isIdealRefraction : 1;
 		};
 
-		int albedoMap;
-		int normalMap;
-		int roughnessMap;
+		int albedoMap{ -1 };
+		int normalMap{ -1 };
+		int roughnessMap{ -1 };
 
-		MaterialParameter()
+		AT_DEVICE_API MaterialParameter()
 		{
 			isIdealRefraction = false;
 		}
-		MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
+		AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
 			: type(_type), attrib(_attrib)
 		{
 			isIdealRefraction = false;
@@ -195,6 +195,29 @@ namespace AT_NAME
 			const aten::vec3& orgNml,
 			aten::vec3& newNml,
 			real u, real v) const;
+
+		static AT_DEVICE_MTRL_API void applyNormalMap(
+			const aten::MaterialParameter* mtrl,
+			const aten::vec3& orgNml,
+			aten::vec3& newNml,
+			real u, real v)
+		{
+			if (mtrl->normalMap >= 0) {
+				newNml = sampleTexture(mtrl->normalMap, u, v, real(0));
+				newNml = real(2) * newNml - aten::vec3(1);
+				newNml = normalize(newNml);
+
+				aten::vec3 n = normalize(orgNml);
+				aten::vec3 t = aten::getOrthoVector(n);
+				aten::vec3 b = cross(n, t);
+
+				newNml = newNml.z * n + newNml.x * t + newNml.y * b;
+				newNml = normalize(newNml);
+			}
+			else {
+				newNml = normalize(orgNml);
+			}
+		}
 
 		virtual real computeFresnel(
 			const aten::vec3& normal,

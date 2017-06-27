@@ -166,21 +166,7 @@ namespace AT_NAME
 		aten::vec3& newNml,
 		real u, real v) const
 	{
-		if (m_param.normalMap >= 0) {
-			newNml = sampleTexture(m_param.normalMap, u, v, real(0));
-			newNml = real(2) * newNml - aten::vec3(1);
-			newNml = normalize(newNml);
-
-			aten::vec3 n = normalize(orgNml);
-			aten::vec3 t = aten::getOrthoVector(n);
-			aten::vec3 b = cross(n, t);
-
-			newNml = newNml.z * n + newNml.x * t + newNml.y * b;
-			newNml = normalize(newNml);
-		}
-		else {
-			newNml = normalize(orgNml);
-		}
+		applyNormalMap(&m_param, orgNml, newNml, u, v);
 	}
 
 	real material::computeFresnel(

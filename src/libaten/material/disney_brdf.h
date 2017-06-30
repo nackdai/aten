@@ -115,23 +115,55 @@ namespace AT_NAME
 			real u, real v,
 			bool isLightPath = false) const override final;
 
+		static AT_DEVICE_MTRL_API real pdf(
+			const aten::MaterialParameter* mtrl,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real u, real v);
+
+		static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+			const aten::MaterialParameter* mtrl,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			real u, real v,
+			aten::sampler* sampler);
+
+		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+			const aten::MaterialParameter* mtrl,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real u, real v);
+
+		static AT_DEVICE_MTRL_API MaterialSampling sample(
+			const aten::MaterialParameter* mtrl,
+			const aten::ray& ray,
+			const aten::vec3& normal,
+			const aten::vec3& orgnormal,
+			aten::sampler* sampler,
+			real u, real v,
+			bool isLightPath);
+
 	private:
-		aten::vec3 sample(
+		static AT_DEVICE_MTRL_API aten::vec3 sample(
+			const aten::MaterialParameter* mtrl,
 			real& pdf,
 			const aten::vec3& V,
 			const aten::vec3& N,
 			const aten::vec3& X,
 			const aten::vec3& Y,
 			real u, real v,
-			aten::sampler* sampler) const;
+			aten::sampler* sampler);
 
-		aten::vec3 bsdf(
+		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+			const aten::MaterialParameter* mtrl,
 			real& fresnel,
 			const aten::vec3& V,
 			const aten::vec3& N,
 			const aten::vec3& L,
 			const aten::vec3& X,
 			const aten::vec3& Y,
-			real u, real v) const;
+			real u, real v);
 	};
 }

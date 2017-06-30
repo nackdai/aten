@@ -8,19 +8,19 @@ namespace AT_NAME
 	// https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
 	// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
 
-	inline real sqr(real f)
+	inline AT_DEVICE_API real sqr(real f)
 	{
 		return f * f;
 	}
 
-	inline real SchlickFresnel(real u)
+	inline AT_DEVICE_API real SchlickFresnel(real u)
 	{
 		real m = aten::clamp<real>(1 - u, 0, 1);
 		real m2 = m * m;
 		return m2 * m2 * m; // pow(m,5)
 	}
 
-	inline real SchlickFresnelEta(real eta, real cosi)
+	inline AT_DEVICE_API real SchlickFresnelEta(real eta, real cosi)
 	{
 		const real f = ((real(1) - eta) / (real(1) + eta)) * ((real(1) - eta) / (real(1) + eta));
 		const real m = real(1) - aten::abs(cosi);
@@ -28,7 +28,7 @@ namespace AT_NAME
 		return f + (real(1) - f) * m2 * m2 * m;
 	}
 
-	inline real GTR1(real NdotH, real a)
+	inline AT_DEVICE_API real GTR1(real NdotH, real a)
 	{
 		// NOTE
 		// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
@@ -42,7 +42,7 @@ namespace AT_NAME
 		return (a2 - 1) / (AT_MATH_PI * aten::log(a2) * t);
 	}
 
-	inline real GTR2(real NdotH, real a)
+	inline AT_DEVICE_API real GTR2(real NdotH, real a)
 	{
 		// NOTE
 		// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
@@ -53,7 +53,7 @@ namespace AT_NAME
 		return a2 / (AT_MATH_PI * t*t);
 	}
 
-	inline real GTR2_aniso(real NdotH, real HdotX, real HdotY, real ax, real ay)
+	inline AT_DEVICE_API real GTR2_aniso(real NdotH, real HdotX, real HdotY, real ax, real ay)
 	{
 		// NOTE
 		// https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
@@ -72,7 +72,7 @@ namespace AT_NAME
 #endif
 	}
 
-	inline real smithG_GGX(real NdotV, real alphaG)
+	inline AT_DEVICE_API real smithG_GGX(real NdotV, real alphaG)
 	{
 		// NOTE
 		// http://graphicrants.blogspot.jp/2013/08/specular-brdf-reference.html
@@ -89,12 +89,12 @@ namespace AT_NAME
 #endif
 	}
 
-	inline real smithG_GGX_aniso(real NdotV, real VdotX, real VdotY, real ax, real ay)
+	inline AT_DEVICE_API real smithG_GGX_aniso(real NdotV, real VdotX, real VdotY, real ax, real ay)
 	{
 		return 1 / (NdotV + sqrt(sqr(VdotX * ax) + sqr(VdotY * ay) + sqr(NdotV)));
 	}
 
-	inline aten::vec3 mon2lin(const aten::vec3& x)
+	inline AT_DEVICE_API aten::vec3 mon2lin(const aten::vec3& x)
 	{
 		return aten::vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
 	}
@@ -105,6 +105,16 @@ namespace AT_NAME
 		const aten::vec3& wo,	/* out */
 		real u, real v) const
 	{
+		return pdf(&m_param, normal, wi, wo, u, v);
+	}
+
+	AT_DEVICE_MTRL_API real DisneyBRDF::pdf(
+		const aten::MaterialParameter* mtrl,
+		const aten::vec3& normal,
+		const aten::vec3& wi,	/* in */
+		const aten::vec3& wo,	/* out */
+		real u, real v)
+	{
 		const aten::vec3& N = normal;
 		const aten::vec3& V = -wi;
 		const aten::vec3& L = wo;
@@ -113,9 +123,9 @@ namespace AT_NAME
 		const aten::vec3 Y = normalize(cross(N, X));
 		
 		// TODO
-		const auto anisotropic = m_param.anisotropic;
-		const auto roughness = m_param.roughness;
-		const auto metalic = m_param.metallic;
+		const auto anisotropic = mtrl->anisotropic;
+		const auto roughness = mtrl->roughness;
+		const auto metalic = mtrl->metallic;
 
 		const auto weight2 = metalic;
 		const auto weight1 = 1 - weight2;
@@ -150,6 +160,16 @@ namespace AT_NAME
 		real u, real v,
 		aten::sampler* sampler) const
 	{
+		return std::move(sampleDirection(&m_param, ray, normal, u, v, sampler));
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sampleDirection(
+		const aten::MaterialParameter* mtrl,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		real u, real v,
+		aten::sampler* sampler)
+	{
 		const aten::vec3& in = ray.dir;
 
 		const aten::vec3& N = normal;
@@ -159,21 +179,22 @@ namespace AT_NAME
 		const aten::vec3 Y = normalize(cross(N, X));
 
 		real pdf;
-		return std::move(sample(pdf, V, N, X, Y, u, v, sampler));
+		return std::move(sample(mtrl, pdf, V, N, X, Y, u, v, sampler));
 	}
 
 	aten::vec3 DisneyBRDF::sample(
+		const aten::MaterialParameter* mtrl,
 		real& pdf,
 		const aten::vec3& V,
 		const aten::vec3& N,
 		const aten::vec3& X,
 		const aten::vec3& Y,
 		real u, real v,
-		aten::sampler* sampler) const
+		aten::sampler* sampler)
 	{
-		const auto anisotropic = m_param.anisotropic;
-		const auto roughness = m_param.roughness;
-		const auto metalic = m_param.metallic;
+		const auto anisotropic = mtrl->anisotropic;
+		const auto roughness = mtrl->roughness;
+		const auto metalic = mtrl->metallic;
 
 		const auto weight2 = metalic;
 		const auto weight1 = 1 - weight2;
@@ -275,6 +296,16 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v) const
 	{
+		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::bsdf(
+		const aten::MaterialParameter* mtrl,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v)
+	{
 		const aten::vec3& N = normal;
 		const aten::vec3 V = -wi;
 		const aten::vec3& L = wo;
@@ -284,29 +315,30 @@ namespace AT_NAME
 
 		real fresnel = 1;
 
-		return std::move(bsdf(fresnel, V, N, L, X, Y, u, v));
+		return std::move(bsdf(mtrl, fresnel, V, N, L, X, Y, u, v));
 	}
 
-	aten::vec3 DisneyBRDF::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::bsdf(
+		const aten::MaterialParameter* mtrl,
 		real& fresnel,
 		const aten::vec3& V,
 		const aten::vec3& N,
 		const aten::vec3& L,
 		const aten::vec3& X,
 		const aten::vec3& Y,
-		real u, real v) const
+		real u, real v)
 	{
-		const auto baseColor = m_param.baseColor;
-		const auto subsurface = m_param.subsurface;
-		const auto metalic = m_param.metallic;
-		const auto specular = m_param.specular;
-		const auto specularTint = m_param.specularTint;
-		const auto roughness = m_param.roughness;
-		const auto anisotropic = m_param.anisotropic;
-		const auto sheen = m_param.sheen;
-		const auto sheenTint = m_param.sheenTint;
-		const auto clearcoat = m_param.clearcoat;
-		const auto clearcoatGloss = m_param.clearcoatGloss;
+		const auto baseColor = mtrl->baseColor;
+		const auto subsurface = mtrl->subsurface;
+		const auto metalic = mtrl->metallic;
+		const auto specular = mtrl->specular;
+		const auto specularTint = mtrl->specularTint;
+		const auto roughness = mtrl->roughness;
+		const auto anisotropic = mtrl->anisotropic;
+		const auto sheen = mtrl->sheen;
+		const auto sheenTint = mtrl->sheenTint;
+		const auto clearcoat = mtrl->clearcoat;
+		const auto clearcoatGloss = mtrl->clearcoatGloss;
 
 		const auto NdotL = dot(N, L);
 		const auto NdotV = dot(N, V);
@@ -385,6 +417,18 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
+		return std::move(sample(&m_param, ray, normal, orgnormal, sampler, u, v, isLightPath));
+	}
+
+	AT_DEVICE_MTRL_API MaterialSampling DisneyBRDF::sample(
+		const aten::MaterialParameter* mtrl,
+		const aten::ray& ray,
+		const aten::vec3& normal,
+		const aten::vec3& orgnormal,
+		aten::sampler* sampler,
+		real u, real v,
+		bool isLightPath)
+	{
 		const aten::vec3& in = ray.dir;
 
 		const aten::vec3& N = normal;
@@ -395,12 +439,12 @@ namespace AT_NAME
 
 		MaterialSampling ret;
 
-		ret.dir = sample(ret.pdf, V, N, X, Y, u, v, sampler);
+		ret.dir = sample(mtrl, ret.pdf, V, N, X, Y, u, v, sampler);
 
 		const aten::vec3& L = ret.dir;
 
 		real fresnel = 1;
-		ret.bsdf = bsdf(fresnel, V, N, L, X, Y, u, v);
+		ret.bsdf = bsdf(mtrl, fresnel, V, N, L, X, Y, u, v);
 		ret.fresnel = fresnel;
 
 		return std::move(ret);

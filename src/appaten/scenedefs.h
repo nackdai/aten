@@ -153,9 +153,9 @@ public:
 //#define Scene DirectionalLightScene
 //#define Scene SpotLightScene
 //#define Scene ManyLightScene
-#define Scene TexturesScene
+//#define Scene TexturesScene
 //#define Scene HideLightScene
-//#define Scene DisneyMaterialTestScene
+#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
 //#define Scene ObjCornellBoxScene

@@ -89,25 +89,25 @@ namespace AT_NAME
 		virtual ~DisneyBRDF() {}
 
 	public:
-		virtual real pdf(
+		virtual AT_DEVICE_MTRL_API real pdf(
 			const aten::vec3& normal, 
 			const aten::vec3& wi,
 			const aten::vec3& wo,
 			real u, real v) const override final;
 
-		virtual aten::vec3 sampleDirection(
+		virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
 			const aten::ray& ray,
 			const aten::vec3& normal,
 			real u, real v,
 			aten::sampler* sampler) const override final;
 
-		virtual aten::vec3 bsdf(
+		virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
 			const aten::vec3& normal, 
 			const aten::vec3& wi,
 			const aten::vec3& wo,
 			real u, real v) const override final;
 
-		virtual MaterialSampling sample(
+		virtual AT_DEVICE_MTRL_API MaterialSampling sample(
 			const aten::ray& ray,
 			const aten::vec3& normal,
 			const aten::vec3& orgnormal,
@@ -124,8 +124,8 @@ namespace AT_NAME
 
 		static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
 			const aten::MaterialParameter* mtrl,
-			const aten::ray& ray,
 			const aten::vec3& normal,
+			const aten::vec3& wi,
 			real u, real v,
 			aten::sampler* sampler);
 
@@ -136,10 +136,11 @@ namespace AT_NAME
 			const aten::vec3& wo,
 			real u, real v);
 
-		static AT_DEVICE_MTRL_API MaterialSampling sample(
+		static AT_DEVICE_MTRL_API void sample(
+			MaterialSampling* result,
 			const aten::MaterialParameter* mtrl,
-			const aten::ray& ray,
 			const aten::vec3& normal,
+			const aten::vec3& wi,
 			const aten::vec3& orgnormal,
 			aten::sampler* sampler,
 			real u, real v,

@@ -63,6 +63,16 @@ public:
 		real& fov);
 };
 
+class DisneyMaterialTestScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at,
+		real& fov);
+};
+
 class ObjCornellBoxScene {
 public:
 	static void makeScene(aten::scene* scene);
@@ -78,5 +88,6 @@ public:
 //#define Scene PointLightScene
 //#define Scene DirectionalLightScene
 //#define Scene SpotLightScene
-#define Scene TexturesScene
+//#define Scene TexturesScene
+#define Scene DisneyMaterialTestScene
 //#define Scene ObjCornellBoxScene

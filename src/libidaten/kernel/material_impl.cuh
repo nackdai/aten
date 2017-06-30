@@ -37,6 +37,8 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
 		AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
 		break;
 	case aten::MaterialType::Disney:
+		AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
 	case aten::MaterialType::Toon:
 	case aten::MaterialType::Layer:
 		break;
@@ -78,6 +80,8 @@ AT_CUDA_INLINE __device__ real samplePDF(
 		pdf = AT_NAME::MicrofacetBeckman::pdf(mtrl, normal, wi, wo, u, v);
 		break;
 	case aten::MaterialType::Disney:
+		pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
+		break;
 	case aten::MaterialType::Toon:
 	case aten::MaterialType::Layer:
 		break;
@@ -111,6 +115,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
 	case aten::MaterialType::Beckman:
 		return AT_NAME::MicrofacetBeckman::sampleDirection(mtrl, normal, wi, u, v, sampler);
 	case aten::MaterialType::Disney:
+		return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
 	case aten::MaterialType::Toon:
 	case aten::MaterialType::Layer:
 		break;
@@ -144,6 +149,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
 	case aten::MaterialType::Beckman:
 		return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
 	case aten::MaterialType::Disney:
+		return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
 	case aten::MaterialType::Toon:
 	case aten::MaterialType::Layer:
 		break;

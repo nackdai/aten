@@ -258,7 +258,7 @@ namespace aten {
 	}
 
 	template <typename TYPE>
-	inline TYPE mix(const TYPE& x, const TYPE& y, real a)
+	inline AT_DEVICE_API TYPE mix(const TYPE& x, const TYPE& y, real a)
 	{
 		// Linear interpolation.
 		// x(1-a)+y*a

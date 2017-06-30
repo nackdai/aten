@@ -99,7 +99,7 @@ namespace AT_NAME
 		return aten::vec3(aten::pow(x[0], real(2.2)), aten::pow(x[1], real(2.2)), aten::pow(x[2], real(2.2)));
 	}
 
-	real DisneyBRDF::pdf(
+	AT_DEVICE_MTRL_API real DisneyBRDF::pdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,	/* in */
 		const aten::vec3& wo,	/* out */
@@ -134,8 +134,8 @@ namespace AT_NAME
 		return weight1;
 #else
 		const auto aspect = aten::sqrt(1 - anisotropic * real(0.9));
-		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
-		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
+		const auto ax = aten::cmpMax<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
+		const auto ay = aten::cmpMax<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
 
 		const auto H = normalize(L + V);
 
@@ -154,26 +154,24 @@ namespace AT_NAME
 #endif
 	}
 
-	aten::vec3 DisneyBRDF::sampleDirection(
+	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sampleDirection(
 		const aten::ray& ray,
 		const aten::vec3& normal,
 		real u, real v,
 		aten::sampler* sampler) const
 	{
-		return std::move(sampleDirection(&m_param, ray, normal, u, v, sampler));
+		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sampleDirection(
 		const aten::MaterialParameter* mtrl,
-		const aten::ray& ray,
 		const aten::vec3& normal,
+		const aten::vec3& wi,
 		real u, real v,
 		aten::sampler* sampler)
 	{
-		const aten::vec3& in = ray.dir;
-
 		const aten::vec3& N = normal;
-		const aten::vec3& V = -in;
+		const aten::vec3& V = -wi;
 
 		const aten::vec3 X = aten::getOrthoVector(N);
 		const aten::vec3 Y = normalize(cross(N, X));
@@ -182,7 +180,7 @@ namespace AT_NAME
 		return std::move(sample(mtrl, pdf, V, N, X, Y, u, v, sampler));
 	}
 
-	aten::vec3 DisneyBRDF::sample(
+	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sample(
 		const aten::MaterialParameter* mtrl,
 		real& pdf,
 		const aten::vec3& V,
@@ -201,8 +199,8 @@ namespace AT_NAME
 
 		// specular
 		const auto aspect = aten::sqrt(1 - anisotropic * real(0.9));
-		const auto ax = std::max<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
-		const auto ay = std::max<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
+		const auto ax = aten::cmpMax<real>(real(0.001), sqr(roughness) / aspect);	// roughness for x direction.
+		const auto ay = aten::cmpMax<real>(real(0.001), sqr(roughness) * aspect);	// roughness for y direction.
 
 		const auto r = sampler->nextSample();
 
@@ -290,7 +288,7 @@ namespace AT_NAME
 		return std::move(L);
 	}
 
-	aten::vec3 DisneyBRDF::bsdf(
+	AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::bsdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -373,8 +371,8 @@ namespace AT_NAME
 
 		// specular
 		const auto aspect = aten::sqrt(1 - anisotropic * real(0.9));
-		const auto ax = std::max(real(0.001), sqr(roughness) / aspect);
-		const auto ay = std::max(real(0.001), sqr(roughness) * aspect);
+		const auto ax = aten::cmpMax(real(0.001), sqr(roughness) / aspect);
+		const auto ay = aten::cmpMax(real(0.001), sqr(roughness) * aspect);
 		const auto Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
 		const auto FH = SchlickFresnel(LdotH);
 		const aten::vec3 Fs = aten::mix(Cspec0, aten::vec3(real(1)), FH);
@@ -409,7 +407,7 @@ namespace AT_NAME
 		return fresnel * ret;
 	}
 
-	MaterialSampling DisneyBRDF::sample(
+	AT_DEVICE_MTRL_API MaterialSampling DisneyBRDF::sample(
 		const aten::ray& ray,
 		const aten::vec3& normal,
 		const aten::vec3& orgnormal,
@@ -417,36 +415,34 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/) const
 	{
-		return std::move(sample(&m_param, ray, normal, orgnormal, sampler, u, v, isLightPath));
+		MaterialSampling ret;
+		sample(&ret, &m_param, normal, ray.dir, orgnormal, sampler, u, v, isLightPath);
+
+		return std::move(ret);
 	}
 
-	AT_DEVICE_MTRL_API MaterialSampling DisneyBRDF::sample(
+	AT_DEVICE_MTRL_API void DisneyBRDF::sample(
+		MaterialSampling* result,
 		const aten::MaterialParameter* mtrl,
-		const aten::ray& ray,
 		const aten::vec3& normal,
+		const aten::vec3& wi,
 		const aten::vec3& orgnormal,
 		aten::sampler* sampler,
 		real u, real v,
 		bool isLightPath)
 	{
-		const aten::vec3& in = ray.dir;
-
 		const aten::vec3& N = normal;
-		const aten::vec3 V = -in;
+		const aten::vec3 V = -wi;
 
 		const aten::vec3 X = aten::getOrthoVector(normal);
 		const aten::vec3 Y = normalize(cross(normal, X));
 
-		MaterialSampling ret;
+		result->dir = sample(mtrl, result->pdf, V, N, X, Y, u, v, sampler);
 
-		ret.dir = sample(mtrl, ret.pdf, V, N, X, Y, u, v, sampler);
-
-		const aten::vec3& L = ret.dir;
+		const aten::vec3& L = result->dir;
 
 		real fresnel = 1;
-		ret.bsdf = bsdf(mtrl, fresnel, V, N, L, X, Y, u, v);
-		ret.fresnel = fresnel;
-
-		return std::move(ret);
+		result->bsdf = bsdf(mtrl, fresnel, V, N, L, X, Y, u, v);
+		result->fresnel = fresnel;
 	}
 }

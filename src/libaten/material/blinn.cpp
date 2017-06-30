@@ -4,7 +4,7 @@
 namespace AT_NAME
 {
 	// NOTE
-	// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 	AT_DEVICE_MTRL_API real MicrofacetBlinn::pdf(
 		const aten::MaterialParameter* param,

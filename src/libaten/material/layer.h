@@ -13,7 +13,7 @@ namespace AT_NAME
 		virtual ~LayeredBSDF() {}
 
 	public:
-		void add(material* mtrl);
+		bool add(material* mtrl);
 
 		virtual aten::vec3 sampleAlbedoMap(real u, real v) const override final;
 

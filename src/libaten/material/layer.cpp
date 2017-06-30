@@ -76,9 +76,21 @@ namespace AT_NAME
 		}
 	}
 
-	void LayeredBSDF::add(material* mtrl)
+	bool LayeredBSDF::add(material* mtrl)
 	{
+		// TODO
+		// GPU‘¤‚Æˆ—‚ð‡‚í‚¹‚é‚½‚ßA‚R‘w‚Ü‚Å‚É‚·‚é.
+		if (m_layer.size() > 0) {
+			return false;
+		}
+
+		// Not permit layer in layer.
+		if (mtrl->param().type == aten::MaterialType::Layer) {
+			return false;
+		}
+
 		m_layer.push_back(mtrl);
+		return true;
 	}
 
 	MaterialSampling LayeredBSDF::sample(

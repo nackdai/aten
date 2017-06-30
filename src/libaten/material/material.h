@@ -89,18 +89,29 @@ namespace aten
 			int isIdealRefraction : 1;
 		};
 
-		int albedoMap{ -1 };
-		int normalMap{ -1 };
-		int roughnessMap{ -1 };
+		union {
+			struct {
+				int albedoMap;
+				int normalMap;
+				int roughnessMap;
+			};
+			int layer[3];
+		};
 
 		AT_DEVICE_API MaterialParameter()
 		{
 			isIdealRefraction = false;
+			albedoMap = -1;
+			normalMap = -1;
+			roughnessMap = -1;
 		}
 		AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
 			: type(_type), attrib(_attrib)
 		{
 			isIdealRefraction = false;
+			albedoMap = -1;
+			normalMap = -1;
+			roughnessMap = -1;
 		}
 	};
 }

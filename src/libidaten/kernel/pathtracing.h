@@ -100,6 +100,8 @@ namespace idaten
 
 		idaten::TypedCudaMemory<int> m_hitbools;
 		idaten::TypedCudaMemory<int> m_hitidx;
+
+		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
 	};
 
 	class PathTracingGeometryRendering : public PathTracing {

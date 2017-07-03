@@ -22,7 +22,8 @@ __global__ void genPath(
 	int width, int height,
 	int sample, int maxSamples,
 	int seed,
-	const aten::CameraParameter* __restrict__ camera)
+	const aten::CameraParameter* __restrict__ camera,
+	const unsigned int* sobolmatrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -41,7 +42,7 @@ __global__ void genPath(
 		return;
 	}
 
-	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
+	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -695,6 +696,9 @@ namespace idaten {
 
 		m_hitbools.init(width * height);
 		m_hitidx.init(width * height);
+
+		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
+		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
 	}
 
 	static bool doneSetStackSize = false;
@@ -833,7 +837,8 @@ namespace idaten {
 			width, height,
 			sample, maxSamples,
 			seed,
-			cam.ptr());
+			cam.ptr(),
+			m_sobolMatrices.ptr());
 
 		checkCudaKernel(genPath);
 	}

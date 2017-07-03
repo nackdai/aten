@@ -193,6 +193,12 @@
     <ClInclude Include="..\src\libaten\material\disney_brdf.h">
       <Filter>aten\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\sobol.h">
+      <Filter>aten\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\sobolproxy.h">
+      <Filter>aten\sampler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -275,8 +281,8 @@
     <ClCompile Include="..\src\libaten\material\layer.cpp">
       <Filter>aten\material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\material\disney_brdf.cpp">
-      <Filter>aten\material</Filter>
+    <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
+      <Filter>aten\sampler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -346,5 +352,6 @@
     <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp" />
   </ItemGroup>
 </Project>

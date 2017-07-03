@@ -22,7 +22,7 @@ namespace aten {
 		}
 		virtual ~Halton() {}
 
-		virtual void init(uint32_t seed) override final
+		virtual void init(uint32_t seed, const unsigned int* data = nullptr) override final
 		{
 			m_idx = (seed == 0 ? 1 : seed);
 			m_dimension = 0;

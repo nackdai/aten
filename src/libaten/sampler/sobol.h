@@ -29,7 +29,7 @@ struct Matrices
 {
     static const unsigned num_dimensions = 1024;
     static const unsigned size = 52;
-    static const unsigned matrices[];
+    static const unsigned matrices[Matrices::num_dimensions * Matrices::size];
 };
 
 // Compute one component of the Sobol'-sequence, where the component
@@ -37,7 +37,8 @@ struct Matrices
 // the point inside the sequence. The scramble parameter can be used
 // to permute elementary intervals, and might be chosen randomly to
 // generate a randomized QMC sequence.
-inline float sample(
+inline AT_DEVICE_API float sample(
+	const unsigned int* matrices,
     unsigned long long index,
     const unsigned dimension,
     const unsigned scramble = 0U)
@@ -48,7 +49,7 @@ inline float sample(
     for (unsigned i = dimension * Matrices::size; index; index >>= 1, ++i)
     {
         if (index & 1)
-            result ^= Matrices::matrices[i];
+            result ^= matrices[i];
     }
 
     return result * (1.f / (1ULL << 32));

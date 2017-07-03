@@ -15,9 +15,11 @@
 #define AT_INHERIT(c)
 
 #include "sampler/wanghash.h"
+#include "sampler/sobolproxy.h"
 
 namespace aten {
-	using sampler = WangHash;
+	//using sampler = WangHash;
+	using sampler = Sobol;
 }
 
 #include "aten_virtual.h"

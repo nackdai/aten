@@ -10,7 +10,7 @@ namespace aten {
 		sampler() {}
 		virtual ~sampler() {}
 
-		virtual void init(uint32_t seed)
+		virtual void init(uint32_t seed, const unsigned int* data = nullptr)
 		{
 			// Nothing is done...
 		}

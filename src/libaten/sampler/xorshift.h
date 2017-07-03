@@ -31,7 +31,7 @@ namespace aten {
 			return (real)next() / UINT_MAX;
 		}
 
-		virtual void init(uint32_t initial_seed) override final
+		virtual void init(uint32_t initial_seed, const unsigned int* data = nullptr) override final
 		{
 			unsigned int s = initial_seed;
 			for (int i = 1; i <= 4; i++) {

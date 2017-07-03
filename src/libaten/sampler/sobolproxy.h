@@ -7,28 +7,36 @@ namespace aten {
 	// NOTE
 	// The code of sobol is taken from: http://gruenschloss.org/sobol/kuo-2d-proj-single-precision.zip
 
-	class Sobol : public sampler {
+	class Sobol AT_INHERIT(sampler) {
 	public:
+		AT_DEVICE_API Sobol() {}
 		Sobol(uint32_t idx)
 		{
 			init(idx);
 		}
-		virtual ~Sobol() {}
+		AT_VIRTUAL(AT_DEVICE_API ~Sobol() {})
 
-		virtual void init(uint32_t seed) override final
+		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
 		{
 			m_idx = (seed == 0 ? 1 : seed);
 			m_dimension = 0;
+#ifdef __CUDACC__
+			m_matrices = data;
+#else
+			m_matrices = data ? data : sobol::Matrices::matrices;
+#endif
 		}
 
-		virtual real nextSample() override final
+		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
 		{
+#ifndef __CUDACC__
 			if (m_dimension >= sobol::Matrices::num_dimensions) {
 				AT_ASSERT(false);
 				return aten::drand48();
 			}
+#endif
 
-			auto ret = sobol::sample(m_idx, m_dimension);
+			auto ret = sobol::sample(m_matrices, m_idx, m_dimension);
 			m_dimension += 1;
 
 			return ret;
@@ -37,5 +45,6 @@ namespace aten {
 	private:
 		uint32_t m_idx;
 		uint32_t m_dimension;
+		const unsigned int* m_matrices;
 	};
 }

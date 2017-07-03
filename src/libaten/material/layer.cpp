@@ -80,16 +80,21 @@ namespace AT_NAME
 	{
 		// TODO
 		// GPU側と処理を合わせるため、３層までにする.
-		if (m_layer.size() > 0) {
+		if (m_layer.size() > 3) {
+			AT_ASSERT(false);
 			return false;
 		}
 
 		// Not permit layer in layer.
 		if (mtrl->param().type == aten::MaterialType::Layer) {
+			AT_ASSERT(false);
 			return false;
 		}
 
 		m_layer.push_back(mtrl);
+
+		m_param.layer[m_layer.size()] = mtrl->id();
+
 		return true;
 	}
 
@@ -118,7 +123,7 @@ namespace AT_NAME
 			aten::vec3 appliedNml = normal;
 
 			// NOTE
-			// 外部では最表層の NormalMap が適用されている.
+			// 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
 			if (i > 0) {
 				mtrl->applyNormalMap(normal, appliedNml, u, v);
 			}
@@ -168,7 +173,7 @@ namespace AT_NAME
 			aten::vec3 appliedNml = normal;
 
 			// NOTE
-			// 外部では最表層の NormalMap が適用されている.
+			// 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
 			if (i > 0) {
 				mtrl->applyNormalMap(normal, appliedNml, u, v);
 			}
@@ -227,7 +232,7 @@ namespace AT_NAME
 			aten::vec3 appliedNml = normal;
 
 			// NOTE
-			// 外部では最表層の NormalMap が適用されている.
+			// 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
 			if (i > 0) {
 				mtrl->applyNormalMap(normal, appliedNml, u, v);
 			}

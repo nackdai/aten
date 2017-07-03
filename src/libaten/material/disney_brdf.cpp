@@ -445,4 +445,23 @@ namespace AT_NAME
 		result->bsdf = bsdf(mtrl, fresnel, V, N, L, X, Y, u, v);
 		result->fresnel = fresnel;
 	}
+
+	AT_DEVICE_MTRL_API real DisneyBRDF::computeFresnel(
+		const aten::MaterialParameter* mtrl,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real outsideIor)
+	{
+		real fresnel = real(1);
+
+		const real et = 1.f;
+		if (et != 0.f)
+		{
+			const real cosi = dot(normal, -wi);
+			fresnel = real(1) - SchlickFresnelEta(et, cosi);
+		}
+
+		return fresnel;
+	}
 }

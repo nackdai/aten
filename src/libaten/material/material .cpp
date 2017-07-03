@@ -166,34 +166,6 @@ namespace AT_NAME
 		aten::vec3& newNml,
 		real u, real v) const
 	{
-		applyNormalMap(&m_param, orgNml, newNml, u, v);
-	}
-
-	real material::computeFresnel(
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real outsideIor/*= 1*/) const
-	{
-		aten::vec3 V = -wi;
-		aten::vec3 L = wo;
-		aten::vec3 N = normal;
-		aten::vec3 H = normalize(L + V);
-
-		auto ni = outsideIor;
-		auto nt = ior();
-
-		// NOTE
-		// Fschlick(v,h) Å‡ R0 + (1 - R0)(1 - cosÉ¶)^5
-		// R0 = ((n1 - n2) / (n1 + n2))^2
-
-		auto r0 = (ni - nt) / (ni + nt);
-		r0 = r0 * r0;
-
-		auto LdotH = aten::abs(dot(L, H));
-
-		auto F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
-
-		return F;
-	}
+		applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
+	}	
 }

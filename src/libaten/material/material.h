@@ -208,13 +208,13 @@ namespace AT_NAME
 			real u, real v) const;
 
 		static AT_DEVICE_MTRL_API void applyNormalMap(
-			const aten::MaterialParameter* mtrl,
+			const int normalMapIdx,
 			const aten::vec3& orgNml,
 			aten::vec3& newNml,
 			real u, real v)
 		{
-			if (mtrl->normalMap >= 0) {
-				newNml = sampleTexture(mtrl->normalMap, u, v, real(0));
+			if (normalMapIdx >= 0) {
+				newNml = sampleTexture(normalMapIdx, u, v, real(0));
 				newNml = real(2) * newNml - aten::vec3(1);
 				newNml = normalize(newNml);
 
@@ -230,11 +230,43 @@ namespace AT_NAME
 			}
 		}
 
-		virtual real computeFresnel(
+		virtual AT_DEVICE_MTRL_API real computeFresnel(
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,
-			real outsideIor = 1) const;
+			real outsideIor = 1) const
+		{
+			return computeFresnel(&m_param, normal, wi, wo, outsideIor);
+		}
+
+		static AT_DEVICE_MTRL_API real computeFresnel(
+			const aten::MaterialParameter* mtrl,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real outsideIor)
+		{
+			aten::vec3 V = -wi;
+			aten::vec3 L = wo;
+			aten::vec3 N = normal;
+			aten::vec3 H = normalize(L + V);
+
+			auto ni = outsideIor;
+			auto nt = mtrl->ior;
+
+			// NOTE
+			// Fschlick(v,h) Å‡ R0 + (1 - R0)(1 - cosÉ¶)^5
+			// R0 = ((n1 - n2) / (n1 + n2))^2
+
+			auto r0 = (ni - nt) / (ni + nt);
+			r0 = r0 * r0;
+
+			auto LdotH = aten::abs(dot(L, H));
+
+			auto F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
+
+			return F;
+		}
 
 		virtual AT_DEVICE_MTRL_API real pdf(
 			const aten::vec3& normal,
@@ -306,7 +338,7 @@ namespace AT_NAME
 		virtual ~NPRMaterial() {}
 
 	public:
-		virtual real computeFresnel(
+		virtual AT_DEVICE_MTRL_API real computeFresnel(
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,

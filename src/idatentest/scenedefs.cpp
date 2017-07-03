@@ -380,6 +380,37 @@ void DisneyMaterialTestScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
+void LayeredMaterialTestScene::makeScene(aten::scene* scene)
+{
+	auto spec = new aten::MicrofacetBlinn(aten::vec3(1, 1, 1), 200, 0.8);
+	auto diff = new aten::lambert(aten::vec3(0.7, 0.0, 0.0));
+
+	auto layer = new aten::LayeredBSDF();
+	layer->add(spec);
+	layer->add(diff);
+
+	auto s_layer = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, layer);
+	scene->add(s_layer);
+
+	auto s_diff = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, diff);
+	scene->add(s_diff);
+
+	auto s_spec = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0, 0), 200, 0.8));
+	scene->add(s_spec);
+}
+
+void LayeredMaterialTestScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0, 0, 13);
+	at = aten::vec3(0, 0, 0);
+	fov = 30;
+}
+
+/////////////////////////////////////////////////////
+
 void ObjCornellBoxScene::makeScene(aten::scene* scene)
 {
 	aten::AssetManager::registerMtrl(

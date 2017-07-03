@@ -146,6 +146,22 @@ namespace AT_NAME
 			real u, real v,
 			bool isLightPath);
 
+		virtual AT_DEVICE_MTRL_API real computeFresnel(
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real outsideIor = 1) const
+		{
+			return computeFresnel(&m_param, normal, wi, wo, outsideIor);
+		}
+
+		static AT_DEVICE_MTRL_API real computeFresnel(
+			const aten::MaterialParameter* mtrl,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real outsideIor);
+
 	private:
 		static AT_DEVICE_MTRL_API aten::vec3 sample(
 			const aten::MaterialParameter* mtrl,

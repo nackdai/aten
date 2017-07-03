@@ -190,6 +190,7 @@ __global__ void raytracing(
 			
 		sampleMaterial(
 			&sampling,
+			&ctxt,
 			mtrl,
 			orienting_normal, 
 			path.ray.dir,

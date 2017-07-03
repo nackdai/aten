@@ -327,18 +327,25 @@ __global__ void shade(
 	evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
 	aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
-	{
-		mtrl.albedoMap = (int)(mtrl.albedoMap >= 0 ? ctxt.textures[mtrl.albedoMap] : -1);
-		mtrl.normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
-		mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
-	}
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 	// Apply normal map.
-	AT_NAME::material::applyNormalMap(&mtrl, orienting_normal, orienting_normal, rec.u, rec.v);
+	if (mtrl.type == aten::MaterialType::Layer) {
+		// 最表層の NormalMap を適用.
+		auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
+		auto normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
+		AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+	}
+	else {
+		mtrl.albedoMap = (int)(mtrl.albedoMap >= 0 ? ctxt.textures[mtrl.albedoMap] : -1);
+		mtrl.normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
+		mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
+
+		AT_NAME::material::applyNormalMap(mtrl.normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+	}
 
 	// Implicit conection to light.
 	if (mtrl.attrib.isEmissive) {
@@ -435,8 +442,8 @@ __global__ void shade(
 		if (isHit) {
 			auto cosShadow = dot(orienting_normal, dirToLight);
 
-			real pdfb = samplePDF(&mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-			auto bsdf = sampleBSDF(&mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			real pdfb = samplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+			auto bsdf = sampleBSDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
 			bsdf *= path.throughput;
 
@@ -497,6 +504,7 @@ __global__ void shade(
 
 	sampleMaterial(
 		&sampling,
+		&ctxt,
 		&mtrl,
 		orienting_normal,
 		ray.dir,

@@ -61,6 +61,7 @@ namespace AT_NAME
 		real outsideIor/*= 1*/) const
 	{
 		// TODO
+		// Not permit layer in layer, so this api should not be called.
 		AT_ASSERT(false);
 
 		auto num = m_layer.size();
@@ -91,9 +92,8 @@ namespace AT_NAME
 			return false;
 		}
 
-		m_layer.push_back(mtrl);
-
 		m_param.layer[m_layer.size()] = mtrl->id();
+		m_layer.push_back(mtrl);
 
 		return true;
 	}

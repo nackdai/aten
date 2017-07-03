@@ -69,11 +69,21 @@ namespace AT_NAME
 			real u, real v,
 			bool isLightPath = false) const override final;
 
-		virtual real computeFresnel(
+		virtual AT_DEVICE_MTRL_API real computeFresnel(
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			const aten::vec3& wo,
 			real outsideIor = 1) const override final
+		{
+			return computeFresnel(&m_param, normal, wi, wo, outsideIor);
+		}
+
+		static AT_DEVICE_MTRL_API real computeFresnel(
+			const aten::MaterialParameter* mtrl,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real outsideIor)
 		{
 			return real(1);
 		}

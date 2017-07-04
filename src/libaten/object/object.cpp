@@ -271,9 +271,11 @@ namespace AT_NAME
 	{
 		auto f = face::faces()[isect.primid];
 
-		const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
-		const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
-		const auto& v2 = aten::VertexManager::getVertex(f->param.idx[2]);
+		auto& vtxs = aten::VertexManager::getVertices();
+
+		const auto& v0 = vtxs[f->param.idx[0]];
+		const auto& v1 = vtxs[f->param.idx[1]];
+		const auto& v2 = vtxs[f->param.idx[2]];
 
 		face::evalHitResult(v0, v1, v2, &rec, &isect);
 

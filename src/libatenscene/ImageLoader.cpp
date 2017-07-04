@@ -98,6 +98,7 @@ namespace aten {
 
 		if (!input) {
 			AT_ASSERT(false);
+			AT_PRINTF("Failed load texture. [%s]\n", fullpath.c_str());
 			return nullptr;
 		}
 

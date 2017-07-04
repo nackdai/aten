@@ -87,6 +87,10 @@ namespace aten
 
 		for (int p = 0; p < shapes.size(); p++) {
 			const auto& shape = shapes[p];
+
+			AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
+			AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
+
 			aten::shape* dstshape = new aten::shape();
 
 			auto idxnum = shape.mesh.indices.size();
@@ -163,13 +167,17 @@ namespace aten
 			vtxnum = shape.mesh.texcoords.size();
 
 			for (uint32_t i = 0; i < vtxnum; i += 2) {
-				uint32_t vpos = i / 2;
+				uint32_t vpos = i / 2 + curVtxPos;
 
 				auto& vtx = VertexManager::getVertex(vpos);
 
 				vtx.uv.x = shape.mesh.texcoords[i + 0];
 				vtx.uv.y = shape.mesh.texcoords[i + 1];
 				vtx.uv.z = vtx.uv.w = real(0);
+
+				if (vtx.uv.x > real(1) || vtx.uv.y > real(1)) {
+					int xxx = 0;
+				}
 			}
 
 			auto mtrl = dstshape->getMaterial();

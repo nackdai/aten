@@ -147,7 +147,7 @@ __global__ void geometryRender(
 	denom = denom / (sumWeight + AT_MATH_EPSILON);
 
 	float4 data;
-#if 0
+#if 1
 	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
 	// First data.w value is 0.

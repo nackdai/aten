@@ -642,7 +642,7 @@ __global__ void gather(
 	int sample = path.samples;
 
 	float4 data;
-#if 0
+#if 1
 	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
 	// First data.w value is 0.

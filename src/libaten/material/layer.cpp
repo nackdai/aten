@@ -3,6 +3,9 @@
 
 namespace AT_NAME
 {
+	// NOTE
+	// https://www.solidangle.com/research/physically_based_shader_design_in_arnold.pdf
+
 	aten::vec3 LayeredBSDF::sampleAlbedoMap(real u, real v) const
 	{
 		auto num = m_layer.size();

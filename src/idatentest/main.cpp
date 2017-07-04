@@ -52,7 +52,7 @@ static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
-static int g_maxSamples = 16;
+static int g_maxSamples = 1;
 static int g_maxDepth = 5;
 
 void onRun()
@@ -61,6 +61,10 @@ void onRun()
 		g_camera.update();
 		g_tracer.updateCamera(g_camera.param());
 		g_isCameraDirty = false;
+
+#ifndef ENABLE_TEMPORAL
+		aten::visualizer::clear();
+#endif
 	}
 
 	aten::timer timer;
@@ -145,6 +149,7 @@ void onMouseMove(int x, int y)
 			WIDTH, HEIGHT,
 			g_prevX, g_prevY,
 			x, y);
+		g_isCameraDirty = true;
 	}
 	else if (g_isMouseRBtnDown) {
 		aten::CameraOperator::move(
@@ -152,12 +157,11 @@ void onMouseMove(int x, int y)
 			g_prevX, g_prevY,
 			x, y,
 			real(0.001));
+		g_isCameraDirty = true;
 	}
 
 	g_prevX = x;
 	g_prevY = y;
-
-	g_isCameraDirty = true;
 }
 
 void onMouseWheel(int delta)

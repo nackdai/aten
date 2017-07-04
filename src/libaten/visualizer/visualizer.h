@@ -99,6 +99,8 @@ namespace aten {
 
 		static void render(bool revert);
 
+		static void clear();
+
 		static void takeScreenshot(const char* filename);
 	};
 }

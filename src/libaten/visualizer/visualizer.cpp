@@ -310,6 +310,25 @@ namespace aten {
 		}
 	}
 
+	void visualizer::clear()
+	{
+		static const uint8_t clearclr[4] = { 0, 0, 0, 0 };
+
+		GLenum pixelfmt = 0;
+		GLenum pixeltype = 0;
+		GLenum pixelinternal = 0;
+
+		getGLPixelFormat(
+			g_fmt,
+			pixelfmt, pixeltype, pixelinternal);
+
+		CALL_GL_API(::glClearTexImage(
+			g_tex,
+			0,
+			pixelfmt, pixeltype,
+			clearclr));
+	}
+
 	void visualizer::takeScreenshot(const char* filename)
 	{
 		CALL_GL_API(::glFlush());

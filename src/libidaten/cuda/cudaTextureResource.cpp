@@ -90,8 +90,8 @@ namespace idaten
 			cudaTextureDesc tex_desc = {};
 			tex_desc.readMode = cudaReadModeElementType;
 			tex_desc.filterMode = cudaFilterModeLinear;
-			tex_desc.addressMode[0] = cudaAddressModeClamp;
-			tex_desc.addressMode[1] = cudaAddressModeClamp;
+			tex_desc.addressMode[0] = cudaAddressModeWrap;
+			tex_desc.addressMode[1] = cudaAddressModeWrap;
 			tex_desc.normalizedCoords = 1;
 
 			checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));

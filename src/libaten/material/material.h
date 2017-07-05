@@ -69,7 +69,7 @@ namespace aten
 
 		aten::vec3 baseColor;			// サーフェイスカラー，通常テクスチャマップによって供給される.
 
-		real ior{ 1.0 };
+		real ior{ 1.0 };				// 物質の相対屈折率.
 		real roughness{ 0.5 };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 		real shininess{ 1.0 };
 

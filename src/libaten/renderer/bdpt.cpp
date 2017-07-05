@@ -112,6 +112,10 @@ namespace aten
 			const vec3 toNextVtx = ray.org - rec.p;
 
 			if (depth == 0) {
+				// NOTE
+				// レンダリング方程式２.
+				// http://rayspace.xyz/CG/contents/LTE2.html
+
 				// x1のサンプリング確率密度はイメージセンサ上のサンプリング確率密度を変換することで求める,
 				auto pdfOnImageSensor = camera->convertImageSensorPdfToScenePdf(
 					camsample.pdfOnImageSensor,

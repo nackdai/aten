@@ -69,7 +69,15 @@ namespace aten
 
 		aten::vec3 baseColor;			// サーフェイスカラー，通常テクスチャマップによって供給される.
 
-		real ior{ 1.0 };				// 物質の相対屈折率.
+		// NOTE
+		// https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
+		// - Index Of Refraction
+		//	 Water's index of refraction is a mild 1.3; diamond's is a high 2.4.
+		// - eta
+		//   屈折率の比.
+		//   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
+		real ior{ 1.0 };				// 屈折率.
+
 		real roughness{ 0.5 };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 		real shininess{ 1.0 };
 

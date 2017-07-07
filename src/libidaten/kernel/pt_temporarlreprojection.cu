@@ -281,7 +281,8 @@ __global__ void makePathMask(
 	const aten::CameraParameter* __restrict__ camera,
 	const float4* __restrict__ aovs,
 	const float4* __restrict__ prevAOVs,
-	const aten::mat4* __restrict__ mtxs)
+	const aten::mat4* __restrict__ mtxs,
+	const unsigned int* sobolmatrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -336,7 +337,7 @@ __global__ void makePathMask(
 		}
 	}
 
-	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
+	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -362,7 +363,8 @@ __global__ void genPathTemporalReprojection(
 	int seed,
 	const aten::CameraParameter* __restrict__ camera,
 	const int* __restrict__ hitindices,
-	int hitnum)
+	int hitnum,
+	const unsigned int* sobolmatrices)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -390,7 +392,7 @@ __global__ void genPathTemporalReprojection(
 	int ix = idx % width;
 	int iy = idx / height;
 
-	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
+	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -542,7 +544,8 @@ namespace idaten
 					cam.ptr(),
 					m_aovs[cur].ptr(),
 					m_aovs[prev].ptr(),
-					m_mtxs.ptr());
+					m_mtxs.ptr(),
+					m_sobolMatrices.ptr());
 #else
 				makePathMask << <grid, block >> > (
 					m_aovs[cur].ptr(),

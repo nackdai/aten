@@ -26,7 +26,8 @@ __global__ void renderAOV(
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
-	aten::mat4* matrices)
+	const aten::mat4* __restrict__ matrices,
+	const unsigned int* sobolmatrices)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -38,7 +39,7 @@ __global__ void renderAOV(
 	const auto idx = getIdx(ix, iy, width);
 
 	aten::sampler sampler;
-	sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed);
+	sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
 
 	float s = (ix + sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + sampler.nextSample()) / (float)(camera->height);
@@ -250,7 +251,8 @@ namespace idaten
 			nodetex.ptr(),
 			primparams.ptr(),
 			texVtxPos,
-			mtxparams.ptr());
+			mtxparams.ptr(),
+			m_sobolMatrices.ptr());
 
 		checkCudaKernel(renderAOV);
 	}

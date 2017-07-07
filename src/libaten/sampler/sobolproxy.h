@@ -16,7 +16,7 @@ namespace aten {
 		}
 		AT_VIRTUAL(AT_DEVICE_API ~Sobol() {})
 
-		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
+			AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
 		{
 			m_idx = (seed == 0 ? 1 : seed);
 			m_dimension = 0;
@@ -45,6 +45,6 @@ namespace aten {
 	private:
 		uint32_t m_idx;
 		uint32_t m_dimension;
-		const unsigned int* m_matrices;
+		const unsigned int* m_matrices{ nullptr };
 	};
 }

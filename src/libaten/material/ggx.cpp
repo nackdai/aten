@@ -129,7 +129,7 @@ namespace AT_NAME
 
 		real costheta = aten::abs(dot(v, n));
 
-		real sintheta = aten::sqrt(1 - aten::clamp<real>(costheta, 0, 1));
+		real sintheta = aten::sqrt(1 - aten::clamp<real>(costheta * costheta, 0, 1));
 		real tan = costheta > 0 ? sintheta / costheta : 0;
 
 		real denom = aten::sqrt(1 + a * a * tan * tan);
@@ -146,7 +146,7 @@ namespace AT_NAME
 		const aten::vec3& wo)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 		auto wh = normalize(-wi + wo);
 

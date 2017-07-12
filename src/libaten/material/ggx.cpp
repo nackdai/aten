@@ -2,6 +2,9 @@
 
 namespace AT_NAME
 {
+	// NOTE
+	// http://qiita.com/_Pheema_/items/f1ffb2e38cc766e6e668
+
 	AT_DEVICE_MTRL_API real MicrofacetGGX::pdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,

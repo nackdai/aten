@@ -582,3 +582,30 @@ void SponzaScene::getCameraPosAndAt(
 	fov = 45;
 }
 
+
+/////////////////////////////////////////////////////
+
+void BunnyScene::makeScene(aten::scene* scene)
+{
+	aten::AssetManager::registerMtrl(
+		"m",
+		//new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+		new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.2, 0.2));
+
+	std::vector<aten::object*> objs;
+
+	aten::ObjLoader::load(objs, "../../asset/bunny/bunny.obj");
+	auto bunny = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
+	scene->add(bunny);
+}
+
+void BunnyScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0.f, 1.f, 10.f);
+	at = aten::vec3(0.f, 1.f, 0.f);
+	fov = 45;
+}
+

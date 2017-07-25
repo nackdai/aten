@@ -85,6 +85,8 @@ namespace aten
 		vec3 shapemin = vec3(AT_MATH_INF);
 		vec3 shapemax = vec3(-AT_MATH_INF);
 
+		uint32_t numPolygons = 0;
+
 		for (int p = 0; p < shapes.size(); p++) {
 			const auto& shape = shapes[p];
 
@@ -101,6 +103,7 @@ namespace aten
 			vec3 pmin = vec3(AT_MATH_INF);
 			vec3 pmax = vec3(-AT_MATH_INF);
 
+			// positions and normals.
 			for (uint32_t i = 0; i < vtxnum; i += 3) {
 				vertex vtx;
 
@@ -149,6 +152,9 @@ namespace aten
 				dstshape->faces.push_back(f);
 			}
 
+			// Keep polygon counts.
+			numPolygons += idxnum / 3;
+
 			// Assign material.
 			auto mtrlidx = -1;
 			if (shape.mesh.material_ids.size() > 0) {
@@ -159,11 +165,12 @@ namespace aten
 				dstshape->setMaterial(AssetManager::getMtrl(mtrl.name));
 			}
 			if (!dstshape->param.mtrl.ptr){
-				// dummy....
+				// No material, set dummy material....
 				AT_ASSERT(false);
-				dstshape->setMaterial(new lambert(vec3()));
+				dstshape->setMaterial(new lambert(vec3(real(0.5))));
 			}
 
+			// texture cooridnates.
 			vtxnum = shape.mesh.texcoords.size();
 
 			for (uint32_t i = 0; i < vtxnum; i += 2) {
@@ -180,6 +187,7 @@ namespace aten
 				}
 			}
 
+			// Check if emmisive object.
 			auto mtrl = dstshape->getMaterial();
 
 			if (mtrl->param().type == aten::MaterialType::Emissive) {
@@ -197,5 +205,7 @@ namespace aten
 		objs.push_back(obj);
 
 		AssetManager::registerObj(tag, obj);
+
+		AT_PRINTF("(%s) %d[polygons]\n", path.c_str(), numPolygons);
 	}
 }

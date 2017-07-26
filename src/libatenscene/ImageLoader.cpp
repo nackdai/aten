@@ -1,9 +1,11 @@
-#include "OpenImageIO/imageio.h"
 #include "ImageLoader.h"
 #include "AssetManager.h"
 #include "texture/texture.h"
 #include "utility.h"
 #include <map>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 namespace aten {
 	static std::string g_base;
@@ -11,54 +13,6 @@ namespace aten {
 	void ImageLoader::setBasePath(const std::string& base)
 	{
 		g_base = removeTailPathSeparator(base);
-	}
-
-	template <typename TYPE>
-	void read(
-		OIIO::ImageInput* input,
-		texture* tex, 
-		OIIO::TypeDesc oioType,
-		uint32_t srcChannels,
-		real normalize)
-	{
-		const auto chn = tex->channels();
-
-		int width = tex->width();
-		int height = tex->height();
-
-		auto size = width * height * srcChannels;
-
-		// Resize storage
-		std::vector<TYPE> texturedata(size);
-
-		// Read data to storage
-		input->read_image(oioType, &texturedata[0], sizeof(TYPE) * srcChannels);
-
-		static const real div = real(1) / real(255.0);
-
-#ifdef ENABLE_OMP
-#pragma omp parallel for
-#endif
-		for (int y = height - 1; y >= 0; y--) {
-			for (int x = 0; x < width; x++) {
-				// TODO
-				// Invert y coordinate. Why?
-				auto src_i = y * width + x;
-				auto dst_i = ((height - 1) - y) * width + x;
-
-				TYPE* s = &texturedata[src_i * srcChannels];
-
-				switch (chn) {
-				case 3:
-					(*tex)(x, y, 2) = s[2] * normalize;
-				case 2:
-					(*tex)(x, y, 1) = s[1] * normalize;
-				case 1:
-					(*tex)(x, y, 0) = s[0] * normalize;
-					break;
-				}
-			}
-		}
 	}
 
 	texture* ImageLoader::load(const std::string& path)
@@ -78,10 +32,36 @@ namespace aten {
 		return tex;
 	}
 
+	template <typename TYPE>
+	static void read(
+		TYPE* src,
+		texture* tex,
+		int width,
+		int height,
+		int channel,
+		real norm)
+	{
+#pragma omp parallel for
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int idx = y * width + x;
+				idx *= channel;
+
+				switch (channel) {
+				case 3:
+					(*tex)(x, y, 2) = src[idx + 2] * norm;
+				case 2:
+					(*tex)(x, y, 1) = src[idx + 1] * norm;
+				case 1:
+					(*tex)(x, y, 0) = src[idx + 0] * norm;
+					break;
+				}
+			}
+		}
+	}
+
 	texture* ImageLoader::load(const std::string& tag, const std::string& path)
 	{
-		OIIO_NAMESPACE_USING
-
 		std::string fullpath = path;
 		if (!g_base.empty()) {
 			fullpath = g_base + "/" + fullpath;
@@ -94,43 +74,40 @@ namespace aten {
 			return tex;
 		}
 
-		ImageInput* input = ImageInput::open(fullpath);
+		real* dst = nullptr;
+		int width = 0;
+		int height = 0;
+		int channels = 0;
 
-		if (!input) {
-			AT_ASSERT(false);
-			AT_PRINTF("Failed load texture. [%s]\n", fullpath.c_str());
-			return nullptr;
-		}
+		if (stbi_is_hdr(fullpath.c_str())) {
+			auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);
+			if (src) {
+				tex = new texture(width, height, std::min(channels, 3));
+				real norm = real(1);
+				read<float>(src, tex, width, height, channels, norm);
 
-		ImageSpec const& spec = input->spec();
-
-		auto width = spec.width;
-		auto height = spec.height;
-
-		AT_ASSERT(spec.depth == 1);
-
-		// ３チャンネル（RGB）まで.
-		tex = new texture(width, height, std::min(spec.nchannels, 3));
-		const auto chn = tex->channels();
-
-		if (spec.format == TypeDesc::UINT8) {
-			static const real div = real(1) / real(255.0);
-
-			read<uint8_t>(input, tex, spec.format, spec.nchannels, div);
-		}
-		else if (spec.format == TypeDesc::HALF) {
-			// TODO
-			AT_ASSERT(false);
+				STBI_FREE(src);
+			}
 		}
 		else {
-			read<float>(input, tex, spec.format, spec.nchannels, real(1));
-		}
+			auto src = stbi_load(fullpath.c_str(), &width, &height, &channels, 0);
+			if (src) {
+				tex = new texture(width, height, std::min(channels, 3));
+				real norm = real(1) / real(255);
 
-		// Close handle
-		input->close();
+				read<stbi_uc>(src, tex, width, height, channels, norm);
+
+				STBI_FREE(src);
+			}
+		}
 
 		if (tex) {
 			AssetManager::registerTex(tag, tex);
+		}
+		else {
+			AT_ASSERT(false);
+			AT_PRINTF("Failed load texture. [%s]\n", fullpath.c_str());
+			return nullptr;
 		}
 
 		return tex;

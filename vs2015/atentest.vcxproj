@@ -142,8 +142,7 @@
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -162,8 +161,7 @@ copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -185,8 +183,7 @@ copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
@@ -208,8 +205,7 @@ copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -231,8 +227,7 @@ copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -254,8 +249,7 @@ copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(Outp
       <AdditionalDependencies>libaten.lib;libatenscene.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y $(ProjectDir)..\3rdparty\OpenImageIO\bin\$(PlatformName)\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

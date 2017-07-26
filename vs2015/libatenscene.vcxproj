@@ -159,7 +159,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
@@ -167,7 +167,7 @@
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -219,7 +219,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -230,7 +230,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -240,7 +240,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\OpenImageIO\include;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -251,7 +251,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

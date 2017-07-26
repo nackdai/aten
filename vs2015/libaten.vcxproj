@@ -409,7 +409,6 @@
     <None Include="..\src\shader\fs.glsl" />
     <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\nlm_fs.glsl" />
-    <None Include="..\src\shader\separate_fs .glsl" />
     <None Include="..\src\shader\tonemap_fs.glsl" />
     <None Include="..\src\shader\vs.glsl" />
   </ItemGroup>

@@ -37,9 +37,6 @@ __global__ void genPath(
 	auto& path = paths[idx];
 	path.isHit = false;
 
-	path.ix = ix;
-	path.iy = iy;
-
 	if (path.isKill) {
 		path.isTerminate = true;
 		return;
@@ -284,6 +281,7 @@ __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	cudaSurfaceObject_t* aovs,
 	float depthMax,
+	int width, int height,
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
 	int hitnum,
@@ -356,8 +354,8 @@ __global__ void shade(
 
 #if 1
 	if (needAOV) {
-		int ix = path.ix;
-		int iy = path.iy;
+		int ix = idx % width;
+		int iy = idx / width;
 
 		auto d = isect.t / depthMax;
 
@@ -851,6 +849,7 @@ namespace idaten {
 				onShade(
 					outputSurf,
 					hitcount,
+					width, height,
 					depth, rrDepth,
 					vtxTexPos, vtxTexNml);
 
@@ -981,6 +980,7 @@ namespace idaten {
 	void PathTracing::onShade(
 		cudaSurfaceObject_t outputSurf,
 		int hitcount,
+		int width, int height,
 		int depth, int rrDepth,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
@@ -995,6 +995,7 @@ namespace idaten {
 			//shade<true> << <1, 1 >> > (
 				outputSurf,
 				m_aovCudaRsc.ptr(), m_depthMax,
+				width, height,
 				paths.ptr(),
 				m_hitidx.ptr(), hitcount,
 				isects.ptr(),
@@ -1014,6 +1015,7 @@ namespace idaten {
 			//shade<false> << <1, 1 >> > (
 				outputSurf,
 				m_aovCudaRsc.ptr(), m_depthMax,
+				width, height,
 				paths.ptr(),
 				m_hitidx.ptr(), hitcount,
 				isects.ptr(),

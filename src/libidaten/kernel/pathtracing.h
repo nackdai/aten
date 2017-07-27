@@ -29,18 +29,10 @@ namespace idaten
 			real pdfb;
 			int samples;
 
-			struct {
-				unsigned char isHit : 1;
-				unsigned char isTerminate : 1;
-				unsigned char isSingular : 1;
-				unsigned char isKill : 1;
-			};
-			char padding0;
-
-			unsigned short ix;
-			unsigned short iy;
-
-			unsigned short padding1;
+			bool isHit;
+			bool isTerminate;
+			bool isSingular;
+			bool isKill;
 		};
 		C_ASSERT((sizeof(Path) % 4) == 0);
 #else
@@ -97,6 +89,7 @@ namespace idaten
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,
 			int hitcount,
+			int width, int height,
 			int depth, int rrDepth,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml);
@@ -231,6 +224,7 @@ namespace idaten
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,
 			int hitcount,
+			int width, int height,
 			int depth, int rrDepth,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml) override final;

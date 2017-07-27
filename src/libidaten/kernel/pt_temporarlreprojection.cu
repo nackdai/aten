@@ -607,6 +607,7 @@ namespace idaten
 	void PathTracingTemporalReprojection::onShade(
 		cudaSurfaceObject_t outputSurf,
 		int hitcount,
+		int width, int height,
 		int depth, int rrDepth,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
@@ -615,6 +616,7 @@ namespace idaten
 		PathTracing::onShade(
 			outputSurf,
 			hitcount,
+			width, height,
 			depth, rrDepth,
 			texVtxPos, texVtxNml);
 #endif

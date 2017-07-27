@@ -5,6 +5,13 @@
 namespace aten {
 	bool FBO::init(int width, int height, PixelFormat fmt)
 	{
+		if (m_fbo > 0) {
+			// TODO
+			// Check size, format...
+
+			return true;
+		}
+
 		CALL_GL_API(glGenFramebuffers(1, &m_fbo));
 
 		CALL_GL_API(glGenTextures(1, &m_tex));

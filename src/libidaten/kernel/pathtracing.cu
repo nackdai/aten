@@ -287,7 +287,7 @@ __global__ void shade(
 	int hitnum,
 	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
-	int depth, int rrDepth,
+	int bounce, int rrBounce,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
@@ -361,7 +361,7 @@ __global__ void shade(
 
 		auto n = (orienting_normal + 1.0f) * 0.5f;
 
-		// depth
+		// bounce
 		surf2Dwrite(
 			make_float4(d, d, d, 1.0f),
 			aovs[0],
@@ -381,7 +381,7 @@ __global__ void shade(
 	if (mtrl.attrib.isEmissive) {
 		float weight = 1.0f;
 
-		if (depth > 0 && !path.isSingular) {
+		if (bounce > 0 && !path.isSingular) {
 			auto cosLight = dot(orienting_normal, -ray.dir);
 			auto dist2 = aten::squared_length(rec.p - ray.org);
 
@@ -515,7 +515,7 @@ __global__ void shade(
 
 	real russianProb = real(1);
 
-	if (depth > rrDepth) {
+	if (bounce > rrBounce) {
 		auto t = normalize(path.throughput);
 		auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
 
@@ -757,7 +757,7 @@ namespace idaten {
 		aten::vec4* image,
 		int width, int height,
 		int maxSamples,
-		int maxDepth)
+		int maxBounce)
 	{
 #ifdef __AT_DEBUG__
 		if (!doneSetStackSize) {
@@ -768,7 +768,7 @@ namespace idaten {
 		}
 #endif
 
-		int depth = 0;
+		int bounce = 0;
 
 		paths.init(width * height);
 		isects.init(width * height);
@@ -811,7 +811,7 @@ namespace idaten {
 			m_aovCudaRsc.writeByNum(&tmp[0], tmp.size());
 		}
 
-		static const int rrDepth = 3;
+		static const int rrBounce = 3;
 
 		auto time = AT_NAME::timer::getSystemTime();
 
@@ -825,14 +825,14 @@ namespace idaten {
 				seed,
 				vtxTexPos);
 
-			depth = 0;
+			bounce = 0;
 
-			while (depth < maxDepth) {
+			while (bounce < maxBounce) {
 				onHitTest(
 					width, height,
 					vtxTexPos);
 				
-				onShadeMiss(width, height, depth);
+				onShadeMiss(width, height, bounce);
 
 				int hitcount = 0;
 				idaten::Compaction::compact(
@@ -850,10 +850,10 @@ namespace idaten {
 					outputSurf,
 					hitcount,
 					width, height,
-					depth, rrDepth,
+					bounce, rrBounce,
 					vtxTexPos, vtxTexNml);
 
-				depth++;
+				bounce++;
 			}
 		}
 
@@ -936,7 +936,7 @@ namespace idaten {
 
 	void PathTracing::onShadeMiss(
 		int width, int height,
-		int depth)
+		int bounce)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -944,7 +944,7 @@ namespace idaten {
 			(height + block.y - 1) / block.y);
 
 		if (m_envmapRsc.idx >= 0) {
-			if (depth == 0) {
+			if (bounce == 0) {
 				shadeMissWithEnvmap<true> << <grid, block >> > (
 					tex.ptr(),
 					m_envmapRsc.idx, m_envmapRsc.avgIllum,
@@ -962,7 +962,7 @@ namespace idaten {
 			}
 		}
 		else {
-			if (depth == 0) {
+			if (bounce == 0) {
 				shadeMiss<true> << <grid, block >> > (
 					paths.ptr(),
 					width, height);
@@ -981,14 +981,14 @@ namespace idaten {
 		cudaSurfaceObject_t outputSurf,
 		int hitcount,
 		int width, int height,
-		int depth, int rrDepth,
+		int bounce, int rrBounce,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
 		dim3 blockPerGrid((hitcount + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
 
-		bool enableAOV = (depth == 0 && m_enableAOV);
+		bool enableAOV = (bounce == 0 && m_enableAOV);
 
 		if (enableAOV) {
 			shade<true> << <blockPerGrid, threadPerBlock >> > (
@@ -1000,7 +1000,7 @@ namespace idaten {
 				m_hitidx.ptr(), hitcount,
 				isects.ptr(),
 				rays.ptr(),
-				depth, rrDepth,
+				bounce, rrBounce,
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),
@@ -1020,7 +1020,7 @@ namespace idaten {
 				m_hitidx.ptr(), hitcount,
 				isects.ptr(),
 				rays.ptr(),
-				depth, rrDepth,
+				bounce, rrBounce,
 				shapeparam.ptr(), shapeparam.num(),
 				mtrlparam.ptr(),
 				lightparam.ptr(), lightparam.num(),

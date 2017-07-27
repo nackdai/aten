@@ -14,11 +14,11 @@
 
 #include "scenedefs.h"
 
-//#define ENABLE_ENVMAP
+#define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
-#define TEST_AOV
+//#define TEST_AOV
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -58,7 +58,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
-static int g_maxDepth = 5;
+static int g_maxBounce = 5;
 
 void onRun()
 {
@@ -86,7 +86,7 @@ void onRun()
 		WIDTH, HEIGHT,
 #endif
 		g_maxSamples,
-		g_maxDepth);
+		g_maxBounce);
 
 	auto cudaelapsed = timer.end();
 
@@ -115,12 +115,12 @@ void onRun()
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
 
 		int prevSamples = g_maxSamples;
-		int prevDepth = g_maxDepth;
+		int prevDepth = g_maxBounce;
 
 		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
-		ImGui::SliderInt("Depth", &g_maxDepth, 1, 10);
+		ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
 
-		if (prevSamples != g_maxSamples || prevDepth != g_maxDepth) {
+		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
 			g_tracer.reset();
 		}
 

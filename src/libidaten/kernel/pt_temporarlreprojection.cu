@@ -597,10 +597,10 @@ namespace idaten
 
 	void PathTracingTemporalReprojection::onShadeMiss(
 		int width, int height,
-		int depth)
+		int bounce)
 	{
 #ifndef ENABLE_DEBUG
-		PathTracing::onShadeMiss(width, height, depth);
+		PathTracing::onShadeMiss(width, height, bounce);
 #endif
 	}
 
@@ -608,7 +608,7 @@ namespace idaten
 		cudaSurfaceObject_t outputSurf,
 		int hitcount,
 		int width, int height,
-		int depth, int rrDepth,
+		int bounce, int rrBounce,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
@@ -617,7 +617,7 @@ namespace idaten
 			outputSurf,
 			hitcount,
 			width, height,
-			depth, rrDepth,
+			bounce, rrBounce,
 			texVtxPos, texVtxNml);
 #endif
 	}

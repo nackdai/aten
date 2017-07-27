@@ -50,7 +50,7 @@ namespace idaten
 			aten::vec4* image,
 			int width, int height,
 			int maxSamples,
-			int maxDepth) override final;
+			int maxBounce) override final;
 
 		virtual void update(
 			GLuint gltex,
@@ -84,13 +84,13 @@ namespace idaten
 
 		virtual void onShadeMiss(
 			int width, int height,
-			int depth);
+			int bounce);
 
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,
 			int hitcount,
 			int width, int height,
-			int depth, int rrDepth,
+			int bounce, int rrBounce,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml);
 
@@ -219,13 +219,13 @@ namespace idaten
 
 		virtual void onShadeMiss(
 			int width, int height,
-			int depth) override final;
+			int bounce) override final;
 
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,
 			int hitcount,
 			int width, int height,
-			int depth, int rrDepth,
+			int bounce, int rrBounce,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml) override final;
 #endif

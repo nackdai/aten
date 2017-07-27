@@ -28,7 +28,7 @@ namespace idaten
 			aten::vec4* image,
 			int width, int height,
 			int maxSamples,
-			int maxDepth) = 0;
+			int maxBounce) = 0;
 
 		virtual void update(
 			GLuint gltex,

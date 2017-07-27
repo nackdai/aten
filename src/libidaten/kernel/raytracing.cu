@@ -342,14 +342,14 @@ namespace idaten {
 		aten::vec4* image,
 		int width, int height,
 		int maxSamples,
-		int maxDepth)
+		int maxBounce)
 	{
 		dim3 block(16, 16);
 		dim3 grid(
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		int depth = 0;
+		int bounce = 0;
 
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
@@ -377,7 +377,7 @@ namespace idaten {
 
 		//checkCudaErrors(cudaDeviceSynchronize());
 
-		while (depth < 5) {
+		while (bounce < 5) {
 			hitTestRayTracing << <grid, block >> > (
 			//hitTestRayTracing << <1, 1 >> > (
 				paths.ptr(),
@@ -436,7 +436,7 @@ namespace idaten {
 
 			//checkCudaErrors(cudaDeviceSynchronize());
 
-			depth++;
+			bounce++;
 		}
 
 		checkCudaErrors(cudaDeviceSynchronize());

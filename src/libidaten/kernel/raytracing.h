@@ -21,6 +21,6 @@ namespace idaten
 			aten::vec4* image,
 			int width, int height,
 			int maxSamples,
-			int maxDepth) override final;
+			int maxBounce) override final;
 	};
 }

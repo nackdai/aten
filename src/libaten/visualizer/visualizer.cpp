@@ -317,7 +317,9 @@ namespace aten {
 
 	void visualizer::clear()
 	{
-		static const uint8_t clearclr[4] = { 0, 0, 0, 0 };
+		static const uint8_t clearclr_uc[4] = { 0, 0, 0, 0 };
+		static const uint16_t clearclr_us[4] = { 0, 0, 0, 0 };
+		static const uint32_t clearclr_ui[4] = { 0, 0, 0, 0 };
 
 		GLenum pixelfmt = 0;
 		GLenum pixeltype = 0;
@@ -326,6 +328,20 @@ namespace aten {
 		getGLPixelFormat(
 			g_fmt,
 			pixelfmt, pixeltype, pixelinternal);
+
+		const void* clearclr = nullptr;
+
+		switch (g_fmt) {
+		case rgba8:
+			clearclr = clearclr_uc;
+			break;
+		case rgba32f:
+			clearclr = clearclr_ui;
+			break;
+		case rgba16f:
+			clearclr = clearclr_us;
+			break;
+		}
 
 		CALL_GL_API(::glClearTexImage(
 			g_tex,

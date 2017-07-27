@@ -117,4 +117,23 @@ namespace aten {
 			m_gltex = 0;
 		}
 	}
+
+	void texture::clearAsGLTexture(const aten::vec4& clearColor)
+	{
+		if (m_gltex > 0) {
+			const float clearclr[4] = {
+				clearColor.x,
+				clearColor.y,
+				clearColor.z,
+				clearColor.w,
+			};
+
+			CALL_GL_API(::glClearTexImage(
+				m_gltex,
+				0,
+				GL_RGBA,
+				GL_FLOAT,
+				clearclr));
+		}
+	}
 }

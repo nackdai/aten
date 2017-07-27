@@ -14,11 +14,11 @@
 
 #include "scenedefs.h"
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
-//#define TEST_AOV
+#define TEST_AOV
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -71,6 +71,9 @@ void onRun()
 		aten::visualizer::clear();
 #endif
 	}
+
+	g_aovDepth.clearAsGLTexture(aten::vec4(real(1)));
+	g_aovNormal.clearAsGLTexture(aten::vec4(real(0)));
 
 	aten::timer timer;
 	timer.begin();

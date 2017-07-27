@@ -87,6 +87,7 @@ namespace aten {
 		bool initAsGLTexture();
 		void bindAsGLTexture(uint8_t stage, shader* shd) const;
 		void releaseAsGLTexture();
+		void clearAsGLTexture(const aten::vec4& clearColor);
 
 		uint32_t getGLTexHandle() const
 		{

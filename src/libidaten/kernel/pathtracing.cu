@@ -280,7 +280,7 @@ template <bool needAOV>
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	cudaSurfaceObject_t* aovs,
-	float depthMax,
+	float3 posRange,
 	int width, int height,
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
@@ -357,13 +357,14 @@ __global__ void shade(
 		int ix = idx % width;
 		int iy = idx / width;
 
-		auto d = isect.t / depthMax;
+		auto p = make_float3(rec.p.x, rec.p.y, rec.p.z);
+		p /= posRange;
 
 		auto n = (orienting_normal + 1.0f) * 0.5f;
 
-		// bounce
+		// position
 		surf2Dwrite(
-			make_float4(d, d, d, 1.0f),
+			make_float4(p.x, p.y, p.z, 1.0f),
 			aovs[0],
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
@@ -731,20 +732,20 @@ namespace idaten {
 	}
 
 	void PathTracing::enableRenderAOV(
-		GLuint gltexDepth,
+		GLuint gltexPosition,
 		GLuint gltexNormal,
-		float depthMax)
+		aten::vec3& posRange)
 	{
-		AT_ASSERT(gltexDepth > 0);
+		AT_ASSERT(gltexPosition > 0);
 		AT_ASSERT(gltexNormal > 0);
 
 		if (!m_enableAOV) {
 			m_enableAOV = true;
 
-			m_depthMax = depthMax;
+			m_posRange = posRange;
 
 			m_aovs.resize(2);
-			m_aovs[0].init(gltexDepth, CudaGLRscRegisterType::WriteOnly);
+			m_aovs[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
 			m_aovs[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
 
 			m_aovCudaRsc.init(2);
@@ -989,12 +990,13 @@ namespace idaten {
 		dim3 threadPerBlock(64);
 
 		bool enableAOV = (bounce == 0 && m_enableAOV);
+		float3 posRange = make_float3(m_posRange.x, m_posRange.y, m_posRange.z);
 
 		if (enableAOV) {
 			shade<true> << <blockPerGrid, threadPerBlock >> > (
 			//shade<true> << <1, 1 >> > (
 				outputSurf,
-				m_aovCudaRsc.ptr(), m_depthMax,
+				m_aovCudaRsc.ptr(), posRange,
 				width, height,
 				paths.ptr(),
 				m_hitidx.ptr(), hitcount,
@@ -1014,7 +1016,7 @@ namespace idaten {
 			shade<false> << <blockPerGrid, threadPerBlock >> > (
 			//shade<false> << <1, 1 >> > (
 				outputSurf,
-				m_aovCudaRsc.ptr(), m_depthMax,
+				m_aovCudaRsc.ptr(), posRange,
 				width, height,
 				paths.ptr(),
 				m_hitidx.ptr(), hitcount,

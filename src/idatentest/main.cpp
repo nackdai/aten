@@ -18,7 +18,7 @@
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
-//#define TEST_AOV
+#define TEST_AOV
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -37,7 +37,7 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
-aten::texture g_aovDepth;
+aten::texture g_aovPos;
 aten::texture g_aovNormal;
 
 //static idaten::RayTracing g_tracer;
@@ -72,7 +72,7 @@ void onRun()
 #endif
 	}
 
-	g_aovDepth.clearAsGLTexture(aten::vec4(real(1)));
+	g_aovPos.clearAsGLTexture(aten::vec4(real(1)));
 	g_aovNormal.clearAsGLTexture(aten::vec4(real(0)));
 
 	aten::timer timer;
@@ -91,7 +91,7 @@ void onRun()
 	auto cudaelapsed = timer.end();
 
 #ifdef TEST_AOV
-	aten::visualizer::render(g_aovDepth.getGLTexHandle(), false);
+	aten::visualizer::render(g_aovPos.getGLTexHandle(), false);
 #else
 	aten::visualizer::render(false);
 #endif
@@ -277,10 +277,10 @@ int main()
 
 	aten::visualizer::addPostProc(&blitter);
 
-	g_aovDepth.init(WIDTH, HEIGHT, 4);
+	g_aovPos.init(WIDTH, HEIGHT, 4);
 	g_aovNormal.init(WIDTH, HEIGHT, 4);
 
-	g_aovDepth.initAsGLTexture();
+	g_aovPos.initAsGLTexture();
 	g_aovNormal.initAsGLTexture();
 #else
 	aten::visualizer::addPostProc(&gamma);
@@ -384,9 +384,9 @@ int main()
 
 #ifdef TEST_AOV
 		g_tracer.enableRenderAOV(
-			g_aovDepth.getGLTexHandle(),
+			g_aovPos.getGLTexHandle(),
 			g_aovNormal.getGLTexHandle(),
-			100.0f);
+			aten::vec3(real(1)));
 #endif
 	}
 

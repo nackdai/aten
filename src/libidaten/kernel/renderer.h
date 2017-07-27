@@ -49,9 +49,9 @@ namespace idaten
 		void updateCamera(const aten::CameraParameter& camera);
 
 		virtual void enableRenderAOV(
-			GLuint gltexDepth,
+			GLuint gltexPosition,
 			GLuint gltexNormal,
-			float depthMax)
+			aten::vec3& posRange)
 		{
 			// Nothing is done...
 		}

@@ -67,9 +67,9 @@ namespace idaten
 			const EnvmapResource& envmapRsc) override;
 
 		virtual void enableRenderAOV(
-			GLuint gltexDepth,
+			GLuint gltexPosition,
 			GLuint gltexNormal,
-			float depthMax) override;
+			aten::vec3& posRange) override;
 
 	protected:
 		virtual void onGenPath(
@@ -111,7 +111,7 @@ namespace idaten
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
 
 		bool m_enableAOV{ false };
-		float m_depthMax{ 0.0f };
+		aten::vec3 m_posRange{ aten::vec3(real(1)) };
 		idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc;
 		std::vector<idaten::CudaGLSurface> m_aovs;
 	};

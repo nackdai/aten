@@ -263,6 +263,11 @@ namespace aten {
 
 	void visualizer::render(bool revert)
 	{
+		render(g_tex, revert);
+	}
+
+	void visualizer::render(uint32_t gltex, bool revert)
+	{
 		// For using written OpenGL texture resource by GPGPU directly.
 		// So, not handle pixel data pointer directly.
 
@@ -273,7 +278,7 @@ namespace aten {
 
 		CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
-		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
+		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, gltex));
 
 		bool willRevert = revert;
 

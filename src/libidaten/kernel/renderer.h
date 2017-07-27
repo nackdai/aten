@@ -48,6 +48,14 @@ namespace idaten
 
 		void updateCamera(const aten::CameraParameter& camera);
 
+		virtual void enableRenderAOV(
+			GLuint gltexDepth,
+			GLuint gltexNormal,
+			float depthMax)
+		{
+			// Nothing is done...
+		}
+
 	protected:
 		idaten::CudaMemory dst;
 		idaten::TypedCudaMemory<aten::CameraParameter> cam;

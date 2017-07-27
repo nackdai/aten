@@ -121,6 +121,6 @@ public:
 //#define Scene TexturesScene
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
-//#define Scene ObjCornellBoxScene
+#define Scene ObjCornellBoxScene
 //#define Scene SponzaScene
-#define Scene BunnyScene
+//#define Scene BunnyScene

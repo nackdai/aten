@@ -7,6 +7,8 @@
 #include "math/vec4.h"
 
 namespace aten {
+	class shader;
+
 	class texture {
 		static std::vector<texture*> g_textures;
 
@@ -17,6 +19,8 @@ namespace aten {
 		~texture();
 
 	public:
+		void init(uint32_t width, uint32_t height, uint32_t channels);
+
 		AT_DEVICE_API vec3 at(real u, real v) const
 		{
 			uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (m_width - 1));
@@ -80,6 +84,15 @@ namespace aten {
 		static const texture* getTexture(int id);
 		static const std::vector<texture*>& getTextures();
 
+		bool initAsGLTexture();
+		void bindAsGLTexture(uint8_t stage, shader* shd) const;
+		void releaseAsGLTexture();
+
+		uint32_t getGLTexHandle() const
+		{
+			return m_gltex;
+		}
+
 	private:
 		int m_id{ -1 };
 
@@ -90,5 +103,7 @@ namespace aten {
 		uint32_t m_size{ 0 };
 
 		std::vector<vec4> m_colors;
+
+		uint32_t m_gltex{ 0 };
 	};
 }

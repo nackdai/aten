@@ -37,6 +37,9 @@ __global__ void genPath(
 	auto& path = paths[idx];
 	path.isHit = false;
 
+	path.ix = ix;
+	path.iy = iy;
+
 	if (path.isKill) {
 		path.isTerminate = true;
 		return;
@@ -276,8 +279,11 @@ __global__ void shadeMissWithEnvmap(
 	}
 }
 
+template <bool needAOV>
 __global__ void shade(
 	cudaSurfaceObject_t outSurface,
+	cudaSurfaceObject_t* aovs,
+	float depthMax,
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
 	int hitnum,
@@ -347,6 +353,31 @@ __global__ void shade(
 
 		AT_NAME::material::applyNormalMap(mtrl.normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 	}
+
+#if 1
+	if (needAOV) {
+		int ix = path.ix;
+		int iy = path.iy;
+
+		auto d = isect.t / depthMax;
+
+		auto n = (orienting_normal + 1.0f) * 0.5f;
+
+		// depth
+		surf2Dwrite(
+			make_float4(d, d, d, 1.0f),
+			aovs[0],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+
+		// normal
+		surf2Dwrite(
+			make_float4(n.x, n.y, n.z, 1.0f),
+			aovs[1],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+	}
+#endif
 
 	// Implicit conection to light.
 	if (mtrl.attrib.isEmissive) {
@@ -701,6 +732,27 @@ namespace idaten {
 		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
 	}
 
+	void PathTracing::enableRenderAOV(
+		GLuint gltexDepth,
+		GLuint gltexNormal,
+		float depthMax)
+	{
+		AT_ASSERT(gltexDepth > 0);
+		AT_ASSERT(gltexNormal > 0);
+
+		if (!m_enableAOV) {
+			m_enableAOV = true;
+
+			m_depthMax = depthMax;
+
+			m_aovs.resize(2);
+			m_aovs[0].init(gltexDepth, CudaGLRscRegisterType::WriteOnly);
+			m_aovs[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
+
+			m_aovCudaRsc.init(2);
+		}
+	}
+
 	static bool doneSetStackSize = false;
 
 	void PathTracing::render(
@@ -750,6 +802,15 @@ namespace idaten {
 				tmp.push_back(cudaTex);
 			}
 			tex.writeByNum(&tmp[0], tmp.size());
+		}
+
+		if (m_enableAOV) {
+			std::vector<cudaSurfaceObject_t> tmp;
+			for (int i = 0; i < m_aovs.size(); i++) {
+				m_aovs[i].map();
+				tmp.push_back(m_aovs[i].bind());
+			}
+			m_aovCudaRsc.writeByNum(&tmp[0], tmp.size());
 		}
 
 		static const int rrDepth = 3;
@@ -814,10 +875,13 @@ namespace idaten {
 				texRsc[i].unbind();
 			}
 			tex.reset();
+
+			for (int i = 0; i < m_aovs.size(); i++) {
+				m_aovs[i].unbind();
+				m_aovs[i].unmap();
+			}
+			m_aovCudaRsc.reset();
 		}
-
-
-		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}
 
 	void PathTracing::onGenPath(
@@ -924,22 +988,46 @@ namespace idaten {
 		dim3 blockPerGrid((hitcount + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
 
-		shade << <blockPerGrid, threadPerBlock >> > (
-		//shade << <1, 1 >> > (
-			outputSurf,
-			paths.ptr(),
-			m_hitidx.ptr(), hitcount,
-			isects.ptr(),
-			rays.ptr(),
-			depth, rrDepth,
-			shapeparam.ptr(), shapeparam.num(),
-			mtrlparam.ptr(),
-			lightparam.ptr(), lightparam.num(),
-			nodetex.ptr(),
-			primparams.ptr(),
-			texVtxPos, texVtxNml,
-			mtxparams.ptr(),
-			tex.ptr());
+		bool enableAOV = (depth == 0 && m_enableAOV);
+
+		if (enableAOV) {
+			shade<true> << <blockPerGrid, threadPerBlock >> > (
+			//shade<true> << <1, 1 >> > (
+				outputSurf,
+				m_aovCudaRsc.ptr(), m_depthMax,
+				paths.ptr(),
+				m_hitidx.ptr(), hitcount,
+				isects.ptr(),
+				rays.ptr(),
+				depth, rrDepth,
+				shapeparam.ptr(), shapeparam.num(),
+				mtrlparam.ptr(),
+				lightparam.ptr(), lightparam.num(),
+				nodetex.ptr(),
+				primparams.ptr(),
+				texVtxPos, texVtxNml,
+				mtxparams.ptr(),
+				tex.ptr());
+		}
+		else {
+			shade<false> << <blockPerGrid, threadPerBlock >> > (
+			//shade<false> << <1, 1 >> > (
+				outputSurf,
+				m_aovCudaRsc.ptr(), m_depthMax,
+				paths.ptr(),
+				m_hitidx.ptr(), hitcount,
+				isects.ptr(),
+				rays.ptr(),
+				depth, rrDepth,
+				shapeparam.ptr(), shapeparam.num(),
+				mtrlparam.ptr(),
+				lightparam.ptr(), lightparam.num(),
+				nodetex.ptr(),
+				primparams.ptr(),
+				texVtxPos, texVtxNml,
+				mtxparams.ptr(),
+				tex.ptr());
+		}
 
 		checkCudaKernel(shade);
 

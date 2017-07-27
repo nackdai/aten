@@ -91,7 +91,7 @@ namespace aten
 			const auto& shape = shapes[p];
 
 			AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
-			AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
+			//AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
 
 			aten::shape* dstshape = new aten::shape();
 

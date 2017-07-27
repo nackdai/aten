@@ -29,11 +29,20 @@ namespace idaten
 			real pdfb;
 			int samples;
 
-			bool isHit;
-			bool isTerminate;
-			bool isSingular;
-			bool isKill;
+			struct {
+				unsigned char isHit : 1;
+				unsigned char isTerminate : 1;
+				unsigned char isSingular : 1;
+				unsigned char isKill : 1;
+			};
+			char padding0;
+
+			unsigned short ix;
+			unsigned short iy;
+
+			unsigned short padding1;
 		};
+		C_ASSERT((sizeof(Path) % 4) == 0);
 #else
 		struct Path;
 #endif
@@ -64,6 +73,11 @@ namespace idaten
 			const std::vector<aten::mat4>& mtxs,
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
+
+		virtual void enableRenderAOV(
+			GLuint gltexDepth,
+			GLuint gltexNormal,
+			float depthMax) override;
 
 	protected:
 		virtual void onGenPath(
@@ -102,6 +116,11 @@ namespace idaten
 		idaten::TypedCudaMemory<int> m_hitidx;
 
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
+
+		bool m_enableAOV{ false };
+		float m_depthMax{ 0.0f };
+		idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc;
+		std::vector<idaten::CudaGLSurface> m_aovs;
 	};
 
 	class PathTracingGeometryRendering : public PathTracing {

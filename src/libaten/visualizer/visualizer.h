@@ -98,6 +98,7 @@ namespace aten {
 			bool revert);
 
 		static void render(bool revert);
+		static void render(uint32_t gltex, bool revert);
 
 		static void clear();
 

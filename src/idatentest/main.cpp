@@ -18,6 +18,8 @@
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
+//#define TEST_AOV
+
 static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "idaten";
@@ -34,6 +36,9 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::bvh> g_scene;
+
+aten::texture g_aovDepth;
+aten::texture g_aovNormal;
 
 //static idaten::RayTracing g_tracer;
 
@@ -82,8 +87,11 @@ void onRun()
 
 	auto cudaelapsed = timer.end();
 
-	//aten::visualizer::render(g_buffer.image(), false);
+#ifdef TEST_AOV
+	aten::visualizer::render(g_aovDepth.getGLTexHandle(), false);
+#else
 	aten::visualizer::render(false);
+#endif
 
 	if (g_willTakeScreenShot) {
 		static char buffer[1024];
@@ -256,7 +264,24 @@ int main()
 		"../shader/vs.glsl",
 		"../shader/gamma_fs.glsl");
 
+#ifdef TEST_AOV
+	aten::Blitter blitter;
+	blitter.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/fs.glsl");
+	blitter.setIsRenderRGB(true);
+
+	aten::visualizer::addPostProc(&blitter);
+
+	g_aovDepth.init(WIDTH, HEIGHT, 4);
+	g_aovNormal.init(WIDTH, HEIGHT, 4);
+
+	g_aovDepth.initAsGLTexture();
+	g_aovNormal.initAsGLTexture();
+#else
 	aten::visualizer::addPostProc(&gamma);
+#endif
 
 	aten::vec3 pos, at;
 	real vfov;
@@ -352,6 +377,13 @@ int main()
 			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace()));
 #else
 			tex, idaten::EnvmapResource());
+#endif
+
+#ifdef TEST_AOV
+		g_tracer.enableRenderAOV(
+			g_aovDepth.getGLTexHandle(),
+			g_aovNormal.getGLTexHandle(),
+			100.0f);
 #endif
 	}
 

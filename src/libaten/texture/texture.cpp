@@ -88,7 +88,14 @@ namespace aten {
 
 	void texture::bindAsGLTexture(uint8_t stage, shader* shd) const
 	{
-		AT_ASSERT(m_gltex > 0);
+		bindAsGLTexture(m_gltex, stage, shd);
+	}
+
+	void texture::bindAsGLTexture(
+		uint32_t gltex,
+		uint8_t stage, shader* shd)
+	{
+		AT_ASSERT(gltex > 0);
 		AT_ASSERT(shd);
 
 		// NOTE
@@ -101,7 +108,7 @@ namespace aten {
 
 		CALL_GL_API(::glActiveTexture(GL_TEXTURE0 + stage));
 
-		CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_gltex));
+		CALL_GL_API(glBindTexture(GL_TEXTURE_2D, gltex));
 
 		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));

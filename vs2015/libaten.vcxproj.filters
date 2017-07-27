@@ -591,5 +591,8 @@
     <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat">
       <Filter>filter\VirtualFlashImage</Filter>
     </None>
+    <None Include="..\src\shader\atrous_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

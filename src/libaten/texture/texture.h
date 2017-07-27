@@ -89,6 +89,10 @@ namespace aten {
 		void releaseAsGLTexture();
 		void clearAsGLTexture(const aten::vec4& clearColor);
 
+		static void bindAsGLTexture(
+			uint32_t gltex,
+			uint8_t stage, shader* shd);
+
 		uint32_t getGLTexHandle() const
 		{
 			return m_gltex;

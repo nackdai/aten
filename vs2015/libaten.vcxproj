@@ -399,6 +399,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat" />
+    <None Include="..\src\shader\atrous_fs.glsl" />
     <None Include="..\src\shader\bilateral_fs.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_2x2.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_4x4.glsl" />

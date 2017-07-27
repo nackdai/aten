@@ -18,7 +18,7 @@
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
-#define TEST_AOV
+//#define TEST_AOV
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -267,7 +267,6 @@ int main()
 		"../shader/vs.glsl",
 		"../shader/gamma_fs.glsl");
 
-#ifdef TEST_AOV
 	aten::Blitter blitter;
 	blitter.init(
 		WIDTH, HEIGHT,
@@ -275,6 +274,7 @@ int main()
 		"../shader/fs.glsl");
 	blitter.setIsRenderRGB(true);
 
+#ifdef TEST_AOV
 	aten::visualizer::addPostProc(&blitter);
 
 	g_aovPos.init(WIDTH, HEIGHT, 4);
@@ -283,7 +283,7 @@ int main()
 	g_aovPos.initAsGLTexture();
 	g_aovNormal.initAsGLTexture();
 #else
-	aten::visualizer::addPostProc(&gamma);
+	aten::visualizer::addPostProc(&blitter);
 #endif
 
 	aten::vec3 pos, at;

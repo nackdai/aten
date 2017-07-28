@@ -46,6 +46,10 @@ namespace aten {
 		int m_num{ 1 };
 		std::vector<uint32_t> m_tex;
 
+		std::vector<uint32_t> m_comps;
+
+		uint32_t m_depth{ 0 };
+
 		PixelFormat m_fmt{ PixelFormat::rgba8 };
 		uint32_t m_width{ 0 };
 		uint32_t m_height{ 0 };

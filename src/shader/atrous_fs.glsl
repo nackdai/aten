@@ -15,8 +15,8 @@ uniform float nmlSigma = 0.125;
 uniform float posSigma = 0.125;
 uniform float threshold = 0.05125;
 
-layout(location = 0) out highp vec4 oCoarse;
-layout(location = 1) out highp vec4 oDetail;
+layout(location = 0) out vec4 oCoarse;
+layout(location = 1) out vec4 oDetail;
 
 // NOTE
 // h = [1/16, 1/4, 3/8, 1/4, 1/16]
@@ -62,7 +62,8 @@ void main()
 		float w_rt = min(exp(-dist2 / clrSigma), 1.0);
 
 		delta = nml - centerNml;
-		dist2 = max(dot(delta, delta) / (stepScale * stepScale), 0.0f);
+		//dist2 = max(dot(delta, delta) / (stepScale * stepScale), 0.0f);
+		dist2 = dot(delta, delta);
 		float w_n = min(exp(-dist2 / nmlSigma), 1.0);
 
 		delta = pos - centerPos;

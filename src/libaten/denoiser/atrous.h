@@ -12,8 +12,8 @@ namespace aten {
 	public:
 		bool init(
 			int width, int height,
-			const char* vsPath,
-			const char* fsPath);
+			const char* vsPath, const char* fsPath,
+			const char* finalVsPath, const char* finalFsPath);
 
 		texture& getNormalMap()
 		{
@@ -36,7 +36,7 @@ namespace aten {
 
 		virtual FBO& getFbo() override final
 		{
-			return m_pass[ITER - 1].getFbo();
+			return m_final.getFbo();
 		}
 
 	private:
@@ -63,11 +63,18 @@ namespace aten {
 			int m_idx{ -1 };
 		};
 
+		class ATrousFinalPass : public ATrousPass {
+			virtual void prepareRender(
+				const void* pixels,
+				bool revert) override;
+		};
+
 		static const int ITER = 5;
 
 		texture m_pos;
 		texture m_normal;
 
 		ATrousPass m_pass[ITER];
+		ATrousFinalPass m_final;
 	};
 }

@@ -269,10 +269,11 @@ int main()
 
 	atrous.init(
 		WIDTH, HEIGHT,
-		"../shader/vs.glsl",
-		"../shader/atrous_fs.glsl");
+		"../shader/vs.glsl", "../shader/atrous_fs.glsl",
+		"../shader/vs.glsl", "../shader/atrous_final_fs.glsl");
 
 	aten::visualizer::addPostProc(&atrous);
+	aten::visualizer::addPostProc(&gamma);
 
 	aten::vec3 pos, at;
 	real vfov;

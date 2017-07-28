@@ -5,8 +5,8 @@
 namespace aten {
 	bool ATrousDenoiser::init(
 		int width, int height,
-		const char* vsPath,
-		const char* fsPath)
+		const char* vsPath, const char* fsPath,
+		const char* finalVsPath, const char* finalFsPath)
 	{
 		m_normal.init(width, height, 4);
 		m_pos.init(width, height, 4);
@@ -14,7 +14,6 @@ namespace aten {
 		m_normal.initAsGLTexture();
 		m_pos.initAsGLTexture();
 
-#if 1
 		for (int i = 0; i < ITER; i++) {
 			auto res = m_pass[i].init(
 				width, height,
@@ -24,9 +23,23 @@ namespace aten {
 			m_pass[i].m_body = this;
 			m_pass[i].m_idx = i;
 
+			m_pass[i].getFbo().asMulti(2);
+
 			addPass(&m_pass[i]);
 		}
-#endif
+
+		{
+			auto res = m_final.init(
+				width, height,
+				finalVsPath, finalFsPath);
+			AT_ASSERT(res);
+
+			m_final.m_body = this;
+
+			m_final.getFbo().asMulti(2);
+
+			addPass(&m_final);
+		}
 
 		return true;
 	}
@@ -66,5 +79,22 @@ namespace aten {
 
 		// TODO
 		// Sigma.
+	}
+
+	void ATrousDenoiser::ATrousFinalPass::prepareRender(
+		const void* pixels,
+		bool revert)
+	{
+		shader::prepareRender(pixels, revert);
+
+		// coarse.
+		auto tex = m_body->m_pass[ITER - 1].getFbo().getTexHandle(0);
+		texture::bindAsGLTexture(tex, 0, this);
+
+		// detail.
+		for (int i = 0; i < ITER; i++) {
+			auto detailTex = m_body->m_pass[i].getFbo().getTexHandle(1);
+			texture::bindAsGLTexture(tex, i + 1, this);
+		}
 	}
 }

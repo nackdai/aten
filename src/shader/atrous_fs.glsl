@@ -10,12 +10,13 @@ uniform sampler2D s2;	// position map.
 // pow(2, iteration)
 uniform int stepScale;
 
-uniform float clrSigma = 1.125;
-uniform float nmlSigma = 1.125;
-uniform float posSigma = 1.125;
+uniform float clrSigma = 0.125;
+uniform float nmlSigma = 0.125;
+uniform float posSigma = 0.125;
+uniform float threshold = 0.05125;
 
-// output colour for the fragment
-layout(location = 0) out highp vec4 oColour;
+layout(location = 0) out highp vec4 oCoarse;
+layout(location = 1) out highp vec4 oDetail;
 
 // NOTE
 // h = [1/16, 1/4, 3/8, 1/4, 1/16]
@@ -74,8 +75,9 @@ void main()
 		weightSum += weight * kernel[i];
 	}
 
-	sum /= weightSum;
+	vec4 coarse = sum / weightSum;
+	vec4 detail = centerClr - coarse;
 
-	oColour.rgb = sum.rgb;
-	oColour.a = 1.0;
+	oCoarse = coarse;
+	oDetail = max(vec4(0.0), abs(detail) - vec4(threshold)) * sign(detail);
 }

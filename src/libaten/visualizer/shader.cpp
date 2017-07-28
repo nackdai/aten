@@ -61,6 +61,8 @@ namespace aten {
 				CALL_GL_API(::glGetProgramInfoLog(program, infoLen, NULL, log));
 				AT_ASSERT(false);
 
+				AT_PRINTF("%s\n", log);
+
 				free(log);
 			}
 		}

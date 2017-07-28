@@ -764,7 +764,7 @@ namespace idaten {
 		if (!doneSetStackSize) {
 			size_t val = 0;
 			cudaThreadGetLimit(&val, cudaLimitStackSize);
-			cudaThreadSetLimit(cudaLimitStackSize, val * 2);
+			cudaThreadSetLimit(cudaLimitStackSize, val * 4);
 			doneSetStackSize = true;
 		}
 #endif

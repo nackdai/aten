@@ -90,3 +90,5 @@
 #include "renderer/bdpt.h"
 
 #include "posteffect/BloomEffect.h"
+
+#include "denoiser/atrous.h"

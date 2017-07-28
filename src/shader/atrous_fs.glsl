@@ -41,7 +41,7 @@ void main()
 	vec4 sum = vec4(0.0);
 	float weightSum = 0.0;
 
-	ivec2 centerPos = ivec2(gl_FragCoord.xy);
+	ivec2 centerUV = ivec2(gl_FragCoord.xy);
 
 	vec4 centerClr = texelFetch(s0, ivec2(gl_FragCoord.xy), 0);
 	vec4 centerNml = texelFetch(s1, ivec2(gl_FragCoord.xy), 0);
@@ -50,14 +50,14 @@ void main()
 	// NOTE
 	// 5x5 = 25
 	for (int i = 0; i < 25; i++) {
-		ivec2 uv = centerPos + offsets[i] * stepScale;
+		ivec2 uv = centerUV + offsets[i] * stepScale;
 
 		vec4 clr = texelFetch(s0, uv, 0);
 		vec4 nml = texelFetch(s1, uv, 0);
 		vec4 pos = texelFetch(s2, uv, 0);
 
 		vec4 delta = clr - centerClr;
-		vec4 dist2 = dot(delta, delta);
+		float dist2 = dot(delta, delta);
 		float w_rt = min(exp(-dist2 / clrSigma), 1.0);
 
 		delta = nml - centerNml;
@@ -71,7 +71,7 @@ void main()
 		float weight = w_rt + w_n + w_p;
 
 		sum += clr * weight * kernel[i];
-		weightSum += weight;
+		weightSum += weight * kernel[i];
 	}
 
 	sum /= weightSum;

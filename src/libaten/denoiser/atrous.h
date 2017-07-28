@@ -15,11 +15,11 @@ namespace aten {
 			const char* vsPath,
 			const char* fsPath);
 
-		texture& getNormalBuffer()
+		texture& getNormalMap()
 		{
 			return m_normal;
 		}
-		texture& getPositionBuffer()
+		texture& getPositionMap()
 		{
 			return m_pos;
 		}

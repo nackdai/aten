@@ -18,8 +18,6 @@
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
 
-//#define TEST_AOV
-
 static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "idaten";
@@ -37,8 +35,7 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::bvh> g_scene;
 
-aten::texture g_aovPos;
-aten::texture g_aovNormal;
+aten::ATrousDenoiser atrous;
 
 //static idaten::RayTracing g_tracer;
 
@@ -72,8 +69,8 @@ void onRun()
 #endif
 	}
 
-	g_aovPos.clearAsGLTexture(aten::vec4(real(1)));
-	g_aovNormal.clearAsGLTexture(aten::vec4(real(0)));
+	atrous.getPositionMap().clearAsGLTexture(aten::vec4(real(1)));
+	atrous.getNormalMap().clearAsGLTexture(aten::vec4(real(0)));
 
 	aten::timer timer;
 	timer.begin();
@@ -90,11 +87,7 @@ void onRun()
 
 	auto cudaelapsed = timer.end();
 
-#ifdef TEST_AOV
-	aten::visualizer::render(g_aovPos.getGLTexHandle(), false);
-#else
 	aten::visualizer::render(false);
-#endif
 
 	if (g_willTakeScreenShot) {
 		static char buffer[1024];
@@ -274,17 +267,12 @@ int main()
 		"../shader/fs.glsl");
 	blitter.setIsRenderRGB(true);
 
-#ifdef TEST_AOV
-	aten::visualizer::addPostProc(&blitter);
+	atrous.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/atrous_fs.glsl");
 
-	g_aovPos.init(WIDTH, HEIGHT, 4);
-	g_aovNormal.init(WIDTH, HEIGHT, 4);
-
-	g_aovPos.initAsGLTexture();
-	g_aovNormal.initAsGLTexture();
-#else
-	aten::visualizer::addPostProc(&blitter);
-#endif
+	aten::visualizer::addPostProc(&atrous);
 
 	aten::vec3 pos, at;
 	real vfov;
@@ -382,12 +370,10 @@ int main()
 			tex, idaten::EnvmapResource());
 #endif
 
-#ifdef TEST_AOV
 		g_tracer.enableRenderAOV(
-			g_aovPos.getGLTexHandle(),
-			g_aovNormal.getGLTexHandle(),
+			atrous.getPositionMap().getGLTexHandle(),
+			atrous.getNormalMap().getGLTexHandle(),
 			aten::vec3(real(1)));
-#endif
 	}
 
 	aten::window::run(onRun);

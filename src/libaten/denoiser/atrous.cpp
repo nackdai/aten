@@ -14,6 +14,7 @@ namespace aten {
 		m_normal.initAsGLTexture();
 		m_pos.initAsGLTexture();
 
+#if 1
 		for (int i = 0; i < ITER; i++) {
 			auto res = m_pass[i].init(
 				width, height,
@@ -25,6 +26,7 @@ namespace aten {
 
 			addPass(&m_pass[i]);
 		}
+#endif
 
 		return true;
 	}
@@ -59,7 +61,7 @@ namespace aten {
 
 		int stepScale = 1 << m_idx;
 
-		auto hStepScape = this->getHandle("");
+		auto hStepScape = this->getHandle("stepScale");
 		CALL_GL_API(::glUniform1i(hStepScape, stepScale));
 
 		// TODO

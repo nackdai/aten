@@ -248,6 +248,7 @@
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\denoiser\atrous.h" />
     <ClInclude Include="..\src\libaten\filter\bilateral.h" />
     <ClInclude Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.h" />
     <ClInclude Include="..\src\libaten\filter\nlm.h" />
@@ -338,6 +339,7 @@
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
+    <ClCompile Include="..\src\libaten\denoiser\atrous.cpp" />
     <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp" />
     <ClCompile Include="..\src\libaten\filter\nlm.cpp" />

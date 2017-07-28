@@ -76,6 +76,9 @@
     <Filter Include="ui\imgui">
       <UniqueIdentifier>{aa3cb08a-98d0-4aa4-968c-fd2f7291b94d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="denoiser">
+      <UniqueIdentifier>{351d88a4-d2bc-4bc5-9e72-f4e20bfbdbdd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -353,6 +356,9 @@
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\denoiser\atrous.h">
+      <Filter>denoiser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -549,6 +555,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\texture\texture.cpp">
       <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\denoiser\atrous.cpp">
+      <Filter>denoiser</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -48,6 +48,9 @@ void main()
 	vec4 centerNml = texelFetch(s1, ivec2(gl_FragCoord.xy), 0);
 	vec4 centerPos = texelFetch(s2, ivec2(gl_FragCoord.xy), 0);
 
+	int centerMtrlId = int(centerPos.w);
+	centerPos.w = 1.0f;
+
 	// NOTE
 	// 5x5 = 25
 	for (int i = 0; i < 25; i++) {
@@ -55,7 +58,15 @@ void main()
 
 		vec4 clr = texelFetch(s0, uv, 0);
 		vec4 nml = texelFetch(s1, uv, 0);
+
 		vec4 pos = texelFetch(s2, uv, 0);
+
+		int mtrlId = int(pos.w);
+		pos.w = 1.0f;
+
+		if (mtrlId != centerMtrlId) {
+			continue;
+		}
 
 		vec4 delta = clr - centerClr;
 		float dist2 = dot(delta, delta);

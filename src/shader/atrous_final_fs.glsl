@@ -15,7 +15,7 @@ uniform sampler2D s5;
 // output colour for the fragment
 layout(location = 0) out highp vec4 oColour;
 
-uniform float beta = 1.0;
+uniform float beta = 0.0;
 
 void main()
 {

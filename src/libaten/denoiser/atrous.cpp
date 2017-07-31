@@ -85,7 +85,6 @@ namespace aten {
 	{
 		shader::prepareRender(pixels, revert);
 
-#if 0
 		// coarse.
 		auto tex = m_body->m_pass[ITER - 1].getFbo().getTexHandle(0);
 		texture::bindAsGLTexture(tex, 0, this);
@@ -95,24 +94,5 @@ namespace aten {
 			auto detailTex = m_body->m_pass[i].getFbo().getTexHandle(1);
 			texture::bindAsGLTexture(tex, i + 1, this);
 		}
-#else
-		auto tex = m_body->m_pass[4].getFbo().getTexHandle(0);
-		texture::bindAsGLTexture(tex, 0, this);
-
-		tex = m_body->m_pass[0].getFbo().getTexHandle(1);
-		texture::bindAsGLTexture(tex, 1, this);
-
-		tex = m_body->m_pass[1].getFbo().getTexHandle(1);
-		texture::bindAsGLTexture(tex, 2, this);
-
-		tex = m_body->m_pass[2].getFbo().getTexHandle(1);
-		texture::bindAsGLTexture(tex, 3, this);
-
-		tex = m_body->m_pass[3].getFbo().getTexHandle(1);
-		texture::bindAsGLTexture(tex, 4, this);
-
-		tex = m_body->m_pass[4].getFbo().getTexHandle(1);
-		texture::bindAsGLTexture(tex, 5, this);
-#endif
 	}
 }

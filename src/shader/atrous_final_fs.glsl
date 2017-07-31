@@ -19,19 +19,6 @@ uniform float beta = 0.0;
 
 void main()
 {
-#if 0
-	vec4 data = texelFetch(s0, ivec2(gl_FragCoord.xy), 0);
-
-	data += texelFetch(s1, ivec2(gl_FragCoord.xy), 0) * beta;
-	data += texelFetch(s2, ivec2(gl_FragCoord.xy), 0) * beta;
-	data += texelFetch(s3, ivec2(gl_FragCoord.xy), 0) * beta;
-	data += texelFetch(s4, ivec2(gl_FragCoord.xy), 0) * beta;
-	data += texelFetch(s5, ivec2(gl_FragCoord.xy), 0) * beta;
-
-	data.a = 1.0;
-
-	oColour = data;
-#else
 	oColour = texelFetch(s0, ivec2(gl_FragCoord.xy), 0);
 	oColour += texelFetch(s1, ivec2(gl_FragCoord.xy), 0) * beta;
 	oColour += texelFetch(s2, ivec2(gl_FragCoord.xy), 0) * beta;
@@ -39,5 +26,4 @@ void main()
 	oColour += texelFetch(s4, ivec2(gl_FragCoord.xy), 0) * beta;
 	oColour += texelFetch(s5, ivec2(gl_FragCoord.xy), 0) * beta;
 	oColour.a = 1.0;
-#endif
 }

@@ -73,7 +73,6 @@ void main()
 		float w_rt = min(exp(-dist2 / clrSigma), 1.0);
 
 		delta = nml - centerNml;
-		//dist2 = max(dot(delta, delta) / (stepScale * stepScale), 0.0f);
 		dist2 = dot(delta, delta);
 		float w_n = min(exp(-dist2 / nmlSigma), 1.0);
 
@@ -81,7 +80,7 @@ void main()
 		dist2 = dot(delta, delta);
 		float w_p = min(exp(-dist2 / posSigma), 1.0);
 
-		float weight = w_rt + w_n + w_p;
+		float weight = w_rt * w_n * w_p;
 
 		sum += clr * weight * kernel[i];
 		weightSum += weight * kernel[i];

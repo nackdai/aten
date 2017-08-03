@@ -388,7 +388,7 @@ namespace AT_NAME
 
 		for (auto s : shapes) {
 			// NOTE
-			// 下位レイヤーでは、ローカル座標系で計算するので、L2Wを乗算する.
+			// 下位レイヤーでは、ローカル座標系で計算するので、何もしない（単位マトリクスを乗算する）.
 			aten::bvh::collectNodes(
 				&s->m_node,
 				s->m_externalId,

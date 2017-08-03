@@ -152,13 +152,13 @@ namespace aten {
 		param.boxmax = aten::vec4(transformedBox.maxPos(), 0);
 
 		if (isLeaf()) {
-			param.shapeid = transformable::findShapeIdxAsHitable(this);
+			param.shapeid = (float)transformable::findShapeIdxAsHitable(this);
 
-			param.exid = this->m_externalId;
+			param.exid = (float)this->m_externalId;
 
 			if (instanceParent) {
 				AT_ASSERT(param.shapeid < 0);
-				param.shapeid = transformable::findShapeIdxAsHitable(instanceParent);
+				param.shapeid = (float)transformable::findShapeIdxAsHitable(instanceParent);
 			}
 		}
 
@@ -354,10 +354,10 @@ namespace aten {
 			}
 				
 			if (isHit) {
-				nodeid = node->hit;
+				nodeid = (int)node->hit;
 			}
 			else {
-				nodeid = node->miss;
+				nodeid = (int)node->miss;
 			}
 		}
 
@@ -833,8 +833,8 @@ namespace aten {
 					// Hit/Miss.
 					// Always the next node in the array.
 					if (next) {
-						node.hit = next->m_traverseOrder;
-						node.miss = next->m_traverseOrder;
+						node.hit = (float)next->m_traverseOrder;
+						node.miss = (float)next->m_traverseOrder;
 					}
 					else {
 						node.hit = -1;
@@ -872,7 +872,7 @@ namespace aten {
 							isLeft = (sibling != nullptr);
 
 							if (isLeft) {
-								node.miss = sibling->m_traverseOrder;
+								node.miss = (float)sibling->m_traverseOrder;
 							}
 						}
 
@@ -896,7 +896,7 @@ namespace aten {
 									auto sibling = _right;
 									if (sibling) {
 										if (sibling != curParent) {
-											node.miss = sibling->m_traverseOrder;
+											node.miss = (float)sibling->m_traverseOrder;
 											break;
 										}
 									}
@@ -980,7 +980,7 @@ namespace aten {
 		BVHNode node;
 
 		if (parent) {
-			node.parent = parent->m_traverseOrder;
+			node.parent = (float)parent->m_traverseOrder;
 		}
 
 		if (pnode->setBVHNodeParam(node, parent, idx, nodes, instanceParent, mtxL2W)) {

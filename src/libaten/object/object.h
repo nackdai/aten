@@ -8,6 +8,7 @@
 #include "math/mat4.h"
 #include "shape/shape.h"
 #include "shape/tranformable.h"
+#include "shape/mesh.h"
 #include "object/vertex.h"
 
 namespace AT_NAME
@@ -80,7 +81,7 @@ namespace AT_NAME
 		}
 	};
 
-	class shape : public aten::bvhnode {
+	class shape : public aten::mesh<aten::bvhnode> {
 		friend class object;
 
 	public:

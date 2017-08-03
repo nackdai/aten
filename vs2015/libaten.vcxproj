@@ -316,6 +316,7 @@
     <ClInclude Include="..\src\libaten\scene\instance.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\shape\cube.h" />
+    <ClInclude Include="..\src\libaten\shape\mesh.h" />
     <ClInclude Include="..\src\libaten\shape\shape.h" />
     <ClInclude Include="..\src\libaten\shape\sphere.h" />
     <ClInclude Include="..\src\libaten\shape\tranformable.h" />
@@ -388,6 +389,7 @@
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\shape\cube.cpp" />
+    <ClCompile Include="..\src\libaten\shape\mesh.cpp" />
     <ClCompile Include="..\src\libaten\shape\sphere.cpp" />
     <ClCompile Include="..\src\libaten\shape\tranformable.cpp" />
     <ClCompile Include="..\src\libaten\texture\texture.cpp" />

@@ -4,13 +4,14 @@
 #include "accelerator/bvh.h"
 #include "math/mat4.h"
 #include "shape/tranformable.h"
+#include "shape/mesh.h"
 #include "shape/shape.h"
 
 namespace AT_NAME
 {
 	template<typename T> class instance;
 
-	class sphere : public aten::transformable {
+	class sphere : public aten::mesh<aten::transformable> {
 		friend class instance<sphere>;
 
 	public:

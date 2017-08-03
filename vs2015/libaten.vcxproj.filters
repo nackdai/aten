@@ -359,6 +359,9 @@
     <ClInclude Include="..\src\libaten\denoiser\atrous.h">
       <Filter>denoiser</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\shape\mesh.h">
+      <Filter>shape</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -558,6 +561,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\denoiser\atrous.cpp">
       <Filter>denoiser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\shape\mesh.cpp">
+      <Filter>shape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

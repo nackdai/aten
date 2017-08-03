@@ -3,7 +3,7 @@
 namespace AT_NAME
 {
 	cube::cube(const aten::vec3& center, real w, real h, real d, material* mtrl)
-		: transformable(), m_param(center, aten::vec3(w, h, d), mtrl)
+		: m_param(center, aten::vec3(w, h, d), mtrl)
 	{
 		m_aabb.init(
 			center - m_param.size * real(0.5),

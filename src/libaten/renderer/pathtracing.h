@@ -64,7 +64,7 @@ namespace aten
 			CameraSampleResult& camsample,
 			scene* scene);
 
-		bool PathTracing::shade(
+		bool shade(
 			sampler* sampler,
 			scene* scene,
 			camera* cam,
@@ -72,7 +72,7 @@ namespace aten
 			int depth,
 			Path& path);
 
-		void PathTracing::shadeMiss(
+		void shadeMiss(
 			scene* scene,
 			int depth,
 			Path& path);

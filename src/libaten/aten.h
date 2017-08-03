@@ -88,6 +88,7 @@
 #include "renderer/aov.h"
 #include "renderer/sorted_pathtracing.h"
 #include "renderer/bdpt.h"
+#include "renderer/directlight.h"
 
 #include "posteffect/BloomEffect.h"
 

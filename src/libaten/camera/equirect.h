@@ -27,15 +27,15 @@ namespace aten {
 
 			// ’l‚ğ•Û.
 			m_at = lookat;
-			m_width = width;
-			m_height = height;
+			m_width = (real)width;
+			m_height = (real)height;
 		}
 
 		virtual void update() override final
 		{
 			init(
 				m_origin, m_at, m_up,
-				m_width, m_height);
+				(uint32_t)m_width, (uint32_t)m_height);
 		}
 
 		virtual CameraSampleResult sample(

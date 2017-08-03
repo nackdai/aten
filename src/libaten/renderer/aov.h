@@ -6,10 +6,10 @@
 
 namespace aten
 {
-	class GeometryInfoRenderer : public Renderer {
+	class AOVRenderer : public Renderer {
 	public:
-		GeometryInfoRenderer() {}
-		virtual ~GeometryInfoRenderer() {}
+		AOVRenderer() {}
+		virtual ~AOVRenderer() {}
 
 		virtual void render(
 			Destination& dst,

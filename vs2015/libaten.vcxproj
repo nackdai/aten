@@ -293,12 +293,12 @@
     <ClInclude Include="..\src\libaten\object\vertex.h" />
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h" />
+    <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\bdpt.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
-    <ClInclude Include="..\src\libaten\renderer\geominforender.h" />
     <ClInclude Include="..\src\libaten\renderer\nonphotoreal.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
@@ -373,11 +373,11 @@
     <ClCompile Include="..\src\libaten\object\vertex.cpp" />
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\aov.cpp" />
     <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\geominforender.cpp" />
     <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />

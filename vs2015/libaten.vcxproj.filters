@@ -254,9 +254,6 @@
     <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\geominforender.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\math\vec4.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -361,6 +358,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\shape\mesh.h">
       <Filter>shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\aov.h">
+      <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -472,9 +472,6 @@
     <ClCompile Include="..\src\libaten\shape\cube.cpp">
       <Filter>shape</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\geominforender.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\material\oren_nayar.cpp">
       <Filter>material</Filter>
     </ClCompile>
@@ -564,6 +561,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\shape\mesh.cpp">
       <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\aov.cpp">
+      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

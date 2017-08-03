@@ -1,9 +1,9 @@
-#include "renderer/geominforender.h"
+#include "renderer/aov.h"
 #include "sampler/xorshift.h"
 
 namespace aten
 {
-	GeometryInfoRenderer::Path GeometryInfoRenderer::radiance(
+	AOVRenderer::Path AOVRenderer::radiance(
 		const ray& inRay,
 		scene* scene,
 		sampler* sampler)
@@ -115,7 +115,7 @@ namespace aten
 		return std::move(path);
 	}
 
-	void GeometryInfoRenderer::render(
+	void AOVRenderer::render(
 		Destination& dst,
 		scene* scene,
 		camera* camera)

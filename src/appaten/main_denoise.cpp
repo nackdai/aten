@@ -17,7 +17,7 @@ static aten::PinholeCamera g_camera;
 #endif
 
 //static aten::AcceledScene<aten::LinearList> g_scene;
-static aten::AcceledScene<aten::bvh> g_scene;
+static aten::AcceleratedScene<aten::bvh> g_scene;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
@@ -25,10 +25,10 @@ static aten::texture* g_envmap;
 
 static aten::PathTracing g_pathtracer;
 static aten::RayTracing g_raytracer;
-static aten::GeometryInfoRenderer g_geotracer;
+static aten::AOVRenderer g_geotracer;
 
-//#define VFI
-#define GR
+#define VFI
+//#define GR
 
 static aten::Film g_directBuffer(WIDTH, HEIGHT);
 
@@ -101,7 +101,7 @@ void display()
 		}
 
 		virtualLight.setPos(g_camera.getPos());
-		virtualLight.setLe(aten::vec3(36.0, 36.0, 36.0) * 2);
+		virtualLight.setLe(aten::vec3(36.0, 36.0, 36.0) * real(2));
 		g_pathtracer.setVirtualLight(&virtualLight, g_camera.getDir());
 		g_pathtracer.render(dst, &g_scene, &g_camera);
 	}
@@ -224,7 +224,7 @@ void display()
 
 int main(int argc, char* argv[])
 {
-	aten::random::init();
+	aten::initSampler();
 
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
@@ -264,8 +264,9 @@ int main(int argc, char* argv[])
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;
+	real fov;
 
-	Scene::getCameraPosAndAt(lookfrom, lookat);
+	Scene::getCameraPosAndAt(lookfrom, lookat, fov);
 
 #ifdef ENABLE_DOF
 	g_camera.init(
@@ -282,7 +283,7 @@ int main(int argc, char* argv[])
 		lookfrom,
 		lookat,
 		aten::vec3(0, 1, 0),
-		30,
+		fov,
 		WIDTH, HEIGHT);
 #endif
 

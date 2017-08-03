@@ -813,6 +813,10 @@ namespace aten {
 
 		// Specify hit/miss link.
 
+		// NOTE
+		// http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
+		// Threaded BVH.
+
 		for (int i = 0; i < nodeList.size(); i++) {
 			auto num = nodeList[i].size();
 

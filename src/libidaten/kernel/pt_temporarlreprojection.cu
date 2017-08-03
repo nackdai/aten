@@ -152,6 +152,7 @@ __global__ void temporalReprojection(
 
 	const auto centerDepth = aten::clamp(aov.y, CAMERA_NEAR, CAMERA_FAR);
 
+	// 前のフレームのクリップ空間座標を計算.
 	aten::vec4 prevPos;
 	computePrevPos(
 		ix, iy,
@@ -160,14 +161,16 @@ __global__ void temporalReprojection(
 		&prevPos,
 		mtxs);
 
+	// [0, 1]の範囲内に入っているか.
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
-#if 1
+	// 今回のフレームのピクセルカラー.
 	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 	cur.w = 1;
 
 	if (isInsideX && isInsideY) {
+		// 前のフレームのスクリーン座標.
 		int px = (int)(prevPos.x * (width - 1) + 0.5f);
 		int py = (int)(prevPos.y * (height - 1) + 0.5f);
 
@@ -179,9 +182,11 @@ __global__ void temporalReprojection(
 		const auto prevAov = prevAOVs[pidx];
 		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
 
+		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
 		if (abs(centerDepth - prevDepth) <= 0.1f
 			&& aov.x == prevAov.x)
 		{
+			// 前のフレームのピクセルカラーを取得.
 			float4 prev;
 			surf2Dread(&prev, outSurface, px * sizeof(float4), py);
 
@@ -190,6 +195,7 @@ __global__ void temporalReprojection(
 			// TODO
 			n = min(16, n);
 
+			// 現在のフレームと前のフレームのカラーを混ぜる.
 			cur = prev * n + cur;
 			cur /= (float)(n + 1);
 			cur.w = n + 1;
@@ -200,75 +206,7 @@ __global__ void temporalReprojection(
 		cur,
 		outSurface,
 		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
-#else
-	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0);
-
-	if (path.samples > 0) {
-		cur /= path.samples;
-		cur.w = 1;
-
-		if (isInsideX && isInsideY) {
-			int px = (int)(prevPos.x * (width - 1) + 0.5f);
-			int py = (int)(prevPos.y * (height - 1) + 0.5f);
-
-			px = min(px, width - 1);
-			py = min(py, height - 1);
-
-			const auto pidx = getIdx(px, py, width);
-
-			const auto prevAov = prevAOVs[pidx];
-			const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
-
-			if (abs(centerDepth - prevDepth) <= 0.1f
-				&& aov.x == prevAov.x)
-			{
-				float4 prev;
-				surf2Dread(&prev, outSurface, px * sizeof(float4), py);
-
-				int n = (int)prev.w;
-
-				// TODO
-				//n = min(16, n);
-
-				cur = prev * n + cur;
-				cur /= (float)(n + 1);
-				cur.w = n + 1;
-			}
-		}
-	}
-	else {
-		if (isInsideX && isInsideY) {
-			int px = (int)(prevPos.x * (width - 1) + 0.5f);
-			int py = (int)(prevPos.y * (height - 1) + 0.5f);
-
-			px = min(px, width - 1);
-			py = min(py, height - 1);
-
-			const auto pidx = getIdx(px, py, width);
-
-			const auto prevAov = prevAOVs[pidx];
-			const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
-
-			if (abs(centerDepth - prevDepth) <= 0.1f
-				&& aov.x == prevAov.x)
-			{
-				float4 prev;
-				surf2Dread(&prev, outSurface, px * sizeof(float4), py);
-
-				cur = prev;
-			}
-		}
-	}
-
-	surf2Dwrite(
-		cur,
-		outSurface,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
-#endif
-
-	
+		cudaBoundaryModeTrap);	
 }
 #endif
 
@@ -305,6 +243,7 @@ __global__ void makePathMask(
 
 	const auto centerDepth = aten::clamp(aov.y, CAMERA_NEAR, CAMERA_FAR);
 
+	// 前のフレームでのクリップ空間座標を取得.
 	aten::vec4 prevPos;
 	computePrevPos(
 		ix, iy,
@@ -313,10 +252,12 @@ __global__ void makePathMask(
 		&prevPos,
 		mtxs);
 
+	// [0, 1]の範囲内に入っているか.
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
 	if (isInsideX && isInsideY) {
+		// スクリーン座標に変換.
 		int px = (int)(prevPos.x * (width - 1) + 0.5f);
 		int py = (int)(prevPos.y * (height - 1) + 0.5f);
 
@@ -328,9 +269,11 @@ __global__ void makePathMask(
 		const auto prevAov = prevAOVs[pidx];
 		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
 
+		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
 		if (abs(centerDepth - prevDepth) <= 0.1f
 			&& aov.x == prevAov.x)
 		{
+			// 前のフレームのピクセルが利用できるので、パスは終了.
 			path.isKill = true;
 			path.isTerminate = true;
 			return;
@@ -487,8 +430,8 @@ namespace idaten
 			m_mtxC2V.invert();
 		}
 
-#if 1
 		if (m_isFirstRender) {
+			// 最初のフレームは参照できる過去のフレームがないので、普通に処理する.
 			PathTracingGeometryRendering::onGenPath(
 				width, height,
 				sample, maxSamples,
@@ -496,16 +439,8 @@ namespace idaten
 				texVtxPos);
 		}
 		else {
-#if 0
 			if (sample == 0) {
-				PathTracingGeometryRendering::renderAOVs(
-					width, height,
-					sample, maxSamples,
-					seed,
-					texVtxPos);
-			}
-#else
-			if (sample == 0) {
+				// １パス目では、AOVをレンダリングする.
 				PathTracingGeometryRendering::onGenPath(
 					width, height,
 					sample, maxSamples,
@@ -513,8 +448,6 @@ namespace idaten
 					texVtxPos);
 			}
 			else
-#endif
-
 			{
 				// 2フレーム目以降は、テンポラルリプロジェクションの隙間のみに飛ばす.
 
@@ -534,7 +467,6 @@ namespace idaten
 					(width + block.x - 1) / block.x,
 					(height + block.y - 1) / block.y);
 
-#if 1
 				makePathMask << <grid, block >> > (
 					paths.ptr(),
 					rays.ptr(),
@@ -546,44 +478,10 @@ namespace idaten
 					m_aovs[prev].ptr(),
 					m_mtxs.ptr(),
 					m_sobolMatrices.ptr());
-#else
-				makePathMask << <grid, block >> > (
-					m_aovs[cur].ptr(),
-					m_aovs[prev].ptr(),
-					m_mtxs.ptr(),
-					m_hitboolsTemporal.ptr(),
-					width, height);
-
-				int hitcount = 0;
-				idaten::Compaction::compact(
-					m_hitidxTemporal,
-					m_hitboolsTemporal,
-					&hitcount);
-
-				dim3 blockPerGrid((width * height + 128 - 1) / 128);
-				dim3 threadPerBlock(128);
-
-				genPathTemporalReprojection << <blockPerGrid, threadPerBlock >> > (
-					paths.ptr(),
-					rays.ptr(),
-					width, height,
-					sample, maxSamples,
-					seed,
-					cam.ptr(),
-					m_hitidxTemporal.ptr(),
-					hitcount);
-#endif
 
 				m_mtxs.reset();
 			}
 		}
-#else
-		PathTracingGeometryRendering::onGenPath(
-			width, height,
-			sample, maxSamples,
-			seed,
-			texVtxPos);
-#endif
 	}
 
 	void PathTracingTemporalReprojection::onHitTest(

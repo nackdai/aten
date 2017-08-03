@@ -49,7 +49,10 @@ void main()
 	vec4 centerPos = texelFetch(s2, ivec2(gl_FragCoord.xy), 0);
 
 	int centerMtrlId = int(centerPos.w);
+	int centerMeshId = int(centerNml.w);
+
 	centerPos.w = 1.0f;
+	centerNml.w = 0.0f;
 
 	// NOTE
 	// 5x5 = 25
@@ -62,9 +65,18 @@ void main()
 		vec4 pos = texelFetch(s2, uv, 0);
 
 		int mtrlId = int(pos.w);
+		int meshId = int(nml.w);
+
+		if (meshId < 0) {
+			oCoarse = vec4(1, 0, 0, 1);
+			return;
+		}
+
+
+		nml.w = 0.0f;
 		pos.w = 1.0f;
 
-		if (mtrlId != centerMtrlId) {
+		if (mtrlId != centerMtrlId || meshId != centerMeshId) {
 			continue;
 		}
 

@@ -235,7 +235,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 
 	while (nodeid >= 0) {
 		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
+		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid, w: meshid
 		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
 		aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
@@ -277,6 +277,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
+				isect->meshid = (int)attrib.w;
 			}
 		}
 		else {
@@ -357,6 +358,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
+				isect->meshid = (int)attrib.w;
 				return true;
 			}
 		}
@@ -438,6 +440,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 			if (isHit) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
+				isect->meshid = (int)attrib.w;
 				return true;
 			}
 		}

@@ -37,13 +37,16 @@ namespace aten {
 	struct Intersection {
 		real t{ AT_MATH_INF };
 
-		int objid{ -1 };
-		int mtrlid{ -1 };
-
 		real area{ real(1) };
 
-		// cube.
-		int face;
+		int objid{ -1 };
+
+		short mtrlid{ -1 };
+
+		// for cube.
+		short face;
+
+		int meshid{ -1 };
 
 		int primid{ -1 };
 		real a, b;	// barycentric

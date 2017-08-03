@@ -371,7 +371,7 @@ __global__ void shade(
 
 		// normal
 		surf2Dwrite(
-			make_float4(n.x, n.y, n.z, 1.0f),
+			make_float4(n.x, n.y, n.z, isect.meshid),
 			aovs[1],
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);

@@ -21,10 +21,10 @@ namespace aten
 
 		real area;
 
-		int shapeid{ -1 };
-		int mtxid{ -1 };
-		int primid{ -1 };
-		int primnum{ 0 };
+		int shapeid{ -1 };	///< Own index in array.
+		int mtxid{ -1 };	///< Index of matrix which the shape refer.
+		int primid{ -1 };	///< First index of triangles which the shape has.
+		int primnum{ 0 };	///< Number of triangles which the shape has.
 
 		struct {
 			vec3 center;

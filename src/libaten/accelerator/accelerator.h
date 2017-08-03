@@ -7,18 +7,18 @@ namespace aten {
 	class bvhnode;
 
 	struct BVHNode {
-		float hit{ -1 };
-		float miss{ -1 };
-		float parent{ -1 };
+		float hit{ -1 };		///< Link index if ray hit.
+		float miss{ -1 };		///< Link index if ray miss.
+		float parent{ -1 };		///< Parent node index.
 		float padding0;
 
-		float shapeid{ -1 };
-		float primid{ -1 };
-		float exid{ -1 };
-		float padding1;
+		float shapeid{ -1 };	///< Object index.
+		float primid{ -1 };		///< Triangle index.
+		float exid{ -1 };		///< External bvh index.
+		float meshid{ -1 };		///< Mesh id.
 
-		aten::vec4 boxmin;
-		aten::vec4 boxmax;
+		aten::vec4 boxmin;		///< AABB min position.
+		aten::vec4 boxmax;		///< AABB max position.
 
 		bool isLeaf() const
 		{

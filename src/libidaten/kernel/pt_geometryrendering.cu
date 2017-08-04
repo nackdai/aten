@@ -22,7 +22,7 @@ __global__ void renderAOV(
 	int sample, int maxSamples,
 	int seed,
 	aten::mat4 mtxW2C,
-	const aten::CameraParameter* __restrict__ camera,
+	const aten::ray* __restrict__ rays,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -40,15 +40,6 @@ __global__ void renderAOV(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	aten::sampler sampler;
-	sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
-
-	float s = (ix + sampler.nextSample()) / (float)(camera->width - 1);
-	float t = (iy + sampler.nextSample()) / (float)(camera->height - 1);
-
-	AT_NAME::CameraSampleResult camsample;
-	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
-
 	Context ctxt;
 	{
 		ctxt.geomnum = geomnum;
@@ -60,14 +51,16 @@ __global__ void renderAOV(
 		ctxt.matrices = matrices;
 	}
 
+	auto ray = rays[idx];
+
 	aten::hitrecord rec;
 	aten::Intersection isect;
 
-	bool isHit = intersectBVH(&ctxt, camsample.r, &isect);
+	bool isHit = intersectBVH(&ctxt, ray, &isect);
 
 	if (isHit) {
 		auto obj = &ctxt.shapes[isect.objid];
-		evalHitResult(&ctxt, obj, camsample.r, &rec, &isect);
+		evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
 		aten::vec4 pos = aten::vec4(rec.p, 1);
 		pos = mtxW2C.apply(pos);
@@ -282,7 +275,7 @@ namespace idaten
 			sample, maxSamples,
 			seed,
 			mtxW2C,
-			cam.ptr(),
+			rays.ptr(),
 			shapeparam.ptr(), shapeparam.num(),
 			nodetex.ptr(),
 			primparams.ptr(),

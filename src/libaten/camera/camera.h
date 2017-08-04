@@ -24,6 +24,9 @@ namespace aten {
 		real vfov;
 		int width;
 		int height;
+
+		real znear;
+		real zfar;
 	};
 };
 

@@ -16,13 +16,6 @@
 
 #include "aten4idaten.h"
 
-//#define ENABLE_DEBUG
-
-// TODO
-#define CAMERA_NEAR		(0.001f)
-#define CAMERA_FAR		(10000.0f)
-#define CAMERA_EPSILON	(CAMERA_NEAR / (CAMERA_FAR - CAMERA_NEAR))
-
 inline __device__ void computePrevPos(
 	int ix, int iy,
 	float centerDepth,
@@ -36,12 +29,12 @@ inline __device__ void computePrevPos(
 	//          0 H 0  0
 	//          0 0 A  B
 	//          0 0 -1 0
-	// mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, -Zview)
-	//  Wclip = -Zview = -depth
-	// Xscr = Xclip / Wclip = Xclip / -Zview = Xclip / -depth
-	// Yscr = Yclip / Wclip = Yclip / -Zview = Yclip / -depth
+	// mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
+	//  Wclip = Zview = depth
+	// Xscr = Xclip / Wclip = Xclip / Zview = Xclip / depth
+	// Yscr = Yclip / Wclip = Yclip / Zview = Yclip / depth
 	//
-	// Xscr * -depth = Xclip
+	// Xscr * depth = Xclip
 	// Xview = mtxC2V * Xclip
 
 	const aten::mat4 mtxC2V = mtxs[0];
@@ -68,39 +61,9 @@ inline __device__ void computePrevPos(
 	*prevPos = *prevPos * 0.5 + 0.5;	// [-1, 1] -> [0, 1]
 }
 
-#ifdef ENABLE_DEBUG
-// For debug.
 __global__ void temporalReprojection(
 	const idaten::PathTracing::Path* __restrict__ paths,
-	const float4* __restrict__ aovs,
-	const float4* __restrict__ prevAOVs,
-	const aten::mat4* __restrict__ mtxs,
-	cudaSurfaceObject_t outSurface,
-	int width, int height)
-{
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-	if (ix >= width && iy >= height) {
-		return;
-	}
-
-	const auto idx = getIdx(ix, iy, width);
-
-	const auto path = paths[idx];
-
-	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
-	cur.w = 1;
-
-	surf2Dwrite(
-		cur,
-		outSurface,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
-}
-#else
-__global__ void temporalReprojection(
-	const idaten::PathTracing::Path* __restrict__ paths,
+	const aten::CameraParameter* __restrict__ camera,
 	const float4* __restrict__ aovs,
 	const float4* __restrict__ prevAOVs,
 	const aten::mat4* __restrict__ mtxs,
@@ -123,7 +86,7 @@ __global__ void temporalReprojection(
 
 	const auto aov = aovs[idx];
 
-	if (aov.y > CAMERA_FAR) {
+	if (aov.y > camera->zfar) {
 		// 背景なので、そのまま出力して終わり.
 		float4 clr = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 		clr.w = 1;
@@ -137,7 +100,7 @@ __global__ void temporalReprojection(
 		return;
 	}
 
-	const auto centerDepth = aten::clamp(aov.y, CAMERA_NEAR, CAMERA_FAR);
+	const auto centerDepth = aten::clamp(aov.y, camera->znear, camera->zfar);
 
 	// 前のフレームのクリップ空間座標を計算.
 	aten::vec4 prevPos;
@@ -168,7 +131,7 @@ __global__ void temporalReprojection(
 		const auto pidx = getIdx(px, py, width);
 
 		const auto prevAov = prevAOVs[pidx];
-		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
+		const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
 		if (abs(1 - prevDepth / centerDepth) < 0.05
@@ -188,40 +151,19 @@ __global__ void temporalReprojection(
 			cur = prev * n + cur;
 			cur /= (float)(n + 1);
 			cur.w = n + 1;
-#else
-			//cur = cur * 0.2 + prev * 0.8;
-			
+#else		
 			int diffx = ix - px;
 			int diffy = iy - py;
-#if 0
 
-			if (diffx < 0 && diffy < 0) {
-				cur = make_float4(1, 0, 0, 1);
-			}
-			else if (diffx < 0 && diffy > 0) {
-				cur = make_float4(0, 1, 0, 1);
-			}
-			else if (diffx > 0 && diffy < 0) {
-				cur = make_float4(0, 0, 1, 1);
-			}
-			else if (diffx > 0 && diffy > 0) {
-				cur = make_float4(1, 1, 0, 1);
-			}
-			else {
-				cur = make_float4(1, 0, 1, 1);
-			}
-#else
 			diffx = abs(diffx);
 			diffy = abs(diffy);
 
 			if (diffx >= 1 && diffy >= 1) {
-				//cur = cur;
-				cur = make_float4(1, 0, 0, 1);
+				cur = cur;
 			}
 			else {
 				cur = cur * 0.2 + prev * 0.8;
 			}
-#endif
 #endif
 		}
 	}
@@ -233,7 +175,6 @@ __global__ void temporalReprojection(
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);	
 }
-#endif
 
 __global__ void makePathMask(
 	idaten::PathTracing::Path* paths,
@@ -266,7 +207,7 @@ __global__ void makePathMask(
 
 	const auto aov = aovs[idx];
 
-	const auto centerDepth = aten::clamp(aov.y, CAMERA_NEAR, CAMERA_FAR);
+	const auto centerDepth = aten::clamp(aov.y, camera->znear, camera->zfar);
 
 	// 前のフレームでのクリップ空間座標を取得.
 	aten::vec4 prevPos;
@@ -292,7 +233,7 @@ __global__ void makePathMask(
 		const auto pidx = getIdx(px, py, width);
 
 		const auto prevAov = prevAOVs[pidx];
-		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
+		const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
 		if (abs(1 - prevDepth / centerDepth) < 0.05
@@ -376,10 +317,6 @@ __global__ void genPathTemporalReprojection(
 	path.isSingular = false;
 
 	path.samples += 1;
-
-#ifdef ENABLE_DEBUG
-	path.contrib = aten::vec3(1, 0, 0);
-#endif
 }
 
 namespace idaten
@@ -425,32 +362,11 @@ namespace idaten
 		// Compute clip-view matrix.
 		if (sample == 0)
 		{
-			/*
-			* D3DXMatrixPerspectiveFovRH
-			*
-			* xScale     0          0              0
-			* 0        yScale       0              0
-			* 0        0        zf/(zn-zf)   zn*zf/(zn-zf)
-			* 0        0            -1             0
-			* where:
-			* yScale = cot(fovY/2)
-			*
-			* xScale = yScale / aspect ratio
-			*/
-
-			// Use Vertical FOV
-			const real fH = 1 / aten::tan(Deg2Rad(m_camParam.vfov) * 0.5f);
-			const real fW = fH / m_camParam.aspect;
-
-			m_mtxV2C.m[0][0] = fW;
-			m_mtxV2C.m[1][1] = fH;
-
-			m_mtxV2C.m[2][2] = CAMERA_FAR / (CAMERA_NEAR - CAMERA_FAR);
-			m_mtxV2C.m[2][3] = CAMERA_NEAR * CAMERA_FAR / (CAMERA_NEAR - CAMERA_FAR);
-
-			m_mtxV2C.m[3][2] = -1.0f;
-
-			m_mtxV2C.m[3][3] = 0.0f;
+			m_mtxV2C.perspective(
+				m_camParam.znear,
+				m_camParam.zfar,
+				m_camParam.vfov,
+				m_camParam.aspect);
 
 			m_mtxC2V = m_mtxV2C;
 			m_mtxC2V.invert();
@@ -516,18 +432,14 @@ namespace idaten
 		int width, int height,
 		cudaTextureObject_t texVtxPos)
 	{
-#ifndef ENABLE_DEBUG
 		PathTracing::onHitTest(width, height, texVtxPos);
-#endif
 	}
 
 	void PathTracingTemporalReprojection::onShadeMiss(
 		int width, int height,
 		int bounce)
 	{
-#ifndef ENABLE_DEBUG
 		PathTracing::onShadeMiss(width, height, bounce);
-#endif
 	}
 
 	void PathTracingTemporalReprojection::onShade(
@@ -538,14 +450,12 @@ namespace idaten
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
-#ifndef ENABLE_DEBUG
 		PathTracing::onShade(
 			outputSurf,
 			hitcount,
 			width, height,
 			bounce, rrBounce,
 			texVtxPos, texVtxNml);
-#endif
 	}
 
 	void PathTracingTemporalReprojection::onGather(
@@ -576,6 +486,7 @@ namespace idaten
 			temporalReprojection << <grid, block >> > (
 			//temporalReprojection << <1, 1 >> > (
 				paths.ptr(),
+				cam.ptr(),
 				m_aovs[cur].ptr(),
 				m_aovs[prev].ptr(),
 				m_mtxs.ptr(),

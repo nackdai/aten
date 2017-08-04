@@ -817,14 +817,15 @@ namespace idaten {
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-			int seed = time.milliSeconds;
-			//int seed = 0;
+			//int seed = time.milliSeconds;
+			int seed = 0;
 
 			onGenPath(
 				width, height,
 				i, maxSamples,
 				seed,
-				vtxTexPos);
+				vtxTexPos,
+				vtxTexNml);
 
 			bounce = 0;
 
@@ -888,7 +889,8 @@ namespace idaten {
 		int width, int height,
 		int sample, int maxSamples,
 		int seed,
-		cudaTextureObject_t texVtxPos)
+		cudaTextureObject_t texVtxPos,
+		cudaTextureObject_t texVtxNml)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(

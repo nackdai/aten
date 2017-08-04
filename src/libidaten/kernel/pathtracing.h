@@ -76,7 +76,8 @@ namespace idaten
 			int width, int height,
 			int sample, int maxSamples,
 			int seed,
-			cudaTextureObject_t texVtxPos);
+			cudaTextureObject_t texVtxPos,
+			cudaTextureObject_t texVtxNml);
 
 		virtual void onHitTest(
 			int width, int height,
@@ -141,13 +142,15 @@ namespace idaten
 			int width, int height,
 			int sample, int maxSamples,
 			int seed,
-			cudaTextureObject_t texVtxPos) override;
+			cudaTextureObject_t texVtxPos,
+			cudaTextureObject_t texVtxNml) override;
 
 		void renderAOVs(
 			int width, int height,
 			int sample, int maxSamples,
 			int seed,
-			cudaTextureObject_t texVtxPos);
+			cudaTextureObject_t texVtxPos,
+			cudaTextureObject_t texVtxNml);
 
 		virtual void getRenderAOVSize(int& w, int& h)
 		{
@@ -191,7 +194,7 @@ namespace idaten
 
 		virtual void reset() override final
 		{
-			m_isFirstRender = true;
+			//m_isFirstRender = true;
 		}
 
 	protected:
@@ -210,7 +213,8 @@ namespace idaten
 			int width, int height,
 			int sample, int maxSamples,
 			int seed,
-			cudaTextureObject_t texVtxPos) override final;
+			cudaTextureObject_t texVtxPos,
+			cudaTextureObject_t texVtxNml) override final;
 
 #if 1
 		virtual void onHitTest(

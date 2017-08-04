@@ -21,11 +21,13 @@ __global__ void renderAOV(
 	int width, int height,
 	int sample, int maxSamples,
 	int seed,
+	aten::mat4 mtxW2C,
 	const aten::CameraParameter* __restrict__ camera,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
+	cudaTextureObject_t vtxNml,
 	const aten::mat4* __restrict__ matrices,
 	const unsigned int* sobolmatrices)
 {
@@ -54,15 +56,29 @@ __global__ void renderAOV(
 		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vtxPos = vtxPos;
+		ctxt.vtxNml = vtxNml;
 		ctxt.matrices = matrices;
 	}
 
+	aten::hitrecord rec;
 	aten::Intersection isect;
 
 	bool isHit = intersectBVH(&ctxt, camsample.r, &isect);
 
-	aovs[idx].x = isHit ? isect.mtrlid : -1;		// material id.
-	aovs[idx].y = isHit ? isect.t : AT_MATH_INF;	// depth.
+	if (isHit) {
+		auto obj = &ctxt.shapes[isect.objid];
+		evalHitResult(&ctxt, obj, camsample.r, &rec, &isect);
+
+		aten::vec4 pos = aten::vec4(rec.p, 1);
+		pos = mtxW2C.apply(pos);
+
+		aovs[idx].x = isect.mtrlid;	// material id.
+		aovs[idx].y = pos.w;		// depth.
+	}
+	else {
+		aovs[idx].x = -1.0;			// material id.
+		aovs[idx].y = AT_MATH_INF;	// depth.
+	}
 }
 
 enum ReferPos {
@@ -205,20 +221,23 @@ namespace idaten
 		int width, int height,
 		int sample, int maxSamples,
 		int seed,
-		cudaTextureObject_t texVtxPos)
+		cudaTextureObject_t texVtxPos,
+		cudaTextureObject_t texVtxNml)
 	{
 		idaten::PathTracing::onGenPath(
 			width, height,
 			sample, maxSamples,
 			seed,
-			texVtxPos);
+			texVtxPos,
+			texVtxNml);
 
 		if (sample == 0) {
 			renderAOVs(
 				width, height,
 				sample, maxSamples,
 				seed,
-				texVtxPos);
+				texVtxPos,
+				texVtxNml);
 		}
 	}
 
@@ -226,7 +245,8 @@ namespace idaten
 		int width, int height,
 		int sample, int maxSamples,
 		int seed,
-		cudaTextureObject_t texVtxPos)
+		cudaTextureObject_t texVtxPos,
+		cudaTextureObject_t texVtxNml)
 	{
 		int W = width;
 		int H = height;
@@ -246,11 +266,13 @@ namespace idaten
 			W, H,
 			sample, maxSamples,
 			seed,
+			mtxW2C,
 			cam.ptr(),
 			shapeparam.ptr(), shapeparam.num(),
 			nodetex.ptr(),
 			primparams.ptr(),
 			texVtxPos,
+			texVtxNml,
 			mtxparams.ptr(),
 			m_sobolMatrices.ptr());
 

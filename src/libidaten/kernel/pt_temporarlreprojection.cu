@@ -47,38 +47,23 @@ inline __device__ void computePrevPos(
 	const aten::mat4 mtxC2V = mtxs[0];
 	const aten::mat4 mtxPrevV2C = mtxs[1];
 
-	float2 uv = make_float2(ix, iy);
-	uv /= make_float2(width - 1, height - 1);	// [0 - 1]
-	uv = uv * 2.0f - 1.0f;	// [0 - 1] -> [-1, 1]
+	float2 uv = make_float2(ix + 0.5, iy + 0.5);
+	uv /= make_float2(width - 1, height - 1);	// [0, 1]
+	uv = uv * 2.0f - 1.0f;	// [0, 1] -> [-1, 1]
 
-	aten::vec4 pos(uv.x, uv.y, 0, 1);
+	aten::vec4 pos(uv.x, uv.y, 0, 0);
 
 	// Screen-space -> Clip-space.
-	pos.x *= -centerDepth;
-	pos.y *= -centerDepth;
+	pos.x *= centerDepth;
+	pos.y *= centerDepth;
 
 	// Clip-space -> View-space
 	pos = mtxC2V.apply(pos);
-	pos.z = centerDepth;
+	pos.z = -centerDepth;
+	pos.w = 1.0;
 
 	*prevPos = mtxPrevV2C.apply(pos);
 	*prevPos /= prevPos->w;
-
-	// TODO
-	// 誤差対策.
-	if (prevPos->x < -1) {
-		prevPos->x += 0.1f / width;
-	}
-	else if (prevPos->x > 1) {
-		prevPos->x -= 0.1f / width;
-	}
-
-	if (prevPos->y < -1) {
-		prevPos->y += 0.1f / height;
-	}
-	else if (prevPos->y > 1) {
-		prevPos->y -= 0.1f / height;
-	}
 
 	*prevPos = *prevPos * 0.5 + 0.5;	// [-1, 1] -> [0, 1]
 }
@@ -183,7 +168,8 @@ __global__ void temporalReprojection(
 		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
-		if (abs(centerDepth - prevDepth) <= 0.1f
+		//if (abs(centerDepth - prevDepth) <= 0.1f
+		if (abs(1 - prevDepth / centerDepth) < 0.05
 			&& aov.x == prevAov.x)
 		{
 			// 前のフレームのピクセルカラーを取得.
@@ -394,7 +380,8 @@ namespace idaten
 		int width, int height,
 		int sample, int maxSamples,
 		int seed,
-		cudaTextureObject_t texVtxPos)
+		cudaTextureObject_t texVtxPos,
+		cudaTextureObject_t texVtxNml)
 	{
 		// Compute clip-view matrix.
 		if (sample == 0)
@@ -436,7 +423,8 @@ namespace idaten
 				width, height,
 				sample, maxSamples,
 				seed,
-				texVtxPos);
+				texVtxPos,
+				texVtxNml);
 		}
 		else {
 			if (sample == 0) {
@@ -445,7 +433,8 @@ namespace idaten
 					width, height,
 					sample, maxSamples,
 					seed,
-					texVtxPos);
+					texVtxPos,
+					texVtxNml);
 			}
 			else
 			{

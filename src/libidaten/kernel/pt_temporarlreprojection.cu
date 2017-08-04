@@ -159,8 +159,8 @@ __global__ void temporalReprojection(
 #if 1
 	if (isInsideX && isInsideY) {
 		// 前のフレームのスクリーン座標.
-		int px = (int)(prevPos.x * (width - 1) + 0.5f);
-		int py = (int)(prevPos.y * (height - 1) + 0.5f);
+		int px = (int)(prevPos.x * width - 0.5f);
+		int py = (int)(prevPos.y * height - 0.5f);
 
 		px = min(px, width - 1);
 		py = min(py, height - 1);
@@ -171,7 +171,6 @@ __global__ void temporalReprojection(
 		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
-		//if (abs(centerDepth - prevDepth) <= 0.1f
 		if (abs(1 - prevDepth / centerDepth) < 0.05
 			&& aov.x == prevAov.x)
 		{
@@ -216,7 +215,8 @@ __global__ void temporalReprojection(
 			diffy = abs(diffy);
 
 			if (diffx >= 1 && diffy >= 1) {
-				cur = cur;
+				//cur = cur;
+				cur = make_float4(1, 0, 0, 1);
 			}
 			else {
 				cur = cur * 0.2 + prev * 0.8;
@@ -283,8 +283,8 @@ __global__ void makePathMask(
 
 	if (isInsideX && isInsideY) {
 		// スクリーン座標に変換.
-		int px = (int)(prevPos.x * (width - 1) + 0.5f);
-		int py = (int)(prevPos.y * (height - 1) + 0.5f);
+		int px = (int)(prevPos.x * width - 0.5f);
+		int py = (int)(prevPos.y * height - 0.5f);
 
 		px = min(px, width - 1);
 		py = min(py, height - 1);
@@ -295,7 +295,7 @@ __global__ void makePathMask(
 		const auto prevDepth = aten::clamp(prevAov.y, CAMERA_NEAR, CAMERA_FAR);
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
-		if (abs(centerDepth - prevDepth) <= 0.1f
+		if (abs(1 - prevDepth / centerDepth) < 0.05
 			&& aov.x == prevAov.x)
 		{
 			// 前のフレームのピクセルが利用できるので、パスは終了.

@@ -817,8 +817,8 @@ namespace idaten {
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-			//int seed = time.milliSeconds;
-			int seed = 0;
+			int seed = time.milliSeconds;
+			//int seed = 0;
 
 			onGenPath(
 				width, height,

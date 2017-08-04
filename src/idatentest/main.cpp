@@ -16,7 +16,7 @@
 
 #define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
-//#define ENABLE_TEMPORAL
+#define ENABLE_TEMPORAL
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -272,7 +272,7 @@ int main()
 		"../shader/vs.glsl", "../shader/atrous_fs.glsl",
 		"../shader/vs.glsl", "../shader/atrous_final_fs.glsl");
 
-	aten::visualizer::addPostProc(&atrous);
+	//aten::visualizer::addPostProc(&atrous);
 	aten::visualizer::addPostProc(&gamma);
 
 	aten::vec3 pos, at;
@@ -350,6 +350,10 @@ int main()
 		}
 #endif
 
+		auto camparam = g_camera.param();
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
 		g_tracer.update(
 			aten::visualizer::getTexHandle(),
 #ifdef ENABLE_GEOMRENDERING
@@ -357,7 +361,7 @@ int main()
 #else
 			WIDTH, HEIGHT,
 #endif
-			g_camera.param(),
+			camparam,
 			shapeparams,
 			mtrlparms,
 			lightparams,

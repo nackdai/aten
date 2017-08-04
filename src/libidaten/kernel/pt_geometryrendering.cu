@@ -43,8 +43,8 @@ __global__ void renderAOV(
 	aten::sampler sampler;
 	sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
 
-	float s = (ix + sampler.nextSample()) / (float)(camera->width);
-	float t = (iy + sampler.nextSample()) / (float)(camera->height);
+	float s = (ix + sampler.nextSample()) / (float)(camera->width - 1);
+	float t = (iy + sampler.nextSample()) / (float)(camera->height - 1);
 
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -251,6 +251,21 @@ namespace idaten
 		int W = width;
 		int H = height;
 
+		aten::mat4 mtxW2V;
+		mtxW2V.lookat(
+			m_camParam.origin,
+			m_camParam.center,
+			m_camParam.up);
+
+		aten::mat4 mtxV2C;
+		mtxV2C.perspective(
+			m_camParam.znear,
+			m_camParam.zfar,
+			m_camParam.vfov,
+			m_camParam.aspect);
+
+		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
 		getRenderAOVSize(W, H);
 
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
@@ -261,7 +276,7 @@ namespace idaten
 		auto& aovs = getCurAOVs();
 
 		renderAOV << <grid, block >> > (
-			//renderAOV << <1, 1 >> > (
+		//renderAOV << <1, 1 >> > (
 			aovs.ptr(),
 			W, H,
 			sample, maxSamples,

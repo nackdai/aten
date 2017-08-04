@@ -110,6 +110,8 @@ __global__ void temporalReprojection(
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	//int ix = 303;
+	//int iy = 480 - 409;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -154,6 +156,7 @@ __global__ void temporalReprojection(
 	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 	cur.w = 1;
 
+#if 1
 	if (isInsideX && isInsideY) {
 		// 前のフレームのスクリーン座標.
 		int px = (int)(prevPos.x * (width - 1) + 0.5f);
@@ -176,6 +179,7 @@ __global__ void temporalReprojection(
 			float4 prev;
 			surf2Dread(&prev, outSurface, px * sizeof(float4), py);
 
+#if 0
 			int n = (int)prev.w;
 
 			// TODO
@@ -185,8 +189,43 @@ __global__ void temporalReprojection(
 			cur = prev * n + cur;
 			cur /= (float)(n + 1);
 			cur.w = n + 1;
+#else
+			//cur = cur * 0.2 + prev * 0.8;
+			
+			int diffx = ix - px;
+			int diffy = iy - py;
+#if 0
+
+			if (diffx < 0 && diffy < 0) {
+				cur = make_float4(1, 0, 0, 1);
+			}
+			else if (diffx < 0 && diffy > 0) {
+				cur = make_float4(0, 1, 0, 1);
+			}
+			else if (diffx > 0 && diffy < 0) {
+				cur = make_float4(0, 0, 1, 1);
+			}
+			else if (diffx > 0 && diffy > 0) {
+				cur = make_float4(1, 1, 0, 1);
+			}
+			else {
+				cur = make_float4(1, 0, 1, 1);
+			}
+#else
+			diffx = abs(diffx);
+			diffy = abs(diffy);
+
+			if (diffx >= 1 && diffy >= 1) {
+				cur = cur;
+			}
+			else {
+				cur = cur * 0.2 + prev * 0.8;
+			}
+#endif
+#endif
 		}
 	}
+#endif
 
 	surf2Dwrite(
 		cur,

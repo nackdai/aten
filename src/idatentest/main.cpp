@@ -61,7 +61,12 @@ void onRun()
 {
 	if (g_isCameraDirty) {
 		g_camera.update();
-		g_tracer.updateCamera(g_camera.param());
+
+		auto camparam = g_camera.param();
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		g_tracer.updateCamera(camparam);
 		g_isCameraDirty = false;
 
 #ifndef ENABLE_TEMPORAL
@@ -272,7 +277,7 @@ int main()
 		"../shader/vs.glsl", "../shader/atrous_fs.glsl",
 		"../shader/vs.glsl", "../shader/atrous_final_fs.glsl");
 
-	//aten::visualizer::addPostProc(&atrous);
+	aten::visualizer::addPostProc(&atrous);
 	aten::visualizer::addPostProc(&gamma);
 
 	aten::vec3 pos, at;

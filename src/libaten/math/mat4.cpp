@@ -164,4 +164,61 @@ namespace aten {
 
 		return *this;
 	}
+
+	mat4& mat4::lookat(
+		const vec3& eye,
+		const vec3& at,
+		const vec3& up)
+	{
+		vec3 zaxis = normalize(eye - at);
+		vec3 xaxis = normalize(cross(up, zaxis));
+		vec3 yaxis = cross(zaxis, xaxis);
+
+		m[0][0] = xaxis.x; m[1][0] = yaxis.x; m[2][0] = zaxis.x;
+		m[0][1] = xaxis.y; m[1][1] = yaxis.y; m[2][1] = zaxis.y;
+		m[0][2] = xaxis.z; m[1][2] = yaxis.z; m[2][2] = zaxis.z;
+
+		m[0][3] = -dot(xaxis, eye);
+		m[1][3] = -dot(yaxis, eye);
+		m[2][3] = -dot(zaxis, eye);
+
+		m[3][3] = 1;
+
+		return *this;
+	}
+
+	mat4& mat4::perspective(
+		real znear, real zfar,
+		real vfov,
+		real aspect)
+	{
+		/*
+		* D3DXMatrixPerspectiveFovRH
+		*
+		* xScale     0          0              0
+		* 0        yScale       0              0
+		* 0        0        zf/(zn-zf)   zn*zf/(zn-zf)
+		* 0        0            -1             0
+		* where:
+		* yScale = cot(fovY/2)
+		*
+		* xScale = yScale / aspect ratio
+		*/
+
+		// Use Vertical FOV
+		const real fH = 1 / aten::tan(Deg2Rad(vfov) * 0.5f);
+		const real fW = fH / aspect;
+
+		m[0][0] = fW;
+		m[1][1] = fH;
+
+		m[2][2] = zfar / (znear - zfar);
+		m[2][3] = znear * zfar / (znear - zfar);
+
+		m[3][2] = -1.0f;
+
+		m[3][3] = 0.0f;
+
+		return *this;
+	}
 }

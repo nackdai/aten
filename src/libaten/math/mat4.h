@@ -293,6 +293,16 @@ namespace aten {
 		mat4& asRotateByAxis(real r, const vec3& axis);
 
 		mat4& asRotateFromVector(const vec3& v, const vec3& up);
+
+		mat4& lookat(
+			const vec3& eye,
+			const vec3& at,
+			const vec3& up);
+
+		mat4& perspective(
+			real znear, real zfar,
+			real vfov,
+			real aspect);
 	};
 
 	inline AT_DEVICE_API mat4 operator+(const mat4& m1, const mat4& m2)

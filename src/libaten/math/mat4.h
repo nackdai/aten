@@ -303,6 +303,14 @@ namespace aten {
 			real znear, real zfar,
 			real vfov,
 			real aspect);
+
+		void dump() const
+		{
+			AT_PRINTF("%f %f %f %f\n", m[0][0], m[0][1], m[0][2], m[0][3]);
+			AT_PRINTF("%f %f %f %f\n", m[1][0], m[1][1], m[1][2], m[1][3]);
+			AT_PRINTF("%f %f %f %f\n", m[2][0], m[2][1], m[2][2], m[2][3]);
+			AT_PRINTF("%f %f %f %f\n", m[3][0], m[3][1], m[3][2], m[3][3]);
+		}
 	};
 
 	inline AT_DEVICE_API mat4 operator+(const mat4& m1, const mat4& m2)

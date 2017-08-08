@@ -117,6 +117,13 @@ namespace aten
 				vtx.nml.z = shape.mesh.normals[i + 2];
 				vtx.nml.w = real(0);
 
+				if (isnan(vtx.nml.x) || isnan(vtx.nml.y) || isnan(vtx.nml.z))
+				{
+					// TODO
+					// work around...
+					vtx.nml = aten::vec4(real(0), real(1), real(0), 1);
+				}
+
 				VertexManager::addVertex(vtx);
 
 				pmin = vec3(

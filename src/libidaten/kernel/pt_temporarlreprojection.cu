@@ -73,8 +73,6 @@ __global__ void temporalReprojection(
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-	//int ix = 303;
-	//int iy = 480 - 409;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -101,6 +99,12 @@ __global__ void temporalReprojection(
 	}
 
 	const auto centerDepth = aten::clamp(aov.y, camera->znear, camera->zfar);
+
+	// TODO
+	// For trial.
+	// Zの符号を正確に復元できていない.
+	float3 centerNormal = make_float3(aov.z, aov.w, 0);
+	centerNormal.z = sqrtf(1 - dot(centerNormal, centerNormal));
 
 	// 前のフレームのクリップ空間座標を計算.
 	aten::vec4 prevPos;
@@ -133,8 +137,15 @@ __global__ void temporalReprojection(
 		const auto prevAov = prevAOVs[pidx];
 		const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
 
+		// TODO
+		// For trial.
+		// Zの符号を正確に復元できていない.
+		float3 prevNormal = make_float3(prevAov.z, prevAov.w, 0);
+		prevNormal.z = sqrtf(1 - dot(prevNormal, prevNormal));
+
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
-		if (abs(1 - prevDepth / centerDepth) < 0.05
+		if (abs(1 - centerDepth / prevDepth) < 0.05
+			&& abs(dot(centerNormal, prevNormal)) > 0.98
 			&& aov.x == prevAov.x)
 		{
 			// 前のフレームのピクセルカラーを取得.
@@ -236,7 +247,7 @@ __global__ void makePathMask(
 		const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
-		if (abs(1 - prevDepth / centerDepth) < 0.05
+		if (abs(1 - centerDepth / prevDepth) < 0.05
 			&& aov.x == prevAov.x)
 		{
 			// 前のフレームのピクセルが利用できるので、パスは終了.

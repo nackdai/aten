@@ -67,6 +67,12 @@ __global__ void renderAOV(
 
 		aovs[idx].x = isect.mtrlid;	// material id.
 		aovs[idx].y = pos.w;		// depth.
+
+		// TODO
+		// For trial.
+		// Z‚Ì•„†‚ğ³Šm‚É•œŒ³‚Å‚«‚È‚¢.
+		aovs[idx].z = rec.normal.x;
+		aovs[idx].w = rec.normal.y;
 	}
 	else {
 		aovs[idx].x = -1.0;			// material id.

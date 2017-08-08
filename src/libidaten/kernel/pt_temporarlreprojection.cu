@@ -145,7 +145,7 @@ __global__ void temporalReprojection(
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
 		if (abs(1 - centerDepth / prevDepth) < 0.05
-			&& abs(dot(centerNormal, prevNormal)) > 0.98
+			&& dot(centerNormal, prevNormal) > 0.98
 			&& aov.x == prevAov.x)
 		{
 			// 前のフレームのピクセルカラーを取得.

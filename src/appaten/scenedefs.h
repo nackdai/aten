@@ -145,6 +145,16 @@ public:
 		real& fov);
 };
 
+class SponzaScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at,
+		real& fov);
+};
+
 //#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
@@ -158,4 +168,5 @@ public:
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
-#define Scene ObjCornellBoxScene
+//#define Scene ObjCornellBoxScene
+#define Scene SponzaScene

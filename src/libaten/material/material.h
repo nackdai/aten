@@ -222,15 +222,15 @@ namespace AT_NAME
 			real u, real v)
 		{
 			if (normalMapIdx >= 0) {
-				newNml = sampleTexture(normalMapIdx, u, v, real(0));
-				newNml = real(2) * newNml - aten::vec3(1);
-				newNml = normalize(newNml);
+				auto nml = sampleTexture(normalMapIdx, u, v, real(0));
+				nml = real(2) * nml - aten::vec3(1);	// [0, 1] -> [-1, 1].
+				nml = normalize(nml);
 
 				aten::vec3 n = normalize(orgNml);
 				aten::vec3 t = aten::getOrthoVector(n);
 				aten::vec3 b = cross(n, t);
 
-				newNml = newNml.z * n + newNml.x * t + newNml.y * b;
+				newNml = nml.z * n + nml.x * t + nml.y * b;
 				newNml = normalize(newNml);
 			}
 			else {

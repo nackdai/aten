@@ -163,13 +163,10 @@ __global__ void temporalReprojection(
 			cur /= (float)(n + 1);
 			cur.w = n + 1;
 #else		
-			int diffx = ix - px;
-			int diffy = iy - py;
+			float2 diff = make_float2(ix - px, iy - py);
+			float len = length(diff);
 
-			diffx = abs(diffx);
-			diffy = abs(diffy);
-
-			if (diffx >= 1 && diffy >= 1) {
+			if (len >= 2) {
 				cur = cur;
 			}
 			else {

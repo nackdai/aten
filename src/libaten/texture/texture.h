@@ -14,7 +14,7 @@ namespace aten {
 
 	public:
 		texture();
-		texture(uint32_t width, uint32_t height, uint32_t channels);
+		texture(uint32_t width, uint32_t height, uint32_t channels, const char* tag = nullptr);
 
 		~texture();
 
@@ -23,6 +23,9 @@ namespace aten {
 
 		AT_DEVICE_API vec3 at(real u, real v) const
 		{
+			u -= floor(u);
+			v -= floor(v);
+
 			uint32_t x = (uint32_t)(aten::cmpMin(u, real(1)) * (m_width - 1));
 			uint32_t y = (uint32_t)(aten::cmpMin(v, real(1)) * (m_height - 1));
 
@@ -110,5 +113,7 @@ namespace aten {
 		std::vector<vec4> m_colors;
 
 		uint32_t m_gltex{ 0 };
+
+		std::string m_tag;
 	};
 }

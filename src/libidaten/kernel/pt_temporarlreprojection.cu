@@ -104,7 +104,7 @@ __global__ void temporalReprojection(
 	// For trial.
 	// Zの符号を正確に復元できていない.
 	float3 centerNormal = make_float3(aov.z, aov.w, 0);
-	centerNormal.z = sqrtf(1 - dot(centerNormal, centerNormal));
+	centerNormal.z = sqrtf(1 - clamp(dot(centerNormal, centerNormal), 0.0f, 1.0f));
 
 	// 前のフレームのクリップ空間座標を計算.
 	aten::vec4 prevPos;
@@ -141,7 +141,7 @@ __global__ void temporalReprojection(
 		// For trial.
 		// Zの符号を正確に復元できていない.
 		float3 prevNormal = make_float3(prevAov.z, prevAov.w, 0);
-		prevNormal.z = sqrtf(1 - dot(prevNormal, prevNormal));
+		prevNormal.z = sqrtf(1 - clamp(dot(prevNormal, prevNormal), 0.0f, 1.0f));
 
 		// 前のフレームとの深度差が範囲内 && マテリアルIDが同じかどうか.
 		if (abs(1 - centerDepth / prevDepth) < 0.05

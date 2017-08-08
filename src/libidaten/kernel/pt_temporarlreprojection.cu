@@ -71,8 +71,8 @@ __global__ void temporalReprojection(
 	int width, int height,
 	int maxSamples)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	const int ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -106,6 +106,74 @@ __global__ void temporalReprojection(
 	float3 centerNormal = make_float3(aov.z, aov.w, 0);
 	centerNormal.z = sqrtf(1 - clamp(dot(centerNormal, centerNormal), 0.0f, 1.0f));
 
+	// 今回のフレームのピクセルカラー.
+	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
+	cur.w = 1;
+
+#if 1
+	float4 sum = make_float4(0, 0, 0, 0);
+	float weight = 0.0f;
+
+	for (int y = -1; y < 1; y++) {
+		for (int x = -1; x < 1; x++) {
+			int xx = clamp(ix + x, 0, width - 1);
+			int yy = clamp(iy + y, 0, height - 1);
+
+			// 前のフレームのクリップ空間座標を計算.
+			aten::vec4 prevPos;
+			computePrevPos(
+				xx, yy,
+				centerDepth,
+				width, height,
+				&prevPos,
+				mtxs);
+
+			// [0, 1]の範囲内に入っているか.
+			bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
+			bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
+
+			if (isInsideX && isInsideY) {
+				// 前のフレームのスクリーン座標.
+				int px = (int)(prevPos.x * width - 0.5f);
+				int py = (int)(prevPos.y * height - 0.5f);
+
+				px = clamp(px, 0, width - 1);
+				py = clamp(py, 0, height - 1);
+
+				const auto pidx = getIdx(px, py, width);
+
+				const auto prevAov = prevAOVs[pidx];
+				const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
+
+				// TODO
+				// For trial.
+				// Zの符号を正確に復元できていない.
+				float3 prevNormal = make_float3(prevAov.z, prevAov.w, 0);
+				prevNormal.z = sqrtf(1 - clamp(dot(prevNormal, prevNormal), 0.0f, 1.0f));
+
+				static const float zThreshold = 0.05f;
+				static const float nThreshold = 0.98f;
+
+				float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
+				float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
+				float Wm = aov.x == prevAov.x ? 1.0f : 0.0f;
+
+				// 前のフレームのピクセルカラーを取得.
+				float4 prev;
+				surf2Dread(&prev, outSurface, px * sizeof(float4), py);
+
+				float W = Wz * Wn * Wm;
+				sum += prev * W;
+				weight += W;
+			}
+		}
+	}
+
+	if (weight > 0.0f) {
+		sum /= weight;
+		cur = 0.2 * cur + 0.8 * sum;
+	}
+#else
 	// 前のフレームのクリップ空間座標を計算.
 	aten::vec4 prevPos;
 	computePrevPos(
@@ -119,11 +187,6 @@ __global__ void temporalReprojection(
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
-	// 今回のフレームのピクセルカラー.
-	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
-	cur.w = 1;
-
-#if 1
 	if (isInsideX && isInsideY) {
 		// 前のフレームのスクリーン座標.
 		int px = (int)(prevPos.x * width - 0.5f);
@@ -152,17 +215,6 @@ __global__ void temporalReprojection(
 			float4 prev;
 			surf2Dread(&prev, outSurface, px * sizeof(float4), py);
 
-#if 0
-			int n = (int)prev.w;
-
-			// TODO
-			n = min(16, n);
-
-			// 現在のフレームと前のフレームのカラーを混ぜる.
-			cur = prev * n + cur;
-			cur /= (float)(n + 1);
-			cur.w = n + 1;
-#else		
 			float2 diff = make_float2(ix - px, iy - py);
 			float len = length(diff);
 
@@ -172,7 +224,6 @@ __global__ void temporalReprojection(
 			else {
 				cur = cur * 0.2 + prev * 0.8;
 			}
-#endif
 		}
 	}
 #endif
@@ -380,6 +431,14 @@ namespace idaten
 			m_mtxC2V.invert();
 		}
 
+#if 1
+		PathTracingGeometryRendering::onGenPath(
+			width, height,
+			sample, maxSamples,
+			seed,
+			texVtxPos,
+			texVtxNml);
+#else
 		if (m_isFirstRender) {
 			// 最初のフレームは参照できる過去のフレームがないので、普通に処理する.
 			PathTracingGeometryRendering::onGenPath(
@@ -434,6 +493,7 @@ namespace idaten
 				m_mtxs.reset();
 			}
 		}
+#endif
 	}
 
 	void PathTracingTemporalReprojection::onHitTest(

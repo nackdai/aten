@@ -202,8 +202,9 @@ __global__ void hitTest(
 #endif
 }
 
-template <bool isFirstBounce>
+template <bool isFirstBounce, bool needAOV>
 __global__ void shadeMiss(
+	cudaSurfaceObject_t* aovs,
 	idaten::PathTracing::Path* paths,
 	int width, int height)
 {
@@ -228,12 +229,21 @@ __global__ void shadeMiss(
 
 		if (isFirstBounce) {
 			path.isKill = true;
+
+			if (needAOV) {
+				surf2Dwrite(
+					make_float4(bg.x, bg.y, bg.z, 1),
+					aovs[2],
+					ix * sizeof(float4), iy,
+					cudaBoundaryModeTrap);
+			}
 		}
 	}
 }
 
-template <bool isFirstBounce>
+template <bool isFirstBounce, bool needAOV>
 __global__ void shadeMissWithEnvmap(
+	cudaSurfaceObject_t* aovs,
 	cudaTextureObject_t* textures,
 	int envmapIdx,
 	real envmapAvgIllum,
@@ -264,6 +274,19 @@ __global__ void shadeMissWithEnvmap(
 		float misW = 1.0f;
 		if (isFirstBounce) {
 			path.isKill = true;
+
+			if (needAOV) {
+				surf2Dwrite(
+					make_float4(emit.x, emit.y, emit.z, 1),
+					aovs[2],
+					ix * sizeof(float4), iy,
+					cudaBoundaryModeTrap);
+			}
+
+#if 0
+			// For exporting separated albedo.
+			emit = aten::vec3(1, 1, 1);
+#endif
 		}
 		else {
 			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
@@ -963,17 +986,32 @@ namespace idaten {
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
+		bool enableAOV = (bounce == 0 && m_enableAOV);
+
 		if (m_envmapRsc.idx >= 0) {
 			if (bounce == 0) {
-				shadeMissWithEnvmap<true> << <grid, block >> > (
-					tex.ptr(),
-					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-					paths.ptr(),
-					rays.ptr(),
-					width, height);
+				if (enableAOV) {
+					shadeMissWithEnvmap<true, true> << <grid, block >> > (
+						m_aovCudaRsc.ptr(),
+						tex.ptr(),
+						m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
+						paths.ptr(),
+						rays.ptr(),
+						width, height);
+				}
+				else {
+					shadeMissWithEnvmap<true, false> << <grid, block >> > (
+						m_aovCudaRsc.ptr(),
+						tex.ptr(),
+						m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
+						paths.ptr(),
+						rays.ptr(),
+						width, height);
+				}
 			}
 			else {
-				shadeMissWithEnvmap<false> << <grid, block >> > (
+				shadeMissWithEnvmap<false, false> << <grid, block >> > (
+					m_aovCudaRsc.ptr(),
 					tex.ptr(),
 					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 					paths.ptr(),
@@ -983,12 +1021,22 @@ namespace idaten {
 		}
 		else {
 			if (bounce == 0) {
-				shadeMiss<true> << <grid, block >> > (
-					paths.ptr(),
-					width, height);
+				if (enableAOV) {
+					shadeMiss<true, true> << <grid, block >> > (
+						m_aovCudaRsc.ptr(),
+						paths.ptr(),
+						width, height);
+				}
+				else {
+					shadeMiss<true, false> << <grid, block >> > (
+						m_aovCudaRsc.ptr(),
+						paths.ptr(),
+						width, height);
+				}
 			}
 			else {
-				shadeMiss<false> << <grid, block >> > (
+				shadeMiss<false, false> << <grid, block >> > (
+					m_aovCudaRsc.ptr(),
 					paths.ptr(),
 					width, height);
 			}

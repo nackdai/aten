@@ -75,7 +75,7 @@ void onRun()
 	}
 
 	atrous.getPositionMap().clearAsGLTexture(aten::vec4(real(1)));
-	atrous.getNormalMap().clearAsGLTexture(aten::vec4(real(0)));
+	atrous.getNormalMap().clearAsGLTexture(aten::vec4(real(0), real(0), real(0), real(-1)));
 	atrous.getAlbedoMap().clearAsGLTexture(aten::vec4(real(1)));
 
 	aten::timer timer;

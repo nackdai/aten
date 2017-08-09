@@ -52,6 +52,13 @@ void main()
 	int centerMtrlId = int(centerPos.w);
 	int centerMeshId = int(centerNml.w);
 
+	vec4 albedo = texelFetch(s3, centerUV, 0);
+
+	if (centerMeshId < 0) {
+		oCoarse = albedo;
+		return;
+	}
+
 	centerPos.w = 1.0f;
 	centerNml.w = 0.0f;
 
@@ -69,10 +76,8 @@ void main()
 		int meshId = int(nml.w);
 
 		if (meshId < 0) {
-			oCoarse = vec4(1, 0, 0, 1);
-			return;
+			continue;
 		}
-
 
 		nml.w = 0.0f;
 		pos.w = 1.0f;
@@ -101,8 +106,6 @@ void main()
 
 	vec4 coarse = sum / weightSum;
 	vec4 detail = centerClr - coarse;
-
-	vec4 albedo = texelFetch(s3, centerUV, 0);
 
 #if 0
 	// For modulating Albedo map.

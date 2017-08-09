@@ -10,9 +10,11 @@ namespace aten {
 	{
 		m_normal.init(width, height, 4);
 		m_pos.init(width, height, 4);
+		m_albedo.init(width, height, 4);
 
 		m_normal.initAsGLTexture();
 		m_pos.initAsGLTexture();
+		m_albedo.initAsGLTexture();
 
 		for (int i = 0; i < ITER; i++) {
 			auto res = m_pass[i].init(
@@ -69,6 +71,7 @@ namespace aten {
 		// Bind G-Buffer.
 		m_body->m_normal.bindAsGLTexture(1, this);
 		m_body->m_pos.bindAsGLTexture(2, this);
+		m_body->m_albedo.bindAsGLTexture(3, this);
 
 		int stepScale = 1 << m_idx;
 

@@ -10,11 +10,12 @@ namespace idaten
 	struct EnvmapResource {
 		int idx{ -1 };
 		real avgIllum;
+		real multiplyer{ real(1) };
 
 		EnvmapResource() {}
 
-		EnvmapResource(int i, real illum)
-			: idx(i), avgIllum(illum)
+		EnvmapResource(int i, real illum, real mul = real(1))
+			: idx(i), avgIllum(illum), multiplyer(mul)
 		{}
 	};
 
@@ -51,6 +52,7 @@ namespace idaten
 		virtual void enableRenderAOV(
 			GLuint gltexPosition,
 			GLuint gltexNormal,
+			GLuint gltexAlbedo,
 			aten::vec3& posRange)
 		{
 			// Nothing is done...

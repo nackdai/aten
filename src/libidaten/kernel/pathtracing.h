@@ -69,6 +69,7 @@ namespace idaten
 		virtual void enableRenderAOV(
 			GLuint gltexPosition,
 			GLuint gltexNormal,
+			GLuint gltexAlbedo,
 			aten::vec3& posRange) override;
 
 	protected:

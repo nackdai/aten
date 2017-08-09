@@ -176,7 +176,6 @@ __global__ void hitTest(
 	{
 		ctxt.geomnum = geomnum;
 		ctxt.shapes = shapes;
-		ctxt.mtrls = mtrls;
 		ctxt.lightnum = lightnum;
 		ctxt.lights = lights;
 		ctxt.nodes = nodes;
@@ -238,6 +237,7 @@ __global__ void shadeMissWithEnvmap(
 	cudaTextureObject_t* textures,
 	int envmapIdx,
 	real envmapAvgIllum,
+	real envmapMultiplyer,
 	idaten::PathTracing::Path* paths,
 	const aten::ray* __restrict__ rays,
 	int width, int height)
@@ -268,6 +268,8 @@ __global__ void shadeMissWithEnvmap(
 		else {
 			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
 			misW = path.pdfb / (pdfLight + path.pdfb);
+
+			emit *= envmapMultiplyer;
 		}
 
 		path.contrib += path.throughput * misW * emit;
@@ -375,7 +377,20 @@ __global__ void shade(
 			aovs[1],
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
+
+		auto albedo = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
+
+		surf2Dwrite(
+			make_float4(albedo.x, albedo.y, albedo.z, 1),
+			aovs[2],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
 	}
+#endif
+
+#if 0
+	// For exporting separated albedo.
+	mtrl.albedoMap = -1;
 #endif
 
 	// Implicit conection to light.
@@ -734,6 +749,7 @@ namespace idaten {
 	void PathTracing::enableRenderAOV(
 		GLuint gltexPosition,
 		GLuint gltexNormal,
+		GLuint gltexAlbedo,
 		aten::vec3& posRange)
 	{
 		AT_ASSERT(gltexPosition > 0);
@@ -744,11 +760,12 @@ namespace idaten {
 
 			m_posRange = posRange;
 
-			m_aovs.resize(2);
+			m_aovs.resize(3);
 			m_aovs[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
 			m_aovs[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
+			m_aovs[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
 
-			m_aovCudaRsc.init(2);
+			m_aovCudaRsc.init(3);
 		}
 	}
 
@@ -921,7 +938,7 @@ namespace idaten {
 #else
 		hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
 #endif
-			//hitTest << <1, 1 >> > (
+		//hitTest << <1, 1 >> > (
 			paths.ptr(),
 			isects.ptr(),
 			rays.ptr(),
@@ -950,7 +967,7 @@ namespace idaten {
 			if (bounce == 0) {
 				shadeMissWithEnvmap<true> << <grid, block >> > (
 					tex.ptr(),
-					m_envmapRsc.idx, m_envmapRsc.avgIllum,
+					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 					paths.ptr(),
 					rays.ptr(),
 					width, height);
@@ -958,7 +975,7 @@ namespace idaten {
 			else {
 				shadeMissWithEnvmap<false> << <grid, block >> > (
 					tex.ptr(),
-					m_envmapRsc.idx, m_envmapRsc.avgIllum,
+					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 					paths.ptr(),
 					rays.ptr(),
 					width, height);

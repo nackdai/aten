@@ -23,6 +23,10 @@ namespace aten {
 		{
 			return m_pos;
 		}
+		texture& getAlbedoMap()
+		{
+			return m_albedo;
+		}
 
 		virtual PixelFormat inFormat() const override final
 		{
@@ -73,6 +77,7 @@ namespace aten {
 
 		texture m_pos;
 		texture m_normal;
+		texture m_albedo;
 
 		ATrousPass m_pass[ITER];
 		ATrousFinalPass m_final;

@@ -16,7 +16,7 @@
 
 #define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
-#define ENABLE_TEMPORAL
+//#define ENABLE_TEMPORAL
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -76,6 +76,7 @@ void onRun()
 
 	atrous.getPositionMap().clearAsGLTexture(aten::vec4(real(1)));
 	atrous.getNormalMap().clearAsGLTexture(aten::vec4(real(0)));
+	atrous.getAlbedoMap().clearAsGLTexture(aten::vec4(real(1)));
 
 	aten::timer timer;
 	timer.begin();
@@ -279,6 +280,7 @@ int main()
 
 	aten::visualizer::addPostProc(&atrous);
 	aten::visualizer::addPostProc(&gamma);
+	//aten::visualizer::addPostProc(&blitter);
 
 	aten::vec3 pos, at;
 	real vfov;
@@ -375,15 +377,18 @@ int main()
 			vtxparams,
 			mtxs,
 #ifdef ENABLE_ENVMAP
-			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace()));
+			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
 #else
 			tex, idaten::EnvmapResource());
 #endif
 
+#if 1
 		g_tracer.enableRenderAOV(
 			atrous.getPositionMap().getGLTexHandle(),
 			atrous.getNormalMap().getGLTexHandle(),
+			atrous.getAlbedoMap().getGLTexHandle(),
 			aten::vec3(real(1)));
+#endif
 	}
 
 	aten::window::run(onRun);

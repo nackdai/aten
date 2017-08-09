@@ -144,4 +144,29 @@ namespace aten {
 				clearclr));
 		}
 	}
+
+	void texture::getDataAsGLTexture(
+		int& width,
+		int& height,
+		int& channel,
+		std::vector<vec4>& dst) const
+	{
+		if (m_gltex > 0) {
+			width = m_width;
+			height = m_height;
+			channel = m_channels;
+
+			dst.resize(m_width * m_height);
+
+			int bufsize = m_width * m_height * sizeof(float) * 4;
+
+			CALL_GL_API(::glGetTextureImage(
+				m_gltex,
+				0,
+				GL_RGBA,
+				GL_FLOAT,
+				bufsize,
+				&dst[0]));
+		}
+	}
 }

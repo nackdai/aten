@@ -92,6 +92,12 @@ namespace aten {
 		void releaseAsGLTexture();
 		void clearAsGLTexture(const aten::vec4& clearColor);
 
+		void getDataAsGLTexture(
+			int& width,
+			int& height,
+			int& channel,
+			std::vector<vec4>& dst) const;
+
 		static void bindAsGLTexture(
 			uint32_t gltex,
 			uint8_t stage, shader* shd);

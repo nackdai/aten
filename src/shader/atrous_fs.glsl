@@ -5,7 +5,6 @@ precision highp int;
 uniform sampler2D s0;	// rt buffer.
 uniform sampler2D s1;	// normal map.
 uniform sampler2D s2;	// position map.
-uniform sampler2D s3;	// albedo map.
 
 // NOTE
 // pow(2, iteration)
@@ -52,10 +51,8 @@ void main()
 	int centerMtrlId = int(centerPos.w);
 	int centerMeshId = int(centerNml.w);
 
-	vec4 albedo = texelFetch(s3, centerUV, 0);
-
 	if (centerMeshId < 0) {
-		oCoarse = albedo;
+		oCoarse = vec4(1, 1, 1, 1);
 		return;
 	}
 
@@ -107,12 +104,6 @@ void main()
 	vec4 coarse = sum / weightSum;
 	vec4 detail = centerClr - coarse;
 
-#if 0
-	// For modulating Albedo map.
-	oCoarse = albedo * coarse;
-#else
 	oCoarse = coarse;
-#endif
-
 	oDetail = max(vec4(0.0), abs(detail) - vec4(threshold)) * sign(detail);
 }

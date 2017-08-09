@@ -71,7 +71,6 @@ namespace aten {
 		// Bind G-Buffer.
 		m_body->m_normal.bindAsGLTexture(1, this);
 		m_body->m_pos.bindAsGLTexture(2, this);
-		m_body->m_albedo.bindAsGLTexture(3, this);
 
 		int stepScale = 1 << m_idx;
 
@@ -92,10 +91,15 @@ namespace aten {
 		auto tex = m_body->m_pass[ITER - 1].getFbo().getTexHandle(0);
 		texture::bindAsGLTexture(tex, 0, this);
 
+#if 0
 		// detail.
 		for (int i = 0; i < ITER; i++) {
 			auto detailTex = m_body->m_pass[i].getFbo().getTexHandle(1);
 			texture::bindAsGLTexture(tex, i + 1, this);
 		}
+#else
+		// albedo.
+		m_body->m_albedo.bindAsGLTexture(1, this);
+#endif
 	}
 }

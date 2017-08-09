@@ -16,6 +16,8 @@
 
 #include "aten4idaten.h"
 
+//#define ENALBLE_SEPARATE_ALBEDO
+
 __global__ void genPath(
 	idaten::PathTracing::Path* paths,
 	aten::ray* rays,
@@ -223,10 +225,6 @@ __global__ void shadeMiss(
 		// TODO
 		auto bg = aten::vec3(0);
 
-		path.contrib += path.throughput * bg;
-
-		path.isTerminate = true;
-
 		if (isFirstBounce) {
 			path.isKill = true;
 
@@ -237,7 +235,16 @@ __global__ void shadeMiss(
 					ix * sizeof(float4), iy,
 					cudaBoundaryModeTrap);
 			}
+
+#ifdef ENALBLE_SEPARATE_ALBEDO
+			// For exporting separated albedo.
+			bg = aten::vec3(1, 1, 1);
+#endif
 		}
+
+		path.contrib += path.throughput * bg;
+
+		path.isTerminate = true;
 	}
 }
 
@@ -283,7 +290,7 @@ __global__ void shadeMissWithEnvmap(
 					cudaBoundaryModeTrap);
 			}
 
-#if 0
+#ifdef ENALBLE_SEPARATE_ALBEDO
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
 #endif
@@ -411,7 +418,7 @@ __global__ void shade(
 	}
 #endif
 
-#if 0
+#ifdef ENALBLE_SEPARATE_ALBEDO
 	// For exporting separated albedo.
 	mtrl.albedoMap = -1;
 #endif

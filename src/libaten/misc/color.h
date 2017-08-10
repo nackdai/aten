@@ -59,6 +59,12 @@ namespace AT_NAME {
 			return ret;
 		}
 
+		static AT_DEVICE_API real luminance(real r, real g, real b)
+		{
+			real ret = real(0.2126) * r + real(0.7152) * g + real(0.0722) * b;
+			return ret;
+		}
+
 		static aten::vec3 RGBtoYCbCr(const aten::vec3& rgb)
 		{
 			auto y = dot(RGB2Y, rgb);

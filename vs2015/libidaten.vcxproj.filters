@@ -202,6 +202,9 @@
     <ClInclude Include="..\src\libidaten\kernel\directlight.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\svgf\svgf_pt.h">
+      <Filter>svgf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -242,6 +245,9 @@
     </Filter>
     <Filter Include="aten\misc">
       <UniqueIdentifier>{958091ea-8a50-46eb-9691-fa6322bb4029}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="svgf">
+      <UniqueIdentifier>{58051365-e283-4a32-b359-70330e6c9d8c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -358,6 +364,9 @@
     <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <CudaCompile Include="..\src\libidaten\kernel\directlight.cu">
       <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\svgf\svgf_pt.cu">
+      <Filter>svgf</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

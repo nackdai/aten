@@ -5,3 +5,5 @@
 #include "kernel/directlight.h"
 
 #include "kernel/compaction.h"
+
+#include "svgf/svgf_pt.h"

@@ -53,6 +53,12 @@
 <node CREATED="1502176387613" ID="ID_325174859" MODIFIED="1502176402007" TEXT="&#x5168;&#x304f;&#x7570;&#x306a;&#x308b;&#x5024;&#x306b;&#x5909;&#x5316;&#x3057;&#x3066;&#x3044;&#x308b;&#x305f;&#x3081;"/>
 </node>
 </node>
+<node CREATED="1502353723929" ID="ID_1378688510" MODIFIED="1502353746500" TEXT="http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf">
+<node CREATED="1502353747161" ID="ID_1181730164" MODIFIED="1502353752764" TEXT="p25-28"/>
+<node CREATED="1502353754609" ID="ID_1968413229" MODIFIED="1502353760286" TEXT="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader">
+<node CREATED="1502353770705" ID="ID_583406133" MODIFIED="1502353771427" TEXT="temporal_reprojection"/>
+</node>
+</node>
 </node>
 </node>
 <node CREATED="1502081600851" ID="ID_1575352646" MODIFIED="1502175431292" TEXT="3x3 bilinear filter">
@@ -137,6 +143,14 @@
 <node CREATED="1502176696734" ID="ID_1543183041" MODIFIED="1502176730697" TEXT="N&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x307e;&#x3067;&#x5e83;&#x3052;&#x308b;&#x53ef;&#x80fd;&#x6027;&#x3082;">
 <node CREATED="1502176708655" ID="ID_1300221022" MODIFIED="1502176713970" TEXT="&#x30e1;&#x30e2;&#x30ea;&#x3068;&#x306e;&#x517c;&#x306d;&#x5408;&#x3044;"/>
 </node>
+<node CREATED="1502354102392" ID="ID_10960173" MODIFIED="1502354116347" TEXT="&#x305d;&#x3082;&#x305d;&#x3082;&#x4e0d;&#x8981;&#x304b;&#x3082;">
+<node CREATED="1502354116955" ID="ID_225906864" MODIFIED="1502354137067" TEXT="&#x8ad6;&#x6587;&#x5185;&#x3067;&#x306f;&#x904e;&#x53bb;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3092;&#x8907;&#x6570;&#x6301;&#x3064;&#x3053;&#x3068;&#x306f;&#x8a18;&#x8ff0;&#x3055;&#x308c;&#x3066;&#x3044;&#x306a;&#x3044;"/>
+</node>
+</node>
+</node>
+<node CREATED="1502355552679" ID="ID_373630921" MODIFIED="1502355556187" POSITION="right" TEXT="&#x53c2;&#x8003;&#x30ea;&#x30f3;&#x30af;">
+<node CREATED="1502355556513" ID="ID_1353579983" MODIFIED="1502355562404" TEXT="&#x30b9;&#x30c8;&#x30ea;&#x30fc;&#x30e0;&#x30a2;&#x30eb;&#x30b4;&#x30ea;&#x30ba;&#x30e0;">
+<node CREATED="1502355562802" ID="ID_847499542" MODIFIED="1502355563427" TEXT="https://qpp.bitbucket.io/post/streaming_algorithm/"/>
 </node>
 </node>
 </node>

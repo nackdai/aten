@@ -313,19 +313,19 @@ namespace idaten {
 		shade<< <blockPerGrid, threadPerBlock >> > (
 			outputSurf,
 			width, height,
-			paths.ptr(),
+			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount,
-			isects.ptr(),
-			rays.ptr(),
+			m_isects.ptr(),
+			m_rays.ptr(),
 			bounce, rrBounce,
-			shapeparam.ptr(), shapeparam.num(),
-			mtrlparam.ptr(),
-			lightparam.ptr(), lightparam.num(),
-			nodetex.ptr(),
-			primparams.ptr(),
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_mtrlparam.ptr(),
+			m_lightparam.ptr(), m_lightparam.num(),
+			m_nodetex.ptr(),
+			m_primparams.ptr(),
 			texVtxPos, texVtxNml,
-			mtxparams.ptr(),
-			tex.ptr());
+			m_mtxparams.ptr(),
+			m_tex.ptr());
 
 		checkCudaKernel(shade);
 	}

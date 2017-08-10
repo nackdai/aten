@@ -479,12 +479,12 @@ namespace idaten
 					(height + block.y - 1) / block.y);
 
 				makePathMask << <grid, block >> > (
-					paths.ptr(),
-					rays.ptr(),
+					m_paths.ptr(),
+					m_rays.ptr(),
 					width, height,
 					sample, maxSamples,
 					seed,
-					cam.ptr(),
+					m_cam.ptr(),
 					m_aovs[cur].ptr(),
 					m_aovs[prev].ptr(),
 					m_mtxs.ptr(),
@@ -553,8 +553,8 @@ namespace idaten
 
 			temporalReprojection << <grid, block >> > (
 			//temporalReprojection << <1, 1 >> > (
-				paths.ptr(),
-				cam.ptr(),
+				m_paths.ptr(),
+				m_cam.ptr(),
 				m_aovs[cur].ptr(),
 				m_aovs[prev].ptr(),
 				m_mtxs.ptr(),

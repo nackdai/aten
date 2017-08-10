@@ -28,37 +28,37 @@ namespace idaten {
 		dst.init(sizeof(float4) * width * height);
 #else
 		//glimg.init(gltex, CudaGLRscRegisterType::WriteOnly);
-		glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
+		m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
 #endif
 
-		cam.init(sizeof(camera));
-		cam.writeByNum(&camera, 1);
+		m_cam.init(sizeof(camera));
+		m_cam.writeByNum(&camera, 1);
 		m_camParam = camera;
 
-		shapeparam.init(shapes.size());
-		shapeparam.writeByNum(&shapes[0], shapes.size());
+		m_shapeparam.init(shapes.size());
+		m_shapeparam.writeByNum(&shapes[0], shapes.size());
 
-		mtrlparam.init(mtrls.size());
-		mtrlparam.writeByNum(&mtrls[0], mtrls.size());
+		m_mtrlparam.init(mtrls.size());
+		m_mtrlparam.writeByNum(&mtrls[0], mtrls.size());
 
-		lightparam.init(lights.size());
-		lightparam.writeByNum(&lights[0], lights.size());
+		m_lightparam.init(lights.size());
+		m_lightparam.writeByNum(&lights[0], lights.size());
 
 		if (!prims.empty()) {
-			primparams.init(prims.size());
-			primparams.writeByNum(&prims[0], prims.size());
+			m_primparams.init(prims.size());
+			m_primparams.writeByNum(&prims[0], prims.size());
 		}
 
 		if (!mtxs.empty()) {
-			mtxparams.init(mtxs.size());
-			mtxparams.writeByNum(&mtxs[0], mtxs.size());
+			m_mtxparams.init(mtxs.size());
+			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
 		}
 
 		for (int i = 0; i < nodes.size(); i++) {
-			nodeparam.push_back(idaten::CudaTextureResource());
-			nodeparam[i].init((aten::vec4*)&nodes[i][0], sizeof(aten::BVHNode) / sizeof(float4), nodes[i].size());
+			m_nodeparam.push_back(idaten::CudaTextureResource());
+			m_nodeparam[i].init((aten::vec4*)&nodes[i][0], sizeof(aten::BVHNode) / sizeof(float4), nodes[i].size());
 		}
-		nodetex.init(nodes.size());
+		m_nodetex.init(nodes.size());
 
 		if (!vtxs.empty()) {
 			// TODO
@@ -70,16 +70,16 @@ namespace idaten {
 				nml.push_back(aten::vec4(v.nml.x, v.nml.y, v.nml.z, v.uv.y));
 			}
 
-			vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size());
-			vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size());
+			m_vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size());
+			m_vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size());
 		}
 
 		if (!texs.empty()) {
 			for (int i = 0; i < texs.size(); i++) {
-				texRsc.push_back(idaten::CudaTexture());
-				texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
+				m_texRsc.push_back(idaten::CudaTexture());
+				m_texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
 			}
-			tex.init(texs.size());
+			m_tex.init(texs.size());
 
 			AT_ASSERT(envmapRsc.idx < texs.size());
 			if (envmapRsc.idx < texs.size()) {
@@ -90,8 +90,8 @@ namespace idaten {
 
 	void Renderer::updateCamera(const aten::CameraParameter& camera)
 	{
-		cam.reset();
-		cam.writeByNum(&camera, 1);
+		m_cam.reset();
+		m_cam.writeByNum(&camera, 1);
 
 		m_camParam = camera;
 	}

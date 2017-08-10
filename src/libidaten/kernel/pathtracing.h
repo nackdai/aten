@@ -102,10 +102,10 @@ namespace idaten
 			int maxSamples);
 
 	protected:
-		idaten::TypedCudaMemory<idaten::PathTracing::Path> paths;
-		idaten::TypedCudaMemory<aten::Intersection> isects;
-		idaten::TypedCudaMemory<aten::ray> rays;
-		idaten::TypedCudaMemory<idaten::PathTracing::ShadowRay> shadowRays;
+		idaten::TypedCudaMemory<idaten::PathTracing::Path> m_paths;
+		idaten::TypedCudaMemory<aten::Intersection> m_isects;
+		idaten::TypedCudaMemory<aten::ray> m_rays;
+		idaten::TypedCudaMemory<idaten::PathTracing::ShadowRay> m_shadowRays;
 
 		idaten::TypedCudaMemory<int> m_hitbools;
 		idaten::TypedCudaMemory<int> m_hitidx;

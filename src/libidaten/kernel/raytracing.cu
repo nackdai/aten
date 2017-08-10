@@ -354,18 +354,18 @@ namespace idaten {
 		idaten::TypedCudaMemory<Path> paths;
 		paths.init(width * height);
 
-		CudaGLResourceMap rscmap(&glimg);
-		auto outputSurf = glimg.bind();
+		CudaGLResourceMap rscmap(&m_glimg);
+		auto outputSurf = m_glimg.bind();
 
-		auto vtxTexPos = vtxparamsPos.bind();
-		auto vtxTexNml = vtxparamsNml.bind();
+		auto vtxTexPos = m_vtxparamsPos.bind();
+		auto vtxTexNml = m_vtxparamsNml.bind();
 
 		std::vector<cudaTextureObject_t> tmp;
-		for (int i = 0; i < nodeparam.size(); i++) {
-			auto nodeTex = nodeparam[i].bind();
+		for (int i = 0; i < m_nodeparam.size(); i++) {
+			auto nodeTex = m_nodeparam[i].bind();
 			tmp.push_back(nodeTex);
 		}
-		nodetex.writeByNum(&tmp[0], tmp.size());
+		m_nodetex.writeByNum(&tmp[0], tmp.size());
 
 		idaten::TypedCudaMemory<ShadowRay> shadowRays;
 		shadowRays.init(width * height);
@@ -373,7 +373,7 @@ namespace idaten {
 		genPathRayTracing << <grid, block >> > (
 			paths.ptr(),
 			width, height,
-			cam.ptr());
+			m_cam.ptr());
 
 		//checkCudaErrors(cudaDeviceSynchronize());
 
@@ -382,13 +382,13 @@ namespace idaten {
 			//hitTestRayTracing << <1, 1 >> > (
 				paths.ptr(),
 				width, height,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodetex.ptr(),
-				primparams.ptr(),
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_mtrlparam.ptr(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
 				vtxTexPos,
-				mtxparams.ptr());
+				m_mtxparams.ptr());
 
 			auto err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -402,13 +402,13 @@ namespace idaten {
 				paths.ptr(),
 				shadowRays.ptr(),
 				width, height,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodetex.ptr(),
-				primparams.ptr(),
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_mtrlparam.ptr(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
 				vtxTexPos, vtxTexNml,
-				mtxparams.ptr());
+				m_mtxparams.ptr());
 
 			err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -421,13 +421,13 @@ namespace idaten {
 				paths.ptr(),
 				shadowRays.ptr(),
 				width, height,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodetex.ptr(),
-				primparams.ptr(),
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_mtrlparam.ptr(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
 				vtxTexPos,
-				mtxparams.ptr());
+				m_mtxparams.ptr());
 
 			err = cudaGetLastError();
 			if (err != cudaSuccess) {
@@ -441,12 +441,12 @@ namespace idaten {
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
-		vtxparamsPos.unbind();
-		vtxparamsNml.unbind();
-		for (int i = 0; i < nodeparam.size(); i++) {
-			nodeparam[i].unbind();
+		m_vtxparamsPos.unbind();
+		m_vtxparamsNml.unbind();
+		for (int i = 0; i < m_nodeparam.size(); i++) {
+			m_nodeparam[i].unbind();
 		}
-		nodetex.reset();
+		m_nodetex.reset();
 
 		//dst.read(image, sizeof(aten::vec4) * width * height);
 	}

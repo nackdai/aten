@@ -281,13 +281,13 @@ namespace idaten
 			sample, maxSamples,
 			seed,
 			mtxW2C,
-			rays.ptr(),
-			shapeparam.ptr(), shapeparam.num(),
-			nodetex.ptr(),
-			primparams.ptr(),
+			m_rays.ptr(),
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_nodetex.ptr(),
+			m_primparams.ptr(),
 			texVtxPos,
 			texVtxNml,
-			mtxparams.ptr(),
+			m_mtxparams.ptr(),
 			m_sobolMatrices.ptr());
 
 		checkCudaKernel(renderAOV);
@@ -313,7 +313,7 @@ namespace idaten
 
 		geometryRender << <grid, block >> > (
 		//geometryRender << <1, 1 >> > (
-			paths.ptr(),
+			m_paths.ptr(),
 			aovs.ptr(),
 			outputSurf,
 			width, height,

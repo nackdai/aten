@@ -818,36 +818,36 @@ namespace idaten {
 
 		int bounce = 0;
 
-		paths.init(width * height);
-		isects.init(width * height);
-		rays.init(width * height);
-		shadowRays.init(width * height);
+		m_paths.init(width * height);
+		m_isects.init(width * height);
+		m_rays.init(width * height);
+		m_shadowRays.init(width * height);
 
-		cudaMemset(paths.ptr(), 0, paths.bytes());
+		cudaMemset(m_paths.ptr(), 0, m_paths.bytes());
 
-		CudaGLResourceMap rscmap(&glimg);
-		auto outputSurf = glimg.bind();
+		CudaGLResourceMap rscmap(&m_glimg);
+		auto outputSurf = m_glimg.bind();
 
-		auto vtxTexPos = vtxparamsPos.bind();
-		auto vtxTexNml = vtxparamsNml.bind();
+		auto vtxTexPos = m_vtxparamsPos.bind();
+		auto vtxTexNml = m_vtxparamsNml.bind();
 
 		{
 			std::vector<cudaTextureObject_t> tmp;
-			for (int i = 0; i < nodeparam.size(); i++) {
-				auto nodeTex = nodeparam[i].bind();
+			for (int i = 0; i < m_nodeparam.size(); i++) {
+				auto nodeTex = m_nodeparam[i].bind();
 				tmp.push_back(nodeTex);
 			}
-			nodetex.writeByNum(&tmp[0], tmp.size());
+			m_nodetex.writeByNum(&tmp[0], tmp.size());
 		}
 
-		if (!texRsc.empty())
+		if (!m_texRsc.empty())
 		{
 			std::vector<cudaTextureObject_t> tmp;
-			for (int i = 0; i < texRsc.size(); i++) {
-				auto cudaTex = texRsc[i].bind();
+			for (int i = 0; i < m_texRsc.size(); i++) {
+				auto cudaTex = m_texRsc[i].bind();
 				tmp.push_back(cudaTex);
 			}
-			tex.writeByNum(&tmp[0], tmp.size());
+			m_tex.writeByNum(&tmp[0], tmp.size());
 		}
 
 		if (m_enableAOV) {
@@ -911,18 +911,18 @@ namespace idaten {
 		checkCudaErrors(cudaDeviceSynchronize());
 
 		{
-			vtxparamsPos.unbind();
-			vtxparamsNml.unbind();
+			m_vtxparamsPos.unbind();
+			m_vtxparamsNml.unbind();
 
-			for (int i = 0; i < nodeparam.size(); i++) {
-				nodeparam[i].unbind();
+			for (int i = 0; i < m_nodeparam.size(); i++) {
+				m_nodeparam[i].unbind();
 			}
-			nodetex.reset();
+			m_nodetex.reset();
 
-			for (int i = 0; i < texRsc.size(); i++) {
-				texRsc[i].unbind();
+			for (int i = 0; i < m_texRsc.size(); i++) {
+				m_texRsc[i].unbind();
 			}
-			tex.reset();
+			m_tex.reset();
 
 			for (int i = 0; i < m_aovs.size(); i++) {
 				m_aovs[i].unbind();
@@ -945,12 +945,12 @@ namespace idaten {
 			(height + block.y - 1) / block.y);
 
 		genPath << <grid, block >> > (
-			paths.ptr(),
-			rays.ptr(),
+			m_paths.ptr(),
+			m_rays.ptr(),
 			width, height,
 			sample, maxSamples,
 			seed,
-			cam.ptr(),
+			m_cam.ptr(),
 			m_sobolMatrices.ptr());
 
 		checkCudaKernel(genPath);
@@ -969,17 +969,17 @@ namespace idaten {
 		hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
 #endif
 		//hitTest << <1, 1 >> > (
-			paths.ptr(),
-			isects.ptr(),
-			rays.ptr(),
+			m_paths.ptr(),
+			m_isects.ptr(),
+			m_rays.ptr(),
 			m_hitbools.ptr(),
 			width, height,
-			shapeparam.ptr(), shapeparam.num(),
-			lightparam.ptr(), lightparam.num(),
-			nodetex.ptr(),
-			primparams.ptr(),
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_lightparam.ptr(), m_lightparam.num(),
+			m_nodetex.ptr(),
+			m_primparams.ptr(),
 			texVtxPos,
-			mtxparams.ptr());
+			m_mtxparams.ptr());
 
 		checkCudaKernel(hitTest);
 	}
@@ -1000,29 +1000,29 @@ namespace idaten {
 				if (enableAOV) {
 					shadeMissWithEnvmap<true, true> << <grid, block >> > (
 						m_aovCudaRsc.ptr(),
-						tex.ptr(),
+						m_tex.ptr(),
 						m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-						paths.ptr(),
-						rays.ptr(),
+						m_paths.ptr(),
+						m_rays.ptr(),
 						width, height);
 				}
 				else {
 					shadeMissWithEnvmap<true, false> << <grid, block >> > (
 						m_aovCudaRsc.ptr(),
-						tex.ptr(),
+						m_tex.ptr(),
 						m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-						paths.ptr(),
-						rays.ptr(),
+						m_paths.ptr(),
+						m_rays.ptr(),
 						width, height);
 				}
 			}
 			else {
 				shadeMissWithEnvmap<false, false> << <grid, block >> > (
 					m_aovCudaRsc.ptr(),
-					tex.ptr(),
+					m_tex.ptr(),
 					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-					paths.ptr(),
-					rays.ptr(),
+					m_paths.ptr(),
+					m_rays.ptr(),
 					width, height);
 			}
 		}
@@ -1031,20 +1031,20 @@ namespace idaten {
 				if (enableAOV) {
 					shadeMiss<true, true> << <grid, block >> > (
 						m_aovCudaRsc.ptr(),
-						paths.ptr(),
+						m_paths.ptr(),
 						width, height);
 				}
 				else {
 					shadeMiss<true, false> << <grid, block >> > (
 						m_aovCudaRsc.ptr(),
-						paths.ptr(),
+						m_paths.ptr(),
 						width, height);
 				}
 			}
 			else {
 				shadeMiss<false, false> << <grid, block >> > (
 					m_aovCudaRsc.ptr(),
-					paths.ptr(),
+					m_paths.ptr(),
 					width, height);
 			}
 		}
@@ -1072,19 +1072,19 @@ namespace idaten {
 				outputSurf,
 				m_aovCudaRsc.ptr(), posRange,
 				width, height,
-				paths.ptr(),
+				m_paths.ptr(),
 				m_hitidx.ptr(), hitcount,
-				isects.ptr(),
-				rays.ptr(),
+				m_isects.ptr(),
+				m_rays.ptr(),
 				bounce, rrBounce,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodetex.ptr(),
-				primparams.ptr(),
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_mtrlparam.ptr(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
 				texVtxPos, texVtxNml,
-				mtxparams.ptr(),
-				tex.ptr());
+				m_mtxparams.ptr(),
+				m_tex.ptr());
 		}
 		else {
 			shade<false> << <blockPerGrid, threadPerBlock >> > (
@@ -1092,19 +1092,19 @@ namespace idaten {
 				outputSurf,
 				m_aovCudaRsc.ptr(), posRange,
 				width, height,
-				paths.ptr(),
+				m_paths.ptr(),
 				m_hitidx.ptr(), hitcount,
-				isects.ptr(),
-				rays.ptr(),
+				m_isects.ptr(),
+				m_rays.ptr(),
 				bounce, rrBounce,
-				shapeparam.ptr(), shapeparam.num(),
-				mtrlparam.ptr(),
-				lightparam.ptr(), lightparam.num(),
-				nodetex.ptr(),
-				primparams.ptr(),
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_mtrlparam.ptr(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
 				texVtxPos, texVtxNml,
-				mtxparams.ptr(),
-				tex.ptr());
+				m_mtxparams.ptr(),
+				m_tex.ptr());
 		}
 
 		checkCudaKernel(shade);
@@ -1139,7 +1139,7 @@ namespace idaten {
 
 		gather << <grid, block >> > (
 			outputSurf,
-			paths.ptr(),
+			m_paths.ptr(),
 			width, height);
 	}
 }

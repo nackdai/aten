@@ -59,25 +59,25 @@ namespace idaten
 		}
 
 	protected:
-		idaten::CudaMemory dst;
-		idaten::TypedCudaMemory<aten::CameraParameter> cam;
-		idaten::TypedCudaMemory<aten::ShapeParameter> shapeparam;
-		idaten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
-		idaten::TypedCudaMemory<aten::LightParameter> lightparam;
-		idaten::TypedCudaMemory<aten::PrimitiveParamter> primparams;
+		idaten::CudaMemory m_dst;
+		idaten::TypedCudaMemory<aten::CameraParameter> m_cam;
+		idaten::TypedCudaMemory<aten::ShapeParameter> m_shapeparam;
+		idaten::TypedCudaMemory<aten::MaterialParameter> m_mtrlparam;
+		idaten::TypedCudaMemory<aten::LightParameter> m_lightparam;
+		idaten::TypedCudaMemory<aten::PrimitiveParamter> m_primparams;
 
-		idaten::TypedCudaMemory<aten::mat4> mtxparams;
+		idaten::TypedCudaMemory<aten::mat4> m_mtxparams;
 		
-		std::vector<idaten::CudaTextureResource> nodeparam;
-		idaten::TypedCudaMemory<cudaTextureObject_t> nodetex;
+		std::vector<idaten::CudaTextureResource> m_nodeparam;
+		idaten::TypedCudaMemory<cudaTextureObject_t> m_nodetex;
 
-		std::vector<idaten::CudaTexture> texRsc;
-		idaten::TypedCudaMemory<cudaTextureObject_t> tex;
+		std::vector<idaten::CudaTexture> m_texRsc;
+		idaten::TypedCudaMemory<cudaTextureObject_t> m_tex;
 		EnvmapResource m_envmapRsc;
 
-		idaten::CudaGLSurface glimg;
-		idaten::CudaTextureResource vtxparamsPos;
-		idaten::CudaTextureResource vtxparamsNml;
+		idaten::CudaGLSurface m_glimg;
+		idaten::CudaTextureResource m_vtxparamsPos;
+		idaten::CudaTextureResource m_vtxparamsNml;
 
 		aten::CameraParameter m_camParam;
 	};

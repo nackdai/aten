@@ -94,6 +94,15 @@ namespace idaten
 			int width, int height,
 			int maxSamples);
 
+		idaten::TypedCudaMemory<cudaSurfaceObject_t>& getCurAovs()
+		{
+			return m_aovCudaRsc[m_curAOVPos];
+		}
+		idaten::TypedCudaMemory<cudaSurfaceObject_t>& getPrevAovs()
+		{
+			return m_aovCudaRsc[1 - m_curAOVPos];
+		}
+
 	protected:
 		idaten::TypedCudaMemory<Path> m_paths;
 		idaten::TypedCudaMemory<aten::Intersection> m_isects;
@@ -112,5 +121,13 @@ namespace idaten
 
 		idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc[2];
 		std::vector<idaten::CudaGLSurface> m_aovs[2];
+
+		aten::mat4 m_mtxV2C;		// View - Clip.
+		aten::mat4 m_mtxC2V;		// Clip - View.
+		aten::mat4 m_mtxPrevV2C;	// View - Clip.
+
+		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
+
+		bool m_isFirstRender{ true };
 	};
 }

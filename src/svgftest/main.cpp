@@ -52,9 +52,7 @@ void onRun()
 		g_tracer.updateCamera(camparam);
 		g_isCameraDirty = false;
 
-#ifndef ENABLE_TEMPORAL
 		aten::visualizer::clear();
-#endif
 	}
 
 	aten::timer timer;

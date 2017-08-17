@@ -413,6 +413,11 @@ void LayeredMaterialTestScene::getCameraPosAndAt(
 
 void ObjCornellBoxScene::makeScene(aten::scene* scene)
 {
+	auto emit = new aten::emissive(aten::vec3(36, 33, 24));
+	aten::AssetManager::registerMtrl(
+		"light",
+		emit);
+
 	aten::AssetManager::registerMtrl(
 		"backWall",
 		new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
@@ -425,11 +430,6 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
 	aten::AssetManager::registerMtrl(
 		"leftWall",
 		new aten::lambert(aten::vec3(0.504000, 0.052000, 0.040000)));
-
-	auto emit = new aten::emissive(aten::vec3(36, 33, 24));
-	aten::AssetManager::registerMtrl(
-		"light",
-		emit);
 
 	aten::AssetManager::registerMtrl(
 		"rightWall",

@@ -94,6 +94,10 @@ namespace idaten
 			int width, int height,
 			int maxSamples);
 
+		void onTemporalReprojection(
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
 		idaten::TypedCudaMemory<cudaSurfaceObject_t>& getCurAovs()
 		{
 			return m_aovCudaRsc[m_curAOVPos];

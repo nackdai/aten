@@ -662,8 +662,8 @@ __global__ void temporalReprojection(
 	float4 prevDepthMeshId;
 	float4 prevNormal;
 
-	for (int y = -1; y < 1; y++) {
-		for (int x = -1; x < 1; x++) {
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
 			int xx = clamp(ix + x, 0, width - 1);
 			int yy = clamp(iy + y, 0, height - 1);
 
@@ -704,6 +704,9 @@ __global__ void temporalReprojection(
 				// [0, 1] -> [-1, 1]
 				prevNormal = 2 * prevNormal - 1;
 				prevNormal.w = 0;
+
+				// TODO
+				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
 
 				static const float zThreshold = 0.05f;
 				static const float nThreshold = 0.98f;

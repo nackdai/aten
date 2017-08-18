@@ -2,6 +2,12 @@
 precision highp float;
 precision highp int;
 
+// NOTE
+// https://github.com/wosugi/compressive-bilateral-filter/blob/master/CompressiveBilateralFilter/original_bilateral_filter.hpp
+// http://lcaraffa.net/posts/article-2015TIP-guided-bilateral.html
+// http://d.hatena.ne.jp/hanecci/20131013
+// http://imagingsolution.net/imaging/bilateralfilter/
+
 uniform sampler2D image;
 
 uniform vec4 invScreen;

@@ -739,7 +739,7 @@ namespace idaten
 
 		onGather(outputSurf, width, height, maxSamples);
 
-		onEstimateVariance(outputSurf, width, height);
+		onVarianceEstimation(outputSurf, width, height);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 

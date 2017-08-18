@@ -98,7 +98,7 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
-		void onEstimateVariance(
+		void onVarianceEstimation(
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 

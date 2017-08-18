@@ -31,7 +31,7 @@ inline __device__ float4 sampleTex(
 	return ret;
 }
 
-__global__ void estimateVariance(
+__global__ void varianceEstimation(
 	cudaSurfaceObject_t dst,
 	cudaSurfaceObject_t* aovs,
 	int width, int height)
@@ -138,7 +138,7 @@ __global__ void estimateVariance(
 
 namespace idaten
 {
-	void SVGFPathTracing::onEstimateVariance(
+	void SVGFPathTracing::onVarianceEstimation(
 		cudaSurfaceObject_t outputSurf,
 		int width, int height)
 	{
@@ -149,12 +149,12 @@ namespace idaten
 
 		auto& curaov = getCurAovs();
 
-		estimateVariance << <grid, block >> > (
-		//estimateVariance << <1, 1 >> > (
+		varianceEstimation << <grid, block >> > (
+		//varianceEstimation << <1, 1 >> > (
 			outputSurf,
 			curaov.ptr(),
 			width, height);
 
-		checkCudaKernel(estimateVariance);
+		checkCudaKernel(varianceEstimation);
 	}
 }

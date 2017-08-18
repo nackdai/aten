@@ -4,8 +4,8 @@
 #include "atenscene.h"
 #include "scenedefs.h"
 
-static int WIDTH = 640;
-static int HEIGHT = 480;
+static int WIDTH = 512;
+static int HEIGHT = 512;
 static const char* TITLE = "app";
 
 //#define ENABLE_DOF
@@ -24,7 +24,8 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-static aten::PathTracing g_tracer;
+//static aten::PathTracing g_tracer;
+static aten::SVGFPathTracing g_tracer;
 //static aten::BDPT g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
@@ -42,13 +43,17 @@ static uint32_t g_threadnum = 8;
 static uint32_t g_threadnum = 1;
 #endif
 
+static uint32_t g_frameNo = 0;
+
 void display()
 {
+	g_camera.update();
+
 	aten::Destination dst;
 	{
 		dst.width = WIDTH;
 		dst.height = HEIGHT;
-		dst.maxDepth = 6;
+		dst.maxDepth = 5;
 		dst.russianRouletteDepth = 3;
 		dst.startDepth = 0;
 		dst.sample = 1;
@@ -80,7 +85,14 @@ void display()
 	}
 
 	aten::visualizer::render(g_buffer.image(), g_camera.needRevert());
-	aten::visualizer::takeScreenshot("sc.png");
+
+	{
+		static char tmp[1024];
+		sprintf(tmp, "sc_%d.png\0", g_frameNo);
+
+		aten::visualizer::takeScreenshot(tmp);
+	}
+	g_frameNo++;
 }
 
 int main(int argc, char* argv[])

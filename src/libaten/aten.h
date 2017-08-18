@@ -89,6 +89,7 @@
 #include "renderer/sorted_pathtracing.h"
 #include "renderer/bdpt.h"
 #include "renderer/directlight.h"
+#include "renderer/svgf_pt.h"
 
 #include "posteffect/BloomEffect.h"
 

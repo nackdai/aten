@@ -119,6 +119,9 @@ __global__ void temporalReprojection(
 	float4 prevDepthMeshId;
 	float4 prevNormal;
 
+	static const float zThreshold = 0.05f;
+	static const float nThreshold = 0.98f;
+
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
 			int xx = clamp(ix + x, 0, width - 1);
@@ -160,9 +163,6 @@ __global__ void temporalReprojection(
 
 				// TODO
 				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
-
-				static const float zThreshold = 0.05f;
-				static const float nThreshold = 0.98f;
 
 				float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
 				float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
@@ -221,16 +221,34 @@ __global__ void temporalReprojection(
 			px = clamp(px, 0, width - 1);
 			py = clamp(py, 0, height - 1);
 
-			float4 prevMoment;
 			surf2Dread(
-				&prevMoment,
-				prevAovs[idaten::SVGFPathTracing::AOVType::moments],
+				&prevDepthMeshId,
+				prevAovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
 				px * sizeof(float4), py);
 
-			// 積算フレーム数を１増やす.
-			frame = (int)prevMoment.w + 1;
+			const float prevDepth = aten::clamp(depth_meshid.x, camera->znear, camera->zfar);
+			const int prevMeshId = (int)depth_meshid.y;
 
-			centerMoment += prevMoment;
+			surf2Dread(
+				&prevNormal,
+				prevAovs[idaten::SVGFPathTracing::AOVType::normal],
+				px * sizeof(float4), py);
+
+			if (abs(1 - centerDepth / prevDepth) < zThreshold
+				&& dot(centerNormal, prevNormal) > nThreshold
+				&& centerMeshId == prevMeshId)
+			{
+				float4 prevMoment;
+				surf2Dread(
+					&prevMoment,
+					prevAovs[idaten::SVGFPathTracing::AOVType::moments],
+					px * sizeof(float4), py);
+
+				// 積算フレーム数を１増やす.
+				frame = (int)prevMoment.w + 1;
+
+				centerMoment += prevMoment;
+			}
 		}
 
 		centerMoment.w = frame;

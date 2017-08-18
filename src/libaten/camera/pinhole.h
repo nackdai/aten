@@ -47,7 +47,7 @@ namespace AT_NAME {
 			return m_at;
 		}
 
-		const aten::CameraParameter& param() const
+		virtual const aten::CameraParameter& param() const override final
 		{
 			return m_param;
 		}

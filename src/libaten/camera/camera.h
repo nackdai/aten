@@ -119,5 +119,11 @@ namespace AT_NAME {
 		{
 			return real(1);
 		}
+
+		virtual const aten::CameraParameter& param() const
+		{
+			AT_ASSERT(false);
+			return aten::CameraParameter();
+		}
 	};
 }

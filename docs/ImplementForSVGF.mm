@@ -40,12 +40,13 @@
 <node CREATED="1502157589504" ID="ID_1798248251" MODIFIED="1502169972899" TEXT="&#x6cd5;&#x7dda;&#x306e;&#x5dee;&#x5206;&#x3092;&#x898b;&#x308b;">
 <icon BUILTIN="button_ok"/>
 </node>
-<node CREATED="1502168978902" ID="ID_180679577" MODIFIED="1502168984939" TEXT="&#x8f1d;&#x5ea6;&#x3092;&#x898b;&#x308b;">
-<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1502168978902" ID="ID_180679577" MODIFIED="1502954096964" TEXT="&#x8f1d;&#x5ea6;&#x3092;&#x898b;&#x308b;">
+<icon BUILTIN="idea"/>
 <node CREATED="1502169927080" ID="ID_519132782" MODIFIED="1502169949852" TEXT="&#x30e9;&#x30a4;&#x30c8;&#x306e;&#x7e01;&#x307e;&#x308f;&#x308a;&#x306f;&#x6539;&#x5584;&#x3055;&#x308c;&#x308b;&#x53ef;&#x80fd;&#x6027;&#x3042;&#x308a;">
 <node CREATED="1502169950303" ID="ID_1745864291" MODIFIED="1502169960435" TEXT="&#x305f;&#x3060;&#x3001;&#x8ad6;&#x6587;&#x5185;&#x3067;&#x306f;&#x53c2;&#x7167;&#x3057;&#x3066;&#x3044;&#x308b;&#x3068;&#x306f;&#x66f8;&#x304b;&#x308c;&#x3066;&#x3044;&#x306a;&#x3044;"/>
 </node>
-<node CREATED="1502173525642" ID="ID_673020803" MODIFIED="1502173546588" TEXT="&#x524d;&#x306e;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x306e;&#x30ab;&#x30e9;&#x30fc;&#x306e;&#x4fdd;&#x6301;&#x65b9;&#x6cd5;&#x3092;&#x6c17;&#x3092;&#x4ed8;&#x3051;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
+<node CREATED="1502173525642" ID="ID_673020803" MODIFIED="1502875758675" TEXT="&#x524d;&#x306e;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x306e;&#x30ab;&#x30e9;&#x30fc;&#x306e;&#x4fdd;&#x6301;&#x65b9;&#x6cd5;&#x3092;&#x6c17;&#x3092;&#x4ed8;&#x3051;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1502173547714" ID="ID_1943077431" MODIFIED="1502173572603" TEXT="&#x540c;&#x3058;&#x30d0;&#x30c3;&#x30d5;&#x30a1;&#x3092;&#x4f7f;&#x308f;&#x306a;&#x3044;">
 <node CREATED="1502173574409" ID="ID_1527172890" MODIFIED="1502173589348" TEXT="&#x65b0;&#x3057;&#x3044;&#x5024;&#x306b;&#x306a;&#x3063;&#x305f;&#x30d4;&#x30af;&#x30bb;&#x30eb;&#x3092;&#x53c2;&#x7167;&#x3059;&#x308b;&#x53ef;&#x80fd;&#x6027;&#x304c;&#x3042;&#x308b;&#x304b;&#x3089;"/>
 </node>
@@ -55,10 +56,19 @@
 </node>
 <node CREATED="1502353723929" ID="ID_1378688510" MODIFIED="1502353746500" TEXT="http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf">
 <node CREATED="1502353747161" ID="ID_1181730164" MODIFIED="1502353752764" TEXT="p25-28"/>
-<node CREATED="1502353754609" ID="ID_1968413229" MODIFIED="1502353760286" TEXT="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader">
+<node CREATED="1502353754609" ID="ID_1968413229" MODIFIED="1502948429108" TEXT="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader">
 <node CREATED="1502353770705" ID="ID_583406133" MODIFIED="1502353771427" TEXT="temporal_reprojection"/>
 </node>
 </node>
+<node CREATED="1502875747377" ID="ID_982087915" MODIFIED="1502951616909" TEXT="&#x8f1d;&#x5ea6;&#x81ea;&#x4f53;&#x304c;&#x30d1;&#x30b9;&#x30c8;&#x30ec;&#x306e;&#x7d50;&#x679c;&#x304b;&#x3089;&#x8a08;&#x7b97;&#x3055;&#x308c;&#x308b;&#x305f;&#x3081;&#x30ce;&#x30a4;&#x30ba;&#x3060;&#x3089;&#x3051;">
+<node CREATED="1502875782722" ID="ID_912563158" MODIFIED="1502875790515" TEXT="&#x30ce;&#x30a4;&#x30ba;&#x3060;&#x3089;&#x3051;&#x306e;&#x30c7;&#x30fc;&#x30bf;&#x306e;&#x6bd4;&#x8f03;&#x306f;&#x5b89;&#x5b9a;&#x3057;&#x306a;&#x3044;"/>
+<node CREATED="1502875804777" ID="ID_510112511" MODIFIED="1502951609148" TEXT="&#x30a2;&#x30eb;&#x30d9;&#x30c9;&#x3092;&#x4fdd;&#x6301;&#x3057;&#x3001;&#x305d;&#x3053;&#x304b;&#x3089;&#x7591;&#x4f3c;&#x7684;&#x306a;&#x8f1d;&#x5ea6;&#x3092;&#x8a08;&#x7b97;&#x3057;&#x3066;&#x6bd4;&#x8f03;&#x3059;&#x308b;">
+<icon BUILTIN="button_cancel"/>
+</node>
+</node>
+</node>
+<node CREATED="1502951628074" ID="ID_1717751705" MODIFIED="1502954082283" TEXT="&#x30e9;&#x30a4;&#x30c8;&#x306a;&#x3069;&#x306b;&#x7167;&#x3089;&#x3055;&#x308c;&#x3066;&#x3001;&#x540c;&#x4e00;&#x30e1;&#x30c3;&#x30b7;&#x30e5;&#x5185;&#x3067;&#x6975;&#x7aef;&#x306b;&#x660e;&#x308b;&#x3044;&#x30d4;&#x30af;&#x30bb;&#x30eb;&#x90e8;&#x5206;&#x304c;&#x30b4;&#x30fc;&#x30b9;&#x30c8;&#x306b;&#x306a;&#x308b;">
+<icon BUILTIN="messagebox_warning"/>
 </node>
 </node>
 <node CREATED="1502081600851" ID="ID_1575352646" MODIFIED="1502175431292" TEXT="3x3 bilinear filter">
@@ -78,7 +88,33 @@
 </node>
 </node>
 <node CREATED="1502097135653" ID="ID_786353110" MODIFIED="1502097142656" TEXT="Variance estimation">
-<node CREATED="1502097168196" ID="ID_1185666449" MODIFIED="1502097183497" TEXT="7x7 bilateral filter"/>
+<node CREATED="1502097168196" ID="ID_1185666449" MODIFIED="1503046049205" TEXT="7x7 bilateral filter">
+<icon BUILTIN="button_ok"/>
+</node>
+<node CREATED="1503045937381" ID="ID_1017396240" MODIFIED="1503046040701" TEXT="moment&#x306e;temporal accumulation">
+<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1503045955467" ID="ID_105049940" MODIFIED="1503045964822" TEXT="&#x73fe;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3068;&#x904e;&#x53bb;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x304c;&#x540c;&#x7387;&#x3067;&#x52a0;&#x7b97;&#x3055;&#x308c;&#x308b;&#x305f;&#x3081;&#x3001;&#x3069;&#x3061;&#x3089;&#x304b;&#x306b;&#x5f37;&#x3044;&#x5f71;&#x97ff;&#x304c;&#x3067;&#x308b;&#x3068;&#x5f71;&#x97ff;&#x304c;&#x5f31;&#x307e;&#x308b;&#x307e;&#x3067;&#x306b;&#x975e;&#x5e38;&#x306b;&#x6642;&#x9593;&#x304c;&#x304b;&#x304b;&#x308b;">
+<node CREATED="1503045976547" ID="ID_372166807" MODIFIED="1503045978909" TEXT="&#x4f8b;">
+<node CREATED="1503045979387" ID="ID_1966258035" MODIFIED="1503046018582">
+<richcontent TYPE="NODE"><html>
+  <head>
+    
+  </head>
+  <body>
+    <p>
+      f0 = 100, f1 = 0, f2 = 0
+    </p>
+    <p>
+      avg = (f0 + f1 + f2) / 3 = 33.3
+    </p>
+  </body>
+</html>
+</richcontent>
+<node CREATED="1503046020594" ID="ID_1542575579" MODIFIED="1503046032045" TEXT="&#x975e;&#x5e38;&#x306b;&#x5927;&#x304d;&#x3044;&#x5024;&#x306e;&#x5f71;&#x97ff;&#x304c;&#x6b8b;&#x308a;&#x7d9a;&#x3051;&#x308b;"/>
+</node>
+</node>
+</node>
+</node>
 </node>
 <node CREATED="1502081737916" ID="ID_925201324" MODIFIED="1502252693391" TEXT="A-Trous">
 <node CREATED="1502080532768" ID="ID_299779790" MODIFIED="1502252052666" TEXT="albedo&#x3068;&#x306e;modulate">

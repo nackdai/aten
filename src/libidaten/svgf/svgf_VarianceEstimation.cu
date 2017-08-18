@@ -71,12 +71,14 @@ __global__ void estimateVariance(
 			aovs[idaten::SVGFPathTracing::AOVType::normal],
 			ix * sizeof(float4), iy);
 
-		float4 vdepth;
+		float4 depth_meshid;
 		surf2Dread(
-			&vdepth,
+			&depth_meshid,
 			aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
 			ix * sizeof(float4), iy);
-		float centerDepth = vdepth.x;
+
+		float centerDepth = depth_meshid.x;
+		int centerMeshId = (int)depth_meshid.y;
 
 		float4 sum = make_float4(0, 0, 0, 0);
 		float weight = 0.0f;
@@ -86,24 +88,25 @@ __global__ void estimateVariance(
 			for (int u = -radius; u <= radius; u++)
 			{
 				auto moment = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::moments], ix + u, iy + v, width, height);
-				auto tmpNml = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::normal], ix + u, iy + v, width, height);
-				auto tmpDepth = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::depth_meshid], ix + u, iy + v, width, height);
+				auto sampleNml = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::normal], ix + u, iy + v, width, height);
+				auto sampleDepthMeshId = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::depth_meshid], ix + u, iy + v, width, height);
 
 				moment /= moment.w;
 
-				float4 sampleNml = tmpNml;
+				float sampleDepth = sampleDepthMeshId.x;
+				int sampleMeshId = (int)sampleDepthMeshId.y;
 
 				float n = 1 - dot(sampleNml, centerNormal);
 				float Wn = exp(-0.5f * n * n / (sigmaN * sigmaN));
-
-				float sampleDepth = tmpDepth.x;
 
 				float d = 1 - min(centerDepth, sampleDepth) / max(centerDepth, sampleDepth);
 				float Wd = exp(-0.5f * d * d / (sigmaD * sigmaD));
 
 				float Ws = exp(-0.5f * (u * u + v * v) / (sigmaS * sigmaS));
 
-				float W = Ws * Wn * Wd;
+				float Wm = centerMeshId == sampleMeshId ? 1.0f : 0.0f;
+
+				float W = Ws * Wn * Wd * Wm;
 				sum += moment * W;
 				weight += W;
 			}

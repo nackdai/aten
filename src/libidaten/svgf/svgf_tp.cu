@@ -193,6 +193,12 @@ __global__ void temporalReprojection(
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 
+	// TODO
+	// 現フレームと過去フレームが同率で加算されるため、どちらかに強い影響がでると影響が弱まるまでに非常に時間がかかる.
+	// ex) 
+	// f0 = 100, f1 = 0, f2 = 0
+	// avg = (f0 + f1 + f2) / 3 = 33.3 <- 非常に大きい値が残り続ける.
+
 	// accumulate moments.
 	{
 		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);

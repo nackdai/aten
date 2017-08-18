@@ -77,11 +77,22 @@ __global__ void hitTest(
 	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
+#if 0
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
 	if (idx >= width * height) {
 		return;
 	}
+#else
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	const auto idx = getIdx(ix, iy, width);
+#endif
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -307,12 +318,9 @@ __global__ void shade(
 		aten::vec4 pos = aten::vec4(rec.p, 1);
 		pos = mtxW2C.apply(pos);
 
-		// [-1, 1] -> [0, 1]
-		auto n = (orienting_normal + 1.0f) * 0.5f;
-
 		// normal
 		surf2Dwrite(
-			make_float4(n.x, n.y, n.z, 0),
+			make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, 0),
 			aovs[idaten::SVGFPathTracing::AOVType::normal],
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
@@ -365,6 +373,7 @@ __global__ void shade(
 		return;
 	}
 
+#if 1
 	// Explicit conection to light.
 	if (!mtrl.attrib.isSingular)
 	{
@@ -456,6 +465,7 @@ __global__ void shade(
 			}
 		}
 	}
+#endif
 
 	real russianProb = real(1);
 
@@ -538,14 +548,14 @@ __global__ void gather(
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
 	surf2Dwrite(
-		make_float4(lum, lum, lum, 1),
-		aovs[idaten::SVGFPathTracing::AOVType::lum],
+		make_float4(lum * lum, lum, 0, 1),
+		aovs[idaten::SVGFPathTracing::AOVType::moments],
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 
 	surf2Dwrite(
 		contrib,
-		aovs[idaten::SVGFPathTracing::AOVType::clr_history],
+		aovs[idaten::SVGFPathTracing::AOVType::color],
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 
@@ -662,11 +672,11 @@ namespace idaten
 			m_aovTex[m_curAOVPos].tex[AOVType::normal].clearAsGLTexture(aten::vec4(0));
 			m_aovTex[m_curAOVPos].tex[AOVType::depth_meshid].clearAsGLTexture(aten::vec4(-1, -1, -1, -1));
 			m_aovTex[m_curAOVPos].tex[AOVType::texclr].clearAsGLTexture(aten::vec4(1));
-			m_aovTex[m_curAOVPos].tex[AOVType::lum].clearAsGLTexture(aten::vec4(0));
+			m_aovTex[m_curAOVPos].tex[AOVType::var].clearAsGLTexture(aten::vec4(0));
 
 			// TODO
-			m_aovTex[m_curAOVPos].tex[AOVType::clr_history].clearAsGLTexture(aten::vec4(0));
-			m_aovTex[m_curAOVPos].tex[AOVType::lum_histroy].clearAsGLTexture(aten::vec4(0));
+			m_aovTex[m_curAOVPos].tex[AOVType::color].clearAsGLTexture(aten::vec4(0));
+			m_aovTex[m_curAOVPos].tex[AOVType::moments].clearAsGLTexture(aten::vec4(0));
 		}
 
 		for (int i = 0; i < 2; i++)
@@ -685,8 +695,8 @@ namespace idaten
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-			int seed = time.milliSeconds;
-			//int seed = 0;
+			//int seed = time.milliSeconds;
+			int seed = 0;
 
 			onGenPath(
 				width, height,
@@ -729,10 +739,14 @@ namespace idaten
 
 		onGather(outputSurf, width, height, maxSamples);
 
+		onEstimateVariance(outputSurf, width, height);
+
 		checkCudaErrors(cudaDeviceSynchronize());
 
 		// Toggle aov buffer pos.
 		m_curAOVPos = 1 - m_curAOVPos;
+
+		m_isFirstRender = false;
 
 		{
 			m_vtxparamsPos.unbind();
@@ -786,10 +800,19 @@ namespace idaten
 		int width, int height,
 		cudaTextureObject_t texVtxPos)
 	{
+#if 0
 		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
 		dim3 threadPerBlock_HitTest(128);
 
 		hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
+#else
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+		dim3 grid(
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
+
+		hitTest << <grid, block >> > (
+#endif
 		//hitTest << <1, 1 >> > (
 			m_paths.ptr(),
 			m_isects.ptr(),
@@ -946,6 +969,8 @@ namespace idaten
 				curaov.ptr(),
 				m_paths.ptr(),
 				width, height);
+
+			checkCudaKernel(gather);
 		}
 		else {
 			onTemporalReprojection(
@@ -954,7 +979,5 @@ namespace idaten
 		}
 
 		m_mtxPrevV2C = m_mtxV2C;
-
-		m_isFirstRender = false;
 	}
 }

@@ -14,9 +14,9 @@ namespace idaten
 			normal,
 			depth_meshid,
 			texclr,
-			lum,
-			clr_history,
-			lum_histroy,
+			var,
+			color,
+			moments,
 
 			num,
 		};
@@ -95,6 +95,10 @@ namespace idaten
 			int maxSamples);
 
 		void onTemporalReprojection(
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
+		void onEstimateVariance(
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 

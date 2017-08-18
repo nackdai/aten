@@ -72,8 +72,8 @@ __global__ void temporalReprojection(
 	cudaSurfaceObject_t dst,
 	int width, int height)
 {
-	const int ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const int iy = blockIdx.y * blockDim.y + threadIdx.y;
+	int ix = blockIdx.x * blockDim.x + threadIdx.x;
+	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -112,10 +112,6 @@ __global__ void temporalReprojection(
 		&centerNormal,
 		curAovs[idaten::SVGFPathTracing::AOVType::normal],
 		ix * sizeof(float4), iy);
-
-	// [0, 1] -> [-1, 1]
-	centerNormal = 2 * centerNormal - 1;
-	centerNormal.w = 0;
 
 	float4 sum = make_float4(0, 0, 0, 0);
 	float weight = 0.0f;
@@ -162,10 +158,6 @@ __global__ void temporalReprojection(
 					prevAovs[idaten::SVGFPathTracing::AOVType::normal],
 					px * sizeof(float4), py);
 
-				// [0, 1] -> [-1, 1]
-				prevNormal = 2 * prevNormal - 1;
-				prevNormal.w = 0;
-
 				// TODO
 				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
 
@@ -180,7 +172,7 @@ __global__ void temporalReprojection(
 				float4 prev;
 				surf2Dread(
 					&prev, 
-					prevAovs[idaten::SVGFPathTracing::AOVType::clr_history],
+					prevAovs[idaten::SVGFPathTracing::AOVType::color],
 					px * sizeof(float4), py);
 
 				float W = Wz * Wn * Wm;
@@ -197,9 +189,58 @@ __global__ void temporalReprojection(
 
 	surf2Dwrite(
 		curColor,
-		curAovs[idaten::SVGFPathTracing::AOVType::clr_history],
+		curAovs[idaten::SVGFPathTracing::AOVType::color],
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
+
+	// accumulate moments.
+	{
+		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
+		float4 centerMoment = make_float4(lum * lum, lum, 0, 0);
+
+		// 前のフレームのクリップ空間座標を計算.
+		aten::vec4 prevPos;
+		computePrevScreenPos(
+			ix, iy,
+			centerDepth,
+			width, height,
+			&prevPos,
+			mtxs);
+
+		// [0, 1]の範囲内に入っているか.
+		bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
+		bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
+
+		// 積算フレーム数のリセット.
+		int frame = 1;
+
+		if (isInsideX && isInsideY) {
+			int px = (int)(prevPos.x * width - 0.5f);
+			int py = (int)(prevPos.y * height - 0.5f);
+
+			px = clamp(px, 0, width - 1);
+			py = clamp(py, 0, height - 1);
+
+			float4 prevMoment;
+			surf2Dread(
+				&prevMoment,
+				prevAovs[idaten::SVGFPathTracing::AOVType::moments],
+				px * sizeof(float4), py);
+
+			// 積算フレーム数を１増やす.
+			frame = (int)prevMoment.w + 1;
+
+			centerMoment += prevMoment;
+		}
+
+		centerMoment.w = frame;
+
+		surf2Dwrite(
+			centerMoment,
+			curAovs[idaten::SVGFPathTracing::AOVType::moments],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+	}
 
 	surf2Dwrite(
 		curColor,
@@ -238,6 +279,8 @@ namespace idaten
 			m_mtxs.ptr(),
 			outputSurf,
 			width, height);
+
+		checkCudaKernel(temporalReprojection);
 
 		m_mtxs.reset();
 	}

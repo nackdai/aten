@@ -18,8 +18,8 @@
 #include "sampler/sobolproxy.h"
 
 namespace aten {
-	using sampler = WangHash;
-	//using sampler = Sobol;
+	//using sampler = WangHash;
+	using sampler = Sobol;
 }
 
 #include "aten_virtual.h"

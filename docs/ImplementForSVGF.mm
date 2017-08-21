@@ -54,9 +54,9 @@
 <node CREATED="1502176387613" ID="ID_325174859" MODIFIED="1502176402007" TEXT="&#x5168;&#x304f;&#x7570;&#x306a;&#x308b;&#x5024;&#x306b;&#x5909;&#x5316;&#x3057;&#x3066;&#x3044;&#x308b;&#x305f;&#x3081;"/>
 </node>
 </node>
-<node CREATED="1502353723929" ID="ID_1378688510" MODIFIED="1502353746500" TEXT="http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf">
+<node CREATED="1503280332711" ID="ID_1644844629" LINK="http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf" MODIFIED="1503280332711" TEXT="twvideo01.ubm-us.net &gt; O1 &gt; Vault &gt; Gdc2016 &gt; Presentations &gt; Pedersen LasseJonFuglsang TemporalReprojectionAntiAliasing">
 <node CREATED="1502353747161" ID="ID_1181730164" MODIFIED="1502353752764" TEXT="p25-28"/>
-<node CREATED="1502353754609" ID="ID_1968413229" MODIFIED="1502948429108" TEXT="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader">
+<node CREATED="1503280345595" ID="ID_1057256172" LINK="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader" MODIFIED="1503280345595" TEXT="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader">
 <node CREATED="1502353770705" ID="ID_583406133" MODIFIED="1502353771427" TEXT="temporal_reprojection"/>
 </node>
 </node>
@@ -108,8 +108,7 @@
       avg = (f0 + f1 + f2) / 3 = 33.3
     </p>
   </body>
-</html>
-</richcontent>
+</html></richcontent>
 <node CREATED="1503046020594" ID="ID_1542575579" MODIFIED="1503046032045" TEXT="&#x975e;&#x5e38;&#x306b;&#x5927;&#x304d;&#x3044;&#x5024;&#x306e;&#x5f71;&#x97ff;&#x304c;&#x6b8b;&#x308a;&#x7d9a;&#x3051;&#x308b;"/>
 </node>
 </node>
@@ -132,6 +131,12 @@
 <node CREATED="1502176763517" ID="ID_504346254" MODIFIED="1502259416427" TEXT="&#x30a6;&#x30a8;&#x30a4;&#x30c8;&#x8a08;&#x7b97;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1502097143071" ID="ID_679061488" MODIFIED="1502097156344" TEXT="glsl&#x306e;dFdx&#x3001;dFdy&#x547d;&#x4ee4;&#x306e;&#x7406;&#x89e3;"/>
+<node CREATED="1503280290576" ID="ID_1883296631" MODIFIED="1503280298852" TEXT="hlsl&#x306e;ddx&#x3001;ddy">
+<node CREATED="1503280321896" ID="ID_388782686" LINK="http://mosapui.blog116.fc2.com/blog-entry-35.html" MODIFIED="1503280321896" TEXT="mosapui.blog116.fc2.com &gt; Blog-entry-35"/>
+<node CREATED="1503280313200" ID="ID_94214412" LINK="https://www.gamedev.net/forums/topic/478820-derivative-instruction-details-ddx-ddy-or-dfdx-dfdy-etc/" MODIFIED="1503280313200" TEXT="https://www.gamedev.net/forums/topic/478820-derivative-instruction-details-ddx-ddy-or-dfdx-dfdy-etc/"/>
+<node CREATED="1503280404700" LINK="http://d.hatena.ne.jp/umonist/20110616/p1" MODIFIED="1503280404700" TEXT="d.hatena.ne.jp &gt; Umonist &gt; 20110616 &gt; P1"/>
+<node CREATED="1503281247054" LINK="http://monsho.blog63.fc2.com/blog-entry-105.html" MODIFIED="1503281247054" TEXT="monsho.blog63.fc2.com &gt; Blog-entry-105"/>
+</node>
 </node>
 </node>
 <node CREATED="1502252694293" ID="ID_1042291421" MODIFIED="1502252701697" TEXT="singular material&#x306e;&#x6271;&#x3044;">

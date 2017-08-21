@@ -149,6 +149,7 @@ __global__ void hitTest(
 		isects[idx].t = isect.t;
 		isects[idx].objid = isect.objid;
 		isects[idx].mtrlid = isect.mtrlid;
+		isects[idx].meshid = isect.meshid;
 		isects[idx].area = isect.area;
 		isects[idx].primid = isect.primid;
 		isects[idx].a = isect.a;
@@ -193,6 +194,7 @@ __global__ void hitTest(
 	isects[idx].t = isect.t;
 	isects[idx].objid = isect.objid;
 	isects[idx].mtrlid = isect.mtrlid;
+	isects[idx].meshid = isect.meshid;
 	isects[idx].area = isect.area;
 	isects[idx].primid = isect.primid;
 	isects[idx].a = isect.a;

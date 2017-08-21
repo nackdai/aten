@@ -141,7 +141,7 @@ __global__ void atrousFilter(
 	int centerMeshId = (int)centerDepthMeshId.y;
 
 	float4 tmpDdzX = ddx(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
-	float4 tmpDdzY = ddy(iy, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
+	float4 tmpDdzY = ddy(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
 	float2 ddZ = make_float2(tmpDdzX.x, tmpDdzY.x);
 
 	float4 centerColor;
@@ -256,7 +256,9 @@ __global__ void atrousFilter(
 
 			float Wl = min(exp(-abs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
 
-			float W = Wz * Wn * Wl;
+			float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
+
+			float W = Wz * Wn * Wl * Wm;
 			
 			sumC += h[idx] * W * color;
 			weightC += h[idx] * W;
@@ -338,7 +340,7 @@ __global__ void atrousFilterEx(
 	int centerMeshId = (int)centerDepthMeshId.y;
 
 	float4 tmpDdzX = ddx(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
-	float4 tmpDdzY = ddy(iy, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
+	float4 tmpDdzY = ddy(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
 	float2 ddZ = make_float2(tmpDdzX.x, tmpDdzY.x);
 
 	float4 centerColor;
@@ -453,7 +455,9 @@ __global__ void atrousFilterEx(
 
 			float Wl = min(exp(-abs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
 
-			float W = Wz * Wn * Wl;
+			float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
+
+			float W = Wz * Wn * Wl * Wm;
 
 			sumC += h[idx] * W * color;
 			weightC += h[idx] * W;

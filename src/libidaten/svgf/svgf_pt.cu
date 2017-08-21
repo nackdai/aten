@@ -45,8 +45,16 @@ __global__ void genPath(
 
 	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
 
+#ifdef IDATEN_USE_SOBOL
+	path.sampler.nextSample();
+	path.sampler.nextSample();
+
+	float s = ((float)ix + 0.5f) / (float)(camera->width);
+	float t = ((float)iy + 0.5f) / (float)(camera->height);
+#else
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
+#endif
 
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);

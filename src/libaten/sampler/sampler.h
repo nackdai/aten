@@ -17,9 +17,14 @@
 #include "sampler/wanghash.h"
 #include "sampler/sobolproxy.h"
 
+#define IDATEN_USE_SOBOL
+
 namespace aten {
-	//using sampler = WangHash;
+#ifdef IDATEN_USE_SOBOL
 	using sampler = Sobol;
+#else
+	using sampler = WangHash;
+#endif
 }
 
 #include "aten_virtual.h"

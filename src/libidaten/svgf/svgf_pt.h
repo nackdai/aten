@@ -102,6 +102,10 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
+		void onAtrousFilter(
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
 		idaten::TypedCudaMemory<cudaSurfaceObject_t>& getCurAovs()
 		{
 			return m_aovCudaRsc[m_curAOVPos];
@@ -137,5 +141,11 @@ namespace idaten
 		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
 
 		bool m_isFirstRender{ true };
+
+		aten::texture m_atroushClrTex[2];
+		aten::texture m_atroushVarTex[2];
+
+		idaten::CudaGLSurface m_atrousClrBuffer[2];
+		idaten::CudaGLSurface m_atrousVarBuffer[2];
 	};
 }

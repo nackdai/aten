@@ -615,6 +615,21 @@ namespace idaten
 
 			m_aovCudaRsc[i].init(AOVType::num);
 		}
+
+		for (int i = 0; i < 2; i++) {
+			m_atroushClrTex[i].init(width, height, 3);
+			m_atroushClrTex[i].initAsGLTexture();
+			m_atrousClrBuffer[i].init(
+				m_atroushClrTex[i].getGLTexHandle(),
+				CudaGLRscRegisterType::ReadWrite);
+
+
+			m_atroushVarTex[i].init(width, height, 3);
+			m_atroushVarTex[i].initAsGLTexture();
+			m_atrousVarBuffer[i].init(
+				m_atroushVarTex[i].getGLTexHandle(),
+				CudaGLRscRegisterType::ReadWrite);
+		}
 	}
 
 	static bool doneSetStackSize = false;
@@ -740,6 +755,8 @@ namespace idaten
 		onGather(outputSurf, width, height, maxSamples);
 
 		onVarianceEstimation(outputSurf, width, height);
+
+		onAtrousFilter(outputSurf, width, height);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 

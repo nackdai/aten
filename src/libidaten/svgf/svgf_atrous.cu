@@ -185,6 +185,8 @@ __global__ void atrousFilter(
 		nextClrBuffer[idx] = centerColor;
 
 		if (isFinalIter) {
+			centerColor *= aovs[idx].texclr;
+
 			surf2Dwrite(
 				centerColor,
 				dst,
@@ -300,6 +302,8 @@ __global__ void atrousFilter(
 		aovs[idx].color = sumC;
 	}
 	else if (isFinalIter) {
+		sumC *= aovs[idx].texclr;
+
 		surf2Dwrite(
 			sumC,
 			dst,

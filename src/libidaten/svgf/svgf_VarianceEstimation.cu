@@ -43,6 +43,30 @@ __global__ void varianceEstimation(
 		return;
 	}
 
+	float4 depth_meshid;
+	surf2Dread(
+		&depth_meshid,
+		aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
+		ix * sizeof(float4), iy);
+
+	float centerDepth = depth_meshid.x;
+	int centerMeshId = (int)depth_meshid.y;
+
+	if (centerMeshId < 0) {
+		// ”wŒi‚È‚Ì‚ÅA•ªŽU‚Íƒ[ƒ.
+		surf2Dwrite(
+			make_float4(0),
+			aovs[idaten::SVGFPathTracing::AOVType::var],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+
+		surf2Dwrite(
+			make_float4(0),
+			dst,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+	}
+
 	float4 centerMoment;
 	surf2Dread(
 		&centerMoment,
@@ -70,15 +94,6 @@ __global__ void varianceEstimation(
 			&centerNormal,
 			aovs[idaten::SVGFPathTracing::AOVType::normal],
 			ix * sizeof(float4), iy);
-
-		float4 depth_meshid;
-		surf2Dread(
-			&depth_meshid,
-			aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-			ix * sizeof(float4), iy);
-
-		float centerDepth = depth_meshid.x;
-		int centerMeshId = (int)depth_meshid.y;
 
 		float4 sum = make_float4(0, 0, 0, 0);
 		float weight = 0.0f;

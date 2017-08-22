@@ -104,6 +104,17 @@ __global__ void temporalReprojection(
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
 
+		surf2Dwrite(
+			curColor,
+			curAovs[idaten::SVGFPathTracing::AOVType::color],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+		surf2Dwrite(
+			make_float4(1),
+			curAovs[idaten::SVGFPathTracing::AOVType::moments],
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+
 		return;
 	}
 
@@ -296,6 +307,7 @@ namespace idaten
 		m_mtxs.writeByNum(mtxs, AT_COUNTOF(mtxs));
 
 		temporalReprojection << <grid, block >> > (
+		//temporalReprojection << <1, 1 >> > (
 			m_paths.ptr(),
 			m_cam.ptr(),
 			curaov.ptr(),

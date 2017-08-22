@@ -159,6 +159,16 @@ __global__ void atrousFilter(
 			ix * sizeof(float4), iy);
 	}
 
+	if (centerMeshId < 0) {
+		// 背景なので、そのまま出力して終了.
+		surf2Dwrite(
+			centerColor,
+			nextClrBuffer,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+		return;
+	}
+
 	float centerLum = AT_NAME::color::luminance(centerColor.x, centerColor.y, centerColor.z);
 
 	// ガウスフィルタ3x3

@@ -10,17 +10,6 @@ namespace idaten
 {
 	class SVGFPathTracing : public Renderer {
 	public:
-		enum AOVType {
-			normal,
-			depth_meshid,
-			texclr,
-			var,
-			color,
-			moments,
-
-			num,
-		};
-
 #ifdef __AT_CUDA__
 		struct Path {
 			aten::vec3 throughput;
@@ -36,8 +25,22 @@ namespace idaten
 			bool isKill;
 		};
 		C_ASSERT((sizeof(Path) % 4) == 0);
+
+		struct AOV {
+			float depth;
+			int meshid;
+			int mtrlid;
+			int padding0;
+
+			float4 normal;
+			float4 texclr;
+			float4 color;
+			float4 moments;
+			float4 var;
+		};
 #else
 		struct Path;
+		struct AOV;
 #endif
 
 	public:
@@ -106,13 +109,13 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
-		idaten::TypedCudaMemory<cudaSurfaceObject_t>& getCurAovs()
+		idaten::TypedCudaMemory<AOV>& getCurAovs()
 		{
-			return m_aovCudaRsc[m_curAOVPos];
+			return m_aovs[m_curAOVPos];
 		}
-		idaten::TypedCudaMemory<cudaSurfaceObject_t>& getPrevAovs()
+		idaten::TypedCudaMemory<AOV>& getPrevAovs()
 		{
-			return m_aovCudaRsc[1 - m_curAOVPos];
+			return m_aovs[1 - m_curAOVPos];
 		}
 
 	protected:
@@ -127,12 +130,7 @@ namespace idaten
 
 		int m_curAOVPos{ 0 };
 
-		struct AOVs {
-			aten::texture tex[AOVType::num];
-		} m_aovTex[2];
-
-		idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc[2];
-		std::vector<idaten::CudaGLSurface> m_aovs[2];
+		idaten::TypedCudaMemory<AOV> m_aovs[2];
 
 		aten::mat4 m_mtxV2C;		// View - Clip.
 		aten::mat4 m_mtxC2V;		// Clip - View.
@@ -142,10 +140,7 @@ namespace idaten
 
 		bool m_isFirstRender{ true };
 
-		aten::texture m_atroushClrTex[2];
-		aten::texture m_atroushVarTex[2];
-
-		idaten::CudaGLSurface m_atrousClrBuffer[2];
-		idaten::CudaGLSurface m_atrousVarBuffer[2];
+		idaten::TypedCudaMemory<float4> m_atrousClr[2];
+		idaten::TypedCudaMemory<float4> m_atrousVar[2];
 	};
 }

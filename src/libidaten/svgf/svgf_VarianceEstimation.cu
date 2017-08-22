@@ -17,23 +17,22 @@
 
 #include "aten4idaten.h"
 
-inline __device__ float4 sampleTex(
-	cudaSurfaceObject_t tex, 
+inline __device__ idaten::SVGFPathTracing::AOV* sampleAov(
+	idaten::SVGFPathTracing::AOV* aovs,
 	int ix, int iy,
 	int width, int height)
 {
 	ix = clamp(ix, 0, width - 1);
 	iy = clamp(iy, 0, height - 1);
 
-	float4 ret;
-	surf2Dread(&ret, tex, ix * sizeof(float4), iy);
+	const int idx = getIdx(ix, iy, width);
 
-	return ret;
+	return &aovs[idx];
 }
 
 __global__ void varianceEstimation(
 	cudaSurfaceObject_t dst,
-	cudaSurfaceObject_t* aovs,
+	idaten::SVGFPathTracing::AOV* aovs,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -43,22 +42,14 @@ __global__ void varianceEstimation(
 		return;
 	}
 
-	float4 depth_meshid;
-	surf2Dread(
-		&depth_meshid,
-		aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-		ix * sizeof(float4), iy);
+	const int idx = getIdx(ix, iy, width);
 
-	float centerDepth = depth_meshid.x;
-	int centerMeshId = (int)depth_meshid.y;
+	float centerDepth = aovs[idx].depth;
+	int centerMeshId = aovs[idx].meshid;
 
 	if (centerMeshId < 0) {
 		// îwåiÇ»ÇÃÇ≈ÅAï™éUÇÕÉ[Éç.
-		surf2Dwrite(
-			make_float4(0),
-			aovs[idaten::SVGFPathTracing::AOVType::var],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		aovs[idx].moments = make_float4(0, 0, 0, 1);
 
 		surf2Dwrite(
 			make_float4(0),
@@ -67,11 +58,7 @@ __global__ void varianceEstimation(
 			cudaBoundaryModeTrap);
 	}
 
-	float4 centerMoment;
-	surf2Dread(
-		&centerMoment,
-		aovs[idaten::SVGFPathTracing::AOVType::moments],
-		ix * sizeof(float4), iy);
+	float4 centerMoment = aovs[idx].moments;
 
 	int frame = (int)centerMoment.w;
 
@@ -89,11 +76,7 @@ __global__ void varianceEstimation(
 		static const float sigmaD = 0.005f;
 		static const float sigmaS = 8;
 
-		float4 centerNormal;
-		surf2Dread(
-			&centerNormal,
-			aovs[idaten::SVGFPathTracing::AOVType::normal],
-			ix * sizeof(float4), iy);
+		float4 centerNormal = aovs[idx].normal;
 
 		float4 sum = make_float4(0, 0, 0, 0);
 		float weight = 0.0f;
@@ -102,14 +85,15 @@ __global__ void varianceEstimation(
 		{
 			for (int u = -radius; u <= radius; u++)
 			{
-				auto moment = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::moments], ix + u, iy + v, width, height);
-				auto sampleNml = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::normal], ix + u, iy + v, width, height);
-				auto sampleDepthMeshId = sampleTex(aovs[idaten::SVGFPathTracing::AOVType::depth_meshid], ix + u, iy + v, width, height);
-
+				auto sampleaov = sampleAov(aovs, ix + u, iy + v, width, height);
+				
+				auto moment = sampleaov->moments;
 				moment /= moment.w;
 
-				float sampleDepth = sampleDepthMeshId.x;
-				int sampleMeshId = (int)sampleDepthMeshId.y;
+				auto sampleNml = sampleaov->normal;
+
+				float sampleDepth = sampleaov->depth;
+				int sampleMeshId = sampleaov->meshid;
 
 				float n = 1 - dot(sampleNml, centerNormal);
 				float Wn = exp(-0.5f * n * n / (sigmaN * sigmaN));
@@ -138,11 +122,7 @@ __global__ void varianceEstimation(
 	// ï™éUÇÕÉ}ÉCÉiÉXÇ…Ç»ÇÁÇ»Ç¢Ç™ÅEÅEÅEÅE
 	var = abs(var);
 
-	surf2Dwrite(
-		make_float4(var, var, var, var),
-		aovs[idaten::SVGFPathTracing::AOVType::var],
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
+	aovs[idx].var = make_float4(var, var, var, var);
 
 	surf2Dwrite(
 		make_float4(var, var, var, var),

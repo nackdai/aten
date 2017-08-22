@@ -66,8 +66,8 @@ inline __device__ void computePrevScreenPos(
 __global__ void temporalReprojection(
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	const aten::CameraParameter* __restrict__ camera,
-	cudaSurfaceObject_t* curAovs,
-	cudaSurfaceObject_t* prevAovs,
+	idaten::SVGFPathTracing::AOV* curAovs,
+	idaten::SVGFPathTracing::AOV* prevAovs,
 	const aten::mat4* __restrict__ mtxs,
 	cudaSurfaceObject_t dst,
 	int width, int height)
@@ -83,14 +83,8 @@ __global__ void temporalReprojection(
 
 	const auto path = paths[idx];
 
-	float4 depth_meshid;
-	surf2Dread(
-		&depth_meshid,
-		curAovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-		ix * sizeof(float4), iy);
-
-	const float centerDepth = aten::clamp(depth_meshid.x, camera->znear, camera->zfar);
-	const int centerMeshId = (int)depth_meshid.y;
+	const float centerDepth = curAovs[idx].depth;
+	const int centerMeshId = curAovs[idx].meshid;
 
 	// 今回のフレームのピクセルカラー.
 	float4 curColor = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
@@ -104,30 +98,17 @@ __global__ void temporalReprojection(
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
 
-		surf2Dwrite(
-			curColor,
-			curAovs[idaten::SVGFPathTracing::AOVType::color],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
-		surf2Dwrite(
-			make_float4(1),
-			curAovs[idaten::SVGFPathTracing::AOVType::moments],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		curAovs[idx].color = curColor;
+		curAovs[idx].moments = make_float4(1);
 
 		return;
 	}
 
-	float4 centerNormal;
-	surf2Dread(
-		&centerNormal,
-		curAovs[idaten::SVGFPathTracing::AOVType::normal],
-		ix * sizeof(float4), iy);
+	float4 centerNormal = curAovs[idx].normal;
 
 	float4 sum = make_float4(0, 0, 0, 0);
 	float weight = 0.0f;
 
-	float4 prevDepthMeshId;
 	float4 prevNormal;
 
 	static const float zThreshold = 0.05f;
@@ -159,18 +140,12 @@ __global__ void temporalReprojection(
 				px = clamp(px, 0, width - 1);
 				py = clamp(py, 0, height - 1);
 
-				surf2Dread(
-					&prevDepthMeshId,
-					prevAovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-					px * sizeof(float4), py);
+				int pidx = getIdx(px, py, width);
 
-				const float prevDepth = aten::clamp(depth_meshid.x, camera->znear, camera->zfar);
-				const int prevMeshId = (int)depth_meshid.y;
+				const float prevDepth = prevAovs[pidx].depth;
+				const int prevMeshId = prevAovs[pidx].meshid;
 
-				surf2Dread(
-					&prevNormal,
-					prevAovs[idaten::SVGFPathTracing::AOVType::normal],
-					px * sizeof(float4), py);
+				prevNormal = prevAovs[pidx].normal;
 
 				// TODO
 				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
@@ -180,11 +155,7 @@ __global__ void temporalReprojection(
 				float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
 
 				// 前のフレームのピクセルカラーを取得.
-				float4 prev;
-				surf2Dread(
-					&prev, 
-					prevAovs[idaten::SVGFPathTracing::AOVType::color],
-					px * sizeof(float4), py);
+				float4 prev = prevAovs[pidx].color;
 
 				float W = Wz * Wn * Wm;
 				sum += prev * W;
@@ -198,11 +169,7 @@ __global__ void temporalReprojection(
 		curColor = 0.2 * curColor + 0.8 * sum;
 	}
 
-	surf2Dwrite(
-		curColor,
-		curAovs[idaten::SVGFPathTracing::AOVType::color],
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
+	curAovs[idx].color = curColor;
 
 	// TODO
 	// 現フレームと過去フレームが同率で加算されるため、どちらかに強い影響がでると影響が弱まるまでに非常に時間がかかる.
@@ -238,28 +205,18 @@ __global__ void temporalReprojection(
 			px = clamp(px, 0, width - 1);
 			py = clamp(py, 0, height - 1);
 
-			surf2Dread(
-				&prevDepthMeshId,
-				prevAovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-				px * sizeof(float4), py);
+			int pidx = getIdx(px, py, width);
 
-			const float prevDepth = aten::clamp(depth_meshid.x, camera->znear, camera->zfar);
-			const int prevMeshId = (int)depth_meshid.y;
+			const float prevDepth = prevAovs[pidx].depth;
+			const int prevMeshId = prevAovs[pidx].meshid;
 
-			surf2Dread(
-				&prevNormal,
-				prevAovs[idaten::SVGFPathTracing::AOVType::normal],
-				px * sizeof(float4), py);
+			prevNormal = prevAovs[pidx].normal;
 
 			if (abs(1 - centerDepth / prevDepth) < zThreshold
 				&& dot(centerNormal, prevNormal) > nThreshold
 				&& centerMeshId == prevMeshId)
 			{
-				float4 prevMoment;
-				surf2Dread(
-					&prevMoment,
-					prevAovs[idaten::SVGFPathTracing::AOVType::moments],
-					px * sizeof(float4), py);
+				float4 prevMoment = prevAovs[pidx].moments;
 
 				// 積算フレーム数を１増やす.
 				frame = (int)prevMoment.w + 1;
@@ -270,11 +227,7 @@ __global__ void temporalReprojection(
 
 		centerMoment.w = frame;
 
-		surf2Dwrite(
-			centerMoment,
-			curAovs[idaten::SVGFPathTracing::AOVType::moments],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		curAovs[idx].moments = centerMoment;
 	}
 
 	surf2Dwrite(

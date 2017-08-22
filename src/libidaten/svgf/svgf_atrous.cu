@@ -24,10 +24,10 @@
 // http://d.hatena.ne.jp/umonist/20110616/p1
 // http://monsho.blog63.fc2.com/blog-entry-105.html
 
-inline __device__ float4 ddx(
+inline __device__ float ddx(
 	int x, int y,
 	int w, int h,
-	cudaSurfaceObject_t s)
+	idaten::SVGFPathTracing::AOV* aov)
 {
 	// NOTE
 	// 2x2 pixel‚²‚Æ‚ÉŒvŽZ‚·‚é.
@@ -41,19 +41,19 @@ inline __device__ float4 ddx(
 
 	rightX = min(rightX, w - 1);
 
-	float4 left;
-	float4 right;
+	const int idxL = getIdx(leftX, y, w);
+	const int idxR = getIdx(rightX, y, w);
 
-	surf2Dread(&left, s, leftX * sizeof(float4), y);
-	surf2Dread(&right, s, rightX * sizeof(float4), y);
+	float left = aov[idxL].depth;
+	float right = aov[idxR].depth;
 
 	return right - left;
 }
 
-inline __device__ float4 ddy(
+inline __device__ float ddy(
 	int x, int y,
 	int w, int h,
-	cudaSurfaceObject_t s)
+	idaten::SVGFPathTracing::AOV* aov)
 {
 	// NOTE
 	// 2x2 pixel‚²‚Æ‚ÉŒvŽZ‚·‚é.
@@ -67,11 +67,11 @@ inline __device__ float4 ddy(
 
 	bottomY = min(bottomY, h - 1);
 
-	float4 top;
-	float4 bottom;
+	int idxT = getIdx(x, topY, w);
+	int idxB = getIdx(x, bottomY, w);
 
-	surf2Dread(&top, s, x * sizeof(float4), topY);
-	surf2Dread(&bottom, s, x * sizeof(float4), bottomY);
+	float top = aov[idxT].depth;
+	float bottom = aov[idxB].depth;
 
 	return bottom - top;
 }
@@ -79,7 +79,7 @@ inline __device__ float4 ddy(
 inline __device__ float4 gaussFilter3x3(
 	int ix, int iy,
 	int w, int h,
-	cudaSurfaceObject_t s)
+	idaten::SVGFPathTracing::AOV* aov)
 {
 	static const float kernel[] = {
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
@@ -96,8 +96,9 @@ inline __device__ float4 gaussFilter3x3(
 			int xx = clamp(ix + x, 0, w - 1);
 			int yy = clamp(iy + y, 0, h - 1);
 
-			float4 tmp;
-			surf2Dread(&tmp, s, xx * sizeof(float4), yy);
+			int idx = getIdx(xx, yy, w);
+
+			float4 tmp = aov[idx].var;
 
 			sum += kernel[pos] * tmp;
 
@@ -108,13 +109,47 @@ inline __device__ float4 gaussFilter3x3(
 	return sum;
 }
 
-template <bool isFirstIter>
+inline __device__ float4 gaussFilter3x3(
+	int ix, int iy,
+	int w, int h,
+	const float4* __restrict__ var)
+{
+	static const float kernel[] = {
+		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
+		1.0 / 8.0,  1.0 / 4.0, 1.0 / 8.0,
+		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
+	};
+
+	float4 sum = make_float4(0, 0, 0, 0);
+
+	int pos = 0;
+
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			int xx = clamp(ix + x, 0, w - 1);
+			int yy = clamp(iy + y, 0, h - 1);
+
+			int idx = getIdx(xx, yy, w);
+
+			float4 tmp = var[idx];
+
+			sum += kernel[pos] * tmp;
+
+			pos++;
+		}
+	}
+
+	return sum;
+}
+
+template <bool isFirstIter, bool isFinalIter>
 __global__ void atrousFilter(
-	cudaSurfaceObject_t* aovs,
-	cudaSurfaceObject_t clrBuffer,
-	cudaSurfaceObject_t nextClrBuffer,
-	cudaSurfaceObject_t varBuffer,
-	cudaSurfaceObject_t nextVarBuffer,
+	cudaSurfaceObject_t dst,
+	idaten::SVGFPathTracing::AOV* aovs,
+	const float4* __restrict__ clrBuffer,
+	float4* nextClrBuffer,
+	const float4* __restrict__ varBuffer,
+	float4* nextVarBuffer,
 	int stepScale,
 	int width, int height)
 {
@@ -125,47 +160,38 @@ __global__ void atrousFilter(
 		return;
 	}
 
-	float4 centerNormal;
-	surf2Dread(
-		&centerNormal,
-		aovs[idaten::SVGFPathTracing::AOVType::normal],
-		ix * sizeof(float4), iy);
+	const int idx = getIdx(ix, iy, width);
 
-	float4 centerDepthMeshId;
-	surf2Dread(
-		&centerDepthMeshId,
-		aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-		ix * sizeof(float4), iy);
+	float4 centerNormal = aovs[idx].normal;
 
-	float centerDepth = centerDepthMeshId.x;
-	int centerMeshId = (int)centerDepthMeshId.y;
+	float centerDepth = aovs[idx].depth;
+	int centerMeshId = aovs[idx].meshid;
 
-	float4 tmpDdzX = ddx(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
-	float4 tmpDdzY = ddy(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
-	float2 ddZ = make_float2(tmpDdzX.x, tmpDdzY.x);
+	float tmpDdzX = ddx(ix, iy, width, height, aovs);
+	float tmpDdzY = ddy(ix, iy, width, height, aovs);
+	float2 ddZ = make_float2(tmpDdzX, tmpDdzY);
 
 	float4 centerColor;
 
 	if (isFirstIter) {
-		surf2Dread(
-			&centerColor,
-			aovs[idaten::SVGFPathTracing::AOVType::color],
-			ix * sizeof(float4), iy);
+		centerColor = aovs[idx].color;
 	}
 	else {
-		surf2Dread(
-			&centerColor,
-			clrBuffer,
-			ix * sizeof(float4), iy);
+		centerColor = clrBuffer[idx];
 	}
 
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI—¹.
-		surf2Dwrite(
-			centerColor,
-			nextClrBuffer,
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		nextClrBuffer[idx] = centerColor;
+
+		if (isFinalIter) {
+			surf2Dwrite(
+				centerColor,
+				dst,
+				ix * sizeof(float4), iy,
+				cudaBoundaryModeTrap);
+		}
+
 		return;
 	}
 
@@ -175,7 +201,7 @@ __global__ void atrousFilter(
 	float4 gaussedVarLum;
 	
 	if (isFirstIter) {
-		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::var]);
+		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovs);
 	}
 	else {
 		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, varBuffer);
@@ -198,7 +224,7 @@ __global__ void atrousFilter(
 	float4 sumV = make_float4(0, 0, 0, 0);
 	float weightV = 0;
 
-	int idx = 0;
+	int pos = 0;
 
 	static const float h[] = {
 		1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
@@ -215,47 +241,27 @@ __global__ void atrousFilter(
 
 			float2 q = make_float2(xx, yy);
 
-			float4 depthmeshid;
-			surf2Dread(
-				&depthmeshid,
-				aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-				xx * sizeof(float4), yy);
+			const int qidx = getIdx(xx, yy, width);
 
-			float depth = depthmeshid.x;
-			int meshid = (int)depthmeshid.y;
+			float depth = aovs[qidx].depth;
+			int meshid = aovs[qidx].meshid;
 
 			if (meshid != centerMeshId) {
 				continue;
 			}
 
-			float4 normal;
-			surf2Dread(
-				&normal,
-				aovs[idaten::SVGFPathTracing::AOVType::normal],
-				xx * sizeof(float4), yy);
+			float4 normal = aovs[qidx].normal;
 
 			float4 color;
 			float4 variance;
 
 			if (isFirstIter) {
-				surf2Dread(
-					&color,
-					aovs[idaten::SVGFPathTracing::AOVType::color],
-					xx * sizeof(float4), yy);
-				surf2Dread(
-					&variance,
-					aovs[idaten::SVGFPathTracing::AOVType::var],
-					xx * sizeof(float4), yy);
+				color = aovs[qidx].color;
+				variance = aovs[qidx].var;
 			}
 			else {
-				surf2Dread(
-					&color,
-					clrBuffer,
-					xx * sizeof(float4), yy);
-				surf2Dread(
-					&variance,
-					varBuffer,
-					xx * sizeof(float4), yy);
+				color = clrBuffer[qidx];
+				variance = varBuffer[qidx];
 			}
 
 			float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
@@ -270,13 +276,13 @@ __global__ void atrousFilter(
 
 			float W = Wz * Wn * Wl * Wm;
 			
-			sumC += h[idx] * W * color;
-			weightC += h[idx] * W;
+			sumC += h[pos] * W * color;
+			weightC += h[pos] * W;
 
-			sumV += (h[idx] * h[idx]) * (W * W) * variance;
-			weightV += h[idx] * W;
+			sumV += (h[pos] * h[pos]) * (W * W) * variance;
+			weightV += h[pos] * W;
 
-			idx++;
+			pos++;
 		}
 	}
 
@@ -287,218 +293,20 @@ __global__ void atrousFilter(
 		sumV /= (weightV * weightV);
 	}
 
-	surf2Dwrite(
-		sumC,
-		nextClrBuffer,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
-
-	surf2Dwrite(
-		sumV,
-		nextVarBuffer,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
-}
-
-__global__ void copyForNextFrame(
-	cudaSurfaceObject_t srcClr,
-	cudaSurfaceObject_t* aovs,
-	int width, int height)
-{
-	int ix = blockIdx.x * blockDim.x + threadIdx.x;
-	int iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-	if (ix >= width && iy >= height) {
-		return;
-	}
-
-	float4 clr;
-	surf2Dread(&clr, srcClr, ix * sizeof(float4), iy);
-	surf2Dwrite(clr, aovs[idaten::SVGFPathTracing::AOVType::color], ix * sizeof(float4), iy, cudaBoundaryModeTrap);
-}
-
-template <bool isFirstIter>
-__global__ void atrousFilterEx(
-	cudaSurfaceObject_t* aovs,
-	cudaSurfaceObject_t clrBuffer,
-	cudaSurfaceObject_t nextClrBuffer,
-	cudaSurfaceObject_t varBuffer,
-	cudaSurfaceObject_t nextVarBuffer,
-	int stepScale,
-	int width, int height)
-{
-	int ix = blockIdx.x * blockDim.x + threadIdx.x;
-	int iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-	if (ix >= width && iy >= height) {
-		return;
-	}
-
-	float4 centerNormal;
-	surf2Dread(
-		&centerNormal,
-		aovs[idaten::SVGFPathTracing::AOVType::normal],
-		ix * sizeof(float4), iy);
-
-	float4 centerDepthMeshId;
-	surf2Dread(
-		&centerDepthMeshId,
-		aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-		ix * sizeof(float4), iy);
-
-	float centerDepth = centerDepthMeshId.x;
-	int centerMeshId = (int)centerDepthMeshId.y;
-
-	float4 tmpDdzX = ddx(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
-	float4 tmpDdzY = ddy(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::depth_meshid]);
-	float2 ddZ = make_float2(tmpDdzX.x, tmpDdzY.x);
-
-	float4 centerColor;
+	nextClrBuffer[idx] = sumC;
+	nextVarBuffer[idx] = sumV;
 
 	if (isFirstIter) {
-		surf2Dread(
-			&centerColor,
-			aovs[idaten::SVGFPathTracing::AOVType::color],
-			ix * sizeof(float4), iy);
+		aovs[idx].color = sumC;
 	}
-	else {
-		surf2Dread(
-			&centerColor,
-			clrBuffer,
-			ix * sizeof(float4), iy);
+	else if (isFinalIter) {
+		surf2Dwrite(
+			sumC,
+			dst,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
 	}
-
-	float centerLum = AT_NAME::color::luminance(centerColor.x, centerColor.y, centerColor.z);
-
-	// ƒKƒEƒXƒtƒBƒ‹ƒ^3x3
-	float4 gaussedVarLum;
-
-	if (isFirstIter) {
-		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovs[idaten::SVGFPathTracing::AOVType::var]);
-	}
-	else {
-		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, varBuffer);
-	}
-
-	float sqrGaussedVarLum = sqrt(gaussedVarLum.x);
-
-	static const float sigmaZ = 1.0f;
-	static const float sigmaN = 128.0f;
-	static const float sigmaL = 4.0f;
-
-	float2 p = make_float2(ix, iy);
-
-	// NOTE
-	// 5x5
-
-	float4 sumC = make_float4(0, 0, 0, 0);
-	float weightC = 0;
-
-	float4 sumV = make_float4(0, 0, 0, 0);
-	float weightV = 0;
-
-	int idx = 0;
-
-	static const float h[] = {
-		1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
-		1.0 / 64.0,  1.0 / 16.0, 3.0 / 32.0,  1.0 / 16.0, 1.0 / 64.0,
-		3.0 / 128.0, 3.0 / 32.0, 9.0 / 64.0,  3.0 / 32.0, 3.0 / 128.0,
-		1.0 / 64.0,  1.0 / 16.0, 3.0 / 32.0,  1.0 / 16.0, 1.0 / 64.0,
-		1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
-	};
-
-	for (int y = -2; y <= 2; y++) {
-		for (int x = -2; x <= 2; x++) {
-			int xx = clamp(ix + x * stepScale, 0, width - 1);
-			int yy = clamp(iy + y * stepScale, 0, height - 1);
-
-			float2 q = make_float2(xx, yy);
-
-			float4 depthmeshid;
-			surf2Dread(
-				&depthmeshid,
-				aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-				xx * sizeof(float4), yy);
-
-			float depth = depthmeshid.x;
-			int meshid = (int)depthmeshid.y;
-
-			if (meshid != centerMeshId) {
-				continue;
-			}
-
-			float4 normal;
-			surf2Dread(
-				&normal,
-				aovs[idaten::SVGFPathTracing::AOVType::normal],
-				xx * sizeof(float4), yy);
-
-			float4 color;
-			float4 variance;
-
-			if (isFirstIter) {
-				surf2Dread(
-					&color,
-					aovs[idaten::SVGFPathTracing::AOVType::color],
-					xx * sizeof(float4), yy);
-				surf2Dread(
-					&variance,
-					aovs[idaten::SVGFPathTracing::AOVType::var],
-					xx * sizeof(float4), yy);
-			}
-			else {
-				surf2Dread(
-					&color,
-					clrBuffer,
-					xx * sizeof(float4), yy);
-				surf2Dread(
-					&variance,
-					varBuffer,
-					xx * sizeof(float4), yy);
-			}
-
-			float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
-
-			float Wz = min(exp(-abs(centerDepth - depth) / (sigmaZ * dot(ddZ, p - q) + 0.000001f)), 1.0f);
-
-			float Wn = pow(max(0.0f, dot(centerNormal, normal)), sigmaN);
-
-			float Wl = min(exp(-abs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
-
-			float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
-
-			float W = Wz * Wn * Wl * Wm;
-
-			sumC += h[idx] * W * color;
-			weightC += h[idx] * W;
-
-			sumV += (h[idx] * h[idx]) * (W * W) * variance;
-			weightV += h[idx] * W;
-
-			idx++;
-		}
-	}
-
-	if (weightC > 0.0) {
-		sumC /= weightC;
-	}
-	if (weightV > 0.0) {
-		sumV /= (weightV * weightV);
-	}
-
-	surf2Dwrite(
-		sumC,
-		nextClrBuffer,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
-
-	surf2Dwrite(
-		sumV,
-		nextVarBuffer,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
 }
-
 
 namespace idaten
 {
@@ -515,20 +323,6 @@ namespace idaten
 
 		auto& curaov = getCurAovs();
 
-		for (int i = 0; i < 2; i++) {
-			m_atrousClrBuffer[i].map();
-			m_atrousVarBuffer[i].map();
-		}
-
-		cudaSurfaceObject_t clr[] = {
-			m_atrousClrBuffer[0].bind(),
-			m_atrousClrBuffer[1].bind(),
-		};
-		cudaSurfaceObject_t var[] = {
-			m_atrousVarBuffer[0].bind(),
-			m_atrousVarBuffer[1].bind(),
-		};
-
 		int cur = 0;
 		int next = 1;
 
@@ -537,37 +331,33 @@ namespace idaten
 
 			if (i == 0) {
 				// First.
-				atrousFilter<true> << <grid, block >> > (
+				atrousFilter<true, false> << <grid, block >> > (
+					outputSurf,
 					curaov.ptr(),
-					clr[cur], clr[next],
-					var[cur], var[next],
+					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
+					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
 					stepScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
-
-				copyForNextFrame << <grid, block >> > (
-					clr[next],
-					curaov.ptr(),
-					width, height);
-				checkCudaKernel(copyForNextFrame);
 			}
 #if 1
 			else if (i == ITER - 1) {
 				// Final.
-				atrousFilter<false> << <grid, block >> > (
-				//atrousFilterEx<false> << <1, 1 >> > (
+				atrousFilter<false, true> << <grid, block >> > (
+					outputSurf,
 					curaov.ptr(),
-					clr[cur], outputSurf,
-					var[cur], var[next],
+					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
+					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
 					stepScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}
 			else {
-				atrousFilter<false> << <grid, block >> > (
+				atrousFilter<false, false> << <grid, block >> > (
+					outputSurf,
 					curaov.ptr(),
-					clr[cur], clr[next],
-					var[cur], var[next],
+					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
+					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
 					stepScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
@@ -577,14 +367,5 @@ namespace idaten
 			cur = next;
 			next = 1 - cur;
 		}
-
-		for (int i = 0; i < 2; i++) {
-			m_atrousClrBuffer[i].unbind();
-			m_atrousVarBuffer[i].unbind();
-
-			m_atrousClrBuffer[i].unmap();
-			m_atrousVarBuffer[i].unmap();
-		}
-
 	}
 }

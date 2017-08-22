@@ -143,7 +143,7 @@ __global__ void hitTest(
 
 template <bool isFirstBounce>
 __global__ void shadeMiss(
-	cudaSurfaceObject_t* aovs,
+	idaten::SVGFPathTracing::AOV* aovs,
 	idaten::SVGFPathTracing::Path* paths,
 	int width, int height)
 {
@@ -166,11 +166,10 @@ __global__ void shadeMiss(
 			path.isKill = true;
 
 			// Export bg color to albedo buffer.
-			surf2Dwrite(
-				make_float4(bg.x, bg.y, bg.z, 1),
-				aovs[idaten::SVGFPathTracing::AOVType::texclr],
-				ix * sizeof(float4), iy,
-				cudaBoundaryModeTrap);
+			aovs[idx].texclr = make_float4(bg.x, bg.y, bg.z, 1);
+			aovs[idx].depth = -1;
+			aovs[idx].meshid = -1;
+			aovs[idx].mtrlid = -1;
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
@@ -184,7 +183,7 @@ __global__ void shadeMiss(
 
 template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
-	cudaSurfaceObject_t* aovs,
+	idaten::SVGFPathTracing::AOV* aovs,
 	cudaTextureObject_t* textures,
 	int envmapIdx,
 	real envmapAvgIllum,
@@ -217,15 +216,10 @@ __global__ void shadeMissWithEnvmap(
 			path.isKill = true;
 
 			// Export envmap to albedo buffer.
-			surf2Dwrite(
-				make_float4(emit.x, emit.y, emit.z, 1),
-				aovs[idaten::SVGFPathTracing::AOVType::texclr],
-				ix * sizeof(float4), iy,
-				cudaBoundaryModeTrap);
-
-			// TODO
-			// îwåiÇæÇ∆Ç¢Ç§Ç±Ç∆Ç™ï™Ç©ÇÈÇÊÇ§Ç…ÅAmeshID = -1 ÇÇ±Ç±Ç≈èoóÕÇ∑ÇÈÇ©?
-			// ÇªÇÍÇ∆Ç‡ÅAtexture clear Ç≈éwíËÇ∑ÇÈÇ©?
+			aovs[idx].texclr = make_float4(emit.x, emit.y, emit.z, 1);
+			aovs[idx].depth = -1;
+			aovs[idx].meshid = -1;
+			aovs[idx].mtrlid = -1;
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
@@ -245,7 +239,7 @@ __global__ void shadeMissWithEnvmap(
 
 template <bool isFirstBounce>
 __global__ void shade(
-	cudaSurfaceObject_t* aovs,
+	idaten::SVGFPathTracing::AOV* aovs,
 	aten::mat4 mtxW2C,
 	int width, int height,
 	idaten::SVGFPathTracing::Path* paths,
@@ -328,28 +322,16 @@ __global__ void shade(
 		pos = mtxW2C.apply(pos);
 
 		// normal
-		surf2Dwrite(
-			make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, 0),
-			aovs[idaten::SVGFPathTracing::AOVType::normal],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		aovs[idx].normal = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, 0);
 
 		// depth, meshid.
-		surf2Dwrite(
-			make_float4(pos.w, isect.meshid, rec.mtrlid, 0),
-			aovs[idaten::SVGFPathTracing::AOVType::depth_meshid],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		aovs[idx].depth = pos.w;
+		aovs[idx].meshid = isect.meshid;
+		aovs[idx].mtrlid = rec.mtrlid;
 
 		// texture color.
-
 		auto texcolor = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
-
-		surf2Dwrite(
-			make_float4(texcolor.x, texcolor.y, texcolor.z, 1),
-			aovs[idaten::SVGFPathTracing::AOVType::texclr],
-			ix * sizeof(float4), iy,
-			cudaBoundaryModeTrap);
+		aovs[idx].texclr = make_float4(texcolor.x, texcolor.y, texcolor.z, 1);
 
 		// For exporting separated albedo.
 		mtrl.albedoMap = -1;
@@ -534,7 +516,7 @@ __global__ void shade(
 
 __global__ void gather(
 	cudaSurfaceObject_t dst,
-	cudaSurfaceObject_t* aovs,
+	idaten::SVGFPathTracing::AOV* aovs,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	int width, int height)
 {
@@ -556,17 +538,9 @@ __global__ void gather(
 
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
-	surf2Dwrite(
-		make_float4(lum * lum, lum, 0, 1),
-		aovs[idaten::SVGFPathTracing::AOVType::moments],
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
+	aovs[idx].moments = make_float4(lum * lum, lum, 0, 1);
 
-	surf2Dwrite(
-		contrib,
-		aovs[idaten::SVGFPathTracing::AOVType::color],
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
+	aovs[idx].color = contrib;
 
 	surf2Dwrite(
 		contrib,
@@ -611,33 +585,12 @@ namespace idaten
 		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
 
 		for (int i = 0; i < 2; i++) {
-			m_aovs[i].resize(AOVType::num);
-
-			for (int n = 0; n < (int)AOVType::num; n++) {
-				m_aovTex[i].tex[n].init(width, height, 3);
-				m_aovTex[i].tex[n].initAsGLTexture();
-
-				m_aovs[i][n].init(
-					m_aovTex[i].tex[n].getGLTexHandle(), 
-					CudaGLRscRegisterType::ReadWrite);
-			}
-
-			m_aovCudaRsc[i].init(AOVType::num);
+			m_aovs[i].init(width * height);
 		}
 
 		for (int i = 0; i < 2; i++) {
-			m_atroushClrTex[i].init(width, height, 3);
-			m_atroushClrTex[i].initAsGLTexture();
-			m_atrousClrBuffer[i].init(
-				m_atroushClrTex[i].getGLTexHandle(),
-				CudaGLRscRegisterType::ReadWrite);
-
-
-			m_atroushVarTex[i].init(width, height, 3);
-			m_atroushVarTex[i].initAsGLTexture();
-			m_atrousVarBuffer[i].init(
-				m_atroushVarTex[i].getGLTexHandle(),
-				CudaGLRscRegisterType::ReadWrite);
+			m_atrousClr[i].init(width * height);
+			m_atrousVar[i].init(width * height);
 		}
 	}
 
@@ -689,29 +642,6 @@ namespace idaten
 				tmp.push_back(cudaTex);
 			}
 			m_tex.writeByNum(&tmp[0], tmp.size());
-		}
-
-		// Clear textures for aov.
-		{
-			m_aovTex[m_curAOVPos].tex[AOVType::normal].clearAsGLTexture(aten::vec4(0));
-			m_aovTex[m_curAOVPos].tex[AOVType::depth_meshid].clearAsGLTexture(aten::vec4(-1, -1, -1, -1));
-			m_aovTex[m_curAOVPos].tex[AOVType::texclr].clearAsGLTexture(aten::vec4(1));
-			m_aovTex[m_curAOVPos].tex[AOVType::var].clearAsGLTexture(aten::vec4(0));
-
-			// TODO
-			m_aovTex[m_curAOVPos].tex[AOVType::color].clearAsGLTexture(aten::vec4(0));
-			m_aovTex[m_curAOVPos].tex[AOVType::moments].clearAsGLTexture(aten::vec4(0));
-		}
-
-		for (int i = 0; i < 2; i++)
-		{
-			std::vector<cudaSurfaceObject_t> tmp;
-
-			for (int n = 0; n < m_aovs[i].size(); n++) {
-				m_aovs[i][n].map();
-				tmp.push_back(m_aovs[i][n].bind());
-			}
-			m_aovCudaRsc[i].writeByNum(&tmp[0], tmp.size());
 		}
 
 		static const int rrBounce = 3;
@@ -787,14 +717,6 @@ namespace idaten
 				m_texRsc[i].unbind();
 			}
 			m_tex.reset();
-
-			for (int i = 0; i < 2; i++) {
-				for (int n = 0; n < m_aovs[i].size(); n++) {
-					m_aovs[i][n].unbind();
-					m_aovs[i][n].unmap();
-				}
-				m_aovCudaRsc[i].reset();
-			}
 		}
 	}
 

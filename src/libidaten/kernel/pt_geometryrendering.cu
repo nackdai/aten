@@ -17,7 +17,7 @@
 #include "aten4idaten.h"
 
 __global__ void renderAOV(
-	float4* aovs,
+	idaten::PathTracingGeometryRendering::AOV* aovs,
 	int width, int height,
 	int sample, int maxSamples,
 	int seed,
@@ -65,18 +65,16 @@ __global__ void renderAOV(
 		aten::vec4 pos = aten::vec4(rec.p, 1);
 		pos = mtxW2C.apply(pos);
 
-		aovs[idx].x = isect.mtrlid;	// material id.
-		aovs[idx].y = pos.w;		// depth.
+		aovs[idx].mtrlid = isect.mtrlid;	// material id.
+		aovs[idx].meshid = isect.meshid;
+		aovs[idx].depth = pos.w;		// depth.
 
-		// TODO
-		// For trial.
-		// ZÇÃïÑçÜÇê≥ämÇ…ïúå≥Ç≈Ç´Ç»Ç¢.
-		aovs[idx].z = rec.normal.x;
-		aovs[idx].w = rec.normal.y;
+		aovs[idx].normal = make_float3(rec.normal.x, rec.normal.y, rec.normal.z);
 	}
 	else {
-		aovs[idx].x = -1.0;			// material id.
-		aovs[idx].y = AT_MATH_INF;	// depth.
+		aovs[idx].mtrlid = -1;			// material id.
+		aovs[idx].meshid = -1;
+		aovs[idx].depth = AT_MATH_INF;	// depth.
 	}
 }
 
@@ -89,7 +87,7 @@ enum ReferPos {
 
 __global__ void geometryRender(
 	const idaten::PathTracing::Path* __restrict__ paths,
-	const float4* __restrict__ aovs,
+	const idaten::PathTracingGeometryRendering::AOV* __restrict__ aovs,
 	cudaSurfaceObject_t outSurface,
 	int width, int height,
 	int mwidth, int mheight)
@@ -134,7 +132,7 @@ __global__ void geometryRender(
 	v = aten::clamp(v, AT_MATH_EPSILON, real(1));
 
 	int refmidx = getIdx(ix, iy, width);
-	const int mtrlIdx = (int)aovs[refmidx].x;
+	const int mtrlIdx = aovs[refmidx].mtrlid;
 
 	real norms[4] = {
 		1 / (u * (1 - v)),
@@ -149,7 +147,7 @@ __global__ void geometryRender(
 	
 	for (int i = 0; i < 4; i++) {
 		auto midx = getIdx(pos[i].x * ratio, pos[i].y * ratio, width);
-		int refMtrlIdx = (int)aovs[midx].x;
+		int refMtrlIdx = aovs[midx].mtrlid;
 
 		int coeff = (mtrlIdx == refMtrlIdx ? 1 : 0);
 		auto weight = norms[i] * coeff;;

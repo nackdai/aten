@@ -64,8 +64,8 @@ inline __device__ void computePrevPos(
 __global__ void temporalReprojection(
 	const idaten::PathTracing::Path* __restrict__ paths,
 	const aten::CameraParameter* __restrict__ camera,
-	const float4* __restrict__ aovs,
-	const float4* __restrict__ prevAOVs,
+	const idaten::PathTracingGeometryRendering::AOV* __restrict__ aovs,
+	const idaten::PathTracingGeometryRendering::AOV* __restrict__ prevAOVs,
 	const aten::mat4* __restrict__ mtxs,
 	cudaSurfaceObject_t outSurface,
 	int width, int height,
@@ -84,7 +84,7 @@ __global__ void temporalReprojection(
 
 	const auto aov = aovs[idx];
 
-	if (aov.y > camera->zfar) {
+	if (aov.meshid < 0) {
 		// 背景なので、そのまま出力して終わり.
 		float4 clr = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 		clr.w = 1;
@@ -98,13 +98,9 @@ __global__ void temporalReprojection(
 		return;
 	}
 
-	const auto centerDepth = aten::clamp(aov.y, camera->znear, camera->zfar);
+	const auto centerDepth = aten::clamp(aov.depth, camera->znear, camera->zfar);
 
-	// TODO
-	// For trial.
-	// Zの符号を正確に復元できていない.
-	float3 centerNormal = make_float3(aov.z, aov.w, 0);
-	centerNormal.z = sqrtf(1 - clamp(dot(centerNormal, centerNormal), 0.0f, 1.0f));
+	float3 centerNormal = aov.normal;
 
 	// 今回のフレームのピクセルカラー.
 	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
@@ -114,8 +110,8 @@ __global__ void temporalReprojection(
 	float4 sum = make_float4(0, 0, 0, 0);
 	float weight = 0.0f;
 
-	for (int y = -1; y < 1; y++) {
-		for (int x = -1; x < 1; x++) {
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
 			int xx = clamp(ix + x, 0, width - 1);
 			int yy = clamp(iy + y, 0, height - 1);
 
@@ -143,20 +139,16 @@ __global__ void temporalReprojection(
 				const auto pidx = getIdx(px, py, width);
 
 				const auto prevAov = prevAOVs[pidx];
-				const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
+				const auto prevDepth = aten::clamp(prevAov.depth, camera->znear, camera->zfar);
 
-				// TODO
-				// For trial.
-				// Zの符号を正確に復元できていない.
-				float3 prevNormal = make_float3(prevAov.z, prevAov.w, 0);
-				prevNormal.z = sqrtf(1 - clamp(dot(prevNormal, prevNormal), 0.0f, 1.0f));
+				float3 prevNormal = prevAov.normal;
 
 				static const float zThreshold = 0.05f;
 				static const float nThreshold = 0.98f;
 
 				float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
 				float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
-				float Wm = aov.x == prevAov.x ? 1.0f : 0.0f;
+				float Wm = aov.meshid == prevAov.meshid ? 1.0f : 0.0f;
 
 				// 前のフレームのピクセルカラーを取得.
 				float4 prev;

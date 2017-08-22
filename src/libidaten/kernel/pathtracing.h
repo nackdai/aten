@@ -138,6 +138,13 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
+		struct AOV {
+			float depth;
+			int meshid;
+			int mtrlid;
+			float3 normal;
+		};
+
 	protected:
 		virtual void onGenPath(
 			int width, int height,
@@ -159,7 +166,7 @@ namespace idaten
 			h <<= 1;
 		}
 
-		virtual idaten::TypedCudaMemory<float4>& getCurAOVs()
+		virtual idaten::TypedCudaMemory<AOV>& getCurAOVs()
 		{
 			return m_aovs[0];
 		}
@@ -170,7 +177,7 @@ namespace idaten
 			int maxSamples) override;
 
 	protected:
-		idaten::TypedCudaMemory<float4> m_aovs[2];
+		idaten::TypedCudaMemory<AOV> m_aovs[2];
 	};
 
 	class PathTracingTemporalReprojection : public PathTracingGeometryRendering {
@@ -205,7 +212,7 @@ namespace idaten
 			h = h;
 		}
 
-		virtual idaten::TypedCudaMemory<float4>& getCurAOVs() override final
+		virtual idaten::TypedCudaMemory<AOV>& getCurAOVs() override final
 		{
 			return m_aovs[m_curAOV];
 		}

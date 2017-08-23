@@ -268,7 +268,7 @@ __global__ void atrousFilter(
 
 			float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
 
-			float Wz = min(exp(-abs(centerDepth - depth) / (sigmaZ * dot(ddZ, p - q) + 0.000001f)), 1.0f);
+			float Wz = min(exp(-abs(centerDepth - depth) / (sigmaZ * abs(dot(ddZ, p - q)) + 0.000001f)), 1.0f);
 
 			float Wn = pow(max(0.0f, dot(centerNormal, normal)), sigmaN);
 
@@ -301,7 +301,8 @@ __global__ void atrousFilter(
 	if (isFirstIter) {
 		aovs[idx].color = sumC;
 	}
-	else if (isFinalIter) {
+	
+	if (isFinalIter) {
 		sumC *= aovs[idx].texclr;
 
 		surf2Dwrite(

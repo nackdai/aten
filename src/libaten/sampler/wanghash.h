@@ -23,15 +23,16 @@ namespace aten {
 		// [0, 1]
 		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
 		{
-			return (real)next() / UINT_MAX;
+			auto ret = (real)next(m_seed) / UINT_MAX;
+			m_seed += 1;
+			return ret;
 		}
 
-	private:
 		// NOTE
 		// https://gist.github.com/badboy/6267743
-		AT_DEVICE_API uint32_t next()
+		static AT_DEVICE_API uint32_t next(unsigned int seed)
 		{
-			uint32_t key = 1664525U * m_seed + 1013904223U;
+			uint32_t key = 1664525U * seed + 1013904223U;
 
 			key = (key ^ 61) ^ (key >> 16);
 			key = key + (key << 3);
@@ -39,11 +40,10 @@ namespace aten {
 			key = key * 0x27d4eb2d;
 			key = key ^ (key >> 15);
 
-			m_seed += 1;
-
 			return key;
 		}
 
+	private:
 		unsigned int m_seed;
 	};
 }

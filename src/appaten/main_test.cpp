@@ -24,8 +24,8 @@ static aten::envmap g_bg;
 static aten::texture* g_envmap;
 
 //static aten::RayTracing g_tracer;
-//static aten::PathTracing g_tracer;
-static aten::SVGFPathTracing g_tracer;
+static aten::PathTracing g_tracer;
+//static aten::SVGFPathTracing g_tracer;
 //static aten::BDPT g_tracer;
 //static aten::SortedPathTracing g_tracer;
 //static aten::ERPT g_tracer;
@@ -97,7 +97,7 @@ void display()
 
 int main(int argc, char* argv[])
 {
-	aten::initSampler();
+	aten::initSampler(WIDTH, HEIGHT, 0, true);
 
 #if 0
 	aten::MicrofacetBlinn blinn(aten:: vec3(1, 1, 1), 1, 1.5);
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 	g_bg.init(g_envmap);
 
 	aten::ImageBasedLight ibl(&g_bg);
-	g_scene.addImageBasedLight(&ibl);
+	//g_scene.addImageBasedLight(&ibl);
 
 	//g_tracer.setBG(&g_staticbg);
 

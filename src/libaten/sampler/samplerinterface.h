@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "defs.h"
 #include "types.h"
 
@@ -18,7 +19,13 @@ namespace aten {
 	};
 #endif
 
-	void initSampler();
+	void initSampler(
+		uint32_t width, uint32_t height, 
+		int seed = 0,
+		bool needInitHalton = false);
+
+	const std::vector<uint32_t>& getRandom();
+	uint32_t getRandom(uint32_t idx);
 
 	inline real drand48()
 	{

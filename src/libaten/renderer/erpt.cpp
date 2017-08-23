@@ -191,7 +191,10 @@ namespace aten
 			auto idx = thread::getThreadIdx();
 
 			for (int x = 0; x < width; x++) {
-				XorShift rnd((y * height * 4 + x * 4) * samples + time.milliSeconds);
+				int pos = y * width + x;
+
+				auto scramble = aten::getRandom(pos) * 0x1fe3434f;
+				XorShift rnd(scramble + time.milliSeconds);
 				ERPTSampler X(&rnd);
 
 				auto path = genPath(scene, &X, x, y, width, height, camera, false);

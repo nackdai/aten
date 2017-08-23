@@ -41,7 +41,7 @@ inline AT_DEVICE_API float sample(
 	const unsigned int* matrices,
     unsigned long long index,
     const unsigned dimension,
-    const unsigned scramble = 0U)
+    const unsigned scramble)
 {
     AT_ASSERT(dimension < Matrices::num_dimensions);
 

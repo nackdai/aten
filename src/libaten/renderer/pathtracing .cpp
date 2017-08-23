@@ -385,11 +385,15 @@ namespace aten
 		}
 	}
 
+	static uint32_t frame = 0;
+
 	void PathTracing::render(
 		Destination& dst,
 		scene* scene,
 		camera* camera)
 	{
+		frame++;
+
 		int width = dst.width;
 		int height = dst.height;
 		uint32_t samples = dst.sample;
@@ -412,16 +416,15 @@ namespace aten
 		}
 #endif
 
+		auto time = timer::getSystemTime();
+
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
 		{
 			auto idx = thread::getThreadIdx();
 
-			//XorShift rnd(idx);
-			//UniformDistributionSampler sampler(&rnd);
-
-			auto time = timer::getSystemTime();
+			auto t = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
@@ -441,15 +444,12 @@ namespace aten
 #endif
 
 					for (uint32_t i = 0; i < samples; i++) {
-						int seed = (y * height * 4 + x * 4) * samples + i + 1;
-#ifndef RELEASE_DEBUG
-						seed += time.milliSeconds;
-#endif
+						auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
-						//XorShift rnd(seed);
-						//Halton rnd(seed);
-						//Sobol rnd(seed);
-						WangHash rnd(seed);
+						//XorShift rnd(scramble + t.milliSeconds);
+						//Halton rnd(scramble + t.milliSeconds);
+						Sobol rnd(scramble + t.milliSeconds);
+						//WangHash rnd(scramble + t.milliSeconds);
 
 						real u = real(x + rnd.nextSample()) / real(width);
 						real v = real(y + rnd.nextSample()) / real(height);
@@ -468,6 +468,7 @@ namespace aten
 							camsample,
 							scene);
 #else
+
 						auto path = radiance(
 							&rnd,
 							ray, 

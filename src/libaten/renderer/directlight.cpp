@@ -320,17 +320,13 @@ namespace aten
 					vec3 col2 = vec3(0);
 					uint32_t cnt = 0;
 
-
 					for (uint32_t i = 0; i < samples; i++) {
-						int seed = (y * height * 4 + x * 4) * samples + i + 1;
-#if 0
-						seed += time.milliSeconds;
-#endif
+						auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
-						//XorShift rnd(seed);
-						//Halton rnd(seed);
-						//Sobol rnd(seed);
-						WangHash rnd(seed);
+						//XorShift rnd(scramble + time.milliSeconds);
+						//Halton rnd(scramble + time.milliSeconds);
+						Sobol rnd(scramble + time.milliSeconds);
+						//WangHash rnd(scramble + time.milliSeconds);
 
 						real u = real(x + rnd.nextSample()) / real(width);
 						real v = real(y + rnd.nextSample()) / real(height);

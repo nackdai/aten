@@ -27,13 +27,15 @@ namespace aten
 				auto& path = paths[idx];
 
 				if (!path.isTerminate) {
+					auto scramble = aten::getRandom(idx) * 0x1fe3434f;
+
 					if (path.sampler) {
-						path.sampler->init((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
-						//path.sampler->init((y * height * 4 + x * 4) * m_samples + sample + 1);
+						path.sampler->init(scramble + time.milliSeconds);
+						//path.sampler->init(scramble + time.milliSeconds);
 					}
 					else {
-						path.sampler = new Sobol((y * height * 4 + x * 4) * m_samples + sample + 1 + time.milliSeconds);
-						//path.sampler = new XorShift((y * height * 4 + x * 4) * m_samples + sample + 1);
+						path.sampler = new Sobol(scramble + time.milliSeconds);
+						//path.sampler = new XorShift(scramble + time.milliSeconds);
 					}
 
 					sampler* sampler = path.sampler;

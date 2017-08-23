@@ -896,19 +896,20 @@ namespace aten
 
 			auto time = timer::getSystemTime();
 
-			XorShift rnd(idx * 32);
-
 #if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
 #pragma omp for
 #endif
 			for (int y = 0; y < m_height; y++) {
 				for (int x = 0; x < m_width; x++) {
+					int pos = y * m_width + x;
 
 					for (uint32_t i = 0; i < samples; i++) {
-						XorShift rnd((y * m_height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						//Halton rnd((y * height * 4 + x * 4) * samples + i + 1);
-						//Sobol rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
-						//Sobol rnd((y * m_height * 4 + x * 4) * samples + i + 1);
+						auto scramble = aten::getRandom(pos) * 0x1fe3434f;
+
+						XorShift rnd(scramble + time.milliSeconds);
+						//Halton rnd(scramble + time.milliSeconds);
+						//Sobol rnd(scramble + time.milliSeconds);
+						//WangHash rnd(scramble + time.milliSeconds);
 
 						std::vector<Result> result;
 

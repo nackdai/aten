@@ -39,6 +39,7 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
+static int g_curMode = 0;
 
 void onRun()
 {
@@ -94,6 +95,15 @@ void onRun()
 
 		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
 			g_tracer.reset();
+		}
+
+		static const char* items[] = { "SVGF", "TF", "PT" };
+		int item_current = g_curMode;
+		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items), 3);
+
+		if (g_curMode != item_current) {
+			g_curMode = item_current;
+			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 		}
 
 		aten::window::drawImGui();

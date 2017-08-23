@@ -10,6 +10,12 @@ namespace idaten
 {
 	class SVGFPathTracing : public Renderer {
 	public:
+		enum Mode {
+			SVGF,	// Spatio-temporal Variance Guided Filter.
+			TF,		// Temporal Filter.
+			PT,		// Path Tracing.
+		};
+
 #ifdef __AT_CUDA__
 		struct Path {
 			aten::vec3 throughput;
@@ -67,6 +73,24 @@ namespace idaten
 			const std::vector<aten::mat4>& mtxs,
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
+
+		Mode getMode() const
+		{
+			return m_mode;
+		}
+		void setMode(Mode mode)
+		{
+			auto prev = m_mode;
+			m_mode = mode;
+			if (prev != m_mode) {
+				reset();
+			}
+		}
+
+		virtual void reset() override final
+		{
+			m_frame = 1;
+		}
 
 	protected:
 		virtual void onGenPath(
@@ -140,9 +164,10 @@ namespace idaten
 		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
 
 		unsigned int m_frame{ 1 };
-		bool m_isFirstRender{ true };
 
 		idaten::TypedCudaMemory<float4> m_atrousClr[2];
 		idaten::TypedCudaMemory<float4> m_atrousVar[2];
+
+		Mode m_mode{ Mode::SVGF };
 	};
 }

@@ -17,8 +17,6 @@
 
 #include "aten4idaten.h"
 
-#define ENABLE_SVGF
-
 __global__ void genPath(
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
@@ -698,11 +696,11 @@ namespace idaten
 
 		onGather(outputSurf, width, height, maxSamples);
 
-#ifdef ENABLE_SVGF
-		onVarianceEstimation(outputSurf, width, height);
+		if (m_mode == Mode::SVGF) {
+			onVarianceEstimation(outputSurf, width, height);
 
-		onAtrousFilter(outputSurf, width, height);
-#endif
+			onAtrousFilter(outputSurf, width, height);
+		}
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
@@ -710,7 +708,6 @@ namespace idaten
 		m_curAOVPos = 1 - m_curAOVPos;
 
 		m_frame++;
-		m_isFirstRender = false;
 
 		{
 			m_vtxparamsPos.unbind();
@@ -920,7 +917,27 @@ namespace idaten
 		auto& curaov = getCurAovs();
 		auto& prevaov = getPrevAovs();
 
-		if (m_isFirstRender) {
+		bool isFirstFrame = (m_frame == 1);
+
+		if (m_mode == Mode::SVGF
+			|| m_mode == Mode::TF)
+		{
+			if (isFirstFrame) {
+				gather << <grid, block >> > (
+					outputSurf,
+					curaov.ptr(),
+					m_paths.ptr(),
+					width, height);
+
+				checkCudaKernel(gather);
+			}
+			else {
+				onTemporalReprojection(
+					outputSurf,
+					width, height);
+			}
+		}
+		else {
 			gather << <grid, block >> > (
 				outputSurf,
 				curaov.ptr(),
@@ -928,11 +945,6 @@ namespace idaten
 				width, height);
 
 			checkCudaKernel(gather);
-		}
-		else {
-			onTemporalReprojection(
-				outputSurf,
-				width, height);
 		}
 
 		m_mtxPrevV2C = m_mtxV2C;

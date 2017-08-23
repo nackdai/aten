@@ -139,6 +139,7 @@ namespace idaten
 
 		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
 
+		unsigned int m_frame{ 1 };
 		bool m_isFirstRender{ true };
 
 		idaten::TypedCudaMemory<float4> m_atrousClr[2];

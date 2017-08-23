@@ -24,10 +24,10 @@ __global__ void genPath(
 	aten::ray* rays,
 	int width, int height,
 	int sample, int maxSamples,
-	int seed,
+	unsigned int frame,
 	const aten::CameraParameter* __restrict__ camera,
 	const unsigned int* sobolmatrices,
-	const unsigned int* random)
+	unsigned int* random)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -47,7 +47,12 @@ __global__ void genPath(
 	}
 
 	auto scramble = random[idx] * 0x1fe3434f;
-	path.sampler.init(scramble + seed, sobolmatrices);
+
+	if (frame & 0xf) {
+		random[idx] = aten::WangHash::next(scramble);
+	}
+
+	path.sampler.init(scramble + frame, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -704,6 +709,7 @@ namespace idaten
 		// Toggle aov buffer pos.
 		m_curAOVPos = 1 - m_curAOVPos;
 
+		m_frame++;
 		m_isFirstRender = false;
 
 		{
@@ -739,7 +745,7 @@ namespace idaten
 			m_rays.ptr(),
 			width, height,
 			sample, maxSamples,
-			seed,
+			m_frame,
 			m_cam.ptr(),
 			m_sobolMatrices.ptr(),
 			m_random.ptr());

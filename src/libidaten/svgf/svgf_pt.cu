@@ -26,7 +26,8 @@ __global__ void genPath(
 	int sample, int maxSamples,
 	int seed,
 	const aten::CameraParameter* __restrict__ camera,
-	const unsigned int* sobolmatrices)
+	const unsigned int* sobolmatrices,
+	const unsigned int* random)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -45,18 +46,11 @@ __global__ void genPath(
 		return;
 	}
 
-	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
+	auto scramble = random[idx] * 0x1fe3434f;
+	path.sampler.init(scramble + seed, sobolmatrices);
 
-#ifdef IDATEN_USE_SOBOL
-	path.sampler.nextSample();
-	path.sampler.nextSample();
-
-	float s = ((float)ix + 0.5f) / (float)(camera->width);
-	float t = ((float)iy + 0.5f) / (float)(camera->height);
-#else
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
-#endif
 
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -586,6 +580,10 @@ namespace idaten
 		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
 		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
 
+		auto& r = aten::getRandom();
+		m_random.init(width * height);
+		m_random.writeByNum(&r[0], width * height);
+
 		for (int i = 0; i < 2; i++) {
 			m_aovs[i].init(width * height);
 		}
@@ -743,7 +741,8 @@ namespace idaten
 			sample, maxSamples,
 			seed,
 			m_cam.ptr(),
-			m_sobolMatrices.ptr());
+			m_sobolMatrices.ptr(),
+			m_random.ptr());
 
 		checkCudaKernel(genPath);
 	}

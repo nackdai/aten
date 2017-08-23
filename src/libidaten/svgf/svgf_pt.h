@@ -127,6 +127,7 @@ namespace idaten
 		idaten::TypedCudaMemory<int> m_hitidx;
 
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
+		idaten::TypedCudaMemory<unsigned int> m_random;
 
 		int m_curAOVPos{ 0 };
 

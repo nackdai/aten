@@ -223,6 +223,8 @@ int main()
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
 
+	aten::initSampler(WIDTH, HEIGHT);
+
 	aten::window::init(
 		WIDTH, HEIGHT, TITLE,
 		onClose,

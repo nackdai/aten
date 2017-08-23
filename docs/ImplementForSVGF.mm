@@ -3,15 +3,17 @@
 <node CREATED="1502080353020" ID="ID_1501713082" MODIFIED="1502096894701" TEXT="SVGF&#x5b9f;&#x88c5;&#x30e1;&#x30e2;">
 <node CREATED="1502080463016" ID="ID_1040204367" MODIFIED="1502080465602" POSITION="right" TEXT="TODO">
 <node CREATED="1502080499046" ID="ID_1458021787" MODIFIED="1502080513410" TEXT="Direct&#x3001;Indirect&#x540c;&#x6642;&#x51e6;&#x7406;&#x3057;&#x3064;&#x3064;&#x3001;&#x5206;&#x96e2;&#x51fa;&#x529b;"/>
-<node COLOR="#ff0000" CREATED="1503387783672" ID="ID_1417453371" MODIFIED="1503387875457" TEXT="&#x4e71;&#x6570;&#x751f;&#x6210;">
-<font BOLD="true" NAME="SansSerif" SIZE="12"/>
-<icon BUILTIN="idea"/>
-<node CREATED="1503387789538" ID="ID_1757434283" MODIFIED="1503387803451" TEXT="sobol&#x306e;&#x521d;&#x671f;&#x5024;&#x3092;&#x3082;&#x3063;&#x3068;&#x6563;&#x3089;&#x3055;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;"/>
-<node CREATED="1503387803823" ID="ID_1844943984" MODIFIED="1503387808515" TEXT="&#x30d1;&#x30bf;&#x30fc;&#x30f3;&#x304c;&#x51fa;&#x3066;&#x3057;&#x307e;&#x3063;&#x3066;&#x3044;&#x308b;">
 <node CREATED="1503387817759" ID="ID_689743960" MODIFIED="1503387838474" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x539f;&#x56e0;">
 <icon BUILTIN="help"/>
+<node CREATED="1503470731543" ID="ID_203719625" MODIFIED="1503470761032" TEXT="&#x30d6;&#x30ec;&#x30f3;&#x30c9;&#x7387;&#x304c;0.2&#x3067;&#x73fe;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x30ab;&#x30e9;&#x30fc;&#x306e;&#x5f71;&#x97ff;&#x304c;&#x5f37;&#x3044;"/>
+<node CREATED="1503470761469" ID="ID_784267533" MODIFIED="1503470780560" TEXT="&#x73fe;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x30ab;&#x30e9;&#x30fc;&#x306f;1spp&#x306a;&#x306e;&#x3067;&#x30ce;&#x30a4;&#x30ba;&#x3092;&#x542b;&#x3080;"/>
+<node CREATED="1503470781196" ID="ID_696233291" MODIFIED="1503470793120" TEXT="&#x305d;&#x306e;&#x305f;&#x3081;&#x3001;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x5f37;&#x304f;&#x3067;&#x3066;&#x3057;&#x307e;&#x3046;"/>
 </node>
-</node>
+<node COLOR="#000000" CREATED="1503387783672" ID="ID_1417453371" MODIFIED="1503456231331" TEXT="&#x4e71;&#x6570;&#x751f;&#x6210;">
+<font NAME="SansSerif" SIZE="12"/>
+<icon BUILTIN="button_ok"/>
+<node CREATED="1503387789538" ID="ID_1757434283" MODIFIED="1503387803451" TEXT="sobol&#x306e;&#x521d;&#x671f;&#x5024;&#x3092;&#x3082;&#x3063;&#x3068;&#x6563;&#x3089;&#x3055;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;"/>
+<node CREATED="1503387803823" ID="ID_1844943984" MODIFIED="1503387808515" TEXT="&#x30d1;&#x30bf;&#x30fc;&#x30f3;&#x304c;&#x51fa;&#x3066;&#x3057;&#x307e;&#x3063;&#x3066;&#x3044;&#x308b;"/>
 </node>
 <node CREATED="1502080513966" ID="ID_1185746015" MODIFIED="1503385074572" TEXT="AOV">
 <icon BUILTIN="button_ok"/>
@@ -205,7 +207,7 @@
 </node>
 <node CREATED="1502355552679" ID="ID_373630921" MODIFIED="1502355556187" POSITION="right" TEXT="&#x53c2;&#x8003;&#x30ea;&#x30f3;&#x30af;">
 <node CREATED="1502355556513" ID="ID_1353579983" MODIFIED="1502355562404" TEXT="&#x30b9;&#x30c8;&#x30ea;&#x30fc;&#x30e0;&#x30a2;&#x30eb;&#x30b4;&#x30ea;&#x30ba;&#x30e0;">
-<node CREATED="1502355562802" ID="ID_847499542" MODIFIED="1502355563427" TEXT="https://qpp.bitbucket.io/post/streaming_algorithm/"/>
+<node CREATED="1503470722347" LINK="https://qpp.bitbucket.io/post/streaming_algorithm/" MODIFIED="1503470722347" TEXT="https://qpp.bitbucket.io/post/streaming_algorithm/"/>
 </node>
 </node>
 </node>

@@ -17,6 +17,7 @@
 #define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
+#define ENABLE_ATROUS
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -250,6 +251,8 @@ int main()
 	aten::timer::init();
 	aten::thread::setThreadNum(g_threadnum);
 
+	aten::initSampler(WIDTH, HEIGHT);
+
 	aten::window::init(
 		WIDTH, HEIGHT, TITLE,
 		onClose,
@@ -278,7 +281,9 @@ int main()
 		"../shader/vs.glsl", "../shader/atrous_fs.glsl",
 		"../shader/vs.glsl", "../shader/atrous_final_fs.glsl");
 
+#ifdef ENABLE_ATROUS
 	aten::visualizer::addPostProc(&atrous);
+#endif
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 

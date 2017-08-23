@@ -111,6 +111,7 @@ namespace idaten
 		idaten::TypedCudaMemory<int> m_hitidx;
 
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
+		idaten::TypedCudaMemory<unsigned int> m_random;
 
 		bool m_enableAOV{ false };
 		aten::vec3 m_posRange{ aten::vec3(real(1)) };

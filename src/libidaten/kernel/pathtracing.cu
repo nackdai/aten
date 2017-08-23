@@ -25,7 +25,8 @@ __global__ void genPath(
 	int sample, int maxSamples,
 	int seed,
 	const aten::CameraParameter* __restrict__ camera,
-	const unsigned int* sobolmatrices)
+	const unsigned int* sobolmatrices,
+	const unsigned int* random)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -44,7 +45,8 @@ __global__ void genPath(
 		return;
 	}
 
-	path.sampler.init((iy * height * 4 + ix * 4) * maxSamples + sample + 1 + seed, sobolmatrices);
+	auto scramble = random[idx];
+	path.sampler.init(scramble + seed, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -776,6 +778,11 @@ namespace idaten {
 
 		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
 		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
+
+		auto& r = aten::getRandom();
+
+		m_random.init(width * height);
+		m_random.writeByNum(&r[0], width * height);
 	}
 
 	void PathTracing::enableRenderAOV(
@@ -953,7 +960,8 @@ namespace idaten {
 			sample, maxSamples,
 			seed,
 			m_cam.ptr(),
-			m_sobolMatrices.ptr());
+			m_sobolMatrices.ptr(),
+			m_random.ptr());
 
 		checkCudaKernel(genPath);
 	}

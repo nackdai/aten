@@ -17,6 +17,8 @@
 
 #include "aten4idaten.h"
 
+#define ENABLE_SVGF
+
 __global__ void genPath(
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
@@ -693,9 +695,11 @@ namespace idaten
 
 		onGather(outputSurf, width, height, maxSamples);
 
+#ifdef ENABLE_SVGF
 		onVarianceEstimation(outputSurf, width, height);
 
 		onAtrousFilter(outputSurf, width, height);
+#endif
 
 		checkCudaErrors(cudaDeviceSynchronize());
 

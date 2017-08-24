@@ -92,6 +92,11 @@ namespace idaten
 			m_frame = 1;
 		}
 
+		uint32_t frame() const
+		{
+			return m_frame;
+		}
+
 	protected:
 		virtual void onGenPath(
 			int width, int height,

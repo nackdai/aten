@@ -369,9 +369,14 @@ __global__ void shade(
 
 	aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
 
+	bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
+
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
-	aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
+	aten::vec3 orienting_normal = rec.normal;
+	if (mtrl.attrib.isTranslucent && isBackfacing) {
+		orienting_normal = -rec.normal;
+	}
 
 	// Apply normal map.
 	if (mtrl.type == aten::MaterialType::Layer) {
@@ -429,25 +434,27 @@ __global__ void shade(
 
 	// Implicit conection to light.
 	if (mtrl.attrib.isEmissive) {
-		float weight = 1.0f;
+		if (!isBackfacing) {
+			float weight = 1.0f;
 
-		if (bounce > 0 && !path.isSingular) {
-			auto cosLight = dot(orienting_normal, -ray.dir);
-			auto dist2 = aten::squared_length(rec.p - ray.org);
+			if (bounce > 0 && !path.isSingular) {
+				auto cosLight = dot(orienting_normal, -ray.dir);
+				auto dist2 = aten::squared_length(rec.p - ray.org);
 
-			if (cosLight >= 0) {
-				auto pdfLight = 1 / rec.area;
+				if (cosLight >= 0) {
+					auto pdfLight = 1 / rec.area;
 
-				// Convert pdf area to sradian.
-				// http://www.slideshare.net/h013/edubpt-v100
-				// p31 - p35
-				pdfLight = pdfLight * dist2 / cosLight;
+					// Convert pdf area to sradian.
+					// http://www.slideshare.net/h013/edubpt-v100
+					// p31 - p35
+					pdfLight = pdfLight * dist2 / cosLight;
 
-				weight = path.pdfb / (pdfLight + path.pdfb);
+					weight = path.pdfb / (pdfLight + path.pdfb);
+				}
 			}
-		}
 
-		path.contrib += path.throughput * weight * mtrl.baseColor;
+			path.contrib += path.throughput * weight * mtrl.baseColor;
+		}
 
 		// When ray hit the light, tracing will finish.
 		path.isTerminate = true;

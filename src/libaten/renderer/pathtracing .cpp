@@ -12,8 +12,8 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X	(390)
-#define BREAK_Y	(480 - 364)
+#define BREAK_X	(309)
+#define BREAK_Y	(511 - 61)
 #pragma optimize( "", off)
 #endif
 
@@ -109,17 +109,27 @@ namespace aten
 	{
 		uint32_t rrDepth = m_rrDepth;
 
+		auto mtrl = material::getMaterial(path.rec.mtrlid);
+
+#if 1
+		bool isBackfacing = dot(path.rec.normal, -path.ray.dir) < real(0);
+
 		// 交差位置の法線.
 		// 物体からのレイの入出を考慮.
+		vec3 orienting_normal = path.rec.normal;
+		if (mtrl->isTranslucent() && isBackfacing) {
+			orienting_normal = -path.rec.normal;
+		}
+#else
 		vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
-
-		auto mtrl = material::getMaterial(path.rec.mtrlid);
+#endif
 
 		// Apply normal map.
 		mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
 		// Implicit conection to light.
 		if (mtrl->isEmissive()) {
+#if 0
 			if (depth == 0) {
 				// Ray hits the light directly.
 				path.contrib = mtrl->color();
@@ -153,6 +163,32 @@ namespace aten
 					return false;
 				}
 			}
+#else
+			if (!isBackfacing) {
+				real weight = 1.0f;
+
+				if (depth > 0 && !(path.prevMtrl && path.prevMtrl->isSingular())) {
+					auto cosLight = dot(orienting_normal, -path.ray.dir);
+					auto dist2 = aten::squared_length(path.rec.p - path.ray.org);
+
+					if (cosLight >= 0) {
+						auto pdfLight = 1 / path.rec.area;
+
+						// Convert pdf area to sradian.
+						// http://www.slideshare.net/h013/edubpt-v100
+						// p31 - p35
+						pdfLight = pdfLight * dist2 / cosLight;
+
+						weight = path.pdfb / (pdfLight + path.pdfb);
+					}
+				}
+
+				path.contrib += path.throughput * weight * mtrl->color();
+			}
+
+			path.isTerminate = true;
+			return false;
+#endif
 		}
 
 #if 0
@@ -439,7 +475,7 @@ namespace aten
 
 #ifdef RELEASE_DEBUG
 					if (x == BREAK_X && y == BREAK_Y) {
-						int xxx = 0;
+						DEBUG_BREAK();
 					}
 #endif
 
@@ -448,7 +484,7 @@ namespace aten
 
 						//XorShift rnd(scramble + t.milliSeconds);
 						//Halton rnd(scramble + t.milliSeconds);
-						Sobol rnd(scramble + t.milliSeconds);
+						Sobol rnd(scramble + frame);
 						//WangHash rnd(scramble + t.milliSeconds);
 
 						real u = real(x + rnd.nextSample()) / real(width);

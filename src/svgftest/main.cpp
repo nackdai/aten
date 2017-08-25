@@ -14,6 +14,8 @@
 
 #include "scenedefs.h"
 
+#define ENABLE_ENVMAP
+
 static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "svgf";
@@ -39,10 +41,19 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
-static int g_curMode = 0;
+static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
+
+static bool g_enableFrameStep = false;
+static bool g_frameStep = false;
 
 void onRun()
 {
+	if (g_enableFrameStep && !g_frameStep) {
+		return;
+	}
+
+	g_frameStep = false;
+
 	if (g_isCameraDirty) {
 		g_camera.update();
 
@@ -69,7 +80,8 @@ void onRun()
 
 	aten::visualizer::render(false);
 
-	if (g_willTakeScreenShot) {
+	if (g_willTakeScreenShot)
+	{
 		static char buffer[1024];
 		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
 
@@ -83,7 +95,7 @@ void onRun()
 
 	if (g_willShowGUI)
 	{
-		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", g_tracer.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
 
@@ -105,6 +117,10 @@ void onRun()
 			g_curMode = item_current;
 			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 		}
+
+		auto cam = g_camera.param();
+		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
+		ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
 
 		aten::window::drawImGui();
 	}
@@ -175,6 +191,16 @@ void onKey(bool press, aten::Key key)
 		else if (key == aten::Key::Key_F2) {
 			g_willTakeScreenShot = true;
 			return;
+		}
+		else if (key == aten::Key::Key_F3) {
+			g_enableFrameStep = !g_enableFrameStep;
+			return;
+		}
+		else if (key == aten::Key::Key_SPACE) {
+			if (g_enableFrameStep) {
+				g_frameStep = true;
+				return;
+			}
 		}
 	}
 
@@ -283,12 +309,14 @@ int main()
 		WIDTH * HEIGHT,
 		1024);
 
+#ifdef ENABLE_ENVMAP
 	auto envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
 	aten::ImageBasedLight ibl(&bg);
 
 	g_scene.addImageBasedLight(&ibl);
+#endif
 
 	{
 		std::vector<aten::ShapeParameter> shapeparams;
@@ -320,11 +348,13 @@ int main()
 			}
 		}
 
+#ifdef ENABLE_ENVMAP
 		for (auto& l : lightparams) {
 			if (l.type == aten::LightType::IBL) {
 				l.envmap.idx = envmap->id();
 			}
 		}
+#endif
 
 		auto camparam = g_camera.param();
 		camparam.znear = real(0.1);
@@ -341,8 +371,15 @@ int main()
 			primparams,
 			vtxparams,
 			mtxs,
-			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+			tex,
+#ifdef ENABLE_ENVMAP
+			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+#else
+			idaten::EnvmapResource());
+#endif
 	}
+
+	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 
 	aten::window::run(onRun);
 

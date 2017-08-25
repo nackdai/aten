@@ -1,13 +1,56 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
 <node CREATED="1502080353020" ID="ID_1501713082" MODIFIED="1502096894701" TEXT="SVGF&#x5b9f;&#x88c5;&#x30e1;&#x30e2;">
+<node CREATED="1503644678039" HGAP="57" ID="ID_1938093211" MODIFIED="1503644902848" POSITION="right" TEXT="&#x30d0;&#x30b0;" VSHIFT="-86">
+<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1503644694286" ID="ID_260132461" MODIFIED="1503644708026" TEXT="&#x5916;&#x5074;&#x6cd5;&#x7dda;&#x3082;&#x898b;&#x3066;&#x3057;&#x307e;&#x3046;&#x554f;&#x984c;">
+<node CREATED="1503644852117" ID="ID_1805667843" MODIFIED="1503644890457" TEXT="orienting_normal&#x306e;&#x8a08;&#x7b97;&#x30bf;&#x30a4;&#x30df;&#x30f3;&#x30b0;&#x3068;implicit light &#x306e;&#x8a08;&#x7b97;&#x6642;&#x306b;back facing&#x304b;&#x3069;&#x3046;&#x304b;&#x306e;&#x5224;&#x5b9a;&#x3092;&#x5165;&#x308c;&#x305f;&#x5f71;&#x97ff;"/>
+</node>
+</node>
+<node CREATED="1503649194707" HGAP="85" ID="ID_1998195825" MODIFIED="1503649201487" POSITION="right" TEXT="&#x30e1;&#x30e2;" VSHIFT="-124">
+<node CREATED="1503649204348" ID="ID_1795270965" MODIFIED="1503649210440" TEXT="Layered Material">
+<node CREATED="1503649213483" LINK="http://www.cs.cornell.edu/projects/layered-sg14/layered.pdf" MODIFIED="1503649213483" TEXT="cs.cornell.edu &gt; Projects &gt; Layered-sg14 &gt; Layered"/>
+</node>
+</node>
 <node CREATED="1502080463016" ID="ID_1040204367" MODIFIED="1502080465602" POSITION="right" TEXT="TODO">
 <node CREATED="1502080499046" ID="ID_1458021787" MODIFIED="1502080513410" TEXT="Direct&#x3001;Indirect&#x540c;&#x6642;&#x51e6;&#x7406;&#x3057;&#x3064;&#x3064;&#x3001;&#x5206;&#x96e2;&#x51fa;&#x529b;"/>
-<node CREATED="1503387817759" ID="ID_689743960" MODIFIED="1503387838474" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x539f;&#x56e0;">
-<icon BUILTIN="help"/>
+<node CREATED="1503387817759" ID="ID_689743960" MODIFIED="1503642217275" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x539f;&#x56e0;">
+<icon BUILTIN="messagebox_warning"/>
 <node CREATED="1503470731543" ID="ID_203719625" MODIFIED="1503470761032" TEXT="&#x30d6;&#x30ec;&#x30f3;&#x30c9;&#x7387;&#x304c;0.2&#x3067;&#x73fe;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x30ab;&#x30e9;&#x30fc;&#x306e;&#x5f71;&#x97ff;&#x304c;&#x5f37;&#x3044;"/>
 <node CREATED="1503470761469" ID="ID_784267533" MODIFIED="1503470780560" TEXT="&#x73fe;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x30ab;&#x30e9;&#x30fc;&#x306f;1spp&#x306a;&#x306e;&#x3067;&#x30ce;&#x30a4;&#x30ba;&#x3092;&#x542b;&#x3080;"/>
 <node CREATED="1503470781196" ID="ID_696233291" MODIFIED="1503470793120" TEXT="&#x305d;&#x306e;&#x305f;&#x3081;&#x3001;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x5f37;&#x304f;&#x3067;&#x3066;&#x3057;&#x307e;&#x3046;"/>
+</node>
+<node CREATED="1503642218566" ID="ID_354078465" MODIFIED="1503648111119" TEXT="temporal anti aliasing">
+<icon BUILTIN="yes"/>
+</node>
+<node CREATED="1503642246189" ID="ID_1485550685" MODIFIED="1503642281128" TEXT="fire fly &#x554f;&#x984c;">
+<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1503642256629" ID="ID_1932789778" MODIFIED="1503642262793" TEXT="fire fly &#x304c;&#x51fa;&#x3059;&#x304e;"/>
+<node CREATED="1503642263405" ID="ID_555121057" MODIFIED="1503644795930" TEXT="SVGF&#x3067;&#x3082;&#x6d88;&#x3048;&#x306a;&#x3044;"/>
+<node CREATED="1503644751990" ID="ID_1793954070" MODIFIED="1503644788058" TEXT="&#x539f;&#x56e0;">
+<icon BUILTIN="help"/>
+<node CREATED="1503642275332" ID="ID_1134505672" MODIFIED="1503644778762" TEXT="&#x30d1;&#x30b9;&#x30c8;&#x30ec;&#x30fc;&#x30b5;&#x30fc;&#x306e;&#x54c1;&#x8cea;&#x306e;&#x554f;&#x984c;"/>
+<node CREATED="1503644719599" ID="ID_730594718" MODIFIED="1503644823577" TEXT="sponza&#x306e;&#x5834;&#x5408;">
+<node CREATED="1503644826837" ID="ID_1701627354" MODIFIED="1503644843451" TEXT="&#x30e9;&#x30a4;&#x30c8;&#x304c;&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x3057;&#x304b;&#x306a;&#x3044;&#x306b;&#x3082;&#x95a2;&#x308f;&#x3089;&#x305a;&#x3001;&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x306e;&#x30a4;&#x30f3;&#x30dd;&#x30fc;&#x30bf;&#x30f3;&#x30b9;&#x30b5;&#x30f3;&#x30d7;&#x30ea;&#x30f3;&#x30b0;&#x3092;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x304b;&#x3089;"/>
+</node>
+</node>
+<node CREATED="1503644759150" ID="ID_1372538499" MODIFIED="1503648055588" TEXT="&#x5bfe;&#x7b56;&#x6848;">
+<icon BUILTIN="idea"/>
+<node CREATED="1503643936977" ID="ID_1306899752" LINK="https://www.blenderguru.com/articles/7-ways-get-rid-fireflies" MODIFIED="1503643936977" TEXT="https://www.blenderguru.com/articles/7-ways-get-rid-fireflies"/>
+<node CREATED="1503647155991" ID="ID_674263063" LINK="https://github.com/fogleman/pt/blob/master/pt/renderer.go" MODIFIED="1503647155991" TEXT="https://github.com/fogleman/pt/blob/master/pt/renderer.go">
+<node CREATED="1503647572477" ID="ID_1902048172" MODIFIED="1503647613721" TEXT="&#x5206;&#x6563;&#x304c;&#x5927;&#x304d;&#x3044;&#x30d4;&#x30af;&#x30bb;&#x30eb;&#x306b;&#x3064;&#x3044;&#x3066;&#x3055;&#x3089;&#x306b;&#x30ec;&#x30a4;&#x3092;&#x98db;&#x3070;&#x3059;"/>
+</node>
+<node CREATED="1503647554962" ID="ID_1369397093" LINK="https://cs.dartmouth.edu/~wjarosz/publications/mara17towards.pdf" MODIFIED="1503647554962" TEXT="https://cs.dartmouth.edu/~wjarosz/publications/mara17towards.pdf">
+<node CREATED="1503647557151" ID="ID_1038873264" MODIFIED="1503647567745" TEXT="3x3 median filter after temporal"/>
+</node>
+<node CREATED="1503648056169" ID="ID_743240749" LINK="http://www.luxrender.net/forum/viewtopic.php?f=8&amp;t=11407" MODIFIED="1503648056169" TEXT="luxrender.net &gt; Forum &gt; Viewtopic ? ..."/>
+<node CREATED="1503648082907" ID="ID_1565956981" MODIFIED="1503648092398" TEXT="Tone mapping&#x3067;&#x6291;&#x5236;&#xff1f;">
+<node CREATED="1503648093074" ID="ID_1349446668" LINK="http://graphicrants.blogspot.jp/2013/12/tone-mapping.html" MODIFIED="1503648093074" TEXT="graphicrants.blogspot.jp &gt; 2013 &gt; 12 &gt; Tone-mapping"/>
+</node>
+<node CREATED="1503649462781" ID="ID_1923894867" MODIFIED="1503649463385" TEXT="Consistent normal interpolation">
+<node CREATED="1503649480931" LINK="http://blog.yiningkarlli.com/2015/01/consistent-normal-interpolation.html" MODIFIED="1503649480931" TEXT="blog.yiningkarlli.com &gt; 2015 &gt; 01 &gt; Consistent-normal-interpolation"/>
+</node>
+</node>
 </node>
 <node COLOR="#000000" CREATED="1503387783672" ID="ID_1417453371" MODIFIED="1503456231331" TEXT="&#x4e71;&#x6570;&#x751f;&#x6210;">
 <font NAME="SansSerif" SIZE="12"/>

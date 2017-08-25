@@ -306,7 +306,6 @@
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h" />
-    <ClInclude Include="..\src\libaten\renderer\svgf_pt.h" />
     <ClInclude Include="..\src\libaten\sampler\halton.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\samplerinterface.h" />
@@ -386,7 +385,6 @@
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp" />
     <ClCompile Include="..\src\libaten\renderer\sorted_pathtracing.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\svgf_pt.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />

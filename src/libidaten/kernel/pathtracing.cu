@@ -374,9 +374,6 @@ __global__ void shade(
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = rec.normal;
-	if (mtrl.attrib.isTranslucent && isBackfacing) {
-		orienting_normal = -rec.normal;
-	}
 
 	// Apply normal map.
 	if (mtrl.type == aten::MaterialType::Layer) {
@@ -459,6 +456,10 @@ __global__ void shade(
 		// When ray hit the light, tracing will finish.
 		path.isTerminate = true;
 		return;
+	}
+
+	if (!mtrl.attrib.isTranslucent && isBackfacing) {
+		orienting_normal = -orienting_normal;
 	}
 
 	// Explicit conection to light.

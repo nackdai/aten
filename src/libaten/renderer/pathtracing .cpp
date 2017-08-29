@@ -117,9 +117,6 @@ namespace aten
 		// 交差位置の法線.
 		// 物体からのレイの入出を考慮.
 		vec3 orienting_normal = path.rec.normal;
-		if (mtrl->isTranslucent() && isBackfacing) {
-			orienting_normal = -path.rec.normal;
-		}
 #else
 		vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 #endif
@@ -189,6 +186,10 @@ namespace aten
 			path.isTerminate = true;
 			return false;
 #endif
+		}
+
+		if (!mtrl->isTranslucent() && isBackfacing) {
+			orienting_normal = -orienting_normal;
 		}
 
 #if 0

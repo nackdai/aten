@@ -104,18 +104,19 @@ namespace aten {
 
 		std::string texuniform = std::string("s") + std::to_string(stage);
 		auto handle = shd->getHandle(texuniform.c_str());
-		AT_ASSERT(handle >= 0);
-		CALL_GL_API(::glUniform1i(handle, stage));
+		if (handle >= 0) {
+			CALL_GL_API(::glUniform1i(handle, stage));
 
-		CALL_GL_API(::glActiveTexture(GL_TEXTURE0 + stage));
+			CALL_GL_API(::glActiveTexture(GL_TEXTURE0 + stage));
 
-		CALL_GL_API(glBindTexture(GL_TEXTURE_2D, gltex));
+			CALL_GL_API(glBindTexture(GL_TEXTURE_2D, gltex));
 
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+			CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+			CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
 
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+			CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
+			CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+		}
 	}
 
 	void texture::releaseAsGLTexture()

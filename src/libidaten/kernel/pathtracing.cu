@@ -375,19 +375,10 @@ __global__ void shade(
 	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = rec.normal;
 
-	// Apply normal map.
-	if (mtrl.type == aten::MaterialType::Layer) {
-		// 最表層の NormalMap を適用.
-		auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
-		auto normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
-		AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
-	}
-	else {
+	if (mtrl.type != aten::MaterialType::Layer) {
 		mtrl.albedoMap = (int)(mtrl.albedoMap >= 0 ? ctxt.textures[mtrl.albedoMap] : -1);
 		mtrl.normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
 		mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
-
-		AT_NAME::material::applyNormalMap(mtrl.normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 	}
 
 #if 1
@@ -461,6 +452,15 @@ __global__ void shade(
 	if (!mtrl.attrib.isTranslucent && isBackfacing) {
 		orienting_normal = -orienting_normal;
 	}
+
+	// Apply normal map.
+	int normalMap = mtrl.normalMap;
+	if (mtrl.type == aten::MaterialType::Layer) {
+		// 最表層の NormalMap を適用.
+		auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
+		normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
+	}
+	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
 	// Explicit conection to light.
 	if (!mtrl.attrib.isSingular)

@@ -121,9 +121,6 @@ namespace aten
 		vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 #endif
 
-		// Apply normal map.
-		mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
-
 		// Implicit conection to light.
 		if (mtrl->isEmissive()) {
 #if 0
@@ -191,6 +188,9 @@ namespace aten
 		if (!mtrl->isTranslucent() && isBackfacing) {
 			orienting_normal = -orienting_normal;
 		}
+
+		// Apply normal map.
+		mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
 #if 0
 		if (depth == 0) {

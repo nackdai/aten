@@ -3,8 +3,14 @@
 namespace aten
 {
 	Film::Film(int w, int h)
-		: m_width(w), m_height(h)
 	{
+		init(w, h);
+	}
+
+	void Film::init(int w, int h)
+	{
+		m_width = w;
+		m_height = h;
 		m_image.resize(m_width * m_height);
 	}
 
@@ -40,6 +46,12 @@ namespace aten
 	void Film::add(int i, const vec4& v)
 	{
 		m_image[i] += v;
+	}
+
+	const vec4& Film::at(int x, int y) const
+	{
+		auto pos = y * m_width + x;
+		return m_image[pos];
 	}
 
 	// NOTE

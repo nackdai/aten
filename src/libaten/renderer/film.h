@@ -13,6 +13,8 @@ namespace aten
 		virtual ~Film() {}
 
 	public:
+		void init(int w, int h);
+
 		virtual void clear();
 
 		void put(int x, int y, const vec3& v);
@@ -22,6 +24,8 @@ namespace aten
 		virtual void put(int i, const vec4& v);
 
 		virtual void add(int i, const vec4& v);
+
+		const vec4& at(int x, int y) const;
 
 		vec4* image()
 		{

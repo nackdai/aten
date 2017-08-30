@@ -163,48 +163,6 @@ __global__ void temporalReprojection(
 			}
 		}
 	}
-
-#if 0
-	auto centerClr = curColor;
-
-	static const int radius = 9;
-	static const float sigmaN = 0.1f + (radius / 10.f) * 0.15f;
-	static const float sigmaC = (radius / 10.f) * 5.f;
-
-	curColor = make_float4(0);
-	float weightC = 0;
-
-	for (int y = -radius; y <= radius; y++) {
-		for (int x = -radius; x <= radius; x++) {
-			int xx = clamp(ix + x, 0, width - 1);
-			int yy = clamp(iy + y, 0, height - 1);
-
-			int pidx = getIdx(xx, yy, width);
-
-			const float depth = curAovs[pidx].depth;
-			const int meshId = curAovs[pidx].meshid;
-
-			auto normal = curAovs[pidx].normal;
-
-			auto p = paths[pidx];
-			float4 color = make_float4(p.contrib.x, p.contrib.y, p.contrib.z, 0) / p.samples;
-
-			if (centerMeshId == meshId)
-			{
-				float an = length(normal - centerNormal) / sigmaN;
-				float Wn = exp(-0.5f * an * an);
-
-				float ac = length(color - centerClr) / sigmaC;
-				float Wc = exp(-0.5f * ac * ac);
-
-				curColor += color * Wn * Wc;
-				weightC += Wn * Wc;
-			}
-		}
-	}
-
-	curColor /= weightC;
-#endif
 	
 	if (weight > 0.0f) {
 		sum /= weight;

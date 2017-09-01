@@ -17,6 +17,13 @@
 
 #include "aten4idaten.h"
 
+//#define ENABLE_DEBUG_1PIXEL
+
+#ifdef ENABLE_DEBUG_1PIXEL
+#define DEBUG_IX	(140)
+#define DEBUG_IY	(511 - 81)
+#endif
+
 __global__ void genPath(
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
@@ -45,11 +52,6 @@ __global__ void genPath(
 	}
 
 	auto scramble = random[idx] * 0x1fe3434f;
-
-	if (frame & 0xf) {
-		random[idx] = aten::WangHash::next(scramble);
-	}
-
 	path.sampler.init(scramble + frame, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
@@ -246,6 +248,7 @@ __global__ void shade(
 	int hitnum,
 	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
+	int frame,
 	int bounce, int rrBounce,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -279,6 +282,12 @@ __global__ void shade(
 	}
 
 	idx = hitindices[idx];
+
+#ifdef ENABLE_DEBUG_1PIXEL
+	int ix = DEBUG_IX;
+	int iy = DEBUG_IY;
+	idx = getIdx(ix, iy, width);
+#endif
 
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
@@ -527,12 +536,17 @@ __global__ void gather(
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	int width, int height)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (ix >= width && iy >= height) {
 		return;
 	}
+
+#ifdef ENABLE_DEBUG_1PIXEL
+	ix = DEBUG_IX;
+	iy = DEBUG_IY;
+#endif
 
 	const auto idx = getIdx(ix, iy, width);
 
@@ -545,12 +559,18 @@ __global__ void gather(
 
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
-	aovs[idx].moments = make_float4(lum * lum, lum, 0, 1);
+	aovs[idx].moments += make_float4(lum * lum, lum, 0, 1);
+
+	auto n = aovs[idx].moments.w;
+
+	auto m = aovs[idx].moments / n;
+
+	auto var = m.x - m.y * m.y;
 
 	aovs[idx].color = contrib;
 
 	surf2Dwrite(
-		contrib,
+		make_float4(var, var, var, 1),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
@@ -868,20 +888,25 @@ namespace idaten
 
 		aten::mat4 mtxW2C = m_mtxV2C * mtxW2V;
 
+#ifdef ENABLE_DEBUG_1PIXEL
+		int blockPerGrid = 1;
+		int threadPerBlock = 1;
+#else
 		dim3 blockPerGrid((hitcount + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
+#endif
 
 		auto& curaov = getCurAovs();
 
 		if (bounce == 0) {
 			shade<true> << <blockPerGrid, threadPerBlock >> > (
-			//shade<true> << <1, 1 >> > (
 				curaov.ptr(), mtxW2C,
 				width, height,
 				m_paths.ptr(),
 				m_hitidx.ptr(), hitcount,
 				m_isects.ptr(),
 				m_rays.ptr(),
+				m_frame,
 				bounce, rrBounce,
 				m_shapeparam.ptr(), m_shapeparam.num(),
 				m_mtrlparam.ptr(),
@@ -894,13 +919,13 @@ namespace idaten
 		}
 		else {
 			shade<false> << <blockPerGrid, threadPerBlock >> > (
-			//shade<false> << <1, 1 >> > (
 				curaov.ptr(), mtxW2C,
 				width, height,
 				m_paths.ptr(),
 				m_hitidx.ptr(), hitcount,
 				m_isects.ptr(),
 				m_rays.ptr(),
+				m_frame,
 				bounce, rrBounce,
 				m_shapeparam.ptr(), m_shapeparam.num(),
 				m_mtrlparam.ptr(),
@@ -920,19 +945,33 @@ namespace idaten
 		int width, int height,
 		int maxSamples)
 	{
+#ifdef ENABLE_DEBUG_1PIXEL
+		int block = 1;
+		int grid = 1;
+#else
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
-
-		auto& curaov = getCurAovs();
-		auto& prevaov = getPrevAovs();
+#endif
 
 		bool isFirstFrame = (m_frame == 1);
 
-		if (m_mode == Mode::SVGF
-			|| m_mode == Mode::TF)
-		{
+		if (m_mode == Mode::PT) {
+			auto& curaov = m_aovs[0];
+
+			gather << <grid, block >> > (
+				outputSurf,
+				curaov.ptr(),
+				m_paths.ptr(),
+				width, height);
+
+			checkCudaKernel(gather);
+		}
+		else {
+			auto& curaov = getCurAovs();
+			auto& prevaov = getPrevAovs();
+
 			if (isFirstFrame) {
 				gather << <grid, block >> > (
 					outputSurf,
@@ -947,15 +986,6 @@ namespace idaten
 					outputSurf,
 					width, height);
 			}
-		}
-		else {
-			gather << <grid, block >> > (
-				outputSurf,
-				curaov.ptr(),
-				m_paths.ptr(),
-				width, height);
-
-			checkCudaKernel(gather);
 		}
 
 		m_mtxPrevV2C = m_mtxV2C;

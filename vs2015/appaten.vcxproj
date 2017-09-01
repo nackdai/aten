@@ -99,6 +99,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)..\src\$(ProjectName)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <TargetName>$(ProjectName)_D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)..\src\$(ProjectName)\</OutDir>
@@ -107,10 +108,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
     <OutDir>$(ProjectDir)..\src\$(ProjectName)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <TargetName>$(ProjectName)_P</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\src\$(ProjectName)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <TargetName>$(ProjectName)_D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\src\$(ProjectName)\</OutDir>
@@ -119,6 +122,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
     <OutDir>$(ProjectDir)..\src\$(ProjectName)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+    <TargetName>$(ProjectName)_P</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

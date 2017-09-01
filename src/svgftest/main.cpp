@@ -40,7 +40,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
-static int g_maxBounce = 5;
+static int g_maxBounce = 1;
 static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
 
 static bool g_enableFrameStep = false;
@@ -109,9 +109,9 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		static const char* items[] = { "SVGF", "TF", "PT" };
+		static const char* items[] = { "SVGF", "TF", "PT", "VAR" };
 		int item_current = g_curMode;
-		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items), 3);
+		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items));
 
 		if (g_curMode != item_current) {
 			g_curMode = item_current;

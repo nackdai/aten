@@ -14,6 +14,7 @@ namespace idaten
 			SVGF,	// Spatio-temporal Variance Guided Filter.
 			TF,		// Temporal Filter.
 			PT,		// Path Tracing.
+			VAR,	// Variance (For debug).
 		};
 
 #ifdef __AT_CUDA__

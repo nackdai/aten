@@ -709,6 +709,9 @@ namespace idaten
 
 			onAtrousFilter(outputSurf, width, height);
 		}
+		else if (m_mode == Mode::VAR) {
+			onVarianceEstimation(outputSurf, width, height);
+		}
 
 		checkCudaErrors(cudaDeviceSynchronize());
 

@@ -561,19 +561,27 @@ __global__ void gather(
 
 	aovs[idx].moments += make_float4(lum * lum, lum, 0, 1);
 
+	aovs[idx].color = contrib;
+
+#if 0
 	auto n = aovs[idx].moments.w;
 
 	auto m = aovs[idx].moments / n;
 
 	auto var = m.x - m.y * m.y;
 
-	aovs[idx].color = contrib;
-
 	surf2Dwrite(
 		make_float4(var, var, var, 1),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
+#else
+	surf2Dwrite(
+		contrib,
+		dst,
+		ix * sizeof(float4), iy,
+		cudaBoundaryModeTrap);
+#endif
 }
 
 namespace idaten

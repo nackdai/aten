@@ -6,6 +6,9 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 	const aten::ShapeParameter* shape,
 	aten::sampler* sampler)
 {
+	// CPUコードと処理を合わせるためのダミー.
+	int dummy = sampler->nextSample();
+
 	int r = sampler->nextSample();
 	int basePrimIdx = aten::cmpMin(r * shape->primnum, shape->primnum - 1);
 

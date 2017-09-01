@@ -3,8 +3,32 @@
 <node CREATED="1502080353020" ID="ID_1501713082" MODIFIED="1502096894701" TEXT="SVGF&#x5b9f;&#x88c5;&#x30e1;&#x30e2;">
 <node CREATED="1503644678039" HGAP="57" ID="ID_1938093211" MODIFIED="1503644902848" POSITION="right" TEXT="&#x30d0;&#x30b0;" VSHIFT="-86">
 <icon BUILTIN="messagebox_warning"/>
-<node CREATED="1503644694286" ID="ID_260132461" MODIFIED="1503644708026" TEXT="&#x5916;&#x5074;&#x6cd5;&#x7dda;&#x3082;&#x898b;&#x3066;&#x3057;&#x307e;&#x3046;&#x554f;&#x984c;">
+<node CREATED="1503644694286" ID="ID_260132461" MODIFIED="1503989038449" TEXT="&#x5916;&#x5074;&#x6cd5;&#x7dda;&#x3082;&#x898b;&#x3066;&#x3057;&#x307e;&#x3046;&#x554f;&#x984c;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1503644852117" ID="ID_1805667843" MODIFIED="1503644890457" TEXT="orienting_normal&#x306e;&#x8a08;&#x7b97;&#x30bf;&#x30a4;&#x30df;&#x30f3;&#x30b0;&#x3068;implicit light &#x306e;&#x8a08;&#x7b97;&#x6642;&#x306b;back facing&#x304b;&#x3069;&#x3046;&#x304b;&#x306e;&#x5224;&#x5b9a;&#x3092;&#x5165;&#x308c;&#x305f;&#x5f71;&#x97ff;"/>
+</node>
+<node CREATED="1504081432736" ID="ID_942317682" MODIFIED="1504081441260" TEXT="&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x6570;&#x3092;&#x5897;&#x3084;&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x554f;&#x984c;">
+<node CREATED="1504081444226" ID="ID_301832192" MODIFIED="1504081459621" TEXT="&#x4e71;&#x6570;&#x30b7;&#x30fc;&#x30c9;&#x304c;&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x3054;&#x3068;&#x306b;&#x8fd1;&#x3059;&#x304e;&#x308b;&#x304b;&#x3089;&#xff1f;">
+<node CREATED="1504082303396" ID="ID_784818053" MODIFIED="1504082312823" TEXT="&#x591a;&#x5206;&#x305d;&#x3046;">
+<icon BUILTIN="idea"/>
+</node>
+</node>
+</node>
+<node CREATED="1504081496202" ID="ID_736075829" MODIFIED="1504081514837" TEXT="16&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3054;&#x3068;&#x306b;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x5f37;&#x304f;&#x306a;&#x308b;&#x554f;&#x984c;">
+<node CREATED="1504081515226" ID="ID_126750635" MODIFIED="1504081575935" TEXT="SVGF&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x306e;&#x307f;&#x3067;&#x767a;&#x751f;"/>
+<node CREATED="1504081519282" ID="ID_261232175" MODIFIED="1504081536934" TEXT="PathTracing&#x30e2;&#x30fc;&#x30c9;&#x3067;&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x6570;&#x3092;&#x5897;&#x3084;&#x3059;&#x3068;&#x3001;&#x306f;&#x3063;&#x304d;&#x308a;&#x308f;&#x304b;&#x308b;">
+<node CREATED="1504081537589" ID="ID_484831864" MODIFIED="1504082483054" TEXT="16&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3054;&#x3068;&#x306b;&#x4e71;&#x6570;&#x306e;&#x5143;&#x3092;wang hash&#x3067;&#x66f4;&#x65b0;&#x3057;&#x3066;&#x3044;&#x308b;&#x304b;&#x3089;">
+<node CREATED="1504082483498" ID="ID_788669850" MODIFIED="1504082505173" TEXT="&#x539f;&#x56e0;&#x500b;&#x6240;&#x306f;&#x305d;&#x3046;&#x306a;&#x306e;&#x3060;&#x304c;&#x3001;&#x306a;&#x305c;&#x3053;&#x308c;&#x3067;&#x305d;&#x3046;&#x306a;&#x308b;&#x306e;&#x304b;&#x304c;&#x308f;&#x304b;&#x3089;&#x306a;&#x3044;">
+<icon BUILTIN="idea"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1504084772124" ID="ID_156898370" MODIFIED="1504084781824" TEXT="&#x30b8;&#x30e9;&#x30b8;&#x30e9;&#x5bfe;&#x5fdc;">
+<node CREATED="1504084787951" ID="ID_1465055682" MODIFIED="1504084792448" TEXT="fire fly&#x554f;&#x984c;"/>
+<node CREATED="1504084822829" ID="ID_839787983" MODIFIED="1504084823544" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;">
+<node CREATED="1504084824137" ID="ID_1893139620" MODIFIED="1504084864287" TEXT="temporal reprojection &#x6642;&#x306b;&#x524d;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3068;&#x306e;&#x30de;&#x30fc;&#x30b8;&#x3067;&#x84c4;&#x7a4d;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x6570;&#x500d;&#x3057;&#x3066;&#x304b;&#x3089;&#x8db3;&#x3057;&#x3053;&#x3080;"/>
+</node>
 </node>
 </node>
 <node CREATED="1503649194707" HGAP="85" ID="ID_1998195825" MODIFIED="1503649201487" POSITION="right" TEXT="&#x30e1;&#x30e2;" VSHIFT="-124">
@@ -49,6 +73,9 @@
 </node>
 <node CREATED="1503649462781" ID="ID_1923894867" MODIFIED="1503649463385" TEXT="Consistent normal interpolation">
 <node CREATED="1503649480931" LINK="http://blog.yiningkarlli.com/2015/01/consistent-normal-interpolation.html" MODIFIED="1503649480931" TEXT="blog.yiningkarlli.com &gt; 2015 &gt; 01 &gt; Consistent-normal-interpolation"/>
+</node>
+<node CREATED="1504084740597" ID="ID_569239122" MODIFIED="1504084759312" TEXT="INSIDE&#x306e;TAA&#x306e;clip color">
+<icon BUILTIN="yes"/>
 </node>
 </node>
 </node>

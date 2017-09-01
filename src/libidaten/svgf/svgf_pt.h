@@ -91,6 +91,7 @@ namespace idaten
 		virtual void reset() override final
 		{
 			m_frame = 1;
+			m_curAOVPos = 0;
 		}
 
 		uint32_t frame() const

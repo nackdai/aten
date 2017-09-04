@@ -51,8 +51,9 @@ __global__ void genPath(
 		return;
 	}
 
-	auto scramble = random[idx] * 0x1fe3434f;
-	path.sampler.init(scramble + frame, sobolmatrices);
+	auto scramble = random[idx] * 0x1fe3434f + frame;
+	scramble *= (sample + 1);
+	path.sampler.init(scramble, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);

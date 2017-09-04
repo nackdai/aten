@@ -14,7 +14,8 @@
 
 #include "scenedefs.h"
 
-//#define ENABLE_ENVMAP
+#define ENABLE_ENVMAP
+//#define ENABLE_NLM
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -299,8 +300,19 @@ int main()
 		"../shader/fs.glsl");
 	blitter.setIsRenderRGB(true);
 
+	aten::NonLocalMeanFilterShader nlmshd;
+	nlmshd.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/nlm_fs.glsl");
+	nlmshd.setParam(0.04f, 0.04f);
+
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
+
+#ifdef ENABLE_NLM
+	aten::visualizer::addPostProc(&nlmshd);
+#endif
 
 	aten::vec3 pos, at;
 	real vfov;

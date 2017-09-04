@@ -11,10 +11,11 @@ namespace idaten
 	class SVGFPathTracing : public Renderer {
 	public:
 		enum Mode {
-			SVGF,	// Spatio-temporal Variance Guided Filter.
-			TF,		// Temporal Filter.
-			PT,		// Path Tracing.
-			VAR,	// Variance (For debug).
+			SVGF,		// Spatio-temporal Variance Guided Filter.
+			SVGF_NOTAA,	// Spatio-temporal Variance Guided Filter Without TAA.
+			TF,			// Temporal Filter.
+			PT,			// Path Tracing.
+			VAR,		// Variance (For debug).
 		};
 
 #ifdef __AT_CUDA__
@@ -140,6 +141,10 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
+		void onTAA(
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
 		idaten::TypedCudaMemory<AOV>& getCurAovs()
 		{
 			return m_aovs[m_curAOVPos];
@@ -147,6 +152,11 @@ namespace idaten
 		idaten::TypedCudaMemory<AOV>& getPrevAovs()
 		{
 			return m_aovs[1 - m_curAOVPos];
+		}
+
+		bool isFirstFrame() const
+		{
+			return (m_frame == 1);
 		}
 
 	protected:

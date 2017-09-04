@@ -733,10 +733,15 @@ namespace idaten
 
 		onGather(outputSurf, width, height, maxSamples);
 
-		if (m_mode == Mode::SVGF) {
+		if (m_mode == Mode::SVGF || m_mode == Mode::SVGF_NOTAA)
+		{
 			onVarianceEstimation(outputSurf, width, height);
 
 			onAtrousFilter(outputSurf, width, height);
+
+			if (m_mode == Mode::SVGF) {
+				onTAA(outputSurf, width, height);
+			}
 		}
 		else if (m_mode == Mode::VAR) {
 			onVarianceEstimation(outputSurf, width, height);
@@ -964,8 +969,6 @@ namespace idaten
 			(height + block.y - 1) / block.y);
 #endif
 
-		bool isFirstFrame = (m_frame == 1);
-
 		if (m_mode == Mode::PT) {
 			auto& curaov = m_aovs[0];
 
@@ -981,7 +984,7 @@ namespace idaten
 			auto& curaov = getCurAovs();
 			auto& prevaov = getPrevAovs();
 
-			if (isFirstFrame) {
+			if (isFirstFrame()) {
 				gather << <grid, block >> > (
 					outputSurf,
 					curaov.ptr(),

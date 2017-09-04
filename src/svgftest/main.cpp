@@ -14,7 +14,7 @@
 
 #include "scenedefs.h"
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -41,7 +41,7 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 1;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
+static int g_curMode = (int)idaten::SVGFPathTracing::Mode::PT;
 
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
@@ -109,7 +109,7 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		static const char* items[] = { "SVGF", "TF", "PT", "VAR" };
+		static const char* items[] = { "SVGF", "SVFG_NoTAA", "TF", "PT", "VAR" };
 		int item_current = g_curMode;
 		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items));
 

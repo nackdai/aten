@@ -7,20 +7,23 @@
 <icon BUILTIN="button_ok"/>
 <node CREATED="1503644852117" ID="ID_1805667843" MODIFIED="1503644890457" TEXT="orienting_normal&#x306e;&#x8a08;&#x7b97;&#x30bf;&#x30a4;&#x30df;&#x30f3;&#x30b0;&#x3068;implicit light &#x306e;&#x8a08;&#x7b97;&#x6642;&#x306b;back facing&#x304b;&#x3069;&#x3046;&#x304b;&#x306e;&#x5224;&#x5b9a;&#x3092;&#x5165;&#x308c;&#x305f;&#x5f71;&#x97ff;"/>
 </node>
-<node CREATED="1504081432736" ID="ID_942317682" MODIFIED="1504081441260" TEXT="&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x6570;&#x3092;&#x5897;&#x3084;&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x554f;&#x984c;">
+<node CREATED="1504081432736" ID="ID_942317682" MODIFIED="1504491116052" TEXT="&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x6570;&#x3092;&#x5897;&#x3084;&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x554f;&#x984c;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1504081444226" ID="ID_301832192" MODIFIED="1504081459621" TEXT="&#x4e71;&#x6570;&#x30b7;&#x30fc;&#x30c9;&#x304c;&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x3054;&#x3068;&#x306b;&#x8fd1;&#x3059;&#x304e;&#x308b;&#x304b;&#x3089;&#xff1f;">
 <node CREATED="1504082303396" ID="ID_784818053" MODIFIED="1504082312823" TEXT="&#x591a;&#x5206;&#x305d;&#x3046;">
 <icon BUILTIN="idea"/>
 </node>
 </node>
 </node>
-<node CREATED="1504081496202" ID="ID_736075829" MODIFIED="1504081514837" TEXT="16&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3054;&#x3068;&#x306b;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x5f37;&#x304f;&#x306a;&#x308b;&#x554f;&#x984c;">
+<node CREATED="1504081496202" ID="ID_736075829" MODIFIED="1504491119580" TEXT="16&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3054;&#x3068;&#x306b;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x5f37;&#x304f;&#x306a;&#x308b;&#x554f;&#x984c;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1504081515226" ID="ID_126750635" MODIFIED="1504081575935" TEXT="SVGF&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x306e;&#x307f;&#x3067;&#x767a;&#x751f;"/>
 <node CREATED="1504081519282" ID="ID_261232175" MODIFIED="1504081536934" TEXT="PathTracing&#x30e2;&#x30fc;&#x30c9;&#x3067;&#x30b5;&#x30f3;&#x30d7;&#x30eb;&#x6570;&#x3092;&#x5897;&#x3084;&#x3059;&#x3068;&#x3001;&#x306f;&#x3063;&#x304d;&#x308a;&#x308f;&#x304b;&#x308b;">
 <node CREATED="1504081537589" ID="ID_484831864" MODIFIED="1504082483054" TEXT="16&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3054;&#x3068;&#x306b;&#x4e71;&#x6570;&#x306e;&#x5143;&#x3092;wang hash&#x3067;&#x66f4;&#x65b0;&#x3057;&#x3066;&#x3044;&#x308b;&#x304b;&#x3089;">
 <node CREATED="1504082483498" ID="ID_788669850" MODIFIED="1504082505173" TEXT="&#x539f;&#x56e0;&#x500b;&#x6240;&#x306f;&#x305d;&#x3046;&#x306a;&#x306e;&#x3060;&#x304c;&#x3001;&#x306a;&#x305c;&#x3053;&#x308c;&#x3067;&#x305d;&#x3046;&#x306a;&#x308b;&#x306e;&#x304b;&#x304c;&#x308f;&#x304b;&#x3089;&#x306a;&#x3044;">
 <icon BUILTIN="idea"/>
 </node>
+<node CREATED="1504491123397" ID="ID_1399812872" MODIFIED="1504491151741" TEXT="&#x3068;&#x308a;&#x3042;&#x3048;&#x305a;&#x3001;&#x539f;&#x56e0;&#x500b;&#x6240;&#x3092;&#x524a;&#x9664;&#x3059;&#x308b;&#x3053;&#x3068;&#x3067;&#x5bfe;&#x5fdc;"/>
 </node>
 </node>
 </node>
@@ -54,8 +57,10 @@
 <node CREATED="1503644751990" ID="ID_1793954070" MODIFIED="1503644788058" TEXT="&#x539f;&#x56e0;">
 <icon BUILTIN="help"/>
 <node CREATED="1503642275332" ID="ID_1134505672" MODIFIED="1503644778762" TEXT="&#x30d1;&#x30b9;&#x30c8;&#x30ec;&#x30fc;&#x30b5;&#x30fc;&#x306e;&#x54c1;&#x8cea;&#x306e;&#x554f;&#x984c;"/>
-<node CREATED="1503644719599" ID="ID_730594718" MODIFIED="1503644823577" TEXT="sponza&#x306e;&#x5834;&#x5408;">
-<node CREATED="1503644826837" ID="ID_1701627354" MODIFIED="1503644843451" TEXT="&#x30e9;&#x30a4;&#x30c8;&#x304c;&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x3057;&#x304b;&#x306a;&#x3044;&#x306b;&#x3082;&#x95a2;&#x308f;&#x3089;&#x305a;&#x3001;&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x306e;&#x30a4;&#x30f3;&#x30dd;&#x30fc;&#x30bf;&#x30f3;&#x30b9;&#x30b5;&#x30f3;&#x30d7;&#x30ea;&#x30f3;&#x30b0;&#x3092;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x304b;&#x3089;"/>
+<node CREATED="1503644719599" ID="ID_730594718" MODIFIED="1504506217013" TEXT="sponza&#x306e;&#x5834;&#x5408;">
+<node CREATED="1503644826837" ID="ID_1701627354" MODIFIED="1504506219379" TEXT="&#x30e9;&#x30a4;&#x30c8;&#x304c;&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x3057;&#x304b;&#x306a;&#x3044;&#x306b;&#x3082;&#x95a2;&#x308f;&#x3089;&#x305a;&#x3001;&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x306e;&#x30a4;&#x30f3;&#x30dd;&#x30fc;&#x30bf;&#x30f3;&#x30b9;&#x30b5;&#x30f3;&#x30d7;&#x30ea;&#x30f3;&#x30b0;&#x3092;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x304b;&#x3089;">
+<icon BUILTIN="messagebox_warning"/>
+</node>
 </node>
 </node>
 <node CREATED="1503644759150" ID="ID_1372538499" MODIFIED="1503648055588" TEXT="&#x5bfe;&#x7b56;&#x6848;">

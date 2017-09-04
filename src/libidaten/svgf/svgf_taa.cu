@@ -174,6 +174,7 @@ inline __device__ void computePrevScreenPos(
 	*prevPos = *prevPos * 0.5 + 0.5;	// [-1, 1] -> [0, 1]
 }
 
+template <bool showDiff>
 __global__ void temporalAA(
 	cudaSurfaceObject_t dst,
 	idaten::SVGFPathTracing::Path* paths,
@@ -243,10 +244,19 @@ __global__ void temporalAA(
 
 		auto f = make_float4(c.x, c.y, c.z, 1) + noise4;
 
-		f = make_float4(abs(f.x - tmp.x), abs(f.y - tmp.y), abs(f.z - tmp.z), 1);
+		if (showDiff) {
+			f = make_float4(abs(f.x - tmp.x), abs(f.y - tmp.y), abs(f.z - tmp.z), 1);
+		}
 
 		surf2Dwrite(
 			f,
+			dst,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+	}
+	else if (showDiff) {
+		surf2Dwrite(
+			make_float4(0, 0, 0, 1),
 			dst,
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
@@ -263,26 +273,41 @@ namespace idaten
 			return;
 		}
 
-		auto& curaov = getCurAovs();
-		auto& prevaov = getPrevAovs();
+		if (isEnableTAA()) {
+			auto& curaov = getCurAovs();
+			auto& prevaov = getPrevAovs();
 
-		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+			dim3 grid(
+				(width + block.x - 1) / block.x,
+				(height + block.y - 1) / block.y);
 
-		float sintime = aten::abs(aten::sin((m_frame & 0xf) * AT_MATH_PI));
+			float sintime = aten::abs(aten::sin((m_frame & 0xf) * AT_MATH_PI));
 
-		temporalAA << <grid, block >> > (
-			outputSurf,
-			m_paths.ptr(),
-			curaov.ptr(),
-			prevaov.ptr(),
-			m_mtxC2V,
-			m_mtxPrevV2C,
-			sintime,
-			width, height);
+			if (canShowTAADiff()) {
+				temporalAA<true> << <grid, block >> > (
+					outputSurf,
+					m_paths.ptr(),
+					curaov.ptr(),
+					prevaov.ptr(),
+					m_mtxC2V,
+					m_mtxPrevV2C,
+					sintime,
+					width, height);
+			}
+			else {
+				temporalAA<false> << <grid, block >> > (
+					outputSurf,
+					m_paths.ptr(),
+					curaov.ptr(),
+					prevaov.ptr(),
+					m_mtxC2V,
+					m_mtxPrevV2C,
+					sintime,
+					width, height);
+			}
 
-		checkCudaKernel(temporalAA);
+			checkCudaKernel(temporalAA);
+		}
 	}
 }

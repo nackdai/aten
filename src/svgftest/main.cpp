@@ -109,13 +109,28 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		static const char* items[] = { "SVGF", "SVFG_NoTAA", "TF", "PT", "VAR" };
+		static const char* items[] = { "SVGF", "TF", "PT", "VAR" };
 		int item_current = g_curMode;
 		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items));
 
 		if (g_curMode != item_current) {
 			g_curMode = item_current;
 			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
+		}
+
+		bool prevEnableTAA = g_tracer.isEnableTAA();
+		bool enableTAA = prevEnableTAA;
+		ImGui::Checkbox("Enable TAA", &enableTAA);
+
+		bool prevCanShowTAADiff = g_tracer.canShowTAADiff();
+		bool canShowTAADiff = prevCanShowTAADiff;
+		ImGui::Checkbox("Show TAA Diff", &canShowTAADiff);
+
+		if (prevEnableTAA != enableTAA) {
+			g_tracer.enableTAA(enableTAA);
+		}
+		if (prevCanShowTAADiff != canShowTAADiff) {
+			g_tracer.showTAADiff(canShowTAADiff);
 		}
 
 		auto cam = g_camera.param();

@@ -733,15 +733,13 @@ namespace idaten
 
 		onGather(outputSurf, width, height, maxSamples);
 
-		if (m_mode == Mode::SVGF || m_mode == Mode::SVGF_NOTAA)
+		if (m_mode == Mode::SVGF)
 		{
 			onVarianceEstimation(outputSurf, width, height);
 
 			onAtrousFilter(outputSurf, width, height);
 
-			if (m_mode == Mode::SVGF) {
-				onTAA(outputSurf, width, height);
-			}
+			onTAA(outputSurf, width, height);
 		}
 		else if (m_mode == Mode::VAR) {
 			onVarianceEstimation(outputSurf, width, height);

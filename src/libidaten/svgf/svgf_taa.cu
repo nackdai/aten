@@ -10,6 +10,8 @@
 
 #include "aten4idaten.h"
 
+#define ENABLE_YCOCG
+
 inline __device__ float3 clipAABB(
 	float3 aabb_min,
 	float3 aabb_max,
@@ -39,7 +41,60 @@ inline __device__ float3 clipAABB(
 	}
 }
 
+// https://software.intel.com/en-us/node/503873
+inline __device__ float3 RGB2YCoCg(float3 c)
+{
+	// Y = R/4 + G/2 + B/4
+	// Co = R/2 - B/2
+	// Cg = -R/4 + G/2 - B/4
+	return make_float3(
+		c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
+		c.x / 2.0 - c.z / 2.0,
+		-c.x / 4.0 + c.y / 2.0 - c.z / 4.0);
+}
+
+// https://software.intel.com/en-us/node/503873
+inline __device__ float3 YCoCg2RGB(float3 c)
+{
+	// R = Y + Co - Cg
+	// G = Y + Cg
+	// B = Y - Co - Cg
+#if 0
+	return make_float3(
+		clamp(c.x + c.y - c.z, 0.0f, 1.0f),
+		clamp(c.x + c.z, 0.0f, 1.0f),
+		clamp(c.x - c.y - c.z, 0.0f, 1.0f));
+#else
+	return make_float3(
+		max(c.x + c.y - c.z, 0.0f),
+		max(c.x + c.z, 0.0f),
+		max(c.x - c.y - c.z, 0.0f));
+#endif
+}
+
 inline __device__ float3 sampleColor(
+	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
+	int width, int height,
+	int2 p)
+{
+	int ix = clamp(p.x, 0, width);
+	int iy = clamp(p.y, 0, height);
+
+	auto idx = getIdx(ix, iy, width);
+
+	auto c = aovs[idx].color;
+
+#ifdef ENABLE_YCOCG
+	auto rgb = make_float3(c.x, c.y, c.z);
+	auto ycocg = RGB2YCoCg(rgb);
+
+	return ycocg;
+#else
+	return make_float3(c.x, c.y, c.z);
+#endif
+}
+
+inline __device__ float3 sampleColorRGB(
 	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
 	int width, int height,
 	int2 p)
@@ -60,12 +115,16 @@ inline __device__ float3 sampleColor(
 	int2 p,
 	float2 jitter)
 {
-	auto pclr = sampleColor(aovs, width, height, p);
-	auto jclr = sampleColor(aovs, width, height, make_int2(p.x - 1, p.y - 1));
+	auto pclr = sampleColorRGB(aovs, width, height, p);
+	auto jclr = sampleColorRGB(aovs, width, height, make_int2(p.x - 1, p.y - 1));
 
 	auto f = sqrtf(dot(jitter, jitter));
 
 	auto ret = lerp(jclr, pclr, f);
+
+#ifdef ENABLE_YCOCG
+	ret = RGB2YCoCg(ret);
+#endif
 
 	return ret;
 }
@@ -81,7 +140,7 @@ inline __device__ float3 max(float3 a, float3 b)
 }
 
 inline __device__ float3 clipColor(
-	float3 clr,
+	float3 clr0, float3 clr1,
 	int ix, int iy,
 	int width, int height,
 	const idaten::SVGFPathTracing::AOV* __restrict__ aovs)
@@ -113,7 +172,22 @@ inline __device__ float3 clipColor(
 	cmax = 0.5 * (cmax + cmax5);
 	cavg = 0.5 * (cavg + cavg5);
 
-	auto ret = clipAABB(cmin, cmax, clr);
+#ifdef ENABLE_YCOCG
+	auto ex = 0.25 * 0.5 * (cmax.x - cmin.x);
+	float2 chroma_extent = make_float2(ex, ex);
+	float2 chroma_center = make_float2(clr0.y, clr0.z);
+	
+	cmin.y = chroma_center.x - chroma_extent.x;
+	cmin.z = chroma_center.y - chroma_extent.y;
+
+	cmax.y = chroma_center.x + chroma_extent.x;
+	cmax.z = chroma_center.y + chroma_extent.y;
+
+	cavg.y = chroma_center.x;
+	cavg.z = chroma_center.y;
+#endif
+
+	auto ret = clipAABB(cmin, cmax, clr1);
 
 	return ret;
 }
@@ -202,7 +276,7 @@ __global__ void temporalAA(
 	auto r2 = sampler->nextSample();
 	float2 jitter = make_float2(r1, r2);
 
-	auto tmp = sampleColor(curAovs, width, height, p);
+	auto tmp = sampleColorRGB(curAovs, width, height, p);
 
 	auto clr0 = sampleColor(curAovs, width, height, p, jitter);
 
@@ -227,10 +301,15 @@ __global__ void temporalAA(
 
 		auto clr1 = sampleColor(prevAovs, width, height, make_int2(px, py));
 
-		clr1 = clipColor(clr1, ix, iy, width, height, curAovs);
+		clr1 = clipColor(clr0, clr1, ix, iy, width, height, curAovs);
 
+#ifdef ENABLE_YCOCG
+		float lum0 = clr0.x;
+		float lum1 = clr1.x;
+#else
 		float lum0 = AT_NAME::color::luminance(clr0.x, clr0.y, clr0.z);
 		float lum1 = AT_NAME::color::luminance(clr1.x, clr1.y, clr1.z);
+#endif
 
 		float unbiased_diff = abs(lum0 - lum1) / max(lum0, max(lum1, 0.2f));
 		float unbiased_weight = 1.0 - unbiased_diff;
@@ -238,6 +317,10 @@ __global__ void temporalAA(
 		float k_feedback = lerp(0.8, 0.2, unbiased_weight_sqr);
 
 		auto c = lerp(clr0, clr1, k_feedback);
+
+#ifdef ENABLE_YCOCG
+		c = YCoCg2RGB(ycocg);
+#endif
 
 		auto noise4 = PDsrand4(make_float2(ix, iy) + sinTime + 0.6959174f) / 510.0f;
 		noise4.w = 0;

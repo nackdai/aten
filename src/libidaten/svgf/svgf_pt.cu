@@ -55,8 +55,13 @@ __global__ void genPath(
 	scramble *= (sample + 1);
 	path.sampler.init(scramble, sobolmatrices);
 
+#if 0
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
+#else
+	float s = (ix) / (float)(camera->width);
+	float t = (iy) / (float)(camera->height);
+#endif
 
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -632,6 +637,8 @@ namespace idaten
 			m_atrousClr[i].init(width * height);
 			m_atrousVar[i].init(width * height);
 		}
+
+		m_tmpBuf.init(width * height);
 	}
 
 	static bool doneSetStackSize = false;

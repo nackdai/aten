@@ -202,6 +202,8 @@ namespace idaten
 		idaten::TypedCudaMemory<float4> m_atrousClr[2];
 		idaten::TypedCudaMemory<float4> m_atrousVar[2];
 
+		idaten::TypedCudaMemory<float4> m_tmpBuf;
+
 		Mode m_mode{ Mode::SVGF };
 
 		bool m_enableTAA{ true };

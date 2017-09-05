@@ -145,6 +145,7 @@ inline __device__ float4 gaussFilter3x3(
 template <bool isFirstIter, bool isFinalIter>
 __global__ void atrousFilter(
 	cudaSurfaceObject_t dst,
+	float4* tmpBuffer,
 	idaten::SVGFPathTracing::AOV* aovs,
 	const float4* __restrict__ clrBuffer,
 	float4* nextClrBuffer,
@@ -299,7 +300,8 @@ __global__ void atrousFilter(
 	nextVarBuffer[idx] = sumV;
 
 	if (isFirstIter) {
-		aovs[idx].color = sumC;
+		// Store color temporary.
+		tmpBuffer[idx] = sumC;
 	}
 	
 	if (isFinalIter) {
@@ -311,6 +313,23 @@ __global__ void atrousFilter(
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
 	}
+}
+
+__global__ void copyFromBufferToAov(
+	float4* src,
+	idaten::SVGFPathTracing::AOV* aovs,
+	int width, int height)
+{
+	int ix = blockIdx.x * blockDim.x + threadIdx.x;
+	int iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	const int idx = getIdx(ix, iy, width);
+
+	aovs[idx].color = src[idx];
 }
 
 namespace idaten
@@ -338,6 +357,7 @@ namespace idaten
 				// First.
 				atrousFilter<true, false> << <grid, block >> > (
 					outputSurf,
+					m_tmpBuf.ptr(),
 					curaov.ptr(),
 					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
 					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
@@ -350,6 +370,7 @@ namespace idaten
 				// Final.
 				atrousFilter<false, true> << <grid, block >> > (
 					outputSurf,
+					m_tmpBuf.ptr(),
 					curaov.ptr(),
 					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
 					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
@@ -360,6 +381,7 @@ namespace idaten
 			else {
 				atrousFilter<false, false> << <grid, block >> > (
 					outputSurf,
+					m_tmpBuf.ptr(),
 					curaov.ptr(),
 					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
 					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
@@ -371,6 +393,13 @@ namespace idaten
 
 			cur = next;
 			next = 1 - cur;
+
+			// Copy color from temporary buffer to AOV buffer for next temporal reprojection.
+			copyFromBufferToAov << <grid, block >> > (
+				m_tmpBuf.ptr(),
+				curaov.ptr(),
+				width, height);
+			checkCudaKernel(copyFromBufferToAov);
 		}
 	}
 }

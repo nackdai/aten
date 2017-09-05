@@ -72,28 +72,6 @@ inline __device__ float3 YCoCg2RGB(float3 c)
 #endif
 }
 
-inline __device__ float3 sampleColor(
-	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
-	int width, int height,
-	int2 p)
-{
-	int ix = clamp(p.x, 0, width);
-	int iy = clamp(p.y, 0, height);
-
-	auto idx = getIdx(ix, iy, width);
-
-	auto c = aovs[idx].color;
-
-#ifdef ENABLE_YCOCG
-	auto rgb = make_float3(c.x, c.y, c.z);
-	auto ycocg = RGB2YCoCg(rgb);
-
-	return ycocg;
-#else
-	return make_float3(c.x, c.y, c.z);
-#endif
-}
-
 inline __device__ float3 sampleColorRGB(
 	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
 	int width, int height,
@@ -106,7 +84,27 @@ inline __device__ float3 sampleColorRGB(
 
 	auto c = aovs[idx].color;
 
+	c.x = powf(c.x, 1.0f / 2.2f);
+	c.y = powf(c.y, 1.0f / 2.2f);
+	c.z = powf(c.z, 1.0f / 2.2f);
+
 	return make_float3(c.x, c.y, c.z);
+}
+
+inline __device__ float3 sampleColor(
+	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
+	int width, int height,
+	int2 p)
+{
+	auto c = sampleColorRGB(aovs, width, height, p);
+
+#ifdef ENABLE_YCOCG
+	auto ycocg = RGB2YCoCg(c);
+
+	return ycocg;
+#else
+	return c;
+#endif
 }
 
 inline __device__ float3 sampleColor(
@@ -118,7 +116,7 @@ inline __device__ float3 sampleColor(
 	auto pclr = sampleColorRGB(aovs, width, height, p);
 	auto jclr = sampleColorRGB(aovs, width, height, make_int2(p.x - 1, p.y - 1));
 
-	auto f = sqrtf(dot(jitter, jitter));
+	auto f = sqrtf(dot(jitter, jitter)) / sqrtf(2.0f);
 
 	auto ret = lerp(jclr, pclr, f);
 
@@ -139,10 +137,20 @@ inline __device__ float3 max(float3 a, float3 b)
 	return make_float3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
 }
 
+inline __device__ float4 abs(float4 v)
+{
+	v.x = fabsf(v.x);
+	v.y = fabsf(v.y);
+	v.z = fabsf(v.z);
+	v.w = fabsf(v.w);
+	return v;
+}
+
 inline __device__ float3 clipColor(
 	float3 clr0, float3 clr1,
 	int ix, int iy,
 	int width, int height,
+	float2 jitter,
 	const idaten::SVGFPathTracing::AOV* __restrict__ aovs)
 {
 	int2 du = make_int2(1, 0);
@@ -150,15 +158,15 @@ inline __device__ float3 clipColor(
 
 	int2 uv = make_int2(ix, iy);
 
-	float3 ctl = sampleColor(aovs, width, height, uv - dv - du);
-	float3 ctc = sampleColor(aovs, width, height, uv - dv);
-	float3 ctr = sampleColor(aovs, width, height, uv - dv + du);
-	float3 cml = sampleColor(aovs, width, height, uv - du);
-	float3 cmc = sampleColor(aovs, width, height, uv);
-	float3 cmr = sampleColor(aovs, width, height, uv + du);
-	float3 cbl = sampleColor(aovs, width, height, uv + dv - du);
-	float3 cbc = sampleColor(aovs, width, height, uv + dv);
-	float3 cbr = sampleColor(aovs, width, height, uv + dv + du);
+	float3 ctl = sampleColor(aovs, width, height, uv - dv - du, jitter);
+	float3 ctc = sampleColor(aovs, width, height, uv - dv, jitter);
+	float3 ctr = sampleColor(aovs, width, height, uv - dv + du, jitter);
+	float3 cml = sampleColor(aovs, width, height, uv - du, jitter);
+	float3 cmc = sampleColor(aovs, width, height, uv, jitter);
+	float3 cmr = sampleColor(aovs, width, height, uv + du, jitter);
+	float3 cbl = sampleColor(aovs, width, height, uv + dv - du, jitter);
+	float3 cbc = sampleColor(aovs, width, height, uv + dv, jitter);
+	float3 cbr = sampleColor(aovs, width, height, uv + dv + du, jitter);
 
 	float3 cmin = min(ctl, min(ctc, min(ctr, min(cml, min(cmc, min(cmr, min(cbl, min(cbc, cbr))))))));
 	float3 cmax = max(ctl, max(ctc, max(ctr, max(cml, max(cmc, max(cmr, max(cbl, max(cbc, cbr))))))));
@@ -256,6 +264,7 @@ __global__ void temporalAA(
 	const idaten::SVGFPathTracing::AOV* __restrict__ prevAovs,
 	const aten::mat4 mtxC2V,
 	const aten::mat4 mtxPrevV2C,
+	float2 jitter,
 	float sinTime,
 	int width, int height)
 {
@@ -271,10 +280,6 @@ __global__ void temporalAA(
 	auto p = make_int2(ix, iy);
 
 	auto* sampler = &paths[idx].sampler;
-
-	auto r1 = sampler->nextSample();
-	auto r2 = sampler->nextSample();
-	float2 jitter = make_float2(r1, r2);
 
 	auto tmp = sampleColorRGB(curAovs, width, height, p);
 
@@ -301,7 +306,7 @@ __global__ void temporalAA(
 
 		auto clr1 = sampleColor(prevAovs, width, height, make_int2(px, py));
 
-		clr1 = clipColor(clr0, clr1, ix, iy, width, height, curAovs);
+		clr1 = clipColor(clr0, clr1, ix, iy, width, height, jitter, curAovs);
 
 #ifdef ENABLE_YCOCG
 		float lum0 = clr0.x;
@@ -314,15 +319,15 @@ __global__ void temporalAA(
 		float unbiased_diff = abs(lum0 - lum1) / max(lum0, max(lum1, 0.2f));
 		float unbiased_weight = 1.0 - unbiased_diff;
 		float unbiased_weight_sqr = unbiased_weight * unbiased_weight;
-		float k_feedback = lerp(0.8, 0.2, unbiased_weight_sqr);
+		float k_feedback = lerp(0.3, 0.6, unbiased_weight_sqr);
 
 		auto c = lerp(clr0, clr1, k_feedback);
 
 #ifdef ENABLE_YCOCG
-		c = YCoCg2RGB(ycocg);
+		c = YCoCg2RGB(c);
 #endif
 
-		auto noise4 = PDsrand4(make_float2(ix, iy) + sinTime + 0.6959174f) / 510.0f;
+		auto noise4 = abs(PDsrand4(make_float2(ix, iy) + sinTime + 0.6959174f) / 510.0f);
 		noise4.w = 0;
 
 		auto f = make_float4(c.x, c.y, c.z, 1) + noise4;
@@ -367,6 +372,20 @@ namespace idaten
 
 			float sintime = aten::abs(aten::sin((m_frame & 0xf) * AT_MATH_PI));
 
+			// http://en.wikipedia.org/wiki/Halton_sequence
+			const static float2 offset[8][2] = {
+				make_float2( 1.0f / 2.0f, 1.0f / 3.0f ),
+				make_float2( 1.0f / 4.0f, 2.0f / 3.0f ),
+				make_float2( 3.0f / 4.0f, 1.0f / 9.0f ),
+				make_float2( 1.0f / 8.0f, 4.0f / 9.0f ),
+				make_float2( 5.0f / 8.0f, 7.0f / 9.0f ),
+				make_float2( 3.0f / 8.0f, 2.0f / 9.0f ),
+				make_float2( 7.0f / 8.0f, 5.0f / 9.0f ),
+				make_float2( 1.0f / 16.0f, 8.0f / 9.0f ),
+			};
+
+			auto frame = (m_frame + 1) & 0x7;
+
 			if (canShowTAADiff()) {
 				temporalAA<true> << <grid, block >> > (
 					outputSurf,
@@ -375,17 +394,20 @@ namespace idaten
 					prevaov.ptr(),
 					m_mtxC2V,
 					m_mtxPrevV2C,
+					offset[frame],
 					sintime,
 					width, height);
 			}
 			else {
 				temporalAA<false> << <grid, block >> > (
+				//temporalAA<false> << <1, 1 >> > (
 					outputSurf,
 					m_paths.ptr(),
 					curaov.ptr(),
 					prevaov.ptr(),
 					m_mtxC2V,
 					m_mtxPrevV2C,
+					offset[frame],
 					sintime,
 					width, height);
 			}

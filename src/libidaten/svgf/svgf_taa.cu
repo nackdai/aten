@@ -373,7 +373,7 @@ namespace idaten
 			float sintime = aten::abs(aten::sin((m_frame & 0xf) * AT_MATH_PI));
 
 			// http://en.wikipedia.org/wiki/Halton_sequence
-			const static float2 offset[8][2] = {
+			const static float2 offset[8] = {
 				make_float2( 1.0f / 2.0f, 1.0f / 3.0f ),
 				make_float2( 1.0f / 4.0f, 2.0f / 3.0f ),
 				make_float2( 3.0f / 4.0f, 1.0f / 9.0f ),

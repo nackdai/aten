@@ -307,6 +307,8 @@ __global__ void atrousFilter(
 	if (isFinalIter) {
 		sumC *= aovs[idx].texclr;
 
+		aovs[idx].color = sumC;
+
 		surf2Dwrite(
 			sumC,
 			dst,
@@ -393,13 +395,23 @@ namespace idaten
 
 			cur = next;
 			next = 1 - cur;
-
-			// Copy color from temporary buffer to AOV buffer for next temporal reprojection.
-			copyFromBufferToAov << <grid, block >> > (
-				m_tmpBuf.ptr(),
-				curaov.ptr(),
-				width, height);
-			checkCudaKernel(copyFromBufferToAov);
 		}
+	}
+
+	void SVGFPathTracing::copyFromTmpBufferToAov(int width, int height)
+	{
+		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+		dim3 grid(
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
+
+		auto& curaov = getCurAovs();
+
+		// Copy color from temporary buffer to AOV buffer for next temporal reprojection.
+		copyFromBufferToAov << <grid, block >> > (
+			m_tmpBuf.ptr(),
+			curaov.ptr(),
+			width, height);
+		checkCudaKernel(copyFromBufferToAov);
 	}
 }

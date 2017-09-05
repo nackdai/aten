@@ -639,6 +639,7 @@ namespace idaten
 		}
 
 		m_tmpBuf.init(width * height);
+		m_prevBuf.init(width * height);
 	}
 
 	static bool doneSetStackSize = false;
@@ -747,6 +748,8 @@ namespace idaten
 			onAtrousFilter(outputSurf, width, height);
 
 			onTAA(outputSurf, width, height);
+
+			copyFromTmpBufferToAov(width, height);
 		}
 		else if (m_mode == Mode::VAR) {
 			onVarianceEstimation(outputSurf, width, height);

@@ -158,6 +158,8 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
+		void copyFromTmpBufferToAov(int width, int height);
+
 		void onTAA(
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
@@ -203,6 +205,7 @@ namespace idaten
 		idaten::TypedCudaMemory<float4> m_atrousVar[2];
 
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
+		idaten::TypedCudaMemory<float4> m_prevBuf;
 
 		Mode m_mode{ Mode::SVGF };
 

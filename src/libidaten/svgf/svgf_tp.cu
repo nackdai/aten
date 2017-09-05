@@ -119,11 +119,15 @@ __global__ void temporalReprojection(
 			int xx = clamp(ix + x, 0, width - 1);
 			int yy = clamp(iy + y, 0, height - 1);
 
+			int _idx = getIdx(xx, yy, width);
+
+			auto depth = curAovs[_idx].depth;
+
 			// 前のフレームのクリップ空間座標を計算.
 			aten::vec4 prevPos;
 			computePrevScreenPos(
 				xx, yy,
-				centerDepth,
+				depth,
 				width, height,
 				&prevPos,
 				mtxs);

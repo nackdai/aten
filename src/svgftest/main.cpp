@@ -313,9 +313,9 @@ int main()
 		"../shader/vs.glsl", "../shader/taa_fs.glsl",
 		"../shader/vs.glsl", "../shader/taa_final_fs.glsl");
 
-	//aten::visualizer::addPostProc(&gamma);
-	//aten::visualizer::addPostProc(&blitter);
 	aten::visualizer::addPostProc(&taa);
+	aten::visualizer::addPostProc(&gamma);
+	//aten::visualizer::addPostProc(&blitter);
 
 #ifdef ENABLE_NLM
 	aten::visualizer::addPostProc(&nlmshd);

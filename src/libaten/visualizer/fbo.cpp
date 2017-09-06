@@ -40,6 +40,7 @@ namespace aten {
 				nullptr));
 		}
 
+#if 0
 		CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
 
 		for (int i = 0; i < m_num; i++) {
@@ -54,6 +55,7 @@ namespace aten {
 		}
 
 		CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+#endif
 
 		m_width = width;
 		m_height = height;
@@ -81,6 +83,25 @@ namespace aten {
 		AT_ASSERT(isValid());
 
 		CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
+
+		if (m_func) {
+			m_func(&m_tex[0], m_num, m_comps);
+		}
+		else {
+			if (m_comps.empty()) {
+				for (int i = 0; i < m_num; i++) {
+					CALL_GL_API(glFramebufferTexture2D(
+						GL_FRAMEBUFFER,
+						GL_COLOR_ATTACHMENT0 + i,
+						GL_TEXTURE_2D,
+						m_tex[i],
+						0));
+
+					m_comps.push_back(GL_COLOR_ATTACHMENT0 + i);
+				}
+			}
+		}
+
 		CALL_GL_API(glDrawBuffers(m_comps.size(), &m_comps[0]));
 
 		//auto res = glCheckNamedFramebufferStatus(m_fbo, GL_FRAMEBUFFER);

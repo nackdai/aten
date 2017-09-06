@@ -79,6 +79,12 @@
     <Filter Include="denoiser">
       <UniqueIdentifier>{351d88a4-d2bc-4bc5-9e72-f4e20bfbdbdd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\atrous">
+      <UniqueIdentifier>{13bf602d-1804-4f8b-8946-2d5f580fef59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader\taa">
+      <UniqueIdentifier>{bfcc2677-ea69-434a-b998-76705ca61c21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -365,6 +371,9 @@
     <ClInclude Include="..\src\libaten\renderer\directlight.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\filter\taa.h">
+      <Filter>filter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -571,6 +580,9 @@
     <ClCompile Include="..\src\libaten\renderer\directlight.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\taa.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">
@@ -612,11 +624,17 @@
     <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat">
       <Filter>filter\VirtualFlashImage</Filter>
     </None>
-    <None Include="..\src\shader\atrous_fs.glsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\src\shader\atrous_final_fs.glsl">
-      <Filter>shader</Filter>
+      <Filter>shader\atrous</Filter>
+    </None>
+    <None Include="..\src\shader\atrous_fs.glsl">
+      <Filter>shader\atrous</Filter>
+    </None>
+    <None Include="..\src\shader\taa_fs.glsl">
+      <Filter>shader\taa</Filter>
+    </None>
+    <None Include="..\src\shader\taa_final_fs.glsl">
+      <Filter>shader\taa</Filter>
     </None>
   </ItemGroup>
 </Project>

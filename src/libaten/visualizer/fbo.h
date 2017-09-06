@@ -4,6 +4,7 @@
 #include "visualizer/pixelformat.h"
 
 #include <vector>
+#include <functional>
 
 namespace aten {
 	class FBO {
@@ -40,6 +41,12 @@ namespace aten {
 
 		void asMulti(uint32_t num);
 
+		using FuncPrepareFbo = std::function<void(const uint32_t*, int, std::vector<uint32_t>&)>;
+		void setPrepareFboFunction(FuncPrepareFbo func)
+		{
+			m_func = func;
+		}
+
 	protected:
 		uint32_t m_fbo{ 0 };
 
@@ -47,6 +54,8 @@ namespace aten {
 		std::vector<uint32_t> m_tex;
 
 		std::vector<uint32_t> m_comps;
+
+		FuncPrepareFbo m_func{ nullptr };
 
 		uint32_t m_depth{ 0 };
 

@@ -42,7 +42,7 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 1;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::PT;
+static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
 
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
@@ -307,8 +307,15 @@ int main()
 		"../shader/nlm_fs.glsl");
 	nlmshd.setParam(0.04f, 0.04f);
 
-	aten::visualizer::addPostProc(&gamma);
+	aten::TAA taa;
+	taa.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl", "../shader/taa_fs.glsl",
+		"../shader/vs.glsl", "../shader/taa_final_fs.glsl");
+
+	//aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
+	aten::visualizer::addPostProc(&taa);
 
 #ifdef ENABLE_NLM
 	aten::visualizer::addPostProc(&nlmshd);

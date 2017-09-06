@@ -209,7 +209,7 @@ namespace idaten
 
 		Mode m_mode{ Mode::SVGF };
 
-		bool m_enableTAA{ true };
+		bool m_enableTAA{ false };
 		bool m_canShowAADiff{ false };
 	};
 }

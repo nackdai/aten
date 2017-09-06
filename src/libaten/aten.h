@@ -10,6 +10,7 @@
 
 #include "filter/nlm.h"
 #include "filter/bilateral.h"
+#include "filter/taa.h"
 
 #include "filter/PracticalNoiseReduction/PracticalNoiseReduction.h"
 #include "filter/VirtualFlashImage/VirtualFlashImage.h"

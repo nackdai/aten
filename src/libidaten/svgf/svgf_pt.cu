@@ -55,7 +55,7 @@ __global__ void genPath(
 	scramble *= (sample + 1);
 	path.sampler.init(scramble, sobolmatrices);
 
-#if 0
+#if 1
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
 #else

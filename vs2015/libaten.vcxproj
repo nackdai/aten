@@ -254,6 +254,7 @@
     <ClInclude Include="..\src\libaten\filter\nlm.h" />
     <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.h" />
     <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h" />
+    <ClInclude Include="..\src\libaten\filter\taa.h" />
     <ClInclude Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.h" />
     <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />
@@ -347,6 +348,7 @@
     <ClCompile Include="..\src\libaten\filter\nlm.cpp" />
     <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.cpp" />
     <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp" />
+    <ClCompile Include="..\src\libaten\filter\taa.cpp" />
     <ClCompile Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.cpp" />
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp" />
     <ClCompile Include="..\src\libaten\hdr\hdr.cpp" />
@@ -417,6 +419,8 @@
     <None Include="..\src\shader\fs.glsl" />
     <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\nlm_fs.glsl" />
+    <None Include="..\src\shader\taa_final_fs.glsl" />
+    <None Include="..\src\shader\taa_fs.glsl" />
     <None Include="..\src\shader\tonemap_fs.glsl" />
     <None Include="..\src\shader\vs.glsl" />
   </ItemGroup>

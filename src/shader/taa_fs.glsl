@@ -69,6 +69,7 @@ vec3 unmap(vec3 clr)
 	return clr / (1 - lum);
 }
 
+// http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
 vec3 clipAABB(
 	vec3 aabb_min,
 	vec3 aabb_max,
@@ -113,6 +114,11 @@ vec4 sampleColor(sampler2D s, vec2 uv)
 
 void main()
 {
+	// http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
+	// https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader
+	// http://t-pot.com/program/152_TAA/
+	// https://github.com/t-pot/TAA
+
 	ivec2 texsize = textureSize(s0, 0);
 
 	vec2 invScr = 1.0 / texsize.xy;;

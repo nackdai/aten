@@ -70,6 +70,14 @@ namespace aten
 
 		auto texAcc = getFbo().getTexHandle(cur);
 		texture::bindAsGLTexture(texAcc, 1, this);
+
+		auto enableTAA = m_body->isEnableTAA();
+		auto hEnableTAA = this->getHandle("enableTAA");
+		CALL_GL_API(::glUniform1i(hEnableTAA, enableTAA));
+
+		auto canShowDiff = m_body->canShowTAADiff();
+		auto hShowDiff = this->getHandle("showDiff");
+		CALL_GL_API(::glUniform1i(hShowDiff, canShowDiff));
 	}
 
 	void TAA::FinalPass::prepareRender(

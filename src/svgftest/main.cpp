@@ -36,6 +36,8 @@ static aten::AcceleratedScene<aten::bvh> g_scene;
 
 static idaten::SVGFPathTracing g_tracer;
 
+static aten::TAA g_taa;
+
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
@@ -119,19 +121,19 @@ void onRun()
 			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 		}
 
-		bool prevEnableTAA = g_tracer.isEnableTAA();
+		bool prevEnableTAA = g_taa.isEnableTAA();
 		bool enableTAA = prevEnableTAA;
 		ImGui::Checkbox("Enable TAA", &enableTAA);
 
-		bool prevCanShowTAADiff = g_tracer.canShowTAADiff();
+		bool prevCanShowTAADiff = g_taa.canShowTAADiff();
 		bool canShowTAADiff = prevCanShowTAADiff;
 		ImGui::Checkbox("Show TAA Diff", &canShowTAADiff);
 
 		if (prevEnableTAA != enableTAA) {
-			g_tracer.enableTAA(enableTAA);
+			g_taa.enableTAA(enableTAA);
 		}
 		if (prevCanShowTAADiff != canShowTAADiff) {
-			g_tracer.showTAADiff(canShowTAADiff);
+			g_taa.showTAADiff(canShowTAADiff);
 		}
 
 		auto cam = g_camera.param();
@@ -307,13 +309,12 @@ int main()
 		"../shader/nlm_fs.glsl");
 	nlmshd.setParam(0.04f, 0.04f);
 
-	aten::TAA taa;
-	taa.init(
+	g_taa.init(
 		WIDTH, HEIGHT,
 		"../shader/vs.glsl", "../shader/taa_fs.glsl",
 		"../shader/vs.glsl", "../shader/taa_final_fs.glsl");
 
-	aten::visualizer::addPostProc(&taa);
+	aten::visualizer::addPostProc(&g_taa);
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 

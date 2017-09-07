@@ -7,6 +7,9 @@ uniform sampler2D s1;	// previous frame.
 
 uniform float blurSize = 0.2;
 
+uniform bool enableTAA = true;
+uniform bool showDiff = false;
+
 // output colour for the fragment
 layout(location = 0) out highp vec4 oBuffer;
 layout(location = 1) out highp vec4 oScreen;
@@ -125,6 +128,13 @@ void main()
 
 	vec2 uv = gl_FragCoord.xy * invScr;
 
+	if (!enableTAA) {
+		oBuffer = texture2D(s0, uv);
+		oBuffer.a = 1;
+		oScreen = oBuffer;
+		return;
+	}
+
 	vec2 du = vec2(invScr.x, 0.0);
 	vec2 dv = vec2(0.0, invScr.y);
 
@@ -220,5 +230,12 @@ void main()
 	oBuffer = neighbor_sum;
 	oBuffer.a = 1;
 
-	oScreen = oBuffer;
+	if (showDiff) {
+		vec3 c = YCoCg2RGB(center_color.xyz);
+		oScreen.xyz = abs(neighbor_sum.xyz - c);
+		oScreen.a = 1;
+	}
+	else {
+		oScreen = oBuffer;
+	}
 }

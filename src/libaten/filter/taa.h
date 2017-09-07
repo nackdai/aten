@@ -30,6 +30,24 @@ namespace aten {
 			return m_final.getFbo();
 		}
 
+		void enableTAA(bool e)
+		{
+			m_enableTAA = e;
+		}
+		bool isEnableTAA() const
+		{
+			return m_enableTAA;
+		}
+
+		void showTAADiff(bool s)
+		{
+			m_canShowAADiff = s;
+		}
+		bool canShowTAADiff() const
+		{
+			return m_canShowAADiff;
+		}
+
 	private:
 		void prepareFbo(const uint32_t* tex, int num, std::vector<uint32_t>& comps);
 
@@ -82,5 +100,8 @@ namespace aten {
 		FinalPass m_final;
 
 		int m_idx{ 0 };
+
+		bool m_enableTAA{ true };
+		bool m_canShowAADiff{ false };
 	};
 }

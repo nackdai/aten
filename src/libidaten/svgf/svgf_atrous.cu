@@ -307,8 +307,6 @@ __global__ void atrousFilter(
 	if (isFinalIter) {
 		sumC *= aovs[idx].texclr;
 
-		aovs[idx].color = sumC;
-
 		surf2Dwrite(
 			sumC,
 			dst,

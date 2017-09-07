@@ -99,24 +99,6 @@ namespace idaten
 			return m_frame;
 		}
 
-		void enableTAA(bool e)
-		{
-			m_enableTAA = e;
-		}
-		bool isEnableTAA() const
-		{
-			return m_enableTAA;
-		}
-
-		void showTAADiff(bool s)
-		{
-			m_canShowAADiff = s;
-		}
-		bool canShowTAADiff() const
-		{
-			return m_canShowAADiff;
-		}
-
 	protected:
 		virtual void onGenPath(
 			int width, int height,
@@ -160,10 +142,6 @@ namespace idaten
 
 		void copyFromTmpBufferToAov(int width, int height);
 
-		void onTAA(
-			cudaSurfaceObject_t outputSurf,
-			int width, int height);
-
 		idaten::TypedCudaMemory<AOV>& getCurAovs()
 		{
 			return m_aovs[m_curAOVPos];
@@ -205,11 +183,7 @@ namespace idaten
 		idaten::TypedCudaMemory<float4> m_atrousVar[2];
 
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
-		idaten::TypedCudaMemory<float4> m_prevBuf;
 
 		Mode m_mode{ Mode::SVGF };
-
-		bool m_enableTAA{ false };
-		bool m_canShowAADiff{ false };
 	};
 }

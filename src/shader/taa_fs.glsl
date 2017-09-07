@@ -29,6 +29,44 @@ vec3 YCbCr2RGB(vec3 ycc)
 	return vec3(dot(ycc, YCbCr2R), dot(ycc, YCbCr2G), dot(ycc, YCbCr2B));
 }
 
+// https://software.intel.com/en-us/node/503873
+vec3 RGB2YCoCg(vec3 c)
+{
+	// Y = R/4 + G/2 + B/4
+	// Co = R/2 - B/2
+	// Cg = -R/4 + G/2 - B/4
+	return vec3(
+		c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
+		c.x / 2.0 - c.z / 2.0,
+		-c.x / 4.0 + c.y / 2.0 - c.z / 4.0);
+}
+
+vec3 YCoCg2RGB(vec3 c)
+{
+	// R = Y + Co - Cg
+	// G = Y + Cg
+	// B = Y - Co - Cg
+	return clamp(
+		vec3(
+			c.x + c.y - c.z,
+			c.x + c.z,
+			c.x - c.y - c.z),
+		0, 1);
+}
+
+// http://graphicrants.blogspot.jp/2013/12/tone-mapping.html
+vec3 map(vec3 clr)
+{
+	float lum = RGB2YCoCg(clr).x;
+	return clr / (1 + lum);
+}
+
+vec3 unmap(vec3 clr)
+{
+	float lum = RGB2YCoCg(clr).x;
+	return clr / (1 - lum);
+}
+
 vec3 clipAABB(
 	vec3 aabb_min,
 	vec3 aabb_max,
@@ -62,9 +100,7 @@ vec4 sampleColor(sampler2D s, vec2 uv)
 {
 	vec4 clr = texture2D(s, uv);
 
-	float lum = RGB2YCbCr(clr.xyz).x;
-
-	clr.xyz = clr.xyz / (1 + lum);
+	clr.xyz = map(clr.xyz);
 
 	return clr;
 }
@@ -122,13 +158,13 @@ void main()
 
 #if 1
 		vec3 color_diff = abs(neighbor.xyz - center_color.xyz);
-		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// 中心との差をYCbCrで見る
+		vec3 ycc = RGB2YCoCg(color_diff.xyz);		// 中心との差をYCbCrで見る
 		float cbcr_len = length(color_diff.yz);
 
 		// 色相成分が大きく異なる時、閾値に収まる範囲に色を補正して合成
 		if (cbcr_threshhold < cbcr_len) {
 			ycc = (cbcr_threshhold / cbcr_len) * ycc;
-			neighbor.rgb = center_color.rgb + YCbCr2RGB(ycc);
+			neighbor.rgb = center_color.rgb + YCoCg2RGB(ycc);
 		}
 #else
 		float lum0 = RGB2YCbCr(center_color.xyz).x;
@@ -147,8 +183,7 @@ void main()
 
 	neighbor_sum /= 5.0;
 
-	float lum = RGB2YCbCr(neighbor_sum.xyz).x;
-	neighbor_sum.xyz = neighbor_sum.xyz / (1 - lum);
+	neighbor_sum.xyz = unmap(neighbor_sum.xyz);
 
 	oBuffer = neighbor_sum;
 	oBuffer.a = 1;

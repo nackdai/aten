@@ -493,7 +493,11 @@ __global__ void shade(
 		auto hitobj = lightobj;
 
 		aten::Intersection isectTmp;
-		aten::ray shadowRay(rec.p, dirToLight);
+
+		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
+		auto tmp = rec.p + dirToLight - shadowRayOrg;
+		auto shadowRayDir = normalize(tmp);
+		aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
 		bool isHit = false;
 

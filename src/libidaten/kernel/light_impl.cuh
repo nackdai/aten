@@ -169,6 +169,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 	// TODO
 	int envmapidx = light->envmap.idx;
 
+#if 0
 	real u = sampler->nextSample();
 	real v = sampler->nextSample();
 
@@ -177,6 +178,27 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 
 	// u, v -> direction.
 	result->dir = AT_NAME::envmap::convertUVToDirection(u, v);
+#else
+	auto n = normal;
+	auto t = aten::getOrthoVector(normal);
+	auto b = normalize(cross(n, t));
+
+	real r1 = sampler->nextSample();
+	real r2 = sampler->nextSample();
+
+	real sinpsi = aten::sin(2 * AT_MATH_PI * r1);
+	real cospsi = aten::cos(2 * AT_MATH_PI * r1);
+	real costheta = aten::pow(1 - r2, 0.5);
+	real sintheta = aten::sqrt(1 - costheta * costheta);
+
+	// Return the result
+	result->dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
+
+	auto uv = AT_NAME::envmap::convertDirectionToUV(result->dir);
+
+	auto u = uv.x;
+	auto v = uv.y;
+#endif
 
 	// TODO
 	// シーンのAABBを覆う球上に配置されるようにするべき.

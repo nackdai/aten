@@ -38,7 +38,10 @@ namespace AT_NAME {
 			aten::sampler* sampler)
 		{
 			result->pos = rec->p;
-			result->pdf = 1 / rec->area;
+
+			auto dist2 = aten::squared_length(rec->p - org);
+			result->pdf = dist2 / rec->area;
+
 			result->dir = rec->p - org;
 			result->nml = rec->normal;
 

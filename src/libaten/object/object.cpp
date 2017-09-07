@@ -148,6 +148,7 @@ namespace AT_NAME
 		aten::hitable::SamplePosNormalPdfResult* result,
 		aten::sampler* sampler) const
 	{
+#if 0
 		// 0 <= a + b <= 1
 		real a = sampler->nextSample();
 		real b = sampler->nextSample();
@@ -158,6 +159,13 @@ namespace AT_NAME
 			a /= d;
 			b /= d;
 		}
+#else
+		real r0 = sampler->nextSample();
+		real r1 = sampler->nextSample();
+
+		real a = aten::sqrt(r0) * (real(1) - r1);
+		real b = aten::sqrt(r0) * r1;
+#endif
 
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);

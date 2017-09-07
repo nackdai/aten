@@ -11,6 +11,8 @@ uniform float blurSize = 0.2;
 layout(location = 0) out highp vec4 oBuffer;
 layout(location = 1) out highp vec4 oScreen;
 
+#define USE_YCOCG
+
 vec3 RGB2YCbCr(vec3 rgb)
 {
 	vec3 RGB2Y = { 0.29900, 0.58700, 0.11400 };
@@ -102,6 +104,10 @@ vec4 sampleColor(sampler2D s, vec2 uv)
 
 	clr.xyz = map(clr.xyz);
 
+#ifdef USE_YCOCG
+	clr.xyz = RGB2YCoCg(clr.xyz);
+#endif
+
 	return clr;
 }
 
@@ -158,17 +164,33 @@ void main()
 
 #if 1
 		vec3 color_diff = abs(neighbor.xyz - center_color.xyz);
-		vec3 ycc = RGB2YCoCg(color_diff.xyz);		// 中心との差をYCbCrで見る
+
+#ifdef USE_YCOCG
+		vec3 ycc = color_diff.xyz;
+#else
+		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// 中心との差をYCbCrで見る
+#endif
+		
 		float cbcr_len = length(color_diff.yz);
 
 		// 色相成分が大きく異なる時、閾値に収まる範囲に色を補正して合成
 		if (cbcr_threshhold < cbcr_len) {
 			ycc = (cbcr_threshhold / cbcr_len) * ycc;
-			neighbor.rgb = center_color.rgb + YCoCg2RGB(ycc);
+#ifdef USE_YCOCG
+			neighbor.rgb = center_color.rgb + ycc;
+#else
+			neighbor.rgb = center_color.rgb + YCbCr2RGB(ycc);
+#endif
+			
 		}
+#else
+#ifdef USE_YCOCG
+		float lum0 = center_color.x;
+		float lum1 = neighbor.x;
 #else
 		float lum0 = RGB2YCbCr(center_color.xyz).x;
 		float lum1 = RGB2YCbCr(neighbor.xyz).x;
+#endif
 
 		float unbiased_diff = abs(lum0 - lum1) / max(lum0, max(lum1, 0.2));
 		float unbiased_weight = 1.0 - unbiased_diff;
@@ -182,6 +204,10 @@ void main()
 	}
 
 	neighbor_sum /= 5.0;
+
+#ifdef USE_YCOCG
+	neighbor_sum.xyz = YCoCg2RGB(neighbor_sum.xyz);
+#endif
 
 	neighbor_sum.xyz = unmap(neighbor_sum.xyz);
 

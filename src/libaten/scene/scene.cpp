@@ -40,7 +40,7 @@ namespace aten {
 		real& selectPdf,
 		LightSampleResult& sampleRes)
 	{
-#if 0
+#if 1
 		Light* light = nullptr;
 
 		auto num = m_lights.size();
@@ -49,7 +49,7 @@ namespace aten {
 			uint32_t idx = (uint32_t)aten::clamp<real>(r * num, 0, num - 1);
 			light = m_lights[idx];
 
-			sampleRes = light->sample(org, sampler);
+			sampleRes = light->sample(org, nml, sampler);
 			selectPdf = real(1) / num;
 		}
 		else {
@@ -69,7 +69,7 @@ namespace aten {
 		for (int i = 0; i < m_lights.size(); i++) {
 			const auto light = m_lights[i];
 
-			samples[i] = light->sample(org, sampler);
+			samples[i] = light->sample(org, nml, sampler);
 
 			const auto& lightsample = samples[i];
 

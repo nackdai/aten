@@ -198,10 +198,16 @@ namespace AT_NAME {
 		return 0;
 	}
 
-	aten::LightSampleResult ImageBasedLight::sample(const aten::vec3& org, aten::sampler* sampler) const
+	aten::LightSampleResult ImageBasedLight::sample(
+		const aten::vec3& org, 
+		const aten::vec3& nml,
+		aten::sampler* sampler) const
 	{
 		auto envmap = getEnvMap();
 
+		aten::LightSampleResult result;
+
+#if 1
 		const auto r1 = sampler->nextSample();
 		const auto r2 = sampler->nextSample();
 
@@ -217,8 +223,6 @@ namespace AT_NAME {
 		real u = (real)(x + 0.5) / width;
 		real v = (real)(y + 0.5) / height;
 
-		aten::LightSampleResult result;
-
 		// NOTE
 		// p(w) = p(u, v) * (w * h) / (2ƒÎ^2 * sin(ƒÆ))
 		auto pi2 = AT_MATH_PI * AT_MATH_PI;
@@ -231,6 +235,72 @@ namespace AT_NAME {
 		result.le = envmap->sample(u, v);
 		result.intensity = real(1);
 		result.finalColor = result.le * result.intensity;
+#elif 0
+		auto uv = AT_NAME::envmap::convertDirectionToUV(nml);
+
+		static const real radius = real(3);
+
+		auto r1 = sampler->nextSample();
+		auto r2 = sampler->nextSample();
+
+		// [0, 1] -> [-1, 1]
+		r1 = r1 * 2 - 1;
+		r2 = r2 * 2 - 1;
+
+		auto width = envmap->getTexture()->width();
+		auto height = envmap->getTexture()->height();
+
+		r1 = r1 * radius / (real)width;
+		r2 = r2 * radius / (real)height;
+
+		real u = uv.x + r1;
+		if (u < real(0)) {
+			u += real(1);
+		}
+		else if (u > real(1)) {
+			u = real(1) - (u - real(1));
+		}
+
+		real v = uv.y + r2;
+		if (v < real(0)) {
+			v += real(1);
+		}
+		else if (v > real(1)) {
+			v = real(1) - (v - real(1));
+		}
+
+		// u, v -> direction.
+		result.dir = AT_NAME::envmap::convertUVToDirection(u, v);
+
+		result.pdf = dot(nml, result.dir) / AT_MATH_PI;
+
+		result.le = envmap->sample(u, v);
+		result.intensity = real(1);
+		result.finalColor = result.le * result.intensity;
+#else
+		auto n = nml;
+		auto t = aten::getOrthoVector(nml);
+		auto b = normalize(cross(n, t));
+
+		real r1 = sampler->nextSample();
+		real r2 = sampler->nextSample();
+
+		real sinpsi = aten::sin(2 * AT_MATH_PI * r1);
+		real cospsi = aten::cos(2 * AT_MATH_PI * r1);
+		real costheta = aten::pow(1 - r2, 0.5);
+		real sintheta = aten::sqrt(1 - costheta * costheta);
+
+		// Return the result
+		result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
+
+		result.pdf = dot(nml, result.dir) / AT_MATH_PI;
+
+		auto uv = AT_NAME::envmap::convertDirectionToUV(result.dir);
+
+		result.le = envmap->sample(uv.x, uv.y);
+		result.intensity = real(1);
+		result.finalColor = result.le * result.intensity;
+#endif
 
 		// TODO
 		// Currently not used...

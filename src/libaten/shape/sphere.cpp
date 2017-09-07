@@ -70,7 +70,7 @@ namespace AT_NAME
 			return false;
 		}
 #elif 1
-		bool close = aten::isClose(aten::abs(b), sqrt_D4, 25000);
+		bool close = aten::isClose(aten::abs(b), sqrt_D4, 2500);
 
 		if (t1 > AT_MATH_EPSILON && !close) {
 			isect->t = t1;

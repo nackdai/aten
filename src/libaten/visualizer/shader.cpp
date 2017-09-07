@@ -6,7 +6,7 @@ namespace aten {
 	GLuint createShader(const char* path, GLenum type)
 	{
 		FILE* fp = nullptr;
-		fopen_s(&fp, path, "rt");
+		fopen_s(&fp, path, "rb");
 		AT_ASSERT(fp != nullptr);
 
 		fseek(fp, 0, SEEK_END);

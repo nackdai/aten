@@ -32,6 +32,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 	aten::vec3 n1 = aten::vec3(_n1.x, _n1.y, _n1.z);
 	aten::vec3 n2 = aten::vec3(_n2.x, _n2.y, _n2.z);
 
+#if 0
 	// 0 <= a + b <= 1
 	real a = sampler->nextSample();
 	real b = sampler->nextSample();
@@ -42,6 +43,13 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 		a /= d;
 		b /= d;
 	}
+#else
+	real r0 = sampler->nextSample();
+	real r1 = sampler->nextSample();
+
+	real a = aten::sqrt(r0) * (real(1) - r1);
+	real b = aten::sqrt(r0) * r1;
+#endif
 
 	// dSÀ•WŒn(barycentric coordinates).
 	// v0Šî€.

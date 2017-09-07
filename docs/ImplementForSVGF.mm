@@ -1,7 +1,7 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
 <node CREATED="1502080353020" ID="ID_1501713082" MODIFIED="1502096894701" TEXT="SVGF&#x5b9f;&#x88c5;&#x30e1;&#x30e2;">
-<node CREATED="1503644678039" HGAP="57" ID="ID_1938093211" MODIFIED="1503644902848" POSITION="right" TEXT="&#x30d0;&#x30b0;" VSHIFT="-86">
+<node CREATED="1503644678039" HGAP="57" ID="ID_1938093211" MODIFIED="1504751411142" POSITION="right" TEXT="&#x30d0;&#x30b0;" VSHIFT="-86">
 <icon BUILTIN="messagebox_warning"/>
 <node CREATED="1503644694286" ID="ID_260132461" MODIFIED="1503989038449" TEXT="&#x5916;&#x5074;&#x6cd5;&#x7dda;&#x3082;&#x898b;&#x3066;&#x3057;&#x307e;&#x3046;&#x554f;&#x984c;">
 <icon BUILTIN="button_ok"/>
@@ -29,8 +29,21 @@
 </node>
 <node CREATED="1504084772124" ID="ID_156898370" MODIFIED="1504084781824" TEXT="&#x30b8;&#x30e9;&#x30b8;&#x30e9;&#x5bfe;&#x5fdc;">
 <node CREATED="1504084787951" ID="ID_1465055682" MODIFIED="1504084792448" TEXT="fire fly&#x554f;&#x984c;"/>
-<node CREATED="1504084822829" ID="ID_839787983" MODIFIED="1504084823544" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;">
+<node CREATED="1504084822829" ID="ID_839787983" MODIFIED="1504750646769" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;">
 <node CREATED="1504084824137" ID="ID_1893139620" MODIFIED="1504084864287" TEXT="temporal reprojection &#x6642;&#x306b;&#x524d;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x3068;&#x306e;&#x30de;&#x30fc;&#x30b8;&#x3067;&#x84c4;&#x7a4d;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x6570;&#x500d;&#x3057;&#x3066;&#x304b;&#x3089;&#x8db3;&#x3057;&#x3053;&#x3080;"/>
+</node>
+<node CREATED="1504750649966" ID="ID_704604445" MODIFIED="1504750677057" TEXT="TAA&#x3059;&#x308b;&#x3053;&#x3068;&#x3067;&#x5b8c;&#x5168;&#x306b;&#x3068;&#x306f;&#x3044;&#x304b;&#x306a;&#x3044;&#x304c;&#x304b;&#x306a;&#x308a;&#x89e3;&#x6d88;&#x3067;&#x304d;&#x308b;">
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1504750743666" ID="ID_1913819585" MODIFIED="1504750791999" TEXT="Temporal Reprojection&#x306e;&#x3068;&#x304d;&#x306b; current color &#x306b; previous color &#x3092;&#x57fa;&#x6e96;&#x3068;&#x3057;&#x305f; clip AABB &#x3092;&#x3057;&#x3066;&#x307f;&#x308b;">
+<icon BUILTIN="yes"/>
+</node>
+</node>
+<node CREATED="1504750704895" ID="ID_336994059" MODIFIED="1504750723356" TEXT="Sponza&#x3067;&#x4e00;&#x90e8;&#x306b;TemporalReprojection&#x304c;&#x304b;&#x304b;&#x3089;&#x306a;&#x3044;"/>
+<node CREATED="1504766642451" ID="ID_1976079074" MODIFIED="1504766656484" TEXT="&#x305d;&#x3082;&#x305d;&#x3082;&#x3001;Baikal&#x3068;&#x63cf;&#x753b;&#x7d50;&#x679c;&#x304c;&#x4e00;&#x81f4;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;">
+<node CREATED="1504775337622" ID="ID_227025949" MODIFIED="1504775362805" TEXT="&#x3044;&#x304f;&#x3064;&#x304b;&#x7570;&#x306a;&#x308b;&#x3068;&#x3053;&#x308d;&#x304c;&#x3042;&#x3063;&#x305f;&#x306e;&#x3067;&#x5408;&#x308f;&#x305b;&#x308b;&#x3088;&#x3046;&#x306b;&#x5909;&#x66f4;&#x3057;&#x305f;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1504775350647" ID="ID_330591087" MODIFIED="1504775355603" TEXT="&#x304c;&#x3001;&#x307e;&#x3060;&#x4e00;&#x81f4;&#x3057;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;"/>
 </node>
 </node>
 </node>
@@ -47,10 +60,16 @@
 <node CREATED="1503470761469" ID="ID_784267533" MODIFIED="1503470780560" TEXT="&#x73fe;&#x30d5;&#x30ec;&#x30fc;&#x30e0;&#x30ab;&#x30e9;&#x30fc;&#x306f;1spp&#x306a;&#x306e;&#x3067;&#x30ce;&#x30a4;&#x30ba;&#x3092;&#x542b;&#x3080;"/>
 <node CREATED="1503470781196" ID="ID_696233291" MODIFIED="1503470793120" TEXT="&#x305d;&#x306e;&#x305f;&#x3081;&#x3001;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x5f37;&#x304f;&#x3067;&#x3066;&#x3057;&#x307e;&#x3046;"/>
 </node>
-<node CREATED="1503642218566" ID="ID_354078465" MODIFIED="1503648111119" TEXT="temporal anti aliasing">
-<icon BUILTIN="yes"/>
+<node CREATED="1503642218566" ID="ID_354078465" MODIFIED="1504750685737" TEXT="temporal anti aliasing">
+<icon BUILTIN="button_ok"/>
 </node>
-<node CREATED="1503642246189" ID="ID_1485550685" MODIFIED="1503642281128" TEXT="fire fly &#x554f;&#x984c;">
+<node CREATED="1504751428482" ID="ID_1020482192" MODIFIED="1504751438838" TEXT="Shadow Ray &#x3092;&#xff12;&#x672c;&#x306b;&#x5897;&#x3084;&#x3059;"/>
+<node CREATED="1504751439961" ID="ID_1420487554" MODIFIED="1504775402010" TEXT="IBL&#x30b5;&#x30f3;&#x30d7;&#x30ea;&#x30f3;&#x30b0;&#x306e;&#x5b89;&#x5b9a;&#x5316;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1504751450844" ID="ID_440626989" MODIFIED="1504751473663" TEXT="&#x73fe;&#x5728;&#x306f;&#x5b8c;&#x5168;&#x30e9;&#x30f3;&#x30c0;&#x30e0;&#x30b5;&#x30f3;&#x30d7;&#x30ea;&#x30f3;&#x30b0;&#x306a;&#x306e;&#x3067;&#x30ce;&#x30a4;&#x30ba;&#x306e;&#x539f;&#x56e0;&#x306b;&#x306a;&#x3063;&#x3066;&#x3044;&#x308b;"/>
+<node CREATED="1504775371248" ID="ID_1947488352" MODIFIED="1504775397587" TEXT="Baikal&#x3068;&#x540c;&#x3058;&#x3088;&#x3046;&#x306b;&#x534a;&#x7403;&#x306e;importance sampling&#x3092;&#x3059;&#x308b;&#x3088;&#x3046;&#x306b;&#x3057;&#x305f;"/>
+</node>
+<node CREATED="1503642246189" HGAP="41" ID="ID_1485550685" MODIFIED="1504751481350" TEXT="fire fly &#x554f;&#x984c;" VSHIFT="26">
 <icon BUILTIN="messagebox_warning"/>
 <node CREATED="1503642256629" ID="ID_1932789778" MODIFIED="1503642262793" TEXT="fire fly &#x304c;&#x51fa;&#x3059;&#x304e;"/>
 <node CREATED="1503642263405" ID="ID_555121057" MODIFIED="1503644795930" TEXT="SVGF&#x3067;&#x3082;&#x6d88;&#x3048;&#x306a;&#x3044;"/>
@@ -81,6 +100,12 @@
 </node>
 <node CREATED="1504084740597" ID="ID_569239122" MODIFIED="1504084759312" TEXT="INSIDE&#x306e;TAA&#x306e;clip color">
 <icon BUILTIN="yes"/>
+<node CREATED="1503280332711" ID="ID_1419513206" LINK="http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf" MODIFIED="1503280332711" TEXT="twvideo01.ubm-us.net &gt; O1 &gt; Vault &gt; Gdc2016 &gt; Presentations &gt; Pedersen LasseJonFuglsang TemporalReprojectionAntiAliasing">
+<node CREATED="1502353747161" ID="ID_144766608" MODIFIED="1502353752764" TEXT="p25-28"/>
+<node CREATED="1503280345595" ID="ID_998905450" LINK="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader" MODIFIED="1503280345595" TEXT="https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader">
+<node CREATED="1502353770705" ID="ID_939577430" MODIFIED="1502353771427" TEXT="temporal_reprojection"/>
+</node>
+</node>
 </node>
 </node>
 </node>
@@ -118,7 +143,7 @@
 <icon BUILTIN="button_ok"/>
 <node CREATED="1502080607455" ID="ID_618985484" MODIFIED="1502080615665" TEXT="7x7 birateral filter"/>
 </node>
-<node CREATED="1502081704507" ID="ID_1869441458" MODIFIED="1502081707856" TEXT="&#x6280;&#x8853;&#x8abf;&#x67fb;">
+<node CREATED="1502081704507" FOLDED="true" ID="ID_1869441458" MODIFIED="1504751417383" TEXT="&#x6280;&#x8853;&#x8abf;&#x67fb;">
 <node CREATED="1502080468711" ID="ID_586526238" MODIFIED="1502081627286" TEXT="MeshID&#x306e;&#x51fa;&#x529b;">
 <icon BUILTIN="button_ok"/>
 </node>

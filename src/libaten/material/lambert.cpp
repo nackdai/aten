@@ -59,7 +59,7 @@ namespace AT_NAME {
 	{
 		auto c = dot(normal, wo);
 		//AT_ASSERT(c >= 0);
-		//c = aten::abs(c);
+		c = aten::abs(c);
 
 		auto ret = c / AT_MATH_PI;
 

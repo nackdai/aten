@@ -5,6 +5,7 @@
 
 namespace aten {
 	// Correllated multi jittered.
+	// http://graphics.pixar.com/library/MultiJitteredSampling/paper.pdf
 	class CMJ : public sampler {
 	public:
 		AT_DEVICE_API CMJ() {}

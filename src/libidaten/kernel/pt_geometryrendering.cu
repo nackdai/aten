@@ -20,7 +20,6 @@ __global__ void renderAOV(
 	idaten::PathTracingGeometryRendering::AOV* aovs,
 	int width, int height,
 	int sample, int maxSamples,
-	int seed,
 	aten::mat4 mtxW2C,
 	const aten::ray* __restrict__ rays,
 	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
@@ -217,14 +216,12 @@ namespace idaten
 	void PathTracingGeometryRendering::onGenPath(
 		int width, int height,
 		int sample, int maxSamples,
-		int seed,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
 		idaten::PathTracing::onGenPath(
 			width, height,
 			sample, maxSamples,
-			seed,
 			texVtxPos,
 			texVtxNml);
 
@@ -232,7 +229,6 @@ namespace idaten
 			renderAOVs(
 				width, height,
 				sample, maxSamples,
-				seed,
 				texVtxPos,
 				texVtxNml);
 		}
@@ -241,7 +237,6 @@ namespace idaten
 	void PathTracingGeometryRendering::renderAOVs(
 		int width, int height,
 		int sample, int maxSamples,
-		int seed,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
@@ -277,7 +272,6 @@ namespace idaten
 			aovs.ptr(),
 			W, H,
 			sample, maxSamples,
-			seed,
 			mtxW2C,
 			m_rays.ptr(),
 			m_shapeparam.ptr(), m_shapeparam.num(),

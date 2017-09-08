@@ -406,7 +406,6 @@ namespace idaten
 	void PathTracingTemporalReprojection::onGenPath(
 		int width, int height,
 		int sample, int maxSamples,
-		int seed,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
@@ -427,7 +426,6 @@ namespace idaten
 		PathTracingGeometryRendering::onGenPath(
 			width, height,
 			sample, maxSamples,
-			seed,
 			texVtxPos,
 			texVtxNml);
 #else

@@ -23,7 +23,7 @@ __global__ void genPath(
 	aten::ray* rays,
 	int width, int height,
 	int sample, int maxSamples,
-	int seed,
+	unsigned int frame,
 	const aten::CameraParameter* __restrict__ camera,
 	const unsigned int* sobolmatrices,
 	const unsigned int* random)
@@ -46,7 +46,7 @@ __global__ void genPath(
 	}
 
 	auto scramble = random[idx] * 0x1fe3434f;
-	path.sampler.init(scramble + seed, sobolmatrices);
+	path.sampler.init(frame, 0, scramble, sobolmatrices);
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -314,6 +314,7 @@ __global__ void shadeMissWithEnvmap(
 
 template <bool needAOV>
 __global__ void shade(
+	unsigned int frame,
 	cudaSurfaceObject_t outSurface,
 	cudaSurfaceObject_t* aovs,
 	float3 posRange,
@@ -332,7 +333,8 @@ __global__ void shade(
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml,
 	const aten::mat4* __restrict__ matrices,
-	cudaTextureObject_t* textures)
+	cudaTextureObject_t* textures,
+	const unsigned int* random)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -359,6 +361,9 @@ __global__ void shade(
 
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
+
+	auto scramble = random[idx] * 0x1fe3434f;
+	path.sampler.init(frame, 4 + bounce * 300, scramble);
 
 	aten::hitrecord rec;
 
@@ -885,13 +890,9 @@ namespace idaten {
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-			int seed = time.milliSeconds;
-			//int seed = 0;
-
 			onGenPath(
 				width, height,
 				i, maxSamples,
-				seed,
 				vtxTexPos,
 				vtxTexNml);
 
@@ -931,6 +932,8 @@ namespace idaten {
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
+		m_frame++;
+
 		{
 			m_vtxparamsPos.unbind();
 			m_vtxparamsNml.unbind();
@@ -956,7 +959,6 @@ namespace idaten {
 	void PathTracing::onGenPath(
 		int width, int height,
 		int sample, int maxSamples,
-		int seed,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
@@ -970,7 +972,7 @@ namespace idaten {
 			m_rays.ptr(),
 			width, height,
 			sample, maxSamples,
-			seed,
+			m_frame,
 			m_cam.ptr(),
 			m_sobolMatrices.ptr(),
 			m_random.ptr());
@@ -1091,6 +1093,7 @@ namespace idaten {
 		if (enableAOV) {
 			shade<true> << <blockPerGrid, threadPerBlock >> > (
 			//shade<true> << <1, 1 >> > (
+				m_frame,
 				outputSurf,
 				m_aovCudaRsc.ptr(), posRange,
 				width, height,
@@ -1106,11 +1109,13 @@ namespace idaten {
 				m_primparams.ptr(),
 				texVtxPos, texVtxNml,
 				m_mtxparams.ptr(),
-				m_tex.ptr());
+				m_tex.ptr(),
+				m_random.ptr());
 		}
 		else {
 			shade<false> << <blockPerGrid, threadPerBlock >> > (
 			//shade<false> << <1, 1 >> > (
+				m_frame,
 				outputSurf,
 				m_aovCudaRsc.ptr(), posRange,
 				width, height,
@@ -1126,7 +1131,8 @@ namespace idaten {
 				m_primparams.ptr(),
 				texVtxPos, texVtxNml,
 				m_mtxparams.ptr(),
-				m_tex.ptr());
+				m_tex.ptr(),
+				m_random.ptr());
 		}
 
 		checkCudaKernel(shade);

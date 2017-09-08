@@ -27,6 +27,18 @@ namespace aten {
 #endif
 		}
 
+		AT_DEVICE_API void init(
+			uint32_t index, 
+			uint32_t dimension,
+			uint32_t scramble,
+			const unsigned int* data = nullptr)
+		{
+			m_idx = index;
+			m_dimension = dimension;
+			m_scramble = scramble;
+			m_matrices = data ? data : m_matrices;
+		}
+
 		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
 		{
 #ifndef __CUDACC__

@@ -76,7 +76,6 @@ namespace idaten
 		virtual void onGenPath(
 			int width, int height,
 			int sample, int maxSamples,
-			int seed,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml);
 
@@ -117,6 +116,8 @@ namespace idaten
 		aten::vec3 m_posRange{ aten::vec3(real(1)) };
 		idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc;
 		std::vector<idaten::CudaGLSurface> m_aovs;
+
+		uint32_t m_frame{ 1 };
 	};
 
 	class PathTracingGeometryRendering : public PathTracing {
@@ -150,14 +151,12 @@ namespace idaten
 		virtual void onGenPath(
 			int width, int height,
 			int sample, int maxSamples,
-			int seed,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml) override;
 
 		void renderAOVs(
 			int width, int height,
 			int sample, int maxSamples,
-			int seed,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml);
 
@@ -221,7 +220,6 @@ namespace idaten
 		virtual void onGenPath(
 			int width, int height,
 			int sample, int maxSamples,
-			int seed,
 			cudaTextureObject_t texVtxPos,
 			cudaTextureObject_t texVtxNml) override final;
 

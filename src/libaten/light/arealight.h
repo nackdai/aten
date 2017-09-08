@@ -40,9 +40,9 @@ namespace AT_NAME {
 			result->pos = rec->p;
 
 			// TODO
-			// AMD‚ÌProRender(Baikal)‚Å‚Í‚±‚¤‚È‚Á‚Ä‚¢‚é‚ªAPDF‚Í 1/–ÊÏ ‚¾‚Á‚½‚æ‚¤‚È...
+			// AMD‚ÌProRender(Baikal)‚Å‚Í‚± dist2/–ÊÏ ‚Æ‚È‚Á‚Ä‚¢‚é‚ª...
 			auto dist2 = aten::squared_length(rec->p - org);
-			result->pdf = dist2 / rec->area;
+			result->pdf = 1 / rec->area;
 
 			result->dir = rec->p - org;
 			result->nml = rec->normal;

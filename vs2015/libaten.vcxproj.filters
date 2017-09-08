@@ -377,6 +377,9 @@
     <ClInclude Include="..\src\libaten\sampler\cmj.h">
       <Filter>sampler</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\math\vec2.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

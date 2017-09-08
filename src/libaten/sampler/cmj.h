@@ -13,7 +13,8 @@ namespace aten {
 	public:
 		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
 		{
-			// TODO
+			AT_ASSERT(false);
+			init(seed, 0, 0, data);
 		}
 
 		AT_DEVICE_API void init(
@@ -22,13 +23,23 @@ namespace aten {
 			uint32_t scramble,
 			const unsigned int* data = nullptr)
 		{
-			// TODO
+			m_idx = index;
+			m_dimension = dimension;
+			m_scramble = scramble;
 		}
 
 		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
 		{
-			// TODO
-			return 0.0f;
+			vec2 r = sample2D();
+			m_dimension++;
+			return r.x;
+		}
+
+		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API vec2 nextSample2D())
+		{
+			vec2 r = sample2D();
+			m_dimension++;
+			return std::move(r);
 		}
 
 	private:
@@ -80,6 +91,29 @@ namespace aten {
 			i *= 1 | p >> 18;
 
 			return i * (1.0f / 4294967808.0f);
+		}
+
+		vec2 cmj(int s, int n, int p)
+		{
+			int sx = permute(s % n, n, p * 0xa511e9b3);
+			int sy = permute(s / n, n, p * 0x63d83595);
+			float jx = randfloat(s, p * 0xa399d265);
+			float jy = randfloat(s, p * 0x711ad6a5);
+
+			return std::move(vec2(
+				(s % n + (sy + jx) / n) / n,
+				(s / n + (sx + jy) / n) / n));
+		}
+
+		enum {
+			CMJ_DIM = 16,
+		};
+
+		vec2 sample2D()
+		{
+			int idx = permute(m_idx, CMJ_DIM * CMJ_DIM, 0xa399d265 * m_dimension * m_scramble);
+			auto ret = cmj(idx, CMJ_DIM, m_dimension * m_scramble);
+			return std::move(ret);
 		}
 
 	private:

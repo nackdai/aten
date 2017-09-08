@@ -3,6 +3,7 @@
 #include <vector>
 #include "defs.h"
 #include "types.h"
+#include "math/vec2.h"
 
 namespace aten {
 #ifndef __AT_CUDA__
@@ -16,6 +17,15 @@ namespace aten {
 			// Nothing is done...
 		}
 		virtual AT_DEVICE_API real nextSample() = 0;
+
+		virtual AT_DEVICE_API vec2 nextSample2D()
+		{
+			vec2 ret;
+			ret.x = nextSample();
+			ret.y = nextSample();
+
+			return std::move(ret);
+		}
 	};
 #endif
 

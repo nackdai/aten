@@ -6,7 +6,7 @@
 namespace aten {
 	// Correllated multi jittered.
 	// http://graphics.pixar.com/library/MultiJitteredSampling/paper.pdf
-	class CMJ : public sampler {
+	class CMJ AT_INHERIT(sampler) {
 	public:
 		AT_DEVICE_API CMJ() {}
 		AT_VIRTUAL(AT_DEVICE_API ~CMJ() {});
@@ -43,8 +43,12 @@ namespace aten {
 			return std::move(r);
 		}
 
+		enum {
+			CMJ_DIM = 16,
+		};
+
 	private:
-		uint32_t permute(uint32_t i, uint32_t l, uint32_t p)
+		AT_DEVICE_API uint32_t permute(uint32_t i, uint32_t l, uint32_t p)
 		{
 			uint32_t w = l - 1;
 			w |= w >> 1;
@@ -78,7 +82,7 @@ namespace aten {
 			return (i + p) % l;
 		}
 
-		float randfloat(uint32_t i, uint32_t p)
+		AT_DEVICE_API float randfloat(uint32_t i, uint32_t p)
 		{
 			i ^= p;
 			i ^= i >> 17;
@@ -94,7 +98,7 @@ namespace aten {
 			return i * (1.0f / 4294967808.0f);
 		}
 
-		vec2 cmj(int s, int n, int p)
+		AT_DEVICE_API vec2 cmj(int s, int n, int p)
 		{
 			int sx = permute(s % n, n, p * 0xa511e9b3);
 			int sy = permute(s / n, n, p * 0x63d83595);
@@ -106,11 +110,7 @@ namespace aten {
 				(s / n + (sx + jy) / n) / n));
 		}
 
-		enum {
-			CMJ_DIM = 16,
-		};
-
-		vec2 sample2D()
+		AT_DEVICE_API vec2 sample2D()
 		{
 			int idx = permute(m_idx, CMJ_DIM * CMJ_DIM, 0xa399d265 * m_dimension * m_scramble);
 			auto ret = cmj(idx, CMJ_DIM, m_dimension * m_scramble);

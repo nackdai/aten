@@ -16,12 +16,18 @@
 
 #include "sampler/wanghash.h"
 #include "sampler/sobolproxy.h"
+#include "sampler/cmj.h"
 
-#define IDATEN_USE_SOBOL
+#define IDATEN_SAMPLER_SOBOL	(0)
+#define IDATEN_SAMPLER_CMJ		(1)
+
+#define IDATEN_SAMPLER	IDATEN_SAMPLER_CMJ
 
 namespace aten {
-#ifdef IDATEN_USE_SOBOL
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	using sampler = Sobol;
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
+	using sampler = CMJ;
 #else
 	using sampler = WangHash;
 #endif

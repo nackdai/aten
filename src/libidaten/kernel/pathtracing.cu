@@ -45,8 +45,14 @@ __global__ void genPath(
 		return;
 	}
 
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
 	path.sampler.init(frame, 0, scramble, sobolmatrices);
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
+	auto rnd = random[idx];
+	auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+#endif
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -362,8 +368,14 @@ __global__ void shade(
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
 
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
 	path.sampler.init(frame, 4 + bounce * 300, scramble);
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
+	auto rnd = random[idx];
+	auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+#endif
 
 	aten::hitrecord rec;
 

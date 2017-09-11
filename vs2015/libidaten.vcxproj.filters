@@ -205,6 +205,9 @@
     <ClInclude Include="..\src\libidaten\svgf\svgf_pt.h">
       <Filter>svgf</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\sampler\cmj.h">
+      <Filter>aten\sampler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

@@ -51,17 +51,17 @@ __global__ void genPath(
 		return;
 	}
 
-	auto scramble = random[idx] * 0x1fe3434f + frame;
-	scramble *= (sample + 1);
-	path.sampler.init(scramble, sobolmatrices);
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
+	auto scramble = random[idx] * 0x1fe3434f;
+	path.sampler.init(frame, 0, scramble, sobolmatrices);
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
+	auto rnd = random[idx];
+	auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+#endif
 
-#if 1
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
-#else
-	float s = (ix) / (float)(camera->width);
-	float t = (iy) / (float)(camera->height);
-#endif
 
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -264,7 +264,8 @@ __global__ void shade(
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml,
 	const aten::mat4* __restrict__ matrices,
-	cudaTextureObject_t* textures)
+	cudaTextureObject_t* textures,
+	unsigned int* random)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -297,6 +298,15 @@ __global__ void shade(
 
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
+
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
+	auto scramble = random[idx] * 0x1fe3434f;
+	path.sampler.init(frame, 4 + bounce * 300, scramble);
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
+	auto rnd = random[idx];
+	auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+#endif
 
 	aten::hitrecord rec;
 
@@ -938,7 +948,8 @@ namespace idaten
 				m_primparams.ptr(),
 				texVtxPos, texVtxNml,
 				m_mtxparams.ptr(),
-				m_tex.ptr());
+				m_tex.ptr(),
+				m_random.ptr());
 		}
 		else {
 			shade<false> << <blockPerGrid, threadPerBlock >> > (
@@ -957,7 +968,8 @@ namespace idaten
 				m_primparams.ptr(),
 				texVtxPos, texVtxNml,
 				m_mtxparams.ptr(),
-				m_tex.ptr());
+				m_tex.ptr(),
+				m_random.ptr());
 		}
 
 		checkCudaKernel(shade);

@@ -312,6 +312,16 @@ namespace AT_NAME
 			return m_param;
 		}
 
+		void setName(const char* name)
+		{
+			m_name = name;
+		}
+
+		const char* name() const
+		{
+			return m_name.c_str();
+		}
+
 		static AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue)
 		{
 			auto ret = AT_NAME::sampleTexture(texid, u, v, aten::vec3(defaultValue));
@@ -331,6 +341,9 @@ namespace AT_NAME
 		int m_id{ 0 };
 
 		aten::MaterialParameter m_param;
+
+		// For debug.
+		std::string m_name;
 	};
 
 	class NPRMaterial : public material {

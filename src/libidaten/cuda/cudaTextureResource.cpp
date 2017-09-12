@@ -61,10 +61,19 @@ namespace idaten
 		const aten::vec4* p,
 		int width, int height)
 	{
-		auto size = sizeof(float4) * width * height;
+		// NOTE
+		// http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?%A5%EA%A5%CB%A5%A2%A5%E1%A5%E2%A5%EA%A4%C8CUDA%C7%DB%CE%F3
+		// http://www.orangeowlsolutions.com/archives/613
 
-		checkCudaErrors(cudaMalloc(&m_buffer, size));
-		checkCudaErrors(cudaMemcpy(m_buffer, p, size, cudaMemcpyHostToDevice));
+		// NOTE
+		// 2Dテクスチャの場合は、pitchのアラインメントを考慮しないといけない.
+		// cudaMallocPitch はアラインメントを考慮した処理になっている.
+
+		size_t dstPitch = 0;
+		size_t srcPitch = sizeof(float4) * width;
+
+		checkCudaErrors(cudaMallocPitch(&m_buffer, &dstPitch, srcPitch, height));
+		checkCudaErrors(cudaMemcpy2D(m_buffer, dstPitch, p, srcPitch, srcPitch, height, cudaMemcpyHostToDevice));
 
 		// Make Resource description:
 		memset(&m_resDesc, 0, sizeof(m_resDesc));
@@ -77,7 +86,7 @@ namespace idaten
 		m_resDesc.res.pitch2D.desc.w = 32; // bits per channel
 		m_resDesc.res.pitch2D.width = width;
 		m_resDesc.res.pitch2D.height = height;
-		m_resDesc.res.pitch2D.pitchInBytes = sizeof(float4) * width;
+		m_resDesc.res.pitch2D.pitchInBytes = dstPitch;
 	}
 
 	cudaTextureObject_t CudaTexture::bind()

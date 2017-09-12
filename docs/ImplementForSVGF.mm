@@ -40,14 +40,15 @@
 </node>
 </node>
 <node CREATED="1504750704895" ID="ID_336994059" MODIFIED="1504750723356" TEXT="Sponza&#x3067;&#x4e00;&#x90e8;&#x306b;TemporalReprojection&#x304c;&#x304b;&#x304b;&#x3089;&#x306a;&#x3044;"/>
-<node CREATED="1504766642451" ID="ID_1976079074" MODIFIED="1504766656484" TEXT="&#x305d;&#x3082;&#x305d;&#x3082;&#x3001;Baikal&#x3068;&#x63cf;&#x753b;&#x7d50;&#x679c;&#x304c;&#x4e00;&#x81f4;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;">
+<node CREATED="1504766642451" ID="ID_1976079074" MODIFIED="1505106000735" TEXT="&#x305d;&#x3082;&#x305d;&#x3082;&#x3001;Baikal&#x3068;&#x63cf;&#x753b;&#x7d50;&#x679c;&#x304c;&#x4e00;&#x81f4;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1504775337622" ID="ID_227025949" MODIFIED="1504846677285" TEXT="&#x3044;&#x304f;&#x3064;&#x304b;&#x7570;&#x306a;&#x308b;&#x3068;&#x3053;&#x308d;&#x304c;&#x3042;&#x3063;&#x305f;&#x306e;&#x3067;&#x5408;&#x308f;&#x305b;&#x308b;&#x3088;&#x3046;&#x306b;&#x5909;&#x66f4;&#x3057;&#x305f;">
 <node CREATED="1504775350647" ID="ID_330591087" MODIFIED="1504775355603" TEXT="&#x304c;&#x3001;&#x307e;&#x3060;&#x4e00;&#x81f4;&#x3057;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;"/>
 <node CREATED="1504854664040" ID="ID_1638113368" MODIFIED="1504854685412" TEXT="&#x4e71;&#x6570;&#x30b5;&#x30f3;&#x30d7;&#x30e9;&#x306e;&#x521d;&#x671f;&#x5316;&#x51e6;&#x7406;&#x304c;&#x7570;&#x306a;&#x308b;&#x306e;&#x304c;&#x539f;&#x56e0;&#x307d;&#x3044;">
 <icon BUILTIN="yes"/>
 <node CREATED="1504858338953" ID="ID_1404819797" MODIFIED="1504858369851" TEXT="sobol&#x3060;&#x3068;1spp&#x306e;&#x3068;&#x304d;&#x306e;&#x6563;&#x308a;&#x5177;&#x5408;&#x304c;&#x504f;&#x308b;&#x306e;&#x3067;temporal&#x3067;&#x4f7f;&#x3046;&#x306e;&#x306f;&#x3088;&#x308d;&#x3057;&#x304f;&#x306a;&#x3044;"/>
-<node CREATED="1504858370358" ID="ID_476785779" MODIFIED="1504858380683" TEXT="CMJ&#x3092;&#x8a66;&#x3057;&#x3066;&#x307f;&#x308b;">
-<icon BUILTIN="yes"/>
+<node CREATED="1504858370358" ID="ID_476785779" MODIFIED="1505105997928" TEXT="CMJ&#x3092;&#x8a66;&#x3057;&#x3066;&#x307f;&#x308b;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1504860051521" ID="ID_1082003016" MODIFIED="1504860066971" TEXT="Baikal&#x3092;&#x898b;&#x308b;&#x9650;&#x308a;&#x3001;sobol&#x3088;&#x308a;&#x306f;&#x304b;&#x306a;&#x308a;&#x3088;&#x3055;&#x305d;&#x3046;"/>
 </node>
 </node>

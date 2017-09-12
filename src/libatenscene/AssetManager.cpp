@@ -60,6 +60,8 @@ namespace aten {
 
 	bool AssetManager::registerMtrl(const std::string& name, material* mtrl)
 	{
+		mtrl->setName(name.c_str());
+
 		return registerAsset(name, Asset(mtrl), AssetType::Material);
 	}
 

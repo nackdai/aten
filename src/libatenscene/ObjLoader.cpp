@@ -93,9 +93,6 @@ namespace aten
 			AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
 			//AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
 
-			aten::shape* dstshape = new aten::shape();
-
-			auto idxnum = shape.mesh.indices.size();
 			auto vtxnum = shape.mesh.positions.size();
 
 			auto curVtxPos = VertexManager::getVertexNum();
@@ -145,7 +142,47 @@ namespace aten
 				std::max(shapemax.y, pmax.y),
 				std::max(shapemax.z, pmax.z));
 
+			aten::shape* dstshape = nullptr; 
+			int mtrlidx = -1;
+
+			auto idxnum = shape.mesh.indices.size();
+
 			for (uint32_t i = 0; i < idxnum; i += 3) {
+				int mtrlpos = i / 3;
+
+				int m = shape.mesh.material_ids[mtrlpos];
+
+				if (mtrlidx != m) {
+					if (dstshape) {
+						// Check if emmisive object.
+						auto mtrl = dstshape->getMaterial();
+
+						if (mtrl->param().type == aten::MaterialType::Emissive) {
+							auto emitobj = new object();
+							emitobj->shapes.push_back(dstshape);
+							emitobj->bbox.init(pmin, pmax);
+							objs.push_back(emitobj);
+						}
+						else {
+							obj->shapes.push_back(dstshape);
+						}
+					}
+
+					dstshape = new aten::shape();
+					mtrlidx = m;
+
+					if (mtrlidx >= 0) {
+						const auto mtrl = mtrls[mtrlidx];
+						dstshape->setMaterial(AssetManager::getMtrl(mtrl.name));
+					}
+
+					if (!dstshape->param.mtrl.ptr) {
+						// No material, set dummy material....
+						AT_ASSERT(false);
+						dstshape->setMaterial(new lambert(vec3(real(0.5))));
+					}
+				}
+
 				face* f = new face();
 
 				f->param.idx[0] = shape.mesh.indices[i + 0] + curVtxPos;
@@ -162,19 +199,18 @@ namespace aten
 			// Keep polygon counts.
 			numPolygons += idxnum / 3;
 
-			// Assign material.
-			auto mtrlidx = -1;
-			if (shape.mesh.material_ids.size() > 0) {
-				mtrlidx = shape.mesh.material_ids[0];
-			}
-			if (mtrlidx >= 0) {
-				const auto mtrl = mtrls[mtrlidx];
-				dstshape->setMaterial(AssetManager::getMtrl(mtrl.name));
-			}
-			if (!dstshape->param.mtrl.ptr){
-				// No material, set dummy material....
-				AT_ASSERT(false);
-				dstshape->setMaterial(new lambert(vec3(real(0.5))));
+			{
+				auto mtrl = dstshape->getMaterial();
+
+				if (mtrl->param().type == aten::MaterialType::Emissive) {
+					auto emitobj = new object();
+					emitobj->shapes.push_back(dstshape);
+					emitobj->bbox.init(pmin, pmax);
+					objs.push_back(emitobj);
+				}
+				else {
+					obj->shapes.push_back(dstshape);
+				}
 			}
 
 			// texture cooridnates.
@@ -188,23 +224,6 @@ namespace aten
 				vtx.uv.x = shape.mesh.texcoords[i + 0];
 				vtx.uv.y = shape.mesh.texcoords[i + 1];
 				vtx.uv.z = vtx.uv.w = real(0);
-
-				if (vtx.uv.x > real(1) || vtx.uv.y > real(1)) {
-					int xxx = 0;
-				}
-			}
-
-			// Check if emmisive object.
-			auto mtrl = dstshape->getMaterial();
-
-			if (mtrl->param().type == aten::MaterialType::Emissive) {
-				auto emitobj = new object();
-				emitobj->shapes.push_back(dstshape);
-				emitobj->bbox.init(pmin, pmax);
-				objs.push_back(emitobj);
-			}
-			else {
-				obj->shapes.push_back(dstshape);
 			}
 		}
 

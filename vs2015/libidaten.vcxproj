@@ -277,6 +277,11 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\svgf\svgf_aov.cu">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_atrous.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>

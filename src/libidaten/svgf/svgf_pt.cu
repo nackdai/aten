@@ -24,6 +24,7 @@
 #define DEBUG_IY	(511 - 81)
 #endif
 
+template <bool isFillAOV>
 __global__ void genPath(
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
@@ -60,8 +61,15 @@ __global__ void genPath(
 	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
 #endif
 
-	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
-	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
+	float r1 = path.sampler.nextSample();
+	float r2 = path.sampler.nextSample();
+
+	if (isFillAOV) {
+		r1 = r2 = 0.5f;
+	}
+
+	float s = (ix + r1) / (float)(camera->width);
+	float t = (iy + r2) / (float)(camera->height);
 
 	AT_NAME::CameraSampleResult camsample;
 	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -801,15 +809,28 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		genPath << <grid, block >> > (
-			m_paths.ptr(),
-			m_rays.ptr(),
-			width, height,
-			sample, maxSamples,
-			m_frame,
-			m_cam.ptr(),
-			m_sobolMatrices.ptr(),
-			m_random.ptr());
+		if (m_mode == Mode::AOVar) {
+			genPath<true> << <grid, block >> > (
+				m_paths.ptr(),
+				m_rays.ptr(),
+				width, height,
+				sample, maxSamples,
+				m_frame,
+				m_cam.ptr(),
+				m_sobolMatrices.ptr(),
+				m_random.ptr());
+		}
+		else {
+			genPath<false> << <grid, block >> > (
+				m_paths.ptr(),
+				m_rays.ptr(),
+				width, height,
+				sample, maxSamples,
+				m_frame,
+				m_cam.ptr(),
+				m_sobolMatrices.ptr(),
+				m_random.ptr());
+		}
 
 		checkCudaKernel(genPath);
 	}
@@ -991,7 +1012,7 @@ namespace idaten
 #endif
 
 		if (m_mode == Mode::PT) {
-			auto& curaov = m_aovs[0];
+			auto& curaov = getCurAovs();
 
 			gather << <grid, block >> > (
 				outputSurf,
@@ -1000,6 +1021,9 @@ namespace idaten
 				width, height);
 
 			checkCudaKernel(gather);
+		}
+		else if (m_mode == Mode::AOVar) {
+			onFillAOV(outputSurf, width, height);
 		}
 		else {
 			auto& curaov = getCurAovs();

@@ -45,6 +45,7 @@ static int g_cntScreenShot = 0;
 static int g_maxSamples = 1;
 static int g_maxBounce = 1;
 static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
+static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
 
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
@@ -112,13 +113,24 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		static const char* items[] = { "SVGF", "TF", "PT", "VAR" };
+		static const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
 		int item_current = g_curMode;
 		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items));
 
 		if (g_curMode != item_current) {
 			g_curMode = item_current;
 			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
+		}
+
+		if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
+			static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire" };
+			int aov_current = g_curAOVMode;
+			ImGui::Combo("aov", &aov_current, aovitems, AT_COUNTOF(aovitems));
+
+			if (g_curAOVMode != aov_current) {
+				g_curAOVMode = aov_current;
+				g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
+			}
 		}
 
 		bool prevEnableTAA = g_taa.isEnableTAA();
@@ -415,6 +427,7 @@ int main()
 	}
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
+	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
 
 	aten::window::run(onRun);
 

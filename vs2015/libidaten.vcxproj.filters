@@ -380,5 +380,8 @@
     <CudaCompile Include="..\src\libidaten\svgf\svgf_atrous.cu">
       <Filter>svgf</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\svgf\svgf_aov.cu">
+      <Filter>svgf</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

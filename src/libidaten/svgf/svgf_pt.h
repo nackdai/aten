@@ -15,6 +15,14 @@ namespace idaten
 			TF,				// Temporal Filter.
 			PT,				// Path Tracing.
 			VAR,			// Variance (For debug).
+			AOVar,			// Arbitrary Output Variables.
+		};
+
+		enum AOVMode {
+			Normal,
+			TexColor,
+			Depth,
+			WireFrame,
 		};
 
 #ifdef __AT_CUDA__
@@ -88,6 +96,15 @@ namespace idaten
 			}
 		}
 
+		AOVMode getAOVMode() const
+		{
+			return m_aovMode;
+		}
+		void setAOVMode(AOVMode mode)
+		{
+			m_aovMode = mode;
+		}
+
 		virtual void reset() override final
 		{
 			m_frame = 1;
@@ -142,6 +159,10 @@ namespace idaten
 
 		void copyFromTmpBufferToAov(int width, int height);
 
+		void onFillAOV(
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
 		idaten::TypedCudaMemory<AOV>& getCurAovs()
 		{
 			return m_aovs[m_curAOVPos];
@@ -185,5 +206,6 @@ namespace idaten
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
 
 		Mode m_mode{ Mode::SVGF };
+		AOVMode m_aovMode{ AOVMode::WireFrame };
 	};
 }

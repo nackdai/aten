@@ -58,6 +58,17 @@ namespace idaten
 		struct AOV;
 #endif
 
+		struct PickedInfo {
+			int ix{ -1 };
+			int iy{ -1 };
+			aten::vec3 color;
+			aten::vec3 normal;
+			float depth;
+			int meshid;
+			int triid;
+			int mtrlid;
+		};
+
 	public:
 		SVGFPathTracing() {}
 		virtual ~SVGFPathTracing() {}
@@ -116,6 +127,25 @@ namespace idaten
 			return m_frame;
 		}
 
+		void willPickPixel(int ix, int iy)
+		{
+			m_willPicklPixel = true;
+			m_pickedInfo.ix = ix;
+			m_pickedInfo.iy = iy;
+		}
+
+		bool getPickedPixelInfo(PickedInfo& ret)
+		{
+			bool isValid = (m_pickedInfo.ix >= 0);
+
+			ret = m_pickedInfo;
+
+			m_pickedInfo.ix = -1;
+			m_pickedInfo.iy = -1;
+
+			return isValid;
+		}
+
 	protected:
 		virtual void onGenPath(
 			int width, int height,
@@ -163,6 +193,11 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
+		void pick(
+			int ix, int iy,
+			int width, int height,
+			cudaTextureObject_t texVtxPos);
+
 		idaten::TypedCudaMemory<AOV>& getCurAovs()
 		{
 			return m_aovs[m_curAOVPos];
@@ -204,6 +239,11 @@ namespace idaten
 		idaten::TypedCudaMemory<float4> m_atrousVar[2];
 
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
+
+		idaten::TypedCudaMemory<PickedInfo> m_pick;
+
+		bool m_willPicklPixel{ false };
+		PickedInfo m_pickedInfo;
 
 		Mode m_mode{ Mode::SVGF };
 		AOVMode m_aovMode{ AOVMode::WireFrame };

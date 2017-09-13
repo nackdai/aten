@@ -50,6 +50,8 @@ static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
 
+static bool g_pickPixel = false;
+
 void onRun()
 {
 	if (g_enableFrameStep && !g_frameStep) {
@@ -154,6 +156,14 @@ void onRun()
 
 		aten::window::drawImGui();
 	}
+
+	idaten::SVGFPathTracing::PickedInfo info;
+	auto isPicked = g_tracer.getPickedPixelInfo(info);
+	if (isPicked) {
+		AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
+		AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
+		AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
+	}
 }
 
 void onClose()
@@ -177,6 +187,11 @@ void onMouseBtn(bool left, bool press, int x, int y)
 
 		g_isMouseLBtnDown = left;
 		g_isMouseRBtnDown = !left;
+
+		if (g_pickPixel) {
+			g_tracer.willPickPixel(x, y);
+			g_pickPixel = false;
+		}
 	}
 }
 
@@ -231,6 +246,10 @@ void onKey(bool press, aten::Key key)
 				g_frameStep = true;
 				return;
 			}
+		}
+		else if (key == aten::Key::Key_CONTROL) {
+			g_pickPixel = true;
+			return;
 		}
 	}
 

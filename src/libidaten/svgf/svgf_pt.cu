@@ -774,6 +774,11 @@ namespace idaten
 			onVarianceEstimation(outputSurf, width, height);
 		}
 
+		pick(
+			m_pickedInfo.ix, m_pickedInfo.iy, 
+			width, height,
+			vtxTexPos);
+
 		checkCudaErrors(cudaDeviceSynchronize());
 
 		// Toggle aov buffer pos.

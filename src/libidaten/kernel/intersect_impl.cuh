@@ -128,6 +128,15 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
 	return isIntersect;
 }
 
+inline __device__ float4 cross(float4 a, float4 b)
+{
+	return make_float4(
+		a.y * b.z - a.z * b.y, 
+		a.z * b.x - a.x * b.z, 
+		a.x * b.y - a.y * b.x,
+		0);
+}
+
 AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	const Context* ctxt,
 	const aten::ShapeParameter* param,
@@ -161,6 +170,13 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	auto p = c * p0 + a * p1 + b * p2;
 	auto n = c * n0 + a * n1 + b * n2;
 	auto uv = c * u0 + a * u1 + b * u2;
+
+	if (prim->needNormal > 0) {
+		float4 e01 = p1 - p0;
+		float4 e02 = p2 - p0;
+
+		n = normalize(cross(e01, e02));
+	}
 
 	rec->p = aten::vec3(p.x, p.y, p.z);
 	rec->normal = aten::vec3(n.x, n.y, n.z);

@@ -93,6 +93,15 @@ namespace AT_NAME
 		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
 
 		evalHitResult(v0, v1, v2, &rec, &isect);
+
+		if (param.needNormal > 0) {
+			auto e01 = v1.pos - v0.pos;
+			auto e02 = v2.pos - v0.pos;
+
+			e01.w = e02.w = real(0);
+
+			rec.normal = normalize(cross(e01, e02));
+		}
 	}
 
 	void face::evalHitResult(
@@ -285,7 +294,8 @@ namespace AT_NAME
 		const auto& v1 = vtxs[f->param.idx[1]];
 		const auto& v2 = vtxs[f->param.idx[2]];
 
-		face::evalHitResult(v0, v1, v2, &rec, &isect);
+		//face::evalHitResult(v0, v1, v2, &rec, &isect);
+		f->evalHitResult(r, rec, isect);
 
 		real orignalLen = 0;
 		{

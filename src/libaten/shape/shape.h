@@ -63,8 +63,9 @@ namespace aten
 	struct PrimitiveParamter {
 		int idx[3];
 		int mtrlid;
+		int needNormal{ 0 };
 		real area;
-		real padding[3];
+		real padding[2];
 	};
 	AT_STATICASSERT((sizeof(PrimitiveParamter) % 16) == 0);
 }

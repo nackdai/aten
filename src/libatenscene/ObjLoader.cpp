@@ -71,7 +71,8 @@ namespace aten
 		// TODO
 		// mtl_basepath
 
-		auto flags = tinyobj::triangulation | tinyobj::calculate_normals;
+		//auto flags = tinyobj::triangulation | tinyobj::calculate_normals;
+		auto flags = tinyobj::triangulation;
 
 		auto result = tinyobj::LoadObj(
 			shapes, mtrls,
@@ -90,7 +91,7 @@ namespace aten
 		for (int p = 0; p < shapes.size(); p++) {
 			const auto& shape = shapes[p];
 
-			AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
+			//AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
 			//AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
 
 			auto vtxnum = shape.mesh.positions.size();
@@ -109,10 +110,16 @@ namespace aten
 				vtx.pos.z = shape.mesh.positions[i + 2];
 				vtx.pos.w = real(0);
 
-				vtx.nml.x = shape.mesh.normals[i + 0];
-				vtx.nml.y = shape.mesh.normals[i + 1];
-				vtx.nml.z = shape.mesh.normals[i + 2];
-				vtx.nml.w = real(0);
+				if (shape.mesh.normals.empty()) {
+					// Flag not to specify normal.
+					vtx.nml.w = real(1);
+				}
+				else {
+					vtx.nml.x = shape.mesh.normals[i + 0];
+					vtx.nml.y = shape.mesh.normals[i + 1];
+					vtx.nml.z = shape.mesh.normals[i + 2];
+					vtx.nml.w = real(0);
+				}
 
 				if (isnan(vtx.nml.x) || isnan(vtx.nml.y) || isnan(vtx.nml.z))
 				{
@@ -188,6 +195,18 @@ namespace aten
 				f->param.idx[0] = shape.mesh.indices[i + 0] + curVtxPos;
 				f->param.idx[1] = shape.mesh.indices[i + 1] + curVtxPos;
 				f->param.idx[2] = shape.mesh.indices[i + 2] + curVtxPos;
+
+				auto& v0 = VertexManager::getVertex(f->param.idx[0]);
+				auto& v1 = VertexManager::getVertex(f->param.idx[1]);
+				auto& v2 = VertexManager::getVertex(f->param.idx[2]);
+
+				if (v0.nml.w == real(1)
+					|| v1.nml.w == real(1)
+					|| v2.nml.w == real(1))
+				{
+					f->param.needNormal = 1;
+				}
+
 
 				f->build();
 

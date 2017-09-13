@@ -719,6 +719,9 @@ namespace idaten
 
 		static const int rrBounce = 3;
 
+		// Set bounce count to 1 forcibly, aov render mode.
+		maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
+
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {

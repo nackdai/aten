@@ -39,7 +39,10 @@
 <icon BUILTIN="yes"/>
 </node>
 </node>
-<node CREATED="1504750704895" ID="ID_336994059" MODIFIED="1504750723356" TEXT="Sponza&#x3067;&#x4e00;&#x90e8;&#x306b;TemporalReprojection&#x304c;&#x304b;&#x304b;&#x3089;&#x306a;&#x3044;"/>
+<node CREATED="1504750704895" ID="ID_336994059" MODIFIED="1505292109445" TEXT="Sponza&#x3067;&#x4e00;&#x90e8;&#x306b;TemporalReprojection&#x304c;&#x304b;&#x304b;&#x3089;&#x306a;&#x3044;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1505292091043" ID="ID_560467442" MODIFIED="1505292106341" TEXT="Sponza&#x30d0;&#x30b0;&#x306e;&#x305b;&#x3044;&#x3067;&#x6cd5;&#x7dda;&#x304c;&#x304a;&#x304b;&#x3057;&#x304b;&#x3063;&#x305f;&#x305f;&#x3081;&#x3068;&#x601d;&#x308f;&#x308c;&#x308b;"/>
+</node>
 <node CREATED="1504766642451" ID="ID_1976079074" MODIFIED="1505106000735" TEXT="&#x305d;&#x3082;&#x305d;&#x3082;&#x3001;Baikal&#x3068;&#x63cf;&#x753b;&#x7d50;&#x679c;&#x304c;&#x4e00;&#x81f4;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1504775337622" ID="ID_227025949" MODIFIED="1504846677285" TEXT="&#x3044;&#x304f;&#x3064;&#x304b;&#x7570;&#x306a;&#x308b;&#x3068;&#x3053;&#x308d;&#x304c;&#x3042;&#x3063;&#x305f;&#x306e;&#x3067;&#x5408;&#x308f;&#x305b;&#x308b;&#x3088;&#x3046;&#x306b;&#x5909;&#x66f4;&#x3057;&#x305f;">
@@ -51,6 +54,17 @@
 <icon BUILTIN="button_ok"/>
 <node CREATED="1504860051521" ID="ID_1082003016" MODIFIED="1504860066971" TEXT="Baikal&#x3092;&#x898b;&#x308b;&#x9650;&#x308a;&#x3001;sobol&#x3088;&#x308a;&#x306f;&#x304b;&#x306a;&#x308a;&#x3088;&#x3055;&#x305d;&#x3046;"/>
 </node>
+</node>
+</node>
+</node>
+<node CREATED="1505208478445" ID="ID_1004083572" MODIFIED="1505292082527" TEXT="Sponza&#x30d0;&#x30b0;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1505208486557" ID="ID_1543366451" MODIFIED="1505208495177" TEXT="&#x9762;&#x6cd5;&#x7dda;&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;">
+<node CREATED="1505208501998" ID="ID_895305021" MODIFIED="1505292010195" TEXT="&#x78ba;&#x8a8d;&#x7528;&#x306b;AOV&#x8868;&#x793a;&#x30e2;&#x30fc;&#x30c9;&#x3092;&#x4f5c;&#x308b;">
+<icon BUILTIN="button_ok"/>
+</node>
+<node CREATED="1505292014998" ID="ID_829507945" MODIFIED="1505292042638" TEXT="&#x9802;&#x70b9;&#x3092;&#x5171;&#x6709;&#x3057;&#x3066;&#x3044;&#x308b;&#x305f;&#x3081;&#x3001;&#x6cd5;&#x7dda;&#x306e;&#x8a08;&#x7b97;&#x304c;&#x9762;&#x306b;&#x5bfe;&#x3057;&#x3066;&#x304a;&#x304b;&#x3057;&#x304f;&#x306a;&#x3063;&#x3066;&#x3044;&#x305f;">
+<node CREATED="1505292043298" ID="ID_516675655" MODIFIED="1505292079398" TEXT="&#x6cd5;&#x7dda;&#x304c;obj&#x30d5;&#x30a1;&#x30a4;&#x30eb;&#x5185;&#x3067;&#x6307;&#x5b9a;&#x3055;&#x308c;&#x3044;&#x306a;&#x3044;&#x5834;&#x5408;&#x306f;&#x3001;&#x51e6;&#x7406;&#x4e2d;&#x306b;&#x9762;&#x6cd5;&#x7dda;&#x3092;&#x8a08;&#x7b97;&#x3059;&#x308b;&#x3088;&#x3046;&#x306b;&#x3057;&#x305f;"/>
 </node>
 </node>
 </node>

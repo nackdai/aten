@@ -337,31 +337,6 @@ __global__ void shade(
 		mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
 	}
 
-	// Render AOVs.
-	if (isFirstBounce) {
-		int ix = idx % width;
-		int iy = idx / width;
-
-		// World coordinate to Clip coordinate.
-		aten::vec4 pos = aten::vec4(rec.p, 1);
-		pos = mtxW2C.apply(pos);
-
-		// normal
-		aovs[idx].normal = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, 0);
-
-		// depth, meshid.
-		aovs[idx].depth = pos.w;
-		aovs[idx].meshid = isect.meshid;
-		aovs[idx].mtrlid = rec.mtrlid;
-
-		// texture color.
-		auto texcolor = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
-		aovs[idx].texclr = make_float4(texcolor.x, texcolor.y, texcolor.z, 1);
-
-		// For exporting separated albedo.
-		mtrl.albedoMap = -1;
-	}
-
 	// Implicit conection to light.
 	if (mtrl.attrib.isEmissive) {
 		if (!isBackfacing) {
@@ -388,7 +363,6 @@ __global__ void shade(
 
 		// When ray hit the light, tracing will finish.
 		path.isTerminate = true;
-		return;
 	}
 
 	if (!mtrl.attrib.isTranslucent && isBackfacing) {
@@ -403,6 +377,36 @@ __global__ void shade(
 		normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+
+	// Render AOVs.
+	if (isFirstBounce) {
+		int ix = idx % width;
+		int iy = idx / width;
+
+		// World coordinate to Clip coordinate.
+		aten::vec4 pos = aten::vec4(rec.p, 1);
+		pos = mtxW2C.apply(pos);
+
+		// normal
+		aovs[idx].normal = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, 0);
+
+		// depth, meshid.
+		aovs[idx].depth = pos.w;
+		aovs[idx].meshid = isect.meshid;
+		aovs[idx].mtrlid = rec.mtrlid;
+
+		// texture color.
+		auto texcolor = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
+		aovs[idx].texclr = make_float4(texcolor.x, texcolor.y, texcolor.z, 1);
+
+		// For exporting separated albedo.
+		mtrl.albedoMap = -1;
+	}
+
+	if (path.isTerminate) {
+		// Path is terminated, so shade finish.
+		return;
+	}
 
 #if 1
 	// Explicit conection to light.

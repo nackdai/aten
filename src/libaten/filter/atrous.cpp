@@ -1,4 +1,4 @@
-#include "denoiser/atrous.h"
+#include "filter/atrous.h"
 
 #include "visualizer/atengl.h"
 

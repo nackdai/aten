@@ -10,6 +10,7 @@
 
 #include "filter/nlm.h"
 #include "filter/bilateral.h"
+#include "filter/atrous.h"
 #include "filter/taa.h"
 
 #include "filter/PracticalNoiseReduction/PracticalNoiseReduction.h"
@@ -92,5 +93,3 @@
 #include "renderer/directlight.h"
 
 #include "posteffect/BloomEffect.h"
-
-#include "denoiser/atrous.h"

@@ -76,9 +76,6 @@
     <Filter Include="ui\imgui">
       <UniqueIdentifier>{aa3cb08a-98d0-4aa4-968c-fd2f7291b94d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="denoiser">
-      <UniqueIdentifier>{351d88a4-d2bc-4bc5-9e72-f4e20bfbdbdd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shader\atrous">
       <UniqueIdentifier>{13bf602d-1804-4f8b-8946-2d5f580fef59}</UniqueIdentifier>
     </Filter>
@@ -359,9 +356,6 @@
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\denoiser\atrous.h">
-      <Filter>denoiser</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\shape\mesh.h">
       <Filter>shape</Filter>
     </ClInclude>
@@ -379,6 +373,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\math\vec2.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\filter\atrous.h">
+      <Filter>filter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -574,9 +571,6 @@
     <ClCompile Include="..\src\libaten\texture\texture.cpp">
       <Filter>texture</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\denoiser\atrous.cpp">
-      <Filter>denoiser</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\shape\mesh.cpp">
       <Filter>shape</Filter>
     </ClCompile>
@@ -587,6 +581,9 @@
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\filter\taa.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\atrous.cpp">
       <Filter>filter</Filter>
     </ClCompile>
   </ItemGroup>

@@ -173,7 +173,12 @@ __global__ void temporalReprojection(
 	
 	if (weight > 0.0f) {
 		sum /= weight;
+#if 0
 		curColor = 0.2 * curColor + 0.8 * sum;
+#else
+		weight /= 9;
+		curColor = (1.0f - weight) * curColor + weight * sum;
+#endif
 	}
 
 

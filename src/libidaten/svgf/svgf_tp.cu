@@ -17,6 +17,8 @@
 
 #include "aten4idaten.h"
 
+//#define ENABLE_MEDIAN_FILTER
+
 inline __device__ void computePrevScreenPos(
 	int ix, int iy,
 	float centerDepth,
@@ -70,6 +72,7 @@ __global__ void temporalReprojection(
 	idaten::SVGFPathTracing::AOV* prevAovs,
 	const aten::mat4* __restrict__ mtxs,
 	cudaSurfaceObject_t dst,
+	float4* tmpBuffer,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -173,6 +176,10 @@ __global__ void temporalReprojection(
 		curColor = 0.2 * curColor + 0.8 * sum;
 	}
 
+
+#ifdef ENABLE_MEDIAN_FILTER
+	tmpBuffer[idx] = curColor;
+#else
 	curAovs[idx].color = curColor;
 
 	// TODO
@@ -233,6 +240,162 @@ __global__ void temporalReprojection(
 
 		curAovs[idx].moments = centerMoment;
 	}
+#endif
+
+	surf2Dwrite(
+		curColor,
+		dst,
+		ix * sizeof(float4), iy,
+		cudaBoundaryModeTrap);
+}
+
+inline __device__ float4 min(float4 a, float4 b)
+{
+	return make_float4(
+		min(a.x, b.x),
+		min(a.y, b.y),
+		min(a.z, b.z),
+		min(a.w, b.w));
+}
+
+inline __device__ float4 max(float4 a, float4 b)
+{
+	return make_float4(
+		max(a.x, b.x),
+		max(a.y, b.y),
+		max(a.z, b.z),
+		max(a.w, b.w));
+}
+
+// Macro for sorting.
+#define s2(a, b)				temp = a; a = min(a, b); b = max(temp, b);
+#define mn3(a, b, c)			s2(a, b); s2(a, c);
+#define mx3(a, b, c)			s2(b, c); s2(a, c);
+
+#define mnmx3(a, b, c)			mx3(a, b, c); s2(a, b);                                   // 3 exchanges
+#define mnmx4(a, b, c, d)		s2(a, b); s2(c, d); s2(a, c); s2(b, d);                   // 4 exchanges
+#define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
+#define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
+
+template <bool isReferPath>
+inline __device__ float4 medianFilter(
+	int ix, int iy,
+	const float4* src,
+	const idaten::SVGFPathTracing::Path* paths,
+	int width, int height)
+{
+	float4 v[9];
+
+	int pos = 0;
+
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			int xx = clamp(ix + x, 0, width - 1);
+			int yy = clamp(iy + y, 0, height - 1);
+
+			int pidx = getIdx(xx, yy, width);
+
+			if (isReferPath) {
+				v[pos] = make_float4(paths[pidx].contrib.x, paths[pidx].contrib.y, paths[pidx].contrib.z, 0);
+			}
+			else {
+				v[pos] = src[pidx];
+			}
+			pos++;
+		}
+	}
+
+	// Sort
+	float4 temp;
+	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
+	mnmx5(v[1], v[2], v[3], v[4], v[6]);
+	mnmx4(v[2], v[3], v[4], v[7]);
+	mnmx3(v[3], v[4], v[8]);
+
+	return v[4];
+}
+
+__global__ void medianFilter(
+	cudaSurfaceObject_t dst,
+	const float4* __restrict__ src,
+	idaten::SVGFPathTracing::AOV* curAovs,
+	const idaten::SVGFPathTracing::AOV* __restrict__ prevAovs,
+	const aten::mat4* __restrict__ mtxs,
+	const idaten::SVGFPathTracing::Path* __restrict__ paths,
+	int width, int height)
+{
+	int ix = blockIdx.x * blockDim.x + threadIdx.x;
+	int iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	auto idx = getIdx(ix, iy, width);
+
+	auto curColor = medianFilter<false>(ix, iy, src, paths, width, height);
+
+	curAovs[idx].color = curColor;
+
+	const float centerDepth = curAovs[idx].depth;
+	const int centerMeshId = curAovs[idx].meshid;
+	const auto centerNormal = curAovs[idx].normal;
+
+	static const float zThreshold = 0.05f;
+	static const float nThreshold = 0.98f;
+
+	// accumulate moments.
+	{
+		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
+		float4 centerMoment = make_float4(lum * lum, lum, 0, 0);
+
+		// 前のフレームのクリップ空間座標を計算.
+		aten::vec4 prevPos;
+		computePrevScreenPos(
+			ix, iy,
+			centerDepth,
+			width, height,
+			&prevPos,
+			mtxs);
+
+		// [0, 1]の範囲内に入っているか.
+		bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
+		bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
+
+		// 積算フレーム数のリセット.
+		int frame = 1;
+
+		if (isInsideX && isInsideY) {
+			int px = (int)(prevPos.x * width - 0.5f);
+			int py = (int)(prevPos.y * height - 0.5f);
+
+			px = clamp(px, 0, width - 1);
+			py = clamp(py, 0, height - 1);
+
+			int pidx = getIdx(px, py, width);
+
+			const float prevDepth = prevAovs[pidx].depth;
+			const int prevMeshId = prevAovs[pidx].meshid;
+
+			auto prevNormal = prevAovs[pidx].normal;
+
+			if (abs(1 - centerDepth / prevDepth) < zThreshold
+				&& dot(centerNormal, prevNormal) > nThreshold
+				&& centerMeshId == prevMeshId)
+			{
+				float4 prevMoment = prevAovs[pidx].moments;
+
+				// 積算フレーム数を１増やす.
+				frame = (int)prevMoment.w + 1;
+
+				centerMoment += prevMoment;
+			}
+		}
+
+		centerMoment.w = frame;
+
+		curAovs[idx].moments = centerMoment;
+	}
 
 	surf2Dwrite(
 		curColor,
@@ -271,9 +434,23 @@ namespace idaten
 			prevaov.ptr(),
 			m_mtxs.ptr(),
 			outputSurf,
+			m_tmpBuf.ptr(),
 			width, height);
 
 		checkCudaKernel(temporalReprojection);
+
+#ifdef ENABLE_MEDIAN_FILTER
+		medianFilter << <grid, block >> > (
+			outputSurf,
+			m_tmpBuf.ptr(),
+			curaov.ptr(),
+			prevaov.ptr(),
+			m_mtxs.ptr(),
+			m_paths.ptr(),
+			width, height);
+
+		checkCudaKernel(medianFilter);
+#endif
 
 		m_mtxs.reset();
 	}

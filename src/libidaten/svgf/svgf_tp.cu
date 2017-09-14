@@ -17,7 +17,7 @@
 
 #include "aten4idaten.h"
 
-//#define ENABLE_MEDIAN_FILTER
+#define ENABLE_MEDIAN_FILTER
 
 inline __device__ void computePrevScreenPos(
 	int ix, int iy,
@@ -338,12 +338,18 @@ __global__ void medianFilter(
 
 	auto idx = getIdx(ix, iy, width);
 
+	const int centerMeshId = curAovs[idx].meshid;
+
+	if (centerMeshId < 0) {
+		// This pixel is background, so nothing is done.
+		return;
+	}
+
 	auto curColor = medianFilter<false>(ix, iy, src, paths, width, height);
 
 	curAovs[idx].color = curColor;
 
 	const float centerDepth = curAovs[idx].depth;
-	const int centerMeshId = curAovs[idx].meshid;
 	const auto centerNormal = curAovs[idx].normal;
 
 	static const float zThreshold = 0.05f;

@@ -152,6 +152,8 @@ __global__ void atrousFilter(
 	const float4* __restrict__ varBuffer,
 	float4* nextVarBuffer,
 	int stepScale,
+	float thresholdTemporalWeight,
+	int radiusScale,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -240,8 +242,8 @@ __global__ void atrousFilter(
 	int R = 2;
 
 	if (isFirstIter) {
-		if (aovs[idx].temporalWeight < 0.1f) {
-			R *= 3;
+		if (aovs[idx].temporalWeight < thresholdTemporalWeight) {
+			R *= radiusScale;
 		}
 	}
 
@@ -370,6 +372,7 @@ namespace idaten
 					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
 					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
 					stepScale,
+					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}
@@ -383,6 +386,7 @@ namespace idaten
 					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
 					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
 					stepScale,
+					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}
@@ -394,6 +398,7 @@ namespace idaten
 					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
 					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
 					stepScale,
+					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}

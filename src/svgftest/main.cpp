@@ -124,6 +124,24 @@ void onRun()
 			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 		}
 
+		if (g_curMode == idaten::SVGFPathTracing::Mode::SVGF) {
+			auto prevThreshold = g_tracer.getTemporalWeightThreshold();
+			auto prevScale = g_tracer.getAtrousTapRadiusScale();
+
+			auto threshold = prevThreshold;
+			auto scale = prevScale;
+
+			ImGui::SliderFloat("Threshold", &threshold, 0.0f, 1.0f);
+			ImGui::SliderInt("Scale", &scale, 1, 4);
+
+			if (prevThreshold != threshold) {
+				g_tracer.setTemporalWeightThreshold(threshold);
+			}
+			if (prevScale != scale) {
+				g_tracer.setAtrousTapRadiusScale(scale);
+			}
+		}
+
 		if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
 			static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire" };
 			int aov_current = g_curAOVMode;

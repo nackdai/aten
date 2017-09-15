@@ -38,6 +38,10 @@
 </node>
 </node>
 </node>
+<node CREATED="1505466187661" ID="ID_696711244" MODIFIED="1505466205871" TEXT="&#x30ab;&#x30e1;&#x30e9;&#x304c;&#x52d5;&#x3044;&#x3066;&#x3044;&#x308b;&#x3068;&#x304d;&#x306e;Variance Estimation&#x306e;&#x54c1;&#x8cea;&#x304c;&#x4f4e;&#x3044;">
+<icon BUILTIN="help"/>
+<node CREATED="1505466206924" ID="ID_438012733" MODIFIED="1505466226808" TEXT="7x7bilatral filter &#x306e;&#x30a6;&#x30a8;&#x30a4;&#x30c8;&#x8a08;&#x7b97;&#x3092;&#x898b;&#x76f4;&#x3059;"/>
+</node>
 </node>
 <node CREATED="1504084787951" ID="ID_1465055682" MODIFIED="1504084792448" TEXT="fire fly&#x554f;&#x984c;">
 <node CREATED="1505376567609" ID="ID_966940260" MODIFIED="1505376575803" TEXT="median filter">
@@ -64,6 +68,9 @@
 <node CREATED="1505464317214" ID="ID_1554930522" MODIFIED="1505464329416" TEXT="&#x30d6;&#x30ed;&#x30c3;&#x30af;&#x30ce;&#x30a4;&#x30ba;&#x306b;&#x306a;&#x3063;&#x3066;&#x3057;&#x307e;&#x3046;"/>
 </node>
 </node>
+<node CREATED="1505464339413" ID="ID_1773398779" MODIFIED="1505466234138" TEXT="clamping">
+<icon BUILTIN="yes"/>
+</node>
 </node>
 <node CREATED="1505366949928" ID="ID_538859275" MODIFIED="1505451392776" TEXT="&#x30b4;&#x30fc;&#x30b9;&#x30c8;&#x554f;&#x984c;">
 <icon BUILTIN="messagebox_warning"/>
@@ -71,7 +78,6 @@
 <icon BUILTIN="button_cancel"/>
 <node CREATED="1505379163537" ID="ID_37577875" MODIFIED="1505379168546" TEXT="&#x54c1;&#x8cea;&#x304c;&#x826f;&#x304f;&#x306a;&#x3044;"/>
 </node>
-<node CREATED="1505464339413" ID="ID_1773398779" MODIFIED="1505464343401" TEXT="clamping"/>
 </node>
 <node CREATED="1504750704895" ID="ID_336994059" MODIFIED="1505292109445" TEXT="Sponza&#x3067;&#x4e00;&#x90e8;&#x306b;TemporalReprojection&#x304c;&#x304b;&#x304b;&#x3089;&#x306a;&#x3044;">
 <icon BUILTIN="button_ok"/>

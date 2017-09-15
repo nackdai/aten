@@ -17,7 +17,7 @@
 
 #include "aten4idaten.h"
 
-#define ENABLE_MEDIAN_FILTER
+//#define ENABLE_MEDIAN_FILTER
 
 inline __device__ void computePrevScreenPos(
 	int ix, int iy,

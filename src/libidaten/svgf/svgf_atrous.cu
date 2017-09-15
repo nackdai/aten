@@ -237,8 +237,16 @@ __global__ void atrousFilter(
 		1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
 	};
 
-	for (int y = -2; y <= 2; y++) {
-		for (int x = -2; x <= 2; x++) {
+	int R = 2;
+
+	if (isFirstIter) {
+		if (aovs[idx].temporalWeight < 0.1f) {
+			R *= 3;
+		}
+	}
+
+	for (int y = -R; y <= R; y++) {
+		for (int x = -R; x <= R; x++) {
 			int xx = clamp(ix + x * stepScale, 0, width - 1);
 			int yy = clamp(iy + y * stepScale, 0, height - 1);
 

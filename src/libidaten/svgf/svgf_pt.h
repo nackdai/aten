@@ -45,7 +45,7 @@ namespace idaten
 			float depth;
 			int meshid;
 			int mtrlid;
-			int padding0;
+			float temporalWeight;
 
 			float4 normal;
 			float4 texclr;

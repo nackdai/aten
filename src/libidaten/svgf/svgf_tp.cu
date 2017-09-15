@@ -181,6 +181,7 @@ __global__ void temporalReprojection(
 #endif
 	}
 
+	curAovs[idx].temporalWeight = weight;
 
 #ifdef ENABLE_MEDIAN_FILTER
 	tmpBuffer[idx] = curColor;
@@ -252,6 +253,46 @@ __global__ void temporalReprojection(
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
+}
+
+__global__ void dilateWeight(
+	idaten::SVGFPathTracing::AOV* curAovs,
+	int width, int height)
+{
+	int ix = blockIdx.x * blockDim.x + threadIdx.x;
+	int iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	auto idx = getIdx(ix, iy, width);
+
+	const int centerMeshId = curAovs[idx].meshid;
+
+	if (centerMeshId < 0) {
+		// This pixel is background, so nothing is done.
+		return;
+	}
+
+	float temporalWeight = curAovs[idx].temporalWeight;
+
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			int xx = ix + x;
+			int yy = iy + y;
+
+			if ((0 <= xx) && (xx < width)
+				&& (0 <= yy) && (yy < height))
+			{
+				int pidx = getIdx(xx, yy, width);
+				float w = curAovs[pidx].temporalWeight;
+				temporalWeight = min(temporalWeight, w);
+			}
+		}
+	}
+
+	curAovs[idx].temporalWeight = temporalWeight;
 }
 
 inline __device__ float4 min(float4 a, float4 b)
@@ -462,6 +503,11 @@ namespace idaten
 
 		checkCudaKernel(medianFilter);
 #endif
+
+		dilateWeight << <grid, block >> > (
+			curaov.ptr(),
+			width, height);
+		checkCudaKernel(dilateWeight);
 
 		m_mtxs.reset();
 	}

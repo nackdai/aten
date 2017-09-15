@@ -38,7 +38,8 @@ __global__ void fillAOV(
 	float4 clr = make_float4(1);
 
 	if (mode == idaten::SVGFPathTracing::AOVMode::Normal) {
-		clr = aovs[idx].normal * 0.5f + 0.5f;
+		auto n = aovs[idx].normal * 0.5f + 0.5f;
+		clr = make_float4(n.x, n.y, n.z, 1);
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::Depth) {
 		// TODO

@@ -76,7 +76,7 @@ inline __device__ float ddy(
 	return bottom - top;
 }
 
-inline __device__ float4 gaussFilter3x3(
+inline __device__ float gaussFilter3x3(
 	int ix, int iy,
 	int w, int h,
 	idaten::SVGFPathTracing::AOV* aov)
@@ -87,7 +87,7 @@ inline __device__ float4 gaussFilter3x3(
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
 	};
 
-	float4 sum = make_float4(0, 0, 0, 0);
+	float sum = 0;
 
 	int pos = 0;
 
@@ -98,7 +98,7 @@ inline __device__ float4 gaussFilter3x3(
 
 			int idx = getIdx(xx, yy, w);
 
-			float4 tmp = aov[idx].var;
+			float tmp = aov[idx].var;
 
 			sum += kernel[pos] * tmp;
 
@@ -109,10 +109,10 @@ inline __device__ float4 gaussFilter3x3(
 	return sum;
 }
 
-inline __device__ float4 gaussFilter3x3(
+inline __device__ float gaussFilter3x3(
 	int ix, int iy,
 	int w, int h,
-	const float4* __restrict__ var)
+	const float* __restrict__ var)
 {
 	static const float kernel[] = {
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
@@ -120,7 +120,7 @@ inline __device__ float4 gaussFilter3x3(
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
 	};
 
-	float4 sum = make_float4(0, 0, 0, 0);
+	float sum = 0;
 
 	int pos = 0;
 
@@ -131,7 +131,7 @@ inline __device__ float4 gaussFilter3x3(
 
 			int idx = getIdx(xx, yy, w);
 
-			float4 tmp = var[idx];
+			float tmp = var[idx];
 
 			sum += kernel[pos] * tmp;
 
@@ -149,8 +149,8 @@ __global__ void atrousFilter(
 	idaten::SVGFPathTracing::AOV* aovs,
 	const float4* __restrict__ clrBuffer,
 	float4* nextClrBuffer,
-	const float4* __restrict__ varBuffer,
-	float4* nextVarBuffer,
+	const float* __restrict__ varBuffer,
+	float* nextVarBuffer,
 	int stepScale,
 	float thresholdTemporalWeight,
 	int radiusScale,
@@ -165,7 +165,7 @@ __global__ void atrousFilter(
 
 	const int idx = getIdx(ix, iy, width);
 
-	float4 centerNormal = aovs[idx].normal;
+	auto centerNormal = aovs[idx].normal;
 
 	float centerDepth = aovs[idx].depth;
 	int centerMeshId = aovs[idx].meshid;
@@ -203,7 +203,7 @@ __global__ void atrousFilter(
 	float centerLum = AT_NAME::color::luminance(centerColor.x, centerColor.y, centerColor.z);
 
 	// ガウスフィルタ3x3
-	float4 gaussedVarLum;
+	float gaussedVarLum;
 	
 	if (isFirstIter) {
 		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovs);
@@ -212,7 +212,7 @@ __global__ void atrousFilter(
 		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, varBuffer);
 	}
 
-	float sqrGaussedVarLum = sqrt(gaussedVarLum.x);
+	float sqrGaussedVarLum = sqrt(gaussedVarLum);
 
 	static const float sigmaZ = 1.0f;
 	static const float sigmaN = 128.0f;
@@ -226,7 +226,7 @@ __global__ void atrousFilter(
 	float4 sumC = make_float4(0, 0, 0, 0);
 	float weightC = 0;
 
-	float4 sumV = make_float4(0, 0, 0, 0);
+	float sumV = 0;
 	float weightV = 0;
 
 	int pos = 0;
@@ -263,10 +263,10 @@ __global__ void atrousFilter(
 				continue;
 			}
 
-			float4 normal = aovs[qidx].normal;
+			auto normal = aovs[qidx].normal;
 
 			float4 color;
-			float4 variance;
+			float variance;
 
 			if (isFirstIter) {
 				color = aovs[qidx].color;

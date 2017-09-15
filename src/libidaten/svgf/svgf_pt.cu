@@ -351,7 +351,7 @@ __global__ void shade(
 		pos = mtxW2C.apply(pos);
 
 		// normal
-		aovs[idx].normal = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, 0);
+		aovs[idx].normal = make_float3(orienting_normal.x, orienting_normal.y, orienting_normal.z);
 
 		// depth, meshid.
 		aovs[idx].depth = pos.w;

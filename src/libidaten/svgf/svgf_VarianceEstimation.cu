@@ -76,7 +76,7 @@ __global__ void varianceEstimation(
 		static const float sigmaD = 0.005f;
 		static const float sigmaS = 8;
 
-		float4 centerNormal = aovs[idx].normal;
+		auto centerNormal = aovs[idx].normal;
 
 		float4 sum = make_float4(0, 0, 0, 0);
 		float weight = 0.0f;
@@ -122,7 +122,7 @@ __global__ void varianceEstimation(
 	// 分散はマイナスにならないが・・・・
 	var = abs(var);
 
-	aovs[idx].var = make_float4(var, var, var, var);
+	aovs[idx].var = var;
 
 	surf2Dwrite(
 		make_float4(var, var, var, var),

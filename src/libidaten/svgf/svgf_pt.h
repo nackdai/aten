@@ -47,11 +47,13 @@ namespace idaten
 			int mtrlid;
 			float temporalWeight;
 
-			float4 normal;
+			float3 normal;
+			float var;
+
 			float4 texclr;
 			float4 color;
+
 			float4 moments;
-			float4 var;
 		};
 #else
 		struct Path;
@@ -256,7 +258,7 @@ namespace idaten
 		unsigned int m_frame{ 1 };
 
 		idaten::TypedCudaMemory<float4> m_atrousClr[2];
-		idaten::TypedCudaMemory<float4> m_atrousVar[2];
+		idaten::TypedCudaMemory<float> m_atrousVar[2];
 
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
 

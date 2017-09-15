@@ -107,12 +107,10 @@ __global__ void temporalReprojection(
 		return;
 	}
 
-	float4 centerNormal = curAovs[idx].normal;
+	auto centerNormal = curAovs[idx].normal;
 
 	float4 sum = make_float4(0, 0, 0, 0);
 	float weight = 0.0f;
-
-	float4 prevNormal;
 
 	static const float zThreshold = 0.05f;
 	static const float nThreshold = 0.98f;
@@ -152,7 +150,7 @@ __global__ void temporalReprojection(
 				const float prevDepth = prevAovs[pidx].depth;
 				const int prevMeshId = prevAovs[pidx].meshid;
 
-				prevNormal = prevAovs[pidx].normal;
+				auto prevNormal = prevAovs[pidx].normal;
 
 				// TODO
 				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
@@ -227,7 +225,7 @@ __global__ void temporalReprojection(
 			const float prevDepth = prevAovs[pidx].depth;
 			const int prevMeshId = prevAovs[pidx].meshid;
 
-			prevNormal = prevAovs[pidx].normal;
+			auto prevNormal = prevAovs[pidx].normal;
 
 			if (abs(1 - centerDepth / prevDepth) < zThreshold
 				&& dot(centerNormal, prevNormal) > nThreshold

@@ -261,7 +261,7 @@ __global__ void shadeMissWithEnvmap(
 	}
 }
 
-template <bool isFirstBounce>
+template <bool isFirstBounce, int ShadowRayNum>
 __global__ void shade(
 	idaten::SVGFPathTracing::AOV* aovs,
 	aten::mat4 mtxW2C,
@@ -421,93 +421,95 @@ __global__ void shade(
 	// Explicit conection to light.
 	if (!mtrl.attrib.isSingular)
 	{
-		real lightSelectPdf = 1;
-		aten::LightSampleResult sampleres;
+		for (int i = 0; i < ShadowRayNum; i++) {
+			real lightSelectPdf = 1;
+			aten::LightSampleResult sampleres;
 
-		// TODO
-		// Importance sampling.
-		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
-		lightSelectPdf = 1.0f / lightnum;
+			// TODO
+			// Importance sampling.
+			int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
+			lightSelectPdf = 1.0f / lightnum;
 
-		auto light = ctxt.lights[lightidx];
+			auto light = ctxt.lights[lightidx];
 
-		sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &path.sampler);
+			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &path.sampler);
 
-		const auto& posLight = sampleres.pos;
-		const auto& nmlLight = sampleres.nml;
-		real pdfLight = sampleres.pdf;
+			const auto& posLight = sampleres.pos;
+			const auto& nmlLight = sampleres.nml;
+			real pdfLight = sampleres.pdf;
 
-		auto lightobj = sampleres.obj;
+			auto lightobj = sampleres.obj;
 
-		auto dirToLight = normalize(sampleres.dir);
-		auto distToLight = length(posLight - rec.p);
+			auto dirToLight = normalize(sampleres.dir);
+			auto distToLight = length(posLight - rec.p);
 
-		real distHitObjToRayOrg = AT_MATH_INF;
+			real distHitObjToRayOrg = AT_MATH_INF;
 
-		// Ray aim to the area light.
-		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-		auto hitobj = lightobj;
+			// Ray aim to the area light.
+			// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+			auto hitobj = lightobj;
 
-		aten::Intersection isectTmp;
-		
-		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
-		auto tmp = rec.p + dirToLight - shadowRayOrg;
-		auto shadowRayDir = normalize(tmp);
-		aten::ray shadowRay(shadowRayOrg, shadowRayDir);
+			aten::Intersection isectTmp;
 
-		bool isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
+			auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
+			auto tmp = rec.p + dirToLight - shadowRayOrg;
+			auto shadowRayDir = normalize(tmp);
+			aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
-		if (isHit) {
-			hitobj = (void*)&ctxt.shapes[isectTmp.objid];
-		}
+			bool isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 
-		isHit = AT_NAME::scene::hitLight(
-			isHit,
-			light.attrib,
-			lightobj,
-			distToLight,
-			distHitObjToRayOrg,
-			isectTmp.t,
-			hitobj);
-
-		if (isHit) {
-			auto cosShadow = dot(orienting_normal, dirToLight);
-
-			real pdfb = samplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-			auto bsdf = sampleBSDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-
-			bsdf *= path.throughput;
-
-			// Get light color.
-			auto emit = sampleres.finalColor;
-
-			if (light.attrib.isSingular || light.attrib.isInfinite) {
-				if (pdfLight > real(0) && cosShadow >= 0) {
-					// TODO
-					// ジオメトリタームの扱いについて.
-					// singular light の場合は、finalColor に距離の除算が含まれている.
-					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-					auto misW = pdfLight / (pdfb + pdfLight);
-					path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
-				}
+			if (isHit) {
+				hitobj = (void*)&ctxt.shapes[isectTmp.objid];
 			}
-			else {
-				auto cosLight = dot(nmlLight, -dirToLight);
 
-				if (cosShadow >= 0 && cosLight >= 0) {
-					auto dist2 = aten::squared_length(sampleres.dir);
-					auto G = cosShadow * cosLight / dist2;
+			isHit = AT_NAME::scene::hitLight(
+				isHit,
+				light.attrib,
+				lightobj,
+				distToLight,
+				distHitObjToRayOrg,
+				isectTmp.t,
+				hitobj);
 
-					if (pdfb > real(0) && pdfLight > real(0)) {
-						// Convert pdf from steradian to area.
-						// http://www.slideshare.net/h013/edubpt-v100
-						// p31 - p35
-						pdfb = pdfb * cosLight / dist2;
+			if (isHit) {
+				auto cosShadow = dot(orienting_normal, dirToLight);
 
+				real pdfb = samplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+				auto bsdf = sampleBSDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+
+				bsdf *= path.throughput;
+
+				// Get light color.
+				auto emit = sampleres.finalColor;
+
+				if (light.attrib.isSingular || light.attrib.isInfinite) {
+					if (pdfLight > real(0) && cosShadow >= 0) {
+						// TODO
+						// ジオメトリタームの扱いについて.
+						// singular light の場合は、finalColor に距離の除算が含まれている.
+						// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+						// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 						auto misW = pdfLight / (pdfb + pdfLight);
+						path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)ShadowRayNum;
+					}
+				}
+				else {
+					auto cosLight = dot(nmlLight, -dirToLight);
 
-						path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+					if (cosShadow >= 0 && cosLight >= 0) {
+						auto dist2 = aten::squared_length(sampleres.dir);
+						auto G = cosShadow * cosLight / dist2;
+
+						if (pdfb > real(0) && pdfLight > real(0)) {
+							// Convert pdf from steradian to area.
+							// http://www.slideshare.net/h013/edubpt-v100
+							// p31 - p35
+							pdfb = pdfb * cosLight / dist2;
+
+							auto misW = pdfLight / (pdfb + pdfLight);
+
+							path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)ShadowRayNum;
+						}
 					}
 				}
 			}
@@ -977,8 +979,10 @@ namespace idaten
 
 		auto& curaov = getCurAovs();
 
+		static const int ShdowRayNum = 2;
+
 		if (bounce == 0) {
-			shade<true> << <blockPerGrid, threadPerBlock >> > (
+			shade<true, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
 				curaov.ptr(), mtxW2C,
 				width, height,
 				m_paths.ptr(),
@@ -998,7 +1002,7 @@ namespace idaten
 				m_random.ptr());
 		}
 		else {
-			shade<false> << <blockPerGrid, threadPerBlock >> > (
+			shade<false, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
 				curaov.ptr(), mtxW2C,
 				width, height,
 				m_paths.ptr(),

@@ -98,7 +98,9 @@ __global__ void hitTest(
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
-	aten::mat4* matrices)
+	aten::mat4* matrices,
+	int bounce,
+	float hitDistLimit)
 {
 #if 0
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -150,6 +152,13 @@ __global__ void hitTest(
 	isects[idx].primid = isect.primid;
 	isects[idx].a = isect.a;
 	isects[idx].b = isect.b;
+
+	if (bounce >= 1
+		&& !path.isSingular
+		&& isect.t > hitDistLimit)
+	{
+		isHit = false;
+	}
 
 	path.isHit = isHit;
 
@@ -740,6 +749,7 @@ namespace idaten
 			while (bounce < maxBounce) {
 				onHitTest(
 					width, height,
+					bounce,
 					vtxTexPos);
 				
 				onShadeMiss(width, height, bounce);
@@ -849,6 +859,7 @@ namespace idaten
 
 	void SVGFPathTracing::onHitTest(
 		int width, int height,
+		int bounce,
 		cudaTextureObject_t texVtxPos)
 	{
 #if 0
@@ -875,7 +886,9 @@ namespace idaten
 			m_nodetex.ptr(),
 			m_primparams.ptr(),
 			texVtxPos,
-			m_mtxparams.ptr());
+			m_mtxparams.ptr(),
+			bounce,
+			m_hitDistLimit);
 
 		checkCudaKernel(hitTest);
 	}

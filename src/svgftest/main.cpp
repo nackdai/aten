@@ -403,6 +403,10 @@ int main()
 #endif
 
 	{
+		auto aabb = g_scene.getAccel()->getBoundingbox();
+		auto d = aabb.getLengthBetweenMinAndMax();
+		g_tracer.setHitDistanceLimit(d * 0.25f);
+
 		std::vector<aten::ShapeParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
 		std::vector<aten::LightParameter> lightparams;

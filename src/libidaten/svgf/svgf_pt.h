@@ -168,6 +168,11 @@ namespace idaten
 			return m_atrousTapRadiusScale;
 		}
 
+		void setHitDistanceLimit(float d)
+		{
+			m_hitDistLimit = d;
+		}
+
 	protected:
 		virtual void onGenPath(
 			int width, int height,
@@ -178,6 +183,7 @@ namespace idaten
 
 		virtual void onHitTest(
 			int width, int height,
+			int bounce,
 			cudaTextureObject_t texVtxPos);
 
 		virtual void onShadeMiss(
@@ -264,6 +270,8 @@ namespace idaten
 
 		float m_thresholdTemporalWeight{ 0.0f };
 		int m_atrousTapRadiusScale{ 1 };
+
+		float m_hitDistLimit{ AT_MATH_INF };
 
 		idaten::TypedCudaMemory<PickedInfo> m_pick;
 

@@ -168,6 +168,12 @@ namespace aten {
 			m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
 		}
 
+		real getLengthBetweenMinAndMax() const
+		{
+			auto ret = length(m_max - m_min);
+			return ret;
+		}
+
 		static aabb merge(const aabb& box0, const aabb& box1)
 		{
 			vec3 _min = aten::vec3(

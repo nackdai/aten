@@ -264,6 +264,7 @@ __global__ void shadeMissWithEnvmap(
 template <bool isFirstBounce, int ShadowRayNum>
 __global__ void shade(
 	idaten::SVGFPathTracing::AOV* aovs,
+	cudaSurfaceObject_t aovExportBuffer,
 	aten::mat4 mtxW2C,
 	int width, int height,
 	idaten::SVGFPathTracing::Path* paths,
@@ -373,6 +374,14 @@ __global__ void shade(
 
 		// For exporting separated albedo.
 		mtrl.albedoMap = -1;
+
+		if (aovExportBuffer > 0) {
+			surf2Dwrite(
+				make_float4(aovs[idx].normal, aovs[idx].depth),
+				aovExportBuffer,
+				ix * sizeof(float4), iy,
+				cudaBoundaryModeTrap);
+		}
 	}
 
 	// Implicit conection to light.
@@ -678,6 +687,11 @@ namespace idaten
 		m_tmpBuf.init(width * height);
 	}
 
+	void SVGFPathTracing::setAovExportBuffer(GLuint gltexId)
+	{
+		m_aovGLBuffer.init(gltexId, CudaGLRscRegisterType::WriteOnly);
+	}
+
 	static bool doneSetStackSize = false;
 
 	void SVGFPathTracing::render(
@@ -979,11 +993,19 @@ namespace idaten
 
 		auto& curaov = getCurAovs();
 
+		cudaSurfaceObject_t aovExportBuffer = 0;
+		if (m_aovGLBuffer.isValid()) {
+			m_aovGLBuffer.map();
+			aovExportBuffer = m_aovGLBuffer.bind();
+		}
+
 		static const int ShdowRayNum = 2;
 
 		if (bounce == 0) {
 			shade<true, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
-				curaov.ptr(), mtxW2C,
+				curaov.ptr(),
+				aovExportBuffer,
+				mtxW2C,
 				width, height,
 				m_paths.ptr(),
 				m_hitidx.ptr(), hitcount,
@@ -1003,7 +1025,9 @@ namespace idaten
 		}
 		else {
 			shade<false, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
-				curaov.ptr(), mtxW2C,
+				curaov.ptr(), 
+				aovExportBuffer,
+				mtxW2C,
 				width, height,
 				m_paths.ptr(),
 				m_hitidx.ptr(), hitcount,
@@ -1023,6 +1047,11 @@ namespace idaten
 		}
 
 		checkCudaKernel(shade);
+
+		if (m_aovGLBuffer.isValid()) {
+			m_aovGLBuffer.unbind();
+			m_aovGLBuffer.unmap();
+		}
 	}
 
 	void SVGFPathTracing::onGather(

@@ -4,11 +4,15 @@ precision highp int;
 
 uniform sampler2D s0;	// current frame.
 uniform sampler2D s1;	// previous frame.
+uniform sampler2D s2;	// aov.
 
 uniform float blurSize = 0.2;
 
 uniform bool enableTAA = true;
 uniform bool showDiff = false;
+
+uniform mat4 mtxC2V;
+uniform mat4 mtxPrevV2C;
 
 // output colour for the fragment
 layout(location = 0) out highp vec4 oBuffer;

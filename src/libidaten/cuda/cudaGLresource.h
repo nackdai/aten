@@ -62,6 +62,11 @@ namespace idaten
 	public:
 		void init(GLuint gltex, CudaGLRscRegisterType type);
 
+		bool isValid() const
+		{
+			return (m_gltex > 0);
+		}
+
 		cudaSurfaceObject_t bind();
 		void unbind();
 

@@ -25,6 +25,8 @@ namespace aten
 		addPass(&m_taa);
 		addPass(&m_final);
 
+		m_aovTex.initAsGLTexture(width, height);
+
 		return true;
 	}
 
@@ -71,6 +73,8 @@ namespace aten
 		auto texAcc = getFbo().getTexHandle(cur);
 		texture::bindAsGLTexture(texAcc, 1, this);
 
+		m_body->m_aovTex.bindAsGLTexture(2, this);
+
 		auto enableTAA = m_body->isEnableTAA();
 		auto hEnableTAA = this->getHandle("enableTAA");
 		CALL_GL_API(::glUniform1i(hEnableTAA, enableTAA));
@@ -91,6 +95,8 @@ namespace aten
 		auto tex = prevPass->getFbo().getTexHandle(2);
 
 		texture::bindAsGLTexture(tex, 0, this);
+
+		m_body->m_aovTex.bindAsGLTexture(1, this);
 
 		m_body->m_idx = 1 - m_body->m_idx;
 	}

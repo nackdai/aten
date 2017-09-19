@@ -88,6 +88,7 @@ namespace aten {
 		static const std::vector<texture*>& getTextures();
 
 		bool initAsGLTexture();
+		bool initAsGLTexture(int width, int height);
 		void bindAsGLTexture(uint8_t stage, shader* shd) const;
 		void releaseAsGLTexture();
 		void clearAsGLTexture(const aten::vec4& clearColor);

@@ -96,6 +96,8 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
+		void setAovExportBuffer(GLuint gltexId);
+
 		Mode getMode() const
 		{
 			return m_mode;
@@ -272,6 +274,8 @@ namespace idaten
 		int m_atrousTapRadiusScale{ 1 };
 
 		float m_hitDistLimit{ AT_MATH_INF };
+
+		idaten::CudaGLSurface m_aovGLBuffer;
 
 		idaten::TypedCudaMemory<PickedInfo> m_pick;
 

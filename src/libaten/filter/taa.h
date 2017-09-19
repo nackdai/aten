@@ -1,6 +1,7 @@
 #pragma once
 
 #include "visualizer/MultiPassPostProc.h"
+#include "texture/texture.h"
 #include "camera/pinhole.h"
 
 namespace aten {
@@ -28,6 +29,11 @@ namespace aten {
 		virtual FBO& getFbo() override final
 		{
 			return m_final.getFbo();
+		}
+
+		uint32_t getAovGLTexHandle() const
+		{
+			return m_aovTex.getGLTexHandle();
 		}
 
 		void enableTAA(bool e)
@@ -98,6 +104,8 @@ namespace aten {
 	private:
 		TAAPass m_taa;
 		FinalPass m_final;
+
+		texture m_aovTex;
 
 		int m_idx{ 0 };
 

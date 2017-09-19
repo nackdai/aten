@@ -407,6 +407,8 @@ int main()
 		auto d = aabb.getLengthBetweenMinAndMax();
 		g_tracer.setHitDistanceLimit(d * 0.25f);
 
+		g_tracer.setAovExportBuffer(g_taa.getAovGLTexHandle());
+
 		std::vector<aten::ShapeParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
 		std::vector<aten::LightParameter> lightparams;

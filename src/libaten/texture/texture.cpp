@@ -87,6 +87,40 @@ namespace aten {
 		return true;
 	}
 
+	bool texture::initAsGLTexture(int width, int height)
+	{
+		m_width = width;
+		m_height = height;
+
+		AT_VRETURN(m_width > 0, false);
+		AT_VRETURN(m_height > 0, false);
+
+		CALL_GL_API(::glGenTextures(1, &m_gltex));
+		AT_VRETURN(m_gltex > 0, false);
+
+		CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_gltex));
+
+		CALL_GL_API(glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RGBA32F,
+			m_width, m_height,
+			0,
+			GL_RGBA,
+			GL_FLOAT,
+			nullptr));
+
+		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
+		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+
+		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, 0));
+
+		return true;
+	}
+
 	void texture::bindAsGLTexture(uint8_t stage, shader* shd) const
 	{
 		bindAsGLTexture(m_gltex, stage, shd);

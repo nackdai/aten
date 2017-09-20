@@ -489,7 +489,8 @@ namespace aten
 
 						//XorShift rnd(scramble + t.milliSeconds);
 						//Halton rnd(scramble + t.milliSeconds);
-						Sobol rnd(scramble + frame);
+						Sobol rnd;
+						rnd.init(frame, 0, scramble);
 						//WangHash rnd(scramble + t.milliSeconds);
 
 						real u = real(x + rnd.nextSample()) / real(width);

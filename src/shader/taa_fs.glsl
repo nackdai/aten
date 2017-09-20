@@ -230,7 +230,7 @@ void main()
 	for (int i = 0; i < 4; i++) {
 		vec2 offset = neighbor_offset[i] * invScr * blurSize;
 
-		float depth = texture2D(s2, uv).w;
+		float depth = texture2D(s2, uv + offset).w;
 
 		vec4 prevPos = computePrevScreenPos(uv + offset, depth);
 

@@ -41,7 +41,9 @@ inline __device__ void computePrevScreenPos(
 	// Xview = mtxC2V * Xclip
 
 	const aten::mat4 mtxC2V = mtxs[0];
-	const aten::mat4 mtxPrevV2C = mtxs[1];
+	const aten::mat4 mtxV2W = mtxs[1];
+	const aten::mat4 mtxPrevW2V = mtxs[2];
+	const aten::mat4 mtxV2C = mtxs[3];
 
 	float2 uv = make_float2(ix + 0.5, iy + 0.5);
 	uv /= make_float2(width - 1, height - 1);	// [0, 1]
@@ -58,8 +60,11 @@ inline __device__ void computePrevScreenPos(
 	pos.z = -centerDepth;
 	pos.w = 1.0;
 
+	pos = mtxV2W.apply(pos);
+
 	// Reproject previous screen position.
-	*prevPos = mtxPrevV2C.apply(pos);
+	pos = mtxPrevW2V.apply(pos);
+	*prevPos = mtxV2C.apply(pos);
 	*prevPos /= prevPos->w;
 
 	*prevPos = *prevPos * 0.5 + 0.5;	// [-1, 1] -> [0, 1]
@@ -468,9 +473,11 @@ namespace idaten
 		auto& curaov = getCurAovs();
 		auto& prevaov = getPrevAovs();
 
-		aten::mat4 mtxs[2] = {
+		aten::mat4 mtxs[] = {
 			m_mtxC2V,
-			m_mtxPrevV2C,
+			m_mtxV2W,
+			m_mtxPrevW2V,
+			m_mtxV2C,
 		};
 
 		m_mtxs.init(sizeof(aten::mat4) * AT_COUNTOF(mtxs));

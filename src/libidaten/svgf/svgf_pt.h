@@ -257,9 +257,13 @@ namespace idaten
 
 		idaten::TypedCudaMemory<AOV> m_aovs[2];
 
+		aten::mat4 m_mtxW2V;		// World - View.
 		aten::mat4 m_mtxV2C;		// View - Clip.
 		aten::mat4 m_mtxC2V;		// Clip - View.
-		aten::mat4 m_mtxPrevV2C;	// View - Clip.
+
+		// View - World.
+		aten::mat4 m_mtxV2W;
+		aten::mat4 m_mtxPrevW2V;
 
 		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
 

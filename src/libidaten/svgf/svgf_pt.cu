@@ -966,8 +966,7 @@ namespace idaten
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
-		aten::mat4 mtxW2V;
-		mtxW2V.lookat(
+		m_mtxW2V.lookat(
 			m_camParam.origin,
 			m_camParam.center,
 			m_camParam.up);
@@ -981,7 +980,10 @@ namespace idaten
 		m_mtxC2V = m_mtxV2C;
 		m_mtxC2V.invert();
 
-		aten::mat4 mtxW2C = m_mtxV2C * mtxW2V;
+		m_mtxV2W = m_mtxW2V;
+		m_mtxV2W.invert();
+
+		aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
 
 #ifdef ENABLE_DEBUG_1PIXEL
 		int blockPerGrid = 1;
@@ -1103,6 +1105,6 @@ namespace idaten
 			}
 		}
 
-		m_mtxPrevV2C = m_mtxV2C;
+		m_mtxPrevW2V = m_mtxW2V;
 	}
 }

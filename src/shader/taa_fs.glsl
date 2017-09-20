@@ -227,6 +227,9 @@ void main()
 
 	float weight = 1.0;
 
+	// NOTE
+	// http://d.hatena.ne.jp/hanecci/20140614
+
 	for (int i = 0; i < 4; i++) {
 		vec2 offset = neighbor_offset[i] * invScr * blurSize;
 

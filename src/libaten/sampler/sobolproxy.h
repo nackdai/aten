@@ -36,7 +36,11 @@ namespace aten {
 			m_idx = index;
 			m_dimension = dimension;
 			m_scramble = scramble;
+#ifdef __CUDACC__
 			m_matrices = data ? data : m_matrices;
+#else
+			m_matrices = data ? data : sobol::Matrices::matrices;
+#endif
 		}
 
 		AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())

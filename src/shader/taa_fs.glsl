@@ -1,4 +1,4 @@
-#version 420
+Ôªø#version 420
 precision highp float;
 precision highp int;
 
@@ -88,10 +88,10 @@ vec3 clipAABB(
 
 	vec3 halfsize = 0.5 * (aabb_max - aabb_min) + 0.00000001f;
 
-	// íÜêSÇ©ÇÁÇÃëäëŒà íu.
+	// ‰∏≠ÂøÉ„Åã„Çâ„ÅÆÁõ∏ÂØæ‰ΩçÁΩÆ.
 	vec3 clip = q - center;
 
-	// ëäëŒà íuÇÃê≥ãKâª.
+	// Áõ∏ÂØæ‰ΩçÁΩÆ„ÅÆÊ≠£Ë¶èÂåñ.
 	vec3 unit = clip / halfsize;
 
 	vec3 abs_unit = abs(unit);
@@ -99,7 +99,7 @@ vec3 clipAABB(
 	float ma_unit = max(abs_unit.x, max(abs_unit.y, abs_unit.z));
 
 	if (ma_unit > 1.0) {
-		// ÉNÉäÉbÉvà íu.
+		// „ÇØ„É™„ÉÉ„Éó‰ΩçÁΩÆ.
 		return center + clip / ma_unit;
 	}
 	else {
@@ -164,7 +164,143 @@ vec4 computePrevScreenPos(
 	return prevPos;
 }
 
+#if 1
+void main()
+{
+	// http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
+	// https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader
+	// http://t-pot.com/program/152_TAA/
+	// https://github.com/t-pot/TAA
 
+	ivec2 texsize = textureSize(s0, 0);
+
+	vec2 invScr = 1.0 / texsize.xy;;
+
+	vec2 uv = gl_FragCoord.xy * invScr;
+
+	if (!enableTAA) {
+		oBuffer = texture2D(s0, uv);
+		oBuffer.a = 1;
+		oScreen = oBuffer;
+		return;
+	}
+
+	vec2 du = vec2(invScr.x, 0.0);
+	vec2 dv = vec2(0.0, invScr.y);
+
+	vec4 ctl = sampleColor(s0, uv - dv - du);
+	vec4 ctc = sampleColor(s0, uv - dv);
+	vec4 ctr = sampleColor(s0, uv - dv + du);
+	vec4 cml = sampleColor(s0, uv - du);
+	vec4 cmc = sampleColor(s0, uv);
+	vec4 cmr = sampleColor(s0, uv + du);
+	vec4 cbl = sampleColor(s0, uv + dv - du);
+	vec4 cbc = sampleColor(s0, uv + dv);
+	vec4 cbr = sampleColor(s0, uv + dv + du);
+
+	vec4 cmin = min(ctl, min(ctc, min(ctr, min(cml, min(cmc, min(cmr, min(cbl, min(cbc, cbr))))))));
+	vec4 cmax = max(ctl, max(ctc, max(ctr, max(cml, max(cmc, max(cmr, max(cbl, max(cbc, cbr))))))));
+
+	vec4 cavg = (ctl + ctc + ctr + cml + cmc + cmr + cbl + cbc + cbr) / 9.0;
+
+	vec4 cmin5 = min(ctc, min(cml, min(cmc, min(cmr, cbc))));
+	vec4 cmax5 = max(ctc, max(cml, max(cmc, max(cmr, cbc))));
+	vec4 cavg5 = (ctc + cml + cmc + cmr + cbc) / 5.0;
+	cmin = 0.5 * (cmin + cmin5);
+	cmax = 0.5 * (cmax + cmax5);
+	cavg = 0.5 * (cavg + cavg5);
+
+	vec4 center_color = sampleColor(s0, uv);
+
+	vec4 neighbor_sum = vec4(0, 0, 0, 0);
+	float weight = 0;
+
+	const float cbcr_threshhold = 0.32;
+	const float maxLen = 2.0;
+
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			vec2 offset = vec2(x, y);
+
+#if 0
+			float len = length(offset);
+			float W = exp(-2.29 * len * len);
+
+			vec4 neighbor = sampleColor(s1, uv + offset * invScr);
+#else
+			float depth = texture2D(s2, uv + offset).w;
+
+			vec4 prevPos = computePrevScreenPos(uv + offset, depth);
+
+			vec2 velocity = prevPos.xy - (uv.xy + offset.xy);
+
+			float len2 = dot(velocity, velocity) + 1e-6f;
+			velocity /= len2;
+
+			velocity *= min(len2, maxLen);
+
+			vec4 neighbor = sampleColor(s1, uv + velocity);
+
+			// NOTE
+			// High-Quality Temporal Supersampling.
+			// http://advances.realtimerendering.com/s2014/epic/TemporalAA.pptx
+			// p.23
+			float len = length(velocity);
+			float W = exp(-2.29 * len * len);
+
+			W *= 1 - clamp(len2 / maxLen, 0.0, 1.0);
+#endif
+
+			neighbor.xyz = clipAABB(cmin.xyz, cmax.xyz, neighbor.xyz);
+
+			vec3 color_diff = abs(neighbor.xyz - center_color.xyz);
+
+#ifdef USE_YCOCG
+			vec3 ycc = color_diff.xyz;
+#else
+			vec3 ycc = RGB2YCbCr(color_diff.xyz);		// ‰∏≠ÂøÉ„Å®„ÅÆÂ∑Æ„ÇíYCbCr„ÅßË¶ã„Çã
+#endif
+
+			float cbcr_len = length(color_diff.yz);
+
+			// Ëâ≤Áõ∏ÊàêÂàÜ„ÅåÂ§ß„Åç„ÅèÁï∞„Å™„ÇãÊôÇ„ÄÅÈñæÂÄ§„Å´Âèé„Åæ„ÇãÁØÑÂõ≤„Å´Ëâ≤„ÇíË£úÊ≠£„Åó„Å¶ÂêàÊàê
+			if (cbcr_threshhold < cbcr_len) {
+				ycc = (cbcr_threshhold / cbcr_len) * ycc;
+#ifdef USE_YCOCG
+				neighbor.rgb = center_color.rgb + ycc;
+#else
+				neighbor.rgb = center_color.rgb + YCbCr2RGB(ycc);
+#endif
+			}
+
+			neighbor_sum.xyz += neighbor.xyz * W;
+			weight += W;
+		}
+	}
+
+	neighbor_sum /= weight;
+	weight /= 9;
+	neighbor_sum.xyz = mix(center_color.xyz, neighbor_sum.xyz, weight);
+
+#ifdef USE_YCOCG
+	neighbor_sum.xyz = YCoCg2RGB(neighbor_sum.xyz);
+#endif
+
+	neighbor_sum.xyz = unmap(neighbor_sum.xyz);
+
+	oBuffer = neighbor_sum;
+	oBuffer.a = 1;
+
+	if (showDiff) {
+		vec3 c = YCoCg2RGB(center_color.xyz);
+		oScreen.xyz = abs(neighbor_sum.xyz - c);
+		oScreen.a = 1;
+	}
+	else {
+		oScreen = oBuffer;
+	}
+}
+#else
 void main()
 {
 	// http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
@@ -211,10 +347,17 @@ void main()
 	cavg = 0.5 * (cavg + cavg5);
 
 	vec2 neighbor_offset[4] = {
+#if 0
+		{ +0.5, +0.5 },
+		{ +0.5, -0.5 },
+		{ -0.5, +0.5 },
+		{ -0.5, -0.5 },
+#else
 		{  0, +1 },
 		{  0, -1 },
 		{ +1,  0 },
 		{ -1,  0 },
+#endif
 	};
 
 	vec4 center_color = sampleColor(s0, uv);
@@ -253,12 +396,12 @@ void main()
 #ifdef USE_YCOCG
 		vec3 ycc = color_diff.xyz;
 #else
-		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// íÜêSÇ∆ÇÃç∑ÇYCbCrÇ≈å©ÇÈ
+		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// ‰∏≠ÂøÉ„Å®„ÅÆÂ∑Æ„ÇíYCbCr„ÅßË¶ã„Çã
 #endif
 
 		float cbcr_len = length(color_diff.yz);
 
-		// êFëäê¨ï™Ç™ëÂÇ´Ç≠àŸÇ»ÇÈéûÅAËáílÇ…é˚Ç‹ÇÈîÕàÕÇ…êFÇï‚ê≥ÇµÇƒçáê¨
+		// Ëâ≤Áõ∏ÊàêÂàÜ„ÅåÂ§ß„Åç„ÅèÁï∞„Å™„ÇãÊôÇ„ÄÅÈñæÂÄ§„Å´Âèé„Åæ„ÇãÁØÑÂõ≤„Å´Ëâ≤„ÇíË£úÊ≠£„Åó„Å¶ÂêàÊàê
 		if (cbcr_threshhold < cbcr_len) {
 			ycc = (cbcr_threshhold / cbcr_len) * ycc;
 #ifdef USE_YCOCG
@@ -289,12 +432,12 @@ void main()
 #ifdef USE_YCOCG
 		vec3 ycc = color_diff.xyz;
 #else
-		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// íÜêSÇ∆ÇÃç∑ÇYCbCrÇ≈å©ÇÈ
+		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// ‰∏≠ÂøÉ„Å®„ÅÆÂ∑Æ„ÇíYCbCr„ÅßË¶ã„Çã
 #endif
 		
 		float cbcr_len = length(color_diff.yz);
 
-		// êFëäê¨ï™Ç™ëÂÇ´Ç≠àŸÇ»ÇÈéûÅAËáílÇ…é˚Ç‹ÇÈîÕàÕÇ…êFÇï‚ê≥ÇµÇƒçáê¨
+		// Ëâ≤Áõ∏ÊàêÂàÜ„ÅåÂ§ß„Åç„ÅèÁï∞„Å™„ÇãÊôÇ„ÄÅÈñæÂÄ§„Å´Âèé„Åæ„ÇãÁØÑÂõ≤„Å´Ëâ≤„ÇíË£úÊ≠£„Åó„Å¶ÂêàÊàê
 		if (cbcr_threshhold < cbcr_len) {
 			ycc = (cbcr_threshhold / cbcr_len) * ycc;
 #ifdef USE_YCOCG
@@ -345,3 +488,4 @@ void main()
 		oScreen = oBuffer;
 	}
 }
+#endif

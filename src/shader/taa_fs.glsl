@@ -12,7 +12,9 @@ uniform bool enableTAA = true;
 uniform bool showDiff = false;
 
 uniform mat4 mtxC2V;
-uniform mat4 mtxPrevV2C;
+uniform mat4 mtxV2W;
+uniform mat4 mtxPrevW2V;
+uniform mat4 mtxV2C;
 
 // output colour for the fragment
 layout(location = 0) out highp vec4 oBuffer;
@@ -119,6 +121,50 @@ vec4 sampleColor(sampler2D s, vec2 uv)
 	return clr;
 }
 
+vec4 computePrevScreenPos(
+	vec2 uv,
+	float centerDepth)
+{
+	// NOTE
+	// Pview = (Xview, Yview, Zview, 1)
+	// mtxV2C = W 0 0  0
+	//          0 H 0  0
+	//          0 0 A  B
+	//          0 0 -1 0
+	// mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
+	//  Wclip = Zview = depth
+	// Xscr = Xclip / Wclip = Xclip / Zview = Xclip / depth
+	// Yscr = Yclip / Wclip = Yclip / Zview = Yclip / depth
+	//
+	// Xscr * depth = Xclip
+	// Xview = mtxC2V * Xclip
+
+	uv = uv * 2.0 - 1.0;	// [0, 1] -> [-1, 1]
+
+	vec4 pos = vec4(uv.x, uv.y, 0, 0);
+
+	// Screen-space -> Clip-space.
+	pos.x *= centerDepth;
+	pos.y *= centerDepth;
+
+	// Clip-space -> View-space
+	pos = mtxC2V * pos;
+	pos.z = -centerDepth;
+	pos.w = 1.0;
+
+	pos = mtxV2W * pos;
+
+	// Reproject previous screen position.
+	pos = mtxPrevW2V * pos;
+	vec4 prevPos = mtxV2C * pos;
+	prevPos /= prevPos.w;
+
+	prevPos = prevPos * 0.5 + 0.5;	// [-1, 1] -> [0, 1]
+
+	return prevPos;
+}
+
+
 void main()
 {
 	// http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
@@ -171,11 +217,63 @@ void main()
 		{ -1,  0 },
 	};
 
-	const float cbcr_threshhold = 0.32;
-
 	vec4 center_color = sampleColor(s0, uv);
 
 	vec4 neighbor_sum = center_color;
+
+#if 1
+	const float maxLen = 2.0;
+	const float cbcr_threshhold = 0.32;
+
+	float weight = 1.0;
+
+	for (int i = 0; i < 4; i++) {
+		vec2 offset = neighbor_offset[i] * invScr * blurSize;
+
+		float depth = texture2D(s2, uv).w;
+
+		vec4 prevPos = computePrevScreenPos(uv + offset, depth);
+
+		vec2 velocity = prevPos.xy - (uv.xy + offset.xy);
+
+		float len2 = dot(velocity, velocity) + 1e-6f;
+		velocity /= len2;
+
+		vec4 neighbor = sampleColor(s1, uv + velocity * min(len2, maxLen));
+
+		neighbor.xyz = clipAABB(cmin.xyz, cmax.xyz, neighbor.xyz);
+
+		float W = 1 - clamp(len2 / maxLen, 0.0, 1.0);
+
+		vec3 color_diff = abs(neighbor.xyz - center_color.xyz);
+
+#ifdef USE_YCOCG
+		vec3 ycc = color_diff.xyz;
+#else
+		vec3 ycc = RGB2YCbCr(color_diff.xyz);		// 中心との差をYCbCrで見る
+#endif
+
+		float cbcr_len = length(color_diff.yz);
+
+		// 色相成分が大きく異なる時、閾値に収まる範囲に色を補正して合成
+		if (cbcr_threshhold < cbcr_len) {
+			ycc = (cbcr_threshhold / cbcr_len) * ycc;
+#ifdef USE_YCOCG
+			neighbor.rgb = center_color.rgb + ycc;
+#else
+			neighbor.rgb = center_color.rgb + YCbCr2RGB(ycc);
+#endif
+		}
+
+		neighbor_sum.xyz += neighbor.xyz * W;
+		weight += W;
+	}
+
+	neighbor_sum.xyz /= weight;
+	weight /= 5;
+	neighbor_sum.xyz = mix(center_color.xyz, neighbor_sum.xyz, weight);
+#else
+	const float cbcr_threshhold = 0.32;
 
 	for (int i = 0; i < 4; i++) {
 		vec4 neighbor = sampleColor(s1, uv + neighbor_offset[i] * invScr * blurSize);
@@ -224,6 +322,7 @@ void main()
 	}
 
 	neighbor_sum /= 5.0;
+#endif
 
 #ifdef USE_YCOCG
 	neighbor_sum.xyz = YCoCg2RGB(neighbor_sum.xyz);

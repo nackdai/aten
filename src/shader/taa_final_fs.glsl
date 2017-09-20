@@ -14,9 +14,6 @@ void main()
 
 	vec2 uv = gl_FragCoord.xy / texsize.xy;
 
-	oColor = texture2D(s1, uv);
-
-	oColor = oColor * 0.5 + 0.5;
-
+	oColor = texture2D(s0, uv);
 	oColor.a = 1;
 }

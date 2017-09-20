@@ -3,6 +3,7 @@
 #include "visualizer/MultiPassPostProc.h"
 #include "texture/texture.h"
 #include "camera/pinhole.h"
+#include "math/mat4.h"
 
 namespace aten {
 	class TAA : public MultiPassPostProc {
@@ -15,6 +16,10 @@ namespace aten {
 			int width, int height,
 			const char* taaVsPath, const char* taaFsPath,
 			const char* finalVsPath, const char* finalFsPath);
+
+		void update(
+			uint32_t frame,
+			const PinholeCamera& cam);
 
 		virtual PixelFormat inFormat() const override final
 		{
@@ -106,6 +111,14 @@ namespace aten {
 		FinalPass m_final;
 
 		texture m_aovTex;
+
+		aten::mat4 m_mtxW2V;		// World - View.
+		aten::mat4 m_mtxV2C;		// View - Clip.
+		aten::mat4 m_mtxC2V;		// Clip - View.
+
+		// View - World.
+		aten::mat4 m_mtxV2W;
+		aten::mat4 m_mtxPrevW2V;
 
 		int m_idx{ 0 };
 

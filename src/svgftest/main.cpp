@@ -73,6 +73,10 @@ void onRun()
 		aten::visualizer::clear();
 	}
 
+	g_taa.update(
+		g_tracer.frame(),
+		g_camera);
+
 	aten::timer timer;
 	timer.begin();
 

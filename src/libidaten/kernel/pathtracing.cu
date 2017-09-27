@@ -16,7 +16,8 @@
 
 #include "aten4idaten.h"
 
-//#define ENALBLE_SEPARATE_ALBEDO
+//#define ENABLE_SEPARATE_ALBEDO
+//#define ENABLE_PROGRESSIVE
 
 __global__ void genPath(
 	idaten::PathTracing::Path* paths,
@@ -45,6 +46,7 @@ __global__ void genPath(
 		return;
 	}
 
+#ifdef ENABLE_PROGRESSIVE
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
 	path.sampler.init(frame, 0, scramble, sobolmatrices);
@@ -52,6 +54,10 @@ __global__ void genPath(
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
 	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+#endif
+#else
+	auto scramble = (iy * height * 4 + ix * 4) * maxSamples + sample + 1 + frame;
+	path.sampler.init(frame, 0, scramble, sobolmatrices);
 #endif
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
@@ -246,7 +252,7 @@ __global__ void shadeMiss(
 					cudaBoundaryModeTrap);
 			}
 
-#ifdef ENALBLE_SEPARATE_ALBEDO
+#ifdef ENABLE_SEPARATE_ALBEDO
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
 #endif
@@ -300,7 +306,7 @@ __global__ void shadeMissWithEnvmap(
 					cudaBoundaryModeTrap);
 			}
 
-#ifdef ENALBLE_SEPARATE_ALBEDO
+#ifdef ENABLE_SEPARATE_ALBEDO
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
 #endif
@@ -368,6 +374,7 @@ __global__ void shade(
 	auto& path = paths[idx];
 	const auto& ray = rays[idx];
 
+#ifdef ENABLE_PROGRESSIVE
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
 	path.sampler.init(frame, 4 + bounce * 300, scramble);
@@ -375,6 +382,7 @@ __global__ void shade(
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
 	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+#endif
 #endif
 
 	aten::hitrecord rec;
@@ -432,7 +440,7 @@ __global__ void shade(
 	}
 #endif
 
-#ifdef ENALBLE_SEPARATE_ALBEDO
+#ifdef ENABLE_SEPARATE_ALBEDO
 	// For exporting separated albedo.
 	mtrl.albedoMap = -1;
 #endif
@@ -750,7 +758,7 @@ __global__ void gather(
 	int sample = path.samples;
 
 	float4 data;
-#if 1
+#ifdef ENABLE_PROGRESSIVE
 	surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
 	// First data.w value is 0.

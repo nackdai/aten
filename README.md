@@ -3,8 +3,9 @@
 This is easy, simple path tracer.<br>
 Aten is Egyptian sun god.
 
-And, idaten(path tracing on GPGPU) is under construction.<br>
+Idaten(path tracing on GPGPU) is under construction.<br>
 Idaten is Japanese god, it runs fast.
+And Idanten include characters of aten, "id**aten**"
 
 ## Features
 
@@ -37,6 +38,7 @@ Idaten is Japanese god, it runs fast.
 - Quasi Monte Carlo
   - Halton
   - Sobol
+  - CMJ(Correllated Multi Jittered)
 - Rendering shapes
   - Polygon(.obj file)
   - Sphere
@@ -77,10 +79,11 @@ Idaten is Japanese god, it runs fast.
 
 - GPGPU
   - idaten is GPGPU project.
+- More efficient denoise filter
+  - [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
 
 ## Future Works
 
-- More efficient denoise filter
 - Specify all scene definitions by XML
 - Bi-Directional Path Tracing
   - Enable to use all lights

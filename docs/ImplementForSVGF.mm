@@ -125,10 +125,14 @@
 </node>
 </node>
 <node CREATED="1502080463016" ID="ID_1040204367" MODIFIED="1502080465602" POSITION="right" TEXT="TODO">
-<node CREATED="1502080499046" ID="ID_1458021787" MODIFIED="1505464111544" TEXT="Direct&#x3001;Indirect&#x540c;&#x6642;&#x51e6;&#x7406;&#x3057;&#x3064;&#x3064;&#x3001;&#x5206;&#x96e2;&#x51fa;&#x529b;">
-<icon BUILTIN="button_ok"/>
+<node CREATED="1502080499046" ID="ID_1458021787" MODIFIED="1506474834624" TEXT="Direct&#x3001;Indirect&#x540c;&#x6642;&#x51e6;&#x7406;&#x3057;&#x3064;&#x3064;&#x3001;&#x5206;&#x96e2;&#x51fa;&#x529b;">
 <node CREATED="1505464113015" ID="ID_495909071" MODIFIED="1505464127608" TEXT="&#x3042;&#x307e;&#x308a;&#x5909;&#x5316;&#x304c;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;">
 <icon BUILTIN="messagebox_warning"/>
+</node>
+<node CREATED="1506474836386" ID="ID_1174227804" MODIFIED="1506474846571" TEXT="&#x8ad6;&#x6587;&#x3092;&#x898b;&#x308b;&#x3068;Direct&#x306b;&#x306f;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x306a;&#x3044;">
+<node CREATED="1506474846998" ID="ID_1582673424" MODIFIED="1506474866771" TEXT="Direct&#x306e;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x306b;&#x3064;&#x3044;&#x3066;&#x8981;&#x8abf;&#x67fb;&#x3001;&#x691c;&#x8a0e;">
+<icon BUILTIN="yes"/>
+</node>
 </node>
 </node>
 <node CREATED="1505377116331" ID="ID_180438925" MODIFIED="1505449492537" TEXT="temporal weight&#x304c;&#x3057;&#x304d;&#x3044;&#x5024;&#x4ee5;&#x4e0b;&#x306e;&#x5834;&#x5408;&#x306f;&#x30bf;&#x30c3;&#x30d7;&#x7bc4;&#x56f2;&#x3092;&#x5e83;&#x3052;&#x308b;">

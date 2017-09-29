@@ -10,6 +10,10 @@ uniform sampler2D s2;	// position map.
 // pow(2, iteration)
 uniform int stepScale;
 
+// NOTE
+// pow(2, -iteration)
+uniform float clrSigmaScale = 1.0;
+
 uniform float clrSigma = 0.125;
 uniform float nmlSigma = 0.125;
 uniform float posSigma = 0.125;
@@ -85,7 +89,7 @@ void main()
 
 		vec4 delta = clr - centerClr;
 		float dist2 = dot(delta, delta);
-		float w_rt = min(exp(-dist2 / clrSigma), 1.0);
+		float w_rt = min(exp(-dist2 / (clrSigma * clrSigmaScale)), 1.0);
 
 		delta = nml - centerNml;
 		dist2 = dot(delta, delta);

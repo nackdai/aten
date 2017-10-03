@@ -108,6 +108,10 @@ namespace aten {
 			return m_gltex;
 		}
 
+		bool merge(const texture& rhs);
+
+		bool exportAsPNG(const std::string& filename);
+
 	private:
 		int m_id{ -1 };
 

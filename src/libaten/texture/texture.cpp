@@ -2,8 +2,11 @@
 
 #include "visualizer/atengl.h"
 #include "visualizer/shader.h"
+#include "misc/color.h"
 
 #include <string>
+
+#include "stb_image_write.h"
 
 namespace aten {
 	std::vector<texture*> texture::g_textures;
@@ -203,5 +206,53 @@ namespace aten {
 				bufsize,
 				&dst[0]));
 		}
+	}
+
+	bool texture::merge(const texture& rhs)
+	{
+		AT_VRETURN(m_width == rhs.m_width, false);
+		AT_VRETURN(m_height == rhs.m_height, false);
+		AT_VRETURN(m_colors.size() == rhs.m_colors.size(), false);
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < m_height; y++) {
+			for (int x = 0; x < m_width; x++) {
+				int idx = y * m_width + x;
+
+				m_colors[idx] += rhs.m_colors[idx];
+			}
+		}
+
+		return true;
+	}
+
+	bool texture::exportAsPNG(const std::string& filename)
+	{
+		using ScreenShotImageType = TColor<uint8_t, 3>;
+
+		std::vector<ScreenShotImageType> dst(m_width * m_height);
+
+		static const int bpp = sizeof(ScreenShotImageType);
+		const int pitch = m_width * bpp;
+
+#ifdef ENABLE_OMP
+#pragma omp parallel for
+#endif
+		for (int y = 0; y < m_height; y++) {
+			for (int x = 0; x < m_width; x++) {
+				int yy = m_height - 1 - y;
+
+				dst[yy * m_width + x].r() = (uint8_t)aten::clamp(m_colors[y * m_width + x].x * real(255), real(0), real(255));
+				dst[yy * m_width + x].g() = (uint8_t)aten::clamp(m_colors[y * m_width + x].y * real(255), real(0), real(255));
+				dst[yy * m_width + x].b() = (uint8_t)aten::clamp(m_colors[y * m_width + x].z * real(255), real(0), real(255));
+			}
+		}
+
+		auto ret = ::stbi_write_png(filename.c_str(), m_width, m_height, bpp, &dst[0], pitch);
+		AT_ASSERT(ret > 0);
+
+		return (ret > 0);
 	}
 }

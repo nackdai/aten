@@ -87,6 +87,26 @@ __global__ void genPath(
 	//path.contrib = aten::vec3(0);
 }
 
+// NOTE
+// persistent thread.
+// https://gist.github.com/guozhou/b972bb42bbc5cba1f062#file-persistent-cpp-L15
+
+// NOTE
+// compute capability 6.0
+// http://homepages.math.uic.edu/~jan/mcs572/performance_considerations.pdf
+// p3
+
+#define NUM_SM				64	// no. of streaming multiprocessors
+#define NUM_WARP_PER_SM		64	// maximum no. of resident warps per SM
+#define NUM_BLOCK_PER_SM	32	// maximum no. of resident blocks per SM
+#define NUM_BLOCK			(NUM_SM * NUM_BLOCK_PER_SM)
+#define NUM_WARP_PER_BLOCK	(NUM_WARP_PER_SM / NUM_BLOCK_PER_SM)
+#define WARP_SIZE			32
+
+__device__ unsigned int g_headDev = 0;
+
+#define ENABLE_PERSISTENT_THREAD
+
 __global__ void hitTest(
 	idaten::SVGFPathTracing::Path* paths,
 	aten::Intersection* isects,
@@ -102,12 +122,74 @@ __global__ void hitTest(
 	int bounce,
 	float hitDistLimit)
 {
-#if 0
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+#ifdef ENABLE_PERSISTENT_THREAD
+	// warp-wise head index of tasks in a block
+	__shared__ volatile unsigned int headBlock[NUM_WARP_PER_BLOCK];
 
-	if (idx >= width * height) {
-		return;
+	volatile unsigned int& headWarp = headBlock[threadIdx.y];
+
+	if (blockIdx.x == 0 && threadIdx.x == 0) {
+		g_headDev = 0;
 	}
+
+	Context ctxt;
+	{
+		ctxt.geomnum = geomnum;
+		ctxt.shapes = shapes;
+		ctxt.lightnum = lightnum;
+		ctxt.lights = lights;
+		ctxt.nodes = nodes;
+		ctxt.prims = prims;
+		ctxt.vtxPos = vtxPos;
+		ctxt.matrices = matrices;
+	}
+
+	do
+	{
+		// let lane 0 fetch [wh, wh + WARP_SIZE - 1] for a warp
+		if (threadIdx.x == 0) {
+			headWarp = atomicAdd(&g_headDev, WARP_SIZE);
+		}
+		// task index per thread in a warp
+		unsigned int idx = headWarp + threadIdx.x;
+
+		if (idx >= width * height) {
+			return;
+		}
+
+		auto& path = paths[idx];
+		path.isHit = false;
+
+		hitbools[idx] = 0;
+
+		if (path.isTerminate) {
+			continue;
+		}
+
+		aten::Intersection isect;
+
+		bool isHit = intersectBVH(&ctxt, rays[idx], &isect);
+
+		isects[idx].t = isect.t;
+		isects[idx].objid = isect.objid;
+		isects[idx].mtrlid = isect.mtrlid;
+		isects[idx].meshid = isect.meshid;
+		isects[idx].area = isect.area;
+		isects[idx].primid = isect.primid;
+		isects[idx].a = isect.a;
+		isects[idx].b = isect.b;
+
+		if (bounce >= 1
+			&& !path.isSingular
+			&& isect.t > hitDistLimit)
+		{
+			isHit = false;
+		}
+
+		path.isHit = isHit;
+
+		hitbools[idx] = isHit ? 1 : 0;
+	} while (true);
 #else
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -117,7 +199,6 @@ __global__ void hitTest(
 	}
 
 	const auto idx = getIdx(ix, iy, width);
-#endif
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -163,6 +244,7 @@ __global__ void hitTest(
 	path.isHit = isHit;
 
 	hitbools[idx] = isHit ? 1 : 0;
+#endif
 }
 
 template <bool isFirstBounce>
@@ -878,11 +960,8 @@ namespace idaten
 		int bounce,
 		cudaTextureObject_t texVtxPos)
 	{
-#if 0
-		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
-		dim3 threadPerBlock_HitTest(128);
-
-		hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
+#ifdef ENABLE_PERSISTENT_THREAD
+		hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
 #else
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(

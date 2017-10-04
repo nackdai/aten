@@ -84,7 +84,8 @@
 <node CREATED="1505879795204" ID="ID_832580268" MODIFIED="1505879803456" TEXT="TAA&#x3092;&#x5909;&#x3048;&#x308b;&#x3053;&#x3068;&#x3067;&#x304b;&#x306a;&#x308a;&#x6539;&#x5584;"/>
 </node>
 </node>
-<node CREATED="1505879841372" HGAP="23" ID="ID_621017290" MODIFIED="1505879870742" TEXT="&#x753b;&#x9762;&#x7aef;&#x554f;&#x984c;" VSHIFT="13">
+<node CREATED="1505879841372" HGAP="23" ID="ID_621017290" MODIFIED="1507082497963" TEXT="&#x753b;&#x9762;&#x7aef;&#x554f;&#x984c;" VSHIFT="13">
+<icon BUILTIN="messagebox_warning"/>
 <node CREATED="1505879850620" ID="ID_748016742" MODIFIED="1505879861815" TEXT="&#x753b;&#x9762;&#x7aef;&#x304c;disoclusion&#x306b;&#x306a;&#x308a;&#x3001;&#x54c1;&#x8cea;&#x304c;&#x4e0b;&#x304c;&#x308b;"/>
 <node CREATED="1505887972761" ID="ID_622114360" MODIFIED="1505887994021" TEXT="TAA&#x306e;&#x5909;&#x66f4;&#x3067;&#x591a;&#x5c11;&#x30de;&#x30b7;&#x306b;&#x30fb;&#x30fb;&#x30fb;">
 <icon BUILTIN="button_ok"/>
@@ -132,6 +133,9 @@
 <node CREATED="1506474836386" ID="ID_1174227804" MODIFIED="1506474846571" TEXT="&#x8ad6;&#x6587;&#x3092;&#x898b;&#x308b;&#x3068;Direct&#x306b;&#x306f;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x306a;&#x3044;">
 <node CREATED="1506474846998" ID="ID_1582673424" MODIFIED="1506474866771" TEXT="Direct&#x306e;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x306b;&#x3064;&#x3044;&#x3066;&#x8981;&#x8abf;&#x67fb;&#x3001;&#x691c;&#x8a0e;">
 <icon BUILTIN="yes"/>
+<node CREATED="1507020036616" ID="ID_1175272897" MODIFIED="1507020065649" TEXT="pbrt&#x306a;&#x3069;&#x306e;DirectLighting&#x3092;&#x8abf;&#x3079;&#x3066;&#x3082;&#x3001;&#x4e71;&#x6570;&#x306f;&#x4f7f;&#x3063;&#x3066;&#x3044;&#x308b;&#x306e;&#x3067;&#x3001;&#x30ce;&#x30a4;&#x30ba;&#x304c;&#x51fa;&#x306a;&#x3044;&#x308f;&#x3051;&#x306a;&#x3044;&#x30fb;&#x30fb;&#x30fb;">
+<icon BUILTIN="messagebox_warning"/>
+</node>
 </node>
 </node>
 </node>
@@ -148,6 +152,21 @@
 <node CREATED="1505805207422" ID="ID_994389578" MODIFIED="1505806588382" TEXT="&#x30b7;&#x30e3;&#x30c9;&#x30a6;&#x30ec;&#x30a4;&#x5897;&#x3084;&#x3059;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1505805229015" ID="ID_1467687517" MODIFIED="1505805237641" TEXT="template&#x3067;&#x6307;&#x5b9a;&#x3067;&#x304d;&#x308b;&#x3088;&#x3046;&#x306b;&#x3059;&#x308b;"/>
+</node>
+<node CREATED="1507020722842" HGAP="35" ID="ID_1666358101" MODIFIED="1507020744629" TEXT="TAA&#x3067;&#x6df1;&#x5ea6;&#x5024;&#x3092;&#x898b;&#x308b;" VSHIFT="27">
+<node CREATED="1507020746052" ID="ID_1383107024" MODIFIED="1507020800222" TEXT="&#x6df1;&#x5ea6;&#x304c;&#x5dee;&#x304c;&#x5927;&#x304d;&#x3044;&#x3082;&#x306e;&#x306e;&#x30a6;&#x30a8;&#x30a4;&#x30c8;&#x3092;&#x5c0f;&#x3055;&#x304f;&#x3059;&#x308b;">
+<node CREATED="1507082208085" ID="ID_1889868507" MODIFIED="1507082249580" TEXT="&#x4e00;&#x5b9a;&#x306e;&#x52b9;&#x679c;&#x306f;&#x51fa;&#x305f;"/>
+<node CREATED="1507082215089" ID="ID_1518375062" MODIFIED="1507082244926" TEXT="&#x753b;&#x9762;&#x7aef;&#x306e;temporal reprojection&#x3067;&#x30d5;&#x30a3;&#x30eb;&#x30bf;&#x30ea;&#x30f3;&#x30b0;&#x3067;&#x304d;&#x3066;&#x306a;&#x3044;&#x90e8;&#x5206;&#x306e;&#x54c1;&#x8cea;&#x304c;&#x4e0b;&#x304c;&#x308b;">
+<icon BUILTIN="messagebox_warning"/>
+</node>
+</node>
+</node>
+<node CREATED="1507020076356" HGAP="32" ID="ID_1911513314" MODIFIED="1507020096799" TEXT="TAA+MotionBlur" VSHIFT="19">
+<node CREATED="1507020761795" ID="ID_1371249319" MODIFIED="1507020785541" TEXT="&#x307e;&#x305a;&#x306f;OpenGL&#x306e;&#x30e9;&#x30b9;&#x30bf;&#x30e9;&#x30a4;&#x30ba;&#x74b0;&#x5883;l&#x3067;&#x5b9f;&#x9a13;&#x5b9f;&#x88c5;">
+<node CREATED="1507021289450" ID="ID_1643654399" LINK="https://sites.google.com/site/monshonosuana/directxno-hanashi-1/directx-123" MODIFIED="1507021289450" TEXT="https://sites.google.com/site/monshonosuana/directxno-hanashi-1/directx-123"/>
+<node CREATED="1507021301710" LINK="http://nvidiagameworks.github.io/GraphicsSamples/MotionBlurGL4GLES3AdvancedSample.htm" MODIFIED="1507021301710" TEXT="nvidiagameworks.github.io &gt; GraphicsSamples &gt; MotionBlurGL4GLES3AdvancedSample"/>
+<node CREATED="1507021309979" LINK="http://john-chapman-graphics.blogspot.jp/2013/01/what-is-motion-blur-motion-pictures-are.html" MODIFIED="1507021309979" TEXT="john-chapman-graphics.blogspot.jp &gt; 2013 &gt; 01 &gt; What-is-motion-blur-motion-pictures-are"/>
+</node>
 </node>
 <node CREATED="1503387817759" ID="ID_689743960" MODIFIED="1503642217275" TEXT="temporal filter&#x3057;&#x3066;&#x3082;&#x53ce;&#x675f;&#x3057;&#x306a;&#x3044;&#x539f;&#x56e0;">
 <icon BUILTIN="messagebox_warning"/>

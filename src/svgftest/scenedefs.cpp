@@ -609,3 +609,26 @@ void BunnyScene::getCameraPosAndAt(
 	fov = 45;
 }
 
+/////////////////////////////////////////////////////
+
+void DragonScene::makeScene(aten::scene* scene)
+{
+	aten::AssetManager::registerMtrl(
+		"wire_087224198",
+		//new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+		new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+
+	auto obj = aten::ObjLoader::load("../../asset/dragon/dragon.obj");
+	auto dragon = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+	scene->add(dragon);
+}
+
+void DragonScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0.f, 1.f, 10.f);
+	at = aten::vec3(0.f, 1.f, 0.f);
+	fov = 45;
+}

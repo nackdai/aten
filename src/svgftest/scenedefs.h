@@ -113,6 +113,16 @@ public:
 		real& fov);
 };
 
+class DragonScene {
+public:
+	static void makeScene(aten::scene* scene);
+
+	static void getCameraPosAndAt(
+		aten::vec3& pos,
+		aten::vec3& at,
+		real& fov);
+};
+
 //#define Scene CornellBoxScene
 //#define Scene MtrlTestScene
 //#define Scene PointLightScene
@@ -121,6 +131,7 @@ public:
 //#define Scene TexturesScene
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
-#define Scene ObjCornellBoxScene
+//#define Scene ObjCornellBoxScene
 //#define Scene SponzaScene
 //#define Scene BunnyScene
+#define Scene DragonScene

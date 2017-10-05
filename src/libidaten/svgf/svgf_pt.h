@@ -25,6 +25,8 @@ namespace idaten
 			WireFrame,
 		};
 
+		static const int ShdowRayNum = 2;
+
 #ifdef __AT_CUDA__
 		struct Path {
 			aten::vec3 throughput;
@@ -55,9 +57,21 @@ namespace idaten
 
 			float4 moments;
 		};
+
+		struct ShadowRay {
+			aten::ray ray[ShdowRayNum];
+			aten::vec3 lightcontrib[ShdowRayNum];
+			real distToLight[ShdowRayNum];
+			int targetLightId[ShdowRayNum];
+
+			struct {
+				uint32_t isActive : 1;
+			};
+		};
 #else
 		struct Path;
 		struct AOV;
+		struct ShadowRay;
 #endif
 
 		struct PickedInfo {
@@ -249,6 +263,8 @@ namespace idaten
 
 		idaten::TypedCudaMemory<int> m_hitbools;
 		idaten::TypedCudaMemory<int> m_hitidx;
+
+		idaten::TypedCudaMemory<ShadowRay> m_shadowRays;
 
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
 		idaten::TypedCudaMemory<unsigned int> m_random;

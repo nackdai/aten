@@ -19,6 +19,9 @@
 //#define ENABLE_SEPARATE_ALBEDO
 //#define ENABLE_PROGRESSIVE
 
+#define ENABLE_PERSISTENT_THREAD
+#define SEPARATE_SHADOWRAY_HITTEST
+
 __global__ void genPath(
 	idaten::PathTracing::Path* paths,
 	aten::ray* rays,
@@ -96,8 +99,6 @@ __global__ void genPath(
 #define WARP_SIZE			32
 
 __device__ unsigned int headDev = 0;
-
-#define ENABLE_PERSISTENT_THREAD
 
 __global__ void hitTest(
 	idaten::PathTracing::Path* paths,
@@ -346,7 +347,8 @@ __global__ void shade(
 	cudaTextureObject_t vtxNml,
 	const aten::mat4* __restrict__ matrices,
 	cudaTextureObject_t* textures,
-	const unsigned int* random)
+	const unsigned int* random,
+	idaten::PathTracing::ShadowRay* shadowRays)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -487,6 +489,10 @@ __global__ void shade(
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
+#ifdef SEPARATE_SHADOWRAY_HITTEST
+	shadowRays[idx].isActive = false;
+#endif
+
 	// Explicit conection to light.
 	if (!mtrl.attrib.isSingular)
 	{
@@ -522,26 +528,17 @@ __global__ void shade(
 		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 		auto tmp = rec.p + dirToLight - shadowRayOrg;
 		auto shadowRayDir = normalize(tmp);
+
+#ifdef SEPARATE_SHADOWRAY_HITTEST
+		shadowRays[idx].isActive = true;
+		shadowRays[idx].org = shadowRayOrg;
+		shadowRays[idx].dir = shadowRayDir;
+		shadowRays[idx].targetLightId = lightidx;
+		shadowRays[idx].distToLight = distToLight;
+#else
 		aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
-		bool isHit = false;
-
-#if 0
-		if (light.type == aten::LightType::Area) {
-			// Area.
-			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
-		}
-		else if (light.attrib.isInfinite) {
-			// IBL, Directional.
-			isHit = intersectAnyBVH(&ctxt, shadowRay, &isectTmp);
-		}
-		else {
-			// Point, Spot.
-			isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
-		}
-#else
-		isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
-#endif
+		bool isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 
 		if (isHit) {
 			hitobj = (void*)&ctxt.shapes[isectTmp.objid];
@@ -556,7 +553,9 @@ __global__ void shade(
 			isectTmp.t,
 			hitobj);
 
-		if (isHit) {
+		if (isHit)
+#endif
+		{
 			auto cosShadow = dot(orienting_normal, dirToLight);
 
 			real pdfb = samplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
@@ -575,7 +574,12 @@ __global__ void shade(
 					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
 					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 					auto misW = pdfLight / (pdfb + pdfLight);
-					path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+#ifdef SEPARATE_SHADOWRAY_HITTEST
+					shadowRays[idx].lightcontrib = 
+#else
+					path.contrib +=
+#endif
+						(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
 				}
 			}
 			else {
@@ -592,8 +596,12 @@ __global__ void shade(
 						pdfb = pdfb * cosLight / dist2;
 
 						auto misW = pdfLight / (pdfb + pdfLight);
-
-						path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+#ifdef SEPARATE_SHADOWRAY_HITTEST
+						shadowRays[idx].lightcontrib =
+#else
+						path.contrib +=
+#endif
+							(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
 					}
 				}
 			}
@@ -660,14 +668,14 @@ __global__ void hitShadowRay(
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
 	int hitnum,
-	idaten::PathTracing::ShadowRay* shadowRays,
-	aten::ShapeParameter* shapes, int geomnum,
+	const idaten::PathTracing::ShadowRay* __restrict__ shadowRays,
+	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
-	aten::LightParameter* lights, int lightnum,
+	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
-	aten::PrimitiveParamter* prims,
+	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
-	aten::mat4* matrices)
+	const aten::mat4* __restrict__ matrices)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -702,26 +710,13 @@ __global__ void hitShadowRay(
 		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
 		const aten::ShapeParameter* hitobj = lightobj;
 
-		aten::Intersection isect;
+		aten::Intersection isectTmp;
 
 		bool isHit = false;
+		isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, shadowRay.distToLight - AT_MATH_EPSILON);
 
-		if (light->type == aten::LightType::Area) {
-			isHit = intersectCloserBVH(&ctxt, shadowRay, &isect, shadowRay.distToLight - AT_MATH_EPSILON);			
-			//isHit = intersectBVH(&ctxt, shadowRay, &isect);
-
-			if (isHit) {
-				hitobj = &ctxt.shapes[isect.objid];
-#if 0
-				aten::hitrecord rec;
-				evalHitResult(&ctxt, hitobj, shadowRay, &rec, &isect);
-
-				distHitObjToRayOrg = (rec.p - shadowRay.org).length();
-#endif
-			}
-		}
-		else {
-			isHit = intersectBVH(&ctxt, shadowRay, &isect);
+		if (isHit) {
+			hitobj = &ctxt.shapes[isectTmp.objid];
 		}
 		
 		isHit = AT_NAME::scene::hitLight(
@@ -730,7 +725,7 @@ __global__ void hitShadowRay(
 			lightobj,
 			shadowRay.distToLight,
 			distHitObjToRayOrg,
-			isect.t,
+			isectTmp.t,
 			hitobj);
 
 		if (isHit) {
@@ -867,7 +862,10 @@ namespace idaten {
 		m_paths.init(width * height);
 		m_isects.init(width * height);
 		m_rays.init(width * height);
+
+#ifdef SEPARATE_SHADOWRAY_HITTEST
 		m_shadowRays.init(width * height);
+#endif
 
 		cudaMemset(m_paths.ptr(), 0, m_paths.bytes());
 
@@ -1130,7 +1128,8 @@ namespace idaten {
 				texVtxPos, texVtxNml,
 				m_mtxparams.ptr(),
 				m_tex.ptr(),
-				m_random.ptr());
+				m_random.ptr(),
+				m_shadowRays.ptr());
 		}
 		else {
 			shade<false> << <blockPerGrid, threadPerBlock >> > (
@@ -1152,24 +1151,25 @@ namespace idaten {
 				texVtxPos, texVtxNml,
 				m_mtxparams.ptr(),
 				m_tex.ptr(),
-				m_random.ptr());
+				m_random.ptr(),
+				m_shadowRays.ptr());
 		}
 
 		checkCudaKernel(shade);
 
-#if 0
+#ifdef SEPARATE_SHADOWRAY_HITTEST
 		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 			//hitShadowRay << <1, 1 >> > (
-			paths.ptr(),
+			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount,
-			shadowRays.ptr(),
-			shapeparam.ptr(), shapeparam.num(),
-			mtrlparam.ptr(),
-			lightparam.ptr(), lightparam.num(),
-			nodetex.ptr(),
-			primparams.ptr(),
-			vtxTexPos,
-			mtxparams.ptr());
+			m_shadowRays.ptr(),
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_mtrlparam.ptr(),
+			m_lightparam.ptr(), m_lightparam.num(),
+			m_nodetex.ptr(),
+			m_primparams.ptr(),
+			texVtxPos,
+			m_mtxparams.ptr());
 
 		checkCudaKernel(hitShadowRay);
 #endif

@@ -49,32 +49,77 @@ namespace aten {
 	};
 
 	struct LightParameter {
-		LightType type;
+		vec4 pos;
+		vec4 dir;
+		vec4 le;
 
-		vec3 pos;
-		vec3 dir;
-		vec3 le;
+		union {
+			aten::vec4 v0;
 
-		// For pointlight, spotlight.
-		real constAttn{ 1 };
-		real linearAttn{ 0 };
-		real expAttn{ 0 };
+			struct {
+				LightType type;
 
-		// For spotlight.
-		real innerAngle{ AT_MATH_PI };
-		real outerAngle{ AT_MATH_PI };
-		real falloff{ 0 };
+				// For pointlight, spotlight.
+				real constAttn;
+				real linearAttn;
+				real expAttn;
+			};
+		};
 
-		LightAttribute attrib;
+		union {
+			aten::vec4 v1;
 
-		int objid{ -1 };
-		UnionIdxPtr envmap;
+			struct {
+				// For spotlight.
+				real innerAngle;
+				real outerAngle;
+				real falloff;
+
+				LightAttribute attrib;
+			};
+		};
+
+		union {
+			aten::vec4 v2;
+
+			struct{
+				int objid;
+				UnionIdxPtr envmap;
+			};
+		};
+
+		AT_DEVICE_API LightParameter() {}
 
 		AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
 			: attrib(_attrib), type(_type)
-		{}
+		{
+			constAttn = real(1);
+			linearAttn = real(0);
+			expAttn = real(0);
+
+			innerAngle = AT_MATH_PI;
+			outerAngle = AT_MATH_PI;
+			falloff = real(0);
+
+			objid = -1;
+		}
+
+		AT_DEVICE_API LightParameter(const LightParameter& rhs)
+		{
+			pos = rhs.pos;
+			dir = rhs.dir;
+			le = rhs.le;
+
+			v0 = rhs.v0;
+			v1 = rhs.v1;
+
+			objid = rhs.objid;
+			envmap = rhs.envmap;
+		}
 	};
 	//AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
+
+	const size_t LightParameter_float4_size = sizeof(LightParameter) / sizeof(aten::vec4);
 }
 
 namespace AT_NAME

@@ -82,13 +82,13 @@ namespace AT_NAME {
 		{
 			result->pos = param->pos;
 			result->pdf = real(1);
-			result->dir = normalize(param->pos - org);
+			result->dir = normalize(((aten::vec3)param->pos) - org);
 			result->nml = aten::vec3();	// Not used...
 
 			// NOTE
 			// https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx
 
-			auto rho = dot(-param->dir, result->dir);
+			auto rho = dot(-((aten::vec3)param->dir), result->dir);
 
 			auto cosHalfTheta = aten::cos(param->innerAngle * real(0.5));
 			auto cosHalfPhi = aten::cos(param->outerAngle * real(0.5));

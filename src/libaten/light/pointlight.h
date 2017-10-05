@@ -60,7 +60,7 @@ namespace AT_NAME {
 		{-
 			result->pos = param->pos;
 			result->pdf = real(1);
-			result->dir = param->pos - org;
+			result->dir = ((aten::vec3)param->pos) - org;
 			result->nml = aten::vec3();	// Not used...
 
 			auto dist2 = aten::squared_length(result->dir);

@@ -73,6 +73,14 @@ namespace aten {
 			return *this;
 		}
 
+		inline AT_DEVICE_API const vec4& operator=(const vec3& rhs)
+		{
+			x = rhs.x;
+			y = rhs.y;
+			z = rhs.z;
+			return *this;
+		}
+
 		inline AT_DEVICE_API const vec4& operator+() const
 		{
 			return *this;

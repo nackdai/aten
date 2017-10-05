@@ -504,7 +504,14 @@ __global__ void shade(
 		int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
 		lightSelectPdf = 1.0f / lightnum;
 
-		auto light = ctxt.lights[lightidx];
+		aten::LightParameter light;
+		light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
+		light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
+		light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
+		light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
+		light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
+		light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
+		//auto light = ctxt.lights[lightidx];
 
 		sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &path.sampler);
 

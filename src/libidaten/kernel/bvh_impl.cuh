@@ -64,7 +64,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 		bool isHit = false;
 
 		if (attrib.y >= 0) {
-			const auto& prim = ctxt->prims[(int)attrib.y];
+			int primidx = (int)attrib.y;
+			aten::PrimitiveParamter prim;
+			prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
+			prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 
 			isectTmp.t = AT_MATH_INF;
 			isHit = hitTriangle(&prim, ctxt, r, &isectTmp);
@@ -124,7 +127,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloserTriangles(
 		bool isHit = false;
 
 		if (attrib.y >= 0) {
-			const auto& prim = ctxt->prims[(int)attrib.y];
+			int primidx = (int)attrib.y;
+			aten::PrimitiveParamter prim;
+			prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
+			prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 
 			isectTmp.t = AT_MATH_INF;
 			isHit = hitTriangle(&prim, ctxt, r, &isectTmp);
@@ -185,7 +191,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHAnyTriangles(
 		bool isHit = false;
 
 		if (attrib.y >= 0) {
-			const auto& prim = ctxt->prims[(int)attrib.y];
+			int primidx = (int)attrib.y;
+			aten::PrimitiveParamter prim;
+			prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
+			prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 
 			isectTmp.t = AT_MATH_INF;
 			isHit = hitTriangle(&prim, ctxt, r, &isectTmp);

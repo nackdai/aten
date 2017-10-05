@@ -61,11 +61,35 @@ namespace aten
 	AT_STATICASSERT((sizeof(ShapeParameter) % 16) == 0);
 
 	struct PrimitiveParamter {
-		int idx[3];
-		int mtrlid;
-		int needNormal{ 0 };
-		real area;
-		real padding[2];
+		union {
+			aten::vec4 v0;
+			struct {
+				int idx[3];
+				int mtrlid;
+			};
+		};
+		
+		union {
+			aten::vec4 v1;
+			struct{
+				int needNormal;
+				real area;
+				real padding[2];
+			};
+		};
+
+		AT_DEVICE_API PrimitiveParamter()
+		{
+			needNormal = 0;
+		}
+
+		AT_DEVICE_API PrimitiveParamter(const PrimitiveParamter& rhs)
+		{
+			v0 = rhs.v0;
+			v1 = rhs.v1;
+		}
 	};
 	AT_STATICASSERT((sizeof(PrimitiveParamter) % 16) == 0);
+
+	const size_t PrimitiveParamter_float4_size = sizeof(PrimitiveParamter) / sizeof(aten::vec4);
 }

@@ -144,15 +144,18 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	aten::hitrecord* rec,
 	const aten::Intersection* isect)
 {
-	auto prim = &ctxt->prims[isect->primid];
+	int primidx = isect->primid;
+	aten::PrimitiveParamter prim;
+	prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
+	prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 
-	float4 p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[0]);
-	float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);
-	float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
+	float4 p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[0]);
+	float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[1]);
+	float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[2]);
 
-	float4 n0 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[0]);
-	float4 n1 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[1]);
-	float4 n2 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[2]);
+	float4 n0 = tex1Dfetch<float4>(ctxt->vtxNml, prim.idx[0]);
+	float4 n1 = tex1Dfetch<float4>(ctxt->vtxNml, prim.idx[1]);
+	float4 n2 = tex1Dfetch<float4>(ctxt->vtxNml, prim.idx[2]);
 
 	float2 u0 = make_float2(p0.w, n0.w);
 	float2 u1 = make_float2(p1.w, n1.w);
@@ -171,7 +174,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	auto n = c * n0 + a * n1 + b * n2;
 	auto uv = c * u0 + a * u1 + b * u2;
 
-	if (prim->needNormal > 0) {
+	if (prim.needNormal > 0) {
 		float4 e01 = p1 - p0;
 		float4 e02 = p2 - p0;
 

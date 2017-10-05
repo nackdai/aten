@@ -17,7 +17,7 @@
 #define ENABLE_ENVMAP
 //#define ENABLE_GEOMRENDERING
 //#define ENABLE_TEMPORAL
-#define ENABLE_ATROUS
+//#define ENABLE_ATROUS
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
@@ -316,7 +316,7 @@ int main()
 		1024);
 
 #ifdef ENABLE_ENVMAP
-	auto envmap = aten::ImageLoader::load("../../asset/studio015.hdr");
+	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
 	aten::ImageBasedLight ibl(&bg);

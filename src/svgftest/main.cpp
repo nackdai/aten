@@ -408,7 +408,7 @@ int main()
 
 	{
 		auto aabb = g_scene.getAccel()->getBoundingbox();
-		auto d = aabb.getLengthBetweenMinAndMax();
+		auto d = aabb.getDiagonalLenght();
 		g_tracer.setHitDistanceLimit(d * 0.25f);
 
 		g_tracer.setAovExportBuffer(g_taa.getAovGLTexHandle());

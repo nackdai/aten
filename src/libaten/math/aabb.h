@@ -168,7 +168,7 @@ namespace aten {
 			m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
 		}
 
-		real getLengthBetweenMinAndMax() const
+		real getDiagonalLenght() const
 		{
 			auto ret = length(m_max - m_min);
 			return ret;

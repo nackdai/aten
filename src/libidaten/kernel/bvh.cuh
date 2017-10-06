@@ -10,23 +10,6 @@
 
 #include "cuda/helper_math.h"
 
-struct BVHRay : public aten::ray {
-	aten::vec3 inv;
-	int sign[3];
-
-	__device__ BVHRay(const aten::ray& r)
-	{
-		org = r.org;
-		dir = r.dir;
-
-		inv = real(1) / dir;
-
-		sign[0] = (inv.x < real(0) ? 1 : 0);
-		sign[1] = (inv.y < real(0) ? 1 : 0);
-		sign[2] = (inv.z < real(0) ? 1 : 0);
-	}
-};
-
 enum IntersectType {
 	Closest,
 	Closer,

@@ -1,36 +1,5 @@
 #include "kernel/idatendefs.cuh"
 
-AT_CUDA_INLINE __device__ bool intersectAABB(
-	const BVHRay* ray,
-	const float4* aabb,
-	real& t_result)
-{
-	// NOTE
-	// https://github.com/hpicgs/cgsee/wiki/Ray-Box-Intersection-on-the-GPU
-
-	float tmin, tmax, tymin, tymax, tzmin, tzmax;
-
-	tmin = (aabb[ray->sign[0]].x - ray->org.x) * ray->inv.x;
-	tmax = (aabb[1 - ray->sign[0]].x - ray->org.x) * ray->inv.x;
-
-	tymin = (aabb[ray->sign[1]].y - ray->org.y) * ray->inv.y;
-	tymax = (aabb[1 - ray->sign[1]].y - ray->org.y) * ray->inv.y;
-
-	tzmin = (aabb[ray->sign[2]].z - ray->org.z) * ray->inv.z;
-	tzmax = (aabb[1 - ray->sign[2]].z - ray->org.z) * ray->inv.z;
-
-	tmin = max(max(tmin, tymin), tzmin);
-	tmax = min(min(tmax, tymax), tzmax);
-
-	if (tmin > tmax) {
-		return false;
-	}
-
-	t_result = tmin;
-
-	return true;
-}
-
 AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 	cudaTextureObject_t nodes,
 	const Context* ctxt,
@@ -58,8 +27,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 		_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
 		_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
 
-		boxmin = aten::vec3(_boxmin.x, _boxmin.y, _boxmin.z);
-		boxmax = aten::vec3(_boxmax.x, _boxmax.y, _boxmax.z);
+		//boxmin = aten::vec3(_boxmin.x, _boxmin.y, _boxmin.z);
+		//boxmax = aten::vec3(_boxmax.x, _boxmax.y, _boxmax.z);
 
 		bool isHit = false;
 
@@ -80,7 +49,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 			}
 		}
 		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
+			isHit = hitAABB(r.org, r.dir, _boxmin, _boxmax, t_min, t_max);
 		}
 
 		if (isHit) {
@@ -144,7 +114,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloserTriangles(
 			}
 		}
 		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
+			isHit = hitAABB(r.org, r.dir, _boxmin, _boxmax, t_min, t_max);
 		}
 
 		if (isHit) {
@@ -208,7 +179,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHAnyTriangles(
 			}
 		}
 		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
+			isHit = hitAABB(r.org, r.dir, _boxmin, _boxmax, t_min, t_max);
 		}
 
 		if (isHit) {
@@ -290,7 +262,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 			}
 		}
 		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			isHit = hitAABB(r.org, r.dir, aabb[0], aabb[1], t_min, t_max, &t);
 		}
 
 		if (isHit) {
@@ -372,7 +345,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 			}
 		}
 		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			isHit = hitAABB(r.org, r.dir, aabb[0], aabb[1], t_min, t_max, &t);
 		}
 
 		if (isHit) {
@@ -454,7 +428,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 			}
 		}
 		else {
-			isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			isHit = hitAABB(r.org, r.dir, aabb[0], aabb[1], t_min, t_max, &t);
 		}
 
 		if (isHit) {

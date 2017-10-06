@@ -20,6 +20,19 @@ __device__ bool hitTriangle(
 	const aten::ray& ray,
 	aten::Intersection* isect);
 
+__device__ bool hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max);
+
+__device__ bool hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max,
+	real* t_result);
+
 __device__ void evalHitResultTriangle(
 	const Context* ctxt,
 	const aten::ShapeParameter* param,

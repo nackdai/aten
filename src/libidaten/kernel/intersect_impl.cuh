@@ -128,6 +128,74 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
 	return isIntersect;
 }
 
+inline __device__ float4 vmax(float4 a, float4 b)
+{
+	return make_float4(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z), max(a.w, b.w));
+}
+
+inline __device__ float4 vmin(float4 a, float4 b)
+{
+	return make_float4(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z), min(a.w, b.w));
+}
+
+inline __device__ float max3(float a, float b, float c)
+{
+	return max(max(a, b), c);
+}
+
+inline __device__ float min3(float a, float b, float c)
+{
+	return min(min(a, b), c);
+}
+
+inline __device__ float2 _hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max)
+{
+	float4 invdir = make_float4(1.0f / (dir.x + 1e-6f), 1.0f / (dir.y + 1e-6f), 1.0f / (dir.z + 1e-6f), 1.0f);
+
+	float4 oxinvdir = make_float4(org.x, org.y, org.z, 1.0f);
+	oxinvdir = -oxinvdir * invdir;
+
+	const float4 f = boxmax * invdir + oxinvdir;
+	const float4 n = boxmin * invdir + oxinvdir;
+
+	const float4 tmax = vmax(f, n);
+	const float4 tmin = vmin(f, n);
+
+	const float t1 = min(min3(tmax.x, tmax.y, tmax.z), AT_MATH_INF);
+	const float t0 = max(max3(tmin.x, tmin.y, tmin.z), -1.0f);
+
+	return make_float2(t0, t1);
+}
+
+inline __device__ bool hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max)
+{
+	auto s = _hitAABB(org, dir, boxmin, boxmax, t_min, t_max);
+
+	return s.x <= s.y;
+}
+
+inline __device__ bool hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max,
+	real* t_result)
+{
+	auto s = _hitAABB(org, dir, boxmin, boxmax, t_min, t_max);
+
+	*t_result = s.x;
+
+	return s.x <= s.y;
+}
+
 inline __device__ float4 cross(float4 a, float4 b)
 {
 	return make_float4(

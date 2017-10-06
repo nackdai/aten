@@ -230,7 +230,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				if (hitAABB(r.org, r.dir, aabb[0], aabb[1], t_min, t_max, &t)) {
 					aten::ray transformedRay;
 
 					if (s->mtxid >= 0) {
@@ -312,7 +313,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				if (hitAABB(r.org, r.dir, aabb[0], aabb[1], t_min, t_max, &t)) {
 					aten::ray transformedRay;
 
 					if (s->mtxid >= 0) {
@@ -395,7 +397,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				if (hitAABB(r.org, r.dir, aabb[0], aabb[1], t_min, t_max, &t)) {
 					aten::ray transformedRay;
 
 					if (s->mtxid >= 0) {

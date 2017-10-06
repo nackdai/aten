@@ -165,8 +165,8 @@ inline __device__ float2 _hitAABB(
 	const float4 tmax = vmax(f, n);
 	const float4 tmin = vmin(f, n);
 
-	const float t1 = min(min3(tmax.x, tmax.y, tmax.z), AT_MATH_INF);
-	const float t0 = max(max3(tmin.x, tmin.y, tmin.z), -1.0f);
+	const float t1 = min(min3(tmax.x, tmax.y, tmax.z), t_max);
+	const float t0 = max(max3(tmin.x, tmin.y, tmin.z), t_min);
 
 	return make_float2(t0, t1);
 }

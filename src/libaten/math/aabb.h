@@ -59,6 +59,7 @@ namespace aten {
 			real t_min, real t_max,
 			real* t_result = nullptr)
 		{
+#if 0
 			bool isHit = false;
 
 			for (uint32_t i = 0; i < 3; i++) {
@@ -112,6 +113,25 @@ namespace aten {
 			}
 
 			return isHit;
+#else
+			aten::vec3 invdir = real(1) / (r.dir + aten::vec3(real(1e-6)));
+			aten::vec3 oxinvdir = -r.org * invdir;
+
+			const auto f = _max * invdir + oxinvdir;
+			const auto n = _min * invdir + oxinvdir;
+
+			const auto tmax = max(f, n);
+			const auto tmin = min(f, n);
+
+			const float t1 = aten::cmpMin(aten::cmpMin(aten::cmpMin(tmax.x, tmax.y), tmax.z), t_max);
+			const float t0 = aten::cmpMax(aten::cmpMax(aten::cmpMax(tmin.x, tmin.y), tmin.z), t_min);
+
+			if (t_result) {
+				*t_result = t0;
+			}
+
+			return t0 <= t1;
+#endif
 		}
 
 		bool isIn(const vec3& p) const

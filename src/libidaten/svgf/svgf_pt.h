@@ -44,18 +44,37 @@ namespace idaten
 		C_ASSERT((sizeof(Path) % 4) == 0);
 
 		struct AOV {
-			float depth;
-			int meshid;
-			int mtrlid;
-			float temporalWeight;
+			union {
+				float4 v0;
+				struct {
+					float3 normal;
+					float depth;
+				};
+			};
 
-			float3 normal;
-			float var;
+			union {
+				float4 v1;
+				struct {
+					float3 texclr;
+					float temporalWeight;
+				};
+			};
 
-			float4 texclr;
-			float4 color;
+			union {
+				float4 v2;
+				struct {
+					float3 color;
+					float var;
+				};
+			};
 
-			float4 moments;
+			union {
+				float4 v3;
+				struct {
+					float3 moments;
+					int meshid;
+				};
+			};
 		};
 
 		struct ShadowRay {

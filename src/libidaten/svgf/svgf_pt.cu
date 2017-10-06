@@ -273,10 +273,9 @@ __global__ void shadeMiss(
 			path.isKill = true;
 
 			// Export bg color to albedo buffer.
-			aovs[idx].texclr = make_float4(bg.x, bg.y, bg.z, 1);
+			aovs[idx].texclr = make_float3(bg.x, bg.y, bg.z);
 			aovs[idx].depth = -1;
 			aovs[idx].meshid = -1;
-			aovs[idx].mtrlid = -1;
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
@@ -323,10 +322,9 @@ __global__ void shadeMissWithEnvmap(
 			path.isKill = true;
 
 			// Export envmap to albedo buffer.
-			aovs[idx].texclr = make_float4(emit.x, emit.y, emit.z, 1);
+			aovs[idx].texclr = make_float3(emit.x, emit.y, emit.z);
 			aovs[idx].depth = -1;
 			aovs[idx].meshid = -1;
-			aovs[idx].mtrlid = -1;
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
@@ -450,11 +448,10 @@ __global__ void shade(
 		// depth, meshid.
 		aovs[idx].depth = pos.w;
 		aovs[idx].meshid = isect.meshid;
-		aovs[idx].mtrlid = rec.mtrlid;
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
-		aovs[idx].texclr = make_float4(texcolor.x, texcolor.y, texcolor.z, 1);
+		aovs[idx].texclr = make_float3(texcolor.x, texcolor.y, texcolor.z);
 
 		// For exporting separated albedo.
 		mtrl.albedoMap = -1;
@@ -796,12 +793,12 @@ __global__ void gather(
 
 	int sample = path.samples;
 
-	float4 contrib = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / sample;
-	contrib.w = sample;
+	float3 contrib = make_float3(path.contrib.x, path.contrib.y, path.contrib.z) / sample;
+	//contrib.w = sample;
 
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
-	aovs[idx].moments += make_float4(lum * lum, lum, 0, 1);
+	aovs[idx].moments += make_float3(lum * lum, lum, 1);
 
 	aovs[idx].color = contrib;
 
@@ -819,7 +816,7 @@ __global__ void gather(
 		cudaBoundaryModeTrap);
 #else
 	surf2Dwrite(
-		contrib,
+		make_float4(contrib, 0),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);

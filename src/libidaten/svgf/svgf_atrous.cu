@@ -44,8 +44,16 @@ inline __device__ float ddx(
 	const int idxL = getIdx(leftX, y, w);
 	const int idxR = getIdx(rightX, y, w);
 
+#if 0
 	float left = aov[idxL].depth;
 	float right = aov[idxR].depth;
+#else
+	auto l_v0 = aov[idxL].v0;
+	auto r_v0 = aov[idxR].v0;
+
+	float left = l_v0.w;
+	float right = r_v0.w;
+#endif
 
 	return right - left;
 }
@@ -70,8 +78,16 @@ inline __device__ float ddy(
 	int idxT = getIdx(x, topY, w);
 	int idxB = getIdx(x, bottomY, w);
 
+#if 0
 	float top = aov[idxT].depth;
 	float bottom = aov[idxB].depth;
+#else
+	auto t_v0 = aov[idxT].v0;
+	auto b_v0 = aov[idxB].v0;
+
+	float top = t_v0.w;
+	float bottom = b_v0.w;
+#endif
 
 	return bottom - top;
 }
@@ -98,7 +114,12 @@ inline __device__ float gaussFilter3x3(
 
 			int idx = getIdx(xx, yy, w);
 
+#if 0
 			float tmp = aov[idx].var;
+#else
+			auto v = aov[idx].v2;
+			float tmp = v.w;
+#endif
 
 			sum += kernel[pos] * tmp;
 
@@ -177,7 +198,11 @@ __global__ void atrousFilter(
 	float4 centerColor;
 
 	if (isFirstIter) {
-		centerColor = aovs[idx].color;
+#if 0
+		centerColor = make_float4(aovs[idx].color, 1);
+#else
+		centerColor = aovs[idx].v2;
+#endif
 	}
 	else {
 		centerColor = clrBuffer[idx];
@@ -188,7 +213,11 @@ __global__ void atrousFilter(
 		nextClrBuffer[idx] = centerColor;
 
 		if (isFinalIter) {
-			centerColor *= aovs[idx].texclr;
+#if 0
+			centerColor *= make_float4(aovs[idx].texclr, 1);
+#else
+			centerColor *= aovs[idx].v1;
+#endif
 
 			surf2Dwrite(
 				centerColor,
@@ -256,21 +285,30 @@ __global__ void atrousFilter(
 
 			const int qidx = getIdx(xx, yy, width);
 
-			float depth = aovs[qidx].depth;
-			int meshid = aovs[qidx].meshid;
+			auto v0 = aovs[qidx].v0;
+			auto v3 = aovs[qidx].v3;
+
+			float depth = v0.w;
+			int meshid = __float_as_int(v3.w);
 
 			if (meshid != centerMeshId) {
 				continue;
 			}
 
-			auto normal = aovs[qidx].normal;
+			float3 normal = make_float3(v0.x, v0.y, v0.z);
 
 			float4 color;
 			float variance;
 
 			if (isFirstIter) {
-				color = aovs[qidx].color;
+#if 0
+				color = make_float4(aovs[qidx].color, 1);
 				variance = aovs[qidx].var;
+#else
+				auto v2 = aovs[qidx].v2;
+				color = v2;
+				variance = v2.w;
+#endif
 			}
 			else {
 				color = clrBuffer[qidx];
@@ -315,7 +353,11 @@ __global__ void atrousFilter(
 	}
 	
 	if (isFinalIter) {
-		sumC *= aovs[idx].texclr;
+#if 0
+		sumC *= make_float4(aovs[idx].texclr, 1);
+#else
+		sumC *= aovs[idx].v1;
+#endif
 
 		surf2Dwrite(
 			sumC,
@@ -339,7 +381,8 @@ __global__ void copyFromBufferToAov(
 
 	const int idx = getIdx(ix, iy, width);
 
-	aovs[idx].color = src[idx];
+	float4 s = src[idx];
+	aovs[idx].color = make_float3(s.x, s.y, s.z);
 }
 
 namespace idaten

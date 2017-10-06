@@ -90,7 +90,7 @@ __global__ void varianceEstimation(
 
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA•ªŽU‚Íƒ[ƒ.
-		aovs[idx].moments = make_float4(0, 0, 0, 1);
+		aovs[idx].moments = make_float3(0, 0, 1);
 
 		surf2Dwrite(
 			make_float4(0),
@@ -101,11 +101,11 @@ __global__ void varianceEstimation(
 
 	auto centerViewPos = computeViewSpace(ix, iy, centerDepth, width, height, &mtxC2V);
 
-	float4 centerMoment = aovs[idx].moments;
+	float3 centerMoment = aovs[idx].moments;
 
-	int frame = (int)centerMoment.w;
+	int frame = (int)centerMoment.z;
 
-	centerMoment /= centerMoment.w;
+	centerMoment /= centerMoment.z;
 
 	// •ªŽU‚ðŒvŽZ.
 	float var = centerMoment.x - centerMoment.y * centerMoment.y;
@@ -121,7 +121,7 @@ __global__ void varianceEstimation(
 
 		auto centerNormal = aovs[idx].normal;
 
-		float4 sum = make_float4(0, 0, 0, 0);
+		float3 sum = make_float3(0);
 		float weight = 0.0f;
 
 		for (int v = -radius; v <= radius; v++)
@@ -131,15 +131,31 @@ __global__ void varianceEstimation(
 				if (IS_IN_BOUND(ix + u, 0, width)
 					&& IS_IN_BOUND(iy + v, 0, height))
 				{
+#if 0
 					auto sampleaov = sampleAov(aovs, ix + u, iy + v, width, height);
 
 					auto moment = sampleaov->moments;
-					moment /= moment.w;
+					moment /= moment.z;
 
 					auto sampleNml = sampleaov->normal;
 
 					float sampleDepth = sampleaov->depth;
 					int sampleMeshId = sampleaov->meshid;
+#else
+					int xx = clamp(ix + u, 0, width - 1);
+					int yy = clamp(iy + v, 0, height - 1);
+
+					int pidx = getIdx(xx, yy, width);
+					auto v0 = aovs[pidx].v0;
+					auto v3 = aovs[pidx].v3;
+
+					float3 sampleNml = make_float3(v0.x, v0.y, v0.z);
+					float sampleDepth = v0.w;
+					int sampleMeshId = __float_as_int(v3.w);
+
+					float3 moment = make_float3(v3.x, v3.y, v3.z);
+					moment /= moment.z;
+#endif
 
 #if 0
 					float n = 1 - dot(sampleNml, centerNormal);

@@ -45,7 +45,7 @@ __global__ void fillAOV(
 		// TODO
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::TexColor) {
-		clr = aovs[idx].texclr;
+		clr = make_float4(aovs[idx].texclr, 1);
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::WireFrame) {
 		bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
@@ -105,7 +105,6 @@ __global__ void pickPixel(
 		dst->normal = aten::vec3(aov.normal.x, aov.normal.y, aov.normal.z);
 		dst->depth = aov.depth;
 		dst->meshid = aov.meshid;
-		dst->mtrlid = aov.mtrlid;
 		dst->triid = isect.primid;
 	}
 	else {

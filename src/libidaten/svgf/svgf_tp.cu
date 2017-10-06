@@ -95,26 +95,26 @@ __global__ void temporalReprojection(
 	const int centerMeshId = curAovs[idx].meshid;
 
 	// 今回のフレームのピクセルカラー.
-	float4 curColor = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
-	curColor.w = 1;
+	float3 curColor = make_float3(path.contrib.x, path.contrib.y, path.contrib.z) / path.samples;
+	//curColor.w = 1;
 
 	if (centerMeshId < 0) {
 		// 背景なので、そのまま出力して終わり.
 		surf2Dwrite(
-			curColor,
+			make_float4(curColor, 0),
 			dst,
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
 
 		curAovs[idx].color = curColor;
-		curAovs[idx].moments = make_float4(1);
+		curAovs[idx].moments = make_float3(1);
 
 		return;
 	}
 
 	auto centerNormal = curAovs[idx].normal;
 
-	float4 sum = make_float4(0, 0, 0, 0);
+	float3 sum = make_float3(0);
 	float weight = 0.0f;
 
 	static const float zThreshold = 0.05f;
@@ -165,7 +165,7 @@ __global__ void temporalReprojection(
 				float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
 
 				// 前のフレームのピクセルカラーを取得.
-				float4 prev = prevAovs[pidx].color;
+				float3 prev = prevAovs[pidx].color;
 
 				float W = Wz * Wn * Wm;
 				sum += prev * W;
@@ -200,7 +200,7 @@ __global__ void temporalReprojection(
 	// accumulate moments.
 	{
 		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
-		float4 centerMoment = make_float4(lum * lum, lum, 0, 0);
+		float3 centerMoment = make_float3(lum * lum, lum, 0);
 
 		// 前のフレームのクリップ空間座標を計算.
 		aten::vec4 prevPos;
@@ -236,23 +236,23 @@ __global__ void temporalReprojection(
 				&& dot(centerNormal, prevNormal) > nThreshold
 				&& centerMeshId == prevMeshId)
 			{
-				float4 prevMoment = prevAovs[pidx].moments;
+				float3 prevMoment = prevAovs[pidx].moments;
 
 				// 積算フレーム数を１増やす.
-				frame = (int)prevMoment.w + 1;
+				frame = (int)prevMoment.z + 1;
 
 				centerMoment += prevMoment;
 			}
 		}
 
-		centerMoment.w = frame;
+		centerMoment.z = frame;
 
 		curAovs[idx].moments = centerMoment;
 	}
 #endif
 
 	surf2Dwrite(
-		curColor,
+		make_float4(curColor, 0),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
@@ -298,22 +298,20 @@ __global__ void dilateWeight(
 	curAovs[idx].temporalWeight = temporalWeight;
 }
 
-inline __device__ float4 min(float4 a, float4 b)
+inline __device__ float3 min(float3 a, float3 b)
 {
-	return make_float4(
+	return make_float3(
 		min(a.x, b.x),
 		min(a.y, b.y),
-		min(a.z, b.z),
-		min(a.w, b.w));
+		min(a.z, b.z));
 }
 
-inline __device__ float4 max(float4 a, float4 b)
+inline __device__ float3 max(float3 a, float3 b)
 {
-	return make_float4(
+	return make_float3(
 		max(a.x, b.x),
 		max(a.y, b.y),
-		max(a.z, b.z),
-		max(a.w, b.w));
+		max(a.z, b.z));
 }
 
 // Macro for sorting.
@@ -327,13 +325,13 @@ inline __device__ float4 max(float4 a, float4 b)
 #define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
 
 template <bool isReferPath>
-inline __device__ float4 medianFilter(
+inline __device__ float3 medianFilter(
 	int ix, int iy,
 	const float4* src,
 	const idaten::SVGFPathTracing::Path* paths,
 	int width, int height)
 {
-	float4 v[9];
+	float3 v[9];
 
 	int pos = 0;
 
@@ -345,17 +343,18 @@ inline __device__ float4 medianFilter(
 			int pidx = getIdx(xx, yy, width);
 
 			if (isReferPath) {
-				v[pos] = make_float4(paths[pidx].contrib.x, paths[pidx].contrib.y, paths[pidx].contrib.z, 0);
+				v[pos] = make_float3(paths[pidx].contrib.x, paths[pidx].contrib.y, paths[pidx].contrib.z);
 			}
 			else {
-				v[pos] = src[pidx];
+				auto s = src[pidx];
+				v[pos] = make_float3(s.x, s.y, s.z);
 			}
 			pos++;
 		}
 	}
 
 	// Sort
-	float4 temp;
+	float3 temp;
 	mnmx6(v[0], v[1], v[2], v[3], v[4], v[5]);
 	mnmx5(v[1], v[2], v[3], v[4], v[6]);
 	mnmx4(v[2], v[3], v[4], v[7]);
@@ -402,7 +401,7 @@ __global__ void medianFilter(
 	// accumulate moments.
 	{
 		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
-		float4 centerMoment = make_float4(lum * lum, lum, 0, 0);
+		float3 centerMoment = make_float3(lum * lum, lum, 0);
 
 		// 前のフレームのクリップ空間座標を計算.
 		aten::vec4 prevPos;
@@ -438,22 +437,22 @@ __global__ void medianFilter(
 				&& dot(centerNormal, prevNormal) > nThreshold
 				&& centerMeshId == prevMeshId)
 			{
-				float4 prevMoment = prevAovs[pidx].moments;
+				float3 prevMoment = prevAovs[pidx].moments;
 
 				// 積算フレーム数を１増やす.
-				frame = (int)prevMoment.w + 1;
+				frame = (int)prevMoment.z + 1;
 
 				centerMoment += prevMoment;
 			}
 		}
 
-		centerMoment.w = frame;
+		centerMoment.z = frame;
 
 		curAovs[idx].moments = centerMoment;
 	}
 
 	surf2Dwrite(
-		curColor,
+		make_float4(curColor, 0),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);

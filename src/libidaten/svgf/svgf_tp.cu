@@ -132,6 +132,8 @@ __global__ void temporalReprojection(
 	static const float zThreshold = 0.05f;
 	static const float nThreshold = 0.98f;
 
+	aten::vec4 centerPrevPos;
+
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
 			int xx = clamp(ix + x, 0, width - 1);
@@ -154,6 +156,10 @@ __global__ void temporalReprojection(
 				width, height,
 				&prevPos,
 				mtxs);
+
+			if (x == 0 && y == 0) {
+				centerPrevPos = prevPos;
+			}
 
 			// [0, 1]の範囲内に入っているか.
 			bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
@@ -228,6 +234,7 @@ __global__ void temporalReprojection(
 		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
 		float3 centerMoment = make_float3(lum * lum, lum, 0);
 
+#if 0
 		// 前のフレームのクリップ空間座標を計算.
 		aten::vec4 prevPos;
 		computePrevScreenPos(
@@ -236,6 +243,9 @@ __global__ void temporalReprojection(
 			width, height,
 			&prevPos,
 			mtxs);
+#else
+		aten::vec4 prevPos = centerPrevPos;
+#endif
 
 		// [0, 1]の範囲内に入っているか.
 		bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);

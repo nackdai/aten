@@ -5,9 +5,10 @@ namespace AT_NAME
 	cube::cube(const aten::vec3& center, real w, real h, real d, material* mtrl)
 		: m_param(center, aten::vec3(w, h, d), mtrl)
 	{
-		m_aabb.init(
-			center - m_param.size * real(0.5),
-			center + m_param.size * real(0.5));
+		setBoundingBox(
+			aten::aabb(
+				center - m_param.size * real(0.5),
+				center + m_param.size * real(0.5)));
 	}
 
 	cube::Face cube::findFace(const aten::vec3& d)
@@ -51,7 +52,7 @@ namespace AT_NAME
 		aten::Intersection& isect) const
 	{
 		real t = 0;
-		bool isHit = m_aabb.hit(r, t_min, t_max, &t);
+		bool isHit = getBoundingbox().hit(r, t_min, t_max, &t);
 
 		if (isHit) {
 			auto p = r.org + t * r.dir;
@@ -64,7 +65,7 @@ namespace AT_NAME
 			isect.objid = id();
 			isect.mtrlid = ((material*)m_param.mtrl.ptr)->id();
 
-			isect.area = m_aabb.computeSurfaceArea();
+			isect.area = getBoundingbox().computeSurfaceArea();
 		}
 
 		return isHit;
@@ -115,7 +116,7 @@ namespace AT_NAME
 		rec.objid = isect.objid;
 		rec.mtrlid = isect.mtrlid;
 
-		rec.area = m_aabb.computeSurfaceArea();
+		rec.area = getBoundingbox().computeSurfaceArea();
 	}
 
 	cube::Face cube::getRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const

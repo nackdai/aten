@@ -23,11 +23,6 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
-		virtual aabb getBoundingbox() const override final
-		{
-			return std::move(m_aabb);
-		}
-
 		bool isLeaf() const
 		{
 			return (!m_left && !m_right);
@@ -64,7 +59,6 @@ namespace aten {
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
-		aabb m_aabb;
 
 		int m_traverseOrder{ -1 };
 		int m_externalId{ -1 };
@@ -85,7 +79,7 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
-		virtual aabb getBoundingbox() const override
+		virtual const aabb& getBoundingbox() const override
 		{
 			if (m_root) {
 				return std::move(m_root->getBoundingbox());

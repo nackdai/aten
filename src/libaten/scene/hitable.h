@@ -65,7 +65,14 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const = 0;
 
-		virtual aabb getBoundingbox() const = 0;
+		virtual const aabb& getBoundingbox() const
+		{
+			return m_aabb;
+		}
+		void setBoundingBox(const aabb& bbox)
+		{
+			m_aabb = bbox;
+		}
 
 		struct SamplePosNormalPdfResult {
 			aten::vec3 pos;
@@ -111,5 +118,6 @@ namespace aten {
 
 	private:
 		const char* m_name;
+		aabb m_aabb;
 	};
 }

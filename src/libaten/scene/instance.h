@@ -18,7 +18,7 @@ namespace aten
 			: m_param(ShapeType::Instance)
 		{
 			m_obj = obj;
-			m_aabb = m_obj->getBoundingbox();
+			setBoundingBox(m_obj->getBoundingbox());
 		}
 
 		instance(OBJ* obj, const mat4& mtxL2W)
@@ -29,7 +29,7 @@ namespace aten
 			m_mtxW2L = m_mtxL2W;
 			m_mtxW2L.invert();
 
-			m_aabb = transformBoundingBox();
+			setBoundingBox(transformBoundingBox());
 		}
 
 		virtual ~instance() {}
@@ -98,7 +98,7 @@ namespace aten
 	private:
 		aabb transformBoundingBox()
 		{
-			return std::move(aabb::transform(m_aabb, m_mtxL2W));
+			return std::move(aabb::transform(getBoundingbox(), m_mtxL2W));
 		}
 
 		virtual void getSamplePosNormalArea(
@@ -163,7 +163,7 @@ namespace aten
 	{
 		m_obj = obj;
 		m_obj->build();
-		m_aabb = m_obj->bbox;
+		setBoundingBox(m_obj->bbox);
 
 		m_param.shapeid = transformable::findShapeIdx(obj);
 	}

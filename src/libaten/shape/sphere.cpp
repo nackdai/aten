@@ -17,7 +17,7 @@ namespace AT_NAME
 		auto _min = center - radius;
 		auto _max = center + radius;
 
-		m_aabb.init(_min, _max);
+		setBoundingBox(aten::aabb(_min, _max));
 	}
 
 	bool sphere::hit(

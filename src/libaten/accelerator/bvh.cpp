@@ -579,10 +579,11 @@ namespace aten {
 		while (info.node != nullptr)
 		{
 			// 全体を覆うAABBを計算.
-			info.node->m_aabb = info.list[0]->getBoundingbox();
+			info.node->setBoundingBox(info.list[0]->getBoundingbox());
 			for (uint32_t i = 1; i < info.num; i++) {
 				auto bbox = info.list[i]->getBoundingbox();
-				info.node->m_aabb = aabb::merge(info.node->m_aabb, bbox);
+				info.node->setBoundingBox(
+					aabb::merge(info.node->getBoundingbox(), bbox));
 			}
 
 			if (info.num == 1) {
@@ -627,7 +628,7 @@ namespace aten {
 			int bestSplitIndex = -1;
 
 			// ノード全体のAABBの表面積
-			auto rootSurfaceArea = info.node->m_aabb.computeSurfaceArea();
+			auto rootSurfaceArea = info.node->getBoundingbox().computeSurfaceArea();
 
 			for (int axis = 0; axis < 3; axis++) {
 				// ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.

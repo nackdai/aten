@@ -145,7 +145,7 @@ namespace AT_NAME
 			std::min(v0.pos.y, std::min(v1.pos.y, v2.pos.y)),
 			std::min(v0.pos.z, std::min(v1.pos.z, v2.pos.z)));
 
-		m_aabb.init(vmin, vmax);
+		setBoundingBox(aten::aabb(vmin, vmax));
 
 		// éOäpå`ÇÃñ êœ = ÇQï”ÇÃäOêœÇÃí∑Ç≥ / 2;
 		auto e0 = v1.pos - v0.pos;
@@ -213,7 +213,7 @@ namespace AT_NAME
 			(bvhnode**)&tmp[0],
 			(uint32_t)tmp.size());
 
-		m_aabb = m_node.getBoundingbox();
+		setBoundingBox(m_node.getBoundingbox());
 
 		param.area = 0;
 		for (const auto f : faces) {

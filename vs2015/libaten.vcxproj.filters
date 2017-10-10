@@ -586,6 +586,9 @@
     <ClCompile Include="..\src\libaten\filter\atrous.cpp">
       <Filter>filter</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\bvh_gpu_builder.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">

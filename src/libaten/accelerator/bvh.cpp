@@ -5,7 +5,6 @@
 #include <random>
 #include <vector>
 
-#define BVH_SAH
 #define TEST_NODE_LIST
 //#pragma optimize( "", off)
 
@@ -77,49 +76,7 @@ namespace aten {
 		bvhnode** list,
 		uint32_t num)
 	{
-#ifdef BVH_SAH
 		bvh::buildBySAH(this, list, num);
-#else
-		build(list, num, true);
-#endif
-	}
-
-	void bvhnode::build(
-		bvhnode** list,
-		uint32_t num,
-		bool needSort)
-	{
-		if (needSort) {
-			// TODO
-			//int axis = (int)(::rand() % 3);
-			int axis = 0;
-
-			sortList(list, num, axis);
-		}
-
-		if (num == 1) {
-			m_left = list[0];
-		}
-		else if (num == 2) {
-			m_left = list[0];
-			m_right = list[1];
-		}
-		else {
-			m_left = new bvhnode(list, num / 2);
-			m_right = new bvhnode(list + num / 2, num - num / 2);
-		}
-
-		if (m_left && m_right) {
-			auto boxLeft = m_left->getBoundingbox();
-			auto boxRight = m_right->getBoundingbox();
-
-			m_aabb = aabb::merge(boxLeft, boxRight);
-		}
-		else {
-			auto boxLeft = m_left->getBoundingbox();
-
-			m_aabb = boxLeft;
-		}
 	}
 
 	bool bvhnode::hit(
@@ -232,11 +189,7 @@ namespace aten {
 		sortList(list, num, axis);
 
 		m_root = new bvhnode();
-#ifdef BVH_SAH
 		buildBySAH(m_root, list, num);
-#else
-		m_root->build(&list[0], num, false);
-#endif
 
 #ifdef TEST_NODE_LIST
 		if (snodes.empty()) {

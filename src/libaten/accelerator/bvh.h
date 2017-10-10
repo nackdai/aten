@@ -13,14 +13,6 @@ namespace aten {
 		bvhnode() {}
 		virtual ~bvhnode() {}
 
-	private:
-		bvhnode(
-			bvhnode** list,
-			uint32_t num)
-		{
-			build(list, num);
-		}
-
 	public:
 		void build(
 			bvhnode** list,
@@ -47,11 +39,6 @@ namespace aten {
 		}
 
 	protected:
-		void build(
-			bvhnode** list,
-			uint32_t num,
-			bool needSort);
-
 		virtual bool setBVHNodeParam(
 			BVHNode& param,
 			const bvhnode* parent,

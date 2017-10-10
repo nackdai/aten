@@ -171,7 +171,7 @@ inline __device__ float2 _hitAABB(
 	return make_float2(t0, t1);
 }
 
-inline __device__ bool hitAABB(
+AT_CUDA_INLINE __device__ bool hitAABB(
 	aten::vec3 org,
 	aten::vec3 dir,
 	float4 boxmin, float4 boxmax,
@@ -182,7 +182,7 @@ inline __device__ bool hitAABB(
 	return s.x <= s.y;
 }
 
-inline __device__ bool hitAABB(
+AT_CUDA_INLINE __device__ bool hitAABB(
 	aten::vec3 org,
 	aten::vec3 dir,
 	float4 boxmin, float4 boxmax,

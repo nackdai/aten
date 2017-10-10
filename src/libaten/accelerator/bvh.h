@@ -36,21 +36,9 @@ namespace aten {
 			return std::move(m_aabb);
 		}
 
-		virtual bool isLeaf() const
+		bool isLeaf() const
 		{
 			return (!m_left && !m_right);
-		}
-
-		virtual const hitable* getHasObject() const
-		{
-			return nullptr;
-		}
-
-		virtual void getMatrices(
-			aten::mat4& mtxL2W,
-			aten::mat4& mtxW2L) const
-		{
-			AT_ASSERT(false);
 		}
 
 		int getTraversalOrder() const
@@ -76,7 +64,7 @@ namespace aten {
 			const int idx,
 			std::vector<std::vector<bvhnode*>>& nodeList);
 
-		virtual void getNodes(
+		void getNodes(
 			bvhnode*& left,
 			bvhnode*& right);
 

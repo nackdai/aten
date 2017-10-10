@@ -38,6 +38,18 @@ namespace aten
 			// Nothing is done...
 		}
 
+		virtual const hitable* getHasObject() const
+		{
+			return nullptr;
+		}
+
+		virtual void getMatrices(
+			aten::mat4& mtxL2W,
+			aten::mat4& mtxW2L) const
+		{
+			AT_ASSERT(false);
+		}
+
 		int id() const
 		{
 			return m_id;

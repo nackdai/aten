@@ -146,8 +146,8 @@ __global__ void varianceEstimation(
 					int yy = clamp(iy + v, 0, height - 1);
 
 					int pidx = getIdx(xx, yy, width);
-					auto v0 = aovs[pidx].v0;
-					auto v3 = aovs[pidx].v3;
+					auto v0 = ((float4*)aovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
+					auto v3 = ((float4*)aovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
 
 					float3 sampleNml = make_float3(v0.x, v0.y, v0.z);
 					float sampleDepth = v0.w;

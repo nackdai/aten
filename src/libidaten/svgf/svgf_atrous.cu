@@ -48,8 +48,8 @@ inline __device__ float ddx(
 	float left = aov[idxL].depth;
 	float right = aov[idxR].depth;
 #else
-	auto l_v0 = aov[idxL].v0;
-	auto r_v0 = aov[idxR].v0;
+	auto l_v0 = ((float4*)aov)[idxL * idaten::SVGFPathTracing::AOV_float4_size + 0];
+	auto r_v0 = ((float4*)aov)[idxR * idaten::SVGFPathTracing::AOV_float4_size + 0];
 
 	float left = l_v0.w;
 	float right = r_v0.w;
@@ -82,8 +82,8 @@ inline __device__ float ddy(
 	float top = aov[idxT].depth;
 	float bottom = aov[idxB].depth;
 #else
-	auto t_v0 = aov[idxT].v0;
-	auto b_v0 = aov[idxB].v0;
+	auto t_v0 = ((float4*)aov)[idxT * idaten::SVGFPathTracing::AOV_float4_size + 0];
+	auto b_v0 = ((float4*)aov)[idxB * idaten::SVGFPathTracing::AOV_float4_size + 0];
 
 	float top = t_v0.w;
 	float bottom = b_v0.w;
@@ -285,17 +285,23 @@ __global__ void atrousFilter(
 
 			const int qidx = getIdx(xx, yy, width);
 
-			auto v0 = aovs[qidx].v0;
-			auto v3 = aovs[qidx].v3;
+#if 0
+			float3 normal = aovs[qidx].normal;
+			float depth = aovs[qidx].depth;
+			int meshid = aovs[qidx].meshid;
+#else
+			auto v0 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
+			auto v3 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+
+			float3 normal = make_float3(v0.x, v0.y, v0.z);
 
 			float depth = v0.w;
 			int meshid = __float_as_int(v3.w);
+#endif
 
 			if (meshid != centerMeshId) {
 				continue;
 			}
-
-			float3 normal = make_float3(v0.x, v0.y, v0.z);
 
 			float4 color;
 			float variance;
@@ -305,7 +311,7 @@ __global__ void atrousFilter(
 				color = make_float4(aovs[qidx].color, 1);
 				variance = aovs[qidx].var;
 #else
-				auto v2 = aovs[qidx].v2;
+				auto v2 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 2];
 				color = v2;
 				variance = v2.w;
 #endif

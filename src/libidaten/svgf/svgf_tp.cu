@@ -91,8 +91,16 @@ __global__ void temporalReprojection(
 
 	const auto path = paths[idx];
 
+#if 0
 	const float centerDepth = curAovs[idx].depth;
 	const int centerMeshId = curAovs[idx].meshid;
+#else
+	auto v0 = ((float4*)curAovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 0];
+	auto v3 = ((float4*)curAovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+
+	const float centerDepth = v0.w;
+	const int centerMeshId = __float_as_int(v3.w);
+#endif
 
 	// 今回のフレームのピクセルカラー.
 	float3 curColor = make_float3(path.contrib.x, path.contrib.y, path.contrib.z) / path.samples;
@@ -112,7 +120,11 @@ __global__ void temporalReprojection(
 		return;
 	}
 
+#if 0
 	auto centerNormal = curAovs[idx].normal;
+#else
+	float3 centerNormal = make_float3(v0.x, v0.y, v0.z);
+#endif
 
 	float3 sum = make_float3(0);
 	float weight = 0.0f;
@@ -127,7 +139,12 @@ __global__ void temporalReprojection(
 
 			int _idx = getIdx(xx, yy, width);
 
+#if 0
 			auto depth = curAovs[_idx].depth;
+#else
+			auto v0 = ((float4*)curAovs)[_idx * idaten::SVGFPathTracing::AOV_float4_size + 0];
+			auto depth = v0.w;
+#endif
 
 			// 前のフレームのクリップ空間座標を計算.
 			aten::vec4 prevPos;
@@ -152,10 +169,19 @@ __global__ void temporalReprojection(
 
 				int pidx = getIdx(px, py, width);
 
+#if 0
 				const float prevDepth = prevAovs[pidx].depth;
 				const int prevMeshId = prevAovs[pidx].meshid;
 
 				auto prevNormal = prevAovs[pidx].normal;
+#else
+				auto _v0 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
+				auto _v3 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+
+				const float prevDepth = _v0.w;
+				const int prevMeshId = __float_as_int(_v3.w);
+				float3 prevNormal = make_float3(_v0.x, _v0.y, _v0.z);
+#endif
 
 				// TODO
 				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
@@ -227,10 +253,19 @@ __global__ void temporalReprojection(
 
 			int pidx = getIdx(px, py, width);
 
+#if 0
 			const float prevDepth = prevAovs[pidx].depth;
 			const int prevMeshId = prevAovs[pidx].meshid;
 
 			auto prevNormal = prevAovs[pidx].normal;
+#else
+			auto _v0 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
+			auto _v3 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+
+			const float prevDepth = _v0.w;
+			const int prevMeshId = __float_as_int(_v3.w);
+			float3 prevNormal = make_float3(_v0.x, _v0.y, _v0.z);
+#endif
 
 			if (abs(1 - centerDepth / prevDepth) < zThreshold
 				&& dot(centerNormal, prevNormal) > nThreshold

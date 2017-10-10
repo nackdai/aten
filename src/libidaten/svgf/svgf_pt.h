@@ -77,6 +77,8 @@ namespace idaten
 			};
 		};
 
+		static const size_t AOV_float4_size = sizeof(AOV) / sizeof(float4);
+
 		struct ShadowRay {
 			aten::ray ray[ShdowRayNum];
 			aten::vec3 lightcontrib[ShdowRayNum];

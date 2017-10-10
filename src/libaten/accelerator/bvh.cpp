@@ -5,7 +5,7 @@
 #include <random>
 #include <vector>
 
-#define TEST_NODE_LIST
+//#define TEST_NODE_LIST
 //#pragma optimize( "", off)
 
 namespace aten {
@@ -84,14 +84,19 @@ namespace aten {
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
-		auto bbox = getBoundingbox();
-		auto isHit = bbox.hit(r, t_min, t_max);
-
-		if (isHit) {
-			isHit = bvh::hit(this, r, t_min, t_max, isect);
+		if (m_item) {
+			return m_item->hit(r, t_min, t_max, isect);
 		}
+		else {
+			auto bbox = getBoundingbox();
+			auto isHit = bbox.hit(r, t_min, t_max);
 
-		return isHit;
+			if (isHit) {
+				isHit = bvh::hit(this, r, t_min, t_max, isect);
+			}
+
+			return isHit;
+		}
 	}
 
 	bool bvhnode::setBVHNodeParam(
@@ -588,7 +593,7 @@ namespace aten {
 
 			if (info.num == 1) {
 				// ‚PŒÂ‚µ‚©‚È‚¢‚Ì‚ÅA‚±‚ê‚¾‚¯‚ÅI—¹.
-				info.node->m_left = info.list[0];
+				info.node->m_left = new bvhnode(info.list[0]);
 
 				info = stacks.back();
 				stacks.pop_back();
@@ -603,8 +608,8 @@ namespace aten {
 
 				sortList(info.list, info.num, axis);
 
-				info.node->m_left = info.list[0];
-				info.node->m_right = info.list[1];
+				info.node->m_left = new bvhnode(info.list[0]);
+				info.node->m_right = new bvhnode(info.list[1]);
 
 				info = stacks.back();
 				stacks.pop_back();

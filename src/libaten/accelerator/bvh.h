@@ -13,6 +13,9 @@ namespace aten {
 		bvhnode() {}
 		virtual ~bvhnode() {}
 
+	private:
+		bvhnode(hitable* item) : m_item(item) {}
+
 	public:
 		void build(
 			bvhnode** list,
@@ -22,6 +25,14 @@ namespace aten {
 			const ray& r,
 			real t_min, real t_max,
 			Intersection& isect) const override;
+
+		virtual const aabb& getBoundingbox() const override
+		{
+			if (m_item) {
+				return m_item->getBoundingbox();
+			}
+			return hitable::getBoundingbox();
+		}
 
 		bool isLeaf() const
 		{
@@ -59,6 +70,8 @@ namespace aten {
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
+
+		hitable* m_item{ nullptr };
 
 		int m_traverseOrder{ -1 };
 		int m_externalId{ -1 };

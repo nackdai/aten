@@ -17,10 +17,6 @@ namespace aten {
 		bvhnode(hitable* item) : m_item(item) {}
 
 	public:
-		void build(
-			hitable** list,
-			uint32_t num);
-
 		bool hit(
 			const ray& r,
 			real t_min, real t_max,
@@ -64,6 +60,10 @@ namespace aten {
 
 	class bvh : public accelerator {
 		friend class bvhnode;
+
+	public:
+		bvh() {}
+		virtual ~bvh() {}
 
 	public:
 		virtual void build(

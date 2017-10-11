@@ -72,13 +72,6 @@ namespace aten {
 		}
 	}
 
-	void bvhnode::build(
-		hitable** list,
-		uint32_t num)
-	{
-		bvh::buildBySAH(this, list, num);
-	}
-
 	bool bvhnode::hit(
 		const ray& r,
 		real t_min, real t_max,

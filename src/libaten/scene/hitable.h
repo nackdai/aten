@@ -12,6 +12,7 @@
 
 namespace aten {
 	class hitable;
+	class accelerator;
 
 	struct hitrecord {
 		vec3 p;
@@ -83,6 +84,13 @@ namespace aten {
 		{
 			return (getHasObject() != nullptr);
 		}
+
+		virtual int meshid() const
+		{
+			return -1;
+		}
+
+		virtual accelerator* getInternalAccelerator();
 
 		struct SamplePosNormalPdfResult {
 			aten::vec3 pos;

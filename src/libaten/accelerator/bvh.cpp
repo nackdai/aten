@@ -93,6 +93,7 @@ namespace aten {
 	}
 
 	///////////////////////////////////////////////////////
+
 	void bvh::build(
 		hitable** list,
 		uint32_t num)
@@ -103,7 +104,7 @@ namespace aten {
 
 		sortList(list, num, axis);
 
-		m_root = new bvhnode();
+		m_root = new bvhnode(nullptr);
 		buildBySAH(m_root, list, num);
 	}
 
@@ -347,7 +348,7 @@ namespace aten {
 
 			if (info.num == 1) {
 				// １個しかないので、これだけで終了.
-				info.node->m_left = new bvhnode(info.list[0]);
+				info.node->m_left = new bvhnode(info.node, info.list[0]);
 
 				info = stacks.back();
 				stacks.pop_back();
@@ -362,8 +363,8 @@ namespace aten {
 
 				sortList(info.list, info.num, axis);
 
-				info.node->m_left = new bvhnode(info.list[0]);
-				info.node->m_right = new bvhnode(info.list[1]);
+				info.node->m_left = new bvhnode(info.node, info.list[0]);
+				info.node->m_right = new bvhnode(info.node, info.list[1]);
 
 				info = stacks.back();
 				stacks.pop_back();
@@ -464,8 +465,8 @@ namespace aten {
 				sortList(info.list, info.num, bestAxis);
 
 				// 左右の子ノードを作成.
-				info.node->m_left = new bvhnode();
-				info.node->m_right = new bvhnode();
+				info.node->m_left = new bvhnode(info.node);
+				info.node->m_right = new bvhnode(info.node);
 
 				// リストを分割.
 				int leftListNum = bestSplitIndex;

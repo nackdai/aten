@@ -239,6 +239,7 @@
     <ClInclude Include="..\3rdparty\imgui\imgui_internal.h" />
     <ClInclude Include="..\src\libaten\accelerator\accelerator.h" />
     <ClInclude Include="..\src\libaten\accelerator\bvh.h" />
+    <ClInclude Include="..\src\libaten\accelerator\gpu_bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
     <ClInclude Include="..\src\libaten\aten_virtual.h" />
@@ -340,6 +341,7 @@
     <ClCompile Include="..\3rdparty\imgui\imgui.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\gpu_bvh.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />

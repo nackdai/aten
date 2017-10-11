@@ -10,11 +10,13 @@ namespace aten {
 		friend class bvh;
 
 	public:
-		bvhnode() {}
+		bvhnode(bvhnode* parent) : m_parent(parent) {}
 		virtual ~bvhnode() {}
 
 	private:
-		bvhnode(hitable* item) : m_item(item) {}
+		bvhnode(bvhnode* parent, hitable* item)
+			: m_item(item), m_parent(parent)
+		{}
 
 	public:
 		bool hit(
@@ -39,14 +41,44 @@ namespace aten {
 			return (!m_left && !m_right);
 		}
 
+		bvhnode* getLeft()
+		{
+			return m_left;
+		}
+		bvhnode* getRight()
+		{
+			return m_right;
+		}
+
+		bvhnode* getParent()
+		{
+			return m_parent;
+		}
+
+		hitable* getItem()
+		{
+			return m_item;
+		}
+
 		int getTraversalOrder() const
 		{
 			return m_traverseOrder;
+		}
+		void setTraversalOrder(int order)
+		{
+			m_traverseOrder = order;
+		}
+
+		int getExternalId() const
+		{
+			return m_externalId;
 		}
 
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
+
+		bvhnode* m_parent{ nullptr };
 
 		aabb m_aabb;
 
@@ -83,6 +115,11 @@ namespace aten {
 			return std::move(aabb());
 		}
 
+		bvhnode* getRoot()
+		{
+			return m_root;
+		}
+
 	private:
 		static bool hit(
 			const bvhnode* root,
@@ -95,7 +132,7 @@ namespace aten {
 			hitable** list,
 			uint32_t num);
 
-	private:
+	protected:
 		bvhnode* m_root{ nullptr };
 	};
 }

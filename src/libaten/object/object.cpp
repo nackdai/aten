@@ -203,6 +203,22 @@ namespace AT_NAME
 		result->primid = id;
 	}
 
+	int face::findIdx(hitable* h)
+	{
+		int idx = -1;
+
+		if (h) {
+			auto found = std::find(s_faces.begin(), s_faces.end(), h);
+			if (found != s_faces.end()) {
+				idx = std::distance(s_faces.begin(), found);
+				AT_ASSERT(h == s_faces[idx]);
+			}
+		}
+
+		return idx;
+	}
+
+
 	void shape::build()
 	{
 		m_accel = new bvh();

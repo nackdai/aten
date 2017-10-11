@@ -44,7 +44,7 @@ namespace aten
 
 	int transformable::findShapeIdxAsHitable(const hitable* shape)
 	{
-		if (!shape) {
+		if (shape) {
 			auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
 			if (found != g_shapes.end()) {
 				auto id = std::distance(g_shapes.begin(), found);

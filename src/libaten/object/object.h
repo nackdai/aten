@@ -60,6 +60,8 @@ namespace AT_NAME
 		{
 			return s_faces;
 		}
+
+		static int findIdx(hitable* h);
 	
 		aten::PrimitiveParamter param;
 		shape* parent{ nullptr };
@@ -135,6 +137,11 @@ namespace AT_NAME
 		virtual const aten::ShapeParameter& getParam() const override final
 		{
 			return param;
+		}
+
+		virtual accelerator* getInternalAccelerator() override final
+		{
+			return m_accel;
 		}
 
 	private:

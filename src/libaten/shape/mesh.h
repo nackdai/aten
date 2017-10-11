@@ -16,11 +16,6 @@ namespace aten
 		meshbase();
 		virtual ~meshbase() {}
 
-		int meshid() const
-		{
-			return m_meshid;
-		}
-
 	protected:
 		int m_meshid{ -1 };
 	};
@@ -30,5 +25,11 @@ namespace aten
 	protected:
 		mesh() {}
 		virtual ~mesh() {}
+
+	public:
+		virtual int meshid() const override
+		{
+			return m_meshid;
+		}
 	};
 }

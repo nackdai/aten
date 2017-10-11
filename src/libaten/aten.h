@@ -66,9 +66,11 @@
 #include "visualizer/blitter.h"
 
 #include "scene/scene.h"
-#include "accelerator/bvh.h"
 #include "scene/instance.h"
+
 #include "accelerator/accelerator.h"
+#include "accelerator/bvh.h"
+#include "accelerator/gpu_bvh.h"
 
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

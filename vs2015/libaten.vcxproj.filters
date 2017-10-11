@@ -377,6 +377,9 @@
     <ClInclude Include="..\src\libaten\filter\atrous.h">
       <Filter>filter</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\accelerator\gpu_bvh.h">
+      <Filter>accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -585,6 +588,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\filter\atrous.cpp">
       <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\gpu_bvh.cpp">
+      <Filter>accelerator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

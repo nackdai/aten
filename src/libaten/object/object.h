@@ -105,7 +105,7 @@ namespace AT_NAME
 		std::vector<face*> faces;
 
 	private:
-		bvhnode m_node;
+		accelerator* m_accel{ nullptr };
 		material* m_mtrl{ nullptr };
 	};
 
@@ -151,7 +151,7 @@ namespace AT_NAME
 		aten::aabb bbox;
 
 	private:
-		bvhnode m_node;
+		accelerator* m_accel{ nullptr };
 		uint32_t m_triangles{ 0 };
 	};
 }

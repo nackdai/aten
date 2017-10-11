@@ -205,15 +205,17 @@ namespace AT_NAME
 
 	void shape::build()
 	{
+		m_accel = new bvh();
+
 		// Avoid sorting face list in bvh::build directly.
 		std::vector<face*> tmp;
 		std::copy(faces.begin(), faces.end(), std::back_inserter(tmp));
 
-		m_node.build(
+		m_accel->build(
 			(hitable**)&tmp[0],
 			(uint32_t)tmp.size());
 
-		setBoundingBox(m_node.getBoundingbox());
+		setBoundingBox(m_accel->getBoundingbox());
 
 		param.area = 0;
 		for (const auto f : faces) {
@@ -226,7 +228,7 @@ namespace AT_NAME
 		real t_min, real t_max,
 		aten::Intersection& isect) const
 	{
-		auto isHit = m_node.hit(r, t_min, t_max, isect);
+		auto isHit = m_accel->hit(r, t_min, t_max, isect);
 
 		if (isHit) {
 			isect.mtrlid = ((material*)param.mtrl.ptr)->id();
@@ -241,6 +243,8 @@ namespace AT_NAME
 			// Builded already.
 			return;
 		}
+
+		m_accel = new bvh();
 
 		param.primid = shapes[0]->faces[0]->id;
 
@@ -260,8 +264,8 @@ namespace AT_NAME
 		std::vector<shape*> tmp;
 		std::copy(shapes.begin(), shapes.end(), std::back_inserter(tmp));
 
-		m_node.build((hitable**)&tmp[0], (uint32_t)tmp.size());
-		bbox = m_node.getBoundingbox();
+		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size());
+		bbox = m_accel->getBoundingbox();
 	}
 
 	bool object::hit(
@@ -269,7 +273,7 @@ namespace AT_NAME
 		real t_min, real t_max,
 		aten::Intersection& isect) const
 	{
-		bool isHit = m_node.hit(r, t_min, t_max, isect);
+		bool isHit = m_accel->hit(r, t_min, t_max, isect);
 
 		if (isHit) {
 			auto f = face::faces()[isect.objid];

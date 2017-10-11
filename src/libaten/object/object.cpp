@@ -210,7 +210,7 @@ namespace AT_NAME
 		std::copy(faces.begin(), faces.end(), std::back_inserter(tmp));
 
 		m_node.build(
-			(bvhnode**)&tmp[0],
+			(hitable**)&tmp[0],
 			(uint32_t)tmp.size());
 
 		setBoundingBox(m_node.getBoundingbox());
@@ -260,7 +260,7 @@ namespace AT_NAME
 		std::vector<shape*> tmp;
 		std::copy(shapes.begin(), shapes.end(), std::back_inserter(tmp));
 
-		m_node.build((bvhnode**)&tmp[0], (uint32_t)tmp.size());
+		m_node.build((hitable**)&tmp[0], (uint32_t)tmp.size());
 		bbox = m_node.getBoundingbox();
 	}
 
@@ -379,75 +379,5 @@ namespace AT_NAME
 				primparams[cnt++] = faceParam;
 			}
 		}
-	}
-
-	bool object::setBVHNodeParam(
-		aten::BVHNode& param,
-		const bvhnode* parent,
-		const int idx,
-		std::vector<std::vector<aten::BVHNode>>& nodes,
-		const transformable* instanceParent,
-		const aten::mat4& mtxL2W)
-	{
-		int curPos = nodes[idx].size();
-
-		// NOTE
-		// 最上位レイヤーでは、すべてをワールド座標系で計算するので、L2Wを乗算する.
-		aten::bvh::collectNodes(
-			&m_node,
-			idx,
-			nodes,
-			instanceParent,
-			mtxL2W);
-
-		if (parent) {
-			nodes[idx][curPos].parent = parent->getTraversalOrder();
-		}
-
-		for (auto s : shapes) {
-			// NOTE
-			// 下位レイヤーでは、ローカル座標系で計算するので、何もしない（単位マトリクスを乗算する）.
-			aten::bvh::collectNodes(
-				&s->m_node,
-				s->m_externalId,
-				nodes,
-				instanceParent,
-				aten::mat4::Identity);
-		}
-
-		return false;
-	}
-
-	void object::registerToList(
-		const int idx,
-		std::vector<std::vector<bvhnode*>>& nodeList)
-	{
-		aten::bvh::registerToList(
-			&m_node,
-			idx,
-			nodeList);
-
-		auto found = std::find(
-			nodeList[idx].begin(),
-			nodeList[idx].end(),
-			this);
-
-		if (found == nodeList[idx].end()) {
-			for (auto s : shapes) {
-				s->m_externalId = nodeList.size();
-
-				nodeList.push_back(std::vector<bvhnode*>());
-
-				aten::bvh::registerToList(
-					&s->m_node,
-					s->m_externalId,
-					nodeList);
-			}
-		}
-	}
-
-	aten::bvhnode* object::getNode()
-	{
-		return &m_node;
 	}
 }

@@ -8,7 +8,7 @@
 
 namespace aten
 {
-	class transformable : public bvhnode {
+	class transformable : public hitable {
 		static std::vector<transformable*> g_shapes;
 
 	public:
@@ -36,11 +36,6 @@ namespace aten
 		virtual void getPrimitives(PrimitiveParamter* primparams) const
 		{
 			// Nothing is done...
-		}
-
-		virtual const hitable* getHasObject() const
-		{
-			return nullptr;
 		}
 
 		virtual void getMatrices(

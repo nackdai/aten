@@ -6,7 +6,7 @@
 namespace aten {
 	class transformable;
 
-	class bvhnode : public hitable {
+	class bvhnode {
 		friend class bvh;
 
 	public:
@@ -18,20 +18,24 @@ namespace aten {
 
 	public:
 		void build(
-			bvhnode** list,
+			hitable** list,
 			uint32_t num);
 
-		virtual bool hit(
+		bool hit(
 			const ray& r,
 			real t_min, real t_max,
-			Intersection& isect) const override;
+			Intersection& isect) const;
 
-		virtual const aabb& getBoundingbox() const override
+		const aabb& getBoundingbox() const
 		{
 			if (m_item) {
 				return m_item->getBoundingbox();
 			}
-			return hitable::getBoundingbox();
+			return m_aabb;
+		}
+		void setBoundingBox(const aabb& bbox)
+		{
+			m_aabb = bbox;
 		}
 
 		bool isLeaf() const
@@ -45,31 +49,10 @@ namespace aten {
 		}
 
 	protected:
-		virtual bool setBVHNodeParam(
-			BVHNode& param,
-			const bvhnode* parent,
-			const int idx,
-			std::vector<std::vector<BVHNode>>& nodes,
-			const transformable* instanceParent,
-			const aten::mat4& mtxL2W);
-
-		virtual void registerToList(
-			const int idx,
-			std::vector<std::vector<bvhnode*>>& nodeList);
-
-		void getNodes(
-			bvhnode*& left,
-			bvhnode*& right);
-
-		virtual bvhnode* getNode()
-		{
-			AT_ASSERT(false);
-			return nullptr;
-		}
-
-	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
+
+		aabb m_aabb;
 
 		hitable* m_item{ nullptr };
 
@@ -84,7 +67,7 @@ namespace aten {
 
 	public:
 		virtual void build(
-			bvhnode** list,
+			hitable** list,
 			uint32_t num) override;
 
 		virtual bool hit(
@@ -100,24 +83,6 @@ namespace aten {
 			return std::move(aabb());
 		}
 
-		virtual void collectNodes(
-			std::vector<std::vector<BVHNode>>& nodes,
-			std::vector<aten::mat4>& mtxs) const override final;
-
-		static void registerToList(
-			bvhnode* root,
-			const int idx,
-			std::vector<std::vector<bvhnode*>>& nodeList);
-
-		static void collectNodes(
-			bvhnode* root,
-			const int idx,
-			std::vector<std::vector<BVHNode>>& nodes,
-			const transformable* instanceParent,
-			const aten::mat4& mtxL2W);
-
-		static void dumpCollectedNodes(std::vector<BVHNode>& nodes, const char* path);
-
 	private:
 		static bool hit(
 			const bvhnode* root,
@@ -127,16 +92,8 @@ namespace aten {
 
 		static void buildBySAH(
 			bvhnode* root,
-			bvhnode** list,
+			hitable** list,
 			uint32_t num);
-
-		static void collectNodes(
-			bvhnode* node,
-			const bvhnode* parent,
-			const int idx,
-			std::vector<std::vector<BVHNode>>& nodes,
-			const transformable* instanceParent,
-			const aten::mat4& mtxL2W);
 
 	private:
 		bvhnode* m_root{ nullptr };

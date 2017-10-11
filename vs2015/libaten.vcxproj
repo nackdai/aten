@@ -340,7 +340,6 @@
     <ClCompile Include="..\3rdparty\imgui\imgui.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
-    <ClCompile Include="..\src\libaten\accelerator\bvh_gpu_builder.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />

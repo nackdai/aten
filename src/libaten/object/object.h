@@ -15,7 +15,7 @@ namespace AT_NAME
 {
 	class shape;
 
-	class face : public aten::bvhnode {
+	class face : public aten::hitable {
 		static std::atomic<int> s_id;
 		static std::vector<face*> s_faces;
 
@@ -64,24 +64,9 @@ namespace AT_NAME
 		aten::PrimitiveParamter param;
 		shape* parent{ nullptr };
 		int id{ -1 };
-
-	private:
-		virtual bool setBVHNodeParam(
-			aten::BVHNode& param,
-			const bvhnode* parent,
-			const int idx,
-			std::vector<std::vector<aten::BVHNode>>& nodes,
-			const aten::transformable* instanceParent,
-			const aten::mat4& mtxL2W) override final
-		{
-			bvhnode::setBVHNodeParam(param, parent, idx, nodes, instanceParent, mtxL2W);
-			param.primid = (float)id;
-			param.exid = -1;
-			return true;
-		}
 	};
 
-	class shape : public aten::mesh<aten::bvhnode> {
+	class shape : public aten::mesh<aten::hitable> {
 		friend class object;
 
 	public:
@@ -159,20 +144,6 @@ namespace AT_NAME
 			aten::hitable::SamplePosNormalPdfResult* result,
 			const aten::mat4& mtxL2W, 
 			aten::sampler* sampler) const override final;
-
-		virtual bool setBVHNodeParam(
-			aten::BVHNode& param,
-			const bvhnode* parent,
-			const int idx,
-			std::vector<std::vector<aten::BVHNode>>& nodes,
-			const transformable* instanceParent,
-			const aten::mat4& mtxL2W) override final;
-
-		virtual void registerToList(
-			const int idx,
-			std::vector<std::vector<bvhnode*>>& nodeList) override final;
-
-		virtual bvhnode* getNode() override final;
 
 	public:
 		std::vector<shape*> shapes;

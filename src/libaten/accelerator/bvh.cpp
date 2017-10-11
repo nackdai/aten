@@ -57,23 +57,23 @@ namespace aten {
 		}
 	}
 
-	void sortList(bvhnode**& list, uint32_t num, int axis)
+	void sortList(hitable**& list, uint32_t num, int axis)
 	{
 		switch (axis) {
 		case 0:
-			::qsort(list, num, sizeof(bvhnode*), compareX);
+			::qsort(list, num, sizeof(hitable*), compareX);
 			break;
 		case 1:
-			::qsort(list, num, sizeof(bvhnode*), compareY);
+			::qsort(list, num, sizeof(hitable*), compareY);
 			break;
 		default:
-			::qsort(list, num, sizeof(bvhnode*), compareZ);
+			::qsort(list, num, sizeof(hitable*), compareZ);
 			break;
 		}
 	}
 
 	void bvhnode::build(
-		bvhnode** list,
+		hitable** list,
 		uint32_t num)
 	{
 		bvh::buildBySAH(this, list, num);
@@ -99,92 +99,9 @@ namespace aten {
 		}
 	}
 
-	bool bvhnode::setBVHNodeParam(
-		BVHNode& param,
-		const bvhnode* parent,
-		const int idx,
-		std::vector<std::vector<BVHNode>>& nodes,
-		const transformable* instanceParent,
-		const aten::mat4& mtxL2W)
-	{
-		// Compute transformed AABB.
-		const auto& box = getBoundingbox();
-		auto transformedBox = aten::aabb::transform(box, mtxL2W);
-		param.boxmin = aten::vec4(transformedBox.minPos(), 0);
-		param.boxmax = aten::vec4(transformedBox.maxPos(), 0);
-
-		if (isLeaf()) {
-			param.shapeid = (float)transformable::findShapeIdxAsHitable(this);
-
-			param.exid = (float)this->m_externalId;
-
-			if (instanceParent) {
-				AT_ASSERT(param.shapeid < 0);
-				param.shapeid = (float)transformable::findShapeIdxAsHitable(instanceParent);
-			}
-		}
-
-		return true;
-	}
-
-	void bvhnode::registerToList(
-		const int idx,
-		std::vector<std::vector<bvhnode*>>& nodeList)
-	{
-		m_traverseOrder = nodeList[idx].size();
-
-		if (isLeaf() && idx > 0) {
-			m_externalId = idx;
-		}
-
-		nodeList[idx].push_back(this);
-	}
-
-	void bvhnode::getNodes(
-		bvhnode*& left,
-		bvhnode*& right)
-	{
-		if (m_left) {
-			auto tid = transformable::findShapeIdxAsHitable(m_left);
-			if (tid >= 0) {
-				auto t = transformable::getShape(tid);
-				const auto& param = t->getParam();
-
-				if (param.type == aten::ShapeType::Instance) {
-					left = t->getNode();
-				}
-			}
-			
-			if (!left) {
-				left = m_left;
-			}
-		}
-
-		if (m_right) {
-			auto tid = transformable::findShapeIdxAsHitable(m_right);
-			if (tid >= 0) {
-				auto t = transformable::getShape(tid);
-				const auto& param = t->getParam();
-
-				if (param.type == aten::ShapeType::Instance) {
-					right = t->getNode();
-				}
-			}
-
-			if (!right) {
-				right = m_right;
-			}
-		}
-	}
-
 	///////////////////////////////////////////////////////
-#ifdef TEST_NODE_LIST
-	static std::vector<std::vector<BVHNode>> snodes;
-	static std::vector<aten::mat4> smtxs;
-#endif
-
 	void bvh::build(
-		bvhnode** list,
+		hitable** list,
 		uint32_t num)
 	{
 		// TODO
@@ -195,171 +112,15 @@ namespace aten {
 
 		m_root = new bvhnode();
 		buildBySAH(m_root, list, num);
-
-#ifdef TEST_NODE_LIST
-		if (snodes.empty()) {
-			collectNodes(snodes, smtxs);
-			//bvh::dumpCollectedNodes(snodes, "_nodes.txt");
-		}
-#endif
 	}
-
-#ifdef TEST_NODE_LIST
-	static bool _hit(
-		BVHNode* nodes,
-		const ray& r,
-		real t_min, real t_max,
-		Intersection& isect)
-	{
-		static const uint32_t stacksize = 64;
-
-		auto& shapes = transformable::getShapes();
-		auto& prims = face::faces();
-
-		real hitt = AT_MATH_INF;
-
-		struct {
-			int exid{ -1 };
-			int shapeid{ -1 };
-		} candidateExid[stacksize];
-		int candidateExidNum = 0;
-
-		int nodeid = 0;
-
-		for (;;) {
-			BVHNode* node = nullptr;
-
-			if (nodeid >= 0) {
-				node = &nodes[nodeid];
-			}
-
-			if (!node) {
-				break;
-			}
-
-			bool isHit = false;
-			
-			if (node->isLeaf()) {
-				Intersection isectTmp;
-
-				auto s = shapes[(int)node->shapeid];
-
-				int tmpexid = -1;
-
-				if (node->exid >= 0) {
-#if 0
-					real t = AT_MATH_INF;
-					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t);
-					isectTmp.t = t;
-					tmpexid = node->exid;
-#else
-					const auto& param = s->getParam();
-
-					int mtxid = param.mtxid;
-
-					aten::ray transformedRay;
-
-					if (mtxid >= 0) {
-						const auto& mtxW2L = smtxs[mtxid * 2 + 1];
-
-						transformedRay = mtxW2L.applyRay(r);
-					}
-					else {
-						transformedRay = r;
-					}
-
-					isHit = _hit(&snodes[(int)node->exid][0], transformedRay, t_min, t_max, isectTmp);
-#endif
-				}
-				else if (node->primid >= 0) {
-					auto prim = (hitable*)prims[(int)node->primid];
-					isHit = prim->hit(r, t_min, t_max, isectTmp);
-					if (isHit) {
-						isectTmp.objid = s->id();
-					}
-				}
-				else {
-					isHit = s->hit(r, t_min, t_max, isectTmp);
-					tmpexid = -1;
-				}
-
-				if (isHit) {
-#if 0
-#if 0
-					if (isectTmp.t <= hitt)
-#endif
-					{
-						hitt = isectTmp.t;
-
-						if (tmpexid >= 0) {
-							candidateExid[candidateExidNum].exid = tmpexid;
-							candidateExid[candidateExidNum].shapeid = (int)node->shapeid;
-							candidateExidNum++;
-						}
-					}
-
-					if (tmpexid < 0)
-#endif
-					{
-						if (isectTmp.t < isect.t) {
-							isect = isectTmp;
-						}
-					}
-				}
-			}
-			else {
-				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
-			}
-				
-			if (isHit) {
-				nodeid = (int)node->hit;
-			}
-			else {
-				nodeid = (int)node->miss;
-			}
-		}
-
-#if 0
-		if (candidateExidNum > 0) {
-			for (int i = 0; i < candidateExidNum; i++) {
-				const auto& c = candidateExid[i];
-
-				const auto s = shapes[c.shapeid];
-				const auto& param = s->getParam();
-
-				int mtxid = param.mtxid;
-
-				const auto& mtxW2L = smtxs[mtxid * 2 + 1];
-
-				auto transformedRay = mtxW2L.applyRay(r);
-
-				Intersection isectTmp;
-
-				if (_hit(&snodes[c.exid][0], transformedRay, t_min, t_max, isectTmp)) {
-					if (isectTmp.t < isect.t) {
-						isect = isectTmp;
-					}
-				}
-			}
-		}
-#endif
-
-		return (isect.objid >= 0);
-	}
-#endif
 
 	bool bvh::hit(
 		const ray& r,
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
-#ifdef TEST_NODE_LIST
-		bool isHit = _hit(&snodes[0][0], r, t_min, t_max, isect);
-		return isHit;
-#else
 		bool isHit = hit(m_root, r, t_min, t_max, isect);
 		return isHit;
-#endif
 	}
 
 	bool bvh::hit(
@@ -421,7 +182,7 @@ namespace aten {
 
 	void bvh::buildBySAH(
 		bvhnode* root,
-		bvhnode** list,
+		hitable** list,
 		uint32_t num)
 	{
 		// NOTE
@@ -564,11 +325,11 @@ namespace aten {
 #else
 		struct BuildInfo {
 			bvhnode* node{ nullptr };
-			bvhnode** list{ nullptr };
+			hitable** list{ nullptr };
 			uint32_t num{ 0 };
 
 			BuildInfo() {}
-			BuildInfo(bvhnode* _node, bvhnode** _list, uint32_t _num)
+			BuildInfo(bvhnode* _node, hitable** _list, uint32_t _num)
 			{
 				node = _node;
 				list = _list;
@@ -645,8 +406,8 @@ namespace aten {
 				std::vector<real> s2SurfaceArea(info.num + 1, AT_MATH_INF);
 
 				// 分割された2つの領域.
-				std::vector<bvhnode*> s1;					// 右側.
-				std::vector<bvhnode*> s2(info.list, info.list + info.num);	// 左側.
+				std::vector<hitable*> s1;					// 右側.
+				std::vector<hitable*> s2(info.list, info.list + info.num);	// 左側.
 
 				// NOTE
 				// s2側から取り出して、s1に格納するため、s2にリストを全部入れる.

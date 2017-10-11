@@ -30,20 +30,5 @@ namespace aten
 	protected:
 		mesh() {}
 		virtual ~mesh() {}
-
-		virtual bool setBVHNodeParam(
-			BVHNode& param,
-			const bvhnode* parent,
-			const int idx,
-			std::vector<std::vector<BVHNode>>& nodes,
-			const transformable* instanceParent,
-			const aten::mat4& mtxL2W) override final
-		{
-			bool ret = INHERIT::setBVHNodeParam(param, parent, idx, nodes, instanceParent, mtxL2W);
-
-			param.meshid = (float)meshid();
-
-			return ret;
-		}
 	};
 }

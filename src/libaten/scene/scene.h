@@ -73,7 +73,7 @@ namespace AT_NAME {
 		virtual void build()
 		{}
 
-		void add(aten::bvhnode* s)
+		void add(aten::hitable* s)
 		{
 			m_tmp.push_back(s);
 		}
@@ -211,7 +211,7 @@ namespace AT_NAME {
 			aten::LightSampleResult& sampleRes);
 
 	protected:
-		std::vector<aten::bvhnode*> m_tmp;
+		std::vector<aten::hitable*> m_tmp;
 
 		std::vector<Light*> m_lights;
 		ImageBasedLight* m_ibl{ nullptr };

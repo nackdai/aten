@@ -123,7 +123,7 @@ public:
 		real& fov);
 };
 
-//#define Scene CornellBoxScene
+#define Scene CornellBoxScene
 //#define Scene MtrlTestScene
 //#define Scene PointLightScene
 //#define Scene DirectionalLightScene
@@ -132,6 +132,6 @@ public:
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ObjCornellBoxScene
-#define Scene SponzaScene
+//#define Scene SponzaScene
 //#define Scene BunnyScene
 //#define Scene DragonScene

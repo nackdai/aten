@@ -33,14 +33,7 @@ namespace aten {
 
 	public:
 		virtual void build(
-			bvhnode** list,
+			hitable** list,
 			uint32_t num) = 0;
-
-		virtual void collectNodes(
-			std::vector<std::vector<BVHNode>>& nodes,
-			std::vector<aten::mat4>& mtxs) const
-		{
-			// Nothing is done...
-		}
 	};
 }

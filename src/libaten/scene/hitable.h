@@ -74,6 +74,16 @@ namespace aten {
 			m_aabb = bbox;
 		}
 
+		virtual const hitable* getHasObject() const
+		{
+			return nullptr;
+		}
+
+		bool isInstance() const
+		{
+			return (getHasObject() != nullptr);
+		}
+
 		struct SamplePosNormalPdfResult {
 			aten::vec3 pos;
 			aten::vec3 nml;

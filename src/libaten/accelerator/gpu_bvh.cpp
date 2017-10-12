@@ -6,14 +6,14 @@
 #include <random>
 #include <vector>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten {
 	static std::vector<std::vector<GPUBvhNode>> s_listGpuBvhNode;
 	static std::vector<aten::mat4> s_mtxs;
 
 	// TODO
-	static std::map<hitable*, accelerator*> s_nestedBvhMap;
+	static std::map<hitable*, std::vector<accelerator*>> s_nestedBvhMap;
 
 	void GPUBvh::build(
 		hitable** list,
@@ -60,7 +60,11 @@ namespace aten {
 			// TODO
 			// Find parent.
 			for (auto it : s_nestedBvhMap) {
-				if (it.second == bvh) {
+				auto& list = it.second;
+				auto found = std::find(list.begin(), list.end(), bvh);
+
+				if (found != list.end()) {
+					// Found nested bvh.
 					parent = it.first;
 					break;
 				}
@@ -85,7 +89,7 @@ namespace aten {
 			setOrderForLinearBVH(listBvhNode[i], s_listGpuBvhNode[i]);
 		}
 
-		dump(s_listGpuBvhNode[1], "node.txt");
+		//dump(s_listGpuBvhNode[1], "node.txt");
 	}
 
 	void GPUBvh::dump(std::vector<GPUBvhNode>& nodes, const char* path)
@@ -174,9 +178,15 @@ namespace aten {
 
 					// TODO
 					auto obj = (object*)child;
+
+					std::vector<accelerator*> accels;
 					for (auto s : obj->shapes) {
 						auto nestedBvh = s->getInternalAccelerator();
-						s_nestedBvhMap.insert(std::pair<hitable*, accelerator*>(parent, nestedBvh));
+						accels.push_back(nestedBvh);
+					}
+
+					if (!accels.empty()) {
+						s_nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));
 					}
 				}
 
@@ -194,8 +204,12 @@ namespace aten {
 
 				if (pnode->isLeaf()) {
 					auto item = pnode->getItem();
-					auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
-					pnode->setExternalId(externalId);
+					auto externalId = item->getExtraId();
+
+					if (externalId >= 0) {
+						auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
+						pnode->setExternalId(externalId);
+					}
 
 					pnode = *(--stack);
 					stackpos -= 1;

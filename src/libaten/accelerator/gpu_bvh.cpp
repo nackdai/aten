@@ -6,15 +6,17 @@
 #include <random>
 #include <vector>
 
+#pragma optimize( "", off)
+
 namespace aten {
-	static std::vector<GPUBvhNode> listGpuBvhNode;
+	static std::vector<std::vector<GPUBvhNode>> s_listGpuBvhNode;
 	static std::vector<aten::mat4> s_mtxs;
 
 	void GPUBvh::build(
 		hitable** list,
 		uint32_t num)
 	{
-		bvh::build(list, num);
+		m_bvh.build(list, num);
 
 		// Gather local-world matrix.
 		{
@@ -36,19 +38,37 @@ namespace aten {
 				}
 			}
 		}
+
+		std::vector<std::vector<bvhnode*>> listBvhNode;
 		
 		// Register to linear list to traverse bvhnode easily.
-		std::vector<bvhnode*> listBvhNode;
-		auto root = getRoot();
-		registerBvhNodeToLinearList(root, listBvhNode);
+		auto root = m_bvh.getRoot();
+		listBvhNode.push_back(std::vector<bvhnode*>());
+		registerBvhNodeToLinearList(root, listBvhNode[0]);
+
+		auto& bvhList = bvh::getBvhList();
+
+		for (int i = 0; i < bvhList.size(); i++) {
+			auto bvh = bvhList[i];
+			root = bvh->getRoot();
+			
+			listBvhNode.push_back(std::vector<bvhnode*>());
+
+			registerBvhNodeToLinearList(root, listBvhNode[i + 1]);
+		}
 
 		// Register bvh node for gpu.
-		registerGpuBvhNode(listBvhNode, listGpuBvhNode);
+		for (int i = 0; i < listBvhNode.size(); i++) {
+			s_listGpuBvhNode.push_back(std::vector<GPUBvhNode>());
+			registerGpuBvhNode(listBvhNode[i], s_listGpuBvhNode[i]);
+		}
 
 		// Set traverse order for linear bvh.
-		setOrderForLinearBVH(listBvhNode, listGpuBvhNode);
+		for (int i = 0; i < listBvhNode.size(); i++) {
+			setOrderForLinearBVH(listBvhNode[i], s_listGpuBvhNode[i]);
+		}
 
-		dump(listGpuBvhNode, "node.txt");
+		dump(s_listGpuBvhNode[0], "node.txt");
 	}
 
 	void GPUBvh::dump(std::vector<GPUBvhNode>& nodes, const char* path)
@@ -70,6 +90,33 @@ namespace aten {
 		fclose(fp);
 	}
 
+	static inline bvhnode* getInternalNode(bvhnode* node)
+	{
+		bvhnode* ret = nullptr;
+
+		if (node) {
+			auto item = node->getItem();
+			if (item) {
+				auto internalObj = const_cast<hitable*>(item->getHasObject());
+				if (internalObj) {
+					auto accel = internalObj->getInternalAccelerator();
+
+					// NOTE
+					// 本来ならこのキャストは不正だが、BVHであることは自明なので.
+					auto bvh = *(aten::bvh**)&accel;
+
+					ret = bvh->getRoot();
+				}
+			}
+
+			if (!ret) {
+				ret = node;
+			}
+		}
+
+		return ret;
+	}
+
 	void GPUBvh::registerBvhNodeToLinearList(
 		bvhnode* root,
 		std::vector<bvhnode*>& listBvhNode)
@@ -86,6 +133,8 @@ namespace aten {
 		bvhnode* pnode = root;
 
 		while (pnode != nullptr) {
+			pnode = getInternalNode(pnode);
+
 			bvhnode* pleft = pnode->getLeft();
 			bvhnode* pright = pnode->getRight();
 
@@ -93,6 +142,10 @@ namespace aten {
 			listBvhNode.push_back(pnode);
 
 			if (pnode->isLeaf()) {
+				auto item = pnode->getItem();
+				auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
+				pnode->setExternalId(externalId);
+
 				pnode = *(--stack);
 				stackpos -= 1;
 			}
@@ -134,6 +187,7 @@ namespace aten {
 					// This node is instance, so find index as internal object in instance.
 					item = const_cast<hitable*>(internalObj);
 
+#if 0
 					int idx = transformable::findShapeIdxAsHitable(item);
 					auto instance = transformable::getShape(idx);
 					AT_ASSERT(instance);
@@ -144,13 +198,24 @@ namespace aten {
 
 					// Apply local-world matrix.
 					bbox = aten::aabb::transform(bbox, mtxL2W);
+#else
+					bbox = item->getTransformedBoundingBox();
+#endif
 				}
 
 				gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
 
 				if (gpunode.shapeid < 0) {
-					// Not shape, so this node is primitive.
-					gpunode.primid = (float)face::findIdx(item);
+					auto instanceParent = item->getInstanceParent();
+
+					if (instanceParent) {
+						bbox = instanceParent->getTransformedBoundingBox();
+						gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(instanceParent);
+					}
+					else {
+						// Not shape, so this node is primitive.
+						gpunode.primid = (float)face::findIdx(item);
+					}
 				}
 
 				gpunode.meshid = (float)item->meshid();
@@ -163,33 +228,6 @@ namespace aten {
 
 			listGpuBvhNode.push_back(gpunode);
 		}
-	}
-
-	static inline bvhnode* getInternalNode(bvhnode* node)
-	{
-		bvhnode* ret = nullptr;
-
-		if (node) {
-			auto item = node->getItem();
-			if (item) {
-				auto internalObj = const_cast<hitable*>(item->getHasObject());
-				if (internalObj) {
-					auto accel = internalObj->getInternalAccelerator();
-
-					// NOTE
-					// 本来ならこのキャストは不正だが、BVHであることは自明なので.
-					auto bvh = *(aten::bvh**)&accel;
-
-					ret = bvh->getRoot();
-				}
-			}
-
-			if (!ret) {
-				ret = node;
-			}
-		}
-
-		return ret;
 	}
 
 	void GPUBvh::setOrderForLinearBVH(
@@ -296,6 +334,16 @@ namespace aten {
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
+		return hit(0, s_listGpuBvhNode, r, t_min, t_max, isect);
+	}
+
+	bool GPUBvh::hit(
+		int exid,
+		std::vector<std::vector<GPUBvhNode>>& listGpuBvhNode,
+		const ray& r,
+		real t_min, real t_max,
+		Intersection& isect) const
+	{
 		static const uint32_t stacksize = 64;
 
 		auto& shapes = transformable::getShapes();
@@ -309,7 +357,7 @@ namespace aten {
 			GPUBvhNode* node = nullptr;
 
 			if (nodeid >= 0) {
-				node = &listGpuBvhNode[nodeid];
+				node = &listGpuBvhNode[exid][nodeid];
 			}
 
 			if (!node) {
@@ -324,7 +372,7 @@ namespace aten {
 				auto s = shapes[(int)node->shapeid];
 
 				if (node->exid >= 0) {
-					// Traverse external tree.
+					// Traverse external linear bvh list.
 					const auto& param = s->getParam();
 
 					int mtxid = param.mtxid;
@@ -340,8 +388,12 @@ namespace aten {
 						transformedRay = r;
 					}
 
-					// TODO
-					//isHit = _hit(&snodes[(int)node->exid][0], transformedRay, t_min, t_max, isectTmp);
+					isHit = hit(
+						node->exid,
+						listGpuBvhNode,
+						transformedRay,
+						t_min, t_max,
+						isectTmp);
 				}
 				else if (node->primid >= 0) {
 					// Hit test for a primitive.

@@ -73,6 +73,10 @@ namespace aten {
 		{
 			return m_externalId;
 		}
+		void setExternalId(int exid)
+		{
+			m_externalId = exid;
+		}
 
 	protected:
 		bvhnode* m_left{ nullptr };
@@ -92,6 +96,10 @@ namespace aten {
 
 	class bvh : public accelerator {
 		friend class bvhnode;
+		friend class accelerator;
+		friend class GPUBvh;
+
+		static std::vector<bvh*> s_bvhList;
 
 	public:
 		bvh() {}
@@ -119,6 +127,9 @@ namespace aten {
 		{
 			return m_root;
 		}
+
+		static int registerToList(bvh* b);
+		static std::vector<bvh*>& bvh::getBvhList();
 
 	private:
 		static bool hit(

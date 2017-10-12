@@ -219,9 +219,16 @@ namespace AT_NAME
 	}
 
 
-	void shape::build()
+	void shape::build(aten::transformable* instanceParent)
 	{
-		m_accel = new bvh();
+		m_instanceParent = instanceParent;
+
+		auto result = accelerator::createAccelerator(true);
+
+		m_accel = std::get<0>(result);
+		
+		auto uniqueId = std::get<1>(result);
+		setExtraId(uniqueId);
 
 		// Avoid sorting face list in bvh::build directly.
 		std::vector<face*> tmp;
@@ -253,14 +260,18 @@ namespace AT_NAME
 		return isHit;
 	}
 
-	void object::build()
+	void object::build(aten::transformable* instanceParent)
 	{
 		if (m_triangles > 0) {
 			// Builded already.
 			return;
 		}
 
-		m_accel = new bvh();
+		m_instanceParent = instanceParent;
+
+		auto result = accelerator::createAccelerator(false);
+
+		m_accel = std::get<0>(result);
 
 		param.primid = shapes[0]->faces[0]->id;
 
@@ -268,7 +279,7 @@ namespace AT_NAME
 		m_triangles = 0;
 
 		for (const auto s : shapes) {
-			s->build();
+			s->build(instanceParent);
 
 			param.area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();

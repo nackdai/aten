@@ -26,7 +26,7 @@ namespace aten {
 
 	// TODO
 	// テスト用に bvh の継承クラスで作るが、インスタシエイトする必要がないので、あとで変更する.
-	class GPUBvh : public bvh {
+	class GPUBvh : public accelerator {
 	public:
 		GPUBvh() {}
 		virtual ~GPUBvh() {}
@@ -54,9 +54,18 @@ namespace aten {
 			std::vector<bvhnode*>& listBvhNode,
 			std::vector<GPUBvhNode>& listGpuBvhNode);
 
+		bool hit(
+			int exid,
+			std::vector<std::vector<GPUBvhNode>>& listGpuBvhNode,
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const;
+
 		void dump(std::vector<GPUBvhNode>& nodes, const char* path);
 
 	private:
+		bvh m_bvh;
+
 		std::vector<std::vector<GPUBvhNode>> m_nodes;
 	};
 }

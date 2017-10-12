@@ -75,7 +75,7 @@ namespace AT_NAME
 		shape() : param(aten::ShapeType::Polygon) {}
 		virtual ~shape() {}
 
-		void build();
+		void build(aten::transformable* instanceParent);
 
 		virtual bool hit(
 			const aten::ray& r,
@@ -103,12 +103,19 @@ namespace AT_NAME
 			return m_mtrl;
 		}
 
+		virtual aten::hitable* getInstanceParent() override final
+		{
+			return m_instanceParent;
+		}
+
 		aten::ShapeParameter param;
 		std::vector<face*> faces;
 
 	private:
 		accelerator* m_accel{ nullptr };
 		material* m_mtrl{ nullptr };
+
+		aten::transformable* m_instanceParent{ nullptr };
 	};
 
 	template<typename T> class instance;
@@ -144,8 +151,13 @@ namespace AT_NAME
 			return m_accel;
 		}
 
+		virtual aten::hitable* getInstanceParent() override final
+		{
+			return m_instanceParent;
+		}
+
 	private:
-		void build();
+		void build(aten::transformable* instanceParent);
 
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
@@ -160,5 +172,7 @@ namespace AT_NAME
 	private:
 		accelerator* m_accel{ nullptr };
 		uint32_t m_triangles{ 0 };
+
+		aten::transformable* m_instanceParent{ nullptr };
 	};
 }

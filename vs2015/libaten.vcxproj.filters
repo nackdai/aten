@@ -592,6 +592,9 @@
     <ClCompile Include="..\src\libaten\accelerator\gpu_bvh.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\vs.glsl">

@@ -31,6 +31,18 @@ namespace aten
 		return nullptr;
 	}
 
+	transformable* transformable::getShapeAsHitable(const hitable* shape)
+	{
+		transformable* ret = nullptr;
+
+		auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
+		if (found != g_shapes.end()) {
+			ret = *found;
+		}
+
+		return ret;
+	}
+
 	int transformable::findShapeIdx(const transformable* shape)
 	{
 		auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);

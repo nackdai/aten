@@ -103,9 +103,9 @@ namespace AT_NAME
 			return m_mtrl;
 		}
 
-		virtual aten::hitable* getInstanceParent() override final
+		virtual accelerator* getInternalAccelerator() override final
 		{
-			return m_instanceParent;
+			return m_accel;
 		}
 
 		aten::ShapeParameter param;
@@ -114,8 +114,6 @@ namespace AT_NAME
 	private:
 		accelerator* m_accel{ nullptr };
 		material* m_mtrl{ nullptr };
-
-		aten::transformable* m_instanceParent{ nullptr };
 	};
 
 	template<typename T> class instance;
@@ -151,11 +149,6 @@ namespace AT_NAME
 			return m_accel;
 		}
 
-		virtual aten::hitable* getInstanceParent() override final
-		{
-			return m_instanceParent;
-		}
-
 	private:
 		void build(aten::transformable* instanceParent);
 
@@ -172,7 +165,5 @@ namespace AT_NAME
 	private:
 		accelerator* m_accel{ nullptr };
 		uint32_t m_triangles{ 0 };
-
-		aten::transformable* m_instanceParent{ nullptr };
 	};
 }

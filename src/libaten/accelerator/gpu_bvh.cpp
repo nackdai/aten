@@ -6,11 +6,14 @@
 #include <random>
 #include <vector>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten {
 	static std::vector<std::vector<GPUBvhNode>> s_listGpuBvhNode;
 	static std::vector<aten::mat4> s_mtxs;
+
+	// TODO
+	static std::map<hitable*, accelerator*> s_nestedBvhMap;
 
 	void GPUBvh::build(
 		hitable** list,
@@ -39,28 +42,42 @@ namespace aten {
 			}
 		}
 
-		std::vector<std::vector<bvhnode*>> listBvhNode;
+		auto& bvhList = bvh::getBvhList();
+
+		std::vector<std::vector<GPUBvhNodeEntry>> listBvhNode;
+		listBvhNode.resize(bvhList.size() + 1);
 		
 		// Register to linear list to traverse bvhnode easily.
 		auto root = m_bvh.getRoot();
-		listBvhNode.push_back(std::vector<bvhnode*>());
-		registerBvhNodeToLinearList(root, listBvhNode[0]);
-
-		auto& bvhList = bvh::getBvhList();
+		registerBvhNodeToLinearList(root, nullptr, aten::mat4::Identity, listBvhNode[0]);
 
 		for (int i = 0; i < bvhList.size(); i++) {
 			auto bvh = bvhList[i];
 			root = bvh->getRoot();
-			
-			listBvhNode.push_back(std::vector<bvhnode*>());
 
-			registerBvhNodeToLinearList(root, listBvhNode[i + 1]);
+			hitable* parent = nullptr;
+
+			// TODO
+			// Find parent.
+			for (auto it : s_nestedBvhMap) {
+				if (it.second == bvh) {
+					parent = it.first;
+					break;
+				}
+			}
+
+			registerBvhNodeToLinearList(root, parent, aten::mat4::Identity, listBvhNode[i + 1]);
 		}
 
 		// Register bvh node for gpu.
 		for (int i = 0; i < listBvhNode.size(); i++) {
 			s_listGpuBvhNode.push_back(std::vector<GPUBvhNode>());
-			registerGpuBvhNode(listBvhNode[i], s_listGpuBvhNode[i]);
+
+			// Leaves of nested bvh are primitive.
+			// Index 0 is primiary tree, and Index N (N > 0) is nested tree.
+			bool isPrimitiveLeaf = (i > 0);
+
+			registerGpuBvhNode(isPrimitiveLeaf, listBvhNode[i], s_listGpuBvhNode[i]);
 		}
 
 		// Set traverse order for linear bvh.
@@ -68,7 +85,7 @@ namespace aten {
 			setOrderForLinearBVH(listBvhNode[i], s_listGpuBvhNode[i]);
 		}
 
-		dump(s_listGpuBvhNode[0], "node.txt");
+		dump(s_listGpuBvhNode[1], "node.txt");
 	}
 
 	void GPUBvh::dump(std::vector<GPUBvhNode>& nodes, const char* path)
@@ -90,7 +107,7 @@ namespace aten {
 		fclose(fp);
 	}
 
-	static inline bvhnode* getInternalNode(bvhnode* node)
+	static inline bvhnode* getInternalNode(bvhnode* node, aten::mat4* mtxL2W = nullptr)
 	{
 		bvhnode* ret = nullptr;
 
@@ -99,6 +116,13 @@ namespace aten {
 			if (item) {
 				auto internalObj = const_cast<hitable*>(item->getHasObject());
 				if (internalObj) {
+					auto t = transformable::getShapeAsHitable(item);
+
+					if (mtxL2W) {
+						aten::mat4 mtxW2L;
+						t->getMatrices(*mtxL2W, mtxW2L);
+					}
+
 					auto accel = internalObj->getInternalAccelerator();
 
 					// NOTE
@@ -119,7 +143,9 @@ namespace aten {
 
 	void GPUBvh::registerBvhNodeToLinearList(
 		bvhnode* root,
-		std::vector<bvhnode*>& listBvhNode)
+		hitable* nestParent,
+		const aten::mat4& mtxL2W,
+		std::vector<GPUBvhNodeEntry>& listBvhNode)
 	{
 		static const uint32_t stacksize = 64;
 		bvhnode* stackbuf[stacksize] = { nullptr };
@@ -133,46 +159,81 @@ namespace aten {
 		bvhnode* pnode = root;
 
 		while (pnode != nullptr) {
-			pnode = getInternalNode(pnode);
+			auto tmp = pnode;
+			aten::mat4 mtxL2WForChild;
+			pnode = getInternalNode(pnode, &mtxL2WForChild);
 
-			bvhnode* pleft = pnode->getLeft();
-			bvhnode* pright = pnode->getRight();
+			if (pnode != tmp) {
+				// Register nested bvh.
+				hitable* parent = tmp->getItem();
+				AT_ASSERT(parent->isInstance());
 
-			pnode->setTraversalOrder((int)listBvhNode.size());
-			listBvhNode.push_back(pnode);
+				// Register relation between instance and nested bvh.
+				{
+					auto child = const_cast<hitable*>(parent->getHasObject());
 
-			if (pnode->isLeaf()) {
-				auto item = pnode->getItem();
-				auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
-				pnode->setExternalId(externalId);
+					// TODO
+					auto obj = (object*)child;
+					for (auto s : obj->shapes) {
+						auto nestedBvh = s->getInternalAccelerator();
+						s_nestedBvhMap.insert(std::pair<hitable*, accelerator*>(parent, nestedBvh));
+					}
+				}
+
+				registerBvhNodeToLinearList(pnode, parent, mtxL2WForChild, listBvhNode);
 
 				pnode = *(--stack);
 				stackpos -= 1;
 			}
 			else {
-				pnode = pleft;
+				bvhnode* pleft = pnode->getLeft();
+				bvhnode* pright = pnode->getRight();
 
-				if (pright) {
-					*(stack++) = pright;
-					stackpos += 1;
+				pnode->setTraversalOrder((int)listBvhNode.size());
+				listBvhNode.push_back(GPUBvhNodeEntry(pnode, nestParent, mtxL2W));
+
+				if (pnode->isLeaf()) {
+					auto item = pnode->getItem();
+					auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
+					pnode->setExternalId(externalId);
+
+					pnode = *(--stack);
+					stackpos -= 1;
+				}
+				else {
+					pnode = pleft;
+
+					if (pright) {
+						*(stack++) = pright;
+						stackpos += 1;
+					}
+				}
+
+				if (stackbuf[1] == pnode) {
+					int xxx = 0;
 				}
 			}
 		}
 	}
 
 	void GPUBvh::registerGpuBvhNode(
-		std::vector<bvhnode*>& listBvhNode,
+		bool isPrimitiveLeaf,
+		std::vector<GPUBvhNodeEntry>& listBvhNode,
 		std::vector<GPUBvhNode>& listGpuBvhNode)
 	{
 		listGpuBvhNode.reserve(listBvhNode.size());
 
-		for (const auto& node : listBvhNode) {
+		for (const auto& entry : listBvhNode) {
+			auto node = entry.node;
+			auto nestParent = entry.nestParent;
+
 			GPUBvhNode gpunode;
 
 			// NOTE
 			// Differ set hit/miss index.
 
 			auto bbox = node->getBoundingbox();
+			bbox = aten::aabb::transform(bbox, entry.mtxL2W);
 
 			auto parent = node->getParent();
 			gpunode.parent = (float)(parent ? parent->getTraversalOrder() : -1);
@@ -186,41 +247,26 @@ namespace aten {
 				if (internalObj) {
 					// This node is instance, so find index as internal object in instance.
 					item = const_cast<hitable*>(internalObj);
-
-#if 0
-					int idx = transformable::findShapeIdxAsHitable(item);
-					auto instance = transformable::getShape(idx);
-					AT_ASSERT(instance);
-
-					aten::mat4 mtxL2W;
-					aten::mat4 mtxW2L;
-					instance->getMatrices(mtxL2W, mtxW2L);
-
-					// Apply local-world matrix.
-					bbox = aten::aabb::transform(bbox, mtxL2W);
-#else
-					bbox = item->getTransformedBoundingBox();
-#endif
 				}
 
 				gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
 
 				if (gpunode.shapeid < 0) {
-					auto instanceParent = item->getInstanceParent();
-
-					if (instanceParent) {
-						bbox = instanceParent->getTransformedBoundingBox();
-						gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(instanceParent);
-					}
-					else {
-						// Not shape, so this node is primitive.
-						gpunode.primid = (float)face::findIdx(item);
+					if (nestParent) {
+						gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
 					}
 				}
 
 				gpunode.meshid = (float)item->meshid();
 
-				gpunode.exid = (float)node->getExternalId();
+				if (isPrimitiveLeaf) {
+					// Leaves of this tree are primitive.
+					gpunode.primid = (float)face::findIdx(item);
+					gpunode.exid = -1.0f;
+				}
+				else {
+					gpunode.exid = (float)node->getExternalId();
+				}
 			}
 
 			gpunode.boxmax = bbox.maxPos();
@@ -231,18 +277,18 @@ namespace aten {
 	}
 
 	void GPUBvh::setOrderForLinearBVH(
-		std::vector<bvhnode*>& listBvhNode,
+		std::vector<GPUBvhNodeEntry>& listBvhNode,
 		std::vector<GPUBvhNode>& listGpuBvhNode)
 	{
 		auto num = listGpuBvhNode.size();
 
 		for (int n = 0; n < num; n++) {
-			auto node = listBvhNode[n];
+			auto node = listBvhNode[n].node;
 			auto& gpunode = listGpuBvhNode[n];
 
 			bvhnode* next = nullptr;
 			if (n + 1 < num) {
-				next = listBvhNode[n + 1];
+				next = listBvhNode[n + 1].node;
 			}
 
 			if (node->isLeaf()) {
@@ -271,7 +317,7 @@ namespace aten {
 
 				// Search the parent.
 				bvhnode* parent = (gpunode.parent >= 0.0f
-					? listBvhNode[(int)gpunode.parent]
+					? listBvhNode[(int)gpunode.parent].node
 					: nullptr);
 
 				if (parent) {
@@ -298,7 +344,7 @@ namespace aten {
 							// Search the grand parent.
 							const auto& parentNode = listGpuBvhNode[curParent->getTraversalOrder()];
 							bvhnode* grandParent = (parentNode.parent >= 0
-								? listBvhNode[(int)parentNode.parent]
+								? listBvhNode[(int)parentNode.parent].node
 								: nullptr);
 
 							if (grandParent) {

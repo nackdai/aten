@@ -42,16 +42,29 @@ namespace aten {
 			Intersection& isect) const override;
 
 	private:
+		struct GPUBvhNodeEntry {
+			bvhnode* node;
+			hitable* nestParent;
+			aten::mat4 mtxL2W;
+
+			GPUBvhNodeEntry(bvhnode* n, hitable* p, const aten::mat4& m)
+				: node(n), nestParent(p), mtxL2W(m)
+			{}
+		};
+
 		void registerBvhNodeToLinearList(
 			bvhnode* root, 
-			std::vector<bvhnode*>& listBvhNode);
+			hitable* nestParent,
+			const aten::mat4& mtxL2W,
+			std::vector<GPUBvhNodeEntry>& listBvhNode);
 
 		void registerGpuBvhNode(
-			std::vector<bvhnode*>& listBvhNode, 
+			bool isPrimitiveLeaf,
+			std::vector<GPUBvhNodeEntry>& listBvhNode,
 			std::vector<GPUBvhNode>& listGpuBvhNode);
 
 		void setOrderForLinearBVH(
-			std::vector<bvhnode*>& listBvhNode,
+			std::vector<GPUBvhNodeEntry>& listBvhNode,
 			std::vector<GPUBvhNode>& listGpuBvhNode);
 
 		bool hit(

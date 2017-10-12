@@ -130,11 +130,6 @@ namespace aten {
 #endif
 		}
 
-		virtual aten::hitable* getInstanceParent()
-		{
-			return nullptr;
-		}
-
 		void setExtraId(int id)
 		{
 			m_extraId = id;

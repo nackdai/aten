@@ -42,7 +42,8 @@ namespace aten
 			aten::mat4& mtxL2W,
 			aten::mat4& mtxW2L) const
 		{
-			AT_ASSERT(false);
+			mtxL2W.identity();
+			mtxW2L.identity();
 		}
 
 		int id() const
@@ -52,6 +53,7 @@ namespace aten
 
 		static uint32_t getShapeNum();
 		static transformable* getShape(uint32_t idx);
+		static transformable* getShapeAsHitable(const hitable* shape);
 		static int findShapeIdx(const transformable* shape);
 		static int findShapeIdxAsHitable(const hitable* shape);
 		static const std::vector<transformable*>& getShapes();

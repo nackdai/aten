@@ -32,7 +32,7 @@ static aten::Film g_buffer(WIDTH, HEIGHT);
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::bvh> g_scene;
+static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::SVGFPathTracing g_tracer;
 
@@ -43,7 +43,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
-static int g_maxBounce = 1;
+static int g_maxBounce = 5;
 static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
 static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
 
@@ -426,11 +426,8 @@ int main()
 			mtrlparms,
 			vtxparams);
 
-		std::vector<std::vector<aten::GPUBvhNode>> nodes;
-		std::vector<aten::mat4> mtxs;
-
-		g_scene.getAccel()->collectNodes(nodes, mtxs);
-		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
+		std::vector<std::vector<aten::GPUBvhNode>>& nodes = g_scene.getAccel()->getNodes();
+		std::vector<aten::mat4>& mtxs = g_scene.getAccel()->getMatrices();
 
 		std::vector<idaten::TextureResource> tex;
 		{

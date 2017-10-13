@@ -70,6 +70,8 @@ namespace AT_NAME
 			return false;
 		}
 #elif 1
+		// TODO
+		// maxUlps ‚Ì’l‚É‚æ‚Á‚ÄARandomScene‚Ìreflaction‚ª‚¤‚Ü‚­‚¢‚©‚È‚¢‚±‚Æ‚ª‚ ‚é...
 		bool close = aten::isClose(aten::abs(b), sqrt_D4, 2500);
 
 		if (t1 > AT_MATH_EPSILON && !close) {

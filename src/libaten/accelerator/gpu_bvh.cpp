@@ -15,6 +15,8 @@ namespace aten {
 	{
 		m_bvh.build(list, num);
 
+		setBoundingBox(m_bvh.getBoundingbox());
+
 		// Gather local-world matrix.
 		{
 			auto& shapes = const_cast<std::vector<transformable*>&>(transformable::getShapes());

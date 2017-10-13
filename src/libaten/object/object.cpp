@@ -221,12 +221,7 @@ namespace AT_NAME
 
 	void shape::build(aten::transformable* instanceParent)
 	{
-		auto result = aten::accelerator::createAccelerator(true);
-
-		m_accel = std::get<0>(result);
-		
-		auto uniqueId = std::get<1>(result);
-		setExtraId(uniqueId);
+		m_accel = aten::accelerator::createAccelerator();
 
 		// Avoid sorting face list in bvh::build directly.
 		std::vector<face*> tmp;
@@ -265,9 +260,7 @@ namespace AT_NAME
 			return;
 		}
 
-		auto result = aten::accelerator::createAccelerator(false);
-
-		m_accel = std::get<0>(result);
+		m_accel = aten::accelerator::createAccelerator();
 
 		param.primid = shapes[0]->faces[0]->id;
 

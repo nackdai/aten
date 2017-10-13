@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <tuple>
 #include "scene/hitable.h"
 
 namespace aten {
@@ -9,7 +8,7 @@ namespace aten {
 		float hit{ -1 };		///< Link index if ray hit.
 		float miss{ -1 };		///< Link index if ray miss.
 		float parent{ -1 };		///< Parent node index.
-		float padding0;
+		float padding0{ 0 };
 
 		float shapeid{ -1 };	///< Object index.
 		float primid{ -1 };		///< Triangle index.
@@ -33,7 +32,7 @@ namespace aten {
 		virtual ~accelerator() {}
 
 	public:
-		static std::tuple<accelerator*, int> createAccelerator(bool needRegister = false);
+		static accelerator* createAccelerator();
 
 		virtual void build(
 			hitable** list,

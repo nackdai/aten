@@ -103,8 +103,6 @@ namespace aten {
 		friend class accelerator;
 		friend class GPUBvh;
 
-		static std::vector<bvh*> s_bvhList;
-
 	public:
 		bvh() {}
 		virtual ~bvh() {}
@@ -131,9 +129,6 @@ namespace aten {
 		{
 			return m_root;
 		}
-
-		static int registerToList(bvh* b);
-		static std::vector<bvh*>& bvh::getBvhList();
 
 	private:
 		static bool hit(

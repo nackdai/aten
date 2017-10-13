@@ -30,6 +30,8 @@ namespace aten {
 			return m_mtxs;
 		}
 
+		static void dump(std::vector<GPUBvhNode>& nodes, const char* path);
+
 	private:
 		struct GPUBvhNodeEntry {
 			bvhnode* node;
@@ -47,6 +49,7 @@ namespace aten {
 			hitable* nestParent,
 			const aten::mat4& mtxL2W,
 			std::vector<GPUBvhNodeEntry>& listBvhNode,
+			std::vector<accelerator*>& listBvh,
 			std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap);
 
 		void registerGpuBvhNode(
@@ -64,8 +67,6 @@ namespace aten {
 			const ray& r,
 			real t_min, real t_max,
 			Intersection& isect) const;
-
-		void dump(std::vector<GPUBvhNode>& nodes, const char* path);
 
 	private:
 		bvh m_bvh;

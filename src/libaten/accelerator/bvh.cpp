@@ -94,20 +94,6 @@ namespace aten {
 
 	///////////////////////////////////////////////////////
 
-	std::vector<bvh*> bvh::s_bvhList;
-
-	int bvh::registerToList(bvh* b)
-	{
-		int ret = s_bvhList.size();
-		s_bvhList.push_back(b);
-		return ret;
-	}
-
-	std::vector<bvh*>& bvh::getBvhList()
-	{
-		return s_bvhList;
-	}
-
 	void bvh::build(
 		hitable** list,
 		uint32_t num)

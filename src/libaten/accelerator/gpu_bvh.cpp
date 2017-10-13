@@ -36,19 +36,20 @@ namespace aten {
 			}
 		}
 
-		auto& bvhList = bvh::getBvhList();
-
+		std::vector<accelerator*> listBvh;
 		std::map<hitable*, std::vector<accelerator*>> nestedBvhMap;
 
 		std::vector<std::vector<GPUBvhNodeEntry>> listBvhNode;
-		listBvhNode.resize(bvhList.size() + 1);
 		
 		// Register to linear list to traverse bvhnode easily.
 		auto root = m_bvh.getRoot();
-		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], nestedBvhMap);
+		listBvhNode.push_back(std::vector<GPUBvhNodeEntry>());
+		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
-		for (int i = 0; i < bvhList.size(); i++) {
-			auto bvh = bvhList[i];
+		for (int i = 0; i < listBvh.size(); i++) {
+			// TODO
+			auto bvh = (aten::bvh*)listBvh[i];
+
 			root = bvh->getRoot();
 
 			hitable* parent = nullptr;
@@ -66,7 +67,11 @@ namespace aten {
 				}
 			}
 
-			registerBvhNodeToLinearList(root, nullptr, parent, aten::mat4::Identity, listBvhNode[i + 1], nestedBvhMap);
+			listBvhNode.push_back(std::vector<GPUBvhNodeEntry>());
+			std::vector<accelerator*> dummy;
+
+			registerBvhNodeToLinearList(root, nullptr, parent, aten::mat4::Identity, listBvhNode[i + 1], dummy, nestedBvhMap);
+			AT_ASSERT(dummy.empty());
 		}
 
 		// Register bvh node for gpu.
@@ -98,8 +103,8 @@ namespace aten {
 		}
 
 		for (const auto& n : nodes) {
-			fprintf(fp, "%d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n", 
-				(int)n.hit, (int)n.miss, (int)n.shapeid, (int)n.primid,
+			fprintf(fp, "%d %d %d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n", 
+				(int)n.hit, (int)n.miss, (int)n.shapeid, (int)n.primid, (int)n.exid, (int)n.meshid,
 				n.boxmin.x, n.boxmin.y, n.boxmin.z,
 				n.boxmax.x, n.boxmax.y, n.boxmax.z);
 		}
@@ -147,6 +152,7 @@ namespace aten {
 		hitable* nestParent,
 		const aten::mat4& mtxL2W,
 		std::vector<GPUBvhNodeEntry>& listBvhNode,
+		std::vector<accelerator*>& listBvh,
 		std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap)
 	{
 		if (!root) {
@@ -175,6 +181,13 @@ namespace aten {
 				for (auto s : obj->shapes) {
 					auto nestedBvh = s->getInternalAccelerator();
 					accels.push_back(nestedBvh);
+
+					auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
+					if (found == listBvh.end()) {
+						auto exid = listBvh.size();
+						s->setExtraId(exid);
+						listBvh.push_back(nestedBvh);
+					}
 				}
 
 				if (!accels.empty()) {
@@ -182,7 +195,7 @@ namespace aten {
 				}
 			}
 
-			registerBvhNodeToLinearList(pnode, parentNode, parent, mtxL2WForChild, listBvhNode, nestedBvhMap);
+			registerBvhNodeToLinearList(pnode, parentNode, parent, mtxL2WForChild, listBvhNode, listBvh, nestedBvhMap);
 		}
 		else {
 			pnode->setParent(parentNode);
@@ -202,8 +215,8 @@ namespace aten {
 			bvhnode* pleft = pnode->getLeft();
 			bvhnode* pright = pnode->getRight();
 
-			registerBvhNodeToLinearList(pleft, pnode, nestParent, mtxL2W, listBvhNode, nestedBvhMap);
-			registerBvhNodeToLinearList(pright, pnode, nestParent, mtxL2W, listBvhNode, nestedBvhMap);
+			registerBvhNodeToLinearList(pleft, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap);
+			registerBvhNodeToLinearList(pright, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap);
 		}
 	}
 
@@ -228,8 +241,6 @@ namespace aten {
 
 			auto parent = node->getParent();
 			gpunode.parent = (float)(parent ? parent->getTraversalOrder() : -1);
-
-			gpunode.padding0 = -1.0f;
 
 			if (node->isLeaf()) {
 				hitable* item = node->getItem();
@@ -260,8 +271,8 @@ namespace aten {
 				}
 			}
 
-			gpunode.boxmax = bbox.maxPos();
-			gpunode.boxmin = bbox.minPos();
+			gpunode.boxmax = aten::vec4(bbox.maxPos(), 0);
+			gpunode.boxmin = aten::vec4(bbox.minPos(), 0);
 
 			listGpuBvhNode.push_back(gpunode);
 		}

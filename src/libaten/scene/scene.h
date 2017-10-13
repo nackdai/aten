@@ -250,7 +250,7 @@ namespace AT_NAME {
 			return isHit;
 		}
 
-		const aten::accelerator* getAccel()
+		ACCEL* getAccel()
 		{
 			return &m_accel;
 		}

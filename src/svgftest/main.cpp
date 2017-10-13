@@ -426,7 +426,7 @@ int main()
 			mtrlparms,
 			vtxparams);
 
-		std::vector<std::vector<aten::BVHNode>> nodes;
+		std::vector<std::vector<aten::GPUBvhNode>> nodes;
 		std::vector<aten::mat4> mtxs;
 
 		g_scene.getAccel()->collectNodes(nodes, mtxs);

@@ -34,7 +34,7 @@ static aten::Film g_buffer(WIDTH, HEIGHT);
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::bvh> g_scene;
+static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 aten::ATrousDenoiser atrous;
 
@@ -338,10 +338,8 @@ int main()
 			mtrlparms,
 			vtxparams);
 
-		std::vector<std::vector<aten::BVHNode>> nodes;
-		std::vector<aten::mat4> mtxs;
-
-		g_scene.getAccel()->collectNodes(nodes, mtxs);
+		std::vector<std::vector<aten::GPUBvhNode>>& nodes = g_scene.getAccel()->getNodes();
+		std::vector<aten::mat4>& mtxs = g_scene.getAccel()->getMatrices();
 		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 		std::vector<idaten::TextureResource> tex;

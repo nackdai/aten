@@ -103,7 +103,7 @@ namespace AT_NAME
 			return m_mtrl;
 		}
 
-		virtual accelerator* getInternalAccelerator() override final
+		virtual aten::accelerator* getInternalAccelerator() override final
 		{
 			return m_accel;
 		}
@@ -112,7 +112,7 @@ namespace AT_NAME
 		std::vector<face*> faces;
 
 	private:
-		accelerator* m_accel{ nullptr };
+		aten::accelerator* m_accel{ nullptr };
 		material* m_mtrl{ nullptr };
 	};
 
@@ -144,7 +144,7 @@ namespace AT_NAME
 			return param;
 		}
 
-		virtual accelerator* getInternalAccelerator() override final
+		virtual aten::accelerator* getInternalAccelerator() override final
 		{
 			return m_accel;
 		}
@@ -163,7 +163,7 @@ namespace AT_NAME
 		aten::aabb bbox;
 
 	private:
-		accelerator* m_accel{ nullptr };
+		aten::accelerator* m_accel{ nullptr };
 		uint32_t m_triangles{ 0 };
 	};
 }

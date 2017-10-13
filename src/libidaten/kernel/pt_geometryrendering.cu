@@ -188,7 +188,7 @@ namespace idaten
 		const std::vector<aten::ShapeParameter>& shapes,
 		const std::vector<aten::MaterialParameter>& mtrls,
 		const std::vector<aten::LightParameter>& lights,
-		const std::vector<std::vector<aten::BVHNode>>& nodes,
+		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
 		const std::vector<aten::vertex>& vtxs,
 		const std::vector<aten::mat4>& mtxs,

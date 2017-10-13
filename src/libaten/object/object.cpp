@@ -221,7 +221,7 @@ namespace AT_NAME
 
 	void shape::build(aten::transformable* instanceParent)
 	{
-		auto result = accelerator::createAccelerator(true);
+		auto result = aten::accelerator::createAccelerator(true);
 
 		m_accel = std::get<0>(result);
 		
@@ -265,7 +265,7 @@ namespace AT_NAME
 			return;
 		}
 
-		auto result = accelerator::createAccelerator(false);
+		auto result = aten::accelerator::createAccelerator(false);
 
 		m_accel = std::get<0>(result);
 

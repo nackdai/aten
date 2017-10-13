@@ -54,6 +54,7 @@ namespace aten {
 
 		void registerBvhNodeToLinearList(
 			bvhnode* root, 
+			bvhnode* parentNode,
 			hitable* nestParent,
 			const aten::mat4& mtxL2W,
 			std::vector<GPUBvhNodeEntry>& listBvhNode);

@@ -50,6 +50,10 @@ namespace aten {
 			return m_right;
 		}
 
+		void setParent(bvhnode* parent)
+		{
+			m_parent = parent;
+		}
 		bvhnode* getParent()
 		{
 			return m_parent;

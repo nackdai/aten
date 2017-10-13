@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten {
 	static std::vector<std::vector<GPUBvhNode>> s_listGpuBvhNode;
@@ -49,7 +49,7 @@ namespace aten {
 		
 		// Register to linear list to traverse bvhnode easily.
 		auto root = m_bvh.getRoot();
-		registerBvhNodeToLinearList(root, nullptr, aten::mat4::Identity, listBvhNode[0]);
+		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0]);
 
 		for (int i = 0; i < bvhList.size(); i++) {
 			auto bvh = bvhList[i];
@@ -70,7 +70,7 @@ namespace aten {
 				}
 			}
 
-			registerBvhNodeToLinearList(root, parent, aten::mat4::Identity, listBvhNode[i + 1]);
+			registerBvhNodeToLinearList(root, nullptr, parent, aten::mat4::Identity, listBvhNode[i + 1]);
 		}
 
 		// Register bvh node for gpu.
@@ -147,86 +147,66 @@ namespace aten {
 
 	void GPUBvh::registerBvhNodeToLinearList(
 		bvhnode* root,
+		bvhnode* parentNode,
 		hitable* nestParent,
 		const aten::mat4& mtxL2W,
 		std::vector<GPUBvhNodeEntry>& listBvhNode)
 	{
-		static const uint32_t stacksize = 64;
-		bvhnode* stackbuf[stacksize] = { nullptr };
-		bvhnode** stack = &stackbuf[0];
+		if (!root) {
+			return;
+		}
 
-		// push terminator.
-		*stack++ = nullptr;
+		auto pnode = root;
 
-		int stackpos = 1;
+		auto tmp = pnode;
+		aten::mat4 mtxL2WForChild;
+		pnode = getInternalNode(pnode, &mtxL2WForChild);
 
-		bvhnode* pnode = root;
+		if (pnode != tmp) {
+			// Register nested bvh.
+			hitable* parent = tmp->getItem();
+			AT_ASSERT(parent->isInstance());
 
-		while (pnode != nullptr) {
-			auto tmp = pnode;
-			aten::mat4 mtxL2WForChild;
-			pnode = getInternalNode(pnode, &mtxL2WForChild);
+			// Register relation between instance and nested bvh.
+			{
+				auto child = const_cast<hitable*>(parent->getHasObject());
 
-			if (pnode != tmp) {
-				// Register nested bvh.
-				hitable* parent = tmp->getItem();
-				AT_ASSERT(parent->isInstance());
+				// TODO
+				auto obj = (object*)child;
 
-				// Register relation between instance and nested bvh.
-				{
-					auto child = const_cast<hitable*>(parent->getHasObject());
-
-					// TODO
-					auto obj = (object*)child;
-
-					std::vector<accelerator*> accels;
-					for (auto s : obj->shapes) {
-						auto nestedBvh = s->getInternalAccelerator();
-						accels.push_back(nestedBvh);
-					}
-
-					if (!accels.empty()) {
-						s_nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));
-					}
+				std::vector<accelerator*> accels;
+				for (auto s : obj->shapes) {
+					auto nestedBvh = s->getInternalAccelerator();
+					accels.push_back(nestedBvh);
 				}
 
-				registerBvhNodeToLinearList(pnode, parent, mtxL2WForChild, listBvhNode);
-
-				pnode = *(--stack);
-				stackpos -= 1;
-			}
-			else {
-				bvhnode* pleft = pnode->getLeft();
-				bvhnode* pright = pnode->getRight();
-
-				pnode->setTraversalOrder((int)listBvhNode.size());
-				listBvhNode.push_back(GPUBvhNodeEntry(pnode, nestParent, mtxL2W));
-
-				if (pnode->isLeaf()) {
-					auto item = pnode->getItem();
-					auto externalId = item->getExtraId();
-
-					if (externalId >= 0) {
-						auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
-						pnode->setExternalId(externalId);
-					}
-
-					pnode = *(--stack);
-					stackpos -= 1;
-				}
-				else {
-					pnode = pleft;
-
-					if (pright) {
-						*(stack++) = pright;
-						stackpos += 1;
-					}
-				}
-
-				if (stackbuf[1] == pnode) {
-					int xxx = 0;
+				if (!accels.empty()) {
+					s_nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));
 				}
 			}
+
+			registerBvhNodeToLinearList(pnode, parentNode, parent, mtxL2WForChild, listBvhNode);
+		}
+		else {
+			pnode->setParent(parentNode);
+			pnode->setTraversalOrder((int)listBvhNode.size());
+			listBvhNode.push_back(GPUBvhNodeEntry(pnode, nestParent, mtxL2W));
+
+			if (pnode->isLeaf()) {
+				auto item = pnode->getItem();
+				auto externalId = item->getExtraId();
+
+				if (externalId >= 0) {
+					auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
+					pnode->setExternalId(externalId);
+				}
+			}
+
+			bvhnode* pleft = pnode->getLeft();
+			bvhnode* pright = pnode->getRight();
+
+			registerBvhNodeToLinearList(pleft, pnode, nestParent, mtxL2W, listBvhNode);
+			registerBvhNodeToLinearList(pright, pnode, nestParent, mtxL2W, listBvhNode);
 		}
 	}
 

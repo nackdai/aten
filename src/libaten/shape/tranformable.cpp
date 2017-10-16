@@ -71,4 +71,25 @@ namespace aten
 	{
 		return g_shapes;
 	}
+
+	void transformable::gatherAllTransformMatrixAndSetMtxIdx(std::vector<aten::mat4>& mtxs)
+	{
+		auto& shapes = const_cast<std::vector<transformable*>&>(transformable::getShapes());
+
+		for (auto s : shapes) {
+			auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
+
+			if (param.type == ShapeType::Instance) {
+				aten::mat4 mtxL2W, mtxW2L;
+				s->getMatrices(mtxL2W, mtxW2L);
+
+				if (!mtxL2W.isIdentity()) {
+					param.mtxid = (int)(mtxs.size() / 2);
+
+					mtxs.push_back(mtxL2W);
+					mtxs.push_back(mtxW2L);
+				}
+			}
+		}
+	}
 }

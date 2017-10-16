@@ -1,9 +1,6 @@
 #pragma once
 
 #include "types.h"
-#include "shape/tranformable.h"
-#include "accelerator/bvh.h"
-#include "math/mat4.h"
 
 #include <atomic>
 

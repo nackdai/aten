@@ -1,5 +1,4 @@
 #include "proxy/DataCollector.h"
-#include "shape/tranformable.h"
 #include "object/object.h"
 
 #include <map>

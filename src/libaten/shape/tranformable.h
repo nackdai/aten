@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "accelerator/bvh.h"
+#include "scene/hitable.h"
 #include "math/mat4.h"
 
 #include <vector>
@@ -57,6 +57,8 @@ namespace aten
 		static int findShapeIdx(const transformable* shape);
 		static int findShapeIdxAsHitable(const hitable* shape);
 		static const std::vector<transformable*>& getShapes();
+
+		static void gatherAllTransformMatrixAndSetMtxIdx(std::vector<aten::mat4>& mtxs);
 
 	private:
 		int m_id{ -1 };

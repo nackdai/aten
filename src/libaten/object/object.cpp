@@ -1,5 +1,6 @@
 #include "object/object.h"
 #include "math/intersect.h"
+#include "accelerator/accelerator.h"
 
 #include <iterator>
 

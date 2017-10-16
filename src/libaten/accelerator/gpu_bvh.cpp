@@ -18,25 +18,7 @@ namespace aten {
 		setBoundingBox(m_bvh.getBoundingbox());
 
 		// Gather local-world matrix.
-		{
-			auto& shapes = const_cast<std::vector<transformable*>&>(transformable::getShapes());
-
-			for (auto s : shapes) {
-				auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
-
-				if (param.type == ShapeType::Instance) {
-					aten::mat4 mtxL2W, mtxW2L;
-					s->getMatrices(mtxL2W, mtxW2L);
-
-					if (!mtxL2W.isIdentity()) {
-						param.mtxid = (int)(m_mtxs.size() / 2);
-
-						m_mtxs.push_back(mtxL2W);
-						m_mtxs.push_back(mtxW2L);
-					}
-				}
-			}
-		}
+		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
 		std::vector<accelerator*> listBvh;
 		std::map<hitable*, std::vector<accelerator*>> nestedBvhMap;
@@ -157,64 +139,25 @@ namespace aten {
 		std::vector<accelerator*>& listBvh,
 		std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap)
 	{
-		if (!root) {
-			return;
-		}
-
-		auto pnode = root;
-
-		auto original = pnode;
-		aten::mat4 mtxL2WForChild;
-		pnode = getInternalNode(original, &mtxL2WForChild);
-
-		if (pnode != original) {
-			{
-				original->setParent(parentNode);
-				original->setTraversalOrder((int)listBvhNode.size());
-				listBvhNode.push_back(GPUBvhNodeEntry(original, nestParent, mtxL2W));
-
-				if (original->isLeaf()) {
-					original->setExternalId(m_exid);
-					m_exid++;
-				}
+		bvh::registerBvhNodeToLinearList<GPUBvhNodeEntry>(
+			root,
+			parentNode,
+			nestParent,
+			mtxL2W,
+			listBvhNode,
+			listBvh,
+			nestedBvhMap,
+			[this](std::vector<GPUBvhNodeEntry>& list, bvhnode* node, hitable* obj, const aten::mat4& mtx)
+		{
+			list.push_back(GPUBvhNodeEntry(node, obj, mtx));
+		},
+			[this](bvhnode* node)
+		{
+			if (node->isLeaf()) {
+				node->setExternalId(m_exid);
+				m_exid++;
 			}
-
-			// Register nested bvh.
-			hitable* parent = original->getItem();
-			AT_ASSERT(parent->isInstance());
-
-			// Register relation between instance and nested bvh.
-			auto child = const_cast<hitable*>(parent->getHasObject());
-
-			// TODO
-			auto obj = (object*)child;
-
-			std::vector<accelerator*> accels;
-			auto nestedBvh = obj->getInternalAccelerator();
-			accels.push_back(nestedBvh);
-
-			auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
-			if (found == listBvh.end()) {
-				auto exid = listBvh.size();
-				obj->setExtraId(exid);
-				listBvh.push_back(nestedBvh);
-			}
-
-			if (!accels.empty()) {
-				nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));
-			}
-		}
-		else {
-			pnode->setParent(parentNode);
-			pnode->setTraversalOrder((int)listBvhNode.size());
-			listBvhNode.push_back(GPUBvhNodeEntry(pnode, nestParent, mtxL2W));
-
-			bvhnode* pleft = pnode->getLeft();
-			bvhnode* pright = pnode->getRight();
-
-			registerBvhNodeToLinearList(pleft, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap);
-			registerBvhNodeToLinearList(pright, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap);
-		}
+		});
 	}
 
 	void GPUBvh::registerGpuBvhNode(

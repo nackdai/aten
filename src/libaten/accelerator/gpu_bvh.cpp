@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten {
 	void GPUBvh::build(
@@ -163,68 +163,51 @@ namespace aten {
 
 		auto pnode = root;
 
-		auto tmp = pnode;
+		auto original = pnode;
 		aten::mat4 mtxL2WForChild;
-		pnode = getInternalNode(pnode, &mtxL2WForChild);
+		pnode = getInternalNode(original, &mtxL2WForChild);
 
-		if (pnode != tmp) {
-			// Register nested bvh.
-			hitable* parent = tmp->getItem();
-			AT_ASSERT(parent->isInstance());
-
-			// Register relation between instance and nested bvh.
+		if (pnode != original) {
 			{
-				auto child = const_cast<hitable*>(parent->getHasObject());
+				original->setParent(parentNode);
+				original->setTraversalOrder((int)listBvhNode.size());
+				listBvhNode.push_back(GPUBvhNodeEntry(original, nestParent, mtxL2W));
 
-				// TODO
-				auto obj = (object*)child;
-
-				std::vector<accelerator*> accels;
-#if 0
-				for (auto s : obj->shapes) {
-					auto nestedBvh = s->getInternalAccelerator();
-					accels.push_back(nestedBvh);
-
-					auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
-					if (found == listBvh.end()) {
-						auto exid = listBvh.size();
-						s->setExtraId(exid);
-						listBvh.push_back(nestedBvh);
-					}
-				}
-#else
-				auto nestedBvh = obj->getInternalAccelerator();
-				accels.push_back(nestedBvh);
-
-				auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
-				if (found == listBvh.end()) {
-					auto exid = listBvh.size();
-					obj->setExtraId(exid);
-					listBvh.push_back(nestedBvh);
-				}
-#endif
-
-				if (!accels.empty()) {
-					nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));
+				if (original->isLeaf()) {
+					original->setExternalId(m_exid);
+					m_exid++;
 				}
 			}
 
-			registerBvhNodeToLinearList(pnode, parentNode, parent, mtxL2WForChild, listBvhNode, listBvh, nestedBvhMap);
+			// Register nested bvh.
+			hitable* parent = original->getItem();
+			AT_ASSERT(parent->isInstance());
+
+			// Register relation between instance and nested bvh.
+			auto child = const_cast<hitable*>(parent->getHasObject());
+
+			// TODO
+			auto obj = (object*)child;
+
+			std::vector<accelerator*> accels;
+			auto nestedBvh = obj->getInternalAccelerator();
+			accels.push_back(nestedBvh);
+
+			auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
+			if (found == listBvh.end()) {
+				auto exid = listBvh.size();
+				obj->setExtraId(exid);
+				listBvh.push_back(nestedBvh);
+			}
+
+			if (!accels.empty()) {
+				nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));
+			}
 		}
 		else {
 			pnode->setParent(parentNode);
 			pnode->setTraversalOrder((int)listBvhNode.size());
 			listBvhNode.push_back(GPUBvhNodeEntry(pnode, nestParent, mtxL2W));
-
-			if (pnode->isLeaf()) {
-				auto item = pnode->getItem();
-				auto externalId = item->getExtraId();
-
-				if (externalId >= 0) {
-					auto externalId = item->getExtraId() + 1;	// Index 0 is for main tree.
-					pnode->setExternalId(externalId);
-				}
-			}
 
 			bvhnode* pleft = pnode->getLeft();
 			bvhnode* pright = pnode->getRight();

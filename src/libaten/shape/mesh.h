@@ -16,6 +16,12 @@ namespace aten
 		meshbase();
 		virtual ~meshbase() {}
 
+	public:
+		int getMeshId() const
+		{
+			return m_meshid;
+		}
+
 	protected:
 		int m_meshid{ -1 };
 	};

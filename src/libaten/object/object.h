@@ -54,6 +54,8 @@ namespace AT_NAME
 			aten::hitable::SamplePosNormalPdfResult* result,
 			aten::sampler* sampler) const override;
 
+		virtual int meshid() const override;
+
 		void build();
 
 		static const std::vector<face*>& faces()
@@ -68,7 +70,7 @@ namespace AT_NAME
 		int id{ -1 };
 	};
 
-	class shape  {
+	class shape : public aten::meshbase {
 		friend class object;
 
 	public:

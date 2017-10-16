@@ -203,6 +203,15 @@ namespace AT_NAME
 		result->primid = id;
 	}
 
+	int face::meshid() const
+	{
+		AT_ASSERT(parent);
+		if (parent) {
+			return parent->getMeshId();
+		}
+		return -1;
+	}
+
 	int face::findIdx(hitable* h)
 	{
 		int idx = -1;
@@ -233,7 +242,7 @@ namespace AT_NAME
 			const auto& faabb = f->getBoundingbox();
 
 			boxmin = aten::min(faabb.minPos(), boxmin);
-			boxmax = aten::min(faabb.maxPos(), boxmax);
+			boxmax = aten::max(faabb.maxPos(), boxmax);
 		}
 
 		m_aabb.init(boxmin, boxmax);

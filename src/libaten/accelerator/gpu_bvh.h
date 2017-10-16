@@ -71,6 +71,8 @@ namespace aten {
 	private:
 		bvh m_bvh;
 
+		int m_exid{ 1 };
+
 		std::vector<std::vector<GPUBvhNode>> m_listGpuBvhNode;
 		std::vector<aten::mat4> m_mtxs;
 	};

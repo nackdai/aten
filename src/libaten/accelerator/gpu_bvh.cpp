@@ -184,19 +184,22 @@ namespace aten {
 
 			if (node->isLeaf()) {
 				hitable* item = node->getItem();
-				auto internalObj = item->getHasObject();
 
-				if (internalObj) {
-					// This node is instance, so find index as internal object in instance.
-					item = const_cast<hitable*>(internalObj);
-				}
-
+				// 自分自身のIDを取得.
 				gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
 
+				// もしなかったら、ネストしているので親のIDを取得.
 				if (gpunode.shapeid < 0) {
 					if (nestParent) {
 						gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
 					}
+				}
+
+				// インスタンスの実体を取得.
+				auto internalObj = item->getHasObject();
+
+				if (internalObj) {
+					item = const_cast<hitable*>(internalObj);
 				}
 
 				gpunode.meshid = (float)item->meshid();

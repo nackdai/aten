@@ -138,7 +138,7 @@ namespace aten
 		: m_param(ShapeType::Instance)
 	{
 		m_obj = obj;
-		m_obj->build(this);
+		m_obj->build();
 		setBoundingBox(m_obj->bbox);
 
 		m_param.shapeid = transformable::findShapeIdx(obj);

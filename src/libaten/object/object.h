@@ -75,7 +75,7 @@ namespace AT_NAME
 		shape() : param(aten::ShapeType::Polygon) {}
 		virtual ~shape() {}
 
-		void build(aten::transformable* instanceParent);
+		void build();
 
 		virtual bool hit(
 			const aten::ray& r,
@@ -150,7 +150,7 @@ namespace AT_NAME
 		}
 
 	private:
-		void build(aten::transformable* instanceParent);
+		void build();
 
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,

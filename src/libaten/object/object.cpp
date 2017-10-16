@@ -219,7 +219,7 @@ namespace AT_NAME
 	}
 
 
-	void shape::build(aten::transformable* instanceParent)
+	void shape::build()
 	{
 		m_accel = aten::accelerator::createAccelerator();
 
@@ -253,7 +253,7 @@ namespace AT_NAME
 		return isHit;
 	}
 
-	void object::build(aten::transformable* instanceParent)
+	void object::build()
 	{
 		if (m_triangles > 0) {
 			// Builded already.
@@ -268,7 +268,7 @@ namespace AT_NAME
 		m_triangles = 0;
 
 		for (const auto s : shapes) {
-			s->build(instanceParent);
+			s->build();
 
 			param.area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();

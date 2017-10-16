@@ -46,6 +46,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
 				isect->mtrlid = prim.mtrlid;
+				isect->meshid = (int)attrib.w;
 			}
 		}
 		else {
@@ -110,6 +111,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloserTriangles(
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
 				isect->mtrlid = prim.mtrlid;
+				isect->meshid = (int)attrib.w;
 				return true;
 			}
 		}
@@ -175,6 +177,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHAnyTriangles(
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
 				isect->mtrlid = prim.mtrlid;
+				isect->meshid = (int)attrib.w;
 				return true;
 			}
 		}
@@ -259,7 +262,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
-				isect->meshid = (int)attrib.w;
+				//isect->meshid = (int)attrib.w;
 			}
 		}
 		else {
@@ -342,7 +345,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
-				isect->meshid = (int)attrib.w;
+				//isect->meshid = (int)attrib.w;
 				return true;
 			}
 		}
@@ -426,7 +429,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 			if (isHit) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
-				isect->meshid = (int)attrib.w;
+				//isect->meshid = (int)attrib.w;
 				return true;
 			}
 		}

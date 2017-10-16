@@ -23,7 +23,6 @@ namespace aten {
 			case ShapeType::Polygon:
 			{
 				auto param = s->getParam();
-				shapeparams.push_back(param);
 
 				const int primcnt = primparams.size();
 
@@ -39,10 +38,6 @@ namespace aten {
 			case ShapeType::Sphere:
 			case ShapeType::Cube:
 			{
-				auto param = s->getParam();
-				param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
-				shapeparams.push_back(param);
-
 				orderMap.insert(std::pair<transformable*, int>(s, order++));
 			}
 				break;
@@ -67,6 +62,17 @@ namespace aten {
 
 				param.area = it->first->getParam().area;
 
+				shapeparams.push_back(param);
+			}
+			else if (type == ShapeType::Polygon) {
+				auto param = s->getParam();
+				shapeparams.push_back(param);
+			}
+			else if (type == ShapeType::Sphere
+				|| type == ShapeType::Cube)
+			{
+				auto param = s->getParam();
+				param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
 				shapeparams.push_back(param);
 			}
 		}

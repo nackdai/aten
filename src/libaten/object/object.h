@@ -68,7 +68,7 @@ namespace AT_NAME
 		int id{ -1 };
 	};
 
-	class shape : public aten::mesh<aten::hitable> {
+	class shape  {
 		friend class object;
 
 	public:
@@ -76,21 +76,6 @@ namespace AT_NAME
 		virtual ~shape() {}
 
 		void build();
-
-		virtual bool hit(
-			const aten::ray& r,
-			real t_min, real t_max,
-			aten::Intersection& isect) const override final;
-
-		virtual void getSamplePosNormalArea(
-			aten::hitable::SamplePosNormalPdfResult* result,
-			aten::sampler* sampler) const override final
-		{
-			auto r = sampler->nextSample();
-			int idx = (int)(r * (faces.size() - 1));
-			auto face = faces[idx];
-			return face->getSamplePosNormalArea(result, sampler);
-		}
 
 		void setMaterial(material* mtrl)
 		{
@@ -103,16 +88,11 @@ namespace AT_NAME
 			return m_mtrl;
 		}
 
-		virtual aten::accelerator* getInternalAccelerator() override final
-		{
-			return m_accel;
-		}
-
 		aten::ShapeParameter param;
 		std::vector<face*> faces;
+		aten::aabb m_aabb;
 
 	private:
-		aten::accelerator* m_accel{ nullptr };
 		material* m_mtrl{ nullptr };
 	};
 

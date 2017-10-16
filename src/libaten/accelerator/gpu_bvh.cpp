@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten {
 	void GPUBvh::build(
@@ -180,6 +180,7 @@ namespace aten {
 				auto obj = (object*)child;
 
 				std::vector<accelerator*> accels;
+#if 0
 				for (auto s : obj->shapes) {
 					auto nestedBvh = s->getInternalAccelerator();
 					accels.push_back(nestedBvh);
@@ -191,6 +192,17 @@ namespace aten {
 						listBvh.push_back(nestedBvh);
 					}
 				}
+#else
+				auto nestedBvh = obj->getInternalAccelerator();
+				accels.push_back(nestedBvh);
+
+				auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
+				if (found == listBvh.end()) {
+					auto exid = listBvh.size();
+					obj->setExtraId(exid);
+					listBvh.push_back(nestedBvh);
+				}
+#endif
 
 				if (!accels.empty()) {
 					nestedBvhMap.insert(std::pair<hitable*, std::vector<accelerator*>>(parent, accels));

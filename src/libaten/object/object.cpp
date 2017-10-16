@@ -221,36 +221,22 @@ namespace AT_NAME
 
 	void shape::build()
 	{
-		m_accel = aten::accelerator::createAccelerator();
-
-		// Avoid sorting face list in bvh::build directly.
-		std::vector<face*> tmp;
-		std::copy(faces.begin(), faces.end(), std::back_inserter(tmp));
-
-		m_accel->build(
-			(hitable**)&tmp[0],
-			(uint32_t)tmp.size());
-
-		setBoundingBox(m_accel->getBoundingbox());
+		aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
+		aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
 
 		param.area = 0;
+
 		for (const auto f : faces) {
+			f->build();
 			param.area += f->param.area;
-		}
-	}
 
-	bool shape::hit(
-		const aten::ray& r,
-		real t_min, real t_max,
-		aten::Intersection& isect) const
-	{
-		auto isHit = m_accel->hit(r, t_min, t_max, isect);
+			const auto& faabb = f->getBoundingbox();
 
-		if (isHit) {
-			isect.mtrlid = ((material*)param.mtrl.ptr)->id();
+			boxmin = aten::min(faabb.minPos(), boxmin);
+			boxmax = aten::min(faabb.maxPos(), boxmax);
 		}
 
-		return isHit;
+		m_aabb.init(boxmin, boxmax);
 	}
 
 	void object::build()
@@ -267,18 +253,19 @@ namespace AT_NAME
 		param.area = 0;
 		m_triangles = 0;
 
+		// Avoid sorting shape list in bvh::build directly.
+		std::vector<face*> tmp;
+
 		for (const auto s : shapes) {
 			s->build();
 
 			param.area += s->param.area;
 			m_triangles += (uint32_t)s->faces.size();
+
+			tmp.insert(tmp.end(), s->faces.begin(), s->faces.end());
 		}
 
 		param.primnum = m_triangles;
-
-		// Avoid sorting shape list in bvh::build directly.
-		std::vector<shape*> tmp;
-		std::copy(shapes.begin(), shapes.end(), std::back_inserter(tmp));
 
 		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size());
 		bbox = m_accel->getBoundingbox();
@@ -294,8 +281,8 @@ namespace AT_NAME
 		if (isHit) {
 			auto f = face::faces()[isect.objid];
 
-			// 最終的には、やっぱりshapeを渡す.
-			isect.objid = f->id;
+			// 自身のIDを返す.
+			isect.objid = id();
 		}
 		return isHit;
 	}

@@ -203,6 +203,24 @@ namespace aten {
 		return ret;
 	}
 
+	inline AT_DEVICE_API vec3 min(const vec3& a, const vec3& b)
+	{
+		vec3 ret(
+			aten::cmpMin(a.x, b.x),
+			aten::cmpMin(a.y, b.y),
+			aten::cmpMin(a.z, b.z));
+		return std::move(ret);
+	}
+
+	inline AT_DEVICE_API vec3 max(const vec3& a, const vec3& b)
+	{
+		vec3 ret(
+			aten::cmpMax(a.x, b.x),
+			aten::cmpMax(a.y, b.y),
+			aten::cmpMax(a.z, b.z));
+		return std::move(ret);
+	}
+
 	// 直行ベクトルを計算.
 	inline AT_DEVICE_API vec3 getOrthoVector(const vec3& n)
 	{

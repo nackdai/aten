@@ -134,6 +134,8 @@ namespace aten {
 			return m_root;
 		}
 
+		static bvhnode* getInternalNode(bvhnode* node, aten::mat4* mtxL2W = nullptr);
+
 		template <typename _T>
 		static void registerBvhNodeToLinearList(
 			aten::bvhnode* root,

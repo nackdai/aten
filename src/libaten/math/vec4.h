@@ -254,4 +254,24 @@ namespace aten {
 			aten::abs(v.w));
 		return std::move(ret);
 	}
+
+	inline AT_DEVICE_API vec4 min(const vec4& a, const vec4& b)
+	{
+		vec4 ret(
+			aten::cmpMin(a.x, b.x),
+			aten::cmpMin(a.y, b.y),
+			aten::cmpMin(a.z, b.z),
+			aten::cmpMin(a.w, b.w));
+		return std::move(ret);
+	}
+
+	inline AT_DEVICE_API vec4 max(const vec4& a, const vec4& b)
+	{
+		vec4 ret(
+			aten::cmpMax(a.x, b.x),
+			aten::cmpMax(a.y, b.y),
+			aten::cmpMax(a.z, b.z),
+			aten::cmpMax(a.w, b.w));
+		return std::move(ret);
+	}
 }

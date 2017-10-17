@@ -96,40 +96,6 @@ namespace aten {
 		fclose(fp);
 	}
 
-	static inline bvhnode* getInternalNode(bvhnode* node, aten::mat4* mtxL2W = nullptr)
-	{
-		bvhnode* ret = nullptr;
-
-		if (node) {
-			auto item = node->getItem();
-			if (item) {
-				auto internalObj = const_cast<hitable*>(item->getHasObject());
-				if (internalObj) {
-					auto t = transformable::getShapeAsHitable(item);
-
-					if (mtxL2W) {
-						aten::mat4 mtxW2L;
-						t->getMatrices(*mtxL2W, mtxW2L);
-					}
-
-					auto accel = internalObj->getInternalAccelerator();
-
-					// NOTE
-					// 本来ならこのキャストは不正だが、BVHであることは自明なので.
-					auto bvh = *(aten::bvh**)&accel;
-
-					ret = bvh->getRoot();
-				}
-			}
-
-			if (!ret) {
-				ret = node;
-			}
-		}
-
-		return ret;
-	}
-
 	void GPUBvh::registerBvhNodeToLinearList(
 		bvhnode* root,
 		bvhnode* parentNode,
@@ -266,8 +232,8 @@ namespace aten {
 					: nullptr);
 
 				if (parent) {
-					bvhnode* left = getInternalNode(parent->getLeft());
-					bvhnode* right = getInternalNode(parent->getRight());
+					bvhnode* left = bvh::getInternalNode(parent->getLeft());
+					bvhnode* right = bvh::getInternalNode(parent->getRight());
 
 					bool isLeft = (left == node);
 
@@ -293,8 +259,8 @@ namespace aten {
 								: nullptr);
 
 							if (grandParent) {
-								bvhnode* _left = getInternalNode(grandParent->getLeft());;
-								bvhnode* _right = getInternalNode(grandParent->getRight());;
+								bvhnode* _left = bvh::getInternalNode(grandParent->getLeft());;
+								bvhnode* _right = bvh::getInternalNode(grandParent->getRight());;
 
 								auto sibling = _right;
 								if (sibling) {

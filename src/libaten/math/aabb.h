@@ -123,8 +123,8 @@ namespace aten {
 			const auto tmax = max(f, n);
 			const auto tmin = min(f, n);
 
-			const float t1 = aten::cmpMin(aten::cmpMin(aten::cmpMin(tmax.x, tmax.y), tmax.z), t_max);
-			const float t0 = aten::cmpMax(aten::cmpMax(aten::cmpMax(tmin.x, tmin.y), tmin.z), t_min);
+			const auto t1 = aten::cmpMin(aten::cmpMin(aten::cmpMin(tmax.x, tmax.y), tmax.z), t_max);
+			const auto t0 = aten::cmpMax(aten::cmpMax(aten::cmpMax(tmin.x, tmin.y), tmin.z), t_min);
 
 			if (t_result) {
 				*t_result = t0;

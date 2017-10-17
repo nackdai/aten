@@ -70,6 +70,7 @@
 
 #include "accelerator/accelerator.h"
 #include "accelerator/bvh.h"
+#include "accelerator/qbvh.h"
 #include "accelerator/gpu_bvh.h"
 
 #include "sampler/xorshift.h"

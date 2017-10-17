@@ -491,7 +491,7 @@ namespace aten {
 #endif
 	}
 
-	bvhnode* bvh::getInternalNode(bvhnode* node, aten::mat4* mtxL2W = nullptr)
+	bvhnode* bvh::getInternalNode(bvhnode* node, aten::mat4* mtxL2W/*= nullptr*/)
 	{
 		bvhnode* ret = nullptr;
 

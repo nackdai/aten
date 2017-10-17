@@ -1,5 +1,7 @@
 #include "accelerator/qbvh.h"
 
+#pragma optimize( "", off)
+
 namespace aten
 {
 	void qbvh::build(
@@ -343,7 +345,7 @@ namespace aten
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
-		//return hit(0,)
+		return hit(0, m_listQbvhNode, r, t_min, t_max, isect);
 	}
 
 	bool qbvh::hit(
@@ -460,5 +462,7 @@ namespace aten
 				}
 			}
 		}
+
+		return (isect.objid >= 0);
 	}
 }

@@ -8,8 +8,11 @@
 
 //#pragma optimize( "", off)
 
+// Threaded BVH
+// http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
+
 namespace aten {
-	void GPUBvh::build(
+	void ThreadedBVH::build(
 		hitable** list,
 		uint32_t num)
 	{
@@ -23,11 +26,11 @@ namespace aten {
 		std::vector<accelerator*> listBvh;
 		std::map<hitable*, std::vector<accelerator*>> nestedBvhMap;
 
-		std::vector<std::vector<GPUBvhNodeEntry>> listBvhNode;
+		std::vector<std::vector<ThreadedBvhNodeEntry>> listBvhNode;
 		
 		// Register to linear list to traverse bvhnode easily.
 		auto root = m_bvh.getRoot();
-		listBvhNode.push_back(std::vector<GPUBvhNodeEntry>());
+		listBvhNode.push_back(std::vector<ThreadedBvhNodeEntry>());
 		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
 		for (int i = 0; i < listBvh.size(); i++) {
@@ -51,7 +54,7 @@ namespace aten {
 				}
 			}
 
-			listBvhNode.push_back(std::vector<GPUBvhNodeEntry>());
+			listBvhNode.push_back(std::vector<ThreadedBvhNodeEntry>());
 			std::vector<accelerator*> dummy;
 
 			registerBvhNodeToLinearList(root, nullptr, parent, aten::mat4::Identity, listBvhNode[i + 1], dummy, nestedBvhMap);
@@ -77,7 +80,7 @@ namespace aten {
 		//dump(m_listGpuBvhNode[1], "node.txt");
 	}
 
-	void GPUBvh::dump(std::vector<GPUBvhNode>& nodes, const char* path)
+	void ThreadedBVH::dump(std::vector<GPUBvhNode>& nodes, const char* path)
 	{
 		FILE* fp = nullptr;
 		fopen_s(&fp, path, "wt");
@@ -96,16 +99,16 @@ namespace aten {
 		fclose(fp);
 	}
 
-	void GPUBvh::registerBvhNodeToLinearList(
+	void ThreadedBVH::registerBvhNodeToLinearList(
 		bvhnode* root,
 		bvhnode* parentNode,
 		hitable* nestParent,
 		const aten::mat4& mtxL2W,
-		std::vector<GPUBvhNodeEntry>& listBvhNode,
+		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
 		std::vector<accelerator*>& listBvh,
 		std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap)
 	{
-		bvh::registerBvhNodeToLinearList<GPUBvhNodeEntry>(
+		bvh::registerBvhNodeToLinearList<ThreadedBvhNodeEntry>(
 			root,
 			parentNode,
 			nestParent,
@@ -113,9 +116,9 @@ namespace aten {
 			listBvhNode,
 			listBvh,
 			nestedBvhMap,
-			[this](std::vector<GPUBvhNodeEntry>& list, bvhnode* node, hitable* obj, const aten::mat4& mtx)
+			[this](std::vector<ThreadedBvhNodeEntry>& list, bvhnode* node, hitable* obj, const aten::mat4& mtx)
 		{
-			list.push_back(GPUBvhNodeEntry(node, obj, mtx));
+			list.push_back(ThreadedBvhNodeEntry(node, obj, mtx));
 		},
 			[this](bvhnode* node)
 		{
@@ -126,9 +129,9 @@ namespace aten {
 		});
 	}
 
-	void GPUBvh::registerGpuBvhNode(
+	void ThreadedBVH::registerGpuBvhNode(
 		bool isPrimitiveLeaf,
-		std::vector<GPUBvhNodeEntry>& listBvhNode,
+		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
 		std::vector<GPUBvhNode>& listGpuBvhNode)
 	{
 		listGpuBvhNode.reserve(listBvhNode.size());
@@ -187,8 +190,8 @@ namespace aten {
 		}
 	}
 
-	void GPUBvh::setOrderForLinearBVH(
-		std::vector<GPUBvhNodeEntry>& listBvhNode,
+	void ThreadedBVH::setOrderForLinearBVH(
+		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
 		std::vector<GPUBvhNode>& listGpuBvhNode)
 	{
 		auto num = listGpuBvhNode.size();
@@ -286,7 +289,7 @@ namespace aten {
 		}
 	}
 
-	bool GPUBvh::hit(
+	bool ThreadedBVH::hit(
 		const ray& r,
 		real t_min, real t_max,
 		Intersection& isect) const
@@ -294,7 +297,7 @@ namespace aten {
 		return hit(0, m_listGpuBvhNode, r, t_min, t_max, isect);
 	}
 
-	bool GPUBvh::hit(
+	bool ThreadedBVH::hit(
 		int exid,
 		const std::vector<std::vector<GPUBvhNode>>& listGpuBvhNode,
 		const ray& r,

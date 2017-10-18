@@ -4,12 +4,10 @@
 #include "accelerator/bvh.h"
 
 namespace aten {
-	// TODO
-	// テスト用に bvh の継承クラスで作るが、インスタシエイトする必要がないので、あとで変更する.
-	class GPUBvh : public accelerator {
+	class ThreadedBVH : public accelerator {
 	public:
-		GPUBvh() {}
-		virtual ~GPUBvh() {}
+		ThreadedBVH() {}
+		virtual ~ThreadedBVH() {}
 
 	public:
 		virtual void build(
@@ -33,12 +31,12 @@ namespace aten {
 		static void dump(std::vector<GPUBvhNode>& nodes, const char* path);
 
 	private:
-		struct GPUBvhNodeEntry {
+		struct ThreadedBvhNodeEntry {
 			bvhnode* node;
 			hitable* nestParent;
 			aten::mat4 mtxL2W;
 
-			GPUBvhNodeEntry(bvhnode* n, hitable* p, const aten::mat4& m)
+			ThreadedBvhNodeEntry(bvhnode* n, hitable* p, const aten::mat4& m)
 				: node(n), nestParent(p), mtxL2W(m)
 			{}
 		};
@@ -48,17 +46,17 @@ namespace aten {
 			bvhnode* parentNode,
 			hitable* nestParent,
 			const aten::mat4& mtxL2W,
-			std::vector<GPUBvhNodeEntry>& listBvhNode,
+			std::vector<ThreadedBvhNodeEntry>& listBvhNode,
 			std::vector<accelerator*>& listBvh,
 			std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap);
 
 		void registerGpuBvhNode(
 			bool isPrimitiveLeaf,
-			std::vector<GPUBvhNodeEntry>& listBvhNode,
+			std::vector<ThreadedBvhNodeEntry>& listBvhNode,
 			std::vector<GPUBvhNode>& listGpuBvhNode);
 
 		void setOrderForLinearBVH(
-			std::vector<GPUBvhNodeEntry>& listBvhNode,
+			std::vector<ThreadedBvhNodeEntry>& listBvhNode,
 			std::vector<GPUBvhNode>& listGpuBvhNode);
 
 		bool hit(

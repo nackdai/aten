@@ -105,7 +105,7 @@ namespace aten {
 	class bvh : public accelerator {
 		friend class bvhnode;
 		friend class accelerator;
-		friend class GPUBvh;
+		friend class ThreadedBVH;
 
 	public:
 		bvh() {}

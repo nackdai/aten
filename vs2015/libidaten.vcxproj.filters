@@ -214,6 +214,9 @@
     <ClInclude Include="..\src\libidaten\kernel\qbvh_impl.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

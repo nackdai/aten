@@ -4,7 +4,7 @@
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/bvh.cuh"
+#include "kernel/accelerator.cuh"
 #include "kernel/compaction.h"
 #include "kernel/pt_common.h"
 
@@ -169,7 +169,7 @@ __global__ void hitTest(
 
 		aten::Intersection isect;
 
-		bool isHit = intersectBVH(&ctxt, rays[idx], &isect);
+		bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
 
 		isects[idx].t = isect.t;
 		isects[idx].objid = isect.objid;
@@ -224,7 +224,7 @@ __global__ void hitTest(
 
 	aten::Intersection isect;
 
-	bool isHit = intersectBVH(&ctxt, rays[idx], &isect);
+	bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
 
 	isects[idx].t = isect.t;
 	isects[idx].objid = isect.objid;
@@ -565,7 +565,7 @@ __global__ void shade(
 #else
 			aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
-			bool isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
+			bool isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 
 			if (isHit) {
 				hitobj = (void*)&ctxt.shapes[isectTmp.objid];
@@ -747,7 +747,7 @@ __global__ void hitShadowRay(
 			aten::Intersection isectTmp;
 
 			bool isHit = false;
-			isHit = intersectCloserBVH(&ctxt, shadowRay.ray[i], &isectTmp, distToLight - AT_MATH_EPSILON);
+			isHit = intersectCloser(&ctxt, shadowRay.ray[i], &isectTmp, distToLight - AT_MATH_EPSILON);
 
 			if (isHit) {
 				hitobj = &ctxt.shapes[isectTmp.objid];

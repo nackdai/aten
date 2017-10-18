@@ -4,7 +4,7 @@
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/bvh.cuh"
+#include "kernel/accelerator.cuh"
 #include "kernel/compaction.h"
 #include "kernel/pt_common.h"
 
@@ -91,7 +91,7 @@ __global__ void pickPixel(
 	}
 
 	aten::Intersection isect;
-	bool isHit = intersectBVH(&ctxt, camsample.r, &isect);
+	bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
 
 	if (isHit) {
 		const auto idx = getIdx(ix, iy, width);

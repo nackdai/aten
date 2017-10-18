@@ -80,6 +80,7 @@
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
     <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
+    <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\compaction.h" />

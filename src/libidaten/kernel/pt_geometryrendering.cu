@@ -3,7 +3,7 @@
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/bvh.cuh"
+#include "kernel/accelerator.cuh"
 #include "kernel/compaction.h"
 #include "kernel/pt_common.h"
 
@@ -55,7 +55,7 @@ __global__ void renderAOV(
 	aten::hitrecord rec;
 	aten::Intersection isect;
 
-	bool isHit = intersectBVH(&ctxt, ray, &isect);
+	bool isHit = intersectClosest(&ctxt, ray, &isect);
 
 	if (isHit) {
 		auto obj = &ctxt.shapes[isect.objid];

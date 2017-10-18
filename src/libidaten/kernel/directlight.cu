@@ -3,7 +3,7 @@
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/bvh.cuh"
+#include "kernel/accelerator.cuh"
 #include "kernel/compaction.h"
 #include "kernel/pt_common.h"
 
@@ -175,7 +175,7 @@ __global__ void shade(
 			aten::Intersection isectTmp;
 			aten::ray shadowRay(rec.p, dirToLight);
 
-			bool isHit = intersectCloserBVH(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
+			bool isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
 
 			if (isHit) {
 				hitobj = (void*)&ctxt.shapes[isectTmp.objid];
@@ -258,7 +258,7 @@ __global__ void shade(
 					aten::ray nextRay = aten::ray(rec.p, nextDir);
 
 					aten::Intersection tmpIsect;
-					bool isAnyHit = intersectBVH(&ctxt, nextRay, &tmpIsect);
+					bool isAnyHit = intersectClosest(&ctxt, nextRay, &tmpIsect);
 
 					if (isAnyHit)
 					{

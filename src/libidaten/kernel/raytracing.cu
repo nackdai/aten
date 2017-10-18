@@ -3,7 +3,7 @@
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/bvh.cuh"
+#include "kernel/accelerator.cuh"
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
@@ -101,7 +101,7 @@ __global__ void hitTestRayTracing(
 	
 	aten::Intersection isect;
 
-	bool isHit = intersectBVH(&ctxt, path.ray, &isect);
+	bool isHit = intersectClosest(&ctxt, path.ray, &isect);
 
 	path.isect.t = isect.t;
 	path.isect.objid = isect.objid;
@@ -291,7 +291,7 @@ __global__ void hitShadowRay(
 		auto& path = paths[idx];
 
 		aten::Intersection isect;
-		bool isHit = intersectBVH(&ctxt, shadowRay, &isect);
+		bool isHit = intersectClosest(&ctxt, shadowRay, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
 		const aten::ShapeParameter* hitobj = nullptr;

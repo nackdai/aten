@@ -33,6 +33,15 @@ __device__ bool hitAABB(
 	real t_min, real t_max,
 	real* t_result);
 
+__device__ int hit4AABBWith1Ray(
+	aten::vec4* result,
+	aten::vec3 org,
+	aten::vec3 dir,
+	const float4& bminx, const float4& bmaxx,
+	const float4& bminy, const float4& bmaxy,
+	const float4& bminz, const float4& bmaxz,
+	float t_min, float t_max);
+
 __device__ void evalHitResultTriangle(
 	const Context* ctxt,
 	const aten::ShapeParameter* param,

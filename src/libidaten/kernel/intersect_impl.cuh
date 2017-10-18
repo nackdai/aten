@@ -196,6 +196,72 @@ AT_CUDA_INLINE __device__ bool hitAABB(
 	return s.x <= s.y;
 }
 
+AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
+	aten::vec4* result,
+	aten::vec3 org,
+	aten::vec3 dir,
+	const float4& bminx, const float4& bmaxx,
+	const float4& bminy, const float4& bmaxy,
+	const float4& bminz, const float4& bmaxz,
+	float t_min, float t_max)
+{
+	float4 invdx = make_float4(1.0f / (dir.x + 1e-6f));
+	float4 invdy = make_float4(1.0f / (dir.y + 1e-6f));
+	float4 invdz = make_float4(1.0f / (dir.z + 1e-6f));
+
+	float4 ox = make_float4(-org.x * invdx.x);
+	float4 oy = make_float4(-org.y * invdx.y);
+	float4 oz = make_float4(-org.z * invdx.z);
+
+	// X 
+	auto fx = bmaxx * invdx + ox;
+	auto nx = bminx * invdx + ox;
+
+	// Y
+	auto fy = bmaxy * invdy + oy;
+	auto ny = bminy * invdy + oy;
+
+	// Z
+	auto fz = bmaxz * invdz + oz;
+	auto nz = bminz * invdz + oz;
+
+	auto tmaxX = vmax(fx, nx);
+	auto tminX = vmin(fx, nx);
+
+	auto tmaxY = vmax(fy, ny);
+	auto tminY = vmin(fy, ny);
+
+	auto tmaxZ = vmax(fz, nz);
+	auto tminZ = vmin(fz, nz);
+
+	auto t1 = vmin(vmin(tmaxX, tmaxY), vmin(tmaxZ, make_float4(t_max)));
+	auto t0 = vmax(vmax(tminX, tminY), vmax(tminZ, make_float4(t_min)));
+
+	union isHit {
+		struct {
+			uint8_t _0 : 1;
+			uint8_t _1 : 1;
+			uint8_t _2 : 1;
+			uint8_t _3 : 1;
+			uint8_t padding : 4;
+		};
+		uint8_t f;
+	} hit;
+
+	hit.f = 0;
+	hit._0 = (t0.x <= t1.x);
+	hit._1 = (t0.y <= t1.y);
+	hit._2 = (t0.z <= t1.z);
+	hit._3 = (t0.w <= t1.w);
+
+	result->x = t0.x;
+	result->y = t0.y;
+	result->z = t0.z;
+	result->w = t0.w;
+
+	return hit.f;
+}
+
 inline __device__ float4 cross(float4 a, float4 b)
 {
 	return make_float4(

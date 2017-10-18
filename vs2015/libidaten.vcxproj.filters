@@ -127,9 +127,6 @@
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\bvh.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\object\object.h">
       <Filter>aten\object</Filter>
     </ClInclude>
@@ -161,9 +158,6 @@
       <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\material_impl.cuh">
@@ -208,6 +202,18 @@
     <ClInclude Include="..\src\libaten\sampler\cmj.h">
       <Filter>aten\sampler</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\bvh.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\qbvh.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\qbvh_impl.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -251,6 +257,9 @@
     </Filter>
     <Filter Include="svgf">
       <UniqueIdentifier>{58051365-e283-4a32-b359-70330e6c9d8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="kernel\accelerator">
+      <UniqueIdentifier>{2d173933-17b5-4c14-8cc7-60629a90d056}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -340,9 +349,6 @@
     <CudaCompile Include="..\src\libaten\camera\pinhole .cpp">
       <Filter>aten\camera</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\intersect.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
@@ -382,6 +388,12 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_debug.cu">
       <Filter>svgf</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\bvh.cu">
+      <Filter>kernel\accelerator</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\qbvh.cu">
+      <Filter>kernel\accelerator</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

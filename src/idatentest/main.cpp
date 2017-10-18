@@ -34,7 +34,7 @@ static aten::Film g_buffer(WIDTH, HEIGHT);
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::AcceleratedScene<aten::ThreadedBVH> g_scene;
 
 aten::ATrousDenoiser atrous;
 

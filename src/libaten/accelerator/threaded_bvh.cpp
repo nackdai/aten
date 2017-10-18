@@ -1,4 +1,4 @@
-#include "accelerator/gpu_bvh.h"
+#include "accelerator/threaded_bvh.h"
 #include "accelerator/bvh.h"
 #include "shape/tranformable.h"
 #include "object/object.h"

@@ -377,10 +377,10 @@
     <ClInclude Include="..\src\libaten\filter\atrous.h">
       <Filter>filter</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\accelerator\gpu_bvh.h">
+    <ClInclude Include="..\src\libaten\accelerator\qbvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\accelerator\qbvh.h">
+    <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
   </ItemGroup>
@@ -592,13 +592,13 @@
     <ClCompile Include="..\src\libaten\filter\atrous.cpp">
       <Filter>filter</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\accelerator\gpu_bvh.cpp">
-      <Filter>accelerator</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
   </ItemGroup>

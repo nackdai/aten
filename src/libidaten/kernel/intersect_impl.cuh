@@ -198,8 +198,8 @@ AT_CUDA_INLINE __device__ bool hitAABB(
 
 AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
 	aten::vec4* result,
-	aten::vec3 org,
-	aten::vec3 dir,
+	const aten::vec3& org,
+	const aten::vec3& dir,
 	const float4& bminx, const float4& bmaxx,
 	const float4& bminy, const float4& bmaxy,
 	const float4& bminz, const float4& bmaxz,
@@ -210,8 +210,8 @@ AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
 	float4 invdz = make_float4(1.0f / (dir.z + 1e-6f));
 
 	float4 ox = make_float4(-org.x * invdx.x);
-	float4 oy = make_float4(-org.y * invdx.y);
-	float4 oz = make_float4(-org.z * invdx.z);
+	float4 oy = make_float4(-org.y * invdy.x);
+	float4 oz = make_float4(-org.z * invdz.x);
 
 	// X 
 	auto fx = bmaxx * invdx + ox;

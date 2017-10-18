@@ -35,8 +35,8 @@ __device__ bool hitAABB(
 
 __device__ int hit4AABBWith1Ray(
 	aten::vec4* result,
-	aten::vec3 org,
-	aten::vec3 dir,
+	const aten::vec3& org,
+	const aten::vec3& dir,
 	const float4& bminx, const float4& bmaxx,
 	const float4& bminy, const float4& bmaxy,
 	const float4& bminz, const float4& bmaxz,

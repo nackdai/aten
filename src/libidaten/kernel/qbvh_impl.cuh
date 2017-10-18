@@ -4,8 +4,8 @@ struct QbvhIntersect {
 	int nodeid{ -1 };
 	float t;
 
-	QbvhIntersect(int id, float _t) : nodeid(id), t(_t) {}
-	QbvhIntersect() {}
+	__device__ QbvhIntersect(int id, float _t) : nodeid(id), t(_t) {}
+	__device__ QbvhIntersect() {}
 };
 
 AT_CUDA_INLINE __device__ bool intersectQBVHClosestTriangles(

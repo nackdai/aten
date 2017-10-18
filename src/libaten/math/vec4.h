@@ -66,6 +66,14 @@ namespace aten {
 			w = _w;
 			return *this;
 		}
+		inline AT_DEVICE_API const vec4& set(real f)
+		{
+			x = f;
+			y = f;
+			z = f;
+			w = f;
+			return *this;
+		}
 		inline AT_DEVICE_API const vec4& set(const vec3& _v, real _w)
 		{
 			v = _v;

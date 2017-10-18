@@ -64,7 +64,7 @@ namespace aten {
 			std::vector<accelerator*>& listBvh,
 			std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap);
 
-		void convertFromBvh(
+		uint32_t convertFromBvh(
 			bool isPrimitiveLeaf,
 			std::vector<BvhNode>& listBvhNode,
 			std::vector<QbvhNode>& listQbvhNode);

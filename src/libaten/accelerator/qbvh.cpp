@@ -1,6 +1,6 @@
 #include "accelerator/qbvh.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {
@@ -59,10 +59,13 @@ namespace aten
 		for (int i = 0; i < listBvhNode.size(); i++) {
 			bool isPrimitiveLeafBvh = (i > 0);
 
-			convertFromBvh(
+			auto numNodes = convertFromBvh(
 				isPrimitiveLeafBvh,
 				listBvhNode[i],
 				m_listQbvhNode[i]);
+
+			// TODO
+			// listQbvhNodeÇÃèkëﬁ.
 		}
 	}
 
@@ -96,7 +99,7 @@ namespace aten
 		});
 	}
 
-	void qbvh::convertFromBvh(
+	uint32_t qbvh::convertFromBvh(
 		bool isPrimitiveLeaf,
 		std::vector<BvhNode>& listBvhNode,
 		std::vector<QbvhNode>& listQbvhNode)
@@ -117,9 +120,9 @@ namespace aten
 		stack[0] = QbvhStackEntry(0, 0);
 
 		int stackPos = 1;
+		uint32_t numNodes = 1;
 
 		int children[4];
-		uint32_t numNodes = 0;
 
 		while (stackPos > 0) {
 			auto top = stack[--stackPos];
@@ -142,12 +145,21 @@ namespace aten
 				children,
 				numChildren);
 
+			qbvhNode.children[0] = (children[0] >= 0 ? numNodes + 0 : -1);
+			qbvhNode.children[1] = (children[1] >= 0 ? numNodes + 1 : -1);
+			qbvhNode.children[2] = (children[2] >= 0 ? numNodes + 2 : -1);
+			qbvhNode.children[3] = (children[3] >= 0 ? numNodes + 3 : -1);
+
+			qbvhNode.numChildren = numChildren;
+
 			// push all children to the stack
 			for (int i = 0; i < numChildren; i++) {
-				stack[stackPos] = QbvhStackEntry(numNodes, children[i]);
+				stack[stackPos++] = QbvhStackEntry(numNodes, children[i]);
 				++numNodes;
 			}
 		}
+
+		return numNodes;
 	}
 
 	void qbvh::setQbvhNodeLeafParams(
@@ -165,6 +177,18 @@ namespace aten
 		auto parent = node->getParent();
 		qbvhNode.parent = (float)(parent ? parent->getTraversalOrder() : -1);
 #endif
+
+		qbvhNode.children[0] = qbvhNode.children[1] = qbvhNode.children[2] = qbvhNode.children[3] = -1;
+
+		qbvhNode.bmaxx.set(real(0));
+		qbvhNode.bmaxy.set(real(0));
+		qbvhNode.bmaxz.set(real(0));
+
+		qbvhNode.bminx.set(real(0));
+		qbvhNode.bminy.set(real(0));
+		qbvhNode.bminz.set(real(0));
+
+		qbvhNode.numChildren = 0;
 
 		if (node->isLeaf()) {
 			hitable* item = node->getItem();
@@ -196,6 +220,8 @@ namespace aten
 			else {
 				qbvhNode.exid = node->getExternalId();
 			}
+
+			qbvhNode.isLeaf = true;
 		}
 	}
 
@@ -235,7 +261,11 @@ namespace aten
 			qbvhNode.bminx[i] = real(0);
 			qbvhNode.bminy[i] = real(0);
 			qbvhNode.bminz[i] = real(0);
+
+			qbvhNode.children[i] = -1;
 		}
+
+		qbvhNode.isLeaf = false;
 	}
 
 	int qbvh::getChildren(
@@ -256,28 +286,40 @@ namespace aten
 
 		const auto left = bvhNode->getLeft();
 
-		if (left->isLeaf()) {
-			children[numChildren++] = left->getTraversalOrder();
-		}
-		else {
-			const auto left_left = left->getLeft();
-			const auto left_right = left->getRight();
+		if (left) {
+			if (left->isLeaf()) {
+				children[numChildren++] = left->getTraversalOrder();
+			}
+			else {
+				const auto left_left = left->getLeft();
+				const auto left_right = left->getRight();
 
-			children[numChildren++] = left_left->getTraversalOrder();
-			children[numChildren++] = left_right->getTraversalOrder();
+				if (left_left) {
+					children[numChildren++] = left_left->getTraversalOrder();
+				}
+				if (left_right) {
+					children[numChildren++] = left_right->getTraversalOrder();
+				}
+			}
 		}
 
 		const auto right = bvhNode->getRight();
 
-		if (right->isLeaf()) {
-			children[numChildren++] = right->getTraversalOrder();
-		}
-		else {
-			const auto right_left = right->getLeft();
-			const auto right_right = right->getRight();
+		if (right) {
+			if (right->isLeaf()) {
+				children[numChildren++] = right->getTraversalOrder();
+			}
+			else {
+				const auto right_left = right->getLeft();
+				const auto right_right = right->getRight();
 
-			children[numChildren++] = right_left->getTraversalOrder();
-			children[numChildren++] = right_right->getTraversalOrder();
+				if (right_left) {
+					children[numChildren++] = right_left->getTraversalOrder();
+				}
+				if (right_right) {
+					children[numChildren++] = right_right->getTraversalOrder();
+				}
+			}
 		}
 
 		return numChildren;
@@ -291,6 +333,9 @@ namespace aten
 		const aten::vec4& bminy, const aten::vec4& bmaxy,
 		const aten::vec4& bminz, const aten::vec4& bmaxz)
 	{
+		// NOTE
+		// No SSE...
+
 		aten::vec3 invdir = real(1) / (r.dir + aten::vec3(real(1e-6)));
 		aten::vec3 oxinvdir = -r.org * invdir;
 
@@ -302,42 +347,53 @@ namespace aten
 		aten::vec4 oy(oxinvdir.y);
 		aten::vec4 oz(oxinvdir.z);
 
-		aten::vec4 tmin(t_min);
-		aten::vec4 tmax(t_max);
+		aten::vec4 minus_inf(-AT_MATH_INF);
+		aten::vec4 plus_inf(AT_MATH_INF);
 
 		// X 
-		auto f = bmaxx * invdx + ox;
-		auto n = bminx * invdx + ox;
-
-		tmin = max(f, tmin);
-		tmax = min(n, tmax);
+		auto fx = bmaxx * invdx + ox;
+		auto nx = bminx * invdx + ox;
 
 		// Y
-		f = bmaxy * invdy + oy;
-		n = bminy * invdy + oy;
-
-		tmin = max(f, tmin);
-		tmax = min(n, tmax);
+		auto fy = bmaxy * invdy + oy;
+		auto ny = bminy * invdy + oy;
 
 		// Z
-		f = bmaxz * invdz + oz;
-		n = bminz * invdz + oz;
+		auto fz = bmaxz * invdz + oz;
+		auto nz = bminz * invdz + oz;
 
-		tmin = max(f, tmin);
-		tmax = min(n, tmax);
+		auto tmaxX = max(fx, nx);
+		auto tminX = min(fx, nx);
 
-		result = tmin;
+		auto tmaxY = max(fy, ny);
+		auto tminY = min(fy, ny);
 
-		int isHit[4] = {
-			tmin.x <= tmax.x,
-			tmin.y <= tmax.y,
-			tmin.z <= tmax.z,
-			tmin.w <= tmax.w,
-		};
+		auto tmaxZ = max(fz, nz);
+		auto tminZ = min(fz, nz);
 
-		int ret = (isHit[3] << 3) | (isHit[2] << 2) | (isHit[1] << 1) | (isHit[0] << 0);
+		auto t1 = min(min(tmaxX, tmaxY), min(tmaxZ, t_max));
+		auto t0 = max(max(tminX, tminY), max(tminZ, t_min));
 
-		return ret;
+		union isHit {
+			struct {
+				uint8_t _0 : 1;
+				uint8_t _1 : 1;
+				uint8_t _2 : 1;
+				uint8_t _3 : 1;
+				uint8_t padding : 4;
+			};
+			uint8_t f;
+		} hit;
+
+		hit.f = 0;
+		hit._0 = (t0.x <= t1.x);
+		hit._1 = (t0.y <= t1.y);
+		hit._2 = (t0.z <= t1.z);
+		hit._3 = (t0.w <= t1.w);
+
+		result = t0;
+
+		return hit.f;
 	}
 
 	bool qbvh::hit(
@@ -415,23 +471,16 @@ namespace aten
 						isectTmp);
 				}
 				else if (pnode->primid >= 0) {
-					// TODO
-					// 4trianglesÇìØéûÇ…åvéZÇµÇΩÇ¢.
-					for (int i = 0; i < numChildren; i++) {
-						auto f = prims[pnode->children[i]];
+					auto f = prims[pnode->primid];
+					isHit = f->hit(r, t_min, t_max, isectTmp);
 
-						Intersection isectTmpTmp;
-						if (f->hit(r, t_min, t_max, isectTmpTmp)) {
-							if (isectTmpTmp.t < isectTmp.t) {
-								isectTmp = isectTmpTmp;
-								isHit = true;
-							}
-						}
+					if (isHit) {
+						isectTmp.objid = s->id();
 					}
 				}
 				else {
-					// TODO
 					// sphere, cube.
+					isHit = s->hit(r, t_min, t_max, isectTmp);
 				}
 
 				if (isHit) {
@@ -441,7 +490,7 @@ namespace aten
 				}
 			}
 			else {
-				// Hit children aabb.
+				// Hit test children aabb.
 				aten::vec4 interserctT;
 				auto res = intersectAABB(
 					interserctT,
@@ -453,7 +502,7 @@ namespace aten
 
 				// Stack hit children.
 				for (int i = 0; i < numChildren; i++) {
-					if ((res & (i << i)) > 0) {
+					if ((res & (1 << i)) > 0) {
 						stackbuf[stackpos] = Intersect(
 							&listQbvhNode[exid][pnode->children[i]],
 							interserctT[i]);

@@ -12,8 +12,8 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X	(256)
-#define BREAK_Y	(511 - 256)
+#define BREAK_X	(259)
+#define BREAK_Y	(511-53)
 #pragma optimize( "", off)
 #endif
 

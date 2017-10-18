@@ -482,6 +482,7 @@ namespace aten
 				if (isHit) {
 					if (isectTmp.t < isect.t) {
 						isect = isectTmp;
+						t_max = isect.t;
 					}
 				}
 			}

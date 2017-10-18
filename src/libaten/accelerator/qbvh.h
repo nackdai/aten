@@ -32,9 +32,6 @@ namespace aten {
 		};
 
 		struct QbvhNode {
-			hitable* item;
-			int children[4];
-
 			aten::vec4 bminx;
 			aten::vec4 bmaxx;
 
@@ -49,6 +46,7 @@ namespace aten {
 			int shapeid{ -1 };
 			int meshid{ -1 };
 
+			uint32_t leftChildrenIdx;
 			struct {
 				uint32_t isLeaf : 1;
 				uint32_t numChildren : 3;

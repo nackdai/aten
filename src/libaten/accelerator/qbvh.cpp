@@ -143,11 +143,7 @@ namespace aten
 				children,
 				numChildren);
 
-			qbvhNode.children[0] = (children[0] >= 0 ? numNodes + 0 : -1);
-			qbvhNode.children[1] = (children[1] >= 0 ? numNodes + 1 : -1);
-			qbvhNode.children[2] = (children[2] >= 0 ? numNodes + 2 : -1);
-			qbvhNode.children[3] = (children[3] >= 0 ? numNodes + 3 : -1);
-
+			qbvhNode.leftChildrenIdx = numNodes;
 			qbvhNode.numChildren = numChildren;
 
 			// push all children to the stack
@@ -178,7 +174,7 @@ namespace aten
 		qbvhNode.parent = (float)(parent ? parent->getTraversalOrder() : -1);
 #endif
 
-		qbvhNode.children[0] = qbvhNode.children[1] = qbvhNode.children[2] = qbvhNode.children[3] = -1;
+		qbvhNode.leftChildrenIdx = 0;
 
 		qbvhNode.bmaxx.set(real(0));
 		qbvhNode.bmaxy.set(real(0));
@@ -262,7 +258,7 @@ namespace aten
 			qbvhNode.bminy[i] = real(0);
 			qbvhNode.bminz[i] = real(0);
 
-			qbvhNode.children[i] = -1;
+			qbvhNode.leftChildrenIdx = 0;
 		}
 
 		qbvhNode.isLeaf = false;
@@ -504,7 +500,7 @@ namespace aten
 				for (int i = 0; i < numChildren; i++) {
 					if ((res & (1 << i)) > 0) {
 						stackbuf[stackpos] = Intersect(
-							&listQbvhNode[exid][pnode->children[i]],
+							&listQbvhNode[exid][pnode->leftChildrenIdx + i],
 							interserctT[i]);
 						stackpos++;
 					}

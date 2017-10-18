@@ -130,15 +130,6 @@ namespace aten {
 #endif
 		}
 
-		void setExtraId(int id)
-		{
-			m_extraId = id;
-		}
-		int getExtraId() const
-		{
-			return m_extraId;
-		}
-
 	private:
 		virtual void evalHitResult(
 			const ray& r,
@@ -151,9 +142,5 @@ namespace aten {
 	private:
 		const char* m_name;
 		aabb m_aabb;
-
-		// TODO
-		// ‰¼.
-		int m_extraId{ -1 };
 	};
 }

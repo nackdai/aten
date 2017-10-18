@@ -185,8 +185,6 @@ namespace aten {
 
 				auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
 				if (found == listBvh.end()) {
-					auto exid = (int)listBvh.size();
-					obj->setExtraId(exid);
 					listBvh.push_back(nestedBvh);
 				}
 

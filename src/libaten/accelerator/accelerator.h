@@ -24,8 +24,6 @@ namespace aten {
 		}
 	};
 
-	class bvhnode;
-
 	class accelerator : public hitable {
 	public:
 		accelerator() {}

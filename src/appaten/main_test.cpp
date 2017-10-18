@@ -8,6 +8,7 @@ static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "app";
 
+//#define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_DOF
 
 #ifdef ENABLE_DOF
@@ -16,8 +17,7 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-//static aten::AcceleratedScene<aten::LinearList> g_scene;
-static aten::AcceleratedScene<aten::bvh> g_scene;
+static aten::AcceleratedScene<aten::qbvh> g_scene;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
@@ -85,12 +85,14 @@ void display()
 
 	aten::visualizer::render(g_buffer.image(), g_camera.needRevert());
 
+#ifdef ENABLE_EVERY_FRAME_SC
 	{
 		static char tmp[1024];
 		sprintf(tmp, "sc_%d.png\0", g_frameNo);
 
 		aten::visualizer::takeScreenshot(tmp);
 	}
+#endif
 	g_frameNo++;
 }
 
@@ -210,7 +212,7 @@ int main(int argc, char* argv[])
 	g_bg.init(g_envmap);
 
 	aten::ImageBasedLight ibl(&g_bg);
-	//g_scene.addImageBasedLight(&ibl);
+	g_scene.addImageBasedLight(&ibl);
 
 	//g_tracer.setBG(&g_staticbg);
 

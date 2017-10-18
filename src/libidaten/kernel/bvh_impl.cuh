@@ -262,7 +262,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
-				//isect->meshid = (int)attrib.w;
+				isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
 			}
 		}
 		else {
@@ -345,7 +345,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 			if (isectTmp.t < isect->t) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
-				//isect->meshid = (int)attrib.w;
+				isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
 				return true;
 			}
 		}
@@ -429,7 +429,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 			if (isHit) {
 				*isect = isectTmp;
 				isect->objid = (int)attrib.x;
-				//isect->meshid = (int)attrib.w;
+				isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
 				return true;
 			}
 		}

@@ -143,8 +143,8 @@ namespace aten
 				children,
 				numChildren);
 
-			qbvhNode.leftChildrenIdx = numNodes;
-			qbvhNode.numChildren = numChildren;
+			qbvhNode.leftChildrenIdx = (float)numNodes;
+			qbvhNode.numChildren = (float)numChildren;
 
 			// push all children to the stack
 			for (int i = 0; i < numChildren; i++) {
@@ -190,12 +190,12 @@ namespace aten
 			hitable* item = node->getItem();
 
 			// 自分自身のIDを取得.
-			qbvhNode.shapeid = transformable::findShapeIdxAsHitable(item);
+			qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
 
 			// もしなかったら、ネストしているので親のIDを取得.
 			if (qbvhNode.shapeid < 0) {
 				if (nestParent) {
-					qbvhNode.shapeid = transformable::findShapeIdxAsHitable(nestParent);
+					qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
 				}
 			}
 
@@ -206,18 +206,18 @@ namespace aten
 				item = const_cast<hitable*>(internalObj);
 			}
 
-			qbvhNode.meshid = item->meshid();
+			qbvhNode.meshid = (float)item->meshid();
 
 			if (isPrimitiveLeaf) {
 				// Leaves of this tree are primitive.
-				qbvhNode.primid = face::findIdx(item);
-				qbvhNode.exid = -1;
+				qbvhNode.primid = (float)face::findIdx(item);
+				qbvhNode.exid = -1.0f;
 			}
 			else {
-				qbvhNode.exid = node->getExternalId();
+				qbvhNode.exid = (float)node->getExternalId();
 			}
 
-			qbvhNode.isLeaf = true;
+			qbvhNode.isLeaf = (float)true;
 		}
 	}
 
@@ -467,7 +467,7 @@ namespace aten
 						isectTmp);
 				}
 				else if (pnode->primid >= 0) {
-					auto f = prims[pnode->primid];
+					auto f = prims[(int)pnode->primid];
 					isHit = f->hit(r, t_min, t_max, isectTmp);
 
 					if (isHit) {
@@ -501,7 +501,7 @@ namespace aten
 				for (int i = 0; i < numChildren; i++) {
 					if ((res & (1 << i)) > 0) {
 						stackbuf[stackpos] = Intersect(
-							&listQbvhNode[exid][pnode->leftChildrenIdx + i],
+							&listQbvhNode[exid][(int)pnode->leftChildrenIdx + i],
 							interserctT[i]);
 						stackpos++;
 					}

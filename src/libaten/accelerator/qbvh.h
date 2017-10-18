@@ -3,6 +3,27 @@
 #include "accelerator/bvh.h"
 
 namespace aten {
+	struct QbvhNode {
+		float leftChildrenIdx;
+		float isLeaf{ false };
+		float numChildren{ 0 };
+		float padding;
+
+		float shapeid{ -1 };	///< Object index.
+		float primid{ -1 };		///< Triangle index.
+		float exid{ -1 };		///< External bvh index.
+		float meshid{ -1 };		///< Mesh id.
+
+		aten::vec4 bminx;
+		aten::vec4 bmaxx;
+
+		aten::vec4 bminy;
+		aten::vec4 bmaxy;
+
+		aten::vec4 bminz;
+		aten::vec4 bmaxz;
+	};
+
 	class transformable;
 
 	class qbvh : public accelerator {
@@ -20,6 +41,15 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
+		std::vector<std::vector<QbvhNode>>& getNodes()
+		{
+			return m_listQbvhNode;
+		}
+		std::vector<aten::mat4>& getMatrices()
+		{
+			return m_mtxs;
+		}
+
 	private:
 		struct BvhNode {
 			bvhnode* node;
@@ -29,28 +59,6 @@ namespace aten {
 			BvhNode(bvhnode* n, hitable* p, const aten::mat4& m)
 				: node(n), nestParent(p), mtxL2W(m)
 			{}
-		};
-
-		struct QbvhNode {
-			aten::vec4 bminx;
-			aten::vec4 bmaxx;
-
-			aten::vec4 bminy;
-			aten::vec4 bmaxy;
-
-			aten::vec4 bminz;
-			aten::vec4 bmaxz;
-
-			int exid{ -1 };
-			int primid{ -1 };
-			int shapeid{ -1 };
-			int meshid{ -1 };
-
-			uint32_t leftChildrenIdx;
-			struct {
-				uint32_t isLeaf : 1;
-				uint32_t numChildren : 3;
-			};
 		};
 
 		void registerBvhNodeToLinearList(

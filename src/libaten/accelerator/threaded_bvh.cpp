@@ -63,24 +63,24 @@ namespace aten {
 
 		// Register bvh node for gpu.
 		for (int i = 0; i < listBvhNode.size(); i++) {
-			m_listGpuBvhNode.push_back(std::vector<GPUBvhNode>());
+			m_listThreadedBvhNode.push_back(std::vector<ThreadedBvhNode>());
 
 			// Leaves of nested bvh are primitive.
 			// Index 0 is primiary tree, and Index N (N > 0) is nested tree.
 			bool isPrimitiveLeaf = (i > 0);
 
-			registerGpuBvhNode(isPrimitiveLeaf, listBvhNode[i], m_listGpuBvhNode[i]);
+			registerGpuBvhNode(isPrimitiveLeaf, listBvhNode[i], m_listThreadedBvhNode[i]);
 		}
 
 		// Set traverse order for linear bvh.
 		for (int i = 0; i < listBvhNode.size(); i++) {
-			setOrderForLinearBVH(listBvhNode[i], m_listGpuBvhNode[i]);
+			setOrderForLinearBVH(listBvhNode[i], m_listThreadedBvhNode[i]);
 		}
 
-		//dump(m_listGpuBvhNode[1], "node.txt");
+		//dump(m_listThreadedBvhNode[1], "node.txt");
 	}
 
-	void ThreadedBVH::dump(std::vector<GPUBvhNode>& nodes, const char* path)
+	void ThreadedBVH::dump(std::vector<ThreadedBvhNode>& nodes, const char* path)
 	{
 		FILE* fp = nullptr;
 		fopen_s(&fp, path, "wt");
@@ -132,7 +132,7 @@ namespace aten {
 	void ThreadedBVH::registerGpuBvhNode(
 		bool isPrimitiveLeaf,
 		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-		std::vector<GPUBvhNode>& listGpuBvhNode)
+		std::vector<ThreadedBvhNode>& listGpuBvhNode)
 	{
 		listGpuBvhNode.reserve(listBvhNode.size());
 
@@ -140,7 +140,7 @@ namespace aten {
 			auto node = entry.node;
 			auto nestParent = entry.nestParent;
 
-			GPUBvhNode gpunode;
+			ThreadedBvhNode gpunode;
 
 			// NOTE
 			// Differ set hit/miss index.
@@ -192,7 +192,7 @@ namespace aten {
 
 	void ThreadedBVH::setOrderForLinearBVH(
 		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-		std::vector<GPUBvhNode>& listGpuBvhNode)
+		std::vector<ThreadedBvhNode>& listGpuBvhNode)
 	{
 		auto num = listGpuBvhNode.size();
 
@@ -294,12 +294,12 @@ namespace aten {
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
-		return hit(0, m_listGpuBvhNode, r, t_min, t_max, isect);
+		return hit(0, m_listThreadedBvhNode, r, t_min, t_max, isect);
 	}
 
 	bool ThreadedBVH::hit(
 		int exid,
-		const std::vector<std::vector<GPUBvhNode>>& listGpuBvhNode,
+		const std::vector<std::vector<ThreadedBvhNode>>& listGpuBvhNode,
 		const ray& r,
 		real t_min, real t_max,
 		Intersection& isect) const
@@ -314,7 +314,7 @@ namespace aten {
 		int nodeid = 0;
 
 		for (;;) {
-			const GPUBvhNode* node = nullptr;
+			const ThreadedBvhNode* node = nullptr;
 
 			if (nodeid >= 0) {
 				node = &listGpuBvhNode[exid][nodeid];

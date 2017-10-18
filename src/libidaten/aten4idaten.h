@@ -3,8 +3,7 @@
 #include "defs.h"
 #include "types.h"
 
-#include "accelerator/accelerator.h"
-#include "accelerator/qbvh.h"
+#include "accelerator/GpuPayloadDefs.h"
 
 #include "camera/camera.h"
 #include "camera/pinhole.h"

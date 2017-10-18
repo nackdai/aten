@@ -73,6 +73,8 @@
 #include "accelerator/qbvh.h"
 #include "accelerator/threaded_bvh.h"
 
+#include "accelerator/GpuPayloadDefs.h"
+
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"

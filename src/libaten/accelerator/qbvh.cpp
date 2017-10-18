@@ -63,9 +63,6 @@ namespace aten
 				isPrimitiveLeafBvh,
 				listBvhNode[i],
 				m_listQbvhNode[i]);
-
-			// TODO
-			// listQbvhNodeÇÃèkëﬁ.
 		}
 	}
 
@@ -114,7 +111,8 @@ namespace aten
 			QbvhStackEntry() {}
 		};
 
-		listQbvhNode.resize(listBvhNode.size());
+		listQbvhNode.reserve(listBvhNode.size());
+		listQbvhNode.push_back(QbvhNode());
 
 		QbvhStackEntry stack[256];
 		stack[0] = QbvhStackEntry(0, 0);
@@ -155,6 +153,8 @@ namespace aten
 			// push all children to the stack
 			for (int i = 0; i < numChildren; i++) {
 				stack[stackPos++] = QbvhStackEntry(numNodes, children[i]);
+
+				listQbvhNode.push_back(QbvhNode());
 				++numNodes;
 			}
 		}

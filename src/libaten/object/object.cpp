@@ -47,9 +47,13 @@ namespace AT_NAME
 
 			isect.primid = id;
 
+#if 0
 			if (parent) {
 				isect.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
 			}
+#else
+			isect.mtrlid = param.mtrlid;
+#endif
 		}
 
 		return isHit;
@@ -130,7 +134,7 @@ namespace AT_NAME
 		rec->v = uv.y;
 	}
 
-	void face::build()
+	void face::build(shape* _parent)
 	{
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
@@ -152,6 +156,9 @@ namespace AT_NAME
 		auto e0 = v1.pos - v0.pos;
 		auto e1 = v2.pos - v0.pos;
 		param.area = real(0.5) * cross(e0, e1).length();
+
+		parent = _parent;
+		param.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
 	}
 
 	void face::getSamplePosNormalArea(
@@ -237,7 +244,7 @@ namespace AT_NAME
 		param.area = 0;
 
 		for (const auto f : faces) {
-			f->build();
+			f->build(this);
 			param.area += f->param.area;
 
 			const auto& faabb = f->getBoundingbox();

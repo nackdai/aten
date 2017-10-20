@@ -55,7 +55,7 @@ namespace AT_NAME
 
 		virtual int meshid() const override;
 
-		void build();
+		void build(shape* _parent);
 
 		static const std::vector<face*>& faces()
 		{

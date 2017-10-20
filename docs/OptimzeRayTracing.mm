@@ -57,9 +57,36 @@
 </node>
 <node CREATED="1507194799032" ID="ID_1334717846" MODIFIED="1507262829196" TEXT="triangle&#x885d;&#x7a81;&#x5224;&#x5b9a;">
 <icon BUILTIN="button_ok"/>
-<node CREATED="1507098342202" ID="ID_98076709" MODIFIED="1507098356370" TEXT="Woop ray/triangle intersection"/>
+<node CREATED="1507098342202" ID="ID_98076709" MODIFIED="1507098356370" TEXT="Woop ray/triangle intersection">
+<node CREATED="1508486078351" ID="ID_1802221635" MODIFIED="1508486104606" TEXT="&#x4e8b;&#x524d;&#x8a08;&#x7b97;&#x304c;&#x5fc5;&#x8981;&#x3067;&#x30e1;&#x30e2;&#x30ea;&#x4f7f;&#x7528;&#x91cf;&#x3082;&#x5897;&#x3048;&#x308b;">
+<icon BUILTIN="messagebox_warning"/>
+</node>
+</node>
 <node CREATED="1507194772800" ID="ID_587042392" MODIFIED="1507262774749" TEXT="AMD&#x306e;RadeonRay&#x3092;&#x8abf;&#x67fb;">
 <node CREATED="1507262734049" ID="ID_193028416" MODIFIED="1507262738773" TEXT="&#x540c;&#x3058;&#x51e6;&#x7406;&#x3060;&#x3063;&#x305f;"/>
+</node>
+</node>
+<node CREATED="1508463748073" ID="ID_952556670" MODIFIED="1508486072063" TEXT="BVH" VSHIFT="17">
+<node CREATED="1508463749882" ID="ID_648945565" MODIFIED="1508485909205" TEXT="meshid&#x3044;&#x3089;&#x306a;&#x3044;">
+<icon BUILTIN="button_cancel"/>
+<node CREATED="1508463760930" ID="ID_758836617" MODIFIED="1508486067798" TEXT="SVGF&#x3067;&#x306f;mtrlid&#x3092;&#x4f7f;&#x3046;">
+<icon BUILTIN="button_cancel"/>
+</node>
+<node CREATED="1508466720995" ID="ID_1477715053" MODIFIED="1508486062110" TEXT="ThreadedBVHNode">
+<icon BUILTIN="button_cancel"/>
+<node CREATED="1508466725971" ID="ID_1491340263" MODIFIED="1508466742678" TEXT="meshid&#x304c;&#x4e0d;&#x8981;&#x306b;&#x306a;&#x308c;&#x3070;&#x3001;&#xff12;&#x3064;&#x7a7a;&#x304d;&#x304c;&#x3067;&#x304d;&#x308b;">
+<node CREATED="1508466743178" ID="ID_470386598" MODIFIED="1508466765917" TEXT="boxmin&#x3001;boxmax&#x304c;vec4&#x3060;&#x304c;&#x672c;&#x6765;&#x306f;vec3&#x306a;&#x306e;&#x3067; float x 6">
+<node CREATED="1508466766378" ID="ID_1516966942" MODIFIED="1508466785597" TEXT="&#x7a7a;&#x304d;&#xff12;&#x3064;&#x306b;float x 2&#x3092;&#x5165;&#x308c;&#x308c;&#x3070;&#x3001;&#x3042;&#x3068;&#x306f; float4 &#xff11;&#x3064;&#x5206;&#x3060;&#x3051;&#x306b;&#x306a;&#x308b;">
+<node CREATED="1508466785938" ID="ID_1036695632" MODIFIED="1508466793884" TEXT="float4&#x30b5;&#x30a4;&#x30ba;&#x3092;&#x6e1b;&#x3089;&#x305b;&#x308b;"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1508485912026" ID="ID_669116261" MODIFIED="1508485927639" TEXT="&#x3053;&#x3061;&#x3089;&#x3092;&#x3064;&#x304b;&#x3063;&#x305f;&#x65b9;&#x304c;&#x3088;&#x308a;&#x53b3;&#x5bc6;&#x306b;&#x306a;&#x308b;&#x3068;&#x601d;&#x308f;&#x308c;&#x308b;"/>
+<node CREATED="1508485928179" ID="ID_88683209" MODIFIED="1508485957319" TEXT="face&#x3054;&#x3068;&#x306b;&#x6240;&#x5c5e;&#x3059;&#x308b;shape&#x306b;&#x5fdc;&#x3058;&#x305f;meshid&#x3092;&#x30bb;&#x30c3;&#x30c8;&#x3057;&#x3066;&#x3044;&#x308b;&#x306e;&#x3067;&#x610f;&#x5473;&#x306e;&#x3042;&#x308b;&#x5024;&#x306b;&#x306a;&#x3063;&#x3066;&#x3044;&#x308b;"/>
+</node>
+<node CREATED="1508466691443" ID="ID_605032726" MODIFIED="1508485974086" TEXT="invidr&#x306a;&#x3069;intersection&#x8a08;&#x7b97;&#x306b;&#x3064;&#x304b;&#x3046;&#x30d9;&#x30af;&#x30c8;&#x30eb;&#x3092;&#x4e8b;&#x524d;&#x8a08;&#x7b97;&#x3057;&#x3066;&#x304a;&#x304f;">
+<icon BUILTIN="yes"/>
 </node>
 </node>
 </node>
@@ -123,7 +150,8 @@
 <icon BUILTIN="messagebox_warning"/>
 </node>
 </node>
-<node CREATED="1508376036924" ID="ID_1133255603" MODIFIED="1508406131394" TEXT="BVH&#x306e;&#x6642;&#x70b9;&#x3067;&#xff11;&#x30ea;&#x30fc;&#x30d5;&#x3001;&#xff11;&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x3067;&#x306f;&#x306a;&#x304f;&#x3001;4&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x306b;&#x3057;&#x3066;&#x304a;&#x304f;">
+<node CREATED="1508376036924" ID="ID_1133255603" MODIFIED="1508484309691" TEXT="BVH&#x306e;&#x6642;&#x70b9;&#x3067;&#xff11;&#x30ea;&#x30fc;&#x30d5;&#x3001;&#xff11;&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x3067;&#x306f;&#x306a;&#x304f;&#x3001;4&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x306b;&#x3057;&#x3066;&#x304a;&#x304f;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1508376162668" ID="ID_1467426966" MODIFIED="1508406137073" TEXT="&#x305d;&#x3046;&#x3059;&#x308b;&#x3053;&#x3068;&#x3067;&#x3001;QBVH&#x306b;&#x304a;&#x3044;&#x3066;&#x3082;&#xff11;&#x30ea;&#x30fc;&#x30d5;&#x3001;4&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30a4;&#x30f3;&#x30b0;&#x30eb;&#x306b;&#x306a;&#x308b;">
 <node CREATED="1508377897284" ID="ID_1284711952" MODIFIED="1508391901990" TEXT="SAH&#x3067;&#xff14;&#x4ee5;&#x4e0b;&#x3067;&#x6b62;&#x3081;&#x308b;&#x3053;&#x3068;&#x3067;&#x8a66;&#x3059;">
 <icon BUILTIN="button_ok"/>
@@ -133,8 +161,12 @@
 <node CREATED="1508391915140" ID="ID_893192833" LINK="https://github.com/githole/akari2/blob/master/qbvh.h" MODIFIED="1508391915140" TEXT="https://github.com/githole/akari2/blob/master/qbvh.h"/>
 <node CREATED="1508406102702" ID="ID_1490973592" MODIFIED="1508406121209" TEXT="CPU&#x3067;&#x306f;SIMD&#x5316;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x304b;&#x3089;&#x304b;&#x3001;&#x9045;&#x304f;&#x306a;&#x308b;"/>
 </node>
-<node CREATED="1508406087326" ID="ID_887910993" MODIFIED="1508406098907" TEXT="GPGPU&#x5bfe;&#x5fdc;">
-<icon BUILTIN="yes"/>
+<node CREATED="1508406087326" ID="ID_887910993" MODIFIED="1508484292618" TEXT="GPGPU&#x5bfe;&#x5fdc;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1508484293796" ID="ID_1789937554" MODIFIED="1508484324307" TEXT="&#x9045;&#x304f;&#x306a;&#x3063;&#x305f;">
+<icon BUILTIN="messagebox_warning"/>
+</node>
+<node CREATED="1508484326319" ID="ID_1375924336" MODIFIED="1508484343323" TEXT="&#x30d0;&#x30b0;&#x304c;&#x3042;&#x308b;&#x3000;&#xff06;&#x3000;&#x9045;&#x304f;&#x306a;&#x3063;&#x305f;&#x306e;&#x3067;&#x30b3;&#x30fc;&#x30c9;&#x306f;&#x524a;&#x9664;"/>
 </node>
 </node>
 </node>

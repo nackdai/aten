@@ -77,9 +77,35 @@ namespace aten {
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
+#if 0
 		if (m_item) {
 			return m_item->hit(r, t_min, t_max, isect);
 		}
+#else
+		if (m_childrenNum > 0) {
+			bool isHit = false;
+
+			for (int i = 0; i < m_childrenNum; i++) {
+				Intersection isectTmp;
+				isectTmp.t = AT_MATH_INF;
+				auto res = m_children[i]->hit(r, t_min, t_max, isectTmp);
+				
+				if (res) {
+					if (isectTmp.t < isect.t) {
+						isect = isectTmp;
+						t_max = isect.t;
+
+						isHit = true;
+					}
+				}
+			}
+
+			return isHit;
+		}
+		else if (m_item) {
+			return m_item->hit(r, t_min, t_max, isect);
+		}
+#endif
 		else {
 			auto bbox = getBoundingbox();
 			auto isHit = bbox.hit(r, t_min, t_max);
@@ -346,6 +372,7 @@ namespace aten {
 					aabb::merge(info.node->getBoundingbox(), bbox));
 			}
 
+#if 0
 			if (info.num == 1) {
 				// １個しかないので、これだけで終了.
 				info.node->m_left = new bvhnode(info.node, info.list[0]);
@@ -370,6 +397,38 @@ namespace aten {
 				stacks.pop_back();
 				continue;
 			}
+#else
+			if (info.num <= 4) {
+				bool canRegisterAsChild = true;
+
+				if (info.num > 1) {
+					for (int i = 0; i < info.num; i++) {
+						auto internalObj = info.list[i]->getHasObject();
+						if (internalObj) {
+							canRegisterAsChild = false;
+							break;
+						}
+					}
+				}
+
+				if (canRegisterAsChild) {
+					// TODO
+					int axis = 0;
+
+					sortList(info.list, info.num, axis);
+
+					for (int i = 0; i < info.num; i++) {
+						info.node->registerChild(info.list[i], i);
+					}
+
+					info.node->setChildrenNum(info.num);
+
+					info = stacks.back();
+					stacks.pop_back();
+					continue;
+				}
+			}
+#endif
 
 			// Triangleとrayのヒットにかかる処理時間の見積もり.
 			static const real T_tri = 1;  // 適当.

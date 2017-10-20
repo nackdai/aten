@@ -282,4 +282,43 @@ namespace aten {
 			aten::cmpMax(a.w, b.w));
 		return std::move(ret);
 	}
+
+	union _vec4_cmp_res {
+		struct {
+			uint8_t _0 : 1;
+			uint8_t _1 : 1;
+			uint8_t _2 : 1;
+			uint8_t _3 : 1;
+			uint8_t padding : 4;
+		};
+		uint8_t f;
+	};
+
+	// Compare Less EQual
+	inline int cmpLEQ(const vec4& a, const vec4& b)
+	{
+		_vec4_cmp_res res;
+
+		res.f = 0;
+		res._0 = (a.x <= b.x);
+		res._1 = (a.y <= b.y);
+		res._2 = (a.z <= b.z);
+		res._3 = (a.w <= b.w);
+
+		return res.f;
+	}
+
+	// Compare Greater EQual
+	inline int cmpGEQ(const vec4& a, const vec4& b)
+	{
+		_vec4_cmp_res res;
+
+		res.f = 0;
+		res._0 = (a.x >= b.x);
+		res._1 = (a.y >= b.y);
+		res._2 = (a.z >= b.z);
+		res._3 = (a.w >= b.w);
+
+		return res.f;
+	}
 }

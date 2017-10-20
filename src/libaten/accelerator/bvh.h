@@ -14,13 +14,20 @@ namespace aten {
 		friend class bvh;
 
 	public:
-		bvhnode(bvhnode* parent) : m_parent(parent) {}
+		bvhnode(bvhnode* parent)
+			: m_parent(parent)
+		{
+			m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
+		}
 		virtual ~bvhnode() {}
 
 	private:
 		bvhnode(bvhnode* parent, hitable* item)
-			: m_item(item), m_parent(parent)
-		{}
+			: m_parent(parent)
+		{
+			m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
+			m_item = item;
+		}
 
 	public:
 		bool hit(
@@ -30,10 +37,14 @@ namespace aten {
 
 		const aabb& getBoundingbox() const
 		{
+#if 0
 			if (m_item) {
 				return m_item->getBoundingbox();
 			}
 			return m_aabb;
+#else
+			return m_aabb;
+#endif
 		}
 		void setBoundingBox(const aabb& bbox)
 		{
@@ -86,6 +97,25 @@ namespace aten {
 			m_externalId = exid;
 		}
 
+		int getChildrenNum() const
+		{
+			return m_childrenNum;
+		}
+		void setChildrenNum(int num)
+		{
+			AT_ASSERT((0 <= num) && (num <= 4));
+			m_childrenNum = num;
+		}
+
+		hitable** getChildren()
+		{
+			return m_children;
+		}
+		void registerChild(hitable* child, int idx)
+		{
+			m_children[idx] = child;
+		}
+
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
@@ -94,10 +124,17 @@ namespace aten {
 
 		aabb m_aabb;
 
-		hitable* m_item{ nullptr };
+		union {
+			struct {
+				hitable* m_item;
+				hitable* padding[3];
+			};
+			hitable* m_children[4];
+		};
 
 		int m_traverseOrder{ -1 };
 		int m_externalId{ -1 };
+		int m_childrenNum{ 0 };
 	};
 
 	//////////////////////////////////////////////

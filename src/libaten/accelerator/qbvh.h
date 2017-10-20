@@ -4,24 +4,83 @@
 
 namespace aten {
 	struct QbvhNode {
-		float leftChildrenIdx;
-		float isLeaf{ false };
-		float numChildren{ 0 };
-		float padding;
+		union {
+			aten::vec4 p0;
+			struct {
+				float leftChildrenIdx;
+				float isLeaf;
+				float numChildren;
 
-		float shapeid{ -1 };	///< Object index.
-		float primid{ -1 };		///< Triangle index.
-		float exid{ -1 };		///< External bvh index.
-		float meshid{ -1 };		///< Mesh id.
+				// TODO
+				// BVHでは4つのリーフを１つのリーフで扱うので、shape(sphere etc)とprimitive(triangle)が入り乱れるので、その判定フラグにする.
+				// 現時点ではprimitive(triangle)のみ.
+				float padding;
+			};
+		};
+
+		union {
+			aten::vec4 p1;
+			struct {
+				float shapeid;	///< Object index.
+				float primid;	///< Triangle index.
+				float exid;		///< External bvh index.
+				float meshid;	///< Mesh id.
+			};
+		};
+
+		union {
+			aten::vec4 p2;
+			struct {
+				float shapeidx[4];
+			};
+		};
+		union {
+			aten::vec4 p3;
+			struct {
+				float primidx[4];
+			};
+		};
+		union {
+			aten::vec4 p4;
+			struct {
+				float meshidx[4];
+			};
+		};
 
 		aten::vec4 bminx;
 		aten::vec4 bmaxx;
-
 		aten::vec4 bminy;
 		aten::vec4 bmaxy;
-
 		aten::vec4 bminz;
 		aten::vec4 bmaxz;
+
+		QbvhNode()
+		{
+			isLeaf = false;
+			numChildren = 0;
+
+			shapeid = -1;
+			primid = -1;
+			meshid = -1;
+			exid = -1;
+		}
+		QbvhNode(const QbvhNode& rhs)
+		{
+			p0 = rhs.p0;
+			p1 = rhs.p1;
+			p2 = rhs.p2;
+			p3 = rhs.p3;
+			p4 = rhs.p4;
+
+			bminx = rhs.bminx;
+			bmaxx = rhs.bmaxx;
+
+			bminy = rhs.bminy;
+			bmaxy = rhs.bmaxy;
+
+			bminz = rhs.bminz;
+			bmaxz = rhs.bmaxz;
+		}
 	};
 
 	class transformable;

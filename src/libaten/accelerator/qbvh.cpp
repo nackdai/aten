@@ -187,6 +187,7 @@ namespace aten
 		qbvhNode.numChildren = 0;
 
 		if (node->isLeaf()) {
+#if 0
 			hitable* item = node->getItem();
 
 			// 自分自身のIDを取得.
@@ -216,6 +217,46 @@ namespace aten
 			else {
 				qbvhNode.exid = (float)node->getExternalId();
 			}
+#else
+			int numChildren = node->getChildrenNum();
+			auto children = node->getChildren();
+
+			qbvhNode.numChildren = numChildren;
+
+			for (int i = 0; i < numChildren; i++) {
+				auto ch = children[i];
+
+				// 自分自身のIDを取得.
+				qbvhNode.shapeidx[i] = (float)transformable::findShapeIdxAsHitable(ch);
+
+				// もしなかったら、ネストしているので親のIDを取得.
+				if (qbvhNode.shapeidx[i] < 0) {
+					if (nestParent) {
+						qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
+						qbvhNode.shapeidx[i] = qbvhNode.shapeid;
+					}
+				}
+
+				// インスタンスの実体を取得.
+				auto internalObj = ch->getHasObject();
+
+				if (internalObj) {
+					ch = const_cast<hitable*>(internalObj);
+				}
+
+				qbvhNode.meshidx[i] = (float)ch->meshid();
+
+				if(isPrimitiveLeaf) {
+					// Leaves of this tree are primitive.
+					qbvhNode.primidx[i] = (float)face::findIdx(ch);
+					qbvhNode.exid = -1.0f;
+				}
+				else {
+					qbvhNode.shapeid = qbvhNode.shapeidx[i];
+					qbvhNode.exid = (float)node->getExternalId();
+				}
+			}
+#endif
 
 			qbvhNode.isLeaf = (float)true;
 		}
@@ -370,6 +411,7 @@ namespace aten
 		auto t1 = min(min(tmaxX, tmaxY), min(tmaxZ, t_max));
 		auto t0 = max(max(tminX, tminY), max(tminZ, t_min));
 
+#if 0
 		union isHit {
 			struct {
 				uint8_t _0 : 1;
@@ -390,6 +432,123 @@ namespace aten
 		result = t0;
 
 		return hit.f;
+#else
+		int ret = cmpLEQ(t0, t1);
+		result = t0;
+		return ret;
+#endif
+	}
+
+	inline int intersectTriangle(
+		aten::vec4& resultT,
+		aten::vec4& resultA,
+		aten::vec4& resultB,
+		const aten::ray& r,
+		real t_min, real t_max,
+		const QbvhNode& qnode)
+	{
+		// NOTE
+		// https://github.com/githole/akari2/blob/master/qbvh.h
+
+		// NOTE
+		// No SSE...
+
+		aten::vec4 v0x;
+		aten::vec4 v0y;
+		aten::vec4 v0z;
+
+		aten::vec4 v1x;
+		aten::vec4 v1y;
+		aten::vec4 v1z;
+
+		aten::vec4 v2x;
+		aten::vec4 v2y;
+		aten::vec4 v2z;
+
+		for (int i = 0; i < qnode.numChildren; i++) {
+			auto f = face::faces()[(int)qnode.primidx[i]];
+
+			const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
+			const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
+			const auto& v2 = aten::VertexManager::getVertex(f->param.idx[2]);
+
+			v0x[i] = v0.pos.x;
+			v0y[i] = v0.pos.y;
+			v0z[i] = v0.pos.z;
+
+			v1x[i] = v1.pos.x;
+			v1y[i] = v1.pos.y;
+			v1z[i] = v1.pos.z;
+
+			v2x[i] = v2.pos.x;
+			v2y[i] = v2.pos.y;
+			v2z[i] = v2.pos.z;
+		}
+
+		// e1 = v1 - v0
+		auto e1_x = v1x - v0x;
+		auto e1_y = v1y - v0y;
+		auto e1_z = v1z - v0z;
+
+		// e2 = v2 - v0
+		auto e2_x = v2x - v0x;
+		auto e2_y = v2y - v0y;
+		auto e2_z = v2z - v0z;
+
+		vec4 ox = vec4(r.org.x, r.org.x, r.org.x, r.org.x);
+		vec4 oy = vec4(r.org.y, r.org.y, r.org.y, r.org.y);
+		vec4 oz = vec4(r.org.z, r.org.z, r.org.z, r.org.z);
+
+		// d
+		vec4 d_x = vec4(r.dir.x, r.dir.x, r.dir.x, r.dir.x);
+		vec4 d_y = vec4(r.dir.y, r.dir.y, r.dir.y, r.dir.y);
+		vec4 d_z = vec4(r.dir.z, r.dir.z, r.dir.z, r.dir.z);
+
+		// r = r.org - v0
+		auto r_x = ox - v0x;
+		auto r_y = oy - v0y;
+		auto r_z = oz - v0z;
+
+		// u = cross(d, e2)
+		auto u_x = d_y * e2_z - d_z * e2_y;
+		auto u_y = d_z * e2_x - d_x * e2_z;
+		auto u_z = d_x * e2_y - d_y * e2_x;
+
+		// v = cross(r, e1)
+		auto v_x = r_y * e1_z - r_z * e1_y;
+		auto v_y = r_z * e1_x - r_x * e1_z;
+		auto v_z = r_x * e1_y - r_y * e1_x;
+
+		// inv = real(1) / dot(u, e1)
+		auto divisor = u_x * e1_x + u_y * e1_y + u_z * e1_z;
+		auto inv = real(1) / (divisor + real(1e-6));
+
+		// t = dot(v, e2) * inv
+		auto t = (v_x * e2_x + v_y * e2_y + v_z * e2_z) * inv;
+
+		// beta = dot(u, r) * inv
+		auto beta = (u_x * r_x + u_y * r_y + u_z * r_z) * inv;
+
+		// gamma = dot(v, d) * inv
+		auto gamma = (v_x * d_x + v_y * d_y + v_z * d_z) * inv;
+
+		resultT = t;
+		resultA = beta;
+		resultB = gamma;
+
+		int res_b0 = cmpGEQ(beta, real(0));		// beta >= 0
+		int res_b1 = cmpLEQ(beta, real(1));		// beta <= 1
+
+		int res_g0 = cmpGEQ(gamma, real(0));	// gamma >= 0
+		int res_g1 = cmpLEQ(gamma, real(1));	// gamma <= 1
+
+		int res_bg1 = cmpLEQ(beta + gamma, real(1));	// beta + gammma <= 1
+
+		int res_t0 = cmpGEQ(t, real(0));		// t >= 0
+
+		int ret = res_b0 & res_b1 & res_g0 & res_g1 & res_bg1 & res_t0;
+
+		return ret;
 	}
 
 	bool qbvh::hit(
@@ -439,11 +598,11 @@ namespace aten
 				Intersection isectTmp;
 
 				bool isHit = false;
-
+#if 0
 				auto s = shapes[(int)pnode->shapeid];
 
 				if (pnode->exid >= 0) {
-					// Traverse external linear bvh list.
+					// Traverse external qbvh.
 					const auto& param = s->getParam();
 
 					int mtxid = param.mtxid;
@@ -478,6 +637,66 @@ namespace aten
 					// sphere, cube.
 					isHit = s->hit(r, t_min, t_max, isectTmp);
 				}
+#else
+				if (pnode->exid >= 0) {
+					// Traverse external qbvh.
+					auto s = shapes[(int)pnode->shapeid];
+					const auto& param = s->getParam();
+
+					int mtxid = param.mtxid;
+
+					aten::ray transformedRay;
+
+					if (mtxid >= 0) {
+						const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+
+						transformedRay = mtxW2L.applyRay(r);
+					}
+					else {
+						transformedRay = r;
+					}
+
+					isHit = hit(
+						(int)pnode->exid,
+						listQbvhNode,
+						transformedRay,
+						t_min, t_max,
+						isectTmp);
+				}
+				else {
+					aten::vec4 resultT, resultA, resultB;
+
+					int res = intersectTriangle(
+						resultT, resultA, resultB,
+						r,
+						t_min, t_max,
+						*pnode);
+
+					for (int i = 0; i < pnode->numChildren; i++) {
+						if ((res & (1 << i)) && (resultT[i] < isectTmp.t)) {
+							isectTmp.t = resultT[i];
+							isectTmp.a = resultA[i];
+							isectTmp.b = resultB[i];
+
+							isectTmp.primid = (int)pnode->primidx[i];
+							isectTmp.meshid = (int)pnode->meshidx[i];
+							isectTmp.objid = (int)pnode->shapeidx[i];
+
+							auto f = prims[isectTmp.primid];
+
+							isectTmp.mtrlid = f->param.mtrlid;
+							isectTmp.area = f->param.area;
+
+							isHit = true;
+						}
+					}
+
+					if (isHit) {
+						auto s = shapes[isectTmp.objid];
+						isectTmp.objid = s->id();
+					}
+				}
+#endif
 
 				if (isHit) {
 					if (isectTmp.t < isect.t) {

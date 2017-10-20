@@ -20,6 +20,16 @@ __device__ bool hitTriangle(
 	const aten::ray& ray,
 	aten::Intersection* isect);
 
+__device__ int hit4Triangles1Ray(
+	const Context* ctxt,
+	float4 primIdx, int num,
+	float4* resultT,
+	float4* resultA,
+	float4* resultB,
+	aten::vec3 org, aten::vec3 dir,
+	float4 v0x, float4 v0y, float4 v0z,
+	float4 e1x, float4 e1y, float4 e1z);
+
 __device__ bool hitAABB(
 	aten::vec3 org,
 	aten::vec3 dir,

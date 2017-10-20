@@ -29,19 +29,6 @@ namespace aten {
 		};
 
 		union {
-			aten::vec4 p2;
-			struct {
-				float shapeidx[4];
-			};
-		};
-		union {
-			aten::vec4 p3;
-			struct {
-				float primidx[4];
-			};
-		};
-
-		union {
 			aten::vec4 bminx;
 			aten::vec4 v0x;
 		};
@@ -69,6 +56,19 @@ namespace aten {
 		union {
 			aten::vec4 bmaxz;
 			aten::vec4 e1z;
+		};
+
+		union {
+			aten::vec4 p2;
+			struct {
+				float shapeidx[4];
+			};
+		};
+		union {
+			aten::vec4 p3;
+			struct {
+				float primidx[4];
+			};
 		};
 
 		QbvhNode()

@@ -43,6 +43,7 @@ static uint32_t g_threadnum = 1;
 #endif
 
 static uint32_t g_frameNo = 0;
+static float g_avgElapsed = 0.0f;
 
 void display()
 {
@@ -71,7 +72,11 @@ void display()
 	g_tracer.render(dst, &g_scene, &g_camera);
 
 	auto elapsed = timer.end();
-	AT_PRINTF("Elapsed %f[ms]\n", elapsed);
+
+	g_avgElapsed = g_avgElapsed * g_frameNo + elapsed;
+	g_avgElapsed /= (g_frameNo + 1);
+
+	AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, g_avgElapsed);
 
 	if (!isExportedHdr) {
 		isExportedHdr = true;

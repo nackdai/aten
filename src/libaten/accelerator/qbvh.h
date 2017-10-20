@@ -10,10 +10,6 @@ namespace aten {
 				float leftChildrenIdx;
 				float isLeaf;
 				float numChildren;
-
-				// TODO
-				// BVHでは4つのリーフを１つのリーフで扱うので、shape(sphere etc)とprimitive(triangle)が入り乱れるので、その判定フラグにする.
-				// 現時点ではprimitive(triangle)のみ.
 				float padding;
 			};
 		};
@@ -58,6 +54,7 @@ namespace aten {
 			aten::vec4 e1z;
 		};
 
+#ifdef ENABLE_BVH_MULTI_TRIANGLES
 		union {
 			aten::vec4 p2;
 			struct {
@@ -70,6 +67,7 @@ namespace aten {
 				float primidx[4];
 			};
 		};
+#endif
 
 		QbvhNode()
 		{
@@ -85,8 +83,11 @@ namespace aten {
 		{
 			p0 = rhs.p0;
 			p1 = rhs.p1;
+
+#ifdef ENABLE_BVH_MULTI_TRIANGLES
 			p2 = rhs.p2;
 			p3 = rhs.p3;
+#endif
 
 			bminx = rhs.bminx;
 			bmaxx = rhs.bmaxx;

@@ -187,7 +187,60 @@ namespace aten
 		qbvhNode.numChildren = 0;
 
 		if (node->isLeaf()) {
-#if 0
+#ifdef ENABLE_BVH_MULTI_TRIANGLES
+			int numChildren = node->getChildrenNum();
+			auto children = node->getChildren();
+
+			qbvhNode.numChildren = numChildren;
+
+			for (int i = 0; i < numChildren; i++) {
+				auto ch = children[i];
+
+				// 自分自身のIDを取得.
+				qbvhNode.shapeidx[i] = (float)transformable::findShapeIdxAsHitable(ch);
+
+				// もしなかったら、ネストしているので親のIDを取得.
+				if (qbvhNode.shapeidx[i] < 0) {
+					if (nestParent) {
+						qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
+						qbvhNode.shapeidx[i] = qbvhNode.shapeid;
+					}
+				}
+
+				// インスタンスの実体を取得.
+				auto internalObj = ch->getHasObject();
+
+				if (internalObj) {
+					ch = const_cast<hitable*>(internalObj);
+				}
+
+				if (isPrimitiveLeaf) {
+					// Leaves of this tree are primitive.
+					qbvhNode.primidx[i] = (float)face::findIdx(ch);
+
+					auto f = face::faces()[(int)qbvhNode.primidx[i]];
+
+					const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
+					const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
+
+					auto e1 = v1.pos - v0.pos;
+
+					qbvhNode.v0x[i] = v0.pos.x;
+					qbvhNode.v0y[i] = v0.pos.y;
+					qbvhNode.v0z[i] = v0.pos.z;
+
+					qbvhNode.e1x[i] = e1.x;
+					qbvhNode.e1y[i] = e1.y;
+					qbvhNode.e1z[i] = e1.z;
+
+					qbvhNode.exid = -1.0f;
+				}
+				else {
+					qbvhNode.shapeid = qbvhNode.shapeidx[i];
+					qbvhNode.exid = (float)node->getExternalId();
+				}
+			}
+#else
 			hitable* item = node->getItem();
 
 			// 自分自身のIDを取得.
@@ -216,59 +269,6 @@ namespace aten
 			}
 			else {
 				qbvhNode.exid = (float)node->getExternalId();
-			}
-#else
-			int numChildren = node->getChildrenNum();
-			auto children = node->getChildren();
-
-			qbvhNode.numChildren = numChildren;
-
-			for (int i = 0; i < numChildren; i++) {
-				auto ch = children[i];
-
-				// 自分自身のIDを取得.
-				qbvhNode.shapeidx[i] = (float)transformable::findShapeIdxAsHitable(ch);
-
-				// もしなかったら、ネストしているので親のIDを取得.
-				if (qbvhNode.shapeidx[i] < 0) {
-					if (nestParent) {
-						qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
-						qbvhNode.shapeidx[i] = qbvhNode.shapeid;
-					}
-				}
-
-				// インスタンスの実体を取得.
-				auto internalObj = ch->getHasObject();
-
-				if (internalObj) {
-					ch = const_cast<hitable*>(internalObj);
-				}
-
-				if(isPrimitiveLeaf) {
-					// Leaves of this tree are primitive.
-					qbvhNode.primidx[i] = (float)face::findIdx(ch);
-
-					auto f = face::faces()[(int)qbvhNode.primidx[i]];
-
-					const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
-					const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
-
-					auto e1 = v1.pos - v0.pos;
-
-					qbvhNode.v0x[i] = v0.pos.x;
-					qbvhNode.v0y[i] = v0.pos.y;
-					qbvhNode.v0z[i] = v0.pos.z;
-
-					qbvhNode.e1x[i] = e1.x;
-					qbvhNode.e1y[i] = e1.y;
-					qbvhNode.e1z[i] = e1.z;
-
-					qbvhNode.exid = -1.0f;
-				}
-				else {
-					qbvhNode.shapeid = qbvhNode.shapeidx[i];
-					qbvhNode.exid = (float)node->getExternalId();
-				}
 			}
 #endif
 
@@ -425,32 +425,9 @@ namespace aten
 		auto t1 = min(min(tmaxX, tmaxY), min(tmaxZ, t_max));
 		auto t0 = max(max(tminX, tminY), max(tminZ, t_min));
 
-#if 0
-		union isHit {
-			struct {
-				uint8_t _0 : 1;
-				uint8_t _1 : 1;
-				uint8_t _2 : 1;
-				uint8_t _3 : 1;
-				uint8_t padding : 4;
-			};
-			uint8_t f;
-		} hit;
-
-		hit.f = 0;
-		hit._0 = (t0.x <= t1.x);
-		hit._1 = (t0.y <= t1.y);
-		hit._2 = (t0.z <= t1.z);
-		hit._3 = (t0.w <= t1.w);
-
-		result = t0;
-
-		return hit.f;
-#else
 		int ret = cmpLEQ(t0, t1);
 		result = t0;
 		return ret;
-#endif
 	}
 
 	inline int intersectTriangle(
@@ -459,6 +436,7 @@ namespace aten
 		aten::vec4& resultB,
 		const aten::ray& r,
 		real t_min, real t_max,
+		const float* primidx,
 		const QbvhNode& qnode)
 	{
 		// NOTE
@@ -472,7 +450,7 @@ namespace aten
 		aten::vec4 v2z;
 
 		for (int i = 0; i < qnode.numChildren; i++) {
-			auto f = face::faces()[(int)qnode.primidx[i]];
+			auto f = face::faces()[(int)primidx[i]];
 
 			const auto& v2 = aten::VertexManager::getVertex(f->param.idx[2]);
 
@@ -594,7 +572,67 @@ namespace aten
 				Intersection isectTmp;
 
 				bool isHit = false;
-#if 0
+
+#ifdef ENABLE_BVH_MULTI_TRIANGLES
+				if (pnode->exid >= 0) {
+					// Traverse external qbvh.
+					auto s = shapes[(int)pnode->shapeid];
+					const auto& param = s->getParam();
+
+					int mtxid = param.mtxid;
+
+					aten::ray transformedRay;
+
+					if (mtxid >= 0) {
+						const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+
+						transformedRay = mtxW2L.applyRay(r);
+					}
+					else {
+						transformedRay = r;
+					}
+
+					isHit = hit(
+						(int)pnode->exid,
+						listQbvhNode,
+						transformedRay,
+						t_min, t_max,
+						isectTmp);
+				}
+				else {
+					aten::vec4 resultT, resultA, resultB;
+
+					int res = intersectTriangle(
+						resultT, resultA, resultB,
+						r,
+						t_min, t_max,
+						qnode->primidx,
+						*pnode);
+
+					for (int i = 0; i < pnode->numChildren; i++) {
+						if ((res & (1 << i)) && (resultT[i] < isectTmp.t)) {
+							isectTmp.t = resultT[i];
+							isectTmp.a = resultA[i];
+							isectTmp.b = resultB[i];
+
+							isectTmp.primid = (int)pnode->primidx[i];
+							isectTmp.objid = (int)pnode->shapeidx[i];
+
+							auto f = prims[isectTmp.primid];
+
+							isectTmp.mtrlid = f->param.mtrlid;
+							isectTmp.area = f->param.area;
+
+							isHit = true;
+						}
+					}
+
+					if (isHit) {
+						auto s = shapes[isectTmp.objid];
+						isectTmp.objid = s->id();
+					}
+				}
+#else
 				auto s = shapes[(int)pnode->shapeid];
 
 				if (pnode->exid >= 0) {
@@ -632,64 +670,6 @@ namespace aten
 				else {
 					// sphere, cube.
 					isHit = s->hit(r, t_min, t_max, isectTmp);
-				}
-#else
-				if (pnode->exid >= 0) {
-					// Traverse external qbvh.
-					auto s = shapes[(int)pnode->shapeid];
-					const auto& param = s->getParam();
-
-					int mtxid = param.mtxid;
-
-					aten::ray transformedRay;
-
-					if (mtxid >= 0) {
-						const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
-
-						transformedRay = mtxW2L.applyRay(r);
-					}
-					else {
-						transformedRay = r;
-					}
-
-					isHit = hit(
-						(int)pnode->exid,
-						listQbvhNode,
-						transformedRay,
-						t_min, t_max,
-						isectTmp);
-				}
-				else {
-					aten::vec4 resultT, resultA, resultB;
-
-					int res = intersectTriangle(
-						resultT, resultA, resultB,
-						r,
-						t_min, t_max,
-						*pnode);
-
-					for (int i = 0; i < pnode->numChildren; i++) {
-						if ((res & (1 << i)) && (resultT[i] < isectTmp.t)) {
-							isectTmp.t = resultT[i];
-							isectTmp.a = resultA[i];
-							isectTmp.b = resultB[i];
-
-							isectTmp.primid = (int)pnode->primidx[i];
-							isectTmp.objid = (int)pnode->shapeidx[i];
-
-							auto f = prims[isectTmp.primid];
-
-							isectTmp.mtrlid = f->param.mtrlid;
-							isectTmp.area = f->param.area;
-
-							isHit = true;
-						}
-					}
-
-					if (isHit) {
-						auto s = shapes[isectTmp.objid];
-						isectTmp.objid = s->id();
-					}
 				}
 #endif
 

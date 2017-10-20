@@ -372,32 +372,7 @@ namespace aten {
 					aabb::merge(info.node->getBoundingbox(), bbox));
 			}
 
-#if 0
-			if (info.num == 1) {
-				// １個しかないので、これだけで終了.
-				info.node->m_left = new bvhnode(info.node, info.list[0]);
-
-				info = stacks.back();
-				stacks.pop_back();
-				continue;
-			}
-			else if (info.num == 2) {
-				// ２個だけのときは適当にソートして、終了.
-
-				// TODO
-				//int axis = (int)(::rand() % 3);
-				int axis = 0;
-
-				sortList(info.list, info.num, axis);
-
-				info.node->m_left = new bvhnode(info.node, info.list[0]);
-				info.node->m_right = new bvhnode(info.node, info.list[1]);
-
-				info = stacks.back();
-				stacks.pop_back();
-				continue;
-			}
-#else
+#ifdef ENABLE_BVH_MULTI_TRIANGLES
 			if (info.num <= 4) {
 				bool canRegisterAsChild = true;
 
@@ -426,8 +401,33 @@ namespace aten {
 					info = stacks.back();
 					stacks.pop_back();
 					continue;
-				}
+		}
 			}
+#else
+			if (info.num == 1) {
+				// １個しかないので、これだけで終了.
+				info.node->m_left = new bvhnode(info.node, info.list[0]);
+
+				info = stacks.back();
+				stacks.pop_back();
+				continue;
+			}
+			else if (info.num == 2) {
+				// ２個だけのときは適当にソートして、終了.
+
+				// TODO
+				//int axis = (int)(::rand() % 3);
+				int axis = 0;
+
+				sortList(info.list, info.num, axis);
+
+				info.node->m_left = new bvhnode(info.node, info.list[0]);
+				info.node->m_right = new bvhnode(info.node, info.list[1]);
+
+				info = stacks.back();
+				stacks.pop_back();
+				continue;
+			}			
 #endif
 
 			// Triangleとrayのヒットにかかる処理時間の見積もり.

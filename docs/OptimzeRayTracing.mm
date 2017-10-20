@@ -18,6 +18,12 @@
 </node>
 <node CREATED="1508386228307" ID="ID_275327721" LINK="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH" MODIFIED="1508386228307" TEXT="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH"/>
 <node CREATED="1508386228312" ID="ID_495432910" LINK="http://www.luxrender.net/wiki/LuxRender_Render_settings#SQBVH" MODIFIED="1508386228312" TEXT="luxrender.net &gt; Wiki &gt; LuxRender Render settings#SQBVH"/>
+<node CREATED="1508490034313" ID="ID_124334878" MODIFIED="1508490039847" TEXT="Panta-Ray">
+<node CREATED="1508490040804" LINK="https://qiita.com/7of9/items/c04b08c5e719dc6f8593" MODIFIED="1508490040804" TEXT="https://qiita.com/7of9/items/c04b08c5e719dc6f8593"/>
+</node>
+<node CREATED="1508490041827" ID="ID_1119476349" MODIFIED="1508490049470" TEXT="&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;">
+<node CREATED="1508490054639" LINK="https://qiita.com/edo_m18/items/b5058581555a9823b8d6" MODIFIED="1508490054639" TEXT="https://qiita.com/edo_m18/items/b5058581555a9823b8d6"/>
+</node>
 </node>
 <node CREATED="1507092246382" HGAP="35" ID="ID_449402318" MODIFIED="1507192383555" POSITION="right" TEXT="TODO" VSHIFT="46">
 <node CREATED="1507092248381" ID="ID_1848368983" MODIFIED="1507191164843" TEXT="Memory alignment">
@@ -85,16 +91,33 @@
 <node CREATED="1508485912026" ID="ID_669116261" MODIFIED="1508485927639" TEXT="&#x3053;&#x3061;&#x3089;&#x3092;&#x3064;&#x304b;&#x3063;&#x305f;&#x65b9;&#x304c;&#x3088;&#x308a;&#x53b3;&#x5bc6;&#x306b;&#x306a;&#x308b;&#x3068;&#x601d;&#x308f;&#x308c;&#x308b;"/>
 <node CREATED="1508485928179" ID="ID_88683209" MODIFIED="1508485957319" TEXT="face&#x3054;&#x3068;&#x306b;&#x6240;&#x5c5e;&#x3059;&#x308b;shape&#x306b;&#x5fdc;&#x3058;&#x305f;meshid&#x3092;&#x30bb;&#x30c3;&#x30c8;&#x3057;&#x3066;&#x3044;&#x308b;&#x306e;&#x3067;&#x610f;&#x5473;&#x306e;&#x3042;&#x308b;&#x5024;&#x306b;&#x306a;&#x3063;&#x3066;&#x3044;&#x308b;"/>
 </node>
-<node CREATED="1508466691443" ID="ID_605032726" MODIFIED="1508485974086" TEXT="invidr&#x306a;&#x3069;intersection&#x8a08;&#x7b97;&#x306b;&#x3064;&#x304b;&#x3046;&#x30d9;&#x30af;&#x30c8;&#x30eb;&#x3092;&#x4e8b;&#x524d;&#x8a08;&#x7b97;&#x3057;&#x3066;&#x304a;&#x304f;">
-<icon BUILTIN="yes"/>
+<node CREATED="1508466691443" ID="ID_605032726" MODIFIED="1508486941407" TEXT="invidr&#x306a;&#x3069;intersection&#x8a08;&#x7b97;&#x306b;&#x3064;&#x304b;&#x3046;&#x30d9;&#x30af;&#x30c8;&#x30eb;&#x3092;&#x4e8b;&#x524d;&#x8a08;&#x7b97;&#x3057;&#x3066;&#x304a;&#x304f;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1508486942745" ID="ID_217458290" MODIFIED="1508486957152" TEXT="&#x901f;&#x304f;&#x306a;&#x3089;&#x306a;&#x304b;&#x3063;&#x305f;"/>
 </node>
 </node>
 </node>
 <node CREATED="1507109127782" ID="ID_1629311417" MODIFIED="1507109270295" POSITION="right" TEXT="&#x8981;&#x691c;&#x8a0e;&#x30e1;&#x30e2;">
 <node CREATED="1507109122412" ID="ID_401997312" MODIFIED="1507109125168" TEXT="LOD">
 <node CREATED="1507277931057" ID="ID_203429155" MODIFIED="1507277933788" TEXT="&#x3069;&#x3046;&#x3084;&#x3063;&#x3066;&#x4f5c;&#x308b;">
-<node CREATED="1507277934208" ID="ID_1896610377" MODIFIED="1507277936172" TEXT="&#x4e8b;&#x524d;"/>
-<node CREATED="1507277939336" ID="ID_577122329" MODIFIED="1507277941532" TEXT="&#x52d5;&#x7684;"/>
+<node CREATED="1508491651613" ID="ID_773686385" MODIFIED="1508491776863" TEXT="BVH&#x306e;&#x30ce;&#x30fc;&#x30c9;&#x306e;AABB&#x3092;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x306b;&#x898b;&#x7acb;&#x3066;&#x308b;">
+<node CREATED="1508491777276" ID="ID_605464562" MODIFIED="1508491799951" TEXT="LOD&#x30ec;&#x30d9;&#x30eb;&#x306b;&#x5fdc;&#x3058;&#x3066;&#x3001;&#x30ce;&#x30fc;&#x30c9;&#x306e;&#x6df1;&#x3055;&#x3092;&#x5207;&#x308a;&#x66ff;&#x3048;&#x308b;&#x3053;&#x3068;&#x3067;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x30b5;&#x30a4;&#x30ba;&#x3082;&#x5909;&#x3048;&#x308b;"/>
+<node CREATED="1508491801851" ID="ID_1480610484" MODIFIED="1508491849630" TEXT="&#x305d;&#x306e;&#x305f;&#x3081;&#x306b;&#x306f;&#x3001;&#x30ce;&#x30fc;&#x30c9;&#x306b;&#x6240;&#x5c5e;&#x3059;&#x308b;&#x5b50;&#x30ce;&#x30fc;&#x30c9;&#x304c;&#x540c;&#x3058;&#x30de;&#x30c6;&#x30ea;&#x30a2;&#x30eb;&#x3067;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
+<node CREATED="1508491864418" ID="ID_1139157266" MODIFIED="1508491904847" TEXT="BVH&#x30d3;&#x30eb;&#x30c9;&#x3067;&#x4e09;&#x89d2;&#x5f62;&#xff08;face&#xff09;&#x5358;&#x4f4d;&#x3067;&#x3084;&#x3063;&#x3066;&#x3044;&#x308b;&#x304c;&#x3001;&#x3053;&#x308c;&#x3092;shape&#x5358;&#x4f4d;&#x3067;&#x884c;&#x3044;&#x3001;shape&#x306e;&#x76f4;&#x4e0b;&#x306b;&#x4e09;&#x89d2;&#x5f62;(face)&#x5358;&#x4f4d;&#x306e;BVH&#x3092;&#x3076;&#x3089;&#x4e0b;&#x3052;&#x308b;"/>
+</node>
+<node CREATED="1508492250411" ID="ID_1387559803" MODIFIED="1508492275799" TEXT="&#x305f;&#x3060;&#x3001;&#x3053;&#x306e;&#x5834;&#x5408;&#x3060;&#x3068;&#x3067;&#x304d;&#x3066;&#x3082;&#x4e00;&#x756a;&#x4f4e;&#x3044;&#x30ec;&#x30d9;&#x30eb;&#x306e;&#xff11;&#x3064;&#x4e0a;&#x307e;&#x3067;&#x304c;&#x9650;&#x754c;">
+<node CREATED="1508492276749" ID="ID_1186358807" MODIFIED="1508492291830" TEXT="&#x3064;&#x307e;&#x308a;&#x3001;&#x4e09;&#x89d2;&#x5f62;&#x30ce;&#x30fc;&#x30c9;&#x306e;&#xff11;&#x3064;&#x4e0a;&#x306e;&#x89aa;&#x30ce;&#x30fc;&#x30c9;&#x307e;&#x3067;">
+<node CREATED="1508492292836" ID="ID_311488504" MODIFIED="1508492315599" TEXT="Voxel&#x5316;&#x306b;&#x3088;&#x308a;&#x6cd5;&#x7dda;&#x304c;&#x5909;&#x5316;&#x3059;&#x308b;">
+<node CREATED="1508492316170" ID="ID_1092327930" MODIFIED="1508492326406" TEXT="&#x3042;&#x307e;&#x308a;&#x5927;&#x304d;&#x3044;Voxel&#x3060;&#x3068;&#x5909;&#x5316;&#x304c;&#x5927;&#x304d;&#x3059;&#x304e;&#x308b;"/>
+</node>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1508492336411" ID="ID_37106589" MODIFIED="1508492338815" TEXT="TODO">
+<node CREATED="1508492339139" ID="ID_1329276560" MODIFIED="1508492352846" TEXT="&#x307e;&#x305a;&#x306f;&#x73fe;&#x884c;&#x306e;BVH&#x3067;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x5316;&#x3057;&#x305f;&#x3089;&#x3069;&#x3046;&#x306a;&#x308b;&#x304b;&#x30c6;&#x30b9;&#x30c8;">
+<icon BUILTIN="yes"/>
+</node>
 </node>
 </node>
 <node CREATED="1507109149757" ID="ID_428371364" MODIFIED="1507109156472" TEXT="&#x9060;&#x65b9;&#x3092;&#x7701;&#x304f;">

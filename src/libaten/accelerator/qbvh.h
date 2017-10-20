@@ -40,19 +40,36 @@ namespace aten {
 				float primidx[4];
 			};
 		};
+
 		union {
-			aten::vec4 p4;
-			struct {
-				float meshidx[4];
-			};
+			aten::vec4 bminx;
+			aten::vec4 v0x;
 		};
 
-		aten::vec4 bminx;
-		aten::vec4 bmaxx;
-		aten::vec4 bminy;
-		aten::vec4 bmaxy;
-		aten::vec4 bminz;
-		aten::vec4 bmaxz;
+		union {
+			aten::vec4 bmaxx;
+			aten::vec4 v0y;
+		};
+
+		union {
+			aten::vec4 bminy;
+			aten::vec4 v0z;
+		};
+
+		union {
+			aten::vec4 bmaxy;
+			aten::vec4 e1x;
+		};
+
+		union {
+			aten::vec4 bminz;
+			aten::vec4 e1y;
+		};
+
+		union {
+			aten::vec4 bmaxz;
+			aten::vec4 e1z;
+		};
 
 		QbvhNode()
 		{
@@ -70,7 +87,6 @@ namespace aten {
 			p1 = rhs.p1;
 			p2 = rhs.p2;
 			p3 = rhs.p3;
-			p4 = rhs.p4;
 
 			bminx = rhs.bminx;
 			bmaxx = rhs.bmaxx;

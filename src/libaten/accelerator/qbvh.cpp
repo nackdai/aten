@@ -244,11 +244,25 @@ namespace aten
 					ch = const_cast<hitable*>(internalObj);
 				}
 
-				qbvhNode.meshidx[i] = (float)ch->meshid();
-
 				if(isPrimitiveLeaf) {
 					// Leaves of this tree are primitive.
 					qbvhNode.primidx[i] = (float)face::findIdx(ch);
+
+					auto f = face::faces()[(int)qbvhNode.primidx[i]];
+
+					const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
+					const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
+
+					auto e1 = v1.pos - v0.pos;
+
+					qbvhNode.v0x[i] = v0.pos.x;
+					qbvhNode.v0y[i] = v0.pos.y;
+					qbvhNode.v0z[i] = v0.pos.z;
+
+					qbvhNode.e1x[i] = e1.x;
+					qbvhNode.e1y[i] = e1.y;
+					qbvhNode.e1z[i] = e1.z;
+
 					qbvhNode.exid = -1.0f;
 				}
 				else {
@@ -453,14 +467,6 @@ namespace aten
 		// NOTE
 		// No SSE...
 
-		aten::vec4 v0x;
-		aten::vec4 v0y;
-		aten::vec4 v0z;
-
-		aten::vec4 v1x;
-		aten::vec4 v1y;
-		aten::vec4 v1z;
-
 		aten::vec4 v2x;
 		aten::vec4 v2y;
 		aten::vec4 v2z;
@@ -468,17 +474,7 @@ namespace aten
 		for (int i = 0; i < qnode.numChildren; i++) {
 			auto f = face::faces()[(int)qnode.primidx[i]];
 
-			const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
-			const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
 			const auto& v2 = aten::VertexManager::getVertex(f->param.idx[2]);
-
-			v0x[i] = v0.pos.x;
-			v0y[i] = v0.pos.y;
-			v0z[i] = v0.pos.z;
-
-			v1x[i] = v1.pos.x;
-			v1y[i] = v1.pos.y;
-			v1z[i] = v1.pos.z;
 
 			v2x[i] = v2.pos.x;
 			v2y[i] = v2.pos.y;
@@ -486,14 +482,14 @@ namespace aten
 		}
 
 		// e1 = v1 - v0
-		auto e1_x = v1x - v0x;
-		auto e1_y = v1y - v0y;
-		auto e1_z = v1z - v0z;
+		const auto& e1_x = qnode.e1x;
+		const auto& e1_y = qnode.e1y;
+		const auto& e1_z = qnode.e1z;
 
 		// e2 = v2 - v0
-		auto e2_x = v2x - v0x;
-		auto e2_y = v2y - v0y;
-		auto e2_z = v2z - v0z;
+		auto e2_x = v2x - qnode.v0x;
+		auto e2_y = v2y - qnode.v0y;
+		auto e2_z = v2z - qnode.v0z;
 
 		vec4 ox = vec4(r.org.x, r.org.x, r.org.x, r.org.x);
 		vec4 oy = vec4(r.org.y, r.org.y, r.org.y, r.org.y);
@@ -505,9 +501,9 @@ namespace aten
 		vec4 d_z = vec4(r.dir.z, r.dir.z, r.dir.z, r.dir.z);
 
 		// r = r.org - v0
-		auto r_x = ox - v0x;
-		auto r_y = oy - v0y;
-		auto r_z = oz - v0z;
+		auto r_x = ox - qnode.v0x;
+		auto r_y = oy - qnode.v0y;
+		auto r_z = oz - qnode.v0z;
 
 		// u = cross(d, e2)
 		auto u_x = d_y * e2_z - d_z * e2_y;
@@ -679,7 +675,6 @@ namespace aten
 							isectTmp.b = resultB[i];
 
 							isectTmp.primid = (int)pnode->primidx[i];
-							isectTmp.meshid = (int)pnode->meshidx[i];
 							isectTmp.objid = (int)pnode->shapeidx[i];
 
 							auto f = prims[isectTmp.primid];

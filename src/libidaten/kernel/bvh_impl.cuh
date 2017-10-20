@@ -22,10 +22,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosestTriangles(
 	isect->t = t_max;
 
 	while (nodeid >= 0) {
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primid, z : exid
-		_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+		node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// x : shapeid, y : primid, z : exid
+		_boxmin = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		_boxmax = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
 
 		//boxmin = aten::vec3(_boxmin.x, _boxmin.y, _boxmin.z);
 		//boxmax = aten::vec3(_boxmax.x, _boxmax.y, _boxmax.z);
@@ -87,10 +87,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloserTriangles(
 	isect->t = t_max;
 
 	while (nodeid >= 0) {
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primid, z : exid
-		_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+		node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// x : shapeid, y : primid, z : exid
+		_boxmin = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		_boxmax = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
 
 		boxmin = aten::vec3(_boxmin.x, _boxmin.y, _boxmin.z);
 		boxmax = aten::vec3(_boxmax.x, _boxmax.y, _boxmax.z);
@@ -153,10 +153,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHAnyTriangles(
 	isect->t = t_max;
 
 	while (nodeid >= 0) {
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primid, z : exid
-		_boxmin = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		_boxmax = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+		node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// x : shapeid, y : primid, z : exid
+		_boxmin = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		_boxmax = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
 
 		boxmin = aten::vec3(_boxmin.x, _boxmin.y, _boxmin.z);
 		boxmax = aten::vec3(_boxmax.x, _boxmax.y, _boxmax.z);
@@ -218,10 +218,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHClosest(
 	real t = AT_MATH_INF;
 
 	while (nodeid >= 0) {
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid, w: meshid
-		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+		node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// x : shapeid, y : primgid, z : exid, w: meshid
+		aabb[0] = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		aabb[1] = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
 
 		auto boxmin = aten::vec3(aabb[0].x, aabb[0].y, aabb[0].z);
 		auto boxmax = aten::vec3(aabb[1].x, aabb[1].y, aabb[1].z);
@@ -301,10 +301,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHCloser(
 	real t = AT_MATH_INF;
 
 	while (nodeid >= 0) {
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
-		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+		node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// x : shapeid, y : primgid, z : exid
+		aabb[0] = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		aabb[1] = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
 
 		auto boxmin = aten::vec3(aabb[0].x, aabb[0].y, aabb[0].z);
 		auto boxmax = aten::vec3(aabb[1].x, aabb[1].y, aabb[1].z);
@@ -385,10 +385,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHAny(
 	real t = AT_MATH_INF;
 
 	while (nodeid >= 0) {
-		node = tex1Dfetch<float4>(nodes, 4 * nodeid + 0);	// x : hit, y: miss
-		attrib = tex1Dfetch<float4>(nodes, 4 * nodeid + 1);	// x : shapeid, y : primgid, z : exid
-		aabb[0] = tex1Dfetch<float4>(nodes, 4 * nodeid + 2);
-		aabb[1] = tex1Dfetch<float4>(nodes, 4 * nodeid + 3);
+		node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// x : hit, y: miss
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// x : shapeid, y : primgid, z : exid
+		aabb[0] = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		aabb[1] = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
 
 		auto boxmin = aten::vec3(aabb[0].x, aabb[0].y, aabb[0].z);
 		auto boxmax = aten::vec3(aabb[1].x, aabb[1].y, aabb[1].z);

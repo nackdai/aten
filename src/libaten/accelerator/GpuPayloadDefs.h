@@ -3,9 +3,8 @@
 #include "accelerator/threaded_bvh.h"
 #include "accelerator/qbvh.h"
 
-// TODO
 #define GPGPU_TRAVERSE_THREADED_BVH
-#define GPGPU_TRAVERSE_QBVH
+//#define GPGPU_TRAVERSE_QBVH
 
 namespace aten {
 #if defined(GPGPU_TRAVERSE_THREADED_BVH)
@@ -15,4 +14,7 @@ namespace aten {
 #else
 	AT_STATICASSERT(false);
 #endif
+
+	AT_STATICASSERT((sizeof(GPUBvhNode) % (sizeof(float) * 4)) == 0);
+	static const int GPUBvhNodeSize = sizeof(GPUBvhNode) / (sizeof(float) * 4);
 }

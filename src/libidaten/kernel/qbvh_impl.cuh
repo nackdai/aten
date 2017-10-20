@@ -33,17 +33,17 @@ AT_CUDA_INLINE __device__ bool intersectQBVHClosestTriangles(
 		}
 
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -120,17 +120,17 @@ AT_CUDA_INLINE __device__ bool intersectQBVHCloserTriangles(
 		}
 
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -209,17 +209,17 @@ AT_CUDA_INLINE __device__ bool intersectQBVHAnyTriangles(
 		}
 
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -301,17 +301,17 @@ AT_CUDA_INLINE __device__ bool intersectQBVHClosest(
 		}
 
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -408,17 +408,17 @@ AT_CUDA_INLINE __device__ bool intersectQBVHCloser(
 		}
 
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -517,17 +517,17 @@ AT_CUDA_INLINE __device__ bool intersectQBVHAny(
 		}
 
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, 8 * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;

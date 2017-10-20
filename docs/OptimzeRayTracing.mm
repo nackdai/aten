@@ -16,6 +16,8 @@
 <node CREATED="1507277445764" LINK="https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/" MODIFIED="1507277445764" TEXT="https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/"/>
 </node>
 </node>
+<node CREATED="1508386228307" ID="ID_275327721" LINK="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH" MODIFIED="1508386228307" TEXT="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH"/>
+<node CREATED="1508386228312" ID="ID_495432910" LINK="http://www.luxrender.net/wiki/LuxRender_Render_settings#SQBVH" MODIFIED="1508386228312" TEXT="luxrender.net &gt; Wiki &gt; LuxRender Render settings#SQBVH"/>
 </node>
 <node CREATED="1507092246382" HGAP="35" ID="ID_449402318" MODIFIED="1507192383555" POSITION="right" TEXT="TODO" VSHIFT="46">
 <node CREATED="1507092248381" ID="ID_1848368983" MODIFIED="1507191164843" TEXT="Memory alignment">
@@ -112,6 +114,32 @@
 </node>
 <node CREATED="1507109311396" ID="ID_1174414119" MODIFIED="1507109311396" TEXT="&#x4e00;&#x5b9a;&#x5024;&#x4ee5;&#x4e0a;&#x306b;&#x306a;&#x3089;&#x306a;&#x3044;&#x3088;&#x3046;&#x306b;&#x3059;&#x308b;">
 <node CREATED="1507109314687" ID="ID_487099792" MODIFIED="1507109314687" TEXT="&#x30d5;&#x30a1;&#x30a4;&#x30a2;&#x30d5;&#x30e9;&#x30a4;&#x5bfe;&#x7b56;"/>
+</node>
+</node>
+<node CREATED="1508376034853" HGAP="25" ID="ID_1590537783" MODIFIED="1508376222839" TEXT="QBVH" VSHIFT="71">
+<node CREATED="1508376228810" ID="ID_410480423" MODIFIED="1508376316775" TEXT="AABB&#x306e;&#x5224;&#x5b9a;&#x90e8;&#x5206;&#x3092;&#xff14;&#x3064;&#x540c;&#x6642;&#xff08;Not use SSE&#xff09;&#x306b;&#x3059;&#x308b;&#x3068;CPU&#x4e0a;&#x306e;&#x30d1;&#x30d5;&#x30a9;&#x30fc;&#x30de;&#x30f3;&#x30b9;&#x306f;&#x3088;&#x304f;&#x306a;&#x3063;&#x3066;&#x3044;&#x308b;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1508376251225" ID="ID_1793615203" MODIFIED="1508376270245" TEXT="GPU&#x3060;&#x3068;&#x60aa;&#x304f;&#x306a;&#x308b;">
+<icon BUILTIN="messagebox_warning"/>
+</node>
+</node>
+<node CREATED="1508376036924" ID="ID_1133255603" MODIFIED="1508406131394" TEXT="BVH&#x306e;&#x6642;&#x70b9;&#x3067;&#xff11;&#x30ea;&#x30fc;&#x30d5;&#x3001;&#xff11;&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x3067;&#x306f;&#x306a;&#x304f;&#x3001;4&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x306b;&#x3057;&#x3066;&#x304a;&#x304f;">
+<node CREATED="1508376162668" ID="ID_1467426966" MODIFIED="1508406137073" TEXT="&#x305d;&#x3046;&#x3059;&#x308b;&#x3053;&#x3068;&#x3067;&#x3001;QBVH&#x306b;&#x304a;&#x3044;&#x3066;&#x3082;&#xff11;&#x30ea;&#x30fc;&#x30d5;&#x3001;4&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30a4;&#x30f3;&#x30b0;&#x30eb;&#x306b;&#x306a;&#x308b;">
+<node CREATED="1508377897284" ID="ID_1284711952" MODIFIED="1508391901990" TEXT="SAH&#x3067;&#xff14;&#x4ee5;&#x4e0b;&#x3067;&#x6b62;&#x3081;&#x308b;&#x3053;&#x3068;&#x3067;&#x8a66;&#x3059;">
+<icon BUILTIN="button_ok"/>
+</node>
+<node CREATED="1508391903139" ID="ID_941424485" MODIFIED="1508406079114" TEXT="4&#x30c8;&#x30e9;&#x30a4;&#x30a2;&#x30f3;&#x30b0;&#x30eb;&#x3092;&#x540c;&#x6642;&#x8a08;&#x7b97;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1508391915140" ID="ID_893192833" LINK="https://github.com/githole/akari2/blob/master/qbvh.h" MODIFIED="1508391915140" TEXT="https://github.com/githole/akari2/blob/master/qbvh.h"/>
+<node CREATED="1508406102702" ID="ID_1490973592" MODIFIED="1508406121209" TEXT="CPU&#x3067;&#x306f;SIMD&#x5316;&#x3057;&#x3066;&#x3044;&#x306a;&#x3044;&#x304b;&#x3089;&#x304b;&#x3001;&#x9045;&#x304f;&#x306a;&#x308b;"/>
+</node>
+<node CREATED="1508406087326" ID="ID_887910993" MODIFIED="1508406098907" TEXT="GPGPU&#x5bfe;&#x5fdc;">
+<icon BUILTIN="yes"/>
+</node>
+</node>
+</node>
+<node CREATED="1508406154078" ID="ID_526553431" MODIFIED="1508406170785" TEXT="QBVH&#x306b;&#x9069;&#x3057;&#x305f;&#x30c7;&#x30fc;&#x30bf;&#x69cb;&#x9020;&#x3092;GPU&#x306b;&#x30da;&#x30a4;&#x30ed;&#x30fc;&#x30c9;&#x3059;&#x308b;">
+<node CREATED="1508406171270" ID="ID_1432594631" MODIFIED="1508406189545" TEXT="BVH&#x3068;&#x5171;&#x7528;&#x3060;&#x3068;&#x6700;&#x9069;&#x5316;&#x3057;&#x304d;&#x308c;&#x306a;&#x3044;&#xff1f;"/>
 </node>
 </node>
 </node>

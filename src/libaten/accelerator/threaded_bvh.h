@@ -5,18 +5,16 @@
 
 namespace aten {
 	struct ThreadedBvhNode {
+		aten::vec3 boxmin;		///< AABB min position.
 		float hit{ -1 };		///< Link index if ray hit.
+
+		aten::vec3 boxmax;		///< AABB max position.
 		float miss{ -1 };		///< Link index if ray miss.
-		float parent{ -1 };		///< Parent node index.
-		float padding0{ 0 };
 
 		float shapeid{ -1 };	///< Object index.
 		float primid{ -1 };		///< Triangle index.
 		float exid{ -1 };		///< External bvh index.
 		float meshid{ -1 };		///< Mesh id.
-
-		aten::vec4 boxmin;		///< AABB min position.
-		aten::vec4 boxmax;		///< AABB max position.
 
 		bool isLeaf() const
 		{
@@ -70,14 +68,16 @@ namespace aten {
 			std::vector<accelerator*>& listBvh,
 			std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap);
 
-		void registerGpuBvhNode(
+		void registerThreadedBvhNode(
 			bool isPrimitiveLeaf,
-			std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-			std::vector<ThreadedBvhNode>& listGpuBvhNode);
+			const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
+			std::vector<ThreadedBvhNode>& listThreadedBvhNode,
+			std::vector<int>& listParentId);
 
-		void setOrderForLinearBVH(
-			std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-			std::vector<ThreadedBvhNode>& listGpuBvhNode);
+		void setOrder(
+			const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
+			const std::vector<int>& listParentId,
+			std::vector<ThreadedBvhNode>& listThreadedBvhNode);
 
 		bool hit(
 			int exid,

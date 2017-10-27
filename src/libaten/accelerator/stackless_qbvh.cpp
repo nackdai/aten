@@ -400,10 +400,34 @@ namespace aten
 		return ret;
 	}
 
+	// returns position of the rightmost set bit of n
 	int bitScan(int n)
 	{
-		int set_bit = n ^ (n & (n - 1));
-		return set_bit - 1;
+		// NOTE
+		// http://www.techiedelight.com/bit-hacks-part-3-playing-rightmost-set-bit-number/
+
+		// if number is odd, return 1
+		if (n & 1) {
+			//return 1;
+			return 0;
+		}
+
+		// unset rightmost bit and xor with number itself
+		n = n ^ (n & (n - 1));
+
+		// find the position of the only set bit in the result
+		// we can directly return log2(n) + 1 from the function
+#if 0
+		int pos = 0;
+		while (n)
+		{
+			n = n >> 1;
+			pos++;
+		}
+#else
+		int pos = ::log2(n) + 1;
+#endif
+		return pos - 1;
 	}
 
 	int SkipCode(int mask, int pos)

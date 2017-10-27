@@ -408,6 +408,8 @@ namespace aten {
 				// ‚PŒÂ‚µ‚©‚È‚¢‚Ì‚ÅA‚±‚ê‚¾‚¯‚ÅI—¹.
 				info.node->m_left = new bvhnode(info.node, info.list[0]);
 
+				info.node->m_left->setBoundingBox(info.list[0]->getBoundingbox());
+
 				info = stacks.back();
 				stacks.pop_back();
 				continue;
@@ -423,6 +425,9 @@ namespace aten {
 
 				info.node->m_left = new bvhnode(info.node, info.list[0]);
 				info.node->m_right = new bvhnode(info.node, info.list[1]);
+
+				info.node->m_left->setBoundingBox(info.list[0]->getBoundingbox());
+				info.node->m_right->setBoundingBox(info.list[1]->getBoundingbox());
 
 				info = stacks.back();
 				stacks.pop_back();

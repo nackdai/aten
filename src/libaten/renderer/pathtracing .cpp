@@ -9,11 +9,11 @@
 
 //#define Deterministic_Path_Termination
 
-//#define RELEASE_DEBUG
+#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X	(259)
-#define BREAK_Y	(511-53)
+#define BREAK_X	(138)
+#define BREAK_Y	(511 - 507)
 #pragma optimize( "", off)
 #endif
 

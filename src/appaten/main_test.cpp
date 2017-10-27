@@ -8,7 +8,7 @@ static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "app";
 
-//#define ENABLE_EVERY_FRAME_SC
+#define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_DOF
 
 #ifdef ENABLE_DOF
@@ -17,7 +17,7 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-static aten::AcceleratedScene<aten::qbvh> g_scene;
+static aten::AcceleratedScene<aten::StacklessQbvh> g_scene;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;

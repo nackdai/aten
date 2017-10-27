@@ -386,6 +386,9 @@
     <ClInclude Include="..\src\libaten\accelerator\GpuPayloadDefs.h">
       <Filter>accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\accelerator\stackless_bvh.h">
+      <Filter>accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -602,6 +605,9 @@
       <Filter>accelerator</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
   </ItemGroup>

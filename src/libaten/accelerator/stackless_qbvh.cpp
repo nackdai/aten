@@ -132,14 +132,28 @@ namespace aten
 			auto& qbvhNode = listQbvhNode[top.qbvhNodeIdx];
 			const auto& bvhNode = listBvhNode[top.bvhNodeIdx];
 
-			int numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
-
 			qbvhNode.parent = (float)top.parentQbvhNodeIdx;
 
 			if (top.parentQbvhNodeIdx >= 0) {
 				const auto& parentQbvhNode = listQbvhNode[top.parentQbvhNodeIdx];
-				qbvhNode.leftSiblingIdx = parentQbvhNode.leftChildrenIdx;
+				auto leftSiblingIdx = parentQbvhNode.leftChildrenIdx;
+				auto siblingNum = parentQbvhNode.numChildren;
+
+				// Šî€“_‚ğŒˆ‚ß‚é.
+				int base = 0;
+				for (int i = 0; i < 4; i++) {
+					if (top.qbvhNodeIdx == leftSiblingIdx + i) {
+						base = i + 1;
+						break;
+					}
+				}
+
+				qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
+				qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
+				qbvhNode.sib[2] = leftSiblingIdx + ((base + 2) % siblingNum);
 			}
+
+			int numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
 
 			if (numChildren == 0) {
 				// No children, so it is a leaf.
@@ -389,7 +403,7 @@ namespace aten
 	int bitScan(int n)
 	{
 		int set_bit = n ^ (n & (n - 1));
-		return set_bit;
+		return set_bit - 1;
 	}
 
 	int SkipCode(int mask, int pos)
@@ -544,14 +558,14 @@ namespace aten
 				pnode = &listQbvhNode[exid][nodeid];
 			}
 
-			if (pnode->leftSiblingIdx < 0) {
-				return (isect.objid >= 0);
-			}
-
+			// ‚±‚ê‚ª‚¨‚©‚µ‚¢š
 			auto siblingPos = bitScan(skipCode);
-			siblingPos += (int)pnode->leftSiblingIdx;
 
-			nodeid = siblingPos;
+			nodeid = pnode->sib[siblingPos];
+
+			if (nodeid < 0) {
+				int xxx = 0;
+			}
 
 			int n = SkipCodeNext(skipCode);
 			bitstack = bitstack ^ n;

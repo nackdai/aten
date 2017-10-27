@@ -10,12 +10,13 @@ namespace aten {
 			uint32_t numChildren : 3;
 		};
 		float parent{ -1 };
-		float leftSiblingIdx{ -1 };
+
+		int sib[3];
 
 		float shapeid{ -1 };	///< Object index.
-		float primid{ -1 };	///< Triangle index.
+		float primid{ -1 };		///< Triangle index.
 		float exid{ -1 };		///< External bvh index.
-		float meshid{ -1 };	///< Mesh id.
+		float meshid{ -1 };		///< Mesh id.
 
 		aten::vec4 bminx;
 		aten::vec4 bmaxx;
@@ -30,6 +31,7 @@ namespace aten {
 		{
 			isLeaf = false;
 			numChildren = 0;
+			sib[0] = sib[1] = sib[2] = -1;
 		}
 
 		StacklessQbvhNode(const StacklessQbvhNode& rhs)
@@ -37,7 +39,10 @@ namespace aten {
 			leftChildrenIdx = rhs.leftChildrenIdx;
 			isLeaf = rhs.isLeaf;
 			numChildren = rhs.numChildren;
-			leftSiblingIdx = rhs.leftSiblingIdx;
+			
+			sib[0] = rhs.sib[0];
+			sib[1] = rhs.sib[1];
+			sib[2] = rhs.sib[2];
 
 			shapeid = rhs.shapeid;
 			primid = rhs.primid;

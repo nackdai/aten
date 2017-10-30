@@ -579,9 +579,9 @@ namespace aten
 			}
 			else {
 				// Hit test children aabb.
-				aten::vec4 interserctT;
+				aten::vec4 intersectT;
 				auto hitMask = intersectAABB(
-					interserctT,
+					intersectT,
 					r,
 					t_min, t_max,
 					pnode->bminx, pnode->bmaxx,
@@ -604,10 +604,10 @@ namespace aten
 						nodeid = (int)pnode->leftChildrenIdx + 3;
 					}
 					else {
-						int nearId_a = (interserctT.x < interserctT.y ? 0 : 1);
-						int nearId_b = (interserctT.z < interserctT.w ? 2 : 3);
+						int nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
+						int nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
 
-						int nearPos = (interserctT[nearId_a] < interserctT[nearId_b] ? nearId_a : nearId_b);
+						int nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
 
 						nodeid = (int)pnode->leftChildrenIdx + nearPos;
 

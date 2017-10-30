@@ -5,13 +5,11 @@
 namespace aten {
 	struct StacklessQbvhNode {
 		float leftChildrenIdx{ -1 };
-		struct {
-			uint32_t isLeaf : 1;
-			uint32_t numChildren : 3;
-		};
+		float isLeaf{ false };
+		float numChildren{ 0 };
 		float parent{ -1 };
 
-		int sib[3];
+		float sib[4];
 
 		float shapeid{ -1 };	///< Object index.
 		float primid{ -1 };		///< Triangle index.

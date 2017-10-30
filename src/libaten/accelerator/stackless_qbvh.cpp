@@ -140,8 +140,8 @@ namespace aten
 
 			if (top.parentQbvhNodeIdx >= 0) {
 				const auto& parentQbvhNode = listQbvhNode[top.parentQbvhNodeIdx];
-				auto leftSiblingIdx = parentQbvhNode.leftChildrenIdx;
-				auto siblingNum = parentQbvhNode.numChildren;
+				int leftSiblingIdx = (int)parentQbvhNode.leftChildrenIdx;
+				int siblingNum = (int)parentQbvhNode.numChildren;
 
 				// Šî€“_‚ðŒˆ‚ß‚é.
 				int base = 0;
@@ -153,51 +153,51 @@ namespace aten
 				}
 
 				if (siblingNum == 4) {
-					qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
-					qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
-					qbvhNode.sib[2] = leftSiblingIdx + ((base + 2) % siblingNum);
+					qbvhNode.sib[0] = (float)(leftSiblingIdx + ((base + 0) % siblingNum));
+					qbvhNode.sib[1] = (float)(leftSiblingIdx + ((base + 1) % siblingNum));
+					qbvhNode.sib[2] = (float)(leftSiblingIdx + ((base + 2) % siblingNum));
 				}
 				else if (siblingNum == 3) {
-					qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
-					qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
-					qbvhNode.sib[2] = leftSiblingIdx + ((base + 2) % siblingNum);
+					qbvhNode.sib[0] = (float)(leftSiblingIdx + ((base + 0) % siblingNum));
+					qbvhNode.sib[1] = (float)(leftSiblingIdx + ((base + 1) % siblingNum));
+					qbvhNode.sib[2] = (float)(leftSiblingIdx + ((base + 2) % siblingNum));
 
 					switch (base) {
 					case 1:
-						qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
-						qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
-						qbvhNode.sib[2] = -1;
+						qbvhNode.sib[0] = (float)(leftSiblingIdx + ((base + 0) % siblingNum));
+						qbvhNode.sib[1] = (float)(leftSiblingIdx + ((base + 1) % siblingNum));
+						qbvhNode.sib[2] = -1.0f;
 						break;
 					case 2:
-						qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
-						qbvhNode.sib[1] = -1;
-						qbvhNode.sib[2] = leftSiblingIdx + ((base + 1) % siblingNum);
+						qbvhNode.sib[0] = (float)(leftSiblingIdx + ((base + 0) % siblingNum));
+						qbvhNode.sib[1] = -1.0f;
+						qbvhNode.sib[2] = (float)(leftSiblingIdx + ((base + 1) % siblingNum));
 						break;
 					case 3:
-						qbvhNode.sib[0] = -1;
-						qbvhNode.sib[1] = leftSiblingIdx + ((base + 0) % siblingNum);
-						qbvhNode.sib[2] = leftSiblingIdx + ((base + 1) % siblingNum);
+						qbvhNode.sib[0] = -1.0f;
+						qbvhNode.sib[1] = (float)(leftSiblingIdx + ((base + 0) % siblingNum));
+						qbvhNode.sib[2] = (float)(leftSiblingIdx + ((base + 1) % siblingNum));
 						break;
 					}
 				}
 				else if (siblingNum == 2) {
-					qbvhNode.sib[0] = -1;
-					qbvhNode.sib[1] = -1;
-					qbvhNode.sib[2] = -1;
+					qbvhNode.sib[0] = -1.0f;
+					qbvhNode.sib[1] = -1.0f;
+					qbvhNode.sib[2] = -1.0f;
 
 					switch (base) {
 					case 1:
-						qbvhNode.sib[0] = leftSiblingIdx + (base % siblingNum);
+						qbvhNode.sib[0] = (float)(leftSiblingIdx + (base % siblingNum));
 						break;
 					case 2:
-						qbvhNode.sib[2] = leftSiblingIdx + (base % siblingNum);
+						qbvhNode.sib[2] = (float)(leftSiblingIdx + (base % siblingNum));
 						break;
 					}
 				}
 				else {
-					qbvhNode.sib[0] = -1;
-					qbvhNode.sib[1] = -1;
-					qbvhNode.sib[2] = -1;
+					qbvhNode.sib[0] = -1.0f;
+					qbvhNode.sib[1] = -1.0f;
+					qbvhNode.sib[2] = -1.0f;
 				}
 			}
 
@@ -473,7 +473,7 @@ namespace aten
 			pos++;
 		}
 #else
-		int pos = ::log2(n) + 1;
+		int pos = (int)(::log2(n) + 1);
 #endif
 		return pos - 1;
 	}
@@ -632,7 +632,7 @@ namespace aten
 
 			auto siblingPos = bitScan(skipCode);
 
-			nodeid = pnode->sib[siblingPos];
+			nodeid = (int)pnode->sib[siblingPos];
 
 			int n = SkipCodeNext(skipCode);
 			bitstack = bitstack ^ n;

@@ -15,4 +15,9 @@
 	#define intersectClosest	intersectClosestStacklessBVH
 	#define intersectCloser		intersectCloserStacklessBVH
 	#define interserctAny		intersectAnyStacklessBVH
+#elif defined(GPGPU_TRAVERSE_STACKLESS_QBVH)
+	#include "kernel/stackless_qbvh.cuh"
+	#define intersectClosest	intersectClosestStacklessQBVH
+	#define intersectCloser		intersectCloserStacklessQBVH
+	#define interserctAny		intersectAnyStacklessQBVH
 #endif

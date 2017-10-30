@@ -226,6 +226,12 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -408,6 +414,9 @@
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\stackless_bvh.cu">
+      <Filter>kernel\accelerator</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\stackless_qbvh.cu">
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>
   </ItemGroup>

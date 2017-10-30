@@ -373,10 +373,10 @@ AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
 	hit._2 = (t0.z <= t1.z);
 	hit._3 = (t0.w <= t1.w);
 
-	result->x = t0.x;
-	result->y = t0.y;
-	result->z = t0.z;
-	result->w = t0.w;
+	result->x = hit._0 ? t0.x : AT_MATH_INF;
+	result->y = hit._1 ? t0.y : AT_MATH_INF;
+	result->z = hit._2 ? t0.z : AT_MATH_INF;
+	result->w = hit._3 ? t0.w : AT_MATH_INF;
 
 	return hit.f;
 }

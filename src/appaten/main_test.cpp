@@ -8,7 +8,7 @@ static int WIDTH = 512;
 static int HEIGHT = 512;
 static const char* TITLE = "app";
 
-#define ENABLE_EVERY_FRAME_SC
+//#define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_DOF
 
 #ifdef ENABLE_DOF

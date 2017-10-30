@@ -168,5 +168,5 @@ public:
 //#define Scene DisneyMaterialTestScene
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
-#define Scene ObjCornellBoxScene
-//#define Scene SponzaScene
+//#define Scene ObjCornellBoxScene
+#define Scene SponzaScene

@@ -1,6 +1,6 @@
 #include "accelerator/stackless_qbvh.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 // NOTE
 // http://cg.iit.bme.hu/~afra/publications/afra2013cgf_mbvhsl.pdf
@@ -134,6 +134,10 @@ namespace aten
 
 			qbvhNode.parent = (float)top.parentQbvhNodeIdx;
 
+			if (top.qbvhNodeIdx == 11) {
+				int xxxx = 0;
+			}
+
 			if (top.parentQbvhNodeIdx >= 0) {
 				const auto& parentQbvhNode = listQbvhNode[top.parentQbvhNodeIdx];
 				auto leftSiblingIdx = parentQbvhNode.leftChildrenIdx;
@@ -148,9 +152,52 @@ namespace aten
 					}
 				}
 
-				qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
-				qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
-				qbvhNode.sib[2] = leftSiblingIdx + ((base + 2) % siblingNum);
+				if (siblingNum == 4) {
+					qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
+					qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
+					qbvhNode.sib[2] = leftSiblingIdx + ((base + 2) % siblingNum);
+				}
+				else if (siblingNum == 3) {
+					qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
+					qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
+					qbvhNode.sib[2] = leftSiblingIdx + ((base + 2) % siblingNum);
+
+					switch (base) {
+					case 1:
+						qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
+						qbvhNode.sib[1] = leftSiblingIdx + ((base + 1) % siblingNum);
+						qbvhNode.sib[2] = -1;
+						break;
+					case 2:
+						qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
+						qbvhNode.sib[1] = -1;
+						qbvhNode.sib[2] = leftSiblingIdx + ((base + 1) % siblingNum);
+					case 3:
+						qbvhNode.sib[0] = -1;
+						qbvhNode.sib[1] = leftSiblingIdx + ((base + 0) % siblingNum);
+						qbvhNode.sib[2] = leftSiblingIdx + ((base + 1) % siblingNum);
+						break;
+					}
+				}
+				else if (siblingNum == 2) {
+					qbvhNode.sib[0] = -1;
+					qbvhNode.sib[1] = -1;
+					qbvhNode.sib[2] = -1;
+
+					switch (base) {
+					case 1:
+						qbvhNode.sib[0] = leftSiblingIdx + (base % siblingNum);
+						break;
+					case 2:
+						qbvhNode.sib[2] = leftSiblingIdx + (base % siblingNum);
+						break;
+					}
+				}
+				else {
+					qbvhNode.sib[0] = -1;
+					qbvhNode.sib[1] = -1;
+					qbvhNode.sib[2] = -1;
+				}
 			}
 
 			int numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
@@ -582,14 +629,9 @@ namespace aten
 				pnode = &listQbvhNode[exid][nodeid];
 			}
 
-			// ‚±‚ê‚ª‚¨‚©‚µ‚¢š
 			auto siblingPos = bitScan(skipCode);
 
 			nodeid = pnode->sib[siblingPos];
-
-			if (nodeid < 0) {
-				int xxx = 0;
-			}
 
 			int n = SkipCodeNext(skipCode);
 			bitstack = bitstack ^ n;

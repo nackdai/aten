@@ -10,6 +10,8 @@
 
 #include "cuda/helper_math.h"
 
+#include "kernel/intersecttype.h"
+
 __device__ bool intersectQBVH(
 	const Context* ctxt,
 	const aten::ray& r,

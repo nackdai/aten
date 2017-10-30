@@ -134,7 +134,7 @@ namespace aten
 
 			qbvhNode.parent = (float)top.parentQbvhNodeIdx;
 
-			if (top.qbvhNodeIdx == 11) {
+			if (top.qbvhNodeIdx == 52005) {
 				int xxxx = 0;
 			}
 
@@ -172,6 +172,7 @@ namespace aten
 						qbvhNode.sib[0] = leftSiblingIdx + ((base + 0) % siblingNum);
 						qbvhNode.sib[1] = -1;
 						qbvhNode.sib[2] = leftSiblingIdx + ((base + 1) % siblingNum);
+						break;
 					case 3:
 						qbvhNode.sib[0] = -1;
 						qbvhNode.sib[1] = leftSiblingIdx + ((base + 0) % siblingNum);

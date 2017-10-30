@@ -10,6 +10,14 @@
 
 #include "cuda/helper_math.h"
 
+namespace idaten {
+	enum IntersectType {
+		Closest,
+		Closer,
+		Any,
+	};
+}
+
 __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,

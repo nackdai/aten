@@ -1,16 +1,8 @@
 #include "kernel/idatendefs.cuh"
 
-struct QbvhIntersect {
-	int nodeid{ -1 };
-	float t;
-
-	__device__ QbvhIntersect(int id, float _t) : nodeid(id), t(_t) {}
-	__device__ QbvhIntersect() {}
-};
-
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
-	QbvhIntersect* stack,
+	int* stack,
 	int beginStackPos,
 	cudaTextureObject_t nodes,
 	const Context* ctxt,
@@ -22,29 +14,25 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 
 	int stackpos = beginStackPos + 1;
 
-	stack[stackpos] = QbvhIntersect(0, t_max);
+	stack[stackpos] = 0;
 	stackpos++;
 	
 	while (stackpos > beginStackPos) {
-		auto qi = stack[stackpos - 1];
+		int nodeid = stack[stackpos - 1];
 		stackpos -= 1;
 
-		if (qi.t > t_max) {
-			continue;
-		}
-
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -93,11 +81,10 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 
 			// Stack hit children.
 			if (res > 0) {
-				for (int i = 0; i < numChildren; i++) {
-					if (res & (1 << i)) {
-						stack[stackpos] = QbvhIntersect(
-							leftChildrenIdx + i,
-							intersectT[i]);
+#pragma unroll
+				for (int i = 0; i < 4; i++) {
+					if ((res & (1 << i)) && intersectT[i] < t_max) {
+						stack[stackpos] = leftChildrenIdx + i;
 						stackpos++;
 					}
 				}
@@ -117,36 +104,32 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 	aten::Intersection* isect)
 {
 	static const int stacksize = 64;
-	QbvhIntersect stack[stacksize];
+	int stack[stacksize];
 
 	aten::Intersection isectTmp;
 
 	isect->t = t_max;
 
 	int stackpos = 0;
-	stack[stackpos] = QbvhIntersect(0, t_max);
+	stack[stackpos] = 0;
 	stackpos++;
 
 	while (stackpos > 0) {
-		auto qi = stack[stackpos - 1];
+		int nodeid = stack[stackpos - 1];
 		stackpos -= 1;
 
-		if (qi.t > t_max) {
-			continue;
-		}
-
 		// x : leftChildIdx, y : isLeaf, z : numChildren
-		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 0);
+		float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
 
 		// x: shapeid, y : primid, z : exid, w : meshid
-		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 1);
+		float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);
 
-		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 2);
-		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 3);
-		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 4);
-		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 5);
-		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 6);
-		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * qi.nodeid + 7);
+		float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
+		float4 bmaxx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
+		float4 bminy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);
+		float4 bmaxy = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 5);
+		float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 6);
+		float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 7);
 
 		int leftChildrenIdx = (int)node.x;
 		int isLeaf = (int)node.y;
@@ -213,11 +196,10 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 
 			// Stack hit children.
 			if (res > 0) {
-				for (int i = 0; i < numChildren; i++) {
-					if (res & (1 << i)) {
-						stack[stackpos] = QbvhIntersect(
-							leftChildrenIdx + i,
-							intersectT[i]);
+#pragma unroll
+				for (int i = 0; i < 4; i++) {
+					if ((res & (1 << i)) && intersectT[i] < t_max) {
+						stack[stackpos] = leftChildrenIdx + i;
 						stackpos++;
 					}
 				}

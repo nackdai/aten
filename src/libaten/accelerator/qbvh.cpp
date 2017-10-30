@@ -692,12 +692,14 @@ namespace aten
 					pnode->bminz, pnode->bmaxz);
 
 				// Stack hit children.
-				for (int i = 0; i < numChildren; i++) {
-					if ((res & (1 << i)) > 0) {
-						stackbuf[stackpos] = Intersect(
-							&listQbvhNode[exid][(int)pnode->leftChildrenIdx + i],
-							interserctT[i]);
-						stackpos++;
+				if (res > 0) {
+					for (int i = 0; i < numChildren; i++) {
+						if ((res & (1 << i)) > 0) {
+							stackbuf[stackpos] = Intersect(
+								&listQbvhNode[exid][(int)pnode->leftChildrenIdx + i],
+								interserctT[i]);
+							stackpos++;
+						}
 					}
 				}
 			}

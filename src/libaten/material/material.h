@@ -94,7 +94,7 @@ namespace aten
 		const MaterialAttribute attrib;
 
 		struct {
-			int isIdealRefraction : 1;
+			uint32_t isIdealRefraction : 1;
 		};
 
 		union {

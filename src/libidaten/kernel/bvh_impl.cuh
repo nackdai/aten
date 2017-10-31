@@ -56,6 +56,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 				{
 					return true;
 				}
+
+				t_max = isect->t;
 			}
 		}
 		else {
@@ -152,6 +154,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 				{
 					return true;
 				}
+
+				t_max = isect->t;
 			}
 		}
 		else {

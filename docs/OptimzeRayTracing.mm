@@ -21,9 +21,14 @@
 <node CREATED="1508490034313" ID="ID_124334878" MODIFIED="1508490039847" TEXT="Panta-Ray">
 <node CREATED="1508490040804" LINK="https://qiita.com/7of9/items/c04b08c5e719dc6f8593" MODIFIED="1508490040804" TEXT="https://qiita.com/7of9/items/c04b08c5e719dc6f8593"/>
 </node>
-<node CREATED="1508490041827" ID="ID_1119476349" MODIFIED="1508490049470" TEXT="&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;">
+<node CREATED="1508490041827" ID="ID_1119476349" MODIFIED="1508830040770" TEXT="&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;">
 <node CREATED="1508490054639" LINK="https://qiita.com/edo_m18/items/b5058581555a9823b8d6" MODIFIED="1508490054639" TEXT="https://qiita.com/edo_m18/items/b5058581555a9823b8d6"/>
 </node>
+<node CREATED="1508830041323" ID="ID_1972292834" MODIFIED="1508830047918" TEXT="&#x6700;&#x9069;&#x5316;">
+<icon BUILTIN="idea"/>
+<node CREATED="1508830045711" LINK="http://www.diva-portal.org/smash/get/diva2:359850/FULLTEXT01.pdf" MODIFIED="1508830045711" TEXT="diva-portal.org &gt; Smash &gt; Get &gt; Diva2:359850 &gt; FULLTEXT01"/>
+</node>
+<node CREATED="1508837367829" LINK="http://www.zora.uzh.ch/id/eprint/125432/7/ZORA125432.pdf" MODIFIED="1508837367829" TEXT="zora.uzh.ch &gt; Id &gt; Eprint &gt; 125432 &gt; 7 &gt; ZORA125432"/>
 </node>
 <node CREATED="1507092246382" HGAP="35" ID="ID_449402318" MODIFIED="1507192383555" POSITION="right" TEXT="TODO" VSHIFT="46">
 <node CREATED="1507092248381" ID="ID_1848368983" MODIFIED="1507191164843" TEXT="Memory alignment">
@@ -114,10 +119,9 @@
 </node>
 </node>
 </node>
-<node CREATED="1508492336411" ID="ID_37106589" MODIFIED="1508492338815" TEXT="TODO">
-<node CREATED="1508492339139" ID="ID_1329276560" MODIFIED="1508492352846" TEXT="&#x307e;&#x305a;&#x306f;&#x73fe;&#x884c;&#x306e;BVH&#x3067;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x5316;&#x3057;&#x305f;&#x3089;&#x3069;&#x3046;&#x306a;&#x308b;&#x304b;&#x30c6;&#x30b9;&#x30c8;">
-<icon BUILTIN="yes"/>
-</node>
+<node CREATED="1508832102318" ID="ID_221174673" MODIFIED="1508832116873" TEXT="VoxLOD">
+<icon BUILTIN="idea"/>
+<node CREATED="1508832115120" LINK="http://sirkan.iit.bme.hu/~szirmay/voxlod_cgf_final.pdf" MODIFIED="1508832115120" TEXT="sirkan.iit.bme.hu &gt; Szirmay &gt; Voxlod cgf final"/>
 </node>
 </node>
 <node CREATED="1507109149757" ID="ID_428371364" MODIFIED="1507109156472" TEXT="&#x9060;&#x65b9;&#x3092;&#x7701;&#x304f;">
@@ -195,6 +199,18 @@
 </node>
 <node CREATED="1508406154078" ID="ID_526553431" MODIFIED="1508406170785" TEXT="QBVH&#x306b;&#x9069;&#x3057;&#x305f;&#x30c7;&#x30fc;&#x30bf;&#x69cb;&#x9020;&#x3092;GPU&#x306b;&#x30da;&#x30a4;&#x30ed;&#x30fc;&#x30c9;&#x3059;&#x308b;">
 <node CREATED="1508406171270" ID="ID_1432594631" MODIFIED="1508406189545" TEXT="BVH&#x3068;&#x5171;&#x7528;&#x3060;&#x3068;&#x6700;&#x9069;&#x5316;&#x3057;&#x304d;&#x308c;&#x306a;&#x3044;&#xff1f;"/>
+</node>
+</node>
+<node CREATED="1508830033459" ID="ID_61171238" MODIFIED="1508831986905" TEXT="Frustum View Culling">
+<node CREATED="1508831988199" ID="ID_711043454" MODIFIED="1508832003162" TEXT="&#xff11;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x76ee;&#x306e;Primary Ray&#x306b;&#x9650;&#x3063;&#x3066;&#x3001;FVC&#x3059;&#x308b;">
+<node CREATED="1508832003861" ID="ID_932378788" MODIFIED="1508832031385" TEXT="Frustum&#x5185;&#x306b;&#x898b;&#x3048;&#x306a;&#x3044;&#x3082;&#x306e;&#x306f;&#x305d;&#x3082;&#x305d;&#x3082;&#x30d2;&#x30c3;&#x30c8;&#x3057;&#x306a;&#x3044;&#x306e;&#x3067;&#x3001;&#x30ab;&#x30ea;&#x30f3;&#x30b0;&#x3057;&#x3066;&#x3057;&#x307e;&#x3046;"/>
+</node>
+<node CREATED="1508832067925" ID="ID_504518282" MODIFIED="1508832077201" TEXT="Multi-Level Ray Tracing Algorithm">
+<icon BUILTIN="idea"/>
+<node CREATED="1508832074358" ID="ID_631711364" LINK="http://cseweb.ucsd.edu/~ravir/274/15/papers/p1176-reshetov.pdf" MODIFIED="1508832074358" TEXT="cseweb.ucsd.edu &gt; Ravir &gt; 274 &gt; 15 &gt; Papers &gt; P1176-reshetov"/>
+</node>
+<node CREATED="1508832133877" ID="ID_1956932111" MODIFIED="1508832134578" TEXT="An Improved Multi-Level Raytracing Algorithm">
+<node CREATED="1508832138206" LINK="http://www.joshbarczak.com/pathcompression.pdf" MODIFIED="1508832138206" TEXT="joshbarczak.com &gt; Pathcompression"/>
 </node>
 </node>
 </node>

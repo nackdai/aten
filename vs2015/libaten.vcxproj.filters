@@ -392,6 +392,9 @@
     <ClInclude Include="..\src\libaten\accelerator\stackless_qbvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\math\frustum.h">
+      <Filter>math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

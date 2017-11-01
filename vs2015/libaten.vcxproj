@@ -284,6 +284,7 @@
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\material\toon.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h" />
+    <ClInclude Include="..\src\libaten\math\frustum.h" />
     <ClInclude Include="..\src\libaten\math\intersect.h" />
     <ClInclude Include="..\src\libaten\math\mat4.h" />
     <ClInclude Include="..\src\libaten\math\math.h" />

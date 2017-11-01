@@ -170,6 +170,7 @@ namespace aten {
 				if (node->hit(r, t_min, t_max, isectTmp)) {
 					if (isectTmp.t < isect.t) {
 						isect = isectTmp;
+						t_max = isect.t;
 					}
 				}
 			}

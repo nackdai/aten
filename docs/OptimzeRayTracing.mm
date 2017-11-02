@@ -78,7 +78,7 @@
 </node>
 </node>
 <node CREATED="1508463748073" ID="ID_952556670" MODIFIED="1508486072063" TEXT="BVH" VSHIFT="17">
-<node CREATED="1508463749882" ID="ID_648945565" MODIFIED="1508485909205" TEXT="meshid&#x3044;&#x3089;&#x306a;&#x3044;">
+<node CREATED="1508463749882" ID="ID_648945565" MODIFIED="1509588903766" TEXT="meshid&#x3044;&#x3089;&#x306a;&#x3044;">
 <icon BUILTIN="button_cancel"/>
 <node CREATED="1508463760930" ID="ID_758836617" MODIFIED="1508486067798" TEXT="SVGF&#x3067;&#x306f;mtrlid&#x3092;&#x4f7f;&#x3046;">
 <icon BUILTIN="button_cancel"/>
@@ -101,8 +101,18 @@
 <node CREATED="1508486942745" ID="ID_217458290" MODIFIED="1508486957152" TEXT="&#x901f;&#x304f;&#x306a;&#x3089;&#x306a;&#x304b;&#x3063;&#x305f;"/>
 </node>
 </node>
+<node CREATED="1509613360056" ID="ID_1575838070" MODIFIED="1509613483028" TEXT="&#x30d5;&#x30e9;&#x30b9;&#x30bf;&#x30e0;&#x30ab;&#x30ea;&#x30f3;&#x30b0;" VSHIFT="41">
+<node CREATED="1509613368223" ID="ID_285604259" MODIFIED="1509613373019" TEXT="instance&#x307e;&#x3067;">
+<node CREATED="1509613374073" ID="ID_118390939" MODIFIED="1509613453579" TEXT="L2W&#x307e;&#x3067;&#x8003;&#x616e;&#x306b;&#x5165;&#x308c;&#x308b;&#x3068;&#x3001;&#x30d5;&#x30e9;&#x30b9;&#x30bf;&#x30e0;&#x306e;W2L&#x304c;&#x5fc5;&#x8981;&#x306b;&#x306a;&#x308a;&#x3001;&#x9762;&#x5012;"/>
+<node CREATED="1509613398712" ID="ID_1386081372" MODIFIED="1509613426476" TEXT="instance&#x4ee5;&#x4e0b;&#x306e;bvh&#x304c;&#x5171;&#x6709;&#x3055;&#x308c;&#x308b;&#x306e;&#x3067;&#x3001;&#x30a8;&#x30f3;&#x30c8;&#x30ea;&#x30dd;&#x30a4;&#x30f3;&#x30c8;&#x306e;&#x30ce;&#x30fc;&#x30c9;&#x306e;&#x533a;&#x5225;&#x304c;&#x3064;&#x304b;&#x306a;&#x3044;">
+<node CREATED="1509613454960" ID="ID_843978395" MODIFIED="1509613475188" TEXT="exid&#x3068;entry point&#x306e;&#x7d44;&#x307f;&#x5408;&#x308f;&#x305b;&#x3067;&#x3044;&#x3051;&#x308b;">
+<icon BUILTIN="help"/>
 </node>
-<node CREATED="1507109127782" ID="ID_1629311417" MODIFIED="1507109270295" POSITION="right" TEXT="&#x8981;&#x691c;&#x8a0e;&#x30e1;&#x30e2;">
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1507109127782" HGAP="14" ID="ID_1629311417" MODIFIED="1509613480675" POSITION="right" TEXT="&#x8981;&#x691c;&#x8a0e;&#x30e1;&#x30e2;" VSHIFT="71">
 <node CREATED="1507109122412" ID="ID_401997312" MODIFIED="1507109125168" TEXT="LOD">
 <node CREATED="1507277931057" ID="ID_203429155" MODIFIED="1507277933788" TEXT="&#x3069;&#x3046;&#x3084;&#x3063;&#x3066;&#x4f5c;&#x308b;">
 <node CREATED="1508491651613" ID="ID_773686385" MODIFIED="1508491776863" TEXT="BVH&#x306e;&#x30ce;&#x30fc;&#x30c9;&#x306e;AABB&#x3092;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x306b;&#x898b;&#x7acb;&#x3066;&#x308b;">
@@ -211,6 +221,12 @@
 </node>
 <node CREATED="1508832133877" ID="ID_1956932111" MODIFIED="1508832134578" TEXT="An Improved Multi-Level Raytracing Algorithm">
 <node CREATED="1508832138206" LINK="http://www.joshbarczak.com/pathcompression.pdf" MODIFIED="1508832138206" TEXT="joshbarczak.com &gt; Pathcompression"/>
+</node>
+</node>
+<node CREATED="1509615585489" HGAP="15" ID="ID_772098326" MODIFIED="1509615757138" TEXT="&#x30b9;&#x30af;&#x30ea;&#x30fc;&#x30f3;&#x30b9;&#x30da;&#x30fc;&#x30b9;" VSHIFT="56">
+<icon BUILTIN="idea"/>
+<node CREATED="1509615593037" ID="ID_1814431587" MODIFIED="1509615610026" TEXT="primary ray&#x306e;&#x8a08;&#x7b97;&#x3092;pixel shader &#x3067;&#x884c;&#x3046;">
+<node CREATED="1509615610542" ID="ID_1455729802" MODIFIED="1509615676369" TEXT="&#xff12;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x76ee;&#x4ee5;&#x964d;&#x306b;&#x5fc5;&#x8981;&#x306a;&#x306e;&#x306f;&#x3001;normal&#x3001;uv&#x3001;world pos&#x306a;&#x306e;&#x3067;&#x3001;&#x305d;&#x308c;&#x3092;G-Buffer&#x306b;&#x30e9;&#x30b9;&#x30bf;&#x30e9;&#x30a4;&#x30b6;&#x3067;&#x66f8;&#x304d;&#x51fa;&#x3057;&#x3066;&#x5229;&#x7528;&#x3059;&#x308b;"/>
 </node>
 </node>
 </node>

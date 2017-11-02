@@ -29,6 +29,16 @@ namespace aten {
 			ResultIntersectTestByFrustum() {}
 		};
 
+		virtual bool hitMultiLevel(
+			const ResultIntersectTestByFrustum& fisect,
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const
+		{
+			AT_ASSERT(false);
+			return false;
+		}
+
 		virtual ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f)
 		{
 			AT_ASSERT(false);

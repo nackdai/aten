@@ -37,6 +37,12 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
+		virtual bool hitMultiLevel(
+			const accelerator::ResultIntersectTestByFrustum& fisect,
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const override final;
+
 		virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
 
 		std::vector<std::vector<ThreadedBvhNode>>& getNodes()
@@ -83,7 +89,16 @@ namespace aten {
 
 		bool hit(
 			int exid,
-			const std::vector<std::vector<ThreadedBvhNode>>& listGpuBvhNode,
+			const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const;
+
+		bool hitMultiLevel(
+			int exid,
+			int nodeid,
+			int topid,
+			const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
 			const ray& r,
 			real t_min, real t_max,
 			Intersection& isect) const;

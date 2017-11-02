@@ -6,6 +6,7 @@
 #include "accelerator/accelerator.h"
 
 #include <functional>
+#include <stack>
 
 namespace aten {
 	class transformable;
@@ -116,6 +117,16 @@ namespace aten {
 			m_children[idx] = child;
 		}
 
+	private:
+		bool setIsCandidate(bool c)
+		{
+			m_isCandidate = c;
+		}
+		bool isCandidate() const
+		{
+			return m_isCandidate;
+		}
+
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
@@ -135,6 +146,8 @@ namespace aten {
 		int m_traverseOrder{ -1 };
 		int m_externalId{ -1 };
 		int m_childrenNum{ 0 };
+
+		bool m_isCandidate{ false };
 	};
 
 	//////////////////////////////////////////////
@@ -170,6 +183,8 @@ namespace aten {
 		{
 			return m_root;
 		}
+
+		virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
 
 		static bvhnode* getInternalNode(bvhnode* node, aten::mat4* mtxL2W = nullptr);
 
@@ -207,14 +222,14 @@ namespace aten {
 				}
 
 				// Register nested bvh.
-				aten::hitable* parent = original->getItem();
-				AT_ASSERT(parent->isInstance());
+				aten::hitable* originalItem = original->getItem();
+				AT_ASSERT(originalItem->isInstance());
 
 				// Register relation between instance and nested bvh.
-				auto child = const_cast<hitable*>(parent->getHasObject());
+				auto internalItem = const_cast<hitable*>(originalItem->getHasObject());
 
 				// TODO
-				auto obj = (AT_NAME::object*)child;
+				auto obj = (AT_NAME::object*)internalItem;
 
 				std::vector<aten::accelerator*> accels;
 				auto nestedBvh = obj->getInternalAccelerator();
@@ -253,6 +268,27 @@ namespace aten {
 			bvhnode* root,
 			hitable** list,
 			uint32_t num);
+
+		struct Candidate {
+			bvhnode* node{ nullptr };
+			bvhnode* instanceNode{ nullptr };
+
+			Candidate(bvhnode* n, bvhnode* i = nullptr)
+			{
+				node = n;
+				instanceNode = i;
+			}
+		};
+
+		bool findCandidates(
+			bvhnode* node,
+			bvhnode* instanceNode,
+			const frustum& f,
+			std::stack<Candidate>& stack);
+
+		bvhnode* traverse(
+			bvhnode* root,
+			const frustum& f);
 
 	protected:
 		bvhnode* m_root{ nullptr };

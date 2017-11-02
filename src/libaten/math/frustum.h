@@ -36,6 +36,25 @@ namespace aten {
 			m_points[2] = org + dir[1] * real(100000.0);
 			m_points[3] = org + dir[2] * real(100000.0);
 			m_points[4] = org + dir[3] * real(100000.0);
+
+			m_dir[0] = dir[0];
+			m_dir[1] = dir[1];
+			m_dir[2] = dir[2];
+			m_dir[3] = dir[3];
+		}
+
+		void transform(const mat4& mtx)
+		{
+			vec3 org = m_points[0];
+
+			org = mtx.apply(org);
+
+			m_dir[0] = mtx.applyXYZ(m_dir[0]);
+			m_dir[1] = mtx.applyXYZ(m_dir[1]);
+			m_dir[2] = mtx.applyXYZ(m_dir[2]);
+			m_dir[3] = mtx.applyXYZ(m_dir[3]);
+
+			update(org, m_dir);
 		}
 
 		enum Intersect {
@@ -146,5 +165,7 @@ namespace aten {
 		// NOTE
 		// 1 is origin, othere 4 are corner.
 		vec4 m_points[5];
+
+		vec3 m_dir[4];
 	};
 }

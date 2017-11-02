@@ -395,4 +395,9 @@ namespace aten {
 
 		return (isect.objid >= 0);
 	}
+
+	accelerator::ResultIntersectTestByFrustum ThreadedBVH::intersectTestByFrustum(const frustum& f)
+	{
+		return std::move(m_bvh.intersectTestByFrustum(f));
+	}
 }

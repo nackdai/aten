@@ -26,12 +26,14 @@ namespace aten {
 			uint32_t x1;
 			uint32_t y1;
 
-			int ep{ -1 };
+			accelerator::ResultIntersectTestByFrustum isect;
 		};
 
 		void traverseIntersect(
 			accelerator* accel,
 			std::vector<IntersectResult>& results);
+
+		int computeTileIdx(int x, int y);
 
 	private:
 		struct Tile {
@@ -54,7 +56,6 @@ namespace aten {
 		uint32_t m_width;
 		uint32_t m_height;
 		uint32_t m_tileSize;
-
 
 		int m_xTileNum;
 		int m_yTileNum;

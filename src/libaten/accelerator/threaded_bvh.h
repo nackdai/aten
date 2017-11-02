@@ -37,6 +37,8 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
+		virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
+
 		std::vector<std::vector<ThreadedBvhNode>>& getNodes()
 		{
 			return m_listThreadedBvhNode;

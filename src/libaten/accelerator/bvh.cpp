@@ -640,11 +640,11 @@ namespace aten {
 
 			if (n) {
 				candidate = n;
+				
 				result.ep = candidate->getTraversalOrder();
 				result.ex = exid;
+				result.top = instanceNode->getTraversalOrder();
 
-				// ★
-				// この情報だと、もしnest bvh内をレイトレースしてhit missした場合に、最上のbvhに戻ることができない.
 				break;
 			}
 		}

@@ -118,7 +118,7 @@ namespace aten {
 		}
 
 	private:
-		bool setIsCandidate(bool c)
+		void setIsCandidate(bool c)
 		{
 			m_isCandidate = c;
 		}
@@ -241,7 +241,7 @@ namespace aten {
 				}
 
 				if (!accels.empty()) {
-					nestedBvhMap.insert(std::pair<aten::hitable*, std::vector<aten::accelerator*>>(parent, accels));
+					nestedBvhMap.insert(std::pair<aten::hitable*, std::vector<aten::accelerator*>>(originalItem, accels));
 				}
 			}
 			else {

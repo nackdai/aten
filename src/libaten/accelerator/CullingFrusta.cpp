@@ -106,8 +106,18 @@ namespace aten {
 				results[pos].x1 = tile.x1;
 				results[pos].y1 = tile.y1;
 
-				results[pos].ep = res.ep;
+				results[pos].isect = res;
 			}
 		}
+	}
+
+	int CullingFrusta::computeTileIdx(int x, int y)
+	{
+		int xPos = x / m_tileSize;
+		int yPos = y / m_tileSize;
+
+		int ret = yPos * m_xTileNum + xPos;
+
+		return ret;
 	}
 }

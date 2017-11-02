@@ -17,7 +17,7 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-static aten::AcceleratedScene<aten::StacklessQbvh> g_scene;
+static aten::AcceleratedScene<aten::ThreadedBVH> g_scene;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;

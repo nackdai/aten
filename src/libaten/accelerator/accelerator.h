@@ -18,9 +18,13 @@ namespace aten {
 			uint32_t num) = 0;
 
 		struct ResultIntersectTestByFrustum {
-			int ep{ -1 };
-			int ex{ -1 };
-			// TODO
+			int ep{ -1 };	///< Entry Point.
+			int ex{ -1 };	///< Layer Id.
+
+			// 1つ上のレイヤーへの戻り先のノードID.
+			int top{ -1 };	///< Upper layer id.
+
+			int padding;
 
 			ResultIntersectTestByFrustum() {}
 		};

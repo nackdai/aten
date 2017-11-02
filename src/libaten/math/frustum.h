@@ -38,7 +38,18 @@ namespace aten {
 			m_points[4] = org + dir[3] * real(100000.0);
 		}
 
-		bool intersect(const aabb& box)
+		enum Intersect {
+			Miss,
+			Inside,
+			Intersecting,
+		};
+
+		Intersect intersect(const aabb& box) const
+		{
+			return intersect(box.minPos(), box.maxPos());
+		}
+
+		Intersect intersect(const vec3& minbox, const vec3& maxbox) const
 		{
 			// NOTE
 			// http://www.txutxi.com/?p=584
@@ -46,9 +57,9 @@ namespace aten {
 			// TODO
 			// SIMDfy...
 
-			bool isIntersect = true;
+			bool intersecting = false;
 
-			vec3 b[] = { box.minPos(), box.maxPos() };
+			vec3 b[] = { minbox, maxbox };
 
 			for (int i = 0; i < AT_COUNTOF(m_plane); i++) {
 				const vec4& plane = m_plane[i];
@@ -65,30 +76,32 @@ namespace aten {
 					+ (plane.z * b[py].z);
 
 				if (d < -plane.w) {
-					isIntersect = false;
-					break;
+					return Intersect::Miss;
+				}
+				else {
+					intersecting = true;
 				}
 			}
 
 			// NOTE
 			// https://cesium.com/blog/2017/02/02/tighter-frustum-culling-and-why-you-may-want-to-disregard-it/
 
-			if (isIntersect) {
-				auto center = box.getCenter();
+			if (intersecting) {
+				auto center = (minbox + maxbox) * real(0.5);
 
 				vec3 diff[] = {
-					m_points[0] - center,
-					m_points[1] - center,
-					m_points[2] - center,
-					m_points[3] - center,
-					m_points[4] - center,
+					(vec3)m_points[0] - center,
+					(vec3)m_points[1] - center,
+					(vec3)m_points[2] - center,
+					(vec3)m_points[3] - center,
+					(vec3)m_points[4] - center,
 				};
 
 				// NOTE
 				// AABBなので、x, y, z 軸に平行な軸になる.
 				// ただし、正規化する必要がないので、大きさがAABBのハーフサイズになる.
 
-				auto size = box.size();
+				auto size = maxbox - minbox;
 				vec3 axis[] = {
 					vec3(size.x * real(0.5), real(0), real(0)),
 					vec3(real(0), size.y * real(0.5), real(0)),
@@ -115,14 +128,14 @@ namespace aten {
 					}
 
 					if (out1 == AT_COUNTOF(diff) || out2 == AT_COUNTOF(diff)) {
-						return false;
+						return Intersect::Miss;
 					}
 
-					isIntersect |= (out1 != 0 || out2 != 0);
+					intersecting |= (out1 != 0 || out2 != 0);
 				}
 			}
 
-			return true;
+			return intersecting ? Intersect::Intersecting : Intersect::Inside;
 		}
 
 	private:
@@ -132,6 +145,6 @@ namespace aten {
 
 		// NOTE
 		// 1 is origin, othere 4 are corner.
-		vec3 m_points[5];
+		vec4 m_points[5];
 	};
 }

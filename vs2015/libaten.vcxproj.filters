@@ -395,6 +395,9 @@
     <ClInclude Include="..\src\libaten\math\frustum.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\accelerator\CullingFrusta.h">
+      <Filter>accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -617,6 +620,9 @@
       <Filter>accelerator</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\CullingFrusta.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
   </ItemGroup>

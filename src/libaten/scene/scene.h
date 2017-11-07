@@ -210,6 +210,8 @@ namespace AT_NAME {
 			real& selectPdf,
 			aten::LightSampleResult& sampleRes);
 
+		virtual accelerator* getAccel() = 0;
+
 	protected:
 		std::vector<aten::hitable*> m_tmp;
 
@@ -250,7 +252,7 @@ namespace AT_NAME {
 			return isHit;
 		}
 
-		ACCEL* getAccel()
+		virtual accelerator* getAccel() override final
 		{
 			return &m_accel;
 		}

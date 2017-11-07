@@ -592,7 +592,7 @@ namespace aten {
 
 	accelerator::ResultIntersectTestByFrustum bvh::intersectTestByFrustum(const frustum& f)
 	{
-		std::stack<Candidate> stack;
+		std::stack<Candidate> stack[2];
 
 		accelerator::ResultIntersectTestByFrustum result;
 
@@ -600,9 +600,9 @@ namespace aten {
 
 		bvhnode* candidate = nullptr;
 
-		while (!stack.empty()) {
-			auto c = stack.top();
-			stack.pop();
+		while (!stack[1].empty()) {
+			auto c = stack[1].top();
+			stack[1].pop();
 
 			auto instanceNode = c.instanceNode;
 
@@ -612,9 +612,10 @@ namespace aten {
 			aten::mat4 mtxW2L;
 
 			if (instanceNode) {
-				node = getInternalNode(node, &mtxW2L);
+				auto n = getInternalNode(instanceNode, &mtxW2L);
 
-				aten::hitable* originalItem = node->getItem();
+#if 0
+				aten::hitable* originalItem = n->getItem();
 				AT_ASSERT(originalItem->isInstance());
 
 				// Register relation between instance and nested bvh.
@@ -624,8 +625,8 @@ namespace aten {
 				auto obj = (AT_NAME::object*)internalItem;
 
 				auto nestedBvh = (bvh*)obj->getInternalAccelerator();
+#endif
 
-				node = nestedBvh->m_root;
 				mtxW2L.invert();
 
 				exid = instanceNode->getExternalId();
@@ -649,6 +650,29 @@ namespace aten {
 			}
 		}
 
+		if (result.ep < 0) {
+			while (!stack[0].empty()) {
+				auto c = stack[0].top();
+				stack[0].pop();
+
+				bvhnode* node = c.node;
+
+				candidate = node;
+
+				auto n = traverse(node, f);
+
+				if (n) {
+					candidate = n;
+
+					result.ep = candidate->getTraversalOrder();
+					result.ex = 0;
+					result.top = -1;
+
+					break;
+				}
+			}
+		}
+
 		return std::move(result);
 	}
 
@@ -669,14 +693,14 @@ namespace aten {
 			if (node->isLeaf()) {
 				auto i = f.intersect(node->getBoundingbox());
 
-				if (i != frustum::Intersect::Miss) {
+				if (i) {
 					return node;
 				}
 			}
 			else {
 				auto i = f.intersect(node->getBoundingbox());
 
-				if (i != frustum::Intersect::Miss) {
+				if (i) {
 					auto left = node->getLeft();
 					auto right = node->getRight();
 
@@ -697,7 +721,7 @@ namespace aten {
 		bvhnode* node,
 		bvhnode* instanceNode,
 		const frustum& f,
-		std::stack<Candidate>& stack)
+		std::stack<Candidate>* stack)
 	{
 		if (!node) {
 			return false;
@@ -735,7 +759,7 @@ namespace aten {
 
 			auto i = f.intersect(node->getBoundingbox());
 
-			if (i != frustum::Intersect::Miss) {
+			if (i) {
 				if (nestedBvh) {
 					// Node has nested bvh.
 					auto transformedFrustum = f;
@@ -750,7 +774,7 @@ namespace aten {
 				else {
 					node->setIsCandidate(true);
 
-					stack.push(Candidate(node, instanceNode));
+					stack[instanceNode != nullptr].push(Candidate(node, instanceNode));
 				}
 
 				return true;
@@ -762,7 +786,7 @@ namespace aten {
 
 		if (s0 || s1) {
 			node->setIsCandidate(true);
-			stack.push(Candidate(node, instanceNode));
+			stack[instanceNode != nullptr].push(Candidate(node, instanceNode));
 		}
 
 		return s0 || s1;

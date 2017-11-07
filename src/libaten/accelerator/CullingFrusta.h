@@ -35,6 +35,11 @@ namespace aten {
 
 		int computeTileIdx(int x, int y);
 
+		const frustum& getFrustum(uint32_t idx) const
+		{
+			return m_tiles[idx].f;
+		}
+
 	private:
 		struct Tile {
 			uint32_t x0;

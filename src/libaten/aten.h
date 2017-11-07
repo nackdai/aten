@@ -74,6 +74,7 @@
 #include "accelerator/threaded_bvh.h"
 #include "accelerator/stackless_bvh.h"
 #include "accelerator/stackless_qbvh.h"
+#include "accelerator/CullingFrusta.h"
 
 #include "accelerator/GpuPayloadDefs.h"
 

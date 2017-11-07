@@ -284,7 +284,7 @@ namespace aten {
 			bvhnode* node,
 			bvhnode* instanceNode,
 			const frustum& f,
-			std::stack<Candidate>& stack);
+			std::stack<Candidate>* stack);
 
 		bvhnode* traverse(
 			bvhnode* root,

@@ -12,7 +12,7 @@
 
 namespace AT_NAME
 {
-	class shape;
+	class objshape;
 
 	class face : public aten::hitable {
 		static std::atomic<int> s_id;
@@ -55,7 +55,7 @@ namespace AT_NAME
 
 		virtual int geomid() const override;
 
-		void build(shape* _parent);
+		void build(objshape* _parent);
 
 		static const std::vector<face*>& faces()
 		{
@@ -65,16 +65,16 @@ namespace AT_NAME
 		static int findIdx(hitable* h);
 	
 		aten::PrimitiveParamter param;
-		shape* parent{ nullptr };
+		objshape* parent{ nullptr };
 		int id{ -1 };
 	};
 
-	class shape : public aten::geombase {
+	class objshape : public aten::geombase {
 		friend class object;
 
 	public:
-		shape() : param(aten::GeometryType::Polygon) {}
-		virtual ~shape() {}
+		objshape() : param(aten::GeometryType::Polygon) {}
+		virtual ~objshape() {}
 
 		void build();
 
@@ -139,7 +139,7 @@ namespace AT_NAME
 			aten::sampler* sampler) const override final;
 
 	public:
-		std::vector<shape*> shapes;
+		std::vector<objshape*> shapes;
 		aten::GeomParameter param;
 		aten::aabb bbox;
 

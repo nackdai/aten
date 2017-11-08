@@ -134,7 +134,7 @@ namespace AT_NAME
 		rec->v = uv.y;
 	}
 
-	void face::build(shape* _parent)
+	void face::build(objshape* _parent)
 	{
 		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
@@ -236,7 +236,7 @@ namespace AT_NAME
 	}
 
 
-	void shape::build()
+	void objshape::build()
 	{
 		aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
 		aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
@@ -270,7 +270,7 @@ namespace AT_NAME
 		param.area = 0;
 		m_triangles = 0;
 
-		// Avoid sorting shape list in bvh::build directly.
+		// Avoid sorting objshape list in bvh::build directly.
 		std::vector<face*> tmp;
 
 		for (const auto s : shapes) {
@@ -353,11 +353,11 @@ namespace AT_NAME
 	{
 		auto r = sampler->nextSample();
 		int shapeidx = (int)(r * (shapes.size() - 1));
-		auto shape = shapes[shapeidx];
+		auto objshape = shapes[shapeidx];
 
 		r = sampler->nextSample();
-		int faceidx = (int)(r * (shape->faces.size() - 1));
-		auto f = shape->faces[faceidx];
+		int faceidx = (int)(r * (objshape->faces.size() - 1));
+		auto f = objshape->faces[faceidx];
 
 		const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
 		const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);

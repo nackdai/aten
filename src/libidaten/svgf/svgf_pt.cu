@@ -114,7 +114,7 @@ __global__ void hitTest(
 	aten::ray* rays,
 	int* hitbools,
 	int width, int height,
-	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -355,7 +355,7 @@ __global__ void shade(
 	aten::ray* rays,
 	int frame,
 	int bounce, int rrBounce,
-	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
@@ -699,7 +699,7 @@ __global__ void hitShadowRay(
 	int* hitindices,
 	int hitnum,
 	const idaten::SVGFPathTracing::ShadowRay* __restrict__ shadowRays,
-	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
@@ -742,7 +742,7 @@ __global__ void hitShadowRay(
 
 			// Ray aim to the area light.
 			// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-			const aten::ShapeParameter* hitobj = lightobj;
+			const aten::GeomParameter* hitobj = lightobj;
 
 			aten::Intersection isectTmp;
 
@@ -829,7 +829,7 @@ namespace idaten
 		GLuint gltex,
 		int width, int height,
 		const aten::CameraParameter& camera,
-		const std::vector<aten::ShapeParameter>& shapes,
+		const std::vector<aten::GeomParameter>& shapes,
 		const std::vector<aten::MaterialParameter>& mtrls,
 		const std::vector<aten::LightParameter>& lights,
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,

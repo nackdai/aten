@@ -62,7 +62,7 @@ __global__ void genPathRayTracing(
 __global__ void hitTestRayTracing(
 	Path* paths,
 	int width, int height,
-	aten::ShapeParameter* shapes, int geomnum,
+	aten::GeomParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
@@ -119,7 +119,7 @@ __global__ void raytracing(
 	Path* paths,
 	ShadowRay* shadowRays,
 	int width, int height,
-	aten::ShapeParameter* shapes, int geomnum,
+	aten::GeomParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
@@ -249,7 +249,7 @@ __global__ void hitShadowRay(
 	Path* paths,
 	ShadowRay* shadowRays,
 	int width, int height,
-	aten::ShapeParameter* shapes, int geomnum,
+	aten::GeomParameter* shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	aten::LightParameter* lights, int lightnum,
 	cudaTextureObject_t* nodes,
@@ -294,7 +294,7 @@ __global__ void hitShadowRay(
 		bool isHit = intersectClosest(&ctxt, shadowRay, &isect);
 
 		real distHitObjToRayOrg = AT_MATH_INF;
-		const aten::ShapeParameter* hitobj = nullptr;
+		const aten::GeomParameter* hitobj = nullptr;
 
 		aten::hitrecord rec;
 

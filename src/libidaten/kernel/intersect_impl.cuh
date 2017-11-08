@@ -1,7 +1,7 @@
 #include "kernel/idatendefs.cuh"
 
 AT_CUDA_INLINE __device__ bool hitSphere(
-	const aten::ShapeParameter* shape,
+	const aten::GeomParameter* shape,
 	const aten::ray& r,
 	float t_min, float t_max,
 	aten::Intersection* isect)
@@ -392,7 +392,7 @@ inline __device__ float4 cross(float4 a, float4 b)
 
 AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	const Context* ctxt,
-	const aten::ShapeParameter* param,
+	const aten::GeomParameter* param,
 	const aten::ray& r,
 	aten::hitrecord* rec,
 	const aten::Intersection* isect)
@@ -472,17 +472,17 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 
 AT_CUDA_INLINE __device__ void evalHitResult(
 	const Context* ctxt,
-	const aten::ShapeParameter* param,
+	const aten::GeomParameter* param,
 	const aten::ray& r,
 	aten::hitrecord* rec,
 	const aten::Intersection* isect)
 {
-	const aten::ShapeParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+	const aten::GeomParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
-	if (realShape->type == aten::ShapeType::Polygon) {
+	if (realShape->type == aten::GeometryType::Polygon) {
 		evalHitResultTriangle(ctxt, param, r, rec, isect);
 	}
-	else if (realShape->type == aten::ShapeType::Sphere) {
+	else if (realShape->type == aten::GeometryType::Sphere) {
 		AT_NAME::sphere::evalHitResult(param, r, rec, isect);
 	}
 	else {

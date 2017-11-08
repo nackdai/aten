@@ -30,6 +30,7 @@
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\geometry\sphere.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
     <ClInclude Include="..\src\libaten\light\directionallight.h" />
     <ClInclude Include="..\src\libaten\light\ibl.h" />
@@ -57,7 +58,6 @@
     <ClInclude Include="..\src\libaten\math\vec4.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
-    <ClInclude Include="..\src\libaten\object\object.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
@@ -66,10 +66,6 @@
     <ClInclude Include="..\src\libaten\sampler\wanghash.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
-    <ClInclude Include="..\src\libaten\shape\cube.h" />
-    <ClInclude Include="..\src\libaten\shape\shape.h" />
-    <ClInclude Include="..\src\libaten\shape\sphere.h" />
-    <ClInclude Include="..\src\libaten\shape\tranfomable.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libidaten\aten4idaten.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h" />
@@ -121,6 +117,20 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\geometry\sphere.cpp">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
     <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
@@ -241,32 +251,6 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
-    <CudaCompile Include="..\src\libaten\object\object.cpp">
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
-    </CudaCompile>
-    <ClCompile Include="..\src\libaten\shape\cube.cpp" />
-    <CudaCompile Include="..\src\libaten\shape\sphere.cpp">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">-x cu %(AdditionalOptions)</AdditionalOptions>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
-      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
-    </CudaCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
     <CudaCompile Include="..\src\libidaten\kernel\directlight.cu">

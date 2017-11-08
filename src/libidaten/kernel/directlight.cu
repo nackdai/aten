@@ -25,7 +25,7 @@ __global__ void shade(
 	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
 	int bounce, int rrBounce,
-	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,

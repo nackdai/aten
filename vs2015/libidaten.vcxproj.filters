@@ -92,18 +92,6 @@
     <ClInclude Include="..\src\libaten\scene\scene.h">
       <Filter>aten\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\shape.h">
-      <Filter>aten\shape</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\sphere.h">
-      <Filter>aten\shape</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\tranfomable.h">
-      <Filter>aten\shape</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\cube.h">
-      <Filter>aten\shape</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\light.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
@@ -126,9 +114,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh">
       <Filter>kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\object\object.h">
-      <Filter>aten\object</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\sampler.h">
       <Filter>aten\sampler</Filter>
@@ -232,6 +217,9 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\sphere.h">
+      <Filter>aten\geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -255,14 +243,8 @@
     <Filter Include="aten\scene">
       <UniqueIdentifier>{b31615c0-8133-4599-b5a9-7fd52f0d1e34}</UniqueIdentifier>
     </Filter>
-    <Filter Include="aten\shape">
-      <UniqueIdentifier>{06f7c18d-6575-491d-9f22-6a8dc6c848f8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="aten\camera">
       <UniqueIdentifier>{acb20f76-8ecc-4139-8957-fa6d24abedd5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="aten\object">
-      <UniqueIdentifier>{6ea18010-7a1d-4ea1-bea9-d8beae7ce9dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="aten\sampler">
       <UniqueIdentifier>{4419bdc9-7db1-48c5-a291-f22a459053e0}</UniqueIdentifier>
@@ -278,6 +260,9 @@
     </Filter>
     <Filter Include="kernel\accelerator">
       <UniqueIdentifier>{2d173933-17b5-4c14-8cc7-60629a90d056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="aten\geometry">
+      <UniqueIdentifier>{c2beec74-9797-4217-aadc-71236397673a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -295,9 +280,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\math\mat4.cpp">
       <Filter>aten\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\shape\cube.cpp">
-      <Filter>aten\shape</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp">
       <Filter>cuda</Filter>
@@ -323,6 +305,9 @@
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
       <Filter>aten\sampler</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\sphere.cpp">
+      <Filter>aten\geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
@@ -330,9 +315,6 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">
       <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libaten\shape\sphere.cpp">
-      <Filter>aten\shape</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\material.cu">
       <Filter>kernel</Filter>
@@ -369,9 +351,6 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\intersect.cu">
       <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libaten\object\object.cpp">
-      <Filter>aten\object</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
       <Filter>kernel</Filter>

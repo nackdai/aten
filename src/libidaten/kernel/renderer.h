@@ -35,7 +35,7 @@ namespace idaten
 			GLuint gltex,
 			int width, int height,
 			const aten::CameraParameter& camera,
-			const std::vector<aten::ShapeParameter>& shapes,
+			const std::vector<aten::GeomParameter>& shapes,
 			const std::vector<aten::MaterialParameter>& mtrls,
 			const std::vector<aten::LightParameter>& lights,
 			const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
@@ -61,7 +61,7 @@ namespace idaten
 	protected:
 		idaten::CudaMemory m_dst;
 		idaten::TypedCudaMemory<aten::CameraParameter> m_cam;
-		idaten::TypedCudaMemory<aten::ShapeParameter> m_shapeparam;
+		idaten::TypedCudaMemory<aten::GeomParameter> m_shapeparam;
 		idaten::TypedCudaMemory<aten::MaterialParameter> m_mtrlparam;
 		idaten::TypedCudaMemory<aten::LightParameter> m_lightparam;
 		idaten::TypedCudaMemory<aten::PrimitiveParamter> m_primparams;

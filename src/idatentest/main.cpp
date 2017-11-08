@@ -325,7 +325,7 @@ int main()
 #endif
 
 	{
-		std::vector<aten::ShapeParameter> shapeparams;
+		std::vector<aten::GeomParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
 		std::vector<aten::LightParameter> lightparams;
 		std::vector<aten::MaterialParameter> mtrlparms;

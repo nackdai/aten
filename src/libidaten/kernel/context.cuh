@@ -4,7 +4,7 @@
 
 struct Context {
 	int geomnum;
-	const aten::ShapeParameter* shapes;
+	const aten::GeomParameter* shapes;
 
 	const aten::MaterialParameter* mtrls;
 

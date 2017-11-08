@@ -66,7 +66,7 @@ __global__ void pickPixel(
 	const aten::CameraParameter* __restrict__ camera,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
-	const aten::ShapeParameter* __restrict__ shapes, int geomnum,
+	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,

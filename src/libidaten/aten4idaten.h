@@ -41,11 +41,8 @@
 
 #include "scene/scene.h"
 
-#include "shape/sphere.h"
-#include "shape/cube.h"
-
-#include "object/vertex.h"
-#include "object/object.h"
+#include "geometry/geomparam.h"
+#include "geometry/sphere.h"
 
 #include "renderer/envmap.h"
 

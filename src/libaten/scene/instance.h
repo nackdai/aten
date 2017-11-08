@@ -3,7 +3,7 @@
 #include "types.h"
 #include "accelerator/bvh.h"
 #include "math/mat4.h"
-#include "object/object.h"
+#include "geometry/object.h"
 
 namespace aten
 {
@@ -11,11 +11,11 @@ namespace aten
 	class instance : public transformable {
 	public:
 		instance()
-			: m_param(ShapeType::Instance)
+			: m_param(GeometryType::Instance)
 		{}
 
 		instance(OBJ* obj)
-			: m_param(ShapeType::Instance)
+			: m_param(GeometryType::Instance)
 		{
 			m_obj = obj;
 			setBoundingBox(m_obj->getBoundingbox());
@@ -120,7 +120,7 @@ namespace aten
 			AT_ASSERT(false);
 		}
 
-		virtual const ShapeParameter& getParam() const override final
+		virtual const GeomParameter& getParam() const override final
 		{
 			return m_param;
 		}
@@ -130,12 +130,12 @@ namespace aten
 		mat4 m_mtxL2W;
 		mat4 m_mtxW2L;	// inverted.
 
-		ShapeParameter m_param;
+		GeomParameter m_param;
 	};
 
 	template<>
 	instance<object>::instance(object* obj)
-		: m_param(ShapeType::Instance)
+		: m_param(GeometryType::Instance)
 	{
 		m_obj = obj;
 		m_obj->build();

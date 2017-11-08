@@ -49,8 +49,8 @@
 #include "light/arealight.h"
 #include "light/ibl.h"
 
-#include "object/object.h"
-#include "object/vertex.h"
+#include "geometry/object.h"
+#include "geometry/vertex.h"
 
 #include "proxy/DataCollector.h"
 
@@ -83,9 +83,9 @@
 #include "sampler/sobolproxy.h"
 #include "sampler/wanghash.h"
 
-#include "shape/sphere.h"
-#include "shape/cube.h"
-#include "shape/tranformable.h"
+#include "geometry/sphere.h"
+#include "geometry/cube.h"
+#include "geometry/tranformable.h"
 
 #include "renderer/renderer.h"
 #include "renderer/film.h"

@@ -5,9 +5,6 @@
 #include "math/mat4.h"
 #include "math/aabb.h"
 
-//#pragma optimize( "", off)
-
-
 namespace aten {
 	class frustum {
 	public:
@@ -187,5 +184,3 @@ namespace aten {
 		vec3 m_dir[4];
 	};
 }
-
-#pragma optimize( "", on)

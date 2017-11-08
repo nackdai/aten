@@ -112,13 +112,13 @@ namespace aten
 
 				if (shape.mesh.normals.empty()) {
 					// Flag not to specify normal.
-					vtx.nml.w = real(1);
+					vtx.uv.z = real(1);
 				}
 				else {
 					vtx.nml.x = shape.mesh.normals[i + 0];
 					vtx.nml.y = shape.mesh.normals[i + 1];
 					vtx.nml.z = shape.mesh.normals[i + 2];
-					vtx.nml.w = real(0);
+					vtx.uv.z = real(0);
 				}
 
 				if (isnan(vtx.nml.x) || isnan(vtx.nml.y) || isnan(vtx.nml.z))
@@ -200,9 +200,9 @@ namespace aten
 				auto& v1 = VertexManager::getVertex(f->param.idx[1]);
 				auto& v2 = VertexManager::getVertex(f->param.idx[2]);
 
-				if (v0.nml.w == real(1)
-					|| v1.nml.w == real(1)
-					|| v2.nml.w == real(1))
+				if (v0.uv.z == real(1)
+					|| v1.uv.z == real(1)
+					|| v2.uv.z == real(1))
 				{
 					f->param.needNormal = 1;
 				}
@@ -240,7 +240,6 @@ namespace aten
 
 				vtx.uv.x = shape.mesh.texcoords[i + 0];
 				vtx.uv.y = shape.mesh.texcoords[i + 1];
-				vtx.uv.z = vtx.uv.w = real(0);
 			}
 		}
 

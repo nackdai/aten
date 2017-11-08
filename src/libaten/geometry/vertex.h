@@ -8,9 +8,8 @@ namespace aten
 {
 	struct vertex {
 		vec4 pos;
-		vec4 nml;
-		vec4 uv;
-		vec4 padding;
+		vec3 nml;
+		vec3 uv;	// z is used for checking to compute plane normal in real-time.
 	};
 
 	class VertexManager {

@@ -263,9 +263,11 @@
     <ClInclude Include="..\src\libaten\filter\taa.h" />
     <ClInclude Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.h" />
     <ClInclude Include="..\src\libaten\geometry\cube.h" />
+    <ClInclude Include="..\src\libaten\geometry\face.h" />
     <ClInclude Include="..\src\libaten\geometry\geombase.h" />
     <ClInclude Include="..\src\libaten\geometry\geomparam.h" />
     <ClInclude Include="..\src\libaten\geometry\object.h" />
+    <ClInclude Include="..\src\libaten\geometry\objshape.h" />
     <ClInclude Include="..\src\libaten\geometry\sphere.h" />
     <ClInclude Include="..\src\libaten\geometry\tranformable.h" />
     <ClInclude Include="..\src\libaten\geometry\vertex.h" />
@@ -366,8 +368,10 @@
     <ClCompile Include="..\src\libaten\filter\taa.cpp" />
     <ClCompile Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.cpp" />
     <ClCompile Include="..\src\libaten\geometry\cube.cpp" />
+    <ClCompile Include="..\src\libaten\geometry\face.cpp" />
     <ClCompile Include="..\src\libaten\geometry\geombase.cpp" />
     <ClCompile Include="..\src\libaten\geometry\object.cpp" />
+    <ClCompile Include="..\src\libaten\geometry\objshape.cpp" />
     <ClCompile Include="..\src\libaten\geometry\sphere.cpp" />
     <ClCompile Include="..\src\libaten\geometry\tranformable.cpp" />
     <ClCompile Include="..\src\libaten\geometry\vertex.cpp" />

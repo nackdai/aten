@@ -149,7 +149,7 @@ namespace aten
 				std::max(shapemax.y, pmax.y),
 				std::max(shapemax.z, pmax.z));
 
-			aten::shape* dstshape = nullptr; 
+			aten::objshape* dstshape = nullptr; 
 			int mtrlidx = -1;
 
 			auto idxnum = shape.mesh.indices.size();
@@ -175,7 +175,7 @@ namespace aten
 						}
 					}
 
-					dstshape = new aten::shape();
+					dstshape = new aten::objshape();
 					mtrlidx = m;
 
 					if (mtrlidx >= 0) {

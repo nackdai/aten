@@ -395,6 +395,12 @@
     <ClInclude Include="..\src\libaten\geometry\cube.h">
       <Filter>geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\face.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\objshape.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -620,6 +626,12 @@
       <Filter>geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\geombase.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\objshape.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\face.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
   </ItemGroup>

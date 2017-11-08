@@ -1,5 +1,7 @@
 #include "accelerator/CullingFrusta.h"
 
+//#pragma optimize( "", off)
+
 namespace aten {
 	void CullingFrusta::init(
 		uint32_t width, uint32_t height,

@@ -781,8 +781,11 @@ namespace aten {
 			}
 		}
 
-		auto s0 = findCandidates(node->getLeft(), instanceNode, f, stack);
-		auto s1 = findCandidates(node->getRight(), instanceNode, f, stack);
+		// NOTE
+		// leftからtraverseするので、もし、外した時にtraverseが続くようにするには、leftが採用されやすくならないといけない.
+		// そこで、スタックの最後にleftが積まれやすくなるように先にrightから探索する.
+		auto s0 = findCandidates(node->getRight(), instanceNode, f, stack);
+		auto s1 = findCandidates(node->getLeft(), instanceNode, f, stack);
 
 		if (s0 || s1) {
 			node->setIsCandidate(true);

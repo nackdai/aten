@@ -5,7 +5,7 @@
 #include "math/mat4.h"
 #include "math/aabb.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 
 namespace aten {

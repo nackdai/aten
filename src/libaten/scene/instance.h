@@ -100,6 +100,13 @@ namespace aten
 			return std::move(aabb::transform(getBoundingbox(), m_mtxL2W));
 		}
 
+		virtual void draw()
+		{
+			// TODO
+			// mtxL2W
+			m_obj->draw();
+		}
+
 	private:
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,

@@ -217,6 +217,8 @@ namespace AT_NAME {
 			real& selectPdf,
 			aten::LightSampleResult& sampleRes);
 
+		void draw(const aten::mat4& mtxW2C);
+
 	protected:
 		std::vector<aten::hitable*> m_tmp;
 

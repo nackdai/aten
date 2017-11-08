@@ -79,6 +79,9 @@
     <Filter Include="geometry">
       <UniqueIdentifier>{fff5ea6b-cef6-4352-8aeb-ae964c4f5ceb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\ssrt">
+      <UniqueIdentifier>{05918011-57d5-43e3-abd9-7fa4bcc34154}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -692,6 +695,12 @@
     </None>
     <None Include="..\src\shader\taa_final_fs.glsl">
       <Filter>shader\taa</Filter>
+    </None>
+    <None Include="..\src\shader\ssrt_fs.glsl">
+      <Filter>shader\ssrt</Filter>
+    </None>
+    <None Include="..\src\shader\ssrt_vs.glsl">
+      <Filter>shader\ssrt</Filter>
     </None>
   </ItemGroup>
 </Project>

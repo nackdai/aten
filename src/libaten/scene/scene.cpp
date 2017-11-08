@@ -117,4 +117,14 @@ namespace aten {
 		return nullptr;
 #endif
 	}
+
+	void scene::draw(const aten::mat4& mtxW2C)
+	{
+		// TODO
+		// mtxW2C.
+
+		for (auto h : m_tmp) {
+			h->draw();
+		}
+	}
 }

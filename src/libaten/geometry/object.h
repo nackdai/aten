@@ -44,6 +44,8 @@ namespace AT_NAME
 			return m_accel;
 		}
 
+		virtual void draw() override final;
+
 	private:
 		void build();
 

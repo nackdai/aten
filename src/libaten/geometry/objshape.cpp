@@ -1,6 +1,7 @@
 #include "geometry/objshape.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
+#include "geometry/vertex.h"
 
 #include <iterator>
 
@@ -24,6 +25,20 @@ namespace AT_NAME
 		}
 
 		m_aabb.init(boxmin, boxmax);
+
+		// For rasterize rendering.
+		{
+			std::vector<uint32_t> idx;
+			idx.resize(faces.size() * 3);
+
+			for (const auto f : faces) {
+				idx.push_back(f->param.idx[0]);
+				idx.push_back(f->param.idx[1]);
+				idx.push_back(f->param.idx[2]);
+			}
+
+			m_ib.init((uint32_t)idx.size(), &idx[0]);
+		}
 	}
 
 	void objshape::addFace(face* f)
@@ -38,5 +53,14 @@ namespace AT_NAME
 		faces.push_back(f);
 
 		m_baseTriIdx = std::min(f->id, m_baseTriIdx);
+	}
+
+	void objshape::draw()
+	{
+		auto vb = VertexManager::getVB();
+
+		auto triNum = (uint32_t)faces.size();
+
+		m_ib.draw(vb, 0, triNum);
 	}
 }

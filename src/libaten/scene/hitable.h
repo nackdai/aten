@@ -129,6 +129,11 @@ namespace aten {
 #endif
 		}
 
+		virtual void draw()
+		{
+			// For rasterize rendering.
+		}
+
 	private:
 		virtual void evalHitResult(
 			const ray& r,

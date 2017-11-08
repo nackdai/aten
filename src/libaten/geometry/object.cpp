@@ -156,4 +156,11 @@ namespace AT_NAME
 			}
 		}
 	}
+
+	void object::draw()
+	{
+		for (auto s : shapes) {
+			s->draw();
+		}
+	}
 }

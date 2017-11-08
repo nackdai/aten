@@ -6,6 +6,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "geometry/face.h"
+#include "visualizer/GeomDataBuffer.h"
 
 namespace AT_NAME
 {
@@ -31,12 +32,16 @@ namespace AT_NAME
 
 		void addFace(face* f);
 
+		void draw();
+
 		aten::GeomParameter param;
 		aten::aabb m_aabb;
 
 	private:
 		material* m_mtrl{ nullptr };
 		std::vector<face*> faces;
+
+		GeomIndexBuffer m_ib;
 
 		int m_baseIdx{ INT32_MAX };
 		int m_baseTriIdx{ INT32_MAX };

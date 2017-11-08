@@ -3,6 +3,7 @@
 #include <vector>
 #include "types.h"
 #include "math/vec4.h"
+#include "visualizer/GeomDataBuffer.h"
 
 namespace aten
 {
@@ -15,6 +16,8 @@ namespace aten
 	class VertexManager {
 		static std::vector<int> s_indices;
 		static std::vector<vertex> s_vertices;
+
+		static GeomVertexBuffer s_vb;
 
 	private:
 		VertexManager() {}
@@ -52,6 +55,12 @@ namespace aten
 		static uint32_t getVertexNum()
 		{
 			return (uint32_t)s_vertices.size();
+		}
+
+		static void build();
+		static GeomVertexBuffer& getVB()
+		{
+			return s_vb;
 		}
 	};
 }

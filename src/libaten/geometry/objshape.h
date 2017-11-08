@@ -29,11 +29,16 @@ namespace AT_NAME
 			return m_mtrl;
 		}
 
+		void addFace(face* f);
+
 		aten::GeomParameter param;
-		std::vector<face*> faces;
 		aten::aabb m_aabb;
 
 	private:
 		material* m_mtrl{ nullptr };
+		std::vector<face*> faces;
+
+		int m_baseIdx{ INT32_MAX };
+		int m_baseTriIdx{ INT32_MAX };
 	};
 }

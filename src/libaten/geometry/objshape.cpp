@@ -25,4 +25,18 @@ namespace AT_NAME
 
 		m_aabb.init(boxmin, boxmax);
 	}
+
+	void objshape::addFace(face* f)
+	{
+		int idx0 = f->param.idx[0];
+		int idx1 = f->param.idx[1];
+		int idx2 = f->param.idx[2];
+
+		int baseIdx = std::min(idx0, std::min(idx1, idx2));
+		m_baseIdx = std::min(baseIdx, m_baseIdx);
+
+		faces.push_back(f);
+
+		m_baseTriIdx = std::min(f->id, m_baseTriIdx);
+	}
 }

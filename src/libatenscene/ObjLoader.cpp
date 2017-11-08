@@ -210,7 +210,7 @@ namespace aten
 
 				f->build(dstshape);
 
-				dstshape->faces.push_back(f);
+				dstshape->addFace(f);
 			}
 
 			// Keep polygon counts.

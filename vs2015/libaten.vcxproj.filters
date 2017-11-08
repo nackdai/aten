@@ -401,6 +401,9 @@
     <ClInclude Include="..\src\libaten\geometry\objshape.h">
       <Filter>geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\visualizer\GeomDataBuffer.h">
+      <Filter>visualizer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -633,6 +636,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\face.cpp">
       <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\visualizer\GeomDataBuffer.cpp">
+      <Filter>visualizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

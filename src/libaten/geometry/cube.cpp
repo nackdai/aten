@@ -1,4 +1,4 @@
-#include "shape/cube.h"
+#include "geometry/cube.h"
 
 namespace AT_NAME
 {

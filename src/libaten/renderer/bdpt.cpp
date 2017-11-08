@@ -3,7 +3,7 @@
 #include "misc/timer.h"
 #include "material/lambert.h"
 #include "material/refraction.h"
-#include "shape/tranformable.h"
+#include "geometry/tranformable.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"

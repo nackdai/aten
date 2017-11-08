@@ -8,16 +8,16 @@
 
 namespace aten
 {
-	enum ShapeType : int {
+	enum GeometryType : int {
 		Polygon,
 		Instance,
 		Sphere,
 		Cube,
-		ShapeTypeMax,
+		GeometryTypeMax,
 	};
 
-	struct ShapeParameter {
-		ShapeType type{ ShapeType::ShapeTypeMax };
+	struct GeomParameter {
+		GeometryType type{ GeometryType::GeometryTypeMax };
 
 		real area;
 
@@ -38,27 +38,27 @@ namespace aten
 
 		aten::UnionIdxPtr mtrl;
 
-		AT_DEVICE_API ShapeParameter(ShapeType _type)
+		AT_DEVICE_API GeomParameter(GeometryType _type)
 			: type(_type)
 		{}
 
 		// sphere.
-		AT_DEVICE_API ShapeParameter(const vec3& c, real r, AT_NAME::material* m)
-			: center(c), radius(r), type(ShapeType::Sphere)
+		AT_DEVICE_API GeomParameter(const vec3& c, real r, AT_NAME::material* m)
+			: center(c), radius(r), type(GeometryType::Sphere)
 		{
 			mtrl.ptr = m;
 		}
 
 		// cube.
-		AT_DEVICE_API ShapeParameter(const vec3& c, const vec3& s, AT_NAME::material* m)
-			: center(c), size(s), type(ShapeType::Sphere)
+		AT_DEVICE_API GeomParameter(const vec3& c, const vec3& s, AT_NAME::material* m)
+			: center(c), size(s), type(GeometryType::Sphere)
 		{
 			mtrl.ptr = m;
 		}
 
-		~ShapeParameter() {}
+		~GeomParameter() {}
 	};
-	AT_STATICASSERT((sizeof(ShapeParameter) % 16) == 0);
+	AT_STATICASSERT((sizeof(GeomParameter) % 16) == 0);
 
 	struct PrimitiveParamter {
 		union {

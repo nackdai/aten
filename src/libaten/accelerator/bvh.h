@@ -1,8 +1,8 @@
 #pragma once
 
 #include "scene/hitable.h"
-#include "shape/tranformable.h"
-#include "object/object.h"
+#include "geometry/tranformable.h"
+#include "geometry/object.h"
 #include "accelerator/accelerator.h"
 
 #include <functional>

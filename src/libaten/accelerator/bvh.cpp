@@ -1,6 +1,6 @@
 #include "accelerator/bvh.h"
-#include "shape/tranformable.h"
-#include "object/object.h"
+#include "geometry/tranformable.h"
+#include "geometry/object.h"
 
 #include <random>
 #include <vector>

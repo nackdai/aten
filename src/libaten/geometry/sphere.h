@@ -1,17 +1,16 @@
 #pragma once
 
 #include "types.h"
-#include "accelerator/bvh.h"
 #include "math/mat4.h"
-#include "shape/tranformable.h"
-#include "shape/mesh.h"
-#include "shape/shape.h"
+#include "geometry/tranformable.h"
+#include "geometry/geombase.h"
+#include "geometry/geomparam.h"
 
 namespace AT_NAME
 {
 	template<typename T> class instance;
 
-	class sphere : public aten::mesh<aten::transformable> {
+	class sphere : public aten::geom<aten::transformable> {
 		friend class instance<sphere>;
 
 	public:
@@ -29,7 +28,7 @@ namespace AT_NAME
 			aten::Intersection& isect) const override final;
 
 		static AT_DEVICE_API bool hit(
-			const aten::ShapeParameter* param,
+			const aten::GeomParameter* param,
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::Intersection* isect);
@@ -40,13 +39,13 @@ namespace AT_NAME
 			const aten::Intersection& isect) const override final;
 
 		static AT_DEVICE_API void evalHitResult(
-			const aten::ShapeParameter* param,
+			const aten::GeomParameter* param,
 			const aten::ray& r,
 			aten::hitrecord* rec,
 			const aten::Intersection* isect);
 
 		static AT_DEVICE_API void evalHitResult(
-			const aten::ShapeParameter* param,
+			const aten::GeomParameter* param,
 			const aten::ray& r,
 			const aten::mat4& mtxL2W, 
 			aten::hitrecord* rec,
@@ -68,10 +67,10 @@ namespace AT_NAME
 
 		static AT_DEVICE_API void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
-			const aten::ShapeParameter* param,
+			const aten::GeomParameter* param,
 			aten::sampler* sampler);
 
-		virtual const aten::ShapeParameter& getParam() const override final
+		virtual const aten::GeomParameter& getParam() const override final
 		{
 			return m_param;
 		}
@@ -90,11 +89,11 @@ namespace AT_NAME
 
 		static AT_DEVICE_API void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
-			const aten::ShapeParameter* param,
+			const aten::GeomParameter* param,
 			const aten::mat4& mtxL2W,
 			aten::sampler* sampler);
 
 	private:
-		aten::ShapeParameter m_param;
+		aten::GeomParameter m_param;
 	};
 }

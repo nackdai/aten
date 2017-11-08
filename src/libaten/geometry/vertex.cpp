@@ -1,4 +1,4 @@
-#include "object/vertex.h"
+#include "geometry/vertex.h"
 
 namespace aten
 {

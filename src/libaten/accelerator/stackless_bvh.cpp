@@ -1,7 +1,7 @@
 #include "accelerator/stackless_bvh.h"
 #include "accelerator/bvh.h"
-#include "shape/tranformable.h"
-#include "object/object.h"
+#include "geometry/tranformable.h"
+#include "geometry/object.h"
 
 #include <random>
 #include <vector>
@@ -167,7 +167,7 @@ namespace aten {
 					item = const_cast<hitable*>(internalObj);
 				}
 
-				stacklessBvhNode.meshid = (float)item->meshid();
+				stacklessBvhNode.meshid = (float)item->geomid();
 
 				if (isPrimitiveLeaf) {
 					// Leaves of this tree are primitive.

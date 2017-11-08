@@ -3,6 +3,7 @@
 #include "types.h"
 #include "scene/hitable.h"
 #include "math/mat4.h"
+#include "geometry/geomparam.h"
 
 #include <vector>
 
@@ -27,10 +28,10 @@ namespace aten
 			hitrecord& rec,
 			const Intersection& isect) const = 0;
 
-		virtual const ShapeParameter& getParam() const
+		virtual const GeomParameter& getParam() const
 		{
 			AT_ASSERT(false);
-			return std::move(ShapeParameter(ShapeType::ShapeTypeMax));
+			return std::move(GeomParameter(GeometryType::GeometryTypeMax));
 		}
 
 		virtual void getPrimitives(PrimitiveParamter* primparams) const

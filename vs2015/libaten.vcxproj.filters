@@ -34,9 +34,6 @@
     <Filter Include="shader">
       <UniqueIdentifier>{d02f9897-3ec7-49aa-afe9-076f1ccbfbef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="object">
-      <UniqueIdentifier>{11aea900-a318-402f-832a-89a669cb7c99}</UniqueIdentifier>
-    </Filter>
     <Filter Include="light">
       <UniqueIdentifier>{73ad43e6-957c-4167-b693-161d560e49e4}</UniqueIdentifier>
     </Filter>
@@ -45,9 +42,6 @@
     </Filter>
     <Filter Include="shader\bloomeffect">
       <UniqueIdentifier>{7d011257-74d3-46a3-b33e-d87cdde6f216}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="shape">
-      <UniqueIdentifier>{0721ed3f-82f2-4111-8ff3-91a03315e3d6}</UniqueIdentifier>
     </Filter>
     <Filter Include="filter">
       <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
@@ -81,6 +75,9 @@
     </Filter>
     <Filter Include="shader\taa">
       <UniqueIdentifier>{bfcc2677-ea69-434a-b998-76705ca61c21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="geometry">
+      <UniqueIdentifier>{fff5ea6b-cef6-4352-8aeb-ae964c4f5ceb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -161,9 +158,6 @@
     <ClInclude Include="..\src\libaten\scene\hitable.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\object\object.h">
-      <Filter>object</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\math\intersect.h">
       <Filter>math</Filter>
     </ClInclude>
@@ -242,12 +236,6 @@
     <ClInclude Include="..\src\libaten\math\mat4.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\cube.h">
-      <Filter>shape</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\sphere.h">
-      <Filter>shape</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\visualizer\pixelformat.h">
       <Filter>visualizer</Filter>
     </ClInclude>
@@ -306,18 +294,9 @@
       <Filter>math</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\aten.h" />
-    <ClInclude Include="..\src\libaten\shape\shape.h">
-      <Filter>shape</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
-    <ClInclude Include="..\src\libaten\object\vertex.h">
-      <Filter>object</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h">
       <Filter>proxy</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\tranformable.h">
-      <Filter>shape</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\accelerator\bvh.h">
       <Filter>accelerator</Filter>
@@ -355,9 +334,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\shape\mesh.h">
-      <Filter>shape</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\aov.h">
       <Filter>renderer</Filter>
@@ -398,6 +374,27 @@
     <ClInclude Include="..\src\libaten\accelerator\CullingFrusta.h">
       <Filter>accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\geombase.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\geomparam.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\object.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\sphere.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\tranformable.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\vertex.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\cube.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -435,9 +432,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp">
       <Filter>visualizer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\object\object.cpp">
-      <Filter>object</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\lambert.cpp">
       <Filter>material</Filter>
@@ -502,12 +496,6 @@
     <ClCompile Include="..\src\libaten\math\mat4.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\shape\sphere.cpp">
-      <Filter>shape</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\shape\cube.cpp">
-      <Filter>shape</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\material\oren_nayar.cpp">
       <Filter>material</Filter>
     </ClCompile>
@@ -559,14 +547,8 @@
     <ClCompile Include="..\src\libaten\light\arealight.cpp">
       <Filter>light</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\object\vertex.cpp">
-      <Filter>object</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp">
       <Filter>proxy</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\shape\tranformable.cpp">
-      <Filter>shape</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp">
       <Filter>accelerator</Filter>
@@ -591,9 +573,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\texture\texture.cpp">
       <Filter>texture</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\shape\mesh.cpp">
-      <Filter>shape</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\aov.cpp">
       <Filter>renderer</Filter>
@@ -624,6 +603,24 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\CullingFrusta.cpp">
       <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\object.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\sphere.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\tranformable.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\vertex.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\cube.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\geombase.cpp">
+      <Filter>geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

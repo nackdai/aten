@@ -1,6 +1,6 @@
 #include "scene/scene.h"
 #include "misc/color.h"
-#include "shape/tranformable.h"
+#include "geometry/tranformable.h"
 
 namespace aten {
 	bool scene::hitLight(

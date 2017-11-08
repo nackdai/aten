@@ -6,7 +6,6 @@
 #include "math/vec3.h"
 #include "material/material.h"
 #include "sampler/sampler.h"
-#include "shape/shape.h"
 
 //#define ENABLE_TANGENTCOORD_IN_HITREC
 
@@ -90,7 +89,7 @@ namespace aten {
 			return (getHasObject() != nullptr);
 		}
 
-		virtual int meshid() const
+		virtual int geomid() const
 		{
 			return -1;
 		}

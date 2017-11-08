@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
-#include "shape/shape.h"
+#include "geometry/geomparam.h"
 #include "light/light.h"
 #include "material/material.h"
-#include "object/vertex.h"
+#include "geometry/vertex.h"
 
 namespace aten {
 	class DataCollector {
@@ -14,7 +14,7 @@ namespace aten {
 
 	public:
 		static void collect(
-			std::vector<aten::ShapeParameter>& shapeparams,
+			std::vector<aten::GeomParameter>& shapeparams,
 			std::vector<aten::PrimitiveParamter>& primparams,
 			std::vector<aten::LightParameter>& lightparams,
 			std::vector<aten::MaterialParameter>& mtrlparms,

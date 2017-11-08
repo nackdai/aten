@@ -1,11 +1,11 @@
 #include "proxy/DataCollector.h"
-#include "object/object.h"
+#include "geometry/object.h"
 
 #include <map>
 
 namespace aten {
 	void DataCollector::collect(
-		std::vector<aten::ShapeParameter>& shapeparams,
+		std::vector<aten::GeomParameter>& shapeparams,
 		std::vector<aten::PrimitiveParamter>& primparams,
 		std::vector<aten::LightParameter>& lightparams,
 		std::vector<aten::MaterialParameter>& mtrlparms,
@@ -20,7 +20,7 @@ namespace aten {
 			auto type = s->getParam().type;
 
 			switch (type) {
-			case ShapeType::Polygon:
+			case GeometryType::Polygon:
 			{
 				auto param = s->getParam();
 
@@ -35,8 +35,8 @@ namespace aten {
 				orderMap.insert(std::pair<transformable*, int>(s, order++));
 			}
 				break;
-			case ShapeType::Sphere:
-			case ShapeType::Cube:
+			case GeometryType::Sphere:
+			case GeometryType::Cube:
 			{
 				orderMap.insert(std::pair<transformable*, int>(s, order++));
 			}
@@ -50,7 +50,7 @@ namespace aten {
 		for (auto s : shapes) {
 			auto type = s->getParam().type;
 
-			if (type == ShapeType::Instance) {
+			if (type == GeometryType::Instance) {
 				auto param = s->getParam();
 				auto obj = s->getHasObject();
 				
@@ -64,12 +64,12 @@ namespace aten {
 
 				shapeparams.push_back(param);
 			}
-			else if (type == ShapeType::Polygon) {
+			else if (type == GeometryType::Polygon) {
 				auto param = s->getParam();
 				shapeparams.push_back(param);
 			}
-			else if (type == ShapeType::Sphere
-				|| type == ShapeType::Cube)
+			else if (type == GeometryType::Sphere
+				|| type == GeometryType::Cube)
 			{
 				auto param = s->getParam();
 				param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);

@@ -5,10 +5,10 @@
 #include "types.h"
 #include "material/material.h"
 #include "math/mat4.h"
-#include "shape/shape.h"
-#include "shape/tranformable.h"
-#include "shape/mesh.h"
-#include "object/vertex.h"
+#include "geometry/geomparam.h"
+#include "geometry/tranformable.h"
+#include "geometry/geombase.h"
+#include "geometry/vertex.h"
 
 namespace AT_NAME
 {
@@ -53,7 +53,7 @@ namespace AT_NAME
 			aten::hitable::SamplePosNormalPdfResult* result,
 			aten::sampler* sampler) const override;
 
-		virtual int meshid() const override;
+		virtual int geomid() const override;
 
 		void build(shape* _parent);
 
@@ -69,11 +69,11 @@ namespace AT_NAME
 		int id{ -1 };
 	};
 
-	class shape : public aten::meshbase {
+	class shape : public aten::geombase {
 		friend class object;
 
 	public:
-		shape() : param(aten::ShapeType::Polygon) {}
+		shape() : param(aten::GeometryType::Polygon) {}
 		virtual ~shape() {}
 
 		void build();
@@ -89,7 +89,7 @@ namespace AT_NAME
 			return m_mtrl;
 		}
 
-		aten::ShapeParameter param;
+		aten::GeomParameter param;
 		std::vector<face*> faces;
 		aten::aabb m_aabb;
 
@@ -103,7 +103,7 @@ namespace AT_NAME
 		friend class instance<object>;
 
 	public:
-		object() : param(aten::ShapeType::Polygon) {}
+		object() : param(aten::GeometryType::Polygon) {}
 		virtual ~object() {}
 
 	public:
@@ -120,7 +120,7 @@ namespace AT_NAME
 
 		virtual void getPrimitives(aten::PrimitiveParamter* primparams) const override final;
 
-		virtual const aten::ShapeParameter& getParam() const override final
+		virtual const aten::GeomParameter& getParam() const override final
 		{
 			return param;
 		}
@@ -140,7 +140,7 @@ namespace AT_NAME
 
 	public:
 		std::vector<shape*> shapes;
-		aten::ShapeParameter param;
+		aten::GeomParameter param;
 		aten::aabb bbox;
 
 	private:

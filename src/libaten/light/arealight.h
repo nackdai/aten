@@ -1,7 +1,7 @@
 #pragma once
 
 #include "light/light.h"
-#include "shape/tranformable.h"
+#include "geometry/tranformable.h"
 
 namespace AT_NAME {
 	class AreaLight : public Light {

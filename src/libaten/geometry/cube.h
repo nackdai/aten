@@ -1,17 +1,16 @@
 #pragma once
 
 #include "types.h"
-#include "accelerator/bvh.h"
 #include "math/mat4.h"
-#include "shape/tranformable.h"
-#include "shape/mesh.h"
-#include "shape/shape.h"
+#include "geometry/tranformable.h"
+#include "geometry/geombase.h"
+#include "geometry/geomparam.h"
 
 namespace AT_NAME
 {
 	template<typename T> class instance;
 
-	class cube : public aten::mesh<aten::transformable> {
+	class cube : public aten::geom<aten::transformable> {
 		friend class instance<cube>;
 
 	public:
@@ -42,7 +41,7 @@ namespace AT_NAME
 			aten::hitable::SamplePosNormalPdfResult* result,
 			aten::sampler* sampler) const override final;
 
-		virtual const aten::ShapeParameter& getParam() const override final
+		virtual const aten::GeomParameter& getParam() const override final
 		{
 			return m_param;
 		}
@@ -79,6 +78,6 @@ namespace AT_NAME
 		static Face findFace(const aten::vec3& d);
 
 	private:
-		aten::ShapeParameter m_param;
+		aten::GeomParameter m_param;
 	};
 }

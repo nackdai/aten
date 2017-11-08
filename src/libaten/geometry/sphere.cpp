@@ -1,4 +1,4 @@
-#include "shape/sphere.h"
+#include "geometry/sphere.h"
 
 namespace AT_NAME
 {
@@ -36,7 +36,7 @@ namespace AT_NAME
 	}
 
 	bool AT_DEVICE_API sphere::hit(
-		const aten::ShapeParameter* param,
+		const aten::GeomParameter* param,
 		const aten::ray& r,
 		real t_min, real t_max,
 		aten::Intersection* isect)
@@ -116,7 +116,7 @@ namespace AT_NAME
 	}
 
 	void sphere::evalHitResult(
-		const aten::ShapeParameter* param, 
+		const aten::GeomParameter* param,
 		const aten::ray& r, 
 		aten::hitrecord* rec,
 		const aten::Intersection* isect)
@@ -125,7 +125,7 @@ namespace AT_NAME
 	}
 
 	void sphere::evalHitResult(
-		const aten::ShapeParameter* param,
+		const aten::GeomParameter* param,
 		const aten::ray& r,
 		const aten::mat4& mtxL2W, 
 		aten::hitrecord* rec,
@@ -160,7 +160,7 @@ namespace AT_NAME
 
 	AT_DEVICE_API void sphere::getSamplePosNormalArea(
 		aten::hitable::SamplePosNormalPdfResult* result,
-		const aten::ShapeParameter* param,
+		const aten::GeomParameter* param,
 		aten::sampler* sampler)
 	{
 		getSamplePosNormalArea(result, param, aten::mat4(), sampler);
@@ -176,7 +176,7 @@ namespace AT_NAME
 
 	void sphere::getSamplePosNormalArea(
 		aten::hitable::SamplePosNormalPdfResult* result,
-		const aten::ShapeParameter* param,
+		const aten::GeomParameter* param,
 		const aten::mat4& mtxL2W,
 		aten::sampler* sampler)
 	{

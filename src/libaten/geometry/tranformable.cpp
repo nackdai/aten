@@ -1,4 +1,4 @@
-#include "shape/tranformable.h"
+#include "geometry/tranformable.h"
 
 namespace aten
 {
@@ -77,9 +77,9 @@ namespace aten
 		auto& shapes = const_cast<std::vector<transformable*>&>(transformable::getShapes());
 
 		for (auto s : shapes) {
-			auto& param = const_cast<aten::ShapeParameter&>(s->getParam());
+			auto& param = const_cast<aten::GeomParameter&>(s->getParam());
 
-			if (param.type == ShapeType::Instance) {
+			if (param.type == GeometryType::Instance) {
 				aten::mat4 mtxL2W, mtxW2L;
 				s->getMatrices(mtxL2W, mtxW2L);
 

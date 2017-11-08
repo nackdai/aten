@@ -1,4 +1,4 @@
-#include "object/object.h"
+#include "geometry/object.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 
@@ -211,11 +211,11 @@ namespace AT_NAME
 		result->primid = id;
 	}
 
-	int face::meshid() const
+	int face::geomid() const
 	{
 		AT_ASSERT(parent);
 		if (parent) {
-			return parent->getMeshId();
+			return parent->getGeomId();
 		}
 		return -1;
 	}

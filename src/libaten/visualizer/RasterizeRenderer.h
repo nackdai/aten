@@ -29,6 +29,7 @@ namespace aten {
 			const char* pathFS);
 
 		static void draw(
+			int frame,
 			scene* scene,
 			const camera* cam,
 			FBO* fbo = nullptr);

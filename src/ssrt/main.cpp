@@ -35,6 +35,8 @@ static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
+static int g_frame = 0;
+
 void onRun()
 {
 	if (g_isCameraDirty) {
@@ -48,6 +50,7 @@ void onRun()
 	}
 
 	aten::ResterizeRenderer::draw(
+		g_frame,
 		&g_scene,
 		&g_camera);
 
@@ -57,6 +60,8 @@ void onRun()
 
 		aten::window::drawImGui();
 	}
+
+	g_frame++;
 }
 
 void onClose()

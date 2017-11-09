@@ -3,15 +3,22 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "math/mat4.h"
+#include "sampler/cmj.h"
 
 namespace aten {
 	shader ResterizeRenderer::s_shader;
+
+	static int s_width = 0;
+	static int s_height = 0;
 
 	bool ResterizeRenderer::init(
 		int width, int height,
 		const char* pathVS,
 		const char* pathFS)
 	{
+		s_width = width;
+		s_height = height;
+
 		return s_shader.init(width, height, pathVS, pathFS);
 	}
 
@@ -21,10 +28,14 @@ namespace aten {
 		const char* pathGS,
 		const char* pathFS)
 	{
+		s_width = width;
+		s_height = height;
+
 		return s_shader.init(width, height, pathVS, pathGS, pathFS);
 	}
 
 	void ResterizeRenderer::draw(
+		int frame,
 		scene* scene,
 		const camera* cam,
 		FBO* fbo/*= nullptr*/)
@@ -55,6 +66,26 @@ namespace aten {
 
 		auto hMtxW2C = s_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+		// TODO
+		// For TAA.
+		{
+			CMJ sampler;
+			auto rnd = getRandom(0);
+			auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+			sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 300, scramble);
+
+			auto smpl = sampler.nextSample2D();
+
+			aten::mat4 mtxOffset;
+			mtxOffset.asTrans(aten::vec3(
+				smpl.x / s_width, 
+				smpl.y / s_height, 
+				real(0)));
+
+			auto hMtxOffset = s_shader.getHandle("mtxOffset");
+			CALL_GL_API(::glUniformMatrix4fv(hMtxOffset, 1, GL_TRUE, &mtxOffset.a[0]));
+		}
 
 		if (fbo) {
 			// TODO

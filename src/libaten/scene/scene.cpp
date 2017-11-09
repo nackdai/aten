@@ -118,11 +118,8 @@ namespace aten {
 #endif
 	}
 
-	void scene::draw(const aten::mat4& mtxW2C)
+	void scene::draw()
 	{
-		// TODO
-		// mtxW2C.
-
 		for (auto h : m_tmp) {
 			h->draw();
 		}

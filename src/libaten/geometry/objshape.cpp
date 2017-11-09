@@ -29,7 +29,7 @@ namespace AT_NAME
 		// For rasterize rendering.
 		{
 			std::vector<uint32_t> idx;
-			idx.resize(faces.size() * 3);
+			idx.reserve(faces.size() * 3);
 
 			for (const auto f : faces) {
 				idx.push_back(f->param.idx[0]);

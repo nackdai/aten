@@ -41,7 +41,7 @@ namespace AT_NAME
 		material* m_mtrl{ nullptr };
 		std::vector<face*> faces;
 
-		GeomIndexBuffer m_ib;
+		aten::GeomIndexBuffer m_ib;
 
 		int m_baseIdx{ INT32_MAX };
 		int m_baseTriIdx{ INT32_MAX };

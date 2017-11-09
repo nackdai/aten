@@ -342,6 +342,7 @@
     <ClInclude Include="..\src\libaten\visualizer\GeomDataBuffer.h" />
     <ClInclude Include="..\src\libaten\visualizer\MultiPassPostProc.h" />
     <ClInclude Include="..\src\libaten\visualizer\pixelformat.h" />
+    <ClInclude Include="..\src\libaten\visualizer\RasterizeRenderer.h" />
     <ClInclude Include="..\src\libaten\visualizer\shader.h" />
     <ClInclude Include="..\src\libaten\visualizer\visualizer.h" />
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
@@ -422,6 +423,7 @@
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\GeomDataBuffer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\MultiPassPostProc.cpp" />
+    <ClCompile Include="..\src\libaten\visualizer\RasterizeRenderer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />

@@ -248,6 +248,21 @@ namespace aten {
 		::glfwMakeContextCurrent(g_window);
 		::glfwSwapInterval(1);
 
+		result = glewInit();
+		AT_ASSERT(result == GLEW_OK);
+
+		auto version = ::glGetString(GL_VERSION);
+		AT_PRINTF("GL Version(%s)\n", version);
+
+		CALL_GL_API(::glClipControl(
+			GL_LOWER_LEFT,
+			GL_ZERO_TO_ONE));
+
+		CALL_GL_API(::glFrontFace(GL_CCW));
+
+		CALL_GL_API(::glViewport(0, 0, width, height));
+		CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
+
 		return true;
 	}
 

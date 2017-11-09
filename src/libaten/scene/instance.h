@@ -100,7 +100,7 @@ namespace aten
 			return std::move(aabb::transform(getBoundingbox(), m_mtxL2W));
 		}
 
-		virtual void draw()
+		virtual void draw() override final
 		{
 			// TODO
 			// mtxL2W

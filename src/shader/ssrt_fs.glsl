@@ -9,6 +9,6 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	outColor.xyz = worldNormal;
+	outColor.xyz = worldNormal * 0.5 + 0.5;
 	outColor.w = 1.0;
 }

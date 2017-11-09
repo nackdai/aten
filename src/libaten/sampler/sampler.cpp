@@ -29,6 +29,6 @@ namespace aten {
 	}
 	uint32_t getRandom(uint32_t idx)
 	{
-		return g_random[idx];
+		return g_random[idx % g_random.size()];
 	}
 }

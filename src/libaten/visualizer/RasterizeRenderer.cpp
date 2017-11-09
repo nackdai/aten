@@ -71,7 +71,7 @@ namespace aten {
 		// For TAA.
 		{
 			CMJ sampler;
-			auto rnd = getRandom(0);
+			auto rnd = getRandom(frame);
 			auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
 			sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 300, scramble);
 

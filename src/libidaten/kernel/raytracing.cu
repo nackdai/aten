@@ -106,7 +106,6 @@ __global__ void hitTestRayTracing(
 	path.isect.t = isect.t;
 	path.isect.objid = isect.objid;
 	path.isect.mtrlid = isect.mtrlid;
-	path.isect.area = isect.area;
 	path.isect.primid = isect.primid;
 	path.isect.a = isect.a;
 	path.isect.b = isect.b;

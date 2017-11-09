@@ -116,8 +116,6 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
 	if (isIntersect) {
 		isect->t = t;
 
-		isect->area = prim->area;
-
 		isect->a = beta;
 		isect->b = gamma;
 

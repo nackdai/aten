@@ -64,8 +64,6 @@ namespace AT_NAME
 
 			isect.objid = id();
 			isect.mtrlid = ((material*)m_param.mtrl.ptr)->id();
-
-			isect.area = getBoundingbox().computeSurfaceArea();
 		}
 
 		return isHit;

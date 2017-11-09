@@ -37,8 +37,6 @@ namespace aten {
 	struct Intersection {
 		real t{ AT_MATH_INF };
 
-		real area{ real(1) };
-
 		int objid{ -1 };
 
 		short mtrlid{ -1 };
@@ -50,6 +48,8 @@ namespace aten {
 
 		int primid{ -1 };
 		real a, b;	// barycentric
+
+		real padding;
 	};
 
 	class hitable {

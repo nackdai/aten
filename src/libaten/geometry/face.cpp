@@ -80,8 +80,6 @@ namespace AT_NAME
 				isect->a = res.a;
 				isect->b = res.b;
 
-				isect->area = param->area;
-
 				isHit = true;
 			}
 		}
@@ -108,6 +106,8 @@ namespace AT_NAME
 
 			rec.normal = normalize(cross(e01, e02));
 		}
+
+		rec.area = param.area;
 	}
 
 	void face::evalHitResult(

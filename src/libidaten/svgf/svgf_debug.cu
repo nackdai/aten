@@ -51,6 +51,10 @@ __global__ void fillAOV(
 		bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
 		clr = isHitEdge ? make_float4(0) : make_float4(1);
 	}
+	else if (mode == idaten::SVGFPathTracing::AOVMode::BaryCentric) {
+		auto c = 1 - isect.a - isect.b;
+		clr = make_float4(isect.a, isect.b, c, 1);
+	}
 
 	surf2Dwrite(
 		clr,

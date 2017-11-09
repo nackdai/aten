@@ -23,6 +23,7 @@ namespace idaten
 			TexColor,
 			Depth,
 			WireFrame,
+			BaryCentric,
 		};
 
 		static const int ShdowRayNum = 2;

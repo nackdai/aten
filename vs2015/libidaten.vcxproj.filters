@@ -11,9 +11,6 @@
       <Filter>cuda</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\idaten.h" />
-    <ClInclude Include="..\src\libidaten\kernel\raytracing.h">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h">
       <Filter>cuda</Filter>
     </ClInclude>
@@ -124,14 +121,8 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h">
       <Filter>cuda</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\pathtracing.h">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h">
       <Filter>cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\renderer.h">
-      <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\compaction.h">
       <Filter>kernel</Filter>
@@ -157,9 +148,6 @@
     <ClInclude Include="..\src\libaten\misc\timer.h">
       <Filter>aten\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>aten\material</Filter>
     </ClInclude>
@@ -177,9 +165,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h">
       <Filter>aten\sampler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\directlight.h">
-      <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\svgf\svgf_pt.h">
       <Filter>svgf</Filter>
@@ -219,6 +204,21 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\sphere.h">
       <Filter>aten\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\pathtracing.h">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\raytracing.h">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\renderer.h">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\directlight.h">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
+      <Filter>kernel\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -264,6 +264,9 @@
     <Filter Include="aten\geometry">
       <UniqueIdentifier>{c2beec74-9797-4217-aadc-71236397673a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="kernel\renderer">
+      <UniqueIdentifier>{deaffd9a-5ffd-486c-927f-355fbbf5f941}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
@@ -287,9 +290,6 @@
     <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libidaten\kernel\renderer.cpp">
-      <Filter>kernel</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
       <Filter>aten\renderer</Filter>
     </ClCompile>
@@ -305,14 +305,11 @@
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp">
       <Filter>aten\sampler</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\geometry\sphere.cpp">
-      <Filter>aten\geometry</Filter>
+    <ClCompile Include="..\src\libidaten\kernel\renderer.cpp">
+      <Filter>kernel\renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
@@ -352,25 +349,13 @@
     <CudaCompile Include="..\src\libidaten\kernel\intersect.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\compaction.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\pt_geometryrendering.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\pt_temporarlreprojection.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp" />
-    <CudaCompile Include="..\src\libidaten\kernel\directlight.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_pt.cu">
       <Filter>svgf</Filter>
     </CudaCompile>
@@ -397,6 +382,22 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\stackless_qbvh.cu">
       <Filter>kernel\accelerator</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\geometry\sphere.cpp" />
+    <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
+      <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\pt_geometryrendering.cu">
+      <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\pt_temporarlreprojection.cu">
+      <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
+      <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\directlight.cu">
+      <Filter>kernel\renderer</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

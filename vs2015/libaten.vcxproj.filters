@@ -708,5 +708,8 @@
     <None Include="..\src\shader\ssrt_vs.glsl">
       <Filter>shader\ssrt</Filter>
     </None>
+    <None Include="..\src\shader\ssrt_gs.glsl">
+      <Filter>shader\ssrt</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -195,6 +195,7 @@ int main()
 	aten::ResterizeRenderer::init(
 		WIDTH, HEIGHT,
 		"../shader/ssrt_vs.glsl",
+		"../shader/ssrt_gs.glsl",
 		"../shader/ssrt_fs.glsl");
 
 	aten::vec3 pos, at;

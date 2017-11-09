@@ -15,6 +15,15 @@ namespace aten {
 		return s_shader.init(width, height, pathVS, pathFS);
 	}
 
+	bool ResterizeRenderer::init(
+		int width, int height,
+		const char* pathVS,
+		const char* pathGS,
+		const char* pathFS)
+	{
+		return s_shader.init(width, height, pathVS, pathGS, pathFS);
+	}
+
 	void ResterizeRenderer::draw(
 		scene* scene,
 		const camera* cam,

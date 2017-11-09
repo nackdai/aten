@@ -443,6 +443,7 @@
     <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\nlm_fs.glsl" />
     <None Include="..\src\shader\ssrt_fs.glsl" />
+    <None Include="..\src\shader\ssrt_gs.glsl" />
     <None Include="..\src\shader\ssrt_vs.glsl" />
     <None Include="..\src\shader\taa_final_fs.glsl" />
     <None Include="..\src\shader\taa_fs.glsl" />

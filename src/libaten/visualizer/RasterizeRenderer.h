@@ -22,6 +22,12 @@ namespace aten {
 			const char* pathVS,
 			const char* pathFS);
 
+		static bool init(
+			int width, int height,
+			const char* pathVS,
+			const char* pathGS,
+			const char* pathFS);
+
 		static void draw(
 			scene* scene,
 			const camera* cam,

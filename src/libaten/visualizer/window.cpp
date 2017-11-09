@@ -196,8 +196,10 @@ namespace aten {
 		auto result = ::glfwInit();
 		AT_VRETURN(result, false);
 
-		::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-		::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		// Not specify version.
+		// Default value sepcify latest version.
+		//::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+		//::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
 		g_window = ::glfwCreateWindow(
 			width,

@@ -35,13 +35,18 @@ namespace aten {
 		return shader;
 	}
 
-	GLuint createProgram(GLuint vs, GLuint fs)
+	GLuint createProgram(GLuint vs, GLuint fs, GLuint gs = 0)
 	{
 		auto program = ::glCreateProgram();
 		AT_ASSERT(program != 0);
 
 		CALL_GL_API(::glAttachShader(program, vs));
 		CALL_GL_API(::glAttachShader(program, fs));
+
+		// For geometry shader.
+		if (gs > 0) {
+			CALL_GL_API(::glAttachShader(program, gs));
+		}
 
 		CALL_GL_API(::glLinkProgram(program));
 
@@ -82,6 +87,30 @@ namespace aten {
 		AT_VRETURN(fs != 0, false);
 
 		m_program = createProgram(vs, fs);
+		AT_VRETURN(m_program != 0, false);
+
+		m_width = width;
+		m_height = height;
+
+		return true;
+	}
+
+	bool shader::init(
+		int width, int height,
+		const char* pathVS,
+		const char* pathGS,
+		const char* pathFS)
+	{
+		auto vs = createShader(pathVS, GL_VERTEX_SHADER);
+		AT_VRETURN(vs != 0, false);
+
+		auto fs = createShader(pathFS, GL_FRAGMENT_SHADER);
+		AT_VRETURN(fs != 0, false);
+
+		auto gs = createShader(pathGS, GL_GEOMETRY_SHADER);
+		AT_VRETURN(gs != 0, false);
+
+		m_program = createProgram(vs, fs, gs);
 		AT_VRETURN(m_program != 0, false);
 
 		m_width = width;

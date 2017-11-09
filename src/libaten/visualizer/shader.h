@@ -14,6 +14,12 @@ namespace aten {
 			const char* pathVS,
 			const char* pathFS);
 
+		bool init(
+			int width, int height,
+			const char* pathVS,
+			const char* pathGS,
+			const char* pathFS);
+
 		virtual void prepareRender(
 			const void* pixels,
 			bool revert);

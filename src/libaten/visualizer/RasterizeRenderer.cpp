@@ -56,12 +56,6 @@ namespace aten {
 		auto hMtxW2C = s_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
-		// TODO
-		// L2W‚ÍinstanceƒNƒ‰ƒX‚Å•ÛŽ‚³‚ê‚Ä‚¢‚é.
-		aten::mat4 mtxL2W;
-		auto hMtxL2W = s_shader.getHandle("mtxL2W");
-		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
-
 		if (fbo) {
 			// TODO
 			// Œ»Žž“_‚ÌFBO‚ÌŽÀ‘•‚ÍDepth‚ðŽ‚Â‚æ‚¤‚É‚È‚Á‚Ä‚¢‚È‚¢.
@@ -94,7 +88,16 @@ namespace aten {
 			isInitVB = true;
 		}
 
-		scene->draw();
+		scene->draw([&](const aten::mat4& mtxL2W, int objid, int primid) {
+			auto hMtxL2W = s_shader.getHandle("mtxL2W");
+			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+
+			auto hObjId = s_shader.getHandle("objid");
+			CALL_GL_API(::glUniform1i(hObjId, objid));
+
+			auto hPrimId = s_shader.getHandle("primid");
+			CALL_GL_API(::glUniform1i(hPrimId, primid));
+		});
 
 		if (fbo) {
 			// Set default frame buffer.

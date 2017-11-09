@@ -44,7 +44,10 @@ namespace AT_NAME
 			return m_accel;
 		}
 
-		virtual void draw() override final;
+		virtual void draw(
+			aten::hitable::FuncPreDraw func,
+			const aten::mat4& mtxL2W,
+			int parentId) override final;
 
 	private:
 		void build();

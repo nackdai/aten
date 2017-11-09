@@ -100,11 +100,12 @@ namespace aten
 			return std::move(aabb::transform(getBoundingbox(), m_mtxL2W));
 		}
 
-		virtual void draw() override final
+		virtual void draw(
+			aten::hitable::FuncPreDraw func,
+			const aten::mat4& mtxL2W,
+			int parentId) override final
 		{
-			// TODO
-			// mtxL2W
-			m_obj->draw();
+			m_obj->draw(func, m_mtxL2W, id());
 		}
 
 	private:

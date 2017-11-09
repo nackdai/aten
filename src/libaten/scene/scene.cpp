@@ -118,10 +118,10 @@ namespace aten {
 #endif
 	}
 
-	void scene::draw()
+	void scene::draw(aten::hitable::FuncPreDraw func)
 	{
 		for (auto h : m_tmp) {
-			h->draw();
+			h->draw(func, aten::mat4::Identity);
 		}
 	}
 }

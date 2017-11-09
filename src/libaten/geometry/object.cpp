@@ -157,10 +157,15 @@ namespace AT_NAME
 		}
 	}
 
-	void object::draw()
+	void object::draw(
+		aten::hitable::FuncPreDraw func,
+		const aten::mat4& mtxL2W,
+		int parentId)
 	{
+		int objid = (parentId < 0 ? id() : parentId);
+
 		for (auto s : shapes) {
-			s->draw();
+			s->draw(func, mtxL2W, objid);
 		}
 	}
 }

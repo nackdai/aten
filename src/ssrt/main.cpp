@@ -14,11 +14,11 @@
 
 #include "scenedefs.h"
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
-static const char* TITLE = "idaten";
+static const char* TITLE = "ssrt";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -162,11 +162,7 @@ void onKey(bool press, aten::Key key)
 				at,
 				aten::vec3(0, 1, 0),
 				vfov,
-#ifdef ENABLE_GEOMRENDERING
-				WIDTH >> 1, HEIGHT >> 1);
-#else
 				WIDTH, HEIGHT);
-#endif
 		}
 			break;
 		default:
@@ -207,11 +203,7 @@ int main()
 		at,
 		aten::vec3(0, 1, 0),
 		vfov,
-#ifdef ENABLE_GEOMRENDERING
-		WIDTH >> 1, HEIGHT >> 1);
-#else
 		WIDTH, HEIGHT);
-#endif
 
 	Scene::makeScene(&g_scene);
 	g_scene.build();

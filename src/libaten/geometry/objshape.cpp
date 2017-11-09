@@ -55,8 +55,15 @@ namespace AT_NAME
 		m_baseTriIdx = std::min(f->id, m_baseTriIdx);
 	}
 
-	void objshape::draw()
+	void objshape::draw(
+		aten::hitable::FuncPreDraw func,
+		const aten::mat4& mtxL2W,
+		int parentId)
 	{
+		if (func) {
+			func(mtxL2W, parentId, m_baseTriIdx);
+		}
+
 		auto vb = VertexManager::getVB();
 
 		auto triNum = (uint32_t)faces.size();

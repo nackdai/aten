@@ -32,7 +32,10 @@ namespace AT_NAME
 
 		void addFace(face* f);
 
-		void draw();
+		void draw(
+			aten::hitable::FuncPreDraw func,
+			const aten::mat4& mtxL2W,
+			int parentId);
 
 		aten::GeomParameter param;
 		aten::aabb m_aabb;

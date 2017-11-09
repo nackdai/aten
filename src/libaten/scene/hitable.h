@@ -1,6 +1,8 @@
 #pragma once 
 
 #include <vector>
+#include <functional>
+
 #include "types.h"
 #include "math/aabb.h"
 #include "math/vec3.h"
@@ -129,9 +131,15 @@ namespace aten {
 #endif
 		}
 
-		virtual void draw()
+		using FuncPreDraw = std::function<void(const aten::mat4&, int, int)>;
+
+		virtual void draw(
+			FuncPreDraw func,
+			const aten::mat4& mtxL2W,
+			int parentId = -1)
 		{
 			// For rasterize rendering.
+			AT_ASSERT(false);
 		}
 
 	private:

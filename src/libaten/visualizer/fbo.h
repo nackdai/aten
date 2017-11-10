@@ -22,7 +22,7 @@ namespace aten {
 
 		void bindAsTexture(uint32_t idx = 0);
 
-		void setFBO();
+		void bindFBO();
 
 		uint32_t getWidth() const
 		{

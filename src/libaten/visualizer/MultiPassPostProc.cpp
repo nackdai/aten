@@ -21,7 +21,7 @@ namespace aten {
 
 			if (pass->getFbo().isValid()) {
 				// Set FBO.
-				pass->getFbo().setFBO();
+				pass->getFbo().bindFBO();
 			}
 			else {
 				// Set default frame buffer.

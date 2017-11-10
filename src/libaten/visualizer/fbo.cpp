@@ -78,7 +78,7 @@ namespace aten {
 		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 	}
 
-	void FBO::setFBO()
+	void FBO::bindFBO()
 	{
 		AT_ASSERT(isValid());
 

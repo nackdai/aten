@@ -235,7 +235,7 @@ namespace aten {
 
 			if (fbo.isValid()) {
 				// Set FBO.
-				fbo.setFBO();
+				fbo.bindFBO();
 			}
 			else {
 				// Set default frame buffer.
@@ -289,7 +289,7 @@ namespace aten {
 
 			if (fbo.isValid()) {
 				// Set FBO.
-				fbo.setFBO();
+				fbo.bindFBO();
 			}
 			else {
 				// Set default frame buffer.

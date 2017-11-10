@@ -51,13 +51,13 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 				isect->mtrlid = prim.mtrlid;
 				isect->meshid = (int)attrib.w;
 
+				t_max = isect->t;
+
 				if (Type == idaten::IntersectType::Closer
 					|| Type == idaten::IntersectType::Any)
 				{
 					return true;
 				}
-
-				t_max = isect->t;
 			}
 		}
 		else {
@@ -149,13 +149,13 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 				isect->objid = (int)attrib.x;
 				isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
 
+				t_max = isect->t;
+
 				if (Type == idaten::IntersectType::Closer
 					|| Type == idaten::IntersectType::Any)
 				{
 					return true;
 				}
-
-				t_max = isect->t;
 			}
 		}
 		else {

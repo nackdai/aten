@@ -220,6 +220,9 @@
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\ssrt.h">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -397,6 +400,9 @@
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\directlight.cu">
+      <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\ssrt.cu">
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
   </ItemGroup>

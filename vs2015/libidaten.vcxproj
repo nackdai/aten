@@ -97,6 +97,7 @@
     <ClInclude Include="..\src\libidaten\kernel\raytracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\renderer.h" />
     <ClInclude Include="..\src\libidaten\kernel\sample_texture_impl.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\ssrt.h" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh" />
@@ -270,6 +271,14 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\ssrt.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>

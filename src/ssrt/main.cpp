@@ -29,7 +29,12 @@ static uint32_t g_threadnum = 1;
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::ThreadedBVH> g_scene;
+static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+
+static idaten::SSRT g_tracer;
+
+static int g_maxSamples = 1;
+static int g_maxBounce = 5;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -37,6 +42,7 @@ static int g_cntScreenShot = 0;
 
 static int g_frame = 0;
 
+#if 0
 void onRun()
 {
 	if (g_isCameraDirty) {
@@ -63,6 +69,73 @@ void onRun()
 
 	g_frame++;
 }
+#else
+void onRun()
+{
+	if (g_isCameraDirty) {
+		g_camera.update();
+
+		auto camparam = g_camera.param();
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		g_tracer.updateCamera(camparam);
+		g_isCameraDirty = false;
+
+		aten::visualizer::clear();
+	}
+
+	aten::timer timer;
+	timer.begin();
+
+	g_tracer.render(
+		WIDTH, HEIGHT,
+		g_maxSamples,
+		g_maxBounce);
+
+	auto cudaelapsed = timer.end();
+
+	aten::visualizer::render(false);
+
+	if (g_willTakeScreenShot)
+	{
+		static char buffer[1024];
+		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
+
+		aten::visualizer::takeScreenshot(buffer);
+
+		g_willTakeScreenShot = false;
+		g_cntScreenShot++;
+
+		AT_PRINTF("Take Screenshot[%s]\n", buffer);
+	}
+
+	if (g_willShowGUI)
+	{
+		ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", g_frame, 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("cuda : %.3f ms", cudaelapsed);
+		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+
+		int prevSamples = g_maxSamples;
+		int prevDepth = g_maxBounce;
+
+		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
+		ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
+
+		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
+			g_tracer.reset();
+		}
+
+		auto cam = g_camera.param();
+		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
+		ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
+
+		aten::window::drawImGui();
+	}
+
+	g_frame++;
+}
+#endif
 
 void onClose()
 {
@@ -193,6 +266,16 @@ int main()
 		onMouseWheel,
 		onKey);
 
+	aten::visualizer::init(WIDTH, HEIGHT);
+
+	aten::GammaCorrection gamma;
+	gamma.init(
+		WIDTH, HEIGHT,
+		"../shader/vs.glsl",
+		"../shader/gamma_fs.glsl");
+
+	aten::visualizer::addPostProc(&gamma);
+
 	aten::ResterizeRenderer::init(
 		WIDTH, HEIGHT,
 		"../shader/ssrt_vs.glsl",
@@ -213,6 +296,10 @@ int main()
 	Scene::makeScene(&g_scene);
 	g_scene.build();
 
+	idaten::Compaction::init(
+		WIDTH * HEIGHT,
+		1024);
+
 #ifdef ENABLE_ENVMAP
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
@@ -221,6 +308,64 @@ int main()
 
 	g_scene.addImageBasedLight(&ibl);
 #endif
+
+	{
+		std::vector<aten::GeomParameter> shapeparams;
+		std::vector<aten::PrimitiveParamter> primparams;
+		std::vector<aten::LightParameter> lightparams;
+		std::vector<aten::MaterialParameter> mtrlparms;
+		std::vector<aten::vertex> vtxparams;
+
+		aten::DataCollector::collect(
+			shapeparams,
+			primparams,
+			lightparams,
+			mtrlparms,
+			vtxparams);
+
+		std::vector<std::vector<aten::GPUBvhNode>>& nodes = g_scene.getAccel()->getNodes();
+		std::vector<aten::mat4>& mtxs = g_scene.getAccel()->getMatrices();
+
+		std::vector<idaten::TextureResource> tex;
+		{
+			auto texs = aten::texture::getTextures();
+
+			for (const auto t : texs) {
+				tex.push_back(
+					idaten::TextureResource(t->colors(), t->width(), t->height()));
+			}
+		}
+
+#ifdef ENABLE_ENVMAP
+		for (auto& l : lightparams) {
+			if (l.type == aten::LightType::IBL) {
+				l.envmap.idx = envmap->id();
+			}
+		}
+#endif
+
+		auto camparam = g_camera.param();
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		g_tracer.update(
+			aten::visualizer::getTexHandle(),
+			WIDTH, HEIGHT,
+			camparam,
+			shapeparams,
+			mtrlparms,
+			lightparams,
+			nodes,
+			primparams,
+			vtxparams,
+			mtxs,
+			tex,
+#ifdef ENABLE_ENVMAP
+			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+#else
+			idaten::EnvmapResource());
+#endif
+	}
 
 	aten::window::run(onRun);
 

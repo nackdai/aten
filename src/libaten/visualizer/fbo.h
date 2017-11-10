@@ -13,7 +13,11 @@ namespace aten {
 		virtual ~FBO() {}
 
 	public:
-		bool init(int width, int height, PixelFormat fmt);
+		bool init(
+			int width, 
+			int height, 
+			PixelFormat fmt,
+			bool needDepth = false);
 
 		bool isValid() const
 		{
@@ -22,7 +26,7 @@ namespace aten {
 
 		void bindAsTexture(uint32_t idx = 0);
 
-		void bindFBO();
+		void bindFBO(bool needDepth = false);
 
 		uint32_t getWidth() const
 		{

@@ -3,7 +3,11 @@
 #include "visualizer/fbo.h"
 
 namespace aten {
-	bool FBO::init(int width, int height, PixelFormat fmt)
+	bool FBO::init(
+		int width, 
+		int height, 
+		PixelFormat fmt,
+		bool needDepth/*= false*/)
 	{
 		if (m_fbo > 0) {
 			// TODO
@@ -40,25 +44,24 @@ namespace aten {
 				nullptr));
 		}
 
-#if 0
-		CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
-
-		for (int i = 0; i < m_num; i++) {
-			CALL_GL_API(glFramebufferTexture2D(
-				GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0 + i,
-				GL_TEXTURE_2D,
-				m_tex[i],
-				0));
-
-			m_comps.push_back(GL_COLOR_ATTACHMENT0 + i);
-		}
-
-		CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-#endif
-
 		m_width = width;
 		m_height = height;
+
+		if (needDepth) {
+			CALL_GL_API(::glGenTextures(1, &m_depth));
+		
+			CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_depth));
+
+			CALL_GL_API(::glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				GL_DEPTH_COMPONENT,
+				width, height,
+				0,
+				GL_DEPTH_COMPONENT,
+				GL_UNSIGNED_INT,
+				nullptr));
+		}
 
 		return true;
 	}
@@ -78,7 +81,7 @@ namespace aten {
 		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 	}
 
-	void FBO::bindFBO()
+	void FBO::bindFBO(bool needDepth/*= false*/)
 	{
 		AT_ASSERT(isValid());
 
@@ -103,6 +106,17 @@ namespace aten {
 		}
 
 		CALL_GL_API(glDrawBuffers(m_comps.size(), &m_comps[0]));
+
+		if (needDepth) {
+			AT_ASSERT(m_depth > 0);
+
+			CALL_GL_API(::glFramebufferTexture2D(
+				GL_FRAMEBUFFER,
+				GL_DEPTH_ATTACHMENT,
+				GL_TEXTURE_2D,
+				m_depth,
+				0));
+		}
 
 		//auto res = glCheckNamedFramebufferStatus(m_fbo, GL_FRAMEBUFFER);
 		//AT_ASSERT(res == GL_FRAMEBUFFER_COMPLETE);

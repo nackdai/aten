@@ -160,6 +160,7 @@ namespace AT_NAME
 
 		parent = _parent;
 		param.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
+		param.gemoid = parent->getGeomId();
 	}
 
 	void face::getSamplePosNormalArea(

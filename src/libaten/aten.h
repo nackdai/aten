@@ -62,6 +62,7 @@
 #include "visualizer/shader.h"
 #include "visualizer/blitter.h"
 #include "visualizer/RasterizeRenderer.h"
+#include "visualizer/fbo.h"
 
 #include "scene/scene.h"
 #include "scene/instance.h"

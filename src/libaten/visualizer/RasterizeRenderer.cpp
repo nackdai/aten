@@ -88,10 +88,8 @@ namespace aten {
 		}
 
 		if (fbo) {
-			// TODO
-			// Œ»Žž“_‚ÌFBO‚ÌŽÀ‘•‚ÍDepth‚ðŽ‚Â‚æ‚¤‚É‚È‚Á‚Ä‚¢‚È‚¢.
 			AT_ASSERT(fbo->isValid());
-			fbo->setFBO();
+			fbo->bindFBO(true);
 		}
 		else {
 			// Set default frame buffer.
@@ -105,7 +103,10 @@ namespace aten {
 
 		// Clear.
 		{
-			CALL_GL_API(::glClearColor(0.0f, 0.0f, 0.0f, 0.0f));
+			int iclr = -1;
+			float fclr = *(float*)&iclr;
+
+			CALL_GL_API(::glClearColor(fclr, fclr, fclr, fclr));
 			CALL_GL_API(::glClearDepthf(1.0f));
 			CALL_GL_API(::glClearStencil(0));
 			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));

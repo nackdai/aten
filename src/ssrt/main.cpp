@@ -33,6 +33,8 @@ static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::SSRT g_tracer;
 
+static aten::FBO g_fbo;
+
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
 
@@ -84,6 +86,12 @@ void onRun()
 
 		aten::visualizer::clear();
 	}
+
+	aten::ResterizeRenderer::draw(
+		g_frame,
+		&g_scene,
+		&g_camera,
+		&g_fbo);
 
 	aten::timer timer;
 	timer.begin();
@@ -282,6 +290,11 @@ int main()
 		"../shader/ssrt_gs.glsl",
 		"../shader/ssrt_fs.glsl");
 
+	g_fbo.init(
+		WIDTH, HEIGHT,
+		aten::PixelFormat::rgba32f,
+		true);
+
 	aten::vec3 pos, at;
 	real vfov;
 	Scene::getCameraPosAndAt(pos, at, vfov);
@@ -365,6 +378,8 @@ int main()
 #else
 			idaten::EnvmapResource());
 #endif
+
+		g_tracer.setGBuffer(g_fbo.getTexHandle());
 	}
 
 	aten::window::run(onRun);

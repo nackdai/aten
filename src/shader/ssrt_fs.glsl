@@ -7,6 +7,10 @@ in vec2 uv;
 in vec3 baryCentric;
 flat in ivec2 ids;	// x: objid, y: primid.
 
+// NOTE
+// x : objid
+// y : primid
+// zw : bary centroid
 layout(location = 0) out vec4 outColor;
 
 const vec3 clr[8] = {
@@ -22,6 +26,7 @@ const vec3 clr[8] = {
 
 void main()
 {
+#if 0
 	//outColor.xyz = normal * 0.5 + 0.5;
 	
 	//outColor.xyz = baryCentric;
@@ -29,4 +34,9 @@ void main()
 	outColor.xyz = clr[ids.y % 8];
 
 	outColor.w = 1.0;
+#else
+	outColor.x = intBitsToFloat(ids.x);
+	outColor.y = intBitsToFloat(ids.y);
+	outColor.zw = baryCentric.xy;
+#endif
 }

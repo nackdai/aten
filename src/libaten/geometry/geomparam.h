@@ -65,7 +65,7 @@ namespace aten
 			aten::vec4 v0;
 			struct {
 				int idx[3];
-				int mtrlid;
+				real area;
 			};
 		};
 		
@@ -73,8 +73,9 @@ namespace aten
 			aten::vec4 v1;
 			struct{
 				int needNormal;
-				real area;
-				real padding[2];
+				int mtrlid;
+				int gemoid;
+				real padding;
 			};
 		};
 

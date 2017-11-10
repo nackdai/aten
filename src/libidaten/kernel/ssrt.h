@@ -65,6 +65,8 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
+		void setGBuffer(GLuint gltex);
+
 	protected:
 		virtual void onGenPath(
 			int width, int height,
@@ -74,6 +76,7 @@ namespace idaten
 
 		virtual void onHitTest(
 			int width, int height,
+			int bounce,
 			cudaTextureObject_t texVtxPos);
 
 		virtual void onShadeMiss(
@@ -104,6 +107,8 @@ namespace idaten
 
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
 		idaten::TypedCudaMemory<unsigned int> m_random;
+
+		idaten::CudaGLSurface m_gbuffer;
 
 		uint32_t m_frame{ 1 };
 	};

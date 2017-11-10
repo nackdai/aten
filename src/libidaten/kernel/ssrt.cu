@@ -182,11 +182,14 @@ __global__ void hitTest(
 	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (idx >= width * height) {
+	if (ix >= width && iy >= height) {
 		return;
 	}
+
+	const auto idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 	path.isHit = false;

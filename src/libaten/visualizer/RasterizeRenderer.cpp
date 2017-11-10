@@ -98,7 +98,7 @@ namespace aten {
 
 		{
 			CALL_GL_API(::glEnable(GL_DEPTH_TEST));
-			CALL_GL_API(::glEnable(GL_CULL_FACE));
+			//CALL_GL_API(::glEnable(GL_CULL_FACE));
 		}
 
 		// Clear.

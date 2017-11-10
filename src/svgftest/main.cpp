@@ -27,8 +27,6 @@ static uint32_t g_threadnum = 8;
 static uint32_t g_threadnum = 1;
 #endif
 
-static aten::Film g_buffer(WIDTH, HEIGHT);
-
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
@@ -81,7 +79,6 @@ void onRun()
 	timer.begin();
 
 	g_tracer.render(
-		g_buffer.image(),
 		WIDTH, HEIGHT,
 		g_maxSamples,
 		g_maxBounce);

@@ -849,7 +849,6 @@ namespace idaten {
 	static bool doneSetStackSize = false;
 
 	void PathTracing::render(
-		aten::vec4* image,
 		int width, int height,
 		int maxSamples,
 		int maxBounce)

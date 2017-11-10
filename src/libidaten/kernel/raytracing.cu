@@ -338,7 +338,6 @@ namespace idaten {
 	}
 
 	void RayTracing::render(
-		aten::vec4* image,
 		int width, int height,
 		int maxSamples,
 		int maxBounce)

@@ -224,7 +224,7 @@ namespace aten {
 				CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
 				// Set FBO as source texture.
-				fbo.setAsTexture();
+				fbo.bindAsTexture();
 			}
 
 			postproc->prepareRender(prevPostproc, pixels, willRevert);
@@ -278,7 +278,7 @@ namespace aten {
 				CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
 				// Set FBO as source texture.
-				fbo.setAsTexture();
+				fbo.bindAsTexture();
 			}
 
 			postproc->prepareRender(prevPostproc, nullptr, willRevert);

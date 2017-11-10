@@ -20,7 +20,7 @@ namespace aten {
 			return (m_fbo > 0);
 		}
 
-		void setAsTexture(uint32_t idx = 0);
+		void bindAsTexture(uint32_t idx = 0);
 
 		void setFBO();
 

@@ -63,7 +63,7 @@ namespace aten {
 		return true;
 	}
 
-	void FBO::setAsTexture(uint32_t idx/*= 0*/)
+	void FBO::bindAsTexture(uint32_t idx/*= 0*/)
 	{
 		AT_ASSERT(m_tex[idx] > 0);
 

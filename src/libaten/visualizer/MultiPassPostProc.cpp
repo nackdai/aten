@@ -14,7 +14,7 @@ namespace aten {
 				prevPass = m_passes[i - 1];
 
 				// Set FBO as source texture.
-				prevPass->getFbo().setAsTexture();
+				prevPass->getFbo().bindAsTexture();
 			}
 
 			pass->prepareRender(prevPass, pixels, revert);

@@ -145,6 +145,7 @@ inline __device__ float gaussFilter3x3(
 
 	int pos = 0;
 
+#pragma unroll
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
 			int xx = clamp(ix + x, 0, w - 1);

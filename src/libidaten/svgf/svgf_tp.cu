@@ -134,6 +134,7 @@ __global__ void temporalReprojection(
 
 	aten::vec4 centerPrevPos;
 
+#pragma unroll
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
 			int xx = clamp(ix + x, 0, width - 1);

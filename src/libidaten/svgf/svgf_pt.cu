@@ -169,7 +169,15 @@ __global__ void hitTest(
 
 		aten::Intersection isect;
 
-		bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
+		float t_max = AT_MATH_INF;
+
+		if (bounce >= 1
+			&& !path.isSingular)
+		{
+			t_max = hitDistLimit;
+		}
+
+		bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
 
 		isects[idx].t = isect.t;
 		isects[idx].objid = isect.objid;
@@ -223,7 +231,15 @@ __global__ void hitTest(
 
 	aten::Intersection isect;
 
-	bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
+	float t_max = AT_MATH_INF;
+
+	if (bounce >= 1
+		&& !path.isSingular)
+	{
+		t_max = hitDistLimit;
+	}
+
+	bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
 
 	isects[idx].t = isect.t;
 	isects[idx].objid = isect.objid;

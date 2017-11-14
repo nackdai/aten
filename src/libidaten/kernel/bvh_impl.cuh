@@ -177,10 +177,10 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 AT_CUDA_INLINE __device__ bool intersectBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	float t_max/*= AT_MATH_INF*/)
 {
 	float t_min = AT_MATH_EPSILON;
-	float t_max = AT_MATH_INF;
 
 	bool isHit = intersectBVH<idaten::IntersectType::Closest>(
 		ctxt->nodes[0],

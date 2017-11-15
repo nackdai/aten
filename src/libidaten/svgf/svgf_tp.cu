@@ -518,6 +518,10 @@ namespace idaten
 		auto& curaov = getCurAovs();
 		auto& prevaov = getPrevAovs();
 
+		// NOTE
+		// V2Cは aspect、fov、near、far から計算される.
+		// 基本的にはこれらの値は変わらないので、current、prevに 関係なく利用できる.
+
 		aten::mat4 mtxs[] = {
 			m_mtxC2V,
 			m_mtxV2W,

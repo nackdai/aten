@@ -5,6 +5,7 @@ precision highp int;
 in vec3 normal;
 in vec2 uv;
 in vec3 baryCentric;
+in float depth;
 flat in ivec2 ids;	// x: objid, y: primid.
 
 // NOTE
@@ -12,6 +13,7 @@ flat in ivec2 ids;	// x: objid, y: primid.
 // y : primid
 // zw : bary centroid
 layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outDepth;
 
 const vec3 clr[8] = {
 	vec3(0, 0, 0),
@@ -38,5 +40,7 @@ void main()
 	outColor.x = intBitsToFloat(ids.x);
 	outColor.y = intBitsToFloat(ids.y);
 	outColor.zw = baryCentric.xy;
+
+	outDepth = vec4(depth, 1, 1, 1);
 #endif
 }

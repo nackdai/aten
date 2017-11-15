@@ -169,6 +169,273 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 	}
 }
 
+inline __device__ bool intersectsDepthBuffer(float z, float minZ, float maxZ, float zThickness)
+{
+	// 指定範囲内（レイの始点と終点）に z があれば、それはレイにヒットしたとみなせる.
+	z += zThickness;
+	return (maxZ >= z) && (minZ - zThickness <= z);
+}
+
+inline __device__ bool traceScreenSpaceRay(
+	cudaSurfaceObject_t depth,
+	const aten::vec3& csOrig,
+	const aten::vec3& csDir,
+	const aten::mat4& mtxV2C,
+	int width, int height,
+	float nearPlaneZ,
+	float stride,
+	float jitter,
+	aten::vec3& hitPixel)
+{
+	static const float zThickness = 1.0f;
+	static const float maxDistance = 1000.0f;
+
+	// Clip to the near plane.
+	float rayLength = (csOrig.z + csDir.z * maxDistance) > -nearPlaneZ
+		? (nearPlaneZ - csOrig.z) / csDir.z
+		: maxDistance;
+
+	aten::vec3 csEndPoint = csOrig + csDir * rayLength;
+
+	// Project into homogeneous clip space.
+	aten::vec4 H0 = mtxV2C.apply(aten::vec4(csOrig, 1));
+	aten::vec4 H1 = mtxV2C.apply(aten::vec4(csEndPoint, 1));
+
+	float k0 = 1.0 / H0.w;
+	float k1 = 1.0 / H1.w;
+
+	// The interpolated homogeneous version of the camera-space points.
+	aten::vec3 Q0 = csOrig * k0;
+	aten::vec3 Q1 = csEndPoint * k1;
+
+	// Screen space point.
+	aten::vec3 P0 = H0 * k0;
+	aten::vec3 P1 = H1 * k1;
+
+	// [-1, 1] -> [0, 1]
+	P0 = P0 * 0.5f + 0.5f;
+	P1 = P1 * 0.5f + 0.5f;
+
+	P0.x *= width;
+	P0.y *= height;
+	P0.z = 0.0f;
+
+	P1.x *= width;
+	P1.y *= height;
+	P1.z = 0.0f;
+
+	// If the line is degenerate, make it cover at least one pixel to avoid handling zero-pixel extent as a special case later.
+	// 2点間の距離がある程度離れるようにする.
+	P1 += aten::squared_length(P0 - P1) < 0.0001f
+		? aten::vec3(0.01f)
+		: aten::vec3(0.0f);
+	aten::vec3 delta = P1 - P0;
+
+	// Permute so that the primary iteration is in x to collapse all quadrant-specific DDA cases later.
+	bool permute = false;
+	if (abs(delta.x) < abs(delta.y))
+	{
+		permute = true;
+
+		aten::swapVal(delta.x, delta.y);
+		aten::swapVal(P0.x, P0.y);
+		aten::swapVal(P1.x, P1.y);
+	}
+
+	float stepDir = 0.0f;
+	if (delta.x < 0.0f) {
+		stepDir = -1.0f;
+	}
+	else if (delta.x > 0.0f) {
+		stepDir = 1.0f;
+	}
+	float invdx = stepDir / delta.x;
+
+	// Track the derivatives of Q and k.
+	aten::vec3 dQ = (Q1 - Q0) * invdx;
+	float dk = (k1 - k0) * invdx;
+
+	// y is slope.
+	// slope = (y1 - y0) / (x1 - x0)
+	aten::vec3 dP = aten::vec3(stepDir, delta.y * invdx, 0.0f);
+
+	// Adjust end condition for iteration direction
+	float end = P1.x * stepDir;
+
+	int stepCount = 0;
+
+	float prevZMaxEstimate = -csOrig.z;
+
+	float rayZMin = prevZMaxEstimate;
+	float rayZMax = prevZMaxEstimate;
+
+	float sceneZMax = rayZMax + 100.0f;
+
+	dP *= stride;
+	dQ *= stride;
+	dk *= stride;
+
+	P0 += dP * jitter;
+	Q0 += dQ * jitter;
+	k0 += dk * jitter;
+
+	aten::vec4 PQk = aten::vec4(P0.x, P0.y, Q0.z, k0);
+	aten::vec4 dPQk = aten::vec4(dP.x, dP.y, dQ.z, dk);
+	aten::vec3 Q = Q0;
+
+	static const int maxSteps = 50;
+
+	for (;
+		((PQk.x * stepDir) <= end)	// 終点に到達したか.
+		&& (stepCount < maxSteps)	// 最大処理数に到達したか.
+		&& (sceneZMax != 0.0);	// 何もないところに到達してないか.
+		++stepCount)
+	{
+		// 前回のZの最大値が次の最小値になる.
+		rayZMin = prevZMaxEstimate;
+
+		// 次のZの最大値を計算する.
+		// ただし、1/2 pixel分 余裕を持たせる.
+		// Qはw成分で除算されていて、そこに1/wで除算するので、元（View座標系）に戻ることになる.
+		rayZMax = -(PQk.z + dPQk.z * 0.5) / (PQk.w + dPQk.w * 0.5);
+
+		// 次に向けて最大値を保持.
+		prevZMaxEstimate = rayZMax;
+
+		if (rayZMin > rayZMax) {
+			// 念のため.
+			float tmp = rayZMin;
+			rayZMin = rayZMax;
+			rayZMax = tmp;
+		}
+
+		hitPixel = permute ? aten::vec3(PQk.y, PQk.x, 0.0f) : aten::vec3(PQk.x, PQk.y, 0.0f);
+
+		int ix = (int)hitPixel.x;
+		int iy = (int)hitPixel.y;
+
+		if (ix < 0 || ix >= width || iy < 0 || iy >= height) {
+			return false;
+		}
+
+		// シーン内の現時点での深度値を取得.
+		float4 data;
+		surf2Dread(&data, depth, ix * sizeof(float4), iy);
+
+		sceneZMax = data.x;
+
+		if (intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness)) {
+			break;
+		}
+
+		PQk += dPQk;
+	}
+
+	if (sceneZMax <= 0) {
+		return false;
+	}
+	return intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
+}
+
+__global__ void hitTestPrimaryRayInScreenSpaceEx(
+	cudaSurfaceObject_t gbuffer,
+	cudaSurfaceObject_t depth,
+	idaten::SSRT::Path* paths,
+	aten::Intersection* isects,
+	int* hitbools,
+	int width, int height,
+	const aten::vec4 camPos,
+	float cameraNearPlaneZ,
+	const aten::mat4 mtxW2V,
+	const aten::mat4 mtxV2C,
+	const aten::ray* __restrict__ rays,
+	const aten::GeomParameter* __restrict__ geoms,
+	const aten::PrimitiveParamter* __restrict__ prims,
+	const aten::mat4* __restrict__ matrices,
+	cudaTextureObject_t vtxPos,
+	cudaTextureObject_t vtxNml)
+{
+	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if (ix >= width && iy >= height) {
+		return;
+	}
+
+	const auto idx = getIdx(ix, iy, width);
+
+	auto& path = paths[idx];
+	path.isHit = false;
+
+	hitbools[idx] = 0;
+
+	if (path.isTerminate) {
+		return;
+	}
+
+	// Sample data from texture.
+	float4 data;
+	surf2Dread(&data, gbuffer, ix * sizeof(float4), iy);
+
+	// NOTE
+	// x : objid
+	// y : primid
+	// zw : bary centroid
+
+	int objid = __float_as_int(data.x);
+	int primid = __float_as_int(data.y);
+
+	isects[idx].objid = objid;
+	isects[idx].primid = primid;
+
+	// bary centroid.
+	isects[idx].a = data.z;
+	isects[idx].b = data.w;
+
+	if (objid >= 0) {
+		aten::vec3 vsOrig(0);	// カメラからのレイなので.
+		aten::vec3 vsDir = mtxW2V.apply(rays[idx].dir);
+
+		// TODO
+		static const float stride = 5.0f;
+
+		float c = (ix + iy) * 0.25f;
+		float jitter = stride > 1.0f ? fmod(c, 1.0f) : 0.0f;
+
+		aten::vec3 hitPixel(0);
+
+		bool isIntersect = traceScreenSpaceRay(
+			depth,
+			vsOrig, vsDir,
+			mtxV2C,
+			width, height,
+			cameraNearPlaneZ,
+			stride, jitter,
+			hitPixel);
+
+		int x = (int)hitPixel.x;
+		int y = (int)hitPixel.y;
+
+		isIntersect = (0 <= x && x < width && 0 <= y && y < height);
+
+		if (isIntersect) {
+			path.isHit = true;
+			hitbools[idx] = 1;
+
+			aten::PrimitiveParamter prim;
+			prim.v0 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 0];
+			prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
+
+			isects[idx].mtrlid = prim.mtrlid;
+			isects[idx].meshid = prim.gemoid;
+		}
+	}
+	else {
+		path.isHit = false;
+		hitbools[idx] = 0;
+	}
+}
+
 __global__ void hitTest(
 	idaten::SSRT::Path* paths,
 	aten::Intersection* isects,
@@ -762,9 +1029,12 @@ namespace idaten {
 		m_random.writeByNum(&r[0], width * height);
 	}
 
-	void SSRT::setGBuffer(GLuint gltex)
+	void SSRT::setGBuffer(
+		GLuint gltexGbuffer,
+		GLuint gltexDepth)
 	{
-		m_gbuffer.init(gltex, idaten::CudaGLRscRegisterType::ReadOnly);
+		m_gbuffer.init(gltexGbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
+		m_depth.init(gltexDepth, idaten::CudaGLRscRegisterType::ReadOnly);
 	}
 
 	static bool doneSetStackSize = false;
@@ -837,7 +1107,8 @@ namespace idaten {
 				onHitTest(
 					width, height,
 					bounce,
-					vtxTexPos);
+					vtxTexPos,
+					vtxTexNml);
 				
 				onShadeMiss(width, height, bounce);
 
@@ -913,7 +1184,8 @@ namespace idaten {
 	void SSRT::onHitTest(
 		int width, int height,
 		int bounce,
-		cudaTextureObject_t texVtxPos)
+		cudaTextureObject_t texVtxPos,
+		cudaTextureObject_t texVtxNml)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -921,6 +1193,7 @@ namespace idaten {
 			(height + block.y - 1) / block.y);
 
 		if (bounce == 0) {
+#if 0
 			aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
 
 			CudaGLResourceMap rscmap(&m_gbuffer);
@@ -939,6 +1212,43 @@ namespace idaten {
 				texVtxPos);
 
 			checkCudaKernel(hitTestPrimaryRayInScreenSpace);
+#else
+			aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
+
+			aten::mat4 mtxW2V;
+			aten::mat4 mtxV2C;
+
+			mtxW2V.lookat(
+				m_camParam.origin,
+				m_camParam.center,
+				m_camParam.up);
+
+			mtxV2C.perspective(
+				m_camParam.znear,
+				m_camParam.zfar,
+				m_camParam.vfov,
+				m_camParam.aspect);
+
+			CudaGLResourceMap rscmapGbuffer(&m_gbuffer);
+			CudaGLResourceMap rscmapDepth(&m_depth);
+			auto gbuffer = m_gbuffer.bind();
+			auto depth = m_depth.bind();
+
+			hitTestPrimaryRayInScreenSpaceEx << <grid, block >> > (
+				gbuffer, depth,
+				m_paths.ptr(),
+				m_isects.ptr(),
+				m_hitbools.ptr(),
+				width, height,
+				campos, m_camParam.znear,
+				mtxW2V, mtxV2C,
+				m_rays.ptr(),
+				m_shapeparam.ptr(),
+				m_primparams.ptr(),
+				m_mtxparams.ptr(),
+				texVtxPos,
+				texVtxNml);
+#endif
 		}
 		else {
 			hitTest << <grid, block >> > (

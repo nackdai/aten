@@ -132,6 +132,14 @@ namespace aten {
 		return AT_MATH_FUNC(::ceil, f);
 	}
 
+	template <typename T>
+	inline AT_DEVICE_API void swapVal(T& a, T& b)
+	{
+		T tmp = a;
+		a = b;
+		b = tmp;
+	}
+
 #ifdef __CUDACC__
 	template <typename T>
 	inline AT_DEVICE_API T cmpMax(T a, T b)

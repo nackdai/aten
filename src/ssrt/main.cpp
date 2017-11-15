@@ -290,6 +290,7 @@ int main()
 		"../shader/ssrt_gs.glsl",
 		"../shader/ssrt_fs.glsl");
 
+	g_fbo.asMulti(2);
 	g_fbo.init(
 		WIDTH, HEIGHT,
 		aten::PixelFormat::rgba32f,
@@ -379,7 +380,9 @@ int main()
 			idaten::EnvmapResource());
 #endif
 
-		g_tracer.setGBuffer(g_fbo.getTexHandle());
+		g_tracer.setGBuffer(
+			g_fbo.getTexHandle(0),
+			g_fbo.getTexHandle(1));
 	}
 
 	aten::window::run(onRun);

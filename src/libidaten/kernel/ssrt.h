@@ -65,7 +65,9 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
-		void setGBuffer(GLuint gltex);
+		void setGBuffer(
+			GLuint gltexGbuffer,
+			GLuint gltexDepth);
 
 	protected:
 		virtual void onGenPath(
@@ -77,7 +79,8 @@ namespace idaten
 		virtual void onHitTest(
 			int width, int height,
 			int bounce,
-			cudaTextureObject_t texVtxPos);
+			cudaTextureObject_t texVtxPos,
+			cudaTextureObject_t texVtxNml);
 
 		virtual void onShadeMiss(
 			int width, int height,
@@ -109,6 +112,7 @@ namespace idaten
 		idaten::TypedCudaMemory<unsigned int> m_random;
 
 		idaten::CudaGLSurface m_gbuffer;
+		idaten::CudaGLSurface m_depth;
 
 		uint32_t m_frame{ 1 };
 	};

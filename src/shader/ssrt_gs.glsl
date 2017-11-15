@@ -17,6 +17,7 @@ in vec2 vUV[3];
 out vec3 normal;
 out vec2 uv;
 out vec3 baryCentric;
+out float depth;
 flat out ivec2 ids;
 
 // TODO
@@ -33,6 +34,8 @@ void main()
 {
 	for (int i = 0; i < gl_in.length(); i++) {
 		gl_Position = mtxOffset * mtxW2C * gl_in[i].gl_Position;
+
+		depth = gl_Position.w;
 		
 		normal = worldNormal[i];
 		uv = vUV[i];

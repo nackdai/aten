@@ -36,7 +36,7 @@ static idaten::SSRT g_tracer;
 static aten::FBO g_fbo;
 
 static int g_maxSamples = 1;
-static int g_maxBounce = 5;
+static int g_maxBounce = 2;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;

@@ -187,19 +187,31 @@ inline __device__ bool traceScreenSpaceRay(
 	float jitter,
 	aten::vec3& hitPixel)
 {
-	static const float zThickness = 1.0f;
+	static const float zThickness = 0.1f;
 	static const float maxDistance = 1000.0f;
 
 	// Clip to the near plane.
 	float rayLength = (csOrig.z + csDir.z * maxDistance) > -nearPlaneZ
-		? (nearPlaneZ - csOrig.z) / csDir.z
+		? (-nearPlaneZ - csOrig.z) / csDir.z
 		: maxDistance;
 
 	aten::vec3 csEndPoint = csOrig + csDir * rayLength;
 
+#if 0
+	printf("rayLenght : %f = (%f - %f) / %f\n", rayLength, nearPlaneZ, csOrig.z, csDir.z);
+	printf("dir : %f, %f, %f\n", csDir.x, csDir.y, csDir.z);
+	printf("org : %f, %f, %f\n", csOrig.x, csOrig.y, csOrig.z);
+	printf("end : %f, %f, %f\n", csEndPoint.x, csEndPoint.y, csEndPoint.z);
+#endif
+
 	// Project into homogeneous clip space.
 	aten::vec4 H0 = mtxV2C.apply(aten::vec4(csOrig, 1));
 	aten::vec4 H1 = mtxV2C.apply(aten::vec4(csEndPoint, 1));
+
+#if 0
+	printf("H0 : %f, %f, %f, %f\n", H0.x, H0.y, H0.z, H0.w);
+	printf("H1 : %f, %f, %f, %f\n", H1.x, H1.y, H1.z, H1.w);
+#endif
 
 	float k0 = 1.0 / H0.w;
 	float k1 = 1.0 / H1.w;
@@ -216,6 +228,11 @@ inline __device__ bool traceScreenSpaceRay(
 	P0 = P0 * 0.5f + 0.5f;
 	P1 = P1 * 0.5f + 0.5f;
 
+#if 0
+	printf("P0 : %f, %f, %f\n", P0.x, P0.y, P0.z);
+	printf("P1 : %f, %f, %f\n", P1.x, P1.y, P1.z);
+#endif
+
 	P0.x *= width;
 	P0.y *= height;
 	P0.z = 0.0f;
@@ -223,6 +240,10 @@ inline __device__ bool traceScreenSpaceRay(
 	P1.x *= width;
 	P1.y *= height;
 	P1.z = 0.0f;
+
+#if 0
+	printf("[%f, %f] -> [%f, %f]\n", P0.x, P0.y, P1.x, P1.y);
+#endif
 
 	// If the line is degenerate, make it cover at least one pixel to avoid handling zero-pixel extent as a special case later.
 	// 2点間の距離がある程度離れるようにする.
@@ -334,7 +355,15 @@ inline __device__ bool traceScreenSpaceRay(
 	if (sceneZMax <= 0) {
 		return false;
 	}
-	return intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
+	auto isect = intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
+
+#if 0
+	printf("[%d]%f, %f, %f\n", stepCount, sceneZMax, rayZMin, rayZMax);
+	printf("(%s)%d, %d\n", isect ? "true" : "false", (int)hitPixel.x, (int)hitPixel.x);
+	printf("=======\n");
+#endif
+
+	return isect;
 }
 
 __global__ void hitTestPrimaryRayInScreenSpaceEx(
@@ -344,7 +373,6 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	aten::Intersection* isects,
 	int* hitbools,
 	int width, int height,
-	const aten::vec4 camPos,
 	float cameraNearPlaneZ,
 	const aten::mat4 mtxW2V,
 	const aten::mat4 mtxV2C,
@@ -352,11 +380,14 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	const aten::GeomParameter* __restrict__ geoms,
 	const aten::PrimitiveParamter* __restrict__ prims,
 	const aten::mat4* __restrict__ matrices,
+	cudaTextureObject_t* nodes,
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	//int ix = 136;
+	//int iy = 512 - 388;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -373,66 +404,93 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 		return;
 	}
 
-	// Sample data from texture.
-	float4 data;
-	surf2Dread(&data, gbuffer, ix * sizeof(float4), iy);
+	aten::vec3 vsOrig = mtxW2V.apply(rays[idx].org);
+	aten::vec3 vsDir = normalize(mtxW2V.applyXYZ(rays[idx].dir));
 
-	// NOTE
-	// x : objid
-	// y : primid
-	// zw : bary centroid
+	// TODO
+	static const float stride = 5.0f;
 
-	int objid = __float_as_int(data.x);
-	int primid = __float_as_int(data.y);
+	float c = (ix + iy) * 0.25f;
+	float jitter = stride > 1.0f ? fmod(c, 1.0f) : 0.0f;
 
-	isects[idx].objid = objid;
-	isects[idx].primid = primid;
+	aten::vec3 hitPixel(0);
 
-	// bary centroid.
-	isects[idx].a = data.z;
-	isects[idx].b = data.w;
+	bool isIntersect = traceScreenSpaceRay(
+		depth,
+		vsOrig, vsDir,
+		mtxV2C,
+		width, height,
+		cameraNearPlaneZ,
+		stride, jitter,
+		hitPixel);
 
-	if (objid >= 0) {
-		aten::vec3 vsOrig(0);	// カメラからのレイなので.
-		aten::vec3 vsDir = mtxW2V.apply(rays[idx].dir);
+	int x = (int)hitPixel.x;
+	int y = (int)hitPixel.y;
 
-		// TODO
-		static const float stride = 5.0f;
+	isIntersect = isIntersect && (0 <= x && x < width && 0 <= y && y < height);
 
-		float c = (ix + iy) * 0.25f;
-		float jitter = stride > 1.0f ? fmod(c, 1.0f) : 0.0f;
+	int objid = -1;
+	int primid = -1;
 
-		aten::vec3 hitPixel(0);
+	if (isIntersect) {
+		// Sample data from texture.
+		float4 data;
+		surf2Dread(&data, gbuffer, ix * sizeof(float4), iy);
 
-		bool isIntersect = traceScreenSpaceRay(
-			depth,
-			vsOrig, vsDir,
-			mtxV2C,
-			width, height,
-			cameraNearPlaneZ,
-			stride, jitter,
-			hitPixel);
+		// NOTE
+		// x : objid
+		// y : primid
+		// zw : bary centroid
 
-		int x = (int)hitPixel.x;
-		int y = (int)hitPixel.y;
+		int objid = __float_as_int(data.x);
+		int primid = __float_as_int(data.y);
 
-		isIntersect = (0 <= x && x < width && 0 <= y && y < height);
+		isects[idx].objid = objid;
+		isects[idx].primid = primid;
 
-		if (isIntersect) {
-			path.isHit = true;
-			hitbools[idx] = 1;
+		// bary centroid.
+		isects[idx].a = data.z;
+		isects[idx].b = data.w;
 
-			aten::PrimitiveParamter prim;
-			prim.v0 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 0];
-			prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
+		isIntersect = (objid >= 0);
+	}
 
-			isects[idx].mtrlid = prim.mtrlid;
-			isects[idx].meshid = prim.gemoid;
-		}
+	if (isIntersect) {
+		aten::PrimitiveParamter prim;
+		prim.v0 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 0];
+		prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
+
+		isects[idx].mtrlid = prim.mtrlid;
+		isects[idx].meshid = prim.gemoid;
+
+		path.isHit = true;
+		hitbools[idx] = 1;
 	}
 	else {
-		path.isHit = false;
-		hitbools[idx] = 0;
+		Context ctxt;
+		{
+			ctxt.shapes = geoms;
+			ctxt.nodes = nodes;
+			ctxt.prims = prims;
+			ctxt.vtxPos = vtxPos;
+			ctxt.matrices = matrices;
+		}
+
+		aten::Intersection isect;
+
+		bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
+
+		isects[idx].t = isect.t;
+		isects[idx].objid = isect.objid;
+		isects[idx].mtrlid = isect.mtrlid;
+		isects[idx].meshid = isect.meshid;
+		isects[idx].primid = isect.primid;
+		isects[idx].a = isect.a;
+		isects[idx].b = isect.b;
+
+		path.isHit = isHit;
+
+		hitbools[idx] = isHit ? 1 : 0;
 	}
 }
 
@@ -483,7 +541,7 @@ __global__ void hitTest(
 
 	bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
 
-	isects[idx].t = isect.t;
+	//isects[idx].t = isect.t;
 	isects[idx].objid = isect.objid;
 	isects[idx].mtrlid = isect.mtrlid;
 	isects[idx].meshid = isect.meshid;
@@ -1193,7 +1251,6 @@ namespace idaten {
 			(height + block.y - 1) / block.y);
 
 		if (bounce == 0) {
-#if 0
 			aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
 
 			CudaGLResourceMap rscmap(&m_gbuffer);
@@ -1212,9 +1269,24 @@ namespace idaten {
 				texVtxPos);
 
 			checkCudaKernel(hitTestPrimaryRayInScreenSpace);
-#else
-			aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
+		}
+		else {
+#if 0
+			hitTest << <grid, block >> > (
+				m_paths.ptr(),
+				m_isects.ptr(),
+				m_rays.ptr(),
+				m_hitbools.ptr(),
+				width, height,
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
+				texVtxPos,
+				m_mtxparams.ptr());
 
+			checkCudaKernel(hitTest);
+#else
 			aten::mat4 mtxW2V;
 			aten::mat4 mtxV2C;
 
@@ -1235,36 +1307,24 @@ namespace idaten {
 			auto depth = m_depth.bind();
 
 			hitTestPrimaryRayInScreenSpaceEx << <grid, block >> > (
+			//hitTestPrimaryRayInScreenSpaceEx << <1, 1 >> > (
 				gbuffer, depth,
 				m_paths.ptr(),
 				m_isects.ptr(),
 				m_hitbools.ptr(),
 				width, height,
-				campos, m_camParam.znear,
+				m_camParam.znear,
 				mtxW2V, mtxV2C,
 				m_rays.ptr(),
 				m_shapeparam.ptr(),
 				m_primparams.ptr(),
 				m_mtxparams.ptr(),
+				m_nodetex.ptr(),
 				texVtxPos,
 				texVtxNml);
-#endif
-		}
-		else {
-			hitTest << <grid, block >> > (
-				m_paths.ptr(),
-				m_isects.ptr(),
-				m_rays.ptr(),
-				m_hitbools.ptr(),
-				width, height,
-				m_shapeparam.ptr(), m_shapeparam.num(),
-				m_lightparam.ptr(), m_lightparam.num(),
-				m_nodetex.ptr(),
-				m_primparams.ptr(),
-				texVtxPos,
-				m_mtxparams.ptr());
 
-			checkCudaKernel(hitTest);
+			checkCudaKernel(hitTestPrimaryRayInScreenSpaceEx);
+#endif
 		}
 	}
 

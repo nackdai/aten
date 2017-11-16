@@ -34,12 +34,6 @@ __device__ bool hitAABB(
 	aten::vec3 org,
 	aten::vec3 dir,
 	float4 boxmin, float4 boxmax,
-	real t_min, real t_max);
-
-__device__ bool hitAABB(
-	aten::vec3 org,
-	aten::vec3 dir,
-	float4 boxmin, float4 boxmax,
 	real t_min, real t_max,
 	real* t_result);
 

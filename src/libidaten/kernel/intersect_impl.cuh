@@ -265,11 +265,12 @@ inline __device__ float min3(float a, float b, float c)
 	return min(min(a, b), c);
 }
 
-inline __device__ float2 _hitAABB(
+AT_CUDA_INLINE __device__ bool hitAABB(
 	aten::vec3 org,
 	aten::vec3 dir,
 	float4 boxmin, float4 boxmax,
-	real t_min, real t_max)
+	real t_min, real t_max,
+	real* t_result)
 {
 	float4 invdir = make_float4(1.0f / (dir.x + 1e-6f), 1.0f / (dir.y + 1e-6f), 1.0f / (dir.z + 1e-6f), 1.0f);
 
@@ -285,32 +286,9 @@ inline __device__ float2 _hitAABB(
 	const float t1 = min(min3(tmax.x, tmax.y, tmax.z), t_max);
 	const float t0 = max(max3(tmin.x, tmin.y, tmin.z), t_min);
 
-	return make_float2(t0, t1);
-}
+	*t_result = t0;
 
-AT_CUDA_INLINE __device__ bool hitAABB(
-	aten::vec3 org,
-	aten::vec3 dir,
-	float4 boxmin, float4 boxmax,
-	real t_min, real t_max)
-{
-	auto s = _hitAABB(org, dir, boxmin, boxmax, t_min, t_max);
-
-	return s.x <= s.y;
-}
-
-AT_CUDA_INLINE __device__ bool hitAABB(
-	aten::vec3 org,
-	aten::vec3 dir,
-	float4 boxmin, float4 boxmax,
-	real t_min, real t_max,
-	real* t_result)
-{
-	auto s = _hitAABB(org, dir, boxmin, boxmax, t_min, t_max);
-
-	*t_result = s.x;
-
-	return s.x <= s.y;
+	return t0 <= t1;
 }
 
 AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(

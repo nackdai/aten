@@ -19,6 +19,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 	float4 boxmin;
 	float4 boxmax;
 
+	float t = AT_MATH_INF;
+
 	isect->t = t_max;
 
 	while (nodeid >= 0) {
@@ -61,8 +63,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 			}
 		}
 		else {
-			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max);
-			isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max);
+			isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
 		}
 
 		if (isHit) {

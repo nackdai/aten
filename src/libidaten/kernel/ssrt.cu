@@ -18,6 +18,8 @@
 
 #define SEPARATE_SHADOWRAY_HITTEST
 
+//#define DUMP_DEBUG_LOG
+
 //#define ENABLE_PROGRESSIVE
 
 __global__ void genPath(
@@ -197,7 +199,7 @@ inline __device__ bool traceScreenSpaceRay(
 
 	aten::vec3 csEndPoint = csOrig + csDir * rayLength;
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("rayLenght : %f = (%f - %f) / %f\n", rayLength, nearPlaneZ, csOrig.z, csDir.z);
 	printf("dir : %f, %f, %f\n", csDir.x, csDir.y, csDir.z);
 	printf("org : %f, %f, %f\n", csOrig.x, csOrig.y, csOrig.z);
@@ -208,7 +210,7 @@ inline __device__ bool traceScreenSpaceRay(
 	aten::vec4 H0 = mtxV2C.apply(aten::vec4(csOrig, 1));
 	aten::vec4 H1 = mtxV2C.apply(aten::vec4(csEndPoint, 1));
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("H0 : %f, %f, %f, %f\n", H0.x, H0.y, H0.z, H0.w);
 	printf("H1 : %f, %f, %f, %f\n", H1.x, H1.y, H1.z, H1.w);
 #endif
@@ -228,7 +230,7 @@ inline __device__ bool traceScreenSpaceRay(
 	P0 = P0 * 0.5f + 0.5f;
 	P1 = P1 * 0.5f + 0.5f;
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("P0 : %f, %f, %f\n", P0.x, P0.y, P0.z);
 	printf("P1 : %f, %f, %f\n", P1.x, P1.y, P1.z);
 #endif
@@ -241,7 +243,7 @@ inline __device__ bool traceScreenSpaceRay(
 	P1.y *= height;
 	P1.z = 0.0f;
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("[%f, %f] -> [%f, %f]\n", P0.x, P0.y, P1.x, P1.y);
 #endif
 
@@ -264,9 +266,9 @@ inline __device__ bool traceScreenSpaceRay(
 	}
 
 	float stepDir = delta.x < 0.0f ? -1.0f : 0.0f;
-	stepDir = delta.x > 0.0f ? 1.0f : delta.x;
+	stepDir = delta.x > 0.0f ? 1.0f : stepDir;
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("delta %f, %f\n", delta.x, delta.y);
 	printf("stepDir %f\n", stepDir);
 	printf("permute %s\n", permute ? "true" : "false");
@@ -306,7 +308,7 @@ inline __device__ bool traceScreenSpaceRay(
 	float4 dPQk = make_float4(dP.x, dP.y, dQ.z, dk);
 	aten::vec3 Q = Q0;
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("P0 (%f, %f), dP (%f, %f)\n", P0.x, P0.y, dP.x, dP.y);
 #endif
 
@@ -344,7 +346,9 @@ inline __device__ bool traceScreenSpaceRay(
 			return false;
 		}
 
-		//printf("    [%d] %d, %d\n", stepCount, ix, iy);
+#ifdef DUMP_DEBUG_LOG
+		printf("    [%d] %d, %d\n", stepCount, ix, iy);
+#endif
 
 		// シーン内の現時点での深度値を取得.
 		float4 data;
@@ -361,7 +365,7 @@ inline __device__ bool traceScreenSpaceRay(
 
 	auto isect = intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 	printf("[%d]%f, %f, %f\n", stepCount, sceneZMax, rayZMin, rayZMax);
 	printf("(%s)%d, %d\n", isect ? "true" : "false", (int)hitPixel.x, (int)hitPixel.y);
 	printf("=======\n");
@@ -390,8 +394,8 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 {
 	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-	//int ix = 134;
-	//int iy = 512 - 374;
+	//int ix = 140;
+	//int iy = 512 - 320;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -460,7 +464,7 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	}
 
 	if (isIntersect) {
-#if 0
+#ifdef DUMP_DEBUG_LOG
 		printf("***\n");
 		printf("objid %d\n", objid);
 		printf("primid %d\n", primid);
@@ -473,7 +477,7 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 		isects[idx].mtrlid = prim.mtrlid;
 		isects[idx].meshid = prim.gemoid;
 
-#if 0
+#ifdef DUMP_DEBUG_LOG
 		printf("mtrlid %d\n", prim.mtrlid);
 		printf("gemoid %d\n", prim.gemoid);
 #endif

@@ -185,7 +185,7 @@ inline __device__ bool traceScreenSpaceRay(
 	float nearPlaneZ,
 	float stride,
 	float jitter,
-	aten::vec3& hitPixel)
+	float2& hitPixel)
 {
 	static const float zThickness = 0.1f;
 	static const float maxDistance = 1000.0f;
@@ -263,13 +263,9 @@ inline __device__ bool traceScreenSpaceRay(
 		aten::swapVal(P1.x, P1.y);
 	}
 
-	float stepDir = 0.0f;
-	if (delta.x < 0.0f) {
-		stepDir = -1.0f;
-	}
-	else if (delta.x > 0.0f) {
-		stepDir = 1.0f;
-	}
+	float stepDir = delta.x < 0.0f ? -1.0f : 0.0f;
+	stepDir = delta.x > 0.0f ? 1.0f : delta.x;
+
 	float invdx = stepDir / delta.x;
 
 	// Track the derivatives of Q and k.
@@ -300,8 +296,8 @@ inline __device__ bool traceScreenSpaceRay(
 	Q0 += dQ * jitter;
 	k0 += dk * jitter;
 
-	aten::vec4 PQk = aten::vec4(P0.x, P0.y, Q0.z, k0);
-	aten::vec4 dPQk = aten::vec4(dP.x, dP.y, dQ.z, dk);
+	float4 PQk = make_float4(P0.x, P0.y, Q0.z, k0);
+	float4 dPQk = make_float4(dP.x, dP.y, dQ.z, dk);
 	aten::vec3 Q = Q0;
 
 	static const int maxSteps = 50;
@@ -318,19 +314,18 @@ inline __device__ bool traceScreenSpaceRay(
 		// ŽŸ‚ÌZ‚ÌÅ‘å’l‚ðŒvŽZ‚·‚é.
 		// ‚½‚¾‚µA1/2 pixel•ª —]—T‚ðŽ‚½‚¹‚é.
 		// Q‚Íw¬•ª‚ÅœŽZ‚³‚ê‚Ä‚¢‚ÄA‚»‚±‚É1/w‚ÅœŽZ‚·‚é‚Ì‚ÅAŒ³iViewÀ•WŒnj‚É–ß‚é‚±‚Æ‚É‚È‚é.
-		rayZMax = -(PQk.z + dPQk.z * 0.5) / (PQk.w + dPQk.w * 0.5);
+		rayZMax = -(PQk.z + dPQk.z * 0.5f) / (PQk.w + dPQk.w * 0.5f);
 
 		// ŽŸ‚ÉŒü‚¯‚ÄÅ‘å’l‚ð•ÛŽ.
 		prevZMaxEstimate = rayZMax;
 
-		if (rayZMin > rayZMax) {
-			// ”O‚Ì‚½‚ß.
-			float tmp = rayZMin;
-			rayZMin = rayZMax;
-			rayZMax = tmp;
-		}
+		float tmpMin = rayZMin;
+		float tmpMax = rayZMax;
+		rayZMin = tmpMin > tmpMax ? tmpMax : tmpMin;
+		rayZMax = tmpMin > tmpMax ? tmpMin : tmpMax;
 
-		hitPixel = permute ? aten::vec3(PQk.y, PQk.x, 0.0f) : aten::vec3(PQk.x, PQk.y, 0.0f);
+		hitPixel.x = permute ? PQk.y : PQk.x;
+		hitPixel.y = permute ? PQk.x : PQk.y;
 
 		int ix = (int)hitPixel.x;
 		int iy = (int)hitPixel.y;
@@ -352,9 +347,6 @@ inline __device__ bool traceScreenSpaceRay(
 		PQk += dPQk;
 	}
 
-	if (sceneZMax <= 0) {
-		return false;
-	}
 	auto isect = intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
 
 #if 0
@@ -413,7 +405,7 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	float c = (ix + iy) * 0.25f;
 	float jitter = stride > 1.0f ? fmod(c, 1.0f) : 0.0f;
 
-	aten::vec3 hitPixel(0);
+	float2 hitPixel = make_float2(0.0f);
 
 	bool isIntersect = traceScreenSpaceRay(
 		depth,
@@ -467,6 +459,7 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 		hitbools[idx] = 1;
 	}
 	else {
+#if 0
 		Context ctxt;
 		{
 			ctxt.shapes = geoms;
@@ -491,6 +484,10 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 		path.isHit = isHit;
 
 		hitbools[idx] = isHit ? 1 : 0;
+#else
+		path.isHit = false;
+		hitbools[idx] = 0;
+#endif
 	}
 }
 

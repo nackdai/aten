@@ -108,6 +108,8 @@ namespace idaten
 		idaten::TypedCudaMemory<int> m_hitbools;
 		idaten::TypedCudaMemory<int> m_hitidx;
 
+		idaten::TypedCudaMemory<int> m_notIntersectInScreenSpaceBools;
+
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
 		idaten::TypedCudaMemory<unsigned int> m_random;
 

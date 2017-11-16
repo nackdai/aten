@@ -374,12 +374,13 @@ inline __device__ bool traceScreenSpaceRay(
 	return isect;
 }
 
-__global__ void hitTestPrimaryRayInScreenSpaceEx(
+__global__ void hitTestInScreenSpace(
 	cudaSurfaceObject_t gbuffer,
 	cudaSurfaceObject_t depth,
 	idaten::SSRT::Path* paths,
 	aten::Intersection* isects,
 	int* hitbools,
+	int* notIntersectBools,
 	int width, int height,
 	float cameraNearPlaneZ,
 	const aten::mat4 mtxW2V,
@@ -407,6 +408,7 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	path.isHit = false;
 
 	hitbools[idx] = 0;
+	notIntersectBools[idx] = 0;
 
 	if (path.isTerminate) {
 		return;
@@ -414,6 +416,12 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 
 	aten::vec3 vsOrig = mtxW2V.apply(rays[idx].org);
 	aten::vec3 vsDir = normalize(mtxW2V.applyXYZ(rays[idx].dir));
+
+	auto d = dot(vsDir, aten::vec3(0, 0, 1));
+	if (abs(d) > 0.96f) {
+		notIntersectBools[idx] = 1;
+		return;
+	}
 
 	// TODO
 	static const float stride = 5.0f;
@@ -514,11 +522,15 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 #else
 		path.isHit = false;
 		hitbools[idx] = 0;
+
+		notIntersectBools[idx] = 1;
 #endif
 	}
 }
 
 __global__ void hitTest(
+	const int* __restrict__ notIntersectInScreenSpaceIds,
+	int testNum,
 	idaten::SSRT::Path* paths,
 	aten::Intersection* isects,
 	aten::ray* rays,
@@ -531,14 +543,18 @@ __global__ void hitTest(
 	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (ix >= width && iy >= height) {
+	if (idx >= testNum) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	idx = notIntersectInScreenSpaceIds[idx];
+
+	int ix = idx % width;
+	int iy = idx / width;
+
+	idx = getIdx(ix, iy, width);
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -659,7 +675,7 @@ __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	int width, int height,
 	idaten::SSRT::Path* paths,
-	int* hitindices,
+	const int* __restrict__ hitindices,
 	int hitnum,
 	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
@@ -1102,6 +1118,8 @@ namespace idaten {
 		m_hitbools.init(width * height);
 		m_hitidx.init(width * height);
 
+		m_notIntersectInScreenSpaceBools.init(width * height);
+
 		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
 		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
 
@@ -1330,12 +1348,13 @@ namespace idaten {
 			auto gbuffer = m_gbuffer.bind();
 			auto depth = m_depth.bind();
 
-			hitTestPrimaryRayInScreenSpaceEx << <grid, block >> > (
-			//hitTestPrimaryRayInScreenSpaceEx << <1, 1 >> > (
+			hitTestInScreenSpace << <grid, block >> > (
+			//hitTestInScreenSpace << <1, 1 >> > (
 				gbuffer, depth,
 				m_paths.ptr(),
 				m_isects.ptr(),
 				m_hitbools.ptr(),
+				m_notIntersectInScreenSpaceBools.ptr(),
 				width, height,
 				m_camParam.znear,
 				mtxW2V, mtxV2C,
@@ -1347,7 +1366,34 @@ namespace idaten {
 				texVtxPos,
 				texVtxNml);
 
-			checkCudaKernel(hitTestPrimaryRayInScreenSpaceEx);
+			checkCudaKernel(hitTestInScreenSpace);
+
+			int hitTestCount = 0;
+			idaten::Compaction::compact(
+				m_hitidx,
+				m_notIntersectInScreenSpaceBools,
+				&hitTestCount);
+
+			//AT_PRINTF("BVHTrabers %d\n", hitTestCount);
+
+			dim3 blockPerGrid((hitTestCount + 64 - 1) / 64);
+			dim3 threadPerBlock(64);
+
+			hitTest << <blockPerGrid, threadPerBlock >> > (
+				m_hitidx.ptr(), hitTestCount,
+				m_paths.ptr(),
+				m_isects.ptr(),
+				m_rays.ptr(),
+				m_hitbools.ptr(),
+				width, height,
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
+				texVtxPos,
+				m_mtxparams.ptr());
+
+			checkCudaKernel(hitTest);
 #endif
 		}
 	}

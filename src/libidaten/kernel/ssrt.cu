@@ -266,6 +266,12 @@ inline __device__ bool traceScreenSpaceRay(
 	float stepDir = delta.x < 0.0f ? -1.0f : 0.0f;
 	stepDir = delta.x > 0.0f ? 1.0f : delta.x;
 
+#if 0
+	printf("delta %f, %f\n", delta.x, delta.y);
+	printf("stepDir %f\n", stepDir);
+	printf("permute %s\n", permute ? "true" : "false");
+#endif
+
 	float invdx = stepDir / delta.x;
 
 	// Track the derivatives of Q and k.
@@ -299,6 +305,10 @@ inline __device__ bool traceScreenSpaceRay(
 	float4 PQk = make_float4(P0.x, P0.y, Q0.z, k0);
 	float4 dPQk = make_float4(dP.x, dP.y, dQ.z, dk);
 	aten::vec3 Q = Q0;
+
+#if 0
+	printf("P0 (%f, %f), dP (%f, %f)\n", P0.x, P0.y, dP.x, dP.y);
+#endif
 
 	static const int maxSteps = 50;
 
@@ -334,6 +344,8 @@ inline __device__ bool traceScreenSpaceRay(
 			return false;
 		}
 
+		//printf("    [%d] %d, %d\n", stepCount, ix, iy);
+
 		// シーン内の現時点での深度値を取得.
 		float4 data;
 		surf2Dread(&data, depth, ix * sizeof(float4), iy);
@@ -351,7 +363,7 @@ inline __device__ bool traceScreenSpaceRay(
 
 #if 0
 	printf("[%d]%f, %f, %f\n", stepCount, sceneZMax, rayZMin, rayZMax);
-	printf("(%s)%d, %d\n", isect ? "true" : "false", (int)hitPixel.x, (int)hitPixel.x);
+	printf("(%s)%d, %d\n", isect ? "true" : "false", (int)hitPixel.x, (int)hitPixel.y);
 	printf("=======\n");
 #endif
 
@@ -376,10 +388,10 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-	//int ix = 136;
-	//int iy = 512 - 388;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	//int ix = 134;
+	//int iy = 512 - 374;
 
 	if (ix >= width && iy >= height) {
 		return;
@@ -416,10 +428,10 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 		stride, jitter,
 		hitPixel);
 
-	int x = (int)hitPixel.x;
-	int y = (int)hitPixel.y;
+	ix = (int)hitPixel.x;
+	iy = (int)hitPixel.y;
 
-	isIntersect = isIntersect && (0 <= x && x < width && 0 <= y && y < height);
+	isIntersect = isIntersect && (0 <= ix && ix < width && 0 <= iy && iy < height);
 
 	int objid = -1;
 	int primid = -1;
@@ -434,8 +446,8 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 		// y : primid
 		// zw : bary centroid
 
-		int objid = __float_as_int(data.x);
-		int primid = __float_as_int(data.y);
+		objid = __float_as_int(data.x);
+		primid = __float_as_int(data.y);
 
 		isects[idx].objid = objid;
 		isects[idx].primid = primid;
@@ -448,12 +460,23 @@ __global__ void hitTestPrimaryRayInScreenSpaceEx(
 	}
 
 	if (isIntersect) {
+#if 0
+		printf("***\n");
+		printf("objid %d\n", objid);
+		printf("primid %d\n", primid);
+#endif
+
 		aten::PrimitiveParamter prim;
 		prim.v0 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 0];
 		prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
 
 		isects[idx].mtrlid = prim.mtrlid;
 		isects[idx].meshid = prim.gemoid;
+
+#if 0
+		printf("mtrlid %d\n", prim.mtrlid);
+		printf("gemoid %d\n", prim.gemoid);
+#endif
 
 		path.isHit = true;
 		hitbools[idx] = 1;

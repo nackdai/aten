@@ -344,7 +344,8 @@ namespace aten {
 
 		std::vector<ScreenShotImageType> tmp(g_width * g_height);
 
-		CALL_GL_API(::glReadBuffer(GL_BACK));
+		CALL_GL_API(::glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
+		CALL_GL_API(::glNamedFramebufferReadBuffer(0, GL_BACK));
 
 		CALL_GL_API(::glReadPixels(0, 0, g_width, g_height, GL_RGB, GL_UNSIGNED_BYTE, &tmp[0]));
 

@@ -312,13 +312,12 @@ inline __device__ bool traceScreenSpaceRay(
 	printf("P0 (%f, %f), dP (%f, %f)\n", P0.x, P0.y, dP.x, dP.y);
 #endif
 
-	static const int maxSteps = 50;
+	static const int maxSteps = 20;
 
-	for (;
-		((PQk.x * stepDir) <= end)	// 終点に到達したか.
-		&& (stepCount < maxSteps)	// 最大処理数に到達したか.
-		&& (sceneZMax != 0.0);	// 何もないところに到達してないか.
-		++stepCount)
+	bool isect = false;
+	bool breakLoop = false;
+
+	for (; (stepCount < maxSteps) && !breakLoop; ++stepCount)
 	{
 		// 前回のZの最大値が次の最小値になる.
 		rayZMin = prevZMaxEstimate;
@@ -350,20 +349,26 @@ inline __device__ bool traceScreenSpaceRay(
 		printf("    [%d] %d, %d\n", stepCount, ix, iy);
 #endif
 
+		// 終点に到達したか.
+		bool b0 = ((PQk.x * stepDir) <= end);
+
+		// 何もないところに到達してないか.
+		bool b1 = (sceneZMax != 0.0);
+
 		// シーン内の現時点での深度値を取得.
 		float4 data;
 		surf2Dread(&data, depth, ix * sizeof(float4), iy);
 
 		sceneZMax = data.x;
 
-		if (intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness)) {
-			break;
-		}
+		isect = intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
+
+		breakLoop = b0 && b1 && isect;
 
 		PQk += dPQk;
 	}
 
-	auto isect = intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
+	//auto isect = intersectsDepthBuffer(sceneZMax, rayZMin, rayZMax, zThickness);
 
 #ifdef DUMP_DEBUG_LOG
 	printf("[%d]%f, %f, %f\n", stepCount, sceneZMax, rayZMin, rayZMax);
@@ -424,7 +429,7 @@ __global__ void hitTestInScreenSpace(
 	}
 
 	// TODO
-	static const float stride = 5.0f;
+	static const float stride = 15.0f;
 
 	float c = (ix + iy) * 0.25f;
 	float jitter = stride > 1.0f ? fmod(c, 1.0f) : 0.0f;
@@ -528,6 +533,15 @@ __global__ void hitTestInScreenSpace(
 	}
 }
 
+#define NUM_SM				64	// no. of streaming multiprocessors
+#define NUM_WARP_PER_SM		64	// maximum no. of resident warps per SM
+#define NUM_BLOCK_PER_SM	32	// maximum no. of resident blocks per SM
+#define NUM_BLOCK			(NUM_SM * NUM_BLOCK_PER_SM)
+#define NUM_WARP_PER_BLOCK	(NUM_WARP_PER_SM / NUM_BLOCK_PER_SM)
+#define WARP_SIZE			32
+
+__device__ unsigned int _headDev = 0;
+
 __global__ void hitTest(
 	const int* __restrict__ notIntersectInScreenSpaceIds,
 	int testNum,
@@ -543,26 +557,13 @@ __global__ void hitTest(
 	cudaTextureObject_t vtxPos,
 	aten::mat4* matrices)
 {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	// warp-wise head index of tasks in a block
+	__shared__ volatile unsigned int headBlock[NUM_WARP_PER_BLOCK];
 
-	if (idx >= testNum) {
-		return;
-	}
+	volatile unsigned int& headWarp = headBlock[threadIdx.y];
 
-	idx = notIntersectInScreenSpaceIds[idx];
-
-	int ix = idx % width;
-	int iy = idx / width;
-
-	idx = getIdx(ix, iy, width);
-
-	auto& path = paths[idx];
-	path.isHit = false;
-
-	hitbools[idx] = 0;
-
-	if (path.isTerminate) {
-		return;
+	if (blockIdx.x == 0 && threadIdx.x == 0) {
+		_headDev = 0;
 	}
 
 	Context ctxt;
@@ -577,21 +578,52 @@ __global__ void hitTest(
 		ctxt.matrices = matrices;
 	}
 
-	aten::Intersection isect;
+	do
+	{
+		// let lane 0 fetch [wh, wh + WARP_SIZE - 1] for a warp
+		if (threadIdx.x == 0) {
+			headWarp = atomicAdd(&_headDev, WARP_SIZE);
+		}
 
-	bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
+		// task index per thread in a warp
+		unsigned int idx = headWarp + threadIdx.x;
 
-	//isects[idx].t = isect.t;
-	isects[idx].objid = isect.objid;
-	isects[idx].mtrlid = isect.mtrlid;
-	isects[idx].meshid = isect.meshid;
-	isects[idx].primid = isect.primid;
-	isects[idx].a = isect.a;
-	isects[idx].b = isect.b;
+		if (idx >= testNum) {
+			return;
+		}
 
-	path.isHit = isHit;
+		idx = notIntersectInScreenSpaceIds[idx];
 
-	hitbools[idx] = isHit ? 1 : 0;
+		int ix = idx % width;
+		int iy = idx / width;
+
+		idx = getIdx(ix, iy, width);
+
+		auto& path = paths[idx];
+		path.isHit = false;
+
+		hitbools[idx] = 0;
+
+		if (path.isTerminate) {
+			continue;
+		}
+
+		aten::Intersection isect;
+
+		bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
+
+		//isects[idx].t = isect.t;
+		isects[idx].objid = isect.objid;
+		isects[idx].mtrlid = isect.mtrlid;
+		isects[idx].meshid = isect.meshid;
+		isects[idx].primid = isect.primid;
+		isects[idx].a = isect.a;
+		isects[idx].b = isect.b;
+
+		path.isHit = isHit;
+
+		hitbools[idx] = isHit ? 1 : 0;
+	} while (true);
 }
 
 template <bool isFirstBounce>
@@ -1379,7 +1411,8 @@ namespace idaten {
 			dim3 blockPerGrid((hitTestCount + 64 - 1) / 64);
 			dim3 threadPerBlock(64);
 
-			hitTest << <blockPerGrid, threadPerBlock >> > (
+			//hitTest << <blockPerGrid, threadPerBlock >> > (
+			hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
 				m_hitidx.ptr(), hitTestCount,
 				m_paths.ptr(),
 				m_isects.ptr(),

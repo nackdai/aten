@@ -473,10 +473,6 @@ __global__ void hitTestInScreenSpace(
 		isects[idx].a = data.z;
 		isects[idx].b = data.w;
 
-		isIntersect = (objid >= 0);
-	}
-
-	if (isIntersect) {
 #ifdef DUMP_DEBUG_LOG
 		printf("***\n");
 		printf("objid %d\n", objid);
@@ -494,43 +490,11 @@ __global__ void hitTestInScreenSpace(
 		printf("mtrlid %d\n", prim.mtrlid);
 		printf("gemoid %d\n", prim.gemoid);
 #endif
-
-		path.isHit = true;
-		hitbools[idx] = 1;
 	}
-	else {
-#if 0
-		Context ctxt;
-		{
-			ctxt.shapes = geoms;
-			ctxt.nodes = nodes;
-			ctxt.prims = prims;
-			ctxt.vtxPos = vtxPos;
-			ctxt.matrices = matrices;
-		}
 
-		aten::Intersection isect;
-
-		bool isHit = intersectClosest(&ctxt, rays[idx], &isect);
-
-		isects[idx].t = isect.t;
-		isects[idx].objid = isect.objid;
-		isects[idx].mtrlid = isect.mtrlid;
-		isects[idx].meshid = isect.meshid;
-		isects[idx].primid = isect.primid;
-		isects[idx].a = isect.a;
-		isects[idx].b = isect.b;
-
-		path.isHit = isHit;
-
-		hitbools[idx] = isHit ? 1 : 0;
-#else
-		path.isHit = false;
-		hitbools[idx] = 0;
-
-		notIntersectBools[idx] = 1;
-#endif
-	}
+	path.isHit = isIntersect;
+	hitbools[idx] = isIntersect ? 1 : 0;
+	notIntersectBools[idx] = isIntersect ? 0 : 1;
 }
 
 #define NUM_SM				64	// no. of streaming multiprocessors

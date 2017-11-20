@@ -15,7 +15,8 @@ namespace aten {
 
 		virtual void build(
 			hitable** list,
-			uint32_t num) = 0;
+			uint32_t num,
+			aabb* bbox = nullptr) = 0;
 
 		struct ResultIntersectTestByFrustum {
 			int ep{ -1 };	///< Entry Point.

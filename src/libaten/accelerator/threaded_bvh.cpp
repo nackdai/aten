@@ -14,9 +14,10 @@
 namespace aten {
 	void ThreadedBVH::build(
 		hitable** list,
-		uint32_t num)
+		uint32_t num,
+		aabb* bbox/*= nullptr*/)
 	{
-		m_bvh.build(list, num);
+		m_bvh.build(list, num, bbox);
 
 		setBoundingBox(m_bvh.getBoundingbox());
 

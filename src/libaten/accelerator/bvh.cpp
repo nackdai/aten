@@ -120,13 +120,34 @@ namespace aten {
 
 	///////////////////////////////////////////////////////
 
+	inline int findLongestAxis(const aabb& bbox)
+	{
+		const auto& minP = bbox.minPos();
+		const auto& maxP = bbox.maxPos();
+
+		auto x = maxP.x - minP.x;
+		auto y = maxP.y - minP.y;
+		auto z = maxP.z - minP.z;
+
+		auto maxAxis = std::max(std::max(x, y), z);
+
+		auto axis = (maxAxis == x
+			? 0
+			: maxAxis == y ? 1 : 2);
+
+		return axis;
+	}
+
 	void bvh::build(
 		hitable** list,
-		uint32_t num)
+		uint32_t num,
+		aabb* bbox/*= nullptr*/)
 	{
-		// TODO
-		//int axis = (int)(::rand() % 3);
 		int axis = 0;
+
+		if (bbox) {
+			axis = findLongestAxis(*bbox);
+		}
 
 		sortList(list, num, axis);
 
@@ -418,9 +439,10 @@ namespace aten {
 			else if (info.num == 2) {
 				// ２個だけのときは適当にソートして、終了.
 
-				// TODO
-				//int axis = (int)(::rand() % 3);
-				int axis = 0;
+				auto bbox = info.list[0]->getBoundingbox();
+				bbox = aabb::merge(bbox, info.list[1]->getBoundingbox());
+
+				int axis = findLongestAxis(bbox);
 
 				sortList(info.list, info.num, axis);
 

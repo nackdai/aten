@@ -25,6 +25,8 @@ namespace AT_NAME
 		// Avoid sorting objshape list in bvh::build directly.
 		std::vector<face*> tmp;
 
+		bbox.empty();
+
 		for (const auto s : shapes) {
 			s->build();
 
@@ -32,11 +34,13 @@ namespace AT_NAME
 			m_triangles += (uint32_t)s->faces.size();
 
 			tmp.insert(tmp.end(), s->faces.begin(), s->faces.end());
+
+			aabb::merge(bbox, s->m_aabb);
 		}
 
 		param.primnum = m_triangles;
 
-		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size());
+		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
 		bbox = m_accel->getBoundingbox();
 	}
 

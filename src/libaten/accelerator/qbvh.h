@@ -110,7 +110,8 @@ namespace aten {
 	public:
 		virtual void build(
 			hitable** list,
-			uint32_t num) override final;
+			uint32_t num,
+			aabb* bbox = nullptr) override final;
 
 		virtual bool hit(
 			const ray& r,

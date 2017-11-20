@@ -235,8 +235,14 @@ namespace AT_NAME {
 	public:
 		virtual void build() override final
 		{
+			aten::aabb bbox;
+
+			for (const auto& t : m_tmp) {
+				bbox = aten::aabb::merge(bbox, t->getBoundingbox());
+			}
+
 			if (!m_tmp.empty()) {
-				m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size());
+				m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size(), &bbox);
 			}
 		}
 

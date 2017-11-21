@@ -118,6 +118,28 @@ namespace aten {
 		}
 	}
 
+	void bvhnode::drawAABB(
+		aten::hitable::FuncDrawAABB func,
+		const aten::mat4& mtxL2W) const
+	{
+		if (m_item && m_item->getHasObject()) {
+			m_item->drawAABB(func, mtxL2W);
+		}
+		else {
+			auto transofrmedBox = aten::aabb::transform(m_aabb, mtxL2W);
+
+			aten::mat4 mtxScale;
+			mtxScale.asScale(transofrmedBox.size());
+
+			aten::mat4 mtxTrans;
+			mtxTrans.asTrans(transofrmedBox.minPos());
+
+			aten::mat4 mtx = mtxTrans * mtxScale;
+
+			func(mtx);
+		}
+	}
+
 	///////////////////////////////////////////////////////
 
 	inline int findLongestAxis(const aabb& bbox)
@@ -815,5 +837,36 @@ namespace aten {
 		}
 
 		return s0 || s1;
+	}
+
+	void bvh::drawAABB(
+		aten::hitable::FuncDrawAABB func,
+		const aten::mat4& mtxL2W)
+	{
+		bvhnode* node = m_root;
+
+		static const uint32_t stacksize = 64;
+		const bvhnode* stackbuf[stacksize];
+
+		stackbuf[0] = m_root;
+		int stackpos = 1;
+
+		while (stackpos > 0) {
+			auto node = stackbuf[stackpos - 1];
+
+			stackpos -= 1;
+
+			node->drawAABB(func, mtxL2W);
+
+			auto left = node->m_left;
+			auto right = node->m_right;
+
+			if (left) {
+				stackbuf[stackpos++] = left;
+			}
+			if (right) {
+				stackbuf[stackpos++] = right;
+			}
+		}
 	}
 }

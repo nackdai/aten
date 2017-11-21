@@ -68,6 +68,6 @@ namespace AT_NAME
 
 		auto triNum = (uint32_t)faces.size();
 
-		m_ib.draw(vb, 0, triNum);
+		m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
 	}
 }

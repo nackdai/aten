@@ -18,6 +18,13 @@ namespace aten {
 			uint32_t num,
 			aabb* bbox = nullptr) = 0;
 
+		virtual void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W)
+		{
+			AT_ASSERT(false);
+		}
+
 		struct ResultIntersectTestByFrustum {
 			int ep{ -1 };	///< Entry Point.
 			int ex{ -1 };	///< Layer Id.

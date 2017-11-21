@@ -127,6 +127,10 @@ namespace aten {
 			return m_isCandidate;
 		}
 
+		void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W) const;
+
 	protected:
 		bvhnode* m_left{ nullptr };
 		bvhnode* m_right{ nullptr };
@@ -257,6 +261,10 @@ namespace aten {
 				registerBvhNodeToLinearList(pright, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap, funcRegisterToList, funcIfInstanceNode);
 			}
 		}
+
+		virtual void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W) override;
 
 	private:
 		static bool hit(

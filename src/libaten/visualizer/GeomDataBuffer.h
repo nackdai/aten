@@ -3,6 +3,11 @@
 #include "types.h"
 
 namespace aten {
+	enum Primitive {
+		Triangles,
+		Lines,
+	};
+
 	class GeomVertexBuffer {
 		friend class GeomIndexBuffer;
 
@@ -16,6 +21,11 @@ namespace aten {
 			uint32_t vtxNum,
 			uint32_t offset,
 			void* data);
+
+		void draw(
+			Primitive mode,
+			uint32_t idxOffset,
+			uint32_t primNum);
 
 	protected:
 		uint32_t m_vbo{ 0 };
@@ -41,6 +51,7 @@ namespace aten {
 
 		void draw(
 			GeomVertexBuffer& vb,
+			Primitive mode,
 			uint32_t idxOffset,
 			uint32_t primNum);
 

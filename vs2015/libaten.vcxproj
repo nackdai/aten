@@ -443,6 +443,8 @@
     <None Include="..\src\shader\bloomeffect_fs_VBlur.glsl" />
     <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\nlm_fs.glsl" />
+    <None Include="..\src\shader\simple3d_fs.glsl" />
+    <None Include="..\src\shader\simple3d_vs.glsl" />
     <None Include="..\src\shader\ssrt_fs.glsl" />
     <None Include="..\src\shader\ssrt_gs.glsl" />
     <None Include="..\src\shader\ssrt_vs.glsl" />

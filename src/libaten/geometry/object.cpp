@@ -172,4 +172,11 @@ namespace AT_NAME
 			s->draw(func, mtxL2W, objid);
 		}
 	}
+
+	void object::drawAABB(
+		aten::hitable::FuncDrawAABB func,
+		const aten::mat4& mtxL2W)
+	{
+		m_accel->drawAABB(func, mtxL2W);
+	}
 }

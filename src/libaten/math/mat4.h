@@ -294,6 +294,16 @@ namespace aten {
 
 		mat4& asRotateFromVector(const vec3& v, const vec3& up);
 
+		inline mat4& asScale(const vec3& v)
+		{
+			m00 = v.x; m01 = 0;   m02 = 0;   m03 = 0;
+			m10 = 0;   m11 = v.y; m12 = 0;   m13 = 0;
+			m20 = 0;   m21 = 0;   m22 = v.z; m23 = 0;
+			m30 = 0;   m31 = 0;   m32 = 0;   m33 = 1;
+
+			return *this;
+		}
+
 		mat4& lookat(
 			const vec3& eye,
 			const vec3& at,

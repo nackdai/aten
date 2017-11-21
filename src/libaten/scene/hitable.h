@@ -142,6 +142,16 @@ namespace aten {
 			AT_ASSERT(false);
 		}
 
+		using FuncDrawAABB = std::function<void(const aten::mat4&)>;
+
+		virtual void drawAABB(
+			FuncDrawAABB func,
+			const aten::mat4& mtxL2W)
+		{
+			// For debug rendering.
+			AT_ASSERT(false);
+		}
+
 	private:
 		virtual void evalHitResult(
 			const ray& r,

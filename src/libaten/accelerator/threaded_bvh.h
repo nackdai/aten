@@ -46,6 +46,13 @@ namespace aten {
 
 		virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
 
+		virtual void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W) override final
+		{
+			m_bvh.drawAABB(func, mtxL2W);
+		}
+
 		std::vector<std::vector<ThreadedBvhNode>>& getNodes()
 		{
 			return m_listThreadedBvhNode;

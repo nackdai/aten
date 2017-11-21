@@ -64,6 +64,40 @@ namespace aten {
 		}
 	}
 
+	static GLenum prims[] = {
+		GL_TRIANGLES,
+		GL_LINES,
+	};
+
+	inline uint32_t computeVtxNum(Primitive mode, uint32_t primNum)
+	{
+		uint32_t vtxNum = 0;
+
+		switch (mode)
+		{
+		case Primitive::Triangles:
+			vtxNum = primNum * 3;
+			break;
+		case Primitive::Lines:
+			vtxNum = primNum * 2;
+			break;
+		}
+
+		return vtxNum;
+	}
+
+	void GeomVertexBuffer::draw(
+		Primitive mode,
+		uint32_t idxOffset,
+		uint32_t primNum)
+	{
+		CALL_GL_API(::glBindVertexArray(m_vao));
+
+		auto vtxNum = computeVtxNum(mode, primNum);
+
+		CALL_GL_API(::glDrawArrays(prims[mode], idxOffset, vtxNum));
+	}
+
 	void GeomIndexBuffer::init(
 		uint32_t idxNum,
 		void* data)
@@ -111,6 +145,7 @@ namespace aten {
 
 	void GeomIndexBuffer::draw(
 		GeomVertexBuffer& vb,
+		Primitive mode,
 		uint32_t idxOffset,
 		uint32_t primNum)
 	{
@@ -119,11 +154,10 @@ namespace aten {
 
 		auto offsetByte = idxOffset * sizeof(GLuint);
 
-		// Only triangles.
-		auto idxNum = primNum * 3;
+		auto idxNum = computeVtxNum(mode, primNum);
 
 		CALL_GL_API(::glDrawElements(
-			GL_TRIANGLES,
+			prims[mode],
 			idxNum,
 			GL_UNSIGNED_INT,
 			(const GLvoid*)offsetByte));

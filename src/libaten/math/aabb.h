@@ -21,9 +21,11 @@ namespace aten {
 	public:
 		AT_DEVICE_API void init(const vec3& _min, const vec3& _max)
 		{
+#if 0
 			AT_ASSERT(_min.x <= _max.x);
 			AT_ASSERT(_min.y <= _max.y);
 			AT_ASSERT(_min.z <= _max.z);
+#endif
 
 			m_min = _min;
 			m_max = _max;
@@ -192,6 +194,11 @@ namespace aten {
 		{
 			auto ret = length(m_max - m_min);
 			return ret;
+		}
+
+		void expand(const aabb& box)
+		{
+			*this = merge(*this, box);
 		}
 
 		static aabb merge(const aabb& box0, const aabb& box1)

@@ -49,6 +49,10 @@ namespace AT_NAME
 			const aten::mat4& mtxL2W,
 			int parentId) override final;
 
+		virtual void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W) override final;
+
 	private:
 		void build();
 

@@ -108,6 +108,13 @@ namespace aten
 			m_obj->draw(func, m_mtxL2W, id());
 		}
 
+		virtual void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W) override final
+		{
+			m_obj->drawAABB(func, m_mtxL2W);
+		}
+
 	private:
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,

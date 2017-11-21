@@ -3,10 +3,12 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "math/mat4.h"
+#include "accelerator/accelerator.h"
 #include "sampler/cmj.h"
 
 namespace aten {
 	shader ResterizeRenderer::s_shader;
+	GeomVertexBuffer ResterizeRenderer::s_boxvb;
 
 	static int s_width = 0;
 	static int s_height = 0;
@@ -140,5 +142,107 @@ namespace aten {
 			CALL_GL_API(::glDisable(GL_DEPTH_TEST));
 			CALL_GL_API(::glDisable(GL_CULL_FACE));
 		}
+	}
+
+	static const vertex boxvtx[] = {
+		// 0
+		{ { 0, 0, 0, 1 }, { 0, 0, 0 }, { 1, 0, 0 } },
+		{ { 1, 0, 0, 1 }, { 0, 0, 0 }, { 1, 0, 0 } },
+
+		// 1
+		{ { 0, 0, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 0, 1, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 2
+		{ { 0, 0, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 0, 0, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 3
+		{ { 1, 0, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 0, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 4
+		{ { 1, 0, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 1, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 5
+		{ { 0, 1, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 1, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 6
+		{ { 0, 1, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 0, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 7
+		{ { 0, 0, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 0, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 8
+		{ { 0, 0, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 0, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 9
+		{ { 1, 0, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		// 10
+		{ { 1, 1, 0, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+
+		{ { 0, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+		{ { 1, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
+	};
+
+	void ResterizeRenderer::drawAABB(
+		shader* shd,
+		const camera* cam,
+		accelerator* accel)
+	{
+		// Initialize vb.
+		static bool isInitVB = false;
+		if (!isInitVB) {
+			s_boxvb.init(
+				sizeof(aten::vertex),
+				AT_COUNTOF(boxvtx),
+				0,
+				(void*)boxvtx);
+
+			isInitVB = true;
+		}
+
+		shd->prepareRender(nullptr, false);
+
+		auto camparam = cam->param();
+
+		// TODO
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		mat4 mtxW2V;
+		mat4 mtxV2C;
+
+		mtxW2V.lookat(
+			camparam.origin,
+			camparam.center,
+			camparam.up);
+
+		mtxV2C.perspective(
+			camparam.znear,
+			camparam.zfar,
+			camparam.vfov,
+			camparam.aspect);
+
+		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+		auto hMtxW2C = shd->getHandle("mtxW2C");
+		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+		auto hMtxL2W = shd->getHandle("mtxL2W");
+
+		accel->drawAABB([&](const aten::mat4& mtxL2W) {
+			// Draw.
+			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+			s_boxvb.draw(aten::Primitive::Lines, 0, 12);
+		}, aten::mat4::Identity);
 	}
 }

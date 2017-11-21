@@ -711,5 +711,11 @@
     <None Include="..\src\shader\2dblit_vs.glsl">
       <Filter>shader</Filter>
     </None>
+    <None Include="..\src\shader\simple3d_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\simple3d_vs.glsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

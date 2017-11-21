@@ -651,12 +651,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\shader\vs.glsl">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="..\src\shader\fs.glsl">
-      <Filter>shader</Filter>
-    </None>
     <None Include="..\src\shader\tonemap_fs.glsl">
       <Filter>shader</Filter>
     </None>
@@ -710,6 +704,12 @@
     </None>
     <None Include="..\src\shader\ssrt_gs.glsl">
       <Filter>shader\ssrt</Filter>
+    </None>
+    <None Include="..\src\shader\2dblit_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\2dblit_vs.glsl">
+      <Filter>shader</Filter>
     </None>
   </ItemGroup>
 </Project>

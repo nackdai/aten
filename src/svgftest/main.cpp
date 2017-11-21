@@ -342,27 +342,27 @@ int main()
 	aten::GammaCorrection gamma;
 	gamma.init(
 		WIDTH, HEIGHT,
-		"../shader/vs.glsl",
+		"../shader/2dblit_vs.glsl",
 		"../shader/gamma_fs.glsl");
 
 	aten::Blitter blitter;
 	blitter.init(
 		WIDTH, HEIGHT,
-		"../shader/vs.glsl",
-		"../shader/fs.glsl");
+		"../shader/2dblit_vs.glsl",
+		"../shader/2dblit_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
 	aten::NonLocalMeanFilterShader nlmshd;
 	nlmshd.init(
 		WIDTH, HEIGHT,
-		"../shader/vs.glsl",
+		"../shader/2dblit_vs.glsl",
 		"../shader/nlm_fs.glsl");
 	nlmshd.setParam(0.04f, 0.04f);
 
 	g_taa.init(
 		WIDTH, HEIGHT,
-		"../shader/vs.glsl", "../shader/taa_fs.glsl",
-		"../shader/vs.glsl", "../shader/taa_final_fs.glsl");
+		"../shader/2dblit_vs.glsl", "../shader/taa_fs.glsl",
+		"../shader/2dblit_vs.glsl", "../shader/taa_final_fs.glsl");
 
 	aten::visualizer::addPostProc(&g_taa);
 	aten::visualizer::addPostProc(&gamma);

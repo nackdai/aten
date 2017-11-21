@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 		aten::GammaCorrection gamma;
 		gamma.init(
 			WIDTH, HEIGHT,
-			"../shader/vs.glsl",
+			"../shader/2dblit_vs.glsl",
 			"../shader/gamma_fs.glsl");
 		aten::visualizer::addPostProc(&gamma);
 

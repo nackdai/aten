@@ -62,6 +62,16 @@ namespace aten {
 			return m_mtxs;
 		}
 
+		void disableLayer()
+		{
+			m_enableLayer = false;
+		}
+
+		const std::vector<accelerator*>& getNestedAccel()
+		{
+			return m_nestedBvh;
+		}
+
 		static void dump(std::vector<ThreadedBvhNode>& nodes, const char* path);
 
 	private:
@@ -116,7 +126,11 @@ namespace aten {
 
 		int m_exid{ 1 };
 
+		bool m_enableLayer{ true };
+
 		std::vector<std::vector<ThreadedBvhNode>> m_listThreadedBvhNode;
 		std::vector<aten::mat4> m_mtxs;
+
+		std::vector<accelerator*> m_nestedBvh;
 	};
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "accelerator/bvh.h"
 #include "accelerator/threaded_bvh.h"
 
 namespace aten {
@@ -29,11 +28,21 @@ namespace aten {
 			uint32_t num,
 			aabb* bbox = nullptr) override final;
 
-		void convert(
-			std::vector<ThreadedSbvhNode>& nodes,
-			std::vector<int>& indices);
+		ThreadedBVH& getTopLayer()
+		{
+			return m_bvh;
+		}
 
 	private:
+		void buildInternal(
+			hitable** list,
+			uint32_t num);
+
+		void convert(
+			std::vector<ThreadedSbvhNode>& nodes,
+			int offset,
+			std::vector<int>& indices) const;
+
 		struct SBVHNode {
 			SBVHNode() {}
 
@@ -134,10 +143,12 @@ namespace aten {
 			std::vector<uint32_t>& leftList,
 			std::vector<uint32_t>& rightList);
 
-		void getOrderIndex(std::vector<int>& indices);
+		void getOrderIndex(std::vector<int>& indices) const;
 
 	private:
-		bvh m_bvh;
+		ThreadedBVH m_bvh;
+
+		bool m_isNested{ false };
 
 		// 分割最大数.
 		uint32_t m_numBins{ 16 };
@@ -147,10 +158,17 @@ namespace aten {
 
 		uint32_t m_refIndexNum{ 0 };
 
+		uint32_t m_offsetTriIdx{ 0 };
+
 		std::vector<SBVHNode> m_nodes;
 
 		// 三角形情報リスト.
 		// ここでいう三角形情報とは分割された or されていない三角形の情報.
 		std::vector<Reference> m_refs;
+
+		// For layer.
+		std::vector<sbvh*> m_nestedSbvh;
+		std::vector<std::vector<ThreadedSbvhNode>> m_threadedNodes;
+		std::vector<int> m_refIndices;
 	};
 }

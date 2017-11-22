@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 // Threaded BVH
 // http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
@@ -33,6 +33,13 @@ namespace aten {
 		auto root = m_bvh.getRoot();
 		listBvhNode.push_back(std::vector<ThreadedBvhNodeEntry>());
 		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
+
+		// Copy to keep.
+		m_nestedBvh = listBvh;
+
+		if (!m_enableLayer) {
+			listBvh.clear();
+		}
 
 		for (int i = 0; i < listBvh.size(); i++) {
 			// TODO

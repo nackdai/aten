@@ -74,6 +74,42 @@ namespace aten
 		uint32_t num,
 		aabb* bbox/*= nullptr*/)
 	{
+		if (m_isNested) {
+			buildInternal(list, num);
+		}
+		else {
+			// Build top layer bvh.
+
+			m_bvh.disableLayer();
+
+			m_isNested = true;
+			m_bvh.build(list, num, bbox);
+			m_isNested = false;
+
+			const auto& nestedBvh = m_bvh.getNestedAccel();
+
+			m_threadedNodes.resize(nestedBvh.size());
+
+			// Convert to threaded.
+			for (int i = 0; i < nestedBvh.size(); i++) {
+				// TODO
+				const auto bvh = (const sbvh*)nestedBvh[i];
+
+				std::vector<int> indices;
+				bvh->convert(
+					m_threadedNodes[i], 
+					(int)m_refIndices.size(),
+					indices);
+
+				m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
+			}
+		}
+	}
+
+	void sbvh::buildInternal(
+		hitable** list,
+		uint32_t num)
+	{
 		std::vector<face*> tris;
 		tris.reserve(num);
 
@@ -87,9 +123,13 @@ namespace aten
 		m_refs.reserve(2 * tris.size());
 		m_refs.resize(tris.size());
 
+		m_offsetTriIdx = UINT32_MAX;
+
 		for (uint32_t i = 0; i < tris.size(); i++) {
 			m_refs[i].triid = i;
 			m_refs[i].bbox = tris[i]->computeAABB();
+
+			m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tris[i]->id);
 
 			rootBox.expand(m_refs[i].bbox);
 		}
@@ -676,7 +716,8 @@ namespace aten
 
 	void sbvh::convert(
 		std::vector<ThreadedSbvhNode>& nodes,
-		std::vector<int>& indices)
+		int offset,
+		std::vector<int>& indices) const
 	{
 		indices.resize(m_refIndexNum);
 		nodes.resize(m_nodes.size());
@@ -730,7 +771,7 @@ namespace aten
 					thrededNode.miss = (float)inOrderIndices[nodeCount + 1];
 				}
 
-				thrededNode.refIdListStart = (float)refIndicesCount;
+				thrededNode.refIdListStart = (float)refIndicesCount + offset;
 				thrededNode.refIdNum = (float)sbvhNode.refIds.size();
 
 				// 参照する三角形インデックスを配列に格納.
@@ -739,7 +780,7 @@ namespace aten
 					const auto refId = sbvhNode.refIds[i];
 					const auto& ref = m_refs[refId];
 
-					indices[refIndicesCount++] = ref.triid;
+					indices[refIndicesCount++] = ref.triid + m_offsetTriIdx;
 				}
 			}
 			else {
@@ -758,7 +799,7 @@ namespace aten
 
 	}
 
-	void sbvh::getOrderIndex(std::vector<int>& indices)
+	void sbvh::getOrderIndex(std::vector<int>& indices) const
 	{
 		indices.reserve(m_nodes.size());
 

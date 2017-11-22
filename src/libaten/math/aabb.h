@@ -170,7 +170,7 @@ namespace aten {
 
 		vec3& maxPos()
 		{
-			return m_min;
+			return m_max;
 		}
 
 		vec3 getCenter() const

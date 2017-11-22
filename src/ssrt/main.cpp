@@ -337,8 +337,8 @@ int main()
 			mtrlparms,
 			vtxparams);
 
-		std::vector<std::vector<aten::GPUBvhNode>>& nodes = g_scene.getAccel()->getNodes();
-		std::vector<aten::mat4>& mtxs = g_scene.getAccel()->getMatrices();
+		const auto& nodes = g_scene.getAccel()->getNodes();
+		const auto& mtxs = g_scene.getAccel()->getMatrices();
 
 		std::vector<idaten::TextureResource> tex;
 		{

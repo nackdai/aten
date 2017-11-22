@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 // Threaded BVH
 // http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
@@ -24,7 +24,7 @@ namespace aten {
 		// Gather local-world matrix.
 		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
-		std::vector<accelerator*> listBvh;
+		std::vector<accelerator*> listNestedBvh;
 		std::map<hitable*, std::vector<accelerator*>> nestedBvhMap;
 
 		std::vector<std::vector<ThreadedBvhNodeEntry>> listBvhNode;
@@ -32,18 +32,18 @@ namespace aten {
 		// Register to linear list to traverse bvhnode easily.
 		auto root = m_bvh.getRoot();
 		listBvhNode.push_back(std::vector<ThreadedBvhNodeEntry>());
-		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
+		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listNestedBvh, nestedBvhMap);
 
 		// Copy to keep.
-		m_nestedBvh = listBvh;
+		m_nestedBvh = listNestedBvh;
 
 		if (!m_enableLayer) {
-			listBvh.clear();
+			listNestedBvh.clear();
 		}
 
-		for (int i = 0; i < listBvh.size(); i++) {
+		for (int i = 0; i < listNestedBvh.size(); i++) {
 			// TODO
-			auto bvh = (aten::bvh*)listBvh[i];
+			auto bvh = (aten::bvh*)listNestedBvh[i];
 
 			root = bvh->getRoot();
 
@@ -114,7 +114,7 @@ namespace aten {
 		hitable* nestParent,
 		const aten::mat4& mtxL2W,
 		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-		std::vector<accelerator*>& listBvh,
+		std::vector<accelerator*>& listNestedBvh,
 		std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap)
 	{
 		bvh::registerBvhNodeToLinearList<ThreadedBvhNodeEntry>(
@@ -123,7 +123,7 @@ namespace aten {
 			nestParent,
 			mtxL2W,
 			listBvhNode,
-			listBvh,
+			listNestedBvh,
 			nestedBvhMap,
 			[this](std::vector<ThreadedBvhNodeEntry>& list, bvhnode* node, hitable* obj, const aten::mat4& mtx)
 		{

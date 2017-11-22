@@ -58,7 +58,9 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
 				isect->mtrlid = prim.mtrlid;
-				isect->meshid = (int)attrib.w;
+
+				//isect->meshid = (int)attrib.w;
+				isect->meshid = prim.gemoid;
 
 				t_max = isect->t;
 
@@ -213,10 +215,10 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 AT_CUDA_INLINE __device__ bool intersectQBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	const float t_max/*= AT_MATH_INF*/)
 {
 	float t_min = AT_MATH_EPSILON;
-	float t_max = AT_MATH_INF;
 
 	bool isHit = intersectQBVH<idaten::IntersectType::Closest>(
 		ctxt->nodes[0],

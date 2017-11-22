@@ -60,7 +60,9 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
 				isect->mtrlid = prim.mtrlid;
-				isect->meshid = (int)attrib.w;
+				
+				//isect->meshid = (int)attrib.w;
+				isect->meshid = prim.gemoid;
 
 				if (Type == idaten::IntersectType::Closer
 					|| Type == idaten::IntersectType::Any)
@@ -248,10 +250,10 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
 AT_CUDA_INLINE __device__ bool intersectClosestStacklessBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	const float t_max/*= AT_MATH_INF*/)
 {
 	float t_min = AT_MATH_EPSILON;
-	float t_max = AT_MATH_INF;
 
 	bool isHit = intersectStacklessBVH<idaten::IntersectType::Closest>(
 		ctxt->nodes[0],

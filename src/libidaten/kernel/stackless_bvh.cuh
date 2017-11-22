@@ -15,7 +15,8 @@
 __device__ bool intersectClosestStacklessBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	aten::Intersection* isect);
+	aten::Intersection* isect,
+	const float t_max = AT_MATH_INF);
 
 __device__ bool intersectCloserStacklessBVH(
 	const Context* ctxt,

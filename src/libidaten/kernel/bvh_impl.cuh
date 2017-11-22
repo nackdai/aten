@@ -51,7 +51,9 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 				isect->objid = (int)attrib.x;
 				isect->primid = (int)attrib.y;
 				isect->mtrlid = prim.mtrlid;
-				isect->meshid = (int)attrib.w;
+
+				//isect->meshid = (int)attrib.w;
+				isect->meshid = prim.gemoid;
 
 				t_max = isect->t;
 

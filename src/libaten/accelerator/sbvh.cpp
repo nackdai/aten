@@ -26,16 +26,16 @@ namespace aten
 	template <class Iter, class Cmp>
 	void mergeSort(Iter first, Iter last, Cmp cmp)
 	{
-		const int numThreads = ::omp_get_max_threads();
-		const int numItems = last - first;
-		const int numItemPerThread = numItems / numThreads;
+		const auto numThreads = ::omp_get_max_threads();
+		const auto numItems = last - first;
+		const auto numItemPerThread = numItems / numThreads;
 
 		// Sort each blocks.
 #pragma omp parallel num_threads(numThreads)
 		{
-			const int idx = ::omp_get_thread_num();
-			const int startPos = idx * numItemPerThread;
-			const int endPos = (idx + 1 == numThreads ? numItems : startPos + numItemPerThread);
+			const auto idx = ::omp_get_thread_num();
+			const auto startPos = idx * numItemPerThread;
+			const auto endPos = (idx + 1 == numThreads ? numItems : startPos + numItemPerThread);
 
 			std::sort(first + startPos, first + endPos, cmp);
 		}
@@ -45,21 +45,21 @@ namespace aten
 		// Merge blocks.
 		while (blockNum >= 2)
 		{
-			const int numItemsInBlocks = numItems / blockNum;
+			const auto numItemsInBlocks = numItems / blockNum;
 
 			// ２つのブロックを１つにマージする.
 #pragma omp parallel num_threads(blockNum / 2)
 			{
-				const int idx = ::omp_get_thread_num();
+				const auto idx = ::omp_get_thread_num();
 
 				// ２つのブロックを１つにマージするので、numItemsInBlocks * 2 となる.
-				int startPos = idx * numItemsInBlocks * 2;
+				auto startPos = idx * numItemsInBlocks * 2;
 
 				// 中間地点なので、numItemsInBlocks * 2 の半分で numItemsInBlocks となる.
-				int pivot = startPos + numItemsInBlocks;
+				auto pivot = startPos + numItemsInBlocks;
 
 				// 終端.
-				int endPos = (idx + 1 == blockNum / 2 ? numItems : pivot + numItemsInBlocks);
+				auto endPos = (idx + 1 == blockNum / 2 ? numItems : pivot + numItemsInBlocks);
 
 				std::inplace_merge(first + startPos, first + pivot, first + endPos);
 			}
@@ -101,7 +101,7 @@ namespace aten
 		auto rootSurfaceArea = rootBox.computeSurfaceArea();
 
 		// TODO
-		const real areaAlpha = 1e-5;
+		const real areaAlpha = real(1e-5);
 
 		struct SBVHEntry {
 			SBVHEntry() {}
@@ -118,6 +118,8 @@ namespace aten
 
 		uint32_t numNodes = 1;
 
+		m_refIndexNum = 0;
+
 		while (stackpos >= 0)
 		{
 			auto top = stack[--stackpos];
@@ -125,6 +127,7 @@ namespace aten
 
 			// enough triangles so far.
 			if (node.refIds.size() <= m_maxTriangles) {
+				m_refIndexNum += (uint32_t)node.refIds.size();
 				continue;
 			}
 
@@ -292,10 +295,10 @@ namespace aten
 
 		aabb bbCentroid = node.bbox;
 
-		auto refNum = node.refIds.size();
+		uint32_t refNum = (uint32_t)node.refIds.size();
 
 		// compute the aabb of all centroids.
-		for (int i = 0; i < refNum; i++) {
+		for (uint32_t i = 0; i < refNum; i++) {
 			auto id = node.refIds[i];
 			const auto& ref = m_refs[id];
 			auto center = ref.bbox.getCenter();
@@ -320,12 +323,12 @@ namespace aten
 			const real invLen = real(1) / (centroidMax[dim] - centroidMin[dim]);
 
 			// clear bins;
-			for (int i = 0; i < m_numBins; i++) {
+			for (uint32_t i = 0; i < m_numBins; i++) {
 				bins[i] = Bin();
 			}
 
 			// distribute references in the bins based on the centroids.
-			for (int i = 0; i < refNum; i++) {
+			for (uint32_t i = 0; i < refNum; i++) {
 				// ノードに含まれる三角形のAABBについて計算.
 
 				auto id = node.refIds[i];
@@ -335,7 +338,7 @@ namespace aten
 
 				// 分割情報(bins)へのインデックス.
 				// 最小端点から三角形AABBの中心への距離を軸の長さで正規化することで計算.
-				int binIdx = m_numBins * ((center[dim] - centroidMin[dim]) * invLen);
+				int binIdx = (int)(m_numBins * ((center[dim] - centroidMin[dim]) * invLen));
 
 				binIdx = std::min<int>(binIdx, m_numBins - 1);
 				AT_ASSERT(binIdx >= 0);
@@ -363,7 +366,7 @@ namespace aten
 			auto leftBox = bins[0].bbox;
 
 			// find split.
-			for (int i = 0; i < m_numBins - 1; i++) {
+			for (uint32_t i = 0; i < m_numBins - 1; i++) {
 				// 一つずつ範囲を広げていく.
 				leftBox.expand(bins[i].bbox);
 
@@ -412,7 +415,7 @@ namespace aten
 
 		std::vector<Bin> bins(m_numBins);
 
-		int refNum = node.refIds.size();
+		uint32_t refNum = (uint32_t)node.refIds.size();
 
 		const auto& box = node.bbox;
 		const auto boxMin = box.minPos();
@@ -433,11 +436,11 @@ namespace aten
 			const auto lenghthPerBin = segmentLength / (float)m_numBins;
 
 			// clear bins;
-			for (int i = 0; i < m_numBins; i++) {
+			for (uint32_t i = 0; i < m_numBins; i++) {
 				bins[i] = Bin();
 			}
 
-			for (int i = 0; i < refNum; i++) {
+			for (uint32_t i = 0; i < refNum; i++) {
 				const auto id = node.refIds[i];
 				const auto& ref = m_refs[id];
 
@@ -447,8 +450,8 @@ namespace aten
 				// split each triangle into references.
 				// each triangle will be recorded into multiple bins.
 				// 三角形が入る分割情報のインデックス範囲を計算.
-				int binStartIdx = m_numBins * ((triMin - boxMin[dim]) * invLen);
-				int binEndIdx = m_numBins * ((triMax - boxMin[dim]) * invLen);
+				int binStartIdx = (int)(m_numBins * ((triMin - boxMin[dim]) * invLen));
+				int binEndIdx = (int)(m_numBins * ((triMax - boxMin[dim]) * invLen));
 
 				binStartIdx = aten::clamp<int>(binStartIdx, 0, m_numBins - 1);
 				binEndIdx = aten::clamp<int>(binEndIdx, 0, m_numBins - 1);
@@ -496,7 +499,7 @@ namespace aten
 			auto leftBox = bins[0].bbox;
 
 			// find split.
-			for (int n = 0; n < m_numBins - 1; n++) {
+			for (uint32_t n = 0; n < m_numBins - 1; n++) {
 				const int rightCount = bins[n + 1].end;
 				leftCount += bins[n].start;
 
@@ -542,10 +545,10 @@ namespace aten
 		real rightSurfaceArea = rightBB.computeSurfaceArea();
 		real leftSurfaceArea = leftBB.computeSurfaceArea();
 
-		int refNum = node.refIds.size();
+		uint32_t refNum = (uint32_t)node.refIds.size();
 
 		// distribute the refenreces to left, right or both children.
-		for (int i = 0; i < refNum; i++) {
+		for (uint32_t i = 0; i < refNum; i++) {
 			const auto refIdx = node.refIds[i];
 			const auto& ref = m_refs[refIdx];
 
@@ -622,7 +625,7 @@ namespace aten
 					m_refs.push_back(rightRef);
 
 					leftList.push_back(refIdx);
-					rightList.push_back(m_refs.size() - 1);
+					rightList.push_back((uint32_t)m_refs.size() - 1);
 				}
 			}
 		}
@@ -658,7 +661,7 @@ namespace aten
 			auto center = ref.bbox.getCenter();
 
 			// compute the bin index of the current reference and put to EITHER left OR right
-			int binIdx = m_numBins * ((center[axis] - bbCentroid.minPos()[axis]) * invLen);
+			int binIdx = (int)(m_numBins * ((center[axis] - bbCentroid.minPos()[axis]) * invLen));
 
 			binIdx = aten::clamp<int>(binIdx, 0, m_numBins - 1);
 
@@ -667,6 +670,108 @@ namespace aten
 			}
 			else {
 				rightList.push_back(id);
+			}
+		}
+	}
+
+	void sbvh::convert(
+		std::vector<ThreadedSbvhNode>& nodes,
+		std::vector<int>& indices)
+	{
+		indices.resize(m_refIndexNum);
+		nodes.resize(m_nodes.size());
+
+		// in order traversal to index nodes
+		std::vector<int> inOrderIndices;
+		getOrderIndex(inOrderIndices);
+
+		struct ThreadedEntry {
+			ThreadedEntry() {}
+
+			ThreadedEntry(int idx, int _parentSiblind)
+				: nodeIdx(idx), parentSibling(_parentSiblind)
+			{}
+
+			int nodeIdx{ -1 };
+			int parentSibling{ -1 };
+		} stack[128];
+
+		int stackpos = 1;
+
+		int refIndicesCount = 0;
+		int nodeCount = 0;
+
+		stack[0] = ThreadedEntry(0, -1);
+
+		while (stackpos > 0) {
+			auto entry = stack[stackpos - 1];
+			stackpos -= 1;
+
+			const auto& sbvhNode = m_nodes[entry.nodeIdx];
+			auto& thrededNode = nodes[entry.nodeIdx];
+
+			thrededNode.boxmin = sbvhNode.bbox.minPos();
+			thrededNode.boxmax = sbvhNode.bbox.maxPos();
+
+			if (nodeCount + 1 == nodes.size()) {
+				thrededNode.hit = -1.0f;
+			}
+			else {
+				thrededNode.hit = (float)inOrderIndices[nodeCount + 1];
+			}
+
+			if (sbvhNode.isLeaf()) {
+				if (nodeCount + 1 == nodes.size()) {
+					thrededNode.miss = -1.0f;
+				}
+				else {
+					thrededNode.miss = (float)inOrderIndices[nodeCount + 1];
+				}
+
+				thrededNode.refIdListStart = refIndicesCount;
+				thrededNode.refIdNum = (int)sbvhNode.refIds.size();
+
+				// 参照する三角形インデックスを配列に格納.
+				// 分割しているので、重複する場合もあるので、別配列に格納していく.
+				for (int i = 0; i < sbvhNode.refIds.size(); i++) {
+					const auto refId = sbvhNode.refIds[i];
+					const auto& ref = m_refs[refId];
+
+					indices[refIndicesCount++] = ref.triid;
+				}
+			}
+			else {
+				thrededNode.refIdListStart = -1;
+				thrededNode.refIdNum = 0;
+
+				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
+				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
+			}
+
+			nodeCount++;
+		}
+
+	}
+
+	void sbvh::getOrderIndex(std::vector<int>& indices)
+	{
+		indices.reserve(m_nodes.size());
+
+		int stack[128] = { 0 };
+
+		int stackpos = 1;
+
+		while (stackpos >= 0) {
+			int idx = stack[stackpos - 1];
+			stackpos -= 1;
+
+			const auto& sbvhNode = m_nodes[idx];
+
+			indices.push_back(idx);
+
+			if (!sbvhNode.isLeaf()) {
+				stack[stackpos++] = sbvhNode.right;
+				stack[stackpos++] = sbvhNode.left;
 			}
 		}
 	}

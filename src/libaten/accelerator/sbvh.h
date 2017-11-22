@@ -3,6 +3,17 @@
 #include "accelerator/bvh.h"
 
 namespace aten {
+	struct ThreadedSbvhNode {
+		aten::vec3 boxmin;		///< AABB min position.
+		float hit{ -1 };		///< Link index if ray hit.
+
+		aten::vec3 boxmax;		///< AABB max position.
+		float miss{ -1 };		///< Link index if ray miss.
+
+		int refIdListStart{ -1 };
+		int refIdNum{ 0 };
+	};
+
 	class sbvh : public accelerator {
 	public:
 		sbvh() {}
@@ -13,6 +24,10 @@ namespace aten {
 			hitable** list,
 			uint32_t num,
 			aabb* bbox = nullptr) override final;
+
+		void convert(
+			std::vector<ThreadedSbvhNode>& nodes,
+			std::vector<int>& indices);
 
 	private:
 		struct SBVHNode {
@@ -115,11 +130,15 @@ namespace aten {
 			std::vector<uint32_t>& leftList,
 			std::vector<uint32_t>& rightList);
 
+		void getOrderIndex(std::vector<int>& indices);
+
 	private:
 		bvh m_bvh;
 
 		uint32_t m_numBins{ 16 };
 		uint32_t m_maxTriangles{ 4 };
+
+		uint32_t m_refIndexNum{ 0 };
 
 		std::vector<SBVHNode> m_nodes;
 

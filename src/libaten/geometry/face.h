@@ -57,7 +57,7 @@ namespace AT_NAME
 
 		void build(objshape* _parent);
 
-		aabb computeAABB() const;
+		aten::aabb computeAABB() const;
 
 		static const std::vector<face*>& faces()
 		{

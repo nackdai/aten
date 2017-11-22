@@ -1,6 +1,7 @@
 #pragma once
 
 #include "accelerator/bvh.h"
+#include "accelerator/threaded_bvh.h"
 
 namespace aten {
 	struct ThreadedSbvhNode {
@@ -10,9 +11,12 @@ namespace aten {
 		aten::vec3 boxmax;		///< AABB max position.
 		float miss{ -1 };		///< Link index if ray miss.
 
-		int refIdListStart{ -1 };
-		int refIdNum{ 0 };
+		float refIdListStart{ -1.0f };
+		float refIdNum{ 0.0f };
+		float parent{ -1.0f };
+		float padding;
 	};
+	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
 	class sbvh : public accelerator {
 	public:
@@ -135,13 +139,18 @@ namespace aten {
 	private:
 		bvh m_bvh;
 
+		// 分割最大数.
 		uint32_t m_numBins{ 16 };
+
+		// ノード当たりの最大三角形数.
 		uint32_t m_maxTriangles{ 4 };
 
 		uint32_t m_refIndexNum{ 0 };
 
 		std::vector<SBVHNode> m_nodes;
 
+		// 三角形情報リスト.
+		// ここでいう三角形情報とは分割された or されていない三角形の情報.
 		std::vector<Reference> m_refs;
 	};
 }

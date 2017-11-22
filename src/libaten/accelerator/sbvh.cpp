@@ -703,6 +703,8 @@ namespace aten
 
 		stack[0] = ThreadedEntry(0, -1);
 
+		nodes[0].parent = -1;
+
 		while (stackpos > 0) {
 			auto entry = stack[stackpos - 1];
 			stackpos -= 1;
@@ -728,8 +730,8 @@ namespace aten
 					thrededNode.miss = (float)inOrderIndices[nodeCount + 1];
 				}
 
-				thrededNode.refIdListStart = refIndicesCount;
-				thrededNode.refIdNum = (int)sbvhNode.refIds.size();
+				thrededNode.refIdListStart = (float)refIndicesCount;
+				thrededNode.refIdNum = (float)sbvhNode.refIds.size();
 
 				// 参照する三角形インデックスを配列に格納.
 				// 分割しているので、重複する場合もあるので、別配列に格納していく.
@@ -746,6 +748,9 @@ namespace aten
 
 				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
+
+				nodes[sbvhNode.right].parent = (float)entry.nodeIdx;
+				nodes[sbvhNode.left].parent = (float)entry.nodeIdx;
 			}
 
 			nodeCount++;

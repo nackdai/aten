@@ -821,4 +821,162 @@ namespace aten
 			}
 		}
 	}
+
+	bool sbvh::hit(
+		const ray& r,
+		real t_min, real t_max,
+		Intersection& isect) const
+	{
+		auto& shapes = transformable::getShapes();
+		auto& prims = face::faces();
+
+		auto& mtxs = m_bvh.getMatrices();
+
+		const auto& topLayerBvhNode = m_bvh.getNodes()[0];
+
+		real hitt = AT_MATH_INF;
+
+		int nodeid = 0;
+
+		for (;;) {
+			const ThreadedBvhNode* node = nullptr;
+
+			if (nodeid >= 0) {
+				node = &topLayerBvhNode[nodeid];
+			}
+
+			if (!node) {
+				break;
+			}
+
+			bool isHit = false;
+
+			if (node->isLeaf()) {
+				Intersection isectTmp;
+
+				auto s = shapes[(int)node->shapeid];
+
+				if (node->exid >= 0) {
+					// Traverse external linear bvh list.
+					const auto& param = s->getParam();
+
+					int mtxid = param.mtxid;
+
+					aten::ray transformedRay;
+
+					if (mtxid >= 0) {
+						const auto& mtxW2L = mtxs[mtxid * 2 + 1];
+
+						transformedRay = mtxW2L.applyRay(r);
+					}
+					else {
+						transformedRay = r;
+					}
+
+					isHit = hit(
+						(int)node->exid,
+						transformedRay,
+						t_min, t_max,
+						isectTmp);
+				}
+				else if (node->primid >= 0) {
+					// Hit test for a primitive.
+					auto prim = (hitable*)prims[(int)node->primid];
+					isHit = prim->hit(r, t_min, t_max, isectTmp);
+					if (isHit) {
+						isectTmp.objid = s->id();
+					}
+				}
+				else {
+					// Hit test for a shape.
+					isHit = s->hit(r, t_min, t_max, isectTmp);
+				}
+
+				if (isHit) {
+					if (isectTmp.t < isect.t) {
+						isect = isectTmp;
+						isect.objid = s->id();
+						t_max = isect.t;
+					}
+				}
+			}
+			else {
+				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+			}
+
+			if (isHit) {
+				nodeid = (int)node->hit;
+			}
+			else {
+				nodeid = (int)node->miss;
+			}
+		}
+
+		return (isect.objid >= 0);
+	}
+
+	bool sbvh::hit(
+		int exid,
+		const ray& r,
+		real t_min, real t_max,
+		Intersection& isect) const
+	{
+		auto& shapes = transformable::getShapes();
+		auto& prims = face::faces();
+
+		exid -= 1;
+
+		real hitt = AT_MATH_INF;
+
+		int nodeid = 0;
+
+		for (;;) {
+			const ThreadedSbvhNode* node = nullptr;
+
+			if (nodeid >= 0) {
+				node = &m_threadedNodes[exid][nodeid];
+			}
+
+			if (!node) {
+				break;
+			}
+
+			bool isHit = false;
+
+			if (node->isLeaf()) {
+				Intersection isectTmp;
+
+				int num = (int)node->refIdNum;
+
+				for (int i = 0; i < num; i++) {
+					int pos = (int)node->refIdListStart + i;
+					int triid = m_refIndices[pos];
+
+					auto prim = prims[triid];
+					isHit = prim->hit(r, t_min, t_max, isectTmp);
+
+					isectTmp.meshid = prim->param.gemoid;
+				}
+
+				if (isHit) {
+					if (isectTmp.t < isect.t) {
+						isect = isectTmp;
+						t_max = isect.t;
+					}
+				}
+			}
+			else {
+				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
+			}
+
+			if (isHit) {
+				nodeid = (int)node->hit;
+			}
+			else {
+				nodeid = (int)node->miss;
+			}
+		}
+
+		return (isect.objid >= 0);
+	}
 }

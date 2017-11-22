@@ -53,11 +53,11 @@ namespace aten {
 			m_bvh.drawAABB(func, mtxL2W);
 		}
 
-		std::vector<std::vector<ThreadedBvhNode>>& getNodes()
+		const std::vector<std::vector<ThreadedBvhNode>>& getNodes() const
 		{
 			return m_listThreadedBvhNode;
 		}
-		std::vector<aten::mat4>& getMatrices()
+		const std::vector<aten::mat4>& getMatrices() const
 		{
 			return m_mtxs;
 		}

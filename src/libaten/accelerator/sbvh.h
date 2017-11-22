@@ -14,6 +14,11 @@ namespace aten {
 		float refIdNum{ 0.0f };
 		float parent{ -1.0f };
 		float padding;
+
+		bool isLeaf() const
+		{
+			return refIdNum > 0;
+		}
 	};
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
@@ -27,6 +32,11 @@ namespace aten {
 			hitable** list,
 			uint32_t num,
 			aabb* bbox = nullptr) override final;
+
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const override;
 
 		ThreadedBVH& getTopLayer()
 		{
@@ -42,6 +52,12 @@ namespace aten {
 			std::vector<ThreadedSbvhNode>& nodes,
 			int offset,
 			std::vector<int>& indices) const;
+
+		bool hit(
+			int exid,
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const;
 
 		struct SBVHNode {
 			SBVHNode() {}

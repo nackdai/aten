@@ -236,4 +236,18 @@ namespace AT_NAME
 
 		return idx;
 	}
+
+	aabb face::computeAABB() const
+	{
+		const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
+		const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
+		const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
+
+		auto vmin = aten::min(aten::min(v0.pos, v1.pos), v2.pos);
+		auto vmax = aten::max(aten::max(v0.pos, v1.pos), v2.pos);
+
+		aabb ret(vmin, vmax);
+
+		return ret;
+	}
 }

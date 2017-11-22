@@ -242,6 +242,7 @@
     <ClInclude Include="..\src\libaten\accelerator\CullingFrusta.h" />
     <ClInclude Include="..\src\libaten\accelerator\GpuPayloadDefs.h" />
     <ClInclude Include="..\src\libaten\accelerator\qbvh.h" />
+    <ClInclude Include="..\src\libaten\accelerator\sbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\stackless_bvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\stackless_qbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h" />
@@ -354,6 +355,7 @@
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\CullingFrusta.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />

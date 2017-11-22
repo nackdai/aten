@@ -158,9 +158,19 @@ namespace aten {
 			return m_min;
 		}
 
+		vec3& minPos()
+		{
+			return m_min;
+		}
+
 		const vec3& maxPos() const
 		{
 			return m_max;
+		}
+
+		vec3& maxPos()
+		{
+			return m_min;
 		}
 
 		vec3 getCenter() const
@@ -190,6 +200,11 @@ namespace aten {
 			m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
 		}
 
+		bool isValid() const
+		{
+			return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
+		}
+
 		real getDiagonalLenght() const
 		{
 			auto ret = length(m_max - m_min);
@@ -199,6 +214,15 @@ namespace aten {
 		void expand(const aabb& box)
 		{
 			*this = merge(*this, box);
+		}
+
+		void expand(const vec3& v)
+		{
+			vec3 _min = aten::min(m_min, v);
+			vec3 _max = aten::max(m_max, v);
+
+			m_min = _min;
+			m_max = _max;
 		}
 
 		static aabb merge(const aabb& box0, const aabb& box1)

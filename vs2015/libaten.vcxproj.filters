@@ -410,6 +410,9 @@
     <ClInclude Include="..\src\libaten\visualizer\RasterizeRenderer.h">
       <Filter>visualizer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\accelerator\sbvh.h">
+      <Filter>accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -648,6 +651,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\RasterizeRenderer.cpp">
       <Filter>visualizer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp">
+      <Filter>accelerator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

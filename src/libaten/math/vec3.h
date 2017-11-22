@@ -221,6 +221,28 @@ namespace aten {
 		return std::move(ret);
 	}
 
+	union _vec3_cmp_res {
+		struct {
+			uint8_t _0 : 1;
+			uint8_t _1 : 1;
+			uint8_t _2 : 1;
+			uint8_t padding : 5;
+		};
+		uint8_t f;
+	};
+
+	inline int cmpGEQ(const vec3& a, const vec3& b)
+	{
+		_vec3_cmp_res res;
+
+		res.f = 0;
+		res._0 = (a.x >= b.x);
+		res._1 = (a.y >= b.y);
+		res._2 = (a.z >= b.z);
+
+		return res.f;
+	}
+
 	// 直行ベクトルを計算.
 	inline AT_DEVICE_API vec3 getOrthoVector(const vec3& n)
 	{

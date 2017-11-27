@@ -15,7 +15,7 @@ if not defined CONFIG (
 )
 
 if not defined PLATFORM (
-    set PLATFORM=Win32
+    set PLATFORM=x64
 )
 
 rem glfw =============================

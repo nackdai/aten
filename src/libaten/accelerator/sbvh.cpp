@@ -2,7 +2,7 @@
 
 #include <numeric>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten
 {
@@ -12,8 +12,8 @@ namespace aten
 		real& overlap)
 	{
 		aabb delta = aabb(
-			aten::min(box0.minPos(), box1.minPos()),
-			aten::max(box0.maxPos(), box1.maxPos()));
+			aten::max(box0.minPos(), box1.minPos()),
+			aten::min(box0.maxPos(), box1.maxPos()));
 
 		if (delta.isValid()) {
 			overlap = delta.computeSurfaceArea();
@@ -26,14 +26,26 @@ namespace aten
 	template <class Iter, class Cmp>
 	void mergeSort(Iter first, Iter last, Cmp cmp)
 	{
+#if defined(ENABLE_OMP)
 		const auto numThreads = ::omp_get_max_threads();
+#else
+		const auto numThreads = 8;
+#endif
+
 		const auto numItems = last - first;
 		const auto numItemPerThread = numItems / numThreads;
 
 		// Sort each blocks.
+#if defined(ENABLE_OMP)
 #pragma omp parallel num_threads(numThreads)
 		{
 			const auto idx = ::omp_get_thread_num();
+#else
+		for (int i = 0; i < numThreads; i++)
+		{
+			const auto idx = i;
+#endif
+		
 			const auto startPos = idx * numItemPerThread;
 			const auto endPos = (idx + 1 == numThreads ? numItems : startPos + numItemPerThread);
 
@@ -48,10 +60,15 @@ namespace aten
 			const auto numItemsInBlocks = numItems / blockNum;
 
 			// ２つのブロックを１つにマージする.
+#if defined(ENABLE_OMP)
 #pragma omp parallel num_threads(blockNum / 2)
 			{
 				const auto idx = ::omp_get_thread_num();
-
+#else
+			for (int i = 0; i < numThreads; i++)
+			{
+				const auto idx = i;
+#endif
 				// ２つのブロックを１つにマージするので、numItemsInBlocks * 2 となる.
 				auto startPos = idx * numItemsInBlocks * 2;
 
@@ -81,10 +98,7 @@ namespace aten
 			// Build top layer bvh.
 
 			m_bvh.disableLayer();
-
-			m_isNested = true;
 			m_bvh.build(list, num, bbox);
-			m_isNested = false;
 
 			const auto& nestedBvh = m_bvh.getNestedAccel();
 
@@ -150,7 +164,7 @@ namespace aten
 			uint32_t nodeIdx;
 		} stack[128];
 
-		uint32_t stackpos = 1;
+		int stackpos = 1;
 		stack[0] = SBVHEntry(0);
 
 		m_nodes.push_back(SBVHNode());
@@ -160,7 +174,7 @@ namespace aten
 
 		m_refIndexNum = 0;
 
-		while (stackpos >= 0)
+		while (stackpos > 0)
 		{
 			auto top = stack[--stackpos];
 			auto& node = m_nodes[top.nodeIdx];
@@ -333,7 +347,7 @@ namespace aten
 	{
 		std::vector<Bin> bins(m_numBins);
 
-		aabb bbCentroid = node.bbox;
+		aabb bbCentroid = aabb(node.bbox.maxPos(), node.bbox.minPos());
 
 		uint32_t refNum = (uint32_t)node.refIds.size();
 
@@ -498,7 +512,7 @@ namespace aten
 
 				AT_ASSERT(binStartIdx <= binEndIdx);
 
-				for (int n = binStartIdx; n < binEndIdx; n++) {
+				for (int n = binStartIdx; n <= binEndIdx; n++) {
 					const auto binMin = boxMin[dim] + n * lenghthPerBin;
 					const auto binMax = boxMin[dim] + (n + 1) * lenghthPerBin;
 					AT_ASSERT(binMin <= binMax);
@@ -509,7 +523,7 @@ namespace aten
 						bins[n].bbox.minPos()[dim] = binMin;
 					}
 
-					if (bins[n].bbox.maxPos()[dim] < binMax) {
+					if (bins[n].bbox.maxPos()[dim] > binMax) {
 						bins[n].bbox.maxPos()[dim] = binMax;
 					}
 				}
@@ -522,7 +536,6 @@ namespace aten
 			// augment the bins from right to left.
 
 			bins[m_numBins - 1].accum = bins[m_numBins - 1].bbox;
-			bins[m_numBins - 1].end = bins[m_numBins - 1].start;
 
 			for (int n = m_numBins - 2; n >= 0; n--) {
 				// ここまでのAABB全体サイズ.
@@ -532,7 +545,7 @@ namespace aten
 				bins[n].accum.expand(bins[n].bbox);
 
 				// ここまでの三角形数.
-				bins[n].end += bins[n].start + bins[n + 1].end;
+				bins[n].end += bins[n + 1].end;
 			}
 
 			int leftCount = 0;
@@ -680,7 +693,7 @@ namespace aten
 	{
 		std::vector<Bin> bins(m_numBins);
 
-		aabb bbCentroid = node.bbox;
+		aabb bbCentroid = aabb(node.bbox.maxPos(), node.bbox.minPos());
 
 		const auto refNum = node.refIds.size();
 
@@ -772,7 +785,7 @@ namespace aten
 				}
 
 				thrededNode.refIdListStart = (float)refIndicesCount + offset;
-				thrededNode.refIdNum = (float)sbvhNode.refIds.size();
+				thrededNode.refIdListEnd = thrededNode.refIdListStart + (float)sbvhNode.refIds.size();
 
 				// 参照する三角形インデックスを配列に格納.
 				// 分割しているので、重複する場合もあるので、別配列に格納していく.
@@ -785,7 +798,7 @@ namespace aten
 			}
 			else {
 				thrededNode.refIdListStart = -1;
-				thrededNode.refIdNum = 0;
+				thrededNode.refIdListEnd = -1;
 
 				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
@@ -946,11 +959,11 @@ namespace aten
 			if (node->isLeaf()) {
 				Intersection isectTmp;
 
-				int num = (int)node->refIdNum;
+				int start = (int)node->refIdListStart;
+				int end = (int)node->refIdListEnd;
 
-				for (int i = 0; i < num; i++) {
-					int pos = (int)node->refIdListStart + i;
-					int triid = m_refIndices[pos];
+				for (int i = start; i < end; i++) {
+					int triid = m_refIndices[i];
 
 					auto prim = prims[triid];
 					isHit = prim->hit(r, t_min, t_max, isectTmp);

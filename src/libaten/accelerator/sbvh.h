@@ -11,20 +11,20 @@ namespace aten {
 		float miss{ -1 };		///< Link index if ray miss.
 
 		float refIdListStart{ -1.0f };
-		float refIdNum{ 0.0f };
+		float refIdListEnd{ -1.0f };
 		float parent{ -1.0f };
 		float padding;
 
 		bool isLeaf() const
 		{
-			return refIdNum > 0;
+			return refIdListStart > 0;
 		}
 	};
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
 	class sbvh : public accelerator {
 	public:
-		sbvh() {}
+		sbvh() : accelerator(AccelType::Sbvh) {}
 		virtual ~sbvh() {}
 
 	public:
@@ -164,13 +164,11 @@ namespace aten {
 	private:
 		ThreadedBVH m_bvh;
 
-		bool m_isNested{ false };
-
 		// 分割最大数.
 		uint32_t m_numBins{ 16 };
 
 		// ノード当たりの最大三角形数.
-		uint32_t m_maxTriangles{ 4 };
+		uint32_t m_maxTriangles{ 8 };
 
 		uint32_t m_refIndexNum{ 0 };
 

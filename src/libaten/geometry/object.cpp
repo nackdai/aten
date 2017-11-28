@@ -40,7 +40,9 @@ namespace AT_NAME
 
 		param.primnum = m_triangles;
 
+		m_accel->asNested();
 		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
+
 		bbox = m_accel->getBoundingbox();
 	}
 

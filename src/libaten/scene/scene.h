@@ -7,63 +7,6 @@
 #include "light/ibl.h"
 
 namespace AT_NAME {
-#if 0
-	class LinearList : public aten::accelerator {
-	public:
-		LinearList() {}
-		~LinearList() {}
-
-		virtual void build(
-			aten::bvhnode** list,
-			uint32_t num) override final
-		{
-			for (uint32_t i = 0; i < num; i++) {
-				m_objs.push_back(list[i]);
-			}
-		}
-
-		virtual aten::aabb getBoundingbox() const override final
-		{
-			// TODO
-			AT_ASSERT(false);
-			return std::move(aten::aabb());
-		}
-
-		virtual bool hit(
-			const aten::ray& r,
-			real t_min, real t_max,
-			aten::hitrecord& rec,
-			aten::Intersection& isect) const override final
-		{
-			bool isHit = false;
-
-			aten::hitrecord tmp;
-			aten::Intersection tmpOpt;
-
-			for (size_t i = 0; i < m_objs.size(); i++) {
-				auto o = m_objs[i];
-				if (o->hit(r, t_min, t_max, tmp, tmpOpt)) {
-					if (tmp.t < rec.t) {
-						rec = tmp;
-						rec.obj = o;
-
-						isect = tmpOpt;
-
-						t_max = tmp.t;
-
-						isHit = true;
-					}
-				}
-			}
-
-			return isHit;
-		}
-
-	private:
-		std::vector<aten::bvhnode*> m_objs;
-	};
-#endif
-
 	class scene {
 	public:
 		scene() {}
@@ -229,7 +172,10 @@ namespace AT_NAME {
 	template <typename ACCEL>
 	class AcceleratedScene : public scene {
 	public:
-		AcceleratedScene() {}
+		AcceleratedScene()
+		{
+			accelerator::setInternalAccelType(m_accel.getAccelType());
+		}
 		virtual ~AcceleratedScene() {}
 
 	public:

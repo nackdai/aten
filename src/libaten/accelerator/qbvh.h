@@ -104,7 +104,7 @@ namespace aten {
 
 	class qbvh : public accelerator {
 	public:
-		qbvh() {}
+		qbvh() : accelerator(AccelType::Qbvh) {}
 		virtual ~qbvh() {}
 
 	public:

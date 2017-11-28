@@ -6,13 +6,45 @@
 
 namespace aten {
 	class accelerator : public hitable {
-	public:
+		friend class object;
+		template<typename ACCEL> friend class AcceleratedScene;
+
+	private:
 		accelerator() {}
+
+	protected:
+		enum AccelType {
+			Bvh,
+			Qbvh,
+			Sbvh,
+			ThreadedBvh,
+			StacklessBvh,
+			StacklessQbvh,
+		};
+
+		accelerator(AccelType type)
+		{
+			m_type = type;
+		}
 		virtual ~accelerator() {}
 
-	public:
+		AccelType m_type{ AccelType::Bvh };
+		bool m_isNested{ false };
+
+	private:
+		static AccelType s_internalType;
+
 		static accelerator* createAccelerator();
 
+		static void setInternalAccelType(AccelType type);
+		static AccelType getInternalAccelType();
+
+		void asNested()
+		{
+			m_isNested = true;
+		}
+
+	public:
 		virtual void build(
 			hitable** list,
 			uint32_t num,
@@ -51,6 +83,11 @@ namespace aten {
 		{
 			AT_ASSERT(false);
 			return std::move(ResultIntersectTestByFrustum());
+		}
+
+		AccelType getAccelType()
+		{
+			return m_type;
 		}
 	};
 }

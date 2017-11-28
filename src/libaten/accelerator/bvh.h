@@ -162,7 +162,7 @@ namespace aten {
 		friend class ThreadedBVH;
 
 	public:
-		bvh() {}
+		bvh() : accelerator(AccelType::Bvh) {}
 		virtual ~bvh() {}
 
 	public:

@@ -24,7 +24,7 @@ namespace aten {
 
 	class ThreadedBVH : public accelerator {
 	public:
-		ThreadedBVH() {}
+		ThreadedBVH() : accelerator(AccelType::ThreadedBvh) {}
 		virtual ~ThreadedBVH() {}
 
 	public:

@@ -30,7 +30,7 @@ namespace aten {
 
 	class StacklessBVH : public accelerator {
 	public:
-		StacklessBVH() {}
+		StacklessBVH() : accelerator(AccelType::StacklessBvh) {}
 		virtual ~StacklessBVH() {}
 
 	public:

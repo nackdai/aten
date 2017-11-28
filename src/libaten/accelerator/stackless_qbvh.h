@@ -62,7 +62,7 @@ namespace aten {
 
 	class StacklessQbvh : public accelerator {
 	public:
-		StacklessQbvh() {}
+		StacklessQbvh() : accelerator(AccelType::StacklessQbvh) {}
 		virtual ~StacklessQbvh() {}
 
 	public:

@@ -168,7 +168,7 @@ namespace aten {
 		uint32_t m_numBins{ 16 };
 
 		// ノード当たりの最大三角形数.
-		uint32_t m_maxTriangles{ 8 };
+		uint32_t m_maxTriangles{ 4 };
 
 		uint32_t m_refIndexNum{ 0 };
 

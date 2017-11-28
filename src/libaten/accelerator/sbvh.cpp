@@ -167,6 +167,7 @@ namespace aten
 		int stackpos = 1;
 		stack[0] = SBVHEntry(0);
 
+		m_nodes.reserve(m_refs.size() * 3);
 		m_nodes.push_back(SBVHNode());
 		m_nodes[0] = SBVHNode(std::move(refIndices), rootBox);
 
@@ -311,15 +312,15 @@ namespace aten
 
 			// dont with this object, deallocate memory for the current node.
 			node.refIds.clear();
+			node.setChild(leftIdx, rightIdx);
 
 			// copy node data to left and right children.
+			// ここで push_back することで、std::vector 内部のメモリ構造が変わることがあるので、参照である node の変更はこの前までに終わらせること.
 			m_nodes.push_back(SBVHNode());
 			m_nodes.push_back(SBVHNode());
 
 			m_nodes[leftIdx] = SBVHNode(std::move(leftList), objLeftBB);
 			m_nodes[rightIdx] = SBVHNode(std::move(rightList), objRightBB);
-
-			node.setChild(leftIdx, rightIdx);
 
 			stack[stackpos++].nodeIdx = leftIdx;
 			stack[stackpos++].nodeIdx = rightIdx;
@@ -800,6 +801,8 @@ namespace aten
 				thrededNode.refIdListStart = -1;
 				thrededNode.refIdListEnd = -1;
 
+				thrededNode.miss = (float)entry.parentSibling;
+
 				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
 
@@ -820,7 +823,7 @@ namespace aten
 
 		int stackpos = 1;
 
-		while (stackpos >= 0) {
+		while (stackpos > 0) {
 			int idx = stack[stackpos - 1];
 			stackpos -= 1;
 
@@ -962,13 +965,18 @@ namespace aten
 				int start = (int)node->refIdListStart;
 				int end = (int)node->refIdListEnd;
 
+				auto tmpTmax = t_max;
+
 				for (int i = start; i < end; i++) {
 					int triid = m_refIndices[i];
 
 					auto prim = prims[triid];
-					isHit = prim->hit(r, t_min, t_max, isectTmp);
+					isHit = prim->hit(r, t_min, tmpTmax, isectTmp);
 
-					isectTmp.meshid = prim->param.gemoid;
+					if (isHit) {
+						tmpTmax = isectTmp.t;
+						isectTmp.meshid = prim->param.gemoid;
+					}
 				}
 
 				if (isHit) {

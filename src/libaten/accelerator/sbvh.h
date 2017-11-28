@@ -17,7 +17,7 @@ namespace aten {
 
 		bool isLeaf() const
 		{
-			return refIdListStart > 0;
+			return refIdListStart >= 0;
 		}
 	};
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
@@ -181,7 +181,6 @@ namespace aten {
 		std::vector<Reference> m_refs;
 
 		// For layer.
-		std::vector<sbvh*> m_nestedSbvh;
 		std::vector<std::vector<ThreadedSbvhNode>> m_threadedNodes;
 		std::vector<int> m_refIndices;
 	};

@@ -2,7 +2,7 @@
 
 #include <numeric>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {
@@ -147,6 +147,9 @@ namespace aten
 
 			rootBox.expand(m_refs[i].bbox);
 		}
+
+		// Set as bounding box.
+		setBoundingBox(rootBox);
 
 		// Referenceのインデックスリストを作成.
 		std::vector<uint32_t> refIndices(m_refs.size());
@@ -971,9 +974,10 @@ namespace aten
 					int triid = m_refIndices[i];
 
 					auto prim = prims[triid];
-					isHit = prim->hit(r, t_min, tmpTmax, isectTmp);
+					auto hit = prim->hit(r, t_min, tmpTmax, isectTmp);
 
-					if (isHit) {
+					if (hit) {
+						isHit = true;
 						tmpTmax = isectTmp.t;
 						isectTmp.meshid = prim->param.gemoid;
 					}

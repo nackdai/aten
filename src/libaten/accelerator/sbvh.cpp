@@ -514,7 +514,7 @@ namespace aten
 				binStartIdx = aten::clamp<int>(binStartIdx, 0, m_numBins - 1);
 				binEndIdx = aten::clamp<int>(binEndIdx, 0, m_numBins - 1);
 
-				AT_ASSERT(binStartIdx <= binEndIdx);
+				//AT_ASSERT(binStartIdx <= binEndIdx);
 
 				for (int n = binStartIdx; n <= binEndIdx; n++) {
 					const auto binMin = boxMin[dim] + n * lenghthPerBin;
@@ -616,7 +616,7 @@ namespace aten
 				// •ªŠ„ˆÊ’u‚æ‚è¶.
 				leftList.push_back(refIdx);
 			}
-			else if (refMin >= splitCost) {
+			else if (refMin >= splitPlane) {
 				// •ªŠ„ˆÊ’u‚æ‚è‰E.
 				rightList.push_back(refIdx);
 			}

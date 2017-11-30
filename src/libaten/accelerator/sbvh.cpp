@@ -791,7 +791,7 @@ namespace aten
 #if (SBVH_TRIANGLE_NUM == 1)
 				const auto refid = sbvhNode.refIds[0];
 				const auto& ref = m_refs[refid];
-				thrededNode.triid = ref.triid;
+				thrededNode.triid = ref.triid + m_offsetTriIdx;
 #else
 				thrededNode.refIdListStart = (float)refIndicesCount + offset;
 				thrededNode.refIdListEnd = thrededNode.refIdListStart + (float)sbvhNode.refIds.size();

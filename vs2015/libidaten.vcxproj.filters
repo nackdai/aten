@@ -208,13 +208,7 @@
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\raytracing.h">
-      <Filter>kernel\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\renderer.h">
-      <Filter>kernel\renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\directlight.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h">
@@ -388,18 +382,6 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\geometry\sphere.cpp" />
     <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
-      <Filter>kernel\renderer</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\pt_geometryrendering.cu">
-      <Filter>kernel\renderer</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\pt_temporarlreprojection.cu">
-      <Filter>kernel\renderer</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\raytracing.cu">
-      <Filter>kernel\renderer</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\directlight.cu">
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\ssrt.cu">

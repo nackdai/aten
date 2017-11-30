@@ -3,10 +3,12 @@
 #include "accelerator/threaded_bvh.h"
 #include "accelerator/qbvh.h"
 #include "accelerator/stackless_bvh.h"
+#include "accelerator/sbvh.h"
 
-#define GPGPU_TRAVERSE_THREADED_BVH
+//#define GPGPU_TRAVERSE_THREADED_BVH
 //#define GPGPU_TRAVERSE_QBVH
 //#define GPGPU_TRAVERSE_STACKLESS_BVH
+#define GPGPU_TRAVERSE_SBVH
 
 namespace aten {
 #if defined(GPGPU_TRAVERSE_THREADED_BVH)
@@ -18,6 +20,10 @@ namespace aten {
 #elif defined(GPGPU_TRAVERSE_STACKLESS_BVH)
 	using GPUBvhNode = StacklessBvhNode;
 	using GPUBvh = StacklessBVH;
+#elif defined(GPGPU_TRAVERSE_SBVH)
+	using GPUBvhNode = ThreadedSbvhNode;
+	using GPUBvh = sbvh;
+	AT_STATICASSERT(sizeof(ThreadedBvhNode) == sizeof(ThreadedSbvhNode));
 #else
 	AT_STATICASSERT(false);
 #endif

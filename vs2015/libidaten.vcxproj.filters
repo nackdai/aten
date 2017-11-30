@@ -217,6 +217,12 @@
     <ClInclude Include="..\src\libidaten\kernel\ssrt.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\sbvh.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\sbvh_impl.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -386,6 +392,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\ssrt.cu">
       <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\sbvh.cu">
+      <Filter>kernel\accelerator</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

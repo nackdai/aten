@@ -1,4 +1,4 @@
-#include "kernel/pathtracing.h"
+#include "kernel/pt_ex.h"
 #include "kernel/context.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"

@@ -1,5 +1,6 @@
 #include "accelerator/sbvh.h"
 
+#include <omp.h>
 #include <numeric>
 
 //#pragma optimize( "", off)
@@ -26,25 +27,15 @@ namespace aten
 	template <class Iter, class Cmp>
 	void mergeSort(Iter first, Iter last, Cmp cmp)
 	{
-#if defined(ENABLE_OMP)
 		const auto numThreads = ::omp_get_max_threads();
-#else
-		const auto numThreads = 8;
-#endif
 
 		const auto numItems = last - first;
 		const auto numItemPerThread = numItems / numThreads;
 
 		// Sort each blocks.
-#if defined(ENABLE_OMP)
 #pragma omp parallel num_threads(numThreads)
 		{
 			const auto idx = ::omp_get_thread_num();
-#else
-		for (int i = 0; i < numThreads; i++)
-		{
-			const auto idx = i;
-#endif
 		
 			const auto startPos = idx * numItemPerThread;
 			const auto endPos = (idx + 1 == numThreads ? numItems : startPos + numItemPerThread);
@@ -60,15 +51,10 @@ namespace aten
 			const auto numItemsInBlocks = numItems / blockNum;
 
 			// ２つのブロックを１つにマージする.
-#if defined(ENABLE_OMP)
 #pragma omp parallel num_threads(blockNum / 2)
 			{
 				const auto idx = ::omp_get_thread_num();
-#else
-			for (int i = 0; i < numThreads; i++)
-			{
-				const auto idx = i;
-#endif
+
 				// ２つのブロックを１つにマージするので、numItemsInBlocks * 2 となる.
 				auto startPos = idx * numItemsInBlocks * 2;
 
@@ -982,7 +968,7 @@ namespace aten
 				Intersection isectTmp;
 
 #if (SBVH_TRIANGLE_NUM == 1)
-				auto prim = prims[node->triid];
+				auto prim = prims[(int)node->triid];
 				isHit = prim->hit(r, t_min, t_max, isectTmp);
 
 				if (isHit) {

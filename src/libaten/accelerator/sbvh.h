@@ -34,6 +34,9 @@ namespace aten {
 		}
 #endif
 	};
+
+	// NOTE
+	// GPGPU処理用に両方を同じメモリ空間上に格納するため、同じサイズでないといけない.
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
 	class sbvh : public accelerator {
@@ -55,6 +58,15 @@ namespace aten {
 		ThreadedBVH& getTopLayer()
 		{
 			return m_bvh;
+		}
+
+		const std::vector<std::vector<ThreadedSbvhNode>>& getNodes() const
+		{
+			return m_threadedNodes;
+		}
+		const std::vector<aten::mat4>& getMatrices() const
+		{
+			return m_bvh.getMatrices();
 		}
 
 	private:

@@ -102,7 +102,14 @@ namespace aten
 
 			const auto& nestedBvh = m_bvh.getNestedAccel();
 
-			m_threadedNodes.resize(nestedBvh.size());
+			// NOTE
+			// GPGPU処理用に threaded bvh(top layer) と sbvh を同じメモリ空間上に格納するため、１つのリストで管理する.
+			// そのため、+1する.
+			m_threadedNodes.resize(nestedBvh.size() + 1);
+
+			const auto& toplayer = m_bvh.getNodes()[0];
+			m_threadedNodes[0].resize(toplayer.size());
+			memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
 
 			// Convert to threaded.
 			for (int i = 0; i < nestedBvh.size(); i++) {
@@ -111,7 +118,7 @@ namespace aten
 
 				std::vector<int> indices;
 				bvh->convert(
-					m_threadedNodes[i], 
+					m_threadedNodes[i + 1], 
 					(int)m_refIndices.size(),
 					indices);
 
@@ -871,7 +878,8 @@ namespace aten
 			const ThreadedBvhNode* node = nullptr;
 
 			if (nodeid >= 0) {
-				node = &topLayerBvhNode[nodeid];
+				//node = &topLayerBvhNode[nodeid];
+				node = (const ThreadedBvhNode*)&m_threadedNodes[0][nodeid];
 			}
 
 			if (!node) {
@@ -952,8 +960,6 @@ namespace aten
 	{
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
-
-		exid -= 1;
 
 		real hitt = AT_MATH_INF;
 

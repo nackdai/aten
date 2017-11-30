@@ -23,7 +23,6 @@ namespace aten {
 #elif defined(GPGPU_TRAVERSE_SBVH)
 	using GPUBvhNode = ThreadedSbvhNode;
 	using GPUBvh = sbvh;
-	AT_STATICASSERT(sizeof(ThreadedBvhNode) == sizeof(ThreadedSbvhNode));
 #else
 	AT_STATICASSERT(false);
 #endif

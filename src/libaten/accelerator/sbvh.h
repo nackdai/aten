@@ -2,7 +2,10 @@
 
 #include "accelerator/threaded_bvh.h"
 
+#define SBVH_TRIANGLE_NUM	(1)
+
 namespace aten {
+
 	struct ThreadedSbvhNode {
 		aten::vec3 boxmin;		///< AABB min position.
 		float hit{ -1 };		///< Link index if ray hit.
@@ -10,6 +13,16 @@ namespace aten {
 		aten::vec3 boxmax;		///< AABB max position.
 		float miss{ -1 };		///< Link index if ray miss.
 
+#if (SBVH_TRIANGLE_NUM == 1)
+		int triid{ -1 };
+		int parent{ -1 };
+		float padding[2];
+
+		bool isLeaf() const
+		{
+			return (triid >= 0);
+		}
+#else
 		float refIdListStart{ -1.0f };
 		float refIdListEnd{ -1.0f };
 		float parent{ -1.0f };
@@ -19,6 +32,7 @@ namespace aten {
 		{
 			return refIdListStart >= 0;
 		}
+#endif
 	};
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
@@ -168,7 +182,7 @@ namespace aten {
 		uint32_t m_numBins{ 16 };
 
 		// ノード当たりの最大三角形数.
-		uint32_t m_maxTriangles{ 4 };
+		uint32_t m_maxTriangles{ SBVH_TRIANGLE_NUM };
 
 		uint32_t m_refIndexNum{ 0 };
 

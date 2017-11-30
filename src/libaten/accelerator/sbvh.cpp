@@ -788,8 +788,14 @@ namespace aten
 					thrededNode.miss = (float)inOrderIndices[nodeCount + 1];
 				}
 
+#if (SBVH_TRIANGLE_NUM == 1)
+				const auto refid = sbvhNode.refIds[0];
+				const auto& ref = m_refs[refid];
+				thrededNode.triid = ref.triid;
+#else
 				thrededNode.refIdListStart = (float)refIndicesCount + offset;
 				thrededNode.refIdListEnd = thrededNode.refIdListStart + (float)sbvhNode.refIds.size();
+#endif
 
 				// 参照する三角形インデックスを配列に格納.
 				// 分割しているので、重複する場合もあるので、別配列に格納していく.
@@ -801,8 +807,12 @@ namespace aten
 				}
 			}
 			else {
+#if (SBVH_TRIANGLE_NUM == 1)
+				thrededNode.triid = -1;
+#else
 				thrededNode.refIdListStart = -1;
 				thrededNode.refIdListEnd = -1;
+#endif
 
 				thrededNode.miss = (float)entry.parentSibling;
 
@@ -965,6 +975,14 @@ namespace aten
 			if (node->isLeaf()) {
 				Intersection isectTmp;
 
+#if (SBVH_TRIANGLE_NUM == 1)
+				auto prim = prims[node->triid];
+				isHit = prim->hit(r, t_min, t_max, isectTmp);
+
+				if (isHit) {
+					isectTmp.meshid = prim->param.gemoid;
+				}
+#else
 				int start = (int)node->refIdListStart;
 				int end = (int)node->refIdListEnd;
 
@@ -982,6 +1000,7 @@ namespace aten
 						isectTmp.meshid = prim->param.gemoid;
 					}
 				}
+#endif
 
 				if (isHit) {
 					if (isectTmp.t < isect.t) {

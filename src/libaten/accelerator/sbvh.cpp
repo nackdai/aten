@@ -86,6 +86,8 @@ namespace aten
 			m_bvh.disableLayer();
 			m_bvh.build(list, num, bbox);
 
+			auto bbox = m_bvh.getBoundingbox();
+
 			const auto& nestedBvh = m_bvh.getNestedAccel();
 
 			// NOTE
@@ -102,6 +104,9 @@ namespace aten
 				// TODO
 				const auto bvh = (const sbvh*)nestedBvh[i];
 
+				auto box = bvh->getBoundingbox();
+				bbox.expand(box);
+
 				std::vector<int> indices;
 				bvh->convert(
 					m_threadedNodes[i + 1], 
@@ -110,6 +115,8 @@ namespace aten
 
 				m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
 			}
+
+			setBoundingBox(bbox);
 		}
 	}
 

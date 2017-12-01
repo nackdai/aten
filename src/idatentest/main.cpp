@@ -32,7 +32,7 @@ static uint32_t g_threadnum = 1;
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::ThreadedBVH> g_scene;
+static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 aten::ATrousDenoiser atrous;
 

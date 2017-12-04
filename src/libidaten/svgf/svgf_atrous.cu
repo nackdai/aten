@@ -103,28 +103,39 @@ inline __device__ float gaussFilter3x3(
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
 	};
 
+	static const int offsetx[] = {
+		-1, 0, 1,
+		-1, 0, 1,
+		-1, 0, 1,
+	};
+
+	static const int offsety[] = {
+		-1, -1, -1,
+		0, 0, 0,
+		1, 1, 1,
+	};
+
 	float sum = 0;
 
 	int pos = 0;
 
-	for (int y = -1; y <= 1; y++) {
-		for (int x = -1; x <= 1; x++) {
-			int xx = clamp(ix + x, 0, w - 1);
-			int yy = clamp(iy + y, 0, h - 1);
+#pragma unroll
+	for (int i = 0; i < 9; i++) {
+		int xx = clamp(ix + offsetx[i], 0, w - 1);
+		int yy = clamp(iy + offsety[i], 0, h - 1);
 
-			int idx = getIdx(xx, yy, w);
+		int idx = getIdx(xx, yy, w);
 
 #if 0
-			float tmp = aov[idx].var;
+		float tmp = aov[idx].var;
 #else
-			auto v = aov[idx].v2;
-			float tmp = v.w;
+		auto v = aov[idx].v2;
+		float tmp = v.w;
 #endif
 
-			sum += kernel[pos] * tmp;
+		sum += kernel[pos] * tmp;
 
-			pos++;
-		}
+		pos++;
 	}
 
 	return sum;
@@ -141,24 +152,34 @@ inline __device__ float gaussFilter3x3(
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
 	};
 
+	static const int offsetx[] = {
+		-1, 0, 1,
+		-1, 0, 1,
+		-1, 0, 1,
+	};
+
+	static const int offsety[] = {
+		-1, -1, -1,
+		0, 0, 0,
+		1, 1, 1,
+	};
+
 	float sum = 0;
 
 	int pos = 0;
 
 #pragma unroll
-	for (int y = -1; y <= 1; y++) {
-		for (int x = -1; x <= 1; x++) {
-			int xx = clamp(ix + x, 0, w - 1);
-			int yy = clamp(iy + y, 0, h - 1);
+	for (int i = 0; i < 9; i++) {
+		int xx = clamp(ix + offsetx[i], 0, w - 1);
+		int yy = clamp(iy + offsety[i], 0, h - 1);
 
-			int idx = getIdx(xx, yy, w);
+		int idx = getIdx(xx, yy, w);
 
-			float tmp = var[idx];
+		float tmp = var[idx];
 
-			sum += kernel[pos] * tmp;
+		sum += kernel[pos] * tmp;
 
-			pos++;
-		}
+		pos++;
 	}
 
 	return sum;
@@ -202,12 +223,15 @@ __global__ void atrousFilter(
 #if 0
 		centerColor = make_float4(aovs[idx].color, 1);
 #else
-		centerColor = aovs[idx].v2;
+		auto v2 = ((float4*)aovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 2];
+		centerColor = v2;
 #endif
 	}
 	else {
 		centerColor = clrBuffer[idx];
 	}
+
+	auto v1 = ((float4*)aovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 1];
 
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI—¹.
@@ -217,7 +241,7 @@ __global__ void atrousFilter(
 #if 0
 			centerColor *= make_float4(aovs[idx].texclr, 1);
 #else
-			centerColor *= aovs[idx].v1;
+			centerColor *= v1;
 #endif
 
 			surf2Dwrite(
@@ -271,6 +295,7 @@ __global__ void atrousFilter(
 
 	int R = 2;
 
+#if 0
 	if (isFirstIter) {
 		if (aovs[idx].temporalWeight < thresholdTemporalWeight) {
 			R *= radiusScale;
@@ -281,6 +306,28 @@ __global__ void atrousFilter(
 		for (int x = -R; x <= R; x++) {
 			int xx = clamp(ix + x * stepScale, 0, width - 1);
 			int yy = clamp(iy + y * stepScale, 0, height - 1);
+#else
+	static const int offsetx[] = {
+		-2, -1, 0, 1, 2,
+		-2, -1, 0, 1, 2,
+		-2, -1, 0, 1, 2,
+		-2, -1, 0, 1, 2,
+		-2, -1, 0, 1, 2,
+	};
+	static const int offsety[] = {
+		-2, -2, -2, -2, -2,
+		-1, -1, -1, -1, -1,
+		 0,  0,  0,  0,  0,
+		 1,  1,  1,  1,  1,
+		 2,  2,  2,  2,  2,
+	};
+
+#pragma unroll
+	for (int i = 0; i < 25; i++) {
+	{
+			int xx = clamp(ix + offsetx[i] * stepScale, 0, width - 1);
+			int yy = clamp(iy + offsety[i] * stepScale, 0, height - 1);
+#endif
 
 			float2 q = make_float2(xx, yy);
 
@@ -299,10 +346,6 @@ __global__ void atrousFilter(
 			float depth = v0.w;
 			int meshid = __float_as_int(v3.w);
 #endif
-
-			if (meshid != centerMeshId) {
-				continue;
-			}
 
 			float4 color;
 			float variance;
@@ -324,11 +367,11 @@ __global__ void atrousFilter(
 
 			float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
 
-			float Wz = min(exp(-abs(centerDepth - depth) / (sigmaZ * abs(dot(ddZ, p - q)) + 0.000001f)), 1.0f);
+			float Wz = min(expf(-abs(centerDepth - depth) / (sigmaZ * abs(dot(ddZ, p - q)) + 0.000001f)), 1.0f);
 
-			float Wn = pow(max(0.0f, dot(centerNormal, normal)), sigmaN);
+			float Wn = powf(max(0.0f, dot(centerNormal, normal)), sigmaN);
 
-			float Wl = min(exp(-abs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
+			float Wl = min(expf(-abs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
 
 			float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
 
@@ -363,7 +406,7 @@ __global__ void atrousFilter(
 #if 0
 		sumC *= make_float4(aovs[idx].texclr, 1);
 #else
-		sumC *= aovs[idx].v1;
+		sumC *= v1;
 #endif
 
 		surf2Dwrite(

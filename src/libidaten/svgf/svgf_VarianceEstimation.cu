@@ -124,10 +124,38 @@ __global__ void varianceEstimation(
 		float3 sum = make_float3(0);
 		float weight = 0.0f;
 
+#if 0
 		for (int v = -radius; v <= radius; v++)
 		{
 			for (int u = -radius; u <= radius; u++)
 			{
+#else
+		static const int offsetx[] = {
+			-3, -2, -1, 0, 1, 2, 3,
+			-3, -2, -1, 0, 1, 2, 3,
+			-3, -2, -1, 0, 1, 2, 3,
+			-3, -2, -1, 0, 1, 2, 3,
+			-3, -2, -1, 0, 1, 2, 3,
+			-3, -2, -1, 0, 1, 2, 3,
+			-3, -2, -1, 0, 1, 2, 3,
+		};
+
+		static const int offsety[] = {
+			-3, -3, -3, -3, -3, -3, -3,
+			-2,	-2,	-2,	-2,	-2,	-2,	-2,
+			-1,	-1,	-1,	-1,	-1,	-1,	-1,
+			 0,	 0,	 0,	 0,	 0,	 0,	 0,
+			 1,	 1,	 1,	 1,	 1,	 1,	 1,
+			 2,	 2,	 2,	 2,	 2,	 2,	 2,
+			 3,	 3,	 3,	 3,	 3,	 3,	 3,
+		};
+
+#pragma unroll
+		for (int i = 0; i < 49; i++) {
+		{
+				int u = offsetx[i];
+				int v = offsety[i];
+#endif
 				if (IS_IN_BOUND(ix + u, 0, width)
 					&& IS_IN_BOUND(iy + v, 0, height))
 				{

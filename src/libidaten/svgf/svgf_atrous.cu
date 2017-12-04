@@ -34,10 +34,17 @@ inline __device__ float ddx(
 
 	int leftX = x; 
 	int rightX = x + 1;
+
+#if 0
 	if ((x & 0x01) == 1) {
 		leftX = x - 1;
 		rightX = x;
 	}
+#else
+	int offset = (x & 0x01);
+	leftX -= offset;
+	rightX -= offset;
+#endif
 
 	rightX = min(rightX, w - 1);
 
@@ -68,10 +75,17 @@ inline __device__ float ddy(
 
 	int topY = y;
 	int bottomY = y + 1;
+
+#if 0
 	if ((y & 0x01) == 1) {
 		topY = y - 1;
 		bottomY = y;
 	}
+#else
+	int offset = (y & 0x01);
+	topY -= offset;
+	bottomY -= offset;
+#endif
 
 	bottomY = min(bottomY, h - 1);
 

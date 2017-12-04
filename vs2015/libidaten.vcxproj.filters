@@ -396,5 +396,8 @@
     <CudaCompile Include="..\src\libidaten\kernel\sbvh.cu">
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\svgf\svgf_ssrt.cu">
+      <Filter>svgf</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

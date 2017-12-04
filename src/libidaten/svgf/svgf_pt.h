@@ -133,6 +133,8 @@ namespace idaten
 
 		void setAovExportBuffer(GLuint gltexId);
 
+		void setGBuffer(GLuint gltexGbuffer);
+
 		Mode getMode() const
 		{
 			return m_mode;
@@ -223,6 +225,11 @@ namespace idaten
 			int bounce,
 			cudaTextureObject_t texVtxPos);
 
+		virtual void onScreenSpaceHitTest(
+			int width, int height,
+			int bounce,
+			cudaTextureObject_t texVtxPos);
+
 		virtual void onShadeMiss(
 			int width, int height,
 			int bounce);
@@ -290,8 +297,10 @@ namespace idaten
 		idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
 		idaten::TypedCudaMemory<unsigned int> m_random;
 
+		// Current AOV buffer position.
 		int m_curAOVPos{ 0 };
 
+		// AOV buffer. Current frame and previous frame.
 		idaten::TypedCudaMemory<AOV> m_aovs[2];
 
 		aten::mat4 m_mtxW2V;		// World - View.
@@ -306,6 +315,7 @@ namespace idaten
 
 		unsigned int m_frame{ 1 };
 
+		// For A-trous wavelet.
 		idaten::TypedCudaMemory<float4> m_atrousClr[2];
 		idaten::TypedCudaMemory<float> m_atrousVar[2];
 
@@ -314,9 +324,14 @@ namespace idaten
 		float m_thresholdTemporalWeight{ 0.0f };
 		int m_atrousTapRadiusScale{ 1 };
 
+		// Distance limitation to kill path.
 		float m_hitDistLimit{ AT_MATH_INF };
 
+		// AOV buffer to use in OpenGL.
 		idaten::CudaGLSurface m_aovGLBuffer;
+
+		// G-Buffer rendered by OpenGL.
+		idaten::CudaGLSurface m_gbuffer;
 
 		idaten::TypedCudaMemory<PickedInfo> m_pick;
 

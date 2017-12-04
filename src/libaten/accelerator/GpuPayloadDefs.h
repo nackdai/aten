@@ -5,10 +5,10 @@
 #include "accelerator/stackless_bvh.h"
 #include "accelerator/sbvh.h"
 
-#define GPGPU_TRAVERSE_THREADED_BVH
+//#define GPGPU_TRAVERSE_THREADED_BVH
 //#define GPGPU_TRAVERSE_QBVH
 //#define GPGPU_TRAVERSE_STACKLESS_BVH
-//#define GPGPU_TRAVERSE_SBVH
+#define GPGPU_TRAVERSE_SBVH
 
 namespace aten {
 #if defined(GPGPU_TRAVERSE_THREADED_BVH)

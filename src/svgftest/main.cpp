@@ -36,6 +36,8 @@ static idaten::SVGFPathTracing g_tracer;
 
 static aten::TAA g_taa;
 
+static aten::FBO g_fbo;
+
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
@@ -70,6 +72,12 @@ void onRun()
 
 		aten::visualizer::clear();
 	}
+
+	aten::ResterizeRenderer::draw(
+		g_tracer.frame(),
+		&g_scene,
+		&g_camera,
+		&g_fbo);
 
 	g_taa.update(
 		g_tracer.frame(),
@@ -372,6 +380,18 @@ int main()
 	aten::visualizer::addPostProc(&nlmshd);
 #endif
 
+	aten::ResterizeRenderer::init(
+		WIDTH, HEIGHT,
+		"../shader/ssrt_vs.glsl",
+		"../shader/ssrt_gs.glsl",
+		"../shader/ssrt_fs.glsl");
+
+	g_fbo.asMulti(2);
+	g_fbo.init(
+		WIDTH, HEIGHT,
+		aten::PixelFormat::rgba32f,
+		true);
+
 	aten::vec3 pos, at;
 	real vfov;
 	Scene::getCameraPosAndAt(pos, at, vfov);
@@ -465,6 +485,8 @@ int main()
 #else
 			idaten::EnvmapResource());
 #endif
+
+		g_tracer.setGBuffer(g_fbo.getTexHandle(0));
 	}
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);

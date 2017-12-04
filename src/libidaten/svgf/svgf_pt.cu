@@ -895,6 +895,11 @@ namespace idaten
 		m_aovGLBuffer.init(gltexId, CudaGLRscRegisterType::WriteOnly);
 	}
 
+	void SVGFPathTracing::setGBuffer(GLuint gltexGbuffer)
+	{
+		m_gbuffer.init(gltexGbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
+	}
+
 	static bool doneSetStackSize = false;
 
 	void SVGFPathTracing::render(
@@ -1084,32 +1089,37 @@ namespace idaten
 		int bounce,
 		cudaTextureObject_t texVtxPos)
 	{
+		if (bounce == 0) {
+			onScreenSpaceHitTest(width, height, bounce, texVtxPos);
+		}
+		else {
 #ifdef ENABLE_PERSISTENT_THREAD
-		hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
+			hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
 #else
-		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+			dim3 grid(
+				(width + block.x - 1) / block.x,
+				(height + block.y - 1) / block.y);
 
-		hitTest << <grid, block >> > (
+			hitTest << <grid, block >> > (
 #endif
-		//hitTest << <1, 1 >> > (
-			m_paths.ptr(),
-			m_isects.ptr(),
-			m_rays.ptr(),
-			m_hitbools.ptr(),
-			width, height,
-			m_shapeparam.ptr(), m_shapeparam.num(),
-			m_lightparam.ptr(), m_lightparam.num(),
-			m_nodetex.ptr(),
-			m_primparams.ptr(),
-			texVtxPos,
-			m_mtxparams.ptr(),
-			bounce,
-			m_hitDistLimit);
+				//hitTest << <1, 1 >> > (
+				m_paths.ptr(),
+				m_isects.ptr(),
+				m_rays.ptr(),
+				m_hitbools.ptr(),
+				width, height,
+				m_shapeparam.ptr(), m_shapeparam.num(),
+				m_lightparam.ptr(), m_lightparam.num(),
+				m_nodetex.ptr(),
+				m_primparams.ptr(),
+				texVtxPos,
+				m_mtxparams.ptr(),
+				bounce,
+				m_hitDistLimit);
 
-		checkCudaKernel(hitTest);
+			checkCudaKernel(hitTest);
+		}
 	}
 
 	void SVGFPathTracing::onShadeMiss(

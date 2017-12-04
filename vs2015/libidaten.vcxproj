@@ -576,6 +576,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <FastMath>true</FastMath>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
@@ -632,6 +633,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
       <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <FastMath>true</FastMath>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">

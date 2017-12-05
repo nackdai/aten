@@ -14,8 +14,10 @@ namespace aten {
 		float miss{ -1 };		///< Link index if ray miss.
 
 #if (SBVH_TRIANGLE_NUM == 1)
-		float triid{ -1 };
+		// NOTE
+		// triid‚ÌˆÊ’u‚ğThreadedBvhNode‚Æ‡‚í‚¹‚é.
 		float parent{ -1 };
+		float triid{ -1 };
 		float padding[2];
 
 		bool isLeaf() const

@@ -26,15 +26,15 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
 	while (nodeid >= 0) {
 		node0 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// xyz : boxmin, z: hit
 		node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// xyz : boxmax, z: miss
-		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);	// x : triid, y : parent, z : padding, w : padding
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);	// y : parent, y : triid, z : padding, w : padding
 
 		boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
 		boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
 
 		bool isHit = false;
 
-		if (attrib.x >= 0) {
-			int primidx = (int)attrib.x;
+		if (attrib.y >= 0) {
+			int primidx = (int)attrib.y;
 			aten::PrimitiveParamter prim;
 			prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
 			prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];

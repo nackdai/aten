@@ -537,8 +537,7 @@ __global__ void shade(
 
 #ifdef SEPARATE_SHADOWRAY_HITTEST
 		shadowRays[idx].isActive = true;
-		shadowRays[idx].org = shadowRayOrg;
-		shadowRays[idx].dir = shadowRayDir;
+		shadowRays[idx].r = aten::ray(shadowRayOrg, shadowRayDir);
 		shadowRays[idx].targetLightId = lightidx;
 		shadowRays[idx].distToLight = distToLight;
 #else
@@ -719,7 +718,7 @@ __global__ void hitShadowRay(
 		aten::Intersection isectTmp;
 
 		bool isHit = false;
-		isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, shadowRay.distToLight - AT_MATH_EPSILON);
+		isHit = intersectCloser(&ctxt, shadowRay.r, &isectTmp, shadowRay.distToLight - AT_MATH_EPSILON);
 
 		if (isHit) {
 			hitobj = &ctxt.shapes[isectTmp.objid];

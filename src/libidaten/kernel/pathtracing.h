@@ -10,7 +10,8 @@ namespace idaten
 {
 	class PathTracing : public Renderer {
 	public:
-		struct ShadowRay : public aten::ray {
+		struct ShadowRay {
+			aten::ray r;
 			aten::vec3 lightcontrib;
 			real distToLight;
 			int targetLightId;

@@ -79,6 +79,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
 	return (isect->objid >= 0);
 }
 
+#define ENABLE_PLANE_LOOP_SBVH
+
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectSBVH(
 	const Context* ctxt,
@@ -91,7 +93,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 	isect->t = t_max;
 
 	int nodeid = 0;
-	
+
 	float4 node0;	// xyz: boxmin, z: hit
 	float4 node1;	// xyz: boxmax, z: hit
 	float4 attrib;	// x:shapeid, y:primid, z:exid,	w:meshid
@@ -119,13 +121,14 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
 		bool isHit = false;
 
+#ifdef ENABLE_PLANE_LOOP_SBVH
 		if (attrib.x >= 0) {
 			// Leaf.
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
-				if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
+				//if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t))
+				{
 					if (s->mtxid >= 0) {
 						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
 						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
@@ -200,6 +203,66 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 			node = ctxt->nodes[0];
 			transformedRay = r;
 		}
+#else
+		if (attrib.x >= 0) {
+			// Leaf.
+			const auto* s = &ctxt->shapes[(int)attrib.x];
+
+			if (attrib.z >= 0) {	// exid
+									//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
+				if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
+					if (s->mtxid >= 0) {
+						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+						transformedRay.dir = normalize(transformedRay.dir);
+						transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
+					}
+					else {
+						transformedRay = r;
+					}
+
+					isHit = intersectSBVHTriangles<Type>(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+				}
+			}
+			else {
+				// TODO
+				// Only sphere...
+				//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+				isectTmp.t = AT_MATH_INF;
+				isHit = hitSphere(s, r, t_min, t_max, &isectTmp);
+				isectTmp.mtrlid = s->mtrl.idx;
+			}
+
+			bool isIntersect = (Type == idaten::IntersectType::Any
+				? isHit
+				: isectTmp.t < isect->t);
+
+			if (isIntersect) {
+				*isect = isectTmp;
+				isect->objid = (int)attrib.x;
+				isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
+
+				t_max = isect->t;
+
+				if (Type == idaten::IntersectType::Closer
+					|| Type == idaten::IntersectType::Any)
+				{
+					return true;
+				}
+			}
+	}
+		else {
+			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
+			isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
+		}
+
+		if (isHit) {
+			nodeid = (int)node0.w;
+		}
+		else {
+			nodeid = (int)node1.w;
+		}
+#endif
 	}
 
 	return (isect->objid >= 0);

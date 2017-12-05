@@ -104,8 +104,6 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 	real t = AT_MATH_INF;
 
 	cudaTextureObject_t node = ctxt->nodes[0];
-
-#ifdef ENABLE_PLANE_LOOP_BVH
 	aten::ray transformedRay = r;
 
 	int toplayerHit = -1;
@@ -123,6 +121,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 
 		bool isHit = false;
 
+#ifdef ENABLE_PLANE_LOOP_BVH
 		if (attrib.x >= 0) {
 			// Leaf.
 			const auto* s = &ctxt->shapes[(int)attrib.x];
@@ -203,24 +202,12 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 			node = ctxt->nodes[0];
 			transformedRay = r;
 		}
-	}
 #else
-	while (nodeid >= 0) {
-		node0 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 0);	// xyz : boxmin, z: hit
-		node1 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 1);	// xyz : boxmin, z: hit
-		attrib = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 2);	// x : shapeid, y : primid, z : exid, w : meshid
-
-		boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
-		boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
-
-		bool isHit = false;
-
 		if (attrib.x >= 0) {
 			// Leaf.
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-									//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
 				if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
 					aten::ray transformedRay;
 
@@ -275,8 +262,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 		else {
 			nodeid = (int)node1.w;
 		}
-	}
 #endif
+	}
 
 	return (isect->objid >= 0);
 }

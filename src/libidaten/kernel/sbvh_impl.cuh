@@ -26,7 +26,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
 	while (nodeid >= 0) {
 		node0 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// xyz : boxmin, z: hit
 		node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// xyz : boxmax, z: miss
-		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);	// y : parent, y : triid, z : padding, w : padding
+		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);	// x : parent, y : triid, z : padding, w : padding
 
 		boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
 		boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
@@ -81,7 +81,6 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
 
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectSBVH(
-	cudaTextureObject_t nodes,
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
@@ -102,10 +101,18 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
 	real t = AT_MATH_INF;
 
+	cudaTextureObject_t node = ctxt->nodes[0];
+	aten::ray transformedRay = r;
+
+	int toplayerHit = -1;
+	int toplayerMiss = -1;
+	int objid = 0;
+	int meshid = 0;
+
 	while (nodeid >= 0) {
-		node0 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);	// xyz : boxmin, z: hit
-		node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);	// xyz : boxmin, z: hit
-		attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);	// x : shapeid, y : primid, z : exid, w : meshid
+		node0 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 0);	// xyz : boxmin, z: hit
+		node1 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 1);	// xyz : boxmin, z: hit
+		attrib = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 2);	// x : shapeid, y : primid, z : exid, w : meshid
 
 		boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
 		boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
@@ -119,8 +126,6 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 			if (attrib.z >= 0) {	// exid
 				//if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
 				if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
-					aten::ray transformedRay;
-
 					if (s->mtxid >= 0) {
 						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
 						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
@@ -131,39 +136,54 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 						transformedRay = r;
 					}
 
-					isHit = intersectSBVHTriangles<Type>(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+					node = ctxt->nodes[(int)attrib.z];
+
+					objid = (int)attrib.x;
+					meshid = (int)attrib.w;
+
+					toplayerHit = (int)node0.w;
+					toplayerMiss = (int)node1.w;
+
+					nodeid = 0;
+
+					continue;
 				}
 			}
-			else {
-				// TODO
-				// Only sphere...
-				//isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
+			else if (attrib.y >= 0) {
+				int primidx = (int)attrib.y;
+				aten::PrimitiveParamter prim;
+				prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
+				prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
+
 				isectTmp.t = AT_MATH_INF;
-				isHit = hitSphere(s, r, t_min, t_max, &isectTmp);
-				isectTmp.mtrlid = s->mtrl.idx;
-			}
+				isHit = hitTriangle(&prim, ctxt, transformedRay, &isectTmp);
 
-			bool isIntersect = (Type == idaten::IntersectType::Any
-				? isHit
-				: isectTmp.t < isect->t);
+				bool isIntersect = (Type == idaten::IntersectType::Any
+					? isHit
+					: isectTmp.t < isect->t);
 
-			if (isIntersect) {
-				*isect = isectTmp;
-				isect->objid = (int)attrib.x;
-				isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
+				if (isIntersect) {
+					*isect = isectTmp;
+					isect->objid = objid;
+					isect->primid = primidx;
+					isect->mtrlid = prim.mtrlid;
 
-				t_max = isect->t;
+					isect->meshid = prim.gemoid;
+					isect->meshid = (isect->meshid < 0 ? meshid : isect->meshid);
 
-				if (Type == idaten::IntersectType::Closer
-					|| Type == idaten::IntersectType::Any)
-				{
-					return true;
+					t_max = isect->t;
+
+					if (Type == idaten::IntersectType::Closer
+						|| Type == idaten::IntersectType::Any)
+					{
+						return true;
+					}
 				}
 			}
 		}
 		else {
 			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-			isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
+			isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t);
 		}
 
 		if (isHit) {
@@ -171,6 +191,14 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 		}
 		else {
 			nodeid = (int)node1.w;
+		}
+
+		if (nodeid < 0 && toplayerHit >= 0) {
+			nodeid = isHit ? toplayerHit : toplayerMiss;
+			toplayerHit = -1;
+			toplayerMiss = -1;
+			node = ctxt->nodes[0];
+			transformedRay = r;
 		}
 	}
 
@@ -186,7 +214,6 @@ AT_CUDA_INLINE __device__ bool intersectClosestSBVH(
 	float t_min = AT_MATH_EPSILON;
 
 	bool isHit = intersectSBVH<idaten::IntersectType::Closest>(
-		ctxt->nodes[0],
 		ctxt,
 		r,
 		t_min, t_max,
@@ -204,7 +231,6 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
 	float t_min = AT_MATH_EPSILON;
 
 	bool isHit = intersectSBVH<idaten::IntersectType::Closer>(
-		ctxt->nodes[0],
 		ctxt,
 		r,
 		t_min, t_max,
@@ -222,7 +248,6 @@ AT_CUDA_INLINE __device__ bool intersectAnySBVH(
 	float t_max = AT_MATH_INF;
 
 	bool isHit = intersectSBVH<idaten::IntersectType::Any>(
-		ctxt->nodes[0],
 		ctxt,
 		r,
 		t_min, t_max,

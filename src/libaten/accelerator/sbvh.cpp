@@ -792,6 +792,7 @@ namespace aten
 				const auto refid = sbvhNode.refIds[0];
 				const auto& ref = m_refs[refid];
 				thrededNode.triid = ref.triid + m_offsetTriIdx;
+				thrededNode.isleaf = 1;
 #else
 				thrededNode.refIdListStart = (float)refIndicesCount + offset;
 				thrededNode.refIdListEnd = thrededNode.refIdListStart + (float)sbvhNode.refIds.size();
@@ -809,6 +810,7 @@ namespace aten
 			else {
 #if (SBVH_TRIANGLE_NUM == 1)
 				thrededNode.triid = -1;
+				thrededNode.isleaf = -1;
 #else
 				thrededNode.refIdListStart = -1;
 				thrededNode.refIdListEnd = -1;

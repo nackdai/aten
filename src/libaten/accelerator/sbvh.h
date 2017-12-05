@@ -4,8 +4,8 @@
 
 #define SBVH_TRIANGLE_NUM	(1)
 
-namespace aten {
-
+namespace aten
+{
 	struct ThreadedSbvhNode {
 		aten::vec3 boxmin;		///< AABB min position.
 		float hit{ -1 };		///< Link index if ray hit.
@@ -16,9 +16,16 @@ namespace aten {
 #if (SBVH_TRIANGLE_NUM == 1)
 		// NOTE
 		// triidの位置をThreadedBvhNodeと合わせる.
-		float parent{ -1 };
+
+		// NOTE
+		// ThreadedBvhNode では parent の位置に shapeid がいてGPUでは shapeid を見てリーフノードかどうか判定している.
+		// そのため、最初のfloatでリーフノードかどうかを判定するようにする.
+		// padding の部分は ThreadedBvhNode では exid なので、ここは常に -1 になるようにする.
+
+		float isleaf{ -1 };
 		float triid{ -1 };
-		float padding[2];
+		float padding{ -1 };
+		float parent{ -1 };
 
 		bool isLeaf() const
 		{

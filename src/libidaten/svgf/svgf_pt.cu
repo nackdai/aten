@@ -371,7 +371,7 @@ __global__ void shade(
 	int frame,
 	int bounce, int rrBounce,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
-	aten::MaterialParameter* mtrls,
+	const aten::MaterialParameter* __restrict__ mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -411,16 +411,22 @@ __global__ void shade(
 	idx = getIdx(ix, iy, width);
 #endif
 
-	auto& path = paths[idx];
-	const auto& ray = rays[idx];
+	__shared__ idaten::SVGFPathTracing::Path shPaths[64];
+	__shared__ idaten::SVGFPathTracing::ShadowRay shShadowRays[64];
+	__shared__ aten::MaterialParameter shMtrls[64];
+
+	shShadowRays[threadIdx.x] = shadowRays[idx];
+	shPaths[threadIdx.x] = paths[idx];
+
+	const auto ray = rays[idx];
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
-	path.sampler.init(frame, 4 + bounce * 300, scramble);
+	shPaths[threadIdx.x].sampler.init(frame, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+	shPaths[threadIdx.x].sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
 #endif
 
 	aten::hitrecord rec;
@@ -430,7 +436,7 @@ __global__ void shade(
 	auto obj = &ctxt.shapes[isect.objid];
 	evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
-	aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
+	shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
 
 	bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
@@ -438,10 +444,10 @@ __global__ void shade(
 	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = rec.normal;
 
-	if (mtrl.type != aten::MaterialType::Layer) {
-		mtrl.albedoMap = (int)(mtrl.albedoMap >= 0 ? ctxt.textures[mtrl.albedoMap] : -1);
-		mtrl.normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
-		mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
+	if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
+		shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
+		shMtrls[threadIdx.x].normalMap = (int)(shMtrls[threadIdx.x].normalMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].normalMap] : -1);
+		shMtrls[threadIdx.x].roughnessMap = (int)(shMtrls[threadIdx.x].roughnessMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].roughnessMap] : -1);
 	}
 
 	// Render AOVs.
@@ -465,11 +471,11 @@ __global__ void shade(
 		aovs[idx].meshid = isect.meshid;
 
 		// texture color.
-		auto texcolor = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
+		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
 		aovs[idx].texclr = make_float3(texcolor.x, texcolor.y, texcolor.z);
 
 		// For exporting separated albedo.
-		mtrl.albedoMap = -1;
+		shMtrls[threadIdx.x].albedoMap = -1;
 
 		if (aovExportBuffer > 0) {
 			surf2Dwrite(
@@ -481,11 +487,11 @@ __global__ void shade(
 	}
 
 	// Implicit conection to light.
-	if (mtrl.attrib.isEmissive) {
+	if (shMtrls[threadIdx.x].attrib.isEmissive) {
 		if (!isBackfacing) {
 			float weight = 1.0f;
 
-			if (bounce > 0 && !path.isSingular) {
+			if (bounce > 0 && !shPaths[threadIdx.x].isSingular) {
 				auto cosLight = dot(orienting_normal, -ray.dir);
 				auto dist2 = aten::squared_length(rec.p - ray.org);
 
@@ -497,38 +503,39 @@ __global__ void shade(
 					// p31 - p35
 					pdfLight = pdfLight * dist2 / cosLight;
 
-					weight = path.pdfb / (pdfLight + path.pdfb);
+					weight = shPaths[threadIdx.x].pdfb / (pdfLight + shPaths[threadIdx.x].pdfb);
 				}
 			}
 
-			path.contrib += path.throughput * weight * mtrl.baseColor;
+			shPaths[threadIdx.x].contrib += shPaths[threadIdx.x].throughput * weight * shMtrls[threadIdx.x].baseColor;
 		}
 
 		// When ray hit the light, tracing will finish.
-		path.isTerminate = true;
+		shPaths[threadIdx.x].isTerminate = true;
+		paths[idx] = shPaths[threadIdx.x];
 		return;
 	}
 
-	if (!mtrl.attrib.isTranslucent && isBackfacing) {
+	if (!shMtrls[threadIdx.x].attrib.isTranslucent && isBackfacing) {
 		orienting_normal = -orienting_normal;
 	}
 
 	// Apply normal map.
-	int normalMap = mtrl.normalMap;
-	if (mtrl.type == aten::MaterialType::Layer) {
+	int normalMap = shMtrls[threadIdx.x].normalMap;
+	if (shMtrls[threadIdx.x].type == aten::MaterialType::Layer) {
 		// 最表層の NormalMap を適用.
-		auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
+		auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
 		normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
 #ifdef SEPARATE_SHADOWRAY_HITTEST
-	shadowRays[idx].isActive = false;
+	shShadowRays[threadIdx.x].isActive = false;
 #endif
 
 #if 1
 	// Explicit conection to light.
-	if (!mtrl.attrib.isSingular)
+	if (!shMtrls[threadIdx.x].attrib.isSingular)
 	{
 		for (int i = 0; i < ShadowRayNum; i++) {
 			real lightSelectPdf = 1;
@@ -536,7 +543,7 @@ __global__ void shade(
 
 			// TODO
 			// Importance sampling.
-			int lightidx = aten::cmpMin<int>(path.sampler.nextSample() * lightnum, lightnum - 1);
+			int lightidx = aten::cmpMin<int>(shPaths[threadIdx.x].sampler.nextSample() * lightnum, lightnum - 1);
 			lightSelectPdf = 1.0f / lightnum;
 
 			aten::LightParameter light;
@@ -548,7 +555,7 @@ __global__ void shade(
 			light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
 			//auto light = ctxt.lights[lightidx];
 
-			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &path.sampler);
+			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &shPaths[threadIdx.x].sampler);
 
 			const auto& posLight = sampleres.pos;
 			const auto& nmlLight = sampleres.nml;
@@ -572,11 +579,11 @@ __global__ void shade(
 			auto shadowRayDir = normalize(tmp);
 
 #ifdef SEPARATE_SHADOWRAY_HITTEST
-			shadowRays[idx].isActive = true;
-			shadowRays[idx].ray[i] = aten::ray(shadowRayOrg, shadowRayDir);
-			shadowRays[idx].targetLightId[i] = lightidx;
-			shadowRays[idx].distToLight[i] = distToLight;
-			shadowRays[idx].lightcontrib[i] = aten::vec3(0);
+			shShadowRays[threadIdx.x].isActive = true;
+			shShadowRays[threadIdx.x].ray[i] = aten::ray(shadowRayOrg, shadowRayDir);
+			shShadowRays[threadIdx.x].targetLightId[i] = lightidx;
+			shShadowRays[threadIdx.x].distToLight[i] = distToLight;
+			shShadowRays[threadIdx.x].lightcontrib[i] = aten::vec3(0);
 #else
 			aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
@@ -600,10 +607,10 @@ __global__ void shade(
 			{
 				auto cosShadow = dot(orienting_normal, dirToLight);
 
-				real pdfb = samplePDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-				auto bsdf = sampleBSDF(&ctxt, &mtrl, orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+				real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+				auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
-				bsdf *= path.throughput;
+				bsdf *= shPaths[threadIdx.x].throughput;
 
 				// Get light color.
 				auto emit = sampleres.finalColor;
@@ -617,9 +624,9 @@ __global__ void shade(
 						// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 						auto misW = pdfLight / (pdfb + pdfLight);
 #ifdef SEPARATE_SHADOWRAY_HITTEST
-						shadowRays[idx].lightcontrib[i] = 
+						shShadowRays[threadIdx.x].lightcontrib[i] =
 #else
-						path.contrib +=
+						shPaths[threadIdx.x].contrib +=
 #endif
 							(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)ShadowRayNum;
 					}
@@ -639,9 +646,9 @@ __global__ void shade(
 
 							auto misW = pdfLight / (pdfb + pdfLight);
 #ifdef SEPARATE_SHADOWRAY_HITTEST
-							shadowRays[idx].lightcontrib[i] = 
+							shShadowRays[threadIdx.x].lightcontrib[i] =
 #else
-							path.contrib +=
+							shPaths[threadIdx.x].contrib +=
 #endif
 								(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)ShadowRayNum;
 						}
@@ -655,14 +662,14 @@ __global__ void shade(
 	real russianProb = real(1);
 
 	if (bounce > rrBounce) {
-		auto t = normalize(path.throughput);
+		auto t = normalize(shPaths[threadIdx.x].throughput);
 		auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
 
-		russianProb = path.sampler.nextSample();
+		russianProb = shPaths[threadIdx.x].sampler.nextSample();
 
 		if (russianProb >= p) {
-			//path.contrib = aten::vec3(0);
-			path.isTerminate = true;
+			//shPaths[threadIdx.x].contrib = aten::vec3(0);
+			shPaths[threadIdx.x].isTerminate = true;
 		}
 		else {
 			russianProb = p;
@@ -674,11 +681,11 @@ __global__ void shade(
 	sampleMaterial(
 		&sampling,
 		&ctxt,
-		&mtrl,
+		&shMtrls[threadIdx.x],
 		orienting_normal,
 		ray.dir,
 		rec.normal,
-		&path.sampler,
+		&shPaths[threadIdx.x].sampler,
 		rec.u, rec.v);
 
 	auto nextDir = normalize(sampling.dir);
@@ -686,7 +693,7 @@ __global__ void shade(
 	auto bsdf = sampling.bsdf;
 
 	real c = 1;
-	if (!mtrl.attrib.isSingular) {
+	if (!shMtrls[threadIdx.x].attrib.isSingular) {
 		// TODO
 		// AMDのはabsしているが....
 		//c = aten::abs(dot(orienting_normal, nextDir));
@@ -694,18 +701,21 @@ __global__ void shade(
 	}
 
 	if (pdfb > 0 && c > 0) {
-		path.throughput *= bsdf * c / pdfb;
-		path.throughput /= russianProb;
+		shPaths[threadIdx.x].throughput *= bsdf * c / pdfb;
+		shPaths[threadIdx.x].throughput /= russianProb;
 	}
 	else {
-		path.isTerminate = true;
+		shPaths[threadIdx.x].isTerminate = true;
 	}
 
 	// Make next ray.
 	rays[idx] = aten::ray(rec.p, nextDir);
 
-	path.pdfb = pdfb;
-	path.isSingular = mtrl.attrib.isSingular;
+	shPaths[threadIdx.x].pdfb = pdfb;
+	shPaths[threadIdx.x].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
+
+	paths[idx] = shPaths[threadIdx.x];
+	shadowRays[idx] = shShadowRays[threadIdx.x];
 }
 
 template <int ShadowRayNum>

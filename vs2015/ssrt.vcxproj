@@ -148,6 +148,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <Include>$(ProjectDir)..\src\libidaten;%(Include)</Include>
       <AdditionalOptions>-Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
@@ -174,6 +175,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>$(ProjectDir)..\src\libidaten;%(Include)</Include>
       <AdditionalOptions>-Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
@@ -206,6 +208,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <Include>$(ProjectDir)..\src\libidaten;%(Include)</Include>
       <AdditionalOptions>-Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
@@ -235,6 +238,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <Include>$(ProjectDir)..\src\libidaten;%(Include)</Include>
       <AdditionalOptions>-Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
@@ -265,6 +269,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>$(ProjectDir)..\src\libidaten;%(Include)</Include>
       <AdditionalOptions>-Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <CodeGeneration>compute_60,sm_60</CodeGeneration>
     </CudaCompile>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>

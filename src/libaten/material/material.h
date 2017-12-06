@@ -19,11 +19,11 @@ namespace aten
 
 	struct MaterialAttribute {
 		struct {
-			const uint32_t isEmissive : 1;
-			const uint32_t isSingular : 1;
-			const uint32_t isTranslucent : 1;
-			const uint32_t isGlossy : 1;
-			const uint32_t isNPR : 1;
+			uint32_t isEmissive : 1;
+			uint32_t isSingular : 1;
+			uint32_t isTranslucent : 1;
+			uint32_t isGlossy : 1;
+			uint32_t isNPR : 1;
 		};
 
 		AT_DEVICE_API MaterialAttribute(
@@ -91,7 +91,7 @@ namespace aten
 		real clearcoat{ 0.0 };			// 第二の特別な目的のスペキュラーローブ.
 		real clearcoatGloss{ 1.0 };		// クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
-		const MaterialAttribute attrib;
+		MaterialAttribute attrib;
 
 		struct {
 			uint32_t isIdealRefraction : 1;

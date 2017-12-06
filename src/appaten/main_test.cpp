@@ -134,33 +134,33 @@ int main(int argc, char* argv[])
 	aten::Blitter blitter;
 	blitter.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
-		"../shader/2dblit_fs.glsl");
+		"../shader/fullscreen_vs.glsl",
+		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
 	aten::TonemapPostProc tonemap;
 	tonemap.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/tonemap_fs.glsl");
 
 	aten::NonLocalMeanFilterShader nlmshd;
 	nlmshd.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/nlm_fs.glsl");
 
 	aten::BilateralFilterShader bishd;
 	bishd.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/bilateral_fs.glsl");
 
 	aten::BloomEffect bloom;
 	bloom.init(
 		WIDTH, HEIGHT,
 		aten::rgba32f, aten::rgba32f,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/bloomeffect_fs_4x4.glsl",
 		"../shader/bloomeffect_fs_2x2.glsl",
 		"../shader/bloomeffect_fs_HBlur.glsl",
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
 	aten::GammaCorrection gamma;
 	gamma.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/gamma_fs.glsl");
 
 	//aten::visualizer::addPostProc(&bishd);

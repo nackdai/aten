@@ -279,7 +279,7 @@ int main()
 	aten::GammaCorrection gamma;
 	gamma.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/gamma_fs.glsl");
 
 	aten::visualizer::addPostProc(&gamma);

@@ -432,8 +432,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat" />
-    <None Include="..\src\shader\2dblit_fs.glsl" />
-    <None Include="..\src\shader\2dblit_vs.glsl" />
     <None Include="..\src\shader\atrous_final_fs.glsl" />
     <None Include="..\src\shader\atrous_fs.glsl" />
     <None Include="..\src\shader\bilateral_fs.glsl" />
@@ -443,6 +441,8 @@
     <None Include="..\src\shader\bloomeffect_fs_Gauss.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_HBlur.glsl" />
     <None Include="..\src\shader\bloomeffect_fs_VBlur.glsl" />
+    <None Include="..\src\shader\fullscreen_fs.glsl" />
+    <None Include="..\src\shader\fullscreen_vs.glsl" />
     <None Include="..\src\shader\gamma_fs.glsl" />
     <None Include="..\src\shader\nlm_fs.glsl" />
     <None Include="..\src\shader\simple3d_fs.glsl" />

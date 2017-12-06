@@ -242,20 +242,20 @@ int main(int argc, char* argv[])
 	aten::TonemapPostProc tonemap;
 	tonemap.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/tonemap_fs.glsl");
 
 	aten::GammaCorrection gamma;
 	gamma.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/gamma_fs.glsl");
 
 	aten::Blitter blitter;
 	blitter.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
-		"../shader/2dblit_fs.glsl");
+		"../shader/fullscreen_vs.glsl",
+		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
 	aten::visualizer::addPostProc(&gamma);

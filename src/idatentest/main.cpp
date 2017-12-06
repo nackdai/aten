@@ -263,20 +263,20 @@ int main()
 	aten::GammaCorrection gamma;
 	gamma.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
+		"../shader/fullscreen_vs.glsl",
 		"../shader/gamma_fs.glsl");
 
 	aten::Blitter blitter;
 	blitter.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl",
-		"../shader/2dblit_fs.glsl");
+		"../shader/fullscreen_vs.glsl",
+		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
 	atrous.init(
 		WIDTH, HEIGHT,
-		"../shader/2dblit_vs.glsl", "../shader/atrous_fs.glsl",
-		"../shader/2dblit_vs.glsl", "../shader/atrous_final_fs.glsl");
+		"../shader/fullscreen_vs.glsl", "../shader/atrous_fs.glsl",
+		"../shader/fullscreen_vs.glsl", "../shader/atrous_final_fs.glsl");
 
 #ifdef ENABLE_ATROUS
 	aten::visualizer::addPostProc(&atrous);

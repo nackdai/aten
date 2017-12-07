@@ -85,6 +85,12 @@ namespace aten {
 			return std::move(ResultIntersectTestByFrustum());
 		}
 
+		virtual bool export(const char* path)
+		{
+			AT_ASSERT(false);
+			return false;
+		}
+
 		AccelType getAccelType()
 		{
 			return m_type;

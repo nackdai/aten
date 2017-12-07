@@ -27,5 +27,7 @@ namespace aten {
 
 		static bool registerObj(const std::string& name, object* obj);
 		static object* getObj(const std::string& name);
+
+		static void suppressWarnings();
 	};
 }

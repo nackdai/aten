@@ -15,6 +15,8 @@ namespace aten {
 	using AssetStorage = std::map<std::string, Asset>;
 	static AssetStorage g_assets[AssetManager::AssetType::Num];
 
+	static bool g_enableWarnings = true;
+
 	static const char* AssetTypeName[AssetManager::AssetType::Num] = {
 		"Texture",
 		"Material",
@@ -49,7 +51,9 @@ namespace aten {
 
 		if (it == mapAsset.end()) {
 			//AT_ASSERT(false);
-			AT_PRINTF("Asset is not registered [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
+			if (g_enableWarnings) {
+				AT_PRINTF("Asset is not registered [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
+			}
 			return Asset();
 		}
 
@@ -91,5 +95,10 @@ namespace aten {
 	{
 		auto& asset = getAsset(name, AssetType::Object);
 		return asset.obj;
+	}
+
+	void AssetManager::suppressWarnings()
+	{
+		g_enableWarnings = false;
 	}
 }

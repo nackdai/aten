@@ -1024,4 +1024,46 @@ namespace aten
 
 		return (isect.objid >= 0);
 	}
+
+	bool sbvh::export(const char* path)
+	{
+		if (m_threadedNodes.size() == 0) {
+			// TODO
+			// through exception...
+			AT_ASSERT(false);
+			return false;
+		}
+
+		FILE* fp = nullptr;
+		auto err = fopen_s(&fp, path, "wb");
+		if (err != 0) {
+			// TODO
+			// through exception...
+			AT_ASSERT(false);
+			return false;
+		}
+
+		SbvhFileHeader header;
+		{
+			header.magic[0] = 'S';
+			header.magic[1] = 'B';
+			header.magic[2] = 'V';
+			header.magic[3] = 'H';
+
+			header.version[0] = 0;
+			header.version[1] = 0;
+			header.version[2] = 0;
+			header.version[3] = 1;
+
+			header.nodeNum = m_threadedNodes.size();
+		}
+
+		fwrite(&header, sizeof(header), 1, fp);
+
+		fwrite(&m_threadedNodes[0], sizeof(ThreadedSbvhNode), m_threadedNodes.size(), fp);
+
+		fclose(fp);
+
+		return true;
+	}
 }

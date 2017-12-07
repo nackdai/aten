@@ -1025,7 +1025,7 @@ namespace aten
 		return (isect.objid >= 0);
 	}
 
-	bool sbvh::export(const char* path)
+	bool sbvh::exportTree(const char* path)
 	{
 		if (m_threadedNodes.size() == 0) {
 			// TODO

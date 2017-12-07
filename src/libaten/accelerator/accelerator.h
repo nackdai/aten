@@ -85,7 +85,7 @@ namespace aten {
 			return std::move(ResultIntersectTestByFrustum());
 		}
 
-		virtual bool export(const char* path)
+		virtual bool exportTree(const char* path)
 		{
 			AT_ASSERT(false);
 			return false;

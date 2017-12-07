@@ -181,4 +181,13 @@ namespace AT_NAME
 	{
 		m_accel->drawAABB(func, mtxL2W);
 	}
+
+	bool object::exportInternalAccelTree(const char* path)
+	{
+		bool result = false;
+		if (m_accel) {
+			result = m_accel->exportTree(path);
+		}
+		return result;
+	}
 }

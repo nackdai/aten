@@ -71,7 +71,7 @@ namespace aten
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
-		virtual bool export(const char* path) override final;
+		virtual bool exportTree(const char* path) override final;
 
 		ThreadedBVH& getTopLayer()
 		{

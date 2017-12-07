@@ -53,14 +53,7 @@ namespace AT_NAME
 			aten::hitable::FuncDrawAABB func,
 			const aten::mat4& mtxL2W) override final;
 
-		bool exportInternalAccelTree(const char* path)
-		{
-			bool result = false;
-			if (m_accel) {
-				result = m_accel->export(path);
-			}
-			return result;
-		}
+		bool exportInternalAccelTree(const char* path);
 
 	private:
 		void build();

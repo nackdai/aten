@@ -53,6 +53,9 @@ namespace aten
 		uint8_t version[4];
 
 		uint32_t nodeNum;
+
+		float boxmin[3];
+		float boxmax[3];
 	};
 
 	class sbvh : public accelerator {

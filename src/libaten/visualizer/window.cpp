@@ -305,4 +305,9 @@ namespace aten {
 		//CALL_GL_API(glClear(GL_COLOR_BUFFER_BIT));
 		ImGui::Render();
 	}
+
+	bool window::isInitialized()
+	{
+		return (g_window != nullptr);
+	}
 }

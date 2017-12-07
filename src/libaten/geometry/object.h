@@ -58,6 +58,8 @@ namespace AT_NAME
 	private:
 		void build();
 
+		void build(std::function<void()> f);
+
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
 			const aten::mat4& mtxL2W, 

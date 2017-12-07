@@ -185,7 +185,7 @@ namespace aten
 
 					if (!dstshape->param.mtrl.ptr) {
 						// No material, set dummy material....
-						AT_ASSERT(false);
+						//AT_ASSERT(false);
 						dstshape->setMaterial(new lambert(vec3(real(0.5))));
 					}
 				}

@@ -2,6 +2,7 @@
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 #include "geometry/vertex.h"
+#include "visualizer/window.h"
 
 #include <iterator>
 
@@ -27,6 +28,7 @@ namespace AT_NAME
 		m_aabb.init(boxmin, boxmax);
 
 		// For rasterize rendering.
+		if (window::isInitialized())
 		{
 			std::vector<uint32_t> idx;
 			idx.reserve(faces.size() * 3);

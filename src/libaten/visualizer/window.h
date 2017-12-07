@@ -207,5 +207,7 @@ namespace aten {
 		static bool SetCurrentDirectoryFromExe();
 
 		static void drawImGui();
+
+		static bool isInitialized();
 	};
 }

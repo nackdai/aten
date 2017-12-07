@@ -79,6 +79,16 @@ namespace aten
 	{
 		if (m_isNested) {
 			buildInternal(list, num);
+
+			if (isExporting()) {
+				m_threadedNodes.resize(1);
+
+				std::vector<int> indices;
+				convert(
+					m_threadedNodes[0],
+					0,
+					indices);
+			}
 		}
 		else {
 			// Build top layer bvh.
@@ -1055,12 +1065,24 @@ namespace aten
 			header.version[2] = 0;
 			header.version[3] = 1;
 
-			header.nodeNum = m_threadedNodes.size();
+			header.nodeNum = m_threadedNodes[0].size();
+
+			auto bbox = getBoundingbox();
+			auto boxmin = bbox.minPos();
+			auto boxmax = bbox.maxPos();
+
+			header.boxmin[0] = boxmin.x;
+			header.boxmin[1] = boxmin.y;
+			header.boxmin[2] = boxmin.z;
+
+			header.boxmax[0] = boxmax.x;
+			header.boxmax[1] = boxmax.y;
+			header.boxmax[2] = boxmax.z;
 		}
 
 		fwrite(&header, sizeof(header), 1, fp);
 
-		fwrite(&m_threadedNodes[0], sizeof(ThreadedSbvhNode), m_threadedNodes.size(), fp);
+		fwrite(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
 
 		fclose(fp);
 

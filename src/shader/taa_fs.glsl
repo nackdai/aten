@@ -228,6 +228,8 @@ void main()
 
 			vec4 neighbor = sampleColor(s1, uv + offset * invScr);
 #else
+			offset *= invScr;
+
 			float depth = texture2D(s2, uv + offset).w;
 
 			vec4 prevPos = computePrevScreenPos(uv + offset, depth);

@@ -10,9 +10,6 @@
 [submodule "3rdparty/stb"]
 	path = 3rdparty/stb
 	url = https://github.com/nothings/stb.git
-[submodule "3rdparty/cmdline"]
-	path = 3rdparty/cmdline
-	url = https://github.com/tanakh/cmdline.git
 [submodule "3rdparty/tinyxml2"]
 	path = 3rdparty/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git

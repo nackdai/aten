@@ -960,6 +960,9 @@ void SponzaScene::makeScene(aten::scene* scene)
 	std::vector<aten::object*> objs;
 
 	aten::ObjLoader::load(objs, "../../asset/sponza/sponza.obj");
+
+	objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh");
+
 	auto sponza = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
 	scene->add(sponza);
 }

@@ -44,42 +44,6 @@ namespace idaten
 		};
 		C_ASSERT((sizeof(Path) % 4) == 0);
 
-		struct AOV {
-			union {
-				float4 v0;
-				struct {
-					float3 normal;
-					float depth;
-				};
-			};
-
-			union {
-				float4 v1;
-				struct {
-					float3 texclr;
-					float temporalWeight;
-				};
-			};
-
-			union {
-				float4 v2;
-				struct {
-					float3 color;
-					float var;
-				};
-			};
-
-			union {
-				float4 v3;
-				struct {
-					float3 moments;
-					int meshid;
-				};
-			};
-		};
-
-		static const size_t AOV_float4_size = sizeof(AOV) / sizeof(float4);
-
 		struct ShadowRay {
 			aten::ray ray[ShdowRayNum];
 			aten::vec3 lightcontrib[ShdowRayNum];
@@ -92,7 +56,6 @@ namespace idaten
 		};
 #else
 		struct Path;
-		struct AOV;
 		struct ShadowRay;
 #endif
 
@@ -270,13 +233,13 @@ namespace idaten
 			int width, int height,
 			cudaTextureObject_t texVtxPos);
 
-		idaten::TypedCudaMemory<AOV>& getCurAovs()
+		int getCurAovs()
 		{
-			return m_aovs[m_curAOVPos];
+			return m_curAOVPos;
 		}
-		idaten::TypedCudaMemory<AOV>& getPrevAovs()
+		int getPrevAovs()
 		{
-			return m_aovs[1 - m_curAOVPos];
+			return 1 - m_curAOVPos;
 		}
 
 		bool isFirstFrame() const
@@ -301,7 +264,10 @@ namespace idaten
 		int m_curAOVPos{ 0 };
 
 		// AOV buffer. Current frame and previous frame.
-		idaten::TypedCudaMemory<AOV> m_aovs[2];
+		idaten::TypedCudaMemory<float4> m_aovNormalDepth[2];
+		idaten::TypedCudaMemory<float4> m_aovTexclrTemporalWeight[2];
+		idaten::TypedCudaMemory<float4> m_aovColorVariance[2];
+		idaten::TypedCudaMemory<float4> m_aovMomentMeshid[2];
 
 		aten::mat4 m_mtxW2V;		// World - View.
 		aten::mat4 m_mtxV2C;		// View - Clip.

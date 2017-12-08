@@ -27,7 +27,7 @@
 inline __device__ float ddx(
 	int x, int y,
 	int w, int h,
-	idaten::SVGFPathTracing::AOV* aov)
+	const float4* __restrict__ aovNormalDepth)
 {
 	// NOTE
 	// 2x2 pixel‚²‚Æ‚ÉŒvŽZ‚·‚é.
@@ -51,16 +51,9 @@ inline __device__ float ddx(
 	const int idxL = getIdx(leftX, y, w);
 	const int idxR = getIdx(rightX, y, w);
 
-#if 0
-	float left = aov[idxL].depth;
-	float right = aov[idxR].depth;
-#else
-	auto l_v0 = ((float4*)aov)[idxL * idaten::SVGFPathTracing::AOV_float4_size + 0];
-	auto r_v0 = ((float4*)aov)[idxR * idaten::SVGFPathTracing::AOV_float4_size + 0];
 
-	float left = l_v0.w;
-	float right = r_v0.w;
-#endif
+	float left = aovNormalDepth[idxL].w;
+	float right = aovNormalDepth[idxR].w;
 
 	return right - left;
 }
@@ -68,7 +61,7 @@ inline __device__ float ddx(
 inline __device__ float ddy(
 	int x, int y,
 	int w, int h,
-	idaten::SVGFPathTracing::AOV* aov)
+	const float4* __restrict__ aovNormalDepth)
 {
 	// NOTE
 	// 2x2 pixel‚²‚Æ‚ÉŒvŽZ‚·‚é.
@@ -92,67 +85,10 @@ inline __device__ float ddy(
 	int idxT = getIdx(x, topY, w);
 	int idxB = getIdx(x, bottomY, w);
 
-#if 0
-	float top = aov[idxT].depth;
-	float bottom = aov[idxB].depth;
-#else
-	auto t_v0 = ((float4*)aov)[idxT * idaten::SVGFPathTracing::AOV_float4_size + 0];
-	auto b_v0 = ((float4*)aov)[idxB * idaten::SVGFPathTracing::AOV_float4_size + 0];
-
-	float top = t_v0.w;
-	float bottom = b_v0.w;
-#endif
+	float top = aovNormalDepth[idxT].w;
+	float bottom = aovNormalDepth[idxB].w;
 
 	return bottom - top;
-}
-
-inline __device__ float gaussFilter3x3(
-	int ix, int iy,
-	int w, int h,
-	idaten::SVGFPathTracing::AOV* aov)
-{
-	static const float kernel[] = {
-		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
-		1.0 / 8.0,  1.0 / 4.0, 1.0 / 8.0,
-		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
-	};
-
-	static const int offsetx[] = {
-		-1, 0, 1,
-		-1, 0, 1,
-		-1, 0, 1,
-	};
-
-	static const int offsety[] = {
-		-1, -1, -1,
-		0, 0, 0,
-		1, 1, 1,
-	};
-
-	float sum = 0;
-
-	int pos = 0;
-
-#pragma unroll
-	for (int i = 0; i < 9; i++) {
-		int xx = clamp(ix + offsetx[i], 0, w - 1);
-		int yy = clamp(iy + offsety[i], 0, h - 1);
-
-		int idx = getIdx(xx, yy, w);
-
-#if 0
-		float tmp = aov[idx].var;
-#else
-		auto v = aov[idx].v2;
-		float tmp = v.w;
-#endif
-
-		sum += kernel[pos] * tmp;
-
-		pos++;
-	}
-
-	return sum;
 }
 
 inline __device__ float gaussFilter3x3(
@@ -203,7 +139,10 @@ template <bool isFirstIter, bool isFinalIter>
 __global__ void atrousFilter(
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
-	idaten::SVGFPathTracing::AOV* aovs,
+	const float4* __restrict__ aovNormalDepth,
+	const float4* __restrict__ aovTexclrTemporalWeight,
+	const float4* __restrict__ aovColorVariance,
+	const float4* __restrict__ aovMomentMeshid,
 	const float4* __restrict__ clrVarBuffer,
 	float4* nextClrVarBuffer,
 	int stepScale,
@@ -220,33 +159,34 @@ __global__ void atrousFilter(
 
 	const int idx = getIdx(ix, iy, width);
 
-	auto centerNormal = aovs[idx].normal;
+	auto normalDepth = aovNormalDepth[idx];
+	auto momentMeshid = aovMomentMeshid[idx];
 
-	float centerDepth = aovs[idx].depth;
-	int centerMeshId = aovs[idx].meshid;
+	float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
+	float centerDepth = normalDepth.w;
+	int centerMeshId = (int)momentMeshid.w;
 
-	float tmpDdzX = ddx(ix, iy, width, height, aovs);
-	float tmpDdzY = ddy(ix, iy, width, height, aovs);
+	float tmpDdzX = ddx(ix, iy, width, height, aovNormalDepth);
+	float tmpDdzY = ddy(ix, iy, width, height, aovNormalDepth);
 	float2 ddZ = make_float2(tmpDdzX, tmpDdzY);
 
 	float4 centerColor;
 
 	if (isFirstIter) {
-		auto v2 = ((float4*)aovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 2];
-		centerColor = v2;
+		centerColor = aovColorVariance[idx];
 	}
 	else {
 		centerColor = clrVarBuffer[idx];
 	}
 
-	auto v1 = ((float4*)aovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 1];
+	auto texClrTemporalWeight = aovTexclrTemporalWeight[idx];
 
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI—¹.
 		nextClrVarBuffer[idx] = make_float4(centerColor.x, centerColor.y, centerColor.z, 0.0f);
 
 		if (isFinalIter) {
-			centerColor *= v1;
+			centerColor *= texClrTemporalWeight;
 
 			surf2Dwrite(
 				centerColor,
@@ -264,7 +204,7 @@ __global__ void atrousFilter(
 	float gaussedVarLum;
 	
 	if (isFirstIter) {
-		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovs);
+		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovColorVariance);
 	}
 	else {
 		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, clrVarBuffer);
@@ -337,19 +277,18 @@ __global__ void atrousFilter(
 
 			const int qidx = getIdx(xx, yy, width);
 
-			auto v0 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
-			auto v3 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+			normalDepth = aovNormalDepth[qidx];
+			momentMeshid = aovMomentMeshid[qidx];
 
-			float3 normal = make_float3(v0.x, v0.y, v0.z);
+			float3 normal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 
-			float depth = v0.w;
-			int meshid = __float_as_int(v3.w);
+			float depth = normalDepth.w;
+			int meshid = (int)momentMeshid.w;
 
 			float4 color;
 
 			if (isFirstIter) {
-				auto v2 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 2];
-				color = v2;
+				color = aovColorVariance[qidx];
 			}
 			else {
 				color = clrVarBuffer[qidx];
@@ -394,7 +333,7 @@ __global__ void atrousFilter(
 	}
 	
 	if (isFinalIter) {
-		sumC *= v1;
+		sumC *= texClrTemporalWeight;
 
 		surf2Dwrite(
 			sumC,
@@ -405,8 +344,8 @@ __global__ void atrousFilter(
 }
 
 __global__ void copyFromBufferToAov(
-	float4* src,
-	idaten::SVGFPathTracing::AOV* aovs,
+	const float4* __restrict__ src,
+	float4* aovColorVariance,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -419,7 +358,10 @@ __global__ void copyFromBufferToAov(
 	const int idx = getIdx(ix, iy, width);
 
 	float4 s = src[idx];
-	aovs[idx].color = make_float3(s.x, s.y, s.z);
+
+	aovColorVariance[idx].x = s.x;
+	aovColorVariance[idx].y = s.y;
+	aovColorVariance[idx].z = s.z;
 }
 
 namespace idaten
@@ -435,7 +377,7 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		auto& curaov = getCurAovs();
+		int curaov = getCurAovs();
 
 		int cur = 0;
 		int next = 1;
@@ -448,7 +390,10 @@ namespace idaten
 				atrousFilter<true, false> << <grid, block >> > (
 					outputSurf,
 					m_tmpBuf.ptr(),
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovColorVariance[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
 					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
@@ -461,7 +406,10 @@ namespace idaten
 				atrousFilter<false, true> << <grid, block >> > (
 					outputSurf,
 					m_tmpBuf.ptr(),
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovColorVariance[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
 					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
@@ -472,7 +420,10 @@ namespace idaten
 				atrousFilter<false, false> << <grid, block >> > (
 					outputSurf,
 					m_tmpBuf.ptr(),
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovColorVariance[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
 					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
@@ -493,12 +444,12 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		auto& curaov = getCurAovs();
+		int curaov = getCurAovs();
 
 		// Copy color from temporary buffer to AOV buffer for next temporal reprojection.
 		copyFromBufferToAov << <grid, block >> > (
 			m_tmpBuf.ptr(),
-			curaov.ptr(),
+			m_aovColorVariance[curaov].ptr(),
 			width, height);
 		checkCudaKernel(copyFromBufferToAov);
 	}

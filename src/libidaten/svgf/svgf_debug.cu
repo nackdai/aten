@@ -21,7 +21,8 @@ __global__ void fillAOV(
 	cudaSurfaceObject_t dst,
 	idaten::SVGFPathTracing::AOVMode mode,
 	int width, int height,
-	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
+	const float4* __restrict__ aovNormalDepth,
+	const float4* __restrict__ aovTexclrTemporalWeight,
 	const aten::Intersection* __restrict__ isects)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -38,14 +39,14 @@ __global__ void fillAOV(
 	float4 clr = make_float4(1);
 
 	if (mode == idaten::SVGFPathTracing::AOVMode::Normal) {
-		auto n = aovs[idx].normal * 0.5f + 0.5f;
+		auto n = aovNormalDepth[idx] * 0.5f + 0.5f;
 		clr = make_float4(n.x, n.y, n.z, 1);
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::Depth) {
 		// TODO
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::TexColor) {
-		clr = make_float4(aovs[idx].texclr, 1);
+		clr = aovTexclrTemporalWeight[idx];
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::WireFrame) {
 		bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
@@ -69,7 +70,8 @@ __global__ void pickPixel(
 	int width, int height,
 	const aten::CameraParameter* __restrict__ camera,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
-	const idaten::SVGFPathTracing::AOV* __restrict__ aovs,
+	const float4* __restrict__ aovNormalDepth,
+	const float4* __restrict__ aovMomentMeshid,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -101,14 +103,16 @@ __global__ void pickPixel(
 		const auto idx = getIdx(ix, iy, width);
 
 		const auto& path = paths[idx];
-		const auto& aov = aovs[idx];
+		
+		auto normalDepth = aovNormalDepth[idx];
+		auto momentMeshid = aovMomentMeshid[idx];
 
 		dst->ix = ix;
 		dst->iy = iy;
 		dst->color = path.contrib;
-		dst->normal = aten::vec3(aov.normal.x, aov.normal.y, aov.normal.z);
-		dst->depth = aov.depth;
-		dst->meshid = aov.meshid;
+		dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
+		dst->depth = normalDepth.w;
+		dst->meshid = (int)momentMeshid.w;
 		dst->triid = isect.primid;
 	}
 	else {
@@ -128,13 +132,14 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		auto& curaov = getCurAovs();
+		int curaov = getCurAovs();
 
 		fillAOV << <grid, block >> > (
 			outputSurf,
 			m_aovMode,
 			width, height,
-			curaov.ptr(),
+			m_aovNormalDepth[curaov].ptr(),
+			m_aovTexclrTemporalWeight[curaov].ptr(),
 			m_isects.ptr());
 	}
 
@@ -146,7 +151,7 @@ namespace idaten
 		if (m_willPicklPixel) {
 			m_pick.init(1);
 
-			auto& curAov = getCurAovs();
+			int curaov = getCurAovs();
 
 			pickPixel << <1, 1 >> > (
 				m_pick.ptr(),
@@ -154,7 +159,8 @@ namespace idaten
 				width, height,
 				m_cam.ptr(),
 				m_paths.ptr(),
-				curAov.ptr(),
+				m_aovNormalDepth[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
 				m_shapeparam.ptr(), m_shapeparam.num(),
 				m_nodetex.ptr(),
 				m_primparams.ptr(),

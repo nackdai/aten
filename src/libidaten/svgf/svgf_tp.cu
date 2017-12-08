@@ -73,8 +73,14 @@ inline __device__ void computePrevScreenPos(
 __global__ void temporalReprojection(
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	const aten::CameraParameter* __restrict__ camera,
-	idaten::SVGFPathTracing::AOV* curAovs,
-	idaten::SVGFPathTracing::AOV* prevAovs,
+	float4* curAovNormalDepth,
+	float4* curAovTexclrTemporalWeight,
+	float4* curAovColorVariance,
+	float4* curAovMomentMeshid,
+	const float4* __restrict__ prevAovNormalDepth,
+	const float4* __restrict__ prevAovTexclrTemporalWeight,
+	const float4* __restrict__ prevAovColorVariance,
+	const float4* __restrict__ prevAovMomentMeshid,
 	const aten::mat4* __restrict__ mtxs,
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
@@ -91,42 +97,33 @@ __global__ void temporalReprojection(
 
 	const auto path = paths[idx];
 
-#if 0
-	const float centerDepth = curAovs[idx].depth;
-	const int centerMeshId = curAovs[idx].meshid;
-#else
-	auto v0 = ((float4*)curAovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 0];
-	auto v3 = ((float4*)curAovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+	auto nmlDepth = curAovNormalDepth[idx];
+	auto momentMeshId = curAovMomentMeshid[idx];
 
-	const float centerDepth = v0.w;
-	const int centerMeshId = __float_as_int(v3.w);
-#endif
+	const float centerDepth = nmlDepth.w;
+	const int centerMeshId = (int)momentMeshId.w;
 
 	// 今回のフレームのピクセルカラー.
-	float3 curColor = make_float3(path.contrib.x, path.contrib.y, path.contrib.z) / path.samples;
+	float4 curColor = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 1.0f) / path.samples;
 	//curColor.w = 1;
 
 	if (centerMeshId < 0) {
 		// 背景なので、そのまま出力して終わり.
 		surf2Dwrite(
-			make_float4(curColor, 0),
+			curColor,
 			dst,
 			ix * sizeof(float4), iy,
 			cudaBoundaryModeTrap);
 
-		curAovs[idx].color = curColor;
-		curAovs[idx].moments = make_float3(1);
+		curAovColorVariance[idx] = curColor;
+		curAovMomentMeshid[idx] = make_float4(1, 1, 1, curAovMomentMeshid[idx].w);
 
 		return;
 	}
 
-#if 0
-	auto centerNormal = curAovs[idx].normal;
-#else
-	float3 centerNormal = make_float3(v0.x, v0.y, v0.z);
-#endif
+	float3 centerNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
-	float3 sum = make_float3(0);
+	float4 sum = make_float4(0);
 	float weight = 0.0f;
 
 	static const float zThreshold = 0.05f;
@@ -142,12 +139,8 @@ __global__ void temporalReprojection(
 
 			int _idx = getIdx(xx, yy, width);
 
-#if 0
-			auto depth = curAovs[_idx].depth;
-#else
-			auto v0 = ((float4*)curAovs)[_idx * idaten::SVGFPathTracing::AOV_float4_size + 0];
-			auto depth = v0.w;
-#endif
+			nmlDepth = curAovNormalDepth[_idx];
+			auto depth = nmlDepth.w;
 
 			// 前のフレームのクリップ空間座標を計算.
 			aten::vec4 prevPos;
@@ -176,19 +169,12 @@ __global__ void temporalReprojection(
 
 				int pidx = getIdx(px, py, width);
 
-#if 0
-				const float prevDepth = prevAovs[pidx].depth;
-				const int prevMeshId = prevAovs[pidx].meshid;
+				nmlDepth = prevAovNormalDepth[pidx];
+				momentMeshId = prevAovMomentMeshid[pidx];
 
-				auto prevNormal = prevAovs[pidx].normal;
-#else
-				auto _v0 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
-				auto _v3 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
-
-				const float prevDepth = _v0.w;
-				const int prevMeshId = __float_as_int(_v3.w);
-				float3 prevNormal = make_float3(_v0.x, _v0.y, _v0.z);
-#endif
+				const float prevDepth = nmlDepth.w;
+				const int prevMeshId = (int)momentMeshId.w;
+				float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
 				// TODO
 				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
@@ -198,7 +184,7 @@ __global__ void temporalReprojection(
 				float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
 
 				// 前のフレームのピクセルカラーを取得.
-				float3 prev = prevAovs[pidx].color;
+				float4 prev = prevAovColorVariance[pidx];
 
 				float W = Wz * Wn * Wm;
 				sum += prev * W;
@@ -217,12 +203,14 @@ __global__ void temporalReprojection(
 #endif
 	}
 
-	curAovs[idx].temporalWeight = weight;
+	curAovTexclrTemporalWeight[idx].w = weight;
 
 #ifdef ENABLE_MEDIAN_FILTER
 	tmpBuffer[idx] = curColor;
 #else
-	curAovs[idx].color = curColor;
+	curAovColorVariance[idx].x = curColor.x;
+	curAovColorVariance[idx].y = curColor.y;
+	curAovColorVariance[idx].z = curColor.z;
 
 	// TODO
 	// 現フレームと過去フレームが同率で加算されるため、どちらかに強い影響がでると影響が弱まるまでに非常に時間がかかる.
@@ -264,25 +252,19 @@ __global__ void temporalReprojection(
 
 			int pidx = getIdx(px, py, width);
 
-#if 0
-			const float prevDepth = prevAovs[pidx].depth;
-			const int prevMeshId = prevAovs[pidx].meshid;
+			nmlDepth = prevAovNormalDepth[pidx];
+			momentMeshId = prevAovMomentMeshid[pidx];
 
-			auto prevNormal = prevAovs[pidx].normal;
-#else
-			auto _v0 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
-			auto _v3 = ((float4*)prevAovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
-
-			const float prevDepth = _v0.w;
-			const int prevMeshId = __float_as_int(_v3.w);
-			float3 prevNormal = make_float3(_v0.x, _v0.y, _v0.z);
-#endif
+			const float prevDepth = nmlDepth.w;
+			const int prevMeshId = (int)momentMeshId.w;
+			float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
 			if (abs(1 - centerDepth / prevDepth) < zThreshold
 				&& dot(centerNormal, prevNormal) > nThreshold
 				&& centerMeshId == prevMeshId)
 			{
-				float3 prevMoment = prevAovs[pidx].moments;
+				auto momentMeshid = prevAovMomentMeshid[pidx];;
+				float3 prevMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
 
 				// 積算フレーム数を１増やす.
 				frame = (int)prevMoment.z + 1;
@@ -293,19 +275,22 @@ __global__ void temporalReprojection(
 
 		centerMoment.z = frame;
 
-		curAovs[idx].moments = centerMoment;
+		curAovMomentMeshid[idx].x = centerMoment.x;
+		curAovMomentMeshid[idx].y = centerMoment.y;
+		curAovMomentMeshid[idx].z = centerMoment.z;
 	}
 #endif
 
 	surf2Dwrite(
-		make_float4(curColor, 0),
+		curColor,
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 }
 
 __global__ void dilateWeight(
-	idaten::SVGFPathTracing::AOV* curAovs,
+	float4* aovTexclrTemporalWeight,
+	const float4* __restrict__ aovMomentMeshid,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -317,14 +302,14 @@ __global__ void dilateWeight(
 
 	auto idx = getIdx(ix, iy, width);
 
-	const int centerMeshId = curAovs[idx].meshid;
+	const int centerMeshId = (int)aovMomentMeshid[idx].w;
 
 	if (centerMeshId < 0) {
 		// This pixel is background, so nothing is done.
 		return;
 	}
 
-	float temporalWeight = curAovs[idx].temporalWeight;
+	float temporalWeight = aovTexclrTemporalWeight[idx].w;
 
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
@@ -335,15 +320,16 @@ __global__ void dilateWeight(
 				&& (0 <= yy) && (yy < height))
 			{
 				int pidx = getIdx(xx, yy, width);
-				float w = curAovs[pidx].temporalWeight;
+				float w = aovTexclrTemporalWeight[pidx].w;
 				temporalWeight = min(temporalWeight, w);
 			}
 		}
 	}
 
-	curAovs[idx].temporalWeight = temporalWeight;
+	aovTexclrTemporalWeight[idx].w = temporalWeight;
 }
 
+#if 0
 inline __device__ float3 min(float3 a, float3 b)
 {
 	return make_float3(
@@ -503,6 +489,7 @@ __global__ void medianFilter(
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 }
+#endif
 
 namespace idaten
 {
@@ -515,8 +502,8 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		auto& curaov = getCurAovs();
-		auto& prevaov = getPrevAovs();
+		int curaov = getCurAovs();
+		int prevaov = getPrevAovs();
 
 		// NOTE
 		// V2Cは aspect、fov、near、far から計算される.
@@ -536,8 +523,14 @@ namespace idaten
 		//temporalReprojection << <1, 1 >> > (
 			m_paths.ptr(),
 			m_cam.ptr(),
-			curaov.ptr(),
-			prevaov.ptr(),
+			m_aovNormalDepth[curaov].ptr(),
+			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovColorVariance[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
+			m_aovNormalDepth[prevaov].ptr(),
+			m_aovTexclrTemporalWeight[prevaov].ptr(),
+			m_aovColorVariance[prevaov].ptr(),
+			m_aovMomentMeshid[prevaov].ptr(),
 			m_mtxs.ptr(),
 			outputSurf,
 			m_tmpBuf.ptr(),
@@ -559,7 +552,8 @@ namespace idaten
 #endif
 
 		dilateWeight << <grid, block >> > (
-			curaov.ptr(),
+			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
 			width, height);
 		checkCudaKernel(dilateWeight);
 

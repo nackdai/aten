@@ -17,19 +17,6 @@
 
 #include "aten4idaten.h"
 
-inline __device__ idaten::SVGFPathTracing::AOV* sampleAov(
-	idaten::SVGFPathTracing::AOV* aovs,
-	int ix, int iy,
-	int width, int height)
-{
-	ix = clamp(ix, 0, width - 1);
-	iy = clamp(iy, 0, height - 1);
-
-	const int idx = getIdx(ix, iy, width);
-
-	return &aovs[idx];
-}
-
 inline __device__ float3 computeViewSpace(
 	int ix, int iy,
 	float centerDepth,
@@ -72,7 +59,10 @@ inline __device__ float3 computeViewSpace(
 
 __global__ void varianceEstimation(
 	cudaSurfaceObject_t dst,
-	idaten::SVGFPathTracing::AOV* aovs,
+	const float4* __restrict__ aovNormalDepth,
+	const float4* __restrict__ aovTexclrTemporalWeight,
+	float4* aovColorVariance,
+	float4* aovMomentMeshid,
 	aten::mat4 mtxC2V,
 	int width, int height)
 {
@@ -85,12 +75,17 @@ __global__ void varianceEstimation(
 
 	const int idx = getIdx(ix, iy, width);
 
-	float centerDepth = aovs[idx].depth;
-	int centerMeshId = aovs[idx].meshid;
+	auto normalDepth = aovNormalDepth[idx];
+	auto momentMeshid = aovMomentMeshid[idx];
+
+	float centerDepth = aovNormalDepth[idx].w;
+	int centerMeshId = (int)momentMeshid.w;
 
 	if (centerMeshId < 0) {
 		// îwåiÇ»ÇÃÇ≈ÅAï™éUÇÕÉ[Éç.
-		aovs[idx].moments = make_float3(0, 0, 1);
+		aovMomentMeshid[idx].x = 0;
+		aovMomentMeshid[idx].y = 0;
+		aovMomentMeshid[idx].z = 1;
 
 		surf2Dwrite(
 			make_float4(0),
@@ -101,7 +96,7 @@ __global__ void varianceEstimation(
 
 	auto centerViewPos = computeViewSpace(ix, iy, centerDepth, width, height, &mtxC2V);
 
-	float3 centerMoment = aovs[idx].moments;
+	float3 centerMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
 
 	int frame = (int)centerMoment.z;
 
@@ -119,7 +114,7 @@ __global__ void varianceEstimation(
 		static const float sigmaD = 0.005f;
 		static const float sigmaS = 0.965f;
 
-		auto centerNormal = aovs[idx].normal;
+		float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 
 		float3 sum = make_float3(0);
 		float weight = 0.0f;
@@ -159,31 +154,19 @@ __global__ void varianceEstimation(
 				if (IS_IN_BOUND(ix + u, 0, width)
 					&& IS_IN_BOUND(iy + v, 0, height))
 				{
-#if 0
-					auto sampleaov = sampleAov(aovs, ix + u, iy + v, width, height);
-
-					auto moment = sampleaov->moments;
-					moment /= moment.z;
-
-					auto sampleNml = sampleaov->normal;
-
-					float sampleDepth = sampleaov->depth;
-					int sampleMeshId = sampleaov->meshid;
-#else
 					int xx = clamp(ix + u, 0, width - 1);
 					int yy = clamp(iy + v, 0, height - 1);
 
 					int pidx = getIdx(xx, yy, width);
-					auto v0 = ((float4*)aovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
-					auto v3 = ((float4*)aovs)[pidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
+					normalDepth = aovNormalDepth[pidx];
+					momentMeshid = aovMomentMeshid[pidx];
 
-					float3 sampleNml = make_float3(v0.x, v0.y, v0.z);
-					float sampleDepth = v0.w;
-					int sampleMeshId = __float_as_int(v3.w);
+					float3 sampleNml = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
+					float sampleDepth = normalDepth.w;
+					int sampleMeshId = (int)momentMeshid.w;
 
-					float3 moment = make_float3(v3.x, v3.y, v3.z);
+					float3 moment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
 					moment /= moment.z;
-#endif
 
 #if 0
 					float n = 1 - dot(sampleNml, centerNormal);
@@ -244,7 +227,7 @@ __global__ void varianceEstimation(
 	// ï™éUÇÕÉ}ÉCÉiÉXÇ…Ç»ÇÁÇ»Ç¢Ç™ÅEÅEÅEÅE
 	var = abs(var);
 
-	aovs[idx].var = var;
+	aovColorVariance[idx].w = var;
 
 	surf2Dwrite(
 		make_float4(var, var, var, var),
@@ -264,12 +247,15 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		auto& curaov = getCurAovs();
+		int curaov = getCurAovs();
 
 		varianceEstimation << <grid, block >> > (
 		//varianceEstimation << <1, 1 >> > (
 			outputSurf,
-			curaov.ptr(),
+			m_aovNormalDepth[curaov].ptr(),
+			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovColorVariance[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
 			m_mtxC2V,
 			width, height);
 

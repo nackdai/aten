@@ -265,7 +265,9 @@ __global__ void hitTest(
 
 template <bool isFirstBounce>
 __global__ void shadeMiss(
-	idaten::SVGFPathTracing::AOV* aovs,
+	float4* aovNormalDepth,
+	float4* aovTexclrTemporalWeight,
+	float4* aovMomentMeshid,
 	idaten::SVGFPathTracing::Path* paths,
 	int width, int height)
 {
@@ -288,9 +290,9 @@ __global__ void shadeMiss(
 			path.isKill = true;
 
 			// Export bg color to albedo buffer.
-			aovs[idx].texclr = make_float3(bg.x, bg.y, bg.z);
-			aovs[idx].depth = -1;
-			aovs[idx].meshid = -1;
+			aovTexclrTemporalWeight[idx] = make_float4(bg.x, bg.y, bg.z, aovTexclrTemporalWeight[idx].w);
+			aovNormalDepth[idx].w = -1;
+			aovMomentMeshid[idx].w = -1;
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
@@ -304,7 +306,9 @@ __global__ void shadeMiss(
 
 template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
-	idaten::SVGFPathTracing::AOV* aovs,
+	float4* aovNormalDepth,
+	float4* aovTexclrTemporalWeight,
+	float4* aovMomentMeshid,
 	cudaTextureObject_t* textures,
 	int envmapIdx,
 	real envmapAvgIllum,
@@ -337,9 +341,9 @@ __global__ void shadeMissWithEnvmap(
 			path.isKill = true;
 
 			// Export envmap to albedo buffer.
-			aovs[idx].texclr = make_float3(emit.x, emit.y, emit.z);
-			aovs[idx].depth = -1;
-			aovs[idx].meshid = -1;
+			aovTexclrTemporalWeight[idx] = make_float4(emit.x, emit.y, emit.z, aovTexclrTemporalWeight[idx].w);
+			aovNormalDepth[idx].w = -1;
+			aovMomentMeshid[idx].w = -1;
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
@@ -359,7 +363,9 @@ __global__ void shadeMissWithEnvmap(
 
 template <bool isFirstBounce, int ShadowRayNum>
 __global__ void shade(
-	idaten::SVGFPathTracing::AOV* aovs,
+	float4* aovNormalDepth,
+	float4* aovTexclrTemporalWeight,
+	float4* aovMomentMeshid,
 	cudaSurfaceObject_t aovExportBuffer,
 	aten::mat4 mtxW2C,
 	int width, int height,
@@ -463,23 +469,22 @@ __global__ void shade(
 		aten::vec4 pos = aten::vec4(rec.p, 1);
 		pos = mtxW2C.apply(pos);
 
-		// normal
-		aovs[idx].normal = make_float3(orienting_normal.x, orienting_normal.y, orienting_normal.z);
+		// normal, depth
+		aovNormalDepth[idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
-		// depth, meshid.
-		aovs[idx].depth = pos.w;
-		aovs[idx].meshid = isect.meshid;
+		// meshid.
+		aovMomentMeshid[idx].w = isect.meshid;
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
-		aovs[idx].texclr = make_float3(texcolor.x, texcolor.y, texcolor.z);
+		aovTexclrTemporalWeight[idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[idx].w);
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
 
 		if (aovExportBuffer > 0) {
 			surf2Dwrite(
-				make_float4(aovs[idx].normal, aovs[idx].depth),
+				aovNormalDepth[idx],
 				aovExportBuffer,
 				ix * sizeof(float4), iy,
 				cudaBoundaryModeTrap);
@@ -797,7 +802,8 @@ __global__ void hitShadowRay(
 
 __global__ void gather(
 	cudaSurfaceObject_t dst,
-	idaten::SVGFPathTracing::AOV* aovs,
+	float4* aovColorVariance,
+	float4* aovMomentMeshid,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	int width, int height)
 {
@@ -824,9 +830,11 @@ __global__ void gather(
 
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
-	aovs[idx].moments += make_float3(lum * lum, lum, 1);
+	aovMomentMeshid[idx].x += lum * lum;
+	aovMomentMeshid[idx].y += lum;
+	aovMomentMeshid[idx].z += 1;
 
-	aovs[idx].color = contrib;
+	aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
 
 #if 0
 	auto n = aovs[idx].moments.w;
@@ -888,8 +896,11 @@ namespace idaten
 		m_random.init(width * height);
 		m_random.writeByNum(&r[0], width * height);
 
-		for (int i = 0; i < AT_COUNTOF(m_aovs); i++) {
-			m_aovs[i].init(width * height);
+		for (int i = 0; i < 2; i++) {
+			m_aovNormalDepth[i].init(width * height);
+			m_aovTexclrTemporalWeight[i].init(width * height);
+			m_aovColorVariance[i].init(width * height);
+			m_aovMomentMeshid[i].init(width * height);
 		}
 
 		for (int i = 0; i < AT_COUNTOF(m_atrousClrVar); i++) {
@@ -1140,12 +1151,14 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		auto& curaov = getCurAovs();
+		int curaov = getCurAovs();
 
 		if (m_envmapRsc.idx >= 0) {
 			if (bounce == 0) {
 				shadeMissWithEnvmap<true> << <grid, block >> > (
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_tex.ptr(),
 					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 					m_paths.ptr(),
@@ -1154,7 +1167,9 @@ namespace idaten
 			}
 			else {
 				shadeMissWithEnvmap<false> << <grid, block >> > (
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_tex.ptr(),
 					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 					m_paths.ptr(),
@@ -1165,13 +1180,17 @@ namespace idaten
 		else {
 			if (bounce == 0) {
 				shadeMiss<true> << <grid, block >> > (
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_paths.ptr(),
 					width, height);
 			}
 			else {
 				shadeMiss<false> << <grid, block >> > (
-					curaov.ptr(),
+					m_aovNormalDepth[curaov].ptr(),
+					m_aovTexclrTemporalWeight[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_paths.ptr(),
 					width, height);
 			}
@@ -1215,7 +1234,7 @@ namespace idaten
 		dim3 threadPerBlock(64);
 #endif
 
-		auto& curaov = getCurAovs();
+		int curaov = getCurAovs();
 
 		cudaSurfaceObject_t aovExportBuffer = 0;
 		if (m_aovGLBuffer.isValid()) {
@@ -1225,7 +1244,9 @@ namespace idaten
 
 		if (bounce == 0) {
 			shade<true, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
-				curaov.ptr(),
+				m_aovNormalDepth[curaov].ptr(),
+				m_aovTexclrTemporalWeight[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
 				aovExportBuffer,
 				mtxW2C,
 				width, height,
@@ -1248,7 +1269,9 @@ namespace idaten
 		}
 		else {
 			shade<false, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
-				curaov.ptr(), 
+				m_aovNormalDepth[curaov].ptr(),
+				m_aovTexclrTemporalWeight[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
 				aovExportBuffer,
 				mtxW2C,
 				width, height,
@@ -1308,13 +1331,13 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 #endif
+		int curaov = getCurAovs();
 
 		if (m_mode == Mode::PT) {
-			auto& curaov = getCurAovs();
-
 			gather << <grid, block >> > (
 				outputSurf,
-				curaov.ptr(),
+				m_aovColorVariance[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
 				m_paths.ptr(),
 				width, height);
 
@@ -1324,13 +1347,11 @@ namespace idaten
 			onFillAOV(outputSurf, width, height);
 		}
 		else {
-			auto& curaov = getCurAovs();
-			auto& prevaov = getPrevAovs();
-
 			if (isFirstFrame()) {
 				gather << <grid, block >> > (
 					outputSurf,
-					curaov.ptr(),
+					m_aovColorVariance[curaov].ptr(),
+					m_aovMomentMeshid[curaov].ptr(),
 					m_paths.ptr(),
 					width, height);
 

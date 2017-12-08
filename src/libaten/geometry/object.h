@@ -55,6 +55,8 @@ namespace AT_NAME
 
 		bool exportInternalAccelTree(const char* path);
 
+		bool importInternalAccelTree(const char* path);
+
 	private:
 		void build();
 

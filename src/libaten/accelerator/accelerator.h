@@ -91,6 +91,12 @@ namespace aten {
 			return false;
 		}
 
+		virtual bool importTree(const char* path)
+		{
+			AT_ASSERT(false);
+			return false;
+		}
+
 		AccelType getAccelType()
 		{
 			return m_type;

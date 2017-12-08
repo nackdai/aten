@@ -48,16 +48,6 @@ namespace aten
 	// GPGPU処理用に両方を同じメモリ空間上に格納するため、同じサイズでないといけない.
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
-	struct SbvhFileHeader {
-		char magic[4];
-		uint8_t version[4];
-
-		uint32_t nodeNum;
-
-		float boxmin[3];
-		float boxmax[3];
-	};
-
 	class sbvh : public accelerator {
 	public:
 		sbvh() : accelerator(AccelType::Sbvh) {}
@@ -75,6 +65,7 @@ namespace aten
 			Intersection& isect) const override;
 
 		virtual bool exportTree(const char* path) override final;
+		virtual bool importTree(const char* path) override final;
 
 		ThreadedBVH& getTopLayer()
 		{

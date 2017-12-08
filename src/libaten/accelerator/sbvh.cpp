@@ -1,6 +1,9 @@
 #include "accelerator/sbvh.h"
 
 #include <omp.h>
+
+#include <algorithm>
+#include <iterator>
 #include <numeric>
 
 //#pragma optimize( "", off)
@@ -78,7 +81,27 @@ namespace aten
 		aabb* bbox/*= nullptr*/)
 	{
 		if (m_isNested) {
-			buildInternal(list, num);
+			if (m_threadedNodes.size() > 0) {
+				// Imported tree already.
+
+				// Search offset triangle index.
+				m_offsetTriIdx = UINT32_MAX;
+
+				for (uint32_t i = 0; i < num; i++) {
+					auto tri = (face*)list[i];
+					m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->id);
+				}
+
+				// Offset triangle index.
+				for (auto& node : m_threadedNodes[0]) {
+					if (node.isLeaf()) {
+						node.triid += m_offsetTriIdx;
+					}
+				}
+			}
+			else {
+				buildInternal(list, num);
+			}
 		}
 		else {
 			// Build top layer bvh.
@@ -736,6 +759,17 @@ namespace aten
 		int offset,
 		std::vector<int>& indices) const
 	{
+		if (m_threadedNodes.size() > 0
+			&& m_threadedNodes[0].size() > 0)
+		{
+			// Imported noddes already. So, just copy.
+			std::copy(
+				m_threadedNodes[0].begin(),
+				m_threadedNodes[0].end(),
+				std::back_inserter(nodes));
+			return;
+		}
+
 		indices.resize(m_refIndexNum);
 		nodes.resize(m_nodes.size());
 
@@ -1025,6 +1059,20 @@ namespace aten
 		return (isect.objid >= 0);
 	}
 
+	struct SbvhFileHeader {
+		char magic[4];
+
+		union {
+			uint32_t v;
+			uint8_t version[4];
+		};
+
+		uint32_t nodeNum;
+
+		float boxmin[3];
+		float boxmax[3];
+	};
+
 	bool sbvh::exportTree(const char* path)
 	{
 		m_threadedNodes.resize(1);
@@ -1076,6 +1124,31 @@ namespace aten
 		fwrite(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
 
 		fclose(fp);
+
+		return true;
+	}
+
+	bool sbvh::importTree(const char* path)
+	{
+		FILE* fp = nullptr;
+		auto err = fopen_s(&fp, path, "rb");
+		if (err != 0) {
+			// TODO
+			// through exception...
+			AT_ASSERT(false);
+			return false;
+		}
+
+		SbvhFileHeader header;
+		fread(&header, sizeof(header), 1, fp);
+
+		// TODO
+		// Check magic number.
+
+		m_threadedNodes.resize(1);
+		m_threadedNodes[0].resize(header.nodeNum);
+
+		fread(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
 
 		return true;
 	}

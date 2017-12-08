@@ -15,7 +15,9 @@ namespace AT_NAME
 			return;
 		}
 
-		m_accel = aten::accelerator::createAccelerator();
+		if (!m_accel) {
+			m_accel = aten::accelerator::createAccelerator();
+		}
 
 		param.primid = shapes[0]->faces[0]->id;
 
@@ -193,5 +195,13 @@ namespace AT_NAME
 		}
 
 		return result;
+	}
+
+	bool object::importInternalAccelTree(const char* path)
+	{
+		AT_ASSERT(!m_accel);
+
+		m_accel = aten::accelerator::createAccelerator();
+		return m_accel->importTree(path);
 	}
 }

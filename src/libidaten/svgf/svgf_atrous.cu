@@ -158,7 +158,7 @@ inline __device__ float gaussFilter3x3(
 inline __device__ float gaussFilter3x3(
 	int ix, int iy,
 	int w, int h,
-	const float* __restrict__ var)
+	const float4* __restrict__ var)
 {
 	static const float kernel[] = {
 		1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
@@ -189,7 +189,7 @@ inline __device__ float gaussFilter3x3(
 
 		int idx = getIdx(xx, yy, w);
 
-		float tmp = var[idx];
+		float tmp = var[idx].w;
 
 		sum += kernel[pos] * tmp;
 
@@ -204,10 +204,8 @@ __global__ void atrousFilter(
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
 	idaten::SVGFPathTracing::AOV* aovs,
-	const float4* __restrict__ clrBuffer,
-	float4* nextClrBuffer,
-	const float* __restrict__ varBuffer,
-	float* nextVarBuffer,
+	const float4* __restrict__ clrVarBuffer,
+	float4* nextClrVarBuffer,
 	int stepScale,
 	float thresholdTemporalWeight,
 	int radiusScale,
@@ -234,29 +232,21 @@ __global__ void atrousFilter(
 	float4 centerColor;
 
 	if (isFirstIter) {
-#if 0
-		centerColor = make_float4(aovs[idx].color, 1);
-#else
 		auto v2 = ((float4*)aovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 2];
 		centerColor = v2;
-#endif
 	}
 	else {
-		centerColor = clrBuffer[idx];
+		centerColor = clrVarBuffer[idx];
 	}
 
 	auto v1 = ((float4*)aovs)[idx * idaten::SVGFPathTracing::AOV_float4_size + 1];
 
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI—¹.
-		nextClrBuffer[idx] = centerColor;
+		nextClrVarBuffer[idx] = make_float4(centerColor.x, centerColor.y, centerColor.z, 0.0f);
 
 		if (isFinalIter) {
-#if 0
-			centerColor *= make_float4(aovs[idx].texclr, 1);
-#else
 			centerColor *= v1;
-#endif
 
 			surf2Dwrite(
 				centerColor,
@@ -277,7 +267,7 @@ __global__ void atrousFilter(
 		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovs);
 	}
 	else {
-		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, varBuffer);
+		gaussedVarLum = gaussFilter3x3(ix, iy, width, height, clrVarBuffer);
 	}
 
 	float sqrGaussedVarLum = sqrt(gaussedVarLum);
@@ -347,11 +337,6 @@ __global__ void atrousFilter(
 
 			const int qidx = getIdx(xx, yy, width);
 
-#if 0
-			float3 normal = aovs[qidx].normal;
-			float depth = aovs[qidx].depth;
-			int meshid = aovs[qidx].meshid;
-#else
 			auto v0 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 0];
 			auto v3 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 3];
 
@@ -359,25 +344,18 @@ __global__ void atrousFilter(
 
 			float depth = v0.w;
 			int meshid = __float_as_int(v3.w);
-#endif
 
 			float4 color;
-			float variance;
 
 			if (isFirstIter) {
-#if 0
-				color = make_float4(aovs[qidx].color, 1);
-				variance = aovs[qidx].var;
-#else
 				auto v2 = ((float4*)aovs)[qidx * idaten::SVGFPathTracing::AOV_float4_size + 2];
 				color = v2;
-				variance = v2.w;
-#endif
 			}
 			else {
-				color = clrBuffer[qidx];
-				variance = varBuffer[qidx];
+				color = clrVarBuffer[qidx];
 			}
+
+			float variance = color.w;
 
 			float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
 
@@ -408,8 +386,7 @@ __global__ void atrousFilter(
 		sumV /= (weightV * weightV);
 	}
 
-	nextClrBuffer[idx] = sumC;
-	nextVarBuffer[idx] = sumV;
+	nextClrVarBuffer[idx] = make_float4(sumC.x, sumC.y, sumC.z, sumV);
 
 	if (isFirstIter) {
 		// Store color temporary.
@@ -417,11 +394,7 @@ __global__ void atrousFilter(
 	}
 	
 	if (isFinalIter) {
-#if 0
-		sumC *= make_float4(aovs[idx].texclr, 1);
-#else
 		sumC *= v1;
-#endif
 
 		surf2Dwrite(
 			sumC,
@@ -476,8 +449,7 @@ namespace idaten
 					outputSurf,
 					m_tmpBuf.ptr(),
 					curaov.ptr(),
-					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
-					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
+					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
 					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
@@ -490,8 +462,7 @@ namespace idaten
 					outputSurf,
 					m_tmpBuf.ptr(),
 					curaov.ptr(),
-					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
-					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
+					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
 					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
@@ -502,8 +473,7 @@ namespace idaten
 					outputSurf,
 					m_tmpBuf.ptr(),
 					curaov.ptr(),
-					m_atrousClr[cur].ptr(), m_atrousClr[next].ptr(),
-					m_atrousVar[cur].ptr(), m_atrousVar[next].ptr(),
+					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
 					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);

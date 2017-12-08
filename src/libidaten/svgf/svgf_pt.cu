@@ -888,13 +888,12 @@ namespace idaten
 		m_random.init(width * height);
 		m_random.writeByNum(&r[0], width * height);
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < AT_COUNTOF(m_aovs); i++) {
 			m_aovs[i].init(width * height);
 		}
 
-		for (int i = 0; i < 2; i++) {
-			m_atrousClr[i].init(width * height);
-			m_atrousVar[i].init(width * height);
+		for (int i = 0; i < AT_COUNTOF(m_atrousClrVar); i++) {
+			m_atrousClrVar[i].init(width * height);
 		}
 
 		m_tmpBuf.init(width * height);

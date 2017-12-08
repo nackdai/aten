@@ -316,8 +316,7 @@ namespace idaten
 		unsigned int m_frame{ 1 };
 
 		// For A-trous wavelet.
-		idaten::TypedCudaMemory<float4> m_atrousClr[2];
-		idaten::TypedCudaMemory<float> m_atrousVar[2];
+		idaten::TypedCudaMemory<float4> m_atrousClrVar[2];
 
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
 

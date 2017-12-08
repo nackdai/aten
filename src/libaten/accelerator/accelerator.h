@@ -95,22 +95,5 @@ namespace aten {
 		{
 			return m_type;
 		}
-
-	protected:
-		void enableIsExporting()
-		{
-			m_isExporting = true;
-		}
-		void disableIsExporting()
-		{
-			m_isExporting = false;
-		}
-		bool isExporting() const
-		{
-			return m_isExporting;
-		}
-
-	private:
-		bool m_isExporting{ false };
 	};
 }

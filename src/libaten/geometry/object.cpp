@@ -10,11 +10,6 @@ namespace AT_NAME
 {
 	void object::build()
 	{
-		build(nullptr);
-	}
-
-	void object::build(std::function<void()> f)
-	{
 		if (m_triangles > 0) {
 			// Builded already.
 			return;
@@ -44,10 +39,6 @@ namespace AT_NAME
 		}
 
 		param.primnum = m_triangles;
-
-		if (f) {
-			f();
-		}
 
 		m_accel->asNested();
 		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
@@ -195,9 +186,7 @@ namespace AT_NAME
 	{
 		bool result = false;
 
-		build([&] {
-			m_accel->enableIsExporting();
-		});
+		build();
 
 		if (m_accel) {
 			result = m_accel->exportTree(path);

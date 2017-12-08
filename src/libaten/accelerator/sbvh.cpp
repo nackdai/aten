@@ -79,16 +79,6 @@ namespace aten
 	{
 		if (m_isNested) {
 			buildInternal(list, num);
-
-			if (isExporting()) {
-				m_threadedNodes.resize(1);
-
-				std::vector<int> indices;
-				convert(
-					m_threadedNodes[0],
-					0,
-					indices);
-			}
 		}
 		else {
 			// Build top layer bvh.
@@ -1037,12 +1027,13 @@ namespace aten
 
 	bool sbvh::exportTree(const char* path)
 	{
-		if (m_threadedNodes.size() == 0) {
-			// TODO
-			// through exception...
-			AT_ASSERT(false);
-			return false;
-		}
+		m_threadedNodes.resize(1);
+
+		std::vector<int> indices;
+		convert(
+			m_threadedNodes[0],
+			0,
+			indices);
 
 		FILE* fp = nullptr;
 		auto err = fopen_s(&fp, path, "wb");

@@ -65,9 +65,15 @@ int main(int argc, char* argv[])
 
 	aten::AssetManager::suppressWarnings();
 
-	auto obj = aten::ObjLoader::load(opt.input);
+	// TODO
+	// Specify material by command line...
+	auto emit = new aten::emissive(aten::vec3(1));
+	aten::AssetManager::registerMtrl("light", emit);
 
-	if (!obj) {
+	std::vector<aten::object*> objs;
+	aten::ObjLoader::load(objs, opt.input);
+
+	if (objs.empty()) {
 		// TODO
 		return 0;
 	}
@@ -77,9 +83,26 @@ int main(int argc, char* argv[])
 	aten::AcceleratedScene<aten::sbvh> scene;
 	
 	try {
-		obj->exportInternalAccelTree(opt.output.c_str());
+		static char buf[2048] = { 0 };
+
+		for (int i = 0; i < objs.size(); i++) {
+			auto obj = objs[i];
+
+			std::string output;
+
+			if (i == 0) {
+				output = opt.output;
+			}
+			else {
+				// TODO
+				sprintf(buf, "%d_%s\0", i, opt.output.c_str());
+				output = std::string(buf);
+			}
+
+			obj->exportInternalAccelTree(output.c_str());
+		}
 	}
-	catch (std::exception* e) {
+	catch (const std::exception& e) {
 		// TODO
 
 		return 0;

@@ -1,36 +1,8 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
 <node CREATED="1507091972806" ID="ID_639959707" MODIFIED="1507091980811" TEXT="OptimzeRT">
-<node CREATED="1507092217426" ID="ID_39119329" MODIFIED="1507107714113" POSITION="right" TEXT="&#x53c2;&#x8003;&#x30ea;&#x30f3;&#x30af;">
-<node CREATED="1507092215119" ID="ID_568942259" LINK="http://raytracey.blogspot.jp/2016/09/gpu-path-tracing-tutorial-4-optimised.html" MODIFIED="1507092215119" TEXT="raytracey.blogspot.jp &gt; 2016 &gt; 09 &gt; Gpu-path-tracing-tutorial-4-optimised"/>
-<node CREATED="1507092237905" ID="ID_1927465354" LINK="http://robbinmarcus.blogspot.jp/2015/11/real-time-raytracing-part-3.html" MODIFIED="1507092237905" TEXT="robbinmarcus.blogspot.jp &gt; 2015 &gt; 11 &gt; Real-time-raytracing-part-3"/>
-<node CREATED="1507092278227" LINK="http://robbinmarcus.blogspot.jp/2015/12/real-time-raytracing-part-31.html" MODIFIED="1507092278227" TEXT="robbinmarcus.blogspot.jp &gt; 2015 &gt; 12 &gt; Real-time-raytracing-part-31"/>
-<node CREATED="1507107675995" LINK="http://research.nvidia.com/sites/default/files/publications/aila2009hpg_paper.pdf" MODIFIED="1507107675995" TEXT="research.nvidia.com &gt; Sites &gt; Default &gt; Files &gt; Publications &gt; Aila2009hpg paper"/>
-<node CREATED="1507107684996" ID="ID_1897362761" LINK="http://citeseerx.ist.psu.edu/viewdoc/download" MODIFIED="1507107684996" TEXT="citeseerx.ist.psu.edu &gt; Viewdoc &gt; Download;jsessionid=E7AE35FB9EABFED6A43CE590E409AAB1 ? ..."/>
-<node CREATED="1507107704329" ID="ID_1767602175" LINK="https://graphics.stanford.edu/~boulos/papers/togbvh.pdf" MODIFIED="1507107704329" TEXT="https://graphics.stanford.edu/~boulos/papers/togbvh.pdf"/>
-<node CREATED="1507107714569" ID="ID_653591007" LINK="http://gamma.cs.unc.edu/HART/HART_files/HART_preprint.pdf" MODIFIED="1507107714569" TEXT="gamma.cs.unc.edu &gt; HART &gt; HART files &gt; HART preprint"/>
-<node CREATED="1507107724552" ID="ID_463240444" LINK="http://jcgt.org/published/0004/03/02/paper.pdf" MODIFIED="1507107724552" TEXT="jcgt.org &gt; Published &gt; 0004 &gt; 03 &gt; 02 &gt; Paper"/>
-<node CREATED="1507277430690" ID="ID_1835107175" MODIFIED="1507277435623" TEXT="BVH">
-<node CREATED="1507277428729" ID="ID_723176223" LINK="https://github.com/andrewwuan/smallpt-parallel-bvh-gpu" MODIFIED="1507277428729" TEXT="https://github.com/andrewwuan/smallpt-parallel-bvh-gpu"/>
-<node CREATED="1507277437362" ID="ID_281926743" MODIFIED="1507277439382" TEXT="LBVH">
-<node CREATED="1507277445764" LINK="https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/" MODIFIED="1507277445764" TEXT="https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/"/>
-</node>
-</node>
-<node CREATED="1508386228307" ID="ID_275327721" LINK="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH" MODIFIED="1508386228307" TEXT="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH"/>
-<node CREATED="1508386228312" ID="ID_495432910" LINK="http://www.luxrender.net/wiki/LuxRender_Render_settings#SQBVH" MODIFIED="1508386228312" TEXT="luxrender.net &gt; Wiki &gt; LuxRender Render settings#SQBVH"/>
-<node CREATED="1508490034313" ID="ID_124334878" MODIFIED="1508490039847" TEXT="Panta-Ray">
-<node CREATED="1508490040804" LINK="https://qiita.com/7of9/items/c04b08c5e719dc6f8593" MODIFIED="1508490040804" TEXT="https://qiita.com/7of9/items/c04b08c5e719dc6f8593"/>
-</node>
-<node CREATED="1508490041827" ID="ID_1119476349" MODIFIED="1508830040770" TEXT="&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;">
-<node CREATED="1508490054639" LINK="https://qiita.com/edo_m18/items/b5058581555a9823b8d6" MODIFIED="1508490054639" TEXT="https://qiita.com/edo_m18/items/b5058581555a9823b8d6"/>
-</node>
-<node CREATED="1508830041323" ID="ID_1972292834" MODIFIED="1508830047918" TEXT="&#x6700;&#x9069;&#x5316;">
-<icon BUILTIN="idea"/>
-<node CREATED="1508830045711" LINK="http://www.diva-portal.org/smash/get/diva2:359850/FULLTEXT01.pdf" MODIFIED="1508830045711" TEXT="diva-portal.org &gt; Smash &gt; Get &gt; Diva2:359850 &gt; FULLTEXT01"/>
-</node>
-<node CREATED="1508837367829" LINK="http://www.zora.uzh.ch/id/eprint/125432/7/ZORA125432.pdf" MODIFIED="1508837367829" TEXT="zora.uzh.ch &gt; Id &gt; Eprint &gt; 125432 &gt; 7 &gt; ZORA125432"/>
-</node>
-<node CREATED="1507092246382" HGAP="35" ID="ID_449402318" MODIFIED="1507192383555" POSITION="right" TEXT="TODO" VSHIFT="46">
+<node CREATED="1512725564832" FOLDED="true" ID="ID_898405978" MODIFIED="1512725581763" POSITION="left" TEXT="old">
+<node CREATED="1507092246382" HGAP="35" ID="ID_449402318" MODIFIED="1507192383555" TEXT="TODO" VSHIFT="46">
 <node CREATED="1507092248381" ID="ID_1848368983" MODIFIED="1507191164843" TEXT="Memory alignment">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1507092250768" ID="ID_603609798" MODIFIED="1507092265114" TEXT="128bit&#xff08;16byte&#xff09;&#x30a2;&#x30e9;&#x30a4;&#x30f3;&#x30e1;&#x30f3;&#x30c8;&#xff06;&#x30a2;&#x30af;&#x30bb;&#x30b9;">
@@ -120,7 +92,7 @@
 </node>
 </node>
 </node>
-<node CREATED="1507109127782" HGAP="14" ID="ID_1629311417" MODIFIED="1509613480675" POSITION="right" TEXT="&#x8981;&#x691c;&#x8a0e;&#x30e1;&#x30e2;" VSHIFT="71">
+<node CREATED="1507109127782" HGAP="14" ID="ID_1629311417" MODIFIED="1509613480675" TEXT="&#x8981;&#x691c;&#x8a0e;&#x30e1;&#x30e2;" VSHIFT="71">
 <node CREATED="1507109122412" ID="ID_401997312" MODIFIED="1507109125168" TEXT="LOD">
 <node CREATED="1507277931057" ID="ID_203429155" MODIFIED="1507277933788" TEXT="&#x3069;&#x3046;&#x3084;&#x3063;&#x3066;&#x4f5c;&#x308b;">
 <node CREATED="1508491651613" ID="ID_773686385" MODIFIED="1508491776863" TEXT="BVH&#x306e;&#x30ce;&#x30fc;&#x30c9;&#x306e;AABB&#x3092;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x306b;&#x898b;&#x7acb;&#x3066;&#x308b;">
@@ -237,6 +209,46 @@
 <node CREATED="1509615610542" ID="ID_1455729802" MODIFIED="1509615676369" TEXT="&#xff12;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x76ee;&#x4ee5;&#x964d;&#x306b;&#x5fc5;&#x8981;&#x306a;&#x306e;&#x306f;&#x3001;normal&#x3001;uv&#x3001;world pos&#x306a;&#x306e;&#x3067;&#x3001;&#x305d;&#x308c;&#x3092;G-Buffer&#x306b;&#x30e9;&#x30b9;&#x30bf;&#x30e9;&#x30a4;&#x30b6;&#x3067;&#x66f8;&#x304d;&#x51fa;&#x3057;&#x3066;&#x5229;&#x7528;&#x3059;&#x308b;"/>
 </node>
 </node>
+</node>
+<node CREATED="1507092217426" ID="ID_39119329" MODIFIED="1507107714113" TEXT="&#x53c2;&#x8003;&#x30ea;&#x30f3;&#x30af;">
+<node CREATED="1507092215119" ID="ID_568942259" LINK="http://raytracey.blogspot.jp/2016/09/gpu-path-tracing-tutorial-4-optimised.html" MODIFIED="1507092215119" TEXT="raytracey.blogspot.jp &gt; 2016 &gt; 09 &gt; Gpu-path-tracing-tutorial-4-optimised"/>
+<node CREATED="1507092237905" ID="ID_1927465354" LINK="http://robbinmarcus.blogspot.jp/2015/11/real-time-raytracing-part-3.html" MODIFIED="1507092237905" TEXT="robbinmarcus.blogspot.jp &gt; 2015 &gt; 11 &gt; Real-time-raytracing-part-3"/>
+<node CREATED="1507092278227" LINK="http://robbinmarcus.blogspot.jp/2015/12/real-time-raytracing-part-31.html" MODIFIED="1507092278227" TEXT="robbinmarcus.blogspot.jp &gt; 2015 &gt; 12 &gt; Real-time-raytracing-part-31"/>
+<node CREATED="1507107675995" LINK="http://research.nvidia.com/sites/default/files/publications/aila2009hpg_paper.pdf" MODIFIED="1507107675995" TEXT="research.nvidia.com &gt; Sites &gt; Default &gt; Files &gt; Publications &gt; Aila2009hpg paper"/>
+<node CREATED="1507107684996" ID="ID_1897362761" LINK="http://citeseerx.ist.psu.edu/viewdoc/download" MODIFIED="1507107684996" TEXT="citeseerx.ist.psu.edu &gt; Viewdoc &gt; Download;jsessionid=E7AE35FB9EABFED6A43CE590E409AAB1 ? ..."/>
+<node CREATED="1507107704329" ID="ID_1767602175" LINK="https://graphics.stanford.edu/~boulos/papers/togbvh.pdf" MODIFIED="1507107704329" TEXT="https://graphics.stanford.edu/~boulos/papers/togbvh.pdf"/>
+<node CREATED="1507107714569" ID="ID_653591007" LINK="http://gamma.cs.unc.edu/HART/HART_files/HART_preprint.pdf" MODIFIED="1507107714569" TEXT="gamma.cs.unc.edu &gt; HART &gt; HART files &gt; HART preprint"/>
+<node CREATED="1507107724552" ID="ID_463240444" LINK="http://jcgt.org/published/0004/03/02/paper.pdf" MODIFIED="1507107724552" TEXT="jcgt.org &gt; Published &gt; 0004 &gt; 03 &gt; 02 &gt; Paper"/>
+<node CREATED="1507277430690" ID="ID_1835107175" MODIFIED="1507277435623" TEXT="BVH">
+<node CREATED="1507277428729" ID="ID_723176223" LINK="https://github.com/andrewwuan/smallpt-parallel-bvh-gpu" MODIFIED="1507277428729" TEXT="https://github.com/andrewwuan/smallpt-parallel-bvh-gpu"/>
+<node CREATED="1507277437362" ID="ID_281926743" MODIFIED="1507277439382" TEXT="LBVH">
+<node CREATED="1507277445764" LINK="https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/" MODIFIED="1507277445764" TEXT="https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/"/>
+</node>
+</node>
+<node CREATED="1508386228307" ID="ID_275327721" LINK="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH" MODIFIED="1508386228307" TEXT="https://wiki.blender.org/index.php/Dev:Source/Render/Cycles/BVH"/>
+<node CREATED="1508386228312" ID="ID_495432910" LINK="http://www.luxrender.net/wiki/LuxRender_Render_settings#SQBVH" MODIFIED="1508386228312" TEXT="luxrender.net &gt; Wiki &gt; LuxRender Render settings#SQBVH"/>
+<node CREATED="1508490034313" ID="ID_124334878" MODIFIED="1508490039847" TEXT="Panta-Ray">
+<node CREATED="1508490040804" LINK="https://qiita.com/7of9/items/c04b08c5e719dc6f8593" MODIFIED="1508490040804" TEXT="https://qiita.com/7of9/items/c04b08c5e719dc6f8593"/>
+</node>
+<node CREATED="1508490041827" ID="ID_1119476349" MODIFIED="1508830040770" TEXT="&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;">
+<node CREATED="1508490054639" LINK="https://qiita.com/edo_m18/items/b5058581555a9823b8d6" MODIFIED="1508490054639" TEXT="https://qiita.com/edo_m18/items/b5058581555a9823b8d6"/>
+</node>
+<node CREATED="1508830041323" ID="ID_1972292834" MODIFIED="1508830047918" TEXT="&#x6700;&#x9069;&#x5316;">
+<icon BUILTIN="idea"/>
+<node CREATED="1508830045711" LINK="http://www.diva-portal.org/smash/get/diva2:359850/FULLTEXT01.pdf" MODIFIED="1508830045711" TEXT="diva-portal.org &gt; Smash &gt; Get &gt; Diva2:359850 &gt; FULLTEXT01"/>
+</node>
+<node CREATED="1508837367829" LINK="http://www.zora.uzh.ch/id/eprint/125432/7/ZORA125432.pdf" MODIFIED="1508837367829" TEXT="zora.uzh.ch &gt; Id &gt; Eprint &gt; 125432 &gt; 7 &gt; ZORA125432"/>
+</node>
+</node>
+<node CREATED="1512725584159" ID="ID_492455089" MODIFIED="1512725586304" POSITION="right" TEXT="&#x30d0;&#x30b0;">
+<node CREATED="1512725586782" ID="ID_540437548" MODIFIED="1512725594593" TEXT="&#x89e3;&#x50cf;&#x5ea6;&#x304c;16&#x306e;&#x500d;&#x6570;&#x3067;&#x306a;&#x3044;&#x3068;&#x843d;&#x3061;&#x308b;"/>
+<node CREATED="1512725595262" ID="ID_1485210165" MODIFIED="1512725600297" TEXT="&#x80cc;&#x666f;&#x304c;&#x5d29;&#x308c;&#x308b;">
+<node CREATED="1512725600918" ID="ID_821746869" MODIFIED="1512725613384" TEXT="&#x3069;&#x306e;&#x30b3;&#x30df;&#x30c3;&#x30c8;&#x304b;&#x3089;&#x767a;&#x751f;&#x3057;&#x3066;&#x3044;&#x308b;&#x306e;&#x304b;&#x8abf;&#x3079;&#x308b;&#x3068;&#x3053;&#x308d;&#x304b;&#x3089;"/>
+</node>
+</node>
+<node CREATED="1512725616581" ID="ID_1838812617" MODIFIED="1512725620825" POSITION="right" TEXT="&#x9ad8;&#x901f;&#x5316;&#x6848;">
+<node CREATED="1512725621309" ID="ID_637230800" MODIFIED="1512725626993" TEXT="&#x30b8;&#x30aa;&#x30e1;&#x30c8;&#x30ea;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;"/>
+<node CREATED="1512725628509" ID="ID_1885131339" MODIFIED="1512725648889" TEXT="BVH&#x306e;AABB&#x3092;&#x30dc;&#x30af;&#x30bb;&#x30eb;&#x306b;&#x898b;&#x7acb;&#x3066;&#x3066;LOD"/>
 </node>
 </node>
 </map>

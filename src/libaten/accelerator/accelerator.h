@@ -101,5 +101,18 @@ namespace aten {
 		{
 			return m_type;
 		}
+
+	protected:
+		bool isExporting() const
+		{
+			return m_isExporting;
+		}
+		void enableExporting()
+		{
+			m_isExporting = true;
+		}
+
+	private:
+		bool m_isExporting{ false };
 	};
 }

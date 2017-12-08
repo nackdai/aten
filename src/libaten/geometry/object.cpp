@@ -188,6 +188,9 @@ namespace AT_NAME
 	{
 		bool result = false;
 
+		m_accel = aten::accelerator::createAccelerator();
+		m_accel->enableExporting();
+
 		build();
 
 		if (m_accel) {

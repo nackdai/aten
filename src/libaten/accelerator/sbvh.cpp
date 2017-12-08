@@ -85,7 +85,7 @@ namespace aten
 				// Imported tree already.
 
 				// Search offset triangle index.
-				m_offsetTriIdx = UINT32_MAX;
+				m_offsetTriIdx = INT32_MAX;
 
 				for (uint32_t i = 0; i < num; i++) {
 					auto tri = (face*)list[i];
@@ -93,7 +93,9 @@ namespace aten
 				}
 
 				// Offset triangle index.
-				for (auto& node : m_threadedNodes[0]) {
+#pragma omp parallel for
+				for (int i = 0; i < m_threadedNodes[0].size(); i++) {
+					auto& node = m_threadedNodes[0][i];
 					if (node.isLeaf()) {
 						node.triid += m_offsetTriIdx;
 					}
@@ -160,15 +162,20 @@ namespace aten
 		m_refs.reserve(2 * tris.size());
 		m_refs.resize(tris.size());
 
-		m_offsetTriIdx = UINT32_MAX;
+		m_offsetTriIdx = INT32_MAX;
 
 		for (uint32_t i = 0; i < tris.size(); i++) {
 			m_refs[i].triid = i;
 			m_refs[i].bbox = tris[i]->computeAABB();
 
-			m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tris[i]->id);
+			m_offsetTriIdx = std::min<int>(m_offsetTriIdx, tris[i]->id);
 
 			rootBox.expand(m_refs[i].bbox);
+		}
+
+		if (isExporting()) {
+			// No offset triangle index for exporting sbvh data which are multiple in a obj.
+			m_offsetTriIdx = 0;
 		}
 
 		// Set as bounding box.
@@ -1149,6 +1156,10 @@ namespace aten
 		m_threadedNodes[0].resize(header.nodeNum);
 
 		fread(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
+
+		vec3 boxmin = vec3(header.boxmin[0], header.boxmin[1], header.boxmin[2]);
+		vec3 boxmax = vec3(header.boxmax[0], header.boxmax[1], header.boxmax[2]);
+		setBoundingBox(aabb(boxmin, boxmax));
 
 		return true;
 	}

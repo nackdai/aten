@@ -29,7 +29,7 @@ namespace aten
 
 		bool isLeaf() const
 		{
-			return (triid >= 0);
+			return (isleaf >= 0);
 		}
 #else
 		float refIdListStart{ -1.0f };
@@ -151,10 +151,10 @@ namespace aten
 		struct Reference {
 			Reference() {}
 
-			Reference(uint32_t id) : triid(id) {}
+			Reference(int id) : triid(id) {}
 
 			// 分割元の三角形インデックス.
-			uint32_t triid;
+			int triid;
 
 			// 分割した後のAABB.
 			aabb bbox;
@@ -210,7 +210,7 @@ namespace aten
 
 		uint32_t m_refIndexNum{ 0 };
 
-		uint32_t m_offsetTriIdx{ 0 };
+		int m_offsetTriIdx{ 0 };
 
 		std::vector<SBVHNode> m_nodes;
 

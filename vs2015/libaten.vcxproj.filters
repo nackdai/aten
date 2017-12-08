@@ -451,9 +451,6 @@
     <ClCompile Include="..\src\libaten\visualizer\shader.cpp">
       <Filter>visualizer</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\material\lambert.cpp">
-      <Filter>material</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\material\blinn.cpp">
       <Filter>material</Filter>
     </ClCompile>
@@ -555,9 +552,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp">
       <Filter>camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\emissive.cpp">
-      <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\light\light.cpp">
       <Filter>light</Filter>

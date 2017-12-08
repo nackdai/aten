@@ -325,13 +325,7 @@
     <CudaCompile Include="..\src\libaten\material\blinn.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\emissive.cpp">
-      <Filter>aten\material</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\ggx.cpp">
-      <Filter>aten\material</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\lambert.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\material .cpp">

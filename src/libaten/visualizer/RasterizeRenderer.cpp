@@ -7,36 +7,30 @@
 #include "sampler/cmj.h"
 
 namespace aten {
-	shader ResterizeRenderer::s_shader;
-	GeomVertexBuffer ResterizeRenderer::s_boxvb;
-
-	static int s_width = 0;
-	static int s_height = 0;
-
-	bool ResterizeRenderer::init(
+	bool RasterizeRenderer::init(
 		int width, int height,
 		const char* pathVS,
 		const char* pathFS)
 	{
-		s_width = width;
-		s_height = height;
+		m_width = width;
+		m_height = height;
 
-		return s_shader.init(width, height, pathVS, pathFS);
+		return m_shader.init(width, height, pathVS, pathFS);
 	}
 
-	bool ResterizeRenderer::init(
+	bool RasterizeRenderer::init(
 		int width, int height,
 		const char* pathVS,
 		const char* pathGS,
 		const char* pathFS)
 	{
-		s_width = width;
-		s_height = height;
+		m_width = width;
+		m_height = height;
 
-		return s_shader.init(width, height, pathVS, pathGS, pathFS);
+		return m_shader.init(width, height, pathVS, pathGS, pathFS);
 	}
 
-	void ResterizeRenderer::draw(
+	void RasterizeRenderer::draw(
 		int frame,
 		scene* scene,
 		const camera* cam,
@@ -64,9 +58,9 @@ namespace aten {
 
 		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
-		s_shader.prepareRender(nullptr, false);
+		m_shader.prepareRender(nullptr, false);
 
-		auto hMtxW2C = s_shader.getHandle("mtxW2C");
+		auto hMtxW2C = m_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
 		// TODO
@@ -81,11 +75,11 @@ namespace aten {
 
 			aten::mat4 mtxOffset;
 			mtxOffset.asTrans(aten::vec3(
-				smpl.x / s_width, 
-				smpl.y / s_height, 
+				smpl.x / m_width, 
+				smpl.y / m_height, 
 				real(0)));
 
-			auto hMtxOffset = s_shader.getHandle("mtxOffset");
+			auto hMtxOffset = m_shader.getHandle("mtxOffset");
 			CALL_GL_API(::glUniformMatrix4fv(hMtxOffset, 1, GL_TRUE, &mtxOffset.a[0]));
 		}
 
@@ -123,13 +117,13 @@ namespace aten {
 		}
 
 		scene->draw([&](const aten::mat4& mtxL2W, int objid, int primid) {
-			auto hMtxL2W = s_shader.getHandle("mtxL2W");
+			auto hMtxL2W = m_shader.getHandle("mtxL2W");
 			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
 
-			auto hObjId = s_shader.getHandle("objid");
+			auto hObjId = m_shader.getHandle("objid");
 			CALL_GL_API(::glUniform1i(hObjId, objid));
 
-			auto hPrimId = s_shader.getHandle("primid");
+			auto hPrimId = m_shader.getHandle("primid");
 			CALL_GL_API(::glUniform1i(hPrimId, primid));
 		});
 
@@ -193,7 +187,7 @@ namespace aten {
 		{ { 1, 1, 1, 1 },{ 0, 0, 0 },{ 1, 0, 0 } },
 	};
 
-	void ResterizeRenderer::drawAABB(
+	void RasterizeRenderer::drawAABB(
 		shader* shd,
 		const camera* cam,
 		accelerator* accel)
@@ -201,7 +195,7 @@ namespace aten {
 		// Initialize vb.
 		static bool isInitVB = false;
 		if (!isInitVB) {
-			s_boxvb.init(
+			m_boxvb.init(
 				sizeof(aten::vertex),
 				AT_COUNTOF(boxvtx),
 				0,
@@ -242,7 +236,7 @@ namespace aten {
 		accel->drawAABB([&](const aten::mat4& mtxL2W) {
 			// Draw.
 			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
-			s_boxvb.draw(aten::Primitive::Lines, 0, 12);
+			m_boxvb.draw(aten::Primitive::Lines, 0, 12);
 		}, aten::mat4::Identity);
 	}
 }

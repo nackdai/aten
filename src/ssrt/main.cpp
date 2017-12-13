@@ -35,6 +35,8 @@ static idaten::SSRT g_tracer;
 
 static aten::FBO g_fbo;
 
+static aten::RasterizeRenderer g_rasterizer;
+
 static int g_maxSamples = 1;
 static int g_maxBounce = 2;
 
@@ -57,7 +59,7 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
-	aten::ResterizeRenderer::draw(
+	aten::RasterizeRenderer::draw(
 		g_frame,
 		&g_scene,
 		&g_camera);
@@ -87,7 +89,7 @@ void onRun()
 		aten::visualizer::clear();
 	}
 
-	aten::ResterizeRenderer::draw(
+	g_rasterizer.draw(
 		g_frame,
 		&g_scene,
 		&g_camera,
@@ -284,7 +286,7 @@ int main()
 
 	aten::visualizer::addPostProc(&gamma);
 
-	aten::ResterizeRenderer::init(
+	g_rasterizer.init(
 		WIDTH, HEIGHT,
 		"../shader/ssrt_vs.glsl",
 		"../shader/ssrt_gs.glsl",

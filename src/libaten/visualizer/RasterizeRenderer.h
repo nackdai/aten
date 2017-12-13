@@ -11,35 +11,39 @@ namespace aten {
 	class camera;
 	class accelerator;
 
-	class ResterizeRenderer {
-		static shader s_shader;
-		static GeomVertexBuffer s_boxvb;
-
-	private:
-		ResterizeRenderer() {}
-		~ResterizeRenderer() {}
+	class RasterizeRenderer {
+	public:
+		RasterizeRenderer() {}
+		~RasterizeRenderer() {}
 
 	public:
-		static bool init(
+		bool init(
 			int width, int height,
 			const char* pathVS,
 			const char* pathFS);
 
-		static bool init(
+		bool init(
 			int width, int height,
 			const char* pathVS,
 			const char* pathGS,
 			const char* pathFS);
 
-		static void draw(
+		void draw(
 			int frame,
 			scene* scene,
 			const camera* cam,
 			FBO* fbo = nullptr);
 
-		static void drawAABB(
+		void drawAABB(
 			shader* shd,
 			const camera* cam,
 			accelerator* accel);
+
+	private:
+		shader m_shader;
+		GeomVertexBuffer m_boxvb;
+
+		int m_width{ 0 };
+		int m_height{ 0 };
 	};
 }

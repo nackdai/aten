@@ -17,8 +17,8 @@
 #define ENABLE_ENVMAP
 //#define ENABLE_NLM
 
-static int WIDTH = 512;
-static int HEIGHT = 512;
+static int WIDTH = 640;
+static int HEIGHT = 360;
 static const char* TITLE = "svgf";
 
 #ifdef ENABLE_OMP
@@ -37,6 +37,8 @@ static idaten::SVGFPathTracing g_tracer;
 static aten::TAA g_taa;
 
 static aten::FBO g_fbo;
+
+static aten::RasterizeRenderer g_rasterizer;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -73,7 +75,7 @@ void onRun()
 		aten::visualizer::clear();
 	}
 
-	aten::ResterizeRenderer::draw(
+	g_rasterizer.draw(
 		g_tracer.frame(),
 		&g_scene,
 		&g_camera,
@@ -380,7 +382,7 @@ int main()
 	aten::visualizer::addPostProc(&nlmshd);
 #endif
 
-	aten::ResterizeRenderer::init(
+	g_rasterizer.init(
 		WIDTH, HEIGHT,
 		"../shader/ssrt_vs.glsl",
 		"../shader/ssrt_gs.glsl",

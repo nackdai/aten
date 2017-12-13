@@ -185,6 +185,14 @@ void main()
 		return;
 	}
 
+	float center_depth = texture2D(s2, uv).w;
+	if (center_depth < 0) {
+		oBuffer = texture2D(s0, uv);
+		oBuffer.a = 1;
+		oScreen = oBuffer;
+		return;
+	}
+
 	vec2 du = vec2(invScr.x, 0.0);
 	vec2 dv = vec2(0.0, invScr.y);
 
@@ -231,6 +239,10 @@ void main()
 			offset *= invScr;
 
 			float depth = texture2D(s2, uv + offset).w;
+
+			if (depth < 0) {
+				continue;
+			}
 
 			vec4 prevPos = computePrevScreenPos(uv + offset, depth);
 
@@ -280,18 +292,23 @@ void main()
 		}
 	}
 
-	neighbor_sum /= weight;
-	weight /= 9;
-	neighbor_sum.xyz = mix(center_color.xyz, neighbor_sum.xyz, weight);
+	if (weight > 0) {
+		neighbor_sum /= weight;
+		weight /= 9;
+		neighbor_sum.xyz = mix(center_color.xyz, neighbor_sum.xyz, weight);
 
 #ifdef USE_YCOCG
-	neighbor_sum.xyz = YCoCg2RGB(neighbor_sum.xyz);
+		neighbor_sum.xyz = YCoCg2RGB(neighbor_sum.xyz);
 #endif
 
-	neighbor_sum.xyz = unmap(neighbor_sum.xyz);
+		neighbor_sum.xyz = unmap(neighbor_sum.xyz);
 
-	oBuffer = neighbor_sum;
-	oBuffer.a = 1;
+		oBuffer = neighbor_sum;
+		oBuffer.a = 1;
+	}
+	else {
+		oBuffer = center_color;
+	}
 
 	if (showDiff) {
 		vec3 c = YCoCg2RGB(center_color.xyz);

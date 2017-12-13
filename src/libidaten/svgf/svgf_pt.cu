@@ -265,6 +265,7 @@ __global__ void hitTest(
 
 template <bool isFirstBounce>
 __global__ void shadeMiss(
+	cudaSurfaceObject_t aovExportBuffer,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -296,6 +297,14 @@ __global__ void shadeMiss(
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
+
+			if (aovExportBuffer > 0) {
+				surf2Dwrite(
+					aovNormalDepth[idx],
+					aovExportBuffer,
+					ix * sizeof(float4), iy,
+					cudaBoundaryModeTrap);
+			}
 		}
 
 		path.contrib += path.throughput * bg;
@@ -306,6 +315,7 @@ __global__ void shadeMiss(
 
 template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
+	cudaSurfaceObject_t aovExportBuffer,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -347,6 +357,14 @@ __global__ void shadeMissWithEnvmap(
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
+
+			if (aovExportBuffer > 0) {
+				surf2Dwrite(
+					aovNormalDepth[idx],
+					aovExportBuffer,
+					ix * sizeof(float4), iy,
+					cudaBoundaryModeTrap);
+			}
 		}
 		else {
 			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
@@ -973,6 +991,12 @@ namespace idaten
 			m_tex.writeByNum(&tmp[0], tmp.size());
 		}
 
+		cudaSurfaceObject_t aovExportBuffer = 0;
+		if (m_aovGLBuffer.isValid()) {
+			m_aovGLBuffer.map();
+			aovExportBuffer = m_aovGLBuffer.bind();
+		}
+
 		static const int rrBounce = 3;
 
 		// Set bounce count to 1 forcibly, aov render mode.
@@ -999,7 +1023,7 @@ namespace idaten
 					bounce,
 					vtxTexPos);
 				
-				onShadeMiss(width, height, bounce);
+				onShadeMiss(width, height, bounce, aovExportBuffer);
 
 				int hitcount = 0;
 				idaten::Compaction::compact(
@@ -1015,6 +1039,7 @@ namespace idaten
 
 				onShade(
 					outputSurf,
+					aovExportBuffer,
 					hitcount,
 					width, height,
 					bounce, rrBounce,
@@ -1063,6 +1088,11 @@ namespace idaten
 				m_texRsc[i].unbind();
 			}
 			m_tex.reset();
+		}
+
+		if (m_aovGLBuffer.isValid()) {
+			m_aovGLBuffer.unbind();
+			m_aovGLBuffer.unmap();
 		}
 	}
 
@@ -1144,7 +1174,8 @@ namespace idaten
 
 	void SVGFPathTracing::onShadeMiss(
 		int width, int height,
-		int bounce)
+		int bounce,
+		cudaSurfaceObject_t aovExportBuffer)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -1156,6 +1187,7 @@ namespace idaten
 		if (m_envmapRsc.idx >= 0) {
 			if (bounce == 0) {
 				shadeMissWithEnvmap<true> << <grid, block >> > (
+					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1167,6 +1199,7 @@ namespace idaten
 			}
 			else {
 				shadeMissWithEnvmap<false> << <grid, block >> > (
+					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1180,6 +1213,7 @@ namespace idaten
 		else {
 			if (bounce == 0) {
 				shadeMiss<true> << <grid, block >> > (
+					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1188,6 +1222,7 @@ namespace idaten
 			}
 			else {
 				shadeMiss<false> << <grid, block >> > (
+					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1201,6 +1236,7 @@ namespace idaten
 
 	void SVGFPathTracing::onShade(
 		cudaSurfaceObject_t outputSurf,
+		cudaSurfaceObject_t aovExportBuffer,
 		int hitcount,
 		int width, int height,
 		int bounce, int rrBounce,
@@ -1235,12 +1271,6 @@ namespace idaten
 #endif
 
 		int curaov = getCurAovs();
-
-		cudaSurfaceObject_t aovExportBuffer = 0;
-		if (m_aovGLBuffer.isValid()) {
-			m_aovGLBuffer.map();
-			aovExportBuffer = m_aovGLBuffer.bind();
-		}
 
 		if (bounce == 0) {
 			shade<true, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
@@ -1294,11 +1324,6 @@ namespace idaten
 		}
 
 		checkCudaKernel(shade);
-
-		if (m_aovGLBuffer.isValid()) {
-			m_aovGLBuffer.unbind();
-			m_aovGLBuffer.unmap();
-		}
 
 #ifdef SEPARATE_SHADOWRAY_HITTEST
 		hitShadowRay<ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (

@@ -18,7 +18,7 @@ namespace aten
 		// triidの位置をThreadedBvhNodeと合わせる.
 
 		// NOTE
-		// ThreadedBvhNode では parent の位置に shapeid がいてGPUでは shapeid を見てリーフノードかどうか判定している.
+		// ThreadedBvhNode では isleaf の位置に shapeid がいてGPUでは shapeid を見てリーフノードかどうか判定している.
 		// そのため、最初のfloatでリーフノードかどうかを判定するようにする.
 		// padding の部分は ThreadedBvhNode では exid なので、ここは常に -1 になるようにする.
 

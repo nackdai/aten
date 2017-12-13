@@ -28,7 +28,7 @@ __global__ void fillAOV(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 

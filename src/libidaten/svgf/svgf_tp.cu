@@ -89,7 +89,7 @@ __global__ void temporalReprojection(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -296,7 +296,7 @@ __global__ void dilateWeight(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -407,7 +407,7 @@ __global__ void medianFilter(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 

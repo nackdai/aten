@@ -69,7 +69,7 @@ __global__ void varianceEstimation(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 

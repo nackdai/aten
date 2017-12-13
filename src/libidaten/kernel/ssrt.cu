@@ -35,7 +35,7 @@ __global__ void genPath(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -97,7 +97,7 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -403,7 +403,7 @@ __global__ void hitTestInScreenSpace(
 	//int ix = 140;
 	//int iy = 512 - 320;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -598,7 +598,7 @@ __global__ void shadeMiss(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -633,7 +633,7 @@ __global__ void shadeMissWithEnvmap(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
@@ -1048,7 +1048,7 @@ __global__ void gather(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width && iy >= height) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 

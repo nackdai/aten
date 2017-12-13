@@ -58,9 +58,17 @@ namespace idaten {
 // This will output the proper CUDA error strings in the event that a CUDA host call returns an error.
 #define checkCudaErrors(val)	idaten::cuda::check((val), #val, __FILE__, __LINE__)
 
+#ifdef __AT_DEBUG__
 #define checkCudaKernel(kernel)	{\
 	auto err = cudaGetLastError();\
 	if (err != cudaSuccess) {\
 		AT_PRINTF("Cuda Kernel Err(%s) [%s]\n", (#kernel), cudaGetErrorString(err));\
 	}\
+	err = cudaDeviceSynchronize();\
+	if (cudaSuccess != err) {\
+		AT_PRINTF("Cuda Kernel Err with Sync(%s) [%s]\n", (#kernel), cudaGetErrorString(err));\
+	}\
 }
+#else
+#define checkCudaKernel(kernel)
+#endif

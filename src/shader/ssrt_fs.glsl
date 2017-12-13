@@ -37,8 +37,8 @@ void main()
 
 	outColor.w = 1.0;
 #else
-	outColor.x = intBitsToFloat(ids.x);
-	outColor.y = intBitsToFloat(ids.y);
+	outColor.x = intBitsToFloat(ids.x);	// objid
+	outColor.y = intBitsToFloat(ids.y);	// primid
 	outColor.zw = baryCentric.xy;
 
 	outDepth = vec4(depth, 1, 1, 1);

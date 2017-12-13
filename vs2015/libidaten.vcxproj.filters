@@ -352,7 +352,6 @@
     <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <CudaCompile Include="..\src\libidaten\svgf\svgf_pt.cu">
       <Filter>svgf</Filter>
     </CudaCompile>
@@ -380,7 +379,6 @@
     <CudaCompile Include="..\src\libidaten\kernel\stackless_qbvh.cu">
       <Filter>kernel\accelerator</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\geometry\sphere.cpp" />
     <CudaCompile Include="..\src\libidaten\kernel\pathtracing.cu">
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
@@ -392,6 +390,12 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_ssrt.cu">
       <Filter>svgf</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\geometry\sphere.cpp">
+      <Filter>aten\geometry</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

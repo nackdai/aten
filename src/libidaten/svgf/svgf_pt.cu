@@ -439,7 +439,6 @@ __global__ void shade(
 	__shared__ idaten::SVGFPathTracing::ShadowRay shShadowRays[64];
 	__shared__ aten::MaterialParameter shMtrls[64];
 
-	shShadowRays[threadIdx.x] = shadowRays[idx];
 	shPaths[threadIdx.x] = paths[idx];
 
 	const auto ray = rays[idx];

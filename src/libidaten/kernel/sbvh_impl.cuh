@@ -147,9 +147,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 					toplayerHit = (int)node0.w;
 					toplayerMiss = (int)node1.w;
 
-					nodeid = 0;
-
-					continue;
+					isHit = true;
+					node0.w = 0.0f;
 				}
 			}
 			else if (attrib.y >= 0) {

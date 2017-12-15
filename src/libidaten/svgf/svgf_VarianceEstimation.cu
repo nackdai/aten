@@ -55,6 +55,20 @@ inline __device__ float3 computeViewSpace(
 	return make_float3(pos.x, pos.y, pos.z);
 }
 
+inline __device__ float C(float3 x1, float3 x2, float sigma)
+{
+	float a = length(x1 - x2) / sigma;
+	a *= a;
+	return expf(-0.5f * a);
+}
+
+inline __device__ float C(float x1, float x2, float sigma)
+{
+	float a = abs(x1 - x2) / sigma;
+	a *= a;
+	return expf(-0.5f * a);
+}
+
 #define IS_IN_BOUND(x, a, b)	((a) <= (x) && (x) < (b))
 
 __global__ void varianceEstimation(
@@ -94,7 +108,7 @@ __global__ void varianceEstimation(
 			cudaBoundaryModeTrap);
 	}
 
-	auto centerViewPos = computeViewSpace(ix, iy, centerDepth, width, height, &mtxC2V);
+	float3 centerViewPos = computeViewSpace(ix, iy, centerDepth, width, height, &mtxC2V);
 
 	float3 centerMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
 
@@ -176,7 +190,7 @@ __global__ void varianceEstimation(
 					float Wd = exp(-0.5f * d * d / (sigmaD * sigmaD));
 
 					float Ws = exp(-0.5f * (u * u + v * v) / (sigmaS * sigmaS));
-#else
+#elif 0
 					float Wn = 1.0f;
 					{
 						float normalCloseness = dot(sampleNml, centerNormal);
@@ -205,6 +219,12 @@ __global__ void varianceEstimation(
 							? 1.0
 							: pow(max(0.0, 1.0 - 2.0 * err / sqrt(dist2)), 2.0);
 					}
+#else
+					float3 sampleViewPos = computeViewSpace(ix + u, iy + v, sampleDepth, width, height, &mtxC2V);
+
+					float Wn = C(centerNormal, sampleNml, 0.1f);
+					float Ws = C(centerViewPos, sampleViewPos, 0.1f);
+					float Wd = C(centerDepth, sampleDepth, 0.1f);
 #endif
 
 					float Wm = centerMeshId == sampleMeshId ? 1.0f : 0.0f;

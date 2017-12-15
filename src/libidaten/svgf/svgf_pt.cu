@@ -583,18 +583,8 @@ __global__ void shade(
 			const auto& nmlLight = sampleres.nml;
 			real pdfLight = sampleres.pdf;
 
-			auto lightobj = sampleres.obj;
-
 			auto dirToLight = normalize(sampleres.dir);
 			auto distToLight = length(posLight - rec.p);
-
-			real distHitObjToRayOrg = AT_MATH_INF;
-
-			// Ray aim to the area light.
-			// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-			auto hitobj = lightobj;
-
-			aten::Intersection isectTmp;
 
 			auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 			auto tmp = rec.p + dirToLight - shadowRayOrg;
@@ -607,6 +597,16 @@ __global__ void shade(
 			shShadowRays[threadIdx.x].distToLight[i] = distToLight;
 			shShadowRays[threadIdx.x].lightcontrib[i] = aten::vec3(0);
 #else
+			auto lightobj = sampleres.obj;
+
+			real distHitObjToRayOrg = AT_MATH_INF;
+
+			// Ray aim to the area light.
+			// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+			auto hitobj = lightobj;
+
+			aten::Intersection isectTmp;
+
 			aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
 			bool isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);

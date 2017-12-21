@@ -213,8 +213,8 @@ __global__ void temporalReprojection(
 				float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
 
 				// 前のフレームのピクセルカラーを取得.
-				//float4 prev = prevAovColorVariance[pidx];
-				float4 prev = sampleBilinear(prevAovColorVariance, prevPos.x, prevPos.y, width, height);
+				float4 prev = prevAovColorVariance[pidx];
+				//float4 prev = sampleBilinear(prevAovColorVariance, prevPos.x, prevPos.y, width, height);
 
 				float W = Wz * Wn * Wm;
 				sum += prev * W;
@@ -289,7 +289,7 @@ __global__ void temporalReprojection(
 			const int prevMeshId = (int)momentMeshId.w;
 			float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
-			if (abs(1 - centerDepth / prevDepth) < zThreshold
+			if (fabs(1 - centerDepth / prevDepth) < zThreshold
 				&& dot(centerNormal, prevNormal) > nThreshold
 				&& centerMeshId == prevMeshId)
 			{

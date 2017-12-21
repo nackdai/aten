@@ -64,7 +64,7 @@ inline __device__ float C(float3 x1, float3 x2, float sigma)
 
 inline __device__ float C(float x1, float x2, float sigma)
 {
-	float a = abs(x1 - x2) / sigma;
+	float a = fabs(x1 - x2) / sigma;
 	a *= a;
 	return expf(-0.5f * a);
 }
@@ -160,79 +160,76 @@ __global__ void varianceEstimation(
 		};
 
 #pragma unroll
-		for (int i = 0; i < 49; i++) {
+		for (int i = 0; i < 49; i++)
 		{
+			{
 				int u = offsetx[i];
 				int v = offsety[i];
 #endif
-				if (IS_IN_BOUND(ix + u, 0, width)
-					&& IS_IN_BOUND(iy + v, 0, height))
-				{
-					int xx = clamp(ix + u, 0, width - 1);
-					int yy = clamp(iy + v, 0, height - 1);
+				int xx = clamp(ix + u, 0, width - 1);
+				int yy = clamp(iy + v, 0, height - 1);
 
-					int pidx = getIdx(xx, yy, width);
-					normalDepth = aovNormalDepth[pidx];
-					momentMeshid = aovMomentMeshid[pidx];
+				int pidx = getIdx(xx, yy, width);
+				normalDepth = aovNormalDepth[pidx];
+				momentMeshid = aovMomentMeshid[pidx];
 
-					float3 sampleNml = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
-					float sampleDepth = normalDepth.w;
-					int sampleMeshId = (int)momentMeshid.w;
+				float3 sampleNml = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
+				float sampleDepth = normalDepth.w;
+				int sampleMeshId = (int)momentMeshid.w;
 
-					float3 moment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
-					moment /= moment.z;
+				float3 moment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
+				moment /= moment.z;
 
 #if 0
-					float n = 1 - dot(sampleNml, centerNormal);
-					float Wn = exp(-0.5f * n * n / (sigmaN * sigmaN));
+				float n = 1 - dot(sampleNml, centerNormal);
+				float Wn = exp(-0.5f * n * n / (sigmaN * sigmaN));
 
-					float d = 1 - min(centerDepth, sampleDepth) / max(centerDepth, sampleDepth);
-					float Wd = exp(-0.5f * d * d / (sigmaD * sigmaD));
+				float d = 1 - min(centerDepth, sampleDepth) / max(centerDepth, sampleDepth);
+				float Wd = exp(-0.5f * d * d / (sigmaD * sigmaD));
 
-					float Ws = exp(-0.5f * (u * u + v * v) / (sigmaS * sigmaS));
+				float Ws = exp(-0.5f * (u * u + v * v) / (sigmaS * sigmaS));
 #elif 0
-					float Wn = 1.0f;
-					{
-						float normalCloseness = dot(sampleNml, centerNormal);
-						normalCloseness = normalCloseness * normalCloseness;
-						normalCloseness = normalCloseness * normalCloseness;
-						float normalError = (1.0f - normalCloseness);
-						Wn = max((1.0f - normalError), 0.0f);
-					}
+				float Wn = 1.0f;
+				{
+					float normalCloseness = dot(sampleNml, centerNormal);
+					normalCloseness = normalCloseness * normalCloseness;
+					normalCloseness = normalCloseness * normalCloseness;
+					float normalError = (1.0f - normalCloseness);
+					Wn = max((1.0f - normalError), 0.0f);
+				}
 
-					float Wd = max(0.0f, 1.0f - abs(centerDepth - sampleDepth));
+				float Wd = max(0.0f, 1.0f - fabs(centerDepth - sampleDepth));
 
-					float Ws = 1.0f;
-					{
-						auto sampleViewPos = computeViewSpace(ix + u, iy + v, sampleDepth, width, height, &mtxC2V);
+				float Ws = 1.0f;
+				{
+					auto sampleViewPos = computeViewSpace(ix + u, iy + v, sampleDepth, width, height, &mtxC2V);
 
-						// Change in position in camera space.
-						auto dq = centerViewPos - sampleViewPos;
+					// Change in position in camera space.
+					auto dq = centerViewPos - sampleViewPos;
 
-						// How far away is this point from the original sample in camera space? (Max value is unbounded).
-						auto dist2 = dot(dq, dq);
+					// How far away is this point from the original sample in camera space? (Max value is unbounded).
+					auto dist2 = dot(dq, dq);
 
-						// How far off the expected plane (on the perpendicular) is this point?  Max value is unbounded.
-						float err = max(abs(dot(dq, sampleNml)), abs(dot(dq, centerNormal)));
+					// How far off the expected plane (on the perpendicular) is this point?  Max value is unbounded.
+					float err = max(fabs(dot(dq, sampleNml)), abs(dot(dq, centerNormal)));
 
-						Ws = (dist2 < 0.001f)
-							? 1.0
-							: pow(max(0.0, 1.0 - 2.0 * err / sqrt(dist2)), 2.0);
-					}
+					Ws = (dist2 < 0.001f)
+						? 1.0
+						: pow(max(0.0, 1.0 - 2.0 * err / sqrt(dist2)), 2.0);
+				}
 #else
-					float3 sampleViewPos = computeViewSpace(ix + u, iy + v, sampleDepth, width, height, &mtxC2V);
+				float3 sampleViewPos = computeViewSpace(ix + u, iy + v, sampleDepth, width, height, &mtxC2V);
 
-					float Wn = C(centerNormal, sampleNml, 0.1f);
-					float Ws = C(centerViewPos, sampleViewPos, 0.1f);
-					float Wd = C(centerDepth, sampleDepth, 0.1f);
+				float Wn = C(centerNormal, sampleNml, 0.1f);
+				float Ws = C(centerViewPos, sampleViewPos, 0.1f);
+				float Wd = C(centerDepth, sampleDepth, 0.1f);
 #endif
 
-					float Wm = centerMeshId == sampleMeshId ? 1.0f : 0.0f;
+				float Wm = centerMeshId == sampleMeshId ? 1.0f : 0.0f;
 
-					float W = Ws * Wn * Wd * Wm;
-					sum += moment * W;
-					weight += W;
-				}
+				float W = Ws * Wn * Wd * Wm;
+				sum += moment * W;
+				weight += W;
 			}
 		}
 
@@ -245,12 +242,12 @@ __global__ void varianceEstimation(
 
 	// TODO
 	// 分散はマイナスにならないが・・・・
-	var = abs(var);
+	var = fabs(var);
 
 	aovColorVariance[idx].w = var;
 
 	surf2Dwrite(
-		make_float4(var, var, var, var),
+		frame < 4 ? make_float4(1, 0, 0, 1) : make_float4(var, var, var, var),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);

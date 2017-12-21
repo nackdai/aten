@@ -166,9 +166,11 @@ __global__ void atrousFilter(
 	float centerDepth = normalDepth.w;
 	int centerMeshId = (int)momentMeshid.w;
 
+#if 0
 	float tmpDdzX = ddx(ix, iy, width, height, aovNormalDepth);
 	float tmpDdzY = ddy(ix, iy, width, height, aovNormalDepth);
 	float2 ddZ = make_float2(tmpDdzX, tmpDdzY);
+#endif
 
 	float4 centerColor;
 
@@ -296,13 +298,21 @@ __global__ void atrousFilter(
 
 			float variance = color.w;
 
+			int _idx = getIdx(xx, iy, width);
+			float depthX = aovNormalDepth[_idx].w;
+
+			_idx = getIdx(ix, yy, width);
+			float depthY = aovNormalDepth[_idx].w;
+
+			float2 ddZ = make_float2(depthX - centerDepth, depthY - centerDepth);
+
 			float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
 
-			float Wz = min(expf(-abs(centerDepth - depth) / (sigmaZ * abs(dot(ddZ, p - q)) + 0.000001f)), 1.0f);
+			float Wz = min(expf(-fabs(centerDepth - depth) / (sigmaZ * fabs(dot(ddZ, p - q)) + 0.000001f)), 1.0f);
 
 			float Wn = powf(max(0.0f, dot(centerNormal, normal)), sigmaN);
 
-			float Wl = min(expf(-abs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
+			float Wl = min(expf(-fabs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
 
 			float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
 

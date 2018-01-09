@@ -5,4 +5,4 @@
 
 #include "kernel/compaction.h"
 
-#include "svgf/svgf_pt.h"
+#include "svgf/svgf.h"

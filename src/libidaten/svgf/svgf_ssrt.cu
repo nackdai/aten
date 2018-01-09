@@ -1,4 +1,4 @@
-#include "svgf/svgf_pt.h"
+#include "svgf/svgf.h"
 
 #include "kernel/context.cuh"
 #include "kernel/light.cuh"

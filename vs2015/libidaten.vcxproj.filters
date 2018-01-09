@@ -166,9 +166,6 @@
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h">
       <Filter>aten\sampler</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\svgf\svgf_pt.h">
-      <Filter>svgf</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\cmj.h">
       <Filter>aten\sampler</Filter>
     </ClInclude>
@@ -222,6 +219,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\sbvh_impl.cuh">
       <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\svgf\svgf.h">
+      <Filter>svgf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -310,6 +310,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\renderer.cpp">
       <Filter>kernel\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\svgf\svgf.cpp">
+      <Filter>svgf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

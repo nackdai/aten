@@ -102,9 +102,10 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh" />
-    <ClInclude Include="..\src\libidaten\svgf\svgf_pt.h" />
+    <ClInclude Include="..\src\libidaten\svgf\svgf.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\libidaten\svgf\svgf.cpp" />
     <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>

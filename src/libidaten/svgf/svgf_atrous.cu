@@ -135,6 +135,46 @@ inline __device__ float gaussFilter3x3(
 	return sum;
 }
 
+// https://software.intel.com/en-us/node/503873
+inline __device__ float4 RGB2YCoCg(float4 c)
+{
+	// Y = R/4 + G/2 + B/4
+	// Co = R/2 - B/2
+	// Cg = -R/4 + G/2 - B/4
+	return make_float4(
+		c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
+		c.x / 2.0 - c.z / 2.0,
+		-c.x / 4.0 + c.y / 2.0 - c.z / 4.0,
+		c.w);
+}
+
+inline __device__ float4 YCoCg2RGB(float4 c)
+{
+	// R = Y + Co - Cg
+	// G = Y + Cg
+	// B = Y - Co - Cg
+	return clamp(
+		make_float4(
+			c.x + c.y - c.z,
+			c.x + c.z,
+			c.x - c.y - c.z,
+			c.w),
+		0, 1);
+}
+
+// http://graphicrants.blogspot.jp/2013/12/tone-mapping.html
+inline __device__ float4 map(float4 clr)
+{
+	float lum = RGB2YCoCg(clr).x;
+	return clr / (1 + lum);
+}
+
+inline __device__ float4 unmap(float4 clr)
+{
+	float lum = RGB2YCoCg(clr).x;
+	return clr / (1 - lum);
+}
+
 template <bool isFirstIter, bool isFinalIter>
 __global__ void atrousFilter(
 	cudaSurfaceObject_t dst,
@@ -288,15 +328,19 @@ __global__ void atrousFilter(
 			int meshid = (int)momentMeshid.w;
 
 			float4 color;
+			float variance;
 
 			if (isFirstIter) {
 				color = aovColorVariance[qidx];
+				variance = color.w;
+
+				color = map(color);
+				color = RGB2YCoCg(color);
 			}
 			else {
 				color = clrVarBuffer[qidx];
+				variance = color.w;
 			}
-
-			float variance = color.w;
 
 			int _idx = getIdx(xx, iy, width);
 			float depthX = aovNormalDepth[_idx].w;
@@ -339,10 +383,13 @@ __global__ void atrousFilter(
 
 	if (isFirstIter) {
 		// Store color temporary.
-		tmpBuffer[idx] = sumC;
+		sumC = YCoCg2RGB(sumC);
+		tmpBuffer[idx] = unmap(sumC);
 	}
 	
 	if (isFinalIter) {
+		sumC = YCoCg2RGB(sumC);
+		sumC = unmap(sumC);
 		sumC *= texClrTemporalWeight;
 
 		surf2Dwrite(

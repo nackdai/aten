@@ -17,8 +17,8 @@
 #define ENABLE_ENVMAP
 //#define ENABLE_NLM
 
-static int WIDTH = 640;
-static int HEIGHT = 360;
+static int WIDTH = 1280;
+static int HEIGHT = 720;
 static const char* TITLE = "svgf";
 
 #ifdef ENABLE_OMP

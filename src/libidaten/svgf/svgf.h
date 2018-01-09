@@ -150,26 +150,6 @@ namespace idaten
 			return isValid;
 		}
 
-		void setTemporalWeightThreshold(float th)
-		{
-			m_thresholdTemporalWeight = aten::clamp(th, 0.0f, 1.0f);
-		}
-
-		float getTemporalWeightThreshold() const
-		{
-			return m_thresholdTemporalWeight;
-		}
-
-		void setAtrousTapRadiusScale(int s)
-		{
-			m_atrousTapRadiusScale = std::max(s, 1);
-		}
-
-		int getAtrousTapRadiusScale() const
-		{
-			return m_atrousTapRadiusScale;
-		}
-
 		void setHitDistanceLimit(float d)
 		{
 			m_hitDistLimit = d;
@@ -287,9 +267,6 @@ namespace idaten
 		idaten::TypedCudaMemory<float4> m_atrousClrVar[2];
 
 		idaten::TypedCudaMemory<float4> m_tmpBuf;
-
-		float m_thresholdTemporalWeight{ 0.0f };
-		int m_atrousTapRadiusScale{ 1 };
 
 		// Distance limitation to kill path.
 		float m_hitDistLimit{ AT_MATH_INF };

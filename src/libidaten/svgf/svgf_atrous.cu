@@ -186,8 +186,6 @@ __global__ void atrousFilter(
 	const float4* __restrict__ clrVarBuffer,
 	float4* nextClrVarBuffer,
 	int stepScale,
-	float thresholdTemporalWeight,
-	int radiusScale,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -279,14 +277,8 @@ __global__ void atrousFilter(
 		1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
 	};
 
-	int R = 2;
-
 #if 0
-	if (isFirstIter) {
-		if (aovs[idx].temporalWeight < thresholdTemporalWeight) {
-			R *= radiusScale;
-		}
-	}
+	int R = 2;
 
 	for (int y = -R; y <= R; y++) {
 		for (int x = -R; x <= R; x++) {
@@ -453,7 +445,6 @@ namespace idaten
 					m_aovMomentMeshid[curaov].ptr(),
 					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
-					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}
@@ -469,7 +460,6 @@ namespace idaten
 					m_aovMomentMeshid[curaov].ptr(),
 					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
-					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}
@@ -483,7 +473,6 @@ namespace idaten
 					m_aovMomentMeshid[curaov].ptr(),
 					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 					stepScale,
-					m_thresholdTemporalWeight, m_atrousTapRadiusScale,
 					width, height);
 				checkCudaKernel(atrousFilter);
 			}

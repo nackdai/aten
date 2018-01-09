@@ -253,54 +253,17 @@ __global__ void temporalReprojection(
 		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
 		float3 centerMoment = make_float3(lum * lum, lum, 0);
 
-#if 0
-		// 前のフレームのクリップ空間座標を計算.
-		aten::vec4 prevPos;
-		computePrevScreenPos(
-			ix, iy,
-			centerDepth,
-			width, height,
-			&prevPos,
-			mtxs);
-#else
-		aten::vec4 prevPos = centerPrevPos;
-#endif
-
-		// [0, 1]の範囲内に入っているか.
-		bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
-		bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
-
 		// 積算フレーム数のリセット.
 		int frame = 1;
 
-		if (isInsideX && isInsideY) {
-			int px = (int)(prevPos.x * width - 0.5f);
-			int py = (int)(prevPos.y * height - 0.5f);
+		if (weight > 0.0f) {
+			auto momentMeshid = prevAovMomentMeshid[idx];;
+			float3 prevMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
 
-			px = clamp(px, 0, width - 1);
-			py = clamp(py, 0, height - 1);
+			// 積算フレーム数を１増やす.
+			frame = (int)prevMoment.z + 1;
 
-			int pidx = getIdx(px, py, width);
-
-			nmlDepth = prevAovNormalDepth[pidx];
-			momentMeshId = prevAovMomentMeshid[pidx];
-
-			const float prevDepth = nmlDepth.w;
-			const int prevMeshId = (int)momentMeshId.w;
-			float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
-
-			if (fabs(1 - centerDepth / prevDepth) < zThreshold
-				&& dot(centerNormal, prevNormal) > nThreshold
-				&& centerMeshId == prevMeshId)
-			{
-				auto momentMeshid = prevAovMomentMeshid[pidx];;
-				float3 prevMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
-
-				// 積算フレーム数を１増やす.
-				frame = (int)prevMoment.z + 1;
-
-				centerMoment += prevMoment;
-			}
+			centerMoment += prevMoment;
 		}
 
 		centerMoment.z = frame;

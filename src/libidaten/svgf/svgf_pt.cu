@@ -779,8 +779,8 @@ __global__ void hitShadowRay(
 	if (shadowRay.isActive) {
 #pragma unroll
 		for (int i = 0; i < ShadowRayNum; i++) {
-			int targetLightId = shadowRay.targetLightId[i];
-			int distToLight = shadowRay.distToLight[i];
+			auto targetLightId = shadowRay.targetLightId[i];
+			auto distToLight = shadowRay.distToLight[i];
 
 			auto light = &ctxt.lights[targetLightId];
 			auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);

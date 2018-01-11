@@ -164,7 +164,8 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 	const aten::LightParameter* light,
 	const aten::vec3& org,
 	const aten::vec3& normal,
-	aten::sampler* sampler)
+	aten::sampler* sampler,
+	int lod)
 {
 	// TODO
 	int envmapidx = light->envmap.idx;
@@ -206,7 +207,8 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 
 	result->pdf = dot(normal, result->dir) / AT_MATH_PI;
 
-	auto le = tex2D<float4>(ctxt->textures[envmapidx], u, v);
+	//auto le = tex2D<float4>(ctxt->textures[envmapidx], u, v);
+	auto le = tex2DLod<float4>(ctxt->textures[envmapidx], u, v, lod);
 
 	result->le = aten::vec3(le.x, le.y, le.z);
 	result->intensity = 1.0f;
@@ -219,14 +221,15 @@ AT_CUDA_INLINE __device__ void sampleLight(
 	const aten::LightParameter* light,
 	const aten::vec3& org,
 	const aten::vec3& normal,
-	aten::sampler* sampler)
+	aten::sampler* sampler,
+	int lod/*= 0*/)
 {
 	switch (light->type) {
 	case aten::LightType::Area:
 		sampleAreaLight(result, ctxt, light, org, sampler);
 		break;
 	case aten::LightType::IBL:
-		sampleImageBasedLight(result, ctxt, light, org, normal, sampler);
+		sampleImageBasedLight(result, ctxt, light, org, normal, sampler, lod);
 		break;
 	case aten::LightType::Direction:
 		AT_NAME::DirectionalLight::sample(result, light, org, sampler);

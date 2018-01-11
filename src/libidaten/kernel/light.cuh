@@ -11,7 +11,8 @@ __device__ void sampleLight(
 	const aten::LightParameter* light,
 	const aten::vec3& org,
 	const aten::vec3& normal,
-	aten::sampler* sampler);
+	aten::sampler* sampler,
+	int lod = 0);
 
 #ifndef __AT_DEBUG__
 #include "kernel/light_impl.cuh"

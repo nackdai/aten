@@ -578,7 +578,7 @@ __global__ void shade(
 			light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
 			//auto light = ctxt.lights[lightidx];
 
-			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &shPaths[threadIdx.x].sampler);
+			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &shPaths[threadIdx.x].sampler, bounce);
 
 			const auto& posLight = sampleres.pos;
 			const auto& nmlLight = sampleres.nml;

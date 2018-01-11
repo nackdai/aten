@@ -228,6 +228,55 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
 	}
 }
 
+AT_CUDA_INLINE __device__ void sampleMaterial(
+	AT_NAME::MaterialSampling* result,
+	const Context* ctxt,
+	const aten::MaterialParameter* mtrl,
+	const aten::vec3& normal,
+	const aten::vec3& wi,
+	const aten::vec3& orgnormal,
+	aten::sampler* sampler,
+	float u, float v,
+	const aten::vec3& externalAlbedo)
+{
+	switch (mtrl->type) {
+	case aten::MaterialType::Emissive:
+		AT_NAME::emissive::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+		break;
+	case aten::MaterialType::Lambert:
+		AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, externalAlbedo, false);
+		break;
+	case aten::MaterialType::OrneNayar:
+		AT_NAME::OrenNayar::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+		break;
+	case aten::MaterialType::Specular:
+		AT_NAME::specular::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+		break;
+	case aten::MaterialType::Refraction:
+		// TODO
+		AT_NAME::refraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Blinn:
+		AT_NAME::MicrofacetBlinn::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+		break;
+	case aten::MaterialType::GGX:
+		AT_NAME::MicrofacetGGX::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+		break;
+	case aten::MaterialType::Beckman:
+		AT_NAME::MicrofacetBeckman::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+		break;
+	case aten::MaterialType::Disney:
+		// TODO
+		AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+		break;
+	case aten::MaterialType::Layer:
+		sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
+		break;
+	case aten::MaterialType::Toon:
+		break;
+	}
+}
+
 AT_CUDA_INLINE __device__ real samplePDF(
 	const Context* ctxt,
 	const aten::MaterialParameter* mtrl,
@@ -338,6 +387,44 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
 	case aten::MaterialType::Beckman:
 		return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v);
 	case aten::MaterialType::Disney:
+		return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Layer:
+		return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v);
+	case aten::MaterialType::Toon:
+		break;
+	}
+
+	return std::move(aten::vec3());
+}
+
+AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
+	const Context* ctxt,
+	const aten::MaterialParameter* mtrl,
+	const aten::vec3& normal,
+	const aten::vec3& wi,
+	const aten::vec3& wo,
+	real u, real v,
+	const aten::vec3& externalAlbedo)
+{
+	switch (mtrl->type) {
+	case aten::MaterialType::Emissive:
+		return AT_NAME::emissive::bsdf(mtrl, externalAlbedo);
+	case aten::MaterialType::Lambert:
+		return AT_NAME::lambert::bsdf(mtrl, externalAlbedo);
+	case aten::MaterialType::OrneNayar:
+		return AT_NAME::OrenNayar::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+	case aten::MaterialType::Specular:
+		return AT_NAME::specular::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+	case aten::MaterialType::Refraction:
+		return AT_NAME::refraction::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+	case aten::MaterialType::Blinn:
+		return AT_NAME::MicrofacetBlinn::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+	case aten::MaterialType::GGX:
+		return AT_NAME::MicrofacetGGX::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+	case aten::MaterialType::Beckman:
+		return AT_NAME::MicrofacetBeckman::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+	case aten::MaterialType::Disney:
+		// TODO
 		return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
 	case aten::MaterialType::Layer:
 		return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v);

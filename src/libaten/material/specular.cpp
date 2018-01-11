@@ -73,6 +73,22 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v,
+		const aten::vec3& externalAlbedo)
+	{
+		auto c = dot(normal, wo);
+
+		aten::vec3 bsdf = param->baseColor;
+		bsdf *= externalAlbedo;
+
+		return std::move(bsdf);
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
 		const aten::vec3& normal, 
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -117,5 +133,21 @@ namespace AT_NAME
 		result->dir = sampleDirection(param, normal, wi, u, v, sampler);
 		result->pdf = pdf(param, normal, wi, result->dir, u, v);
 		result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
+	}
+
+	AT_DEVICE_MTRL_API void specular::sample(
+		MaterialSampling* result,
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& orgnormal,
+		aten::sampler* sampler,
+		real u, real v,
+		const aten::vec3& externalAlbedo,
+		bool isLightPath/*= false*/)
+	{
+		result->dir = sampleDirection(param, normal, wi, u, v, sampler);
+		result->pdf = pdf(param, normal, wi, result->dir, u, v);
+		result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
 	}
 }

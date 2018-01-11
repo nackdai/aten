@@ -100,6 +100,14 @@ namespace AT_NAME
 			return std::move(ret);
 		}
 
+		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+			const aten::MaterialParameter* param,
+			const aten::vec3& externalAlbedo)
+		{
+			auto ret = lambert::bsdf(param, externalAlbedo);
+			return std::move(ret);
+		}
+
 		static AT_DEVICE_MTRL_API void sample(
 			MaterialSampling* result,
 			const aten::MaterialParameter* param,
@@ -113,6 +121,22 @@ namespace AT_NAME
 			result->dir = sampleDirection(param, normal, wi, u, v, sampler);
 			result->pdf = pdf(param, normal, wi, result->dir, u, v);
 			result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
+		}
+
+		static AT_DEVICE_MTRL_API void sample(
+			MaterialSampling* result,
+			const aten::MaterialParameter* param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& orgnormal,
+			aten::sampler* sampler,
+			real u, real v,
+			const aten::vec3& externalAlbedo,
+			bool isLightPath = false)
+		{
+			result->dir = sampleDirection(param, normal, wi, u, v, sampler);
+			result->pdf = pdf(param, normal, wi, result->dir, u, v);
+			result->bsdf = bsdf(param, externalAlbedo);
 		}
 
 		virtual AT_DEVICE_MTRL_API real computeFresnel(

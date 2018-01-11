@@ -66,6 +66,26 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v,
+		const aten::vec3& externalAlbedo)
+	{
+		auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
+
+		auto albedo = param->baseColor;
+		albedo *= externalAlbedo;
+
+		real fresnel = 1;
+		real ior = param->ior;
+
+		aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
+		return std::move(ret);
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -267,6 +287,36 @@ namespace AT_NAME
 			param->albedoMap,
 			u, v,
 			real(1));
+
+		result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
+		result->fresnel = fresnel;
+	}
+
+	AT_DEVICE_MTRL_API void MicrofacetBeckman::sample(
+		MaterialSampling* result,
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& orgnormal,
+		aten::sampler* sampler,
+		real u, real v,
+		const aten::vec3& externalAlbedo,
+		bool isLightPath/*= false*/)
+	{
+		auto roughness = material::sampleTexture(
+			param->roughnessMap,
+			u, v,
+			param->roughness);
+
+		result->dir = sampleDirection(roughness.r, wi, normal, sampler);
+		result->pdf = pdf(roughness.r, normal, wi, result->dir);
+
+		real fresnel = real(1);
+
+		real ior = param->ior;
+
+		auto albedo = param->baseColor;
+		albedo *= externalAlbedo;
 
 		result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
 		result->fresnel = fresnel;

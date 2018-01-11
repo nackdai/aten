@@ -88,6 +88,17 @@ namespace AT_NAME
 			return ret;
 		}
 
+		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+			const aten::MaterialParameter* param,
+			const aten::vec3& externalAlbedo)
+		{
+			aten::vec3 albedo = param->baseColor;
+			albedo *= externalAlbedo;
+
+			aten::vec3 ret = albedo / AT_MATH_PI;
+			return ret;
+		}
+
 		static AT_DEVICE_MTRL_API void sample(
 			MaterialSampling* result,
 			const aten::MaterialParameter* param,
@@ -103,6 +114,23 @@ namespace AT_NAME
 			result->dir = sampleDirection(normal, sampler);
 			result->pdf = pdf(normal, result->dir);
 			result->bsdf = bsdf(param, u, v);
+		}
+
+		static AT_DEVICE_MTRL_API void sample(
+			MaterialSampling* result,
+			const aten::MaterialParameter* param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& orgnormal,
+			aten::sampler* sampler,
+			const aten::vec3& externalAlbedo,
+			bool isLightPath = false)
+		{
+			MaterialSampling ret;
+
+			result->dir = sampleDirection(normal, sampler);
+			result->pdf = pdf(normal, result->dir);
+			result->bsdf = bsdf(param, externalAlbedo);
 		}
 
 		virtual AT_DEVICE_MTRL_API real pdf(

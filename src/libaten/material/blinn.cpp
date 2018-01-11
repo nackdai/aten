@@ -127,6 +127,25 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v,
+		const aten::vec3& externalAlbedo)
+	{
+		real fresnel = 1;
+		real ior = param->ior;
+		real shininess = param->shininess;
+
+		auto albedo = param->baseColor;
+		albedo *= externalAlbedo;
+
+		auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
+		return std::move(ret);
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
 		const aten::vec3& normal,
 		const aten::vec3& wi,
 		const aten::vec3& wo,
@@ -260,6 +279,32 @@ namespace AT_NAME
 			ret.pdf = 0;
 		}
 #endif
+	}
+
+	AT_DEVICE_MTRL_API void MicrofacetBlinn::sample(
+		MaterialSampling* result,
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& orgnormal,
+		aten::sampler* sampler,
+		real u, real v,
+		const aten::vec3& externalAlbedo,
+		bool isLightPath/*= false*/)
+	{
+		result->dir = sampleDirection(param, normal, wi, u, v, sampler);
+
+		result->pdf = pdf(param, normal, wi, result->dir, u, v);
+
+		real fresnel = 1;
+		real ior = param->ior;
+		real shininess = param->shininess;
+
+		auto albedo = param->baseColor;
+		albedo *= externalAlbedo;
+
+		result->bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, result->dir, u, v);
+		result->fresnel = fresnel;
 	}
 
 	AT_DEVICE_MTRL_API MaterialSampling MicrofacetBlinn::sample(

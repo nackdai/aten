@@ -70,6 +70,22 @@ namespace AT_NAME
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
+		const aten::MaterialParameter* param,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v,
+		const aten::vec3& externalAlbedo)
+	{
+		AT_ASSERT(false);
+
+		aten::vec3 albedo = param->baseColor;
+		albedo *= externalAlbedo;
+
+		return std::move(albedo);
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
 		const aten::vec3& normal, 
 		const aten::vec3& wi,
 		const aten::vec3& wo,

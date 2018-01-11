@@ -41,6 +41,14 @@ namespace AT_NAME
 			const aten::vec3& wo,
 			real u, real v);
 
+		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+			const aten::MaterialParameter* param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& wo,
+			real u, real v,
+			const aten::vec3& externalAlbedo);
+
 		static AT_DEVICE_MTRL_API void sample(
 			MaterialSampling* result,
 			const aten::MaterialParameter* param,
@@ -49,6 +57,17 @@ namespace AT_NAME
 			const aten::vec3& orgnormal,
 			aten::sampler* sampler,
 			real u, real v,
+			bool isLightPath = false);
+
+		static AT_DEVICE_MTRL_API void sample(
+			MaterialSampling* result,
+			const aten::MaterialParameter* param,
+			const aten::vec3& normal,
+			const aten::vec3& wi,
+			const aten::vec3& orgnormal,
+			aten::sampler* sampler,
+			real u, real v,
+			const aten::vec3& externalAlbedo,
 			bool isLightPath = false);
 
 		virtual AT_DEVICE_MTRL_API real pdf(

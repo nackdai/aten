@@ -554,6 +554,8 @@ __global__ void shade(
 	shShadowRays[threadIdx.x].isActive = false;
 #endif
 
+	auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1));
+
 #if 1
 	// Explicit conection to light.
 	if (!shMtrls[threadIdx.x].attrib.isSingular)
@@ -629,7 +631,7 @@ __global__ void shade(
 				auto cosShadow = dot(orienting_normal, dirToLight);
 
 				real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-				auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+				auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v, albedo);
 
 				bsdf *= shPaths[threadIdx.x].throughput;
 
@@ -707,7 +709,8 @@ __global__ void shade(
 		ray.dir,
 		rec.normal,
 		&shPaths[threadIdx.x].sampler,
-		rec.u, rec.v);
+		rec.u, rec.v,
+		albedo);
 
 	auto nextDir = normalize(sampling.dir);
 	auto pdfb = sampling.pdf;

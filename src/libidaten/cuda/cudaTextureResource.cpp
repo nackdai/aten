@@ -1,5 +1,12 @@
 #include "cuda/cudaTextureResource.h"
 
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+
+#include "cuda/helper_math.h"
+#include "cuda/cudautil.h"
+#include "cuda/cudamemory.h"
+
 namespace idaten
 {
 	// NOTE
@@ -91,7 +98,24 @@ namespace idaten
 
 	cudaTextureObject_t CudaTexture::bind()
 	{
-		if (m_buffer) {
+		if (m_isMipmap) {
+			cudaTextureDesc tex_desc = {};
+
+			tex_desc.normalizedCoords = 1;
+			tex_desc.filterMode = cudaFilterModeLinear;
+			tex_desc.mipmapFilterMode = cudaFilterModeLinear;
+
+			tex_desc.addressMode[0] = cudaAddressModeClamp;
+			tex_desc.addressMode[1] = cudaAddressModeClamp;
+			tex_desc.addressMode[2] = cudaAddressModeClamp;
+
+			tex_desc.maxMipmapLevelClamp = float(m_mipmapLevel - 1);
+
+			tex_desc.readMode = cudaReadModeElementType;
+
+			checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+		}
+		else if (m_buffer) {
 			// TODO
 			// Only for resource array.
 
@@ -107,5 +131,189 @@ namespace idaten
 		}
 
 		return m_tex;
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////
+
+	// NOTE
+	// http://www.cse.uaa.alaska.edu/~ssiewert/a490dmis_code/CUDA/cuda_work/samples/2_Graphics/bindlessTexture/bindlessTexture_kernel.cu
+
+	__global__ void genMipmap(
+		cudaSurfaceObject_t mipOutput, 
+		cudaTextureObject_t mipInput, 
+		int imageW, int imageH)
+	{
+		int x = blockIdx.x * blockDim.x + threadIdx.x;
+		int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+		float px = 1.0 / float(imageW);
+		float py = 1.0 / float(imageH);
+
+		if ((x < imageW) && (y < imageH))
+		{
+			// take the average of 4 samples
+
+			// we are using the normalized access to make sure non-power-of-two textures
+			// behave well when downsized.
+			float4 color =
+				(tex2D<float4>(mipInput, (x + 0) * px, (y + 0) * py)) +
+				(tex2D<float4>(mipInput, (x + 1) * px, (y + 0) * py)) +
+				(tex2D<float4>(mipInput, (x + 1) * px, (y + 1) * py)) +
+				(tex2D<float4>(mipInput, (x + 0) * px, (y + 1) * py));
+
+
+			color /= 4.0f;
+
+			surf2Dwrite(color, mipOutput, x * sizeof(float4), y);
+		}
+	}
+
+	static void onGenMipmaps(
+		cudaMipmappedArray_t mipmapArray,
+		int width, int height)
+	{
+		int level = 0;
+
+		while (width != 1 || height != 1)
+		{
+			width /= 2;
+			height /= 2;
+
+			width = std::max(1, width);
+			height = std::max(1, height);
+
+			// Copy from.
+			cudaArray_t levelFrom;
+			checkCudaErrors(cudaGetMipmappedArrayLevel(&levelFrom, mipmapArray, level));
+
+			// Copy to.
+			cudaArray_t levelTo;
+			checkCudaErrors(cudaGetMipmappedArrayLevel(&levelTo, mipmapArray, level + 1));
+
+			cudaExtent levelToSize;
+			checkCudaErrors(cudaArrayGetInfo(nullptr, &levelToSize, nullptr, levelTo));
+			AT_ASSERT(levelToSize.width == width);
+			AT_ASSERT(levelToSize.height == height);
+			AT_ASSERT(levelToSize.depth == 0);
+
+			// generate texture object for reading
+			cudaTextureObject_t texInput;
+			{
+				cudaResourceDesc texRes;
+				{
+					memset(&texRes, 0, sizeof(cudaResourceDesc));
+
+					texRes.resType = cudaResourceTypeArray;
+					texRes.res.array.array = levelFrom;
+				}
+
+				cudaTextureDesc texDesc;
+				{
+					memset(&texDesc, 0, sizeof(cudaTextureDesc));
+
+					texDesc.normalizedCoords = 1;
+					texDesc.filterMode = cudaFilterModeLinear;
+					texDesc.addressMode[0] = cudaAddressModeClamp;
+					texDesc.addressMode[1] = cudaAddressModeClamp;
+					texDesc.addressMode[2] = cudaAddressModeClamp;
+					texDesc.readMode = cudaReadModeElementType;
+				}
+
+				checkCudaErrors(cudaCreateTextureObject(&texInput, &texRes, &texDesc, nullptr));
+			}
+
+			// generate surface object for writing
+			cudaSurfaceObject_t surfOutput;
+			{
+				cudaResourceDesc surfRes;
+				{
+					memset(&surfRes, 0, sizeof(cudaResourceDesc));
+					surfRes.resType = cudaResourceTypeArray;
+					surfRes.res.array.array = levelTo;
+				}
+
+				checkCudaErrors(cudaCreateSurfaceObject(&surfOutput, &surfRes));
+			}
+
+			// run mipmap kernel
+			dim3 block(16, 16, 1);
+			dim3 grid(
+				(width + block.x - 1) / block.x,
+				(height + block.y - 1) / block.y, 1);
+
+			genMipmap << <grid, block >> > (
+				surfOutput,
+				texInput,
+				width, height);
+
+			checkCudaErrors(cudaDeviceSynchronize());
+			checkCudaErrors(cudaGetLastError());
+
+			checkCudaErrors(cudaDestroySurfaceObject(surfOutput));
+
+			checkCudaErrors(cudaDestroyTextureObject(texInput));
+
+			level++;
+		}
+	}
+
+	static inline int getMipMapLevels(int width, int height)
+	{
+		int sz = std::max(width, height);
+
+		int levels = 0;
+
+		while (sz)
+		{
+			sz /= 2;
+			levels++;
+		}
+
+		return levels;
+	}
+
+	void CudaTexture::initAsMipmap(
+		const aten::vec4* p,
+		int width, int height,
+		int level)
+	{
+		level = std::min(level, getMipMapLevels(width, height));
+
+		cudaExtent size;
+		{
+			size.width = width;
+			size.height = height;
+			size.depth = 0;
+		}
+
+		cudaMipmappedArray_t mipmapArray;
+
+		cudaChannelFormatDesc desc = cudaCreateChannelDesc<float4>();
+		checkCudaErrors(cudaMallocMipmappedArray(&mipmapArray, &desc, size, level));
+
+		// upload level 0.
+		cudaArray_t level0;
+		checkCudaErrors(cudaGetMipmappedArrayLevel(&level0, mipmapArray, 0));
+
+		void* data = const_cast<void*>((const void*)p);
+
+		cudaMemcpy3DParms copyParams = { 0 };
+		copyParams.srcPtr = make_cudaPitchedPtr(data, size.width * sizeof(float4), size.width, size.height);
+		copyParams.dstArray = level0;
+		copyParams.extent = size;
+		copyParams.extent.depth = 1;
+		copyParams.kind = cudaMemcpyHostToDevice;
+		checkCudaErrors(cudaMemcpy3D(&copyParams));
+
+		// compute rest of mipmaps based on level 0.
+		onGenMipmaps(mipmapArray, width, height);
+
+		// Make Resource description:
+		memset(&m_resDesc, 0, sizeof(m_resDesc));
+		m_resDesc.resType = cudaResourceTypeMipmappedArray;
+		m_resDesc.res.mipmap.mipmap = mipmapArray;
+
+		m_isMipmap = true;
+		m_mipmapLevel = level;
 	}
 }

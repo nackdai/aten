@@ -47,6 +47,15 @@ namespace idaten
 			const aten::vec4* p,
 			int width, int height);
 
+		void initAsMipmap(
+			const aten::vec4* p,
+			int width, int height,
+			int level);
+
 		virtual cudaTextureObject_t bind() override final;
+
+	private:
+		bool m_isMipmap{ false };
+		int m_mipmapLevel{ 0 };
 	};
 }

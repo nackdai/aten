@@ -77,7 +77,13 @@ namespace idaten {
 		if (!texs.empty()) {
 			for (int i = 0; i < texs.size(); i++) {
 				m_texRsc.push_back(idaten::CudaTexture());
-				m_texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
+
+				if (envmapRsc.idx == i) {
+					m_texRsc[i].initAsMipmap(texs[i].ptr, texs[i].width, texs[i].height, 100);
+				}
+				else {
+					m_texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
+				}
 			}
 			m_tex.init(texs.size());
 

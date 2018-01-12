@@ -19,7 +19,7 @@ namespace AT_NAME {
 }
 #else
 namespace AT_NAME {
-	inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue)
+	inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue, int lod = 0)
 	{
 		aten::vec3 ret = defaultValue;
 

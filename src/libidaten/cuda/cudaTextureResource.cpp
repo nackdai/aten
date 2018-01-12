@@ -105,9 +105,15 @@ namespace idaten
 			tex_desc.filterMode = cudaFilterModeLinear;
 			tex_desc.mipmapFilterMode = cudaFilterModeLinear;
 
+#if 0
 			tex_desc.addressMode[0] = cudaAddressModeClamp;
 			tex_desc.addressMode[1] = cudaAddressModeClamp;
 			tex_desc.addressMode[2] = cudaAddressModeClamp;
+#else
+			tex_desc.addressMode[0] = cudaAddressModeWrap;
+			tex_desc.addressMode[1] = cudaAddressModeWrap;
+			tex_desc.addressMode[2] = cudaAddressModeWrap;
+#endif
 
 			tex_desc.maxMipmapLevelClamp = float(m_mipmapLevel - 1);
 
@@ -170,11 +176,13 @@ namespace idaten
 
 	static void onGenMipmaps(
 		cudaMipmappedArray_t mipmapArray,
-		int width, int height)
+		int width, int height,
+		int maxLevel)
 	{
 		int level = 0;
 
-		while (width != 1 || height != 1)
+		//while (width != 1 || height != 1)
+		while (level + 1 < maxLevel)
 		{
 			width /= 2;
 			height /= 2;
@@ -306,7 +314,7 @@ namespace idaten
 		checkCudaErrors(cudaMemcpy3D(&copyParams));
 
 		// compute rest of mipmaps based on level 0.
-		onGenMipmaps(mipmapArray, width, height);
+		onGenMipmaps(mipmapArray, width, height, level);
 
 		// Make Resource description:
 		memset(&m_resDesc, 0, sizeof(m_resDesc));

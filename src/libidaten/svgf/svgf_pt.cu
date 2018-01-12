@@ -554,7 +554,7 @@ __global__ void shade(
 	shShadowRays[threadIdx.x].isActive = false;
 #endif
 
-	auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1));
+	auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1), bounce);
 
 #if 1
 	// Explicit conection to light.

@@ -202,7 +202,7 @@ namespace idaten
 			width, height,
 			vtxTexPos);
 
-		checkCudaErrors(cudaDeviceSynchronize());
+		//checkCudaErrors(cudaDeviceSynchronize());
 
 		// Toggle aov buffer pos.
 		m_curAOVPos = 1 - m_curAOVPos;

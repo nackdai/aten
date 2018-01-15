@@ -50,7 +50,8 @@ namespace idaten
 			aten::vec3 raydir[ShdowRayNum];
 			aten::vec3 lightcontrib[ShdowRayNum];
 			real distToLight[ShdowRayNum];
-			int targetLightId[ShdowRayNum];
+
+			uint8_t targetLightId[ShdowRayNum];
 
 			struct {
 				uint32_t isActive : 1;

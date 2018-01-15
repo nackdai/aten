@@ -560,6 +560,9 @@ __global__ void shade(
 	// Explicit conection to light.
 	if (!shMtrls[threadIdx.x].attrib.isSingular)
 	{
+		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
+		shShadowRays[threadIdx.x].rayorg = shadowRayOrg;
+
 		for (int i = 0; i < ShadowRayNum; i++) {
 			real lightSelectPdf = 1;
 			aten::LightSampleResult sampleres;
@@ -587,13 +590,12 @@ __global__ void shade(
 			auto dirToLight = normalize(sampleres.dir);
 			auto distToLight = length(posLight - rec.p);
 
-			auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 			auto tmp = rec.p + dirToLight - shadowRayOrg;
 			auto shadowRayDir = normalize(tmp);
 
 #ifdef SEPARATE_SHADOWRAY_HITTEST
 			shShadowRays[threadIdx.x].isActive = true;
-			shShadowRays[threadIdx.x].ray[i] = aten::ray(shadowRayOrg, shadowRayDir);
+			shShadowRays[threadIdx.x].raydir[i] = shadowRayDir;
 			shShadowRays[threadIdx.x].targetLightId[i] = lightidx;
 			shShadowRays[threadIdx.x].distToLight[i] = distToLight;
 			shShadowRays[threadIdx.x].lightcontrib[i] = aten::vec3(0);
@@ -785,8 +787,8 @@ __global__ void hitShadowRay(
 			auto targetLightId = shadowRay.targetLightId[i];
 			auto distToLight = shadowRay.distToLight[i];
 
-			auto light = &ctxt.lights[targetLightId];
-			auto lightobj = (light->objid >= 0 ? &ctxt.shapes[light->objid] : nullptr);
+			auto light = ctxt.lights[targetLightId];
+			auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
 
 			real distHitObjToRayOrg = AT_MATH_INF;
 
@@ -797,7 +799,10 @@ __global__ void hitShadowRay(
 			aten::Intersection isectTmp;
 
 			bool isHit = false;
-			isHit = intersectCloser(&ctxt, shadowRay.ray[i], &isectTmp, distToLight - AT_MATH_EPSILON);
+
+			aten::ray r(shadowRay.rayorg, shadowRay.raydir[i]);
+
+			isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON);
 
 			if (isHit) {
 				hitobj = &ctxt.shapes[isectTmp.objid];
@@ -805,7 +810,7 @@ __global__ void hitShadowRay(
 
 			isHit = AT_NAME::scene::hitLight(
 				isHit,
-				light->attrib,
+				light.attrib,
 				lightobj,
 				distToLight,
 				distHitObjToRayOrg,

@@ -45,7 +45,9 @@ namespace idaten
 		C_ASSERT((sizeof(Path) % 4) == 0);
 
 		struct ShadowRay {
-			aten::ray ray[ShdowRayNum];
+			aten::vec3 rayorg;
+
+			aten::vec3 raydir[ShdowRayNum];
 			aten::vec3 lightcontrib[ShdowRayNum];
 			real distToLight[ShdowRayNum];
 			int targetLightId[ShdowRayNum];

@@ -4,7 +4,7 @@ AT_CUDA_INLINE AT_DEVICE_MTRL_API aten::vec3 sampleTexture(
 	const int texid, 
 	real u, real v, 
 	const aten::vec3& defaultValue,
-	int lod = 0)
+	int lod/*= 0*/)
 {
 	aten::vec3 ret = defaultValue;
 

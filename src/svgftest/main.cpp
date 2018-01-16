@@ -39,6 +39,7 @@ static aten::TAA g_taa;
 static aten::FBO g_fbo;
 
 static aten::RasterizeRenderer g_rasterizer;
+static aten::RasterizeRenderer g_rasterizerAABB;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -48,6 +49,7 @@ static int g_maxSamples = 1;
 static int g_maxBounce = 5;
 static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
 static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
+static bool g_showAABB = false;
 
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
@@ -96,6 +98,12 @@ void onRun()
 	auto cudaelapsed = timer.end();
 
 	aten::visualizer::render(false);
+
+	if (g_showAABB) {
+		g_rasterizerAABB.drawAABB(
+			&g_camera,
+			g_scene.getAccel());
+	}
 
 	if (g_willTakeScreenShot)
 	{
@@ -160,6 +168,8 @@ void onRun()
 		if (prevCanShowTAADiff != canShowTAADiff) {
 			g_taa.showTAADiff(canShowTAADiff);
 		}
+
+		ImGui::Checkbox("Show AABB", &g_showAABB);
 
 		auto cam = g_camera.param();
 		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
@@ -369,6 +379,10 @@ int main()
 		"../shader/ssrt_vs.glsl",
 		"../shader/ssrt_gs.glsl",
 		"../shader/ssrt_fs.glsl");
+	g_rasterizerAABB.init(
+		WIDTH, HEIGHT,
+		"../shader/simple3d_vs.glsl",
+		"../shader/simple3d_fs.glsl");
 
 	g_fbo.asMulti(2);
 	g_fbo.init(

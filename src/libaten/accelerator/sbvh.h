@@ -72,6 +72,10 @@ namespace aten
 			return m_bvh;
 		}
 
+		virtual void drawAABB(
+			aten::hitable::FuncDrawAABB func,
+			const aten::mat4& mtxL2W) override final;
+
 		const std::vector<std::vector<ThreadedSbvhNode>>& getNodes() const
 		{
 			return m_threadedNodes;

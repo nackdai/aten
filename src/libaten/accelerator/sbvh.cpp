@@ -1163,4 +1163,63 @@ namespace aten
 
 		return true;
 	}
+
+	static inline void _drawAABB(
+		const aten::ThreadedSbvhNode* node,
+		aten::hitable::FuncDrawAABB func,
+		const aten::mat4& mtxL2W)
+	{
+		aabb box(node->boxmin, node->boxmax);
+
+		auto transofrmedBox = aten::aabb::transform(box, mtxL2W);
+
+		aten::mat4 mtxScale;
+		mtxScale.asScale(transofrmedBox.size());
+
+		aten::mat4 mtxTrans;
+		mtxTrans.asTrans(transofrmedBox.minPos());
+
+		aten::mat4 mtx = mtxTrans * mtxScale;
+
+		func(mtx);
+	}
+
+	void sbvh::drawAABB(
+		aten::hitable::FuncDrawAABB func,
+		const aten::mat4& mtxL2W)
+	{
+		// TODO
+		//int nodeListSize = m_threadedNodes.size();
+		int nodeListSize = 1;
+
+		static const uint32_t stacksize = 64;
+		const ThreadedSbvhNode* stackbuf[stacksize];
+
+		for (int i = 0; i < nodeListSize; i++) {
+			const auto& nodes = m_threadedNodes[i];
+
+			auto* node = &nodes[0];
+
+			stackbuf[0] = node;
+			int stackpos = 1;
+
+			while (stackpos > 0) {
+				node = stackbuf[stackpos - 1];
+
+				stackpos -= 1;
+
+				_drawAABB(node, func, mtxL2W);
+
+				auto hit = node->hit;
+				auto miss = node->miss;
+
+				if (hit >= 0) {
+					stackbuf[stackpos++] = &nodes[hit];
+				}
+				if (miss >= 0) {
+					stackbuf[stackpos++] = &nodes[miss];
+				}
+			}
+		}
+	}
 }

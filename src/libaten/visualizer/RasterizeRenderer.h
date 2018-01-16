@@ -35,7 +35,6 @@ namespace aten {
 			FBO* fbo = nullptr);
 
 		void drawAABB(
-			shader* shd,
 			const camera* cam,
 			accelerator* accel);
 

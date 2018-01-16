@@ -188,7 +188,6 @@ namespace aten {
 	};
 
 	void RasterizeRenderer::drawAABB(
-		shader* shd,
 		const camera* cam,
 		accelerator* accel)
 	{
@@ -204,7 +203,7 @@ namespace aten {
 			isInitVB = true;
 		}
 
-		shd->prepareRender(nullptr, false);
+		m_shader.prepareRender(nullptr, false);
 
 		auto camparam = cam->param();
 
@@ -228,10 +227,10 @@ namespace aten {
 
 		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
-		auto hMtxW2C = shd->getHandle("mtxW2C");
+		auto hMtxW2C = m_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
-		auto hMtxL2W = shd->getHandle("mtxL2W");
+		auto hMtxL2W = m_shader.getHandle("mtxL2W");
 
 		accel->drawAABB([&](const aten::mat4& mtxL2W) {
 			// Draw.

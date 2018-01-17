@@ -33,7 +33,8 @@ namespace aten
 
 	void ObjLoader::load(
 		std::vector<object*>& objs,
-		const std::string& path)
+		const std::string& path,
+		bool willSeparate/*= false*/)
 	{
 		std::string pathname;
 		std::string extname;
@@ -50,12 +51,13 @@ namespace aten
 			fullpath = g_base + "/" + fullpath;
 		}
 
-		load(objs, filename, fullpath);
+		load(objs, filename, fullpath, willSeparate);
 	}
 
 	void ObjLoader::load(
 		std::vector<object*>& objs,
-		const std::string& tag, const std::string& path)
+		const std::string& tag, const std::string& path,
+		bool willSeparate/*= false*/)
 	{
 		object* obj = AssetManager::getObj(tag);
 		if (obj) {
@@ -164,6 +166,13 @@ namespace aten
 						// Check if emmisive object.
 						auto mtrl = dstshape->getMaterial();
 
+						if (willSeparate) {
+							obj->shapes.push_back(dstshape);
+							obj->bbox.init(pmin, pmax);
+							objs.push_back(obj);
+
+							obj = new object();
+						}
 						if (mtrl->param().type == aten::MaterialType::Emissive) {
 							auto emitobj = new object();
 							emitobj->shapes.push_back(dstshape);
@@ -219,7 +228,19 @@ namespace aten
 			{
 				auto mtrl = dstshape->getMaterial();
 
-				if (mtrl->param().type == aten::MaterialType::Emissive) {
+				if (willSeparate) {
+					obj->shapes.push_back(dstshape);
+					obj->bbox.init(pmin, pmax);
+					objs.push_back(obj);
+
+					if (p + 1 < shapes.size()) {
+						obj = new object();
+					}
+					else {
+						obj = nullptr;
+					}
+				}
+				else if (mtrl->param().type == aten::MaterialType::Emissive) {
 					auto emitobj = new object();
 					emitobj->shapes.push_back(dstshape);
 					emitobj->bbox.init(pmin, pmax);
@@ -243,10 +264,15 @@ namespace aten
 			}
 		}
 
-		obj->bbox.init(shapemin, shapemax);
-		objs.push_back(obj);
+		if (!willSeparate) {
+			AT_ASSERT(obj);
 
-		AssetManager::registerObj(tag, obj);
+			obj->bbox.init(shapemin, shapemax);
+			objs.push_back(obj);
+
+			// TODO
+			AssetManager::registerObj(tag, obj);
+		}
 
 		AT_PRINTF("(%s) %d[polygons]\n", path.c_str(), numPolygons);
 	}

@@ -19,9 +19,11 @@ namespace aten
 
 		static void load(
 			std::vector<object*>& objs,
-			const std::string& path);
+			const std::string& path,
+			bool willSeparate = false);
 		static void load(
 			std::vector<object*>& objs,
-			const std::string& tag, const std::string& path);
+			const std::string& tag, const std::string& path,
+			bool willSeparate = false);
 	};
 }

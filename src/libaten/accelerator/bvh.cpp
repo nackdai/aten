@@ -247,12 +247,13 @@ namespace aten {
 	void bvh::buildBySAH(
 		bvhnode* root,
 		hitable** list,
-		uint32_t num)
+		uint32_t num,
+		bvhnode* parent/*= nullptr*/)
 	{
 		// NOTE
 		// http://qiita.com/omochi64/items/9336f57118ba918f82ec
 
-#if 0
+#if 1
 		// ある？
 		AT_ASSERT(num > 0);
 
@@ -265,17 +266,27 @@ namespace aten {
 
 		if (num == 1) {
 			// １個しかないので、これだけで終了.
-			root->m_left = list[0];
+			root->m_left = new bvhnode(parent, list[0]);
+
+			root->m_left->setBoundingBox(list[0]->getBoundingbox());
+
 			return;
 		}
 		else if (num == 2) {
 			// ２個だけのときは適当にソートして、終了.
-			int axis = (int)(::rand() % 3);
+			auto bbox = list[0]->getBoundingbox();
+			bbox = aabb::merge(bbox, list[1]->getBoundingbox());
+
+			int axis = findLongestAxis(bbox);
 
 			sortList(list, num, axis);
 
-			root->m_left = list[0];
-			root->m_right = list[1];
+			root->m_left = new bvhnode(parent, list[0]);
+			root->m_right = new bvhnode(parent, list[1]);
+
+			root->m_left->setBoundingBox(list[0]->getBoundingbox());
+			root->m_right->setBoundingBox(list[1]->getBoundingbox());
+
 			return;
 		}
 
@@ -308,8 +319,8 @@ namespace aten {
 			std::vector<real> s2SurfaceArea(num + 1, AT_MATH_INF);
 
 			// 分割された2つの領域.
-			std::vector<bvhnode*> s1;					// 右側.
-			std::vector<bvhnode*> s2(list, list + num);	// 左側.
+			std::vector<hitable*> s1;					// 右側.
+			std::vector<hitable*> s2(list, list + num);	// 左側.
 
 			// NOTE
 			// s2側から取り出して、s1に格納するため、s2にリストを全部入れる.
@@ -373,8 +384,8 @@ namespace aten {
 			sortList(list, num, bestAxis);
 
 			// 左右の子ノードを作成.
-			root->m_left = new bvhnode();
-			root->m_right = new bvhnode();
+			root->m_left = new bvhnode(root, nullptr);
+			root->m_right = new bvhnode(root, nullptr);
 
 			// リストを分割.
 			int leftListNum = bestSplitIndex;
@@ -383,8 +394,8 @@ namespace aten {
 			AT_ASSERT(rightListNum > 0);
 
 			// 再帰処理
-			buildBySAH(root->m_left, list, leftListNum);
-			buildBySAH(root->m_right, list + leftListNum, rightListNum);
+			buildBySAH(root->m_left, list, leftListNum, root);
+			buildBySAH(root->m_right, list + leftListNum, rightListNum, root);
 		}
 #else
 		struct BuildInfo {

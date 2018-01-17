@@ -276,7 +276,8 @@ namespace aten {
 		static void buildBySAH(
 			bvhnode* root,
 			hitable** list,
-			uint32_t num);
+			uint32_t num,
+			bvhnode* parent = nullptr);
 
 		struct Candidate {
 			bvhnode* node{ nullptr };

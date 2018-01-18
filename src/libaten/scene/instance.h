@@ -32,6 +32,21 @@ namespace aten
 			setBoundingBox(getTransformedBoundingBox());
 		}
 
+		instance(
+			OBJ* obj, 
+			const vec3& trans,
+			const vec3& rot,
+			const vec3& scale)
+			: instance(obj), m_trans(trans), m_rot(rot), m_scale(scale)
+		{
+			updateMatrix();
+
+			m_mtxW2L = m_mtxL2W;
+			m_mtxW2L.invert();
+
+			setBoundingBox(getTransformedBoundingBox());
+		}
+
 		virtual ~instance() {}
 
 	public:
@@ -115,6 +130,46 @@ namespace aten
 			m_obj->drawAABB(func, m_mtxL2W);
 		}
 
+		virtual void update()
+		{
+			if (m_isDirty) {
+				updateMatrix();
+				setBoundingBox(getTransformedBoundingBox());
+				onNotifyChanged();
+
+				m_isDirty = false;
+			}
+		}
+
+		vec3 getTrans()
+		{
+			return m_trans;
+		}
+		vec3 getRot()
+		{
+			return m_rot;
+		}
+		vec3 getScale()
+		{
+			return m_scale;
+		}
+
+		void setTrans(const vec3& trans)
+		{
+			m_isDirty = true;
+			m_trans = trans;
+		}
+		void setRot(const vec3& rot)
+		{
+			m_isDirty = true;
+			m_rot = rot;
+		}
+		void setScale(const vec3& scale)
+		{
+			m_isDirty = true;
+			m_scale = scale;
+		}
+
 	private:
 		virtual void getSamplePosNormalArea(
 			aten::hitable::SamplePosNormalPdfResult* result,
@@ -140,10 +195,33 @@ namespace aten
 			return m_param;
 		}
 
+		void updateMatrix()
+		{
+			mat4 mtxTrans;
+			mat4 mtxRotX;
+			mat4 mtxRotY;
+			mat4 mtxRotZ;
+			mat4 mtxScale;
+
+			mtxTrans.asTrans(m_trans);
+			mtxRotX.asRotateByX(m_rot.x);
+			mtxRotY.asRotateByX(m_rot.y);
+			mtxRotZ.asRotateByX(m_rot.z);
+			mtxScale.asScale(scale);
+
+			m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
+		}
+
 	private:
 		OBJ* m_obj{ nullptr };
 		mat4 m_mtxL2W;
 		mat4 m_mtxW2L;	// inverted.
+
+		vec3 m_trans;
+		vec3 m_rot;
+		vec3 m_scale;
+
+		bool m_isDirty{ false };
 
 		GeomParameter m_param;
 	};

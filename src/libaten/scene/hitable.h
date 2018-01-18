@@ -158,6 +158,13 @@ namespace aten {
 		{
 			m_onNotifyChanged = onNotifyChanged;
 		}
+
+		virtual void update()
+		{
+			// Nothing is done...
+		}
+
+	protected:
 		void onNotifyChanged()
 		{
 			if (m_onNotifyChanged) {

@@ -118,6 +118,13 @@ namespace aten {
 		}
 	}
 
+	void bvhnode::itemChanged(hitable* sender)
+	{
+		AT_ASSERT(m_item == sender);
+
+		// TODO
+	}
+
 	void bvhnode::drawAABB(
 		aten::hitable::FuncDrawAABB func,
 		const aten::mat4& mtxL2W) const

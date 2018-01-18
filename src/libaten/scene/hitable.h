@@ -54,6 +54,8 @@ namespace aten {
 		real padding;
 	};
 
+	using NotifyChanged = std::function<void(hitable*)>;
+
 	class hitable {
 	public:
 		hitable(const char* name = nullptr)
@@ -152,6 +154,17 @@ namespace aten {
 			AT_ASSERT(false);
 		}
 
+		void setFuncNotifyChanged(NotifyChanged onNotifyChanged)
+		{
+			m_onNotifyChanged = onNotifyChanged;
+		}
+		void onNotifyChanged()
+		{
+			if (m_onNotifyChanged) {
+				m_onNotifyChanged(this);
+			}
+		}
+
 	private:
 		virtual void evalHitResult(
 			const ray& r,
@@ -164,5 +177,7 @@ namespace aten {
 	private:
 		const char* m_name;
 		aabb m_aabb;
+
+		NotifyChanged m_onNotifyChanged;
 	};
 }

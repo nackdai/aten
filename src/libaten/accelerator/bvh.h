@@ -28,6 +28,8 @@ namespace aten {
 		{
 			m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
 			m_item = item;
+
+			m_item->setFuncNotifyChanged(std::bind(&bvhnode::itemChanged, this, std::placeholders::_1));
 		}
 
 	public:
@@ -137,6 +139,8 @@ namespace aten {
 		}
 
 	private:
+		void itemChanged(hitable* sender);
+
 		void setIsCandidate(bool c)
 		{
 			m_isCandidate = c;

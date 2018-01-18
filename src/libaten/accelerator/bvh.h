@@ -117,6 +117,25 @@ namespace aten {
 			m_children[idx] = child;
 		}
 
+		void setDepth(int depth)
+		{
+			m_depth = depth;
+		}
+		void setDepthToChildren(int depth)
+		{
+			m_depth = depth;
+			if (m_left) {
+				m_left->setDepthToChildren(depth + 1);
+			}
+			if (m_right) {
+				m_right->setDepthToChildren(depth + 1);
+			}
+		}
+		int getDepth() const
+		{
+			return m_depth;
+		}
+
 	private:
 		void setIsCandidate(bool c)
 		{
@@ -150,6 +169,8 @@ namespace aten {
 		int m_traverseOrder{ -1 };
 		int m_externalId{ -1 };
 		int m_childrenNum{ 0 };
+
+		int m_depth{ 0 };
 
 		bool m_isCandidate{ false };
 	};
@@ -277,6 +298,7 @@ namespace aten {
 			bvhnode* root,
 			hitable** list,
 			uint32_t num,
+			int depth = 0,
 			bvhnode* parent = nullptr);
 
 		struct Candidate {

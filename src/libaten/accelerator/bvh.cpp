@@ -248,6 +248,7 @@ namespace aten {
 		bvhnode* root,
 		hitable** list,
 		uint32_t num,
+		int depth/*= 0*/,
 		bvhnode* parent/*= nullptr*/)
 	{
 		// NOTE
@@ -269,6 +270,7 @@ namespace aten {
 			root->m_left = new bvhnode(parent, list[0]);
 
 			root->m_left->setBoundingBox(list[0]->getBoundingbox());
+			root->m_left->setDepth(depth + 1);
 
 			return;
 		}
@@ -286,6 +288,9 @@ namespace aten {
 
 			root->m_left->setBoundingBox(list[0]->getBoundingbox());
 			root->m_right->setBoundingBox(list[1]->getBoundingbox());
+
+			root->m_left->setDepth(depth + 1);
+			root->m_right->setDepth(depth + 1);
 
 			return;
 		}
@@ -387,6 +392,9 @@ namespace aten {
 			root->m_left = new bvhnode(root, nullptr);
 			root->m_right = new bvhnode(root, nullptr);
 
+			root->m_left->setDepth(depth + 1);
+			root->m_right->setDepth(depth + 1);
+
 			// ƒŠƒXƒg‚ð•ªŠ„.
 			int leftListNum = bestSplitIndex;
 			int rightListNum = num - leftListNum;
@@ -394,8 +402,8 @@ namespace aten {
 			AT_ASSERT(rightListNum > 0);
 
 			// Ä‹Aˆ—
-			buildBySAH(root->m_left, list, leftListNum, root);
-			buildBySAH(root->m_right, list + leftListNum, rightListNum, root);
+			buildBySAH(root->m_left, list, leftListNum, depth + 1, root);
+			buildBySAH(root->m_right, list + leftListNum, rightListNum, depth + 1, root);
 		}
 #else
 		struct BuildInfo {

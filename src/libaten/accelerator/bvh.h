@@ -10,27 +10,14 @@
 
 namespace aten {
 	class transformable;
+	class bvh;
 
 	class bvhnode {
 		friend class bvh;
 
-	public:
-		bvhnode(bvhnode* parent)
-			: m_parent(parent)
-		{
-			m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
-		}
-		virtual ~bvhnode() {}
-
 	private:
-		bvhnode(bvhnode* parent, hitable* item)
-			: m_parent(parent)
-		{
-			m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
-			m_item = item;
-
-			m_item->setFuncNotifyChanged(std::bind(&bvhnode::itemChanged, this, std::placeholders::_1));
-		}
+		bvhnode(bvhnode* parent, hitable* item, bvh* bvh);
+		virtual ~bvhnode() {}
 
 	public:
 		bool hit(
@@ -119,18 +106,17 @@ namespace aten {
 			m_children[idx] = child;
 		}
 
-		void setDepth(int depth)
+		void setDepth(int depth, bool propagate = false)
 		{
 			m_depth = depth;
-		}
-		void setDepthToChildren(int depth)
-		{
-			m_depth = depth;
-			if (m_left) {
-				m_left->setDepthToChildren(depth + 1);
-			}
-			if (m_right) {
-				m_right->setDepthToChildren(depth + 1);
+
+			if (propagate) {
+				if (m_left) {
+					m_left->setDepth(depth + 1, propagate);
+				}
+				if (m_right) {
+					m_right->setDepth(depth + 1, propagate);
+				}
 			}
 		}
 		int getDepth() const
@@ -140,6 +126,10 @@ namespace aten {
 
 	private:
 		void itemChanged(hitable* sender);
+
+		void tryRotate(bvh* bvh);
+
+		static void refitChildren(bvhnode* node, bool propagate);
 
 		void setIsCandidate(bool c)
 		{
@@ -175,6 +165,7 @@ namespace aten {
 		int m_childrenNum{ 0 };
 
 		int m_depth{ 0 };
+		bvh* m_bvh{ nullptr };
 
 		bool m_isCandidate{ false };
 	};
@@ -291,14 +282,21 @@ namespace aten {
 			aten::hitable::FuncDrawAABB func,
 			const aten::mat4& mtxL2W) override;
 
+		void update();
+
 	private:
+		void addToRefit(bvhnode* node)
+		{
+			m_refitNodes.push_back(node);
+		}
+
 		static bool hit(
 			const bvhnode* root,
 			const ray& r,
 			real t_min, real t_max,
 			Intersection& isect);
 
-		static void buildBySAH(
+		void buildBySAH(
 			bvhnode* root,
 			hitable** list,
 			uint32_t num,
@@ -328,5 +326,7 @@ namespace aten {
 
 	protected:
 		bvhnode* m_root{ nullptr };
+
+		std::vector<bvhnode*> m_refitNodes;
 	};
 }

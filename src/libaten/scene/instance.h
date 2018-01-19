@@ -207,7 +207,7 @@ namespace aten
 			mtxRotX.asRotateByX(m_rot.x);
 			mtxRotY.asRotateByX(m_rot.y);
 			mtxRotZ.asRotateByX(m_rot.z);
-			mtxScale.asScale(scale);
+			mtxScale.asScale(m_scale);
 
 			m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
 		}

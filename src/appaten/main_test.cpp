@@ -17,7 +17,7 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-static aten::AcceleratedScene<aten::ThreadedBVH> g_scene;
+static aten::AcceleratedScene<aten::bvh> g_scene;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
@@ -31,8 +31,8 @@ static aten::PathTracing g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
 
-static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-//static aten::Film g_buffer(WIDTH, HEIGHT);
+//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static bool isExportedHdr = false;
 
@@ -45,8 +45,41 @@ static uint32_t g_threadnum = 1;
 static uint32_t g_frameNo = 0;
 static float g_avgElapsed = 0.0f;
 
+#pragma optimize( "", off)
+
+void update()
+{
+	static float y = 0.0f;
+	static float d = -0.1f;
+
+	auto obj = getMovableObj();
+
+	if (obj) {
+		auto t = obj->getTrans();
+
+		if (y >= 0.0f) {
+			d = -0.1f;
+		}
+		else if (y <= -0.5f) {
+			d = 0.1f;
+
+		}
+
+		y += d;
+		t.y += d;
+
+		obj->setTrans(t);
+		obj->update();
+
+		auto accel = g_scene.getAccel();
+		accel->update();
+	}
+}
+
 void display()
 {
+	update();
+
 	g_camera.update();
 
 	aten::Destination dst;

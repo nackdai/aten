@@ -6,7 +6,7 @@
 #include <vector>
 
 //#define TEST_NODE_LIST
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -178,7 +178,6 @@ namespace aten {
 	inline real computeSurfaceArea(bvhnode* node)
 	{
 		if (!node) {
-			AT_ASSERT(false);
 			return real(0);
 		}
 
@@ -1286,7 +1285,7 @@ namespace aten {
 
 			auto it = m_refitNodes.begin();
 
-			for (; it != m_refitNodes.end(); it++) {
+			while (it != m_refitNodes.end()) {
 				auto node = *it;
 				int depth = node->getDepth();
 
@@ -1294,9 +1293,12 @@ namespace aten {
 					sweepNodes.push_back(node);
 					it = m_refitNodes.erase(it);
 				}
+				else {
+					it++;
+				}
 			}
 
-			for (auto node : m_refitNodes) {
+			for (auto node : sweepNodes) {
 				node->tryRotate(this);
 			}
 		}

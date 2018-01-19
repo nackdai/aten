@@ -50,6 +50,11 @@ namespace aten {
 			uint32_t num,
 			aabb* bbox = nullptr) = 0;
 
+		virtual void update()
+		{
+			AT_ASSERT(false);
+		}
+
 		virtual void drawAABB(
 			aten::hitable::FuncDrawAABB func,
 			const aten::mat4& mtxL2W)

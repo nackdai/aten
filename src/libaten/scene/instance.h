@@ -37,8 +37,12 @@ namespace aten
 			const vec3& trans,
 			const vec3& rot,
 			const vec3& scale)
-			: instance(obj), m_trans(trans), m_rot(rot), m_scale(scale)
+			: instance(obj)
 		{
+			m_trans = trans;
+			m_rot = rot;
+			m_scale= scale;
+
 			updateMatrix();
 
 			m_mtxW2L = m_mtxL2W;
@@ -210,6 +214,9 @@ namespace aten
 			mtxScale.asScale(m_scale);
 
 			m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
+
+			m_mtxW2L = m_mtxL2W;
+			m_mtxW2L.invert();
 		}
 
 	private:

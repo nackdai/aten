@@ -282,7 +282,7 @@ namespace aten {
 			aten::hitable::FuncDrawAABB func,
 			const aten::mat4& mtxL2W) override;
 
-		void update();
+		virtual void update() override;
 
 	private:
 		void addToRefit(bvhnode* node)

@@ -1297,7 +1297,7 @@ namespace aten {
 			}
 
 			for (auto node : m_refitNodes) {
-				// TODO
+				node->tryRotate(this);
 			}
 		}
 	}

@@ -1222,4 +1222,17 @@ namespace aten
 			}
 		}
 	}
+
+	void sbvh::update()
+	{
+		m_bvh.update();
+
+		// Only for top layer...
+
+		const auto& toplayer = m_bvh.getNodes()[0];
+
+		AT_ASSERT(m_threadedNodes[0].size() == toplayer.size());
+		
+		memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
+	}
 }

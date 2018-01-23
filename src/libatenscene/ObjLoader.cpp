@@ -168,7 +168,7 @@ namespace aten
 
 						if (willSeparate) {
 							obj->shapes.push_back(dstshape);
-							obj->bbox.init(pmin, pmax);
+							obj->setBoundingBox(aten::aabb(pmin, pmax));
 							objs.push_back(obj);
 
 							obj = new object();
@@ -176,7 +176,7 @@ namespace aten
 						if (mtrl->param().type == aten::MaterialType::Emissive) {
 							auto emitobj = new object();
 							emitobj->shapes.push_back(dstshape);
-							emitobj->bbox.init(pmin, pmax);
+							emitobj->setBoundingBox(aten::aabb(pmin, pmax));
 							objs.push_back(emitobj);
 						}
 						else {
@@ -230,7 +230,7 @@ namespace aten
 
 				if (willSeparate) {
 					obj->shapes.push_back(dstshape);
-					obj->bbox.init(pmin, pmax);
+					obj->setBoundingBox(aten::aabb(pmin, pmax));
 					objs.push_back(obj);
 
 					if (p + 1 < shapes.size()) {
@@ -243,7 +243,7 @@ namespace aten
 				else if (mtrl->param().type == aten::MaterialType::Emissive) {
 					auto emitobj = new object();
 					emitobj->shapes.push_back(dstshape);
-					emitobj->bbox.init(pmin, pmax);
+					emitobj->setBoundingBox(aten::aabb(pmin, pmax));
 					objs.push_back(emitobj);
 				}
 				else {
@@ -267,7 +267,7 @@ namespace aten
 		if (!willSeparate) {
 			AT_ASSERT(obj);
 
-			obj->bbox.init(shapemin, shapemax);
+			obj->setBoundingBox(aten::aabb(shapemin, shapemax));
 			objs.push_back(obj);
 
 			// TODO

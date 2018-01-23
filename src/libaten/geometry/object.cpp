@@ -27,7 +27,7 @@ namespace AT_NAME
 		// Avoid sorting objshape list in bvh::build directly.
 		std::vector<face*> tmp;
 
-		bbox.empty();
+		aabb bbox;
 
 		for (const auto s : shapes) {
 			s->build();
@@ -46,6 +46,8 @@ namespace AT_NAME
 		m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
 
 		bbox = m_accel->getBoundingbox();
+
+		setBoundingBox(bbox);
 	}
 
 	bool object::hit(

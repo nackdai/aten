@@ -68,7 +68,6 @@ namespace AT_NAME
 	public:
 		std::vector<objshape*> shapes;
 		aten::GeomParameter param;
-		aten::aabb bbox;
 
 	private:
 		aten::accelerator* m_accel{ nullptr };

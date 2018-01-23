@@ -6,7 +6,7 @@
 #include <vector>
 
 //#define TEST_NODE_LIST
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten {
 	int compareX(const void* a, const void* b)
@@ -213,6 +213,10 @@ namespace aten {
 	void bvhnode::tryRotate(bvh* bvh)
 	{
 		AT_ASSERT(m_bvh == bvh);
+
+		if (bvh->getRoot() == this) {
+			return;
+		}
 
 		auto left = m_left;
 		auto right = m_right;
@@ -554,7 +558,7 @@ namespace aten {
 		sortList(list, num, axis);
 
 		m_root = new bvhnode(nullptr, nullptr, this);
-		buildBySAH(m_root, list, num);
+		buildBySAH(m_root, list, num, 0, m_root);
 	}
 
 	bool bvh::hit(
@@ -782,8 +786,8 @@ namespace aten {
 			AT_ASSERT(rightListNum > 0);
 
 			// Ä‹Aˆ—
-			buildBySAH(root->m_left, list, leftListNum, depth + 1, root);
-			buildBySAH(root->m_right, list + leftListNum, rightListNum, depth + 1, root);
+			buildBySAH(root->m_left, list, leftListNum, depth + 1, root->m_left);
+			buildBySAH(root->m_right, list + leftListNum, rightListNum, depth + 1, root->m_right);
 		}
 #else
 		struct BuildInfo {

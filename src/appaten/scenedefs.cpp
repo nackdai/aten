@@ -848,7 +848,7 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
 		new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
 
 	std::vector<aten::object*> objs;
-	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj");
+	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", true);
 
 	auto light = new aten::instance<aten::object>(
 		objs[0],

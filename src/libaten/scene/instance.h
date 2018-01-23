@@ -116,7 +116,7 @@ namespace aten
 
 		virtual aabb getTransformedBoundingBox() const override
 		{
-			return std::move(aabb::transform(getBoundingbox(), m_mtxL2W));
+			return std::move(aabb::transform(m_obj->getBoundingbox(), m_mtxL2W));
 		}
 
 		virtual void draw(
@@ -239,7 +239,7 @@ namespace aten
 	{
 		m_obj = obj;
 		m_obj->build();
-		setBoundingBox(m_obj->bbox);
+		setBoundingBox(m_obj->getBoundingbox());
 
 		m_param.shapeid = transformable::findShapeIdx(obj);
 	}

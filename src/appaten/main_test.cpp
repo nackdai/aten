@@ -17,7 +17,7 @@ static aten::ThinLensCamera g_camera;
 static aten::PinholeCamera g_camera;
 #endif
 
-static aten::AcceleratedScene<aten::bvh> g_scene;
+static aten::AcceleratedScene<aten::ThreadedBVH> g_scene;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
@@ -33,6 +33,8 @@ static aten::PathTracing g_tracer;
 
 //static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
 static aten::Film g_buffer(WIDTH, HEIGHT);
+
+static aten::RasterizeRenderer g_rasterizerAABB;
 
 static bool isExportedHdr = false;
 
@@ -122,6 +124,10 @@ void display()
 	}
 
 	aten::visualizer::render(g_buffer.image(), g_camera.needRevert());
+
+	g_rasterizerAABB.drawAABB(
+		&g_camera,
+		g_scene.getAccel());
 
 #ifdef ENABLE_EVERY_FRAME_SC
 	{
@@ -213,6 +219,11 @@ int main(int argc, char* argv[])
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&tonemap);
 	//aten::visualizer::addPostProc(&bloom);
+
+	g_rasterizerAABB.init(
+		WIDTH, HEIGHT,
+		"../shader/simple3d_vs.glsl",
+		"../shader/simple3d_fs.glsl");
 
 	aten::vec3 lookfrom;
 	aten::vec3 lookat;

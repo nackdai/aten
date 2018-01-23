@@ -53,6 +53,8 @@ namespace aten {
 			m_bvh.drawAABB(func, mtxL2W);
 		}
 
+		virtual void update() override;
+
 		const std::vector<std::vector<ThreadedBvhNode>>& getNodes() const
 		{
 			return m_listThreadedBvhNode;
@@ -120,6 +122,10 @@ namespace aten {
 			const ray& r,
 			real t_min, real t_max,
 			Intersection& isect) const;
+
+		void registerBvhNodeToLinearList(
+			bvhnode* root,
+			std::vector<ThreadedBvhNodeEntry>& nodes);
 
 	private:
 		bvh m_bvh;

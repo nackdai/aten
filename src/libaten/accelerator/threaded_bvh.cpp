@@ -522,4 +522,84 @@ namespace aten {
 
 		return ret;
 	}
+
+	void ThreadedBVH::update()
+	{
+		m_bvh.update();
+
+		setBoundingBox(m_bvh.getBoundingbox());
+
+		// TODO
+		// More efficient. ex) Gather only transformed object etc...
+		// Gather local-world matrix.
+		m_mtxs.clear();
+		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+
+		auto root = m_bvh.getRoot();
+		std::vector<ThreadedBvhNodeEntry> listBvhNode;
+		registerBvhNodeToLinearList(root, listBvhNode);
+
+		std::vector<int> listParentId;
+		listParentId.reserve(listBvhNode.size());
+
+		m_listThreadedBvhNode[0].clear();
+
+		for (auto& entry : listBvhNode) {
+			auto node = entry.node;
+
+			ThreadedBvhNode gpunode;
+
+			// NOTE
+			// Differ set hit/miss index.
+
+			auto bbox = node->getBoundingbox();
+
+			auto parent = node->getParent();
+			int parentId = parent ? parent->getTraversalOrder() : -1;
+			listParentId.push_back(parentId);
+
+			if (node->isLeaf()) {
+				hitable* item = node->getItem();
+
+				// 自分自身のIDを取得.
+				gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
+				AT_ASSERT(gpunode.shapeid >= 0);
+
+				// インスタンスの実体を取得.
+				auto internalObj = item->getHasObject();
+
+				if (internalObj) {
+					item = const_cast<hitable*>(internalObj);
+				}
+
+				gpunode.meshid = (float)item->geomid();
+
+				gpunode.exid = (float)node->getExternalId();
+			}
+
+			gpunode.boxmax = aten::vec4(bbox.maxPos(), 0);
+			gpunode.boxmin = aten::vec4(bbox.minPos(), 0);
+
+			m_listThreadedBvhNode[0].push_back(gpunode);
+		}
+
+		setOrder(listBvhNode, listParentId, m_listThreadedBvhNode[0]);
+	}
+
+	void ThreadedBVH::registerBvhNodeToLinearList(
+		bvhnode* root, 
+		std::vector<ThreadedBvhNodeEntry>& nodes)
+	{
+		if (!root) {
+			return;
+		}
+
+		int order = nodes.size();
+		root->setTraversalOrder(order);
+
+		nodes.push_back(ThreadedBvhNodeEntry(root, nullptr, aten::mat4::Identity));
+
+		registerBvhNodeToLinearList(root->getLeft(), nodes);
+		registerBvhNodeToLinearList(root->getRight(), nodes);
+	}
 }

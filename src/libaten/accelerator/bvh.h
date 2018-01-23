@@ -29,7 +29,7 @@ namespace aten {
 		{
 #if 0
 			if (m_item) {
-				return m_item->getBoundingbox();
+				return m_item->getTransformedBoundingBox();
 			}
 			return m_aabb;
 #else

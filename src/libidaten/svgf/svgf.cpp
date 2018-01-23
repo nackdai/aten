@@ -65,9 +65,13 @@ namespace idaten
 	}
 
 	void SVGFPathTracing::update(
+		const std::vector<aten::GeomParameter>& geoms,
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::mat4>& mtxs)
 	{
+		m_shapeparam.writeByNum(&geoms[0], geoms.size());
+		m_shapeparam.reset();
+
 		// Only for top layer...
 		m_nodeparam[0].init(
 			(aten::vec4*)&nodes[0][0], 

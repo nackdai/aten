@@ -66,10 +66,10 @@ void update()
 	if (obj) {
 		auto t = obj->getTrans();
 
-		if (y >= 0.0f) {
+		if (y >= -0.1f) {
 			d = -0.01f;
 		}
-		else if (y <= -0.5f) {
+		else if (y <= -1.5f) {
 			d = 0.01f;
 
 		}
@@ -83,10 +83,28 @@ void update()
 		auto accel = g_scene.getAccel();
 		accel->update();
 
-		const auto& nodes = g_scene.getAccel()->getNodes();
-		const auto& mtxs = g_scene.getAccel()->getMatrices();
+		{
+			std::vector<aten::GeomParameter> shapeparams;
+			std::vector<aten::PrimitiveParamter> primparams;
+			std::vector<aten::LightParameter> lightparams;
+			std::vector<aten::MaterialParameter> mtrlparms;
+			std::vector<aten::vertex> vtxparams;
 
-		g_tracer.update(nodes, mtxs);
+			aten::DataCollector::collect(
+				shapeparams,
+				primparams,
+				lightparams,
+				mtrlparms,
+				vtxparams);
+
+			const auto& nodes = g_scene.getAccel()->getNodes();
+			const auto& mtxs = g_scene.getAccel()->getMatrices();
+
+			g_tracer.update(
+				shapeparams,
+				nodes, 
+				mtxs);
+		}
 	}
 }
 

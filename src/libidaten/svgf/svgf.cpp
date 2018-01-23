@@ -64,6 +64,22 @@ namespace idaten
 		m_tmpBuf.init(width * height);
 	}
 
+	void SVGFPathTracing::update(
+		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+		const std::vector<aten::mat4>& mtxs)
+	{
+		// Only for top layer...
+		m_nodeparam[0].init(
+			(aten::vec4*)&nodes[0][0], 
+			sizeof(aten::GPUBvhNode) / sizeof(float4), 
+			nodes[0].size());
+
+		if (!mtxs.empty()) {
+			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
+			m_mtxparams.reset();
+		}
+	}
+
 	void SVGFPathTracing::setAovExportBuffer(GLuint gltexId)
 	{
 		m_aovGLBuffer.init(gltexId, CudaGLRscRegisterType::WriteOnly);

@@ -1,5 +1,7 @@
 #include "aten.h"
 
+aten::instance<aten::object>* getMovableObj();
+
 class CornellBoxScene {
 public:
 	static void makeScene(aten::scene* scene);

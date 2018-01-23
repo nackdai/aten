@@ -1,6 +1,13 @@
 #include "scenedefs.h"
 #include "atenscene.h"
 
+static aten::instance<aten::object>* g_movableObj = nullptr;
+
+aten::instance<aten::object>* getMovableObj()
+{
+	return g_movableObj;
+}
+
 void CornellBoxScene::makeScene(aten::scene* scene)
 {
 	auto emit = new aten::emissive(aten::vec3(36, 36, 36));
@@ -446,8 +453,14 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
 #if 1
 	aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", true);
 
-	auto light = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
+	auto light = new aten::instance<aten::object>(
+		objs[0],
+		aten::vec3(0),
+		aten::vec3(0),
+		aten::vec3(1));
 	scene->add(light);
+
+	g_movableObj = light;
 
 	auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
 	scene->addLight(areaLight);

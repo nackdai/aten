@@ -97,6 +97,10 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
+		void update(
+			const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+			const std::vector<aten::mat4>& mtxs);
+
 		void setAovExportBuffer(GLuint gltexId);
 
 		void setGBuffer(GLuint gltexGbuffer);

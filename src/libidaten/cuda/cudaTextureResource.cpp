@@ -36,7 +36,7 @@ namespace idaten
 
 	cudaTextureObject_t CudaTextureResource::bind()
 	{
-		if (m_buffer) {
+		if (m_tex == 0) {
 			// TODO
 			// Only for resource array.
 
@@ -57,9 +57,19 @@ namespace idaten
 	void CudaTextureResource::unbind()
 	{
 		if (m_tex > 0) {
-			checkCudaErrors(cudaDestroyTextureObject(m_tex));
-			m_tex = 0;
+			//checkCudaErrors(cudaDestroyTextureObject(m_tex));
+			//m_tex = 0;
 		}
+	}
+
+	void CudaTextureResource::update(
+		const aten::vec4* p,
+		uint32_t memberNumInItem,
+		uint32_t numOfContaints)
+	{
+		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
+
+		checkCudaErrors(cudaMemcpy(m_buffer, p, size, cudaMemcpyHostToDevice));
 	}
 
 	/////////////////////////////////////////////////////
@@ -98,42 +108,44 @@ namespace idaten
 
 	cudaTextureObject_t CudaTexture::bind()
 	{
-		if (m_isMipmap) {
-			cudaTextureDesc tex_desc = {};
+		if (m_tex == 0) {
+			if (m_isMipmap) {
+				cudaTextureDesc tex_desc = {};
 
-			tex_desc.normalizedCoords = 1;
-			tex_desc.filterMode = cudaFilterModeLinear;
-			tex_desc.mipmapFilterMode = cudaFilterModeLinear;
+				tex_desc.normalizedCoords = 1;
+				tex_desc.filterMode = cudaFilterModeLinear;
+				tex_desc.mipmapFilterMode = cudaFilterModeLinear;
 
 #if 0
-			tex_desc.addressMode[0] = cudaAddressModeClamp;
-			tex_desc.addressMode[1] = cudaAddressModeClamp;
-			tex_desc.addressMode[2] = cudaAddressModeClamp;
+				tex_desc.addressMode[0] = cudaAddressModeClamp;
+				tex_desc.addressMode[1] = cudaAddressModeClamp;
+				tex_desc.addressMode[2] = cudaAddressModeClamp;
 #else
-			tex_desc.addressMode[0] = cudaAddressModeWrap;
-			tex_desc.addressMode[1] = cudaAddressModeWrap;
-			tex_desc.addressMode[2] = cudaAddressModeWrap;
+				tex_desc.addressMode[0] = cudaAddressModeWrap;
+				tex_desc.addressMode[1] = cudaAddressModeWrap;
+				tex_desc.addressMode[2] = cudaAddressModeWrap;
 #endif
 
-			tex_desc.maxMipmapLevelClamp = float(m_mipmapLevel - 1);
+				tex_desc.maxMipmapLevelClamp = float(m_mipmapLevel - 1);
 
-			tex_desc.readMode = cudaReadModeElementType;
+				tex_desc.readMode = cudaReadModeElementType;
 
-			checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
-		}
-		else if (m_buffer) {
-			// TODO
-			// Only for resource array.
+				checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+			}
+			else {
+				// TODO
+				// Only for resource array.
 
-			// Make texture description:
-			cudaTextureDesc tex_desc = {};
-			tex_desc.readMode = cudaReadModeElementType;
-			tex_desc.filterMode = cudaFilterModeLinear;
-			tex_desc.addressMode[0] = cudaAddressModeWrap;
-			tex_desc.addressMode[1] = cudaAddressModeWrap;
-			tex_desc.normalizedCoords = 1;
+				// Make texture description:
+				cudaTextureDesc tex_desc = {};
+				tex_desc.readMode = cudaReadModeElementType;
+				tex_desc.filterMode = cudaFilterModeLinear;
+				tex_desc.addressMode[0] = cudaAddressModeWrap;
+				tex_desc.addressMode[1] = cudaAddressModeWrap;
+				tex_desc.normalizedCoords = 1;
 
-			checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+				checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
+			}
 		}
 
 		return m_tex;

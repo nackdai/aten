@@ -21,6 +21,11 @@ namespace idaten
 		virtual cudaTextureObject_t bind();
 		void unbind();
 
+		void update(
+			const aten::vec4* p,
+			uint32_t memberNumInItem,
+			uint32_t numOfContaints);
+
 	protected:
 		void* m_buffer{ nullptr };
 		cudaResourceDesc m_resDesc;

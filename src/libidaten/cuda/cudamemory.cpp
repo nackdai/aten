@@ -34,8 +34,7 @@ namespace idaten {
 	__host__ uint32_t CudaMemory::write(const void* p, uint32_t size)
 	{
 		if (!m_device) {
-			AT_ASSERT(false);
-			return 0;
+			init(size);
 		}
 
 		if (m_pos + size > m_bytes) {

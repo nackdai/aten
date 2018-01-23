@@ -14,7 +14,7 @@
 
 #include "scenedefs.h"
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 //#define ENABLE_NLM
 
 static int WIDTH = 1280;
@@ -56,6 +56,40 @@ static bool g_frameStep = false;
 
 static bool g_pickPixel = false;
 
+void update()
+{
+	static float y = 0.0f;
+	static float d = -0.1f;
+
+	auto obj = getMovableObj();
+
+	if (obj) {
+		auto t = obj->getTrans();
+
+		if (y >= 0.0f) {
+			d = -0.01f;
+		}
+		else if (y <= -0.5f) {
+			d = 0.01f;
+
+		}
+
+		y += d;
+		t.y += d;
+
+		obj->setTrans(t);
+		obj->update();
+
+		auto accel = g_scene.getAccel();
+		accel->update();
+
+		const auto& nodes = g_scene.getAccel()->getNodes();
+		const auto& mtxs = g_scene.getAccel()->getMatrices();
+
+		g_tracer.update(nodes, mtxs);
+	}
+}
+
 void onRun()
 {
 	if (g_enableFrameStep && !g_frameStep) {
@@ -63,6 +97,8 @@ void onRun()
 	}
 
 	g_frameStep = false;
+
+	update();
 
 	if (g_isCameraDirty) {
 		g_camera.update();

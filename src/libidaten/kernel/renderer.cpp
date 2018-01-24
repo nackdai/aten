@@ -41,6 +41,8 @@ namespace idaten {
 		m_mtrlparam.init(mtrls.size());
 		m_mtrlparam.writeByNum(&mtrls[0], mtrls.size());
 
+		AT_ASSERT_LOG(!lights.empty(), "No Lights!!");
+
 		m_lightparam.init(lights.size());
 		m_lightparam.writeByNum(&lights[0], lights.size());
 

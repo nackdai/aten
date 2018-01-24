@@ -290,9 +290,6 @@
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
-      <Filter>cuda</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp">
       <Filter>aten\renderer</Filter>
     </ClCompile>
@@ -399,6 +396,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\geometry\sphere.cpp">
       <Filter>aten\geometry</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
+      <Filter>cuda</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

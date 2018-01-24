@@ -21,20 +21,6 @@ namespace aten {
 
 			switch (type) {
 			case GeometryType::Polygon:
-			{
-				auto param = s->getParam();
-
-				const int primcnt = primparams.size();
-
-				if (primcnt <= param.primid) {
-					primparams.resize(primparams.size() + param.primid + param.primnum);
-				}
-
-				s->getPrimitives(&primparams[param.primid]);
-
-				orderMap.insert(std::pair<transformable*, int>(s, order++));
-			}
-				break;
 			case GeometryType::Sphere:
 			case GeometryType::Cube:
 			{

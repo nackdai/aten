@@ -31,6 +31,8 @@ namespace aten {
 
 #define AT_PRINTF		aten::OutputDebugString
 
+#define DEBUG_BREAK()	__debugbreak()
+
 #ifdef __CUDACC__
 	#ifdef __AT_DEBUG__
 		#define AT_ASSERT(b)\
@@ -41,8 +43,6 @@ namespace aten {
 		#define AT_ASSERT(b)
 	#endif
 #else
-	#define DEBUG_BREAK()	__debugbreak()
-
 	#ifdef __AT_DEBUG__
 		#define AT_ASSERT(b)\
 			if (!(b)) {\
@@ -50,13 +50,28 @@ namespace aten {
 				DEBUG_BREAK();\
 			}
 	#else
-		//#define AT_ASSERT(b)
 		#define AT_ASSERT(b)\
 			if (!(b)) {\
 				AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
 			}
 	#endif
 #endif
+
+#ifdef __AT_DEBUG__
+	#define AT_ASSERT_LOG(b, log)\
+		if (!(b)) {\
+			AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
+			AT_PRINTF("    [%s]\n", log);\
+			DEBUG_BREAK();\
+		}
+#else
+	#define AT_ASSERT_LOG(b, log)\
+		if (!(b)) {\
+			AT_PRINTF("assert : %s(%d)\n", __FILE__, __LINE__);\
+			AT_PRINTF("    [%s]\n", log);\
+		}
+#endif
+
 
 #define AT_VRETURN(b, ret)\
 	if (!(b)) {\

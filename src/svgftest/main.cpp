@@ -14,7 +14,7 @@
 
 #include "scenedefs.h"
 
-//#define ENABLE_ENVMAP
+#define ENABLE_ENVMAP
 //#define ENABLE_NLM
 
 static int WIDTH = 1280;

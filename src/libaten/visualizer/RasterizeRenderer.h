@@ -5,6 +5,7 @@
 #include "visualizer/fbo.h"
 #include "visualizer/shader.h"
 #include "visualizer/GeomDataBuffer.h"
+#include "math/mat4.h"
 
 namespace aten {
 	class scene;
@@ -41,6 +42,8 @@ namespace aten {
 	private:
 		shader m_shader;
 		GeomVertexBuffer m_boxvb;
+
+		mat4 m_mtxPrevW2C;
 
 		int m_width{ 0 };
 		int m_height{ 0 };

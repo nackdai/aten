@@ -58,10 +58,21 @@ namespace aten {
 
 		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
+		if (m_mtxPrevW2C.isIdentity()) {
+			m_mtxPrevW2C = mtxW2C;
+		}
+
 		m_shader.prepareRender(nullptr, false);
 
 		auto hMtxW2C = m_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+		auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
+		CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, &m_mtxPrevW2C.a[0]));
+
+		aten::vec4 invScreen(1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f);
+		auto hInvScr = m_shader.getHandle("invScreen");
+		CALL_GL_API(::glUniform4fv(hInvScr, 1, invScreen.p));
 
 		// TODO
 		// For TAA.
@@ -116,9 +127,12 @@ namespace aten {
 			isInitVB = true;
 		}
 
-		scene->draw([&](const aten::mat4& mtxL2W, int objid, int primid) {
+		scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
 			auto hMtxL2W = m_shader.getHandle("mtxL2W");
 			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+
+			auto hPrevMtxL2W = m_shader.getHandle("mtxPrevL2W");
+			CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, &mtxPrevL2W.a[0]));
 
 			auto hObjId = m_shader.getHandle("objid");
 			CALL_GL_API(::glUniform1i(hObjId, objid));
@@ -136,6 +150,8 @@ namespace aten {
 			CALL_GL_API(::glDisable(GL_DEPTH_TEST));
 			CALL_GL_API(::glDisable(GL_CULL_FACE));
 		}
+
+		m_mtxPrevW2C = mtxW2C;
 	}
 
 	static const vertex boxvtx[] = {

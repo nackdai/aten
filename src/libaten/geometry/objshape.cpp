@@ -60,10 +60,11 @@ namespace AT_NAME
 	void objshape::draw(
 		aten::hitable::FuncPreDraw func,
 		const aten::mat4& mtxL2W,
+		const aten::mat4& mtxPrevL2W,
 		int parentId)
 	{
 		if (func) {
-			func(mtxL2W, parentId, m_baseTriIdx);
+			func(mtxL2W, mtxPrevL2W, parentId, m_baseTriIdx);
 		}
 
 		auto vb = VertexManager::getVB();

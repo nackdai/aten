@@ -122,9 +122,10 @@ namespace aten
 		virtual void draw(
 			aten::hitable::FuncPreDraw func,
 			const aten::mat4& mtxL2W,
+			const aten::mat4& mtxPrevL2W,
 			int parentId) override final
 		{
-			m_obj->draw(func, m_mtxL2W, id());
+			m_obj->draw(func, m_mtxL2W, mtxPrevL2W, id());
 		}
 
 		virtual void drawAABB(
@@ -213,6 +214,9 @@ namespace aten
 			mtxRotZ.asRotateByX(m_rot.z);
 			mtxScale.asScale(m_scale);
 
+			// Keep previous L2W matrix.
+			m_mtxPrevL2W = m_mtxL2W;
+
 			m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
 
 			m_mtxW2L = m_mtxL2W;
@@ -223,6 +227,7 @@ namespace aten
 		OBJ* m_obj{ nullptr };
 		mat4 m_mtxL2W;
 		mat4 m_mtxW2L;	// inverted.
+		mat4 m_mtxPrevL2W;
 
 		vec3 m_trans;
 		vec3 m_rot;

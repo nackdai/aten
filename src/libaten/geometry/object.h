@@ -47,6 +47,7 @@ namespace AT_NAME
 		virtual void draw(
 			aten::hitable::FuncPreDraw func,
 			const aten::mat4& mtxL2W,
+			const aten::mat4& mtxPrevL2W,
 			int parentId) override final;
 
 		virtual void drawAABB(

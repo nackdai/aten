@@ -6,14 +6,17 @@ in vec3 normal;
 in vec2 uv;
 in vec3 baryCentric;
 in float depth;
+in vec4 prevCSPos;
 flat in ivec2 ids;	// x: objid, y: primid.
+
+uniform vec4 invScreen;
 
 // NOTE
 // x : objid
 // y : primid
 // zw : bary centroid
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec4 outDepth;
+layout(location = 1) out vec4 outMotionDepth;
 
 const vec3 clr[8] = {
 	vec3(0, 0, 0),
@@ -28,19 +31,24 @@ const vec3 clr[8] = {
 
 void main()
 {
-#if 0
-	//outColor.xyz = normal * 0.5 + 0.5;
-	
-	//outColor.xyz = baryCentric;
+	vec2 curScreenPos = gl_FragCoord.xy * invScreen.xy;
 
-	outColor.xyz = clr[ids.y % 8];
+	vec2 prevScreenPos = prevCSPos.xy / prevCSPos.w;
+	prevScreenPos *= vec2(0.5, 0.5) + vec2(0.5);
 
-	outColor.w = 1.0;
-#else
+	// [-1, 1] -> [0, 1]
+	prevScreenPos = prevScreenPos * vec2(0.5) + vec2(0.5);
+
+	// ([0, width], [0, height])
+	vec2 motion = prevScreenPos - curScreenPos;
+	motion /= invScreen.xy;
+
 	outColor.x = intBitsToFloat(ids.x);	// objid
 	outColor.y = intBitsToFloat(ids.y);	// primid
 	outColor.zw = baryCentric.xy;
 
-	outDepth = vec4(depth, 1, 1, 1);
-#endif
+	outMotionDepth.x = motion.x;
+	outMotionDepth.y = motion.y;
+	outMotionDepth.z = depth;
+	outMotionDepth.w = 1;
 }

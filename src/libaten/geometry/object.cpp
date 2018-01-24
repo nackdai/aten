@@ -170,12 +170,13 @@ namespace AT_NAME
 	void object::draw(
 		aten::hitable::FuncPreDraw func,
 		const aten::mat4& mtxL2W,
+		const aten::mat4& mtxPrevL2W,
 		int parentId)
 	{
 		int objid = (parentId < 0 ? id() : parentId);
 
 		for (auto s : shapes) {
-			s->draw(func, mtxL2W, objid);
+			s->draw(func, mtxL2W, mtxPrevL2W, objid);
 		}
 	}
 

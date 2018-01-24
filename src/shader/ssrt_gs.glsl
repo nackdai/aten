@@ -7,17 +7,20 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 6) out;
 
 uniform mat4 mtxW2C;
+uniform mat4 mtxPrevW2C;
 uniform int objid;
 uniform int primid;
 uniform mat4 mtxOffset;
 
 in vec3 worldNormal[3];
 in vec2 vUV[3];
+in vec4 prevWorldPos[3];
 
 out vec3 normal;
 out vec2 uv;
 out vec3 baryCentric;
 out float depth;
+out vec4 prevCSPos;
 flat out ivec2 ids;
 
 // TODO
@@ -34,6 +37,8 @@ void main()
 {
 	for (int i = 0; i < gl_in.length(); i++) {
 		gl_Position = mtxOffset * mtxW2C * gl_in[i].gl_Position;
+
+		prevCSPos = mtxPrevW2C * prevWorldPos[i];
 
 		depth = gl_Position.w;
 		

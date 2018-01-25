@@ -43,6 +43,11 @@ namespace aten {
 			return m_tex[idx];
 		}
 
+		uint32_t getHandle() const
+		{
+			return m_fbo;
+		}
+
 		void asMulti(uint32_t num);
 
 		using FuncPrepareFbo = std::function<void(const uint32_t*, int, std::vector<uint32_t>&)>;

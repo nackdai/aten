@@ -109,11 +109,17 @@ namespace aten {
 		}
 
 		// Clear.
-		{
-			int iclr = -1;
-			float fclr = *(float*)&iclr;
+		if (fbo) {
+			float clr[] = { -1.0f, -1.0f, -1.0f, -1.0f };
+			CALL_GL_API(glClearNamedFramebufferfv(fbo->getHandle(), GL_COLOR, 0, clr));
+			CALL_GL_API(glClearNamedFramebufferfv(fbo->getHandle(), GL_COLOR, 1, clr));
 
-			CALL_GL_API(::glClearColor(fclr, fclr, fclr, fclr));
+			CALL_GL_API(::glClearDepthf(1.0f));
+			CALL_GL_API(::glClearStencil(0));
+			CALL_GL_API(::glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+		}
+		else {
+			CALL_GL_API(::glClearColor(0, 0, 0, 0));
 			CALL_GL_API(::glClearDepthf(1.0f));
 			CALL_GL_API(::glClearStencil(0));
 			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));

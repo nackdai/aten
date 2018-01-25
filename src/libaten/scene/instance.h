@@ -125,7 +125,7 @@ namespace aten
 			const aten::mat4& mtxPrevL2W,
 			int parentId) override final
 		{
-			m_obj->draw(func, m_mtxL2W, mtxPrevL2W, id());
+			m_obj->draw(func, m_mtxL2W, m_mtxPrevL2W, id());
 		}
 
 		virtual void drawAABB(

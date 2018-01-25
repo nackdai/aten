@@ -110,7 +110,7 @@ __global__ void temporalReprojection(
 	const float4* __restrict__ prevAovTexclrTemporalWeight,
 	const float4* __restrict__ prevAovColorVariance,
 	const float4* __restrict__ prevAovMomentMeshid,
-	const aten::mat4* __restrict__ mtxs,
+	cudaSurfaceObject_t motionDetphBuffer,
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
 	int width, int height)
@@ -166,60 +166,39 @@ __global__ void temporalReprojection(
 			int xx = clamp(ix + x, 0, width - 1);
 			int yy = clamp(iy + y, 0, height - 1);
 
-			int _idx = getIdx(xx, yy, width);
+			float4 motionDepth;
+			surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
-			nmlDepth = curAovNormalDepth[_idx];
-			auto depth = nmlDepth.w;
+			// 前のフレームのスクリーン座標.
+			int px = (int)(xx + motionDepth.x * width);
+			int py = (int)(yy + motionDepth.y * height);
 
-			// 前のフレームのクリップ空間座標を計算.
-			aten::vec4 prevPos;
-			computePrevScreenPos(
-				xx, yy,
-				depth,
-				width, height,
-				&prevPos,
-				mtxs);
+			px = clamp(px, 0, width - 1);
+			py = clamp(py, 0, height - 1);
 
-			if (x == 0 && y == 0) {
-				centerPrevPos = prevPos;
-			}
+			int pidx = getIdx(px, py, width);
 
-			// [0, 1]の範囲内に入っているか.
-			bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
-			bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
+			nmlDepth = prevAovNormalDepth[pidx];
+			momentMeshId = prevAovMomentMeshid[pidx];
 
-			if (isInsideX && isInsideY) {
-				// 前のフレームのスクリーン座標.
-				int px = (int)(prevPos.x * width - 0.5f);
-				int py = (int)(prevPos.y * height - 0.5f);
+			const float prevDepth = nmlDepth.w;
+			const int prevMeshId = (int)momentMeshId.w;
+			float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
-				px = clamp(px, 0, width - 1);
-				py = clamp(py, 0, height - 1);
+			// TODO
+			// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
 
-				int pidx = getIdx(px, py, width);
+			float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
+			float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
+			float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
 
-				nmlDepth = prevAovNormalDepth[pidx];
-				momentMeshId = prevAovMomentMeshid[pidx];
+			// 前のフレームのピクセルカラーを取得.
+			float4 prev = prevAovColorVariance[pidx];
+			//float4 prev = sampleBilinear(prevAovColorVariance, prevPos.x, prevPos.y, width, height);
 
-				const float prevDepth = nmlDepth.w;
-				const int prevMeshId = (int)momentMeshId.w;
-				float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
-
-				// TODO
-				// 同じメッシュ上でもライトのそばの明るくなったピクセルを拾ってしまう場合の対策が必要.
-
-				float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
-				float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
-				float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
-
-				// 前のフレームのピクセルカラーを取得.
-				float4 prev = prevAovColorVariance[pidx];
-				//float4 prev = sampleBilinear(prevAovColorVariance, prevPos.x, prevPos.y, width, height);
-
-				float W = Wz * Wn * Wm;
-				sum += prev * W;
-				weight += W;
-			}
+			float W = Wz * Wn * Wm;
+			sum += prev * W;
+			weight += W;
 		}
 	}
 	
@@ -501,20 +480,9 @@ namespace idaten
 		int curaov = getCurAovs();
 		int prevaov = getPrevAovs();
 
-		// NOTE
-		// V2Cは aspect、fov、near、far から計算される.
-		// 基本的にはこれらの値は変わらないので、current、prevに 関係なく利用できる.
-
-		aten::mat4 mtxs[] = {
-			m_mtxC2V,
-			m_mtxV2W,
-			m_mtxPrevW2V,
-			m_mtxV2C,
-		};
-
-		m_mtxs.init(sizeof(aten::mat4) * AT_COUNTOF(mtxs));
-		m_mtxs.writeByNum(mtxs, AT_COUNTOF(mtxs));
-
+		CudaGLResourceMap rscmap(&m_motionDepthBuffer);
+		auto motionDepthBuffer = m_motionDepthBuffer.bind();
+		
 		temporalReprojection << <grid, block >> > (
 		//temporalReprojection << <1, 1 >> > (
 			m_paths.ptr(),
@@ -527,7 +495,7 @@ namespace idaten
 			m_aovTexclrTemporalWeight[prevaov].ptr(),
 			m_aovColorVariance[prevaov].ptr(),
 			m_aovMomentMeshid[prevaov].ptr(),
-			m_mtxs.ptr(),
+			motionDepthBuffer,
 			outputSurf,
 			m_tmpBuf.ptr(),
 			width, height);
@@ -552,7 +520,5 @@ namespace idaten
 			m_aovMomentMeshid[curaov].ptr(),
 			width, height);
 		checkCudaKernel(dilateWeight);
-
-		m_mtxs.reset();
 	}
 }

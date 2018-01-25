@@ -17,6 +17,8 @@
 #define ENABLE_ENVMAP
 //#define ENABLE_NLM
 
+//#define TEST_FOR_GL_RENDER
+
 static int WIDTH = 1280;
 static int HEIGHT = 720;
 static const char* TITLE = "svgf";
@@ -100,14 +102,38 @@ void update()
 			const auto& nodes = g_scene.getAccel()->getNodes();
 			const auto& mtxs = g_scene.getAccel()->getMatrices();
 
+#ifndef TEST_FOR_GL_RENDER
 			g_tracer.update(
 				shapeparams,
 				nodes, 
 				mtxs);
+#endif
 		}
 	}
 }
 
+#ifdef TEST_FOR_GL_RENDER
+void onRun()
+{
+	update();
+
+	if (g_isCameraDirty) {
+		g_camera.update();
+
+		auto camparam = g_camera.param();
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		g_isCameraDirty = false;
+	}
+
+	g_rasterizer.draw(
+		g_tracer.frame(),
+		&g_scene,
+		&g_camera,
+		&g_fbo);
+}
+#else
 void onRun()
 {
 	if (g_enableFrameStep && !g_frameStep) {
@@ -240,6 +266,7 @@ void onRun()
 		AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
 	}
 }
+#endif
 
 void onClose()
 {
@@ -408,13 +435,6 @@ int main()
 		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
-	aten::NonLocalMeanFilterShader nlmshd;
-	nlmshd.init(
-		WIDTH, HEIGHT,
-		"../shader/fullscreen_vs.glsl",
-		"../shader/nlm_fs.glsl");
-	nlmshd.setParam(0.04f, 0.04f);
-
 	g_taa.init(
 		WIDTH, HEIGHT,
 		"../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
@@ -423,10 +443,6 @@ int main()
 	aten::visualizer::addPostProc(&g_taa);
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
-
-#ifdef ENABLE_NLM
-	aten::visualizer::addPostProc(&nlmshd);
-#endif
 
 	g_rasterizer.init(
 		WIDTH, HEIGHT,
@@ -462,6 +478,7 @@ int main()
 	Scene::makeScene(&g_scene);
 	g_scene.build();
 
+#ifndef TEST_FOR_GL_RENDER
 	idaten::Compaction::init(
 		WIDTH * HEIGHT,
 		1024);
@@ -545,6 +562,7 @@ int main()
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
+#endif
 
 	aten::window::run(onRun);
 

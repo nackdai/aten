@@ -24,6 +24,7 @@ namespace idaten
 			Depth,
 			WireFrame,
 			BaryCentric,
+			Motion,
 		};
 
 		static const int ShdowRayNum = 2;
@@ -104,7 +105,9 @@ namespace idaten
 
 		void setAovExportBuffer(GLuint gltexId);
 
-		void setGBuffer(GLuint gltexGbuffer);
+		void setGBuffer(
+			GLuint gltexGbuffer,
+			GLuint gltexMotionDepthbuffer);
 
 		Mode getMode() const
 		{
@@ -284,6 +287,7 @@ namespace idaten
 
 		// G-Buffer rendered by OpenGL.
 		idaten::CudaGLSurface m_gbuffer;
+		idaten::CudaGLSurface m_motionDepthBuffer;
 
 		idaten::TypedCudaMemory<PickedInfo> m_pick;
 

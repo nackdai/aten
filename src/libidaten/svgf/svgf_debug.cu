@@ -23,7 +23,8 @@ __global__ void fillAOV(
 	int width, int height,
 	const float4* __restrict__ aovNormalDepth,
 	const float4* __restrict__ aovTexclrTemporalWeight,
-	const aten::Intersection* __restrict__ isects)
+	const aten::Intersection* __restrict__ isects,
+	cudaSurfaceObject_t motionDetphBuffer)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -55,6 +56,16 @@ __global__ void fillAOV(
 	else if (mode == idaten::SVGFPathTracing::AOVMode::BaryCentric) {
 		auto c = 1 - isect.a - isect.b;
 		clr = make_float4(isect.a, isect.b, c, 1);
+	}
+	else if (mode == idaten::SVGFPathTracing::AOVMode::Motion) {
+		float4 data;
+		surf2Dread(&data, motionDetphBuffer, ix * sizeof(float4), iy);
+
+		// TODO
+		float motionX = data.x;
+		float motionY = data.y;
+
+		clr = make_float4(motionX, motionY, 0, 1);
 	}
 
 	surf2Dwrite(
@@ -134,13 +145,17 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
+		CudaGLResourceMap rscmap(&m_motionDepthBuffer);
+		auto gbuffer = m_motionDepthBuffer.bind();
+
 		fillAOV << <grid, block >> > (
 			outputSurf,
 			m_aovMode,
 			width, height,
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),
-			m_isects.ptr());
+			m_isects.ptr(),
+			gbuffer);
 	}
 
 	void SVGFPathTracing::pick(

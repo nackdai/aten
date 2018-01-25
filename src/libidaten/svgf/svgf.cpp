@@ -69,8 +69,8 @@ namespace idaten
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::mat4>& mtxs)
 	{
-		m_shapeparam.writeByNum(&geoms[0], geoms.size());
 		m_shapeparam.reset();
+		m_shapeparam.writeByNum(&geoms[0], geoms.size());
 
 		// Only for top layer...
 		m_nodeparam[0].init(
@@ -79,8 +79,8 @@ namespace idaten
 			nodes[0].size());
 
 		if (!mtxs.empty()) {
-			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
 			m_mtxparams.reset();
+			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
 		}
 	}
 
@@ -89,9 +89,12 @@ namespace idaten
 		m_aovGLBuffer.init(gltexId, CudaGLRscRegisterType::WriteOnly);
 	}
 
-	void SVGFPathTracing::setGBuffer(GLuint gltexGbuffer)
+	void SVGFPathTracing::setGBuffer(
+		GLuint gltexGbuffer,
+		GLuint gltexMotionDepthbuffer)
 	{
 		m_gbuffer.init(gltexGbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
+		m_motionDepthBuffer.init(gltexMotionDepthbuffer, idaten::CudaGLRscRegisterType::ReadOnly);
 	}
 
 	static bool doneSetStackSize = false;

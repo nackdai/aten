@@ -34,11 +34,6 @@ namespace aten
 			return std::move(GeomParameter(GeometryType::GeometryTypeMax));
 		}
 
-		virtual void getPrimitives(PrimitiveParamter* primparams) const
-		{
-			// Nothing is done...
-		}
-
 		virtual void getMatrices(
 			aten::mat4& mtxL2W,
 			aten::mat4& mtxW2L) const

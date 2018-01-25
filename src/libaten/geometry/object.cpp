@@ -150,23 +150,6 @@ namespace AT_NAME
 		result->area = area;
 	}
 
-	void object::getPrimitives(aten::PrimitiveParamter* primparams) const
-	{
-		int cnt = 0;
-
-		for (auto s : shapes) {
-			const auto& shapeParam = s->param;
-			
-			auto mtrlid = material::findMaterialIdx((material*)shapeParam.mtrl.ptr);
-
-			for (auto f : s->faces) {
-				auto faceParam = f->param;
-				faceParam.mtrlid = mtrlid;
-				primparams[cnt++] = faceParam;
-			}
-		}
-	}
-
 	void object::draw(
 		aten::hitable::FuncPreDraw func,
 		const aten::mat4& mtxL2W,

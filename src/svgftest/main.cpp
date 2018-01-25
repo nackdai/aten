@@ -198,7 +198,7 @@ void onRun()
 		}
 
 		if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
-			static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric" };
+			static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion" };
 			int aov_current = g_curAOVMode;
 			ImGui::Combo("aov", &aov_current, aovitems, AT_COUNTOF(aovitems));
 
@@ -538,7 +538,9 @@ int main()
 			idaten::EnvmapResource());
 #endif
 
-		g_tracer.setGBuffer(g_fbo.getTexHandle(0));
+		g_tracer.setGBuffer(
+			g_fbo.getTexHandle(0),
+			g_fbo.getTexHandle(1));
 	}
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);

@@ -360,7 +360,7 @@ __global__ void shadeMissWithEnvmap(
 	}
 }
 
-template <bool isFirstBounce, int ShadowRayNum>
+template <bool isFirstBounce>
 __global__ void shade(
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
@@ -536,7 +536,7 @@ __global__ void shade(
 		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 		shShadowRays[threadIdx.x].rayorg = shadowRayOrg;
 
-		for (int i = 0; i < ShadowRayNum; i++) {
+		for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
 			real lightSelectPdf = 1;
 			aten::LightSampleResult sampleres;
 
@@ -626,7 +626,7 @@ __global__ void shade(
 #else
 						shPaths[threadIdx.x].contrib +=
 #endif
-							(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)ShadowRayNum;
+							(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;
 					}
 				}
 				else {
@@ -648,7 +648,7 @@ __global__ void shade(
 #else
 							shPaths[threadIdx.x].contrib +=
 #endif
-								(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)ShadowRayNum;
+								(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;;
 						}
 					}
 				}
@@ -717,7 +717,6 @@ __global__ void shade(
 	shadowRays[idx] = shShadowRays[threadIdx.x];
 }
 
-template <int ShadowRayNum>
 __global__ void hitShadowRay(
 	idaten::SVGFPathTracing::Path* paths,
 	int* hitindices,
@@ -756,7 +755,7 @@ __global__ void hitShadowRay(
 
 	if (shadowRay.isActive) {
 #pragma unroll
-		for (int i = 0; i < ShadowRayNum; i++) {
+		for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
 			auto targetLightId = shadowRay.targetLightId[i];
 			auto distToLight = shadowRay.distToLight[i];
 
@@ -1027,7 +1026,7 @@ namespace idaten
 		int curaov = getCurAovs();
 
 		if (bounce == 0) {
-			shade<true, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
+			shade<true> << <blockPerGrid, threadPerBlock >> > (
 				m_aovNormalDepth[curaov].ptr(),
 				m_aovTexclrTemporalWeight[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
@@ -1051,7 +1050,7 @@ namespace idaten
 				m_shadowRays.ptr());
 		}
 		else {
-			shade<false, ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
+			shade<false> << <blockPerGrid, threadPerBlock >> > (
 				m_aovNormalDepth[curaov].ptr(),
 				m_aovTexclrTemporalWeight[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
@@ -1078,7 +1077,7 @@ namespace idaten
 		checkCudaKernel(shade);
 
 #ifdef SEPARATE_SHADOWRAY_HITTEST
-		hitShadowRay<ShdowRayNum> << <blockPerGrid, threadPerBlock >> > (
+		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount,
 			m_shadowRays.ptr(),

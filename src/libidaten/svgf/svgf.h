@@ -27,7 +27,7 @@ namespace idaten
 			Motion,
 		};
 
-		static const int ShdowRayNum = 2;
+		static const int ShadowRayNum = 2;
 
 #ifdef __AT_CUDA__
 		struct Path {
@@ -48,11 +48,11 @@ namespace idaten
 		struct ShadowRay {
 			aten::vec3 rayorg;
 
-			aten::vec3 raydir[ShdowRayNum];
-			aten::vec3 lightcontrib[ShdowRayNum];
-			real distToLight[ShdowRayNum];
+			aten::vec3 raydir[ShadowRayNum];
+			aten::vec3 lightcontrib[ShadowRayNum];
+			real distToLight[ShadowRayNum];
 
-			uint8_t targetLightId[ShdowRayNum];
+			uint8_t targetLightId[ShadowRayNum];
 
 			struct {
 				uint32_t isActive : 1;

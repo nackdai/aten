@@ -28,6 +28,8 @@ struct QVertex {
 		grid[1] = rhs.grid[1];
 		grid[2] = rhs.grid[2];
 		hash = rhs.hash;
+
+		return *this;
 	}
 };
 
@@ -38,7 +40,7 @@ using qit = std::vector<QVertex>::iterator;
 
 static void computeAverage(qit start, qit end)
 {
-	aten::vec3 pos(start->v.pos);
+	aten::vec4 pos(start->v.pos);
 	aten::vec3 nml(start->v.nml);
 	aten::vec3 uv(start->v.uv);
 
@@ -58,6 +60,7 @@ static void computeAverage(qit start, qit end)
 	nml *= div;
 	uv *= div;
 
+	pos.w = real(1);
 	nml = normalize(nml);
 
 	// ŒvŽZŒ‹‰Ê‚ð–ß‚·...

@@ -217,3 +217,36 @@ void LodMaker::make(
 		}
 	}
 }
+
+void LodMaker::removeCollapsedTriangles(
+	std::vector<std::vector<int>>& dstIndices,
+	const std::vector<aten::vertex>& vertices,
+	const std::vector<std::vector<int>>& indices)
+{
+	dstIndices.resize(indices.size());
+
+	for (int i = 0; i < indices.size(); i++) {
+		const auto& idxs = indices[i];
+
+		for (int n = 0; n < idxs.size(); n += 3) {
+			auto id0 = idxs[n + 0];
+			auto id1 = idxs[n + 1];
+			auto id2 = idxs[n + 2];
+
+			const auto& v0 = vertices[id0];
+			const auto& v1 = vertices[id1];
+			const auto& v2 = vertices[id2];
+
+			// ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+			auto e0 = v1.pos - v0.pos;
+			auto e1 = v2.pos - v0.pos;
+			auto area = real(0.5) * cross(e0, e1).length();
+
+			if (area > real(0)) {
+				dstIndices[i].push_back(id0);
+				dstIndices[i].push_back(id1);
+				dstIndices[i].push_back(id2);
+			}
+		}
+	}
+}

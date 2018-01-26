@@ -365,11 +365,18 @@ int main(int argc, char* argv[])
 	std::vector<std::vector<aten::face*>> tris;
 	g_obj->gatherTriangles(tris);
 
+	std::vector<std::vector<int>> tmpIdx;
+
 	LodMaker::make(
-		g_lodVtx, g_lodIdx,
+		g_lodVtx, tmpIdx,
 		g_obj->getBoundingbox(),
 		vtxs, tris,
-		128, 128, 128);
+		16, 16, 16);
+
+	LodMaker::removeCollapsedTriangles(
+		g_lodIdx,
+		g_lodVtx,
+		tmpIdx);
 #else
 	g_obj->buildForRasterizeRendering();
 #endif

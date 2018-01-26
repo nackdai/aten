@@ -14,4 +14,9 @@ public:
 		int gridX,
 		int gridY,
 		int gridZ);
+
+	static void removeCollapsedTriangles(
+		std::vector<std::vector<int>>& dstIndices,
+		const std::vector<aten::vertex>& vertices,
+		const std::vector<std::vector<int>>& indices);
 };

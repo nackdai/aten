@@ -40,7 +40,10 @@ namespace aten {
 			const camera* cam,
 			accelerator* accel);
 
-		void draw(object* obj, const camera* cam);
+		void draw(
+			object* obj, 
+			const camera* cam,
+			bool isWireFrame);
 
 	private:
 		shader m_shader;

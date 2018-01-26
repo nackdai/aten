@@ -260,7 +260,10 @@ namespace aten {
 		}, aten::mat4::Identity);
 	}
 
-	void RasterizeRenderer::draw(object* obj, const camera* cam)
+	void RasterizeRenderer::draw(
+		object* obj, 
+		const camera* cam,
+		bool isWireFrame)
 	{
 		auto camparam = cam->param();
 
@@ -295,6 +298,13 @@ namespace aten {
 
 		// Set default frame buffer.
 		CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+
+		if (isWireFrame) {
+			CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+		}
+		else {
+			CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+		}
 
 		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
 		CALL_GL_API(::glEnable(GL_CULL_FACE));

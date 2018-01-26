@@ -14,6 +14,9 @@ static aten::RasterizeRenderer g_rasterizer;
 
 static aten::object* g_obj = nullptr;
 
+static std::vector<aten::vertex> g_lodVtx;
+static std::vector<std::vector<int>> g_lodIdx;
+
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
@@ -25,6 +28,8 @@ static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
 static int g_prevX = 0;
 static int g_prevY = 0;
+
+#define TEST_LOD
 
 void onRun()
 {
@@ -38,7 +43,15 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
-	g_rasterizer.draw(g_obj, &g_camera);
+#ifdef TEST_LOD
+	g_rasterizer.draw(
+		g_lodVtx,
+		g_lodIdx,
+		&g_camera,
+		true);
+#else
+	g_rasterizer.draw(g_obj, &g_camera, true);
+#endif
 }
 
 void onClose()
@@ -345,21 +358,21 @@ int main(int argc, char* argv[])
 		onKey);
 
 	g_obj = loadObj();
-	g_obj->buildForRasterizeRendering();
 
+#ifdef TEST_LOD
 	auto& vtxs = aten::VertexManager::getVertices();
 
 	std::vector<std::vector<aten::face*>> tris;
 	g_obj->gatherTriangles(tris);
 
-	std::vector<aten::vertex> lodVtx;
-	std::vector<std::vector<int>> lodIdx;
-
 	LodMaker::make(
-		lodVtx, lodIdx,
+		g_lodVtx, g_lodIdx,
 		g_obj->getBoundingbox(),
 		vtxs, tris,
 		128, 128, 128);
+#else
+	g_obj->buildForRasterizeRendering();
+#endif
 
 	// TODO
 	aten::vec3 pos(0, 1, 10);

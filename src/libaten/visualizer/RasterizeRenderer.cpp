@@ -336,4 +336,85 @@ namespace aten {
 			}
 		});
 	}
+
+	void RasterizeRenderer::draw(
+		std::vector<vertex>& vtxs,
+		std::vector<std::vector<int>>& idxs,
+		const camera* cam,
+		bool isWireFrame)
+	{
+		auto camparam = cam->param();
+
+		// TODO
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		mat4 mtxW2V;
+		mat4 mtxV2C;
+
+		mtxW2V.lookat(
+			camparam.origin,
+			camparam.center,
+			camparam.up);
+
+		mtxV2C.perspective(
+			camparam.znear,
+			camparam.zfar,
+			camparam.vfov,
+			camparam.aspect);
+
+		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+		m_shader.prepareRender(nullptr, false);
+
+		// Not modify local to world matrix...
+		auto hMtxL2W = m_shader.getHandle("mtxL2W");
+		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mat4::Identity.a[0]));
+
+		auto hMtxW2C = m_shader.getHandle("mtxW2C");
+		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+		// Set default frame buffer.
+		CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+
+		if (isWireFrame) {
+			CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+		}
+		else {
+			CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+		}
+
+		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+		CALL_GL_API(::glEnable(GL_CULL_FACE));
+
+		// TODO
+		// Will modify to specify clear color.
+		CALL_GL_API(::glClearColor(0, 0, 0, 0));
+		CALL_GL_API(::glClearDepthf(1.0f));
+		CALL_GL_API(::glClearStencil(0));
+		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+		static bool isInitBuffer = false;
+
+		if (!isInitBuffer) {
+			m_vb.init(
+				sizeof(vertex),
+				vtxs.size(),
+				0,
+				&vtxs[0]);
+
+			m_ib.resize(idxs.size());
+
+			for (int i = 0; i < idxs.size(); i++) {
+				m_ib[i].init((uint32_t)idxs[i].size(), &idxs[i][0]);
+			}
+
+			isInitBuffer = true;
+		}
+
+		for (int i = 0; i < m_ib.size(); i++) {
+			auto triNum = (uint32_t)idxs[i].size() / 3;
+			m_ib[i].draw(m_vb, aten::Primitive::Triangles, 0, triNum);
+		}
+	}
 }

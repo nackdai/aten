@@ -25,6 +25,7 @@ namespace idaten
 			WireFrame,
 			BaryCentric,
 			Motion,
+			ObjId,
 		};
 
 		static const int ShadowRayNum = 2;

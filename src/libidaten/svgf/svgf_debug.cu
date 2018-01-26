@@ -33,6 +33,19 @@ __global__ void fillAOV(
 		return;
 	}
 
+	const aten::vec3 colors[] = {
+		aten::vec3(255,   0,   0),
+		aten::vec3(  0, 255,   0),
+		aten::vec3(  0,   0, 255),
+		aten::vec3(255, 255,   0),
+		aten::vec3(255,   0, 255),
+		aten::vec3(  0, 255, 255),
+		aten::vec3(128, 128, 128),
+		aten::vec3( 86,  99, 143),
+		aten::vec3( 71, 234, 126),
+		aten::vec3(124,  83,  53),
+	};
+
 	const auto idx = getIdx(ix, iy, width);
 
 	const auto& isect = isects[idx];
@@ -66,6 +79,19 @@ __global__ void fillAOV(
 		float motionY = data.y;
 
 		clr = make_float4(motionX, motionY, 0, 1);
+	}
+	else if (mode == idaten::SVGFPathTracing::AOVMode::ObjId) {
+		int objid = isect.objid;
+		if (objid >= 0) {
+			objid %= AT_COUNTOF(colors);
+			auto c = colors[objid];
+
+			clr = make_float4(c.x, c.y, c.z, 1);
+			clr /= 255.0f;
+		}
+		else {
+			clr = make_float4(0, 0, 0, 1);
+		}
 	}
 
 	surf2Dwrite(

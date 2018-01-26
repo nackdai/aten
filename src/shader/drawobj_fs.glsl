@@ -18,6 +18,6 @@ void main()
 	}
 	else {
 		// TODO
-		outColor = vec4(normal, 1);
+		outColor = vec4(1, 1, 1, 1);
 	}
 }

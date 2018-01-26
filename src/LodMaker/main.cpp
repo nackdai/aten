@@ -303,11 +303,10 @@ aten::object* loadObj()
 	std::vector<aten::object*> objs;
 
 	aten::AssetManager::registerMtrl(
-		"wire_087224198",
-		//new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
-		new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+		"Material.001",
+		new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
 
-	aten::ObjLoader::load(objs, "../../asset/dragon/dragon.obj");
+	aten::ObjLoader::load(objs, "../../asset/suzanne/suzanne.obj");
 #endif
 
 	// NOTE
@@ -347,6 +346,20 @@ int main(int argc, char* argv[])
 
 	g_obj = loadObj();
 	g_obj->buildForRasterizeRendering();
+
+	auto& vtxs = aten::VertexManager::getVertices();
+
+	std::vector<std::vector<aten::face*>> tris;
+	g_obj->gatherTriangles(tris);
+
+	std::vector<aten::vertex> lodVtx;
+	std::vector<std::vector<int>> lodIdx;
+
+	LodMaker::make(
+		lodVtx, lodIdx,
+		g_obj->getBoundingbox(),
+		vtxs, tris,
+		128, 128, 128);
 
 	// TODO
 	aten::vec3 pos(0, 1, 10);

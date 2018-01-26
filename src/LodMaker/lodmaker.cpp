@@ -132,9 +132,9 @@ void LodMaker::make(
 			return q0.hash > q1.hash;
 		});
 
-		sortedIndices.reserve(triGroups[i].size());
-
 		uint32_t num = (uint32_t)qvtxs[i].size();
+
+		sortedIndices[i].resize(num);
 
 		// インデックスも頂点にあわせて並べ替える.
 		for (uint32_t n = 0; n < num; n++) {

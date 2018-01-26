@@ -221,4 +221,18 @@ namespace AT_NAME
 		m_accel = aten::accelerator::createAccelerator();
 		return m_accel->importTree(path);
 	}
+
+	void object::gatherTriangles(
+		std::vector<std::vector<AT_NAME::face*>>& tris)
+	{
+		tris.resize(shapes.size());
+
+		for (int i = 0; i < shapes.size(); i++) {
+			auto shape = shapes[i];
+
+			for (auto face : shape->faces) {
+				tris[i].push_back(face);
+			}
+		}
+	}
 }

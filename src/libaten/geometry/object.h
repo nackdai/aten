@@ -60,6 +60,9 @@ namespace AT_NAME
 
 		void buildForRasterizeRendering();
 
+		void gatherTriangles(
+			std::vector<std::vector<AT_NAME::face*>>& tris);
+
 	private:
 		void build();
 

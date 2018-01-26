@@ -259,4 +259,71 @@ namespace aten {
 			m_boxvb.draw(aten::Primitive::Lines, 0, 12);
 		}, aten::mat4::Identity);
 	}
+
+	void RasterizeRenderer::draw(object* obj, const camera* cam)
+	{
+		auto camparam = cam->param();
+
+		// TODO
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		mat4 mtxW2V;
+		mat4 mtxV2C;
+
+		mtxW2V.lookat(
+			camparam.origin,
+			camparam.center,
+			camparam.up);
+
+		mtxV2C.perspective(
+			camparam.znear,
+			camparam.zfar,
+			camparam.vfov,
+			camparam.aspect);
+
+		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+		m_shader.prepareRender(nullptr, false);
+
+		// Not modify local to world matrix...
+		auto hMtxL2W = m_shader.getHandle("mtxL2W");
+		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mat4::Identity.a[0]));
+
+		auto hMtxW2C = m_shader.getHandle("mtxW2C");
+		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+		// Set default frame buffer.
+		CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+
+		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+		CALL_GL_API(::glEnable(GL_CULL_FACE));
+
+		// TODO
+		// Will modify to specify clear color.
+		CALL_GL_API(::glClearColor(0, 0, 0, 0));
+		CALL_GL_API(::glClearDepthf(1.0f));
+		CALL_GL_API(::glClearStencil(0));
+		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+		// TODO
+		// ‚±‚±‚Å‚â‚é?
+		static bool isInitVB = false;
+		if (!isInitVB) {
+			VertexManager::build();
+			isInitVB = true;
+		}
+
+		auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
+
+		obj->draw([&](const aten::texture* albedo) {
+			if (albedo) {
+				albedo->bindAsGLTexture(0, &m_shader);
+				CALL_GL_API(::glUniform1i(hHasAlbedo, true));
+			}
+			else {
+				CALL_GL_API(::glUniform1i(hHasAlbedo, false));
+			}
+		});
+	}
 }

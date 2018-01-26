@@ -48,6 +48,8 @@ namespace AT_NAME
 			const aten::mat4& mtxPrevL2W,
 			int parentId) override final;
 
+		void draw(aten::FuncObjectMeshDraw func);
+
 		virtual void drawAABB(
 			aten::hitable::FuncDrawAABB func,
 			const aten::mat4& mtxL2W) override final;
@@ -55,6 +57,8 @@ namespace AT_NAME
 		bool exportInternalAccelTree(const char* path);
 
 		bool importInternalAccelTree(const char* path);
+
+		void buildForRasterizeRendering();
 
 	private:
 		void build();

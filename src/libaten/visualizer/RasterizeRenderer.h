@@ -6,6 +6,7 @@
 #include "visualizer/shader.h"
 #include "visualizer/GeomDataBuffer.h"
 #include "math/mat4.h"
+#include "geometry/object.h"
 
 namespace aten {
 	class scene;
@@ -38,6 +39,8 @@ namespace aten {
 		void drawAABB(
 			const camera* cam,
 			accelerator* accel);
+
+		void draw(object* obj, const camera* cam);
 
 	private:
 		shader m_shader;

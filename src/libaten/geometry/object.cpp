@@ -50,6 +50,27 @@ namespace AT_NAME
 		setBoundingBox(bbox);
 	}
 
+	void object::buildForRasterizeRendering()
+	{
+		if (m_triangles > 0) {
+			// Builded already.
+			return;
+		}
+
+		param.primid = shapes[0]->faces[0]->id;
+
+		param.area = 0;
+		m_triangles = 0;
+
+		for (const auto s : shapes) {
+			s->build();
+
+			m_triangles += (uint32_t)s->faces.size();
+		}
+
+		param.primnum = m_triangles;
+	}
+
 	bool object::hit(
 		const aten::ray& r,
 		real t_min, real t_max,
@@ -160,6 +181,13 @@ namespace AT_NAME
 
 		for (auto s : shapes) {
 			s->draw(func, mtxL2W, mtxPrevL2W, objid);
+		}
+	}
+
+	void object::draw(aten::FuncObjectMeshDraw func)
+	{
+		for (auto s : shapes) {
+			s->draw(func);
 		}
 	}
 

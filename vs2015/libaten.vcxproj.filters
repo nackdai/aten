@@ -82,6 +82,9 @@
     <Filter Include="shader\ssrt">
       <UniqueIdentifier>{05918011-57d5-43e3-abd9-7fa4bcc34154}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\object">
+      <UniqueIdentifier>{8c8be517-9a29-48f4-bd6a-c92f969a9771}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -716,6 +719,12 @@
     </None>
     <None Include="..\src\shader\fullscreen_fs.glsl">
       <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\drawobj_vs.glsl">
+      <Filter>shader\object</Filter>
+    </None>
+    <None Include="..\src\shader\drawobj_fs.glsl">
+      <Filter>shader\object</Filter>
     </None>
   </ItemGroup>
 </Project>

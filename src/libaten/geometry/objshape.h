@@ -10,6 +10,8 @@
 
 namespace AT_NAME
 {
+	using FuncObjectMeshDraw = std::function<void(const aten::texture*)>;
+
 	class objshape : public aten::geombase {
 		friend class object;
 
@@ -37,6 +39,8 @@ namespace AT_NAME
 			const aten::mat4& mtxL2W,
 			const aten::mat4& mtxPrevL2W,
 			int parentId);
+
+		void draw(aten::FuncObjectMeshDraw func);
 
 		aten::GeomParameter param;
 		aten::aabb m_aabb;

@@ -7,7 +7,7 @@ layout(location = 1) in vec2 uv;
 
 uniform sampler2D s0;	// albedo.
 
-uniform bool hasAlbedo;
+uniform bool hasAlbedo = false;
 
 layout(location = 0) out vec4 outColor;
 

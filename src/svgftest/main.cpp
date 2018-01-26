@@ -163,10 +163,6 @@ void onRun()
 		&g_camera,
 		&g_fbo);
 
-	g_taa.update(
-		g_tracer.frame(),
-		g_camera);
-
 	aten::timer timer;
 	timer.begin();
 
@@ -460,6 +456,8 @@ int main()
 		aten::PixelFormat::rgba32f,
 		true);
 
+	g_taa.setMotionDepthBufferHandle(g_fbo.getTexHandle(1));
+
 	aten::vec3 pos, at;
 	real vfov;
 	Scene::getCameraPosAndAt(pos, at, vfov);
@@ -496,8 +494,6 @@ int main()
 		auto aabb = g_scene.getAccel()->getBoundingbox();
 		auto d = aabb.getDiagonalLenght();
 		g_tracer.setHitDistanceLimit(d * 0.25f);
-
-		g_tracer.setAovExportBuffer(g_taa.getAovGLTexHandle());
 
 		std::vector<aten::GeomParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;

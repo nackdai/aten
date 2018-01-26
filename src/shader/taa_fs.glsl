@@ -4,17 +4,12 @@ precision highp int;
 
 uniform sampler2D s0;	// current frame.
 uniform sampler2D s1;	// previous frame.
-uniform sampler2D s2;	// aov.
+uniform sampler2D s2;	// motion depth buffer.
 
 uniform float blurSize = 0.2;
 
 uniform bool enableTAA = true;
 uniform bool showDiff = false;
-
-uniform mat4 mtxC2V;
-uniform mat4 mtxV2W;
-uniform mat4 mtxPrevW2V;
-uniform mat4 mtxV2C;
 
 // output colour for the fragment
 layout(location = 0) out highp vec4 oBuffer;
@@ -121,49 +116,6 @@ vec4 sampleColor(sampler2D s, vec2 uv)
 	return clr;
 }
 
-vec4 computePrevScreenPos(
-	vec2 uv,
-	float centerDepth)
-{
-	// NOTE
-	// Pview = (Xview, Yview, Zview, 1)
-	// mtxV2C = W 0 0  0
-	//          0 H 0  0
-	//          0 0 A  B
-	//          0 0 -1 0
-	// mtxV2C * Pview = (Xclip, Yclip, Zclip, Wclip) = (Xclip, Yclip, Zclip, Zview)
-	//  Wclip = Zview = depth
-	// Xscr = Xclip / Wclip = Xclip / Zview = Xclip / depth
-	// Yscr = Yclip / Wclip = Yclip / Zview = Yclip / depth
-	//
-	// Xscr * depth = Xclip
-	// Xview = mtxC2V * Xclip
-
-	uv = uv * 2.0 - 1.0;	// [0, 1] -> [-1, 1]
-
-	vec4 pos = vec4(uv.x, uv.y, 0, 0);
-
-	// Screen-space -> Clip-space.
-	pos.x *= centerDepth;
-	pos.y *= centerDepth;
-
-	// Clip-space -> View-space
-	pos = mtxC2V * pos;
-	pos.z = -centerDepth;
-	pos.w = 1.0;
-
-	pos = mtxV2W * pos;
-
-	// Reproject previous screen position.
-	pos = mtxPrevW2V * pos;
-	vec4 prevPos = mtxV2C * pos;
-	prevPos /= prevPos.w;
-
-	prevPos = prevPos * 0.5 + 0.5;	// [-1, 1] -> [0, 1]
-
-	return prevPos;
-}
-
 void main()
 {
 	// http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
@@ -184,7 +136,7 @@ void main()
 		return;
 	}
 
-	float center_depth = texture2D(s2, uv).w;
+	float center_depth = texture2D(s2, uv).z;
 	if (center_depth < 0) {
 		oBuffer = texture2D(s0, uv);
 		oBuffer.a = 1;
@@ -237,15 +189,14 @@ void main()
 #else
 			offset *= invScr;
 
-			float depth = texture2D(s2, uv + offset).w;
+			vec3 motiondepth = texture2D(s2, uv + offset).xyz;
+			float depth = motiondepth.z;
 
 			if (depth < 0) {
 				continue;
 			}
 
-			vec4 prevPos = computePrevScreenPos(uv + offset, depth);
-
-			vec2 velocity = prevPos.xy - (uv.xy + offset.xy);
+			vec2 velocity = motiondepth.xy;
 
 			float len2 = dot(velocity, velocity) + 1e-6f;
 			velocity /= len2;

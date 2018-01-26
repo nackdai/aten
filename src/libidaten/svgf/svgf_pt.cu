@@ -264,7 +264,6 @@ __global__ void hitTest(
 
 template <bool isFirstBounce>
 __global__ void shadeMiss(
-	cudaSurfaceObject_t aovExportBuffer,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -296,14 +295,6 @@ __global__ void shadeMiss(
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
-
-			if (aovExportBuffer > 0) {
-				surf2Dwrite(
-					aovNormalDepth[idx],
-					aovExportBuffer,
-					ix * sizeof(float4), iy,
-					cudaBoundaryModeTrap);
-			}
 		}
 
 		path.contrib += path.throughput * bg;
@@ -314,7 +305,6 @@ __global__ void shadeMiss(
 
 template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
-	cudaSurfaceObject_t aovExportBuffer,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -356,14 +346,6 @@ __global__ void shadeMissWithEnvmap(
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
-
-			if (aovExportBuffer > 0) {
-				surf2Dwrite(
-					aovNormalDepth[idx],
-					aovExportBuffer,
-					ix * sizeof(float4), iy,
-					cudaBoundaryModeTrap);
-			}
 		}
 		else {
 			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
@@ -383,7 +365,6 @@ __global__ void shade(
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
-	cudaSurfaceObject_t aovExportBuffer,
 	aten::mat4 mtxW2C,
 	int width, int height,
 	idaten::SVGFPathTracing::Path* paths,
@@ -497,14 +478,6 @@ __global__ void shade(
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
-
-		if (aovExportBuffer > 0) {
-			surf2Dwrite(
-				aovNormalDepth[idx],
-				aovExportBuffer,
-				ix * sizeof(float4), iy,
-				cudaBoundaryModeTrap);
-		}
 	}
 
 	// Implicit conection to light.
@@ -961,8 +934,7 @@ namespace idaten
 
 	void SVGFPathTracing::onShadeMiss(
 		int width, int height,
-		int bounce,
-		cudaSurfaceObject_t aovExportBuffer)
+		int bounce)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -974,7 +946,6 @@ namespace idaten
 		if (m_envmapRsc.idx >= 0) {
 			if (bounce == 0) {
 				shadeMissWithEnvmap<true> << <grid, block >> > (
-					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -986,7 +957,6 @@ namespace idaten
 			}
 			else {
 				shadeMissWithEnvmap<false> << <grid, block >> > (
-					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1000,7 +970,6 @@ namespace idaten
 		else {
 			if (bounce == 0) {
 				shadeMiss<true> << <grid, block >> > (
-					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1009,7 +978,6 @@ namespace idaten
 			}
 			else {
 				shadeMiss<false> << <grid, block >> > (
-					aovExportBuffer,
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -1023,7 +991,6 @@ namespace idaten
 
 	void SVGFPathTracing::onShade(
 		cudaSurfaceObject_t outputSurf,
-		cudaSurfaceObject_t aovExportBuffer,
 		int hitcount,
 		int width, int height,
 		int bounce, int rrBounce,
@@ -1064,7 +1031,6 @@ namespace idaten
 				m_aovNormalDepth[curaov].ptr(),
 				m_aovTexclrTemporalWeight[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
-				aovExportBuffer,
 				mtxW2C,
 				width, height,
 				m_paths.ptr(),
@@ -1089,7 +1055,6 @@ namespace idaten
 				m_aovNormalDepth[curaov].ptr(),
 				m_aovTexclrTemporalWeight[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
-				aovExportBuffer,
 				mtxW2C,
 				width, height,
 				m_paths.ptr(),

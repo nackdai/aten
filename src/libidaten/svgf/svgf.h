@@ -103,8 +103,6 @@ namespace idaten
 			const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 			const std::vector<aten::mat4>& mtxs);
 
-		void setAovExportBuffer(GLuint gltexId);
-
 		void setGBuffer(
 			GLuint gltexGbuffer,
 			GLuint gltexMotionDepthbuffer);
@@ -186,12 +184,10 @@ namespace idaten
 
 		virtual void onShadeMiss(
 			int width, int height,
-			int bounce,
-			cudaSurfaceObject_t aovExportBuffer);
+			int bounce);
 
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,
-			cudaSurfaceObject_t aovExportBuffer,
 			int hitcount,
 			int width, int height,
 			int bounce, int rrBounce,
@@ -281,9 +277,6 @@ namespace idaten
 
 		// Distance limitation to kill path.
 		float m_hitDistLimit{ AT_MATH_INF };
-
-		// AOV buffer to use in OpenGL.
-		idaten::CudaGLSurface m_aovGLBuffer;
 
 		// G-Buffer rendered by OpenGL.
 		idaten::CudaGLSurface m_gbuffer;

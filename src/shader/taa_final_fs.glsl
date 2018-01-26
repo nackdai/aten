@@ -3,7 +3,6 @@ precision highp float;
 precision highp int;
 
 uniform sampler2D s0;
-uniform sampler2D s1;	// aov.
 
 // output colour for the fragment
 layout(location = 0) out highp vec4 oColor;

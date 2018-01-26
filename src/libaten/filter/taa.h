@@ -17,10 +17,6 @@ namespace aten {
 			const char* taaVsPath, const char* taaFsPath,
 			const char* finalVsPath, const char* finalFsPath);
 
-		void update(
-			uint32_t frame,
-			const PinholeCamera& cam);
-
 		virtual PixelFormat inFormat() const override final
 		{
 			return PixelFormat::rgba32f;
@@ -36,9 +32,9 @@ namespace aten {
 			return m_final.getFbo();
 		}
 
-		uint32_t getAovGLTexHandle() const
+		void setMotionDepthBufferHandle(uint32_t handle)
 		{
-			return m_aovTex.getGLTexHandle();
+			m_motionDepthBuffer = handle;
 		}
 
 		void enableTAA(bool e)
@@ -110,15 +106,7 @@ namespace aten {
 		TAAPass m_taa;
 		FinalPass m_final;
 
-		texture m_aovTex;
-
-		aten::mat4 m_mtxW2V;		// World - View.
-		aten::mat4 m_mtxV2C;		// View - Clip.
-		aten::mat4 m_mtxC2V;		// Clip - View.
-
-		// View - World.
-		aten::mat4 m_mtxV2W;
-		aten::mat4 m_mtxPrevW2V;
+		uint32_t m_motionDepthBuffer{ 0 };
 
 		int m_idx{ 0 };
 

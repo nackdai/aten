@@ -84,11 +84,6 @@ namespace idaten
 		}
 	}
 
-	void SVGFPathTracing::setAovExportBuffer(GLuint gltexId)
-	{
-		m_aovGLBuffer.init(gltexId, CudaGLRscRegisterType::WriteOnly);
-	}
-
 	void SVGFPathTracing::setGBuffer(
 		GLuint gltexGbuffer,
 		GLuint gltexMotionDepthbuffer)
@@ -148,12 +143,6 @@ namespace idaten
 			m_tex.writeByNum(&tmp[0], tmp.size());
 		}
 
-		cudaSurfaceObject_t aovExportBuffer = 0;
-		if (m_aovGLBuffer.isValid()) {
-			m_aovGLBuffer.map();
-			aovExportBuffer = m_aovGLBuffer.bind();
-		}
-
 		static const int rrBounce = 3;
 
 		// Set bounce count to 1 forcibly, aov render mode.
@@ -180,7 +169,7 @@ namespace idaten
 					bounce,
 					vtxTexPos);
 				
-				onShadeMiss(width, height, bounce, aovExportBuffer);
+				onShadeMiss(width, height, bounce);
 
 				int hitcount = 0;
 				idaten::Compaction::compact(
@@ -196,7 +185,6 @@ namespace idaten
 
 				onShade(
 					outputSurf,
-					aovExportBuffer,
 					hitcount,
 					width, height,
 					bounce, rrBounce,
@@ -245,11 +233,6 @@ namespace idaten
 				m_texRsc[i].unbind();
 			}
 			m_tex.reset();
-		}
-
-		if (m_aovGLBuffer.isValid()) {
-			m_aovGLBuffer.unbind();
-			m_aovGLBuffer.unmap();
 		}
 	}
 }

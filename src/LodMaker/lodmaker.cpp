@@ -63,6 +63,10 @@ static void computeAverage(qit start, qit end)
 	pos.w = real(1);
 	nml = normalize(nml);
 
+	// NOTE
+	// z is used for checking to compute plane normal in real-time.
+	uv.z = uv.z >= 0 ? 1 : 0;
+
 	// ŒvŽZŒ‹‰Ê‚ð–ß‚·...
 	for (auto q = start; q != end; q++) {
 		q->v.pos = pos;

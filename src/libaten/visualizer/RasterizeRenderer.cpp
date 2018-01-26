@@ -58,6 +58,25 @@ namespace aten {
 
 		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
+		// TODO
+		// For TAA.
+		{
+			CMJ sampler;
+			auto rnd = getRandom(frame);
+			auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+			sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 300, scramble);
+
+			auto smpl = sampler.nextSample2D();
+
+			aten::mat4 mtxOffset;
+			mtxOffset.asTrans(aten::vec3(
+				smpl.x / m_width,
+				smpl.y / m_height,
+				real(0)));
+
+			mtxW2C = mtxOffset * mtxW2C;
+		}
+
 		if (m_mtxPrevW2C.isIdentity()) {
 			m_mtxPrevW2C = mtxW2C;
 		}
@@ -73,26 +92,6 @@ namespace aten {
 		aten::vec4 invScreen(1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f);
 		auto hInvScr = m_shader.getHandle("invScreen");
 		CALL_GL_API(::glUniform4fv(hInvScr, 1, invScreen.p));
-
-		// TODO
-		// For TAA.
-		{
-			CMJ sampler;
-			auto rnd = getRandom(frame);
-			auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-			sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 300, scramble);
-
-			auto smpl = sampler.nextSample2D();
-
-			aten::mat4 mtxOffset;
-			mtxOffset.asTrans(aten::vec3(
-				smpl.x / m_width, 
-				smpl.y / m_height, 
-				real(0)));
-
-			auto hMtxOffset = m_shader.getHandle("mtxOffset");
-			CALL_GL_API(::glUniformMatrix4fv(hMtxOffset, 1, GL_TRUE, &mtxOffset.a[0]));
-		}
 
 		if (fbo) {
 			AT_ASSERT(fbo->isValid());

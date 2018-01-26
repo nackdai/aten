@@ -10,7 +10,6 @@ uniform mat4 mtxW2C;
 uniform mat4 mtxPrevW2C;
 uniform int objid;
 uniform int primid;
-uniform mat4 mtxOffset;
 
 in vec3 worldNormal[3];
 in vec2 vUV[3];
@@ -36,7 +35,7 @@ const vec3 weight[3] = {
 void main()
 {
 	for (int i = 0; i < gl_in.length(); i++) {
-		gl_Position = mtxOffset * mtxW2C * gl_in[i].gl_Position;
+		gl_Position = mtxW2C * gl_in[i].gl_Position;
 
 		prevCSPos = mtxPrevW2C * prevWorldPos[i];
 

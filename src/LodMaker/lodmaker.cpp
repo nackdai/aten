@@ -34,6 +34,40 @@ struct QVertex {
 // NOTE
 // gridX * gridY * gridZ ‚ª uint64_t ‚ð’´‚¦‚È‚¢‚æ‚¤‚É‚·‚é
 
+using qit = std::vector<QVertex>::iterator;
+
+static void computeAverage(qit start, qit end)
+{
+	aten::vec3 pos(start->v.pos);
+	aten::vec3 nml(start->v.nml);
+	aten::vec3 uv(start->v.uv);
+
+	uint32_t cnt = 1;
+
+	for (auto q = start + 1; q != end; q++) {
+		pos += q->v.pos;
+		nml += q->v.nml;
+		uv += q->v.uv;
+
+		cnt++;
+	}
+
+	real div = real(1) / cnt;
+
+	pos *= div;
+	nml *= div;
+	uv *= div;
+
+	nml = normalize(nml);
+
+	// ŒvŽZŒ‹‰Ê‚ð–ß‚·...
+	for (auto q = start; q != end; q++) {
+		q->v.pos = pos;
+		q->v.nml = nml;
+		q->v.uv = uv;
+	}
+}
+
 void LodMaker::make(
 	std::vector<aten::vertex>& dstVertices,
 	std::vector<std::vector<int>>& dstIndices,
@@ -122,6 +156,7 @@ void LodMaker::make(
 
 			// TODO
 			// •½‹ÏŒvŽZ.
+			computeAverage(start, end);
 
 			for (auto q = start; q != end; q++) {
 				if (q == start) {

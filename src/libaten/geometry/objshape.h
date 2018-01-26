@@ -40,7 +40,7 @@ namespace AT_NAME
 			const aten::mat4& mtxPrevL2W,
 			int parentId);
 
-		void draw(aten::FuncObjectMeshDraw func);
+		void draw(AT_NAME::FuncObjectMeshDraw func);
 
 		aten::GeomParameter param;
 		aten::aabb m_aabb;

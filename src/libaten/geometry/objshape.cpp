@@ -74,7 +74,7 @@ namespace AT_NAME
 		m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
 	}
 
-	void objshape::draw(aten::FuncObjectMeshDraw func)
+	void objshape::draw(AT_NAME::FuncObjectMeshDraw func)
 	{
 		if (func) {
 			int albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;

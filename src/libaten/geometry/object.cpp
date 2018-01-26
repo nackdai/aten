@@ -184,7 +184,7 @@ namespace AT_NAME
 		}
 	}
 
-	void object::draw(aten::FuncObjectMeshDraw func)
+	void object::draw(AT_NAME::FuncObjectMeshDraw func)
 	{
 		for (auto s : shapes) {
 			s->draw(func);

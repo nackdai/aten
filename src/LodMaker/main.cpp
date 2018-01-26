@@ -1,6 +1,8 @@
 #include "aten.h"
 #include "atenscene.h"
 
+#include "lodmaker.h"
+
 #include <cmdline.h>
 
 static const int WIDTH = 1280;
@@ -185,6 +187,7 @@ bool parseOption(
 // TODO
 aten::object* loadObj()
 {
+#if 0
 	auto SP_LUK = aten::ImageLoader::load("../../asset/sponza/sp_luk.JPG");
 	auto SP_LUK_nml = aten::ImageLoader::load("../../asset/sponza/sp_luk-nml.png");
 
@@ -296,6 +299,16 @@ aten::object* loadObj()
 	std::vector<aten::object*> objs;
 
 	aten::ObjLoader::load(objs, "../../asset/sponza/sponza.obj");
+#else
+	std::vector<aten::object*> objs;
+
+	aten::AssetManager::registerMtrl(
+		"wire_087224198",
+		//new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+		new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+
+	aten::ObjLoader::load(objs, "../../asset/dragon/dragon.obj");
+#endif
 
 	// NOTE
 	// ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
@@ -336,8 +349,8 @@ int main(int argc, char* argv[])
 	g_obj->buildForRasterizeRendering();
 
 	// TODO
-	aten::vec3 pos(0, 0, 10);
-	aten::vec3 at(0, 0, 1);
+	aten::vec3 pos(0, 1, 10);
+	aten::vec3 at(0, 1, 1);
 	real vfov = real(45);
 
 	g_camera.init(

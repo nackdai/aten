@@ -364,8 +364,8 @@ namespace aten {
 	}
 
 	void RasterizeRenderer::draw(
-		std::vector<vertex>& vtxs,
-		std::vector<std::vector<int>>& idxs,
+		const std::vector<vertex>& vtxs,
+		const std::vector<std::vector<int>>& idxs,
 		const std::vector<material*>& mtrls,
 		const camera* cam,
 		bool isWireFrame,

@@ -222,8 +222,9 @@ namespace AT_NAME
 		return m_accel->importTree(path);
 	}
 
-	void object::gatherTriangles(
-		std::vector<std::vector<AT_NAME::face*>>& tris)
+	void object::gatherTrianglesAndMaterials(
+		std::vector<std::vector<AT_NAME::face*>>& tris,
+		std::vector<AT_NAME::material*>& mtrls)
 	{
 		tris.resize(shapes.size());
 
@@ -233,6 +234,8 @@ namespace AT_NAME
 			for (auto face : shape->faces) {
 				tris[i].push_back(face);
 			}
+
+			mtrls.push_back(shape->m_mtrl);
 		}
 	}
 }

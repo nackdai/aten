@@ -366,10 +366,13 @@ namespace aten {
 	void RasterizeRenderer::draw(
 		std::vector<vertex>& vtxs,
 		std::vector<std::vector<int>>& idxs,
+		const std::vector<material*>& mtrls,
 		const camera* cam,
 		bool isWireFrame,
 		bool updateBuffer)
 	{
+		AT_ASSERT(idxs.size() == mtrls.size());
+
 		auto camparam = cam->param();
 
 		// TODO
@@ -447,9 +450,24 @@ namespace aten {
 			}
 		}
 
+		auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
+
 		for (int i = 0; i < m_ib.size(); i++) {
 			auto triNum = (uint32_t)idxs[i].size() / 3;
 			if (triNum > 0) {
+				auto m = mtrls[i];
+				
+				int albedoTexId = m ? m->param().albedoMap : -1;
+				const aten::texture* albedo = albedoTexId >= 0 ? aten::texture::getTexture(albedoTexId) : nullptr;
+
+				if (albedo) {
+					albedo->bindAsGLTexture(0, &m_shader);
+					CALL_GL_API(::glUniform1i(hHasAlbedo, true));
+				}
+				else {
+					CALL_GL_API(::glUniform1i(hHasAlbedo, false));
+				}
+
 				m_ib[i].draw(m_vb, aten::Primitive::Triangles, 0, triNum);
 			}
 		}

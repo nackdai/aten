@@ -9,12 +9,10 @@
 // TASKS
 // * imgui
 //    背景色
-//    グリッド数
 //    出力ボタン
 // * オリジナルの頂点データを使いたいので、最終的なインデックスもオリジナルの頂点配列のインデックスとマッチするようにする
 //     これはダメで、いまの方法だと新しい頂点を生成しているから意味がない
 // * LOD処理をワーカースレッドで動かす
-//     LOD処理が終わるまではその前の結果を表示
 //     LOD処理のOpenMP対応
 //         ワーカースレッド内でさらにOpenMPってできるのか？
 // * マテリアルの外部ファイル指定(XML)対応
@@ -30,6 +28,7 @@ static aten::RasterizeRenderer g_rasterizer;
 static aten::object* g_obj = nullptr;
 
 static std::vector<std::vector<aten::face*>> g_triangles;
+static std::vector<aten::material*> g_mtrls;
 
 static LodMaker g_lodmaker;
 static std::vector<aten::vertex> g_lodVtx;
@@ -76,6 +75,7 @@ void onRun()
 		g_rasterizer.draw(
 			g_lodVtx,
 			g_lodIdx,
+			g_mtrls,
 			&g_camera,
 			g_isWireFrame,
 			g_isUpdateBuffer);
@@ -278,7 +278,7 @@ bool parseOption(
 // TODO
 aten::object* loadObj()
 {
-#if 0
+#if 1
 	auto SP_LUK = aten::ImageLoader::load("../../asset/sponza/sp_luk.JPG");
 	auto SP_LUK_nml = aten::ImageLoader::load("../../asset/sponza/sp_luk-nml.png");
 
@@ -445,7 +445,7 @@ int main(int argc, char* argv[])
 		auto stride = sizeof(aten::vertex);
 		auto vtxNum = (uint32_t)vtxs.size();
 
-		g_obj->gatherTriangles(g_triangles);
+		g_obj->gatherTrianglesAndMaterials(g_triangles, g_mtrls);
 
 		std::vector<uint32_t> idxNums;
 

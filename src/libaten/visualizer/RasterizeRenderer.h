@@ -53,6 +53,7 @@ namespace aten {
 		void draw(
 			std::vector<vertex>& vtxs,
 			std::vector<std::vector<int>>& idxs,
+			const std::vector<material*>& mtrls,
 			const camera* cam,
 			bool isWireFrame,
 			bool updateBuffer);

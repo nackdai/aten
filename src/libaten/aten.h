@@ -41,6 +41,7 @@
 #include "misc/omputil.h"
 #include "misc/value.h"
 #include "misc/stream.h"
+#include "misc/thread.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"

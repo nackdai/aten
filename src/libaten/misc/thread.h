@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <mutex>
 #include <atomic>
 
 #include "defs.h"
@@ -38,11 +39,7 @@ namespace aten
             std::function<void(void*)> func,
             void* userData);
 
-        /** このスレッドの実行を開始.
-         */
-        virtual bool start();
-
-        /** スレッド実行中かどうかを取得.
+		/** スレッド実行中かどうかを取得.
          */
         bool isRunning();
 
@@ -68,4 +65,29 @@ namespace aten
         std::function<void(void*)> m_func{ nullptr };
         void* m_userData{ nullptr };
     };
+
+	/////////////////////////////////////////////////////////
+
+	/** セマフォ.
+	*/
+	class Semaphore {
+	public:
+		Semaphore();
+		~Semaphore();
+
+	public:
+		/** 待機.
+		*/
+		void wait();
+
+		/** セマフォカウントを解放.
+		*/
+		void notify();
+
+	private:
+		std::mutex m_mutex;
+		std::condition_variable m_condVar;
+
+		uint16_t m_count;
+	};
 }

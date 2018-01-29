@@ -43,15 +43,6 @@ namespace aten
 		return true;
 	}
 
-	// このスレッドの実行を開始.
-	bool Thread::start()
-	{
-		m_isRunning = true;
-		m_thread = std::thread([this] { run(); });
-
-		return true;
-	}
-
 	// スレッド実行中かどうかを取得.
 	bool Thread::isRunning()
 	{
@@ -79,5 +70,38 @@ namespace aten
 	const char* Thread::getName() const
 	{
 		return m_Name.c_str();
+	}
+
+	/////////////////////////////////////////////////////////
+
+	Semaphore::Semaphore()
+	{
+		m_count = 0;
+	}
+
+	Semaphore::~Semaphore()
+	{
+		AT_ASSERT(m_count == 0);
+	}
+
+	// 待機.
+	void Semaphore::wait()
+	{
+		std::unique_lock<std::mutex> lock(m_mutex);
+
+		m_condVar.wait(lock, [this] { return (m_count > 0); });
+
+		--m_count;
+	}
+
+	// セマフォカウントを解放.
+	void Semaphore::notify()
+	{
+		// もし、セマフォが非シグナル状態ならセマフォをシグナル状態にする
+		std::lock_guard<std::mutex> lock(m_mutex);
+
+		m_count++;
+
+		m_condVar.notify_one();
 	}
 }

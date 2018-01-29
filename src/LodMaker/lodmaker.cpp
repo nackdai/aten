@@ -127,8 +127,14 @@ void LodMaker::make(
 		(gridY - 1) / range.y,
 		(gridZ - 1) / range.z);
 
-	std::vector<std::vector<QVertex>> qvtxs(triGroups.size());
-	std::vector<std::vector<uint32_t>> sortedIndices(triGroups.size());
+	static std::vector<std::vector<QVertex>> qvtxs;
+	static std::vector<std::vector<uint32_t>> sortedIndices;
+
+	qvtxs.clear();
+	qvtxs.resize(triGroups.size());
+
+	sortedIndices.clear();
+	sortedIndices.resize(triGroups.size());
 
 	for (uint32_t i = 0; i < triGroups.size(); i++) {
 		const auto tris = triGroups[i];
@@ -284,4 +290,87 @@ void LodMaker::removeCollapsedTriangles(
 			}
 		}
 	}
+}
+
+bool LodMaker::runOnThread(
+	std::function<void()> funcFinish,
+	std::vector<aten::vertex>& dstVertices,
+	std::vector<std::vector<int>>& dstIndices,
+	const aten::aabb& bound,
+	const std::vector<aten::vertex>& vertices,
+	const std::vector<std::vector<aten::face*>>& tris,
+	int gridX,
+	int gridY,
+	int gridZ)
+{
+	if (m_isRunning) {
+		// Not finish yet.
+		return false;
+	}
+
+	if (m_param) {
+		delete m_param;
+		m_param = nullptr;
+	}
+	m_param = new LodParams(funcFinish, dstVertices, dstIndices, bound, vertices, tris, gridX, gridY, gridZ);
+
+	static std::vector<std::vector<int>> tmpIdx;
+
+	if (!m_thread.isRunning()) {
+		m_thread.start([&](void* data) {
+			while (1) {
+				m_sema.wait();
+
+				if (m_isTerminate) {
+					break;
+				}
+
+				tmpIdx.clear();
+
+				make(
+					m_param->dstVertices,
+					tmpIdx,
+					m_param->bound,
+					m_param->vertices,
+					m_param->tris,
+					m_param->gridX,
+					m_param->gridY,
+					m_param->gridZ);
+
+				removeCollapsedTriangles(
+					m_param->dstIndices,
+					m_param->dstVertices,
+					tmpIdx);
+
+				if (m_param->funcFinish) {
+					m_param->funcFinish();
+				}
+
+				m_isRunning = false;
+			}
+
+		}, nullptr);
+	}
+
+	dstVertices.clear();
+
+	for (auto ids : dstIndices) {
+		ids.clear();
+	}
+	dstIndices.clear();
+
+	m_isRunning = true;
+	m_sema.notify();
+
+	return true;
+}
+
+void LodMaker::terminate()
+{
+	m_isTerminate = true;
+
+	// Awake thread, maybe thread does not run.
+	m_sema.notify();
+
+	m_thread.join();
 }

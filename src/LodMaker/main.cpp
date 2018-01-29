@@ -29,15 +29,22 @@ static aten::RasterizeRenderer g_rasterizer;
 
 static aten::object* g_obj = nullptr;
 
-std::vector<std::vector<aten::face*>> g_triangles;
+static std::vector<std::vector<aten::face*>> g_triangles;
 
+static LodMaker g_lodmaker;
 static std::vector<aten::vertex> g_lodVtx;
 static std::vector<std::vector<int>> g_lodIdx;
+
+static int g_GridX = 16;
+static int g_GridY = 16;
+static int g_GridZ = 16;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
+static uint32_t g_lodTriCnt = 0;
 static bool g_isWireFrame = true;
+static bool g_isUpdateBuffer = false;
 static bool g_displayLOD = true;
 
 static bool g_willShowGUI = true;
@@ -61,23 +68,34 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
-	if (g_displayLOD) {
+	bool canDisplayLod = g_displayLOD
+		&& !g_lodmaker.isRunningThread()
+		&& !g_lodIdx.empty();
+
+	if (canDisplayLod) {
 		g_rasterizer.draw(
 			g_lodVtx,
 			g_lodIdx,
 			&g_camera,
-			g_isWireFrame);
+			g_isWireFrame,
+			g_isUpdateBuffer);
+
+		g_isUpdateBuffer = false;
 	}
 	else {
 		g_rasterizer.draw(g_obj, &g_camera, g_isWireFrame);
 	}
 
 	{
-		uint32_t lodTriCnt = 0;
+		if (!g_lodmaker.isRunningThread()
+			&& !g_lodIdx.empty())
+		{
+			g_lodTriCnt = 0;
 
-		for (auto ids : g_lodIdx) {
-			uint32_t cnt = ids.size();
-			lodTriCnt += cnt / 3;
+			for (auto ids : g_lodIdx) {
+				uint32_t cnt = ids.size();
+				g_lodTriCnt += cnt / 3;
+			}
 		}
 
 		uint32_t orgTriCnt = 0;
@@ -87,11 +105,32 @@ void onRun()
 		}
 
 		ImGui::Text("Org Polygon [%d]", orgTriCnt);
-		ImGui::Text("LOD Polygon [%d]", lodTriCnt);
-		ImGui::Text("Collapsed [%.3f]%%", lodTriCnt / (float)orgTriCnt * 100.0f);
+		ImGui::Text("LOD Polygon [%d]", g_lodTriCnt);
+		ImGui::Text("Collapsed [%.3f]%%", g_lodTriCnt / (float)orgTriCnt * 100.0f);
 
 		ImGui::Checkbox("Display LOD", &g_displayLOD);
 		ImGui::Checkbox("Wireframe", &g_isWireFrame);
+
+		ImGui::SliderInt("Grid X", &g_GridX, 4, 1024);
+		ImGui::SliderInt("Grid Y", &g_GridY, 4, 1024);
+		ImGui::SliderInt("Grid Z", &g_GridZ, 4, 1024);
+
+		if (!g_lodmaker.isRunningThread()) {
+			auto& vtxs = aten::VertexManager::getVertices();
+
+			if (ImGui::Button("Make LOD")) {
+				g_lodmaker.runOnThread(
+					[&]() { g_isUpdateBuffer = true;  },
+					g_lodVtx, g_lodIdx,
+					g_obj->getBoundingbox(),
+					vtxs, g_triangles,
+					g_GridX, g_GridY, g_GridZ);
+			}
+		}
+		else {
+			ImGui::Text("Makeing LOD...");
+		}
+
 
 		aten::window::drawImGui();
 	}
@@ -400,24 +439,22 @@ int main(int argc, char* argv[])
 
 	g_obj->buildForRasterizeRendering();
 
-	// LOD
 	{
 		auto& vtxs = aten::VertexManager::getVertices();
 
+		auto stride = sizeof(aten::vertex);
+		auto vtxNum = (uint32_t)vtxs.size();
+
 		g_obj->gatherTriangles(g_triangles);
 
-		std::vector<std::vector<int>> tmpIdx;
+		std::vector<uint32_t> idxNums;
 
-		LodMaker::make(
-			g_lodVtx, tmpIdx,
-			g_obj->getBoundingbox(),
-			vtxs, g_triangles,
-			16, 16, 16);
+		for (int i = 0; i < g_triangles.size(); i++) {
+			auto triNum = (uint32_t)g_triangles[i].size();
+			idxNums.push_back(triNum * 3);
+		}
 
-		LodMaker::removeCollapsedTriangles(
-			g_lodIdx,
-			g_lodVtx,
-			tmpIdx);
+		g_rasterizer.initBuffer(stride, vtxNum, idxNums);
 	}
 
 	// TODO
@@ -438,6 +475,8 @@ int main(int argc, char* argv[])
 		"../shader/drawobj_fs.glsl");
 
 	aten::window::run(onRun);
+
+	g_lodmaker.terminate();
 
 	aten::window::terminate();
 

@@ -5,6 +5,7 @@ struct QVertex {
 	uint32_t idx;
 	uint32_t orgIdx;
 	uint32_t grid[3];
+	int group;
 	uint64_t hash;
 
 	QVertex() {}
@@ -13,11 +14,13 @@ struct QVertex {
 		aten::vertex _v, 
 		uint32_t i, 
 		uint32_t original,
+		int g,
 		uint64_t h,
 		uint32_t gx, uint32_t gy, uint32_t gz)
 		: v(_v), idx(i), hash(h)
 	{
 		orgIdx = original;
+		group = g;
 		grid[0] = gx;
 		grid[1] = gy;
 		grid[2] = gz;
@@ -28,6 +31,7 @@ struct QVertex {
 		v = rhs.v;
 		idx = rhs.idx;
 		orgIdx = rhs.orgIdx;
+		group = rhs.group;
 		grid[0] = rhs.grid[0];
 		grid[1] = rhs.grid[1];
 		grid[2] = rhs.grid[2];
@@ -131,21 +135,18 @@ void LodMaker::make(
 		(gridY - 1) / range.y,
 		(gridZ - 1) / range.z);
 
-	static std::vector<std::vector<QVertex>> qvtxs;
-	static std::vector<std::vector<uint32_t>> sortedIndices;
+	static std::vector<QVertex> qvtxs;
+	static std::vector<uint32_t> sortedIndices;
 
 	qvtxs.clear();
-	qvtxs.resize(triGroups.size());
-
 	sortedIndices.clear();
-	sortedIndices.resize(triGroups.size());
+
+	uint32_t orderIdx = 0;
+
+	// グループに分かれているデータを線形リストに格納する.
 
 	for (uint32_t i = 0; i < triGroups.size(); i++) {
 		const auto tris = triGroups[i];
-
-		qvtxs[i].reserve(tris.size());
-
-		uint32_t orderIdx = 0;
 
 		for (uint32_t n = 0; n < tris.size(); n++) {
 			const auto tri = tris[n];
@@ -162,9 +163,9 @@ void LodMaker::make(
 
 				uint64_t hash = gz * (gridX * gridY) + gy * gridX + gx;
 
-				qvtxs[i].push_back(QVertex(v, orderIdx, vtxIdx, hash, gx, gy, gz));
+				qvtxs.push_back(QVertex(v, orderIdx, vtxIdx, i, hash, gx, gy, gz));
 
-				sortedIndices[i].push_back(orderIdx);
+				sortedIndices.push_back(orderIdx);
 				orderIdx++;
 			}
 		}
@@ -172,39 +173,41 @@ void LodMaker::make(
 
 	// 同じグリッドに入っている頂点の順になるようにソートする.
 
-	for (uint32_t i = 0; i < qvtxs.size(); i++)
 	{
 		std::sort(
-			qvtxs[i].begin(), qvtxs[i].end(),
+			qvtxs.begin(), qvtxs.end(),
 			[](const QVertex& q0, const QVertex& q1)
 		{
-			return q0.hash > q1.hash;
+			if (q0.hash == q1.hash) {
+				return q0.group > q1.group;
+			}
+			else {
+				return q0.hash > q1.hash;
+			}
 		});
 
-		uint32_t num = (uint32_t)qvtxs[i].size();
+		uint32_t num = (uint32_t)qvtxs.size();
 
 		// インデックスも頂点にあわせて並べ替える.
 		for (uint32_t n = 0; n < num; n++) {
-			const auto& q = qvtxs[i][n];
+			const auto& q = qvtxs[n];
 
 			// 元々のインデックスの位置に新しいインデックス値を入れる.
-			sortedIndices[i][q.idx] = n;
+			sortedIndices[q.idx] = n;
 		}
 	}
 
 	// 同じグリッド内に入っている頂点の平均値を計算して、１つの頂点にしてしまう.
 	// UVは崩れるが、所詮セカンダリバウンスに使うので、そこは気にしない.
-
-	for (uint32_t i = 0; i < qvtxs.size(); i++)
 	{
-		auto start = qvtxs[i].begin();
+		auto start = qvtxs.begin();
 
-		while (start != qvtxs[i].end())
+		while (start != qvtxs.end())
 		{
 			auto end = start;
 
 			// グリッドが異なる頂点になるまで探す.
-			while (end != qvtxs[i].end() && start->hash == end->hash) {
+			while (end != qvtxs.end() && start->hash == end->hash) {
 				end++;
 			}
 
@@ -246,28 +249,60 @@ void LodMaker::make(
 
 	dstIndices.resize(triGroups.size());
 
+	orderIdx = 0;
+	int prevGroup = -1;
+
+	// 線形にならんだインデックスをグループごとに振り分ける.
+
 	for (uint32_t i = 0; i < triGroups.size(); i++) {
 		const auto tris = triGroups[i];
 
 		dstIndices[i].reserve(tris.size() * 3);
 
-		uint32_t orderIdx = 0;
-
 		for (uint32_t n = 0; n < tris.size(); n++) {
 			const auto tri = tris[n];
 
 			for (int t = 0; t < 3; t++) {
-#if 0
-				uint32_t idx = tri->param.idx[t];
+				auto sortedIdx = sortedIndices[orderIdx];
 
-				auto sortedIdx = sortedIndices[i][idx];
-#else
-				auto sortedIdx = sortedIndices[i][orderIdx];
+				const auto& qvtx = qvtxs[sortedIdx];
+
+				if (prevGroup < 0) {
+					prevGroup = qvtx.group;
+				}
+
+				auto newIdx = qvtx.idx;
+
+				if (prevGroup == qvtx.group) {
+					dstIndices[qvtx.group].push_back(newIdx);
+				}
+				else {
+					// グループが変わった.
+
+					auto num = dstIndices[prevGroup].size();
+
+					// 三角形にするために不足している点の数.
+					auto rest = 3 - num % 3;
+
+					if (rest == 1) {
+						dstIndices[prevGroup].push_back(newIdx);
+					}
+					else if (rest == 2) {
+						dstIndices[prevGroup].push_back(newIdx);
+
+						// 次も必要.
+						auto _sortedIdx = sortedIndices[orderIdx + 1];
+						auto _newIdx = qvtxs[sortedIdx].idx;
+
+						dstIndices[prevGroup].push_back(_newIdx);
+					}
+
+					dstIndices[qvtx.group].push_back(newIdx);
+				}
+
 				orderIdx++;
-#endif
-				auto newIdx = qvtxs[i][sortedIdx].idx;
 
-				dstIndices[i].push_back(newIdx);
+				prevGroup = qvtx.group;
 			}
 		}
 	}

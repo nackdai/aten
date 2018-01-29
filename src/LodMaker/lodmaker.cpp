@@ -3,6 +3,7 @@
 struct QVertex {
 	aten::vertex v;
 	uint32_t idx;
+	uint32_t orgIdx;
 	uint32_t grid[3];
 	uint64_t hash;
 
@@ -11,10 +12,12 @@ struct QVertex {
 	QVertex(
 		aten::vertex _v, 
 		uint32_t i, 
+		uint32_t original,
 		uint64_t h,
 		uint32_t gx, uint32_t gy, uint32_t gz)
 		: v(_v), idx(i), hash(h)
 	{
+		orgIdx = original;
 		grid[0] = gx;
 		grid[1] = gy;
 		grid[2] = gz;
@@ -24,6 +27,7 @@ struct QVertex {
 	{
 		v = rhs.v;
 		idx = rhs.idx;
+		orgIdx = rhs.orgIdx;
 		grid[0] = rhs.grid[0];
 		grid[1] = rhs.grid[1];
 		grid[2] = rhs.grid[2];
@@ -141,12 +145,14 @@ void LodMaker::make(
 
 		qvtxs[i].reserve(tris.size());
 
+		uint32_t orderIdx = 0;
+
 		for (uint32_t n = 0; n < tris.size(); n++) {
 			const auto tri = tris[n];
 
 			for (int t = 0; t < 3; t++) {
-				uint32_t idx = tri->param.idx[t];
-				const auto& v = vertices[idx];
+				uint32_t vtxIdx = tri->param.idx[t];
+				const auto& v = vertices[vtxIdx];
 
 				auto grid = ((aten::vec3)v.pos - bmin) * scale + real(0.5);
 
@@ -156,7 +162,10 @@ void LodMaker::make(
 
 				uint64_t hash = gz * (gridX * gridY) + gy * gridX + gx;
 
-				qvtxs[i].push_back(QVertex(v, idx, hash, gx, gy, gz));
+				qvtxs[i].push_back(QVertex(v, orderIdx, vtxIdx, hash, gx, gy, gz));
+
+				sortedIndices[i].push_back(orderIdx);
+				orderIdx++;
 			}
 		}
 	}
@@ -173,8 +182,6 @@ void LodMaker::make(
 		});
 
 		uint32_t num = (uint32_t)qvtxs[i].size();
-
-		sortedIndices[i].resize(num);
 
 		// インデックスも頂点にあわせて並べ替える.
 		for (uint32_t n = 0; n < num; n++) {
@@ -244,13 +251,20 @@ void LodMaker::make(
 
 		dstIndices[i].reserve(tris.size() * 3);
 
+		uint32_t orderIdx = 0;
+
 		for (uint32_t n = 0; n < tris.size(); n++) {
 			const auto tri = tris[n];
 
 			for (int t = 0; t < 3; t++) {
+#if 0
 				uint32_t idx = tri->param.idx[t];
 
 				auto sortedIdx = sortedIndices[i][idx];
+#else
+				auto sortedIdx = sortedIndices[i][orderIdx];
+				orderIdx++;
+#endif
 				auto newIdx = qvtxs[i][sortedIdx].idx;
 
 				dstIndices[i].push_back(newIdx);

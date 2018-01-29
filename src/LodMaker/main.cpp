@@ -4,6 +4,21 @@
 #include "lodmaker.h"
 
 #include <cmdline.h>
+#include <imgui.h>
+
+// TASKS
+// * imgui
+//    背景色
+//    グリッド数
+//    出力ボタン
+// * オリジナルの頂点データを使いたいので、最終的なインデックスもオリジナルの頂点配列のインデックスとマッチするようにする
+//     これはダメで、いまの方法だと新しい頂点を生成しているから意味がない
+// * LOD処理をワーカースレッドで動かす
+//     LOD処理が終わるまではその前の結果を表示
+//     LOD処理のOpenMP対応
+//         ワーカースレッド内でさらにOpenMPってできるのか？
+// * マテリアルの外部ファイル指定(XML)対応
+// * シェーダ内でAlbedoマップがないときにベースカラーを利用する
 
 static const int WIDTH = 1280;
 static const int HEIGHT = 720;
@@ -14,15 +29,18 @@ static aten::RasterizeRenderer g_rasterizer;
 
 static aten::object* g_obj = nullptr;
 
+std::vector<std::vector<aten::face*>> g_triangles;
+
 static std::vector<aten::vertex> g_lodVtx;
 static std::vector<std::vector<int>> g_lodIdx;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
+static bool g_isWireFrame = true;
+static bool g_displayLOD = true;
+
 static bool g_willShowGUI = true;
-static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
@@ -43,15 +61,40 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
-#ifdef TEST_LOD
-	g_rasterizer.draw(
-		g_lodVtx,
-		g_lodIdx,
-		&g_camera,
-		true);
-#else
-	g_rasterizer.draw(g_obj, &g_camera, true);
-#endif
+	if (g_displayLOD) {
+		g_rasterizer.draw(
+			g_lodVtx,
+			g_lodIdx,
+			&g_camera,
+			g_isWireFrame);
+	}
+	else {
+		g_rasterizer.draw(g_obj, &g_camera, g_isWireFrame);
+	}
+
+	{
+		uint32_t lodTriCnt = 0;
+
+		for (auto ids : g_lodIdx) {
+			uint32_t cnt = ids.size();
+			lodTriCnt += cnt / 3;
+		}
+
+		uint32_t orgTriCnt = 0;
+
+		for (auto tris : g_triangles) {
+			orgTriCnt += tris.size();
+		}
+
+		ImGui::Text("Org Polygon [%d]", orgTriCnt);
+		ImGui::Text("LOD Polygon [%d]", lodTriCnt);
+		ImGui::Text("Collapsed [%.3f]%%", lodTriCnt / (float)orgTriCnt * 100.0f);
+
+		ImGui::Checkbox("Display LOD", &g_displayLOD);
+		ImGui::Checkbox("Wireframe", &g_isWireFrame);
+
+		aten::window::drawImGui();
+	}
 }
 
 void onClose()
@@ -109,10 +152,6 @@ void onKey(bool press, aten::Key key)
 	if (press) {
 		if (key == aten::Key::Key_F1) {
 			g_willShowGUI = !g_willShowGUI;
-			return;
-		}
-		else if (key == aten::Key::Key_F2) {
-			g_willTakeScreenShot = true;
 			return;
 		}
 	}
@@ -359,27 +398,27 @@ int main(int argc, char* argv[])
 
 	g_obj = loadObj();
 
-#ifdef TEST_LOD
-	auto& vtxs = aten::VertexManager::getVertices();
-
-	std::vector<std::vector<aten::face*>> tris;
-	g_obj->gatherTriangles(tris);
-
-	std::vector<std::vector<int>> tmpIdx;
-
-	LodMaker::make(
-		g_lodVtx, tmpIdx,
-		g_obj->getBoundingbox(),
-		vtxs, tris,
-		16, 16, 16);
-
-	LodMaker::removeCollapsedTriangles(
-		g_lodIdx,
-		g_lodVtx,
-		tmpIdx);
-#else
 	g_obj->buildForRasterizeRendering();
-#endif
+
+	// LOD
+	{
+		auto& vtxs = aten::VertexManager::getVertices();
+
+		g_obj->gatherTriangles(g_triangles);
+
+		std::vector<std::vector<int>> tmpIdx;
+
+		LodMaker::make(
+			g_lodVtx, tmpIdx,
+			g_obj->getBoundingbox(),
+			vtxs, g_triangles,
+			16, 16, 16);
+
+		LodMaker::removeCollapsedTriangles(
+			g_lodIdx,
+			g_lodVtx,
+			tmpIdx);
+	}
 
 	// TODO
 	aten::vec3 pos(0, 1, 10);

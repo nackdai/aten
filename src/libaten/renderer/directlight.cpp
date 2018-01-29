@@ -1,5 +1,5 @@
 #include "renderer/directlight.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "misc/timer.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
@@ -305,7 +305,7 @@ namespace aten
 #pragma omp parallel
 #endif
 		{
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 			auto time = timer::getSystemTime();
 

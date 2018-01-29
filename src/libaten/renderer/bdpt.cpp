@@ -1,5 +1,5 @@
 #include "renderer/bdpt.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "misc/timer.h"
 #include "material/lambert.h"
 #include "material/refraction.h"
@@ -880,7 +880,7 @@ namespace aten
 		}
 		*/
 
-		auto threadnum = thread::getThreadNum();
+		auto threadnum = OMPUtil::getThreadNum();
 
 		std::vector<std::vector<vec4>> image(threadnum);
 
@@ -892,7 +892,7 @@ namespace aten
 #pragma omp parallel
 #endif
 		{
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 			auto time = timer::getSystemTime();
 

@@ -1,5 +1,5 @@
 #include "renderer/erpt.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -175,7 +175,7 @@ namespace aten
 			m_rrDepth = m_maxDepth - 1;
 		}
 
-		auto threadNum = thread::getThreadNum();
+		auto threadNum = OMPUtil::getThreadNum();
 
 		vec3 sumI = vec3(0, 0, 0);
 
@@ -188,7 +188,7 @@ namespace aten
 #pragma omp parallel for
 #endif
 		for (int y = 0; y < height; y++) {
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 			for (int x = 0; x < width; x++) {
 				int pos = y * width + x;
@@ -217,7 +217,7 @@ namespace aten
 		for (int y = 0; y < height; y++) {
 			AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
 
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 			auto& image = acuumImage[idx];
 			if (image.empty()) {

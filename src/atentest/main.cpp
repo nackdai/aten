@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	aten::random::init();
 
 	aten::timer::init();
-	aten::thread::setThreadNum(g_threadnum);
+	aten::OMPUtil::setThreadNum(g_threadnum);
 
 	try {
 		sceneinfo = aten::SceneLoader::load(scenefile);

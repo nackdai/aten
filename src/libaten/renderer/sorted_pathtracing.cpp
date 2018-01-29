@@ -1,5 +1,5 @@
 #include "renderer/sorted_pathtracing.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "misc/timer.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"

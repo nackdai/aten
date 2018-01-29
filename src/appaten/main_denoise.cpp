@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
 	aten::initSampler();
 
 	aten::timer::init();
-	aten::thread::setThreadNum(g_threadnum);
+	aten::OMPUtil::setThreadNum(g_threadnum);
 
 	aten::window::init(WIDTH, HEIGHT, TITLE);
 

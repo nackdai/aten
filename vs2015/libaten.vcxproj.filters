@@ -131,9 +131,6 @@
     <ClInclude Include="..\src\libaten\misc\color.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\misc\thread.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\raytracing.h">
       <Filter>renderer</Filter>
     </ClInclude>
@@ -416,6 +413,9 @@
     <ClInclude Include="..\src\libaten\accelerator\sbvh.h">
       <Filter>accelerator</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\omputil.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -432,9 +432,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp">
       <Filter>hdr</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\misc\thread.cpp">
-      <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\raytracing .cpp">
       <Filter>renderer</Filter>
@@ -651,6 +648,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp">
       <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\misc\omputil.cpp">
+      <Filter>misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

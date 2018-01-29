@@ -2,7 +2,7 @@
 #include <vector>
 #include "visualizer/atengl.h"
 #include "hdr/tonemap.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 
 namespace aten
 {
@@ -18,7 +18,7 @@ namespace aten
 		int width, int height,
 		const vec4* src)
 	{
-		auto threadnum = thread::getThreadNum();
+		auto threadnum = OMPUtil::getThreadNum();
 		std::vector<real> sumY(threadnum);
 		std::vector<real> maxLum(threadnum);
 
@@ -28,7 +28,7 @@ namespace aten
 		{
 			int cnt = 0;
 
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 #ifdef ENABLE_OMP
 #pragma omp for

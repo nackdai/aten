@@ -3,7 +3,7 @@
 #include "renderer/pssmlt.h"
 #include "sampler/xorshift.h"
 #include "misc/color.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "misc/timer.h"
 
 namespace aten
@@ -211,7 +211,7 @@ namespace aten
 			m_rrDepth = m_maxDepth - 1;
 		}
 
-		auto threadNum = thread::getThreadNum();
+		auto threadNum = OMPUtil::getThreadNum();
 
 		std::vector<std::vector<vec3>> acuumImage(threadNum);
 
@@ -221,7 +221,7 @@ namespace aten
 #pragma omp parallel for
 #endif
 		for (int mi = 0; mi < mltNum; mi++) {
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 			auto& image = acuumImage[idx];
 			if (image.empty()) {

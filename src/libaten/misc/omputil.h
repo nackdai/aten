@@ -4,10 +4,10 @@
 #include "defs.h"
 
 namespace aten {
-	class thread {
+	class OMPUtil {
 	private:
-		thread() {}
-		~thread() {}
+		OMPUtil() {}
+		~OMPUtil() {}
 
 	public:
 		static void setThreadNum(uint32_t num);

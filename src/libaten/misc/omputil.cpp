@@ -1,10 +1,10 @@
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "math/math.h"
 
 namespace aten {
-	uint32_t thread::g_threadnum = 1;
+	uint32_t OMPUtil::g_threadnum = 1;
 	
-	void thread::setThreadNum(uint32_t num)
+	void OMPUtil::setThreadNum(uint32_t num)
 	{
 #ifdef ENABLE_OMP
 		auto maxThreadnum = omp_get_max_threads();
@@ -19,7 +19,7 @@ namespace aten {
 #endif
 	}
 
-	int thread::getThreadIdx()
+	int OMPUtil::getThreadIdx()
 	{
 		int idx = 0;
 #ifdef ENABLE_OMP

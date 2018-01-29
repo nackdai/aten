@@ -1,5 +1,5 @@
 #include "raytracing.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "renderer/nonphotoreal.h"
 
 namespace aten

@@ -1,5 +1,5 @@
 #include "renderer/pathtracing.h"
-#include "misc/thread.h"
+#include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/nonphotoreal.h"
 #include "sampler/xorshift.h"
@@ -463,7 +463,7 @@ namespace aten
 #pragma omp parallel
 #endif
 		{
-			auto idx = thread::getThreadIdx();
+			auto idx = OMPUtil::getThreadIdx();
 
 			auto t = timer::getSystemTime();
 

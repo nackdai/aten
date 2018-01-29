@@ -449,7 +449,9 @@ namespace aten {
 
 		for (int i = 0; i < m_ib.size(); i++) {
 			auto triNum = (uint32_t)idxs[i].size() / 3;
-			m_ib[i].draw(m_vb, aten::Primitive::Triangles, 0, triNum);
+			if (triNum > 0) {
+				m_ib[i].draw(m_vb, aten::Primitive::Triangles, 0, triNum);
+			}
 		}
 
 		// –ß‚·.

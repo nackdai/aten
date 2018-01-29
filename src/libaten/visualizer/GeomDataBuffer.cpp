@@ -152,11 +152,13 @@ namespace aten {
 
 		m_idxNum = idxNum;
 
-		CALL_GL_API(::glNamedBufferSubData(
-			m_ibo,
-			(GLintptr)0,
-			size,
-			data));
+		if (size > 0) {
+			CALL_GL_API(::glNamedBufferSubData(
+				m_ibo,
+				(GLintptr)0,
+				size,
+				data));
+		}
 	}
 
 	void GeomIndexBuffer::lock(void** dst)

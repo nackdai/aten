@@ -434,7 +434,9 @@ namespace aten {
 			m_ib.resize(idxs.size());
 
 			for (int i = 0; i < idxs.size(); i++) {
-				m_ib[i].init((uint32_t)idxs[i].size(), &idxs[i][0]);
+				if (!idxs[i].empty()) {
+					m_ib[i].init((uint32_t)idxs[i].size(), &idxs[i][0]);
+				}
 			}
 
 			m_isInitBuffer = true;
@@ -446,7 +448,9 @@ namespace aten {
 			m_vb.update(vtxs.size(), &vtxs[0]);
 
 			for (int i = 0; i < idxs.size(); i++) {
-				m_ib[i].update((uint32_t)idxs[i].size(), &idxs[i][0]);
+				if (!idxs[i].empty()) {
+					m_ib[i].update((uint32_t)idxs[i].size(), &idxs[i][0]);
+				}
 			}
 		}
 
@@ -454,6 +458,9 @@ namespace aten {
 
 		for (int i = 0; i < m_ib.size(); i++) {
 			auto triNum = (uint32_t)idxs[i].size() / 3;
+
+			AT_ASSERT(triNum > 0);
+
 			if (triNum > 0) {
 				auto m = mtrls[i];
 				

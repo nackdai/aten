@@ -416,6 +416,9 @@
     <ClInclude Include="..\src\libaten\misc\omputil.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\thread.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -650,6 +653,9 @@
       <Filter>accelerator</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\misc\omputil.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\misc\thread.cpp">
       <Filter>misc</Filter>
     </ClCompile>
   </ItemGroup>

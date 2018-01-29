@@ -318,10 +318,10 @@ namespace aten {
 
 		// TODO
 		// ここでやる?
-		static bool isInitVB = false;
-		if (!isInitVB) {
+		static bool isInitGlobalVB = false;
+		if (!isInitGlobalVB) {
 			VertexManager::build();
-			isInitVB = true;
+			isInitGlobalVB = true;
 		}
 
 		auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
@@ -340,11 +340,35 @@ namespace aten {
 		CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 	}
 
+	void RasterizeRenderer::initBuffer(
+		uint32_t vtxStride,
+		uint32_t vtxNum,
+		const std::vector<uint32_t>& idxNums)
+	{
+		if (!m_isInitBuffer) {
+			m_vb.init(
+				sizeof(vertex),
+				vtxNum,
+				0,
+				nullptr);
+
+			m_ib.resize(idxNums.size());
+
+			for (int i = 0; i < idxNums.size(); i++) {
+				auto num = idxNums[i];
+				m_ib[i].init(num, nullptr);
+			}
+
+			m_isInitBuffer = true;
+		}
+	}
+
 	void RasterizeRenderer::draw(
 		std::vector<vertex>& vtxs,
 		std::vector<std::vector<int>>& idxs,
 		const camera* cam,
-		bool isWireFrame)
+		bool isWireFrame,
+		bool updateBuffer)
 	{
 		auto camparam = cam->param();
 
@@ -397,9 +421,7 @@ namespace aten {
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
-		static bool isInitBuffer = false;
-
-		if (!isInitBuffer) {
+		if (!m_isInitBuffer) {
 			m_vb.init(
 				sizeof(vertex),
 				vtxs.size(),
@@ -412,7 +434,17 @@ namespace aten {
 				m_ib[i].init((uint32_t)idxs[i].size(), &idxs[i][0]);
 			}
 
-			isInitBuffer = true;
+			m_isInitBuffer = true;
+		}
+		else if (updateBuffer) {
+			// TODO
+			// 最初に最大数バッファをアロケートしておかないといけない...
+
+			m_vb.update(vtxs.size(), &vtxs[0]);
+
+			for (int i = 0; i < idxs.size(); i++) {
+				m_ib[i].update((uint32_t)idxs[i].size(), &idxs[i][0]);
+			}
 		}
 
 		for (int i = 0; i < m_ib.size(); i++) {

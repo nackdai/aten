@@ -20,7 +20,11 @@ namespace aten {
 			uint32_t stride,
 			uint32_t vtxNum,
 			uint32_t offset,
-			void* data);
+			const void* data);
+
+		void update(
+			uint32_t vtxNum,
+			const void* data);
 
 		void draw(
 			Primitive mode,
@@ -34,7 +38,11 @@ namespace aten {
 		uint32_t m_vtxStride{ 0 };
 		uint32_t m_vtxNum{ 0 };
 		uint32_t m_vtxOffset{ 0 };
+
+		uint32_t m_initVtxNum{ 0 };
 	};
+
+	//////////////////////////////////////////////////////////
 
 	class GeomIndexBuffer {
 	public:
@@ -44,7 +52,11 @@ namespace aten {
 	public:
 		void init(
 			uint32_t idxNum,
-			void* data);
+			const void* data);
+
+		void update(
+			uint32_t idxNum,
+			const void* data);
 
 		void lock(void** dst);
 		void unlock();
@@ -61,5 +73,7 @@ namespace aten {
 		uint32_t m_idxNum{ 0 };
 
 		bool m_isLockedIBO{ false };
+
+		uint32_t m_initIdxNum{ 0 };
 	};
 }

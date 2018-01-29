@@ -45,11 +45,17 @@ namespace aten {
 			const camera* cam,
 			bool isWireFrame);
 
+		void initBuffer(
+			uint32_t vtxStride,
+			uint32_t vtxNum,
+			const std::vector<uint32_t>& idxNums);
+
 		void draw(
 			std::vector<vertex>& vtxs,
 			std::vector<std::vector<int>>& idxs,
 			const camera* cam,
-			bool isWireFrame);
+			bool isWireFrame,
+			bool updateBuffer);
 
 	private:
 		shader m_shader;
@@ -60,6 +66,7 @@ namespace aten {
 		int m_width{ 0 };
 		int m_height{ 0 };
 
+		bool m_isInitBuffer{ false };
 		GeomVertexBuffer m_vb;
 		std::vector<GeomIndexBuffer> m_ib;
 	};

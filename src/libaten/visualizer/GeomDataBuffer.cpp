@@ -6,7 +6,7 @@ namespace aten {
 		uint32_t stride,
 		uint32_t vtxNum,
 		uint32_t offset,
-		void* data)
+		const void* data)
 	{
 		CALL_GL_API(::glGenBuffers(1, &m_vbo));
 
@@ -15,6 +15,8 @@ namespace aten {
 		m_vtxStride = stride;
 		m_vtxNum = vtxNum;
 		m_vtxOffset = offset;
+
+		m_initVtxNum = vtxNum;
 
 		CALL_GL_API(::glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
 
@@ -64,6 +66,24 @@ namespace aten {
 		}
 	}
 
+	void GeomVertexBuffer::update(
+		uint32_t vtxNum,
+		const void* data)
+	{
+		AT_ASSERT(m_vbo > 0);
+		AT_ASSERT(vtxNum <= m_initVtxNum);
+
+		auto size = m_vtxStride * vtxNum;
+
+		m_vtxNum = vtxNum;
+
+		CALL_GL_API(::glNamedBufferSubData(
+			m_vbo,
+			(GLintptr)0,
+			size,
+			data));
+	}
+
 	static GLenum prims[] = {
 		GL_TRIANGLES,
 		GL_LINES,
@@ -98,15 +118,19 @@ namespace aten {
 		CALL_GL_API(::glDrawArrays(prims[mode], idxOffset, vtxNum));
 	}
 
+	//////////////////////////////////////////////////////////
+
 	void GeomIndexBuffer::init(
 		uint32_t idxNum,
-		void* data)
+		const void* data)
 	{
 		CALL_GL_API(::glGenBuffers(1, &m_ibo));
 
 		auto size = sizeof(GLuint) * idxNum;
 
 		m_idxNum = idxNum;
+
+		m_initIdxNum = idxNum;
 
 		CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo));
 
@@ -115,6 +139,24 @@ namespace aten {
 			size,
 			data,
 			GL_STATIC_DRAW));
+	}
+
+	void GeomIndexBuffer::update(
+		uint32_t idxNum,
+		const void* data)
+	{
+		AT_ASSERT(m_ibo > 0);
+		AT_ASSERT(idxNum <= m_initIdxNum);
+
+		auto size = sizeof(GLuint) * idxNum;
+
+		m_idxNum = idxNum;
+
+		CALL_GL_API(::glNamedBufferSubData(
+			m_ibo,
+			(GLintptr)0,
+			size,
+			data));
 	}
 
 	void GeomIndexBuffer::lock(void** dst)

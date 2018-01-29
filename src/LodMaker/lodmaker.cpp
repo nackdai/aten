@@ -75,6 +75,40 @@ static void computeAverage(qit start, qit end)
 	}
 }
 
+static void computeClosestFromAvg(qit start, qit end)
+{
+	aten::vec4 pos(start->v.pos);
+
+	uint32_t cnt = 1;
+
+	for (auto q = start + 1; q != end; q++) {
+		pos += q->v.pos;
+
+		cnt++;
+	}
+
+	real div = real(1) / cnt;
+
+	pos *= div;
+
+	real distMin = AT_MATH_INF;
+
+	qit closest = start;
+
+	for (auto q = start; q != end; q++) {
+		auto d = (pos - q->v.pos).length();
+		if (d < distMin) {
+			distMin = d;
+			closest = q;
+		}
+	}
+
+	// ŒvŽZŒ‹‰Ê‚ð–ß‚·...
+	for (auto q = start; q != end; q++) {
+		q->v = closest->v;
+	}
+}
+
 void LodMaker::make(
 	std::vector<aten::vertex>& dstVertices,
 	std::vector<std::vector<int>>& dstIndices,
@@ -163,7 +197,8 @@ void LodMaker::make(
 
 			// TODO
 			// •½‹ÏŒvŽZ.
-			computeAverage(start, end);
+			//computeAverage(start, end);
+			computeClosestFromAvg(start, end);
 
 			for (auto q = start; q != end; q++) {
 				if (q == start) {

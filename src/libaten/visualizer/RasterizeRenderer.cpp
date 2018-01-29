@@ -335,6 +335,9 @@ namespace aten {
 				CALL_GL_API(::glUniform1i(hHasAlbedo, false));
 			}
 		});
+
+		// –ß‚·.
+		CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 	}
 
 	void RasterizeRenderer::draw(
@@ -416,5 +419,8 @@ namespace aten {
 			auto triNum = (uint32_t)idxs[i].size() / 3;
 			m_ib[i].draw(m_vb, aten::Primitive::Triangles, 0, triNum);
 		}
+
+		// –ß‚·.
+		CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
 	}
 }

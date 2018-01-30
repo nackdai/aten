@@ -63,20 +63,23 @@ static inline void writeFace(FILE* fp, const ObjFace& f)
 	// NOTE
 	// obj ÇÕ 1 äÓì_Ç»ÇÃÇ≈ÅA+1 Ç∑ÇÈ.
 
+	// NOTE
+	// pos/uv/nml.
+
 	fprintf(fp, "f ");
 
 	for (int i = 0; i < AT_COUNTOF(ObjFace::vtx); i++) {
 		fprintf(fp, "%d/", f.vtx[i].pos + 1);
-
-		if (f.vtx[i].nml >= 0) {
-			fprintf(fp, "%d/", f.vtx[i].nml + 1);
+		
+		if (f.vtx[i].uv >= 0) {
+			fprintf(fp, "%d ", f.vtx[i].uv + 1);
 		}
 		else {
 			fprintf(fp, "/");
 		}
 
-		if (f.vtx[i].uv >= 0) {
-			fprintf(fp, "%d ", f.vtx[i].uv + 1);
+		if (f.vtx[i].nml >= 0) {
+			fprintf(fp, "%d/", f.vtx[i].nml + 1);
 		}
 		else {
 			fprintf(fp, " ");
@@ -100,14 +103,20 @@ static inline void replaceIndex(ObjVertex& v, int idx)
 }
 
 bool ObjWriter::write(
-	const char* path,
+	const std::string& path,
+	const std::string& mtrlName,
 	const std::vector<aten::vertex>& vertices,
 	const std::vector<std::vector<int>>& indices,
 	const std::vector<aten::material*>& mtrls)
 {
 	AT_ASSERT(mtrls.size() == indices.size());
 
-	FILE* fp = fopen(path, "wt");
+	FILE* fp = fopen(path.c_str(), "wt");
+
+	// Write header.
+	{
+		fprintf(fp, "mtllib %s\n", mtrlName.c_str());
+	}
 
 	std::vector<ObjVertex> vtxs;
 
@@ -161,6 +170,10 @@ bool ObjWriter::write(
 
 		const auto mtrl = mtrls[i];
 
+		// TODO
+		// Write dummy group name...
+		fprintf(fp, "g %d\n", i);
+
 		writeMaterrial(fp, mtrl);
 
 		for (const auto& t : tris) {
@@ -175,7 +188,8 @@ bool ObjWriter::write(
 
 bool ObjWriter::runOnThread(
 	std::function<void()> funcFinish,
-	const char* path,
+	const std::string& path,
+	const std::string& mtrlName,
 	const std::vector<aten::vertex>& vertices,
 	const std::vector<std::vector<int>>& indices,
 	const std::vector<aten::material*>& mtrls)
@@ -189,7 +203,7 @@ bool ObjWriter::runOnThread(
 		delete m_param;
 		m_param = nullptr;
 	}
-	m_param = new WriteParams(funcFinish, path, vertices, indices, mtrls);
+	m_param = new WriteParams(funcFinish, path, mtrlName, vertices, indices, mtrls);
 
 	static std::vector<std::vector<int>> tmpIdx;
 
@@ -204,6 +218,7 @@ bool ObjWriter::runOnThread(
 
 				write(
 					m_param->path,
+					m_param->mtrlName,
 					m_param->vertices,
 					m_param->indices,
 					m_param->mtrls);

@@ -10,14 +10,16 @@ public:
 
 public:
 	static bool write(
-		const char* path,
+		const std::string& path,
+		const std::string& mtrlName,
 		const std::vector<aten::vertex>& vertices,
 		const std::vector<std::vector<int>>& indices,
 		const std::vector<aten::material*>& mtrls);
 
 	bool runOnThread(
 		std::function<void()> funcFinish,
-		const char* path,
+		const std::string& path,
+		const std::string& mtrlName,
 		const std::vector<aten::vertex>& vertices,
 		const std::vector<std::vector<int>>& indices,
 		const std::vector<aten::material*>& mtrls);
@@ -33,21 +35,24 @@ private:
 	struct WriteParams {
 		std::function<void()> funcFinish;
 
-		const char* path;
+		std::string path;
+		std::string mtrlName;
 		const std::vector<aten::vertex>& vertices;
 		const std::vector<std::vector<int>>& indices;
 		const std::vector<aten::material*>& mtrls;
 
 		WriteParams(
 			std::function<void()> _func,
-			const char* _path,
+			const std::string& _path,
+			const std::string& _mtrlName,
 			const std::vector<aten::vertex>& _vertices,
 			const std::vector<std::vector<int>>& _indices,
 			const std::vector<aten::material*>& _mtrls)
-			: vertices(_vertices), indices(_indices), mtrls(_mtrls)
+			: path(_path), vertices(_vertices), indices(_indices), mtrls(_mtrls)
 		{
 			funcFinish = _func;
 			path = _path;
+			mtrlName = _mtrlName;
 		}
 	};
 

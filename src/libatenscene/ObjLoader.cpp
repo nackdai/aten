@@ -3,6 +3,7 @@
 #include "ObjLoader.h"
 #include "AssetManager.h"
 #include "utility.h"
+#include "ImageLoader.h"
 
 namespace aten
 {
@@ -66,6 +67,14 @@ namespace aten
 			return;
 		}
 
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		aten::getStringsFromPath(path, pathname, extname, filename);
+
+		std::string mtrlBasePath = pathname + "/";
+
 		std::vector<tinyobj::shape_t> shapes;
 		std::vector<tinyobj::material_t> mtrls;
 		std::string err;
@@ -79,7 +88,7 @@ namespace aten
 		auto result = tinyobj::LoadObj(
 			shapes, mtrls,
 			err,
-			path.c_str(), nullptr,
+			path.c_str(), mtrlBasePath.c_str(),
 			flags);
 		AT_VRETURN(result, );
 
@@ -194,8 +203,33 @@ namespace aten
 
 					if (!dstshape->param.mtrl.ptr) {
 						// No material, set dummy material....
-						//AT_ASSERT(false);
-						dstshape->setMaterial(new lambert(vec3(real(0.5))));
+
+						// Only lambertian.
+						const auto& objmtrl = mtrls[m];
+
+						aten::vec3 diffuse(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]);
+
+						aten::texture* albedoMap = nullptr;
+
+						if (!objmtrl.diffuse_texname.empty()) {
+							albedoMap = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
+
+							if (!albedoMap) {
+								std::string texname = pathname + "/" + objmtrl.diffuse_texname;
+								albedoMap = aten::ImageLoader::load(texname);
+							}
+
+							// TODO
+							// ‚±‚±‚Å‚¢‚¢‚Ì‚©?
+							if (albedoMap) {
+								albedoMap->initAsGLTexture();
+							}
+						}
+						
+						aten::material* mtrl = new aten::lambert(diffuse, albedoMap);
+						mtrl->setName(objmtrl.name.c_str());
+
+						dstshape->setMaterial(mtrl);
 					}
 				}
 

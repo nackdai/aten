@@ -19,7 +19,7 @@ namespace aten {
 		int pathPos = (int)filepath.find_last_of("/") + 1;
 		int extPos = (int)filepath.find_last_of(".");
 
-		pathname = filepath.substr(0, pathPos + 1);
+		pathname = filepath.substr(0, pathPos - 1);
 		extname = filepath.substr(extPos, filepath.size() - extPos);
 		filename = filepath.substr(pathPos, extPos - pathPos);
 	}

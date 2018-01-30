@@ -2,6 +2,7 @@
 #include "atenscene.h"
 
 #include "lodmaker.h"
+#include "ObjWriter.h"
 
 #include <cmdline.h>
 #include <imgui.h>
@@ -34,6 +35,8 @@ static std::vector<aten::material*> g_mtrls;
 static LodMaker g_lodmaker;
 static std::vector<aten::vertex> g_lodVtx;
 static std::vector<std::vector<int>> g_lodIdx;
+
+static ObjWriter g_writer;
 
 static int g_GridX = 16;
 static int g_GridY = 16;
@@ -116,7 +119,10 @@ void onRun()
 		ImGui::SliderInt("Grid Y", &g_GridY, 4, 1024);
 		ImGui::SliderInt("Grid Z", &g_GridZ, 4, 1024);
 
-		if (!g_lodmaker.isRunningThread()) {
+		bool canRunThread = !g_lodmaker.isRunningThread()
+			&& !g_writer.isRunningThread();
+
+		if (canRunThread) {
 			auto& vtxs = aten::VertexManager::getVertices();
 
 			if (ImGui::Button("Make LOD")) {
@@ -129,7 +135,30 @@ void onRun()
 			}
 		}
 		else {
-			ImGui::Text("Makeing LOD...");
+			if (g_lodmaker.isRunningThread()) {
+				ImGui::Text("Making LOD...");
+			}
+			else {
+				ImGui::Text("Writing to obj...");
+			}
+		}
+
+		if (canRunThread) {
+			if (ImGui::Button("Write Obj")) {
+				g_writer.runOnThread(
+					[&]() {},
+					"lod.obj",
+					g_lodVtx, g_lodIdx,
+					g_mtrls);
+			}
+		}
+		else {
+			if (g_writer.isRunningThread()) {
+				ImGui::Text("Writing to obj...");
+			}
+			else {
+				ImGui::Text("Making LOD...");
+			}
 		}
 
 
@@ -279,7 +308,7 @@ bool parseOption(
 // TODO
 aten::object* loadObj()
 {
-#if 1
+#if 0
 	auto SP_LUK = aten::ImageLoader::load("../../asset/sponza/sp_luk.JPG");
 	auto SP_LUK_nml = aten::ImageLoader::load("../../asset/sponza/sp_luk-nml.png");
 
@@ -478,6 +507,7 @@ int main(int argc, char* argv[])
 	aten::window::run(onRun);
 
 	g_lodmaker.terminate();
+	g_writer.terminate();
 
 	aten::window::terminate();
 

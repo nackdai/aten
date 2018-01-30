@@ -254,13 +254,29 @@ namespace aten
 			// texture cooridnates.
 			vtxnum = shape.mesh.texcoords.size();
 
-			for (uint32_t i = 0; i < vtxnum; i += 2) {
-				uint32_t vpos = i / 2 + curVtxPos;
+			if (vtxnum > 0) {
+				for (uint32_t i = 0; i < vtxnum; i += 2) {
+					uint32_t vpos = i / 2 + curVtxPos;
 
-				auto& vtx = VertexManager::getVertex(vpos);
+					auto& vtx = VertexManager::getVertex(vpos);
 
-				vtx.uv.x = shape.mesh.texcoords[i + 0];
-				vtx.uv.y = shape.mesh.texcoords[i + 1];
+					vtx.uv.x = shape.mesh.texcoords[i + 0];
+					vtx.uv.y = shape.mesh.texcoords[i + 1];
+				}
+			}
+			else {
+				// NOTE
+				// positions ‚É‚Í x,y,z ‚ª‚Î‚ç‚Î‚ç‚É“ü‚Á‚Ä‚¢‚é‚Ì‚ÅA3 ‚ÅŠ„‚é‚±‚Æ‚Å‚P’¸“_‚ ‚½‚è‚É‚È‚é.
+				vtxnum = shape.mesh.positions.size() / 3;
+
+				for (uint32_t i = 0; i < vtxnum; i++) {
+					uint32_t vpos = i + curVtxPos;
+
+					auto& vtx = VertexManager::getVertex(vpos);
+
+					// Specify not have texture coordinates.
+					vtx.uv.z = real(-1);
+				}
 			}
 		}
 

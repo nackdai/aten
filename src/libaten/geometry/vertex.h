@@ -10,7 +10,10 @@ namespace aten
 	struct vertex {
 		vec4 pos;
 		vec3 nml;
-		vec3 uv;	// z is used for checking to compute plane normal in real-time.
+
+		// z == 1, compute plane normal in real-time.
+		// z == -1, there is no texture coordinate.
+		vec3 uv;
 	};
 
 	class VertexManager {

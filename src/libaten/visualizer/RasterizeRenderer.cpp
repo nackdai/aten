@@ -459,8 +459,6 @@ namespace aten {
 		for (int i = 0; i < m_ib.size(); i++) {
 			auto triNum = (uint32_t)idxs[i].size() / 3;
 
-			AT_ASSERT(triNum > 0);
-
 			if (triNum > 0) {
 				auto m = mtrls[i];
 				

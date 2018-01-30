@@ -422,4 +422,7 @@ void LodMaker::terminate()
 	m_sema.notify();
 
 	m_thread.join();
+
+	delete m_param;
+	m_param = nullptr;
 }

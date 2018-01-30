@@ -17,7 +17,6 @@
 #include "aten4idaten.h"
 
 #define ENABLE_PERSISTENT_THREAD
-#define SEPARATE_SHADOWRAY_HITTEST
 
 //#define ENABLE_DEBUG_1PIXEL
 
@@ -360,8 +359,8 @@ __global__ void shadeMissWithEnvmap(
 	}
 }
 
-template <bool isFirstBounce>
 __global__ void shade(
+	bool isFirstBounce,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -377,7 +376,6 @@ __global__ void shade(
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	const aten::MaterialParameter* __restrict__ mtrls,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
-	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
 	cudaTextureObject_t vtxPos,
 	cudaTextureObject_t vtxNml,
@@ -399,7 +397,6 @@ __global__ void shade(
 		ctxt.mtrls = mtrls;
 		ctxt.lightnum = lightnum;
 		ctxt.lights = lights;
-		ctxt.nodes = nodes;
 		ctxt.prims = prims;
 		ctxt.vtxPos = vtxPos;
 		ctxt.vtxNml = vtxNml;
@@ -408,12 +405,6 @@ __global__ void shade(
 	}
 
 	idx = hitindices[idx];
-
-#ifdef ENABLE_DEBUG_1PIXEL
-	int ix = DEBUG_IX;
-	int iy = DEBUG_IY;
-	idx = getIdx(ix, iy, width);
-#endif
 
 	__shared__ idaten::SVGFPathTracing::Path shPaths[64];
 	__shared__ idaten::SVGFPathTracing::ShadowRay shShadowRays[64];
@@ -523,9 +514,7 @@ __global__ void shade(
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
-#ifdef SEPARATE_SHADOWRAY_HITTEST
 	shShadowRays[threadIdx.x].isActive = false;
-#endif
 
 	auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1), bounce);
 
@@ -566,42 +555,11 @@ __global__ void shade(
 			auto tmp = rec.p + dirToLight - shadowRayOrg;
 			auto shadowRayDir = normalize(tmp);
 
-#ifdef SEPARATE_SHADOWRAY_HITTEST
 			shShadowRays[threadIdx.x].isActive = true;
 			shShadowRays[threadIdx.x].raydir[i] = shadowRayDir;
 			shShadowRays[threadIdx.x].targetLightId[i] = lightidx;
 			shShadowRays[threadIdx.x].distToLight[i] = distToLight;
 			shShadowRays[threadIdx.x].lightcontrib[i] = aten::vec3(0);
-#else
-			auto lightobj = sampleres.obj;
-
-			real distHitObjToRayOrg = AT_MATH_INF;
-
-			// Ray aim to the area light.
-			// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-			auto hitobj = lightobj;
-
-			aten::Intersection isectTmp;
-
-			aten::ray shadowRay(shadowRayOrg, shadowRayDir);
-
-			bool isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
-
-			if (isHit) {
-				hitobj = (void*)&ctxt.shapes[isectTmp.objid];
-			}
-
-			isHit = AT_NAME::scene::hitLight(
-				isHit,
-				light.attrib,
-				lightobj,
-				distToLight,
-				distHitObjToRayOrg,
-				isectTmp.t,
-				hitobj);
-
-			if (isHit)
-#endif
 			{
 				auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -621,11 +579,8 @@ __global__ void shade(
 						// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
 						// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 						auto misW = pdfLight / (pdfb + pdfLight);
-#ifdef SEPARATE_SHADOWRAY_HITTEST
+
 						shShadowRays[threadIdx.x].lightcontrib[i] =
-#else
-						shPaths[threadIdx.x].contrib +=
-#endif
 							(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;
 					}
 				}
@@ -643,11 +598,8 @@ __global__ void shade(
 							pdfb = pdfb * cosLight / dist2;
 
 							auto misW = pdfLight / (pdfb + pdfLight);
-#ifdef SEPARATE_SHADOWRAY_HITTEST
+
 							shShadowRays[threadIdx.x].lightcontrib[i] =
-#else
-							shPaths[threadIdx.x].contrib +=
-#endif
 								(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;;
 						}
 					}
@@ -1025,58 +977,33 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		if (bounce == 0) {
-			shade<true> << <blockPerGrid, threadPerBlock >> > (
-				m_aovNormalDepth[curaov].ptr(),
-				m_aovTexclrTemporalWeight[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
-				mtxW2C,
-				width, height,
-				m_paths.ptr(),
-				m_hitidx.ptr(), hitcount,
-				m_isects.ptr(),
-				m_rays.ptr(),
-				m_frame,
-				bounce, rrBounce,
-				m_shapeparam.ptr(), m_shapeparam.num(),
-				m_mtrlparam.ptr(),
-				m_lightparam.ptr(), m_lightparam.num(),
-				m_nodetex.ptr(),
-				m_primparams.ptr(),
-				texVtxPos, texVtxNml,
-				m_mtxparams.ptr(),
-				m_tex.ptr(),
-				m_random.ptr(),
-				m_shadowRays.ptr());
-		}
-		else {
-			shade<false> << <blockPerGrid, threadPerBlock >> > (
-				m_aovNormalDepth[curaov].ptr(),
-				m_aovTexclrTemporalWeight[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
-				mtxW2C,
-				width, height,
-				m_paths.ptr(),
-				m_hitidx.ptr(), hitcount,
-				m_isects.ptr(),
-				m_rays.ptr(),
-				m_frame,
-				bounce, rrBounce,
-				m_shapeparam.ptr(), m_shapeparam.num(),
-				m_mtrlparam.ptr(),
-				m_lightparam.ptr(), m_lightparam.num(),
-				m_nodetex.ptr(),
-				m_primparams.ptr(),
-				texVtxPos, texVtxNml,
-				m_mtxparams.ptr(),
-				m_tex.ptr(),
-				m_random.ptr(),
-				m_shadowRays.ptr());
-		}
+		bool isFirstBounce = (bounce == 0);
+
+		shade << <blockPerGrid, threadPerBlock >> > (
+			isFirstBounce,
+			m_aovNormalDepth[curaov].ptr(),
+			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
+			mtxW2C,
+			width, height,
+			m_paths.ptr(),
+			m_hitidx.ptr(), hitcount,
+			m_isects.ptr(),
+			m_rays.ptr(),
+			m_frame,
+			bounce, rrBounce,
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_mtrlparam.ptr(),
+			m_lightparam.ptr(), m_lightparam.num(),
+			m_primparams.ptr(),
+			texVtxPos, texVtxNml,
+			m_mtxparams.ptr(),
+			m_tex.ptr(),
+			m_random.ptr(),
+			m_shadowRays.ptr());
 
 		checkCudaKernel(shade);
 
-#ifdef SEPARATE_SHADOWRAY_HITTEST
 		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount,
@@ -1090,7 +1017,6 @@ namespace idaten
 			m_mtxparams.ptr());
 
 		checkCudaKernel(hitShadowRay);
-#endif
 	}
 
 	void SVGFPathTracing::onGather(

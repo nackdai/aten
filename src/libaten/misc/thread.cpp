@@ -81,7 +81,7 @@ namespace aten
 
 	Semaphore::~Semaphore()
 	{
-		AT_ASSERT(m_count == 0);
+		//AT_ASSERT(m_count == 0);
 	}
 
 	// 待機.

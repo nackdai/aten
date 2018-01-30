@@ -60,28 +60,27 @@ struct ObjFace {
 
 static inline void writeFace(FILE* fp, const ObjFace& f)
 {
+	// NOTE
+	// obj ÇÕ 1 äÓì_Ç»ÇÃÇ≈ÅA+1 Ç∑ÇÈ.
+
 	fprintf(fp, "f ");
 
 	for (int i = 0; i < AT_COUNTOF(ObjFace::vtx); i++) {
-#if 1
-		fprintf(fp, "%d ", f.vtx[i].pos);
-#else
-		fprintf(fp, "%d/", f.vtx[i].pos);
+		fprintf(fp, "%d/", f.vtx[i].pos + 1);
 
 		if (f.vtx[i].nml >= 0) {
-			fprintf(fp, "%d/", f.vtx[i].nml);
+			fprintf(fp, "%d/", f.vtx[i].nml + 1);
 		}
 		else {
 			fprintf(fp, "/");
 		}
 
 		if (f.vtx[i].uv >= 0) {
-			fprintf(fp, "%d ", f.vtx[i].uv);
+			fprintf(fp, "%d ", f.vtx[i].uv + 1);
 		}
 		else {
 			fprintf(fp, " ");
 		}
-#endif
 	}
 
 	writeLineFeed(fp);
@@ -91,6 +90,13 @@ static inline void writeMaterrial(FILE* fp, const aten::material* mtrl)
 {
 	auto name = mtrl->name();
 	fprintf(fp, "usemtl %s\n", name);
+}
+
+static inline void replaceIndex(ObjVertex& v, int idx)
+{
+	v.pos = v.pos >= 0 ? idx : -1;
+	v.nml = v.nml >= 0 ? idx : -1;
+	v.uv = v.uv >= 0 ? idx : -1;
 }
 
 bool ObjWriter::write(
@@ -110,15 +116,15 @@ bool ObjWriter::write(
 		const auto& v = vertices[i];
 
 		bool hasPos = writeVertexPosition(fp, v);
-		//bool hasNml = writeVertexNormal(fp, v);
-		//bool hasUv = writeVertexUV(fp, v);
+		bool hasNml = writeVertexNormal(fp, v);
+		bool hasUv = writeVertexUV(fp, v);
 
+		// Set tentative index.
 		vtxs.push_back(
 			ObjVertex(
 				hasPos ? i : -1,
-				//hasNml ? i : -1,
-				//hasUv ? i : -1));
-				-1, -1));
+				hasNml ? i : -1,
+				hasUv ? i : -1));
 	}
 
 	std::vector<std::vector<ObjFace>> triGroup(indices.size());
@@ -139,6 +145,11 @@ bool ObjWriter::write(
 			t.vtx[0] = vtxs[id0];
 			t.vtx[1] = vtxs[id1];
 			t.vtx[2] = vtxs[id2];
+
+			// Replace correct index.
+			replaceIndex(t.vtx[0], id0);
+			replaceIndex(t.vtx[1], id1);
+			replaceIndex(t.vtx[2], id2);
 
 			tris.push_back(t);
 		}

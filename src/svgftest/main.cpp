@@ -36,6 +36,8 @@ static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::SVGFPathTracing g_tracer;
 
+static float g_avgcuda = 0.0f;
+
 static aten::TAA g_taa;
 
 static aten::FBO g_fbo;
@@ -157,6 +159,8 @@ void onRun()
 		aten::visualizer::clear();
 	}
 
+	auto frame = g_tracer.frame();
+
 	g_rasterizer.draw(
 		g_tracer.frame(),
 		&g_scene,
@@ -172,6 +176,9 @@ void onRun()
 		g_maxBounce);
 
 	auto cudaelapsed = timer.end();
+
+	g_avgcuda = g_avgcuda * (frame - 1) + cudaelapsed;
+	g_avgcuda /= (float)frame;
 
 	aten::visualizer::render(false);
 
@@ -197,7 +204,7 @@ void onRun()
 	if (g_willShowGUI)
 	{
 		ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", g_tracer.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::Text("cuda : %.3f ms", cudaelapsed);
+		ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, g_avgcuda);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
 
 		int prevSamples = g_maxSamples;

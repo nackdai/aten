@@ -18,10 +18,10 @@ namespace aten {
 		union {
 			float exid{ -1 };
 			struct {
-				uint32_t noExternal : 1;
-				uint32_t hasLod : 1;
 				uint32_t mainExid : 15;
 				uint32_t lodExid : 15;
+				uint32_t hasLod : 1;
+				uint32_t noExternal : 1;
 			};
 		};
 
@@ -32,6 +32,11 @@ namespace aten {
 			return (shapeid >= 0 || primid >= 0);
 		}
 	};
+
+#define AT_BVHNODE_HAS_EXTERNAL(n)	(((n) & (1 << 31)) == 0)
+#define AT_BVHNODE_HAS_LOD(n)	(((n) & (1 << 30)) > 0)
+#define AT_BVHNODE_MAIN_EXID(n)	((n) & 0x7fff)
+#define AT_BVHNODE_LOD_EXID(n)	(((n) & (0x7fff << 15)) >> 15)
 
 	class ThreadedBVH : public accelerator {
 	public:

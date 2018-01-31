@@ -139,7 +139,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 						transformedRay = r;
 					}
 
-					node = ctxt->nodes[(int)attrib.z];
+					int exid = __float_as_int(attrib.z);
+					exid = AT_BVHNODE_MAIN_EXID(exid);
+
+					node = ctxt->nodes[exid];
 
 					objid = (int)attrib.x;
 					meshid = (int)attrib.w;

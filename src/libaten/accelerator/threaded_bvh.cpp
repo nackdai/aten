@@ -367,7 +367,9 @@ namespace aten {
 						transformedRay = r;
 					}
 
-					int exid = node->mainExid;
+					//int exid = node->mainExid;
+					int exid = *(int*)(&node->exid);
+					exid = AT_BVHNODE_MAIN_EXID(exid);
 
 					isHit = hit(
 						exid,

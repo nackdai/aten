@@ -88,6 +88,11 @@ namespace aten {
 			return nullptr;
 		}
 
+		virtual const hitable* getHasSecondObject() const
+		{
+			return nullptr;
+		}
+
 		bool isInstance() const
 		{
 			return (getHasObject() != nullptr);

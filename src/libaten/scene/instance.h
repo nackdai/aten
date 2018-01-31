@@ -106,6 +106,11 @@ namespace aten
 			return m_obj;
 		}
 
+		virtual const hitable* getHasSecondObject() const override final
+		{
+			return m_lod;
+		}
+
 		virtual void getMatrices(
 			aten::mat4& mtxL2W,
 			aten::mat4& mtxW2L) const override final
@@ -144,6 +149,11 @@ namespace aten
 
 				m_isDirty = false;
 			}
+		}
+
+		void setLod(OBJ* obj)
+		{
+			m_lod = obj;
 		}
 
 		vec3 getTrans()
@@ -225,6 +235,8 @@ namespace aten
 
 	private:
 		OBJ* m_obj{ nullptr };
+		OBJ* m_lod{ nullptr };
+
 		mat4 m_mtxL2W;
 		mat4 m_mtxW2L;	// inverted.
 		mat4 m_mtxPrevL2W;

@@ -946,8 +946,10 @@ namespace aten
 						transformedRay = r;
 					}
 
+					int exid = node->mainExid;
+
 					isHit = hit(
-						(int)node->exid,
+						exid,
 						transformedRay,
 						t_min, t_max,
 						isectTmp);

@@ -13,7 +13,18 @@ namespace aten {
 
 		float shapeid{ -1 };	///< Object index.
 		float primid{ -1 };		///< Triangle index.
-		float exid{ -1 };		///< External bvh index.
+
+		///< External bvh index.
+		union {
+			float exid{ -1 };
+			struct {
+				uint32_t noExternal : 1;
+				uint32_t hasLod : 1;
+				uint32_t mainExid : 15;
+				uint32_t lodExid : 15;
+			};
+		};
+
 		float meshid{ -1 };		///< Mesh id.
 
 		bool isLeaf() const

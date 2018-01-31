@@ -125,12 +125,16 @@ namespace aten {
 		{
 			list.push_back(ThreadedBvhNodeEntry(node, obj, mtx));
 		},
-			[this](bvhnode* node, int exid)
+			[this](bvhnode* node, int exid, int subExid)
 		{
 			if (node->isLeaf()) {
 				// NOTE
 				// 0 はベースツリーなので、+1 する.
 				node->setExternalId(exid + 1);
+
+				if (subExid >= 0) {
+					node->setSubExternalId(subExid + 1);
+				}
 			}
 		});
 	}
@@ -188,7 +192,13 @@ namespace aten {
 					gpunode.exid = -1.0f;
 				}
 				else {
-					gpunode.exid = (float)node->getExternalId();
+					auto exid = node->getExternalId();
+					auto subexid = node->getSubExternalId();
+
+					gpunode.noExternal = false;
+					gpunode.hasLod = (subexid >= 0);
+					gpunode.mainExid = exid;
+					gpunode.lodExid = (subexid >= 0 ? subexid : 0);
 				}
 			}
 
@@ -357,8 +367,10 @@ namespace aten {
 						transformedRay = r;
 					}
 
+					int exid = node->mainExid;
+
 					isHit = hit(
-						(int)node->exid,
+						exid,
 						listThreadedBvhNode,
 						transformedRay,
 						t_min, t_max,
@@ -467,8 +479,10 @@ namespace aten {
 						transformedRay = r;
 					}
 
+					int exid = node->mainExid;
+
 					isHit = hit(
-						(int)node->exid,
+						exid,
 						listThreadedBvhNode,
 						transformedRay,
 						t_min, t_max,
@@ -571,7 +585,18 @@ namespace aten {
 
 				gpunode.meshid = (float)item->geomid();
 
-				gpunode.exid = (float)node->getExternalId();
+				int exid = node->getExternalId();
+				int subexid = node->getSubExternalId();
+
+				if (exid < 0) {
+					gpunode.exid = -1.0f;
+				}
+				else {
+					gpunode.noExternal = false;
+					gpunode.hasLod = (subexid >= 0);
+					gpunode.mainExid = (exid >= 0 ? exid : 0);
+					gpunode.lodExid = (subexid >= 0 ? subexid : 0);
+				}
 			}
 
 			gpunode.boxmax = aten::vec4(bbox.maxPos(), 0);

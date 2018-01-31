@@ -91,7 +91,7 @@ namespace aten {
 		{
 			list.push_back(StacklessBvhNodeEntry(node, obj, mtx));
 		},
-			[this](bvhnode* node, int exid)
+			[this](bvhnode* node, int exid, int subExid)
 		{
 			if (node->isLeaf()) {
 				// NOTE

@@ -87,6 +87,15 @@ namespace aten {
 			m_externalId = exid;
 		}
 
+		int getSubExternalId() const
+		{
+			return m_subExternalId;
+		}
+		void setSubExternalId(int exid)
+		{
+			m_subExternalId = exid;
+		}
+
 		int getChildrenNum() const
 		{
 			return m_childrenNum;
@@ -164,6 +173,8 @@ namespace aten {
 		int m_externalId{ -1 };
 		int m_childrenNum{ 0 };
 
+		int m_subExternalId{ -1 };
+
 		int m_depth{ 0 };
 		bvh* m_bvh{ nullptr };
 
@@ -219,7 +230,7 @@ namespace aten {
 			std::vector<aten::accelerator*>& listBvh,
 			std::map<hitable*, aten::accelerator*>& nestedBvhMap,
 			std::function<void(std::vector<_T>&, aten::bvhnode*, aten::hitable*, const aten::mat4&)> funcRegisterToList,
-			std::function<void(aten::bvhnode*, int)> funcIfInstanceNode)
+			std::function<void(aten::bvhnode*, int, int)> funcIfInstanceNode)
 		{
 			if (!root) {
 				return;
@@ -248,26 +259,46 @@ namespace aten {
 
 				// Register relation between instance and nested bvh.
 				auto internalItem = const_cast<hitable*>(originalItem->getHasObject());
+				auto internalSecondItem = const_cast<hitable*>(originalItem->getHasSecondObject());
 
-				// TODO
-				auto obj = (AT_NAME::object*)internalItem;
+				hitable* items[] = {
+					internalItem,
+					internalSecondItem,
+				};
 
-				auto nestedBvh = obj->getInternalAccelerator();
+				int exids[2] = { -1, -1 };
 
-				auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
-				if (found == listBvh.end()) {
-					listBvh.push_back(nestedBvh);
-				}
+				for (int i = 0; i < AT_COUNTOF(items); i++) {
+					auto item = items[i];
 
-				if (nestedBvh) {
-					nestedBvhMap.insert(std::pair<aten::hitable*, aten::accelerator*>(originalItem, nestedBvh));
+					if (item == nullptr) {
+						break;
+					}
+
+					// TODO
+					auto obj = (AT_NAME::object*)item;
+
+					auto nestedBvh = obj->getInternalAccelerator();
+
+					auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
+					if (found == listBvh.end()) {
+						listBvh.push_back(nestedBvh);
+
+						int exid = (int)listBvh.size() - 1;
+						AT_ASSERT(exid >= 0);
+
+						exids[i] = exid;
+					}
+
+					if (i == 0) {
+						if (nestedBvh) {
+							nestedBvhMap.insert(std::pair<aten::hitable*, aten::accelerator*>(originalItem, nestedBvh));
+						}
+					}
 				}
 
 				if (funcIfInstanceNode) {
-					int exid = (int)listBvh.size() - 1;
-					AT_ASSERT(exid >= 0);
-
-					funcIfInstanceNode(original, exid);
+					funcIfInstanceNode(original, exids[0], exids[1]);
 				}
 			}
 			else {

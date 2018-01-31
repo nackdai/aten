@@ -96,7 +96,7 @@ namespace aten {
 			return false;
 		}
 
-		virtual bool importTree(const char* path)
+		virtual bool importTree(const char* path, int offsetTriIdx)
 		{
 			AT_ASSERT(false);
 			return false;

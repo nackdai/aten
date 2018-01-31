@@ -65,7 +65,7 @@ namespace aten
 			Intersection& isect) const override;
 
 		virtual bool exportTree(const char* path) override final;
-		virtual bool importTree(const char* path) override final;
+		virtual bool importTree(const char* path, int offsetTriIdx) override final;
 
 		ThreadedBVH& getTopLayer()
 		{

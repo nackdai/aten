@@ -56,7 +56,7 @@ namespace AT_NAME
 
 		bool exportInternalAccelTree(const char* path);
 
-		bool importInternalAccelTree(const char* path);
+		bool importInternalAccelTree(const char* path, int offsetTriIdx = 0);
 
 		void buildForRasterizeRendering();
 

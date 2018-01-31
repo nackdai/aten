@@ -1139,7 +1139,7 @@ namespace aten
 		return true;
 	}
 
-	bool sbvh::importTree(const char* path)
+	bool sbvh::importTree(const char* path, int offsetTriIdx)
 	{
 		FILE* fp = nullptr;
 		auto err = fopen_s(&fp, path, "rb");
@@ -1160,6 +1160,16 @@ namespace aten
 		m_threadedNodes[0].resize(header.nodeNum);
 
 		fread(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
+
+		if (offsetTriIdx > 0) {
+			for (auto& nodes : m_threadedNodes) {
+				for (auto& node : nodes) {
+					if (node.triid >= 0) {
+						node.triid += offsetTriIdx;
+					}
+				}
+			}
+		}
 
 		vec3 boxmin = vec3(header.boxmin[0], header.boxmin[1], header.boxmin[2]);
 		vec3 boxmax = vec3(header.boxmax[0], header.boxmax[1], header.boxmax[2]);

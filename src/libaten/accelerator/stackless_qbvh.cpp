@@ -91,11 +91,12 @@ namespace aten
 		{
 			list.push_back(BvhNode(node, obj, mtx));
 		},
-			[this](bvhnode* node)
+			[this](bvhnode* node, int exid)
 		{
 			if (node->isLeaf()) {
-				node->setExternalId(m_exid);
-				m_exid++;
+				// NOTE
+				// 0 はベースツリーなので、+1 する.
+				node->setExternalId(exid);
 			}
 		});
 	}

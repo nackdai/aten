@@ -130,8 +130,6 @@ namespace aten {
 	private:
 		bvh m_bvh;
 
-		int m_exid{ 1 };
-
 		bool m_enableLayer{ true };
 
 		std::vector<std::vector<ThreadedBvhNode>> m_listThreadedBvhNode;

@@ -219,7 +219,7 @@ namespace aten {
 			std::vector<aten::accelerator*>& listBvh,
 			std::map<hitable*, std::vector<aten::accelerator*>>& nestedBvhMap,
 			std::function<void(std::vector<_T>&, aten::bvhnode*, aten::hitable*, const aten::mat4&)> funcRegisterToList,
-			std::function<void(aten::bvhnode*)> funcIfInstanceNode)
+			std::function<void(aten::bvhnode*, int)> funcIfInstanceNode)
 		{
 			if (!root) {
 				return;
@@ -236,10 +236,6 @@ namespace aten {
 					original->setParent(parentNode);
 					original->setTraversalOrder((int)listBvhNode.size());
 					funcRegisterToList(listBvhNode, original, nestParent, mtxL2W);
-
-					if (funcIfInstanceNode) {
-						funcIfInstanceNode(original);
-					}
 				}
 
 				// Register nested bvh.
@@ -263,6 +259,13 @@ namespace aten {
 
 				if (!accels.empty()) {
 					nestedBvhMap.insert(std::pair<aten::hitable*, std::vector<aten::accelerator*>>(originalItem, accels));
+				}
+
+				if (funcIfInstanceNode) {
+					int exid = (int)listBvh.size() - 1;
+					AT_ASSERT(exid >= 0);
+
+					funcIfInstanceNode(original, exid);
 				}
 			}
 			else {

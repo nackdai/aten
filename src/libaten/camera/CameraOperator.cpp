@@ -2,8 +2,6 @@
 #include "math/vec4.h"
 #include "math/mat4.h"
 
-#pragma optimize( "", off)
-
 namespace aten {
 	void CameraOperator::move(
 		camera& camera,

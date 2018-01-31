@@ -3,8 +3,6 @@
 #include "math/mat4.h"
 #include "texture/texture.h"
 
-#pragma optimize( "", off)
-
 namespace aten
 {
 	bool TAA::init(

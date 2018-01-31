@@ -47,8 +47,6 @@ static uint32_t g_threadnum = 1;
 static uint32_t g_frameNo = 0;
 static float g_avgElapsed = 0.0f;
 
-#pragma optimize( "", off)
-
 void update()
 {
 	static float y = 0.0f;

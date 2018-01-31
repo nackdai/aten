@@ -1,5 +1,4 @@
 #include "camera/pinhole.h"
-#pragma optimize( "", off)
 
 namespace AT_NAME {
 	void PinholeCamera::init(

@@ -217,7 +217,7 @@ namespace aten {
 			const aten::mat4& mtxL2W,
 			std::vector<_T>& listBvhNode,
 			std::vector<aten::accelerator*>& listBvh,
-			std::map<hitable*, std::vector<aten::accelerator*>>& nestedBvhMap,
+			std::map<hitable*, aten::accelerator*>& nestedBvhMap,
 			std::function<void(std::vector<_T>&, aten::bvhnode*, aten::hitable*, const aten::mat4&)> funcRegisterToList,
 			std::function<void(aten::bvhnode*, int)> funcIfInstanceNode)
 		{
@@ -229,9 +229,13 @@ namespace aten {
 
 			auto original = pnode;
 			aten::mat4 mtxL2WForChild;
+
+			// ネストしている場合にはネストさきのツリーのルートノードを取得.
+			// ネストしていない場合は同じものが返ってくる.
 			pnode = getInternalNode(original, &mtxL2WForChild);
 
 			if (pnode != original) {
+				// ネストしている.
 				{
 					original->setParent(parentNode);
 					original->setTraversalOrder((int)listBvhNode.size());
@@ -248,17 +252,15 @@ namespace aten {
 				// TODO
 				auto obj = (AT_NAME::object*)internalItem;
 
-				std::vector<aten::accelerator*> accels;
 				auto nestedBvh = obj->getInternalAccelerator();
-				accels.push_back(nestedBvh);
 
 				auto found = std::find(listBvh.begin(), listBvh.end(), nestedBvh);
 				if (found == listBvh.end()) {
 					listBvh.push_back(nestedBvh);
 				}
 
-				if (!accels.empty()) {
-					nestedBvhMap.insert(std::pair<aten::hitable*, std::vector<aten::accelerator*>>(originalItem, accels));
+				if (nestedBvh) {
+					nestedBvhMap.insert(std::pair<aten::hitable*, aten::accelerator*>(originalItem, nestedBvh));
 				}
 
 				if (funcIfInstanceNode) {

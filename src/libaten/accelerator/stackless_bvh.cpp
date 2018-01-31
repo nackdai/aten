@@ -25,7 +25,7 @@ namespace aten {
 		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
 		std::vector<accelerator*> listBvh;
-		std::map<hitable*, std::vector<accelerator*>> nestedBvhMap;
+		std::map<hitable*, accelerator*> nestedBvhMap;
 
 		std::vector<std::vector<StacklessBvhNodeEntry>> listBvhNode;
 		
@@ -42,13 +42,9 @@ namespace aten {
 
 			hitable* parent = nullptr;
 
-			// TODO
-			// Find parent.
+			// Find parent which has specified bvh.
 			for (auto it : nestedBvhMap) {
-				auto& list = it.second;
-				auto found = std::find(list.begin(), list.end(), bvh);
-
-				if (found != list.end()) {
+				if (bvh == it.second) {
 					// Found nested bvh.
 					parent = it.first;
 					break;
@@ -81,7 +77,7 @@ namespace aten {
 		const aten::mat4& mtxL2W,
 		std::vector<StacklessBvhNodeEntry>& listBvhNode,
 		std::vector<accelerator*>& listBvh,
-		std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap)
+		std::map<hitable*, accelerator*>& nestedBvhMap)
 	{
 		bvh::registerBvhNodeToLinearList<StacklessBvhNodeEntry>(
 			root,

@@ -145,7 +145,7 @@ namespace aten {
 			const aten::mat4& mtxL2W,
 			std::vector<BvhNode>& listBvhNode,
 			std::vector<accelerator*>& listBvh,
-			std::map<hitable*, std::vector<accelerator*>>& nestedBvhMap);
+			std::map<hitable*, accelerator*>& nestedBvhMap);
 
 		uint32_t convertFromBvh(
 			bool isPrimitiveLeaf,

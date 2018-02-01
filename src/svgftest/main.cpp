@@ -37,6 +37,9 @@ static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 static idaten::SVGFPathTracing g_tracer;
 
 static float g_avgcuda = 0.0f;
+static float g_avgupdate = 0.0f;
+
+static bool g_enableUpdate = false;
 
 static aten::TAA g_taa;
 
@@ -142,9 +145,25 @@ void onRun()
 		return;
 	}
 
+	auto frame = g_tracer.frame();
+
 	g_frameStep = false;
 
-	update();
+	float updateTime = 0.0f;
+
+	{
+		aten::timer timer;
+		timer.begin();
+
+		if (g_enableUpdate) {
+			update();
+		}
+
+		updateTime = timer.end();
+
+		g_avgupdate = g_avgupdate * (frame - 1) + updateTime;
+		g_avgupdate /= (float)frame;
+	}
 
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -158,8 +177,6 @@ void onRun()
 
 		aten::visualizer::clear();
 	}
-
-	auto frame = g_tracer.frame();
 
 	g_rasterizer.draw(
 		g_tracer.frame(),
@@ -205,6 +222,7 @@ void onRun()
 	{
 		ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", g_tracer.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, g_avgcuda);
+		ImGui::Text("update : %.3f ms (avg : %.3f ms)", updateTime, g_avgupdate);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
 
 		int prevSamples = g_maxSamples;
@@ -344,6 +362,10 @@ void onKey(bool press, aten::Key key)
 		}
 		else if (key == aten::Key::Key_F3) {
 			g_enableFrameStep = !g_enableFrameStep;
+			return;
+		}
+		else if (key == aten::Key::Key_F4) {
+			g_enableUpdate = !g_enableUpdate;
 			return;
 		}
 		else if (key == aten::Key::Key_SPACE) {

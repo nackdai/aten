@@ -899,6 +899,15 @@ namespace aten
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
+		return hit(r, t_min, t_max, isect, false);
+	}
+
+	bool sbvh::hit(
+		const ray& r,
+		real t_min, real t_max,
+		Intersection& isect,
+		bool enableLod) const
+	{
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
 
@@ -948,7 +957,9 @@ namespace aten
 
 					//int exid = node->mainExid;
 					int exid = *(int*)(&node->exid);
-					exid = AT_BVHNODE_MAIN_EXID(exid);
+					bool hasLod = AT_BVHNODE_HAS_LOD(exid);
+					exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
+					//exid = AT_BVHNODE_LOD_EXID(exid);
 
 					isHit = hit(
 						exid,

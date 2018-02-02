@@ -50,6 +50,12 @@ namespace aten {
 			uint32_t num,
 			aabb* bbox = nullptr) = 0;
 
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect,
+			bool enableLod) const = 0;
+
 		virtual void update()
 		{
 			AT_ASSERT(false);

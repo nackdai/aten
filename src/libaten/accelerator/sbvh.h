@@ -64,6 +64,12 @@ namespace aten
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect,
+			bool enableLod) const override;
+
 		virtual bool exportTree(const char* path) override final;
 		virtual bool importTree(const char* path, int offsetTriIdx) override final;
 

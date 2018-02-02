@@ -124,7 +124,7 @@ namespace aten {
 			auto isHit = bbox.hit(r, t_min, t_max);
 
 			if (isHit) {
-				isHit = bvh::hit(this, r, t_min, t_max, isect);
+				isHit = bvh::onHit(this, r, t_min, t_max, isect);
 			}
 
 			return isHit;
@@ -566,11 +566,11 @@ namespace aten {
 		real t_min, real t_max,
 		Intersection& isect) const
 	{
-		bool isHit = hit(m_root, r, t_min, t_max, isect);
+		bool isHit = onHit(m_root, r, t_min, t_max, isect);
 		return isHit;
 	}
 
-	bool bvh::hit(
+	bool bvh::onHit(
 		const bvhnode* root,
 		const ray& r,
 		real t_min, real t_max,

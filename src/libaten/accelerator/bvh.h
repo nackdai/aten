@@ -203,6 +203,15 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect,
+			bool enableLod) const override
+		{
+			return hit(r, t_min, t_max, isect);
+		}
+
 		virtual const aabb& getBoundingbox() const override
 		{
 			if (m_root) {
@@ -326,7 +335,7 @@ namespace aten {
 			m_refitNodes.push_back(node);
 		}
 
-		static bool hit(
+		static bool onHit(
 			const bvhnode* root,
 			const ray& r,
 			real t_min, real t_max,

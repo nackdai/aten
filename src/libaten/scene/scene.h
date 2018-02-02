@@ -25,7 +25,8 @@ namespace AT_NAME {
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::hitrecord& rec,
-			aten::Intersection& isect) const = 0;
+			aten::Intersection& isect,
+			bool enableLod = false) const = 0;
 
 		virtual bool hit(
 			const aten::accelerator::ResultIntersectTestByFrustum& resF,
@@ -79,7 +80,8 @@ namespace AT_NAME {
 			const aten::vec3& lightPos,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec);
+			aten::hitrecord& rec,
+			bool enableLod = false);
 
 		static inline AT_DEVICE_API bool hitLight(
 			bool isHit,
@@ -196,9 +198,10 @@ namespace AT_NAME {
 			const aten::ray& r,
 			real t_min, real t_max,
 			aten::hitrecord& rec,
-			aten::Intersection& isect) const override final
+			aten::Intersection& isect,
+			bool enableLod = false) const override final
 		{
-			auto isHit = m_accel.hit(r, t_min, t_max, isect);
+			auto isHit = m_accel.hit(r, t_min, t_max, isect, enableLod);
 
 			// TODO
 #ifndef __AT_CUDA__

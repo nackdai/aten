@@ -76,6 +76,15 @@ namespace aten {
 			real t_min, real t_max,
 			Intersection& isect) const override;
 
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect,
+			bool enableLod) const override
+		{
+			return hit(r, t_min, t_max, isect);
+		}
+
 		std::vector<std::vector<StacklessQbvhNode>>& getNodes()
 		{
 			return m_listQbvhNode;

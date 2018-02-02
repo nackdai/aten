@@ -31,8 +31,8 @@ static aten::PathTracing g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
 
-//static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-static aten::Film g_buffer(WIDTH, HEIGHT);
+static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+//static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static aten::RasterizeRenderer g_rasterizerAABB;
 

@@ -980,6 +980,7 @@ void SponzaScene::makeScene(aten::scene* scene)
 
 	auto sponza = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
 
+#if 1
 	{
 		int offsetTriIdx = aten::face::faces().size();
 
@@ -988,6 +989,7 @@ void SponzaScene::makeScene(aten::scene* scene)
 		objs[0]->importInternalAccelTree("../../asset/sponza/sponza_lod.sbvh", offsetTriIdx);
 		sponza->setLod(objs[0]);
 	}
+#endif
 
 	scene->add(sponza);
 }

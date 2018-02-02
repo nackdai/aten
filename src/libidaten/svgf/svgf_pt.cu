@@ -175,7 +175,10 @@ __global__ void hitTest(
 			t_max = hitDistLimit;
 		}
 
-		bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
+		// TODO
+		bool enableLod = (bounce >= 2);
+
+		bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod);
 
 		isects[idx].t = isect.t;
 		isects[idx].objid = isect.objid;
@@ -190,6 +193,7 @@ __global__ void hitTest(
 			&& isect.t > hitDistLimit)
 		{
 			isHit = false;
+			path.isTerminate = true;
 		}
 
 		path.isHit = isHit;
@@ -670,6 +674,7 @@ __global__ void shade(
 }
 
 __global__ void hitShadowRay(
+	int bounce,
 	idaten::SVGFPathTracing::Path* paths,
 	int* hitindices,
 	int hitnum,
@@ -726,7 +731,10 @@ __global__ void hitShadowRay(
 
 			aten::ray r(shadowRay.rayorg, shadowRay.raydir[i]);
 
-			isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON);
+			// TODO
+			bool enableLod = (bounce >= 2);
+
+			isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
 
 			if (isHit) {
 				hitobj = &ctxt.shapes[isectTmp.objid];
@@ -1005,6 +1013,7 @@ namespace idaten
 		checkCudaKernel(shade);
 
 		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
+			bounce,
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount,
 			m_shadowRays.ptr(),

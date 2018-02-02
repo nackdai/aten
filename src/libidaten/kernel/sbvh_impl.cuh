@@ -86,7 +86,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 	const Context* ctxt,
 	const aten::ray r,
 	float t_min, float t_max,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	bool enableLod)
 {
 	aten::Intersection isectTmp;
 
@@ -140,7 +141,9 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 					}
 
 					int exid = __float_as_int(attrib.z);
-					exid = AT_BVHNODE_MAIN_EXID(exid);
+					bool hasLod = AT_BVHNODE_HAS_LOD(exid);
+					exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
+					//exid = AT_BVHNODE_MAIN_EXID(exid);
 
 					node = ctxt->nodes[exid];
 
@@ -274,7 +277,8 @@ AT_CUDA_INLINE __device__ bool intersectClosestSBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	aten::Intersection* isect,
-	float t_max/*= AT_MATH_INF*/)
+	float t_max/*= AT_MATH_INF*/,
+	bool enableLod/*= false*/)
 {
 	float t_min = AT_MATH_EPSILON;
 
@@ -282,7 +286,8 @@ AT_CUDA_INLINE __device__ bool intersectClosestSBVH(
 		ctxt,
 		r,
 		t_min, t_max,
-		isect);
+		isect,
+		enableLod);
 
 	return isHit;
 }
@@ -291,7 +296,8 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	aten::Intersection* isect,
-	const float t_max)
+	const float t_max,
+	bool enableLod/*= false*/)
 {
 	float t_min = AT_MATH_EPSILON;
 
@@ -299,7 +305,8 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
 		ctxt,
 		r,
 		t_min, t_max,
-		isect);
+		isect,
+		enableLod);
 
 	return isHit;
 }
@@ -307,7 +314,8 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
 AT_CUDA_INLINE __device__ bool intersectAnySBVH(
 	const Context* ctxt,
 	const aten::ray& r,
-	aten::Intersection* isect)
+	aten::Intersection* isect,
+	bool enableLod/*= false*/)
 {
 	float t_min = AT_MATH_EPSILON;
 	float t_max = AT_MATH_INF;
@@ -316,7 +324,8 @@ AT_CUDA_INLINE __device__ bool intersectAnySBVH(
 		ctxt,
 		r,
 		t_min, t_max,
-		isect);
+		isect,
+		enableLod);
 
 	return isHit;
 }

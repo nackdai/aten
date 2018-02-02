@@ -21,6 +21,8 @@ namespace idaten {
 			idaten::TypedCudaMemory<int>& bools,
 			int* result = nullptr);
 
+		static idaten::TypedCudaMemory<int>& getCount();
+
 #if 0
 		// test implementation.
 		static void compact();

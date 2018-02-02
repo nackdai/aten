@@ -189,7 +189,6 @@ namespace idaten
 
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,
-			int hitcount,
 			int width, int height,
 			int bounce, int rrBounce,
 			cudaTextureObject_t texVtxPos,

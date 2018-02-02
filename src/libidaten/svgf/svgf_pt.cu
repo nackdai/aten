@@ -1,5 +1,7 @@
 #include "svgf/svgf.h"
 
+#include "kernel/compaction.h"
+
 #include "kernel/context.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
@@ -372,7 +374,7 @@ __global__ void shade(
 	int width, int height,
 	idaten::SVGFPathTracing::Path* paths,
 	const int* __restrict__ hitindices,
-	int hitnum,
+	int* hitnum,
 	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
 	int frame,
@@ -390,7 +392,7 @@ __global__ void shade(
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (idx >= hitnum) {
+	if (idx >= *hitnum) {
 		return;
 	}
 
@@ -684,7 +686,7 @@ __global__ void hitShadowRay(
 	int bounce,
 	idaten::SVGFPathTracing::Path* paths,
 	int* hitindices,
-	int hitnum,
+	int* hitnum,
 	const idaten::SVGFPathTracing::ShadowRay* __restrict__ shadowRays,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -696,7 +698,7 @@ __global__ void hitShadowRay(
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (idx >= hitnum) {
+	if (idx >= *hitnum) {
 		return;
 	}
 
@@ -958,7 +960,6 @@ namespace idaten
 
 	void SVGFPathTracing::onShade(
 		cudaSurfaceObject_t outputSurf,
-		int hitcount,
 		int width, int height,
 		int bounce, int rrBounce,
 		cudaTextureObject_t texVtxPos,
@@ -987,9 +988,11 @@ namespace idaten
 		int blockPerGrid = 1;
 		int threadPerBlock = 1;
 #else
-		dim3 blockPerGrid((hitcount + 64 - 1) / 64);
+		dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
 #endif
+
+		auto& hitcount = Compaction::getCount();
 
 		int curaov = getCurAovs();
 
@@ -1003,7 +1006,7 @@ namespace idaten
 			mtxW2C,
 			width, height,
 			m_paths.ptr(),
-			m_hitidx.ptr(), hitcount,
+			m_hitidx.ptr(), hitcount.ptr(),
 			m_isects.ptr(),
 			m_rays.ptr(),
 			m_frame,
@@ -1023,7 +1026,7 @@ namespace idaten
 		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 			bounce,
 			m_paths.ptr(),
-			m_hitidx.ptr(), hitcount,
+			m_hitidx.ptr(), hitcount.ptr(),
 			m_shadowRays.ptr(),
 			m_shapeparam.ptr(), m_shapeparam.num(),
 			m_mtrlparam.ptr(),

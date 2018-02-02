@@ -141,6 +141,11 @@ namespace idaten
 	idaten::TypedCudaMemory<int> g_iota;
 	idaten::TypedCudaMemory<int> g_counts;
 
+	idaten::TypedCudaMemory<int>& Compaction::getCount()
+	{
+		return g_counts;
+	}
+
 	void Compaction::init(
 		int maxInputNum,
 		int blockSize)

@@ -174,18 +174,12 @@ namespace idaten
 				int hitcount = 0;
 				idaten::Compaction::compact(
 					m_hitidx,
-					m_hitbools,
-					&hitcount);
+					m_hitbools);
 
 				//AT_PRINTF("%d\n", hitcount);
 
-				if (hitcount == 0) {
-					break;
-				}
-
 				onShade(
 					outputSurf,
-					hitcount,
 					width, height,
 					bounce, rrBounce,
 					vtxTexPos, vtxTexNml);

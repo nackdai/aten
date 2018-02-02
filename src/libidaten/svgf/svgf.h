@@ -49,11 +49,11 @@ namespace idaten
 		struct ShadowRay {
 			aten::vec3 rayorg;
 
-			aten::vec3 raydir[ShadowRayNum];
-			aten::vec3 lightcontrib[ShadowRayNum];
-			real distToLight[ShadowRayNum];
+			aten::vec3 raydir;
+			aten::vec3 lightcontrib;
+			real distToLight;
 
-			uint8_t targetLightId[ShadowRayNum];
+			uint8_t targetLightId;
 
 			struct {
 				uint32_t isActive : 1;

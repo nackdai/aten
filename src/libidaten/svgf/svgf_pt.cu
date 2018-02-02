@@ -411,7 +411,7 @@ __global__ void shade(
 	idx = hitindices[idx];
 
 	__shared__ idaten::SVGFPathTracing::Path shPaths[64];
-	__shared__ idaten::SVGFPathTracing::ShadowRay shShadowRays[64];
+	__shared__ idaten::SVGFPathTracing::ShadowRay shShadowRays[64 * idaten::SVGFPathTracing::ShadowRayNum];
 	__shared__ aten::MaterialParameter shMtrls[64];
 
 	shPaths[threadIdx.x] = paths[idx];
@@ -518,16 +518,18 @@ __global__ void shade(
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
-	shShadowRays[threadIdx.x].isActive = false;
-
 	auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1), bounce);
 
 #if 1
+#pragma unroll
+	for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+		shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = false;
+	}
+
 	// Explicit conection to light.
 	if (!shMtrls[threadIdx.x].attrib.isSingular)
 	{
 		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
-		shShadowRays[threadIdx.x].rayorg = shadowRayOrg;
 
 		for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
 			real lightSelectPdf = 1;
@@ -559,11 +561,12 @@ __global__ void shade(
 			auto tmp = rec.p + dirToLight - shadowRayOrg;
 			auto shadowRayDir = normalize(tmp);
 
-			shShadowRays[threadIdx.x].isActive = true;
-			shShadowRays[threadIdx.x].raydir[i] = shadowRayDir;
-			shShadowRays[threadIdx.x].targetLightId[i] = lightidx;
-			shShadowRays[threadIdx.x].distToLight[i] = distToLight;
-			shShadowRays[threadIdx.x].lightcontrib[i] = aten::vec3(0);
+			shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = true;
+			shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].rayorg = shadowRayOrg;
+			shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].raydir = shadowRayDir;
+			shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].targetLightId = lightidx;
+			shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].distToLight = distToLight;
+			shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib = aten::vec3(0);
 			{
 				auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -584,7 +587,7 @@ __global__ void shade(
 						// i‘Å‚¿Á‚µ‚ ‚¤‚Ì‚ÅApdfLight‚É‚Í‹——£¬•ª‚ÍŠÜ‚ñ‚Å‚¢‚È‚¢j.
 						auto misW = pdfLight / (pdfb + pdfLight);
 
-						shShadowRays[threadIdx.x].lightcontrib[i] =
+						shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
 							(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;
 					}
 				}
@@ -603,7 +606,7 @@ __global__ void shade(
 
 							auto misW = pdfLight / (pdfb + pdfLight);
 
-							shShadowRays[threadIdx.x].lightcontrib[i] =
+							shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
 								(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;;
 						}
 					}
@@ -670,7 +673,11 @@ __global__ void shade(
 	shPaths[threadIdx.x].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
 
 	paths[idx] = shPaths[threadIdx.x];
-	shadowRays[idx] = shShadowRays[threadIdx.x];
+
+#pragma unroll
+	for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+		shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i] = shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i];
+	}
 }
 
 __global__ void hitShadowRay(
@@ -708,50 +715,51 @@ __global__ void hitShadowRay(
 
 	idx = hitindices[idx];
 
-	auto& shadowRay = shadowRays[idx];
-
-	if (shadowRay.isActive) {
 #pragma unroll
-		for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
-			auto targetLightId = shadowRay.targetLightId[i];
-			auto distToLight = shadowRay.distToLight[i];
+	for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+		const auto& shadowRay = shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i];
 
-			auto light = ctxt.lights[targetLightId];
-			auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
+		if (shadowRay.isActive) {
+			continue;
+		}
+		auto targetLightId = shadowRay.targetLightId;
+		auto distToLight = shadowRay.distToLight;
 
-			real distHitObjToRayOrg = AT_MATH_INF;
+		auto light = ctxt.lights[targetLightId];
+		auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
 
-			// Ray aim to the area light.
-			// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-			const aten::GeomParameter* hitobj = lightobj;
+		real distHitObjToRayOrg = AT_MATH_INF;
 
-			aten::Intersection isectTmp;
+		// Ray aim to the area light.
+		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+		const aten::GeomParameter* hitobj = lightobj;
 
-			bool isHit = false;
+		aten::Intersection isectTmp;
 
-			aten::ray r(shadowRay.rayorg, shadowRay.raydir[i]);
+		bool isHit = false;
 
-			// TODO
-			bool enableLod = (bounce >= 2);
+		aten::ray r(shadowRay.rayorg, shadowRay.raydir);
 
-			isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
+		// TODO
+		bool enableLod = (bounce >= 2);
 
-			if (isHit) {
-				hitobj = &ctxt.shapes[isectTmp.objid];
-			}
+		isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
 
-			isHit = AT_NAME::scene::hitLight(
-				isHit,
-				light.attrib,
-				lightobj,
-				distToLight,
-				distHitObjToRayOrg,
-				isectTmp.t,
-				hitobj);
+		if (isHit) {
+			hitobj = &ctxt.shapes[isectTmp.objid];
+		}
 
-			if (isHit) {
-				paths[idx].contrib += shadowRay.lightcontrib[i];
-			}
+		isHit = AT_NAME::scene::hitLight(
+			isHit,
+			light.attrib,
+			lightobj,
+			distToLight,
+			distHitObjToRayOrg,
+			isectTmp.t,
+			hitobj);
+
+		if (isHit) {
+			paths[idx].contrib += shadowRay.lightcontrib;
 		}
 	}
 }

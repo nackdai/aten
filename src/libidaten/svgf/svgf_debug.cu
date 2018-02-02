@@ -151,6 +151,7 @@ __global__ void pickPixel(
 		dst->depth = normalDepth.w;
 		dst->meshid = (int)momentMeshid.w;
 		dst->triid = isect.primid;
+		dst->mtrlid = isect.mtrlid;
 	}
 	else {
 		dst->ix = -1;

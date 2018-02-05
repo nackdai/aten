@@ -178,11 +178,15 @@ void onRun()
 		aten::visualizer::clear();
 	}
 
+	aten::GLProfiler::begin();
+
 	g_rasterizer.draw(
 		g_tracer.frame(),
 		&g_scene,
 		&g_camera,
 		&g_fbo);
+
+	auto rasterizerTime = aten::GLProfiler::end();
 
 	aten::timer timer;
 	timer.begin();
@@ -197,7 +201,11 @@ void onRun()
 	g_avgcuda = g_avgcuda * (frame - 1) + cudaelapsed;
 	g_avgcuda /= (float)frame;
 
+	aten::GLProfiler::begin();
+
 	aten::visualizer::render(false);
+
+	auto visualizerTime = aten::GLProfiler::end();
 
 	if (g_showAABB) {
 		g_rasterizerAABB.drawAABB(
@@ -224,6 +232,10 @@ void onRun()
 		ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, g_avgcuda);
 		ImGui::Text("update : %.3f ms (avg : %.3f ms)", updateTime, g_avgupdate);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+
+		if (aten::GLProfiler::isEnabled()) {
+			ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
+		}
 
 		int prevSamples = g_maxSamples;
 		int prevDepth = g_maxBounce;
@@ -368,6 +380,10 @@ void onKey(bool press, aten::Key key)
 			g_enableUpdate = !g_enableUpdate;
 			return;
 		}
+		else if (key == aten::Key::Key_F5) {
+			aten::GLProfiler::trigger();
+			return;
+		}
 		else if (key == aten::Key::Key_SPACE) {
 			if (g_enableFrameStep) {
 				g_frameStep = true;
@@ -444,6 +460,8 @@ int main()
 		onMouseMove,
 		onMouseWheel,
 		onKey);
+
+	aten::GLProfiler::start();
 
 	aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -590,6 +608,8 @@ int main()
 #endif
 
 	aten::window::run(onRun);
+
+	aten::GLProfiler::terminate();
 
 	aten::window::terminate();
 }

@@ -419,6 +419,9 @@
     <ClInclude Include="..\src\libaten\misc\thread.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\visualizer\GLProfiler.h">
+      <Filter>visualizer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -657,6 +660,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\misc\thread.cpp">
       <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\visualizer\GLProfiler.cpp">
+      <Filter>visualizer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

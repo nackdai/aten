@@ -38,12 +38,11 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	auto& path = paths[idx];
-	path.isHit = false;
+	paths->attrib[idx].isHit = false;
 
 	hitbools[idx] = 0;
 
-	if (path.isTerminate) {
+	if (paths->attrib[idx].isTerminate) {
 		return;
 	}
 
@@ -97,11 +96,11 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 
 		isects[idx].t = (camPos - vp).length();
 
-		path.isHit = true;
+		paths->attrib[idx].isHit = true;
 		hitbools[idx] = 1;
 	}
 	else {
-		path.isHit = false;
+		paths->attrib[idx].isHit = false;
 		hitbools[idx] = 0;
 	}
 }

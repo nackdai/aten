@@ -110,13 +110,13 @@ namespace idaten
 
 		int bounce = 0;
 
-		m_paths.init(width * height);
 		m_isects.init(width * height);
 		m_rays.init(width * height);
 
 		m_shadowRays.init(width * height * ShadowRayNum);
 
-		cudaMemset(m_paths.ptr(), 0, m_paths.bytes());
+		onInit(width, height);
+		onClear();
 
 		CudaGLResourceMap rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();

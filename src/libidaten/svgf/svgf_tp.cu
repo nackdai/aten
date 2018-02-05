@@ -124,8 +124,6 @@ __global__ void temporalReprojection(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	const auto path = paths[idx];
-
 	auto nmlDepth = curAovNormalDepth[idx];
 	auto momentMeshId = curAovMomentMeshid[idx];
 
@@ -133,7 +131,8 @@ __global__ void temporalReprojection(
 	const int centerMeshId = (int)momentMeshId.w;
 
 	// 今回のフレームのピクセルカラー.
-	float4 curColor = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 1.0f) / path.samples;
+	auto contrib = paths->contrib[idx].contrib;
+	float4 curColor = make_float4(contrib.x, contrib.y, contrib.z, 1.0f) / paths->contrib[idx].samples;
 	//curColor.w = 1;
 
 	if (centerMeshId < 0) {

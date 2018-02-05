@@ -138,15 +138,13 @@ __global__ void pickPixel(
 
 	if (isHit) {
 		const auto idx = getIdx(ix, iy, width);
-
-		const auto& path = paths[idx];
 		
 		auto normalDepth = aovNormalDepth[idx];
 		auto momentMeshid = aovMomentMeshid[idx];
 
 		dst->ix = ix;
 		dst->iy = iy;
-		dst->color = path.contrib;
+		dst->color = paths->contrib[idx].contrib;
 		dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
 		dst->depth = normalDepth.w;
 		dst->meshid = (int)momentMeshid.w;

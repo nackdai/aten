@@ -47,11 +47,10 @@ __global__ void genPath(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	auto& path = paths[idx];
-	path.isHit = false;
+	paths->attrib[idx].isHit = false;
 
-	if (path.isKill) {
-		path.isTerminate = true;
+	if (paths->attrib[idx].isKill) {
+		paths->attrib[idx].isTerminate = true;
 		return;
 	}
 
@@ -61,11 +60,11 @@ __global__ void genPath(
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+	paths->sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
 #endif
 
-	float r1 = path.sampler.nextSample();
-	float r2 = path.sampler.nextSample();
+	float r1 = paths->sampler[idx].nextSample();
+	float r2 = paths->sampler[idx].nextSample();
 
 	if (isFillAOV) {
 		r1 = r2 = 0.5f;
@@ -79,12 +78,12 @@ __global__ void genPath(
 
 	rays[idx] = camsample.r;
 
-	path.throughput = aten::vec3(1);
-	path.pdfb = 0.0f;
-	path.isTerminate = false;
-	path.isSingular = false;
+	paths->throughput[idx].throughput = aten::vec3(1);
+	paths->throughput[idx].pdfb = 0.0f;
+	paths->attrib[idx].isTerminate = false;
+	paths->attrib[idx].isSingular = false;
 
-	path.samples += 1;
+	paths->contrib[idx].samples += 1;
 
 	// Accumulate value, so do not reset.
 	//path.contrib = aten::vec3(0);
@@ -158,12 +157,11 @@ __global__ void hitTest(
 			return;
 		}
 
-		auto& path = paths[idx];
-		path.isHit = false;
+		paths->attrib[idx].isHit = false;
 
 		hitbools[idx] = 0;
 
-		if (path.isTerminate) {
+		if (paths->attrib[idx].isTerminate) {
 			continue;
 		}
 
@@ -172,7 +170,7 @@ __global__ void hitTest(
 		float t_max = AT_MATH_INF;
 
 		if (bounce >= 1
-			&& !path.isSingular)
+			&& !paths->attrib[idx].isSingular)
 		{
 			t_max = hitDistLimit;
 		}
@@ -191,14 +189,14 @@ __global__ void hitTest(
 		isects[idx].b = isect.b;
 
 		if (bounce >= 1
-			&& !path.isSingular
+			&& !paths->attrib[idx].isSingular
 			&& isect.t > hitDistLimit)
 		{
 			isHit = false;
-			path.isTerminate = true;
+			paths->attrib[idx].isTerminate = true;
 		}
 
-		path.isHit = isHit;
+		paths->attrib[idx].isHit = isHit;
 
 		hitbools[idx] = isHit ? 1 : 0;
 	} while (true);
@@ -212,12 +210,11 @@ __global__ void hitTest(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	auto& path = paths[idx];
-	path.isHit = false;
+	paths->attrib[idx].isHit = false;
 
 	hitbools[idx] = 0;
 
-	if (path.isTerminate) {
+	if (paths->attrib[idx].isTerminate) {
 		return;
 	}
 
@@ -238,7 +235,7 @@ __global__ void hitTest(
 	float t_max = AT_MATH_INF;
 
 	if (bounce >= 1
-		&& !path.isSingular)
+		&& !paths->attrib[idx].isSingular)
 	{
 		t_max = hitDistLimit;
 	}
@@ -255,13 +252,13 @@ __global__ void hitTest(
 	isects[idx].b = isect.b;
 
 	if (bounce >= 1
-		&& !path.isSingular
+		&& !paths->attrib[idx].isSingular
 		&& isect.t > hitDistLimit)
 	{
 		isHit = false;
 	}
 
-	path.isHit = isHit;
+	paths->attrib[idx].isHit = isHit;
 
 	hitbools[idx] = isHit ? 1 : 0;
 #endif
@@ -284,14 +281,12 @@ __global__ void shadeMiss(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	auto& path = paths[idx];
-
-	if (!path.isTerminate && !path.isHit) {
+	if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
 		// TODO
 		auto bg = aten::vec3(0);
 
 		if (isFirstBounce) {
-			path.isKill = true;
+			paths->attrib[idx].isKill = true;
 
 			// Export bg color to albedo buffer.
 			aovTexclrTemporalWeight[idx] = make_float4(bg.x, bg.y, bg.z, aovTexclrTemporalWeight[idx].w);
@@ -302,9 +297,9 @@ __global__ void shadeMiss(
 			bg = aten::vec3(1, 1, 1);
 		}
 
-		path.contrib += path.throughput * bg;
+		paths->contrib[idx].contrib += paths->throughput[idx].throughput * bg;
 
-		path.isTerminate = true;
+		paths->attrib[idx].isTerminate = true;
 	}
 }
 
@@ -330,9 +325,7 @@ __global__ void shadeMissWithEnvmap(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	auto& path = paths[idx];
-
-	if (!path.isTerminate && !path.isHit) {
+	if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
 		auto r = rays[idx];
 
 		auto uv = AT_NAME::envmap::convertDirectionToUV(r.dir);
@@ -342,7 +335,7 @@ __global__ void shadeMissWithEnvmap(
 
 		float misW = 1.0f;
 		if (isFirstBounce) {
-			path.isKill = true;
+			paths->attrib[idx].isKill = true;
 
 			// Export envmap to albedo buffer.
 			aovTexclrTemporalWeight[idx] = make_float4(emit.x, emit.y, emit.z, aovTexclrTemporalWeight[idx].w);
@@ -354,14 +347,14 @@ __global__ void shadeMissWithEnvmap(
 		}
 		else {
 			auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
-			misW = path.pdfb / (pdfLight + path.pdfb);
+			misW = paths->throughput[idx].pdfb / (pdfLight + paths->throughput[idx].pdfb);
 
 			emit *= envmapMultiplyer;
 		}
 
-		path.contrib += path.throughput * misW * emit;
+		paths->contrib[idx].contrib += paths->throughput[idx].throughput * misW * emit;
 
-		path.isTerminate = true;
+		paths->attrib[idx].isTerminate = true;
 	}
 }
 
@@ -412,11 +405,8 @@ __global__ void shade(
 
 	idx = hitindices[idx];
 
-	__shared__ idaten::SVGFPathTracing::Path shPaths[64];
 	__shared__ idaten::SVGFPathTracing::ShadowRay shShadowRays[64 * idaten::SVGFPathTracing::ShadowRayNum];
 	__shared__ aten::MaterialParameter shMtrls[64];
-
-	shPaths[threadIdx.x] = paths[idx];
 
 	const auto ray = rays[idx];
 
@@ -426,7 +416,7 @@ __global__ void shade(
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-	shPaths[threadIdx.x].sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+	paths->sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
 #endif
 
 	aten::hitrecord rec;
@@ -482,7 +472,7 @@ __global__ void shade(
 		if (!isBackfacing) {
 			float weight = 1.0f;
 
-			if (bounce > 0 && !shPaths[threadIdx.x].isSingular) {
+			if (bounce > 0 && !paths->attrib[idx].isSingular) {
 				auto cosLight = dot(orienting_normal, -ray.dir);
 				auto dist2 = aten::squared_length(rec.p - ray.org);
 
@@ -494,16 +484,15 @@ __global__ void shade(
 					// p31 - p35
 					pdfLight = pdfLight * dist2 / cosLight;
 
-					weight = shPaths[threadIdx.x].pdfb / (pdfLight + shPaths[threadIdx.x].pdfb);
+					weight = paths->throughput[idx].pdfb / (pdfLight + paths->throughput[idx].pdfb);
 				}
 			}
 
-			shPaths[threadIdx.x].contrib += shPaths[threadIdx.x].throughput * weight * shMtrls[threadIdx.x].baseColor;
+			paths->contrib[idx].contrib += paths->throughput[idx].throughput * weight * shMtrls[threadIdx.x].baseColor;
 		}
 
 		// When ray hit the light, tracing will finish.
-		shPaths[threadIdx.x].isTerminate = true;
-		paths[idx] = shPaths[threadIdx.x];
+		paths->attrib[idx].isTerminate = true;
 		return;
 	}
 
@@ -539,7 +528,7 @@ __global__ void shade(
 
 			// TODO
 			// Importance sampling.
-			int lightidx = aten::cmpMin<int>(shPaths[threadIdx.x].sampler.nextSample() * lightnum, lightnum - 1);
+			int lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
 			lightSelectPdf = 1.0f / lightnum;
 
 			aten::LightParameter light;
@@ -551,7 +540,7 @@ __global__ void shade(
 			light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
 			//auto light = ctxt.lights[lightidx];
 
-			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &shPaths[threadIdx.x].sampler, bounce);
+			sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
 
 			const auto& posLight = sampleres.pos;
 			const auto& nmlLight = sampleres.nml;
@@ -575,7 +564,7 @@ __global__ void shade(
 				real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 				auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v, albedo);
 
-				bsdf *= shPaths[threadIdx.x].throughput;
+				bsdf *= paths->throughput[idx].throughput;
 
 				// Get light color.
 				auto emit = sampleres.finalColor;
@@ -621,14 +610,14 @@ __global__ void shade(
 	real russianProb = real(1);
 
 	if (bounce > rrBounce) {
-		auto t = normalize(shPaths[threadIdx.x].throughput);
+		auto t = normalize(paths->throughput[idx].throughput);
 		auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
 
-		russianProb = shPaths[threadIdx.x].sampler.nextSample();
+		russianProb = paths->sampler[idx].nextSample();
 
 		if (russianProb >= p) {
 			//shPaths[threadIdx.x].contrib = aten::vec3(0);
-			shPaths[threadIdx.x].isTerminate = true;
+			paths->attrib[idx].isTerminate = true;
 		}
 		else {
 			russianProb = p;
@@ -644,7 +633,7 @@ __global__ void shade(
 		orienting_normal,
 		ray.dir,
 		rec.normal,
-		&shPaths[threadIdx.x].sampler,
+		&paths->sampler[idx],
 		rec.u, rec.v,
 		albedo);
 
@@ -661,20 +650,18 @@ __global__ void shade(
 	}
 
 	if (pdfb > 0 && c > 0) {
-		shPaths[threadIdx.x].throughput *= bsdf * c / pdfb;
-		shPaths[threadIdx.x].throughput /= russianProb;
+		paths->throughput[idx].throughput *= bsdf * c / pdfb;
+		paths->throughput[idx].throughput /= russianProb;
 	}
 	else {
-		shPaths[threadIdx.x].isTerminate = true;
+		paths->attrib[idx].isTerminate = true;
 	}
 
 	// Make next ray.
 	rays[idx] = aten::ray(rec.p, nextDir);
 
-	shPaths[threadIdx.x].pdfb = pdfb;
-	shPaths[threadIdx.x].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
-
-	paths[idx] = shPaths[threadIdx.x];
+	paths->throughput[idx].pdfb = pdfb;
+	paths->attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
 
 #pragma unroll
 	for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
@@ -761,7 +748,7 @@ __global__ void hitShadowRay(
 			hitobj);
 
 		if (isHit) {
-			paths[idx].contrib += shadowRay.lightcontrib;
+			paths->contrib[idx].contrib += shadowRay.lightcontrib;
 		}
 	}
 }
@@ -787,11 +774,10 @@ __global__ void gather(
 
 	const auto idx = getIdx(ix, iy, width);
 
-	const auto& path = paths[idx];
+	int sample = paths->contrib[idx].samples;
+	auto c = paths->contrib[idx].contrib;
 
-	int sample = path.samples;
-
-	float3 contrib = make_float3(path.contrib.x, path.contrib.y, path.contrib.z) / sample;
+	float3 contrib = make_float3(c.x, c.y, c.z) / sample;
 	//contrib.w = sample;
 
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);

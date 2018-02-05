@@ -400,5 +400,8 @@
     <CudaCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
       <Filter>cuda</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\svgf\svgf_init.cu">
+      <Filter>svgf</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

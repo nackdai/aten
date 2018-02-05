@@ -31,20 +31,34 @@ namespace idaten
 		static const int ShadowRayNum = 2;
 
 #ifdef __AT_CUDA__
-		struct Path {
+		struct PathThroughput {
 			aten::vec3 throughput;
-			aten::vec3 contrib;
-			aten::sampler sampler;
-
 			real pdfb;
-			int samples;
-
-			bool isHit;
-			bool isTerminate;
-			bool isSingular;
-			bool isKill;
 		};
-		C_ASSERT((sizeof(Path) % 4) == 0);
+
+		struct PathContrib {
+			aten::vec3 contrib;
+			int samples;
+		};
+
+		struct PathAttribute {
+			union {
+				float4 v;
+				struct {
+					bool isHit;
+					bool isTerminate;
+					bool isSingular;
+					bool isKill;
+				};
+			};
+		};
+
+		struct Path {
+			PathThroughput* throughput;
+			PathContrib* contrib;
+			PathAttribute* attrib;
+			aten::sampler* sampler;
+		};
 
 		struct ShadowRay {
 			aten::vec3 rayorg;
@@ -61,6 +75,9 @@ namespace idaten
 		};
 #else
 		struct Path;
+		struct PathThroughput;
+		struct PathContrib;
+		struct PathAttribute;
 		struct ShadowRay;
 #endif
 
@@ -166,6 +183,10 @@ namespace idaten
 		}
 
 	protected:
+		void onInit(int width, int height);
+
+		void onClear();
+
 		virtual void onGenPath(
 			int width, int height,
 			int sample, int maxSamples,
@@ -237,7 +258,13 @@ namespace idaten
 		}
 
 	protected:
+		bool m_isInitPash{ false };
 		idaten::TypedCudaMemory<Path> m_paths;
+		idaten::TypedCudaMemory<PathThroughput> m_pathThroughput;
+		idaten::TypedCudaMemory<PathContrib> m_pathContrib;
+		idaten::TypedCudaMemory<PathAttribute> m_pathAttrib;
+		idaten::TypedCudaMemory<aten::sampler> m_pathSampler;
+
 		idaten::TypedCudaMemory<aten::Intersection> m_isects;
 		idaten::TypedCudaMemory<aten::ray> m_rays;
 

@@ -52,6 +52,11 @@ namespace aten {
 		// http://qiita.com/edo_m18/items/2bd885b13bd74803a368
 		// http://kanamori.cs.tsukuba.ac.jp/jikken/inner/triangle_intersection.pdf
 
+		// NOTE
+		// À‘•‚µ‚Ä‚İ‚Ä‘¬“x“I‚É•Ï‰»‚ª‚È‚©‚Á‚½‚ªAƒƒ‚‚Æ‚µ‚Ä.
+		// Fast	Minimum Storage RayTriangle	Intersection.
+		// https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
+
 		vec3 e1 = v1 - v0;
 		vec3 e2 = v2 - v0;
 		vec3 r = ray.org - v0;

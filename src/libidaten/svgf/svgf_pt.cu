@@ -708,7 +708,7 @@ __global__ void hitShadowRay(
 	for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
 		const auto& shadowRay = shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i];
 
-		if (shadowRay.isActive) {
+		if (!shadowRay.isActive) {
 			continue;
 		}
 		auto targetLightId = shadowRay.targetLightId;

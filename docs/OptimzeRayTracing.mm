@@ -269,6 +269,10 @@
 </node>
 </node>
 </node>
+<node CREATED="1517822752019" ID="ID_282486606" MODIFIED="1517822762177" TEXT="&#xff16;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x4ee5;&#x964d;&#x63cf;&#x753b;&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;">
+<node CREATED="1517822762677" ID="ID_1650141646" MODIFIED="1517822766576" TEXT="sponza&#x3067;&#x78ba;&#x8a8d;"/>
+</node>
+<node CREATED="1517822767252" ID="ID_594255335" MODIFIED="1517822781600" TEXT="CornellBox&#x3067;&#x30e9;&#x30a4;&#x30c8;&#x79fb;&#x52d5;&#x306e;Variance&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;"/>
 </node>
 <node CREATED="1512725616581" ID="ID_1838812617" MODIFIED="1512725620825" POSITION="right" TEXT="&#x9ad8;&#x901f;&#x5316;&#x6848;">
 <node CREATED="1512725621309" ID="ID_637230800" MODIFIED="1516934323710" TEXT="&#x30b8;&#x30aa;&#x30e1;&#x30c8;&#x30ea;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;">
@@ -303,6 +307,10 @@
 <node CREATED="1517477673601" ID="ID_631395261" MODIFIED="1517555285842" TEXT="ShadowRay&#x5206;&#x5272;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1517477680209" ID="ID_1871317225" MODIFIED="1517477708906" TEXT="&#x73fe;&#x5728;&#x306e;ShadowRay&#x306b;&#xff12;&#x3064;&#x5206;&#x306e;&#x30c7;&#x30fc;&#x30bf;&#x3092;&#x5165;&#x308c;&#x308b;&#x306e;&#x3067;&#x306f;&#x306a;&#x304f;&#x3001;&#x5168;&#x90e8;&#x30d5;&#x30e9;&#x30c3;&#x30c8;&#x306a;&#x914d;&#x5217;&#x306b;&#x3059;&#x308b;"/>
+</node>
+<node CREATED="1517822784508" ID="ID_29808556" MODIFIED="1517822789256" TEXT="Voxel">
+<node CREATED="1517822794924" ID="ID_1430070360" LINK="http://research.nvidia.com/publication/voxelpipe-programmable-pipeline-3d-voxelization" MODIFIED="1517822802645" TEXT="http://research.nvidia.com/publication/voxelpipe-programmable-pipeline-3d-voxelization"/>
+<node CREATED="1517822805805" ID="ID_1988477591" LINK="https://github.com/nervoussystem/voxelpipe" MODIFIED="1517823009749" TEXT="&#x30bd;&#x30fc;&#x30b9;&#x30b3;&#x30fc;&#x30c9;&#x3082;&#x3042;&#x308b;"/>
 </node>
 </node>
 </node>

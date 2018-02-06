@@ -6,7 +6,7 @@
 #include <iterator>
 #include <numeric>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten
 {
@@ -103,6 +103,7 @@ namespace aten
 			}
 			else {
 				buildInternal(list, num);
+				makeTreelet();
 			}
 		}
 		else {
@@ -192,13 +193,14 @@ namespace aten
 
 		struct SBVHEntry {
 			SBVHEntry() {}
-			SBVHEntry(uint32_t id) : nodeIdx(id) {}
+			SBVHEntry(uint32_t id, uint32_t d) : nodeIdx(id), depth(d) {}
 
 			uint32_t nodeIdx;
+			uint32_t depth;
 		} stack[128];
 
 		int stackpos = 1;
-		stack[0] = SBVHEntry(0);
+		stack[0] = SBVHEntry(0, 0);
 
 		m_nodes.reserve(m_refs.size() * 3);
 		m_nodes.push_back(SBVHNode());
@@ -355,8 +357,14 @@ namespace aten
 			m_nodes[leftIdx] = SBVHNode(std::move(leftList), objLeftBB);
 			m_nodes[rightIdx] = SBVHNode(std::move(rightList), objRightBB);
 
-			stack[stackpos++].nodeIdx = leftIdx;
-			stack[stackpos++].nodeIdx = rightIdx;
+			m_nodes[leftIdx].parent = top.nodeIdx;
+			m_nodes[leftIdx].depth = top.depth + 1;
+
+			m_nodes[rightIdx].parent = top.nodeIdx;
+			m_nodes[rightIdx].depth = top.depth + 1;
+
+			stack[stackpos++] = SBVHEntry(leftIdx, top.depth + 1);
+			stack[stackpos++] = SBVHEntry(rightIdx, top.depth + 1);
 
 			numNodes += 2;
 		}
@@ -890,6 +898,48 @@ namespace aten
 			if (!sbvhNode.isLeaf()) {
 				stack[stackpos++] = sbvhNode.right;
 				stack[stackpos++] = sbvhNode.left;
+			}
+		}
+	}
+
+	void sbvh::makeTreelet()
+	{
+		int stack[128] = { 0 };
+
+		for (size_t i = 0; i < m_nodes.size(); i++) {
+			const auto& root = m_nodes[i];
+
+			bool isTreeletRoot = (((root.depth % 3) == 0) && !root.isLeaf());
+
+			if (isTreeletRoot) {
+				m_treelets.push_back(SbvhTreelet());
+				auto& treelet = m_treelets[m_treelets.size() - 1];
+
+				treelet.idxInBvhTree = i;
+
+				stack[0] = root.left;
+				stack[1] = root.right;
+				int stackpos = 2;
+
+				while (stackpos > 0) {
+					int idx = stack[stackpos - 1];
+					stackpos -= 1;
+
+					const auto& sbvhNode = m_nodes[idx];
+
+					if (sbvhNode.isLeaf()) {
+						treelet.leafChildren.push_back(idx);
+						
+						const auto refid = sbvhNode.refIds[0];
+						const auto& ref = m_refs[refid];
+						const auto triid = ref.triid + m_offsetTriIdx;
+						treelet.tris.push_back(triid);
+					}
+					else {
+						stack[stackpos++] = sbvhNode.right;
+						stack[stackpos++] = sbvhNode.left;
+					}
+				}
 			}
 		}
 	}

@@ -44,6 +44,12 @@ namespace aten
 #endif
 	};
 
+	struct SbvhTreelet {
+		uint32_t idxInBvhTree;
+		std::vector<uint32_t> leafChildren;
+		std::vector<uint32_t> tris;
+	};
+
 	// NOTE
 	// GPGPU処理用に両方を同じメモリ空間上に格納するため、同じサイズでないといけない.
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
@@ -104,6 +110,8 @@ namespace aten
 			int offset,
 			std::vector<int>& indices) const;
 
+		void makeTreelet();
+
 		bool hit(
 			int exid,
 			const ray& r,
@@ -139,6 +147,9 @@ namespace aten
 
 			// Child right;
 			int right{ -1 };
+
+			int parent{ -1 };
+			int depth{ -1 };
 
 			bool leaf{ true };
 		};
@@ -234,5 +245,8 @@ namespace aten
 		// For layer.
 		std::vector<std::vector<ThreadedSbvhNode>> m_threadedNodes;
 		std::vector<int> m_refIndices;
+
+		// For treelet.
+		std::vector<SbvhTreelet> m_treelets;
 	};
 }

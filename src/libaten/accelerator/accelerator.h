@@ -50,6 +50,12 @@ namespace aten {
 			uint32_t num,
 			aabb* bbox = nullptr) = 0;
 
+		virtual void buildVoxel()
+		{
+			// Nothing is done.
+			AT_ASSERT(false);
+		}
+
 		virtual bool hit(
 			const ray& r,
 			real t_min, real t_max,

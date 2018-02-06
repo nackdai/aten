@@ -6,7 +6,7 @@
 #include <iterator>
 #include <numeric>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {
@@ -916,6 +916,7 @@ namespace aten
 				auto& treelet = m_treelets[m_treelets.size() - 1];
 
 				treelet.idxInBvhTree = i;
+				treelet.depth = root.depth;
 
 				stack[0] = root.left;
 				stack[1] = root.right;

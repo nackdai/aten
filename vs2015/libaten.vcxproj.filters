@@ -664,6 +664,9 @@
     <ClCompile Include="..\src\libaten\visualizer\GLProfiler.cpp">
       <Filter>visualizer</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemap_fs.glsl">

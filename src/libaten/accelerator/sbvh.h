@@ -46,8 +46,17 @@ namespace aten
 
 	struct SbvhTreelet {
 		uint32_t idxInBvhTree;
+		uint32_t depth;
 		std::vector<uint32_t> leafChildren;
 		std::vector<uint32_t> tris;
+	};
+
+	struct BvhVoxel {
+		aten::vec3 normal;
+		float padding0{ 0.0f };
+
+		aten::vec3 color;
+		float padding1{ 0.0f };
 	};
 
 	// NOTE
@@ -64,6 +73,8 @@ namespace aten
 			hitable** list,
 			uint32_t num,
 			aabb* bbox = nullptr) override final;
+
+		virtual void buildVoxel() override final;
 
 		virtual bool hit(
 			const ray& r,
@@ -246,7 +257,8 @@ namespace aten
 		std::vector<std::vector<ThreadedSbvhNode>> m_threadedNodes;
 		std::vector<int> m_refIndices;
 
-		// For treelet.
+		// For voxelize.
 		std::vector<SbvhTreelet> m_treelets;
+		std::vector<BvhVoxel> m_voxels;
 	};
 }

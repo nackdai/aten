@@ -358,6 +358,7 @@
     <ClCompile Include="..\src\libaten\accelerator\CullingFrusta.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />

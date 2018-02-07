@@ -19,9 +19,11 @@ struct Options {
 	std::string inputFilename;
 } g_opt;
 
+static std::vector<aten::object*> g_objs;
 static aten::AcceleratedScene<aten::sbvh> g_scene;
 
 static VoxelViewer g_viewer;
+static aten::RasterizeRenderer g_rasterizer;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -29,6 +31,7 @@ static bool g_isCameraDirty = false;
 static bool g_willShowGUI = true;
 
 static int g_drawVoxelIdx = -1;
+static bool g_drawMesh = false;
 static bool g_isWireframe = false;
 
 static bool g_isMouseLBtnDown = false;
@@ -58,10 +61,17 @@ void onRun()
 		g_isWireframe,
 		g_drawVoxelIdx);
 
+	if (g_drawMesh) {
+		for (auto obj : g_objs) {
+			g_rasterizer.draw(obj, &g_camera, false);
+		}
+	}
+
 	{
 		ImGui::Text("Voxel Cnt [%d]", voxels.size());
 		ImGui::InputInt("Voxel", &g_drawVoxelIdx);
 		ImGui::Checkbox("Wireframe,", &g_isWireframe);
+		ImGui::Checkbox("Draw mesh,", &g_drawMesh);
 
 		g_drawVoxelIdx = aten::clamp(g_drawVoxelIdx, -1, (int)voxels.size() - 1);
 
@@ -69,6 +79,7 @@ void onRun()
 			const auto& voxel = voxels[g_drawVoxelIdx];
 			const auto& node = nodes[voxel.exid][voxel.nodeid];
 
+			ImGui::Text("ExId [%d] NodeId[%d] Depth[%d]", voxel.exid, voxel.nodeid, voxel.depth);
 			ImGui::Text("Box min [%f, %f, %f]", node.boxmin.x, node.boxmin.y, node.boxmin.z);
 			ImGui::Text("Box max [%f, %f, %f]", node.boxmax.x, node.boxmax.y, node.boxmax.z);
 		}
@@ -214,11 +225,9 @@ bool parseOption(
 // TODO
 void loadObj(const Options& opt)
 {
-	std::vector<aten::object*> objs;
+	aten::ObjLoader::load(g_objs, opt.input);
 
-	aten::ObjLoader::load(objs, opt.input);
-
-	for (auto obj : objs) {
+	for (auto obj : g_objs) {
 		auto instance = new aten::instance<aten::object>(obj, aten::mat4::Identity);
 		g_scene.add(instance);
 	}
@@ -275,6 +284,11 @@ int main(int argc, char* argv[])
 		WIDTH, HEIGHT,
 		"voxelviewer_vs.glsl",
 		"voxelviewer_fs.glsl");
+
+	g_rasterizer.init(
+		WIDTH, HEIGHT,
+		"../shader/drawobj_vs.glsl",
+		"../shader/drawobj_fs.glsl");
 
 	aten::window::run(onRun);
 

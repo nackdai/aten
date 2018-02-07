@@ -50,7 +50,7 @@ namespace aten {
 			uint32_t num,
 			aabb* bbox = nullptr) = 0;
 
-		virtual void buildVoxel()
+		virtual void buildVoxel(uint32_t offset)
 		{
 			// Nothing is done.
 			AT_ASSERT(false);

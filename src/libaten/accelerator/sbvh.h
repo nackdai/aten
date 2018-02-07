@@ -4,6 +4,8 @@
 
 #define SBVH_TRIANGLE_NUM	(1)
 
+#define VOXEL_TEST
+
 namespace aten
 {
 	struct ThreadedSbvhNode {
@@ -25,7 +27,13 @@ namespace aten
 		float isleaf{ -1 };
 		float triid{ -1 };
 		float padding{ -1 };
+
+#ifdef VOXEL_TEST
+		float voxel{ -1 };
+#else
 		float parent{ -1 };
+#endif
+
 
 		bool isLeaf() const
 		{
@@ -53,10 +61,10 @@ namespace aten
 
 	struct BvhVoxel {
 		aten::vec3 normal;
-		float padding0{ 0.0f };
+		float geomid{ -1.0f };
 
 		aten::vec3 color;
-		float padding1{ 0.0f };
+		float padding{ 0.0f };
 	};
 
 	// NOTE
@@ -74,7 +82,7 @@ namespace aten
 			uint32_t num,
 			aabb* bbox = nullptr) override final;
 
-		virtual void buildVoxel() override final;
+		virtual void buildVoxel(uint32_t offset) override final;
 
 		virtual bool hit(
 			const ray& r,
@@ -161,6 +169,8 @@ namespace aten
 
 			int parent{ -1 };
 			int depth{ -1 };
+
+			int voxelIdx{ -1 };
 
 			bool leaf{ true };
 		};

@@ -6,7 +6,7 @@
 #include <iterator>
 #include <numeric>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {
@@ -52,7 +52,7 @@ namespace aten
 		return lambda1 >= 0.0f && lambda2 >= 0.0f && lambda1 + lambda2 <= 1.0f;
 	}
 
-	void sbvh::buildVoxel()
+	void sbvh::buildVoxel(uint32_t offset)
 	{
 		const auto& faces = aten::face::faces();
 		const auto& vertices = aten::VertexManager::getVertices();
@@ -61,7 +61,10 @@ namespace aten
 		for (size_t i = 0; i < m_treelets.size(); i++) {
 			const auto& treelet = m_treelets[i];
 
-			const auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
+			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
+
+			// Speficfy having voxel.
+			sbvhNode.voxelIdx = i + offset;
 
 			auto center = sbvhNode.bbox.getCenter();
 

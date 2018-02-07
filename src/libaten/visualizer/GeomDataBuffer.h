@@ -8,6 +8,13 @@ namespace aten {
 		Lines,
 	};
 
+	struct VertexAttrib {
+		int type;
+		int num;
+		int size;
+		int offset;
+	};
+
 	class GeomVertexBuffer {
 		friend class GeomIndexBuffer;
 
@@ -20,6 +27,14 @@ namespace aten {
 			uint32_t stride,
 			uint32_t vtxNum,
 			uint32_t offset,
+			const void* data);
+
+		void init(
+			uint32_t stride,
+			uint32_t vtxNum,
+			uint32_t offset,
+			const VertexAttrib* attribs,
+			uint32_t attribNum,
 			const void* data);
 
 		void update(

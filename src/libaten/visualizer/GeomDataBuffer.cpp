@@ -8,6 +8,34 @@ namespace aten {
 		uint32_t offset,
 		const void* data)
 	{
+		// Fix vertex structure
+		//  float4 pos
+		//  float3 nml
+		//  float3 uv
+
+		static const VertexAttrib attribs[] = {
+			{ GL_FLOAT, 3, sizeof(GLfloat), 0 },
+			{ GL_FLOAT, 3, sizeof(GLfloat), 16 },
+			{ GL_FLOAT, 2, sizeof(GLfloat), 28 },
+		};
+
+		init(
+			stride,
+			vtxNum,
+			offset,
+			attribs,
+			AT_COUNTOF(attribs),
+			data);
+	}
+
+	void GeomVertexBuffer::init(
+		uint32_t stride,
+		uint32_t vtxNum,
+		uint32_t offset,
+		const VertexAttrib* attribs,
+		uint32_t attribNum,
+		const void* data)
+	{
 		CALL_GL_API(::glGenBuffers(1, &m_vbo));
 
 		auto size = stride * vtxNum;
@@ -33,26 +61,9 @@ namespace aten {
 			CALL_GL_API(::glBindVertexArray(m_vao));
 			CALL_GL_API(::glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
 
-			// TODO
-			// Fix vertex structure
-			//  float4 pos
-			//  float3 nml
-			//  float3 uv
-
-			static const struct VertexAttrib {
-				GLenum type;
-				int num;
-				int size;
-				int offset;
-			} attribs[] = {
-				{ GL_FLOAT, 3, sizeof(GLfloat), 0 },
-				{ GL_FLOAT, 3, sizeof(GLfloat), 16 },
-				{ GL_FLOAT, 2, sizeof(GLfloat), 28 },
-			};
-
 			auto offsetByte = offset * m_vtxStride;
 
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < attribNum; i++) {
 				CALL_GL_API(::glEnableVertexAttribArray(i));
 
 				CALL_GL_API(::glVertexAttribPointer(

@@ -134,7 +134,9 @@ namespace aten
 				auto box = bvh->getBoundingbox();
 				bbox.expand(box);
 
-				bvh->buildVoxel(m_voxels.size());
+				// NOTE
+				// exid ‚Í top layer ‚ª 0 ‚È‚Ì‚ÅA+1 ‚·‚é.
+				bvh->buildVoxel(i + 1, m_voxels.size());
 				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
 
 				std::vector<int> indices;

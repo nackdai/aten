@@ -101,7 +101,9 @@ namespace aten
 		return lambda1 >= 0.0f && lambda2 >= 0.0f && lambda1 + lambda2 <= 1.0f;
 	}
 
-	void sbvh::buildVoxel(uint32_t offset)
+	void sbvh::buildVoxel(
+		uint32_t exid,
+		uint32_t offset)
 	{
 		const auto& faces = aten::face::faces();
 		const auto& vertices = aten::VertexManager::getVertices();
@@ -124,6 +126,7 @@ namespace aten
 			}
 
 			voxel.nodeid = treelet.idxInBvhTree;
+			voxel.exid = exid;
 			voxel.depth = sbvhNode.depth;
 
 			for (const auto tid : treelet.tris) {

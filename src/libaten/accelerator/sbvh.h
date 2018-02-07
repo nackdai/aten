@@ -64,7 +64,10 @@ namespace aten
 		uint32_t nodeid{ 0 };
 
 		aten::vec3 color;
-		uint32_t depth{ 0 };
+		struct {
+			uint32_t exid : 16;
+			uint32_t depth : 16;
+		};
 	};
 
 	// NOTE
@@ -82,7 +85,9 @@ namespace aten
 			uint32_t num,
 			aabb* bbox = nullptr) override final;
 
-		virtual void buildVoxel(uint32_t offset) override final;
+		virtual void buildVoxel(
+			uint32_t exid,
+			uint32_t offset) override final;
 
 		virtual bool hit(
 			const ray& r,
@@ -117,6 +122,10 @@ namespace aten
 		const std::vector<aten::mat4>& getMatrices() const
 		{
 			return m_bvh.getMatrices();
+		}
+		const std::vector<BvhVoxel>& getVoxels() const
+		{
+			return m_voxels;
 		}
 
 	private:

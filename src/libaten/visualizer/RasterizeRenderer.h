@@ -43,7 +43,8 @@ namespace aten {
 		void draw(
 			object* obj, 
 			const camera* cam,
-			bool isWireFrame);
+			bool isWireFrame,
+			bool willClear = false);
 
 		void initBuffer(
 			uint32_t vtxStride,

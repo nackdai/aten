@@ -80,7 +80,9 @@ namespace AT_NAME
 			int albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
 			const aten::texture* albedo = albedoTexId >= 0 ? aten::texture::getTexture(albedoTexId) : nullptr;
 
-			func(albedo);
+			auto color = m_mtrl ? m_mtrl->param().baseColor : vec3(1);
+
+			func(color, albedo);
 		}
 
 		auto vb = VertexManager::getVB();

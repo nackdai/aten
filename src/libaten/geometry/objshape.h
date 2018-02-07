@@ -10,7 +10,7 @@
 
 namespace AT_NAME
 {
-	using FuncObjectMeshDraw = std::function<void(const aten::texture*)>;
+	using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*)>;
 
 	class objshape : public aten::geombase {
 		friend class object;

@@ -263,7 +263,8 @@ namespace aten {
 	void RasterizeRenderer::draw(
 		object* obj, 
 		const camera* cam,
-		bool isWireFrame)
+		bool isWireFrame,
+		bool willClear/*= false*/)
 	{
 		auto camparam = cam->param();
 
@@ -309,12 +310,14 @@ namespace aten {
 		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
 		CALL_GL_API(::glEnable(GL_CULL_FACE));
 
-		// TODO
-		// Will modify to specify clear color.
-		CALL_GL_API(::glClearColor(0, 0, 0, 0));
-		CALL_GL_API(::glClearDepthf(1.0f));
-		CALL_GL_API(::glClearStencil(0));
-		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+		if (willClear) {
+			// TODO
+			// Will modify to specify clear color.
+			CALL_GL_API(::glClearColor(0, 0, 0, 0));
+			CALL_GL_API(::glClearDepthf(1.0f));
+			CALL_GL_API(::glClearStencil(0));
+			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+		}
 
 		// TODO
 		// ‚±‚±‚Å‚â‚é?
@@ -325,8 +328,9 @@ namespace aten {
 		}
 
 		auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
+		auto hColor = m_shader.getHandle("color");
 
-		obj->draw([&](const aten::texture* albedo) {
+		obj->draw([&](const aten::vec3& color, const aten::texture* albedo) {
 			if (albedo) {
 				albedo->bindAsGLTexture(0, &m_shader);
 				CALL_GL_API(::glUniform1i(hHasAlbedo, true));
@@ -334,6 +338,8 @@ namespace aten {
 			else {
 				CALL_GL_API(::glUniform1i(hHasAlbedo, false));
 			}
+
+			CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
 		});
 
 		// –ß‚·.

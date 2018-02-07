@@ -29,6 +29,7 @@ static bool g_isCameraDirty = false;
 static bool g_willShowGUI = true;
 
 static int g_drawVoxelIdx = -1;
+static bool g_isWireframe = false;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
@@ -54,11 +55,13 @@ void onRun()
 		&g_camera,
 		nodes,
 		voxels,
+		g_isWireframe,
 		g_drawVoxelIdx);
 
 	{
 		ImGui::Text("Voxel Cnt [%d]", voxels.size());
 		ImGui::InputInt("Voxel", &g_drawVoxelIdx);
+		ImGui::Checkbox("Wireframe,", &g_isWireframe);
 
 		g_drawVoxelIdx = aten::clamp(g_drawVoxelIdx, -1, (int)voxels.size() - 1);
 

@@ -39,6 +39,25 @@ static const uint32_t VoxelIdxs[] = {
 	4, 7, 5,
 };
 
+static const uint32_t VoxelWireFrameIdxs[] = {
+	0, 1,
+	0, 2,
+	1, 3,
+	2, 3,
+
+	4, 5,
+	4, 6,
+	5, 7,
+	6, 7,
+
+	2, 6,
+	3, 7,
+
+	0, 4,
+	1, 5,
+};
+
+
 bool VoxelViewer::init(
 	int width, int height,
 	const char* pathVS,
@@ -63,6 +82,8 @@ bool VoxelViewer::init(
 	// index buffer.
 	m_ib.init(AT_COUNTOF(VoxelIdxs), VoxelIdxs);
 
+	m_ibForWireframe.init(AT_COUNTOF(VoxelWireFrameIdxs), VoxelWireFrameIdxs);
+
 	return m_shader.init(width, height, pathVS, pathFS);
 }
 
@@ -70,7 +91,8 @@ void VoxelViewer::draw(
 	const aten::camera* cam,
 	const std::vector<std::vector<aten::ThreadedSbvhNode>>& nodes,
 	const std::vector<aten::BvhVoxel>& voxels,
-	int drawVoxelIdx/*= -1*/)
+	bool isWireframe,
+	int drawVoxelIdx)
 {
 	m_shader.prepareRender(nullptr, false);
 
@@ -140,6 +162,11 @@ void VoxelViewer::draw(
 		CALL_GL_API(::glUniform3f(hColor, voxel.color.x, voxel.color.y, voxel.color.z));
 		CALL_GL_API(::glUniform3f(hNormal, voxel.normal.x, voxel.normal.y, voxel.normal.z));
 
-		m_ib.draw(m_vb, aten::Primitive::Triangles, 0, PrimCnt);
+		if (isWireframe) {
+			m_ibForWireframe.draw(m_vb, aten::Primitive::Lines, 0, 12);
+		}
+		else {
+			m_ib.draw(m_vb, aten::Primitive::Triangles, 0, PrimCnt);
+		}
 	}
 }

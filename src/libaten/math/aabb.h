@@ -136,6 +136,45 @@ namespace aten {
 #endif
 		}
 
+		enum Face {
+			None = -1,
+			FaceX,
+			FaceY,
+			FaceZ,
+		};
+
+		static AT_DEVICE_API bool hit(
+			const ray& r,
+			const aten::vec3& _min, const aten::vec3& _max,
+			real t_min, real t_max,
+			real& t_result,
+			Face& face)
+		{
+			aten::vec3 invdir = real(1) / (r.dir + aten::vec3(real(1e-6)));
+			aten::vec3 oxinvdir = -r.org * invdir;
+
+			const auto f = _max * invdir + oxinvdir;
+			const auto n = _min * invdir + oxinvdir;
+
+			const auto tmax = max(f, n);
+			const auto tmin = min(f, n);
+
+			const auto t1 = aten::cmpMin(aten::cmpMin(aten::cmpMin(tmax.x, tmax.y), tmax.z), t_max);
+			const auto t0 = aten::cmpMax(aten::cmpMax(aten::cmpMax(tmin.x, tmin.y), tmin.z), t_min);
+
+			t_result = t0;
+
+			face = t_result == tmin.x
+				? Face::FaceX
+				: t_result == tmin.y
+					? Face::FaceY
+					: t_result == tmin.z
+						? Face::FaceZ
+						: Face::None;
+
+			return t0 <= t1;
+		}
+
 		bool isIn(const vec3& p) const
 		{
 			bool isInX = (m_min.x <= p.x && p.x <= m_max.x);
@@ -177,6 +216,22 @@ namespace aten {
 		{
 			vec3 center = (m_min + m_max) * real(0.5);
 			return std::move(center);
+		}
+
+		static vec3 computeFaceSurfaceArea(
+			const vec3& vMin,
+			const vec3& vMax)
+		{
+			auto dx = aten::abs(vMax.x - vMin.x);
+			auto dy = aten::abs(vMax.y - vMin.y);
+			auto dz = aten::abs(vMax.z - vMin.z);
+
+			return std::move(vec3(dx * dy, dy * dz, dz * dx));
+		}
+
+		vec3 computeFaceSurfaceArea() const
+		{
+			return computeFaceSurfaceArea(m_max, m_min);
 		}
 
 		real computeSurfaceArea() const

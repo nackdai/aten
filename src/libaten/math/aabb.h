@@ -226,7 +226,7 @@ namespace aten {
 			auto dy = aten::abs(vMax.y - vMin.y);
 			auto dz = aten::abs(vMax.z - vMin.z);
 
-			return std::move(vec3(dx * dy, dy * dz, dz * dx));
+			return std::move(vec3(dy * dz, dz * dx, dx * dy));
 		}
 
 		vec3 computeFaceSurfaceArea() const

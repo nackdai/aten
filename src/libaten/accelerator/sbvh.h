@@ -61,10 +61,10 @@ namespace aten
 
 	struct BvhVoxel {
 		aten::vec3 normal;
-		float geomid{ -1.0f };
+		uint32_t nodeid{ 0 };
 
 		aten::vec3 color;
-		float padding{ 0.0f };
+		uint32_t depth{ 0 };
 	};
 
 	// NOTE
@@ -268,6 +268,7 @@ namespace aten
 		std::vector<int> m_refIndices;
 
 		// For voxelize.
+		int m_deepestVoxelNodeDepth{ -1 };
 		std::vector<SbvhTreelet> m_treelets;
 		std::vector<BvhVoxel> m_voxels;
 	};

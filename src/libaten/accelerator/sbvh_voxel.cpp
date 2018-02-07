@@ -6,10 +6,59 @@
 #include <iterator>
 #include <numeric>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten
 {
+	void sbvh::makeTreelet()
+	{
+		static const int VoxelDepth = 3;
+
+		int stack[128] = { 0 };
+
+		m_deepestVoxelNodeDepth = -1;
+
+		for (size_t i = 0; i < m_nodes.size(); i++) {
+			const auto& root = m_nodes[i];
+
+			bool isTreeletRoot = (((root.depth % VoxelDepth) == 0) && !root.isLeaf());
+
+			if (isTreeletRoot) {
+				m_treelets.push_back(SbvhTreelet());
+				auto& treelet = m_treelets[m_treelets.size() - 1];
+
+				treelet.idxInBvhTree = i;
+				treelet.depth = root.depth;
+
+				m_deepestVoxelNodeDepth = std::max<int>(m_deepestVoxelNodeDepth, treelet.depth);
+
+				stack[0] = root.left;
+				stack[1] = root.right;
+				int stackpos = 2;
+
+				while (stackpos > 0) {
+					int idx = stack[stackpos - 1];
+					stackpos -= 1;
+
+					const auto& sbvhNode = m_nodes[idx];
+
+					if (sbvhNode.isLeaf()) {
+						treelet.leafChildren.push_back(idx);
+
+						const auto refid = sbvhNode.refIds[0];
+						const auto& ref = m_refs[refid];
+						const auto triid = ref.triid + m_offsetTriIdx;
+						treelet.tris.push_back(triid);
+					}
+					else {
+						stack[stackpos++] = sbvhNode.right;
+						stack[stackpos++] = sbvhNode.left;
+					}
+				}
+			}
+		}
+	}
+
 	bool barycentric(
 		const aten::vec3& v1,
 		const aten::vec3& v2,
@@ -74,6 +123,9 @@ namespace aten
 				voxel.color = aten::vec3(0);
 			}
 
+			voxel.nodeid = treelet.idxInBvhTree;
+			voxel.depth = sbvhNode.depth;
+
 			for (const auto tid : treelet.tris) {
 				const auto triparam = faces[tid]->param;
 
@@ -109,6 +161,7 @@ namespace aten
 
 				const auto mtrl = mtrls[triparam.mtrlid];
 				auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
+				color *= mtrl->color();
 
 				voxel.normal += normal;
 				voxel.color += color;
@@ -118,6 +171,8 @@ namespace aten
 
 			voxel.normal /= cnt;
 			voxel.color /= cnt;
+
+			voxel.normal = normalize(voxel.normal);
 
 			m_voxels.push_back(voxel);
 		}

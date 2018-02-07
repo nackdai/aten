@@ -6,7 +6,7 @@
 #include <iterator>
 #include <numeric>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten
 {
@@ -103,6 +103,7 @@ namespace aten
 			}
 			else {
 				buildInternal(list, num);
+
 				makeTreelet();
 			}
 		}
@@ -128,10 +129,13 @@ namespace aten
 			// Convert to threaded.
 			for (int i = 0; i < nestedBvh.size(); i++) {
 				// TODO
-				const auto bvh = (const sbvh*)nestedBvh[i];
+				auto bvh = (sbvh*)nestedBvh[i];
 
 				auto box = bvh->getBoundingbox();
 				bbox.expand(box);
+
+				bvh->buildVoxel(m_voxels.size());
+				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
 
 				std::vector<int> indices;
 				bvh->convert(
@@ -810,7 +814,11 @@ namespace aten
 
 		stack[0] = ThreadedEntry(0, -1);
 
+#ifdef VOXEL_TEST
+		nodes[0].voxel = -1;
+#else
 		nodes[0].parent = -1;
+#endif
 
 		while (stackpos > 0) {
 			auto entry = stack[stackpos - 1];
@@ -870,8 +878,12 @@ namespace aten
 				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
 
+#ifdef VOXEL_TEST
+				thrededNode.voxel = sbvhNode.voxelIdx;
+#else
 				nodes[sbvhNode.right].parent = (float)entry.nodeIdx;
 				nodes[sbvhNode.left].parent = (float)entry.nodeIdx;
+#endif
 			}
 
 			nodeCount++;
@@ -898,49 +910,6 @@ namespace aten
 			if (!sbvhNode.isLeaf()) {
 				stack[stackpos++] = sbvhNode.right;
 				stack[stackpos++] = sbvhNode.left;
-			}
-		}
-	}
-
-	void sbvh::makeTreelet()
-	{
-		int stack[128] = { 0 };
-
-		for (size_t i = 0; i < m_nodes.size(); i++) {
-			const auto& root = m_nodes[i];
-
-			bool isTreeletRoot = (((root.depth % 3) == 0) && !root.isLeaf());
-
-			if (isTreeletRoot) {
-				m_treelets.push_back(SbvhTreelet());
-				auto& treelet = m_treelets[m_treelets.size() - 1];
-
-				treelet.idxInBvhTree = i;
-				treelet.depth = root.depth;
-
-				stack[0] = root.left;
-				stack[1] = root.right;
-				int stackpos = 2;
-
-				while (stackpos > 0) {
-					int idx = stack[stackpos - 1];
-					stackpos -= 1;
-
-					const auto& sbvhNode = m_nodes[idx];
-
-					if (sbvhNode.isLeaf()) {
-						treelet.leafChildren.push_back(idx);
-						
-						const auto refid = sbvhNode.refIds[0];
-						const auto& ref = m_refs[refid];
-						const auto triid = ref.triid + m_offsetTriIdx;
-						treelet.tris.push_back(triid);
-					}
-					else {
-						stack[stackpos++] = sbvhNode.right;
-						stack[stackpos++] = sbvhNode.left;
-					}
-				}
 			}
 		}
 	}
@@ -1080,6 +1049,7 @@ namespace aten
 
 			bool isHit = false;
 
+#if 0
 			if (node->isLeaf()) {
 				Intersection isectTmp;
 
@@ -1115,6 +1085,54 @@ namespace aten
 						isect = isectTmp;
 						t_max = isect.t;
 					}
+				}
+			}
+			else
+#endif
+			if (node->voxel >= 0) {
+				Intersection isectTmp;
+
+				const auto& voxel = m_voxels[(int)node->voxel];
+
+				if (voxel.depth == 3) {
+					float t_result = 0.0f;
+					aten::aabb::Face face = aten::aabb::Face::None;
+					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, face);
+
+					isectTmp.isVoxel = false;
+					isectTmp.area = real(1);
+
+					if (isHit) {
+						auto area = aten::aabb::computeFaceSurfaceArea(node->boxmin, node->boxmax);
+
+						isectTmp.t = t_result;
+
+						isectTmp.isVoxel = true;
+						isectTmp.area = collapseTo31bitInteger(area[face]);
+
+						isectTmp.nml_x = voxel.normal.x;
+						isectTmp.nml_y = voxel.normal.y;
+						isectTmp.signNmlZ = voxel.normal.z < real(0) ? 1 : 0;
+
+						isectTmp.clr_r = voxel.color.r;
+						isectTmp.clr_g = collapseTo31bitInteger(voxel.color.g);
+						isectTmp.clr_b = voxel.color.b;
+
+						// Dummy value, return ray hit voxel.
+						isectTmp.objid = 1;
+					}
+
+					if (isHit) {
+						if (isectTmp.t < isect.t) {
+							isect = isectTmp;
+							t_max = isect.t;
+
+							return true;
+						}
+					}
+				}
+				else {
+					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
 				}
 			}
 			else {

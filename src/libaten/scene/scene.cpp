@@ -20,7 +20,7 @@ namespace aten {
 		const auto& param = light->param();
 
 		auto lightobj = transformable::getShape(param.objid);
-		auto hitobj = transformable::getShape(rec.objid);
+		auto hitobj = transformable::getShape(isect.objid);
 
 		isHit = scene::hitLight(
 			isHit,

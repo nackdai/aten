@@ -32,7 +32,7 @@ namespace aten {
 
 		real area{ real(1) };
 
-		int objid{ -1 };
+		//int objid{ -1 };
 		int mtrlid{ -1 };
 	};
 

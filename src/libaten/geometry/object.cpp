@@ -125,7 +125,6 @@ namespace AT_NAME
 
 		rec.area = param.area * ratio;
 
-		rec.objid = isect.objid;
 		rec.mtrlid = isect.mtrlid;
 	}
 

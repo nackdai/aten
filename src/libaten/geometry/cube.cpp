@@ -111,7 +111,6 @@ namespace AT_NAME
 			break;
 		}
 
-		rec.objid = isect.objid;
 		rec.mtrlid = isect.mtrlid;
 
 		rec.area = getBoundingbox().computeSurfaceArea();

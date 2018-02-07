@@ -134,7 +134,6 @@ namespace AT_NAME
 		rec->p = r.org + isect->t * r.dir;
 		rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
 
-		rec->objid = isect->objid;
 		rec->mtrlid = isect->mtrlid;
 
 		{

@@ -465,7 +465,6 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 		// TODO
 	}
 
-	rec->objid = isect->objid;
 	rec->mtrlid = isect->mtrlid;
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC

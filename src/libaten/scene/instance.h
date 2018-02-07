@@ -90,7 +90,6 @@ namespace aten
 			rec.p = m_mtxL2W.apply(rec.p);
 			rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
 
-			rec.objid = isect.objid;
 			rec.mtrlid = isect.mtrlid;
 		}
 

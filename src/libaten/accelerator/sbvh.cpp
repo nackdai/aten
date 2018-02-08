@@ -1100,7 +1100,7 @@ namespace aten
 
 				const auto& voxel = m_voxels[(int)node->voxel];
 
-				if (voxel.depth == 3) {
+				if (voxel.lod == 3) {
 					float t_result = 0.0f;
 					aten::aabb::Face face = aten::aabb::Face::None;
 					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, face);

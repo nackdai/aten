@@ -10,11 +10,27 @@
 
 namespace aten
 {
+	// TODO
+	static const int VoxelDepth = 3;
+	static const real VoxelVolumeThreshold = real(0.5);
+
+	inline int computeVoxelLodLevel(int depth, int maxDepth)
+	{
+		int approximateMaxVoxelDepth = (maxDepth - 1) / VoxelDepth * VoxelDepth;
+		int approximateMaxVoxelLodLevel = approximateMaxVoxelDepth / VoxelDepth - 1;	// Zero origin.
+
+		int lod = depth / (VoxelDepth + 1);
+
+		// NOTE
+		// 深いほどLODレベルが下がるようにする.
+		int ret = approximateMaxVoxelLodLevel - lod;
+		AT_ASSERT(ret >= 0);
+
+		return ret;
+	}
+
 	void sbvh::makeTreelet()
 	{
-		static const int VoxelDepth = 3;
-		static const real VoxelVolumeThreshold = real(0.5);
-
 		int stack[128] = { 0 };
 
 		aabb wholeBox = m_nodes[0].bbox;
@@ -27,11 +43,15 @@ namespace aten
 			bool isTreeletRoot = (((node->depth % VoxelDepth) == 0) && !node->isLeaf());
 
 			if (isTreeletRoot) {
+				auto lod = computeVoxelLodLevel(node->depth, m_maxDepth);
+
+				auto ratioThreshold = VoxelVolumeThreshold / (lod + 1);
+
 				auto ratio = wholeBox.computeRatio(node->bbox);
 
 				std::map<uint32_t, SBVHNode*> treeletRoots;
 
-				if (ratio < VoxelVolumeThreshold) {
+				if (ratio < ratioThreshold) {
 					if (!node->isTreeletRoot) {
 						treeletRoots.insert(std::pair<uint32_t, SBVHNode*>(i, node));
 						node->isTreeletRoot = true;
@@ -59,9 +79,15 @@ namespace aten
 
 						auto* n = &m_nodes[idx];
 
+						auto tmpLod = computeVoxelLodLevel(n->depth, m_maxDepth);
+						if (tmpLod > lod) {
+							// ボクセルのレベルが次のレベルになったので、打ち切り.
+							continue;
+						}
+
 						if (!n->isLeaf()) {
 							ratio = wholeBox.computeRatio(n->bbox);
-							if (ratio < VoxelVolumeThreshold) {
+							if (ratio < ratioThreshold) {
 								if (!n->isTreeletRoot) {
 									treeletRoots.insert(std::pair<uint32_t, SBVHNode*>(idx, n));
 									n->isTreeletRoot = true;
@@ -193,7 +219,7 @@ namespace aten
 
 			voxel.nodeid = treelet.idxInBvhTree;
 			voxel.exid = exid;
-			voxel.depth = sbvhNode.depth;
+			voxel.lod = computeVoxelLodLevel(sbvhNode.depth, m_maxDepth);
 
 			for (const auto tid : treelet.tris) {
 				const auto triparam = faces[tid]->param;

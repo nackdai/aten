@@ -66,7 +66,7 @@ namespace aten
 		aten::vec3 color;
 		struct {
 			uint32_t exid : 16;
-			uint32_t depth : 16;
+			uint32_t lod : 16;
 		};
 	};
 

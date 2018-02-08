@@ -1100,7 +1100,8 @@ namespace aten
 
 				const auto& voxel = m_voxels[(int)node->voxel];
 
-				if (voxel.lod == 3) {
+				
+				{
 					float t_result = 0.0f;
 					aten::aabb::Face face = aten::aabb::Face::None;
 					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, face);
@@ -1116,13 +1117,13 @@ namespace aten
 						isectTmp.isVoxel = true;
 						isectTmp.area = collapseTo31bitInteger(area[face]);
 
-						isectTmp.nml_x = voxel.normal.x;
-						isectTmp.nml_y = voxel.normal.y;
-						isectTmp.signNmlZ = voxel.normal.z < real(0) ? 1 : 0;
+						isectTmp.nml_x = voxel.nmlX;
+						isectTmp.nml_y = voxel.nmlY;
+						isectTmp.signNmlZ = voxel.signNmlZ;
 
-						isectTmp.clr_r = voxel.color.r;
-						isectTmp.clr_g = collapseTo31bitInteger(voxel.color.g);
-						isectTmp.clr_b = voxel.color.b;
+						isectTmp.clr_r = voxel.clrR;
+						isectTmp.clr_g = voxel.clrG;
+						isectTmp.clr_b = voxel.clrB;
 
 						// Dummy value, return ray hit voxel.
 						isectTmp.objid = 1;
@@ -1136,9 +1137,6 @@ namespace aten
 							return true;
 						}
 					}
-				}
-				else {
-					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
 				}
 			}
 			else {
@@ -1168,6 +1166,8 @@ namespace aten
 
 		uint32_t treeletNum;
 		uint32_t voxelNum;
+
+		float maxVoxelRadius;
 
 		float boxmin[3];
 		float boxmax[3];
@@ -1221,6 +1221,8 @@ namespace aten
 
 			header.treeletNum = m_treelets.size();
 			header.voxelNum = m_voxels.size();
+
+			header.maxVoxelRadius = m_maxVoxelRadius;
 
 			auto bbox = getBoundingbox();
 			auto boxmin = bbox.minPos();

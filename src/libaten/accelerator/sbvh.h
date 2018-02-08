@@ -60,10 +60,20 @@ namespace aten
 	};
 
 	struct BvhVoxel {
-		aten::vec3 normal;
+		float nmlX;
+		float nmlY;
+		struct {
+			uint32_t signNmlZ : 1;
+			uint32_t radius : 31;
+		};
 		uint32_t nodeid{ 0 };
 
-		aten::vec3 color;
+		float clrR;
+		struct {
+			uint32_t clrG : 31;
+			uint32_t padding : 1;
+		};
+		float clrB;
 		struct {
 			uint32_t exid : 16;
 			uint32_t lod : 16;
@@ -127,6 +137,8 @@ namespace aten
 		{
 			return m_voxels;
 		}
+
+		void prepareToComputeVoxelLodError(uint32_t height, real verticalFov);
 
 	private:
 		void buildInternal(
@@ -283,7 +295,11 @@ namespace aten
 		uint32_t m_maxDepth{ 0 };
 
 		// For voxelize.
+		float m_maxVoxelRadius{ 0.0f };
 		std::vector<SbvhTreelet> m_treelets;
 		std::vector<BvhVoxel> m_voxels;
+
+		// For voxel hit test.
+		real m_voxelLodErrorC{ real(1) };
 	};
 }

@@ -158,9 +158,20 @@ void VoxelViewer::draw(
 
 		mtxL2W = mtxTrans * mtxScale;
 
+		aten::vec3 normal;
+		normal.x = voxel.nmlX;
+		normal.y = voxel.nmlY;
+		normal.z = sqrtf(1.0f - normal.x * normal.x - normal.y * normal.y) * (voxel.signNmlZ ? -1.0f : 1.0f);
+		normal = normalize(normal);
+
+		aten::vec3 color;
+		color.r = voxel.clrR;
+		color.g = aten::expandTo32bitFloat(voxel.clrG);
+		color.b = voxel.clrB;
+
 		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
-		CALL_GL_API(::glUniform3f(hColor, voxel.color.x, voxel.color.y, voxel.color.z));
-		CALL_GL_API(::glUniform3f(hNormal, voxel.normal.x, voxel.normal.y, voxel.normal.z));
+		CALL_GL_API(::glUniform3f(hColor, color.x, color.y, color.z));
+		CALL_GL_API(::glUniform3f(hNormal, normal.x, normal.y, normal.z));
 
 		if (isWireframe) {
 			m_ibForWireframe.draw(m_vb, aten::Primitive::Lines, 0, 12);

@@ -58,7 +58,7 @@ namespace aten
 
 				if (ratio < ratioThreshold) {
 					if (!node->isTreeletRoot) {
-						treeletRoots.insert(std::pair<uint32_t, SBVHNode*>(i, node));
+						treeletRoots.insert(std::pair<uint32_t, SBVHNode*>((uint32_t)i, node));
 						node->isTreeletRoot = true;
 					}
 				}
@@ -224,6 +224,8 @@ namespace aten
 			return;
 		}
 
+		m_maxVoxelRadius = 0.0f;
+
 		const auto& faces = aten::face::faces();
 		const auto& vertices = aten::VertexManager::getVertices();
 		const auto& mtrls = aten::material::getMaterials();
@@ -234,16 +236,14 @@ namespace aten
 			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
 			// Speficfy having voxel.
-			sbvhNode.voxelIdx = i + offset;
+			sbvhNode.voxelIdx = (int)i + offset;
 
 			auto center = sbvhNode.bbox.getCenter();
 
-			BvhVoxel voxel;
-			{
-				voxel.normal = aten::vec3(0);
-				voxel.color = aten::vec3(0);
-			}
+			aten::vec3 avgNormal(0);
+			aten::vec3 avgColor(0);
 
+			BvhVoxel voxel;
 			voxel.nodeid = treelet.idxInBvhTree;
 			voxel.exid = exid;
 			voxel.lod = computeVoxelLodLevel(sbvhNode.depth, m_maxDepth);
@@ -285,18 +285,43 @@ namespace aten
 				auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
 				color *= mtrl->color();
 
-				voxel.normal += normal;
-				voxel.color += color;
+				avgNormal += normal;
+				avgColor += color;
 			}
 
 			int cnt = (int)treelet.tris.size();
 
-			voxel.normal /= cnt;
-			voxel.color /= cnt;
+			avgNormal /= cnt;
+			avgColor /= cnt;
 
-			voxel.normal = normalize(voxel.normal);
+			voxel.clrR = avgColor.r;
+			voxel.clrG = collapseTo31bitInteger(avgColor.g);
+			voxel.clrB = avgColor.b;
+
+			avgNormal = normalize(avgNormal);
+
+			voxel.nmlX = avgNormal.x;
+			voxel.nmlY = avgNormal.y;
+			voxel.signNmlZ = avgNormal.z < real(0) ? 1 : 0;
+
+			float radius = sbvhNode.bbox.getDiagonalLenght() * 0.5f;
+			voxel.radius = collapseTo31bitInteger(radius);
+
+			m_maxVoxelRadius = std::max(m_maxVoxelRadius, radius);
 
 			m_voxels.push_back(voxel);
 		}
+	}
+
+	void sbvh::prepareToComputeVoxelLodError(uint32_t height, real verticalFov)
+	{
+		// NOTE
+		// http://sirkan.iit.bme.hu/~szirmay/voxlod_cgf_final.pdf
+		// 6.2. LOD error metric
+
+		real theta = Deg2Rad(verticalFov);
+		real lambda = (height * real(0.5)) / (aten::tan(theta * real(0.5)));
+
+		m_voxelLodErrorC = m_maxVoxelRadius / lambda;
 	}
 }

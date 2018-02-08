@@ -6,7 +6,7 @@
 #include <iterator>
 #include <numeric>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {

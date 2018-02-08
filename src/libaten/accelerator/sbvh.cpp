@@ -1166,13 +1166,29 @@ namespace aten
 
 		uint32_t nodeNum;
 
+		uint32_t treeletNum;
+		uint32_t voxelNum;
+
 		float boxmin[3];
 		float boxmax[3];
+	};
+
+	struct SbvhTreeletHeader {
+		uint32_t idxInBvhTree;
+		uint32_t depth;
+
+		uint32_t leafChildrenNum;
+		uint32_t triNum;
 	};
 
 	bool sbvh::exportTree(const char* path)
 	{
 		m_threadedNodes.resize(1);
+
+		// Build voxel.
+		if (!m_treelets.empty() && !m_nodes.empty()) {
+			buildVoxel(0, 0);
+		}
 
 		std::vector<int> indices;
 		convert(
@@ -1203,6 +1219,9 @@ namespace aten
 
 			header.nodeNum = m_threadedNodes[0].size();
 
+			header.treeletNum = m_treelets.size();
+			header.voxelNum = m_voxels.size();
+
 			auto bbox = getBoundingbox();
 			auto boxmin = bbox.minPos();
 			auto boxmax = bbox.maxPos();
@@ -1218,7 +1237,29 @@ namespace aten
 
 		fwrite(&header, sizeof(header), 1, fp);
 
+		// Nodes.
 		fwrite(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
+
+		// Treelets.
+		for (const auto& treelet : m_treelets)
+		{
+			SbvhTreeletHeader treeletHeader;
+			{
+				treeletHeader.idxInBvhTree = treelet.idxInBvhTree;
+				treeletHeader.depth = treelet.depth;
+				treeletHeader.leafChildrenNum = treelet.leafChildren.size();
+				treeletHeader.triNum = treelet.tris.size();
+			}
+			fwrite(&treeletHeader, sizeof(treeletHeader), 1, fp);
+
+			fwrite(&treelet.leafChildren[0], sizeof(uint32_t), treelet.leafChildren.size(), fp);
+			fwrite(&treelet.tris[0], sizeof(uint32_t), treelet.tris.size(), fp);
+		}
+
+		// Voxels.
+		if (header.voxelNum > 0) {
+			fwrite(&m_voxels[0], sizeof(BvhVoxel), header.voxelNum, fp);
+		}
 
 		fclose(fp);
 
@@ -1260,6 +1301,40 @@ namespace aten
 		vec3 boxmin = vec3(header.boxmin[0], header.boxmin[1], header.boxmin[2]);
 		vec3 boxmax = vec3(header.boxmax[0], header.boxmax[1], header.boxmax[2]);
 		setBoundingBox(aabb(boxmin, boxmax));
+
+		// Treelets.
+		if (header.treeletNum > 0)
+		{
+			m_treelets.resize(header.treeletNum);
+
+			for (auto& treelet : m_treelets) {
+				SbvhTreeletHeader treeletHeader;
+				fread(&treeletHeader, sizeof(treeletHeader), 1, fp);
+
+				treelet.idxInBvhTree = treeletHeader.idxInBvhTree;
+				treelet.depth = treeletHeader.depth;
+
+				if (treeletHeader.leafChildrenNum > 0) {
+					treelet.leafChildren.resize(treeletHeader.leafChildrenNum);
+					fread(&treelet.leafChildren[0], sizeof(uint32_t), treelet.leafChildren.size(), fp);
+				}
+
+				if (treeletHeader.triNum > 0) {
+					treelet.tris.resize(treeletHeader.triNum);
+					fread(&treelet.tris[0], sizeof(uint32_t), treelet.tris.size(), fp);
+
+					for (size_t i = 0; i < treelet.tris.size(); i++) {
+						treelet.tris[i] += offsetTriIdx;
+					}
+				}
+			}
+		}
+
+		// Voxels.
+		if (header.voxelNum > 0) {
+			m_voxels.resize(header.voxelNum);
+			fread(&m_voxels[0], sizeof(BvhVoxel), m_voxels.size(), fp);
+		}
 
 		return true;
 	}

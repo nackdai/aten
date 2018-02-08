@@ -31,6 +31,11 @@ namespace aten
 
 	void sbvh::makeTreelet()
 	{
+		if (m_treelets.size() > 0) {
+			// Imported already.
+			return;
+		}
+
 		int stack[128] = { 0 };
 
 		aabb wholeBox = m_nodes[0].bbox;
@@ -197,6 +202,28 @@ namespace aten
 		uint32_t exid,
 		uint32_t offset)
 	{
+		if (m_voxels.size() > 0 || m_nodes.empty()) {
+			// Imported already.
+
+			AT_ASSERT(!m_threadedNodes.empty());
+			AT_ASSERT(!m_threadedNodes[0].empty());
+
+			// Add voxel index offset.
+			for (auto& threadedNode : m_threadedNodes[0])
+			{
+				if (threadedNode.voxel >= 0) {
+					threadedNode.voxel += offset;
+				}
+			}
+
+			// Set correct external node index.
+			for (auto& voxel : m_voxels) {
+				voxel.exid += exid;
+			}
+
+			return;
+		}
+
 		const auto& faces = aten::face::faces();
 		const auto& vertices = aten::VertexManager::getVertices();
 		const auto& mtrls = aten::material::getMaterials();

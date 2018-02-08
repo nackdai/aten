@@ -225,7 +225,13 @@ bool parseOption(
 // TODO
 void loadObj(const Options& opt)
 {
+#if 1
 	aten::ObjLoader::load(g_objs, opt.input);
+#else
+	aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");
+
+	g_objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh");
+#endif
 
 	for (auto obj : g_objs) {
 		auto instance = new aten::instance<aten::object>(obj, aten::mat4::Identity);

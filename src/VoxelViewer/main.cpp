@@ -79,7 +79,7 @@ void onRun()
 			const auto& voxel = voxels[g_drawVoxelIdx];
 			const auto& node = nodes[voxel.exid][voxel.nodeid];
 
-			ImGui::Text("ExId [%d] NodeId[%d] Depth[%d]", voxel.exid, voxel.nodeid, voxel.depth);
+			ImGui::Text("ExId [%d] NodeId[%d] Lod[%d]", voxel.exid, voxel.nodeid, voxel.lod);
 			ImGui::Text("Box min [%f, %f, %f]", node.boxmin.x, node.boxmin.y, node.boxmin.z);
 			ImGui::Text("Box max [%f, %f, %f]", node.boxmax.x, node.boxmax.y, node.boxmax.z);
 		}

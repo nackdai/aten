@@ -280,6 +280,23 @@ namespace aten {
 			m_max = _max;
 		}
 
+		real volume() const
+		{
+			auto dx = aten::abs(m_max.x - m_min.x);
+			auto dy = aten::abs(m_max.y - m_min.y);
+			auto dz = aten::abs(m_max.z - m_min.z);
+
+			return dx * dy * dz;
+		}
+
+		real computeRatio(const aabb& box)
+		{
+			auto v0 = volume();
+			auto v1 = box.volume();
+
+			return v1 / (v0 + AT_MATH_EPSILON);
+		}
+
 		static aabb merge(const aabb& box0, const aabb& box1)
 		{
 			vec3 _min = aten::vec3(

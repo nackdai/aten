@@ -96,7 +96,7 @@ void VoxelViewer::draw(
 {
 	m_shader.prepareRender(nullptr, false);
 
-	CALL_GL_API(::glClearColor(0, 0, 0, 0));
+	CALL_GL_API(::glClearColor(0, 0, 1, 0));
 	CALL_GL_API(::glClearDepthf(1.0f));
 	CALL_GL_API(::glClearStencil(0));
 	CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));

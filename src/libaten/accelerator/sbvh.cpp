@@ -216,10 +216,14 @@ namespace aten
 
 		m_refIndexNum = 0;
 
+		m_maxDepth = 0;
+
 		while (stackpos > 0)
 		{
 			auto top = stack[--stackpos];
 			auto& node = m_nodes[top.nodeIdx];
+
+			m_maxDepth = std::max<uint32_t>(node.depth, m_maxDepth);
 
 			// enough triangles so far.
 			if (node.refIds.size() <= m_maxTriangles) {

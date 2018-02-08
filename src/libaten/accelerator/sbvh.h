@@ -138,8 +138,6 @@ namespace aten
 			int offset,
 			std::vector<int>& indices) const;
 
-		void makeTreelet();
-
 		bool hit(
 			int exid,
 			const ray& r,
@@ -177,11 +175,12 @@ namespace aten
 			int right{ -1 };
 
 			int parent{ -1 };
-			int depth{ -1 };
+			uint32_t depth{ 0 };
 
 			int voxelIdx{ -1 };
 
 			bool leaf{ true };
+			bool isTreeletRoot{ false };
 		};
 
 		// ï™äÑèÓïÒ.
@@ -253,6 +252,11 @@ namespace aten
 
 		void getOrderIndex(std::vector<int>& indices) const;
 
+		void makeTreelet();
+		void onMakeTreelet(
+			uint32_t idx,
+			const sbvh::SBVHNode& root);
+
 	private:
 		ThreadedBVH m_bvh;
 
@@ -276,8 +280,9 @@ namespace aten
 		std::vector<std::vector<ThreadedSbvhNode>> m_threadedNodes;
 		std::vector<int> m_refIndices;
 
+		uint32_t m_maxDepth{ 0 };
+
 		// For voxelize.
-		int m_deepestVoxelNodeDepth{ -1 };
 		std::vector<SbvhTreelet> m_treelets;
 		std::vector<BvhVoxel> m_voxels;
 	};

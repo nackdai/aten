@@ -13,48 +13,114 @@ namespace aten
 	void sbvh::makeTreelet()
 	{
 		static const int VoxelDepth = 3;
+		static const real VoxelVolumeThreshold = real(0.5);
 
 		int stack[128] = { 0 };
 
-		m_deepestVoxelNodeDepth = -1;
+		aabb wholeBox = m_nodes[0].bbox;
 
-		for (size_t i = 0; i < m_nodes.size(); i++) {
-			const auto& root = m_nodes[i];
+		// NOTE
+		// rootノードは対象外.
+		for (size_t i = 1; i < m_nodes.size(); i++) {
+			auto* node = &m_nodes[i];
 
-			bool isTreeletRoot = (((root.depth % VoxelDepth) == 0) && !root.isLeaf());
+			bool isTreeletRoot = (((node->depth % VoxelDepth) == 0) && !node->isLeaf());
 
 			if (isTreeletRoot) {
-				m_treelets.push_back(SbvhTreelet());
-				auto& treelet = m_treelets[m_treelets.size() - 1];
+				auto ratio = wholeBox.computeRatio(node->bbox);
 
-				treelet.idxInBvhTree = i;
-				treelet.depth = root.depth;
+				std::map<uint32_t, SBVHNode*> treeletRoots;
 
-				m_deepestVoxelNodeDepth = std::max<int>(m_deepestVoxelNodeDepth, treelet.depth);
-
-				stack[0] = root.left;
-				stack[1] = root.right;
-				int stackpos = 2;
-
-				while (stackpos > 0) {
-					int idx = stack[stackpos - 1];
-					stackpos -= 1;
-
-					const auto& sbvhNode = m_nodes[idx];
-
-					if (sbvhNode.isLeaf()) {
-						treelet.leafChildren.push_back(idx);
-
-						const auto refid = sbvhNode.refIds[0];
-						const auto& ref = m_refs[refid];
-						const auto triid = ref.triid + m_offsetTriIdx;
-						treelet.tris.push_back(triid);
-					}
-					else {
-						stack[stackpos++] = sbvhNode.right;
-						stack[stackpos++] = sbvhNode.left;
+				if (ratio < VoxelVolumeThreshold) {
+					if (!node->isTreeletRoot) {
+						treeletRoots.insert(std::pair<uint32_t, SBVHNode*>(i, node));
+						node->isTreeletRoot = true;
 					}
 				}
+				else {
+					stack[0] = node->left;
+					stack[1] = node->right;
+					int stackpos = 2;
+
+					bool enableTraverseToChild = true;
+					
+					while (stackpos > 0) {
+						auto idx = stack[stackpos - 1];
+						stackpos -= 1;
+
+						if (idx < 0) {
+							return;
+						}
+
+						if (idx == node->right) {
+							// 分岐点に戻ったので、子供の探索を許す.
+							enableTraverseToChild = true;
+						}
+
+						auto* n = &m_nodes[idx];
+
+						if (!n->isLeaf()) {
+							ratio = wholeBox.computeRatio(n->bbox);
+							if (ratio < VoxelVolumeThreshold) {
+								if (!n->isTreeletRoot) {
+									treeletRoots.insert(std::pair<uint32_t, SBVHNode*>(idx, n));
+									n->isTreeletRoot = true;
+
+									// Treeletのルート候補は見つけたので、これ以上は子供を探索しない.
+									enableTraverseToChild = false;
+								}
+							}
+							else if (enableTraverseToChild) {
+								stack[stackpos++] = n->left;
+								stack[stackpos++] = n->right;
+							}
+						}
+					}
+				}
+
+				for (auto it = treeletRoots.begin(); it != treeletRoots.end(); it++) {
+					auto idx = it->first;
+					auto node = it->second;
+
+					onMakeTreelet(idx, *node);
+				}
+			}
+		}
+	}
+
+	void sbvh::onMakeTreelet(
+		uint32_t idx,
+		const sbvh::SBVHNode& root)
+	{
+		m_treelets.push_back(SbvhTreelet());
+		auto& treelet = m_treelets[m_treelets.size() - 1];
+
+		treelet.idxInBvhTree = idx;
+		treelet.depth = root.depth;
+
+		int stack[128] = { 0 };
+
+		stack[0] = root.left;
+		stack[1] = root.right;
+		int stackpos = 2;
+
+		while (stackpos > 0) {
+			int idx = stack[stackpos - 1];
+			stackpos -= 1;
+
+			const auto& sbvhNode = m_nodes[idx];
+
+			if (sbvhNode.isLeaf()) {
+				treelet.leafChildren.push_back(idx);
+
+				const auto refid = sbvhNode.refIds[0];
+				const auto& ref = m_refs[refid];
+				const auto triid = ref.triid + m_offsetTriIdx;
+				treelet.tris.push_back(triid);
+			}
+			else {
+				stack[stackpos++] = sbvhNode.right;
+				stack[stackpos++] = sbvhNode.left;
 			}
 		}
 	}

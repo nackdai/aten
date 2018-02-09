@@ -35,11 +35,16 @@ namespace AT_NAME
 		return g_materials;
 	}
 
-	material::material(aten::MaterialType type, const aten::MaterialAttribute& attrib)
+	material::material(
+		aten::MaterialType type, 
+		const aten::MaterialAttribute& attrib,
+		bool local/*= false*/)
 		: m_param(type, attrib)
 	{
-		m_id = g_materials.size();
-		g_materials.push_back(this);
+		if (!local) {
+			m_id = g_materials.size();
+			g_materials.push_back(this);
+		}
 	}
 
 	material::material(
@@ -48,11 +53,14 @@ namespace AT_NAME
 		const aten::vec3& clr,
 		real ior/*= 1*/,
 		aten::texture* albedoMap/*= nullptr*/,
-		aten::texture* normalMap/*= nullptr*/)
+		aten::texture* normalMap/*= nullptr*/,
+		bool local/*= false*/)
 		: m_param(type, attrib)
 	{
-		m_id = g_materials.size();
-		g_materials.push_back(this);
+		if (!local) {
+			m_id = g_materials.size();
+			g_materials.push_back(this);
+		}
 
 		m_param.baseColor = clr;
 		m_param.ior = ior;
@@ -61,11 +69,17 @@ namespace AT_NAME
 		m_param.normalMap = normalMap ? normalMap->id() : -1;
 	}
 
-	material::material(aten::MaterialType type, const aten::MaterialAttribute& attrib, aten::Values& val)
+	material::material(
+		aten::MaterialType type, 
+		const aten::MaterialAttribute& attrib, 
+		aten::Values& val,
+		bool local/*= false*/)
 		: m_param(type, attrib)
 	{
-		m_id = g_materials.size();
-		g_materials.push_back(this);
+		if (!local) {
+			m_id = g_materials.size();
+			g_materials.push_back(this);
+		}
 
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);

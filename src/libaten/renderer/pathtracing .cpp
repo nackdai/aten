@@ -7,6 +7,8 @@
 #include "sampler/sobolproxy.h"
 #include "sampler/wanghash.h"
 
+#include "material/lambert.h"
+
 //#define Deterministic_Path_Termination
 
 //#define RELEASE_DEBUG
@@ -107,9 +109,13 @@ namespace aten
 		int depth,
 		Path& path)
 	{
+		lambert voxelMtrl(path.rec.albedo, true);
+
 		uint32_t rrDepth = m_rrDepth;
 
-		auto mtrl = material::getMaterial(path.rec.mtrlid);
+		material* mtrl = path.rec.isVoxel
+			? &voxelMtrl
+			: material::getMaterial(path.rec.mtrlid);
 
 #if 1
 		bool isBackfacing = dot(path.rec.normal, -path.ray.dir) < real(0);

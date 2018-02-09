@@ -1055,7 +1055,6 @@ namespace aten
 
 			bool isHit = false;
 
-#if 0
 			if (node->isLeaf()) {
 				Intersection isectTmp;
 
@@ -1093,52 +1092,60 @@ namespace aten
 					}
 				}
 			}
+#if 0
 			else
-#endif
 			if (node->voxel >= 0) {
 				Intersection isectTmp;
 
 				const auto& voxel = m_voxels[(int)node->voxel];
 
-				
-				{
-					float t_result = 0.0f;
-					aten::aabb::Face face = aten::aabb::Face::None;
-					isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, face);
+				float t_result = 0.0f;
+				aten::aabb::Face face = aten::aabb::Face::None;
+				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, face);
 
-					isectTmp.isVoxel = false;
-					isectTmp.area = real(1);
+				isectTmp.isVoxel = false;
+				isectTmp.area = real(1);
 
-					if (isHit) {
-						auto area = aten::aabb::computeFaceSurfaceArea(node->boxmin, node->boxmax);
+				float radius = expandTo32bitFloat(voxel.radius);
 
-						isectTmp.t = t_result;
+				//isHit = isHit && (radius <= t_result * m_voxelLodErrorC);
 
-						isectTmp.isVoxel = true;
-						isectTmp.area = collapseTo31bitInteger(area[face]);
+				if (isHit) {
+					// 無いはずだが、念のため.
+					face = face == aten::aabb::Face::None ? aten::aabb::Face::FaceX : face;
 
-						isectTmp.nml_x = voxel.nmlX;
-						isectTmp.nml_y = voxel.nmlY;
-						isectTmp.signNmlZ = voxel.signNmlZ;
+					// TODO
+					// L2Wマトリクス.
+					auto area = aten::aabb::computeFaceSurfaceArea(node->boxmin, node->boxmax);
 
-						isectTmp.clr_r = voxel.clrR;
-						isectTmp.clr_g = voxel.clrG;
-						isectTmp.clr_b = voxel.clrB;
+					isectTmp.t = t_result;
 
-						// Dummy value, return ray hit voxel.
-						isectTmp.objid = 1;
+					isectTmp.isVoxel = true;
+					isectTmp.area = collapseTo31bitInteger(area[face]);
+
+					isectTmp.nml_x = voxel.nmlX;
+					isectTmp.nml_y = voxel.nmlY;
+					isectTmp.signNmlZ = voxel.signNmlZ;
+
+					isectTmp.clr_r = voxel.clrR;
+					isectTmp.clr_g = voxel.clrG;
+					isectTmp.clr_b = voxel.clrB;
+
+					// Dummy value, return ray hit voxel.
+					isectTmp.objid = 1;
+				}
+
+				if (isHit) {
+					if (isectTmp.t < isect.t) {
+						isect = isectTmp;
+						t_max = isect.t;
 					}
 
-					if (isHit) {
-						if (isectTmp.t < isect.t) {
-							isect = isectTmp;
-							t_max = isect.t;
-
-							return true;
-						}
-					}
+					// LODにヒットしたので、子供（詳細）は探索しないようにする.
+					isHit = false;
 				}
 			}
+#endif
 			else {
 				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
 			}

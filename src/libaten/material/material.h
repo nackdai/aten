@@ -146,7 +146,10 @@ namespace AT_NAME
 		static std::vector<material*> g_materials;
 
 	protected:
-		material(aten::MaterialType type, const aten::MaterialAttribute& attrib);
+		material(
+			aten::MaterialType type, 
+			const aten::MaterialAttribute& attrib,
+			bool local = false);
 		virtual ~material();
 
 		material(
@@ -155,9 +158,14 @@ namespace AT_NAME
 			const aten::vec3& clr,
 			real ior = 1,
 			aten::texture* albedoMap = nullptr,
-			aten::texture* normalMap = nullptr);
+			aten::texture* normalMap = nullptr,
+			bool local = false);
 
-		material(aten::MaterialType type, const aten::MaterialAttribute& attrib, aten::Values& val);
+		material(
+			aten::MaterialType type, 
+			const aten::MaterialAttribute& attrib, 
+			aten::Values& val,
+			bool local = false);
 
 	public:
 		bool isEmissive() const

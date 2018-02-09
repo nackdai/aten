@@ -77,7 +77,7 @@ namespace aten
 							return;
 						}
 
-						if (idx == node->right) {
+						if (idx == node->left) {
 							// •ªŠò“_‚É–ß‚Á‚½‚Ì‚ÅAq‹Ÿ‚Ì’Tõ‚ğ‹–‚·.
 							enableTraverseToChild = true;
 						}

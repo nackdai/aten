@@ -18,6 +18,14 @@ namespace AT_NAME
 			: material(aten::MaterialType::Lambert, MaterialAttributeLambert, val)
 		{}
 
+		// TODO
+		// Voxelレンダリング用にダミー...
+		lambert(const aten::vec3& albedo, bool local)
+			: material(aten::MaterialType::Lambert, MaterialAttributeLambert, local)
+		{
+			m_param.baseColor = albedo;
+		}
+
 		virtual ~lambert() {}
 
 	public:

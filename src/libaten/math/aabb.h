@@ -164,11 +164,11 @@ namespace aten {
 
 			t_result = t0;
 
-			face = t_result == tmin.x
+			face = tmin.x < tmin.y && tmin.x < tmin.z
 				? Face::FaceX
-				: t_result == tmin.y
+				: tmin.y < tmin.x && tmin.y < tmin.z
 					? Face::FaceY
-					: t_result == tmin.z
+					: tmin.z < tmin.x && tmin.z < tmin.y
 						? Face::FaceZ
 						: Face::None;
 

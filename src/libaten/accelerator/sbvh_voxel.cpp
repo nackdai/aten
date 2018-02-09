@@ -313,7 +313,10 @@ namespace aten
 		}
 	}
 
-	void sbvh::prepareToComputeVoxelLodError(uint32_t height, real verticalFov)
+	real sbvh::computeVoxelLodErrorMetric(
+		uint32_t height, 
+		real verticalFov,
+		real pixelOfError/*= real(-1)*/)
 	{
 		// NOTE
 		// http://sirkan.iit.bme.hu/~szirmay/voxlod_cgf_final.pdf
@@ -322,6 +325,30 @@ namespace aten
 		real theta = Deg2Rad(verticalFov);
 		real lambda = (height * real(0.5)) / (aten::tan(theta * real(0.5)));
 
-		m_voxelLodErrorC = m_maxVoxelRadius / lambda;
+		m_voxelLodErrorMetric = m_maxVoxelRadius / lambda;
+
+		setPixelOfError(pixelOfError);
+
+		return m_voxelLodErrorMetric;
+	}
+
+	real sbvh::getVoxelLodErrorMetric(real err)
+	{
+		return m_voxelLodErrorMetric;
+	}
+
+	void sbvh::setPixelOfError(real pixelOfError)
+	{
+		if (pixelOfError < real(0)) {
+			m_voxelLodErrorMetricMultiplyer = real(1);
+		}
+		else {
+			m_voxelLodErrorMetricMultiplyer = pixelOfError / m_voxelLodErrorMetric;
+		}
+	}
+
+	void sbvh::setVoxelLodErrorMetricMultiplyer(real multiplyer)
+	{
+		m_voxelLodErrorMetricMultiplyer = multiplyer;
 	}
 }

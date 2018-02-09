@@ -126,6 +126,8 @@ namespace aten
 			m_threadedNodes[0].resize(toplayer.size());
 			memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
 
+			m_maxVoxelRadius = 0.0f;
+
 			// Convert to threaded.
 			for (int i = 0; i < nestedBvh.size(); i++) {
 				// TODO
@@ -138,6 +140,8 @@ namespace aten
 				// exid は top layer が 0 なので、+1 する.
 				bvh->buildVoxel(i + 1, m_voxels.size());
 				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
+
+				m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
 
 				std::vector<int> indices;
 				bvh->convert(
@@ -991,7 +995,8 @@ namespace aten
 						exid,
 						transformedRay,
 						t_min, t_max,
-						isectTmp);
+						isectTmp,
+						enableLod);
 				}
 				else if (node->primid >= 0) {
 					// Hit test for a primitive.
@@ -1033,7 +1038,8 @@ namespace aten
 		int exid,
 		const ray& r,
 		real t_min, real t_max,
-		Intersection& isect) const
+		Intersection& isect,
+		bool enableLod) const
 	{
 		auto& shapes = transformable::getShapes();
 		auto& prims = face::faces();
@@ -1092,36 +1098,31 @@ namespace aten
 					}
 				}
 			}
-#if 0
-			else
-			if (node->voxel >= 0) {
+#if 1
+			else if (enableLod && node->voxel >= 0) {
 				Intersection isectTmp;
 
 				const auto& voxel = m_voxels[(int)node->voxel];
 
 				float t_result = 0.0f;
-				aten::aabb::Face face = aten::aabb::Face::None;
-				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, face);
+				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t_result);
 
-				isectTmp.isVoxel = false;
-				isectTmp.area = real(1);
-
+#if 1
 				float radius = expandTo32bitFloat(voxel.radius);
 
-				//isHit = isHit && (radius <= t_result * m_voxelLodErrorC);
-
-				if (isHit) {
-					// 無いはずだが、念のため.
-					face = face == aten::aabb::Face::None ? aten::aabb::Face::FaceX : face;
+				if (isHit && radius <= t_result * m_voxelLodErrorMetric * m_voxelLodErrorMetricMultiplyer)
+				//if (isHit && voxel.lod >= 3)
+				{
+					isectTmp.isVoxel = true;
 
 					// TODO
 					// L2Wマトリクス.
-					auto area = aten::aabb::computeFaceSurfaceArea(node->boxmin, node->boxmax);
+
+					// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
+					auto area = aten::aabb::computeSurfaceArea(node->boxmin, node->boxmax) * real(0.5);
+					isectTmp.area = collapseTo31bitInteger(area);
 
 					isectTmp.t = t_result;
-
-					isectTmp.isVoxel = true;
-					isectTmp.area = collapseTo31bitInteger(area[face]);
 
 					isectTmp.nml_x = voxel.nmlX;
 					isectTmp.nml_y = voxel.nmlY;
@@ -1133,9 +1134,7 @@ namespace aten
 
 					// Dummy value, return ray hit voxel.
 					isectTmp.objid = 1;
-				}
 
-				if (isHit) {
 					if (isectTmp.t < isect.t) {
 						isect = isectTmp;
 						t_max = isect.t;
@@ -1144,6 +1143,7 @@ namespace aten
 					// LODにヒットしたので、子供（詳細）は探索しないようにする.
 					isHit = false;
 				}
+#endif
 			}
 #endif
 			else {
@@ -1291,6 +1291,8 @@ namespace aten
 
 		// TODO
 		// Check magic number.
+
+		m_maxVoxelRadius = header.maxVoxelRadius;
 
 		m_threadedNodes.resize(1);
 		m_threadedNodes[0].resize(header.nodeNum);

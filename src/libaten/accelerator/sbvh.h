@@ -138,7 +138,16 @@ namespace aten
 			return m_voxels;
 		}
 
-		void prepareToComputeVoxelLodError(uint32_t height, real verticalFov);
+		real computeVoxelLodErrorMetric(
+			uint32_t height, 
+			real verticalFov, 
+			real pixelOfError = real(-1));
+
+		real getVoxelLodErrorMetric(real err);
+
+		void setPixelOfError(real pixelOfError);
+
+		void setVoxelLodErrorMetricMultiplyer(real multiplyer);
 
 	private:
 		void buildInternal(
@@ -154,7 +163,8 @@ namespace aten
 			int exid,
 			const ray& r,
 			real t_min, real t_max,
-			Intersection& isect) const;
+			Intersection& isect,
+			bool enableLod) const;
 
 		struct SBVHNode {
 			SBVHNode() {}
@@ -300,6 +310,7 @@ namespace aten
 		std::vector<BvhVoxel> m_voxels;
 
 		// For voxel hit test.
-		real m_voxelLodErrorC{ real(1) };
+		real m_voxelLodErrorMetric{ real(1) };
+		real m_voxelLodErrorMetricMultiplyer{ real(1) };
 	};
 }

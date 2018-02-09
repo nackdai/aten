@@ -43,7 +43,7 @@ namespace AT_NAME {
 				obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, isect);
 			}
 
-			aten::hitable::evalHitResult(obj, r, rec, isect);
+			aten::hitable::evalHitResultForAreaLight(obj, r, rec, isect);
 
 			sample(
 				&result,

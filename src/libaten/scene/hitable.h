@@ -216,6 +216,22 @@ namespace aten {
 #endif
 		}
 
+		static void evalHitResultForAreaLight(
+			const hitable* obj,
+			const ray& r,
+			hitrecord& rec,
+			const Intersection& isect)
+		{
+			obj->evalHitResult(r, rec, isect);
+			rec.mtrlid = isect.mtrlid;
+
+#ifdef ENABLE_TANGENTCOORD_IN_HITREC
+			// tangent coordinate.
+			rec.du = normalize(getOrthoVector(rec.normal));
+			rec.dv = normalize(cross(rec.normal, rec.du));
+#endif
+		}
+
 		using FuncPreDraw = std::function<void(const aten::mat4&, const aten::mat4&, int, int)>;
 
 		virtual void draw(

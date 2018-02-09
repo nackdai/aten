@@ -34,7 +34,6 @@ namespace aten
 		float parent{ -1 };
 #endif
 
-
 		bool isLeaf() const
 		{
 			return (isleaf >= 0);
@@ -64,7 +63,7 @@ namespace aten
 		float nmlY;
 		struct {
 			uint32_t signNmlZ : 1;
-			uint32_t radius : 31;
+			uint32_t area : 31;
 		};
 		uint32_t nodeid{ 0 };
 
@@ -78,11 +77,15 @@ namespace aten
 			uint32_t exid : 16;
 			uint32_t lod : 16;
 		};
+
+		float radius;
+		float reserved[3];
 	};
 
 	// NOTE
 	// GPGPU処理用に両方を同じメモリ空間上に格納するため、同じサイズでないといけない.
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
+	AT_STATICASSERT(sizeof(BvhVoxel) == sizeof(ThreadedBvhNode));
 
 	class sbvh : public accelerator {
 	public:

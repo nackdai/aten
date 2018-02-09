@@ -305,7 +305,11 @@ namespace aten
 			voxel.signNmlZ = avgNormal.z < real(0) ? 1 : 0;
 
 			float radius = sbvhNode.bbox.getDiagonalLenght() * 0.5f;
-			voxel.radius = collapseTo31bitInteger(radius);
+			voxel.radius = radius;
+
+			// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
+			float area = sbvhNode.bbox.computeSurfaceArea() * 0.5f;
+			voxel.area = collapseTo31bitInteger(area);
 
 			m_maxVoxelRadius = std::max(m_maxVoxelRadius, radius);
 

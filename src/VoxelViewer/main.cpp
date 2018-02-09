@@ -79,7 +79,10 @@ void onRun()
 			const auto& voxel = voxels[g_drawVoxelIdx];
 			const auto& node = nodes[voxel.exid][voxel.nodeid];
 
+			float radius = aten::expandTo32bitFloat(voxel.radius);
+
 			ImGui::Text("ExId [%d] NodeId[%d] Lod[%d]", voxel.exid, voxel.nodeid, voxel.lod);
+			ImGui::Text("Radius [%f]", radius);
 			ImGui::Text("Box min [%f, %f, %f]", node.boxmin.x, node.boxmin.y, node.boxmin.z);
 			ImGui::Text("Box max [%f, %f, %f]", node.boxmax.x, node.boxmax.y, node.boxmax.z);
 		}
@@ -226,6 +229,11 @@ bool parseOption(
 void loadObj(const Options& opt)
 {
 #if 1
+	auto emit = new aten::emissive(aten::vec3(36, 33, 24));
+	aten::AssetManager::registerMtrl(
+		"light",
+		emit);
+
 	aten::ObjLoader::load(g_objs, opt.input);
 #else
 	aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");

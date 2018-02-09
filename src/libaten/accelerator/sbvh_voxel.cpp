@@ -235,7 +235,7 @@ namespace aten
 
 			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
-			// Speficfy having voxel.
+			// Specify having voxel.
 			sbvhNode.voxelIdx = (int)i + offset;
 
 			auto center = sbvhNode.bbox.getCenter();
@@ -354,5 +354,22 @@ namespace aten
 	void sbvh::setVoxelLodErrorMetricMultiplyer(real multiplyer)
 	{
 		m_voxelLodErrorMetricMultiplyer = multiplyer;
+	}
+
+	void sbvh::copyVoxelToNodeArray(std::vector<ThreadedSbvhNode>& dst)
+	{
+		// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
+
+		if (m_voxels.empty()) {
+			return;
+		}
+
+		size_t cur = dst.size();
+		size_t expand = m_voxels.size();
+
+		size_t size = cur + expand;
+		dst.resize(size);
+
+		memcpy(&dst[cur], &m_voxels[0], sizeof(BvhVoxel) * expand);
 	}
 }

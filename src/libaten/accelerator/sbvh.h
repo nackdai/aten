@@ -29,6 +29,7 @@ namespace aten
 		float padding{ -1 };
 
 #ifdef VOXEL_TEST
+		// Offset to voxel from current node index.
 		float voxel{ -1 };
 #else
 		float parent{ -1 };
@@ -281,6 +282,8 @@ namespace aten
 		void onMakeTreelet(
 			uint32_t idx,
 			const sbvh::SBVHNode& root);
+
+		void copyVoxelToNodeArray(std::vector<ThreadedSbvhNode>& dst);
 
 	private:
 		ThreadedBVH m_bvh;

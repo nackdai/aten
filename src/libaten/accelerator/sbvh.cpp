@@ -128,6 +128,8 @@ namespace aten
 
 			m_maxVoxelRadius = 0.0f;
 
+			uint32_t voxelOffset = 0;
+
 			// Convert to threaded.
 			for (int i = 0; i < nestedBvh.size(); i++) {
 				// TODO
@@ -137,9 +139,16 @@ namespace aten
 				bbox.expand(box);
 
 				// NOTE
+				// Voxelデータはノードの配列に入れる.
+				// また、Voxelデータはノードデータの後に入れる.
+				// そこで、Voxelデータのオフセットをノード数から計算する.
+				voxelOffset += bvh->m_threadedNodes.empty()
+					? bvh->m_nodes.size()
+					: bvh->m_threadedNodes[0].size();
+
+				// NOTE
 				// exid は top layer が 0 なので、+1 する.
-				bvh->buildVoxel(i + 1, m_voxels.size());
-				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
+				bvh->buildVoxel(i + 1, voxelOffset);
 
 				m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
 
@@ -150,6 +159,9 @@ namespace aten
 					indices);
 
 				m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
+
+				// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
+				bvh->copyVoxelToNodeArray(m_threadedNodes[i + 1]);
 			}
 
 			setBoundingBox(bbox);
@@ -889,7 +901,8 @@ namespace aten
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
 
 #ifdef VOXEL_TEST
-				thrededNode.voxel = sbvhNode.voxelIdx;
+				// Offset to voxel from current node index.
+				thrededNode.voxel = sbvhNode.voxelIdx - entry.nodeIdx;
 #else
 				nodes[sbvhNode.right].parent = (float)entry.nodeIdx;
 				nodes[sbvhNode.left].parent = (float)entry.nodeIdx;
@@ -1100,48 +1113,53 @@ namespace aten
 			}
 #if 1
 			else if (enableLod && node->voxel >= 0) {
-				Intersection isectTmp;
-
-				const auto& voxel = m_voxels[(int)node->voxel];
-
 				float t_result = 0.0f;
 				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t_result);
 
 #if 1
-				float radius = expandTo32bitFloat(voxel.radius);
+				if (isHit) {
+					// Add offset voxel index to compute voxel index in node array.
+					int voxelIdx = nodeid + (int)node->voxel;
 
-				if (isHit && radius <= t_result * m_voxelLodErrorMetric * m_voxelLodErrorMetricMultiplyer)
-				//if (isHit && voxel.lod >= 3)
-				{
-					isectTmp.isVoxel = true;
+					auto tmp = &m_threadedNodes[exid][voxelIdx];
+					const BvhVoxel* voxel = reinterpret_cast<const BvhVoxel*>(tmp);
+					
+					float radius = expandTo32bitFloat(voxel->radius);
 
-					// TODO
-					// L2Wマトリクス.
+					if (radius <= t_result * m_voxelLodErrorMetric * m_voxelLodErrorMetricMultiplyer)
+					{
+						Intersection isectTmp;
 
-					// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
-					auto area = aten::aabb::computeSurfaceArea(node->boxmin, node->boxmax) * real(0.5);
-					isectTmp.area = collapseTo31bitInteger(area);
+						isectTmp.isVoxel = true;
 
-					isectTmp.t = t_result;
+						// TODO
+						// L2Wマトリクス.
 
-					isectTmp.nml_x = voxel.nmlX;
-					isectTmp.nml_y = voxel.nmlY;
-					isectTmp.signNmlZ = voxel.signNmlZ;
+						// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
+						auto area = aten::aabb::computeSurfaceArea(node->boxmin, node->boxmax) * real(0.5);
+						isectTmp.area = collapseTo31bitInteger(area);
 
-					isectTmp.clr_r = voxel.clrR;
-					isectTmp.clr_g = voxel.clrG;
-					isectTmp.clr_b = voxel.clrB;
+						isectTmp.t = t_result;
 
-					// Dummy value, return ray hit voxel.
-					isectTmp.objid = 1;
+						isectTmp.nml_x = voxel->nmlX;
+						isectTmp.nml_y = voxel->nmlY;
+						isectTmp.signNmlZ = voxel->signNmlZ;
 
-					if (isectTmp.t < isect.t) {
-						isect = isectTmp;
-						t_max = isect.t;
+						isectTmp.clr_r = voxel->clrR;
+						isectTmp.clr_g = voxel->clrG;
+						isectTmp.clr_b = voxel->clrB;
+
+						// Dummy value, return ray hit voxel.
+						isectTmp.objid = 1;
+
+						if (isectTmp.t < isect.t) {
+							isect = isectTmp;
+							t_max = isect.t;
+						}
+
+						// LODにヒットしたので、子供（詳細）は探索しないようにする.
+						isHit = false;
 					}
-
-					// LODにヒットしたので、子供（詳細）は探索しないようにする.
-					isHit = false;
 				}
 #endif
 			}

@@ -273,12 +273,23 @@
 <node CREATED="1517822762677" ID="ID_1650141646" MODIFIED="1517822766576" TEXT="sponza&#x3067;&#x78ba;&#x8a8d;"/>
 </node>
 <node CREATED="1517822767252" ID="ID_594255335" MODIFIED="1517822781600" TEXT="CornellBox&#x3067;&#x30e9;&#x30a4;&#x30c8;&#x79fb;&#x52d5;&#x306e;Variance&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;"/>
+<node CREATED="1518165137739" ID="ID_1838800613" MODIFIED="1518165145490" TEXT="material.cpp&#x30ea;&#x30cd;&#x30fc;&#x30e0;">
+<node CREATED="1518165145869" ID="ID_569888534" MODIFIED="1518165155936" TEXT="material &#x3068; .cpp &#x306e;&#x9593;&#x306b;&#x30b9;&#x30da;&#x30fc;&#x30b9;&#x304c;&#x3042;&#x308b;&#x30fb;&#x30fb;&#x30fb;"/>
+</node>
 </node>
 <node CREATED="1517822784508" HGAP="23" ID="ID_29808556" MODIFIED="1518164988703" POSITION="right" TEXT="Voxel" VSHIFT="42">
 <node CREATED="1518164990528" ID="ID_57331120" MODIFIED="1518164992225" TEXT="&#x53c2;&#x8003;">
 <node CREATED="1517822794924" ID="ID_1430070360" LINK="http://research.nvidia.com/publication/voxelpipe-programmable-pipeline-3d-voxelization" MODIFIED="1517822802645" TEXT="http://research.nvidia.com/publication/voxelpipe-programmable-pipeline-3d-voxelization"/>
 <node CREATED="1517822805805" ID="ID_1988477591" LINK="https://github.com/nervoussystem/voxelpipe" MODIFIED="1517823009749" TEXT="&#x30bd;&#x30fc;&#x30b9;&#x30b3;&#x30fc;&#x30c9;&#x3082;&#x3042;&#x308b;"/>
 </node>
+<node CREATED="1518165160468" ID="ID_1277249483" MODIFIED="1518165171505" TEXT="&#x30d0;&#x30a6;&#x30f3;&#x30b9;">
+<node CREATED="1518165171844" ID="ID_983753623" MODIFIED="1518165183545" TEXT="lambert&#x306e;&#x8a08;&#x7b97;">
+<node CREATED="1518165183918" ID="ID_1773190416" MODIFIED="1518165201192" TEXT="normal&#x304c;&#x9069;&#x5f53;&#x306a;&#x306e;&#x3067;&#x3001;wo&#x30d9;&#x30af;&#x30c8;&#x30eb;&#x3068;&#x306e;dot&#x304c;&#x30de;&#x30a4;&#x30ca;&#x30b9;&#x306b;&#x306a;&#x308a;&#x307e;&#x304f;&#x308b;">
+<node CREATED="1518165201639" ID="ID_184385340" MODIFIED="1518165211176" TEXT="&#x73fe;&#x5728;&#x306f; assert &#x3092;&#x6291;&#x5236;&#x3057;&#x3066;&#x3044;&#x308b;"/>
+</node>
+</node>
+</node>
+<node CREATED="1518165217077" ID="ID_714369888" MODIFIED="1518165222681" TEXT="CUDA&#x5b9f;&#x88c5;"/>
 </node>
 <node CREATED="1512725616581" FOLDED="true" HGAP="17" ID="ID_1838812617" MODIFIED="1518164984535" POSITION="right" TEXT="&#x9ad8;&#x901f;&#x5316;&#x6848;" VSHIFT="82">
 <node CREATED="1512725621309" ID="ID_637230800" MODIFIED="1516934323710" TEXT="&#x30b8;&#x30aa;&#x30e1;&#x30c8;&#x30ea;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;">

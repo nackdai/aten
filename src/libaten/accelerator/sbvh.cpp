@@ -1128,7 +1128,7 @@ namespace aten
 					auto tmp = &m_threadedNodes[exid][voxelIdx];
 					const BvhVoxel* voxel = reinterpret_cast<const BvhVoxel*>(tmp);
 					
-					float radius = expandTo32bitFloat(voxel->radius);
+					float radius = voxel->radius;
 
 					if (radius <= t_result * m_voxelLodErrorMetric * m_voxelLodErrorMetricMultiplyer)
 					{
@@ -1139,19 +1139,17 @@ namespace aten
 						// TODO
 						// L2Wマトリクス.
 
-						// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
-						auto area = aten::aabb::computeSurfaceArea(node->boxmin, node->boxmax) * real(0.5);
-						isectTmp.area = collapseTo31bitInteger(area);
+						isectTmp.area = collapseTo31bitInteger(voxel->area);
 
 						isectTmp.t = t_result;
 
-						isectTmp.nml_x = voxel->nmlX;
-						isectTmp.nml_y = voxel->nmlY;
-						isectTmp.signNmlZ = voxel->signNmlZ;
+						isectTmp.nml_x = voxel->nml.x;
+						isectTmp.nml_y = voxel->nml.y;
+						isectTmp.signNmlZ = voxel->nml.z < 0 ? 1 : 0;
 
-						isectTmp.clr_r = voxel->clrR;
-						isectTmp.clr_g = voxel->clrG;
-						isectTmp.clr_b = voxel->clrB;
+						isectTmp.clr_r = voxel->clr.r;
+						isectTmp.clr_g = collapseTo31bitInteger(voxel->clr.g);
+						isectTmp.clr_b = voxel->clr.b;
 
 						// Dummy value, return ray hit voxel.
 						isectTmp.objid = 1;

@@ -310,7 +310,7 @@ namespace aten {
 
 	// 31bit float (not have sign bit) expand to correct float (32 bit float, have sign bit).
 	// Only return positive value.
-	inline float expandTo32bitFloat(uint32_t n)
+	inline AT_DEVICE_API float expandTo32bitFloat(uint32_t n)
 	{
 		union {
 			float f;
@@ -328,7 +328,7 @@ namespace aten {
 
 	// Collapse 32 bit float to 31 bit float (not have sign bit) as integer.
 	// But miss sign bit.
-	inline uint32_t collapseTo31bitInteger(float f)
+	inline AT_DEVICE_API uint32_t collapseTo31bitInteger(float f)
 	{
 		union {
 			float f;

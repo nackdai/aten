@@ -307,20 +307,14 @@ namespace aten
 
 			avgColor /= clrCnt;
 
-			voxel.clrR = avgColor.r;
-			voxel.clrG = collapseTo31bitInteger(avgColor.g);
-			voxel.clrB = avgColor.b;
-
-			voxel.nmlX = avgNormal.x;
-			voxel.nmlY = avgNormal.y;
-			voxel.signNmlZ = avgNormal.z < real(0) ? 1 : 0;
+			voxel.clr = avgColor;
+			voxel.nml = avgNormal;
 
 			float radius = sbvhNode.bbox.getDiagonalLenght() * 0.5f;
 			voxel.radius = radius;
 
 			// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
-			float area = sbvhNode.bbox.computeSurfaceArea() * 0.5f;
-			voxel.area = collapseTo31bitInteger(area);
+			voxel.area = sbvhNode.bbox.computeSurfaceArea() * 0.5f;
 
 			m_maxVoxelRadius = std::max(m_maxVoxelRadius, radius);
 

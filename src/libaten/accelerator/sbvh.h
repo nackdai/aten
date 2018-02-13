@@ -60,27 +60,18 @@ namespace aten
 	};
 
 	struct BvhVoxel {
-		float nmlX;
-		float nmlY;
-		struct {
-			uint32_t signNmlZ : 1;
-			uint32_t area : 31;
-		};
+		aten::vec3 nml;
 		uint32_t nodeid{ 0 };
 
-		float clrR;
-		struct {
-			uint32_t clrG : 31;
-			uint32_t padding : 1;
-		};
-		float clrB;
+		aten::vec3 clr;
 		struct {
 			uint32_t exid : 16;
 			uint32_t lod : 16;
-		};
+		};		
 
 		float radius;
-		float reserved[3];
+		float area;
+		float reserved[2];
 	};
 
 	// NOTE

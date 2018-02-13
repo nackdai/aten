@@ -151,7 +151,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 		AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
 	}
 
-	evalHitResult(ctxt, s, r, &rec, &isect);
+	evalHitResultForAreaLight(ctxt, s, r, &rec, &isect);
 
 	AT_NAME::AreaLight::sample(result, &rec, light, org, sampler);
 

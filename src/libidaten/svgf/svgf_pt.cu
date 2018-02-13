@@ -180,6 +180,7 @@ __global__ void hitTest(
 
 		bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod);
 
+#if 0
 		isects[idx].t = isect.t;
 		isects[idx].objid = isect.objid;
 		isects[idx].mtrlid = isect.mtrlid;
@@ -187,6 +188,9 @@ __global__ void hitTest(
 		isects[idx].primid = isect.primid;
 		isects[idx].a = isect.a;
 		isects[idx].b = isect.b;
+#else
+		isects[idx] = isect;
+#endif
 
 		if (bounce >= 1
 			&& !paths->attrib[idx].isSingular
@@ -208,7 +212,8 @@ __global__ void hitTest(
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(23, 511 - 503, width);
+
 
 	paths->attrib[idx].isHit = false;
 
@@ -426,18 +431,24 @@ __global__ void shade(
 	auto obj = &ctxt.shapes[isect.objid];
 	evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
-	shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
-
 	bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
 	// 交差位置の法線.
 	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = rec.normal;
 
-	if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
-		shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
-		shMtrls[threadIdx.x].normalMap = (int)(shMtrls[threadIdx.x].normalMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].normalMap] : -1);
-		shMtrls[threadIdx.x].roughnessMap = (int)(shMtrls[threadIdx.x].roughnessMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].roughnessMap] : -1);
+	if (rec.mtrlid >= 0) {
+		shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
+
+		if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
+			shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
+			shMtrls[threadIdx.x].normalMap = (int)(shMtrls[threadIdx.x].normalMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].normalMap] : -1);
+			shMtrls[threadIdx.x].roughnessMap = (int)(shMtrls[threadIdx.x].roughnessMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].roughnessMap] : -1);
+		}
+	}
+	else {
+		shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
+		shMtrls[threadIdx.x].baseColor = rec.albedo;
 	}
 
 	// Render AOVs.

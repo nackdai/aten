@@ -453,6 +453,59 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 	aten::hitrecord* rec,
 	const aten::Intersection* isect)
 {
+	if (isect->isVoxel) {
+		// For voxel.
+		rec->mtrlid = -1;
+
+		rec->area = aten::expandTo32bitFloat(isect->area);
+
+		// Repair normal.
+		auto nml_z = aten::sqrt(min(real(1) - isect->nml_x * isect->nml_x + isect->nml_y * isect->nml_y, real(1)));
+		nml_z *= isect->signNmlZ ? real(-1) : real(1);
+		rec->normal = normalize(aten::vec3(isect->nml_x, isect->nml_y, nml_z));
+
+		// Compute hit point.
+		rec->p = r.org + isect->t * r.dir;
+		rec->p = rec->p + AT_MATH_EPSILON * rec->normal;
+
+		// Repair Albedo color.
+		rec->albedo.x = isect->clr_r;
+		rec->albedo.y = aten::expandTo32bitFloat(isect->clr_g);
+		rec->albedo.z = isect->clr_b;
+
+		// Flag if voxel or not.
+		rec->isVoxel = true;
+	}
+	else {
+		const aten::GeomParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+
+		if (realShape->type == aten::GeometryType::Polygon) {
+			evalHitResultTriangle(ctxt, param, r, rec, isect);
+		}
+		else if (realShape->type == aten::GeometryType::Sphere) {
+			AT_NAME::sphere::evalHitResult(param, r, rec, isect);
+		}
+		else {
+			// TODO
+		}
+
+		rec->mtrlid = isect->mtrlid;
+	}
+
+#ifdef ENABLE_TANGENTCOORD_IN_HITREC
+	// tangent coordinate.
+	rec->du = normalize(getOrthoVector(rec->normal));
+	rec->dv = normalize(cross(rec->normal, rec->du));
+#endif
+}
+
+AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
+	const Context* ctxt,
+	const aten::GeomParameter* param,
+	const aten::ray& r,
+	aten::hitrecord* rec,
+	const aten::Intersection* isect)
+{
 	const aten::GeomParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
 	if (realShape->type == aten::GeometryType::Polygon) {

@@ -128,8 +128,6 @@ namespace aten
 
 			m_maxVoxelRadius = 0.0f;
 
-			uint32_t voxelOffset = 0;
-
 			// Convert to threaded.
 			for (int i = 0; i < nestedBvh.size(); i++) {
 				// TODO
@@ -142,7 +140,7 @@ namespace aten
 				// Voxelデータはノードの配列に入れる.
 				// また、Voxelデータはノードデータの後に入れる.
 				// そこで、Voxelデータのオフセットをノード数から計算する.
-				voxelOffset += bvh->m_threadedNodes.empty()
+				uint32_t voxelOffset = bvh->m_threadedNodes.empty()
 					? bvh->m_nodes.size()
 					: bvh->m_threadedNodes[0].size();
 
@@ -902,7 +900,13 @@ namespace aten
 
 #ifdef VOXEL_TEST
 				// Offset to voxel from current node index.
-				thrededNode.voxel = sbvhNode.voxelIdx - entry.nodeIdx;
+				if (sbvhNode.voxelIdx < 0) {
+					thrededNode.voxel = -1.0f;
+				}
+				else {
+					thrededNode.voxel = sbvhNode.voxelIdx - entry.nodeIdx;
+					AT_ASSERT(thrededNode.voxel >= 0);
+				}
 #else
 				nodes[sbvhNode.right].parent = (float)entry.nodeIdx;
 				nodes[sbvhNode.left].parent = (float)entry.nodeIdx;
@@ -1212,7 +1216,7 @@ namespace aten
 
 		// Build voxel.
 		if (!m_treelets.empty() && !m_nodes.empty()) {
-			buildVoxel(0, 0);
+			buildVoxel(0, m_nodes.size());
 		}
 
 		std::vector<int> indices;

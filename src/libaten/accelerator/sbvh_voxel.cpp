@@ -208,13 +208,8 @@ namespace aten
 			AT_ASSERT(!m_threadedNodes.empty());
 			AT_ASSERT(!m_threadedNodes[0].empty());
 
-			// Add voxel index offset.
-			for (auto& threadedNode : m_threadedNodes[0])
-			{
-				if (threadedNode.voxel >= 0) {
-					threadedNode.voxel += offset;
-				}
-			}
+			// NOTE
+			// インポート時はすでにオフセットが足されているので、何もしない.
 
 			// Set correct external node index.
 			for (auto& voxel : m_voxels) {
@@ -248,6 +243,9 @@ namespace aten
 			voxel.exid = exid;
 			voxel.lod = computeVoxelLodLevel(sbvhNode.depth, m_maxDepth);
 
+			uint32_t nmlCnt = 0;
+			uint32_t clrCnt = 0;
+
 			for (const auto tid : treelet.tris) {
 				const auto triparam = faces[tid]->param;
 
@@ -270,6 +268,7 @@ namespace aten
 				float lambda3 = 1.0f - lambda1 - lambda2;
 
 				auto normal = v0.nml * lambda1 + v1.nml * lambda2 + v2.nml * lambda3;
+
 				if (triparam.needNormal > 0) {
 					auto e01 = v1.pos - v0.pos;
 					auto e02 = v2.pos - v0.pos;
@@ -285,20 +284,32 @@ namespace aten
 				auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
 				color *= mtrl->color();
 
-				avgNormal += normal;
+				if (!::isnan(normal.x) && !::isnan(normal.y) && !::isnan(normal.z)) {
+					avgNormal += normal;
+					nmlCnt++;
+				}
+
 				avgColor += color;
+				clrCnt++;
 			}
 
-			int cnt = (int)treelet.tris.size();
+			if (nmlCnt > 0) {
+				avgNormal /= nmlCnt;
+			}
 
-			avgNormal /= cnt;
-			avgColor /= cnt;
+			// TODO
+			// 合計なので、ゼロになることはあり得る...
+			if (squared_length(avgNormal) == real(0)) {
+				avgNormal = aten::vec3(1);
+			}
+
+			avgNormal = normalize(avgNormal);
+
+			avgColor /= clrCnt;
 
 			voxel.clrR = avgColor.r;
 			voxel.clrG = collapseTo31bitInteger(avgColor.g);
 			voxel.clrB = avgColor.b;
-
-			avgNormal = normalize(avgNormal);
 
 			voxel.nmlX = avgNormal.x;
 			voxel.nmlY = avgNormal.y;

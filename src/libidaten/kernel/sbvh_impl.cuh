@@ -128,34 +128,31 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 			const auto* s = &ctxt->shapes[(int)attrib.x];
 
 			if (attrib.z >= 0) {	// exid
-				//if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t))
-				{
-					if (s->mtxid >= 0) {
-						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
-						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
-						transformedRay.dir = normalize(transformedRay.dir);
-						transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
-					}
-					else {
-						transformedRay = r;
-					}
-
-					int exid = __float_as_int(attrib.z);
-					bool hasLod = AT_BVHNODE_HAS_LOD(exid);
-					exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
-					//exid = AT_BVHNODE_MAIN_EXID(exid);
-
-					node = ctxt->nodes[exid];
-
-					objid = (int)attrib.x;
-					meshid = (int)attrib.w;
-
-					toplayerHit = (int)node0.w;
-					toplayerMiss = (int)node1.w;
-
-					isHit = true;
-					node0.w = 0.0f;
+				if (s->mtxid >= 0) {
+					auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+					transformedRay.dir = mtxW2L.applyXYZ(r.dir);
+					transformedRay.dir = normalize(transformedRay.dir);
+					transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
 				}
+				else {
+					transformedRay = r;
+				}
+
+				int exid = __float_as_int(attrib.z);
+				bool hasLod = AT_BVHNODE_HAS_LOD(exid);
+				exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
+				//exid = AT_BVHNODE_MAIN_EXID(exid);
+
+				node = ctxt->nodes[exid];
+
+				objid = (int)attrib.x;
+				meshid = (int)attrib.w;
+
+				toplayerHit = (int)node0.w;
+				toplayerMiss = (int)node1.w;
+
+				isHit = true;
+				node0.w = 0.0f;
 			}
 			else if (attrib.y >= 0) {
 				int primidx = (int)attrib.y;

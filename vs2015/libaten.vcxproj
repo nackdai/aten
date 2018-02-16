@@ -393,7 +393,7 @@
     <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\layer.cpp" />
-    <ClCompile Include="..\src\libaten\material\material .cpp" />
+    <ClCompile Include="..\src\libaten\material\material.cpp" />
     <ClCompile Include="..\src\libaten\material\oren_nayar.cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />

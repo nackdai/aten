@@ -460,7 +460,7 @@
     <ClCompile Include="..\src\libaten\material\blinn.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\material\material .cpp">
+    <ClCompile Include="..\src\libaten\material\material.cpp">
       <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\ggx.cpp">

@@ -328,7 +328,7 @@
     <CudaCompile Include="..\src\libaten\material\ggx.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\material .cpp">
+    <CudaCompile Include="..\src\libaten\material\material.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\oren_nayar.cpp">

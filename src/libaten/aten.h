@@ -34,6 +34,7 @@
 #include "math/vec4.h"
 #include "math/ray.h"
 #include "math/mat4.h"
+#include "math/quaternion.h"
 #include "math/aabb.h"
 
 #include "misc/color.h"

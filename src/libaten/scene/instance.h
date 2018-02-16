@@ -72,7 +72,7 @@ namespace aten
 			auto isHit = m_obj->hit(transformdRay, t_min, t_max, isect);
 
 			if (isHit) {
-				// Return this instance's id.
+				// returnTo this instance's id.
 				isect.objid = id();
 			}
 

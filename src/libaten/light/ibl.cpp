@@ -290,7 +290,7 @@ namespace AT_NAME {
 		real costheta = aten::pow(1 - r2, 0.5);
 		real sintheta = aten::sqrt(1 - costheta * costheta);
 
-		// Return the result
+		// returnTo the result
 		result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
 
 		result.pdf = dot(nml, result.dir) / AT_MATH_PI;

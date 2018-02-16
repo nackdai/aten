@@ -192,7 +192,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 	real costheta = aten::pow(1 - r2, 0.5);
 	real sintheta = aten::sqrt(1 - costheta * costheta);
 
-	// Return the result
+	// returnTo the result
 	result->dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
 
 	auto uv = AT_NAME::envmap::convertDirectionToUV(result->dir);

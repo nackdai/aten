@@ -107,6 +107,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 	cudaTextureObject_t node = ctxt->nodes[0];
 	aten::ray transformedRay = r;
 
+	bool isTraverseRootTree = true;
+
 	int toplayerHit = -1;
 	int toplayerMiss = -1;
 	int objid = 0;
@@ -153,6 +155,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
 				isHit = true;
 				node0.w = 0.0f;
+
+				isTraverseRootTree = false;
 			}
 			else if (attrib.y >= 0) {
 				int primidx = (int)attrib.y;
@@ -186,7 +190,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 				}
 			}
 		}
-		else if (enableLod && toplayerHit >= 0 && attrib.w >= 0) {
+		else if (enableLod && !isTraverseRootTree && attrib.w >= 0) {
 			// Voxel
 			isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t);
 
@@ -254,13 +258,15 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 			nodeid = (int)node1.w;
 		}
 
-		if (nodeid < 0 && toplayerHit >= 0) {
+		if (nodeid < 0) {
 			nodeid = isHit ? toplayerHit : toplayerMiss;
 			toplayerHit = -1;
 			toplayerMiss = -1;
 			node = ctxt->nodes[0];
 			transformedRay = r;
+			isTraverseRootTree = true;
 		}
+
 #else
 		if (attrib.x >= 0) {
 			// Leaf.

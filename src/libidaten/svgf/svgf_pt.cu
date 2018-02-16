@@ -247,6 +247,7 @@ __global__ void hitTest(
 
 	bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
 
+#if 0
 	isects[idx].t = isect.t;
 	isects[idx].objid = isect.objid;
 	isects[idx].mtrlid = isect.mtrlid;
@@ -255,6 +256,9 @@ __global__ void hitTest(
 	isects[idx].primid = isect.primid;
 	isects[idx].a = isect.a;
 	isects[idx].b = isect.b;
+#else
+	isects[idx] = isect;
+#endif
 
 	if (bounce >= 1
 		&& !paths->attrib[idx].isSingular

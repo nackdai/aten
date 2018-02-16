@@ -43,6 +43,7 @@
 #include "misc/value.h"
 #include "misc/stream.h"
 #include "misc/thread.h"
+#include "misc/key.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"

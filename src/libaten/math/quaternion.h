@@ -5,62 +5,55 @@
 
 namespace aten
 {
-	class quat {
-		static const quat Identity;
-		static const quat Zero;
-
+	template <typename FType>
+	class quaternion {
 	public:
-		union {
-			vec4 v;
-			struct {
-				real x, y, z, w;
-			};
-			real p[4];
-		};
+		FType x, y, z, w;
 
-		quat()
+		quaternion()
 		{
-			x = y = z = w = real(0);
+			x = y = z = w = FType(0);
 		}
 
-		quat(real _x, real _y, real _z, real _w = 1.0f)
+		quaternion(real _x, real _y, real _z, real _w = 1.0f)
 		{
 			x = _x; y = _y; z = _z; w = _w;
 		}
 
-		quat(const quat& rhs)
+		quaternion(const quaternion& rhs)
 		{
 			x = rhs.x; y = rhs.y; z = rhs.z; w = rhs.w;
 		}
 
-		quat(const vec4& rhs)
+		quaternion(const vec4& rhs)
 		{
 			x = rhs.x; y = rhs.y; z = rhs.z; w = rhs.w;
 		}
 
 		// 全成分０のクオータニオンを設定する
-		quat& zero()
+		quaternion& zero()
 		{
-			*this = Zero;
+			x = y = z = w = FType(0);
 			return *this;
 		}
 
-		quat& identity()
+		quaternion& identity()
 		{
-			*this = Identity;
+			x = y = z = FType(0);
+			w = FType(1);
 			return *this;
 		}
 
-		const quat& operator+() const
+		const quaternion& operator+() const
 		{
 			return *this;
 		}
-		quat operator-() const
+		quaternion operator-() const
 		{
 			return vec4(-x, -y, -z, -w);
 		}
 
-		quat& operator+=(const quat& _v)
+		quaternion& operator+=(const quaternion& _v)
 		{
 			x += _v.x;
 			y += _v.y;
@@ -68,7 +61,7 @@ namespace aten
 			w += _v.w;
 			return *this;
 		}
-		quat& operator-=(const quat& _v)
+		quaternion& operator-=(const quaternion& _v)
 		{
 			x -= _v.x;
 			y -= _v.y;
@@ -76,17 +69,17 @@ namespace aten
 			w -= _v.w;
 			return *this;
 		}
-		quat& operator*=(const quat& _v)
+		quaternion& operator*=(const quaternion& _v)
 		{
 			*this = *this * _v;
 			return *this;
 		}
-		quat& operator*=(real f)
+		quaternion& operator*=(real f)
 		{
 			*this = *this * f;
 			return *this;
 		}
-		quat& operator/=(real f)
+		quaternion& operator/=(real f)
 		{
 			*this = *this / f;
 			return *this;
@@ -101,7 +94,7 @@ namespace aten
 		}
 
 		// クオータニオンを正規化する
-		quat& normalize()
+		quaternion& normalize()
 		{
 			auto l = length();
 			*this /= l;
@@ -109,7 +102,7 @@ namespace aten
 		}
 
 		// 共役クオータニオンを求める
-		quat& conjugate()
+		quaternion& conjugate()
 		{
 			x = -x;
 			y = -y;
@@ -119,7 +112,7 @@ namespace aten
 		}
 
 		// 逆クオータニオンを求める
-		quat& invert()
+		quaternion& invert()
 		{
 			// |q|^2
 			real s = x * x + y * y + z * z + w * w;
@@ -134,18 +127,18 @@ namespace aten
 		}
 
 		// 球面線形補間
-		static quat slerp(
-			const quat& quat1, 
-			const quat& quat2, 
+		static quaternion slerp(
+			const quaternion& quat1, 
+			const quaternion& quat2, 
 			real t)
 		{
 			// NOTE
 			// http://www.f-sp.com/entry/2017/06/30/221124#%E7%90%83%E9%9D%A2%E7%B7%9A%E5%BD%A2%E8%A3%9C%E9%96%93
 
-			quat q0 = quat1;
+			quaternion q0 = quat1;
 			q0.normalize;
 
-			quat q1 = quat2;
+			quaternion q1 = quat2;
 			q1.normalize();
 
 			auto c = dot(q0.v, q1.v);
@@ -155,13 +148,13 @@ namespace aten
 			auto s0 = aten::sin((real(1) - t) * theta);
 			auto s1 = aten::sin(t * theta);
 
-			quat ret = s0 / sdiv * quat1 + s1 / sdiv * quat2;
+			quaternion ret = s0 / sdiv * quat1 + s1 / sdiv * quat2;
 
 			return std::move(ret);
 		}
 
 		// 角度と任意軸からクオータニオンを設定する
-		quat& setQuatFromRadAxis(real rad, const aten::vec4& vAxis)
+		quaternion& setQuatFromRadAxis(real rad, const aten::vec4& vAxis)
 		{
 			// 念のため
 			auto v = aten::normalize(vAxis);
@@ -235,7 +228,7 @@ namespace aten
 		}
 
 		// 行列からクオータニオンを計算する
-		quat& fromMatrix(const mat4& mtx)
+		quaternion& fromMatrix(const mat4& mtx)
 		{
 			// 最大値を探す
 			real value[4] = {
@@ -290,13 +283,13 @@ namespace aten
 			return *this;
 		}
 
-		quat& fromEuler(const aten::vec3& euler)
+		quaternion& fromEuler(const aten::vec3& euler)
 		{
 			return fromEuler(euler.x, euler.y, euler.z);
 		}
 
 		// オイラー角からクオータニオンを計算する
-		quat& fromEuler(real x, real y, real z)
+		quaternion& fromEuler(real x, real y, real z)
 		{
 			// Q1 = (x1, y1, z1, w1) = x1i + y1j + z1k + w1
 			// Q2 = (x2, y2, z2, w2) = x2i + y2j + z2k + w2
@@ -349,7 +342,7 @@ namespace aten
 
 		// 二つのベクトルv0,v1が与えられたときに
 		// q  * v0 == v1 となるクオータニオンqを計算する
-		static quat RotationArc(const vec4& from, const vec4& to)
+		static quaternion RotationArc(const vec4& from, const vec4& to)
 		{
 			// 念のため
 			vec4 v0 = aten::normalize(from);
@@ -372,7 +365,7 @@ namespace aten
 
 			real s = aten::sin(angle * real(0.5));
 
-			quat ret;
+			quaternion ret;
 			ret.x = axis.x * s;
 			ret.y = axis.y * s;
 			ret.z = axis.z * s;
@@ -436,21 +429,24 @@ namespace aten
 		}
 	};
 
-	inline quat operator+(const quat& v1, const quat& v2)
+	template <typename FType>
+	inline quaternion<FType> operator+(const quaternion<FType>& v1, const quaternion<FType>& v2)
 	{
-		quat ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
+		quaternion<FType> ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
 		return std::move(ret);
 	}
 
-	inline quat operator-(const quat& v1, const quat& v2)
+	template <typename FType>
+	inline quaternion<FType> operator-(const quaternion<FType>& v1, const quaternion<FType>& v2)
 	{
-		quat ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
+		quaternion<FType> ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
 		return std::move(ret);
 	}
 
-	inline quat operator*(const quat& v1, const quat& v2)
+	template <typename FType>
+	inline quaternion<FType> operator*(const quaternion<FType>& v1, const quaternion<FType>& v2)
 	{
-		quat dst;
+		quaternion<FType> dst;
 
 		dst.x = v1.w * v2.x + v2.w * v1.x + v1.y * v2.z - v1.z * v2.y;
 		dst.y = v1.w * v2.y + v2.w * v1.y + v1.z * v2.x - v1.x * v2.z;
@@ -461,21 +457,26 @@ namespace aten
 		return std::move(dst);
 	}
 
-	inline quat operator*(const quat& v, real t)
+	template <typename FType>
+	inline quaternion<FType> operator*(const quaternion<FType>& v, real t)
 	{
-		quat ret(t * v.x, t * v.y, t * v.z, t * v.w);
+		quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
 		return std::move(ret);
 	}
 
-	inline quat operator*(real t, const quat& v)
+	template <typename FType>
+	inline quaternion<FType> operator*(real t, const quaternion<FType>& v)
 	{
-		quat ret(t * v.x, t * v.y, t * v.z, t * v.w);
+		quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
 		return std::move(ret);
 	}
 
-	inline quat operator/(const quat& v, real t)
+	template <typename FType>
+	inline quaternion<FType> operator/(const quaternion<FType>& v, real t)
 	{
-		quat ret(v.x / t, v.y / t, v.z / t, v.w / t);
+		quaternion<FType> ret(v.x / t, v.y / t, v.z / t, v.w / t);
 		return std::move(ret);
 	}
+
+	using quat = quaternion<real>;
 }

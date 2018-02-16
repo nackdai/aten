@@ -16,5 +16,22 @@
 </node>
 <node CREATED="1518168405377" ID="ID_79677346" LINK="https://vision.cornell.edu/se3/wp-content/uploads/2014/09/54_structured.pdf" MODIFIED="1518168418420" TEXT="Structured Importance Sampling of Environment Maps"/>
 </node>
+<node CREATED="1518502132950" HGAP="27" ID="ID_836452996" MODIFIED="1518502834618" POSITION="right" TEXT="HLBVH" VSHIFT="27">
+<node CREATED="1518502152995" ID="ID_685554108" LINK="https://stackoverflow.com/questions/36111157/how-to-update-an-opengl-vbo-using-a-cuda-kernel" MODIFIED="1518502873970" TEXT="How to update an OpenGL VBO using a CUDA kernel ">
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1518502173227" ID="ID_63628534" LINK="http://www.highperformancegraphics.net/previous/www_2010/media/RayTracing_I/HPG2010_RayTracing_I_Pantaleoni.pdf" MODIFIED="1518502180302" TEXT="http://www.highperformancegraphics.net/previous/www_2010/media/RayTracing_I/HPG2010_RayTracing_I_Pantaleoni.pdf"/>
+<node CREATED="1518502844273" LINK="http://research.nvidia.com/sites/default/files/pubs/2010-06_HLBVH-Hierarchical-LBVH/HLBVH-final.pdf" MODIFIED="1518502844273" TEXT="research.nvidia.com &gt; Sites &gt; Default &gt; Files &gt; Pubs &gt; 2010-06 HLBVH-Hierarchical-LBVH &gt; HLBVH-final"/>
+<node CREATED="1518502844279" LINK="http://www.highperformancegraphics.net/previous/www_2010/media/RayTracing_I/HPG2010_RayTracing_I_Pantaleoni.pdf" MODIFIED="1518502844279" TEXT="highperformancegraphics.net &gt; Previous &gt; Www 2010 &gt; Media &gt; RayTracing I &gt; HPG2010 RayTracing I Pantaleoni"/>
+<node CREATED="1518502844289" LINK="http://highperformancegraphics.org/previous/www_2011/media/Papers/HPG2011_Papers_Garanzha.pdf" MODIFIED="1518502844289" TEXT="highperformancegraphics.org &gt; Previous &gt; Www 2011 &gt; Media &gt; Papers &gt; HPG2011 Papers Garanzha"/>
+<node CREATED="1518502844294" LINK="http://research.nvidia.com/sites/default/files/publications/main.pdf" MODIFIED="1518502844294" TEXT="research.nvidia.com &gt; Sites &gt; Default &gt; Files &gt; Publications &gt; Main"/>
+<node CREATED="1518502844296" LINK="https://github.com/marekvinkler/NTrace" MODIFIED="1518502844296" TEXT="https://github.com/marekvinkler/NTrace"/>
+</node>
+<node CREATED="1518502775058" HGAP="42" ID="ID_619189419" MODIFIED="1518502831707" POSITION="right" TEXT="Toon" VSHIFT="61">
+<node CREATED="1518502807074" ID="ID_988309162" LINK="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon" MODIFIED="1518502829848" TEXT="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon"/>
+<node CREATED="1518502816194" LINK="https://github.com/Kink3d/ToonShading" MODIFIED="1518502816194" TEXT="https://github.com/Kink3d/ToonShading"/>
+<node CREATED="1518502816201" LINK="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/" MODIFIED="1518502816201" TEXT="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/"/>
+<node CREATED="1518502816207" LINK="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader" MODIFIED="1518502816207" TEXT="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader"/>
+</node>
 </node>
 </map>

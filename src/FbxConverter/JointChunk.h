@@ -2,6 +2,9 @@
 
 #include "types.h"
 #include "FbxImporter.h"
+
+#include "deformable/SKLFormat.h"
+
 #include <vector>
 
 class FileOutputStream;
@@ -20,10 +23,10 @@ protected:
     static void getJointInfo(
         FileOutputStream* pOut,
 		aten::FbxImporter* pImporter,
-        std::vector<izanagi::S_SKL_JOINT>& tvJoint);
+        std::vector<aten::JointParam>& tvJoint);
 
     static bool exportJoint(
         FileOutputStream* pOut,
 		aten::FbxImporter* pImporter,
-        std::vector<izanagi::S_SKL_JOINT>& tvJoint);
+        std::vector<aten::JointParam>& tvJoint);
 };

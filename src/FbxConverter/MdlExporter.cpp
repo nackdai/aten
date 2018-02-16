@@ -25,7 +25,7 @@ bool MdlExporter::export(
 
     AT_VRETURN(out.open(lpszOutFile));
 
-    izanagi::S_MDL_HEADER sHeader;
+    aten::S_MDL_HEADER sHeader;
     {
         FILL_ZERO(&sHeader, sizeof(sHeader));
 
@@ -56,8 +56,8 @@ bool MdlExporter::export(
 
     // Export terminater.
     {
-        izanagi::S_MDL_CHUNK_HEADER sChunkHeader;
-        sChunkHeader.magicChunk = izanagi::MDL_CHUNK_MAGIC_TERMINATE;
+        aten::S_MDL_CHUNK_HEADER sChunkHeader;
+        sChunkHeader.magicChunk = aten::MDL_CHUNK_MAGIC_TERMINATE;
         OUTPUT_WRITE_VRETURN(&out, &sChunkHeader, 0, sizeof(sChunkHeader));
     }
 
@@ -65,8 +65,8 @@ bool MdlExporter::export(
     {
         sHeader.sizeFile = out.getCurPos();
 
-        const izanagi::math::SVector4& vMin = CGeometryChunk::getInstance().GetMin();
-        const izanagi::math::SVector4& vMax = CGeometryChunk::getInstance().GetMax();
+        const aten::math::SVector4& vMin = CGeometryChunk::getInstance().GetMin();
+        const aten::math::SVector4& vMax = CGeometryChunk::getInstance().GetMax();
 
         sHeader.minVtx[0] = vMin.x;
         sHeader.minVtx[1] = vMin.y;
@@ -82,8 +82,8 @@ bool MdlExporter::export(
 #else
     // Mesh chunk.
     {
-        izanagi::S_MDL_CHUNK_HEADER sChunkHeader;
-        sChunkHeader.magicChunk = izanagi::MDL_CHUNK_MAGIC_MESH;
+        aten::S_MDL_CHUNK_HEADER sChunkHeader;
+        sChunkHeader.magicChunk = aten::MDL_CHUNK_MAGIC_MESH;
         ret = OUTPUT_WRITE(&out, &sChunkHeader, 0, sizeof(sChunkHeader));
         VGOTO(ret, __EXIT__);
 
@@ -95,8 +95,8 @@ bool MdlExporter::export(
 
     // Skeleton chunk.
     {
-        izanagi::S_MDL_CHUNK_HEADER sChunkHeader;
-        sChunkHeader.magicChunk = izanagi::MDL_CHUNK_MAGIC_SKELETON;
+        aten::S_MDL_CHUNK_HEADER sChunkHeader;
+        sChunkHeader.magicChunk = aten::MDL_CHUNK_MAGIC_SKELETON;
         ret = OUTPUT_WRITE(&out, &sChunkHeader, 0, sizeof(sChunkHeader));
         VGOTO(ret, __EXIT__);
 
@@ -107,8 +107,8 @@ bool MdlExporter::export(
 
     // Export terminater.
     {
-        izanagi::S_MDL_CHUNK_HEADER sChunkHeader;
-        sChunkHeader.magicChunk = izanagi::MDL_CHUNK_MAGIC_TERMINATE;
+        aten::S_MDL_CHUNK_HEADER sChunkHeader;
+        sChunkHeader.magicChunk = aten::MDL_CHUNK_MAGIC_TERMINATE;
         ret = OUTPUT_WRITE(&out, &sChunkHeader, 0, sizeof(sChunkHeader));
         VGOTO(ret, __EXIT__);
     }

@@ -28,8 +28,8 @@ public:
 
     void Clear();
 
-    const izanagi::math::SVector4& GetMin() { return m_vMin; }
-    const izanagi::math::SVector4& GetMax() { return m_vMax; }
+    const aten::math::SVector4& GetMin() { return m_vMin; }
+    const aten::math::SVector4& GetMax() { return m_vMax; }
 
     /** トライアングルリストで出力するかどうかを設定.
      */
@@ -76,8 +76,8 @@ protected:
 
     void getMinMaxPos(
         aten::FbxImporter* pImporter,
-        izanagi::math::SVector4& vMin,
-        izanagi::math::SVector4& vMax,
+        aten::math::SVector4& vMin,
+        aten::math::SVector4& vMax,
         const PrimitiveSetParam& sPrimSet);
 
     bool exportPrimitiveSet(
@@ -98,10 +98,10 @@ protected:
 
     std::vector<uint32_t> m_ExportedVtx;
 
-    izanagi::math::SVector4 m_vMin;
-    izanagi::math::SVector4 m_vMax;
+    aten::vec4 m_vMin;
+	aten::vec4 m_vMax;
 
-    izanagi::S_MSH_HEADER m_Header;
+    aten::S_MSH_HEADER m_Header;
 
     // 最大ボーンマトリクス数
     uint32_t m_MaxJointMtxNum;

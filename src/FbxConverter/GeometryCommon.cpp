@@ -18,7 +18,7 @@ uint32_t TriangleParam::computeKey() const
         }
 
         // Generate key value by joint indices.
-        ret = izanagi::CKey::GenerateValue(
+        ret = aten::CKey::GenerateValue(
                 nJointTbl,
                 (uint32_t)num);
     }

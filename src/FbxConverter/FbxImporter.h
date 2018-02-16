@@ -1,5 +1,11 @@
 #pragma once
 
+#include "GeometryCommon.h"
+
+#include "deformable/ANMFormat.h"
+#include "deformable/SKLFormat.h"
+#include "deformable/MSHFormat.h"
+
 #include <vector>
 #include <map>
 
@@ -51,12 +57,12 @@ namespace aten
 		// 指定された頂点における指定フォーマットのデータを取得.
 		bool getVertex(
 			uint32_t nIdx,
-			izanagi::math::SVector4& vec,
-			izanagi::E_MSH_VTX_FMT_TYPE type);
+			aten::vec4& vec,
+			aten::MeshVertexFormat type);
 
 		void getMaterialForMesh(
 			uint32_t nMeshIdx,
-			izanagi::S_MSH_MTRL& sMtrl);
+			aten::MeshMaterial& sMtrl);
 
 		//////////////////////////////////
 		// For joint chunk.
@@ -74,22 +80,22 @@ namespace aten
 		uint32_t getJointNum();
 
 		// 指定された関節の名前を取得.
-		const char* GetJointName(uint32_t nIdx);
+		const char* getJointName(uint32_t nIdx);
 
 		// 親関節へのインデックスを取得.    
 		int32_t getJointParent(
 			uint32_t nIdx,
-			const std::vector<izanagi::S_SKL_JOINT>& tvJoint);
+			const std::vector<aten::JointParam>& tvJoint);
 
 		// 指定された関節の逆マトリクスを取得.  
 		void getJointInvMtx(
 			uint32_t nIdx,
-			izanagi::math::SMatrix44& mtx);
+			aten::mat4& mtx);
 
 		// 関節の姿勢を取得.
 		void getJointTransform(
 			uint32_t nIdx,
-			const std::vector<izanagi::S_SKL_JOINT>& tvJoint,
+			const std::vector<aten::JointParam>& tvJoint,
 			std::vector<JointTransformParam>& tvTransform);
 
 		//////////////////////////////////
@@ -118,7 +124,7 @@ namespace aten
 		// モーションノード（適用ジョイント）の情報を取得.
 		bool getAnmNode(
 			uint32_t nNodeIdx,
-			izanagi::S_ANM_NODE& sNode);
+			aten::AnmNode& sNode);
 
 		// アニメーションチャンネルの情報を取得.
 		// アニメーションチャンネルとは
@@ -126,7 +132,7 @@ namespace aten
 		bool getAnmChannel(
 			uint32_t nNodeIdx,
 			uint32_t nChannelIdx,
-			izanagi::S_ANM_CHANNEL& sChannel);
+			aten::AnmChannel& sChannel);
 
 		// キーフレーム情報を取得.
 		// キーフレームあたりのジョイントのパラメータに適用するパラメータを取得.
@@ -134,7 +140,7 @@ namespace aten
 			uint32_t nNodeIdx,
 			uint32_t nChannelIdx,
 			uint32_t nKeyIdx,
-			izanagi::S_ANM_KEY& sKey,
+			aten::AnmKey& sKey,
 			std::vector<float>& tvValue);
 
 		//////////////////////////////////
@@ -148,22 +154,22 @@ namespace aten
 
 		bool getMaterial(
 			uint32_t nMtrlIdx,
-			izanagi::S_MTRL_MATERIAL& sMtrl);
+			aten::S_MTRL_MATERIAL& sMtrl);
 
 		void getMaterialTexture(
 			uint32_t nMtrlIdx,
 			uint32_t nTexIdx,
-			izanagi::S_MTRL_TEXTURE& sTex);
+			aten::S_MTRL_TEXTURE& sTex);
 
 		void getMaterialShader(
 			uint32_t nMtrlIdx,
 			uint32_t nShaderIdx,
-			izanagi::S_MTRL_SHADER& sShader);
+			aten::S_MTRL_SHADER& sShader);
 
 		void getMaterialParam(
 			uint32_t nMtrlIdx,
 			uint32_t nParamIdx,
-			izanagi::S_MTRL_PARAM& sParam);
+			aten::S_MTRL_PARAM& sParam);
 
 		void getMaterialParamValue(
 			uint32_t nMtrlIdx,
@@ -173,11 +179,11 @@ namespace aten
 	private:
 		bool getFbxMatrial(
 			uint32_t nMtrlIdx,
-			izanagi::S_MTRL_MATERIAL& sMtrl);
+			aten::S_MTRL_MATERIAL& sMtrl);
 
 		bool getFbxMatrialByImplmentation(
 			uint32_t nMtrlIdx,
-			izanagi::S_MTRL_MATERIAL& sMtrl);
+			aten::S_MTRL_MATERIAL& sMtrl);
 
 	private:
 		FbxDataManager* m_dataMgr{ nullptr };
@@ -192,7 +198,7 @@ namespace aten
 			void* fbxMtrl{ nullptr };
 			std::string paramName;
 			std::string texName;
-			izanagi::S_MTRL_TEXTURE_TYPE type;
+			aten::S_MTRL_TEXTURE_TYPE type;
 		};
 		std::map<uint32_t, std::vector<MaterialTex>> m_mtrlTex;
 

@@ -1,7 +1,10 @@
 #include "FbxImporter.h"
 #include "FbxDataManager.h"
 
+#include "misc/key.h"
+
 #include <map>
+#include <functional>
 
 // NOTE
 // http://www.gamedev.net/page/resources/_/technical/graphics-programming-and-theory/how-to-work-with-fbx-sdk-r3582
@@ -86,7 +89,7 @@ namespace aten
 
 			for (uint32_t n = 0; n < weight.size(); n++)
 			{
-				tvSkinList[i].Add(joint[n], weight[n]);
+				tvSkinList[i].add(joint[n], weight[n]);
 			}
 		}
 	}
@@ -131,18 +134,18 @@ namespace aten
 		FbxMesh* mesh = meshSet.fbxMesh;
 
 		// ポジションが存在しないことはないはず.
-		ret += izanagi::E_MSH_VTX_SIZE::E_MSH_VTX_SIZE_POS;
+		ret += aten::MeshVertexSize::Position;
 
 		if (mesh->GetElementNormalCount() > 0) {
-			ret += izanagi::E_MSH_VTX_SIZE::E_MSH_VTX_SIZE_NORMAL;
+			ret += aten::MeshVertexSize::Normal;
 		}
 
 		if (mesh->GetElementUVCount() > 0) {
-			ret += izanagi::E_MSH_VTX_SIZE::E_MSH_VTX_SIZE_UV;
+			ret += aten::MeshVertexSize::UV;
 		}
 
 		if (mesh->GetElementVertexColorCount() > 0) {
-			ret += izanagi::E_MSH_VTX_SIZE::E_MSH_VTX_SIZE_COLOR;
+			ret += aten::MeshVertexSize::Color;
 		}
 
 		return ret;
@@ -157,18 +160,18 @@ namespace aten
 		FbxMesh* mesh = meshSet.fbxMesh;
 
 		// ポジションが存在しないことはないはず.
-		ret |= 1 << izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_POS;
+		ret |= 1 << aten::MeshVertexFormat::Position;
 
 		if (mesh->GetElementNormalCount() > 0) {
-			ret |= 1 << izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_NORMAL;
+			ret |= 1 << aten::MeshVertexFormat::Normal;
 		}
 
 		if (mesh->GetElementUVCount() > 0) {
-			ret |= 1 << izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_UV;
+			ret |= 1 << aten::MeshVertexFormat::UV;
 		}
 
 		if (mesh->GetElementVertexColorCount() > 0) {
-			ret |= 1 << izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_COLOR;
+			ret |= 1 << aten::MeshVertexFormat::Color;
 		}
 
 		// NOTE
@@ -177,79 +180,77 @@ namespace aten
 		return ret;
 	}
 
-	namespace {
-		bool GetVertexData(
-			fbxsdk::FbxLayerElement::EMappingMode mappingMode,
-			fbxsdk::FbxLayerElement::EReferenceMode referenceMode,
-			uint32_t vtxIdx, uint32_t vtxCounter,
-			std::function<void(uint32_t)> funcDirect,
-			std::function<void(uint32_t)> funcIndex)
+	static bool GetVertexData(
+		fbxsdk::FbxLayerElement::EMappingMode mappingMode,
+		fbxsdk::FbxLayerElement::EReferenceMode referenceMode,
+		uint32_t vtxIdx, uint32_t vtxCounter,
+		std::function<void(uint32_t)> funcDirect,
+		std::function<void(uint32_t)> funcIndex)
+	{
+		bool ret = false;
+
+		switch (mappingMode)
 		{
-			bool ret = false;
-
-			switch (mappingMode)
+		case FbxGeometryElement::eByControlPoint:
+			switch (referenceMode)
 			{
-			case FbxGeometryElement::eByControlPoint:
-				switch (referenceMode)
-				{
-				case FbxGeometryElement::eDirect:
-				{
-					funcDirect(vtxIdx);
-					ret = true;
-				}
-					break;
-
-				case FbxGeometryElement::eIndexToDirect:
-				{
-					funcIndex(vtxIdx);
-					ret = true;
-				}
-					break;
-
-				default:
-					throw std::exception("Invalid Reference");
-				}
-				break;
-
-			case FbxGeometryElement::eByPolygonVertex:
-				// NOTE
-				// 頂点の順番でアクセスする場合.
-				switch (referenceMode)
-				{
-				case FbxGeometryElement::eDirect:
-				{
-					funcDirect(vtxCounter);
-					ret = true;
-				}
-					break;
-
-				case FbxGeometryElement::eIndexToDirect:
-				{
-					funcIndex(vtxCounter);
-					ret = true;
-				}
-					break;
-
-				default:
-					throw std::exception("Invalid Reference");
-				}
-				break;
+			case FbxGeometryElement::eDirect:
+			{
+				funcDirect(vtxIdx);
+				ret = true;
 			}
+				break;
 
-			return ret;
+			case FbxGeometryElement::eIndexToDirect:
+			{
+				funcIndex(vtxIdx);
+				ret = true;
+			}
+				break;
+
+			default:
+				throw std::exception("Invalid Reference");
+			}
+			break;
+
+		case FbxGeometryElement::eByPolygonVertex:
+			// NOTE
+			// 頂点の順番でアクセスする場合.
+			switch (referenceMode)
+			{
+			case FbxGeometryElement::eDirect:
+			{
+				funcDirect(vtxCounter);
+				ret = true;
+			}
+				break;
+
+			case FbxGeometryElement::eIndexToDirect:
+			{
+				funcIndex(vtxCounter);
+				ret = true;
+			}
+				break;
+
+			default:
+				throw std::exception("Invalid Reference");
+			}
+			break;
 		}
+
+		return ret;
 	}
 
 	bool FbxImporter::getVertex(
 		uint32_t nIdx,
-		izanagi::math::SVector4& vec,
-		izanagi::E_MSH_VTX_FMT_TYPE type)
+		aten::vec4& vec,
+		aten::MeshVertexFormat type)
 	{
 		const VertexData& vtx = m_dataMgr->getVertex(nIdx);
 
 		auto mesh = m_dataMgr->getMesh(0).fbxMesh;
 
-		if (type == izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_POS) {
+		if (type == aten::MeshVertexFormat::Position) {
 			vec.x = static_cast<float>(vtx.pos.mData[0]);
 			vec.y = static_cast<float>(vtx.pos.mData[1]);
 			vec.z = static_cast<float>(vtx.pos.mData[2]);
@@ -258,7 +259,7 @@ namespace aten
 			return true;
 		}
 
-		if (type == izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_NORMAL) {
+		if (type == aten::MeshVertexFormat::Normal) {
 			if (mesh->GetElementNormalCount() > 0) {
 	#if 0
 				// TODO
@@ -295,7 +296,7 @@ namespace aten
 			}
 		}
 
-		if (type == izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_UV) {
+		if (type == aten::MeshVertexFormat::UV) {
 			if (mesh->GetElementUVCount() > 0) {
 				vec.x = static_cast<float>(vtx.uv.mData[0]);
 				vec.y = static_cast<float>(vtx.uv.mData[1]);
@@ -304,7 +305,7 @@ namespace aten
 			}
 		}
 
-		if (type == izanagi::E_MSH_VTX_FMT_TYPE::E_MSH_VTX_FMT_TYPE_COLOR) {
+		if (type == aten::MeshVertexFormat::Color) {
 			if (mesh->GetElementVertexColorCount() > 0) {
 	#if 0
 				const FbxGeometryElementVertexColor* vtxClr = mesh->GetElementVertexColor();
@@ -348,12 +349,12 @@ namespace aten
 
 	void FbxImporter::getMaterialForMesh(
 		uint32_t nMeshIdx,
-		izanagi::S_MSH_MTRL& sMtrl)
+		aten::MeshMaterial& sMtrl)
 	{
 		const MeshSubset& mesh = m_dataMgr->getMesh(nMeshIdx);
 
 		sMtrl.name.SetString(mesh.mtrl->GetName());
-		sMtrl.nameKey = sMtrl.name.GetKeyValue();
+		sMtrl.nameKey = aten::Key::gen(sMtrl.name);
 	}
 
 	//////////////////////////////////
@@ -378,7 +379,7 @@ namespace aten
 		return ret;
 	}
 
-	const char* FbxImporter::GetJointName(uint32_t nIdx)
+	const char* FbxImporter::getJointName(uint32_t nIdx)
 	{
 		FbxNode* node = m_dataMgr->getFbxNode(nIdx);
 		return node->GetName();
@@ -386,7 +387,7 @@ namespace aten
 
 	int32_t FbxImporter::getJointParent(
 		uint32_t nIdx,
-		const std::vector<izanagi::S_SKL_JOINT>& tvJoint)
+		const std::vector<aten::JointParam>& tvJoint)
 	{
 		FbxNode* node = m_dataMgr->getFbxNode(nIdx);
 
@@ -402,7 +403,7 @@ namespace aten
 
 	void FbxImporter::getJointInvMtx(
 		uint32_t nIdx,
-		izanagi::math::SMatrix44& mtx)
+		aten::mat4& mtx)
 	{
 		FbxNode* node = m_dataMgr->getFbxNode(nIdx);
 		FbxCluster* cluster = m_dataMgr->getClusterByNode(node);
@@ -454,13 +455,13 @@ namespace aten
 			}
 		}
 		else {
-			izanagi::math::SMatrix44::SetUnit(mtx);
+			mtx.identity();
 		}
 	}
 
 	void FbxImporter::getJointTransform(
 		uint32_t nIdx,
-		const std::vector<izanagi::S_SKL_JOINT>& tvJoint,
+		const std::vector<aten::JointParam>& tvJoint,
 		std::vector<JointTransformParam>& tvTransform)
 	{
 		FbxNode* node = m_dataMgr->getFbxNode(nIdx);
@@ -482,7 +483,7 @@ namespace aten
 			tvTransform.push_back(JointTransformParam());
 			JointTransformParam& sTransform = tvTransform.back();
 
-			sTransform.type = JointTransform_QUATERNION;
+			sTransform.type = JointTransform::Quaternion;
 
 			sTransform.param.push_back(static_cast<float>(quat.mData[0]));
 			sTransform.param.push_back(static_cast<float>(quat.mData[1]));
@@ -498,7 +499,7 @@ namespace aten
 			tvTransform.push_back(JointTransformParam());
 			JointTransformParam& sTransform = tvTransform.back();
 
-			sTransform.type = JointTransform_TRANSLATE;
+			sTransform.type = JointTransform::Translate;
 
 			sTransform.param.push_back(static_cast<float>(trans.mData[0]));
 			sTransform.param.push_back(static_cast<float>(trans.mData[1]));
@@ -619,7 +620,7 @@ namespace aten
 
 	bool FbxImporter::getAnmNode(
 		uint32_t nNodeIdx,
-		izanagi::S_ANM_NODE& sNode)
+		aten::AnmNode& sNode)
 	{
 		auto& node = m_dataMgr->getNode(nNodeIdx);
 		auto fbxNode = node.fbxNode;
@@ -628,7 +629,7 @@ namespace aten
 
 		sNode.targetIdx = (node.targetIdx >= 0 ? node.targetIdx : nNodeIdx);
 		sNode.target.SetString(fbxNode->GetName());
-		sNode.targetKey = sNode.target.GetKeyValue();
+		sNode.targetKey = aten::Key::gen(sNode.target);
 
 		sNode.numChannels = getAnmChannelNum(nNodeIdx);
 
@@ -641,7 +642,7 @@ namespace aten
 	bool FbxImporter::getAnmChannel(
 		uint32_t nNodeIdx,
 		uint32_t nChannelIdx,
-		izanagi::S_ANM_CHANNEL& sChannel)
+		aten::AnmChannel& sChannel)
 	{
 		AT_ASSERT(nNodeIdx < m_channels.size());
 
@@ -744,24 +745,24 @@ namespace aten
 		// Rotation
 		if (type == ParamType::Rotate) {
 			sChannel.numKeys = channel.keys[type].size();
-			sChannel.interp = izanagi::E_ANM_INTERP_TYPE::E_ANM_INTERP_TYPE_SLERP;
-			sChannel.type = izanagi::E_ANM_TRANSFORM_TYPE::E_ANM_TRANSFORM_TYPE_QUATERNION_XYZW;
+			sChannel.interp = aten::AnmInterpType::Slerp;
+			sChannel.type = aten::AnmTransformType::QuaternionXYZW;
 			return true;
 		}
 
 		// Scale
 		if (type == ParamType::Scale) {
 			sChannel.numKeys = channel.keys[type].size();
-			sChannel.interp = izanagi::E_ANM_INTERP_TYPE::E_ANM_INTERP_TYPE_LINEAR;
-			sChannel.type = izanagi::E_ANM_TRANSFORM_TYPE::E_ANM_TRANSFORM_TYPE_SCALE_XYZ;
+			sChannel.interp = aten::AnmInterpType::Linear;
+			sChannel.type = aten::AnmTransformType::ScaleXYZ;
 			return true;
 		}
 
 		// Translate
 		if (type == ParamType::Tranlate) {
 			sChannel.numKeys = channel.keys[type].size();
-			sChannel.interp = izanagi::E_ANM_INTERP_TYPE::E_ANM_INTERP_TYPE_LINEAR;
-			sChannel.type = izanagi::E_ANM_TRANSFORM_TYPE::E_ANM_TRANSFORM_TYPE_TRANSLATE_XYZ;
+			sChannel.interp = aten::AnmInterpType::Linear;
+			sChannel.type = aten::AnmTransformType::TranslateXYZ;
 			return true;
 		}
 
@@ -772,7 +773,7 @@ namespace aten
 		uint32_t nNodeIdx,
 		uint32_t nChannelIdx,
 		uint32_t nKeyIdx,
-		izanagi::S_ANM_KEY& sKey,
+		aten::AnmKey& sKey,
 		std::vector<float>& tvValue)
 	{
 		AT_ASSERT(nNodeIdx < m_channels.size());
@@ -958,7 +959,7 @@ namespace aten
 
 	bool FbxImporter::getMaterial(
 		uint32_t nMtrlIdx,
-		izanagi::S_MTRL_MATERIAL& sMtrl)
+		aten::S_MTRL_MATERIAL& sMtrl)
 	{
 		auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
 
@@ -988,7 +989,7 @@ namespace aten
 
 	bool FbxImporter::getFbxMatrial(
 		uint32_t nMtrlIdx,
-		izanagi::S_MTRL_MATERIAL& sMtrl)
+		aten::S_MTRL_MATERIAL& sMtrl)
 	{
 		auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
 
@@ -1094,7 +1095,7 @@ namespace aten
 
 	bool FbxImporter::getFbxMatrialByImplmentation(
 		uint32_t nMtrlIdx,
-		izanagi::S_MTRL_MATERIAL& sMtrl)
+		aten::S_MTRL_MATERIAL& sMtrl)
 	{
 		// NOTE
 		// http://www.programmershare.com/3142984/
@@ -1269,7 +1270,7 @@ namespace aten
 	void FbxImporter::getMaterialTexture(
 		uint32_t nMtrlIdx,
 		uint32_t nTexIdx,
-		izanagi::S_MTRL_TEXTURE& sTex)
+		aten::S_MTRL_TEXTURE& sTex)
 	{
 		const auto& tex = m_mtrlTex[nMtrlIdx][nTexIdx];
 
@@ -1282,7 +1283,7 @@ namespace aten
 	void FbxImporter::getMaterialShader(
 		uint32_t nMtrlIdx,
 		uint32_t nShaderIdx,
-		izanagi::S_MTRL_SHADER& sShader)
+		aten::S_MTRL_SHADER& sShader)
 	{
 		// NOTE
 		// マテリアルごとに１つのみぽい.
@@ -1312,7 +1313,7 @@ namespace aten
 	void FbxImporter::getMaterialParam(
 		uint32_t nMtrlIdx,
 		uint32_t nParamIdx,
-		izanagi::S_MTRL_PARAM& sParam)
+		aten::S_MTRL_PARAM& sParam)
 	{
 		const auto& param = m_mtrlParam[nMtrlIdx][nParamIdx];
 
@@ -1322,15 +1323,15 @@ namespace aten
 		if (param.values.size() == 4)
 		{
 			sParam.elements = param.values.size();
-			sParam.type = izanagi::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_VECTOR;
+			sParam.type = aten::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_VECTOR;
 		}
 		else if (param.values.size() == 16) {
 			sParam.elements = param.values.size();
-			sParam.type = izanagi::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_MATRIX;
+			sParam.type = aten::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_MATRIX;
 		}
 		else {
 			sParam.elements = param.values.size();
-			sParam.type = izanagi::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_FLOAT;
+			sParam.type = aten::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_FLOAT;
 		}
 
 		sParam.bytes = sizeof(float) * sParam.elements;

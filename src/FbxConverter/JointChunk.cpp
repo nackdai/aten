@@ -2,6 +2,9 @@
 #include "GeometryCommon.h"
 #include "FileOutputStream.h"
 
+#include "math/quaternion.h"
+#include "misc/key.h"
+
 // ジョイントチャンク
 // +----------------------+
 // |    チャンクヘッダ    |
@@ -35,10 +38,8 @@ bool JointChunk::export(
 		return true;
 	}
 
-	izanagi::S_SKL_HEADER sHeader;
+	aten::JointHeader sHeader;
 	{
-		FILL_ZERO(&sHeader, sizeof(sHeader));
-
 		// TODO
 		// version, magic number
 
@@ -50,7 +51,7 @@ bool JointChunk::export(
 	IoStreamSeekHelper seekHelper(pOut);
 	AT_VRETURN(seekHelper.skip(sizeof(sHeader)));
 
-	std::vector<izanagi::S_SKL_JOINT> tvJoint;
+	std::vector<aten::JointParam> tvJoint;
 
 	tvJoint.resize(pImporter->getJointNum());
 
@@ -93,14 +94,14 @@ bool JointChunk::export(
 void JointChunk::getJointInfo(
 	FileOutputStream* pOut,
 	aten::FbxImporter* pImporter,
-	std::vector<izanagi::S_SKL_JOINT>& tvJoint)
+	std::vector<aten::JointParam>& tvJoint)
 {
 	for (uint32_t i = 0; i < (uint32_t)tvJoint.size(); i++) {
-		izanagi::S_SKL_JOINT& sJoint = tvJoint[i];
+		auto& sJoint = tvJoint[i];
 
 		sJoint.name.SetString(
-			pImporter->GetJointName(i));
-		sJoint.nameKey = sJoint.name.GetKeyValue();
+			pImporter->getJointName(i));
+		sJoint.nameKey = aten::Key::gen(sJoint.name);
 
 		sJoint.idx = i;
 
@@ -110,29 +111,28 @@ void JointChunk::getJointInfo(
 	}
 
 	for (size_t i = 0; i < tvJoint.size(); i++) {
-		izanagi::S_SKL_JOINT& sJoint = tvJoint[i];
+		auto& sJoint = tvJoint[i];
 
 		sJoint.parent = pImporter->getJointParent((uint32_t)i, tvJoint);
 	}
 }
 
-bool JointChunk::ExportJoint(
+bool JointChunk::exportJoint(
 	FileOutputStream* pOut,
 	aten::FbxImporter* pImporter,
-	std::vector<izanagi::S_SKL_JOINT>& tvJoint)
+	std::vector<aten::JointParam>& tvJoint)
 {
 	for (size_t i = 0; i < tvJoint.size(); i++) {
-		izanagi::S_SKL_JOINT& sJoint = tvJoint[i];
+		auto& sJoint = tvJoint[i];
 
 		std::vector<JointTransformParam> tvTransform;
 
-		pImporter->GetJointTransform(
+		pImporter->getJointTransform(
 			(uint32_t)i,
 			tvJoint,
 			tvTransform);
 
-		izanagi::math::SMatrix44 mtxRot;
-		izanagi::math::SMatrix44::SetUnit(mtxRot);
+		aten::mat4 mtxRot;
 
 		sJoint.validParam = 0;
 		sJoint.validAnmParam = 0;
@@ -145,7 +145,7 @@ bool JointChunk::ExportJoint(
 		sJoint.pose.scale[1] = 1.0f;
 		sJoint.pose.scale[2] = 1.0f;
 
-		sJoint.pose.quat.Set(0.0f, 0.0f, 0.0f, 1.0f);
+		sJoint.pose.quat.identity();
 
 		bool bHasQuatFromAxisRot = false;
 
@@ -160,7 +160,7 @@ bool JointChunk::ExportJoint(
 				sJoint.pose.trans[1] = sTransform.param[1];
 				sJoint.pose.trans[2] = sTransform.param[2];
 
-				sJoint.validParam |= izanagi::E_SKL_JOINT_PARAM_TRANSLATE;
+				sJoint.validParam |= aten::JointTransformType::Translate;
 			}
 			else if (sTransform.type == JointTransform::Scale) {
 				AT_ASSERT(sTransform.param.size() >= 3);
@@ -168,7 +168,7 @@ bool JointChunk::ExportJoint(
 				sJoint.pose.scale[1] = sTransform.param[1];
 				sJoint.pose.scale[2] = sTransform.param[2];
 
-				sJoint.validParam |= izanagi::E_SKL_JOINT_PARAM_SCALE;
+				sJoint.validParam |= aten::JointTransformType::Scale;
 			}
 			else if (sTransform.type == JointTransform::AxisRot) {
 				float x = sTransform.param[0];
@@ -176,13 +176,12 @@ bool JointChunk::ExportJoint(
 				float z = sTransform.param[2];
 				float angle = sTransform.param[3];
 
-				izanagi::math::SQuat quat;
-				izanagi::math::SQuat::SetQuatFromRadAxis(quat, angle, x, y, z);
+				aten::quat quat;
+				quat.setQuatFromRadAxis(angle, aten::vec4(x, y, z, real(0)));
 
-				izanagi::math::SMatrix44 mtx;
-				izanagi::math::SQuat::MatrixFromQuat(mtx, quat);
+				auto mtx = quat.getMatrix();
 
-				izanagi::math::SMatrix44::Mul(mtxRot, mtxRot, mtx);
+				mtxRot = mtx * mtxRot;
 
 				bHasQuatFromAxisRot = true;
 			}
@@ -193,7 +192,7 @@ bool JointChunk::ExportJoint(
 				sJoint.pose.quat.z = sTransform.param[2];
 				sJoint.pose.quat.w = sTransform.param[3];
 
-				sJoint.validParam |= izanagi::E_SKL_JOINT_PARAM_QUARTANION;
+				sJoint.validParam |= aten::JointTransformType::Quaternion;
 			}
 			else {
 				AT_VRETURN(false);
@@ -201,12 +200,12 @@ bool JointChunk::ExportJoint(
 		}
 
 		if (bHasQuatFromAxisRot) {
-			izanagi::math::SQuat quat;
-			izanagi::math::SQuat::QuatFromMatrix(quat, mtxRot);
+			aten::quat quat;
+			quat.fromMatrix(mtxRot);
 
-			izanagi::math::SQuat::Copy(sJoint.pose.quat, quat);
+			sJoint.pose.quat = quat;
 
-			sJoint.validParam |= izanagi::E_SKL_JOINT_PARAM_QUARTANION;
+			sJoint.validParam |= aten::JointTransformType::Quaternion;
 		}
 
 		OUTPUT_WRITE_VRETURN(pOut, &sJoint, 0, sizeof(sJoint));

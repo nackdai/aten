@@ -85,6 +85,9 @@
     <Filter Include="shader\object">
       <UniqueIdentifier>{8c8be517-9a29-48f4-bd6a-c92f969a9771}</UniqueIdentifier>
     </Filter>
+    <Filter Include="deformable">
+      <UniqueIdentifier>{196027d5-057a-43f0-8728-e47d3d66694f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -424,6 +427,18 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\math\quaternion.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\ANMFormat.h">
+      <Filter>deformable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\SKLFormat.h">
+      <Filter>deformable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\key.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\MSHFormat.h">
+      <Filter>deformable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

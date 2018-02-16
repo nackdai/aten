@@ -1,6 +1,8 @@
 #include "AnmExporter.h"
 #include "FileOutputStream.h"
 
+#include "deformable/ANMFormat.h"
+
 // NOTE
 // フォーマット
 // +----------------+
@@ -27,14 +29,12 @@ bool AnmExporter::export(
 
     AT_VRETURN(out.open(lpszOutFile));
 
-    izanagi::S_ANM_HEADER sHeader;
+    aten::AnmHeader sHeader;
     {
-        FILL_ZERO(&sHeader, sizeof(sHeader));
-
         sHeader.sizeHeader = sizeof(sHeader);
 
         // TODO
-        sHeader.keyType = izanagi::E_ANM_KEY_TYPE_TIME;
+		sHeader.keyType = aten::AnmKeyType::Time;
     }
 
     // Blank for file's header.
@@ -52,8 +52,7 @@ bool AnmExporter::export(
         uint32_t channelIdx = 0;
 
         for (uint32_t i = 0; i < nNodeNum; i++) {
-            izanagi::S_ANM_NODE sNode;
-            FILL_ZERO(&sNode, sizeof(sNode));
+            aten::AnmNode sNode;
 
             AT_VRETURN(pImporter->getAnmNode(i, sNode));
 
@@ -77,8 +76,7 @@ bool AnmExporter::export(
         uint32_t nChannelCnt = channelNum[nNodeIdx];
 
         for (uint32_t nChannelIdx = 0; nChannelIdx < nChannelCnt; nChannelIdx++) {
-            izanagi::S_ANM_CHANNEL sChannel;
-            FILL_ZERO(&sChannel, sizeof(sChannel));
+            aten::AnmChannel sChannel;
 
             AT_VRETURN(
                 pImporter->getAnmChannel(
@@ -111,8 +109,7 @@ bool AnmExporter::export(
             uint32_t nKeyCnt = tvKeyNum[nKeyPos++];
 
             for (uint32_t nKeyIdx = 0; nKeyIdx < nKeyCnt; nKeyIdx++) {
-                izanagi::S_ANM_KEY sKey;
-                FILL_ZERO(&sKey, sizeof(sKey));
+                aten::AnmKey sKey;
 
                 std::vector<float> tvValue;
 
@@ -133,7 +130,7 @@ bool AnmExporter::export(
 
 #if 0
                 int32_t nOffset = sizeof(float);
-                AT_VRETURN(out.Seek(-nOffset, izanagi::E_IO_STREAM_SEEK_POS_CUR));
+                AT_VRETURN(out.Seek(-nOffset, aten::E_IO_STREAM_SEEK_POS_CUR));
 #endif
 
                 OUTPUT_WRITE_VRETURN(&out, &tvValue[0], 0, sizeof(float) * tvValue.size());

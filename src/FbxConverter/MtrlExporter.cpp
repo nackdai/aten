@@ -18,7 +18,7 @@ bool MtrlExporter::export(
     // Open file.
     AT_VRETURN(out.open(lpszOutFile));
 
-    izanagi::S_MTRL_HEADER sHeader;
+    aten::S_MTRL_HEADER sHeader;
     {
         FILL_ZERO(&sHeader, sizeof(sHeader));
 
@@ -79,7 +79,7 @@ bool MtrlExporter::exportMaterial(
     uint32_t nMtrlIdx,
 	aten::FbxImporter* pImporter)
 {
-    izanagi::S_MTRL_MATERIAL sMtrl;
+    aten::S_MTRL_MATERIAL sMtrl;
     FILL_ZERO(&sMtrl, sizeof(sMtrl));
 
     AT_VRETURN(
@@ -91,7 +91,7 @@ bool MtrlExporter::exportMaterial(
 
     // Export textrure's info.
     for (uint32_t i = 0; i < sMtrl.numTex; i++) {
-        izanagi::S_MTRL_TEXTURE sTex;
+        aten::S_MTRL_TEXTURE sTex;
         FILL_ZERO(&sTex, sizeof(sTex));
 
         sTex.idx = i;
@@ -110,7 +110,7 @@ bool MtrlExporter::exportMaterial(
     // NOTE
     // Material has only one shader.
     for (uint32_t i = 0; i < 1; i++) {
-        izanagi::S_MTRL_SHADER sShader;
+        aten::S_MTRL_SHADER sShader;
         FILL_ZERO(&sShader, sizeof(sShader));
 
         pImporter->getMaterialShader(
@@ -121,11 +121,11 @@ bool MtrlExporter::exportMaterial(
         OUTPUT_WRITE_VRETURN(&m_Out, &sShader, 0, sizeof(sShader));
     }
 
-    std::vector<izanagi::S_MTRL_PARAM> tvParam(sMtrl.numParam);
+    std::vector<aten::S_MTRL_PARAM> tvParam(sMtrl.numParam);
 
     // Export parameter's info.
     for (uint32_t i = 0; i < sMtrl.numParam; i++) {
-        izanagi::S_MTRL_PARAM& sParam = tvParam[i];
+        aten::S_MTRL_PARAM& sParam = tvParam[i];
         FILL_ZERO(&sParam, sizeof(sParam));
 
         pImporter->getMaterialParam(
@@ -140,7 +140,7 @@ bool MtrlExporter::exportMaterial(
 
     // Export parameter's value.
     for (uint32_t i = 0; i < sMtrl.numParam; i++) {
-        const izanagi::S_MTRL_PARAM& sParam = tvParam[i];
+        const aten::S_MTRL_PARAM& sParam = tvParam[i];
 
         if (sParam.elements > 0) {
             std::vector<float> tvValue;
@@ -150,15 +150,15 @@ bool MtrlExporter::exportMaterial(
                 tvValue);
 
             switch (sParam.type) {
-            case izanagi::E_MTRL_PARAM_TYPE_FLOAT:
-            case izanagi::E_MTRL_PARAM_TYPE_VECTOR:
-            case izanagi::E_MTRL_PARAM_TYPE_MATRIX:
+            case aten::E_MTRL_PARAM_TYPE_FLOAT:
+            case aten::E_MTRL_PARAM_TYPE_VECTOR:
+            case aten::E_MTRL_PARAM_TYPE_MATRIX:
             {
                 OUTPUT_WRITE_VRETURN(&m_Out, &tvValue[0], 0, sParam.bytes);
                 break;
             }
-            case izanagi::E_MTRL_PARAM_TYPE_UINT:
-            case izanagi::E_MTRL_PARAM_TYPE_BOOL:
+            case aten::E_MTRL_PARAM_TYPE_UINT:
+            case aten::E_MTRL_PARAM_TYPE_BOOL:
                 // TODO
                 AT_ASSERT(false);
                 break;

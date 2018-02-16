@@ -44,9 +44,9 @@ bool CGeometryChunk::export(
     aten::FbxImporter* pImporter)
 {
     // メッシュが影響を受けるマトリクスの最大数
-    m_MaxJointMtxNum = std::max(
+    m_MaxJointMtxNum = std::max<uint32_t>(
                         maxJointMtxNum,
-                        izanagi::MSH_BELONGED_JOINT_MIN);
+                        aten::MaxJointMtxNum);
     m_MaxJointMtxNum = ((m_MaxJointMtxNum & 0x01) == 1
                         ? m_MaxJointMtxNum + 1
                         : m_MaxJointMtxNum);
@@ -112,7 +112,7 @@ bool CGeometryChunk::exportGroup(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter)
 {
-    izanagi::S_MSH_MESH_GROUP sGroupInfo;
+    aten::MeshGroup sGroupInfo;
     {
         FILL_ZERO(&sGroupInfo, sizeof(sGroupInfo));
 
@@ -122,7 +122,7 @@ bool CGeometryChunk::exportGroup(
 
     uint32_t nChunkStartPos = pOut->getCurPos();
 
-    // Blank for S_MSH_MESH_GROUP.
+    // Blank for MeshGroup.
     IoStreamSeekHelper seekHelper(pOut);
     AT_VRETURN(seekHelper.skip(sizeof(sGroupInfo)));
 
@@ -184,7 +184,7 @@ bool CGeometryChunk::exportGroup(
     m_Header.numVB += sGroupInfo.numVB;
     m_Header.numMeshSet += sGroupInfo.numMeshSet;
 
-    // Export S_MSH_MESH_GROUP.
+    // Export MeshGroup.
     {
         // Rmenber end of geometry chunk.
         AT_VRETURN(seekHelper.returnWithAnchor());
@@ -581,11 +581,11 @@ void CGeometryChunk::getMeshInfo(
 
     // For skin.
     if (!m_SkinList.empty()) {
-        sMesh.fmt |= (1 << izanagi::E_MSH_VTX_FMT_TYPE_BLENDWEIGHT);
-        sMesh.fmt |= (1 << izanagi::E_MSH_VTX_FMT_TYPE_BLENDINDICES);
+        sMesh.fmt |= (1 << aten::MeshVertexFormat::BlendWeight);
+        sMesh.fmt |= (1 << aten::MeshVertexFormat::BlendIndices);
 
-        sMesh.sizeVtx += izanagi::E_MSH_VTX_SIZE_BLENDINDICES;
-        sMesh.sizeVtx += izanagi::E_MSH_VTX_SIZE_BLENDWEIGHT;
+        sMesh.sizeVtx += aten::MeshVertexFormat::BlendIndices;
+        sMesh.sizeVtx += aten::MeshVertexFormat::BlendWeight;
     }
 }
 
@@ -593,7 +593,7 @@ bool CGeometryChunk::computeVtxNormal(
     aten::FbxImporter* pImporter,
     const TriangleParam& sTri)
 {
-    izanagi::math::SVector4 vecPos[3];
+    aten::vec4 vecPos[3];
 
     for (uint32_t i = 0; i < 3; i++) {
         uint32_t nVtxIdx = sTri.vtx[i];
@@ -601,7 +601,7 @@ bool CGeometryChunk::computeVtxNormal(
         bool result = pImporter->getVertex(
 			nVtxIdx,
             vecPos[i],
-            izanagi::E_MSH_VTX_FMT_TYPE_POS);
+            aten::MeshVertexFormat::Position);
         AT_VRETURN(result);
     }
 
@@ -619,14 +619,14 @@ bool CGeometryChunk::computeVtxNormal(
         uint32_t nIdx_1 = (i + 1) % 3;
         uint32_t nIdx_2 = (i + 2) % 3;
 
-        izanagi::math::SVector4 vP;
-        izanagi::math::SVector4::SubXYZ(vP, vecPos[nIdx_1], vecPos[nIdx_0]);
+        aten::math::SVector4 vP;
+        aten::math::SVector4::SubXYZ(vP, vecPos[nIdx_1], vecPos[nIdx_0]);
 
-        izanagi::math::SVector4 vQ;
-        izanagi::math::SVector4::SubXYZ(vQ, vecPos[nIdx_2], vecPos[nIdx_0]);
+        aten::math::SVector4 vQ;
+        aten::math::SVector4::SubXYZ(vQ, vecPos[nIdx_2], vecPos[nIdx_0]);
 
-        izanagi::math::SVector4 nml;
-        izanagi::math::SVector4::Cross(nml, vP, vQ);
+        aten::math::SVector4 nml;
+        aten::math::SVector4::Cross(nml, vP, vQ);
 
         VtxAdditional& sVtx = m_VtxList[nVtxIdx];
         sVtx.nml.push_back(nml);
@@ -643,9 +643,9 @@ bool CGeometryChunk::computeVtxTangent(
     aten::FbxImporter* pImporter,
     const TriangleParam& sTri)
 {
-    izanagi::math::SVector4 vecPos[3];
-    izanagi::math::SVector4 vecUV[3];
-    izanagi::math::SVector4 vecNml[3];
+    aten::vec4 vecPos[3];
+    aten::vec4 vecUV[3];
+    aten::vec4 vecNml[3];
 
     for (uint32_t i = 0; i < 3; i++) {
         uint32_t nVtxIdx = sTri.vtx[i];
@@ -654,21 +654,21 @@ bool CGeometryChunk::computeVtxTangent(
         bool result = pImporter->getVertex(
 			nVtxIdx,
             vecPos[i],
-            izanagi::E_MSH_VTX_FMT_TYPE_POS);
+            aten::MeshVertexFormat::Position);
         AT_VRETURN(result);
 
         // Get texture coordinate.
         result = pImporter->getVertex(
 			nVtxIdx,
             vecUV[i],
-            izanagi::E_MSH_VTX_FMT_TYPE_UV);
+            aten::MeshVertexFormat::UV);
         RETURN(result);
 
         // Get normal.
-        result = pImporter->GetVertex(
+        result = pImporter->getVertex(
 			nVtxIdx,
             vecNml[i],
-            izanagi::E_MSH_VTX_FMT_TYPE_NORMAL);
+            aten::MeshVertexFormat::Normal);
         if (!result) {
             // If mesh don't have normal, get normal from computed normal.
             RETURN(m_VtxList.size() > nVtxIdx);
@@ -694,11 +694,11 @@ bool CGeometryChunk::computeVtxTangent(
         uint32_t nIdx_1 = (i + 1) % 3;
         uint32_t nIdx_2 = (i + 2) % 3;
 
-        izanagi::math::SVector4 vP;
-        izanagi::math::SVector4::SubXYZ(vP, vecPos[nIdx_1], vecPos[nIdx_0]);
+        aten::math::SVector4 vP;
+        aten::math::SVector4::SubXYZ(vP, vecPos[nIdx_1], vecPos[nIdx_0]);
 
-        izanagi::math::SVector4 vQ;
-        izanagi::math::SVector4::SubXYZ(vQ, vecPos[nIdx_2], vecPos[nIdx_0]);
+        aten::math::SVector4 vQ;
+        aten::math::SVector4::SubXYZ(vQ, vecPos[nIdx_2], vecPos[nIdx_0]);
 
         fCoeff[0] = vecUV[nIdx_2].v[1] - vecUV[nIdx_0].v[1];
         fCoeff[1] = -(vecUV[nIdx_1].v[1] - vecUV[nIdx_0].v[1]);
@@ -708,19 +708,19 @@ bool CGeometryChunk::computeVtxTangent(
         float fInvDeterminant = 1.0f / (fCoeff[3] * fCoeff[0] - fCoeff[2] * fCoeff[1]);
 
         // BiNormal
-        izanagi::math::SVector4 vB;
+        aten::math::SVector4 vB;
         {
-            izanagi::math::SVector4::Scale(vP, vP, fInvDeterminant * fCoeff[2]);
-            izanagi::math::SVector4::Scale(vQ, vQ, fInvDeterminant * fCoeff[3]);
-            izanagi::math::SVector4::Add(vB, vP, vQ);
-            izanagi::math::SVector4::Normalize(vB, vB);
+            aten::math::SVector4::Scale(vP, vP, fInvDeterminant * fCoeff[2]);
+            aten::math::SVector4::Scale(vQ, vQ, fInvDeterminant * fCoeff[3]);
+            aten::math::SVector4::Add(vB, vP, vQ);
+            aten::math::SVector4::Normalize(vB, vB);
         }
 
         // Tangent
-        izanagi::math::SVector4 vT;
+        aten::math::SVector4 vT;
         {
             // X(T) = Y(B) x Z(N)
-            izanagi::math::SVector4::Cross(vT, vB, vecNml[nIdx_0]);
+            aten::math::SVector4::Cross(vT, vB, vecNml[nIdx_0]);
         }
 
         VtxAdditional& sVtx = m_VtxList[nVtxIdx];
@@ -746,7 +746,7 @@ uint32_t CGeometryChunk::exportVertices(
     uint32_t nPrevFmt = 0;
 
 #if 0
-    izanagi::S_MSH_VERTICES sVtxInfo;
+    aten::MeshVertex sVtxInfo;
     FILL_ZERO(&sVtxInfo, sizeof(sVtxInfo));
 #endif
 
@@ -767,12 +767,12 @@ uint32_t CGeometryChunk::exportVertices(
 
         if (bIsNewVB) {
             if (m_ExportedVtx.size() > 0) {
-                // returnTo to position of expoting S_MSH_VERTICES.
+                // returnTo to position of expoting MeshVertex.
                 AT_VRETURN(seekHelper.returnWithAnchor());
 
                 sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
 
-                // Export S_MSH_VERTICES.
+                // Export MeshVertex.
                 OUTPUT_WRITE_VRETURN(pOut, &sVtxInfo, 0, sizeof(sVtxInfo));
 
                 AT_VRETURN(seekHelper.returnToAnchor());
@@ -780,7 +780,7 @@ uint32_t CGeometryChunk::exportVertices(
                 nVBCnt++;
             }
 
-            // Blank S_MSH_VERTICES. 
+            // Blank MeshVertex. 
             VRETURN_VAL(seekHelper.skip(sizeof(sVtxInfo)), 0);
 
             FILL_ZERO(&sVtxInfo, sizeof(sVtxInfo));
@@ -808,10 +808,10 @@ uint32_t CGeometryChunk::exportVertices(
         for (size_t n = 0; n < sMesh.subset.size(); n++) {
             PrimitiveSetParam& sPrimSet = sMesh.subset[n];
 
-            izanagi::S_MSH_VERTICES sVtxInfo;
+            aten::MeshVertex sVtxInfo;
             sVtxInfo.sizeVtx = sMesh.sizeVtx;
 
-            // Blank S_MSH_VERTICES. 
+            // Blank MeshVertex. 
             VRETURN_VAL(seekHelper.skip(sizeof(sVtxInfo)), 0);
 
             VRETURN_VAL(
@@ -821,12 +821,12 @@ uint32_t CGeometryChunk::exportVertices(
                     sMesh,
                     sPrimSet), 0);
 
-            // returnTo to position of expoting S_MSH_VERTICES.
+            // returnTo to position of expoting MeshVertex.
             AT_VRETURN(seekHelper.returnWithAnchor());
 
             sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
 
-            // Export S_MSH_VERTICES.
+            // Export MeshVertex.
             OUTPUT_WRITE_VRETURN(pOut, &sVtxInfo, 0, sizeof(sVtxInfo));
 
             AT_VRETURN(seekHelper.returnToAnchor());
@@ -843,12 +843,12 @@ uint32_t CGeometryChunk::exportVertices(
 
 #if 0
     if (m_ExportedVtx.size() > 0) {
-        // returnTo to position of expoting S_MSH_VERTICES.
+        // returnTo to position of expoting MeshVertex.
         AT_VRETURN(seekHelper.returnWithAnchor());
 
         sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
 
-        // Export S_MSH_VERTICES.
+        // Export MeshVertex.
         OUTPUT_WRITE_VRETURN(pOut, &sVtxInfo, 0, sizeof(sVtxInfo));
 
         AT_VRETURN(seekHelper.returnToAnchor());
@@ -892,11 +892,11 @@ bool CGeometryChunk::exportVertices(
 {
     // 頂点データサイズのテーブル
     static uint32_t tblVtxSize[] = {
-        izanagi::E_MSH_VTX_SIZE_POS,
-        izanagi::E_MSH_VTX_SIZE_NORMAL, 
-        izanagi::E_MSH_VTX_SIZE_COLOR,
-        izanagi::E_MSH_VTX_SIZE_UV,
-        izanagi::E_MSH_VTX_SIZE_TANGENT,
+        aten::MeshVertexSize::Position,
+        aten::MeshVertexSize::Normal,
+        aten::MeshVertexSize::Color,
+        aten::MeshVertexSize::UV,
+        aten::MeshVertexSize::Tangent,
     };
 
     m_vMin.Set(IZ_FLOAT_MAX, IZ_FLOAT_MAX, IZ_FLOAT_MAX);
@@ -947,14 +947,14 @@ bool CGeometryChunk::exportVertices(
             // 出力済み頂点リストに登録
             m_ExportedVtx.push_back(nVtxIdx);
 
-            for (uint32_t nVtxFmt = 0; nVtxFmt < izanagi::E_MSH_VTX_FMT_TYPE_NUM; nVtxFmt++) {
-                izanagi::math::SVector4 vec;
+            for (uint32_t nVtxFmt = 0; nVtxFmt < aten::MeshVertexFormat::Num; nVtxFmt++) {
+                aten::vec4 vec;
 
                 // 指定された頂点における指定フォーマットのデータを取得.
                 bool bIsExist = pImporter->getVertex(
 					nVtxIdx,
                     vec, 
-                    (izanagi::E_MSH_VTX_FMT_TYPE)nVtxFmt);
+                    (aten::MeshVertexFormat)nVtxFmt);
 
                 // NOTE
                 // bIsExist means whether specified format is exist.
@@ -964,20 +964,20 @@ bool CGeometryChunk::exportVertices(
                     AT_ASSERT(nVtxFmt < AT_COUNTOF(tblVtxSize));
                     AT_ASSERT(sizeof(vec) >= tblVtxSize[nVtxFmt]);
 
-                    if (nVtxFmt == izanagi::E_MSH_VTX_FMT_TYPE_COLOR) {
+                    if (nVtxFmt == aten::MeshVertexFormat::Color) {
                         // カラーの場合は変換してから出力
                         uint8_t r = (uint8_t)vec.x;
                         uint8_t g = (uint8_t)vec.y;
                         uint8_t b = (uint8_t)vec.z;
                         uint8_t a = (uint8_t)vec.w;
                         uint32_t color = IZ_COLOR_RGBA(r, g, b, a);
-                        AT_VRETURN(pOut->Write(&color, 0, tblVtxSize[nVtxFmt]));
+                        AT_VRETURN(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
                     }
                     else {
-                        AT_VRETURN(pOut->Write(&vec, 0, tblVtxSize[nVtxFmt]));
+                        AT_VRETURN(pOut->write(&vec, 0, tblVtxSize[nVtxFmt]));
                     }
 
-                    if (nVtxFmt == izanagi::E_MSH_VTX_FMT_TYPE_POS) {
+                    if (nVtxFmt == aten::MeshVertexFormat::Position) {
                         m_vMin.x = std::min(m_vMin.x, vec.x);
                         m_vMin.y = std::min(m_vMin.y, vec.y);
                         m_vMin.z = std::min(m_vMin.z, vec.z);
@@ -992,14 +992,11 @@ bool CGeometryChunk::exportVertices(
             // For skin.
             if (bEnableSkin) {
                 // 指定頂点におけるスキニング情報を取得
-                uint32_t nSkinIdx = pImporter->GetSkinIdxAffectToVtx(nVtxIdx);
+                uint32_t nSkinIdx = pImporter->getSkinIdxAffectToVtx(nVtxIdx);
                 const SkinParam& sSkin = m_SkinList[nSkinIdx];
 
-                izanagi::math::SVector4 vecJoint;
-                vecJoint.Set(0.0f, 0.0f, 0.0f, 0.0f);
-
-                izanagi::math::SVector4 vecWeight;
-                vecWeight.Set(0.0f, 0.0f, 0.0f, 0.0f);
+				aten::vec4 vecJoint(0);
+				aten::vec4 vecWeight(0);
                 
                 for (size_t n = 0; n < sSkin.joint.size(); n++) {
 #if 1
@@ -1012,8 +1009,8 @@ bool CGeometryChunk::exportVertices(
                     vecWeight.v[n] = sSkin.weight[n];
                 }
 
-                AT_VRETURN(pOut->Write(&vecJoint, 0, izanagi::E_MSH_VTX_SIZE_BLENDINDICES));
-                AT_VRETURN(pOut->Write(&vecWeight, 0, izanagi::E_MSH_VTX_SIZE_BLENDWEIGHT));
+                AT_VRETURN(pOut->write(&vecJoint, 0, aten::MeshVertexSize::BlendIndices));
+                AT_VRETURN(pOut->write(&vecWeight, 0, aten::MeshVertexSize::BlendWeight));
             }
         }
     }
@@ -1031,7 +1028,7 @@ bool CGeometryChunk::exportMesh(
     for (size_t i = 0; i < m_MeshList.size(); i++) {
         const MeshInfo& sMesh = m_MeshList[i];
 
-        izanagi::S_MSH_MESH_SET sMeshInfo;
+        aten::MeshSet sMeshInfo;
         {
             FILL_ZERO(&sMeshInfo, sizeof(sMeshInfo));
 
@@ -1039,7 +1036,7 @@ bool CGeometryChunk::exportMesh(
             sMeshInfo.fmt = sMesh.fmt;
         }
 
-        // Blank S_MSH_MESH_SET. 
+        // Blank MeshSet. 
         IoStreamSeekHelper seekHelper(pOut);
         AT_VRETURN(seekHelper.skip(sizeof(sMeshInfo)));
 
@@ -1047,8 +1044,8 @@ bool CGeometryChunk::exportMesh(
 
         pImporter->beginMesh((uint32_t)i);
 
-        izanagi::math::SVector4 vMin;
-        izanagi::math::SVector4 vMax;
+        aten::math::SVector4 vMin;
+        aten::math::SVector4 vMax;
 
         vMin.Set(IZ_FLOAT_MAX, IZ_FLOAT_MAX, IZ_FLOAT_MAX);
         vMax.Set(IZ_FLOAT_MIN, IZ_FLOAT_MIN, IZ_FLOAT_MIN);
@@ -1081,10 +1078,10 @@ bool CGeometryChunk::exportMesh(
             static_cast<uint32_t>(i),
             sMeshInfo.mtrl);
 
-        // returnTo to position of expoting S_MSH_MESH_SET.
+        // returnTo to position of expoting MeshSet.
         AT_VRETURN(seekHelper.returnWithAnchor());
 
-        // Export S_MSH_PRIM_SET.
+        // Export PrimitiveSet.
         OUTPUT_WRITE_VRETURN(pOut, &sMeshInfo, 0, sizeof(sMeshInfo));
 
         AT_VRETURN(seekHelper.returnToAnchor());
@@ -1095,8 +1092,8 @@ bool CGeometryChunk::exportMesh(
 
 void CGeometryChunk::getMinMaxPos(
     aten::FbxImporter* pImporter,
-    izanagi::math::SVector4& vMin,
-    izanagi::math::SVector4& vMax,
+    aten::math::SVector4& vMin,
+    aten::math::SVector4& vMax,
     const PrimitiveSetParam& sPrimSet)
 {
     for (size_t i = 0; i < sPrimSet.tri.size(); i++) {
@@ -1104,13 +1101,13 @@ void CGeometryChunk::getMinMaxPos(
         const TriangleParam& sTri = m_TriList[nTriIdx];
 
         for (uint32_t n = 0; n < 3; ++n) {
-            izanagi::math::SVector4 vec;
+            aten::vec4 vec;
 
             // Get vertex's position.
-            bool bIsExist = pImporter->GetVertex(
+            bool bIsExist = pImporter->getVertex(
                 sTri.vtx[n],
                 vec, 
-                izanagi::E_MSH_VTX_FMT_TYPE_POS);
+                aten::MeshVertexFormat::Position);
             AT_ASSERT(bIsExist);
 
             vMin.x = std::min(vMin.x, vec.x);
@@ -1129,7 +1126,7 @@ bool CGeometryChunk::exportPrimitiveSet(
     aten::FbxImporter* pImporter,
     const PrimitiveSetParam& sPrimSet)
 {
-    izanagi::S_MSH_PRIM_SET sSubsetInfo;
+    aten::PrimitiveSet sSubsetInfo;
     {
         FILL_ZERO(&sSubsetInfo, sizeof(sSubsetInfo));
 
@@ -1138,11 +1135,8 @@ bool CGeometryChunk::exportPrimitiveSet(
         sSubsetInfo.maxIdx = sPrimSet.maxIdx;
 
         sSubsetInfo.typePrim = (m_ExportTriList
-            ? izanagi::graph::E_GRAPH_PRIM_TYPE_TRIANGLELIST
-            : izanagi::graph::E_GRAPH_PRIM_TYPE_TRIANGLESTRIP);
-
-        // TODO
-        sSubsetInfo.fmtIdx = izanagi::graph::E_GRAPH_INDEX_BUFFER_FMT_INDEX32;
+            ? aten::graph::E_GRAPH_PRIM_TYPE_TRIANGLELIST
+            : aten::graph::E_GRAPH_PRIM_TYPE_TRIANGLESTRIP);
 
         sSubsetInfo.numJoints = (uint16_t)sPrimSet.joint.size();
     }
@@ -1150,7 +1144,7 @@ bool CGeometryChunk::exportPrimitiveSet(
     // のべ所属関節インデックス数
     m_Header.numAllJointIndices += sSubsetInfo.numJoints;
 
-    // Blank S_MSH_PRIM_SET. 
+    // Blank PrimitiveSet. 
     IoStreamSeekHelper seekHelper(pOut);
     AT_VRETURN(seekHelper.skip(sizeof(sSubsetInfo)));
 
@@ -1170,10 +1164,10 @@ bool CGeometryChunk::exportPrimitiveSet(
                             sPrimSet);
     AT_VRETURN(sSubsetInfo.numIdx > 0);
 
-    // returnTo to position of expoting S_MSH_PRIM_SET.
+    // returnTo to position of expoting PrimitiveSet.
     AT_VRETURN(seekHelper.returnWithAnchor());
 
-    // Export S_MSH_PRIM_SET.
+    // Export PrimitiveSet.
     OUTPUT_WRITE_VRETURN(pOut, &sSubsetInfo, 0, sizeof(sSubsetInfo));
 
     AT_VRETURN(seekHelper.returnToAnchor());
@@ -1208,7 +1202,7 @@ uint32_t CGeometryChunk::exportIndices(
 
         nIdxNum = static_cast<uint32_t>(tvIndices.size());
 
-        result = pOut->Write(&tvIndices[0], 0, sizeof(uint32_t) * tvIndices.size());
+        result = pOut->write(&tvIndices[0], 0, sizeof(uint32_t) * tvIndices.size());
         AT_ASSERT(result);
     }
     else
@@ -1232,7 +1226,7 @@ uint32_t CGeometryChunk::exportIndices(
         nIdxNum = pPrimGroup->numIndices;
 
         // Export indices.
-        result = pOut->Write(pPrimGroup->indices, 0, sizeof(UINT32) * pPrimGroup->numIndices);
+        result = pOut->write(pPrimGroup->indices, 0, sizeof(UINT32) * pPrimGroup->numIndices);
         AT_ASSERT(result);
 
         SAFE_DELETE_ARRAY(pPrimGroup);

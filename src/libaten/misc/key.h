@@ -3,10 +3,10 @@
 #include "types.h"
 
 namespace aten {
-	class Key {
+	class KeyValue {
 	private:
-		Key();
-		~Key();
+		KeyValue();
+		~KeyValue();
 
 	public:
 		// 新しいキー値を生成する

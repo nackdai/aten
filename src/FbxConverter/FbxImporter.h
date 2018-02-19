@@ -146,6 +146,7 @@ namespace aten
 		//////////////////////////////////
 		// For material.
 
+#if 0
 		bool beginMaterial();
 
 		bool endMaterial();
@@ -184,6 +185,7 @@ namespace aten
 		bool getFbxMatrialByImplmentation(
 			uint32_t nMtrlIdx,
 			aten::S_MTRL_MATERIAL& sMtrl);
+#endif
 
 	private:
 		FbxDataManager* m_dataMgr{ nullptr };
@@ -194,6 +196,7 @@ namespace aten
 
 		uint32_t m_curAnmIdx{ 0 };
 
+#if 0
 		struct MaterialTex {
 			void* fbxMtrl{ nullptr };
 			std::string paramName;
@@ -207,6 +210,7 @@ namespace aten
 			std::string name;
 		};
 		std::map<uint32_t, std::vector<MaterialShading>> m_mtrlShd;
+#endif
 
 		struct MaterialParam {
 			void* fbxMtrl{ nullptr };

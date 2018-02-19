@@ -1,4 +1,5 @@
 #include "GeometryCommon.h"
+#include "misc/key.h"
 
 ///////////////////////////////////////
 
@@ -18,7 +19,7 @@ uint32_t TriangleParam::computeKey() const
         }
 
         // Generate key value by joint indices.
-        ret = aten::CKey::GenerateValue(
+        ret = aten::Key::gen(
                 nJointTbl,
                 (uint32_t)num);
     }

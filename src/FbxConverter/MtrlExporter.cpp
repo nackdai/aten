@@ -1,7 +1,8 @@
 #include "MtrlExporter.h"
 #include "FileOutputStream.h"
 
-bool MtrlExporter::export(
+#if 0
+bool MtrlExporter::exportMaterial(
     const char* lpszOutFile,
     aten::FbxImporter* pImporter,
     uint32_t nMtrlIdx)
@@ -168,3 +169,4 @@ bool MtrlExporter::exportMaterial(
 
     return true;
 }
+#endif

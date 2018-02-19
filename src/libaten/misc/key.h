@@ -33,19 +33,19 @@ namespace aten {
 		template <typename _T>
 		static _T genValue(const char* str)
 		{
-			if (pszStr == nullptr) {
+			if (str == nullptr) {
 				AT_ASSERT(false);
 				return 0;
 			}
 
-			_T ret = *pszStr;
+			_T ret = *str;
 			_T k = 1;
 
 			for (uint32_t i = 0; ; ++i) {
-				if (pszStr[i] == '\0') {
+				if (str[i] == '\0') {
 					break;
 				}
-				ret += (pszStr[i] * (k *= 31L));
+				ret += (str[i] * (k *= 31L));
 			}
 
 			return ret;

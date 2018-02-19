@@ -15,7 +15,7 @@ protected:
     ~JointChunk();
 
 public:
-    static bool export(
+    static bool exportJoint(
         FileOutputStream* pOut,
         aten::FbxImporter* pImporter);
 

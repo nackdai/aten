@@ -10,7 +10,7 @@ private:
     ~AnmExporter();
 
 public:
-    static bool export(
+    static bool exportAnm(
         const char* lpszOutFile,
         uint32_t nSetIdx,
         aten::FbxImporter* pImporter);

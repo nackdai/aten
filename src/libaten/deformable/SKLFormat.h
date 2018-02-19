@@ -6,7 +6,7 @@
 
 namespace aten
 {
-    enum JointTransformType {
+    enum class JointTransformType {
         Translate  = 1 << 0,
         Quaternion = 1 << 1,
         Scale      = 1 << 2,

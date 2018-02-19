@@ -26,11 +26,11 @@
 // |        ・・・        |
 // +----------------------+
 
-bool JointChunk::export(
+bool JointChunk::exportJoint(
 	FileOutputStream* pOut,
 	aten::FbxImporter* pImporter)
 {
-	AT_VRETURN(pImporter->beginJoint());
+	AT_VRETURN_FALSE(pImporter->beginJoint());
 
 	uint32_t nJointNum = pImporter->getJointNum();
 	if (nJointNum == 0) {
@@ -49,7 +49,7 @@ bool JointChunk::export(
 
 	// Blank for S_SKL_HEADER.
 	IoStreamSeekHelper seekHelper(pOut);
-	AT_VRETURN(seekHelper.skip(sizeof(sHeader)));
+	AT_VRETURN_FALSE(seekHelper.skip(sizeof(sHeader)));
 
 	std::vector<aten::JointParam> tvJoint;
 
@@ -64,7 +64,7 @@ bool JointChunk::export(
 		tvJoint);
 
 	// Export.
-	AT_VRETURN(
+	AT_VRETURN_FALSE(
 		exportJoint(
 			pOut,
 			pImporter,
@@ -77,13 +77,13 @@ bool JointChunk::export(
 		sHeader.sizeFile = pOut->getCurPos();
 
 		// Rmenber end of geometry chunk.
-		AT_VRETURN(seekHelper.returnWithAnchor());
+		AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
 		OUTPUT_WRITE_VRETURN(pOut, &sHeader, 0, sizeof(sHeader));
 		seekHelper.step(sizeof(sHeader));
 
 		// returnTo end of geometry chunk.
-		AT_VRETURN(seekHelper.returnToAnchor());
+		AT_VRETURN_FALSE(seekHelper.returnToAnchor());
 	}
 
 	pImporter->exportJointCompleted();
@@ -160,7 +160,7 @@ bool JointChunk::exportJoint(
 				sJoint.pose.trans[1] = sTransform.param[1];
 				sJoint.pose.trans[2] = sTransform.param[2];
 
-				sJoint.validParam |= aten::JointTransformType::Translate;
+				sJoint.validParam |= (uint8_t)aten::JointTransformType::Translate;
 			}
 			else if (sTransform.type == JointTransform::Scale) {
 				AT_ASSERT(sTransform.param.size() >= 3);
@@ -168,7 +168,7 @@ bool JointChunk::exportJoint(
 				sJoint.pose.scale[1] = sTransform.param[1];
 				sJoint.pose.scale[2] = sTransform.param[2];
 
-				sJoint.validParam |= aten::JointTransformType::Scale;
+				sJoint.validParam |= (uint8_t)aten::JointTransformType::Scale;
 			}
 			else if (sTransform.type == JointTransform::AxisRot) {
 				float x = sTransform.param[0];
@@ -192,10 +192,10 @@ bool JointChunk::exportJoint(
 				sJoint.pose.quat.z = sTransform.param[2];
 				sJoint.pose.quat.w = sTransform.param[3];
 
-				sJoint.validParam |= aten::JointTransformType::Quaternion;
+				sJoint.validParam |= (uint8_t)aten::JointTransformType::Quaternion;
 			}
 			else {
-				AT_VRETURN(false);
+				AT_VRETURN_FALSE(false);
 			}
 		}
 
@@ -205,7 +205,7 @@ bool JointChunk::exportJoint(
 
 			sJoint.pose.quat = quat;
 
-			sJoint.validParam |= aten::JointTransformType::Quaternion;
+			sJoint.validParam |= (uint8_t)aten::JointTransformType::Quaternion;
 		}
 
 		OUTPUT_WRITE_VRETURN(pOut, &sJoint, 0, sizeof(sJoint));

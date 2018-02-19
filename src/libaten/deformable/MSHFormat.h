@@ -4,7 +4,7 @@
 
 namespace aten
 {
-    enum MeshVertexFormat : uint32_t {
+    enum class MeshVertexFormat : uint32_t {
         Position,
         Normal,
         Color,
@@ -16,7 +16,7 @@ namespace aten
 		Num,
     };
 
-    enum MeshVertexSize : uint32_t {
+    enum class MeshVertexSize : uint32_t {
         Position     = sizeof(float) * 4, ///< 頂点位置
         Normal       = sizeof(float) * 3, ///< 法線
         Color        = sizeof(uint8_t) * 4,     ///< 頂点カラー
@@ -68,21 +68,21 @@ namespace aten
     // +------------------------+
     
     struct MeshHeader {
-        uint32_t magic;
-        uint32_t version;
+        uint32_t magic{ 0 };
+        uint32_t version{ 0 };
 
-        uint32_t sizeHeader;
-        uint32_t sizeFile;
+        uint32_t sizeHeader{ 0 };
+        uint32_t sizeFile{ 0 };
 
         float maxVtx[3];
         float minVtx[3];
 
-        uint16_t numVB;
-        uint16_t numMeshGroup;
-        uint16_t numMeshSet;
-        uint16_t numMeshSubset;
+		uint16_t numVB{ 0 };
+        uint16_t numMeshGroup{ 0 };
+        uint16_t numMeshSet{ 0 };
+        uint16_t numMeshSubset{ 0 };
 
-        uint32_t numAllJointIndices; ///< ジョイントインデックス総数
+        uint32_t numAllJointIndices{ 0 }; ///< ジョイントインデックス総数
     };
 
     /////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ namespace aten
     // マテリアル情報
     struct MeshMaterial {
         char name[32];  ///< マテリアル名
-        uint32_t nameKey;    ///< マテリアル名キー
+        uint32_t nameKey{ 0 };    ///< マテリアル名キー
     };
 
     /////////////////////////////////////////////////////////
@@ -103,15 +103,15 @@ namespace aten
 
     // メッシュグループ情報
     struct MeshGroup {
-        uint16_t numVB;        ///< 頂点バッファ数
-        uint16_t numMeshSet;   ///< メッシュセット数
+		uint16_t numVB{ 0 };        ///< 頂点バッファ数
+        uint16_t numMeshSet{ 0 };   ///< メッシュセット数
     };
 
     // メッシュセット情報
     struct MeshSet {
-        uint16_t numSubset;
+        uint16_t numSubset{ 0 };
 
-        uint16_t fmt;      ///< 頂点フォーマット
+        uint16_t fmt{ 0 };      ///< 頂点フォーマット
 
         float center[3]; ///< 重心位置
 
@@ -120,11 +120,11 @@ namespace aten
 
     // プリミティブセット情報
     struct PrimitiveSet {
-        uint16_t idxVB;        ///< 利用する頂点バッファのインデックス
-        uint16_t minIdx;
-        uint16_t maxIdx;
-        uint16_t numJoints;    ///< ジョイント数
+        uint16_t idxVB{ 0 };        ///< 利用する頂点バッファのインデックス
+        uint16_t minIdx{ 0 };
+        uint16_t maxIdx{ 0 };
+        uint16_t numJoints{ 0 };    ///< ジョイント数
 
-        uint32_t numIdx;       ///< インデックス数
+        uint32_t numIdx{ 0 };       ///< インデックス数
     };
 }   // namespace izanagi

@@ -255,6 +255,7 @@
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\deformable\ANMFormat.h" />
+    <ClInclude Include="..\src\libaten\deformable\MDLFormat.h" />
     <ClInclude Include="..\src\libaten\deformable\MSHFormat.h" />
     <ClInclude Include="..\src\libaten\deformable\SKLFormat.h" />
     <ClInclude Include="..\src\libaten\defs.h" />

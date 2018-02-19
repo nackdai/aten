@@ -79,6 +79,8 @@ namespace aten {
 		return ret;\
 	}
 
+#define AT_VRETURN_FALSE(b)	AT_VRETURN(b, false)
+
 #define AT_COUNTOF(a)	(sizeof(a) / sizeof(a[0]))
 
 #define AT_STATICASSERT(b)	static_assert(b, "")

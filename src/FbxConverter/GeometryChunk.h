@@ -6,30 +6,27 @@
 
 #include <vector>
 
-class CGeometryChunk
+class GeometryChunkExporter
 {
-    static CGeometryChunk s_cInstance;
+    static GeometryChunkExporter s_cInstance;
 
 public:
-    static CGeometryChunk& getInstance() { return s_cInstance; }
+    static GeometryChunkExporter& getInstance() { return s_cInstance; }
 
 protected:
-    CGeometryChunk()
+    GeometryChunkExporter()
     {
         m_ExportTriList = false;
     }
-    ~CGeometryChunk() {}
+    ~GeometryChunkExporter() {}
 
 public:
-    bool export(
+    bool exportGeometry(
         uint32_t maxJointMtxNum,
         FileOutputStream* pOut,
         aten::FbxImporter* pImporter);
 
     void Clear();
-
-    const aten::math::SVector4& GetMin() { return m_vMin; }
-    const aten::math::SVector4& GetMax() { return m_vMax; }
 
     /** トライアングルリストで出力するかどうかを設定.
      */
@@ -76,8 +73,8 @@ protected:
 
     void getMinMaxPos(
         aten::FbxImporter* pImporter,
-        aten::math::SVector4& vMin,
-        aten::math::SVector4& vMax,
+        aten::vec4& vMin,
+        aten::vec4& vMax,
         const PrimitiveSetParam& sPrimSet);
 
     bool exportPrimitiveSet(
@@ -101,7 +98,7 @@ protected:
     aten::vec4 m_vMin;
 	aten::vec4 m_vMax;
 
-    aten::S_MSH_HEADER m_Header;
+    aten::MeshHeader m_Header;
 
     // 最大ボーンマトリクス数
     uint32_t m_MaxJointMtxNum;

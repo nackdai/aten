@@ -120,8 +120,8 @@ public:
             break;
 		case FilSeekPos::Tail:
             // 出力時にはファイル終端は存在しないので・・・
-            AT_VRETURN(false);
-            break;
+			AT_VRETURN_FALSE(false);
+			break;
         }
 
         bool ret = true;
@@ -139,7 +139,7 @@ public:
                     m_Pos += offset;
                     break;
 				case FilSeekPos::Tail:
-                    AT_VRETURN(false);
+                    AT_VRETURN_FALSE(false);
                     break;
                 }
             }
@@ -160,7 +160,7 @@ private:
 };
 
 #define OUTPUT_WRITE(out, p, offset, size)           ((out)->write((p), (offset), (size)) == (size))
-#define OUTPUT_WRITE_VRETURN(out, p, offset, size)   AT_VRETURN(OUTPUT_WRITE(out, p, offset, size))
+#define OUTPUT_WRITE_VRETURN(out, p, offset, size)   AT_VRETURN(OUTPUT_WRITE(out, p, offset, size), false)
 
 class IoStreamSeekHelper {
 protected:
@@ -180,7 +180,7 @@ public:
 	bool skip(uint32_t nSkip)
 	{
 		m_nPos = m_pOut->getCurPos();
-		AT_VRETURN(m_pOut->seek(nSkip, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(nSkip, FilSeekPos::Cur));
 		return true;
 	}
 
@@ -193,7 +193,7 @@ public:
 	{
 		uint32_t nCurPos = m_pOut->getCurPos();
 		int32_t nOffset = m_nPos - nCurPos;
-		AT_VRETURN(m_pOut->seek(nOffset, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(nOffset, FilSeekPos::Cur));
 		return true;
 	}
 
@@ -201,7 +201,7 @@ public:
 	{
 		m_nAnchorPos = m_pOut->getCurPos();
 		int32_t nOffset = m_nPos - m_nAnchorPos;
-		AT_VRETURN(m_pOut->seek(nOffset, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(nOffset, FilSeekPos::Cur));
 		return true;
 	}
 
@@ -209,7 +209,7 @@ public:
 	{
 		uint32_t nCurPos = m_pOut->getCurPos();
 		int32_t nOffset = m_nAnchorPos - nCurPos;
-		AT_VRETURN(m_pOut->seek(nOffset, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(nOffset, FilSeekPos::Cur));
 		return true;
 	}
 

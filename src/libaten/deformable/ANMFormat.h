@@ -9,7 +9,7 @@ namespace aten
 {
     /** アニメーションの補間計算.
      */
-    enum AnmInterpType : uint8_t {
+    enum class AnmInterpType : uint8_t {
         Linear,
         Bezier,
         Hermite,
@@ -22,7 +22,7 @@ namespace aten
 
     /** アニメーションを行うパラメータ.
      */
-    enum AnmTransformType : uint32_t {
+    enum class AnmTransformType : uint32_t {
 		Invalid = 0,
 
         ParamX  = 1 << 0,

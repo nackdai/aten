@@ -18,7 +18,7 @@
 // |      キー      |
 // +----------------+
 
-bool AnmExporter::export(
+bool AnmExporter::exportAnm(
     const char* lpszOutFile,
     uint32_t nSetIdx,
     aten::FbxImporter* pImporter)
@@ -27,7 +27,7 @@ bool AnmExporter::export(
 
 	FileOutputStream out;
 
-    AT_VRETURN(out.open(lpszOutFile));
+	AT_VRETURN_FALSE(out.open(lpszOutFile));
 
     aten::AnmHeader sHeader;
     {
@@ -39,9 +39,9 @@ bool AnmExporter::export(
 
     // Blank for file's header.
     IoStreamSeekHelper seekHelper(&out);
-    AT_VRETURN(seekHelper.skip(sizeof(sHeader)));
+	AT_VRETURN_FALSE(seekHelper.skip(sizeof(sHeader)));
 
-    AT_VRETURN(pImporter->beginAnm(nSetIdx));
+	AT_VRETURN_FALSE(pImporter->beginAnm(nSetIdx));
 
     uint32_t nNodeNum = pImporter->getAnmNodeNum();
 
@@ -54,7 +54,7 @@ bool AnmExporter::export(
         for (uint32_t i = 0; i < nNodeNum; i++) {
             aten::AnmNode sNode;
 
-            AT_VRETURN(pImporter->getAnmNode(i, sNode));
+			AT_VRETURN_FALSE(pImporter->getAnmNode(i, sNode));
 
             channelNum.push_back(sNode.numChannels);
 
@@ -78,7 +78,7 @@ bool AnmExporter::export(
         for (uint32_t nChannelIdx = 0; nChannelIdx < nChannelCnt; nChannelIdx++) {
             aten::AnmChannel sChannel;
 
-            AT_VRETURN(
+			AT_VRETURN_FALSE(
                 pImporter->getAnmChannel(
                     nNodeIdx,
                     nChannelIdx,
@@ -113,7 +113,7 @@ bool AnmExporter::export(
 
                 std::vector<float> tvValue;
 
-                AT_VRETURN(
+				AT_VRETURN_FALSE(
                     pImporter->getAnmKey(
                         nNodeIdx,
                         nChannelIdx,
@@ -140,7 +140,7 @@ bool AnmExporter::export(
         }
     }
 
-    AT_VRETURN(pImporter->endAnm());
+	AT_VRETURN_FALSE(pImporter->endAnm());
 
     // Export files's header.
     {
@@ -152,7 +152,7 @@ bool AnmExporter::export(
 
         sHeader.time = fMaxTime;
 
-        AT_VRETURN(seekHelper.returnTo());
+		AT_VRETURN_FALSE(seekHelper.returnTo());
         OUTPUT_WRITE_VRETURN(&out, &sHeader, 0, sizeof(sHeader));
     }
 

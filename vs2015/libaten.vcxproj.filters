@@ -440,6 +440,9 @@
     <ClInclude Include="..\src\libaten\deformable\MSHFormat.h">
       <Filter>deformable</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\MDLFormat.h">
+      <Filter>deformable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">

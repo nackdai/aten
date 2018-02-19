@@ -12,7 +12,7 @@ private:
     ~MtrlExporter();
 
 public:
-    bool export(
+    bool exportMaterial(
         const char* lpszOutFile,
         aten::FbxImporter* pImporter,
         uint32_t nMtrlIdx);

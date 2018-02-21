@@ -2,10 +2,22 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <FBXSDK>C:\Program Files\Autodesk\FBX\FBX SDK\2016.1.2</FBXSDK>
+    <FBXSDK>C:\Program Files\Autodesk\FBX\FBX SDK\2018.1.1</FBXSDK>
   </PropertyGroup>
   <PropertyGroup />
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(FBXSDK)\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(FBXSDK)\lib\vs2015\x64\release\libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>copy /B /Y $(FBXSDK)\lib\vs2015\x64\release\*.dll $(OutputPath)</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="FBXSDK">
       <Value>$(FBXSDK)</Value>

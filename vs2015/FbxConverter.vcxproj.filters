@@ -39,6 +39,7 @@
     <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp">
       <Filter>tinyxml2</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\FbxConverter\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\FbxConverter\FbxDataManager.h">

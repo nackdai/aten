@@ -70,6 +70,7 @@ public:
         }
 
         uint32_t ret = (uint32_t)fwrite(buf, size, 1, m_File);
+		ret *= size;
         AT_ASSERT(ret == size);
 
         if (ret == size) {

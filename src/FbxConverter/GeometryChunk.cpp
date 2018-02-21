@@ -983,11 +983,11 @@ bool GeometryChunkExporter::exportVertices(
 #if 1
                     // プリミティブセット内での関節位置を探す
                     // これが描画時における関節インデックスとなる
-                    vecJoint.v[n] = (float)_FindJointIdx(sPrimSet.joint, sSkin.joint[n]);
+                    vecJoint.p[n] = (float)_FindJointIdx(sPrimSet.joint, sSkin.joint[n]);
 #else
-                    vecJoint.v[n] = sSkin.joint[n];
+                    vecJoint.p[n] = sSkin.joint[n];
 #endif
-                    vecWeight.v[n] = sSkin.weight[n];
+                    vecWeight.p[n] = sSkin.weight[n];
                 }
 
                 AT_VRETURN_FALSE(pOut->write(&vecJoint, 0, (uint32_t)aten::MeshVertexSize::BlendIndices));

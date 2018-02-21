@@ -46,12 +46,23 @@ bool MtrlExporter::exportMaterial(
 				}
 			}
 
+			bool isExportedAlbedoColor = false;
+
 			// TODO
 			for (const auto& param : mtrl.params) {
 				if (param.name == "diffuse") {
 					sprintf(buf, "%.3f %.3f %.3f\0", param.values[0], param.values[1], param.values[2]);
 					xmlMtrlElement->SetAttribute("color", buf);
+
+					isExportedAlbedoColor = true;
+
+					break;
 				}
+			}
+
+			if (!isExportedAlbedoColor) {
+				sprintf(buf, "1.0 1.0 1.0");
+				xmlMtrlElement->SetAttribute("color", buf);
 			}
 
 			xmlRoot->InsertEndChild(xmlMtrlElement);

@@ -1,6 +1,10 @@
 #include "aten.h"
 #include "atenscene.h"
 
+#include "FbxImporter.h"
+#include "MdlExporter.h"
+#include "MtrlExporter.h"
+
 #include <cmdline.h>
 #include <imgui.h>
 
@@ -172,25 +176,13 @@ bool parseOption(
 
 int main(int argc, char* argv[])
 {
-	g_opt.input = "../../asset/sponza/sponza.obj";
-	//g_opt.input = "../../asset/sponza/lod.obj";
-	//g_opt.input = "../../asset/suzanne/suzanne.obj";
-
-	// TODO
-#if 0
-	cmdline::parser cmd;
-
-	if (!parseOption(argc, argv, cmd, g_opt)) {
-		return 0;
-	}
-#endif
-
-	std::string extname;
-	aten::getStringsFromPath(g_opt.input, g_opt.inputBasepath, extname, g_opt.inputFilename);
-
 	aten::window::SetCurrentDirectoryFromExe();
 
+	aten::FbxImporter importer;
 
+	importer.open("../../asset/unitychan/unitychan.fbx");
+	//MdlExporter::exportMdl(48, "unitychan.mdl", &importer);
+	MtrlExporter::exportMaterial("unitychan_mtrl.xml", &importer);
 
 #if 0
 	aten::window::init(

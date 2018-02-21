@@ -7,6 +7,9 @@
     <Filter Include="converter">
       <UniqueIdentifier>{ad3f060a-d36d-479f-95c1-b5e15e592727}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tinyxml2">
+      <UniqueIdentifier>{c33df2ae-e9c0-40b5-9761-ac402fa86455}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\FbxConverter\FbxDataManager.cpp">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="..\src\FbxConverter\JointChunk.cpp">
       <Filter>converter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp">
+      <Filter>tinyxml2</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,5 +66,8 @@
       <Filter>converter</Filter>
     </ClInclude>
     <ClInclude Include="..\src\FbxConverter\FileOutputStream.h" />
+    <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h">
+      <Filter>tinyxml2</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

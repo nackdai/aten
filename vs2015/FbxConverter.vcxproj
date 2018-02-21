@@ -27,6 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="..\src\FbxConverter\AnmExporter.cpp" />
     <ClCompile Include="..\src\FbxConverter\FbxDataManager.cpp" />
     <ClCompile Include="..\src\FbxConverter\FbxImporter.cpp" />
@@ -37,6 +38,7 @@
     <ClCompile Include="..\src\FbxConverter\MtrlExporter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="..\src\FbxConverter\AnmExporter.h" />
     <ClInclude Include="..\src\FbxConverter\FbxDataManager.h" />
     <ClInclude Include="..\src\FbxConverter\FbxImporter.h" />
@@ -175,7 +177,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(FBXSDK)\include;$(ProjectDir)..\3rdparty\NvTriStrip\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(FBXSDK)\include;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -240,7 +242,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(FBXSDK)\include;$(ProjectDir)..\3rdparty\NvTriStrip\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(FBXSDK)\include;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>
@@ -262,7 +264,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(FBXSDK)\include;$(ProjectDir)..\3rdparty\NvTriStrip\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(FBXSDK)\include;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>

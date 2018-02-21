@@ -12,10 +12,10 @@
     <Link>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(FBXSDK)\lib\vs2015\x64\release\libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(FBXSDK)\lib\vs2015\x64\$(Configuration)\libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy /B /Y $(FBXSDK)\lib\vs2015\x64\release\*.dll $(OutputPath)</Command>
+      <Command>copy /B /Y $(FBXSDK)\lib\vs2015\x64\$(Configuration)\*.dll $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

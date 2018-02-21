@@ -189,7 +189,7 @@
     </Link>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y "$(FBXSDK)\lib\vs2015\x64\release\*.dll" $(OutputPath)</Command>
+copy /B /Y "$(FBXSDK)\lib\vs2015\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -256,7 +256,7 @@ copy /B /Y "$(FBXSDK)\lib\vs2015\x64\release\*.dll" $(OutputPath)</Command>
     </Link>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y "$(FBXSDK)\lib\vs2015\x64\release\*.dll" $(OutputPath)</Command>
+copy /B /Y "$(FBXSDK)\lib\vs2015\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -279,7 +279,7 @@ copy /B /Y "$(FBXSDK)\lib\vs2015\x64\release\*.dll" $(OutputPath)</Command>
     </Link>
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)
-copy /B /Y "$(FBXSDK)\lib\vs2015\x64\release\*.dll" $(OutputPath)</Command>
+copy /B /Y "$(FBXSDK)\lib\vs2015\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

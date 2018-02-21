@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-CGeometryChunk CGeometryChunk::s_cInstance;
+GeometryChunkExporter GeometryChunkExporter::s_cInstance;
 
 // ジオメトリチャンク
 // +------------------------+
@@ -40,7 +40,7 @@ CGeometryChunk CGeometryChunk::s_cInstance;
 // |        ・・・          |
 // +------------------------+
 
-bool CGeometryChunk::exportGeometry(
+bool GeometryChunkExporter::exportGeometry(
     uint32_t maxJointMtxNum,
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter)
@@ -99,7 +99,7 @@ bool CGeometryChunk::exportGeometry(
     return true;
 }
 
-void CGeometryChunk::Clear()
+void GeometryChunkExporter::Clear()
 {
     m_MeshList.clear();
     m_TriList.clear();
@@ -108,7 +108,7 @@ void CGeometryChunk::Clear()
 }
 
 // メッシュグループ出力
-bool CGeometryChunk::exportGroup(
+bool GeometryChunkExporter::exportGroup(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter)
 {
@@ -229,7 +229,7 @@ struct JointInfo {
 };
 
 // 指定されたメッシュについて三角形と関節を関連付ける
-void CGeometryChunk::bindJointToTriangle(
+void GeometryChunkExporter::bindJointToTriangle(
     aten::FbxImporter* pImporter,
     MeshInfo& sMesh)
 {
@@ -391,7 +391,7 @@ struct FuncFindIncludedJointIdx {
 std::vector< std::vector<const PrimitiveSetParam*> > FuncFindIncludedJointIdx::candidateList;
 
 // 三角形に影響を与える関節に応じて三角形を分類する
-void CGeometryChunk::classifyTriangleByJoint(MeshInfo& sMesh)
+void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
 {
     for (uint32_t nTriPos = sMesh.startTri; nTriPos < sMesh.endTri; nTriPos++) {
         TriangleParam& sTri = m_TriList[nTriPos];
@@ -570,7 +570,7 @@ void CGeometryChunk::classifyTriangleByJoint(MeshInfo& sMesh)
 }
 
 // メッシュ情報を取得
-void CGeometryChunk::getMeshInfo(
+void GeometryChunkExporter::getMeshInfo(
     aten::FbxImporter* pImporter,
     MeshInfo& sMesh)
 {
@@ -587,7 +587,7 @@ void CGeometryChunk::getMeshInfo(
     }
 }
 
-bool CGeometryChunk::computeVtxNormal(
+bool GeometryChunkExporter::computeVtxNormal(
     aten::FbxImporter* pImporter,
     const TriangleParam& sTri)
 {
@@ -629,7 +629,7 @@ bool CGeometryChunk::computeVtxNormal(
     return true;
 }
 
-bool CGeometryChunk::computeVtxTangent(
+bool GeometryChunkExporter::computeVtxTangent(
     aten::FbxImporter* pImporter,
     const TriangleParam& sTri)
 {
@@ -713,13 +713,13 @@ bool CGeometryChunk::computeVtxTangent(
     return true;
 }
 
-void CGeometryChunk::computeVtxParemters(aten::FbxImporter* pImporter)
+void GeometryChunkExporter::computeVtxParemters(aten::FbxImporter* pImporter)
 {
     // TODO
 }
 
 // 頂点データを出力
-uint32_t CGeometryChunk::exportVertices(
+uint32_t GeometryChunkExporter::exportVertices(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter)
 {
@@ -812,7 +812,7 @@ uint32_t CGeometryChunk::exportVertices(
             // Export MeshVertex.
             OUTPUT_WRITE_VRETURN(pOut, &sVtxInfo, 0, sizeof(sVtxInfo));
 
-            AT_VRETURN(seekHelper.returnToAnchor());
+            AT_VRETURN_FALSE(seekHelper.returnToAnchor());
 
             sPrimSet.idxVB = nVBCnt;
 
@@ -865,7 +865,7 @@ static inline int32_t _FindJointIdx(
 }
 
 // 頂点データを出力.
-bool CGeometryChunk::exportVertices(
+bool GeometryChunkExporter::exportVertices(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter,
     const MeshInfo& sMesh,
@@ -952,10 +952,10 @@ bool CGeometryChunk::exportVertices(
                         uint8_t b = (uint8_t)vec.z;
                         uint8_t a = (uint8_t)vec.w;
                         uint32_t color = AT_COLOR_RGBA(r, g, b, a);
-                        AT_VRETURN(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
+						AT_VRETURN_FALSE(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
                     }
                     else {
-                        AT_VRETURN(pOut->write(&vec, 0, tblVtxSize[nVtxFmt]));
+						AT_VRETURN_FALSE(pOut->write(&vec, 0, tblVtxSize[nVtxFmt]));
                     }
 
                     if (nVtxFmt == (uint32_t)aten::MeshVertexFormat::Position) {
@@ -979,7 +979,7 @@ bool CGeometryChunk::exportVertices(
 				aten::vec4 vecJoint(0);
 				aten::vec4 vecWeight(0);
                 
-                for (size_t n = 0; n < sSkin.joint.size(); n++) {
+                for (uint32_t n = 0; n < (uint32_t)sSkin.joint.size(); n++) {
 #if 1
                     // プリミティブセット内での関節位置を探す
                     // これが描画時における関節インデックスとなる
@@ -1002,7 +1002,7 @@ bool CGeometryChunk::exportVertices(
     return true;
 }
 
-bool CGeometryChunk::exportMesh(
+bool GeometryChunkExporter::exportMesh(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter)
 {
@@ -1017,7 +1017,7 @@ bool CGeometryChunk::exportMesh(
 
         // Blank MeshSet. 
         IoStreamSeekHelper seekHelper(pOut);
-        AT_VRETURN(seekHelper.skip(sizeof(sMeshInfo)));
+		AT_VRETURN_FALSE(seekHelper.skip(sizeof(sMeshInfo)));
 
         m_Header.numMeshSubset += sMeshInfo.numSubset;
 
@@ -1029,7 +1029,7 @@ bool CGeometryChunk::exportMesh(
         for (size_t n = 0; n < sMesh.subset.size(); n++) {
             const PrimitiveSetParam& sPrimSet = sMesh.subset[n];
 
-            AT_VRETURN(
+			AT_VRETURN_FALSE(
                 exportPrimitiveSet(
                     pOut,
                     pImporter,
@@ -1055,18 +1055,18 @@ bool CGeometryChunk::exportMesh(
             sMeshInfo.mtrl);
 
         // returnTo to position of expoting MeshSet.
-        AT_VRETURN(seekHelper.returnWithAnchor());
+		AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
         // Export PrimitiveSet.
         OUTPUT_WRITE_VRETURN(pOut, &sMeshInfo, 0, sizeof(sMeshInfo));
 
-        AT_VRETURN(seekHelper.returnToAnchor());
+		AT_VRETURN_FALSE(seekHelper.returnToAnchor());
     }
 
     return true;
 }
 
-void CGeometryChunk::getMinMaxPos(
+void GeometryChunkExporter::getMinMaxPos(
     aten::FbxImporter* pImporter,
     aten::vec4& vMin,
 	aten::vec4& vMax,
@@ -1097,7 +1097,7 @@ void CGeometryChunk::getMinMaxPos(
     }
 }
 
-bool CGeometryChunk::exportPrimitiveSet(
+bool GeometryChunkExporter::exportPrimitiveSet(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter,
     const PrimitiveSetParam& sPrimSet)
@@ -1116,7 +1116,7 @@ bool CGeometryChunk::exportPrimitiveSet(
 
     // Blank PrimitiveSet. 
     IoStreamSeekHelper seekHelper(pOut);
-    AT_VRETURN(seekHelper.skip(sizeof(sSubsetInfo)));
+	AT_VRETURN_FALSE(seekHelper.skip(sizeof(sSubsetInfo)));
 
     // 所属関節へのインデックス
     {
@@ -1132,20 +1132,20 @@ bool CGeometryChunk::exportPrimitiveSet(
                             pOut,
                             pImporter,
                             sPrimSet);
-    AT_VRETURN(sSubsetInfo.numIdx > 0);
+	AT_VRETURN_FALSE(sSubsetInfo.numIdx > 0);
 
     // returnTo to position of expoting PrimitiveSet.
-    AT_VRETURN(seekHelper.returnWithAnchor());
+	AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
     // Export PrimitiveSet.
     OUTPUT_WRITE_VRETURN(pOut, &sSubsetInfo, 0, sizeof(sSubsetInfo));
 
-    AT_VRETURN(seekHelper.returnToAnchor());
+	AT_VRETURN_FALSE(seekHelper.returnToAnchor());
 
     return true;
 }
 
-uint32_t CGeometryChunk::exportIndices(
+uint32_t GeometryChunkExporter::exportIndices(
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter,
     const PrimitiveSetParam& sPrimSet)
@@ -1170,7 +1170,7 @@ uint32_t CGeometryChunk::exportIndices(
 	// TriangleList
 	nIdxNum = static_cast<uint32_t>(tvIndices.size());
 
-	result = pOut->write(&tvIndices[0], 0, sizeof(uint32_t) * tvIndices.size());
+	result = OUTPUT_WRITE(pOut, &tvIndices[0], 0, sizeof(uint32_t) * tvIndices.size());
 	AT_ASSERT(result);
 #else
     if (m_ExportTriList)

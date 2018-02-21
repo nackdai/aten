@@ -99,9 +99,8 @@ void JointChunk::getJointInfo(
 	for (uint32_t i = 0; i < (uint32_t)tvJoint.size(); i++) {
 		auto& sJoint = tvJoint[i];
 
-		sJoint.name.SetString(
-			pImporter->getJointName(i));
-		sJoint.nameKey = aten::Key::gen(sJoint.name);
+		sprintf(sJoint.name, "%s\0", pImporter->getJointName(i));
+		sJoint.nameKey = aten::KeyValue::gen(sJoint.name);
 
 		sJoint.idx = i;
 

@@ -4,6 +4,8 @@
 #include "misc/key.h"
 
 #include <map>
+#include <algorithm>
+#include <iterator>
 #include <functional>
 
 // NOTE
@@ -134,18 +136,18 @@ namespace aten
 		FbxMesh* mesh = meshSet.fbxMesh;
 
 		// ポジションが存在しないことはないはず.
-		ret += aten::MeshVertexSize::Position;
+		ret += (uint32_t)aten::MeshVertexSize::Position;
 
 		if (mesh->GetElementNormalCount() > 0) {
-			ret += aten::MeshVertexSize::Normal;
+			ret += (uint32_t)aten::MeshVertexSize::Normal;
 		}
 
 		if (mesh->GetElementUVCount() > 0) {
-			ret += aten::MeshVertexSize::UV;
+			ret += (uint32_t)aten::MeshVertexSize::UV;
 		}
 
 		if (mesh->GetElementVertexColorCount() > 0) {
-			ret += aten::MeshVertexSize::Color;
+			ret += (uint32_t)aten::MeshVertexSize::Color;
 		}
 
 		return ret;
@@ -160,18 +162,18 @@ namespace aten
 		FbxMesh* mesh = meshSet.fbxMesh;
 
 		// ポジションが存在しないことはないはず.
-		ret |= 1 << aten::MeshVertexFormat::Position;
+		ret |= 1 << (uint32_t)aten::MeshVertexFormat::Position;
 
 		if (mesh->GetElementNormalCount() > 0) {
-			ret |= 1 << aten::MeshVertexFormat::Normal;
+			ret |= 1 << (uint32_t)aten::MeshVertexFormat::Normal;
 		}
 
 		if (mesh->GetElementUVCount() > 0) {
-			ret |= 1 << aten::MeshVertexFormat::UV;
+			ret |= 1 << (uint32_t)aten::MeshVertexFormat::UV;
 		}
 
 		if (mesh->GetElementVertexColorCount() > 0) {
-			ret |= 1 << aten::MeshVertexFormat::Color;
+			ret |= 1 << (uint32_t)aten::MeshVertexFormat::Color;
 		}
 
 		// NOTE
@@ -353,8 +355,8 @@ namespace aten
 	{
 		const MeshSubset& mesh = m_dataMgr->getMesh(nMeshIdx);
 
-		sMtrl.name.SetString(mesh.mtrl->GetName());
-		sMtrl.nameKey = aten::Key::gen(sMtrl.name);
+		sprintf(sMtrl.name, "%s\0", mesh.mtrl->GetName());
+		sMtrl.nameKey = aten::KeyValue::gen(sMtrl.name);
 	}
 
 	//////////////////////////////////
@@ -628,8 +630,9 @@ namespace aten
 		AT_ASSERT(node.targetIdx >= 0);
 
 		sNode.targetIdx = (node.targetIdx >= 0 ? node.targetIdx : nNodeIdx);
-		sNode.target.SetString(fbxNode->GetName());
-		sNode.targetKey = aten::Key::gen(sNode.target);
+
+		sprintf(sNode.target, "%s\0", fbxNode->GetName());
+		sNode.targetKey = aten::KeyValue::gen(sNode.target);
 
 		sNode.numChannels = getAnmChannelNum(nNodeIdx);
 
@@ -686,10 +689,10 @@ namespace aten
 					AnmKey key;
 					key.key = f - start;
 
-					key.value[0] = q.mData[0];
-					key.value[1] = q.mData[1];
-					key.value[2] = q.mData[2];
-					key.value[3] = q.mData[3];
+					key.value[0] = (float)q.mData[0];
+					key.value[1] = (float)q.mData[1];
+					key.value[2] = (float)q.mData[2];
+					key.value[3] = (float)q.mData[3];
 
 					channel.keys[ParamType::Rotate].push_back(key);
 				}
@@ -700,10 +703,10 @@ namespace aten
 					AnmKey key;
 					key.key = f - start;
 
-					key.value[0] = s.mData[0];
-					key.value[1] = s.mData[1];
-					key.value[2] = s.mData[2];
-					key.value[3] = s.mData[3];
+					key.value[0] = (float)s.mData[0];
+					key.value[1] = (float)s.mData[1];
+					key.value[2] = (float)s.mData[2];
+					key.value[3] = (float)s.mData[3];
 
 					channel.keys[ParamType::Scale].push_back(key);
 				}
@@ -714,10 +717,10 @@ namespace aten
 					AnmKey key;
 					key.key = f - start;
 
-					key.value[0] = t.mData[0];
-					key.value[1] = t.mData[1];
-					key.value[2] = t.mData[2];
-					key.value[3] = t.mData[3];
+					key.value[0] = (float)t.mData[0];
+					key.value[1] = (float)t.mData[1];
+					key.value[2] = (float)t.mData[2];
+					key.value[3] = (float)t.mData[3];
 
 					channel.keys[ParamType::Tranlate].push_back(key);
 				}
@@ -744,7 +747,7 @@ namespace aten
 
 		// Rotation
 		if (type == ParamType::Rotate) {
-			sChannel.numKeys = channel.keys[type].size();
+			sChannel.numKeys = (uint16_t)channel.keys[type].size();
 			sChannel.interp = aten::AnmInterpType::Slerp;
 			sChannel.type = aten::AnmTransformType::QuaternionXYZW;
 			return true;
@@ -752,7 +755,7 @@ namespace aten
 
 		// Scale
 		if (type == ParamType::Scale) {
-			sChannel.numKeys = channel.keys[type].size();
+			sChannel.numKeys = (uint16_t)channel.keys[type].size();
 			sChannel.interp = aten::AnmInterpType::Linear;
 			sChannel.type = aten::AnmTransformType::ScaleXYZ;
 			return true;
@@ -760,7 +763,7 @@ namespace aten
 
 		// Translate
 		if (type == ParamType::Tranlate) {
-			sChannel.numKeys = channel.keys[type].size();
+			sChannel.numKeys = (uint16_t)channel.keys[type].size();
 			sChannel.interp = aten::AnmInterpType::Linear;
 			sChannel.type = aten::AnmTransformType::TranslateXYZ;
 			return true;
@@ -891,39 +894,36 @@ namespace aten
 
 	void FbxImporter::getLambertParams(
 		void* mtrl, 
-		std::vector<FbxImporter::MaterialParam>& list)
+		std::vector<MaterialParam>& list)
 	{
 		fbxsdk::FbxSurfaceLambert* lambert = (fbxsdk::FbxSurfaceLambert*)mtrl;
 
 		if (lambert->Diffuse.IsValid()) {
 			MaterialParam diffuse;
-			diffuse.fbxMtrl = mtrl;
 			diffuse.name = "diffuse";
-			diffuse.values.push_back(lambert->Diffuse.Get().mData[0]);
-			diffuse.values.push_back(lambert->Diffuse.Get().mData[1]);
-			diffuse.values.push_back(lambert->Diffuse.Get().mData[2]);
+			diffuse.values.push_back((float)lambert->Diffuse.Get().mData[0]);
+			diffuse.values.push_back((float)lambert->Diffuse.Get().mData[1]);
+			diffuse.values.push_back((float)lambert->Diffuse.Get().mData[2]);
 			diffuse.values.push_back(1.0f);
 			list.push_back(diffuse);
 		}
 
 		if (lambert->Ambient.IsValid()) {
 			MaterialParam ambient;
-			ambient.fbxMtrl = mtrl;
 			ambient.name = "ambient";
-			ambient.values.push_back(lambert->Ambient.Get().mData[0]);
-			ambient.values.push_back(lambert->Ambient.Get().mData[1]);
-			ambient.values.push_back(lambert->Ambient.Get().mData[2]);
+			ambient.values.push_back((float)lambert->Ambient.Get().mData[0]);
+			ambient.values.push_back((float)lambert->Ambient.Get().mData[1]);
+			ambient.values.push_back((float)lambert->Ambient.Get().mData[2]);
 			ambient.values.push_back(1.0f);
 			list.push_back(ambient);
 		}
 
 		if (lambert->Emissive.IsValid()) {
 			MaterialParam emmisive;
-			emmisive.fbxMtrl = mtrl;
 			emmisive.name = "emmisive";
-			emmisive.values.push_back(lambert->Emissive.Get().mData[0]);
-			emmisive.values.push_back(lambert->Emissive.Get().mData[1]);
-			emmisive.values.push_back(lambert->Emissive.Get().mData[2]);
+			emmisive.values.push_back((float)lambert->Emissive.Get().mData[0]);
+			emmisive.values.push_back((float)lambert->Emissive.Get().mData[1]);
+			emmisive.values.push_back((float)lambert->Emissive.Get().mData[2]);
 			emmisive.values.push_back(1.0f);
 			list.push_back(emmisive);
 		}
@@ -931,7 +931,7 @@ namespace aten
 
 	void FbxImporter::getPhongParams(
 		void* mtrl, 
-		std::vector<FbxImporter::MaterialParam>& list)
+		std::vector<MaterialParam>& list)
 	{
 		getLambertParams(mtrl, list);
 
@@ -939,37 +939,29 @@ namespace aten
 
 		if (phong->Specular.IsValid()) {
 			MaterialParam specular;
-			specular.fbxMtrl = mtrl;
 			specular.name = "specular";
-			specular.values.push_back(phong->Specular.Get().mData[0]);
-			specular.values.push_back(phong->Specular.Get().mData[1]);
-			specular.values.push_back(phong->Specular.Get().mData[2]);
+			specular.values.push_back((float)phong->Specular.Get().mData[0]);
+			specular.values.push_back((float)phong->Specular.Get().mData[1]);
+			specular.values.push_back((float)phong->Specular.Get().mData[2]);
 			specular.values.push_back(1.0f);
 			list.push_back(specular);
 		}
 
 		if (phong->Shininess.IsValid()) {
 			MaterialParam shiness;
-			shiness.fbxMtrl = mtrl;
 			shiness.name = "shiness";
-			shiness.values.push_back(phong->Shininess.Get());
+			shiness.values.push_back((float)phong->Shininess.Get());
 			list.push_back(shiness);
 		}
 	}
 
 	bool FbxImporter::getMaterial(
 		uint32_t nMtrlIdx,
-		aten::S_MTRL_MATERIAL& sMtrl)
+		MaterialInfo& mtrl)
 	{
 		auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
 
-		sMtrl.name.SetString(fbxMtrl->GetName());
-		sMtrl.keyMaterial = sMtrl.name.GetKeyValue();
-
-		sMtrl.numTex = 0;
-
-		sMtrl.numParam = 0;
-		sMtrl.paramBytes = 0;
+		mtrl.name = fbxMtrl->GetName();
 
 		bool ret = false;
 
@@ -978,10 +970,10 @@ namespace aten
 		auto implementation = GetImplementation(fbxMtrl, FBXSDK_IMPLEMENTATION_CGFX);
 
 		if (implementation != nullptr) {
-			ret = getFbxMatrialByImplmentation(nMtrlIdx, sMtrl);
+			ret = getFbxMatrialByImplmentation(nMtrlIdx, mtrl.tex, mtrl.params);
 		}
 		else {
-			ret = getFbxMatrial(nMtrlIdx, sMtrl);
+			ret = getFbxMatrial(nMtrlIdx, mtrl.tex, mtrl.params);
 		}
 
 		return ret;
@@ -989,14 +981,15 @@ namespace aten
 
 	bool FbxImporter::getFbxMatrial(
 		uint32_t nMtrlIdx,
-		aten::S_MTRL_MATERIAL& sMtrl)
+		std::vector<MaterialTex>& mtrlTex,
+		std::vector<MaterialParam>& mtrlParam)
 	{
 		auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
 
 		std::vector<MaterialTex> texList;
 
 		// for tex.
-		for (uint32_t i = 0; i < COUNTOF(FbxMtrlParamNames); i++)
+		for (uint32_t i = 0; i < AT_COUNTOF(FbxMtrlParamNames); i++)
 		{
 			std::string name(FbxMtrlParamNames[i]);
 
@@ -1024,10 +1017,7 @@ namespace aten
 
 					MaterialTex tex;
 					{
-						tex.fbxMtrl = fbxMtrl;
-						tex.paramName = name.c_str();
-						tex.texName = ((fbxsdk::FbxFileTexture*)texture)->GetRelativeFileName();
-						tex.type.flags = 0;
+						tex.name = ((fbxsdk::FbxFileTexture*)texture)->GetRelativeFileName();
 					}
 
 					if (name == fbxsdk::FbxSurfaceMaterial::sSpecular) {
@@ -1043,59 +1033,29 @@ namespace aten
 					// TODO
 					// 他の場合...
 
-					texList.push_back(tex);
+					mtrlTex.push_back(tex);
 				}
 			}
 		}
-
-		if (texList.size() > 0) {
-			if (s_EnvParam.idxEnableTex >= 0
-				&& s_EnvParam.idxEnableTex < texList.size())
-			{
-				// 指定されたテクスチャ以外は無視する.
-				uint32_t pos = 0;
-				for (auto it = texList.begin(); it != texList.end(); it++, pos++) {
-					if (s_EnvParam.idxEnableTex != pos) {
-						it = texList.erase(it);
-					}
-				}
-			}
-
-			m_mtrlTex.insert(std::make_pair(nMtrlIdx, texList));
-			sMtrl.numTex += texList.size();
-		}
-
-		std::vector<MaterialParam> paramList;
 
 		// for param.
 		if (fbxMtrl->GetClassId().Is(fbxsdk::FbxSurfacePhong::ClassId)) {
-			getPhongParams(fbxMtrl, paramList);
+			getPhongParams(fbxMtrl, mtrlParam);
 		}
 		else if (fbxMtrl->GetClassId().Is(fbxsdk::FbxSurfaceLambert::ClassId)) {
-			getLambertParams(fbxMtrl, paramList);
+			getLambertParams(fbxMtrl, mtrlParam);
 		}
 		else {
 			AT_ASSERT(false);
 		}
 
-		if (paramList.size()) {
-			m_mtrlParam.insert(std::make_pair(nMtrlIdx, paramList));
-
-			for (uint32_t i = 0; i < paramList.size(); i++)
-			{
-				const MaterialParam& param = paramList[i];
-
-				sMtrl.paramBytes += sizeof(float) * param.values.size();
-				sMtrl.numParam++;
-			}
-		}
-    
 		return true;
 	}
 
 	bool FbxImporter::getFbxMatrialByImplmentation(
 		uint32_t nMtrlIdx,
-		aten::S_MTRL_MATERIAL& sMtrl)
+		std::vector<MaterialTex>& mtrlTex,
+		std::vector<MaterialParam>& mtrlParam)
 	{
 		// NOTE
 		// http://www.programmershare.com/3142984/
@@ -1105,13 +1065,10 @@ namespace aten
 		// TODO
 		// cgfx.
 		auto implementation = GetImplementation(fbxMtrl, FBXSDK_IMPLEMENTATION_CGFX);
-		AT_VRETURN(implementation != nullptr);
+		AT_VRETURN_FALSE(implementation != nullptr);
 
 		auto rootTable = implementation->GetRootTable();
 		auto entryCount = rootTable->GetEntryCount();
-
-		std::vector<MaterialTex> texList;
-		std::vector<MaterialParam> paramList;
 
 		for (int i = 0; i < entryCount; ++i)
 		{
@@ -1144,10 +1101,7 @@ namespace aten
 
 					MaterialTex tex;
 					{
-						tex.fbxMtrl = fbxMtrl;
-						tex.paramName = propName;
-						tex.texName = texName;
-						tex.type.flags = 0;
+						tex.name = texName;
 					}
 
 					if (src == "Maya|DiffuseTexture") {
@@ -1166,7 +1120,7 @@ namespace aten
 						// TODO
 					}
 
-					texList.push_back(tex);
+					mtrlTex.push_back(tex);
 				}
 			}
 			else {
@@ -1175,7 +1129,6 @@ namespace aten
 				auto dataType = fbxProperty.GetPropertyDataType().GetType();
 
 				MaterialParam param;
-				param.fbxMtrl = fbxMtrl;
 				param.name = propName;
 
 				if (dataType == fbxsdk::eFbxBool) {
@@ -1184,44 +1137,44 @@ namespace aten
 				}
 				else if (dataType == fbxsdk::eFbxInt || dataType == fbxsdk::eFbxEnum) {
 					int v = fbxProperty.Get<int>();
-					param.values.push_back(v);
+					param.values.push_back((float)v);
 				}
 				else if (dataType == fbxsdk::eFbxUInt) {
 					unsigned int v = fbxProperty.Get<unsigned int>();
-					param.values.push_back(v);
+					param.values.push_back((float)v);
 				}
 				else if (dataType == fbxsdk::eFbxFloat) {
 					float v = fbxProperty.Get<float>();
 					param.values.push_back(v);
 				}
 				else if (dataType == fbxsdk::eFbxDouble) {
-					float v = fbxProperty.Get<double>();
-					param.values.push_back(v);
+					double v = fbxProperty.Get<double>();
+					param.values.push_back((float)v);
 				}
 				else if (dataType == fbxsdk::eFbxDouble2) {
 					FbxDouble2 v = fbxProperty.Get<FbxDouble2>();
-					param.values.push_back(v.mData[0]);
-					param.values.push_back(v.mData[1]);
+					param.values.push_back((float)v.mData[0]);
+					param.values.push_back((float)v.mData[1]);
 				}
 				else if (dataType == fbxsdk::eFbxDouble3) {
 					FbxDouble3 v = fbxProperty.Get<FbxDouble3>();
-					param.values.push_back(v.mData[0]);
-					param.values.push_back(v.mData[1]);
-					param.values.push_back(v.mData[2]);
+					param.values.push_back((float)v.mData[0]);
+					param.values.push_back((float)v.mData[1]);
+					param.values.push_back((float)v.mData[2]);
 				}
 				else if (dataType == fbxsdk::eFbxDouble4) {
 					FbxDouble4 v = fbxProperty.Get<FbxDouble4>();
-					param.values.push_back(v.mData[0]);
-					param.values.push_back(v.mData[1]);
-					param.values.push_back(v.mData[2]);
-					param.values.push_back(v.mData[3]);
+					param.values.push_back((float)v.mData[0]);
+					param.values.push_back((float)v.mData[1]);
+					param.values.push_back((float)v.mData[2]);
+					param.values.push_back((float)v.mData[3]);
 				}
 				else if (dataType == fbxsdk::eFbxDouble4x4) {
 					FbxDouble4x4 v = fbxProperty.Get<FbxDouble4x4>();
 
 					for (int i = 0; i < 4; i++) {
 						for (int n = 0; n < 4; n++) {
-							param.values.push_back(v.mData[i].mData[n]);
+							param.values.push_back((float)v.mData[i].mData[n]);
 						}
 					}
 				}
@@ -1230,123 +1183,11 @@ namespace aten
 				}
 
 				if (param.values.size() > 0) {
-					paramList.push_back(param);
+					mtrlParam.push_back(param);
 				}
-			}
-		}
-
-		if (texList.size() > 0) {
-			if (s_EnvParam.idxEnableTex >= 0
-				&& s_EnvParam.idxEnableTex < texList.size())
-			{
-				// 指定されたテクスチャ以外は無視する.
-				uint32_t pos = 0;
-				for (auto it = texList.begin(); it != texList.end(); it++, pos++) {
-					if (s_EnvParam.idxEnableTex != pos) {
-						it = texList.erase(it);
-					}
-				}
-			}
-
-			m_mtrlTex.insert(std::make_pair(nMtrlIdx, texList));
-			sMtrl.numTex += texList.size();
-		}
-
-		if (paramList.size() > 0) {
-			m_mtrlParam.insert(std::make_pair(nMtrlIdx, paramList));
-
-			for (uint32_t i = 0; i < paramList.size(); i++)
-			{
-				const MaterialParam& param = paramList[i];
-
-				sMtrl.paramBytes += sizeof(float)* param.values.size();
-				sMtrl.numParam++;
 			}
 		}
 
 		return true;
-	}
-
-	void FbxImporter::getMaterialTexture(
-		uint32_t nMtrlIdx,
-		uint32_t nTexIdx,
-		aten::S_MTRL_TEXTURE& sTex)
-	{
-		const auto& tex = m_mtrlTex[nMtrlIdx][nTexIdx];
-
-		sTex.name.SetString(tex.texName.c_str());
-		sTex.key = sTex.name.GetKeyValue();
-
-		sTex.type = tex.type;
-	}
-
-	void FbxImporter::getMaterialShader(
-		uint32_t nMtrlIdx,
-		uint32_t nShaderIdx,
-		aten::S_MTRL_SHADER& sShader)
-	{
-		// NOTE
-		// マテリアルごとに１つのみぽい.
-		AT_ASSERT(nShaderIdx == 0);
-
-		auto* fbxMtrl = m_dataMgr->getMaterial(nMtrlIdx);
-
-		auto implementation = GetImplementation(fbxMtrl, FBXSDK_IMPLEMENTATION_CGFX);
-
-		if (implementation != nullptr) {
-			sShader.name.SetString(implementation->GetName());
-		}
-		else {
-			FbxString shading = fbxMtrl->ShadingModel.Get();
-
-			sShader.name.SetString((const char*)shading);
-		}
-
-		if (!s_EnvParam.nameShader.empty()) {
-			// 指定されたシェーダ名で強制上書き
-			sShader.name.SetString(s_EnvParam.nameShader.c_str());
-		}
-
-		sShader.key = sShader.name.GetKeyValue();
-	}
-
-	void FbxImporter::getMaterialParam(
-		uint32_t nMtrlIdx,
-		uint32_t nParamIdx,
-		aten::S_MTRL_PARAM& sParam)
-	{
-		const auto& param = m_mtrlParam[nMtrlIdx][nParamIdx];
-
-		sParam.name.SetString(param.name.c_str());
-		sParam.key = sParam.name.GetKeyValue();
-
-		if (param.values.size() == 4)
-		{
-			sParam.elements = param.values.size();
-			sParam.type = aten::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_VECTOR;
-		}
-		else if (param.values.size() == 16) {
-			sParam.elements = param.values.size();
-			sParam.type = aten::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_MATRIX;
-		}
-		else {
-			sParam.elements = param.values.size();
-			sParam.type = aten::E_MTRL_PARAM_TYPE::E_MTRL_PARAM_TYPE_FLOAT;
-		}
-
-		sParam.bytes = sizeof(float) * sParam.elements;
-	}
-
-	void FbxImporter::getMaterialParamValue(
-		uint32_t nMtrlIdx,
-		uint32_t nParamIdx,
-		std::vector<float>& tvValue)
-	{
-		const auto& param = m_mtrlParam[nMtrlIdx][nParamIdx];
-
-		std::copy(
-			param.values.begin(),
-			param.values.end(),
-			std::back_inserter(tvValue));
 	}
 }

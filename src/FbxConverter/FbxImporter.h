@@ -146,7 +146,6 @@ namespace aten
 		//////////////////////////////////
 		// For material.
 
-#if 0
 		bool beginMaterial();
 
 		bool endMaterial();
@@ -155,37 +154,18 @@ namespace aten
 
 		bool getMaterial(
 			uint32_t nMtrlIdx,
-			aten::S_MTRL_MATERIAL& sMtrl);
-
-		void getMaterialTexture(
-			uint32_t nMtrlIdx,
-			uint32_t nTexIdx,
-			aten::S_MTRL_TEXTURE& sTex);
-
-		void getMaterialShader(
-			uint32_t nMtrlIdx,
-			uint32_t nShaderIdx,
-			aten::S_MTRL_SHADER& sShader);
-
-		void getMaterialParam(
-			uint32_t nMtrlIdx,
-			uint32_t nParamIdx,
-			aten::S_MTRL_PARAM& sParam);
-
-		void getMaterialParamValue(
-			uint32_t nMtrlIdx,
-			uint32_t nParamIdx,
-			std::vector<float>& tvValue);
+			MaterialInfo& mtrl);
 
 	private:
 		bool getFbxMatrial(
 			uint32_t nMtrlIdx,
-			aten::S_MTRL_MATERIAL& sMtrl);
+			std::vector<MaterialTex>& mtrlTex,
+			std::vector<MaterialParam>& mtrlParam);
 
 		bool getFbxMatrialByImplmentation(
 			uint32_t nMtrlIdx,
-			aten::S_MTRL_MATERIAL& sMtrl);
-#endif
+			std::vector<MaterialTex>& mtrlTex,
+			std::vector<MaterialParam>& mtrlParam);
 
 	private:
 		FbxDataManager* m_dataMgr{ nullptr };
@@ -196,28 +176,11 @@ namespace aten
 
 		uint32_t m_curAnmIdx{ 0 };
 
-#if 0
-		struct MaterialTex {
-			void* fbxMtrl{ nullptr };
-			std::string paramName;
-			std::string texName;
-			aten::S_MTRL_TEXTURE_TYPE type;
-		};
-		std::map<uint32_t, std::vector<MaterialTex>> m_mtrlTex;
-
 		struct MaterialShading {
 			void* fbxMtrl{ nullptr };
 			std::string name;
 		};
 		std::map<uint32_t, std::vector<MaterialShading>> m_mtrlShd;
-#endif
-
-		struct MaterialParam {
-			void* fbxMtrl{ nullptr };
-			std::string name;
-			std::vector<float> values;
-		};
-		std::map<uint32_t, std::vector<MaterialParam>> m_mtrlParam;
 
 		void getLambertParams(void* mtrl, std::vector<MaterialParam>& list);
 		void getPhongParams(void* mtrl, std::vector<MaterialParam>& list);

@@ -258,19 +258,19 @@ uint32_t FbxDataManager::reArrangeNodeByTargetBaseModel(FbxDataManager* target)
         std::copy(nodes.begin(), nodes.end(), std::back_inserter(m_nodes));
     }
 
-    uint32_t ret = m_nodes.size();
+    uint32_t ret = (uint32_t)m_nodes.size();
     return ret;
 }
 
 uint32_t FbxDataManager::getFbxMeshNum() const
 {
-    uint32_t ret = m_fbxMeshes.size();
+    uint32_t ret = (uint32_t)m_fbxMeshes.size();
     return ret;
 }
 
 FbxMesh* FbxDataManager::getFbxMesh(uint32_t idx)
 {
-    AT_ASSERT(idx < m_fbxMeshes.size());
+    AT_ASSERT(idx <  (uint32_t)m_fbxMeshes.size());
 
     FbxMesh* ret = m_fbxMeshes[idx];
     return ret;
@@ -278,26 +278,26 @@ FbxMesh* FbxDataManager::getFbxMesh(uint32_t idx)
 
 uint32_t FbxDataManager::getMeshNum() const
 {
-    uint32_t ret = m_meshes.size();
+    uint32_t ret = (uint32_t)m_meshes.size();
     return ret;
 }
 
 MeshSubset& FbxDataManager::getMesh(uint32_t idx)
 {
-    AT_ASSERT(idx < m_meshes.size());
+    AT_ASSERT(idx <  (uint32_t)m_meshes.size());
     return m_meshes[idx];
 }
 
 
 const MeshSubset& FbxDataManager::getMesh(uint32_t idx) const
 {
-    AT_ASSERT(idx < m_meshes.size());
+    AT_ASSERT(idx <  (uint32_t)m_meshes.size());
     return m_meshes[idx];
 }
 
 uint32_t FbxDataManager::getVtxNum() const
 {
-    uint32_t ret = m_vertices.size();
+    uint32_t ret = (uint32_t)m_vertices.size();
     return ret;
 }
 
@@ -308,7 +308,7 @@ const VertexData& FbxDataManager::getVertex(uint32_t idx) const
 
 uint32_t FbxDataManager::getNodeNum() const
 {
-    return m_nodes.size();
+    return  (uint32_t)m_nodes.size();
 }
 
 FbxNode* FbxDataManager::getFbxNode(uint32_t idx)
@@ -336,7 +336,7 @@ uint32_t FbxDataManager::getNodeIndex(const FbxNode* node) const
 
     auto dist = std::distance(m_nodes.begin(), it);
 
-    return dist;
+    return  (uint32_t)dist;
 }
 
 FbxCluster* FbxDataManager::getClusterByNode(const FbxNode* node)
@@ -366,12 +366,12 @@ void FbxDataManager::getSkinData(
 
 uint32_t FbxDataManager::getMaterialNum() const
 {
-    return m_materials.size();
+    return  (uint32_t)m_materials.size();
 }
 
 FbxSurfaceMaterial* FbxDataManager::getMaterial(uint32_t idx)
 {
-    AT_ASSERT(idx < m_materials.size());
+    AT_ASSERT(idx <  (uint32_t)m_materials.size());
     return m_materials[idx];
 }
 
@@ -392,7 +392,7 @@ void FbxDataManager::gatherNodes(FbxNode* node)
 #else
     // ノードを集める.
     auto nodeCount = m_scene->GetNodeCount();
-    for (uint32_t i = 0; i < nodeCount; ++i)
+    for (int i = 0; i < nodeCount; ++i)
     {
         auto fbxNode = m_scene->GetNode(i);
         m_nodes.push_back(Node(fbxNode));
@@ -642,7 +642,7 @@ void FbxDataManager::gatherVertices()
                 // 未登録.
 
                 IndexData newIdx(
-                    m_vertices.size(),
+					(uint32_t)m_vertices.size(),
                     0,  // もう使わない.
                     mesh.fbxMesh,
                     mesh.mtrl);
@@ -656,7 +656,7 @@ void FbxDataManager::gatherVertices()
             {
                 // すでにあったので、どの頂点インデックスか取得.
                 IndexData newIdx(
-                    std::distance(m_vertices.begin(), it),
+					(uint32_t)std::distance(m_vertices.begin(), it),
                     0,  // もう使わない.
                     mesh.fbxMesh,
                     mesh.mtrl);
@@ -707,7 +707,7 @@ void FbxDataManager::gatherPos(std::map<FbxMesh*, std::vector<PosData>>& posList
         
         auto polygonCnt = fbxMesh->GetPolygonCount();
 
-        for (uint32_t p = 0; p < polygonCnt; p++)
+        for (int p = 0; p < polygonCnt; p++)
         {
             for (uint32_t i = 0; i < 3; i++)
             {

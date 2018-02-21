@@ -9,7 +9,7 @@
 
 ///////////////////////////////////////
 
-enum JointTransform {
+enum class JointTransform {
     Translate,
     Quaternion,
     Scale,
@@ -196,4 +196,28 @@ struct JointTransformParam {
     const char* name;
     JointTransform type;
     std::vector<float> param;
+};
+
+///////////////////////////////////////
+
+struct TextureType {
+	bool isSpecular{ false };
+	bool isNormal{ false };
+	bool isTranslucent{ false };
+};
+
+struct MaterialTex {
+	std::string name;
+	TextureType type;
+};
+
+struct MaterialParam {
+	std::string name;
+	std::vector<float> values;
+};
+
+struct MaterialInfo {
+	std::string name;
+	std::vector<MaterialTex> tex;
+	std::vector<MaterialParam> params;
 };

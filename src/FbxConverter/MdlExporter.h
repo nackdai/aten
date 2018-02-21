@@ -9,7 +9,7 @@ private:
     ~MdlExporter();
 
 public:
-    bool exportMdl(
+	static bool exportMdl(
         uint32_t maxJointMtxNum,
         const char* lpszOutFile,
         aten::FbxImporter* pImporter);

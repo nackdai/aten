@@ -73,7 +73,7 @@ public:
         AT_ASSERT(ret == size);
 
         if (ret == size) {
-            m_Pos += offset + size;
+            m_Pos += offset + (uint32_t)size;
         }
 
         return ret;

@@ -79,11 +79,6 @@ namespace aten
 		uint8_t reserved[2];
 
 		JointPose pose;  ///< ポーズパラメータ
-
-		JointParam()
-		{
-			name[0] = 0;
-		}
     };
 
 	// TODO

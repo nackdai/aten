@@ -171,7 +171,7 @@ namespace aten
 		}
 
 		// クオータニオンから行列を計算する
-		mat4 getMatrix()
+		mat4 getMatrix() const
 		{
 			mat4 mtx;
 

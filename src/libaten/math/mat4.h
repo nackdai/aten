@@ -240,6 +240,11 @@ namespace aten {
 			return *this;
 		}
 
+		inline AT_DEVICE_API mat4& asTrans(real x, real y, real z)
+		{
+			return asTrans(vec3(x, y, z));
+		}
+
 		inline AT_DEVICE_API mat4& asScale(real s)
 		{
 			identity();
@@ -302,6 +307,11 @@ namespace aten {
 			m30 = 0;   m31 = 0;   m32 = 0;   m33 = 1;
 
 			return *this;
+		}
+
+		inline mat4& asScale(real x, real y, real z)
+		{
+			return asScale(vec3(x, y, z));
 		}
 
 		mat4& lookat(

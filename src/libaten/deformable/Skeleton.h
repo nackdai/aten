@@ -10,6 +10,8 @@ namespace aten
 	class FileInputStream;
 
 	class Skeleton {
+		friend class deformable;
+
 	private:
 		Skeleton() {}
 		~Skeleton() {}
@@ -19,6 +21,16 @@ namespace aten
 
 	public:
 		void buildPose(const mat4& mtxL2W);
+
+		uint32_t getJointNum() const
+		{
+			return m_header.numJoint;
+		}
+
+		const mat4& getPoseMatrix(uint32_t idx) const
+		{
+			return m_globalPose[idx];
+		}
 
 	private:
 		void buildLocalPose(uint32_t idx);

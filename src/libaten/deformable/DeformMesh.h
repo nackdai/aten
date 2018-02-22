@@ -5,16 +5,23 @@
 namespace aten
 {
 	class FileInputStream;
+	class Skeleton;
 
 	/** メッシュデータ.
 	 */
 	class DeformMesh {
+		friend class deformable;
+
 	private:
 		DeformMesh() {}
 		~DeformMesh() {}
 
 	private:
 		bool read(FileInputStream* stream);
+
+		void render(
+			const Skeleton& skeleton,
+			IDeformMeshRenderHelper* helper);
 
 	private:
 		MeshHeader m_header;

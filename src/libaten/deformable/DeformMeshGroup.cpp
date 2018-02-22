@@ -40,4 +40,13 @@ namespace aten
 
 		return true;
 	}
+
+	void DeformMeshGroup::render(
+		const Skeleton& skeleton,
+		IDeformMeshRenderHelper* helper)
+	{
+		for (auto& mesh : m_meshs) {
+			mesh.render(skeleton, helper);
+		}
+	}
 }

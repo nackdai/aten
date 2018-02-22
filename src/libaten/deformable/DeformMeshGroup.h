@@ -5,6 +5,7 @@
 namespace aten
 {
 	class FileInputStream;
+	class Skeleton;
 
 	/** メッシュグループ.
 	 *
@@ -19,6 +20,10 @@ namespace aten
 
 	private:
 		bool read(FileInputStream* stream);
+
+		void render(
+			const Skeleton& skeleton,
+			IDeformMeshRenderHelper* helper);
 
 	private:
 		MeshGroup m_desc;

@@ -91,6 +91,9 @@
     <Filter Include="deformable\mesh">
       <UniqueIdentifier>{00a15125-d658-4ee2-9c9b-c86c7afc11de}</UniqueIdentifier>
     </Filter>
+    <Filter Include="deformable\skeleton">
+      <UniqueIdentifier>{53d6b552-e655-4135-a485-b381031d1f3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -434,14 +437,8 @@
     <ClInclude Include="..\src\libaten\deformable\ANMFormat.h">
       <Filter>deformable</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\deformable\SKLFormat.h">
-      <Filter>deformable</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\key.h">
       <Filter>misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\deformable\MSHFormat.h">
-      <Filter>deformable</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\deformable\MDLFormat.h">
       <Filter>deformable</Filter>
@@ -457,6 +454,21 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\deformable\DeformMesh.h">
       <Filter>deformable\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\Skeleton.h">
+      <Filter>deformable\skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\bitflag.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\SKLFormat.h">
+      <Filter>deformable\skeleton</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\MSHFormat.h">
+      <Filter>deformable\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\deformable.h">
+      <Filter>deformable</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -714,6 +726,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\deformable\DeformMesh.cpp">
       <Filter>deformable\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\Skeleton.cpp">
+      <Filter>deformable\skeleton</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\deformable.cpp">
+      <Filter>deformable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -154,4 +154,16 @@ namespace aten
 
 		return true;
 	}
+
+	void DeformMeshSet::render(
+		const Skeleton& skeleton,
+		IDeformMeshRenderHelper* helper)
+	{
+		// material...
+		helper->applyMaterial(m_desc.mtrl);
+
+		for (auto& prim : m_prims) {
+			prim.render(skeleton, helper);
+		}
+	}
 }

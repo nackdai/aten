@@ -5,6 +5,7 @@
 namespace aten
 {
 	class FileInputStream;
+	class Skeleton;
 
 	/** メッシュセット.
 	 *
@@ -21,6 +22,10 @@ namespace aten
 		bool read(
 			FileInputStream* stream,
 			std::vector<GeomVertexBuffer>& vbs);
+
+		void render(
+			const Skeleton& skeleton,
+			IDeformMeshRenderHelper* helper);
 
 	private:
 		MeshSet m_desc;

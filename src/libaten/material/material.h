@@ -330,6 +330,11 @@ namespace AT_NAME
 			return m_name.c_str();
 		}
 
+		const std::string& nameString() const
+		{
+			return m_name;
+		}
+
 		static inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue, int lod = 0)
 		{
 			auto ret = AT_NAME::sampleTexture(texid, u, v, aten::vec3(defaultValue), lod);

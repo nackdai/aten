@@ -25,4 +25,24 @@ namespace aten
 		DeformMesh m_mesh;
 		Skeleton m_skl;
 	};
+
+	//////////////////////////////////////////////////////////////
+
+	// For debug.
+	class DeformableRenderer {
+	private:
+		DeformableRenderer();
+		~DeformableRenderer();
+
+	public:
+		static bool init(
+			int width, int height,
+			const char* pathVS,
+			const char* pathFS);
+
+		static void render(deformable* mdl);
+
+	private:
+		static shader s_shd;
+	};
 }

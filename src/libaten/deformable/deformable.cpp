@@ -57,8 +57,30 @@ namespace aten
 
 		virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final
 		{
+			const auto& mtrls = material::getMaterials();
+
 			// TODO
 			// Find material.
+			auto found = std::find_if(
+				mtrls.begin(), mtrls.end(),
+				[&](const material* mtrl)->bool
+			{
+				if (mtrl->nameString() == mtrlDesc.name) {
+					return true;
+				}
+
+				return false;
+			});
+
+			if (found != mtrls.end()) {
+				const auto mtrl = *found;
+				const auto& mtrlParam = mtrl->param();
+
+				auto albedo = texture::getTexture(mtrlParam.albedoMap);
+				if (albedo) {
+					albedo->bindAsGLTexture(0, m_shd);
+				}
+			}
 		}
 
 		virtual void commitChanges() override final
@@ -86,5 +108,27 @@ namespace aten
 		DeformMeshRenderHelper helper(shd);
 
 		m_mesh.render(m_skl, &helper);
+	}
+
+	//////////////////////////////////////////////////////////////
+
+	shader DeformableRenderer::s_shd;
+
+	bool DeformableRenderer::init(
+		int width, int height,
+		const char* pathVS,
+		const char* pathFS)
+	{
+		return s_shd.init(width, height, pathVS, pathFS);
+	}
+
+	void DeformableRenderer::render(deformable* mdl)
+	{
+		CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
+		CALL_GL_API(::glClearDepthf(1.0f));
+		CALL_GL_API(::glClearStencil(0));
+		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+		mdl->render(&s_shd);
 	}
 }

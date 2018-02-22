@@ -118,7 +118,7 @@ namespace aten {
 			CALL_GL_API(::glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 		}
 		else {
-			CALL_GL_API(::glClearColor(0, 0, 0, 0));
+			CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
 			CALL_GL_API(::glClearDepthf(1.0f));
 			CALL_GL_API(::glClearStencil(0));
 			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
@@ -313,7 +313,7 @@ namespace aten {
 		if (willClear) {
 			// TODO
 			// Will modify to specify clear color.
-			CALL_GL_API(::glClearColor(0, 0, 0, 0));
+			CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
 			CALL_GL_API(::glClearDepthf(1.0f));
 			CALL_GL_API(::glClearStencil(0));
 			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
@@ -425,7 +425,7 @@ namespace aten {
 
 		// TODO
 		// Will modify to specify clear color.
-		CALL_GL_API(::glClearColor(0, 0, 0, 0));
+		CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));

@@ -36,6 +36,9 @@ namespace aten {
 		uint32_t attribNum,
 		const void* data)
 	{
+		AT_ASSERT(m_vbo == 0);
+		AT_ASSERT(m_vao == 0);
+
 		CALL_GL_API(::glGenBuffers(1, &m_vbo));
 
 		auto size = stride * vtxNum;
@@ -74,6 +77,60 @@ namespace aten {
 					m_vtxStride,
 					(void*)(offset + attribs[i].offset)));
 			}
+		}
+	}
+
+	void GeomVertexBuffer::initNoVAO(
+		uint32_t stride,
+		uint32_t vtxNum,
+		uint32_t offset,
+		const void* data)
+	{
+		AT_ASSERT(m_vbo == 0);
+
+		CALL_GL_API(::glGenBuffers(1, &m_vbo));
+
+		auto size = stride * vtxNum;
+
+		m_vtxStride = stride;
+		m_vtxNum = vtxNum;
+		m_vtxOffset = offset;
+
+		m_initVtxNum = vtxNum;
+
+		CALL_GL_API(::glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
+
+		CALL_GL_API(::glBufferData(
+			GL_ARRAY_BUFFER,
+			size,
+			data,
+			GL_STATIC_DRAW));
+	}
+
+	void GeomVertexBuffer::createVAO(
+		const VertexAttrib* attribs,
+		uint32_t attribNum)
+	{
+		AT_ASSERT(m_vbo > 0);
+		AT_ASSERT(m_vao == 0);
+
+		CALL_GL_API(::glGenVertexArrays(1, &m_vao));
+
+		CALL_GL_API(::glBindVertexArray(m_vao));
+		CALL_GL_API(::glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
+
+		auto offsetByte = m_vtxOffset * m_vtxStride;
+
+		for (int i = 0; i < attribNum; i++) {
+			CALL_GL_API(::glEnableVertexAttribArray(i));
+
+			CALL_GL_API(::glVertexAttribPointer(
+				i,
+				attribs[i].num,
+				attribs[i].type,
+				GL_FALSE,
+				m_vtxStride,
+				(void*)(m_vtxOffset + attribs[i].offset)));
 		}
 	}
 
@@ -122,6 +179,8 @@ namespace aten {
 		uint32_t idxOffset,
 		uint32_t primNum)
 	{
+		AT_ASSERT(m_vao > 0);
+
 		CALL_GL_API(::glBindVertexArray(m_vao));
 
 		auto vtxNum = computeVtxNum(mode, primNum);

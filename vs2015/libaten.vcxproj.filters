@@ -88,6 +88,9 @@
     <Filter Include="deformable">
       <UniqueIdentifier>{196027d5-057a-43f0-8728-e47d3d66694f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="deformable\mesh">
+      <UniqueIdentifier>{00a15125-d658-4ee2-9c9b-c86c7afc11de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -443,6 +446,18 @@
     <ClInclude Include="..\src\libaten\deformable\MDLFormat.h">
       <Filter>deformable</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\DeformMeshSet.h">
+      <Filter>deformable\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\DeformPrimitives.h">
+      <Filter>deformable\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\DeformMeshGroup.h">
+      <Filter>deformable\mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\DeformMesh.h">
+      <Filter>deformable\mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -687,6 +702,18 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp">
       <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\DeformMeshSet.cpp">
+      <Filter>deformable\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\DeformPrimitives.cpp">
+      <Filter>deformable\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\DeformMeshGroup.cpp">
+      <Filter>deformable\mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\DeformMesh.cpp">
+      <Filter>deformable\mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

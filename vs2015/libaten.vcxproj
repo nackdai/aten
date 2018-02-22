@@ -255,6 +255,10 @@
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\camera\thinlens.h" />
     <ClInclude Include="..\src\libaten\deformable\ANMFormat.h" />
+    <ClInclude Include="..\src\libaten\deformable\DeformMesh.h" />
+    <ClInclude Include="..\src\libaten\deformable\DeformMeshGroup.h" />
+    <ClInclude Include="..\src\libaten\deformable\DeformMeshSet.h" />
+    <ClInclude Include="..\src\libaten\deformable\DeformPrimitives.h" />
     <ClInclude Include="..\src\libaten\deformable\MDLFormat.h" />
     <ClInclude Include="..\src\libaten\deformable\MSHFormat.h" />
     <ClInclude Include="..\src\libaten\deformable\SKLFormat.h" />
@@ -372,6 +376,10 @@
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
     <ClCompile Include="..\src\libaten\camera\pinhole .cpp" />
     <ClCompile Include="..\src\libaten\camera\thinlens.cpp" />
+    <ClCompile Include="..\src\libaten\deformable\DeformMesh.cpp" />
+    <ClCompile Include="..\src\libaten\deformable\DeformMeshGroup.cpp" />
+    <ClCompile Include="..\src\libaten\deformable\DeformMeshSet.cpp" />
+    <ClCompile Include="..\src\libaten\deformable\DeformPrimitives.cpp" />
     <ClCompile Include="..\src\libaten\filter\atrous.cpp" />
     <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
     <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp" />

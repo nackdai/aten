@@ -263,8 +263,7 @@ namespace aten {
 	void RasterizeRenderer::draw(
 		object* obj, 
 		const camera* cam,
-		bool isWireFrame,
-		bool willClear/*= false*/)
+		bool isWireFrame)
 	{
 		auto camparam = cam->param();
 
@@ -310,14 +309,12 @@ namespace aten {
 		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
 		CALL_GL_API(::glEnable(GL_CULL_FACE));
 
-		if (willClear) {
-			// TODO
-			// Will modify to specify clear color.
-			CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-			CALL_GL_API(::glClearDepthf(1.0f));
-			CALL_GL_API(::glClearStencil(0));
-			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-		}
+		// TODO
+		// Will modify to specify clear color.
+		CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
+		CALL_GL_API(::glClearDepthf(1.0f));
+		CALL_GL_API(::glClearStencil(0));
+		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
 		// TODO
 		// ‚±‚±‚Å‚â‚é?

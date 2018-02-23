@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+//#pragma optimize( "", off)
+
 GeometryChunkExporter GeometryChunkExporter::s_cInstance;
 
 // ジオメトリチャンク
@@ -582,8 +584,8 @@ void GeometryChunkExporter::getMeshInfo(
         sMesh.fmt |= (1 << (uint32_t)aten::MeshVertexFormat::BlendWeight);
         sMesh.fmt |= (1 << (uint32_t)aten::MeshVertexFormat::BlendIndices);
 
-        sMesh.sizeVtx += (uint32_t)aten::MeshVertexFormat::BlendIndices;
-        sMesh.sizeVtx += (uint32_t)aten::MeshVertexFormat::BlendWeight;
+        sMesh.sizeVtx += (uint32_t)aten::MeshVertexSize::BlendIndices;
+        sMesh.sizeVtx += (uint32_t)aten::MeshVertexSize::BlendWeight;
     }
 }
 
@@ -728,71 +730,15 @@ uint32_t GeometryChunkExporter::exportVertices(
     uint32_t nVBCnt = 0;
     uint32_t nPrevFmt = 0;
 
-#if 0
-    aten::MeshVertex sVtxInfo;
-    FILL_ZERO(&sVtxInfo, sizeof(sVtxInfo));
-#endif
-
     for (size_t i = 0; i < m_MeshList.size(); i++) {
         MeshInfo& sMesh = m_MeshList[i];
 
         pImporter->beginMesh((uint32_t)i);
 
-#if 0
-        // 頂点数予測
-        uint32_t nTriNum = sMesh.endTri - sMesh.startTri;
-        uint32_t nVtxNum = nTriNum * 3;
-
-        uint32_t nCurVtxNum = (uint32_t)m_ExportedVtx.size();
-
-        bool bIsNewVB = ((nPrevFmt != sMesh.fmt)
-                            || (nCurVtxNum + nVtxNum > uint16_t_MAX));
-
-        if (bIsNewVB) {
-            if (m_ExportedVtx.size() > 0) {
-                // returnTo to position of expoting MeshVertex.
-                AT_VRETURN(seekHelper.returnWithAnchor());
-
-                sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
-
-                // Export MeshVertex.
-                OUTPUT_WRITE_VRETURN(pOut, &sVtxInfo, 0, sizeof(sVtxInfo));
-
-                AT_VRETURN(seekHelper.returnToAnchor());
-
-                nVBCnt++;
-            }
-
-            // Blank MeshVertex. 
-            VRETURN_VAL(seekHelper.skip(sizeof(sVtxInfo)), 0);
-
-            FILL_ZERO(&sVtxInfo, sizeof(sVtxInfo));
-            sVtxInfo.sizeVtx = sMesh.sizeVtx;
-
-            m_ExportedVtx.clear();
-            m_ExportedVtx.reserve(nVtxNum);
-
-            nPrevFmt = sMesh.fmt;
-        }
-
-        for (size_t n = 0; n < sMesh.subset.size(); n++) {
-            PrimitiveSetParam& sPrimSet = sMesh.subset[n];
-
-            VRETURN_VAL(
-                exportVertices(
-                    pOut,
-                    pImporter,
-                    sMesh,
-                    sPrimSet), 0);
-
-            sPrimSet.idxVB = nVBCnt;
-        }
-#else
         for (size_t n = 0; n < sMesh.subset.size(); n++) {
             PrimitiveSetParam& sPrimSet = sMesh.subset[n];
 
             aten::MeshVertex sVtxInfo;
-            sVtxInfo.sizeVtx = sMesh.sizeVtx;
 
             // Blank MeshVertex. 
             AT_VRETURN(seekHelper.skip(sizeof(sVtxInfo)), 0);
@@ -807,6 +753,7 @@ uint32_t GeometryChunkExporter::exportVertices(
             // returnTo to position of expoting MeshVertex.
             AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
+			sVtxInfo.sizeVtx = sMesh.sizeVtx;
             sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
 
             // Export MeshVertex.
@@ -819,26 +766,9 @@ uint32_t GeometryChunkExporter::exportVertices(
             nVBCnt++;
             m_ExportedVtx.clear();
         }
-#endif
 
         pImporter->endMesh();
     }
-
-#if 0
-    if (m_ExportedVtx.size() > 0) {
-        // returnTo to position of expoting MeshVertex.
-        AT_VRETURN(seekHelper.returnWithAnchor());
-
-        sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
-
-        // Export MeshVertex.
-        OUTPUT_WRITE_VRETURN(pOut, &sVtxInfo, 0, sizeof(sVtxInfo));
-
-        AT_VRETURN(seekHelper.returnToAnchor());
-
-        nVBCnt++;
-    }
-#endif
 
     m_ExportedVtx.clear();
 
@@ -897,18 +827,19 @@ bool GeometryChunkExporter::exportVertices(
             // 頂点インデックスを取得
             uint32_t nVtxIdx = sTri.vtx[nVtxPos];
 
+			// For debug.
+			uint32_t vtxSize = 0;
+
             // 出力済み頂点かどうか
-            std::vector<uint32_t>::iterator itFind = std::find(
-                                                        m_ExportedVtx.begin(),
-                                                        m_ExportedVtx.end(),
-                                                        nVtxIdx);
+            auto itFind = std::find(
+                m_ExportedVtx.begin(),
+                m_ExportedVtx.end(),
+                nVtxIdx);
 
             // 頂点データ出力に応じたインデックスに変換
             if (itFind != m_ExportedVtx.end()) {
                 // Exported...
-                sTri.vtx[nVtxPos] = (uint32_t)std::distance(
-                                                m_ExportedVtx.begin(),
-                                                itFind);
+                sTri.vtx[nVtxPos] = (uint32_t)std::distance(m_ExportedVtx.begin(), itFind);
             }
             else {
                 sTri.vtx[nVtxPos] = (uint32_t)m_ExportedVtx.size();
@@ -955,10 +886,14 @@ bool GeometryChunkExporter::exportVertices(
 						AT_VRETURN_FALSE(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
                     }
                     else {
+						// Color以外はそのまま出力.
 						AT_VRETURN_FALSE(pOut->write(&vec, 0, tblVtxSize[nVtxFmt]));
                     }
 
+					vtxSize += tblVtxSize[nVtxFmt];
+
                     if (nVtxFmt == (uint32_t)aten::MeshVertexFormat::Position) {
+						// 最大、最小位置を保持.
                         m_vMin.x = std::min(m_vMin.x, vec.x);
                         m_vMin.y = std::min(m_vMin.y, vec.y);
                         m_vMin.z = std::min(m_vMin.z, vec.z);
@@ -992,6 +927,9 @@ bool GeometryChunkExporter::exportVertices(
 
                 AT_VRETURN_FALSE(pOut->write(&vecJoint, 0, (uint32_t)aten::MeshVertexSize::BlendIndices));
                 AT_VRETURN_FALSE(pOut->write(&vecWeight, 0, (uint32_t)aten::MeshVertexSize::BlendWeight));
+
+				vtxSize += (uint32_t)aten::MeshVertexSize::BlendIndices;
+				vtxSize += (uint32_t)aten::MeshVertexSize::BlendWeight;
             }
         }
     }

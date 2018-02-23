@@ -97,8 +97,8 @@ namespace aten
 
     // 頂点データ情報
     struct MeshVertex {
-        uint16_t sizeVtx;  ///< １頂点あたりのサイズ
-        uint16_t numVtx;   ///< 頂点数
+		uint32_t sizeVtx{ 0 };  ///< １頂点あたりのサイズ
+        uint32_t numVtx{ 0 };   ///< 頂点数
     };
 
     // メッシュグループ情報

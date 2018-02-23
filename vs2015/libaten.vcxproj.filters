@@ -94,6 +94,9 @@
     <Filter Include="deformable\skeleton">
       <UniqueIdentifier>{53d6b552-e655-4135-a485-b381031d1f3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shader\skinning">
+      <UniqueIdentifier>{aabe0fc2-f92a-456b-b5e9-11900c8d80fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -806,6 +809,12 @@
     </None>
     <None Include="..\src\shader\drawobj_fs.glsl">
       <Filter>shader\object</Filter>
+    </None>
+    <None Include="..\src\shader\skinning_fs.glsl">
+      <Filter>shader\skinning</Filter>
+    </None>
+    <None Include="..\src\shader\skinning_vs.glsl">
+      <Filter>shader\skinning</Filter>
     </None>
   </ItemGroup>
 </Project>

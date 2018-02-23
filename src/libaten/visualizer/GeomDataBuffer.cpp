@@ -1,4 +1,5 @@
 #include "visualizer/GeomDataBuffer.h"
+#include "visualizer/shader.h"
 #include "visualizer/atengl.h"
 
 namespace aten {
@@ -14,9 +15,9 @@ namespace aten {
 		//  float3 uv
 
 		static const VertexAttrib attribs[] = {
-			{ GL_FLOAT, 3, sizeof(GLfloat), 0 },
-			{ GL_FLOAT, 3, sizeof(GLfloat), 16 },
-			{ GL_FLOAT, 2, sizeof(GLfloat), 28 },
+			VertexAttrib(GL_FLOAT, 3, sizeof(GLfloat), 0),
+			VertexAttrib(GL_FLOAT, 3, sizeof(GLfloat), 16),
+			VertexAttrib(GL_FLOAT, 2, sizeof(GLfloat), 28),
 		};
 
 		init(
@@ -66,7 +67,7 @@ namespace aten {
 
 			auto offsetByte = offset * m_vtxStride;
 
-			for (int i = 0; i < attribNum; i++) {
+			for (uint32_t i = 0; i < attribNum; i++) {
 				CALL_GL_API(::glEnableVertexAttribArray(i));
 
 				CALL_GL_API(::glVertexAttribPointer(
@@ -107,7 +108,8 @@ namespace aten {
 			GL_STATIC_DRAW));
 	}
 
-	void GeomVertexBuffer::createVAO(
+	void GeomVertexBuffer::createVAOByAttribName(
+		const shader* shd,
 		const VertexAttrib* attribs,
 		uint32_t attribNum)
 	{
@@ -121,7 +123,10 @@ namespace aten {
 
 		auto offsetByte = m_vtxOffset * m_vtxStride;
 
-		for (int i = 0; i < attribNum; i++) {
+		auto program = shd->getProgramHandle();
+
+		for (uint32_t i = 0; i < attribNum; i++) {
+#if 0
 			CALL_GL_API(::glEnableVertexAttribArray(i));
 
 			CALL_GL_API(::glVertexAttribPointer(
@@ -131,6 +136,24 @@ namespace aten {
 				GL_FALSE,
 				m_vtxStride,
 				(void*)(m_vtxOffset + attribs[i].offset)));
+#else
+			if (attribs[i].name) {
+				GLint loc = -1;
+				CALL_GL_API(loc = ::glGetAttribLocation(program, attribs[i].name));
+
+				if (loc >= 0) {
+					CALL_GL_API(::glVertexAttribPointer(
+						loc,
+						attribs[i].num,
+						attribs[i].type,
+						GL_FALSE,
+						m_vtxStride,
+						(void*)(m_vtxOffset + attribs[i].offset)));
+				}
+			}
+#endif
+
+			
 		}
 	}
 

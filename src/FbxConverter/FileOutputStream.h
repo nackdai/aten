@@ -43,7 +43,7 @@ public:
             finalize();
         }
 
-		m_File = fopen(path, FileIoMode::Text ? "wt" : "wb");
+		m_File = fopen(path, mode == FileIoMode::Text ? "wt" : "wb");
         ret = (m_File != nullptr);
 
         return ret;
@@ -69,33 +69,13 @@ public:
             seek(offset, FilSeekPos::Cur);
         }
 
-        uint32_t ret = (uint32_t)fwrite(buf, size, 1, m_File);
-		ret *= size;
+        uint32_t ret = (uint32_t)fwrite(buf, 1, size, m_File);
         AT_ASSERT(ret == size);
 
         if (ret == size) {
             m_Pos += offset + (uint32_t)size;
         }
 
-        return ret;
-    }
-
-    bool write(const char* text)
-    {
-        AT_ASSERT(m_File != nullptr);
-
-        int result = fprintf(m_File, "%s", text);
-        AT_ASSERT(result >= 0);
-
-        return (result >= 0);
-    }
-
-    // サイズ取得
-    uint32_t getSize()
-    {
-        AT_ASSERT(m_File != nullptr);
-
-        uint32_t ret = (uint32_t)ftell(m_File);
         return ret;
     }
 
@@ -155,6 +135,16 @@ public:
         return (m_File != NULL);
     }
 
+	uint32_t tell()
+	{
+		return (uint32_t)ftell(m_File);
+	}
+
+	void flush()
+	{
+		fflush(m_File);
+	}
+
 private:
 	FILE* m_File{ nullptr };
 	uint32_t m_Pos{ 0 };
@@ -192,25 +182,20 @@ public:
 
 	bool returnTo()
 	{
-		uint32_t nCurPos = m_pOut->getCurPos();
-		int32_t nOffset = m_nPos - nCurPos;
-		AT_VRETURN_FALSE(m_pOut->seek(nOffset, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(m_nPos, FilSeekPos::Head));
 		return true;
 	}
 
 	bool returnWithAnchor()
 	{
 		m_nAnchorPos = m_pOut->getCurPos();
-		int32_t nOffset = m_nPos - m_nAnchorPos;
-		AT_VRETURN_FALSE(m_pOut->seek(nOffset, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(m_nPos, FilSeekPos::Head));
 		return true;
 	}
 
 	bool returnToAnchor()
 	{
-		uint32_t nCurPos = m_pOut->getCurPos();
-		int32_t nOffset = m_nAnchorPos - nCurPos;
-		AT_VRETURN_FALSE(m_pOut->seek(nOffset, FilSeekPos::Cur));
+		AT_VRETURN_FALSE(m_pOut->seek(m_nAnchorPos, FilSeekPos::Head));
 		return true;
 	}
 

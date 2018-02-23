@@ -3,7 +3,9 @@
 
 namespace aten
 {
-	bool DeformMeshGroup::read(FileInputStream* stream)
+	bool DeformMeshGroup::read(
+		FileInputStream* stream,
+		IDeformMeshReadHelper* helper)
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
 
@@ -34,7 +36,7 @@ namespace aten
 			m_meshs.resize(m_desc.numMeshSet);
 
 			for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
-				AT_VRETURN_FALSE(m_meshs[i].read(stream, m_vbs));
+				AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, m_vbs));
 			}
 		}
 

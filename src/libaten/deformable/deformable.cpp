@@ -3,11 +3,39 @@
 #include "visualizer/shader.h"
 #include "visualizer/atengl.h"
 #include "texture/texture.h"
+#include "camera/camera.h"
 
 namespace aten
 {
-	bool deformable::read(FileInputStream* stream)
+	class DeformMeshReadHelper : public IDeformMeshReadHelper {
+	public:
+		DeformMeshReadHelper() {}
+		virtual ~DeformMeshReadHelper() {}
+
+	public:
+		virtual void createVAO(
+			GeomVertexBuffer* vb,
+			const VertexAttrib* attribs,
+			uint32_t attribNum) override final
+		{
+			AT_ASSERT(m_shd);
+			vb->createVAOByAttribName(m_shd, attribs, attribNum);
+		}
+
+		shader* m_shd{ nullptr };
+	};
+
+	bool deformable::read(const char* path)
 	{
+		// TODO...
+		DeformMeshReadHelper helper;
+		DeformableRenderer::initDeformMeshReadHelper(&helper);
+
+		FileInputStream file;
+		AT_VRETURN_FALSE(file.open(path, "rb"));
+
+		FileInputStream* stream = &file;
+
 		MdlHeader header;
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &header, sizeof(header)));
 
@@ -17,12 +45,14 @@ namespace aten
 			AT_VRETURN_FALSE(AT_STREAM_READ(stream, &meshChunkHeader, sizeof(meshChunkHeader)));
 
 			if (meshChunkHeader.magicChunk == MdlChunkMagic::Mesh) {
-				AT_VRETURN_FALSE(m_mesh.read(stream));
+				AT_VRETURN_FALSE(m_mesh.read(stream, &helper));
 			}
 			else {
 				AT_VRETURN_FALSE(false);
 			}
 		}
+
+		auto pos = stream->curPos();
 
 		// Skeleton.
 		{
@@ -122,13 +152,48 @@ namespace aten
 		return s_shd.init(width, height, pathVS, pathFS);
 	}
 
-	void DeformableRenderer::render(deformable* mdl)
+	void DeformableRenderer::render(
+		const camera* cam,
+		deformable* mdl)
 	{
 		CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
+		{
+			auto camparam = cam->param();
+
+			// TODO
+			camparam.znear = real(0.1);
+			camparam.zfar = real(10000.0);
+
+			mat4 mtxW2V;
+			mat4 mtxV2C;
+
+			mtxW2V.lookat(
+				camparam.origin,
+				camparam.center,
+				camparam.up);
+
+			mtxV2C.perspective(
+				camparam.znear,
+				camparam.zfar,
+				camparam.vfov,
+				camparam.aspect);
+
+			aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+			auto hMtxW2C = s_shd.getHandle("mtxW2C");
+			CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+		}
+
 		mdl->render(&s_shd);
+	}
+
+	void DeformableRenderer::initDeformMeshReadHelper(DeformMeshReadHelper* helper)
+	{
+		AT_ASSERT(s_shd.isValid());
+		helper->m_shd = &s_shd;
 	}
 }

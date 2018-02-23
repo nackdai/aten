@@ -95,6 +95,8 @@
 #include "geometry/cube.h"
 #include "geometry/tranformable.h"
 
+#include "deformable/deformable.h"
+
 #include "renderer/renderer.h"
 #include "renderer/film.h"
 #include "renderer/background.h"

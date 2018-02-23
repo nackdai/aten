@@ -15,7 +15,7 @@ namespace aten {
 
 		static bool addCreator(std::string type, MaterialCreator creator);
 
-		static void load(const std::string& path);
+		static bool load(const std::string& path);
 
 #ifdef USE_JSON
 		static void onLoad(const std::string& strJson);

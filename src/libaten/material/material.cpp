@@ -84,8 +84,8 @@ namespace AT_NAME
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);
 		
-		auto albedoMap = (aten::texture*)val.get("albedomap", nullptr);
-		auto normalMap = (aten::texture*)val.get("normalmap", nullptr);
+		auto albedoMap = (aten::texture*)val.get<void*>("albedomap", nullptr);
+		auto normalMap = (aten::texture*)val.get<void*>("normalmap", nullptr);
 
 		m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
 		m_param.normalMap = normalMap ? normalMap->id() : -1;

@@ -7,6 +7,18 @@ namespace aten
 	class FileInputStream;
 	class Skeleton;
 
+	class IDeformMeshReadHelper {
+	protected:
+		IDeformMeshReadHelper() {}
+		virtual ~IDeformMeshReadHelper() {}
+
+	public:
+		virtual void createVAO(
+			GeomVertexBuffer* vb,
+			const VertexAttrib* attribs, 
+			uint32_t attribNum) = 0;
+	};
+
 	/** メッシュセット.
 	 *
 	 * マテリアルごとのプリミティブセットの集まり
@@ -21,6 +33,7 @@ namespace aten
 	private:
 		bool read(
 			FileInputStream* stream,
+			IDeformMeshReadHelper* helper,
 			std::vector<GeomVertexBuffer>& vbs);
 
 		void render(

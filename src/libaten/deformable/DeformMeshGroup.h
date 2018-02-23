@@ -19,7 +19,9 @@ namespace aten
 		~DeformMeshGroup() {}
 
 	private:
-		bool read(FileInputStream* stream);
+		bool read(
+			FileInputStream* stream,
+			IDeformMeshReadHelper* helper);
 
 		void render(
 			const Skeleton& skeleton,

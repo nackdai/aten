@@ -3,6 +3,8 @@
 #include "types.h"
 
 namespace aten {
+	class shader;
+
 	enum Primitive {
 		Triangles,
 		Lines,
@@ -13,6 +15,12 @@ namespace aten {
 		int num;
 		int size;
 		int offset;
+		const char* name{ nullptr };
+
+		VertexAttrib() {}
+		VertexAttrib(int t, int n, int s, int o)
+			: type(t), num(n), size(s), offset(o)
+		{}
 	};
 
 	class GeomVertexBuffer {
@@ -43,7 +51,8 @@ namespace aten {
 			uint32_t offset,
 			const void* data);
 
-		void createVAO(
+		void createVAOByAttribName(
+			const shader* shd,
 			const VertexAttrib* attribs,
 			uint32_t attribNum);
 

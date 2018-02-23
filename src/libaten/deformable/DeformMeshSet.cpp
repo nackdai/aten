@@ -7,6 +7,17 @@
 
 namespace aten
 {
+	static const char* attribName[] = {
+		"position",
+		"normal",
+		"color",
+		"uv",
+		"tangent",
+		"blendWeight",
+		"blendIndex",
+	};
+	C_ASSERT(AT_COUNTOF(attribName) == (uint32_t)MeshVertexFormat::Num);
+
 	// 位置.
 	static uint32_t setVtxAttribPos(VertexAttrib* attrib, uint32_t offset)
 	{
@@ -102,6 +113,7 @@ namespace aten
 
 	bool DeformMeshSet::read(
 		FileInputStream* stream,
+		IDeformMeshReadHelper* helper,
 		std::vector<GeomVertexBuffer>& vbs)
 	{
 		static SetVtxAttribFunc funcSetVtxAttrib[] = {
@@ -131,7 +143,9 @@ namespace aten
 
 				for (uint32_t i = 0; i < (uint32_t)MeshVertexFormat::Num; i++) {
 					if (m_desc.fmt & (1 << i)) {
-						offset = funcSetVtxAttrib[i](&attribs[attribNum++], offset);
+						offset = funcSetVtxAttrib[i](&attribs[attribNum], offset);
+						attribs[attribNum].name = attribName[i];
+						attribNum++;
 					}
 				}
 
@@ -144,7 +158,7 @@ namespace aten
 						const auto& primDesc = prim.getDesc();
 						auto& vb = vbs[primDesc.idxVB];
 
-						vb.createVAO(attribs, attribNum);
+						helper->createVAO(&vb, attribs, attribNum);
 
 						prim.setVB(&vb);
 					}

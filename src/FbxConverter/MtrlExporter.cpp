@@ -3,6 +3,8 @@
 
 #include "tinyxml2.h"
 
+#pragma optimize( "", off)
+
 bool MtrlExporter::exportMaterial(
     const char* lpszOutFile,
     aten::FbxImporter* pImporter)
@@ -10,6 +12,9 @@ bool MtrlExporter::exportMaterial(
     bool ret = true;
 
 	tinyxml2::XMLDocument xmlDoc;
+
+	auto xmlDecl = xmlDoc.NewDeclaration();
+	xmlDoc.InsertFirstChild(xmlDecl);
 	
 	auto xmlRoot = xmlDoc.NewElement("root");
 
@@ -33,14 +38,14 @@ bool MtrlExporter::exportMaterial(
 
 				for (const auto& tex : mtrl.tex) {
 					if (tex.type.isNormal && !isExportedNormal) {
-						xmlMtrlElement->SetAttribute("normal", tex.name.c_str());
+						xmlMtrlElement->SetAttribute("normalmap", tex.name.c_str());
 						isExportedNormal = true;
 					}
 					else if (tex.type.isSpecular) {
 						// TODO
 					}
 					else if (!isExportedAlbedo) {
-						xmlMtrlElement->SetAttribute("albedo", tex.name.c_str());
+						xmlMtrlElement->SetAttribute("albedomap", tex.name.c_str());
 						isExportedAlbedo = true;
 					}
 				}
@@ -69,7 +74,7 @@ bool MtrlExporter::exportMaterial(
 		}
 	}
 
-	xmlDoc.InsertFirstChild(xmlRoot);
+	xmlDoc.InsertAfterChild(xmlDecl, xmlRoot);
 
 	auto xmlRes = xmlDoc.SaveFile(lpszOutFile);
 	ret = (xmlRes == tinyxml2::XML_SUCCESS);

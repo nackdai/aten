@@ -31,7 +31,7 @@ namespace aten
 				fclose(m_fp);
 				m_fp = nullptr;
 			}
-		} 
+		}
 
 		uint32_t read(void* p, uint32_t size)
 		{
@@ -40,11 +40,21 @@ namespace aten
 
 			ret *= size;
 
+			m_curPos = (uint32_t)ftell(m_fp);
+
 			return (uint32_t)ret;
+		}
+
+		uint32_t curPos()
+		{
+			AT_ASSERT(m_fp);
+			AT_ASSERT(m_curPos == (uint32_t)ftell(m_fp));
+			return m_curPos;
 		}
 
 	private:
 		FILE* m_fp{ nullptr };
+		uint32_t m_curPos{ 0 };
 	};
 }
 

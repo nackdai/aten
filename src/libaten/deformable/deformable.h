@@ -6,7 +6,6 @@
 
 namespace aten
 {
-	class FileInputStream;
 	class shader;
 
 	/** メッシュデータ.
@@ -17,7 +16,7 @@ namespace aten
 		~deformable() {}
 
 	public:
-		bool read(FileInputStream* stream);
+		bool read(const char* path);
 
 		void render(shader* shd);
 
@@ -28,8 +27,13 @@ namespace aten
 
 	//////////////////////////////////////////////////////////////
 
+	class camera;
+	class DeformMeshReadHelper;
+
 	// For debug.
 	class DeformableRenderer {
+		friend class deformable;
+
 	private:
 		DeformableRenderer();
 		~DeformableRenderer();
@@ -40,7 +44,12 @@ namespace aten
 			const char* pathVS,
 			const char* pathFS);
 
-		static void render(deformable* mdl);
+		static void render(
+			const camera* cam,
+			deformable* mdl);
+
+	private:
+		static void initDeformMeshReadHelper(DeformMeshReadHelper* helper);
 
 	private:
 		static shader s_shd;

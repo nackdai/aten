@@ -21,6 +21,8 @@ struct Options {
 	std::string inputFilename;
 } g_opt;
 
+aten::deformable g_mdl;
+
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
@@ -38,6 +40,17 @@ static int g_prevY = 0;
 
 void onRun()
 {
+	if (g_isCameraDirty) {
+		g_camera.update();
+
+		auto camparam = g_camera.param();
+		camparam.znear = real(0.1);
+		camparam.zfar = real(10000.0);
+
+		g_isCameraDirty = false;
+	}
+
+	aten::DeformableRenderer::render(&g_camera, &g_mdl);
 }
 
 void onClose()
@@ -180,11 +193,13 @@ int main(int argc, char* argv[])
 
 	aten::FbxImporter importer;
 
-	importer.open("../../asset/unitychan/unitychan.fbx");
-	//MdlExporter::exportMdl(48, "unitychan.mdl", &importer);
-	MtrlExporter::exportMaterial("unitychan_mtrl.xml", &importer);
-
 #if 0
+	importer.setIgnoreTexIdx(0);
+	importer.open("../../asset/unitychan/unitychan.fbx");
+	MdlExporter::exportMdl(48, "unitychan.mdl", &importer);
+	MtrlExporter::exportMaterial("unitychan_mtrl.xml", &importer);
+#endif
+
 	aten::window::init(
 		WIDTH, HEIGHT,
 		TITLE,
@@ -193,6 +208,17 @@ int main(int argc, char* argv[])
 		onMouseMove,
 		onMouseWheel,
 		onKey);
+
+	aten::DeformableRenderer::init(
+		WIDTH, HEIGHT,
+		"../shader/skinning_vs.glsl",
+		"../shader/skinning_fs.glsl");
+
+
+	g_mdl.read("unitychan.mdl");
+
+	aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
+	aten::MaterialLoader::load("unitychan_mtrl.xml");
 
 	// TODO
 	aten::vec3 pos(0, 1, 10);
@@ -209,7 +235,6 @@ int main(int argc, char* argv[])
 	aten::window::run(onRun);
 
 	aten::window::terminate();
-#endif
 
 	return 1;
 }

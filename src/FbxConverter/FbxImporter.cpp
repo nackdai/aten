@@ -1070,6 +1070,8 @@ namespace aten
 		auto rootTable = implementation->GetRootTable();
 		auto entryCount = rootTable->GetEntryCount();
 
+		std::vector<MaterialTex> tmpTexList;
+
 		for (int i = 0; i < entryCount; ++i)
 		{
 			auto entry = rootTable->GetEntry(i);
@@ -1120,7 +1122,7 @@ namespace aten
 						// TODO
 					}
 
-					mtrlTex.push_back(tex);
+					tmpTexList.push_back(tex);
 				}
 			}
 			else {
@@ -1186,6 +1188,14 @@ namespace aten
 					mtrlParam.push_back(param);
 				}
 			}
+		}
+
+		for (uint32_t i = 0; i < (uint32_t)tmpTexList.size(); i++) {
+			if (m_ignoreTexIdx == i) {
+				continue;
+			}
+
+			mtrlTex.push_back(tmpTexList[i]);
 		}
 
 		return true;

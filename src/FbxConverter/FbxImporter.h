@@ -156,6 +156,11 @@ namespace aten
 			uint32_t nMtrlIdx,
 			MaterialInfo& mtrl);
 
+		void setIgnoreTexIdx(int32_t idx)
+		{
+			m_ignoreTexIdx = idx;
+		}
+
 	private:
 		bool getFbxMatrial(
 			uint32_t nMtrlIdx,
@@ -184,6 +189,8 @@ namespace aten
 
 		void getLambertParams(void* mtrl, std::vector<MaterialParam>& list);
 		void getPhongParams(void* mtrl, std::vector<MaterialParam>& list);
+
+		int32_t m_ignoreTexIdx{ -1 };
 
 		enum ParamType {
 			Tranlate,

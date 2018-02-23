@@ -27,6 +27,16 @@ namespace aten {
 		//GLint getHandle(const char* name);
 		int getHandle(const char* name);
 
+		uint32_t getProgramHandle() const
+		{
+			return m_program;
+		}
+
+		bool isValid() const
+		{
+			return (m_program > 0);
+		}
+
 	protected:
 		//GLuint m_program{ 0 };
 		uint32_t m_program{ 0 };

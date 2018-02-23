@@ -364,7 +364,7 @@ namespace aten {
 	//  - clearcoat [float]
 	//  - clearcoatGloss [float]
 
-	void MaterialLoader::load(const std::string& path)
+	bool MaterialLoader::load(const std::string& path)
 	{
 		std::string fullpath = path;
 		if (!g_base.empty()) {
@@ -376,6 +376,8 @@ namespace aten {
 		if (err != tinyxml2::XML_SUCCESS) {
 			// TODO
 			// throw exception.
+			AT_ASSERT(false);
+			return false;
 		}
 
 		auto root = xml.FirstChildElement("root");
@@ -385,7 +387,11 @@ namespace aten {
 		else {
 			// TODO
 			// throw exception.
+			AT_ASSERT(false);
+			return false;
 		}
+
+		return true;
 	}
 
 	void MaterialLoader::onLoad(const void* xmlRoot)

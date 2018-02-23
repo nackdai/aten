@@ -28,6 +28,8 @@ void main()
 		varNormal += weight * mat3(mtx) * normal;
 	}
 
+	gl_Position = mtxW2C * gl_Position;
+
 	varNormal = normalize(varNormal);
 	varUV = uv;
 }

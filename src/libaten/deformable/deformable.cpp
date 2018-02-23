@@ -78,7 +78,7 @@ namespace aten
 		virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final
 		{
 			if (m_handleMtxJoint < 0) {
-				m_handleMtxJoint = m_shd->getHandle("mtxJoints");
+				m_handleMtxJoint = m_shd->getHandle("mtxJoint");
 				m_mtxs.reserve(4);
 			}
 
@@ -133,8 +133,6 @@ namespace aten
 	{
 		AT_ASSERT(shd);
 
-		shd->prepareRender(nullptr, false);
-
 		DeformMeshRenderHelper helper(shd);
 
 		m_mesh.render(m_skl, &helper);
@@ -160,6 +158,8 @@ namespace aten
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+		s_shd.prepareRender(nullptr, false);
 
 		{
 			auto camparam = cam->param();

@@ -214,11 +214,15 @@ int main(int argc, char* argv[])
 		"../shader/skinning_vs.glsl",
 		"../shader/skinning_fs.glsl");
 
-
 	g_mdl.read("unitychan.mdl");
 
 	aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
 	aten::MaterialLoader::load("unitychan_mtrl.xml");
+
+	auto textures = aten::texture::getTextures();
+	for (auto tex : textures) {
+		tex->initAsGLTexture();
+	}
 
 	// TODO
 	aten::vec3 pos(0, 1, 10);

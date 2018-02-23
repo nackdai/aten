@@ -34,8 +34,10 @@ namespace aten
 
 	bool FbxImporter::close()
 	{
-		m_dataMgr->close();
-		delete m_dataMgr;
+		if (m_dataMgr) {
+			m_dataMgr->close();
+			delete m_dataMgr;
+		}
 
 		if (m_dataMgrBase) {
 			m_dataMgrBase->close();

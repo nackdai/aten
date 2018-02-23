@@ -878,10 +878,10 @@ bool GeometryChunkExporter::exportVertices(
 
                     if (nVtxFmt == (uint32_t)aten::MeshVertexFormat::Color) {
                         // カラーの場合は変換してから出力
-                        uint8_t r = (uint8_t)vec.x;
-                        uint8_t g = (uint8_t)vec.y;
-                        uint8_t b = (uint8_t)vec.z;
-                        uint8_t a = (uint8_t)vec.w;
+                        uint8_t r = (uint8_t)(vec.x * 255.0f);
+                        uint8_t g = (uint8_t)(vec.y * 255.0f);
+                        uint8_t b = (uint8_t)(vec.z * 255.0f);
+                        uint8_t a = (uint8_t)(vec.w * 255.0f);
                         uint32_t color = AT_COLOR_RGBA(r, g, b, a);
 						AT_VRETURN_FALSE(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
                     }

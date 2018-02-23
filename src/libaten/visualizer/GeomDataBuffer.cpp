@@ -146,7 +146,7 @@ namespace aten {
 						loc,
 						attribs[i].num,
 						attribs[i].type,
-						GL_FALSE,
+						attribs[i].needNormalize ? GL_TRUE : GL_FALSE,
 						m_vtxStride,
 						(void*)(m_vtxOffset + attribs[i].offset)));
 				}

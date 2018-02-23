@@ -15,6 +15,7 @@ namespace aten {
 		int num;
 		int size;
 		int offset;
+		bool needNormalize{ false };
 		const char* name{ nullptr };
 
 		VertexAttrib() {}

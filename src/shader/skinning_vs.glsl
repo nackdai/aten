@@ -4,6 +4,7 @@ precision highp int;
 
 attribute vec4 position;
 attribute vec3 normal;
+attribute vec4 color;
 attribute vec2 uv;
 attribute vec4 blendWeight;
 attribute vec4 blendIndex;
@@ -13,6 +14,7 @@ uniform mat4 mtxW2C;
 
 out vec3 varNormal;
 out vec2 varUV;
+out vec4 varColor;
 
 void main()
 {
@@ -32,4 +34,5 @@ void main()
 
 	varNormal = normalize(varNormal);
 	varUV = uv;
+	varColor = color;
 }

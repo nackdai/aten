@@ -51,6 +51,7 @@ namespace aten
 		attrib->num = 4;
 		attrib->size = sizeof(GLbyte);
 		attrib->offset = offset;
+		attrib->needNormalize = true;
 
 		offset += (uint32_t)MeshVertexSize::Color;
 

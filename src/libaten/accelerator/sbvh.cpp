@@ -148,6 +148,10 @@ namespace aten
 				// exid ‚Í top layer ‚ª 0 ‚È‚Ì‚ÅA+1 ‚·‚é.
 				bvh->buildVoxel(i + 1, voxelOffset);
 
+				// TODO
+				// For VoxelViewer.
+				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
+
 				m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
 
 				std::vector<int> indices;

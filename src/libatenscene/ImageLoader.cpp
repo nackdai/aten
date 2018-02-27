@@ -42,7 +42,6 @@ namespace aten {
 		real norm)
 	{
 		int skipChannel = channel;
-		channel = (channel > 3 ? 3 : channel);
 
 #pragma omp parallel for
 		for (int y = 0; y < height; y++) {
@@ -51,6 +50,8 @@ namespace aten {
 				idx *= skipChannel;
 
 				switch (channel) {
+				case 4:
+					(*tex)(x, y, 3) = src[idx + 3] * norm;
 				case 3:
 					(*tex)(x, y, 2) = src[idx + 2] * norm;
 				case 2:
@@ -85,7 +86,7 @@ namespace aten {
 		if (stbi_is_hdr(fullpath.c_str())) {
 			auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);
 			if (src) {
-				tex = new texture(width, height, std::min(channels, 3), path.c_str());
+				tex = new texture(width, height, channels, path.c_str());
 				real norm = real(1);
 				read<float>(src, tex, width, height, channels, norm);
 
@@ -95,7 +96,7 @@ namespace aten {
 		else {
 			auto src = stbi_load(fullpath.c_str(), &width, &height, &channels, 0);
 			if (src) {
-				tex = new texture(width, height, std::min(channels, 3), path.c_str());
+				tex = new texture(width, height, channels, path.c_str());
 				real norm = real(1) / real(255);
 
 				read<stbi_uc>(src, tex, width, height, channels, norm);

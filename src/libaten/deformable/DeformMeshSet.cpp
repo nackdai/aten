@@ -47,9 +47,9 @@ namespace aten
 	// 頂点カラー.
 	static uint32_t setVtxAttribColor(VertexAttrib* attrib, uint32_t offset)
 	{
-		attrib->type = GL_BYTE;
+		attrib->type = GL_UNSIGNED_BYTE;
 		attrib->num = 4;
-		attrib->size = sizeof(GLbyte);
+		attrib->size = sizeof(GLubyte);
 		attrib->offset = offset;
 		attrib->needNormalize = true;
 

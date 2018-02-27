@@ -142,6 +142,8 @@ namespace aten {
 				CALL_GL_API(loc = ::glGetAttribLocation(program, attribs[i].name));
 
 				if (loc >= 0) {
+					CALL_GL_API(::glEnableVertexAttribArray(loc));
+
 					CALL_GL_API(::glVertexAttribPointer(
 						loc,
 						attribs[i].num,

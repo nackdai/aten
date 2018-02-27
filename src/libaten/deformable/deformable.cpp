@@ -115,11 +115,13 @@ namespace aten
 
 		virtual void commitChanges() override final
 		{
+#if 0
 			AT_ASSERT(m_handleMtxJoint >= 0);
 
 			uint32_t mtxNum = (uint32_t)m_mtxs.size();
 
 			CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_TRUE, (const GLfloat*)&m_mtxs[0]));
+#endif
 
 			m_mtxs.clear();
 		}
@@ -158,6 +160,13 @@ namespace aten
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+
+		// For Alpha Blend.
+		CALL_GL_API(::glEnable(GL_BLEND));
+		CALL_GL_API(::glBlendEquation(GL_FUNC_ADD));
+		CALL_GL_API(::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		s_shd.prepareRender(nullptr, false);
 

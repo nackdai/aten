@@ -13,8 +13,8 @@ namespace aten
 		"color",
 		"uv",
 		"tangent",
-		"blendWeight",
 		"blendIndex",
+		"blendWeight",
 	};
 	C_ASSERT(AT_COUNTOF(attribName) == (uint32_t)MeshVertexFormat::Num);
 
@@ -123,8 +123,8 @@ namespace aten
 			setVtxAttribColor,
 			setVtxAttribUV,
 			setVtxAttribTangent,
-			setVtxAttribBlendWeight,
 			setVtxAttribBlendIndices,
+			setVtxAttribBlendWeight,
 		};
 		C_ASSERT(AT_COUNTOF(funcSetVtxAttrib) == (uint32_t)MeshVertexFormat::Num);
 

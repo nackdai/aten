@@ -88,6 +88,8 @@ namespace aten
 		if (flag.isOn((uint32_t)JointTransformType::Translate)) {
 			mat4 translate;
 			translate.asTrans(joint.pose.trans[0], joint.pose.trans[1], joint.pose.trans[2]);
+
+			mtxJoint = translate * mtxJoint;
 		}
 	}
 }

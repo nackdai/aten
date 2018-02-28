@@ -115,13 +115,11 @@ namespace aten
 
 		virtual void commitChanges() override final
 		{
-#if 0
 			AT_ASSERT(m_handleMtxJoint >= 0);
 
 			uint32_t mtxNum = (uint32_t)m_mtxs.size();
 
-			CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_TRUE, (const GLfloat*)&m_mtxs[0]));
-#endif
+			CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_FALSE, (const GLfloat*)&m_mtxs[0]));
 
 			m_mtxs.clear();
 		}
@@ -138,6 +136,11 @@ namespace aten
 		DeformMeshRenderHelper helper(shd);
 
 		m_mesh.render(m_skl, &helper);
+	}
+
+	void deformable::update(const mat4& mtxL2W)
+	{
+		m_skl.buildPose(mtxL2W);
 	}
 
 	//////////////////////////////////////////////////////////////

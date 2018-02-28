@@ -18,6 +18,7 @@ namespace aten
 	public:
 		bool read(const char* path);
 
+		void update(const mat4& mtxL2W);
 		void render(shader* shd);
 
 	private:

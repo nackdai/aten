@@ -207,7 +207,7 @@ struct JointInfo {
     uint32_t idx;
 
     // 指定された関節におけるスキニングウエイト最大値
-	float maxWeight{ AT_MATH_INF };
+	float maxWeight{ 0.0f };
 
     JointInfo()
     {

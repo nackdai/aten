@@ -457,6 +457,9 @@ namespace aten
 					mtx.m[i][n] = static_cast<float>(globalBindposeInverseMatrix.Get(i, n));
 				}
 			}
+
+			// TODO
+			mtx.transpose();
 		}
 		else {
 			mtx.identity();

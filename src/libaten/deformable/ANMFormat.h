@@ -15,6 +15,8 @@ namespace aten
         Hermite,
         Slerp,
 
+		Num,
+
         Mask = 0x7f,
         UserCustom = 1 << 7,
     };

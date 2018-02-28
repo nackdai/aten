@@ -135,13 +135,13 @@ namespace aten
 			// NOTE
 			// http://www.f-sp.com/entry/2017/06/30/221124#%E7%90%83%E9%9D%A2%E7%B7%9A%E5%BD%A2%E8%A3%9C%E9%96%93
 
-			quaternion q0 = quat1;
-			q0.normalize;
-
-			quaternion q1 = quat2;
+			quaternion q1 = quat1;
 			q1.normalize();
 
-			auto c = dot(q0.v, q1.v);
+			quaternion q2 = quat2;
+			q2.normalize();
+
+			auto c = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
 			auto theta = aten::acos(c);
 
 			auto sdiv = aten::sin(theta);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "deformable/SKLFormat.h"
+#include "deformable/ANMFormat.h"
 #include "math/mat4.h"
 
 #include <vector>
@@ -40,6 +41,7 @@ namespace aten
 
 	class SkeletonController {
 		friend class deformable;
+		friend class DeformAnimation;
 
 	private:
 		SkeletonController() {}
@@ -64,6 +66,14 @@ namespace aten
 
 	private:
 		void buildLocalMatrix(uint32_t idx);
+
+		void beginUpdatePose(uint32_t idx);
+		void endUpdatePose(uint32_t idx, uint8_t updateFlag);
+		void updatePose(
+			uint32_t idx,
+			AnmTransformType transformType,
+			AnmTransformType paramType,
+			const vec4& param);
 
 	private:
 		Skeleton* m_skl{ nullptr };

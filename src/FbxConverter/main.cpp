@@ -54,7 +54,7 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
-	g_timeline.advance(0);
+	g_timeline.advance(1.0f / 60.0f);
 
 	g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
 	aten::DeformableRenderer::render(&g_camera, &g_mdl);
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
 #if 0
 	{
 		aten::FbxImporter importer;
-		importer.open("../../asset/unitychan/unitychan_WAIT00.fbx", true);
+		importer.open("../../asset/unitychan/unitychan_WAIT01.fbx", true);
 		importer.readBaseModel("../../asset/unitychan/unitychan.fbx");
 		AnmExporter::exportAnm("unitychan.anm", 0, &importer);
 	}

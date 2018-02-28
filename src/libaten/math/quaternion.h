@@ -206,6 +206,9 @@ namespace aten
 			mtx.m[3][1] = 0.0f;
 			mtx.m[3][2] = 0.0f;
 			mtx.m[3][3] = 1.0f;
+
+			// TODO
+			mtx.transpose();
 #else
 			// マトリクスの乗算に直すとこうなる
 			mat4 m1, m2;

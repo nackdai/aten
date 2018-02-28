@@ -2,23 +2,24 @@
 precision highp float;
 precision highp int;
 
-attribute vec4 position;
-attribute vec3 normal;
-attribute vec4 color;
-attribute vec2 uv;
-attribute vec4 blendWeight;
-attribute vec4 blendIndex;
+layout(location = 0) in vec4 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec4 color;
+layout(location = 3) in vec2 uv;
+layout(location = 4) in vec4 blendIndex;
+layout(location = 5) in vec4 blendWeight;
 
 uniform mat4 mtxJoint[48];
 uniform mat4 mtxW2C;
 
-out vec3 varNormal;
-out vec2 varUV;
-out vec4 varColor;
+layout(location = 0) out vec3 outNormal;
+layout(location = 1) out vec2 outUV;
+layout(location = 2) out vec4 outColor;
 
 void main()
 {
-	varNormal = vec3(0);
+	gl_Position = vec4(0);
+	outNormal = vec3(0);
 
 	for (int i = 0; i < 4; i++) {
 		int idx = int(blendIndex[i]);
@@ -27,12 +28,13 @@ void main()
 		mat4 mtx = mtxJoint[idx];
 
 		gl_Position += weight * mtx * position;
-		varNormal += weight * mat3(mtx) * normal;
+		outNormal += weight * mat3(mtx) * normal;
 	}
 
+	gl_Position.w = 1;
 	gl_Position = mtxW2C * gl_Position;
+	outNormal = normalize(outNormal);
 
-	varNormal = normalize(varNormal);
-	varUV = uv;
-	varColor = color;
+	outUV = uv;
+	outColor = color;
 }

@@ -147,9 +147,16 @@ namespace aten
 			q2.normalize();
 
 			auto c = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+			c = aten::clamp(c, real(-1), real(1));
+
 			auto theta = aten::acos(c);
 
 			auto sdiv = aten::sin(theta);
+
+			if (sdiv == real(0)) {
+				return std::move(quat1);
+			}
+
 			auto s0 = aten::sin((real(1) - t) * theta);
 			auto s1 = aten::sin(t * theta);
 

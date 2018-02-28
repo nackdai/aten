@@ -50,6 +50,7 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
+	g_mdl.update(aten::mat4());
 	aten::DeformableRenderer::render(&g_camera, &g_mdl);
 }
 
@@ -103,7 +104,7 @@ void onMouseWheel(int delta)
 
 void onKey(bool press, aten::Key key)
 {
-	static const real offset = real(0.1);
+	static const real offset = real(5);
 
 	if (press) {
 		if (key == aten::Key::Key_F1) {
@@ -193,7 +194,7 @@ int main(int argc, char* argv[])
 
 	aten::FbxImporter importer;
 
-#if 0
+#if 1
 	importer.setIgnoreTexIdx(0);
 	importer.open("../../asset/unitychan/unitychan.fbx");
 	MdlExporter::exportMdl(48, "unitychan.mdl", &importer);

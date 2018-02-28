@@ -122,7 +122,7 @@ namespace aten
 
 			uint32_t mtxNum = (uint32_t)m_mtxs.size();
 
-			CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_FALSE, (const GLfloat*)&m_mtxs[0]));
+			CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_TRUE, (const GLfloat*)&m_mtxs[0]));
 
 			m_mtxs.clear();
 		}

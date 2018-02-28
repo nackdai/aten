@@ -65,6 +65,8 @@ namespace aten
 			else {
 				AT_VRETURN_FALSE(false);
 			}
+
+			m_sklController.init(&m_skl);
 		}
 
 		return true;
@@ -135,12 +137,12 @@ namespace aten
 
 		DeformMeshRenderHelper helper(shd);
 
-		m_mesh.render(m_skl, &helper);
+		m_mesh.render(m_sklController, &helper);
 	}
 
 	void deformable::update(const mat4& mtxL2W)
 	{
-		m_skl.buildPose(mtxL2W);
+		m_sklController.buildPose(mtxL2W);
 	}
 
 	//////////////////////////////////////////////////////////////

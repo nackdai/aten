@@ -25,7 +25,7 @@ namespace aten
 	}
 
 	void DeformPrimitives::render(
-		const Skeleton& skeleton,
+		const SkeletonController& skeleton,
 		IDeformMeshRenderHelper* helper)
 	{
 		for (uint32_t i = 0; i < m_desc.numJoints; i++) {

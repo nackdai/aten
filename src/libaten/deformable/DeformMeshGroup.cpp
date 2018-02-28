@@ -44,7 +44,7 @@ namespace aten
 	}
 
 	void DeformMeshGroup::render(
-		const Skeleton& skeleton,
+		const SkeletonController& skeleton,
 		IDeformMeshRenderHelper* helper)
 	{
 		for (auto& mesh : m_meshs) {

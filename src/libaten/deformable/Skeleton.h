@@ -20,11 +20,41 @@ namespace aten
 		bool read(FileInputStream* stream);
 
 	public:
+		uint32_t getJointNum() const
+		{
+			return m_header.numJoint;
+		}
+
+		const std::vector<JointParam>& getJoints() const
+		{
+			return m_joints;
+		}
+
+	private:
+		JointHeader m_header;
+
+		std::vector<JointParam> m_joints;
+	};
+
+	///////////////////////////////////////////////////////
+
+	class SkeletonController {
+		friend class deformable;
+
+	private:
+		SkeletonController() {}
+		~SkeletonController() {}
+
+	private:
+		void init(Skeleton* skl);
+
+	public:
 		void buildPose(const mat4& mtxL2W);
 
 		uint32_t getJointNum() const
 		{
-			return m_header.numJoint;
+			AT_ASSERT(m_skl);
+			return m_skl->getJointNum();
 		}
 
 		const mat4& getPoseMatrix(uint32_t idx) const
@@ -36,9 +66,8 @@ namespace aten
 		void buildLocalPose(uint32_t idx);
 
 	private:
-		JointHeader m_header;
+		Skeleton* m_skl{ nullptr };
 
-		std::vector<JointParam> m_joints;
 		std::vector<mat4> m_globalPose;
 		std::vector<uint8_t> m_needUpdateJointFlag;
 	};

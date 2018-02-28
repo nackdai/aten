@@ -12,28 +12,45 @@ namespace aten
 		if (m_header.numJoint > 0) {
 			m_joints.resize(m_header.numJoint);
 			AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_joints[0], sizeof(JointParam) * m_header.numJoint));
-
-			m_globalPose.resize(m_header.numJoint);
-			m_needUpdateJointFlag.resize(m_header.numJoint);
-
-			// アニメーションパラメータの中で更新が必要なパラメータフラグ.
-			for (uint32_t i = 0;  i < m_header.numJoint; i++) {
-				m_needUpdateJointFlag[i] = m_joints[i].validAnmParam;
-			}
 		}
 		
 		return true;
 	}
 
-	void Skeleton::buildPose(const mat4& mtxL2W)
+
+	///////////////////////////////////////////////////////
+
+	void SkeletonController::init(Skeleton* skl)
 	{
-		for (uint32_t i = 0; i < m_header.numJoint; i++) {
+		m_skl = skl;
+
+		auto numJoint = skl->getJointNum();
+		const auto& joints = skl->getJoints();
+
+		m_globalPose.resize(numJoint);
+		m_needUpdateJointFlag.resize(numJoint);
+
+		// アニメーションパラメータの中で更新が必要なパラメータフラグ.
+		for (uint32_t i = 0; i < numJoint; i++) {
+			m_needUpdateJointFlag[i] = joints[i].validAnmParam;
+		}
+
+	}
+
+	void SkeletonController::buildPose(const mat4& mtxL2W)
+	{
+		AT_ASSERT(m_skl);
+
+		auto numJoint = m_skl->getJointNum();
+		const auto& joints = m_skl->getJoints();
+
+		for (uint32_t i = 0; i < numJoint; i++) {
 			buildLocalPose(i);
 		}
 
 		// Apply parent's matrix.
-		for (uint32_t i = 0; i < m_header.numJoint; i++) {
-			auto parentIdx = m_joints[i].parent;
+		for (uint32_t i = 0; i < numJoint; i++) {
+			auto parentIdx = joints[i].parent;
 
 			auto& mtxJoint = m_globalPose[i];
 
@@ -48,18 +65,20 @@ namespace aten
 			}
 		}
 
-		for (uint32_t i = 0; i < m_header.numJoint; i++) {
+		for (uint32_t i = 0; i < numJoint; i++) {
 			auto& mtxJoint = m_globalPose[i];
 
-			const auto& mtxInvBind = m_joints[i].mtxInvBind;
+			const auto& mtxInvBind = joints[i].mtxInvBind;
 
 			mtxJoint = mtxJoint * mtxInvBind;
 		}
 	}
 
-	void Skeleton::buildLocalPose(uint32_t idx)
+	void SkeletonController::buildLocalPose(uint32_t idx)
 	{
-		const auto& joint = m_joints[idx];
+		const auto& joints = m_skl->getJoints();
+
+		const auto& joint = joints[idx];
 
 		// 計算するパラメータを判定するフラグ.
 		Bit32Flag flag(

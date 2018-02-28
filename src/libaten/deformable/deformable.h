@@ -23,7 +23,10 @@ namespace aten
 
 	private:
 		DeformMesh m_mesh;
+
+		// TODO
 		Skeleton m_skl;
+		SkeletonController m_sklController;
 	};
 
 	//////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@
 namespace aten
 {
 	class FileInputStream;
-	class Skeleton;
+	class SkeletonController;
 
 	class IDeformMeshRenderHelper {
 	protected:
@@ -40,7 +40,7 @@ namespace aten
 		bool read(FileInputStream* stream);
 
 		void render(
-			const Skeleton& skeleton,
+			const SkeletonController& skeleton,
 			IDeformMeshRenderHelper* helper);
 
 		const PrimitiveSet& getDesc() const

@@ -5,7 +5,7 @@
 namespace aten
 {
 	class FileInputStream;
-	class Skeleton;
+	class SkeletonController;
 
 	/** メッシュデータ.
 	 */
@@ -22,7 +22,7 @@ namespace aten
 			IDeformMeshReadHelper* helper);
 
 		void render(
-			const Skeleton& skeleton,
+			const SkeletonController& skeleton,
 			IDeformMeshRenderHelper* helper);
 
 	private:

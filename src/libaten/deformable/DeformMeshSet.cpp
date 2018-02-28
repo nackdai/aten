@@ -171,7 +171,7 @@ namespace aten
 	}
 
 	void DeformMeshSet::render(
-		const Skeleton& skeleton,
+		const SkeletonController& skeleton,
 		IDeformMeshRenderHelper* helper)
 	{
 		// material...

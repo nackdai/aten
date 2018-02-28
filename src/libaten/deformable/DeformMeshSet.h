@@ -5,7 +5,7 @@
 namespace aten
 {
 	class FileInputStream;
-	class Skeleton;
+	class SkeletonController;
 
 	class IDeformMeshReadHelper {
 	protected:
@@ -37,7 +37,7 @@ namespace aten
 			std::vector<GeomVertexBuffer>& vbs);
 
 		void render(
-			const Skeleton& skeleton,
+			const SkeletonController& skeleton,
 			IDeformMeshRenderHelper* helper);
 
 	private:

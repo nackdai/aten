@@ -114,4 +114,77 @@ namespace aten
 			mtxJoint = translate * mtxJoint;
 		}
 	}
+
+	void SkeletonController::beginUpdatePose(uint32_t idx)
+	{
+		AT_ASSERT(!m_isUpdatingPose);
+		m_isUpdatingPose = true;
+	}
+
+	void SkeletonController::endUpdatePose(uint32_t idx, uint8_t updateFlag)
+	{
+		AT_ASSERT(m_isUpdatingPose);
+
+		m_isUpdatingPose = false;
+		m_needUpdateJointFlag[idx] = updateFlag;
+	}
+
+	static inline void _updatePose(
+		AnmTransformType paramType,
+		float* dst,
+		const vec4& src)
+	{
+		switch (paramType) {
+		case AnmTransformType::ParamX:    // X‚Ì‚Ý.
+			dst[0] = src.x;
+			break;
+		case AnmTransformType::ParamY:    // Y‚Ì‚Ý.
+			dst[1] = src.y;
+			break;
+		case AnmTransformType::ParamZ:    // Z‚Ì‚Ý.
+			dst[2] = src.z;
+			break;
+		case AnmTransformType::ParamW:    // W‚Ì‚Ý.
+			dst[3] = src.w;
+			break;
+		case AnmTransformType::ParamXYZ:  // XYZ‚Ì‚Ý.
+			dst[0] = src.x;
+			dst[1] = src.y;
+			dst[2] = src.z;
+			break;
+		case AnmTransformType::ParamXYZW: // XYZW‚·‚×‚Ä.
+			dst[0] = src.x;
+			dst[1] = src.y;
+			dst[2] = src.z;
+			dst[3] = src.w;
+			break;
+		default:
+			AT_ASSERT(false);
+			break;
+		}
+	}
+
+	void SkeletonController::updatePose(
+		uint32_t idx,
+		AnmTransformType transformType,
+		AnmTransformType paramType,
+		const vec4& param)
+	{
+		auto& pose = m_globalPose[idx];
+
+		switch (transformType) {
+		case AnmTransformType::Translate:
+			_updatePose(paramType, pose.trans, param);
+			break;
+		case AnmTransformType::Quaternion:
+			_updatePose(paramType, pose.quat.a, param);
+			break;
+		case AnmTransformType::Scale:
+			_updatePose(paramType, pose.scale, param);
+			break;
+		default:
+			AT_ASSERT(false);
+			break;
+		}
+	}
 }

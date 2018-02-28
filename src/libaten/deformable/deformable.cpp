@@ -1,4 +1,5 @@
 #include "deformable/deformable.h"
+#include "deformable/DeformAnimation.h"
 #include "misc/stream.h"
 #include "visualizer/shader.h"
 #include "visualizer/atengl.h"
@@ -142,6 +143,15 @@ namespace aten
 
 	void deformable::update(const mat4& mtxL2W)
 	{
+		m_sklController.buildPose(mtxL2W);
+	}
+
+	void deformable::update(
+		const mat4& mtxL2W,
+		DeformAnimation* anm,
+		real time)
+	{
+		anm->applyAnimation(&m_sklController, time);
 		m_sklController.buildPose(mtxL2W);
 	}
 

@@ -44,6 +44,7 @@
 #include "misc/stream.h"
 #include "misc/thread.h"
 #include "misc/key.h"
+#include "misc/timeline.h"
 
 #include "light/light.h"
 #include "light/pointlight.h"
@@ -96,6 +97,7 @@
 #include "geometry/tranformable.h"
 
 #include "deformable/deformable.h"
+#include "deformable/DeformAnimation.h"
 
 #include "renderer/renderer.h"
 #include "renderer/film.h"

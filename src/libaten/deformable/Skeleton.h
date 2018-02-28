@@ -81,5 +81,7 @@ namespace aten
 		std::vector<JointPose> m_globalPose;
 		std::vector<mat4> m_globalMatrix;
 		std::vector<uint8_t> m_needUpdateJointFlag;
+
+		bool m_isUpdatingPose{ false };
 	};
 }

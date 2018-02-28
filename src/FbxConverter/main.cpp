@@ -4,6 +4,7 @@
 #include "FbxImporter.h"
 #include "MdlExporter.h"
 #include "MtrlExporter.h"
+#include "AnmExporter.h"
 
 #include <cmdline.h>
 #include <imgui.h>
@@ -22,6 +23,9 @@ struct Options {
 } g_opt;
 
 aten::deformable g_mdl;
+aten::DeformAnimation g_anm;
+
+aten::Timeline g_timeline;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -50,7 +54,9 @@ void onRun()
 		g_isCameraDirty = false;
 	}
 
-	g_mdl.update(aten::mat4());
+	g_timeline.advance(0);
+
+	g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
 	aten::DeformableRenderer::render(&g_camera, &g_mdl);
 }
 
@@ -192,13 +198,24 @@ int main(int argc, char* argv[])
 {
 	aten::window::SetCurrentDirectoryFromExe();
 
-	aten::FbxImporter importer;
+#if 0
+	{
+		aten::FbxImporter importer;
 
-#if 1
-	importer.setIgnoreTexIdx(0);
-	importer.open("../../asset/unitychan/unitychan.fbx");
-	MdlExporter::exportMdl(48, "unitychan.mdl", &importer);
-	MtrlExporter::exportMaterial("unitychan_mtrl.xml", &importer);
+		importer.setIgnoreTexIdx(0);
+		importer.open("../../asset/unitychan/unitychan.fbx");
+		MdlExporter::exportMdl(48, "unitychan.mdl", &importer);
+		MtrlExporter::exportMaterial("unitychan_mtrl.xml", &importer);
+	}
+#endif
+
+#if 0
+	{
+		aten::FbxImporter importer;
+		importer.open("../../asset/unitychan/unitychan_WAIT00.fbx", true);
+		importer.readBaseModel("../../asset/unitychan/unitychan.fbx");
+		AnmExporter::exportAnm("unitychan.anm", 0, &importer);
+	}
 #endif
 
 	aten::window::init(
@@ -216,6 +233,11 @@ int main(int argc, char* argv[])
 		"../shader/skinning_fs.glsl");
 
 	g_mdl.read("unitychan.mdl");
+	g_anm.read("unitychan.anm");
+
+	g_timeline.init(g_anm.getDesc().time, real(0));
+	g_timeline.enableLoop(true);
+	g_timeline.start();
 
 	aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
 	aten::MaterialLoader::load("unitychan_mtrl.xml");

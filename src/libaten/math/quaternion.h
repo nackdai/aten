@@ -8,7 +8,12 @@ namespace aten
 	template <typename FType>
 	class quaternion {
 	public:
-		FType x, y, z, w;
+		union {
+			FType a[4];
+			struct {
+				FType x, y, z, w;
+			};
+		};
 
 		quaternion()
 		{

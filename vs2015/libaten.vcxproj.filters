@@ -97,6 +97,9 @@
     <Filter Include="shader\skinning">
       <UniqueIdentifier>{aabe0fc2-f92a-456b-b5e9-11900c8d80fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="deformable\animation">
+      <UniqueIdentifier>{b1ecd5d9-b04b-4e91-9289-27243b4bd435}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -473,6 +476,15 @@
     <ClInclude Include="..\src\libaten\deformable\deformable.h">
       <Filter>deformable</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\DeformAnimation.h">
+      <Filter>deformable\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\DeformAnimationInterp.h">
+      <Filter>deformable\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\timeline.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -735,6 +747,15 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\deformable\deformable.cpp">
       <Filter>deformable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\DeformAnimation.cpp">
+      <Filter>deformable\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\deformable\DeformAnimationInterp.cpp">
+      <Filter>deformable\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\misc\timeline.cpp">
+      <Filter>misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

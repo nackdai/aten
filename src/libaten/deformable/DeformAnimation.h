@@ -18,7 +18,7 @@ namespace aten
         virtual ~DeformAnimation() {}
 
 	public:
-		bool read(FileInputStream* stream);
+		bool read(const char* path);
 
 		// 指定されたスケルトンにアニメーションを適用する.
 		void applyAnimation(
@@ -31,7 +31,14 @@ namespace aten
 			uint32_t jointIdx,
 			float time);
 
+		const AnmHeader& getDesc() const
+		{
+			return m_header;
+		}
+
 	private:
+		bool read(FileInputStream* stream);
+
 		void applyAnimation(
 			const AnmNode& node,
 			SkeletonController* skl,

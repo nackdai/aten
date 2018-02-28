@@ -5,6 +5,14 @@
 
 namespace aten
 {
+	bool DeformAnimation::read(const char* path)
+	{
+		FileInputStream file;
+		AT_VRETURN_FALSE(file.open(path, "rb"));
+
+		return read(&file);
+	}
+
 	bool DeformAnimation::read(FileInputStream* stream)
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_header, sizeof(m_header)));
@@ -108,8 +116,8 @@ namespace aten
 		{
 			const auto& channel = m_channels[channelIdx + node.channelIdx];
 
-			auto paramType = (AnmTransformType)((uint32_t)channel.type & (uint32_t)AnmTransformType::TransformMask);
-			auto transformType = (AnmTransformType)((uint32_t)channel.type & (uint32_t)AnmTransformType::ParamMask);
+			auto paramType = (AnmTransformType)((uint32_t)channel.type & (uint32_t)AnmTransformType::ParamMask);
+			auto transformType = (AnmTransformType)((uint32_t)channel.type & (uint32_t)AnmTransformType::TransformMask);
 
 			// どのパラメータが更新されるのかというフラグ.
 			switch (transformType) {

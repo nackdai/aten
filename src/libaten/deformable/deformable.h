@@ -7,6 +7,7 @@
 namespace aten
 {
 	class shader;
+	class DeformAnimation;
 
 	/** メッシュデータ.
 	 */
@@ -19,6 +20,12 @@ namespace aten
 		bool read(const char* path);
 
 		void update(const mat4& mtxL2W);
+
+		void update(
+			const mat4& mtxL2W,
+			DeformAnimation* anm,
+			real time);
+
 		void render(shader* shd);
 
 	private:

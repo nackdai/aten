@@ -35,7 +35,7 @@ namespace aten
 				break;
 			}
 
-			const auto& mtxJoint = skeleton.getPoseMatrix(jointIdx);
+			const auto& mtxJoint = skeleton.getMatrix(jointIdx);
 
 			helper->applyMatrix(i, mtxJoint);
 		}

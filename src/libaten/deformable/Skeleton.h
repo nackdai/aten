@@ -57,18 +57,19 @@ namespace aten
 			return m_skl->getJointNum();
 		}
 
-		const mat4& getPoseMatrix(uint32_t idx) const
+		const mat4& getMatrix(uint32_t idx) const
 		{
-			return m_globalPose[idx];
+			return m_globalMatrix[idx];
 		}
 
 	private:
-		void buildLocalPose(uint32_t idx);
+		void buildLocalMatrix(uint32_t idx);
 
 	private:
 		Skeleton* m_skl{ nullptr };
 
-		std::vector<mat4> m_globalPose;
+		std::vector<JointPose> m_globalPose;
+		std::vector<mat4> m_globalMatrix;
 		std::vector<uint8_t> m_needUpdateJointFlag;
 	};
 }

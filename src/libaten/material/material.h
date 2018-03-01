@@ -364,7 +364,7 @@ namespace AT_NAME
 		static material* getMaterial(uint32_t idx);
 
 		// This is very dangerous, be very careful to use...
-		static bool deleteMaterial(uint32_t idx);
+		static bool deleteMaterial(material* mtrl, bool needDelete = false);
 
 		// TODO
 		// マテリアルにIDを持たせているので、この関数は不要.

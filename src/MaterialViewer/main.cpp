@@ -189,7 +189,7 @@ void onRun()
 		};
 		int mtrlType = (int)mtrl->param().type;
 		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
-			aten::material::deleteMaterial(0);
+			aten::material::deleteMaterial(mtrl, true);
 			mtrl = createMaterial((aten::MaterialType)mtrlType);
 			needUpdateMtrl = true;
 		}

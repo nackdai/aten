@@ -66,6 +66,8 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
+		void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
+
 		virtual void enableRenderAOV(
 			GLuint gltexPosition,
 			GLuint gltexNormal,

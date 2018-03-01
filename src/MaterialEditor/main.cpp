@@ -59,6 +59,32 @@ void makeScene(aten::scene* scene)
 	scene->add(teapot);
 }
 
+class MaterialParamEditor : public aten::IMaterialParamEditor {
+public:
+	MaterialParamEditor() {}
+	virtual ~MaterialParamEditor() {}
+
+public:
+	virtual bool edit(const char* name, real& param) override final
+	{
+		return ImGui::SliderFloat(name, &param, 0.0f, 1.0f);
+	}
+
+	virtual bool edit(const char* name, aten::vec3& param) override final
+	{
+		float f[3] = { param.x, param.y, param.z };
+		bool ret = ImGui::ColorEdit3(name, f);
+
+		param.x = f[0];
+		param.y = f[1];
+		param.z = f[2];
+
+		return ret;
+	}
+};
+
+MaterialParamEditor g_mtrlParamEditor;
+
 void onRun()
 {
 	float updateTime = 0.0f;
@@ -116,6 +142,14 @@ void onRun()
 
 		if (prevProgressive != isProgressive) {
 			g_tracer.enableProgressive(isProgressive);
+			g_tracer.reset();
+		}
+
+		auto mtrl = aten::material::getMaterial(0);
+		if (mtrl->edit(&g_mtrlParamEditor)) {
+			std::vector<aten::MaterialParameter> params(1);
+			params[0] = mtrl->param();
+			g_tracer.updateMaterial(params);
 			g_tracer.reset();
 		}
 

@@ -122,7 +122,19 @@ namespace aten
 			roughnessMap = -1;
 		}
 	};
+
+	class IMaterialParamEditor {
+	protected:
+		IMaterialParamEditor() {}
+		virtual ~IMaterialParamEditor() {}
+
+	public:
+		virtual bool edit(const char* name, real& param) = 0;
+		virtual bool edit(const char* name, vec3& param) = 0;
+	};
 }
+
+#define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param.##name)
 
 namespace AT_NAME
 {
@@ -333,6 +345,12 @@ namespace AT_NAME
 		const std::string& nameString() const
 		{
 			return m_name;
+		}
+
+		virtual bool edit(aten::IMaterialParamEditor* editor)
+		{
+			AT_ASSERT(false);
+			return false;
 		}
 
 		static inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue, int lod = 0)

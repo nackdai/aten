@@ -818,6 +818,18 @@ namespace idaten {
 		m_random.writeByNum(&r[0], width * height);
 	}
 
+	void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
+	{
+		AT_ASSERT(mtrls.size() <= m_mtrlparam.maxNum());
+
+		if (mtrls.size() <= m_mtrlparam.maxNum()) {
+			m_mtrlparam.reset();
+			m_mtrlparam.writeByNum(&mtrls[0], mtrls.size());
+
+			reset();
+		}
+	}
+
 	void PathTracing::enableRenderAOV(
 		GLuint gltexPosition,
 		GLuint gltexNormal,

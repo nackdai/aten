@@ -114,8 +114,11 @@ namespace aten {
 	class hitable {
 	public:
 		hitable(const char* name = nullptr)
-			: m_name(name)
-		{}
+		{
+			if (name) {
+				m_name = name;
+			}
+		}
 		virtual ~hitable() {}
 
 	public:
@@ -264,6 +267,15 @@ namespace aten {
 			// Nothing is done...
 		}
 
+		void setName(const char* name)
+		{
+			m_name = name;
+		}
+		const char* name()
+		{
+			return m_name.c_str();
+		}
+
 	protected:
 		void onNotifyChanged()
 		{
@@ -282,7 +294,7 @@ namespace aten {
 		}
 
 	private:
-		const char* m_name;
+		std::string m_name;
 		aabb m_aabb;
 
 		NotifyChanged m_onNotifyChanged;

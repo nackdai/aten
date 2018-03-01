@@ -36,7 +36,16 @@ namespace AT_NAME
 	{
 		AT_ASSERT(false);
 
-		auto reflect = wi - 2 * dot(normal, wi) * normal;
+		aten::vec3 in = -wi;
+		aten::vec3 nml = normal;
+
+		bool into = (dot(in, normal) > real(0));
+
+		if (!into) {
+			nml = -nml;
+		}
+
+		auto reflect = wi - 2 * dot(nml, wi) * nml;
 		reflect = normalize(reflect);
 
 		return std::move(reflect);
@@ -127,29 +136,35 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath/*= false*/)
 	{
-		// レイが入射してくる側の物体の屈折率.
-		real ni = real(1);	// 真空
+		aten::vec3 in = -wi;
+		aten::vec3 nml = normal;
 
-		// 物体内部の屈折率.
-		real nt = param->ior;
+		bool into = (dot(in, normal) > real(0));
 
-		bool into = (dot(orgnormal, normal) > real(0));
+		if (!into) {
+			nml = -nml;
+		}
 
-		auto reflect = wi - 2 * dot(orgnormal, wi) * orgnormal;
+		auto reflect = wi - 2 * dot(nml, wi) * nml;
 		reflect = normalize(reflect);
 
-		real cos_i = dot(wi, normal);
-		real nnt = into ? ni / nt : nt / ni;
+		real nc = real(1);		// 真空の屈折率.
+		real nt = param->ior;	// 物体内部の屈折率.
+		real nnt = into ? nc / nt : nt / nc;
+		real ddn = dot(wi, nml);
 
 		// NOTE
 		// cos_t^2 = 1 - sin_t^2
-		// sin_t^2 = (ni/nt)^2 * sin_i^2 = (ni/nt)^2 * (1 - cos_i^2)
-		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
-		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
+		// sin_t^2 = (nc/nt)^2 * sin_i^2
+		//         = (nc/nt)^2 * (1 - cos_i^2)
+		// sin_i / sin_t = nt/nc
+		//   -> sin_t = (nc/nt) * sin_i
+		//            = (nc/nt) * sqrt(1 - cos_i)
+		real cos2t = real(1) - nnt * nnt * (real(1) - ddn * ddn);
 
 		aten::vec3 albedo = param->baseColor;
 
-		if (cos_t_2 < real(0)) {
+		if (cos2t < real(0)) {
 			//AT_PRINTF("Reflection in refraction...\n");
 
 			// 全反射.
@@ -160,25 +175,26 @@ namespace AT_NAME
 
 			return;
 		}
-
-		aten::vec3 n = into ? orgnormal : -orgnormal;
-#if 0
-		aten::vec3 refract = in * nnt - hitrec.normal * (into ? 1.0 : -1.0) * (cos_i * nnt + sqrt(cos_t_2));
+#if 1
+		aten::vec3 refract = wi * nnt - normal * (into ? real(1) : real(-1)) * (ddn * nnt + sqrt(cos2t));
 #else
 		// NOTE
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
 		auto invnnt = 1 / nnt;
-		aten::vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - cos_i * cos_i)) - (-cos_i)) * normal);
+		aten::vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - ddn * ddn)) - ddn) * nml);
 #endif
 		refract = normalize(refract);
 
-		const auto r0 = ((nt - ni) * (nt - ni)) / ((nt + ni) * (nt + ni));
+		// SchlickによるFresnelの反射係数の近似を使う.
+		const real a = nt - nc;
+		const real b = nt + nc;
+		const real r0 = (a * a) / (b * b);
 
-		const auto c = 1 - (into ? -cos_i : dot(refract, -normal));
+		const real c = 1 - (into ? -ddn : dot(refract, -nml));
 
 		// 反射方向の光が反射してray.dirの方向に運ぶ割合。同時に屈折方向の光が反射する方向に運ぶ割合.
-		auto fresnel = r0 + (1 - r0) * aten::pow(c, 5);
+		const real fresnel = r0 + (1 - r0) * aten::pow(c, 5);
 
 		auto Re = fresnel;
 		auto Tr = (1 - Re);
@@ -193,10 +209,12 @@ namespace AT_NAME
 
 			// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
 			if (isLightPath) {
-				nnt = into ? ni / nt : nt / ni;
+				// TODO
+				// 要確認...
+				nnt = into ? nt / nc : nc / nt;
 			}
 			else {
-				nnt = into ? nt / ni : ni / nt;
+				nnt = into ? nc / nt : nt / nc;
 			}
 
 			real nnt2 = nnt * nnt;
@@ -225,10 +243,12 @@ namespace AT_NAME
 				result->dir = refract;
 				// レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
 				if (isLightPath) {
-					nnt = into ? ni / nt : nt / ni;
+					// TODO
+					// 要確認...
+					nnt = into ? nt / nc : nc / nt;
 				}
 				else {
-					nnt = into ? nt / ni : ni / nt;
+					nnt = into ? nc / nt : nt / nc;
 				}
 
 				real nnt2 = nnt * nnt;
@@ -271,8 +291,8 @@ namespace AT_NAME
 
 		// NOTE
 		// cos_t^2 = 1 - sin_t^2
-		// sin_t^2 = (ni/nt)^2 * sin_i^2 = (ni/nt)^2 * (1 - cos_i^2)
-		// sin_i / sin_t = nt/ni -> sin_t = (ni/nt) * sin_i = (ni/nt) * sqrt(1 - cos_i)
+		// sin_t^2 = (nc/nt)^2 * sin_i^2 = (nc/nt)^2 * (1 - cos_i^2)
+		// sin_i / sin_t = nt/nc -> sin_t = (nc/nt) * sin_i = (nc/nt) * sqrt(1 - cos_i)
 		real cos_t_2 = real(1) - (nnt * nnt) * (real(1) - cos_i * cos_i);
 
 		aten::vec3 albedo = mtrl->color();

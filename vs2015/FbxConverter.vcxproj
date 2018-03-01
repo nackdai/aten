@@ -52,7 +52,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A59DF03A-36EF-40DF-99C6-9A471EF7BEC3}</ProjectGuid>
-    <RootNamespace>LodMaker</RootNamespace>
+    <RootNamespace>FbxConverter</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

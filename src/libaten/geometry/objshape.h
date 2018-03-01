@@ -23,7 +23,6 @@ namespace AT_NAME
 
 		void setMaterial(material* mtrl)
 		{
-			param.mtrl.ptr = mtrl;
 			m_mtrl = mtrl;
 		}
 

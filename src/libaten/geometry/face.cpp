@@ -48,13 +48,7 @@ namespace AT_NAME
 
 			isect.primid = id;
 
-#if 0
-			if (parent) {
-				isect.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
-			}
-#else
 			isect.mtrlid = param.mtrlid;
-#endif
 		}
 
 		return isHit;
@@ -159,7 +153,7 @@ namespace AT_NAME
 		param.area = real(0.5) * cross(e0, e1).length();
 
 		parent = _parent;
-		param.mtrlid = ((material*)parent->param.mtrl.ptr)->id();
+		param.mtrlid = parent->getMaterial()->id();
 		param.gemoid = parent->getGeomId();
 	}
 

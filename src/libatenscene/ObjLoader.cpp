@@ -201,7 +201,7 @@ namespace aten
 						dstshape->setMaterial(AssetManager::getMtrl(mtrl.name));
 					}
 
-					if (!dstshape->param.mtrl.ptr) {
+					if (!dstshape->getMaterial()) {
 						// No material, set dummy material....
 
 						// Only lambertian.

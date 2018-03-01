@@ -137,5 +137,12 @@ namespace AT_NAME
 			AT_ASSERT(false);
 			return real(0);
 		}
+
+		virtual bool edit(aten::IMaterialParamEditor* editor) override final
+		{
+			auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+			auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+			return b0 || b1;
+		}
 	};
 }

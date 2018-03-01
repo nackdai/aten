@@ -114,5 +114,10 @@ namespace AT_NAME
 		{
 			return real(1);
 		}
+
+		virtual bool edit(aten::IMaterialParamEditor* editor) override final
+		{
+			return AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+		}
 	};
 }

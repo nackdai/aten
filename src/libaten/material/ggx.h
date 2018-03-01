@@ -108,6 +108,14 @@ namespace AT_NAME
 			real u, real v,
 			bool isLightPath = false) const override final;
 
+		virtual bool edit(aten::IMaterialParamEditor* editor) override final
+		{
+			auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param, roughness);
+			auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, 0.01, 10);
+			auto b2 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+			return b0 || b1 || b2;
+		}
+
 	private:
 		static AT_DEVICE_MTRL_API real pdf(
 			const real roughness,

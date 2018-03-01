@@ -101,9 +101,9 @@ public:
 	virtual ~MaterialParamEditor() {}
 
 public:
-	virtual bool edit(const char* name, real& param) override final
+	virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
 	{
-		return ImGui::SliderFloat(name, &param, 0.0f, 1.0f);
+		return ImGui::SliderFloat(name, &param, _min, _max);
 	}
 
 	virtual bool edit(const char* name, aten::vec3& param) override final

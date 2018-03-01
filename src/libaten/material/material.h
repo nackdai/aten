@@ -129,12 +129,13 @@ namespace aten
 		virtual ~IMaterialParamEditor() {}
 
 	public:
-		virtual bool edit(const char* name, real& param) = 0;
+		virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) = 0;
 		virtual bool edit(const char* name, vec3& param) = 0;
 	};
 }
 
 #define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param.##name)
+#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)	(e)->edit(#name, param.##name, _min, _max)
 
 namespace AT_NAME
 {

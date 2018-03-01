@@ -175,14 +175,20 @@ namespace AT_NAME
 
 			return;
 		}
-#if 1
+#if 0
 		aten::vec3 refract = wi * nnt - normal * (into ? real(1) : real(-1)) * (ddn * nnt + sqrt(cos2t));
-#else
+#elif 0
 		// NOTE
 		// https://www.vcl.jp/~kanazawa/raytracing/?page_id=478
 
 		auto invnnt = 1 / nnt;
 		aten::vec3 refract = nnt * (wi - (aten::sqrt(invnnt * invnnt - (1 - ddn * ddn)) - ddn) * nml);
+#else
+		// NOTE
+		// https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
+
+		auto d = dot(in, nml);
+		auto refract = -nnt * (in - d * nml) - aten::sqrt(real(1) - nnt * nnt * (1 - ddn * ddn)) * nml;
 #endif
 		refract = normalize(refract);
 
@@ -258,7 +264,7 @@ namespace AT_NAME
 
 				result->subpdf = (1 - prob);
 
-				result->fresnel = Tr;
+				result->fresnel = Tr * nnt2;;
 			}
 		}
 

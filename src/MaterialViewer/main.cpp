@@ -16,7 +16,7 @@
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
-static const char* TITLE = "MaterialEditor";
+static const char* TITLE = "MaterialViewer";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;

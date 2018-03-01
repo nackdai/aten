@@ -72,6 +72,15 @@ namespace idaten
 			GLuint gltexAlbedo,
 			aten::vec3& posRange) override;
 
+		void enableProgressive(bool enable)
+		{
+			m_enableProgressive = enable;
+		}
+		bool isProgressive() const
+		{
+			return m_enableProgressive;
+		}
+
 	protected:
 		virtual void onGenPath(
 			int width, int height,
@@ -118,5 +127,7 @@ namespace idaten
 		std::vector<idaten::CudaGLSurface> m_aovs;
 
 		uint32_t m_frame{ 1 };
+
+		bool m_enableProgressive{ false };
 	};
 }

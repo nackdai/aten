@@ -99,13 +99,23 @@ void onRun()
 
 	if (g_willShowGUI)
 	{
-		int prevSamples = g_maxSamples;
-		int prevDepth = g_maxBounce;
+		const int prevSamples = g_maxSamples;
+		const int prevDepth = g_maxBounce;
 
 		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
 		ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
 
 		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
+			g_tracer.reset();
+		}
+
+		const bool prevProgressive = g_tracer.isProgressive();
+		bool isProgressive = prevProgressive;
+
+		ImGui::Checkbox("Progressive", &isProgressive);
+
+		if (prevProgressive != isProgressive) {
+			g_tracer.enableProgressive(isProgressive);
 			g_tracer.reset();
 		}
 

@@ -7,8 +7,9 @@ namespace AT_NAME
 	class MicrofacetGGX : public material {
 	public:
 		MicrofacetGGX(
-			const aten::vec3& albedo,
-			real roughness, real ior,
+			const aten::vec3& albedo = aten::vec3(0.5),
+			real roughness = real(0.5), 
+			real ior = real(1),
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr,
 			aten::texture* roughnessMap = nullptr)

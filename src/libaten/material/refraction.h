@@ -7,8 +7,8 @@ namespace AT_NAME
 	class refraction : public material {
 	public:
 		refraction(
-			const aten::vec3& albedo,
-			real ior,
+			const aten::vec3& albedo = aten::vec3(0.5),
+			real ior = real(1),
 			bool isIdealRefraction = false,
 			aten::texture* normalMap = nullptr)
 			: material(aten::MaterialType::Refraction, MaterialAttributeRefraction, albedo, ior, nullptr, normalMap)

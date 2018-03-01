@@ -59,6 +59,42 @@ void makeScene(aten::scene* scene)
 	scene->add(teapot);
 }
 
+aten::material* createMaterial(aten::MaterialType type)
+{
+	aten::material* mtrl = nullptr;
+
+	switch (type) {
+	case aten::MaterialType::Emissive:
+	case aten::MaterialType::Lambert:
+		mtrl = new aten::lambert();
+		break;
+	case aten::MaterialType::OrneNayar:
+		mtrl = new aten::OrenNayar();
+		break;
+	case aten::MaterialType::Specular:
+		mtrl = new aten::specular();
+		break;
+	case aten::MaterialType::Refraction:
+		mtrl = new aten::refraction();
+		break;
+	case aten::MaterialType::Blinn:
+		mtrl = new aten::MicrofacetBlinn();
+		break;
+	case aten::MaterialType::GGX:
+		mtrl = new aten::MicrofacetGGX();
+		break;
+	case aten::MaterialType::Beckman:
+		mtrl = new aten::MicrofacetBeckman();
+		break;
+	default:
+		AT_ASSERT(false);
+		mtrl = new aten::lambert();
+		break;
+	}
+
+	return mtrl;
+}
+
 class MaterialParamEditor : public aten::IMaterialParamEditor {
 public:
 	MaterialParamEditor() {}
@@ -125,28 +161,44 @@ void onRun()
 
 	if (g_willShowGUI)
 	{
-		const int prevSamples = g_maxSamples;
-		const int prevDepth = g_maxBounce;
-
-		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
-		ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
-
-		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
+		if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
+			|| ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
+		{
 			g_tracer.reset();
 		}
 
-		const bool prevProgressive = g_tracer.isProgressive();
-		bool isProgressive = prevProgressive;
+		bool isProgressive = g_tracer.isProgressive();
 
-		ImGui::Checkbox("Progressive", &isProgressive);
-
-		if (prevProgressive != isProgressive) {
+		if (ImGui::Checkbox("Progressive", &isProgressive)) {
 			g_tracer.enableProgressive(isProgressive);
 			g_tracer.reset();
 		}
 
 		auto mtrl = aten::material::getMaterial(0);
+		bool needUpdateMtrl = false;
+
+		static const char* items[] = {
+			"Emissive",
+			"Lambert",
+			"OrneNayar",
+			"Specular",
+			"Refraction",
+			"Blinn",
+			"GGX",
+			"Beckman",
+		};
+		int mtrlType = (int)mtrl->param().type;
+		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
+			aten::material::deleteMaterial(0);
+			mtrl = createMaterial((aten::MaterialType)mtrlType);
+			needUpdateMtrl = true;
+		}
+
 		if (mtrl->edit(&g_mtrlParamEditor)) {
+			needUpdateMtrl = true;
+		}
+
+		if (needUpdateMtrl) {
 			std::vector<aten::MaterialParameter> params(1);
 			params[0] = mtrl->param();
 			g_tracer.updateMaterial(params);

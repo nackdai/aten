@@ -19,6 +19,24 @@ namespace AT_NAME
 		return nullptr;
 	}
 
+	bool material::deleteMaterial(uint32_t idx)
+	{
+		auto m = g_materials[idx];
+		auto found = std::find(g_materials.begin(), g_materials.end(), m);
+		if (found != g_materials.end()) {
+			g_materials.erase(found);
+
+			// ID‚ÌU‚è’¼‚µ...
+			for (int i = 0; i < g_materials.size(); i++) {
+				g_materials[i]->m_id = i;
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
 	int material::findMaterialIdx(material* mtrl)
 	{
 		auto found = std::find(g_materials.begin(), g_materials.end(), mtrl);
@@ -93,10 +111,7 @@ namespace AT_NAME
 
 	material::~material()
 	{
-		auto found = std::find(g_materials.begin(), g_materials.end(), this);
-		if (found != g_materials.end()) {
-			g_materials.erase(found);
-		}
+		deleteMaterial(m_id);
 	}
 
 	NPRMaterial::NPRMaterial(

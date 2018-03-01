@@ -349,7 +349,7 @@ namespace AT_NAME
 
 		virtual bool edit(aten::IMaterialParamEditor* editor)
 		{
-			AT_ASSERT(false);
+			//AT_ASSERT(false);
 			return false;
 		}
 
@@ -361,6 +361,9 @@ namespace AT_NAME
 
 		static uint32_t getMaterialNum();
 		static material* getMaterial(uint32_t idx);
+
+		// This is very dangerous, be very careful to use...
+		static bool deleteMaterial(uint32_t idx);
 
 		// TODO
 		// マテリアルにIDを持たせているので、この関数は不要.

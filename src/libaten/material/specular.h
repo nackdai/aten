@@ -7,7 +7,7 @@ namespace AT_NAME
 	class specular : public material {
 	public:
 		specular(
-			const aten::vec3& albedo,
+			const aten::vec3& albedo = aten::vec3(0.5),
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr)
 			: material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, 0, albedoMap, normalMap)

@@ -8,7 +8,7 @@ namespace AT_NAME
 	class lambert : public material {
 	public:
 		lambert(
-			const aten::vec3& albedo, 
+			const aten::vec3& albedo = aten::vec3(0.5),
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr)
 			: material(aten::MaterialType::Lambert, MaterialAttributeLambert, albedo, 0, albedoMap, normalMap)

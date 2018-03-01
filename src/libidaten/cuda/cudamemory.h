@@ -7,7 +7,7 @@
 #include "misc/stream.h"
 
 namespace idaten {
-	class CudaMemory : public aten::IStream {
+	class CudaMemory {
 	public:
 		CudaMemory() {}
 
@@ -33,8 +33,8 @@ namespace idaten {
 			return m_bytes;
 		}
 
-		virtual __host__ uint32_t write(const void* p, uint32_t size) override final;
-		virtual __host__ uint32_t read(void* p, uint32_t size) override final;
+		__host__ uint32_t write(const void* p, uint32_t size);
+		__host__ uint32_t read(void* p, uint32_t size);
 
 		operator void*()
 		{

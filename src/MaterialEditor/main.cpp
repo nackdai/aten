@@ -12,16 +12,11 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#include "scenedefs.h"
-
 #define ENABLE_ENVMAP
-//#define ENABLE_NLM
-
-//#define TEST_FOR_GL_RENDER
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
-static const char* TITLE = "svgf";
+static const char* TITLE = "MaterialEditor";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -34,19 +29,7 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
-static idaten::SVGFPathTracing g_tracer;
-
-static float g_avgcuda = 0.0f;
-static float g_avgupdate = 0.0f;
-
-static bool g_enableUpdate = false;
-
-static aten::TAA g_taa;
-
-static aten::FBO g_fbo;
-
-static aten::RasterizeRenderer g_rasterizer;
-static aten::RasterizeRenderer g_rasterizerAABB;
+static idaten::PathTracing g_tracer;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -54,116 +37,31 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
-static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
-static bool g_showAABB = false;
 
-static bool g_enableFrameStep = false;
-static bool g_frameStep = false;
-
-static bool g_pickPixel = false;
-
-void update()
+void getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
 {
-	static float y = 0.0f;
-	static float d = -0.1f;
-
-	auto obj = getMovableObj();
-
-	if (obj) {
-		auto t = obj->getTrans();
-
-		if (y >= -0.1f) {
-			d = -0.01f;
-		}
-		else if (y <= -1.5f) {
-			d = 0.01f;
-
-		}
-
-		y += d;
-		t.y += d;
-
-		obj->setTrans(t);
-		obj->update();
-
-		auto accel = g_scene.getAccel();
-		accel->update();
-
-		{
-			std::vector<aten::GeomParameter> shapeparams;
-			std::vector<aten::PrimitiveParamter> primparams;
-			std::vector<aten::LightParameter> lightparams;
-			std::vector<aten::MaterialParameter> mtrlparms;
-			std::vector<aten::vertex> vtxparams;
-
-			aten::DataCollector::collect(
-				shapeparams,
-				primparams,
-				lightparams,
-				mtrlparms,
-				vtxparams);
-
-			const auto& nodes = g_scene.getAccel()->getNodes();
-			const auto& mtxs = g_scene.getAccel()->getMatrices();
-
-#ifndef TEST_FOR_GL_RENDER
-			g_tracer.update(
-				shapeparams,
-				nodes, 
-				mtxs);
-#endif
-		}
-	}
+	pos = aten::vec3(0.f, 1.f, 10.f);
+	at = aten::vec3(0.f, 1.f, 0.f);
+	fov = 45;
 }
 
-#ifdef TEST_FOR_GL_RENDER
-void onRun()
+void makeScene(aten::scene* scene)
 {
-	update();
+	aten::AssetManager::registerMtrl(
+		"m1",
+		new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
 
-	if (g_isCameraDirty) {
-		g_camera.update();
-
-		auto camparam = g_camera.param();
-		camparam.znear = real(0.1);
-		camparam.zfar = real(10000.0);
-
-		g_isCameraDirty = false;
-	}
-
-	g_rasterizer.draw(
-		g_tracer.frame(),
-		&g_scene,
-		&g_camera,
-		&g_fbo);
+	auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
+	auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+	scene->add(teapot);
 }
-#else
+
 void onRun()
 {
-	if (g_enableFrameStep && !g_frameStep) {
-		return;
-	}
-
-	auto frame = g_tracer.frame();
-
-	g_frameStep = false;
-
 	float updateTime = 0.0f;
-
-	{
-		aten::timer timer;
-		timer.begin();
-
-		if (g_enableUpdate) {
-			update();
-		}
-
-		updateTime = timer.end();
-
-		g_avgupdate = g_avgupdate * (frame - 1) + updateTime;
-		g_avgupdate /= (float)frame;
-	}
 
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -178,40 +76,13 @@ void onRun()
 		aten::visualizer::clear();
 	}
 
-	aten::GLProfiler::begin();
-
-	g_rasterizer.draw(
-		g_tracer.frame(),
-		&g_scene,
-		&g_camera,
-		&g_fbo);
-
-	auto rasterizerTime = aten::GLProfiler::end();
-
-	aten::timer timer;
-	timer.begin();
-
 	g_tracer.render(
 		WIDTH, HEIGHT,
 		g_maxSamples,
 		g_maxBounce);
 
-	auto cudaelapsed = timer.end();
-
-	g_avgcuda = g_avgcuda * (frame - 1) + cudaelapsed;
-	g_avgcuda /= (float)frame;
-
-	aten::GLProfiler::begin();
 
 	aten::visualizer::render(false);
-
-	auto visualizerTime = aten::GLProfiler::end();
-
-	if (g_showAABB) {
-		g_rasterizerAABB.drawAABB(
-			&g_camera,
-			g_scene.getAccel());
-	}
 
 	if (g_willTakeScreenShot)
 	{
@@ -228,15 +99,6 @@ void onRun()
 
 	if (g_willShowGUI)
 	{
-		ImGui::Text("[%d] %.3f ms/frame (%.1f FPS)", g_tracer.frame(), 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, g_avgcuda);
-		ImGui::Text("update : %.3f ms (avg : %.3f ms)", updateTime, g_avgupdate);
-		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
-
-		if (aten::GLProfiler::isEnabled()) {
-			ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
-		}
-
 		int prevSamples = g_maxSamples;
 		int prevDepth = g_maxBounce;
 
@@ -247,59 +109,9 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		static const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
-		int item_current = g_curMode;
-		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items));
-
-		if (g_curMode != item_current) {
-			g_curMode = item_current;
-			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
-		}
-
-		if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
-			static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
-			int aov_current = g_curAOVMode;
-			ImGui::Combo("aov", &aov_current, aovitems, AT_COUNTOF(aovitems));
-
-			if (g_curAOVMode != aov_current) {
-				g_curAOVMode = aov_current;
-				g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
-			}
-		}
-
-		bool prevEnableTAA = g_taa.isEnableTAA();
-		bool enableTAA = prevEnableTAA;
-		ImGui::Checkbox("Enable TAA", &enableTAA);
-
-		bool prevCanShowTAADiff = g_taa.canShowTAADiff();
-		bool canShowTAADiff = prevCanShowTAADiff;
-		ImGui::Checkbox("Show TAA Diff", &canShowTAADiff);
-
-		if (prevEnableTAA != enableTAA) {
-			g_taa.enableTAA(enableTAA);
-		}
-		if (prevCanShowTAADiff != canShowTAADiff) {
-			g_taa.showTAADiff(canShowTAADiff);
-		}
-
-		ImGui::Checkbox("Show AABB", &g_showAABB);
-
-		auto cam = g_camera.param();
-		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
-		ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
-
 		aten::window::drawImGui();
 	}
-
-	idaten::SVGFPathTracing::PickedInfo info;
-	auto isPicked = g_tracer.getPickedPixelInfo(info);
-	if (isPicked) {
-		AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
-		AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
-		AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
-	}
 }
-#endif
 
 void onClose()
 {
@@ -322,11 +134,6 @@ void onMouseBtn(bool left, bool press, int x, int y)
 
 		g_isMouseLBtnDown = left;
 		g_isMouseRBtnDown = !left;
-
-		if (g_pickPixel) {
-			g_tracer.willPickPixel(x, y);
-			g_pickPixel = false;
-		}
 	}
 }
 
@@ -372,28 +179,6 @@ void onKey(bool press, aten::Key key)
 			g_willTakeScreenShot = true;
 			return;
 		}
-		else if (key == aten::Key::Key_F3) {
-			g_enableFrameStep = !g_enableFrameStep;
-			return;
-		}
-		else if (key == aten::Key::Key_F4) {
-			g_enableUpdate = !g_enableUpdate;
-			return;
-		}
-		else if (key == aten::Key::Key_F5) {
-			aten::GLProfiler::trigger();
-			return;
-		}
-		else if (key == aten::Key::Key_SPACE) {
-			if (g_enableFrameStep) {
-				g_frameStep = true;
-				return;
-			}
-		}
-		else if (key == aten::Key::Key_CONTROL) {
-			g_pickPixel = true;
-			return;
-		}
 	}
 
 	if (press) {
@@ -424,7 +209,7 @@ void onKey(bool press, aten::Key key)
 		{
 			aten::vec3 pos, at;
 			real vfov;
-			Scene::getCameraPosAndAt(pos, at, vfov);
+			getCameraPosAndAt(pos, at, vfov);
 
 			g_camera.init(
 				pos,
@@ -478,70 +263,35 @@ int main()
 		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
-	g_taa.init(
-		WIDTH, HEIGHT,
-		"../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
-		"../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
-
-	aten::visualizer::addPostProc(&g_taa);
 	aten::visualizer::addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 
-	g_rasterizer.init(
-		WIDTH, HEIGHT,
-		"../shader/ssrt_vs.glsl",
-		"../shader/ssrt_gs.glsl",
-		"../shader/ssrt_fs.glsl");
-	g_rasterizerAABB.init(
-		WIDTH, HEIGHT,
-		"../shader/simple3d_vs.glsl",
-		"../shader/simple3d_fs.glsl");
-
-	g_fbo.asMulti(2);
-	g_fbo.init(
-		WIDTH, HEIGHT,
-		aten::PixelFormat::rgba32f,
-		true);
-
-	g_taa.setMotionDepthBufferHandle(g_fbo.getTexHandle(1));
-
 	aten::vec3 pos, at;
 	real vfov;
-	Scene::getCameraPosAndAt(pos, at, vfov);
+	getCameraPosAndAt(pos, at, vfov);
 
 	g_camera.init(
 		pos,
 		at,
 		aten::vec3(0, 1, 0),
 		vfov,
-#ifdef ENABLE_GEOMRENDERING
-		WIDTH >> 1, HEIGHT >> 1);
-#else
 		WIDTH, HEIGHT);
-#endif
 
-	Scene::makeScene(&g_scene);
+	makeScene(&g_scene);
 	g_scene.build();
 
-#ifndef TEST_FOR_GL_RENDER
 	idaten::Compaction::init(
 		WIDTH * HEIGHT,
 		1024);
 
-#ifdef ENABLE_ENVMAP
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
 	aten::ImageBasedLight ibl(&bg);
 
 	g_scene.addImageBasedLight(&ibl);
-#endif
 
 	{
-		auto aabb = g_scene.getAccel()->getBoundingbox();
-		auto d = aabb.getDiagonalLenght();
-		g_tracer.setHitDistanceLimit(d * 0.25f);
-
 		std::vector<aten::GeomParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
 		std::vector<aten::LightParameter> lightparams;
@@ -568,13 +318,11 @@ int main()
 			}
 		}
 
-#ifdef ENABLE_ENVMAP
 		for (auto& l : lightparams) {
 			if (l.type == aten::LightType::IBL) {
 				l.envmap.idx = envmap->id();
 			}
 		}
-#endif
 
 		auto camparam = g_camera.param();
 		camparam.znear = real(0.1);
@@ -592,20 +340,8 @@ int main()
 			vtxparams,
 			mtxs,
 			tex,
-#ifdef ENABLE_ENVMAP
 			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
-#else
-			idaten::EnvmapResource());
-#endif
-
-		g_tracer.setGBuffer(
-			g_fbo.getTexHandle(0),
-			g_fbo.getTexHandle(1));
 	}
-
-	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
-	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
-#endif
 
 	aten::window::run(onRun);
 

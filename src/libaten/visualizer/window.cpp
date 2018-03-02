@@ -248,9 +248,8 @@ namespace aten
 		::glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 		::glfwWindowHint(GLFW_MAXIMIZED, GL_FALSE);
 
-		if (g_windows.size() > 1) {
+		if (g_windows.size() >= 1) {
 			// ‚Q‚Â‚ßˆÈ~.
-			::glfwWindowHint(GLFW_DECORATED, GL_FALSE);
 			::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
 		}
 
@@ -265,7 +264,7 @@ namespace aten
 			AT_VRETURN(false, false);
 		}
 
-		if (g_windows.size() > 1) {
+		if (g_windows.size() >= 1) {
 			// ‚Q‚Â‚ßˆÈ~.
 			auto imguiCtxt = ImGui::CreateContext();
 			ImGui::SetCurrentContext(imguiCtxt);
@@ -362,11 +361,18 @@ namespace aten
 
 				::glfwSwapBuffers(glfwWnd);
 
-				if (glfwWindowShouldClose(glfwWnd)) {
+				if (wnd->id() == 0 
+					&& glfwWindowShouldClose(glfwWnd))
+				{
 					running = false;
 				}
 			}
 		}
+	}
+
+	void window::asCurrent()
+	{
+		::glfwMakeContextCurrent(m_wnd);
 	}
 
 	void window::terminate()
@@ -374,16 +380,25 @@ namespace aten
 		// For imgui.
 		ImGui_ImplGlfwGL3_Shutdown();
 
+		ImGuiContext* defaultImguiCtxt = nullptr;
+
 		for (uint32_t i = 0; i < g_windows.size(); i++) {
 			auto wnd = g_windows[i];
 
 			::glfwDestroyWindow(wnd->m_wnd);
 
-			if (i > 0) {
+			if (i == 0) {
+				defaultImguiCtxt = (ImGuiContext*)wnd->m_imguiCtxt;
+			}
+			else {
 				ImGui::DestroyContext((ImGuiContext*)wnd->m_imguiCtxt);
 			}
 			
 			delete wnd;
+		}
+
+		if (defaultImguiCtxt) {
+			ImGui::SetCurrentContext(defaultImguiCtxt);
 		}
 
 		::glfwTerminate();
@@ -395,10 +410,8 @@ namespace aten
 	{
 		// Rendering
 		int display_w, display_h;
-		CALL_GL_API(glfwGetFramebufferSize(m_wnd, &display_w, &display_h));
+		::glfwGetFramebufferSize(m_wnd, &display_w, &display_h);
 		CALL_GL_API(glViewport(0, 0, display_w, display_h));
-		//CALL_GL_API(glClearColor(clearClr.x, clearClr.y, clearClr.z, clearClr.w));
-		//CALL_GL_API(glClear(GL_COLOR_BUFFER_BIT));
 
 		ImGui::SetCurrentContext((ImGuiContext*)m_imguiCtxt);
 		ImGui::Render();

@@ -368,5 +368,10 @@
 <icon BUILTIN="button_ok"/>
 </node>
 </node>
+<node CREATED="1519976831460" HGAP="39" ID="ID_21098804" MODIFIED="1519976850815" POSITION="right" TEXT="SceneMaterialEditor" VSHIFT="71">
+<node CREATED="1519976839683" ID="ID_783648618" MODIFIED="1519976845451" TEXT="imgui&#x30de;&#x30eb;&#x30c1;&#x30a6;&#x30a4;&#x30f3;&#x30c9;&#x30a6;">
+<node CREATED="1519976838099" ID="ID_125260778" MODIFIED="1519976838896" TEXT="https://gist.github.com/jslee02/67b81376f0f9c3b3228a7f9fe13ff404"/>
+</node>
+</node>
 </node>
 </map>

@@ -139,7 +139,7 @@ void onRun()
 		&g_fbo);
 }
 #else
-void onRun()
+void onRun(aten::window* window)
 {
 	if (g_enableFrameStep && !g_frameStep) {
 		return;
@@ -237,48 +237,33 @@ void onRun()
 			ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
 		}
 
-		int prevSamples = g_maxSamples;
-		int prevDepth = g_maxBounce;
-
-		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
-		ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
-
-		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
+		if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
+			|| ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
+		{
 			g_tracer.reset();
 		}
 
 		static const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
-		int item_current = g_curMode;
-		ImGui::Combo("mode", &item_current, items, AT_COUNTOF(items));
 
-		if (g_curMode != item_current) {
-			g_curMode = item_current;
+		if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items))) {
 			g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 		}
 
 		if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
 			static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
-			int aov_current = g_curAOVMode;
-			ImGui::Combo("aov", &aov_current, aovitems, AT_COUNTOF(aovitems));
 
-			if (g_curAOVMode != aov_current) {
-				g_curAOVMode = aov_current;
+			if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
 				g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
 			}
 		}
 
-		bool prevEnableTAA = g_taa.isEnableTAA();
-		bool enableTAA = prevEnableTAA;
-		ImGui::Checkbox("Enable TAA", &enableTAA);
+		bool enableTAA = g_taa.isEnableTAA();
+		bool canShowTAADiff = g_taa.canShowTAADiff();
 
-		bool prevCanShowTAADiff = g_taa.canShowTAADiff();
-		bool canShowTAADiff = prevCanShowTAADiff;
-		ImGui::Checkbox("Show TAA Diff", &canShowTAADiff);
-
-		if (prevEnableTAA != enableTAA) {
+		if (ImGui::Checkbox("Enable TAA", &enableTAA)) {
 			g_taa.enableTAA(enableTAA);
 		}
-		if (prevCanShowTAADiff != canShowTAADiff) {
+		if (ImGui::Checkbox("Show TAA Diff", &canShowTAADiff)) {
 			g_taa.showTAADiff(canShowTAADiff);
 		}
 
@@ -288,7 +273,7 @@ void onRun()
 		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
 		ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
 
-		aten::window::drawImGui();
+		window->drawImGui();
 	}
 
 	idaten::SVGFPathTracing::PickedInfo info;
@@ -455,6 +440,7 @@ int main()
 
 	aten::window::init(
 		WIDTH, HEIGHT, TITLE,
+		onRun,
 		onClose,
 		onMouseBtn,
 		onMouseMove,
@@ -607,7 +593,7 @@ int main()
 	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
 #endif
 
-	aten::window::run(onRun);
+	aten::window::run();
 
 	aten::GLProfiler::terminate();
 

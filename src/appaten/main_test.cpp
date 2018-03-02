@@ -76,7 +76,7 @@ void update()
 	}
 }
 
-void display()
+void display(aten::window* wnd)
 {
 	update();
 
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 	aten::timer::init();
 	aten::OMPUtil::setThreadNum(g_threadnum);
 
-	aten::window::init(WIDTH, HEIGHT, TITLE);
+	aten::window::init(WIDTH, HEIGHT, TITLE, display);
 
 	aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 	//aten::BilateralFilter filter;
 	//aten::visualizer::addPreProc(&filter);
 
-	aten::window::run(display);
+	aten::window::run();
 
 	aten::window::terminate();
 }

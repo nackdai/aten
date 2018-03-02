@@ -56,7 +56,7 @@ static int g_cntScreenShot = 0;
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
 
-void onRun()
+void onRun(aten::window* window)
 {
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -121,7 +121,7 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		aten::window::drawImGui();
+		window->drawImGui();
 	}
 }
 
@@ -252,6 +252,7 @@ int main()
 
 	aten::window::init(
 		WIDTH, HEIGHT, TITLE,
+		onRun,
 		onClose,
 		onMouseBtn,
 		onMouseMove,
@@ -391,7 +392,7 @@ int main()
 #endif
 	}
 
-	aten::window::run(onRun);
+	aten::window::run();
 
 	aten::window::terminate();
 }

@@ -42,7 +42,7 @@ static bool g_isMouseRBtnDown = false;
 static int g_prevX = 0;
 static int g_prevY = 0;
 
-void onRun()
+void onRun(aten::window* window)
 {
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -221,6 +221,7 @@ int main(int argc, char* argv[])
 	aten::window::init(
 		WIDTH, HEIGHT,
 		TITLE,
+		onRun,
 		onClose,
 		onMouseBtn,
 		onMouseMove,
@@ -259,7 +260,7 @@ int main(int argc, char* argv[])
 		vfov,
 		WIDTH, HEIGHT);
 
-	aten::window::run(onRun);
+	aten::window::run();
 
 	aten::window::terminate();
 

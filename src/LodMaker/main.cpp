@@ -63,7 +63,7 @@ static int g_prevY = 0;
 
 #define TEST_LOD
 
-void onRun()
+void onRun(aten::window* window)
 {
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -168,7 +168,7 @@ void onRun()
 			}
 		}
 
-		aten::window::drawImGui();
+		window->drawImGui();
 	}
 }
 
@@ -347,6 +347,7 @@ int main(int argc, char* argv[])
 	aten::window::init(
 		WIDTH, HEIGHT,
 		TITLE,
+		onRun,
 		onClose,
 		onMouseBtn,
 		onMouseMove,
@@ -392,7 +393,7 @@ int main(int argc, char* argv[])
 		"../shader/drawobj_vs.glsl",
 		"../shader/drawobj_fs.glsl");
 
-	aten::window::run(onRun);
+	aten::window::run();
 
 	g_lodmaker.terminate();
 	g_writer.terminate();

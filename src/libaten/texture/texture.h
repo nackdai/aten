@@ -33,9 +33,13 @@ namespace aten {
 
 			const auto clr = m_colors[pos];
 
+			// TODO
+			// Note use alpha channel...
+			uint32_t ch = std::min<uint32_t>(m_channels, 3);
+
 			vec3 ret;
 
-			switch (m_channels) {
+			switch (ch) {
 			case 3:
 				ret[2] = clr[2];
 			case 2:

@@ -201,6 +201,8 @@ namespace aten {
 		//::glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		//::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
+		::glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
 		g_window = ::glfwCreateWindow(
 			width,
 			height,

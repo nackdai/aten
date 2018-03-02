@@ -174,6 +174,8 @@ namespace aten
 		const vec4* pixels,
 		bool revert)
 	{
+		s_curVisualizer = this;
+
 		// Do pre processes.
 		const void* textureimage = doPreProcs(pixels);
 

@@ -121,7 +121,7 @@ public:
 
 MaterialParamEditor g_mtrlParamEditor;
 
-void onRun()
+void onRun(aten::window* window)
 {
 	float updateTime = 0.0f;
 
@@ -205,7 +205,7 @@ void onRun()
 			g_tracer.reset();
 		}
 
-		aten::window::drawImGui();
+		window->drawImGui();
 	}
 }
 
@@ -334,8 +334,9 @@ int main()
 
 	aten::initSampler(WIDTH, HEIGHT);
 
-	aten::window::init(
+	auto wnd = aten::window::init(
 		WIDTH, HEIGHT, TITLE,
+		onRun,
 		onClose,
 		onMouseBtn,
 		onMouseMove,
@@ -439,7 +440,7 @@ int main()
 			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
 	}
 
-	aten::window::run(onRun);
+	aten::window::run();
 
 	aten::GLProfiler::terminate();
 

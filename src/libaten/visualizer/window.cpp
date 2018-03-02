@@ -7,9 +7,10 @@
 #include <imgui.h>
 #include "ui/imgui_impl_glfw_gl3.h"
 
-namespace aten {
-	static GLFWwindow* g_window{ nullptr };
+#include <algorithm>
 
+namespace aten
+{
 	bool window::SetCurrentDirectoryFromExe()
 	{
 		static char buf[_MAX_PATH];
@@ -34,21 +35,39 @@ namespace aten {
 		return result ? true : false;
 	}
 
-	static int g_mouseX = 0;
-	static int g_mouseY = 0;
+	static std::vector<window*> g_windows;
 
-	static window::OnClose onClose = nullptr;
-	static window::OnMouseBtn onMouseBtn = nullptr;
-	static window::OnMouseMove onMouseMove = nullptr;
-	static window::OnMouseWheel onMouseWheel = nullptr;
-	static window::OnKey onKey = nullptr;
+	static std::vector<int> g_mouseX;
+	static std::vector<int> g_mouseY;
+
+	window* findWindow(GLFWwindow* w)
+	{
+		auto found = std::find_if(
+			g_windows.begin(),
+			g_windows.end(),
+			[&](window* wnd)
+		{
+			if (wnd->getNativeHandle() == w) {
+				return true;
+			}
+			return false;
+		});
+
+		if (found != g_windows.end()) {
+			return *found;
+		}
+
+		return nullptr;
+	}
 
 	static void closeCallback(GLFWwindow* window)
 	{
-		if (onClose) {
-			onClose();
+		auto wnd = findWindow(window);
+
+		if (wnd) {
+			wnd->onClose();
+			::glfwSetWindowShouldClose(window, GL_TRUE);
 		}
-		::glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
 	static inline Key getKeyMap(int key)
@@ -127,11 +146,13 @@ namespace aten {
 
 	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		if (onKey) {
+		auto wnd = findWindow(window);
+
+		if (wnd) {
 			Key k = getKeyMap(key);
 			bool press = (action == GLFW_PRESS || action == GLFW_REPEAT);
 
-			onKey(press, k);
+			wnd->onKey(press, k);
 		}
 
 		// For imgui.
@@ -140,21 +161,26 @@ namespace aten {
 
 	static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		if (onMouseBtn) {
+		auto wnd = findWindow(window);
+
+		if (wnd) {
+			auto mouseX = g_mouseX[wnd->id()];
+			auto mouseY = g_mouseY[wnd->id()];
+
 			if (button == GLFW_MOUSE_BUTTON_LEFT) {
 				if (action == GLFW_PRESS) {
-					onMouseBtn(true, true, g_mouseX, g_mouseY);
+					wnd->onMouseBtn(true, true, mouseX, mouseY);
 				}
 				else if (action == GLFW_RELEASE) {
-					onMouseBtn(true, false, g_mouseX, g_mouseY);
+					wnd->onMouseBtn(true, false, mouseX, mouseY);
 				}
 			}
 			else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 				if (action == GLFW_PRESS) {
-					onMouseBtn(false, true, g_mouseX, g_mouseY);
+					wnd->onMouseBtn(false, true, mouseX, mouseY);
 				}
 				else if (action == GLFW_RELEASE) {
-					onMouseBtn(false, false, g_mouseX, g_mouseY);
+					wnd->onMouseBtn(false, false, mouseX, mouseY);
 				}
 			}
 		}
@@ -165,11 +191,13 @@ namespace aten {
 
 	static void motionCallback(GLFWwindow* window, double xpos, double ypos)
 	{
-		g_mouseX = (int)xpos;
-		g_mouseY = (int)ypos;
+		auto wnd = findWindow(window);
 
-		if (onMouseMove) {
-			onMouseMove(g_mouseX, g_mouseY);
+		g_mouseX[wnd->id()] = (int)xpos;
+		g_mouseY[wnd->id()] = (int)ypos;
+
+		if (wnd) {
+			wnd->onMouseMove((int)xpos, (int)ypos);
 		}
 	}
 
@@ -177,16 +205,32 @@ namespace aten {
 	{
 		auto offset = (int)(yoffset * 10.0f);
 
-		if (onMouseWheel) {
-			onMouseWheel(offset);
+		auto wnd = findWindow(window);
+
+		if (wnd) {
+			wnd->onMouseWheel(offset);
 		}
 
 		// For imgui.
 		ImGui_ImplGlfwGL3_ScrollCallback(window, xoffset, yoffset);
 	}
 
-	bool window::init(
+	static void onFocusWindow(GLFWwindow* window, int focused)
+	{
+		auto wnd = findWindow(window);
+		if (wnd) {
+			// TODO
+			// As current context.
+		}
+	}
+
+	window::window(GLFWwindow* wnd, int32_t id)
+		: m_wnd(wnd), m_id(id)
+	{}
+
+	window* window::init(
 		int width, int height, const char* title,
+		OnRun onRun,
 		OnClose _onClose/*= nullptr*/,
 		OnMouseBtn _onMouseBtn/*= nullptr*/,
 		OnMouseMove _onMouseMove/*= nullptr*/,
@@ -202,54 +246,65 @@ namespace aten {
 		//::glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 
 		::glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+		::glfwWindowHint(GLFW_MAXIMIZED, GL_FALSE);
 
-		g_window = ::glfwCreateWindow(
+		if (g_windows.size() > 1) {
+			// ‚Q‚Â‚ßˆÈ~.
+			::glfwWindowHint(GLFW_DECORATED, GL_FALSE);
+			::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
+		}
+
+		auto glfwWindow = ::glfwCreateWindow(
 			width,
 			height,
 			title,
 			NULL, NULL);
 
-		if (!g_window) {
+		if (!glfwWindow) {
 			::glfwTerminate();
 			AT_VRETURN(false, false);
 		}
 
+		if (g_windows.size() > 1) {
+			// ‚Q‚Â‚ßˆÈ~.
+			auto imguiCtxt = ImGui::CreateContext();
+			ImGui::SetCurrentContext(imguiCtxt);
+		}
+
 		// For imgui.
-		bool succeeded = ImGui_ImplGlfwGL3_Init(g_window);
+		bool succeeded = ImGui_ImplGlfwGL3_Init(glfwWindow);
 		AT_ASSERT(succeeded);
 
 		SetCurrentDirectoryFromExe();
 
-		onClose = _onClose;
-		onMouseBtn = _onMouseBtn;
-		onMouseMove = _onMouseMove;
-		onMouseWheel = _onMouseWheel;
-		onKey = _onKey;
-
 		::glfwSetWindowCloseCallback(
-			g_window,
+			glfwWindow,
 			closeCallback);
 
 		::glfwSetKeyCallback(
-			g_window,
+			glfwWindow,
 			keyCallback);
 
 		::glfwSetMouseButtonCallback(
-			g_window,
+			glfwWindow,
 			mouseCallback);
 
 		::glfwSetCursorPosCallback(
-			g_window,
+			glfwWindow,
 			motionCallback);
 
 		::glfwSetScrollCallback(
-			g_window,
+			glfwWindow,
 			wheelCallback);
 
-		// For imgui.
-		::glfwSetCharCallback(g_window, ImGui_ImplGlfwGL3_CharCallback);
+		::glfwSetWindowFocusCallback(
+			glfwWindow, 
+			onFocusWindow);
 
-		::glfwMakeContextCurrent(g_window);
+		// For imgui.
+		::glfwSetCharCallback(glfwWindow, ImGui_ImplGlfwGL3_CharCallback);
+
+		::glfwMakeContextCurrent(glfwWindow);
 		::glfwSwapInterval(1);
 
 		result = glewInit();
@@ -267,22 +322,50 @@ namespace aten {
 		CALL_GL_API(::glViewport(0, 0, width, height));
 		CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
 
-		return true;
+		window* ret = new window(glfwWindow, g_windows.size());
+		{
+			ret->m_onRun = onRun;
+			ret->m_onClose = _onClose;
+			ret->m_onMouseBtn = _onMouseBtn;
+			ret->m_onMouseMove = _onMouseMove;
+			ret->m_onMouseWheel = _onMouseWheel;
+			ret->m_onKey = _onKey;
+
+			ret->m_imguiCtxt = ImGui::GetCurrentContext();
+		}
+		g_windows.push_back(ret);
+
+		g_mouseX.resize(g_windows.size());
+		g_mouseY.resize(g_windows.size());
+
+		return ret;
 	}
 
-	void window::run(window::OnRun onRun)
+	void window::run()
 	{
-		AT_ASSERT(g_window);
+		bool running = true;
 
-		while (!glfwWindowShouldClose(g_window)) {
-			::glfwPollEvents();
+		while (running) {
+			for (auto wnd : g_windows) {
+				auto glfwWnd = wnd->m_wnd;
 
-			// For imgui.
-			ImGui_ImplGlfwGL3_NewFrame();
+				::glfwMakeContextCurrent(glfwWnd);
 
-			onRun();
+				::glfwPollEvents();
 
-			::glfwSwapBuffers(g_window);
+				ImGui::SetCurrentContext((ImGuiContext*)wnd->m_imguiCtxt);
+
+				// For imgui.
+				ImGui_ImplGlfwGL3_NewFrame(glfwWnd);
+
+				wnd->m_onRun(wnd);
+
+				::glfwSwapBuffers(glfwWnd);
+
+				if (glfwWindowShouldClose(glfwWnd)) {
+					running = false;
+				}
+			}
 		}
 	}
 
@@ -291,25 +374,43 @@ namespace aten {
 		// For imgui.
 		ImGui_ImplGlfwGL3_Shutdown();
 
-		if (g_window) {
-			::glfwDestroyWindow(g_window);
+		for (uint32_t i = 0; i < g_windows.size(); i++) {
+			auto wnd = g_windows[i];
+
+			::glfwDestroyWindow(wnd->m_wnd);
+
+			if (i > 0) {
+				ImGui::DestroyContext((ImGuiContext*)wnd->m_imguiCtxt);
+			}
+			
+			delete wnd;
 		}
+
 		::glfwTerminate();
+
+		g_windows.clear();
 	}
 
 	void window::drawImGui()
 	{
 		// Rendering
 		int display_w, display_h;
-		CALL_GL_API(glfwGetFramebufferSize(g_window, &display_w, &display_h));
+		CALL_GL_API(glfwGetFramebufferSize(m_wnd, &display_w, &display_h));
 		CALL_GL_API(glViewport(0, 0, display_w, display_h));
 		//CALL_GL_API(glClearColor(clearClr.x, clearClr.y, clearClr.z, clearClr.w));
 		//CALL_GL_API(glClear(GL_COLOR_BUFFER_BIT));
+
+		ImGui::SetCurrentContext((ImGuiContext*)m_imguiCtxt);
 		ImGui::Render();
 	}
 
 	bool window::isInitialized()
 	{
-		return (g_window != nullptr);
+		return !g_windows.empty();
+	}
+
+	GLFWwindow* window::getNativeHandle()
+	{
+		return m_wnd;
 	}
 }

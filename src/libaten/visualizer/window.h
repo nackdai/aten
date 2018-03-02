@@ -1,9 +1,12 @@
 #pragma once
 
-#include <functional>
 #include "defs.h"
-
 #include "math/vec4.h"
+
+#include <functional>
+#include <vector>
+
+struct GLFWwindow;
 
 namespace aten {
 	enum Key {
@@ -181,33 +184,91 @@ namespace aten {
 
 	class window {
 	private:
-		window() {}
+		window(GLFWwindow* wnd, int32_t id);
 		~window() {}
 
 	public:
-		using OnRun = std::function<void()>;
+		using OnRun = std::function<void(window*)>;
 		using OnClose = std::function<void()>;
 		using OnMouseBtn = std::function<void(bool left, bool press, int x, int y)>;
 		using OnMouseMove = std::function<void(int x, int y)>;
 		using OnMouseWheel = std::function<void(int delta)>;
 		using OnKey = std::function<void(bool press, Key key)>;
 
-		static bool init(
+		static window* init(
 			int width, int height, const char* title,
+			OnRun onRun,
 			OnClose _onClose = nullptr,
 			OnMouseBtn _onMouseBtn = nullptr,
 			OnMouseMove _onMouseMove = nullptr,
 			OnMouseWheel _onMouseWheel = nullptr,
 			OnKey _onKey = nullptr);
 
-		static void run(OnRun onRim);
+		static void run();
+
+		void asCurrent();
 
 		static void terminate();
 
 		static bool SetCurrentDirectoryFromExe();
 
-		static void drawImGui();
+		void drawImGui();
 
 		static bool isInitialized();
+
+		GLFWwindow* getNativeHandle();
+
+		void window::onClose()
+		{
+			if (m_onClose) {
+				m_onClose();
+			}
+		}
+		
+		void onMouseBtn(bool left, bool press, int x, int y)
+		{
+			if (m_onMouseBtn) {
+				m_onMouseBtn(left, press, x, y);
+			}
+		}
+		
+		void onMouseMove(int x, int y)
+		{
+			if (m_onMouseMove) {
+				m_onMouseMove(x, y);
+			}
+		}
+
+		void onMouseWheel(int delta)
+		{
+			if (m_onMouseWheel) {
+				m_onMouseWheel(delta);
+			}
+		}
+
+		void onKey(bool press, Key key)
+		{
+			if (m_onKey) {
+				m_onKey(press, key);
+			}
+		}
+
+		int32_t id() const
+		{
+			return m_id;
+		}
+
+	private:
+		GLFWwindow* m_wnd{ nullptr };
+		int32_t m_id{ -1 };
+
+		void* m_imguiCtxt{ nullptr };
+
+		OnRun m_onRun{ nullptr };
+		OnClose m_onClose{ nullptr };
+		OnMouseBtn m_onMouseBtn{ nullptr };
+		OnMouseMove m_onMouseMove{ nullptr };
+		OnMouseWheel m_onMouseWheel{ nullptr };
+		OnKey m_onKey{ nullptr };
 	};
 }

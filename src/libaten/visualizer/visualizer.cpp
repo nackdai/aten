@@ -2,34 +2,17 @@
 #include "visualizer/atengl.h"
 #include "visualizer/visualizer.h"
 #include "math/vec3.h"
-#include "misc/color.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-namespace aten {
-	static GLuint g_tex{ 0 };
-
-	static int g_width{ 0 };
-	static int g_height{ 0 };
-
-	static std::vector<TColor<float, 4>> g_tmp;
-
-	static const PixelFormat g_fmt{ PixelFormat::rgba32f };
-
-	static std::vector<visualizer::PreProc*> g_preprocs;
-	static std::vector<vec4> g_preprocBuffer[2];
-
-	static std::vector<visualizer::PostProc*> g_postprocs;
-
-	GLuint visualizer::getTexHandle()
-	{
-		return g_tex;
-	}
+namespace aten
+{
+	visualizer* visualizer::s_curVisualizer = nullptr;
 
 	PixelFormat visualizer::getPixelFormat()
 	{
-		return g_fmt;
+		return m_fmt;
 	}
 
 	static GLuint createTexture(int width, int height, PixelFormat fmt)
@@ -70,28 +53,40 @@ namespace aten {
 		return tex;
 	}
 
-	bool visualizer::init(int width, int height)
+	uint32_t visualizer::getTexHandle()
 	{
-		g_tex = createTexture(width, height, g_fmt);
-		AT_VRETURN(g_tex != 0, false);
+		AT_ASSERT(s_curVisualizer);
+		return s_curVisualizer->m_tex;
+	}
 
-		g_width = width;
-		g_height = height;
+	visualizer* visualizer::init(int width, int height)
+	{
+		visualizer* ret = new visualizer();
 
-		return true;
+		ret->m_tex = createTexture(width, height, ret->m_fmt);
+		AT_VRETURN(ret->m_tex != 0, false);
+
+		ret->m_width = width;
+		ret->m_height = height;
+
+		if (!s_curVisualizer) {
+			s_curVisualizer = ret;
+		}
+
+		return ret;
 	}
 
 	void visualizer::addPreProc(PreProc* preproc)
 	{
-		g_preprocs.push_back(preproc);
+		m_preprocs.push_back(preproc);
 	}
 
 	bool visualizer::addPostProc(PostProc* postproc)
 	{
-		if (g_postprocs.size() > 0) {
+		if (m_postprocs.size() > 0) {
 			// Create fbo to connect between post-processes.
-			auto idx = g_postprocs.size() - 1;
-			auto* prevPostproc = g_postprocs[idx];
+			auto idx = m_postprocs.size() - 1;
+			auto* prevPostproc = m_postprocs[idx];
 			auto outFmt = prevPostproc->outFormat();
 
 			// Check in-out format.
@@ -101,10 +96,10 @@ namespace aten {
 			auto& fbo = prevPostproc->getFbo();
 
 			// Create FBO.
-			AT_VRETURN(fbo.init(g_width, g_height, outFmt), false);
+			AT_VRETURN(fbo.init(m_width, m_height, outFmt), false);
 		}
 
-		g_postprocs.push_back(postproc);
+		m_postprocs.push_back(postproc);
 
 		return true;
 	}
@@ -115,23 +110,23 @@ namespace aten {
 		return handle;
 	}
 
-	static const void* doPreProcs(const vec4* pixels)
+	const void* visualizer::doPreProcs(const vec4* pixels)
 	{
 		const void* textureimage = pixels;
 
-		if (!g_preprocs.empty()) {
+		if (!m_preprocs.empty()) {
 			uint32_t bufpos = 0;
 			const vec4* src = (const vec4*)textureimage;
 			vec4* dst = nullptr;
 
-			for (int i = 0; i < g_preprocs.size(); i++) {
-				auto& buf = g_preprocBuffer[bufpos];
+			for (int i = 0; i < m_preprocs.size(); i++) {
+				auto& buf = m_preprocBuffer[bufpos];
 				if (buf.empty()) {
-					buf.resize(g_width * g_height);
+					buf.resize(m_width * m_height);
 				}
 				dst = &buf[0];
 
-				(*g_preprocs[i])(src, g_width, g_height, dst);
+				(*m_preprocs[i])(src, m_width, m_height, dst);
 
 				src = dst;
 				bufpos = 1 - bufpos;
@@ -143,12 +138,12 @@ namespace aten {
 		return textureimage;
 	}
 
-	static const void* convertTextureData(const void* textureimage)
+	const void* visualizer::convertTextureData(const void* textureimage)
 	{
 		// If type is double, convert double/rgb to float/rgba.
 		// If type is float, convert rgb to rgba.
-		if (g_tmp.empty()) {
-			g_tmp.resize(g_width * g_height);
+		if (m_tmp.empty()) {
+			m_tmp.resize(m_width * m_height);
 		}
 
 		const vec4* src = (const vec4*)textureimage;
@@ -156,12 +151,12 @@ namespace aten {
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-		for (int y = 0; y < g_height; y++) {
-			for (int x = 0; x < g_width; x++) {
-				int pos = y * g_width + x;
+		for (int y = 0; y < m_height; y++) {
+			for (int x = 0; x < m_width; x++) {
+				int pos = y * m_width + x;
 
 				auto& s = src[pos];
-				auto& d = g_tmp[pos];
+				auto& d = m_tmp[pos];
 
 				d.r() = (float)s.x;
 				d.g() = (float)s.y;
@@ -170,7 +165,7 @@ namespace aten {
 			}
 		}
 
-		textureimage = &g_tmp[0];
+		textureimage = &m_tmp[0];
 
 		return textureimage;
 	}
@@ -189,7 +184,7 @@ namespace aten {
 
 		CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
-		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, g_tex));
+		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, m_tex));
 
 		// Converte texture data double->float, rgb->rgba.
 		textureimage = convertTextureData(textureimage);
@@ -199,26 +194,26 @@ namespace aten {
 		GLenum pixelinternal = 0;
 
 		getGLPixelFormat(
-			g_fmt,
+			m_fmt,
 			pixelfmt, pixeltype, pixelinternal);
 
 		CALL_GL_API(::glTexSubImage2D(
 			GL_TEXTURE_2D,
 			0,
 			0, 0,
-			g_width, g_height,
+			m_width, m_height,
 			pixelfmt,
 			pixeltype,
 			textureimage));
 
 		bool willRevert = revert;
 
-		for (int i = 0; i < g_postprocs.size(); i++) {
-			auto* postproc = g_postprocs[i];
+		for (int i = 0; i < m_postprocs.size(); i++) {
+			auto* postproc = m_postprocs[i];
 			PostProc* prevPostproc = nullptr;
 
 			if (i > 0) {
-				prevPostproc = g_postprocs[i - 1];
+				prevPostproc = m_postprocs[i - 1];
 				auto& fbo = prevPostproc->getFbo();
 
 				CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
@@ -248,7 +243,7 @@ namespace aten {
 
 	void visualizer::render(bool revert)
 	{
-		render(g_tex, revert);
+		render(m_tex, revert);
 	}
 
 	void visualizer::render(uint32_t gltex, bool revert)
@@ -267,12 +262,12 @@ namespace aten {
 
 		bool willRevert = revert;
 
-		for (int i = 0; i < g_postprocs.size(); i++) {
-			auto* postproc = g_postprocs[i];
+		for (int i = 0; i < m_postprocs.size(); i++) {
+			auto* postproc = m_postprocs[i];
 			PostProc* prevPostproc = nullptr;
 
 			if (i > 0) {
-				prevPostproc = g_postprocs[i - 1];
+				prevPostproc = m_postprocs[i - 1];
 				auto& fbo = prevPostproc->getFbo();
 
 				CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
@@ -311,12 +306,12 @@ namespace aten {
 		GLenum pixelinternal = 0;
 
 		getGLPixelFormat(
-			g_fmt,
+			m_fmt,
 			pixelfmt, pixeltype, pixelinternal);
 
 		const void* clearclr = nullptr;
 
-		switch (g_fmt) {
+		switch (m_fmt) {
 		case rgba8:
 			clearclr = clearclr_uc;
 			break;
@@ -329,7 +324,7 @@ namespace aten {
 		}
 
 		CALL_GL_API(::glClearTexImage(
-			g_tex,
+			m_tex,
 			0,
 			pixelfmt, pixeltype,
 			clearclr));
@@ -342,32 +337,32 @@ namespace aten {
 
 		using ScreenShotImageType = TColor<uint8_t, 3>;
 
-		std::vector<ScreenShotImageType> tmp(g_width * g_height);
+		std::vector<ScreenShotImageType> tmp(m_width * m_height);
 
 		CALL_GL_API(::glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
 		CALL_GL_API(::glNamedFramebufferReadBuffer(0, GL_BACK));
 
-		CALL_GL_API(::glReadPixels(0, 0, g_width, g_height, GL_RGB, GL_UNSIGNED_BYTE, &tmp[0]));
+		CALL_GL_API(::glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, &tmp[0]));
 
 		// up-side-down.
-		std::vector<ScreenShotImageType> dst(g_width * g_height);
+		std::vector<ScreenShotImageType> dst(m_width * m_height);
 
 		static const int bpp = sizeof(ScreenShotImageType);
-		const int pitch = g_width * bpp;
+		const int pitch = m_width * bpp;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-		for (int y = 0; y < g_height; y++) {
-			int yy = g_height - 1 - y;
+		for (int y = 0; y < m_height; y++) {
+			int yy = m_height - 1 - y;
 
 			memcpy(
-				&dst[yy * g_width],
-				&tmp[y * g_width],
+				&dst[yy * m_width],
+				&tmp[y * m_width],
 				pitch);
 		}
 
-		auto ret = ::stbi_write_png(filename, g_width, g_height, bpp, &dst[0], pitch);
+		auto ret = ::stbi_write_png(filename, m_width, m_height, bpp, &dst[0], pitch);
 		AT_ASSERT(ret > 0);
 	}
 }

@@ -31,6 +31,8 @@ static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::PathTracing g_tracer;
 
+static aten::visualizer* g_visualizer;
+
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
@@ -135,7 +137,7 @@ void onRun(aten::window* window)
 		g_tracer.updateCamera(camparam);
 		g_isCameraDirty = false;
 
-		aten::visualizer::clear();
+		g_visualizer->clear();
 	}
 
 	g_tracer.render(
@@ -144,14 +146,14 @@ void onRun(aten::window* window)
 		g_maxBounce);
 
 
-	aten::visualizer::render(false);
+	g_visualizer->render(false);
 
 	if (g_willTakeScreenShot)
 	{
 		static char buffer[1024];
 		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
 
-		aten::visualizer::takeScreenshot(buffer);
+		g_visualizer->takeScreenshot(buffer);
 
 		g_willTakeScreenShot = false;
 		g_cntScreenShot++;
@@ -345,7 +347,7 @@ int main()
 
 	aten::GLProfiler::start();
 
-	aten::visualizer::init(WIDTH, HEIGHT);
+	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
 	aten::GammaCorrection gamma;
 	gamma.init(
@@ -360,7 +362,7 @@ int main()
 		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
-	aten::visualizer::addPostProc(&gamma);
+	g_visualizer->addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 
 	aten::vec3 pos, at;

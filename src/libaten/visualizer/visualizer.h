@@ -6,6 +6,7 @@
 #include "visualizer/shader.h"
 #include "visualizer/fbo.h"
 #include "misc/value.h"
+#include "misc/color.h"
 
 namespace aten {
 	class visualizer {
@@ -84,24 +85,45 @@ namespace aten {
 		};
 
 	public:
+		PixelFormat getPixelFormat();
+
 		static uint32_t getTexHandle();
-		static PixelFormat getPixelFormat();
+		static visualizer* init(int width, int height);
 
-		static bool init(int width, int height);
+		void addPreProc(PreProc* preproc);
 
-		static void addPreProc(PreProc* preproc);
+		bool addPostProc(PostProc* postproc);
 
-		static bool addPostProc(PostProc* postproc);
-
-		static void render(
+		void render(
 			const vec4* pixels,
 			bool revert);
 
-		static void render(bool revert);
-		static void render(uint32_t gltex, bool revert);
+		void render(bool revert);
+		void render(uint32_t gltex, bool revert);
 
-		static void clear();
+		void clear();
 
-		static void takeScreenshot(const char* filename);
+		void takeScreenshot(const char* filename);
+
+	private:
+		const void* doPreProcs(const vec4* pixels);
+		const void* convertTextureData(const void* textureimage);
+
+	private:
+		static visualizer* s_curVisualizer;
+
+		uint32_t m_tex{ 0 };
+
+		int m_width{ 0 };
+		int m_height{ 0 };
+
+		std::vector<TColor<float, 4>> m_tmp;
+
+		const PixelFormat m_fmt{ PixelFormat::rgba32f };
+
+		std::vector<visualizer::PreProc*> m_preprocs;
+		std::vector<vec4> m_preprocBuffer[2];
+
+		std::vector<visualizer::PostProc*> m_postprocs;
 	};
 }

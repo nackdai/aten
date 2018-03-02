@@ -35,6 +35,7 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::SVGFPathTracing g_tracer;
+static aten::visualizer* g_visualizer;
 
 static float g_avgcuda = 0.0f;
 static float g_avgupdate = 0.0f;
@@ -175,7 +176,7 @@ void onRun(aten::window* window)
 		g_tracer.updateCamera(camparam);
 		g_isCameraDirty = false;
 
-		aten::visualizer::clear();
+		g_visualizer->clear();
 	}
 
 	aten::GLProfiler::begin();
@@ -203,7 +204,7 @@ void onRun(aten::window* window)
 
 	aten::GLProfiler::begin();
 
-	aten::visualizer::render(false);
+	g_visualizer->render(false);
 
 	auto visualizerTime = aten::GLProfiler::end();
 
@@ -218,7 +219,7 @@ void onRun(aten::window* window)
 		static char buffer[1024];
 		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
 
-		aten::visualizer::takeScreenshot(buffer);
+		g_visualizer->takeScreenshot(buffer);
 
 		g_willTakeScreenShot = false;
 		g_cntScreenShot++;
@@ -449,7 +450,7 @@ int main()
 
 	aten::GLProfiler::start();
 
-	aten::visualizer::init(WIDTH, HEIGHT);
+	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
 	aten::GammaCorrection gamma;
 	gamma.init(
@@ -469,8 +470,8 @@ int main()
 		"../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
 		"../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
 
-	aten::visualizer::addPostProc(&g_taa);
-	aten::visualizer::addPostProc(&gamma);
+	g_visualizer->addPostProc(&g_taa);
+	g_visualizer->addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 
 	g_rasterizer.init(

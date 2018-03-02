@@ -31,6 +31,8 @@ static aten::PathTracing g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
 
+static aten::visualizer* g_visualizer;
+
 static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
 //static aten::Film g_buffer(WIDTH, HEIGHT);
 
@@ -121,7 +123,7 @@ void display(aten::window* wnd)
 			WIDTH, HEIGHT);
 	}
 
-	aten::visualizer::render(g_buffer.image(), g_camera.needRevert());
+	g_visualizer->render(g_buffer.image(), g_camera.needRevert());
 
 	g_rasterizerAABB.drawAABB(
 		&g_camera,
@@ -132,7 +134,7 @@ void display(aten::window* wnd)
 		static char tmp[1024];
 		sprintf(tmp, "sc_%d.png\0", g_frameNo);
 
-		aten::visualizer::takeScreenshot(tmp);
+		g_visualizer->takeScreenshot(tmp);
 	}
 #endif
 	g_frameNo++;
@@ -166,7 +168,7 @@ int main(int argc, char* argv[])
 
 	aten::window::init(WIDTH, HEIGHT, TITLE, display);
 
-	aten::visualizer::init(WIDTH, HEIGHT);
+	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
 	aten::Blitter blitter;
 	blitter.init(
@@ -214,7 +216,7 @@ int main(int argc, char* argv[])
 
 	//aten::visualizer::addPostProc(&bishd);
 	//aten::visualizer::addPostProc(&blitter);
-	aten::visualizer::addPostProc(&gamma);
+	g_visualizer->addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&tonemap);
 	//aten::visualizer::addPostProc(&bloom);
 

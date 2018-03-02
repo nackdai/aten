@@ -49,6 +49,8 @@ static idaten::PathTracingTemporalReprojection g_tracer;
 static idaten::PathTracing g_tracer;
 #endif
 
+static aten::visualizer* g_visualizer;
+
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
@@ -69,7 +71,7 @@ void onRun(aten::window* window)
 		g_isCameraDirty = false;
 
 #ifndef ENABLE_TEMPORAL
-		aten::visualizer::clear();
+		g_visualizer->clear();
 #endif
 	}
 
@@ -91,13 +93,13 @@ void onRun(aten::window* window)
 
 	auto cudaelapsed = timer.end();
 
-	aten::visualizer::render(false);
+	g_visualizer->render(false);
 
 	if (g_willTakeScreenShot) {
 		static char buffer[1024];
 		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
 
-		aten::visualizer::takeScreenshot(buffer);
+		g_visualizer->takeScreenshot(buffer);
 
 		g_willTakeScreenShot = false;
 		g_cntScreenShot++;
@@ -259,7 +261,7 @@ int main()
 		onMouseWheel,
 		onKey);
 
-	aten::visualizer::init(WIDTH, HEIGHT);
+	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
 	aten::GammaCorrection gamma;
 	gamma.init(
@@ -282,7 +284,7 @@ int main()
 #ifdef ENABLE_ATROUS
 	aten::visualizer::addPostProc(&atrous);
 #endif
-	aten::visualizer::addPostProc(&gamma);
+	g_visualizer->addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 
 	aten::vec3 pos, at;

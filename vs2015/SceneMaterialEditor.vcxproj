@@ -28,6 +28,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\SceneMaterialEditor\main.cpp" />
+    <ClCompile Include="..\src\SceneMaterialEditor\MaterialEditWindow.cpp" />
+    <ClCompile Include="..\src\SceneMaterialEditor\MaterialSelectWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\SceneMaterialEditor\MaterialEditWindow.h" />
+    <ClInclude Include="..\src\SceneMaterialEditor\MaterialSelectWindow.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{251A6ACF-3B18-415B-94D6-5222C75CF049}</ProjectGuid>

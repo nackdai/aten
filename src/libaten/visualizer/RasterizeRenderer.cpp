@@ -263,7 +263,8 @@ namespace aten {
 	void RasterizeRenderer::draw(
 		object* obj, 
 		const camera* cam,
-		bool isWireFrame)
+		bool isWireFrame,
+		FBO* fbo/*= nullptr*/)
 	{
 		auto camparam = cam->param();
 
@@ -296,8 +297,14 @@ namespace aten {
 		auto hMtxW2C = m_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
-		// Set default frame buffer.
-		CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+		if (fbo) {
+			AT_ASSERT(fbo->isValid());
+			fbo->bindFBO(true);
+		}
+		else {
+			// Set default frame buffer.
+			CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+		}
 
 		if (isWireFrame) {
 			CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));

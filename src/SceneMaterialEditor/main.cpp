@@ -18,9 +18,11 @@ int main()
 
 	aten::AssetManager::suppressWarnings();
 
+#if 0
 	MaterialEditWindow::init(
 		1280, 720,
 		"MaterialEdit");
+#endif
 
 	MaterialSelectWindow::init(
 		1280, 720,

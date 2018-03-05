@@ -30,7 +30,7 @@ private:
 	static idaten::PathTracing s_tracer;
 
 	static aten::GammaCorrection s_gamma;
-	static aten::visualizer* MaterialEditWindow::s_visualizer;
+	static aten::visualizer* s_visualizer;
 
 	static bool s_willShowGUI;
 	static bool s_willTakeScreenShot;

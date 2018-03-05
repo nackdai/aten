@@ -253,6 +253,8 @@ namespace aten
 		// For using written OpenGL texture resource by GPGPU directly.
 		// So, not handle pixel data pointer directly.
 
+		CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+
 		CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
 		CALL_GL_API(::glClearDepthf(1.0f));
 		CALL_GL_API(::glClearStencil(0));
@@ -261,6 +263,15 @@ namespace aten
 		CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
 		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, gltex));
+
+		// TODO
+#if 0
+		// Specify filter after binding!!!!!
+		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
+		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+#endif
 
 		bool willRevert = revert;
 

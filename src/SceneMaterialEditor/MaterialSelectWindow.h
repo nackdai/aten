@@ -27,6 +27,8 @@ private:
 
 	static aten::object* s_obj;
 	static aten::RasterizeRenderer s_rasterizer;
+	
+	static aten::Blitter s_blitter;
 	static aten::visualizer* s_visualizer;
 
 	static bool s_willTakeScreenShot;
@@ -39,4 +41,6 @@ private:
 
 	static int s_width;
 	static int s_height;
+
+	static aten::FBO s_fbo;
 };

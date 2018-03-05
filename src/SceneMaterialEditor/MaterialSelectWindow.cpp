@@ -6,6 +6,11 @@ aten::RasterizeRenderer MaterialSelectWindow::s_rasterizer;
 
 aten::object* MaterialSelectWindow::s_obj = nullptr;
 
+aten::Blitter MaterialSelectWindow::s_blitter;
+aten::visualizer* MaterialSelectWindow::s_visualizer = nullptr;
+
+aten::FBO MaterialSelectWindow::s_fbo;
+
 aten::PinholeCamera MaterialSelectWindow::s_camera;
 bool MaterialSelectWindow::s_isCameraDirty = false;
 
@@ -32,7 +37,14 @@ void MaterialSelectWindow::onRun(aten::window* window)
 		s_isCameraDirty = false;
 	}
 
-	s_rasterizer.draw(s_obj, &s_camera, false);
+	s_rasterizer.draw(
+		s_obj,
+		&s_camera,
+		false,
+		&s_fbo);
+
+	s_fbo.bindAsTexture();
+	s_visualizer->render(s_fbo.getTexHandle(), false);
 }
 
 void MaterialSelectWindow::onClose()
@@ -175,6 +187,18 @@ bool MaterialSelectWindow::init(
 		s_width, s_height,
 		"../shader/drawobj_vs.glsl",
 		"../shader/drawobj_fs.glsl");
+
+	s_visualizer = aten::visualizer::init(s_width, s_height);
+
+	s_blitter.init(
+		s_width, s_height,
+		"../shader/fullscreen_vs.glsl",
+		"../shader/fullscreen_fs.glsl");
+
+	s_visualizer->addPostProc(&s_blitter);
+
+	s_fbo.asMulti(2);
+	s_fbo.init(s_width, s_height, aten::PixelFormat::rgba8, true);
 
 	return true;
 }

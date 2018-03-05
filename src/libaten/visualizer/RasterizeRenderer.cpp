@@ -333,8 +333,9 @@ namespace aten {
 
 		auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
 		auto hColor = m_shader.getHandle("color");
+		auto hMtrlId = m_shader.getHandle("materialId");
 
-		obj->draw([&](const aten::vec3& color, const aten::texture* albedo) {
+		obj->draw([&](const aten::vec3& color, const aten::texture* albedo, int mtrlid) {
 			if (albedo) {
 				albedo->bindAsGLTexture(0, &m_shader);
 				CALL_GL_API(::glUniform1i(hHasAlbedo, true));
@@ -344,6 +345,10 @@ namespace aten {
 			}
 
 			CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
+
+			if (hMtrlId >= 0) {
+				CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
+			}
 		});
 
 		// –ß‚·.

@@ -35,6 +35,10 @@
     <ClInclude Include="..\src\SceneMaterialEditor\MaterialEditWindow.h" />
     <ClInclude Include="..\src\SceneMaterialEditor\MaterialSelectWindow.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\SceneMaterialEditor\drawobj_fs.glsl" />
+    <None Include="..\src\SceneMaterialEditor\drawobj_vs.glsl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{251A6ACF-3B18-415B-94D6-5222C75CF049}</ProjectGuid>
     <RootNamespace>SceneMaterialEditor</RootNamespace>

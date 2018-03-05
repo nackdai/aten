@@ -82,7 +82,9 @@ namespace AT_NAME
 
 			auto color = m_mtrl ? m_mtrl->param().baseColor : vec3(1);
 
-			func(color, albedo);
+			auto mtrlid = m_mtrl ? m_mtrl->id() : -1;
+
+			func(color, albedo, mtrlid);
 		}
 
 		auto vb = VertexManager::getVB();

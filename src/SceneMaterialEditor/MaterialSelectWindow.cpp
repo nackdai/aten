@@ -185,8 +185,8 @@ bool MaterialSelectWindow::init(
 
 	s_rasterizer.init(
 		s_width, s_height,
-		"../shader/drawobj_vs.glsl",
-		"../shader/drawobj_fs.glsl");
+		"./drawobj_vs.glsl",
+		"./drawobj_fs.glsl");
 
 	s_visualizer = aten::visualizer::init(s_width, s_height);
 

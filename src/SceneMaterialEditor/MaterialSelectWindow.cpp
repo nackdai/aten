@@ -25,6 +25,10 @@ int MaterialSelectWindow::s_prevY = 0;
 int MaterialSelectWindow::s_width = 0;
 int MaterialSelectWindow::s_height = 0;
 
+bool MaterialSelectWindow::s_willPick = false;
+
+std::vector<aten::TColor<uint8_t, 4>> MaterialSelectWindow::s_attrib;
+
 void MaterialSelectWindow::onRun(aten::window* window)
 {
 	if (s_isCameraDirty) {
@@ -45,6 +49,29 @@ void MaterialSelectWindow::onRun(aten::window* window)
 
 	s_fbo.bindAsTexture();
 	s_visualizer->render(s_fbo.getTexHandle(), false);
+
+	if (s_willPick && s_isMouseLBtnDown) {
+		aten::visualizer::getTextureData(s_fbo.getTexHandle(1), s_attrib);
+
+		// NOTE
+		// up-side-down.
+		int pos = (s_height - 1 - s_prevY) * s_width + s_prevX;
+		auto attrib = s_attrib[pos];
+
+		int mtrlid = (int)attrib.r();
+		mtrlid -= 1;
+
+		aten::material* mtrl = nullptr;
+		if (mtrlid >= 0) {
+			mtrl = aten::material::getMaterial(mtrlid);
+		}
+
+		AT_PRINTF(
+			"(%d, %d)[%d]->(%s)\n", 
+			s_prevX, s_prevY, 
+			mtrlid,
+			mtrl ? mtrl->name() : "none");
+	}
 }
 
 void MaterialSelectWindow::onClose()
@@ -98,6 +125,19 @@ void MaterialSelectWindow::onMouseWheel(int delta)
 void MaterialSelectWindow::onKey(bool press, aten::Key key)
 {
 	static const real offset = real(0.1);
+
+	if (press) {
+		if (key == aten::Key::Key_CONTROL) {
+			s_willPick = true;
+			return;
+		}
+	}
+	else {
+		if (key == aten::Key::Key_CONTROL) {
+			s_willPick = false;
+			return;
+		}
+	}
 
 	if (press) {
 		switch (key) {
@@ -199,6 +239,8 @@ bool MaterialSelectWindow::init(
 
 	s_fbo.asMulti(2);
 	s_fbo.init(s_width, s_height, aten::PixelFormat::rgba8, true);
+
+	s_attrib.resize(s_width * s_height);
 
 	return true;
 }

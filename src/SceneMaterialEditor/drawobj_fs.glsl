@@ -25,5 +25,7 @@ void main()
 		outColor = color;
 	}
 
-	outAttrib = vec4(materialId / 255.0f, 0, 0, 1);
+	// NOTE
+	// 0 ‚Í‰½‚à‚È‚¢ˆµ‚¢‚É‚·‚é...
+	outAttrib = vec4((materialId + 1) / 255.0f, 0, 0, 1);
 }

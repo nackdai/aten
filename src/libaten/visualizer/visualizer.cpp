@@ -378,4 +378,22 @@ namespace aten
 		auto ret = ::stbi_write_png(filename, m_width, m_height, bpp, &dst[0], pitch);
 		AT_ASSERT(ret > 0);
 	}
+
+	void visualizer::getTextureData(
+		uint32_t gltex, 
+		std::vector<TColor<uint8_t, 4>>& dst)
+	{
+		CALL_GL_API(::glFlush());
+		CALL_GL_API(::glFinish());
+
+		auto size = dst.size() * sizeof(uint8_t) * 4;
+
+		CALL_GL_API(::glGetTextureImage(
+			gltex,
+			0,
+			GL_RGBA,
+			GL_UNSIGNED_BYTE,
+			size,
+			&dst[0]));
+	}
 }

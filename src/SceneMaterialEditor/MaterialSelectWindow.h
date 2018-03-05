@@ -42,5 +42,9 @@ private:
 	static int s_width;
 	static int s_height;
 
+	static bool s_willPick;
+
 	static aten::FBO s_fbo;
+
+	static std::vector<aten::TColor<uint8_t, 4>> s_attrib;
 };

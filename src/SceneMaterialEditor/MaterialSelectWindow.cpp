@@ -26,8 +26,13 @@ int MaterialSelectWindow::s_width = 0;
 int MaterialSelectWindow::s_height = 0;
 
 bool MaterialSelectWindow::s_willPick = false;
+bool MaterialSelectWindow::s_pick = false;
 
 std::vector<aten::TColor<uint8_t, 4>> MaterialSelectWindow::s_attrib;
+
+int MaterialSelectWindow::s_pickedMtrlId = 0;
+
+MaterialSelectWindow::FuncPickMtrlIdNotifier MaterialSelectWindow::s_pickMtrlIdNotifier = nullptr;
 
 void MaterialSelectWindow::onRun(aten::window* window)
 {
@@ -50,7 +55,7 @@ void MaterialSelectWindow::onRun(aten::window* window)
 	s_fbo.bindAsTexture();
 	s_visualizer->render(s_fbo.getTexHandle(), false);
 
-	if (s_willPick && s_isMouseLBtnDown) {
+	if (s_pick) {
 		aten::visualizer::getTextureData(s_fbo.getTexHandle(1), s_attrib);
 
 		// NOTE
@@ -71,6 +76,12 @@ void MaterialSelectWindow::onRun(aten::window* window)
 			s_prevX, s_prevY, 
 			mtrlid,
 			mtrl ? mtrl->name() : "none");
+
+		if (mtrlid >= 0) {
+			s_pickMtrlIdNotifier(mtrlid);
+		}
+
+		s_pick = false;
 	}
 }
 
@@ -90,6 +101,16 @@ void MaterialSelectWindow::onMouseBtn(bool left, bool press, int x, int y)
 
 		s_isMouseLBtnDown = left;
 		s_isMouseRBtnDown = !left;
+
+		if (s_isMouseLBtnDown) {
+			if (s_willPick) {
+				s_pick = true;
+			}
+			else {
+				s_pick = false;
+			}
+			s_willPick = false;
+		}
 	}
 }
 
@@ -135,6 +156,7 @@ void MaterialSelectWindow::onKey(bool press, aten::Key key)
 	else {
 		if (key == aten::Key::Key_CONTROL) {
 			s_willPick = false;
+			s_pick = false;
 			return;
 		}
 	}

@@ -13,6 +13,10 @@ public:
 		int width, int height,
 		const char* titile);
 
+	static void notifyPickMtrlId(int mtrlid);
+
+	static void gatherMaterial();
+
 private:
 	static void onRun(aten::window* window);
 	static void onClose();
@@ -46,4 +50,8 @@ private:
 
 	static int s_width;
 	static int s_height;
+
+	static int s_pickedMtrlId;
+	static bool s_needUpdateMtrl;
+	static std::vector<aten::material*> s_mtrls;
 };

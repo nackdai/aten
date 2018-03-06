@@ -18,16 +18,25 @@ int main()
 
 	aten::AssetManager::suppressWarnings();
 
-#if 0
+#if 1
 	MaterialEditWindow::init(
 		1280, 720,
 		"MaterialEdit");
+
+	aten::material::clearMaterialList();
 #endif
 
 	MaterialSelectWindow::init(
 		1280, 720,
 		"MaterialSelect",
 		"../../asset/cornellbox/orig.obj");
+
+	MaterialEditWindow::gatherMaterial();
+
+	aten::material::clearMaterialList();
+
+	MaterialSelectWindow::setFuncPickMtrlIdNotifier(
+		MaterialEditWindow::notifyPickMtrlId);
 
 	aten::window::run();
 

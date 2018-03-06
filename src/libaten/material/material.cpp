@@ -40,6 +40,11 @@ namespace AT_NAME
 		return false;
 	}
 
+	void material::clearMaterialList()
+	{
+		g_materials.clear();
+	}
+
 	int material::findMaterialIdx(material* mtrl)
 	{
 		auto found = std::find(g_materials.begin(), g_materials.end(), mtrl);

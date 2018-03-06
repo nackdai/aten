@@ -13,6 +13,13 @@ public:
 		const char* titile,
 		const char* input);
 
+	using FuncPickMtrlIdNotifier = std::function<void(int)>;
+
+	static void setFuncPickMtrlIdNotifier(FuncPickMtrlIdNotifier func)
+	{
+		s_pickMtrlIdNotifier = func;
+	}
+
 private:
 	static void onRun(aten::window* window);
 	static void onClose();
@@ -43,8 +50,13 @@ private:
 	static int s_height;
 
 	static bool s_willPick;
+	static bool s_pick;
 
 	static aten::FBO s_fbo;
 
 	static std::vector<aten::TColor<uint8_t, 4>> s_attrib;
+
+	static int s_pickedMtrlId;
+
+	static FuncPickMtrlIdNotifier s_pickMtrlIdNotifier;
 };

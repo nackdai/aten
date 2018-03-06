@@ -333,6 +333,15 @@ namespace AT_NAME
 			return m_param;
 		}
 
+		void copyParam(const aten::MaterialParameter& param)
+		{
+			AT_ASSERT(m_param.type == param.type);
+
+			if (m_param.type == param.type) {
+				m_param = param;
+			}
+		}
+
 		void setName(const char* name)
 		{
 			m_name = name;
@@ -365,6 +374,8 @@ namespace AT_NAME
 
 		// This is very dangerous, be very careful to use...
 		static bool deleteMaterial(material* mtrl, bool needDelete = false);
+
+		static void clearMaterialList();
 
 		// TODO
 		// マテリアルにIDを持たせているので、この関数は不要.

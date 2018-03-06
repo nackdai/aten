@@ -37,6 +37,10 @@ int MaterialEditWindow::s_prevY = 0;
 int MaterialEditWindow::s_width = 0;
 int MaterialEditWindow::s_height = 0;
 
+int MaterialEditWindow::s_pickedMtrlId = 0;
+bool MaterialEditWindow::s_needUpdateMtrl = false;
+std::vector<aten::material*> MaterialEditWindow::s_mtrls;
+
 void getCameraPosAndAt(
 	aten::vec3& pos,
 	aten::vec3& at,
@@ -120,6 +124,26 @@ public:
 
 MaterialParamEditor s_mtrlParamEditor;
 
+void MaterialEditWindow::notifyPickMtrlId(int mtrlid)
+{
+	s_needUpdateMtrl = (s_pickedMtrlId != mtrlid);
+	s_pickedMtrlId = mtrlid;
+}
+
+void MaterialEditWindow::gatherMaterial()
+{
+	const auto& mtrls = aten::material::getMaterials();
+	for (const auto mtrl : mtrls) {
+		s_mtrls.push_back(const_cast<aten::material*>(mtrl));
+	}
+
+	// Update material.
+	std::vector<aten::MaterialParameter> params(1);
+	params[0] = s_mtrls[0]->param();
+	s_tracer.updateMaterial(params);
+	s_tracer.reset();
+}
+
 void MaterialEditWindow::onRun(aten::window* window)
 {
 	float updateTime = 0.0f;
@@ -141,7 +165,6 @@ void MaterialEditWindow::onRun(aten::window* window)
 		s_width, s_height,
 		s_maxSamples,
 		s_maxBounce);
-
 
 	s_visualizer->render(false);
 
@@ -173,8 +196,9 @@ void MaterialEditWindow::onRun(aten::window* window)
 			s_tracer.reset();
 		}
 
-		auto mtrl = aten::material::getMaterial(0);
-		bool needUpdateMtrl = false;
+		auto mtrl = s_mtrls[s_pickedMtrlId];
+
+		ImGui::Text("%s", mtrl->name());
 
 		static const char* items[] = {
 			"Emissive",
@@ -188,20 +212,31 @@ void MaterialEditWindow::onRun(aten::window* window)
 		};
 		int mtrlType = (int)mtrl->param().type;
 		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
-			aten::material::deleteMaterial(mtrl, true);
-			mtrl = createMaterial((aten::MaterialType)mtrlType);
-			needUpdateMtrl = true;
+			auto newMtrl = createMaterial((aten::MaterialType)mtrlType);
+
+			// Avoid to keep global list.
+			aten::material::deleteMaterial(newMtrl);
+
+			newMtrl->copyParam(mtrl->param());
+			newMtrl->setName(mtrl->name());
+
+			mtrl = newMtrl;
+			s_mtrls[s_pickedMtrlId] = mtrl;
+
+			s_needUpdateMtrl = true;
 		}
 
 		if (mtrl->edit(&s_mtrlParamEditor)) {
-			needUpdateMtrl = true;
+			s_needUpdateMtrl = true;
 		}
 
-		if (needUpdateMtrl) {
+		if (s_needUpdateMtrl) {
 			std::vector<aten::MaterialParameter> params(1);
 			params[0] = mtrl->param();
 			s_tracer.updateMaterial(params);
 			s_tracer.reset();
+
+			s_needUpdateMtrl = false;
 		}
 
 		window->drawImGui();
@@ -378,15 +413,15 @@ bool MaterialEditWindow::init(
 	{
 		std::vector<aten::GeomParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
+		std::vector<aten::MaterialParameter> mtrlparams;
 		std::vector<aten::LightParameter> lightparams;
-		std::vector<aten::MaterialParameter> mtrlparms;
 		std::vector<aten::vertex> vtxparams;
 
 		aten::DataCollector::collect(
 			shapeparams,
 			primparams,
 			lightparams,
-			mtrlparms,
+			mtrlparams,
 			vtxparams);
 
 		const auto& nodes = s_scene.getAccel()->getNodes();
@@ -417,7 +452,7 @@ bool MaterialEditWindow::init(
 			s_width, s_height,
 			camparam,
 			shapeparams,
-			mtrlparms,
+			mtrlparams,
 			lightparams,
 			nodes,
 			primparams,

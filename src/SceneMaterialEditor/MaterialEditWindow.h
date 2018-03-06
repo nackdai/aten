@@ -15,7 +15,7 @@ public:
 
 	static void notifyPickMtrlId(int mtrlid);
 
-	static void gatherMaterial();
+	static void buildScene();
 
 	using FuncPickMtrlIdNotifier = std::function<void(int)>;
 
@@ -33,6 +33,8 @@ private:
 	static void onKey(bool press, aten::Key key);
 
 private:
+	static aten::window* s_wnd;
+
 	static aten::PinholeCamera s_camera;
 	static bool s_isCameraDirty;
 

@@ -29,9 +29,10 @@ int main()
 	MaterialSelectWindow::init(
 		1280, 720,
 		"MaterialSelect",
-		"../../asset/cornellbox/orig.obj");
+		//"../../asset/cornellbox/orig.obj");
+		"../../asset/sponza/sponza.obj");
 
-	MaterialEditWindow::gatherMaterial();
+	MaterialEditWindow::buildScene();
 
 	aten::material::clearMaterialList();
 

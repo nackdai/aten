@@ -124,6 +124,7 @@ void MaterialSelectWindow::onRun(aten::window* window)
 		int mtrlid = (int)attrib.r();
 		mtrlid -= 1;
 
+#if 0
 		aten::material* mtrl = nullptr;
 		if (mtrlid >= 0) {
 			mtrl = aten::material::getMaterial(mtrlid);
@@ -134,6 +135,7 @@ void MaterialSelectWindow::onRun(aten::window* window)
 			s_prevX, s_prevY, 
 			mtrlid,
 			mtrl ? mtrl->name() : "none");
+#endif
 
 		if (mtrlid >= 0) {
 			s_pickMtrlIdNotifier(mtrlid);

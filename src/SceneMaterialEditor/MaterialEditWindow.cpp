@@ -12,6 +12,8 @@
 
 #include "atenscene.h"
 
+aten::window* MaterialEditWindow::s_wnd = nullptr;
+
 aten::PinholeCamera MaterialEditWindow::s_camera;
 bool MaterialEditWindow::s_isCameraDirty = false;
 
@@ -135,8 +137,71 @@ void MaterialEditWindow::notifyPickMtrlId(int mtrlid)
 	s_pickedMtrlId = mtrlid;
 }
 
-void MaterialEditWindow::gatherMaterial()
+void MaterialEditWindow::buildScene()
 {
+	s_wnd->asCurrent();
+
+	{
+		auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+		aten::envmap bg;
+		bg.init(envmap);
+		aten::ImageBasedLight ibl(&bg);
+
+		s_scene.addImageBasedLight(&ibl);
+
+		{
+			std::vector<aten::GeomParameter> shapeparams;
+			std::vector<aten::PrimitiveParamter> primparams;
+			std::vector<aten::MaterialParameter> mtrlparams;
+			std::vector<aten::LightParameter> lightparams;
+			std::vector<aten::vertex> vtxparams;
+
+			aten::DataCollector::collect(
+				shapeparams,
+				primparams,
+				lightparams,
+				mtrlparams,
+				vtxparams);
+
+			const auto& nodes = s_scene.getAccel()->getNodes();
+			const auto& mtxs = s_scene.getAccel()->getMatrices();
+
+			std::vector<idaten::TextureResource> tex;
+			{
+				auto texs = aten::texture::getTextures();
+
+				for (const auto t : texs) {
+					tex.push_back(
+						idaten::TextureResource(t->colors(), t->width(), t->height()));
+				}
+			}
+
+			for (auto& l : lightparams) {
+				if (l.type == aten::LightType::IBL) {
+					l.envmap.idx = envmap->id();
+				}
+			}
+
+			auto camparam = s_camera.param();
+			camparam.znear = real(0.1);
+			camparam.zfar = real(10000.0);
+
+			s_tracer.update(
+				aten::visualizer::getTexHandle(),
+				s_width, s_height,
+				camparam,
+				shapeparams,
+				mtrlparams,
+				lightparams,
+				nodes,
+				primparams,
+				vtxparams,
+				mtxs,
+				tex,
+				idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+		}
+	}
+
 	const auto& mtrls = aten::material::getMaterials();
 	for (const auto mtrl : mtrls) {
 		s_mtrls.push_back(const_cast<aten::material*>(mtrl));
@@ -356,11 +421,7 @@ void MaterialEditWindow::onKey(bool press, aten::Key key)
 				at,
 				aten::vec3(0, 1, 0),
 				vfov,
-#ifdef ENABLE_GEOMRENDERING
-				WIDTH >> 1, HEIGHT >> 1);
-#else
 				s_width, s_height);
-#endif
 		}
 			break;
 		default:
@@ -380,7 +441,7 @@ bool MaterialEditWindow::init(
 
 	aten::initSampler(s_width, s_height);
 
-	auto wnd = aten::window::init(
+	s_wnd = aten::window::init(
 		s_width, s_height, title,
 		MaterialEditWindow::onRun,
 		MaterialEditWindow::onClose,
@@ -389,7 +450,7 @@ bool MaterialEditWindow::init(
 		MaterialEditWindow::onMouseWheel,
 		MaterialEditWindow::onKey);
 
-	wnd->asCurrent();
+	s_wnd->asCurrent();
 
 	s_visualizer = aten::visualizer::init(s_width, s_height);
 	
@@ -418,6 +479,7 @@ bool MaterialEditWindow::init(
 		s_width * s_height,
 		1024);
 
+#if 0
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
@@ -476,6 +538,7 @@ bool MaterialEditWindow::init(
 			tex,
 			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
 	}
+#endif
 
 	return true;
 }

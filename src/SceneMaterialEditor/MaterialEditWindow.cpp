@@ -293,7 +293,7 @@ void MaterialEditWindow::onRun(aten::window* window)
 			// Avoid to keep global list.
 			aten::material::deleteMaterial(newMtrl);
 
-			newMtrl->copyParam(mtrl->param());
+			newMtrl->copyParamEx(mtrl->param());
 			newMtrl->setName(mtrl->name());
 
 			mtrl = newMtrl;

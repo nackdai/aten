@@ -351,6 +351,30 @@ namespace AT_NAME
 			}
 		}
 
+		// TODO
+		void copyParamEx(const aten::MaterialParameter& param)
+		{
+			m_param.baseColor = param.baseColor;
+			m_param.ior = param.ior;
+			m_param.shininess = param.shininess;
+			m_param.roughness = param.roughness;			
+			m_param.subsurface = param.subsurface;
+			m_param.metallic = param.metallic;
+			m_param.specular = param.specular;
+			m_param.specularTint = param.specularTint;
+			m_param.anisotropic = param.anisotropic;
+			m_param.sheen = param.sheen;
+			m_param.sheenTint = param.sheenTint;
+			m_param.clearcoat = param.clearcoat;
+			m_param.clearcoatGloss = param.clearcoatGloss;
+
+			m_param.albedoMap = param.albedoMap;
+			m_param.normalMap = param.normalMap;
+			m_param.roughnessMap = param.roughnessMap;
+
+			m_param.attrib = param.attrib;
+		}
+
 		void setName(const char* name)
 		{
 			m_name = name;

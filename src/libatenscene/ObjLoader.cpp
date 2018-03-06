@@ -5,6 +5,8 @@
 #include "utility.h"
 #include "ImageLoader.h"
 
+#pragma optimize( "", off)
+
 namespace aten
 {
 	static std::string g_base;
@@ -210,7 +212,9 @@ namespace aten
 						aten::vec3 diffuse(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]);
 
 						aten::texture* albedoMap = nullptr;
+						aten::texture* normalMap = nullptr;
 
+						// Albedo map.
 						if (!objmtrl.diffuse_texname.empty()) {
 							albedoMap = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
 
@@ -225,8 +229,24 @@ namespace aten
 								albedoMap->initAsGLTexture();
 							}
 						}
+
+						// Normal map.
+						if (!objmtrl.bump_texname.empty()) {
+							normalMap = AssetManager::getTex(objmtrl.bump_texname.c_str());
+
+							if (!normalMap) {
+								std::string texname = pathname + "/" + objmtrl.bump_texname;
+								normalMap = aten::ImageLoader::load(texname);
+							}
+
+							// TODO
+							// ‚±‚±‚Å‚¢‚¢‚Ì‚©?
+							if (normalMap) {
+								normalMap->initAsGLTexture();
+							}
+						}
 						
-						aten::material* mtrl = new aten::lambert(diffuse, albedoMap);
+						aten::material* mtrl = new aten::lambert(diffuse, albedoMap, normalMap);
 						mtrl->setName(objmtrl.name.c_str());
 
 						dstshape->setMaterial(mtrl);

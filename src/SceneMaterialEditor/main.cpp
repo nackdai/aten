@@ -30,7 +30,8 @@ int main()
 		1280, 720,
 		"MaterialSelect",
 		//"../../asset/cornellbox/orig.obj");
-		"../../asset/sponza/sponza.obj");
+		//"../../asset/sponza/sponza.obj");
+		"../../asset/mansion/interior_bundled4_chairmove_1163769_606486.obj");
 
 	MaterialEditWindow::buildScene();
 

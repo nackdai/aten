@@ -250,6 +250,8 @@ namespace aten
 						mtrl->setName(objmtrl.name.c_str());
 
 						dstshape->setMaterial(mtrl);
+
+						AssetManager::registerMtrl(mtrl->name(), mtrl);
 					}
 				}
 

@@ -40,6 +40,9 @@ int MaterialEditWindow::s_height = 0;
 int MaterialEditWindow::s_pickedMtrlId = 0;
 bool MaterialEditWindow::s_needUpdateMtrl = false;
 std::vector<aten::material*> MaterialEditWindow::s_mtrls;
+std::vector<const char*> MaterialEditWindow::s_mtrlNames;
+
+MaterialEditWindow::FuncPickMtrlIdNotifier MaterialEditWindow::s_pickMtrlIdNotifier;
 
 void getCameraPosAndAt(
 	aten::vec3& pos,
@@ -137,6 +140,7 @@ void MaterialEditWindow::gatherMaterial()
 	const auto& mtrls = aten::material::getMaterials();
 	for (const auto mtrl : mtrls) {
 		s_mtrls.push_back(const_cast<aten::material*>(mtrl));
+		s_mtrlNames.push_back(mtrl->name());
 	}
 
 	// Update material.
@@ -200,7 +204,12 @@ void MaterialEditWindow::onRun(aten::window* window)
 
 		auto mtrl = s_mtrls[s_pickedMtrlId];
 
-		ImGui::Text("%s", mtrl->name());
+		if (ImGui::Combo("name", &s_pickedMtrlId, &s_mtrlNames[0], s_mtrlNames.size())) {
+			mtrl = s_mtrls[s_pickedMtrlId];
+			s_needUpdateMtrl = true;
+
+			s_pickMtrlIdNotifier(s_pickedMtrlId);
+		}
 
 		static const char* items[] = {
 			"Emissive",

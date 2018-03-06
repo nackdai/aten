@@ -74,6 +74,11 @@ private:
 	bool m_isForward{ true };
 };
 
+void MaterialSelectWindow::notifyChangeMtrlId(int mtrlid)
+{
+	s_pickedMtrlId = mtrlid;
+}
+
 void MaterialSelectWindow::onRun(aten::window* window)
 {
 	if (s_isCameraDirty) {

@@ -17,6 +17,13 @@ public:
 
 	static void gatherMaterial();
 
+	using FuncPickMtrlIdNotifier = std::function<void(int)>;
+
+	static void setFuncChangeMtrlIdNotifier(FuncPickMtrlIdNotifier func)
+	{
+		s_pickMtrlIdNotifier = func;
+	}
+
 private:
 	static void onRun(aten::window* window);
 	static void onClose();
@@ -54,4 +61,7 @@ private:
 	static int s_pickedMtrlId;
 	static bool s_needUpdateMtrl;
 	static std::vector<aten::material*> s_mtrls;
+	static std::vector<const char*> s_mtrlNames;
+
+	static FuncPickMtrlIdNotifier s_pickMtrlIdNotifier;
 };

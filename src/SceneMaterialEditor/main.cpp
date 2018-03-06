@@ -38,6 +38,9 @@ int main()
 	MaterialSelectWindow::setFuncPickMtrlIdNotifier(
 		MaterialEditWindow::notifyPickMtrlId);
 
+	MaterialEditWindow::setFuncChangeMtrlIdNotifier(
+		MaterialSelectWindow::notifyChangeMtrlId);
+
 	aten::window::run();
 
 	aten::GLProfiler::terminate();

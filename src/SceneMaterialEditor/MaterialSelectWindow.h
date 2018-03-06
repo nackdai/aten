@@ -13,6 +13,8 @@ public:
 		const char* titile,
 		const char* input);
 
+	static void notifyChangeMtrlId(int mtrlid);
+
 	using FuncPickMtrlIdNotifier = std::function<void(int)>;
 
 	static void setFuncPickMtrlIdNotifier(FuncPickMtrlIdNotifier func)

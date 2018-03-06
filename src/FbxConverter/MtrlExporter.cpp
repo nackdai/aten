@@ -3,8 +3,6 @@
 
 #include "tinyxml2.h"
 
-#pragma optimize( "", off)
-
 // TODO
 // libatenscene::MaterialExporter‚Éæ‚èŠ·‚¦‚½‚¢...
 

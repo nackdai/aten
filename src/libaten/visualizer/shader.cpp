@@ -131,4 +131,28 @@ namespace aten {
 		auto handle = ::glGetUniformLocation(m_program, name);
 		return handle;
 	}
+
+	void shader::setUniformFloat(const char* name, real f)
+	{
+		auto handle = getHandle(name);
+		if (handle >= 0) {
+			CALL_GL_API(::glUniform1f(handle, (float)f));
+		}
+	}
+
+	void shader::setUniformInt(const char* name, int i)
+	{
+		auto handle = getHandle(name);
+		if (handle >= 0) {
+			CALL_GL_API(::glUniform1i(handle, i));
+		}
+	}
+
+	void shader::setUniformVec3(const char* name, const vec3& v)
+	{
+		auto handle = getHandle(name);
+		if (handle >= 0) {
+			CALL_GL_API(::glUniform3f(handle, v.x, v.y, v.z));
+		}
+	}
 }

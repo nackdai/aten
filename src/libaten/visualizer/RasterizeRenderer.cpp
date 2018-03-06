@@ -264,7 +264,8 @@ namespace aten {
 		object* obj, 
 		const camera* cam,
 		bool isWireFrame,
-		FBO* fbo/*= nullptr*/)
+		FBO* fbo/*= nullptr*/,
+		FuncSetUniform funcSetUniform/*= nullptr*/)
 	{
 		auto camparam = cam->param();
 
@@ -348,6 +349,10 @@ namespace aten {
 
 			if (hMtrlId >= 0) {
 				CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
+			}
+
+			if (funcSetUniform) {
+				funcSetUniform(m_shader, color, albedo, mtrlid);
 			}
 		});
 

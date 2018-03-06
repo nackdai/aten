@@ -40,11 +40,14 @@ namespace aten {
 			const camera* cam,
 			accelerator* accel);
 
+		using FuncSetUniform = std::function<void(shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)>;
+
 		void draw(
 			object* obj, 
 			const camera* cam,
 			bool isWireFrame,
-			FBO* fbo = nullptr);
+			FBO* fbo = nullptr,
+			FuncSetUniform funcSetUniform = nullptr);
 
 		void initBuffer(
 			uint32_t vtxStride,
@@ -58,7 +61,7 @@ namespace aten {
 			const camera* cam,
 			bool isWireFrame,
 			bool updateBuffer);
-
+		
 	private:
 		shader m_shader;
 		GeomVertexBuffer m_boxvb;

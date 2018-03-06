@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "math/vec3.h"
 
 namespace aten {
 	class shader {
@@ -36,6 +37,14 @@ namespace aten {
 		{
 			return (m_program > 0);
 		}
+
+		void setUniformFloat(const char* name, real f);
+		void setUniformInt(const char* name, int i);
+		void setUniformBool(const char* name, bool b)
+		{
+			setUniformInt(name, (int)b);
+		}
+		void setUniformVec3(const char* name, const vec3& v);
 
 	protected:
 		//GLuint m_program{ 0 };

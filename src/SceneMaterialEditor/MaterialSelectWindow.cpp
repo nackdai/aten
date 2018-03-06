@@ -30,9 +30,49 @@ bool MaterialSelectWindow::s_pick = false;
 
 std::vector<aten::TColor<uint8_t, 4>> MaterialSelectWindow::s_attrib;
 
-int MaterialSelectWindow::s_pickedMtrlId = 0;
+int MaterialSelectWindow::s_pickedMtrlId = -1;
 
 MaterialSelectWindow::FuncPickMtrlIdNotifier MaterialSelectWindow::s_pickMtrlIdNotifier = nullptr;
+
+template <typename T>
+class blink {
+public:
+	blink(T _min, T _max, T step)
+		: m_step(step)
+	{
+		m_min = std::min(_min, _max);
+		m_max = std::max(_min, _max);
+		m_value = m_min;
+	}
+	~blink() {}
+
+public:
+	float update()
+	{
+		m_value += m_isForward ? m_step : -m_step;
+
+		if (m_value >= m_max) {
+			m_isForward = false;
+		}
+		else if (m_value <= m_min) {
+			m_isForward = true;
+		}
+
+		m_value = aten::clamp(m_value, m_min, m_max);
+
+		float normalized = (m_value - m_min) / (float)(m_max - m_min);
+
+		return normalized;
+	}
+
+private:
+	T m_value;
+	T m_min{ (T)0 };
+	T m_max{ (T)0 };
+	T m_step{ (T)0 };
+
+	bool m_isForward{ true };
+};
 
 void MaterialSelectWindow::onRun(aten::window* window)
 {
@@ -46,11 +86,24 @@ void MaterialSelectWindow::onRun(aten::window* window)
 		s_isCameraDirty = false;
 	}
 
+	static blink<float> s_blinker(0.0f, 1.0f, 0.05f);
+	auto t = s_blinker.update();
+
 	s_rasterizer.draw(
 		s_obj,
 		&s_camera,
 		false,
-		&s_fbo);
+		&s_fbo,
+		[&](aten::shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)
+	{
+		if (s_pickedMtrlId == mtrlid) {
+			shd.setUniformBool("isSelected", true);
+			shd.setUniformFloat("time", t);
+		}
+		else {
+			shd.setUniformBool("isSelected", false);
+		}
+	});
 
 	s_fbo.bindAsTexture();
 	s_visualizer->render(s_fbo.getTexHandle(), false);
@@ -79,6 +132,7 @@ void MaterialSelectWindow::onRun(aten::window* window)
 
 		if (mtrlid >= 0) {
 			s_pickMtrlIdNotifier(mtrlid);
+			s_pickedMtrlId = mtrlid;
 		}
 
 		s_pick = false;

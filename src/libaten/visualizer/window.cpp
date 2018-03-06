@@ -250,7 +250,7 @@ namespace aten
 
 		if (g_windows.size() >= 1) {
 			// ÇQÇ¬Çﬂà»ç~.
-			::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
+			//::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
 		}
 
 		auto glfwWindow = ::glfwCreateWindow(

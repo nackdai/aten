@@ -79,21 +79,28 @@ namespace AT_NAME
 
 	const char* material::getMaterialTypeName(aten::MaterialType type)
 	{
+		initMaterialTypeName();
 		return g_mtrlTypeNames[type];
 	}
 
 	std::vector<const char*>& material::getMaterialTypeName()
 	{
+		initMaterialTypeName();
 		return g_mtrlTypeNames;
 	}
 
-	int material::initMaterial(material* mtrl, bool local)
+	void material::initMaterialTypeName()
 	{
 		if (g_mtrlTypeNames.empty()) {
 			for (auto name : mtrlTypeNames) {
 				g_mtrlTypeNames.push_back(name);
 			}
 		}
+	}
+
+	int material::initMaterial(material* mtrl, bool local)
+	{
+		initMaterialTypeName();
 
 		int id = -1;
 		if (!local) {
@@ -144,8 +151,8 @@ namespace AT_NAME
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);
 		
-		auto albedoMap = (aten::texture*)val.get<void*>("albedomap", nullptr);
-		auto normalMap = (aten::texture*)val.get<void*>("normalmap", nullptr);
+		auto albedoMap = (aten::texture*)val.get<void*>("albedoMap", nullptr);
+		auto normalMap = (aten::texture*)val.get<void*>("normalMap", nullptr);
 
 		m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
 		m_param.normalMap = normalMap ? normalMap->id() : -1;

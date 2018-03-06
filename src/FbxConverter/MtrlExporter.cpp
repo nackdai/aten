@@ -5,6 +5,9 @@
 
 #pragma optimize( "", off)
 
+// TODO
+// libatenscene::MaterialExporter‚Éæ‚èŠ·‚¦‚½‚¢...
+
 bool MtrlExporter::exportMaterial(
     const char* lpszOutFile,
     aten::FbxImporter* pImporter)
@@ -27,8 +30,19 @@ bool MtrlExporter::exportMaterial(
 
 		if (pImporter->getMaterial(i, mtrl)) {
 			auto xmlMtrlElement = xmlDoc.NewElement("material");
-			xmlMtrlElement->SetAttribute("name", mtrl.name.c_str());
-			xmlMtrlElement->SetAttribute("type", "lambert");	// Fixed type.
+
+			{
+				auto xmlMtrlAttribElem = xmlDoc.NewElement("name");
+				xmlMtrlAttribElem->SetText(mtrl.name.c_str());
+				xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+			}
+
+			{
+				// Fixed type.
+				auto xmlMtrlAttribElem = xmlDoc.NewElement("type");
+				xmlMtrlAttribElem->SetText("lambert");
+				xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+			}
 			
 			if (!mtrl.tex.empty()) {
 				// TODO
@@ -38,14 +52,18 @@ bool MtrlExporter::exportMaterial(
 
 				for (const auto& tex : mtrl.tex) {
 					if (tex.type.isNormal && !isExportedNormal) {
-						xmlMtrlElement->SetAttribute("normalmap", tex.name.c_str());
+						auto xmlMtrlAttribElem = xmlDoc.NewElement("normalMap");
+						xmlMtrlAttribElem->SetText(tex.name.c_str());
+						xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
 						isExportedNormal = true;
 					}
 					else if (tex.type.isSpecular) {
 						// TODO
 					}
 					else if (!isExportedAlbedo) {
-						xmlMtrlElement->SetAttribute("albedomap", tex.name.c_str());
+						auto xmlMtrlAttribElem = xmlDoc.NewElement("albedoMap");
+						xmlMtrlAttribElem->SetText(tex.name.c_str());
+						xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
 						isExportedAlbedo = true;
 					}
 				}
@@ -57,7 +75,10 @@ bool MtrlExporter::exportMaterial(
 			for (const auto& param : mtrl.params) {
 				if (param.name == "diffuse") {
 					sprintf(buf, "%.3f %.3f %.3f\0", param.values[0], param.values[1], param.values[2]);
-					xmlMtrlElement->SetAttribute("color", buf);
+
+					auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
+					xmlMtrlAttribElem->SetText(buf);
+					xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
 
 					isExportedAlbedoColor = true;
 
@@ -67,7 +88,10 @@ bool MtrlExporter::exportMaterial(
 
 			if (!isExportedAlbedoColor) {
 				sprintf(buf, "1.0 1.0 1.0");
-				xmlMtrlElement->SetAttribute("color", buf);
+				
+				auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
+				xmlMtrlAttribElem->SetText(buf);
+				xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
 			}
 
 			xmlRoot->InsertEndChild(xmlMtrlElement);

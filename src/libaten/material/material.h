@@ -397,6 +397,7 @@ namespace AT_NAME
 
 	private:
 		static int initMaterial(material* mtrl, bool local);
+		static void initMaterialTypeName();
 
 	protected:
 		int m_id{ 0 };

@@ -53,8 +53,8 @@ namespace aten {
 	// param_name
 	//  - type : material type [string]. If type is not specified, default type is "lambert".
 	//  - color : base color, emissive color, albedo color etc... [float3]
-	//	- albedomap : albedo texture [string]
-	//  - normalmap : normal texture [string]
+	//	- albedoMap : albedo texture [string]
+	//  - normalMap : normal texture [string]
 	//  - roughnessmap : roughness texture [string]
 	//  - ior : index of reflaction [float]
 	//  - shininess [float]
@@ -128,7 +128,7 @@ namespace aten {
 	using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
 #else
 	template <typename TYPE>
-	static aten::PolymorphicValue getValue(const tinyxml2::XMLAttribute* a)
+	static aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e)
 	{
 		AT_ASSERT(false);
 		PolymorphicValue ret;
@@ -136,11 +136,11 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLAttribute* a)
+	static aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e)
 	{
 		aten::PolymorphicValue v;
 
-		std::string text(a->Value());
+		std::string text(e->GetText());
 
 		std::vector<std::string> values;
 		int num = split(text, values, ' ');
@@ -153,17 +153,17 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
+	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e)
 	{
 		aten::PolymorphicValue v;
-		v.val.f = (real)a->DoubleValue();
+		v.val.f = (real)e->DoubleText();
 		return std::move(v);
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLAttribute* a)
+	static aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e)
 	{
-		auto s = a->Value();
+		auto s = e->GetText();
 
 		std::string pathname;
 		std::string extname;
@@ -183,7 +183,7 @@ namespace aten {
 		return std::move(v);
 	}
 
-	using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLAttribute*)>;
+	using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*)>;
 #endif
 
 	static GetValueFromFile g_funcGetValueFromFile[] = {
@@ -194,23 +194,22 @@ namespace aten {
 	C_ASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int)MtrlParamType::Num);
 
 	std::map<std::string, MtrlParamType> g_paramtypes = {
-		std::pair<std::string, MtrlParamType>("color", MtrlParamType::Vec3),
-		std::pair<std::string, MtrlParamType>("albedomap", MtrlParamType::Texture),
-		std::pair<std::string, MtrlParamType>("normalmap", MtrlParamType::Texture),
-		std::pair<std::string, MtrlParamType>("roughnessmap", MtrlParamType::Texture),
+		std::pair<std::string, MtrlParamType>("baseColor", MtrlParamType::Vec3),
 		std::pair<std::string, MtrlParamType>("ior", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("roughness", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("shininess", MtrlParamType::Double),
-		std::pair<std::string, MtrlParamType>("roughness", MtrlParamType::Double),
-		std::pair<std::string, MtrlParamType>("metallic", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("subsurface", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("metallic", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("specular", MtrlParamType::Double),
-		std::pair<std::string, MtrlParamType>("roughness", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("specularTint", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("anisotropic", MtrlParamType::Double),
-		std::pair<std::string, MtrlParamType>("sheen[float", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("sheen", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("sheenTint", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("clearcoat", MtrlParamType::Double),
 		std::pair<std::string, MtrlParamType>("clearcoatGloss", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("albedoMap", MtrlParamType::Texture),
+		std::pair<std::string, MtrlParamType>("normalMap", MtrlParamType::Texture),
+		std::pair<std::string, MtrlParamType>("roughnessMap", MtrlParamType::Texture),
 	};
 
 #ifdef USE_JSON
@@ -328,8 +327,8 @@ namespace aten {
 	//  - name : material name [string].
 	//  - type : material type [string]. If type is not specified, default type is "lambert".
 	//  - color : base color, emissive color, albedo color etc... [float3]
-	//	- albedomap : albedo texture [string]
-	//  - normalmap : normal texture [string]
+	//	- albedoMap : albedo texture [string]
+	//  - normalMap : normal texture [string]
 	//  - roughnessmap : roughness texture [string]
 	//  - ior : index of reflaction [float]
 	//  - shininess [float]
@@ -385,11 +384,11 @@ namespace aten {
 			std::string mtrlType;
 			Values mtrlValues;
 
-			for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
-				std::string attrName(attr->Name());
+			for (auto child = elem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
+				std::string paramName(child->Name());
 
-				if (attrName == "name") {
-					mtrlName = attr->Value();
+				if (paramName == "name") {
+					mtrlName = child->GetText();
 
 					// Check if there is same name material.
 					mtrl = AssetManager::getMtrl(mtrlName);
@@ -399,21 +398,21 @@ namespace aten {
 						break;
 					}
 				}
-				else if (attrName == "type") {
-					mtrlType = attr->Value();
+				else if (paramName == "type") {
+					mtrlType = child->GetText();
 				}
 				else {
 					// Get parameter type by parameter name.
-					auto itParamType = g_paramtypes.find(attrName);
+					auto itParamType = g_paramtypes.find(paramName);
 
 					if (itParamType != g_paramtypes.end()) {
 						auto paramType = itParamType->second;
 						auto funcGetValue = g_funcGetValueFromFile[(int)paramType];
 
 						// Get value from json.
-						auto value = funcGetValue(attr);
+						auto value = funcGetValue(child);
 
-						mtrlValues.add(attrName, value);
+						mtrlValues.add(paramName, value);
 					}
 				}
 			}
@@ -459,7 +458,9 @@ namespace aten {
 		const auto& defaultMtrlNames = aten::material::getMaterialTypeName();
 
 		// Check if default creators are registered.
-		if (g_creators.find(defaultMtrlNames[0]) == g_creators.end()) {
+		if (g_creators.empty()
+			|| g_creators.find(defaultMtrlNames[0]) == g_creators.end())
+		{
 			// Register default type.
 			for (int i = 0; i < defaultMtrlNames.size(); i++) {
 				g_creators.insert(std::pair<std::string, MaterialCreator>(defaultMtrlNames[i], g_funcs[i]));

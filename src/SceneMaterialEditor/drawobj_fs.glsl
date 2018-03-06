@@ -28,6 +28,7 @@ void main()
 	}
 
 	if (isSelected) {
+#if 0
 		vec3 complementaryColor = max(vec3(1) - outColor.rgb, vec3(0));
 
 		vec3 tmp = abs(outColor.rgb - complementaryColor.rgb);
@@ -35,6 +36,9 @@ void main()
 		if (tmp.x < 0.1 && tmp.y < 0.1 && tmp.y < 0.1) {
 			complementaryColor = vec3(1, 0, 0);
 		}
+#else
+		vec3 complementaryColor = vec3(1, 0, 0);
+#endif
 
 		outColor.rgb = mix(outColor.rgb, complementaryColor, time);
 	}

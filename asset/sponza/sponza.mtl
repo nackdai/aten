@@ -14,8 +14,8 @@ newmtl sp_00_luk_mali
 	Ke 0.000000 0.000000 0.000000
 	map_Ka SP_LUK.JPG
 	map_Kd SP_LUK.JPG
-	map_bump sp_luk-bump.JPG
-	bump sp_luk-bump.JPG
+	map_bump sp_luk-nml.png
+	bump sp_luk-nml.png
 
 newmtl sp_svod_kapitel
 	Ns 50.000000
@@ -30,8 +30,6 @@ newmtl sp_svod_kapitel
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 00_SKAP.JPG
 	map_Kd 00_SKAP.JPG
-	map_bump 00_SKAP.JPG
-	bump 00_SKAP.JPG
 
 newmtl sp_01_stub_baza_
 	Ns 19.999998
@@ -58,8 +56,8 @@ newmtl sp_01_stub_kut
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 01_STUB.JPG
 	map_Kd 01_STUB.JPG
-	map_bump 01_STUB-bump.jpg
-	bump 01_STUB-bump.jpg
+	map_bump 01_STUB-nml.png
+	bump 01_STUB-nml.png
 
 newmtl sp_00_stup
 	Ns 50.000000
@@ -74,8 +72,8 @@ newmtl sp_00_stup
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 01_STUB.JPG
 	map_Kd 01_STUB.JPG
-	map_bump 01_STUB-bump.jpg
-	bump 01_STUB-bump.jpg
+	map_bump 01_STUB-nml.png
+	bump 01_STUB-nml.png
 
 newmtl sp_01_stub_baza
 	Ns 50.000000
@@ -90,8 +88,6 @@ newmtl sp_01_stub_baza
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 01_S_BA.JPG
 	map_Kd 01_S_BA.JPG
-	map_bump 01_S_BA.JPG
-	bump 01_S_BA.JPG
 
 newmtl sp_00_luk_mal1
 	Ns 50.000000
@@ -106,8 +102,8 @@ newmtl sp_00_luk_mal1
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 01_ST_KP.JPG
 	map_Kd 01_ST_KP.JPG
-	map_bump 01_St_kp-bump.jpg
-	bump 01_St_kp-bump.jpg
+	map_bump 01_St_kp-nml.png
+	bump 01_St_kp-nml.png
 
 newmtl sp_01_stub
 	Ns 50.000000
@@ -122,8 +118,8 @@ newmtl sp_01_stub
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 01_STUB.JPG
 	map_Kd 01_STUB.JPG
-	map_bump 01_STUB-bump.jpg
-	bump 01_STUB-bump.jpg
+	map_bump 01_STUB-nml.png
+	bump 01_STUB-nml.png
 
 newmtl sp_01_stup
 	Ns 50.000000
@@ -152,8 +148,6 @@ newmtl sp_vijenac
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 00_SKAP.JPG
 	map_Kd 00_SKAP.JPG
-	map_bump 00_SKAP.JPG
-	bump 00_SKAP.JPG
 
 newmtl sp_00_svod
 	Ns 1.000000
@@ -168,8 +162,8 @@ newmtl sp_00_svod
 	Ke 0.000000 0.000000 0.000000
         map_Kd KAMEN-stup.JPG
         map_Ka KAMEN-stup.JPG
-        map_bump KAMEN-stup.jpg
-        bump KAMEN-stup.jpg
+        map_bump KAMEN-nml.png
+        bump KAMEN-nml.png
 
 newmtl sp_02_reljef
 	Ns 50.000000
@@ -184,8 +178,8 @@ newmtl sp_02_reljef
 	Ke 0.000000 0.000000 0.000000
 	map_Ka RELJEF.JPG
 	map_Kd RELJEF.JPG
-	map_bump reljef-bump.jpg
-	bump reljef-bump.jpg
+	map_bump reljef-nml.png
+	bump reljef-nml.png
 
 newmtl sp_01_luk_a
 	Ns 50.000000
@@ -200,8 +194,8 @@ newmtl sp_01_luk_a
 	Ke 0.000000 0.000000 0.000000
 	map_Ka SP_LUK.JPG
 	map_Kd SP_LUK.JPG
-	map_bump sp_luk-bump.JPG
-	bump sp_luk-bump.JPG
+	map_bump sp_luk-nml.png
+	bump sp_luk-nml.png
 
 newmtl sp_zid_vani
 	Ns 50.000000
@@ -216,8 +210,8 @@ newmtl sp_zid_vani
 	Ke 0.000000 0.000000 0.000000
 	map_Ka KAMEN.JPG
 	map_Kd KAMEN.JPG
-	map_bump KAMEN-bump.jpg
-	bump KAMEN-bump.jpg
+	map_bump KAMEN-nml.png
+	bump KAMEN-nml.png
 
 newmtl sp_01_stup_baza
 	Ns 50.000000
@@ -232,8 +226,6 @@ newmtl sp_01_stup_baza
 	Ke 0.000000 0.000000 0.000000
 	map_Ka 01_S_BA.JPG
 	map_Kd 01_S_BA.JPG
-	map_bump 01_S_BA.JPG
-	bump 01_S_BA.JPG
 
 newmtl sp_00_zid
 	Ns 50.000000
@@ -248,8 +240,8 @@ newmtl sp_00_zid
 	Ke 0.000000 0.000000 0.000000
 	map_Ka KAMEN.JPG
 	map_Kd KAMEN.JPG
-	map_bump KAMEN-bump.jpg
-	bump KAMEN-bump.jpg
+	map_bump KAMEN-nml.png
+	bump KAMEN-nml.png
 
 newmtl sp_00_prozor
 	Ns 50.000000
@@ -264,8 +256,6 @@ newmtl sp_00_prozor
 	Ke 0.000000 0.000000 0.000000
 	map_Ka PROZOR1.JPG
 	map_Kd PROZOR1.JPG
-	map_bump PROZOR1.JPG
-	bump PROZOR1.JPG
 
 newmtl sp_00_vrata_krug
 	Ns 19.999998
@@ -280,8 +270,6 @@ newmtl sp_00_vrata_krug
 	Ke 0.000000 0.000000 0.000000
 	map_Ka VRATA_KR.JPG
 	map_Kd VRATA_KR.JPG
-	map_bump VRATA_KR.JPG
-	bump VRATA_KR.JPG
 
 newmtl sp_00_pod
 	Ns 50.000000
@@ -296,8 +284,8 @@ newmtl sp_00_pod
 	Ke 0.000000 0.000000 0.000000
 	map_Ka KAMEN.JPG
 	map_Kd KAMEN.JPG
-	map_bump KAMEN-bump.jpg
-	bump KAMEN-bump.jpg
+	map_bump KAMEN-nml.png
+	bump KAMEN-nml.png
 
 newmtl sp_00_vrata_kock
 	Ns 19.999998
@@ -312,5 +300,3 @@ newmtl sp_00_vrata_kock
 	Ke 0.000000 0.000000 0.000000
 	map_Ka VRATA_KO.JPG
 	map_Kd VRATA_KO.JPG
-	map_bump VRATA_KO.JPG
-	bump VRATA_KO.JPG

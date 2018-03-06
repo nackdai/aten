@@ -8,3 +8,4 @@
 #include "AssetManager.h"
 #include "SceneLoader.h"
 #include "utility.h"
+#include "MaterialExporter.h"

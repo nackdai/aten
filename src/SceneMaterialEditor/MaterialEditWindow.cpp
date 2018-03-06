@@ -68,6 +68,8 @@ aten::material* createMaterial(aten::MaterialType type)
 
 	switch (type) {
 	case aten::MaterialType::Emissive:
+		mtrl = new aten::emissive();
+		break;
 	case aten::MaterialType::Lambert:
 		mtrl = new aten::lambert();
 		break;
@@ -237,6 +239,10 @@ void MaterialEditWindow::onRun(aten::window* window)
 			s_tracer.reset();
 
 			s_needUpdateMtrl = false;
+		}
+
+		if (ImGui::Button("Export")) {
+			aten::MaterialExporter::exportMaterial("material.xml", s_mtrls);
 		}
 
 		window->drawImGui();

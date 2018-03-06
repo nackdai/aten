@@ -31,6 +31,7 @@
     <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="..\src\libatenscene\AssetManager.cpp" />
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\MaterialExporter.cpp" />
     <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\SceneLoader.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="..\src\libatenscene\AssetManager.h" />
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\src\libatenscene\ImageLoader.h" />
+    <ClInclude Include="..\src\libatenscene\MaterialExporter.h" />
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
     <ClInclude Include="..\src\libatenscene\SceneLoader.h" />

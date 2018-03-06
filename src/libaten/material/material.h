@@ -132,6 +132,14 @@ namespace aten
 		virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) = 0;
 		virtual bool edit(const char* name, vec3& param) = 0;
 	};
+
+	enum class MtrlParamType {
+		Vec3,
+		Texture,
+		Double,
+
+		Num,
+	};
 }
 
 #define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param.##name)
@@ -157,6 +165,7 @@ namespace AT_NAME
 		friend class LayeredBSDF;
 
 		static std::vector<material*> g_materials;
+		static std::vector<const char*> g_mtrlTypeNames;
 
 	protected:
 		material(
@@ -382,6 +391,12 @@ namespace AT_NAME
 		static int findMaterialIdx(material* mtrl);
 
 		static const std::vector<material*>& getMaterials();
+
+		static const char* getMaterialTypeName(aten::MaterialType type);
+		static std::vector<const char*>& getMaterialTypeName();
+
+	private:
+		static int initMaterial(material* mtrl, bool local);
 
 	protected:
 		int m_id{ 0 };

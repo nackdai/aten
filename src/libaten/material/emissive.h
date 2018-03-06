@@ -7,6 +7,10 @@ namespace AT_NAME
 {
 	class emissive : public material {
 	public:
+		emissive()
+			: material(aten::MaterialType::Emissive, MaterialAttributeEmissive)
+		{}
+
 		emissive(const aten::vec3& e)
 			: material(aten::MaterialType::Emissive, MaterialAttributeEmissive, e)
 		{}

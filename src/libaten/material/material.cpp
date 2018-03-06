@@ -5,6 +5,22 @@
 namespace AT_NAME
 {
 	std::vector<material*> material::g_materials;
+	std::vector<const char*> material::g_mtrlTypeNames;
+
+	static const char* mtrlTypeNames[] = {
+		"emissive",
+		"lambert",
+		"ornenayar",
+		"specular",
+		"refraction",
+		"blinn",
+		"beckman",
+		"ggx",
+		"disney_brdf",
+		"toon",
+		"layer",
+	};
+	C_ASSERT(AT_COUNTOF(mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
 
 	uint32_t material::getMaterialNum()
 	{
@@ -61,16 +77,40 @@ namespace AT_NAME
 		return g_materials;
 	}
 
+	const char* material::getMaterialTypeName(aten::MaterialType type)
+	{
+		return g_mtrlTypeNames[type];
+	}
+
+	std::vector<const char*>& material::getMaterialTypeName()
+	{
+		return g_mtrlTypeNames;
+	}
+
+	int material::initMaterial(material* mtrl, bool local)
+	{
+		if (g_mtrlTypeNames.empty()) {
+			for (auto name : mtrlTypeNames) {
+				g_mtrlTypeNames.push_back(name);
+			}
+		}
+
+		int id = -1;
+		if (!local) {
+			id = g_materials.size();
+			g_materials.push_back(mtrl);
+		}
+
+		return id;
+	}
+
 	material::material(
 		aten::MaterialType type, 
 		const aten::MaterialAttribute& attrib,
 		bool local/*= false*/)
 		: m_param(type, attrib)
 	{
-		if (!local) {
-			m_id = g_materials.size();
-			g_materials.push_back(this);
-		}
+		m_id = initMaterial(this, local);
 	}
 
 	material::material(
@@ -83,10 +123,7 @@ namespace AT_NAME
 		bool local/*= false*/)
 		: m_param(type, attrib)
 	{
-		if (!local) {
-			m_id = g_materials.size();
-			g_materials.push_back(this);
-		}
+		m_id = initMaterial(this, local);
 
 		m_param.baseColor = clr;
 		m_param.ior = ior;
@@ -102,10 +139,7 @@ namespace AT_NAME
 		bool local/*= false*/)
 		: m_param(type, attrib)
 	{
-		if (!local) {
-			m_id = g_materials.size();
-			g_materials.push_back(this);
-		}
+		m_id = initMaterial(this, local);
 
 		m_param.baseColor = val.get("color", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);

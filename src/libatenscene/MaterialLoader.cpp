@@ -19,23 +19,12 @@ namespace aten {
 		g_base = removeTailPathSeparator(base);
 	}
 
-	static const char* g_types[] = {
-		"emissive",
-		"lambert",
-		"specular",
-		"refraction",
-		"blinn",
-		"beckman",
-		"ggx",
-		"disney_brdf",
-		"oren_nayar",
-		"toon",
-	};
-
 	bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
 	{
+		const auto& typeNames = aten::material::getMaterialTypeName();
+
 		// Check if type is as same as default type.
-		for (auto t : g_types) {
+		for (auto t : typeNames) {
 			if (type == t) {
 				AT_ASSERT(false);
 				AT_PRINTF("Same as default type [%s]\n", t);
@@ -197,39 +186,31 @@ namespace aten {
 	using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLAttribute*)>;
 #endif
 
-	enum _MtrlParamType {
-		Vec3,
-		Texture,
-		Double,
-
-		Num,
-	};
-
 	static GetValueFromFile g_funcGetValueFromFile[] = {
 		getValue<vec3>,
 		getValue<texture*>,
 		getValue<real>,
 	};
-	C_ASSERT(AT_COUNTOF(g_funcGetValueFromFile) == _MtrlParamType::Num);
+	C_ASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int)MtrlParamType::Num);
 
-	std::map<std::string, _MtrlParamType> g_paramtypes = {
-		std::pair<std::string, _MtrlParamType>("color", _MtrlParamType::Vec3),
-		std::pair<std::string, _MtrlParamType>("albedomap", _MtrlParamType::Texture),
-		std::pair<std::string, _MtrlParamType>("normalmap", _MtrlParamType::Texture),
-		std::pair<std::string, _MtrlParamType>("roughnessmap", _MtrlParamType::Texture),
-		std::pair<std::string, _MtrlParamType>("ior", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("shininess", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("roughness", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("metallic", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("subsurface", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("specular", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("roughness", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("specularTint", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("anisotropic", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("sheen[float", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("sheenTint", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("clearcoat", _MtrlParamType::Double),
-		std::pair<std::string, _MtrlParamType>("clearcoatGloss", _MtrlParamType::Double),
+	std::map<std::string, MtrlParamType> g_paramtypes = {
+		std::pair<std::string, MtrlParamType>("color", MtrlParamType::Vec3),
+		std::pair<std::string, MtrlParamType>("albedomap", MtrlParamType::Texture),
+		std::pair<std::string, MtrlParamType>("normalmap", MtrlParamType::Texture),
+		std::pair<std::string, MtrlParamType>("roughnessmap", MtrlParamType::Texture),
+		std::pair<std::string, MtrlParamType>("ior", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("shininess", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("roughness", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("metallic", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("subsurface", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("specular", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("roughness", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("specularTint", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("anisotropic", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("sheen[float", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("sheenTint", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("clearcoat", MtrlParamType::Double),
+		std::pair<std::string, MtrlParamType>("clearcoatGloss", MtrlParamType::Double),
 	};
 
 #ifdef USE_JSON
@@ -427,7 +408,7 @@ namespace aten {
 
 					if (itParamType != g_paramtypes.end()) {
 						auto paramType = itParamType->second;
-						auto funcGetValue = g_funcGetValueFromFile[paramType];
+						auto funcGetValue = g_funcGetValueFromFile[(int)paramType];
 
 						// Get value from json.
 						auto value = funcGetValue(attr);
@@ -461,25 +442,27 @@ namespace aten {
 	MaterialLoader::MaterialCreator g_funcs[] = {
 		[](Values& values) { return new emissive(values); },			// emissive
 		[](Values& values) { return new lambert(values); },				// lambert
+		[](Values& values) { return new OrenNayar(values); },			// oren_nayar
 		[](Values& values) { return new specular(values); },			// specular
 		[](Values& values) { return new refraction(values); },			// refraction
 		[](Values& values) { return new MicrofacetBlinn(values); },		// blinn
 		[](Values& values) { return new MicrofacetBeckman(values); },	// beckman
 		[](Values& values) { return new MicrofacetGGX(values); },		// ggx
 		[](Values& values) { return new DisneyBRDF(values); },			// disney_brdf
-		[](Values& values) { return new OrenNayar(values); },			// oren_nayar
 		[](Values& values) { return new toon(values); },				// toon
+		[](Values& values) { return nullptr; },							// layer
 	};
-
-	C_ASSERT(AT_COUNTOF(g_types) == AT_COUNTOF(g_funcs));
+	C_ASSERT(AT_COUNTOF(g_funcs) == (int)aten::MaterialType::MaterialTypeMax);
 
 	material* MaterialLoader::create(std::string type, Values& values)
 	{
+		const auto& defaultMtrlNames = aten::material::getMaterialTypeName();
+
 		// Check if default creators are registered.
-		if (g_creators.find(g_types[0]) == g_creators.end()) {
+		if (g_creators.find(defaultMtrlNames[0]) == g_creators.end()) {
 			// Register default type.
-			for (int i = 0; i < AT_COUNTOF(g_types); i++) {
-				g_creators.insert(std::pair<std::string, MaterialCreator>(g_types[i], g_funcs[i]));
+			for (int i = 0; i < defaultMtrlNames.size(); i++) {
+				g_creators.insert(std::pair<std::string, MaterialCreator>(defaultMtrlNames[i], g_funcs[i]));
 			}
 		}
 

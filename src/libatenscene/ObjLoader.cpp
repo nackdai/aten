@@ -5,7 +5,7 @@
 #include "utility.h"
 #include "ImageLoader.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {
@@ -346,6 +346,10 @@ namespace aten
 			AssetManager::registerObj(tag, obj);
 		}
 
-		AT_PRINTF("(%s) %d[polygons]\n", path.c_str(), numPolygons);
+		auto vtxNum = aten::VertexManager::getVertexNum();
+
+		AT_PRINTF("(%s)\n", path.c_str());
+		AT_PRINTF("    %d[vertices]\n", vtxNum);
+		AT_PRINTF("    %d[polygons]\n", numPolygons);
 	}
 }

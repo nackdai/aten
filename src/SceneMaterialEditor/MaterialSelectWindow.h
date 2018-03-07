@@ -10,8 +10,9 @@ private:
 public:
 	static bool init(
 		int width, int height,
-		const char* titile,
-		const char* input);
+		const char* title,
+		const char* objpath,
+		const char* mtrlpath = nullptr);
 
 	static void notifyChangeMtrlId(int mtrlid);
 

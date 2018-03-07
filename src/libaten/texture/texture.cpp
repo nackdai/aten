@@ -17,11 +17,11 @@ namespace aten {
 		g_textures.push_back(this);
 	}
 
-	texture::texture(uint32_t width, uint32_t height, uint32_t channels, const char* tag/*= nullptr*/)
+	texture::texture(uint32_t width, uint32_t height, uint32_t channels, const char* name/*= nullptr*/)
 		: texture()
 	{
 		init(width, height, channels);
-		m_tag = tag;
+		m_name = name;
 	}
 
 	texture::~texture()

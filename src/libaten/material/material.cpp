@@ -148,7 +148,7 @@ namespace AT_NAME
 	{
 		m_id = initMaterial(this, local);
 
-		m_param.baseColor = val.get("color", m_param.baseColor);
+		m_param.baseColor = val.get("baseColor", m_param.baseColor);
 		m_param.ior = val.get("ior", m_param.ior);
 		
 		auto albedoMap = (aten::texture*)val.get<void*>("albedoMap", nullptr);

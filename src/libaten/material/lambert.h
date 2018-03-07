@@ -214,6 +214,9 @@ namespace AT_NAME
 
 		virtual bool edit(aten::IMaterialParamEditor* editor) override final
 		{
+			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
+			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+
 			return AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 		}
 	};

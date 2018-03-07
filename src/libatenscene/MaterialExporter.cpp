@@ -79,6 +79,17 @@ namespace aten
 			return true;
 		}
 
+		virtual void edit(const char* name, const char* str) override final
+		{
+			std::string s(str);
+
+			if (!s.empty()) {
+				auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
+				xmlMtrlAttribElem->SetText(str);
+				m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
+			}
+		}
+
 	private:
 		tinyxml2::XMLDocument& m_xmlDoc;
 		tinyxml2::XMLElement* m_xmlElem{ nullptr };

@@ -71,6 +71,18 @@ namespace aten {
 			fullpath = g_base + "/" + fullpath;
 		}
 
+		std::string pathname;
+		std::string extname;
+		std::string filename;
+
+		getStringsFromPath(
+			path,
+			pathname,
+			extname,
+			filename);
+
+		std::string texname = filename + extname;
+
 		texture* tex = AssetManager::getTex(tag);
 
 		if (tex) {
@@ -86,7 +98,7 @@ namespace aten {
 		if (stbi_is_hdr(fullpath.c_str())) {
 			auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);
 			if (src) {
-				tex = new texture(width, height, channels, path.c_str());
+				tex = new texture(width, height, channels, texname.c_str());
 				real norm = real(1);
 				read<float>(src, tex, width, height, channels, norm);
 
@@ -96,7 +108,7 @@ namespace aten {
 		else {
 			auto src = stbi_load(fullpath.c_str(), &width, &height, &channels, 0);
 			if (src) {
-				tex = new texture(width, height, channels, path.c_str());
+				tex = new texture(width, height, channels, texname.c_str());
 				real norm = real(1) / real(255);
 
 				read<stbi_uc>(src, tex, width, height, channels, norm);

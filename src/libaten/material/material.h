@@ -131,6 +131,19 @@ namespace aten
 	public:
 		virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) = 0;
 		virtual bool edit(const char* name, vec3& param) = 0;
+
+		void editTex(const char* name, int texid)
+		{
+			if (texid >= 0) {
+				auto tex = aten::texture::getTexture(texid);
+				if (tex) {
+					edit(name, tex->name());
+				}
+			}
+		}
+
+	protected:
+		virtual void edit(const char* name, const char* str) = 0;
 	};
 
 	enum class MtrlParamType {
@@ -144,6 +157,7 @@ namespace aten
 
 #define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param.##name)
 #define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)	(e)->edit(#name, param.##name, _min, _max)
+#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param.##name)
 
 namespace AT_NAME
 {

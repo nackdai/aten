@@ -14,7 +14,7 @@ namespace aten {
 
 	public:
 		texture();
-		texture(uint32_t width, uint32_t height, uint32_t channels, const char* tag = nullptr);
+		texture(uint32_t width, uint32_t height, uint32_t channels, const char* name = nullptr);
 
 		~texture();
 
@@ -88,6 +88,11 @@ namespace aten {
 			return m_id;
 		}
 
+		const char* name() const
+		{
+			return m_name.c_str();
+		}
+
 		static const texture* getTexture(int id);
 		static const std::vector<texture*>& getTextures();
 
@@ -129,6 +134,6 @@ namespace aten {
 
 		uint32_t m_gltex{ 0 };
 
-		std::string m_tag;
+		std::string m_name;
 	};
 }

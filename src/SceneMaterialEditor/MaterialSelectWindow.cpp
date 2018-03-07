@@ -255,11 +255,17 @@ void MaterialSelectWindow::onKey(bool press, aten::Key key)
 }
 
 // TODO
-aten::object* loadObj(const char* input)
+aten::object* loadObj(
+	const char* objpath,
+	const char* mtrlpath)
 {
+	if (mtrlpath) {
+		aten::MaterialLoader::load(mtrlpath);
+	}
+
 	std::vector<aten::object*> objs;
 
-	aten::ObjLoader::load(objs, input);
+	aten::ObjLoader::load(objs, objpath);
 
 	// NOTE
 	// ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
@@ -273,7 +279,8 @@ aten::object* loadObj(const char* input)
 bool MaterialSelectWindow::init(
 	int width, int height,
 	const char* title,
-	const char* input)
+	const char* objpath,
+	const char* mtrlpath/*= nullptr*/)
 {
 	s_width = width;
 	s_height = height;
@@ -290,7 +297,7 @@ bool MaterialSelectWindow::init(
 
 	wnd->asCurrent();
 
-	s_obj = loadObj(input);
+	s_obj = loadObj(objpath, mtrlpath);
 
 	s_obj->buildForRasterizeRendering();
 

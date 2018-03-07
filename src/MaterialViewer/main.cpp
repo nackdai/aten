@@ -119,6 +119,12 @@ public:
 
 		return ret;
 	}
+
+	virtual void edit(const char* name, const char* str) override final
+	{
+		std::string s(str);
+		ImGui::Text("[%s] : (%s)", name, s.empty() ? "none" : str);
+	}
 };
 
 MaterialParamEditor g_mtrlParamEditor;

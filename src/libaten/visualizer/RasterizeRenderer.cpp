@@ -6,8 +6,6 @@
 #include "accelerator/accelerator.h"
 #include "sampler/cmj.h"
 
-#pragma optimize( "", off)
-
 namespace aten {
 	bool RasterizeRenderer::s_isInitGlobalVB = false;
 

@@ -2,8 +2,6 @@
 #include "visualizer/shader.h"
 #include "visualizer/atengl.h"
 
-#pragma optimize( "", off)
-
 namespace aten {
 	void GeomVertexBuffer::init(
 		uint32_t stride,

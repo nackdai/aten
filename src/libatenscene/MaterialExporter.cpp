@@ -3,8 +3,6 @@
 
 #include "tinyxml2.h"
 
-#pragma optimize( "", off)
-
 namespace aten
 {
 	aten::material* createMaterial(aten::MaterialType type)

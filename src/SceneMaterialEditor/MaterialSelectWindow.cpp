@@ -30,7 +30,7 @@ bool MaterialSelectWindow::s_pick = false;
 
 std::vector<aten::TColor<uint8_t, 4>> MaterialSelectWindow::s_attrib;
 
-int MaterialSelectWindow::s_pickedMtrlId = -1;
+int MaterialSelectWindow::s_pickedMtrlId = 0;
 
 MaterialSelectWindow::FuncPickMtrlIdNotifier MaterialSelectWindow::s_pickMtrlIdNotifier = nullptr;
 

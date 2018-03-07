@@ -306,6 +306,12 @@ void MaterialEditWindow::onRun(aten::window* window)
 			s_needUpdateMtrl = true;
 		}
 
+		static char str[128];
+		sprintf(str, "%s\0", mtrl->name());
+		if (ImGui::InputText("MaterialName", str, AT_COUNTOF(str))) {
+			mtrl->setName(str);
+		}
+
 		if (s_needUpdateMtrl) {
 			std::vector<aten::MaterialParameter> params(1);
 			params[0] = mtrl->param();
@@ -374,6 +380,7 @@ void MaterialEditWindow::onMouseWheel(int delta)
 void MaterialEditWindow::onKey(bool press, aten::Key key)
 {
 	static const real offset = real(0.1);
+	static bool isPressedCtrl = false;
 
 	if (press) {
 		if (key == aten::Key::Key_F1) {
@@ -384,9 +391,18 @@ void MaterialEditWindow::onKey(bool press, aten::Key key)
 			s_willTakeScreenShot = true;
 			return;
 		}
+		else if (key == aten::Key::Key_CONTROL) {
+			isPressedCtrl = true;
+		}
+	}
+	else {
+		if (key == aten::Key::Key_CONTROL) {
+			isPressedCtrl = false;
+		}
 	}
 
-	if (press) {
+
+	if (isPressedCtrl) {
 		switch (key) {
 		case aten::Key::Key_W:
 		case aten::Key::Key_UP:

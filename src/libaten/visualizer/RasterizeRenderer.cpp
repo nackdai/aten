@@ -6,7 +6,11 @@
 #include "accelerator/accelerator.h"
 #include "sampler/cmj.h"
 
+#pragma optimize( "", off)
+
 namespace aten {
+	bool RasterizeRenderer::s_isInitGlobalVB = false;
+
 	bool RasterizeRenderer::init(
 		int width, int height,
 		const char* pathVS,
@@ -124,12 +128,9 @@ namespace aten {
 			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 		}
 		
-		// TODO
-		// ‚±‚±‚Å‚â‚é?
-		static bool isInitVB = false;
-		if (!isInitVB) {
+		if (!s_isInitGlobalVB) {
 			VertexManager::build();
-			isInitVB = true;
+			s_isInitGlobalVB = true;
 		}
 
 		scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
@@ -324,12 +325,9 @@ namespace aten {
 		CALL_GL_API(::glClearStencil(0));
 		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
-		// TODO
-		// ‚±‚±‚Å‚â‚é?
-		static bool isInitGlobalVB = false;
-		if (!isInitGlobalVB) {
+		if (!s_isInitGlobalVB) {
 			VertexManager::build();
-			isInitGlobalVB = true;
+			s_isInitGlobalVB = true;
 		}
 
 		auto hHasAlbedo = m_shader.getHandle("hasAlbedo");

@@ -8,6 +8,14 @@
 
 namespace AT_NAME
 {
+	objshape::~objshape()
+	{
+		for (auto f : faces) {
+			delete f;
+		}
+		faces.clear();
+	}
+
 	void objshape::build()
 	{
 		aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
@@ -87,7 +95,7 @@ namespace AT_NAME
 			func(color, albedo, mtrlid);
 		}
 
-		auto vb = VertexManager::getVB();
+		auto& vb = VertexManager::getVB();
 
 		auto triNum = (uint32_t)faces.size();
 

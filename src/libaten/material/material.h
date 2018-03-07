@@ -186,7 +186,6 @@ namespace AT_NAME
 			aten::MaterialType type, 
 			const aten::MaterialAttribute& attrib,
 			bool local = false);
-		virtual ~material();
 
 		material(
 			aten::MaterialType type,
@@ -204,6 +203,8 @@ namespace AT_NAME
 			bool local = false);
 
 	public:
+		virtual ~material();
+
 		bool isEmissive() const
 		{
 			return m_param.attrib.isEmissive;

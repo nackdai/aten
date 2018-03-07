@@ -29,7 +29,10 @@ namespace aten {
 
 	public:
 		GeomVertexBuffer() {}
-		virtual ~GeomVertexBuffer() {}
+		virtual ~GeomVertexBuffer()
+		{
+			clear();
+		}
 
 	public:
 		void init(
@@ -66,6 +69,8 @@ namespace aten {
 			uint32_t idxOffset,
 			uint32_t primNum);
 
+		void clear();
+
 	protected:
 		uint32_t m_vbo{ 0 };
 		uint32_t m_vao{ 0 };
@@ -82,7 +87,7 @@ namespace aten {
 	class GeomIndexBuffer {
 	public:
 		GeomIndexBuffer() {}
-		virtual ~GeomIndexBuffer() {}
+		virtual ~GeomIndexBuffer();
 
 	public:
 		void init(

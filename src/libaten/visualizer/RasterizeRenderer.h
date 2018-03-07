@@ -14,6 +14,8 @@ namespace aten {
 	class accelerator;
 
 	class RasterizeRenderer {
+		static bool s_isInitGlobalVB;
+
 	public:
 		RasterizeRenderer() {}
 		~RasterizeRenderer() {}
@@ -61,6 +63,11 @@ namespace aten {
 			const camera* cam,
 			bool isWireFrame,
 			bool updateBuffer);
+
+		static void reset()
+		{
+			s_isInitGlobalVB = false;
+		}
 		
 	private:
 		shader m_shader;

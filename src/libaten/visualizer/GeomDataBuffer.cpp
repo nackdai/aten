@@ -2,6 +2,8 @@
 #include "visualizer/shader.h"
 #include "visualizer/atengl.h"
 
+#pragma optimize( "", off)
+
 namespace aten {
 	void GeomVertexBuffer::init(
 		uint32_t stride,
@@ -213,7 +215,23 @@ namespace aten {
 		CALL_GL_API(::glDrawArrays(prims[mode], idxOffset, vtxNum));
 	}
 
+	void GeomVertexBuffer::clear()
+	{
+		CALL_GL_API(::glDeleteBuffers(1, &m_vbo));
+		CALL_GL_API(::glDeleteVertexArrays(1, &m_vao));
+
+		m_vbo = 0;
+		m_vao = 0;
+	}
+
 	//////////////////////////////////////////////////////////
+
+	GeomIndexBuffer::~GeomIndexBuffer()
+	{
+		if (m_ibo > 0) {
+			CALL_GL_API(::glDeleteBuffers(1, &m_ibo));
+		}
+	}
 
 	void GeomIndexBuffer::init(
 		uint32_t idxNum,
@@ -288,6 +306,9 @@ namespace aten {
 		uint32_t idxOffset,
 		uint32_t primNum)
 	{
+		AT_ASSERT(m_ibo > 0);
+		AT_ASSERT(vb.m_vao > 0);
+
 		CALL_GL_API(::glBindVertexArray(vb.m_vao));
 		CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo));
 

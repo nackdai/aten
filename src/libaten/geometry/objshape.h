@@ -17,7 +17,7 @@ namespace AT_NAME
 
 	public:
 		objshape() : param(aten::GeometryType::Polygon) {}
-		virtual ~objshape() {}
+		virtual ~objshape();
 
 		void build();
 

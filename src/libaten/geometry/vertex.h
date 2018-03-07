@@ -65,5 +65,12 @@ namespace aten
 		{
 			return s_vb;
 		}
+
+		static void clear()
+		{
+			s_vertices.clear();
+			s_indices.clear();
+			s_vb.clear();
+		}
 	};
 }

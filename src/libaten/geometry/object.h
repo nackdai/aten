@@ -18,7 +18,7 @@ namespace AT_NAME
 
 	public:
 		object() : param(aten::GeometryType::Polygon) {}
-		virtual ~object() {}
+		virtual ~object();
 
 	public:
 		virtual bool hit(

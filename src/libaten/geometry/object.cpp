@@ -8,6 +8,18 @@
 
 namespace AT_NAME
 {
+	object::~object()
+	{
+		for (auto s : shapes) {
+			delete s;
+		}
+		shapes.clear();
+
+		if (m_accel) {
+			delete m_accel;
+		}
+	}
+
 	void object::build()
 	{
 		if (m_triangles > 0) {

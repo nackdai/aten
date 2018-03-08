@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
 	aten::window::SetCurrentDirectoryFromExe();
 
 	aten::AssetManager::suppressWarnings();
+	aten::ObjLoader::disableGenGLTexture();
 
 	// TODO
 	// Specify material by command line...

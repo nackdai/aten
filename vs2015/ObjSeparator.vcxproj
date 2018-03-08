@@ -27,11 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\LodMaker\ObjWriter.cpp" />
     <ClCompile Include="..\src\ObjSeparator\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\LodMaker\ObjWriter.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7747F39F-7052-4C76-9170-8D9FC3889766}</ProjectGuid>
@@ -155,7 +151,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)../src/LodMaker;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -220,7 +216,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)../src/LodMaker;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>
@@ -242,7 +238,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)../src/LodMaker;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>

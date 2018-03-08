@@ -29,11 +29,9 @@
   <ItemGroup>
     <ClCompile Include="..\src\LodMaker\lodmaker.cpp" />
     <ClCompile Include="..\src\LodMaker\main.cpp" />
-    <ClCompile Include="..\src\LodMaker\ObjWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\LodMaker\lodmaker.h" />
-    <ClInclude Include="..\src\LodMaker\ObjWriter.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{694E9288-666D-454E-ABE3-836C3C65F733}</ProjectGuid>

@@ -42,6 +42,9 @@
     <ClCompile Include="..\src\libatenscene\MaterialExporter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libatenscene\ObjWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
@@ -73,6 +76,9 @@
       <Filter>tinyxml2</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\MaterialExporter.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ObjWriter.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

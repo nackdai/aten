@@ -34,6 +34,7 @@
     <ClCompile Include="..\src\libatenscene\MaterialExporter.cpp" />
     <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp" />
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp" />
+    <ClCompile Include="..\src\libatenscene\ObjWriter.cpp" />
     <ClCompile Include="..\src\libatenscene\SceneLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +47,7 @@
     <ClInclude Include="..\src\libatenscene\MaterialExporter.h" />
     <ClInclude Include="..\src\libatenscene\MaterialLoader.h" />
     <ClInclude Include="..\src\libatenscene\ObjLoader.h" />
+    <ClInclude Include="..\src\libatenscene\ObjWriter.h" />
     <ClInclude Include="..\src\libatenscene\SceneLoader.h" />
     <ClInclude Include="..\src\libatenscene\utility.h" />
   </ItemGroup>

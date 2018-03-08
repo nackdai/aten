@@ -66,7 +66,6 @@ int main(int argc, char* argv[])
 	aten::window::SetCurrentDirectoryFromExe();
 
 	aten::AssetManager::suppressWarnings();
-	aten::ObjLoader::disableGenGLTexture();
 
 	std::vector<aten::object*> objs;
 	aten::ObjLoader::load(

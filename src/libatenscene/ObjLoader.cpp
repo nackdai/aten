@@ -9,6 +9,8 @@
 
 namespace aten
 {
+	bool ObjLoader::s_enableGenGLTexture = false;
+
 	static std::string g_base;
 
 	void ObjLoader::setBasePath(const std::string& base)
@@ -225,7 +227,7 @@ namespace aten
 
 							// TODO
 							// ‚±‚±‚Å‚¢‚¢‚Ì‚©?
-							if (albedoMap) {
+							if (albedoMap && s_enableGenGLTexture) {
 								albedoMap->initAsGLTexture();
 							}
 						}
@@ -241,7 +243,7 @@ namespace aten
 
 							// TODO
 							// ‚±‚±‚Å‚¢‚¢‚Ì‚©?
-							if (normalMap) {
+							if (normalMap && s_enableGenGLTexture) {
 								normalMap->initAsGLTexture();
 							}
 						}

@@ -41,6 +41,11 @@ namespace AT_NAME
 
 		void draw(AT_NAME::FuncObjectMeshDraw func);
 
+		const std::vector<face*> tris() const
+		{
+			return faces;
+		}
+
 		aten::GeomParameter param;
 		aten::aabb m_aabb;
 

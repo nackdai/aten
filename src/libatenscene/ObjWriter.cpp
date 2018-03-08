@@ -1,6 +1,8 @@
 #include "ObjWriter.h"
 #include "utility.h"
 
+#pragma optimize( "", off)
+
 static inline void writeLineFeed(FILE* fp)
 {
 	fprintf(fp, "\n");
@@ -71,18 +73,16 @@ static inline void writeFace(FILE* fp, const ObjFace& f)
 		fprintf(fp, "%d/", f.vtx[i].pos + 1);
 
 		if (f.vtx[i].uv >= 0) {
-			fprintf(fp, "%d ", f.vtx[i].uv + 1);
-		}
-		else {
-			fprintf(fp, "/");
+			fprintf(fp, "%d", f.vtx[i].uv + 1);
 		}
 
+		fprintf(fp, "/");
+
 		if (f.vtx[i].nml >= 0) {
-			fprintf(fp, "%d/", f.vtx[i].nml + 1);
+			fprintf(fp, "%d", f.vtx[i].nml + 1);
 		}
-		else {
-			fprintf(fp, " ");
-		}
+
+		fprintf(fp, " ");
 	}
 
 	writeLineFeed(fp);
@@ -124,6 +124,10 @@ bool ObjWriter::write(
 
 	// Write header.
 	{
+		if (mtrlPathName == "./") {
+			mtrlPathName = mtrlPath;
+		}
+
 		fprintf(fp, "mtllib %s\n", mtrlPathName.c_str());
 	}
 

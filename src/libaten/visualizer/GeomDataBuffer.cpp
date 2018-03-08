@@ -215,8 +215,12 @@ namespace aten {
 
 	void GeomVertexBuffer::clear()
 	{
-		CALL_GL_API(::glDeleteBuffers(1, &m_vbo));
-		CALL_GL_API(::glDeleteVertexArrays(1, &m_vao));
+		if (m_vbo > 0) {
+			CALL_GL_API(::glDeleteBuffers(1, &m_vbo));
+		}
+		if (m_vao > 0) {
+			CALL_GL_API(::glDeleteVertexArrays(1, &m_vao));
+		}
 
 		m_vbo = 0;
 		m_vao = 0;

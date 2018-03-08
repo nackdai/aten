@@ -3,6 +3,10 @@
 #include "aten.h"
 #include <vector>
 
+// TODO
+// namespace ‚ÅˆÍ‚¤‚Æ fatal error c1001 ‚ª”­¶‚·‚é.
+// Œ´ˆö‚ª‚í‚©‚ç‚È‚¢‚½‚ßAwork around ‚Å‚Í‚ ‚é‚ª namespace ‚ğg—p‚µ‚È‚¢‚æ‚¤‚É‚·‚é...
+
 class ObjWriter {
 public:
 	ObjWriter() {}
@@ -11,15 +15,19 @@ public:
 public:
 	static bool write(
 		const std::string& path,
-		const std::string& mtrlName,
+		const std::string& mtrlPath,
 		const std::vector<aten::vertex>& vertices,
 		const std::vector<std::vector<int>>& indices,
+		const std::vector<aten::material*>& mtrls);
+
+	static bool writeMaterial(
+		const std::string& mtrlPath,
 		const std::vector<aten::material*>& mtrls);
 
 	bool runOnThread(
 		std::function<void()> funcFinish,
 		const std::string& path,
-		const std::string& mtrlName,
+		const std::string& mtrlPath,
 		const std::vector<aten::vertex>& vertices,
 		const std::vector<std::vector<int>>& indices,
 		const std::vector<aten::material*>& mtrls);
@@ -36,7 +44,7 @@ private:
 		std::function<void()> funcFinish;
 
 		std::string path;
-		std::string mtrlName;
+		std::string mtrlPath;
 		const std::vector<aten::vertex>& vertices;
 		const std::vector<std::vector<int>>& indices;
 		const std::vector<aten::material*>& mtrls;
@@ -44,7 +52,7 @@ private:
 		WriteParams(
 			std::function<void()> _func,
 			const std::string& _path,
-			const std::string& _mtrlName,
+			const std::string& _mtrlPath,
 			const std::vector<aten::vertex>& _vertices,
 			const std::vector<std::vector<int>>& _indices,
 			const std::vector<aten::material*>& _mtrls)
@@ -52,7 +60,7 @@ private:
 		{
 			funcFinish = _func;
 			path = _path;
-			mtrlName = _mtrlName;
+			mtrlPath = _mtrlPath;
 		}
 	};
 

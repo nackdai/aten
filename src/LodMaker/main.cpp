@@ -2,7 +2,6 @@
 #include "atenscene.h"
 
 #include "lodmaker.h"
-#include "ObjWriter.h"
 
 #include <cmdline.h>
 #include <imgui.h>

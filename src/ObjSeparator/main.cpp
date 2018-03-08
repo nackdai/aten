@@ -179,6 +179,19 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	// NOTE
+	// obj ファイル向けにはマテリアルはshapeと同じオーダーでリストに格納されていないといけない.
+	// つまり、重複しても構わない.
+	// しかし、mtl ファイル向けには重複しているのはよろしくない.
+
+	// 重複を許さないマテリアルリストの作成.
+	std::vector<aten::material*> mtrlListForExport;
+	for (const auto mtrl : mtrls) {
+		if (std::find(mtrlListForExport.begin(), mtrlListForExport.end(), mtrl) == mtrlListForExport.end()) {
+			mtrlListForExport.push_back(mtrl);
+		}
+	}
+
 	// Export to obj.
 	ObjWriter::write(
 		"result.obj",
@@ -186,6 +199,10 @@ int main(int argc, char* argv[])
 		vertices,
 		indices,
 		mtrls);
+
+	ObjWriter::writeMaterial(
+		"result.mtl",
+		mtrlListForExport);
 
 	return 1;
 }

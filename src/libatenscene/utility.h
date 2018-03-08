@@ -22,6 +22,11 @@ namespace aten {
 		pathname = filepath.substr(0, pathPos - 1);
 		extname = filepath.substr(extPos, filepath.size() - extPos);
 		filename = filepath.substr(pathPos, extPos - pathPos);
+
+
+		if (path == pathname) {
+			pathname = "./";
+		}
 	}
 
 	inline std::string removeTailPathSeparator(const std::string path)

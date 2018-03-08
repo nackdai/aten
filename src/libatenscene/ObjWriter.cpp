@@ -1,6 +1,5 @@
-#include <stdio.h>
-
 #include "ObjWriter.h"
+#include "utility.h"
 
 static inline void writeLineFeed(FILE* fp)
 {
@@ -70,7 +69,7 @@ static inline void writeFace(FILE* fp, const ObjFace& f)
 
 	for (int i = 0; i < AT_COUNTOF(ObjFace::vtx); i++) {
 		fprintf(fp, "%d/", f.vtx[i].pos + 1);
-		
+
 		if (f.vtx[i].uv >= 0) {
 			fprintf(fp, "%d ", f.vtx[i].uv + 1);
 		}
@@ -89,7 +88,7 @@ static inline void writeFace(FILE* fp, const ObjFace& f)
 	writeLineFeed(fp);
 }
 
-static inline void writeMaterrial(FILE* fp, const aten::material* mtrl)
+static inline void writeMaterrialTag(FILE* fp, const aten::material* mtrl)
 {
 	auto name = mtrl->name();
 	fprintf(fp, "usemtl %s\n", name);
@@ -104,18 +103,28 @@ static inline void replaceIndex(ObjVertex& v, int idx)
 
 bool ObjWriter::write(
 	const std::string& path,
-	const std::string& mtrlName,
+	const std::string& mtrlPath,
 	const std::vector<aten::vertex>& vertices,
 	const std::vector<std::vector<int>>& indices,
 	const std::vector<aten::material*>& mtrls)
 {
 	AT_ASSERT(mtrls.size() == indices.size());
 
+	std::string mtrlPathName;
+	std::string extname;
+	std::string filename;
+
+	aten::getStringsFromPath(
+		mtrlPath,
+		mtrlPathName,
+		extname,
+		filename);
+
 	FILE* fp = fopen(path.c_str(), "wt");
 
 	// Write header.
 	{
-		fprintf(fp, "mtllib %s\n", mtrlName.c_str());
+		fprintf(fp, "mtllib %s\n", mtrlPathName.c_str());
 	}
 
 	std::vector<ObjVertex> vtxs;
@@ -174,7 +183,7 @@ bool ObjWriter::write(
 		// Write dummy group name...
 		fprintf(fp, "g %d\n", i);
 
-		writeMaterrial(fp, mtrl);
+		writeMaterrialTag(fp, mtrl);
 
 		for (const auto& t : tris) {
 			writeFace(fp, t);
@@ -183,13 +192,54 @@ bool ObjWriter::write(
 		writeLineFeed(fp);
 	}
 
+	fclose(fp);
+
+	return true;
+}
+
+bool ObjWriter::writeMaterial(
+	const std::string& mtrlPath,
+	const std::vector<aten::material*>& mtrls)
+{
+	FILE* fp = fopen(mtrlPath.c_str(), "wt");
+
+	for (const auto* mtrl : mtrls) {
+		fprintf(fp, "newmtl %s\n", mtrl->name());
+
+		const auto& param = mtrl->param();
+
+		fprintf(fp, "Ns 1.000000\n");
+		fprintf(fp, "Ka 0.000000 0.000000 0.000000\n");
+		fprintf(fp, "Kd %.6f %.6f %.6f\n", param.baseColor.x, param.baseColor.y, param.baseColor.z);
+		fprintf(fp, "Ks 0.000000 0.000000 0.000000\n");
+		fprintf(fp, "Ni 1.000000\n");
+		fprintf(fp, "d 1.000000\n");
+		fprintf(fp, "illum 2\n");
+
+		if (param.albedoMap >= 0) {
+			auto albedo = aten::texture::getTexture(param.albedoMap);
+			fprintf(fp, "map_Ka %s\n", albedo->name());
+			fprintf(fp, "map_Kd %s\n", albedo->name());
+		}
+
+		if (param.normalMap >= 0) {
+			auto normal = aten::texture::getTexture(param.normalMap);
+			fprintf(fp, "map_bump %s\n", normal->name());
+			fprintf(fp, "bump %s\n", normal->name());
+		}
+
+		fprintf(fp, "\n");
+	}
+
+	fclose(fp);
+
 	return true;
 }
 
 bool ObjWriter::runOnThread(
 	std::function<void()> funcFinish,
 	const std::string& path,
-	const std::string& mtrlName,
+	const std::string& mtrlPath,
 	const std::vector<aten::vertex>& vertices,
 	const std::vector<std::vector<int>>& indices,
 	const std::vector<aten::material*>& mtrls)
@@ -203,7 +253,7 @@ bool ObjWriter::runOnThread(
 		delete m_param;
 		m_param = nullptr;
 	}
-	m_param = new WriteParams(funcFinish, path, mtrlName, vertices, indices, mtrls);
+	m_param = new WriteParams(funcFinish, path, mtrlPath, vertices, indices, mtrls);
 
 	static std::vector<std::vector<int>> tmpIdx;
 
@@ -218,7 +268,7 @@ bool ObjWriter::runOnThread(
 
 				write(
 					m_param->path,
-					m_param->mtrlName,
+					m_param->mtrlPath,
 					m_param->vertices,
 					m_param->indices,
 					m_param->mtrls);

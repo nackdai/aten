@@ -148,6 +148,8 @@ void MaterialEditWindow::buildScene()
 	s_wnd->asCurrent();
 
 	{
+		aten::ImageLoader::setBasePath("./");
+
 		auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 		aten::envmap bg;
 		bg.init(envmap);

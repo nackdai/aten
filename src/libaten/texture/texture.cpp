@@ -183,6 +183,13 @@ namespace aten {
 		}
 	}
 
+	void texture::initAllAsGLTexture()
+	{
+		for (auto tex : g_textures) {
+			tex->initAsGLTexture();
+		}
+	}
+
 	void texture::getDataAsGLTexture(
 		int& width,
 		int& height,

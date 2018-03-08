@@ -259,6 +259,18 @@ aten::object* loadObj(
 	const char* objpath,
 	const char* mtrlpath)
 {
+	std::string pathname;
+	std::string extname;
+	std::string filename;
+
+	aten::getStringsFromPath(
+		objpath,
+		pathname,
+		extname,
+		filename);
+
+	aten::ImageLoader::setBasePath(pathname);
+
 	if (mtrlpath) {
 		aten::MaterialLoader::load(mtrlpath);
 	}
@@ -298,6 +310,8 @@ bool MaterialSelectWindow::init(
 	wnd->asCurrent();
 
 	s_obj = loadObj(objpath, mtrlpath);
+
+	aten::texture::initAllAsGLTexture();
 
 	s_obj->buildForRasterizeRendering();
 

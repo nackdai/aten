@@ -102,6 +102,8 @@ namespace aten {
 		void releaseAsGLTexture();
 		void clearAsGLTexture(const aten::vec4& clearColor);
 
+		static void initAllAsGLTexture();
+
 		void getDataAsGLTexture(
 			int& width,
 			int& height,

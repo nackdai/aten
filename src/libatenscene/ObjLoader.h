@@ -25,13 +25,5 @@ namespace aten
 			std::vector<object*>& objs,
 			const std::string& tag, const std::string& path,
 			bool willSeparate = false);
-
-		static void disableGenGLTexture()
-		{
-			s_enableGenGLTexture = false;
-		}
-
-	private:
-		static bool s_enableGenGLTexture;
 	};
 }

@@ -9,8 +9,6 @@
 
 namespace aten
 {
-	bool ObjLoader::s_enableGenGLTexture = false;
-
 	static std::string g_base;
 
 	void ObjLoader::setBasePath(const std::string& base)
@@ -224,12 +222,6 @@ namespace aten
 								std::string texname = pathname + "/" + objmtrl.diffuse_texname;
 								albedoMap = aten::ImageLoader::load(texname);
 							}
-
-							// TODO
-							// ‚±‚±‚Å‚¢‚¢‚Ì‚©?
-							if (albedoMap && s_enableGenGLTexture) {
-								albedoMap->initAsGLTexture();
-							}
 						}
 
 						// Normal map.
@@ -239,12 +231,6 @@ namespace aten
 							if (!normalMap) {
 								std::string texname = pathname + "/" + objmtrl.bump_texname;
 								normalMap = aten::ImageLoader::load(texname);
-							}
-
-							// TODO
-							// ‚±‚±‚Å‚¢‚¢‚Ì‚©?
-							if (normalMap && s_enableGenGLTexture) {
-								normalMap->initAsGLTexture();
 							}
 						}
 						

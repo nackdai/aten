@@ -31,8 +31,9 @@ int main()
 		"MaterialSelect",
 		//"../../asset/cornellbox/orig.obj");
 		//"../../asset/sponza/sponza.obj");
-		//"../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj");
-		"../../asset/mansion/objs/mirror.obj");
+		"../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
+		"./material.xml");
+		//"../../asset/mansion/objs/room.obj");
 
 	MaterialEditWindow::buildScene();
 

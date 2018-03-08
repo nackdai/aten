@@ -355,6 +355,8 @@ int main(int argc, char* argv[])
 
 	g_obj = loadObj(g_opt);
 
+	aten::texture::initAllAsGLTexture();
+
 	g_obj->buildForRasterizeRendering();
 
 	{

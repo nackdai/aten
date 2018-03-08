@@ -283,6 +283,8 @@ int main(int argc, char* argv[])
 
 	loadObj(g_opt);
 
+	aten::texture::initAllAsGLTexture();
+
 	// TODO
 	aten::vec3 pos(0, 1, 3);
 	aten::vec3 at(0, 1, 0);

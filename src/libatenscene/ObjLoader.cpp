@@ -5,7 +5,7 @@
 #include "utility.h"
 #include "ImageLoader.h"
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 namespace aten
 {
@@ -16,19 +16,24 @@ namespace aten
 		g_base = removeTailPathSeparator(base);
 	}
 
-	object* ObjLoader::load(const std::string& path)
+	object* ObjLoader::load(
+		const std::string& path,
+		bool needComputeNormalOntime/*= false*/)
 	{
 		std::vector<object*> objs;
-		load(objs, path);
+		load(objs, path, needComputeNormalOntime);
 
 		object* ret = (!objs.empty() ? objs[0] : nullptr);
 		return ret;
 	}
 
-	object* ObjLoader::load(const std::string& tag, const std::string& path)
+	object* ObjLoader::load(
+		const std::string& tag, 
+		const std::string& path,
+		bool needComputeNormalOntime/*= false*/)
 	{
 		std::vector<object*> objs;
-		load(objs, tag, path);
+		load(objs, tag, path, needComputeNormalOntime);
 
 		object* ret = (!objs.empty() ? objs[0] : nullptr);
 		return ret;
@@ -37,7 +42,8 @@ namespace aten
 	void ObjLoader::load(
 		std::vector<object*>& objs,
 		const std::string& path,
-		bool willSeparate/*= false*/)
+		bool willSeparate/*= false*/,
+		bool needComputeNormalOntime/*= false*/)
 	{
 		std::string pathname;
 		std::string extname;
@@ -54,13 +60,14 @@ namespace aten
 			fullpath = g_base + "/" + fullpath;
 		}
 
-		load(objs, filename, fullpath, willSeparate);
+		load(objs, filename, fullpath, willSeparate, needComputeNormalOntime);
 	}
 
 	void ObjLoader::load(
 		std::vector<object*>& objs,
 		const std::string& tag, const std::string& path,
-		bool willSeparate/*= false*/)
+		bool willSeparate/*= false*/,
+		bool needComputeNormalOntime/*= false*/)
 	{
 		object* obj = AssetManager::getObj(tag);
 		if (obj) {
@@ -136,7 +143,7 @@ namespace aten
 					vtx.nml.x = shape.mesh.normals[i + 0];
 					vtx.nml.y = shape.mesh.normals[i + 1];
 					vtx.nml.z = shape.mesh.normals[i + 2];
-					vtx.uv.z = real(0);
+					vtx.uv.z = needComputeNormalOntime ? real(1) : real(0);
 				}
 
 				if (isnan(vtx.nml.x) || isnan(vtx.nml.y) || isnan(vtx.nml.z))
@@ -264,7 +271,6 @@ namespace aten
 				{
 					f->param.needNormal = 1;
 				}
-
 
 				f->build(dstshape);
 

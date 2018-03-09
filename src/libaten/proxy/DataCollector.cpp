@@ -12,24 +12,10 @@ namespace aten {
 		std::vector<aten::vertex>& vtxparams)
 	{
 		const auto& shapes = aten::transformable::getShapes();
-
-		int order = 0;
-		std::map<transformable*, int> orderMap;
+		std::vector<aten::transformable*> shapeOrderList;
 
 		for (auto s : shapes) {
-			auto type = s->getParam().type;
-
-			switch (type) {
-			case GeometryType::Polygon:
-			case GeometryType::Sphere:
-			case GeometryType::Cube:
-			{
-				orderMap.insert(std::pair<transformable*, int>(s, order++));
-			}
-				break;
-			default:
-				break;
-			}	
+			shapeOrderList.push_back(s);
 		}
 
 		// Not gurantee order of the object which the instance has.
@@ -40,13 +26,16 @@ namespace aten {
 				auto param = s->getParam();
 				auto obj = s->getHasObject();
 				
-				auto it = orderMap.find((transformable*)(obj));
-				AT_ASSERT(it != orderMap.end());
+				auto it = std::find(shapeOrderList.begin(), shapeOrderList.end(), (transformable*)(obj));
+				AT_ASSERT(it != shapeOrderList.end());
+
+				auto idx = std::distance(shapeOrderList.begin(), it);
 
 				// Specify the index of the object which the instance has.
-				param.shapeid = it->second;
+				param.shapeid = idx;
 
-				param.area = it->first->getParam().area;
+				// TODO
+				param.area = ((aten::object*)obj)->getParam().area;
 
 				shapeparams.push_back(param);
 			}

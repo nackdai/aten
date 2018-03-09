@@ -75,7 +75,7 @@ namespace AT_NAME
 			func(mtxL2W, mtxPrevL2W, parentId, m_baseTriIdx);
 		}
 
-		auto vb = VertexManager::getVB();
+		auto& vb = VertexManager::getVB();
 
 		auto triNum = (uint32_t)faces.size();
 

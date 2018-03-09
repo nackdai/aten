@@ -11,13 +11,13 @@ namespace AT_NAME {
 		ImageBasedLight()
 			: Light(aten::LightType::IBL, LightAttributeIBL)
 		{}
-		ImageBasedLight(AT_NAME::envmap* envmap)
+		ImageBasedLight(AT_NAME::envmap* envmap, bool needPreCompute = true)
 			: Light(aten::LightType::IBL, LightAttributeIBL)
 		{
-			setEnvMap(envmap);
+			setEnvMap(envmap, needPreCompute);
 		}
 
-		ImageBasedLight(aten::Values& val)
+		ImageBasedLight(aten::Values& val, bool needPreCompute = true)
 			: Light(aten::LightType::IBL, LightAttributeIBL, val)
 		{
 			aten::texture* tex = (aten::texture*)val.get("envmap", nullptr);
@@ -25,17 +25,20 @@ namespace AT_NAME {
 			AT_NAME::envmap* bg = new AT_NAME::envmap();
 			bg->init(tex);
 
-			setEnvMap(bg);
+			setEnvMap(bg, needPreCompute);
 		}
 
 		virtual ~ImageBasedLight() {}
 
 	public:
-		void setEnvMap(AT_NAME::envmap* envmap)
+		void setEnvMap(AT_NAME::envmap* envmap, bool needPreCompute = true)
 		{
 			if (m_param.envmap.ptr != envmap) {
 				m_param.envmap.ptr = envmap;
-				preCompute();
+
+				if (needPreCompute) {
+					preCompute();
+				}
 			}
 		}
 

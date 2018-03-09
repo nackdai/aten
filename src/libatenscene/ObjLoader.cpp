@@ -92,7 +92,12 @@ namespace aten
 			err,
 			path.c_str(), mtrlBasePath.c_str(),
 			flags);
-		AT_VRETURN(result, );
+
+		//AT_VRETURN(result, );
+		if (!result) {
+			AT_PRINTF("LoadObj Err[%s]\n", path.c_str());
+			return;
+		}
 
 		obj = new object();
 

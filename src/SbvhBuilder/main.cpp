@@ -44,8 +44,13 @@ bool parseOption(
 		opt.output = cmd.get<std::string>("output");
 	}
 	else {
-		// TODO
-		opt.output = "result.sbvh";
+		std::string pathname;
+		std::string filename;
+		std::string extname;
+
+		aten::getStringsFromPath(opt.input, pathname, extname, filename);
+
+		opt.output = filename + ".sbvh";
 	}
 
 	return true;
@@ -64,7 +69,6 @@ int main(int argc, char* argv[])
 	aten::window::SetCurrentDirectoryFromExe();
 
 	aten::AssetManager::suppressWarnings();
-	aten::ObjLoader::disableGenGLTexture();
 
 	// TODO
 	// Specify material by command line...

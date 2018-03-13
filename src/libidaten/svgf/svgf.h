@@ -49,6 +49,8 @@ namespace idaten
 					bool isTerminate;
 					bool isSingular;
 					bool isKill;
+
+					aten::MaterialType mtrlType;
 				};
 			};
 		};

@@ -312,8 +312,8 @@ __global__ void shadeMiss(
 	}
 }
 
-template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
+	int bounce,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
@@ -338,7 +338,7 @@ __global__ void shadeMissWithEnvmap(
 	if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
 		aten::vec3 dir = rays[idx].dir;
 
-		if (isFirstBounce) {
+		if (bounce == 0) {
 			// Suppress jittering envrinment map.
 			// So, re-sample ray without random.
 
@@ -360,7 +360,9 @@ __global__ void shadeMissWithEnvmap(
 		auto emit = aten::vec3(bg.x, bg.y, bg.z);
 
 		float misW = 1.0f;
-		if (isFirstBounce) {
+		if (bounce == 0
+			|| (bounce == 1 && paths->attrib[idx].isSingular))
+		{
 			paths->attrib[idx].isKill = true;
 
 			// Export envmap to albedo buffer.
@@ -385,7 +387,6 @@ __global__ void shadeMissWithEnvmap(
 }
 
 __global__ void shade(
-	bool isFirstBounce,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -477,7 +478,7 @@ __global__ void shade(
 	// 厳密に法線をAOVに保持するなら、法線マップ適用後するべき.
 	// しかし、temporal reprojection、atrousなどのフィルタ適用時に法線を参照する際に、法線マップが細かすぎてはじかれてしまうことがある.
 	// それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
-	if (isFirstBounce) {
+	if (bounce == 0) {
 		int ix = idx % width;
 		int iy = idx / width;
 
@@ -490,6 +491,26 @@ __global__ void shade(
 
 		// meshid.
 		aovMomentMeshid[idx].w = isect.meshid;
+
+		// texture color.
+		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
+		aovTexclrTemporalWeight[idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[idx].w);
+
+		// For exporting separated albedo.
+		shMtrls[threadIdx.x].albedoMap = -1;
+	}
+	// TODO
+	// How to deal Refraction?
+	else if (bounce == 1 && paths->attrib[idx].mtrlType == aten::MaterialType::Specular) {
+		int ix = idx % width;
+		int iy = idx / width;
+
+		// World coordinate to Clip coordinate.
+		aten::vec4 pos = aten::vec4(rec.p, 1);
+		pos = mtxW2C.apply(pos);
+
+		// normal, depth
+		aovNormalDepth[idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
@@ -694,6 +715,7 @@ __global__ void shade(
 
 	paths->throughput[idx].pdfb = pdfb;
 	paths->attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
+	paths->attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
 
 #pragma unroll
 	for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
@@ -931,30 +953,17 @@ namespace idaten
 		int curaov = getCurAovs();
 
 		if (m_envmapRsc.idx >= 0) {
-			if (bounce == 0) {
-				shadeMissWithEnvmap<true> << <grid, block >> > (
-					m_cam.ptr(),
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_tex.ptr(),
-					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-					m_paths.ptr(),
-					m_rays.ptr(),
-					width, height);
-			}
-			else {
-				shadeMissWithEnvmap<false> << <grid, block >> > (
-					m_cam.ptr(),
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_tex.ptr(),
-					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-					m_paths.ptr(),
-					m_rays.ptr(),
-					width, height);
-			}
+			shadeMissWithEnvmap << <grid, block >> > (
+				bounce,
+				m_cam.ptr(),
+				m_aovNormalDepth[curaov].ptr(),
+				m_aovTexclrTemporalWeight[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
+				m_tex.ptr(),
+				m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
+				m_paths.ptr(),
+				m_rays.ptr(),
+				width, height);
 		}
 		else {
 			if (bounce == 0) {
@@ -1019,7 +1028,6 @@ namespace idaten
 		bool isFirstBounce = (bounce == 0);
 
 		shade << <blockPerGrid, threadPerBlock >> > (
-			isFirstBounce,
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),

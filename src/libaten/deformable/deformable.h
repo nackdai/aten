@@ -19,6 +19,8 @@ namespace aten
 	public:
 		bool read(const char* path);
 
+		void release();
+
 		void update(const mat4& mtxL2W);
 
 		void update(

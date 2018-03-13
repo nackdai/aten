@@ -20,6 +20,11 @@ namespace aten
 	private:
 		bool read(FileInputStream* stream);
 
+		void release()
+		{
+			m_joints.clear();
+		}
+
 	public:
 		uint32_t getJointNum() const
 		{
@@ -49,6 +54,15 @@ namespace aten
 
 	private:
 		void init(Skeleton* skl);
+
+		void release()
+		{
+			m_skl = nullptr;
+
+			m_globalPose.clear();
+			m_globalMatrix.clear();
+			m_needUpdateJointFlag.clear();
+		}
 
 	public:
 		void buildPose(const mat4& mtxL2W);

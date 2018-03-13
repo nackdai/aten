@@ -66,7 +66,7 @@ namespace aten
 			return s_vb;
 		}
 
-		static void clear()
+		static void release()
 		{
 			s_vertices.clear();
 			s_indices.clear();

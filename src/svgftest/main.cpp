@@ -519,7 +519,7 @@ int main()
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
-	aten::ImageBasedLight ibl(&bg);
+	aten::ImageBasedLight ibl(&bg, false);
 
 	g_scene.addImageBasedLight(&ibl);
 #endif
@@ -597,6 +597,10 @@ int main()
 	aten::window::run();
 
 	aten::GLProfiler::terminate();
+
+	g_rasterizer.release();
+	g_rasterizerAABB.release();
+	aten::VertexManager::release();
 
 	aten::window::terminate();
 }

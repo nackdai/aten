@@ -32,6 +32,13 @@ namespace aten {
 			const char* pathGS,
 			const char* pathFS);
 
+		void release()
+		{
+			m_boxvb.clear();
+			m_vb.clear();
+			m_ib.clear();
+		}
+
 		void draw(
 			int frame,
 			scene* scene,

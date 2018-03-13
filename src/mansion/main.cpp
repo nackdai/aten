@@ -483,5 +483,9 @@ int main()
 
 	aten::GLProfiler::terminate();
 
+	g_rasterizer.release();
+	g_rasterizerAABB.release();
+	aten::VertexManager::release();
+
 	aten::window::terminate();
 }

@@ -25,6 +25,11 @@ namespace aten
 			const SkeletonController& skeleton,
 			IDeformMeshRenderHelper* helper);
 
+		void release()
+		{
+			m_groups.clear();
+		}
+
 	private:
 		MeshHeader m_header;
 

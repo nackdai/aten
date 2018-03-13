@@ -73,6 +73,13 @@ namespace aten
 		return true;
 	}
 
+	void deformable::release()
+	{
+		m_mesh.release();
+		m_skl.release();
+		m_sklController.release();
+	}
+
 	class DeformMeshRenderHelper : public IDeformMeshRenderHelper {
 	public:
 		DeformMeshRenderHelper(shader* s) : m_shd(s) {}

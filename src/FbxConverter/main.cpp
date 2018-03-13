@@ -262,6 +262,8 @@ int main(int argc, char* argv[])
 
 	aten::window::run();
 
+	g_mdl.release();
+
 	aten::window::terminate();
 
 	return 1;

@@ -21,15 +21,15 @@ void DemoScene::makeScene(aten::scene* scene)
 		{ "mirror", true },
 		{ "pc", false },
 		{ "room", true }, 
-#if 1
-		{ "side_table", false },
+		{ "side_table", true },
 		{ "sofa_0", true },
+		{ "pillow_0", false },
 		{ "sofa_1", true },
+		{ "pillow_1", false },
 		{ "vase_on_desk", false },
 		{ "vase_on_sidetable", false },
 		{ "window_0", true },
 		{ "window_1", true },
-#endif
 	};
 
 	aten::ObjLoader::setBasePath("../../asset/mansion/objs");

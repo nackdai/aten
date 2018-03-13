@@ -314,6 +314,7 @@ __global__ void shadeMiss(
 
 template <bool isFirstBounce>
 __global__ void shadeMissWithEnvmap(
+	const aten::CameraParameter* __restrict__ camera,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -335,9 +336,25 @@ __global__ void shadeMissWithEnvmap(
 	const auto idx = getIdx(ix, iy, width);
 
 	if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
-		auto r = rays[idx];
+		aten::vec3 dir = rays[idx].dir;
 
-		auto uv = AT_NAME::envmap::convertDirectionToUV(r.dir);
+		if (isFirstBounce) {
+			// Suppress jittering envrinment map.
+			// So, re-sample ray without random.
+
+			// TODO
+			// More efficient way...
+
+			float s = ix / (float)(width);
+			float t = iy / (float)(height);
+
+			AT_NAME::CameraSampleResult camsample;
+			AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+
+			dir = camsample.r.dir;
+		}
+
+		auto uv = AT_NAME::envmap::convertDirectionToUV(dir);
 
 		auto bg = tex2D<float4>(textures[envmapIdx], uv.x, uv.y);
 		auto emit = aten::vec3(bg.x, bg.y, bg.z);
@@ -916,6 +933,7 @@ namespace idaten
 		if (m_envmapRsc.idx >= 0) {
 			if (bounce == 0) {
 				shadeMissWithEnvmap<true> << <grid, block >> > (
+					m_cam.ptr(),
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
@@ -927,6 +945,7 @@ namespace idaten
 			}
 			else {
 				shadeMissWithEnvmap<false> << <grid, block >> > (
+					m_cam.ptr(),
 					m_aovNormalDepth[curaov].ptr(),
 					m_aovTexclrTemporalWeight[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),

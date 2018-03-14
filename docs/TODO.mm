@@ -311,8 +311,17 @@
 </node>
 </node>
 </node>
-<node CREATED="1517822752019" ID="ID_282486606" MODIFIED="1517822762177" TEXT="&#xff16;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x4ee5;&#x964d;&#x63cf;&#x753b;&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;">
+<node CREATED="1517822752019" ID="ID_282486606" MODIFIED="1521013232271" TEXT="&#xff16;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x4ee5;&#x964d;&#x63cf;&#x753b;&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1517822762677" ID="ID_1650141646" MODIFIED="1517822766576" TEXT="sponza&#x3067;&#x78ba;&#x8a8d;"/>
+<node CREATED="1521013142414" ID="ID_645309152" MODIFIED="1521013160910" TEXT="&#x30ed;&#x30b7;&#x30a2;&#x30f3;&#x30eb;&#x30fc;&#x30ec;&#x30c3;&#x30c8;&#x306e;&#x4e71;&#x6570;&#x304c;&#x30bc;&#x30ed;&#x306b;&#x306a;&#x308b;&#x3053;&#x3068;&#x304c;&#x3042;&#x308a;&#x3001;&#x30bc;&#x30ed;&#x5272;&#x308a;&#x7b97;&#x3057;&#x3066;&#x3044;&#x305f;&#x305f;&#x3081;">
+<node CREATED="1521013161339" ID="ID_959484906" MODIFIED="1521013197141" TEXT="&#x6e96;&#x4e71;&#x6570;&#x306a;&#x306e;&#x3067;&#x4e00;&#x5b9a;&#x9593;&#x9694;&#x3067;&#x767a;&#x751f;&#x3057;&#x3066;&#x3044;&#x3066;&#x3001;&#x305d;&#x308c;&#x304c;&#x30ed;&#x30b7;&#x30a2;&#x30f3;&#x30eb;&#x30fc;&#x30ec;&#x30c3;&#x30c8;&#x304c;&#x767a;&#x751f;&#x3059;&#x308b;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x6570;+3&#x3060;&#x3063;&#x305f;&#x305f;&#x3081;">
+<node CREATED="1521013198962" ID="ID_851605349" MODIFIED="1521013213436" TEXT="&#x30ed;&#x30b7;&#x30a2;&#x30f3;&#x30eb;&#x30fc;&#x30ec;&#x30c3;&#x30c8;&#x304c;&#x767a;&#x751f;&#x3059;&#x308b;&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x6570; = 3">
+<node CREATED="1521013214051" ID="ID_1529059715" MODIFIED="1521013218246" TEXT="3 +3 = 6"/>
+<node CREATED="1521013219082" ID="ID_556241975" MODIFIED="1521013228509" TEXT="6&#x30d0;&#x30a6;&#x30f3;&#x30b9;&#x4ee5;&#x964d;&#x306b;&#x767a;&#x751f;&#x3057;&#x3066;&#x3044;&#x305f;"/>
+</node>
+</node>
+</node>
 </node>
 <node CREATED="1517822767252" ID="ID_594255335" MODIFIED="1517822781600" TEXT="CornellBox&#x3067;&#x30e9;&#x30a4;&#x30c8;&#x79fb;&#x52d5;&#x306e;Variance&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;"/>
 <node CREATED="1518165137739" ID="ID_1838800613" MODIFIED="1518747779342" TEXT="material.cpp&#x30ea;&#x30cd;&#x30fc;&#x30e0;">
@@ -323,7 +332,15 @@
 <node CREATED="1519877735682" ID="ID_1112460666" MODIFIED="1519896527122" TEXT="&#x30dd;&#x30a4;&#x30f3;&#x30bf;&#x3092;&#x6301;&#x305f;&#x306a;&#x3044;&#x3088;&#x3046;&#x306b;&#x3057;&#x305f;&#x3044;"/>
 </node>
 <node CREATED="1520319843340" ID="ID_829612037" MODIFIED="1520319857713" TEXT="OrenNayer&#x306e;&#x6cd5;&#x7dda;&#x30de;&#x30c3;&#x30d7;&#x304c;&#x304a;&#x304b;&#x3057;&#x3044;"/>
-<node CREATED="1520589951903" ID="ID_1777878643" MODIFIED="1520589956846" TEXT="TAA&#x306e;&#x54c1;&#x8cea;&#x304c;&#x4f4e;&#x3044;"/>
+<node CREATED="1520589951903" ID="ID_1777878643" MODIFIED="1520927025845" TEXT="TAA&#x306e;&#x54c1;&#x8cea;&#x304c;&#x4f4e;&#x3044;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1520926891946" ID="ID_260417008" MODIFIED="1520926990756" TEXT="&#x305d;&#x3046;&#x3067;&#x306f;&#x306a;&#x3044;">
+<icon BUILTIN="help"/>
+<node CREATED="1520926991788" ID="ID_168498144" MODIFIED="1520927010604" TEXT="TAA&#x306e;&#x30b3;&#x30fc;&#x30c9;&#x3092;&#x5909;&#x3048;&#x3066;&#x3082;&#x30b8;&#x30e9;&#x30b8;&#x30e9;&#x306f;&#x306a;&#x304f;&#x306a;&#x3089;&#x306a;&#x304b;&#x3063;&#x305f;">
+<node CREATED="1520927012296" ID="ID_699743191" MODIFIED="1520927021596" TEXT="&#x30c7;&#x30ce;&#x30a4;&#x30ba;&#x306e;&#x54c1;&#x8cea;&#x306e;&#x554f;&#x984c;"/>
+</node>
+</node>
+</node>
 </node>
 <node CREATED="1517822784508" HGAP="23" ID="ID_29808556" MODIFIED="1518164988703" POSITION="right" TEXT="Voxel" VSHIFT="42">
 <node CREATED="1518164990528" ID="ID_57331120" MODIFIED="1518745186221" TEXT="&#x53c2;&#x8003;">

@@ -56,7 +56,7 @@ __global__ void genPath(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
-	path.sampler.init(frame, 0, scramble, sobolmatrices);
+	paths->sampler[idx].init(frame, 0, scramble, sobolmatrices);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
@@ -439,7 +439,7 @@ __global__ void shade(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
 	auto scramble = random[idx] * 0x1fe3434f;
-	shPaths[threadIdx.x].sampler.init(frame, 4 + bounce * 300, scramble);
+	paths->sampler[idx].init(frame, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
 	auto rnd = random[idx];
 	auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));

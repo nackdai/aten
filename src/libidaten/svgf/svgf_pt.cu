@@ -673,7 +673,7 @@ __global__ void shade(
 			paths->attrib[idx].isTerminate = true;
 		}
 		else {
-			russianProb = p;
+			russianProb = max(p, 0.01f);
 		}
 	}
 			

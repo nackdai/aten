@@ -114,7 +114,6 @@ __global__ void temporalReprojection(
 	const float4* __restrict__ prevAovMomentMeshid,
 	cudaSurfaceObject_t motionDetphBuffer,
 	cudaSurfaceObject_t dst,
-	float4* tmpBuffer,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -216,7 +215,9 @@ __global__ void temporalReprojection(
 	curAovTexclrTemporalWeight[idx].w = weight;
 
 #ifdef ENABLE_MEDIAN_FILTER
-	tmpBuffer[idx] = curColor;
+	curAovColorVariance[idx].x = curColor.x;
+	curAovColorVariance[idx].y = curColor.y;
+	curAovColorVariance[idx].z = curColor.z;
 #else
 	curAovColorVariance[idx].x = curColor.x;
 	curAovColorVariance[idx].y = curColor.y;
@@ -302,7 +303,6 @@ __global__ void dilateWeight(
 	aovTexclrTemporalWeight[idx].w = temporalWeight;
 }
 
-#if 0
 inline __device__ float3 min(float3 a, float3 b)
 {
 	return make_float3(
@@ -329,11 +329,9 @@ inline __device__ float3 max(float3 a, float3 b)
 #define mnmx5(a, b, c, d, e)	s2(a, b); s2(c, d); mn3(a, c, e); mx3(b, d, e);           // 6 exchanges
 #define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
 
-template <bool isReferPath>
 inline __device__ float3 medianFilter(
 	int ix, int iy,
 	const float4* src,
-	const idaten::SVGFPathTracing::Path* paths,
 	int width, int height)
 {
 	float3 v[9];
@@ -347,13 +345,9 @@ inline __device__ float3 medianFilter(
 
 			int pidx = getIdx(xx, yy, width);
 
-			if (isReferPath) {
-				v[pos] = make_float3(paths[pidx].contrib.x, paths[pidx].contrib.y, paths[pidx].contrib.z);
-			}
-			else {
-				auto s = src[pidx];
-				v[pos] = make_float3(s.x, s.y, s.z);
-			}
+			auto s = src[pidx];
+			v[pos] = make_float3(s.x, s.y, s.z);
+			
 			pos++;
 		}
 	}
@@ -370,11 +364,9 @@ inline __device__ float3 medianFilter(
 
 __global__ void medianFilter(
 	cudaSurfaceObject_t dst,
-	const float4* __restrict__ src,
-	idaten::SVGFPathTracing::AOV* curAovs,
-	const idaten::SVGFPathTracing::AOV* __restrict__ prevAovs,
-	const aten::mat4* __restrict__ mtxs,
-	const idaten::SVGFPathTracing::Path* __restrict__ paths,
+	float4* curAovColorVariance,
+	float4* curAovMomentMeshid,
+	const float4* __restrict__ prevAovMomentMeshid,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -386,74 +378,40 @@ __global__ void medianFilter(
 
 	auto idx = getIdx(ix, iy, width);
 
-	const int centerMeshId = curAovs[idx].meshid;
+	const int centerMeshId = curAovMomentMeshid[idx].w;
 
 	if (centerMeshId < 0) {
 		// This pixel is background, so nothing is done.
 		return;
 	}
 
-	auto curColor = medianFilter<false>(ix, iy, src, paths, width, height);
+	auto curColor = medianFilter(ix, iy, curAovColorVariance, width, height);
 
-	curAovs[idx].color = curColor;
-
-	const float centerDepth = curAovs[idx].depth;
-	const auto centerNormal = curAovs[idx].normal;
-
-	static const float zThreshold = 0.05f;
-	static const float nThreshold = 0.98f;
+	curAovColorVariance[idx].x = curColor.x;
+	curAovColorVariance[idx].y = curColor.y;
+	curAovColorVariance[idx].z = curColor.z;
 
 	// accumulate moments.
 	{
 		float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
 		float3 centerMoment = make_float3(lum * lum, lum, 0);
 
-		// 前のフレームのクリップ空間座標を計算.
-		aten::vec4 prevPos;
-		computePrevScreenPos(
-			ix, iy,
-			centerDepth,
-			width, height,
-			&prevPos,
-			mtxs);
-
-		// [0, 1]の範囲内に入っているか.
-		bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
-		bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
-
 		// 積算フレーム数のリセット.
 		int frame = 1;
 
-		if (isInsideX && isInsideY) {
-			int px = (int)(prevPos.x * width - 0.5f);
-			int py = (int)(prevPos.y * height - 0.5f);
+		auto momentMeshid = prevAovMomentMeshid[idx];;
+		float3 prevMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
 
-			px = clamp(px, 0, width - 1);
-			py = clamp(py, 0, height - 1);
+		// 積算フレーム数を１増やす.
+		frame = (int)prevMoment.z + 1;
 
-			int pidx = getIdx(px, py, width);
-
-			const float prevDepth = prevAovs[pidx].depth;
-			const int prevMeshId = prevAovs[pidx].meshid;
-
-			auto prevNormal = prevAovs[pidx].normal;
-
-			if (abs(1 - centerDepth / prevDepth) < zThreshold
-				&& dot(centerNormal, prevNormal) > nThreshold
-				&& centerMeshId == prevMeshId)
-			{
-				float3 prevMoment = prevAovs[pidx].moments;
-
-				// 積算フレーム数を１増やす.
-				frame = (int)prevMoment.z + 1;
-
-				centerMoment += prevMoment;
-			}
-		}
+		centerMoment += prevMoment;
 
 		centerMoment.z = frame;
 
-		curAovs[idx].moments = centerMoment;
+		curAovMomentMeshid[idx].x = centerMoment.x;
+		curAovMomentMeshid[idx].y = centerMoment.y;
+		curAovMomentMeshid[idx].z = centerMoment.z;
 	}
 
 	surf2Dwrite(
@@ -462,7 +420,6 @@ __global__ void medianFilter(
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 }
-#endif
 
 namespace idaten
 {
@@ -497,7 +454,6 @@ namespace idaten
 			m_aovMomentMeshid[prevaov].ptr(),
 			motionDepthBuffer,
 			outputSurf,
-			m_tmpBuf.ptr(),
 			width, height);
 
 		checkCudaKernel(temporalReprojection);
@@ -505,11 +461,9 @@ namespace idaten
 #ifdef ENABLE_MEDIAN_FILTER
 		medianFilter << <grid, block >> > (
 			outputSurf,
-			m_tmpBuf.ptr(),
-			curaov.ptr(),
-			prevaov.ptr(),
-			m_mtxs.ptr(),
-			m_paths.ptr(),
+			m_aovColorVariance[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
+			m_aovMomentMeshid[prevaov].ptr(),
 			width, height);
 
 		checkCudaKernel(medianFilter);

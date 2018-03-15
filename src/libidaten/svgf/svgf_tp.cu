@@ -255,8 +255,7 @@ __global__ void temporalReprojection(
 #endif
 
 	surf2Dwrite(
-		//curColor,
-		make_float4(weight, weight, weight, 1),
+		curColor,
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);

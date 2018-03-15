@@ -100,6 +100,8 @@ inline __device__ float4 sampleBilinear(
 }
 
 __global__ void temporalReprojection(
+	const float nThreshold,
+	const float zThreshold,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* curAovNormalDepth,
@@ -153,9 +155,6 @@ __global__ void temporalReprojection(
 
 	float4 sum = make_float4(0);
 	float weight = 0.0f;
-
-	static const float zThreshold = 0.05f;
-	static const float nThreshold = 0.98f;
 
 	aten::vec4 centerPrevPos;
 
@@ -256,7 +255,8 @@ __global__ void temporalReprojection(
 #endif
 
 	surf2Dwrite(
-		curColor,
+		//curColor,
+		make_float4(weight, weight, weight, 1),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
@@ -484,6 +484,8 @@ namespace idaten
 		
 		temporalReprojection << <grid, block >> > (
 		//temporalReprojection << <1, 1 >> > (
+			m_nmlThresholdTF,
+			m_depthThresholdTF,
 			m_paths.ptr(),
 			m_cam.ptr(),
 			m_aovNormalDepth[curaov].ptr(),

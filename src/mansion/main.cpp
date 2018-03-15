@@ -171,6 +171,18 @@ void onRun(aten::window* window)
 			}
 		}
 
+		{
+			float nTh, zTh;
+			g_tracer.getTemporalFilterThreshold(nTh, zTh);
+
+			bool b0 = ImGui::SliderFloat("TF Normal Threshold", &nTh, 0.0f, 1.0f);
+			bool b1 = ImGui::SliderFloat("TF Depth Threshold", &zTh, 0.0f, 1.0f);
+
+			if (b0 || b1){
+				g_tracer.setTemporalFilterThreshold(nTh, zTh);
+			}
+		}
+
 		bool enableTAA = g_taa.isEnableTAA();
 		bool canShowTAADiff = g_taa.canShowTAADiff();
 

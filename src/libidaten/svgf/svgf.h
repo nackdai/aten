@@ -184,6 +184,18 @@ namespace idaten
 			m_hitDistLimit = d;
 		}
 
+		void getTemporalFilterThreshold(float& nTh, float& zTh)
+		{
+			nTh = m_nmlThresholdTF;
+			zTh = m_depthThresholdTF;
+		}
+
+		void setTemporalFilterThreshold(float nTh, float zTh)
+		{
+			m_nmlThresholdTF = nTh;
+			m_depthThresholdTF = zTh;
+		}
+
 	protected:
 		void onInit(int width, int height);
 
@@ -318,5 +330,8 @@ namespace idaten
 
 		Mode m_mode{ Mode::SVGF };
 		AOVMode m_aovMode{ AOVMode::WireFrame };
+
+		float m_depthThresholdTF{ 0.05f };
+		float m_nmlThresholdTF{ 0.98f };
 	};
 }

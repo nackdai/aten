@@ -51,7 +51,7 @@ namespace aten
 
 		// cube.
 		AT_DEVICE_API GeomParameter(const vec3& c, const vec3& s, AT_NAME::material* m)
-			: center(c), size(s), type(GeometryType::Sphere)
+			: center(c), size(s), type(GeometryType::Cube)
 		{
 			mtrl.ptr = m;
 		}

@@ -19,8 +19,8 @@
 //#define ENABLE_TEMPORAL
 //#define ENABLE_ATROUS
 
-static int WIDTH = 512;
-static int HEIGHT = 512;
+static int WIDTH = 1280;
+static int HEIGHT = 720;
 static const char* TITLE = "idaten";
 
 #ifdef ENABLE_OMP
@@ -121,6 +121,12 @@ void onRun(aten::window* window)
 
 		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
 			g_tracer.reset();
+		}
+
+		bool enableProgressive = g_tracer.isProgressive();
+
+		if (ImGui::Checkbox("Progressive", &enableProgressive)) {
+			g_tracer.enableProgressive(enableProgressive);
 		}
 
 		window->drawImGui();
@@ -319,7 +325,7 @@ int main()
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
-	aten::ImageBasedLight ibl(&bg);
+	aten::ImageBasedLight ibl(&bg, false);
 
 	g_scene.addImageBasedLight(&ibl);
 #endif
@@ -380,7 +386,7 @@ int main()
 			vtxparams,
 			mtxs,
 #ifdef ENABLE_ENVMAP
-			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(4)));
 #else
 			tex, idaten::EnvmapResource());
 #endif

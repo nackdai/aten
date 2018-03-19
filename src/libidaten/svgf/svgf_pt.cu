@@ -20,13 +20,6 @@
 
 #define ENABLE_PERSISTENT_THREAD
 
-//#define ENABLE_DEBUG_1PIXEL
-
-#ifdef ENABLE_DEBUG_1PIXEL
-#define DEBUG_IX	(140)
-#define DEBUG_IY	(511 - 81)
-#endif
-
 __global__ void genPath(
 	bool isFillAOV,
 	idaten::SVGFPathTracing::Path* paths,
@@ -818,11 +811,6 @@ __global__ void gather(
 		return;
 	}
 
-#ifdef ENABLE_DEBUG_1PIXEL
-	ix = DEBUG_IX;
-	iy = DEBUG_IY;
-#endif
-
 	const auto idx = getIdx(ix, iy, width);
 
 	int sample = paths->contrib[idx].samples;
@@ -991,13 +979,8 @@ namespace idaten
 
 		aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
 
-#ifdef ENABLE_DEBUG_1PIXEL
-		int blockPerGrid = 1;
-		int threadPerBlock = 1;
-#else
 		dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
-#endif
 
 		auto& hitcount = Compaction::getCount();
 

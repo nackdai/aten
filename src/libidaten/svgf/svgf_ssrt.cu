@@ -33,11 +33,11 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	paths->attrib[idx].isHit = false;
 
@@ -132,7 +132,7 @@ namespace idaten
 			m_paths.ptr(),
 			m_isects.ptr(),
 			m_hitbools.ptr(),
-			m_tileDomain.w, m_tileDomain.h,
+			width, height,
 			campos,
 			m_shapeparam.ptr(),
 			m_primparams.ptr(),

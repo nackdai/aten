@@ -105,6 +105,7 @@ __global__ void genPath(
 __device__ unsigned int g_headDev = 0;
 
 __global__ void hitTest(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::Intersection* isects,
 	aten::ray* rays,
@@ -150,7 +151,7 @@ __global__ void hitTest(
 		// task index per thread in a warp
 		unsigned int idx = headWarp + threadIdx.x;
 
-		if (idx >= width * height) {
+		if (idx >= tileDomain.w * tileDomain.h) {
 			return;
 		}
 
@@ -205,9 +206,11 @@ __global__ void hitTest(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
+
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	paths->attrib[idx].isHit = false;
 
@@ -268,6 +271,7 @@ __global__ void hitTest(
 }
 
 __global__ void shadeMiss(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	int bounce,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
@@ -275,14 +279,14 @@ __global__ void shadeMiss(
 	idaten::SVGFPathTracing::Path* paths,
 	int width, int height)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
 		// TODO
@@ -291,10 +295,14 @@ __global__ void shadeMiss(
 		if (bounce == 0) {
 			paths->attrib[idx].isKill = true;
 
+			ix += tileDomain.x;
+			iy += tileDomain.y;
+			const auto _idx = getIdx(ix, iy, width);
+
 			// Export bg color to albedo buffer.
-			aovTexclrTemporalWeight[idx] = make_float4(bg.x, bg.y, bg.z, aovTexclrTemporalWeight[idx].w);
-			aovNormalDepth[idx].w = -1;
-			aovMomentMeshid[idx].w = -1;
+			aovTexclrTemporalWeight[_idx] = make_float4(bg.x, bg.y, bg.z, aovTexclrTemporalWeight[_idx].w);
+			aovNormalDepth[_idx].w = -1;
+			aovMomentMeshid[_idx].w = -1;
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
@@ -307,6 +315,7 @@ __global__ void shadeMiss(
 }
 
 __global__ void shadeMissWithEnvmap(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	int bounce,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* aovNormalDepth,
@@ -320,14 +329,14 @@ __global__ void shadeMissWithEnvmap(
 	const aten::ray* __restrict__ rays,
 	int width, int height)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
 		aten::vec3 dir = rays[idx].dir;
@@ -339,8 +348,8 @@ __global__ void shadeMissWithEnvmap(
 			// TODO
 			// More efficient way...
 
-			float s = ix / (float)(width);
-			float t = iy / (float)(height);
+			float s = (ix + tileDomain.x) / (float)(width);
+			float t = (iy + tileDomain.y) / (float)(height);
 
 			AT_NAME::CameraSampleResult camsample;
 			AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -359,10 +368,14 @@ __global__ void shadeMissWithEnvmap(
 		{
 			paths->attrib[idx].isKill = true;
 
+			ix += tileDomain.x;
+			iy += tileDomain.y;
+			const auto _idx = getIdx(ix, iy, width);
+
 			// Export envmap to albedo buffer.
-			aovTexclrTemporalWeight[idx] = make_float4(emit.x, emit.y, emit.z, aovTexclrTemporalWeight[idx].w);
-			aovNormalDepth[idx].w = -1;
-			aovMomentMeshid[idx].w = -1;
+			aovTexclrTemporalWeight[_idx] = make_float4(emit.x, emit.y, emit.z, aovTexclrTemporalWeight[_idx].w);
+			aovNormalDepth[_idx].w = -1;
+			aovMomentMeshid[_idx].w = -1;
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
@@ -919,11 +932,12 @@ namespace idaten
 			hitTest << <grid, block >> > (
 #endif
 				//hitTest << <1, 1 >> > (
+				m_tileDomain,
 				m_paths.ptr(),
 				m_isects.ptr(),
 				m_rays.ptr(),
 				m_hitbools.ptr(),
-				m_tileDomain.w, m_tileDomain.h,
+				width, height,
 				m_shapeparam.ptr(), m_shapeparam.num(),
 				m_lightparam.ptr(), m_lightparam.num(),
 				m_nodetex.ptr(),
@@ -950,6 +964,7 @@ namespace idaten
 
 		if (m_envmapRsc.idx >= 0) {
 			shadeMissWithEnvmap << <grid, block >> > (
+				m_tileDomain,
 				bounce,
 				m_cam.ptr(),
 				m_aovNormalDepth[curaov].ptr(),
@@ -959,16 +974,17 @@ namespace idaten
 				m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 				m_paths.ptr(),
 				m_rays.ptr(),
-				m_tileDomain.w, m_tileDomain.h);
+				width, height);
 		}
 		else {
 			shadeMiss << <grid, block >> > (
+				m_tileDomain,
 				bounce,
 				m_aovNormalDepth[curaov].ptr(),
 				m_aovTexclrTemporalWeight[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
 				m_paths.ptr(),
-				m_tileDomain.w, m_tileDomain.h);
+				width, height);
 		}
 
 		checkCudaKernel(shadeMiss);

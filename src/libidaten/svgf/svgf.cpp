@@ -115,8 +115,8 @@ namespace idaten
 		onInit(width, height);
 		onClear();
 
-		//if (width > 1280 || height > 720) {
-		if (width >= 1280 || height >= 720) {
+		if (width > 1280 || height > 720) {
+		//if (width >= 1280 || height >= 720) {
 			int w = (width + 1) / 2;
 			int h = (height + 1) / 2;
 
@@ -142,6 +142,9 @@ namespace idaten
 			}
 		}
 		else {
+			m_hitbools.init(width * height);
+			m_hitidx.init(width * height);
+
 			Compaction::init(
 				width * height,
 				1024);

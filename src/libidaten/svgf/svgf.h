@@ -271,9 +271,10 @@ namespace idaten
 
 		void copyFromTmpBufferToAov(int width, int height);
 
-		void onFillAOV(
+		void onDisplayAOV(
 			cudaSurfaceObject_t outputSurf,
-			int width, int height);
+			int width, int height,
+			cudaTextureObject_t texVtxPos);
 
 		void pick(
 			int ix, int iy,

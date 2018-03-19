@@ -114,8 +114,8 @@ namespace idaten
 
 		onInit(width, height);
 
-		if (width > 1280 || height > 720) {
-		//if (width >= 512 || height >= 512) {
+		//if (width > 1280 || height > 720) {
+		if (width >= 512 || height >= 512) {
 			int w = (width + 1) / 2;
 			int h = (height + 1) / 2;
 
@@ -240,7 +240,7 @@ namespace idaten
 			onGather(outputSurf, width, height, maxSamples);
 		}
 		else if (m_mode == Mode::AOVar) {
-			onFillAOV(outputSurf, width, height);
+			onDisplayAOV(outputSurf, width, height, vtxTexPos);
 		}
 		else {
 			if (isFirstFrame()) {

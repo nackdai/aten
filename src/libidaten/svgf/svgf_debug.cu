@@ -18,18 +18,24 @@
 #include "aten4idaten.h"
 
 __global__ void fillAOV(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	idaten::SVGFPathTracing::AOVMode mode,
 	int width, int height,
 	const float4* __restrict__ aovNormalDepth,
 	const float4* __restrict__ aovTexclrTemporalWeight,
-	const aten::Intersection* __restrict__ isects,
-	cudaSurfaceObject_t motionDetphBuffer)
+	cudaSurfaceObject_t motionDetphBuffer,
+	const aten::CameraParameter* __restrict__ camera,
+	const aten::GeomParameter* __restrict__ shapes, int geomnum,
+	cudaTextureObject_t* nodes,
+	const aten::PrimitiveParamter* __restrict__ prims,
+	cudaTextureObject_t vtxPos,
+	const aten::mat4* __restrict__ matrices)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
@@ -46,9 +52,29 @@ __global__ void fillAOV(
 		aten::vec3(124,  83,  53),
 	};
 
+	ix += tileDomain.x;
+	iy += tileDomain.y;
+
 	const auto idx = getIdx(ix, iy, width);
 
-	const auto& isect = isects[idx];
+	float s = (ix + 0.5f) / (float)(width);
+	float t = (iy + 0.5f) / (float)(height);
+
+	AT_NAME::CameraSampleResult camsample;
+	AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+
+	Context ctxt;
+	{
+		ctxt.geomnum = geomnum;
+		ctxt.shapes = shapes;
+		ctxt.nodes = nodes;
+		ctxt.prims = prims;
+		ctxt.vtxPos = vtxPos;
+		ctxt.matrices = matrices;
+	}
+
+	aten::Intersection isect;
+	bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
 
 	float4 clr = make_float4(1);
 
@@ -159,14 +185,15 @@ __global__ void pickPixel(
 
 namespace idaten
 {
-	void SVGFPathTracing::onFillAOV(
+	void SVGFPathTracing::onDisplayAOV(
 		cudaSurfaceObject_t outputSurf,
-		int width, int height)
+		int width, int height,
+		cudaTextureObject_t texVtxPos)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		int curaov = getCurAovs();
 
@@ -174,13 +201,19 @@ namespace idaten
 		auto gbuffer = m_motionDepthBuffer.bind();
 
 		fillAOV << <grid, block >> > (
+			m_tileDomain,
 			outputSurf,
 			m_aovMode,
 			width, height,
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),
-			m_isects.ptr(),
-			gbuffer);
+			gbuffer,
+			m_cam.ptr(),
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_nodetex.ptr(),
+			m_primparams.ptr(),
+			texVtxPos,
+			m_mtxparams.ptr());
 	}
 
 	void SVGFPathTracing::pick(

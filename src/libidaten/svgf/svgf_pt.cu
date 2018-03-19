@@ -381,6 +381,7 @@ __global__ void shadeMissWithEnvmap(
 }
 
 __global__ void shade(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -473,22 +474,27 @@ __global__ void shade(
 	// しかし、temporal reprojection、atrousなどのフィルタ適用時に法線を参照する際に、法線マップが細かすぎてはじかれてしまうことがある.
 	// それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
 	if (bounce == 0) {
-		int ix = idx % width;
-		int iy = idx / width;
+		int ix = idx % tileDomain.w;
+		int iy = idx / tileDomain.w;
+
+		ix += tileDomain.x;
+		iy += tileDomain.y;
+
+		const auto _idx = getIdx(ix, iy, width);
 
 		// World coordinate to Clip coordinate.
 		aten::vec4 pos = aten::vec4(rec.p, 1);
 		pos = mtxW2C.apply(pos);
 
 		// normal, depth
-		aovNormalDepth[idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
+		aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
 		// meshid.
-		aovMomentMeshid[idx].w = isect.meshid;
+		aovMomentMeshid[_idx].w = isect.meshid;
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
-		aovTexclrTemporalWeight[idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[idx].w);
+		aovTexclrTemporalWeight[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[_idx].w);
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
@@ -496,19 +502,24 @@ __global__ void shade(
 	// TODO
 	// How to deal Refraction?
 	else if (bounce == 1 && paths->attrib[idx].mtrlType == aten::MaterialType::Specular) {
-		int ix = idx % width;
-		int iy = idx / width;
+		int ix = idx % tileDomain.w;
+		int iy = idx / tileDomain.w;
+
+		ix += tileDomain.x;
+		iy += tileDomain.y;
+
+		const auto _idx = getIdx(ix, iy, width);
 
 		// World coordinate to Clip coordinate.
 		aten::vec4 pos = aten::vec4(rec.p, 1);
 		pos = mtxW2C.apply(pos);
 
 		// normal, depth
-		aovNormalDepth[idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
+		aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
-		aovTexclrTemporalWeight[idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[idx].w);
+		aovTexclrTemporalWeight[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[_idx].w);
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
@@ -816,7 +827,7 @@ __global__ void gather(
 		return;
 	}
 
-	auto idx = getIdx(ix, iy, width);
+	auto idx = getIdx(ix, iy, tileDomain.w);
 
 	int sample = paths->contrib[idx].samples;
 	auto c = paths->contrib[idx].contrib;
@@ -999,11 +1010,12 @@ namespace idaten
 		bool isFirstBounce = (bounce == 0);
 
 		shade << <blockPerGrid, threadPerBlock >> > (
+			m_tileDomain,
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),
 			mtxW2C,
-			m_tileDomain.w, m_tileDomain.h,
+			width, height,
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount.ptr(),
 			m_isects.ptr(),
@@ -1056,7 +1068,7 @@ namespace idaten
 			m_aovColorVariance[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),
 			m_paths.ptr(),
-			m_tileDomain.w, m_tileDomain.h);
+			width, height);
 
 		checkCudaKernel(gather);
 	}

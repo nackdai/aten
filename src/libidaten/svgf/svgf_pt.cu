@@ -27,8 +27,8 @@
 #define DEBUG_IY	(511 - 81)
 #endif
 
-template <bool isFillAOV>
 __global__ void genPath(
+	bool isFillAOV,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
 	int width, int height,
@@ -212,9 +212,6 @@ __global__ void hitTest(
 		return;
 	}
 
-	const auto idx = getIdx(23, 511 - 503, width);
-
-
 	paths->attrib[idx].isHit = false;
 
 	hitbools[idx] = 0;
@@ -273,8 +270,8 @@ __global__ void hitTest(
 #endif
 }
 
-template <bool isFirstBounce>
 __global__ void shadeMiss(
+	int bounce,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -294,7 +291,7 @@ __global__ void shadeMiss(
 		// TODO
 		auto bg = aten::vec3(0);
 
-		if (isFirstBounce) {
+		if (bounce == 0) {
 			paths->attrib[idx].isKill = true;
 
 			// Export bg color to albedo buffer.
@@ -877,28 +874,18 @@ namespace idaten
 			(width + block.x - 1) / block.x,
 			(height + block.y - 1) / block.y);
 
-		if (m_mode == Mode::AOVar) {
-			genPath<true> << <grid, block >> > (
-				m_paths.ptr(),
-				m_rays.ptr(),
-				width, height,
-				sample, maxSamples,
-				m_frame,
-				m_cam.ptr(),
-				m_sobolMatrices.ptr(),
-				m_random.ptr());
-		}
-		else {
-			genPath<false> << <grid, block >> > (
-				m_paths.ptr(),
-				m_rays.ptr(),
-				width, height,
-				sample, maxSamples,
-				m_frame,
-				m_cam.ptr(),
-				m_sobolMatrices.ptr(),
-				m_random.ptr());
-		}
+		bool isFillAOV = m_mode == Mode::AOVar;
+
+		genPath << <grid, block >> > (
+			isFillAOV,
+			m_paths.ptr(),
+			m_rays.ptr(),
+			width, height,
+			sample, maxSamples,
+			m_frame,
+			m_cam.ptr(),
+			m_sobolMatrices.ptr(),
+			m_random.ptr());
 
 		checkCudaKernel(genPath);
 	}
@@ -966,22 +953,13 @@ namespace idaten
 				width, height);
 		}
 		else {
-			if (bounce == 0) {
-				shadeMiss<true> << <grid, block >> > (
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_paths.ptr(),
-					width, height);
-			}
-			else {
-				shadeMiss<false> << <grid, block >> > (
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_paths.ptr(),
-					width, height);
-			}
+			shadeMiss << <grid, block >> > (
+				bounce,
+				m_aovNormalDepth[curaov].ptr(),
+				m_aovTexclrTemporalWeight[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
+				m_paths.ptr(),
+				width, height);
 		}
 
 		checkCudaKernel(shadeMiss);

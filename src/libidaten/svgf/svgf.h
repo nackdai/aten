@@ -83,6 +83,18 @@ namespace idaten
 		struct ShadowRay;
 #endif
 
+		struct TileDomain {
+			int x;
+			int y;
+			int w;
+			int h;
+
+			TileDomain() {}
+			TileDomain(int _x, int _y, int _w, int _h)
+				: x(_x), y(_y), w(_w), h(_h)
+			{}
+		};
+
 		struct PickedInfo {
 			int ix{ -1 };
 			int iy{ -1 };
@@ -200,6 +212,11 @@ namespace idaten
 		void onInit(int width, int height);
 
 		void onClear();
+
+		void onRender(
+			int width, int height,
+			int maxSamples,
+			int maxBounce);
 
 		virtual void onGenPath(
 			int width, int height,

@@ -118,6 +118,14 @@ namespace idaten
 		onInit(width, height);
 		onClear();
 
+		onRender(width, height, maxSamples, maxBounce);
+	}
+
+	void SVGFPathTracing::onRender(
+		int width, int height,
+		int maxSamples,
+		int maxBounce)
+	{
 		CudaGLResourceMap rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();
 
@@ -161,7 +169,7 @@ namespace idaten
 				vtxTexPos,
 				vtxTexNml);
 
-			bounce = 0;
+			int bounce = 0;
 
 			while (bounce < maxBounce) {
 				onHitTest(

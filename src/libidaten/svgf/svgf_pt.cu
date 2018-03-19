@@ -831,6 +831,7 @@ __global__ void gather(
 	float4* aovColorVariance,
 	float4* aovMomentMeshid,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
+	float4* contribs,
 	int width, int height)
 {
 	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -842,8 +843,8 @@ __global__ void gather(
 
 	auto idx = getIdx(ix, iy, tileDomain.w);
 
-	int sample = paths->contrib[idx].samples;
-	auto c = paths->contrib[idx].contrib;
+	float4 c = paths->contrib[idx].v;
+	int sample = c.w;
 
 	float3 contrib = make_float3(c.x, c.y, c.z) / sample;
 	//contrib.w = sample;
@@ -859,6 +860,8 @@ __global__ void gather(
 	aovMomentMeshid[idx].z += 1;
 
 	aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
+
+	contribs[idx] = c;
 
 #if 0
 	auto n = aovs[idx].moments.w;
@@ -1084,6 +1087,7 @@ namespace idaten
 			m_aovColorVariance[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),
 			m_paths.ptr(),
+			m_tmpBuf.ptr(),
 			width, height);
 
 		checkCudaKernel(gather);

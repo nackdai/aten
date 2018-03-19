@@ -232,9 +232,7 @@ namespace idaten
 			int width, int height,
 			int maxSamples,
 			int maxBounce,
-			cudaSurfaceObject_t outputSurf,
-			cudaTextureObject_t vtxTexPos,
-			cudaTextureObject_t vtxTexNml);
+			cudaSurfaceObject_t outputSurf);
 
 		virtual void onGenPath(
 			int width, int height,
@@ -287,6 +285,8 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height,
 			cudaTextureObject_t texVtxPos);
+
+		void onCopyBufferForTile(int width, int height);
 
 		void pick(
 			int ix, int iy,

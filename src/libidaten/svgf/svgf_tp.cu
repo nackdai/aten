@@ -100,9 +100,10 @@ inline __device__ float4 sampleBilinear(
 }
 
 __global__ void temporalReprojection(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	const float nThreshold,
 	const float zThreshold,
-	const idaten::SVGFPathTracing::Path* __restrict__ paths,
+	const float4* __restrict__ contribs,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* curAovNormalDepth,
 	float4* curAovTexclrTemporalWeight,
@@ -119,9 +120,12 @@ __global__ void temporalReprojection(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	const auto idx = getIdx(ix, iy, width);
 
@@ -132,8 +136,8 @@ __global__ void temporalReprojection(
 	const int centerMeshId = (int)momentMeshId.w;
 
 	// 今回のフレームのピクセルカラー.
-	auto contrib = paths->contrib[idx].contrib;
-	float4 curColor = make_float4(contrib.x, contrib.y, contrib.z, 1.0f) / paths->contrib[idx].samples;
+	auto contrib = contribs[idx];
+	float4 curColor = make_float4(contrib.x, contrib.y, contrib.z, 1.0f) / contrib.w;
 	//curColor.w = 1;
 
 	if (centerMeshId < 0) {
@@ -263,6 +267,7 @@ __global__ void temporalReprojection(
 }
 
 __global__ void dilateWeight(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	float4* aovTexclrTemporalWeight,
 	const float4* __restrict__ aovMomentMeshid,
 	int width, int height)
@@ -270,9 +275,12 @@ __global__ void dilateWeight(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	auto idx = getIdx(ix, iy, width);
 
@@ -429,8 +437,8 @@ namespace idaten
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		int curaov = getCurAovs();
 		int prevaov = getPrevAovs();
@@ -440,9 +448,10 @@ namespace idaten
 		
 		temporalReprojection << <grid, block >> > (
 		//temporalReprojection << <1, 1 >> > (
+			m_tileDomain,
 			m_nmlThresholdTF,
 			m_depthThresholdTF,
-			m_paths.ptr(),
+			m_tmpBuf.ptr(),
 			m_cam.ptr(),
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),
@@ -470,6 +479,7 @@ namespace idaten
 #endif
 
 		dilateWeight << <grid, block >> > (
+			m_tileDomain,
 			m_aovTexclrTemporalWeight[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),
 			width, height);

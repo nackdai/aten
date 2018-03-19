@@ -169,6 +169,20 @@ namespace idaten
 						vtxTexNml);
 				}
 			}
+
+#if 1
+			for (int nx = 0; nx < 2; nx++) {
+				for (int ny = 0; ny < 2; ny++) {
+					int x = nx * w;
+					int y = ny * h;
+
+					onDenoise(
+						TileDomain(x, y, w, h),
+						width, height, maxSamples, maxBounce,
+						outputSurf);
+				}
+			}
+#endif
 		}
 		else {
 			m_hitbools.init(width * height);
@@ -192,9 +206,7 @@ namespace idaten
 			onDenoise(
 				tileDomain,
 				width, height, maxSamples, maxBounce,
-				outputSurf,
-				vtxTexPos,
-				vtxTexNml);
+				outputSurf);
 		}
 
 		{
@@ -291,6 +303,14 @@ namespace idaten
 		else if (m_mode == Mode::AOVar) {
 			onDisplayAOV(outputSurf, width, height, vtxTexPos);
 		}
+		else {
+			if (isFirstFrame()) {
+				onGather(outputSurf, width, height, maxSamples);
+			}
+			else {
+				onCopyBufferForTile(width, height);
+			}
+		}
 	}
 
 	void SVGFPathTracing::onDenoise(
@@ -298,9 +318,7 @@ namespace idaten
 		int width, int height,
 		int maxSamples,
 		int maxBounce,
-		cudaSurfaceObject_t outputSurf,
-		cudaTextureObject_t vtxTexPos,
-		cudaTextureObject_t vtxTexNml)
+		cudaSurfaceObject_t outputSurf)
 	{
 		m_tileDomain = tileDomain;
 
@@ -309,7 +327,7 @@ namespace idaten
 			|| m_mode == Mode::VAR)
 		{
 			if (isFirstFrame()) {
-				onGather(outputSurf, width, height, maxSamples);
+				// Nothing is done...
 			}
 			else {
 				onTemporalReprojection(

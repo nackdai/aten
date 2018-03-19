@@ -19,8 +19,8 @@
 
 //#define TEST_FOR_GL_RENDER
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int WIDTH = 512;
+static int HEIGHT = 512;
 static const char* TITLE = "svgf";
 
 #ifdef ENABLE_OMP
@@ -55,7 +55,7 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
+static int g_curMode = (int)idaten::SVGFPathTracing::Mode::PT;
 static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
 static bool g_showAABB = false;
 
@@ -511,9 +511,6 @@ int main()
 	g_scene.build();
 
 #ifndef TEST_FOR_GL_RENDER
-	idaten::Compaction::init(
-		WIDTH * HEIGHT,
-		1024);
 
 #ifdef ENABLE_ENVMAP
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");

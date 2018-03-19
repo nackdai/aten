@@ -871,8 +871,8 @@ namespace idaten
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		bool isFillAOV = m_mode == Mode::AOVar;
 
@@ -880,7 +880,7 @@ namespace idaten
 			isFillAOV,
 			m_paths.ptr(),
 			m_rays.ptr(),
-			width, height,
+			m_tileDomain.w, m_tileDomain.h,
 			sample, maxSamples,
 			m_frame,
 			m_cam.ptr(),
@@ -904,8 +904,8 @@ namespace idaten
 #else
 			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 			dim3 grid(
-				(width + block.x - 1) / block.x,
-				(height + block.y - 1) / block.y);
+				(m_tileDomain.w + block.x - 1) / block.x,
+				(m_tileDomain.h + block.y - 1) / block.y);
 
 			hitTest << <grid, block >> > (
 #endif
@@ -914,7 +914,7 @@ namespace idaten
 				m_isects.ptr(),
 				m_rays.ptr(),
 				m_hitbools.ptr(),
-				width, height,
+				m_tileDomain.w, m_tileDomain.h,
 				m_shapeparam.ptr(), m_shapeparam.num(),
 				m_lightparam.ptr(), m_lightparam.num(),
 				m_nodetex.ptr(),
@@ -934,8 +934,8 @@ namespace idaten
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		int curaov = getCurAovs();
 
@@ -950,7 +950,7 @@ namespace idaten
 				m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 				m_paths.ptr(),
 				m_rays.ptr(),
-				width, height);
+				m_tileDomain.w, m_tileDomain.h);
 		}
 		else {
 			shadeMiss << <grid, block >> > (
@@ -959,7 +959,7 @@ namespace idaten
 				m_aovTexclrTemporalWeight[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
 				m_paths.ptr(),
-				width, height);
+				m_tileDomain.w, m_tileDomain.h);
 		}
 
 		checkCudaKernel(shadeMiss);
@@ -995,7 +995,7 @@ namespace idaten
 		int blockPerGrid = 1;
 		int threadPerBlock = 1;
 #else
-		dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
+		dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
 #endif
 
@@ -1010,7 +1010,7 @@ namespace idaten
 			m_aovTexclrTemporalWeight[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),
 			mtxW2C,
-			width, height,
+			m_tileDomain.w, m_tileDomain.h,
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount.ptr(),
 			m_isects.ptr(),
@@ -1050,15 +1050,11 @@ namespace idaten
 		int width, int height,
 		int maxSamples)
 	{
-#ifdef ENABLE_DEBUG_1PIXEL
-		int block = 1;
-		int grid = 1;
-#else
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
-#endif
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
+
 		int curaov = getCurAovs();
 
 		if (m_mode == Mode::PT) {
@@ -1067,7 +1063,7 @@ namespace idaten
 				m_aovColorVariance[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
 				m_paths.ptr(),
-				width, height);
+				m_tileDomain.w, m_tileDomain.h);
 
 			checkCudaKernel(gather);
 		}
@@ -1081,7 +1077,7 @@ namespace idaten
 					m_aovColorVariance[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),
 					m_paths.ptr(),
-					width, height);
+					m_tileDomain.w, m_tileDomain.h);
 
 				checkCudaKernel(gather);
 			}

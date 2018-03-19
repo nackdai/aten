@@ -118,14 +118,28 @@ namespace idaten
 		onInit(width, height);
 		onClear();
 
-		onRender(width, height, maxSamples, maxBounce);
+		if (width > 1280 || height > 720) {
+			// TODO
+		}
+		else {
+			Compaction::init(
+				width * height,
+				1024);
+
+			onRender(
+				TileDomain(0, 0, width, height),
+				width, height, maxSamples, maxBounce);
+		}
 	}
 
 	void SVGFPathTracing::onRender(
+		const TileDomain& tileDomain,
 		int width, int height,
 		int maxSamples,
 		int maxBounce)
 	{
+		m_tileDomain = tileDomain;
+
 		CudaGLResourceMap rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();
 

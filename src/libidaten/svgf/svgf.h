@@ -214,6 +214,7 @@ namespace idaten
 		void onClear();
 
 		void onRender(
+			const TileDomain& tileDomain,
 			int width, int height,
 			int maxSamples,
 			int maxBounce);
@@ -350,5 +351,7 @@ namespace idaten
 
 		float m_depthThresholdTF{ 0.05f };
 		float m_nmlThresholdTF{ 0.98f };
+
+		TileDomain m_tileDomain;
 	};
 }

@@ -114,8 +114,8 @@ namespace idaten
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
 
@@ -127,7 +127,7 @@ namespace idaten
 			m_paths.ptr(),
 			m_isects.ptr(),
 			m_hitbools.ptr(),
-			width, height,
+			m_tileDomain.w, m_tileDomain.h,
 			campos,
 			m_shapeparam.ptr(),
 			m_primparams.ptr(),

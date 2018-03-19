@@ -114,58 +114,6 @@ namespace idaten
 
 		onInit(width, height);
 
-		//if (width > 1280 || height > 720) {
-		if (width >= 512 || height >= 512) {
-			int w = (width + 1) / 2;
-			int h = (height + 1) / 2;
-
-			int compactionW = std::max(w, width - w);
-			int compactionH = std::max(h, height - h);
-
-			m_hitbools.init(compactionW * compactionH);
-			m_hitidx.init(compactionW * compactionH);
-
-			Compaction::init(
-				compactionW * compactionH,
-				1024);
-
-			for (int nx = 0; nx < 2; nx++) {
-				for (int ny = 0; ny < 2; ny++) {
-					int x = nx * w;
-					int y = ny * h;
-
-					onClear();
-
-					onRender(
-						TileDomain(x, y, w, h),
-						width, height, maxSamples, maxBounce);
-				}
-			}
-		}
-		else {
-			m_hitbools.init(width * height);
-			m_hitidx.init(width * height);
-
-			Compaction::init(
-				width * height,
-				1024);
-
-			onClear();
-
-			onRender(
-				TileDomain(0, 0, width, height),
-				width, height, maxSamples, maxBounce);
-		}
-	}
-
-	void SVGFPathTracing::onRender(
-		const TileDomain& tileDomain,
-		int width, int height,
-		int maxSamples,
-		int maxBounce)
-	{
-		m_tileDomain = tileDomain;
-
 		CudaGLResourceMap rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();
 
@@ -190,6 +138,107 @@ namespace idaten
 			}
 			m_tex.writeByNum(&tmp[0], tmp.size());
 		}
+
+		//if (width > 1280 || height > 720) {
+		if (width >= 512 || height >= 512) {
+			int w = (width + 1) / 2;
+			int h = (height + 1) / 2;
+
+			int compactionW = std::max(w, width - w);
+			int compactionH = std::max(h, height - h);
+
+			m_hitbools.init(compactionW * compactionH);
+			m_hitidx.init(compactionW * compactionH);
+
+			Compaction::init(
+				compactionW * compactionH,
+				1024);
+
+			for (int nx = 0; nx < 2; nx++) {
+				for (int ny = 0; ny < 2; ny++) {
+					int x = nx * w;
+					int y = ny * h;
+
+					onClear();
+
+					onRender(
+						TileDomain(x, y, w, h),
+						width, height, maxSamples, maxBounce,
+						outputSurf,
+						vtxTexPos,
+						vtxTexNml);
+				}
+			}
+		}
+		else {
+			m_hitbools.init(width * height);
+			m_hitidx.init(width * height);
+
+			Compaction::init(
+				width * height,
+				1024);
+
+			onClear();
+
+			TileDomain tileDomain(0, 0, width, height);
+
+			onRender(
+				tileDomain,
+				width, height, maxSamples, maxBounce,
+				outputSurf,
+				vtxTexPos,
+				vtxTexNml);
+
+			onDenoise(
+				tileDomain,
+				width, height, maxSamples, maxBounce,
+				outputSurf,
+				vtxTexPos,
+				vtxTexNml);
+		}
+
+		{
+			m_mtxPrevW2V = m_mtxW2V;
+
+			pick(
+				m_pickedInfo.ix, m_pickedInfo.iy,
+				width, height,
+				vtxTexPos);
+
+			//checkCudaErrors(cudaDeviceSynchronize());
+
+			// Toggle aov buffer pos.
+			m_curAOVPos = 1 - m_curAOVPos;
+
+			m_frame++;
+
+			{
+				m_vtxparamsPos.unbind();
+				m_vtxparamsNml.unbind();
+
+				for (int i = 0; i < m_nodeparam.size(); i++) {
+					m_nodeparam[i].unbind();
+				}
+				m_nodetex.reset();
+
+				for (int i = 0; i < m_texRsc.size(); i++) {
+					m_texRsc[i].unbind();
+				}
+				m_tex.reset();
+			}
+		}
+	}
+
+	void SVGFPathTracing::onRender(
+		const TileDomain& tileDomain,
+		int width, int height,
+		int maxSamples,
+		int maxBounce,
+		cudaSurfaceObject_t outputSurf,
+		cudaTextureObject_t vtxTexPos,
+		cudaTextureObject_t vtxTexNml)
+	{
+		m_tileDomain = tileDomain;
 
 		static const int rrBounce = 3;
 
@@ -216,7 +265,7 @@ namespace idaten
 					width, height,
 					bounce,
 					vtxTexPos);
-				
+
 				onShadeMiss(width, height, bounce);
 
 				int hitcount = 0;
@@ -242,7 +291,23 @@ namespace idaten
 		else if (m_mode == Mode::AOVar) {
 			onDisplayAOV(outputSurf, width, height, vtxTexPos);
 		}
-		else {
+	}
+
+	void SVGFPathTracing::onDenoise(
+		const TileDomain& tileDomain,
+		int width, int height,
+		int maxSamples,
+		int maxBounce,
+		cudaSurfaceObject_t outputSurf,
+		cudaTextureObject_t vtxTexPos,
+		cudaTextureObject_t vtxTexNml)
+	{
+		m_tileDomain = tileDomain;
+
+		if (m_mode == Mode::SVGF
+			|| m_mode == Mode::TF
+			|| m_mode == Mode::VAR)
+		{
 			if (isFirstFrame()) {
 				onGather(outputSurf, width, height, maxSamples);
 			}
@@ -252,8 +317,6 @@ namespace idaten
 					width, height);
 			}
 		}
-
-		m_mtxPrevW2V = m_mtxW2V;
 
 		if (m_mode == Mode::SVGF)
 		{
@@ -265,33 +328,6 @@ namespace idaten
 		}
 		else if (m_mode == Mode::VAR) {
 			onVarianceEstimation(outputSurf, width, height);
-		}
-
-		pick(
-			m_pickedInfo.ix, m_pickedInfo.iy, 
-			width, height,
-			vtxTexPos);
-
-		//checkCudaErrors(cudaDeviceSynchronize());
-
-		// Toggle aov buffer pos.
-		m_curAOVPos = 1 - m_curAOVPos;
-
-		m_frame++;
-
-		{
-			m_vtxparamsPos.unbind();
-			m_vtxparamsNml.unbind();
-
-			for (int i = 0; i < m_nodeparam.size(); i++) {
-				m_nodeparam[i].unbind();
-			}
-			m_nodetex.reset();
-
-			for (int i = 0; i < m_texRsc.size(); i++) {
-				m_texRsc[i].unbind();
-			}
-			m_tex.reset();
 		}
 	}
 }

@@ -222,7 +222,19 @@ namespace idaten
 			const TileDomain& tileDomain,
 			int width, int height,
 			int maxSamples,
-			int maxBounce);
+			int maxBounce,
+			cudaSurfaceObject_t outputSurf,
+			cudaTextureObject_t vtxTexPos,
+			cudaTextureObject_t vtxTexNml);
+		
+		void onDenoise(
+			const TileDomain& tileDomain,
+			int width, int height,
+			int maxSamples,
+			int maxBounce,
+			cudaSurfaceObject_t outputSurf,
+			cudaTextureObject_t vtxTexPos,
+			cudaTextureObject_t vtxTexNml);
 
 		virtual void onGenPath(
 			int width, int height,

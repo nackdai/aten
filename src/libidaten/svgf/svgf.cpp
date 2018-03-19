@@ -40,9 +40,6 @@ namespace idaten
 			mtxs,
 			texs, envmapRsc);
 
-		m_hitbools.init(width * height);
-		m_hitidx.init(width * height);
-
 		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
 		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
 
@@ -118,8 +115,31 @@ namespace idaten
 		onInit(width, height);
 		onClear();
 
-		if (width > 1280 || height > 720) {
-			// TODO
+		//if (width > 1280 || height > 720) {
+		if (width >= 1280 || height >= 720) {
+			int w = (width + 1) / 2;
+			int h = (height + 1) / 2;
+
+			int compactionW = std::max(w, width - w);
+			int compactionH = std::max(h, height - h);
+
+			m_hitbools.init(compactionW * compactionH);
+			m_hitidx.init(compactionW * compactionH);
+
+			Compaction::init(
+				compactionW * compactionH,
+				1024);
+
+			for (int nx = 0; nx < 1; nx++) {
+				for (int ny = 0; ny < 1; ny++) {
+					int x = nx * w;
+					int y = ny * h;
+
+					onRender(
+						TileDomain(x, y, w, h),
+						width, height, maxSamples, maxBounce);
+				}
+			}
 		}
 		else {
 			Compaction::init(

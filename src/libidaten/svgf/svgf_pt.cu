@@ -21,6 +21,7 @@
 #define ENABLE_PERSISTENT_THREAD
 
 __global__ void genPath(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	bool isFillAOV,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
@@ -31,8 +32,8 @@ __global__ void genPath(
 	const unsigned int* sobolmatrices,
 	unsigned int* random)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (ix >= width || iy >= height) {
 		return;
@@ -62,6 +63,9 @@ __global__ void genPath(
 	if (isFillAOV) {
 		r1 = r2 = 0.5f;
 	}
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	float s = (ix + r1) / (float)(camera->width);
 	float t = (iy + r2) / (float)(camera->height);
@@ -865,6 +869,7 @@ namespace idaten
 		bool isFillAOV = m_mode == Mode::AOVar;
 
 		genPath << <grid, block >> > (
+			m_tileDomain,
 			isFillAOV,
 			m_paths.ptr(),
 			m_rays.ptr(),

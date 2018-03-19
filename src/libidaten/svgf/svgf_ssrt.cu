@@ -18,6 +18,7 @@
 #include "aten4idaten.h"
 
 __global__ void hitTestPrimaryRayInScreenSpace(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	cudaSurfaceObject_t gbuffer,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::Intersection* isects,
@@ -29,8 +30,8 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 	const aten::mat4* __restrict__ matrices,
 	cudaTextureObject_t vtxPos)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (ix >= width || iy >= height) {
 		return;
@@ -45,6 +46,9 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 	if (paths->attrib[idx].isTerminate) {
 		return;
 	}
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	// Sample data from texture.
 	float4 data;
@@ -123,6 +127,7 @@ namespace idaten
 		auto gbuffer = m_gbuffer.bind();
 
 		hitTestPrimaryRayInScreenSpace << <grid, block >> > (
+			m_tileDomain,
 			gbuffer,
 			m_paths.ptr(),
 			m_isects.ptr(),

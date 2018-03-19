@@ -113,10 +113,9 @@ namespace idaten
 		m_shadowRays.init(width * height * ShadowRayNum);
 
 		onInit(width, height);
-		onClear();
 
-		if (width > 1280 || height > 720) {
-		//if (width >= 1280 || height >= 720) {
+		//if (width > 1280 || height > 720) {
+		if (width >= 512 || height >= 512) {
 			int w = (width + 1) / 2;
 			int h = (height + 1) / 2;
 
@@ -130,10 +129,12 @@ namespace idaten
 				compactionW * compactionH,
 				1024);
 
-			for (int nx = 0; nx < 1; nx++) {
-				for (int ny = 0; ny < 1; ny++) {
+			for (int nx = 1; nx < 2; nx++) {
+				for (int ny = 1; ny < 2; ny++) {
 					int x = nx * w;
 					int y = ny * h;
+
+					onClear();
 
 					onRender(
 						TileDomain(x, y, w, h),
@@ -148,6 +149,8 @@ namespace idaten
 			Compaction::init(
 				width * height,
 				1024);
+
+			onClear();
 
 			onRender(
 				TileDomain(0, 0, width, height),

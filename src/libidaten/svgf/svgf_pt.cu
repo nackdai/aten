@@ -816,7 +816,7 @@ __global__ void gather(
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	auto idx = getIdx(ix, iy, width);
 
 	int sample = paths->contrib[idx].samples;
 	auto c = paths->contrib[idx].contrib;
@@ -826,14 +826,15 @@ __global__ void gather(
 
 	float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
 
+	ix += tileDomain.x;
+	iy += tileDomain.y;
+	idx = getIdx(ix, iy, width);
+
 	aovMomentMeshid[idx].x += lum * lum;
 	aovMomentMeshid[idx].y += lum;
 	aovMomentMeshid[idx].z += 1;
 
 	aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
-
-	ix += tileDomain.x;
-	iy += tileDomain.y;
 
 #if 0
 	auto n = aovs[idx].moments.w;
@@ -1049,39 +1050,14 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		if (m_mode == Mode::PT) {
-			gather << <grid, block >> > (
-				m_tileDomain,
-				outputSurf,
-				m_aovColorVariance[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
-				m_paths.ptr(),
-				m_tileDomain.w, m_tileDomain.h);
+		gather << <grid, block >> > (
+			m_tileDomain,
+			outputSurf,
+			m_aovColorVariance[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
+			m_paths.ptr(),
+			m_tileDomain.w, m_tileDomain.h);
 
-			checkCudaKernel(gather);
-		}
-		else if (m_mode == Mode::AOVar) {
-			onFillAOV(outputSurf, width, height);
-		}
-		else {
-			if (isFirstFrame()) {
-				gather << <grid, block >> > (
-					m_tileDomain,
-					outputSurf,
-					m_aovColorVariance[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_paths.ptr(),
-					m_tileDomain.w, m_tileDomain.h);
-
-				checkCudaKernel(gather);
-			}
-			else {
-				onTemporalReprojection(
-					outputSurf,
-					width, height);
-			}
-		}
-
-		m_mtxPrevW2V = m_mtxW2V;
+		checkCudaKernel(gather);
 	}
 }

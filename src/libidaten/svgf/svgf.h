@@ -37,8 +37,13 @@ namespace idaten
 		};
 
 		struct PathContrib {
-			aten::vec3 contrib;
-			int samples;
+			union {
+				float4 v;
+				struct {
+					aten::vec3 contrib;
+					float samples;
+				};
+			};
 		};
 
 		struct PathAttribute {

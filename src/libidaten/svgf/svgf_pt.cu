@@ -802,6 +802,7 @@ __global__ void hitShadowRay(
 }
 
 __global__ void gather(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	float4* aovColorVariance,
 	float4* aovMomentMeshid,
@@ -830,6 +831,9 @@ __global__ void gather(
 	aovMomentMeshid[idx].z += 1;
 
 	aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 #if 0
 	auto n = aovs[idx].moments.w;
@@ -1047,6 +1051,7 @@ namespace idaten
 
 		if (m_mode == Mode::PT) {
 			gather << <grid, block >> > (
+				m_tileDomain,
 				outputSurf,
 				m_aovColorVariance[curaov].ptr(),
 				m_aovMomentMeshid[curaov].ptr(),
@@ -1061,6 +1066,7 @@ namespace idaten
 		else {
 			if (isFirstFrame()) {
 				gather << <grid, block >> > (
+					m_tileDomain,
 					outputSurf,
 					m_aovColorVariance[curaov].ptr(),
 					m_aovMomentMeshid[curaov].ptr(),

@@ -129,8 +129,8 @@ namespace idaten
 				compactionW * compactionH,
 				1024);
 
-			for (int nx = 1; nx < 2; nx++) {
-				for (int ny = 1; ny < 2; ny++) {
+			for (int nx = 0; nx < 2; nx++) {
+				for (int ny = 0; ny < 2; ny++) {
 					int x = nx * w;
 					int y = ny * h;
 

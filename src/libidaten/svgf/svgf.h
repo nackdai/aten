@@ -279,7 +279,13 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf,
 			int width, int height);
 
-		void copyFromTmpBufferToAov(int width, int height);
+		void onAtrousFilterIter(
+			uint32_t iterCnt,
+			uint32_t maxIterCnt,
+			cudaSurfaceObject_t outputSurf,
+			int width, int height);
+
+		void onCopyFromTmpBufferToAov(int width, int height);
 
 		void onDisplayAOV(
 			cudaSurfaceObject_t outputSurf,

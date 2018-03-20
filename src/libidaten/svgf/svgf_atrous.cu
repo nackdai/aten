@@ -421,6 +421,20 @@ namespace idaten
 	{
 		static const int ITER = 5;
 
+		for (int i = 0; i < ITER; i++) {
+			onAtrousFilterIter(
+				i, ITER,
+				outputSurf,
+				width, height);
+		}
+	}
+
+	void SVGFPathTracing::onAtrousFilterIter(
+		uint32_t iterCnt,
+		uint32_t maxIterCnt,
+		cudaSurfaceObject_t outputSurf,
+		int width, int height)
+	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
 			(width + block.x - 1) / block.x,
@@ -428,46 +442,26 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		int cur = 0;
-		int next = 1;
+		int cur = iterCnt & 0x01;
+		int next = 1 - cur;
 
-		bool isFirstIter = false;
-		bool isFinalIter = false;
+		bool isFirstIter = iterCnt == 0 ? true : false;
+		bool isFinalIter = iterCnt == maxIterCnt - 1 ? true : false;
 
-		for (int i = 0; i < ITER; i++) {
-			int stepScale = 1 << i;
+		int stepScale = 1 << iterCnt;
 
-			if (i == 0) {
-				// First.
-				isFirstIter = true;
-				isFinalIter = false;
-			}
-			else if (i == ITER - 1) {
-				// Final.
-				isFirstIter = false;
-				isFinalIter = true;
-			}
-			else {
-				isFirstIter = false;
-				isFinalIter = false;
-			}
-
-			atrousFilter << <grid, block >> > (
-				isFirstIter, isFinalIter,
-				outputSurf,
-				m_tmpBuf.ptr(),
-				m_aovNormalDepth[curaov].ptr(),
-				m_aovTexclrTemporalWeight[curaov].ptr(),
-				m_aovColorVariance[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
-				m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
-				stepScale,
-				width, height);
-			checkCudaKernel(atrousFilter);
-
-			cur = next;
-			next = 1 - cur;
-		}
+		atrousFilter << <grid, block >> > (
+			isFirstIter, isFinalIter,
+			outputSurf,
+			m_tmpBuf.ptr(),
+			m_aovNormalDepth[curaov].ptr(),
+			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovColorVariance[curaov].ptr(),
+			m_aovMomentMeshid[curaov].ptr(),
+			m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
+			stepScale,
+			width, height);
+		checkCudaKernel(atrousFilter);
 	}
 
 	void SVGFPathTracing::onCopyFromTmpBufferToAov(int width, int height)

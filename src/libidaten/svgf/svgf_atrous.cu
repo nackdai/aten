@@ -175,8 +175,8 @@ inline __device__ float4 unmap(float4 clr)
 	return clr / (1 - lum);
 }
 
-template <bool isFirstIter, bool isFinalIter>
 __global__ void atrousFilter(
+	bool isFirstIter, bool isFinalIter,
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
 	const float4* __restrict__ aovNormalDepth,
@@ -431,59 +431,46 @@ namespace idaten
 		int cur = 0;
 		int next = 1;
 
+		bool isFirstIter = false;
+		bool isFinalIter = false;
+
 		for (int i = 0; i < ITER; i++) {
 			int stepScale = 1 << i;
 
 			if (i == 0) {
 				// First.
-				atrousFilter<true, false> << <grid, block >> > (
-					outputSurf,
-					m_tmpBuf.ptr(),
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovColorVariance[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
-					stepScale,
-					width, height);
-				checkCudaKernel(atrousFilter);
+				isFirstIter = true;
+				isFinalIter = false;
 			}
-#if 1
 			else if (i == ITER - 1) {
 				// Final.
-				atrousFilter<false, true> << <grid, block >> > (
-					outputSurf,
-					m_tmpBuf.ptr(),
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovColorVariance[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
-					stepScale,
-					width, height);
-				checkCudaKernel(atrousFilter);
+				isFirstIter = false;
+				isFinalIter = true;
 			}
 			else {
-				atrousFilter<false, false> << <grid, block >> > (
-					outputSurf,
-					m_tmpBuf.ptr(),
-					m_aovNormalDepth[curaov].ptr(),
-					m_aovTexclrTemporalWeight[curaov].ptr(),
-					m_aovColorVariance[curaov].ptr(),
-					m_aovMomentMeshid[curaov].ptr(),
-					m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
-					stepScale,
-					width, height);
-				checkCudaKernel(atrousFilter);
+				isFirstIter = false;
+				isFinalIter = false;
 			}
-#endif
+
+			atrousFilter << <grid, block >> > (
+				isFirstIter, isFinalIter,
+				outputSurf,
+				m_tmpBuf.ptr(),
+				m_aovNormalDepth[curaov].ptr(),
+				m_aovTexclrTemporalWeight[curaov].ptr(),
+				m_aovColorVariance[curaov].ptr(),
+				m_aovMomentMeshid[curaov].ptr(),
+				m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
+				stepScale,
+				width, height);
+			checkCudaKernel(atrousFilter);
 
 			cur = next;
 			next = 1 - cur;
 		}
 	}
 
-	void SVGFPathTracing::copyFromTmpBufferToAov(int width, int height)
+	void SVGFPathTracing::onCopyFromTmpBufferToAov(int width, int height)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(

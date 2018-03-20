@@ -837,7 +837,7 @@ __global__ void gather(
 	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 

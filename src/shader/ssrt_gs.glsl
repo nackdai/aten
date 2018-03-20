@@ -20,6 +20,7 @@ out vec2 uv;
 out vec3 baryCentric;
 out float depth;
 out vec4 prevCSPos;
+out vec4 curCSPos;
 flat out ivec2 ids;
 
 // TODO
@@ -37,6 +38,7 @@ void main()
 	for (int i = 0; i < gl_in.length(); i++) {
 		gl_Position = mtxW2C * gl_in[i].gl_Position;
 
+		curCSPos = gl_Position;
 		prevCSPos = mtxPrevW2C * prevWorldPos[i];
 
 		depth = gl_Position.w;

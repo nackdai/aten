@@ -7,9 +7,8 @@ in vec2 uv;
 in vec3 baryCentric;
 in float depth;
 in vec4 prevCSPos;
+in vec4 curCSPos;
 flat in ivec2 ids;	// x: objid, y: primid.
-
-uniform vec4 invScreen;
 
 // NOTE
 // x : objid
@@ -31,7 +30,8 @@ const vec3 clr[8] = {
 
 void main()
 {
-	vec2 curScreenPos = gl_FragCoord.xy * invScreen.xy;
+	vec2 curScreenPos = curCSPos.xy / curCSPos.w;
+	curScreenPos = curScreenPos * vec2(0.5, 0.5) + vec2(0.5);
 
 	vec2 prevScreenPos = prevCSPos.xy / prevCSPos.w;
 	prevScreenPos = prevScreenPos * vec2(0.5, 0.5) + vec2(0.5);

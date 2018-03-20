@@ -91,10 +91,6 @@ namespace aten {
 		auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, &m_mtxPrevW2C.a[0]));
 
-		aten::vec4 invScreen(1.0f / m_width, 1.0f / m_height, 0.0f, 0.0f);
-		auto hInvScr = m_shader.getHandle("invScreen");
-		CALL_GL_API(::glUniform4fv(hInvScr, 1, invScreen.p));
-
 		if (fbo) {
 			AT_ASSERT(fbo->isValid());
 			fbo->bindFBO(true);

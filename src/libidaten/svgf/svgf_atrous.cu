@@ -176,6 +176,7 @@ inline __device__ float4 unmap(float4 clr)
 }
 
 __global__ void atrousFilter(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	bool isFirstIter, bool isFinalIter,
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
@@ -191,9 +192,12 @@ __global__ void atrousFilter(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	const int idx = getIdx(ix, iy, width);
 
@@ -437,8 +441,8 @@ namespace idaten
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		int curaov = getCurAovs();
 
@@ -451,6 +455,7 @@ namespace idaten
 		int stepScale = 1 << iterCnt;
 
 		atrousFilter << <grid, block >> > (
+			m_tileDomain,
 			isFirstIter, isFinalIter,
 			outputSurf,
 			m_tmpBuf.ptr(),

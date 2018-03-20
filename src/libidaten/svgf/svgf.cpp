@@ -139,8 +139,7 @@ namespace idaten
 			m_tex.writeByNum(&tmp[0], tmp.size());
 		}
 
-		//if (width > 1280 || height > 720) {
-		if (width >= 512 || height >= 512) {
+		if (width > 1280 || height > 720) {
 			int w = (width + 1) / 2;
 			int h = (height + 1) / 2;
 
@@ -182,6 +181,28 @@ namespace idaten
 						outputSurf);
 				}
 			}
+
+			if (m_mode == Mode::SVGF) {
+				static const int ITER = 5;
+
+				for (int i = 0; i < ITER; i++) {
+					for (int nx = 0; nx < 2; nx++) {
+						for (int ny = 0; ny < 2; ny++) {
+							int x = nx * w;
+							int y = ny * h;
+
+							m_tileDomain = TileDomain(x, y, w, h);
+
+							onAtrousFilterIter(
+								i, ITER,
+								outputSurf,
+								width, height);
+						}
+					}
+				}
+
+				onCopyFromTmpBufferToAov(width, height);
+			}
 #endif
 		}
 		else {
@@ -207,6 +228,12 @@ namespace idaten
 				tileDomain,
 				width, height, maxSamples, maxBounce,
 				outputSurf);
+
+			if (m_mode == Mode::SVGF)
+			{
+				onAtrousFilter(outputSurf, width, height);
+				onCopyFromTmpBufferToAov(width, height);
+			}
 		}
 
 		{
@@ -336,15 +363,9 @@ namespace idaten
 			}
 		}
 
-		if (m_mode == Mode::SVGF)
+		if (m_mode == Mode::SVGF
+			|| m_mode == Mode::VAR)
 		{
-			onVarianceEstimation(outputSurf, width, height);
-
-			onAtrousFilter(outputSurf, width, height);
-
-			copyFromTmpBufferToAov(width, height);
-		}
-		else if (m_mode == Mode::VAR) {
 			onVarianceEstimation(outputSurf, width, height);
 		}
 	}

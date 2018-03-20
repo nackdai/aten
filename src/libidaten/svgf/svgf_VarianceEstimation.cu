@@ -72,6 +72,7 @@ inline __device__ float C(float x1, float x2, float sigma)
 #define IS_IN_BOUND(x, a, b)	((a) <= (x) && (x) < (b))
 
 __global__ void varianceEstimation(
+	idaten::SVGFPathTracing::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	const float4* __restrict__ aovNormalDepth,
 	const float4* __restrict__ aovTexclrTemporalWeight,
@@ -83,9 +84,12 @@ __global__ void varianceEstimation(
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
 	int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	const int idx = getIdx(ix, iy, width);
 
@@ -261,13 +265,14 @@ namespace idaten
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		int curaov = getCurAovs();
 
 		varianceEstimation << <grid, block >> > (
 		//varianceEstimation << <1, 1 >> > (
+			m_tileDomain,
 			outputSurf,
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),

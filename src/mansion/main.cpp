@@ -417,10 +417,6 @@ int main()
 	Scene::makeScene(&g_scene);
 	g_scene.build();
 
-	idaten::Compaction::init(
-		WIDTH * HEIGHT,
-		1024);
-
 	auto envmap = aten::ImageLoader::load("../../asset/mansion/HDR_040_Field.hdr");
 	aten::envmap bg;
 	bg.init(envmap);

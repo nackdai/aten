@@ -837,5 +837,8 @@
     <None Include="..\src\shader\skinning_vs.glsl">
       <Filter>shader\skinning</Filter>
     </None>
+    <None Include="..\src\shader\srgb_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

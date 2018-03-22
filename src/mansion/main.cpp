@@ -420,7 +420,7 @@ int main()
 	auto envmap = aten::ImageLoader::load("../../asset/mansion/HDR_040_Field.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
-	aten::ImageBasedLight ibl(&bg, false);
+	aten::ImageBasedLight ibl(&bg);
 
 	g_scene.addImageBasedLight(&ibl);
 

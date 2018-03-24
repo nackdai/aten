@@ -2,6 +2,10 @@
 
 namespace AT_NAME
 {
+	// NOTE
+	// http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
+	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+
 	AT_DEVICE_MTRL_API real MicrofacetBeckman::pdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
@@ -222,7 +226,7 @@ namespace AT_NAME
 		real G(1);
 		{
 			// NOTE
-			// http://graphicrants.blogspot.jp/2013/08/specular-bsdf-reference.html
+			// http://graphicrants.blogspot.jp/2013/08/specular-brdf-reference.html
 
 			auto c = NdotV < real(1) ? NdotV / (a * aten::sqrt(real(1) - NdotV * NdotV)) : real(0);
 			auto c2 = c * c;

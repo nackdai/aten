@@ -3,6 +3,10 @@
 namespace AT_NAME
 {
 	// NOTE
+	// http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
+	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+
+	// NOTE
 	// http://qiita.com/_Pheema_/items/f1ffb2e38cc766e6e668
 
 	AT_DEVICE_MTRL_API real MicrofacetGGX::pdf(
@@ -109,9 +113,6 @@ namespace AT_NAME
 	{
 		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
-
-	// NOTE
-	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 	static AT_DEVICE_MTRL_API real sampleGGX_D(
 		const aten::vec3& wh,	// half

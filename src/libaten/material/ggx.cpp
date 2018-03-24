@@ -111,7 +111,7 @@ namespace AT_NAME
 	}
 
 	// NOTE
-	// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+	// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 	static AT_DEVICE_MTRL_API real sampleGGX_D(
 		const aten::vec3& wh,	// half
@@ -119,7 +119,7 @@ namespace AT_NAME
 		real roughness)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 		// NOTE
 		// ((a^2 - 1) * cos^2 + 1)^2

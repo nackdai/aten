@@ -101,7 +101,7 @@ namespace AT_NAME
 		real roughness)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 		auto costheta = dot(wh, n);
 
@@ -131,7 +131,7 @@ namespace AT_NAME
 		const aten::vec3& wo)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-brdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 		auto wh = normalize(-wi + wo);
 
@@ -153,7 +153,7 @@ namespace AT_NAME
 		aten::sampler* sampler)
 	{
 		// NOTE
-		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();

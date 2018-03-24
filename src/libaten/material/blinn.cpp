@@ -57,7 +57,7 @@ namespace AT_NAME
 		// http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
 		// Lobe Distribution Sampling
 
-		// https://agraphicsguy.wordpress.com/2015/11/01/MaterialSampling-microfacet-bsdf/
+		// https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 		// Sampling Blinn
 
 		auto r1 = sampler->nextSample();

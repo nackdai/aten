@@ -16,5 +16,11 @@ namespace idaten
 			const std::vector<uint32_t>& values,
 			TypedCudaMemory<uint32_t>& dst,
 			std::vector<uint32_t>* result = nullptr);
+
+		static void RadixSort::sort(
+			TypedCudaMemory<uint32_t>& values,
+			TypedCudaMemory<uint32_t>& indices,
+			TypedCudaMemory<uint32_t>& dst,
+			std::vector<uint32_t>* result = nullptr);
 	};
 }

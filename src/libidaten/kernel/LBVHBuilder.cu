@@ -5,6 +5,8 @@
 #include <device_launch_parameters.h>
 
 #include "cuda/helper_math.h"
+#include "cuda/cudautil.h"
+#include "cuda/cudaTextureResource.h"
 
 #pragma optimize( "", off)
 
@@ -327,9 +329,9 @@ __device__ inline void computeBoundingBox(
 
 __global__ void computeBoudingBox(
 	int numberOfTris,
+	int triIdOffset,
 	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
 	aten::ThreadedBvhNode* dst,
-	int triIdOffset,
 	const aten::PrimitiveParamter* __restrict__ tris,
 	cudaTextureObject_t vtxPos,
 	uint32_t* executedIdxArray)
@@ -463,7 +465,95 @@ __global__ void computeBoudingBox(
 
 namespace idaten
 {
-	void LBVHBuilder::sort()
+	void LBVHBuilder::build(
+		TypedCudaMemory<aten::ThreadedBvhNode>& nodes,
+		const std::vector<aten::PrimitiveParamter>& tris,
+		int shapeId,
+		int triIdOffset,
+		idaten::CudaTextureResource& texRscVtxPos)
+	{
+		TypedCudaMemory<aten::PrimitiveParamter> triangles;
+		TypedCudaMemory<uint32_t> mortonCodes;
+		TypedCudaMemory<uint32_t> indices;
+
+		triangles.init(tris.size());
+		mortonCodes.init(tris.size());
+		indices.init(tris.size());
+
+		triangles.writeByNum(&tris[0], tris.size());
+
+		// TODO
+		// Compute morton code.
+
+		// Radix sort.
+		TypedCudaMemory<uint32_t> sortedKeys;
+		std::vector<uint32_t> v;
+		RadixSort::sort(mortonCodes, indices, sortedKeys, &v);
+
+		uint32_t numOfElems = tris.size();
+
+		uint32_t numInternalNode = numOfElems - 1;
+		uint32_t numLeaves = numOfElems;
+
+		TypedCudaMemory<LBVHNode> nodesLbvh;
+		nodesLbvh.init(numInternalNode + numLeaves);
+
+		// Build tree.
+		{
+			dim3 block(256, 1, 1);
+			dim3 grid((numOfElems + block.x - 1) / block.x, 1, 1);
+
+			buildTree << <grid, block >> > (
+				numOfElems,
+				sortedKeys.ptr(),
+				nodesLbvh.ptr());
+		}
+
+		nodes.init(numInternalNode + numLeaves);
+
+		// Convert to gpu bvh tree nodes.
+		{
+			numOfElems = numInternalNode + numLeaves;
+
+			dim3 block(128, 1, 1);
+			dim3 grid((numOfElems + block.x - 1) / block.x, 1, 1);
+
+			applyTraverseOrder << <grid, block >> > (
+				numOfElems,
+				numLeaves,
+				shapeId,
+				triIdOffset,
+				nodesLbvh.ptr(),
+				nodes.ptr());
+		}
+
+		// Compute bouding box.
+		{
+			uint32_t numberOfTris = tris.size();
+
+			uint32_t* executedIdxArray;
+			checkCudaErrors(cudaMalloc(&executedIdxArray, (numberOfTris - 1) * sizeof(uint32_t)));
+			checkCudaErrors(cudaMemset(executedIdxArray, 0xFF, (numberOfTris - 1) * sizeof(uint32_t)));
+
+			dim3 block(128, 1, 1);
+			dim3 grid((numOfElems + block.x - 1) / block.x, 1, 1);
+
+			auto vtxPos = texRscVtxPos.bind();
+
+			computeBoudingBox << <grid, block >> > (
+				numberOfTris,
+				triIdOffset,
+				nodesLbvh.ptr(),
+				nodes.ptr(),
+				triangles.ptr(),
+				vtxPos,
+				executedIdxArray);
+
+			texRscVtxPos.unbind();
+		}
+	}
+
+	void LBVHBuilder::build()
 	{
 		static const uint32_t keys[] = {
 			1, 2, 4, 5, 19, 24, 25, 30,
@@ -483,7 +573,8 @@ namespace idaten
 		uint32_t numInternalNode = numOfElems - 1;
 		uint32_t numLeaves = numOfElems;
 
-		m_nodesLbvh.init(numInternalNode + numLeaves);
+		TypedCudaMemory<LBVHNode> nodesLbvh;
+		nodesLbvh.init(numInternalNode + numLeaves);
 
 		{
 			dim3 block(256, 1, 1);
@@ -492,10 +583,11 @@ namespace idaten
 			buildTree << <grid, block >> > (
 				numOfElems,
 				sortedKeys.ptr(),
-				m_nodesLbvh.ptr());
+				nodesLbvh.ptr());
 		}
 
-		m_nodes.init(numInternalNode + numLeaves);
+		TypedCudaMemory<aten::ThreadedBvhNode> nodes;
+		nodes.init(numInternalNode + numLeaves);
 
 #if 1
 		{
@@ -509,11 +601,11 @@ namespace idaten
 				numLeaves,
 				0,
 				0,
-				m_nodesLbvh.ptr(),
-				m_nodes.ptr());
+				nodesLbvh.ptr(),
+				nodes.ptr());
 		}
-		std::vector<aten::ThreadedBvhNode> tmp1(m_nodes.maxNum());
-		m_nodes.read(&tmp1[0], 0);
+		std::vector<aten::ThreadedBvhNode> tmp1(nodes.maxNum());
+		nodes.read(&tmp1[0], 0);
 #else
 		std::vector<LBVHNode> tmp(m_nodesLbvh.maxNum());
 		m_nodesLbvh.read(&tmp[0], 0);

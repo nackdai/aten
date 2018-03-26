@@ -27,10 +27,53 @@ static uint32_t g_threadnum = 8;
 static uint32_t g_threadnum = 1;
 #endif
 
+class Lbvh : aten::accelerator {
+public:
+	Lbvh();
+	~Lbvh();
+
+public:
+	static std::vector<Lbvh*> s_list;
+
+	static accelerator* create()
+	{
+		auto ret = new Lbvh();
+		s_list.push_back(ret);
+		return ret;
+	}
+
+	virtual void build(
+		aten::hitable** list,
+		uint32_t num,
+		aten::aabb* bbox = nullptr) override final;
+
+	virtual bool hit(
+		const aten::ray& r,
+		real t_min, real t_max,
+		aten::Intersection& isect) const override final
+	{
+		AT_ASSERT(false);
+		return false;
+	}
+
+	virtual bool hit(
+		const aten::ray& r,
+		real t_min, real t_max,
+		aten::Intersection& isect,
+		bool enableLod) const override final
+	{
+		AT_ASSERT(false);
+		return false;
+	}
+
+private:
+	idaten::LBVHBuilder m_builder;
+};
+
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::AcceleratedScene<aten::GPUBvh> g_scene(Lbvh::create);
 
 static idaten::SVGFPathTracing g_tracer;
 static aten::visualizer* g_visualizer;

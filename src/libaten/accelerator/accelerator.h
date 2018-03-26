@@ -5,6 +5,16 @@
 #include "math/frustum.h"
 
 namespace aten {
+	enum class AccelType {
+		Bvh,
+		Qbvh,
+		Sbvh,
+		ThreadedBvh,
+		StacklessBvh,
+		StacklessQbvh,
+		UserDefs,
+	};
+
 	class accelerator : public hitable {
 		friend class object;
 		template<typename ACCEL> friend class AcceleratedScene;
@@ -13,16 +23,6 @@ namespace aten {
 		accelerator() {}
 
 	protected:
-		enum class AccelType {
-			Bvh,
-			Qbvh,
-			Sbvh,
-			ThreadedBvh,
-			StacklessBvh,
-			StacklessQbvh,
-			UserDefs,
-		};
-
 		accelerator(AccelType type)
 		{
 			m_type = type;
@@ -43,18 +43,6 @@ namespace aten {
 		void asNested()
 		{
 			m_isNested = true;
-		}
-
-		virtual std::function<accelerator*()> getCreator()
-		{
-			// NOTE
-			// 本来なら実装クラスごとのstatic関数にすべき.
-			// しかし、AcceleratedScene がテンプレートクラスであるため、ACCEL::getCreator となってしまう.
-			// そうすると、全てのBVHクラスで getCreator を用意しなくてはいけなくなり、煩雑となる.
-			// それを避けるための苦肉の策としてのこの関数.
-
-			AT_ASSERT(false);
-			return nullptr;
 		}
 
 	public:

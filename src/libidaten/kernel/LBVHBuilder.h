@@ -7,14 +7,23 @@
 
 namespace idaten
 {
+	class CudaTextureResource;
+
 	class LBVHBuilder {
 	public:
 		LBVHBuilder() {}
 		~LBVHBuilder() {}
 
 	public:
+		static void LBVHBuilder::build(
+			TypedCudaMemory<aten::ThreadedBvhNode>& nodes,
+			const std::vector<aten::PrimitiveParamter>& tris,
+			int shapeId,
+			int triIdOffset,
+			idaten::CudaTextureResource& texRscVtxPos);
+
 		// test implementation.
-		void sort();
+		static void build();
 
 		struct LBVHNode {
 			int order;
@@ -27,9 +36,5 @@ namespace idaten
 			int parent;
 			bool isLeaf;
 		};
-
-	private:
-		TypedCudaMemory<LBVHNode> m_nodesLbvh;
-		TypedCudaMemory<aten::ThreadedBvhNode> m_nodes;
 	};
 }

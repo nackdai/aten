@@ -130,40 +130,44 @@ namespace aten
 
 			// Convert to threaded.
 			for (int i = 0; i < nestedBvh.size(); i++) {
-				// TODO
-				auto bvh = (sbvh*)nestedBvh[i];
+				auto accel = nestedBvh[i];
 
-				auto box = bvh->getBoundingbox();
+				auto box = accel->getBoundingbox();
 				bbox.expand(box);
 
-				// NOTE
-				// Voxelデータはノードの配列に入れる.
-				// また、Voxelデータはノードデータの後に入れる.
-				// そこで、Voxelデータのオフセットをノード数から計算する.
-				uint32_t voxelOffset = bvh->m_threadedNodes.empty()
-					? bvh->m_nodes.size()
-					: bvh->m_threadedNodes[0].size();
+				if (accel->getAccelType() == AccelType::Sbvh) {
+					// TODO
+					auto bvh = (sbvh*)nestedBvh[i];
 
-				// NOTE
-				// exid は top layer が 0 なので、+1 する.
-				bvh->buildVoxel(i + 1, voxelOffset);
+					// NOTE
+					// Voxelデータはノードの配列に入れる.
+					// また、Voxelデータはノードデータの後に入れる.
+					// そこで、Voxelデータのオフセットをノード数から計算する.
+					uint32_t voxelOffset = bvh->m_threadedNodes.empty()
+						? bvh->m_nodes.size()
+						: bvh->m_threadedNodes[0].size();
 
-				// TODO
-				// For VoxelViewer.
-				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
+					// NOTE
+					// exid は top layer が 0 なので、+1 する.
+					bvh->buildVoxel(i + 1, voxelOffset);
 
-				m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
+					// TODO
+					// For VoxelViewer.
+					m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
 
-				std::vector<int> indices;
-				bvh->convert(
-					m_threadedNodes[i + 1], 
-					(int)m_refIndices.size(),
-					indices);
+					m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
 
-				m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
+					std::vector<int> indices;
+					bvh->convert(
+						m_threadedNodes[i + 1],
+						(int)m_refIndices.size(),
+						indices);
 
-				// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
-				bvh->copyVoxelToNodeArray(m_threadedNodes[i + 1]);
+					m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
+
+					// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
+					bvh->copyVoxelToNodeArray(m_threadedNodes[i + 1]);
+				}
 			}
 
 			setBoundingBox(bbox);

@@ -8,6 +8,7 @@
 #include <device_launch_parameters.h>
 
 #include "cuda/helper_math.h"
+#include "cuda/cudautil.h"
 
 namespace idaten
 {
@@ -42,4 +43,36 @@ namespace idaten
 			}
 		}
 	}
+
+	void RadixSort::sort(
+		TypedCudaMemory<uint32_t>& values,
+		TypedCudaMemory<uint32_t>& indices,
+		TypedCudaMemory<uint32_t>& dst,
+		std::vector<uint32_t>* result/*= nullptr*/)
+	{
+		// copy unsorted data from host to device
+		thrust::device_vector<uint32_t> deviceKeys(values.maxNum());
+		thrust::device_vector<uint32_t> deviceIndices(indices.maxNum());
+
+		auto keys = thrust::raw_pointer_cast(deviceKeys.data());
+		checkCudaErrors(cudaMemcpy(keys, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));
+
+		auto ids = thrust::raw_pointer_cast(deviceIndices.data());
+		checkCudaErrors(cudaMemcpy(ids, indices.ptr(), indices.bytes(), cudaMemcpyDeviceToDevice));
+
+		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.end(), deviceIndices.begin());
+
+		auto sortedKeys = thrust::raw_pointer_cast(deviceKeys.data());
+
+		dst.init(deviceKeys.size() * sizeof(uint32_t));
+		dst.writeByNum(sortedKeys, deviceKeys.size());
+
+		if (result) {
+			thrust::host_vector<uint32_t> hostKeys = deviceKeys;
+			for (int i = 0; i < hostKeys.size(); i++) {
+				result->push_back(hostKeys[i]);
+			}
+		}
+	}
+
 }

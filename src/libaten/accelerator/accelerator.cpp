@@ -3,7 +3,7 @@
 #include "accelerator/sbvh.h"
 
 namespace aten {
-	accelerator::AccelType accelerator::s_internalType = accelerator::AccelType::Bvh;
+	AccelType accelerator::s_internalType = AccelType::Bvh;
 	std::function<accelerator*()> accelerator::s_userDefsInternalAccelCreator = nullptr;
 
 	void accelerator::setInternalAccelType(AccelType type)
@@ -11,7 +11,7 @@ namespace aten {
 		s_internalType = type;
 	}
 
-	accelerator::AccelType accelerator::getInternalAccelType()
+	AccelType accelerator::getInternalAccelType()
 	{
 		return s_internalType;
 	}

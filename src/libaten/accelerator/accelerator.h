@@ -13,13 +13,14 @@ namespace aten {
 		accelerator() {}
 
 	protected:
-		enum AccelType {
+		enum class AccelType {
 			Bvh,
 			Qbvh,
 			Sbvh,
 			ThreadedBvh,
 			StacklessBvh,
 			StacklessQbvh,
+			UserDefs,
 		};
 
 		accelerator(AccelType type)
@@ -28,20 +29,32 @@ namespace aten {
 		}
 		virtual ~accelerator() {}
 
-		AccelType m_type{ AccelType::Bvh };
-		bool m_isNested{ false };
-
 	private:
 		static AccelType s_internalType;
+		static std::function<accelerator*()> s_userDefsInternalAccelCreator;
 
 		static accelerator* createAccelerator();
 
 		static void setInternalAccelType(AccelType type);
 		static AccelType getInternalAccelType();
 
+		static void setUserDefsInternalAccelCreator(std::function<accelerator*()> creator);
+
 		void asNested()
 		{
 			m_isNested = true;
+		}
+
+		virtual std::function<accelerator*()> getCreator()
+		{
+			// NOTE
+			// 本来なら実装クラスごとのstatic関数にすべき.
+			// しかし、AcceleratedScene がテンプレートクラスであるため、ACCEL::getCreator となってしまう.
+			// そうすると、全てのBVHクラスで getCreator を用意しなくてはいけなくなり、煩雑となる.
+			// それを避けるための苦肉の策としてのこの関数.
+
+			AT_ASSERT(false);
+			return nullptr;
 		}
 
 	public:
@@ -131,7 +144,9 @@ namespace aten {
 			m_isExporting = true;
 		}
 
-	private:
+	protected:
+		AccelType m_type{ AccelType::Bvh };
+		bool m_isNested{ false };
 		bool m_isExporting{ false };
 	};
 }

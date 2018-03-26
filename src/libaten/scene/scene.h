@@ -177,6 +177,7 @@ namespace AT_NAME {
 		AcceleratedScene()
 		{
 			aten::accelerator::setInternalAccelType(m_accel.getAccelType());
+			aten::accelerator::setUserDefsInternalAccelCreator(m_accel.getCreator());
 		}
 		virtual ~AcceleratedScene() {}
 

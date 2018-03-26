@@ -223,6 +223,12 @@
     <ClInclude Include="..\src\libidaten\svgf\svgf.h">
       <Filter>svgf</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\LBVHBuilder.h">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\RadixSort.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -405,6 +411,12 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_tile.cu">
       <Filter>svgf</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\LBVHBuilder.cu">
+      <Filter>kernel\accelerator</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\RadixSort.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

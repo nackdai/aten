@@ -145,7 +145,17 @@ namespace aten
 		void setVoxelLodErrorMetricMultiplyer(real multiplyer);
 
 	private:
-		void buildInternal(
+		void buildAsNestedTree(
+			hitable** list,
+			uint32_t num,
+			aabb* bbox);
+
+		void buildAsTopLayerTree(
+			hitable** list,
+			uint32_t num,
+			aabb* bbox);
+
+		void onBuild(
 			hitable** list,
 			uint32_t num);
 

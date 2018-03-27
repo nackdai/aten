@@ -78,103 +78,123 @@ namespace aten
 	void sbvh::build(
 		hitable** list,
 		uint32_t num,
-		aabb* bbox/*= nullptr*/)
+		aabb* bbox)
 	{
 		if (m_isNested) {
-			if (m_threadedNodes.size() > 0) {
-				// Imported tree already.
-
-				// Search offset triangle index.
-				m_offsetTriIdx = INT32_MAX;
-
-				for (uint32_t i = 0; i < num; i++) {
-					auto tri = (face*)list[i];
-					m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->id);
-				}
-
-				// Offset triangle index.
-#pragma omp parallel for
-				for (int i = 0; i < m_threadedNodes[0].size(); i++) {
-					auto& node = m_threadedNodes[0][i];
-					if (node.isLeaf()) {
-						node.triid += m_offsetTriIdx;
-					}
-				}
-			}
-			else {
-				buildInternal(list, num);
-
-				makeTreelet();
-			}
+			buildAsNestedTree(list, num, bbox);
 		}
 		else {
-			// Build top layer bvh.
-
-			m_bvh.disableLayer();
-			m_bvh.build(list, num, bbox);
-
-			auto bbox = m_bvh.getBoundingbox();
-
-			const auto& nestedBvh = m_bvh.getNestedAccel();
-
-			// NOTE
-			// GPGPU処理用に threaded bvh(top layer) と sbvh を同じメモリ空間上に格納するため、１つのリストで管理する.
-			// そのため、+1する.
-			m_threadedNodes.resize(nestedBvh.size() + 1);
-
-			const auto& toplayer = m_bvh.getNodes()[0];
-			m_threadedNodes[0].resize(toplayer.size());
-			memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
-
-			m_maxVoxelRadius = 0.0f;
-
-			// Convert to threaded.
-			for (int i = 0; i < nestedBvh.size(); i++) {
-				auto accel = nestedBvh[i];
-
-				auto box = accel->getBoundingbox();
-				bbox.expand(box);
-
-				if (accel->getAccelType() == AccelType::Sbvh) {
-					// TODO
-					auto bvh = (sbvh*)nestedBvh[i];
-
-					// NOTE
-					// Voxelデータはノードの配列に入れる.
-					// また、Voxelデータはノードデータの後に入れる.
-					// そこで、Voxelデータのオフセットをノード数から計算する.
-					uint32_t voxelOffset = bvh->m_threadedNodes.empty()
-						? bvh->m_nodes.size()
-						: bvh->m_threadedNodes[0].size();
-
-					// NOTE
-					// exid は top layer が 0 なので、+1 する.
-					bvh->buildVoxel(i + 1, voxelOffset);
-
-					// TODO
-					// For VoxelViewer.
-					m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
-
-					m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
-
-					std::vector<int> indices;
-					bvh->convert(
-						m_threadedNodes[i + 1],
-						(int)m_refIndices.size(),
-						indices);
-
-					m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
-
-					// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
-					bvh->copyVoxelToNodeArray(m_threadedNodes[i + 1]);
-				}
-			}
-
-			setBoundingBox(bbox);
+			buildAsTopLayerTree(list, num, bbox);
 		}
 	}
 
-	void sbvh::buildInternal(
+	void sbvh::buildAsNestedTree(
+		hitable** list,
+		uint32_t num,
+		aabb* bbox)
+	{
+		AT_ASSERT(m_isNested);
+
+		if (m_threadedNodes.size() > 0) {
+			// Imported tree already.
+
+			// Search offset triangle index.
+			m_offsetTriIdx = INT32_MAX;
+
+			for (uint32_t i = 0; i < num; i++) {
+				auto tri = (face*)list[i];
+				m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->id);
+			}
+
+			// Offset triangle index.
+#pragma omp parallel for
+			for (int i = 0; i < m_threadedNodes[0].size(); i++) {
+				auto& node = m_threadedNodes[0][i];
+				if (node.isLeaf()) {
+					node.triid += m_offsetTriIdx;
+				}
+			}
+		}
+		else {
+			onBuild(list, num);
+
+			makeTreelet();
+		}
+	}
+
+	void sbvh::buildAsTopLayerTree(
+		hitable** list,
+		uint32_t num,
+		aabb* bbox/*= nullptr*/)
+	{
+		AT_ASSERT(!m_isNested);
+
+		// Build top layer bvh.
+
+		m_bvh.disableLayer();
+		m_bvh.build(list, num, bbox);
+
+		auto boundingBox = m_bvh.getBoundingbox();
+
+		const auto& nestedBvh = m_bvh.getNestedAccel();
+
+		// NOTE
+		// GPGPU処理用に threaded bvh(top layer) と sbvh を同じメモリ空間上に格納するため、１つのリストで管理する.
+		// そのため、+1する.
+		m_threadedNodes.resize(nestedBvh.size() + 1);
+
+		const auto& toplayer = m_bvh.getNodes()[0];
+		m_threadedNodes[0].resize(toplayer.size());
+		memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
+
+		m_maxVoxelRadius = 0.0f;
+
+		// Convert to threaded.
+		for (int i = 0; i < nestedBvh.size(); i++) {
+			auto accel = nestedBvh[i];
+
+			auto box = accel->getBoundingbox();
+			boundingBox.expand(box);
+
+			if (accel->getAccelType() == AccelType::Sbvh) {
+				// TODO
+				auto bvh = (sbvh*)nestedBvh[i];
+
+				// NOTE
+				// Voxelデータはノードの配列に入れる.
+				// また、Voxelデータはノードデータの後に入れる.
+				// そこで、Voxelデータのオフセットをノード数から計算する.
+				uint32_t voxelOffset = bvh->m_threadedNodes.empty()
+					? bvh->m_nodes.size()
+					: bvh->m_threadedNodes[0].size();
+
+				// NOTE
+				// exid は top layer が 0 なので、+1 する.
+				bvh->buildVoxel(i + 1, voxelOffset);
+
+				// TODO
+				// For VoxelViewer.
+				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
+
+				m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
+
+				std::vector<int> indices;
+				bvh->convert(
+					m_threadedNodes[i + 1],
+					(int)m_refIndices.size(),
+					indices);
+
+				m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
+
+				// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
+				bvh->copyVoxelToNodeArray(m_threadedNodes[i + 1]);
+			}
+		}
+
+		setBoundingBox(boundingBox);
+	}
+
+	void sbvh::onBuild(
 		hitable** list,
 		uint32_t num)
 	{

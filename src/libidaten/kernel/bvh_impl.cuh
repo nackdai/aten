@@ -122,13 +122,13 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 		bool isHit = false;
 
 #ifdef ENABLE_PLANE_LOOP_BVH
-		if (attrib.x >= 0) {
+		if (attrib.x >= 0 || attrib.y >= 0) {
 			// Leaf.
-			const auto* s = &ctxt->shapes[(int)attrib.x];
-
 			if (attrib.z >= 0) {	// exid
 				//if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
 				{
+					const auto* s = &ctxt->shapes[(int)attrib.x];
+
 					if (s->mtxid >= 0) {
 						auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
 						transformedRay.dir = mtxW2L.applyXYZ(r.dir);
@@ -139,7 +139,10 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 						transformedRay = r;
 					}
 
-					node = ctxt->nodes[(int)attrib.z];
+					int exid = __float_as_int(attrib.z);
+					exid = AT_BVHNODE_MAIN_EXID(exid);
+
+					node = ctxt->nodes[exid];
 
 					objid = (int)attrib.x;
 					meshid = (int)attrib.w;

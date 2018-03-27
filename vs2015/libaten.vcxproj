@@ -377,6 +377,7 @@
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\ThreadedBvhFrustum.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />

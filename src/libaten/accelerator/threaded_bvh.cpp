@@ -7,19 +7,12 @@
 #include <vector>
 #include <iterator>
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 // Threaded BVH
 // http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
 
 namespace aten {
-	struct NodeEntry {
-		int left{ -1 };
-		int right{ -1 };
-		int parent{ -1 };
-		bool isLeaf{ false };
-	};
-
 	void ThreadedBVH::build(
 		hitable** list,
 		uint32_t num,
@@ -459,129 +452,6 @@ namespace aten {
 		return (isect.objid >= 0);
 	}
 
-	accelerator::ResultIntersectTestByFrustum ThreadedBVH::intersectTestByFrustum(const frustum& f)
-	{
-		return std::move(m_bvh.intersectTestByFrustum(f));
-	}
-
-	bool ThreadedBVH::hitMultiLevel(
-		const accelerator::ResultIntersectTestByFrustum& fisect,
-		const ray& r,
-		real t_min, real t_max,
-		Intersection& isect) const
-	{
-		return hitMultiLevel(
-			fisect.ex, fisect.ep, fisect.top,
-			m_listThreadedBvhNode,
-			r,
-			t_min, t_max,
-			isect);
-	}
-
-	bool ThreadedBVH::hitMultiLevel(
-		int exid,
-		int nodeid,
-		int topid,
-		const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
-		const ray& r,
-		real t_min, real t_max,
-		Intersection& isect) const
-	{
-		auto& shapes = transformable::getShapes();
-		auto& prims = face::faces();
-
-		real hitt = AT_MATH_INF;
-
-		for (;;) {
-			const ThreadedBvhNode* node = nullptr;
-
-			if (nodeid >= 0) {
-				node = &listThreadedBvhNode[exid][nodeid];
-			}
-
-			if (!node) {
-				break;
-			}
-
-			bool isHit = false;
-
-			if (node->isLeaf()) {
-				Intersection isectTmp;
-
-				auto s = shapes[(int)node->shapeid];
-
-				if (node->exid >= 0) {
-					// Traverse external linear bvh list.
-					const auto& param = s->getParam();
-
-					int mtxid = param.mtxid;
-
-					aten::ray transformedRay;
-
-					if (mtxid >= 0) {
-						const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
-
-						transformedRay = mtxW2L.applyRay(r);
-					}
-					else {
-						transformedRay = r;
-					}
-
-					int exid = node->mainExid;
-
-					isHit = hit(
-						exid,
-						listThreadedBvhNode,
-						transformedRay,
-						t_min, t_max,
-						isectTmp);
-				}
-				else if (node->primid >= 0) {
-					// Hit test for a primitive.
-					auto prim = (hitable*)prims[(int)node->primid];
-					isHit = prim->hit(r, t_min, t_max, isectTmp);
-					if (isHit) {
-						isectTmp.objid = s->id();
-					}
-				}
-				else {
-					// Hit test for a shape.
-					isHit = s->hit(r, t_min, t_max, isectTmp);
-				}
-
-				if (isHit) {
-					if (isectTmp.t < isect.t) {
-						isect = isectTmp;
-						t_max = isect.t;
-					}
-				}
-			}
-			else {
-				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max);
-			}
-
-			if (isHit) {
-				nodeid = (int)node->hit;
-			}
-			else {
-				nodeid = (int)node->miss;
-			}
-		}
-
-		bool ret = (isect.objid >= 0);
-
-		if (!ret && exid > 0) {
-			ret = hitMultiLevel(
-				0, topid, -1,
-				listThreadedBvhNode,
-				r,
-				t_min, t_max,
-				isect);
-		}
-
-		return ret;
-	}
-
 	void ThreadedBVH::update()
 	{
 		m_bvh.update();
@@ -595,15 +465,15 @@ namespace aten {
 		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
 		auto root = m_bvh.getRoot();
-		std::vector<ThreadedBvhNodeEntry> listBvhNode;
-		registerBvhNodeToLinearList(root, listBvhNode);
+		std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
+		registerBvhNodeToLinearList(root, threadedBvhNodeEntries);
 
 		std::vector<int> listParentId;
-		listParentId.reserve(listBvhNode.size());
+		listParentId.reserve(threadedBvhNodeEntries.size());
 
 		m_listThreadedBvhNode[0].clear();
 
-		for (auto& entry : listBvhNode) {
+		for (auto& entry : threadedBvhNodeEntries) {
 			auto node = entry.node;
 
 			ThreadedBvhNode gpunode;
@@ -653,7 +523,7 @@ namespace aten {
 			m_listThreadedBvhNode[0].push_back(gpunode);
 		}
 
-		setOrder(listBvhNode, listParentId, m_listThreadedBvhNode[0]);
+		setOrder(threadedBvhNodeEntries, listParentId, m_listThreadedBvhNode[0]);
 	}
 
 	void ThreadedBVH::registerBvhNodeToLinearList(

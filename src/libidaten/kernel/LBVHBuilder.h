@@ -18,7 +18,6 @@ namespace idaten
 		static void LBVHBuilder::build(
 			idaten::CudaTextureResource& dst,
 			std::vector<aten::PrimitiveParamter>& tris,
-			int shapeId,
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
 			idaten::CudaTextureResource& texRscVtxPos);

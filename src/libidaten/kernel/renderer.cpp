@@ -56,9 +56,14 @@ namespace idaten {
 			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
 		}
 
+		m_nodeparam.resize(nodes.size());
 		for (int i = 0; i < nodes.size(); i++) {
-			m_nodeparam.push_back(idaten::CudaTextureResource());
-			m_nodeparam[i].init((aten::vec4*)&nodes[i][0], sizeof(aten::GPUBvhNode) / sizeof(float4), nodes[i].size());
+			if (!nodes[i].empty()) {
+				m_nodeparam[i].init(
+					(aten::vec4*)&nodes[i][0], 
+					sizeof(aten::GPUBvhNode) / sizeof(float4), 
+					nodes[i].size());
+			}
 		}
 		m_nodetex.init(nodes.size());
 

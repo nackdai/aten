@@ -1,7 +1,8 @@
 #include "proxy/DataCollector.h"
 #include "geometry/object.h"
 
-#include <map>
+#include <algorithm>
+#include <iterator>
 
 namespace aten {
 	void DataCollector::collect(
@@ -72,9 +73,55 @@ namespace aten {
 		}
 
 		const auto& vtxs = aten::VertexManager::getVertices();
-
+#if 0
 		for (auto v : vtxs) {
 			vtxparams.push_back(v);
 		}
+#else
+		std::copy(
+			vtxs.begin(),
+			vtxs.end(),
+			std::back_inserter(vtxparams));
+#endif
+	}
+
+	void DataCollector::collectTriangles(
+		std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
+		std::vector<int>& triIdOffsets,
+		std::vector<aten::vertex>& vtxparams)
+	{
+		const auto& shapes = aten::transformable::getShapes();
+
+		int triangleCount = 0;
+
+		for (const auto s : shapes) {
+			auto type = s->getParam().type;
+
+			if (type == GeometryType::Polygon) {
+				// TODO
+				aten::object* obj = static_cast<aten::object*>(s);
+
+				triangles.push_back(std::vector<aten::PrimitiveParamter>());
+				int pos = triangles.size() - 1;
+
+				for (const auto objshape : obj->shapes) {
+					const auto& tris = objshape->tris();
+					
+					std::copy(
+						tris.begin(),
+						tris.end(),
+						std::back_inserter(triangles[pos]));
+				}
+
+				triIdOffsets.push_back(triangleCount);
+				triangleCount += triangles[pos].size();
+			}
+		}
+
+		const auto& vtxs = aten::VertexManager::getVertices();
+		std::copy(
+			vtxs.begin(),
+			vtxs.end(),
+			std::back_inserter(vtxparams));
 	}
 }

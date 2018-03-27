@@ -19,7 +19,7 @@
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
-static const char* TITLE = "svgf";
+static const char* TITLE = "deform";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -33,19 +33,21 @@ public:
 	~Lbvh();
 
 public:
-	static std::vector<Lbvh*> s_list;
-
 	static accelerator* create()
 	{
 		auto ret = new Lbvh();
-		s_list.push_back(ret);
 		return ret;
 	}
 
 	virtual void build(
 		aten::hitable** list,
 		uint32_t num,
-		aten::aabb* bbox = nullptr) override final;
+		aten::aabb* bbox = nullptr) override final
+	{
+		m_bvh.build(list, num, bbox);
+
+		setBoundingBox(m_bvh.getBoundingbox());
+	}
 
 	virtual bool hit(
 		const aten::ray& r,
@@ -66,8 +68,7 @@ public:
 		return false;
 	}
 
-private:
-	idaten::LBVHBuilder m_builder;
+	aten::bvh m_bvh;
 };
 
 static aten::PinholeCamera g_camera;
@@ -523,6 +524,31 @@ int main()
 		g_tracer.setGBuffer(
 			g_fbo.getTexHandle(0),
 			g_fbo.getTexHandle(1));
+	}
+
+	// For LBVH.
+	{
+		std::vector<std::vector<aten::PrimitiveParamter>> triangles;
+		std::vector<int> triIdOffsets;
+		std::vector<aten::vertex> vtxparams;
+
+		aten::DataCollector::collectTriangles(triangles, triIdOffsets, vtxparams);
+
+		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
+		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
+		auto& vtxPos = g_tracer.getCudaTextureResourceForVtxPos();
+
+		for (int i = 0; i < triangles.size(); i++) {
+			auto& tris = triangles[i];
+			auto triIdOffset = triIdOffsets[i];
+
+			idaten::LBVHBuilder::build(
+				nodes[i + 1],	// 0 is for top layer.
+				tris,
+				triIdOffset,
+				sceneBbox,
+				vtxPos);
+		}
 	}
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);

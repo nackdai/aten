@@ -57,6 +57,16 @@ namespace idaten
 			// Nothing is done...
 		}
 
+		std::vector<idaten::CudaTextureResource>& getCudaTextureResourceForBvhNodes()
+		{
+			return m_nodeparam;
+		}
+
+		idaten::CudaTextureResource getCudaTextureResourceForVtxPos()
+		{
+			return m_vtxparamsPos;
+		}
+
 	protected:
 		idaten::CudaMemory m_dst;
 		idaten::TypedCudaMemory<aten::CameraParameter> m_cam;

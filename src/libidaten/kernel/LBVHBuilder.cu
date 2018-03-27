@@ -152,7 +152,6 @@ __global__ void buildTree(
 __device__ __host__ inline void onApplyTraverseOrder(
 	int idx,
 	int numberOfTris,
-	int shapeId,
 	int triIdOffset,
 	const idaten::LBVHBuilder::LBVHNode* src,
 	aten::ThreadedBvhNode* dst)
@@ -163,7 +162,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
 
 	auto gpunode = &dst[idx];
 
-	gpunode->shapeid = shapeId;
+	gpunode->shapeid = -1;
 	gpunode->exid = -1;
 	gpunode->meshid = -1;
 
@@ -280,7 +279,6 @@ __device__ __host__ inline void onApplyTraverseOrder(
 __global__ void applyTraverseOrder(
 	uint32_t numberOfNodes,
 	int numberOfTris,
-	int shapeId,
 	int triIdOffset,
 	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
 	aten::ThreadedBvhNode* dst)
@@ -291,7 +289,7 @@ __global__ void applyTraverseOrder(
 		return;
 	}
 
-	onApplyTraverseOrder(idx, numberOfTris, shapeId, triIdOffset, src, dst);
+	onApplyTraverseOrder(idx, numberOfTris, triIdOffset, src, dst);
 }
 
 __device__ inline void computeBoundingBox(
@@ -536,7 +534,6 @@ namespace idaten
 	void LBVHBuilder::build(
 		idaten::CudaTextureResource& dst,
 		std::vector<aten::PrimitiveParamter>& tris,
-		int shapeId,
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		idaten::CudaTextureResource& texRscVtxPos)
@@ -604,7 +601,6 @@ namespace idaten
 			applyTraverseOrder << <grid, block >> > (
 				numOfElems,
 				numLeaves,
-				shapeId,
 				triIdOffset,
 				nodesLbvh.ptr(),
 				nodes.ptr());

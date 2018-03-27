@@ -19,5 +19,10 @@ namespace aten {
 			std::vector<aten::LightParameter>& lightparams,
 			std::vector<aten::MaterialParameter>& mtrlparms,
 			std::vector<aten::vertex>& vtxparams);
+
+		static void collectTriangles(
+			std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
+			std::vector<int>& triIdOffsets,
+			std::vector<aten::vertex>& vtxparams);
 	};
 }

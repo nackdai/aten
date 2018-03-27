@@ -463,34 +463,116 @@ __global__ void computeBoudingBox(
 	}
 }
 
+__forceinline__ __device__ unsigned int expandBits(unsigned int value)
+{
+	value = (value * 0x00010001u) & 0xFF0000FFu;
+	value = (value * 0x00000101u) & 0x0F00F00Fu;
+	value = (value * 0x00000011u) & 0xC30C30C3u;
+	value = (value * 0x00000005u) & 0x49249249u;
+	return value;
+}
+
+__forceinline__ __device__ unsigned int computeMortonCode(aten::vec3 point)
+{
+	// Discretize the unit cube into a 10 bit integer
+	uint3 discretized;
+	discretized.x = (unsigned int)min(max(point.x * 1024.0f, 0.0f), 1023.0f);
+	discretized.y = (unsigned int)min(max(point.y * 1024.0f, 0.0f), 1023.0f);
+	discretized.z = (unsigned int)min(max(point.z * 1024.0f, 0.0f), 1023.0f);
+
+	discretized.x = expandBits(discretized.x);
+	discretized.y = expandBits(discretized.y);
+	discretized.z = expandBits(discretized.z);
+
+	return discretized.x * 4 + discretized.y * 2 + discretized.z;
+}
+
+__global__ void genMortonCode(
+	int numberOfTris,
+	const aten::aabb sceneBbox,
+	const aten::PrimitiveParamter* __restrict__ tris,
+	cudaTextureObject_t vtxPos,
+	uint32_t* mortonCodes,
+	uint32_t* indices)
+{
+	const auto idx = threadIdx.x + blockIdx.x * blockDim.x;
+
+	if (idx >= numberOfTris) {
+		return;
+	}
+
+	aten::PrimitiveParamter prim;
+	prim.v0 = ((aten::vec4*)tris)[idx * aten::PrimitiveParamter_float4_size + 0];
+
+	float4 v0 = tex1Dfetch<float4>(vtxPos, prim.idx[0]);
+	float4 v1 = tex1Dfetch<float4>(vtxPos, prim.idx[1]);
+	float4 v2 = tex1Dfetch<float4>(vtxPos, prim.idx[2]);
+
+	aten::vec3 vmin = aten::vec3(
+		min(min(v0.x, v1.x), v2.x),
+		min(min(v0.y, v1.y), v2.y),
+		min(min(v0.z, v1.z), v2.z));
+
+	aten::vec3 vmax = aten::vec3(
+		max(max(v0.x, v1.x), v2.x),
+		max(max(v0.y, v1.y), v2.y),
+		max(max(v0.z, v1.z), v2.z));
+
+	aten::vec3 center = (vmin + vmax) * 0.5f;
+
+	// Normalize [0, 1].
+	const auto size = sceneBbox.size();
+	const auto bboxMin = sceneBbox.minPos();
+	center = (center - bboxMin) / size;
+
+	auto code = computeMortonCode(center);
+
+	mortonCodes[idx] = code;
+	indices[idx] = idx;
+}
+
 namespace idaten
 {
 	void LBVHBuilder::build(
-		TypedCudaMemory<aten::ThreadedBvhNode>& nodes,
-		const std::vector<aten::PrimitiveParamter>& tris,
+		idaten::CudaTextureResource& dst,
+		std::vector<aten::PrimitiveParamter>& tris,
 		int shapeId,
 		int triIdOffset,
+		const aten::aabb& sceneBbox,
 		idaten::CudaTextureResource& texRscVtxPos)
-	{
+	{		
 		TypedCudaMemory<aten::PrimitiveParamter> triangles;
 		TypedCudaMemory<uint32_t> mortonCodes;
 		TypedCudaMemory<uint32_t> indices;
 
-		triangles.init(tris.size());
-		mortonCodes.init(tris.size());
-		indices.init(tris.size());
+		uint32_t numOfElems = tris.size();
 
-		triangles.writeByNum(&tris[0], tris.size());
+		triangles.init(numOfElems);
+		mortonCodes.init(numOfElems);
+		indices.init(numOfElems);
 
-		// TODO
 		// Compute morton code.
+		{
+			triangles.writeByNum(&tris[0], tris.size());
+
+			uint32_t numberOfTris = triangles.maxNum();
+
+			dim3 block(256, 1, 1);
+			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
+
+			genMortonCode << <grid, block >> > (
+				numberOfTris,
+				sceneBbox,
+				triangles.ptr(),
+				vtxPos,
+				mortonCodes.ptr(),
+				indices.ptr());
+		}
 
 		// Radix sort.
 		TypedCudaMemory<uint32_t> sortedKeys;
 		std::vector<uint32_t> v;
 		RadixSort::sort(mortonCodes, indices, sortedKeys, &v);
-
-		uint32_t numOfElems = tris.size();
 
 		uint32_t numInternalNode = numOfElems - 1;
 		uint32_t numLeaves = numOfElems;
@@ -509,6 +591,7 @@ namespace idaten
 				nodesLbvh.ptr());
 		}
 
+		TypedCudaMemory<aten::ThreadedBvhNode> nodes;
 		nodes.init(numInternalNode + numLeaves);
 
 		// Convert to gpu bvh tree nodes.
@@ -529,7 +612,7 @@ namespace idaten
 
 		// Compute bouding box.
 		{
-			uint32_t numberOfTris = tris.size();
+			uint32_t numberOfTris = triangles.maxNum();
 
 			uint32_t* executedIdxArray;
 			checkCudaErrors(cudaMalloc(&executedIdxArray, (numberOfTris - 1) * sizeof(uint32_t)));
@@ -551,6 +634,11 @@ namespace idaten
 
 			texRscVtxPos.unbind();
 		}
+
+		dst.initFromDeviceMemory(
+			(aten::vec4*)nodes.ptr(),
+			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
+			nodes.maxNum());
 	}
 
 	void LBVHBuilder::build()

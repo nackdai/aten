@@ -10,16 +10,17 @@ namespace idaten
 	class CudaTextureResource;
 
 	class LBVHBuilder {
-	public:
+	private:
 		LBVHBuilder() {}
 		~LBVHBuilder() {}
 
 	public:
 		static void LBVHBuilder::build(
-			TypedCudaMemory<aten::ThreadedBvhNode>& nodes,
-			const std::vector<aten::PrimitiveParamter>& tris,
+			idaten::CudaTextureResource& dst,
+			std::vector<aten::PrimitiveParamter>& tris,
 			int shapeId,
 			int triIdOffset,
+			const aten::aabb& sceneBbox,
 			idaten::CudaTextureResource& texRscVtxPos);
 
 		// test implementation.

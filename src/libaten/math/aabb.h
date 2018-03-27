@@ -37,7 +37,7 @@ namespace aten {
 			m_max = m_min + _size;
 		}
 
-		vec3 size() const
+		AT_DEVICE_API vec3 size() const
 		{
 			vec3 size = m_max - m_min;
 			return std::move(size);
@@ -153,7 +153,7 @@ namespace aten {
 			return b0 & b1;
 		}
 
-		const vec3& minPos() const
+		AT_DEVICE_API const vec3& minPos() const
 		{
 			return m_min;
 		}

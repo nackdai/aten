@@ -8,7 +8,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudaTextureResource.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 __device__  int computeLongestCommonPrefix(
 	const uint32_t* sortedKeys,
@@ -334,7 +334,7 @@ __global__ void computeBoudingBox(
 	cudaTextureObject_t vtxPos,
 	uint32_t* executedIdxArray)
 {
-	const int i = threadIdx.x + blockIdx.x * blockDim.x;
+	const int idx = threadIdx.x + blockIdx.x * blockDim.x;
 	
 	const int firstThreadIdxInBlock = blockIdx.x * blockDim.x;
 	const int lastThreadIdxInBlock = firstThreadIdxInBlock + blockDim.x - 1;
@@ -349,14 +349,14 @@ __global__ void computeBoudingBox(
 	__syncthreads();
 
 	// Check for valid threads
-	if (i >= numberOfTris)
+	if (idx >= numberOfTris)
 	{
 		return;
 	}
 
 	// NOTE
 	// Number of Internal Nodes = Number of Triangles - 1.
-	int leafNodeIdx = i + numberOfTris - 1;
+	int leafNodeIdx = idx + numberOfTris - 1;
 
 	// Base index to convert node index to triangle index.
 	int leafBaseIdx = numberOfTris - 1;
@@ -366,7 +366,6 @@ __global__ void computeBoudingBox(
 
 	// Calculate leaves bounding box.
 	int leafId = node->order - leafBaseIdx;
-
 	int triId = triIdOffset + leafId;
 
 	aten::PrimitiveParamter prim;
@@ -390,15 +389,15 @@ __global__ void computeBoudingBox(
 
 	// リーフから親へたどっていく.
 
-	int lastNode = leafId;
-	int targetId = src->parent;
+	int lastNode = idx;
+	int targetId = node->parent;
 
 	while (targetId >= 0)
 	{
 		// ターゲットは親ノードで、ここでは子ノードを処理しているであろうスレッドのインデックスを取得する.
 		// インデックスの配列は 0xffffffff で初期化されていて、処理されたらスレッドのインデックスで置換される.
 		// つまり、配列内の値が 0xffffffff であったら、未処理ということになる.
-		const auto childNodeThreadIdx = atomicExch(&executedIdxArray[targetId], i);
+		const auto childNodeThreadIdx = atomicExch(&executedIdxArray[targetId], idx);
 
 		if (childNodeThreadIdx == 0xffffffff) {
 			// 未処理なので、これ以上は何もしない.
@@ -548,6 +547,8 @@ namespace idaten
 		mortonCodes.init(numOfElems);
 		indices.init(numOfElems);
 
+		auto vtxPos = texRscVtxPos.bind();
+
 		// Compute morton code.
 		{
 			triangles.writeByNum(&tris[0], tris.size());
@@ -564,6 +565,8 @@ namespace idaten
 				vtxPos,
 				mortonCodes.ptr(),
 				indices.ptr());
+
+			checkCudaKernel(genMortonCode);
 		}
 
 		// Radix sort.
@@ -586,6 +589,8 @@ namespace idaten
 				numOfElems,
 				sortedKeys.ptr(),
 				nodesLbvh.ptr());
+
+			checkCudaKernel(buildTree);
 		}
 
 		TypedCudaMemory<aten::ThreadedBvhNode> nodes;
@@ -604,6 +609,8 @@ namespace idaten
 				triIdOffset,
 				nodesLbvh.ptr(),
 				nodes.ptr());
+
+			checkCudaKernel(applyTraverseOrder);
 		}
 
 		// Compute bouding box.
@@ -615,11 +622,11 @@ namespace idaten
 			checkCudaErrors(cudaMemset(executedIdxArray, 0xFF, (numberOfTris - 1) * sizeof(uint32_t)));
 
 			dim3 block(128, 1, 1);
-			dim3 grid((numOfElems + block.x - 1) / block.x, 1, 1);
+			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
 
-			auto vtxPos = texRscVtxPos.bind();
+			size_t sharedMemorySize = block.x * sizeof(float4) * 2;
 
-			computeBoudingBox << <grid, block >> > (
+			computeBoudingBox << <grid, block, sharedMemorySize >> > (
 				numberOfTris,
 				triIdOffset,
 				nodesLbvh.ptr(),
@@ -628,13 +635,15 @@ namespace idaten
 				vtxPos,
 				executedIdxArray);
 
-			texRscVtxPos.unbind();
+			checkCudaKernel(computeBoudingBox);
 		}
 
 		dst.initFromDeviceMemory(
 			(aten::vec4*)nodes.ptr(),
 			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
 			nodes.maxNum());
+
+		texRscVtxPos.unbind();
 	}
 
 	void LBVHBuilder::build()
@@ -683,7 +692,6 @@ namespace idaten
 			applyTraverseOrder << <grid, block >> > (
 				numOfElems,
 				numLeaves,
-				0,
 				0,
 				nodesLbvh.ptr(),
 				nodes.ptr());

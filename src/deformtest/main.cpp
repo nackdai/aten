@@ -29,8 +29,8 @@ static uint32_t g_threadnum = 1;
 
 class Lbvh : aten::accelerator {
 public:
-	Lbvh();
-	~Lbvh();
+	Lbvh() : aten::accelerator(aten::AccelType::UserDefs) {}
+	~Lbvh() {}
 
 public:
 	static accelerator* create()

@@ -107,10 +107,11 @@ namespace aten {
 				for (const auto objshape : obj->shapes) {
 					const auto& tris = objshape->tris();
 					
-					std::copy(
-						tris.begin(),
-						tris.end(),
-						std::back_inserter(triangles[pos]));
+					triangles[pos].reserve(tris.size());
+
+					for (const auto tri : tris) {
+						triangles[pos].push_back(tri->param);
+					}
 				}
 
 				triIdOffsets.push_back(triangleCount);

@@ -374,6 +374,11 @@
 </node>
 </node>
 </node>
+<node CREATED="1521793174132" ID="ID_1151520209" MODIFIED="1521793180256" POSITION="right" TEXT="&#x6700;&#x9069;&#x5316;&#x30e1;&#x30e2;">
+<node CREATED="1521793180676" ID="ID_1661881408" LINK="http://mimimopu.com/blog/2011/11/cudafermil1shared-mem.html" MODIFIED="1521793218679" TEXT="[CUDA]Fermi&#x3067;&#x306e;L1/Shared Mem &#x30b5;&#x30a4;&#x30ba;&#x5909;&#x66f4;">
+<icon BUILTIN="idea"/>
+</node>
+</node>
 <node CREATED="1517822784508" HGAP="23" ID="ID_29808556" MODIFIED="1518164988703" POSITION="right" TEXT="Voxel" VSHIFT="42">
 <node CREATED="1518164990528" ID="ID_57331120" MODIFIED="1518745186221" TEXT="&#x53c2;&#x8003;">
 <node CREATED="1517822794924" ID="ID_1430070360" LINK="http://research.nvidia.com/publication/voxelpipe-programmable-pipeline-3d-voxelization" MODIFIED="1517822802645" TEXT="http://research.nvidia.com/publication/voxelpipe-programmable-pipeline-3d-voxelization"/>

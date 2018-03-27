@@ -5,84 +5,125 @@
 
 #include <random>
 #include <vector>
+#include <iterator>
 
-//#pragma optimize( "", off)
+#pragma optimize( "", off)
 
 // Threaded BVH
 // http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
 
 namespace aten {
+	struct NodeEntry {
+		int left{ -1 };
+		int right{ -1 };
+		int parent{ -1 };
+		bool isLeaf{ false };
+	};
+
 	void ThreadedBVH::build(
 		hitable** list,
 		uint32_t num,
 		aabb* bbox/*= nullptr*/)
 	{
-		m_bvh.build(list, num, bbox);
+		if (m_isNested) {
+			m_bvh.build(list, num, bbox);
 
-		setBoundingBox(m_bvh.getBoundingbox());
+			setBoundingBox(m_bvh.getBoundingbox());
 
-		// Gather local-world matrix.
-		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+			std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
-		std::vector<accelerator*> listNestedBvh;
-		std::map<hitable*, accelerator*> nestedBvhMap;
+			// Convert to linear list.
+			registerBvhNodeToLinearList(
+				m_bvh.getRoot(),
+				threadedBvhNodeEntries);
+			
+			std::vector<int> listParentId;
+			m_listThreadedBvhNode.resize(1);
 
-		std::vector<std::vector<ThreadedBvhNodeEntry>> listBvhNode;
-		
-		// Register to linear list to traverse bvhnode easily.
-		auto root = m_bvh.getRoot();
-		listBvhNode.push_back(std::vector<ThreadedBvhNodeEntry>());
-		registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listNestedBvh, nestedBvhMap);
+			// Register bvh node for gpu.
+			registerThreadedBvhNode(
+				true,
+				threadedBvhNodeEntries,
+				m_listThreadedBvhNode[0], 
+				listParentId);
 
-		// Copy to keep.
-		m_nestedBvh = listNestedBvh;
-
-		if (!m_enableLayer) {
-			listNestedBvh.clear();
+			// Set order.
+			setOrder(
+				threadedBvhNodeEntries,
+				listParentId, 
+				m_listThreadedBvhNode[0]);
 		}
+		else {
+			m_bvh.build(list, num, bbox);
 
-		for (int i = 0; i < listNestedBvh.size(); i++) {
-			// TODO
-			auto bvh = (aten::bvh*)listNestedBvh[i];
+			setBoundingBox(m_bvh.getBoundingbox());
 
-			root = bvh->getRoot();
+			// Gather local-world matrix.
+			transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
-			hitable* parent = nullptr;
+			std::vector<accelerator*> nestedBvhList;
+			std::map<hitable*, accelerator*> nestedBvhMap;
 
-			// Find parent which has specified bvh.
-			for (auto it : nestedBvhMap) {
-				if (bvh == it.second) {
-					// Found nested bvh.
-					parent = it.first;
-					break;
+			std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
+
+			// Register to linear list to traverse bvhnode easily.
+			auto root = m_bvh.getRoot();
+			registerBvhNodeToLinearList(
+				root, 
+				nullptr, 
+				nullptr, 
+				aten::mat4::Identity, 
+				threadedBvhNodeEntries, 
+				nestedBvhList, 
+				nestedBvhMap);
+
+			// Copy to keep.
+			m_nestedBvh = nestedBvhList;
+
+			std::vector<int> listParentId;
+
+			if (m_enableLayer) {
+				// NOTE
+				// 0 is for top layer. So, need +1.
+				m_listThreadedBvhNode.resize(m_nestedBvh.size() + 1);
+			}
+			else {
+				m_listThreadedBvhNode.resize(1);
+			}
+
+			// Register bvh node for gpu.
+			registerThreadedBvhNode(
+				false,
+				threadedBvhNodeEntries,
+				m_listThreadedBvhNode[0],
+				listParentId);
+
+			// Set traverse order for linear bvh.
+			setOrder(threadedBvhNodeEntries, listParentId, m_listThreadedBvhNode[0]);
+
+			// Copy nested threaded bvh nodes to top layer tree.
+			if (m_enableLayer) {
+				for (int i = 0; i < nestedBvhList.size(); i++) {
+					auto node = nestedBvhList[i];
+
+					// TODO
+					if (node->getAccelType() == AccelType::ThreadedBvh) {
+						auto threadedBvh = static_cast<ThreadedBVH*>(node);
+
+						auto& threadedBvhNodes = threadedBvh->m_listThreadedBvhNode[0];
+
+						// NODE
+						// m_listThreadedBvhNode[0] is for top layer.
+						std::copy(
+							threadedBvhNodes.begin(), 
+							threadedBvhNodes.end(), 
+							std::back_inserter(m_listThreadedBvhNode[i + 1]));
+					}
 				}
 			}
 
-			listBvhNode.push_back(std::vector<ThreadedBvhNodeEntry>());
-			std::vector<accelerator*> dummy;
-
-			registerBvhNodeToLinearList(root, nullptr, parent, aten::mat4::Identity, listBvhNode[i + 1], dummy, nestedBvhMap);
-			AT_ASSERT(dummy.empty());
+			//dump(m_listThreadedBvhNode[1], "node.txt");
 		}
-
-		m_listThreadedBvhNode.resize(listBvhNode.size());
-		std::vector<std::vector<int>> listParentId(listBvhNode.size());
-
-		// Register bvh node for gpu.
-		for (int i = 0; i < listBvhNode.size(); i++) {
-			// Leaves of nested bvh are primitive.
-			// Index 0 is primiary tree, and Index N (N > 0) is nested tree.
-			bool isPrimitiveLeaf = (i > 0);
-
-			registerThreadedBvhNode(isPrimitiveLeaf, listBvhNode[i], m_listThreadedBvhNode[i], listParentId[i]);
-		}
-
-		// Set traverse order for linear bvh.
-		for (int i = 0; i < listBvhNode.size(); i++) {
-			setOrder(listBvhNode[i], listParentId[i], m_listThreadedBvhNode[i]);
-		}
-
-		//dump(m_listThreadedBvhNode[1], "node.txt");
 	}
 
 	void ThreadedBVH::dump(std::vector<ThreadedBvhNode>& nodes, const char* path)
@@ -141,14 +182,14 @@ namespace aten {
 
 	void ThreadedBVH::registerThreadedBvhNode(
 		bool isPrimitiveLeaf,
-		const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-		std::vector<ThreadedBvhNode>& listThreadedBvhNode,
+		const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
+		std::vector<ThreadedBvhNode>& threadedBvhNodes,
 		std::vector<int>& listParentId)
 	{
-		listThreadedBvhNode.reserve(listBvhNode.size());
-		listParentId.reserve(listBvhNode.size());
+		threadedBvhNodes.reserve(threadedBvhNodeEntries.size());
+		listParentId.reserve(threadedBvhNodeEntries.size());
 
-		for (const auto& entry : listBvhNode) {
+		for (const auto& entry : threadedBvhNodeEntries) {
 			auto node = entry.node;
 			auto nestParent = entry.nestParent;
 
@@ -205,24 +246,24 @@ namespace aten {
 			gpunode.boxmax = aten::vec4(bbox.maxPos(), 0);
 			gpunode.boxmin = aten::vec4(bbox.minPos(), 0);
 
-			listThreadedBvhNode.push_back(gpunode);
+			threadedBvhNodes.push_back(gpunode);
 		}
 	}
 
 	void ThreadedBVH::setOrder(
-		const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
+		const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
 		const std::vector<int>& listParentId,
-		std::vector<ThreadedBvhNode>& listThreadedBvhNode)
+		std::vector<ThreadedBvhNode>& threadedBvhNodes)
 	{
-		auto num = listThreadedBvhNode.size();
+		auto num = threadedBvhNodes.size();
 
 		for (int n = 0; n < num; n++) {
-			auto node = listBvhNode[n].node;
-			auto& gpunode = listThreadedBvhNode[n];
+			auto node = threadedBvhNodeEntries[n].node;
+			auto& gpunode = threadedBvhNodes[n];
 
 			bvhnode* next = nullptr;
 			if (n + 1 < num) {
-				next = listBvhNode[n + 1].node;
+				next = threadedBvhNodeEntries[n + 1].node;
 			}
 
 			if (node->isLeaf()) {
@@ -252,7 +293,7 @@ namespace aten {
 				// Search the parent.
 				auto parentId = listParentId[n];
 				bvhnode* parent = (parentId >= 0
-					? listBvhNode[parentId].node
+					? threadedBvhNodeEntries[parentId].node
 					: nullptr);
 
 				if (parent) {
@@ -279,7 +320,7 @@ namespace aten {
 							// Search the grand parent.
 							auto grandParentId = listParentId[curParent->getTraversalOrder()];
 							bvhnode* grandParent = (grandParentId >= 0
-								? listBvhNode[grandParentId].node
+								? threadedBvhNodeEntries[grandParentId].node
 								: nullptr);
 
 							if (grandParent) {
@@ -348,7 +389,7 @@ namespace aten {
 			if (node->isLeaf()) {
 				Intersection isectTmp;
 
-				auto s = shapes[(int)node->shapeid];
+				auto s = node->shapeid >= 0 ? shapes[(int)node->shapeid] : nullptr;
 
 				if (node->exid >= 0) {
 					// Traverse external linear bvh list.
@@ -377,13 +418,18 @@ namespace aten {
 						transformedRay,
 						t_min, t_max,
 						isectTmp);
+
+					if (isHit) {
+						isectTmp.objid = s->id();
+					}
 				}
 				else if (node->primid >= 0) {
 					// Hit test for a primitive.
 					auto prim = (hitable*)prims[(int)node->primid];
 					isHit = prim->hit(r, t_min, t_max, isectTmp);
 					if (isHit) {
-						isectTmp.objid = s->id();
+						// Set dummy to return if ray hit.
+						isectTmp.objid = s ? s->id() : 1;
 					}
 				}
 				else {

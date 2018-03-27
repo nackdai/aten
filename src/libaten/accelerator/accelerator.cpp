@@ -1,6 +1,7 @@
 #include "accelerator/accelerator.h"
 #include "accelerator/bvh.h"
 #include "accelerator/sbvh.h"
+#include "accelerator/threaded_bvh.h"
 
 namespace aten {
 	AccelType accelerator::s_internalType = AccelType::Bvh;
@@ -37,6 +38,9 @@ namespace aten {
 			switch (s_internalType) {
 			case AccelType::Sbvh:
 				ret = new sbvh();
+				break;
+			case AccelType::ThreadedBvh:
+				ret = new ThreadedBVH();
 				break;
 			default:
 				ret = new bvh();

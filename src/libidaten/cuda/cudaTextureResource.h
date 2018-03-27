@@ -18,6 +18,11 @@ namespace idaten
 			uint32_t memberNumInItem, 
 			uint32_t numOfContaints);
 
+		void initFromDeviceMemory(
+			const aten::vec4* p,
+			uint32_t memberNumInItem,
+			uint32_t numOfContaints);
+
 		virtual cudaTextureObject_t bind();
 		void unbind();
 
@@ -25,6 +30,13 @@ namespace idaten
 			const aten::vec4* p,
 			uint32_t memberNumInItem,
 			uint32_t numOfContaints);
+
+	private:
+		void onInit(
+			const aten::vec4* p,
+			uint32_t memberNumInItem,
+			uint32_t numOfContaints,
+			bool isHostToDevice);
 
 	protected:
 		void* m_buffer{ nullptr };

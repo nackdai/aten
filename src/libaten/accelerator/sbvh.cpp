@@ -1255,7 +1255,7 @@ namespace aten
 		auto err = fopen_s(&fp, path, "wb");
 		if (err != 0) {
 			// TODO
-			// through exception...
+			// throw exception...
 			AT_ASSERT(false);
 			return false;
 		}

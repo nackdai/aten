@@ -12,111 +12,132 @@
 // Threaded BVH
 // http://www.ci.i.u-tokyo.ac.jp/~hachisuka/tdf2015.pdf
 
-namespace aten {
+namespace aten
+{
 	void ThreadedBVH::build(
 		hitable** list,
 		uint32_t num,
 		aabb* bbox/*= nullptr*/)
 	{
 		if (m_isNested) {
-			m_bvh.build(list, num, bbox);
-
-			setBoundingBox(m_bvh.getBoundingbox());
-
-			std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
-
-			// Convert to linear list.
-			registerBvhNodeToLinearList(
-				m_bvh.getRoot(),
-				threadedBvhNodeEntries);
-			
-			std::vector<int> listParentId;
-			m_listThreadedBvhNode.resize(1);
-
-			// Register bvh node for gpu.
-			registerThreadedBvhNode(
-				true,
-				threadedBvhNodeEntries,
-				m_listThreadedBvhNode[0], 
-				listParentId);
-
-			// Set order.
-			setOrder(
-				threadedBvhNodeEntries,
-				listParentId, 
-				m_listThreadedBvhNode[0]);
+			buildAsNestedTree(list, num, bbox);
 		}
 		else {
-			m_bvh.build(list, num, bbox);
+			buildAsTopLayerTree(list, num, bbox);
+		}
+	}
 
-			setBoundingBox(m_bvh.getBoundingbox());
+	void ThreadedBVH::buildAsNestedTree(
+		hitable** list,
+		uint32_t num,
+		aabb* bbox)
+	{
+		AT_ASSERT(m_isNested);
 
-			// Gather local-world matrix.
-			transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+		m_bvh.build(list, num, bbox);
 
-			std::vector<accelerator*> nestedBvhList;
-			std::map<hitable*, accelerator*> nestedBvhMap;
+		setBoundingBox(m_bvh.getBoundingbox());
 
-			std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
+		std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
-			// Register to linear list to traverse bvhnode easily.
-			auto root = m_bvh.getRoot();
-			registerBvhNodeToLinearList(
-				root, 
-				nullptr, 
-				nullptr, 
-				aten::mat4::Identity, 
-				threadedBvhNodeEntries, 
-				nestedBvhList, 
-				nestedBvhMap);
+		// Convert to linear list.
+		registerBvhNodeToLinearList(
+			m_bvh.getRoot(),
+			threadedBvhNodeEntries);
 
-			// Copy to keep.
-			m_nestedBvh = nestedBvhList;
+		std::vector<int> listParentId;
+		m_listThreadedBvhNode.resize(1);
 
-			std::vector<int> listParentId;
+		// Register bvh node for gpu.
+		registerThreadedBvhNode(
+			true,
+			threadedBvhNodeEntries,
+			m_listThreadedBvhNode[0],
+			listParentId);
 
-			if (m_enableLayer) {
-				// NOTE
-				// 0 is for top layer. So, need +1.
-				m_listThreadedBvhNode.resize(m_nestedBvh.size() + 1);
-			}
-			else {
-				m_listThreadedBvhNode.resize(1);
-			}
+		// Set order.
+		setOrder(
+			threadedBvhNodeEntries,
+			listParentId,
+			m_listThreadedBvhNode[0]);
+	}
 
-			// Register bvh node for gpu.
-			registerThreadedBvhNode(
-				false,
-				threadedBvhNodeEntries,
-				m_listThreadedBvhNode[0],
-				listParentId);
+	void ThreadedBVH::buildAsTopLayerTree(
+		hitable** list,
+		uint32_t num,
+		aabb* bbox)
+	{
+		AT_ASSERT(!m_isNested);
 
-			// Set traverse order for linear bvh.
-			setOrder(threadedBvhNodeEntries, listParentId, m_listThreadedBvhNode[0]);
+		m_bvh.build(list, num, bbox);
 
-			// Copy nested threaded bvh nodes to top layer tree.
-			if (m_enableLayer) {
-				for (int i = 0; i < nestedBvhList.size(); i++) {
-					auto node = nestedBvhList[i];
+		setBoundingBox(m_bvh.getBoundingbox());
 
-					// TODO
-					if (node->getAccelType() == AccelType::ThreadedBvh) {
-						auto threadedBvh = static_cast<ThreadedBVH*>(node);
+		// Gather local-world matrix.
+		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
-						auto& threadedBvhNodes = threadedBvh->m_listThreadedBvhNode[0];
+		std::vector<accelerator*> nestedBvhList;
+		std::map<hitable*, accelerator*> nestedBvhMap;
 
-						// NODE
-						// m_listThreadedBvhNode[0] is for top layer.
-						std::copy(
-							threadedBvhNodes.begin(), 
-							threadedBvhNodes.end(), 
-							std::back_inserter(m_listThreadedBvhNode[i + 1]));
-					}
+		std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
+
+		// Register to linear list to traverse bvhnode easily.
+		auto root = m_bvh.getRoot();
+		registerBvhNodeToLinearList(
+			root, 
+			nullptr, 
+			nullptr, 
+			aten::mat4::Identity, 
+			threadedBvhNodeEntries, 
+			nestedBvhList, 
+			nestedBvhMap);
+
+		// Copy to keep.
+		m_nestedBvh = nestedBvhList;
+
+		std::vector<int> listParentId;
+
+		if (m_enableLayer) {
+			// NOTE
+			// 0 is for top layer. So, need +1.
+			m_listThreadedBvhNode.resize(m_nestedBvh.size() + 1);
+		}
+		else {
+			m_listThreadedBvhNode.resize(1);
+		}
+
+		// Register bvh node for gpu.
+		registerThreadedBvhNode(
+			false,
+			threadedBvhNodeEntries,
+			m_listThreadedBvhNode[0],
+			listParentId);
+
+		// Set traverse order for linear bvh.
+		setOrder(threadedBvhNodeEntries, listParentId, m_listThreadedBvhNode[0]);
+
+		// Copy nested threaded bvh nodes to top layer tree.
+		if (m_enableLayer) {
+			for (int i = 0; i < nestedBvhList.size(); i++) {
+				auto node = nestedBvhList[i];
+
+				// TODO
+				if (node->getAccelType() == AccelType::ThreadedBvh) {
+					auto threadedBvh = static_cast<ThreadedBVH*>(node);
+
+					auto& threadedBvhNodes = threadedBvh->m_listThreadedBvhNode[0];
+
+					// NODE
+					// m_listThreadedBvhNode[0] is for top layer.
+					std::copy(
+						threadedBvhNodes.begin(), 
+						threadedBvhNodes.end(), 
+						std::back_inserter(m_listThreadedBvhNode[i + 1]));
 				}
 			}
-
-			//dump(m_listThreadedBvhNode[1], "node.txt");
 		}
+
+		//dump(m_listThreadedBvhNode[1], "node.txt");
 	}
 
 	void ThreadedBVH::dump(std::vector<ThreadedBvhNode>& nodes, const char* path)

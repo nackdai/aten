@@ -102,6 +102,16 @@ namespace aten {
 		static void dump(std::vector<ThreadedBvhNode>& nodes, const char* path);
 
 	private:
+		void buildAsNestedTree(
+			hitable** list,
+			uint32_t num,
+			aabb* bbox);
+
+		void buildAsTopLayerTree(
+			hitable** list,
+			uint32_t num,
+			aabb* bbox);
+
 		struct ThreadedBvhNodeEntry {
 			bvhnode* node;
 			hitable* nestParent;

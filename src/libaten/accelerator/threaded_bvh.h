@@ -164,7 +164,7 @@ namespace aten {
 			Intersection& isect) const;
 
 		void registerBvhNodeToLinearList(
-			bvhnode* root,
+			bvhnode* node,
 			std::vector<ThreadedBvhNodeEntry>& nodes);
 
 	private:

@@ -227,7 +227,7 @@ namespace aten {
 
 		virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
 
-		static bvhnode* getInternalNode(bvhnode* node, aten::mat4* mtxL2W = nullptr);
+		static bvhnode* getNestedNode(bvhnode* node, aten::mat4* mtxL2W = nullptr);
 
 		template <typename _T>
 		static void registerBvhNodeToLinearList(
@@ -252,7 +252,7 @@ namespace aten {
 
 			// ネストしている場合にはネストさきのツリーのルートノードを取得.
 			// ネストしていない場合は同じものが返ってくる.
-			pnode = getInternalNode(original, &mtxL2WForChild);
+			pnode = getNestedNode(original, &mtxL2WForChild);
 
 			if (pnode != original) {
 				// ネストしている.

@@ -311,8 +311,10 @@ namespace aten
 					: nullptr);
 
 				if (parent) {
-					bvhnode* left = bvh::getInternalNode(parent->getLeft());
-					bvhnode* right = bvh::getInternalNode(parent->getRight());
+					// š FIXME
+					// getNestedNode‚Å‚ ‚éˆÓ–¡‚ª‚È‚¢.
+					bvhnode* left = bvh::getNestedNode(parent->getLeft());
+					bvhnode* right = bvh::getNestedNode(parent->getRight());
 
 					bool isLeft = (left == node);
 
@@ -338,8 +340,10 @@ namespace aten
 								: nullptr);
 
 							if (grandParent) {
-								bvhnode* _left = bvh::getInternalNode(grandParent->getLeft());;
-								bvhnode* _right = bvh::getInternalNode(grandParent->getRight());;
+								// š FIXME
+								// getNestedNode‚Å‚ ‚éˆÓ–¡‚ª‚È‚¢.
+								bvhnode* _left = bvh::getNestedNode(grandParent->getLeft());;
+								bvhnode* _right = bvh::getNestedNode(grandParent->getRight());;
 
 								auto sibling = _right;
 								if (sibling) {
@@ -548,19 +552,19 @@ namespace aten
 	}
 
 	void ThreadedBVH::registerBvhNodeToLinearList(
-		bvhnode* root, 
+		bvhnode* node,
 		std::vector<ThreadedBvhNodeEntry>& nodes)
 	{
-		if (!root) {
+		if (!node) {
 			return;
 		}
 
 		int order = nodes.size();
-		root->setTraversalOrder(order);
+		node->setTraversalOrder(order);
 
-		nodes.push_back(ThreadedBvhNodeEntry(root, nullptr, aten::mat4::Identity));
+		nodes.push_back(ThreadedBvhNodeEntry(node, nullptr, aten::mat4::Identity));
 
-		registerBvhNodeToLinearList(root->getLeft(), nodes);
-		registerBvhNodeToLinearList(root->getRight(), nodes);
+		registerBvhNodeToLinearList(node->getLeft(), nodes);
+		registerBvhNodeToLinearList(node->getRight(), nodes);
 	}
 }

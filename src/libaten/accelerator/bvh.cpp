@@ -1003,7 +1003,7 @@ namespace aten {
 #endif
 	}
 
-	bvhnode* bvh::getInternalNode(bvhnode* node, aten::mat4* mtxL2W/*= nullptr*/)
+	bvhnode* bvh::getNestedNode(bvhnode* node, aten::mat4* mtxL2W/*= nullptr*/)
 	{
 		bvhnode* ret = nullptr;
 
@@ -1059,7 +1059,7 @@ namespace aten {
 			aten::mat4 mtxW2L;
 
 			if (instanceNode) {
-				auto n = getInternalNode(instanceNode, &mtxW2L);
+				auto n = getNestedNode(instanceNode, &mtxW2L);
 
 #if 0
 				aten::hitable* originalItem = n->getItem();
@@ -1183,7 +1183,7 @@ namespace aten {
 
 			// Check if node has nested bvh.
 			{
-				node = getInternalNode(original, &mtxW2L);
+				node = getNestedNode(original, &mtxW2L);
 
 				if (node != original) {
 					// Register nested bvh.

@@ -80,10 +80,15 @@ namespace aten {
 
 		virtual void update() override;
 
+		std::vector<std::vector<ThreadedBvhNode>>& getNodes()
+		{
+			return m_listThreadedBvhNode;
+		}
 		const std::vector<std::vector<ThreadedBvhNode>>& getNodes() const
 		{
 			return m_listThreadedBvhNode;
 		}
+
 		const std::vector<aten::mat4>& getMatrices() const
 		{
 			return m_mtxs;

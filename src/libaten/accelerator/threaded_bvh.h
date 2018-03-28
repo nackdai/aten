@@ -3,7 +3,10 @@
 #include "scene/hitable.h"
 #include "accelerator/bvh.h"
 
-namespace aten {
+#include <map>
+
+namespace aten
+{
 	struct ThreadedBvhNode {
 		aten::vec3 boxmin;		///< AABB min position.
 		float hit{ -1 };		///< Link index if ray hit.
@@ -166,5 +169,6 @@ namespace aten {
 		std::vector<aten::mat4> m_mtxs;
 
 		std::vector<accelerator*> m_nestedBvh;
+		std::map<int, accelerator*> m_mapNestedBvh;
 	};
 }

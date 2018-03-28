@@ -83,6 +83,22 @@ namespace aten
 			m_bvh.getRoot(),
 			threadedBvhNodeEntries);
 
+		// Convert from map to vector.
+		if (!m_mapNestedBvh.empty()) {
+			m_nestedBvh.resize(m_mapNestedBvh.size());
+
+			for (auto it = m_mapNestedBvh.begin(); it != m_mapNestedBvh.end(); it++) {
+				int exid = it->first;
+				auto accel = it->second;
+
+				// NOTE
+				// 0 は上位レイヤーで使用しているので、-1する.
+				m_nestedBvh[exid - 1] = accel;
+			}
+
+			m_mapNestedBvh.clear();
+		}
+
 		std::vector<int> listParentId;
 
 		if (m_enableLayer) {
@@ -530,7 +546,17 @@ namespace aten
 				auto accel = obj->getInternalAccelerator();
 
 				// Keep nested bvh.
-				m_nestedBvh.push_back(accel);
+				if (m_mapNestedBvh.find(exid) == m_mapNestedBvh.end()) {
+					m_mapNestedBvh.insert(std::pair<int, accelerator*>(exid, accel));
+				}
+				
+				if (subobj) {
+					accel = subobj->getInternalAccelerator();
+
+					if (m_mapNestedBvh.find(subexid) == m_mapNestedBvh.end()) {
+						m_mapNestedBvh.insert(std::pair<int, accelerator*>(subexid, accel));
+					}
+				}
 			}
 		}
 

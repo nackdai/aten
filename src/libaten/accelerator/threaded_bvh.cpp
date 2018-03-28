@@ -76,24 +76,12 @@ namespace aten
 		// Gather local-world matrix.
 		transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
 
-		std::vector<accelerator*> nestedBvhList;
-		std::map<hitable*, accelerator*> nestedBvhMap;
-
 		std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
 		// Register to linear list to traverse bvhnode easily.
-		auto root = m_bvh.getRoot();
 		registerBvhNodeToLinearList(
-			root, 
-			nullptr, 
-			nullptr, 
-			aten::mat4::Identity, 
-			threadedBvhNodeEntries, 
-			nestedBvhList, 
-			nestedBvhMap);
-
-		// Copy to keep.
-		m_nestedBvh = nestedBvhList;
+			m_bvh.getRoot(),
+			threadedBvhNodeEntries);
 
 		std::vector<int> listParentId;
 
@@ -118,8 +106,8 @@ namespace aten
 
 		// Copy nested threaded bvh nodes to top layer tree.
 		if (m_enableLayer) {
-			for (int i = 0; i < nestedBvhList.size(); i++) {
-				auto node = nestedBvhList[i];
+			for (int i = 0; i < m_nestedBvh.size(); i++) {
+				auto node = m_nestedBvh[i];
 
 				// TODO
 				if (node->getAccelType() == AccelType::ThreadedBvh) {
@@ -159,41 +147,6 @@ namespace aten
 		fclose(fp);
 	}
 
-	void ThreadedBVH::registerBvhNodeToLinearList(
-		bvhnode* root,
-		bvhnode* parentNode,
-		hitable* nestParent,
-		const aten::mat4& mtxL2W,
-		std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-		std::vector<accelerator*>& listNestedBvh,
-		std::map<hitable*, accelerator*>& nestedBvhMap)
-	{
-		bvh::registerBvhNodeToLinearList<ThreadedBvhNodeEntry>(
-			root,
-			parentNode,
-			nestParent,
-			mtxL2W,
-			listBvhNode,
-			listNestedBvh,
-			nestedBvhMap,
-			[this](std::vector<ThreadedBvhNodeEntry>& list, bvhnode* node, hitable* obj, const aten::mat4& mtx)
-		{
-			list.push_back(ThreadedBvhNodeEntry(node, obj, mtx));
-		},
-			[this](bvhnode* node, int exid, int subExid)
-		{
-			if (node->isLeaf()) {
-				// NOTE
-				// 0 はベースツリーなので、+1 する.
-				node->setExternalId(exid + 1);
-
-				if (subExid >= 0) {
-					node->setSubExternalId(subExid + 1);
-				}
-			}
-		});
-	}
-
 	void ThreadedBVH::registerThreadedBvhNode(
 		bool isPrimitiveLeaf,
 		const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
@@ -205,7 +158,6 @@ namespace aten
 
 		for (const auto& entry : threadedBvhNodeEntries) {
 			auto node = entry.node;
-			auto nestParent = entry.nestParent;
 
 			ThreadedBvhNode gpunode;
 
@@ -223,14 +175,7 @@ namespace aten
 				hitable* item = node->getItem();
 
 				// 自分自身のIDを取得.
-				gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
-
-				// もしなかったら、ネストしているので親のIDを取得.
-				if (gpunode.shapeid < 0) {
-					if (nestParent) {
-						gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
-					}
-				}
+				gpunode.shapeid = (float)transformable::findIdxAsHitable(item);
 
 				// インスタンスの実体を取得.
 				auto internalObj = item->getHasObject();
@@ -512,7 +457,7 @@ namespace aten
 				hitable* item = node->getItem();
 
 				// 自分自身のIDを取得.
-				gpunode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
+				gpunode.shapeid = (float)transformable::findIdxAsHitable(item);
 				AT_ASSERT(gpunode.shapeid >= 0);
 
 				// インスタンスの実体を取得.
@@ -558,7 +503,38 @@ namespace aten
 		int order = nodes.size();
 		node->setTraversalOrder(order);
 
-		nodes.push_back(ThreadedBvhNodeEntry(node, nullptr, aten::mat4::Identity));
+		mat4 mtxL2W;
+
+		auto item = node->getItem();
+		auto idx = transformable::findIdxAsHitable(item);
+
+		if (idx >= 0) {
+			auto t = transformable::getShape(idx);
+
+			mat4 mtxW2L;
+			t->getMatrices(mtxL2W, mtxW2L);
+
+			if (t->getParam().type == GeometryType::Instance) {
+				// TODO
+				auto obj = (object*)t->getHasObject();
+				auto subobj = (object*)t->getHasSecondObject();
+
+				// NOTE
+				// 0 is for top layer, so need to add 1.
+				int exid = transformable::findIdxFromPolygonObjList(obj) + 1;
+				int subexid = subobj ? transformable::findIdxFromPolygonObjList(subobj) + 1 : -1;
+
+				node->setExternalId(exid);
+				node->setSubExternalId(subexid);
+
+				auto accel = obj->getInternalAccelerator();
+
+				// Keep nested bvh.
+				m_nestedBvh.push_back(accel);
+			}
+		}
+
+		nodes.push_back(ThreadedBvhNodeEntry(node, mtxL2W));
 
 		registerBvhNodeToLinearList(node->getLeft(), nodes);
 		registerBvhNodeToLinearList(node->getRight(), nodes);

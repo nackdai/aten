@@ -119,22 +119,12 @@ namespace aten {
 
 		struct ThreadedBvhNodeEntry {
 			bvhnode* node;
-			hitable* nestParent;
 			aten::mat4 mtxL2W;
 
-			ThreadedBvhNodeEntry(bvhnode* n, hitable* p, const aten::mat4& m)
-				: node(n), nestParent(p), mtxL2W(m)
+			ThreadedBvhNodeEntry(bvhnode* n, const aten::mat4& m)
+				: node(n), mtxL2W(m)
 			{}
 		};
-
-		void registerBvhNodeToLinearList(
-			bvhnode* root, 
-			bvhnode* parentNode,
-			hitable* nestParent,
-			const aten::mat4& mtxL2W,
-			std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-			std::vector<accelerator*>& listBvh,
-			std::map<hitable*, accelerator*>& nestedBvhMap);
 
 		void registerThreadedBvhNode(
 			bool isPrimitiveLeaf,

@@ -371,6 +371,8 @@
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\bvh_frustum.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\CullingFrusta.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp" />

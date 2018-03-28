@@ -760,6 +760,12 @@
     <ClCompile Include="..\src\libaten\accelerator\ThreadedBvhFrustum.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\bvh_frustum.cpp">
+      <Filter>accelerator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemap_fs.glsl">

@@ -311,10 +311,8 @@ namespace aten
 					: nullptr);
 
 				if (parent) {
-					// š FIXME
-					// getNestedNode‚Å‚ ‚éˆÓ–¡‚ª‚È‚¢.
-					bvhnode* left = bvh::getNestedNode(parent->getLeft());
-					bvhnode* right = bvh::getNestedNode(parent->getRight());
+					bvhnode* left = parent->getLeft();
+					bvhnode* right = parent->getRight();
 
 					bool isLeft = (left == node);
 
@@ -340,10 +338,8 @@ namespace aten
 								: nullptr);
 
 							if (grandParent) {
-								// š FIXME
-								// getNestedNode‚Å‚ ‚éˆÓ–¡‚ª‚È‚¢.
-								bvhnode* _left = bvh::getNestedNode(grandParent->getLeft());;
-								bvhnode* _right = bvh::getNestedNode(grandParent->getRight());;
+								bvhnode* _left = grandParent->getLeft();
+								bvhnode* _right = grandParent->getRight();
 
 								auto sibling = _right;
 								if (sibling) {

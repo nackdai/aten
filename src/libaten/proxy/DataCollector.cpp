@@ -22,7 +22,7 @@ namespace aten {
 				auto param = s->getParam();
 				auto obj = s->getHasObject();
 				
-				auto idx = aten::transformable::findShapeIdxAsHitable(obj);
+				auto idx = aten::transformable::findIdxAsHitable(obj);
 
 				// Specify the index of the object which the instance has.
 				param.shapeid = idx;
@@ -35,7 +35,7 @@ namespace aten {
 			else if (type == GeometryType::Polygon) {
 				auto param = s->getParam();
 
-				auto idx = aten::transformable::findShapeIdxAsHitable(s);
+				auto idx = aten::transformable::findIdxAsHitable(s);
 				param.shapeid = idx;
 
 				shapeparams.push_back(param);

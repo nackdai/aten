@@ -17,7 +17,9 @@ namespace AT_NAME
 		friend class instance<object>;
 
 	public:
-		object() : param(aten::GeometryType::Polygon) {}
+		object() 
+			: param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
+		{}
 		virtual ~object();
 
 	public:

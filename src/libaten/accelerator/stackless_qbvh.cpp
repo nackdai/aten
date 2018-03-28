@@ -256,12 +256,12 @@ namespace aten
 			hitable* item = node->getItem();
 
 			// 自分自身のIDを取得.
-			qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(item);
+			qbvhNode.shapeid = (float)transformable::findIdxAsHitable(item);
 
 			// もしなかったら、ネストしているので親のIDを取得.
 			if (qbvhNode.shapeid < 0) {
 				if (nestParent) {
-					qbvhNode.shapeid = (float)transformable::findShapeIdxAsHitable(nestParent);
+					qbvhNode.shapeid = (float)transformable::findIdxAsHitable(nestParent);
 				}
 			}
 

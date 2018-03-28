@@ -1,32 +1,59 @@
 #include "geometry/tranformable.h"
+#pragma optimize( "", off)
 
 namespace aten
 {
-	std::vector<transformable*> transformable::g_shapes;
+	std::vector<transformable*> transformable::g_transformables;
+	std::vector<transformable*> transformable::g_transformablesPolygonObjList;
 
 	transformable::transformable()
 	{
-		m_id = g_shapes.size();
-		g_shapes.push_back(this);
+		m_id = g_transformables.size();
+		g_transformables.push_back(this);
+	}
+
+	transformable::transformable(GeometryType type)
+	{
+		m_id = g_transformables.size();
+		g_transformables.push_back(this);
+
+		if (type == GeometryType::Polygon) {
+			g_transformablesPolygonObjList.push_back(this);
+		}
 	}
 
 	transformable::~transformable()
 	{
-		auto it = std::find(g_shapes.begin(), g_shapes.end(), this);
-		if (it != g_shapes.end()) {
-			g_shapes.erase(it);
+		{
+			auto it = std::find(g_transformables.begin(), g_transformables.end(), this);
+			if (it != g_transformables.end()) {
+				g_transformables.erase(it);
+
+				// IDÇÃêUÇËíºÇµ...
+				for (int i = 0; i < g_transformables.size(); i++) {
+					g_transformables[i]->m_id = i;
+				}
+			}
+		}
+
+		if (getParam().type == GeometryType::Polygon)
+		{
+			auto it = std::find(g_transformablesPolygonObjList.begin(), g_transformablesPolygonObjList.end(), this);
+			if (it != g_transformablesPolygonObjList.end()) {
+				g_transformablesPolygonObjList.erase(it);
+			}
 		}
 	}
 
 	uint32_t transformable::getShapeNum()
 	{
-		return (uint32_t)g_shapes.size();
+		return (uint32_t)g_transformables.size();
 	}
 
 	transformable* transformable::getShape(uint32_t idx)
 	{
-		if (idx < g_shapes.size()) {
-			return g_shapes[idx];
+		if (idx < g_transformables.size()) {
+			return g_transformables[idx];
 		}
 		return nullptr;
 	}
@@ -35,32 +62,39 @@ namespace aten
 	{
 		transformable* ret = nullptr;
 
-		auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
-		if (found != g_shapes.end()) {
+		auto found = std::find(g_transformables.begin(), g_transformables.end(), shape);
+		if (found != g_transformables.end()) {
 			ret = *found;
 		}
 
 		return ret;
 	}
 
-	int transformable::findShapeIdx(const transformable* shape)
+	int transformable::findIdx(const transformable* shape)
 	{
-		auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
-		if (found != g_shapes.end()) {
-			auto id = std::distance(g_shapes.begin(), found);
-			AT_ASSERT(shape == g_shapes[id]);
-			return id;
+		return findIdxAsHitable((const hitable*)shape);
+	}
+
+	int transformable::findIdxAsHitable(const hitable* shape)
+	{
+		if (shape) {
+			auto found = std::find(g_transformables.begin(), g_transformables.end(), shape);
+			if (found != g_transformables.end()) {
+				auto id = std::distance(g_transformables.begin(), found);
+				AT_ASSERT(shape == g_transformables[id]);
+				return id;
+			}
 		}
 		return -1;
 	}
 
-	int transformable::findShapeIdxAsHitable(const hitable* shape)
+	int transformable::findIdxFromPolygonObjList(const hitable* shape)
 	{
 		if (shape) {
-			auto found = std::find(g_shapes.begin(), g_shapes.end(), shape);
-			if (found != g_shapes.end()) {
-				auto id = std::distance(g_shapes.begin(), found);
-				AT_ASSERT(shape == g_shapes[id]);
+			auto found = std::find(g_transformablesPolygonObjList.begin(), g_transformablesPolygonObjList.end(), shape);
+			if (found != g_transformablesPolygonObjList.end()) {
+				auto id = std::distance(g_transformablesPolygonObjList.begin(), found);
+				AT_ASSERT(shape == g_transformablesPolygonObjList[id]);
 				return id;
 			}
 		}
@@ -69,7 +103,12 @@ namespace aten
 
 	const std::vector<transformable*>& transformable::getShapes()
 	{
-		return g_shapes;
+		return g_transformables;
+	}
+
+	const std::vector<transformable*>& transformable::getShapesPolygonObjList()
+	{
+		return g_transformablesPolygonObjList;
 	}
 
 	void transformable::gatherAllTransformMatrixAndSetMtxIdx(std::vector<aten::mat4>& mtxs)

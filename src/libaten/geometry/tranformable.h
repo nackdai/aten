@@ -10,11 +10,15 @@
 namespace aten
 {
 	class transformable : public hitable {
-		static std::vector<transformable*> g_shapes;
+		static std::vector<transformable*> g_transformables;
+		static std::vector<transformable*> g_transformablesPolygonObjList;
 
 	public:
 		transformable();
 		virtual ~transformable();
+
+	protected:
+		transformable(GeometryType type);
 
 	public:
 		virtual void getSamplePosNormalArea(
@@ -48,11 +52,16 @@ namespace aten
 		}
 
 		static uint32_t getShapeNum();
+		
 		static transformable* getShape(uint32_t idx);
 		static transformable* getShapeAsHitable(const hitable* shape);
-		static int findShapeIdx(const transformable* shape);
-		static int findShapeIdxAsHitable(const hitable* shape);
+
+		static int findIdx(const transformable* shape);
+		static int findIdxAsHitable(const hitable* shape);
+		static int findIdxFromPolygonObjList(const hitable* shape);
+		
 		static const std::vector<transformable*>& getShapes();
+		static const std::vector<transformable*>& getShapesPolygonObjList();
 
 		static void gatherAllTransformMatrixAndSetMtxIdx(std::vector<aten::mat4>& mtxs);
 

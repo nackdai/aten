@@ -257,6 +257,6 @@ namespace aten
 		m_obj->build();
 		setBoundingBox(m_obj->getBoundingbox());
 
-		m_param.shapeid = transformable::findShapeIdx(obj);
+		m_param.shapeid = transformable::findIdx(obj);
 	}
 }

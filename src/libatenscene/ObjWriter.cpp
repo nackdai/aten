@@ -1,7 +1,7 @@
 #include "ObjWriter.h"
 #include "utility.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 static inline void writeLineFeed(FILE* fp)
 {

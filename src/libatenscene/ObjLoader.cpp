@@ -5,7 +5,7 @@
 #include "utility.h"
 #include "ImageLoader.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace aten
 {

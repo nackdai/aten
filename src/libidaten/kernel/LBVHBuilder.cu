@@ -327,7 +327,6 @@ __device__ inline void computeBoundingBox(
 
 __global__ void computeBoudingBox(
 	int numberOfTris,
-	int triIdOffset,
 	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
 	aten::ThreadedBvhNode* dst,
 	const aten::PrimitiveParamter* __restrict__ tris,
@@ -366,7 +365,7 @@ __global__ void computeBoudingBox(
 
 	// Calculate leaves bounding box.
 	int leafId = node->order - leafBaseIdx;
-	int triId = triIdOffset + leafId;
+	int triId = leafId;
 
 	aten::PrimitiveParamter prim;
 	prim.v0 = ((aten::vec4*)tris)[triId * aten::PrimitiveParamter_float4_size + 0];
@@ -384,6 +383,14 @@ __global__ void computeBoudingBox(
 
 	gpunode->boxmin = aten::vec3(aabbMin.x, aabbMin.y, aabbMin.z);
 	gpunode->boxmax = aten::vec3(aabbMax.x, aabbMax.y, aabbMax.z);
+
+#if 0
+	printf("Vtx(%d : %d %d %d) [%f, %f, %f] [%f, %f, %f] [%f, %f, %f]\n", 
+		triId,
+		prim.idx[0], prim.idx[1], prim.idx[2],
+		v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+	printf("Target[%d] [%f, %f, %f] [%f, %f, %f]\n", leafNodeIdx, aabbMin.x, aabbMin.y, aabbMin.z, aabbMax.x, aabbMax.y, aabbMax.z);
+#endif
 
 	__syncthreads();
 
@@ -449,6 +456,8 @@ __global__ void computeBoudingBox(
 
 		targetDst->boxmin = aten::vec3(aabbMin.x, aabbMin.y, aabbMin.z);
 		targetDst->boxmax = aten::vec3(aabbMax.x, aabbMax.y, aabbMax.z);
+
+		//printf("Target[%d] [%f, %f, %f] [%f, %f, %f]\n", targetId, aabbMin.x, aabbMin.y, aabbMin.z, aabbMax.x, aabbMax.y, aabbMax.z);
 
 		__syncthreads();
 
@@ -535,7 +544,8 @@ namespace idaten
 		std::vector<aten::PrimitiveParamter>& tris,
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
-		idaten::CudaTextureResource& texRscVtxPos)
+		idaten::CudaTextureResource& texRscVtxPos,
+		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
 	{		
 		TypedCudaMemory<aten::PrimitiveParamter> triangles;
 		TypedCudaMemory<uint32_t> mortonCodes;
@@ -628,7 +638,6 @@ namespace idaten
 
 			computeBoudingBox << <grid, block, sharedMemorySize >> > (
 				numberOfTris,
-				triIdOffset,
 				nodesLbvh.ptr(),
 				nodes.ptr(),
 				triangles.ptr(),
@@ -636,6 +645,13 @@ namespace idaten
 				executedIdxArray);
 
 			checkCudaKernel(computeBoudingBox);
+
+			printf("\n");
+		}
+
+		if (threadedBvhNodes) {
+			threadedBvhNodes->resize(nodes.maxNum());
+			nodes.read(&(*threadedBvhNodes)[0], 0);
 		}
 
 		dst.initFromDeviceMemory(

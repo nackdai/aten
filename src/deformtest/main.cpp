@@ -15,10 +15,10 @@
 #include "scenedefs.h"
 
 #define ENABLE_ENVMAP
-//#define ENABLE_NLM
+#define ENALBE_GPU_TRACER
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int WIDTH = 512;
+static int HEIGHT = 512;
 static const char* TITLE = "deform";
 
 #ifdef ENABLE_OMP
@@ -77,6 +77,10 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene(Lbvh::create);
 
 static idaten::SVGFPathTracing g_tracer;
+
+static aten::PathTracing g_cputracer;
+static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
+
 static aten::visualizer* g_visualizer;
 
 static float g_avgcuda = 0.0f;
@@ -103,6 +107,7 @@ static bool g_frameStep = false;
 
 static bool g_pickPixel = false;
 
+#ifdef ENALBE_GPU_TRACER
 void onRun(aten::window* window)
 {
 	if (g_enableFrameStep && !g_frameStep) {
@@ -231,6 +236,48 @@ void onRun(aten::window* window)
 		AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
 	}
 }
+#else
+void onRun(aten::window* wnd)
+{
+	static uint32_t g_frameNo = 0;
+	static float g_avgElapsed = 0.0f;
+
+	g_camera.update();
+
+	aten::Destination dst;
+	{
+		dst.width = WIDTH;
+		dst.height = HEIGHT;
+		dst.maxDepth = 5;
+		dst.russianRouletteDepth = 3;
+		dst.startDepth = 0;
+		dst.sample = 1;
+		dst.mutation = 10;
+		dst.mltNum = 10;
+		dst.buffer = &g_buffer;
+	}
+
+	dst.geominfo.albedo_vis = &g_buffer;
+	dst.geominfo.depthMax = 1000;
+
+	aten::timer timer;
+	timer.begin();
+
+	// Trace rays.
+	g_cputracer.render(dst, &g_scene, &g_camera);
+
+	auto elapsed = timer.end();
+
+	g_avgElapsed = g_avgElapsed * g_frameNo + elapsed;
+	g_avgElapsed /= (g_frameNo + 1);
+
+	AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, g_avgElapsed);
+
+	g_visualizer->render(g_buffer.image(), g_camera.needRevert());
+
+	g_frameNo++;
+}
+#endif
 
 void onClose()
 {
@@ -538,16 +585,22 @@ int main()
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
 		auto& vtxPos = g_tracer.getCudaTextureResourceForVtxPos();
 
-		for (int i = 0; i < triangles.size(); i++) {
+		auto& cpunodes = g_scene.getAccel()->getNodes();
+
+		for (int i = 0; i < triangles.size(); i++)
+		{
 			auto& tris = triangles[i];
 			auto triIdOffset = triIdOffsets[i];
 
+			// NOTE
+			// 0 is for top layer.
 			idaten::LBVHBuilder::build(
-				nodes[i + 1],	// 0 is for top layer.
+				nodes[i + 1],	
 				tris,
 				triIdOffset,
 				sceneBbox,
-				vtxPos);
+				vtxPos,
+				&cpunodes[i + 1]);
 		}
 	}
 

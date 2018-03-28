@@ -20,7 +20,8 @@ namespace idaten
 			std::vector<aten::PrimitiveParamter>& tris,
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
-			idaten::CudaTextureResource& texRscVtxPos);
+			idaten::CudaTextureResource& texRscVtxPos,
+			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
 
 		// test implementation.
 		static void build();

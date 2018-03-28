@@ -1,5 +1,4 @@
 #include "geometry/tranformable.h"
-#pragma optimize( "", off)
 
 namespace aten
 {

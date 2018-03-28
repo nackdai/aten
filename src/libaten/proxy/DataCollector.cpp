@@ -86,7 +86,7 @@ namespace aten {
 		std::vector<int>& triIdOffsets,
 		std::vector<aten::vertex>& vtxparams)
 	{
-		const auto& shapes = aten::transformable::getShapes();
+		const auto& shapes = aten::transformable::getShapesPolygonObjList();
 
 		int triangleCount = 0;
 

@@ -295,10 +295,10 @@ void TexturesScene::makeScene(aten::scene* scene)
 	auto s_lambert = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, new aten::lambert(clr, albedo, nml));
 	scene->add(s_lambert);
 
-	auto s_spec = new aten::sphere(aten::vec3(-3, +2, 0), 1.0, new aten::specular(clr, nullptr, nml_2));
+	auto s_spec = new aten::sphere(aten::vec3(-3, +2, 0), 1.0, new aten::specular(clr, 0, nullptr, nml_2));
 	scene->add(s_spec);
 
-	auto s_ref = new aten::sphere(aten::vec3(-1, +2, 0), 1.0, new aten::specular(clr, nullptr, nml_2));
+	auto s_ref = new aten::sphere(aten::vec3(-1, +2, 0), 1.0, new aten::specular(clr, 0, nullptr, nml_2));
 	scene->add(s_ref);
 #endif
 }

@@ -69,6 +69,23 @@ namespace AT_NAME
 
 		bsdf *= sampleTexture(param->albedoMap, u, v, real(1));
 
+		if (param->ior > real(0)) {
+			real nc = real(1);		// ^‹ó‚Ì‹üÜ—¦.
+			real nt = param->ior;	// •¨‘Ì“à•”‚Ì‹üÜ—¦.
+
+									// Schlick‚É‚æ‚éFresnel‚Ì”½ËŒW”‚Ì‹ß—‚ğg‚¤.
+			const real a = nt - nc;
+			const real b = nt + nc;
+			const real r0 = (a * a) / (b * b);
+
+			const real c = dot(normal, wo);
+
+			// ”½Ë•ûŒü‚ÌŒõ‚ª”½Ë‚µ‚Äray.dir‚Ì•ûŒü‚É‰^‚ÔŠ„‡B“¯‚É‹üÜ•ûŒü‚ÌŒõ‚ª”½Ë‚·‚é•ûŒü‚É‰^‚ÔŠ„‡.
+			const real fresnel = r0 + (1 - r0) * aten::pow(c, 5);
+
+			bsdf *= fresnel;
+		}
+
 		return std::move(bsdf);
 	}
 

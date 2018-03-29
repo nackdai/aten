@@ -8,9 +8,10 @@ namespace AT_NAME
 	public:
 		specular(
 			const aten::vec3& albedo = aten::vec3(0.5),
+			real ior = real(0),
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr)
-			: material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, 0, albedoMap, normalMap)
+			: material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, ior, albedoMap, normalMap)
 		{}
 
 		specular(aten::Values& val)
@@ -117,10 +118,13 @@ namespace AT_NAME
 
 		virtual bool edit(aten::IMaterialParamEditor* editor) override final
 		{
+			auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+			auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+
 			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
 			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
 
-			return AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+			return b0 || b1;
 		}
 	};
 }

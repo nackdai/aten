@@ -250,6 +250,11 @@ namespace AT_NAME
 			return m_id;
 		}
 
+		void setTextures(
+			aten::texture* albedoMap,
+			aten::texture* normalMap,
+			aten::texture* roughnessMap);
+
 		virtual AT_DEVICE_MTRL_API aten::vec3 sampleAlbedoMap(real u, real v) const
 		{
 			return std::move(sampleTexture(m_param.albedoMap, u, v, real(1)));

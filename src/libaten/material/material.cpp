@@ -135,8 +135,7 @@ namespace AT_NAME
 		m_param.baseColor = clr;
 		m_param.ior = ior;
 
-		m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
-		m_param.normalMap = normalMap ? normalMap->id() : -1;
+		setTextures(albedoMap, normalMap, nullptr);
 	}
 
 	material::material(
@@ -154,8 +153,17 @@ namespace AT_NAME
 		auto albedoMap = (aten::texture*)val.get<void*>("albedoMap", nullptr);
 		auto normalMap = (aten::texture*)val.get<void*>("normalMap", nullptr);
 
+		setTextures(albedoMap, normalMap, nullptr);
+	}
+
+	void material::setTextures(
+		aten::texture* albedoMap,
+		aten::texture* normalMap,
+		aten::texture* roughnessMap)
+	{
 		m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
 		m_param.normalMap = normalMap ? normalMap->id() : -1;
+		m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
 	}
 
 	material::~material()

@@ -1,4 +1,7 @@
 #include "material/oren_nayar.h"
+#include "material/lambert.h"
+
+#pragma optimize( "", off)
 
 namespace AT_NAME {
 	// NOTE
@@ -17,7 +20,7 @@ namespace AT_NAME {
 
 		real pdf = 0;
 
-		if (NL > 0 && NV > 0) {
+		if (NL > 0) {
 			pdf = NL / AT_MATH_PI;
 		}
 
@@ -40,33 +43,7 @@ namespace AT_NAME {
 		real u, real v,
 		aten::sampler* sampler)
 	{
-		// normalの方向を基準とした正規直交基底(w, u, v)を作る.
-		// この基底に対する半球内で次のレイを飛ばす.
-		aten::vec3 n, t, b;
-
-		n = normal;
-
-		// nと平行にならないようにする.
-		if (fabs(n.x) > AT_MATH_EPSILON) {
-			t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
-		}
-		else {
-			t = normalize(cross(aten::vec3(1.0, 0.0, 0.0), n));
-		}
-		b = cross(n, t);
-
-		// コサイン項を使った重点的サンプリング.
-		const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
-		const real r2 = sampler->nextSample();
-		const real r2s = sqrt(r2);
-
-		const real x = aten::cos(r1) * r2s;
-		const real y = aten::sin(r1) * r2s;
-		const real z = aten::sqrt(real(1) - r2);
-
-		aten::vec3 dir = normalize((t * x + b * y + n * z));
-		AT_ASSERT(dot(normal, dir) >= 0);
-
+		auto dir = lambert::sampleDirection(normal, sampler);
 		return std::move(dir);
 	}
 
@@ -79,6 +56,80 @@ namespace AT_NAME {
 		return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
 	}
 
+	inline AT_DEVICE_MTRL_API aten::vec3 computeBsdf(
+		real roughness,
+		const aten::vec3& albedo,
+		const aten::vec3& normal,
+		const aten::vec3& wi,
+		const aten::vec3& wo,
+		real u, real v)
+	{
+		aten::vec3 bsdf = aten::vec3(0);
+
+		const auto NL = dot(normal, wo);
+		const auto NV = dot(normal, -wi);
+
+#if 0
+		// NOTE
+		// https://ja.wikipedia.org/wiki/%E3%82%AA%E3%83%BC%E3%83%AC%E3%83%B3%E3%83%BB%E3%83%8D%E3%82%A4%E3%83%A4%E3%83%BC%E5%8F%8D%E5%B0%84
+
+		real cosThetaO = NL;
+		real cosThetaI = NV;
+
+		real sinThetaO = real(1) - cosThetaO * cosThetaO;
+		real sinThetaI = real(1) - cosThetaI * cosThetaI;
+
+		real tanThetaO = sinThetaO / std::abs(cosThetaO);
+		real tanThetaI = sinThetaI / std::abs(cosThetaI);
+
+		real sinAlpha = aten::cmpMax(sinThetaO, sinThetaI);
+		real tanBeta = aten::cmpMin(tanThetaO, tanThetaI);
+
+		// NOTE
+		// cos(φi - φr) = cosφi * cosφr + sinφi * sinφr
+		
+		// NOTE
+		// NTB座標系において、v = (x, y, z) = (sinφ、cosφ、cosθ).
+
+		auto n = normal;
+		auto t = aten::getOrthoVector(n);
+		auto b = cross(n, t);
+		auto localV = (-wi.x * t + -wi.y * b + -wi.z * n);
+
+		real cosAzimuth = (wo.x * localV.x + wo.y * localV.y);
+
+		if (!aten::isValid(cosAzimuth)) {
+			cosAzimuth = real(0);
+		}
+		
+		const real a = roughness;
+		const real a2 = a * a;
+		const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
+		const real B = real(0.45) * (a2 / (a2 + real(0.09)));
+
+		bsdf = (albedo / AT_MATH_PI) * (A + B * aten::cmpMax(real(0), cosAzimuth) * sinAlpha * tanBeta);
+#else
+		// NOTE
+		// A tiny improvement of Oren-Nayar reflectance model
+		// http://mimosa-pudica.net/improved-oren-nayar.html
+
+		const real a = roughness;
+		const real a2 = a * a;
+
+		const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
+		const real B = real(0.45) * (a2 / (a2 + real(0.09)));
+
+		const auto LV = dot(wo, -wi);
+
+		const auto s = LV - NL * NV;
+		const auto t = s <= 0 ? real(1) : s / aten::cmpMax(NL, NV);
+
+		bsdf = (albedo / AT_MATH_PI) * (A + B * aten::cmpMax(real(0), s / t));
+#endif
+
+		return bsdf;
+	}
+
 	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
 		const aten::MaterialParameter* param,
 		const aten::vec3& normal,
@@ -86,36 +137,20 @@ namespace AT_NAME {
 		const aten::vec3& wo,
 		real u, real v)
 	{
-		// NOTE
-		// A tiny improvement of Oren-Nayar reflectance model
-		// http://mimosa-pudica.net/improved-oren-nayar.html
+		auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
 
-		aten::vec3 bsdf = aten::vec3(0);
+		auto albedo = param->baseColor;
+		albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
 
-		const auto NL = dot(normal, wo);
-		const auto NV = dot(normal, -wi);
-
-		if (NL > 0 && NV > 0) {
-			auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
-
-			auto albedo = param->baseColor;
-			albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
-
-			const real a = roughness.r;
-			const real a2 = a * a;
-
-			const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
-			const real B = real(0.45) * (a2 / (a2 + real(0.09)));
-
-			const auto LV = dot(wo, -wi);
-
-			const auto s = LV - NL * NV;
-			const auto t = s <= 0 ? 1 : aten::cmpMax(NL, NV);
-
-			bsdf = (albedo / AT_MATH_PI) * (A + B * (s / t));
-		}
-
-		return bsdf;
+		auto bsdf = computeBsdf(
+			roughness.r,
+			albedo,
+			normal,
+			wi,
+			wo,
+			u, v);
+		
+		return std::move(bsdf);
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
@@ -126,32 +161,20 @@ namespace AT_NAME {
 		real u, real v,
 		const aten::vec3& externalAlbedo)
 	{
-		aten::vec3 bsdf = aten::vec3(0);
+		auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
 
-		const auto NL = dot(normal, wo);
-		const auto NV = dot(normal, -wi);
+		auto albedo = param->baseColor;
+		albedo *= externalAlbedo;
 
-		if (NL > 0 && NV > 0) {
-			auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
+		auto bsdf = computeBsdf(
+			roughness.r,
+			albedo,
+			normal,
+			wi,
+			wo,
+			u, v);
 
-			auto albedo = param->baseColor;
-			albedo *= externalAlbedo;
-
-			const real a = roughness.r;
-			const real a2 = a * a;
-
-			const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
-			const real B = real(0.45) * (a2 / (a2 + real(0.09)));
-
-			const auto LV = dot(wo, -wi);
-
-			const auto s = LV - NL * NV;
-			const auto t = s <= 0 ? 1 : aten::cmpMax(NL, NV);
-
-			bsdf = (albedo / AT_MATH_PI) * (A + B * (s / t));
-		}
-
-		return bsdf;
+		return std::move(bsdf);
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(

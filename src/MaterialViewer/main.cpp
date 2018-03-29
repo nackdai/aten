@@ -14,6 +14,9 @@
 
 #define ENABLE_ENVMAP
 
+#pragma optimize( "", off)
+
+
 static int WIDTH = 1280;
 static int HEIGHT = 720;
 static const char* TITLE = "MaterialViewer";
@@ -33,12 +36,18 @@ static idaten::PathTracing g_tracer;
 
 static aten::visualizer* g_visualizer;
 
+static aten::texture* g_albedoMap = nullptr;
+static aten::texture* g_normalMap = nullptr;
+
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
+
+static bool g_enableAlbedoMap = true;
+static bool g_enableNormalMap = true;
 
 void getCameraPosAndAt(
 	aten::vec3& pos,
@@ -59,6 +68,12 @@ void makeScene(aten::scene* scene)
 	auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
 	auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
 	scene->add(teapot);
+
+	// TODO
+	g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
+	g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
+
+	obj->shapes[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
 
 aten::material* createMaterial(aten::MaterialType type)
@@ -94,6 +109,13 @@ aten::material* createMaterial(aten::MaterialType type)
 		break;
 	}
 
+	if (mtrl) {
+		mtrl->setTextures(
+			g_enableAlbedoMap ? g_albedoMap : nullptr,
+			g_enableNormalMap ? g_normalMap : nullptr,
+			nullptr);
+	}
+
 	return mtrl;
 }
 
@@ -127,7 +149,7 @@ public:
 	}
 };
 
-MaterialParamEditor g_mtrlParamEditor;
+static MaterialParamEditor g_mtrlParamEditor;
 
 void onRun(aten::window* window)
 {
@@ -200,6 +222,20 @@ void onRun(aten::window* window)
 			aten::material::deleteMaterial(mtrl, true);
 			mtrl = createMaterial((aten::MaterialType)mtrlType);
 			needUpdateMtrl = true;
+		}
+
+		{
+			bool b0 = ImGui::Checkbox("AlbedoMap", &g_enableAlbedoMap);
+			bool b1 = ImGui::Checkbox("NormalMap", &g_enableNormalMap);
+
+			if (b0 || b1) {
+				mtrl->setTextures(
+					g_enableAlbedoMap ? g_albedoMap : nullptr,
+					g_enableNormalMap ? g_normalMap : nullptr,
+					nullptr);
+
+				needUpdateMtrl = true;
+			}
 		}
 
 		if (mtrl->edit(&g_mtrlParamEditor)) {

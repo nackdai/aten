@@ -30,6 +30,10 @@ namespace AT_NAME
 		{
 			return m_mtrl;
 		}
+		material* getMaterial()
+		{
+			return m_mtrl;
+		}
 
 		void addFace(face* f);
 

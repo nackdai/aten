@@ -242,6 +242,14 @@ void onRun(aten::window* window)
 			needUpdateMtrl = true;
 		}
 
+		{
+			auto camPos = g_camera.getPos();
+			auto camAt = g_camera.getAt();
+
+			ImGui::Text("Pos (%f, %f, %f)", camPos.x, camPos.y, camPos.z);
+			ImGui::Text("At  (%f, %f, %f)", camAt.x, camAt.y, camAt.z);
+		}
+
 		if (needUpdateMtrl) {
 			std::vector<aten::MaterialParameter> params(1);
 			params[0] = mtrl->param();

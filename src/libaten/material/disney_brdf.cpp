@@ -346,11 +346,17 @@ namespace AT_NAME
 		const auto clearcoat = mtrl->clearcoat;
 		const auto clearcoatGloss = mtrl->clearcoatGloss;
 
-		const auto NdotL = dot(N, L);
-		const auto NdotV = dot(N, V);
+		auto NdotL = dot(N, L);
+		auto NdotV = dot(N, V);
+
+#if 0
 		if (NdotL < 0 || NdotV < 0) {
 			return aten::vec3(0);
 		}
+#else
+		NdotL = aten::abs(NdotL);
+		NdotV = aten::abs(NdotV);
+#endif
 
 		const aten::vec3 H = normalize(L + V);
 		const auto NdotH = dot(N, H);
@@ -431,9 +437,6 @@ namespace AT_NAME
 		real u, real v,
 		bool isLightPath)
 	{
-		const aten::vec3& N = normal;
-		const aten::vec3 V = -wi;
-
 		result->dir = sampleDirection(mtrl, normal, wi, u, v, sampler);
 
 		const auto wo = result->dir;

@@ -94,10 +94,14 @@ void MaterialSelectWindow::onRun(aten::window* window)
 	static blink<float> s_blinker(0.0f, 1.0f, 0.05f);
 	auto t = s_blinker.update();
 
+	aten::mat4 mtxL2W;
+	mtxL2W.asRotateByX(Deg2Rad(-90));
+
 	s_rasterizer.draw(
 		s_obj,
 		&s_camera,
 		false,
+		mtxL2W,
 		&s_fbo,
 		[&](aten::shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)
 	{
@@ -204,13 +208,17 @@ void MaterialSelectWindow::onMouseWheel(int delta)
 	s_isCameraDirty = true;
 }
 
+real offset = real(0.1);
+
 void MaterialSelectWindow::onKey(bool press, aten::Key key)
 {
-	static const real offset = real(0.1);
-
 	if (press) {
 		if (key == aten::Key::Key_CONTROL) {
 			s_willPick = true;
+			return;
+		}
+		else if (key == aten::Key::Key_SHIFT) {
+			offset *= 10.0f;
 			return;
 		}
 	}

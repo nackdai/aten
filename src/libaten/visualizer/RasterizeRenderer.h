@@ -55,6 +55,7 @@ namespace aten {
 			object* obj, 
 			const camera* cam,
 			bool isWireFrame,
+			const mat4& mtxL2W = mat4::Identity,
 			FBO* fbo = nullptr,
 			FuncSetUniform funcSetUniform = nullptr);
 

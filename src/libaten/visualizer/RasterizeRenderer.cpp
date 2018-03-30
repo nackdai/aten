@@ -259,6 +259,7 @@ namespace aten {
 		object* obj, 
 		const camera* cam,
 		bool isWireFrame,
+		const mat4& mtxL2W,
 		FBO* fbo/*= nullptr*/,
 		FuncSetUniform funcSetUniform/*= nullptr*/)
 	{
@@ -288,7 +289,7 @@ namespace aten {
 
 		// Not modify local to world matrix...
 		auto hMtxL2W = m_shader.getHandle("mtxL2W");
-		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mat4::Identity.a[0]));
+		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
 
 		auto hMtxW2C = m_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));

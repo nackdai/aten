@@ -103,6 +103,9 @@ aten::material* createMaterial(aten::MaterialType type)
 	case aten::MaterialType::Beckman:
 		mtrl = new aten::MicrofacetBeckman();
 		break;
+	case aten::MaterialType::Disney:
+		mtrl = new aten::DisneyBRDF();
+		break;
 	default:
 		AT_ASSERT(false);
 		mtrl = new aten::lambert();
@@ -216,6 +219,7 @@ void onRun(aten::window* window)
 			"Blinn",
 			"GGX",
 			"Beckman",
+			"Disney",
 		};
 		int mtrlType = (int)mtrl->param().type;
 		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {

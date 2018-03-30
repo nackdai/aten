@@ -221,6 +221,22 @@ namespace aten {
 		return std::move(ret);
 	}
 
+	inline AT_DEVICE_API vec3 pow(const vec3& v, real a)
+	{
+		vec3 ret(
+			pow(v.x, a),
+			pow(v.y, a),
+			pow(v.z, a));
+
+		return std::move(ret);
+	}
+
+	inline AT_DEVICE_API vec3 mix(const vec3& v0, const vec3& v1, real a)
+	{
+		vec3 ret = v0 * (real(1) - a) + v1 * a;
+		return std::move(ret);
+	}
+
 	union _vec3_cmp_res {
 		struct {
 			uint8_t _0 : 1;

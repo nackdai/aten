@@ -361,6 +361,10 @@ namespace AT_NAME
 		{
 			return m_param;
 		}
+		aten::MaterialParameter& param() 
+		{
+			return m_param;
+		}
 
 		void copyParam(const aten::MaterialParameter& param)
 		{

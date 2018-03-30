@@ -8,18 +8,18 @@ namespace AT_NAME
 	class DisneyBRDF : public material {
 	public:
 		DisneyBRDF(
-			aten::vec3 baseColor,
-			real subsurface,
-			real metallic,
-			real specular,
-			real specularTint,
-			real roughness,
-			real anisotropic,
-			real sheen,
-			real sheenTint,
-			real clearcoat,
-			real clearcoatGloss,
-			real ior,
+			aten::vec3 baseColor = aten::vec3(0.5),
+			real subsurface = real(0.5),
+			real metallic = real(0.5),
+			real specular = real(0.5),
+			real specularTint = real(0.5),
+			real roughness = real(0.5),
+			real anisotropic = real(0.5),
+			real sheen = real(0.5),
+			real sheenTint = real(0.5),
+			real clearcoat = real(0.5),
+			real clearcoatGloss = real(0.5),
+			real ior = real(0.5),
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr,
 			aten::texture* roughnessMap = nullptr)
@@ -162,25 +162,6 @@ namespace AT_NAME
 			const aten::vec3& wo,
 			real outsideIor);
 
-	private:
-		static AT_DEVICE_MTRL_API aten::vec3 sample(
-			const aten::MaterialParameter* mtrl,
-			real& pdf,
-			const aten::vec3& V,
-			const aten::vec3& N,
-			const aten::vec3& X,
-			const aten::vec3& Y,
-			real u, real v,
-			aten::sampler* sampler);
-
-		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
-			const aten::MaterialParameter* mtrl,
-			real& fresnel,
-			const aten::vec3& V,
-			const aten::vec3& N,
-			const aten::vec3& L,
-			const aten::vec3& X,
-			const aten::vec3& Y,
-			real u, real v);
+		virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 	};
 }

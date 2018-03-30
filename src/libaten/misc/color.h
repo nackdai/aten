@@ -4,6 +4,7 @@
 #include "math/vec3.h"
 
 #define AT_COLOR_RGBA(r, g, b, a) ((b) | ((g) << 8) | ((r) << 16) | ((a) << 24))
+#define AT_COLOR_NORMALIZE(c)	((c) / real(255))
 
 namespace AT_NAME {
 	template <typename _T, int N>

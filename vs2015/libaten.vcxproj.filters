@@ -485,6 +485,9 @@
     <ClInclude Include="..\src\libaten\misc\timeline.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\carpaint.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\misc\timer.cpp">
@@ -765,6 +768,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh_frustum.cpp">
       <Filter>accelerator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\carpaint.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

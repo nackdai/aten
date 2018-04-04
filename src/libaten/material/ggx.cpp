@@ -146,7 +146,7 @@ namespace AT_NAME
 		return D;
 	}
 
-	static AT_DEVICE_MTRL_API real computeGGXSmithG1(real roughness, const aten::vec3& v, const aten::vec3& n)
+	AT_DEVICE_MTRL_API real MicrofacetGGX::computeGGXSmithG1(real roughness, const aten::vec3& v, const aten::vec3& n)
 	{
 		// NOTE
 		// http://computergraphics.stackexchange.com/questions/2489/correct-form-of-the-ggx-geometry-term

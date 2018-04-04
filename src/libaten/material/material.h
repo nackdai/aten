@@ -58,6 +58,7 @@ namespace aten
 		GGX,
 		Beckman,
 		Disney,
+		CarPaint,
 		Toon,
 		Layer,
 
@@ -80,7 +81,7 @@ namespace aten
 
 		real roughness{ 0.5 };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 		real shininess{ 1.0 };
-
+		
 		real subsurface{ 0.0 };			// 表面下の近似を用いてディフューズ形状を制御する.
 		real metallic{ 0.0 };			// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
 		real specular{ 0.5 };			// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.

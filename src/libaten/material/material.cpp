@@ -17,6 +17,7 @@ namespace AT_NAME
 		"beckman",
 		"ggx",
 		"disney_brdf",
+		"carpaint",
 		"toon",
 		"layer",
 	};

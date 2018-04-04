@@ -63,15 +63,15 @@ void makeScene(aten::scene* scene)
 {
 	aten::AssetManager::registerMtrl(
 		"m1",
-		new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+		new aten::CarPaintBRDF(aten::vec3(0.580000, 0.580000, 0.580000)));
 
 	auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
 	auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
 	scene->add(teapot);
 
 	// TODO
-	g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
-	g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
+	//g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
+	//g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
 	obj->shapes[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
@@ -105,6 +105,9 @@ aten::material* createMaterial(aten::MaterialType type)
 		break;
 	case aten::MaterialType::Disney:
 		mtrl = new aten::DisneyBRDF();
+		break;
+	case aten::MaterialType::CarPaint:
+		mtrl = new aten::CarPaintBRDF();
 		break;
 	default:
 		AT_ASSERT(false);
@@ -220,6 +223,7 @@ void onRun(aten::window* window)
 			"GGX",
 			"Beckman",
 			"Disney",
+			"CarPaint",
 		};
 		int mtrlType = (int)mtrl->param().type;
 		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {

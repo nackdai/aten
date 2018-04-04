@@ -28,6 +28,7 @@
 #include "material/oren_nayar.h"
 #include "material/layer.h"
 #include "material/toon.h"
+#include "material/carpaint.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

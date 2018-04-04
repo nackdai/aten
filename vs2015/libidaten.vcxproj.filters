@@ -229,6 +229,9 @@
     <ClInclude Include="..\src\libidaten\kernel\RadixSort.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\carpaint.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -316,6 +319,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\svgf\svgf.cpp">
       <Filter>svgf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\carpaint.cpp">
+      <Filter>aten\material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -113,6 +113,7 @@ namespace aten
 				real flake_normal_orientation;	// Blend between the flake normals (0.0) and the surface normal (1.0)
 				real flake_reflection;
 				real flake_transmittance;
+				real thicknessPaintLayer;
 			};
 		};
 #endif

@@ -77,7 +77,7 @@ namespace AT_NAME
 				param->flake_normal_orientation);
 
 			const auto p = computeFlakeOrentationDistribution(flakeNml, param->flake_normal_orientation, aten::vec3(0, 0, 1));
-			pdf += density * p;
+			pdf += (1 - F) * density * p;
 		}
 #endif	
 
@@ -298,7 +298,7 @@ namespace AT_NAME
 		{
 			const auto D = density;
 			const auto S = param->flake_size;
-			const auto h = real(1);	// TODO
+			const auto h = param->thicknessPaintLayer;
 			const auto r = param->flake_reflection;
 			const auto t = param->flake_transmittance;
 
@@ -323,7 +323,7 @@ namespace AT_NAME
 
 			const auto p = computeFlakeOrentationDistribution(flakeNml, param->flake_normal_orientation, aten::vec3(0, 0, 1));
 
-			bsdf += denom > 0 ? Reff / denom * p : 0;
+			bsdf += denom > 0 ? (1 - F) * Reff / denom * p : 0;
 		}
 #endif
 
@@ -422,9 +422,11 @@ namespace AT_NAME
 		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_reflection, 0, 1);
 		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_transmittance, 0, 1);
 
-		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
-		bool b8 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, thicknessPaintLayer, 1, 50);
 
-		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8;
+		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+		bool b9 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+
+		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9;
 	}
 }

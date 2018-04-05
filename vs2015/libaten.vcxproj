@@ -298,6 +298,7 @@
     <ClInclude Include="..\src\libaten\material\carpaint.h" />
     <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
+    <ClInclude Include="..\src\libaten\material\FlakesNormal.h" />
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\layer.h" />
@@ -420,6 +421,7 @@
     <ClCompile Include="..\src\libaten\material\blinn.cpp" />
     <ClCompile Include="..\src\libaten\material\carpaint.cpp" />
     <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
+    <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <ClCompile Include="..\src\libaten\material\material.cpp" />

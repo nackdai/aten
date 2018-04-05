@@ -125,7 +125,7 @@ namespace AT_NAME
 	{
 		float safe_flake_size_variance = aten::clamp(flake_size_variance, real(0.1), real(1.0));
 
-		static const aten::vec3 cellCenters[9] = {
+		const aten::vec3 cellCenters[9] = {
 			aten::vec3(0.5, 0.5, 0.0),
 			aten::vec3(1.5, 0.5, 0.0),
 			aten::vec3(1.5, 1.5, 0.0),
@@ -167,12 +167,14 @@ namespace AT_NAME
 		aten::vec3 I(0, 0, 1);
 
 		if (nearestCellIndex != -1) {
+
 			aten::vec3 randomNormal = cellnoise(base + cellCenters[nearestCellIndex] + aten::vec3(0.0, 0.0, 1.5));
 			randomNormal = real(2.0) * randomNormal - real(1.0);
 			randomNormal = faceforward(randomNormal, I, randomNormal);
 			randomNormal = normalize(aten::mix(randomNormal, aten::vec3(0.0, 0.0, 1.0), flake_normal_orientation));
 
-			result = aten::vec3(0.5*randomNormal[0] + 0.5, 0.5*randomNormal[1] + 0.5, randomNormal[2]);
+			//result = aten::vec3(0.5*randomNormal[0] + 0.5, 0.5*randomNormal[1] + 0.5, randomNormal[2]);
+			result = aten::vec3(randomNormal[0], randomNormal[1], randomNormal[2]);
 			alpha = 1.0;
 		}
 

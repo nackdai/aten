@@ -65,7 +65,7 @@ namespace AT_NAME
 			pdf += F * (n + 1) / (2 * AT_MATH_PI) * aten::pow(costheta, n) / (4 * c);
 		}
 
-		auto density = FlakesNormal::computeFlakeDensity(param->flake_scale, real(1280) / 720);
+		auto density = FlakesNormal::computeFlakeDensity(param->flake_size, real(1280) / 720);
 
 #if 1
 		{
@@ -306,24 +306,13 @@ namespace AT_NAME
 
 			const auto Reff = ((real(1) - aten::exp(-2 * tau * h)) / (2 * tau * h)) * D * S * h * r;
 
-			// NOTE
-			// NTB座標系において、v = (x, y, z) = (sinφ、cosφ、cosθ).
-
-			auto T = aten::getOrthoVector(N);
-			auto B = cross(N, T);
-			auto localV = (V.x * T + V.y * B + V.z * N);
-
-			auto sinphi = localV.x;
-			auto costheta = localV.z;
+			auto costheta = NdotV;
 			auto sintheta = real(1) - costheta * costheta;
 
-			auto _phi = aten::asin(ni / nt * sinphi);
 			auto _theta = aten::asin(ni / nt * sintheta);
-
-			auto _cosphi = aten::cos(_phi);
 			auto _costheta = aten::cos(_theta);
 
-			auto denom = 4 * nt * nt * _cosphi * _costheta;
+			auto denom = 4 * nt * nt * _costheta;
 
 			auto flakeNml = FlakesNormal::gen(
 				u, v,

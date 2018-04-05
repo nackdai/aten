@@ -95,7 +95,7 @@ void MaterialSelectWindow::onRun(aten::window* window)
 	auto t = s_blinker.update();
 
 	aten::mat4 mtxL2W;
-	mtxL2W.asRotateByX(Deg2Rad(-90));
+	//mtxL2W.asRotateByX(Deg2Rad(-90));
 
 	s_rasterizer.draw(
 		s_obj,

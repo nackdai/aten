@@ -235,6 +235,9 @@
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h">
       <Filter>aten\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\Skinning.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -322,9 +325,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\svgf\svgf.cpp">
       <Filter>svgf</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp">
-      <Filter>aten\material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -429,6 +429,10 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\carpaint.cpp">
       <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\FlakesNormal.cpp" />
+    <CudaCompile Include="..\src\libidaten\kernel\Skinning.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

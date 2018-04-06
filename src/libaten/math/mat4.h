@@ -360,6 +360,12 @@ namespace aten {
 		return std::move(ret);
 	}
 
+	inline AT_DEVICE_API vec4 operator*(const mat4& m, const vec4 v)
+	{
+		vec4 ret = m.apply(v);
+		return std::move(ret);
+	}
+
 	inline AT_DEVICE_API mat4 operator*(real t, const mat4& m)
 	{
 		mat4 ret = m;

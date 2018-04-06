@@ -12,10 +12,9 @@
 #include "atenscene.h"
 #include "idaten.h"
 
+#define GPU_RENDERING
+
 #define ENABLE_ENVMAP
-
-#pragma optimize( "", off)
-
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -33,6 +32,9 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::PathTracing g_tracer;
+
+static aten::PathTracing g_cpuPT;
+static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
 
 static aten::visualizer* g_visualizer;
 
@@ -159,6 +161,7 @@ static MaterialParamEditor g_mtrlParamEditor;
 
 void onRun(aten::window* window)
 {
+#ifdef GPU_RENDERING
 	float updateTime = 0.0f;
 
 	if (g_isCameraDirty) {
@@ -267,6 +270,24 @@ void onRun(aten::window* window)
 
 		window->drawImGui();
 	}
+#else
+	aten::Destination dst;
+	{
+		dst.width = WIDTH;
+		dst.height = HEIGHT;
+		dst.maxDepth = 5;
+		dst.russianRouletteDepth = 3;
+		dst.startDepth = 0;
+		dst.sample = 1;
+		dst.mutation = 10;
+		dst.mltNum = 10;
+		dst.buffer = &g_buffer;
+	}
+
+	g_cpuPT.render(dst, &g_scene, &g_camera);
+
+	g_visualizer->render(g_buffer.image(), g_camera.needRevert());
+#endif
 }
 
 void onClose()

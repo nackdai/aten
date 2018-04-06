@@ -144,6 +144,19 @@ namespace aten
 			albedoMap = -1;
 			normalMap = -1;
 			roughnessMap = -1;
+
+			roughness = real(0.5);
+			shininess = real(1.0);
+
+			subsurface = real(0.0);
+			metallic = real(0.0);
+			specular = real(0.5);
+			specularTint = real(0.0);
+			anisotropic = real(0.0);
+			sheen = real(0.0);
+			sheenTint = real(0.5);
+			clearcoat = real(0.0);
+			clearcoatGloss = real(1.0);
 		}
 		AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
 			: type(_type), attrib(_attrib)
@@ -152,6 +165,19 @@ namespace aten
 			albedoMap = -1;
 			normalMap = -1;
 			roughnessMap = -1;
+
+			roughness = real(0.5);
+			shininess = real(1.0);
+
+			subsurface = real(0.0);
+			metallic = real(0.0);
+			specular = real(0.5);
+			specularTint = real(0.0);
+			anisotropic = real(0.0);
+			sheen = real(0.0);
+			sheenTint = real(0.5);
+			clearcoat = real(0.0);
+			clearcoatGloss = real(1.0);
 		}
 	};
 

@@ -36,5 +36,24 @@
 <node CREATED="1518502816201" LINK="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/" MODIFIED="1518502816201" TEXT="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/"/>
 <node CREATED="1518502816207" LINK="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader" MODIFIED="1518502816207" TEXT="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader"/>
 </node>
+<node CREATED="1523001241900" HGAP="58" ID="ID_875040956" MODIFIED="1523001366583" POSITION="right" TEXT="SubSurfaceScattering" VSHIFT="52">
+<node CREATED="1523001247781" HGAP="27" ID="ID_981506302" LINK="https://github.com/tiansijie/CUDA-Monte-Carlo-Pathtracer/blob/master/src/raytraceKernel.cu" MODIFIED="1523001369302" TEXT="https://github.com/tiansijie/CUDA-Monte-Carlo-Pathtracer/blob/master/src/raytraceKernel.cu" VSHIFT="-19"/>
+<node CREATED="1523001370514" ID="ID_1090547924" LINK="http://unityshader.hatenablog.com/entry/2016/12/25/175333" MODIFIED="1523001379356" TEXT="&#x9802;&#x70b9;&#x7a7a;&#x9593;&#x8868;&#x9762;&#x4e0b;&#x6563;&#x4e71;(VSSS:Vertex Space Subsurface Scattering)"/>
+<node CREATED="1523002079247" ID="ID_307129925" LINK="https://computergraphics.stackexchange.com/questions/5214/a-recent-approach-for-subsurface-scattering" MODIFIED="1523002089025" TEXT="https://computergraphics.stackexchange.com/questions/5214/a-recent-approach-for-subsurface-scattering">
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1523002382653" ID="ID_787306841" LINK="https://renderman.pixar.com/resources/RenderMan_20/subsurface.html" MODIFIED="1523002390526" TEXT="Translucency and Subsurface Scattering"/>
+<node CREATED="1523002401278" ID="ID_33177459" LINK="https://graphics.pixar.com/library/PathTracedSubsurface/paper.pdf" MODIFIED="1523002418909" TEXT="Path Traced Subsurface Scattering using Anisotropic Phase Functions and Non-Exponential Free Flights">
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1523002433646" ID="ID_1611878092" LINK="https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S08/lectures/20_subsurface_scattering.pdf" MODIFIED="1523002440461" TEXT="https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S08/lectures/20_subsurface_scattering.pdf"/>
+<node CREATED="1523002452557" ID="ID_687519890" LINK="https://pdfs.semanticscholar.org/06a2/672837e2052694b83384ac5549c118c04551.pdf" MODIFIED="1523002459941" TEXT="Subdivision Next-Event Estimation for Path-Traced Subsurface Scattering "/>
+</node>
+<node CREATED="1523001834801" HGAP="23" ID="ID_1354241078" MODIFIED="1523001926970" POSITION="right" TEXT="&#x6cd5;&#x7dda;&#x30de;&#x30c3;&#x30d7;&#x3092;&#x9069;&#x7528;&#x3059;&#x308b;&#x3068;&#x9ed2;&#x304f;&#x306a;&#x308b;&#x90e8;&#x5206;&#x304c;&#x51fa;&#x308b;&#x554f;&#x984c;" VSHIFT="33">
+<node CREATED="1523001848681" ID="ID_692679679" MODIFIED="1523001900155" TEXT="&#x6cd5;&#x7dda;&#x30de;&#x30c3;&#x30d7;&#x3068;&#x30b8;&#x30aa;&#x30e1;&#x30c8;&#x30ea;&#x306e;&#x5f62;&#x72b6;&#x306f;&#x4e00;&#x81f4;&#x3057;&#x306a;&#x3044;&#x306e;&#x3067;&#x3001;&#x6cd5;&#x7dda;&#x30de;&#x30c3;&#x30d7;&#x306b;&#x57fa;&#x3065;&#x3044;&#x3066;&#x8a08;&#x7b97;&#x3057;&#x305f;&#x53cd;&#x5c04;&#x30d9;&#x30af;&#x30c8;&#x30eb;&#x306f;&#x30b8;&#x30aa;&#x30e1;&#x30c8;&#x30ea;&#x5185;&#x90e8;&#x306b;&#x4fb5;&#x5165;&#x3057;&#x3066;&#x3057;&#x307e;&#x3046;&#x53ef;&#x80fd;&#x6027;&#x304c;&#x3042;&#x308b;"/>
+<node CREATED="1523001917985" ID="ID_758583542" MODIFIED="1523001922428" TEXT="&#x89e3;&#x6c7a;&#x6848;&#x306e;&#x8ad6;&#x6587;">
+<node CREATED="1523001901391" ID="ID_973899440" LINK="http://mizuooon.hatenablog.jp/entry/microfacet-based-normal-mapping-for-robust-monte-carlo-path-tracing" MODIFIED="1523001917112" TEXT=" Microfacet-based Normal Mapping for Robust Monte Carlo Path Tracing "/>
+</node>
+</node>
 </node>
 </map>

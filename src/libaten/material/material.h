@@ -79,10 +79,10 @@ namespace aten
 		//   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
 		real ior{ 1.0 };				// 屈折率.
 
+#if 0
 		real roughness{ 0.5 };			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 		real shininess{ 1.0 };
 
-#if 0
 		real subsurface{ 0.0 };			// 表面下の近似を用いてディフューズ形状を制御する.
 		real metallic{ 0.0 };			// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
 		real specular{ 0.5 };			// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
@@ -95,6 +95,8 @@ namespace aten
 #else
 		union {
 			struct {
+				real roughness;			// 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+				real shininess;
 				real subsurface;		// 表面下の近似を用いてディフューズ形状を制御する.
 				real metallic;			// 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
 				real specular;			// 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
@@ -107,13 +109,15 @@ namespace aten
 			};
 			struct {
 				real clearcoatRoughness;
+				real flakeLayerRoughness;
 				real flake_scale;				// Smaller values zoom into the flake map, larger values zoom out.
 				real flake_size;				// Relative size of the flakes
 				real flake_size_variance;		// 0.0 makes all flakes the same size, 1.0 assigns random size between 0 and the given flake size
 				real flake_normal_orientation;	// Blend between the flake normals (0.0) and the surface normal (1.0)
 				real flake_reflection;
 				real flake_transmittance;
-				real thicknessPaintLayer;
+				aten::vec3 glitterColor;
+				aten::vec3 flakeColor;
 			};
 		};
 #endif

@@ -17,6 +17,7 @@ namespace AT_NAME
 			m_param.roughnessMap = flakesMap ? flakesMap->id() : -1;
 
 			m_param.clearcoatRoughness = real(0.5);
+			m_param.flakeLayerRoughness = real(0.5);
 
 			m_param.flake_scale = real(100);
 			m_param.flake_size = real(0.01);
@@ -26,7 +27,8 @@ namespace AT_NAME
 			m_param.flake_reflection = real(0.5);
 			m_param.flake_transmittance = real(0.5);
 
-			m_param.thicknessPaintLayer = real(1);
+			m_param.glitterColor = albedo;
+			m_param.flakeColor = albedo;
 		}
 
 		CarPaintBRDF(aten::Values& val)

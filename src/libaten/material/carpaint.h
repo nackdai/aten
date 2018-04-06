@@ -29,6 +29,8 @@ namespace AT_NAME
 
 			m_param.glitterColor = albedo;
 			m_param.flakeColor = albedo;
+
+			m_param.flake_intensity = real(1);
 		}
 
 		CarPaintBRDF(aten::Values& val)

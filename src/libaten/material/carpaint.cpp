@@ -438,7 +438,7 @@ namespace AT_NAME
 				aten::vec3 n = normalize(normal + f);
 				auto c = aten::abs(dot(n, -wi));
 			
-				bsdf += param->flakeColor * (1 - F) * density * aten::pow(c, 16);
+				bsdf += param->flake_intensity * param->flakeColor * (1 - F) * density * aten::pow(c, 16);
 #endif
 			}
 		}
@@ -535,12 +535,14 @@ namespace AT_NAME
 		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_reflection, 0, 1);
 		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_transmittance, 0, 1);
 
-		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_intensity, 0, 10);
 
-		bool b9 = AT_EDIT_MATERIAL_PARAM(editor, m_param, glitterColor);
-		bool b10 = AT_EDIT_MATERIAL_PARAM(editor, m_param, flakeColor);
-		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+		bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
 
-		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10 || b11;
+		bool b10 = AT_EDIT_MATERIAL_PARAM(editor, m_param, glitterColor);
+		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, flakeColor);
+		bool b12 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+
+		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10 || b11 || b12;
 	}
 }

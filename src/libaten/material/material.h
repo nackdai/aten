@@ -118,6 +118,7 @@ namespace aten
 				real flake_transmittance;
 				aten::vec3 glitterColor;
 				aten::vec3 flakeColor;
+				real flake_intensity;
 			};
 		};
 #endif

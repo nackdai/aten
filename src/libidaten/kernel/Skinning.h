@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "cuda/cudamemory.h"
+#include "cuda/cudaGLresource.h"
 #include "aten4idaten.h"
 
 namespace idaten
@@ -13,21 +14,12 @@ namespace idaten
 		~Skinning() {}
 
 	public:
-		// TODO
-		// aten‘¤‚Å’è‹`‚·‚é.
-		struct Vertex {
-			aten::vec4 position;
-			aten::vec3 normal;
-			float uv[2];
-			float blendIndex[4];
-			float blendWeight[4];
-		};
-
 		void init(
-			Vertex* vertices,
+			aten::SkinningVertex* vertices,
 			uint32_t vtxNum, 
 			uint32_t* indices,
-			uint32_t idxNum);
+			uint32_t idxNum,
+			const aten::GeomVertexBuffer& vb);
 
 		void update(
 			aten::mat4* matrices,
@@ -38,8 +30,10 @@ namespace idaten
 		void runMinMaxTest();
 
 	private:
-		TypedCudaMemory<Vertex> m_vertices;
+		TypedCudaMemory<aten::SkinningVertex> m_vertices;
 		TypedCudaMemory<uint32_t> m_indices;
 		TypedCudaMemory<aten::mat4> m_matrices;
+
+		CudaGLBuffer m_interopVBO;
 	};
 }

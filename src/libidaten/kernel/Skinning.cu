@@ -10,7 +10,7 @@
 
 __global__ void computeSkinning(
 	uint32_t indexNum,
-	const idaten::Skinning::Vertex* __restrict__ vertices,
+	const aten::SkinningVertex* __restrict__ vertices,
 	const uint32_t* __restrict__ indices,
 	const aten::mat4* __restrict__ matrices,
 	aten::vertex* dst)
@@ -151,16 +151,20 @@ __global__ void getMinMax(
 namespace idaten
 {
 	void Skinning::init(
-		Skinning::Vertex* vertices,
+		aten::SkinningVertex* vertices,
 		uint32_t vtxNum,
 		uint32_t* indices,
-		uint32_t idxNum)
+		uint32_t idxNum,
+		const aten::GeomVertexBuffer& vb)
 	{
 		m_vertices.init(vtxNum);
 		m_vertices.writeByNum(vertices, vtxNum);
 
 		m_indices.init(idxNum);
 		m_indices.writeByNum(indices, idxNum);
+
+		auto glvbo = vb.getVBOHandle();
+		m_interopVBO.init(glvbo, CudaGLRscRegisterType::WriteOnly);
 	}
 
 	void Skinning::update(
@@ -178,7 +182,35 @@ namespace idaten
 
 	void Skinning::compute()
 	{
-		const auto idxNum = m_indices.maxNum();
+		// Skinning.
+		{
+			const auto idxNum = m_indices.maxNum();
+
+			dim3 block(256);
+			dim3 grid((idxNum + block.x - 1) / block.x);
+
+			aten::vertex* dst;
+			size_t vtxbytes;
+
+			m_interopVBO.map();
+			m_interopVBO.bind(dst, vtxbytes);
+
+			computeSkinning << <grid, block >> > (
+				idxNum,
+				m_vertices.ptr(),
+				m_indices.ptr(),
+				m_matrices.ptr(),
+				dst);
+
+			checkCudaKernel(computeSkinning);
+
+			m_interopVBO.unmap();
+		}
+
+		// Get min/max.
+		{
+			// TODO
+		}
 	}
 
 	void Skinning::runMinMaxTest()

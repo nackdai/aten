@@ -144,6 +144,11 @@ namespace aten
 
 	void deformable::render(shader* shd)
 	{
+		if (isEnabledForGPUSkinning()) {
+			AT_ASSERT_LOG(false, "Not support for gpu skinning format data.");
+			return;
+		}
+
 		AT_ASSERT(shd);
 
 		DeformMeshRenderHelper helper(shd);

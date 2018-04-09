@@ -35,6 +35,11 @@ namespace aten
 			std::vector<SkinningVertex>& vtx,
 			std::vector<uint32_t>& idx) const;
 
+		const MeshHeader& getDesc() const
+		{
+			return m_header;
+		}
+
 	private:
 		MeshHeader m_header;
 

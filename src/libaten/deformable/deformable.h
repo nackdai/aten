@@ -36,6 +36,11 @@ namespace aten
 			std::vector<uint32_t>& idx,
 			std::vector<mat4>& mtx) const;
 
+		bool isEnabledForGPUSkinning() const
+		{
+			return m_mesh.getDesc().isGPUSkinning;
+		}
+
 	private:
 		DeformMesh m_mesh;
 

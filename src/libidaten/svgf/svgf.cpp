@@ -114,7 +114,7 @@ namespace idaten
 
 		onInit(width, height);
 
-		CudaGLResourceMap rscmap(&m_glimg);
+		CudaGLResourceMapper rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();
 
 		auto vtxTexPos = m_vtxparamsPos.bind();

@@ -55,4 +55,37 @@ namespace idaten
 			m_surf = 0;
 		}
 	}
+
+	//////////////////////////////////////////////////////////////////////////
+
+	void CudaGLBuffer::init(GLuint glbuffer, CudaGLRscRegisterType type)
+	{
+		AT_ASSERT(m_glbuffer == 0);
+		AT_ASSERT(!m_rsc);
+
+		if (!m_rsc) {
+			checkCudaErrors(cudaGraphicsGLRegisterBuffer(
+				&m_rsc,
+				glbuffer,
+				flags[type]));
+
+			m_glbuffer = glbuffer;
+		}
+	}
+
+	void CudaGLBuffer::bind(void* p, size_t& bytes)
+	{
+		AT_ASSERT(m_rsc);
+
+		checkCudaErrors(cudaGraphicsMapResources(1, &m_rsc, 0));
+		checkCudaErrors(cudaGraphicsResourceGetMappedPointer(
+			(void**)&p,
+			&bytes,
+			m_rsc));
+	}
+
+	void CudaGLBuffer::unbind()
+	{
+		// Nothing is done...
+	}
 }

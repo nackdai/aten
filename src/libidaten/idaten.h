@@ -7,4 +7,6 @@
 
 #include "kernel/LBVHBuilder.h"
 
+#include "kernel/Skinning.h"
+
 #include "svgf/svgf.h"

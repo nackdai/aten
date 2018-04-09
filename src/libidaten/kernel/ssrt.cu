@@ -1161,7 +1161,7 @@ namespace idaten {
 
 		cudaMemset(m_paths.ptr(), 0, m_paths.bytes());
 
-		CudaGLResourceMap rscmap(&m_glimg);
+		CudaGLResourceMapper rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();
 
 		auto vtxTexPos = m_vtxparamsPos.bind();
@@ -1291,7 +1291,7 @@ namespace idaten {
 		if (bounce == 0) {
 			aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
 
-			CudaGLResourceMap rscmap(&m_gbuffer);
+			CudaGLResourceMapper rscmap(&m_gbuffer);
 			auto gbuffer = m_gbuffer.bind();
 
 			hitTestPrimaryRayInScreenSpace << <grid, block >> > (
@@ -1339,8 +1339,8 @@ namespace idaten {
 				m_camParam.vfov,
 				m_camParam.aspect);
 
-			CudaGLResourceMap rscmapGbuffer(&m_gbuffer);
-			CudaGLResourceMap rscmapDepth(&m_depth);
+			CudaGLResourceMapper rscmapGbuffer(&m_gbuffer);
+			CudaGLResourceMapper rscmapDepth(&m_depth);
 			auto gbuffer = m_gbuffer.bind();
 			auto depth = m_depth.bind();
 

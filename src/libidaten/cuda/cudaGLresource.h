@@ -50,6 +50,8 @@ namespace idaten
 		bool m_isMapped{ false };
 	};
 
+	//////////////////////////////////////////////////////////////////////////
+
 	class CudaGLSurface : public CudaGLResource {
 	public:
 		CudaGLSurface() {}
@@ -82,14 +84,48 @@ namespace idaten
 		cudaSurfaceObject_t m_surf{ 0 };
 	};
 
-	class CudaGLResourceMap {
+	//////////////////////////////////////////////////////////////////////////
+
+	class CudaGLBuffer : public CudaGLResource {
 	public:
-		CudaGLResourceMap(CudaGLResource* rsc)
+		CudaGLBuffer() {}
+		CudaGLBuffer(GLuint glbuffer, CudaGLRscRegisterType type)
+		{
+			init(glbuffer, type);
+		}
+		virtual ~CudaGLBuffer() {}
+
+	public:
+		void init(GLuint glbuffer, CudaGLRscRegisterType type);
+
+		bool isValid() const
+		{
+			return (m_glbuffer > 0);
+		}
+
+		void bind(void* p, size_t& bytes);
+		void unbind();
+
+		virtual void unmap() override final
+		{
+			unbind();
+			CudaGLResource::unmap();
+		}
+
+	private:
+		GLuint m_glbuffer{ 0 };
+	};
+
+	//////////////////////////////////////////////////////////////////////////
+
+	class CudaGLResourceMapper {
+	public:
+		CudaGLResourceMapper(CudaGLResource* rsc)
 		{
 			m_rsc = rsc;
 			m_rsc->map();
 		}
-		~CudaGLResourceMap()
+		~CudaGLResourceMapper()
 		{
 			if (m_rsc) {
 				m_rsc->unmap();

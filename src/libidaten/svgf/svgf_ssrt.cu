@@ -123,7 +123,7 @@ namespace idaten
 
 		aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
 
-		CudaGLResourceMap rscmap(&m_gbuffer);
+		CudaGLResourceMapper rscmap(&m_gbuffer);
 		auto gbuffer = m_gbuffer.bind();
 
 		hitTestPrimaryRayInScreenSpace << <grid, block >> > (

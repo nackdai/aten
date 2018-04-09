@@ -8,6 +8,8 @@
 #include "camera/camera.h"
 #include "camera/pinhole.h"
 
+#include "deformable/SkinningVertex.h"
+
 #include "material/emissive.h"
 #include "material/lambert.h"
 #include "material/specular.h"

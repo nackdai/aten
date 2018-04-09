@@ -881,7 +881,7 @@ namespace idaten {
 
 		cudaMemset(m_paths.ptr(), 0, m_paths.bytes());
 
-		CudaGLResourceMap rscmap(&m_glimg);
+		CudaGLResourceMapper rscmap(&m_glimg);
 		auto outputSurf = m_glimg.bind();
 
 		auto vtxTexPos = m_vtxparamsPos.bind();

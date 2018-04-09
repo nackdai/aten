@@ -197,7 +197,7 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		CudaGLResourceMap rscmap(&m_motionDepthBuffer);
+		CudaGLResourceMapper rscmap(&m_motionDepthBuffer);
 		auto gbuffer = m_motionDepthBuffer.bind();
 
 		fillAOV << <grid, block >> > (

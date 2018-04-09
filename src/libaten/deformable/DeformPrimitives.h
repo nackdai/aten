@@ -31,13 +31,16 @@ namespace aten
 	 */
 	class DeformPrimitives {
 		friend class DeformMeshSet;
+		friend class DeformMeshGroup;
 
 	public:
 		DeformPrimitives() {}
 		~DeformPrimitives() {}
 
 	private:
-		bool read(FileInputStream* stream);
+		bool read(
+			FileInputStream* stream,
+			bool needKeepIndices);
 
 		void render(
 			const SkeletonController& skeleton,
@@ -53,11 +56,15 @@ namespace aten
 			m_vb = vb;
 		}
 
+		void getIndices(std::vector<uint32_t>& indices) const;
+
 	private:
 		PrimitiveSet m_desc;
 
 		// ジョイントインデックス.
 		std::vector<int16_t> m_joints;
+
+		std::vector<uint32_t> m_indices;
 
 		GeomVertexBuffer* m_vb{ nullptr };
 		GeomIndexBuffer m_ib;

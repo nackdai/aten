@@ -78,6 +78,11 @@ namespace aten
 			return m_globalMatrix[idx];
 		}
 
+		const std::vector<mat4>& getMatrices() const
+		{
+			return m_globalMatrix;
+		}
+
 	private:
 		void buildLocalMatrix(uint32_t idx);
 

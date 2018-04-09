@@ -6,6 +6,9 @@
 #include "texture/texture.h"
 #include "camera/camera.h"
 
+#include <algorithm>
+#include <iterator>
+
 namespace aten
 {
 	class DeformMeshReadHelper : public IDeformMeshReadHelper {
@@ -160,6 +163,21 @@ namespace aten
 	{
 		anm->applyAnimation(&m_sklController, time);
 		m_sklController.buildPose(mtxL2W);
+	}
+
+	void deformable::getGeometryData(
+		std::vector<SkinningVertex>& vtx,
+		std::vector<uint32_t>& idx,
+		std::vector<mat4>& mtx) const
+	{
+		m_mesh.getGeometryData(vtx, idx);
+
+		const auto& matrices = m_sklController.getMatrices();
+
+		std::copy(
+			matrices.begin(),
+			matrices.end(),
+			std::back_inserter(mtx));
 	}
 
 	//////////////////////////////////////////////////////////////

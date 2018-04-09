@@ -1,6 +1,7 @@
 #pragma once
 
 #include "deformable/DeformMeshGroup.h"
+#include "deformable/SkinningVertex.h"
 
 namespace aten
 {
@@ -29,6 +30,10 @@ namespace aten
 		{
 			m_groups.clear();
 		}
+
+		void getGeometryData(
+			std::vector<SkinningVertex>& vtx,
+			std::vector<uint32_t>& idx) const;
 
 	private:
 		MeshHeader m_header;

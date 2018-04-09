@@ -34,11 +34,17 @@ namespace aten
 		bool read(
 			FileInputStream* stream,
 			IDeformMeshReadHelper* helper,
-			std::vector<GeomVertexBuffer>& vbs);
+			std::vector<GeomVertexBuffer>& vbs,
+			bool needKeepGeometryData);
 
 		void render(
 			const SkeletonController& skeleton,
 			IDeformMeshRenderHelper* helper);
+
+		const std::vector<DeformPrimitives>& getPrimitives() const
+		{
+			return m_prims;
+		}
 
 	private:
 		MeshSet m_desc;

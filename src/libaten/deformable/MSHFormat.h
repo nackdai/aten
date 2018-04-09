@@ -83,6 +83,10 @@ namespace aten
         uint16_t numMeshSubset{ 0 };
 
         uint32_t numAllJointIndices{ 0 }; ///< ジョイントインデックス総数
+
+		struct {
+			uint32_t isGPUSkinning : 1;
+		};
     };
 
     /////////////////////////////////////////////////////////

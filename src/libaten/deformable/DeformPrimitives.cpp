@@ -2,9 +2,14 @@
 #include "deformable/Skeleton.h"
 #include "misc/stream.h"
 
+#include <algorithm>
+#include <iterator>
+
 namespace aten
 {
-	bool DeformPrimitives::read(FileInputStream* stream)
+	bool DeformPrimitives::read(
+		FileInputStream* stream,
+		bool needKeepIndices)
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
 
@@ -15,10 +20,15 @@ namespace aten
 		}
 
 		if (m_desc.numIdx > 0) {
-			std::vector<uint32_t> indices(m_desc.numIdx);
-			AT_VRETURN_FALSE(AT_STREAM_READ(stream, &indices[0], sizeof(uint32_t) * m_desc.numIdx));
+			m_indices.resize(m_desc.numIdx);
+			AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_indices[0], sizeof(uint32_t) * m_desc.numIdx));
 
-			m_ib.init(m_desc.numIdx, &indices[0]);
+			m_ib.init(m_desc.numIdx, &m_indices[0]);
+		}
+
+		if (!needKeepIndices) {
+			// Not need to keep indices data.
+			m_indices.clear();
 		}
 		
 		return true;
@@ -45,5 +55,15 @@ namespace aten
 		uint32_t primNum = m_desc.numIdx / 3;
 
 		m_ib.draw(*m_vb, aten::Primitive::Triangles, 0, primNum);
+	}
+
+	void DeformPrimitives::getIndices(std::vector<uint32_t>& indices) const
+	{
+		AT_ASSERT(!m_indices.empty());
+
+		std::copy(
+			m_indices.begin(),
+			m_indices.end(),
+			std::back_inserter(indices));
 	}
 }

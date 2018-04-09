@@ -3,6 +3,7 @@
 #include "deformable/MDLFormat.h"
 #include "deformable/DeformMesh.h"
 #include "deformable/Skeleton.h"
+#include "deformable/SkinningVertex.h"
 
 namespace aten
 {
@@ -29,6 +30,11 @@ namespace aten
 			real time);
 
 		void render(shader* shd);
+
+		void getGeometryData(
+			std::vector<SkinningVertex>& vtx,
+			std::vector<uint32_t>& idx,
+			std::vector<mat4>& mtx) const;
 
 	private:
 		DeformMesh m_mesh;

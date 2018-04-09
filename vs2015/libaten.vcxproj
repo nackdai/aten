@@ -265,6 +265,7 @@
     <ClInclude Include="..\src\libaten\deformable\MDLFormat.h" />
     <ClInclude Include="..\src\libaten\deformable\MSHFormat.h" />
     <ClInclude Include="..\src\libaten\deformable\Skeleton.h" />
+    <ClInclude Include="..\src\libaten\deformable\SkinningVertex.h" />
     <ClInclude Include="..\src\libaten\deformable\SKLFormat.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\filter\atrous.h" />

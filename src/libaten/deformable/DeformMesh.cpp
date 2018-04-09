@@ -11,10 +11,12 @@ namespace aten
 
 		m_header.numMeshGroup = 1;
 
+		bool needKeepGeometryData = m_header.isGPUSkinning;
+
 		m_groups.resize(m_header.numMeshGroup);
 
 		for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
-			AT_VRETURN_FALSE(m_groups[i].read(stream, helper));
+			AT_VRETURN_FALSE(m_groups[i].read(stream, helper, needKeepGeometryData));
 		}
 
 		return true;
@@ -26,6 +28,15 @@ namespace aten
 	{
 		for (auto& group : m_groups) {
 			group.render(skeleton, helper);
+		}
+	}
+
+	void DeformMesh::getGeometryData(
+		std::vector<SkinningVertex>& vtx,
+		std::vector<uint32_t>& idx) const
+	{
+		for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
+			m_groups[i].getGeometryData(vtx, idx);
 		}
 	}
 }

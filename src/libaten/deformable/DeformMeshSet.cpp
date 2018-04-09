@@ -115,7 +115,8 @@ namespace aten
 	bool DeformMeshSet::read(
 		FileInputStream* stream,
 		IDeformMeshReadHelper* helper,
-		std::vector<GeomVertexBuffer>& vbs)
+		std::vector<GeomVertexBuffer>& vbs,
+		bool needKeepGeometryData)
 	{
 		static SetVtxAttribFunc funcSetVtxAttrib[] = {
 			setVtxAttribPos,
@@ -154,7 +155,7 @@ namespace aten
 					m_prims.resize(m_desc.numSubset);
 
 					for (auto& prim : m_prims) {
-						AT_VRETURN_FALSE(prim.read(stream));
+						AT_VRETURN_FALSE(prim.read(stream, needKeepGeometryData));
 
 						const auto& primDesc = prim.getDesc();
 						auto& vb = vbs[primDesc.idxVB];

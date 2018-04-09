@@ -84,6 +84,8 @@ bool GeometryChunkExporter::exportGeometry(
     m_Header.maxVtx[1] = m_vMin.y;
     m_Header.maxVtx[2] = m_vMin.z;
 
+	m_Header.isGPUSkinning = m_isExportForGPUSkinning;
+
     // TODO
     m_Header.numMeshGroup = 1;
 

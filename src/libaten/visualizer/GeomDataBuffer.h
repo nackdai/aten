@@ -71,6 +71,11 @@ namespace aten {
 
 		void clear();
 
+		uint32_t getVtxNum() const
+		{
+			return m_vtxNum;
+		}
+
 	protected:
 		uint32_t m_vbo{ 0 };
 		uint32_t m_vao{ 0 };

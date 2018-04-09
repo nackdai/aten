@@ -45,7 +45,8 @@ GeometryChunkExporter GeometryChunkExporter::s_cInstance;
 bool GeometryChunkExporter::exportGeometry(
     uint32_t maxJointMtxNum,
     FileOutputStream* pOut,
-    aten::FbxImporter* pImporter)
+    aten::FbxImporter* pImporter,
+	bool isExportForGPUSkinning)
 {
     // メッシュが影響を受けるマトリクスの最大数
     m_MaxJointMtxNum = std::max<uint32_t>(
@@ -55,6 +56,8 @@ bool GeometryChunkExporter::exportGeometry(
                         ? m_MaxJointMtxNum + 1
                         : m_MaxJointMtxNum);
 
+	// GPUスキニング向けの出力をするかどうか.
+	m_isExportForGPUSkinning = isExportForGPUSkinning;
     
     {
         // TODO
@@ -485,13 +488,13 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
 #else
     // 影響を受ける関節が同じ三角形をまとめる
     // Merge triangles by joint idx.
-    if (sMesh.subset.size() > 1) {
+    if (sMesh.subset.size() > 1)
+	{
         // 候補リストを最大関節数だけ確保
         FuncFindIncludedJointIdx::candidateList.resize(m_MaxJointMtxNum);
 
-        std::vector<PrimitiveSetParam>::iterator it = sMesh.subset.begin();
-
-        for (; it != sMesh.subset.end(); ) {
+        for (auto it = sMesh.subset.begin(); it != sMesh.subset.end(); )
+		{
             PrimitiveSetParam& sPrimSet = *it;
             uint32_t masterKey = sPrimSet.key;
 
@@ -508,10 +511,12 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
 
                 // 一致した関節数ごとに処理を行う
 
-                for (int32_t i = m_MaxJointMtxNum - 1; i >= 0; i--) {
-                    std::vector<const PrimitiveSetParam*>::iterator candidate = FuncFindIncludedJointIdx::candidateList[i].begin();
+                for (int32_t i = m_MaxJointMtxNum - 1; i >= 0; i--)
+				{
+                    auto candidate = FuncFindIncludedJointIdx::candidateList[i].begin();
 
-                    for (; candidate != FuncFindIncludedJointIdx::candidateList[i].end(); candidate++) {
+                    for (; candidate != FuncFindIncludedJointIdx::candidateList[i].end(); candidate++)
+					{
                         const PrimitiveSetParam& prim = *(*candidate);
 
                         // マージする
@@ -530,8 +535,7 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
                             sSubsetMatch.tri.end());
 
                         // Register joint indices.
-                        std::set<uint32_t>::const_iterator itJoint = sSubsetMatch.joint.begin();
-                        for (; itJoint != sSubsetMatch.joint.end(); itJoint++) {
+                        for (auto itJoint = sSubsetMatch.joint.begin(); itJoint != sSubsetMatch.joint.end(); itJoint++) {
                             sPrimSet.joint.insert(*itJoint);
                         }
 
@@ -546,16 +550,17 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
                 for (size_t n = 0; n < releaseList.size(); n++) {
                     uint32_t key = releaseList[n];
 
-                    std::vector<PrimitiveSetParam>::iterator itFind = std::find(
-                                                                sMesh.subset.begin(),
-                                                                sMesh.subset.end(),
-                                                                key);
+                    auto itFind = std::find(
+                        sMesh.subset.begin(),
+                        sMesh.subset.end(),
+                        key);
                     sMesh.subset.erase(itFind);
                     erased = true;
                 }
             }
 
             if (erased) {
+				// 削除したので、新しいイテレータを取得.
                 it = std::find(
                         sMesh.subset.begin(),
                         sMesh.subset.end(),
@@ -915,13 +920,17 @@ bool GeometryChunkExporter::exportVertices(
 				aten::vec4 vecWeight(0);
                 
                 for (uint32_t n = 0; n < (uint32_t)sSkin.joint.size(); n++) {
-#if 1
-                    // プリミティブセット内での関節位置を探す
-                    // これが描画時における関節インデックスとなる
-                    vecJoint.p[n] = (float)_FindJointIdx(sPrimSet.joint, sSkin.joint[n]);
-#else
-                    vecJoint.p[n] = sSkin.joint[n];
-#endif
+					if (m_isExportForGPUSkinning) {
+						// GPUスキニング向けに全体を通じた関節インデックスで出力.
+						vecJoint.p[n] = sSkin.joint[n];
+					}
+					else {
+						// プリミティブセット内での関節位置を探す.
+						// これが描画時における関節インデックスとなる.
+						// 全体を通じた関節インデックスからプリミティブセット内だけでの関節インデックスに変換する.
+						vecJoint.p[n] = (float)_FindJointIdx(sPrimSet.joint, sSkin.joint[n]);
+					}
+
                     vecWeight.p[n] = sSkin.weight[n];
                 }
 

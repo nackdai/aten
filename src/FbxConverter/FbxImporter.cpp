@@ -254,6 +254,10 @@ namespace aten
 
 		auto mesh = m_dataMgr->getMesh(0).fbxMesh;
 
+		// NOTE
+		// 頂点位置はさすがに必ずあるはずなので、無条件にリターンする.
+		// それ以外（法線、色、UV）は有無をチェックする.
+
 		if (type == aten::MeshVertexFormat::Position) {
 			vec.x = static_cast<float>(vtx.pos.mData[0]);
 			vec.y = static_cast<float>(vtx.pos.mData[1]);

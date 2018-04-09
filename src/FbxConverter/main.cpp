@@ -20,6 +20,11 @@ struct Options {
 
 	std::string inputBasepath;
 	std::string inputFilename;
+
+	std::string anmBaseMdl;
+
+	bool isExportModel{ true };
+	bool isExportForGPUSkinning{ false };
 } g_opt;
 
 aten::deformable g_mdl;
@@ -159,6 +164,9 @@ bool parseOption(
 	{
 		cmd.add<std::string>("input", 'i', "input filename", true);
 		cmd.add<std::string>("output", 'o', "output filename base", false, "result");
+		cmd.add<std::string>("type", 't', "export type(m = model, a = animation)", true, "m");
+		cmd.add<std::string>("base", 'b', "input filename for animation base model", false);
+		cmd.add<std::string>("gpu", 'g', "export for gpu skinning");
 
 		cmd.add<std::string>("help", '?', "print usage", false);
 	}
@@ -177,6 +185,14 @@ bool parseOption(
 
 	if (cmd.exist("input")) {
 		opt.input = cmd.get<std::string>("input");
+
+		std::string ext;
+
+		aten::getStringsFromPath(
+			opt.input,
+			opt.inputBasepath,
+			ext,
+			opt.inputFilename);
 	}
 	else {
 		std::cerr << cmd.error() << std::endl << cmd.usage();
@@ -186,16 +202,97 @@ bool parseOption(
 	if (cmd.exist("output")) {
 		opt.output = cmd.get<std::string>("output");
 	}
-	else {
-		// TODO
-		opt.output = "result.sbvh";
+
+	{
+		auto type = cmd.get<std::string>("type");
+		if (type == "m") {
+			opt.isExportModel = true;
+		}
+		else if (type == "a") {
+			opt.isExportModel = false;
+		}
 	}
+
+	if (!opt.isExportModel) {
+		// For animation.
+		if (cmd.exist("base")) {
+			opt.anmBaseMdl = cmd.get<std::string>("base");
+		}
+		else {
+			std::cerr << cmd.error() << std::endl << cmd.usage();
+			return false;
+		}
+	}
+
+	opt.isExportForGPUSkinning = cmd.exist("gpu");
 
 	return true;
 }
 
 int main(int argc, char* argv[])
 {
+#if 1
+	Options opt;
+	cmdline::parser cmd;
+
+	if (!parseOption(argc, argv, cmd, opt)) {
+		return 0;
+	}
+
+	aten::window::SetCurrentDirectoryFromExe();
+
+	if (opt.isExportModel)
+	{
+		aten::FbxImporter importer;
+
+		importer.setIgnoreTexIdx(0);
+		importer.open(opt.input.c_str());
+
+		std::string output = opt.output;
+		if (output.empty()) {
+			output = opt.inputFilename + ".mdl";
+		}
+
+		MdlExporter::exportMdl(
+			48, 
+			output.c_str(), 
+			&importer,
+			opt.isExportForGPUSkinning);
+
+		std::string mtrl;
+		{
+			std::string basepath, ext, filename;
+
+			aten::getStringsFromPath(
+				output,
+				basepath,
+				ext,
+				filename);
+
+			mtrl = basepath + filename + "_mtrl" + ".xml";
+		}
+
+		MtrlExporter::exportMaterial(mtrl.c_str(), &importer);
+
+		// Fbx viewer don't support GPU skinning format data.
+		if (opt.isExportForGPUSkinning) {
+			return 1;
+		}
+	}
+	else {
+		aten::FbxImporter importer;
+		
+		importer.open(opt.input.c_str(), true);
+		importer.readBaseModel(opt.anmBaseMdl.c_str());
+
+		std::string output = opt.output;
+		if (output.empty()) {
+			output = opt.inputFilename + ".anm";
+		}
+
+		AnmExporter::exportAnm(output.c_str(), 0, &importer);
+	}
+#else
 	aten::window::SetCurrentDirectoryFromExe();
 
 #if 0
@@ -216,6 +313,7 @@ int main(int argc, char* argv[])
 		importer.readBaseModel("../../asset/unitychan/unitychan.fbx");
 		AnmExporter::exportAnm("unitychan.anm", 0, &importer);
 	}
+#endif
 #endif
 
 	aten::window::init(

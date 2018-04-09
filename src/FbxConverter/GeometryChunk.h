@@ -24,13 +24,17 @@ public:
     bool exportGeometry(
         uint32_t maxJointMtxNum,
         FileOutputStream* pOut,
-        aten::FbxImporter* pImporter);
+        aten::FbxImporter* pImporter,
+		bool isExportForGPUSkinning);
 
     void Clear();
 
     /** トライアングルリストで出力するかどうかを設定.
      */
-    void setIsExportTriList(bool flag) { m_ExportTriList = flag; }
+    void setIsExportTriList(bool flag)
+	{
+		m_ExportTriList = flag;
+	}
 
 protected:
     bool exportGroup(
@@ -100,8 +104,12 @@ protected:
 
     aten::MeshHeader m_Header;
 
-    // 最大ボーンマトリクス数
+	// メッシュが影響を受けるマトリクスの最大数.
+	// シェーダに設定するマトリクス数.
     uint32_t m_MaxJointMtxNum;
+
+	// GPUスキニング向けの出力をするかどうか.
+	bool m_isExportForGPUSkinning{ false };
 
     // トライアングルリストで出力するかどうか
 	bool m_ExportTriList{ true };

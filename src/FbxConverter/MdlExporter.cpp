@@ -21,7 +21,8 @@
 bool MdlExporter::exportMdl(
     uint32_t maxJointMtxNum,
     const char* lpszOutFile,
-	aten::FbxImporter* pImporter)
+	aten::FbxImporter* pImporter,
+	bool isExportForGPUSkinning/*= false*/)
 {
     bool ret = true;
 
@@ -46,9 +47,10 @@ bool MdlExporter::exportMdl(
         VGOTO(ret, __EXIT__);
 
         ret = GeometryChunkExporter::getInstance().exportGeometry(
-                maxJointMtxNum,
-                &out,
-                pImporter);
+			maxJointMtxNum,
+            &out,
+            pImporter,
+			isExportForGPUSkinning);
     }
 
     // Skeleton chunk.
@@ -59,8 +61,8 @@ bool MdlExporter::exportMdl(
         VGOTO(ret, __EXIT__);
 
         ret = JointChunk::exportJoint(
-                &out,
-                pImporter);
+			&out,
+            pImporter);
     }
 
     // Export terminater.

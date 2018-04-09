@@ -646,7 +646,7 @@ namespace idaten
 
 			checkCudaKernel(computeBoudingBox);
 
-			printf("\n");
+			checkCudaErrors(cudaFree(executedIdxArray));
 		}
 
 		if (threadedBvhNodes) {

@@ -9,8 +9,8 @@ namespace idaten
 {
 	class Skinning {
 	public:
-		Skinning();
-		~Skinning();
+		Skinning() {}
+		~Skinning() {}
 
 	public:
 		// TODO
@@ -34,6 +34,8 @@ namespace idaten
 			uint32_t mtxNum);
 
 		void compute();
+
+		void runMinMaxTest();
 
 	private:
 		TypedCudaMemory<Vertex> m_vertices;

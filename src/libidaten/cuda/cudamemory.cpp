@@ -2,6 +2,9 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudautil.h"
 
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+
 namespace idaten {
 	static std::atomic<uint32_t> g_heapsize(0);
 
@@ -31,7 +34,7 @@ namespace idaten {
 		}
 	}
 
-	__host__ uint32_t CudaMemory::write(const void* p, uint32_t size)
+	uint32_t CudaMemory::write(const void* p, uint32_t size)
 	{
 		if (!m_device) {
 			init(size);
@@ -52,7 +55,7 @@ namespace idaten {
 		return size;
 	}
 
-	__host__ uint32_t CudaMemory::read(void* p, uint32_t size)
+	uint32_t CudaMemory::read(void* p, uint32_t size)
 	{
 		if (size == 0) {
 			size = m_bytes;

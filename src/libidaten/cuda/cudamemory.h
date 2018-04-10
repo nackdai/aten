@@ -1,10 +1,6 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
 #include "defs.h"
-#include "misc/stream.h"
 
 namespace idaten {
 	class CudaMemory {
@@ -33,8 +29,8 @@ namespace idaten {
 			return m_bytes;
 		}
 
-		__host__ uint32_t write(const void* p, uint32_t size);
-		__host__ uint32_t read(void* p, uint32_t size);
+		uint32_t write(const void* p, uint32_t size);
+		uint32_t read(void* p, uint32_t size);
 
 		operator void*()
 		{
@@ -78,7 +74,7 @@ namespace idaten {
 			m_num = num;
 		}
 
-		__host__ uint32_t writeByNum(const _T* p, uint32_t num)
+		uint32_t writeByNum(const _T* p, uint32_t num)
 		{
 			auto ret = CudaMemory::write(p, sizeof(_T) * num);
 			if (ret > 0) {
@@ -87,7 +83,7 @@ namespace idaten {
 			return ret;
 		}
 
-		__host__ uint32_t readByNum(void* p, uint32_t num = 0)
+		uint32_t readByNum(void* p, uint32_t num = 0)
 		{
 			return CudaMemory::read(p, sizeof(_T) * num);
 		}

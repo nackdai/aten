@@ -19,7 +19,7 @@ namespace idaten
 			uint32_t vtxNum, 
 			uint32_t* indices,
 			uint32_t idxNum,
-			const aten::GeomVertexBuffer& vb);
+			const aten::GeomVertexBuffer* vb);
 
 		void update(
 			const aten::mat4* matrices,
@@ -27,12 +27,16 @@ namespace idaten
 
 		void compute();
 
+		bool getComputedResult(aten::vertex* p, uint32_t num);
+
 		void runMinMaxTest();
 
 	private:
 		TypedCudaMemory<aten::SkinningVertex> m_vertices;
 		TypedCudaMemory<uint32_t> m_indices;
 		TypedCudaMemory<aten::mat4> m_matrices;
+
+		TypedCudaMemory<aten::vertex> m_dst;
 
 		CudaGLBuffer m_interopVBO;
 	};

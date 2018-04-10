@@ -155,7 +155,7 @@ namespace idaten
 		uint32_t vtxNum,
 		uint32_t* indices,
 		uint32_t idxNum,
-		const aten::GeomVertexBuffer& vb)
+		const aten::GeomVertexBuffer* vb)
 	{
 		m_vertices.init(vtxNum);
 		m_vertices.writeByNum(vertices, vtxNum);
@@ -163,8 +163,13 @@ namespace idaten
 		m_indices.init(idxNum);
 		m_indices.writeByNum(indices, idxNum);
 
-		auto glvbo = vb.getVBOHandle();
-		m_interopVBO.init(glvbo, CudaGLRscRegisterType::WriteOnly);
+		if (vb) {
+			auto glvbo = vb->getVBOHandle();
+			m_interopVBO.init(glvbo, CudaGLRscRegisterType::WriteOnly);
+		}
+		else {
+			m_dst.init(vtxNum);
+		}
 	}
 
 	void Skinning::update(
@@ -193,8 +198,13 @@ namespace idaten
 			aten::vertex* dst = nullptr;
 			size_t vtxbytes = 0;
 
-			m_interopVBO.map();
-			m_interopVBO.bind((void**)&dst, vtxbytes);
+			if (m_interopVBO.isValid()) {
+				m_interopVBO.map();
+				m_interopVBO.bind((void**)&dst, vtxbytes);
+			}
+			else {
+				dst = m_dst.ptr();
+			}
 
 			computeSkinning << <grid, block >> > (
 				idxNum,
@@ -205,13 +215,26 @@ namespace idaten
 
 			checkCudaKernel(computeSkinning);
 
-			m_interopVBO.unmap();
+			if (m_interopVBO.isValid()) {
+				m_interopVBO.unmap();
+			}
 		}
 
 		// Get min/max.
 		{
 			// TODO
 		}
+	}
+
+	bool Skinning::getComputedResult(aten::vertex* p, uint32_t num)
+	{
+		if (m_dst.bytes() == 0) {
+			return false;
+		}
+
+		m_dst.readByNum(p, num);
+
+		return true;
 	}
 
 	void Skinning::runMinMaxTest()

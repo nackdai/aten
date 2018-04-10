@@ -71,8 +71,23 @@ namespace aten {
 			uint32_t idxOffset,
 			uint32_t primNum);
 
-		void* beginRead();
-		void endRead();
+		void* beginRead()
+		{
+			return beginMap(true);
+		}
+		void endRead()
+		{
+			endMap();
+		}
+
+		void* beginWrite()
+		{
+			return beginMap(false);
+		}
+		void endWrite()
+		{
+			endMap();
+		}
 
 		void clear();
 
@@ -91,6 +106,10 @@ namespace aten {
 			return m_vbo;
 		}
 
+	private:
+		void* beginMap(bool isRead);
+		void endMap();
+
 	protected:
 		uint32_t m_vbo{ 0 };
 		uint32_t m_vao{ 0 };
@@ -101,7 +120,7 @@ namespace aten {
 
 		uint32_t m_initVtxNum{ 0 };
 
-		bool m_isReading{ false };
+		bool m_isMapping{ false };
 	};
 
 	//////////////////////////////////////////////////////////

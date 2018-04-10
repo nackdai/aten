@@ -216,29 +216,29 @@ namespace aten {
 		CALL_GL_API(::glDrawArrays(prims[mode], idxOffset, vtxNum));
 	}
 
-	void* GeomVertexBuffer::beginRead()
+	void* GeomVertexBuffer::beginMap(bool isRead)
 	{
 		AT_ASSERT(m_vbo > 0);
-		AT_ASSERT(!m_isReading);
+		AT_ASSERT(!m_isMapping);
 
 		void* ret = nullptr;
 
-		if (!m_isReading) {
-			CALL_GL_API(ret = ::glMapNamedBuffer(m_vbo, GL_READ_ONLY));
-			m_isReading = true;
+		if (!m_isMapping) {
+			CALL_GL_API(ret = ::glMapNamedBuffer(m_vbo, isRead ? GL_READ_ONLY : GL_WRITE_ONLY));
+			m_isMapping = true;
 		}
 
 		return ret;
 	}
 
-	void GeomVertexBuffer::endRead()
+	void GeomVertexBuffer::endMap()
 	{
 		AT_ASSERT(m_vbo > 0);
-		AT_ASSERT(m_isReading);
+		AT_ASSERT(m_isMapping);
 
-		if (m_isReading) {
+		if (m_isMapping) {
 			CALL_GL_API(::glUnmapNamedBuffer(m_vbo));
-			m_isReading = false;
+			m_isMapping = false;
 		}
 	}
 

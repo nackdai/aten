@@ -7,7 +7,8 @@ namespace aten {
 		uint32_t stride,
 		uint32_t vtxNum,
 		uint32_t offset,
-		const void* data)
+		const void* data,
+		bool isDynamic/*= false*/)
 	{
 		// Fix vertex structure
 		//  float4 pos
@@ -26,7 +27,8 @@ namespace aten {
 			offset,
 			attribs,
 			AT_COUNTOF(attribs),
-			data);
+			data,
+			isDynamic);
 	}
 
 	void GeomVertexBuffer::init(
@@ -35,7 +37,8 @@ namespace aten {
 		uint32_t offset,
 		const VertexAttrib* attribs,
 		uint32_t attribNum,
-		const void* data)
+		const void* data,
+		bool isDynamic/*= false*/)
 	{
 		AT_ASSERT(m_vbo == 0);
 		AT_ASSERT(m_vao == 0);
@@ -56,7 +59,7 @@ namespace aten {
 			GL_ARRAY_BUFFER,
 			size,
 			data,
-			GL_STATIC_DRAW));
+			isDynamic ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW));
 
 		// VAO
 		{
@@ -211,6 +214,32 @@ namespace aten {
 		auto vtxNum = computeVtxNum(mode, primNum);
 
 		CALL_GL_API(::glDrawArrays(prims[mode], idxOffset, vtxNum));
+	}
+
+	void* GeomVertexBuffer::beginRead()
+	{
+		AT_ASSERT(m_vbo > 0);
+		AT_ASSERT(!m_isReading);
+
+		void* ret = nullptr;
+
+		if (!m_isReading) {
+			CALL_GL_API(ret = ::glMapNamedBuffer(m_vbo, GL_READ_ONLY));
+			m_isReading = true;
+		}
+
+		return ret;
+	}
+
+	void GeomVertexBuffer::endRead()
+	{
+		AT_ASSERT(m_vbo > 0);
+		AT_ASSERT(m_isReading);
+
+		if (m_isReading) {
+			CALL_GL_API(::glUnmapNamedBuffer(m_vbo));
+			m_isReading = false;
+		}
 	}
 
 	void GeomVertexBuffer::clear()

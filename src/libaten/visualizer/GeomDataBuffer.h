@@ -39,7 +39,8 @@ namespace aten {
 			uint32_t stride,
 			uint32_t vtxNum,
 			uint32_t offset,
-			const void* data);
+			const void* data,
+			bool isDynamic = false);
 
 		void init(
 			uint32_t stride,
@@ -47,7 +48,8 @@ namespace aten {
 			uint32_t offset,
 			const VertexAttrib* attribs,
 			uint32_t attribNum,
-			const void* data);
+			const void* data,
+			bool isDynamic = false);
 
 		void initNoVAO(
 			uint32_t stride,
@@ -69,11 +71,19 @@ namespace aten {
 			uint32_t idxOffset,
 			uint32_t primNum);
 
+		void* beginRead();
+		void endRead();
+
 		void clear();
 
 		uint32_t getVtxNum() const
 		{
 			return m_vtxNum;
+		}
+
+		uint32_t getStride() const
+		{
+			return m_vtxStride;
 		}
 
 		uint32_t getVBOHandle() const
@@ -90,6 +100,8 @@ namespace aten {
 		uint32_t m_vtxOffset{ 0 };
 
 		uint32_t m_initVtxNum{ 0 };
+
+		bool m_isReading{ false };
 	};
 
 	//////////////////////////////////////////////////////////

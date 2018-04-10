@@ -177,6 +177,7 @@ namespace idaten
 
 		AT_ASSERT(m_matrices.maxNum() >= mtxNum);
 
+		m_matrices.reset();
 		m_matrices.writeByNum(matrices, mtxNum);
 	}
 
@@ -189,11 +190,11 @@ namespace idaten
 			dim3 block(256);
 			dim3 grid((idxNum + block.x - 1) / block.x);
 
-			aten::vertex* dst;
-			size_t vtxbytes;
+			aten::vertex* dst = nullptr;
+			size_t vtxbytes = 0;
 
 			m_interopVBO.map();
-			m_interopVBO.bind(dst, vtxbytes);
+			m_interopVBO.bind((void**)&dst, vtxbytes);
 
 			computeSkinning << <grid, block >> > (
 				idxNum,

@@ -116,7 +116,7 @@ namespace aten
 		FileInputStream* stream,
 		IDeformMeshReadHelper* helper,
 		std::vector<GeomVertexBuffer>& vbs,
-		bool needKeepGeometryData)
+		bool isGPUSkinning)
 	{
 		static SetVtxAttribFunc funcSetVtxAttrib[] = {
 			setVtxAttribPos,
@@ -155,14 +155,19 @@ namespace aten
 					m_prims.resize(m_desc.numSubset);
 
 					for (auto& prim : m_prims) {
-						AT_VRETURN_FALSE(prim.read(stream, needKeepGeometryData));
+						AT_VRETURN_FALSE(prim.read(stream, isGPUSkinning));
 
-						const auto& primDesc = prim.getDesc();
-						auto& vb = vbs[primDesc.idxVB];
+						if (isGPUSkinning) {
+							// Nothing...
+						}
+						else {
+							const auto& primDesc = prim.getDesc();
+							auto& vb = vbs[primDesc.idxVB];
 
-						helper->createVAO(&vb, attribs, attribNum);
+							helper->createVAO(&vb, attribs, attribNum);
 
-						prim.setVB(&vb);
+							prim.setVB(&vb);
+						}
 					}
 				}
 			}
@@ -171,15 +176,23 @@ namespace aten
 		return true;
 	}
 
+	void DeformMeshSet::setExternalVertexBuffer(GeomVertexBuffer& vb)
+	{
+		for (auto& prim : m_prims) {
+			prim.setVB(&vb);
+		}
+	}
+
 	void DeformMeshSet::render(
 		const SkeletonController& skeleton,
-		IDeformMeshRenderHelper* helper)
+		IDeformMeshRenderHelper* helper,
+		bool isGPUSkinning)
 	{
 		// material...
 		helper->applyMaterial(m_desc.mtrl);
 
 		for (auto& prim : m_prims) {
-			prim.render(skeleton, helper);
+			prim.render(skeleton, helper, isGPUSkinning);
 		}
 	}
 }

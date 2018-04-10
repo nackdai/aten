@@ -1,5 +1,8 @@
 #include "deformable/DeformMeshGroup.h"
 #include "misc/stream.h"
+#include "geometry/vertex.h"
+
+#include "visualizer/atengl.h"
 
 #include <algorithm>
 #include <iterator>
@@ -9,9 +12,11 @@ namespace aten
 	bool DeformMeshGroup::read(
 		FileInputStream* stream,
 		IDeformMeshReadHelper* helper,
-		bool needKeepGeometryData)
+		bool isGPUSkinning)
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
+
+		uint32_t totalVtxNum = 0;
 
 		// Read vertices.
 		{
@@ -23,23 +28,26 @@ namespace aten
 
 				auto bytes = vtxDesc.numVtx * vtxDesc.sizeVtx;
 
+				totalVtxNum += vtxDesc.numVtx;
+
 				std::vector<uint8_t> buf;
 				buf.resize(bytes);
 
 				AT_VRETURN_FALSE(AT_STREAM_READ(stream, &buf[0], bytes));
 
-				m_vbs[i].initNoVAO(
-					vtxDesc.sizeVtx,
-					vtxDesc.numVtx,
-					0,
-					&buf[0]);
-
-				if (needKeepGeometryData) {
+				if (isGPUSkinning) {
 					// Need to keep vertices data.
 					std::copy(
 						buf.begin(),
 						buf.end(),
 						std::back_inserter(m_vertices));
+				}
+				else {
+					m_vbs[i].initNoVAO(
+						vtxDesc.sizeVtx,
+						vtxDesc.numVtx,
+						0,
+						&buf[0]);
 				}
 			}
 		}
@@ -48,7 +56,22 @@ namespace aten
 			m_meshs.resize(m_desc.numMeshSet);
 
 			for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
-				AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, m_vbs, needKeepGeometryData));
+				AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, m_vbs, isGPUSkinning));
+			}
+		}
+
+		if (isGPUSkinning) {
+			// TODO
+			// シェーダの input とどう合わせるか...
+
+			m_vbForGPUSkinning.init(
+				sizeof(vertex),
+				totalVtxNum,
+				0,
+				nullptr);
+
+			for (auto& m : m_meshs) {
+				m.setExternalVertexBuffer(m_vbForGPUSkinning);
 			}
 		}
 
@@ -57,10 +80,11 @@ namespace aten
 
 	void DeformMeshGroup::render(
 		const SkeletonController& skeleton,
-		IDeformMeshRenderHelper* helper)
+		IDeformMeshRenderHelper* helper,
+		bool isGPUSkinning)
 	{
 		for (auto& mesh : m_meshs) {
-			mesh.render(skeleton, helper);
+			mesh.render(skeleton, helper, isGPUSkinning);
 		}
 	}
 

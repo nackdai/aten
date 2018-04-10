@@ -9,14 +9,16 @@ namespace aten
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_header, sizeof(m_header)));
 
+		// TODO
+		// Not support multi group (aka. LOD).
 		m_header.numMeshGroup = 1;
 
-		bool needKeepGeometryData = m_header.isGPUSkinning;
+		bool isGPUSkinning = m_header.isGPUSkinning;
 
 		m_groups.resize(m_header.numMeshGroup);
 
 		for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
-			AT_VRETURN_FALSE(m_groups[i].read(stream, helper, needKeepGeometryData));
+			AT_VRETURN_FALSE(m_groups[i].read(stream, helper, isGPUSkinning));
 		}
 
 		return true;
@@ -26,17 +28,14 @@ namespace aten
 		const SkeletonController& skeleton,
 		IDeformMeshRenderHelper* helper)
 	{
-		for (auto& group : m_groups) {
-			group.render(skeleton, helper);
-		}
+		bool isGPUSkinning = m_header.isGPUSkinning;
+		m_groups[0].render(skeleton, helper, isGPUSkinning);
 	}
 
 	void DeformMesh::getGeometryData(
 		std::vector<SkinningVertex>& vtx,
 		std::vector<uint32_t>& idx) const
 	{
-		for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
-			m_groups[i].getGeometryData(vtx, idx);
-		}
+		m_groups[0].getGeometryData(vtx, idx);
 	}
 }

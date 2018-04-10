@@ -9,7 +9,7 @@ namespace aten
 {
 	bool DeformPrimitives::read(
 		FileInputStream* stream,
-		bool needKeepIndices)
+		bool isGPUSkinning)
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
 
@@ -26,7 +26,7 @@ namespace aten
 			m_ib.init(m_desc.numIdx, &m_indices[0]);
 		}
 
-		if (!needKeepIndices) {
+		if (!isGPUSkinning) {
 			// Not need to keep indices data.
 			m_indices.clear();
 		}
@@ -36,21 +36,27 @@ namespace aten
 
 	void DeformPrimitives::render(
 		const SkeletonController& skeleton,
-		IDeformMeshRenderHelper* helper)
+		IDeformMeshRenderHelper* helper,
+		bool isGPUSkinning)
 	{
-		for (uint32_t i = 0; i < m_desc.numJoints; i++) {
-			auto jointIdx = m_joints[i];
+		if (isGPUSkinning) {
+			// Nothing...
+		}
+		else {
+			for (uint32_t i = 0; i < m_desc.numJoints; i++) {
+				auto jointIdx = m_joints[i];
 
-			if (jointIdx < 0) {
-				break;
+				if (jointIdx < 0) {
+					break;
+				}
+
+				const auto& mtxJoint = skeleton.getMatrix(jointIdx);
+
+				helper->applyMatrix(i, mtxJoint);
 			}
 
-			const auto& mtxJoint = skeleton.getMatrix(jointIdx);
-
-			helper->applyMatrix(i, mtxJoint);
+			helper->commitChanges();
 		}
-
-		helper->commitChanges();
 
 		uint32_t primNum = m_desc.numIdx / 3;
 

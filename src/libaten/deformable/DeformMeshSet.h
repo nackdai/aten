@@ -35,11 +35,14 @@ namespace aten
 			FileInputStream* stream,
 			IDeformMeshReadHelper* helper,
 			std::vector<GeomVertexBuffer>& vbs,
-			bool needKeepGeometryData);
+			bool isGPUSkinning);
+
+		void setExternalVertexBuffer(GeomVertexBuffer& vb);
 
 		void render(
 			const SkeletonController& skeleton,
-			IDeformMeshRenderHelper* helper);
+			IDeformMeshRenderHelper* helper,
+			bool isGPUSkinning);
 
 		const std::vector<DeformPrimitives>& getPrimitives() const
 		{

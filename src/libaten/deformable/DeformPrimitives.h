@@ -40,11 +40,12 @@ namespace aten
 	private:
 		bool read(
 			FileInputStream* stream,
-			bool needKeepIndices);
+			bool isGPUSkinning);
 
 		void render(
 			const SkeletonController& skeleton,
-			IDeformMeshRenderHelper* helper);
+			IDeformMeshRenderHelper* helper,
+			bool isGPUSkinning);
 
 		const PrimitiveSet& getDesc() const
 		{

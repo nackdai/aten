@@ -41,6 +41,11 @@ namespace aten
 			return m_mesh.getDesc().isGPUSkinning;
 		}
 
+		GeomVertexBuffer& getVBForGPUSkinning()
+		{
+			return m_mesh.getVBForGPUSkinning();
+		}
+
 	private:
 		DeformMesh m_mesh;
 

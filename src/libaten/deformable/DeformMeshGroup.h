@@ -23,15 +23,21 @@ namespace aten
 		bool read(
 			FileInputStream* stream,
 			IDeformMeshReadHelper* helper,
-			bool needKeepGeometryData);
+			bool isGPUSkinning);
 
 		void render(
 			const SkeletonController& skeleton,
-			IDeformMeshRenderHelper* helper);
+			IDeformMeshRenderHelper* helper,
+			bool isGPUSkinning);
 
 		void getGeometryData(
 			std::vector<SkinningVertex>& vtx,
 			std::vector<uint32_t>& idx) const;
+
+		GeomVertexBuffer& getVBForGPUSkinning()
+		{
+			return m_vbForGPUSkinning;
+		}
 
 	private:
 		MeshGroup m_desc;
@@ -40,5 +46,7 @@ namespace aten
 
 		std::vector<DeformMeshSet> m_meshs;
 		std::vector<GeomVertexBuffer> m_vbs;
+
+		GeomVertexBuffer m_vbForGPUSkinning;
 	};
 }

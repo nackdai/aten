@@ -40,6 +40,12 @@ namespace aten
 			return m_header;
 		}
 
+		GeomVertexBuffer& getVBForGPUSkinning()
+		{
+			// TODO
+			return m_groups[0].getVBForGPUSkinning();
+		}
+
 	private:
 		MeshHeader m_header;
 

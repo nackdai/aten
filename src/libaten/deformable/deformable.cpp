@@ -238,10 +238,9 @@ namespace aten
 			auto hMtxW2C = s_shd.getHandle("mtxW2C");
 			CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
-			// TODO
-			aten::mat4 mtxL2W;
-			auto hMtxL2W = s_shd.getHandle("mtxL2W");
-			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+			// NOTE
+			// グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.
+			// そのため、シェーダでは計算する必要がないので、シェーダに渡さない.
 		}
 
 		mdl->render(&s_shd);

@@ -837,20 +837,30 @@ bool GeometryChunkExporter::exportVertices(
 			// For debug.
 			uint32_t vtxSize = 0;
 
-            // 出力済み頂点かどうか
-            auto itFind = std::find(
-                m_ExportedVtx.begin(),
-                m_ExportedVtx.end(),
-                nVtxIdx);
+			bool isExported = false;
 
-            // 頂点データ出力に応じたインデックスに変換
-            if (itFind != m_ExportedVtx.end()) {
-                // Exported...
-                sTri.vtx[nVtxPos] = (uint32_t)std::distance(m_ExportedVtx.begin(), itFind);
-            }
-            else {
-                sTri.vtx[nVtxPos] = (uint32_t)m_ExportedVtx.size();
-            }
+			if (m_isExportForGPUSkinning) {
+				// GPU スキニング向けにはインデックスは一気通貫になるようにするので何もしない.
+			}
+			else {
+				// プリミティブセット単位でインデックスをゼロベースになるように変換する.
+
+				// 出力済み頂点かどうか
+				auto itFind = std::find(
+					m_ExportedVtx.begin(),
+					m_ExportedVtx.end(),
+					nVtxIdx);
+
+				// 頂点データ出力に応じたインデックスに変換
+				if (itFind != m_ExportedVtx.end()) {
+					// Exported...
+					sTri.vtx[nVtxPos] = (uint32_t)std::distance(m_ExportedVtx.begin(), itFind);
+					isExported = true;
+				}
+				else {
+					sTri.vtx[nVtxPos] = (uint32_t)m_ExportedVtx.size();
+				}
+			}
 
             uint32_t nIdx = sTri.vtx[nVtxPos];
             AT_ASSERT(nIdx <= UINT16_MAX);
@@ -858,7 +868,7 @@ bool GeometryChunkExporter::exportVertices(
             nMinIdx = (nIdx < nMinIdx ? nIdx : nMinIdx);
             nMaxIdx = (nIdx > nMaxIdx ? nIdx : nMaxIdx);
 
-            if (itFind != m_ExportedVtx.end()) {
+            if (isExported) {
                 // 出力済み頂点なのでこれ以上は何もしない
                 continue;
             }

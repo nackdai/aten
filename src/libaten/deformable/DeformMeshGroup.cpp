@@ -16,11 +16,11 @@ namespace aten
 	{
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
 
-		uint32_t totalVtxNum = 0;
-
 		// Read vertices.
 		{
 			m_vbs.resize(m_desc.numVB);
+
+			m_vtxTotalNum = 0;
 
 			for (uint32_t i = 0; i < m_desc.numVB; i++) {
 				MeshVertex vtxDesc;
@@ -28,7 +28,7 @@ namespace aten
 
 				auto bytes = vtxDesc.numVtx * vtxDesc.sizeVtx;
 
-				totalVtxNum += vtxDesc.numVtx;
+				m_vtxTotalNum += vtxDesc.numVtx;
 
 				std::vector<uint8_t> buf;
 				buf.resize(bytes);
@@ -36,6 +36,8 @@ namespace aten
 				AT_VRETURN_FALSE(AT_STREAM_READ(stream, &buf[0], bytes));
 
 				if (isGPUSkinning) {
+					m_vtxNumList.push_back(vtxDesc.numVtx);
+
 					// Need to keep vertices data.
 					std::copy(
 						buf.begin(),
@@ -66,9 +68,10 @@ namespace aten
 
 			m_vbForGPUSkinning.init(
 				sizeof(vertex),
-				totalVtxNum,
+				m_vtxTotalNum,
 				0,
-				nullptr);
+				nullptr,
+				true);
 
 			for (auto& m : m_meshs) {
 				m.setExternalVertexBuffer(m_vbForGPUSkinning);
@@ -92,23 +95,17 @@ namespace aten
 		std::vector<SkinningVertex>& vtx,
 		std::vector<uint32_t>& idx) const
 	{
-		uint32_t totalVtxNum = 0;
-
-		for (uint32_t i = 0; i < m_desc.numVB; i++) {
-			totalVtxNum += m_vbs[i].getVtxNum();
-		}
-
-		vtx.reserve(totalVtxNum);
+		vtx.resize(m_vtxTotalNum);
 
 		// TODO
 		// 頂点フォーマット固定...
-		AT_ASSERT(sizeof(uint8_t) * m_vertices.size() == sizeof(SkinningVertex) * totalVtxNum);
+		AT_ASSERT(sizeof(uint8_t) * m_vertices.size() == sizeof(SkinningVertex) * m_vtxTotalNum);
 
 		uint32_t curPos = 0;
 
 		// Vertex.
 		for (uint32_t i = 0; i < m_desc.numVB; i++) {
-			auto numVtx = m_vbs[i].getVtxNum();
+			auto numVtx = m_vtxNumList[i];
 
 			// TODO
 			// 頂点フォーマット固定...

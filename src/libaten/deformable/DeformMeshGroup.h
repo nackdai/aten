@@ -42,6 +42,8 @@ namespace aten
 	private:
 		MeshGroup m_desc;
 
+		uint32_t m_vtxTotalNum{ 0 };
+		std::vector<uint32_t> m_vtxNumList;
 		std::vector<uint8_t> m_vertices;
 
 		std::vector<DeformMeshSet> m_meshs;

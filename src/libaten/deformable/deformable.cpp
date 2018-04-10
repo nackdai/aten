@@ -172,17 +172,14 @@ namespace aten
 
 	void deformable::getGeometryData(
 		std::vector<SkinningVertex>& vtx,
-		std::vector<uint32_t>& idx,
-		std::vector<mat4>& mtx) const
+		std::vector<uint32_t>& idx) const
 	{
 		m_mesh.getGeometryData(vtx, idx);
+	}
 
-		const auto& matrices = m_sklController.getMatrices();
-
-		std::copy(
-			matrices.begin(),
-			matrices.end(),
-			std::back_inserter(mtx));
+	const std::vector<mat4>& deformable::getMatrices() const
+	{
+		return m_sklController.getMatrices();
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -240,6 +237,11 @@ namespace aten
 
 			auto hMtxW2C = s_shd.getHandle("mtxW2C");
 			CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+			// TODO
+			aten::mat4 mtxL2W;
+			auto hMtxL2W = s_shd.getHandle("mtxL2W");
+			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
 		}
 
 		mdl->render(&s_shd);

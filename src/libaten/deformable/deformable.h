@@ -33,8 +33,9 @@ namespace aten
 
 		void getGeometryData(
 			std::vector<SkinningVertex>& vtx,
-			std::vector<uint32_t>& idx,
-			std::vector<mat4>& mtx) const;
+			std::vector<uint32_t>& idx) const;
+
+		const std::vector<mat4>& getMatrices() const;
 
 		bool isEnabledForGPUSkinning() const
 		{

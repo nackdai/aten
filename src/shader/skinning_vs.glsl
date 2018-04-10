@@ -10,6 +10,7 @@ layout(location = 4) in vec4 blendIndex;
 layout(location = 5) in vec4 blendWeight;
 
 uniform mat4 mtxJoint[48];
+uniform mat4 mtxL2W;
 uniform mat4 mtxW2C;
 
 layout(location = 0) out vec3 outNormal;
@@ -32,7 +33,7 @@ void main()
 	}
 
 	gl_Position.w = 1;
-	gl_Position = mtxW2C * gl_Position;
+	gl_Position = mtxW2C * mtxL2W * gl_Position;
 	outNormal = normalize(outNormal);
 
 	outUV = uv;

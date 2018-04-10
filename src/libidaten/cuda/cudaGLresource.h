@@ -103,7 +103,7 @@ namespace idaten
 			return (m_glbuffer > 0);
 		}
 
-		void bind(void* p, size_t& bytes);
+		void bind(void** p, size_t& bytes);
 		void unbind();
 
 		virtual void unmap() override final

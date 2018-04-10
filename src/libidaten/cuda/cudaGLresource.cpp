@@ -73,13 +73,12 @@ namespace idaten
 		}
 	}
 
-	void CudaGLBuffer::bind(void* p, size_t& bytes)
+	void CudaGLBuffer::bind(void** p, size_t& bytes)
 	{
 		AT_ASSERT(m_rsc);
 
-		checkCudaErrors(cudaGraphicsMapResources(1, &m_rsc, 0));
 		checkCudaErrors(cudaGraphicsResourceGetMappedPointer(
-			(void**)&p,
+			(void**)p,
 			&bytes,
 			m_rsc));
 	}

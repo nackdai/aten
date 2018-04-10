@@ -168,7 +168,7 @@ namespace idaten
 	}
 
 	void Skinning::update(
-		aten::mat4* matrices,
+		const aten::mat4* matrices,
 		uint32_t mtxNum)
 	{
 		if (m_matrices.bytes() == 0) {

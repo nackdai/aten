@@ -22,7 +22,7 @@ namespace idaten
 			const aten::GeomVertexBuffer& vb);
 
 		void update(
-			aten::mat4* matrices,
+			const aten::mat4* matrices,
 			uint32_t mtxNum);
 
 		void compute();

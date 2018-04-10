@@ -36,8 +36,6 @@ namespace aten
 				AT_VRETURN_FALSE(AT_STREAM_READ(stream, &buf[0], bytes));
 
 				if (isGPUSkinning) {
-					m_vtxNumList.push_back(vtxDesc.numVtx);
-
 					// Need to keep vertices data.
 					std::copy(
 						buf.begin(),
@@ -95,27 +93,16 @@ namespace aten
 		std::vector<SkinningVertex>& vtx,
 		std::vector<uint32_t>& idx) const
 	{
-		vtx.resize(m_vtxTotalNum);
-
 		// TODO
 		// 頂点フォーマット固定...
 		AT_ASSERT(sizeof(uint8_t) * m_vertices.size() == sizeof(SkinningVertex) * m_vtxTotalNum);
 
-		uint32_t curPos = 0;
-
 		// Vertex.
-		for (uint32_t i = 0; i < m_desc.numVB; i++) {
-			auto numVtx = m_vtxNumList[i];
+		{
+			vtx.resize(m_vtxTotalNum);
 
-			// TODO
-			// 頂点フォーマット固定...
-			const SkinningVertex* pvtx = reinterpret_cast<const SkinningVertex*>(&m_vertices[0]);
-			auto size = numVtx * sizeof(SkinningVertex);
-
-			// Copy.
-			memcpy(&vtx[0] + curPos, pvtx, size);
-
-			curPos += numVtx;
+			auto size = m_vtxTotalNum * sizeof(SkinningVertex);
+			memcpy(&vtx[0], &m_vertices[0], size);
 		}
 
 		// Index.

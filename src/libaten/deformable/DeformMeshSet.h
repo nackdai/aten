@@ -1,6 +1,7 @@
 #pragma once
 
 #include "deformable/DeformPrimitives.h"
+#include "geometry/geombase.h"
 
 namespace aten
 {
@@ -23,7 +24,7 @@ namespace aten
 	 *
 	 * マテリアルごとのプリミティブセットの集まり
 	 */
-	class DeformMeshSet {
+	class DeformMeshSet : public geombase {
 		friend class DeformMeshGroup;
 
 	public:
@@ -47,6 +48,11 @@ namespace aten
 		const std::vector<DeformPrimitives>& getPrimitives() const
 		{
 			return m_prims;
+		}
+
+		const MeshSet& getDesc() const
+		{
+			return m_desc;
 		}
 
 	private:

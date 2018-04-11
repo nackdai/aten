@@ -34,8 +34,9 @@ namespace aten
 
 	void DeformMesh::getGeometryData(
 		std::vector<SkinningVertex>& vtx,
-		std::vector<uint32_t>& idx) const
+		std::vector<uint32_t>& idx,
+		std::vector<aten::PrimitiveParamter>& tris) const
 	{
-		m_groups[0].getGeometryData(vtx, idx);
+		m_groups[0].getGeometryData(vtx, idx, tris);
 	}
 }

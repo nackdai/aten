@@ -296,13 +296,21 @@ int main(int argc, char* argv[])
 
 		std::vector<aten::SkinningVertex> vtx;
 		std::vector<uint32_t> idx;
+		std::vector<aten::PrimitiveParamter> tris;
 
-		g_mdl.getGeometryData(vtx, idx);
+		g_mdl.getGeometryData(vtx, idx, tris);
 
+#if 0
 		skinning.init(
 			&vtx[0], vtx.size(),
 			&idx[0], idx.size(),
 			&vb);
+#else
+		skinning.initWithTriangles(
+			&vtx[0], vtx.size(),
+			&tris[0], tris.size(),
+			&vb);
+#endif
 	}
 
 	aten::window::run();

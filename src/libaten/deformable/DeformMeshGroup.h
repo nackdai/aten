@@ -2,6 +2,7 @@
 
 #include "deformable/DeformMeshSet.h"
 #include "deformable/SkinningVertex.h"
+#include "geometry/geomparam.h"
 
 namespace aten
 {
@@ -32,7 +33,8 @@ namespace aten
 
 		void getGeometryData(
 			std::vector<SkinningVertex>& vtx,
-			std::vector<uint32_t>& idx) const;
+			std::vector<uint32_t>& idx,
+			std::vector<aten::PrimitiveParamter>& tris) const;
 
 		GeomVertexBuffer& getVBForGPUSkinning()
 		{

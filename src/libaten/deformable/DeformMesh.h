@@ -33,7 +33,8 @@ namespace aten
 
 		void getGeometryData(
 			std::vector<SkinningVertex>& vtx,
-			std::vector<uint32_t>& idx) const;
+			std::vector<uint32_t>& idx,
+			std::vector<aten::PrimitiveParamter>& tris) const;
 
 		const MeshHeader& getDesc() const
 		{

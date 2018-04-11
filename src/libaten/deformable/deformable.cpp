@@ -169,9 +169,10 @@ namespace aten
 
 	void deformable::getGeometryData(
 		std::vector<SkinningVertex>& vtx,
-		std::vector<uint32_t>& idx) const
+		std::vector<uint32_t>& idx,
+		std::vector<aten::PrimitiveParamter>& tris) const
 	{
-		m_mesh.getGeometryData(vtx, idx);
+		m_mesh.getGeometryData(vtx, idx, tris);
 	}
 
 	const std::vector<mat4>& deformable::getMatrices() const

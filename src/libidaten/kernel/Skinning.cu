@@ -47,6 +47,61 @@ __global__ void computeSkinning(
 	dst[idx].uv = aten::vec3(vtx->uv[0], vtx->uv[1], 0);
 }
 
+__global__ void computeSkinningWithTriangles(
+	uint32_t triNum,
+	const aten::SkinningVertex* __restrict__ vertices,
+	aten::PrimitiveParamter* triangles,
+	const aten::mat4* __restrict__ matrices,
+	aten::vertex* dst)
+{
+	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (idx >= triNum) {
+		return;
+	}
+
+	auto* tri = &triangles[idx];
+
+#pragma unroll
+	for (int t = 0; t < 3; t++) {
+		const auto vtxIdx = tri->idx[t];
+		const auto* vtx = &vertices[vtxIdx];
+
+		aten::vec4 srcPos = vtx->position;
+		aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
+
+		aten::vec4 dstPos(0);
+		aten::vec4 dstNml(0);
+
+		for (int i = 0; i < 4; i++) {
+			int idx = int(vtx->blendIndex[i]);
+			float weight = vtx->blendWeight[i];
+
+			aten::mat4 mtx = matrices[idx];
+
+			dstPos += weight * mtx * vtx->position;
+			dstNml += weight * mtx * srcNml;
+		}
+
+		dstNml = normalize(dstNml);
+
+		dst[vtxIdx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, 1);
+		dst[vtxIdx].nml = dstNml;
+		dst[vtxIdx].uv = aten::vec3(vtx->uv[0], vtx->uv[1], 0);
+	}
+
+	{
+		const auto& v0 = dst[tri->idx[0]].pos;
+		const auto& v1 = dst[tri->idx[1]].pos;
+		const auto& v2 = dst[tri->idx[2]].pos;
+
+		auto a = v1 - v0;
+		auto b = v2 - v0;
+		
+		tri->area = cross(a, b).length();
+	}
+}
+
 // NOTE
 // http://www.cuvilib.com/Reduction.pdf
 // https://github.com/AJcodes/cuda_minmax/blob/master/cuda_minmax/kernel.cu
@@ -96,8 +151,6 @@ __global__ void getMinMax(
 		maxPos[tid] = src[idx];
 	}
 #else
-	auto pos = src[idx].pos;
-
 	extern __shared__ aten::vec3 minPos[];
 	__shared__ aten::vec3* maxPos;
 
@@ -110,6 +163,7 @@ __global__ void getMinMax(
 		maxPos[tid] = dstMax[idx];
 	}
 	else {
+		auto pos = src[idx].pos;
 		minPos[tid] = pos;
 		maxPos[tid] = pos;
 	}
@@ -172,6 +226,29 @@ namespace idaten
 		}
 	}
 
+
+	void Skinning::initWithTriangles(
+		aten::SkinningVertex* vertices,
+		uint32_t vtxNum,
+		aten::PrimitiveParamter* tris,
+		uint32_t triNum,
+		const aten::GeomVertexBuffer* vb)
+	{
+		m_vertices.init(vtxNum);
+		m_vertices.writeByNum(vertices, vtxNum);
+
+		m_triangles.init(triNum);
+		m_triangles.writeByNum(tris, triNum);
+
+		if (vb) {
+			auto glvbo = vb->getVBOHandle();
+			m_interopVBO.init(glvbo, CudaGLRscRegisterType::WriteOnly);
+		}
+		else {
+			m_dst.init(vtxNum);
+		}
+	}
+
 	void Skinning::update(
 		const aten::mat4* matrices,
 		uint32_t mtxNum)
@@ -190,11 +267,6 @@ namespace idaten
 	{
 		// Skinning.
 		{
-			const auto idxNum = m_indices.maxNum();
-
-			dim3 block(256);
-			dim3 grid((idxNum + block.x - 1) / block.x);
-
 			aten::vertex* dst = nullptr;
 			size_t vtxbytes = 0;
 
@@ -206,12 +278,34 @@ namespace idaten
 				dst = m_dst.ptr();
 			}
 
-			computeSkinning << <grid, block >> > (
-				idxNum,
-				m_vertices.ptr(),
-				m_indices.ptr(),
-				m_matrices.ptr(),
-				dst);
+			auto willComputeWithTriangles = m_triangles.maxNum() > 0;
+
+			if (willComputeWithTriangles) {
+				const auto triNum = m_triangles.maxNum();
+
+				dim3 block(256);
+				dim3 grid((triNum + block.x - 1) / block.x);
+
+				computeSkinningWithTriangles << <grid, block >> > (
+					triNum,
+					m_vertices.ptr(),
+					m_triangles.ptr(),
+					m_matrices.ptr(),
+					dst);
+			}
+			else {
+				const auto idxNum = m_indices.maxNum();
+
+				dim3 block(256);
+				dim3 grid((idxNum + block.x - 1) / block.x);
+
+				computeSkinning << <grid, block >> > (
+					idxNum,
+					m_vertices.ptr(),
+					m_indices.ptr(),
+					m_matrices.ptr(),
+					dst);
+			}
 
 			checkCudaKernel(computeSkinning);
 

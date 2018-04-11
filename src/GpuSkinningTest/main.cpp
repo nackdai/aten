@@ -51,10 +51,12 @@ void onRun(aten::window* window)
 	g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
 	//g_mdl.update(aten::mat4(), nullptr, 0);
 
+	aten::vec3 aabbMin, aabbMax;
+
 	if (s_isGPUSkinning) {
 		const auto& mtx = g_mdl.getMatrices();
 		skinning.update(&mtx[0], mtx.size());
-		skinning.compute();
+		skinning.compute(0, aabbMin, aabbMax);
 	}
 
 	aten::DeformableRenderer::render(&g_camera, &g_mdl);

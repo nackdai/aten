@@ -32,7 +32,10 @@ namespace idaten
 			const aten::mat4* matrices,
 			uint32_t mtxNum);
 
-		void compute();
+		void compute(
+			int32_t indexOffset,
+			aten::vec3& aabbMin,
+			aten::vec3& aabbMax);
 
 		bool getComputedResult(aten::vertex* p, uint32_t num);
 
@@ -46,6 +49,9 @@ namespace idaten
 		TypedCudaMemory<aten::PrimitiveParamter> m_triangles;
 
 		TypedCudaMemory<aten::vertex> m_dst;
+
+		TypedCudaMemory<aten::vec3> m_minBuf;
+		TypedCudaMemory<aten::vec3> m_maxBuf;
 
 		CudaGLBuffer m_interopVBO;
 	};

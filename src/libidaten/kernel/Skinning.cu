@@ -52,6 +52,7 @@ __global__ void computeSkinningWithTriangles(
 	const aten::SkinningVertex* __restrict__ vertices,
 	aten::PrimitiveParamter* triangles,
 	const aten::mat4* __restrict__ matrices,
+	int indexOffset,
 	aten::vertex* dst)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -99,6 +100,10 @@ __global__ void computeSkinningWithTriangles(
 		auto b = v2 - v0;
 		
 		tri->area = cross(a, b).length();
+
+		tri->idx[0] += indexOffset;
+		tri->idx[1] += indexOffset;
+		tri->idx[2] += indexOffset;
 	}
 }
 
@@ -263,21 +268,24 @@ namespace idaten
 		m_matrices.writeByNum(matrices, mtxNum);
 	}
 
-	void Skinning::compute()
+	void Skinning::compute(
+		int32_t indexOffset,
+		aten::vec3& aabbMin,
+		aten::vec3& aabbMax)
 	{
+		aten::vertex* dst = nullptr;
+		size_t vtxbytes = 0;
+
+		if (m_interopVBO.isValid()) {
+			m_interopVBO.map();
+			m_interopVBO.bind((void**)&dst, vtxbytes);
+		}
+		else {
+			dst = m_dst.ptr();
+		}
+
 		// Skinning.
 		{
-			aten::vertex* dst = nullptr;
-			size_t vtxbytes = 0;
-
-			if (m_interopVBO.isValid()) {
-				m_interopVBO.map();
-				m_interopVBO.bind((void**)&dst, vtxbytes);
-			}
-			else {
-				dst = m_dst.ptr();
-			}
-
 			auto willComputeWithTriangles = m_triangles.maxNum() > 0;
 
 			if (willComputeWithTriangles) {
@@ -291,7 +299,10 @@ namespace idaten
 					m_vertices.ptr(),
 					m_triangles.ptr(),
 					m_matrices.ptr(),
+					indexOffset,
 					dst);
+
+				checkCudaKernel(computeSkinningWithTriangles);
 			}
 			else {
 				const auto idxNum = m_indices.maxNum();
@@ -305,18 +316,50 @@ namespace idaten
 					m_indices.ptr(),
 					m_matrices.ptr(),
 					dst);
-			}
 
-			checkCudaKernel(computeSkinning);
-
-			if (m_interopVBO.isValid()) {
-				m_interopVBO.unmap();
+				checkCudaKernel(computeSkinning);
 			}
 		}
 
 		// Get min/max.
 		{
-			// TODO
+			auto src = dst;
+			auto num = m_vertices.maxNum();
+
+			dim3 block(256);
+			dim3 grid((num + block.x - 1) / block.x);
+
+			m_minBuf.init(grid.x);
+			m_maxBuf.init(grid.x);
+
+			auto sharedMemSize = block.x * sizeof(aten::vertex) * 2;
+
+			getMinMax << <grid, block, sharedMemSize >> > (
+				false,
+				num,
+				src,
+				m_minBuf.ptr(),
+				m_maxBuf.ptr());
+
+			checkCudaKernel(getMinMax);
+
+			num = grid.x;
+
+			getMinMax << <1, block, sharedMemSize >> > (
+				true,
+				num,
+				src,
+				m_minBuf.ptr(),
+				m_maxBuf.ptr());
+
+			checkCudaKernel(getMinMaxFinal);
+
+			m_minBuf.readByNum(&aabbMin, 1);
+			m_maxBuf.readByNum(&aabbMax, 1);
+		}
+
+		if (m_interopVBO.isValid()) {
+			m_interopVBO.unmap();
 		}
 	}
 

@@ -74,6 +74,8 @@ public:
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
+// TODO
+// 現状、GPUBvh = ThreadBVH しか許さない.
 static aten::AcceleratedScene<aten::GPUBvh> g_scene(Lbvh::create);
 
 static idaten::SVGFPathTracing g_tracer;
@@ -422,6 +424,9 @@ void onKey(bool press, aten::Key key)
 
 int main()
 {
+	idaten::Skinning skin;
+	skin.runMinMaxTest();
+
 	aten::timer::init();
 	aten::OMPUtil::setThreadNum(g_threadnum);
 
@@ -585,6 +590,12 @@ int main()
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
 		auto& vtxPos = g_tracer.getCudaTextureResourceForVtxPos();
 
+		// TODO
+		// もし、GPUBvh が SBVH だとした場合.
+		// ここで取得するノード配列は SBVH のノードである、ThreadedSbvhNode となる.
+		// しかし、LBVHBuilder::build で渡すことができるのは、ThreadBVH のノードである ThreadedBvhNode である.
+		// そのため、現状、GPUBvh = ThreadBVH しか許さないことになっている.
+
 		auto& cpunodes = g_scene.getAccel()->getNodes();
 
 		for (int i = 0; i < triangles.size(); i++)
@@ -600,7 +611,7 @@ int main()
 				triIdOffset,
 				sceneBbox,
 				vtxPos,
-				&cpunodes[i + 1]);
+				(std::vector<aten::ThreadedBvhNode>*)&cpunodes[i + 1]);
 		}
 	}
 

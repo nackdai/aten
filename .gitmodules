@@ -25,3 +25,6 @@
 [submodule "3rdparty/imgui"]
 	path = 3rdparty/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "3rdparty/makeitso"]
+	path = 3rdparty/makeitso
+	url = https://github.com/nackdai/makeitso.git

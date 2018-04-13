@@ -45,6 +45,14 @@ set BUILD_DIR=glew\build\vc12
 
 %MSBUILD% %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 
+rem makeitso =========================
+
+set BUILD_DIR=makeitso
+
+%MSBUILD% %BUILD_DIR%\MakeItSoLib\MakeItSoLib.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
+%MSBUILD% %BUILD_DIR%\SolutionParser_VS2015\SolutionParser_VS2015.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
+%MSBUILD% %BUILD_DIR%\MakeItSo\MakeItSo.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
+
 rem end ==============================
 
 rem Copy files for Profile configuration ==============================

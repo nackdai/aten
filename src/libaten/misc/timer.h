@@ -29,6 +29,6 @@ namespace AT_NAME {
 		static SystemTime getSystemTime();
 
 	private:
-		int64_t m_begin;
+		AT_TIME m_begin;
 	};
 }

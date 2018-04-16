@@ -2,9 +2,12 @@
 
 #define NOMINMAX
 
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #include <stdio.h>
 #include <utility>
+
+#include "types.h"
 
 #define AT_VSPRINTF     vsprintf_s
 #define AT_SPRINTF      sprintf_s
@@ -23,15 +26,32 @@ namespace aten {
 		printf("%s", buf);
 	}
 
-	union UnionIdxPtr {
-		int idx;
-		void* ptr{ nullptr };
-	};
+	using AT_TIME = int64_t;
 }
 
 #define AT_PRINTF		aten::OutputDebugString
 
 #define DEBUG_BREAK()	__debugbreak()
+#else
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+#include <utility>
+
+#define AT_VSPRINTF     vsnprintf
+#define AT_SPRINTF      snprintf
+#define AT_FPRINTF      fprintf
+
+namespace aten {
+	using AT_TIME = timeval;
+}
+
+#define AT_PRINTF		printf
+
+#define DEBUG_BREAK()	__builtin_trap()
+#endif
 
 #ifdef __CUDACC__
 	#ifdef __AT_DEBUG__
@@ -84,6 +104,13 @@ namespace aten {
 #define AT_COUNTOF(a)	(sizeof(a) / sizeof(a[0]))
 
 #define AT_STATICASSERT(b)	static_assert(b, "")
+
+namespace aten {
+	union UnionIdxPtr {
+		int idx;
+		void* ptr{ nullptr };
+	};
+}
 
 #include "aten_virtual.h"
 

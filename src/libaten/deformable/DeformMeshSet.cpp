@@ -16,7 +16,7 @@ namespace aten
 		"blendIndex",
 		"blendWeight",
 	};
-	C_ASSERT(AT_COUNTOF(attribName) == (uint32_t)MeshVertexFormat::Num);
+	AT_STATICASSERT(AT_COUNTOF(attribName) == (uint32_t)MeshVertexFormat::Num);
 
 	// 位置.
 	static uint32_t setVtxAttribPos(VertexAttrib* attrib, uint32_t offset)
@@ -127,7 +127,7 @@ namespace aten
 			setVtxAttribBlendIndices,
 			setVtxAttribBlendWeight,
 		};
-		C_ASSERT(AT_COUNTOF(funcSetVtxAttrib) == (uint32_t)MeshVertexFormat::Num);
+		AT_STATICASSERT(AT_COUNTOF(funcSetVtxAttrib) == (uint32_t)MeshVertexFormat::Num);
 
 		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
 

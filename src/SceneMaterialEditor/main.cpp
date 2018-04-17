@@ -14,7 +14,7 @@ int main()
 	aten::timer::init();
 	aten::OMPUtil::setThreadNum(g_threadnum);
 
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	aten::AssetManager::suppressWarnings();
 

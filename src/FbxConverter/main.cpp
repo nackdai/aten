@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	if (opt.isExportModel)
 	{
@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 		AnmExporter::exportAnm(output.c_str(), 0, &importer);
 	}
 #else
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 #if 0
 	{

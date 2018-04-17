@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	aten::ImageLoader::setBasePath("../../asset/");
 
@@ -63,7 +63,7 @@ void display()
 
 int main(int argc, char* argv[])
 {
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	aten::ImageLoader::setBasePath("../../asset/");
 	aten::ObjLoader::setBasePath("../../asset/");

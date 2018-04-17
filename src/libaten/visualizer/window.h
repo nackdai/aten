@@ -210,8 +210,6 @@ namespace aten {
 
 		static void terminate();
 
-		static bool SetCurrentDirectoryFromExe();
-
 		void drawImGui();
 
 		static bool isInitialized();

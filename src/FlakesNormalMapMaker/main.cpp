@@ -101,7 +101,7 @@ bool parseOption(
 
 int main(int argc, char* argv[])
 {
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	aten::window::init(
 		WIDTH, HEIGHT,

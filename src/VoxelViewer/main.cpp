@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
 	std::string extname;
 	aten::getStringsFromPath(g_opt.input, g_opt.inputBasepath, extname, g_opt.inputFilename);
 
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	aten::AssetManager::suppressWarnings();
 

@@ -26,7 +26,7 @@ namespace aten
 			hitrecord rec;
 			material* prevMtrl{ nullptr };
 
-			ray ray;
+			aten::ray ray;
 
 			bool isTerminate{ false };
 

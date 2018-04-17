@@ -85,6 +85,7 @@ namespace aten {
 			return *(TYPE*)val.p;
 		}
 
+#if defined(_WIN32) || defined(_WIN64)
 		template <>
 		real PolymorphicValue::getAs() const;
 
@@ -99,6 +100,7 @@ namespace aten {
 
 		template <>
 		void* PolymorphicValue::getAs() const;
+#endif
 	};
 
 	template <>

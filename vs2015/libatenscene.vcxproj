@@ -154,7 +154,7 @@
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenImageIOD.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -170,7 +170,7 @@
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -191,7 +191,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -212,7 +212,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenImageIO.lib;OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -233,7 +233,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -254,7 +254,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)../3rdparty/OpenImageIO/lib/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>

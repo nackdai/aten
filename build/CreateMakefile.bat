@@ -9,10 +9,7 @@ rem Create Makefile by MakeItSo =======================================
 ..\3rdparty\makeitso\output\MakeItSo.exe -file=makefile.sln -config=MakeItSo_Libs.config
 
 rem Copy Makefie ======================================================
-if %CONFIG% == Release (
-   cd /d %~dp0
-   xcopy /Y /D ..\vs2015\*.makefile .\
-)
+xcopy /Y /D ..\vs2015\*.makefile .\
 
 cd /d %CURDIR%
 

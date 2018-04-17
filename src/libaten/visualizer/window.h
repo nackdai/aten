@@ -216,7 +216,7 @@ namespace aten {
 
 		GLFWwindow* getNativeHandle();
 
-		void window::onClose()
+		void onClose()
 		{
 			if (m_onClose) {
 				m_onClose();

@@ -1,3 +1,4 @@
+#include <string.h>
 #include <vector>
 #include "visualizer/atengl.h"
 #include "visualizer/shader.h"
@@ -5,8 +6,7 @@
 namespace aten {
 	GLuint createShader(const char* path, GLenum type)
 	{
-		FILE* fp = nullptr;
-		fopen_s(&fp, path, "rb");
+		FILE* fp = fopen(path, "rb");
 		AT_ASSERT(fp != nullptr);
 
 		fseek(fp, 0, SEEK_END);

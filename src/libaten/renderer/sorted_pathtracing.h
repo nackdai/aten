@@ -21,7 +21,7 @@ namespace aten
 			real camSensitivity;
 
 			uint32_t x, y;
-			sampler* sampler{ nullptr };
+			aten::sampler* sampler{ nullptr };
 
 			vec3 lightcontrib;
 			vec3 lightPos;

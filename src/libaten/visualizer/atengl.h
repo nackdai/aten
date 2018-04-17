@@ -8,7 +8,7 @@
     func; \
     {\
         GLenum __gl_err__ = ::glGetError();\
-        if (__gl_err__ != GL_NO_ERROR) { aten::OutputDebugString("GL Error[%x](%s[%d])\n", __gl_err__, __FILE__, __LINE__); AT_ASSERT(false); }\
+        if (__gl_err__ != GL_NO_ERROR) { AT_PRINTF("GL Error[%x](%s[%d])\n", __gl_err__, __FILE__, __LINE__); AT_ASSERT(false); }\
     }
 
 namespace aten {

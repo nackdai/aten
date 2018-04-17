@@ -1,3 +1,4 @@
+#include <string.h>
 #include "renderer/film.h"
 
 namespace aten

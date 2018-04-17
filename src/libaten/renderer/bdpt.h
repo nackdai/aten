@@ -96,7 +96,7 @@ namespace aten
 			scene* scene,
 			camera* camera) const;
 
-		Result BDPT::genLightPath(
+		Result genLightPath(
 			std::vector<Vertex>& vs,
 			aten::Light* light,
 			sampler* sampler,
@@ -118,7 +118,7 @@ namespace aten
 			const std::vector<Vertex>& light_vs,
 			int numLightVtx) const;
 
-		void BDPT::combine(
+		void combine(
 			int x, int y,
 			std::vector<Result>& result,
 			const std::vector<Vertex>& eye_vs,

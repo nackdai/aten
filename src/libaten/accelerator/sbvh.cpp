@@ -1251,9 +1251,8 @@ namespace aten
 			0,
 			indices);
 
-		FILE* fp = nullptr;
-		auto err = fopen_s(&fp, path, "wb");
-		if (err != 0) {
+		FILE* fp = fopen(path, "wb");
+		if (!fp) {
 			// TODO
 			// throw exception...
 			AT_ASSERT(false);
@@ -1325,9 +1324,8 @@ namespace aten
 
 	bool sbvh::importTree(const char* path, int offsetTriIdx)
 	{
-		FILE* fp = nullptr;
-		auto err = fopen_s(&fp, path, "rb");
-		if (err != 0) {
+		FILE* fp = fopen(path, "rb");
+		if (!fp) {
 			// TODO
 			// through exception...
 			AT_ASSERT(false);

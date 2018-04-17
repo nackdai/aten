@@ -39,8 +39,7 @@ namespace aten
 		const vec4* image,
 		const int width, const int height)
 	{
-		FILE *fp;
-		fopen_s(&fp, filename.c_str(), "wb");
+		FILE *fp = fopen(filename.c_str(), "wb");
 		if (fp == NULL) {
 			AT_PRINTF("Error: %s\n", filename);
 			return false;

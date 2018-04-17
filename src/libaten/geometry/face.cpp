@@ -9,7 +9,7 @@
 
 namespace AT_NAME
 {
-	std::atomic<int> face::s_id = 0;
+	std::atomic<int> face::s_id(0);
 	std::vector<face*> face::s_faces;
 
 	face::face()

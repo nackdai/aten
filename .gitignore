@@ -1,0 +1,3 @@
+build/**/*.d
+build/**/*.o
+build/**/*.a

@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	aten::window::SetCurrentDirectoryFromExe();
+	aten::SetCurrentDirectoryFromExe();
 
 	aten::AssetManager::suppressWarnings();
 

@@ -100,6 +100,9 @@
     <Filter Include="deformable\animation">
       <UniqueIdentifier>{b1ecd5d9-b04b-4e91-9289-27243b4bd435}</UniqueIdentifier>
     </Filter>
+    <Filter Include="system">
+      <UniqueIdentifier>{4edb64a1-5f78-49a9-b1e5-94c410785824}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -494,6 +497,9 @@
     <ClInclude Include="..\src\libaten\deformable\SkinningVertex.h">
       <Filter>deformable</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\os\system.h">
+      <Filter>system</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -783,6 +789,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole.cpp">
       <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\os\windows\system_windows.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\os\linux\system_linux.cpp">
+      <Filter>system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

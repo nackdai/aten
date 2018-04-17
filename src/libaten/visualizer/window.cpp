@@ -1,8 +1,8 @@
 #include "visualizer/atengl.h"
-
 #include "visualizer/window.h"
+#include "os/system.h"
+
 #include <GLFW/glfw3.h>
-#include <Shlwapi.h>
 
 #include <imgui.h>
 #include "ui/imgui_impl_glfw_gl3.h"
@@ -11,30 +11,6 @@
 
 namespace aten
 {
-	bool window::SetCurrentDirectoryFromExe()
-	{
-		static char buf[_MAX_PATH];
-
-		// 実行プログラムのフルパスを取得
-		{
-			DWORD result = ::GetModuleFileName(
-				NULL,
-				buf,
-				sizeof(buf));
-			AT_ASSERT(result > 0);
-		}
-
-		// ファイル名を取り除く
-		auto result = ::PathRemoveFileSpec(buf);
-		AT_ASSERT(result);
-
-		// カレントディレクトリを設定
-		result = ::SetCurrentDirectory(buf);
-		AT_ASSERT(result);
-
-		return result ? true : false;
-	}
-
 	static std::vector<window*> g_windows;
 
 	static std::vector<int> g_mouseX;

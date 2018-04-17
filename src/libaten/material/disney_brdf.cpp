@@ -466,21 +466,21 @@ namespace AT_NAME
 
 	bool DisneyBRDF::edit(aten::IMaterialParamEditor* editor)
 	{
-		bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, subsurface, 0, 1);
-		bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, metallic, 0, 1);
-		bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, specular, 0, 1);
-		bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, specularTint, 0, 1);
-		bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, roughness, 0, 1);
-		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, anisotropic, 0, 1);
-		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, sheen, 0, 1);
-		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, sheenTint, 0, 1);
-		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, clearcoat, 0, 1);
-		bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, clearcoatGloss, 0, 1);
-		bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
-		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+		bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., subsurface, 0, 1);
+		bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., metallic, 0, 1);
+		bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., specular, 0, 1);
+		bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., specularTint, 0, 1);
+		bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., roughness, 0, 1);
+		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., anisotropic, 0, 1);
+		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., sheen, 0, 1);
+		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., sheenTint, 0, 1);
+		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., clearcoat, 0, 1);
+		bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., clearcoatGloss, 0, 1);
+		bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., ior, real(0.01), real(10));
+		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param., baseColor);
 
-		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param., albedoMap);
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param., normalMap);
 
 		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10 || b11;
 	}

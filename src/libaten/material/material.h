@@ -213,9 +213,9 @@ namespace aten
 	};
 }
 
-#define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param.##name)
-#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)	(e)->edit(#name, param.##name, _min, _max)
-#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param.##name)
+#define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param##name)
+#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)	(e)->edit(#name, param##name, _min, _max)
+#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param##name)
 
 namespace AT_NAME
 {

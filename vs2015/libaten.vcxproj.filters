@@ -508,12 +508,6 @@
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp">
       <Filter>hdr</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\raytracing .cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\pathtracing .cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\material\specular.cpp">
       <Filter>material</Filter>
     </ClCompile>
@@ -624,9 +618,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\film.cpp">
       <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\camera\pinhole .cpp">
-      <Filter>camera</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\light\light.cpp">
       <Filter>light</Filter>
@@ -783,6 +774,15 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp">
       <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\raytracing.cpp">
+      <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\camera\pinhole.cpp">
+      <Filter>camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

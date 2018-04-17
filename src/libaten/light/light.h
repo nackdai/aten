@@ -19,24 +19,15 @@ namespace aten {
 	};
 
 	struct LightAttribute {
-		struct {
-			uint32_t isSingular : 1;
-			uint32_t isInfinite : 1;
-			uint32_t isIBL : 1;
-		};
-
-		AT_DEVICE_API LightAttribute(
-			bool _isSingular = false,
-			bool _isInfinite = false,
-			bool _isIBL = false)
-			: isSingular(_isSingular), isInfinite(_isInfinite), isIBL(_isIBL)
-		{}
+		uint32_t isSingular : 1;
+		uint32_t isInfinite : 1;
+		uint32_t isIBL : 1;
 	};
 
-	#define LightAttributeArea			aten::LightAttribute(false, false, false)
-	#define LightAttributeSingluar		aten::LightAttribute(true,  false, false)
-	#define LightAttributeDirectional	aten::LightAttribute(true,  true,  false)
-	#define LightAttributeIBL			aten::LightAttribute(false, true,  true)
+	#define LightAttributeArea			aten::LightAttribute{ false, false, false }
+	#define LightAttributeSingluar		aten::LightAttribute{ true,  false, false }
+	#define LightAttributeDirectional	aten::LightAttribute{ true,  true,  false }
+	#define LightAttributeIBL			aten::LightAttribute{ false, true,  true }
 
 	enum LightType : int {
 		Area,
@@ -88,7 +79,10 @@ namespace aten {
 			};
 		};
 
-		AT_DEVICE_API LightParameter() {}
+		AT_DEVICE_API LightParameter()
+		{
+			envmap.ptr = nullptr;
+		}
 
 		AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
 			: attrib(_attrib), type(_type)
@@ -102,6 +96,7 @@ namespace aten {
 			falloff = real(0);
 
 			objid = -1;
+			envmap.ptr = nullptr;
 		}
 
 		AT_DEVICE_API LightParameter(const LightParameter& rhs)

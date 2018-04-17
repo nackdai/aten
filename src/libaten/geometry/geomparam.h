@@ -26,12 +26,10 @@ namespace aten
 		int primid{ -1 };	///< First index of triangles which the shape has.
 		int primnum{ 0 };	///< Number of triangles which the shape has.
 
-		struct {
-			vec3 center;
-			union {
-				vec3 size;		// cube.
-				real radius;	// shpere.
-			};
+		vec3 center;
+		union {
+			vec3 size;		// cube.
+			real radius;	// shpere.
 		};
 
 		real padding[2];
@@ -40,7 +38,9 @@ namespace aten
 
 		AT_DEVICE_API GeomParameter(GeometryType _type)
 			: type(_type)
-		{}
+		{
+			mtrl.ptr = nullptr;
+		}
 
 		// sphere.
 		AT_DEVICE_API GeomParameter(const vec3& c, real r, AT_NAME::material* m)

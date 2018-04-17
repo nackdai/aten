@@ -16,21 +16,21 @@ namespace AT_NAME
 		{
 			m_param.roughnessMap = flakesMap ? flakesMap->id() : -1;
 
-			m_param.clearcoatRoughness = real(0.5);
-			m_param.flakeLayerRoughness = real(0.5);
+			m_param.carpaint.clearcoatRoughness = real(0.5);
+			m_param.carpaint.flakeLayerRoughness = real(0.5);
 
-			m_param.flake_scale = real(100);
-			m_param.flake_size = real(0.01);
-			m_param.flake_size_variance = real(0.25);
-			m_param.flake_normal_orientation = real(0.5);
+			m_param.carpaint.flake_scale = real(100);
+			m_param.carpaint.flake_size = real(0.01);
+			m_param.carpaint.flake_size_variance = real(0.25);
+			m_param.carpaint.flake_normal_orientation = real(0.5);
 			
-			m_param.flake_reflection = real(0.5);
-			m_param.flake_transmittance = real(0.5);
+			m_param.carpaint.flake_reflection = real(0.5);
+			m_param.carpaint.flake_transmittance = real(0.5);
 
-			m_param.glitterColor = albedo;
-			m_param.flakeColor = albedo;
+			m_param.carpaint.glitterColor = albedo;
+			m_param.carpaint.flakeColor = albedo;
 
-			m_param.flake_intensity = real(1);
+			m_param.carpaint.flake_intensity = real(1);
 		}
 
 		CarPaintBRDF(aten::Values& val)

@@ -35,7 +35,7 @@ namespace idaten
 			bool isSingular;
 			bool isKill;
 		};
-		C_ASSERT((sizeof(Path) % 4) == 0);
+		AT_STATICASSERT((sizeof(Path) % 4) == 0);
 #else
 		struct Path;
 #endif

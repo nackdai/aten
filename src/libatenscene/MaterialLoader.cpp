@@ -191,7 +191,7 @@ namespace aten {
 		getValue<texture*>,
 		getValue<real>,
 	};
-	C_ASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int)MtrlParamType::Num);
+	AT_STATICASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int)MtrlParamType::Num);
 
 	std::map<std::string, MtrlParamType> g_paramtypes = {
 		std::pair<std::string, MtrlParamType>("baseColor", MtrlParamType::Vec3),
@@ -452,7 +452,7 @@ namespace aten {
 		[](Values& values) { return new toon(values); },				// toon
 		[](Values& values) { return nullptr; },							// layer
 	};
-	C_ASSERT(AT_COUNTOF(g_funcs) == (int)aten::MaterialType::MaterialTypeMax);
+	AT_STATICASSERT(AT_COUNTOF(g_funcs) == (int)aten::MaterialType::MaterialTypeMax);
 
 	material* MaterialLoader::create(std::string type, Values& values)
 	{

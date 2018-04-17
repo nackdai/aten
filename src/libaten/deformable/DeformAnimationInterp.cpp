@@ -32,7 +32,7 @@ namespace aten
 			&DeformAnimationInterp::computeHermite,
 			nullptr,
 		};
-		C_ASSERT(AT_COUNTOF(tblFuncInterp) == (int32_t)AnmInterpType::Num);
+		AT_STATICASSERT(AT_COUNTOF(tblFuncInterp) == (int32_t)AnmInterpType::Num);
 
 		AT_ASSERT(tblFuncInterp[(int32_t)nInterp] != nullptr);
 

@@ -82,5 +82,5 @@ namespace aten
     };
 
 	// TODO
-	C_ASSERT(sizeof(mat4) == sizeof(float) * 16);
+	AT_STATICASSERT(sizeof(mat4) == sizeof(float) * 16);
 }

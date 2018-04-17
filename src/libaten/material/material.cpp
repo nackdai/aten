@@ -21,7 +21,7 @@ namespace AT_NAME
 		"toon",
 		"layer",
 	};
-	C_ASSERT(AT_COUNTOF(mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
+	AT_STATICASSERT(AT_COUNTOF(mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
 
 	uint32_t material::getMaterialNum()
 	{

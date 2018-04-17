@@ -20,7 +20,7 @@ namespace aten
         Mask = 0x7f,
         UserCustom = 1 << 7,
     };
-	C_ASSERT(sizeof(AnmInterpType) == sizeof(uint8_t));
+	AT_STATICASSERT(sizeof(AnmInterpType) == sizeof(uint8_t));
 
     /** アニメーションを行うパラメータ.
      */
@@ -64,7 +64,7 @@ namespace aten
         ScaleY   = Scale | ParamY,
         ScaleZ   = Scale | ParamZ,
     };
-	C_ASSERT(sizeof(AnmTransformType) == sizeof(uint32_t));
+	AT_STATICASSERT(sizeof(AnmTransformType) == sizeof(uint32_t));
 
     /** アニメーションキーフレーム.
      */
@@ -72,7 +72,7 @@ namespace aten
         Time,    ///< 時間ベース.
         Frame,       ///< フレームベース.
     };
-	C_ASSERT(sizeof(AnmKeyType) == sizeof(uint32_t));
+	AT_STATICASSERT(sizeof(AnmKeyType) == sizeof(uint32_t));
 
     // NOTE
     // フォーマット

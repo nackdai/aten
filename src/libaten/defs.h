@@ -40,6 +40,8 @@ namespace aten {
 #include <unistd.h>
 #include <utility>
 
+#include "types.h"
+
 #define AT_VSPRINTF     vsnprintf
 #define AT_SPRINTF      snprintf
 #define AT_FPRINTF      fprintf

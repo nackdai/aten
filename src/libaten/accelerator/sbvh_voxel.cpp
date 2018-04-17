@@ -284,7 +284,7 @@ namespace aten
 				auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
 				color *= mtrl->color();
 
-				if (!::isnan(normal.x) && !::isnan(normal.y) && !::isnan(normal.z)) {
+				if (!std::isnan(normal.x) && !std::isnan(normal.y) && !std::isnan(normal.z)) {
 					avgNormal += normal;
 					nmlCnt++;
 				}

@@ -1,10 +1,11 @@
 #include <unistd.h>
 #include <string.h>
+#include <algorithm>
 #include "os/system.h"
 
 namespace aten
 {
-	static uint64_t ptrToInt(void* p)
+	static inline uint64_t ptrToInt(void* p)
 	{
 		AT_STATICASSERT(sizeof(uint64_t) >= sizeof(void*));
 
@@ -42,16 +43,16 @@ namespace aten
 		static char path[256];
 
 		// 実行プログラムのフルパスを取得
-		int pathSize = getExecuteFilePath(path, sizeof(path));
-		AT_VRETURN(pathSize > 0);
+		int pathSize = aten::getExecuteFilePath(path, sizeof(path));
+		AT_VRETURN_FALSE(pathSize > 0);
 
 		char* tmp = const_cast<char*>(path);
 
 		// ファイル名を取り除く
 		char* p = ::strrchr(tmp, '/');
-		AT_VRETURN(p != nullptr);
+		AT_VRETURN_FALSE(p != nullptr);
 
-		auto diff = getPtrDistance(tmp, p);
+		auto diff = aten::getPtrDistance((void*)tmp, (void*)p);
 
 		tmp[diff] = 0;
 		p = tmp;

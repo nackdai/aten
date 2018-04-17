@@ -222,7 +222,7 @@ namespace aten
 // For linux, to avoid token concat error.
 #define AT_EDIT_MATERIAL_PARAM(e, param, name) false
 #define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max) false
-#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param.##name) false
+#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name) false
 #endif
 
 namespace AT_NAME

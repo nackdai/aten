@@ -97,9 +97,24 @@ And Idanten include characters of aten, "id**aten**"
 
 ## How To Build
 
-1. Run `aten/3rdparty/Build3rdParty.bat`
-2. Launch `aten/vs2015/aten.sln`
-3. Build porjects
+### Windows
+
+1. Install `CUDA 8.0` and depended nVidia driver
+2. Run `aten/3rdparty/Build3rdParty.bat Debug` or `aten/3rdparty/Build3rdParty.bat Release`
+3. Launch `aten/vs2015/aten.sln`
+4. Build porjects with `x64` (not support `x86`)
+
+### Linux
+
+1. Install `CUDA 8.0` and depended nVidia driver
+2. Install `libglfw3`, `libglew`
+
+`sudo apt-get install libglfw3-dev`
+
+`sudo apt-get install libglew-dev`
+
+3. `cd aten/build`
+4. Run make `make Debug` or `make Release`
 
 ## Gallery
 

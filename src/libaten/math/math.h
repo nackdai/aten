@@ -201,9 +201,9 @@ namespace aten {
 
 	inline AT_DEVICE_API bool isValid(real f)
 	{
-		bool b = isnan(f);
+		bool b = std::isnan(f);
 		if (!b) {
-			b = isinf(f);
+			b = std::isinf(f);
 		}
 
 		return !b;

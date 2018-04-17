@@ -4,13 +4,11 @@
 namespace AT_NAME {
 	void timer::init()
 	{
-		m_begin.tv_sec = 0;
-		m_begin.tv_usec = 0;
 	}
 
 	void timer::begin()
 	{
-		gettimeofday(&tv, NULL);
+		gettimeofday(&m_begin, NULL);
 	}
 
 	real timer::end()
@@ -41,7 +39,7 @@ namespace AT_NAME {
 		ret.dayOfWeek = tmp->tm_wday;
 		ret.day = tmp->tm_mday;
 		ret.hour = tmp->tm_hour;
-		ret.minute = tmp->wMinute;
+		ret.minute = tmp->tm_min;
 		ret.second = tmp->tm_sec;
 		ret.milliSeconds = tv.tv_usec / 1000;
 

@@ -40,7 +40,7 @@ namespace AT_NAME
 		real pdf = real(0);
 
 		{
-			const auto m = param->clearcoatRoughness;
+			const auto m = param->carpaint.clearcoatRoughness;
 
 			const auto n = (2 * AT_MATH_PI) / (4 * m * m) - 1;
 
@@ -54,7 +54,7 @@ namespace AT_NAME
 			pdf += F * (n + 1) / (2 * AT_MATH_PI) * aten::pow(costheta, n) / (4 * c);
 		}
 
-		auto density = FlakesNormal::computeFlakeDensity(param->flake_size, real(1280) / 720);
+		auto density = FlakesNormal::computeFlakeDensity(param->carpaint.flake_size, real(1280) / 720);
 
 #if 0
 		{
@@ -93,7 +93,7 @@ namespace AT_NAME
 
 			auto tan2 = tantheta * tantheta;
 
-			const auto m = param->flakeLayerRoughness;
+			const auto m = param->carpaint.flakeLayerRoughness;
 
 			pdf += (1 - F) * density * 1 / (m * m * cos4) * aten::exp(-tan2 / (m * m)) / (4 * c);
 		}
@@ -155,7 +155,7 @@ namespace AT_NAME
 		const auto ni = real(1);
 		const auto nt = param->ior;
 
-		const auto m = param->clearcoatRoughness;
+		const auto m = param->carpaint.clearcoatRoughness;
 
 		const auto n = (2 * AT_MATH_PI) / (4 * m * m) - 1;
 
@@ -209,7 +209,7 @@ namespace AT_NAME
 			r1 -= F;
 			r1 /= (1 - F);
 
-			auto density = FlakesNormal::computeFlakeDensity(param->flake_size, real(1280) / 720);
+			auto density = FlakesNormal::computeFlakeDensity(param->carpaint.flake_size, real(1280) / 720);
 
 			if (r1 < density) {
 				r1 /= density;
@@ -348,7 +348,7 @@ namespace AT_NAME
 
 		// Gross.
 		{
-			const auto m = param->clearcoatRoughness;
+			const auto m = param->carpaint.clearcoatRoughness;
 			const auto n = (2 * AT_MATH_PI) / (4 * m * m) - 1;
 
 			auto G1_lh = MicrofacetGGX::computeGGXSmithG1(m, L, N);
@@ -363,7 +363,7 @@ namespace AT_NAME
 			bsdf += denom > AT_MATH_EPSILON ? F * G * D / denom : 0;
 		}
 
-		const auto density = FlakesNormal::computeFlakeDensity(param->flake_size, real(1280) / 720);
+		const auto density = FlakesNormal::computeFlakeDensity(param->carpaint.flake_size, real(1280) / 720);
 
 #if 1
 		// Glitter.
@@ -391,7 +391,7 @@ namespace AT_NAME
 
 			auto tan2 = tantheta * tantheta;
 
-			const auto m = param->flakeLayerRoughness;
+			const auto m = param->carpaint.flakeLayerRoughness;
 
 			auto G1_lh = MicrofacetGGX::computeGGXSmithG1(m, L, N);
 			auto G1_vh = MicrofacetGGX::computeGGXSmithG1(m, V, N);
@@ -402,10 +402,10 @@ namespace AT_NAME
 			
 			auto denom = 4 * inCostheta * outCosTheta;
 
-			auto r = param->flake_reflection;
-			auto t = aten::cmpMin(param->flake_transmittance, 1 - AT_MATH_EPSILON);
+			auto r = param->carpaint.flake_reflection;
+			auto t = aten::cmpMin(param->carpaint.flake_transmittance, 1 - AT_MATH_EPSILON);
 
-			bsdf += denom > AT_MATH_EPSILON ? param->glitterColor * density * (1 - F) * (r / (1 - t)) * G * D / denom : aten::vec3(0);
+			bsdf += denom > AT_MATH_EPSILON ? param->carpaint.glitterColor * density * (1 - F) * (r / (1 - t)) * G * D / denom : aten::vec3(0);
 		}
 #endif
 
@@ -418,10 +418,10 @@ namespace AT_NAME
 		{
 			auto flakeNml = FlakesNormal::gen(
 				u, v,
-				param->flake_scale,
-				param->flake_size,
-				param->flake_size_variance,
-				param->flake_normal_orientation);
+				param->carpaint.flake_scale,
+				param->carpaint.flake_size,
+				param->carpaint.flake_size_variance,
+				param->carpaint.flake_normal_orientation);
 
 			if (flakeNml.a > 0) {
 				auto T = aten::getOrthoVector(N);
@@ -438,7 +438,7 @@ namespace AT_NAME
 				aten::vec3 n = normalize(normal + f);
 				auto c = aten::abs(dot(n, -wi));
 			
-				bsdf += param->flake_intensity * param->flakeColor * (1 - F) * density * aten::pow(c, 16);
+				bsdf += param->carpaint.flake_intensity * param->carpaint.flakeColor * (1 - F) * density * aten::pow(c, 16);
 #endif
 			}
 		}
@@ -524,23 +524,23 @@ namespace AT_NAME
 
 	bool CarPaintBRDF::edit(aten::IMaterialParamEditor* editor)
 	{
-		bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, clearcoatRoughness, 0, 1);
-		bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flakeLayerRoughness, 0, 1);
+		bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoatRoughness, 0, 1);
+		bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flakeLayerRoughness, 0, 1);
 
-		bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_scale, 1, 5000);
-		bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_size, 0.01, 1);
-		bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_size_variance, 0, 1);
-		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_normal_orientation, 0, 1);
+		bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_scale, 1, 5000);
+		bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size, 0.01, 1);
+		bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size_variance, 0, 1);
+		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_normal_orientation, 0, 1);
 		
-		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_reflection, 0, 1);
-		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_transmittance, 0, 1);
+		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_reflection, 0, 1);
+		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_transmittance, 0, 1);
 
-		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, flake_intensity, 0, 10);
+		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_intensity, 0, 10);
 
 		bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
 
-		bool b10 = AT_EDIT_MATERIAL_PARAM(editor, m_param, glitterColor);
-		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, flakeColor);
+		bool b10 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, glitterColor);
+		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, flakeColor);
 		bool b12 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
 		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10 || b11 || b12;

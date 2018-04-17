@@ -119,7 +119,7 @@ namespace aten
 				aten::vec3 glitterColor;
 				aten::vec3 flakeColor;
 				real flake_intensity;
-			};
+			} carpaint;
 		};
 #endif
 

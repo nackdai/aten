@@ -108,7 +108,7 @@ namespace aten {
 namespace aten {
 	union UnionIdxPtr {
 		int idx;
-		void* ptr{ nullptr };
+		void* ptr;
 	};
 }
 

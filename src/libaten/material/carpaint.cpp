@@ -524,24 +524,24 @@ namespace AT_NAME
 
 	bool CarPaintBRDF::edit(aten::IMaterialParamEditor* editor)
 	{
-		bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., clearcoatRoughness, 0, 1);
-		bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flakeLayerRoughness, 0, 1);
+		bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoatRoughness, 0, 1);
+		bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flakeLayerRoughness, 0, 1);
 
-		bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_scale, 1, 5000);
-		bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_size, 0.01, 1);
-		bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_size_variance, 0, 1);
-		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_normal_orientation, 0, 1);
+		bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_scale, 1, 5000);
+		bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size, 0.01, 1);
+		bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size_variance, 0, 1);
+		bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_normal_orientation, 0, 1);
 		
-		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_reflection, 0, 1);
-		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_transmittance, 0, 1);
+		bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_reflection, 0, 1);
+		bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_transmittance, 0, 1);
 
-		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint., flake_intensity, 0, 10);
+		bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_intensity, 0, 10);
 
-		bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param., ior, real(0.01), real(10));
+		bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
 
-		bool b10 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint., glitterColor);
-		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint. , flakeColor);
-		bool b12 = AT_EDIT_MATERIAL_PARAM(editor, m_param., baseColor);
+		bool b10 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, glitterColor);
+		bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, flakeColor);
+		bool b12 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
 		return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9 || b10 || b11 || b12;
 	}

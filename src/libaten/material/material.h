@@ -213,9 +213,17 @@ namespace aten
 	};
 }
 
-#define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param##name)
-#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)	(e)->edit(#name, param##name, _min, _max)
-#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param##name)
+#if defined(_WIN32) || defined(_WIN64)
+#define AT_EDIT_MATERIAL_PARAM(e, param, name)	(e)->edit(#name, param.##name)
+#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)	(e)->edit(#name, param.##name, _min, _max)
+#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param.##name)
+#else
+// TODO
+// For linux, to avoid token concat error.
+#define AT_EDIT_MATERIAL_PARAM(e, param, name) false
+#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max) false
+#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)	(e)->editTex(#name, param.##name) false
+#endif
 
 namespace AT_NAME
 {

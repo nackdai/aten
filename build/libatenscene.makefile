@@ -11,8 +11,8 @@ Debug_Library_Path=
 Release_Library_Path=
 
 # Additional libraries...
-Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -lglfw -lglew -l$(NOINHERIT) -lGL  -Wl,--end-group
-Release_Libraries=-Wl,--no-as-needed -Wl,--start-group -lglfw -lglew -l$(NOINHERIT) -lGL  -Wl,--end-group
+Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -l$(NOINHERIT)  -Wl,--end-group
+Release_Libraries=-Wl,--no-as-needed -Wl,--start-group -l$(NOINHERIT)  -Wl,--end-group
 
 # Preprocessor definitions...
 Debug_Preprocessor_Definitions=-D __AT_DEBUG__ -D GCC_BUILD 

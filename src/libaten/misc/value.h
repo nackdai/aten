@@ -84,10 +84,25 @@ namespace aten {
 			AT_ASSERT(false);
 			return *(TYPE*)val.p;
 		}
+
+		template <>
+		real PolymorphicValue::getAs() const;
+
+		template <>
+		int PolymorphicValue::getAs() const;
+
+		template <>
+		bool PolymorphicValue::getAs() const;
+
+		template <>
+		vec3 PolymorphicValue::getAs() const;
+
+		template <>
+		void* PolymorphicValue::getAs() const;
 	};
 
 	template <>
-	real PolymorphicValue::getAs()const
+	real PolymorphicValue::getAs() const
 	{
 		return val.f;
 	}

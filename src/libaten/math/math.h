@@ -199,7 +199,7 @@ namespace aten {
 		return cmpMin(cmpMax(f, a), b);
 	}
 
-	inline AT_DEVICE_API bool isValid(real f)
+	inline bool isValid(real f)
 	{
 		bool b = std::isnan(f);
 		if (!b) {

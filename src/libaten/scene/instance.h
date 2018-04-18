@@ -250,7 +250,7 @@ namespace aten
 	};
 
 	template<>
-	instance<object>::instance(object* obj)
+	inline instance<object>::instance(object* obj)
 		: m_param(GeometryType::Instance)
 	{
 		m_obj = obj;

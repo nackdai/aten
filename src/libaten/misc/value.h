@@ -104,27 +104,27 @@ namespace aten {
 	};
 
 	template <>
-	real PolymorphicValue::getAs() const
+	inline real PolymorphicValue::getAs() const
 	{
 		return val.f;
 	}
 	template <>
-	int PolymorphicValue::getAs() const
+	inline int PolymorphicValue::getAs() const
 	{
 		return val.i;
 	}
 	template <>
-	bool PolymorphicValue::getAs() const
+	inline bool PolymorphicValue::getAs() const
 	{
 		return val.b;
 	}
 	template <>
-	vec3 PolymorphicValue::getAs() const
+	inline vec3 PolymorphicValue::getAs() const
 	{
 		return val.v;
 	}
 	template <>
-	void* PolymorphicValue::getAs() const
+	inline void* PolymorphicValue::getAs() const
 	{
 		return val.p;
 	}

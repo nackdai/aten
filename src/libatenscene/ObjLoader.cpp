@@ -146,7 +146,7 @@ namespace aten
 					vtx.uv.z = needComputeNormalOntime ? real(1) : real(0);
 				}
 
-				if (isnan(vtx.nml.x) || isnan(vtx.nml.y) || isnan(vtx.nml.z))
+				if (std::isnan(vtx.nml.x) || std::isnan(vtx.nml.y) || std::isnan(vtx.nml.z))
 				{
 					// TODO
 					// work around...

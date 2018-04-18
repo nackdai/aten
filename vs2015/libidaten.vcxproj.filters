@@ -430,12 +430,14 @@
     <CudaCompile Include="..\src\libaten\material\carpaint.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\FlakesNormal.cpp" />
     <CudaCompile Include="..\src\libidaten\kernel\Skinning.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\camera\pinhole.cpp">
       <Filter>aten\camera</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\FlakesNormal.cpp">
+      <Filter>aten\material</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

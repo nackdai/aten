@@ -138,7 +138,7 @@ namespace aten
 
 
 	template <typename TYPE>
-	static aten::PolymorphicValue getValue(const tinyxml2::XMLAttribute* a)
+	aten::PolymorphicValue getValue(const tinyxml2::XMLAttribute* a)
 	{
 		AT_ASSERT(false);
 		PolymorphicValue ret;
@@ -146,7 +146,7 @@ namespace aten
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLAttribute* a)
+	aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLAttribute* a)
 	{
 		aten::PolymorphicValue v;
 
@@ -163,7 +163,7 @@ namespace aten
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
+	aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
 	{
 		aten::PolymorphicValue v;
 		v.val.f = (real)a->DoubleValue();
@@ -171,7 +171,7 @@ namespace aten
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<int>(const tinyxml2::XMLAttribute* a)
+	aten::PolymorphicValue getValue<int>(const tinyxml2::XMLAttribute* a)
 	{
 		aten::PolymorphicValue v;
 		v.val.i = a->IntValue();

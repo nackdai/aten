@@ -71,7 +71,7 @@ namespace aten {
 	//  - clearcoatGloss [float]
 
 	template <typename TYPE>
-	static aten::PolymorphicValue getValue(picojson::value& v)
+	aten::PolymorphicValue getValue(picojson::value& v)
 	{
 		AT_ASSERT(false);
 		PolymorphicValue ret;
@@ -79,7 +79,7 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<vec3>(picojson::value& val)
+	aten::PolymorphicValue getValue<vec3>(picojson::value& val)
 	{
 		auto a = val.get<picojson::array>();
 
@@ -95,7 +95,7 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<real>(picojson::value& val)
+	aten::PolymorphicValue getValue<real>(picojson::value& val)
 	{
 		aten::PolymorphicValue v;
 		v.val.f = val.get<double>();
@@ -103,7 +103,7 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<texture*>(picojson::value& val)
+	aten::PolymorphicValue getValue<texture*>(picojson::value& val)
 	{
 		auto s = val.get<std::string>();
 
@@ -128,7 +128,7 @@ namespace aten {
 	using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
 #else
 	template <typename TYPE>
-	static aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e)
+	aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e)
 	{
 		AT_ASSERT(false);
 		PolymorphicValue ret;
@@ -136,7 +136,7 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e)
+	aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e)
 	{
 		aten::PolymorphicValue v;
 
@@ -153,7 +153,7 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e)
+	aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e)
 	{
 		aten::PolymorphicValue v;
 		v.val.f = (real)e->DoubleText();
@@ -161,7 +161,7 @@ namespace aten {
 	}
 
 	template <>
-	static aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e)
+	aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e)
 	{
 		auto s = e->GetText();
 

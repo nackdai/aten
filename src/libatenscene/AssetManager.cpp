@@ -41,7 +41,7 @@ namespace aten {
 
 	static bool registerAsset(
 		const std::string& name,
-		Asset& asset,
+		const Asset& asset,
 		AssetManager::AssetType type)
 	{
 		auto& mapAsset = g_assets[type];
@@ -57,7 +57,7 @@ namespace aten {
 		return true;
 	}
 
-	static Asset getAsset(
+	static Asset& getAsset(
 		const std::string& name,
 		AssetManager::AssetType type)
 	{
@@ -70,7 +70,10 @@ namespace aten {
 			if (g_enableWarnings) {
 				AT_PRINTF("Asset is not registered [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
 			}
-			return Asset();
+
+			static Asset dummy;
+
+			return dummy;
 		}
 
 		auto& asset = it->second;

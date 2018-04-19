@@ -308,7 +308,8 @@ __global__ void shadeMiss(
 			bg = aten::vec3(1, 1, 1);
 		}
 
-		paths->contrib[idx].contrib += paths->throughput[idx].throughput * bg;
+		auto contrib = paths->throughput[idx].throughput * bg;
+		paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 
 		paths->attrib[idx].isTerminate = true;
 	}
@@ -386,8 +387,9 @@ __global__ void shadeMissWithEnvmap(
 
 			emit *= envmapMultiplyer;
 		}
-
-		paths->contrib[idx].contrib += paths->throughput[idx].throughput * misW * emit;
+		
+		auto contrib = paths->throughput[idx].throughput * misW * emit;
+		paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 
 		paths->attrib[idx].isTerminate = true;
 	}
@@ -559,7 +561,8 @@ __global__ void shade(
 				}
 			}
 
-			paths->contrib[idx].contrib += paths->throughput[idx].throughput * weight * shMtrls[threadIdx.x].baseColor;
+			auto contrib = paths->throughput[idx].throughput * weight * shMtrls[threadIdx.x].baseColor;
+			paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 		}
 
 		// When ray hit the light, tracing will finish.
@@ -820,7 +823,8 @@ __global__ void hitShadowRay(
 			hitobj);
 
 		if (isHit) {
-			paths->contrib[idx].contrib += shadowRay.lightcontrib;
+			auto contrib = shadowRay.lightcontrib;
+			paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 		}
 	}
 }

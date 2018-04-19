@@ -170,7 +170,7 @@ __global__ void pickPixel(
 
 		dst->ix = ix;
 		dst->iy = iy;
-		dst->color = paths->contrib[idx].contrib;
+		dst->color = aten::vec3(paths->contrib[idx].contrib.x, paths->contrib[idx].contrib.y, paths->contrib[idx].contrib.z);
 		dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
 		dst->depth = normalDepth.w;
 		dst->meshid = (int)momentMeshid.w;

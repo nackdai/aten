@@ -40,7 +40,7 @@ namespace idaten
 			union {
 				float4 v;
 				struct {
-					aten::vec3 contrib;
+					float3 contrib;
 					float samples;
 				};
 			};

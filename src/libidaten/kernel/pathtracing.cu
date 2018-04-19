@@ -834,7 +834,7 @@ namespace idaten {
 		GLuint gltexPosition,
 		GLuint gltexNormal,
 		GLuint gltexAlbedo,
-		aten::vec3& posRange)
+		const aten::vec3& posRange)
 	{
 		AT_ASSERT(gltexPosition > 0);
 		AT_ASSERT(gltexNormal > 0);

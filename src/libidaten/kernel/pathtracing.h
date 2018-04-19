@@ -72,7 +72,7 @@ namespace idaten
 			GLuint gltexPosition,
 			GLuint gltexNormal,
 			GLuint gltexAlbedo,
-			aten::vec3& posRange) override;
+			const aten::vec3& posRange) override;
 
 		void enableProgressive(bool enable)
 		{

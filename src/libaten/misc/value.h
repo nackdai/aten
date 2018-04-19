@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string.h>
 #include <string>
 #include <map>
 #include "types.h"
@@ -83,32 +84,33 @@ namespace aten {
 			AT_ASSERT(false);
 			return *(TYPE*)val.p;
 		}
-		template <>
-		real getAs()const
-		{
-			return val.f;
-		}
-		template <>
-		int getAs() const
-		{
-			return val.i;
-		}
-		template <>
-		bool getAs() const
-		{
-			return val.b;
-		}
-		template <>
-		vec3 getAs() const
-		{
-			return val.v;
-		}
-		template <>
-		void* getAs() const
-		{
-			return val.p;
-		}
 	};
+
+	template <>
+	real PolymorphicValue::getAs()const
+	{
+		return val.f;
+	}
+	template <>
+	int PolymorphicValue::getAs() const
+	{
+		return val.i;
+	}
+	template <>
+	bool PolymorphicValue::getAs() const
+	{
+		return val.b;
+	}
+	template <>
+	vec3 PolymorphicValue::getAs() const
+	{
+		return val.v;
+	}
+	template <>
+	void* PolymorphicValue::getAs() const
+	{
+		return val.p;
+	}
 
 	class Values : public std::map<std::string, PolymorphicValue> {
 	public:

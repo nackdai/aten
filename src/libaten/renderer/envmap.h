@@ -28,7 +28,7 @@ namespace AT_NAME
 			return m_envmap;
 		}
 
-		static AT_DEVICE_API aten::vec3 envmap::convertUVToDirection(real u, real v)
+		static AT_DEVICE_API aten::vec3 convertUVToDirection(real u, real v)
 		{
 			// u = phi / 2PI
 			// => phi = 2PI * u;
@@ -53,7 +53,7 @@ namespace AT_NAME
 			return std::move(dir);
 		}
 
-		static AT_DEVICE_API aten::vec3 envmap::convertDirectionToUV(const aten::vec3& dir)
+		static AT_DEVICE_API aten::vec3 convertDirectionToUV(const aten::vec3& dir)
 		{
 			auto temp = aten::atan2(dir.x, dir.z);
 			auto r = length(dir);

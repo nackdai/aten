@@ -724,7 +724,5 @@ namespace idaten
 			onApplyTraverseOrder(n, &tmp[0], &tmp1[0]);
 		}
 #endif
-
-		int xxx = 0;
 	}
 }

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "material/specular.h"
 
 namespace AT_NAME

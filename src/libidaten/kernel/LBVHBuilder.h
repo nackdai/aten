@@ -15,7 +15,7 @@ namespace idaten
 		~LBVHBuilder() {}
 
 	public:
-		static void LBVHBuilder::build(
+		static void build(
 			idaten::CudaTextureResource& dst,
 			std::vector<aten::PrimitiveParamter>& tris,
 			int triIdOffset,

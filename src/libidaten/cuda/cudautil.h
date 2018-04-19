@@ -3,10 +3,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <utility>
+#include "defs.h"
 
 namespace idaten {
 	namespace cuda {
@@ -38,8 +35,12 @@ namespace idaten {
 					cudaGetErrorString(result),
 					func);
 
+#if 0
 				fprintf(stderr, "%s", buf);
 				::OutputDebugString(buf);
+#else
+				AT_PRINTF("%s", buf);
+#endif
 
 				AT_ASSERT(false);
 #endif

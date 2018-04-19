@@ -21,7 +21,7 @@ namespace aten {
 	public:
 		void init(uint32_t width, uint32_t height, uint32_t channels);
 
-		AT_DEVICE_API vec3 at(real u, real v) const
+		vec3 at(real u, real v) const
 		{
 			u -= floor(u);
 			v -= floor(v);

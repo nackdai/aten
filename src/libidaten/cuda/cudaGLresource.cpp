@@ -1,3 +1,4 @@
+#include <string.h>
 #include "cuda/cudaGLresource.h"
 
 namespace idaten

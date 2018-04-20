@@ -210,10 +210,16 @@ namespace aten
 					auto exid = node->getExternalId();
 					auto subexid = node->getSubExternalId();
 
-					gpunode.noExternal = false;
-					gpunode.hasLod = (subexid >= 0);
-					gpunode.mainExid = exid;
-					gpunode.lodExid = (subexid >= 0 ? subexid : 0);
+					if (exid >= 0) {
+						gpunode.noExternal = false;
+						gpunode.hasLod = (subexid >= 0);
+						gpunode.mainExid = exid;
+						gpunode.lodExid = (subexid >= 0 ? subexid : 0);
+					}
+					else {
+						// In this case, the item which node keeps is sphere/cube.
+						gpunode.exid = -1.0f;
+					}
 				}
 			}
 

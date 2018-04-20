@@ -2,6 +2,7 @@
 #include <stack>
 #include "renderer/pssmlt.h"
 #include "sampler/xorshift.h"
+#include "sampler/cmj.h"
 #include "misc/color.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
@@ -231,7 +232,9 @@ namespace aten
 
 			// TODO
 			// sobol や halton sequence はステップ数が多すぎてオーバーフローしてしまう...
-			XorShift rnd(4 * mltNum + mi + 1 + time.milliSeconds);
+			//XorShift rnd(4 * mltNum + mi + 1 + time.milliSeconds);
+			CMJ rnd;
+			rnd.init(time.milliSeconds, mi, 4 * mltNum + mi + 1);
 			MLTSampler mlt(&rnd);
 
 			// たくさんパスを生成する.

@@ -3,6 +3,7 @@
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
+#include "sampler/cmj.h"
 #include "misc/color.h"
 #include "misc/timer.h"
 
@@ -226,10 +227,17 @@ namespace aten
 			}
 
 			for (int x = 0; x < width; x++) {
+				auto pos = y * width + x;
+				auto scramble = aten::getRandom(pos) * 0x1fe3434f;
+
 				for (uint32_t i = 0; i < samples; i++) {
+					
+
 					// TODO
 					// sobol や halton sequence はステップ数が多すぎてオーバーフローしてしまう...
-					XorShift rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+					//XorShift rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
+					CMJ rnd;
+					rnd.init(time.milliSeconds, i, scramble);
 					ERPTSampler X(&rnd);
 
 					// 現在のスクリーン上のある点からのパスによる放射輝度を求める.

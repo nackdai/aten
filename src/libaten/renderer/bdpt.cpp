@@ -7,6 +7,7 @@
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
+#include "sampler/cmj.h"
 
 //#define BDPT_DEBUG
 
@@ -906,10 +907,12 @@ namespace aten
 					for (uint32_t i = 0; i < samples; i++) {
 						auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
-						XorShift rnd(scramble + time.milliSeconds);
+						//XorShift rnd(scramble + time.milliSeconds);
 						//Halton rnd(scramble + time.milliSeconds);
 						//Sobol rnd(scramble + time.milliSeconds);
 						//WangHash rnd(scramble + time.milliSeconds);
+						CMJ rnd;
+						rnd.init(time.milliSeconds, i, scramble);
 
 						std::vector<Result> result;
 
@@ -966,6 +969,14 @@ namespace aten
 #if 1
 							for (int i = 0; i < (int)result.size(); i++) {
 								const auto& res = result[i];
+
+								// TODO
+								// FIXME
+								// I have to research why contribute value is invalid.
+								if (isInvalidColor(res.contrib)) {
+									//AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
+									continue;
+								}
 
 								const int pos = res.y * m_width + res.x;
 

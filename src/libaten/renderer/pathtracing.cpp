@@ -6,6 +6,7 @@
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
 #include "sampler/wanghash.h"
+#include "sampler/cmj.h"
 
 #include "material/lambert.h"
 
@@ -23,18 +24,6 @@ namespace aten
 {
 	// NOTE
 	// https://www.slideshare.net/shocker_0x15/ss-52688052
-
-	static inline bool isInvalidColor(const vec3& v)
-	{
-		bool b = isInvalid(v);
-		if (!b) {
-			if (v.x < 0 || v.y < 0 || v.z < 0) {
-				b = true;
-			}
-		}
-
-		return b;
-	}
 
 	PathTracing::Path PathTracing::radiance(
 		sampler* sampler,
@@ -495,8 +484,9 @@ namespace aten
 
 						//XorShift rnd(scramble + t.milliSeconds);
 						//Halton rnd(scramble + t.milliSeconds);
-						Sobol rnd;
-						rnd.init(frame, 0, scramble);
+						//Sobol rnd;
+						CMJ rnd;
+						rnd.init(frame, i, scramble);
 						//WangHash rnd(scramble + t.milliSeconds);
 
 						real u = real(x + rnd.nextSample()) / real(width);

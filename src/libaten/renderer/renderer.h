@@ -67,6 +67,18 @@ namespace aten
 			return m_bg;
 		}
 
+		static inline bool isInvalidColor(const vec3& v)
+		{
+			bool b = isInvalid(v);
+			if (!b) {
+				if (v.x < 0 || v.y < 0 || v.z < 0) {
+					b = true;
+				}
+			}
+
+			return b;
+		}
+
 	private:
 		background* m_bg{ nullptr };
 	};

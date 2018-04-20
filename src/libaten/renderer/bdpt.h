@@ -33,7 +33,7 @@ namespace aten
 			ObjectType objType;
 
 			real totalAreaPdf;
-			vec3 throughput;
+			vec3 throughput{ real(1) };
 
 			vec3 bsdf{ real(0) };
 

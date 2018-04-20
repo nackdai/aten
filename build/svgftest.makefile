@@ -11,8 +11,8 @@ Debug_Library_Path=-L"../build/x64/Debug"
 Release_Library_Path=-L"../build/x64/Release" 
 
 # Additional libraries...
-Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lidaten -lcudart  -Wl,--end-group
-Release_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lidaten -lcudart  -Wl,--end-group
+Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lidaten -lcudart -fopenmp -lGL -lglfw -lGLEW  -Wl,--end-group
+Release_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lidaten -lcudart -fopenmp -lGL -lglfw -lGLEW  -Wl,--end-group
 
 # Preprocessor definitions...
 Debug_Preprocessor_Definitions=-D GCC_BUILD -D __AT_DEBUG__ 

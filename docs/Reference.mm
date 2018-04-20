@@ -57,6 +57,7 @@
 </node>
 <node CREATED="1524197470410" HGAP="30" ID="ID_655038805" MODIFIED="1524197604188" POSITION="right" TEXT="Linux&#x5bfe;&#x5fdc;" VSHIFT="27">
 <node CREATED="1524197478076" ID="ID_10574266" LINK="https://qiita.com/sasayabaku/items/2323a2c501e58c0621b6" MODIFIED="1524197494774" TEXT="Ubuntu 16.04&#x306b; GTX 1080Ti &#x30c9;&#x30e9;&#x30a4;&#x30d0;&#x3068;CUDA&#x306e;&#x30a4;&#x30f3;&#x30b9;&#x30c8;&#x30fc;&#x30eb;"/>
+<node CREATED="1524197781910" ID="ID_13955257" LINK="https://qiita.com/conta_/items/d639ef0068c9b7a0cd12" MODIFIED="1524197789815" TEXT="Ubuntu&#x306b;Nvidia GPU&#x306e;Driver + CUDA&#x3092;Install&#x3059;&#x308b;(GTX1080&#x5bfe;&#x5fdc;&#x7248;)"/>
 <node CREATED="1524197570306" ID="ID_648905717" LINK="https://blog.spiralray.net/archives/474" MODIFIED="1524197582113" TEXT="&#x30aa;&#x30f3;&#x30dc;&#x30fc;&#x30c9;&#x306e;Ethernet&#x30b3;&#x30f3;&#x30c8;&#x30ed;&#x30fc;&#x30e9;(I219-V)&#x304c;Ubuntu&#x3067;&#x52d5;&#x304b;&#x306a;&#x3044;&#x6642;&#x306e;&#x5bfe;&#x51e6;"/>
 </node>
 </node>

@@ -11,6 +11,8 @@
 
 #include "aten4idaten.h"
 
+//#pragma optimize( "", off)
+
 namespace idaten
 {
 	void SVGFPathTracing::update(
@@ -120,23 +122,42 @@ namespace idaten
 		auto vtxTexPos = m_vtxparamsPos.bind();
 		auto vtxTexNml = m_vtxparamsNml.bind();
 
+		// TODO
+		// Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
+		// 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.
+
+		static bool isListedTextureObject = false;
+
+		if (!isListedTextureObject)
 		{
-			std::vector<cudaTextureObject_t> tmp;
+			{
+				std::vector<cudaTextureObject_t> tmp;
+				for (int i = 0; i < m_nodeparam.size(); i++) {
+					auto nodeTex = m_nodeparam[i].bind();
+					tmp.push_back(nodeTex);
+				}
+				m_nodetex.writeByNum(&tmp[0], tmp.size());
+			}
+
+			if (!m_texRsc.empty())
+			{
+				std::vector<cudaTextureObject_t> tmp;
+				for (int i = 0; i < m_texRsc.size(); i++) {
+					auto cudaTex = m_texRsc[i].bind();
+					tmp.push_back(cudaTex);
+				}
+				m_tex.writeByNum(&tmp[0], tmp.size());
+			}
+
+			isListedTextureObject = true;
+		}
+		else {
 			for (int i = 0; i < m_nodeparam.size(); i++) {
 				auto nodeTex = m_nodeparam[i].bind();
-				tmp.push_back(nodeTex);
 			}
-			m_nodetex.writeByNum(&tmp[0], tmp.size());
-		}
-
-		if (!m_texRsc.empty())
-		{
-			std::vector<cudaTextureObject_t> tmp;
 			for (int i = 0; i < m_texRsc.size(); i++) {
 				auto cudaTex = m_texRsc[i].bind();
-				tmp.push_back(cudaTex);
 			}
-			m_tex.writeByNum(&tmp[0], tmp.size());
 		}
 
 		if (width > 1280 || height > 720) {

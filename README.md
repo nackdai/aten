@@ -5,7 +5,7 @@ Aten is Egyptian sun god.
 
 Idaten(path tracing on GPGPU) is under construction.<br>
 Idaten is Japanese god, it runs fast.
-And Idanten include characters of aten, "id**aten**"
+And Idanten includes characters of aten, "id**aten**"
 
 ## Features
 
@@ -27,6 +27,7 @@ And Idanten include characters of aten, "id**aten**"
   - Microfacet Beckman
   - Microfacet GGX
   - Disney BRDF
+  - Car Paint (Experimental)
   - Toon(Non Photoreal)
   - Layer
 - Lights
@@ -99,14 +100,14 @@ And Idanten include characters of aten, "id**aten**"
 
 ### Windows
 
-1. Install `CUDA 8.0` and depended nVidia driver
+1. Install `CUDA 8.0` or later and depended NVIDIA driver
 2. Run `aten/3rdparty/Build3rdParty.bat Debug` or `aten/3rdparty/Build3rdParty.bat Release`
 3. Launch `aten/vs2015/aten.sln`
 4. Build porjects with `x64` (not support `x86`)
 
 ### Linux
 
-1. Install `CUDA 8.0` and depended nVidia driver
+1. Install `CUDA 8.0` or later and depended NVIDIA driver
 2. Install `libglfw3`, `libglew`
 
 `sudo apt-get install libglfw3-dev`
@@ -115,6 +116,8 @@ And Idanten include characters of aten, "id**aten**"
 
 3. `cd aten/build`
 4. Run make `make Debug` or `make Release`
+
+I confirmed Windows10 and Ubuntu16.04.
 
 ## Gallery
 
@@ -130,10 +133,10 @@ Bi-Directional PathTracing 100spp
 
 ![BDPT](gallery/bdpt100.png)
 
-PSSMLT 10spp 100mlt 100mutation
+PSSMLT 10spp 10mlt 10mutation
 
-![PSSMLT](gallery/pssmlt_10spp_100mutation_100mlt.png)
+![PSSMLT](gallery/pssmlt_10spp_10mutation_10mlt.png)
 
-ERPT 10spp 10mutation
+GPGPU 1spp
 
-![ERPT](gallery/erpt_10spp_10mutation.png)
+![GPGPU_1spp](gallery/gpgpu_1spp.png)

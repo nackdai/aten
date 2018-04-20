@@ -6,7 +6,7 @@ cd /d %~dp0
 
 rem Create Makefile by MakeItSo =======================================
 
-..\3rdparty\makeitso\output\MakeItSo.exe -file=makefile.sln -config=MakeItSo.config
+..\3rdparty\makeitso\output\MakeItSo.exe -file=makefile.sln -config=MakeItSo.config -nl=crlf
 
 rem Copy Makefie ======================================================
 xcopy /Y /D ..\vs2015\*.makefile .\

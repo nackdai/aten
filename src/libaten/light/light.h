@@ -146,17 +146,17 @@ namespace AT_NAME
 
 		const aten::vec3& getPos() const
 		{
-			return m_param.pos;
+			return m_param.pos.v;
 		}
 
 		const aten::vec3& getDir() const
 		{
-			return m_param.dir;
+			return m_param.dir.v;
 		}
 
 		const aten::vec3& getLe() const
 		{
-			return m_param.le;
+			return m_param.le.v;
 		}
 
 		virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const = 0;

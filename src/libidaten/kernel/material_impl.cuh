@@ -476,4 +476,6 @@ AT_CUDA_INLINE __device__ real computeFresnel(
 	case aten::MaterialType::Toon:
 		return real(1);
 	}
+
+	return real(1);
 }

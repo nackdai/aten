@@ -1030,8 +1030,6 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		bool isFirstBounce = (bounce == 0);
-
 		shade << <blockPerGrid, threadPerBlock >> > (
 			m_tileDomain,
 			m_aovNormalDepth[curaov].ptr(),

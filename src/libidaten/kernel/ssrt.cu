@@ -823,8 +823,6 @@ __global__ void shade(
 		auto dirToLight = normalize(sampleres.dir);
 		auto distToLight = length(posLight - rec.p);
 
-		real distHitObjToRayOrg = AT_MATH_INF;
-
 		// Ray aim to the area light.
 		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
 		auto hitobj = lightobj;
@@ -1133,7 +1131,9 @@ namespace idaten {
 		m_depth.init(gltexDepth, idaten::CudaGLRscRegisterType::ReadOnly);
 	}
 
+#ifdef __AT_DEBUG__
 	static bool doneSetStackSize = false;
+#endif
 
 	void SSRT::render(
 		int width, int height,

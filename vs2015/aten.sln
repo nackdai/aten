@@ -106,6 +106,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GpuSkinningTest", "GpuSkinn
 		{393C16ED-D331-4C42-B02A-4ECC84979166} = {393C16ED-D331-4C42-B02A-4ECC84979166}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mlutigputest", "mlutigputest.vcxproj", "{8281FDD8-7A05-453B-A981-9995D979C8B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -332,6 +334,18 @@ Global
 		{7AF17DA9-897C-4B04-8128-150341B4E585}.Release|x64.Build.0 = Release|x64
 		{7AF17DA9-897C-4B04-8128-150341B4E585}.Release|x86.ActiveCfg = Release|Win32
 		{7AF17DA9-897C-4B04-8128-150341B4E585}.Release|x86.Build.0 = Release|Win32
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Debug|x64.ActiveCfg = Debug|x64
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Debug|x64.Build.0 = Debug|x64
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Debug|x86.ActiveCfg = Debug|Win32
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Debug|x86.Build.0 = Debug|Win32
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Profile|x64.ActiveCfg = Profile|x64
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Profile|x64.Build.0 = Profile|x64
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Profile|x86.ActiveCfg = Profile|Win32
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Profile|x86.Build.0 = Profile|Win32
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Release|x64.ActiveCfg = Release|x64
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Release|x64.Build.0 = Release|x64
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Release|x86.ActiveCfg = Release|Win32
+		{8281FDD8-7A05-453B-A981-9995D979C8B2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

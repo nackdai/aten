@@ -11,15 +11,15 @@ namespace idaten
 	template <class RENDERER>
 	class GpuProxy {
 	public:
-		GpuProxy();
-		~GpuProxy();
+		GpuProxy() {}
+		~GpuProxy() {}
 
 	public:
 		void init(int deviceId)
 		{
 #ifdef ENABLE_MULTI_GPU_EMULATE
 			CUdevice device = 0;
-			checkCudaErrors(cuCtxGetDevice(&device));
+			checkCudaErrors(cuDeviceGet(&device, deviceId));
 			checkCudaErrors(cuCtxCreate(&m_context, 0, device));
 #else
 			checkCudaErrors(cudaSetDevice(deviceId));

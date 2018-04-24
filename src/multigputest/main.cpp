@@ -31,7 +31,7 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
-static idaten::PathTracing g_tracer;
+static idaten::GpuProxy<idaten::PathTracing> g_tracer;
 
 static aten::visualizer* g_visualizer;
 
@@ -51,7 +51,7 @@ void onRun(aten::window* window)
 		camparam.znear = real(0.1);
 		camparam.zfar = real(10000.0);
 
-		g_tracer.updateCamera(camparam);
+		g_tracer.getRenderer().updateCamera(camparam);
 		g_isCameraDirty = false;
 
 		g_visualizer->clear();
@@ -86,22 +86,6 @@ void onRun(aten::window* window)
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
-
-		int prevSamples = g_maxSamples;
-		int prevDepth = g_maxBounce;
-
-		ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
-		ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
-
-		if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
-			g_tracer.reset();
-		}
-
-		bool enableProgressive = g_tracer.isProgressive();
-
-		if (ImGui::Checkbox("Progressive", &enableProgressive)) {
-			g_tracer.enableProgressive(enableProgressive);
-		}
 
 		window->drawImGui();
 	}
@@ -227,6 +211,8 @@ void onKey(bool press, aten::Key key)
 
 int main()
 {
+	idaten::initCuda();
+
 	aten::timer::init();
 	aten::OMPUtil::setThreadNum(g_threadnum);
 
@@ -267,7 +253,10 @@ int main()
 	Scene::makeScene(&g_scene);
 	g_scene.build();
 
-	g_tracer.prepare();
+	g_tracer.init(0);
+	g_tracer.setCurrent();
+
+	g_tracer.getRenderer().prepare();
 
 	idaten::Compaction::init(
 		WIDTH * HEIGHT,
@@ -322,7 +311,7 @@ int main()
 		camparam.znear = real(0.1);
 		camparam.zfar = real(10000.0);
 
-		g_tracer.update(
+		g_tracer.getRenderer().update(
 			aten::visualizer::getTexHandle(),
 			WIDTH, HEIGHT,
 			camparam,

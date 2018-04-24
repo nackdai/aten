@@ -1,7 +1,11 @@
 #pragma once
 
-namespace idaten {
-	void beginCuda();
+#include <cuda.h>
+#include "cuda/cudautil.h"
 
-	void teminateCuda();
+namespace idaten {
+	void initCuda()
+	{
+		checkCudaErrors(cuInit(0));
+	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
@@ -51,9 +52,34 @@ namespace idaten {
 				exit(EXIT_FAILURE);
 			}
 		}
+
+		template <>
+		inline void check(CUresult result, char const *const func, const char *const file, int const line)
+		{
+			if (result)
+			{
+				static char buf[2048];
+
+				snprintf(
+					buf, 2048,
+					"CUDA error at %s:%d code=%d \"%s\" \n",
+					file,
+					line,
+					result,
+					func);
+
+
+				AT_PRINTF("%s", buf);
+
+				AT_ASSERT(false);
+
+				cudaDeviceReset();
+
+				// Make sure we call CUDA Device Reset before exiting.
+				exit(EXIT_FAILURE);
+			}
+		}
 	}
-
-
 }
 
 // This will output the proper CUDA error strings in the event that a CUDA host call returns an error.

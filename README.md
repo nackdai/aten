@@ -72,8 +72,6 @@ And Idanten includes characters of aten, "id**aten**"
   - Only Area Light
 - Scene Definition by XML
   - Can not specify all definitions.
-- Only for Windows.
-  - Only for Visual Studio 2015.
 - There are some Japanese comments...
 
 ## Under Construction Works
@@ -105,6 +103,8 @@ And Idanten includes characters of aten, "id**aten**"
 3. Launch `aten/vs2015/aten.sln`
 4. Build porjects with `x64` (not support `x86`)
 
+I confirmed with Visual Studio 2015 on Windows10.
+
 ### Linux
 
 1. Install `CUDA 8.0` or later and depended NVIDIA driver
@@ -117,7 +117,7 @@ And Idanten includes characters of aten, "id**aten**"
 3. `cd aten/build`
 4. Run make `make Debug` or `make Release`
 
-I confirmed Windows10 and Ubuntu16.04.
+I confirmed on Ubuntu16.04.
 
 ## Gallery
 

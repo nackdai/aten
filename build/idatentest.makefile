@@ -7,8 +7,8 @@ Debug_Include_Path=-I"../src/libaten" -I"../src/libatenscene" -I"../src/libidate
 Release_Include_Path=-I"../src/libaten" -I"../src/libatenscene" -I"../src/libidaten" -I"../src/idatentest" -I"../3rdparty/glm" -I"../3rdparty/imgui" 
 
 # Library paths...
-Debug_Library_Path=-L"../build/x64/Debug" 
-Release_Library_Path=-L"../build/x64/Release" 
+Debug_Library_Path=-L"x64/Debug" 
+Release_Library_Path=-L"x64/Release" 
 
 # Additional libraries...
 Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lidaten -lcudart -fopenmp -lGL -lglfw -lGLEW  -Wl,--end-group
@@ -57,10 +57,6 @@ x64/Debug/idatentest/src/idatentest/scenedefs.o: ../src/idatentest/scenedefs.cpp
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/idatentest/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/idatentest/src/idatentest/scenedefs.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/idatentest/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/idatentest/src/idatentest/scenedefs.d
 
-# Link gpu code files.
-x64/Debug/idatentest/gpuCode.o: 
-	$(NVCC) -arch=sm_20 -dlink  -o x64/Debug/idatentest/gpuCode.o
-
 # Builds the Release configuration...
 .PHONY: Release
 Release: create_folders x64/Release/idatentest/src/idatentest/main.o x64/Release/idatentest/src/idatentest/scenedefs.o 
@@ -77,10 +73,6 @@ x64/Release/idatentest/src/idatentest/main.o: ../src/idatentest/main.cpp
 x64/Release/idatentest/src/idatentest/scenedefs.o: ../src/idatentest/scenedefs.cpp
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/idatentest/scenedefs.cpp $(Release_Include_Path) -o x64/Release/idatentest/src/idatentest/scenedefs.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/idatentest/scenedefs.cpp $(Release_Include_Path) > x64/Release/idatentest/src/idatentest/scenedefs.d
-
-# Link gpu code files.
-x64/Release/idatentest/gpuCode.o: 
-	$(NVCC) -arch=sm_20 -dlink  -o x64/Release/idatentest/gpuCode.o
 
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders

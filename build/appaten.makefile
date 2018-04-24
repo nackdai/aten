@@ -7,8 +7,8 @@ Debug_Include_Path=-I"../src/libaten" -I"../src/libatenscene" -I"../3rdparty/gle
 Release_Include_Path=-I"../src/libaten" -I"../src/libatenscene" -I"../3rdparty/glew/include" -I"../3rdparty/glm" 
 
 # Library paths...
-Debug_Library_Path=-L"../build/x64/Debug" 
-Release_Library_Path=-L"../build/x64/Release" 
+Debug_Library_Path=-L"x64/Debug" 
+Release_Library_Path=-L"x64/Release" 
 
 # Additional libraries...
 Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lGLEW -lglfw -lGL -fopenmp  -Wl,--end-group

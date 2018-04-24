@@ -7,8 +7,8 @@ Debug_Include_Path=-I"../src/libaten" -I"../src/libatenscene" -I"../src/libidate
 Release_Include_Path=-I"../src/libaten" -I"../src/libatenscene" -I"../src/libidaten" -I"../src/svgftest" -I"../3rdparty/glm" -I"../3rdparty/imgui" 
 
 # Library paths...
-Debug_Library_Path=-L"../build/x64/Debug" 
-Release_Library_Path=-L"../build/x64/Release" 
+Debug_Library_Path=-L"x64/Debug" 
+Release_Library_Path=-L"x64/Release" 
 
 # Additional libraries...
 Debug_Libraries=-Wl,--no-as-needed -Wl,--start-group -laten -latenscene -lidaten -lcudart -fopenmp -lGL -lglfw -lGLEW  -Wl,--end-group
@@ -57,10 +57,6 @@ x64/Debug/svgftest/src/svgftest/scenedefs.o: ../src/svgftest/scenedefs.cpp
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/svgftest/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/svgftest/src/svgftest/scenedefs.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/svgftest/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/svgftest/src/svgftest/scenedefs.d
 
-# Link gpu code files.
-x64/Debug/svgftest/gpuCode.o: 
-	$(NVCC) -arch=sm_20 -dlink  -o x64/Debug/svgftest/gpuCode.o
-
 # Builds the Release configuration...
 .PHONY: Release
 Release: create_folders x64/Release/svgftest/src/svgftest/main.o x64/Release/svgftest/src/svgftest/scenedefs.o 
@@ -77,10 +73,6 @@ x64/Release/svgftest/src/svgftest/main.o: ../src/svgftest/main.cpp
 x64/Release/svgftest/src/svgftest/scenedefs.o: ../src/svgftest/scenedefs.cpp
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/svgftest/scenedefs.cpp $(Release_Include_Path) -o x64/Release/svgftest/src/svgftest/scenedefs.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/svgftest/scenedefs.cpp $(Release_Include_Path) > x64/Release/svgftest/src/svgftest/scenedefs.d
-
-# Link gpu code files.
-x64/Release/svgftest/gpuCode.o: 
-	$(NVCC) -arch=sm_20 -dlink  -o x64/Release/svgftest/gpuCode.o
 
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders

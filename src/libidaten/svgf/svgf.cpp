@@ -126,9 +126,7 @@ namespace idaten
 		// Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
 		// 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.
 
-		static bool isListedTextureObject = false;
-
-		if (!isListedTextureObject)
+		if (!m_isListedTextureObject)
 		{
 			{
 				std::vector<cudaTextureObject_t> tmp;
@@ -149,7 +147,7 @@ namespace idaten
 				m_tex.writeByNum(&tmp[0], tmp.size());
 			}
 
-			isListedTextureObject = true;
+			m_isListedTextureObject = true;
 		}
 		else {
 			for (int i = 0; i < m_nodeparam.size(); i++) {

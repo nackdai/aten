@@ -377,5 +377,7 @@ namespace idaten
 		float m_nmlThresholdTF{ 0.98f };
 
 		TileDomain m_tileDomain;
+
+		bool m_isListedTextureObject{ false };
 	};
 }

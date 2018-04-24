@@ -18,7 +18,7 @@
 #include "aten4idaten.h"
 
 __global__ void hitTestPrimaryRayInScreenSpace(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t gbuffer,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::Intersection* isects,

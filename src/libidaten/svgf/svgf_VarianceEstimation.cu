@@ -72,7 +72,7 @@ inline __device__ float C(float x1, float x2, float sigma)
 #define IS_IN_BOUND(x, a, b)	((a) <= (x) && (x) < (b))
 
 __global__ void varianceEstimation(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	const float4* __restrict__ aovNormalDepth,
 	const float4* __restrict__ aovTexclrTemporalWeight,

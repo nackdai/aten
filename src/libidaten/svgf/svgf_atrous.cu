@@ -176,7 +176,7 @@ inline __device__ float4 unmap(float4 clr)
 }
 
 __global__ void atrousFilter(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	bool isFirstIter, bool isFinalIter,
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,

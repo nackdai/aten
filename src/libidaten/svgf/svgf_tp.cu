@@ -100,7 +100,7 @@ inline __device__ float4 sampleBilinear(
 }
 
 __global__ void temporalReprojection(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	const float nThreshold,
 	const float zThreshold,
 	const float4* __restrict__ contribs,
@@ -267,7 +267,7 @@ __global__ void temporalReprojection(
 }
 
 __global__ void dilateWeight(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	float4* aovTexclrTemporalWeight,
 	const float4* __restrict__ aovMomentMeshid,
 	int width, int height)

@@ -88,18 +88,6 @@ namespace idaten
 		struct ShadowRay;
 #endif
 
-		struct TileDomain {
-			int x;
-			int y;
-			int w;
-			int h;
-
-			TileDomain() {}
-			TileDomain(int _x, int _y, int _w, int _h)
-				: x(_x), y(_y), w(_w), h(_h)
-			{}
-		};
-
 		struct PickedInfo {
 			int ix{ -1 };
 			int iy{ -1 };

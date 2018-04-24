@@ -18,7 +18,7 @@
 #include "aten4idaten.h"
 
 __global__ void fillAOV(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	idaten::SVGFPathTracing::AOVMode mode,
 	int width, int height,

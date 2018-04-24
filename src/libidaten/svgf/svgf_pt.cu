@@ -21,7 +21,7 @@
 #define ENABLE_PERSISTENT_THREAD
 
 __global__ void genPath(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	bool isFillAOV,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::ray* rays,
@@ -105,7 +105,7 @@ __global__ void genPath(
 __device__ unsigned int g_headDev = 0;
 
 __global__ void hitTest(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	idaten::SVGFPathTracing::Path* paths,
 	aten::Intersection* isects,
 	aten::ray* rays,
@@ -271,7 +271,7 @@ __global__ void hitTest(
 }
 
 __global__ void shadeMiss(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	int bounce,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
@@ -316,7 +316,7 @@ __global__ void shadeMiss(
 }
 
 __global__ void shadeMissWithEnvmap(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	int bounce,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* aovNormalDepth,
@@ -396,7 +396,7 @@ __global__ void shadeMissWithEnvmap(
 }
 
 __global__ void shade(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	float4* aovNormalDepth,
 	float4* aovTexclrTemporalWeight,
 	float4* aovMomentMeshid,
@@ -830,7 +830,7 @@ __global__ void hitShadowRay(
 }
 
 __global__ void gather(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	float4* aovColorVariance,
 	float4* aovMomentMeshid,

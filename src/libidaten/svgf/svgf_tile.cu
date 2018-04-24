@@ -10,7 +10,7 @@
 #include "cuda/cudamemory.h"
 
 __global__ void copyBufferForTile(
-	idaten::SVGFPathTracing::TileDomain tileDomain,
+	idaten::TileDomain tileDomain,
 	const idaten::SVGFPathTracing::Path* paths,
 	float4* contribs,
 	int width, int height)

@@ -458,7 +458,7 @@ int main()
 	makeScene(&g_scene);
 	g_scene.build();
 
-	idaten::Compaction::init(
+	g_tracer.getCompaction().init(
 		WIDTH * HEIGHT,
 		1024);
 

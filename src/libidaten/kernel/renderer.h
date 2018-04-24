@@ -4,6 +4,7 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 #include "cuda/cudaTextureResource.h"
+#include "kernel/compaction.h"
 
 namespace idaten
 {
@@ -79,7 +80,14 @@ namespace idaten
 			return m_vtxparamsPos;
 		}
 
+		idaten::Compaction& getCompaction()
+		{
+			return m_compaction;
+		}
+
 	protected:
+		idaten::Compaction m_compaction;
+
 		idaten::CudaMemory m_dst;
 		idaten::TypedCudaMemory<aten::CameraParameter> m_cam;
 		idaten::TypedCudaMemory<aten::GeomParameter> m_shapeparam;

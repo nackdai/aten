@@ -499,7 +499,7 @@ bool MaterialEditWindow::init(
 	makeScene(&s_scene);
 	s_scene.build();
 
-	idaten::Compaction::init(
+	s_tracer.getCompaction().init(
 		s_width * s_height,
 		1024);
 

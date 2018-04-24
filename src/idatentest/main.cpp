@@ -313,7 +313,7 @@ int main()
 
 	g_tracer.prepare();
 
-	idaten::Compaction::init(
+	g_tracer.getCompaction().init(
 #ifdef ENABLE_GEOMRENDERING
 		(WIDTH >> 1) * (HEIGHT >> 1),
 #else

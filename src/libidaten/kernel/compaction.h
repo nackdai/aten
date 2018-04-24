@@ -5,27 +5,45 @@
 
 namespace idaten {
 	class Compaction {
-	private:
-		Compaction();
-		~Compaction();
+	public:
+		Compaction() {}
+		~Compaction() {}
 
 	public:
-		static void init(
+		void init(
 			int maxInputNum,
 			int blockSize);
 
-		static void clear();
+		void clear();
 
-		static void compact(
+		void compact(
 			idaten::TypedCudaMemory<int>& dst,
 			idaten::TypedCudaMemory<int>& bools,
 			int* result = nullptr);
 
-		static idaten::TypedCudaMemory<int>& getCount();
+		idaten::TypedCudaMemory<int>& getCount();
 
 #if 0
 		// test implementation.
-		static void compact();
+		void compact();
 #endif
+
+	private:
+		void scan(
+			const int blocksize,
+			idaten::TypedCudaMemory<int>& src,
+			idaten::TypedCudaMemory<int>& dst);
+
+	private:
+		int m_maxInputNum{ 0 };
+		int m_blockSize{ 0 };
+
+		idaten::TypedCudaMemory<int> m_increments;
+		idaten::TypedCudaMemory<int> m_tmp;
+		idaten::TypedCudaMemory<int> m_work;
+
+		idaten::TypedCudaMemory<int> m_indices;
+		idaten::TypedCudaMemory<int> m_iota;
+		idaten::TypedCudaMemory<int> m_counts;
 	};
 }

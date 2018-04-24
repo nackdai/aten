@@ -171,7 +171,7 @@ namespace idaten
 			m_hitbools.init(compactionW * compactionH);
 			m_hitidx.init(compactionW * compactionH);
 
-			Compaction::init(
+			m_compaction.init(
 				compactionW * compactionH,
 				1024);
 
@@ -231,7 +231,7 @@ namespace idaten
 			m_hitbools.init(width * height);
 			m_hitidx.init(width * height);
 
-			Compaction::init(
+			m_compaction.init(
 				width * height,
 				1024);
 
@@ -330,7 +330,7 @@ namespace idaten
 				onShadeMiss(width, height, bounce);
 
 				int hitcount = 0;
-				idaten::Compaction::compact(
+				m_compaction.compact(
 					m_hitidx,
 					m_hitbools);
 

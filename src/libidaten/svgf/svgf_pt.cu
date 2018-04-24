@@ -1026,7 +1026,7 @@ namespace idaten
 		dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
 
-		auto& hitcount = Compaction::getCount();
+		auto& hitcount = m_compaction.getCount();
 
 		int curaov = getCurAovs();
 

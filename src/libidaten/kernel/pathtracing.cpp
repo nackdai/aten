@@ -175,7 +175,7 @@ namespace idaten {
 				onShadeMiss(width, height, bounce);
 
 				int hitcount = 0;
-				idaten::Compaction::compact(
+				m_compaction.compact(
 					m_hitidx,
 					m_hitbools,
 					&hitcount);

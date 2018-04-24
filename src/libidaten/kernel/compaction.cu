@@ -130,70 +130,59 @@ __global__ void scatter(
 
 namespace idaten
 {
-	static int g_maxInputNum = 0;
-	static int g_blockSize = 0;
-
-	idaten::TypedCudaMemory<int> g_increments;
-	idaten::TypedCudaMemory<int> g_tmp;
-	idaten::TypedCudaMemory<int> g_work;
-
-	idaten::TypedCudaMemory<int> g_indices;
-	idaten::TypedCudaMemory<int> g_iota;
-	idaten::TypedCudaMemory<int> g_counts;
-
 	idaten::TypedCudaMemory<int>& Compaction::getCount()
 	{
-		return g_counts;
+		return m_counts;
 	}
 
 	void Compaction::init(
 		int maxInputNum,
 		int blockSize)
 	{
-		AT_ASSERT(g_maxInputNum == 0);
+		AT_ASSERT(m_maxInputNum == 0);
 
-		if (g_maxInputNum == 0) {
-			g_maxInputNum = maxInputNum;
-			g_blockSize = blockSize;
+		if (m_maxInputNum == 0) {
+			m_maxInputNum = maxInputNum;
+			m_blockSize = blockSize;
 
 			int blockPerGrid = (maxInputNum - 1) / blockSize + 1;
 
-			g_increments.init(blockPerGrid);
-			g_tmp.init(blockPerGrid);
-			g_work.init(blockPerGrid);
+			m_increments.init(blockPerGrid);
+			m_tmp.init(blockPerGrid);
+			m_work.init(blockPerGrid);
 
-			g_indices.init(g_maxInputNum);
+			m_indices.init(m_maxInputNum);
 
-			std::vector<int> iota(g_maxInputNum);
+			std::vector<int> iota(m_maxInputNum);
 			std::iota(iota.begin(), iota.end(), 0);
 
-			g_iota.init(iota.size());
-			g_iota.writeByNum(&iota[0], iota.size());
+			m_iota.init(iota.size());
+			m_iota.writeByNum(&iota[0], iota.size());
 
-			g_counts.init(1);
+			m_counts.init(1);
 		}
 	}
 
 	void Compaction::clear()
 	{
-		g_maxInputNum = 0;
-		g_blockSize = 0;
+		m_maxInputNum = 0;
+		m_blockSize = 0;
 
-		g_increments.free();
-		g_tmp.free();
-		g_work.free();
+		m_increments.free();
+		m_tmp.free();
+		m_work.free();
 
-		g_indices.free();
-		g_iota.free();
-		g_counts.free();
+		m_indices.free();
+		m_iota.free();
+		m_counts.free();
 	}
 
-	void scan(
+	void Compaction::scan(
 		const int blocksize,
 		idaten::TypedCudaMemory<int>& src,
 		idaten::TypedCudaMemory<int>& dst)
 	{
-		AT_ASSERT(dst.maxNum() <= g_maxInputNum);
+		AT_ASSERT(dst.maxNum() <= m_maxInputNum);
 
 		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
 
@@ -214,18 +203,18 @@ namespace idaten
 		int tmpBlockSize = blockPerGrid;
 
 		computeBlockCount << <tmpBlockPerGrid, tmpBlockSize >> > (
-			g_increments.ptr(),
-			g_increments.maxNum(),
+			m_increments.ptr(),
+			m_increments.maxNum(),
 			blocksize,
 			src.ptr(),
 			dst.ptr());
 
 		checkCudaKernel(computeBlockCount);
 
-		idaten::TypedCudaMemory<int>* input = &g_increments;
-		idaten::TypedCudaMemory<int>* output = &g_tmp;
+		idaten::TypedCudaMemory<int>* input = &m_increments;
+		idaten::TypedCudaMemory<int>* output = &m_tmp;
 
-		idaten::TypedCudaMemory<int>* tmpptr = &g_tmp;
+		idaten::TypedCudaMemory<int>* tmpptr = &m_tmp;
 
 		int elementNum = blockPerGrid;
 
@@ -240,8 +229,8 @@ namespace idaten
 			stackBlockPerGrid.push_back(elementNum);
 
 			exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int) >> >(
-				g_work.ptr(),
-				g_work.maxNum(),
+				m_work.ptr(),
+				m_work.maxNum(),
 				blocksize,
 				input->ptr());
 
@@ -249,7 +238,7 @@ namespace idaten
 
 			if (innerBlockPerGrid <= 1) {
 				//cudaMemcpyAsync(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyAsyncDeviceToDevice);
-				tmpptr = &g_work;
+				tmpptr = &m_work;
 				break;
 			}
 
@@ -261,7 +250,7 @@ namespace idaten
 				output->maxNum(),
 				blocksize,
 				input->ptr(),
-				g_work.ptr());
+				m_work.ptr());
 
 			checkCudaKernel(iterate_computeBlockCount);
 
@@ -276,7 +265,7 @@ namespace idaten
 
 #if 1
 		input = tmpptr;
-		output = &g_increments;
+		output = &m_increments;
 
 		for (int i = count - 1; i >= 0; i--) {
 			// blocks per grid.
@@ -297,7 +286,7 @@ namespace idaten
 			output = p;
 		}
 
-		idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? tmpptr : &g_increments);
+		idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? tmpptr : &m_increments);
 #endif
 
 		incrementBlocks << <blockPerGrid, blocksize >> > (
@@ -313,21 +302,21 @@ namespace idaten
 		idaten::TypedCudaMemory<int>& bools,
 		int* result/*= nullptr*/)
 	{
-		scan(g_blockSize, bools, g_indices);
+		scan(m_blockSize, bools, m_indices);
 
 		int num = dst.maxNum();
-		int blockPerGrid = (num - 1) / g_blockSize + 1;
+		int blockPerGrid = (num - 1) / m_blockSize + 1;
 
-		scatter << <blockPerGrid, g_blockSize >> > (
+		scatter << <blockPerGrid, m_blockSize >> > (
 			dst.ptr(),
-			g_counts.ptr(),
+			m_counts.ptr(),
 			dst.maxNum(),
 			bools.ptr(),
-			g_indices.ptr(),
-			g_iota.ptr());
+			m_indices.ptr(),
+			m_iota.ptr());
 
 		if (result) {
-			g_counts.readByNum(result);
+			m_counts.readByNum(result);
 		}
 	}
 
@@ -336,7 +325,7 @@ namespace idaten
 	void Compaction::compact()
 	{
 #if 1
-		const int blocksize = g_blockSize;
+		const int blocksize = m_blockSize;
 
 		int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
 		//int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
@@ -363,7 +352,7 @@ namespace idaten
 
 		int xxx = 0;
 #else
-		const int blocksize = g_blockSize;
+		const int blocksize = m_blockSize;
 
 		int b[] = { 1, 0, 1, 0, 1, 0, 1, 0 };
 		int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };

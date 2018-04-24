@@ -348,4 +348,17 @@ namespace AT_NAME
 
 		return std::move(ret);
 	}
+
+	bool MicrofacetBeckman::edit(aten::IMaterialParamEditor* editor)
+	{
+		auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param, roughness);
+		auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+		auto b2 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, roughnessMap);
+
+		return b0 || b1 || b2;
+	}
 }

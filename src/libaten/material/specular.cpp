@@ -165,4 +165,15 @@ namespace AT_NAME
 		result->pdf = pdf(param, normal, wi, result->dir, u, v);
 		result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
 	}
+
+	bool specular::edit(aten::IMaterialParamEditor* editor)
+	{
+		auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+		auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
+		AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
+
+		return b0 || b1;
+	}
 }

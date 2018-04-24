@@ -127,16 +127,6 @@ namespace AT_NAME
 			return real(1);
 		}
 
-		virtual bool edit(aten::IMaterialParamEditor* editor) override final
-		{
-			auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param, roughness);
-			auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
-
-			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
-			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
-			AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, roughnessMap);
-
-			return b0 || b1;
-		}
+		virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 	};
 }

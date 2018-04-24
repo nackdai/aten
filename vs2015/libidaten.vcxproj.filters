@@ -329,6 +329,9 @@
     <ClCompile Include="..\src\libaten\os\linux\misc\timer_linux.cpp">
       <Filter>aten\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp">
+      <Filter>kernel\renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">

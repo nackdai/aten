@@ -48,7 +48,7 @@ namespace idaten {
 		uint8_t* dst = (uint8_t*)m_device;
 		dst += m_pos;
 
-		checkCudaErrors(cudaMemcpy(dst, p, size, cudaMemcpyHostToDevice));
+		checkCudaErrors(cudaMemcpyAsync(dst, p, size, cudaMemcpyHostToDevice));
 
 		m_pos += size;
 
@@ -66,7 +66,7 @@ namespace idaten {
 			return 0;
 		}
 
-		checkCudaErrors(cudaMemcpy(p, m_device, size, cudaMemcpyDeviceToHost));
+		checkCudaErrors(cudaMemcpyAsync(p, m_device, size, cudaMemcpyDeviceToHost));
 
 		return size;
 	}

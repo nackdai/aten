@@ -248,7 +248,7 @@ namespace idaten
 			checkCudaKernel(iterate_exclusiveScan);
 
 			if (innerBlockPerGrid <= 1) {
-				//cudaMemcpy(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyDeviceToDevice);
+				//cudaMemcpyAsync(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyAsyncDeviceToDevice);
 				tmpptr = &g_work;
 				break;
 			}

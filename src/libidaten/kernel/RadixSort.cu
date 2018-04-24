@@ -55,10 +55,10 @@ namespace idaten
 		thrust::device_vector<uint32_t> deviceIndices(indices.maxNum());
 
 		auto keys = thrust::raw_pointer_cast(deviceKeys.data());
-		checkCudaErrors(cudaMemcpy(keys, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));
+		checkCudaErrors(cudaMemcpyAsync(keys, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));
 
 		auto ids = thrust::raw_pointer_cast(deviceIndices.data());
-		checkCudaErrors(cudaMemcpy(ids, indices.ptr(), indices.bytes(), cudaMemcpyDeviceToDevice));
+		checkCudaErrors(cudaMemcpyAsync(ids, indices.ptr(), indices.bytes(), cudaMemcpyDeviceToDevice));
 
 		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.end(), deviceIndices.begin());
 

@@ -37,7 +37,7 @@ namespace idaten
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
 		checkCudaErrors(cudaMalloc(&m_buffer, size));
-		checkCudaErrors(cudaMemcpy(
+		checkCudaErrors(cudaMemcpyAsync(
 			m_buffer, p, size, 
 			isHostToDevice ? cudaMemcpyHostToDevice : cudaMemcpyDeviceToDevice));
 
@@ -88,7 +88,7 @@ namespace idaten
 	{
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
-		checkCudaErrors(cudaMemcpy(m_buffer, p, size, cudaMemcpyHostToDevice));
+		checkCudaErrors(cudaMemcpyAsync(m_buffer, p, size, cudaMemcpyHostToDevice));
 	}
 
 	/////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ namespace idaten
 		size_t srcPitch = sizeof(float4) * width;
 
 		checkCudaErrors(cudaMallocPitch(&m_buffer, &dstPitch, srcPitch, height));
-		checkCudaErrors(cudaMemcpy2D(m_buffer, dstPitch, p, srcPitch, srcPitch, height, cudaMemcpyHostToDevice));
+		checkCudaErrors(cudaMemcpy2DAsync(m_buffer, dstPitch, p, srcPitch, srcPitch, height, cudaMemcpyHostToDevice));
 
 		// Make Resource description:
 		memset(&m_resDesc, 0, sizeof(m_resDesc));
@@ -342,7 +342,7 @@ namespace idaten
 		copyParams.extent = size;
 		copyParams.extent.depth = 1;
 		copyParams.kind = cudaMemcpyHostToDevice;
-		checkCudaErrors(cudaMemcpy3D(&copyParams));
+		checkCudaErrors(cudaMemcpy3DAsync(&copyParams));
 
 		// compute rest of mipmaps based on level 0.
 		onGenMipmaps(mipmapArray, width, height, level);

@@ -94,7 +94,7 @@ namespace idaten
 	static bool doneSetStackSize = false;
 
 	void SVGFPathTracing::render(
-		int width, int height,
+		const TileDomain& tileDomain,
 		int maxSamples,
 		int maxBounce)
 	{
@@ -108,6 +108,9 @@ namespace idaten
 #endif
 
 		int bounce = 0;
+
+		int width = tileDomain.w;
+		int height = tileDomain.h;
 
 		m_isects.init(width * height);
 		m_rays.init(width * height);

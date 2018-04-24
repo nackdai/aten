@@ -92,7 +92,7 @@ namespace idaten {
 #endif
 
 	void PathTracing::render(
-		int width, int height,
+		const TileDomain& tileDomain,
 		int maxSamples,
 		int maxBounce)
 	{
@@ -106,6 +106,9 @@ namespace idaten {
 #endif
 
 		int bounce = 0;
+
+		int width = tileDomain.w;
+		int height = tileDomain.h;
 
 		m_paths.init(width * height);
 		m_isects.init(width * height);

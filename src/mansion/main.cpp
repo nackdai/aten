@@ -106,7 +106,7 @@ void onRun(aten::window* window)
 	timer.begin();
 
 	g_tracer.render(
-		WIDTH, HEIGHT,
+		idaten::TileDomain(0, 0, WIDTH, HEIGHT),
 		g_maxSamples,
 		g_maxBounce);
 

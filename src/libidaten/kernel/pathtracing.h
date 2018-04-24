@@ -48,7 +48,7 @@ namespace idaten
 		void prepare();
 
 		virtual void render(
-			int width, int height,
+			const TileDomain& tileDomain,
 			int maxSamples,
 			int maxBounce) override final;
 

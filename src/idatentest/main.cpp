@@ -84,9 +84,9 @@ void onRun(aten::window* window)
 
 	g_tracer.render(
 #ifdef ENABLE_GEOMRENDERING
-		WIDTH >> 1, HEIGHT >> 1,
+		idaten::TileDomain(0, 0, WIDTH >> 1, HEIGHT >> 1),
 #else
-		WIDTH, HEIGHT,
+		idaten::TileDomain(0, 0, WIDTH, HEIGHT),
 #endif
 		g_maxSamples,
 		g_maxBounce);

@@ -4,7 +4,7 @@
 #include "cuda/cudautil.h"
 
 namespace idaten {
-	void initCuda()
+	inline void initCuda()
 	{
 		checkCudaErrors(cuInit(0));
 	}

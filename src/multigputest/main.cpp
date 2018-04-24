@@ -31,7 +31,12 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
-static idaten::GpuProxy<idaten::PathTracing> g_tracer;
+static idaten::GpuProxy<idaten::PathTracing> g_tracer[2];
+
+static const idaten::TileDomain g_tileDomain[2] = {
+	{   0, 0, 640, 720 },
+	{ 640, 0, 640, 720 },
+};
 
 static aten::visualizer* g_visualizer;
 
@@ -51,7 +56,9 @@ void onRun(aten::window* window)
 		camparam.znear = real(0.1);
 		camparam.zfar = real(10000.0);
 
-		g_tracer.getRenderer().updateCamera(camparam);
+		for (int i = 0; i < AT_COUNTOF(g_tracer); i++) {
+			g_tracer[i].getRenderer().updateCamera(camparam);
+		}
 		g_isCameraDirty = false;
 
 		g_visualizer->clear();
@@ -60,8 +67,8 @@ void onRun(aten::window* window)
 	aten::timer timer;
 	timer.begin();
 
-	g_tracer.render(
-		idaten::TileDomain(0, 0, WIDTH, HEIGHT),
+	g_tracer[0].render(
+		g_tileDomain[0],
 		g_maxSamples,
 		g_maxBounce);
 
@@ -253,65 +260,65 @@ int main()
 	Scene::makeScene(&g_scene);
 	g_scene.build();
 
-	g_tracer.init(0);
-	g_tracer.setCurrent();
-
-	g_tracer.getRenderer().prepare();
-
-	idaten::Compaction::init(
-		WIDTH * HEIGHT,
-		1024);
-
-#ifdef ENABLE_ENVMAP
 	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
 	aten::envmap bg;
 	bg.init(envmap);
 	aten::ImageBasedLight ibl(&bg);
 
 	g_scene.addImageBasedLight(&ibl);
-#endif
 
+	std::vector<aten::GeomParameter> shapeparams;
+	std::vector<aten::PrimitiveParamter> primparams;
+	std::vector<aten::LightParameter> lightparams;
+	std::vector<aten::MaterialParameter> mtrlparms;
+	std::vector<aten::vertex> vtxparams;
+
+	aten::DataCollector::collect(
+		shapeparams,
+		primparams,
+		lightparams,
+		mtrlparms,
+		vtxparams);
+
+	const auto& nodes = g_scene.getAccel()->getNodes();
+	const auto& mtxs = g_scene.getAccel()->getMatrices();
+	//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
+
+	std::vector<idaten::TextureResource> tex;
 	{
-		std::vector<aten::GeomParameter> shapeparams;
-		std::vector<aten::PrimitiveParamter> primparams;
-		std::vector<aten::LightParameter> lightparams;
-		std::vector<aten::MaterialParameter> mtrlparms;
-		std::vector<aten::vertex> vtxparams;
+		auto texs = aten::texture::getTextures();
 
-		aten::DataCollector::collect(
-			shapeparams,
-			primparams,
-			lightparams,
-			mtrlparms,
-			vtxparams);
-
-		const auto& nodes = g_scene.getAccel()->getNodes();
-		const auto& mtxs = g_scene.getAccel()->getMatrices();
-		//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
-
-		std::vector<idaten::TextureResource> tex;
-		{
-			auto texs = aten::texture::getTextures();
-
-			for (const auto t : texs) {
-				tex.push_back(
-					idaten::TextureResource(t->colors(), t->width(), t->height()));
-			}
+		for (const auto t : texs) {
+			tex.push_back(
+				idaten::TextureResource(t->colors(), t->width(), t->height()));
 		}
+	}
 
-#ifdef ENABLE_ENVMAP
-		for (auto& l : lightparams) {
-			if (l.type == aten::LightType::IBL) {
-				l.envmap.idx = envmap->id();
-			}
+	for (auto& l : lightparams) {
+		if (l.type == aten::LightType::IBL) {
+			l.envmap.idx = envmap->id();
 		}
-#endif
+	}
 
-		auto camparam = g_camera.param();
-		camparam.znear = real(0.1);
-		camparam.zfar = real(10000.0);
+	auto camparam = g_camera.param();
+	camparam.znear = real(0.1);
+	camparam.zfar = real(10000.0);
 
-		g_tracer.getRenderer().update(
+
+	g_tracer[0].init(0);
+	g_tracer[1].init(1);
+
+	for (int i = 0; i < AT_COUNTOF(g_tracer); i++)
+	{
+		const auto& tileDomain = g_tileDomain[i];
+
+		g_tracer[i].setCurrent();
+
+		g_tracer[i].getRenderer().getCompaction().init(
+			tileDomain.w * tileDomain.h,
+			1024);
+
+		g_tracer[i].getRenderer().update(
 			aten::visualizer::getTexHandle(),
 			WIDTH, HEIGHT,
 			camparam,
@@ -322,11 +329,7 @@ int main()
 			primparams,
 			vtxparams,
 			mtxs,
-#ifdef ENABLE_ENVMAP
 			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(4)));
-#else
-			tex, idaten::EnvmapResource());
-#endif
 	}
 
 	aten::window::run();

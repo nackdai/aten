@@ -19,7 +19,7 @@ namespace idaten
 		{
 #ifdef ENABLE_MULTI_GPU_EMULATE
 			CUdevice device = 0;
-			checkCudaErrors(cuDeviceGet(&device, deviceId));
+			checkCudaErrors(cuDeviceGet(&device, 0));
 			checkCudaErrors(cuCtxCreate(&m_context, 0, device));
 #else
 			checkCudaErrors(cudaSetDevice(deviceId));

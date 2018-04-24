@@ -131,5 +131,7 @@ namespace idaten
 		uint32_t m_frame{ 1 };
 
 		bool m_enableProgressive{ false };
+
+		idaten::TileDomain m_tileDomain;
 	};
 }

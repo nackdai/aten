@@ -23,6 +23,7 @@
 #define SEPARATE_SHADOWRAY_HITTEST
 
 __global__ void genPath(
+	idaten::TileDomain tileDomain,
 	idaten::PathTracing::Path* paths,
 	aten::ray* rays,
 	int width, int height,
@@ -32,8 +33,8 @@ __global__ void genPath(
 	const unsigned int* sobolmatrices,
 	const unsigned int* random)
 {
-	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
 	if (ix >= width || iy >= height) {
 		return;
@@ -57,6 +58,9 @@ __global__ void genPath(
 	auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
 	path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
 #endif
+
+	ix += tileDomain.x;
+	iy += tileDomain.y;
 
 	float s = (ix + path.sampler.nextSample()) / (float)(camera->width);
 	float t = (iy + path.sampler.nextSample()) / (float)(camera->height);
@@ -96,6 +100,7 @@ __global__ void genPath(
 __device__ unsigned int headDev = 0;
 
 __global__ void hitTest(
+	idaten::TileDomain tileDomain,
 	idaten::PathTracing::Path* paths,
 	aten::Intersection* isects,
 	aten::ray* rays,
@@ -139,7 +144,7 @@ __global__ void hitTest(
 		// task index per thread in a warp
 		unsigned int idx = headWarp + threadIdx.x;
 
-		if (idx >= width * height) {
+		if (idx >= tileDomain.w * tileDomain.h) {
 			return;
 		}
 
@@ -171,9 +176,11 @@ __global__ void hitTest(
 #else
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (idx >= width * height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
+
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -215,8 +222,9 @@ __global__ void hitTest(
 #endif
 }
 
-template <bool isFirstBounce, bool needAOV>
 __global__ void shadeMiss(
+	bool isFirstBounce, bool needAOV,
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t* aovs,
 	idaten::PathTracing::Path* paths,
 	int width, int height)
@@ -224,11 +232,11 @@ __global__ void shadeMiss(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	auto& path = paths[idx];
 
@@ -259,8 +267,9 @@ __global__ void shadeMiss(
 	}
 }
 
-template <bool isFirstBounce, bool needAOV>
 __global__ void shadeMissWithEnvmap(
+	bool isFirstBounce, bool needAOV,
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t* aovs,
 	cudaTextureObject_t* textures,
 	int envmapIdx,
@@ -273,11 +282,11 @@ __global__ void shadeMissWithEnvmap(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	auto& path = paths[idx];
 
@@ -319,8 +328,9 @@ __global__ void shadeMissWithEnvmap(
 	}
 }
 
-template <bool needAOV>
 __global__ void shade(
+	bool needAOV,
+	idaten::TileDomain tileDomain,
 	unsigned int frame,
 	cudaSurfaceObject_t outSurface,
 	cudaSurfaceObject_t* aovs,
@@ -402,8 +412,8 @@ __global__ void shade(
 
 #if 1
 	if (needAOV) {
-		int ix = idx % width;
-		int iy = idx / width;
+		int ix = idx % tileDomain.w;
+		int iy = idx / tileDomain.w;
 
 		auto p = make_float3(rec.p.x, rec.p.y, rec.p.z);
 		p /= posRange;
@@ -731,6 +741,7 @@ __global__ void hitShadowRay(
 }
 
 __global__ void gather(
+	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t outSurface,
 	const idaten::PathTracing::Path* __restrict__ paths,
 	int width, int height,
@@ -739,11 +750,11 @@ __global__ void gather(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	const auto& path = paths[idx];
 
@@ -781,10 +792,11 @@ namespace idaten {
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		genPath << <grid, block >> > (
+			m_tileDomain,
 			m_paths.ptr(),
 			m_rays.ptr(),
 			width, height,
@@ -801,7 +813,7 @@ namespace idaten {
 		int width, int height,
 		cudaTextureObject_t texVtxPos)
 	{
-		dim3 blockPerGrid_HitTest((width * height + 128 - 1) / 128);
+		dim3 blockPerGrid_HitTest((m_tileDomain.w * m_tileDomain.h + 128 - 1) / 128);
 		dim3 threadPerBlock_HitTest(128);
 
 #ifdef ENABLE_PERSISTENT_THREAD
@@ -810,6 +822,7 @@ namespace idaten {
 		hitTest << <blockPerGrid_HitTest, threadPerBlock_HitTest >> > (
 #endif
 		//hitTest << <1, 1 >> > (
+			m_tileDomain,
 			m_paths.ptr(),
 			m_isects.ptr(),
 			m_rays.ptr(),
@@ -831,63 +844,31 @@ namespace idaten {
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		bool enableAOV = (bounce == 0 && m_enableAOV);
 
+		bool isFirstBounce = bounce == 0;
+
 		if (m_envmapRsc.idx >= 0) {
-			if (bounce == 0) {
-				if (enableAOV) {
-					shadeMissWithEnvmap<true, true> << <grid, block >> > (
-						m_aovCudaRsc.ptr(),
-						m_tex.ptr(),
-						m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-						m_paths.ptr(),
-						m_rays.ptr(),
-						width, height);
-				}
-				else {
-					shadeMissWithEnvmap<true, false> << <grid, block >> > (
-						m_aovCudaRsc.ptr(),
-						m_tex.ptr(),
-						m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-						m_paths.ptr(),
-						m_rays.ptr(),
-						width, height);
-				}
-			}
-			else {
-				shadeMissWithEnvmap<false, false> << <grid, block >> > (
-					m_aovCudaRsc.ptr(),
-					m_tex.ptr(),
-					m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-					m_paths.ptr(),
-					m_rays.ptr(),
-					width, height);
-			}
+			shadeMissWithEnvmap << <grid, block >> > (
+				isFirstBounce, enableAOV,
+				m_tileDomain,
+				m_aovCudaRsc.ptr(),
+				m_tex.ptr(),
+				m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
+				m_paths.ptr(),
+				m_rays.ptr(),
+				width, height);
 		}
 		else {
-			if (bounce == 0) {
-				if (enableAOV) {
-					shadeMiss<true, true> << <grid, block >> > (
-						m_aovCudaRsc.ptr(),
-						m_paths.ptr(),
-						width, height);
-				}
-				else {
-					shadeMiss<true, false> << <grid, block >> > (
-						m_aovCudaRsc.ptr(),
-						m_paths.ptr(),
-						width, height);
-				}
-			}
-			else {
-				shadeMiss<false, false> << <grid, block >> > (
-					m_aovCudaRsc.ptr(),
-					m_paths.ptr(),
-					width, height);
-			}
+			shadeMiss << <grid, block >> > (
+				isFirstBounce, enableAOV,
+				m_tileDomain,
+				m_aovCudaRsc.ptr(),
+				m_paths.ptr(),
+				width, height);
 		}
 
 		checkCudaKernel(shadeMiss);
@@ -907,52 +888,29 @@ namespace idaten {
 		bool enableAOV = (bounce == 0 && m_enableAOV);
 		float3 posRange = make_float3(m_posRange.x, m_posRange.y, m_posRange.z);
 
-		if (enableAOV) {
-			shade<true> << <blockPerGrid, threadPerBlock >> > (
-			//shade<true> << <1, 1 >> > (
-				m_frame,
-				outputSurf,
-				m_aovCudaRsc.ptr(), posRange,
-				width, height,
-				m_paths.ptr(),
-				m_hitidx.ptr(), hitcount,
-				m_isects.ptr(),
-				m_rays.ptr(),
-				bounce, rrBounce,
-				m_shapeparam.ptr(), m_shapeparam.num(),
-				m_mtrlparam.ptr(),
-				m_lightparam.ptr(), m_lightparam.num(),
-				m_nodetex.ptr(),
-				m_primparams.ptr(),
-				texVtxPos, texVtxNml,
-				m_mtxparams.ptr(),
-				m_tex.ptr(),
-				m_random.ptr(),
-				m_shadowRays.ptr());
-		}
-		else {
-			shade<false> << <blockPerGrid, threadPerBlock >> > (
-			//shade<false> << <1, 1 >> > (
-				m_frame,
-				outputSurf,
-				m_aovCudaRsc.ptr(), posRange,
-				width, height,
-				m_paths.ptr(),
-				m_hitidx.ptr(), hitcount,
-				m_isects.ptr(),
-				m_rays.ptr(),
-				bounce, rrBounce,
-				m_shapeparam.ptr(), m_shapeparam.num(),
-				m_mtrlparam.ptr(),
-				m_lightparam.ptr(), m_lightparam.num(),
-				m_nodetex.ptr(),
-				m_primparams.ptr(),
-				texVtxPos, texVtxNml,
-				m_mtxparams.ptr(),
-				m_tex.ptr(),
-				m_random.ptr(),
-				m_shadowRays.ptr());
-		}
+		shade << <blockPerGrid, threadPerBlock >> > (
+		//shade<true> << <1, 1 >> > (
+			enableAOV,
+			m_tileDomain,
+			m_frame,
+			outputSurf,
+			m_aovCudaRsc.ptr(), posRange,
+			width, height,
+			m_paths.ptr(),
+			m_hitidx.ptr(), hitcount,
+			m_isects.ptr(),
+			m_rays.ptr(),
+			bounce, rrBounce,
+			m_shapeparam.ptr(), m_shapeparam.num(),
+			m_mtrlparam.ptr(),
+			m_lightparam.ptr(), m_lightparam.num(),
+			m_nodetex.ptr(),
+			m_primparams.ptr(),
+			texVtxPos, texVtxNml,
+			m_mtxparams.ptr(),
+			m_tex.ptr(),
+			m_random.ptr(),
+			m_shadowRays.ptr());
 
 		checkCudaKernel(shade);
 
@@ -981,10 +939,11 @@ namespace idaten {
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(width + block.x - 1) / block.x,
-			(height + block.y - 1) / block.y);
+			(m_tileDomain.w + block.x - 1) / block.x,
+			(m_tileDomain.h + block.y - 1) / block.y);
 
 		gather << <grid, block >> > (
+			m_tileDomain,
 			outputSurf,
 			m_paths.ptr(),
 			width, height,

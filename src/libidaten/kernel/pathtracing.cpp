@@ -105,6 +105,8 @@ namespace idaten {
 		}
 #endif
 
+		m_tileDomain = tileDomain;
+
 		int bounce = 0;
 
 		int width = tileDomain.w;

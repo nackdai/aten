@@ -10,29 +10,29 @@ Release: libatenscene_Release libidaten_Release libaten_Release appaten_Release 
 
 # Builds project 'appaten'...
 .PHONY: appaten_Debug
-appaten_Debug: libatenscene libaten 
+appaten_Debug: libatenscene_Debug libaten_Debug 
 	make --directory=./ --file=appaten.makefile Debug
 
 .PHONY: appaten_Release
-appaten_Release: libatenscene libaten 
+appaten_Release: libatenscene_Release libaten_Release 
 	make --directory=./ --file=appaten.makefile Release
 
 # Builds project 'idatentest'...
 .PHONY: idatentest_Debug
-idatentest_Debug: libatenscene libidaten libaten 
+idatentest_Debug: libatenscene_Debug libidaten_Debug libaten_Debug 
 	make --directory=./ --file=idatentest.makefile Debug
 
 .PHONY: idatentest_Release
-idatentest_Release: libatenscene libidaten libaten 
+idatentest_Release: libatenscene_Release libidaten_Release libaten_Release 
 	make --directory=./ --file=idatentest.makefile Release
 
 # Builds project 'svgftest'...
 .PHONY: svgftest_Debug
-svgftest_Debug: libatenscene libidaten libaten 
+svgftest_Debug: libatenscene_Debug libidaten_Debug libaten_Debug 
 	make --directory=./ --file=svgftest.makefile Debug
 
 .PHONY: svgftest_Release
-svgftest_Release: libatenscene libidaten libaten 
+svgftest_Release: libatenscene_Release libidaten_Release libaten_Release 
 	make --directory=./ --file=svgftest.makefile Release
 
 # Builds project 'libatenscene'...
@@ -64,20 +64,20 @@ libaten_Release:
 
 # Builds project 'mansion'...
 .PHONY: mansion_Debug
-mansion_Debug: libatenscene libidaten libaten 
+mansion_Debug: libatenscene_Debug libidaten_Debug libaten_Debug 
 	make --directory=./ --file=mansion.makefile Debug
 
 .PHONY: mansion_Release
-mansion_Release: libatenscene libidaten libaten 
+mansion_Release: libatenscene_Release libidaten_Release libaten_Release 
 	make --directory=./ --file=mansion.makefile Release
 
 # Builds project 'multigputest'...
 .PHONY: multigputest_Debug
-multigputest_Debug: libatenscene libidaten libaten 
+multigputest_Debug: libatenscene_Debug libidaten_Debug libaten_Debug 
 	make --directory=./ --file=multigputest.makefile Debug
 
 .PHONY: multigputest_Release
-multigputest_Release: libatenscene libidaten libaten 
+multigputest_Release: libatenscene_Release libidaten_Release libaten_Release 
 	make --directory=./ --file=multigputest.makefile Release
 
 # Cleans all projects...

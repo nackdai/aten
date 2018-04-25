@@ -120,7 +120,7 @@ namespace idaten {
 
 		cudaMemset(m_paths.ptr(), 0, m_paths.bytes());
 
-		CudaGLResourceMapper rscmap(&m_glimg);
+		m_glimg.map();
 		auto outputSurf = m_glimg.bind();
 
 		auto vtxTexPos = m_vtxparamsPos.bind();
@@ -188,8 +188,16 @@ namespace idaten {
 				bounce++;
 			}
 		}
+	}
 
-		onGather(outputSurf, width, height, maxSamples);
+	void PathTracing::postRender()
+	{
+		auto outputSurf = m_glimg.bind();
+
+		int width = m_tileDomain.w;
+		int height = m_tileDomain.h;
+
+		onGather(outputSurf, m_paths, width, height);
 
 		checkCudaErrors(cudaDeviceSynchronize());
 
@@ -215,5 +223,8 @@ namespace idaten {
 			}
 			m_aovCudaRsc.reset();
 		}
+
+		m_glimg.unbind();
+		m_glimg.unmap();
 	}
 }

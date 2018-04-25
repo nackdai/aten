@@ -885,8 +885,8 @@ namespace idaten {
 
 	void PathTracing::onGather(
 		cudaSurfaceObject_t outputSurf,
-		int width, int height,
-		int maxSamples)
+		idaten::TypedCudaMemory<idaten::PathTracing::Path>& paths,
+		int width, int height)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -896,7 +896,7 @@ namespace idaten {
 		gather << <grid, block >> > (
 			m_tileDomain,
 			outputSurf,
-			m_paths.ptr(),
+			paths.ptr(),
 			m_enableProgressive);
 	}
 }

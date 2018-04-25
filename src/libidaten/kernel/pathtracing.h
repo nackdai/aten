@@ -52,6 +52,8 @@ namespace idaten
 			int maxSamples,
 			int maxBounce) override final;
 
+		virtual void postRender() override final;
+
 		virtual void update(
 			GLuint gltex,
 			int width, int height,
@@ -107,8 +109,8 @@ namespace idaten
 
 		virtual void onGather(
 			cudaSurfaceObject_t outputSurf,
-			int width, int height,
-			int maxSamples);
+			idaten::TypedCudaMemory<idaten::PathTracing::Path>& paths,
+			int width, int height);
 
 	protected:
 		idaten::TypedCudaMemory<idaten::PathTracing::Path> m_paths;

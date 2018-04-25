@@ -49,6 +49,12 @@ namespace idaten
 			m_renderer.render(tileDomain, maxSamples, maxBounce);
 		}
 
+		void postRender()
+		{
+			setCurrent();
+			m_renderer.postRender();
+		}
+
 		void shutdown()
 		{
 			setCurrent();

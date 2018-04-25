@@ -27,6 +27,10 @@ namespace idaten
 
 	cudaSurfaceObject_t CudaGLSurface::bind()
 	{
+		if (m_surf > 0) {
+			return m_surf;
+		}
+
 		AT_ASSERT(m_rsc);
 
 		// NOTE

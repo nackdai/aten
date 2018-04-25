@@ -17,7 +17,6 @@
 #include "aten4idaten.h"
 
 //#define ENABLE_SEPARATE_ALBEDO
-//#define ENABLE_PROGRESSIVE
 
 #define ENABLE_PERSISTENT_THREAD
 

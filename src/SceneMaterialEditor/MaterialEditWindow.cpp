@@ -244,6 +244,7 @@ void MaterialEditWindow::onRun(aten::window* window)
 		idaten::TileDomain(0, 0, s_width, s_height),
 		s_maxSamples,
 		s_maxBounce);
+	s_tracer.postRender();
 
 	s_visualizer->render(false);
 

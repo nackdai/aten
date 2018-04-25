@@ -182,6 +182,7 @@ void onRun(aten::window* window)
 		g_maxSamples,
 		g_maxBounce);
 
+	g_tracer.postRender();
 
 	g_visualizer->render(false);
 

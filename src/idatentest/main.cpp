@@ -91,6 +91,8 @@ void onRun(aten::window* window)
 		g_maxSamples,
 		g_maxBounce);
 
+	g_tracer.postRender();
+
 	auto cudaelapsed = timer.end();
 
 	g_visualizer->render(false);

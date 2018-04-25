@@ -174,21 +174,13 @@ namespace idaten {
 				
 				onShadeMiss(width, height, bounce);
 
-				int hitcount = 0;
 				m_compaction.compact(
 					m_hitidx,
 					m_hitbools,
-					&hitcount);
-
-				//AT_PRINTF("%d\n", hitcount);
-
-				if (hitcount == 0) {
-					break;
-				}
+					nullptr);
 
 				onShade(
 					outputSurf,
-					hitcount,
 					width, height,
 					bounce, rrBounce,
 					vtxTexPos, vtxTexNml);

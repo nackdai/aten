@@ -338,7 +338,7 @@ __global__ void shade(
 	int width, int height,
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
-	int hitnum,
+	int* hitnum,
 	const aten::Intersection* __restrict__ isects,
 	aten::ray* rays,
 	int bounce, int rrBounce,
@@ -356,7 +356,7 @@ __global__ void shade(
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (idx >= hitnum) {
+	if (idx >= *hitnum) {
 		return;
 	}
 
@@ -673,7 +673,7 @@ __global__ void shade(
 __global__ void hitShadowRay(
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
-	int hitnum,
+	int* hitnum,
 	const idaten::PathTracing::ShadowRay* __restrict__ shadowRays,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	aten::MaterialParameter* mtrls,
@@ -685,7 +685,7 @@ __global__ void hitShadowRay(
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (idx >= hitnum) {
+	if (idx >= *hitnum) {
 		return;
 	}
 
@@ -876,17 +876,18 @@ namespace idaten {
 
 	void PathTracing::onShade(
 		cudaSurfaceObject_t outputSurf,
-		int hitcount,
 		int width, int height,
 		int bounce, int rrBounce,
 		cudaTextureObject_t texVtxPos,
 		cudaTextureObject_t texVtxNml)
 	{
-		dim3 blockPerGrid((hitcount + 64 - 1) / 64);
+		dim3 blockPerGrid((m_tileDomain.w * m_tileDomain.h + 64 - 1) / 64);
 		dim3 threadPerBlock(64);
 
 		bool enableAOV = (bounce == 0 && m_enableAOV);
 		float3 posRange = make_float3(m_posRange.x, m_posRange.y, m_posRange.z);
+
+		auto& hitcount = m_compaction.getCount();
 
 		shade << <blockPerGrid, threadPerBlock >> > (
 		//shade<true> << <1, 1 >> > (
@@ -897,7 +898,7 @@ namespace idaten {
 			m_aovCudaRsc.ptr(), posRange,
 			width, height,
 			m_paths.ptr(),
-			m_hitidx.ptr(), hitcount,
+			m_hitidx.ptr(), hitcount.ptr(),
 			m_isects.ptr(),
 			m_rays.ptr(),
 			bounce, rrBounce,
@@ -918,7 +919,7 @@ namespace idaten {
 		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 			//hitShadowRay << <1, 1 >> > (
 			m_paths.ptr(),
-			m_hitidx.ptr(), hitcount,
+			m_hitidx.ptr(), hitcount.ptr(),
 			m_shadowRays.ptr(),
 			m_shapeparam.ptr(), m_shapeparam.num(),
 			m_mtrlparam.ptr(),

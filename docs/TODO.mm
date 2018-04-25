@@ -560,5 +560,8 @@
 <node CREATED="1519976838099" ID="ID_125260778" MODIFIED="1519976838896" TEXT="https://gist.github.com/jslee02/67b81376f0f9c3b3228a7f9fe13ff404"/>
 </node>
 </node>
+<node CREATED="1524562675585" HGAP="72" ID="ID_1410972639" MODIFIED="1524562681526" POSITION="right" TEXT="&#x30de;&#x30eb;&#x30c1;GPU" VSHIFT="60">
+<node CREATED="1524562694895" ID="ID_84322531" LINK="https://stackoverflow.com/questions/22694518/what-is-the-difference-between-cudamemcpy-and-cudamemcpypeer-for-p2p-copy" MODIFIED="1524562702316" TEXT="What is the difference between cudaMemcpy() and cudaMemcpyPeer() for P2P-copy? "/>
+</node>
 </node>
 </map>

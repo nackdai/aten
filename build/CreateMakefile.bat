@@ -10,6 +10,7 @@ rem Create Makefile by MakeItSo =======================================
 
 rem Copy Makefie ======================================================
 xcopy /Y /D ..\vs2015\*.makefile .\
+xcopy /Y /D ..\vs2015\Makefile .\
 
 cd /d %CURDIR%
 

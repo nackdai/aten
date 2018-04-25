@@ -311,6 +311,10 @@ int main()
 	g_tracer[0].init(0);
 	g_tracer[1].init(1);
 
+	// Set P2P access between GPUs.
+	g_tracer[0].setPeerAccess(1);
+	g_tracer[1].setPeerAccess(0);
+
 	for (int i = 0; i < AT_COUNTOF(g_tracer); i++)
 	{
 		const auto& tileDomain = g_tileDomain[i];

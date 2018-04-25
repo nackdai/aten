@@ -29,6 +29,32 @@ namespace idaten
 			m_deviceId = deviceId;
 		}
 
+		void setPeerAccess(int peerAccessDeviceId)
+		{
+			AT_ASSERT(m_deviceId >= 0);
+
+			// NOTE
+			// https://stackoverflow.com/questions/22694518/what-is-the-difference-between-cudamemcpy-and-cudamemcpypeer-for-p2p-copy
+
+#ifdef ENABLE_MULTI_GPU_EMULATE
+			// Nothing is done...
+#else
+			if (m_deviceId != peerAccessDeviceId) {
+				// Check for peer access between participating GPUs.
+				int canAccessPeer = 0;
+				checkCudaErrors(cudaDeviceCanAccessPeer(&canAccessPeer, deviceId, peerAccessDeviceId);
+
+				AT_ASSERT(canAccessPeer > 0);
+
+				if (canAccessPeer > 0) {
+					// Enable peer access between participating GPUs.
+					setCurrent();
+					checkCudaErrors(cudaDeviceEnablePeerAccess(peerAccessDeviceId, 0));
+				}
+			}
+#endif
+		}
+
 		void setCurrent()
 		{
 #ifdef ENABLE_MULTI_GPU_EMULATE

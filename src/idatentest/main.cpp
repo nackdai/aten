@@ -311,8 +311,6 @@ int main()
 	Scene::makeScene(&g_scene);
 	g_scene.build();
 
-	g_tracer.prepare();
-
 	g_tracer.getCompaction().init(
 #ifdef ENABLE_GEOMRENDERING
 		(WIDTH >> 1) * (HEIGHT >> 1),

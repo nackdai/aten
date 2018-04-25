@@ -9,10 +9,6 @@
 #include "aten4idaten.h"
 
 namespace idaten {
-	void PathTracing::prepare()
-	{
-	}
-
 	void PathTracing::update(
 		GLuint gltex,
 		int width, int height,

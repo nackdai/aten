@@ -45,8 +45,6 @@ namespace idaten
 		virtual ~PathTracing() {}
 
 	public:
-		void prepare();
-
 		virtual void render(
 			const TileDomain& tileDomain,
 			int maxSamples,

@@ -38,7 +38,7 @@ static const idaten::TileDomain g_tileDomain[2] = {
 	{ 640, 0, 640, 720 },
 };
 
-static aten::visualizer* g_visualizer;
+static aten::visualizer* g_visualizer = nullptr;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -201,11 +201,7 @@ void onKey(bool press, aten::Key key)
 				at,
 				aten::vec3(0, 1, 0),
 				vfov,
-#ifdef ENABLE_GEOMRENDERING
-				WIDTH >> 1, HEIGHT >> 1);
-#else
 				WIDTH, HEIGHT);
-#endif
 		}
 			break;
 		default:
@@ -304,7 +300,6 @@ int main()
 	camparam.znear = real(0.1);
 	camparam.zfar = real(10000.0);
 
-
 	g_tracer[0].init(0);
 	g_tracer[1].init(1);
 
@@ -320,7 +315,7 @@ int main()
 
 		g_tracer[i].getRenderer().update(
 			aten::visualizer::getTexHandle(),
-			WIDTH, HEIGHT,
+			tileDomain.w, tileDomain.h,
 			camparam,
 			shapeparams,
 			mtrlparms,

@@ -20,13 +20,11 @@
 //#define ENABLE_PROGRESSIVE
 
 #define ENABLE_PERSISTENT_THREAD
-#define SEPARATE_SHADOWRAY_HITTEST
 
 __global__ void genPath(
 	idaten::TileDomain tileDomain,
 	idaten::PathTracing::Path* paths,
 	aten::ray* rays,
-	int width, int height,
 	int sample, int maxSamples,
 	unsigned int frame,
 	const aten::CameraParameter* __restrict__ camera,
@@ -36,11 +34,11 @@ __global__ void genPath(
 	auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= width || iy >= height) {
+	if (ix >= tileDomain.w || iy >= tileDomain.h) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, width);
+	const auto idx = getIdx(ix, iy, tileDomain.w);
 
 	auto& path = paths[idx];
 	path.isHit = false;
@@ -105,7 +103,6 @@ __global__ void hitTest(
 	aten::Intersection* isects,
 	aten::ray* rays,
 	int* hitbools,
-	int width, int height,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	const aten::LightParameter* __restrict__ lights, int lightnum,
 	cudaTextureObject_t* nodes,
@@ -226,8 +223,7 @@ __global__ void shadeMiss(
 	bool isFirstBounce, bool needAOV,
 	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t* aovs,
-	idaten::PathTracing::Path* paths,
-	int width, int height)
+	idaten::PathTracing::Path* paths)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -276,8 +272,7 @@ __global__ void shadeMissWithEnvmap(
 	real envmapAvgIllum,
 	real envmapMultiplyer,
 	idaten::PathTracing::Path* paths,
-	const aten::ray* __restrict__ rays,
-	int width, int height)
+	const aten::ray* __restrict__ rays)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -335,7 +330,6 @@ __global__ void shade(
 	cudaSurfaceObject_t outSurface,
 	cudaSurfaceObject_t* aovs,
 	float3 posRange,
-	int width, int height,
 	idaten::PathTracing::Path* paths,
 	int* hitindices,
 	int* hitnum,
@@ -415,6 +409,9 @@ __global__ void shade(
 		int ix = idx % tileDomain.w;
 		int iy = idx / tileDomain.w;
 
+		ix += tileDomain.x;
+		iy += tileDomain.y;
+
 		auto p = make_float3(rec.p.x, rec.p.y, rec.p.z);
 		p /= posRange;
 
@@ -491,10 +488,6 @@ __global__ void shade(
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
-#ifdef SEPARATE_SHADOWRAY_HITTEST
-	shadowRays[idx].isActive = false;
-#endif
-
 	// Explicit conection to light.
 	if (!mtrl.attrib.isSingular)
 	{
@@ -526,41 +519,17 @@ __global__ void shade(
 		auto dirToLight = normalize(sampleres.dir);
 		auto distToLight = length(posLight - rec.p);
 
-		// Ray aim to the area light.
-		// So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-		auto hitobj = lightobj;
-
 		aten::Intersection isectTmp;
 
 		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 		auto tmp = rec.p + dirToLight - shadowRayOrg;
 		auto shadowRayDir = normalize(tmp);
 
-#ifdef SEPARATE_SHADOWRAY_HITTEST
 		shadowRays[idx].isActive = true;
 		shadowRays[idx].r = aten::ray(shadowRayOrg, shadowRayDir);
 		shadowRays[idx].targetLightId = lightidx;
 		shadowRays[idx].distToLight = distToLight;
-#else
-		aten::ray shadowRay(shadowRayOrg, shadowRayDir);
 
-		bool isHit = intersectCloser(&ctxt, shadowRay, &isectTmp, distToLight - AT_MATH_EPSILON);
-
-		if (isHit) {
-			hitobj = (void*)&ctxt.shapes[isectTmp.objid];
-		}
-
-		isHit = AT_NAME::scene::hitLight(
-			isHit,
-			light.attrib,
-			lightobj,
-			distToLight,
-			distHitObjToRayOrg,
-			isectTmp.t,
-			hitobj);
-
-		if (isHit)
-#endif
 		{
 			auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -580,12 +549,7 @@ __global__ void shade(
 					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
 					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 					auto misW = pdfLight / (pdfb + pdfLight);
-#ifdef SEPARATE_SHADOWRAY_HITTEST
-					shadowRays[idx].lightcontrib = 
-#else
-					path.contrib +=
-#endif
-						(misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+					shadowRays[idx].lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
 				}
 			}
 			else {
@@ -602,12 +566,7 @@ __global__ void shade(
 						pdfb = pdfb * cosLight / dist2;
 
 						auto misW = pdfLight / (pdfb + pdfLight);
-#ifdef SEPARATE_SHADOWRAY_HITTEST
-						shadowRays[idx].lightcontrib =
-#else
-						path.contrib +=
-#endif
-							(misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+						shadowRays[idx].lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
 					}
 				}
 			}
@@ -744,7 +703,6 @@ __global__ void gather(
 	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t outSurface,
 	const idaten::PathTracing::Path* __restrict__ paths,
-	int width, int height,
 	bool enableProgressive)
 {
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -799,7 +757,6 @@ namespace idaten {
 			m_tileDomain,
 			m_paths.ptr(),
 			m_rays.ptr(),
-			width, height,
 			sample, maxSamples,
 			m_frame,
 			m_cam.ptr(),
@@ -827,7 +784,6 @@ namespace idaten {
 			m_isects.ptr(),
 			m_rays.ptr(),
 			m_hitbools.ptr(),
-			width, height,
 			m_shapeparam.ptr(), m_shapeparam.num(),
 			m_lightparam.ptr(), m_lightparam.num(),
 			m_nodetex.ptr(),
@@ -859,16 +815,14 @@ namespace idaten {
 				m_tex.ptr(),
 				m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 				m_paths.ptr(),
-				m_rays.ptr(),
-				width, height);
+				m_rays.ptr());
 		}
 		else {
 			shadeMiss << <grid, block >> > (
 				isFirstBounce, enableAOV,
 				m_tileDomain,
 				m_aovCudaRsc.ptr(),
-				m_paths.ptr(),
-				width, height);
+				m_paths.ptr());
 		}
 
 		checkCudaKernel(shadeMiss);
@@ -896,7 +850,6 @@ namespace idaten {
 			m_frame,
 			outputSurf,
 			m_aovCudaRsc.ptr(), posRange,
-			width, height,
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount.ptr(),
 			m_isects.ptr(),
@@ -915,7 +868,6 @@ namespace idaten {
 
 		checkCudaKernel(shade);
 
-#ifdef SEPARATE_SHADOWRAY_HITTEST
 		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
 			//hitShadowRay << <1, 1 >> > (
 			m_paths.ptr(),
@@ -930,7 +882,6 @@ namespace idaten {
 			m_mtxparams.ptr());
 
 		checkCudaKernel(hitShadowRay);
-#endif
 	}
 
 	void PathTracing::onGather(
@@ -947,7 +898,6 @@ namespace idaten {
 			m_tileDomain,
 			outputSurf,
 			m_paths.ptr(),
-			width, height,
 			m_enableProgressive);
 	}
 }

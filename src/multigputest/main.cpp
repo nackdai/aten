@@ -34,8 +34,8 @@ static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 static idaten::GpuProxy<idaten::PathTracing> g_tracer[2];
 
 static const idaten::TileDomain g_tileDomain[2] = {
-	{   0, 0, 640, 720 },
-	{ 640, 0, 640, 720 },
+	{ 0,   0, 1280, 360 },
+	{ 0, 360, 1280, 360 },
 };
 
 static aten::visualizer* g_visualizer = nullptr;
@@ -67,10 +67,18 @@ void onRun(aten::window* window)
 	aten::timer timer;
 	timer.begin();
 
-	g_tracer[0].render(
-		g_tileDomain[0],
-		g_maxSamples,
-		g_maxBounce);
+	for (int i = 0; i < AT_COUNTOF(g_tracer); i++) {
+		g_tracer[i].render(
+			g_tileDomain[i],
+			g_maxSamples,
+			g_maxBounce);
+	}
+
+	for (int i = 1; i < AT_COUNTOF(g_tracer); i++) {
+		g_tracer[0].gather(g_tracer[i]);
+	}
+
+	g_tracer[0].postRender(WIDTH, HEIGHT);
 
 	auto cudaelapsed = timer.end();
 
@@ -313,9 +321,12 @@ int main()
 			tileDomain.w * tileDomain.h,
 			1024);
 
+		int w = i == 0 ? WIDTH : tileDomain.w;
+		int h = i == 0 ? HEIGHT : tileDomain.h;
+
 		g_tracer[i].getRenderer().update(
 			aten::visualizer::getTexHandle(),
-			tileDomain.w, tileDomain.h,
+			w, h,
 			camparam,
 			shapeparams,
 			mtrlparms,

@@ -49,10 +49,10 @@ namespace idaten
 			m_renderer.render(tileDomain, maxSamples, maxBounce);
 		}
 
-		void postRender()
+		void postRender(int width = 0, int height = 0)
 		{
 			setCurrent();
-			m_renderer.postRender();
+			m_renderer.postRender(width, height);
 		}
 
 		void shutdown()
@@ -67,6 +67,11 @@ namespace idaten
 #else
 			checkCudaErrors(cudaStreamSynchronize(m_stream));
 #endif
+		}
+
+		void gather(GpuProxy& proxy)
+		{
+			m_renderer.copyFrom(proxy.m_renderer);
 		}
 
 		RENDERER& getRenderer()

@@ -113,6 +113,11 @@ namespace idaten {
 			m_cur = 0;
 		}
 
+		uint32_t stride()
+		{
+			return (uint32_t)sizeof(_T);
+		}
+
 	private:
 		uint32_t m_num{ 0 };
 		uint32_t m_cur{ 0 };

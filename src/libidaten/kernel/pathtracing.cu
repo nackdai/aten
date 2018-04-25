@@ -326,7 +326,6 @@ __global__ void shade(
 	bool needAOV,
 	idaten::TileDomain tileDomain,
 	unsigned int frame,
-	cudaSurfaceObject_t outSurface,
 	cudaSurfaceObject_t* aovs,
 	float3 posRange,
 	idaten::PathTracing::Path* paths,
@@ -699,7 +698,7 @@ __global__ void hitShadowRay(
 }
 
 __global__ void gather(
-	idaten::TileDomain tileDomain,
+	int width, int height,
 	cudaSurfaceObject_t outSurface,
 	const idaten::PathTracing::Path* __restrict__ paths,
 	bool enableProgressive)
@@ -707,11 +706,11 @@ __global__ void gather(
 	const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
 	const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if (ix >= tileDomain.w || iy >= tileDomain.h) {
+	if (ix >= width || iy >= height) {
 		return;
 	}
 
-	const auto idx = getIdx(ix, iy, tileDomain.w);
+	const auto idx = getIdx(ix, iy, width);
 
 	const auto& path = paths[idx];
 
@@ -828,7 +827,6 @@ namespace idaten {
 	}
 
 	void PathTracing::onShade(
-		cudaSurfaceObject_t outputSurf,
 		int width, int height,
 		int bounce, int rrBounce,
 		cudaTextureObject_t texVtxPos,
@@ -847,7 +845,6 @@ namespace idaten {
 			enableAOV,
 			m_tileDomain,
 			m_frame,
-			outputSurf,
 			m_aovCudaRsc.ptr(), posRange,
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount.ptr(),
@@ -890,11 +887,11 @@ namespace idaten {
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
-			(m_tileDomain.w + block.x - 1) / block.x,
-			(m_tileDomain.h + block.y - 1) / block.y);
+			(width + block.x - 1) / block.x,
+			(height + block.y - 1) / block.y);
 
 		gather << <grid, block >> > (
-			m_tileDomain,
+			width, height,
 			outputSurf,
 			paths.ptr(),
 			m_enableProgressive);

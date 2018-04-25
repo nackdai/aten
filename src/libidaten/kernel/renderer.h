@@ -47,7 +47,7 @@ namespace idaten
 		{
 		}
 
-		virtual void postRender()
+		virtual void postRender(int width = 0, int height = 0)
 		{
 		}
 

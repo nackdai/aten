@@ -199,7 +199,7 @@ namespace idaten
 
 					onDenoise(
 						TileDomain(x, y, w, h),
-						width, height, maxSamples, maxBounce,
+						width, height,
 						outputSurf);
 				}
 			}
@@ -248,7 +248,7 @@ namespace idaten
 
 			onDenoise(
 				tileDomain,
-				width, height, maxSamples, maxBounce,
+				width, height,
 				outputSurf);
 
 			if (m_mode == Mode::SVGF)
@@ -365,8 +365,6 @@ namespace idaten
 	void SVGFPathTracing::onDenoise(
 		const TileDomain& tileDomain,
 		int width, int height,
-		int maxSamples,
-		int maxBounce,
 		cudaSurfaceObject_t outputSurf)
 	{
 		m_tileDomain = tileDomain;

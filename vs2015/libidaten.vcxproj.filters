@@ -244,6 +244,9 @@
     <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h">
       <Filter>multigpu</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\multigpu\svgf_multigpu.h">
+      <Filter>multigpu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -342,6 +345,9 @@
       <Filter>kernel\renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp">
+      <Filter>multigpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
     </ClCompile>
   </ItemGroup>

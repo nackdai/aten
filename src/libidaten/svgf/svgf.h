@@ -107,7 +107,7 @@ namespace idaten
 		virtual void render(
 			const TileDomain& tileDomain,
 			int maxSamples,
-			int maxBounce) override final;
+			int maxBounce) override;
 
 		virtual void update(
 			GLuint gltex,
@@ -218,8 +218,6 @@ namespace idaten
 		void onDenoise(
 			const TileDomain& tileDomain,
 			int width, int height,
-			int maxSamples,
-			int maxBounce,
 			cudaSurfaceObject_t outputSurf);
 
 		virtual void onGenPath(

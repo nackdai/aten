@@ -42,7 +42,7 @@ namespace idaten
 			if (m_deviceId != peerAccessDeviceId) {
 				// Check for peer access between participating GPUs.
 				int canAccessPeer = 0;
-				checkCudaErrors(cudaDeviceCanAccessPeer(&canAccessPeer, deviceId, peerAccessDeviceId);
+				checkCudaErrors(cudaDeviceCanAccessPeer(&canAccessPeer, m_deviceId, peerAccessDeviceId));
 
 				AT_ASSERT(canAccessPeer > 0);
 

@@ -208,6 +208,8 @@ namespace aten {
 
 		void asCurrent();
 
+		void enableVSync(bool enabled);
+
 		static void terminate();
 
 		void drawImGui();

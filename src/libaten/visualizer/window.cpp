@@ -351,6 +351,12 @@ namespace aten
 		::glfwMakeContextCurrent(m_wnd);
 	}
 
+	void window::enableVSync(bool enabled)
+	{
+		asCurrent();
+		::glfwSwapInterval(enabled ? 1 : 0);
+	}
+
 	void window::terminate()
 	{
 		// For imgui.

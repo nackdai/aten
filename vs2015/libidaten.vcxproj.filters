@@ -238,6 +238,12 @@
     <ClInclude Include="..\src\libidaten\cuda\multigpu.h">
       <Filter>cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\multigpu\pt_multigpu.h">
+      <Filter>multigpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h">
+      <Filter>multigpu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -285,6 +291,9 @@
     <Filter Include="kernel\renderer">
       <UniqueIdentifier>{deaffd9a-5ffd-486c-927f-355fbbf5f941}</UniqueIdentifier>
     </Filter>
+    <Filter Include="multigpu">
+      <UniqueIdentifier>{a022af60-efd8-427a-82ab-061b0ca6a84c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
@@ -331,6 +340,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp">
       <Filter>kernel\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp">
+      <Filter>multigpu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

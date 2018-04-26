@@ -12,3 +12,5 @@
 
 #include "cuda/cudainit.h"
 #include "cuda/multigpu.h"
+
+#include "multigpu/pt_multigpu.h"

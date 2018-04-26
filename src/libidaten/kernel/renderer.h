@@ -35,7 +35,7 @@ namespace idaten
 	class Renderer {
 	protected:
 		Renderer() {}
-		~Renderer() {}
+		virtual ~Renderer() {}
 
 	public:
 		virtual void render(

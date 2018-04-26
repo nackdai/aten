@@ -107,6 +107,8 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh" />
+    <ClInclude Include="..\src\libidaten\multigpu\pt_multigpu.h" />
+    <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h" />
     <ClInclude Include="..\src\libidaten\svgf\svgf.h" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +150,7 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp" />
+    <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp" />
     <ClCompile Include="..\src\libidaten\svgf\svgf.cpp" />
     <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>

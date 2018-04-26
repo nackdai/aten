@@ -31,7 +31,7 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
-static idaten::GpuProxy<idaten::PathTracing> g_tracer[2];
+static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[2];
 
 static const idaten::TileDomain g_tileDomain[2] = {
 	{ 0,   0, 1280, 360 },

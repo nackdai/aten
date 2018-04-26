@@ -365,5 +365,6 @@ namespace idaten
 		TileDomain m_tileDomain;
 
 		bool m_isListedTextureObject{ false };
+		bool m_canSSRTHitTest{ true };
 	};
 }

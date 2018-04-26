@@ -924,7 +924,7 @@ namespace idaten
 		int bounce,
 		cudaTextureObject_t texVtxPos)
 	{
-		if (bounce == 0) {
+		if (bounce == 0 && m_canSSRTHitTest) {
 			onScreenSpaceHitTest(width, height, bounce, texVtxPos);
 		}
 		else {

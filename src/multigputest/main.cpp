@@ -14,7 +14,7 @@
 
 #include "scenedefs.h"
 
-#define ENABLE_ENVMAP
+#define MULTI_GPU_SVGF
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -31,10 +31,20 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
+#ifdef MULTI_GPU_SVGF
+static idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU> g_tracer[1];
+
+static aten::TAA g_taa;
+
+static aten::FBO g_fbo;
+
+static aten::RasterizeRenderer g_rasterizer;
+#else
 static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[2];
+#endif
 
 static const idaten::TileDomain g_tileDomain[2] = {
-	{ 0,   0, 1280, 360 },
+	{ 0,   0, 1280, 720 },
 	{ 0, 360, 1280, 360 },
 };
 
@@ -66,6 +76,14 @@ void onRun(aten::window* window)
 
 	aten::timer timer;
 	timer.begin();
+
+#ifdef MULTI_GPU_SVGF
+	g_rasterizer.draw(
+		g_tracer[0].getRenderer().frame(),
+		&g_scene,
+		&g_camera,
+		&g_fbo);
+#endif
 
 	for (int i = 0; i < AT_COUNTOF(g_tracer); i++) {
 		g_tracer[i].render(
@@ -240,15 +258,36 @@ int main()
 
 	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
+#ifdef MULTI_GPU_SVGF
+	g_taa.init(
+		WIDTH, HEIGHT,
+		"../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
+		"../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
+
+	g_visualizer->addPostProc(&g_taa);
+
+	g_rasterizer.init(
+		WIDTH, HEIGHT,
+		"../shader/ssrt_vs.glsl",
+		"../shader/ssrt_gs.glsl",
+		"../shader/ssrt_fs.glsl");
+
+	g_fbo.asMulti(2);
+	g_fbo.init(
+		WIDTH, HEIGHT,
+		aten::PixelFormat::rgba32f,
+		true);
+
+	g_taa.setMotionDepthBufferHandle(g_fbo.getTexHandle(1));
+#endif
+
 	aten::GammaCorrection gamma;
 	gamma.init(
 		WIDTH, HEIGHT,
 		"../shader/fullscreen_vs.glsl",
 		"../shader/gamma_fs.glsl");
 
-
 	g_visualizer->addPostProc(&gamma);
-	//aten::visualizer::addPostProc(&blitter);
 
 	aten::vec3 pos, at;
 	real vfov;
@@ -286,7 +325,6 @@ int main()
 
 	const auto& nodes = g_scene.getAccel()->getNodes();
 	const auto& mtxs = g_scene.getAccel()->getMatrices();
-	//aten::bvh::dumpCollectedNodes(nodes, "nodes.txt");
 
 	std::vector<idaten::TextureResource> tex;
 	{
@@ -309,11 +347,13 @@ int main()
 	camparam.zfar = real(10000.0);
 
 	g_tracer[0].init(0);
+#if 0
 	g_tracer[1].init(1);
 
 	// Set P2P access between GPUs.
 	g_tracer[0].setPeerAccess(1);
 	g_tracer[1].setPeerAccess(0);
+#endif
 
 	for (int i = 0; i < AT_COUNTOF(g_tracer); i++)
 	{
@@ -340,6 +380,12 @@ int main()
 			vtxparams,
 			mtxs,
 			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(4)));
+
+#ifdef MULTI_GPU_SVGF
+		g_tracer[i].getRenderer().setGBuffer(
+			g_fbo.getTexHandle(0),
+			g_fbo.getTexHandle(1));
+#endif
 	}
 
 	aten::window::run();

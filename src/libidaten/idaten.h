@@ -14,3 +14,4 @@
 #include "cuda/multigpu.h"
 
 #include "multigpu/pt_multigpu.h"
+#include "multigpu/svgf_multigpu.h"

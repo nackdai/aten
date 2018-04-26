@@ -148,4 +148,9 @@ namespace idaten
 		// ˆê“xŒ³‚É–ß‚³‚ê‚½‚à‚Ì‚ğØ‚è‘Ö‚¦‚ç‚ê‚½ó‘Ô‚É–ß‚·.
 		m_curAOVPos = 1 - m_curAOVPos;
 	}
+
+	void SVGFPathTracingMultiGPU::copyFrom(SVGFPathTracingMultiGPU& tracer)
+	{
+
+	}
 }

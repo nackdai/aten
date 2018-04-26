@@ -166,7 +166,7 @@ namespace idaten
 		auto stride = this->m_paths.stride();
 
 		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
-		auto bytes = dstTileDomain.w * dstTileDomain.h * stride;
+		auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
 		checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
 	}

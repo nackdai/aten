@@ -27,5 +27,15 @@ namespace idaten
 
 	protected:
 		void copyFrom(SVGFPathTracingMultiGPU& tracer);
+
+	private:
+		void onRender(
+			const TileDomain& tileDomain,
+			int width, int height,
+			int maxSamples,
+			int maxBounce,
+			cudaSurfaceObject_t outputSurf,
+			cudaTextureObject_t vtxTexPos,
+			cudaTextureObject_t vtxTexNml);
 	};
 }

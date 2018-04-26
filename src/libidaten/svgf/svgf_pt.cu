@@ -891,7 +891,6 @@ __global__ void gather(
 namespace idaten
 {
 	void SVGFPathTracing::onGenPath(
-		int width, int height,
 		int sample, int maxSamples,
 		int seed,
 		cudaTextureObject_t texVtxPos,

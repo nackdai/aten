@@ -313,7 +313,6 @@ namespace idaten
 			//int seed = 0;
 
 			onGenPath(
-				width, height,
 				i, maxSamples,
 				seed,
 				vtxTexPos,

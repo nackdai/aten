@@ -221,7 +221,6 @@ namespace idaten
 			cudaSurfaceObject_t outputSurf);
 
 		virtual void onGenPath(
-			int width, int height,
 			int sample, int maxSamples,
 			int seed,
 			cudaTextureObject_t texVtxPos,

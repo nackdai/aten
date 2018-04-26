@@ -32,7 +32,7 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 #ifdef MULTI_GPU_SVGF
-static idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU> g_tracer[1];
+static idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU> g_tracer[2];
 
 static aten::TAA g_taa;
 
@@ -44,7 +44,7 @@ static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[2];
 #endif
 
 static const idaten::TileDomain g_tileDomain[2] = {
-	{ 0,   0, 1280, 720 },
+	{ 0,   0, 1280, 360 },
 	{ 0, 360, 1280, 360 },
 };
 
@@ -347,7 +347,7 @@ int main()
 	camparam.zfar = real(10000.0);
 
 	g_tracer[0].init(0);
-#if 0
+#if 1
 	g_tracer[1].init(1);
 
 	// Set P2P access between GPUs.

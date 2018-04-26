@@ -119,6 +119,85 @@ namespace idaten
 				m_tex.reset();
 			}
 		}
+
+		// Keep specified tile domain.
+		m_tileDomain = tileDomain;
+	}
+
+	void SVGFPathTracingMultiGPU::onRender(
+		const TileDomain& tileDomain,
+		int width, int height,
+		int maxSamples,
+		int maxBounce,
+		cudaSurfaceObject_t outputSurf,
+		cudaTextureObject_t vtxTexPos,
+		cudaTextureObject_t vtxTexNml)
+	{
+		static const int rrBounce = 3;
+
+		// Set bounce count to 1 forcibly, aov render mode.
+		maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
+
+		auto time = AT_NAME::timer::getSystemTime();
+
+		for (int i = 0; i < maxSamples; i++) {
+			int seed = time.milliSeconds;
+			//int seed = 0;
+
+			m_tileDomain = tileDomain;
+
+			onGenPath(
+				i, maxSamples,
+				seed,
+				vtxTexPos,
+				vtxTexNml);
+
+			int bounce = 0;
+
+			// NOTE
+			// ここから先ではオフセットさせない.
+			m_tileDomain.x = 0;
+			m_tileDomain.y = 0;
+
+			while (bounce < maxBounce) {
+				onHitTest(
+					width, height,
+					bounce,
+					vtxTexPos);
+
+				onShadeMiss(width, height, bounce);
+
+				int hitcount = 0;
+				m_compaction.compact(
+					m_hitidx,
+					m_hitbools);
+
+				//AT_PRINTF("%d\n", hitcount);
+
+				onShade(
+					outputSurf,
+					width, height,
+					bounce, rrBounce,
+					vtxTexPos, vtxTexNml);
+
+				bounce++;
+			}
+		}
+
+		if (m_mode == Mode::PT) {
+			onGather(outputSurf, width, height, maxSamples);
+		}
+		else if (m_mode == Mode::AOVar) {
+			onDisplayAOV(outputSurf, width, height, vtxTexPos);
+		}
+		else {
+			if (isFirstFrame()) {
+				onGather(outputSurf, width, height, maxSamples);
+			}
+			else {
+				onCopyBufferForTile(width, height);
+			}
+		}
 	}
 
 	void SVGFPathTracingMultiGPU::postRender(int width, int height)
@@ -151,6 +230,66 @@ namespace idaten
 
 	void SVGFPathTracingMultiGPU::copyFrom(SVGFPathTracingMultiGPU& tracer)
 	{
+		if (this == &tracer) {
+			AT_ASSERT(false);
+			return;
+		}
 
+		const auto& srcTileDomain = tracer.m_tileDomain;
+		
+
+		const auto& dstTileDomain = this->m_tileDomain;
+
+		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
+
+		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
+
+		// NOTE
+		// すでに切り替えられているが、切り替え前のものを参照したいので、元に戻す.
+		auto cur = 1 - m_curAOVPos;
+		
+		// Notmal & Depth.
+		{
+			auto src = tracer.m_aovNormalDepth[cur].ptr();
+			auto dst = this->m_aovNormalDepth[cur].ptr();
+		
+			auto stride = this->m_aovNormalDepth[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+			
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+		}
+
+		// Texture color & Temporal weight.
+		{
+			auto src = tracer.m_aovTexclrTemporalWeight[cur].ptr();
+			auto dst = this->m_aovTexclrTemporalWeight[cur].ptr();
+
+			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+		}
+		
+		// Color & Variance.
+		{
+			auto src = tracer.m_aovColorVariance[cur].ptr();
+			auto dst = this->m_aovColorVariance[cur].ptr();
+
+			auto stride = this->m_aovColorVariance[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+		}
+
+		// Moment & Mesh id.
+		{
+			auto src = tracer.m_aovMomentMeshid[cur].ptr();
+			auto dst = this->m_aovMomentMeshid[cur].ptr();
+
+			auto stride = this->m_aovMomentMeshid[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+		}
 	}
 }

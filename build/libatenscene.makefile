@@ -169,6 +169,8 @@ clean:
 	rm -f x64/Debug/libatenscene/src/libatenscene/*.d
 	rm -f x64/Debug/libatenscene/3rdparty/tinyxml2/*.o
 	rm -f x64/Debug/libatenscene/3rdparty/tinyxml2/*.d
+	rm -f x64/Debug/libatenscene/*.o
+	rm -f x64/Debug/libatenscene/*.d
 	rm -f x64/Debug/libatenscene.a
 	rm -f x64/Release/libatenscene/3rdparty/tinyobjloader_v09/*.o
 	rm -f x64/Release/libatenscene/3rdparty/tinyobjloader_v09/*.d
@@ -176,5 +178,7 @@ clean:
 	rm -f x64/Release/libatenscene/src/libatenscene/*.d
 	rm -f x64/Release/libatenscene/3rdparty/tinyxml2/*.o
 	rm -f x64/Release/libatenscene/3rdparty/tinyxml2/*.d
+	rm -f x64/Release/libatenscene/*.o
+	rm -f x64/Release/libatenscene/*.d
 	rm -f x64/Release/libatenscene.a
 

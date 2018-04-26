@@ -87,8 +87,12 @@ create_folders:
 clean:
 	rm -f x64/Debug/svgftest/src/svgftest/*.o
 	rm -f x64/Debug/svgftest/src/svgftest/*.d
+	rm -f x64/Debug/svgftest/*.o
+	rm -f x64/Debug/svgftest/*.d
 	rm -f ../src/svgftest/svgftest.exe
 	rm -f x64/Release/svgftest/src/svgftest/*.o
 	rm -f x64/Release/svgftest/src/svgftest/*.d
+	rm -f x64/Release/svgftest/*.o
+	rm -f x64/Release/svgftest/*.d
 	rm -f ../src/svgftest/svgftest.exe
 

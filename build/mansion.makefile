@@ -87,8 +87,12 @@ create_folders:
 clean:
 	rm -f x64/Debug/mansion/src/mansion/*.o
 	rm -f x64/Debug/mansion/src/mansion/*.d
+	rm -f x64/Debug/mansion/*.o
+	rm -f x64/Debug/mansion/*.d
 	rm -f ../src/mansion/mansion.exe
 	rm -f x64/Release/mansion/src/mansion/*.o
 	rm -f x64/Release/mansion/src/mansion/*.d
+	rm -f x64/Release/mansion/*.o
+	rm -f x64/Release/mansion/*.d
 	rm -f ../src/mansion/mansion.exe
 

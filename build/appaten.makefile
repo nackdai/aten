@@ -89,8 +89,12 @@ create_folders:
 clean:
 	rm -f x64/Debug/appaten/src/appaten/*.o
 	rm -f x64/Debug/appaten/src/appaten/*.d
+	rm -f x64/Debug/appaten/*.o
+	rm -f x64/Debug/appaten/*.d
 	rm -f ../src/appaten/appaten.exe
 	rm -f x64/Release/appaten/src/appaten/*.o
 	rm -f x64/Release/appaten/src/appaten/*.d
+	rm -f x64/Release/appaten/*.o
+	rm -f x64/Release/appaten/*.d
 	rm -f ../src/appaten/appaten.exe
 

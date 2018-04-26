@@ -579,6 +579,8 @@ clean:
 	rm -f x64/Debug/libidaten/src/libaten/geometry/*.d
 	rm -f x64/Debug/libidaten/src/libaten/camera/*.o
 	rm -f x64/Debug/libidaten/src/libaten/camera/*.d
+	rm -f x64/Debug/libidaten/*.o
+	rm -f x64/Debug/libidaten/*.d
 	rm -f x64/Debug/libidaten.a
 	rm -f x64/Release/libidaten/src/libidaten/cuda/*.o
 	rm -f x64/Release/libidaten/src/libidaten/cuda/*.d
@@ -606,5 +608,7 @@ clean:
 	rm -f x64/Release/libidaten/src/libaten/geometry/*.d
 	rm -f x64/Release/libidaten/src/libaten/camera/*.o
 	rm -f x64/Release/libidaten/src/libaten/camera/*.d
+	rm -f x64/Release/libidaten/*.o
+	rm -f x64/Release/libidaten/*.d
 	rm -f x64/Release/libidaten.a
 

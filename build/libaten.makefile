@@ -1297,6 +1297,8 @@ clean:
 	rm -f x64/Debug/libaten/src/libaten/deformable/*.d
 	rm -f x64/Debug/libaten/src/libaten/os/linux/*.o
 	rm -f x64/Debug/libaten/src/libaten/os/linux/*.d
+	rm -f x64/Debug/libaten/*.o
+	rm -f x64/Debug/libaten/*.d
 	rm -f x64/Debug/libaten.a
 	rm -f x64/Release/libaten/src/libaten/misc/*.o
 	rm -f x64/Release/libaten/src/libaten/misc/*.d
@@ -1346,5 +1348,7 @@ clean:
 	rm -f x64/Release/libaten/src/libaten/deformable/*.d
 	rm -f x64/Release/libaten/src/libaten/os/linux/*.o
 	rm -f x64/Release/libaten/src/libaten/os/linux/*.d
+	rm -f x64/Release/libaten/*.o
+	rm -f x64/Release/libaten/*.d
 	rm -f x64/Release/libaten.a
 

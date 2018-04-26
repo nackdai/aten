@@ -87,8 +87,12 @@ create_folders:
 clean:
 	rm -f x64/Debug/multigputest/src/multigputest/*.o
 	rm -f x64/Debug/multigputest/src/multigputest/*.d
+	rm -f x64/Debug/multigputest/*.o
+	rm -f x64/Debug/multigputest/*.d
 	rm -f ../src/multigputest/multigputest.exe
 	rm -f x64/Release/multigputest/src/multigputest/*.o
 	rm -f x64/Release/multigputest/src/multigputest/*.d
+	rm -f x64/Release/multigputest/*.o
+	rm -f x64/Release/multigputest/*.d
 	rm -f ../src/multigputest/multigputest.exe
 

@@ -87,8 +87,12 @@ create_folders:
 clean:
 	rm -f x64/Debug/idatentest/src/idatentest/*.o
 	rm -f x64/Debug/idatentest/src/idatentest/*.d
+	rm -f x64/Debug/idatentest/*.o
+	rm -f x64/Debug/idatentest/*.d
 	rm -f ../src/idatentest/idatentest.exe
 	rm -f x64/Release/idatentest/src/idatentest/*.o
 	rm -f x64/Release/idatentest/src/idatentest/*.d
+	rm -f x64/Release/idatentest/*.o
+	rm -f x64/Release/idatentest/*.d
 	rm -f ../src/idatentest/idatentest.exe
 

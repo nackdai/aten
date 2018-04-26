@@ -43,14 +43,6 @@ namespace idaten
 			int maxSamples,
 			int maxBounce) = 0;
 
-		virtual void preRender()
-		{
-		}
-
-		virtual void postRender(int width = 0, int height = 0)
-		{
-		}
-
 		virtual void update(
 			GLuint gltex,
 			int width, int height,

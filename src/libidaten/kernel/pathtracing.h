@@ -8,11 +8,7 @@
 
 namespace idaten
 {
-	template<class T> class GpuProxy;
-
 	class PathTracing : public Renderer {
-		friend class GpuProxy<PathTracing>;
-
 	public:
 		struct ShadowRay {
 			aten::ray r;
@@ -52,9 +48,7 @@ namespace idaten
 		virtual void render(
 			const TileDomain& tileDomain,
 			int maxSamples,
-			int maxBounce) override final;
-
-		virtual void postRender(int width = 0, int height = 0) override final;
+			int maxBounce) override;
 
 		virtual void update(
 			GLuint gltex,
@@ -88,8 +82,6 @@ namespace idaten
 		}
 
 	protected:
-		void copyFrom(PathTracing& tracer);
-
 		virtual void onGenPath(
 			int width, int height,
 			int sample, int maxSamples,

@@ -117,6 +117,9 @@ namespace idaten {
 
 		checkCudaErrors(cudaMemset(m_paths.ptr(), 0, m_paths.bytes()));
 
+		m_glimg.map();
+		auto outputSurf = m_glimg.bind();
+
 		auto vtxTexPos = m_vtxparamsPos.bind();
 		auto vtxTexNml = m_vtxparamsNml.bind();
 
@@ -182,6 +185,10 @@ namespace idaten {
 			}
 		}
 
+		onGather(outputSurf, m_paths, width, height);
+
+		checkCudaErrors(cudaDeviceSynchronize());
+
 		m_frame++;
 
 		{
@@ -204,44 +211,8 @@ namespace idaten {
 			}
 			m_aovCudaRsc.reset();
 		}
-	}
-
-	void PathTracing::postRender(int width/*= 0*/, int height/*= 0*/)
-	{
-		m_glimg.map();
-		auto outputSurf = m_glimg.bind();
-
-		width = width > 0 ? width : m_tileDomain.w;
-		height = height > 0 ? height : m_tileDomain.h;
-
-		onGather(outputSurf, m_paths, width, height);
-
-		checkCudaErrors(cudaDeviceSynchronize());
 
 		m_glimg.unbind();
 		m_glimg.unmap();
-	}
-
-	void PathTracing::copyFrom(PathTracing& tracer)
-	{
-		if (this == &tracer) {
-			AT_ASSERT(false);
-			return;
-		}
-
-		const auto& srcTileDomain = tracer.m_tileDomain;
-		auto src = tracer.m_paths.ptr();
-
-		const auto& dstTileDomain = this->m_tileDomain;
-		auto dst = this->m_paths.ptr();
-
-		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
-
-		auto stride = this->m_paths.stride();
-
-		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
-		auto bytes = dstTileDomain.w * dstTileDomain.h * stride;
-
-		checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
 	}
 }

@@ -15,6 +15,7 @@
 #include "scenedefs.h"
 
 #define MULTI_GPU_SVGF
+#define GPU_NUM	(2)
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -32,21 +33,33 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 #ifdef MULTI_GPU_SVGF
-static idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU> g_tracer[2];
+static idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU> g_tracer[GPU_NUM];
 
 static aten::TAA g_taa;
 
 static aten::FBO g_fbo;
 
 static aten::RasterizeRenderer g_rasterizer;
+
+using GpuProxy = idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU>;
 #else
-static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[2];
+static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[GPU_NUM];
+using GpuProxy = idaten::GpuProxy<idaten::PathTracingMultiGPU>;
 #endif
 
-static const idaten::TileDomain g_tileDomain[2] = {
-	{ 0,   0, WIDTH, HEIGHT / 2 },
-	{ 0, HEIGHT / 2, WIDTH, HEIGHT / 2 },
+#if (GPU_NUM == 4)
+static const idaten::TileDomain g_tileDomain[4] = {
+	{ 0, 0 * HEIGHT / 4, WIDTH, HEIGHT / 4 },
+	{ 0, 1 * HEIGHT / 4, WIDTH, HEIGHT / 4 },
+	{ 0, 2 * HEIGHT / 4, WIDTH, HEIGHT / 4 },
+	{ 0, 3 * HEIGHT / 4, WIDTH, HEIGHT / 4 },
 };
+#else
+static const idaten::TileDomain g_tileDomain[2] = {
+	{ 0, 0 * HEIGHT / 2, WIDTH, HEIGHT / 2 },
+	{ 0, 1 * HEIGHT / 2, WIDTH, HEIGHT / 2 },
+};
+#endif
 
 static aten::visualizer* g_visualizer = nullptr;
 
@@ -92,9 +105,11 @@ void onRun(aten::window* window)
 			g_maxBounce);
 	}
 
-	for (int i = 1; i < AT_COUNTOF(g_tracer); i++) {
-		g_tracer[0].gather(g_tracer[i]);
-	}
+#if (GPU_NUM == 4)
+	GpuProxy::swapCopy(g_tracer, AT_COUNTOF(g_tracer));
+#else
+	g_tracer[0].copyP2P(g_tracer[1]);
+#endif
 
 	g_tracer[0].postRender(WIDTH, HEIGHT);
 
@@ -247,7 +262,7 @@ int main()
 
 	aten::initSampler(WIDTH, HEIGHT);
 
-	aten::window::init(
+	auto window = aten::window::init(
 		WIDTH, HEIGHT, TITLE,
 		onRun,
 		onClose,
@@ -255,6 +270,7 @@ int main()
 		onMouseMove,
 		onMouseWheel,
 		onKey);
+	window->enableVSync(false);
 
 	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
@@ -347,12 +363,18 @@ int main()
 	camparam.zfar = real(10000.0);
 
 	g_tracer[0].init(0);
-#if 1
 	g_tracer[1].init(1);
 
 	// Set P2P access between GPUs.
 	g_tracer[0].setPeerAccess(1);
 	g_tracer[1].setPeerAccess(0);
+
+#if (GPU_NUM == 4)
+	g_tracer[2].init(2);
+	g_tracer[3].init(3);
+	
+	g_tracer[2].setPeerAccess(3);
+	g_tracer[3].setPeerAccess(2);
 #endif
 
 	for (int i = 0; i < AT_COUNTOF(g_tracer); i++)
@@ -367,6 +389,8 @@ int main()
 
 		int w = i == 0 ? WIDTH : tileDomain.w;
 		int h = i == 0 ? HEIGHT : tileDomain.h;
+
+		h = i == 2 ? HEIGHT / 2 : h;
 
 		g_tracer[i].getRenderer().update(
 			aten::visualizer::getTexHandle(),

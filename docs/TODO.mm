@@ -562,6 +562,23 @@
 </node>
 <node CREATED="1524562675585" HGAP="72" ID="ID_1410972639" MODIFIED="1524562681526" POSITION="right" TEXT="&#x30de;&#x30eb;&#x30c1;GPU" VSHIFT="60">
 <node CREATED="1524562694895" ID="ID_84322531" LINK="https://stackoverflow.com/questions/22694518/what-is-the-difference-between-cudamemcpy-and-cudamemcpypeer-for-p2p-copy" MODIFIED="1524562702316" TEXT="What is the difference between cudaMemcpy() and cudaMemcpyPeer() for P2P-copy? "/>
+<node CREATED="1524819789471" ID="ID_393806358" MODIFIED="1524819813795" TEXT="&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x7d50;&#x679c;&#x304c;svgftest&#x3068;&#x7570;&#x306a;&#x308b;">
+<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1524819803304" ID="ID_1684855334" MODIFIED="1524819810235" TEXT="&#x660e;&#x308b;&#x3059;&#x304e;&#x308b;"/>
+</node>
+<node CREATED="1524819817856" ID="ID_1961276696" MODIFIED="1524819840115" TEXT="cudaMemcpyPeerAsync&#x306e;&#x901f;&#x5ea6;&#x304c;&#x3067;&#x306a;&#x3044;">
+<node CREATED="1524820316270" ID="ID_726563681" LINK="http://www.nvidia.com/docs/IO/116711/sc11-multi-gpu.pdf" MODIFIED="1524820336520" TEXT="Multi GPU Programming">
+<node CREATED="1524820337547" ID="ID_1880277032" MODIFIED="1524820340272" TEXT="P9">
+<node CREATED="1524820353182" ID="ID_1566393535" MODIFIED="1524820373167" TEXT="Currently performance is maximized when stream belongs to the source GPU">
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1524820359958" ID="ID_513033969" MODIFIED="1524820371105" TEXT="If peer-access is not available">
+<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1524820367188" ID="ID_1393088539" MODIFIED="1524820367800" TEXT="CUDA driver stages the transfer via CPU memory"/>
+</node>
+</node>
+</node>
+</node>
 </node>
 </node>
 </map>

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "light/ibl.h"
 
 // NOTE

@@ -186,7 +186,7 @@ namespace idaten
 
 		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
 
-		exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int) >> > (
+		exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int), m_stream >> > (
 			dst.ptr(),
 			dst.maxNum(),
 			blocksize,
@@ -202,7 +202,7 @@ namespace idaten
 		int tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
 		int tmpBlockSize = blockPerGrid;
 
-		computeBlockCount << <tmpBlockPerGrid, tmpBlockSize >> > (
+		computeBlockCount << <tmpBlockPerGrid, tmpBlockSize, 0, m_stream >> > (
 			m_increments.ptr(),
 			m_increments.maxNum(),
 			blocksize,
@@ -228,7 +228,7 @@ namespace idaten
 			innerBlockPerGrid = (elementNum - 1) / blocksize + 1;
 			stackBlockPerGrid.push_back(elementNum);
 
-			exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int) >> >(
+			exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int), m_stream >> >(
 				m_work.ptr(),
 				m_work.maxNum(),
 				blocksize,
@@ -245,7 +245,7 @@ namespace idaten
 			int innerTmpBlockPerGrid = (innerBlockPerGrid - 1) / blocksize + 1;
 			int innerTmpBlockSize = innerBlockPerGrid;
 
-			computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize >> > (
+			computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize, 0, m_stream >> > (
 				output->ptr(),
 				output->maxNum(),
 				blocksize,
@@ -273,7 +273,7 @@ namespace idaten
 
 			auto threadPerBlock = (output->maxNum() + bpg - 1) / bpg;
 
-			incrementBlocks << <bpg, threadPerBlock >> > (
+			incrementBlocks << <bpg, threadPerBlock, 0, m_stream >> > (
 				output->ptr(),
 				output->maxNum(),
 				input->ptr());
@@ -289,7 +289,7 @@ namespace idaten
 		idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? tmpptr : &m_increments);
 #endif
 
-		incrementBlocks << <blockPerGrid, blocksize >> > (
+		incrementBlocks << <blockPerGrid, blocksize, 0, m_stream >> > (
 			dst.ptr(),
 			dst.maxNum(),
 			incrResult->ptr());
@@ -307,7 +307,7 @@ namespace idaten
 		int num = dst.maxNum();
 		int blockPerGrid = (num - 1) / m_blockSize + 1;
 
-		scatter << <blockPerGrid, m_blockSize >> > (
+		scatter << <blockPerGrid, m_blockSize, 0, m_stream >> > (
 			dst.ptr(),
 			m_counts.ptr(),
 			dst.maxNum(),

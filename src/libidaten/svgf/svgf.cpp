@@ -388,4 +388,10 @@ namespace idaten
 			onVarianceEstimation(outputSurf, width, height);
 		}
 	}
+
+	void SVGFPathTracing::setStream(cudaStream_t stream)
+	{
+		m_stream = stream;
+		m_compaction.setStream(stream);
+	}
 }

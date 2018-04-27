@@ -35,7 +35,7 @@ namespace idaten
 			m_pathAttrib.init(width * height);
 			m_pathSampler.init(width * height);
 
-			initSVGF << <1, 1 >> > (
+			initSVGF << <1, 1, 0, m_stream >> > (
 				m_paths.ptr(),
 				m_pathThroughput.ptr(),
 				m_pathContrib.ptr(),
@@ -48,9 +48,9 @@ namespace idaten
 
 	void SVGFPathTracing::onClear()
 	{
-		cudaMemset(m_pathThroughput.ptr(), 0, m_pathThroughput.bytes());
-		cudaMemset(m_pathContrib.ptr(), 0, m_pathContrib.bytes());
-		cudaMemset(m_pathAttrib.ptr(), 0, m_pathAttrib.bytes());
-		cudaMemset(m_pathSampler.ptr(), 0, m_pathSampler.bytes());
+		cudaMemsetAsync(m_pathThroughput.ptr(), 0, m_pathThroughput.bytes(), m_stream);
+		cudaMemsetAsync(m_pathContrib.ptr(), 0, m_pathContrib.bytes(), m_stream);
+		cudaMemsetAsync(m_pathAttrib.ptr(), 0, m_pathAttrib.bytes(), m_stream);
+		cudaMemsetAsync(m_pathSampler.ptr(), 0, m_pathSampler.bytes(), m_stream);
 	}
 }

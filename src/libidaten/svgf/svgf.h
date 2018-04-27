@@ -300,10 +300,7 @@ namespace idaten
 			return (m_frame == 1);
 		}
 
-		void setStream(cudaStream_t stream)
-		{
-			m_stream = stream;
-		}
+		void setStream(cudaStream_t stream);
 
 	protected:
 		bool m_isInitPash{ false };

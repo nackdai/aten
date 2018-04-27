@@ -23,6 +23,11 @@ namespace idaten {
 
 		idaten::TypedCudaMemory<int>& getCount();
 
+		void setStream(cudaStream_t stream)
+		{
+			m_stream = stream;
+		}
+
 #if 0
 		// test implementation.
 		void compact();
@@ -45,5 +50,7 @@ namespace idaten {
 		idaten::TypedCudaMemory<int> m_indices;
 		idaten::TypedCudaMemory<int> m_iota;
 		idaten::TypedCudaMemory<int> m_counts;
+
+		cudaStream_t m_stream{ (cudaStream_t)0 };
 	};
 }

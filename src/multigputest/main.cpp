@@ -44,8 +44,8 @@ static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[2];
 #endif
 
 static const idaten::TileDomain g_tileDomain[2] = {
-	{ 0,   0, 1280, 360 },
-	{ 0, 360, 1280, 360 },
+	{ 0,   0, WIDTH, HEIGHT / 2 },
+	{ 0, HEIGHT / 2, WIDTH, HEIGHT / 2 },
 };
 
 static aten::visualizer* g_visualizer = nullptr;

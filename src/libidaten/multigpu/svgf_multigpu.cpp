@@ -207,7 +207,11 @@ namespace idaten
 
 		// NOTE
 		// renderで切り替えられているが、本来はdenoise後に切り替えるので、ここで一度元に戻す.
+		auto keepCurAovPos = m_curAOVPos;
 		m_curAOVPos = 1 - m_curAOVPos;
+
+		auto keepFrame = m_frame;
+		m_frame = (m_frame > 1) ? m_frame - 1 : m_frame;
 
 		onDenoise(
 			TileDomain(0, 0, width, height),
@@ -223,9 +227,9 @@ namespace idaten
 		m_glimg.unbind();
 		m_glimg.unmap();
 
-		// NOTE
-		// 一度元に戻されたものを切り替えられた状態に戻す.
-		m_curAOVPos = 1 - m_curAOVPos;
+		// Return to kept value.
+		m_curAOVPos = keepCurAovPos;
+		m_frame = keepFrame;
 	}
 
 	void SVGFPathTracingMultiGPU::copyFrom(SVGFPathTracingMultiGPU& tracer)
@@ -236,8 +240,6 @@ namespace idaten
 		}
 
 		const auto& srcTileDomain = tracer.m_tileDomain;
-		
-
 		const auto& dstTileDomain = this->m_tileDomain;
 
 		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
@@ -287,6 +289,16 @@ namespace idaten
 			auto dst = this->m_aovMomentMeshid[cur].ptr();
 
 			auto stride = this->m_aovMomentMeshid[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+		}
+
+		{
+			auto src = tracer.m_tmpBuf.ptr();
+			auto dst = this->m_tmpBuf.ptr();
+
+			auto stride = this->m_tmpBuf.stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
 			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));

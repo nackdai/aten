@@ -154,6 +154,9 @@ namespace idaten
 
 			int bounce = 0;
 
+			int offsetX = m_tileDomain.x;
+			int offsetY = m_tileDomain.y;
+
 			// NOTE
 			// ここから先ではオフセットさせない.
 			m_tileDomain.x = 0;
@@ -165,7 +168,9 @@ namespace idaten
 					bounce,
 					vtxTexPos);
 
-				onShadeMiss(width, height, bounce);
+				onShadeMiss(
+					width, height, bounce,
+					offsetX, offsetY);
 
 				int hitcount = 0;
 				m_compaction.compact(
@@ -213,6 +218,9 @@ namespace idaten
 		auto keepFrame = m_frame;
 		m_frame = (m_frame > 1) ? m_frame - 1 : m_frame;
 
+		auto keepTileDomain = m_tileDomain;
+		m_tileDomain = TileDomain(0, 0, width, height);
+
 		onDenoise(
 			TileDomain(0, 0, width, height),
 			width, height,
@@ -230,6 +238,7 @@ namespace idaten
 		// Return to kept value.
 		m_curAOVPos = keepCurAovPos;
 		m_frame = keepFrame;
+		m_tileDomain = keepTileDomain;
 	}
 
 	void SVGFPathTracingMultiGPU::copyFrom(SVGFPathTracingMultiGPU& tracer)

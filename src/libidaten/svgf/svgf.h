@@ -238,7 +238,9 @@ namespace idaten
 
 		virtual void onShadeMiss(
 			int width, int height,
-			int bounce);
+			int bounce,
+			int offsetX = -1,
+			int offsetY = -1);
 
 		virtual void onShade(
 			cudaSurfaceObject_t outputSurf,

@@ -317,6 +317,7 @@ __global__ void shadeMiss(
 
 __global__ void shadeMissWithEnvmap(
 	idaten::TileDomain tileDomain,
+	int offsetX, int offsetY,
 	int bounce,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* aovNormalDepth,
@@ -349,8 +350,8 @@ __global__ void shadeMissWithEnvmap(
 			// TODO
 			// More efficient way...
 
-			float s = (ix + tileDomain.x) / (float)(width);
-			float t = (iy + tileDomain.y) / (float)(height);
+			float s = (ix + offsetX) / (float)(width);
+			float t = (iy + offsetY) / (float)(height);
 
 			AT_NAME::CameraSampleResult camsample;
 			AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
@@ -959,7 +960,9 @@ namespace idaten
 
 	void SVGFPathTracing::onShadeMiss(
 		int width, int height,
-		int bounce)
+		int bounce,
+		int offsetX/*= -1*/,
+		int offsetY/*= -1*/)
 	{
 		dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 		dim3 grid(
@@ -968,9 +971,13 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
+		offsetX = offsetX < 0 ? m_tileDomain.x : offsetX;
+		offsetY = offsetY < 0 ? m_tileDomain.y : offsetY;
+
 		if (m_envmapRsc.idx >= 0) {
 			shadeMissWithEnvmap << <grid, block >> > (
 				m_tileDomain,
+				offsetX, offsetY,
 				bounce,
 				m_cam.ptr(),
 				m_aovNormalDepth[curaov].ptr(),

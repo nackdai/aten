@@ -108,7 +108,9 @@ void onRun(aten::window* window)
 #if (GPU_NUM == 4)
 	GpuProxy::swapCopy(g_tracer, AT_COUNTOF(g_tracer));
 #else
-	g_tracer[0].copyP2P(g_tracer[1]);
+	for (int i = 1; i < AT_COUNTOF(g_tracer); i++) {
+		g_tracer[0].copyP2P(g_tracer[1]);
+	}
 #endif
 
 	g_tracer[0].postRender(WIDTH, HEIGHT);

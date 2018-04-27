@@ -30,5 +30,10 @@ namespace idaten
 
 	protected:
 		void copyFrom(PathTracingMultiGPU& tracer);
+
+		void copyFrom(
+			int srcDeviceId,
+			int dstDeviceId,
+			PathTracingMultiGPU& tracer);
 	};
 }

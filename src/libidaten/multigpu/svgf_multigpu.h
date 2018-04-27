@@ -28,6 +28,11 @@ namespace idaten
 	protected:
 		void copyFrom(SVGFPathTracingMultiGPU& tracer);
 
+		void copyFrom(
+			int srcDeviceId,
+			int dstDeviceId,
+			SVGFPathTracingMultiGPU& tracer);
+
 	private:
 		void onRender(
 			const TileDomain& tileDomain,

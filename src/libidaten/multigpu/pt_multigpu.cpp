@@ -170,4 +170,30 @@ namespace idaten
 
 		checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
 	}
+
+	void PathTracingMultiGPU::copyFrom(
+		int srcDeviceId,
+		int dstDeviceId,
+		PathTracingMultiGPU& tracer)
+	{
+		if (this == &tracer) {
+			AT_ASSERT(false);
+			return;
+		}
+
+		const auto& srcTileDomain = tracer.m_tileDomain;
+		auto src = tracer.m_paths.ptr();
+
+		const auto& dstTileDomain = this->m_tileDomain;
+		auto dst = this->m_paths.ptr();
+
+		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
+
+		auto stride = this->m_paths.stride();
+
+		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
+		auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+		checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+	}
 }

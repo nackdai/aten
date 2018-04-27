@@ -310,4 +310,80 @@ namespace idaten
 			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
 		}
 	}
+
+	void SVGFPathTracingMultiGPU::copyFrom(
+		int srcDeviceId,
+		int dstDeviceId,
+		SVGFPathTracingMultiGPU& tracer)
+	{
+		if (this == &tracer) {
+			AT_ASSERT(false);
+			return;
+		}
+
+		const auto& srcTileDomain = tracer.m_tileDomain;
+		const auto& dstTileDomain = this->m_tileDomain;
+
+		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
+
+		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
+
+		// NOTE
+		// すでに切り替えられているが、切り替え前のものを参照したいので、元に戻す.
+		auto cur = 1 - m_curAOVPos;
+
+		// Notmal & Depth.
+		{
+			auto src = tracer.m_aovNormalDepth[cur].ptr();
+			auto dst = this->m_aovNormalDepth[cur].ptr();
+
+			auto stride = this->m_aovNormalDepth[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+		}
+
+		// Texture color & Temporal weight.
+		{
+			auto src = tracer.m_aovTexclrTemporalWeight[cur].ptr();
+			auto dst = this->m_aovTexclrTemporalWeight[cur].ptr();
+
+			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+		}
+
+		// Color & Variance.
+		{
+			auto src = tracer.m_aovColorVariance[cur].ptr();
+			auto dst = this->m_aovColorVariance[cur].ptr();
+
+			auto stride = this->m_aovColorVariance[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+		}
+
+		// Moment & Mesh id.
+		{
+			auto src = tracer.m_aovMomentMeshid[cur].ptr();
+			auto dst = this->m_aovMomentMeshid[cur].ptr();
+
+			auto stride = this->m_aovMomentMeshid[cur].stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+		}
+
+		{
+			auto src = tracer.m_tmpBuf.ptr();
+			auto dst = this->m_tmpBuf.ptr();
+
+			auto stride = this->m_tmpBuf.stride();
+			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
+
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+		}
+	}
 }

@@ -264,7 +264,7 @@ namespace idaten
 			auto stride = this->m_aovNormalDepth[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 			
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
 		}
 
 		// Texture color & Temporal weight.
@@ -275,7 +275,7 @@ namespace idaten
 			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
 		}
 		
 		// Color & Variance.
@@ -286,7 +286,7 @@ namespace idaten
 			auto stride = this->m_aovColorVariance[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
 		}
 
 		// Moment & Mesh id.
@@ -297,7 +297,7 @@ namespace idaten
 			auto stride = this->m_aovMomentMeshid[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
 		}
 
 		{
@@ -307,7 +307,7 @@ namespace idaten
 			auto stride = this->m_tmpBuf.stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
 		}
 	}
 
@@ -340,7 +340,7 @@ namespace idaten
 			auto stride = this->m_aovNormalDepth[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
 		}
 
 		// Texture color & Temporal weight.
@@ -351,7 +351,7 @@ namespace idaten
 			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
 		}
 
 		// Color & Variance.
@@ -362,7 +362,7 @@ namespace idaten
 			auto stride = this->m_aovColorVariance[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
 		}
 
 		// Moment & Mesh id.
@@ -373,7 +373,7 @@ namespace idaten
 			auto stride = this->m_aovMomentMeshid[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
 		}
 
 		{
@@ -383,7 +383,7 @@ namespace idaten
 			auto stride = this->m_tmpBuf.stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
 		}
 	}
 }

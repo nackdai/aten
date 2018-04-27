@@ -904,7 +904,7 @@ namespace idaten
 
 		bool isFillAOV = m_mode == Mode::AOVar;
 
-		genPath << <grid, block >> > (
+		genPath << <grid, block, 0, m_stream >> > (
 			m_tileDomain,
 			isFillAOV,
 			m_paths.ptr(),
@@ -929,7 +929,7 @@ namespace idaten
 		}
 		else {
 #ifdef ENABLE_PERSISTENT_THREAD
-			hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK) >> > (
+			hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK), 0, m_stream >> > (
 #else
 			dim3 block(BLOCK_SIZE, BLOCK_SIZE);
 			dim3 grid(
@@ -975,7 +975,7 @@ namespace idaten
 		offsetY = offsetY < 0 ? m_tileDomain.y : offsetY;
 
 		if (m_envmapRsc.idx >= 0) {
-			shadeMissWithEnvmap << <grid, block >> > (
+			shadeMissWithEnvmap << <grid, block, 0, m_stream >> > (
 				m_tileDomain,
 				offsetX, offsetY,
 				bounce,
@@ -990,7 +990,7 @@ namespace idaten
 				width, height);
 		}
 		else {
-			shadeMiss << <grid, block >> > (
+			shadeMiss << <grid, block, 0, m_stream >> > (
 				m_tileDomain,
 				bounce,
 				m_aovNormalDepth[curaov].ptr(),
@@ -1036,7 +1036,7 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		shade << <blockPerGrid, threadPerBlock >> > (
+		shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
 			m_tileDomain,
 			m_aovNormalDepth[curaov].ptr(),
 			m_aovTexclrTemporalWeight[curaov].ptr(),
@@ -1061,7 +1061,7 @@ namespace idaten
 
 		checkCudaKernel(shade);
 
-		hitShadowRay << <blockPerGrid, threadPerBlock >> > (
+		hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
 			bounce,
 			m_paths.ptr(),
 			m_hitidx.ptr(), hitcount.ptr(),
@@ -1089,7 +1089,7 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		gather << <grid, block >> > (
+		gather << <grid, block, 0, m_stream >> > (
 			m_tileDomain,
 			outputSurf,
 			m_aovColorVariance[curaov].ptr(),

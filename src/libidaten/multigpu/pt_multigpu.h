@@ -23,6 +23,12 @@ namespace idaten
 		virtual void postRender(int width, int height) override final;
 
 	protected:
+		void setStream(cudaStream_t stream)
+		{
+			// TODO
+		}
+
+	protected:
 		void copyFrom(PathTracingMultiGPU& tracer);
 	};
 }

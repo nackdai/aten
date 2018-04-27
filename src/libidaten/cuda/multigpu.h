@@ -24,6 +24,8 @@ namespace idaten
 #else
 			checkCudaErrors(cudaSetDevice(deviceId));
 			checkCudaErrors(cudaStreamCreate(&m_stream));
+
+			m_renderer.setStream(m_stream);
 #endif
 
 			m_deviceId = deviceId;

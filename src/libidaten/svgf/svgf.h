@@ -300,6 +300,11 @@ namespace idaten
 			return (m_frame == 1);
 		}
 
+		void setStream(cudaStream_t stream)
+		{
+			m_stream = stream;
+		}
+
 	protected:
 		bool m_isInitPash{ false };
 		idaten::TypedCudaMemory<Path> m_paths;
@@ -367,5 +372,7 @@ namespace idaten
 
 		bool m_isListedTextureObject{ false };
 		bool m_canSSRTHitTest{ true };
+
+		cudaStream_t m_stream{ (cudaStream_t)0 };
 	};
 }

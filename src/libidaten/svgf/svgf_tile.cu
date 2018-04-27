@@ -41,7 +41,7 @@ namespace idaten
 			(m_tileDomain.w + block.x - 1) / block.x,
 			(m_tileDomain.h + block.y - 1) / block.y);
 
-		copyBufferForTile << <grid, block >> > (
+		copyBufferForTile << <grid, block, 0, m_stream >> > (
 			m_tileDomain,
 			m_paths.ptr(),
 			m_tmpBuf.ptr(),

@@ -881,11 +881,13 @@ __global__ void gather(
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);
 #else
-	surf2Dwrite(
-		make_float4(contrib, 0),
-		dst,
-		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);
+	if (dst) {
+		surf2Dwrite(
+			make_float4(contrib, 0),
+			dst,
+			ix * sizeof(float4), iy,
+			cudaBoundaryModeTrap);
+	}
 #endif
 }
 

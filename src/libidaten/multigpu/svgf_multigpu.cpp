@@ -36,9 +36,6 @@ namespace idaten
 
 		onInit(width, height);
 
-		CudaGLResourceMapper rscmap(&m_glimg);
-		auto outputSurf = m_glimg.bind();
-
 		auto vtxTexPos = m_vtxparamsPos.bind();
 		auto vtxTexNml = m_vtxparamsNml.bind();
 
@@ -90,7 +87,7 @@ namespace idaten
 		onRender(
 			tileDomain,
 			width, height, maxSamples, maxBounce,
-			outputSurf,
+			0,
 			vtxTexPos,
 			vtxTexNml);
 

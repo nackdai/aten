@@ -104,6 +104,8 @@ namespace idaten
 
 		void copyP2P(GpuProxy& proxy)
 		{
+			setCurrent();
+
 #if 1
 			// TODO
 			auto keepTileDomain = proxy.m_renderer.m_tileDomain;
@@ -132,6 +134,8 @@ namespace idaten
 
 			proxies[0].m_renderer.m_tileDomain.h *= 2; 
 			proxies[2].m_renderer.m_tileDomain.h *= 2;
+
+			setCurrent();
 
 			proxies[0].m_renderer.copyFrom(
 				proxies[0].m_deviceId,

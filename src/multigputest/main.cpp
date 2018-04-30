@@ -47,6 +47,8 @@ static idaten::GpuProxy<idaten::PathTracingMultiGPU> g_tracer[GPU_NUM];
 using GpuProxy = idaten::GpuProxy<idaten::PathTracingMultiGPU>;
 #endif
 
+static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
+
 #if (GPU_NUM == 4)
 static const idaten::TileDomain g_tileDomain[4] = {
 	{ 0, 0 * HEIGHT / 4, WIDTH, HEIGHT / 4 },
@@ -68,7 +70,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
-static int g_maxBounce = 5;
+static int g_maxBounce = 2;
 
 void onRun(aten::window* window)
 {
@@ -96,6 +98,10 @@ void onRun(aten::window* window)
 		&g_scene,
 		&g_camera,
 		&g_fbo);
+
+	for (int i = 0; i < AT_COUNTOF(g_tracer); i++) {
+		g_tracer[i].getRenderer().setMode((idaten::SVGFPathTracing::Mode)g_curMode);
+	}
 #endif
 
 	for (int i = 0; i < AT_COUNTOF(g_tracer); i++) {
@@ -136,6 +142,21 @@ void onRun(aten::window* window)
 		ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("cuda : %.3f ms", cudaelapsed);
 		ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
+
+		if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
+			|| ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
+		{
+			for (int i = 1; i < AT_COUNTOF(g_tracer); i++) {
+				g_tracer[i].getRenderer().reset();
+			}
+		}
+
+#ifdef MULTI_GPU_SVGF
+		bool enableTAA = g_taa.isEnableTAA();
+		if (ImGui::Checkbox("Enable TAA", &enableTAA)) {
+			g_taa.enableTAA(enableTAA);
+		}
+#endif
 
 		window->drawImGui();
 	}
@@ -405,7 +426,7 @@ int main()
 			primparams,
 			vtxparams,
 			mtxs,
-			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(4)));
+			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
 
 #ifdef MULTI_GPU_SVGF
 		g_tracer[i].getRenderer().setGBuffer(

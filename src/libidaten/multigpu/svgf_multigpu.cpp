@@ -75,6 +75,12 @@ namespace idaten
 			}
 		}
 
+		cudaSurfaceObject_t outputSurf = (cudaSurfaceObject_t)0;
+		if (m_mode == Mode::PT) {
+			m_glimg.map();
+			outputSurf = m_glimg.bind();
+		}
+
 		m_hitbools.init(width * height);
 		m_hitidx.init(width * height);
 
@@ -87,9 +93,11 @@ namespace idaten
 		onRender(
 			tileDomain,
 			width, height, maxSamples, maxBounce,
-			0,
+			outputSurf,
 			vtxTexPos,
 			vtxTexNml);
+
+		//checkCudaErrors(cudaDeviceSynchronize());
 
 		{
 			m_mtxPrevW2V = m_mtxW2V;
@@ -119,6 +127,11 @@ namespace idaten
 
 		// Keep specified tile domain.
 		m_tileDomain = tileDomain;
+
+		if (m_mode == Mode::PT) {
+			m_glimg.unbind();
+			m_glimg.unmap();
+		}
 	}
 
 	void SVGFPathTracingMultiGPU::onRender(
@@ -138,8 +151,8 @@ namespace idaten
 		auto time = AT_NAME::timer::getSystemTime();
 
 		for (int i = 0; i < maxSamples; i++) {
-			int seed = time.milliSeconds;
-			//int seed = 0;
+			//int seed = time.milliSeconds;
+			int seed = 0;
 
 			m_tileDomain = tileDomain;
 

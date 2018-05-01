@@ -454,7 +454,7 @@ namespace idaten
 
 		int stepScale = 1 << iterCnt;
 
-		atrousFilter << <grid, block >> > (
+		atrousFilter << <grid, block, 0, m_stream >> > (
 			m_tileDomain,
 			isFirstIter, isFinalIter,
 			outputSurf,
@@ -479,7 +479,7 @@ namespace idaten
 		int curaov = getCurAovs();
 
 		// Copy color from temporary buffer to AOV buffer for next temporal reprojection.
-		copyFromBufferToAov << <grid, block >> > (
+		copyFromBufferToAov << <grid, block, 0, m_stream >> > (
 			m_tmpBuf.ptr(),
 			m_aovColorVariance[curaov].ptr(),
 			width, height);

@@ -8,6 +8,8 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudaTextureResource.h"
 
+#include "accelerator/GpuPayloadDefs.h"
+
 //#pragma optimize( "", off)
 
 __device__  int computeLongestCommonPrefix(
@@ -174,6 +176,11 @@ __device__ __host__ inline void onApplyTraverseOrder(
 		int triId = triIdOffset + leafId;
 
 		gpunode->primid = triId;
+
+#if defined(GPGPU_TRAVERSE_SBVH)
+		// For ThreadedSbvhNode, this is "isleaf".
+		gpunode->shapeid = 1;
+#endif
 	}
 	else {
 		gpunode->primid = -1;

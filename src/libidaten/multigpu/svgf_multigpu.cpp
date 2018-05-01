@@ -398,5 +398,7 @@ namespace idaten
 
 			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
 		}
+
+		checkCudaErrors(cudaStreamSynchronize(m_stream));
 	}
 }

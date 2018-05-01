@@ -446,7 +446,7 @@ namespace idaten
 		CudaGLResourceMapper rscmap(&m_motionDepthBuffer);
 		auto motionDepthBuffer = m_motionDepthBuffer.bind();
 		
-		temporalReprojection << <grid, block >> > (
+		temporalReprojection << <grid, block, 0, m_stream >> > (
 		//temporalReprojection << <1, 1 >> > (
 			m_tileDomain,
 			m_nmlThresholdTF,
@@ -468,7 +468,7 @@ namespace idaten
 		checkCudaKernel(temporalReprojection);
 
 #ifdef ENABLE_MEDIAN_FILTER
-		medianFilter << <grid, block >> > (
+		medianFilter << <grid, block, 0, m_stream >> > (
 			outputSurf,
 			m_aovColorVariance[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),
@@ -478,7 +478,7 @@ namespace idaten
 		checkCudaKernel(medianFilter);
 #endif
 
-		dilateWeight << <grid, block >> > (
+		dilateWeight << <grid, block, 0, m_stream >> > (
 			m_tileDomain,
 			m_aovTexclrTemporalWeight[curaov].ptr(),
 			m_aovMomentMeshid[curaov].ptr(),

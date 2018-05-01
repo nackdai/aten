@@ -270,7 +270,7 @@ namespace idaten
 
 		int curaov = getCurAovs();
 
-		varianceEstimation << <grid, block >> > (
+		varianceEstimation << <grid, block, 0, m_stream >> > (
 		//varianceEstimation << <1, 1 >> > (
 			m_tileDomain,
 			outputSurf,

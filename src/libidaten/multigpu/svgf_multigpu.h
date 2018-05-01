@@ -28,7 +28,7 @@ namespace idaten
 	protected:
 		void copyFrom(SVGFPathTracingMultiGPU& tracer);
 
-		void copyFrom(
+		void copyTo(
 			int srcDeviceId,
 			int dstDeviceId,
 			SVGFPathTracingMultiGPU& tracer);

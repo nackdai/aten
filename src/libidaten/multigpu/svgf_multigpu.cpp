@@ -324,7 +324,7 @@ namespace idaten
 		}
 	}
 
-	void SVGFPathTracingMultiGPU::copyFrom(
+	void SVGFPathTracingMultiGPU::copyTo(
 		int srcDeviceId,
 		int dstDeviceId,
 		SVGFPathTracingMultiGPU& tracer)
@@ -334,8 +334,8 @@ namespace idaten
 			return;
 		}
 
-		const auto& srcTileDomain = tracer.m_tileDomain;
-		const auto& dstTileDomain = this->m_tileDomain;
+		const auto& srcTileDomain = this->m_tileDomain;
+		const auto& dstTileDomain = tracer.m_tileDomain; 
 
 		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
 
@@ -347,8 +347,8 @@ namespace idaten
 
 		// Notmal & Depth.
 		{
-			auto src = tracer.m_aovNormalDepth[cur].ptr();
-			auto dst = this->m_aovNormalDepth[cur].ptr();
+			auto src = this->m_aovNormalDepth[cur].ptr(); 
+			auto dst = tracer.m_aovNormalDepth[cur].ptr();
 
 			auto stride = this->m_aovNormalDepth[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
@@ -358,8 +358,8 @@ namespace idaten
 
 		// Texture color & Temporal weight.
 		{
-			auto src = tracer.m_aovTexclrTemporalWeight[cur].ptr();
-			auto dst = this->m_aovTexclrTemporalWeight[cur].ptr();
+			auto src = this->m_aovTexclrTemporalWeight[cur].ptr(); 
+			auto dst = tracer.m_aovTexclrTemporalWeight[cur].ptr();
 
 			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
@@ -369,8 +369,8 @@ namespace idaten
 
 		// Color & Variance.
 		{
-			auto src = tracer.m_aovColorVariance[cur].ptr();
-			auto dst = this->m_aovColorVariance[cur].ptr();
+			auto src = this->m_aovColorVariance[cur].ptr(); 
+			auto dst = tracer.m_aovColorVariance[cur].ptr();
 
 			auto stride = this->m_aovColorVariance[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
@@ -380,8 +380,8 @@ namespace idaten
 
 		// Moment & Mesh id.
 		{
-			auto src = tracer.m_aovMomentMeshid[cur].ptr();
-			auto dst = this->m_aovMomentMeshid[cur].ptr();
+			auto src = this->m_aovMomentMeshid[cur].ptr(); 
+			auto dst = tracer.m_aovMomentMeshid[cur].ptr();
 
 			auto stride = this->m_aovMomentMeshid[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
@@ -390,8 +390,8 @@ namespace idaten
 		}
 
 		{
-			auto src = tracer.m_tmpBuf.ptr();
-			auto dst = this->m_tmpBuf.ptr();
+			auto src = this->m_tmpBuf.ptr(); 
+			auto dst = tracer.m_tmpBuf.ptr();
 
 			auto stride = this->m_tmpBuf.stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;

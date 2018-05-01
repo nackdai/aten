@@ -135,12 +135,12 @@ namespace idaten
 			proxies[0].m_renderer.m_tileDomain.h *= 2; 
 			proxies[2].m_renderer.m_tileDomain.h *= 2;
 
-			setCurrent();
+			proxies[2].setCurrent();
 
-			proxies[0].m_renderer.copyFrom(
-				proxies[0].m_deviceId,
+			proxies[2].m_renderer.copyTo(
 				proxies[2].m_deviceId,
-				proxies[2].m_renderer);
+				proxies[0].m_deviceId,
+				proxies[0].m_renderer);
 
 			proxies[0].m_renderer.m_tileDomain = keepTileDomain_0;
 			proxies[2].m_renderer.m_tileDomain = keepTileDomain_1;

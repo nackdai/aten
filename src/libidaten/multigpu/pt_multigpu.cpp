@@ -171,7 +171,7 @@ namespace idaten
 		checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
 	}
 
-	void PathTracingMultiGPU::copyFrom(
+	void PathTracingMultiGPU::copyTo(
 		int srcDeviceId,
 		int dstDeviceId,
 		PathTracingMultiGPU& tracer)
@@ -181,11 +181,11 @@ namespace idaten
 			return;
 		}
 
-		const auto& srcTileDomain = tracer.m_tileDomain;
-		auto src = tracer.m_paths.ptr();
+		const auto& srcTileDomain = this->m_tileDomain; 
+		const auto& dstTileDomain = tracer.m_tileDomain;
 
-		const auto& dstTileDomain = this->m_tileDomain;
-		auto dst = this->m_paths.ptr();
+		auto src = this->m_paths.ptr(); 
+		auto dst = tracer.m_paths.ptr();
 
 		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
 

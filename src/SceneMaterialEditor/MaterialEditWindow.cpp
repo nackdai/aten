@@ -203,7 +203,7 @@ void MaterialEditWindow::buildScene()
 				lightparams,
 				nodes,
 				primparams,
-				vtxparams,
+				vtxparams, 0,
 				mtxs,
 				tex,
 				idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));

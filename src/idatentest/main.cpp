@@ -381,7 +381,7 @@ int main()
 			lightparams,
 			nodes,
 			primparams,
-			vtxparams,
+			vtxparams, 0,
 			mtxs,
 #ifdef ENABLE_ENVMAP
 			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(4)));

@@ -474,7 +474,7 @@ int main()
 			lightparams,
 			nodes,
 			primparams,
-			vtxparams,
+			vtxparams, 0,
 			mtxs,
 			tex,
 			idaten::EnvmapResource(envmap->id(), real(1), real(4)));

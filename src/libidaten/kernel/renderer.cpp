@@ -11,6 +11,7 @@ namespace idaten {
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
 		const std::vector<aten::vertex>& vtxs,
+		uint32_t advanceVtxNum,
 		const std::vector<aten::mat4>& mtxs,
 		const std::vector<TextureResource>& texs,
 		const EnvmapResource& envmapRsc)
@@ -77,8 +78,8 @@ namespace idaten {
 				nml.push_back(aten::vec4(v.nml.x, v.nml.y, v.nml.z, v.uv.y));
 			}
 
-			m_vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size());
-			m_vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size());
+			m_vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size() + advanceVtxNum);
+			m_vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size() + advanceVtxNum);
 		}
 
 		if (!texs.empty()) {

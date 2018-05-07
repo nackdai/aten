@@ -562,7 +562,7 @@ int main()
 			lightparams,
 			nodes,
 			primparams,
-			vtxparams,
+			vtxparams, 0,
 			mtxs,
 			tex,
 #ifdef ENABLE_ENVMAP

@@ -74,8 +74,6 @@ public:
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-// TODO
-// 現状、GPUBvh = ThreadBVH しか許さない.
 static aten::AcceleratedScene<aten::GPUBvh> g_scene(Lbvh::create);
 
 static idaten::SVGFPathTracing g_tracer;
@@ -594,7 +592,8 @@ int main()
 		// もし、GPUBvh が SBVH だとした場合.
 		// ここで取得するノード配列は SBVH のノードである、ThreadedSbvhNode となる.
 		// しかし、LBVHBuilder::build で渡すことができるのは、ThreadBVH のノードである ThreadedBvhNode である.
-		// そのため、現状、GPUBvh = ThreadBVH しか許さないことになっている.
+		// そのため、現状、ThreadedBvhNode に無理やりキャストしている.
+		// もっとスマートな方法を考えたい.
 
 		auto& cpunodes = g_scene.getAccel()->getNodes();
 

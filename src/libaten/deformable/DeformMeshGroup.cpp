@@ -64,10 +64,17 @@ namespace aten
 			// TODO
 			// シェーダの input とどう合わせるか...
 
+			static const VertexAttrib attribs[] = {
+				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),
+				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 16),
+			};
+
 			m_vbForGPUSkinning.init(
-				sizeof(vertex),
+				sizeof(CompressedVertex),
 				m_vtxTotalNum,
 				0,
+				attribs,
+				AT_COUNTOF(attribs),
 				nullptr,
 				true);
 

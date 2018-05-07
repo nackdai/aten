@@ -48,7 +48,7 @@ namespace idaten
 
 		TypedCudaMemory<aten::PrimitiveParamter> m_triangles;
 
-		TypedCudaMemory<aten::vertex> m_dst;
+		TypedCudaMemory<aten::CompressedVertex> m_dst;
 
 		TypedCudaMemory<aten::vec3> m_minBuf;
 		TypedCudaMemory<aten::vec3> m_maxBuf;

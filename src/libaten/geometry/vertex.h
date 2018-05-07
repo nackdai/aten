@@ -16,6 +16,13 @@ namespace aten
 		vec3 uv;
 	};
 
+	struct CompressedVertex {
+		// NOTE
+		// pos.w == uv.x, nml.w == uv.y.
+		vec4 pos;
+		vec4 nml;
+	};
+
 	class VertexManager {
 		static std::vector<int> s_indices;
 		static std::vector<vertex> s_vertices;

@@ -13,7 +13,7 @@ __global__ void computeSkinning(
 	const aten::SkinningVertex* __restrict__ vertices,
 	const uint32_t* __restrict__ indices,
 	const aten::mat4* __restrict__ matrices,
-	aten::vertex* dst)
+	aten::CompressedVertex* dst)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -42,9 +42,8 @@ __global__ void computeSkinning(
 
 	dstNml = normalize(dstNml);
 
-	dst[idx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, 1);
-	dst[idx].nml = dstNml;
-	dst[idx].uv = aten::vec3(vtx->uv[0], vtx->uv[1], 0);
+	dst[idx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, vtx->uv[0]);
+	dst[idx].nml = aten::vec4(dstNml.x, dstNml.y, dstNml.z, vtx->uv[1]);
 }
 
 __global__ void computeSkinningWithTriangles(
@@ -53,7 +52,7 @@ __global__ void computeSkinningWithTriangles(
 	aten::PrimitiveParamter* triangles,
 	const aten::mat4* __restrict__ matrices,
 	int indexOffset,
-	aten::vertex* dst)
+	aten::CompressedVertex* dst)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -86,9 +85,8 @@ __global__ void computeSkinningWithTriangles(
 
 		dstNml = normalize(dstNml);
 
-		dst[vtxIdx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, 1);
-		dst[vtxIdx].nml = dstNml;
-		dst[vtxIdx].uv = aten::vec3(vtx->uv[0], vtx->uv[1], 0);
+		dst[vtxIdx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, vtx->uv[0]);
+		dst[vtxIdx].nml = aten::vec4(dstNml.x, dstNml.y, dstNml.z, vtx->uv[1]);
 	}
 
 	{
@@ -121,7 +119,7 @@ __global__ void getMinMax(
 	uint32_t* dstMin,
 	uint32_t* dstMax)
 #else
-	const aten::vertex* __restrict__ src,
+	const aten::CompressedVertex* __restrict__ src,
 	aten::vec3* dstMin,
 	aten::vec3* dstMax)
 #endif
@@ -273,7 +271,7 @@ namespace idaten
 		aten::vec3& aabbMin,
 		aten::vec3& aabbMax)
 	{
-		aten::vertex* dst = nullptr;
+		aten::CompressedVertex* dst = nullptr;
 		size_t vtxbytes = 0;
 
 		if (m_interopVBO.isValid()) {

@@ -41,7 +41,7 @@ namespace aten
 			return m_header;
 		}
 
-		GeomVertexBuffer& getVBForGPUSkinning()
+		GeomMultiVertexBuffer& getVBForGPUSkinning()
 		{
 			// TODO
 			return m_groups[0].getVBForGPUSkinning();

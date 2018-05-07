@@ -64,15 +64,17 @@ namespace aten
 			// TODO
 			// シェーダの input とどう合わせるか...
 
+			// NOTE
+			// VBOs will be created for each attributes.
+			// i.e. each attributes are dependent.
+			// Variable "offset" is not used, so offset is zero.
 			static const VertexAttrib attribs[] = {
 				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),
-				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 16),
+				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),
 			};
 
 			m_vbForGPUSkinning.init(
-				sizeof(CompressedVertex),
 				m_vtxTotalNum,
-				0,
 				attribs,
 				AT_COUNTOF(attribs),
 				nullptr,

@@ -176,7 +176,7 @@ namespace aten
 		return true;
 	}
 
-	void DeformMeshSet::setExternalVertexBuffer(GeomVertexBuffer& vb)
+	void DeformMeshSet::setExternalVertexBuffer(GeomMultiVertexBuffer& vb)
 	{
 		for (auto& prim : m_prims) {
 			prim.setVB(&vb);

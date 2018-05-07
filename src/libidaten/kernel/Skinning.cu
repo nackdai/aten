@@ -13,7 +13,8 @@ __global__ void computeSkinning(
 	const aten::SkinningVertex* __restrict__ vertices,
 	const uint32_t* __restrict__ indices,
 	const aten::mat4* __restrict__ matrices,
-	aten::CompressedVertex* dst)
+	aten::vec4* dstPos,
+	aten::vec4* dstNml)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -27,8 +28,8 @@ __global__ void computeSkinning(
 	aten::vec4 srcPos = vtx->position;
 	aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
 
-	aten::vec4 dstPos(0);
-	aten::vec4 dstNml(0);
+	aten::vec4 resultPos(0);
+	aten::vec4 resultNml(0);
 
 	for (int i = 0; i < 4; i++) {
 		int idx = int(vtx->blendIndex[i]);
@@ -36,14 +37,14 @@ __global__ void computeSkinning(
 
 		aten::mat4 mtx = matrices[idx];
 
-		dstPos += weight * mtx * vtx->position;
-		dstNml += weight * mtx * srcNml;
+		resultPos += weight * mtx * vtx->position;
+		resultNml += weight * mtx * srcNml;
 	}
 
-	dstNml = normalize(dstNml);
+	resultNml = normalize(resultNml);
 
-	dst[idx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, vtx->uv[0]);
-	dst[idx].nml = aten::vec4(dstNml.x, dstNml.y, dstNml.z, vtx->uv[1]);
+	dstPos[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
+	dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
 }
 
 __global__ void computeSkinningWithTriangles(
@@ -52,7 +53,8 @@ __global__ void computeSkinningWithTriangles(
 	aten::PrimitiveParamter* triangles,
 	const aten::mat4* __restrict__ matrices,
 	int indexOffset,
-	aten::CompressedVertex* dst)
+	aten::vec4* dstPos,
+	aten::vec4* dstNml)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -70,8 +72,8 @@ __global__ void computeSkinningWithTriangles(
 		aten::vec4 srcPos = vtx->position;
 		aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
 
-		aten::vec4 dstPos(0);
-		aten::vec4 dstNml(0);
+		aten::vec4 resultPos(0);
+		aten::vec4 resultNml(0);
 
 		for (int i = 0; i < 4; i++) {
 			int idx = int(vtx->blendIndex[i]);
@@ -79,20 +81,20 @@ __global__ void computeSkinningWithTriangles(
 
 			aten::mat4 mtx = matrices[idx];
 
-			dstPos += weight * mtx * vtx->position;
-			dstNml += weight * mtx * srcNml;
+			resultPos += weight * mtx * vtx->position;
+			resultNml += weight * mtx * srcNml;
 		}
 
-		dstNml = normalize(dstNml);
+		resultNml = normalize(resultNml);
 
-		dst[vtxIdx].pos = aten::vec4(dstPos.x, dstPos.y, dstPos.z, vtx->uv[0]);
-		dst[vtxIdx].nml = aten::vec4(dstNml.x, dstNml.y, dstNml.z, vtx->uv[1]);
+		dstPos[vtxIdx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
+		dstNml[vtxIdx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
 	}
 
 	{
-		const auto& v0 = dst[tri->idx[0]].pos;
-		const auto& v1 = dst[tri->idx[1]].pos;
-		const auto& v2 = dst[tri->idx[2]].pos;
+		const auto& v0 = dstPos[tri->idx[0]];
+		const auto& v1 = dstPos[tri->idx[1]];
+		const auto& v2 = dstPos[tri->idx[2]];
 
 		auto a = v1 - v0;
 		auto b = v2 - v0;
@@ -119,7 +121,7 @@ __global__ void getMinMax(
 	uint32_t* dstMin,
 	uint32_t* dstMax)
 #else
-	const aten::CompressedVertex* __restrict__ src,
+	const aten::vec4* __restrict__ src,
 	aten::vec3* dstMin,
 	aten::vec3* dstMax)
 #endif
@@ -166,7 +168,7 @@ __global__ void getMinMax(
 		maxPos[tid] = dstMax[idx];
 	}
 	else {
-		auto pos = src[idx].pos;
+		auto pos = src[idx];
 		minPos[tid] = pos;
 		maxPos[tid] = pos;
 	}
@@ -212,7 +214,7 @@ namespace idaten
 		uint32_t vtxNum,
 		uint32_t* indices,
 		uint32_t idxNum,
-		const aten::GeomVertexBuffer* vb)
+		const aten::GeomMultiVertexBuffer* vb)
 	{
 		m_vertices.init(vtxNum);
 		m_vertices.writeByNum(vertices, vtxNum);
@@ -221,11 +223,18 @@ namespace idaten
 		m_indices.writeByNum(indices, idxNum);
 
 		if (vb) {
-			auto glvbo = vb->getVBOHandle();
-			m_interopVBO.init(glvbo, CudaGLRscRegisterType::WriteOnly);
+			auto handles = vb->getVBOHandles();
+
+			m_interopVBO.resize(handles.size());
+
+			for (int i = 0; i < handles.size(); i++) {
+				auto glvbo = handles[i];
+				m_interopVBO[i].init(glvbo, CudaGLRscRegisterType::WriteOnly);
+			}
 		}
 		else {
-			m_dst.init(vtxNum);
+			m_dstPos.init(vtxNum);
+			m_dstNml.init(vtxNum);
 		}
 	}
 
@@ -235,7 +244,7 @@ namespace idaten
 		uint32_t vtxNum,
 		aten::PrimitiveParamter* tris,
 		uint32_t triNum,
-		const aten::GeomVertexBuffer* vb)
+		const aten::GeomMultiVertexBuffer* vb)
 	{
 		m_vertices.init(vtxNum);
 		m_vertices.writeByNum(vertices, vtxNum);
@@ -244,11 +253,22 @@ namespace idaten
 		m_triangles.writeByNum(tris, triNum);
 
 		if (vb) {
-			auto glvbo = vb->getVBOHandle();
-			m_interopVBO.init(glvbo, CudaGLRscRegisterType::WriteOnly);
+			auto handles = vb->getVBOHandles();
+
+			// NOTE
+			// Only support position, normal.
+			AT_ASSERT(handles.size() == 2);
+
+			m_interopVBO.resize(handles.size());
+
+			for (int i = 0; i < handles.size(); i++) {
+				auto glvbo = handles[i];
+				m_interopVBO[i].init(glvbo, CudaGLRscRegisterType::WriteOnly);
+			}
 		}
 		else {
-			m_dst.init(vtxNum);
+			m_dstPos.init(vtxNum);
+			m_dstNml.init(vtxNum);
 		}
 	}
 
@@ -271,15 +291,23 @@ namespace idaten
 		aten::vec3& aabbMin,
 		aten::vec3& aabbMax)
 	{
-		aten::CompressedVertex* dst = nullptr;
+		aten::vec4* dstPos = nullptr;
+		aten::vec4* dstNml = nullptr;
 		size_t vtxbytes = 0;
 
-		if (m_interopVBO.isValid()) {
-			m_interopVBO.map();
-			m_interopVBO.bind((void**)&dst, vtxbytes);
+		if (!m_interopVBO.empty()) {
+			// NOTE
+			// Only support position, normal.
+
+			m_interopVBO[0].map();
+			m_interopVBO[0].bind((void**)&dstPos, vtxbytes);
+
+			m_interopVBO[1].map();
+			m_interopVBO[1].bind((void**)&dstNml, vtxbytes);
 		}
 		else {
-			dst = m_dst.ptr();
+			dstPos = m_dstPos.ptr();
+			dstNml = m_dstNml.ptr();
 		}
 
 		// Skinning.
@@ -298,7 +326,7 @@ namespace idaten
 					m_triangles.ptr(),
 					m_matrices.ptr(),
 					indexOffset,
-					dst);
+					dstPos, dstNml);
 
 				checkCudaKernel(computeSkinningWithTriangles);
 			}
@@ -313,7 +341,7 @@ namespace idaten
 					m_vertices.ptr(),
 					m_indices.ptr(),
 					m_matrices.ptr(),
-					dst);
+					dstPos, dstNml);
 
 				checkCudaKernel(computeSkinning);
 			}
@@ -321,7 +349,7 @@ namespace idaten
 
 		// Get min/max.
 		{
-			auto src = dst;
+			auto src = dstPos;
 			auto num = m_vertices.maxNum();
 
 			dim3 block(256);
@@ -356,18 +384,22 @@ namespace idaten
 			m_maxBuf.readByNum(&aabbMax, 1);
 		}
 
-		if (m_interopVBO.isValid()) {
-			m_interopVBO.unmap();
+		if (!m_interopVBO.empty()) {
+			m_interopVBO[0].unmap();
+			m_interopVBO[1].unmap();
 		}
 	}
 
-	bool Skinning::getComputedResult(aten::vertex* p, uint32_t num)
+	bool Skinning::getComputedResult(
+		aten::vec4* pos,
+		aten::vec4* nml,
+		uint32_t num)
 	{
-		if (m_dst.bytes() == 0) {
-			return false;
-		}
+		AT_ASSERT(m_dstPos.bytes() > 0);
+		AT_ASSERT(m_dstNml.bytes() > 0);
 
-		m_dst.readByNum(p, num);
+		m_dstPos.readByNum(pos, num);
+		m_dstNml.readByNum(nml, num);
 
 		return true;
 	}

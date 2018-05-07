@@ -19,14 +19,14 @@ namespace idaten
 			uint32_t vtxNum, 
 			uint32_t* indices,
 			uint32_t idxNum,
-			const aten::GeomVertexBuffer* vb);
+			const aten::GeomMultiVertexBuffer* vb);
 
 		void initWithTriangles(
 			aten::SkinningVertex* vertices,
 			uint32_t vtxNum,
 			aten::PrimitiveParamter* tris,
 			uint32_t triNum,
-			const aten::GeomVertexBuffer* vb);
+			const aten::GeomMultiVertexBuffer* vb);
 
 		void update(
 			const aten::mat4* matrices,
@@ -37,7 +37,10 @@ namespace idaten
 			aten::vec3& aabbMin,
 			aten::vec3& aabbMax);
 
-		bool getComputedResult(aten::vertex* p, uint32_t num);
+		bool getComputedResult(
+			aten::vec4* pos, 
+			aten::vec4* nml,
+			uint32_t num);
 
 		void runMinMaxTest();
 
@@ -48,11 +51,12 @@ namespace idaten
 
 		TypedCudaMemory<aten::PrimitiveParamter> m_triangles;
 
-		TypedCudaMemory<aten::CompressedVertex> m_dst;
+		TypedCudaMemory<aten::vec4> m_dstPos;
+		TypedCudaMemory<aten::vec4> m_dstNml;
 
 		TypedCudaMemory<aten::vec3> m_minBuf;
 		TypedCudaMemory<aten::vec3> m_maxBuf;
 
-		CudaGLBuffer m_interopVBO;
+		std::vector<CudaGLBuffer> m_interopVBO;
 	};
 }

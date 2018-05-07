@@ -57,6 +57,11 @@ namespace aten
 			m_vb = vb;
 		}
 
+		void setVB(GeomMultiVertexBuffer* vb)
+		{
+			m_vb = vb;
+		}
+
 		void getIndices(std::vector<uint32_t>& indices) const;
 
 	private:

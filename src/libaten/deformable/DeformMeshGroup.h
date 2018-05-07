@@ -36,7 +36,7 @@ namespace aten
 			std::vector<uint32_t>& idx,
 			std::vector<aten::PrimitiveParamter>& tris) const;
 
-		GeomVertexBuffer& getVBForGPUSkinning()
+		GeomMultiVertexBuffer& getVBForGPUSkinning()
 		{
 			return m_vbForGPUSkinning;
 		}
@@ -50,6 +50,6 @@ namespace aten
 		std::vector<DeformMeshSet> m_meshs;
 		std::vector<GeomVertexBuffer> m_vbs;
 
-		GeomVertexBuffer m_vbForGPUSkinning;
+		GeomMultiVertexBuffer m_vbForGPUSkinning;
 	};
 }

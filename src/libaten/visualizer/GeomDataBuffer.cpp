@@ -257,6 +257,100 @@ namespace aten {
 
 	//////////////////////////////////////////////////////////
 
+	static inline uint32_t getElementSize(const VertexAttrib& attrib)
+	{
+		uint32_t ret = 0;
+
+		switch (attrib.type)
+		{
+		case GL_FLOAT:
+			ret = sizeof(float) * attrib.num;
+			break;
+		case GL_BYTE:
+			ret = sizeof(GLbyte) * attrib.num;
+			break;
+		default:
+			AT_ASSERT(false);
+			break;
+		}
+
+		return ret;
+	}
+
+	void GeomMultiVertexBuffer::init(
+		uint32_t vtxNum,
+		const VertexAttrib* attribs,
+		uint32_t attribNum,
+		const void* data[],
+		bool isDynamic/*= false*/)
+	{
+		AT_ASSERT(m_vbos.empty());
+		AT_ASSERT(m_vao == 0);
+
+		CALL_GL_API(::glGenVertexArrays(1, &m_vao));
+		CALL_GL_API(::glBindVertexArray(m_vao));
+
+		for (uint32_t i = 0; i < attribNum; i++) {
+			GLuint vbo = 0;
+			CALL_GL_API(::glGenBuffers(1, &vbo));
+
+			AT_ASSERT(vbo > 0);
+
+			m_vbos.push_back(vbo);
+
+			CALL_GL_API(::glBindBuffer(GL_ARRAY_BUFFER, vbo));
+
+			auto elementSize = getElementSize(attribs[i]);
+			auto size = elementSize * vtxNum;
+
+			CALL_GL_API(::glBufferData(
+				GL_ARRAY_BUFFER,
+				size,
+				data ? data[i] : nullptr,
+				isDynamic ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW));
+
+			CALL_GL_API(::glEnableVertexAttribArray(i));
+
+			CALL_GL_API(::glVertexAttribPointer(
+				i,
+				attribs[i].num,
+				attribs[i].type,
+				GL_FALSE,
+				elementSize,
+				(void*)(attribs[i].offset)));
+		}
+		
+		m_vtxNum = vtxNum;
+	}
+
+	void* GeomMultiVertexBuffer::beginMap(bool isRead, uint32_t idx)
+	{
+		AT_ASSERT(!m_vbos.empty());
+		AT_ASSERT(!m_isMapping);
+
+		void* ret = nullptr;
+
+		if (!m_isMapping) {
+			CALL_GL_API(ret = ::glMapNamedBuffer(m_vbos[idx], isRead ? GL_READ_ONLY : GL_WRITE_ONLY));
+			m_isMapping = true;
+		}
+
+		return ret;
+	}
+
+	void GeomMultiVertexBuffer::endMap(uint32_t idx)
+	{
+		AT_ASSERT(!m_vbos.empty());
+		AT_ASSERT(m_isMapping);
+
+		if (m_isMapping) {
+			CALL_GL_API(::glUnmapNamedBuffer(m_vbos[idx]));
+			m_isMapping = false;
+		}
+	}
+
+	//////////////////////////////////////////////////////////
+
 	GeomIndexBuffer::~GeomIndexBuffer()
 	{
 		if (m_ibo > 0) {
@@ -337,10 +431,28 @@ namespace aten {
 		uint32_t idxOffset,
 		uint32_t primNum)
 	{
-		AT_ASSERT(m_ibo > 0);
-		AT_ASSERT(vb.m_vao > 0);
+		draw(vb.m_vao, mode, idxOffset, primNum);
+	}
 
-		CALL_GL_API(::glBindVertexArray(vb.m_vao));
+	void GeomIndexBuffer::draw(
+		GeomMultiVertexBuffer& vb,
+		Primitive mode,
+		uint32_t idxOffset,
+		uint32_t primNum)
+	{
+		draw(vb.m_vao, mode, idxOffset, primNum);
+	}
+
+	void GeomIndexBuffer::draw(
+		uint32_t vao,
+		Primitive mode,
+		uint32_t idxOffset,
+		uint32_t primNum)
+	{
+		AT_ASSERT(m_ibo > 0);
+		AT_ASSERT(vao > 0);
+
+		CALL_GL_API(::glBindVertexArray(vao));
 		CALL_GL_API(::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo));
 
 		auto offsetByte = idxOffset * sizeof(GLuint);

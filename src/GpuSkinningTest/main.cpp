@@ -57,6 +57,20 @@ void onRun(aten::window* window)
 		const auto& mtx = g_mdl.getMatrices();
 		skinning.update(&mtx[0], mtx.size());
 		skinning.compute(0, aabbMin, aabbMax);
+#if 0
+		auto& vb = g_mdl.getVBForGPUSkinning();
+		auto num = vb.getVtxNum();
+
+		std::vector<aten::vec4> pos(num);
+		std::vector<aten::vec4> nml(num);
+
+		//skinning.getComputedResult(&pos[0], &nml[0], num);
+
+		auto v = vb.beginRead(0);
+		memcpy(&pos[0], v, sizeof(aten::vec4) * num);
+
+		int xxx = 0;
+#endif
 	}
 
 	aten::DeformableRenderer::render(&g_camera, &g_mdl);

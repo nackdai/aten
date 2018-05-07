@@ -43,7 +43,7 @@ namespace aten
 			return m_mesh.getDesc().isGPUSkinning;
 		}
 
-		GeomVertexBuffer& getVBForGPUSkinning()
+		GeomMultiVertexBuffer& getVBForGPUSkinning()
 		{
 			return m_mesh.getVBForGPUSkinning();
 		}

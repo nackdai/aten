@@ -38,7 +38,7 @@ namespace aten
 			std::vector<GeomVertexBuffer>& vbs,
 			bool isGPUSkinning);
 
-		void setExternalVertexBuffer(GeomVertexBuffer& vb);
+		void setExternalVertexBuffer(GeomMultiVertexBuffer& vb);
 
 		void render(
 			const SkeletonController& skeleton,

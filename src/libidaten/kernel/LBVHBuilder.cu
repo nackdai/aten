@@ -12,6 +12,9 @@
 
 //#pragma optimize( "", off)
 
+// NOTE
+// https://github.com/leonardo-domingues/atrbvh
+
 __device__  int computeLongestCommonPrefix(
 	const uint32_t* sortedKeys,
 	uint32_t numOfElems,

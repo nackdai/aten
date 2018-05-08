@@ -8,6 +8,9 @@
 
 //#pragma optimize( "", off)
 
+// NOTE
+// https://github.com/martinradev/BVH-algo-lib
+
 namespace aten
 {
 	inline bool checkAABBOverlap(

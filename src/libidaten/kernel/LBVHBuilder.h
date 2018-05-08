@@ -4,6 +4,7 @@
 
 #include "cuda/cudamemory.h"
 #include "accelerator/threaded_bvh.h"
+#include "cuda/cudaGLresource.h"
 
 namespace idaten
 {
@@ -21,6 +22,14 @@ namespace idaten
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
 			idaten::CudaTextureResource& texRscVtxPos,
+			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
+
+		static void build(
+			idaten::CudaTextureResource& dst,
+			std::vector<aten::PrimitiveParamter>& tris,
+			int triIdOffset,
+			const aten::aabb& sceneBbox,
+			CudaGLBuffer& vboVtxPos,
 			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
 
 		// test implementation.

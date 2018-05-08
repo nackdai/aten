@@ -178,7 +178,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
 		int leafId = node->order - leafBaseIdx;
 		int triId = triIdOffset + leafId;
 
-		gpunode->primid = triId;
+		gpunode->primid = (float)triId;
 
 #if defined(GPGPU_TRAVERSE_SBVH)
 		// For ThreadedSbvhNode, this is "isleaf".
@@ -335,12 +335,23 @@ __device__ inline void computeBoundingBox(
 	aabbMax->z = max(bboxMax_0.z, bboxMax_1.z);
 }
 
+__forceinline__ __device__ float4 getFloat4(cudaTextureObject_t tex, int idx)
+{
+	return tex1Dfetch<float4>(tex, idx);
+}
+
+__forceinline__ __device__ float4 getFloat4(float4* data, int idx)
+{
+	return data[idx];
+}
+
+template <typename T>
 __global__ void computeBoudingBox(
 	int numberOfTris,
 	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
 	aten::ThreadedBvhNode* dst,
 	const aten::PrimitiveParamter* __restrict__ tris,
-	cudaTextureObject_t vtxPos,
+	T vtxPos,
 	uint32_t* executedIdxArray)
 {
 	const int idx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -380,9 +391,9 @@ __global__ void computeBoudingBox(
 	aten::PrimitiveParamter prim;
 	prim.v0 = ((aten::vec4*)tris)[triId * aten::PrimitiveParamter_float4_size + 0];
 
-	float4 v0 = tex1Dfetch<float4>(vtxPos, prim.idx[0]);
-	float4 v1 = tex1Dfetch<float4>(vtxPos, prim.idx[1]);
-	float4 v2 = tex1Dfetch<float4>(vtxPos, prim.idx[2]);
+	float4 v0 = getFloat4(vtxPos, prim.idx[0]);
+	float4 v1 = getFloat4(vtxPos, prim.idx[1]);
+	float4 v2 = getFloat4(vtxPos, prim.idx[2]);
 
 	float4 aabbMin, aabbMax;
 	computeBoundingBox(v0, v1, v2, &aabbMin, &aabbMax);
@@ -503,11 +514,12 @@ __forceinline__ __device__ unsigned int computeMortonCode(aten::vec3 point)
 	return discretized.x * 4 + discretized.y * 2 + discretized.z;
 }
 
+template <typename T>
 __global__ void genMortonCode(
 	int numberOfTris,
 	const aten::aabb sceneBbox,
 	const aten::PrimitiveParamter* __restrict__ tris,
-	cudaTextureObject_t vtxPos,
+	T vtxPos,
 	uint32_t* mortonCodes,
 	uint32_t* indices)
 {
@@ -520,9 +532,9 @@ __global__ void genMortonCode(
 	aten::PrimitiveParamter prim;
 	prim.v0 = ((aten::vec4*)tris)[idx * aten::PrimitiveParamter_float4_size + 0];
 
-	float4 v0 = tex1Dfetch<float4>(vtxPos, prim.idx[0]);
-	float4 v1 = tex1Dfetch<float4>(vtxPos, prim.idx[1]);
-	float4 v2 = tex1Dfetch<float4>(vtxPos, prim.idx[2]);
+	float4 v0 = getFloat4(vtxPos, prim.idx[0]);
+	float4 v1 = getFloat4(vtxPos, prim.idx[1]);
+	float4 v2 = getFloat4(vtxPos, prim.idx[2]);
 
 	aten::vec3 vmin = aten::vec3(
 		min(min(v0.x, v1.x), v2.x),
@@ -549,29 +561,28 @@ __global__ void genMortonCode(
 
 namespace idaten
 {
-	void LBVHBuilder::build(
+	template <typename T>
+	void onBuild(
 		idaten::CudaTextureResource& dst,
 		std::vector<aten::PrimitiveParamter>& tris,
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
-		idaten::CudaTextureResource& texRscVtxPos,
-		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
-	{		
+		T vtxPos,
+		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes)
+	{
 		TypedCudaMemory<aten::PrimitiveParamter> triangles;
 		TypedCudaMemory<uint32_t> mortonCodes;
 		TypedCudaMemory<uint32_t> indices;
 
-		uint32_t numOfElems = tris.size();
+		uint32_t numOfElems = (uint32_t)tris.size();
 
 		triangles.init(numOfElems);
 		mortonCodes.init(numOfElems);
 		indices.init(numOfElems);
 
-		auto vtxPos = texRscVtxPos.bind();
-
 		// Compute morton code.
 		{
-			triangles.writeByNum(&tris[0], tris.size());
+			triangles.writeByNum(&tris[0], (uint32_t)tris.size());
 
 			uint32_t numberOfTris = triangles.maxNum();
 
@@ -597,7 +608,7 @@ namespace idaten
 		uint32_t numInternalNode = numOfElems - 1;
 		uint32_t numLeaves = numOfElems;
 
-		TypedCudaMemory<LBVHNode> nodesLbvh;
+		TypedCudaMemory<LBVHBuilder::LBVHNode> nodesLbvh;
 		nodesLbvh.init(numInternalNode + numLeaves);
 
 		// Build tree.
@@ -669,7 +680,42 @@ namespace idaten
 			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
 			nodes.maxNum());
 
+		
+	}
+
+	void LBVHBuilder::build(
+		idaten::CudaTextureResource& dst,
+		std::vector<aten::PrimitiveParamter>& tris,
+		int triIdOffset,
+		const aten::aabb& sceneBbox,
+		idaten::CudaTextureResource& texRscVtxPos,
+		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
+	{		
+		auto vtxPos = texRscVtxPos.bind();
+
+		onBuild(dst, tris, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
+
 		texRscVtxPos.unbind();
+	}
+
+	void LBVHBuilder::build(
+		idaten::CudaTextureResource& dst,
+		std::vector<aten::PrimitiveParamter>& tris,
+		int triIdOffset,
+		const aten::aabb& sceneBbox,
+		CudaGLBuffer& vboVtxPos,
+		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
+	{
+		vboVtxPos.map();
+
+		float4* vtxPos = nullptr;
+		size_t bytes = 0;
+		vboVtxPos.bind((void**)&vtxPos, bytes);
+
+		onBuild(dst, tris, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
+
+		vboVtxPos.unbind();
+		vboVtxPos.unmap();
 	}
 
 	void LBVHBuilder::build()

@@ -294,6 +294,7 @@ namespace idaten
 		}
 		
 		// Color & Variance.
+		if (this->isFirstFrame())
 		{
 			auto src = from.m_aovColorVariance[cur].ptr();
 			auto dst = this->m_aovColorVariance[cur].ptr();
@@ -305,6 +306,7 @@ namespace idaten
 		}
 
 		// Moment & Mesh id.
+		if (this->isFirstFrame())
 		{
 			auto src = from.m_aovMomentTemporalWeight[cur].ptr();
 			auto dst = this->m_aovMomentTemporalWeight[cur].ptr();

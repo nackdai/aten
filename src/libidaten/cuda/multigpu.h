@@ -4,7 +4,7 @@
 #include "cuda/cudautil.h"
 #include "kernel/renderer.h"
 
-#define ENABLE_MULTI_GPU_EMULATE
+//#define ENABLE_MULTI_GPU_EMULATE
 
 namespace idaten
 {
@@ -41,10 +41,10 @@ namespace idaten
 #ifdef ENABLE_MULTI_GPU_EMULATE
 			// Nothing is done...
 #else
-			AT_ASSERT(m_peerAccessDeviceId < 0);
+			//AT_ASSERT(m_peerAccessDeviceId < 0);
 
 			if (m_deviceId != peerAccessDeviceId
-				&& m_peerAccessDeviceId < 0)
+				/*&& m_peerAccessDeviceId < 0*/)
 			{
 				// Check for peer access between participating GPUs.
 				int canAccessPeer = 0;
@@ -125,6 +125,9 @@ namespace idaten
 			// TODO
 			AT_ASSERT(num == 4);
 
+			checkCudaErrors(cudaStreamSynchronize(proxies[1].m_stream));
+			checkCudaErrors(cudaStreamSynchronize(proxies[3].m_stream));
+
 			proxies[0].copyP2P(proxies[1]);
 			proxies[2].copyP2P(proxies[3]);
 
@@ -137,6 +140,8 @@ namespace idaten
 
 			proxies[2].setCurrent();
 
+			checkCudaErrors(cudaStreamSynchronize(proxies[2].m_stream));
+
 			proxies[2].m_renderer.copyTo(
 				proxies[2].m_deviceId,
 				proxies[0].m_deviceId,
@@ -144,6 +149,8 @@ namespace idaten
 
 			proxies[0].m_renderer.m_tileDomain = keepTileDomain_0;
 			proxies[2].m_renderer.m_tileDomain = keepTileDomain_1;
+
+			checkCudaErrors(cudaStreamSynchronize(proxies[0].m_stream));
 #endif
 		}
 

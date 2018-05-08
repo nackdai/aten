@@ -15,7 +15,7 @@
 #include "scenedefs.h"
 
 #define MULTI_GPU_SVGF
-#define GPU_NUM	(2)
+#define GPU_NUM	(4)
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -70,7 +70,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
-static int g_maxBounce = 2;
+static int g_maxBounce = 5;
 
 void onRun(aten::window* window)
 {
@@ -398,6 +398,9 @@ int main()
 	
 	g_tracer[2].setPeerAccess(3);
 	g_tracer[3].setPeerAccess(2);
+
+	g_tracer[2].setPeerAccess(0);
+	g_tracer[0].setPeerAccess(2);
 #endif
 
 	for (int i = 0; i < AT_COUNTOF(g_tracer); i++)
@@ -424,7 +427,7 @@ int main()
 			lightparams,
 			nodes,
 			primparams,
-			vtxparams, 0,
+			vtxparams,
 			mtxs,
 			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
 

@@ -4,6 +4,7 @@
 #include "deformable/DeformMesh.h"
 #include "deformable/Skeleton.h"
 #include "deformable/SkinningVertex.h"
+#include "geometry/tranformable.h"
 
 namespace aten
 {
@@ -12,7 +13,9 @@ namespace aten
 
 	/** メッシュデータ.
 	 */
-	class deformable {
+	class deformable : public transformable {
+		friend class instance<deformable>;
+
 	public:
 		deformable() {}
 		~deformable() {}
@@ -46,6 +49,36 @@ namespace aten
 		GeomMultiVertexBuffer& getVBForGPUSkinning()
 		{
 			return m_mesh.getVBForGPUSkinning();
+		}
+
+	private:
+		virtual bool hit(
+			const ray& r,
+			real t_min, real t_max,
+			Intersection& isect) const override final
+		{
+			// Not support.
+			AT_ASSERT(false);
+			return false;
+		}
+
+		virtual void getSamplePosNormalArea(
+			aten::hitable::SamplePosNormalPdfResult* result,
+			const mat4& mtxL2W,
+			sampler* sampler) const override final
+		{
+			// Not support.
+			AT_ASSERT(false);
+		}
+
+		virtual void evalHitResult(
+			const ray& r,
+			const mat4& mtxL2W,
+			hitrecord& rec,
+			const Intersection& isect) const override final
+		{
+			// Not support.
+			AT_ASSERT(false);
 		}
 
 	private:

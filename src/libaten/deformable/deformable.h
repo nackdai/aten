@@ -10,6 +10,7 @@ namespace aten
 {
 	class shader;
 	class DeformAnimation;
+	template<typename T> class instance;
 
 	/** メッシュデータ.
 	 */

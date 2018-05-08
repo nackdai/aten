@@ -202,7 +202,7 @@ void MaterialEditWindow::buildScene()
 				mtrlparams,
 				lightparams,
 				nodes,
-				primparams,
+				primparams, 0,
 				vtxparams, 0,
 				mtxs,
 				tex,

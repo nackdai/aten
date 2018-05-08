@@ -513,7 +513,7 @@ int main()
 			mtrlparms,
 			lightparams,
 			nodes,
-			primparams,
+			primparams, 0,
 			vtxparams, 0,
 			mtxs,
 			tex,

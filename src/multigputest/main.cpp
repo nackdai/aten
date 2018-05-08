@@ -426,7 +426,7 @@ int main()
 			mtrlparms,
 			lightparams,
 			nodes,
-			primparams,
+			primparams, 0,
 			vtxparams, 0,
 			mtxs,
 			tex, idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));

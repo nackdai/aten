@@ -251,14 +251,16 @@ namespace idaten
 		m_tileDomain = keepTileDomain;
 	}
 
-	void SVGFPathTracingMultiGPU::copyFrom(SVGFPathTracingMultiGPU& tracer)
+	void SVGFPathTracingMultiGPU::copy(
+		SVGFPathTracingMultiGPU& from,
+		cudaStream_t stream)
 	{
-		if (this == &tracer) {
+		if (this == &from) {
 			AT_ASSERT(false);
 			return;
 		}
 
-		const auto& srcTileDomain = tracer.m_tileDomain;
+		const auto& srcTileDomain = from.m_tileDomain;
 		const auto& dstTileDomain = this->m_tileDomain;
 
 		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
@@ -271,134 +273,56 @@ namespace idaten
 		
 		// Notmal & Depth.
 		{
-			auto src = tracer.m_aovNormalDepth[cur].ptr();
+			auto src = from.m_aovNormalDepth[cur].ptr();
 			auto dst = this->m_aovNormalDepth[cur].ptr();
 		
 			auto stride = this->m_aovNormalDepth[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 			
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
 		}
 
 		// Texture color & Temporal weight.
 		{
-			auto src = tracer.m_aovTexclrTemporalWeight[cur].ptr();
+			auto src = from.m_aovTexclrTemporalWeight[cur].ptr();
 			auto dst = this->m_aovTexclrTemporalWeight[cur].ptr();
 
 			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
 		}
 		
 		// Color & Variance.
 		{
-			auto src = tracer.m_aovColorVariance[cur].ptr();
+			auto src = from.m_aovColorVariance[cur].ptr();
 			auto dst = this->m_aovColorVariance[cur].ptr();
 
 			auto stride = this->m_aovColorVariance[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
 		}
 
 		// Moment & Mesh id.
 		{
-			auto src = tracer.m_aovMomentMeshid[cur].ptr();
+			auto src = from.m_aovMomentMeshid[cur].ptr();
 			auto dst = this->m_aovMomentMeshid[cur].ptr();
 
 			auto stride = this->m_aovMomentMeshid[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
 		}
 
 		{
-			auto src = tracer.m_tmpBuf.ptr();
+			auto src = from.m_tmpBuf.ptr();
 			auto dst = this->m_tmpBuf.ptr();
 
 			auto stride = this->m_tmpBuf.stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, m_stream));
+			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
 		}
-	}
-
-	void SVGFPathTracingMultiGPU::copyTo(
-		int srcDeviceId,
-		int dstDeviceId,
-		SVGFPathTracingMultiGPU& tracer)
-	{
-		if (this == &tracer) {
-			AT_ASSERT(false);
-			return;
-		}
-
-		const auto& srcTileDomain = this->m_tileDomain;
-		const auto& dstTileDomain = tracer.m_tileDomain; 
-
-		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
-
-		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
-
-		// NOTE
-		// すでに切り替えられているが、切り替え前のものを参照したいので、元に戻す.
-		auto cur = 1 - m_curAOVPos;
-
-		// Notmal & Depth.
-		{
-			auto src = this->m_aovNormalDepth[cur].ptr(); 
-			auto dst = tracer.m_aovNormalDepth[cur].ptr();
-
-			auto stride = this->m_aovNormalDepth[cur].stride();
-			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
-		}
-
-		// Texture color & Temporal weight.
-		{
-			auto src = this->m_aovTexclrTemporalWeight[cur].ptr(); 
-			auto dst = tracer.m_aovTexclrTemporalWeight[cur].ptr();
-
-			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
-			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
-		}
-
-		// Color & Variance.
-		{
-			auto src = this->m_aovColorVariance[cur].ptr(); 
-			auto dst = tracer.m_aovColorVariance[cur].ptr();
-
-			auto stride = this->m_aovColorVariance[cur].stride();
-			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
-		}
-
-		// Moment & Mesh id.
-		{
-			auto src = this->m_aovMomentMeshid[cur].ptr(); 
-			auto dst = tracer.m_aovMomentMeshid[cur].ptr();
-
-			auto stride = this->m_aovMomentMeshid[cur].stride();
-			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
-		}
-
-		{
-			auto src = this->m_tmpBuf.ptr(); 
-			auto dst = tracer.m_tmpBuf.ptr();
-
-			auto stride = this->m_tmpBuf.stride();
-			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-
-			checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes, m_stream));
-		}
-
-		checkCudaErrors(cudaStreamSynchronize(m_stream));
 	}
 }

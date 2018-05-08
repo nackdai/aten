@@ -29,11 +29,8 @@ namespace idaten
 		}
 
 	protected:
-		void copyFrom(PathTracingMultiGPU& tracer);
-
-		void copyTo(
-			int srcDeviceId,
-			int dstDeviceId,
-			PathTracingMultiGPU& tracer);
+		void copy(
+			PathTracingMultiGPU& from,
+			cudaStream_t stream);
 	};
 }

@@ -26,12 +26,9 @@ namespace idaten
 		virtual void postRender(int width, int height) override final;
 
 	protected:
-		void copyFrom(SVGFPathTracingMultiGPU& tracer);
-
-		void copyTo(
-			int srcDeviceId,
-			int dstDeviceId,
-			SVGFPathTracingMultiGPU& tracer);
+		void copy(
+			SVGFPathTracingMultiGPU& from,
+			cudaStream_t stream);
 
 	private:
 		void onRender(

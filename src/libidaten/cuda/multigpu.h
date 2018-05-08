@@ -41,10 +41,7 @@ namespace idaten
 #ifdef ENABLE_MULTI_GPU_EMULATE
 			// Nothing is done...
 #else
-			//AT_ASSERT(m_peerAccessDeviceId < 0);
-
-			if (m_deviceId != peerAccessDeviceId
-				/*&& m_peerAccessDeviceId < 0*/)
+			if (m_deviceId != peerAccessDeviceId)
 			{
 				// Check for peer access between participating GPUs.
 				int canAccessPeer = 0;
@@ -56,7 +53,6 @@ namespace idaten
 					// Enable peer access between participating GPUs.
 					setCurrent();
 					checkCudaErrors(cudaDeviceEnablePeerAccess(peerAccessDeviceId, 0));
-					m_peerAccessDeviceId = peerAccessDeviceId;
 				}
 			}
 #endif
@@ -102,22 +98,11 @@ namespace idaten
 #endif
 		}
 
-		void copyP2P(GpuProxy& proxy)
+		void copy(GpuProxy& from)
 		{
 			setCurrent();
 
-#if 1
-			// TODO
-			auto keepTileDomain = proxy.m_renderer.m_tileDomain;
-			proxy.m_renderer.m_tileDomain.x = 0;
-			proxy.m_renderer.m_tileDomain.y = proxy.m_renderer.m_tileDomain.h;
-
-			m_renderer.copyFrom(proxy.m_renderer);
-
-			proxy.m_renderer.m_tileDomain = keepTileDomain;
-#else
-			m_renderer.copyFrom(proxy.m_renderer);
-#endif
+			m_renderer.copy(from.m_renderer, from.m_stream);
 		}
 
 		static void swapCopy(GpuProxy* proxies, int num)
@@ -128,30 +113,45 @@ namespace idaten
 			checkCudaErrors(cudaStreamSynchronize(proxies[1].m_stream));
 			checkCudaErrors(cudaStreamSynchronize(proxies[3].m_stream));
 
-			proxies[0].copyP2P(proxies[1]);
-			proxies[2].copyP2P(proxies[3]);
+			{
+				auto keepTileDomain = proxies[1].m_renderer.m_tileDomain;
+				proxies[1].m_renderer.m_tileDomain.x = 0;
+				proxies[1].m_renderer.m_tileDomain.y = proxies[1].m_renderer.m_tileDomain.h;
 
-#if 1
-			auto keepTileDomain_0 = proxies[0].m_renderer.m_tileDomain;
-			auto keepTileDomain_1 = proxies[2].m_renderer.m_tileDomain;
+				proxies[0].copy(proxies[1]);
 
-			proxies[0].m_renderer.m_tileDomain.h *= 2; 
-			proxies[2].m_renderer.m_tileDomain.h *= 2;
+				proxies[1].m_renderer.m_tileDomain = keepTileDomain;
+			}
 
-			proxies[2].setCurrent();
+			{
+				auto keepTileDomain = proxies[3].m_renderer.m_tileDomain;
+				proxies[3].m_renderer.m_tileDomain.x = 0;
+				proxies[3].m_renderer.m_tileDomain.y = proxies[3].m_renderer.m_tileDomain.h;
 
-			checkCudaErrors(cudaStreamSynchronize(proxies[2].m_stream));
+				proxies[2].copy(proxies[3]);
 
-			proxies[2].m_renderer.copyTo(
-				proxies[2].m_deviceId,
-				proxies[0].m_deviceId,
-				proxies[0].m_renderer);
+				proxies[3].m_renderer.m_tileDomain = keepTileDomain;
+			}
 
-			proxies[0].m_renderer.m_tileDomain = keepTileDomain_0;
-			proxies[2].m_renderer.m_tileDomain = keepTileDomain_1;
+			{
+				auto keepTileDomain_0 = proxies[0].m_renderer.m_tileDomain;
+				auto keepTileDomain_1 = proxies[2].m_renderer.m_tileDomain;
 
-			checkCudaErrors(cudaStreamSynchronize(proxies[0].m_stream));
-#endif
+				proxies[0].m_renderer.m_tileDomain.h *= 2;
+				proxies[2].m_renderer.m_tileDomain.h *= 2;
+
+				proxies[2].setCurrent();
+
+				checkCudaErrors(cudaStreamSynchronize(proxies[2].m_stream));
+
+				proxies[0].m_renderer.copy(proxies[2].m_renderer, proxies[2].m_stream);
+
+				proxies[0].m_renderer.m_tileDomain = keepTileDomain_0;
+				proxies[2].m_renderer.m_tileDomain = keepTileDomain_1;
+
+				checkCudaErrors(cudaStreamSynchronize(proxies[2].m_stream));
+				checkCudaErrors(cudaStreamSynchronize(proxies[0].m_stream));
+			}
 		}
 
 		RENDERER& getRenderer()
@@ -161,7 +161,6 @@ namespace idaten
 
 	private:
 		int m_deviceId{ -1 };
-		int m_peerAccessDeviceId{ -1 };
 		CUcontext m_context{ 0 };
 		cudaStream_t m_stream{ 0 };
 

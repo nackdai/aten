@@ -148,15 +148,17 @@ namespace idaten
 		m_glimg.unmap();
 	}
 
-	void PathTracingMultiGPU::copyFrom(PathTracingMultiGPU& tracer)
+	void PathTracingMultiGPU::copy(
+		PathTracingMultiGPU& from,
+		cudaStream_t stream)
 	{
-		if (this == &tracer) {
+		if (this == &from) {
 			AT_ASSERT(false);
 			return;
 		}
 
-		const auto& srcTileDomain = tracer.m_tileDomain;
-		auto src = tracer.m_paths.ptr();
+		const auto& srcTileDomain = from.m_tileDomain;
+		auto src = from.m_paths.ptr();
 
 		const auto& dstTileDomain = this->m_tileDomain;
 		auto dst = this->m_paths.ptr();
@@ -168,32 +170,6 @@ namespace idaten
 		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
 		auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
-		checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault));
-	}
-
-	void PathTracingMultiGPU::copyTo(
-		int srcDeviceId,
-		int dstDeviceId,
-		PathTracingMultiGPU& tracer)
-	{
-		if (this == &tracer) {
-			AT_ASSERT(false);
-			return;
-		}
-
-		const auto& srcTileDomain = this->m_tileDomain; 
-		const auto& dstTileDomain = tracer.m_tileDomain;
-
-		auto src = this->m_paths.ptr(); 
-		auto dst = tracer.m_paths.ptr();
-
-		AT_ASSERT(srcTileDomain.w == dstTileDomain.w);
-
-		auto stride = this->m_paths.stride();
-
-		auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
-		auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-
-		checkCudaErrors(cudaMemcpyPeerAsync(dst + offset, dstDeviceId, src, srcDeviceId, bytes));
+		checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
 	}
 }

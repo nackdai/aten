@@ -37,9 +37,12 @@ namespace idaten
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
 		checkCudaErrors(cudaMalloc(&m_buffer, size));
-		checkCudaErrors(cudaMemcpyAsync(
-			m_buffer, p, size, 
-			isHostToDevice ? cudaMemcpyHostToDevice : cudaMemcpyDeviceToDevice));
+
+		if (p) {
+			checkCudaErrors(cudaMemcpyAsync(
+				m_buffer, p, size,
+				isHostToDevice ? cudaMemcpyHostToDevice : cudaMemcpyDeviceToDevice));
+		}
 
 		// Make Resource description:
 		memset(&m_resDesc, 0, sizeof(m_resDesc));

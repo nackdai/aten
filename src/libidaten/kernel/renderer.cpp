@@ -68,7 +68,10 @@ namespace idaten {
 		}
 		m_nodetex.init(nodes.size());
 
-		if (!vtxs.empty()) {
+		if (vtxs.empty()) {
+			m_vtxparamsPos.init(nullptr, 1, advanceVtxNum);
+		}
+		else {
 			// TODO
 			std::vector<aten::vec4> pos;
 			std::vector<aten::vec4> nml;

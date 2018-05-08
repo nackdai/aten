@@ -44,6 +44,11 @@ namespace idaten
 
 		void runMinMaxTest();
 
+		std::vector<CudaGLBuffer>& getInteropVBO()
+		{
+			return m_interopVBO;
+		}
+
 	private:
 		TypedCudaMemory<aten::SkinningVertex> m_vertices;
 		TypedCudaMemory<uint32_t> m_indices;

@@ -564,26 +564,22 @@ namespace idaten
 	template <typename T>
 	void onBuild(
 		idaten::CudaTextureResource& dst,
-		std::vector<aten::PrimitiveParamter>& tris,
+		TypedCudaMemory<aten::PrimitiveParamter>& triangles,
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		T vtxPos,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes)
 	{
-		TypedCudaMemory<aten::PrimitiveParamter> triangles;
 		TypedCudaMemory<uint32_t> mortonCodes;
 		TypedCudaMemory<uint32_t> indices;
 
-		uint32_t numOfElems = (uint32_t)tris.size();
+		uint32_t numOfElems = (uint32_t)triangles.maxNum();
 
-		triangles.init(numOfElems);
 		mortonCodes.init(numOfElems);
 		indices.init(numOfElems);
 
 		// Compute morton code.
 		{
-			triangles.writeByNum(&tris[0], (uint32_t)tris.size());
-
 			uint32_t numberOfTris = triangles.maxNum();
 
 			dim3 block(256, 1, 1);
@@ -690,17 +686,24 @@ namespace idaten
 		const aten::aabb& sceneBbox,
 		idaten::CudaTextureResource& texRscVtxPos,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
-	{		
+	{
+		TypedCudaMemory<aten::PrimitiveParamter> triangles;
+
+		uint32_t numOfElems = (uint32_t)tris.size();
+
+		triangles.init(numOfElems);
+		triangles.writeByNum(&tris[0], (uint32_t)tris.size());
+
 		auto vtxPos = texRscVtxPos.bind();
 
-		onBuild(dst, tris, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
+		onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
 
 		texRscVtxPos.unbind();
 	}
 
 	void LBVHBuilder::build(
 		idaten::CudaTextureResource& dst,
-		std::vector<aten::PrimitiveParamter>& tris,
+		TypedCudaMemory<aten::PrimitiveParamter> triangles,
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		CudaGLBuffer& vboVtxPos,
@@ -712,7 +715,7 @@ namespace idaten
 		size_t bytes = 0;
 		vboVtxPos.bind((void**)&vtxPos, bytes);
 
-		onBuild(dst, tris, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
+		onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
 
 		vboVtxPos.unbind();
 		vboVtxPos.unmap();

@@ -26,7 +26,7 @@ namespace idaten
 
 		static void build(
 			idaten::CudaTextureResource& dst,
-			std::vector<aten::PrimitiveParamter>& tris,
+			TypedCudaMemory<aten::PrimitiveParamter> triangles,
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
 			CudaGLBuffer& vboVtxPos,

@@ -62,11 +62,17 @@ namespace aten {
 			mtrlparms.push_back(m->param());
 		}
 
+#if 0
 		const auto& faces = aten::face::faces();
 
 		for (auto f : faces) {
 			primparams.push_back(f->param);
 		}
+#else
+		for (auto s : shapes) {
+			s->collectTriangles(primparams);
+		}
+#endif
 
 		const auto& vtxs = aten::VertexManager::getVertices();
 #if 0

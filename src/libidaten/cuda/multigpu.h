@@ -142,7 +142,7 @@ namespace idaten
 
 				proxies[2].setCurrent();
 
-				checkCudaErrors(cudaStreamSynchronize(proxies[2].m_stream));
+				checkCudaErrors(cudaStreamSynchronize(proxies[3].m_stream));
 
 				proxies[0].m_renderer.copy(proxies[2].m_renderer, proxies[2].m_stream);
 

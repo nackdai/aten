@@ -18,6 +18,7 @@ namespace idaten {
 		const std::vector<aten::LightParameter>& lights,
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
+		uint32_t advancePrimNum,
 		const std::vector<aten::vertex>& vtxs,
 		uint32_t advanceVtxNum,
 		const std::vector<aten::mat4>& mtxs,
@@ -32,7 +33,7 @@ namespace idaten {
 			mtrls,
 			lights,
 			nodes,
-			prims,
+			prims, advancePrimNum,
 			vtxs, advanceVtxNum,
 			mtxs,
 			texs, envmapRsc);

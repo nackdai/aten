@@ -10,6 +10,7 @@ namespace idaten {
 		const std::vector<aten::LightParameter>& lights,
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::PrimitiveParamter>& prims,
+		uint32_t advancePrimNum,
 		const std::vector<aten::vertex>& vtxs,
 		uint32_t advanceVtxNum,
 		const std::vector<aten::mat4>& mtxs,
@@ -47,8 +48,11 @@ namespace idaten {
 		m_lightparam.init(lights.size());
 		m_lightparam.writeByNum(&lights[0], lights.size());
 
-		if (!prims.empty()) {
-			m_primparams.init(prims.size());
+		if (prims.empty()) {
+			m_primparams.init(advancePrimNum);
+		}
+		else {
+			m_primparams.init(prims.size() + advancePrimNum);
 			m_primparams.writeByNum(&prims[0], prims.size());
 		}
 

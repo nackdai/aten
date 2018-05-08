@@ -83,8 +83,7 @@ namespace aten {
 
 	void DataCollector::collectTriangles(
 		std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
-		std::vector<int>& triIdOffsets,
-		std::vector<aten::vertex>& vtxparams)
+		std::vector<int>& triIdOffsets)
 	{
 		const auto& shapes = aten::transformable::getShapesPolygonObjList();
 
@@ -103,11 +102,5 @@ namespace aten {
 				triangleCount += triangles[pos].size();
 			}
 		}
-
-		const auto& vtxs = aten::VertexManager::getVertices();
-		std::copy(
-			vtxs.begin(),
-			vtxs.end(),
-			std::back_inserter(vtxparams));
 	}
 }

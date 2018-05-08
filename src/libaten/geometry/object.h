@@ -66,6 +66,8 @@ namespace AT_NAME
 			std::vector<std::vector<AT_NAME::face*>>& tris,
 			std::vector<AT_NAME::material*>& mtrls);
 
+		virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const override final;
+
 	private:
 		void build();
 

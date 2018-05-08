@@ -51,6 +51,12 @@ namespace aten
 			return m_id;
 		}
 
+		virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
+		{
+			// Nothing is done...
+			AT_ASSERT(false);
+		}
+
 		static uint32_t getShapeNum();
 		
 		static transformable* getShape(uint32_t idx);

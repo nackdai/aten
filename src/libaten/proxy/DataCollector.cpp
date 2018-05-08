@@ -94,21 +94,10 @@ namespace aten {
 			auto type = s->getParam().type;
 
 			if (type == GeometryType::Polygon) {
-				// TODO
-				aten::object* obj = static_cast<aten::object*>(s);
-
 				triangles.push_back(std::vector<aten::PrimitiveParamter>());
 				int pos = triangles.size() - 1;
 
-				for (const auto objshape : obj->shapes) {
-					const auto& tris = objshape->tris();
-					
-					triangles[pos].reserve(tris.size());
-
-					for (const auto tri : tris) {
-						triangles[pos].push_back(tri->param);
-					}
-				}
+				s->collectTriangles(triangles[pos]);
 
 				triIdOffsets.push_back(triangleCount);
 				triangleCount += triangles[pos].size();

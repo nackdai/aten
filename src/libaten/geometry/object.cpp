@@ -249,4 +249,17 @@ namespace AT_NAME
 			mtrls.push_back(shape->m_mtrl);
 		}
 	}
+
+	void object::collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
+	{
+		for (const auto objshape : shapes) {
+			const auto& tris = objshape->tris();
+
+			triangles.reserve(tris.size());
+
+			for (const auto tri : tris) {
+				triangles.push_back(tri->param);
+			}
+		}
+	}
 }

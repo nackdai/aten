@@ -106,13 +106,13 @@ __global__ void temporalReprojection(
 	const float4* __restrict__ contribs,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* curAovNormalDepth,
-	float4* curAovTexclrTemporalWeight,
+	float4* curAovTexclrMeshid,
 	float4* curAovColorVariance,
-	float4* curAovMomentMeshid,
+	float4* curAovMomentTemporalWeight,
 	const float4* __restrict__ prevAovNormalDepth,
-	const float4* __restrict__ prevAovTexclrTemporalWeight,
+	const float4* __restrict__ prevAovTexclrMeshid,
 	const float4* __restrict__ prevAovColorVariance,
-	const float4* __restrict__ prevAovMomentMeshid,
+	const float4* __restrict__ prevAovMomentTemporalWeight,
 	cudaSurfaceObject_t motionDetphBuffer,
 	cudaSurfaceObject_t dst,
 	int width, int height)
@@ -130,10 +130,10 @@ __global__ void temporalReprojection(
 	const auto idx = getIdx(ix, iy, width);
 
 	auto nmlDepth = curAovNormalDepth[idx];
-	auto momentMeshId = curAovMomentMeshid[idx];
+	auto texclrMeshId = curAovTexclrMeshid[idx];
 
 	const float centerDepth = nmlDepth.w;
-	const int centerMeshId = (int)momentMeshId.w;
+	const int centerMeshId = (int)texclrMeshId.w;
 
 	// 今回のフレームのピクセルカラー.
 	auto contrib = contribs[idx];
@@ -149,7 +149,7 @@ __global__ void temporalReprojection(
 			cudaBoundaryModeTrap);
 
 		curAovColorVariance[idx] = curColor;
-		curAovMomentMeshid[idx] = make_float4(1, 1, 1, curAovMomentMeshid[idx].w);
+		curAovMomentTemporalWeight[idx] = make_float4(1, 1, 1, curAovMomentTemporalWeight[idx].w);
 
 		return;
 	}
@@ -180,10 +180,10 @@ __global__ void temporalReprojection(
 			int pidx = getIdx(px, py, width);
 
 			nmlDepth = prevAovNormalDepth[pidx];
-			momentMeshId = prevAovMomentMeshid[pidx];
+			texclrMeshId = prevAovTexclrMeshid[pidx];
 
 			const float prevDepth = nmlDepth.w;
-			const int prevMeshId = (int)momentMeshId.w;
+			const int prevMeshId = (int)texclrMeshId.w;
 			float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
 			// TODO
@@ -216,7 +216,7 @@ __global__ void temporalReprojection(
 #endif
 	}
 
-	curAovTexclrTemporalWeight[idx].w = weight;
+	curAovMomentTemporalWeight[idx].w = weight;
 
 #ifdef ENABLE_MEDIAN_FILTER
 	curAovColorVariance[idx].x = curColor.x;
@@ -242,8 +242,8 @@ __global__ void temporalReprojection(
 		int frame = 1;
 
 		if (weight > 0.0f) {
-			auto momentMeshid = prevAovMomentMeshid[idx];;
-			float3 prevMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
+			auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
+			float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
 			// 積算フレーム数を１増やす.
 			frame = (int)prevMoment.z + 1;
@@ -253,9 +253,9 @@ __global__ void temporalReprojection(
 
 		centerMoment.z = frame;
 
-		curAovMomentMeshid[idx].x = centerMoment.x;
-		curAovMomentMeshid[idx].y = centerMoment.y;
-		curAovMomentMeshid[idx].z = centerMoment.z;
+		curAovMomentTemporalWeight[idx].x = centerMoment.x;
+		curAovMomentTemporalWeight[idx].y = centerMoment.y;
+		curAovMomentTemporalWeight[idx].z = centerMoment.z;
 	}
 #endif
 
@@ -268,8 +268,8 @@ __global__ void temporalReprojection(
 
 __global__ void dilateWeight(
 	idaten::TileDomain tileDomain,
-	float4* aovTexclrTemporalWeight,
-	const float4* __restrict__ aovMomentMeshid,
+	float4* aovMomentTemporalWeight,
+	const float4* __restrict__ aovTexclrMeshid,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -284,14 +284,14 @@ __global__ void dilateWeight(
 
 	auto idx = getIdx(ix, iy, width);
 
-	const int centerMeshId = (int)aovMomentMeshid[idx].w;
+	const int centerMeshId = (int)aovTexclrMeshid[idx].w;
 
 	if (centerMeshId < 0) {
 		// This pixel is background, so nothing is done.
 		return;
 	}
 
-	float temporalWeight = aovTexclrTemporalWeight[idx].w;
+	float temporalWeight = aovMomentTemporalWeight[idx].w;
 
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
@@ -302,13 +302,13 @@ __global__ void dilateWeight(
 				&& (0 <= yy) && (yy < height))
 			{
 				int pidx = getIdx(xx, yy, width);
-				float w = aovTexclrTemporalWeight[pidx].w;
+				float w = aovMomentTemporalWeight[pidx].w;
 				temporalWeight = min(temporalWeight, w);
 			}
 		}
 	}
 
-	aovTexclrTemporalWeight[idx].w = temporalWeight;
+	aovMomentTemporalWeight[idx].w = temporalWeight;
 }
 
 inline __device__ float3 min(float3 a, float3 b)
@@ -373,8 +373,9 @@ inline __device__ float3 medianFilter(
 __global__ void medianFilter(
 	cudaSurfaceObject_t dst,
 	float4* curAovColorVariance,
-	float4* curAovMomentMeshid,
-	const float4* __restrict__ prevAovMomentMeshid,
+	float4* curAovMomentTemporalWeight,
+	const float4* __restrict__ curAovTexclrMeshid,
+	const float4* __restrict__ prevAovMomentTemporalWeight,
 	int width, int height)
 {
 	int ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -386,7 +387,7 @@ __global__ void medianFilter(
 
 	auto idx = getIdx(ix, iy, width);
 
-	const int centerMeshId = curAovMomentMeshid[idx].w;
+	const int centerMeshId = curAovTexclrMeshid[idx].w;
 
 	if (centerMeshId < 0) {
 		// This pixel is background, so nothing is done.
@@ -407,8 +408,8 @@ __global__ void medianFilter(
 		// 積算フレーム数のリセット.
 		int frame = 1;
 
-		auto momentMeshid = prevAovMomentMeshid[idx];;
-		float3 prevMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
+		auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
+		float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
 		// 積算フレーム数を１増やす.
 		frame = (int)prevMoment.z + 1;
@@ -417,9 +418,9 @@ __global__ void medianFilter(
 
 		centerMoment.z = frame;
 
-		curAovMomentMeshid[idx].x = centerMoment.x;
-		curAovMomentMeshid[idx].y = centerMoment.y;
-		curAovMomentMeshid[idx].z = centerMoment.z;
+		curAovMomentTemporalWeight[idx].x = centerMoment.x;
+		curAovMomentTemporalWeight[idx].y = centerMoment.y;
+		curAovMomentTemporalWeight[idx].z = centerMoment.z;
 	}
 
 	surf2Dwrite(
@@ -454,13 +455,13 @@ namespace idaten
 			m_tmpBuf.ptr(),
 			m_cam.ptr(),
 			m_aovNormalDepth[curaov].ptr(),
-			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
 			m_aovColorVariance[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
+			m_aovMomentTemporalWeight[curaov].ptr(),
 			m_aovNormalDepth[prevaov].ptr(),
-			m_aovTexclrTemporalWeight[prevaov].ptr(),
+			m_aovTexclrMeshid[prevaov].ptr(),
 			m_aovColorVariance[prevaov].ptr(),
-			m_aovMomentMeshid[prevaov].ptr(),
+			m_aovMomentTemporalWeight[prevaov].ptr(),
 			motionDepthBuffer,
 			outputSurf,
 			width, height);
@@ -471,8 +472,9 @@ namespace idaten
 		medianFilter << <grid, block, 0, m_stream >> > (
 			outputSurf,
 			m_aovColorVariance[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
-			m_aovMomentMeshid[prevaov].ptr(),
+			m_aovMomentTemporalWeight[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
+			m_aovMomentTemporalWeight[prevaov].ptr(),
 			width, height);
 
 		checkCudaKernel(medianFilter);
@@ -480,8 +482,8 @@ namespace idaten
 
 		dilateWeight << <grid, block, 0, m_stream >> > (
 			m_tileDomain,
-			m_aovTexclrTemporalWeight[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
+			m_aovMomentTemporalWeight[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
 			width, height);
 		checkCudaKernel(dilateWeight);
 	}

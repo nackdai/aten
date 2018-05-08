@@ -75,9 +75,9 @@ __global__ void varianceEstimation(
 	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	const float4* __restrict__ aovNormalDepth,
-	const float4* __restrict__ aovTexclrTemporalWeight,
+	float4* aovMomentTemporalWeight,
 	float4* aovColorVariance,
-	float4* aovMomentMeshid,
+	float4* aovTexclrMeshid,
 	aten::mat4 mtxC2V,
 	int width, int height)
 {
@@ -94,16 +94,17 @@ __global__ void varianceEstimation(
 	const int idx = getIdx(ix, iy, width);
 
 	auto normalDepth = aovNormalDepth[idx];
-	auto momentMeshid = aovMomentMeshid[idx];
+	auto texclrMeshid = aovTexclrMeshid[idx];
+	auto momentTemporalWeight = aovMomentTemporalWeight[idx];
 
 	float centerDepth = aovNormalDepth[idx].w;
-	int centerMeshId = (int)momentMeshid.w;
+	int centerMeshId = (int)texclrMeshid.w;
 
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA•ªŽU‚Íƒ[ƒ.
-		aovMomentMeshid[idx].x = 0;
-		aovMomentMeshid[idx].y = 0;
-		aovMomentMeshid[idx].z = 1;
+		aovMomentTemporalWeight[idx].x = 0;
+		aovMomentTemporalWeight[idx].y = 0;
+		aovMomentTemporalWeight[idx].z = 1;
 
 		surf2Dwrite(
 			make_float4(0),
@@ -114,7 +115,7 @@ __global__ void varianceEstimation(
 
 	float3 centerViewPos = computeViewSpace(ix, iy, centerDepth, width, height, &mtxC2V);
 
-	float3 centerMoment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
+	float3 centerMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
 	int frame = (int)centerMoment.z;
 
@@ -175,13 +176,14 @@ __global__ void varianceEstimation(
 
 				int pidx = getIdx(xx, yy, width);
 				normalDepth = aovNormalDepth[pidx];
-				momentMeshid = aovMomentMeshid[pidx];
+				texclrMeshid = aovTexclrMeshid[pidx];
+				momentTemporalWeight = aovMomentTemporalWeight[pidx];
 
 				float3 sampleNml = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 				float sampleDepth = normalDepth.w;
-				int sampleMeshId = (int)momentMeshid.w;
+				int sampleMeshId = (int)texclrMeshid.w;
 
-				float3 moment = make_float3(momentMeshid.x, momentMeshid.y, momentMeshid.z);
+				float3 moment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 				moment /= moment.z;
 
 #if 0
@@ -275,9 +277,9 @@ namespace idaten
 			m_tileDomain,
 			outputSurf,
 			m_aovNormalDepth[curaov].ptr(),
-			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovMomentTemporalWeight[curaov].ptr(),
 			m_aovColorVariance[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
 			m_mtxC2V,
 			width, height);
 

@@ -52,9 +52,9 @@ namespace idaten
 
 		for (int i = 0; i < 2; i++) {
 			m_aovNormalDepth[i].init(width * height);
-			m_aovTexclrTemporalWeight[i].init(width * height);
+			m_aovTexclrMeshid[i].init(width * height);
 			m_aovColorVariance[i].init(width * height);
-			m_aovMomentMeshid[i].init(width * height);
+			m_aovMomentTemporalWeight[i].init(width * height);
 		}
 
 		for (int i = 0; i < AT_COUNTOF(m_atrousClrVar); i++) {

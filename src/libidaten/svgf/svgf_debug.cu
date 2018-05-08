@@ -23,7 +23,7 @@ __global__ void fillAOV(
 	idaten::SVGFPathTracing::AOVMode mode,
 	int width, int height,
 	const float4* __restrict__ aovNormalDepth,
-	const float4* __restrict__ aovTexclrTemporalWeight,
+	const float4* __restrict__ aovTexclrMeshid,
 	cudaSurfaceObject_t motionDetphBuffer,
 	const aten::CameraParameter* __restrict__ camera,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
@@ -86,7 +86,7 @@ __global__ void fillAOV(
 		// TODO
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::TexColor) {
-		clr = aovTexclrTemporalWeight[idx];
+		clr = aovTexclrMeshid[idx];
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::WireFrame) {
 		bool isHitEdge = (isect.a < 1e-2) || (isect.b < 1e-2) || (1 - isect.a - isect.b < 1e-2);
@@ -134,7 +134,7 @@ __global__ void pickPixel(
 	const aten::CameraParameter* __restrict__ camera,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	const float4* __restrict__ aovNormalDepth,
-	const float4* __restrict__ aovMomentMeshid,
+	const float4* __restrict__ aovTexclrMeshid,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	cudaTextureObject_t* nodes,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -166,14 +166,14 @@ __global__ void pickPixel(
 		const auto idx = getIdx(ix, iy, width);
 		
 		auto normalDepth = aovNormalDepth[idx];
-		auto momentMeshid = aovMomentMeshid[idx];
+		auto texclrMeshid = aovTexclrMeshid[idx];
 
 		dst->ix = ix;
 		dst->iy = iy;
 		dst->color = aten::vec3(paths->contrib[idx].contrib.x, paths->contrib[idx].contrib.y, paths->contrib[idx].contrib.z);
 		dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
 		dst->depth = normalDepth.w;
-		dst->meshid = (int)momentMeshid.w;
+		dst->meshid = (int)texclrMeshid.w;
 		dst->triid = isect.primid;
 		dst->mtrlid = isect.mtrlid;
 	}
@@ -206,7 +206,7 @@ namespace idaten
 			m_aovMode,
 			width, height,
 			m_aovNormalDepth[curaov].ptr(),
-			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
 			gbuffer,
 			m_cam.ptr(),
 			m_shapeparam.ptr(), m_shapeparam.num(),
@@ -233,7 +233,7 @@ namespace idaten
 				m_cam.ptr(),
 				m_paths.ptr(),
 				m_aovNormalDepth[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
+				m_aovTexclrMeshid[curaov].ptr(),
 				m_shapeparam.ptr(), m_shapeparam.num(),
 				m_nodetex.ptr(),
 				m_primparams.ptr(),

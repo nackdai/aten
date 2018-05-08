@@ -284,10 +284,10 @@ namespace idaten
 
 		// Texture color & Temporal weight.
 		{
-			auto src = from.m_aovTexclrTemporalWeight[cur].ptr();
-			auto dst = this->m_aovTexclrTemporalWeight[cur].ptr();
+			auto src = from.m_aovTexclrMeshid[cur].ptr();
+			auto dst = this->m_aovTexclrMeshid[cur].ptr();
 
-			auto stride = this->m_aovTexclrTemporalWeight[cur].stride();
+			auto stride = this->m_aovTexclrMeshid[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
 			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
@@ -306,10 +306,10 @@ namespace idaten
 
 		// Moment & Mesh id.
 		{
-			auto src = from.m_aovMomentMeshid[cur].ptr();
-			auto dst = this->m_aovMomentMeshid[cur].ptr();
+			auto src = from.m_aovMomentTemporalWeight[cur].ptr();
+			auto dst = this->m_aovMomentTemporalWeight[cur].ptr();
 
-			auto stride = this->m_aovMomentMeshid[cur].stride();
+			auto stride = this->m_aovMomentTemporalWeight[cur].stride();
 			auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
 			checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));

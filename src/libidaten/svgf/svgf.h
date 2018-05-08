@@ -327,9 +327,9 @@ namespace idaten
 
 		// AOV buffer. Current frame and previous frame.
 		idaten::TypedCudaMemory<float4> m_aovNormalDepth[2];
-		idaten::TypedCudaMemory<float4> m_aovTexclrTemporalWeight[2];
+		idaten::TypedCudaMemory<float4> m_aovTexclrMeshid[2];
 		idaten::TypedCudaMemory<float4> m_aovColorVariance[2];
-		idaten::TypedCudaMemory<float4> m_aovMomentMeshid[2];
+		idaten::TypedCudaMemory<float4> m_aovMomentTemporalWeight[2];
 
 		aten::mat4 m_mtxW2V;		// World - View.
 		aten::mat4 m_mtxV2C;		// View - Clip.

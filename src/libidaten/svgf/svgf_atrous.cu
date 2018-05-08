@@ -181,9 +181,9 @@ __global__ void atrousFilter(
 	cudaSurfaceObject_t dst,
 	float4* tmpBuffer,
 	const float4* __restrict__ aovNormalDepth,
-	const float4* __restrict__ aovTexclrTemporalWeight,
+	const float4* __restrict__ aovTexclrMeshid,
 	const float4* __restrict__ aovColorVariance,
-	const float4* __restrict__ aovMomentMeshid,
+	const float4* __restrict__ aovMomentTemporalWeight,
 	const float4* __restrict__ clrVarBuffer,
 	float4* nextClrVarBuffer,
 	int stepScale,
@@ -202,11 +202,11 @@ __global__ void atrousFilter(
 	const int idx = getIdx(ix, iy, width);
 
 	auto normalDepth = aovNormalDepth[idx];
-	auto momentMeshid = aovMomentMeshid[idx];
+	auto texclrMeshid = aovTexclrMeshid[idx];
 
 	float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 	float centerDepth = normalDepth.w;
-	int centerMeshId = (int)momentMeshid.w;
+	int centerMeshId = (int)texclrMeshid.w;
 
 #if 0
 	float tmpDdzX = ddx(ix, iy, width, height, aovNormalDepth);
@@ -223,14 +223,12 @@ __global__ void atrousFilter(
 		centerColor = clrVarBuffer[idx];
 	}
 
-	auto texClrTemporalWeight = aovTexclrTemporalWeight[idx];
-
 	if (centerMeshId < 0) {
 		// ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI—¹.
 		nextClrVarBuffer[idx] = make_float4(centerColor.x, centerColor.y, centerColor.z, 0.0f);
 
 		if (isFinalIter) {
-			centerColor *= texClrTemporalWeight;
+			centerColor *= texclrMeshid;
 
 			surf2Dwrite(
 				centerColor,
@@ -316,12 +314,12 @@ __global__ void atrousFilter(
 			const int qidx = getIdx(xx, yy, width);
 
 			normalDepth = aovNormalDepth[qidx];
-			momentMeshid = aovMomentMeshid[qidx];
+			texclrMeshid = aovTexclrMeshid[qidx];
 
 			float3 normal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 
 			float depth = normalDepth.w;
-			int meshid = (int)momentMeshid.w;
+			int meshid = (int)texclrMeshid.w;
 
 			float4 color;
 			float variance;
@@ -386,7 +384,9 @@ __global__ void atrousFilter(
 	if (isFinalIter) {
 		sumC = YCoCg2RGB(sumC);
 		sumC = unmap(sumC);
-		sumC *= texClrTemporalWeight;
+
+		texclrMeshid = aovTexclrMeshid[idx];
+		sumC *= texclrMeshid;
 
 		surf2Dwrite(
 			sumC,
@@ -460,9 +460,9 @@ namespace idaten
 			outputSurf,
 			m_tmpBuf.ptr(),
 			m_aovNormalDepth[curaov].ptr(),
-			m_aovTexclrTemporalWeight[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
 			m_aovColorVariance[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
+			m_aovMomentTemporalWeight[curaov].ptr(),
 			m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
 			stepScale,
 			width, height);

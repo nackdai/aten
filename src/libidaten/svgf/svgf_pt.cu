@@ -274,8 +274,7 @@ __global__ void shadeMiss(
 	idaten::TileDomain tileDomain,
 	int bounce,
 	float4* aovNormalDepth,
-	float4* aovTexclrTemporalWeight,
-	float4* aovMomentMeshid,
+	float4* aovTexclrMeshid,
 	idaten::SVGFPathTracing::Path* paths,
 	int width, int height)
 {
@@ -300,9 +299,8 @@ __global__ void shadeMiss(
 			const auto _idx = getIdx(ix, iy, width);
 
 			// Export bg color to albedo buffer.
-			aovTexclrTemporalWeight[_idx] = make_float4(bg.x, bg.y, bg.z, aovTexclrTemporalWeight[_idx].w);
+			aovTexclrMeshid[_idx] = make_float4(bg.x, bg.y, bg.z, -1);
 			aovNormalDepth[_idx].w = -1;
-			aovMomentMeshid[_idx].w = -1;
 
 			// For exporting separated albedo.
 			bg = aten::vec3(1, 1, 1);
@@ -321,8 +319,7 @@ __global__ void shadeMissWithEnvmap(
 	int bounce,
 	const aten::CameraParameter* __restrict__ camera,
 	float4* aovNormalDepth,
-	float4* aovTexclrTemporalWeight,
-	float4* aovMomentMeshid,
+	float4* aovTexclrMeshid,
 	cudaTextureObject_t* textures,
 	int envmapIdx,
 	real envmapAvgIllum,
@@ -375,9 +372,8 @@ __global__ void shadeMissWithEnvmap(
 			const auto _idx = getIdx(ix, iy, width);
 
 			// Export envmap to albedo buffer.
-			aovTexclrTemporalWeight[_idx] = make_float4(emit.x, emit.y, emit.z, aovTexclrTemporalWeight[_idx].w);
+			aovTexclrMeshid[_idx] = make_float4(emit.x, emit.y, emit.z, -1);
 			aovNormalDepth[_idx].w = -1;
-			aovMomentMeshid[_idx].w = -1;
 
 			// For exporting separated albedo.
 			emit = aten::vec3(1, 1, 1);
@@ -399,8 +395,7 @@ __global__ void shadeMissWithEnvmap(
 __global__ void shade(
 	idaten::TileDomain tileDomain,
 	float4* aovNormalDepth,
-	float4* aovTexclrTemporalWeight,
-	float4* aovMomentMeshid,
+	float4* aovTexclrMeshid,
 	aten::mat4 mtxW2C,
 	int width, int height,
 	idaten::SVGFPathTracing::Path* paths,
@@ -505,12 +500,9 @@ __global__ void shade(
 		// normal, depth
 		aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
-		// meshid.
-		aovMomentMeshid[_idx].w = isect.meshid;
-
-		// texture color.
+		// texture color, meshid.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
-		aovTexclrTemporalWeight[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[_idx].w);
+		aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
@@ -535,7 +527,7 @@ __global__ void shade(
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
-		aovTexclrTemporalWeight[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, aovTexclrTemporalWeight[_idx].w);
+		aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
@@ -834,7 +826,7 @@ __global__ void gather(
 	idaten::TileDomain tileDomain,
 	cudaSurfaceObject_t dst,
 	float4* aovColorVariance,
-	float4* aovMomentMeshid,
+	float4* aovMomentTemporalWeight,
 	const idaten::SVGFPathTracing::Path* __restrict__ paths,
 	float4* contribs,
 	int width, int height)
@@ -860,9 +852,9 @@ __global__ void gather(
 	iy += tileDomain.y;
 	idx = getIdx(ix, iy, width);
 
-	aovMomentMeshid[idx].x += lum * lum;
-	aovMomentMeshid[idx].y += lum;
-	aovMomentMeshid[idx].z += 1;
+	aovMomentTemporalWeight[idx].x += lum * lum;
+	aovMomentTemporalWeight[idx].y += lum;
+	aovMomentTemporalWeight[idx].z += 1;
 
 	aovColorVariance[idx] = make_float4(contrib.x, contrib.y, contrib.z, aovColorVariance[idx].w);
 
@@ -983,8 +975,7 @@ namespace idaten
 				bounce,
 				m_cam.ptr(),
 				m_aovNormalDepth[curaov].ptr(),
-				m_aovTexclrTemporalWeight[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
+				m_aovTexclrMeshid[curaov].ptr(),
 				m_tex.ptr(),
 				m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
 				m_paths.ptr(),
@@ -996,8 +987,7 @@ namespace idaten
 				m_tileDomain,
 				bounce,
 				m_aovNormalDepth[curaov].ptr(),
-				m_aovTexclrTemporalWeight[curaov].ptr(),
-				m_aovMomentMeshid[curaov].ptr(),
+				m_aovTexclrMeshid[curaov].ptr(),
 				m_paths.ptr(),
 				width, height);
 		}
@@ -1041,8 +1031,7 @@ namespace idaten
 		shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
 			m_tileDomain,
 			m_aovNormalDepth[curaov].ptr(),
-			m_aovTexclrTemporalWeight[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
+			m_aovTexclrMeshid[curaov].ptr(),
 			mtxW2C,
 			width, height,
 			m_paths.ptr(),
@@ -1095,7 +1084,7 @@ namespace idaten
 			m_tileDomain,
 			outputSurf,
 			m_aovColorVariance[curaov].ptr(),
-			m_aovMomentMeshid[curaov].ptr(),
+			m_aovMomentTemporalWeight[curaov].ptr(),
 			m_paths.ptr(),
 			m_tmpBuf.ptr(),
 			width, height);

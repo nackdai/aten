@@ -39,6 +39,9 @@ namespace idaten
 		auto vtxTexPos = m_vtxparamsPos.bind();
 		auto vtxTexNml = m_vtxparamsNml.bind();
 
+		// Disable SSRT hit test always.
+		m_canSSRTHitTest = false;
+
 		// TODO
 		// Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
 		// 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.

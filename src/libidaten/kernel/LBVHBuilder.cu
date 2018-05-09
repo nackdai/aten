@@ -675,8 +675,6 @@ namespace idaten
 			(aten::vec4*)nodes.ptr(),
 			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
 			nodes.num());
-
-		
 	}
 
 	void LBVHBuilder::build(
@@ -703,7 +701,7 @@ namespace idaten
 
 	void LBVHBuilder::build(
 		idaten::CudaTextureResource& dst,
-		TypedCudaMemory<aten::PrimitiveParamter> triangles,
+		TypedCudaMemory<aten::PrimitiveParamter>& triangles,
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		CudaGLBuffer& vboVtxPos,

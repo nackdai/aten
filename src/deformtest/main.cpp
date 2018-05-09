@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <algorithm>
+#include <iterator>
 
 #include <imgui.h>
 
@@ -74,7 +76,7 @@ public:
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static aten::AcceleratedScene<aten::GPUBvh> g_scene(Lbvh::create);
+static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
 static idaten::SVGFPathTracing g_tracer;
 
@@ -91,6 +93,8 @@ static aten::FBO g_fbo;
 
 static aten::RasterizeRenderer g_rasterizer;
 static aten::RasterizeRenderer g_rasterizerAABB;
+
+static idaten::Skinning g_skinning;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -405,11 +409,7 @@ void onKey(bool press, aten::Key key)
 				at,
 				aten::vec3(0, 1, 0),
 				vfov,
-#ifdef ENABLE_GEOMRENDERING
-				WIDTH >> 1, HEIGHT >> 1);
-#else
 				WIDTH, HEIGHT);
-#endif
 		}
 			break;
 		default:
@@ -422,9 +422,6 @@ void onKey(bool press, aten::Key key)
 
 int main()
 {
-	idaten::Skinning skin;
-	skin.runMinMaxTest();
-
 	aten::timer::init();
 	aten::OMPUtil::setThreadNum(g_threadnum);
 
@@ -492,11 +489,14 @@ int main()
 		at,
 		aten::vec3(0, 1, 0),
 		vfov,
-#ifdef ENABLE_GEOMRENDERING
-		WIDTH >> 1, HEIGHT >> 1);
-#else
 		WIDTH, HEIGHT);
-#endif
+
+	aten::DeformableRenderer::init(
+		WIDTH, HEIGHT,
+		"drawobj_vs.glsl",
+		"drawobj_fs.glsl");
+
+	aten::accelerator::setUserDefsInternalAccelCreator(Lbvh::create);
 
 	Scene::makeScene(&g_scene);
 	g_scene.build();
@@ -509,6 +509,41 @@ int main()
 
 	g_scene.addImageBasedLight(&ibl);
 #endif
+
+	uint32_t advanceVtxNum = 0;
+	uint32_t advanceTriNum = 0;
+	std::vector<aten::PrimitiveParamter> deformTris;
+
+	auto deform = getDeformable();
+
+	// Initialize skinning.
+	if (deform)
+	{
+		auto mdl = deform->getHasObjectAsRealType();
+
+		auto& vb = mdl->getVBForGPUSkinning();
+
+		std::vector<aten::SkinningVertex> vtx;
+		std::vector<uint32_t> idx;
+
+		mdl->getGeometryData(vtx, idx, deformTris);
+
+		g_skinning.initWithTriangles(
+			&vtx[0], vtx.size(),
+			&deformTris[0], deformTris.size(),
+			&vb);
+
+		// TODO
+		const auto& mtx = mdl->getMatrices();
+		g_skinning.update(&mtx[0], mtx.size());
+
+		aten::vec3 aabbMin, aabbMax;
+
+		g_skinning.compute(0, aabbMin, aabbMax);
+
+		advanceVtxNum = vtx.size();
+		advanceTriNum = deformTris.size();
+	}
 
 	{
 		auto aabb = g_scene.getAccel()->getBoundingbox();
@@ -561,8 +596,8 @@ int main()
 			mtrlparms,
 			lightparams,
 			nodes,
-			primparams,
-			vtxparams, 0,
+			primparams, advanceTriNum,
+			vtxparams, advanceVtxNum,
 			mtxs,
 			tex,
 #ifdef ENABLE_ENVMAP
@@ -577,12 +612,42 @@ int main()
 	}
 
 	// For LBVH.
+	if (deform)
+	{
+		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
+		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
+
+		auto& vtxPos = g_skinning.getInteropVBO()[0];
+		auto& tris = g_skinning.getTriangles();
+
+		// TODO
+		int triIdOffset = 0;
+
+		auto& cpunodes = g_scene.getAccel()->getNodes();
+
+		// NOTE
+		// 0 is for top layer.
+		idaten::LBVHBuilder::build(
+			nodes[1],
+			tris,
+			triIdOffset,
+			sceneBbox,
+			vtxPos,
+			(std::vector<aten::ThreadedBvhNode>*)&cpunodes[1]);
+
+		// Copy computed vertices, triangles to the tracer.
+		g_tracer.updateGeometry(
+			g_skinning.getInteropVBO(),
+			0,
+			g_skinning.getTriangles(),
+			0);
+	}
+	else
 	{
 		std::vector<std::vector<aten::PrimitiveParamter>> triangles;
 		std::vector<int> triIdOffsets;
-		std::vector<aten::vertex> vtxparams;
 
-		aten::DataCollector::collectTriangles(triangles, triIdOffsets, vtxparams);
+		aten::DataCollector::collectTriangles(triangles, triIdOffsets);
 
 		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
@@ -616,6 +681,7 @@ int main()
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
+	g_tracer.setCanSSRTHitTest(false);
 
 	aten::window::run();
 

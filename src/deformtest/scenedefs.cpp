@@ -1,6 +1,13 @@
 #include "scenedefs.h"
 #include "atenscene.h"
 
+static aten::instance<aten::deformable>* s_deformMdl = nullptr;
+
+aten::instance<aten::deformable>* getDeformable()
+{
+	return s_deformMdl;
+}
+
 void ObjCornellBoxScene::makeScene(aten::scene* scene)
 {
 	auto emit = new aten::emissive(aten::vec3(36, 33, 24));
@@ -64,5 +71,33 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 {
 	pos = aten::vec3(0.f, 1.f, 3.f);
 	at = aten::vec3(0.f, 1.f, 0.f);
+	fov = 45;
+}
+
+/////////////////////////////////////////////////////
+
+void DeformScene::makeScene(aten::scene* scene)
+{
+	aten::deformable* mdl = new aten::deformable();
+	mdl->read("unitychan_gpu.mdl");
+
+	aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
+	aten::MaterialLoader::load("unitychan_mtrl.xml");
+
+	auto deformMdl = new aten::instance<aten::deformable>(mdl, aten::mat4::Identity);
+	scene->add(deformMdl);
+
+	s_deformMdl = deformMdl;
+
+	aten::ImageLoader::setBasePath("./");
+}
+
+void DeformScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0, 71, 225);
+	at = aten::vec3(0, 71, 216);
 	fov = 45;
 }

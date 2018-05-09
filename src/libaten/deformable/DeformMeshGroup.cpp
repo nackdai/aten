@@ -162,6 +162,9 @@ namespace aten
 
 				tri.mtrlid = mtrlId;
 				tri.gemoid = geomId;
+
+				// TODO
+				tri.needNormal = 0;
 			}
 		}
 	}

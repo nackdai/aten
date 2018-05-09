@@ -537,8 +537,8 @@ namespace aten
 
 			if (t->getParam().type == GeometryType::Instance) {
 				// TODO
-				auto obj = (object*)t->getHasObject();
-				auto subobj = (object*)t->getHasSecondObject();
+				auto obj = const_cast<hitable*>(t->getHasObject());
+				auto subobj = const_cast<hitable*>(t->getHasSecondObject());
 
 				// NOTE
 				// 0 is for top layer, so need to add 1.

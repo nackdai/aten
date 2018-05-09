@@ -5,8 +5,8 @@
 
 #include <imgui.h>
 
-static const int WIDTH = 1280;
-static const int HEIGHT = 720;
+static const int WIDTH = 512;
+static const int HEIGHT = 512;
 
 static const char* TITLE = "GpuSkinningTest";
 
@@ -21,10 +21,8 @@ aten::Timeline g_timeline;
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
-static uint32_t g_lodTriCnt = 0;
-static bool g_isWireFrame = true;
-static bool g_isUpdateBuffer = false;
-static bool g_displayLOD = true;
+static bool g_willTakeScreenShot = false;
+static int g_cntScreenShot = 0;
 
 static bool g_willShowGUI = true;
 
@@ -48,8 +46,8 @@ void onRun(aten::window* window)
 	g_timeline.advance(1.0f / 60.0f);
 
 	
-	g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
-	//g_mdl.update(aten::mat4(), nullptr, 0);
+	//g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
+	g_mdl.update(aten::mat4(), nullptr, 0);
 
 	aten::vec3 aabbMin, aabbMax;
 
@@ -74,6 +72,19 @@ void onRun(aten::window* window)
 	}
 
 	aten::DeformableRenderer::render(&g_camera, &g_mdl);
+
+	if (g_willTakeScreenShot)
+	{
+		static char buffer[1024];
+		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
+
+		aten::visualizer::takeScreenshot(buffer, WIDTH, HEIGHT);
+
+		g_willTakeScreenShot = false;
+		g_cntScreenShot++;
+
+		AT_PRINTF("Take Screenshot[%s]\n", buffer);
+	}
 }
 
 void onClose()
@@ -131,6 +142,10 @@ void onKey(bool press, aten::Key key)
 	if (press) {
 		if (key == aten::Key::Key_F1) {
 			g_willShowGUI = !g_willShowGUI;
+			return;
+		}
+		else if (key == aten::Key::Key_F2) {
+			g_willTakeScreenShot = true;
 			return;
 		}
 	}

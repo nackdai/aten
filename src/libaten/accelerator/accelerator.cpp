@@ -25,17 +25,19 @@ namespace aten {
 		}
 	}
 
-	accelerator* accelerator::createAccelerator()
+	accelerator* accelerator::createAccelerator(AccelType type/*= AccelType::Default*/)
 	{
 		accelerator* ret = nullptr;
 
-		if (s_internalType == AccelType::UserDefs
-			&& s_userDefsInternalAccelCreator)
+		type = (type == AccelType::Default ? s_internalType : type);
+
+		if (type == AccelType::UserDefs)
 		{
+			AT_ASSERT(s_userDefsInternalAccelCreator);
 			ret = s_userDefsInternalAccelCreator();
 		}
 		else {
-			switch (s_internalType) {
+			switch (type) {
 			case AccelType::Sbvh:
 				ret = new sbvh();
 				break;
@@ -44,6 +46,7 @@ namespace aten {
 				break;
 			default:
 				ret = new bvh();
+				AT_ASSERT(false);
 				break;
 			}
 		}

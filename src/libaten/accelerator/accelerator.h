@@ -13,10 +13,13 @@ namespace aten {
 		StacklessBvh,
 		StacklessQbvh,
 		UserDefs,
+
+		Default,
 	};
 
 	class accelerator : public hitable {
 		friend class object;
+		friend class deformable;
 		template<typename ACCEL> friend class AcceleratedScene;
 
 	private:
@@ -33,12 +36,10 @@ namespace aten {
 		static AccelType s_internalType;
 		static std::function<accelerator*()> s_userDefsInternalAccelCreator;
 
-		static accelerator* createAccelerator();
+		static accelerator* createAccelerator(AccelType type = AccelType::Default);
 
 		static void setInternalAccelType(AccelType type);
 		static AccelType getInternalAccelType();
-
-		static void setUserDefsInternalAccelCreator(std::function<accelerator*()> creator);
 
 		void asNested()
 		{
@@ -46,6 +47,8 @@ namespace aten {
 		}
 
 	public:
+		static void setUserDefsInternalAccelCreator(std::function<accelerator*()> creator);
+
 		virtual void build(
 			hitable** list,
 			uint32_t num,

@@ -5,8 +5,8 @@
 
 #include <imgui.h>
 
-static const int WIDTH = 512;
-static const int HEIGHT = 512;
+static const int WIDTH = 1280;
+static const int HEIGHT = 720;
 
 static const char* TITLE = "GpuSkinningTest";
 
@@ -46,8 +46,8 @@ void onRun(aten::window* window)
 	g_timeline.advance(1.0f / 60.0f);
 
 	
-	//g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
-	g_mdl.update(aten::mat4(), nullptr, 0);
+	g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
+	//g_mdl.update(aten::mat4(), nullptr, 0);
 
 	aten::vec3 aabbMin, aabbMax;
 

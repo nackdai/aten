@@ -90,11 +90,13 @@ namespace idaten
 		uint32_t numOfContaints,
 		uint32_t offsetCount/*= 0*/)
 	{
+		AT_ASSERT(m_buffer);
+
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
 		float4* dst = (float4*)m_buffer;
 
-		checkCudaErrors(cudaMemcpyAsync(dst + offsetCount, p, size, cudaMemcpyHostToDevice));
+		checkCudaErrors(cudaMemcpyAsync(dst + offsetCount, p, size, cudaMemcpyDefault));
 	}
 
 	/////////////////////////////////////////////////////

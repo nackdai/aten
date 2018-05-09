@@ -51,8 +51,8 @@ namespace idaten
 		std::vector<uint32_t>* result/*= nullptr*/)
 	{
 		// copy unsorted data from host to device
-		thrust::device_vector<uint32_t> deviceKeys(values.maxNum());
-		thrust::device_vector<uint32_t> deviceIndices(indices.maxNum());
+		thrust::device_vector<uint32_t> deviceKeys(values.num());
+		thrust::device_vector<uint32_t> deviceIndices(indices.num());
 
 		auto keys = thrust::raw_pointer_cast(deviceKeys.data());
 		checkCudaErrors(cudaMemcpyAsync(keys, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));

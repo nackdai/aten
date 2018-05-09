@@ -117,18 +117,15 @@ namespace idaten
 			for (int i = 0; i < m_nodeparam.size(); i++) {
 				m_nodeparam[i].unbind();
 			}
-			m_nodetex.reset();
 
 			for (int i = 0; i < m_texRsc.size(); i++) {
 				m_texRsc[i].unbind();
 			}
-			m_tex.reset();
 
 			for (int i = 0; i < m_aovs.size(); i++) {
 				m_aovs[i].unbind();
 				m_aovs[i].unmap();
 			}
-			m_aovCudaRsc.reset();
 		}
 	}
 

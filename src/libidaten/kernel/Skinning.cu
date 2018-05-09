@@ -280,9 +280,8 @@ namespace idaten
 			m_matrices.init(mtxNum);
 		}
 
-		AT_ASSERT(m_matrices.maxNum() >= mtxNum);
+		AT_ASSERT(m_matrices.num() >= mtxNum);
 
-		m_matrices.reset();
 		m_matrices.writeByNum(matrices, mtxNum);
 	}
 
@@ -312,10 +311,10 @@ namespace idaten
 
 		// Skinning.
 		{
-			auto willComputeWithTriangles = m_triangles.maxNum() > 0;
+			auto willComputeWithTriangles = m_triangles.num() > 0;
 
 			if (willComputeWithTriangles) {
-				const auto triNum = m_triangles.maxNum();
+				const auto triNum = m_triangles.num();
 
 				dim3 block(256);
 				dim3 grid((triNum + block.x - 1) / block.x);
@@ -331,7 +330,7 @@ namespace idaten
 				checkCudaKernel(computeSkinningWithTriangles);
 			}
 			else {
-				const auto idxNum = m_indices.maxNum();
+				const auto idxNum = m_indices.num();
 
 				dim3 block(256);
 				dim3 grid((idxNum + block.x - 1) / block.x);
@@ -350,7 +349,7 @@ namespace idaten
 		// Get min/max.
 		{
 			auto src = dstPos;
-			auto num = m_vertices.maxNum();
+			auto num = m_vertices.num();
 
 			dim3 block(256);
 			dim3 grid((num + block.x - 1) / block.x);

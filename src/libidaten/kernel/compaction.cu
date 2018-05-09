@@ -182,13 +182,13 @@ namespace idaten
 		idaten::TypedCudaMemory<int>& src,
 		idaten::TypedCudaMemory<int>& dst)
 	{
-		AT_ASSERT(dst.maxNum() <= m_maxInputNum);
+		AT_ASSERT(dst.num() <= m_maxInputNum);
 
-		int blockPerGrid = (dst.maxNum() - 1) / blocksize + 1;
+		int blockPerGrid = (dst.num() - 1) / blocksize + 1;
 
 		exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int), m_stream >> > (
 			dst.ptr(),
-			dst.maxNum(),
+			dst.num(),
 			blocksize,
 			src.ptr());
 
@@ -204,7 +204,7 @@ namespace idaten
 
 		computeBlockCount << <tmpBlockPerGrid, tmpBlockSize, 0, m_stream >> > (
 			m_increments.ptr(),
-			m_increments.maxNum(),
+			m_increments.num(),
 			blocksize,
 			src.ptr(),
 			dst.ptr());
@@ -230,7 +230,7 @@ namespace idaten
 
 			exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int), m_stream >> >(
 				m_work.ptr(),
-				m_work.maxNum(),
+				m_work.num(),
 				blocksize,
 				input->ptr());
 
@@ -247,7 +247,7 @@ namespace idaten
 
 			computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize, 0, m_stream >> > (
 				output->ptr(),
-				output->maxNum(),
+				output->num(),
 				blocksize,
 				input->ptr(),
 				m_work.ptr());
@@ -271,11 +271,11 @@ namespace idaten
 			// blocks per grid.
 			auto bpg = stackBlockPerGrid[i];
 
-			auto threadPerBlock = (output->maxNum() + bpg - 1) / bpg;
+			auto threadPerBlock = (output->num() + bpg - 1) / bpg;
 
 			incrementBlocks << <bpg, threadPerBlock, 0, m_stream >> > (
 				output->ptr(),
-				output->maxNum(),
+				output->num(),
 				input->ptr());
 
 			checkCudaKernel(iterate_incrementBlocks);
@@ -291,7 +291,7 @@ namespace idaten
 
 		incrementBlocks << <blockPerGrid, blocksize, 0, m_stream >> > (
 			dst.ptr(),
-			dst.maxNum(),
+			dst.num(),
 			incrResult->ptr());
 
 		checkCudaKernel(incrementBlocks);
@@ -304,13 +304,13 @@ namespace idaten
 	{
 		scan(m_blockSize, bools, m_indices);
 
-		int num = dst.maxNum();
+		int num = dst.num();
 		int blockPerGrid = (num - 1) / m_blockSize + 1;
 
 		scatter << <blockPerGrid, m_blockSize, 0, m_stream >> > (
 			dst.ptr(),
 			m_counts.ptr(),
-			dst.maxNum(),
+			dst.num(),
 			bools.ptr(),
 			m_indices.ptr(),
 			m_iota.ptr());

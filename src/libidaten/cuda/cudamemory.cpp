@@ -34,23 +34,20 @@ namespace idaten {
 		}
 	}
 
-	uint32_t CudaMemory::write(const void* p, uint32_t size)
+	uint32_t CudaMemory::write(const void* p, uint32_t size, uint32_t offset/*= 0*/)
 	{
 		if (!m_device) {
 			init(size);
 		}
 
-		if (m_pos + size > m_bytes) {
+		if (size > m_bytes) {
 			AT_ASSERT(false);
 			return 0;
 		}
 
 		uint8_t* dst = (uint8_t*)m_device;
-		dst += m_pos;
 
-		checkCudaErrors(cudaMemcpyAsync(dst, p, size, cudaMemcpyHostToDevice));
-
-		m_pos += size;
+		checkCudaErrors(cudaMemcpyAsync(dst + offset, p, size, cudaMemcpyDefault));
 
 		return size;
 	}
@@ -71,11 +68,6 @@ namespace idaten {
 		return size;
 	}
 
-	void CudaMemory::reset()
-	{
-		m_pos = 0;
-	}
-
 	void CudaMemory::free()
 	{
 		if (m_device) {
@@ -83,7 +75,6 @@ namespace idaten {
 
 			g_heapsize -= m_bytes;
 		}
-		m_pos = 0;
 		m_bytes = 0;
 	}
 

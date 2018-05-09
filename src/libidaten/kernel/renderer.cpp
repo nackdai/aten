@@ -116,7 +116,6 @@ namespace idaten {
 
 	void Renderer::updateCamera(const aten::CameraParameter& camera)
 	{
-		m_cam.reset();
 		m_cam.writeByNum(&camera, 1);
 
 		m_camParam = camera;

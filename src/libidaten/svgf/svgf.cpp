@@ -45,7 +45,7 @@ namespace idaten
 			texs, envmapRsc);
 
 		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
+		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
 
 		auto& r = aten::getRandom();
 		m_random.init(width * height);
@@ -70,7 +70,6 @@ namespace idaten
 		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 		const std::vector<aten::mat4>& mtxs)
 	{
-		m_shapeparam.reset();
 		m_shapeparam.writeByNum(&geoms[0], geoms.size());
 
 		// Only for top layer...
@@ -80,7 +79,6 @@ namespace idaten
 			nodes[0].size());
 
 		if (!mtxs.empty()) {
-			m_mtxparams.reset();
 			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
 		}
 	}
@@ -282,12 +280,10 @@ namespace idaten
 				for (int i = 0; i < m_nodeparam.size(); i++) {
 					m_nodeparam[i].unbind();
 				}
-				m_nodetex.reset();
 
 				for (int i = 0; i < m_texRsc.size(); i++) {
 					m_texRsc[i].unbind();
 				}
-				m_tex.reset();
 			}
 		}
 	}

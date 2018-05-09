@@ -49,6 +49,11 @@ namespace idaten
 			return m_interopVBO;
 		}
 
+		TypedCudaMemory<aten::PrimitiveParamter>& getTriangles()
+		{
+			return m_triangles;
+		}
+
 	private:
 		TypedCudaMemory<aten::SkinningVertex> m_vertices;
 		TypedCudaMemory<uint32_t> m_indices;

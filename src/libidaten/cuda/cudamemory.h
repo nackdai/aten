@@ -29,15 +29,13 @@ namespace idaten {
 			return m_bytes;
 		}
 
-		uint32_t write(const void* p, uint32_t size);
+		uint32_t write(const void* p, uint32_t size, uint32_t offset = 0);
 		uint32_t read(void* p, uint32_t size);
 
 		operator void*()
 		{
 			return m_device;
 		}
-
-		void reset();
 
 		void free();
 
@@ -46,7 +44,6 @@ namespace idaten {
 	private:
 		void* m_device{ nullptr };
 		uint32_t m_bytes{ 0 };
-		uint32_t m_pos{ 0 };
 	};
 
 	template <typename _T>
@@ -77,9 +74,6 @@ namespace idaten {
 		uint32_t writeByNum(const _T* p, uint32_t num)
 		{
 			auto ret = CudaMemory::write(p, sizeof(_T) * num);
-			if (ret > 0) {
-				m_cur += num;
-			}
 			return ret;
 		}
 
@@ -88,14 +82,9 @@ namespace idaten {
 			return CudaMemory::read(p, sizeof(_T) * num);
 		}
 
-		uint32_t maxNum() const
-		{
-			return m_num;
-		}
-
 		uint32_t num() const
 		{
-			return m_cur;
+			return m_num;
 		}
 
 		const _T* ptr() const
@@ -107,12 +96,6 @@ namespace idaten {
 			return (_T*)CudaMemory::ptr();
 		}
 
-		void reset()
-		{
-			CudaMemory::reset();
-			m_cur = 0;
-		}
-
 		uint32_t stride()
 		{
 			return (uint32_t)sizeof(_T);
@@ -120,6 +103,5 @@ namespace idaten {
 
 	private:
 		uint32_t m_num{ 0 };
-		uint32_t m_cur{ 0 };
 	};
 }

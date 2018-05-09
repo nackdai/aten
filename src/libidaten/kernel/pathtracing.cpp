@@ -39,7 +39,7 @@ namespace idaten {
 			texs, envmapRsc);
 
 		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.maxNum());
+		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
 
 		auto& r = aten::getRandom();
 
@@ -51,10 +51,9 @@ namespace idaten {
 
 	void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
 	{
-		AT_ASSERT(mtrls.size() <= m_mtrlparam.maxNum());
+		AT_ASSERT(mtrls.size() <= m_mtrlparam.num());
 
-		if (mtrls.size() <= m_mtrlparam.maxNum()) {
-			m_mtrlparam.reset();
+		if (mtrls.size() <= m_mtrlparam.num()) {
 			m_mtrlparam.writeByNum(&mtrls[0], (uint32_t)mtrls.size());
 
 			reset();
@@ -200,18 +199,15 @@ namespace idaten {
 			for (int i = 0; i < m_nodeparam.size(); i++) {
 				m_nodeparam[i].unbind();
 			}
-			m_nodetex.reset();
 
 			for (int i = 0; i < m_texRsc.size(); i++) {
 				m_texRsc[i].unbind();
 			}
-			m_tex.reset();
 
 			for (int i = 0; i < m_aovs.size(); i++) {
 				m_aovs[i].unbind();
 				m_aovs[i].unmap();
 			}
-			m_aovCudaRsc.reset();
 		}
 
 		m_glimg.unbind();

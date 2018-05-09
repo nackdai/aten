@@ -573,14 +573,14 @@ namespace idaten
 		TypedCudaMemory<uint32_t> mortonCodes;
 		TypedCudaMemory<uint32_t> indices;
 
-		uint32_t numOfElems = (uint32_t)triangles.maxNum();
+		uint32_t numOfElems = (uint32_t)triangles.num();
 
 		mortonCodes.init(numOfElems);
 		indices.init(numOfElems);
 
 		// Compute morton code.
 		{
-			uint32_t numberOfTris = triangles.maxNum();
+			uint32_t numberOfTris = triangles.num();
 
 			dim3 block(256, 1, 1);
 			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
@@ -642,7 +642,7 @@ namespace idaten
 
 		// Compute bouding box.
 		{
-			uint32_t numberOfTris = triangles.maxNum();
+			uint32_t numberOfTris = triangles.num();
 
 			uint32_t* executedIdxArray;
 			checkCudaErrors(cudaMalloc(&executedIdxArray, (numberOfTris - 1) * sizeof(uint32_t)));
@@ -667,14 +667,14 @@ namespace idaten
 		}
 
 		if (threadedBvhNodes) {
-			threadedBvhNodes->resize(nodes.maxNum());
+			threadedBvhNodes->resize(nodes.num());
 			nodes.read(&(*threadedBvhNodes)[0], 0);
 		}
 
 		dst.initFromDeviceMemory(
 			(aten::vec4*)nodes.ptr(),
 			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
-			nodes.maxNum());
+			nodes.num());
 
 		
 	}
@@ -771,7 +771,7 @@ namespace idaten
 				nodesLbvh.ptr(),
 				nodes.ptr());
 		}
-		std::vector<aten::ThreadedBvhNode> tmp1(nodes.maxNum());
+		std::vector<aten::ThreadedBvhNode> tmp1(nodes.num());
 		nodes.read(&tmp1[0], 0);
 #else
 		std::vector<LBVHNode> tmp(m_nodesLbvh.maxNum());

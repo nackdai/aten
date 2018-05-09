@@ -263,7 +263,7 @@ namespace idaten
 
 			for (int i = 0; i < handles.size(); i++) {
 				auto glvbo = handles[i];
-				m_interopVBO[i].init(glvbo, CudaGLRscRegisterType::WriteOnly);
+				m_interopVBO[i].init(glvbo, CudaGLRscRegisterType::ReadWrite);
 			}
 		}
 		else {

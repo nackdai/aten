@@ -4,6 +4,7 @@
 #include "accelerator/bvh.h"
 #include "math/mat4.h"
 #include "geometry/object.h"
+#include "deformable/deformable.h"
 
 namespace aten
 {
@@ -101,6 +102,11 @@ namespace aten
 		}
 
 		virtual const hitable* getHasObject() const override final
+		{
+			return m_obj;
+		}
+
+		OBJ* getHasObjectAsRealType()
 		{
 			return m_obj;
 		}
@@ -251,6 +257,17 @@ namespace aten
 
 	template<>
 	inline instance<object>::instance(object* obj)
+		: m_param(GeometryType::Instance)
+	{
+		m_obj = obj;
+		m_obj->build();
+		setBoundingBox(m_obj->getBoundingbox());
+
+		m_param.shapeid = transformable::findIdx(obj);
+	}
+
+	template<>
+	inline instance<deformable>::instance(deformable* obj)
 		: m_param(GeometryType::Instance)
 	{
 		m_obj = obj;

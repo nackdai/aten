@@ -178,10 +178,6 @@ namespace AT_NAME {
 		{
 			aten::accelerator::setInternalAccelType(m_accel.getAccelType());
 		}
-		AcceleratedScene(std::function<aten::accelerator*()> internalAccelCreator)
-		{
-			aten::accelerator::setUserDefsInternalAccelCreator(internalAccelCreator);
-		}
 		virtual ~AcceleratedScene() {}
 
 	public:

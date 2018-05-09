@@ -5,6 +5,7 @@
 #include "visualizer/atengl.h"
 #include "texture/texture.h"
 #include "camera/camera.h"
+#include "accelerator/accelerator.h"
 
 #include <algorithm>
 #include <iterator>
@@ -28,6 +29,13 @@ namespace aten
 
 		shader* m_shd{ nullptr };
 	};
+
+	deformable::~deformable()
+	{
+		if (m_accel) {
+			delete m_accel;
+		}
+	}
 
 	bool deformable::read(const char* path)
 	{
@@ -178,6 +186,13 @@ namespace aten
 	const std::vector<mat4>& deformable::getMatrices() const
 	{
 		return m_sklController.getMatrices();
+	}
+
+	void deformable::build()
+	{
+		if (!m_accel) {
+			m_accel = accelerator::createAccelerator(AccelType::UserDefs);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////

@@ -18,8 +18,10 @@ namespace aten
 		friend class instance<deformable>;
 
 	public:
-		deformable() {}
-		~deformable() {}
+		deformable() 
+			: m_param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
+		{}
+		~deformable();
 
 	public:
 		bool read(const char* path);
@@ -34,6 +36,8 @@ namespace aten
 			real time);
 
 		void render(shader* shd);
+
+		void build();
 
 		void getGeometryData(
 			std::vector<SkinningVertex>& vtx,
@@ -50,6 +54,27 @@ namespace aten
 		GeomMultiVertexBuffer& getVBForGPUSkinning()
 		{
 			return m_mesh.getVBForGPUSkinning();
+		}
+
+		virtual const aabb& getBoundingbox() const override final
+		{
+			const auto& desc = m_mesh.getDesc();
+
+			// TODO
+			// Not applied animation...
+			return std::move(aabb(
+				aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
+				aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
+		}
+
+		virtual const aten::GeomParameter& getParam() const override final
+		{
+			return m_param;
+		}
+
+		virtual aten::accelerator* getInternalAccelerator() override final
+		{
+			return m_accel;
 		}
 
 	private:
@@ -84,6 +109,9 @@ namespace aten
 
 	private:
 		DeformMesh m_mesh;
+
+		GeomParameter m_param;
+		aten::accelerator* m_accel{ nullptr };
 
 		// TODO
 		Skeleton m_skl;

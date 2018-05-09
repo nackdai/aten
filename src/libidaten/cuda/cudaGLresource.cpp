@@ -4,9 +4,9 @@
 namespace idaten
 {
 	static const uint32_t flags[] = {
-		cudaGraphicsMapFlagsNone,
-		cudaGraphicsMapFlagsReadOnly,
-		cudaGraphicsMapFlagsWriteDiscard,
+		cudaGraphicsRegisterFlagsNone,
+		cudaGraphicsRegisterFlagsReadOnly,
+		cudaGraphicsRegisterFlagsWriteDiscard,
 	};
 
 	void CudaGLSurface::init(GLuint gltex, CudaGLRscRegisterType type)
@@ -81,6 +81,7 @@ namespace idaten
 	void CudaGLBuffer::bind(void** p, size_t& bytes)
 	{
 		AT_ASSERT(m_rsc);
+		AT_ASSERT(p);
 
 		checkCudaErrors(cudaGraphicsResourceGetMappedPointer(
 			(void**)p,

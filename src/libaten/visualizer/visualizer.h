@@ -105,6 +105,8 @@ namespace aten {
 
 		void takeScreenshot(const char* filename);
 
+		static void takeScreenshot(const char* filename, uint32_t width, uint32_t height);
+
 		static void getTextureData(
 			uint32_t gltex, 
 			std::vector<TColor<uint8_t, 4>>& dst);

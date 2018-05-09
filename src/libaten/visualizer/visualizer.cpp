@@ -345,37 +345,42 @@ namespace aten
 
 	void visualizer::takeScreenshot(const char* filename)
 	{
+		takeScreenshot(filename, m_width, m_height);
+	}
+
+	void visualizer::takeScreenshot(const char* filename, uint32_t width, uint32_t height)
+	{
 		CALL_GL_API(::glFlush());
 		CALL_GL_API(::glFinish());
 
 		using ScreenShotImageType = TColor<uint8_t, 3>;
 
-		std::vector<ScreenShotImageType> tmp(m_width * m_height);
+		std::vector<ScreenShotImageType> tmp(width * height);
 
 		CALL_GL_API(::glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
 		CALL_GL_API(::glNamedFramebufferReadBuffer(0, GL_BACK));
 
-		CALL_GL_API(::glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, &tmp[0]));
+		CALL_GL_API(::glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, &tmp[0]));
 
 		// up-side-down.
-		std::vector<ScreenShotImageType> dst(m_width * m_height);
+		std::vector<ScreenShotImageType> dst(width * height);
 
 		static const int bpp = sizeof(ScreenShotImageType);
-		const int pitch = m_width * bpp;
+		const int pitch = width * bpp;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-		for (int y = 0; y < m_height; y++) {
-			int yy = m_height - 1 - y;
+		for (int y = 0; y < height; y++) {
+			int yy = height - 1 - y;
 
 			memcpy(
-				&dst[yy * m_width],
-				&tmp[y * m_width],
+				&dst[yy * width],
+				&tmp[y * width],
 				pitch);
 		}
 
-		auto ret = ::stbi_write_png(filename, m_width, m_height, bpp, &dst[0], pitch);
+		auto ret = ::stbi_write_png(filename, width, height, bpp, &dst[0], pitch);
 		AT_ASSERT(ret > 0);
 	}
 

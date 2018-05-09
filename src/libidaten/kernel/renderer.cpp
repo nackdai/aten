@@ -74,6 +74,7 @@ namespace idaten {
 
 		if (vtxs.empty()) {
 			m_vtxparamsPos.init(nullptr, 1, advanceVtxNum);
+			m_vtxparamsNml.init(nullptr, 1, advanceVtxNum);
 		}
 		else {
 			// TODO

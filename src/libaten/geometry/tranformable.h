@@ -54,7 +54,6 @@ namespace aten
 		virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
 		{
 			// Nothing is done...
-			AT_ASSERT(false);
 		}
 
 		static uint32_t getShapeNum();

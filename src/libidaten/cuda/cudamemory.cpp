@@ -34,22 +34,22 @@ namespace idaten {
 		}
 	}
 
-	uint32_t CudaMemory::write(const void* p, uint32_t size, uint32_t offset/*= 0*/)
+	uint32_t CudaMemory::write(const void* p, uint32_t sizeBytes, uint32_t offsetBytes/*= 0*/)
 	{
 		if (!m_device) {
-			init(size);
+			init(sizeBytes);
 		}
 
-		if (size > m_bytes) {
+		if (sizeBytes > m_bytes) {
 			AT_ASSERT(false);
 			return 0;
 		}
 
 		uint8_t* dst = (uint8_t*)m_device;
 
-		checkCudaErrors(cudaMemcpyAsync(dst + offset, p, size, cudaMemcpyDefault));
+		checkCudaErrors(cudaMemcpyAsync(dst + offsetBytes, p, sizeBytes, cudaMemcpyDefault));
 
-		return size;
+		return sizeBytes;
 	}
 
 	uint32_t CudaMemory::read(void* p, uint32_t size)

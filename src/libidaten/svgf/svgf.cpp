@@ -83,6 +83,53 @@ namespace idaten
 		}
 	}
 
+	void SVGFPathTracing::updateGeometry(
+		std::vector<CudaGLBuffer>& vertices,
+		uint32_t vtxOffsetCount,
+		TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+		uint32_t triOffsetCount)
+	{
+		// Vertex position.
+		{
+			vertices[0].map();
+
+			aten::vec4* data = nullptr;
+			size_t bytes = 0;
+			vertices[0].bind((void**)&data, bytes);
+
+			uint32_t num = (uint32_t)(bytes / sizeof(float4));
+
+			m_vtxparamsPos.update(data, 1, num, vtxOffsetCount);
+
+			vertices[0].unbind();
+			vertices[0].unmap();
+		}
+
+		// Vertex normal.
+		{
+			vertices[1].map();
+
+			aten::vec4* data = nullptr;
+			size_t bytes = 0;
+			vertices[1].bind((void**)&data, bytes);
+
+			uint32_t num = (uint32_t)(bytes / sizeof(float4));
+
+			m_vtxparamsNml.update(data, 1, num, vtxOffsetCount);
+
+			vertices[1].unbind();
+			vertices[1].unmap();
+		}
+
+		// Triangles.
+		{
+			auto size = triangles.bytes();
+			auto offset = triOffsetCount * triangles.stride();
+
+			m_primparams.write(triangles.ptr(), size, offset);
+		}
+	}
+
 	void SVGFPathTracing::setGBuffer(
 		GLuint gltexGbuffer,
 		GLuint gltexMotionDepthbuffer)

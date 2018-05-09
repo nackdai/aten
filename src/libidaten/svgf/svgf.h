@@ -130,6 +130,12 @@ namespace idaten
 			const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
 			const std::vector<aten::mat4>& mtxs);
 
+		void updateGeometry(
+			std::vector<CudaGLBuffer>& vertices,
+			uint32_t vtxOffsetCount,
+			TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+			uint32_t triOffsetCount);
+
 		void setGBuffer(
 			GLuint gltexGbuffer,
 			GLuint gltexMotionDepthbuffer);
@@ -201,6 +207,11 @@ namespace idaten
 		{
 			m_nmlThresholdTF = nTh;
 			m_depthThresholdTF = zTh;
+		}
+
+		void setCanSSRTHitTest(bool f)
+		{
+			m_canSSRTHitTest = f;
 		}
 
 	protected:

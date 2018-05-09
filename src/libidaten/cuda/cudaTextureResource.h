@@ -29,7 +29,8 @@ namespace idaten
 		void update(
 			const aten::vec4* p,
 			uint32_t memberNumInItem,
-			uint32_t numOfContaints);
+			uint32_t numOfContaints,
+			uint32_t offsetCount = 0);
 
 	private:
 		void onInit(

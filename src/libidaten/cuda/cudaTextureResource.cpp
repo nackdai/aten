@@ -87,11 +87,14 @@ namespace idaten
 	void CudaTextureResource::update(
 		const aten::vec4* p,
 		uint32_t memberNumInItem,
-		uint32_t numOfContaints)
+		uint32_t numOfContaints,
+		uint32_t offsetCount/*= 0*/)
 	{
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
-		checkCudaErrors(cudaMemcpyAsync(m_buffer, p, size, cudaMemcpyHostToDevice));
+		float4* dst = (float4*)m_buffer;
+
+		checkCudaErrors(cudaMemcpyAsync(dst + offsetCount, p, size, cudaMemcpyHostToDevice));
 	}
 
 	/////////////////////////////////////////////////////

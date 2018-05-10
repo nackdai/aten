@@ -5,10 +5,6 @@ precision highp int;
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 normal;
 
-// NOTE
-// グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.
-// そのため、シェーダでは計算する必要がないので、シェーダに渡されてこない.
-
 uniform mat4 mtxW2C;
 
 layout(location = 0) out vec3 outNormal;

@@ -137,11 +137,13 @@ void onRun(aten::window* window)
 
 	aten::GLProfiler::begin();
 
+#if 0
 	g_rasterizer.draw(
 		g_tracer.frame(),
 		&g_scene,
 		&g_camera,
 		&g_fbo);
+#endif
 
 	auto rasterizerTime = aten::GLProfiler::end();
 

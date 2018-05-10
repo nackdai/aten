@@ -60,32 +60,34 @@ namespace aten {
 
 	bool texture::initAsGLTexture()
 	{
-		AT_VRETURN(m_width > 0, false);
-		AT_VRETURN(m_height > 0, false);
-		AT_VRETURN(m_colors.size() > 0, false);
+		if (m_gltex == 0) {
+			AT_VRETURN(m_width > 0, false);
+			AT_VRETURN(m_height > 0, false);
+			AT_VRETURN(m_colors.size() > 0, false);
 
-		CALL_GL_API(::glGenTextures(1, &m_gltex));
-		AT_VRETURN(m_gltex > 0, false);
+			CALL_GL_API(::glGenTextures(1, &m_gltex));
+			AT_VRETURN(m_gltex > 0, false);
 
-		CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_gltex));
+			CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_gltex));
 
-		CALL_GL_API(glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RGBA32F,
-			m_width, m_height,
-			0,
-			GL_RGBA,
-			GL_FLOAT,
-			&m_colors[0]));
+			CALL_GL_API(glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				GL_RGBA32F,
+				m_width, m_height,
+				0,
+				GL_RGBA,
+				GL_FLOAT,
+				&m_colors[0]));
 
-		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+			CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-		CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+			CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+			CALL_GL_API(::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
 
-		CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, 0));
+			CALL_GL_API(::glBindTexture(GL_TEXTURE_2D, 0));
+		}
 
 		return true;
 	}

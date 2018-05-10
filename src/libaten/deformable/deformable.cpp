@@ -193,6 +193,14 @@ namespace aten
 		if (!m_accel) {
 			m_accel = accelerator::createAccelerator(AccelType::UserDefs);
 		}
+
+		const auto& desc = m_mesh.getDesc();
+
+		// TODO
+		// Not applied animation...
+		setBoundingBox(aabb(
+			aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
+			aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
 	}
 
 	//////////////////////////////////////////////////////////////

@@ -56,17 +56,6 @@ namespace aten
 			return m_mesh.getVBForGPUSkinning();
 		}
 
-		virtual const aabb& getBoundingbox() const override final
-		{
-			const auto& desc = m_mesh.getDesc();
-
-			// TODO
-			// Not applied animation...
-			return std::move(aabb(
-				aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
-				aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
-		}
-
 		virtual const aten::GeomParameter& getParam() const override final
 		{
 			return m_param;

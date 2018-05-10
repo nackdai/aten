@@ -737,6 +737,9 @@ uint32_t GeometryChunkExporter::exportVertices(
     uint32_t nVBCnt = 0;
     uint32_t nPrevFmt = 0;
 
+	m_vMin = aten::vec4(AT_MATH_INF);
+	m_vMax = aten::vec4(-AT_MATH_INF);
+
     for (size_t i = 0; i < m_MeshList.size(); i++) {
         MeshInfo& sMesh = m_MeshList[i];
 
@@ -816,9 +819,6 @@ bool GeometryChunkExporter::exportVertices(
 		(uint32_t)aten::MeshVertexSize::UV,
 		(uint32_t)aten::MeshVertexSize::Tangent,
     };
-
-	m_vMin = aten::vec4(AT_MATH_INF);
-	m_vMax = aten::vec4(-AT_MATH_INF);
 
     bool bEnableSkin = (m_SkinList.size() > 0);
 

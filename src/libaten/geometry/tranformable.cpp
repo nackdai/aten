@@ -35,12 +35,9 @@ namespace aten
 			}
 		}
 
-		if (getParam().type == GeometryType::Polygon)
-		{
-			auto it = std::find(g_transformablesPolygonObjList.begin(), g_transformablesPolygonObjList.end(), this);
-			if (it != g_transformablesPolygonObjList.end()) {
-				g_transformablesPolygonObjList.erase(it);
-			}
+		auto it = std::find(g_transformablesPolygonObjList.begin(), g_transformablesPolygonObjList.end(), this);
+		if (it != g_transformablesPolygonObjList.end()) {
+			g_transformablesPolygonObjList.erase(it);
 		}
 	}
 

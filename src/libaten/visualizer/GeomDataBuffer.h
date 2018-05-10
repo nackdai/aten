@@ -109,6 +109,11 @@ namespace aten {
 			return m_vbo;
 		}
 
+		bool isInitialized() const
+		{
+			return m_vbo > 0;
+		}
+
 	private:
 		void* beginMap(bool isRead);
 		void endMap();

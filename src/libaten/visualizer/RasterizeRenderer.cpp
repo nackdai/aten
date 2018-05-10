@@ -207,16 +207,47 @@ namespace aten {
 		const camera* cam,
 		accelerator* accel)
 	{
+		prepareForDrawAABB(cam);
+
+		auto hMtxL2W = m_shader.getHandle("mtxL2W");
+
+		accel->drawAABB([&](const aten::mat4& mtxL2W) {
+			// Draw.
+			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+			m_boxvb.draw(aten::Primitive::Lines, 0, 12);
+		}, aten::mat4::Identity);
+	}
+
+	void RasterizeRenderer::drawAABB(
+		const camera* cam,
+		const aabb& bbox)
+	{
+		prepareForDrawAABB(cam);
+
+		auto hMtxL2W = m_shader.getHandle("mtxL2W");
+
+		aten::mat4 mtxScale;
+		mtxScale.asScale(bbox.size());
+
+		aten::mat4 mtxTrans;
+		mtxTrans.asTrans(bbox.minPos());
+
+		aten::mat4 mtxL2W = mtxTrans * mtxScale;
+
+		// Draw.
+		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+		m_boxvb.draw(aten::Primitive::Lines, 0, 12);
+	}
+	
+	void RasterizeRenderer::prepareForDrawAABB(const camera* cam)
+	{
 		// Initialize vb.
-		static bool isInitVB = false;
-		if (!isInitVB) {
+		if (!m_boxvb.isInitialized()) {
 			m_boxvb.init(
 				sizeof(aten::vertex),
 				AT_COUNTOF(boxvtx),
 				0,
 				(void*)boxvtx);
-
-			isInitVB = true;
 		}
 
 		m_shader.prepareRender(nullptr, false);
@@ -245,14 +276,6 @@ namespace aten {
 
 		auto hMtxW2C = m_shader.getHandle("mtxW2C");
 		CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
-
-		auto hMtxL2W = m_shader.getHandle("mtxL2W");
-
-		accel->drawAABB([&](const aten::mat4& mtxL2W) {
-			// Draw.
-			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
-			m_boxvb.draw(aten::Primitive::Lines, 0, 12);
-		}, aten::mat4::Identity);
 	}
 
 	void RasterizeRenderer::draw(

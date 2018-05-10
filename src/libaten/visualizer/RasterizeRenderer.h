@@ -49,6 +49,10 @@ namespace aten {
 			const camera* cam,
 			accelerator* accel);
 
+		void drawAABB(
+			const camera* cam,
+			const aabb& bbox);
+
 		using FuncSetUniform = std::function<void(shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)>;
 
 		void draw(
@@ -76,6 +80,9 @@ namespace aten {
 		{
 			s_isInitGlobalVB = false;
 		}
+
+	private:
+		void prepareForDrawAABB(const camera* cam);
 		
 	private:
 		shader m_shader;

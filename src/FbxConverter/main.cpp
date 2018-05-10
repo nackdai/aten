@@ -163,12 +163,12 @@ bool parseOption(
 {
 	{
 		cmd.add<std::string>("input", 'i', "input filename", true);
-		cmd.add<std::string>("output", 'o', "output filename base", false, "result");
+		cmd.add<std::string>("output", 'o', "output filename base", false);
 		cmd.add<std::string>("type", 't', "export type(m = model, a = animation)", true, "m");
 		cmd.add<std::string>("base", 'b', "input filename for animation base model", false);
-		cmd.add<std::string>("gpu", 'g', "export for gpu skinning");
+		cmd.add("gpu", 'g', "export for gpu skinning");
 
-		cmd.add<std::string>("help", '?', "print usage", false);
+		cmd.add("help", '?', "print usage");
 	}
 
 	bool isCmdOk = cmd.parse(argc, argv);
@@ -179,7 +179,7 @@ bool parseOption(
 	}
 
 	if (!isCmdOk) {
-		std::cerr << cmd.error() << std::endl << cmd.usage();
+		std::cerr << cmd.error_full() << std::endl << cmd.usage();
 		return false;
 	}
 
@@ -249,8 +249,8 @@ int main(int argc, char* argv[])
 		importer.open(opt.input.c_str());
 
 		std::string output = opt.output;
-		if (output.empty()) {
-			output = opt.inputFilename + ".mdl";
+		if (opt.output.empty()) {
+			output = opt.inputFilename + (opt.isExportForGPUSkinning ? "_gpu" : "") + ".mdl";
 		}
 
 		MdlExporter::exportMdl(
@@ -261,6 +261,11 @@ int main(int argc, char* argv[])
 
 		std::string mtrl;
 		{
+			output = opt.output;
+			if (opt.output.empty()) {
+				output = opt.inputFilename + ".mdl";
+			}
+
 			std::string basepath, ext, filename;
 
 			aten::getStringsFromPath(

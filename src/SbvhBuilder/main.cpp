@@ -15,9 +15,9 @@ bool parseOption(
 {
 	{
 		cmd.add<std::string>("input", 'i', "input filename", true);
-		cmd.add<std::string>("output", 'o', "output filename base", false, "result");
+		cmd.add<std::string>("output", 'o', "output filename base", false);
 
-		cmd.add<std::string>("help", '?', "print usage", false);
+		cmd.add("help", '?', "print usage");
 	}
 
 	bool isCmdOk = cmd.parse(argc, argv);

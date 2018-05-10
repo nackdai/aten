@@ -18,6 +18,8 @@ aten::DeformAnimation g_anm;
 
 aten::Timeline g_timeline;
 
+static aten::RasterizeRenderer g_rasterizerAABB;
+
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
@@ -25,6 +27,7 @@ static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
 static bool g_willShowGUI = true;
+static bool g_willShowAABB = true;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
@@ -84,6 +87,12 @@ void onRun(aten::window* window)
 		g_cntScreenShot++;
 
 		AT_PRINTF("Take Screenshot[%s]\n", buffer);
+	}
+
+	if (g_willShowAABB) {
+		g_rasterizerAABB.drawAABB(
+			&g_camera,
+			aten::aabb(aabbMin, aabbMax));
 	}
 }
 
@@ -146,6 +155,10 @@ void onKey(bool press, aten::Key key)
 		}
 		else if (key == aten::Key::Key_F2) {
 			g_willTakeScreenShot = true;
+			return;
+		}
+		else if (key == aten::Key::Key_F3) {
+			g_willShowAABB = !g_willShowAABB;
 			return;
 		}
 	}
@@ -279,6 +292,11 @@ int main(int argc, char* argv[])
 		onMouseMove,
 		onMouseWheel,
 		onKey);
+
+	g_rasterizerAABB.init(
+		WIDTH, HEIGHT,
+		"../shader/simple3d_vs.glsl",
+		"../shader/simple3d_fs.glsl");
 
 	s_isGPUSkinning = true;
 

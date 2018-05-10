@@ -127,8 +127,9 @@ namespace aten
 				const auto mtrl = *found;
 				const auto& mtrlParam = mtrl->param();
 
-				auto albedo = texture::getTexture(mtrlParam.albedoMap);
+				auto albedo = const_cast<texture*>(texture::getTexture(mtrlParam.albedoMap));
 				if (albedo) {
+					albedo->initAsGLTexture();
 					albedo->bindAsGLTexture(0, m_shd);
 				}
 			}
@@ -201,6 +202,32 @@ namespace aten
 		setBoundingBox(aabb(
 			aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
 			aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
+	}
+
+	class DeformMeshRenderHelperDummy : public IDeformMeshRenderHelper {
+	public:
+		DeformMeshRenderHelperDummy() {}
+		virtual ~DeformMeshRenderHelperDummy() {}
+
+		virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final {}
+		virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final {}
+		virtual void commitChanges() override final {}
+	};
+
+	void deformable::draw(
+		aten::hitable::FuncPreDraw func,
+		const aten::mat4& mtxL2W,
+		const aten::mat4& mtxPrevL2W,
+		int parentId,
+		uint32_t triOffset)
+	{
+		int objid = (parentId < 0 ? id() : parentId);
+
+		func(mtxL2W, mtxPrevL2W, objid, triOffset);
+
+		DeformMeshRenderHelperDummy dummy;
+
+		m_mesh.render(m_sklController, &dummy);
 	}
 
 	//////////////////////////////////////////////////////////////

@@ -121,8 +121,15 @@ namespace aten {
 
 	void scene::draw(aten::hitable::FuncPreDraw func)
 	{
+		uint32_t triOffset = 0;
+
 		for (auto h : m_tmp) {
-			h->draw(func, aten::mat4::Identity, aten::mat4::Identity);
+			h->draw(func, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
+
+			auto item = h->getHasObject();
+			if (item) {
+				triOffset += item->getTriangleCount();
+			}
 		}
 	}
 }

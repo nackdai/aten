@@ -47,6 +47,12 @@ namespace aten
 			return m_groups[0].getVBForGPUSkinning();
 		}
 
+		uint32_t getTriangleCount() const
+		{
+			// TODO
+			return m_groups[0].getTriangleCount();
+		}
+
 	private:
 		MeshHeader m_header;
 

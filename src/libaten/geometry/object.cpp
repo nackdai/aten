@@ -186,8 +186,12 @@ namespace AT_NAME
 		aten::hitable::FuncPreDraw func,
 		const aten::mat4& mtxL2W,
 		const aten::mat4& mtxPrevL2W,
-		int parentId)
+		int parentId,
+		uint32_t triOffset)
 	{
+		// TODO
+		// Currently ignore "triOffset"...
+
 		int objid = (parentId < 0 ? id() : parentId);
 
 		for (auto s : shapes) {

@@ -46,6 +46,13 @@ namespace aten
 
 		const std::vector<mat4>& getMatrices() const;
 
+		virtual void draw(
+			aten::hitable::FuncPreDraw func,
+			const aten::mat4& mtxL2W,
+			const aten::mat4& mtxPrevL2W,
+			int parentId,
+			uint32_t triOffset) override final;
+
 		bool isEnabledForGPUSkinning() const
 		{
 			return m_mesh.getDesc().isGPUSkinning;
@@ -64,6 +71,11 @@ namespace aten
 		virtual aten::accelerator* getInternalAccelerator() override final
 		{
 			return m_accel;
+		}
+
+		virtual uint32_t getTriangleCount() const override final
+		{
+			return m_mesh.getTriangleCount();
 		}
 
 	private:

@@ -235,13 +235,14 @@ namespace aten {
 #endif
 		}
 
-		using FuncPreDraw = std::function<void(const aten::mat4&, const aten::mat4&, int, int)>;
+		using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int parentId, int basePrimId)>;
 
 		virtual void draw(
 			FuncPreDraw func,
 			const aten::mat4& mtxL2W,
 			const aten::mat4& mtxPrevL2W,
-			int parentId = -1)
+			int parentId,
+			uint32_t triOffset)
 		{
 			// For rasterize rendering.
 			AT_ASSERT(false);
@@ -265,6 +266,11 @@ namespace aten {
 		virtual void update()
 		{
 			// Nothing is done...
+		}
+
+		virtual uint32_t getTriangleCount() const
+		{
+			return 0;
 		}
 
 		void setName(const char* name)

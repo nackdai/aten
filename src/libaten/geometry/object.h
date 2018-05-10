@@ -48,7 +48,8 @@ namespace AT_NAME
 			aten::hitable::FuncPreDraw func,
 			const aten::mat4& mtxL2W,
 			const aten::mat4& mtxPrevL2W,
-			int parentId) override final;
+			int parentId,
+			uint32_t triOffset) override final;
 
 		void draw(AT_NAME::FuncObjectMeshDraw func);
 
@@ -67,6 +68,11 @@ namespace AT_NAME
 			std::vector<AT_NAME::material*>& mtrls);
 
 		virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const override final;
+
+		virtual uint32_t getTriangleCount() const override final
+		{
+			return m_triangles;
+		}
 
 	private:
 		void build();

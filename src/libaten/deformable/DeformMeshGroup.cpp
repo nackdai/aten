@@ -52,11 +52,20 @@ namespace aten
 			}
 		}
 
+		// Read mesh data..
 		{
 			m_meshs.resize(m_desc.numMeshSet);
 
+			m_triangles = 0;
+
 			for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
 				AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, m_vbs, isGPUSkinning));
+
+				for (const auto& prim : m_meshs[i].m_prims) {
+					AT_ASSERT(prim.m_desc.numIdx % 3 == 0);
+					auto triNum = prim.m_desc.numIdx / 3;
+					m_triangles += triNum;
+				}
 			}
 		}
 

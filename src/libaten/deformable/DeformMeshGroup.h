@@ -41,6 +41,11 @@ namespace aten
 			return m_vbForGPUSkinning;
 		}
 
+		uint32_t getTriangleCount() const
+		{
+			return m_triangles;
+		}
+
 	private:
 		MeshGroup m_desc;
 
@@ -49,6 +54,8 @@ namespace aten
 
 		std::vector<DeformMeshSet> m_meshs;
 		std::vector<GeomVertexBuffer> m_vbs;
+
+		uint32_t m_triangles{ 0 };
 
 		GeomMultiVertexBuffer m_vbForGPUSkinning;
 	};

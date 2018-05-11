@@ -41,7 +41,9 @@ namespace aten
 			auto newbox = left->getBoundingbox();
 
 			// Expand.
-			newbox.expand(right->getBoundingbox());
+			if (right) {
+				newbox.expand(right->getBoundingbox());
+			}
 
 			// Set new box.
 			node->setBoundingBox(newbox);

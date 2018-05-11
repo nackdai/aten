@@ -63,6 +63,7 @@ And Idanten includes characters of aten, "id**aten**"
 - Others
   - Instancing
   - Scene Definition by XML
+  - Deformation (Experimental)
 
 ## Limitations
   
@@ -72,6 +73,7 @@ And Idanten includes characters of aten, "id**aten**"
   - Only Area Light
 - Scene Definition by XML
   - Can not specify all definitions.
+- Not support texture alpha yet.
 - There are some Japanese comments...
 
 ## Under Construction Works
@@ -140,3 +142,9 @@ PSSMLT 10spp 10mlt 10mutation
 GPGPU 1spp
 
 ![GPGPU_1spp](gallery/gpgpu_1spp.png)
+
+Deformation
+
+![Deformation](gallery/deform.png)
+
+? Unity Technologies Japan/UCL

@@ -19,8 +19,8 @@
 #define ENABLE_ENVMAP
 #define ENALBE_GPU_TRACER
 
-static int WIDTH = 512;
-static int HEIGHT = 512;
+static int WIDTH = 1280;
+static int HEIGHT = 720;
 static const char* TITLE = "deform";
 
 #ifdef ENABLE_OMP
@@ -114,6 +114,50 @@ static bool g_frameStep = false;
 static bool g_pickPixel = false;
 
 #ifdef ENALBE_GPU_TRACER
+void update()
+{
+	auto deform = getDeformable();
+
+	if (deform) {
+		auto mdl = deform->getHasObjectAsRealType();
+
+		const auto& mtx = mdl->getMatrices();
+		g_skinning.update(&mtx[0], mtx.size());
+
+		aten::vec3 aabbMin, aabbMax;
+
+		g_skinning.compute(0, aabbMin, aabbMax);
+
+		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
+		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
+
+		auto& vtxPos = g_skinning.getInteropVBO()[0];
+		auto& tris = g_skinning.getTriangles();
+
+		// TODO
+		int triIdOffset = 0;
+
+		auto& cpunodes = g_scene.getAccel()->getNodes();
+
+		// NOTE
+		// 0 is for top layer.
+		idaten::LBVHBuilder::build(
+			nodes[1],
+			tris,
+			triIdOffset,
+			sceneBbox,
+			vtxPos,
+			(std::vector<aten::ThreadedBvhNode>*)&cpunodes[1]);
+
+		// Copy computed vertices, triangles to the tracer.
+		g_tracer.updateGeometry(
+			g_skinning.getInteropVBO(),
+			0,
+			g_skinning.getTriangles(),
+			0);
+	}
+}
+
 void onRun(aten::window* window)
 {
 	if (g_enableFrameStep && !g_frameStep) {
@@ -123,6 +167,8 @@ void onRun(aten::window* window)
 	auto frame = g_tracer.frame();
 
 	g_frameStep = false;
+
+	update();
 
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -537,14 +583,6 @@ int main()
 			&deformTris[0], deformTris.size(),
 			&vb);
 
-		// TODO
-		const auto& mtx = mdl->getMatrices();
-		g_skinning.update(&mtx[0], mtx.size());
-
-		aten::vec3 aabbMin, aabbMax;
-
-		g_skinning.compute(0, aabbMin, aabbMax);
-
 		advanceVtxNum = vtx.size();
 		advanceTriNum = deformTris.size();
 	}
@@ -616,37 +654,7 @@ int main()
 	}
 
 	// For LBVH.
-	if (deform)
-	{
-		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
-		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
-
-		auto& vtxPos = g_skinning.getInteropVBO()[0];
-		auto& tris = g_skinning.getTriangles();
-
-		// TODO
-		int triIdOffset = 0;
-
-		auto& cpunodes = g_scene.getAccel()->getNodes();
-
-		// NOTE
-		// 0 is for top layer.
-		idaten::LBVHBuilder::build(
-			nodes[1],
-			tris,
-			triIdOffset,
-			sceneBbox,
-			vtxPos,
-			(std::vector<aten::ThreadedBvhNode>*)&cpunodes[1]);
-
-		// Copy computed vertices, triangles to the tracer.
-		g_tracer.updateGeometry(
-			g_skinning.getInteropVBO(),
-			0,
-			g_skinning.getTriangles(),
-			0);
-	}
-	else
+	if (!deform)
 	{
 		std::vector<std::vector<aten::PrimitiveParamter>> triangles;
 		std::vector<int> triIdOffsets;

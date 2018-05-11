@@ -72,6 +72,7 @@ namespace idaten {
 	{
 		if (m_device) {
 			checkCudaErrors(cudaFree(m_device));
+			m_device = nullptr;
 
 			g_heapsize -= m_bytes;
 		}

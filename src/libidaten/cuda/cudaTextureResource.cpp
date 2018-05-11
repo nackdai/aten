@@ -36,7 +36,9 @@ namespace idaten
 	{
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
-		checkCudaErrors(cudaMalloc(&m_buffer, size));
+		if (!m_buffer) {
+			checkCudaErrors(cudaMalloc(&m_buffer, size));
+		}
 
 		if (p) {
 			checkCudaErrors(cudaMemcpyAsync(

@@ -109,9 +109,6 @@ static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
 static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
 static bool g_showAABB = false;
 
-static bool g_enableFrameStep = false;
-static bool g_frameStep = false;
-
 static bool g_pickPixel = false;
 
 #ifdef ENALBE_GPU_TRACER
@@ -202,13 +199,7 @@ void update()
 
 void onRun(aten::window* window)
 {
-	if (g_enableFrameStep && !g_frameStep) {
-		return;
-	}
-
 	auto frame = g_tracer.frame();
-
-	g_frameStep = false;
 
 	update();
 
@@ -445,18 +436,16 @@ void onKey(bool press, aten::Key key)
 			g_willTakeScreenShot = true;
 			return;
 		}
-		else if (key == aten::Key::Key_F3) {
-			g_enableFrameStep = !g_enableFrameStep;
-			return;
-		}
 		else if (key == aten::Key::Key_F5) {
 			aten::GLProfiler::trigger();
 			return;
 		}
 		else if (key == aten::Key::Key_SPACE) {
-			if (g_enableFrameStep) {
-				g_frameStep = true;
-				return;
+			if (g_timeline.isPaused()) {
+				g_timeline.start();
+			}
+			else {
+				g_timeline.pause();
 			}
 		}
 		else if (key == aten::Key::Key_CONTROL) {

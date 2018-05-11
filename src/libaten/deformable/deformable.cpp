@@ -135,7 +135,7 @@ namespace aten
 			}
 		}
 
-		virtual void commitChanges(bool isGPUSkinning) override final
+		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
 		{
 			if (isGPUSkinning) {
 				return;
@@ -215,17 +215,17 @@ namespace aten
 
 		virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final {}
 		virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final {}
-		virtual void commitChanges(bool isGPUSkinning) override final
+		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
 		{
 			AT_ASSERT(isGPUSkinning)
-			func(mtxL2W, mtxPrevL2W, objid, triOffset);
+			func(mtxL2W, mtxPrevL2W, objid, triOffset + globalTriOffset);
 		}
 
 		aten::hitable::FuncPreDraw func;
 		aten::mat4 mtxL2W;
 		aten::mat4 mtxPrevL2W;
 		int objid;
-		uint32_t triOffset;
+		uint32_t globalTriOffset;
 	};
 
 	void deformable::draw(
@@ -243,7 +243,7 @@ namespace aten
 			helper.mtxL2W = mtxL2W;
 			helper.mtxPrevL2W = mtxPrevL2W;
 			helper.objid = objid;
-			helper.triOffset = triOffset;
+			helper.globalTriOffset = triOffset;
 		}
 
 		m_mesh.render(m_sklController, &helper);

@@ -22,7 +22,7 @@ namespace aten
 	public:
 		virtual void applyMatrix(uint32_t idx, const mat4& mtx) = 0;
 		virtual void applyMaterial(const MeshMaterial& mtrlDesc) = 0;
-		virtual void commitChanges(bool isGPUSkinning) = 0;
+		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) = 0;
 	};
 
 	/** プリミティブデータ.
@@ -65,6 +65,12 @@ namespace aten
 		void getIndices(std::vector<uint32_t>& indices) const;
 
 	private:
+		void setTriOffset(uint32_t offset)
+		{
+			m_triOffset = offset;
+		}
+
+	private:
 		PrimitiveSet m_desc;
 
 		// ジョイントインデックス.
@@ -74,5 +80,7 @@ namespace aten
 
 		GeomVertexBuffer* m_vb{ nullptr };
 		GeomIndexBuffer m_ib;
+
+		uint32_t m_triOffset{ 0 };
 	};
 }

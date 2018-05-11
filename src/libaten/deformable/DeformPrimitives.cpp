@@ -56,7 +56,7 @@ namespace aten
 			}
 		}
 
-		helper->commitChanges(isGPUSkinning);
+		helper->commitChanges(isGPUSkinning, m_triOffset);
 
 		uint32_t primNum = m_desc.numIdx / 3;
 

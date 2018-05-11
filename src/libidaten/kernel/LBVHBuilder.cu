@@ -1,5 +1,4 @@
 #include "kernel/LBVHBuilder.h"
-#include "kernel/RadixSort.h"
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
@@ -561,8 +560,27 @@ __global__ void genMortonCode(
 
 namespace idaten
 {
+	void LBVHBuilder::init(uint32_t maxNum)
+	{
+		m_mortonCodes.init(maxNum);
+		m_indices.init(maxNum);
+
+		m_sort.init(maxNum, maxNum);
+
+		uint32_t numInternalNode = maxNum - 1;
+		uint32_t numLeaves = maxNum;
+
+		m_nodesLbvh.init(numInternalNode + numLeaves);
+
+		m_nodes.init(numInternalNode + numLeaves);
+
+		if (!m_executedIdxArray) {
+			checkCudaErrors(cudaMalloc(&m_executedIdxArray, (maxNum - 1) * sizeof(uint32_t)));
+		}
+	}
+
 	template <typename T>
-	void onBuild(
+	void LBVHBuilder::onBuild(
 		idaten::CudaTextureResource& dst,
 		TypedCudaMemory<aten::PrimitiveParamter>& triangles,
 		int triIdOffset,
@@ -570,13 +588,7 @@ namespace idaten
 		T vtxPos,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes)
 	{
-		TypedCudaMemory<uint32_t> mortonCodes;
-		TypedCudaMemory<uint32_t> indices;
-
 		uint32_t numOfElems = (uint32_t)triangles.num();
-
-		mortonCodes.init(numOfElems);
-		indices.init(numOfElems);
 
 		// Compute morton code.
 		{
@@ -590,22 +602,21 @@ namespace idaten
 				sceneBbox,
 				triangles.ptr(),
 				vtxPos,
-				mortonCodes.ptr(),
-				indices.ptr());
+				m_mortonCodes.ptr(),
+				m_indices.ptr());
 
 			checkCudaKernel(genMortonCode);
 		}
 
 		// Radix sort.
-		TypedCudaMemory<uint32_t> sortedKeys;
-		std::vector<uint32_t> v;
-		RadixSort::sort(mortonCodes, indices, sortedKeys, &v);
+		m_sort.sort(
+			m_mortonCodes, 
+			m_indices, 
+			m_sortedKeys, 
+			nullptr);
 
 		uint32_t numInternalNode = numOfElems - 1;
 		uint32_t numLeaves = numOfElems;
-
-		TypedCudaMemory<LBVHBuilder::LBVHNode> nodesLbvh;
-		nodesLbvh.init(numInternalNode + numLeaves);
 
 		// Build tree.
 		{
@@ -614,14 +625,11 @@ namespace idaten
 
 			buildTree << <grid, block >> > (
 				numOfElems,
-				sortedKeys.ptr(),
-				nodesLbvh.ptr());
+				m_sortedKeys.ptr(),
+				m_nodesLbvh.ptr());
 
 			checkCudaKernel(buildTree);
 		}
-
-		TypedCudaMemory<aten::ThreadedBvhNode> nodes;
-		nodes.init(numInternalNode + numLeaves);
 
 		// Convert to gpu bvh tree nodes.
 		{
@@ -634,8 +642,8 @@ namespace idaten
 				numOfElems,
 				numLeaves,
 				triIdOffset,
-				nodesLbvh.ptr(),
-				nodes.ptr());
+				m_nodesLbvh.ptr(),
+				m_nodes.ptr());
 
 			checkCudaKernel(applyTraverseOrder);
 		}
@@ -644,37 +652,34 @@ namespace idaten
 		{
 			uint32_t numberOfTris = triangles.num();
 
-			uint32_t* executedIdxArray;
-			checkCudaErrors(cudaMalloc(&executedIdxArray, (numberOfTris - 1) * sizeof(uint32_t)));
-			checkCudaErrors(cudaMemset(executedIdxArray, 0xFF, (numberOfTris - 1) * sizeof(uint32_t)));
-
 			dim3 block(128, 1, 1);
 			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
 
 			size_t sharedMemorySize = block.x * sizeof(float4) * 2;
 
+			// Fill 0xff.
+			checkCudaErrors(cudaMemset(m_executedIdxArray, 0xFF, (numberOfTris - 1) * sizeof(uint32_t)));
+
 			computeBoudingBox << <grid, block, sharedMemorySize >> > (
 				numberOfTris,
-				nodesLbvh.ptr(),
-				nodes.ptr(),
+				m_nodesLbvh.ptr(),
+				m_nodes.ptr(),
 				triangles.ptr(),
 				vtxPos,
-				executedIdxArray);
+				m_executedIdxArray);
 
 			checkCudaKernel(computeBoudingBox);
-
-			checkCudaErrors(cudaFree(executedIdxArray));
 		}
 
 		if (threadedBvhNodes) {
-			threadedBvhNodes->resize(nodes.num());
-			nodes.read(&(*threadedBvhNodes)[0], 0);
+			threadedBvhNodes->resize(m_nodes.num());
+			m_nodes.read(&(*threadedBvhNodes)[0], 0);
 		}
 
 		dst.initFromDeviceMemory(
-			(aten::vec4*)nodes.ptr(),
+			(aten::vec4*)m_nodes.ptr(),
 			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
-			nodes.num());
+			numInternalNode + numLeaves);
 	}
 
 	void LBVHBuilder::build(

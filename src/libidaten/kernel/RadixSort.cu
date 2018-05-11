@@ -12,6 +12,31 @@
 
 namespace idaten
 {
+	RadixSort::~RadixSort()
+	{
+		if (m_deviceKeys) {
+			thrust::device_vector<uint32_t>& deviceKeys = *(thrust::device_vector<uint32_t>*)(m_deviceKeys);
+			deviceKeys.clear();
+			delete m_deviceKeys;
+		}
+		if (m_deviceIndices) {
+			thrust::device_vector<uint32_t>& deviceIndices = *(thrust::device_vector<uint32_t>*)(m_deviceIndices);
+			deviceIndices.clear();
+			delete m_deviceIndices;
+		}
+	}
+
+	void RadixSort::init(uint32_t valueNum, uint32_t indexNum)
+	{
+		if (!m_deviceKeys) {
+			m_deviceKeys = new thrust::device_vector<uint32_t>(valueNum);
+		}
+
+		if (!m_deviceIndices) {
+			m_deviceIndices = new thrust::device_vector<uint32_t>(indexNum);
+		}
+	}
+
 	void RadixSort::sort(
 		const std::vector<uint32_t>& values,
 		TypedCudaMemory<uint32_t>& dst,
@@ -50,9 +75,12 @@ namespace idaten
 		TypedCudaMemory<uint32_t>& dst,
 		std::vector<uint32_t>* result/*= nullptr*/)
 	{
+		AT_ASSERT(m_deviceKeys);
+		AT_ASSERT(m_deviceIndices);
+
 		// copy unsorted data from host to device
-		thrust::device_vector<uint32_t> deviceKeys(values.num());
-		thrust::device_vector<uint32_t> deviceIndices(indices.num());
+		thrust::device_vector<uint32_t>& deviceKeys = *(thrust::device_vector<uint32_t>*)(m_deviceKeys);
+		thrust::device_vector<uint32_t>& deviceIndices = *(thrust::device_vector<uint32_t>*)(m_deviceIndices);
 
 		auto keys = thrust::raw_pointer_cast(deviceKeys.data());
 		checkCudaErrors(cudaMemcpyAsync(keys, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));
@@ -60,16 +88,16 @@ namespace idaten
 		auto ids = thrust::raw_pointer_cast(deviceIndices.data());
 		checkCudaErrors(cudaMemcpyAsync(ids, indices.ptr(), indices.bytes(), cudaMemcpyDeviceToDevice));
 
-		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.end(), deviceIndices.begin());
+		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.begin() + values.num(), deviceIndices.begin());
 
 		auto sortedKeys = thrust::raw_pointer_cast(deviceKeys.data());
 
 		dst.init(deviceKeys.size() * sizeof(uint32_t));
-		dst.writeByNum(sortedKeys, deviceKeys.size());
+		dst.writeByNum(sortedKeys, values.num());
 
 		if (result) {
 			thrust::host_vector<uint32_t> hostKeys = deviceKeys;
-			for (int i = 0; i < hostKeys.size(); i++) {
+			for (int i = 0; i < values.num(); i++) {
 				result->push_back(hostKeys[i]);
 			}
 		}

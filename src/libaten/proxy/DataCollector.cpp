@@ -62,7 +62,7 @@ namespace aten {
 			mtrlparms.push_back(m->param());
 		}
 
-#if 0
+#if 1
 		const auto& faces = aten::face::faces();
 
 		for (auto f : faces) {

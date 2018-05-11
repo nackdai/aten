@@ -66,6 +66,17 @@ namespace idaten
 			const std::vector<TextureResource>& texs,
 			const EnvmapResource& envmapRsc) override;
 
+		void update(
+			const std::vector<aten::GeomParameter>& geoms,
+			const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+			const std::vector<aten::mat4>& mtxs);
+
+		void updateGeometry(
+			std::vector<CudaGLBuffer>& vertices,
+			uint32_t vtxOffsetCount,
+			TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+			uint32_t triOffsetCount);
+
 		void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
 
 		virtual void enableRenderAOV(
@@ -81,6 +92,11 @@ namespace idaten
 		bool isProgressive() const
 		{
 			return m_enableProgressive;
+		}
+
+		int frame() const
+		{
+			return m_frame;
 		}
 
 	protected:

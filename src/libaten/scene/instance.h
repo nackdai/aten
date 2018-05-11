@@ -151,9 +151,9 @@ namespace aten
 			return m_obj->isDeformable();
 		}
 
-		virtual void update()
+		virtual void update(bool isForcibly = false)
 		{
-			if (m_isDirty) {
+			if (m_isDirty || isForcibly) {
 				updateMatrix();
 				setBoundingBox(getTransformedBoundingBox());
 				onNotifyChanged();
@@ -254,7 +254,7 @@ namespace aten
 
 		vec3 m_trans;
 		vec3 m_rot;
-		vec3 m_scale;
+		vec3 m_scale{ aten::vec3(1, 1, 1) };
 
 		bool m_isDirty{ false };
 

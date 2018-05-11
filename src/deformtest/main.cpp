@@ -16,8 +16,10 @@
 
 #include "scenedefs.h"
 
+#pragma optimize( "", off)
+
 #define ENABLE_ENVMAP
-#define ENALBE_GPU_TRACER
+#define ENABLE_SVGF
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -78,7 +80,11 @@ static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 
+#ifdef ENABLE_SVGF
 static idaten::SVGFPathTracing g_tracer;
+#else
+static idaten::PathTracing g_tracer;
+#endif
 
 static aten::PathTracing g_cputracer;
 static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
@@ -97,7 +103,9 @@ static aten::RasterizeRenderer g_rasterizerAABB;
 static aten::shader g_shdRasterizeDeformable;
 
 static idaten::Skinning g_skinning;
-aten::Timeline g_timeline;
+static aten::Timeline g_timeline;
+
+static idaten::LBVHBuilder g_lbvh;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -111,7 +119,6 @@ static bool g_showAABB = false;
 
 static bool g_pickPixel = false;
 
-#ifdef ENALBE_GPU_TRACER
 void update()
 {
 	auto deform = getDeformable();
@@ -152,13 +159,13 @@ void update()
 
 		// NOTE
 		// 0 is for top layer.
-		idaten::LBVHBuilder::build(
+		g_lbvh.build(
 			nodes[1],
 			tris,
 			triIdOffset,
 			sceneBbox,
 			vtxPos,
-			(std::vector<aten::ThreadedBvhNode>*)&cpunodes[1]);
+			nullptr);
 
 		// Copy computed vertices, triangles to the tracer.
 		g_tracer.updateGeometry(
@@ -167,7 +174,6 @@ void update()
 			g_skinning.getTriangles(),
 			0);
 
-#if 1
 		{
 			std::vector<aten::GeomParameter> shapeparams;
 			std::vector<aten::PrimitiveParamter> primparams;
@@ -193,7 +199,6 @@ void update()
 				nodes,
 				mtxs);
 		}
-#endif
 	}
 }
 
@@ -218,12 +223,14 @@ void onRun(aten::window* window)
 
 	aten::GLProfiler::begin();
 
+#ifdef ENABLE_SVGF
 	g_rasterizer.draw(
 		g_tracer.frame(),
 		&g_scene,
 		&g_camera,
 		&g_fbo,
 		&g_shdRasterizeDeformable);
+#endif
 
 	auto rasterizerTime = aten::GLProfiler::end();
 
@@ -281,6 +288,7 @@ void onRun(aten::window* window)
 			g_tracer.reset();
 		}
 
+#ifdef ENABLE_SVGF
 		static const char* items[] = { "SVGF", "TF", "PT", "VAR", "AOV" };
 
 		if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items))) {
@@ -306,6 +314,7 @@ void onRun(aten::window* window)
 		}
 
 		ImGui::Checkbox("Show AABB", &g_showAABB);
+#endif
 
 		auto cam = g_camera.param();
 		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
@@ -314,6 +323,7 @@ void onRun(aten::window* window)
 		window->drawImGui();
 	}
 
+#ifdef ENABLE_SVGF
 	idaten::SVGFPathTracing::PickedInfo info;
 	auto isPicked = g_tracer.getPickedPixelInfo(info);
 	if (isPicked) {
@@ -321,49 +331,8 @@ void onRun(aten::window* window)
 		AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
 		AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
 	}
-}
-#else
-void onRun(aten::window* wnd)
-{
-	static uint32_t g_frameNo = 0;
-	static float g_avgElapsed = 0.0f;
-
-	g_camera.update();
-
-	aten::Destination dst;
-	{
-		dst.width = WIDTH;
-		dst.height = HEIGHT;
-		dst.maxDepth = 5;
-		dst.russianRouletteDepth = 3;
-		dst.startDepth = 0;
-		dst.sample = 1;
-		dst.mutation = 10;
-		dst.mltNum = 10;
-		dst.buffer = &g_buffer;
-	}
-
-	dst.geominfo.albedo_vis = &g_buffer;
-	dst.geominfo.depthMax = 1000;
-
-	aten::timer timer;
-	timer.begin();
-
-	// Trace rays.
-	g_cputracer.render(dst, &g_scene, &g_camera);
-
-	auto elapsed = timer.end();
-
-	g_avgElapsed = g_avgElapsed * g_frameNo + elapsed;
-	g_avgElapsed /= (g_frameNo + 1);
-
-	AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, g_avgElapsed);
-
-	g_visualizer->render(g_buffer.image(), g_camera.needRevert());
-
-	g_frameNo++;
-}
 #endif
+}
 
 void onClose()
 {
@@ -387,10 +356,12 @@ void onMouseBtn(bool left, bool press, int x, int y)
 		g_isMouseLBtnDown = left;
 		g_isMouseRBtnDown = !left;
 
+#ifdef ENABLE_SVGF
 		if (g_pickPixel) {
 			g_tracer.willPickPixel(x, y);
 			g_pickPixel = false;
 		}
+#endif
 	}
 }
 
@@ -533,12 +504,15 @@ int main()
 		"../shader/fullscreen_fs.glsl");
 	blitter.setIsRenderRGB(true);
 
+#ifdef ENABLE_SVGF
 	g_taa.init(
 		WIDTH, HEIGHT,
 		"../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
 		"../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
 
 	g_visualizer->addPostProc(&g_taa);
+#endif
+
 	g_visualizer->addPostProc(&gamma);
 	//aten::visualizer::addPostProc(&blitter);
 
@@ -558,6 +532,7 @@ int main()
 		"../shader/ssrt_gs.glsl",
 		"../shader/ssrt_fs.glsl");
 
+#ifdef ENABLE_SVGF
 	g_fbo.asMulti(2);
 	g_fbo.init(
 		WIDTH, HEIGHT,
@@ -565,6 +540,7 @@ int main()
 		true);
 
 	g_taa.setMotionDepthBufferHandle(g_fbo.getTexHandle(1));
+#endif
 
 	aten::vec3 pos, at;
 	real vfov;
@@ -627,10 +603,6 @@ int main()
 	}
 
 	{
-		auto aabb = g_scene.getAccel()->getBoundingbox();
-		auto d = aabb.getDiagonalLenght();
-		g_tracer.setHitDistanceLimit(d * 0.25f);
-
 		std::vector<aten::GeomParameter> shapeparams;
 		std::vector<aten::PrimitiveParamter> primparams;
 		std::vector<aten::LightParameter> lightparams;
@@ -687,18 +659,29 @@ int main()
 			idaten::EnvmapResource());
 #endif
 
+#ifdef ENABLE_SVGF
+		auto aabb = g_scene.getAccel()->getBoundingbox();
+		auto d = aabb.getDiagonalLenght();
+		g_tracer.setHitDistanceLimit(d * 0.25f);
+
 		g_tracer.setGBuffer(
 			g_fbo.getTexHandle(0),
 			g_fbo.getTexHandle(1));
+#endif
 	}
 
 	// For LBVH.
-	if (!deform)
+	if (deform) {
+		g_lbvh.init(advanceTriNum);
+	}
+	else
 	{
 		std::vector<std::vector<aten::PrimitiveParamter>> triangles;
 		std::vector<int> triIdOffsets;
 
 		aten::DataCollector::collectTriangles(triangles, triIdOffsets);
+
+		g_lbvh.init(triangles.size());
 
 		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
@@ -720,7 +703,7 @@ int main()
 
 			// NOTE
 			// 0 is for top layer.
-			idaten::LBVHBuilder::build(
+			g_lbvh.build(
 				nodes[i + 1],	
 				tris,
 				triIdOffset,
@@ -730,9 +713,11 @@ int main()
 		}
 	}
 
+#ifdef ENABLE_SVGF
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
 	//g_tracer.setCanSSRTHitTest(false);
+#endif
 
 	aten::window::run();
 

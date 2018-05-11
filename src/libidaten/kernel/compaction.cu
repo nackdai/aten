@@ -139,8 +139,6 @@ namespace idaten
 		int maxInputNum,
 		int blockSize)
 	{
-		AT_ASSERT(m_maxInputNum == 0);
-
 		if (m_maxInputNum == 0) {
 			m_maxInputNum = maxInputNum;
 			m_blockSize = blockSize;

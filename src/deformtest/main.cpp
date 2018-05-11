@@ -97,6 +97,7 @@ static aten::RasterizeRenderer g_rasterizerAABB;
 static aten::shader g_shdRasterizeDeformable;
 
 static idaten::Skinning g_skinning;
+aten::Timeline g_timeline;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -120,6 +121,16 @@ void update()
 
 	if (deform) {
 		auto mdl = deform->getHasObjectAsRealType();
+		auto anm = getDeformAnm();
+
+		if (anm) {
+			mdl->update(aten::mat4(), anm, g_timeline.getTime());
+		}
+		else {
+			mdl->update(aten::mat4(), nullptr, 0);
+		}
+
+		g_timeline.advance(1.0f / 60.0f);
 
 		const auto& mtx = mdl->getMatrices();
 		g_skinning.update(&mtx[0], mtx.size());
@@ -127,6 +138,9 @@ void update()
 		aten::vec3 aabbMin, aabbMax;
 
 		g_skinning.compute(0, aabbMin, aabbMax);
+
+		mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
+		deform->update(true);
 
 		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
@@ -155,6 +169,34 @@ void update()
 			0,
 			g_skinning.getTriangles(),
 			0);
+
+#if 1
+		{
+			std::vector<aten::GeomParameter> shapeparams;
+			std::vector<aten::PrimitiveParamter> primparams;
+			std::vector<aten::LightParameter> lightparams;
+			std::vector<aten::MaterialParameter> mtrlparms;
+			std::vector<aten::vertex> vtxparams;
+
+			aten::DataCollector::collect(
+				shapeparams,
+				primparams,
+				lightparams,
+				mtrlparms,
+				vtxparams);
+
+			auto accel = g_scene.getAccel();
+			accel->update();
+
+			const auto& nodes = g_scene.getAccel()->getNodes();
+			const auto& mtxs = g_scene.getAccel()->getMatrices();
+
+			g_tracer.update(
+				shapeparams,
+				nodes,
+				mtxs);
+		}
+#endif
 	}
 }
 
@@ -585,6 +627,14 @@ int main()
 
 		advanceVtxNum = vtx.size();
 		advanceTriNum = deformTris.size();
+
+		auto anm = getDeformAnm();
+
+		if (anm) {
+			g_timeline.init(anm->getDesc().time, real(0));
+			g_timeline.enableLoop(true);
+			g_timeline.start();
+		}
 	}
 
 	{

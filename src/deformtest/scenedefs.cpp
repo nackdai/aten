@@ -2,10 +2,16 @@
 #include "atenscene.h"
 
 static aten::instance<aten::deformable>* s_deformMdl = nullptr;
+aten::DeformAnimation* s_deformAnm = nullptr;
 
 aten::instance<aten::deformable>* getDeformable()
 {
 	return s_deformMdl;
+}
+
+aten::DeformAnimation* getDeformAnm()
+{
+	return s_deformAnm;
 }
 
 void ObjCornellBoxScene::makeScene(aten::scene* scene)
@@ -90,6 +96,9 @@ void DeformScene::makeScene(aten::scene* scene)
 	s_deformMdl = deformMdl;
 
 	aten::ImageLoader::setBasePath("./");
+
+	s_deformAnm = new aten::DeformAnimation();
+	s_deformAnm->read("unitychan.anm");
 }
 
 void DeformScene::getCameraPosAndAt(

@@ -1,6 +1,7 @@
 #include "aten.h"
 
 aten::instance<aten::deformable>* getDeformable();
+aten::DeformAnimation* getDeformAnm();
 
 class ObjCornellBoxScene {
 public:

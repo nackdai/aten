@@ -34,8 +34,7 @@
     <ClInclude Include="..\src\deformtest\scenedefs.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\deformtest\drawobj_fs.glsl" />
-    <None Include="..\src\deformtest\drawobj_vs.glsl" />
+    <None Include="..\src\deformtest\ssrt_deformable_vs.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6CB34CD6-7181-48B8-92C3-B11776C84844}</ProjectGuid>

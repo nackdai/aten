@@ -94,6 +94,8 @@ static aten::FBO g_fbo;
 static aten::RasterizeRenderer g_rasterizer;
 static aten::RasterizeRenderer g_rasterizerAABB;
 
+static aten::shader g_shdRasterizeDeformable;
+
 static idaten::Skinning g_skinning;
 
 static bool g_willShowGUI = true;
@@ -137,13 +139,12 @@ void onRun(aten::window* window)
 
 	aten::GLProfiler::begin();
 
-#if 0
 	g_rasterizer.draw(
 		g_tracer.frame(),
 		&g_scene,
 		&g_camera,
-		&g_fbo);
-#endif
+		&g_fbo,
+		&g_shdRasterizeDeformable);
 
 	auto rasterizerTime = aten::GLProfiler::end();
 
@@ -345,7 +346,7 @@ void onMouseWheel(int delta)
 
 void onKey(bool press, aten::Key key)
 {
-	static const real offset = real(0.1);
+	static const real offset = real(0.5);
 
 	if (press) {
 		if (key == aten::Key::Key_F1) {
@@ -474,6 +475,12 @@ int main()
 		"../shader/simple3d_vs.glsl",
 		"../shader/simple3d_fs.glsl");
 
+	g_shdRasterizeDeformable.init(
+		WIDTH, HEIGHT,
+		"./ssrt_deformable_vs.glsl",
+		"../shader/ssrt_gs.glsl",
+		"../shader/ssrt_fs.glsl");
+
 	g_fbo.asMulti(2);
 	g_fbo.init(
 		WIDTH, HEIGHT,
@@ -492,11 +499,6 @@ int main()
 		aten::vec3(0, 1, 0),
 		vfov,
 		WIDTH, HEIGHT);
-
-	aten::DeformableRenderer::init(
-		WIDTH, HEIGHT,
-		"drawobj_vs.glsl",
-		"drawobj_fs.glsl");
 
 	aten::accelerator::setUserDefsInternalAccelCreator(Lbvh::create);
 
@@ -683,7 +685,7 @@ int main()
 
 	g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
 	g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
-	g_tracer.setCanSSRTHitTest(false);
+	//g_tracer.setCanSSRTHitTest(false);
 
 	aten::window::run();
 

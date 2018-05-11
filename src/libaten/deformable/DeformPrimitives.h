@@ -22,7 +22,7 @@ namespace aten
 	public:
 		virtual void applyMatrix(uint32_t idx, const mat4& mtx) = 0;
 		virtual void applyMaterial(const MeshMaterial& mtrlDesc) = 0;
-		virtual void commitChanges() = 0;
+		virtual void commitChanges(bool isGPUSkinning) = 0;
 	};
 
 	/** プリミティブデータ.

@@ -135,8 +135,12 @@ namespace aten
 			}
 		}
 
-		virtual void commitChanges() override final
+		virtual void commitChanges(bool isGPUSkinning) override final
 		{
+			if (isGPUSkinning) {
+				return;
+			}
+
 			AT_ASSERT(m_handleMtxJoint >= 0);
 
 			uint32_t mtxNum = (uint32_t)m_mtxs.size();
@@ -204,14 +208,24 @@ namespace aten
 			aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
 	}
 
-	class DeformMeshRenderHelperDummy : public IDeformMeshRenderHelper {
+	class DeformMeshRenderHelperEx : public IDeformMeshRenderHelper {
 	public:
-		DeformMeshRenderHelperDummy() {}
-		virtual ~DeformMeshRenderHelperDummy() {}
+		DeformMeshRenderHelperEx() {}
+		virtual ~DeformMeshRenderHelperEx() {}
 
 		virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final {}
 		virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final {}
-		virtual void commitChanges() override final {}
+		virtual void commitChanges(bool isGPUSkinning) override final
+		{
+			AT_ASSERT(isGPUSkinning)
+			func(mtxL2W, mtxPrevL2W, objid, triOffset);
+		}
+
+		aten::hitable::FuncPreDraw func;
+		aten::mat4 mtxL2W;
+		aten::mat4 mtxPrevL2W;
+		int objid;
+		uint32_t triOffset;
 	};
 
 	void deformable::draw(
@@ -223,11 +237,16 @@ namespace aten
 	{
 		int objid = (parentId < 0 ? id() : parentId);
 
-		func(mtxL2W, mtxPrevL2W, objid, triOffset);
+		DeformMeshRenderHelperEx helper;
+		{
+			helper.func = func;
+			helper.mtxL2W = mtxL2W;
+			helper.mtxPrevL2W = mtxPrevL2W;
+			helper.objid = objid;
+			helper.triOffset = triOffset;
+		}
 
-		DeformMeshRenderHelperDummy dummy;
-
-		m_mesh.render(m_sklController, &dummy);
+		m_mesh.render(m_sklController, &helper);
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -296,7 +315,7 @@ namespace aten
 
 	void DeformableRenderer::initDeformMeshReadHelper(DeformMeshReadHelper* helper)
 	{
-		AT_ASSERT(s_shd.isValid());
+		//AT_ASSERT(s_shd.isValid());
 		helper->m_shd = &s_shd;
 	}
 }

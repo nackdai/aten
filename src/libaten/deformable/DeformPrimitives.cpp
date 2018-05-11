@@ -54,9 +54,9 @@ namespace aten
 
 				helper->applyMatrix(i, mtxJoint);
 			}
-
-			helper->commitChanges();
 		}
+
+		helper->commitChanges(isGPUSkinning);
 
 		uint32_t primNum = m_desc.numIdx / 3;
 

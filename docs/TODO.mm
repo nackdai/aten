@@ -377,8 +377,12 @@
 </node>
 </node>
 </node>
+<node CREATED="1525927674250" HGAP="22" ID="ID_927963707" MODIFIED="1525929988192" TEXT="&#x30a2;&#x30eb;&#x30d5;&#x30a1;&#x30c6;&#x30af;&#x30b9;&#x30c1;&#x30e3;&#x5bfe;&#x5fdc;" VSHIFT="12">
+<icon BUILTIN="messagebox_warning"/>
+<icon BUILTIN="messagebox_warning"/>
 </node>
-<node CREATED="1521793174132" ID="ID_1151520209" MODIFIED="1521793180256" POSITION="right" TEXT="&#x6700;&#x9069;&#x5316;&#x30e1;&#x30e2;">
+</node>
+<node CREATED="1521793174132" HGAP="38" ID="ID_1151520209" MODIFIED="1525929981753" POSITION="right" TEXT="&#x6700;&#x9069;&#x5316;&#x30e1;&#x30e2;" VSHIFT="62">
 <node CREATED="1521793180676" ID="ID_1661881408" LINK="http://mimimopu.com/blog/2011/11/cudafermil1shared-mem.html" MODIFIED="1522223457354" TEXT="[CUDA]Fermi&#x3067;&#x306e;L1/Shared Mem &#x30b5;&#x30a4;&#x30ba;&#x5909;&#x66f4;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1522223444981" ID="ID_1489917930" MODIFIED="1522223453731" TEXT="&#x52b9;&#x679c;&#x306a;&#x304b;&#x3063;&#x305f;"/>
@@ -410,7 +414,9 @@
 <node CREATED="1519807671022" ID="ID_410032447" MODIFIED="1519807719224" TEXT="FBX&#x306e;&#x5909;&#x63db;">
 <icon BUILTIN="button_ok"/>
 </node>
-<node CREATED="1519807723644" ID="ID_935851291" MODIFIED="1519807730432" TEXT="&#x30c4;&#x30fc;&#x30eb;&#x3068;&#x3057;&#x3066;&#x6574;&#x7406;"/>
+<node CREATED="1519807723644" HGAP="44" ID="ID_935851291" MODIFIED="1525929870873" TEXT="&#x30c4;&#x30fc;&#x30eb;&#x3068;&#x3057;&#x3066;&#x6574;&#x7406;" VSHIFT="42">
+<icon BUILTIN="yes"/>
+</node>
 <node CREATED="1519807677964" ID="ID_1077941903" MODIFIED="1523350271750" TEXT="VertexBuffer">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1519807684957" ID="ID_1602136715" MODIFIED="1523350792127" TEXT="CUDA&#x3068;&#x306e;interop">
@@ -475,15 +481,14 @@
 </node>
 </node>
 <node CREATED="1523350280721" HGAP="19" ID="ID_1330156262" MODIFIED="1523350296735" TEXT="&#x5f93;&#x6765;&#x306e;BVH&#x3068;&#x306e;&#x7d50;&#x5408;" VSHIFT="48">
-<node CREATED="1523350298582" ID="ID_116624406" MODIFIED="1523350315560" TEXT="CUDA&#x30b9;&#x30ad;&#x30cb;&#x30f3;&#x30b0;&#x3057;&#x305f;&#x7d50;&#x679c;&#x3092; vertex &#x30ea;&#x30b9;&#x30c8; &#x306b;&#x683c;&#x7d0d;">
+<node CREATED="1523350298582" ID="ID_116624406" MODIFIED="1525856066411" TEXT="CUDA&#x30b9;&#x30ad;&#x30cb;&#x30f3;&#x30b0;&#x3057;&#x305f;&#x7d50;&#x679c;&#x3092; vertex &#x30ea;&#x30b9;&#x30c8; &#x306b;&#x683c;&#x7d0d;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1523350346445" ID="ID_760754192" MODIFIED="1523352512959" TEXT="&#x30c8;&#x30ec;&#x30fc;&#x30b5;&#x30fc;&#x304c;&#x4fdd;&#x6301;&#x3059;&#x308b;&#x30e1;&#x30e2;&#x30ea;&#x30b5;&#x30a4;&#x30ba;&#x306f;deformable&#x306e;&#x9802;&#x70b9;&#x6570;&#x3092;&#x542b;&#x3081;&#x305f; vertex &#x683c;&#x7d0d;&#x7528;&#x30e1;&#x30e2;&#x30ea;&#x3092;&#x78ba;&#x4fdd;&#x3057;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
 <icon BUILTIN="idea"/>
 </node>
-<node CREATED="1523350396459" ID="ID_1624294160" MODIFIED="1523352514822" TEXT="&#x3069;&#x3053;&#x304b;&#x3089;&#x304c;&#x3069;&#x306e;deformable&#x306e;&#x683c;&#x7d0d;&#x4f4d;&#x7f6e;&#x306a;&#x306e;&#x304b;&#x5206;&#x304b;&#x3089;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
-<icon BUILTIN="idea"/>
 </node>
-</node>
-<node CREATED="1523350316324" ID="ID_104484492" MODIFIED="1523350822860" TEXT="CUDA&#x30b9;&#x30ad;&#x30cb;&#x30f3;&#x30b0;&#x3057;&#x305f;&#x7d50;&#x679c;&#x3001;&#x5909;&#x5316;&#x3057;&#x305f;AABB&#x30b5;&#x30a4;&#x30ba;&#x3092;&#x30c8;&#x30c3;&#x30d7;&#x30ec;&#x30a4;&#x30e4;&#x30fc;BVH&#x306b;&#x53cd;&#x6620;">
+<node CREATED="1523350316324" ID="ID_104484492" MODIFIED="1526015570938" TEXT="CUDA&#x30b9;&#x30ad;&#x30cb;&#x30f3;&#x30b0;&#x3057;&#x305f;&#x7d50;&#x679c;&#x3001;&#x5909;&#x5316;&#x3057;&#x305f;AABB&#x30b5;&#x30a4;&#x30ba;&#x3092;&#x30c8;&#x30c3;&#x30d7;&#x30ec;&#x30a4;&#x30e4;&#x30fc;BVH&#x306b;&#x53cd;&#x6620;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1523350437940" ID="ID_1572647987" MODIFIED="1523437104111" TEXT="AABB&#x30b5;&#x30a4;&#x30ba;&#x3092;&#x53d6;&#x5f97;&#x3067;&#x304d;&#x308b;&#x3088;&#x3046;&#x306b;&#x3059;&#x308b;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1523350447244" ID="ID_1617216107" MODIFIED="1523350461607" TEXT="LBVH&#x30c4;&#x30ea;&#x30fc;&#x306e;&#x6700;&#x521d;&#x306e;&#x30ce;&#x30fc;&#x30c9;&#x306e;&#x30b5;&#x30a4;&#x30ba;&#x304c;&#x53d6;&#x308c;&#x308c;&#x3070;&#x3044;&#x3044;">
@@ -494,13 +499,22 @@
 <node CREATED="1523350473836" ID="ID_719708156" MODIFIED="1523350499543" TEXT="&#x3044;&#x307e;&#x3060;&#x3068; update &#x306f; L2W &#x30de;&#x30c8;&#x30ea;&#x30af;&#x30b9;&#x306b;&#x5909;&#x5316;&#x304c;&#x3042;&#x3063;&#x305f;&#x5834;&#x5408;&#x3060;&#x3051;&#x53cd;&#x5fdc;&#x3059;&#x308b;&#x3088;&#x3046;&#x306b;&#x306a;&#x3063;&#x3066;&#x3044;&#x308b;"/>
 </node>
 </node>
-<node CREATED="1523350507411" ID="ID_985285171" MODIFIED="1523350674558" TEXT="deformable &#x306e;&#x4e09;&#x89d2;&#x5f62;&#x30ea;&#x30b9;&#x30c8;&#x5316;">
+<node CREATED="1523350507411" ID="ID_985285171" MODIFIED="1525767417897" TEXT="deformable &#x306e;&#x4e09;&#x89d2;&#x5f62;&#x30ea;&#x30b9;&#x30c8;&#x5316;">
+<icon BUILTIN="button_ok"/>
 <node CREATED="1523350605972" ID="ID_1953089489" MODIFIED="1523350845077" TEXT="&#x901a;&#x3057;&#x306e;&#x30a4;&#x30f3;&#x30c7;&#x30c3;&#x30af;&#x30b9;&#x3092;&#x4fdd;&#x6301;&#x3057;&#x3066;&#x3044;&#x308b;&#x306e;&#x3067;&#x3001;PrimitiveParamter &#x306b;&#x5909;&#x63db;&#x3057;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
 <node CREATED="1523350656435" ID="ID_1490528036" MODIFIED="1523506451942" TEXT="FbxConverter&#x306e;&#x6642;&#x70b9;&#x3067;&#x3084;&#x308b;&#xff1f;">
 <icon BUILTIN="button_ok"/>
 <node CREATED="1523350741426" ID="ID_251513243" MODIFIED="1523350768140" TEXT="area &#x306e;&#x5024;&#x304c; deform &#x306b;&#x3088;&#x3063;&#x3066;&#x5909;&#x5316;&#x3059;&#x308b;&#x306f;&#x305a;&#x306a;&#x306e;&#x3067;&#x30ea;&#x30a2;&#x30eb;&#x30bf;&#x30a4;&#x30e0;&#x306b;&#x5909;&#x63db;&#x3057;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;"/>
 <node CREATED="1523351010297" ID="ID_1037335565" MODIFIED="1523425706140" TEXT="GPU &#x30b9;&#x30ad;&#x30cb;&#x30f3;&#x30b0;&#x3092;&#x30a4;&#x30f3;&#x30c7;&#x30c3;&#x30af;&#x30b9;&#x5358;&#x4f4d;&#x3067;&#x3084;&#x3063;&#x3066;&#x3044;&#x308b;&#x304c;&#x3001;&#x4e09;&#x89d2;&#x5f62;&#x5358;&#x4f4d;&#x3067;&#x884c;&#x3046;&#x3053;&#x3068;&#x3067; area &#x306e;&#x8a08;&#x7b97;&#x3082;&#x540c;&#x6642;&#x306b;&#x3084;&#x308b;&#xff1f;">
 <icon BUILTIN="button_ok"/>
+</node>
+</node>
+</node>
+</node>
+<node CREATED="1525767362264" HGAP="36" ID="ID_496644920" MODIFIED="1525767426577" TEXT="deformable&#x3068;&#x666e;&#x901a;&#x306e;object&#x306e;&#x6df7;&#x5408;" VSHIFT="3">
+<node CREATED="1523350298582" ID="ID_1578710260" MODIFIED="1523350315560" TEXT="CUDA&#x30b9;&#x30ad;&#x30cb;&#x30f3;&#x30b0;&#x3057;&#x305f;&#x7d50;&#x679c;&#x3092; vertex &#x30ea;&#x30b9;&#x30c8; &#x306b;&#x683c;&#x7d0d;">
+<node CREATED="1523350396459" ID="ID_346403873" MODIFIED="1523352514822" TEXT="&#x3069;&#x3053;&#x304b;&#x3089;&#x304c;&#x3069;&#x306e;deformable&#x306e;&#x683c;&#x7d0d;&#x4f4d;&#x7f6e;&#x306a;&#x306e;&#x304b;&#x5206;&#x304b;&#x3089;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
+<icon BUILTIN="idea"/>
 </node>
 </node>
 <node CREATED="1523350856729" ID="ID_1335517483" MODIFIED="1523436527233" TEXT="&#x30b7;&#x30fc;&#x30f3;&#x5168;&#x4f53;&#x306e;&#x901a;&#x3057;&#x306e;&#x9802;&#x70b9;&#x30a4;&#x30f3;&#x30c7;&#x30c3;&#x30af;&#x30b9;&#x306b;&#x5909;&#x63db;&#x3057;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;">
@@ -513,7 +527,13 @@
 </node>
 </node>
 </node>
+<node CREATED="1525927728467" ID="ID_1957005759" MODIFIED="1526011783112" TEXT="&#x30e9;&#x30b9;&#x30bf;&#x30e9;&#x30a4;&#x30ba;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x3068;&#x306e;&#x7d71;&#x5408;">
+<icon BUILTIN="button_ok"/>
+<node CREATED="1525927741443" ID="ID_1143216749" MODIFIED="1525927779502" TEXT="velocity&#x30de;&#x30c3;&#x30d7;&#x751f;&#x6210;&#x306e;&#x305f;&#x3081;&#x306b;SVGF&#x306e;&#x524d;&#x51e6;&#x7406;&#x3068;&#x3057;&#x3066;&#x306e;&#x30e9;&#x30b9;&#x30bf;&#x30e9;&#x30a4;&#x30ba;&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x306b;&#x7d44;&#x307f;&#x8fbc;&#x307e;&#x306a;&#x3044;&#x3068;&#x3044;&#x3051;&#x306a;&#x3044;"/>
 </node>
+</node>
+<node CREATED="1526012131095" HGAP="42" ID="ID_110322535" MODIFIED="1526012147110" TEXT="deformable&#x306e;GeomParameter&#x306e;area&#x304c;&#x8a08;&#x7b97;&#x3055;&#x308c;&#x3066;&#x3044;&#x306a;&#x3044;" VSHIFT="49">
+<icon BUILTIN="messagebox_warning"/>
 </node>
 <node CREATED="1523410428746" HGAP="30" ID="ID_968402276" MODIFIED="1523439051231" TEXT="&#x30dc;&#x30fc;&#x30f3;&#x306e;AABB&#x3060;&#x3051;&#x5909;&#x5316;&#x3055;&#x305b;&#x308b;" VSHIFT="35">
 <icon BUILTIN="yes"/>
@@ -561,7 +581,9 @@
 </node>
 </node>
 <node CREATED="1524562675585" HGAP="72" ID="ID_1410972639" MODIFIED="1524562681526" POSITION="right" TEXT="&#x30de;&#x30eb;&#x30c1;GPU" VSHIFT="60">
+<node CREATED="1525929919026" ID="ID_1581853123" MODIFIED="1525929922492" TEXT="&#x53c2;&#x8003;">
 <node CREATED="1524562694895" ID="ID_84322531" LINK="https://stackoverflow.com/questions/22694518/what-is-the-difference-between-cudamemcpy-and-cudamemcpypeer-for-p2p-copy" MODIFIED="1524562702316" TEXT="What is the difference between cudaMemcpy() and cudaMemcpyPeer() for P2P-copy? "/>
+</node>
 <node CREATED="1524819789471" ID="ID_393806358" MODIFIED="1524819813795" TEXT="&#x30ec;&#x30f3;&#x30c0;&#x30ea;&#x30f3;&#x30b0;&#x7d50;&#x679c;&#x304c;svgftest&#x3068;&#x7570;&#x306a;&#x308b;">
 <icon BUILTIN="messagebox_warning"/>
 <node CREATED="1524819803304" ID="ID_1684855334" MODIFIED="1525141596647" TEXT="&#x660e;&#x308b;&#x3059;&#x304e;&#x308b;">

@@ -119,12 +119,18 @@ namespace aten {
 #endif
 	}
 
-	void scene::draw(aten::hitable::FuncPreDraw func)
+	void scene::draw(
+		aten::hitable::FuncPreDraw func,
+		std::function<bool(aten::hitable*)> funcIfDraw/*= nullptr*/)
 	{
 		uint32_t triOffset = 0;
 
 		for (auto h : m_tmp) {
-			h->draw(func, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
+			bool willDraw = funcIfDraw ? funcIfDraw(h) : true;
+
+			if (willDraw) {
+				h->draw(func, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
+			}
 
 			auto item = h->getHasObject();
 			if (item) {

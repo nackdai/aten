@@ -162,7 +162,9 @@ namespace AT_NAME {
 			real& selectPdf,
 			aten::LightSampleResult& sampleRes);
 
-		void draw(aten::hitable::FuncPreDraw func);
+		void draw(
+			aten::hitable::FuncPreDraw func,
+			std::function<bool(aten::hitable*)> funcIfDraw = nullptr);
 
 	protected:
 		std::vector<aten::hitable*> m_tmp;

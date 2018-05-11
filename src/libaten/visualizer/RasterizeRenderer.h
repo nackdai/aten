@@ -43,7 +43,8 @@ namespace aten {
 			int frame,
 			scene* scene,
 			const camera* cam,
-			FBO* fbo = nullptr);
+			FBO* fbo = nullptr,
+			shader* exShader = nullptr);
 
 		void drawAABB(
 			const camera* cam,

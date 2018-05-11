@@ -36,7 +36,8 @@ namespace aten {
 		int frame,
 		scene* scene,
 		const camera* cam,
-		FBO* fbo/*= nullptr*/)
+		FBO* fbo/*= nullptr*/,
+		shader* exShader/*= nullptr*/)
 	{
 		auto camparam = cam->param();
 
@@ -122,11 +123,9 @@ namespace aten {
 			CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 		}
 		
-		if (!s_isInitGlobalVB) {
-			VertexManager::build();
-			s_isInitGlobalVB = true;
-		}
+		VertexManager::build();
 
+		// For object (which means "not" deformable).
 		scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
 			auto hMtxL2W = m_shader.getHandle("mtxL2W");
 			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
@@ -139,7 +138,38 @@ namespace aten {
 
 			auto hPrimId = m_shader.getHandle("primid");
 			CALL_GL_API(::glUniform1i(hPrimId, primid));
+		},
+			[](hitable* target) {
+				return !target->isDeformable();
 		});
+
+		// For deformable.
+		if (exShader) {
+			exShader->prepareRender(nullptr, false);
+
+			hMtxW2C = exShader->getHandle("mtxW2C");
+			CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+
+			hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
+			CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, &m_mtxPrevW2C.a[0]));
+
+			scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
+				auto hMtxL2W = exShader->getHandle("mtxL2W");
+				CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+
+				auto hPrevMtxL2W = exShader->getHandle("mtxPrevL2W");
+				CALL_GL_API(::glUniformMatrix4fv(hPrevMtxL2W, 1, GL_TRUE, &mtxPrevL2W.a[0]));
+
+				auto hObjId = exShader->getHandle("objid");
+				CALL_GL_API(::glUniform1i(hObjId, objid));
+
+				auto hPrimId = exShader->getHandle("primid");
+				CALL_GL_API(::glUniform1i(hPrimId, primid));
+			},
+				[](hitable* target) {
+					return target->isDeformable();
+			});
+		}
 
 		if (fbo) {
 			// Set default frame buffer.

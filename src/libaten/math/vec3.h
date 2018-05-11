@@ -203,6 +203,12 @@ namespace aten {
 		return ret;
 	}
 
+	inline AT_DEVICE_API real length(const vec3& v)
+	{
+		auto ret = aten::sqrt(dot(v, v));
+		return ret;
+	}
+
 	inline AT_DEVICE_API vec3 min(const vec3& a, const vec3& b)
 	{
 		vec3 ret(

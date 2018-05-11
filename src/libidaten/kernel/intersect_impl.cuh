@@ -419,7 +419,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 	aten::vec3 v0 = aten::vec3(p0.x, p0.y, p0.z);
 	aten::vec3 v1 = aten::vec3(p1.x, p1.y, p1.z);
 
-	real orignalLen = (v1 - v0).length();
+	real orignalLen = aten::length(v1 - v0);
 
 	real scaledLen = 0;
 
@@ -433,11 +433,11 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 			auto _p0 = mtxL2W.apply(v0);
 			auto _p1 = mtxL2W.apply(v1);
 
-			scaledLen = (_p1 - _p0).length();
+			scaledLen = aten::length(_p1 - _p0);
 		}
 	}
 	else {
-		scaledLen = (v1 - v0).length();
+		scaledLen = aten::length(v1 - v0);
 	}
 
 	real ratio = scaledLen / orignalLen;

@@ -273,6 +273,11 @@ namespace aten {
 			return 0;
 		}
 
+		virtual bool isDeformable() const
+		{
+			return false;
+		}
+
 		void setName(const char* name)
 		{
 			m_name = name;

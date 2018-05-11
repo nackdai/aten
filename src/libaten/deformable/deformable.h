@@ -78,6 +78,11 @@ namespace aten
 			return m_mesh.getTriangleCount();
 		}
 
+		virtual bool isDeformable() const override final
+		{
+			return true;
+		}
+
 	private:
 		virtual bool hit(
 			const ray& r,

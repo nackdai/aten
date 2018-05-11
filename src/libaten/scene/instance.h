@@ -146,6 +146,11 @@ namespace aten
 			m_obj->drawAABB(func, m_mtxL2W);
 		}
 
+		virtual bool isDeformable() const override final
+		{
+			return m_obj->isDeformable();
+		}
+
 		virtual void update()
 		{
 			if (m_isDirty) {

@@ -16,10 +16,10 @@ namespace aten
 
 	inline int computeVoxelLodLevel(int depth, int maxDepth)
 	{
-		int approximateMaxVoxelDepth = (maxDepth - 1) / VoxelDepth * VoxelDepth;
-		int approximateMaxVoxelLodLevel = approximateMaxVoxelDepth / VoxelDepth - 1;	// Zero origin.
+		int approximateMaxVoxelDepth = maxDepth / VoxelDepth * VoxelDepth;
+		int approximateMaxVoxelLodLevel = approximateMaxVoxelDepth / VoxelDepth;
 
-		int lod = depth / (VoxelDepth + 1);
+		int lod = depth / VoxelDepth;
 
 		// NOTE
 		// ê[Ç¢ÇŸÇ«LODÉåÉxÉãÇ™â∫Ç™ÇÈÇÊÇ§Ç…Ç∑ÇÈ.

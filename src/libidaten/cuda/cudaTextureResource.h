@@ -27,6 +27,8 @@ namespace idaten
 			uint32_t numOfContaints,
 			uint32_t offsetCount = 0);
 
+		void read(void* p, uint32_t bytes);
+
 	private:
 		void onInit(
 			const aten::vec4* p,

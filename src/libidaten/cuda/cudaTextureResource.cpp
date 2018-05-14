@@ -90,6 +90,12 @@ namespace idaten
 		checkCudaErrors(cudaMemcpyAsync(dst + offsetCount, p, size, cudaMemcpyDefault));
 	}
 
+	void CudaTextureResource::read(void* p, uint32_t bytes)
+	{
+		AT_ASSERT(m_buffer);
+		checkCudaErrors(cudaMemcpy(p, m_buffer, bytes, cudaMemcpyDefault));
+	}
+
 	/////////////////////////////////////////////////////
 
 	void CudaTexture::init(

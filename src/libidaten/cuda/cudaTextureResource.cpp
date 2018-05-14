@@ -17,22 +17,13 @@ namespace idaten
 		uint32_t memberNumInItem,
 		uint32_t numOfContaints)
 	{
-		onInit(p, memberNumInItem, numOfContaints, true);
-	}
-
-	void CudaTextureResource::initFromDeviceMemory(
-		const aten::vec4* p,
-		uint32_t memberNumInItem,
-		uint32_t numOfContaints)
-	{
-		onInit(p, memberNumInItem, numOfContaints, false);
+		onInit(p, memberNumInItem, numOfContaints);
 	}
 
 	void CudaTextureResource::onInit(
 		const aten::vec4* p,
 		uint32_t memberNumInItem,
-		uint32_t numOfContaints,
-		bool isHostToDevice)
+		uint32_t numOfContaints)
 	{
 		auto size = sizeof(float4) * memberNumInItem * numOfContaints;
 
@@ -41,9 +32,7 @@ namespace idaten
 		}
 
 		if (p) {
-			checkCudaErrors(cudaMemcpyAsync(
-				m_buffer, p, size,
-				isHostToDevice ? cudaMemcpyHostToDevice : cudaMemcpyDeviceToDevice));
+			checkCudaErrors(cudaMemcpyAsync(m_buffer, p, size, cudaMemcpyDefault));
 		}
 
 		// Make Resource description:

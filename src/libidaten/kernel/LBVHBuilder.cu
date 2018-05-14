@@ -676,7 +676,7 @@ namespace idaten
 			m_nodes.read(&(*threadedBvhNodes)[0], 0);
 		}
 
-		dst.initFromDeviceMemory(
+		dst.init(
 			(aten::vec4*)m_nodes.ptr(),
 			sizeof(aten::ThreadedBvhNode) / sizeof(float4),
 			numInternalNode + numLeaves);

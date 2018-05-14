@@ -21,7 +21,6 @@ namespace aten {
 	{
 		if (creator) {
 			s_userDefsInternalAccelCreator = creator;
-			s_internalType = AccelType::UserDefs;
 		}
 	}
 

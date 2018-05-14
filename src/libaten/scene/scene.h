@@ -1,6 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+#include <iterator>
+
 #include "accelerator/accelerator.h"
 #include "accelerator/bvh.h"
 #include "light/light.h"
@@ -18,7 +21,7 @@ namespace AT_NAME {
 
 		void add(aten::hitable* s)
 		{
-			m_tmp.push_back(s);
+			m_list.push_back(s);
 		}
 
 		virtual bool hit(
@@ -167,7 +170,7 @@ namespace AT_NAME {
 			std::function<bool(aten::hitable*)> funcIfDraw = nullptr);
 
 	protected:
-		std::vector<aten::hitable*> m_tmp;
+		std::vector<aten::hitable*> m_list;
 
 		std::vector<Light*> m_lights;
 		ImageBasedLight* m_ibl{ nullptr };
@@ -187,11 +190,22 @@ namespace AT_NAME {
 		{
 			aten::aabb bbox;
 
-			for (const auto& t : m_tmp) {
+			for (const auto& t : m_list) {
 				bbox = aten::aabb::merge(bbox, t->getBoundingbox());
 			}
 
-			if (!m_tmp.empty()) {
+			if (!m_list.empty()) {
+				// NOTE
+				// In "m_accel.build", hitable list will be sorted.
+				// To keep order, copy m_list data to another list.
+				// This is work around...
+				if (m_tmp.empty()) {
+					std::copy(
+						m_list.begin(),
+						m_list.end(),
+						std::back_inserter(m_tmp));
+				}
+
 				m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size(), &bbox);
 			}
 		}
@@ -244,5 +258,6 @@ namespace AT_NAME {
 
 	private:
 		ACCEL m_accel;
+		std::vector<aten::hitable*> m_tmp;
 	};
 }

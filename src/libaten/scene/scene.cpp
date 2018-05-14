@@ -125,7 +125,7 @@ namespace aten {
 	{
 		uint32_t triOffset = 0;
 
-		for (auto h : m_tmp) {
+		for (auto h : m_list) {
 			bool willDraw = funcIfDraw ? funcIfDraw(h) : true;
 
 			if (willDraw) {

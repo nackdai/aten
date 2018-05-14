@@ -16,7 +16,7 @@
 
 #include "scenedefs.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 #define ENABLE_ENVMAP
 #define ENABLE_SVGF
@@ -106,6 +106,8 @@ static idaten::Skinning g_skinning;
 static aten::Timeline g_timeline;
 
 static idaten::LBVHBuilder g_lbvh;
+static int g_triOffset = 0;
+static int g_vtxOffset = 0;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -119,7 +121,7 @@ static bool g_showAABB = false;
 
 static bool g_pickPixel = false;
 
-void update()
+void update(int frame)
 {
 	auto deform = getDeformable();
 
@@ -128,7 +130,9 @@ void update()
 		auto anm = getDeformAnm();
 
 		if (anm) {
-			mdl->update(aten::mat4(), anm, g_timeline.getTime());
+			aten::mat4 mtxL2W;
+			mtxL2W.asScale(0.01);
+			mdl->update(mtxL2W, anm, g_timeline.getTime());
 		}
 		else {
 			mdl->update(aten::mat4(), nullptr, 0);
@@ -141,7 +145,13 @@ void update()
 
 		aten::vec3 aabbMin, aabbMax;
 
-		g_skinning.compute(0, aabbMin, aabbMax);
+		// NOTE
+		// Add verted offset, in the first frame.
+		// In "g_skinning.compute", vertex offset is added to triangle paremters.
+		// Added vertex offset is valid permanently, so specify vertex offset just only one time.
+		g_skinning.compute(
+			frame == 1 ? g_vtxOffset : 0,
+			aabbMin, aabbMax);
 
 		mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
 		deform->update(true);
@@ -153,26 +163,29 @@ void update()
 		auto& tris = g_skinning.getTriangles();
 
 		// TODO
-		int triIdOffset = 0;
-
-		auto& cpunodes = g_scene.getAccel()->getNodes();
+		int deformPos = nodes.size() - 1;
 
 		// NOTE
-		// 0 is for top layer.
+		// Vertex offset was added in "g_skinning.compute".
+		// But, in "g_lbvh.build", vertex index have to be handled as zero based index.
+		// Vertex offset have to be removed from vertex index.
+		// So, specify minus vertex offset.
+		// This is work around, too complicated...
 		g_lbvh.build(
-			nodes[1],
+			nodes[deformPos],
 			tris,
-			triIdOffset,
+			g_triOffset,
 			sceneBbox,
 			vtxPos,
+			-g_vtxOffset,
 			nullptr);
 
 		// Copy computed vertices, triangles to the tracer.
 		g_tracer.updateGeometry(
 			g_skinning.getInteropVBO(),
-			0,
+			g_vtxOffset,
 			g_skinning.getTriangles(),
-			0);
+			g_triOffset);
 
 		{
 			std::vector<aten::GeomParameter> shapeparams;
@@ -206,7 +219,7 @@ void onRun(aten::window* window)
 {
 	auto frame = g_tracer.frame();
 
-	update();
+	update(frame);
 
 	if (g_isCameraDirty) {
 		g_camera.update();
@@ -583,6 +596,8 @@ int main()
 		std::vector<aten::SkinningVertex> vtx;
 		std::vector<uint32_t> idx;
 
+		int vtxIdOffset = aten::VertexManager::getVertices().size();
+
 		mdl->getGeometryData(vtx, idx, deformTris);
 
 		g_skinning.initWithTriangles(
@@ -615,6 +630,9 @@ int main()
 			lightparams,
 			mtrlparms,
 			vtxparams);
+
+		g_triOffset = primparams.size();
+		g_vtxOffset = vtxparams.size();
 
 		const auto& nodes = g_scene.getAccel()->getNodes();
 		const auto& mtxs = g_scene.getAccel()->getMatrices();
@@ -709,6 +727,7 @@ int main()
 				triIdOffset,
 				sceneBbox,
 				vtxPos,
+				0,
 				(std::vector<aten::ThreadedBvhNode>*)&cpunodes[i + 1]);
 		}
 	}

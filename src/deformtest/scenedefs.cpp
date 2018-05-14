@@ -106,7 +106,83 @@ void DeformScene::getCameraPosAndAt(
 	aten::vec3& at,
 	real& fov)
 {
-	pos = aten::vec3(0, 71, 225);
-	at = aten::vec3(0, 71, 216);
+	pos = aten::vec3(0.f, 1.f, 3.f);
+	at = aten::vec3(0.f, 1.f, 0.f);
+	fov = 45;
+}
+
+/////////////////////////////////////////////////////
+
+void DeformInBoxScene::makeScene(aten::scene* scene)
+{
+#if 1
+	{
+		auto emit = new aten::emissive(aten::vec3(36, 33, 24));
+		aten::AssetManager::registerMtrl(
+			"light",
+			emit);
+
+		aten::AssetManager::registerMtrl(
+			"backWall",
+			new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+		aten::AssetManager::registerMtrl(
+			"ceiling",
+			new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+		aten::AssetManager::registerMtrl(
+			"floor",
+			new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+		aten::AssetManager::registerMtrl(
+			"leftWall",
+			new aten::lambert(aten::vec3(0.504000, 0.052000, 0.040000)));
+
+		aten::AssetManager::registerMtrl(
+			"rightWall",
+			new aten::lambert(aten::vec3(0.112000, 0.360000, 0.072800)));
+
+		std::vector<aten::object*> objs;
+
+		aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", false);
+
+		auto light = new aten::instance<aten::object>(
+			objs[0],
+			aten::vec3(0),
+			aten::vec3(0),
+			aten::vec3(1));
+		scene->add(light);
+
+		auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+		scene->addLight(areaLight);
+
+		auto box = new aten::instance<aten::object>(objs[1], aten::mat4::Identity);
+		scene->add(box);
+	}
+#endif
+
+	{
+		aten::deformable* mdl = new aten::deformable();
+		mdl->read("unitychan_gpu.mdl");
+
+		aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
+		aten::MaterialLoader::load("unitychan_mtrl.xml");
+
+		auto deformMdl = new aten::instance<aten::deformable>(mdl, aten::mat4::Identity);
+		scene->add(deformMdl);
+
+		s_deformMdl = deformMdl;
+
+		aten::ImageLoader::setBasePath("./");
+
+		s_deformAnm = new aten::DeformAnimation();
+		s_deformAnm->read("unitychan.anm");
+	}
+}
+
+void DeformInBoxScene::getCameraPosAndAt(
+	aten::vec3& pos,
+	aten::vec3& at,
+	real& fov)
+{
+	pos = aten::vec3(0.f, 1.f, 3.f);
+	at = aten::vec3(0.f, 1.f, 0.f);
 	fov = 45;
 }

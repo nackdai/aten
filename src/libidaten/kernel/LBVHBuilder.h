@@ -24,6 +24,7 @@ namespace idaten
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
 			idaten::CudaTextureResource& texRscVtxPos,
+			int vtxOffset,
 			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
 
 		void build(
@@ -32,6 +33,7 @@ namespace idaten
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
 			CudaGLBuffer& vboVtxPos,
+			int vtxOffset,
 			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
 
 		// test implementation.
@@ -59,6 +61,7 @@ namespace idaten
 			int triIdOffset,
 			const aten::aabb& sceneBbox,
 			T vtxPos,
+			int vtxOffset,
 			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes);
 
 	private:

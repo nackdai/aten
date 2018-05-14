@@ -351,6 +351,7 @@ __global__ void computeBoudingBox(
 	aten::ThreadedBvhNode* dst,
 	const aten::PrimitiveParamter* __restrict__ tris,
 	T vtxPos,
+	int vtxOffset,
 	uint32_t* executedIdxArray)
 {
 	const int idx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -390,9 +391,9 @@ __global__ void computeBoudingBox(
 	aten::PrimitiveParamter prim;
 	prim.v0 = ((aten::vec4*)tris)[triId * aten::PrimitiveParamter_float4_size + 0];
 
-	float4 v0 = getFloat4(vtxPos, prim.idx[0]);
-	float4 v1 = getFloat4(vtxPos, prim.idx[1]);
-	float4 v2 = getFloat4(vtxPos, prim.idx[2]);
+	float4 v0 = getFloat4(vtxPos, prim.idx[0] + vtxOffset);
+	float4 v1 = getFloat4(vtxPos, prim.idx[1] + vtxOffset);
+	float4 v2 = getFloat4(vtxPos, prim.idx[2] + vtxOffset);
 
 	float4 aabbMin, aabbMax;
 	computeBoundingBox(v0, v1, v2, &aabbMin, &aabbMax);
@@ -519,6 +520,7 @@ __global__ void genMortonCode(
 	const aten::aabb sceneBbox,
 	const aten::PrimitiveParamter* __restrict__ tris,
 	T vtxPos,
+	int vtxOffset,
 	uint32_t* mortonCodes,
 	uint32_t* indices)
 {
@@ -531,9 +533,9 @@ __global__ void genMortonCode(
 	aten::PrimitiveParamter prim;
 	prim.v0 = ((aten::vec4*)tris)[idx * aten::PrimitiveParamter_float4_size + 0];
 
-	float4 v0 = getFloat4(vtxPos, prim.idx[0]);
-	float4 v1 = getFloat4(vtxPos, prim.idx[1]);
-	float4 v2 = getFloat4(vtxPos, prim.idx[2]);
+	float4 v0 = getFloat4(vtxPos, prim.idx[0] + vtxOffset);
+	float4 v1 = getFloat4(vtxPos, prim.idx[1] + vtxOffset);
+	float4 v2 = getFloat4(vtxPos, prim.idx[2] + vtxOffset);
 
 	aten::vec3 vmin = aten::vec3(
 		min(min(v0.x, v1.x), v2.x),
@@ -586,6 +588,7 @@ namespace idaten
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		T vtxPos,
+		int vtxOffset,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes)
 	{
 		uint32_t numOfElems = (uint32_t)triangles.num();
@@ -602,6 +605,7 @@ namespace idaten
 				sceneBbox,
 				triangles.ptr(),
 				vtxPos,
+				vtxOffset,
 				m_mortonCodes.ptr(),
 				m_indices.ptr());
 
@@ -666,6 +670,7 @@ namespace idaten
 				m_nodes.ptr(),
 				triangles.ptr(),
 				vtxPos,
+				vtxOffset,
 				m_executedIdxArray);
 
 			checkCudaKernel(computeBoudingBox);
@@ -688,6 +693,7 @@ namespace idaten
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		idaten::CudaTextureResource& texRscVtxPos,
+		int vtxOffset,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
 	{
 		TypedCudaMemory<aten::PrimitiveParamter> triangles;
@@ -699,7 +705,7 @@ namespace idaten
 
 		auto vtxPos = texRscVtxPos.bind();
 
-		onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
+		onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, vtxOffset, threadedBvhNodes);
 
 		texRscVtxPos.unbind();
 	}
@@ -710,6 +716,7 @@ namespace idaten
 		int triIdOffset,
 		const aten::aabb& sceneBbox,
 		CudaGLBuffer& vboVtxPos,
+		int vtxOffset,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
 	{
 		vboVtxPos.map();
@@ -718,7 +725,7 @@ namespace idaten
 		size_t bytes = 0;
 		vboVtxPos.bind((void**)&vtxPos, bytes);
 
-		onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, threadedBvhNodes);
+		onBuild(dst, triangles, triIdOffset, sceneBbox, vtxPos, vtxOffset, threadedBvhNodes);
 
 		vboVtxPos.unbind();
 		vboVtxPos.unmap();

@@ -86,8 +86,16 @@ namespace idaten {
 				nml.push_back(aten::vec4(v.nml.x, v.nml.y, v.nml.z, v.uv.y));
 			}
 
+#if 0
 			m_vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size() + advanceVtxNum);
 			m_vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size() + advanceVtxNum);
+#else
+			m_vtxparamsPos.init(nullptr, 1, pos.size() + advanceVtxNum);
+			m_vtxparamsNml.init(nullptr, 1, nml.size() + advanceVtxNum);
+
+			m_vtxparamsPos.update(&pos[0], 1, pos.size());
+			m_vtxparamsNml.update(&nml[0], 1, nml.size());
+#endif
 		}
 
 		if (!texs.empty()) {

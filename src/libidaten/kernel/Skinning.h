@@ -33,7 +33,6 @@ namespace idaten
 			uint32_t mtxNum);
 
 		void compute(
-			int32_t indexOffset,
 			aten::vec3& aabbMin,
 			aten::vec3& aabbMax);
 
@@ -54,6 +53,8 @@ namespace idaten
 			return m_triangles;
 		}
 
+		void setVtxOffset(int offset);
+
 	private:
 		TypedCudaMemory<aten::SkinningVertex> m_vertices;
 		TypedCudaMemory<uint32_t> m_indices;
@@ -68,5 +69,8 @@ namespace idaten
 		TypedCudaMemory<aten::vec3> m_maxBuf;
 
 		std::vector<CudaGLBuffer> m_interopVBO;
+
+		int m_prevVtxOffset{ 0 };
+		int m_curVtxOffset{ 0 };
 	};
 }

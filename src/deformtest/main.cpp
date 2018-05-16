@@ -149,9 +149,7 @@ void update(int frame)
 		// Add verted offset, in the first frame.
 		// In "g_skinning.compute", vertex offset is added to triangle paremters.
 		// Added vertex offset is valid permanently, so specify vertex offset just only one time.
-		g_skinning.compute(
-			frame == 1 ? g_vtxOffset : 0,
-			aabbMin, aabbMax);
+		g_skinning.compute(aabbMin, aabbMax);
 
 		mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
 		deform->update(true);
@@ -690,6 +688,7 @@ int main()
 
 	// For LBVH.
 	if (deform) {
+		g_skinning.setVtxOffset(g_vtxOffset);
 		g_lbvh.init(advanceTriNum);
 	}
 	else

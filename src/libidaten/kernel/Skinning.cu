@@ -286,7 +286,6 @@ namespace idaten
 	}
 
 	void Skinning::compute(
-		int32_t indexOffset,
 		aten::vec3& aabbMin,
 		aten::vec3& aabbMax)
 	{
@@ -308,6 +307,9 @@ namespace idaten
 			dstPos = m_dstPos.ptr();
 			dstNml = m_dstNml.ptr();
 		}
+
+		int32_t indexOffset = m_curVtxOffset - m_prevVtxOffset;
+		m_prevVtxOffset = m_curVtxOffset;
 
 		// Skinning.
 		{
@@ -401,6 +403,13 @@ namespace idaten
 		m_dstNml.readByNum(nml, num);
 
 		return true;
+	}
+
+	void Skinning::setVtxOffset(int offset)
+	{
+		AT_ASSERT(offset >= 0);
+		m_prevVtxOffset = m_curVtxOffset;
+		m_curVtxOffset = offset;
 	}
 
 	void Skinning::runMinMaxTest()

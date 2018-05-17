@@ -313,6 +313,12 @@ void onRun(aten::window* window)
 				g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
 			}
 		}
+		else if (g_curMode == idaten::SVGFPathTracing::Mode::SVGF) {
+			int iterCnt = g_tracer.getAtrousIterCount();
+			if (ImGui::SliderInt("Atrous Iter", &iterCnt, 1, 5)) {
+				g_tracer.setAtrousIterCount(iterCnt);
+			}
+		}
 
 		bool enableTAA = g_taa.isEnableTAA();
 		bool canShowTAADiff = g_taa.canShowTAADiff();

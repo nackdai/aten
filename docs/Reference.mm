@@ -34,7 +34,10 @@
 <node CREATED="1518502807074" ID="ID_988309162" LINK="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon" MODIFIED="1518502829848" TEXT="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon"/>
 <node CREATED="1518502816194" LINK="https://github.com/Kink3d/ToonShading" MODIFIED="1518502816194" TEXT="https://github.com/Kink3d/ToonShading"/>
 <node CREATED="1518502816201" LINK="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/" MODIFIED="1518502816201" TEXT="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/"/>
-<node CREATED="1518502816207" LINK="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader" MODIFIED="1518502816207" TEXT="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader"/>
+<node CREATED="1518502816207" ID="ID_1931509701" LINK="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader" MODIFIED="1518502816207" TEXT="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader"/>
+<node CREATED="1526547226069" ID="ID_576402687" LINK="http://www.sci.utah.edu/~roni/research/projects/NPR-lines/" MODIFIED="1526547265570" TEXT="Ray Tracing NPR-Style Feature Lines">
+<icon BUILTIN="idea"/>
+</node>
 </node>
 <node CREATED="1523001241900" HGAP="58" ID="ID_875040956" MODIFIED="1523001366583" POSITION="right" TEXT="SubSurfaceScattering" VSHIFT="52">
 <node CREATED="1523001247781" HGAP="27" ID="ID_981506302" LINK="https://github.com/tiansijie/CUDA-Monte-Carlo-Pathtracer/blob/master/src/raytraceKernel.cu" MODIFIED="1523001369302" TEXT="https://github.com/tiansijie/CUDA-Monte-Carlo-Pathtracer/blob/master/src/raytraceKernel.cu" VSHIFT="-19"/>
@@ -59,6 +62,11 @@
 <node CREATED="1524197478076" ID="ID_10574266" LINK="https://qiita.com/sasayabaku/items/2323a2c501e58c0621b6" MODIFIED="1524197494774" TEXT="Ubuntu 16.04&#x306b; GTX 1080Ti &#x30c9;&#x30e9;&#x30a4;&#x30d0;&#x3068;CUDA&#x306e;&#x30a4;&#x30f3;&#x30b9;&#x30c8;&#x30fc;&#x30eb;"/>
 <node CREATED="1524197781910" ID="ID_13955257" LINK="https://qiita.com/conta_/items/d639ef0068c9b7a0cd12" MODIFIED="1524197789815" TEXT="Ubuntu&#x306b;Nvidia GPU&#x306e;Driver + CUDA&#x3092;Install&#x3059;&#x308b;(GTX1080&#x5bfe;&#x5fdc;&#x7248;)"/>
 <node CREATED="1524197570306" ID="ID_648905717" LINK="https://blog.spiralray.net/archives/474" MODIFIED="1524197582113" TEXT="&#x30aa;&#x30f3;&#x30dc;&#x30fc;&#x30c9;&#x306e;Ethernet&#x30b3;&#x30f3;&#x30c8;&#x30ed;&#x30fc;&#x30e9;(I219-V)&#x304c;Ubuntu&#x3067;&#x52d5;&#x304b;&#x306a;&#x3044;&#x6642;&#x306e;&#x5bfe;&#x51e6;"/>
+</node>
+<node CREATED="1526547289694" HGAP="9" ID="ID_877020857" MODIFIED="1526547609509" POSITION="right" TEXT="&#x305d;&#x306e;&#x4ed6;" VSHIFT="19">
+<node CREATED="1526547293575" ID="ID_1679432632" LINK="http://on-demand.gputechconf.com/gtc/2017/presentation/s7461-Juan-%20Canada-spectral.pdf.pdf" MODIFIED="1526547353687" TEXT="Porting Maxwell to the GPU">
+<icon BUILTIN="idea"/>
+</node>
 </node>
 </node>
 </map>

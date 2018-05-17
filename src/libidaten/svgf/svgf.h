@@ -214,6 +214,15 @@ namespace idaten
 			m_canSSRTHitTest = f;
 		}
 
+		uint32_t getAtrousIterCount() const
+		{
+			return m_atrousMaxIterCnt;
+		}
+		void setAtrousIterCount(uint32_t c)
+		{
+			m_atrousMaxIterCnt = c;
+		}
+
 	protected:
 		void onInit(int width, int height);
 
@@ -353,7 +362,7 @@ namespace idaten
 
 		idaten::TypedCudaMemory<aten::mat4> m_mtxs;
 
-		unsigned int m_frame{ 1 };
+		uint32_t m_frame{ 1 };
 
 		// For A-trous wavelet.
 		idaten::TypedCudaMemory<float4> m_atrousClrVar[2];
@@ -366,6 +375,8 @@ namespace idaten
 		// G-Buffer rendered by OpenGL.
 		idaten::CudaGLSurface m_gbuffer;
 		idaten::CudaGLSurface m_motionDepthBuffer;
+
+		uint32_t m_atrousMaxIterCnt{ 5 };
 
 		idaten::TypedCudaMemory<PickedInfo> m_pick;
 

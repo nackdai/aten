@@ -382,7 +382,7 @@ __global__ void atrousFilter(
 	}
 	
 	if (isFinalIter) {
-		sumC = YCoCg2RGB(sumC);
+		sumC = isFirstIter ? sumC : YCoCg2RGB(sumC);
 		sumC = unmap(sumC);
 
 		texclrMeshid = aovTexclrMeshid[idx];
@@ -423,11 +423,11 @@ namespace idaten
 		cudaSurfaceObject_t outputSurf,
 		int width, int height)
 	{
-		static const int ITER = 5;
+		m_atrousMaxIterCnt = aten::clamp(m_atrousMaxIterCnt, 0U, 5U);
 
-		for (int i = 0; i < ITER; i++) {
+		for (int i = 0; i < m_atrousMaxIterCnt; i++) {
 			onAtrousFilterIter(
-				i, ITER,
+				i, m_atrousMaxIterCnt,
 				outputSurf,
 				width, height);
 		}

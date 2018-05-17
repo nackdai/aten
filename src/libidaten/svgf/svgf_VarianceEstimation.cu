@@ -253,7 +253,7 @@ __global__ void varianceEstimation(
 	aovColorVariance[idx].w = var;
 
 	surf2Dwrite(
-		frame < 4 ? make_float4(1, 0, 0, 1) : make_float4(var, var, var, var),
+		make_float4(var, var, var, 1),
 		dst,
 		ix * sizeof(float4), iy,
 		cudaBoundaryModeTrap);

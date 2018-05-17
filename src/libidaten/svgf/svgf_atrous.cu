@@ -175,6 +175,21 @@ inline __device__ float4 unmap(float4 clr)
 	return clr / (1 - lum);
 }
 
+inline __device__ float _C(float3 x1, float3 x2, float sigma)
+{
+	float a = length(x1 - x2) / sigma;
+	a *= a;
+	return expf(-0.5f * a);
+}
+
+inline __device__ float _C(float x1, float x2, float sigma)
+{
+	float a = fabs(x1 - x2) / sigma;
+	a *= a;
+	return expf(-0.5f * a);
+}
+
+
 __global__ void atrousFilter(
 	idaten::TileDomain tileDomain,
 	bool isFirstIter, bool isFinalIter,
@@ -238,6 +253,11 @@ __global__ void atrousFilter(
 		}
 
 		return;
+	}
+
+	if (isFirstIter) {
+		centerColor = map(centerColor);
+		centerColor = RGB2YCoCg(centerColor);
 	}
 
 	float centerLum = AT_NAME::color::luminance(centerColor.x, centerColor.y, centerColor.z);
@@ -358,6 +378,13 @@ __global__ void atrousFilter(
 			
 			sumC += h[pos] * W * color;
 			weightC += h[pos] * W;
+
+#if 1
+			Wz = _C(depth, centerDepth, 0.1f);
+			Wn = _C(normal, centerNormal, 0.1f);
+			Wl = _C(lum, centerLum, 0.1f);
+			W = Wz * Wn * Wl * Wm;
+#endif
 
 			sumV += (h[pos] * h[pos]) * (W * W) * variance;
 			weightV += h[pos] * W;

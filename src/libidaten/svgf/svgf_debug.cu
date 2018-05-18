@@ -107,7 +107,11 @@ __global__ void fillAOV(
 		clr = make_float4(motionX, motionY, 0, 1);
 	}
 	else if (mode == idaten::SVGFPathTracing::AOVMode::ObjId) {
-		int objid = isect.objid;
+#if 0
+		int objid = isect.meshid;
+#else
+		int objid = isect.mtrlid;
+#endif
 		if (objid >= 0) {
 			objid %= AT_COUNTOF(colors);
 			auto c = colors[objid];

@@ -502,7 +502,11 @@ __global__ void shade(
 
 		// texture color, meshid.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
+#if 0
 		aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
+#else
+		aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.mtrlid);
+#endif
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;
@@ -527,7 +531,11 @@ __global__ void shade(
 
 		// texture color.
 		auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
+#if 0
 		aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
+#else
+		aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.mtrlid);
+#endif
 
 		// For exporting separated albedo.
 		shMtrls[threadIdx.x].albedoMap = -1;

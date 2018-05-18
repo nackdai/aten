@@ -30,14 +30,17 @@
 <node CREATED="1518502844294" LINK="http://research.nvidia.com/sites/default/files/publications/main.pdf" MODIFIED="1518502844294" TEXT="research.nvidia.com &gt; Sites &gt; Default &gt; Files &gt; Publications &gt; Main"/>
 <node CREATED="1518502844296" LINK="https://github.com/marekvinkler/NTrace" MODIFIED="1518502844296" TEXT="https://github.com/marekvinkler/NTrace"/>
 </node>
-<node CREATED="1518502775058" HGAP="42" ID="ID_619189419" MODIFIED="1518502831707" POSITION="right" TEXT="Toon" VSHIFT="61">
-<node CREATED="1518502807074" ID="ID_988309162" LINK="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon" MODIFIED="1518502829848" TEXT="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon"/>
-<node CREATED="1518502816194" LINK="https://github.com/Kink3d/ToonShading" MODIFIED="1518502816194" TEXT="https://github.com/Kink3d/ToonShading"/>
-<node CREATED="1518502816201" LINK="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/" MODIFIED="1518502816201" TEXT="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/"/>
-<node CREATED="1518502816207" ID="ID_1931509701" LINK="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader" MODIFIED="1518502816207" TEXT="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader"/>
+<node CREATED="1526618999311" ID="ID_182583894" MODIFIED="1526619000473" POSITION="right" TEXT="NPR">
+<node CREATED="1518502775058" HGAP="47" ID="ID_619189419" MODIFIED="1526619011056" TEXT="Toon" VSHIFT="16">
+<node CREATED="1518502816194" ID="ID_927652225" LINK="https://github.com/Kink3d/ToonShading" MODIFIED="1518502816194" TEXT="https://github.com/Kink3d/ToonShading"/>
+<node CREATED="1526611080399" ID="ID_505893151" LINK="https://greyscalegorilla.com/tutorials/5-ways-to-create-cel-shading-in-cinema-4d/" MODIFIED="1526611089368" TEXT="5 WAYS TO CREATE CEL SHADING IN CINEMA 4D"/>
+<node CREATED="1526611106713" ID="ID_501099703" LINK="https://support.solidangle.com/display/A5AFMUG/Toon+Shading+with+the+Facing+Ratio+shader" MODIFIED="1526611127802" TEXT="Toon Shading with the Facing Ratio shader"/>
+<node CREATED="1526611437936" ID="ID_1383201918" LINK="https://docs.chaosgroup.com/display/VRAY3MAX/Toon+Render+Effect+%7C+VRayToon" MODIFIED="1526611447239" TEXT="Toon Render Effect | VRayToon"/>
+</node>
 <node CREATED="1526547226069" ID="ID_576402687" LINK="http://www.sci.utah.edu/~roni/research/projects/NPR-lines/" MODIFIED="1526547265570" TEXT="Ray Tracing NPR-Style Feature Lines">
 <icon BUILTIN="idea"/>
 </node>
+<node CREATED="1526618993156" ID="ID_1818502507" LINK="https://www.cl.cam.ac.uk/teaching/0910/RSL/Richardt.pdf" MODIFIED="1526619020197" TEXT="Non-Photorealistic Rendering (NPR)"/>
 </node>
 <node CREATED="1523001241900" HGAP="58" ID="ID_875040956" MODIFIED="1523001366583" POSITION="right" TEXT="SubSurfaceScattering" VSHIFT="52">
 <node CREATED="1523001247781" HGAP="27" ID="ID_981506302" LINK="https://github.com/tiansijie/CUDA-Monte-Carlo-Pathtracer/blob/master/src/raytraceKernel.cu" MODIFIED="1523001369302" TEXT="https://github.com/tiansijie/CUDA-Monte-Carlo-Pathtracer/blob/master/src/raytraceKernel.cu" VSHIFT="-19"/>

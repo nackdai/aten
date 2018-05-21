@@ -9,21 +9,19 @@
 //#pragma optimize( "", off)
 
 __global__ void computeSkinning(
-	uint32_t indexNum,
+	uint32_t vtxNum,
 	const aten::SkinningVertex* __restrict__ vertices,
-	const uint32_t* __restrict__ indices,
 	const aten::mat4* __restrict__ matrices,
 	aten::vec4* dstPos,
 	aten::vec4* dstNml)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (idx >= indexNum) {
+	if (idx >= vtxNum) {
 		return;
 	}
 
-	const auto vtxIdx = indices[idx];
-	const auto* vtx = &vertices[vtxIdx];
+	const auto* vtx = &vertices[idx];
 
 	aten::vec4 srcPos = vtx->position;
 	aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
@@ -48,13 +46,46 @@ __global__ void computeSkinning(
 }
 
 __global__ void computeSkinningWithTriangles(
-	uint32_t triNum,
+	uint32_t vtxNum,
 	const aten::SkinningVertex* __restrict__ vertices,
-	aten::PrimitiveParamter* triangles,
 	const aten::mat4* __restrict__ matrices,
-	int indexOffset,
 	aten::vec4* dstPos,
 	aten::vec4* dstNml)
+{
+	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (idx >= vtxNum) {
+		return;
+	}
+
+	const auto* vtx = &vertices[idx];
+
+	aten::vec4 srcPos = vtx->position;
+	aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
+
+	aten::vec4 resultPos(0);
+	aten::vec4 resultNml(0);
+
+	for (int i = 0; i < 4; i++) {
+		int idx = int(vtx->blendIndex[i]);
+		float weight = vtx->blendWeight[i];
+
+		aten::mat4 mtx = matrices[idx];
+
+		resultPos += weight * mtx * vtx->position;
+		resultNml += weight * mtx * srcNml;
+	}
+
+	resultNml = normalize(resultNml);
+
+	dstPos[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
+	dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
+}
+__global__ void setTriangleParam(
+	uint32_t triNum,
+	aten::PrimitiveParamter* triangles,
+	int indexOffset,
+	const aten::vec4* __restrict__ pos)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -64,47 +95,18 @@ __global__ void computeSkinningWithTriangles(
 
 	auto* tri = &triangles[idx];
 
-#pragma unroll
-	for (int t = 0; t < 3; t++) {
-		const auto vtxIdx = tri->idx[t];
-		const auto* vtx = &vertices[vtxIdx];
+	const auto& v0 = pos[tri->idx[0]];
+	const auto& v1 = pos[tri->idx[1]];
+	const auto& v2 = pos[tri->idx[2]];
 
-		aten::vec4 srcPos = vtx->position;
-		aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
-
-		aten::vec4 resultPos(0);
-		aten::vec4 resultNml(0);
-
-		for (int i = 0; i < 4; i++) {
-			int idx = int(vtx->blendIndex[i]);
-			float weight = vtx->blendWeight[i];
-
-			aten::mat4 mtx = matrices[idx];
-
-			resultPos += weight * mtx * vtx->position;
-			resultNml += weight * mtx * srcNml;
-		}
-
-		resultNml = normalize(resultNml);
-
-		dstPos[vtxIdx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
-		dstNml[vtxIdx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
-	}
-
-	{
-		const auto& v0 = dstPos[tri->idx[0]];
-		const auto& v1 = dstPos[tri->idx[1]];
-		const auto& v2 = dstPos[tri->idx[2]];
-
-		auto a = v1 - v0;
-		auto b = v2 - v0;
+	auto a = v1 - v0;
+	auto b = v2 - v0;
 		
-		tri->area = cross(a, b).length();
+	tri->area = length(cross(a, b));
 
-		tri->idx[0] += indexOffset;
-		tri->idx[1] += indexOffset;
-		tri->idx[2] += indexOffset;
-	}
+	tri->idx[0] += indexOffset;
+	tri->idx[1] += indexOffset;
+	tri->idx[2] += indexOffset;
 }
 
 // NOTE
@@ -315,32 +317,36 @@ namespace idaten
 		{
 			auto willComputeWithTriangles = m_triangles.num() > 0;
 
+			const auto vtxNum = m_vertices.num();
+
+			dim3 block(512);
+			dim3 grid((vtxNum + block.x - 1) / block.x);
+
 			if (willComputeWithTriangles) {
-				const auto triNum = m_triangles.num();
-
-				dim3 block(256);
-				dim3 grid((triNum + block.x - 1) / block.x);
-
 				computeSkinningWithTriangles << <grid, block >> > (
-					triNum,
+					vtxNum,
 					m_vertices.ptr(),
-					m_triangles.ptr(),
 					m_matrices.ptr(),
-					indexOffset,
 					dstPos, dstNml);
 
 				checkCudaKernel(computeSkinningWithTriangles);
+
+				const auto triNum = m_triangles.num();
+
+				grid = dim3((triNum + block.x - 1) / block.x);
+
+				setTriangleParam << <grid, block >> > (
+					triNum,
+					m_triangles.ptr(),
+					indexOffset,
+					dstPos);
+
+				checkCudaKernel(setTriangleParam);
 			}
 			else {
-				const auto idxNum = m_indices.num();
-
-				dim3 block(256);
-				dim3 grid((idxNum + block.x - 1) / block.x);
-
 				computeSkinning << <grid, block >> > (
-					idxNum,
+					vtxNum,
 					m_vertices.ptr(),
-					m_indices.ptr(),
 					m_matrices.ptr(),
 					dstPos, dstNml);
 

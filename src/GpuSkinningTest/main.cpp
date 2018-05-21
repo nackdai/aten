@@ -57,7 +57,7 @@ void onRun(aten::window* window)
 	if (s_isGPUSkinning) {
 		const auto& mtx = g_mdl.getMatrices();
 		skinning.update(&mtx[0], mtx.size());
-		skinning.compute(0, aabbMin, aabbMax);
+		skinning.compute(aabbMin, aabbMax);
 #if 0
 		auto& vb = g_mdl.getVBForGPUSkinning();
 		auto num = vb.getVtxNum();

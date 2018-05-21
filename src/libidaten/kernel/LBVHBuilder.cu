@@ -105,6 +105,7 @@ __global__ void buildTree(
 	node->order = i;
 	node->isLeaf = false;
 
+	// End of internal nodes position = Start of leaf node position.
 	uint32_t leafBaseIdx = numOfElems - 1;
 
 	if (min(i, j) == splitPosition) {

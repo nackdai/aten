@@ -247,6 +247,9 @@
     <ClInclude Include="..\src\libidaten\multigpu\svgf_multigpu.h">
       <Filter>multigpu</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh">
+      <Filter>kernel\accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

@@ -93,6 +93,7 @@
     <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\material.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\material_impl.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h" />
     <ClInclude Include="..\src\libidaten\kernel\qbvh.cuh" />

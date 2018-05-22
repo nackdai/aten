@@ -19,16 +19,33 @@ __forceinline__ __device__ float4 getFloat4(float4* data, int idx)
 	return data[idx];
 }
 
-__forceinline__ __device__ unsigned int expandBits(unsigned int value)
+// NOTE
+// http://www.forceflow.be/2013/10/07/morton-encodingdecoding-through-bit-interleaving-implementations/
+
+__forceinline__ __device__ __host__ unsigned int expandBits(unsigned int value)
 {
+#if 0
+	// NOTE
+	// 0x00010001u = 1 << 16 + 1 = 0x00010000 + 1 = 0x00010001
+	// 0x00000101u = 1 << 8 + 1 = 0x00000100 + 1 = 0x00000101
+	// 0x00000011u = 1 << 4 + 1 = 0x00000010 + 1 = 0x00000011
+	// 0x00000005u = 1 << 2 + 1 = 0x00000004 + 1 = 0x00000005
 	value = (value * 0x00010001u) & 0xFF0000FFu;
 	value = (value * 0x00000101u) & 0x0F00F00Fu;
 	value = (value * 0x00000011u) & 0xC30C30C3u;
 	value = (value * 0x00000005u) & 0x49249249u;
+#else
+	// NOTE
+	// value | value << 16 = value * (1 + 1 << 16) = value * 0x00010001u
+	value = (value | value << 16) & 0xFF0000FFu;
+	value = (value | value << 8) & 0x0F00F00Fu;
+	value = (value | value << 4) & 0xC30C30C3u;
+	value = (value | value << 2) & 0x49249249u;
+#endif
 	return value;
 }
 
-__forceinline__ __device__ unsigned int computeMortonCode(aten::vec3 point)
+__forceinline__ __device__ __host__ unsigned int computeMortonCode(aten::vec3 point)
 {
 	// Discretize the unit cube into a 10 bit integer
 	uint3 discretized;
@@ -40,7 +57,11 @@ __forceinline__ __device__ unsigned int computeMortonCode(aten::vec3 point)
 	discretized.y = expandBits(discretized.y);
 	discretized.z = expandBits(discretized.z);
 
+#if 0
 	return discretized.x * 4 + discretized.y * 2 + discretized.z;
+#else
+	return discretized.x << 2 | discretized.y << 1 | discretized.z;
+#endif
 }
 
 template <typename T>

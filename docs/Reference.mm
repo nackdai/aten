@@ -28,7 +28,7 @@
 <node CREATED="1518502844279" LINK="http://www.highperformancegraphics.net/previous/www_2010/media/RayTracing_I/HPG2010_RayTracing_I_Pantaleoni.pdf" MODIFIED="1518502844279" TEXT="highperformancegraphics.net &gt; Previous &gt; Www 2010 &gt; Media &gt; RayTracing I &gt; HPG2010 RayTracing I Pantaleoni"/>
 <node CREATED="1518502844289" LINK="http://highperformancegraphics.org/previous/www_2011/media/Papers/HPG2011_Papers_Garanzha.pdf" MODIFIED="1518502844289" TEXT="highperformancegraphics.org &gt; Previous &gt; Www 2011 &gt; Media &gt; Papers &gt; HPG2011 Papers Garanzha"/>
 <node CREATED="1518502844294" LINK="http://research.nvidia.com/sites/default/files/publications/main.pdf" MODIFIED="1518502844294" TEXT="research.nvidia.com &gt; Sites &gt; Default &gt; Files &gt; Publications &gt; Main"/>
-<node CREATED="1518502844296" LINK="https://github.com/marekvinkler/NTrace" MODIFIED="1518502844296" TEXT="https://github.com/marekvinkler/NTrace"/>
+<node CREATED="1518502844296" ID="ID_547415847" LINK="https://github.com/marekvinkler/NTrace" MODIFIED="1518502844296" TEXT="https://github.com/marekvinkler/NTrace"/>
 </node>
 <node CREATED="1526618999311" ID="ID_182583894" MODIFIED="1526619000473" POSITION="right" TEXT="NPR">
 <node CREATED="1518502775058" HGAP="47" ID="ID_619189419" MODIFIED="1526619011056" TEXT="Toon" VSHIFT="16">

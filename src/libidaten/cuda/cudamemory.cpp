@@ -63,7 +63,7 @@ namespace idaten {
 			return 0;
 		}
 
-		checkCudaErrors(cudaMemcpyAsync(p, m_device, size, cudaMemcpyDeviceToHost));
+		checkCudaErrors(cudaMemcpy(p, m_device, size, cudaMemcpyDeviceToHost));
 
 		return size;
 	}

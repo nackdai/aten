@@ -19,88 +19,125 @@ namespace idaten
 			deviceKeys.clear();
 			delete m_deviceKeys;
 		}
-		if (m_deviceIndices) {
-			thrust::device_vector<uint32_t>& deviceIndices = *(thrust::device_vector<uint32_t>*)(m_deviceIndices);
-			deviceIndices.clear();
-			delete m_deviceIndices;
+		if (m_deviceValues) {
+			thrust::device_vector<uint32_t>& deviceValues = *(thrust::device_vector<uint32_t>*)(m_deviceValues);
+			deviceValues.clear();
+			delete m_deviceValues;
 		}
 	}
 
-	void RadixSort::init(uint32_t valueNum, uint32_t indexNum)
+	void RadixSort::init(uint32_t num)
 	{
 		if (!m_deviceKeys) {
-			m_deviceKeys = new thrust::device_vector<uint32_t>(valueNum);
+			m_deviceKeys = new thrust::device_vector<uint32_t>(num);
 		}
 
-		if (!m_deviceIndices) {
-			m_deviceIndices = new thrust::device_vector<uint32_t>(indexNum);
+		if (!m_deviceValues) {
+			m_deviceValues = new thrust::device_vector<uint32_t>(num);
+		}
+	}
+
+	static void radixSort(
+		uint32_t num,
+		thrust::device_vector<uint32_t> deviceKeys,
+		thrust::device_vector<uint32_t> deviceValues,
+		TypedCudaMemory<uint32_t>& refSortedKeys,
+		TypedCudaMemory<uint32_t>& refSortedValues,
+		std::vector<uint32_t>* resultHostKeys/*= nullptr*/,
+		std::vector<uint32_t>* resultHostValues/*= nullptr*/)
+	{
+		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.begin() + num, deviceValues.begin());
+
+		auto sortedKeys = thrust::raw_pointer_cast(deviceKeys.data());
+		auto sortedValues = thrust::raw_pointer_cast(deviceValues.data());
+
+		refSortedKeys.init(deviceKeys.size() * sizeof(uint32_t));
+		refSortedKeys.writeByNum(sortedKeys, num);
+
+		refSortedValues.init(deviceValues.size() * sizeof(uint32_t));
+		refSortedValues.writeByNum(sortedValues, num);
+
+		if (resultHostKeys) {
+			thrust::host_vector<uint32_t> hostKeys = deviceKeys;
+			for (int i = 0; i < num; i++) {
+				resultHostKeys->push_back(hostKeys[i]);
+			}
+		}
+
+		if (resultHostValues) {
+			thrust::host_vector<uint32_t> hostValues = deviceValues;
+			for (int i = 0; i < num; i++) {
+				resultHostValues->push_back(hostValues[i]);
+			}
 		}
 	}
 
 	void RadixSort::sort(
+		const std::vector<uint32_t>& keys,
 		const std::vector<uint32_t>& values,
-		TypedCudaMemory<uint32_t>& dst,
-		std::vector<uint32_t>* result/*= nullptr*/)
+		TypedCudaMemory<uint32_t>& refSortedKeys,
+		TypedCudaMemory<uint32_t>& refSortedValues,
+		std::vector<uint32_t>* resultHostKeys/*= nullptr*/,
+		std::vector<uint32_t>* resultHostValues/*= nullptr*/)
 	{
-		thrust::host_vector<uint32_t> hostKeys(values.size());
-		thrust::host_vector<uint32_t> hostIndices(values.size());
+		AT_ASSERT(keys.size() == values.size());
 
-		for (uint32_t i = 0; i < values.size(); i++) {
-			hostKeys[i] = values[i];
-			hostIndices[i] = i;
+		uint32_t num = (uint32_t)keys.size();
+
+		thrust::host_vector<uint32_t> hostKeys(num);
+		thrust::host_vector<uint32_t> hostValues(num);
+
+		for (uint32_t i = 0; i < num; i++) {
+			hostKeys[i] = keys[i];
+			hostValues[i] = values[i];
 		}
 
 		// copy unsorted data from host to device
 		thrust::device_vector<uint32_t> deviceKeys = hostKeys;
-		thrust::device_vector<uint32_t> deviceIndices = hostIndices;
+		thrust::device_vector<uint32_t> deviceValues = hostValues;
 
-		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.end(), deviceIndices.begin());
-
-		auto sortedKeys = thrust::raw_pointer_cast(deviceKeys.data());
-
-		dst.init(deviceKeys.size() * sizeof(uint32_t));
-		dst.writeByNum(sortedKeys, deviceKeys.size());
-
-		if (result) {
-			hostKeys = deviceKeys;
-			for (int i = 0; i < hostKeys.size(); i++) {
-				result->push_back(hostKeys[i]);
-			}
-		}
+		radixSort(
+			num,
+			deviceKeys,
+			deviceValues,
+			refSortedKeys,
+			refSortedValues,
+			resultHostKeys,
+			resultHostValues);
 	}
 
 	void RadixSort::sort(
+		uint32_t num,
+		TypedCudaMemory<uint32_t>& keys,
 		TypedCudaMemory<uint32_t>& values,
-		TypedCudaMemory<uint32_t>& indices,
-		TypedCudaMemory<uint32_t>& dst,
-		std::vector<uint32_t>* result/*= nullptr*/)
+		TypedCudaMemory<uint32_t>& refSortedKeys,
+		TypedCudaMemory<uint32_t>& refSortedValues,
+		std::vector<uint32_t>* resultHostKeys/*= nullptr*/,
+		std::vector<uint32_t>* resultHostValues/*= nullptr*/)
 	{
 		AT_ASSERT(m_deviceKeys);
-		AT_ASSERT(m_deviceIndices);
+		AT_ASSERT(m_deviceValues);
+
+		AT_ASSERT(keys.num() == values.num());
+		AT_ASSERT(keys.num() <= num);
 
 		// copy unsorted data from host to device
 		thrust::device_vector<uint32_t>& deviceKeys = *(thrust::device_vector<uint32_t>*)(m_deviceKeys);
-		thrust::device_vector<uint32_t>& deviceIndices = *(thrust::device_vector<uint32_t>*)(m_deviceIndices);
+		thrust::device_vector<uint32_t>& deviceValues = *(thrust::device_vector<uint32_t>*)(m_deviceValues);
 
-		auto keys = thrust::raw_pointer_cast(deviceKeys.data());
-		checkCudaErrors(cudaMemcpyAsync(keys, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));
+		auto dkeys = thrust::raw_pointer_cast(deviceKeys.data());
+		checkCudaErrors(cudaMemcpyAsync(dkeys, keys.ptr(), keys.bytes(), cudaMemcpyDeviceToDevice));
 
-		auto ids = thrust::raw_pointer_cast(deviceIndices.data());
-		checkCudaErrors(cudaMemcpyAsync(ids, indices.ptr(), indices.bytes(), cudaMemcpyDeviceToDevice));
+		auto dvalues = thrust::raw_pointer_cast(deviceValues.data());
+		checkCudaErrors(cudaMemcpyAsync(dvalues, values.ptr(), values.bytes(), cudaMemcpyDeviceToDevice));
 
-		thrust::sort_by_key(deviceKeys.begin(), deviceKeys.begin() + values.num(), deviceIndices.begin());
-
-		auto sortedKeys = thrust::raw_pointer_cast(deviceKeys.data());
-
-		dst.init(deviceKeys.size() * sizeof(uint32_t));
-		dst.writeByNum(sortedKeys, values.num());
-
-		if (result) {
-			thrust::host_vector<uint32_t> hostKeys = deviceKeys;
-			for (int i = 0; i < values.num(); i++) {
-				result->push_back(hostKeys[i]);
-			}
-		}
+		radixSort(
+			num,
+			deviceKeys,
+			deviceValues,
+			refSortedKeys,
+			refSortedValues,
+			resultHostKeys,
+			resultHostValues);
 	}
-
 }

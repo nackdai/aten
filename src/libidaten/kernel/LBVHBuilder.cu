@@ -13,6 +13,7 @@
 
 // NOTE
 // https://github.com/leonardo-domingues/atrbvh
+// http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
 __device__  int computeLongestCommonPrefix(
 	const uint32_t* sortedKeys,
@@ -158,7 +159,8 @@ __device__ __host__ inline void onApplyTraverseOrder(
 	int idx,
 	int numberOfTris,
 	int triIdOffset,
-	const idaten::LBVHBuilder::LBVHNode* src,
+	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
+	const uint32_t* __restrict__ sortedIndices,
 	aten::ThreadedBvhNode* dst)
 {
 	const auto* node = &src[idx];
@@ -176,7 +178,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
 		int leafBaseIdx = numberOfTris - 1;
 
 		int leafId = node->order - leafBaseIdx;
-		int triId = triIdOffset + leafId;
+		int triId = triIdOffset + sortedIndices[leafId];
 
 		gpunode->primid = (float)triId;
 
@@ -291,6 +293,7 @@ __global__ void applyTraverseOrder(
 	int numberOfTris,
 	int triIdOffset,
 	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
+	const uint32_t* __restrict__ sortedIndices,
 	aten::ThreadedBvhNode* dst)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -299,7 +302,7 @@ __global__ void applyTraverseOrder(
 		return;
 	}
 
-	onApplyTraverseOrder(idx, numberOfTris, triIdOffset, src, dst);
+	onApplyTraverseOrder(idx, numberOfTris, triIdOffset, src, sortedIndices, dst);
 }
 
 __device__ inline void computeBoundingBox(
@@ -349,6 +352,7 @@ template <typename T>
 __global__ void computeBoudingBox(
 	int numberOfTris,
 	const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
+	const uint32_t* __restrict__ sortedIndices,
 	aten::ThreadedBvhNode* dst,
 	const aten::PrimitiveParamter* __restrict__ tris,
 	T vtxPos,
@@ -387,7 +391,7 @@ __global__ void computeBoudingBox(
 
 	// Calculate leaves bounding box.
 	int leafId = node->order - leafBaseIdx;
-	int triId = leafId;
+	int triId = sortedIndices[leafId];
 
 	aten::PrimitiveParamter prim;
 	prim.v0 = ((aten::vec4*)tris)[triId * aten::PrimitiveParamter_float4_size + 0];
@@ -433,7 +437,7 @@ __global__ void computeBoudingBox(
 			return;
 		}
 
-		auto* targetSrc = &src[targetId];
+		const auto* targetSrc = &src[targetId];
 		auto* targetDst = &dst[targetId];
 
 		float4 childAABBMin, childAABBMax;
@@ -459,7 +463,7 @@ __global__ void computeBoudingBox(
 				childIdx = targetSrc->right;
 			}
 
-			auto* tmp = &dst[childIdx];
+			const auto* tmp = &dst[childIdx];
 
 			childAABBMin = make_float4(tmp->boxmin.x, tmp->boxmin.y, tmp->boxmin.z, 0);
 			childAABBMax = make_float4(tmp->boxmax.x, tmp->boxmax.y, tmp->boxmax.z, 0);
@@ -568,7 +572,7 @@ namespace idaten
 		m_mortonCodes.init(maxNum);
 		m_indices.init(maxNum);
 
-		m_sort.init(maxNum, maxNum);
+		m_sort.init(maxNum);
 
 		uint32_t numInternalNode = maxNum - 1;
 		uint32_t numLeaves = maxNum;
@@ -615,10 +619,11 @@ namespace idaten
 
 		// Radix sort.
 		m_sort.sort(
+			numOfElems,
 			m_mortonCodes, 
 			m_indices, 
-			m_sortedKeys, 
-			nullptr);
+			m_sortedMortonCode,
+			m_sortedIndices);
 
 		uint32_t numInternalNode = numOfElems - 1;
 		uint32_t numLeaves = numOfElems;
@@ -630,7 +635,7 @@ namespace idaten
 
 			buildTree << <grid, block >> > (
 				numOfElems,
-				m_sortedKeys.ptr(),
+				m_sortedMortonCode.ptr(),
 				m_nodesLbvh.ptr());
 
 			checkCudaKernel(buildTree);
@@ -648,6 +653,7 @@ namespace idaten
 				numLeaves,
 				triIdOffset,
 				m_nodesLbvh.ptr(),
+				m_sortedIndices.ptr(),
 				m_nodes.ptr());
 
 			checkCudaKernel(applyTraverseOrder);
@@ -668,6 +674,7 @@ namespace idaten
 			computeBoudingBox << <grid, block, sharedMemorySize >> > (
 				numberOfTris,
 				m_nodesLbvh.ptr(),
+				m_sortedIndices.ptr(),
 				m_nodes.ptr(),
 				triangles.ptr(),
 				vtxPos,
@@ -678,8 +685,10 @@ namespace idaten
 		}
 
 		if (threadedBvhNodes) {
-			threadedBvhNodes->resize(m_nodes.num());
-			m_nodes.read(&(*threadedBvhNodes)[0], 0);
+			auto num = numInternalNode + numLeaves;
+			threadedBvhNodes->clear();
+			threadedBvhNodes->resize(num);
+			m_nodes.readByNum(&(*threadedBvhNodes)[0], num);
 		}
 
 		dst.init(
@@ -734,18 +743,22 @@ namespace idaten
 
 	void LBVHBuilder::build()
 	{
-		static const uint32_t keys[] = {
-			1, 2, 4, 5, 19, 24, 25, 30,
+		static const uint32_t skeys[] = {
+			1, 19, 24, 25, 30, 2, 4, 5,
 		};
 
+		std::vector<uint32_t> keys;
 		std::vector<uint32_t> values;
-		for (auto k : keys) {
-			values.push_back(k);
+		for (int i = 0; i < AT_COUNTOF(skeys); i++) {
+			keys.push_back(skeys[i]);
+			values.push_back(i);
 		}
 
 		TypedCudaMemory<uint32_t> sortedKeys;
+		TypedCudaMemory<uint32_t> sortedValue;
+		std::vector<uint32_t> k;
 		std::vector<uint32_t> v;
-		RadixSort::sort(values, sortedKeys, &v);
+		RadixSort::sort(keys, values, sortedKeys, sortedValue, &k, &v);
 
 		uint32_t numOfElems = values.size();
 
@@ -765,6 +778,9 @@ namespace idaten
 				nodesLbvh.ptr());
 		}
 
+		std::vector<LBVHNode> tmp0(nodesLbvh.num());
+		nodesLbvh.readByNum(&tmp0[0]);
+
 		TypedCudaMemory<aten::ThreadedBvhNode> nodes;
 		nodes.init(numInternalNode + numLeaves);
 
@@ -780,10 +796,13 @@ namespace idaten
 				numLeaves,
 				0,
 				nodesLbvh.ptr(),
+				sortedValue.ptr(),
 				nodes.ptr());
 		}
 		std::vector<aten::ThreadedBvhNode> tmp1(nodes.num());
 		nodes.read(&tmp1[0], 0);
+
+		int xx = 0;
 #else
 		std::vector<LBVHNode> tmp(m_nodesLbvh.maxNum());
 		m_nodesLbvh.read(&tmp[0], 0);

@@ -67,7 +67,8 @@ namespace idaten
 	private:
 		TypedCudaMemory<uint32_t> m_mortonCodes;
 		TypedCudaMemory<uint32_t> m_indices;
-		TypedCudaMemory<uint32_t> m_sortedKeys;
+		TypedCudaMemory<uint32_t> m_sortedMortonCode;
+		TypedCudaMemory<uint32_t> m_sortedIndices;
 		RadixSort m_sort;
 		TypedCudaMemory<LBVHBuilder::LBVHNode> m_nodesLbvh;
 		TypedCudaMemory<aten::ThreadedBvhNode> m_nodes;

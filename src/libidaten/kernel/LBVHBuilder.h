@@ -10,7 +10,6 @@
 namespace idaten
 {
 	class CudaTextureResource;
-	class LBVH;
 	
 	class LBVHBuilder {
 	public:

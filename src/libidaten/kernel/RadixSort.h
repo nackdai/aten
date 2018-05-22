@@ -7,7 +7,6 @@
 namespace idaten
 {
 	class RadixSort {
-		friend class LBVH;
 		friend class LBVHBuilder;
 
 	private:

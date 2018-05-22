@@ -704,7 +704,12 @@ int main()
 
 		aten::DataCollector::collectTriangles(triangles, triIdOffsets);
 
-		g_lbvh.init(triangles.size());
+		uint32_t maxTriNum = 0;
+		for (const auto& tris : triangles) {
+			maxTriNum = std::max<uint32_t>(maxTriNum, tris.size());
+		}
+
+		g_lbvh.init(maxTriNum);
 
 		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();

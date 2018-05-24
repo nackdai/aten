@@ -20,9 +20,11 @@ __forceinline__ __device__ float4 getFloat4(float4* data, int idx)
 }
 
 // NOTE
+// https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
 // http://www.forceflow.be/2013/10/07/morton-encodingdecoding-through-bit-interleaving-implementations/
+// http://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 
-__forceinline__ __device__ __host__ unsigned int expandBits(unsigned int value)
+__forceinline__ __device__ __host__ uint32_t expandBits(uint32_t value)
 {
 #if 0
 	// NOTE
@@ -45,13 +47,35 @@ __forceinline__ __device__ __host__ unsigned int expandBits(unsigned int value)
 	return value;
 }
 
-__forceinline__ __device__ __host__ unsigned int computeMortonCode(aten::vec3 point)
+#if 0
+__forceinline__ __device__ __host__ uint64_t expandBitsBy3(uint32_t value)
+{
+	uint64_t x = value;
+	x = (x | x << 36) & 0x000f000000000ffful;
+	x = (x | x << 24) & 0x000f000f000000fful;
+	x = (x | x << 12) & 0x000f000f000f000ful;
+	x = (x | x << 6) & 0x0303030303030303ul;
+	x = (x | x << 3) & 0x1111111111111111ul;
+	return x;
+}
+#else
+__forceinline__ __device__ __host__ uint32_t expandBitsBy3(uint32_t value)
+{
+	uint32_t x = value;
+	x = (x | x << 12) & 0x000f000fu;
+	x = (x | x << 6) & 0x03030303u;
+	x = (x | x << 3) & 0x11111111u;
+	return x;
+}
+#endif	
+
+__forceinline__ __device__ __host__ uint32_t computeMortonCode(aten::vec3 point)
 {
 	// Discretize the unit cube into a 10 bit integer
 	uint3 discretized;
-	discretized.x = (unsigned int)min(max(point.x * 1024.0f, 0.0f), 1023.0f);
-	discretized.y = (unsigned int)min(max(point.y * 1024.0f, 0.0f), 1023.0f);
-	discretized.z = (unsigned int)min(max(point.z * 1024.0f, 0.0f), 1023.0f);
+	discretized.x = (uint32_t)min(max(point.x * 1024.0f, 0.0f), 1023.0f);
+	discretized.y = (uint32_t)min(max(point.y * 1024.0f, 0.0f), 1023.0f);
+	discretized.z = (uint32_t)min(max(point.z * 1024.0f, 0.0f), 1023.0f);
 
 	discretized.x = expandBits(discretized.x);
 	discretized.y = expandBits(discretized.y);
@@ -62,6 +86,64 @@ __forceinline__ __device__ __host__ unsigned int computeMortonCode(aten::vec3 po
 #else
 	return discretized.x << 2 | discretized.y << 1 | discretized.z;
 #endif
+}
+
+__forceinline__ __device__ __host__ uint32_t computeMortonCode(float x, float y, float z, float s)
+{
+	// Discretize the unit cube into a 8 bit integer
+	uint32_t dx = (uint32_t)min(max(x * 256.0f, 0.0f), 255.0f);
+	uint32_t dy = (uint32_t)min(max(y * 256.0f, 0.0f), 255.0f);
+	uint32_t dz = (uint32_t)min(max(z * 256.0f, 0.0f), 255.0f);
+	uint32_t dw = (uint32_t)min(max(s * 256.0f, 0.0f), 255.0f);
+
+	uint32_t ddx = expandBitsBy3(dx);
+	uint32_t ddy = expandBitsBy3(dy);
+	uint32_t ddz = expandBitsBy3(dz);
+	uint32_t ddw = expandBitsBy3(dw);
+
+	uint32_t ret = (uint32_t)(ddx << 3 | ddy << 2 | ddz << 1);
+	//uint32_t ret = (uint32_t)(ddx << 2 | ddy << 2 | ddz << 1);
+
+	return ret;
+}
+
+__forceinline__ __device__ __host__ uint32_t onComputeMortonCode(
+	const aten::vec3& vmin,
+	const aten::vec3& vmax,
+	const aten::aabb& sceneBbox)
+{
+	// Normalize [0, 1].
+	const auto size = sceneBbox.size();
+	const auto bboxMin = sceneBbox.minPos();
+	
+	aten::vec3 center = (vmin + vmax) * 0.5f;
+	center = (center - bboxMin) / size;
+
+	auto code = computeMortonCode(center);
+
+	return code;
+}
+
+__forceinline__ __device__ __host__ uint32_t onComputeExtendedMortonCode(
+	const aten::vec3& vmin,
+	const aten::vec3& vmax,
+	const aten::aabb& sceneBbox)
+{
+	// Normalize [0, 1].
+	const auto size = sceneBbox.size();
+	const auto bboxMin = sceneBbox.minPos();
+
+	aten::vec3 center = (vmin + vmax) * 0.5f;
+	center = (center - bboxMin) / size;
+
+	// Compute diagonal.
+	//const auto div = sceneBbox.getDiagonalLenght();
+	//auto d = aten::length(vmax - vmin);
+	//d /= div;
+
+	auto code = computeMortonCode(center.x, center.y, center.z, 0);
+
+	return code;
 }
 
 template <typename T>

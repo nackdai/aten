@@ -17,7 +17,7 @@
 // https://github.com/leonardo-domingues/atrbvh
 // http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
-__device__  int computeLongestCommonPrefix(
+__forceinline__ __device__ __host__ int computeLongestCommonPrefix(
 	const uint32_t* sortedKeys,
 	uint32_t numOfElems,
 	int index1, int index2,
@@ -35,10 +35,18 @@ __device__  int computeLongestCommonPrefix(
 	if (key1 == key2)
 	{
 
+#ifdef __CUDA_ARCH__
 		return 32 + __clz(index1 ^ index2);
+#else
+		return 32 + aten::clz(index1 ^ index2);
+#endif
 	}
 
+#ifdef __CUDA_ARCH__
 	auto ret = __clz(key1 ^ key2);
+#else
+	auto ret = aten::clz(key1 ^ key2);
+#endif
 
 	return ret;
 }
@@ -59,9 +67,15 @@ __global__ void buildTree(
 	const auto lcp1 = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + 1, key1);
 	const auto lcp2 = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i - 1, key1);
 
+	// ‚Ç‚¿‚çŒü‚«‚É’Tõ‚µ‚Ä‚¢‚­‚©‚ğŒˆ‚ß‚é.
+	// CommonPrefix ‚ª’·‚­‚È‚é•ûŒü‚É’Tõ‚·‚é.
 	auto d = (lcp1 - lcp2) < 0 ? -1 : 1;
 
 	// Compute upper bound for the length of the range
+	// ’Tõ”ÍˆÍ‚ÌãŒÀ‚ğŒˆ‚ß‚é. ”{X‚ÉL‚°‚Ä‚¢‚«A‰ºŒÀŠî€‚æ‚è LongestCommonPrefix ‚ª’·‚­‚È‚éˆÊ’u‚ğ’Tõ”ÍˆÍ‚ÌãŒÀ‚Æ‚·‚é.
+
+	// Common Prefix ‚ª’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î‚Ì LogestCommonPrefix ‚ğŒvZ‚·‚é.
+	// ’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î = LogestCommonPrefix ‚Ì‰ºŒÀŠî€.
 	const auto minLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i - d, key1);
 	int lMax = 2;
 	while (computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + lMax * d, key1) > minLcp)
@@ -70,36 +84,48 @@ __global__ void buildTree(
 	}
 
 	// Find other end using binary search
-	int l = 0;
+	// 2•ª’Tõ‚ÅŒµ–§‚ÉãŒÀ‚ğŒˆ‚ß‚é.
+	int lowest = 0;
 	int t = lMax;
 	while (t > 1)
 	{
 		t = t / 2;
-		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + (l + t) * d, key1);
+
+		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + (lowest + t) * d, key1);
 		if (lcp > minLcp)
 		{
-			l += t;
+			// ‚æ‚è’·‚¢LogestCommonPrefix‚ªŒ©‚Â‚©‚Á‚½‚Ì‚ÅAˆÊ’u‚ğ‚»‚±‚ÉˆÚ“®.
+			lowest += t;
 		}
 	}
-	const auto j = i + l * d;
+
+	// ’Tõ”ÍˆÍ‚ÌãŒÀ.
+	const auto j = i + lowest * d;
 
 	// Find the split position using binary search
+	// •ªŠ„ˆÊ’u‚ğ2•ª’Tõ‚ÅŒˆ‚ß‚é.
+
+	// ’Tõ”ÍˆÍ‚Ì‰ºŒÀ‚ÆãŒÀ‚ÌŠÔ‚ÌLongestCommonPrefix‚ğŒvZ.
 	const auto nodeLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, j, key1);
-	int s = 0;
+
+	int start = 0;
 	int divisor = 2;
-	t = l;
+	t = lowest;
+
 	while (t > 1)
 	{
-		t = (l + divisor - 1) / divisor;
-		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + (s + t) * d, key1);
+		t = (lowest + divisor - 1) / divisor;
+
+		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + (start + t) * d, key1);
 		if (lcp > nodeLcp)
 		{
-			s += t;
+			// ‚æ‚è’·‚¢LogestCommonPrefix‚ªŒ©‚Â‚©‚Á‚½‚Ì‚ÅAˆÊ’u‚ğ‚»‚±‚ÉˆÚ“®.
+			start += t;
 		}
 		divisor *= 2;
 	}
 
-	const auto splitPosition = i + s * d + min(d, 0);
+	const auto splitPosition = i + start * d + min(d, 0);
 
 	auto* node = nodes + i;
 	if (i == 0) {
@@ -518,12 +544,10 @@ namespace idaten
 		int vtxOffset,
 		std::vector<aten::ThreadedBvhNode>* threadedBvhNodes)
 	{
-		uint32_t numOfElems = (uint32_t)triangles.num();
+		uint32_t numberOfTris = (uint32_t)triangles.num();
 
 		// Compute morton code.
 		{
-			uint32_t numberOfTris = triangles.num();
-
 			dim3 block(256, 1, 1);
 			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
 
@@ -541,22 +565,22 @@ namespace idaten
 
 		// Radix sort.
 		m_sort.sort(
-			numOfElems,
-			m_mortonCodes, 
-			m_indices, 
+			numberOfTris,
+			m_mortonCodes,
+			m_indices,
 			m_sortedMortonCode,
 			m_sortedIndices);
 
-		uint32_t numInternalNode = numOfElems - 1;
-		uint32_t numLeaves = numOfElems;
+		uint32_t numInternalNode = numberOfTris - 1;
+		uint32_t numLeaves = numberOfTris;
 
 		// Build tree.
 		{
 			dim3 block(256, 1, 1);
-			dim3 grid((numOfElems + block.x - 1) / block.x, 1, 1);
+			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
 
 			buildTree << <grid, block >> > (
-				numOfElems,
+				numberOfTris,
 				m_sortedMortonCode.ptr(),
 				m_nodesLbvh.ptr());
 
@@ -565,7 +589,7 @@ namespace idaten
 
 		// Convert to gpu bvh tree nodes.
 		{
-			numOfElems = numInternalNode + numLeaves;
+			const auto numOfElems = numInternalNode + numLeaves;
 
 			dim3 block(128, 1, 1);
 			dim3 grid((numOfElems + block.x - 1) / block.x, 1, 1);
@@ -583,8 +607,6 @@ namespace idaten
 
 		// Compute bouding box.
 		{
-			uint32_t numberOfTris = triangles.num();
-
 			dim3 block(128, 1, 1);
 			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
 

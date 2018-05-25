@@ -47,7 +47,6 @@ __forceinline__ __device__ __host__ uint32_t expandBits(uint32_t value)
 	return value;
 }
 
-#if 0
 __forceinline__ __device__ __host__ uint64_t expandBitsBy3(uint32_t value)
 {
 	uint64_t x = value;
@@ -58,16 +57,6 @@ __forceinline__ __device__ __host__ uint64_t expandBitsBy3(uint32_t value)
 	x = (x | x << 3) & 0x1111111111111111ul;
 	return x;
 }
-#else
-__forceinline__ __device__ __host__ uint32_t expandBitsBy3(uint32_t value)
-{
-	uint32_t x = value;
-	x = (x | x << 12) & 0x000f000fu;
-	x = (x | x << 6) & 0x03030303u;
-	x = (x | x << 3) & 0x11111111u;
-	return x;
-}
-#endif	
 
 __forceinline__ __device__ __host__ uint32_t computeMortonCode(aten::vec3 point)
 {
@@ -88,25 +77,26 @@ __forceinline__ __device__ __host__ uint32_t computeMortonCode(aten::vec3 point)
 #endif
 }
 
-__forceinline__ __device__ __host__ uint32_t computeMortonCode(float x, float y, float z, float s)
+__forceinline__ __device__ __host__ uint64_t computeMortonCode(float x, float y, float z, float s)
 {
 	// Discretize the unit cube into a 8 bit integer
-	uint32_t dx = (uint32_t)min(max(x * 256.0f, 0.0f), 255.0f);
-	uint32_t dy = (uint32_t)min(max(y * 256.0f, 0.0f), 255.0f);
-	uint32_t dz = (uint32_t)min(max(z * 256.0f, 0.0f), 255.0f);
-	uint32_t dw = (uint32_t)min(max(s * 256.0f, 0.0f), 255.0f);
+	uint32_t dx = (uint32_t)min(max(x * 65536.0f, 0.0f), 65535.0f);
+	uint32_t dy = (uint32_t)min(max(y * 65536.0f, 0.0f), 65535.0f);
+	uint32_t dz = (uint32_t)min(max(z * 65536.0f, 0.0f), 65535.0f);
+	uint32_t dw = (uint32_t)min(max(s * 65536.0f, 0.0f), 65535.0f);
 
-	uint32_t ddx = expandBitsBy3(dx);
-	uint32_t ddy = expandBitsBy3(dy);
-	uint32_t ddz = expandBitsBy3(dz);
-	uint32_t ddw = expandBitsBy3(dw);
+	uint64_t ddx = expandBitsBy3(dx);
+	uint64_t ddy = expandBitsBy3(dy);
+	uint64_t ddz = expandBitsBy3(dz);
+	uint64_t ddw = expandBitsBy3(dw);
 
-	uint32_t ret = (uint32_t)(ddx << 3 | ddy << 2 | ddz << 1 | ddw);
+	uint64_t ret = (uint64_t)(ddx << 3 | ddy << 2 | ddz << 1 | ddw);
 
 	return ret;
 }
 
-__forceinline__ __device__ __host__ uint32_t onComputeMortonCode(
+template <typename T>
+__forceinline__ __device__ T onComputeMortonCode(
 	const aten::vec3& vmin,
 	const aten::vec3& vmax,
 	const aten::aabb& sceneBbox)
@@ -123,7 +113,8 @@ __forceinline__ __device__ __host__ uint32_t onComputeMortonCode(
 	return code;
 }
 
-__forceinline__ __device__ __host__ uint32_t onComputeExtendedMortonCode(
+template <uint64_t>
+__forceinline__ __device__ uint64_t onComputeExtendedMortonCode(
 	const aten::vec3& vmin,
 	const aten::vec3& vmax,
 	const aten::aabb& sceneBbox)
@@ -136,23 +127,23 @@ __forceinline__ __device__ __host__ uint32_t onComputeExtendedMortonCode(
 	center = (center - bboxMin) / size;
 
 	// Compute diagonal.
-	//const auto div = sceneBbox.getDiagonalLenght();
-	//auto d = aten::length(vmax - vmin);
-	//d /= div;
+	const auto div = sceneBbox.getDiagonalLenght();
+	auto d = aten::length(vmax - vmin);
+	d /= div;
 
-	auto code = computeMortonCode(center.x, center.y, center.z, 0);
+	auto code = computeMortonCode(center.x, center.y, center.z, d);
 
 	return code;
 }
 
-template <typename T>
+template <typename T, typename M>
 __global__ void genMortonCode(
 	int numberOfTris,
 	const aten::aabb sceneBbox,
 	const aten::PrimitiveParamter* __restrict__ tris,
 	T vtxPos,
 	int vtxOffset,
-	uint32_t* mortonCodes,
+	M* mortonCodes,
 	uint32_t* indices)
 {
 	const auto idx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -185,14 +176,7 @@ __global__ void genMortonCode(
 	const auto bboxMin = sceneBbox.minPos();
 	center = (center - bboxMin) / size;
 
-#if 1
-	auto code = computeMortonCode(center);
-#else
-	const auto d = sceneBbox.getDiagonalLenght();
-	auto s = length(vmax - vmin) / d;
-
-	auto code = computeMortonCode(center.x, center.y, center.z, s);
-#endif
+	auto code = onComputeMortonCode<M>(vmin, vmax, sceneBbox);
 
 	mortonCodes[idx] = code;
 	indices[idx] = idx;

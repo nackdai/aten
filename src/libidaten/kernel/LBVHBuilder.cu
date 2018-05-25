@@ -18,11 +18,12 @@
 // http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
 #if 1
+template <typename T>
 __forceinline__ __device__ int computeLongestCommonPrefix(
-	const uint32_t* sortedKeys,
+	const T* sortedKeys,
 	uint32_t numOfElems,
 	int index1, int index2,
-	uint32_t key1)
+	T key1)
 {
 	// No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one 
 	// thread per internal node)
@@ -46,9 +47,39 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 	return ret;
 }
 
+template <>
+__forceinline__ __device__ int computeLongestCommonPrefix(
+	const uint64_t* sortedKeys,
+	uint32_t numOfElems,
+	int index1, int index2,
+	uint64_t key1)
+{
+	// No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one 
+	// thread per internal node)
+	if (index2 < 0 || index2 >= numOfElems)
+	{
+		// NOTE
+		// delta(i, j) = −1 when not (0 <= j <= n - 1).
+		return -1;
+	}
+
+	auto key2 = sortedKeys[index2];
+
+	if (key1 == key2)
+	{
+
+		return 32 + __clz(index1 ^ index2);
+	}
+
+	auto ret = __clzll(key1 ^ key2);
+
+	return ret;
+}
+
+template <typename T>
 __global__ void buildTree(
 	uint32_t numOfElems,
-	const uint32_t* __restrict__ sortedKeys,
+	const T* __restrict__ sortedKeys,
 	idaten::LBVHBuilder::LBVHNode* nodes)
 {
 	const auto i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -140,8 +171,6 @@ __global__ void buildTree(
 		leaf->parent = i;
 		leaf->left = -1;
 		leaf->right = -1;
-		leaf->rangeMin = 0;
-		leaf->rangeMax = 0;
 		leaf->isLeaf = true;
 	}
 	else {
@@ -161,8 +190,6 @@ __global__ void buildTree(
 		leaf->parent = i;
 		leaf->left = -1;
 		leaf->right = -1;
-		leaf->rangeMin = 0;
-		leaf->rangeMax = 0;
 		leaf->isLeaf = true;
 	}
 	else {
@@ -173,9 +200,6 @@ __global__ void buildTree(
 		child->parent = i;
 		child->isLeaf = false;
 	}
-
-	node->rangeMin = min(i, j);
-	node->rangeMax = max(i, j);
 }
 #else
 __forceinline__ __device__ int computeLongestCommonPrefix(
@@ -312,8 +336,6 @@ __global__ void buildTree(
 		leaf->parent = idx;
 		leaf->left = -1;
 		leaf->right = -1;
-		leaf->rangeMin = 0;
-		leaf->rangeMax = 0;
 		leaf->isLeaf = true;
 	}
 	else {
@@ -333,8 +355,6 @@ __global__ void buildTree(
 		leaf->parent = idx;
 		leaf->left = -1;
 		leaf->right = -1;
-		leaf->rangeMin = 0;
-		leaf->rangeMax = 0;
 		leaf->isLeaf = true;
 	}
 	else {
@@ -345,9 +365,6 @@ __global__ void buildTree(
 		child->parent = idx;
 		child->isLeaf = false;
 	}
-
-	node->rangeMin = range.x;
-	node->rangeMax = range.y;
 }
 #endif
 

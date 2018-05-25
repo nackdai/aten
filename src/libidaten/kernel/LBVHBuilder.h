@@ -43,8 +43,6 @@ namespace idaten
 
 			int left;
 			int right;
-			uint32_t rangeMin;
-			uint32_t rangeMax;
 			
 			int parent;
 			bool isLeaf;
@@ -64,9 +62,11 @@ namespace idaten
 			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes);
 
 	private:
-		TypedCudaMemory<uint32_t> m_mortonCodes;
+		using MORTON_CODE_TYPE = uint32_t;
+
+		TypedCudaMemory<MORTON_CODE_TYPE> m_mortonCodes;
 		TypedCudaMemory<uint32_t> m_indices;
-		TypedCudaMemory<uint32_t> m_sortedMortonCode;
+		TypedCudaMemory<MORTON_CODE_TYPE> m_sortedMortonCode;
 		TypedCudaMemory<uint32_t> m_sortedIndices;
 		RadixSort m_sort;
 		TypedCudaMemory<LBVHBuilder::LBVHNode> m_nodesLbvh;

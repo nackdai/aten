@@ -17,7 +17,8 @@
 // https://github.com/leonardo-domingues/atrbvh
 // http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
-__forceinline__ __device__ __host__ int computeLongestCommonPrefix(
+#if 0
+__forceinline__ __device__ int computeLongestCommonPrefix(
 	const uint32_t* sortedKeys,
 	uint32_t numOfElems,
 	int index1, int index2,
@@ -35,18 +36,10 @@ __forceinline__ __device__ __host__ int computeLongestCommonPrefix(
 	if (key1 == key2)
 	{
 
-#ifdef __CUDA_ARCH__
 		return 32 + __clz(index1 ^ index2);
-#else
-		return 32 + aten::clz(index1 ^ index2);
-#endif
 	}
 
-#ifdef __CUDA_ARCH__
 	auto ret = __clz(key1 ^ key2);
-#else
-	auto ret = aten::clz(key1 ^ key2);
-#endif
 
 	return ret;
 }
@@ -182,6 +175,208 @@ __global__ void buildTree(
 	node->rangeMin = min(i, j);
 	node->rangeMax = max(i, j);
 }
+#else
+__forceinline__ __device__ int computeLongestCommonPrefix(
+	const uint32_t* sortedKeys,
+	uint32_t numOfElems,
+	int index1, int index2)
+{
+	// Select left end
+	int left = min(index1, index2);
+
+	// Select right end
+	int right = max(index1, index2);
+
+	// This is to ensure the node breaks if the index is out of bounds
+	if (left < 0 || right >= numOfElems)
+	{
+		return -1;
+	}
+	// Fetch Morton codes for both ends
+	int left_code = sortedKeys[left];
+	int right_code = sortedKeys[right];
+
+	// Special handling of duplicated codes: use their indices as a fallback
+	return left_code != right_code ? __clz(left_code ^ right_code) : (32 + __clz(left ^ right));
+}
+
+__forceinline__ __device__ int3 findSpan(
+	const uint32_t* mortonCodes, 
+	uint32_t numPrims,
+	int idx)
+{
+	auto lcp1 = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx + 1);
+	auto lcp2 = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - 1);
+
+	// ‚Ç‚¿‚çŒü‚«‚É’Tõ‚µ‚Ä‚¢‚­‚©‚ğŒˆ‚ß‚é.
+	// CommonPrefix ‚ª’·‚­‚È‚é•ûŒü‚É’Tõ‚·‚é.
+	int d = (lcp1 - lcp2) < 0 ? -1 : 1;
+
+	// ’Tõ”ÍˆÍ‚ÌãŒÀ‚ğŒˆ‚ß‚é. ”{X‚ÉL‚°‚Ä‚¢‚«A‰ºŒÀŠî€‚æ‚è LongestCommonPrefix ‚ª’·‚­‚È‚éˆÊ’u‚ğ’Tõ”ÍˆÍ‚ÌãŒÀ‚Æ‚·‚é.
+
+	// Find minimum number of bits for the break on the other side.
+	// Common Prefix ‚ª’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î‚Ì LogestCommonPrefix ‚ğŒvZ‚·‚é.
+	// ’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î = LogestCommonPrefix ‚Ì‰ºŒÀŠî€.
+	int minLcp = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - d);
+
+	// Search conservative far end
+	int lmax = 2;
+	while (computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx + lmax * d) > minLcp) {
+		lmax *= 2;
+	}
+
+	// Search back to find exact bound with binary search.
+	// 2•ª’Tõ‚ÅŒµ–§‚ÉãŒÀ‚ğŒˆ‚ß‚é.
+	int l = 0;
+	int t = lmax;
+	do
+	{
+		t /= 2;
+		if (computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx + (l + t) * d) > minLcp)
+		{
+			l = l + t;
+		}
+	} while (t > 1);
+
+	// Pack span 
+	int3 span;
+	span.x = min(idx, idx + l * d);
+	span.y = max(idx, idx + l * d);
+	span.z = d;
+	return span;
+}
+
+// Find split idx within the span
+__forceinline__ __device__ int findSplit(
+	const uint32_t* sortedKeys,
+	uint32_t numOfElems,
+	int3 span)
+{
+	// Fetch codes for both ends
+	int left = span.x;
+	int right = span.y;
+	int d = span.z;
+
+#if 1
+	// Calculate the number of identical bits from higher end
+	int numIdentical = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
+
+	do
+	{
+		// Proposed split
+		int newSplit = (right + left) / 2;
+
+		// If it has more equal leading bits than left and right accept it
+		if (computeLongestCommonPrefix(sortedKeys, numOfElems, left, newSplit) > numIdentical)
+		{
+			left = newSplit;
+		}
+		else
+		{
+			right = newSplit;
+		}
+	} while (right > left + 1);
+
+	return left;
+#else
+	// Find the split position using binary search
+	// •ªŠ„ˆÊ’u‚ğ2•ª’Tõ‚ÅŒˆ‚ß‚é.
+
+	// ’Tõ”ÍˆÍ‚Ì‰ºŒÀ‚ÆãŒÀ‚ÌŠÔ‚ÌLongestCommonPrefix‚ğŒvZ.
+	const auto nodeLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
+
+	int start = 0;
+	int divisor = 2;
+	int t = left;
+
+	while (t > 1)
+	{
+		t = (left + divisor - 1) / divisor;
+
+		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, left, left + (start + t) * d);
+		if (lcp > nodeLcp)
+		{
+			// ‚æ‚è’·‚¢LogestCommonPrefix‚ªŒ©‚Â‚©‚Á‚½‚Ì‚ÅAˆÊ’u‚ğ‚»‚±‚ÉˆÚ“®.
+			start += t;
+		}
+		divisor *= 2;
+	}
+
+	auto split = left + start * d + min(d, 0);
+
+	return split;
+#endif
+}
+
+__global__ void buildTree(
+	uint32_t numOfElems,
+	const uint32_t* __restrict__ sortedKeys,
+	idaten::LBVHBuilder::LBVHNode* nodes)
+{
+	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (idx >= numOfElems - 1) {
+		return;
+	}
+
+	auto range = findSpan(sortedKeys, numOfElems, idx);
+
+	auto split = findSplit(sortedKeys, numOfElems, range);
+
+	auto* node = nodes + idx;
+	if (idx == 0) {
+		node->parent = -1;
+	}
+	node->order = idx;
+	node->isLeaf = false;
+
+	// Create child nodes if needed
+	if (split == range.x) {
+		node->left = split + numOfElems - 1;
+
+		auto* leaf = nodes + node->left;
+		leaf->order = node->left;
+		leaf->parent = idx;
+		leaf->left = -1;
+		leaf->right = -1;
+		leaf->rangeMin = 0;
+		leaf->rangeMax = 0;
+		leaf->isLeaf = true;
+	}
+	else {
+		node->left = split;
+
+		auto* child = nodes + node->left;
+		child->order = node->left;
+		child->parent = idx;
+		child->isLeaf = false;
+	}
+	
+	if (split + 1 == range.y) {
+		node->right = split + 1 + numOfElems - 1;
+
+		auto* leaf = nodes + node->right;
+		leaf->order = node->right;
+		leaf->parent = idx;
+		leaf->left = -1;
+		leaf->right = -1;
+		leaf->rangeMin = 0;
+		leaf->rangeMax = 0;
+		leaf->isLeaf = true;
+	}
+	else {
+		node->right = split + 1;
+
+		auto* child = nodes + node->right;
+		child->order = node->right;
+		child->parent = idx;
+		child->isLeaf = false;
+	}
+
+	node->rangeMin = range.x;
+	node->rangeMax = range.y;
+}
+#endif
 
 __device__ __host__ inline void onApplyTraverseOrder(
 	int idx,

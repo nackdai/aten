@@ -101,8 +101,7 @@ __forceinline__ __device__ __host__ uint32_t computeMortonCode(float x, float y,
 	uint32_t ddz = expandBitsBy3(dz);
 	uint32_t ddw = expandBitsBy3(dw);
 
-	uint32_t ret = (uint32_t)(ddx << 3 | ddy << 2 | ddz << 1);
-	//uint32_t ret = (uint32_t)(ddx << 2 | ddy << 2 | ddz << 1);
+	uint32_t ret = (uint32_t)(ddx << 3 | ddy << 2 | ddz << 1 | ddw);
 
 	return ret;
 }
@@ -186,7 +185,14 @@ __global__ void genMortonCode(
 	const auto bboxMin = sceneBbox.minPos();
 	center = (center - bboxMin) / size;
 
+#if 0
 	auto code = computeMortonCode(center);
+#else
+	const auto d = sceneBbox.getDiagonalLenght();
+	auto s = length(vmax - vmin) / d;
+
+	auto code = computeMortonCode(center.x, center.y, center.z, s);
+#endif
 
 	mortonCodes[idx] = code;
 	indices[idx] = idx;

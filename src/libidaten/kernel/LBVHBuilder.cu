@@ -1,4 +1,4 @@
-#include "kernel/LBVHBuilder.h"
+ï»¿#include "kernel/LBVHBuilder.h"
 
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
@@ -17,7 +17,7 @@
 // https://github.com/leonardo-domingues/atrbvh
 // http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
-#if 0
+#if 1
 __forceinline__ __device__ int computeLongestCommonPrefix(
 	const uint32_t* sortedKeys,
 	uint32_t numOfElems,
@@ -28,7 +28,9 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 	// thread per internal node)
 	if (index2 < 0 || index2 >= numOfElems)
 	{
-		return 0;
+		// NOTE
+		// delta(i, j) = âˆ’1 when not (0 <= j <= n - 1).
+		return -1;
 	}
 
 	auto key2 = sortedKeys[index2];
@@ -60,15 +62,15 @@ __global__ void buildTree(
 	const auto lcp1 = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + 1, key1);
 	const auto lcp2 = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i - 1, key1);
 
-	// ‚Ç‚¿‚çŒü‚«‚É’Tõ‚µ‚Ä‚¢‚­‚©‚ğŒˆ‚ß‚é.
-	// CommonPrefix ‚ª’·‚­‚È‚é•ûŒü‚É’Tõ‚·‚é.
+	// ã©ã¡ã‚‰å‘ãã«æ¢ç´¢ã—ã¦ã„ãã‹ã‚’æ±ºã‚ã‚‹.
+	// CommonPrefix ãŒé•·ããªã‚‹æ–¹å‘ã«æ¢ç´¢ã™ã‚‹.
 	auto d = (lcp1 - lcp2) < 0 ? -1 : 1;
 
 	// Compute upper bound for the length of the range
-	// ’Tõ”ÍˆÍ‚ÌãŒÀ‚ğŒˆ‚ß‚é. ”{X‚ÉL‚°‚Ä‚¢‚«A‰ºŒÀŠî€‚æ‚è LongestCommonPrefix ‚ª’·‚­‚È‚éˆÊ’u‚ğ’Tõ”ÍˆÍ‚ÌãŒÀ‚Æ‚·‚é.
+	// æ¢ç´¢ç¯„å›²ã®ä¸Šé™ã‚’æ±ºã‚ã‚‹. å€ã€…ã«åºƒã’ã¦ã„ãã€ä¸‹é™åŸºæº–ã‚ˆã‚Š LongestCommonPrefix ãŒé•·ããªã‚‹ä½ç½®ã‚’æ¢ç´¢ç¯„å›²ã®ä¸Šé™ã¨ã™ã‚‹.
 
-	// Common Prefix ‚ª’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î‚Ì LogestCommonPrefix ‚ğŒvZ‚·‚é.
-	// ’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î = LogestCommonPrefix ‚Ì‰ºŒÀŠî€.
+	// Common Prefix ãŒé•·ããªã‚‹æ–¹å‘ã¨ã¯ï¼‘ã¤åå¯¾ã® LogestCommonPrefix ã‚’è¨ˆç®—ã™ã‚‹.
+	// é•·ããªã‚‹æ–¹å‘ã¨ã¯ï¼‘ã¤åå¯¾ = LogestCommonPrefix ã®ä¸‹é™åŸºæº–.
 	const auto minLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i - d, key1);
 	int lMax = 2;
 	while (computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + lMax * d, key1) > minLcp)
@@ -77,7 +79,7 @@ __global__ void buildTree(
 	}
 
 	// Find other end using binary search
-	// 2•ª’Tõ‚ÅŒµ–§‚ÉãŒÀ‚ğŒˆ‚ß‚é.
+	// 2åˆ†æ¢ç´¢ã§å³å¯†ã«ä¸Šé™ã‚’æ±ºã‚ã‚‹.
 	int lowest = 0;
 	int t = lMax;
 	while (t > 1)
@@ -87,18 +89,18 @@ __global__ void buildTree(
 		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + (lowest + t) * d, key1);
 		if (lcp > minLcp)
 		{
-			// ‚æ‚è’·‚¢LogestCommonPrefix‚ªŒ©‚Â‚©‚Á‚½‚Ì‚ÅAˆÊ’u‚ğ‚»‚±‚ÉˆÚ“®.
+			// ã‚ˆã‚Šé•·ã„LogestCommonPrefixãŒè¦‹ã¤ã‹ã£ãŸã®ã§ã€ä½ç½®ã‚’ãã“ã«ç§»å‹•.
 			lowest += t;
 		}
 	}
 
-	// ’Tõ”ÍˆÍ‚ÌãŒÀ.
+	// æ¢ç´¢ç¯„å›²ã®ä¸Šé™.
 	const auto j = i + lowest * d;
 
 	// Find the split position using binary search
-	// •ªŠ„ˆÊ’u‚ğ2•ª’Tõ‚ÅŒˆ‚ß‚é.
+	// åˆ†å‰²ä½ç½®ã‚’2åˆ†æ¢ç´¢ã§æ±ºã‚ã‚‹.
 
-	// ’Tõ”ÍˆÍ‚Ì‰ºŒÀ‚ÆãŒÀ‚ÌŠÔ‚ÌLongestCommonPrefix‚ğŒvZ.
+	// æ¢ç´¢ç¯„å›²ã®ä¸‹é™ã¨ä¸Šé™ã®é–“ã®LongestCommonPrefixã‚’è¨ˆç®—.
 	const auto nodeLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, j, key1);
 
 	int start = 0;
@@ -112,7 +114,7 @@ __global__ void buildTree(
 		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + (start + t) * d, key1);
 		if (lcp > nodeLcp)
 		{
-			// ‚æ‚è’·‚¢LogestCommonPrefix‚ªŒ©‚Â‚©‚Á‚½‚Ì‚ÅAˆÊ’u‚ğ‚»‚±‚ÉˆÚ“®.
+			// ã‚ˆã‚Šé•·ã„LogestCommonPrefixãŒè¦‹ã¤ã‹ã£ãŸã®ã§ã€ä½ç½®ã‚’ãã“ã«ç§»å‹•.
 			start += t;
 		}
 		divisor *= 2;
@@ -208,15 +210,15 @@ __forceinline__ __device__ int3 findSpan(
 	auto lcp1 = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx + 1);
 	auto lcp2 = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - 1);
 
-	// ‚Ç‚¿‚çŒü‚«‚É’Tõ‚µ‚Ä‚¢‚­‚©‚ğŒˆ‚ß‚é.
-	// CommonPrefix ‚ª’·‚­‚È‚é•ûŒü‚É’Tõ‚·‚é.
+	// ã©ã¡ã‚‰å‘ãã«æ¢ç´¢ã—ã¦ã„ãã‹ã‚’æ±ºã‚ã‚‹.
+	// CommonPrefix ãŒé•·ããªã‚‹æ–¹å‘ã«æ¢ç´¢ã™ã‚‹.
 	int d = (lcp1 - lcp2) < 0 ? -1 : 1;
 
-	// ’Tõ”ÍˆÍ‚ÌãŒÀ‚ğŒˆ‚ß‚é. ”{X‚ÉL‚°‚Ä‚¢‚«A‰ºŒÀŠî€‚æ‚è LongestCommonPrefix ‚ª’·‚­‚È‚éˆÊ’u‚ğ’Tõ”ÍˆÍ‚ÌãŒÀ‚Æ‚·‚é.
+	// æ¢ç´¢ç¯„å›²ã®ä¸Šé™ã‚’æ±ºã‚ã‚‹. å€ã€…ã«åºƒã’ã¦ã„ãã€ä¸‹é™åŸºæº–ã‚ˆã‚Š LongestCommonPrefix ãŒé•·ããªã‚‹ä½ç½®ã‚’æ¢ç´¢ç¯„å›²ã®ä¸Šé™ã¨ã™ã‚‹.
 
 	// Find minimum number of bits for the break on the other side.
-	// Common Prefix ‚ª’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î‚Ì LogestCommonPrefix ‚ğŒvZ‚·‚é.
-	// ’·‚­‚È‚é•ûŒü‚Æ‚Í‚P‚Â”½‘Î = LogestCommonPrefix ‚Ì‰ºŒÀŠî€.
+	// Common Prefix ãŒé•·ããªã‚‹æ–¹å‘ã¨ã¯ï¼‘ã¤åå¯¾ã® LogestCommonPrefix ã‚’è¨ˆç®—ã™ã‚‹.
+	// é•·ããªã‚‹æ–¹å‘ã¨ã¯ï¼‘ã¤åå¯¾ = LogestCommonPrefix ã®ä¸‹é™åŸºæº–.
 	int minLcp = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - d);
 
 	// Search conservative far end
@@ -226,7 +228,7 @@ __forceinline__ __device__ int3 findSpan(
 	}
 
 	// Search back to find exact bound with binary search.
-	// 2•ª’Tõ‚ÅŒµ–§‚ÉãŒÀ‚ğŒˆ‚ß‚é.
+	// 2åˆ†æ¢ç´¢ã§å³å¯†ã«ä¸Šé™ã‚’æ±ºã‚ã‚‹.
 	int l = 0;
 	int t = lmax;
 	do
@@ -257,7 +259,6 @@ __forceinline__ __device__ int findSplit(
 	int right = span.y;
 	int d = span.z;
 
-#if 1
 	// Calculate the number of identical bits from higher end
 	int numIdentical = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
 
@@ -278,34 +279,6 @@ __forceinline__ __device__ int findSplit(
 	} while (right > left + 1);
 
 	return left;
-#else
-	// Find the split position using binary search
-	// •ªŠ„ˆÊ’u‚ğ2•ª’Tõ‚ÅŒˆ‚ß‚é.
-
-	// ’Tõ”ÍˆÍ‚Ì‰ºŒÀ‚ÆãŒÀ‚ÌŠÔ‚ÌLongestCommonPrefix‚ğŒvZ.
-	const auto nodeLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
-
-	int start = 0;
-	int divisor = 2;
-	int t = left;
-
-	while (t > 1)
-	{
-		t = (left + divisor - 1) / divisor;
-
-		auto lcp = computeLongestCommonPrefix(sortedKeys, numOfElems, left, left + (start + t) * d);
-		if (lcp > nodeLcp)
-		{
-			// ‚æ‚è’·‚¢LogestCommonPrefix‚ªŒ©‚Â‚©‚Á‚½‚Ì‚ÅAˆÊ’u‚ğ‚»‚±‚ÉˆÚ“®.
-			start += t;
-		}
-		divisor *= 2;
-	}
-
-	auto split = left + start * d + min(d, 0);
-
-	return split;
-#endif
 }
 
 __global__ void buildTree(
@@ -633,20 +606,20 @@ __global__ void computeBoudingBox(
 
 	__syncthreads();
 
-	// ƒŠ[ƒt‚©‚çe‚Ö‚½‚Ç‚Á‚Ä‚¢‚­.
+	// ãƒªãƒ¼ãƒ•ã‹ã‚‰è¦ªã¸ãŸã©ã£ã¦ã„ã.
 
 	int lastNode = idx;
 	int targetId = node->parent;
 
 	while (targetId >= 0)
 	{
-		// ƒ^[ƒQƒbƒg‚Íeƒm[ƒh‚ÅA‚±‚±‚Å‚Íqƒm[ƒh‚ğˆ—‚µ‚Ä‚¢‚é‚Å‚ ‚ë‚¤ƒXƒŒƒbƒh‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚é.
-		// ƒCƒ“ƒfƒbƒNƒX‚Ì”z—ñ‚Í 0xffffffff ‚Å‰Šú‰»‚³‚ê‚Ä‚¢‚ÄAˆ—‚³‚ê‚½‚çƒXƒŒƒbƒh‚ÌƒCƒ“ƒfƒbƒNƒX‚Å’uŠ·‚³‚ê‚é.
-		// ‚Â‚Ü‚èA”z—ñ“à‚Ì’l‚ª 0xffffffff ‚Å‚ ‚Á‚½‚çA–¢ˆ—‚Æ‚¢‚¤‚±‚Æ‚É‚È‚é.
+		// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¯è¦ªãƒãƒ¼ãƒ‰ã§ã€ã“ã“ã§ã¯å­ãƒãƒ¼ãƒ‰ã‚’å‡¦ç†ã—ã¦ã„ã‚‹ã§ã‚ã‚ã†ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹.
+		// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã®é…åˆ—ã¯ 0xffffffff ã§åˆæœŸåŒ–ã•ã‚Œã¦ã„ã¦ã€å‡¦ç†ã•ã‚ŒãŸã‚‰ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã§ç½®æ›ã•ã‚Œã‚‹.
+		// ã¤ã¾ã‚Šã€é…åˆ—å†…ã®å€¤ãŒ 0xffffffff ã§ã‚ã£ãŸã‚‰ã€æœªå‡¦ç†ã¨ã„ã†ã“ã¨ã«ãªã‚‹.
 		const auto childNodeThreadIdx = atomicExch(&executedIdxArray[targetId], idx);
 
 		if (childNodeThreadIdx == 0xffffffff) {
-			// –¢ˆ—‚È‚Ì‚ÅA‚±‚êˆÈã‚Í‰½‚à‚µ‚È‚¢.
+			// æœªå‡¦ç†ãªã®ã§ã€ã“ã‚Œä»¥ä¸Šã¯ä½•ã‚‚ã—ãªã„.
 			return;
 		}
 
@@ -655,20 +628,20 @@ __global__ void computeBoudingBox(
 
 		float4 childAABBMin, childAABBMax;
 
-		// qƒm[ƒh‚ğˆ—‚µ‚Ä‚¢‚é‚Å‚ ‚ë‚¤ƒXƒŒƒbƒh‚ª“¯ˆêƒuƒƒbƒN‚Åˆ—‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©.
+		// å­ãƒãƒ¼ãƒ‰ã‚’å‡¦ç†ã—ã¦ã„ã‚‹ã§ã‚ã‚ã†ã‚¹ãƒ¬ãƒƒãƒ‰ãŒåŒä¸€ãƒ–ãƒ­ãƒƒã‚¯ã§å‡¦ç†ã—ã¦ã„ã‚‹ã‹ã©ã†ã‹.
 		if (firstThreadIdxInBlock <= childNodeThreadIdx
 			&& childNodeThreadIdx <= lastThreadIdxInBlock)
 		{
-			// “¯ˆêƒuƒƒbƒN‚Åˆ—‚³‚ê‚Ä‚¢‚é‚Ì‚ÅAshared memory ‚ÉƒLƒƒƒbƒVƒ…‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ğæ“¾‚·‚é.
+			// åŒä¸€ãƒ–ãƒ­ãƒƒã‚¯ã§å‡¦ç†ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€shared memory ã«ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—ã™ã‚‹.
 
-			// ƒuƒƒbƒN“à‚Å‚ÌƒXƒŒƒbƒhID‚É•ÏŠ·.
+			// ãƒ–ãƒ­ãƒƒã‚¯å†…ã§ã®ã‚¹ãƒ¬ãƒƒãƒ‰IDã«å¤‰æ›.
 			int threadIdxInBlock = childNodeThreadIdx - firstThreadIdxInBlock;
 
 			childAABBMin = sharedBboxMin[threadIdxInBlock];
 			childAABBMax = sharedBboxMax[threadIdxInBlock];
 		}
 		else {
-			// “¯ˆêƒuƒƒbƒN‚Åˆ—‚³‚ê‚Ä‚¢‚È‚¢‚Ì‚ÅA”z—ñ‚ÉŠi”[‚³‚ê‚Ä‚¢‚éƒf[ƒ^‚ğæ“¾‚·‚é.
+			// åŒä¸€ãƒ–ãƒ­ãƒƒã‚¯ã§å‡¦ç†ã•ã‚Œã¦ã„ãªã„ã®ã§ã€é…åˆ—ã«æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—ã™ã‚‹.
 
 			int childIdx = targetSrc->left;
 

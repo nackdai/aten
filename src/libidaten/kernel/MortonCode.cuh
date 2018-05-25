@@ -24,6 +24,10 @@ __forceinline__ __device__ float4 getFloat4(float4* data, int idx)
 // http://www.forceflow.be/2013/10/07/morton-encodingdecoding-through-bit-interleaving-implementations/
 // http://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 
+// NOTE
+// Extended Morton Codes(= EMC).
+// http://dcgi.felk.cvut.cz/projects/emc/
+
 __forceinline__ __device__ __host__ uint32_t expandBits(uint32_t value)
 {
 #if 0
@@ -97,6 +101,7 @@ __forceinline__ __device__ __host__ uint64_t computeMortonCode(float x, float y,
 
 template <typename T>
 __forceinline__ __device__ T onComputeMortonCode(
+	int a0, int a1, int a2,
 	const aten::vec3& vmin,
 	const aten::vec3& vmax,
 	const aten::aabb& sceneBbox)
@@ -115,6 +120,7 @@ __forceinline__ __device__ T onComputeMortonCode(
 
 template <uint64_t>
 __forceinline__ __device__ uint64_t onComputeExtendedMortonCode(
+	int a0, int a1, int a2,
 	const aten::vec3& vmin,
 	const aten::vec3& vmax,
 	const aten::aabb& sceneBbox)
@@ -131,13 +137,14 @@ __forceinline__ __device__ uint64_t onComputeExtendedMortonCode(
 	auto d = aten::length(vmax - vmin);
 	d /= div;
 
-	auto code = computeMortonCode(center.x, center.y, center.z, d);
+	auto code = computeMortonCode(center[a0], center[a1], center[a2], d);
 
 	return code;
 }
 
 template <typename T, typename M>
 __global__ void genMortonCode(
+	int a0, int a1, int a2,
 	int numberOfTris,
 	const aten::aabb sceneBbox,
 	const aten::PrimitiveParamter* __restrict__ tris,
@@ -176,7 +183,9 @@ __global__ void genMortonCode(
 	const auto bboxMin = sceneBbox.minPos();
 	center = (center - bboxMin) / size;
 
-	auto code = onComputeMortonCode<M>(vmin, vmax, sceneBbox);
+	auto code = onComputeMortonCode<M>(
+		a0, a1, a2,
+		vmin, vmax, sceneBbox);
 
 	mortonCodes[idx] = code;
 	indices[idx] = idx;

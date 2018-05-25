@@ -38,7 +38,6 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 
 	if (key1 == key2)
 	{
-
 		return 32 + __clz(index1 ^ index2);
 	}
 
@@ -67,8 +66,7 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 
 	if (key1 == key2)
 	{
-
-		return 32 + __clz(index1 ^ index2);
+		return 63 + __clz(index1 ^ index2);
 	}
 
 	auto ret = __clzll(key1 ^ key2);
@@ -705,7 +703,11 @@ namespace idaten
 		m_mortonCodes.init(maxNum);
 		m_indices.init(maxNum);
 
+#ifdef AT_ENABLE_64BIT_LBVH_MORTON_CODE
+		m_sort.initWith64Bit(maxNum);
+#else
 		m_sort.init(maxNum);
+#endif
 
 		uint32_t numInternalNode = maxNum - 1;
 		uint32_t numLeaves = maxNum;
@@ -731,12 +733,28 @@ namespace idaten
 	{
 		uint32_t numberOfTris = (uint32_t)triangles.num();
 
+		// Get longest axis order.
+		int axis[3] = { 0, 1, 2 };
+		{
+			const auto size = sceneBbox.size();
+			if (size[0] < size[1]) {
+				std::swap(axis[0], axis[1]);
+			}
+			if (size[1] < size[2]) {
+				std::swap(axis[1], axis[2]);
+			}
+			if (size[0] < size[1]) {
+				std::swap(axis[0], axis[1]);
+			}
+		}
+
 		// Compute morton code.
 		{
 			dim3 block(256, 1, 1);
 			dim3 grid((numberOfTris + block.x - 1) / block.x, 1, 1);
 
 			genMortonCode << <grid, block >> > (
+				axis[0], axis[1], axis[2],
 				numberOfTris,
 				sceneBbox,
 				triangles.ptr(),
@@ -749,7 +767,11 @@ namespace idaten
 		}
 
 		// Radix sort.
+#ifdef AT_ENABLE_64BIT_LBVH_MORTON_CODE
+		m_sort.sortWith64Bit(
+#else
 		m_sort.sort(
+#endif
 			numberOfTris,
 			m_mortonCodes,
 			m_indices,

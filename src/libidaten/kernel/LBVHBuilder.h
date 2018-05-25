@@ -7,6 +7,8 @@
 #include "cuda/cudaGLresource.h"
 #include "kernel/RadixSort.h"
 
+//#define AT_ENABLE_64BIT_LBVH_MORTON_CODE
+
 namespace idaten
 {
 	class CudaTextureResource;
@@ -62,7 +64,11 @@ namespace idaten
 			std::vector<aten::ThreadedBvhNode>* threadedBvhNodes);
 
 	private:
+#ifdef AT_ENABLE_64BIT_LBVH_MORTON_CODE
+		using MORTON_CODE_TYPE = uint64_t;
+#else
 		using MORTON_CODE_TYPE = uint32_t;
+#endif
 
 		TypedCudaMemory<MORTON_CODE_TYPE> m_mortonCodes;
 		TypedCudaMemory<uint32_t> m_indices;

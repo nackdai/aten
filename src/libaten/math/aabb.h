@@ -228,7 +228,7 @@ namespace aten {
 			return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
 		}
 
-		real getDiagonalLenght() const
+		AT_DEVICE_API real getDiagonalLenght() const
 		{
 			auto ret = length(m_max - m_min);
 			return ret;

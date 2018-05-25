@@ -154,7 +154,7 @@ void update(int frame)
 		mdl->setBoundingBox(aten::aabb(aabbMin, aabbMax));
 		deform->update(true);
 
-		const auto& sceneBbox = g_scene.getAccel()->getBoundingbox();
+		const auto sceneBbox = aten::aabb(aabbMin, aabbMax);
 		auto& nodes = g_tracer.getCudaTextureResourceForBvhNodes();
 
 		auto& vtxPos = g_skinning.getInteropVBO()[0];

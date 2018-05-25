@@ -185,7 +185,7 @@ __global__ void genMortonCode(
 	const auto bboxMin = sceneBbox.minPos();
 	center = (center - bboxMin) / size;
 
-#if 0
+#if 1
 	auto code = computeMortonCode(center);
 #else
 	const auto d = sceneBbox.getDiagonalLenght();

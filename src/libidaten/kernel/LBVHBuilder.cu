@@ -17,7 +17,7 @@
 // https://github.com/leonardo-domingues/atrbvh
 // http://research.nvidia.com/sites/default/files/publications/karras2012hpg_paper.pdf
 
-#if 1
+#if 0
 template <typename T>
 __forceinline__ __device__ int computeLongestCommonPrefix(
 	const T* sortedKeys,

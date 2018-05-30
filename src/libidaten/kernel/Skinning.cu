@@ -45,42 +45,6 @@ __global__ void computeSkinning(
 	dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
 }
 
-__global__ void computeSkinningWithTriangles(
-	uint32_t vtxNum,
-	const aten::SkinningVertex* __restrict__ vertices,
-	const aten::mat4* __restrict__ matrices,
-	aten::vec4* dstPos,
-	aten::vec4* dstNml)
-{
-	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-	if (idx >= vtxNum) {
-		return;
-	}
-
-	const auto* vtx = &vertices[idx];
-
-	aten::vec4 srcPos = vtx->position;
-	aten::vec4 srcNml = aten::vec4(vtx->normal, 0);
-
-	aten::vec4 resultPos(0);
-	aten::vec4 resultNml(0);
-
-	for (int i = 0; i < 4; i++) {
-		int idx = int(vtx->blendIndex[i]);
-		float weight = vtx->blendWeight[i];
-
-		aten::mat4 mtx = matrices[idx];
-
-		resultPos += weight * mtx * vtx->position;
-		resultNml += weight * mtx * srcNml;
-	}
-
-	resultNml = normalize(resultNml);
-
-	dstPos[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
-	dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
-}
 __global__ void setTriangleParam(
 	uint32_t triNum,
 	aten::PrimitiveParamter* triangles,
@@ -323,7 +287,7 @@ namespace idaten
 			dim3 grid((vtxNum + block.x - 1) / block.x);
 
 			if (willComputeWithTriangles) {
-				computeSkinningWithTriangles << <grid, block >> > (
+				computeSkinning << <grid, block >> > (
 					vtxNum,
 					m_vertices.ptr(),
 					m_matrices.ptr(),

@@ -4,6 +4,7 @@ precision highp int;
 
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 normal;
+layout(location = 2) in vec4 prevPosition;
 
 out vec3 worldNormal;
 out vec2 vUV;
@@ -21,7 +22,7 @@ void main()
 	vec4 worldPos = mtxL2W * pos;
 	gl_Position = worldPos;
 
-	prevWorldPos = mtxPrevL2W * pos;
+	prevWorldPos = mtxPrevL2W * vec4(prevPosition.xyz, 1.0);
 
 	worldNormal = normalize(mtxL2W * vec4(nml, 0)).xyz;
 

@@ -34,7 +34,8 @@ namespace idaten
 
 		void compute(
 			aten::vec3& aabbMin,
-			aten::vec3& aabbMax);
+			aten::vec3& aabbMax,
+			bool isRestart = true);
 
 		bool getComputedResult(
 			aten::vec4* pos, 
@@ -64,6 +65,7 @@ namespace idaten
 
 		TypedCudaMemory<aten::vec4> m_dstPos;
 		TypedCudaMemory<aten::vec4> m_dstNml;
+		TypedCudaMemory<aten::vec4> m_dstPrev;
 
 		TypedCudaMemory<aten::vec3> m_minBuf;
 		TypedCudaMemory<aten::vec3> m_maxBuf;

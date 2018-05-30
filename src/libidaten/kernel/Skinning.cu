@@ -9,11 +9,13 @@
 //#pragma optimize( "", off)
 
 __global__ void computeSkinning(
+	bool isRestart,
 	uint32_t vtxNum,
 	const aten::SkinningVertex* __restrict__ vertices,
 	const aten::mat4* __restrict__ matrices,
 	aten::vec4* dstPos,
-	aten::vec4* dstNml)
+	aten::vec4* dstNml,
+	aten::vec4* dstPrev)
 {
 	const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -40,6 +42,15 @@ __global__ void computeSkinning(
 	}
 
 	resultNml = normalize(resultNml);
+
+	if (isRestart) {
+		dstPrev[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, 1.0f);
+	}
+	else {
+		// Keep previous position.
+		dstPrev[idx] = dstPos[idx];
+		dstPrev[idx].w = 1.0f;
+	}
 
 	dstPos[idx] = aten::vec4(resultPos.x, resultPos.y, resultPos.z, vtx->uv[0]);
 	dstNml[idx] = aten::vec4(resultNml.x, resultNml.y, resultNml.z, vtx->uv[1]);
@@ -201,6 +212,7 @@ namespace idaten
 		else {
 			m_dstPos.init(vtxNum);
 			m_dstNml.init(vtxNum);
+			m_dstPrev.init(vtxNum);
 		}
 	}
 
@@ -222,8 +234,8 @@ namespace idaten
 			auto handles = vb->getVBOHandles();
 
 			// NOTE
-			// Only support position, normal.
-			AT_ASSERT(handles.size() == 2);
+			// Only support position, normal, previous position.
+			AT_ASSERT(handles.size() == 3);
 
 			m_interopVBO.resize(handles.size());
 
@@ -235,6 +247,7 @@ namespace idaten
 		else {
 			m_dstPos.init(vtxNum);
 			m_dstNml.init(vtxNum);
+			m_dstPrev.init(vtxNum);
 		}
 	}
 
@@ -253,10 +266,12 @@ namespace idaten
 
 	void Skinning::compute(
 		aten::vec3& aabbMin,
-		aten::vec3& aabbMax)
+		aten::vec3& aabbMax,
+		bool isRestart/*= true*/)
 	{
 		aten::vec4* dstPos = nullptr;
 		aten::vec4* dstNml = nullptr;
+		aten::vec4* dstPrev = nullptr;
 		size_t vtxbytes = 0;
 
 		if (!m_interopVBO.empty()) {
@@ -268,10 +283,14 @@ namespace idaten
 
 			m_interopVBO[1].map();
 			m_interopVBO[1].bind((void**)&dstNml, vtxbytes);
+
+			m_interopVBO[2].map();
+			m_interopVBO[2].bind((void**)&dstPrev, vtxbytes);
 		}
 		else {
 			dstPos = m_dstPos.ptr();
 			dstNml = m_dstNml.ptr();
+			dstPrev = m_dstPrev.ptr();
 		}
 
 		int32_t indexOffset = m_curVtxOffset - m_prevVtxOffset;
@@ -288,10 +307,11 @@ namespace idaten
 
 			if (willComputeWithTriangles) {
 				computeSkinning << <grid, block >> > (
+					isRestart,
 					vtxNum,
 					m_vertices.ptr(),
 					m_matrices.ptr(),
-					dstPos, dstNml);
+					dstPos, dstNml, dstPrev);
 
 				checkCudaKernel(computeSkinningWithTriangles);
 
@@ -309,10 +329,11 @@ namespace idaten
 			}
 			else {
 				computeSkinning << <grid, block >> > (
+					isRestart,
 					vtxNum,
 					m_vertices.ptr(),
 					m_matrices.ptr(),
-					dstPos, dstNml);
+					dstPos, dstNml, dstPrev);
 
 				checkCudaKernel(computeSkinning);
 			}
@@ -358,6 +379,7 @@ namespace idaten
 		if (!m_interopVBO.empty()) {
 			m_interopVBO[0].unmap();
 			m_interopVBO[1].unmap();
+			m_interopVBO[2].unmap();
 		}
 	}
 

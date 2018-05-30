@@ -80,8 +80,9 @@ namespace aten
 			// i.e. each attributes are dependent.
 			// Variable "offset" is not used, so offset is zero.
 			static const VertexAttrib attribs[] = {
-				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),
-				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),
+				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),	// Position.
+				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),	// Normal.
+				VertexAttrib(GL_FLOAT, 4, sizeof(GLfloat), 0),	// Previous Position.
 			};
 
 			m_vbForGPUSkinning.init(

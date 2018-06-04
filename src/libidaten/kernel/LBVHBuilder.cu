@@ -737,13 +737,13 @@ namespace idaten
 		int axis[3] = { 0, 1, 2 };
 		{
 			const auto size = sceneBbox.size();
-			if (size[0] < size[1]) {
+			if (size[axis[0]] < size[axis[1]]) {
 				std::swap(axis[0], axis[1]);
 			}
-			if (size[1] < size[2]) {
+			if (size[axis[1]] < size[axis[2]]) {
 				std::swap(axis[1], axis[2]);
 			}
-			if (size[0] < size[1]) {
+			if (size[axis[0]] < size[axis[1]]) {
 				std::swap(axis[0], axis[1]);
 			}
 		}

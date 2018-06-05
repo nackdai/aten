@@ -486,6 +486,8 @@ __global__ void shade(
 	}
 	AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
+	shadowRays[idx].isActive = false;
+
 	// Explicit conection to light.
 	if (!mtrl.attrib.isSingular)
 	{

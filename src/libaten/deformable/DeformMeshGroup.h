@@ -9,8 +9,8 @@ namespace aten
 	class FileInputStream;
 	class SkeletonController;
 
-	/** メッシュグループ.
-	 *
+	/**
+	 * @brief メッシュグループ.
 	 * LODのレベルごとのメッシュセットの集まり
 	 */
 	class DeformMeshGroup {

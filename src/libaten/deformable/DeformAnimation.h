@@ -11,21 +11,29 @@ namespace aten
 	class SkeletonController;
 
     /**
-    */
+	 * @brief Animation for deformable mesh.
+     */
     class DeformAnimation {
     public:
 		DeformAnimation() {}
         virtual ~DeformAnimation() {}
 
 	public:
+		/**
+		 * @brief Read animation data from the specified file.
+		 */
 		bool read(const char* path);
 
-		// 指定されたスケルトンにアニメーションを適用する.
+		/**
+		 * @brief 指定されたスケルトンにアニメーションを適用する.
+		 */
 		void applyAnimation(
 			SkeletonController* skl,
 			float time);
 
-		// 指定されたスケルトンの指定されたジョイントにアニメーションを適用する.
+		/** 
+		 * @brief 指定されたスケルトンの指定されたジョイントにアニメーションを適用する.
+		 */
 		void applyAnimationByIdx(
 			SkeletonController* skl,
 			uint32_t jointIdx,

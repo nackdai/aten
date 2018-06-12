@@ -20,8 +20,8 @@ namespace aten
 			uint32_t attribNum) = 0;
 	};
 
-	/** メッシュセット.
-	 *
+	/**
+	 * @brief メッシュセット.
 	 * マテリアルごとのプリミティブセットの集まり
 	 */
 	class DeformMeshSet : public geombase {

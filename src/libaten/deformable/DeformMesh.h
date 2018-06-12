@@ -8,7 +8,8 @@ namespace aten
 	class FileInputStream;
 	class SkeletonController;
 
-	/** メッシュデータ.
+	/**
+	 * @brief メッシュデータ.
 	 */
 	class DeformMesh {
 		friend class deformable;

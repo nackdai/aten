@@ -42,9 +42,12 @@ namespace aten
 
 		// NOTE
 		// rootƒm[ƒh‚Í‘ÎÛŠO.
+
+		// Find the node for treelet root.
 		for (size_t i = 1; i < m_nodes.size(); i++) {
 			auto* node = &m_nodes[i];
 
+			// Chech if the node is treelet root.
 			bool isTreeletRoot = (((node->depth % VoxelDepth) == 0) && !node->isLeaf());
 
 			if (isTreeletRoot) {
@@ -54,15 +57,19 @@ namespace aten
 
 				auto ratio = wholeBox.computeRatio(node->bbox);
 
+				// Treelet root list.
 				std::map<uint32_t, SBVHNode*> treeletRoots;
 
 				if (ratio < ratioThreshold) {
 					if (!node->isTreeletRoot) {
+						// Register to treelet root list.
 						treeletRoots.insert(std::pair<uint32_t, SBVHNode*>((uint32_t)i, node));
 						node->isTreeletRoot = true;
 					}
 				}
 				else {
+					// Traverse the tree.
+
 					stack[0] = node->left;
 					stack[1] = node->right;
 					int stackpos = 2;
@@ -90,6 +97,7 @@ namespace aten
 							continue;
 						}
 
+						// Leaf node can not be treelet root.
 						if (!n->isLeaf()) {
 							ratio = wholeBox.computeRatio(n->bbox);
 							if (ratio < ratioThreshold) {
@@ -109,6 +117,7 @@ namespace aten
 					}
 				}
 
+				// Make treelet from thd found treelet node.
 				for (auto it = treeletRoots.begin(); it != treeletRoots.end(); it++) {
 					auto idx = it->first;
 					auto node = it->second;

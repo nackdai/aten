@@ -6,6 +6,7 @@
 namespace aten
 {
     /**
+	 * @brief Interpolator to interpolate key frame data for deform animation.
      */
     class DeformAnimationInterp {
     private:
@@ -13,8 +14,14 @@ namespace aten
         ~DeformAnimationInterp();
 
     public:
+		/**
+		 * @brief Return whether the specified type uses the interpolator with scalar.
+		 */
 		static bool isScalarInterp(AnmInterpType type);
 
+		/**
+		 * @brief Compute interpolated data between two key data.
+		 */
         static float computeInterp(
             AnmInterpType nInterp,
             float fTime,
@@ -22,6 +29,9 @@ namespace aten
             uint32_t nPos,
             const AnmKey* pKeys);
 
+		/**
+		 * @brief Compute interpolated data between two key data.
+		 */
         static void computeInterp(
             vec4& vRef,
             AnmInterpType nInterp,
@@ -31,32 +41,37 @@ namespace aten
             const AnmKey* pKeys);
 
     private:
+		/**
+		 * @brief Linear interpolator.
+		 */
         static float computeLinear(
             float fTime,
             uint32_t nKeyNum,
             uint32_t nPos,
             const AnmKey* pKeys);
 
+		/**
+		 * @brief Bezier interpolator.
+		 */
         static float computeBezier(
             float fTime,
             uint32_t nKeyNum,
             uint32_t nPos,
             const AnmKey* pKeys);
 
+		/**
+		 * @brief Hermite interpolator.
+		 */
         static float computeHermite(
             float fTime,
             uint32_t nKeyNum,
             uint32_t nPos,
             const AnmKey* pKeys);
 
+		/**
+		 * @brief Spherical linear interpolator.
+		 */
         static void computeSlerp(
-            vec4& vRef,
-            float fTime,
-            uint32_t nKeyNum,
-            uint32_t nPos,
-            const AnmKey* pKeys);
-
-        static void computeBezierSlerp(
             vec4& vRef,
             float fTime,
             uint32_t nKeyNum,

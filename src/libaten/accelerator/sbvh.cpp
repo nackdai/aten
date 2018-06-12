@@ -13,6 +13,7 @@
 
 namespace aten
 {
+	// Check if the surface area of merged AABBs is bigger than the specified cost.
 	inline bool checkAABBOverlap(
 		const aabb& box0,
 		const aabb& box1,
@@ -132,9 +133,10 @@ namespace aten
 	{
 		AT_ASSERT(!m_isNested);
 
-		// Build top layer bvh.
-
+		// Tell not to build bottome layer.
 		m_bvh.disableLayer();
+
+		// Build top layer bvh.
 		m_bvh.build(list, num, bbox);
 
 		auto boundingBox = m_bvh.getBoundingbox();
@@ -146,13 +148,14 @@ namespace aten
 		// そのため、+1する.
 		m_threadedNodes.resize(nestedBvh.size() + 1);
 
+		// Copy top layer bvh nodes to the array which SBVH has.
 		const auto& toplayer = m_bvh.getNodes()[0];
 		m_threadedNodes[0].resize(toplayer.size());
 		memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
 
 		m_maxVoxelRadius = 0.0f;
 
-		// Convert to threaded.
+		// Convert to threaded bvh.
 		for (int i = 0; i < nestedBvh.size(); i++) {
 			auto accel = nestedBvh[i];
 
@@ -288,9 +291,11 @@ namespace aten
 			real overlapCost = real(0);
 			bool needComputeSpatial = false;
 
+			// Check if the surface area of merged AABBs is bigger than the specified cost.
 			bool isOverrlap = checkAABBOverlap(objLeftBB, objRightBB, overlapCost);
 
 			if (isOverrlap) {
+				// If the AABBs are overlapped, check whether the node is needed to split.
 				needComputeSpatial = (overlapCost / rootSurfaceArea) >= areaAlpha;
 			}
 
@@ -533,8 +538,10 @@ namespace aten
 					continue;
 				}
 
+				// Evaluate split cost.
 				auto splitCost = evalPreSplitCost(leftArea, leftCount, rightArea, rightCount);
 
+				// If the split cost is lower than the specified cost, update cost, bin position, axis etc.
 				if (splitCost < cost)
 				{
 					cost = splitCost;
@@ -591,6 +598,7 @@ namespace aten
 				bins[i] = Bin();
 			}
 
+			// Check all triangles which the node has.
 			for (uint32_t i = 0; i < refNum; i++) {
 				const auto id = node.refIds[i];
 				const auto& ref = m_refs[id];
@@ -794,6 +802,7 @@ namespace aten
 
 		const auto refNum = node.refIds.size();
 
+		// compute the aabb of all centroids.
 		for (int i = 0; i < refNum; i++) {
 			const auto id = node.refIds[i];
 			const auto& ref = m_refs[id];
@@ -810,15 +819,18 @@ namespace aten
 
 			auto center = ref.bbox.getCenter();
 
-			// compute the bin index of the current reference and put to EITHER left OR right
+			// 分割情報(bins)へのインデックス.
+			// 最小端点から三角形AABBの中心への距離を軸の長さで正規化することで計算.
 			int binIdx = (int)(m_numBins * ((center[axis] - bbCentroid.minPos()[axis]) * invLen));
 
 			binIdx = aten::clamp<int>(binIdx, 0, m_numBins - 1);
 
 			if (binIdx <= splitBin) {
+				// bin indexがsplitBinより小さいので左.
 				leftList.push_back(id);
 			}
 			else {
+				// bin indexがsplitBinより大きいので右.
 				rightList.push_back(id);
 			}
 		}
@@ -951,6 +963,8 @@ namespace aten
 
 	void sbvh::getOrderIndex(std::vector<int>& indices) const
 	{
+		// Traverse the tree and register index to the list.
+
 		indices.reserve(m_nodes.size());
 
 		int stack[128] = { 0 };

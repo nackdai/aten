@@ -6,11 +6,17 @@
 #include "math/math.h"
 
 namespace AT_NAME {
+	/**
+	 * @brief Pinhole camera.
+	 */
 	class PinholeCamera : public camera {
 	public:
 		PinholeCamera() {}
 		virtual ~PinholeCamera() {}
 
+		/**
+		 * @brief Initialize the camera.
+		 */
 		void init(
 			const aten::vec3& origin,
 			const aten::vec3& lookat,
@@ -18,30 +24,53 @@ namespace AT_NAME {
 			real vfov,	// vertical fov.
 			uint32_t width, uint32_t height);
 
+		/**
+		 * @brief Update transformed camera parmaters.
+		 */
 		virtual void update() override final;
 
+		/**
+		 * @brief Sample camera.
+		 */
 		virtual CameraSampleResult sample(
 			real s, real t,
 			aten::sampler* sampler) const override final;
 
+		/**
+		 * @brief Sample camera.
+		 */
 		static AT_DEVICE_API void sample(
 			CameraSampleResult* result,
 			const aten::CameraParameter* param,
 			real s, real t);
 
+		/**
+		 * @brief Return camera's origin.
+		 */
 		virtual const aten::vec3& getPos() const override final
 		{
 			return m_param.origin;
 		}
+
+		/**
+		 * @brief Return camera's direction.
+		 */
 		virtual const aten::vec3& getDir() const override final
 		{
 			return m_param.dir;
 		}
 
+		/**
+		 * @brief Return camera's origin.
+		 */
 		virtual aten::vec3& getPos() override final
 		{
 			return m_param.origin;
 		}
+
+		/**
+		 * @brief Return camera's point of gaze
+		 */
 		virtual aten::vec3& getAt() override final
 		{
 			return m_at;

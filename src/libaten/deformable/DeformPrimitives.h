@@ -25,8 +25,8 @@ namespace aten
 		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) = 0;
 	};
 
-	/** プリミティブデータ.
-	 *
+	/**
+	 * @brief プリミティブデータ.
 	 * メッシュデータの最小単位.
 	 */
 	class DeformPrimitives {

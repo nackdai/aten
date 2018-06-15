@@ -443,9 +443,6 @@
     <ClInclude Include="..\src\libaten\math\quaternion.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\deformable\ANMFormat.h">
-      <Filter>deformable</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\key.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -499,6 +496,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\os\system.h">
       <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\deformable\ANMFormat.h">
+      <Filter>deformable\animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

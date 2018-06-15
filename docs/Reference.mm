@@ -71,5 +71,14 @@
 <icon BUILTIN="idea"/>
 </node>
 </node>
+<node CREATED="1529046952161" ID="ID_1231796761" MODIFIED="1529046956808" POSITION="right" TEXT="&#x30ea;&#x30a2;&#x30eb;&#x30bf;&#x30a4;&#x30e0;GI">
+<node CREATED="1529046958828" ID="ID_694318551" LINK="http://asura.iaigiri.com/OpenGL/gl68.html" MODIFIED="1529046983732" TEXT="http://asura.iaigiri.com/OpenGL/gl68.html"/>
+<node CREATED="1529046985235" ID="ID_1820300214" LINK="http://asura.iaigiri.com/OpenGL/gl69.html" MODIFIED="1529046993370" TEXT="http://asura.iaigiri.com/OpenGL/gl69.html"/>
+<node CREATED="1529047089651" ID="ID_1332007043" LINK="https://dickyjim.wordpress.com/2013/09/04/spherical-harmonics-for-beginners/" MODIFIED="1529047097634" TEXT="Spherical Harmonics for Beginners"/>
+<node CREATED="1529047030108" ID="ID_1601809241" LINK="http://unityshader.hatenablog.com/entry/2014/05/10/040142" MODIFIED="1529047038922" TEXT="LPV(Light Propagation Volume) &#x30e1;&#x30e2;"/>
+<node CREATED="1529047049814" ID="ID_842546585" LINK="https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter10.html" MODIFIED="1529047057842" TEXT="Real-Time Computation of Dynamic Irradiance Environment Maps"/>
+<node CREATED="1529047115602" ID="ID_70030394" LINK="https://qiita.com/edo_m18/items/b5058581555a9823b8d6" MODIFIED="1529047123290" TEXT="[&#x6570;&#x5b66;] &#x30c6;&#x30a4;&#x30e9;&#x30fc;&#x5c55;&#x958b;&#x3084;&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;&#x306b;&#x3064;&#x3044;&#x3066;&#x30e1;&#x30e2;"/>
+<node CREATED="1529047136818" ID="ID_971209944" LINK="http://t-pot.com/program/108_RealTimeGI/index.html" MODIFIED="1529047145249" TEXT="&#x30ea;&#x30a2;&#x30eb;&#x30bf;&#x30a4;&#x30e0;&#x5927;&#x57df;&#x7167;&#x660e;"/>
+</node>
 </node>
 </map>

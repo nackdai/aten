@@ -407,9 +407,6 @@
     <ClInclude Include="..\src\libaten\geometry\sphere.h">
       <Filter>geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\geometry\tranformable.h">
-      <Filter>geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\vertex.h">
       <Filter>geometry</Filter>
     </ClInclude>
@@ -499,6 +496,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\deformable\ANMFormat.h">
       <Filter>deformable\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\transformable.h">
+      <Filter>geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -694,9 +694,6 @@
     <ClCompile Include="..\src\libaten\geometry\sphere.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\geometry\tranformable.cpp">
-      <Filter>geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\vertex.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
@@ -795,6 +792,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\linux\system_linux.cpp">
       <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\transformable.cpp">
+      <Filter>geometry</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

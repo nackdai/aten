@@ -7,7 +7,7 @@
 #include "math/mat4.h"
 #include "geometry/face.h"
 #include "geometry/objshape.h"
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 
 namespace AT_NAME
 {

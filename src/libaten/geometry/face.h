@@ -6,7 +6,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "geometry/geomparam.h"
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 #include "geometry/geombase.h"
 #include "geometry/vertex.h"
 

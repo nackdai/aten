@@ -1,7 +1,7 @@
 #pragma once
 
 #include "scene/hitable.h"
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 #include "geometry/object.h"
 #include "accelerator/accelerator.h"
 

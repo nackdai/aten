@@ -1,6 +1,6 @@
 #include "accelerator/stackless_bvh.h"
 #include "accelerator/bvh.h"
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 #include "geometry/object.h"
 
 #include <random>

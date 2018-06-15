@@ -1,4 +1,4 @@
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 
 namespace aten
 {

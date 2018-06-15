@@ -4,7 +4,7 @@
 #include "deformable/DeformMesh.h"
 #include "deformable/Skeleton.h"
 #include "deformable/SkinningVertex.h"
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 
 namespace aten
 {

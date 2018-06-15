@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "math/mat4.h"
-#include "geometry/tranformable.h"
+#include "geometry/transformable.h"
 #include "geometry/geombase.h"
 #include "geometry/geomparam.h"
 

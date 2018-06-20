@@ -41,7 +41,7 @@ if not exist %BUILD_DIR%\GLFW.sln (
 
 rem glew =============================
 
-set BUILD_DIR=glew\build\vc12
+set BUILD_DIR=glew\build\vc14
 
 %MSBUILD% %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 

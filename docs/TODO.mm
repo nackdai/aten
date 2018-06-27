@@ -381,6 +381,16 @@
 <icon BUILTIN="messagebox_warning"/>
 <icon BUILTIN="messagebox_warning"/>
 </node>
+<node CREATED="1530090868472" HGAP="21" ID="ID_1474285676" MODIFIED="1530090895076" TEXT="&#x74b0;&#x5883;&#x30de;&#x30c3;&#x30d7;&#x306e;PDF" VSHIFT="41">
+<icon BUILTIN="messagebox_warning"/>
+<icon BUILTIN="messagebox_warning"/>
+<icon BUILTIN="messagebox_warning"/>
+<icon BUILTIN="messagebox_warning"/>
+<node CREATED="1530090875955" ID="ID_1176086271" MODIFIED="1530090884230" TEXT="&#x8a08;&#x7b97;&#x304c;&#x9593;&#x9055;&#x3063;&#x3066;&#x3044;&#x308b;">
+<node CREATED="1530090897691" ID="ID_1523387970" LINK="https://rayspace.xyz/CG/contents/convert_PDF/" MODIFIED="1530090921811" TEXT="&#x78ba;&#x7387;&#x5bc6;&#x5ea6;&#x95a2;&#x6570; (PDF) &#x306e;&#x5909;&#x63db;"/>
+<node CREATED="1530090933881" ID="ID_499668847" LINK="https://cs184.eecs.berkeley.edu/2017-spring/article/24" MODIFIED="1530090948306" TEXT="Environment Map Lights"/>
+</node>
+</node>
 </node>
 <node CREATED="1521793174132" HGAP="38" ID="ID_1151520209" MODIFIED="1525929981753" POSITION="right" TEXT="&#x6700;&#x9069;&#x5316;&#x30e1;&#x30e2;" VSHIFT="62">
 <node CREATED="1521793180676" ID="ID_1661881408" LINK="http://mimimopu.com/blog/2011/11/cudafermil1shared-mem.html" MODIFIED="1522223457354" TEXT="[CUDA]Fermi&#x3067;&#x306e;L1/Shared Mem &#x30b5;&#x30a4;&#x30ba;&#x5909;&#x66f4;">
@@ -410,7 +420,7 @@
 <node CREATED="1518744747041" ID="ID_560376569" MODIFIED="1518744750108" TEXT="&#x4eca;&#x306f;&#x9069;&#x5f53;"/>
 </node>
 </node>
-<node CREATED="1519807660079" HGAP="25" ID="ID_1503466789" MODIFIED="1519807707007" POSITION="right" TEXT="&#x30c7;&#x30d5;&#x30a9;&#x30fc;&#x30e1;&#x30fc;&#x30b7;&#x30e7;&#x30f3;" VSHIFT="61">
+<node CREATED="1519807660079" FOLDED="true" HGAP="25" ID="ID_1503466789" MODIFIED="1530090863502" POSITION="right" TEXT="&#x30c7;&#x30d5;&#x30a9;&#x30fc;&#x30e1;&#x30fc;&#x30b7;&#x30e7;&#x30f3;" VSHIFT="61">
 <node CREATED="1519807671022" ID="ID_410032447" MODIFIED="1519807719224" TEXT="FBX&#x306e;&#x5909;&#x63db;">
 <icon BUILTIN="button_ok"/>
 </node>

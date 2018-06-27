@@ -72,13 +72,38 @@
 </node>
 </node>
 <node CREATED="1529046952161" ID="ID_1231796761" MODIFIED="1529046956808" POSITION="right" TEXT="&#x30ea;&#x30a2;&#x30eb;&#x30bf;&#x30a4;&#x30e0;GI">
-<node CREATED="1529046958828" ID="ID_694318551" LINK="http://asura.iaigiri.com/OpenGL/gl68.html" MODIFIED="1529046983732" TEXT="http://asura.iaigiri.com/OpenGL/gl68.html"/>
-<node CREATED="1529046985235" ID="ID_1820300214" LINK="http://asura.iaigiri.com/OpenGL/gl69.html" MODIFIED="1529046993370" TEXT="http://asura.iaigiri.com/OpenGL/gl69.html"/>
+<node CREATED="1529046958828" ID="ID_694318551" LINK="http://asura.iaigiri.com/OpenGL/gl68.html" MODIFIED="1530085705564" TEXT="http://asura.iaigiri.com/OpenGL/gl68.html">
+<icon BUILTIN="idea"/>
+<icon BUILTIN="idea"/>
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1529046985235" ID="ID_1820300214" LINK="http://asura.iaigiri.com/OpenGL/gl69.html" MODIFIED="1530085707828" TEXT="http://asura.iaigiri.com/OpenGL/gl69.html">
+<icon BUILTIN="idea"/>
+<icon BUILTIN="idea"/>
+</node>
+<node CREATED="1529047136818" ID="ID_971209944" LINK="http://t-pot.com/program/108_RealTimeGI/index.html" MODIFIED="1530085699995" TEXT="&#x30ea;&#x30a2;&#x30eb;&#x30bf;&#x30a4;&#x30e0;&#x5927;&#x57df;&#x7167;&#x660e;">
+<icon BUILTIN="idea"/>
+</node>
 <node CREATED="1529047089651" ID="ID_1332007043" LINK="https://dickyjim.wordpress.com/2013/09/04/spherical-harmonics-for-beginners/" MODIFIED="1529047097634" TEXT="Spherical Harmonics for Beginners"/>
 <node CREATED="1529047030108" ID="ID_1601809241" LINK="http://unityshader.hatenablog.com/entry/2014/05/10/040142" MODIFIED="1529047038922" TEXT="LPV(Light Propagation Volume) &#x30e1;&#x30e2;"/>
 <node CREATED="1529047049814" ID="ID_842546585" LINK="https://developer.nvidia.com/gpugems/GPUGems2/gpugems2_chapter10.html" MODIFIED="1529047057842" TEXT="Real-Time Computation of Dynamic Irradiance Environment Maps"/>
 <node CREATED="1529047115602" ID="ID_70030394" LINK="https://qiita.com/edo_m18/items/b5058581555a9823b8d6" MODIFIED="1529047123290" TEXT="[&#x6570;&#x5b66;] &#x30c6;&#x30a4;&#x30e9;&#x30fc;&#x5c55;&#x958b;&#x3084;&#x7403;&#x9762;&#x8abf;&#x548c;&#x95a2;&#x6570;&#x306b;&#x3064;&#x3044;&#x3066;&#x30e1;&#x30e2;"/>
-<node CREATED="1529047136818" ID="ID_971209944" LINK="http://t-pot.com/program/108_RealTimeGI/index.html" MODIFIED="1529047145249" TEXT="&#x30ea;&#x30a2;&#x30eb;&#x30bf;&#x30a4;&#x30e0;&#x5927;&#x57df;&#x7167;&#x660e;"/>
+</node>
+<node CREATED="1530091171233" HGAP="37" ID="ID_1210561962" MODIFIED="1530091179098" POSITION="right" TEXT="&#x30ec;&#x30a4;&#x30c8;&#x30ec;" VSHIFT="84">
+<node CREATED="1530091180042" ID="ID_861403801" LINK="https://github.com/IteratorAdvance/taichi.git" MODIFIED="1530091185304" TEXT="https://github.com/IteratorAdvance/taichi.git"/>
+<node CREATED="1530091258320" ID="ID_51594819" LINK="https://github.com/appleseedhq/appleseed.git" MODIFIED="1530091263663" TEXT="https://github.com/appleseedhq/appleseed.git"/>
+<node CREATED="1530091485064" ID="ID_1777495161" LINK=" https://github.com/ospray/ospray.git" MODIFIED="1530091644600" TEXT="https://github.com/ospray/ospray.git"/>
+<node CREATED="1530091594365" ID="ID_1763182641" LINK="https://github.com/syoyo/lucille.git" MODIFIED="1530091599005" TEXT="https://github.com/syoyo/lucille.git"/>
+<node CREATED="1530091633142" ID="ID_1219457064" LINK="https://github.com/cessen/psychopath.git" MODIFIED="1530091639208" TEXT="https://github.com/cessen/psychopath.git"/>
+<node CREATED="1530091449895" ID="ID_267111725" LINK=" https://github.com/marekvinkler/NTrace.git" MODIFIED="1530091647144" TEXT="https://github.com/marekvinkler/NTrace.git"/>
+<node CREATED="1530091285793" ID="ID_1488595652" MODIFIED="1530091287867" TEXT="BVH">
+<node CREATED="1530091288231" ID="ID_32827997" LINK="ttps://github.com/martinradev/BVH-algo-lib.git" MODIFIED="1530091314936" TEXT="https://github.com/martinradev/BVH-algo-lib.git"/>
+<node CREATED="1530091388815" ID="ID_1421033576" LINK="https://github.com/leonardo-domingues/atrbvh" MODIFIED="1530091396542" TEXT="https://github.com/leonardo-domingues/atrbvh"/>
+<node CREATED="1530091492927" ID="ID_179039412" LINK=" https://github.com/embree/embree.git" MODIFIED="1530091524424" TEXT="https://github.com/embree/embree.git"/>
+</node>
+</node>
+<node CREATED="1530091539741" ID="ID_13954390" MODIFIED="1530091546130" POSITION="right" TEXT="&#x30b2;&#x30fc;&#x30e0;&#x30a8;&#x30f3;&#x30b8;&#x30f3;">
+<node CREATED="1530091549439" ID="ID_1798034906" LINK="https://github.com/NVIDIAGameWorks/Falcor" MODIFIED="1530091568413" TEXT="Falcor"/>
 </node>
 </node>
 </map>

@@ -1,4 +1,4 @@
-<map version="1.0.1">
+<map version="1.1.0">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
 <node CREATED="1518165439376" ID="ID_1149980291" MODIFIED="1518165446414" TEXT="Reference">
 <node CREATED="1518165447144" ID="ID_711799101" MODIFIED="1518165450704" POSITION="right" TEXT="&#x30ab;&#x30fc;&#x30da;&#x30a4;&#x30f3;&#x30c8;">
@@ -104,6 +104,11 @@
 </node>
 <node CREATED="1530091539741" ID="ID_13954390" MODIFIED="1530091546130" POSITION="right" TEXT="&#x30b2;&#x30fc;&#x30e0;&#x30a8;&#x30f3;&#x30b8;&#x30f3;">
 <node CREATED="1530091549439" ID="ID_1798034906" LINK="https://github.com/NVIDIAGameWorks/Falcor" MODIFIED="1530091568413" TEXT="Falcor"/>
+</node>
+<node CREATED="1532528288149" ID="ID_1670573368" MODIFIED="1532528291813" POSITION="right" TEXT="AI&#x30c7;&#x30ce;&#x30a4;&#x30ba;">
+<node CREATED="1532528305286" ID="ID_605580992" LINK="http://cvc.ucsb.edu/graphics/Papers/SIGGRAPH2015_LBF/" MODIFIED="1532528317403" TEXT="A Machine Learning Approach for Filtering Monte Carlo Noise"/>
+<node CREATED="1532528367251" ID="ID_1925867271" LINK="http://cvc.ucsb.edu/graphics/Papers/SIGGRAPH2017_KPCN/" MODIFIED="1532528377079" TEXT="Kernel-Predicting Convolutional Networks for Denoising Monte Carlo Renderings"/>
+<node CREATED="1532528329763" ID="ID_276417459" LINK="http://research.nvidia.com/sites/default/files/publications/dnn_denoise_author.pdf" MODIFIED="1532528345200" TEXT="Interactive Reconstruction of Monte Carlo Image Sequences using a Recurrent Denoising Autoencoder"/>
 </node>
 </node>
 </map>

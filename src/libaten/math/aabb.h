@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defs.h"
+#include "math/vec3.h"
 #include "math/vec4.h"
 #include "math/mat4.h"
 #include "math/ray.h"
@@ -134,6 +135,52 @@ namespace aten {
 
 			return t0 <= t1;
 #endif
+		}
+
+		static AT_DEVICE_API bool hit(
+			const ray& r,
+			const aten::vec3& _min, const aten::vec3& _max,
+			real t_min, real t_max,
+			real& t_result,
+			aten::vec3& nml)
+		{
+			bool isHit = hit(r, _min, _max, t_min, t_max, &t_result);
+
+			// NOTE
+			// https://www.gamedev.net/forums/topic/551816-finding-the-aabb-surface-normal-from-an-intersection-point-on-aabb/
+
+			auto point = r.org + t_result * r.dir;
+			auto center = real(0.5) * (_min + _max);
+			auto extent = real(0.5) * (_max - _min);
+
+			point -= center;
+
+			aten::vec3 sign(
+				point.x < real(0) ? real(-1) : real(1),
+				point.y < real(0) ? real(-1) : real(1),
+				point.z < real(0) ? real(-1) : real(1));
+
+			real minDist = AT_MATH_INF;
+
+			real dist = aten::abs(extent.x - aten::abs(point.x));
+			if (dist < minDist) {
+				minDist = dist;
+				nml = sign.x * aten::vec3(1, 0, 0);
+			}
+
+			dist = aten::abs(extent.y - aten::abs(point.y));
+			if (dist < minDist) {
+				minDist = dist;
+				nml = sign.y * aten::vec3(0, 1, 0);
+			}
+
+			dist = aten::abs(extent.z - aten::abs(point.z));
+			if (dist < minDist) {
+				minDist = dist;
+				nml = sign.z * aten::vec3(0, 0, 1);
+			}
+
+			return isHit;
 		}
 
 		bool isIn(const vec3& p) const

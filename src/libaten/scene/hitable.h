@@ -75,8 +75,9 @@ namespace aten {
 			// For voxel.
 			struct {
 				struct {
-					uint32_t area : 31;
 					uint32_t isVoxel : 1;
+					uint32_t signNmlZ : 1;
+					uint32_t tmp : 30;
 				};
 				real clr_r;
 			};
@@ -93,10 +94,7 @@ namespace aten {
 			struct {
 				real nml_x;
 				real nml_y;
-				union {
-					uint32_t signNmlZ : 1;
-					uint32_t clr_g : 31;
-				};
+				real clr_g;
 				real clr_b;
 			};
 		};
@@ -186,7 +184,6 @@ namespace aten {
 		{
 			if (isect.isVoxel) {
 				// For voxel.
-				rec.area = expandTo32bitFloat(isect.area);
 
 				// Repair normal.
 				auto nml_z = aten::sqrt(std::min<real>(real(1) - isect.nml_x * isect.nml_x + isect.nml_y * isect.nml_y, real(1)));
@@ -199,7 +196,7 @@ namespace aten {
 
 				// Repair Albedo color.
 				rec.albedo.x = isect.clr_r;
-				rec.albedo.y = expandTo32bitFloat(isect.clr_g);
+				rec.albedo.y = isect.clr_g;
 				rec.albedo.z = isect.clr_b;
 
 				// Flag if voxel or not.

@@ -153,8 +153,6 @@ namespace aten
 		m_threadedNodes[0].resize(toplayer.size());
 		memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
 
-		m_maxVoxelRadius = 0.0f;
-
 		// Convert to threaded bvh.
 		for (int i = 0; i < nestedBvh.size(); i++) {
 			auto accel = nestedBvh[i];
@@ -178,12 +176,6 @@ namespace aten
 				// exid は top layer が 0 なので、+1 する.
 				bvh->buildVoxel(i + 1, voxelOffset);
 
-				// TODO
-				// For VoxelViewer.
-				m_voxels.insert(m_voxels.end(), bvh->m_voxels.begin(), bvh->m_voxels.end());
-
-				m_maxVoxelRadius = std::max(m_maxVoxelRadius, bvh->m_maxVoxelRadius);
-
 				std::vector<int> indices;
 				bvh->convert(
 					m_threadedNodes[i + 1],
@@ -191,9 +183,6 @@ namespace aten
 					indices);
 
 				m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
-
-				// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
-				bvh->copyVoxelToNodeArray(m_threadedNodes[i + 1]);
 			}
 		}
 
@@ -877,11 +866,7 @@ namespace aten
 
 		stack[0] = ThreadedEntry(0, -1);
 
-#ifdef VOXEL_TEST
-		nodes[0].voxel = -1;
-#else
-		nodes[0].parent = -1;
-#endif
+		nodes[0].padding = 0.0f;
 
 		while (stackpos > 0) {
 			auto entry = stack[stackpos - 1];
@@ -941,19 +926,30 @@ namespace aten
 				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
 
-#ifdef VOXEL_TEST
-				// Offset to voxel from current node index.
-				if (sbvhNode.voxelIdx < 0) {
-					thrededNode.voxel = -1.0f;
+				if (sbvhNode.isTreeletRoot) {
+					thrededNode.isVoxel = ENABLE_VOXEL;
+
+					const auto& found = m_treelets.find(entry.nodeIdx);
+					if (found != m_treelets.end()) {
+						const auto& treelet = found->second;
+						
+						auto clr = treelet.avgclr;
+						clr = normalize(clr);
+
+						// Set voxel color.
+						thrededNode.clr_r = (uint8_t)aten::clamp<int>((int)(clr.r * 255.0f), 0, 255);
+						thrededNode.clr_g = (uint8_t)aten::clamp<int>((int)(clr.g * 255.0f), 0, 255);
+						thrededNode.clr_b = (uint8_t)aten::clamp<int>((int)(clr.b * 255.0f), 0, 255);
+						thrededNode.tmp = 0;
+					}
 				}
 				else {
-					thrededNode.voxel = sbvhNode.voxelIdx - entry.nodeIdx;
-					AT_ASSERT(thrededNode.voxel >= 0);
+					thrededNode.isVoxel = DISABLE_VOXEL;
+					thrededNode.clr_r = 0;
+					thrededNode.clr_g = 0;
+					thrededNode.clr_b = 0;
+					thrededNode.tmp = 0;
 				}
-#else
-				nodes[sbvhNode.right].parent = (float)entry.nodeIdx;
-				nodes[sbvhNode.left].parent = (float)entry.nodeIdx;
-#endif
 			}
 
 			nodeCount++;
@@ -1161,52 +1157,41 @@ namespace aten
 				}
 			}
 #if 1
-			else if (enableLod && node->voxel >= 0) {
+			else if (enableLod && AT_CHECK_IS_VOXEL(node->isVoxel))
+			{
 				float t_result = 0.0f;
-				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, &t_result);
+				aten::vec3 nml;
+				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, nml);
 
 #if 1
 				if (isHit) {
-					// Add offset voxel index to compute voxel index in node array.
-					int voxelIdx = nodeid + (int)node->voxel;
+					Intersection isectTmp;
 
-					auto tmp = &m_threadedNodes[exid][voxelIdx];
-					const BvhVoxel* voxel = reinterpret_cast<const BvhVoxel*>(tmp);
-					
-					float radius = voxel->radius;
+					isectTmp.isVoxel = true;
 
-					if (radius <= t_result * m_voxelLodErrorMetric * m_voxelLodErrorMetricMultiplyer)
-					{
-						Intersection isectTmp;
+					// TODO
+					// L2Wマトリクス.
 
-						isectTmp.isVoxel = true;
+					isectTmp.t = t_result;
 
-						// TODO
-						// L2Wマトリクス.
+					isectTmp.nml_x = nml.x;
+					isectTmp.nml_y = nml.y;
+					isectTmp.signNmlZ = nml.z < 0 ? 1 : 0;
 
-						isectTmp.area = collapseTo31bitInteger(voxel->area);
+					isectTmp.clr_r = node->clr_r;
+					isectTmp.clr_g = node->clr_g;
+					isectTmp.clr_b = node->clr_b;
 
-						isectTmp.t = t_result;
+					// Dummy value, return ray hit voxel.
+					isectTmp.objid = 1;
 
-						isectTmp.nml_x = voxel->nml.x;
-						isectTmp.nml_y = voxel->nml.y;
-						isectTmp.signNmlZ = voxel->nml.z < 0 ? 1 : 0;
-
-						isectTmp.clr_r = voxel->clr.r;
-						isectTmp.clr_g = collapseTo31bitInteger(voxel->clr.g);
-						isectTmp.clr_b = voxel->clr.b;
-
-						// Dummy value, return ray hit voxel.
-						isectTmp.objid = 1;
-
-						if (isectTmp.t < isect.t) {
-							isect = isectTmp;
-							t_max = isect.t;
-						}
-
-						// LODにヒットしたので、子供（詳細）は探索しないようにする.
-						isHit = false;
+					if (isectTmp.t < isect.t) {
+						isect = isectTmp;
+						t_max = isect.t;
 					}
+
+					// LODにヒットしたので、子供（詳細）は探索しないようにする.
+					isHit = false;
 				}
 #endif
 			}
@@ -1236,21 +1221,8 @@ namespace aten
 
 		uint32_t nodeNum;
 
-		uint32_t treeletNum;
-		uint32_t voxelNum;
-
-		float maxVoxelRadius;
-
 		float boxmin[3];
 		float boxmax[3];
-	};
-
-	struct SbvhTreeletHeader {
-		uint32_t idxInBvhTree;
-		uint32_t depth;
-
-		uint32_t leafChildrenNum;
-		uint32_t triNum;
 	};
 
 	bool sbvh::exportTree(const char* path)
@@ -1290,11 +1262,6 @@ namespace aten
 
 			header.nodeNum = m_threadedNodes[0].size();
 
-			header.treeletNum = m_treelets.size();
-			header.voxelNum = m_voxels.size();
-
-			header.maxVoxelRadius = m_maxVoxelRadius;
-
 			auto bbox = getBoundingbox();
 			auto boxmin = bbox.minPos();
 			auto boxmax = bbox.maxPos();
@@ -1312,27 +1279,6 @@ namespace aten
 
 		// Nodes.
 		fwrite(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
-
-		// Treelets.
-		for (const auto& treelet : m_treelets)
-		{
-			SbvhTreeletHeader treeletHeader;
-			{
-				treeletHeader.idxInBvhTree = treelet.idxInBvhTree;
-				treeletHeader.depth = treelet.depth;
-				treeletHeader.leafChildrenNum = treelet.leafChildren.size();
-				treeletHeader.triNum = treelet.tris.size();
-			}
-			fwrite(&treeletHeader, sizeof(treeletHeader), 1, fp);
-
-			fwrite(&treelet.leafChildren[0], sizeof(uint32_t), treelet.leafChildren.size(), fp);
-			fwrite(&treelet.tris[0], sizeof(uint32_t), treelet.tris.size(), fp);
-		}
-
-		// Voxels.
-		if (header.voxelNum > 0) {
-			fwrite(&m_voxels[0], sizeof(BvhVoxel), header.voxelNum, fp);
-		}
 
 		fclose(fp);
 
@@ -1355,8 +1301,6 @@ namespace aten
 		// TODO
 		// Check magic number.
 
-		m_maxVoxelRadius = header.maxVoxelRadius;
-
 		m_threadedNodes.resize(1);
 		m_threadedNodes[0].resize(header.nodeNum);
 
@@ -1376,39 +1320,7 @@ namespace aten
 		vec3 boxmax = vec3(header.boxmax[0], header.boxmax[1], header.boxmax[2]);
 		setBoundingBox(aabb(boxmin, boxmax));
 
-		// Treelets.
-		if (header.treeletNum > 0)
-		{
-			m_treelets.resize(header.treeletNum);
-
-			for (auto& treelet : m_treelets) {
-				SbvhTreeletHeader treeletHeader;
-				fread(&treeletHeader, sizeof(treeletHeader), 1, fp);
-
-				treelet.idxInBvhTree = treeletHeader.idxInBvhTree;
-				treelet.depth = treeletHeader.depth;
-
-				if (treeletHeader.leafChildrenNum > 0) {
-					treelet.leafChildren.resize(treeletHeader.leafChildrenNum);
-					fread(&treelet.leafChildren[0], sizeof(uint32_t), treelet.leafChildren.size(), fp);
-				}
-
-				if (treeletHeader.triNum > 0) {
-					treelet.tris.resize(treeletHeader.triNum);
-					fread(&treelet.tris[0], sizeof(uint32_t), treelet.tris.size(), fp);
-
-					for (size_t i = 0; i < treelet.tris.size(); i++) {
-						treelet.tris[i] += offsetTriIdx;
-					}
-				}
-			}
-		}
-
-		// Voxels.
-		if (header.voxelNum > 0) {
-			m_voxels.resize(header.voxelNum);
-			fread(&m_voxels[0], sizeof(BvhVoxel), m_voxels.size(), fp);
-		}
+		m_isImported = true;
 
 		return true;
 	}

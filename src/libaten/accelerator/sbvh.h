@@ -4,10 +4,13 @@
 
 #define SBVH_TRIANGLE_NUM	(1)
 
-#define VOXEL_TEST
-
 namespace aten
 {
+	static const float ENABLE_VOXEL = -2.0f;
+	static const float DISABLE_VOXEL = -1.0f;
+
+#define AT_CHECK_IS_VOXEL(v)	(v <= ENABLE_VOXEL)
+
 	/**
 	 * @brief Description for the node in SBVH.
 	 */
@@ -25,17 +28,23 @@ namespace aten
 		// NOTE
 		// ThreadedBvhNode では isleaf の位置に shapeid がいてGPUでは shapeid を見てリーフノードかどうか判定している.
 		// そのため、最初のfloatでリーフノードかどうかを判定するようにする.
-		// padding の部分は ThreadedBvhNode では exid なので、ここは常に -1 になるようにする.
+		// isVoxel の部分は ThreadedBvhNode では exid なので、ここは常にマイナスになるようにする.
+		// ただし、マイナスでありさえすればいいので、ここでは -1 より小さい数を判定の閾値にする.
 
 		float isleaf{ -1 };		///< Flag if the node is leaf.
 		float triid{ -1 };		///< Index of the triangle.
-		float padding{ -1 };
 
-#ifdef VOXEL_TEST
-		float voxel{ -1 };		///< Offset to voxel from current node index.
-#else
-		float parent{ -1 };
-#endif
+		float isVoxel{ DISABLE_VOXEL };	///< If hasVoxel < -1, the node is used as voxel.
+
+		union {
+			float padding;
+			struct {
+				uint8_t clr_r;
+				uint8_t clr_g;
+				uint8_t clr_b;
+				uint8_t tmp;
+			};
+		};
 
 		bool isLeaf() const
 		{
@@ -54,38 +63,9 @@ namespace aten
 #endif
 	};
 
-	/**
-	 * @brief Description for the treelet root.
-	 */
-	struct SbvhTreelet {
-		uint32_t idxInBvhTree;	///< Node index in the tree.
-		uint32_t depth;			///< Depth in the tree.
-		std::vector<uint32_t> leafChildren;	///< List of leaf children in the treelet.
-		std::vector<uint32_t> tris;			///< Triangle indices in the treelet.
-	};
-
-	/**
-	 * @brief Desctiption for the voxel in the tree.
-	 */
-	struct BvhVoxel {
-		aten::vec3 nml;			///< Averaged normal of the voxel.
-		uint32_t nodeid{ 0 };	///< Node index in the tree.
-
-		aten::vec3 clr;			///< Averaged color of the voxel.
-		struct {
-			uint32_t exid : 16;	///< Index of an external tree.
-			uint32_t lod : 16;	///< LOD level.
-		};		
-
-		float radius;	///< Radius of the voxel.
-		float area;		///< Area of the voxel.
-		float reserved[2];
-	};
-
 	// NOTE
 	// GPGPU処理用に両方を同じメモリ空間上に格納するため、同じサイズでないといけない.
 	AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
-	AT_STATICASSERT(sizeof(BvhVoxel) == sizeof(ThreadedBvhNode));
 
 	/**
 	 * @brief Spatial Splits in Bounding Volume Hierarchies.
@@ -174,25 +154,6 @@ namespace aten
 			return m_bvh.getMatrices();
 		}
 
-		/**
-		 * @brief Return all voxels.
-		 */
-		const std::vector<BvhVoxel>& getVoxels() const
-		{
-			return m_voxels;
-		}
-
-		real computeVoxelLodErrorMetric(
-			uint32_t height, 
-			real verticalFov, 
-			real pixelOfError = real(-1));
-
-		real getVoxelLodErrorMetric(real err);
-
-		void setPixelOfError(real pixelOfError);
-
-		void setVoxelLodErrorMetricMultiplyer(real multiplyer);
-
 	private:
 		/**
 		 * @brief Build the tree for the bottom layer.
@@ -267,8 +228,6 @@ namespace aten
 
 			int parent{ -1 };
 			uint32_t depth{ 0 };
-
-			int voxelIdx{ -1 };
 
 			bool leaf{ true };
 			bool isTreeletRoot{ false };
@@ -403,12 +362,6 @@ namespace aten
 			uint32_t idx,
 			const sbvh::SBVHNode& root);
 
-		/**
-		 * @brief Copy voxel data to the node array.
-		 * Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
-		 */
-		void copyVoxelToNodeArray(std::vector<ThreadedSbvhNode>& dst);
-
 	private:
 		ThreadedBVH m_bvh;
 
@@ -434,13 +387,28 @@ namespace aten
 
 		uint32_t m_maxDepth{ 0 };
 
-		// For voxelize.
-		float m_maxVoxelRadius{ 0.0f };
-		std::vector<SbvhTreelet> m_treelets;
-		std::vector<BvhVoxel> m_voxels;
+		// Description for the treelet root.
+		struct SbvhTreelet {
+			// Node index in the tree.
+			uint32_t idxInBvhTree;
+			
+			// Flag if the treelet is enabled.
+			// If a treelet has a child which is light, it is disabled.
+			bool enabled{ true };
 
-		// For voxel hit test.
-		real m_voxelLodErrorMetric{ real(1) };
-		real m_voxelLodErrorMetricMultiplyer{ real(1) };
+			aten::vec3 avgclr;
+
+			// List of leaf children in the treelet.
+			std::vector<uint32_t> leafChildren;
+
+			// Triangle indices in the treelet.
+			std::vector<uint32_t> tris;
+		};
+
+		// For voxelize.
+		std::map<uint32_t, SbvhTreelet> m_treelets;
+
+		// Flag if sbvh is imported from file.
+		bool m_isImported{ false };
 	};
 }

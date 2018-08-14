@@ -12,33 +12,13 @@ namespace aten
 {
 	// TODO
 	static const int VoxelDepth = 3;
-	static const real VoxelVolumeThreshold = real(0.5);
-
-	inline int computeVoxelLodLevel(int depth, int maxDepth)
-	{
-		int approximateMaxVoxelDepth = maxDepth / VoxelDepth * VoxelDepth;
-		int approximateMaxVoxelLodLevel = approximateMaxVoxelDepth / VoxelDepth;
-
-		int lod = depth / VoxelDepth;
-
-		// NOTE
-		// 深いほどLODレベルが下がるようにする.
-		int ret = approximateMaxVoxelLodLevel - lod;
-		AT_ASSERT(ret >= 0);
-
-		return ret;
-	}
 
 	void sbvh::makeTreelet()
 	{
-		if (m_treelets.size() > 0) {
+		if (m_isImported) {
 			// Imported already.
 			return;
 		}
-
-		int stack[128] = { 0 };
-
-		aabb wholeBox = m_nodes[0].bbox;
 
 		// NOTE
 		// rootノードは対象外.
@@ -47,83 +27,14 @@ namespace aten
 		for (size_t i = 1; i < m_nodes.size(); i++) {
 			auto* node = &m_nodes[i];
 
-			// Chech if the node is treelet root.
+			// Check if the node is treelet root.
 			bool isTreeletRoot = (((node->depth % VoxelDepth) == 0) && !node->isLeaf());
 
 			if (isTreeletRoot) {
-				auto lod = computeVoxelLodLevel(node->depth, m_maxDepth);
-
-				auto ratioThreshold = VoxelVolumeThreshold / (lod + 1);
-
-				auto ratio = wholeBox.computeRatio(node->bbox);
-
-				// Treelet root list.
-				std::map<uint32_t, SBVHNode*> treeletRoots;
-
-				if (ratio < ratioThreshold) {
-					if (!node->isTreeletRoot) {
-						// Register to treelet root list.
-						treeletRoots.insert(std::pair<uint32_t, SBVHNode*>((uint32_t)i, node));
-						node->isTreeletRoot = true;
-					}
-				}
-				else {
-					// Traverse the tree.
-
-					stack[0] = node->left;
-					stack[1] = node->right;
-					int stackpos = 2;
-
-					bool enableTraverseToChild = true;
-					
-					while (stackpos > 0) {
-						auto idx = stack[stackpos - 1];
-						stackpos -= 1;
-
-						if (idx < 0) {
-							return;
-						}
-
-						if (idx == node->left) {
-							// 分岐点に戻ったので、子供の探索を許す.
-							enableTraverseToChild = true;
-						}
-
-						auto* n = &m_nodes[idx];
-
-						auto tmpLod = computeVoxelLodLevel(n->depth, m_maxDepth);
-						if (tmpLod > lod) {
-							// ボクセルのレベルが次のレベルになったので、打ち切り.
-							continue;
-						}
-
-						// Leaf node can not be treelet root.
-						if (!n->isLeaf()) {
-							ratio = wholeBox.computeRatio(n->bbox);
-							if (ratio < ratioThreshold) {
-								if (!n->isTreeletRoot) {
-									treeletRoots.insert(std::pair<uint32_t, SBVHNode*>(idx, n));
-									n->isTreeletRoot = true;
-
-									// Treeletのルート候補は見つけたので、これ以上は子供を探索しない.
-									enableTraverseToChild = false;
-								}
-							}
-							else if (enableTraverseToChild) {
-								stack[stackpos++] = n->left;
-								stack[stackpos++] = n->right;
-							}
-						}
-					}
-				}
+				node->isTreeletRoot = true;
 
 				// Make treelet from thd found treelet node.
-				for (auto it = treeletRoots.begin(); it != treeletRoots.end(); it++) {
-					auto idx = it->first;
-					auto node = it->second;
-
-					onMakeTreelet(idx, *node);
-				}
+				onMakeTreelet(i, *node);
 			}
 		}
 	}
@@ -132,11 +43,10 @@ namespace aten
 		uint32_t idx,
 		const sbvh::SBVHNode& root)
 	{
-		m_treelets.push_back(SbvhTreelet());
-		auto& treelet = m_treelets[m_treelets.size() - 1];
+		auto it = m_treelets.insert(std::make_pair(idx, SbvhTreelet()));
+		auto& treelet = it.first->second;
 
 		treelet.idxInBvhTree = idx;
-		treelet.depth = root.depth;
 
 		int stack[128] = { 0 };
 
@@ -171,7 +81,6 @@ namespace aten
 		const aten::vec3& v3,
 		const aten::vec3& p, float &lambda1, float &lambda2)
 	{
-#if 1
 		// NOTE
 		// https://blogs.msdn.microsoft.com/rezanour/2011/08/07/barycentric-coordinates-and-point-in-triangle-tests/
 
@@ -191,18 +100,6 @@ namespace aten
 		float denom = length(uCrossV);
 		lambda1 = length(vCrossW) / denom;
 		lambda2 = length(uCrossW) / denom;
-#else
-		auto f1 = v1 - p;
-		auto f2 = v2 - p;
-		auto f3 = v3 - p;
-		auto c = cross(v2 - v1, v3 - v1);
-		float area = length(c);
-		lambda1 = length(cross(f2, f3));
-		lambda2 = length(cross(f3, f1));
-
-		lambda1 /= area;
-		lambda2 /= area;
-#endif
 
 		return lambda1 >= 0.0f && lambda2 >= 0.0f && lambda1 + lambda2 <= 1.0f;
 	}
@@ -211,48 +108,20 @@ namespace aten
 		uint32_t exid,
 		uint32_t offset)
 	{
-		if (m_voxels.size() > 0 || m_nodes.empty()) {
-			// Imported already.
-
-			AT_ASSERT(!m_threadedNodes.empty());
-			AT_ASSERT(!m_threadedNodes[0].empty());
-
-			// NOTE
-			// インポート時はすでにオフセットが足されているので、何もしない.
-
-			// Set correct external node index.
-			for (auto& voxel : m_voxels) {
-				voxel.exid += exid;
-			}
-
-			return;
-		}
-
-		m_maxVoxelRadius = 0.0f;
-
 		const auto& faces = aten::face::faces();
 		const auto& vertices = aten::VertexManager::getVertices();
 		const auto& mtrls = aten::material::getMaterials();
 
 		for (size_t i = 0; i < m_treelets.size(); i++) {
-			const auto& treelet = m_treelets[i];
+			auto& treelet = m_treelets[i];
+			treelet.enabled = true;
 
 			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
-			// Specify having voxel.
-			sbvhNode.voxelIdx = (int)i + offset;
-
 			auto center = sbvhNode.bbox.getCenter();
 
-			aten::vec3 avgNormal(0);
-			aten::vec3 avgColor(0);
+			treelet.avgclr = aten::vec3(0);
 
-			BvhVoxel voxel;
-			voxel.nodeid = treelet.idxInBvhTree;
-			voxel.exid = exid;
-			voxel.lod = computeVoxelLodLevel(sbvhNode.depth, m_maxDepth);
-
-			uint32_t nmlCnt = 0;
 			uint32_t clrCnt = 0;
 
 			for (const auto tid : treelet.tris) {
@@ -276,114 +145,29 @@ namespace aten
 
 				float lambda3 = 1.0f - lambda1 - lambda2;
 
-				auto normal = v0.nml * lambda1 + v1.nml * lambda2 + v2.nml * lambda3;
-
-				if (triparam.needNormal > 0) {
-					auto e01 = v1.pos - v0.pos;
-					auto e02 = v2.pos - v0.pos;
-
-					e01.w = e02.w = real(0);
-
-					normal = normalize(cross(e01, e02));
-				}
-
 				auto uv = v0.uv * lambda1 + v1.uv * lambda2 + v2.uv * lambda3;
 
 				const auto mtrl = mtrls[triparam.mtrlid];
-				auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
-				color *= mtrl->color();
 
-				if (!std::isnan(normal.x) && !std::isnan(normal.y) && !std::isnan(normal.z)) {
-					avgNormal += normal;
-					nmlCnt++;
+				if (mtrl->isEmissive()) {
+					// The treelet has a child which is light, it is disabled.
+					treelet.enabled = false;
+
+					auto& node = m_nodes[treelet.idxInBvhTree];
+					node.isTreeletRoot = false;
+
+					break;
 				}
+				else {
+					auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
+					color *= mtrl->color();
 
-				avgColor += color;
-				clrCnt++;
+					treelet.avgclr += color;
+					clrCnt++;
+				}
 			}
 
-			if (nmlCnt > 0) {
-				avgNormal /= nmlCnt;
-			}
-
-			// TODO
-			// 合計なので、ゼロになることはあり得る...
-			if (squared_length(avgNormal) == real(0)) {
-				avgNormal = aten::vec3(1);
-			}
-
-			avgNormal = normalize(avgNormal);
-
-			avgColor /= clrCnt;
-
-			voxel.clr = avgColor;
-			voxel.nml = avgNormal;
-
-			float radius = sbvhNode.bbox.getDiagonalLenght() * 0.5f;
-			voxel.radius = radius;
-
-			// 全体ではなく、XYZ面の１つずつの合計のみでいいので、半分にする.
-			voxel.area = sbvhNode.bbox.computeSurfaceArea() * 0.5f;
-
-			m_maxVoxelRadius = std::max(m_maxVoxelRadius, radius);
-
-			m_voxels.push_back(voxel);
+			treelet.avgclr /= clrCnt;
 		}
-	}
-
-	real sbvh::computeVoxelLodErrorMetric(
-		uint32_t height, 
-		real verticalFov,
-		real pixelOfError/*= real(-1)*/)
-	{
-		// NOTE
-		// http://sirkan.iit.bme.hu/~szirmay/voxlod_cgf_final.pdf
-		// 6.2. LOD error metric
-
-		real theta = Deg2Rad(verticalFov);
-		real lambda = (height * real(0.5)) / (aten::tan(theta * real(0.5)));
-
-		m_voxelLodErrorMetric = m_maxVoxelRadius / lambda;
-
-		setPixelOfError(pixelOfError);
-
-		return m_voxelLodErrorMetric;
-	}
-
-	real sbvh::getVoxelLodErrorMetric(real err)
-	{
-		return m_voxelLodErrorMetric;
-	}
-
-	void sbvh::setPixelOfError(real pixelOfError)
-	{
-		if (pixelOfError < real(0)) {
-			m_voxelLodErrorMetricMultiplyer = real(1);
-		}
-		else {
-			m_voxelLodErrorMetricMultiplyer = pixelOfError / m_voxelLodErrorMetric;
-		}
-	}
-
-	void sbvh::setVoxelLodErrorMetricMultiplyer(real multiplyer)
-	{
-		m_voxelLodErrorMetricMultiplyer = multiplyer;
-	}
-
-	void sbvh::copyVoxelToNodeArray(std::vector<ThreadedSbvhNode>& dst)
-	{
-		// Voxelデータをノードの配列に入れるために、強制的にコピーを行う.
-
-		if (m_voxels.empty()) {
-			return;
-		}
-
-		size_t cur = dst.size();
-		size_t expand = m_voxels.size();
-
-		size_t size = cur + expand;
-		dst.resize(size);
-
-		memcpy(&dst[cur], &m_voxels[0], sizeof(BvhVoxel) * expand);
 	}
 }

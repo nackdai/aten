@@ -83,8 +83,7 @@ namespace AT_NAME {
 			const aten::vec3& lightPos,
 			const aten::ray& r,
 			real t_min, real t_max,
-			aten::hitrecord& rec,
-			bool enableLod = false);
+			aten::hitrecord& rec);
 
 		static inline AT_DEVICE_API bool hitLight(
 			bool isHit,

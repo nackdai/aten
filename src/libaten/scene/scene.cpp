@@ -8,11 +8,10 @@ namespace aten {
 		const vec3& lightPos,
 		const ray& r,
 		real t_min, real t_max,
-		hitrecord& rec,
-		bool enableLod/*= false*/)
+		hitrecord& rec)
 	{
 		Intersection isect;
-		bool isHit = this->hit(r, t_min, t_max, rec, isect, enableLod);
+		bool isHit = this->hit(r, t_min, t_max, rec, isect);
 
 		real distToLight = length(lightPos - r.org);
 		real distHitObjToRayOrg = length(rec.p - r.org);

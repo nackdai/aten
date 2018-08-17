@@ -150,6 +150,8 @@ void VoxelViewer::draw(
 	// BoxÇ»ÇÃÇ≈ÅAÇPñ ìñÇΩÇËéOäpå`ÇQÇ¬Ç≈ÅAÇUñ .
 	static const int PrimCnt = 2 * 6;
 
+	depth = (depth / aten::sbvh::VoxelDepth) * aten::sbvh::VoxelDepth;
+
 	auto& voxels = voxelList[depth];
 
 	for (size_t i = 0; i < voxels.size(); i++) {

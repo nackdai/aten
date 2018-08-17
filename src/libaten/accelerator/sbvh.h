@@ -73,6 +73,10 @@ namespace aten
 	 */
 	class sbvh : public accelerator {
 	public:
+		// TODO
+		static const int VoxelDepth = 3;
+
+	public:
 		sbvh() : accelerator(AccelType::Sbvh) {}
 		virtual ~sbvh() {}
 

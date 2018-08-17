@@ -10,9 +10,6 @@
 
 namespace aten
 {
-	// TODO
-	static const int VoxelDepth = 3;
-
 	void sbvh::makeTreelet()
 	{
 		if (m_isImported) {

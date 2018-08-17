@@ -87,12 +87,23 @@ bool VoxelViewer::init(
 	return m_shader.init(width, height, pathVS, pathFS);
 }
 
+void VoxelViewer::bringVoxels(
+	const std::vector<aten::ThreadedSbvhNode>& nodes,
+	std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList)
+{
+	for (const auto& node : nodes) {
+		if (AT_IS_VOXEL(node.voxeldepth)) {
+			int depth = AT_GET_VOXEL_DEPTH(node.voxeldepth);
+			voxelList[depth].push_back(node);
+		}
+	}
+}
+
 void VoxelViewer::draw(
 	const aten::camera* cam,
-	const std::vector<std::vector<aten::ThreadedSbvhNode>>& nodes,
-	const std::vector<aten::BvhVoxel>& voxels,
+	std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList,
 	bool isWireframe,
-	int drawVoxelIdx)
+	uint32_t depth)
 {
 	m_shader.prepareRender(nullptr, false);
 
@@ -139,38 +150,39 @@ void VoxelViewer::draw(
 	// BoxÇ»ÇÃÇ≈ÅAÇPñ ìñÇΩÇËéOäpå`ÇQÇ¬Ç≈ÅAÇUñ .
 	static const int PrimCnt = 2 * 6;
 
-	for (size_t i = 0; i < voxels.size(); i++) {
-		if (drawVoxelIdx >= 0 && i != drawVoxelIdx) {
-			continue;
-		}
+	auto& voxels = voxelList[depth];
 
+	for (size_t i = 0; i < voxels.size(); i++) {
 		const auto& voxel = voxels[i];
 
-		const auto& node = nodes[voxel.exid][voxel.nodeid];
+		auto voxeldepth = (int)AT_GET_VOXEL_DEPTH(voxel.voxeldepth);
+		AT_ASSERT(voxeldepth == depth);
 
-		auto size = node.boxmax - node.boxmin;
+		if (voxeldepth == depth) {
+			auto size = voxel.boxmax - voxel.boxmin;
 
-		aten::mat4 mtxScale;
-		aten::mat4 mtxTrans;
+			aten::mat4 mtxScale;
+			aten::mat4 mtxTrans;
 
-		mtxScale.asScale(size);
-		mtxTrans.asTrans(node.boxmin);
+			mtxScale.asScale(size);
+			mtxTrans.asTrans(voxel.boxmin);
 
-		mtxL2W = mtxTrans * mtxScale;
+			mtxL2W = mtxTrans * mtxScale;
 
-		aten::vec3 normal = voxel.nml;
+			aten::vec3 color(voxel.clr_r, voxel.clr_g, voxel.clr_b);
 
-		aten::vec3 color = voxel.clr;
+			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
+			CALL_GL_API(::glUniform3f(hColor, color.x, color.y, color.z));
 
-		CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
-		CALL_GL_API(::glUniform3f(hColor, color.x, color.y, color.z));
-		CALL_GL_API(::glUniform3f(hNormal, normal.x, normal.y, normal.z));
+			// TODO
+			CALL_GL_API(::glUniform3f(hNormal, 1.0f, 0.0f, 0.0f));
 
-		if (isWireframe) {
-			m_ibForWireframe.draw(m_vb, aten::Primitive::Lines, 0, 12);
-		}
-		else {
-			m_ib.draw(m_vb, aten::Primitive::Triangles, 0, PrimCnt);
+			if (isWireframe) {
+				m_ibForWireframe.draw(m_vb, aten::Primitive::Lines, 0, 12);
+			}
+			else {
+				m_ib.draw(m_vb, aten::Primitive::Triangles, 0, PrimCnt);
+			}
 		}
 	}
 }

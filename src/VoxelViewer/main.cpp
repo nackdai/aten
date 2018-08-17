@@ -30,7 +30,7 @@ static bool g_isCameraDirty = false;
 
 static bool g_willShowGUI = true;
 
-static int g_drawVoxelIdx = -1;
+static int g_drawVoxelDepth = 1;
 static bool g_drawMesh = false;
 static bool g_isWireframe = false;
 
@@ -38,6 +38,8 @@ static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
 static int g_prevX = 0;
 static int g_prevY = 0;
+
+static std::vector<std::vector<aten::ThreadedSbvhNode>> g_voxels;
 
 void onRun(aten::window* window)
 {
@@ -51,15 +53,24 @@ void onRun(aten::window* window)
 		g_isCameraDirty = false;
 	}
 
-	const auto& nodes = g_scene.getAccel()->getNodes();
-	const auto& voxels = g_scene.getAccel()->getVoxels();
+	// TODO
+	auto sbvh = (aten::sbvh*)g_objs[0]->getInternalAccelerator();
+
+	if (g_voxels.empty()) {
+		auto maxDepth = sbvh->getMaxDepth();
+		g_voxels.resize(maxDepth);
+
+		// NOTE
+		// nodes[0] is top layer.
+		const auto& nodes = g_scene.getAccel()->getNodes();
+		g_viewer.bringVoxels(nodes[1], g_voxels);
+	}
 
 	g_viewer.draw(
 		&g_camera,
-		nodes,
-		voxels,
+		g_voxels,
 		g_isWireframe,
-		g_drawVoxelIdx);
+		g_drawVoxelDepth);
 
 	if (g_drawMesh) {
 		for (auto obj : g_objs) {
@@ -68,24 +79,9 @@ void onRun(aten::window* window)
 	}
 
 	{
-		ImGui::Text("Voxel Cnt [%d]", voxels.size());
-		ImGui::InputInt("Voxel", &g_drawVoxelIdx);
+		ImGui::SliderInt("Depth", &g_drawVoxelDepth, 1, sbvh->getMaxDepth());
 		ImGui::Checkbox("Wireframe,", &g_isWireframe);
 		ImGui::Checkbox("Draw mesh,", &g_drawMesh);
-
-		g_drawVoxelIdx = aten::clamp(g_drawVoxelIdx, -1, (int)voxels.size() - 1);
-
-		if (g_drawVoxelIdx >= 0) {
-			const auto& voxel = voxels[g_drawVoxelIdx];
-			const auto& node = nodes[voxel.exid][voxel.nodeid];
-
-			float radius = aten::expandTo32bitFloat(voxel.radius);
-
-			ImGui::Text("ExId [%d] NodeId[%d] Lod[%d]", voxel.exid, voxel.nodeid, voxel.lod);
-			ImGui::Text("Radius [%f]", radius);
-			ImGui::Text("Box min [%f, %f, %f]", node.boxmin.x, node.boxmin.y, node.boxmin.z);
-			ImGui::Text("Box max [%f, %f, %f]", node.boxmax.x, node.boxmax.y, node.boxmax.z);
-		}
 
 		window->drawImGui();
 	}
@@ -228,12 +224,14 @@ bool parseOption(
 // TODO
 void loadObj(const Options& opt)
 {
-#if 1
+#if 0
 	auto emit = new aten::emissive(aten::vec3(36, 33, 24));
 	aten::AssetManager::registerMtrl(
 		"light",
 		emit);
 
+	aten::ObjLoader::load(g_objs, opt.input);
+#elif 1
 	aten::ObjLoader::load(g_objs, opt.input);
 #else
 	aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");
@@ -251,9 +249,10 @@ void loadObj(const Options& opt)
 
 int main(int argc, char* argv[])
 {
-	g_opt.input = "../../asset/cornellbox/orig.obj";
+	//g_opt.input = "../../asset/cornellbox/orig.obj";
 	//g_opt.input = "../../asset/sponza/lod.obj";
 	//g_opt.input = "../../asset/suzanne/suzanne.obj";
+	g_opt.input = "../../asset/bunny/bunny.obj";
 
 	// TODO
 #if 0

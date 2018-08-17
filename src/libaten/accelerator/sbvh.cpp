@@ -164,17 +164,7 @@ namespace aten
 				// TODO
 				auto bvh = (sbvh*)nestedBvh[i];
 
-				// NOTE
-				// Voxelデータはノードの配列に入れる.
-				// また、Voxelデータはノードデータの後に入れる.
-				// そこで、Voxelデータのオフセットをノード数から計算する.
-				uint32_t voxelOffset = bvh->m_threadedNodes.empty()
-					? bvh->m_nodes.size()
-					: bvh->m_threadedNodes[0].size();
-
-				// NOTE
-				// exid は top layer が 0 なので、+1 する.
-				bvh->buildVoxel(i + 1, voxelOffset);
+				bvh->buildVoxel();
 
 				std::vector<int> indices;
 				bvh->convert(
@@ -926,29 +916,35 @@ namespace aten
 				stack[stackpos++] = ThreadedEntry(sbvhNode.right, entry.parentSibling);
 				stack[stackpos++] = ThreadedEntry(sbvhNode.left, sbvhNode.right);
 
-				if (sbvhNode.isTreeletRoot) {
-					thrededNode.isVoxel = ENABLE_VOXEL;
-
-					const auto& found = m_treelets.find(entry.nodeIdx);
-					if (found != m_treelets.end()) {
-						const auto& treelet = found->second;
-						
-						auto clr = treelet.avgclr;
-						clr = normalize(clr);
-
-						// Set voxel color.
-						thrededNode.clr_r = (uint8_t)aten::clamp<int>((int)(clr.r * 255.0f), 0, 255);
-						thrededNode.clr_g = (uint8_t)aten::clamp<int>((int)(clr.g * 255.0f), 0, 255);
-						thrededNode.clr_b = (uint8_t)aten::clamp<int>((int)(clr.b * 255.0f), 0, 255);
-						thrededNode.tmp = 0;
-					}
-				}
-				else {
-					thrededNode.isVoxel = DISABLE_VOXEL;
+				// For voxel.
+				{
+					thrededNode.voxeldepth = DISABLE_VOXEL;
 					thrededNode.clr_r = 0;
 					thrededNode.clr_g = 0;
 					thrededNode.clr_b = 0;
 					thrededNode.tmp = 0;
+
+					if (sbvhNode.isTreeletRoot) {
+						const auto& found = m_treelets.find(entry.nodeIdx);
+						if (found != m_treelets.end()) {
+							const auto& treelet = found->second;
+
+							if (treelet.enabled) {
+								int32_t depth = sbvhNode.depth;
+
+								thrededNode.voxeldepth = AT_SET_VOXEL_DETPH(depth);
+
+								auto clr = treelet.avgclr;
+								clr = normalize(clr);
+
+								// Set voxel color.
+								thrededNode.clr_r = (uint8_t)aten::clamp<int>((int)(clr.r * 255.0f), 0, 255);
+								thrededNode.clr_g = (uint8_t)aten::clamp<int>((int)(clr.g * 255.0f), 0, 255);
+								thrededNode.clr_b = (uint8_t)aten::clamp<int>((int)(clr.b * 255.0f), 0, 255);
+								thrededNode.tmp = 0;
+							}
+						}
+					}
 				}
 			}
 
@@ -1157,7 +1153,7 @@ namespace aten
 				}
 			}
 #if 1
-			else if (enableLod && AT_CHECK_IS_VOXEL(node->isVoxel))
+			else if (enableLod && AT_IS_VOXEL(node->voxeldepth))
 			{
 				float t_result = 0.0f;
 				aten::vec3 nml;
@@ -1220,6 +1216,7 @@ namespace aten
 		};
 
 		uint32_t nodeNum;
+		uint32_t maxDepth;
 
 		float boxmin[3];
 		float boxmax[3];
@@ -1231,7 +1228,7 @@ namespace aten
 
 		// Build voxel.
 		if (!m_treelets.empty() && !m_nodes.empty()) {
-			buildVoxel(0, m_nodes.size());
+			buildVoxel();
 		}
 
 		std::vector<int> indices;
@@ -1261,6 +1258,7 @@ namespace aten
 			header.version[3] = 1;
 
 			header.nodeNum = m_threadedNodes[0].size();
+			header.maxDepth = m_maxDepth;
 
 			auto bbox = getBoundingbox();
 			auto boxmin = bbox.minPos();
@@ -1319,6 +1317,8 @@ namespace aten
 		vec3 boxmin = vec3(header.boxmin[0], header.boxmin[1], header.boxmin[2]);
 		vec3 boxmax = vec3(header.boxmax[0], header.boxmax[1], header.boxmax[2]);
 		setBoundingBox(aabb(boxmin, boxmax));
+
+		m_maxDepth = header.maxDepth;
 
 		m_isImported = true;
 

@@ -83,9 +83,7 @@ namespace aten {
 		/**
 		 * @brief Build voxel data from the structure tree.
 		 */
-		virtual void buildVoxel(
-			uint32_t exid,
-			uint32_t offset)
+		virtual void buildVoxel()
 		{
 			// Nothing is done.
 			AT_ASSERT(false);

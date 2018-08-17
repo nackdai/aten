@@ -6,10 +6,11 @@
 
 namespace aten
 {
-	static const float ENABLE_VOXEL = -2.0f;
 	static const float DISABLE_VOXEL = -1.0f;
 
-#define AT_CHECK_IS_VOXEL(v)	(v <= ENABLE_VOXEL)
+#define AT_IS_VOXEL(v)	(v < aten::DISABLE_VOXEL)
+#define AT_SET_VOXEL_DETPH(d)	(-(d) + aten::DISABLE_VOXEL)
+#define AT_GET_VOXEL_DEPTH(d)	(aten::abs((d)) + aten::DISABLE_VOXEL)
 
 	/**
 	 * @brief Description for the node in SBVH.
@@ -29,12 +30,12 @@ namespace aten
 		// ThreadedBvhNode では isleaf の位置に shapeid がいてGPUでは shapeid を見てリーフノードかどうか判定している.
 		// そのため、最初のfloatでリーフノードかどうかを判定するようにする.
 		// isVoxel の部分は ThreadedBvhNode では exid なので、ここは常にマイナスになるようにする.
-		// ただし、マイナスでありさえすればいいので、ここでは -1 より小さい数を判定の閾値にする.
+		// ただし、マイナスでありさえすればいいので、ここでは -1 より小さい数を判定の閾値にしつつ、depth値として扱う.
 
 		float isleaf{ -1 };		///< Flag if the node is leaf.
 		float triid{ -1 };		///< Index of the triangle.
 
-		float isVoxel{ DISABLE_VOXEL };	///< If hasVoxel < -1, the node is used as voxel.
+		float voxeldepth{ DISABLE_VOXEL };	///< If hasVoxel < -1, the node is used as voxel.
 
 		union {
 			float padding;
@@ -87,9 +88,7 @@ namespace aten
 		/**
 		 * @brief Build voxels from the specified tree.
 		 */
-		virtual void buildVoxel(
-			uint32_t exid,
-			uint32_t offset) override final;
+		virtual void buildVoxel() override final;
 
 		/**
 		 * @brief Test if a ray hits a object.
@@ -152,6 +151,11 @@ namespace aten
 		const std::vector<aten::mat4>& getMatrices() const
 		{
 			return m_bvh.getMatrices();
+		}
+
+		uint32_t getMaxDepth() const
+		{
+			return m_maxDepth;
 		}
 
 	private:
@@ -227,7 +231,7 @@ namespace aten
 			int right{ -1 };
 
 			int parent{ -1 };
-			uint32_t depth{ 0 };
+			int32_t depth{ 0 };
 
 			bool leaf{ true };
 			bool isTreeletRoot{ false };

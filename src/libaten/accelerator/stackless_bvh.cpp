@@ -123,7 +123,7 @@ namespace aten {
 			// Parent id.
 			auto parent = node->getParent();
 			int parentId = parent ? parent->getTraversalOrder() : -1;
-			stacklessBvhNode.parent = parentId;
+			stacklessBvhNode.parent = (float)parentId;
 
 			// Sibling id.
 			if (parent) {

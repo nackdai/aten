@@ -232,6 +232,11 @@ void loadObj(const Options& opt)
 
 	aten::ObjLoader::load(g_objs, opt.input);
 #elif 1
+	aten::AssetManager::registerMtrl(
+		"m",
+		//new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+		new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.2, 0.2));
+
 	aten::ObjLoader::load(g_objs, opt.input);
 #else
 	aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");

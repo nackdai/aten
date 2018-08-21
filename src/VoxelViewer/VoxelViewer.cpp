@@ -152,6 +152,8 @@ void VoxelViewer::draw(
 
 	depth = (depth / aten::sbvh::VoxelDepth) * aten::sbvh::VoxelDepth;
 
+	const auto& mtrls = aten::material::getMaterials();
+
 	auto& voxels = voxelList[depth];
 
 	for (size_t i = 0; i < voxels.size(); i++) {
@@ -171,7 +173,17 @@ void VoxelViewer::draw(
 
 			mtxL2W = mtxTrans * mtxScale;
 
-			aten::vec3 color(voxel.clr_r, voxel.clr_g, voxel.clr_b);
+			aten::vec3 color(real(0));
+
+			int mtrlid = (int)voxel.mtrlid;
+			AT_ASSERT(mtrlid >= 0);
+
+			if (mtrlid >= 0
+				&& mtrls.size() > mtrlid)
+			{
+				const auto mtrl = mtrls[mtrlid];
+				color = mtrl->color();
+			}
 
 			CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
 			CALL_GL_API(::glUniform3f(hColor, color.x, color.y, color.z));

@@ -37,15 +37,7 @@ namespace aten
 
 		float voxeldepth{ DISABLE_VOXEL };	///< If hasVoxel < -1, the node is used as voxel.
 
-		union {
-			float padding;
-			struct {
-				uint8_t clr_r;
-				uint8_t clr_g;
-				uint8_t clr_b;
-				uint8_t tmp;
-			};
-		};
+		float mtrlid{ -1 };
 
 		bool isLeaf() const
 		{
@@ -404,7 +396,7 @@ namespace aten
 			// If a treelet has a child which is light, it is disabled.
 			bool enabled{ true };
 
-			aten::vec3 avgclr;
+			int mtrlid{ -1 };
 
 			// List of leaf children in the treelet.
 			std::vector<uint32_t> leafChildren;
@@ -414,6 +406,8 @@ namespace aten
 		};
 
 		// For voxelize.
+		//  key : index in nodes.
+		//  value : treelet.
 		std::map<uint32_t, SbvhTreelet> m_treelets;
 
 		// Flag if sbvh is imported from file.

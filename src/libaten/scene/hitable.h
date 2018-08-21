@@ -26,35 +26,16 @@ namespace aten {
 		vec3 dv;
 #endif
 
-		union {
-			// For triangle.
-			struct {
-				// texture coordinate.
-				real u;
-				real v;
-				real padding;
-			};
-			// For voxel.
-			vec3 albedo;
-		};
+		// texture coordinate.
+		real u{ real(0) };
+		real v{ real(0) };
 
 		real area{ real(1) };
 
-		union {
-			int mtrlid;
+		int mtrlid{ -1 };
 
-			// For voxel.
-			struct {
-				int unused : 31;
-				int isVoxel : 1;
-			};
-		};
-
-		AT_DEVICE_API hitrecord()
-		{
-			u = v = real(0);
-			mtrlid = -1;
-		}
+		bool isVoxel{ false };
+		uint8_t padding[3];
 	};
 
 	struct Intersection {
@@ -62,47 +43,28 @@ namespace aten {
 
 		int objid{ -1 };
 
-		union {
-			// For triangle.
-			struct {
-				// for cube.
-				short face;
+		int mtrlid{ -1 };
 
-				short mtrlid;
-
-				int meshid;
-			};
-			// For voxel.
-			struct {
-				struct {
-					uint32_t isVoxel : 1;
-					uint32_t signNmlZ : 1;
-					uint32_t tmp : 30;
-				};
-				real clr_r;
-			};
-		};
+		int meshid{ -1 };
 
 		union {
 			// For triangle.
 			struct {
 				int primid;
 				real a, b;	// barycentric
-				real padding;
+				int face;	// for cube.
 			};
 			// Fox voxel.
 			struct {
+				int isVoxel;
 				real nml_x;
 				real nml_y;
-				real clr_g;
-				real clr_b;
+				real nml_z;
 			};
 		};
 
 		AT_DEVICE_API Intersection()
 		{
-			mtrlid = -1;
-			meshid = -1;
 			primid = -1;
 		}
 	};
@@ -185,28 +147,23 @@ namespace aten {
 			if (isect.isVoxel) {
 				// For voxel.
 
-				// Repair normal.
-				auto nml_z = aten::sqrt(std::min<real>(real(1) - isect.nml_x * isect.nml_x + isect.nml_y * isect.nml_y, real(1)));
-				nml_z *= isect.signNmlZ ? real(-1) : real(1);
-				rec.normal = normalize(vec3(isect.nml_x, isect.nml_y, nml_z));
-
 				// Compute hit point.
 				rec.p = r.org + isect.t * r.dir;
 				rec.p = rec.p + AT_MATH_EPSILON * rec.normal;
 
-				// Repair Albedo color.
-				rec.albedo.x = isect.clr_r;
-				rec.albedo.y = isect.clr_g;
-				rec.albedo.z = isect.clr_b;
+				rec.normal.x = isect.nml_x;
+				rec.normal.y = isect.nml_y;
+				rec.normal.z = isect.nml_z;
 
-				// Flag if voxel or not.
+				rec.mtrlid = isect.mtrlid;
+
 				rec.isVoxel = true;
 			}
 			else {
 				obj->evalHitResult(r, rec, isect);
 				rec.mtrlid = isect.mtrlid;
 
-				AT_ASSERT(!rec.isVoxel);
+				rec.isVoxel = false;
 			}
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC

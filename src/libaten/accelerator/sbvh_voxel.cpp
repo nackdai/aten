@@ -21,7 +21,7 @@ namespace aten
 		// rootƒm[ƒh‚Í‘ÎÛŠO.
 
 		// Find the node for treelet root.
-		for (size_t i = 1; i < m_nodes.size(); i++) {
+		for (uint32_t i = 1; i < (uint32_t)m_nodes.size(); i++) {
 			auto* node = &m_nodes[i];
 
 			// Check if the node is treelet root.
@@ -107,12 +107,45 @@ namespace aten
 		const auto& vertices = aten::VertexManager::getVertices();
 		const auto& mtrls = aten::material::getMaterials();
 
-		for (size_t i = 0; i < m_treelets.size(); i++) {
+		for (uint32_t i = 0; i < (uint32_t)m_treelets.size(); i++) {
 			auto& treelet = m_treelets[i];
 			treelet.enabled = true;
 
 			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
+#if 1
+			std::map<int, real> mtrlMap;
+
+			for (const auto tid : treelet.tris) {
+				const auto triparam = faces[tid]->param;
+
+				auto found = mtrlMap.find(triparam.mtrlid);
+
+				if (found != mtrlMap.end()) {
+					found->second += triparam.area;
+				}
+				else {
+					mtrlMap.insert(std::make_pair(triparam.mtrlid, triparam.area));
+				}
+			}
+
+			int mtrlCandidateId = -1;
+			real maxArea = real(-1);
+
+			for (auto it : mtrlMap) {
+				auto mtrlid = it.first;
+				auto area = it.second;
+
+				if (area >= maxArea) {
+					maxArea = area;
+					mtrlCandidateId = mtrlid;
+				}
+			}
+
+			AT_ASSERT(mtrlCandidateId >= 0);
+
+			treelet.mtrlid = mtrlCandidateId;
+#else
 			auto center = sbvhNode.bbox.getCenter();
 
 			treelet.avgclr = aten::vec3(0);
@@ -163,6 +196,7 @@ namespace aten
 			}
 
 			treelet.avgclr /= clrCnt;
+#endif
 		}
 	}
 }

@@ -503,6 +503,8 @@ namespace AT_NAME
 		// マテリアルにIDを持たせているので、この関数は不要.
 		static int findMaterialIdx(material* mtrl);
 
+		static int findMaterialIdxByName(const char* name);
+
 		static const std::vector<material*>& getMaterials();
 
 		static const char* getMaterialTypeName(aten::MaterialType type);

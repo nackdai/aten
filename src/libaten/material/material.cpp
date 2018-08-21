@@ -73,6 +73,24 @@ namespace AT_NAME
 		return -1;
 	}
 
+	int material::findMaterialIdxByName(const char* name)
+	{
+		std::string strname(name);
+
+		auto found = std::find_if(
+			g_materials.begin(), g_materials.end(),
+			[&](const material* mtrl) {
+			return mtrl->nameString() == strname;
+		});
+
+		if (found != g_materials.end()) {
+			const auto* mtrl = *found;
+			return mtrl->m_id;
+		}
+
+		return -1;
+	}
+
 	const std::vector<material*>& material::getMaterials()
 	{
 		return g_materials;

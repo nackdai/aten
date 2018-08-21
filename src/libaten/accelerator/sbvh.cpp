@@ -856,8 +856,6 @@ namespace aten
 
 		stack[0] = ThreadedEntry(0, -1);
 
-		nodes[0].padding = 0.0f;
-
 		while (stackpos > 0) {
 			auto entry = stack[stackpos - 1];
 			stackpos -= 1;
@@ -886,7 +884,7 @@ namespace aten
 #if (SBVH_TRIANGLE_NUM == 1)
 				const auto refid = sbvhNode.refIds[0];
 				const auto& ref = m_refs[refid];
-				thrededNode.triid = ref.triid + m_offsetTriIdx;
+				thrededNode.triid = (float)(ref.triid + m_offsetTriIdx);
 				thrededNode.isleaf = 1;
 #else
 				thrededNode.refIdListStart = (float)refIndicesCount + offset;
@@ -919,10 +917,6 @@ namespace aten
 				// For voxel.
 				{
 					thrededNode.voxeldepth = DISABLE_VOXEL;
-					thrededNode.clr_r = 0;
-					thrededNode.clr_g = 0;
-					thrededNode.clr_b = 0;
-					thrededNode.tmp = 0;
 
 					if (sbvhNode.isTreeletRoot) {
 						const auto& found = m_treelets.find(entry.nodeIdx);
@@ -934,14 +928,7 @@ namespace aten
 
 								thrededNode.voxeldepth = AT_SET_VOXEL_DETPH(depth);
 
-								auto clr = treelet.avgclr;
-								clr = normalize(clr);
-
-								// Set voxel color.
-								thrededNode.clr_r = (uint8_t)aten::clamp<int>((int)(clr.r * 255.0f), 0, 255);
-								thrededNode.clr_g = (uint8_t)aten::clamp<int>((int)(clr.g * 255.0f), 0, 255);
-								thrededNode.clr_b = (uint8_t)aten::clamp<int>((int)(clr.b * 255.0f), 0, 255);
-								thrededNode.tmp = 0;
+								thrededNode.mtrlid = (float)treelet.mtrlid;
 							}
 						}
 					}
@@ -1172,11 +1159,9 @@ namespace aten
 
 					isectTmp.nml_x = nml.x;
 					isectTmp.nml_y = nml.y;
-					isectTmp.signNmlZ = nml.z < 0 ? 1 : 0;
+					isectTmp.nml_z = nml.z;
 
-					isectTmp.clr_r = node->clr_r;
-					isectTmp.clr_g = node->clr_g;
-					isectTmp.clr_b = node->clr_b;
+					isectTmp.mtrlid = (short)node->mtrlid;
 
 					// Dummy value, return ray hit voxel.
 					isectTmp.objid = 1;
@@ -1218,6 +1203,8 @@ namespace aten
 		uint32_t nodeNum;
 		uint32_t maxDepth;
 
+		uint32_t cntMtrlForVoxel;
+
 		float boxmin[3];
 		float boxmax[3];
 	};
@@ -1245,6 +1232,20 @@ namespace aten
 			return false;
 		}
 
+		// Gather material information.
+		std::map<int, std::string> mtrlMap;
+		{
+			for (auto it : m_treelets) {
+				const auto& treelet = it.second;
+				if (treelet.mtrlid >= 0) {
+					const auto mtrl = aten::material::getMaterial(treelet.mtrlid);
+					AT_ASSERT(mtrl);
+
+					mtrlMap.insert(std::make_pair(treelet.mtrlid, mtrl->nameString()));
+				}
+			}
+		}
+
 		SbvhFileHeader header;
 		{
 			header.magic[0] = 'S';
@@ -1257,8 +1258,10 @@ namespace aten
 			header.version[2] = 0;
 			header.version[3] = 1;
 
-			header.nodeNum = m_threadedNodes[0].size();
+			header.nodeNum = (uint32_t)m_threadedNodes[0].size();
 			header.maxDepth = m_maxDepth;
+
+			header.cntMtrlForVoxel = (uint32_t)mtrlMap.size();
 
 			auto bbox = getBoundingbox();
 			auto boxmin = bbox.minPos();
@@ -1274,6 +1277,35 @@ namespace aten
 		}
 
 		fwrite(&header, sizeof(header), 1, fp);
+
+		// Write material information.
+		{
+			static const uint8_t zeros[4] = { 0 };
+
+			for (auto it : mtrlMap) {
+				int mtrlid = it.first;
+				const auto& name = it.second;
+
+				// id.
+				fwrite(&mtrlid, sizeof(mtrlid), 1, fp);
+
+				int len = (int)name.length();
+				int alinedLen = ((len + 3) / 4) * 4;
+				int fillZeroLen = alinedLen - len;
+
+				// String size.
+				fwrite(&alinedLen, sizeof(alinedLen), 1, fp);
+
+				// String.
+				const char* pstr = name.c_str();
+				fwrite(pstr, 1, alinedLen, fp);
+
+				// Fill zero.
+				if (fillZeroLen > 0) {
+					fwrite(zeros, 1, fillZeroLen, fp);
+				}
+			}
+		}
 
 		// Nodes.
 		fwrite(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
@@ -1299,16 +1331,56 @@ namespace aten
 		// TODO
 		// Check magic number.
 
+		// Read material information.
+		std::map<int, std::string> mtrlMap;
+		{
+			// TODO
+			static char tmpbuf[128] = { 0 };
+
+			for (int i = 0; i < header.cntMtrlForVoxel; i++)
+			{
+				// id.
+				int mtrlid = -1;
+				fread(&mtrlid, sizeof(mtrlid), 1, fp);
+
+				// String size.
+				int len = 0;
+				fread(&len, sizeof(len), 1, fp);
+
+				AT_ASSERT(0 < len && len < AT_COUNTOF(tmpbuf));
+
+				// String.
+				fread(tmpbuf, 1, len, fp);
+
+				mtrlMap.insert(std::make_pair(mtrlid, std::string(tmpbuf)));
+			}
+		}
+
 		m_threadedNodes.resize(1);
 		m_threadedNodes[0].resize(header.nodeNum);
 
 		fread(&m_threadedNodes[0][0], sizeof(ThreadedSbvhNode), header.nodeNum, fp);
 
-		if (offsetTriIdx > 0) {
+		if (offsetTriIdx > 0 || !mtrlMap.empty())
+		{
 			for (auto& nodes : m_threadedNodes) {
 				for (auto& node : nodes) {
 					if (node.triid >= 0) {
 						node.triid += offsetTriIdx;
+					}
+
+					// Re-set material id.
+					if (node.mtrlid >= 0) {
+						auto found = mtrlMap.find(node.mtrlid);
+						AT_ASSERT(found != mtrlMap.end());
+
+						// Find material index by name.
+						const auto& name = found->second;
+						int mtrlid = material::findMaterialIdxByName(name.c_str());
+						AT_ASSERT(mtrlid >= 0);
+
+						// Replace current material index.
+						node.mtrlid = mtrlid;
 					}
 				}
 			}
@@ -1371,8 +1443,8 @@ namespace aten
 
 				_drawAABB(node, func, mtxL2W);
 
-				auto hit = node->hit;
-				auto miss = node->miss;
+				int hit = (int)node->hit;
+				int miss = (int)node->miss;
 
 				if (hit >= 0) {
 					stackbuf[stackpos++] = &nodes[hit];

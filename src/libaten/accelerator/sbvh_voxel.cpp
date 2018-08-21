@@ -107,13 +107,14 @@ namespace aten
 		const auto& vertices = aten::VertexManager::getVertices();
 		const auto& mtrls = aten::material::getMaterials();
 
-		for (uint32_t i = 0; i < (uint32_t)m_treelets.size(); i++) {
-			auto& treelet = m_treelets[i];
+#if 1
+		for (auto it = m_treelets.begin(); it != m_treelets.end(); it++) {
+			auto& treelet = it->second;
+
 			treelet.enabled = true;
 
 			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
-#if 1
 			std::map<int, real> mtrlMap;
 
 			for (const auto tid : treelet.tris) {
@@ -145,7 +146,14 @@ namespace aten
 			AT_ASSERT(mtrlCandidateId >= 0);
 
 			treelet.mtrlid = mtrlCandidateId;
+		}
 #else
+		for (uint32_t i = 0; i < (uint32_t)m_treelets.size(); i++) {
+			auto& treelet = m_treelets[i];
+			treelet.enabled = true;
+
+			auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
+
 			auto center = sbvhNode.bbox.getCenter();
 
 			treelet.avgclr = aten::vec3(0);
@@ -196,7 +204,7 @@ namespace aten
 			}
 
 			treelet.avgclr /= clrCnt;
-#endif
 		}
+#endif
 	}
 }

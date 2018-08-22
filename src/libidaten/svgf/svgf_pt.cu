@@ -468,6 +468,12 @@ __global__ void shade(
 	if (rec.mtrlid >= 0) {
 		shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
 
+		if (isect.isVoxel) {
+			const auto& albedo = shMtrls[threadIdx.x].baseColor;
+			shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
+			shMtrls[threadIdx.x].baseColor = albedo;
+		}
+
 		if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
 			shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
 			shMtrls[threadIdx.x].normalMap = (int)(shMtrls[threadIdx.x].normalMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].normalMap] : -1);
@@ -475,9 +481,11 @@ __global__ void shade(
 		}
 	}
 	else {
+		// TODO
 		shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
-		shMtrls[threadIdx.x].baseColor = rec.albedo;
+		shMtrls[threadIdx.x].baseColor = aten::vec3(1.0f);
 	}
+
 
 	// Render AOVs.
 	// NOTE

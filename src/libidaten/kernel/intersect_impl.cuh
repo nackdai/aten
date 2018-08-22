@@ -291,6 +291,56 @@ AT_CUDA_INLINE __device__ bool hitAABB(
 	return t0 <= t1;
 }
 
+AT_CUDA_INLINE __device__ bool hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max,
+	real* t_result,
+	aten::vec3* nml)
+{
+	auto isHit = hitAABB(org, dir, boxmin, boxmax, t_min, t_max, t_result);
+
+	// NOTE
+	// https://www.gamedev.net/forums/topic/551816-finding-the-aabb-surface-normal-from-an-intersection-point-on-aabb/
+
+	auto point = org + *t_result * dir;
+	auto center = real(0.5) * (boxmin + boxmin);
+	auto extent = real(0.5) * (boxmin - boxmin);
+
+	point.x -= center.x;
+	point.y -= center.y;
+	point.z -= center.z;
+
+	aten::vec3 sign(
+		point.x < real(0) ? real(-1) : real(1),
+		point.y < real(0) ? real(-1) : real(1),
+		point.z < real(0) ? real(-1) : real(1));
+
+	real minDist = AT_MATH_INF;
+
+	real dist = aten::abs(extent.x - aten::abs(point.x));
+	if (dist < minDist) {
+		minDist = dist;
+		*nml = sign.x * aten::vec3(1, 0, 0);
+	}
+
+	dist = aten::abs(extent.y - aten::abs(point.y));
+	if (dist < minDist) {
+		minDist = dist;
+		*nml = sign.y * aten::vec3(0, 1, 0);
+	}
+
+	dist = aten::abs(extent.z - aten::abs(point.z));
+	if (dist < minDist) {
+		minDist = dist;
+		*nml = sign.z * aten::vec3(0, 0, 1);
+	}
+
+	return isHit;
+}
+
+
 AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
 	aten::vec4* result,
 	const aten::vec3& org,
@@ -457,21 +507,15 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 		// For voxel.
 		rec->mtrlid = -1;
 
-		rec->area = aten::expandTo32bitFloat(isect->area);
-
 		// Repair normal.
-		auto nml_z = aten::sqrt(min(real(1) - isect->nml_x * isect->nml_x + isect->nml_y * isect->nml_y, real(1)));
-		nml_z *= isect->signNmlZ ? real(-1) : real(1);
-		rec->normal = normalize(aten::vec3(isect->nml_x, isect->nml_y, nml_z));
+		rec->normal = normalize(aten::vec3(isect->nml_x, isect->nml_y, isect->nml_z));
 
 		// Compute hit point.
 		rec->p = r.org + isect->t * r.dir;
 		rec->p = rec->p + AT_MATH_EPSILON * rec->normal;
 
-		// Repair Albedo color.
-		rec->albedo.x = isect->clr_r;
-		rec->albedo.y = aten::expandTo32bitFloat(isect->clr_g);
-		rec->albedo.z = isect->clr_b;
+		// Material id.
+		rec->mtrlid = isect->mtrlid;
 
 		// Flag if voxel or not.
 		rec->isVoxel = true;

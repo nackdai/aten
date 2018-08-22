@@ -190,59 +190,46 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 				}
 			}
 		}
+		// TODO
 		else if (enableLod && !isTraverseRootTree && attrib.w >= 0) {
 			// Voxel
-			isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t);
+
+			aten::vec3 nml;
+			isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t, &nml);
 
 			bool isIntersect = (Type == idaten::IntersectType::Any
 				? isHit
 				: isHit && t < isect->t);
 
 			if (isIntersect) {
-				// Add offset voxel index to compute voxel index in node array.
-				int voxelIdx = nodeid + (int)attrib.w;
-
-				float4 voxel0 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * voxelIdx + 0);
-				float4 voxel1 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * voxelIdx + 1);
-				float4 voxel2 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * voxelIdx + 2);
-
-				auto radius = voxel2.x;
+				isectTmp.isVoxel = true;
 
 				// TODO
-				if (radius <= t * 4)
+				// L2Wマトリクス.
+
+				isectTmp.t = t;
+
+				isectTmp.nml_x = nml.x;
+				isectTmp.nml_y = nml.y;
+				isectTmp.nml_z = nml.z;
+
+				isectTmp.mtrlid = attrib.w;
+
+				isectTmp.objid = objid;
+
+				if (isectTmp.t < isect->t) {
+					*isect = isectTmp;
+					t_max = isect->t;
+				}
+
+				// LODにヒットしたので、子供（詳細）は探索しないようにする.
+				node0.w = -1.0f;
+				node1.w = -1.0f;
+
+				if (Type == idaten::IntersectType::Closer
+					|| Type == idaten::IntersectType::Any)
 				{
-					isectTmp.isVoxel = true;
-
-					// TODO
-					// L2Wマトリクス.
-
-					isectTmp.area = aten::collapseTo31bitInteger(voxel2.y);
-
-					isectTmp.t = t;
-
-					isectTmp.nml_x = voxel0.x;
-					isectTmp.nml_y = voxel0.y;
-					isectTmp.signNmlZ = voxel0.z < 0 ? 1 : 0;
-
-					isectTmp.clr_r = voxel1.x;
-					isectTmp.clr_g = aten::collapseTo31bitInteger(voxel1.y);
-					isectTmp.clr_b = voxel1.z;
-
-					isectTmp.objid = objid;
-
-					if (isectTmp.t < isect->t) {
-						*isect = isectTmp;
-						t_max = isect->t;
-					}
-
-					// LODにヒットしたので、子供（詳細）は探索しないようにする.
-					isHit = false;
-
-					if (Type == idaten::IntersectType::Closer
-						|| Type == idaten::IntersectType::Any)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 		}

@@ -98,13 +98,9 @@ namespace aten
 		int depth,
 		Path& path)
 	{
-		lambert voxelMtrl(path.rec.albedo, true);
-
 		uint32_t rrDepth = m_rrDepth;
 
-		material* mtrl = path.rec.isVoxel
-			? &voxelMtrl
-			: material::getMaterial(path.rec.mtrlid);
+		material* mtrl = material::getMaterial(path.rec.mtrlid);
 
 #if 1
 		bool isBackfacing = dot(path.rec.normal, -path.ray.dir) < real(0);

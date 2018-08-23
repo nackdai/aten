@@ -56,16 +56,17 @@ namespace aten {
 			};
 			// Fox voxel.
 			struct {
-				int isVoxel;
 				real nml_x;
 				real nml_y;
 				real nml_z;
+				int isVoxel;
 			};
 		};
 
 		AT_DEVICE_API Intersection()
 		{
 			primid = -1;
+			isVoxel = 0;
 		}
 	};
 

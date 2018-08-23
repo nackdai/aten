@@ -916,7 +916,7 @@ namespace aten
 
 				// For voxel.
 				{
-					thrededNode.voxeldepth = DISABLE_VOXEL;
+					thrededNode.voxeldepth = AT_DISABLE_VOXEL;
 
 					if (sbvhNode.isTreeletRoot) {
 						const auto& found = m_treelets.find(entry.nodeIdx);
@@ -1142,12 +1142,15 @@ namespace aten
 #if 1
 			else if (enableLod && AT_IS_VOXEL(node->voxeldepth))
 			{
+				int voxeldepth = AT_GET_VOXEL_DEPTH(node->voxeldepth);
+
 				float t_result = 0.0f;
 				aten::vec3 nml;
 				isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, nml);
 
-#if 1
-				if (isHit) {
+				// TODO
+				// Fixed depth for debug...
+				if (isHit && voxeldepth == 3) {
 					Intersection isectTmp;
 
 					isectTmp.isVoxel = true;
@@ -1170,11 +1173,7 @@ namespace aten
 						isect = isectTmp;
 						t_max = isect.t;
 					}
-
-					// LODにヒットしたので、子供（詳細）は探索しないようにする.
-					isHit = false;
 				}
-#endif
 			}
 #endif
 			else {
@@ -1186,6 +1185,11 @@ namespace aten
 			}
 			else {
 				nodeid = (int)node->miss;
+			}
+
+			// LODにヒットしたので、子供（詳細）は探索しないようにする.
+			if (isect.isVoxel) {
+				nodeid = -1;
 			}
 		}
 

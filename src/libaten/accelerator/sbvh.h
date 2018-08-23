@@ -6,11 +6,10 @@
 
 namespace aten
 {
-	static const float DISABLE_VOXEL = -1.0f;
-
-#define AT_IS_VOXEL(v)	(v < aten::DISABLE_VOXEL)
-#define AT_SET_VOXEL_DETPH(d)	(-(d) + aten::DISABLE_VOXEL)
-#define AT_GET_VOXEL_DEPTH(d)	(aten::abs((d)) + aten::DISABLE_VOXEL)
+#define AT_DISABLE_VOXEL	(-1.0f)
+#define AT_IS_VOXEL(v)	(v < AT_DISABLE_VOXEL)
+#define AT_SET_VOXEL_DETPH(d)	(-(d) + AT_DISABLE_VOXEL)
+#define AT_GET_VOXEL_DEPTH(d)	(aten::abs((d)) + AT_DISABLE_VOXEL)
 
 	/**
 	 * @brief Description for the node in SBVH.
@@ -35,7 +34,7 @@ namespace aten
 		float isleaf{ -1 };		///< Flag if the node is leaf.
 		float triid{ -1 };		///< Index of the triangle.
 
-		float voxeldepth{ DISABLE_VOXEL };	///< If hasVoxel < -1, the node is used as voxel.
+		float voxeldepth{ AT_DISABLE_VOXEL };	///< If hasVoxel < -1, the node is used as voxel.
 
 		float mtrlid{ -1 };
 

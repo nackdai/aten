@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
 	Scene::makeScene(&g_scene);
 
 	g_scene.build();
-	g_scene.getAccel()->computeVoxelLodErrorMetric(HEIGHT, fov, 4);
+	//g_scene.getAccel()->computeVoxelLodErrorMetric(HEIGHT, fov, 4);
 
 	//g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
 

@@ -305,8 +305,8 @@ AT_CUDA_INLINE __device__ bool hitAABB(
 	// https://www.gamedev.net/forums/topic/551816-finding-the-aabb-surface-normal-from-an-intersection-point-on-aabb/
 
 	auto point = org + *t_result * dir;
-	auto center = real(0.5) * (boxmin + boxmin);
-	auto extent = real(0.5) * (boxmin - boxmin);
+	auto center = real(0.5) * (boxmax + boxmin);
+	auto extent = real(0.5) * (boxmax - boxmin);
 
 	point.x -= center.x;
 	point.y -= center.y;
@@ -505,7 +505,6 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 {
 	if (isect->isVoxel) {
 		// For voxel.
-		rec->mtrlid = -1;
 
 		// Repair normal.
 		rec->normal = normalize(aten::vec3(isect->nml_x, isect->nml_y, isect->nml_z));
@@ -534,6 +533,8 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 		}
 
 		rec->mtrlid = isect->mtrlid;
+
+		rec->isVoxel = false;
 	}
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC

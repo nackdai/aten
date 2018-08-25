@@ -1169,6 +1169,9 @@ namespace aten
 					// Dummy value, return ray hit voxel.
 					isectTmp.objid = 1;
 
+					// LODにヒットしたので、子供（詳細）は探索しないようにする.
+					isHit = false;
+
 					if (isectTmp.t < isect.t) {
 						isect = isectTmp;
 						t_max = isect.t;
@@ -1185,11 +1188,6 @@ namespace aten
 			}
 			else {
 				nodeid = (int)node->miss;
-			}
-
-			// LODにヒットしたので、子供（詳細）は探索しないようにする.
-			if (isect.isVoxel) {
-				nodeid = -1;
 			}
 		}
 

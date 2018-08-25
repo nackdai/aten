@@ -209,6 +209,11 @@ namespace idaten
 			m_depthThresholdTF = zTh;
 		}
 
+		bool canSSRTHitTest() const
+		{
+			return m_canSSRTHitTest;
+		}
+
 		void setCanSSRTHitTest(bool f)
 		{
 			m_canSSRTHitTest = f;

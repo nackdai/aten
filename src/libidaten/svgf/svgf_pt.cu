@@ -174,9 +174,13 @@ __global__ void hitTest(
 		}
 
 		// TODO
-		bool enableLod = (bounce >= 2);
+		// 近距離でVoxelにすると品質が落ちる.
+		// しかも同じオブジェクト間だとそれが起こりやすい.
+		//bool enableLod = (bounce >= 2);
+		bool enableLod = false;
+		int depth = 9;
 
-		bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod);
+		bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod, depth);
 
 #if 0
 		isects[idx].t = isect.t;
@@ -468,11 +472,15 @@ __global__ void shade(
 	if (rec.mtrlid >= 0) {
 		shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
 
-		if (isect.isVoxel) {
-			const auto& albedo = shMtrls[threadIdx.x].baseColor;
+#if 1
+		if (rec.isVoxel)
+		{
+			// Replace to lambert.
+			const auto& albedo = ctxt.mtrls[rec.mtrlid].baseColor;
 			shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
 			shMtrls[threadIdx.x].baseColor = albedo;
 		}
+#endif
 
 		if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
 			shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);

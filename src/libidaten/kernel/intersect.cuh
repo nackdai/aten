@@ -37,6 +37,14 @@ __device__ bool hitAABB(
 	real t_min, real t_max,
 	real* t_result);
 
+__device__ bool hitAABB(
+	aten::vec3 org,
+	aten::vec3 dir,
+	float4 boxmin, float4 boxmax,
+	real t_min, real t_max,
+	real* t_result,
+	aten::vec3* nml);
+
 __device__ int hit4AABBWith1Ray(
 	aten::vec4* result,
 	const aten::vec3& org,

@@ -87,11 +87,13 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 	const aten::ray r,
 	float t_min, float t_max,
 	aten::Intersection* isect,
-	bool enableLod)
+	bool enableLod,
+	int depth)
 {
 	aten::Intersection isectTmp;
 
 	isect->t = t_max;
+	isect->isVoxel = false;
 
 	int nodeid = 0;
 
@@ -190,49 +192,53 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 				}
 			}
 		}
+#if 1
 		// TODO
-		else if (enableLod && !isTraverseRootTree && attrib.w >= 0) {
+		else if (enableLod && !isTraverseRootTree && AT_IS_VOXEL(attrib.z)) {
 			// Voxel
+			const int voxeldepth = (int)AT_GET_VOXEL_DEPTH(attrib.z);
 
-			aten::vec3 nml;
-			isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t, &nml);
+			if (voxeldepth == 3) {
+				aten::vec3 nml;
+				isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t, &nml);
 
-			bool isIntersect = (Type == idaten::IntersectType::Any
-				? isHit
-				: isHit && t < isect->t);
+				bool isIntersect = (Type == idaten::IntersectType::Any
+					? isHit
+					: isHit && t < isect->t);
 
-			if (isIntersect) {
-				isectTmp.isVoxel = true;
+				if (isIntersect) {
+					isectTmp.isVoxel = true;
 
-				// TODO
-				// L2Wマトリクス.
+					// TODO
+					// Normal have to be transformed by L2W matrix.
 
-				isectTmp.t = t;
+					isectTmp.t = t;
 
-				isectTmp.nml_x = nml.x;
-				isectTmp.nml_y = nml.y;
-				isectTmp.nml_z = nml.z;
+					isectTmp.nml_x = nml.x;
+					isectTmp.nml_y = nml.y;
+					isectTmp.nml_z = nml.z;
 
-				isectTmp.mtrlid = attrib.w;
+					isectTmp.mtrlid = attrib.w;
 
-				isectTmp.objid = objid;
+					isectTmp.objid = objid;
 
-				if (isectTmp.t < isect->t) {
-					*isect = isectTmp;
-					t_max = isect->t;
-				}
+					if (isectTmp.t < isect->t) {
+						*isect = isectTmp;
+						t_max = isect->t;
+					}
 
-				// LODにヒットしたので、子供（詳細）は探索しないようにする.
-				node0.w = -1.0f;
-				node1.w = -1.0f;
+					// LODにヒットしたので、子供（詳細）は探索しないようにする.
+					isHit = false;
 
-				if (Type == idaten::IntersectType::Closer
-					|| Type == idaten::IntersectType::Any)
-				{
-					return true;
+					if (Type == idaten::IntersectType::Closer
+						|| Type == idaten::IntersectType::Any)
+					{
+						return true;
+					}
 				}
 			}
 		}
+#endif
 		else {
 			//isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
 			isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t);
@@ -324,7 +330,8 @@ AT_CUDA_INLINE __device__ bool intersectClosestSBVH(
 	const aten::ray& r,
 	aten::Intersection* isect,
 	float t_max/*= AT_MATH_INF*/,
-	bool enableLod/*= false*/)
+	bool enableLod/*= false*/,
+	int depth/*= -1*/)
 {
 	float t_min = AT_MATH_EPSILON;
 
@@ -333,7 +340,8 @@ AT_CUDA_INLINE __device__ bool intersectClosestSBVH(
 		r,
 		t_min, t_max,
 		isect,
-		enableLod);
+		enableLod,
+		depth);
 
 	return isHit;
 }
@@ -343,7 +351,8 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
 	const aten::ray& r,
 	aten::Intersection* isect,
 	const float t_max,
-	bool enableLod/*= false*/)
+	bool enableLod/*= false*/,
+	int depth/*= -1*/)
 {
 	float t_min = AT_MATH_EPSILON;
 
@@ -352,7 +361,8 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
 		r,
 		t_min, t_max,
 		isect,
-		enableLod);
+		enableLod,
+		depth);
 
 	return isHit;
 }
@@ -361,7 +371,8 @@ AT_CUDA_INLINE __device__ bool intersectAnySBVH(
 	const Context* ctxt,
 	const aten::ray& r,
 	aten::Intersection* isect,
-	bool enableLod/*= false*/)
+	bool enableLod/*= false*/,
+	int depth/*= -1*/)
 {
 	float t_min = AT_MATH_EPSILON;
 	float t_max = AT_MATH_INF;
@@ -371,7 +382,8 @@ AT_CUDA_INLINE __device__ bool intersectAnySBVH(
 		r,
 		t_min, t_max,
 		isect,
-		enableLod);
+		enableLod,
+		depth);
 
 	return isHit;
 }

@@ -130,12 +130,12 @@ __global__ void scatter(
 
 namespace idaten
 {
-	idaten::TypedCudaMemory<int>& Compaction::getCount()
+	idaten::TypedCudaMemory<int>& StreamCompaction::getCount()
 	{
 		return m_counts;
 	}
 
-	void Compaction::init(
+	void StreamCompaction::init(
 		int maxInputNum,
 		int blockSize)
 	{
@@ -161,7 +161,7 @@ namespace idaten
 		}
 	}
 
-	void Compaction::clear()
+	void StreamCompaction::clear()
 	{
 		m_maxInputNum = 0;
 		m_blockSize = 0;
@@ -175,7 +175,7 @@ namespace idaten
 		m_counts.free();
 	}
 
-	void Compaction::scan(
+	void StreamCompaction::scan(
 		const int blocksize,
 		idaten::TypedCudaMemory<int>& src,
 		idaten::TypedCudaMemory<int>& dst)
@@ -295,7 +295,7 @@ namespace idaten
 		checkCudaKernel(incrementBlocks);
 	}
 
-	void Compaction::compact(
+	void StreamCompaction::compact(
 		idaten::TypedCudaMemory<int>& dst,
 		idaten::TypedCudaMemory<int>& bools,
 		int* result/*= nullptr*/)
@@ -320,7 +320,7 @@ namespace idaten
 
 #if 0
 	// test implementation.
-	void Compaction::compact()
+	void StreamCompaction::compact()
 	{
 #if 1
 		const int blocksize = m_blockSize;

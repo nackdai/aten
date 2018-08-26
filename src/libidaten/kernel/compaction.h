@@ -4,10 +4,10 @@
 #include "cuda/cudamemory.h"
 
 namespace idaten {
-	class Compaction {
+	class StreamCompaction {
 	public:
-		Compaction() {}
-		~Compaction() {}
+		StreamCompaction() {}
+		~StreamCompaction() {}
 
 	public:
 		void init(

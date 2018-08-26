@@ -82,13 +82,13 @@ namespace idaten
 			return m_vtxparamsPos;
 		}
 
-		idaten::Compaction& getCompaction()
+		idaten::StreamCompaction& getCompaction()
 		{
 			return m_compaction;
 		}
 
 	protected:
-		idaten::Compaction m_compaction;
+		idaten::StreamCompaction m_compaction;
 
 		idaten::CudaMemory m_dst;
 		idaten::TypedCudaMemory<aten::CameraParameter> m_cam;

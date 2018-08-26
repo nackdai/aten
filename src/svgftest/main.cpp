@@ -270,6 +270,13 @@ void onRun(aten::window* window)
 
 		ImGui::Checkbox("Show AABB", &g_showAABB);
 
+#if 0
+		bool canSSRTHitTest = g_tracer.canSSRTHitTest();
+		if (ImGui::Checkbox("Can SSRT Hit", &canSSRTHitTest)) {
+			g_tracer.setCanSSRTHitTest(canSSRTHitTest);
+		}
+#endif
+
 		auto cam = g_camera.param();
 		ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
 		ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);

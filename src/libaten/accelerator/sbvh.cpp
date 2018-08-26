@@ -1300,7 +1300,7 @@ namespace aten
 
 				// String.
 				const char* pstr = name.c_str();
-				fwrite(pstr, 1, alinedLen, fp);
+				fwrite(pstr, 1, len, fp);
 
 				// Fill zero.
 				if (fillZeroLen > 0) {
@@ -1353,6 +1353,7 @@ namespace aten
 
 				// String.
 				fread(tmpbuf, 1, len, fp);
+				tmpbuf[len] = 0;	// Add termination.
 
 				mtrlMap.insert(std::make_pair(mtrlid, std::string(tmpbuf)));
 			}

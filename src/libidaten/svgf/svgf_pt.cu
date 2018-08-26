@@ -1,6 +1,6 @@
 #include "svgf/svgf.h"
 
-#include "kernel/compaction.h"
+#include "kernel/StreamCompaction.h"
 
 #include "kernel/context.cuh"
 #include "kernel/light.cuh"

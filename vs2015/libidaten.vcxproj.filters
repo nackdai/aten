@@ -124,9 +124,6 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h">
       <Filter>cuda</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\compaction.h">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
@@ -249,6 +246,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh">
       <Filter>kernel\accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\StreamCompaction.h">
+      <Filter>kernel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -385,9 +385,6 @@
     <CudaCompile Include="..\src\libidaten\kernel\intersect.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\compaction.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\sample_texture_impl.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
@@ -459,6 +456,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\pathtracing_impl.cu">
       <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\StreamCompaction.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

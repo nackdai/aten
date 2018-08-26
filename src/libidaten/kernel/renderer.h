@@ -4,7 +4,7 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 #include "cuda/cudaTextureResource.h"
-#include "kernel/compaction.h"
+#include "kernel/StreamCompaction.h"
 
 namespace idaten
 {

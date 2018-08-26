@@ -2,7 +2,7 @@
 
 #include "kernel/pathtracing.h"
 
-#include "kernel/compaction.h"
+#include "kernel/StreamCompaction.h"
 
 #include "kernel/LBVHBuilder.h"
 

@@ -5,7 +5,7 @@
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/accelerator.cuh"
-#include "kernel/compaction.h"
+#include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
 
 #include <cuda_runtime.h>

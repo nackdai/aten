@@ -82,7 +82,6 @@
     <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\compaction.h" />
     <ClInclude Include="..\src\libidaten\kernel\context.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
@@ -108,6 +107,7 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\StreamCompaction.h" />
     <ClInclude Include="..\src\libidaten\multigpu\pt_multigpu.h" />
     <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h" />
     <ClInclude Include="..\src\libidaten\multigpu\svgf_multigpu.h" />
@@ -442,7 +442,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\compaction.cu">
+    <CudaCompile Include="..\src\libidaten\kernel\StreamCompaction.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>

@@ -1,5 +1,5 @@
 #include "kernel/pathtracing.h"
-#include "kernel/compaction.h"
+#include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
 
 #include "cuda/helper_math.h"

@@ -774,9 +774,7 @@ namespace idaten
 #endif
 			numberOfTris,
 			m_mortonCodes,
-			m_indices,
-			m_sortedMortonCode,
-			m_sortedIndices);
+			m_indices);
 
 		uint32_t numInternalNode = numberOfTris - 1;
 		uint32_t numLeaves = numberOfTris;
@@ -788,7 +786,7 @@ namespace idaten
 
 			buildTree << <grid, block >> > (
 				numberOfTris,
-				m_sortedMortonCode.ptr(),
+				m_mortonCodes.ptr(),
 				m_nodesLbvh.ptr());
 
 			checkCudaKernel(buildTree);
@@ -806,7 +804,7 @@ namespace idaten
 				numLeaves,
 				triIdOffset,
 				m_nodesLbvh.ptr(),
-				m_sortedIndices.ptr(),
+				m_indices.ptr(),
 				m_nodes.ptr());
 
 			checkCudaKernel(applyTraverseOrder);
@@ -825,7 +823,7 @@ namespace idaten
 			computeBoudingBox << <grid, block, sharedMemorySize >> > (
 				numberOfTris,
 				m_nodesLbvh.ptr(),
-				m_sortedIndices.ptr(),
+				m_indices.ptr(),
 				m_nodes.ptr(),
 				triangles.ptr(),
 				vtxPos,

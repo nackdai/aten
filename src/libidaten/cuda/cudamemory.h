@@ -39,6 +39,11 @@ namespace idaten {
 
 		void free();
 
+		bool empty() const
+		{
+			return (m_device == nullptr);
+		}
+
 		static uint32_t getHeapSize();
 
 	private:

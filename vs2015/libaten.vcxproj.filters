@@ -500,6 +500,9 @@
     <ClInclude Include="..\src\libaten\geometry\transformable.h">
       <Filter>geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\velvet.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -795,6 +798,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\transformable.cpp">
       <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\velvet.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

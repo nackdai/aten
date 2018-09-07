@@ -57,6 +57,7 @@ namespace aten
 		Blinn,
 		GGX,
 		Beckman,
+		Velvet,
 		Disney,
 		CarPaint,
 		Toon,

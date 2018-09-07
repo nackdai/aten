@@ -29,6 +29,7 @@
 #include "material/layer.h"
 #include "material/toon.h"
 #include "material/carpaint.h"
+#include "material/velvet.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

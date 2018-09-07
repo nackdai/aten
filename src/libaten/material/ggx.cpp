@@ -131,7 +131,14 @@ namespace AT_NAME
 		//  = a4 * cos4 + 2 * a2 * cos2 * sin2 + sin4
 		//  = cos4 * (a4 + 2 * a2 * (sin2 / cos2) + (sin4 / cos4))
 		//  = cos4 * (a4 + 2 * a2 * tan2 + tan4)
-		//  = cos4 * (a2 + tan2) ^ 2
+		//  = cos4 * (a2 + tan2)^2
+		//  = (cos2 * (a2 + tan2))^2
+		// (tan = sin / cos -> tan2 = sin2 / cos2)
+		//  = (a2 * cos2 + sin2)^2
+		//  = (a2 * cos2 + (1 - cos2))^2
+		//  = ((a2 - 1) * cos2 + 1)^2
+
+
 
 		real a = roughness;
 		auto a2 = a * a;

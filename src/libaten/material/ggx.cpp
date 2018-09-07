@@ -114,7 +114,7 @@ namespace AT_NAME
 		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
-	static AT_DEVICE_MTRL_API real sampleGGX_D(
+	static AT_DEVICE_MTRL_API inline real sampleGGX_D(
 		const aten::vec3& wh,	// half
 		const aten::vec3& n,	// normal
 		real roughness)
@@ -137,8 +137,6 @@ namespace AT_NAME
 		//  = (a2 * cos2 + sin2)^2
 		//  = (a2 * cos2 + (1 - cos2))^2
 		//  = ((a2 - 1) * cos2 + 1)^2
-
-
 
 		real a = roughness;
 		auto a2 = a * a;

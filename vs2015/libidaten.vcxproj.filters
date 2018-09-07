@@ -250,6 +250,9 @@
     <ClInclude Include="..\src\libidaten\kernel\StreamCompaction.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\velvet.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -352,6 +355,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\velvet.cpp">
+      <Filter>aten\material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

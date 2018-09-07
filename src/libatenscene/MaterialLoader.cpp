@@ -445,8 +445,9 @@ namespace aten {
 		[](Values& values) { return new specular(values); },			// specular
 		[](Values& values) { return new refraction(values); },			// refraction
 		[](Values& values) { return new MicrofacetBlinn(values); },		// blinn
-		[](Values& values) { return new MicrofacetBeckman(values); },	// beckman
 		[](Values& values) { return new MicrofacetGGX(values); },		// ggx
+		[](Values& values) { return new MicrofacetBeckman(values); },	// beckman
+		[](Values& values) { return new MicrofacetVelvet(values); },	// velvet
 		[](Values& values) { return new DisneyBRDF(values); },			// disney_brdf
 		[](Values& values) { return new CarPaintBRDF(values); },		// carpaint
 		[](Values& values) { return new toon(values); },				// toon

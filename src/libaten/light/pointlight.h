@@ -57,9 +57,11 @@ namespace AT_NAME {
 			const aten::LightParameter* param,
 			const aten::vec3& org,
 			aten::sampler* sampler)
-		{-
-			result->pos = param->pos;
+		{
+			// PDF to sample area.
 			result->pdf = real(1);
+
+			result->pos = param->pos;
 			result->dir = ((aten::vec3)param->pos) - org;
 			result->nml = aten::vec3();	// Not used...
 

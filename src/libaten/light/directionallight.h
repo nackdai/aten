@@ -37,7 +37,9 @@ namespace AT_NAME {
 			const aten::vec3& org,
 			aten::sampler* sampler)
 		{
+			// PDF to sample area.
 			result->pdf = real(1);
+
 			result->dir = -normalize(param->dir);
 			result->nml = aten::vec3();	// Not used...
 

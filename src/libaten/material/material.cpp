@@ -17,6 +17,7 @@ namespace AT_NAME
 		"ggx",
 		"beckman",
 		"velvet",
+		"lambert_refraction",
 		"disney_brdf",
 		"carpaint",
 		"toon",

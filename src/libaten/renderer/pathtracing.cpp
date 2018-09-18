@@ -152,7 +152,7 @@ namespace aten
 			if (!isBackfacing) {
 				real weight = 1.0f;
 
-				if (depth > 0 && !(path.prevMtrl && path.prevMtrl->isSingular())) {
+				if (depth > 0 && !(path.prevMtrl && path.prevMtrl->isSingularOrTranslucent())) {
 					auto cosLight = dot(orienting_normal, -path.ray.dir);
 					auto dist2 = aten::squared_length(path.rec.p - path.ray.org);
 
@@ -217,7 +217,7 @@ namespace aten
 		}
 		
 		// Explicit conection to light.
-		if (!mtrl->isSingular())
+		if (!mtrl->isSingularOrTranslucent())
 		{
 			real lightSelectPdf = 1;
 			LightSampleResult sampleres;

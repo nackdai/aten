@@ -609,7 +609,7 @@ __global__ void shade(
 	}
 
 	// Explicit conection to light.
-	if (!shMtrls[threadIdx.x].attrib.isSingular)
+	if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
 	{
 		auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 

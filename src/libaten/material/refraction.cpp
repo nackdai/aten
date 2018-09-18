@@ -247,6 +247,7 @@ namespace AT_NAME
 			else {
 				// ‹üÜ.
 				result->dir = refract;
+
 				// ƒŒƒC‚Ì‰^‚Ô•úŽË‹P“x‚Í‹üÜ—¦‚ÌˆÙ‚È‚é•¨‘ÌŠÔ‚ðˆÚ“®‚·‚é‚Æ‚«A‹üÜ—¦‚Ì”ä‚Ì“ñæ‚Ì•ª‚¾‚¯•Ï‰»‚·‚é.
 				if (isLightPath) {
 					// TODO

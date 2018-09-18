@@ -503,6 +503,9 @@
     <ClInclude Include="..\src\libaten\material\velvet.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\lambert_refraction.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

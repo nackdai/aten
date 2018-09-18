@@ -40,13 +40,14 @@ namespace aten
 		{}
 	};
 
-	//													          Em     Sp      Tr    Gl    NPR
-	#define MaterialAttributeMicrofacet	aten::MaterialAttribute(false, false, false, true,  false)
-	#define MaterialAttributeLambert	aten::MaterialAttribute(false, false, false, false, false)
-	#define MaterialAttributeEmissive	aten::MaterialAttribute(true,  false, false, false, false)
-	#define MaterialAttributeSpecular	aten::MaterialAttribute(false, true,  false, true,  false)
-	#define MaterialAttributeRefraction	aten::MaterialAttribute(false, true,  true,  true,  false)
-	#define MaterialAttributeNPR		aten::MaterialAttribute(false, false, false, false, true)
+	//													              Em     Si      Tr    Gl    NPR
+	#define MaterialAttributeMicrofacet	    aten::MaterialAttribute(false, false, false, true,  false)
+	#define MaterialAttributeLambert	    aten::MaterialAttribute(false, false, false, false, false)
+	#define MaterialAttributeEmissive	    aten::MaterialAttribute(true,  false, false, false, false)
+	#define MaterialAttributeSpecular	    aten::MaterialAttribute(false, true,  false, true,  false)
+	#define MaterialAttributeRefraction	    aten::MaterialAttribute(false, true,  true,  true,  false)
+	#define MaterialAttributeTransmission	aten::MaterialAttribute(false, false, true,  false, false)
+	#define MaterialAttributeNPR		    aten::MaterialAttribute(false, false, false, false, true)
 
 	enum MaterialType : int {
 		Emissive,
@@ -58,6 +59,7 @@ namespace aten
 		GGX,
 		Beckman,
 		Velvet,
+		Lambert_Refraction,
 		Disney,
 		CarPaint,
 		Toon,
@@ -285,6 +287,11 @@ namespace AT_NAME
 		bool isTranslucent() const
 		{
 			return m_param.attrib.isTranslucent;
+		}
+
+		bool isSingularOrTranslucent() const
+		{
+			return isSingular() || isTranslucent();
 		}
 
 		// TODO

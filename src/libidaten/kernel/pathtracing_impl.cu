@@ -489,7 +489,7 @@ __global__ void shade(
 	shadowRays[idx].isActive = false;
 
 	// Explicit conection to light.
-	if (!mtrl.attrib.isSingular)
+	if (!(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))
 	{
 		real lightSelectPdf = 1;
 		aten::LightSampleResult sampleres;

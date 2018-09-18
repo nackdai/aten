@@ -108,6 +108,9 @@ aten::material* createMaterial(aten::MaterialType type)
 	case aten::MaterialType::Velvet:
 		mtrl = new aten::MicrofacetVelvet();
 		break;
+	case aten::MaterialType::Lambert_Refraction:
+		mtrl = new aten::LambertRefraction();
+		break;
 	case aten::MaterialType::Disney:
 		mtrl = new aten::DisneyBRDF();
 		break;
@@ -228,6 +231,7 @@ void onRun(aten::window* window)
 			"GGX",
 			"Beckman",
 			"Velvet",
+			"LambertRefraction",
 			"Disney",
 			"CarPaint",
 		};

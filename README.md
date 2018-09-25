@@ -1,6 +1,6 @@
 # aten
 
-This is easy, simple path tracer.<br>
+This is easy, simple ray tracing renderer.<br>
 Aten is Egyptian sun god.
 
 Idaten(path tracing on GPGPU) is under construction.<br>
@@ -100,12 +100,14 @@ And Idanten includes characters of aten, "id**aten**"
 
 ### Windows
 
-1. Install `CUDA 8.0` or later and depended NVIDIA driver
+1. Install `CUDA 8.0` depended NVIDIA driver
 2. Run `aten/3rdparty/Build3rdParty.bat Debug` or `aten/3rdparty/Build3rdParty.bat Release`
 3. Launch `aten/vs2015/aten.sln`
 4. Build porjects with `x64` (not support `x86`)
 
 I confirmed with Visual Studio 2015 on Windows10.
+
+Supoort just only `CUDA 8.0`.
 
 ### Linux
 
@@ -147,4 +149,4 @@ Deformation
 
 ![Deformation](gallery/deform.png)
 
-? Unity Technologies Japan/UCL
+(c) Unity Technologies Japan/UCL

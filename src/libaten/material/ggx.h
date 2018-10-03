@@ -5,6 +5,8 @@
 namespace AT_NAME
 {
 	class MicrofacetGGX : public material {
+		friend class MicrofacetRefraction;
+
 	public:
 		MicrofacetGGX(
 			const aten::vec3& albedo = aten::vec3(0.5),
@@ -110,7 +112,15 @@ namespace AT_NAME
 
 		virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 
-		static AT_DEVICE_MTRL_API real computeGGXSmithG1(real roughness, const aten::vec3& v, const aten::vec3& n);
+		static AT_DEVICE_MTRL_API real sampleGGX_D(
+			const aten::vec3& wh,	// half
+			const aten::vec3& n,	// normal
+			real roughness);
+
+		static AT_DEVICE_MTRL_API real computeGGXSmithG1(
+			real roughness, 
+			const aten::vec3& v, 
+			const aten::vec3& n);
 
 	private:
 		static AT_DEVICE_MTRL_API real pdf(
@@ -122,6 +132,11 @@ namespace AT_NAME
 		static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
 			const real roughness,
 			const aten::vec3& in,
+			const aten::vec3& normal,
+			aten::sampler* sampler);
+
+		static AT_DEVICE_MTRL_API aten::vec3 sampleNormal(
+			const real roughness,
 			const aten::vec3& normal,
 			aten::sampler* sampler);
 

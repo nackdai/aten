@@ -114,7 +114,7 @@ namespace AT_NAME
 		return std::move(bsdf(&m_param, normal, wi, wo, u, v));
 	}
 
-	static AT_DEVICE_MTRL_API inline real sampleGGX_D(
+	AT_DEVICE_MTRL_API real MicrofacetGGX::sampleGGX_D(
 		const aten::vec3& wh,	// half
 		const aten::vec3& n,	// normal
 		real roughness)
@@ -199,6 +199,18 @@ namespace AT_NAME
 		const aten::vec3& normal,
 		aten::sampler* sampler)
 	{
+		const auto w = sampleNormal(roughness, normal, sampler);
+
+		auto dir = in - 2 * dot(in, w) * w;
+
+		return std::move(dir);
+	}
+
+	AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleNormal(
+		const real roughness,
+		const aten::vec3& normal,
+		aten::sampler* sampler)
+	{
 		auto r1 = sampler->nextSample();
 		auto r2 = sampler->nextSample();
 
@@ -223,9 +235,7 @@ namespace AT_NAME
 		auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
 		w = normalize(w);
 
-		auto dir = in - 2 * dot(in, w) * w;
-
-		return std::move(dir);
+		return std::move(w);
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(

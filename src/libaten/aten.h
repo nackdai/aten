@@ -31,6 +31,7 @@
 #include "material/carpaint.h"
 #include "material/velvet.h"
 #include "material/lambert_refraction.h"
+#include "material/microfacet_refraction.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

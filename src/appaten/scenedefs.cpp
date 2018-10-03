@@ -1011,7 +1011,9 @@ void BunnyScene::makeScene(aten::scene* scene)
 	aten::AssetManager::registerMtrl(
 		"m",
 		//new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
-		new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.2, 0.2));
+		//new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.5, 1.0));
+		new aten::MicrofacetRefraction(aten::vec3(0.7, 0.7, 0.7), 0.5, 1.0));
+		//new aten::refraction(aten::vec3(0.7, 0.7, 0.7), 2.3));
 
 	std::vector<aten::object*> objs;
 

@@ -506,6 +506,9 @@
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h">
       <Filter>material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\microfacet_refraction.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -803,6 +806,9 @@
       <Filter>geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\velvet.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
       <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>

@@ -188,7 +188,7 @@ namespace AT_NAME
 		// https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
 
 		auto d = dot(in, nml);
-		auto refract = -nnt * (in - d * nml) - aten::sqrt(real(1) - nnt * nnt * (1 - ddn * ddn)) * nml;
+		auto refract = -nnt * (in - d * nml) - aten::sqrt(real(1) - nnt * nnt * (1 - d * d)) * nml;
 #endif
 		refract = normalize(refract);
 

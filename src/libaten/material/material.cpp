@@ -18,6 +18,7 @@ namespace AT_NAME
 		"beckman",
 		"velvet",
 		"lambert_refraction",
+		"microfacet_refraction",
 		"disney_brdf",
 		"carpaint",
 		"toon",

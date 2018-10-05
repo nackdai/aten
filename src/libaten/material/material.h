@@ -60,6 +60,7 @@ namespace aten
 		Beckman,
 		Velvet,
 		Lambert_Refraction,
+		Microfacet_Refraction,
 		Disney,
 		CarPaint,
 		Toon,

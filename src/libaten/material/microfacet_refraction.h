@@ -17,12 +17,12 @@ namespace AT_NAME
 			aten::texture* albedoMap = nullptr,
 			aten::texture* normalMap = nullptr,
 			aten::texture* roughnessMap = nullptr)
-			: material(aten::MaterialType::Refraction, MaterialAttributeRefraction, albedo, ior, nullptr, normalMap)
+			: material(aten::MaterialType::Microfacet_Refraction, MaterialAttributeRefraction, albedo, ior, nullptr, normalMap)
 		{
 		}
 
 		MicrofacetRefraction(aten::Values& val)
-			: material(aten::MaterialType::Refraction, MaterialAttributeRefraction, val)
+			: material(aten::MaterialType::Microfacet_Refraction, MaterialAttributeRefraction, val)
 		{
 		}
 

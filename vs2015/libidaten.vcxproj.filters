@@ -256,6 +256,9 @@
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h">
       <Filter>aten\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\microfacet_refraction.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -358,6 +361,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
+      <Filter>aten\material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

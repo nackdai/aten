@@ -449,6 +449,7 @@ namespace aten {
 		[](Values& values) { return new MicrofacetBeckman(values); },	// beckman
 		[](Values& values) { return new MicrofacetVelvet(values); },	// velvet
 		[](Values& values) { return new LambertRefraction(values); },	// lambert_rafraction
+		[](Values& values) { return new MicrofacetRefraction(values); },	// microfacet_rafraction
 		[](Values& values) { return new DisneyBRDF(values); },			// disney_brdf
 		[](Values& values) { return new CarPaintBRDF(values); },		// carpaint
 		[](Values& values) { return new toon(values); },				// toon

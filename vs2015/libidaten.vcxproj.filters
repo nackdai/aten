@@ -362,9 +362,6 @@
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
-      <Filter>aten\material</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">
@@ -472,8 +469,13 @@
     <CudaCompile Include="..\src\libidaten\kernel\StreamCompaction.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\velvet.cpp" />
     <CudaCompile Include="..\src\libaten\material\lambert_refraction.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\velvet.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
   </ItemGroup>

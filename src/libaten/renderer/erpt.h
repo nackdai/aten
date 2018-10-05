@@ -6,30 +6,30 @@
 
 namespace aten
 {
-	class ERPT : public PathTracing {
-	public:
-		ERPT() {}
-		~ERPT() {}
+    class ERPT : public PathTracing {
+    public:
+        ERPT() {}
+        ~ERPT() {}
 
-		virtual void render(
-			Destination& dst,
-			scene* scene,
-			camera* camera) override final;
+        virtual void render(
+            Destination& dst,
+            scene* scene,
+            camera* camera) override final;
 
-	private:
-		struct Path {
-			int x{ 0 };
-			int y{ 0 };
-			vec3 contrib;
-			bool isTerminate{ false };
-		};
+    private:
+        struct Path {
+            int x{ 0 };
+            int y{ 0 };
+            vec3 contrib;
+            bool isTerminate{ false };
+        };
 
-		Path genPath(
-			scene* scene,
-			sampler* sampler,
-			int x, int y,
-			int width, int height,
-			camera* camera,
-			bool willImagePlaneMutation);
-	};
+        Path genPath(
+            scene* scene,
+            sampler* sampler,
+            int x, int y,
+            int width, int height,
+            camera* camera,
+            bool willImagePlaneMutation);
+    };
 }

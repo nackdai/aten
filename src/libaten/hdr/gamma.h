@@ -6,21 +6,21 @@
 
 namespace aten
 {
-	class GammaCorrection : public Blitter {
-	public:
-		GammaCorrection() {}
-		GammaCorrection(float gamma)
-		{
-			m_gamma = std::max(1.0f, gamma);
-		}
-		virtual ~GammaCorrection() {}
+    class GammaCorrection : public Blitter {
+    public:
+        GammaCorrection() {}
+        GammaCorrection(float gamma)
+        {
+            m_gamma = std::max(1.0f, gamma);
+        }
+        virtual ~GammaCorrection() {}
 
-	public:
-		virtual void prepareRender(
-			const void* pixels,
-			bool revert) override final;
+    public:
+        virtual void prepareRender(
+            const void* pixels,
+            bool revert) override final;
 
-	private:
-		float m_gamma{ 2.2f };
-	};
+    private:
+        float m_gamma{ 2.2f };
+    };
 }

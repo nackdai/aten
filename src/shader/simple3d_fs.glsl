@@ -8,6 +8,6 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	outColor.xyz = varColor.xyz;
-	outColor.w = 1;
+    outColor.xyz = varColor.xyz;
+    outColor.w = 1;
 }

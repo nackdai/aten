@@ -4,31 +4,31 @@
 
 namespace aten
 {
-	class SceneLoader {
-	private:
-		SceneLoader() {}
-		~SceneLoader() {}
+    class SceneLoader {
+    private:
+        SceneLoader() {}
+        ~SceneLoader() {}
 
-	public:
-		static void setBasePath(const std::string& base);
+    public:
+        static void setBasePath(const std::string& base);
 
-		struct ProcInfo {
-			std::string type;
-			Values val;
-		};
+        struct ProcInfo {
+            std::string type;
+            Values val;
+        };
 
-		struct SceneInfo {
-			aten::scene* scene{ nullptr };
-			
-			aten::camera* camera{ nullptr };
+        struct SceneInfo {
+            aten::scene* scene{ nullptr };
+            
+            aten::camera* camera{ nullptr };
 
-			std::string rendererType;
-			aten::Destination dst;
+            std::string rendererType;
+            aten::Destination dst;
 
-			std::vector<ProcInfo> preprocs;
-			std::vector<ProcInfo> postprocs;
-		};
+            std::vector<ProcInfo> preprocs;
+            std::vector<ProcInfo> postprocs;
+        };
 
-		static SceneInfo load(const std::string& path);
-	};
+        static SceneInfo load(const std::string& path);
+    };
 }

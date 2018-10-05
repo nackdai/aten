@@ -266,7 +266,7 @@ void main()
         result,
         alpha);
 
-	gl_FragColor.xyz = result;
+    gl_FragColor.xyz = result;
     gl_FragColor.w = alpha;
 }
 #endif

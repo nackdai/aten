@@ -4,114 +4,114 @@
 #include <cmdline.h>
 
 struct Options {
-	std::string input;
-	std::string output;
+    std::string input;
+    std::string output;
 };
 
 bool parseOption(
-	int argc, char* argv[],
-	cmdline::parser& cmd,
-	Options& opt)
+    int argc, char* argv[],
+    cmdline::parser& cmd,
+    Options& opt)
 {
-	{
-		cmd.add<std::string>("input", 'i', "input filename", true);
-		cmd.add<std::string>("output", 'o', "output filename base", false);
+    {
+        cmd.add<std::string>("input", 'i', "input filename", true);
+        cmd.add<std::string>("output", 'o', "output filename base", false);
 
-		cmd.add("help", '?', "print usage");
-	}
+        cmd.add("help", '?', "print usage");
+    }
 
-	bool isCmdOk = cmd.parse(argc, argv);
+    bool isCmdOk = cmd.parse(argc, argv);
 
-	if (cmd.exist("help")) {
-		std::cerr << cmd.usage();
-		return false;
-	}
+    if (cmd.exist("help")) {
+        std::cerr << cmd.usage();
+        return false;
+    }
 
-	if (!isCmdOk) {
-		std::cerr << cmd.error() << std::endl << cmd.usage();
-		return false;
-	}
+    if (!isCmdOk) {
+        std::cerr << cmd.error() << std::endl << cmd.usage();
+        return false;
+    }
 
-	if (cmd.exist("input")) {
-		opt.input = cmd.get<std::string>("input");
-	}
-	else {
-		std::cerr << cmd.error() << std::endl << cmd.usage();
-		return false;
-	}
+    if (cmd.exist("input")) {
+        opt.input = cmd.get<std::string>("input");
+    }
+    else {
+        std::cerr << cmd.error() << std::endl << cmd.usage();
+        return false;
+    }
 
-	if (cmd.exist("output")) {
-		opt.output = cmd.get<std::string>("output");
-	}
-	else {
-		std::string pathname;
-		std::string filename;
-		std::string extname;
+    if (cmd.exist("output")) {
+        opt.output = cmd.get<std::string>("output");
+    }
+    else {
+        std::string pathname;
+        std::string filename;
+        std::string extname;
 
-		aten::getStringsFromPath(opt.input, pathname, extname, filename);
+        aten::getStringsFromPath(opt.input, pathname, extname, filename);
 
-		opt.output = filename + ".sbvh";
-	}
+        opt.output = filename + ".sbvh";
+    }
 
-	return true;
+    return true;
 }
 
 
 int main(int argc, char* argv[])
 {
-	Options opt;
-	cmdline::parser cmd;
+    Options opt;
+    cmdline::parser cmd;
 
-	if (!parseOption(argc, argv, cmd, opt)) {
-		return 0;
-	}
+    if (!parseOption(argc, argv, cmd, opt)) {
+        return 0;
+    }
 
-	aten::SetCurrentDirectoryFromExe();
+    aten::SetCurrentDirectoryFromExe();
 
-	aten::AssetManager::suppressWarnings();
+    aten::AssetManager::suppressWarnings();
 
-	// TODO
-	// Specify material by command line...
-	auto emit = new aten::emissive(aten::vec3(1));
-	aten::AssetManager::registerMtrl("light", emit);
+    // TODO
+    // Specify material by command line...
+    auto emit = new aten::emissive(aten::vec3(1));
+    aten::AssetManager::registerMtrl("light", emit);
 
-	std::vector<aten::object*> objs;
-	aten::ObjLoader::load(objs, opt.input);
+    std::vector<aten::object*> objs;
+    aten::ObjLoader::load(objs, opt.input);
 
-	if (objs.empty()) {
-		// TODO
-		return 0;
-	}
+    if (objs.empty()) {
+        // TODO
+        return 0;
+    }
 
-	// Not use.
-	// But specify internal accelerator type in constructor...
-	aten::AcceleratedScene<aten::sbvh> scene;
-	
-	try {
-		static char buf[2048] = { 0 };
+    // Not use.
+    // But specify internal accelerator type in constructor...
+    aten::AcceleratedScene<aten::sbvh> scene;
+    
+    try {
+        static char buf[2048] = { 0 };
 
-		for (int i = 0; i < objs.size(); i++) {
-			auto obj = objs[i];
+        for (int i = 0; i < objs.size(); i++) {
+            auto obj = objs[i];
 
-			std::string output;
+            std::string output;
 
-			if (i == 0) {
-				output = opt.output;
-			}
-			else {
-				// TODO
-				sprintf(buf, "%d_%s\0", i, opt.output.c_str());
-				output = std::string(buf);
-			}
+            if (i == 0) {
+                output = opt.output;
+            }
+            else {
+                // TODO
+                sprintf(buf, "%d_%s\0", i, opt.output.c_str());
+                output = std::string(buf);
+            }
 
-			obj->exportInternalAccelTree(output.c_str());
-		}
-	}
-	catch (const std::exception& e) {
-		// TODO
+            obj->exportInternalAccelTree(output.c_str());
+        }
+    }
+    catch (const std::exception& e) {
+        // TODO
 
-		return 0;
-	}
+        return 0;
+    }
 
-	return 1;
+    return 1;
 }

@@ -12,94 +12,94 @@ bool MtrlExporter::exportMaterial(
 {
     bool ret = true;
 
-	tinyxml2::XMLDocument xmlDoc;
+    tinyxml2::XMLDocument xmlDoc;
 
-	auto xmlDecl = xmlDoc.NewDeclaration();
-	xmlDoc.InsertFirstChild(xmlDecl);
-	
-	auto xmlRoot = xmlDoc.NewElement("root");
+    auto xmlDecl = xmlDoc.NewDeclaration();
+    xmlDoc.InsertFirstChild(xmlDecl);
+    
+    auto xmlRoot = xmlDoc.NewElement("root");
 
-	auto mtrlNum = pImporter->getMaterialNum();
+    auto mtrlNum = pImporter->getMaterialNum();
 
-	char buf[128] = { 0 };
+    char buf[128] = { 0 };
 
-	for (uint32_t i = 0; i < mtrlNum; i++) {
-		MaterialInfo mtrl;
+    for (uint32_t i = 0; i < mtrlNum; i++) {
+        MaterialInfo mtrl;
 
-		if (pImporter->getMaterial(i, mtrl)) {
-			auto xmlMtrlElement = xmlDoc.NewElement("material");
+        if (pImporter->getMaterial(i, mtrl)) {
+            auto xmlMtrlElement = xmlDoc.NewElement("material");
 
-			{
-				auto xmlMtrlAttribElem = xmlDoc.NewElement("name");
-				xmlMtrlAttribElem->SetText(mtrl.name.c_str());
-				xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
-			}
+            {
+                auto xmlMtrlAttribElem = xmlDoc.NewElement("name");
+                xmlMtrlAttribElem->SetText(mtrl.name.c_str());
+                xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+            }
 
-			{
-				// Fixed type.
-				auto xmlMtrlAttribElem = xmlDoc.NewElement("type");
-				xmlMtrlAttribElem->SetText("lambert");
-				xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
-			}
-			
-			if (!mtrl.tex.empty()) {
-				// TODO
-				// レイヤーテクスチャは許していない.
-				bool isExportedAlbedo = false;
-				bool isExportedNormal = false;
+            {
+                // Fixed type.
+                auto xmlMtrlAttribElem = xmlDoc.NewElement("type");
+                xmlMtrlAttribElem->SetText("lambert");
+                xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+            }
+            
+            if (!mtrl.tex.empty()) {
+                // TODO
+                // レイヤーテクスチャは許していない.
+                bool isExportedAlbedo = false;
+                bool isExportedNormal = false;
 
-				for (const auto& tex : mtrl.tex) {
-					if (tex.type.isNormal && !isExportedNormal) {
-						auto xmlMtrlAttribElem = xmlDoc.NewElement("normalMap");
-						xmlMtrlAttribElem->SetText(tex.name.c_str());
-						xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
-						isExportedNormal = true;
-					}
-					else if (tex.type.isSpecular) {
-						// TODO
-					}
-					else if (!isExportedAlbedo) {
-						auto xmlMtrlAttribElem = xmlDoc.NewElement("albedoMap");
-						xmlMtrlAttribElem->SetText(tex.name.c_str());
-						xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
-						isExportedAlbedo = true;
-					}
-				}
-			}
+                for (const auto& tex : mtrl.tex) {
+                    if (tex.type.isNormal && !isExportedNormal) {
+                        auto xmlMtrlAttribElem = xmlDoc.NewElement("normalMap");
+                        xmlMtrlAttribElem->SetText(tex.name.c_str());
+                        xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+                        isExportedNormal = true;
+                    }
+                    else if (tex.type.isSpecular) {
+                        // TODO
+                    }
+                    else if (!isExportedAlbedo) {
+                        auto xmlMtrlAttribElem = xmlDoc.NewElement("albedoMap");
+                        xmlMtrlAttribElem->SetText(tex.name.c_str());
+                        xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+                        isExportedAlbedo = true;
+                    }
+                }
+            }
 
-			bool isExportedAlbedoColor = false;
+            bool isExportedAlbedoColor = false;
 
-			// TODO
-			for (const auto& param : mtrl.params) {
-				if (param.name == "diffuse") {
-					sprintf(buf, "%.3f %.3f %.3f\0", param.values[0], param.values[1], param.values[2]);
+            // TODO
+            for (const auto& param : mtrl.params) {
+                if (param.name == "diffuse") {
+                    sprintf(buf, "%.3f %.3f %.3f\0", param.values[0], param.values[1], param.values[2]);
 
-					auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
-					xmlMtrlAttribElem->SetText(buf);
-					xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+                    auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
+                    xmlMtrlAttribElem->SetText(buf);
+                    xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
 
-					isExportedAlbedoColor = true;
+                    isExportedAlbedoColor = true;
 
-					break;
-				}
-			}
+                    break;
+                }
+            }
 
-			if (!isExportedAlbedoColor) {
-				sprintf(buf, "1.0 1.0 1.0");
-				
-				auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
-				xmlMtrlAttribElem->SetText(buf);
-				xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
-			}
+            if (!isExportedAlbedoColor) {
+                sprintf(buf, "1.0 1.0 1.0");
+                
+                auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
+                xmlMtrlAttribElem->SetText(buf);
+                xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
+            }
 
-			xmlRoot->InsertEndChild(xmlMtrlElement);
-		}
-	}
+            xmlRoot->InsertEndChild(xmlMtrlElement);
+        }
+    }
 
-	xmlDoc.InsertAfterChild(xmlDecl, xmlRoot);
+    xmlDoc.InsertAfterChild(xmlDecl, xmlRoot);
 
-	auto xmlRes = xmlDoc.SaveFile(lpszOutFile);
-	ret = (xmlRes == tinyxml2::XML_SUCCESS);
+    auto xmlRes = xmlDoc.SaveFile(lpszOutFile);
+    ret = (xmlRes == tinyxml2::XML_SUCCESS);
 
     return true;
 }

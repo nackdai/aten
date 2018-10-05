@@ -8,78 +8,78 @@
 
 namespace aten
 {
-	struct Destination {
-		int width{ 0 };
-		int height{ 0 };
-		uint32_t maxDepth{ 1 };
-		uint32_t russianRouletteDepth{ 1 };
-		uint32_t startDepth{ 0 };
-		uint32_t sample{ 1 };
-		uint32_t mutation{ 1 };
-		uint32_t mltNum{ 1 };
-		Film* buffer{ nullptr };
-		Film* variance{ nullptr };
+    struct Destination {
+        int width{ 0 };
+        int height{ 0 };
+        uint32_t maxDepth{ 1 };
+        uint32_t russianRouletteDepth{ 1 };
+        uint32_t startDepth{ 0 };
+        uint32_t sample{ 1 };
+        uint32_t mutation{ 1 };
+        uint32_t mltNum{ 1 };
+        Film* buffer{ nullptr };
+        Film* variance{ nullptr };
 
-		struct {
-			Film* nml_depth{ nullptr };		///< Normal and Depth / rgb : normal, a : depth
-			Film* albedo_vis{ nullptr };	///< Albedo and Visibility / rgb : albedo, a : visibility
-			Film* ids{ nullptr };			///< Geometry Id / r : shape id, g : material id
-			real depthMax{ 1 };
-			bool needNormalize{ true };
-		} geominfo;
-	};
+        struct {
+            Film* nml_depth{ nullptr };        ///< Normal and Depth / rgb : normal, a : depth
+            Film* albedo_vis{ nullptr };    ///< Albedo and Visibility / rgb : albedo, a : visibility
+            Film* ids{ nullptr };            ///< Geometry Id / r : shape id, g : material id
+            real depthMax{ 1 };
+            bool needNormalize{ true };
+        } geominfo;
+    };
 
-	class scene;
-	class camera;
+    class scene;
+    class camera;
 
-	class Renderer {
-	protected:
-		Renderer() {}
-		virtual ~Renderer() {}
+    class Renderer {
+    protected:
+        Renderer() {}
+        virtual ~Renderer() {}
 
-	public:
-		virtual void render(
-			Destination& dst,
-			scene* scene,
-			camera* camera) = 0;
+    public:
+        virtual void render(
+            Destination& dst,
+            scene* scene,
+            camera* camera) = 0;
 
-		void setBG(background* bg)
-		{
-			m_bg = bg;
-		}
+        void setBG(background* bg)
+        {
+            m_bg = bg;
+        }
 
-	protected:
-		virtual vec3 sampleBG(const ray& inRay) const
-		{
-			if (m_bg) {
-				return m_bg->sample(inRay);
-			}
-			return std::move(vec3());
-		}
+    protected:
+        virtual vec3 sampleBG(const ray& inRay) const
+        {
+            if (m_bg) {
+                return m_bg->sample(inRay);
+            }
+            return std::move(vec3());
+        }
 
-		bool hasBG() const
-		{
-			return (m_bg != nullptr);
-		}
+        bool hasBG() const
+        {
+            return (m_bg != nullptr);
+        }
 
-		background* bg()
-		{
-			return m_bg;
-		}
+        background* bg()
+        {
+            return m_bg;
+        }
 
-		static inline bool isInvalidColor(const vec3& v)
-		{
-			bool b = isInvalid(v);
-			if (!b) {
-				if (v.x < 0 || v.y < 0 || v.z < 0) {
-					b = true;
-				}
-			}
+        static inline bool isInvalidColor(const vec3& v)
+        {
+            bool b = isInvalid(v);
+            if (!b) {
+                if (v.x < 0 || v.y < 0 || v.z < 0) {
+                    b = true;
+                }
+            }
 
-			return b;
-		}
+            return b;
+        }
 
-	private:
-		background* m_bg{ nullptr };
-	};
+    private:
+        background* m_bg{ nullptr };
+    };
 }

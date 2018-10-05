@@ -47,294 +47,294 @@ std::vector<const char*> MaterialEditWindow::s_mtrlNames;
 MaterialEditWindow::FuncPickMtrlIdNotifier MaterialEditWindow::s_pickMtrlIdNotifier;
 
 void getCameraPosAndAt(
-	aten::vec3& pos,
-	aten::vec3& at,
-	real& fov)
+    aten::vec3& pos,
+    aten::vec3& at,
+    real& fov)
 {
-	pos = aten::vec3(0.f, 1.f, 10.f);
-	at = aten::vec3(0.f, 1.f, 0.f);
-	fov = 45;
+    pos = aten::vec3(0.f, 1.f, 10.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45;
 }
 
 void makeScene(aten::scene* scene)
 {
-	aten::AssetManager::registerMtrl(
-		"m1",
-		new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+    aten::AssetManager::registerMtrl(
+        "m1",
+        new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
 
-	auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
-	auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
-	scene->add(teapot);
+    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
+    auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+    scene->add(teapot);
 }
 
 aten::material* createMaterial(aten::MaterialType type)
 {
-	aten::material* mtrl = nullptr;
+    aten::material* mtrl = nullptr;
 
-	switch (type) {
-	case aten::MaterialType::Emissive:
-		mtrl = new aten::emissive();
-		break;
-	case aten::MaterialType::Lambert:
-		mtrl = new aten::lambert();
-		break;
-	case aten::MaterialType::OrneNayar:
-		mtrl = new aten::OrenNayar();
-		break;
-	case aten::MaterialType::Specular:
-		mtrl = new aten::specular();
-		break;
-	case aten::MaterialType::Refraction:
-		mtrl = new aten::refraction();
-		break;
-	case aten::MaterialType::Blinn:
-		mtrl = new aten::MicrofacetBlinn();
-		break;
-	case aten::MaterialType::GGX:
-		mtrl = new aten::MicrofacetGGX();
-		break;
-	case aten::MaterialType::Beckman:
-		mtrl = new aten::MicrofacetBeckman();
-		break;
-	default:
-		AT_ASSERT(false);
-		mtrl = new aten::lambert();
-		break;
-	}
+    switch (type) {
+    case aten::MaterialType::Emissive:
+        mtrl = new aten::emissive();
+        break;
+    case aten::MaterialType::Lambert:
+        mtrl = new aten::lambert();
+        break;
+    case aten::MaterialType::OrneNayar:
+        mtrl = new aten::OrenNayar();
+        break;
+    case aten::MaterialType::Specular:
+        mtrl = new aten::specular();
+        break;
+    case aten::MaterialType::Refraction:
+        mtrl = new aten::refraction();
+        break;
+    case aten::MaterialType::Blinn:
+        mtrl = new aten::MicrofacetBlinn();
+        break;
+    case aten::MaterialType::GGX:
+        mtrl = new aten::MicrofacetGGX();
+        break;
+    case aten::MaterialType::Beckman:
+        mtrl = new aten::MicrofacetBeckman();
+        break;
+    default:
+        AT_ASSERT(false);
+        mtrl = new aten::lambert();
+        break;
+    }
 
-	return mtrl;
+    return mtrl;
 }
 
 class MaterialParamEditor : public aten::IMaterialParamEditor {
 public:
-	MaterialParamEditor() {}
-	virtual ~MaterialParamEditor() {}
+    MaterialParamEditor() {}
+    virtual ~MaterialParamEditor() {}
 
 public:
-	virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
-	{
-		return ImGui::SliderFloat(name, &param, _min, _max);
-	}
+    virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
+    {
+        return ImGui::SliderFloat(name, &param, _min, _max);
+    }
 
-	virtual bool edit(const char* name, aten::vec3& param) override final
-	{
-		float f[3] = { param.x, param.y, param.z };
-		bool ret = ImGui::ColorEdit3(name, f);
+    virtual bool edit(const char* name, aten::vec3& param) override final
+    {
+        float f[3] = { param.x, param.y, param.z };
+        bool ret = ImGui::ColorEdit3(name, f);
 
-		param.x = f[0];
-		param.y = f[1];
-		param.z = f[2];
+        param.x = f[0];
+        param.y = f[1];
+        param.z = f[2];
 
-		return ret;
-	}
+        return ret;
+    }
 
-	virtual void edit(const char* name, const char* str) override final
-	{
-		std::string s(str);
-		ImGui::Text("[%s] : (%s)", name, s.empty() ? "none" : str);
-	}
+    virtual void edit(const char* name, const char* str) override final
+    {
+        std::string s(str);
+        ImGui::Text("[%s] : (%s)", name, s.empty() ? "none" : str);
+    }
 };
 
 MaterialParamEditor s_mtrlParamEditor;
 
 void MaterialEditWindow::notifyPickMtrlId(int mtrlid)
 {
-	s_needUpdateMtrl = (s_pickedMtrlId != mtrlid);
-	s_pickedMtrlId = mtrlid;
+    s_needUpdateMtrl = (s_pickedMtrlId != mtrlid);
+    s_pickedMtrlId = mtrlid;
 }
 
 void MaterialEditWindow::buildScene()
 {
-	s_wnd->asCurrent();
+    s_wnd->asCurrent();
 
-	{
-		aten::ImageLoader::setBasePath("./");
+    {
+        aten::ImageLoader::setBasePath("./");
 
-		auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
-		aten::envmap bg;
-		bg.init(envmap);
-		aten::ImageBasedLight ibl(&bg);
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+        aten::envmap bg;
+        bg.init(envmap);
+        aten::ImageBasedLight ibl(&bg);
 
-		s_scene.addImageBasedLight(&ibl);
+        s_scene.addImageBasedLight(&ibl);
 
-		{
-			std::vector<aten::GeomParameter> shapeparams;
-			std::vector<aten::PrimitiveParamter> primparams;
-			std::vector<aten::MaterialParameter> mtrlparams;
-			std::vector<aten::LightParameter> lightparams;
-			std::vector<aten::vertex> vtxparams;
+        {
+            std::vector<aten::GeomParameter> shapeparams;
+            std::vector<aten::PrimitiveParamter> primparams;
+            std::vector<aten::MaterialParameter> mtrlparams;
+            std::vector<aten::LightParameter> lightparams;
+            std::vector<aten::vertex> vtxparams;
 
-			aten::DataCollector::collect(
-				shapeparams,
-				primparams,
-				lightparams,
-				mtrlparams,
-				vtxparams);
+            aten::DataCollector::collect(
+                shapeparams,
+                primparams,
+                lightparams,
+                mtrlparams,
+                vtxparams);
 
-			const auto& nodes = s_scene.getAccel()->getNodes();
-			const auto& mtxs = s_scene.getAccel()->getMatrices();
+            const auto& nodes = s_scene.getAccel()->getNodes();
+            const auto& mtxs = s_scene.getAccel()->getMatrices();
 
-			std::vector<idaten::TextureResource> tex;
-			{
-				auto texs = aten::texture::getTextures();
+            std::vector<idaten::TextureResource> tex;
+            {
+                auto texs = aten::texture::getTextures();
 
-				for (const auto t : texs) {
-					tex.push_back(
-						idaten::TextureResource(t->colors(), t->width(), t->height()));
-				}
-			}
+                for (const auto t : texs) {
+                    tex.push_back(
+                        idaten::TextureResource(t->colors(), t->width(), t->height()));
+                }
+            }
 
-			for (auto& l : lightparams) {
-				if (l.type == aten::LightType::IBL) {
-					l.envmap.idx = envmap->id();
-				}
-			}
+            for (auto& l : lightparams) {
+                if (l.type == aten::LightType::IBL) {
+                    l.envmap.idx = envmap->id();
+                }
+            }
 
-			auto camparam = s_camera.param();
-			camparam.znear = real(0.1);
-			camparam.zfar = real(10000.0);
+            auto camparam = s_camera.param();
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
 
-			s_tracer.update(
-				aten::visualizer::getTexHandle(),
-				s_width, s_height,
-				camparam,
-				shapeparams,
-				mtrlparams,
-				lightparams,
-				nodes,
-				primparams, 0,
-				vtxparams, 0,
-				mtxs,
-				tex,
-				idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
-		}
-	}
+            s_tracer.update(
+                aten::visualizer::getTexHandle(),
+                s_width, s_height,
+                camparam,
+                shapeparams,
+                mtrlparams,
+                lightparams,
+                nodes,
+                primparams, 0,
+                vtxparams, 0,
+                mtxs,
+                tex,
+                idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+        }
+    }
 
-	const auto& mtrls = aten::material::getMaterials();
-	for (const auto mtrl : mtrls) {
-		s_mtrls.push_back(const_cast<aten::material*>(mtrl));
-		s_mtrlNames.push_back(mtrl->name());
-	}
+    const auto& mtrls = aten::material::getMaterials();
+    for (const auto mtrl : mtrls) {
+        s_mtrls.push_back(const_cast<aten::material*>(mtrl));
+        s_mtrlNames.push_back(mtrl->name());
+    }
 
-	// Update material.
-	std::vector<aten::MaterialParameter> params(1);
-	params[0] = s_mtrls[0]->param();
-	s_tracer.updateMaterial(params);
-	s_tracer.reset();
+    // Update material.
+    std::vector<aten::MaterialParameter> params(1);
+    params[0] = s_mtrls[0]->param();
+    s_tracer.updateMaterial(params);
+    s_tracer.reset();
 }
 
 void MaterialEditWindow::onRun(aten::window* window)
 {
-	float updateTime = 0.0f;
+    float updateTime = 0.0f;
 
-	if (s_isCameraDirty) {
-		s_camera.update();
+    if (s_isCameraDirty) {
+        s_camera.update();
 
-		auto camparam = s_camera.param();
-		camparam.znear = real(0.1);
-		camparam.zfar = real(10000.0);
+        auto camparam = s_camera.param();
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
 
-		s_tracer.updateCamera(camparam);
-		s_isCameraDirty = false;
+        s_tracer.updateCamera(camparam);
+        s_isCameraDirty = false;
 
-		s_visualizer->clear();
-	}
+        s_visualizer->clear();
+    }
 
-	s_tracer.render(
-		idaten::TileDomain(0, 0, s_width, s_height),
-		s_maxSamples,
-		s_maxBounce);
+    s_tracer.render(
+        idaten::TileDomain(0, 0, s_width, s_height),
+        s_maxSamples,
+        s_maxBounce);
 
-	s_visualizer->render(false);
+    s_visualizer->render(false);
 
-	if (s_willTakeScreenShot)
-	{
-		static char buffer[1024];
-		::sprintf(buffer, "sc_%d.png\0", s_cntScreenShot);
+    if (s_willTakeScreenShot)
+    {
+        static char buffer[1024];
+        ::sprintf(buffer, "sc_%d.png\0", s_cntScreenShot);
 
-		s_visualizer->takeScreenshot(buffer);
+        s_visualizer->takeScreenshot(buffer);
 
-		s_willTakeScreenShot = false;
-		s_cntScreenShot++;
+        s_willTakeScreenShot = false;
+        s_cntScreenShot++;
 
-		AT_PRINTF("Take Screenshot[%s]\n", buffer);
-	}
+        AT_PRINTF("Take Screenshot[%s]\n", buffer);
+    }
 
-	if (s_willShowGUI)
-	{
-		if (ImGui::SliderInt("Samples", &s_maxSamples, 1, 100)
-			|| ImGui::SliderInt("Bounce", &s_maxBounce, 1, 10))
-		{
-			s_tracer.reset();
-		}
+    if (s_willShowGUI)
+    {
+        if (ImGui::SliderInt("Samples", &s_maxSamples, 1, 100)
+            || ImGui::SliderInt("Bounce", &s_maxBounce, 1, 10))
+        {
+            s_tracer.reset();
+        }
 
-		bool isProgressive = s_tracer.isProgressive();
+        bool isProgressive = s_tracer.isProgressive();
 
-		if (ImGui::Checkbox("Progressive", &isProgressive)) {
-			s_tracer.enableProgressive(isProgressive);
-			s_tracer.reset();
-		}
+        if (ImGui::Checkbox("Progressive", &isProgressive)) {
+            s_tracer.enableProgressive(isProgressive);
+            s_tracer.reset();
+        }
 
-		auto mtrl = s_mtrls[s_pickedMtrlId];
+        auto mtrl = s_mtrls[s_pickedMtrlId];
 
-		if (ImGui::Combo("name", &s_pickedMtrlId, &s_mtrlNames[0], s_mtrlNames.size())) {
-			mtrl = s_mtrls[s_pickedMtrlId];
-			s_needUpdateMtrl = true;
+        if (ImGui::Combo("name", &s_pickedMtrlId, &s_mtrlNames[0], s_mtrlNames.size())) {
+            mtrl = s_mtrls[s_pickedMtrlId];
+            s_needUpdateMtrl = true;
 
-			s_pickMtrlIdNotifier(s_pickedMtrlId);
-		}
+            s_pickMtrlIdNotifier(s_pickedMtrlId);
+        }
 
-		static const char* items[] = {
-			"Emissive",
-			"Lambert",
-			"OrneNayar",
-			"Specular",
-			"Refraction",
-			"Blinn",
-			"GGX",
-			"Beckman",
-		};
-		int mtrlType = (int)mtrl->param().type;
-		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
-			auto newMtrl = createMaterial((aten::MaterialType)mtrlType);
+        static const char* items[] = {
+            "Emissive",
+            "Lambert",
+            "OrneNayar",
+            "Specular",
+            "Refraction",
+            "Blinn",
+            "GGX",
+            "Beckman",
+        };
+        int mtrlType = (int)mtrl->param().type;
+        if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
+            auto newMtrl = createMaterial((aten::MaterialType)mtrlType);
 
-			// Avoid to keep global list.
-			aten::material::deleteMaterial(newMtrl);
+            // Avoid to keep global list.
+            aten::material::deleteMaterial(newMtrl);
 
-			newMtrl->copyParamEx(mtrl->param());
-			newMtrl->setName(mtrl->name());
+            newMtrl->copyParamEx(mtrl->param());
+            newMtrl->setName(mtrl->name());
 
-			mtrl = newMtrl;
-			s_mtrls[s_pickedMtrlId] = mtrl;
+            mtrl = newMtrl;
+            s_mtrls[s_pickedMtrlId] = mtrl;
 
-			s_needUpdateMtrl = true;
-		}
+            s_needUpdateMtrl = true;
+        }
 
-		if (mtrl->edit(&s_mtrlParamEditor)) {
-			s_needUpdateMtrl = true;
-		}
+        if (mtrl->edit(&s_mtrlParamEditor)) {
+            s_needUpdateMtrl = true;
+        }
 
-		static char str[128];
-		sprintf(str, "%s\0", mtrl->name());
-		if (ImGui::InputText("MaterialName", str, AT_COUNTOF(str))) {
-			mtrl->setName(str);
-		}
+        static char str[128];
+        sprintf(str, "%s\0", mtrl->name());
+        if (ImGui::InputText("MaterialName", str, AT_COUNTOF(str))) {
+            mtrl->setName(str);
+        }
 
-		if (s_needUpdateMtrl) {
-			std::vector<aten::MaterialParameter> params(1);
-			params[0] = mtrl->param();
-			s_tracer.updateMaterial(params);
-			s_tracer.reset();
+        if (s_needUpdateMtrl) {
+            std::vector<aten::MaterialParameter> params(1);
+            params[0] = mtrl->param();
+            s_tracer.updateMaterial(params);
+            s_tracer.reset();
 
-			s_needUpdateMtrl = false;
-		}
+            s_needUpdateMtrl = false;
+        }
 
-		if (ImGui::Button("Export")) {
-			aten::MaterialExporter::exportMaterial("material.xml", s_mtrls);
-		}
+        if (ImGui::Button("Export")) {
+            aten::MaterialExporter::exportMaterial("material.xml", s_mtrls);
+        }
 
-		window->drawImGui();
-	}
+        window->drawImGui();
+    }
 }
 
 void MaterialEditWindow::onClose()
@@ -344,225 +344,225 @@ void MaterialEditWindow::onClose()
 
 void MaterialEditWindow::onMouseBtn(bool left, bool press, int x, int y)
 {
-	s_isMouseLBtnDown = false;
-	s_isMouseRBtnDown = false;
+    s_isMouseLBtnDown = false;
+    s_isMouseRBtnDown = false;
 
-	if (press) {
-		s_prevX = x;
-		s_prevY = y;
+    if (press) {
+        s_prevX = x;
+        s_prevY = y;
 
-		s_isMouseLBtnDown = left;
-		s_isMouseRBtnDown = !left;
-	}
+        s_isMouseLBtnDown = left;
+        s_isMouseRBtnDown = !left;
+    }
 }
 
 void MaterialEditWindow::onMouseMove(int x, int y)
 {
-	if (s_isMouseLBtnDown) {
-		aten::CameraOperator::rotate(
-			s_camera,
-			s_width, s_height,
-			s_prevX, s_prevY,
-			x, y);
-		s_isCameraDirty = true;
-	}
-	else if (s_isMouseRBtnDown) {
-		aten::CameraOperator::move(
-			s_camera,
-			s_prevX, s_prevY,
-			x, y,
-			real(0.001));
-		s_isCameraDirty = true;
-	}
+    if (s_isMouseLBtnDown) {
+        aten::CameraOperator::rotate(
+            s_camera,
+            s_width, s_height,
+            s_prevX, s_prevY,
+            x, y);
+        s_isCameraDirty = true;
+    }
+    else if (s_isMouseRBtnDown) {
+        aten::CameraOperator::move(
+            s_camera,
+            s_prevX, s_prevY,
+            x, y,
+            real(0.001));
+        s_isCameraDirty = true;
+    }
 
-	s_prevX = x;
-	s_prevY = y;
+    s_prevX = x;
+    s_prevY = y;
 }
 
 void MaterialEditWindow::onMouseWheel(int delta)
 {
-	aten::CameraOperator::dolly(s_camera, delta * real(0.1));
-	s_isCameraDirty = true;
+    aten::CameraOperator::dolly(s_camera, delta * real(0.1));
+    s_isCameraDirty = true;
 }
 
 void MaterialEditWindow::onKey(bool press, aten::Key key)
 {
-	static const real offset = real(0.1);
-	static bool isPressedCtrl = false;
+    static const real offset = real(0.1);
+    static bool isPressedCtrl = false;
 
-	if (press) {
-		if (key == aten::Key::Key_F1) {
-			s_willShowGUI = !s_willShowGUI;
-			return;
-		}
-		else if (key == aten::Key::Key_F2) {
-			s_willTakeScreenShot = true;
-			return;
-		}
-		else if (key == aten::Key::Key_CONTROL) {
-			isPressedCtrl = true;
-		}
-	}
-	else {
-		if (key == aten::Key::Key_CONTROL) {
-			isPressedCtrl = false;
-		}
-	}
+    if (press) {
+        if (key == aten::Key::Key_F1) {
+            s_willShowGUI = !s_willShowGUI;
+            return;
+        }
+        else if (key == aten::Key::Key_F2) {
+            s_willTakeScreenShot = true;
+            return;
+        }
+        else if (key == aten::Key::Key_CONTROL) {
+            isPressedCtrl = true;
+        }
+    }
+    else {
+        if (key == aten::Key::Key_CONTROL) {
+            isPressedCtrl = false;
+        }
+    }
 
 
-	if (isPressedCtrl) {
-		switch (key) {
-		case aten::Key::Key_W:
-		case aten::Key::Key_UP:
-			aten::CameraOperator::moveForward(s_camera, offset);
-			break;
-		case aten::Key::Key_S:
-		case aten::Key::Key_DOWN:
-			aten::CameraOperator::moveForward(s_camera, -offset);
-			break;
-		case aten::Key::Key_D:
-		case aten::Key::Key_RIGHT:
-			aten::CameraOperator::moveRight(s_camera, offset);
-			break;
-		case aten::Key::Key_A:
-		case aten::Key::Key_LEFT:
-			aten::CameraOperator::moveRight(s_camera, -offset);
-			break;
-		case aten::Key::Key_Z:
-			aten::CameraOperator::moveUp(s_camera, offset);
-			break;
-		case aten::Key::Key_X:
-			aten::CameraOperator::moveUp(s_camera, -offset);
-			break;
-		case aten::Key::Key_R:
-		{
-			aten::vec3 pos, at;
-			real vfov;
-			getCameraPosAndAt(pos, at, vfov);
+    if (isPressedCtrl) {
+        switch (key) {
+        case aten::Key::Key_W:
+        case aten::Key::Key_UP:
+            aten::CameraOperator::moveForward(s_camera, offset);
+            break;
+        case aten::Key::Key_S:
+        case aten::Key::Key_DOWN:
+            aten::CameraOperator::moveForward(s_camera, -offset);
+            break;
+        case aten::Key::Key_D:
+        case aten::Key::Key_RIGHT:
+            aten::CameraOperator::moveRight(s_camera, offset);
+            break;
+        case aten::Key::Key_A:
+        case aten::Key::Key_LEFT:
+            aten::CameraOperator::moveRight(s_camera, -offset);
+            break;
+        case aten::Key::Key_Z:
+            aten::CameraOperator::moveUp(s_camera, offset);
+            break;
+        case aten::Key::Key_X:
+            aten::CameraOperator::moveUp(s_camera, -offset);
+            break;
+        case aten::Key::Key_R:
+        {
+            aten::vec3 pos, at;
+            real vfov;
+            getCameraPosAndAt(pos, at, vfov);
 
-			s_camera.init(
-				pos,
-				at,
-				aten::vec3(0, 1, 0),
-				vfov,
-				s_width, s_height);
-		}
-			break;
-		default:
-			break;
-		}
+            s_camera.init(
+                pos,
+                at,
+                aten::vec3(0, 1, 0),
+                vfov,
+                s_width, s_height);
+        }
+            break;
+        default:
+            break;
+        }
 
-		s_isCameraDirty = true;
-	}
+        s_isCameraDirty = true;
+    }
 }
 
 bool MaterialEditWindow::init(
-	int width, int height,
-	const char* title)
+    int width, int height,
+    const char* title)
 {
-	s_width = width;
-	s_height = height;
+    s_width = width;
+    s_height = height;
 
-	aten::initSampler(s_width, s_height);
+    aten::initSampler(s_width, s_height);
 
-	s_wnd = aten::window::init(
-		s_width, s_height, title,
-		MaterialEditWindow::onRun,
-		MaterialEditWindow::onClose,
-		MaterialEditWindow::onMouseBtn,
-		MaterialEditWindow::onMouseMove,
-		MaterialEditWindow::onMouseWheel,
-		MaterialEditWindow::onKey);
+    s_wnd = aten::window::init(
+        s_width, s_height, title,
+        MaterialEditWindow::onRun,
+        MaterialEditWindow::onClose,
+        MaterialEditWindow::onMouseBtn,
+        MaterialEditWindow::onMouseMove,
+        MaterialEditWindow::onMouseWheel,
+        MaterialEditWindow::onKey);
 
-	s_wnd->asCurrent();
+    s_wnd->asCurrent();
 
-	s_visualizer = aten::visualizer::init(s_width, s_height);
-	
-	s_gamma.init(
-		s_width, s_height,
-		"../shader/fullscreen_vs.glsl",
-		"../shader/gamma_fs.glsl");
+    s_visualizer = aten::visualizer::init(s_width, s_height);
+    
+    s_gamma.init(
+        s_width, s_height,
+        "../shader/fullscreen_vs.glsl",
+        "../shader/gamma_fs.glsl");
 
-	s_visualizer->addPostProc(&s_gamma);
+    s_visualizer->addPostProc(&s_gamma);
 
-	aten::vec3 pos, at;
-	real vfov;
-	getCameraPosAndAt(pos, at, vfov);
+    aten::vec3 pos, at;
+    real vfov;
+    getCameraPosAndAt(pos, at, vfov);
 
-	s_camera.init(
-		pos,
-		at,
-		aten::vec3(0, 1, 0),
-		vfov,
-		s_width, s_height);
+    s_camera.init(
+        pos,
+        at,
+        aten::vec3(0, 1, 0),
+        vfov,
+        s_width, s_height);
 
-	makeScene(&s_scene);
-	s_scene.build();
+    makeScene(&s_scene);
+    s_scene.build();
 
-	s_tracer.getCompaction().init(
-		s_width * s_height,
-		1024);
+    s_tracer.getCompaction().init(
+        s_width * s_height,
+        1024);
 
 #if 0
-	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
-	aten::envmap bg;
-	bg.init(envmap);
-	aten::ImageBasedLight ibl(&bg);
+    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+    aten::envmap bg;
+    bg.init(envmap);
+    aten::ImageBasedLight ibl(&bg);
 
-	s_scene.addImageBasedLight(&ibl);
+    s_scene.addImageBasedLight(&ibl);
 
-	{
-		std::vector<aten::GeomParameter> shapeparams;
-		std::vector<aten::PrimitiveParamter> primparams;
-		std::vector<aten::MaterialParameter> mtrlparams;
-		std::vector<aten::LightParameter> lightparams;
-		std::vector<aten::vertex> vtxparams;
+    {
+        std::vector<aten::GeomParameter> shapeparams;
+        std::vector<aten::PrimitiveParamter> primparams;
+        std::vector<aten::MaterialParameter> mtrlparams;
+        std::vector<aten::LightParameter> lightparams;
+        std::vector<aten::vertex> vtxparams;
 
-		aten::DataCollector::collect(
-			shapeparams,
-			primparams,
-			lightparams,
-			mtrlparams,
-			vtxparams);
+        aten::DataCollector::collect(
+            shapeparams,
+            primparams,
+            lightparams,
+            mtrlparams,
+            vtxparams);
 
-		const auto& nodes = s_scene.getAccel()->getNodes();
-		const auto& mtxs = s_scene.getAccel()->getMatrices();
+        const auto& nodes = s_scene.getAccel()->getNodes();
+        const auto& mtxs = s_scene.getAccel()->getMatrices();
 
-		std::vector<idaten::TextureResource> tex;
-		{
-			auto texs = aten::texture::getTextures();
+        std::vector<idaten::TextureResource> tex;
+        {
+            auto texs = aten::texture::getTextures();
 
-			for (const auto t : texs) {
-				tex.push_back(
-					idaten::TextureResource(t->colors(), t->width(), t->height()));
-			}
-		}
+            for (const auto t : texs) {
+                tex.push_back(
+                    idaten::TextureResource(t->colors(), t->width(), t->height()));
+            }
+        }
 
-		for (auto& l : lightparams) {
-			if (l.type == aten::LightType::IBL) {
-				l.envmap.idx = envmap->id();
-			}
-		}
+        for (auto& l : lightparams) {
+            if (l.type == aten::LightType::IBL) {
+                l.envmap.idx = envmap->id();
+            }
+        }
 
-		auto camparam = s_camera.param();
-		camparam.znear = real(0.1);
-		camparam.zfar = real(10000.0);
+        auto camparam = s_camera.param();
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
 
-		s_tracer.update(
-			aten::visualizer::getTexHandle(),
-			s_width, s_height,
-			camparam,
-			shapeparams,
-			mtrlparams,
-			lightparams,
-			nodes,
-			primparams,
-			vtxparams,
-			mtxs,
-			tex,
-			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
-	}
+        s_tracer.update(
+            aten::visualizer::getTexHandle(),
+            s_width, s_height,
+            camparam,
+            shapeparams,
+            mtrlparams,
+            lightparams,
+            nodes,
+            primparams,
+            vtxparams,
+            mtxs,
+            tex,
+            idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+    }
 #endif
 
-	return true;
+    return true;
 }

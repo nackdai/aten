@@ -29,10 +29,10 @@ layout(location = 0) out vec4 oColour;
 
 const vec2 offset[4] = vec2[4]
 (
-	vec2(-1.0, -1.0),
-	vec2( 1.0, -1.0),
-	vec2(-1.0,  1.0),
-	vec2( 1.0,  1.0)
+    vec2(-1.0, -1.0),
+    vec2( 1.0, -1.0),
+    vec2(-1.0,  1.0),
+    vec2( 1.0,  1.0)
 );
 
 const vec3 RGB2Y = vec3(0.29891,  0.58661,  0.11448);
@@ -54,26 +54,26 @@ vec3 YUVToRGB(vec3 vYUV)
 
 void main()
 {
-	oColour = vec4(0.0);
+    oColour = vec4(0.0);
 
-	for (int i = 0; i < 4; i++) {
-		vec2 uv = gl_FragCoord.xy * dstTexel;
-		uv += offset[i] * srcTexel;
+    for (int i = 0; i < 4; i++) {
+        vec2 uv = gl_FragCoord.xy * dstTexel;
+        uv += offset[i] * srcTexel;
 
-		oColour += texture2D(image, uv);
-	}
+        oColour += texture2D(image, uv);
+    }
 
-	oColour *= 0.25;
-	oColour.a = 1.0;
+    oColour *= 0.25;
+    oColour.a = 1.0;
 
-	float fMiddleGrey = 0.18;
+    float fMiddleGrey = 0.18;
 
-	// RGB -> YUV
+    // RGB -> YUV
     vec3 vYUV = RGBToYUV(oColour.rgb);
 
-	float yy = max(vYUV.x - threshold, 0.0f);
+    float yy = max(vYUV.x - threshold, 0.0f);
 
-	yy = yy * fMiddleGrey / (adaptedLum + 0.00001);
+    yy = yy * fMiddleGrey / (adaptedLum + 0.00001);
     
     // x' = (1 - exp(2 * x)) ^ 1.5
     float fY = pow(1.0f - exp(-yy * 2.0f), 1.5f);

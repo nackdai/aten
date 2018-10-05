@@ -25,7 +25,7 @@ namespace aten
     // +--------------------+
     
     struct JointHeader {
-		uint32_t magic{ 0 };
+        uint32_t magic{ 0 };
         uint32_t version{ 0 };
 
         uint32_t sizeHeader{ 0 };
@@ -61,7 +61,7 @@ namespace aten
     struct JointPose {
         float trans[3];
         quaternion<float> quat;
-		float scale[3];
+        float scale[3];
     };
 
     struct JointParam {
@@ -75,12 +75,12 @@ namespace aten
         mat4 mtxInvBind;
 
         uint8_t validParam{ 0 };    ///< 有効なパラメータフラグ。ポーズパラメータの全てが有効とは限らない.
-		uint8_t validAnmParam{ 0 }; ///< アニメ計算時の有効なパラメータフラグ。ポーズパラメータの全てが有効とは限らない.
-		uint8_t reserved[2];
+        uint8_t validAnmParam{ 0 }; ///< アニメ計算時の有効なパラメータフラグ。ポーズパラメータの全てが有効とは限らない.
+        uint8_t reserved[2];
 
-		JointPose pose;  ///< ポーズパラメータ
+        JointPose pose;  ///< ポーズパラメータ
     };
 
-	// TODO
-	AT_STATICASSERT(sizeof(mat4) == sizeof(float) * 16);
+    // TODO
+    AT_STATICASSERT(sizeof(mat4) == sizeof(float) * 16);
 }

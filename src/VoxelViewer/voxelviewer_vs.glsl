@@ -9,5 +9,5 @@ uniform mat4 mtxW2C;
 
 void main()
 {
-	gl_Position = mtxW2C * mtxL2W * position;
+    gl_Position = mtxW2C * mtxL2W * position;
 }

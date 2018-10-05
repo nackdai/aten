@@ -25,23 +25,23 @@ bool AnmExporter::exportAnm(
 {
     bool ret = true;
 
-	FileOutputStream out;
+    FileOutputStream out;
 
-	AT_VRETURN_FALSE(out.open(lpszOutFile));
+    AT_VRETURN_FALSE(out.open(lpszOutFile));
 
     aten::AnmHeader sHeader;
     {
         sHeader.sizeHeader = sizeof(sHeader);
 
         // TODO
-		sHeader.keyType = aten::AnmKeyType::Time;
+        sHeader.keyType = aten::AnmKeyType::Time;
     }
 
     // Blank for file's header.
     IoStreamSeekHelper seekHelper(&out);
-	AT_VRETURN_FALSE(seekHelper.skip(sizeof(sHeader)));
+    AT_VRETURN_FALSE(seekHelper.skip(sizeof(sHeader)));
 
-	AT_VRETURN_FALSE(pImporter->beginAnm(nSetIdx));
+    AT_VRETURN_FALSE(pImporter->beginAnm(nSetIdx));
 
     uint32_t nNodeNum = pImporter->getAnmNodeNum();
 
@@ -54,7 +54,7 @@ bool AnmExporter::exportAnm(
         for (uint32_t i = 0; i < nNodeNum; i++) {
             aten::AnmNode sNode;
 
-			AT_VRETURN_FALSE(pImporter->getAnmNode(i, sNode));
+            AT_VRETURN_FALSE(pImporter->getAnmNode(i, sNode));
 
             channelNum.push_back(sNode.numChannels);
 
@@ -78,7 +78,7 @@ bool AnmExporter::exportAnm(
         for (uint32_t nChannelIdx = 0; nChannelIdx < nChannelCnt; nChannelIdx++) {
             aten::AnmChannel sChannel;
 
-			AT_VRETURN_FALSE(
+            AT_VRETURN_FALSE(
                 pImporter->getAnmChannel(
                     nNodeIdx,
                     nChannelIdx,
@@ -113,7 +113,7 @@ bool AnmExporter::exportAnm(
 
                 std::vector<float> tvValue;
 
-				AT_VRETURN_FALSE(
+                AT_VRETURN_FALSE(
                     pImporter->getAnmKey(
                         nNodeIdx,
                         nChannelIdx,
@@ -140,7 +140,7 @@ bool AnmExporter::exportAnm(
         }
     }
 
-	AT_VRETURN_FALSE(pImporter->endAnm());
+    AT_VRETURN_FALSE(pImporter->endAnm());
 
     // Export files's header.
     {
@@ -152,7 +152,7 @@ bool AnmExporter::exportAnm(
 
         sHeader.time = fMaxTime;
 
-		AT_VRETURN_FALSE(seekHelper.returnTo());
+        AT_VRETURN_FALSE(seekHelper.returnTo());
         OUTPUT_WRITE_VRETURN(&out, &sHeader, 0, sizeof(sHeader));
     }
 

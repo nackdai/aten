@@ -4,82 +4,82 @@
 #include "texture/texture.h"
 
 namespace aten {
-	class ATrousDenoiser : public MultiPassPostProc {
-	public:
-		ATrousDenoiser() {}
-		~ATrousDenoiser() {}
+    class ATrousDenoiser : public MultiPassPostProc {
+    public:
+        ATrousDenoiser() {}
+        ~ATrousDenoiser() {}
 
-	public:
-		bool init(
-			int width, int height,
-			const char* vsPath, const char* fsPath,
-			const char* finalVsPath, const char* finalFsPath);
+    public:
+        bool init(
+            int width, int height,
+            const char* vsPath, const char* fsPath,
+            const char* finalVsPath, const char* finalFsPath);
 
-		texture& getNormalMap()
-		{
-			return m_normal;
-		}
-		texture& getPositionMap()
-		{
-			return m_pos;
-		}
-		texture& getAlbedoMap()
-		{
-			return m_albedo;
-		}
+        texture& getNormalMap()
+        {
+            return m_normal;
+        }
+        texture& getPositionMap()
+        {
+            return m_pos;
+        }
+        texture& getAlbedoMap()
+        {
+            return m_albedo;
+        }
 
-		virtual PixelFormat inFormat() const override final
-		{
-			return PixelFormat::rgba32f;
-		}
+        virtual PixelFormat inFormat() const override final
+        {
+            return PixelFormat::rgba32f;
+        }
 
-		virtual PixelFormat outFormat() const override final
-		{
-			return PixelFormat::rgba32f;
-		}
+        virtual PixelFormat outFormat() const override final
+        {
+            return PixelFormat::rgba32f;
+        }
 
-		virtual FBO& getFbo() override final
-		{
-			return m_final.getFbo();
-		}
+        virtual FBO& getFbo() override final
+        {
+            return m_final.getFbo();
+        }
 
-	private:
-		class ATrousPass : public visualizer::PostProc {
-		public:
-			ATrousPass() {}
-			virtual ~ATrousPass() {}
+    private:
+        class ATrousPass : public visualizer::PostProc {
+        public:
+            ATrousPass() {}
+            virtual ~ATrousPass() {}
 
-		public:
-			virtual void prepareRender(
-				const void* pixels,
-				bool revert) override;
+        public:
+            virtual void prepareRender(
+                const void* pixels,
+                bool revert) override;
 
-			virtual PixelFormat inFormat() const override final
-			{
-				return PixelFormat::rgba32f;
-			}
-			virtual PixelFormat outFormat() const override final
-			{
-				return PixelFormat::rgba32f;
-			}
+            virtual PixelFormat inFormat() const override final
+            {
+                return PixelFormat::rgba32f;
+            }
+            virtual PixelFormat outFormat() const override final
+            {
+                return PixelFormat::rgba32f;
+            }
 
-			ATrousDenoiser* m_body{ nullptr };
-			int m_idx{ -1 };
-		};
+            ATrousDenoiser* m_body{ nullptr };
+            int m_idx{ -1 };
+        };
 
-		class ATrousFinalPass : public ATrousPass {
-			virtual void prepareRender(
-				const void* pixels,
-				bool revert) override;
-		};
+        class ATrousFinalPass : public ATrousPass {
+            virtual void prepareRender(
+                const void* pixels,
+                bool revert) override;
+        };
 
-		static const int ITER = 5;
+        static const int ITER = 5;
 
-		texture m_pos;
-		texture m_normal;
-		texture m_albedo;
+        texture m_pos;
+        texture m_normal;
+        texture m_albedo;
 
-		ATrousPass m_pass[ITER];
-		ATrousFinalPass m_final;
-	};
+        ATrousPass m_pass[ITER];
+        ATrousFinalPass m_final;
+    };
 }

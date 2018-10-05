@@ -8,11 +8,11 @@
 
 namespace aten
 {
-	vec3 shadeNPR(
-		material* mtrl,
-		const vec3& p,
-		const vec3& normal,
-		real u, real v,
-		scene* scene,
-		sampler* sampler);
+    vec3 shadeNPR(
+        material* mtrl,
+        const vec3& p,
+        const vec3& normal,
+        real u, real v,
+        scene* scene,
+        sampler* sampler);
 }

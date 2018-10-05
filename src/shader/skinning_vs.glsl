@@ -22,23 +22,23 @@ layout(location = 2) out vec4 outColor;
 
 void main()
 {
-	gl_Position = vec4(0);
-	outNormal = vec3(0);
+    gl_Position = vec4(0);
+    outNormal = vec3(0);
 
-	for (int i = 0; i < 4; i++) {
-		int idx = int(blendIndex[i]);
-		float weight = blendWeight[i];
+    for (int i = 0; i < 4; i++) {
+        int idx = int(blendIndex[i]);
+        float weight = blendWeight[i];
 
-		mat4 mtx = mtxJoint[idx];
+        mat4 mtx = mtxJoint[idx];
 
-		gl_Position += weight * mtx * position;
-		outNormal += weight * mat3(mtx) * normal;
-	}
+        gl_Position += weight * mtx * position;
+        outNormal += weight * mat3(mtx) * normal;
+    }
 
-	gl_Position.w = 1;
-	gl_Position = mtxW2C * gl_Position;
-	outNormal = normalize(outNormal);
+    gl_Position.w = 1;
+    gl_Position = mtxW2C * gl_Position;
+    outNormal = normalize(outNormal);
 
-	outUV = uv;
-	outColor = color;
+    outUV = uv;
+    outColor = color;
 }

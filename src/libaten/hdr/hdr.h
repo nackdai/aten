@@ -7,11 +7,11 @@
 
 namespace aten
 {
-	class HDRExporter {
-	public:
-		static bool save(
-			const std::string& filename,
-			const vec4* image,
-			const int width, const int height);
-	};
+    class HDRExporter {
+    public:
+        static bool save(
+            const std::string& filename,
+            const vec4* image,
+            const int width, const int height);
+    };
 }

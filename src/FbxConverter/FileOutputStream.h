@@ -4,20 +4,20 @@
 #include "types.h"
 
 enum FileIoMode {
-	Bin,
-	Text,
+    Bin,
+    Text,
 };
 
 enum FilSeekPos {
-	Head,
-	Tail,
-	Cur,
+    Head,
+    Tail,
+    Cur,
 };
 
 class FileOutputStream
 {
 public:
-	FileOutputStream()
+    FileOutputStream()
     {
     }
     ~FileOutputStream()
@@ -25,8 +25,8 @@ public:
         finalize();
     }
 
-	FileOutputStream(const FileOutputStream& rhs) = delete;
-	FileOutputStream& operator=(const FileOutputStream& rhs) = delete;
+    FileOutputStream(const FileOutputStream& rhs) = delete;
+    FileOutputStream& operator=(const FileOutputStream& rhs) = delete;
 
 public:
     bool open(const char* path)
@@ -43,7 +43,7 @@ public:
             finalize();
         }
 
-		m_File = fopen(path, mode == FileIoMode::Text ? "wt" : "wb");
+        m_File = fopen(path, mode == FileIoMode::Text ? "wt" : "wb");
         ret = (m_File != nullptr);
 
         return ret;
@@ -51,9 +51,9 @@ public:
 
     void finalize()
     {
-		if (m_File) {
-			fclose(m_File);
-		}
+        if (m_File) {
+            fclose(m_File);
+        }
 
         m_File = nullptr;
         m_Pos = 0;
@@ -93,16 +93,16 @@ public:
         uint32_t nPos = SEEK_SET;
 
         switch (seekPos) {
-		case FilSeekPos::Head:
+        case FilSeekPos::Head:
             nPos = SEEK_SET;
             break;
-		case FilSeekPos::Cur:
+        case FilSeekPos::Cur:
             nPos = SEEK_CUR;
             break;
-		case FilSeekPos::Tail:
+        case FilSeekPos::Tail:
             // 出力時にはファイル終端は存在しないので・・・
-			AT_VRETURN_FALSE(false);
-			break;
+            AT_VRETURN_FALSE(false);
+            break;
         }
 
         bool ret = true;
@@ -113,13 +113,13 @@ public:
             if (ret) {
                 // 現在位置更新
                 switch (seekPos) {
-				case FilSeekPos::Head:
+                case FilSeekPos::Head:
                     m_Pos = offset;
                     break;
-				case FilSeekPos::Cur:
+                case FilSeekPos::Cur:
                     m_Pos += offset;
                     break;
-				case FilSeekPos::Tail:
+                case FilSeekPos::Tail:
                     AT_VRETURN_FALSE(false);
                     break;
                 }
@@ -135,19 +135,19 @@ public:
         return (m_File != NULL);
     }
 
-	uint32_t tell()
-	{
-		return (uint32_t)ftell(m_File);
-	}
+    uint32_t tell()
+    {
+        return (uint32_t)ftell(m_File);
+    }
 
-	void flush()
-	{
-		fflush(m_File);
-	}
+    void flush()
+    {
+        fflush(m_File);
+    }
 
 private:
-	FILE* m_File{ nullptr };
-	uint32_t m_Pos{ 0 };
+    FILE* m_File{ nullptr };
+    uint32_t m_Pos{ 0 };
 };
 
 #define OUTPUT_WRITE(out, p, offset, size)           ((out)->write((p), (offset), (size)) == (size))
@@ -155,54 +155,54 @@ private:
 
 class IoStreamSeekHelper {
 protected:
-	IoStreamSeekHelper() {}
+    IoStreamSeekHelper() {}
 
 public:
-	IoStreamSeekHelper(FileOutputStream* pOut)
-	{
-		m_pOut = pOut;
-		m_nPos = 0;
-		m_nAnchorPos = 0;
-	}
+    IoStreamSeekHelper(FileOutputStream* pOut)
+    {
+        m_pOut = pOut;
+        m_nPos = 0;
+        m_nAnchorPos = 0;
+    }
 
-	~IoStreamSeekHelper() {}
+    ~IoStreamSeekHelper() {}
 
 public:
-	bool skip(uint32_t nSkip)
-	{
-		m_nPos = m_pOut->getCurPos();
-		AT_VRETURN_FALSE(m_pOut->seek(nSkip, FilSeekPos::Cur));
-		return true;
-	}
+    bool skip(uint32_t nSkip)
+    {
+        m_nPos = m_pOut->getCurPos();
+        AT_VRETURN_FALSE(m_pOut->seek(nSkip, FilSeekPos::Cur));
+        return true;
+    }
 
-	void step(uint32_t nStep)
-	{
-		m_nPos += nStep;
-	}
+    void step(uint32_t nStep)
+    {
+        m_nPos += nStep;
+    }
 
-	bool returnTo()
-	{
-		AT_VRETURN_FALSE(m_pOut->seek(m_nPos, FilSeekPos::Head));
-		return true;
-	}
+    bool returnTo()
+    {
+        AT_VRETURN_FALSE(m_pOut->seek(m_nPos, FilSeekPos::Head));
+        return true;
+    }
 
-	bool returnWithAnchor()
-	{
-		m_nAnchorPos = m_pOut->getCurPos();
-		AT_VRETURN_FALSE(m_pOut->seek(m_nPos, FilSeekPos::Head));
-		return true;
-	}
+    bool returnWithAnchor()
+    {
+        m_nAnchorPos = m_pOut->getCurPos();
+        AT_VRETURN_FALSE(m_pOut->seek(m_nPos, FilSeekPos::Head));
+        return true;
+    }
 
-	bool returnToAnchor()
-	{
-		AT_VRETURN_FALSE(m_pOut->seek(m_nAnchorPos, FilSeekPos::Head));
-		return true;
-	}
+    bool returnToAnchor()
+    {
+        AT_VRETURN_FALSE(m_pOut->seek(m_nAnchorPos, FilSeekPos::Head));
+        return true;
+    }
 
-	FileOutputStream* getOutputStream() { return m_pOut; }
+    FileOutputStream* getOutputStream() { return m_pOut; }
 
 protected:
-	FileOutputStream* m_pOut;
-	uint32_t m_nPos;
-	uint32_t m_nAnchorPos;
+    FileOutputStream* m_pOut;
+    uint32_t m_nPos;
+    uint32_t m_nAnchorPos;
 };

@@ -15,24 +15,24 @@ namespace aten
         Hermite,
         Slerp,
 
-		Num,
+        Num,
 
         Mask = 0x7f,
         UserCustom = 1 << 7,
     };
-	AT_STATICASSERT(sizeof(AnmInterpType) == sizeof(uint8_t));
+    AT_STATICASSERT(sizeof(AnmInterpType) == sizeof(uint8_t));
 
     /** アニメーションを行うパラメータ.
      */
     enum class AnmTransformType : uint32_t {
-		Invalid = 0,
+        Invalid = 0,
 
         ParamX  = 1 << 0,
-		ParamY  = 1 << 1,
-		ParamZ  = 1 << 2,
-		ParamW  = 1 << 3,
-		ParamXYZ  = ParamX | ParamY | ParamZ,
-		ParamXYZW = ParamX | ParamY | ParamZ | ParamW,
+        ParamY  = 1 << 1,
+        ParamZ  = 1 << 2,
+        ParamW  = 1 << 3,
+        ParamXYZ  = ParamX | ParamY | ParamZ,
+        ParamXYZW = ParamX | ParamY | ParamZ | ParamW,
 
         ParamShift = 0,
         ParamMask = 0x0f,
@@ -43,12 +43,12 @@ namespace aten
         Scale      = 1 << 7,
 
         TransformShift = 4,
-		TransformMask = 0x7ffffff0,
+        TransformMask = 0x7ffffff0,
 
-		TranslateXYZ = Translate | ParamXYZ,
-		TranslateX   = Translate | ParamX,
-		TranslateY   = Translate | ParamY,
-		TranslateZ   = Translate | ParamZ,
+        TranslateXYZ = Translate | ParamXYZ,
+        TranslateX   = Translate | ParamX,
+        TranslateY   = Translate | ParamY,
+        TranslateZ   = Translate | ParamZ,
 
         RotateXYZ = Rotate | ParamXYZ,
         RotateX   = Rotate | ParamX,
@@ -64,7 +64,7 @@ namespace aten
         ScaleY   = Scale | ParamY,
         ScaleZ   = Scale | ParamZ,
     };
-	AT_STATICASSERT(sizeof(AnmTransformType) == sizeof(uint32_t));
+    AT_STATICASSERT(sizeof(AnmTransformType) == sizeof(uint32_t));
 
     /** アニメーションキーフレーム.
      */
@@ -72,7 +72,7 @@ namespace aten
         Time,    ///< 時間ベース.
         Frame,       ///< フレームベース.
     };
-	AT_STATICASSERT(sizeof(AnmKeyType) == sizeof(uint32_t));
+    AT_STATICASSERT(sizeof(AnmKeyType) == sizeof(uint32_t));
 
     // NOTE
     // フォーマット
@@ -92,7 +92,7 @@ namespace aten
     /**
     */
     struct AnmHeader {
-		uint32_t magic{ 0 };
+        uint32_t magic{ 0 };
         uint32_t version{ 0 };
 
         uint32_t sizeHeader{ 0 };
@@ -102,10 +102,10 @@ namespace aten
         uint32_t numChannels{ 0 };
         uint32_t numKeys{ 0 };
 
-		AnmKeyType keyType{ AnmKeyType::Time };    ///< アニメーションキーフレーム.
+        AnmKeyType keyType{ AnmKeyType::Time };    ///< アニメーションキーフレーム.
         uint32_t reserved{ 0 };
 
-		float time{ 0.0f };
+        float time{ 0.0f };
     };
 
     /** キーフレーム情報.
@@ -113,9 +113,9 @@ namespace aten
      * キーフレームあたりのジョイントのパラメータに適用するパラメータ.
      */
     struct AnmKey {
-		float keyTime{ 0.0f };         ///< キー時間.
+        float keyTime{ 0.0f };         ///< キー時間.
         
-		uint8_t numParams{ 0 };     ///< アニメーションパラメータ数。位置、回転、スケールによって異なる.
+        uint8_t numParams{ 0 };     ///< アニメーションパラメータ数。位置、回転、スケールによって異なる.
         uint8_t stride{ 0 };        ///< １パラメータあたりのバイトサイズ.
         uint8_t reserved[2];
 
@@ -126,10 +126,10 @@ namespace aten
             float* params;
         };
 
-		AnmKey()
-		{
-			value = 0;
-		}
+        AnmKey()
+        {
+            value = 0;
+        }
     };
 
     /** アニメーションチャンネル
@@ -137,13 +137,13 @@ namespace aten
      * ジョイントのパラメータ（ex. 位置、回転など）ごとのアニメーション情報
      */
     struct AnmChannel {
-		AnmInterpType interp{ AnmInterpType::Linear };    ///< 補間計算のタイプ.
-		uint8_t stride{ 0 };
+        AnmInterpType interp{ AnmInterpType::Linear };    ///< 補間計算のタイプ.
+        uint8_t stride{ 0 };
         uint16_t numKeys{ 0 };  ///< キーフレーム情報数.
 
         uint32_t keyIdx{ 0 };     ///< チャンネルが参照するキーの最初の位置.
 
-		AnmTransformType type{ AnmTransformType::Invalid };       ///< アニメーションを行うパラメータのタイプ.
+        AnmTransformType type{ AnmTransformType::Invalid };       ///< アニメーションを行うパラメータのタイプ.
     };
 
     /** アニメーションノード.
@@ -152,16 +152,16 @@ namespace aten
      */
     struct AnmNode {
         char target[32];       ///< 適用対象のジョイント名.
-		uint32_t targetKey{ 0 };    ///< 適用対象のジョイントのキー値.
+        uint32_t targetKey{ 0 };    ///< 適用対象のジョイントのキー値.
 
-		uint16_t targetIdx{ 0 };    ///< 適用対象のジョイントのインデックス.
-		uint16_t numChannels{ 0 };  ///< チャンネル数.
+        uint16_t targetIdx{ 0 };    ///< 適用対象のジョイントのインデックス.
+        uint16_t numChannels{ 0 };  ///< チャンネル数.
 
         uint32_t channelIdx{ 0 };   ///< ノードが参照するチャンネルの最初の位置.
 
-		AnmNode()
-		{
-			target[0] = 0;
-		}
+        AnmNode()
+        {
+            target[0] = 0;
+        }
     };
 }

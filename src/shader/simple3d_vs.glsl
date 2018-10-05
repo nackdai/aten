@@ -13,6 +13,6 @@ out vec3 varColor;
 
 void main()
 {
-	gl_Position = mtxW2C * mtxL2W * position;
-	varColor = color;
+    gl_Position = mtxW2C * mtxL2W * position;
+    varColor = color;
 }

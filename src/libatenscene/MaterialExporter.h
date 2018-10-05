@@ -6,29 +6,29 @@
 
 namespace aten
 {
-	struct MtrlExportInfo {
-		std::string name;
-		aten::MaterialParameter param;
+    struct MtrlExportInfo {
+        std::string name;
+        aten::MaterialParameter param;
 
-		MtrlExportInfo() {}
+        MtrlExportInfo() {}
 
-		MtrlExportInfo(const char* n, const aten::MaterialParameter& p)
-			: name(n), param(p)
-		{}
-	};
+        MtrlExportInfo(const char* n, const aten::MaterialParameter& p)
+            : name(n), param(p)
+        {}
+    };
 
-	class MaterialExporter {
-	private:
-		MaterialExporter();
-		~MaterialExporter();
+    class MaterialExporter {
+    private:
+        MaterialExporter();
+        ~MaterialExporter();
 
-	public:
-		static bool exportMaterial(
-			const char* lpszOutFile,
-			const std::vector<MtrlExportInfo>& mtrls);
+    public:
+        static bool exportMaterial(
+            const char* lpszOutFile,
+            const std::vector<MtrlExportInfo>& mtrls);
 
-		static bool exportMaterial(
-			const char* lpszOutFile,
-			const std::vector<aten::material*>& mtrls);
-	};
+        static bool exportMaterial(
+            const char* lpszOutFile,
+            const std::vector<aten::material*>& mtrls);
+    };
 }

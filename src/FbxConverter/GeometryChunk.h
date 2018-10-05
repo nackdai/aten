@@ -25,16 +25,16 @@ public:
         uint32_t maxJointMtxNum,
         FileOutputStream* pOut,
         aten::FbxImporter* pImporter,
-		bool isExportForGPUSkinning);
+        bool isExportForGPUSkinning);
 
     void Clear();
 
     /** トライアングルリストで出力するかどうかを設定.
      */
     void setIsExportTriList(bool flag)
-	{
-		m_ExportTriList = flag;
-	}
+    {
+        m_ExportTriList = flag;
+    }
 
 protected:
     bool exportGroup(
@@ -100,17 +100,17 @@ protected:
     std::vector<uint32_t> m_ExportedVtx;
 
     aten::vec4 m_vMin;
-	aten::vec4 m_vMax;
+    aten::vec4 m_vMax;
 
     aten::MeshHeader m_Header;
 
-	// メッシュが影響を受けるマトリクスの最大数.
-	// シェーダに設定するマトリクス数.
+    // メッシュが影響を受けるマトリクスの最大数.
+    // シェーダに設定するマトリクス数.
     uint32_t m_MaxJointMtxNum;
 
-	// GPUスキニング向けの出力をするかどうか.
-	bool m_isExportForGPUSkinning{ false };
+    // GPUスキニング向けの出力をするかどうか.
+    bool m_isExportForGPUSkinning{ false };
 
     // トライアングルリストで出力するかどうか
-	bool m_ExportTriList{ true };
+    bool m_ExportTriList{ true };
 };

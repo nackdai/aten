@@ -40,15 +40,15 @@ namespace aten
             std::function<void(void*)> func,
             void* userData);
 
-		/** スレッド実行中かどうかを取得.
+        /** スレッド実行中かどうかを取得.
          */
         bool isRunning();
 
-		virtual void run();
+        virtual void run();
 
         /** このスレッドが終了するのを待機.
          */
-		virtual void join();
+        virtual void join();
 
         /** 名前取得.
          */
@@ -57,7 +57,7 @@ namespace aten
     protected:
         uint32_t m_ThreadResult;
 
-		std::thread m_thread;
+        std::thread m_thread;
 
         std::string m_Name;
 
@@ -67,28 +67,28 @@ namespace aten
         void* m_userData{ nullptr };
     };
 
-	/////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
 
-	/** セマフォ.
-	*/
-	class Semaphore {
-	public:
-		Semaphore();
-		~Semaphore();
+    /** セマフォ.
+    */
+    class Semaphore {
+    public:
+        Semaphore();
+        ~Semaphore();
 
-	public:
-		/** 待機.
-		*/
-		void wait();
+    public:
+        /** 待機.
+        */
+        void wait();
 
-		/** セマフォカウントを解放.
-		*/
-		void notify();
+        /** セマフォカウントを解放.
+        */
+        void notify();
 
-	private:
-		std::mutex m_mutex;
-		std::condition_variable m_condVar;
+    private:
+        std::mutex m_mutex;
+        std::condition_variable m_condVar;
 
-		uint16_t m_count;
-	};
+        uint16_t m_count;
+    };
 }

@@ -12,310 +12,310 @@
 
 namespace aten
 {
-	class DeformMeshReadHelper : public IDeformMeshReadHelper {
-	public:
-		DeformMeshReadHelper() {}
-		virtual ~DeformMeshReadHelper() {}
+    class DeformMeshReadHelper : public IDeformMeshReadHelper {
+    public:
+        DeformMeshReadHelper() {}
+        virtual ~DeformMeshReadHelper() {}
 
-	public:
-		virtual void createVAO(
-			GeomVertexBuffer* vb,
-			const VertexAttrib* attribs,
-			uint32_t attribNum) override final
-		{
-			AT_ASSERT(m_shd);
-			vb->createVAOByAttribName(m_shd, attribs, attribNum);
-		}
+    public:
+        virtual void createVAO(
+            GeomVertexBuffer* vb,
+            const VertexAttrib* attribs,
+            uint32_t attribNum) override final
+        {
+            AT_ASSERT(m_shd);
+            vb->createVAOByAttribName(m_shd, attribs, attribNum);
+        }
 
-		shader* m_shd{ nullptr };
-	};
+        shader* m_shd{ nullptr };
+    };
 
-	deformable::~deformable()
-	{
-		if (m_accel) {
-			delete m_accel;
-		}
-	}
+    deformable::~deformable()
+    {
+        if (m_accel) {
+            delete m_accel;
+        }
+    }
 
-	bool deformable::read(const char* path)
-	{
-		// TODO...
-		DeformMeshReadHelper helper;
-		DeformableRenderer::initDeformMeshReadHelper(&helper);
+    bool deformable::read(const char* path)
+    {
+        // TODO...
+        DeformMeshReadHelper helper;
+        DeformableRenderer::initDeformMeshReadHelper(&helper);
 
-		FileInputStream file;
-		AT_VRETURN_FALSE(file.open(path, "rb"));
+        FileInputStream file;
+        AT_VRETURN_FALSE(file.open(path, "rb"));
 
-		FileInputStream* stream = &file;
+        FileInputStream* stream = &file;
 
-		MdlHeader header;
-		AT_VRETURN_FALSE(AT_STREAM_READ(stream, &header, sizeof(header)));
+        MdlHeader header;
+        AT_VRETURN_FALSE(AT_STREAM_READ(stream, &header, sizeof(header)));
 
-		// Mesh.
-		{
-			MdlChunkHeader meshChunkHeader;
-			AT_VRETURN_FALSE(AT_STREAM_READ(stream, &meshChunkHeader, sizeof(meshChunkHeader)));
+        // Mesh.
+        {
+            MdlChunkHeader meshChunkHeader;
+            AT_VRETURN_FALSE(AT_STREAM_READ(stream, &meshChunkHeader, sizeof(meshChunkHeader)));
 
-			if (meshChunkHeader.magicChunk == MdlChunkMagic::Mesh) {
-				AT_VRETURN_FALSE(m_mesh.read(stream, &helper));
-			}
-			else {
-				AT_VRETURN_FALSE(false);
-			}
-		}
+            if (meshChunkHeader.magicChunk == MdlChunkMagic::Mesh) {
+                AT_VRETURN_FALSE(m_mesh.read(stream, &helper));
+            }
+            else {
+                AT_VRETURN_FALSE(false);
+            }
+        }
 
-		auto pos = stream->curPos();
+        auto pos = stream->curPos();
 
-		// Skeleton.
-		{
-			MdlChunkHeader sklChunkHeader;
-			AT_VRETURN_FALSE(AT_STREAM_READ(stream, &sklChunkHeader, sizeof(sklChunkHeader)));
+        // Skeleton.
+        {
+            MdlChunkHeader sklChunkHeader;
+            AT_VRETURN_FALSE(AT_STREAM_READ(stream, &sklChunkHeader, sizeof(sklChunkHeader)));
 
-			if (sklChunkHeader.magicChunk == MdlChunkMagic::Joint) {
-				AT_VRETURN_FALSE(m_skl.read(stream));
-			}
-			else {
-				AT_VRETURN_FALSE(false);
-			}
+            if (sklChunkHeader.magicChunk == MdlChunkMagic::Joint) {
+                AT_VRETURN_FALSE(m_skl.read(stream));
+            }
+            else {
+                AT_VRETURN_FALSE(false);
+            }
 
-			m_sklController.init(&m_skl);
-		}
+            m_sklController.init(&m_skl);
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	void deformable::release()
-	{
-		m_mesh.release();
-		m_skl.release();
-		m_sklController.release();
-	}
+    void deformable::release()
+    {
+        m_mesh.release();
+        m_skl.release();
+        m_sklController.release();
+    }
 
-	class DeformMeshRenderHelper : public IDeformMeshRenderHelper {
-	public:
-		DeformMeshRenderHelper(shader* s) : m_shd(s) {}
-		virtual ~DeformMeshRenderHelper() {}
+    class DeformMeshRenderHelper : public IDeformMeshRenderHelper {
+    public:
+        DeformMeshRenderHelper(shader* s) : m_shd(s) {}
+        virtual ~DeformMeshRenderHelper() {}
 
-		virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final
-		{
-			if (m_handleMtxJoint < 0) {
-				m_handleMtxJoint = m_shd->getHandle("mtxJoint");
-				m_mtxs.reserve(4);
-			}
+        virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final
+        {
+            if (m_handleMtxJoint < 0) {
+                m_handleMtxJoint = m_shd->getHandle("mtxJoint");
+                m_mtxs.reserve(4);
+            }
 
-			m_mtxs.push_back(mtx);
-		}
+            m_mtxs.push_back(mtx);
+        }
 
-		virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final
-		{
-			const auto& mtrls = material::getMaterials();
+        virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final
+        {
+            const auto& mtrls = material::getMaterials();
 
-			// TODO
-			// Find material.
-			auto found = std::find_if(
-				mtrls.begin(), mtrls.end(),
-				[&](const material* mtrl)->bool
-			{
-				if (mtrl->nameString() == mtrlDesc.name) {
-					return true;
-				}
+            // TODO
+            // Find material.
+            auto found = std::find_if(
+                mtrls.begin(), mtrls.end(),
+                [&](const material* mtrl)->bool
+            {
+                if (mtrl->nameString() == mtrlDesc.name) {
+                    return true;
+                }
 
-				return false;
-			});
+                return false;
+            });
 
-			if (found != mtrls.end()) {
-				const auto mtrl = *found;
-				const auto& mtrlParam = mtrl->param();
+            if (found != mtrls.end()) {
+                const auto mtrl = *found;
+                const auto& mtrlParam = mtrl->param();
 
-				auto albedo = const_cast<texture*>(texture::getTexture(mtrlParam.albedoMap));
-				if (albedo) {
-					albedo->initAsGLTexture();
-					albedo->bindAsGLTexture(0, m_shd);
-				}
-			}
-		}
+                auto albedo = const_cast<texture*>(texture::getTexture(mtrlParam.albedoMap));
+                if (albedo) {
+                    albedo->initAsGLTexture();
+                    albedo->bindAsGLTexture(0, m_shd);
+                }
+            }
+        }
 
-		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
-		{
-			if (isGPUSkinning) {
-				return;
-			}
+        virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
+        {
+            if (isGPUSkinning) {
+                return;
+            }
 
-			AT_ASSERT(m_handleMtxJoint >= 0);
+            AT_ASSERT(m_handleMtxJoint >= 0);
 
-			uint32_t mtxNum = (uint32_t)m_mtxs.size();
+            uint32_t mtxNum = (uint32_t)m_mtxs.size();
 
-			CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_TRUE, (const GLfloat*)&m_mtxs[0]));
+            CALL_GL_API(::glUniformMatrix4fv(m_handleMtxJoint, mtxNum, GL_TRUE, (const GLfloat*)&m_mtxs[0]));
 
-			m_mtxs.clear();
-		}
+            m_mtxs.clear();
+        }
 
-		shader* m_shd{ nullptr };
-		int m_handleMtxJoint{ -1 };
-		std::vector<mat4> m_mtxs;
-	};
+        shader* m_shd{ nullptr };
+        int m_handleMtxJoint{ -1 };
+        std::vector<mat4> m_mtxs;
+    };
 
-	void deformable::render(shader* shd)
-	{
-		AT_ASSERT(shd);
+    void deformable::render(shader* shd)
+    {
+        AT_ASSERT(shd);
 
-		DeformMeshRenderHelper helper(shd);
+        DeformMeshRenderHelper helper(shd);
 
-		m_mesh.render(m_sklController, &helper);
-	}
+        m_mesh.render(m_sklController, &helper);
+    }
 
-	void deformable::update(const mat4& mtxL2W)
-	{
-		m_sklController.buildPose(mtxL2W);
-	}
+    void deformable::update(const mat4& mtxL2W)
+    {
+        m_sklController.buildPose(mtxL2W);
+    }
 
-	void deformable::update(
-		const mat4& mtxL2W,
-		DeformAnimation* anm,
-		real time)
-	{
-		if (anm) {
-			anm->applyAnimation(&m_sklController, time);
-		}
-		m_sklController.buildPose(mtxL2W);
-	}
+    void deformable::update(
+        const mat4& mtxL2W,
+        DeformAnimation* anm,
+        real time)
+    {
+        if (anm) {
+            anm->applyAnimation(&m_sklController, time);
+        }
+        m_sklController.buildPose(mtxL2W);
+    }
 
-	void deformable::getGeometryData(
-		std::vector<SkinningVertex>& vtx,
-		std::vector<uint32_t>& idx,
-		std::vector<aten::PrimitiveParamter>& tris) const
-	{
-		m_mesh.getGeometryData(vtx, idx, tris);
-	}
+    void deformable::getGeometryData(
+        std::vector<SkinningVertex>& vtx,
+        std::vector<uint32_t>& idx,
+        std::vector<aten::PrimitiveParamter>& tris) const
+    {
+        m_mesh.getGeometryData(vtx, idx, tris);
+    }
 
-	const std::vector<mat4>& deformable::getMatrices() const
-	{
-		return m_sklController.getMatrices();
-	}
+    const std::vector<mat4>& deformable::getMatrices() const
+    {
+        return m_sklController.getMatrices();
+    }
 
-	void deformable::build()
-	{
-		if (!m_accel) {
-			m_accel = accelerator::createAccelerator(AccelType::UserDefs);
-		}
+    void deformable::build()
+    {
+        if (!m_accel) {
+            m_accel = accelerator::createAccelerator(AccelType::UserDefs);
+        }
 
-		const auto& desc = m_mesh.getDesc();
+        const auto& desc = m_mesh.getDesc();
 
-		// TODO
-		// Not applied animation...
-		setBoundingBox(aabb(
-			aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
-			aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
-	}
+        // TODO
+        // Not applied animation...
+        setBoundingBox(aabb(
+            aten::vec3(desc.minVtx[0], desc.minVtx[1], desc.minVtx[2]),
+            aten::vec3(desc.maxVtx[0], desc.maxVtx[1], desc.maxVtx[2])));
+    }
 
-	class DeformMeshRenderHelperEx : public IDeformMeshRenderHelper {
-	public:
-		DeformMeshRenderHelperEx() {}
-		virtual ~DeformMeshRenderHelperEx() {}
+    class DeformMeshRenderHelperEx : public IDeformMeshRenderHelper {
+    public:
+        DeformMeshRenderHelperEx() {}
+        virtual ~DeformMeshRenderHelperEx() {}
 
-		virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final {}
-		virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final {}
-		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
-		{
-			AT_ASSERT(isGPUSkinning)
-			func(mtxL2W, mtxPrevL2W, objid, triOffset + globalTriOffset);
-		}
+        virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final {}
+        virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final {}
+        virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
+        {
+            AT_ASSERT(isGPUSkinning)
+            func(mtxL2W, mtxPrevL2W, objid, triOffset + globalTriOffset);
+        }
 
-		aten::hitable::FuncPreDraw func;
-		aten::mat4 mtxL2W;
-		aten::mat4 mtxPrevL2W;
-		int objid;
-		uint32_t globalTriOffset;
-	};
+        aten::hitable::FuncPreDraw func;
+        aten::mat4 mtxL2W;
+        aten::mat4 mtxPrevL2W;
+        int objid;
+        uint32_t globalTriOffset;
+    };
 
-	void deformable::draw(
-		aten::hitable::FuncPreDraw func,
-		const aten::mat4& mtxL2W,
-		const aten::mat4& mtxPrevL2W,
-		int parentId,
-		uint32_t triOffset)
-	{
-		int objid = (parentId < 0 ? id() : parentId);
+    void deformable::draw(
+        aten::hitable::FuncPreDraw func,
+        const aten::mat4& mtxL2W,
+        const aten::mat4& mtxPrevL2W,
+        int parentId,
+        uint32_t triOffset)
+    {
+        int objid = (parentId < 0 ? id() : parentId);
 
-		DeformMeshRenderHelperEx helper;
-		{
-			helper.func = func;
-			helper.mtxL2W = mtxL2W;
-			helper.mtxPrevL2W = mtxPrevL2W;
-			helper.objid = objid;
-			helper.globalTriOffset = triOffset;
-		}
+        DeformMeshRenderHelperEx helper;
+        {
+            helper.func = func;
+            helper.mtxL2W = mtxL2W;
+            helper.mtxPrevL2W = mtxPrevL2W;
+            helper.objid = objid;
+            helper.globalTriOffset = triOffset;
+        }
 
-		m_mesh.render(m_sklController, &helper);
-	}
+        m_mesh.render(m_sklController, &helper);
+    }
 
-	//////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
 
-	shader DeformableRenderer::s_shd;
+    shader DeformableRenderer::s_shd;
 
-	bool DeformableRenderer::init(
-		int width, int height,
-		const char* pathVS,
-		const char* pathFS)
-	{
-		return s_shd.init(width, height, pathVS, pathFS);
-	}
+    bool DeformableRenderer::init(
+        int width, int height,
+        const char* pathVS,
+        const char* pathFS)
+    {
+        return s_shd.init(width, height, pathVS, pathFS);
+    }
 
-	void DeformableRenderer::render(
-		const camera* cam,
-		deformable* mdl)
-	{
-		CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-		CALL_GL_API(::glClearDepthf(1.0f));
-		CALL_GL_API(::glClearStencil(0));
-		CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+    void DeformableRenderer::render(
+        const camera* cam,
+        deformable* mdl)
+    {
+        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
+        CALL_GL_API(::glClearDepthf(1.0f));
+        CALL_GL_API(::glClearStencil(0));
+        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
-		CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+        CALL_GL_API(::glEnable(GL_DEPTH_TEST));
 
-		// For Alpha Blend.
-		CALL_GL_API(::glEnable(GL_BLEND));
-		CALL_GL_API(::glBlendEquation(GL_FUNC_ADD));
-		CALL_GL_API(::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        // For Alpha Blend.
+        CALL_GL_API(::glEnable(GL_BLEND));
+        CALL_GL_API(::glBlendEquation(GL_FUNC_ADD));
+        CALL_GL_API(::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-		s_shd.prepareRender(nullptr, false);
+        s_shd.prepareRender(nullptr, false);
 
-		{
-			auto camparam = cam->param();
+        {
+            auto camparam = cam->param();
 
-			// TODO
-			camparam.znear = real(0.1);
-			camparam.zfar = real(10000.0);
+            // TODO
+            camparam.znear = real(0.1);
+            camparam.zfar = real(10000.0);
 
-			mat4 mtxW2V;
-			mat4 mtxV2C;
+            mat4 mtxW2V;
+            mat4 mtxV2C;
 
-			mtxW2V.lookat(
-				camparam.origin,
-				camparam.center,
-				camparam.up);
+            mtxW2V.lookat(
+                camparam.origin,
+                camparam.center,
+                camparam.up);
 
-			mtxV2C.perspective(
-				camparam.znear,
-				camparam.zfar,
-				camparam.vfov,
-				camparam.aspect);
+            mtxV2C.perspective(
+                camparam.znear,
+                camparam.zfar,
+                camparam.vfov,
+                camparam.aspect);
 
-			aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+            aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
-			auto hMtxW2C = s_shd.getHandle("mtxW2C");
-			CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+            auto hMtxW2C = s_shd.getHandle("mtxW2C");
+            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
-			// NOTE
-			// グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.
-			// そのため、シェーダでは計算する必要がないので、シェーダに渡さない.
-		}
+            // NOTE
+            // グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.
+            // そのため、シェーダでは計算する必要がないので、シェーダに渡さない.
+        }
 
-		mdl->render(&s_shd);
-	}
+        mdl->render(&s_shd);
+    }
 
-	void DeformableRenderer::initDeformMeshReadHelper(DeformMeshReadHelper* helper)
-	{
-		//AT_ASSERT(s_shd.isValid());
-		helper->m_shd = &s_shd;
-	}
+    void DeformableRenderer::initDeformMeshReadHelper(DeformMeshReadHelper* helper)
+    {
+        //AT_ASSERT(s_shd.isValid());
+        helper->m_shd = &s_shd;
+    }
 }

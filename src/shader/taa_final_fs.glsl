@@ -9,10 +9,10 @@ layout(location = 0) out highp vec4 oColor;
 
 void main()
 {
-	ivec2 texsize = textureSize(s0, 0);
+    ivec2 texsize = textureSize(s0, 0);
 
-	vec2 uv = gl_FragCoord.xy / texsize.xy;
+    vec2 uv = gl_FragCoord.xy / texsize.xy;
 
-	oColor = texture2D(s0, uv);
-	oColor.a = 1;
+    oColor = texture2D(s0, uv);
+    oColor.a = 1;
 }

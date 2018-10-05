@@ -46,7 +46,7 @@ bool GeometryChunkExporter::exportGeometry(
     uint32_t maxJointMtxNum,
     FileOutputStream* pOut,
     aten::FbxImporter* pImporter,
-	bool isExportForGPUSkinning)
+    bool isExportForGPUSkinning)
 {
     // メッシュが影響を受けるマトリクスの最大数
     m_MaxJointMtxNum = std::max<uint32_t>(
@@ -56,8 +56,8 @@ bool GeometryChunkExporter::exportGeometry(
                         ? m_MaxJointMtxNum + 1
                         : m_MaxJointMtxNum);
 
-	// GPUスキニング向けの出力をするかどうか.
-	m_isExportForGPUSkinning = isExportForGPUSkinning;
+    // GPUスキニング向けの出力をするかどうか.
+    m_isExportForGPUSkinning = isExportForGPUSkinning;
     
     {
         // TODO
@@ -72,7 +72,7 @@ bool GeometryChunkExporter::exportGeometry(
 
     // TODO
     // Export mesh groups.
-	AT_VRETURN_FALSE(exportGroup(pOut, pImporter));
+    AT_VRETURN_FALSE(exportGroup(pOut, pImporter));
 
     m_Header.sizeFile = pOut->getCurPos();
 
@@ -84,7 +84,7 @@ bool GeometryChunkExporter::exportGeometry(
     m_Header.maxVtx[1] = m_vMax.y;
     m_Header.maxVtx[2] = m_vMax.z;
 
-	m_Header.isGPUSkinning = m_isExportForGPUSkinning;
+    m_Header.isGPUSkinning = m_isExportForGPUSkinning;
 
     // TODO
     m_Header.numMeshGroup = 1;
@@ -92,13 +92,13 @@ bool GeometryChunkExporter::exportGeometry(
     // Export S_MSH_HEADER.
     {
         // Rmenber end of geometry chunk.
-		AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
+        AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
         OUTPUT_WRITE_VRETURN(pOut, &m_Header, 0, sizeof(m_Header));
         seekHelper.step(sizeof(m_Header));
 
         // returnTo end of geometry chunk.
-		AT_VRETURN_FALSE(seekHelper.returnToAnchor());
+        AT_VRETURN_FALSE(seekHelper.returnToAnchor());
     }
 
     pImporter->exportGeometryCompleted();
@@ -178,7 +178,7 @@ bool GeometryChunkExporter::exportGroup(
     sGroupInfo.numVB = exportVertices(
                         pOut,
                         pImporter);
-	AT_VRETURN_FALSE(sGroupInfo.numVB > 0);
+    AT_VRETURN_FALSE(sGroupInfo.numVB > 0);
 
     // Export meshes.
     AT_VRETURN_FALSE(
@@ -192,13 +192,13 @@ bool GeometryChunkExporter::exportGroup(
     // Export MeshGroup.
     {
         // Rmenber end of geometry chunk.
-		AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
+        AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
         OUTPUT_WRITE_VRETURN(pOut, &sGroupInfo, 0, sizeof(sGroupInfo));
         seekHelper.step(sizeof(sGroupInfo));
 
         // returnTo end of geometry chunk.
-		AT_VRETURN_FALSE(seekHelper.returnToAnchor());
+        AT_VRETURN_FALSE(seekHelper.returnToAnchor());
     }
 
     pImporter->exportGeometryCompleted();
@@ -212,7 +212,7 @@ struct JointInfo {
     uint32_t idx;
 
     // 指定された関節におけるスキニングウエイト最大値
-	float maxWeight{ 0.0f };
+    float maxWeight{ 0.0f };
 
     JointInfo()
     {
@@ -491,12 +491,12 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
     // 影響を受ける関節が同じ三角形をまとめる
     // Merge triangles by joint idx.
     if (sMesh.subset.size() > 1)
-	{
+    {
         // 候補リストを最大関節数だけ確保
         FuncFindIncludedJointIdx::candidateList.resize(m_MaxJointMtxNum);
 
         for (auto it = sMesh.subset.begin(); it != sMesh.subset.end(); )
-		{
+        {
             PrimitiveSetParam& sPrimSet = *it;
             uint32_t masterKey = sPrimSet.key;
 
@@ -514,11 +514,11 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
                 // 一致した関節数ごとに処理を行う
 
                 for (int32_t i = m_MaxJointMtxNum - 1; i >= 0; i--)
-				{
+                {
                     auto candidate = FuncFindIncludedJointIdx::candidateList[i].begin();
 
                     for (; candidate != FuncFindIncludedJointIdx::candidateList[i].end(); candidate++)
-					{
+                    {
                         const PrimitiveSetParam& prim = *(*candidate);
 
                         // マージする
@@ -562,7 +562,7 @@ void GeometryChunkExporter::classifyTriangleByJoint(MeshInfo& sMesh)
             }
 
             if (erased) {
-				// 削除したので、新しいイテレータを取得.
+                // 削除したので、新しいイテレータを取得.
                 it = std::find(
                         sMesh.subset.begin(),
                         sMesh.subset.end(),
@@ -606,10 +606,10 @@ bool GeometryChunkExporter::computeVtxNormal(
         uint32_t nVtxIdx = sTri.vtx[i];
 
         bool result = pImporter->getVertex(
-			nVtxIdx,
+            nVtxIdx,
             vecPos[i],
             aten::MeshVertexFormat::Position);
-		AT_VRETURN_FALSE(result);
+        AT_VRETURN_FALSE(result);
     }
 
     // NOTE
@@ -626,10 +626,10 @@ bool GeometryChunkExporter::computeVtxNormal(
         uint32_t nIdx_1 = (i + 1) % 3;
         uint32_t nIdx_2 = (i + 2) % 3;
 
-		auto vP = vecPos[nIdx_1] - vecPos[nIdx_0];
-		auto vQ = vecPos[nIdx_2] - vecPos[nIdx_0];
+        auto vP = vecPos[nIdx_1] - vecPos[nIdx_0];
+        auto vQ = vecPos[nIdx_2] - vecPos[nIdx_0];
 
-		auto nml = aten::cross(vQ, vP);
+        auto nml = aten::cross(vQ, vP);
 
         VtxAdditional& sVtx = m_VtxList[nVtxIdx];
         sVtx.nml.push_back(nml);
@@ -651,26 +651,26 @@ bool GeometryChunkExporter::computeVtxTangent(
 
         // Get position.
         bool result = pImporter->getVertex(
-			nVtxIdx,
+            nVtxIdx,
             vecPos[i],
             aten::MeshVertexFormat::Position);
-		AT_VRETURN_FALSE(result);
+        AT_VRETURN_FALSE(result);
 
         // Get texture coordinate.
         result = pImporter->getVertex(
-			nVtxIdx,
+            nVtxIdx,
             vecUV[i],
             aten::MeshVertexFormat::UV);
-		AT_VRETURN_FALSE(result);
+        AT_VRETURN_FALSE(result);
 
         // Get normal.
         result = pImporter->getVertex(
-			nVtxIdx,
+            nVtxIdx,
             vecNml[i],
             aten::MeshVertexFormat::Normal);
         if (!result) {
             // If mesh don't have normal, get normal from computed normal.
-			AT_VRETURN_FALSE(m_VtxList.size() > nVtxIdx);
+            AT_VRETURN_FALSE(m_VtxList.size() > nVtxIdx);
 
             const VtxAdditional& sVtx = m_VtxList[nVtxIdx];
             sVtx.getNormal((aten::vec3)vecNml[i]);
@@ -694,8 +694,8 @@ bool GeometryChunkExporter::computeVtxTangent(
         uint32_t nIdx_1 = (i + 1) % 3;
         uint32_t nIdx_2 = (i + 2) % 3;
 
-		auto vP = vecPos[nIdx_1] - vecPos[nIdx_0];
-		auto vQ = vecPos[nIdx_2] - vecPos[nIdx_0];
+        auto vP = vecPos[nIdx_1] - vecPos[nIdx_0];
+        auto vQ = vecPos[nIdx_2] - vecPos[nIdx_0];
 
         fCoeff[0] = vecUV[nIdx_2].v[1] - vecUV[nIdx_0].v[1];
         fCoeff[1] = -(vecUV[nIdx_1].v[1] - vecUV[nIdx_0].v[1]);
@@ -705,14 +705,14 @@ bool GeometryChunkExporter::computeVtxTangent(
         float fInvDeterminant = 1.0f / (fCoeff[3] * fCoeff[0] - fCoeff[2] * fCoeff[1]);
 
         // BiNormal
-		vP = vP * fInvDeterminant * fCoeff[2];
-		vQ = vQ * fInvDeterminant * fCoeff[3];
-		auto vB = vP + vQ;
-		vB.normalize();
+        vP = vP * fInvDeterminant * fCoeff[2];
+        vQ = vQ * fInvDeterminant * fCoeff[3];
+        auto vB = vP + vQ;
+        vB.normalize();
 
         // Tangent
-		// X(T) = Y(B) x Z(N)
-		auto vT = cross(vB, vecNml[nIdx_0]);
+        // X(T) = Y(B) x Z(N)
+        auto vT = cross(vB, vecNml[nIdx_0]);
 
         VtxAdditional& sVtx = m_VtxList[nVtxIdx];
         sVtx.tangent.push_back(vT);
@@ -737,8 +737,8 @@ uint32_t GeometryChunkExporter::exportVertices(
     uint32_t nVBCnt = 0;
     uint32_t nPrevFmt = 0;
 
-	m_vMin = aten::vec4(AT_MATH_INF);
-	m_vMax = aten::vec4(-AT_MATH_INF);
+    m_vMin = aten::vec4(AT_MATH_INF);
+    m_vMax = aten::vec4(-AT_MATH_INF);
 
     for (size_t i = 0; i < m_MeshList.size(); i++) {
         MeshInfo& sMesh = m_MeshList[i];
@@ -753,7 +753,7 @@ uint32_t GeometryChunkExporter::exportVertices(
             // Blank MeshVertex. 
             AT_VRETURN(seekHelper.skip(sizeof(sVtxInfo)), 0);
 
-			AT_VRETURN(
+            AT_VRETURN(
                 exportVertices(
                     pOut,
                     pImporter,
@@ -763,7 +763,7 @@ uint32_t GeometryChunkExporter::exportVertices(
             // returnTo to position of expoting MeshVertex.
             AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
-			sVtxInfo.sizeVtx = sMesh.sizeVtx;
+            sVtxInfo.sizeVtx = sMesh.sizeVtx;
             sVtxInfo.numVtx = (uint16_t)m_ExportedVtx.size();
 
             // Export MeshVertex.
@@ -814,10 +814,10 @@ bool GeometryChunkExporter::exportVertices(
     // 頂点データサイズのテーブル
     static uint32_t tblVtxSize[] = {
         (uint32_t)aten::MeshVertexSize::Position,
-		(uint32_t)aten::MeshVertexSize::Normal,
-		(uint32_t)aten::MeshVertexSize::Color,
-		(uint32_t)aten::MeshVertexSize::UV,
-		(uint32_t)aten::MeshVertexSize::Tangent,
+        (uint32_t)aten::MeshVertexSize::Normal,
+        (uint32_t)aten::MeshVertexSize::Color,
+        (uint32_t)aten::MeshVertexSize::UV,
+        (uint32_t)aten::MeshVertexSize::Tangent,
     };
 
     bool bEnableSkin = (m_SkinList.size() > 0);
@@ -834,33 +834,33 @@ bool GeometryChunkExporter::exportVertices(
             // 頂点インデックスを取得
             uint32_t nVtxIdx = sTri.vtx[nVtxPos];
 
-			// For debug.
-			uint32_t vtxSize = 0;
+            // For debug.
+            uint32_t vtxSize = 0;
 
-			bool isExported = false;
+            bool isExported = false;
 
-			if (m_isExportForGPUSkinning) {
-				// GPU スキニング向けにはインデックスは一気通貫になるようにするので何もしない.
-			}
-			else {
-				// プリミティブセット単位でインデックスをゼロベースになるように変換する.
+            if (m_isExportForGPUSkinning) {
+                // GPU スキニング向けにはインデックスは一気通貫になるようにするので何もしない.
+            }
+            else {
+                // プリミティブセット単位でインデックスをゼロベースになるように変換する.
 
-				// 出力済み頂点かどうか
-				auto itFind = std::find(
-					m_ExportedVtx.begin(),
-					m_ExportedVtx.end(),
-					nVtxIdx);
+                // 出力済み頂点かどうか
+                auto itFind = std::find(
+                    m_ExportedVtx.begin(),
+                    m_ExportedVtx.end(),
+                    nVtxIdx);
 
-				// 頂点データ出力に応じたインデックスに変換
-				if (itFind != m_ExportedVtx.end()) {
-					// Exported...
-					sTri.vtx[nVtxPos] = (uint32_t)std::distance(m_ExportedVtx.begin(), itFind);
-					isExported = true;
-				}
-				else {
-					sTri.vtx[nVtxPos] = (uint32_t)m_ExportedVtx.size();
-				}
-			}
+                // 頂点データ出力に応じたインデックスに変換
+                if (itFind != m_ExportedVtx.end()) {
+                    // Exported...
+                    sTri.vtx[nVtxPos] = (uint32_t)std::distance(m_ExportedVtx.begin(), itFind);
+                    isExported = true;
+                }
+                else {
+                    sTri.vtx[nVtxPos] = (uint32_t)m_ExportedVtx.size();
+                }
+            }
 
             uint32_t nIdx = sTri.vtx[nVtxPos];
             AT_ASSERT(nIdx <= UINT16_MAX);
@@ -881,7 +881,7 @@ bool GeometryChunkExporter::exportVertices(
 
                 // 指定された頂点における指定フォーマットのデータを取得.
                 bool bIsExist = pImporter->getVertex(
-					nVtxIdx,
+                    nVtxIdx,
                     vec, 
                     (aten::MeshVertexFormat)nVtxFmt);
 
@@ -900,17 +900,17 @@ bool GeometryChunkExporter::exportVertices(
                         uint8_t b = (uint8_t)(vec.z * 255.0f);
                         uint8_t a = (uint8_t)(vec.w * 255.0f);
                         uint32_t color = AT_COLOR_RGBA(r, g, b, a);
-						AT_VRETURN_FALSE(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
+                        AT_VRETURN_FALSE(pOut->write(&color, 0, tblVtxSize[nVtxFmt]));
                     }
                     else {
-						// Color以外はそのまま出力.
-						AT_VRETURN_FALSE(pOut->write(&vec, 0, tblVtxSize[nVtxFmt]));
+                        // Color以外はそのまま出力.
+                        AT_VRETURN_FALSE(pOut->write(&vec, 0, tblVtxSize[nVtxFmt]));
                     }
 
-					vtxSize += tblVtxSize[nVtxFmt];
+                    vtxSize += tblVtxSize[nVtxFmt];
 
                     if (nVtxFmt == (uint32_t)aten::MeshVertexFormat::Position) {
-						// 最大、最小位置を保持.
+                        // 最大、最小位置を保持.
                         m_vMin.x = std::min(m_vMin.x, vec.x);
                         m_vMin.y = std::min(m_vMin.y, vec.y);
                         m_vMin.z = std::min(m_vMin.z, vec.z);
@@ -928,20 +928,20 @@ bool GeometryChunkExporter::exportVertices(
                 uint32_t nSkinIdx = pImporter->getSkinIdxAffectToVtx(nVtxIdx);
                 const SkinParam& sSkin = m_SkinList[nSkinIdx];
 
-				aten::vec4 vecJoint(0);
-				aten::vec4 vecWeight(0);
+                aten::vec4 vecJoint(0);
+                aten::vec4 vecWeight(0);
                 
                 for (uint32_t n = 0; n < (uint32_t)sSkin.joint.size(); n++) {
-					if (m_isExportForGPUSkinning) {
-						// GPUスキニング向けに全体を通じた関節インデックスで出力.
-						vecJoint.p[n] = sSkin.joint[n];
-					}
-					else {
-						// プリミティブセット内での関節位置を探す.
-						// これが描画時における関節インデックスとなる.
-						// 全体を通じた関節インデックスからプリミティブセット内だけでの関節インデックスに変換する.
-						vecJoint.p[n] = (float)_FindJointIdx(sPrimSet.joint, sSkin.joint[n]);
-					}
+                    if (m_isExportForGPUSkinning) {
+                        // GPUスキニング向けに全体を通じた関節インデックスで出力.
+                        vecJoint.p[n] = sSkin.joint[n];
+                    }
+                    else {
+                        // プリミティブセット内での関節位置を探す.
+                        // これが描画時における関節インデックスとなる.
+                        // 全体を通じた関節インデックスからプリミティブセット内だけでの関節インデックスに変換する.
+                        vecJoint.p[n] = (float)_FindJointIdx(sPrimSet.joint, sSkin.joint[n]);
+                    }
 
                     vecWeight.p[n] = sSkin.weight[n];
                 }
@@ -949,8 +949,8 @@ bool GeometryChunkExporter::exportVertices(
                 AT_VRETURN_FALSE(pOut->write(&vecJoint, 0, (uint32_t)aten::MeshVertexSize::BlendIndices));
                 AT_VRETURN_FALSE(pOut->write(&vecWeight, 0, (uint32_t)aten::MeshVertexSize::BlendWeight));
 
-				vtxSize += (uint32_t)aten::MeshVertexSize::BlendIndices;
-				vtxSize += (uint32_t)aten::MeshVertexSize::BlendWeight;
+                vtxSize += (uint32_t)aten::MeshVertexSize::BlendIndices;
+                vtxSize += (uint32_t)aten::MeshVertexSize::BlendWeight;
             }
         }
     }
@@ -976,19 +976,19 @@ bool GeometryChunkExporter::exportMesh(
 
         // Blank MeshSet. 
         IoStreamSeekHelper seekHelper(pOut);
-		AT_VRETURN_FALSE(seekHelper.skip(sizeof(sMeshInfo)));
+        AT_VRETURN_FALSE(seekHelper.skip(sizeof(sMeshInfo)));
 
         m_Header.numMeshSubset += sMeshInfo.numSubset;
 
         pImporter->beginMesh((uint32_t)i);
 
-		aten::vec4 vMin(AT_MATH_INF);
-		aten::vec4 vMax(-AT_MATH_INF);
+        aten::vec4 vMin(AT_MATH_INF);
+        aten::vec4 vMax(-AT_MATH_INF);
 
         for (size_t n = 0; n < sMesh.subset.size(); n++) {
             const PrimitiveSetParam& sPrimSet = sMesh.subset[n];
 
-			AT_VRETURN_FALSE(
+            AT_VRETURN_FALSE(
                 exportPrimitiveSet(
                     pOut,
                     pImporter,
@@ -1014,12 +1014,12 @@ bool GeometryChunkExporter::exportMesh(
             sMeshInfo.mtrl);
 
         // returnTo to position of expoting MeshSet.
-		AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
+        AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
         // Export PrimitiveSet.
         OUTPUT_WRITE_VRETURN(pOut, &sMeshInfo, 0, sizeof(sMeshInfo));
 
-		AT_VRETURN_FALSE(seekHelper.returnToAnchor());
+        AT_VRETURN_FALSE(seekHelper.returnToAnchor());
     }
 
     return true;
@@ -1028,7 +1028,7 @@ bool GeometryChunkExporter::exportMesh(
 void GeometryChunkExporter::getMinMaxPos(
     aten::FbxImporter* pImporter,
     aten::vec4& vMin,
-	aten::vec4& vMax,
+    aten::vec4& vMax,
     const PrimitiveSetParam& sPrimSet)
 {
     for (size_t i = 0; i < sPrimSet.tri.size(); i++) {
@@ -1075,7 +1075,7 @@ bool GeometryChunkExporter::exportPrimitiveSet(
 
     // Blank PrimitiveSet. 
     IoStreamSeekHelper seekHelper(pOut);
-	AT_VRETURN_FALSE(seekHelper.skip(sizeof(sSubsetInfo)));
+    AT_VRETURN_FALSE(seekHelper.skip(sizeof(sSubsetInfo)));
 
     // 所属関節へのインデックス
     {
@@ -1091,15 +1091,15 @@ bool GeometryChunkExporter::exportPrimitiveSet(
                             pOut,
                             pImporter,
                             sPrimSet);
-	AT_VRETURN_FALSE(sSubsetInfo.numIdx > 0);
+    AT_VRETURN_FALSE(sSubsetInfo.numIdx > 0);
 
     // returnTo to position of expoting PrimitiveSet.
-	AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
+    AT_VRETURN_FALSE(seekHelper.returnWithAnchor());
 
     // Export PrimitiveSet.
     OUTPUT_WRITE_VRETURN(pOut, &sSubsetInfo, 0, sizeof(sSubsetInfo));
 
-	AT_VRETURN_FALSE(seekHelper.returnToAnchor());
+    AT_VRETURN_FALSE(seekHelper.returnToAnchor());
 
     return true;
 }
@@ -1126,11 +1126,11 @@ uint32_t GeometryChunkExporter::exportIndices(
     }
 
 #if 1
-	// TriangleList
-	nIdxNum = static_cast<uint32_t>(tvIndices.size());
+    // TriangleList
+    nIdxNum = static_cast<uint32_t>(tvIndices.size());
 
-	result = OUTPUT_WRITE(pOut, &tvIndices[0], 0, sizeof(uint32_t) * tvIndices.size());
-	AT_ASSERT(result);
+    result = OUTPUT_WRITE(pOut, &tvIndices[0], 0, sizeof(uint32_t) * tvIndices.size());
+    AT_ASSERT(result);
 #else
     if (m_ExportTriList)
     {
@@ -1156,8 +1156,8 @@ uint32_t GeometryChunkExporter::exportIndices(
                 &pPrimGroup,
                 &nPrimGroupNum), 0);
 
-		AT_VRETURN(nPrimGroupNum == 1, 0);
-		AT_VRETURN(pPrimGroup != nullptr, 0);
+        AT_VRETURN(nPrimGroupNum == 1, 0);
+        AT_VRETURN(pPrimGroup != nullptr, 0);
 
         nIdxNum = pPrimGroup->numIndices;
 

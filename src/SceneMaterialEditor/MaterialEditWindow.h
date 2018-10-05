@@ -5,65 +5,65 @@
 
 class MaterialEditWindow {
 private:
-	MaterialEditWindow();
-	~MaterialEditWindow();
+    MaterialEditWindow();
+    ~MaterialEditWindow();
 
 public:
-	static bool init(
-		int width, int height,
-		const char* titile);
+    static bool init(
+        int width, int height,
+        const char* titile);
 
-	static void notifyPickMtrlId(int mtrlid);
+    static void notifyPickMtrlId(int mtrlid);
 
-	static void buildScene();
+    static void buildScene();
 
-	using FuncPickMtrlIdNotifier = std::function<void(int)>;
+    using FuncPickMtrlIdNotifier = std::function<void(int)>;
 
-	static void setFuncChangeMtrlIdNotifier(FuncPickMtrlIdNotifier func)
-	{
-		s_pickMtrlIdNotifier = func;
-	}
-
-private:
-	static void onRun(aten::window* window);
-	static void onClose();
-	static void onMouseBtn(bool left, bool press, int x, int y);
-	static void onMouseMove(int x, int y);
-	static void onMouseWheel(int delta);
-	static void onKey(bool press, aten::Key key);
+    static void setFuncChangeMtrlIdNotifier(FuncPickMtrlIdNotifier func)
+    {
+        s_pickMtrlIdNotifier = func;
+    }
 
 private:
-	static aten::window* s_wnd;
+    static void onRun(aten::window* window);
+    static void onClose();
+    static void onMouseBtn(bool left, bool press, int x, int y);
+    static void onMouseMove(int x, int y);
+    static void onMouseWheel(int delta);
+    static void onKey(bool press, aten::Key key);
 
-	static aten::PinholeCamera s_camera;
-	static bool s_isCameraDirty;
+private:
+    static aten::window* s_wnd;
 
-	static aten::AcceleratedScene<aten::GPUBvh> s_scene;
+    static aten::PinholeCamera s_camera;
+    static bool s_isCameraDirty;
 
-	static idaten::PathTracing s_tracer;
+    static aten::AcceleratedScene<aten::GPUBvh> s_scene;
 
-	static aten::GammaCorrection s_gamma;
-	static aten::visualizer* s_visualizer;
+    static idaten::PathTracing s_tracer;
 
-	static bool s_willShowGUI;
-	static bool s_willTakeScreenShot;
-	static int s_cntScreenShot;
+    static aten::GammaCorrection s_gamma;
+    static aten::visualizer* s_visualizer;
 
-	static int s_maxSamples;
-	static int s_maxBounce;
+    static bool s_willShowGUI;
+    static bool s_willTakeScreenShot;
+    static int s_cntScreenShot;
 
-	static bool s_isMouseLBtnDown;
-	static bool s_isMouseRBtnDown;
-	static int s_prevX;
-	static int s_prevY;
+    static int s_maxSamples;
+    static int s_maxBounce;
 
-	static int s_width;
-	static int s_height;
+    static bool s_isMouseLBtnDown;
+    static bool s_isMouseRBtnDown;
+    static int s_prevX;
+    static int s_prevY;
 
-	static int s_pickedMtrlId;
-	static bool s_needUpdateMtrl;
-	static std::vector<aten::material*> s_mtrls;
-	static std::vector<const char*> s_mtrlNames;
+    static int s_width;
+    static int s_height;
 
-	static FuncPickMtrlIdNotifier s_pickMtrlIdNotifier;
+    static int s_pickedMtrlId;
+    static bool s_needUpdateMtrl;
+    static std::vector<aten::material*> s_mtrls;
+    static std::vector<const char*> s_mtrlNames;
+
+    static FuncPickMtrlIdNotifier s_pickMtrlIdNotifier;
 };

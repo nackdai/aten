@@ -9,275 +9,275 @@
 #include "aten4idaten.h"
 
 namespace idaten {
-	void PathTracing::update(
-		GLuint gltex,
-		int width, int height,
-		const aten::CameraParameter& camera,
-		const std::vector<aten::GeomParameter>& shapes,
-		const std::vector<aten::MaterialParameter>& mtrls,
-		const std::vector<aten::LightParameter>& lights,
-		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-		const std::vector<aten::PrimitiveParamter>& prims,
-		uint32_t advancePrimNum,
-		const std::vector<aten::vertex>& vtxs,
-		uint32_t advanceVtxNum,
-		const std::vector<aten::mat4>& mtxs,
-		const std::vector<TextureResource>& texs,
-		const EnvmapResource& envmapRsc)
-	{
-		idaten::Renderer::update(
-			gltex,
-			width, height,
-			camera,
-			shapes,
-			mtrls,
-			lights,
-			nodes,
-			prims, advancePrimNum,
-			vtxs, advanceVtxNum,
-			mtxs,
-			texs, envmapRsc);
+    void PathTracing::update(
+        GLuint gltex,
+        int width, int height,
+        const aten::CameraParameter& camera,
+        const std::vector<aten::GeomParameter>& shapes,
+        const std::vector<aten::MaterialParameter>& mtrls,
+        const std::vector<aten::LightParameter>& lights,
+        const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+        const std::vector<aten::PrimitiveParamter>& prims,
+        uint32_t advancePrimNum,
+        const std::vector<aten::vertex>& vtxs,
+        uint32_t advanceVtxNum,
+        const std::vector<aten::mat4>& mtxs,
+        const std::vector<TextureResource>& texs,
+        const EnvmapResource& envmapRsc)
+    {
+        idaten::Renderer::update(
+            gltex,
+            width, height,
+            camera,
+            shapes,
+            mtrls,
+            lights,
+            nodes,
+            prims, advancePrimNum,
+            vtxs, advanceVtxNum,
+            mtxs,
+            texs, envmapRsc);
 
-		m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-		m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
+        m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
+        m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
 
-		auto& r = aten::getRandom();
+        auto& r = aten::getRandom();
 
-		m_random.init(width * height);
-		m_random.writeByNum(&r[0], width * height);
+        m_random.init(width * height);
+        m_random.writeByNum(&r[0], width * height);
 
-		m_paths.init(width * height);
-	}
+        m_paths.init(width * height);
+    }
 
-	void PathTracing::update(
-		const std::vector<aten::GeomParameter>& geoms,
-		const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-		const std::vector<aten::mat4>& mtxs)
-	{
-		m_shapeparam.writeByNum(&geoms[0], geoms.size());
+    void PathTracing::update(
+        const std::vector<aten::GeomParameter>& geoms,
+        const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+        const std::vector<aten::mat4>& mtxs)
+    {
+        m_shapeparam.writeByNum(&geoms[0], geoms.size());
 
-		// Only for top layer...
-		m_nodeparam[0].init(
-			(aten::vec4*)&nodes[0][0],
-			sizeof(aten::GPUBvhNode) / sizeof(float4),
-			nodes[0].size());
+        // Only for top layer...
+        m_nodeparam[0].init(
+            (aten::vec4*)&nodes[0][0],
+            sizeof(aten::GPUBvhNode) / sizeof(float4),
+            nodes[0].size());
 
-		if (!mtxs.empty()) {
-			m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
-		}
-	}
+        if (!mtxs.empty()) {
+            m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
+        }
+    }
 
-	void PathTracing::updateGeometry(
-		std::vector<CudaGLBuffer>& vertices,
-		uint32_t vtxOffsetCount,
-		TypedCudaMemory<aten::PrimitiveParamter>& triangles,
-		uint32_t triOffsetCount)
-	{
-		// Vertex position.
-		{
-			vertices[0].map();
+    void PathTracing::updateGeometry(
+        std::vector<CudaGLBuffer>& vertices,
+        uint32_t vtxOffsetCount,
+        TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+        uint32_t triOffsetCount)
+    {
+        // Vertex position.
+        {
+            vertices[0].map();
 
-			aten::vec4* data = nullptr;
-			size_t bytes = 0;
-			vertices[0].bind((void**)&data, bytes);
+            aten::vec4* data = nullptr;
+            size_t bytes = 0;
+            vertices[0].bind((void**)&data, bytes);
 
-			uint32_t num = (uint32_t)(bytes / sizeof(float4));
+            uint32_t num = (uint32_t)(bytes / sizeof(float4));
 
-			m_vtxparamsPos.update(data, 1, num, vtxOffsetCount);
+            m_vtxparamsPos.update(data, 1, num, vtxOffsetCount);
 
-			vertices[0].unbind();
-			vertices[0].unmap();
-		}
+            vertices[0].unbind();
+            vertices[0].unmap();
+        }
 
-		// Vertex normal.
-		{
-			vertices[1].map();
+        // Vertex normal.
+        {
+            vertices[1].map();
 
-			aten::vec4* data = nullptr;
-			size_t bytes = 0;
-			vertices[1].bind((void**)&data, bytes);
+            aten::vec4* data = nullptr;
+            size_t bytes = 0;
+            vertices[1].bind((void**)&data, bytes);
 
-			uint32_t num = (uint32_t)(bytes / sizeof(float4));
+            uint32_t num = (uint32_t)(bytes / sizeof(float4));
 
-			m_vtxparamsNml.update(data, 1, num, vtxOffsetCount);
+            m_vtxparamsNml.update(data, 1, num, vtxOffsetCount);
 
-			vertices[1].unbind();
-			vertices[1].unmap();
-		}
+            vertices[1].unbind();
+            vertices[1].unmap();
+        }
 
-		// Triangles.
-		{
-			auto size = triangles.bytes();
-			auto offset = triOffsetCount * triangles.stride();
+        // Triangles.
+        {
+            auto size = triangles.bytes();
+            auto offset = triOffsetCount * triangles.stride();
 
-			m_primparams.write(triangles.ptr(), size, offset);
-		}
-	}
+            m_primparams.write(triangles.ptr(), size, offset);
+        }
+    }
 
-	void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
-	{
-		AT_ASSERT(mtrls.size() <= m_mtrlparam.num());
+    void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
+    {
+        AT_ASSERT(mtrls.size() <= m_mtrlparam.num());
 
-		if (mtrls.size() <= m_mtrlparam.num()) {
-			m_mtrlparam.writeByNum(&mtrls[0], (uint32_t)mtrls.size());
+        if (mtrls.size() <= m_mtrlparam.num()) {
+            m_mtrlparam.writeByNum(&mtrls[0], (uint32_t)mtrls.size());
 
-			reset();
-		}
-	}
+            reset();
+        }
+    }
 
-	void PathTracing::enableRenderAOV(
-		GLuint gltexPosition,
-		GLuint gltexNormal,
-		GLuint gltexAlbedo,
-		const aten::vec3& posRange)
-	{
-		AT_ASSERT(gltexPosition > 0);
-		AT_ASSERT(gltexNormal > 0);
+    void PathTracing::enableRenderAOV(
+        GLuint gltexPosition,
+        GLuint gltexNormal,
+        GLuint gltexAlbedo,
+        const aten::vec3& posRange)
+    {
+        AT_ASSERT(gltexPosition > 0);
+        AT_ASSERT(gltexNormal > 0);
 
-		if (!m_enableAOV) {
-			m_enableAOV = true;
+        if (!m_enableAOV) {
+            m_enableAOV = true;
 
-			m_posRange = posRange;
+            m_posRange = posRange;
 
-			m_aovs.resize(3);
-			m_aovs[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
-			m_aovs[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
-			m_aovs[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
+            m_aovs.resize(3);
+            m_aovs[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
+            m_aovs[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
+            m_aovs[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
 
-			m_aovCudaRsc.init(3);
-		}
-	}
+            m_aovCudaRsc.init(3);
+        }
+    }
 
 #ifdef __AT_DEBUG__
-	static bool doneSetStackSize = false;
+    static bool doneSetStackSize = false;
 #endif
 
-	void PathTracing::render(
-		const TileDomain& tileDomain,
-		int maxSamples,
-		int maxBounce)
-	{
+    void PathTracing::render(
+        const TileDomain& tileDomain,
+        int maxSamples,
+        int maxBounce)
+    {
 #ifdef __AT_DEBUG__
-		if (!doneSetStackSize) {
-			size_t val = 0;
-			cudaThreadGetLimit(&val, cudaLimitStackSize);
-			cudaThreadSetLimit(cudaLimitStackSize, val * 4);
-			doneSetStackSize = true;
-		}
+        if (!doneSetStackSize) {
+            size_t val = 0;
+            cudaThreadGetLimit(&val, cudaLimitStackSize);
+            cudaThreadSetLimit(cudaLimitStackSize, val * 4);
+            doneSetStackSize = true;
+        }
 #endif
 
-		m_tileDomain = tileDomain;
+        m_tileDomain = tileDomain;
 
-		int bounce = 0;
+        int bounce = 0;
 
-		int width = tileDomain.w;
-		int height = tileDomain.h;
+        int width = tileDomain.w;
+        int height = tileDomain.h;
 
-		m_compaction.init(width * height, 1024);
+        m_compaction.init(width * height, 1024);
 
-		m_isects.init(width * height);
-		m_rays.init(width * height);
+        m_isects.init(width * height);
+        m_rays.init(width * height);
 
-		m_hitbools.init(width * height);
-		m_hitidx.init(width * height);
+        m_hitbools.init(width * height);
+        m_hitidx.init(width * height);
 
-		m_shadowRays.init(width * height);
+        m_shadowRays.init(width * height);
 
-		checkCudaErrors(cudaMemset(m_paths.ptr(), 0, m_paths.bytes()));
+        checkCudaErrors(cudaMemset(m_paths.ptr(), 0, m_paths.bytes()));
 
-		m_glimg.map();
-		auto outputSurf = m_glimg.bind();
+        m_glimg.map();
+        auto outputSurf = m_glimg.bind();
 
-		auto vtxTexPos = m_vtxparamsPos.bind();
-		auto vtxTexNml = m_vtxparamsNml.bind();
+        auto vtxTexPos = m_vtxparamsPos.bind();
+        auto vtxTexNml = m_vtxparamsNml.bind();
 
-		{
-			std::vector<cudaTextureObject_t> tmp;
-			for (int i = 0; i < m_nodeparam.size(); i++) {
-				auto nodeTex = m_nodeparam[i].bind();
-				tmp.push_back(nodeTex);
-			}
-			m_nodetex.writeByNum(&tmp[0], (uint32_t)tmp.size());
-		}
+        {
+            std::vector<cudaTextureObject_t> tmp;
+            for (int i = 0; i < m_nodeparam.size(); i++) {
+                auto nodeTex = m_nodeparam[i].bind();
+                tmp.push_back(nodeTex);
+            }
+            m_nodetex.writeByNum(&tmp[0], (uint32_t)tmp.size());
+        }
 
-		if (!m_texRsc.empty())
-		{
-			std::vector<cudaTextureObject_t> tmp;
-			for (int i = 0; i < m_texRsc.size(); i++) {
-				auto cudaTex = m_texRsc[i].bind();
-				tmp.push_back(cudaTex);
-			}
-			m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
-		}
+        if (!m_texRsc.empty())
+        {
+            std::vector<cudaTextureObject_t> tmp;
+            for (int i = 0; i < m_texRsc.size(); i++) {
+                auto cudaTex = m_texRsc[i].bind();
+                tmp.push_back(cudaTex);
+            }
+            m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
+        }
 
-		if (m_enableAOV) {
-			std::vector<cudaSurfaceObject_t> tmp;
-			for (int i = 0; i < m_aovs.size(); i++) {
-				m_aovs[i].map();
-				tmp.push_back(m_aovs[i].bind());
-			}
-			m_aovCudaRsc.writeByNum(&tmp[0], (uint32_t)tmp.size());
-		}
+        if (m_enableAOV) {
+            std::vector<cudaSurfaceObject_t> tmp;
+            for (int i = 0; i < m_aovs.size(); i++) {
+                m_aovs[i].map();
+                tmp.push_back(m_aovs[i].bind());
+            }
+            m_aovCudaRsc.writeByNum(&tmp[0], (uint32_t)tmp.size());
+        }
 
-		static const int rrBounce = 3;
+        static const int rrBounce = 3;
 
-		auto time = AT_NAME::timer::getSystemTime();
+        auto time = AT_NAME::timer::getSystemTime();
 
-		for (int i = 0; i < maxSamples; i++) {
-			onGenPath(
-				width, height,
-				i, maxSamples,
-				vtxTexPos,
-				vtxTexNml);
+        for (int i = 0; i < maxSamples; i++) {
+            onGenPath(
+                width, height,
+                i, maxSamples,
+                vtxTexPos,
+                vtxTexNml);
 
-			bounce = 0;
+            bounce = 0;
 
-			while (bounce < maxBounce) {
-				onHitTest(
-					width, height,
-					vtxTexPos);
-				
-				onShadeMiss(width, height, bounce);
+            while (bounce < maxBounce) {
+                onHitTest(
+                    width, height,
+                    vtxTexPos);
+                
+                onShadeMiss(width, height, bounce);
 
-				m_compaction.compact(
-					m_hitidx,
-					m_hitbools,
-					nullptr);
+                m_compaction.compact(
+                    m_hitidx,
+                    m_hitbools,
+                    nullptr);
 
-				onShade(
-					width, height,
-					bounce, rrBounce,
-					vtxTexPos, vtxTexNml);
+                onShade(
+                    width, height,
+                    bounce, rrBounce,
+                    vtxTexPos, vtxTexNml);
 
-				bounce++;
-			}
-		}
+                bounce++;
+            }
+        }
 
-		onGather(outputSurf, m_paths, width, height);
+        onGather(outputSurf, m_paths, width, height);
 
-		checkCudaErrors(cudaDeviceSynchronize());
+        checkCudaErrors(cudaDeviceSynchronize());
 
-		m_frame++;
+        m_frame++;
 
-		{
-			m_vtxparamsPos.unbind();
-			m_vtxparamsNml.unbind();
+        {
+            m_vtxparamsPos.unbind();
+            m_vtxparamsNml.unbind();
 
-			for (int i = 0; i < m_nodeparam.size(); i++) {
-				m_nodeparam[i].unbind();
-			}
+            for (int i = 0; i < m_nodeparam.size(); i++) {
+                m_nodeparam[i].unbind();
+            }
 
-			for (int i = 0; i < m_texRsc.size(); i++) {
-				m_texRsc[i].unbind();
-			}
+            for (int i = 0; i < m_texRsc.size(); i++) {
+                m_texRsc[i].unbind();
+            }
 
-			for (int i = 0; i < m_aovs.size(); i++) {
-				m_aovs[i].unbind();
-				m_aovs[i].unmap();
-			}
-		}
+            for (int i = 0; i < m_aovs.size(); i++) {
+                m_aovs[i].unbind();
+                m_aovs[i].unmap();
+            }
+        }
 
-		m_glimg.unbind();
-		m_glimg.unmap();
-	}
+        m_glimg.unbind();
+        m_glimg.unmap();
+    }
 }

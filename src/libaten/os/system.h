@@ -3,5 +3,5 @@
 #include "defs.h"
 
 namespace aten {
-	bool SetCurrentDirectoryFromExe();
+    bool SetCurrentDirectoryFromExe();
 }

@@ -85,8 +85,8 @@ void SkinParam::add(uint32_t nJointIdx, float fWeight)
         }
 
         if (fWeight > fMinWeight) {
-			eraseItem(joint, nMinIdx);
-			eraseItem(weight, nMinIdx);
+            eraseItem(joint, nMinIdx);
+            eraseItem(weight, nMinIdx);
 
             joint.push_back(nJointIdx);
             weight.push_back(fWeight);

@@ -16,11 +16,11 @@ uniform bool revert;
 // output colour for the fragment
 layout(location = 0) out highp vec4 oColour;
 
-#define F	(2)
-#define R	(6)
+#define F    (2)
+#define R    (6)
 
-#define kKernel		(2 * F + 1)
-#define kSupport	(2 * R + 1)
+#define kKernel        (2 * F + 1)
+#define kSupport    (2 * R + 1)
 #define kHalfKernel (kKernel / 2)
 #define kHalfSupport (kSupport / 2)
 
@@ -65,7 +65,7 @@ float computeDistanceSquared(in Template a, in Template b)
     sum += sumV.g;
     sum += sumV.b;
 
-	sum /= (kKernel * kKernel * 3);
+    sum /= (kKernel * kKernel * 3);
 
     return sum;
 }
@@ -75,10 +75,10 @@ void main()
     ivec2 xy = ivec2(gl_FragCoord.x, gl_FragCoord.y);
 
     vec2 uv = gl_FragCoord.xy * invScreen.xy;
-	if (revert) {
-		uv.x = 1.0 - uv.x;
-		uv.y = 1.0 - uv.y;
-	}
+    if (revert) {
+        uv.x = 1.0 - uv.x;
+        uv.y = 1.0 - uv.y;
+    }
 
     // íçñ⁄óÃàÊ.
     Template focus;
@@ -112,6 +112,6 @@ void main()
 
     vec4 color = sum / sum_weight;
 
-	oColour = color;
-	oColour.a = 1.0;
+    oColour = color;
+    oColour.a = 1.0;
 }

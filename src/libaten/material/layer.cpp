@@ -3,261 +3,261 @@
 
 namespace AT_NAME
 {
-	// NOTE
-	// https://www.solidangle.com/research/physically_based_shader_design_in_arnold.pdf
+    // NOTE
+    // https://www.solidangle.com/research/physically_based_shader_design_in_arnold.pdf
 
-	aten::vec3 LayeredBSDF::sampleAlbedoMap(real u, real v) const
-	{
-		auto num = m_layer.size();
+    aten::vec3 LayeredBSDF::sampleAlbedoMap(real u, real v) const
+    {
+        auto num = m_layer.size();
 
-		aten::vec3 albedo = aten::vec3(1);
+        aten::vec3 albedo = aten::vec3(1);
 
-		for (int i = 0; i < num; i++) {
-			auto mtrl = m_layer[i];
+        for (int i = 0; i < num; i++) {
+            auto mtrl = m_layer[i];
 
-			// TODO
-			auto c = mtrl->color();
-			auto a = mtrl->sampleAlbedoMap(u, v);
+            // TODO
+            auto c = mtrl->color();
+            auto a = mtrl->sampleAlbedoMap(u, v);
 
-			albedo *= c * a;
-		}
+            albedo *= c * a;
+        }
 
-		return std::move(albedo);
-	}
+        return std::move(albedo);
+    }
 
-	bool LayeredBSDF::isGlossy() const
-	{
-		auto num = m_layer.size();
+    bool LayeredBSDF::isGlossy() const
+    {
+        auto num = m_layer.size();
 
-		for (int i = 0; i < num; i++) {
-			auto mtrl = m_layer[i];
+        for (int i = 0; i < num; i++) {
+            auto mtrl = m_layer[i];
 
-			if (mtrl->isGlossy()) {
-				return true;
-			}
-		}
+            if (mtrl->isGlossy()) {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	void LayeredBSDF::applyNormalMap(
-		const aten::vec3& orgNml,
-		aten::vec3& newNml,
-		real u, real v) const
-	{
-		auto num = m_layer.size();
+    void LayeredBSDF::applyNormalMap(
+        const aten::vec3& orgNml,
+        aten::vec3& newNml,
+        real u, real v) const
+    {
+        auto num = m_layer.size();
 
-		if (num == 0) {
-			newNml = orgNml;
-		}
-		else {
-			// 最表層の NormalMap を適用.
-			auto mtrl = m_layer[0];
-			mtrl->applyNormalMap(orgNml, newNml, u, v);
-		}
-	}
+        if (num == 0) {
+            newNml = orgNml;
+        }
+        else {
+            // 最表層の NormalMap を適用.
+            auto mtrl = m_layer[0];
+            mtrl->applyNormalMap(orgNml, newNml, u, v);
+        }
+    }
 
-	real LayeredBSDF::computeFresnel(
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real outsideIor/*= 1*/) const
-	{
-		// TODO
-		// Not permit layer in layer, so this api should not be called.
-		AT_ASSERT(false);
+    real LayeredBSDF::computeFresnel(
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        const aten::vec3& wo,
+        real outsideIor/*= 1*/) const
+    {
+        // TODO
+        // Not permit layer in layer, so this api should not be called.
+        AT_ASSERT(false);
 
-		auto num = m_layer.size();
+        auto num = m_layer.size();
 
-		if (num == 0) {
-			return real(1);
-		}
-		else {
-			// 最表層のフレネルを返す.
-			auto mtrl = m_layer[0];
-			auto f = mtrl->computeFresnel(normal, wi, wo, outsideIor);
-			return f;
-		}
-	}
+        if (num == 0) {
+            return real(1);
+        }
+        else {
+            // 最表層のフレネルを返す.
+            auto mtrl = m_layer[0];
+            auto f = mtrl->computeFresnel(normal, wi, wo, outsideIor);
+            return f;
+        }
+    }
 
-	bool LayeredBSDF::add(material* mtrl)
-	{
-		// TODO
-		// GPU側と処理を合わせるため、３層までにする.
-		if (m_layer.size() > 3) {
-			AT_ASSERT(false);
-			return false;
-		}
+    bool LayeredBSDF::add(material* mtrl)
+    {
+        // TODO
+        // GPU側と処理を合わせるため、３層までにする.
+        if (m_layer.size() > 3) {
+            AT_ASSERT(false);
+            return false;
+        }
 
-		// Not permit layer in layer.
-		if (mtrl->param().type == aten::MaterialType::Layer) {
-			AT_ASSERT(false);
-			return false;
-		}
+        // Not permit layer in layer.
+        if (mtrl->param().type == aten::MaterialType::Layer) {
+            AT_ASSERT(false);
+            return false;
+        }
 
-		m_param.layer[m_layer.size()] = mtrl->id();
-		m_layer.push_back(mtrl);
+        m_param.layer[m_layer.size()] = mtrl->id();
+        m_layer.push_back(mtrl);
 
-		return true;
-	}
+        return true;
+    }
 
-	MaterialSampling LayeredBSDF::sample(
-		const aten::ray& ray,
-		const aten::vec3& normal,
-		const aten::vec3& orgnormal,
-		aten::sampler* sampler,
-		real u, real v,
-		bool isLightPath/*= false*/) const
-	{
-		MaterialSampling ret;
+    MaterialSampling LayeredBSDF::sample(
+        const aten::ray& ray,
+        const aten::vec3& normal,
+        const aten::vec3& orgnormal,
+        aten::sampler* sampler,
+        real u, real v,
+        bool isLightPath/*= false*/) const
+    {
+        MaterialSampling ret;
 
-		auto num = m_layer.size();
+        auto num = m_layer.size();
 
-		if (num == 0) {
-			AT_ASSERT(false);
-			return std::move(ret);
-		}
+        if (num == 0) {
+            AT_ASSERT(false);
+            return std::move(ret);
+        }
 
-		real weight = 1;
+        real weight = 1;
 
-		for (int i = 0; i < num; i++) {
-			auto mtrl = m_layer[i];
+        for (int i = 0; i < num; i++) {
+            auto mtrl = m_layer[i];
 
-			aten::vec3 appliedNml = normal;
+            aten::vec3 appliedNml = normal;
 
-			// NOTE
-			// 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
-			if (i > 0) {
-				mtrl->applyNormalMap(normal, appliedNml, u, v);
-			}
+            // NOTE
+            // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
+            if (i > 0) {
+                mtrl->applyNormalMap(normal, appliedNml, u, v);
+            }
 
-			auto sampleres = mtrl->sample(ray, appliedNml, orgnormal, sampler, u, v);
+            auto sampleres = mtrl->sample(ray, appliedNml, orgnormal, sampler, u, v);
 
-			const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
+            const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
 
-			ret.pdf += weight * f * sampleres.pdf;
+            ret.pdf += weight * f * sampleres.pdf;
 
-			// bsdf includes fresnale value.
-			ret.bsdf += weight * sampleres.bsdf;
-			//ret.bsdf += weight * f * sampleres.bsdf;
+            // bsdf includes fresnale value.
+            ret.bsdf += weight * sampleres.bsdf;
+            //ret.bsdf += weight * f * sampleres.bsdf;
 
-			// TODO
-			// ret.fresnel
+            // TODO
+            // ret.fresnel
 
-			weight = aten::clamp<real>(weight - f, 0, 1);
-			if (weight <= 0) {
-				break;
-			}
+            weight = aten::clamp<real>(weight - f, 0, 1);
+            if (weight <= 0) {
+                break;
+            }
 
-			if (i == 0) {
-				ret.dir = sampleres.dir;
-			}
-		}
+            if (i == 0) {
+                ret.dir = sampleres.dir;
+            }
+        }
 
-		return std::move(ret);
-	}
+        return std::move(ret);
+    }
 
-	real LayeredBSDF::pdf(
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real u, real v) const
-	{
-		auto num = m_layer.size();
-		
-		real pdf = 0;
+    real LayeredBSDF::pdf(
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        const aten::vec3& wo,
+        real u, real v) const
+    {
+        auto num = m_layer.size();
+        
+        real pdf = 0;
 
-		real weight = 1;
-		real ior = 1;	// 真空から始める.
+        real weight = 1;
+        real ior = 1;    // 真空から始める.
 
-		for (int i = 0; i < num; i++) {
-			auto mtrl = m_layer[i];
+        for (int i = 0; i < num; i++) {
+            auto mtrl = m_layer[i];
 
-			aten::vec3 appliedNml = normal;
+            aten::vec3 appliedNml = normal;
 
-			// NOTE
-			// 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
-			if (i > 0) {
-				mtrl->applyNormalMap(normal, appliedNml, u, v);
-			}
+            // NOTE
+            // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
+            if (i > 0) {
+                mtrl->applyNormalMap(normal, appliedNml, u, v);
+            }
 
-			auto p = mtrl->pdf(appliedNml, wi, wo, u, v);
-			auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
+            auto p = mtrl->pdf(appliedNml, wi, wo, u, v);
+            auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
 
-			f = aten::clamp<real>(f, 0, 1);
+            f = aten::clamp<real>(f, 0, 1);
 
-			pdf += weight * p;
+            pdf += weight * p;
 
-			weight = aten::clamp<real>(weight - f, 0, 1);
-			if (weight <= 0) {
-				break;
-			}
+            weight = aten::clamp<real>(weight - f, 0, 1);
+            if (weight <= 0) {
+                break;
+            }
 
-			// 上層の値を下層に使う.
-			ior = mtrl->ior();
-		}
+            // 上層の値を下層に使う.
+            ior = mtrl->ior();
+        }
 
-		return pdf;
-	}
+        return pdf;
+    }
 
-	aten::vec3 LayeredBSDF::sampleDirection(
-		const aten::ray& ray,
-		const aten::vec3& normal,
-		real u, real v,
-		aten::sampler* sampler) const
-	{
-		auto num = m_layer.size();
-		AT_ASSERT(num > 0);
+    aten::vec3 LayeredBSDF::sampleDirection(
+        const aten::ray& ray,
+        const aten::vec3& normal,
+        real u, real v,
+        aten::sampler* sampler) const
+    {
+        auto num = m_layer.size();
+        AT_ASSERT(num > 0);
 
-		auto mtrl = m_layer[0];
-		
-		auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler);
+        auto mtrl = m_layer[0];
+        
+        auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler);
 
-		return std::move(dir);
-	}
+        return std::move(dir);
+    }
 
-	aten::vec3 LayeredBSDF::bsdf(
-		const aten::vec3& normal,
-		const aten::vec3& wi,
-		const aten::vec3& wo,
-		real u, real v) const
-	{
-		auto num = m_layer.size();
+    aten::vec3 LayeredBSDF::bsdf(
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        const aten::vec3& wo,
+        real u, real v) const
+    {
+        auto num = m_layer.size();
 
-		aten::vec3 bsdf;
+        aten::vec3 bsdf;
 
-		real weight = 1;
-		real ior = 1;	// 真空から始める.
+        real weight = 1;
+        real ior = 1;    // 真空から始める.
 
-		for (int i = 0; i < num; i++) {
-			auto mtrl = m_layer[i];
+        for (int i = 0; i < num; i++) {
+            auto mtrl = m_layer[i];
 
-			aten::vec3 appliedNml = normal;
+            aten::vec3 appliedNml = normal;
 
-			// NOTE
-			// 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
-			if (i > 0) {
-				mtrl->applyNormalMap(normal, appliedNml, u, v);
-			}
+            // NOTE
+            // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
+            if (i > 0) {
+                mtrl->applyNormalMap(normal, appliedNml, u, v);
+            }
 
-			auto b = mtrl->bsdf(appliedNml, wi, wo, u, v);
-			auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
+            auto b = mtrl->bsdf(appliedNml, wi, wo, u, v);
+            auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
 
-			f = aten::clamp<real>(f, 0, 1);
+            f = aten::clamp<real>(f, 0, 1);
 
-			// bsdf includes fresnel value.
-			bsdf += weight * b;
-			//bsdf += weight * f * b;
+            // bsdf includes fresnel value.
+            bsdf += weight * b;
+            //bsdf += weight * f * b;
 
-			weight = aten::clamp<real>(weight - f, 0, 1);
-			if (weight <= 0) {
-				break;
-			}
+            weight = aten::clamp<real>(weight - f, 0, 1);
+            if (weight <= 0) {
+                break;
+            }
 
-			// 上層の値を下層に使う.
-			ior = mtrl->ior();
-		}
+            // 上層の値を下層に使う.
+            ior = mtrl->ior();
+        }
 
-		return std::move(bsdf);
-	}
+        return std::move(bsdf);
+    }
 }

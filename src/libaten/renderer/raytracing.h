@@ -6,22 +6,22 @@
 
 namespace aten
 {
-	class RayTracing : public Renderer {
-	public:
-		RayTracing() {}
-		virtual ~RayTracing() {}
+    class RayTracing : public Renderer {
+    public:
+        RayTracing() {}
+        virtual ~RayTracing() {}
 
-		virtual void render(
-			Destination& dst,
-			scene* scene,
-			camera* camera) override;
+        virtual void render(
+            Destination& dst,
+            scene* scene,
+            camera* camera) override;
 
-	private:
-		vec3 radiance(
-			const ray& ray,
-			scene* scene);
+    private:
+        vec3 radiance(
+            const ray& ray,
+            scene* scene);
 
-	private:
-		uint32_t m_maxDepth{ 1 };
-	};
+    private:
+        uint32_t m_maxDepth{ 1 };
+    };
 }

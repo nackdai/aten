@@ -642,7 +642,7 @@ void FbxDataManager::gatherVertices()
                 // 未登録.
 
                 IndexData newIdx(
-					(uint32_t)m_vertices.size(),
+                    (uint32_t)m_vertices.size(),
                     0,  // もう使わない.
                     mesh.fbxMesh,
                     mesh.mtrl);
@@ -656,7 +656,7 @@ void FbxDataManager::gatherVertices()
             {
                 // すでにあったので、どの頂点インデックスか取得.
                 IndexData newIdx(
-					(uint32_t)std::distance(m_vertices.begin(), it),
+                    (uint32_t)std::distance(m_vertices.begin(), it),
                     0,  // もう使わない.
                     mesh.fbxMesh,
                     mesh.mtrl);

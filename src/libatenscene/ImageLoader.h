@@ -4,17 +4,17 @@
 #include "defs.h"
 
 namespace aten {
-	class texture;
+    class texture;
 
-	class ImageLoader {
-	private:
-		ImageLoader() {}
-		~ImageLoader() {}
+    class ImageLoader {
+    private:
+        ImageLoader() {}
+        ~ImageLoader() {}
 
-	public:
-		static void setBasePath(const std::string& base);
+    public:
+        static void setBasePath(const std::string& base);
 
-		static texture* load(const std::string& path);
-		static texture* load(const std::string& tag, const std::string& path);
-	};
+        static texture* load(const std::string& path);
+        static texture* load(const std::string& tag, const std::string& path);
+    };
 }

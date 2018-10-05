@@ -28,29 +28,29 @@ flat out ivec2 ids;
 
 // For computing bary centric.
 const vec3 weight[3] = {
-	vec3(0, 0, 1),
-	vec3(1, 0, 0),
-	vec3(0, 1, 0),
+    vec3(0, 0, 1),
+    vec3(1, 0, 0),
+    vec3(0, 1, 0),
 };
 
 void main()
 {
-	for (int i = 0; i < gl_in.length(); i++) {
-		gl_Position = mtxW2C * gl_in[i].gl_Position;
+    for (int i = 0; i < gl_in.length(); i++) {
+        gl_Position = mtxW2C * gl_in[i].gl_Position;
 
-		curCSPos = gl_Position;
-		prevCSPos = mtxPrevW2C * prevWorldPos[i];
+        curCSPos = gl_Position;
+        prevCSPos = mtxPrevW2C * prevWorldPos[i];
 
-		depth = gl_Position.w;
-		
-		normal = worldNormal[i];
-		uv = vUV[i];
-		baryCentric = weight[i];
+        depth = gl_Position.w;
+        
+        normal = worldNormal[i];
+        uv = vUV[i];
+        baryCentric = weight[i];
 
-		ids.x = objid;
-		ids.y = primid + gl_PrimitiveIDIn;
+        ids.x = objid;
+        ids.y = primid + gl_PrimitiveIDIn;
 
-		EmitVertex();
-	}
-	EndPrimitive();
+        EmitVertex();
+    }
+    EndPrimitive();
 }

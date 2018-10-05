@@ -6,7 +6,7 @@
 
 class AnmExporter {
 private:
-	AnmExporter();
+    AnmExporter();
     ~AnmExporter();
 
 public:

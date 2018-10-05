@@ -5,58 +5,58 @@
 
 namespace AT_NAME
 {
-	class LayeredBSDF : public material {
-	public:
-		LayeredBSDF()
-			: material(aten::MaterialType::Layer, MaterialAttributeMicrofacet)
-		{}
-		virtual ~LayeredBSDF() {}
+    class LayeredBSDF : public material {
+    public:
+        LayeredBSDF()
+            : material(aten::MaterialType::Layer, MaterialAttributeMicrofacet)
+        {}
+        virtual ~LayeredBSDF() {}
 
-	public:
-		bool add(material* mtrl);
+    public:
+        bool add(material* mtrl);
 
-		virtual aten::vec3 sampleAlbedoMap(real u, real v) const override final;
+        virtual aten::vec3 sampleAlbedoMap(real u, real v) const override final;
 
-		virtual bool isGlossy() const override final;
+        virtual bool isGlossy() const override final;
 
-		virtual void applyNormalMap(
-			const aten::vec3& orgNml,
-			aten::vec3& newNml,
-			real u, real v) const override final;
+        virtual void applyNormalMap(
+            const aten::vec3& orgNml,
+            aten::vec3& newNml,
+            real u, real v) const override final;
 
-		virtual real computeFresnel(
-			const aten::vec3& normal,
-			const aten::vec3& wi,
-			const aten::vec3& wo,
-			real outsideIor = 1) const override final;
+        virtual real computeFresnel(
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            real outsideIor = 1) const override final;
 
-		virtual real pdf(
-			const aten::vec3& normal,
-			const aten::vec3& wi,
-			const aten::vec3& wo,
-			real u, real v) const override final;
+        virtual real pdf(
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            real u, real v) const override final;
 
-		virtual aten::vec3 sampleDirection(
-			const aten::ray& ray,
-			const aten::vec3& normal,
-			real u, real v,
-			aten::sampler* sampler) const override final;
+        virtual aten::vec3 sampleDirection(
+            const aten::ray& ray,
+            const aten::vec3& normal,
+            real u, real v,
+            aten::sampler* sampler) const override final;
 
-		virtual aten::vec3 bsdf(
-			const aten::vec3& normal,
-			const aten::vec3& wi,
-			const aten::vec3& wo,
-			real u, real v) const override final;
+        virtual aten::vec3 bsdf(
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            real u, real v) const override final;
 
-		virtual MaterialSampling sample(
-			const aten::ray& ray,
-			const aten::vec3& normal,
-			const aten::vec3& orgnormal,
-			aten::sampler* sampler,
-			real u, real v,
-			bool isLightPath = false) const override final;
+        virtual MaterialSampling sample(
+            const aten::ray& ray,
+            const aten::vec3& normal,
+            const aten::vec3& orgnormal,
+            aten::sampler* sampler,
+            real u, real v,
+            bool isLightPath = false) const override final;
 
-	private:
-		std::vector<material*> m_layer;
-	};
+    private:
+        std::vector<material*> m_layer;
+    };
 }

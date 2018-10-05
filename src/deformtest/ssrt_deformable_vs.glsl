@@ -15,16 +15,16 @@ uniform mat4 mtxPrevL2W;
 
 void main()
 {
-	vec4 pos = vec4(position.xyz, 1.0);
-	vec3 nml = normal.xyz;
-	vec2 uv = vec2(position.w, normal.w);
+    vec4 pos = vec4(position.xyz, 1.0);
+    vec3 nml = normal.xyz;
+    vec2 uv = vec2(position.w, normal.w);
 
-	vec4 worldPos = mtxL2W * pos;
-	gl_Position = worldPos;
+    vec4 worldPos = mtxL2W * pos;
+    gl_Position = worldPos;
 
-	prevWorldPos = mtxPrevL2W * vec4(prevPosition.xyz, 1.0);
+    prevWorldPos = mtxPrevL2W * vec4(prevPosition.xyz, 1.0);
 
-	worldNormal = normalize(mtxL2W * vec4(nml, 0)).xyz;
+    worldNormal = normalize(mtxL2W * vec4(nml, 0)).xyz;
 
-	vUV = uv.xy;
+    vUV = uv.xy;
 }

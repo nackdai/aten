@@ -1,9 +1,9 @@
 #pragma once
 
 namespace idaten {
-	enum IntersectType {
-		Closest,
-		Closer,
-		Any,
-	};
+    enum IntersectType {
+        Closest,
+        Closer,
+        Any,
+    };
 }

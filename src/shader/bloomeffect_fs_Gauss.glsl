@@ -25,7 +25,7 @@ layout(location = 0) out highp vec4 oColour;
 
 const highp vec2 offset[13] = vec2[13]
 (
-	vec2(0.0, -2.0),   // 0
+    vec2(0.0, -2.0),   // 0
     vec2(-1.0, -1.0),  // 1
     vec2(0.0, -1.0),   // 2
     vec2(1.0, -1.0),   // 3
@@ -43,7 +43,7 @@ const highp vec2 offset[13] = vec2[13]
 
 const highp float weight[13] = float[13]
 (
-	0.024882466,
+    0.024882466,
     0.067637555,
     0.11151548,
     0.067637555,
@@ -60,12 +60,12 @@ const highp float weight[13] = float[13]
 
 void main()
 {
-	for (int i = 0; i < 13; i++) {
-		highp vec2 uv = gl_FragCoord.xy * dstTexel.xy;
-		uv += offset[i] * srcTexel.xy;
+    for (int i = 0; i < 13; i++) {
+        highp vec2 uv = gl_FragCoord.xy * dstTexel.xy;
+        uv += offset[i] * srcTexel.xy;
 
-		oColour += weight[i] * texture2D(image, uv);
-	}
+        oColour += weight[i] * texture2D(image, uv);
+    }
 
-	oColour.a = 1.0;
+    oColour.a = 1.0;
 }

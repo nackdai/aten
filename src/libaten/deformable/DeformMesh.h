@@ -5,58 +5,58 @@
 
 namespace aten
 {
-	class FileInputStream;
-	class SkeletonController;
+    class FileInputStream;
+    class SkeletonController;
 
-	/**
-	 * @brief メッシュデータ.
-	 */
-	class DeformMesh {
-		friend class deformable;
+    /**
+     * @brief メッシュデータ.
+     */
+    class DeformMesh {
+        friend class deformable;
 
-	private:
-		DeformMesh() {}
-		~DeformMesh() {}
+    private:
+        DeformMesh() {}
+        ~DeformMesh() {}
 
-	private:
-		bool read(
-			FileInputStream* stream,
-			IDeformMeshReadHelper* helper);
+    private:
+        bool read(
+            FileInputStream* stream,
+            IDeformMeshReadHelper* helper);
 
-		void render(
-			const SkeletonController& skeleton,
-			IDeformMeshRenderHelper* helper);
+        void render(
+            const SkeletonController& skeleton,
+            IDeformMeshRenderHelper* helper);
 
-		void release()
-		{
-			m_groups.clear();
-		}
+        void release()
+        {
+            m_groups.clear();
+        }
 
-		void getGeometryData(
-			std::vector<SkinningVertex>& vtx,
-			std::vector<uint32_t>& idx,
-			std::vector<aten::PrimitiveParamter>& tris) const;
+        void getGeometryData(
+            std::vector<SkinningVertex>& vtx,
+            std::vector<uint32_t>& idx,
+            std::vector<aten::PrimitiveParamter>& tris) const;
 
-		const MeshHeader& getDesc() const
-		{
-			return m_header;
-		}
+        const MeshHeader& getDesc() const
+        {
+            return m_header;
+        }
 
-		GeomMultiVertexBuffer& getVBForGPUSkinning()
-		{
-			// TODO
-			return m_groups[0].getVBForGPUSkinning();
-		}
+        GeomMultiVertexBuffer& getVBForGPUSkinning()
+        {
+            // TODO
+            return m_groups[0].getVBForGPUSkinning();
+        }
 
-		uint32_t getTriangleCount() const
-		{
-			// TODO
-			return m_groups[0].getTriangleCount();
-		}
+        uint32_t getTriangleCount() const
+        {
+            // TODO
+            return m_groups[0].getTriangleCount();
+        }
 
-	private:
-		MeshHeader m_header;
+    private:
+        MeshHeader m_header;
 
-		std::vector<DeformMeshGroup> m_groups;
-	};
+        std::vector<DeformMeshGroup> m_groups;
+    };
 }

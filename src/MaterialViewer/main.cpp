@@ -52,118 +52,118 @@ static bool g_enableAlbedoMap = true;
 static bool g_enableNormalMap = true;
 
 void getCameraPosAndAt(
-	aten::vec3& pos,
-	aten::vec3& at,
-	real& fov)
+    aten::vec3& pos,
+    aten::vec3& at,
+    real& fov)
 {
-	pos = aten::vec3(0.f, 1.f, 10.f);
-	at = aten::vec3(0.f, 1.f, 0.f);
-	fov = 45;
+    pos = aten::vec3(0.f, 1.f, 10.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45;
 }
 
 void makeScene(aten::scene* scene)
 {
-	aten::AssetManager::registerMtrl(
-		"m1",
-		new aten::CarPaintBRDF(aten::vec3(0.580000, 0.580000, 0.580000)));
+    aten::AssetManager::registerMtrl(
+        "m1",
+        new aten::CarPaintBRDF(aten::vec3(0.580000, 0.580000, 0.580000)));
 
-	auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
-	auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
-	scene->add(teapot);
+    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
+    auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+    scene->add(teapot);
 
-	// TODO
-	//g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
-	//g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
+    // TODO
+    //g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
+    //g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
-	obj->shapes[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
+    obj->shapes[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
 
 aten::material* createMaterial(aten::MaterialType type)
 {
-	aten::material* mtrl = nullptr;
+    aten::material* mtrl = nullptr;
 
-	switch (type) {
-	case aten::MaterialType::Emissive:
-	case aten::MaterialType::Lambert:
-		mtrl = new aten::lambert();
-		break;
-	case aten::MaterialType::OrneNayar:
-		mtrl = new aten::OrenNayar();
-		break;
-	case aten::MaterialType::Specular:
-		mtrl = new aten::specular();
-		break;
-	case aten::MaterialType::Refraction:
-		mtrl = new aten::refraction();
-		break;
-	case aten::MaterialType::Blinn:
-		mtrl = new aten::MicrofacetBlinn();
-		break;
-	case aten::MaterialType::GGX:
-		mtrl = new aten::MicrofacetGGX();
-		break;
-	case aten::MaterialType::Beckman:
-		mtrl = new aten::MicrofacetBeckman();
-		break;
-	case aten::MaterialType::Velvet:
-		mtrl = new aten::MicrofacetVelvet();
-		break;
-	case aten::MaterialType::Lambert_Refraction:
-		mtrl = new aten::LambertRefraction();
-		break;
-	case aten::MaterialType::Microfacet_Refraction:
-		mtrl = new aten::MicrofacetRefraction();
-		break;
-	case aten::MaterialType::Disney:
-		mtrl = new aten::DisneyBRDF();
-		break;
-	case aten::MaterialType::CarPaint:
-		mtrl = new aten::CarPaintBRDF();
-		break;
-	default:
-		AT_ASSERT(false);
-		mtrl = new aten::lambert();
-		break;
-	}
+    switch (type) {
+    case aten::MaterialType::Emissive:
+    case aten::MaterialType::Lambert:
+        mtrl = new aten::lambert();
+        break;
+    case aten::MaterialType::OrneNayar:
+        mtrl = new aten::OrenNayar();
+        break;
+    case aten::MaterialType::Specular:
+        mtrl = new aten::specular();
+        break;
+    case aten::MaterialType::Refraction:
+        mtrl = new aten::refraction();
+        break;
+    case aten::MaterialType::Blinn:
+        mtrl = new aten::MicrofacetBlinn();
+        break;
+    case aten::MaterialType::GGX:
+        mtrl = new aten::MicrofacetGGX();
+        break;
+    case aten::MaterialType::Beckman:
+        mtrl = new aten::MicrofacetBeckman();
+        break;
+    case aten::MaterialType::Velvet:
+        mtrl = new aten::MicrofacetVelvet();
+        break;
+    case aten::MaterialType::Lambert_Refraction:
+        mtrl = new aten::LambertRefraction();
+        break;
+    case aten::MaterialType::Microfacet_Refraction:
+        mtrl = new aten::MicrofacetRefraction();
+        break;
+    case aten::MaterialType::Disney:
+        mtrl = new aten::DisneyBRDF();
+        break;
+    case aten::MaterialType::CarPaint:
+        mtrl = new aten::CarPaintBRDF();
+        break;
+    default:
+        AT_ASSERT(false);
+        mtrl = new aten::lambert();
+        break;
+    }
 
-	if (mtrl) {
-		mtrl->setTextures(
-			g_enableAlbedoMap ? g_albedoMap : nullptr,
-			g_enableNormalMap ? g_normalMap : nullptr,
-			nullptr);
-	}
+    if (mtrl) {
+        mtrl->setTextures(
+            g_enableAlbedoMap ? g_albedoMap : nullptr,
+            g_enableNormalMap ? g_normalMap : nullptr,
+            nullptr);
+    }
 
-	return mtrl;
+    return mtrl;
 }
 
 class MaterialParamEditor : public aten::IMaterialParamEditor {
 public:
-	MaterialParamEditor() {}
-	virtual ~MaterialParamEditor() {}
+    MaterialParamEditor() {}
+    virtual ~MaterialParamEditor() {}
 
 public:
-	virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
-	{
-		return ImGui::SliderFloat(name, &param, _min, _max);
-	}
+    virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
+    {
+        return ImGui::SliderFloat(name, &param, _min, _max);
+    }
 
-	virtual bool edit(const char* name, aten::vec3& param) override final
-	{
-		float f[3] = { param.x, param.y, param.z };
-		bool ret = ImGui::ColorEdit3(name, f);
+    virtual bool edit(const char* name, aten::vec3& param) override final
+    {
+        float f[3] = { param.x, param.y, param.z };
+        bool ret = ImGui::ColorEdit3(name, f);
 
-		param.x = f[0];
-		param.y = f[1];
-		param.z = f[2];
+        param.x = f[0];
+        param.y = f[1];
+        param.z = f[2];
 
-		return ret;
-	}
+        return ret;
+    }
 
-	virtual void edit(const char* name, const char* str) override final
-	{
-		std::string s(str);
-		ImGui::Text("[%s] : (%s)", name, s.empty() ? "none" : str);
-	}
+    virtual void edit(const char* name, const char* str) override final
+    {
+        std::string s(str);
+        ImGui::Text("[%s] : (%s)", name, s.empty() ? "none" : str);
+    }
 };
 
 static MaterialParamEditor g_mtrlParamEditor;
@@ -171,133 +171,133 @@ static MaterialParamEditor g_mtrlParamEditor;
 void onRun(aten::window* window)
 {
 #ifdef GPU_RENDERING
-	float updateTime = 0.0f;
+    float updateTime = 0.0f;
 
-	if (g_isCameraDirty) {
-		g_camera.update();
+    if (g_isCameraDirty) {
+        g_camera.update();
 
-		auto camparam = g_camera.param();
-		camparam.znear = real(0.1);
-		camparam.zfar = real(10000.0);
+        auto camparam = g_camera.param();
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
 
-		g_tracer.updateCamera(camparam);
-		g_isCameraDirty = false;
+        g_tracer.updateCamera(camparam);
+        g_isCameraDirty = false;
 
-		g_visualizer->clear();
-	}
+        g_visualizer->clear();
+    }
 
-	g_tracer.render(
-		idaten::TileDomain(0, 0, WIDTH, HEIGHT),
-		g_maxSamples,
-		g_maxBounce);
+    g_tracer.render(
+        idaten::TileDomain(0, 0, WIDTH, HEIGHT),
+        g_maxSamples,
+        g_maxBounce);
 
-	g_visualizer->render(false);
+    g_visualizer->render(false);
 
-	if (g_willTakeScreenShot)
-	{
-		static char buffer[1024];
-		::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
+    if (g_willTakeScreenShot)
+    {
+        static char buffer[1024];
+        ::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
 
-		g_visualizer->takeScreenshot(buffer);
+        g_visualizer->takeScreenshot(buffer);
 
-		g_willTakeScreenShot = false;
-		g_cntScreenShot++;
+        g_willTakeScreenShot = false;
+        g_cntScreenShot++;
 
-		AT_PRINTF("Take Screenshot[%s]\n", buffer);
-	}
+        AT_PRINTF("Take Screenshot[%s]\n", buffer);
+    }
 
-	if (g_willShowGUI)
-	{
-		if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
-			|| ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
-		{
-			g_tracer.reset();
-		}
+    if (g_willShowGUI)
+    {
+        if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
+            || ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
+        {
+            g_tracer.reset();
+        }
 
-		bool isProgressive = g_tracer.isProgressive();
+        bool isProgressive = g_tracer.isProgressive();
 
-		if (ImGui::Checkbox("Progressive", &isProgressive)) {
-			g_tracer.enableProgressive(isProgressive);
-			g_tracer.reset();
-		}
+        if (ImGui::Checkbox("Progressive", &isProgressive)) {
+            g_tracer.enableProgressive(isProgressive);
+            g_tracer.reset();
+        }
 
-		auto mtrl = aten::material::getMaterial(0);
-		bool needUpdateMtrl = false;
+        auto mtrl = aten::material::getMaterial(0);
+        bool needUpdateMtrl = false;
 
-		static const char* items[] = {
-			"Emissive",
-			"Lambert",
-			"OrneNayar",
-			"Specular",
-			"Refraction",
-			"Blinn",
-			"GGX",
-			"Beckman",
-			"Velvet",
-			"LambertRefraction",
-			"MicrofacetRefraction",
-			"Disney",
-			"CarPaint",
-		};
-		int mtrlType = (int)mtrl->param().type;
-		if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
-			aten::material::deleteMaterial(mtrl, true);
-			mtrl = createMaterial((aten::MaterialType)mtrlType);
-			needUpdateMtrl = true;
-		}
+        static const char* items[] = {
+            "Emissive",
+            "Lambert",
+            "OrneNayar",
+            "Specular",
+            "Refraction",
+            "Blinn",
+            "GGX",
+            "Beckman",
+            "Velvet",
+            "LambertRefraction",
+            "MicrofacetRefraction",
+            "Disney",
+            "CarPaint",
+        };
+        int mtrlType = (int)mtrl->param().type;
+        if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
+            aten::material::deleteMaterial(mtrl, true);
+            mtrl = createMaterial((aten::MaterialType)mtrlType);
+            needUpdateMtrl = true;
+        }
 
-		{
-			bool b0 = ImGui::Checkbox("AlbedoMap", &g_enableAlbedoMap);
-			bool b1 = ImGui::Checkbox("NormalMap", &g_enableNormalMap);
+        {
+            bool b0 = ImGui::Checkbox("AlbedoMap", &g_enableAlbedoMap);
+            bool b1 = ImGui::Checkbox("NormalMap", &g_enableNormalMap);
 
-			if (b0 || b1) {
-				mtrl->setTextures(
-					g_enableAlbedoMap ? g_albedoMap : nullptr,
-					g_enableNormalMap ? g_normalMap : nullptr,
-					nullptr);
+            if (b0 || b1) {
+                mtrl->setTextures(
+                    g_enableAlbedoMap ? g_albedoMap : nullptr,
+                    g_enableNormalMap ? g_normalMap : nullptr,
+                    nullptr);
 
-				needUpdateMtrl = true;
-			}
-		}
+                needUpdateMtrl = true;
+            }
+        }
 
-		if (mtrl->edit(&g_mtrlParamEditor)) {
-			needUpdateMtrl = true;
-		}
+        if (mtrl->edit(&g_mtrlParamEditor)) {
+            needUpdateMtrl = true;
+        }
 
-		{
-			auto camPos = g_camera.getPos();
-			auto camAt = g_camera.getAt();
+        {
+            auto camPos = g_camera.getPos();
+            auto camAt = g_camera.getAt();
 
-			ImGui::Text("Pos (%f, %f, %f)", camPos.x, camPos.y, camPos.z);
-			ImGui::Text("At  (%f, %f, %f)", camAt.x, camAt.y, camAt.z);
-		}
+            ImGui::Text("Pos (%f, %f, %f)", camPos.x, camPos.y, camPos.z);
+            ImGui::Text("At  (%f, %f, %f)", camAt.x, camAt.y, camAt.z);
+        }
 
-		if (needUpdateMtrl) {
-			std::vector<aten::MaterialParameter> params(1);
-			params[0] = mtrl->param();
-			g_tracer.updateMaterial(params);
-			g_tracer.reset();
-		}
+        if (needUpdateMtrl) {
+            std::vector<aten::MaterialParameter> params(1);
+            params[0] = mtrl->param();
+            g_tracer.updateMaterial(params);
+            g_tracer.reset();
+        }
 
-		window->drawImGui();
-	}
+        window->drawImGui();
+    }
 #else
-	aten::Destination dst;
-	{
-		dst.width = WIDTH;
-		dst.height = HEIGHT;
-		dst.maxDepth = 5;
-		dst.russianRouletteDepth = 3;
-		dst.startDepth = 0;
-		dst.sample = 1;
-		dst.mutation = 10;
-		dst.mltNum = 10;
-		dst.buffer = &g_buffer;
-	}
+    aten::Destination dst;
+    {
+        dst.width = WIDTH;
+        dst.height = HEIGHT;
+        dst.maxDepth = 5;
+        dst.russianRouletteDepth = 3;
+        dst.startDepth = 0;
+        dst.sample = 1;
+        dst.mutation = 10;
+        dst.mltNum = 10;
+        dst.buffer = &g_buffer;
+    }
 
-	g_cpuPT.render(dst, &g_scene, &g_camera);
+    g_cpuPT.render(dst, &g_scene, &g_camera);
 
-	g_visualizer->render(g_buffer.image(), g_camera.needRevert());
+    g_visualizer->render(g_buffer.image(), g_camera.needRevert());
 #endif
 }
 
@@ -313,228 +313,228 @@ int g_prevY = 0;
 
 void onMouseBtn(bool left, bool press, int x, int y)
 {
-	g_isMouseLBtnDown = false;
-	g_isMouseRBtnDown = false;
+    g_isMouseLBtnDown = false;
+    g_isMouseRBtnDown = false;
 
-	if (press) {
-		g_prevX = x;
-		g_prevY = y;
+    if (press) {
+        g_prevX = x;
+        g_prevY = y;
 
-		g_isMouseLBtnDown = left;
-		g_isMouseRBtnDown = !left;
-	}
+        g_isMouseLBtnDown = left;
+        g_isMouseRBtnDown = !left;
+    }
 }
 
 void onMouseMove(int x, int y)
 {
-	if (g_isMouseLBtnDown) {
-		aten::CameraOperator::rotate(
-			g_camera,
-			WIDTH, HEIGHT,
-			g_prevX, g_prevY,
-			x, y);
-		g_isCameraDirty = true;
-	}
-	else if (g_isMouseRBtnDown) {
-		aten::CameraOperator::move(
-			g_camera,
-			g_prevX, g_prevY,
-			x, y,
-			real(0.001));
-		g_isCameraDirty = true;
-	}
+    if (g_isMouseLBtnDown) {
+        aten::CameraOperator::rotate(
+            g_camera,
+            WIDTH, HEIGHT,
+            g_prevX, g_prevY,
+            x, y);
+        g_isCameraDirty = true;
+    }
+    else if (g_isMouseRBtnDown) {
+        aten::CameraOperator::move(
+            g_camera,
+            g_prevX, g_prevY,
+            x, y,
+            real(0.001));
+        g_isCameraDirty = true;
+    }
 
-	g_prevX = x;
-	g_prevY = y;
+    g_prevX = x;
+    g_prevY = y;
 }
 
 void onMouseWheel(int delta)
 {
-	aten::CameraOperator::dolly(g_camera, delta * real(0.1));
-	g_isCameraDirty = true;
+    aten::CameraOperator::dolly(g_camera, delta * real(0.1));
+    g_isCameraDirty = true;
 }
 
 void onKey(bool press, aten::Key key)
 {
-	static const real offset = real(0.1);
+    static const real offset = real(0.1);
 
-	if (press) {
-		if (key == aten::Key::Key_F1) {
-			g_willShowGUI = !g_willShowGUI;
-			return;
-		}
-		else if (key == aten::Key::Key_F2) {
-			g_willTakeScreenShot = true;
-			return;
-		}
-	}
+    if (press) {
+        if (key == aten::Key::Key_F1) {
+            g_willShowGUI = !g_willShowGUI;
+            return;
+        }
+        else if (key == aten::Key::Key_F2) {
+            g_willTakeScreenShot = true;
+            return;
+        }
+    }
 
-	if (press) {
-		switch (key) {
-		case aten::Key::Key_W:
-		case aten::Key::Key_UP:
-			aten::CameraOperator::moveForward(g_camera, offset);
-			break;
-		case aten::Key::Key_S:
-		case aten::Key::Key_DOWN:
-			aten::CameraOperator::moveForward(g_camera, -offset);
-			break;
-		case aten::Key::Key_D:
-		case aten::Key::Key_RIGHT:
-			aten::CameraOperator::moveRight(g_camera, offset);
-			break;
-		case aten::Key::Key_A:
-		case aten::Key::Key_LEFT:
-			aten::CameraOperator::moveRight(g_camera, -offset);
-			break;
-		case aten::Key::Key_Z:
-			aten::CameraOperator::moveUp(g_camera, offset);
-			break;
-		case aten::Key::Key_X:
-			aten::CameraOperator::moveUp(g_camera, -offset);
-			break;
-		case aten::Key::Key_R:
-		{
-			aten::vec3 pos, at;
-			real vfov;
-			getCameraPosAndAt(pos, at, vfov);
+    if (press) {
+        switch (key) {
+        case aten::Key::Key_W:
+        case aten::Key::Key_UP:
+            aten::CameraOperator::moveForward(g_camera, offset);
+            break;
+        case aten::Key::Key_S:
+        case aten::Key::Key_DOWN:
+            aten::CameraOperator::moveForward(g_camera, -offset);
+            break;
+        case aten::Key::Key_D:
+        case aten::Key::Key_RIGHT:
+            aten::CameraOperator::moveRight(g_camera, offset);
+            break;
+        case aten::Key::Key_A:
+        case aten::Key::Key_LEFT:
+            aten::CameraOperator::moveRight(g_camera, -offset);
+            break;
+        case aten::Key::Key_Z:
+            aten::CameraOperator::moveUp(g_camera, offset);
+            break;
+        case aten::Key::Key_X:
+            aten::CameraOperator::moveUp(g_camera, -offset);
+            break;
+        case aten::Key::Key_R:
+        {
+            aten::vec3 pos, at;
+            real vfov;
+            getCameraPosAndAt(pos, at, vfov);
 
-			g_camera.init(
-				pos,
-				at,
-				aten::vec3(0, 1, 0),
-				vfov,
+            g_camera.init(
+                pos,
+                at,
+                aten::vec3(0, 1, 0),
+                vfov,
 #ifdef ENABLE_GEOMRENDERING
-				WIDTH >> 1, HEIGHT >> 1);
+                WIDTH >> 1, HEIGHT >> 1);
 #else
-				WIDTH, HEIGHT);
+                WIDTH, HEIGHT);
 #endif
-		}
-			break;
-		default:
-			break;
-		}
+        }
+            break;
+        default:
+            break;
+        }
 
-		g_isCameraDirty = true;
-	}
+        g_isCameraDirty = true;
+    }
 }
 
 int main()
 {
-	aten::timer::init();
-	aten::OMPUtil::setThreadNum(g_threadnum);
+    aten::timer::init();
+    aten::OMPUtil::setThreadNum(g_threadnum);
 
-	aten::initSampler(WIDTH, HEIGHT);
+    aten::initSampler(WIDTH, HEIGHT);
 
-	auto wnd = aten::window::init(
-		WIDTH, HEIGHT, TITLE,
-		onRun,
-		onClose,
-		onMouseBtn,
-		onMouseMove,
-		onMouseWheel,
-		onKey);
+    auto wnd = aten::window::init(
+        WIDTH, HEIGHT, TITLE,
+        onRun,
+        onClose,
+        onMouseBtn,
+        onMouseMove,
+        onMouseWheel,
+        onKey);
 
-	aten::GLProfiler::start();
+    aten::GLProfiler::start();
 
-	g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
+    g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
 
-	aten::GammaCorrection gamma;
-	gamma.init(
-		WIDTH, HEIGHT,
-		"../shader/fullscreen_vs.glsl",
-		"../shader/gamma_fs.glsl");
+    aten::GammaCorrection gamma;
+    gamma.init(
+        WIDTH, HEIGHT,
+        "../shader/fullscreen_vs.glsl",
+        "../shader/gamma_fs.glsl");
 
-	aten::Blitter blitter;
-	blitter.init(
-		WIDTH, HEIGHT,
-		"../shader/fullscreen_vs.glsl",
-		"../shader/fullscreen_fs.glsl");
-	blitter.setIsRenderRGB(true);
+    aten::Blitter blitter;
+    blitter.init(
+        WIDTH, HEIGHT,
+        "../shader/fullscreen_vs.glsl",
+        "../shader/fullscreen_fs.glsl");
+    blitter.setIsRenderRGB(true);
 
-	g_visualizer->addPostProc(&gamma);
-	//aten::visualizer::addPostProc(&blitter);
+    g_visualizer->addPostProc(&gamma);
+    //aten::visualizer::addPostProc(&blitter);
 
-	aten::vec3 pos, at;
-	real vfov;
-	getCameraPosAndAt(pos, at, vfov);
+    aten::vec3 pos, at;
+    real vfov;
+    getCameraPosAndAt(pos, at, vfov);
 
-	g_camera.init(
-		pos,
-		at,
-		aten::vec3(0, 1, 0),
-		vfov,
-		WIDTH, HEIGHT);
+    g_camera.init(
+        pos,
+        at,
+        aten::vec3(0, 1, 0),
+        vfov,
+        WIDTH, HEIGHT);
 
-	makeScene(&g_scene);
-	g_scene.build();
+    makeScene(&g_scene);
+    g_scene.build();
 
-	g_tracer.getCompaction().init(
-		WIDTH * HEIGHT,
-		1024);
+    g_tracer.getCompaction().init(
+        WIDTH * HEIGHT,
+        1024);
 
-	auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
-	aten::envmap bg;
-	bg.init(envmap);
-	aten::ImageBasedLight ibl(&bg);
+    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+    aten::envmap bg;
+    bg.init(envmap);
+    aten::ImageBasedLight ibl(&bg);
 
-	g_scene.addImageBasedLight(&ibl);
+    g_scene.addImageBasedLight(&ibl);
 
-	{
-		std::vector<aten::GeomParameter> shapeparams;
-		std::vector<aten::PrimitiveParamter> primparams;
-		std::vector<aten::LightParameter> lightparams;
-		std::vector<aten::MaterialParameter> mtrlparms;
-		std::vector<aten::vertex> vtxparams;
+    {
+        std::vector<aten::GeomParameter> shapeparams;
+        std::vector<aten::PrimitiveParamter> primparams;
+        std::vector<aten::LightParameter> lightparams;
+        std::vector<aten::MaterialParameter> mtrlparms;
+        std::vector<aten::vertex> vtxparams;
 
-		aten::DataCollector::collect(
-			shapeparams,
-			primparams,
-			lightparams,
-			mtrlparms,
-			vtxparams);
+        aten::DataCollector::collect(
+            shapeparams,
+            primparams,
+            lightparams,
+            mtrlparms,
+            vtxparams);
 
-		const auto& nodes = g_scene.getAccel()->getNodes();
-		const auto& mtxs = g_scene.getAccel()->getMatrices();
+        const auto& nodes = g_scene.getAccel()->getNodes();
+        const auto& mtxs = g_scene.getAccel()->getMatrices();
 
-		std::vector<idaten::TextureResource> tex;
-		{
-			auto texs = aten::texture::getTextures();
+        std::vector<idaten::TextureResource> tex;
+        {
+            auto texs = aten::texture::getTextures();
 
-			for (const auto t : texs) {
-				tex.push_back(
-					idaten::TextureResource(t->colors(), t->width(), t->height()));
-			}
-		}
+            for (const auto t : texs) {
+                tex.push_back(
+                    idaten::TextureResource(t->colors(), t->width(), t->height()));
+            }
+        }
 
-		for (auto& l : lightparams) {
-			if (l.type == aten::LightType::IBL) {
-				l.envmap.idx = envmap->id();
-			}
-		}
+        for (auto& l : lightparams) {
+            if (l.type == aten::LightType::IBL) {
+                l.envmap.idx = envmap->id();
+            }
+        }
 
-		auto camparam = g_camera.param();
-		camparam.znear = real(0.1);
-		camparam.zfar = real(10000.0);
+        auto camparam = g_camera.param();
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
 
-		g_tracer.update(
-			aten::visualizer::getTexHandle(),
-			WIDTH, HEIGHT,
-			camparam,
-			shapeparams,
-			mtrlparms,
-			lightparams,
-			nodes,
-			primparams, 0,
-			vtxparams, 0,
-			mtxs,
-			tex,
-			idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
-	}
+        g_tracer.update(
+            aten::visualizer::getTexHandle(),
+            WIDTH, HEIGHT,
+            camparam,
+            shapeparams,
+            mtrlparms,
+            lightparams,
+            nodes,
+            primparams, 0,
+            vtxparams, 0,
+            mtxs,
+            tex,
+            idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+    }
 
-	aten::window::run();
+    aten::window::run();
 
-	aten::GLProfiler::terminate();
+    aten::GLProfiler::terminate();
 
-	aten::window::terminate();
+    aten::window::terminate();
 }

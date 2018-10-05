@@ -11,43 +11,43 @@ static uint32_t g_threadnum = 1;
 
 int main()
 {
-	aten::timer::init();
-	aten::OMPUtil::setThreadNum(g_threadnum);
+    aten::timer::init();
+    aten::OMPUtil::setThreadNum(g_threadnum);
 
-	aten::SetCurrentDirectoryFromExe();
+    aten::SetCurrentDirectoryFromExe();
 
-	aten::AssetManager::suppressWarnings();
+    aten::AssetManager::suppressWarnings();
 
 #if 1
-	MaterialEditWindow::init(
-		1280, 720,
-		"MaterialEdit");
+    MaterialEditWindow::init(
+        1280, 720,
+        "MaterialEdit");
 
-	aten::material::clearMaterialList();
+    aten::material::clearMaterialList();
 #endif
 
-	MaterialSelectWindow::init(
-		1280, 720,
-		"MaterialSelect",
-		//"../../asset/cornellbox/orig.obj");
-		//"../../asset/sponza/sponza.obj");
-		"../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
-		"./material.xml");
-		//"../../asset/mansion/objs/room.obj");
+    MaterialSelectWindow::init(
+        1280, 720,
+        "MaterialSelect",
+        //"../../asset/cornellbox/orig.obj");
+        //"../../asset/sponza/sponza.obj");
+        "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
+        "./material.xml");
+        //"../../asset/mansion/objs/room.obj");
 
-	MaterialEditWindow::buildScene();
+    MaterialEditWindow::buildScene();
 
-	aten::material::clearMaterialList();
+    aten::material::clearMaterialList();
 
-	MaterialSelectWindow::setFuncPickMtrlIdNotifier(
-		MaterialEditWindow::notifyPickMtrlId);
+    MaterialSelectWindow::setFuncPickMtrlIdNotifier(
+        MaterialEditWindow::notifyPickMtrlId);
 
-	MaterialEditWindow::setFuncChangeMtrlIdNotifier(
-		MaterialSelectWindow::notifyChangeMtrlId);
+    MaterialEditWindow::setFuncChangeMtrlIdNotifier(
+        MaterialSelectWindow::notifyChangeMtrlId);
 
-	aten::window::run();
+    aten::window::run();
 
-	aten::GLProfiler::terminate();
+    aten::GLProfiler::terminate();
 
-	aten::window::terminate();
+    aten::window::terminate();
 }

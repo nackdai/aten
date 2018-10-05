@@ -5,32 +5,32 @@
 
 namespace idaten
 {
-	template<class T> class GpuProxy;
+    template<class T> class GpuProxy;
 
-	class PathTracingMultiGPU : public RendererMultiGPU<PathTracing> {
-		friend class GpuProxy<PathTracingMultiGPU>;
+    class PathTracingMultiGPU : public RendererMultiGPU<PathTracing> {
+        friend class GpuProxy<PathTracingMultiGPU>;
 
-	public:
-		PathTracingMultiGPU() {}
-		virtual ~PathTracingMultiGPU() {}
+    public:
+        PathTracingMultiGPU() {}
+        virtual ~PathTracingMultiGPU() {}
 
-	public:
-		virtual void render(
-			const TileDomain& tileDomain,
-			int maxSamples,
-			int maxBounce) override final;
+    public:
+        virtual void render(
+            const TileDomain& tileDomain,
+            int maxSamples,
+            int maxBounce) override final;
 
-		virtual void postRender(int width, int height) override final;
+        virtual void postRender(int width, int height) override final;
 
-	protected:
-		void setStream(cudaStream_t stream)
-		{
-			// TODO
-		}
+    protected:
+        void setStream(cudaStream_t stream)
+        {
+            // TODO
+        }
 
-	protected:
-		void copy(
-			PathTracingMultiGPU& from,
-			cudaStream_t stream);
-	};
+    protected:
+        void copy(
+            PathTracingMultiGPU& from,
+            cudaStream_t stream);
+    };
 }

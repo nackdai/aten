@@ -12,62 +12,62 @@
 
 namespace AT_NAME
 {
-	class objshape;
+    class objshape;
 
-	class face : public aten::hitable {
-		static std::atomic<int> s_id;
-		static std::vector<face*> s_faces;
+    class face : public aten::hitable {
+        static std::atomic<int> s_id;
+        static std::vector<face*> s_faces;
 
-	public:
-		face();
-		virtual ~face();
+    public:
+        face();
+        virtual ~face();
 
-	public:
-		virtual bool hit(
-			const aten::ray& r,
-			real t_min, real t_max,
-			aten::Intersection& isect) const override;
+    public:
+        virtual bool hit(
+            const aten::ray& r,
+            real t_min, real t_max,
+            aten::Intersection& isect) const override;
 
-		static bool hit(
-			const aten::PrimitiveParamter* param,
-			const aten::vec3& v0,
-			const aten::vec3& v1,
-			const aten::vec3& v2,
-			const aten::ray& r,
-			real t_min, real t_max,
-			aten::Intersection* isect);
+        static bool hit(
+            const aten::PrimitiveParamter* param,
+            const aten::vec3& v0,
+            const aten::vec3& v1,
+            const aten::vec3& v2,
+            const aten::ray& r,
+            real t_min, real t_max,
+            aten::Intersection* isect);
 
-		virtual void evalHitResult(
-			const aten::ray& r, 
-			aten::hitrecord& rec,
-			const aten::Intersection& isect) const;
+        virtual void evalHitResult(
+            const aten::ray& r, 
+            aten::hitrecord& rec,
+            const aten::Intersection& isect) const;
 
-		static void evalHitResult(
-			const aten::vertex& v0,
-			const aten::vertex& v1,
-			const aten::vertex& v2,
-			aten::hitrecord* rec,
-			const aten::Intersection* isect);
+        static void evalHitResult(
+            const aten::vertex& v0,
+            const aten::vertex& v1,
+            const aten::vertex& v2,
+            aten::hitrecord* rec,
+            const aten::Intersection* isect);
 
-		virtual void getSamplePosNormalArea(
-			aten::hitable::SamplePosNormalPdfResult* result,
-			aten::sampler* sampler) const override;
+        virtual void getSamplePosNormalArea(
+            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::sampler* sampler) const override;
 
-		virtual int geomid() const override;
+        virtual int geomid() const override;
 
-		void build(objshape* _parent);
+        void build(objshape* _parent);
 
-		aten::aabb computeAABB() const;
+        aten::aabb computeAABB() const;
 
-		static const std::vector<face*>& faces()
-		{
-			return s_faces;
-		}
+        static const std::vector<face*>& faces()
+        {
+            return s_faces;
+        }
 
-		static int findIdx(hitable* h);
-	
-		aten::PrimitiveParamter param;
-		objshape* parent{ nullptr };
-		int id{ -1 };
-	};
+        static int findIdx(hitable* h);
+    
+        aten::PrimitiveParamter param;
+        objshape* parent{ nullptr };
+        int id{ -1 };
+    };
 }

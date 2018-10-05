@@ -12,32 +12,32 @@
     }
 
 namespace aten {
-	inline void getGLPixelFormat(
-		PixelFormat fmt,
-		GLenum& glfmt,
-		GLenum& gltype,
-		GLenum& glinternal)
-	{
-		static GLenum glpixelfmt[] = {
-			GL_RGBA,
-			GL_RGBA,
-			GL_RGBA,
-		};
+    inline void getGLPixelFormat(
+        PixelFormat fmt,
+        GLenum& glfmt,
+        GLenum& gltype,
+        GLenum& glinternal)
+    {
+        static GLenum glpixelfmt[] = {
+            GL_RGBA,
+            GL_RGBA,
+            GL_RGBA,
+        };
 
-		static GLenum glpixeltype[] = {
-			GL_UNSIGNED_BYTE,
-			GL_FLOAT,
-			GL_HALF_FLOAT,
-		};
+        static GLenum glpixeltype[] = {
+            GL_UNSIGNED_BYTE,
+            GL_FLOAT,
+            GL_HALF_FLOAT,
+        };
 
-		static GLenum glpixelinternal[] = {
-			GL_RGBA,
-			GL_RGBA32F,
-			GL_RGBA16F,
-		};
+        static GLenum glpixelinternal[] = {
+            GL_RGBA,
+            GL_RGBA32F,
+            GL_RGBA16F,
+        };
 
-		glinternal = glpixelinternal[fmt];
-		glfmt = glpixelfmt[fmt];
-		gltype = glpixeltype[fmt];
-	}
+        glinternal = glpixelinternal[fmt];
+        glfmt = glpixelfmt[fmt];
+        gltype = glpixeltype[fmt];
+    }
 }

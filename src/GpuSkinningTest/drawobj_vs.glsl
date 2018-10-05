@@ -12,12 +12,12 @@ layout(location = 1) out vec2 outUV;
 
 void main()
 {
-	vec4 pos = vec4(position.xyz, 1.0);
-	vec3 nml = normal.xyz;
-	vec2 uv = vec2(position.w, normal.w);
+    vec4 pos = vec4(position.xyz, 1.0);
+    vec3 nml = normal.xyz;
+    vec2 uv = vec2(position.w, normal.w);
 
-	gl_Position = mtxW2C * pos;
+    gl_Position = mtxW2C * pos;
 
-	outNormal = normalize(nml);
-	outUV = uv.xy;
+    outNormal = normalize(nml);
+    outUV = uv.xy;
 }

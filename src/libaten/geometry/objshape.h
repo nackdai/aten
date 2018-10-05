@@ -10,56 +10,56 @@
 
 namespace AT_NAME
 {
-	using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*, int)>;
+    using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*, int)>;
 
-	class objshape : public aten::geombase {
-		friend class object;
+    class objshape : public aten::geombase {
+        friend class object;
 
-	public:
-		objshape() : param(aten::GeometryType::Polygon) {}
-		virtual ~objshape();
+    public:
+        objshape() : param(aten::GeometryType::Polygon) {}
+        virtual ~objshape();
 
-		void build();
+        void build();
 
-		void setMaterial(material* mtrl)
-		{
-			m_mtrl = mtrl;
-		}
+        void setMaterial(material* mtrl)
+        {
+            m_mtrl = mtrl;
+        }
 
-		const material* getMaterial() const
-		{
-			return m_mtrl;
-		}
-		material* getMaterial()
-		{
-			return m_mtrl;
-		}
+        const material* getMaterial() const
+        {
+            return m_mtrl;
+        }
+        material* getMaterial()
+        {
+            return m_mtrl;
+        }
 
-		void addFace(face* f);
+        void addFace(face* f);
 
-		void draw(
-			aten::hitable::FuncPreDraw func,
-			const aten::mat4& mtxL2W,
-			const aten::mat4& mtxPrevL2W,
-			int parentId);
+        void draw(
+            aten::hitable::FuncPreDraw func,
+            const aten::mat4& mtxL2W,
+            const aten::mat4& mtxPrevL2W,
+            int parentId);
 
-		void draw(AT_NAME::FuncObjectMeshDraw func);
+        void draw(AT_NAME::FuncObjectMeshDraw func);
 
-		const std::vector<face*>& tris() const
-		{
-			return faces;
-		}
+        const std::vector<face*>& tris() const
+        {
+            return faces;
+        }
 
-		aten::GeomParameter param;
-		aten::aabb m_aabb;
+        aten::GeomParameter param;
+        aten::aabb m_aabb;
 
-	private:
-		material* m_mtrl{ nullptr };
-		std::vector<face*> faces;
+    private:
+        material* m_mtrl{ nullptr };
+        std::vector<face*> faces;
 
-		aten::GeomIndexBuffer m_ib;
+        aten::GeomIndexBuffer m_ib;
 
-		int m_baseIdx{ INT32_MAX };
-		int m_baseTriIdx{ INT32_MAX };
-	};
+        int m_baseIdx{ INT32_MAX };
+        int m_baseTriIdx{ INT32_MAX };
+    };
 }

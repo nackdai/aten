@@ -3,130 +3,130 @@
 #include "visualizer/fbo.h"
 
 namespace aten {
-	bool FBO::init(
-		int width, 
-		int height, 
-		PixelFormat fmt,
-		bool needDepth/*= false*/)
-	{
-		if (m_fbo > 0) {
-			// TODO
-			// Check size, format...
+    bool FBO::init(
+        int width, 
+        int height, 
+        PixelFormat fmt,
+        bool needDepth/*= false*/)
+    {
+        if (m_fbo > 0) {
+            // TODO
+            // Check size, format...
 
-			return true;
-		}
+            return true;
+        }
 
-		CALL_GL_API(glGenFramebuffers(1, &m_fbo));
+        CALL_GL_API(glGenFramebuffers(1, &m_fbo));
 
-		m_tex.resize(m_num);
+        m_tex.resize(m_num);
 
-		CALL_GL_API(glGenTextures(m_num, &m_tex[0]));
+        CALL_GL_API(glGenTextures(m_num, &m_tex[0]));
 
-		for (int i = 0; i < m_num; i++) {
-			CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_tex[i]));
+        for (int i = 0; i < m_num; i++) {
+            CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_tex[i]));
 
-			GLenum pixelfmt = 0;
-			GLenum pixeltype = 0;
-			GLenum pixelinternal = 0;
+            GLenum pixelfmt = 0;
+            GLenum pixeltype = 0;
+            GLenum pixelinternal = 0;
 
-			getGLPixelFormat(
-				fmt,
-				pixelfmt, pixeltype, pixelinternal);
+            getGLPixelFormat(
+                fmt,
+                pixelfmt, pixeltype, pixelinternal);
 
-			CALL_GL_API(glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				pixelinternal,
-				width, height,
-				0,
-				pixelfmt,
-				pixeltype,
-				nullptr));
-		}
+            CALL_GL_API(glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                pixelinternal,
+                width, height,
+                0,
+                pixelfmt,
+                pixeltype,
+                nullptr));
+        }
 
-		m_width = width;
-		m_height = height;
+        m_width = width;
+        m_height = height;
 
-		if (needDepth) {
-			CALL_GL_API(::glGenTextures(1, &m_depth));
-		
-			CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_depth));
+        if (needDepth) {
+            CALL_GL_API(::glGenTextures(1, &m_depth));
+        
+            CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_depth));
 
-			CALL_GL_API(::glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				GL_DEPTH_COMPONENT,
-				width, height,
-				0,
-				GL_DEPTH_COMPONENT,
-				GL_UNSIGNED_INT,
-				nullptr));
-		}
+            CALL_GL_API(::glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_DEPTH_COMPONENT,
+                width, height,
+                0,
+                GL_DEPTH_COMPONENT,
+                GL_UNSIGNED_INT,
+                nullptr));
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	void FBO::bindAsTexture(uint32_t idx/*= 0*/)
-	{
-		AT_ASSERT(m_tex[idx] > 0);
+    void FBO::bindAsTexture(uint32_t idx/*= 0*/)
+    {
+        AT_ASSERT(m_tex[idx] > 0);
 
-		CALL_GL_API(glBindTexture(
-			GL_TEXTURE_2D,
-			m_tex[idx]));
+        CALL_GL_API(glBindTexture(
+            GL_TEXTURE_2D,
+            m_tex[idx]));
 
-		// Specify filter after binding!!!!!
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-		CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	}
+        // Specify filter after binding!!!!!
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP));
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP));
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        CALL_GL_API(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    }
 
-	void FBO::bindFBO(bool needDepth/*= false*/)
-	{
-		AT_ASSERT(isValid());
+    void FBO::bindFBO(bool needDepth/*= false*/)
+    {
+        AT_ASSERT(isValid());
 
-		CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
+        CALL_GL_API(glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
 
-		if (m_func) {
-			m_func(&m_tex[0], m_num, m_comps);
-		}
-		else {
-			if (m_comps.empty()) {
-				for (int i = 0; i < m_num; i++) {
-					CALL_GL_API(glFramebufferTexture2D(
-						GL_FRAMEBUFFER,
-						GL_COLOR_ATTACHMENT0 + i,
-						GL_TEXTURE_2D,
-						m_tex[i],
-						0));
+        if (m_func) {
+            m_func(&m_tex[0], m_num, m_comps);
+        }
+        else {
+            if (m_comps.empty()) {
+                for (int i = 0; i < m_num; i++) {
+                    CALL_GL_API(glFramebufferTexture2D(
+                        GL_FRAMEBUFFER,
+                        GL_COLOR_ATTACHMENT0 + i,
+                        GL_TEXTURE_2D,
+                        m_tex[i],
+                        0));
 
-					m_comps.push_back(GL_COLOR_ATTACHMENT0 + i);
-				}
-			}
-		}
+                    m_comps.push_back(GL_COLOR_ATTACHMENT0 + i);
+                }
+            }
+        }
 
-		CALL_GL_API(glDrawBuffers(m_comps.size(), &m_comps[0]));
+        CALL_GL_API(glDrawBuffers(m_comps.size(), &m_comps[0]));
 
-		if (needDepth) {
-			AT_ASSERT(m_depth > 0);
+        if (needDepth) {
+            AT_ASSERT(m_depth > 0);
 
-			CALL_GL_API(::glFramebufferTexture2D(
-				GL_FRAMEBUFFER,
-				GL_DEPTH_ATTACHMENT,
-				GL_TEXTURE_2D,
-				m_depth,
-				0));
-		}
+            CALL_GL_API(::glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_DEPTH_ATTACHMENT,
+                GL_TEXTURE_2D,
+                m_depth,
+                0));
+        }
 
-		//auto res = glCheckNamedFramebufferStatus(m_fbo, GL_FRAMEBUFFER);
-		//AT_ASSERT(res == GL_FRAMEBUFFER_COMPLETE);
-	}
+        //auto res = glCheckNamedFramebufferStatus(m_fbo, GL_FRAMEBUFFER);
+        //AT_ASSERT(res == GL_FRAMEBUFFER_COMPLETE);
+    }
 
-	void FBO::asMulti(uint32_t num)
-	{
-		AT_ASSERT(num > 0);
-		AT_ASSERT(m_fbo == 0);
+    void FBO::asMulti(uint32_t num)
+    {
+        AT_ASSERT(num > 0);
+        AT_ASSERT(m_fbo == 0);
 
-		m_num = num;
-	}
+        m_num = num;
+    }
 }

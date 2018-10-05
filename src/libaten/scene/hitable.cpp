@@ -3,8 +3,8 @@
 
 namespace aten
 {
-	accelerator* hitable::getInternalAccelerator()
-	{
-		return nullptr;
-	}
+    accelerator* hitable::getInternalAccelerator()
+    {
+        return nullptr;
+    }
 }

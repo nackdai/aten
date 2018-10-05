@@ -14,8 +14,8 @@ layout(location = 1) out vec2 outUV;
 
 void main()
 {
-	gl_Position = mtxW2C * mtxL2W * position;
+    gl_Position = mtxW2C * mtxL2W * position;
 
-	outNormal = normalize(mtxL2W * vec4(normal, 0)).xyz;
-	outUV = uv.xy;
+    outNormal = normalize(mtxL2W * vec4(normal, 0)).xyz;
+    outUV = uv.xy;
 }

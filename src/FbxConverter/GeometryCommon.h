@@ -158,7 +158,7 @@ struct VtxAdditional {
         // NOTE
         // Need to call "fixNormal" before call this function...
         AT_ASSERT(nml.size() == 1);
-		v = nml[0];
+        v = nml[0];
     }
 
     void fixTangent()
@@ -186,7 +186,7 @@ struct VtxAdditional {
         // NOTE
         // Need to call "fixTangent" before call this function...
         AT_ASSERT(tangent.size() == 1);
-		v = tangent[0];
+        v = tangent[0];
     }
 };
 
@@ -201,23 +201,23 @@ struct JointTransformParam {
 ///////////////////////////////////////
 
 struct TextureType {
-	bool isSpecular{ false };
-	bool isNormal{ false };
-	bool isTranslucent{ false };
+    bool isSpecular{ false };
+    bool isNormal{ false };
+    bool isTranslucent{ false };
 };
 
 struct MaterialTex {
-	std::string name;
-	TextureType type;
+    std::string name;
+    TextureType type;
 };
 
 struct MaterialParam {
-	std::string name;
-	std::vector<float> values;
+    std::string name;
+    std::vector<float> values;
 };
 
 struct MaterialInfo {
-	std::string name;
-	std::vector<MaterialTex> tex;
-	std::vector<MaterialParam> params;
+    std::string name;
+    std::vector<MaterialTex> tex;
+    std::vector<MaterialParam> params;
 };

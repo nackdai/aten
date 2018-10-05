@@ -11,8 +11,8 @@ namespace aten
     */
     class Timeline {
     public:
-		Timeline();
-		Timeline(
+        Timeline();
+        Timeline(
             real duration,
             real delay);
 
@@ -49,7 +49,7 @@ namespace aten
          */
         void rewind();
 
-		using TimeOverHandler = std::function<void(const Timeline&)>;
+        using TimeOverHandler = std::function<void(const Timeline&)>;
 
         /** Set handler if timeline is over the specified time.
          */
@@ -104,7 +104,7 @@ namespace aten
         void setOverTime(real over);
 
     protected:
-		real m_Time{ real(0) };        // 時間
+        real m_Time{ real(0) };        // 時間
         real m_DelayTime{ real(0) };
 
         real m_Duration{ real(0) };    // 期間
@@ -112,12 +112,12 @@ namespace aten
 
         real m_OverTime{ real(0) };
 
-		bool m_isLoop{ false };    // ループするか
+        bool m_isLoop{ false };    // ループするか
         bool m_isReverse{ false };    // 逆回転するかどうか
         bool m_isPause{ false };    // ポーズ中かどうか
         bool m_isForward{ true };    // 順方向進行かどうか
 
-		TimeOverHandler m_TimeOverHandler;
+        TimeOverHandler m_TimeOverHandler;
     };
 
 }

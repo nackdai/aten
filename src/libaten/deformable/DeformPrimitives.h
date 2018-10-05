@@ -11,76 +11,76 @@
 
 namespace aten
 {
-	class FileInputStream;
-	class SkeletonController;
+    class FileInputStream;
+    class SkeletonController;
 
-	class IDeformMeshRenderHelper {
-	protected:
-		IDeformMeshRenderHelper() {}
-		virtual ~IDeformMeshRenderHelper() {}
+    class IDeformMeshRenderHelper {
+    protected:
+        IDeformMeshRenderHelper() {}
+        virtual ~IDeformMeshRenderHelper() {}
 
-	public:
-		virtual void applyMatrix(uint32_t idx, const mat4& mtx) = 0;
-		virtual void applyMaterial(const MeshMaterial& mtrlDesc) = 0;
-		virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) = 0;
-	};
+    public:
+        virtual void applyMatrix(uint32_t idx, const mat4& mtx) = 0;
+        virtual void applyMaterial(const MeshMaterial& mtrlDesc) = 0;
+        virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) = 0;
+    };
 
-	/**
-	 * @brief プリミティブデータ.
-	 * メッシュデータの最小単位.
-	 */
-	class DeformPrimitives {
-		friend class DeformMeshSet;
-		friend class DeformMeshGroup;
+    /**
+     * @brief プリミティブデータ.
+     * メッシュデータの最小単位.
+     */
+    class DeformPrimitives {
+        friend class DeformMeshSet;
+        friend class DeformMeshGroup;
 
-	public:
-		DeformPrimitives() {}
-		~DeformPrimitives() {}
+    public:
+        DeformPrimitives() {}
+        ~DeformPrimitives() {}
 
-	private:
-		bool read(
-			FileInputStream* stream,
-			bool isGPUSkinning);
+    private:
+        bool read(
+            FileInputStream* stream,
+            bool isGPUSkinning);
 
-		void render(
-			const SkeletonController& skeleton,
-			IDeformMeshRenderHelper* helper,
-			bool isGPUSkinning);
+        void render(
+            const SkeletonController& skeleton,
+            IDeformMeshRenderHelper* helper,
+            bool isGPUSkinning);
 
-		const PrimitiveSet& getDesc() const
-		{
-			return m_desc;
-		}
+        const PrimitiveSet& getDesc() const
+        {
+            return m_desc;
+        }
 
-		void setVB(GeomVertexBuffer* vb)
-		{
-			m_vb = vb;
-		}
+        void setVB(GeomVertexBuffer* vb)
+        {
+            m_vb = vb;
+        }
 
-		void setVB(GeomMultiVertexBuffer* vb)
-		{
-			m_vb = vb;
-		}
+        void setVB(GeomMultiVertexBuffer* vb)
+        {
+            m_vb = vb;
+        }
 
-		void getIndices(std::vector<uint32_t>& indices) const;
+        void getIndices(std::vector<uint32_t>& indices) const;
 
-	private:
-		void setTriOffset(uint32_t offset)
-		{
-			m_triOffset = offset;
-		}
+    private:
+        void setTriOffset(uint32_t offset)
+        {
+            m_triOffset = offset;
+        }
 
-	private:
-		PrimitiveSet m_desc;
+    private:
+        PrimitiveSet m_desc;
 
-		// ジョイントインデックス.
-		std::vector<int16_t> m_joints;
+        // ジョイントインデックス.
+        std::vector<int16_t> m_joints;
 
-		std::vector<uint32_t> m_indices;
+        std::vector<uint32_t> m_indices;
 
-		GeomVertexBuffer* m_vb{ nullptr };
-		GeomIndexBuffer m_ib;
+        GeomVertexBuffer* m_vb{ nullptr };
+        GeomIndexBuffer m_ib;
 
-		uint32_t m_triOffset{ 0 };
-	};
+        uint32_t m_triOffset{ 0 };
+    };
 }

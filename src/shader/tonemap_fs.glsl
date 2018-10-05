@@ -24,26 +24,26 @@ vec3 YCbCr2B = vec3(+1.00000, +1.77200, +0.00000);
 void main()
 {
     vec2 uv = gl_FragCoord.xy * invScreen.xy;
-	if (revert) {
-		uv.x = 1.0 - uv.x;
-		uv.y = 1.0 - uv.y;
-	}
+    if (revert) {
+        uv.x = 1.0 - uv.x;
+        uv.y = 1.0 - uv.y;
+    }
 
-	vec4 col = sqrt(texture2D(image, uv));
+    vec4 col = sqrt(texture2D(image, uv));
 
-	float y = dot(RGB2Y, col.rgb);
-	float cb = dot(RGB2Cb, col.rgb);
-	float cr = dot(RGB2Cr, col.rgb);
+    float y = dot(RGB2Y, col.rgb);
+    float cb = dot(RGB2Cb, col.rgb);
+    float cr = dot(RGB2Cr, col.rgb);
 
-	y = coeff * y;
-	y = y * (1.0 + y / (l_max * l_max)) / (1.0 + y);
+    y = coeff * y;
+    y = y * (1.0 + y / (l_max * l_max)) / (1.0 + y);
 
-	vec3 ycbcr = vec3(y, cb, cr);
+    vec3 ycbcr = vec3(y, cb, cr);
 
-	float r = dot(YCbCr2R, ycbcr);
-	float g = dot(YCbCr2G, ycbcr);
-	float b = dot(YCbCr2B, ycbcr);
+    float r = dot(YCbCr2R, ycbcr);
+    float g = dot(YCbCr2G, ycbcr);
+    float b = dot(YCbCr2B, ycbcr);
 
-	oColour.rgb = clamp(vec3(r, g, b), 0, 1);
-	oColour.a = 1;
+    oColour.rgb = clamp(vec3(r, g, b), 0, 1);
+    oColour.a = 1;
 }

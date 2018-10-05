@@ -9,9 +9,9 @@ private:
     ~MdlExporter();
 
 public:
-	static bool exportMdl(
+    static bool exportMdl(
         uint32_t maxJointMtxNum,
         const char* lpszOutFile,
         aten::FbxImporter* pImporter,
-		bool isExportForGPUSkinning = false);
+        bool isExportForGPUSkinning = false);
 };

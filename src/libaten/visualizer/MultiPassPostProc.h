@@ -5,19 +5,19 @@
 #include "visualizer/visualizer.h"
 
 namespace aten {
-	class MultiPassPostProc : public visualizer::PostProc {
-	protected:
-		MultiPassPostProc() {}
-		virtual ~MultiPassPostProc() {}
+    class MultiPassPostProc : public visualizer::PostProc {
+    protected:
+        MultiPassPostProc() {}
+        virtual ~MultiPassPostProc() {}
 
-	protected:
-		virtual void prepareRender(
-			const void* pixels,
-			bool revert) override;
+    protected:
+        virtual void prepareRender(
+            const void* pixels,
+            bool revert) override;
 
-		bool addPass(visualizer::PostProc* pass);
+        bool addPass(visualizer::PostProc* pass);
 
-	private:
-		std::vector<visualizer::PostProc*> m_passes;
-	};
+    private:
+        std::vector<visualizer::PostProc*> m_passes;
+    };
 }

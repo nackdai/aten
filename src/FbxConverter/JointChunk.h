@@ -11,7 +11,7 @@ class FileOutputStream;
 
 class JointChunk {
 protected:
-	JointChunk();
+    JointChunk();
     ~JointChunk();
 
 public:
@@ -22,11 +22,11 @@ public:
 protected:
     static void getJointInfo(
         FileOutputStream* pOut,
-		aten::FbxImporter* pImporter,
+        aten::FbxImporter* pImporter,
         std::vector<aten::JointParam>& tvJoint);
 
     static bool exportJoint(
         FileOutputStream* pOut,
-		aten::FbxImporter* pImporter,
+        aten::FbxImporter* pImporter,
         std::vector<aten::JointParam>& tvJoint);
 };

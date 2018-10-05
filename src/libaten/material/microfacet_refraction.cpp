@@ -117,39 +117,49 @@ namespace AT_NAME
 		const aten::vec3& wi,
 		const aten::vec3& wo)
 	{
-		const auto& i = -wi;
-		const auto& o = wo;
+		const auto& in = -wi;
+		const auto& out = wo;
+		auto n = nml;
 
-		bool isSameHemisphere = dot(i, o) > real(0);
-		if (isSameHemisphere) {
+		auto NdotI = dot(nml, in);
+		auto NdotO = dot(nml, out);
+
+		if (NdotI * NdotO >= 0) {
+			// Incomling ray and Outgoing ray are same direction.
 			return real(0);
 		}
 
-		auto pdf = MicrofacetGGX::pdf(roughness, nml, wi, wo);
+		bool into = (NdotI >= real(0));
 
+		real etai = real(1);	// 真空の屈折率.
+		real etat = ior;		// 物体内部の屈折率.
 
-		bool into = dot(i, nml) > real(0);
+		if (!into) {
+			auto tmp = etai;
+			etai = etat;
+			etat = tmp;
 
-		real nc = real(1);	// 真空の屈折率.
-		real nt = ior;		// 物体内部の屈折率.
-		real nnt = into ? nc / nt : nt / nc;
-
-		// Macrofacet normal.
-		const auto& n = into ? nml : -nml;
-
-		//const auto wh = normalize(i + nnt * o);
-		auto wh = i + nnt * o;
-		{
-			auto len = aten::length(wh);
-			wh = len > real(0) ? wh / len : wh;
+			n = -n;
 		}
 
-		const float denom = dot(o, wh) + nnt * dot(i, wh);
-		const float dwh_dwi = nnt * nnt * aten::abs(dot(i, wh)) / (denom * denom + real(0.000001));
+		// Expression(16)
+		const auto ht = -(etai * in + etat * out);
+		
+		const auto wh = normalize(ht);
 
-		pdf = pdf * dwh_dwi;
+		auto OdotWh = aten::abs(dot(out, wh));
 
-		return pdf == real(0) ? real(1) : pdf;
+		// Expression(17)
+		auto wh_wo = etai * etai * OdotWh;
+		auto denom = dot(ht, ht);
+
+		// Expression(24)
+		auto pdf = MicrofacetGGX::sampleGGX_D(wh, n, roughness) * aten::abs(dot(wh, n));
+
+		// Expression(38)
+		pdf = denom > AT_MATH_EPSILON ? pdf * wh_wo / denom : real(0);
+
+		return pdf;
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::sampleDirection(
@@ -159,97 +169,50 @@ namespace AT_NAME
 		const aten::vec3& nml,
 		aten::sampler* sampler)
 	{
-#if 0
-		const auto& i = -wi;
+		const auto& in = -wi;
+		auto n = nml;
 
-		bool into = dot(i, nml) > real(0);
+		auto NdotI = dot(nml, in);
 
-		// Macrofacet normal.
-		const auto& n = into ? nml : -nml;
-
-		real nc = real(1);	// 真空の屈折率.
-		real nt = ior;		// 物体内部の屈折率.
-		real nnt = into ? nc / nt : nt / nc;
-		real ddn = dot(wi, nml);
-
-		// TODO
-		// 全反射.
-
-		// Sample Microfacet normal.
-		const auto m = MicrofacetGGX::sampleNormal(roughness, n, sampler);
-
-#if 0
-		const real sign = into ? real(1) : real(-1);
-		const real c = dot(i, m);
-		
-		//const auto dir = (nnt * c - sign * aten::sqrt(real(1) + nnt * (c * c - real(1)))) * m - nnt * i;
-
-		const auto t = real(1) - nnt * nnt * aten::cmpMax(real(0), real(1) - c * c);
-
-		if (t < real(0)) {
-			return aten::vec3(0);
+		if (NdotI == 0) {
+			return std::move(aten::vec3(0));
 		}
 
-		const auto tt = nnt * c - sign * aten::sqrt(t);
+		bool into = (NdotI >= real(0));
 
-		auto dir = tt * m;
-		dir = dir - nnt * i;
-
-		auto xxx = dot(i, dir);
-#else
-		const real coso = dot(i, m);
-		const real eta = coso > 0 ? (nt / nc) : (nc / nt);
-		const real t = real(1) - eta * eta * std::max(0.0f, 1.0f - coso * coso);
-
-		// total inner reflection
-		if (t <= 0.0f) {
-			auto reflect = wi - 2 * dot(nml, wi) * nml;
-			reflect = normalize(reflect);
-			return aten::vec3(0);
-		}
-		const float scale = coso < 0.0f ? -1.0f : 1.0f;
-		auto dir = -eta * i + (eta * coso - scale * sqrt(t)) * n;
-#endif
-#else
-		aten::vec3 in = -wi;
-		aten::vec3 n = nml;
-
-		bool into = (dot(in, n) > real(0));
+		real etai = real(1);	// 真空の屈折率.
+		real etat = ior;		// 物体内部の屈折率.
+		real sign = real(1);
 
 		if (!into) {
+			auto tmp = etai;
+			etai = etat;
+			etat = tmp;
+
+			sign = -sign;
+
 			n = -n;
 		}
 
-		real nc = real(1);		// 真空の屈折率.
-		real nt = ior;	// 物体内部の屈折率.
-		real nnt = into ? nc / nt : nt / nc;
-		real ddn = dot(wi, nml);
-
-		// NOTE
-		// cos_t^2 = 1 - sin_t^2
-		// sin_t^2 = (nc/nt)^2 * sin_i^2
-		//         = (nc/nt)^2 * (1 - cos_i^2)
-		// sin_i / sin_t = nt/nc
-		//   -> sin_t = (nc/nt) * sin_i
-		//            = (nc/nt) * sqrt(1 - cos_i)
-		real cos2t = real(1) - nnt * nnt * (real(1) - ddn * ddn);
-
+		// Sample microfacet normal.
 		const auto m = MicrofacetGGX::sampleNormal(roughness, n, sampler);
 
-		if (cos2t < real(0)) {
-			auto reflect = wi - 2 * dot(m, wi) * m;
-			reflect = normalize(reflect);
-			return std::move(reflect);
+		// Expression(40)
+		const auto c = dot(in, m);
+		const auto eta = etai / etat;
+
+		//const auto d = 1 + eta * (c * c - 1);
+		const auto d = 1 - eta * eta * aten::cmpMax(real(0), 1 - c * c);
+
+		if (d <= 0) {
+			return std::move(aten::vec3(0));
 		}
 
-		auto d = dot(in, m);
-		auto dir = -nnt * (in - d * m) - aten::sqrt(real(1) - nnt * nnt * (1 - ddn * ddn)) * m;
-		dir = normalize(dir);
+		const auto t = (eta * c - aten::sqrt(d));
+		auto wo = t * m - eta * in;
+		wo = normalize(wo);
 
-		auto xxx = dot(in, dir);
-#endif
-
-		return std::move(dir);
+		return std::move(wo);
 	}
 
 	AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
@@ -262,31 +225,41 @@ namespace AT_NAME
 		const aten::vec3& wo,
 		real u, real v)
 	{
-		const aten::vec3& i = -wi;
-		const aten::vec3& o = wo;
+		const auto& in = -wi;
+		const auto& out = wo;
+		auto n = nml;
 
-		bool into = dot(i, nml) > real(0);
+		auto NdotI = dot(nml, in);
+		auto NdotO = dot(nml, out);
 
-		const aten::vec3& n = into ? nml : -nml;
-
-		real nc = real(1);	// 真空
-		real nt = ior;		// 物体内部の屈折率.
-		real nnt = into ? nc / nt : nt / nc;
-
-		//const auto wh = normalize(i + nnt * o);
-		auto wh = i + nnt * o;
-		{
-			auto len = aten::length(wh);
-			wh = len > real(0) ? wh / len : wh;
+		if (NdotI * NdotO >= 0) {
+			// Incomling ray and Outgoing ray are same direction.
+			return std::move(aten::vec3(0));
 		}
+
+		bool into = (NdotI >= real(0));
+
+		real etai = real(1);	// 真空の屈折率.
+		real etat = ior;		// 物体内部の屈折率.
+
+		if (!into) {
+			auto tmp = etai;
+			etai = etat;
+			etat = tmp;
+
+			n = -n;
+		}
+
+		const auto ht = -(etai * in + etat * out);
+		const auto wh = normalize(ht);
 
 		real D = MicrofacetGGX::sampleGGX_D(wh, n, roughness);
 
 		// Compute G.
 		real G(1);
 		{
-			auto G1_lh = MicrofacetGGX::computeGGXSmithG1(roughness, i, n);
-			auto G1_vh = MicrofacetGGX::computeGGXSmithG1(roughness, o, n);
+			auto G1_lh = MicrofacetGGX::computeGGXSmithG1(roughness, in, wh);
+			auto G1_vh = MicrofacetGGX::computeGGXSmithG1(roughness, out, wh);
 
 			G = G1_lh * G1_vh;
 		}
@@ -299,35 +272,27 @@ namespace AT_NAME
 			// Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
 			// R0 = ((n1 - n2) / (n1 + n2))^2
 
-			auto r0 = (nc - nt) / (nc + nt);
+			auto r0 = (etai - etat) / (etai + etat);
 			r0 = r0 * r0;
 
-			auto LdotH = aten::abs(dot(o, wh));
+			auto LdotH = aten::abs(dot(out, wh));
 
 			F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
 		}
 
-		auto IdotN = aten::abs(dot(i, n));
-		auto OdotN = aten::abs(dot(o, n));
+		auto IdotN = aten::abs(dot(in, n));
+		auto OdotN = aten::abs(dot(out, n));
 
-		auto IdotH = aten::abs(dot(i, wh));
-		auto OdotH = aten::abs(dot(o, wh));
+		auto IdotH = aten::abs(dot(in, wh));
+		auto OdotH = aten::abs(dot(out, wh));
 
-		auto NdotV = aten::abs(dot(n, i));
+		auto denom = dot(ht, ht);	// Expression(17)
+		denom *= (IdotN * OdotN);
 
-		//auto denom = IdotH + nnt * OdotH;
-
-		const float sqrtDenom = IdotH + nnt * OdotH;
-		const float t = nnt / (sqrtDenom + 0.0001);
-
-#if 0
-		//auto bsdf = denom > AT_MATH_EPSILON ? albedo * nnt * nnt * (real(1) - F) * G * D * ((IdotH * OdotH) / (IdotN * OdotN)) / (denom * denom) : aten::vec3(0);
+		// Expression(21)
 		auto bsdf = denom > AT_MATH_EPSILON
-			? albedo * ((real(1) - F) * aten::abs(G * D * (nnt * denom) * (nnt * denom) * IdotH * OdotH / denom))
+			? albedo * (1 - F) * G * D * (IdotH * OdotH) * etat * etat / denom
 			: aten::vec3(0);
-#else
-		auto bsdf = albedo * ((real(1) - F) * aten::abs(G * D * t * t * IdotH * OdotH / NdotV));
-#endif
 
 		fresnel = F;
 

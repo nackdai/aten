@@ -23,78 +23,22 @@ namespace AT_NAME
 	public:
 		static AT_DEVICE_MTRL_API real pdf(
 			const aten::vec3& normal,
-			const aten::vec3& wo)
-		{
-			auto c = dot(normal, wo);
-			//AT_ASSERT(c >= 0);
-			c = aten::abs(c);
-
-			auto ret = c / AT_MATH_PI;
-
-			return ret;
-		}
+			const aten::vec3& wo);
 
 		static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
 			const aten::MaterialParameter* param,
 			const aten::vec3& normal,
 			const aten::vec3& wi,
 			real u, real v,
-			aten::sampler* sampler)
-		{
-			aten::vec3 in = -wi;
-			aten::vec3 nml = normal;
-
-			bool into = (dot(in, normal) > real(0));
-
-			if (!into) {
-				nml = -nml;
-			}
-
-			// normalの方向を基準とした正規直交基底(w, u, v)を作る.
-			// この基底に対する半球内で次のレイを飛ばす.
-			auto n = nml;
-			auto t = aten::getOrthoVector(n);
-			auto b = cross(n, t);
-
-			// コサイン項を使った重点的サンプリング.
-			const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
-			const real r2 = sampler->nextSample();
-			const real r2s = sqrt(r2);
-
-			const real x = aten::cos(r1) * r2s;
-			const real y = aten::sin(r1) * r2s;
-			const real z = aten::sqrt(real(1) - r2);
-
-			aten::vec3 dir = normalize((t * x + b * y + n * z));
-			//AT_ASSERT(dot(normal, dir) >= 0);
-
-			return std::move(dir);
-		}
+			aten::sampler* sampler);
 
 		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
 			const aten::MaterialParameter* param,
-			real u, real v)
-		{
-			aten::vec3 albedo = param->baseColor;
-			albedo *= sampleTexture(
-				param->albedoMap,
-				u, v,
-				real(1));
-
-			aten::vec3 ret = albedo / AT_MATH_PI;
-			return ret;
-		}
+			real u, real v);
 
 		static AT_DEVICE_MTRL_API aten::vec3 bsdf(
 			const aten::MaterialParameter* param,
-			const aten::vec3& externalAlbedo)
-		{
-			aten::vec3 albedo = param->baseColor;
-			albedo *= externalAlbedo;
-
-			aten::vec3 ret = albedo / AT_MATH_PI;
-			return ret;
-		}
+			const aten::vec3& externalAlbedo);
 
 		static AT_DEVICE_MTRL_API void sample(
 			MaterialSampling* result,
@@ -104,14 +48,7 @@ namespace AT_NAME
 			const aten::vec3& orgnormal,
 			aten::sampler* sampler,
 			real u, real v,
-			bool isLightPath = false)
-		{
-			MaterialSampling ret;
-
-			result->dir = sampleDirection(param, normal, wi, u, v, sampler);
-			result->pdf = pdf(normal, result->dir);
-			result->bsdf = bsdf(param, u, v);
-		}
+			bool isLightPath = false);
 
 		static AT_DEVICE_MTRL_API void sample(
 			MaterialSampling* result,

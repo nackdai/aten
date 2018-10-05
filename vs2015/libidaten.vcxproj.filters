@@ -467,5 +467,8 @@
       <Filter>kernel</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\velvet.cpp" />
+    <CudaCompile Include="..\src\libaten\material\lambert_refraction.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

@@ -366,8 +366,8 @@ namespace aten
 		if (!mtrl->isSingular()) {
 			// TODO
 			// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
-			//c = aten::abs(dot(orienting_normal, nextDir));
-			c = dot(orienting_normal, nextDir);
+			c = aten::abs(dot(orienting_normal, nextDir));
+			//c = dot(orienting_normal, nextDir);
 		}
 #else
 		auto c = dot(orienting_normal, nextDir);

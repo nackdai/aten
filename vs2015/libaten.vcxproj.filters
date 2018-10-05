@@ -811,6 +811,9 @@
     <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp">
       <Filter>material</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemap_fs.glsl">

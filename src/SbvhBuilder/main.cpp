@@ -1,7 +1,7 @@
+#include <cmdline.h>
+
 #include "aten.h"
 #include "atenscene.h"
-
-#include <cmdline.h>
 
 struct Options {
     std::string input;

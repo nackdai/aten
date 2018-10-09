@@ -1,9 +1,8 @@
-#include "aten.h"
-#include "atenscene.h"
-
 #include <cmdline.h>
 #include <imgui.h>
 
+#include "aten.h"
+#include "atenscene.h"
 #include "VoxelViewer.h"
 
 static const int WIDTH = 1280;

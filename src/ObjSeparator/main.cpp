@@ -1,8 +1,8 @@
+#include <cmdline.h>
+
 #include "aten.h"
 #include "atenscene.h"
 #include "ObjWriter.h"
-
-#include <cmdline.h>
 
 struct Options {
     std::string input;

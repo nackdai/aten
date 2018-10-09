@@ -1,12 +1,11 @@
 #pragma once
 
+#include "cuda/multigpu.h"
 #include "multigpu/renderer_multigpu.h"
 #include "svgf/svgf.h"
 
 namespace idaten
 {
-    template<class T> class GpuProxy;
-
     class SVGFPathTracingMultiGPU : public RendererMultiGPU<SVGFPathTracing> {
         friend class GpuProxy<SVGFPathTracingMultiGPU>;
 

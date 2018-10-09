@@ -1,12 +1,11 @@
 #pragma once
 
+#include "cuda/multigpu.h"
 #include "multigpu/renderer_multigpu.h"
 #include "kernel/pathtracing.h"
 
 namespace idaten
 {
-    template<class T> class GpuProxy;
-
     class PathTracingMultiGPU : public RendererMultiGPU<PathTracing> {
         friend class GpuProxy<PathTracingMultiGPU>;
 

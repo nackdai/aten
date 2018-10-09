@@ -1,16 +1,15 @@
-#include "MaterialEditWindow.h"
-
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+
 #include <imgui.h>
 
 #include "atenscene.h"
+#include "MaterialEditWindow.h"
 
 aten::window* MaterialEditWindow::s_wnd = nullptr;
 

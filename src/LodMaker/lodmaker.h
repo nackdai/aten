@@ -1,7 +1,7 @@
 #pragma once
 
-#include "aten.h"
 #include <vector>
+#include "aten.h"
 
 class LodMaker {
 public:

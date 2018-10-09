@@ -129,7 +129,7 @@ namespace AT_NAME
         rec->v = uv.y;
     }
 
-    void face::build(objshape* _parent)
+    void face::build(int mtrlid, int geomid)
     {
         const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
         const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
@@ -152,9 +152,8 @@ namespace AT_NAME
         auto e1 = v2.pos - v0.pos;
         param.area = real(0.5) * cross(e0, e1).length();
 
-        parent = _parent;
-        param.mtrlid = parent->getMaterial()->id();
-        param.gemoid = parent->getGeomId();
+        param.mtrlid = mtrlid;
+        param.gemoid = geomid;
     }
 
     void face::getSamplePosNormalArea(
@@ -209,11 +208,7 @@ namespace AT_NAME
 
     int face::geomid() const
     {
-        AT_ASSERT(parent);
-        if (parent) {
-            return parent->getGeomId();
-        }
-        return -1;
+        return param.gemoid;
     }
 
     int face::findIdx(hitable* h)

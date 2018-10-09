@@ -12,8 +12,6 @@
 
 namespace AT_NAME
 {
-    class objshape;
-
     class face : public aten::hitable {
         static std::atomic<int> s_id;
         static std::vector<face*> s_faces;
@@ -55,7 +53,7 @@ namespace AT_NAME
 
         virtual int geomid() const override;
 
-        void build(objshape* _parent);
+        void build(int mtrlid, int geomid);
 
         aten::aabb computeAABB() const;
 
@@ -67,7 +65,6 @@ namespace AT_NAME
         static int findIdx(hitable* h);
     
         aten::PrimitiveParamter param;
-        objshape* parent{ nullptr };
         int id{ -1 };
     };
 }

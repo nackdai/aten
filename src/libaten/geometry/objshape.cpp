@@ -23,8 +23,11 @@ namespace AT_NAME
 
         param.area = 0;
 
+        int mtrlid = getMaterial()->id();
+        int geomid = getGeomId();
+
         for (const auto f : faces) {
-            f->build(this);
+            f->build(mtrlid, geomid);
             param.area += f->param.area;
 
             const auto& faabb = f->getBoundingbox();

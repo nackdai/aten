@@ -272,7 +272,9 @@ namespace aten
                     f->param.needNormal = 1;
                 }
 
-                f->build(dstshape);
+                f->build(
+                    dstshape->getMaterial()->id(),
+                    dstshape->getGeomId());
 
                 dstshape->addFace(f);
             }

@@ -120,8 +120,6 @@ namespace aten {
 namespace AT_NAME
 {
     class Light {
-        static std::vector<Light*> g_lights;
-
     protected:
         Light(aten::LightType type, const aten::LightAttribute& attrib);
         Light(aten::LightType type, const aten::LightAttribute& attrib, aten::Values& val);
@@ -202,10 +200,6 @@ namespace AT_NAME
             // Only for AreaLight...
             AT_ASSERT(false);
         }
-
-        static uint32_t getLightNum();
-        static const Light* getLight(uint32_t idx);
-        static const std::vector<Light*>& getLights();
 
     protected:
         aten::LightParameter m_param;

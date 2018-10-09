@@ -5,6 +5,7 @@
 #include "light/light.h"
 #include "material/material.h"
 #include "geometry/vertex.h"
+#include "scene/scene.h"
 
 namespace aten {
     class DataCollector {
@@ -14,6 +15,7 @@ namespace aten {
 
     public:
         static void collect(
+            scene& scene,
             std::vector<aten::GeomParameter>& shapeparams,
             std::vector<aten::PrimitiveParamter>& primparams,
             std::vector<aten::LightParameter>& lightparams,

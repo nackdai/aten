@@ -356,6 +356,7 @@ int main()
     std::vector<aten::vertex> vtxparams;
 
     aten::DataCollector::collect(
+        g_scene,
         shapeparams,
         primparams,
         lightparams,

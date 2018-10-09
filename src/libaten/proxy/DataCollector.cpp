@@ -6,6 +6,7 @@
 
 namespace aten {
     void DataCollector::collect(
+        scene& scene,
         std::vector<aten::GeomParameter>& shapeparams,
         std::vector<aten::PrimitiveParamter>& primparams,
         std::vector<aten::LightParameter>& lightparams,
@@ -49,9 +50,10 @@ namespace aten {
             }
         }
 
-        const auto& lights = aten::Light::getLights();
+        auto lightNum = scene.lightNum();
 
-        for (auto l : lights) {
+        for (uint32_t i = 0; i < lightNum; i++) {
+            const auto& l = scene.getLight(i);
             auto param = l->param();
             lightparams.push_back(param);
         }

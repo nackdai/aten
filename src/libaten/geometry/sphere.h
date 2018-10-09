@@ -8,11 +8,7 @@
 
 namespace AT_NAME
 {
-    template<typename T> class instance;
-
     class sphere : public aten::geom<aten::transformable> {
-        friend class instance<sphere>;
-
     public:
         sphere(const aten::vec3& center, real radius, material* mtrl);
         sphere(real radius, material* mtrl)
@@ -75,7 +71,6 @@ namespace AT_NAME
             return m_param;
         }
 
-    private:
         virtual void evalHitResult(
             const aten::ray& r,
             const aten::mat4& mtxL2W,
@@ -87,6 +82,7 @@ namespace AT_NAME
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 
+    private:
         static AT_DEVICE_API void getSamplePosNormalArea(
             aten::hitable::SamplePosNormalPdfResult* result,
             const aten::GeomParameter* param,

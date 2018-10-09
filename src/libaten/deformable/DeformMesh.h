@@ -2,12 +2,11 @@
 
 #include "deformable/DeformMeshGroup.h"
 #include "deformable/SkinningVertex.h"
+#include "deformable/Skeleton.h"
+#include "misc/stream.h"
 
 namespace aten
 {
-    class FileInputStream;
-    class SkeletonController;
-
     /**
      * @brief メッシュデータ.
      */

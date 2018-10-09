@@ -1,7 +1,7 @@
 #include "material/oren_nayar.h"
 #include "material/lambert.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace AT_NAME {
     // NOTE

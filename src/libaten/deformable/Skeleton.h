@@ -1,15 +1,14 @@
 #pragma once
 
+#include <vector>
+
 #include "deformable/SKLFormat.h"
 #include "deformable/ANMFormat.h"
 #include "math/mat4.h"
-
-#include <vector>
+#include "misc/stream.h"
 
 namespace aten
 {
-    class FileInputStream;
-
     class Skeleton {
         friend class deformable;
 

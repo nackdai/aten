@@ -1,8 +1,8 @@
+#include <iterator>
+
 #include "geometry/object.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
-
-#include <iterator>
 
 //#define ENABLE_LINEAR_HITTEST
 

@@ -1,6 +1,6 @@
 #include "material/lambert_refraction.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace AT_NAME
 {

@@ -1,19 +1,18 @@
 #pragma
 
+#include <vector>
+#include <functional>
+
 #include "defs.h"
 #include "deformable/MSHFormat.h"
+#include "deformable/Skeleton.h"
+#include "misc/stream.h"
 #include "visualizer/GeomDataBuffer.h"
 #include "math/mat4.h"
 #include "material/material.h"
 
-#include <vector>
-#include <functional>
-
 namespace aten
 {
-    class FileInputStream;
-    class SkeletonController;
-
     class IDeformMeshRenderHelper {
     protected:
         IDeformMeshRenderHelper() {}

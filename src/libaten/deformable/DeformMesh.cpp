@@ -1,5 +1,4 @@
 #include "deformable/DeformMesh.h"
-#include "misc/stream.h"
 
 namespace aten
 {

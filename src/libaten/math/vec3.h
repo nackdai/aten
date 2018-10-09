@@ -1,9 +1,9 @@
 #pragma once
 
+#include "glm/glm.hpp"
+
 #include "defs.h"
 #include "math/math.h"
-
-#include "glm/glm.hpp"
 
 namespace aten {
 #if 0

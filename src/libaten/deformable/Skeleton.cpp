@@ -1,5 +1,4 @@
 #include "deformable/Skeleton.h"
-#include "misc/stream.h"
 #include "misc/bitflag.h"
 #include "math/quaternion.h"
 

@@ -1,10 +1,10 @@
 #pragma once
 
+#include <vector>
+
 #include "math/frustum.h"
 #include "camera/camera.h"
 #include "accelerator/accelerator.h"
-
-#include <vector>
 
 namespace aten {
     class CullingFrusta {

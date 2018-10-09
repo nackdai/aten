@@ -1,9 +1,9 @@
 #pragma once
 
+#include <map>
+
 #include "scene/hitable.h"
 #include "accelerator/bvh.h"
-
-#include <map>
 
 namespace aten
 {

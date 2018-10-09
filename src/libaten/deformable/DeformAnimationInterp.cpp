@@ -1,8 +1,8 @@
+#include <functional>
+
 #include "deformable/DeformAnimationInterp.h"
 #include "math/mat4.h"
 #include "math/quaternion.h"
-
-#include <functional>
 
 namespace aten
 {

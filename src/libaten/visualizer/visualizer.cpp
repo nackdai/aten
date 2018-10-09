@@ -1,10 +1,11 @@
 #include <vector>
-#include "visualizer/atengl.h"
-#include "visualizer/visualizer.h"
-#include "math/vec3.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
+
+#include "visualizer/atengl.h"
+#include "visualizer/visualizer.h"
+#include "math/vec3.h"
 
 namespace aten
 {

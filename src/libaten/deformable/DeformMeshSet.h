@@ -1,13 +1,12 @@
 #pragma once
 
 #include "deformable/DeformPrimitives.h"
+#include "deformable/Skeleton.h"
+#include "misc/stream.h"
 #include "geometry/geombase.h"
 
 namespace aten
 {
-    class FileInputStream;
-    class SkeletonController;
-
     class IDeformMeshReadHelper {
     protected:
         IDeformMeshReadHelper() {}

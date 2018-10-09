@@ -1,12 +1,12 @@
 #pragma once
 
+#include <functional>
+#include <stack>
+
 #include "scene/hitable.h"
 #include "geometry/transformable.h"
 #include "geometry/object.h"
 #include "accelerator/accelerator.h"
-
-#include <functional>
-#include <stack>
 
 namespace aten {
     class transformable;

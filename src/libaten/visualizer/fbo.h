@@ -1,10 +1,10 @@
 #pragma once
 
-#include "types.h"
-#include "visualizer/pixelformat.h"
-
 #include <vector>
 #include <functional>
+
+#include "types.h"
+#include "visualizer/pixelformat.h"
 
 namespace aten {
     class FBO {

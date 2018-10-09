@@ -1,10 +1,10 @@
+#include <iterator>
+
 #include "geometry/objshape.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 #include "geometry/vertex.h"
 #include "visualizer/window.h"
-
-#include <iterator>
 
 namespace AT_NAME
 {

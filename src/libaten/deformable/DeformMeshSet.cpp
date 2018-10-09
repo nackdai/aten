@@ -1,9 +1,7 @@
-#include "deformable/DeformMeshSet.h"
-#include "misc/stream.h"
-
-#include "visualizer/atengl.h"
-
 #include <functional>
+
+#include "deformable/DeformMeshSet.h"
+#include "visualizer/atengl.h"
 
 namespace aten
 {

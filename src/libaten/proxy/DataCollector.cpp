@@ -1,8 +1,8 @@
-#include "proxy/DataCollector.h"
-#include "geometry/object.h"
-
 #include <algorithm>
 #include <iterator>
+
+#include "proxy/DataCollector.h"
+#include "geometry/object.h"
 
 namespace aten {
     void DataCollector::collect(

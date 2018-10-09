@@ -1,9 +1,9 @@
+#include <random>
+#include <vector>
+
 #include "accelerator/bvh.h"
 #include "geometry/transformable.h"
 #include "geometry/object.h"
-
-#include <random>
-#include <vector>
 
 namespace aten
 {

@@ -1,7 +1,7 @@
 #include "material/microfacet_refraction.h"
 #include "material/ggx.h"
 
-#pragma optimize( "", off)
+//#pragma optimize( "", off)
 
 namespace AT_NAME
 {

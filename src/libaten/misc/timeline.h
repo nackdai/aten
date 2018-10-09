@@ -1,8 +1,8 @@
 #pragma once
 
-#include "types.h"
-
 #include <functional>
+
+#include "types.h"
 
 namespace aten
 {

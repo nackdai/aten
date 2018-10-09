@@ -1,10 +1,10 @@
-#include "accelerator/sbvh.h"
-
-#include <omp.h>
-
 #include <algorithm>
 #include <iterator>
 #include <numeric>
+
+#include <omp.h>
+
+#include "accelerator/sbvh.h"
 
 //#pragma optimize( "", off)
 

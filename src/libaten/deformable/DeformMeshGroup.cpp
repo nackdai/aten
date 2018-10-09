@@ -1,11 +1,9 @@
-#include "deformable/DeformMeshGroup.h"
-#include "misc/stream.h"
-#include "geometry/vertex.h"
-
-#include "visualizer/atengl.h"
-
 #include <algorithm>
 #include <iterator>
+
+#include "deformable/DeformMeshGroup.h"
+#include "geometry/vertex.h"
+#include "visualizer/atengl.h"
 
 namespace aten
 {

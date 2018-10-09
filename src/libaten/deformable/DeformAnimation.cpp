@@ -1,7 +1,5 @@
 #include "deformable/DeformAnimation.h"
 #include "deformable/DeformAnimationInterp.h"
-#include "misc/stream.h"
-#include "deformable/Skeleton.h"
 
 namespace aten
 {

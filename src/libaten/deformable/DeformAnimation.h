@@ -1,15 +1,14 @@
 #pragma once
 
-#include "ANMFormat.h"
-
 #include <vector>
 #include <map>
 
+#include "ANMFormat.h"
+#include "misc/stream.h"
+#include "deformable/Skeleton.h"
+
 namespace aten
 {
-    class FileInputStream;
-    class SkeletonController;
-
     /**
      * @brief Animation for deformable mesh.
      */

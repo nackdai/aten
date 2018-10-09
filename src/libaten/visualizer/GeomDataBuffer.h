@@ -1,9 +1,9 @@
 #pragma once
 
+#include <vector>
+
 #include "types.h"
 #include "defs.h"
-
-#include <vector>
 
 namespace aten {
     class shader;

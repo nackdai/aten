@@ -1,9 +1,7 @@
-#include "deformable/DeformPrimitives.h"
-#include "deformable/Skeleton.h"
-#include "misc/stream.h"
-
 #include <algorithm>
 #include <iterator>
+
+#include "deformable/DeformPrimitives.h"
 
 namespace aten
 {

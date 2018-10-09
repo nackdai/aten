@@ -2,13 +2,12 @@
 
 #include "deformable/DeformMeshSet.h"
 #include "deformable/SkinningVertex.h"
+#include "deformable/Skeleton.h"
+#include "misc/stream.h"
 #include "geometry/geomparam.h"
 
 namespace aten
 {
-    class FileInputStream;
-    class SkeletonController;
-
     /**
      * @brief メッシュグループ.
      * LODのレベルごとのメッシュセットの集まり

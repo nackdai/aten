@@ -1,9 +1,9 @@
+#include <iterator>
+
 #include "geometry/face.h"
 #include "geometry/objshape.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
-
-#include <iterator>
 
 //#define ENABLE_LINEAR_HITTEST
 

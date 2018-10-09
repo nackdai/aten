@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <iterator>
+
 #include "deformable/deformable.h"
 #include "deformable/DeformAnimation.h"
 #include "misc/stream.h"
@@ -6,9 +9,6 @@
 #include "texture/texture.h"
 #include "camera/camera.h"
 #include "accelerator/accelerator.h"
-
-#include <algorithm>
-#include <iterator>
 
 namespace aten
 {

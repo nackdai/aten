@@ -1,12 +1,11 @@
-#include "texture/texture.h"
-
-#include "visualizer/atengl.h"
-#include "visualizer/shader.h"
-#include "misc/color.h"
-
 #include <string>
 
 #include "stb_image_write.h"
+
+#include "texture/texture.h"
+#include "visualizer/atengl.h"
+#include "visualizer/shader.h"
+#include "misc/color.h"
 
 namespace aten {
     std::vector<texture*> texture::g_textures;

@@ -9,7 +9,6 @@
 #include "accelerator/accelerator.h"
 
 namespace aten {
-    class transformable;
     class bvh;
 
     /**

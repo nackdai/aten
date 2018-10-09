@@ -11,11 +11,7 @@
 
 namespace AT_NAME
 {
-    template<typename T> class instance;
-
     class object : public aten::transformable {
-        friend class instance<object>;
-
     public:
         object() 
             : param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
@@ -74,7 +70,6 @@ namespace AT_NAME
             return m_triangles;
         }
 
-    private:
         void build();
 
         virtual void getSamplePosNormalArea(

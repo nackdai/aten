@@ -4,12 +4,12 @@
 #include "deformable/DeformMesh.h"
 #include "deformable/Skeleton.h"
 #include "deformable/SkinningVertex.h"
+#include "deformable/DeformAnimation.h"
 #include "geometry/transformable.h"
+#include "visualizer/shader.h"
 
 namespace aten
 {
-    class shader;
-    class DeformAnimation;
     template<typename T> class instance;
 
     /** メッシュデータ.

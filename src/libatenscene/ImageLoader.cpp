@@ -1,11 +1,11 @@
-#include "ImageLoader.h"
-#include "AssetManager.h"
-#include "texture/texture.h"
-#include "utility.h"
 #include <map>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#include "ImageLoader.h"
+#include "AssetManager.h"
+#include "utility.h"
 
 namespace aten {
     static std::string g_base;

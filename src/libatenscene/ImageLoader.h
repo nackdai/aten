@@ -1,11 +1,9 @@
 #pragma once
 
 #include <string>
-#include "defs.h"
+#include "texture/texture.h"
 
 namespace aten {
-    class texture;
-
     class ImageLoader {
     private:
         ImageLoader() {}

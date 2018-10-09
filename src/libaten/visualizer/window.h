@@ -1,10 +1,10 @@
 #pragma once
 
-#include "defs.h"
-#include "math/vec4.h"
-
 #include <functional>
 #include <vector>
+
+#include "defs.h"
+#include "math/vec4.h"
 
 struct GLFWwindow;
 

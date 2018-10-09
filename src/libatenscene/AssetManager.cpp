@@ -1,6 +1,6 @@
-#include "AssetManager.h"
-
 #include <algorithm>
+
+#include "AssetManager.h"
 
 namespace aten {
     struct Asset {

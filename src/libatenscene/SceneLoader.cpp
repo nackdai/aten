@@ -1,11 +1,11 @@
+#include "tinyxml2.h"
+
 #include "SceneLoader.h"
 #include "utility.h"
 #include "ImageLoader.h"
 #include "MaterialLoader.h"
 #include "ObjLoader.h"
 #include "AssetManager.h"
-
-#include "tinyxml2.h"
 
 namespace aten
 {

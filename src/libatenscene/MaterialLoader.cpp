@@ -1,13 +1,13 @@
-#include "MaterialLoader.h"
-#include "ImageLoader.h"
-#include "AssetManager.h"
-#include "utility.h"
-
 #ifdef USE_JSON
 #include "picojson.h"
 #else
 #include "tinyxml2.h"
 #endif
+
+#include "MaterialLoader.h"
+#include "ImageLoader.h"
+#include "AssetManager.h"
+#include "utility.h"
 
 namespace aten {
     std::map<std::string, MaterialLoader::MaterialCreator> g_creators;

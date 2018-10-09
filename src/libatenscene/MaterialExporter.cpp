@@ -1,7 +1,7 @@
+#include "tinyxml2.h"
+
 #include "MaterialExporter.h"
 #include "aten.h"
-
-#include "tinyxml2.h"
 
 namespace aten
 {

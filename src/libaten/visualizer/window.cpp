@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "visualizer/atengl.h"
 #include "visualizer/window.h"
 #include "os/system.h"
@@ -6,8 +8,6 @@
 
 #include <imgui.h>
 #include "ui/imgui_impl_glfw_gl3.h"
-
-#include <algorithm>
 
 namespace aten
 {

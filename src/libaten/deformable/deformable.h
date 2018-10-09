@@ -10,13 +10,9 @@
 
 namespace aten
 {
-    template<typename T> class instance;
-
     /** メッシュデータ.
      */
     class deformable : public transformable {
-        friend class instance<deformable>;
-
     public:
         deformable() 
             : m_param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
@@ -83,7 +79,6 @@ namespace aten
             return true;
         }
 
-    private:
         virtual bool hit(
             const ray& r,
             real t_min, real t_max,
@@ -111,7 +106,7 @@ namespace aten
         {
             // Not support.
             AT_ASSERT(false);
-        }
+        }        
 
     private:
         DeformMesh m_mesh;

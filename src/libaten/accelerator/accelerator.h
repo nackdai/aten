@@ -22,7 +22,7 @@ namespace aten {
     };
 
     /**
-     * @brief Interface for acceleration structure.
+     * @brief Base class for acceleration structure.
      */
     class accelerator : public hitable {
         friend class object;

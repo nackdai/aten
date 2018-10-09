@@ -5,9 +5,8 @@
 #include "texture/texture.h"
 
 #ifdef __AT_CUDA__
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 
 namespace AT_NAME {

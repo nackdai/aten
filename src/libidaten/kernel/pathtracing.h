@@ -3,7 +3,6 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
-
 #include "kernel/renderer.h"
 
 namespace idaten

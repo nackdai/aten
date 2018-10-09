@@ -1,10 +1,8 @@
 #pragma once
 
 #include "defs.h"
+#include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
-
-#include <cuda_runtime.h>
-#include <cuda_gl_interop.h>
 
 namespace idaten
 {

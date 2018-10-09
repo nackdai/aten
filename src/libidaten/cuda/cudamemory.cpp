@@ -2,9 +2,6 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudautil.h"
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
 namespace idaten {
     static std::atomic<uint32_t> g_heapsize(0);
 

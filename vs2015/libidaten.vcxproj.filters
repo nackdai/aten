@@ -259,6 +259,9 @@
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h">
       <Filter>aten\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\cuda\cudadefs.h">
+      <Filter>cuda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

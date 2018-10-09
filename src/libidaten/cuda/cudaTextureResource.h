@@ -1,9 +1,8 @@
 #pragma once
 
 #include "math/vec4.h"
+#include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
-
-#include <cuda_runtime.h>
 
 namespace idaten
 {

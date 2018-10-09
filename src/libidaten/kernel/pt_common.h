@@ -1,9 +1,7 @@
 #pragma once
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
-
 #include "aten4idaten.h"
 
 #define BLOCK_SIZE    (16)

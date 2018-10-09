@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cuda.h>
+#include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
 #include "kernel/renderer.h"
 

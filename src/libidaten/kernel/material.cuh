@@ -1,14 +1,10 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
-
 #include "kernel/context.cuh"
-
 #include "aten4idaten.h"
 
 __device__ void sampleMaterial(

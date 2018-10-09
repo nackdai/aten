@@ -1,8 +1,6 @@
 #include "cuda/cudaTextureResource.h"
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"

@@ -1,12 +1,9 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudaTextureResource.h"
-
 #include "aten4idaten.h"
 
 __forceinline__ __device__ float4 getFloat4(cudaTextureObject_t tex, int idx)

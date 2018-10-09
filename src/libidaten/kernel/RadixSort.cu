@@ -1,13 +1,10 @@
-#include "kernel/RadixSort.h"
-
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <thrust/execution_policy.h>
 #include <thrust/sort.h>
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
+#include "kernel/RadixSort.h"
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 

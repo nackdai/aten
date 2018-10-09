@@ -1,14 +1,11 @@
+#include <vector>
+#include <numeric>
+
 #include "kernel/StreamCompaction.h"
-
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
-
-#include <vector>
-#include <numeric>
 
 // NOTE
 // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html

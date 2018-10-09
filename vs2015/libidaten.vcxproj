@@ -73,6 +73,7 @@
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\types.h" />
     <ClInclude Include="..\src\libidaten\aten4idaten.h" />
+    <ClInclude Include="..\src\libidaten\cuda\cudadefs.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudaGLresource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudainit.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudamemory.h" />

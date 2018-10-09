@@ -1,11 +1,10 @@
 #include "kernel/pathtracing.h"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
-
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
-
 #include "aten4idaten.h"
 
 namespace idaten {

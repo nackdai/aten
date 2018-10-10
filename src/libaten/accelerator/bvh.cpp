@@ -176,7 +176,7 @@ namespace aten {
     void bvh::build(
         hitable** list,
         uint32_t num,
-        aabb* bbox/*= nullptr*/)
+        aabb* bbox)
     {
         int axis = 0;
 
@@ -632,7 +632,7 @@ namespace aten {
 #endif
     }
 
-    bvhnode* bvh::getNestedNode(bvhnode* node, aten::mat4* mtxL2W/*= nullptr*/)
+    bvhnode* bvh::getNestedNode(bvhnode* node, aten::mat4* mtxL2W)
     {
         bvhnode* ret = nullptr;
 

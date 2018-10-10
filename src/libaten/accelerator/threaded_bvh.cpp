@@ -17,7 +17,7 @@ namespace aten
     void ThreadedBVH::build(
         hitable** list,
         uint32_t num,
-        aabb* bbox/*= nullptr*/)
+        aabb* bbox)
     {
         if (m_isNested) {
             buildAsNestedTree(list, num, bbox);

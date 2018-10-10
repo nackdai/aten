@@ -111,7 +111,7 @@ namespace aten {
         virtual void build(
             hitable** list,
             uint32_t num,
-            aabb* bbox = nullptr) override final;
+            aabb* bbox) override final;
 
         virtual bool hit(
             const ray& r,

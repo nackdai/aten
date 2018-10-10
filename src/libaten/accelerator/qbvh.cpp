@@ -7,7 +7,7 @@ namespace aten
     void qbvh::build(
         hitable** list,
         uint32_t num,
-        aabb* bbox/*= nullptr*/)
+        aabb* bbox)
     {
         m_bvh.build(list, num, bbox);
 

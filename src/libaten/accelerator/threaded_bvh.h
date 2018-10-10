@@ -59,7 +59,7 @@ namespace aten
         virtual void build(
             hitable** list,
             uint32_t num,
-            aabb* bbox = nullptr) override;
+            aabb* bbox) override;
 
         /**
          * @brief Test if a ray hits a object.

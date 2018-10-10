@@ -296,7 +296,7 @@ namespace aten {
         virtual void build(
             hitable** list,
             uint32_t num,
-            aabb* bbox = nullptr) override;
+            aabb* bbox) override;
 
         /**
          * @brief Test if a ray hits a object.
@@ -342,7 +342,7 @@ namespace aten {
         /**
          * @brief Return the root of the nested tree which the specified node has.
          */
-        static bvhnode* getNestedNode(bvhnode* node, aten::mat4* mtxL2W = nullptr);
+        static bvhnode* getNestedNode(bvhnode* node, aten::mat4* mtxL2W);
 
         /**
          * @brief Convert the tree to the linear list.
@@ -478,8 +478,8 @@ namespace aten {
             bvhnode* root,
             hitable** list,
             uint32_t num,
-            int depth = 0,
-            bvhnode* parent = nullptr);
+            int depth,
+            bvhnode* parent);
 
         struct Candidate {
             bvhnode* node{ nullptr };

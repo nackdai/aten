@@ -47,8 +47,8 @@ namespace aten {
         virtual bool hit(
             const ray& r,
             real t_min, real t_max,
-            Intersection& isect,
-            bool enableLod) const override
+            bool enableLod,
+            Intersection& isect) const override
         {
             return hit(r, t_min, t_max, isect);
         }

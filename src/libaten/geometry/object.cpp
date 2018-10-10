@@ -88,7 +88,7 @@ namespace AT_NAME
         real t_min, real t_max,
         aten::Intersection& isect) const
     {
-        bool isHit = m_accel->hit(r, t_min, t_max, isect, false);
+        bool isHit = m_accel->hit(r, t_min, t_max, false, isect);
 
         if (isHit) {
             auto f = face::faces()[isect.objid];

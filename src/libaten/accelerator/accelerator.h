@@ -78,7 +78,7 @@ namespace aten {
         virtual void build(
             hitable** list,
             uint32_t num,
-            aabb* bbox = nullptr) = 0;
+            aabb* bbox) = 0;
 
         /**
          * @brief Build voxel data from the structure tree.
@@ -95,8 +95,8 @@ namespace aten {
         virtual bool hit(
             const ray& r,
             real t_min, real t_max,
-            Intersection& isect,
-            bool enableLod) const = 0;
+            bool enableLod,
+            Intersection& isect) const = 0;
 
         /**
          * @brief Update the structure tree.

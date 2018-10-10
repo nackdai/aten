@@ -970,14 +970,14 @@ namespace aten
         real t_min, real t_max,
         Intersection& isect) const
     {
-        return hit(r, t_min, t_max, isect, false);
+        return hit(r, t_min, t_max, false, isect);
     }
 
     bool sbvh::hit(
         const ray& r,
         real t_min, real t_max,
-        Intersection& isect,
-        bool enableLod) const
+        bool enableLod,
+        Intersection& isect) const
     {
         auto& shapes = transformable::getShapes();
         auto& prims = face::faces();

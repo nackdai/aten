@@ -27,9 +27,18 @@ namespace AT_NAME {
         virtual bool hit(
             const aten::ray& r,
             real t_min, real t_max,
+            bool enableLod,
             aten::hitrecord& rec,
-            aten::Intersection& isect,
-            bool enableLod = false) const = 0;
+            aten::Intersection& isect) const = 0;
+
+        bool hit(
+            const aten::ray& r,
+            real t_min, real t_max,
+            aten::hitrecord& rec,
+            aten::Intersection& isect) const
+        {
+            return hit(r, t_min, t_max, false, rec, isect);
+        }
 
         virtual bool hit(
             const aten::accelerator::ResultIntersectTestByFrustum& resF,
@@ -212,11 +221,11 @@ namespace AT_NAME {
         virtual bool hit(
             const aten::ray& r,
             real t_min, real t_max,
+            bool enableLod,
             aten::hitrecord& rec,
-            aten::Intersection& isect,
-            bool enableLod = false) const override final
+            aten::Intersection& isect) const override final
         {
-            auto isHit = m_accel.hit(r, t_min, t_max, isect, enableLod);
+            auto isHit = m_accel.hit(r, t_min, t_max, enableLod, isect);
 
             // TODO
 #ifndef __AT_CUDA__

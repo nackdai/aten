@@ -99,8 +99,8 @@ namespace aten
         virtual bool hit(
             const ray& r,
             real t_min, real t_max,
-            Intersection& isect,
-            bool enableLod) const override;
+            bool enableLod,
+            Intersection& isect) const override;
 
         /**
          * @brief Export the built structure data.

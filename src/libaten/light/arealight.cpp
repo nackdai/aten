@@ -46,11 +46,11 @@ namespace AT_NAME {
             aten::hitable::evalHitResultForAreaLight(obj, r, rec, isect);
 
             sample(
-                &result,
                 &rec,
                 &this->param(),
                 org,
-                sampler);
+                sampler,
+                &result);
 
             result.obj = m_obj;
         }

@@ -153,7 +153,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 
     evalHitResultForAreaLight(ctxt, s, r, &rec, &isect);
 
-    AT_NAME::AreaLight::sample(result, &rec, light, org, sampler);
+    AT_NAME::AreaLight::sample(&rec, light, org, sampler, result);
 
     result->obj = (void*)s;
 }
@@ -232,13 +232,13 @@ AT_CUDA_INLINE __device__ void sampleLight(
         sampleImageBasedLight(result, ctxt, light, org, normal, sampler, lod);
         break;
     case aten::LightType::Direction:
-        AT_NAME::DirectionalLight::sample(result, light, org, sampler);
+        AT_NAME::DirectionalLight::sample(light, org, sampler, result);
         break;
     case aten::LightType::Point:
-        AT_NAME::PointLight::sample(result, light, org, sampler);
+        AT_NAME::PointLight::sample(light, org, sampler, result);
         break;
     case aten::LightType::Spot:
-        AT_NAME::SpotLight::sample(result, light, org, sampler);
+        AT_NAME::SpotLight::sample(light, org, sampler, result);
         break;
     }
 }

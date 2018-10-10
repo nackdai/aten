@@ -31,11 +31,11 @@ namespace AT_NAME {
 
     public:
         static AT_DEVICE_API void sample(
-            aten::LightSampleResult* result,
             const aten::hitrecord* rec,
             const aten::LightParameter* param,
             const aten::vec3& org,
-            aten::sampler* sampler)
+            aten::sampler* sampler,
+            aten::LightSampleResult* result)
         {
             result->pos = rec->p;
 

@@ -374,7 +374,8 @@ namespace aten
             case Rot::L_RR:
             case Rot::R_LL:
             case Rot::R_LR:
-                this->setDepth(m_depth, true);
+                this->setDepth(m_depth);
+                this->propageteDepthToChildren();
                 break;
             }
         }

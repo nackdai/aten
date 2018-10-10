@@ -179,17 +179,23 @@ namespace aten {
         /**
          * @brief Set depth in the tree which the node belonges to.
          */
-        void setDepth(int depth, bool propagate = false)
+        void setDepth(int depth)
         {
             m_depth = depth;
+        }
 
-            if (propagate) {
-                if (m_left) {
-                    m_left->setDepth(depth + 1, propagate);
-                }
-                if (m_right) {
-                    m_right->setDepth(depth + 1, propagate);
-                }
+        /**
+        * @brief Propagete depth to children which belong to the node.
+        */
+        void propageteDepthToChildren()
+        {
+            if (m_left) {
+                m_left->setDepth(m_depth + 1);
+                m_left->propageteDepthToChildren();
+            }
+            if (m_right) {
+                m_right->setDepth(m_depth + 1);
+                m_right->propageteDepthToChildren();
             }
         }
 

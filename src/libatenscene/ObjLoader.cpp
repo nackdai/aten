@@ -190,7 +190,7 @@ namespace aten
                         auto mtrl = dstshape->getMaterial();
 
                         if (willSeparate) {
-                            obj->shapes.push_back(dstshape);
+                            obj->appendShape(dstshape);
                             obj->setBoundingBox(aten::aabb(pmin, pmax));
                             objs.push_back(obj);
 
@@ -198,12 +198,12 @@ namespace aten
                         }
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             auto emitobj = new object();
-                            emitobj->shapes.push_back(dstshape);
+                            emitobj->appendShape(dstshape);
                             emitobj->setBoundingBox(aten::aabb(pmin, pmax));
                             objs.push_back(emitobj);
                         }
                         else {
-                            obj->shapes.push_back(dstshape);
+                            obj->appendShape(dstshape);
                         }
                     }
 
@@ -290,7 +290,7 @@ namespace aten
                 auto mtrl = dstshape->getMaterial();
 
                 if (willSeparate) {
-                    obj->shapes.push_back(dstshape);
+                    obj->appendShape(dstshape);
                     obj->setBoundingBox(aten::aabb(pmin, pmax));
                     objs.push_back(obj);
 
@@ -303,12 +303,12 @@ namespace aten
                 }
                 else if (mtrl->param().type == aten::MaterialType::Emissive) {
                     auto emitobj = new object();
-                    emitobj->shapes.push_back(dstshape);
+                    emitobj->appendShape(dstshape);
                     emitobj->setBoundingBox(aten::aabb(pmin, pmax));
                     objs.push_back(emitobj);
                 }
                 else {
-                    obj->shapes.push_back(dstshape);
+                    obj->appendShape(dstshape);
                 }
             }
 

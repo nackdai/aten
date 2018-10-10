@@ -77,11 +77,15 @@ namespace AT_NAME
             const aten::mat4& mtxL2W, 
             aten::sampler* sampler) const override final;
 
-    public:
+        void appendShape(objshape* shape)
+        {
+            shapes.push_back(shape);
+        }
+
+    private:
         std::vector<objshape*> shapes;
         aten::GeomParameter param;
 
-    private:
         aten::accelerator* m_accel{ nullptr };
         uint32_t m_triangles{ 0 };
     };

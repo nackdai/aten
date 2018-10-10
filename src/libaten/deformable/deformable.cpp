@@ -171,8 +171,8 @@ namespace aten
 
     void deformable::update(
         const mat4& mtxL2W,
-        DeformAnimation* anm,
-        real time)
+        real time,
+        DeformAnimation* anm)
     {
         if (anm) {
             anm->applyAnimation(&m_sklController, time);

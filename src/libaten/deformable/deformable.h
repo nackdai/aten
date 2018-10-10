@@ -28,8 +28,8 @@ namespace aten
 
         void update(
             const mat4& mtxL2W,
-            DeformAnimation* anm,
-            real time);
+            real time,
+            DeformAnimation* anm);
 
         void render(shader* shd);
 

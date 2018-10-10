@@ -57,7 +57,7 @@ namespace aten
             m_triangles = 0;
 
             for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
-                AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, m_vbs, isGPUSkinning));
+                AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, isGPUSkinning, m_vbs));
 
                 for (auto& prim : m_meshs[i].m_prims) {
                     prim.setTriOffset(m_triangles);

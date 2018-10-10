@@ -61,7 +61,7 @@ void onRun(aten::window* window)
 
     g_timeline.advance(1.0f / 60.0f);
 
-    g_mdl.update(aten::mat4(), &g_anm, g_timeline.getTime());
+    g_mdl.update(aten::mat4(), g_timeline.getTime(), &g_anm);
     aten::DeformableRenderer::render(&g_camera, &g_mdl);
 }
 

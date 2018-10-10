@@ -34,8 +34,8 @@ namespace aten
         bool read(
             FileInputStream* stream,
             IDeformMeshReadHelper* helper,
-            std::vector<GeomVertexBuffer>& vbs,
-            bool isGPUSkinning);
+            bool isGPUSkinning,
+            std::vector<GeomVertexBuffer>& vbs);
 
         void setExternalVertexBuffer(GeomMultiVertexBuffer& vb);
 

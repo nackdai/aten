@@ -257,20 +257,24 @@ namespace aten
 
                 face* f = new face();
 
-                f->param.idx[0] = shape.mesh.indices[i + 0] + curVtxPos;
-                f->param.idx[1] = shape.mesh.indices[i + 1] + curVtxPos;
-                f->param.idx[2] = shape.mesh.indices[i + 2] + curVtxPos;
+                aten::PrimitiveParamter faceParam;
 
-                auto& v0 = VertexManager::getVertex(f->param.idx[0]);
-                auto& v1 = VertexManager::getVertex(f->param.idx[1]);
-                auto& v2 = VertexManager::getVertex(f->param.idx[2]);
+                faceParam.idx[0] = shape.mesh.indices[i + 0] + curVtxPos;
+                faceParam.idx[1] = shape.mesh.indices[i + 1] + curVtxPos;
+                faceParam.idx[2] = shape.mesh.indices[i + 2] + curVtxPos;
+
+                auto& v0 = VertexManager::getVertex(faceParam.idx[0]);
+                auto& v1 = VertexManager::getVertex(faceParam.idx[1]);
+                auto& v2 = VertexManager::getVertex(faceParam.idx[2]);
 
                 if (v0.uv.z == real(1)
                     || v1.uv.z == real(1)
                     || v2.uv.z == real(1))
                 {
-                    f->param.needNormal = 1;
+                    faceParam.needNormal = 1;
                 }
+
+                f->setParam(faceParam);
 
                 f->build(
                     dstshape->getMaterial()->id(),

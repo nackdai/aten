@@ -31,7 +31,7 @@ namespace AT_NAME
             m_accel = aten::accelerator::createAccelerator();
         }
 
-        param.primid = shapes[0]->faces[0]->id;
+        param.primid = shapes[0]->faces[0]->getId();
 
         param.area = 0;
         m_triangles = 0;
@@ -69,7 +69,7 @@ namespace AT_NAME
             return;
         }
 
-        param.primid = shapes[0]->faces[0]->id;
+        param.primid = shapes[0]->faces[0]->getId();
 
         param.area = 0;
         m_triangles = 0;
@@ -109,9 +109,11 @@ namespace AT_NAME
 
         auto& vtxs = aten::VertexManager::getVertices();
 
-        const auto& v0 = vtxs[f->param.idx[0]];
-        const auto& v1 = vtxs[f->param.idx[1]];
-        const auto& v2 = vtxs[f->param.idx[2]];
+        const auto& faceParam = f->getParam();
+
+        const auto& v0 = vtxs[faceParam.idx[0]];
+        const auto& v1 = vtxs[faceParam.idx[1]];
+        const auto& v2 = vtxs[faceParam.idx[2]];
 
         //face::evalHitResult(v0, v1, v2, &rec, &isect);
         f->evalHitResult(r, rec, isect);
@@ -153,8 +155,10 @@ namespace AT_NAME
         int faceidx = (int)(r * (objshape->faces.size() - 1));
         auto f = objshape->faces[faceidx];
 
-        const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
+        const auto& faceParam = f->getParam();
+
+        const auto& v0 = aten::VertexManager::getVertex(faceParam.idx[0]);
+        const auto& v1 = aten::VertexManager::getVertex(faceParam.idx[1]);
 
         real orignalLen = 0;
         {
@@ -262,7 +266,7 @@ namespace AT_NAME
             triangles.reserve(tris.size());
 
             for (const auto tri : tris) {
-                triangles.push_back(tri->param);
+                triangles.push_back(tri->getParam());
             }
         }
     }

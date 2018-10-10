@@ -68,7 +68,7 @@ namespace aten {
         const auto& faces = aten::face::faces();
 
         for (auto f : faces) {
-            primparams.push_back(f->param);
+            primparams.push_back(f->getParam());
         }
 #else
         for (auto s : shapes) {

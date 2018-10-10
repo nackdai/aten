@@ -28,7 +28,9 @@ namespace AT_NAME
 
         for (const auto f : faces) {
             f->build(mtrlid, geomid);
-            param.area += f->param.area;
+
+            const auto& faceParam = f->getParam();
+            param.area += faceParam.area;
 
             const auto& faabb = f->getBoundingbox();
 
@@ -45,9 +47,11 @@ namespace AT_NAME
             idx.reserve(faces.size() * 3);
 
             for (const auto f : faces) {
-                idx.push_back(f->param.idx[0]);
-                idx.push_back(f->param.idx[1]);
-                idx.push_back(f->param.idx[2]);
+                const auto& faceParam = f->getParam();
+
+                idx.push_back(faceParam.idx[0]);
+                idx.push_back(faceParam.idx[1]);
+                idx.push_back(faceParam.idx[2]);
             }
 
             m_ib.init((uint32_t)idx.size(), &idx[0]);
@@ -56,16 +60,18 @@ namespace AT_NAME
 
     void objshape::addFace(face* f)
     {
-        int idx0 = f->param.idx[0];
-        int idx1 = f->param.idx[1];
-        int idx2 = f->param.idx[2];
+        const auto& faceParam = f->getParam();
+
+        int idx0 = faceParam.idx[0];
+        int idx1 = faceParam.idx[1];
+        int idx2 = faceParam.idx[2];
 
         int baseIdx = std::min(idx0, std::min(idx1, idx2));
         m_baseIdx = std::min(baseIdx, m_baseIdx);
 
         faces.push_back(f);
 
-        m_baseTriIdx = std::min(f->id, m_baseTriIdx);
+        m_baseTriIdx = std::min(f->getId(), m_baseTriIdx);
     }
 
     void objshape::draw(

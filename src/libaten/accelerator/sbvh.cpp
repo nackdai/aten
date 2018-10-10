@@ -107,7 +107,7 @@ namespace aten
 
             for (uint32_t i = 0; i < num; i++) {
                 auto tri = (face*)list[i];
-                m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->id);
+                m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->getId());
             }
 
             // Offset triangle index.
@@ -202,7 +202,7 @@ namespace aten
             m_refs[i].triid = i;
             m_refs[i].bbox = tris[i]->computeAABB();
 
-            m_offsetTriIdx = std::min<int>(m_offsetTriIdx, tris[i]->id);
+            m_offsetTriIdx = std::min<int>(m_offsetTriIdx, tris[i]->getId());
 
             rootBox.expand(m_refs[i].bbox);
         }
@@ -1110,7 +1110,8 @@ namespace aten
                 isHit = prim->hit(r, t_min, t_max, isectTmp);
 
                 if (isHit) {
-                    isectTmp.meshid = prim->param.gemoid;
+                    const auto& primParam = prim->getParam();
+                    isectTmp.meshid = primParam.gemoid;
                 }
 #else
                 int start = (int)node->refIdListStart;

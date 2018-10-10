@@ -118,7 +118,7 @@ namespace aten
             std::map<int, real> mtrlMap;
 
             for (const auto tid : treelet.tris) {
-                const auto triparam = faces[tid]->param;
+                const auto& triparam = faces[tid]->getParam();
 
                 auto found = mtrlMap.find(triparam.mtrlid);
 

@@ -57,6 +57,21 @@ namespace AT_NAME
 
         aten::aabb computeAABB() const;
 
+        const aten::PrimitiveParamter& getParam() const
+        {
+            return param;
+        }
+
+        void setParam(const aten::PrimitiveParamter& p)
+        {
+            param = p;
+        }
+
+        int getId() const
+        {
+            return id;
+        }
+
         static const std::vector<face*>& faces()
         {
             return s_faces;
@@ -64,6 +79,7 @@ namespace AT_NAME
 
         static int findIdx(hitable* h);
     
+    private:
         aten::PrimitiveParamter param;
         int id{ -1 };
     };

@@ -450,7 +450,9 @@ namespace aten
         for (int i = 0; i < qnode.numChildren; i++) {
             auto f = face::faces()[(int)primidx[i]];
 
-            const auto& v2 = aten::VertexManager::getVertex(f->param.idx[2]);
+            const auto& faceParam = f->getParam();
+
+            const auto& v2 = aten::VertexManager::getVertex(faceParam.idx[2]);
 
             v2x[i] = v2.pos.x;
             v2y[i] = v2.pos.y;

@@ -21,15 +21,13 @@ namespace aten {
 
     bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
     {
-        const auto& typeNames = aten::material::getMaterialTypeName();
-
         // Check if type is as same as default type.
-        for (auto t : typeNames) {
-            if (type == t) {
-                AT_ASSERT(false);
-                AT_PRINTF("Same as default type [%s]\n", t);
-                return false;
-            }
+        bool isDefaultMaterialName = aten::material::checkDefaultMaterialName(type);
+
+        if (isDefaultMaterialName) {
+            AT_ASSERT(false);
+            AT_PRINTF("Same as default type [%s]\n", type);
+            return false;
         }
 
         auto it = g_creators.find(type);
@@ -459,15 +457,18 @@ namespace aten {
 
     material* MaterialLoader::create(std::string type, Values& values)
     {
-        const auto& defaultMtrlNames = aten::material::getMaterialTypeName();
+        int mtrlNum = aten::MaterialType::MaterialTypeMax;
+
+        const char* mtrlName = aten::material::getMaterialTypeName(static_cast<aten::MaterialType>(0));
 
         // Check if default creators are registered.
         if (g_creators.empty()
-            || g_creators.find(defaultMtrlNames[0]) == g_creators.end())
+            || g_creators.find(mtrlName) == g_creators.end())
         {
             // Register default type.
-            for (int i = 0; i < defaultMtrlNames.size(); i++) {
-                g_creators.insert(std::pair<std::string, MaterialCreator>(defaultMtrlNames[i], g_funcs[i]));
+            for (int i = 0; i < mtrlNum; i++) {
+                mtrlName = aten::material::getMaterialTypeName(static_cast<aten::MaterialType>(i));
+                g_creators.insert(std::pair<std::string, MaterialCreator>(mtrlName, g_funcs[i]));
             }
         }
 

@@ -5,9 +5,8 @@
 namespace AT_NAME
 {
     std::vector<material*> material::g_materials;
-    std::vector<const char*> material::g_mtrlTypeNames;
 
-    static const char* mtrlTypeNames[] = {
+    static const char* g_mtrlTypeNames[] = {
         "emissive",
         "lambert",
         "ornenayar",
@@ -24,7 +23,7 @@ namespace AT_NAME
         "toon",
         "layer",
     };
-    AT_STATICASSERT(AT_COUNTOF(mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
+    AT_STATICASSERT(AT_COUNTOF(g_mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
 
     uint32_t material::getMaterialNum()
     {
@@ -101,29 +100,26 @@ namespace AT_NAME
 
     const char* material::getMaterialTypeName(aten::MaterialType type)
     {
-        initMaterialTypeName();
+        AT_ASSERT(static_cast<int>(type) < AT_COUNTOF(g_mtrlTypeNames));
         return g_mtrlTypeNames[type];
     }
 
-    std::vector<const char*>& material::getMaterialTypeName()
+    bool material::checkDefaultMaterialName(const std::string& name)
     {
-        initMaterialTypeName();
-        return g_mtrlTypeNames;
-    }
+        auto lower = name;
+        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    void material::initMaterialTypeName()
-    {
-        if (g_mtrlTypeNames.empty()) {
-            for (auto name : mtrlTypeNames) {
-                g_mtrlTypeNames.push_back(name);
+        for each (const char* mtrl_name in g_mtrlTypeNames) {
+            if (lower == mtrl_name) {
+                return true;
             }
         }
+
+        return false;
     }
 
     int material::initMaterial(material* mtrl, bool local)
     {
-        initMaterialTypeName();
-
         int id = -1;
         if (!local) {
             id = g_materials.size();

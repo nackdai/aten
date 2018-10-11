@@ -249,7 +249,6 @@ namespace AT_NAME
         friend class LayeredBSDF;
 
         static std::vector<material*> g_materials;
-        static std::vector<const char*> g_mtrlTypeNames;
 
     protected:
         material(
@@ -517,11 +516,11 @@ namespace AT_NAME
         static const std::vector<material*>& getMaterials();
 
         static const char* getMaterialTypeName(aten::MaterialType type);
-        static std::vector<const char*>& getMaterialTypeName();
+
+        static bool checkDefaultMaterialName(const std::string& name);
 
     private:
         static int initMaterial(material* mtrl, bool local);
-        static void initMaterialTypeName();
 
     protected:
         int m_id{ 0 };

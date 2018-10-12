@@ -1,14 +1,9 @@
 ﻿#include "kernel/LBVHBuilder.h"
-
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
+#include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudaTextureResource.h"
-
 #include "accelerator/GpuPayloadDefs.h"
-
 #include "kernel/MortonCode.cuh"
 
 //#pragma optimize( "", off)
@@ -30,7 +25,7 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
     if (index2 < 0 || index2 >= numOfElems)
     {
         // NOTE
-        // delta(i, j) = −1 when not (0 <= j <= n - 1).
+        // delta(i, j) = ?1 when not (0 <= j <= n - 1).
         return -1;
     }
 
@@ -58,7 +53,7 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
     if (index2 < 0 || index2 >= numOfElems)
     {
         // NOTE
-        // delta(i, j) = −1 when not (0 <= j <= n - 1).
+        // delta(i, j) = ?1 when not (0 <= j <= n - 1).
         return -1;
     }
 

@@ -1,19 +1,9 @@
-#include "aten.h"
-#include "atenscene.h"
-
-#include "lodmaker.h"
-
 #include <cmdline.h>
 #include <imgui.h>
 
-// TASKS
-// * imgui
-//    背景色
-// * LOD処理をワーカースレッドで動かす
-//     LOD処理のOpenMP対応
-//         ワーカースレッド内でさらにOpenMPってできるのか？
-// * マテリアルの外部ファイル指定(XML)対応
-// * シェーダ内でAlbedoマップがないときにベースカラーを利用する
+#include "aten.h"
+#include "atenscene.h"
+#include "lodmaker.h"
 
 static const int WIDTH = 1280;
 static const int HEIGHT = 720;

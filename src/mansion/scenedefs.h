@@ -2,7 +2,9 @@
 
 class DemoScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(
+        aten::context& ctxt,
+        aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,

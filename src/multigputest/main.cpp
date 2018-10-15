@@ -31,6 +31,7 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::context g_ctxt;
 
 #ifdef MULTI_GPU_SVGF
 static idaten::GpuProxy<idaten::SVGFPathTracingMultiGPU> g_tracer[GPU_NUM];
@@ -93,8 +94,9 @@ void onRun(aten::window* window)
     timer.begin();
 
 #ifdef MULTI_GPU_SVGF
-    g_rasterizer.draw(
+    g_rasterizer.drawScene(
         g_tracer[0].getRenderer().frame(),
+        g_ctxt,
         &g_scene,
         &g_camera,
         &g_fbo);
@@ -339,8 +341,8 @@ int main()
         vfov,
         WIDTH, HEIGHT);
 
-    Scene::makeScene(&g_scene);
-    g_scene.build();
+    Scene::makeScene(g_ctxt, &g_scene);
+    g_scene.build(g_ctxt);
 
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
     aten::envmap bg;
@@ -356,6 +358,7 @@ int main()
     std::vector<aten::vertex> vtxparams;
 
     aten::DataCollector::collect(
+        g_ctxt,
         g_scene,
         shapeparams,
         primparams,

@@ -5,7 +5,9 @@ aten::DeformAnimation* getDeformAnm();
 
 class ObjCornellBoxScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(
+        aten::context& ctxt,
+        aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -15,7 +17,9 @@ public:
 
 class DeformScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(
+        aten::context& ctxt,
+        aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -25,7 +29,9 @@ public:
 
 class DeformInBoxScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(
+        aten::context& ctxt,
+        aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,

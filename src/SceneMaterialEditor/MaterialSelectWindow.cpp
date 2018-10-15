@@ -4,6 +4,8 @@
 
 aten::RasterizeRenderer MaterialSelectWindow::s_rasterizer;
 
+static aten::context s_ctxt;
+
 aten::object* MaterialSelectWindow::s_obj = nullptr;
 
 aten::Blitter MaterialSelectWindow::s_blitter;
@@ -97,8 +99,9 @@ void MaterialSelectWindow::onRun(aten::window* window)
     aten::mat4 mtxL2W;
     //mtxL2W.asRotateByX(Deg2Rad(-90));
 
-    s_rasterizer.draw(
-        s_obj,
+    s_rasterizer.drawObject(
+        s_ctxt,
+        *s_obj,
         &s_camera,
         false,
         mtxL2W,
@@ -285,7 +288,7 @@ aten::object* loadObj(
 
     std::vector<aten::object*> objs;
 
-    aten::ObjLoader::load(objs, objpath);
+    aten::ObjLoader::load(objs, objpath, s_ctxt);
 
     // NOTE
     // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
@@ -321,7 +324,7 @@ bool MaterialSelectWindow::init(
 
     aten::texture::initAllAsGLTexture();
 
-    s_obj->buildForRasterizeRendering();
+    s_obj->buildForRasterizeRendering(s_ctxt);
 
     // TODO
     aten::vec3 pos(0, 1, 10);

@@ -14,7 +14,9 @@ aten::DeformAnimation* getDeformAnm()
     return s_deformAnm;
 }
 
-void ObjCornellBoxScene::makeScene(aten::scene* scene)
+void ObjCornellBoxScene::makeScene(
+    aten::context& ctxt,
+    aten::scene* scene)
 {
     auto emit = new aten::emissive(aten::vec3(36, 33, 24));
     aten::AssetManager::registerMtrl(
@@ -47,10 +49,11 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
     std::vector<aten::object*> objs;
 
 #if 1
-    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", true);
+    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true);
 
     auto light = new aten::instance<aten::object>(
         objs[0],
+        ctxt,
         aten::vec3(0),
         aten::vec3(0),
         aten::vec3(1));
@@ -60,7 +63,7 @@ void ObjCornellBoxScene::makeScene(aten::scene* scene)
     scene->addLight(areaLight);
 
     for (int i = 1; i < objs.size(); i++) {
-        auto box = new aten::instance<aten::object>(objs[i], aten::mat4::Identity);
+        auto box = new aten::instance<aten::object>(objs[i], ctxt, aten::mat4::Identity);
         scene->add(box);
     }
 #else
@@ -82,7 +85,9 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void DeformScene::makeScene(aten::scene* scene)
+void DeformScene::makeScene(
+    aten::context& ctxt,
+    aten::scene* scene)
 {
     aten::deformable* mdl = new aten::deformable();
     mdl->read("unitychan_gpu.mdl");
@@ -90,7 +95,7 @@ void DeformScene::makeScene(aten::scene* scene)
     aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
     aten::MaterialLoader::load("unitychan_mtrl.xml");
 
-    auto deformMdl = new aten::instance<aten::deformable>(mdl, aten::mat4::Identity);
+    auto deformMdl = new aten::instance<aten::deformable>(mdl, ctxt, aten::mat4::Identity);
     scene->add(deformMdl);
 
     s_deformMdl = deformMdl;
@@ -113,7 +118,9 @@ void DeformScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void DeformInBoxScene::makeScene(aten::scene* scene)
+void DeformInBoxScene::makeScene(
+    aten::context& ctxt,
+    aten::scene* scene)
 {
 #if 1
     {
@@ -141,10 +148,11 @@ void DeformInBoxScene::makeScene(aten::scene* scene)
 
         std::vector<aten::object*> objs;
 
-        aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", false);
+        aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", ctxt, false);
 
         auto light = new aten::instance<aten::object>(
             objs[0],
+            ctxt,
             aten::vec3(0),
             aten::vec3(0),
             aten::vec3(1));
@@ -153,7 +161,7 @@ void DeformInBoxScene::makeScene(aten::scene* scene)
         auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
         scene->addLight(areaLight);
 
-        auto box = new aten::instance<aten::object>(objs[1], aten::mat4::Identity);
+        auto box = new aten::instance<aten::object>(objs[1], ctxt, aten::mat4::Identity);
         scene->add(box);
     }
 #endif
@@ -165,7 +173,7 @@ void DeformInBoxScene::makeScene(aten::scene* scene)
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
         aten::MaterialLoader::load("unitychan_mtrl.xml");
 
-        auto deformMdl = new aten::instance<aten::deformable>(mdl, aten::mat4::Identity);
+        auto deformMdl = new aten::instance<aten::deformable>(mdl, ctxt, aten::mat4::Identity);
         scene->add(deformMdl);
 
         s_deformMdl = deformMdl;

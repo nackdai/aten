@@ -2,7 +2,7 @@
 
 class CornellBoxScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -12,7 +12,7 @@ public:
 
 class MtrlTestScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -22,7 +22,7 @@ public:
 
 class PointLightScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -33,7 +33,7 @@ public:
 
 class DirectionalLightScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -44,7 +44,7 @@ public:
 
 class SpotLightScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -55,7 +55,7 @@ public:
 
 class TexturesScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -65,7 +65,7 @@ public:
 
 class DisneyMaterialTestScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -75,7 +75,7 @@ public:
 
 class LayeredMaterialTestScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -85,7 +85,7 @@ public:
 
 class ObjCornellBoxScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -95,7 +95,7 @@ public:
 
 class SponzaScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -105,7 +105,7 @@ public:
 
 class BunnyScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,
@@ -115,7 +115,7 @@ public:
 
 class DragonScene {
 public:
-    static void makeScene(aten::scene* scene);
+    static void makeScene(aten::context& ctxt, aten::scene* scene);
 
     static void getCameraPosAndAt(
         aten::vec3& pos,

@@ -17,6 +17,7 @@ aten::PinholeCamera MaterialEditWindow::s_camera;
 bool MaterialEditWindow::s_isCameraDirty = false;
 
 aten::AcceleratedScene<aten::GPUBvh> MaterialEditWindow::s_scene;
+static aten::context s_ctxt;
 
 idaten::PathTracing MaterialEditWindow::s_tracer;
 
@@ -61,8 +62,8 @@ void makeScene(aten::scene* scene)
         "m1",
         new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
 
-    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
-    auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", s_ctxt);
+    auto teapot = new aten::instance<aten::object>(obj, s_ctxt, aten::mat4::Identity);
     scene->add(teapot);
 }
 
@@ -164,6 +165,8 @@ void MaterialEditWindow::buildScene()
             std::vector<aten::vertex> vtxparams;
 
             aten::DataCollector::collect(
+                s_ctxt,
+                s_scene,
                 shapeparams,
                 primparams,
                 lightparams,
@@ -496,7 +499,7 @@ bool MaterialEditWindow::init(
         s_width, s_height);
 
     makeScene(&s_scene);
-    s_scene.build();
+    s_scene.build(s_ctxt);
 
     s_tracer.getCompaction().init(
         s_width * s_height,

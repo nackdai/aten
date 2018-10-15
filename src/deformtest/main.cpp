@@ -44,16 +44,18 @@ public:
     }
 
     virtual void build(
+        const aten::context& ctxt,
         aten::hitable** list,
         uint32_t num,
         aten::aabb* bbox = nullptr) override final
     {
-        m_bvh.build(list, num, bbox);
+        m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
     }
 
     virtual bool hit(
+        const aten::context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
         aten::Intersection& isect) const override final
@@ -63,10 +65,11 @@ public:
     }
 
     virtual bool hit(
+        const aten::context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
-        aten::Intersection& isect,
-        bool enableLod) const override final
+        bool enableLod,
+        aten::Intersection& isect) const override final
     {
         AT_ASSERT(false);
         return false;
@@ -79,6 +82,7 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::context g_ctxt;
 
 #ifdef ENABLE_SVGF
 static idaten::SVGFPathTracing g_tracer;
@@ -132,10 +136,10 @@ void update(int frame)
         if (anm) {
             aten::mat4 mtxL2W;
             mtxL2W.asScale(0.01);
-            mdl->update(mtxL2W, anm, g_timeline.getTime());
+            mdl->update(mtxL2W, g_timeline.getTime(), anm);
         }
         else {
-            mdl->update(aten::mat4(), nullptr, 0);
+            mdl->update(aten::mat4(), 0, nullptr);
         }
 
         g_timeline.advance(1.0f / 60.0f);
@@ -195,6 +199,8 @@ void update(int frame)
             std::vector<aten::vertex> vtxparams;
 
             aten::DataCollector::collect(
+                g_ctxt,
+                g_scene,
                 shapeparams,
                 primparams,
                 lightparams,
@@ -237,8 +243,9 @@ void onRun(aten::window* window)
     aten::GLProfiler::begin();
 
 #ifdef ENABLE_SVGF
-    g_rasterizer.draw(
+    g_rasterizer.drawScene(
         g_tracer.frame(),
+        g_ctxt,
         &g_scene,
         &g_camera,
         &g_fbo,
@@ -574,8 +581,8 @@ int main()
 
     aten::accelerator::setUserDefsInternalAccelCreator(Lbvh::create);
 
-    Scene::makeScene(&g_scene);
-    g_scene.build();
+    Scene::makeScene(g_ctxt, &g_scene);
+    g_scene.build(g_ctxt);
 
 #ifdef ENABLE_ENVMAP
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
@@ -602,7 +609,7 @@ int main()
         std::vector<aten::SkinningVertex> vtx;
         std::vector<uint32_t> idx;
 
-        int vtxIdOffset = aten::VertexManager::getVertices().size();
+        int vtxIdOffset = g_ctxt.getVertices().size();
 
         mdl->getGeometryData(vtx, idx, deformTris);
 
@@ -631,6 +638,8 @@ int main()
         std::vector<aten::vertex> vtxparams;
 
         aten::DataCollector::collect(
+            g_ctxt,
+            g_scene,
             shapeparams,
             primparams,
             lightparams,
@@ -756,7 +765,7 @@ int main()
 
     g_rasterizer.release();
     g_rasterizerAABB.release();
-    aten::VertexManager::release();
+    g_ctxt.release();
 
     aten::window::terminate();
 }

@@ -20,6 +20,7 @@ struct Options {
 
 static std::vector<aten::object*> g_objs;
 static aten::AcceleratedScene<aten::sbvh> g_scene;
+static aten::context g_ctxt;
 
 static VoxelViewer g_viewer;
 static aten::RasterizeRenderer g_rasterizer;
@@ -73,7 +74,7 @@ void onRun(aten::window* window)
 
     if (g_drawMesh) {
         for (auto obj : g_objs) {
-            g_rasterizer.draw(obj, &g_camera, false);
+            g_rasterizer.drawObject(g_ctxt, *obj, &g_camera, false);
         }
     }
 
@@ -236,7 +237,7 @@ void loadObj(const Options& opt)
         //new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
         new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.2, 0.2));
 
-    aten::ObjLoader::load(g_objs, opt.input);
+    aten::ObjLoader::load(g_objs, opt.input, g_ctxt);
 #else
     aten::ObjLoader::load(g_objs, "../../asset/sponza/sponza.obj");
 
@@ -244,11 +245,11 @@ void loadObj(const Options& opt)
 #endif
 
     for (auto obj : g_objs) {
-        auto instance = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+        auto instance = new aten::instance<aten::object>(obj, g_ctxt, aten::mat4::Identity);
         g_scene.add(instance);
     }
 
-    g_scene.build();
+    g_scene.build(g_ctxt);
 }
 
 int main(int argc, char* argv[])

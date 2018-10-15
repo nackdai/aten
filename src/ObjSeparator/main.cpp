@@ -67,10 +67,13 @@ int main(int argc, char* argv[])
 
     aten::AssetManager::suppressWarnings();
 
+    aten::context ctxt;
+
     std::vector<aten::object*> objs;
     aten::ObjLoader::load(
         objs,
-        "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj");
+        "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
+        ctxt);
 
     if (objs.empty()) {
         // TODO
@@ -91,7 +94,10 @@ int main(int argc, char* argv[])
     std::vector<aten::objshape*> shapes;
     std::vector<aten::material*> mtrls;
 
-    for (auto shape : obj->shapes) {
+    auto num = obj->getShapeNum();
+
+    for (int i = 0; i < num; i++) {
+        const auto shape = obj->getShape(i);
         auto mtrl = shape->getMaterial();
 
         std::string mtrlName(mtrl->name());
@@ -125,8 +131,10 @@ int main(int argc, char* argv[])
             const auto& tris = shape->tris();
 
             for (auto tri : tris) {
+                const auto& triParam = tri->getParam();
+
                 for (int i = 0; i < 3; i++) {
-                    auto idx = tri->param.idx[i];
+                    auto idx = triParam.idx[i];
                     auto found = std::find(tmpIndices.begin(), tmpIndices.end(), idx);
                     if (found == tmpIndices.end()) {
                         tmpIndices.push_back(idx);
@@ -138,7 +146,7 @@ int main(int argc, char* argv[])
         indexMapList.reserve(tmpIndices.size());
 
         // Gather vertices.
-        const auto& vtxs = aten::VertexManager::getVertices();
+        const auto& vtxs = ctxt.getVertices();
         for (auto idx : tmpIndices) {
             const auto v = vtxs[idx];
             
@@ -158,8 +166,10 @@ int main(int argc, char* argv[])
             const auto& tris = shape->tris();
 
             for (auto tri : tris) {
+                const auto& triParam = tri->getParam();
+
                 for (int i = 0; i < 3; i++) {
-                    auto idx = tri->param.idx[i];
+                    auto idx = triParam.idx[i];
 
                     auto found = std::find_if(
                         indexMapList.begin(),

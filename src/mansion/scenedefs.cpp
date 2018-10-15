@@ -1,7 +1,9 @@
 #include "scenedefs.h"
 #include "atenscene.h"
 
-void DemoScene::makeScene(aten::scene* scene)
+void DemoScene::makeScene(
+    aten::context& ctxt,
+    aten::scene* scene)
 {
     aten::ImageLoader::setBasePath("../../asset/mansion/objs");
 
@@ -43,10 +45,10 @@ void DemoScene::makeScene(aten::scene* scene)
         std::string sbvhpath(info.name);
         sbvhpath = "../../asset/mansion/objs/" + sbvhpath + ".sbvh";
 
-        aten::ObjLoader::load(objs, objpath.c_str(), false, info.needComputeNormalOntime);
+        aten::ObjLoader::load(objs, objpath.c_str(), ctxt, false, info.needComputeNormalOntime);
         objs[0]->importInternalAccelTree(sbvhpath.c_str());
 
-        auto inst = new aten::instance<aten::object>(objs[0], aten::mat4::Identity);
+        auto inst = new aten::instance<aten::object>(objs[0], ctxt, aten::mat4::Identity);
 
         scene->add(inst);
     }

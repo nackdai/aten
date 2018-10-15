@@ -91,9 +91,14 @@ namespace AT_NAME
             shapes.push_back(shape);
         }
 
+        uint32_t getShapeNum() const
+        {
+            return static_cast<uint32_t>(shapes.size());
+        }
+
         objshape* getShape(uint32_t idx)
         {
-            AT_ASSERT(idx < shapes.size());
+            AT_ASSERT(idx < getShapeNum());
             return shapes[idx];
         }
 

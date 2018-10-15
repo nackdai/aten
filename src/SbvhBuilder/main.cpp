@@ -75,8 +75,10 @@ int main(int argc, char* argv[])
     auto emit = new aten::emissive(aten::vec3(1));
     aten::AssetManager::registerMtrl("light", emit);
 
+    aten::context ctxt;
+
     std::vector<aten::object*> objs;
-    aten::ObjLoader::load(objs, opt.input);
+    aten::ObjLoader::load(objs, opt.input, ctxt);
 
     if (objs.empty()) {
         // TODO
@@ -104,7 +106,7 @@ int main(int argc, char* argv[])
                 output = std::string(buf);
             }
 
-            obj->exportInternalAccelTree(output.c_str());
+            obj->exportInternalAccelTree(ctxt, output.c_str());
         }
     }
     catch (const std::exception& e) {

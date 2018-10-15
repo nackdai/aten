@@ -33,6 +33,7 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::context g_ctxt;
 
 aten::ATrousDenoiser atrous;
 
@@ -308,8 +309,8 @@ int main()
         WIDTH, HEIGHT);
 #endif
 
-    Scene::makeScene(&g_scene);
-    g_scene.build();
+    Scene::makeScene(g_ctxt, &g_scene);
+    g_scene.build(g_ctxt);
 
     g_tracer.getCompaction().init(
 #ifdef ENABLE_GEOMRENDERING
@@ -336,6 +337,7 @@ int main()
         std::vector<aten::vertex> vtxparams;
 
         aten::DataCollector::collect(
+            g_ctxt,
             g_scene,
             shapeparams,
             primparams,

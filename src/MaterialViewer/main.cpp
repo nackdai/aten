@@ -30,6 +30,7 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::context g_ctxt;
 
 static idaten::PathTracing g_tracer;
 
@@ -67,15 +68,15 @@ void makeScene(aten::scene* scene)
         "m1",
         new aten::CarPaintBRDF(aten::vec3(0.580000, 0.580000, 0.580000)));
 
-    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj");
-    auto teapot = new aten::instance<aten::object>(obj, aten::mat4::Identity);
+    auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt);
+    auto teapot = new aten::instance<aten::object>(obj, g_ctxt, aten::mat4::Identity);
     scene->add(teapot);
 
     // TODO
     //g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
     //g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
-    obj->shapes[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
+    obj->getShape(0)->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
 
 aten::material* createMaterial(aten::MaterialType type)
@@ -467,7 +468,7 @@ int main()
         WIDTH, HEIGHT);
 
     makeScene(&g_scene);
-    g_scene.build();
+    g_scene.build(g_ctxt);
 
     g_tracer.getCompaction().init(
         WIDTH * HEIGHT,
@@ -488,6 +489,7 @@ int main()
         std::vector<aten::vertex> vtxparams;
 
         aten::DataCollector::collect(
+            g_ctxt,
             g_scene,
             shapeparams,
             primparams,

@@ -26,6 +26,7 @@ namespace aten {
          * @brief Test if a ray hits the node.
          */
         bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const;
@@ -294,6 +295,7 @@ namespace aten {
          * @brief Bulid structure tree from the specified list.
          */
         virtual void build(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox) override;
@@ -302,6 +304,7 @@ namespace aten {
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const override;
@@ -310,12 +313,13 @@ namespace aten {
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             bool enableLod,
             Intersection& isect) const override
         {
-            return hit(r, t_min, t_max, isect);
+            return hit(ctxt, r, t_min, t_max, isect);
         }
 
         /**
@@ -336,8 +340,6 @@ namespace aten {
         {
             return m_root;
         }
-
-        virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
 
         /**
          * @brief Return the root of the nested tree which the specified node has.
@@ -466,6 +468,7 @@ namespace aten {
          * @brief Test whether a ray is hit to a object.
          */
         static bool onHit(
+            const context& ctxt,
             const bvhnode* root,
             const ray& r,
             real t_min, real t_max,

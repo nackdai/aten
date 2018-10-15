@@ -151,8 +151,10 @@ void LodMaker::make(
         for (uint32_t n = 0; n < tris.size(); n++) {
             const auto tri = tris[n];
 
+            const auto& triparam = tri->getParam();
+
             for (int t = 0; t < 3; t++) {
-                uint32_t vtxIdx = tri->param.idx[t];
+                uint32_t vtxIdx = triparam.idx[t];
                 const auto& v = vertices[vtxIdx];
 
                 auto grid = ((aten::vec3)v.pos - bmin) * scale + real(0.5);

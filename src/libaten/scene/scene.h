@@ -8,6 +8,7 @@
 #include "accelerator/bvh.h"
 #include "light/light.h"
 #include "light/ibl.h"
+#include "scene/context.h"
 
 namespace AT_NAME {
     class scene {
@@ -16,7 +17,7 @@ namespace AT_NAME {
         virtual ~scene() {}
 
     public:
-        virtual void build()
+        virtual void build(const aten::context& ctxt)
         {}
 
         void add(aten::hitable* s)
@@ -25,6 +26,7 @@ namespace AT_NAME {
         }
 
         virtual bool hit(
+            const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
             bool enableLod,
@@ -32,20 +34,14 @@ namespace AT_NAME {
             aten::Intersection& isect) const = 0;
 
         bool hit(
+            const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
             aten::hitrecord& rec,
             aten::Intersection& isect) const
         {
-            return hit(r, t_min, t_max, false, rec, isect);
+            return hit(ctxt, r, t_min, t_max, false, rec, isect);
         }
-
-        virtual bool hit(
-            const aten::accelerator::ResultIntersectTestByFrustum& resF,
-            const aten::ray& r,
-            real t_min, real t_max,
-            aten::hitrecord& rec,
-            aten::Intersection& isect) const = 0;
 
         void addLight(Light* l)
         {
@@ -68,17 +64,14 @@ namespace AT_NAME {
             return (uint32_t)m_lights.size();
         }
 
+        const Light* getLight(uint32_t i) const
+        {
+            return m_lights[i];
+        }
+
         // TODO
         Light* getLight(uint32_t i)
         {
-            if (m_lights.empty()) {
-                return nullptr;
-            }
-
-            if (i >= lightNum()) {
-                AT_ASSERT(false);
-                return nullptr;
-            }
             return m_lights[i];
         }
 
@@ -88,6 +81,7 @@ namespace AT_NAME {
         }
 
         bool hitLight(
+            const aten::context& ctxt,
             const Light* light,
             const aten::vec3& lightPos,
             const aten::ray& r,
@@ -167,6 +161,7 @@ namespace AT_NAME {
         }
 
         Light* sampleLight(
+            const aten::context& ctxt,
             const aten::vec3& org,
             const aten::vec3& nml,
             aten::sampler* sampler,
@@ -175,7 +170,8 @@ namespace AT_NAME {
 
         void draw(
             aten::hitable::FuncPreDraw func,
-            std::function<bool(aten::hitable*)> funcIfDraw = nullptr);
+            std::function<bool(aten::hitable*)> funcIfDraw,
+            const aten::context& ctxt) const;
 
     protected:
         std::vector<aten::hitable*> m_list;
@@ -194,7 +190,7 @@ namespace AT_NAME {
         virtual ~AcceleratedScene() {}
 
     public:
-        virtual void build() override final
+        virtual void build(const aten::context& ctxt) override final
         {
             aten::aabb bbox;
 
@@ -214,49 +210,29 @@ namespace AT_NAME {
                         std::back_inserter(m_tmp));
                 }
 
-                m_accel.build(&m_tmp[0], (uint32_t)m_tmp.size(), &bbox);
+                m_accel.build(ctxt, &m_tmp[0], (uint32_t)m_tmp.size(), &bbox);
             }
         }
 
         virtual bool hit(
+            const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
             bool enableLod,
             aten::hitrecord& rec,
             aten::Intersection& isect) const override final
         {
-            auto isHit = m_accel.hit(r, t_min, t_max, enableLod, isect);
+            auto isHit = m_accel.hit(ctxt, r, t_min, t_max, enableLod, isect);
 
             // TODO
 #ifndef __AT_CUDA__
             if (isHit) {
                 auto obj = transformable::getShape(isect.objid);
-                aten::hitable::evalHitResult(obj, r, rec, isect);
+                aten::hitable::evalHitResult(ctxt, obj, r, rec, isect);
             }
 #endif
 
             return isHit;
-        }
-
-        virtual bool hit(
-            const aten::accelerator::ResultIntersectTestByFrustum& resF,
-            const aten::ray& r,
-            real t_min, real t_max,
-            aten::hitrecord& rec,
-            aten::Intersection& isect) const override final
-        {
-            auto isHit = m_accel.hitMultiLevel(resF, r, t_min, t_max, isect);
-
-            // TODO
-#ifndef __AT_CUDA__
-            if (isHit) {
-                auto obj = transformable::getShape(isect.objid);
-                aten::hitable::evalHitResult(obj, r, rec, isect);
-            }
-#endif
-
-            return isHit;
-
         }
 
         ACCEL* getAccel()

@@ -80,19 +80,21 @@ namespace aten
     }
 
     void sbvh::build(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
     {
         if (m_isNested) {
-            buildAsNestedTree(list, num, bbox);
+            buildAsNestedTree(ctxt, list, num, bbox);
         }
         else {
-            buildAsTopLayerTree(list, num, bbox);
+            buildAsTopLayerTree(ctxt, list, num, bbox);
         }
     }
 
     void sbvh::buildAsNestedTree(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
@@ -120,16 +122,17 @@ namespace aten
             }
         }
         else {
-            onBuild(list, num);
+            onBuild(ctxt, list, num);
 
             makeTreelet();
         }
     }
 
     void sbvh::buildAsTopLayerTree(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
-        aabb* bbox/*= nullptr*/)
+        aabb* bbox)
     {
         AT_ASSERT(!m_isNested);
 
@@ -137,7 +140,7 @@ namespace aten
         m_bvh.disableLayer();
 
         // Build top layer bvh.
-        m_bvh.build(list, num, bbox);
+        m_bvh.build(ctxt, list, num, bbox);
 
         auto boundingBox = m_bvh.getBoundingbox();
 
@@ -164,7 +167,7 @@ namespace aten
                 // TODO
                 auto bvh = (sbvh*)nestedBvh[i];
 
-                bvh->buildVoxel();
+                bvh->buildVoxel(ctxt);
 
                 std::vector<int> indices;
                 bvh->convert(
@@ -180,6 +183,7 @@ namespace aten
     }
 
     void sbvh::onBuild(
+        const context& ctxt,
         hitable** list,
         uint32_t num)
     {
@@ -200,7 +204,7 @@ namespace aten
 
         for (uint32_t i = 0; i < tris.size(); i++) {
             m_refs[i].triid = i;
-            m_refs[i].bbox = tris[i]->computeAABB();
+            m_refs[i].bbox = tris[i]->computeAABB(ctxt);
 
             m_offsetTriIdx = std::min<int>(m_offsetTriIdx, tris[i]->getId());
 
@@ -966,14 +970,16 @@ namespace aten
     }
 
     bool sbvh::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
     {
-        return hit(r, t_min, t_max, false, isect);
+        return hit(ctxt, r, t_min, t_max, false, isect);
     }
 
     bool sbvh::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         bool enableLod,
@@ -1033,6 +1039,7 @@ namespace aten
                     //exid = AT_BVHNODE_LOD_EXID(exid);
 
                     isHit = hit(
+                        ctxt,
                         exid,
                         transformedRay,
                         t_min, t_max,
@@ -1042,14 +1049,14 @@ namespace aten
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = (hitable*)prims[(int)node->primid];
-                    isHit = prim->hit(r, t_min, t_max, isectTmp);
+                    isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(r, t_min, t_max, isectTmp);
+                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
                 if (isHit) {
@@ -1076,6 +1083,7 @@ namespace aten
     }
 
     bool sbvh::hit(
+        const context& ctxt,
         int exid,
         const ray& r,
         real t_min, real t_max,
@@ -1107,7 +1115,7 @@ namespace aten
 
 #if (SBVH_TRIANGLE_NUM == 1)
                 auto prim = prims[(int)node->triid];
-                isHit = prim->hit(r, t_min, t_max, isectTmp);
+                isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
 
                 if (isHit) {
                     const auto& primParam = prim->getParam();
@@ -1212,13 +1220,15 @@ namespace aten
         float boxmax[3];
     };
 
-    bool sbvh::exportTree(const char* path)
+    bool sbvh::exportTree(
+        const context& ctxt,
+        const char* path)
     {
         m_threadedNodes.resize(1);
 
         // Build voxel.
         if (!m_treelets.empty() && !m_nodes.empty()) {
-            buildVoxel();
+            buildVoxel(ctxt);
         }
 
         std::vector<int> indices;

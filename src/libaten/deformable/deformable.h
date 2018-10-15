@@ -44,6 +44,7 @@ namespace aten
 
         virtual void draw(
             aten::hitable::FuncPreDraw func,
+            const context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
             int parentId,
@@ -80,6 +81,7 @@ namespace aten
         }
 
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const override final
@@ -90,6 +92,7 @@ namespace aten
         }
 
         virtual void getSamplePosNormalArea(
+            const context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             const mat4& mtxL2W,
             sampler* sampler) const override final
@@ -99,6 +102,7 @@ namespace aten
         }
 
         virtual void evalHitResult(
+            const context& ctxt,
             const ray& r,
             const mat4& mtxL2W,
             hitrecord& rec,

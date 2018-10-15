@@ -51,6 +51,7 @@ namespace aten
     }
 
     BDPT::Result BDPT::genEyePath(
+        const context& ctxt,
         std::vector<Vertex>& vs,
         int x, int y,
         sampler* sampler,
@@ -89,7 +90,7 @@ namespace aten
         for (;;) {
             hitrecord rec;
             Intersection isect;
-            if (!scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
+            if (!scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
                 break;
             }
 
@@ -227,6 +228,7 @@ namespace aten
     }
 
     BDPT::Result BDPT::genLightPath(
+        const context& ctxt,
         std::vector<Vertex>& vs,
         aten::Light* light,
         sampler* sampler,
@@ -238,7 +240,7 @@ namespace aten
 
         // 光源上にサンプル点生成（y0）.
         aten::hitable::SamplePosNormalPdfResult res;
-        light->getSamplePosNormalArea(&res, sampler);
+        light->getSamplePosNormalArea(ctxt, &res, sampler);
         auto posOnLight = res.pos;
         auto nmlOnLight = res.nml;
         auto pdfOnLight = real(1) / res.area;
@@ -275,7 +277,7 @@ namespace aten
         for (;;) {
             hitrecord rec;
             Intersection isect;
-            bool isHit = scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
+            bool isHit = scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
 
             if (!camera->isPinhole()) {
                 // The light will never hit to the pinhole camera.
@@ -683,7 +685,9 @@ namespace aten
     }
 
     void BDPT::combine(
-        const int x, const int y,
+        const context& ctxt,
+        int x, 
+        int y,
         std::vector<Result>& result,
         const std::vector<Vertex>& eye_vs,
         const std::vector<Vertex>& light_vs,
@@ -732,7 +736,7 @@ namespace aten
 
                 hitrecord rec;
                 Intersection isect;
-                bool isHit = scene->hit(r, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
+                bool isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, rec, isect);
 
                 if (eye_end.objType == ObjectType::Lens) {
                     if (camera->isPinhole()) {
@@ -860,6 +864,7 @@ namespace aten
     }
 
     void BDPT::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -919,7 +924,7 @@ namespace aten
                         std::vector<Vertex> eyevs;
                         std::vector<Vertex> lightvs;
 
-                        auto eyeRes = genEyePath(eyevs, x, y, &rnd, scene, camera);
+                        auto eyeRes = genEyePath(ctxt, eyevs, x, y, &rnd, scene, camera);
                         
 #if 0
                         if (eyeRes.isTerminate) {
@@ -930,7 +935,7 @@ namespace aten
                         auto lightNum = scene->lightNum();
                         for (uint32_t n = 0; n < lightNum; n++) {
                             auto light = scene->getLight(n);
-                            auto lightRes = genLightPath(lightvs, light, &rnd, scene, camera);
+                            auto lightRes = genLightPath(ctxt, lightvs, light, &rnd, scene, camera);
 
                             if (eyeRes.isTerminate) {
                                 const real misWeight = computeMISWeight(
@@ -959,6 +964,7 @@ namespace aten
                             }
 
                             combine(
+                                ctxt, 
                                 x, y,
                                 result, 
                                 eyevs,

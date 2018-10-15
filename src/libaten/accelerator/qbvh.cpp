@@ -5,11 +5,12 @@
 namespace aten
 {
     void qbvh::build(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
     {
-        m_bvh.build(list, num, bbox);
+        m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
 
@@ -429,13 +430,14 @@ namespace aten
     }
 
     inline int intersectTriangle(
-        aten::vec4& resultT,
-        aten::vec4& resultA,
-        aten::vec4& resultB,
+        const context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
         const float* primidx,
-        const QbvhNode& qnode)
+        const QbvhNode& qnode,
+        aten::vec4& resultT,
+        aten::vec4& resultA,
+        aten::vec4& resultB)
     {
         // NOTE
         // https://github.com/githole/akari2/blob/master/qbvh.h
@@ -452,7 +454,7 @@ namespace aten
 
             const auto& faceParam = f->getParam();
 
-            const auto& v2 = aten::VertexManager::getVertex(faceParam.idx[2]);
+            const auto& v2 = ctxt.getVertex(faceParam.idx[2]);
 
             v2x[i] = v2.pos.x;
             v2y[i] = v2.pos.y;
@@ -526,14 +528,16 @@ namespace aten
     }
 
     bool qbvh::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
     {
-        return hit(0, m_listQbvhNode, r, t_min, t_max, isect);
+        return hit(ctxt, 0, m_listQbvhNode, r, t_min, t_max, isect);
     }
 
     bool qbvh::hit(
+        const context& ctxt,
         int exid,
         const std::vector<std::vector<QbvhNode>>& listQbvhNode,
         const ray& r,
@@ -653,6 +657,7 @@ namespace aten
                     }
 
                     isHit = hit(
+                        ctxt,
                         (int)pnode->exid,
                         listQbvhNode,
                         transformedRay,
@@ -661,7 +666,7 @@ namespace aten
                 }
                 else if (pnode->primid >= 0) {
                     auto f = prims[(int)pnode->primid];
-                    isHit = f->hit(r, t_min, t_max, isectTmp);
+                    isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
                     if (isHit) {
                         isectTmp.objid = s->id();
@@ -669,7 +674,7 @@ namespace aten
                 }
                 else {
                     // sphere, cube.
-                    isHit = s->hit(r, t_min, t_max, isectTmp);
+                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 #endif
 

@@ -5,6 +5,9 @@
 #include "math/vec4.h"
 #include "renderer/background.h"
 #include "renderer/film.h"
+#include "scene/context.h"
+#include "scene/scene.h"
+#include "camera/camera.h"
 
 namespace aten
 {
@@ -29,9 +32,6 @@ namespace aten
         } geominfo;
     };
 
-    class scene;
-    class camera;
-
     class Renderer {
     protected:
         Renderer() {}
@@ -39,6 +39,7 @@ namespace aten
 
     public:
         virtual void render(
+            const context& ctxt,
             Destination& dst,
             scene* scene,
             camera* camera) = 0;

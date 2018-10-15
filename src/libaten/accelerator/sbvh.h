@@ -1,6 +1,7 @@
 #pragma once
 
 #include "accelerator/threaded_bvh.h"
+#include "scene/context.h"
 
 #define SBVH_TRIANGLE_NUM    (1)
 
@@ -76,6 +77,7 @@ namespace aten
          * @brief Bulid structure tree from the specified list.
          */
         virtual void build(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox) override final;
@@ -83,12 +85,13 @@ namespace aten
         /**
          * @brief Build voxels from the specified tree.
          */
-        virtual void buildVoxel() override final;
+        virtual void buildVoxel(const context& ctxt) override final;
 
         /**
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const override;
@@ -97,6 +100,7 @@ namespace aten
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             bool enableLod,
@@ -105,7 +109,9 @@ namespace aten
         /**
          * @brief Export the built structure data.
          */
-        virtual bool exportTree(const char* path) override final;
+        virtual bool exportTree(
+            const context& ctxt,
+            const char* path) override final;
 
         /**
          * @brief Import the exported structure data.
@@ -158,6 +164,7 @@ namespace aten
          * @brief Build the tree for the bottom layer.
          */
         void buildAsNestedTree(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox);
@@ -166,6 +173,7 @@ namespace aten
          * @brief Build the tree for the top layer.
          */
         void buildAsTopLayerTree(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox);
@@ -174,6 +182,7 @@ namespace aten
          * @brief Build the tree.
          */
         void onBuild(
+            const context& ctxt,
             hitable** list,
             uint32_t num);
 
@@ -186,6 +195,7 @@ namespace aten
             std::vector<int>& indices) const;
 
         bool hit(
+            const context& ctxt,
             int exid,
             const ray& r,
             real t_min, real t_max,

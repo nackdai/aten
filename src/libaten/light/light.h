@@ -157,14 +157,18 @@ namespace AT_NAME
             return m_param.le.v;
         }
 
-        virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const = 0;
+        virtual aten::LightSampleResult sample(
+            const aten::context& ctxt,
+            const aten::vec3& org, 
+            aten::sampler* sampler) const = 0;
 
         virtual aten::LightSampleResult sample(
+            const aten::context& ctxt,
             const aten::vec3& org, 
             const aten::vec3& nml,
             aten::sampler* sampler) const
         {
-            return std::move(sample(org, sampler));
+            return std::move(sample(ctxt, org, sampler));
         }
 
         bool isSingular() const
@@ -193,6 +197,7 @@ namespace AT_NAME
         }
 
         virtual void getSamplePosNormalArea(
+            const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const
         {

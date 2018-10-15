@@ -101,6 +101,7 @@ namespace aten
     ///////////////////////////////////////////////////////
 
     ERPT::Path ERPT::genPath(
+        const context& ctxt,
         scene* scene,
         sampler* sampler,
         int x, int y,
@@ -140,7 +141,7 @@ namespace aten
 
         auto camsample = camera->sample(u, v, sampler);
 
-        auto path = radiance(sampler, camsample.r, camera, camsample, scene);
+        auto path = radiance(ctxt, sampler, camsample.r, camera, camsample, scene);
 
         auto pdfOnImageSensor = camsample.pdfOnImageSensor;
         auto pdfOnLens = camsample.pdfOnLens;
@@ -160,6 +161,7 @@ namespace aten
     }
 
     void ERPT::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -198,7 +200,7 @@ namespace aten
                 XorShift rnd(scramble + time.milliSeconds);
                 ERPTSampler X(&rnd);
 
-                auto path = genPath(scene, &X, x, y, width, height, camera, false);
+                auto path = genPath(ctxt, scene, &X, x, y, width, height, camera, false);
 
                 tmpSumI[idx] += path.contrib;
             }
@@ -241,7 +243,7 @@ namespace aten
                     ERPTSampler X(&rnd);
 
                     // 現在のスクリーン上のある点からのパスによる放射輝度を求める.
-                    auto newSample = genPath(scene, &X, x, y, width, height, camera, false);
+                    auto newSample = genPath(ctxt, scene, &X, x, y, width, height, camera, false);
 
                     // パスが光源に直接ヒットしてた場合、エネルギー分配しないで、そのまま画像に送る.
                     if (newSample.isTerminate) {
@@ -278,7 +280,7 @@ namespace aten
                                 ERPTSampler Z = Y;
                                 Z.mutate();
 
-                                Path Zpath = genPath(scene, &Z, x, y, width, height, camera, true);
+                                Path Zpath = genPath(ctxt, scene, &Z, x, y, width, height, camera, true);
 
                                 // いる？
                                 //Z.reset();

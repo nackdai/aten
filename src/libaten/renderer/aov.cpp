@@ -4,6 +4,7 @@
 namespace aten
 {
     AOVRenderer::Path AOVRenderer::radiance(
+        const context& ctxt,
         const ray& inRay,
         scene* scene,
         sampler* sampler)
@@ -21,7 +22,7 @@ namespace aten
             hitrecord rec;
             Intersection isect;
 
-            if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, false, rec, isect)) {
+            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, false, rec, isect)) {
                 // 交差位置の法線.
                 // 物体からのレイの入出を考慮.
                 vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
@@ -59,6 +60,7 @@ namespace aten
                         LightSampleResult sampleres;
 
                         auto light = scene->sampleLight(
+                            ctxt,
                             rec.p,
                             orienting_normal,
                             sampler,
@@ -76,7 +78,7 @@ namespace aten
 
                             hitrecord tmpRec;
 
-                            if (scene->hitLight(light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                            if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                                 path.visibility = 1;
                             }
                         }
@@ -116,6 +118,7 @@ namespace aten
     }
 
     void AOVRenderer::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -138,7 +141,7 @@ namespace aten
 
                 auto camsample = camera->sample(u, v, &rnd);
 
-                auto path = radiance(camsample.r, scene, &rnd);
+                auto path = radiance(ctxt, camsample.r, scene, &rnd);
 
                 if (dst.geominfo.nml_depth) {
                     if (dst.geominfo.needNormalize) {

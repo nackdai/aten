@@ -217,6 +217,7 @@ namespace aten
 
     void readObjects(
         const tinyxml2::XMLElement* root,
+        context& ctxt,
         std::map<std::string, transformable*>& objs)
     {
         auto objRoot = root->FirstChildElement("objects");
@@ -273,7 +274,7 @@ namespace aten
             object* obj = nullptr;
 
             if (type == "object") {
-                obj = ObjLoader::load(path);
+                obj = ObjLoader::load(path, ctxt);
             }
 
             mat4 mtxS;
@@ -291,7 +292,7 @@ namespace aten
             auto mtxL2W = mtxT * mtxRotX * mtxRotY * mtxRotZ * mtxS;
 
             if (obj) {
-                auto instance = new aten::instance<aten::object>(obj, mtxL2W);
+                auto instance = new aten::instance<aten::object>(obj, ctxt, mtxL2W);
                 objs.insert(std::pair<std::string, transformable*>(tag, instance));
             }
             else {
@@ -527,7 +528,9 @@ namespace aten
         info.dst.mltNum = val.get("mlt", int(100));
     }
 
-    SceneLoader::SceneInfo SceneLoader::load(const std::string& path)
+    SceneLoader::SceneInfo SceneLoader::load(
+        const std::string& path,
+        context& ctxt)
     {
         std::string fullpath = path;
         if (!g_base.empty()) {
@@ -583,7 +586,7 @@ namespace aten
 
             readTextures(root);
             readMaterials(root);
-            readObjects(root, objs);
+            readObjects(root, ctxt, objs);
             readLights(root, objs, lights);
             readProcs(root, "preprocs", ret.preprocs);
             readProcs(root, "postprocs", ret.postprocs);

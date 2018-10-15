@@ -20,7 +20,7 @@ namespace AT_NAME
         }
     }
 
-    void object::build()
+    void object::build(const context& ctxt)
     {
         if (m_triangles > 0) {
             // Builded already.
@@ -42,7 +42,7 @@ namespace AT_NAME
         aabb bbox;
 
         for (const auto s : shapes) {
-            s->build();
+            s->build(ctxt);
 
             param.area += s->param.area;
             m_triangles += (uint32_t)s->faces.size();
@@ -55,14 +55,14 @@ namespace AT_NAME
         param.primnum = m_triangles;
 
         m_accel->asNested();
-        m_accel->build((hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
+        m_accel->build(ctxt, (hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
 
         bbox = m_accel->getBoundingbox();
 
         setBoundingBox(bbox);
     }
 
-    void object::buildForRasterizeRendering()
+    void object::buildForRasterizeRendering(const context& ctxt)
     {
         if (m_triangles > 0) {
             // Builded already.
@@ -75,7 +75,7 @@ namespace AT_NAME
         m_triangles = 0;
 
         for (const auto s : shapes) {
-            s->build();
+            s->build(ctxt);
 
             m_triangles += (uint32_t)s->faces.size();
         }
@@ -84,11 +84,12 @@ namespace AT_NAME
     }
 
     bool object::hit(
+        const context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
         aten::Intersection& isect) const
     {
-        bool isHit = m_accel->hit(r, t_min, t_max, false, isect);
+        bool isHit = m_accel->hit(ctxt, r, t_min, t_max, false, isect);
 
         if (isHit) {
             auto f = face::faces()[isect.objid];
@@ -100,6 +101,7 @@ namespace AT_NAME
     }
 
     void object::evalHitResult(
+        const context& ctxt,
         const aten::ray& r,
         const aten::mat4& mtxL2W,
         aten::hitrecord& rec,
@@ -107,7 +109,7 @@ namespace AT_NAME
     {
         auto f = face::faces()[isect.primid];
 
-        auto& vtxs = aten::VertexManager::getVertices();
+        auto& vtxs = ctxt.getVertices();
 
         const auto& faceParam = f->getParam();
 
@@ -116,7 +118,7 @@ namespace AT_NAME
         const auto& v2 = vtxs[faceParam.idx[2]];
 
         //face::evalHitResult(v0, v1, v2, &rec, &isect);
-        f->evalHitResult(r, rec, isect);
+        f->evalHitResult(ctxt, r, rec, isect);
 
         real orignalLen = 0;
         {
@@ -143,6 +145,7 @@ namespace AT_NAME
     }
 
     void object::getSamplePosNormalArea(
+        const context& ctxt,
         aten::hitable::SamplePosNormalPdfResult* result,
         const aten::mat4& mtxL2W, 
         aten::sampler* sampler) const
@@ -157,8 +160,8 @@ namespace AT_NAME
 
         const auto& faceParam = f->getParam();
 
-        const auto& v0 = aten::VertexManager::getVertex(faceParam.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(faceParam.idx[1]);
+        const auto& v0 = ctxt.getVertex(faceParam.idx[0]);
+        const auto& v1 = ctxt.getVertex(faceParam.idx[1]);
 
         real orignalLen = 0;
         {
@@ -181,13 +184,14 @@ namespace AT_NAME
 
         auto area = param.area * ratio;
 
-        f->getSamplePosNormalArea(result, sampler);
+        f->getSamplePosNormalArea(ctxt, result, sampler);
 
         result->area = area;
     }
 
     void object::draw(
         aten::hitable::FuncPreDraw func,
+        const context& ctxt,
         const aten::mat4& mtxL2W,
         const aten::mat4& mtxPrevL2W,
         int parentId,
@@ -199,14 +203,16 @@ namespace AT_NAME
         int objid = (parentId < 0 ? id() : parentId);
 
         for (auto s : shapes) {
-            s->draw(func, mtxL2W, mtxPrevL2W, objid);
+            s->draw(func, ctxt, mtxL2W, mtxPrevL2W, objid);
         }
     }
 
-    void object::draw(AT_NAME::FuncObjectMeshDraw func)
+    void object::draw(
+        AT_NAME::FuncObjectMeshDraw func,
+        const context& ctxt) const
     {
         for (auto s : shapes) {
-            s->draw(func);
+            s->draw(func, ctxt);
         }
     }
 
@@ -217,17 +223,19 @@ namespace AT_NAME
         m_accel->drawAABB(func, mtxL2W);
     }
 
-    bool object::exportInternalAccelTree(const char* path)
+    bool object::exportInternalAccelTree(
+        const context& ctxt,
+        const char* path)
     {
         bool result = false;
 
         m_accel = aten::accelerator::createAccelerator();
         m_accel->enableExporting();
 
-        build();
+        build(ctxt);
 
         if (m_accel) {
-            result = m_accel->exportTree(path);
+            result = m_accel->exportTree(ctxt, path);
         }
 
         return result;

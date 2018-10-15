@@ -13,11 +13,12 @@
 
 namespace aten {
     void StacklessBVH::build(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox/*= nullptr*/)
     {
-        m_bvh.build(list, num, bbox);
+        m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
 
@@ -198,14 +199,16 @@ namespace aten {
     }
 
     bool StacklessBVH::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
     {
-        return hit(0, m_listStacklessBvhNode, r, t_min, t_max, isect);
+        return hit(ctxt, 0, m_listStacklessBvhNode, r, t_min, t_max, isect);
     }
 
     bool StacklessBVH::hit(
+        const context& ctxt,
         int exid,
         const std::vector<std::vector<StacklessBvhNode>>& listStacklessBvhNode,
         const ray& r,
@@ -256,6 +259,7 @@ namespace aten {
                     }
 
                     isHit = hit(
+                        ctxt,
                         (int)node->exid,
                         listStacklessBvhNode,
                         transformedRay,
@@ -265,14 +269,14 @@ namespace aten {
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = (hitable*)prims[(int)node->primid];
-                    isHit = prim->hit(r, t_min, t_max, isectTmp);
+                    isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();
                     }
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(r, t_min, t_max, isectTmp);
+                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
                 if (isHit) {

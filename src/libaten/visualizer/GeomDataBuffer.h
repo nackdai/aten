@@ -202,23 +202,23 @@ namespace aten {
         void unlock();
 
         void draw(
-            GeomVertexBuffer& vb,
+            const GeomVertexBuffer& vb,
             Primitive mode,
             uint32_t idxOffset,
-            uint32_t primNum);
+            uint32_t primNum) const;
 
         void draw(
-            GeomMultiVertexBuffer& vb,
+            const GeomMultiVertexBuffer& vb,
             Primitive mode,
             uint32_t idxOffset,
-            uint32_t primNum);
+            uint32_t primNum) const;
 
     private:
         void draw(
             uint32_t vao,
             Primitive mode,
             uint32_t idxOffset,
-            uint32_t primNum);
+            uint32_t primNum) const;
 
     protected:
         uint32_t m_ibo{ 0 };

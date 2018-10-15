@@ -3,6 +3,7 @@
 #include "renderer/renderer.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -12,12 +13,14 @@ namespace aten
         virtual ~RayTracing() {}
 
         virtual void render(
+            const context& ctxt,
             Destination& dst,
             scene* scene,
             camera* camera) override;
 
     private:
         vec3 radiance(
+            const context& ctxt,
             const ray& ray,
             scene* scene);
 

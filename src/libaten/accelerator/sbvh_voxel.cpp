@@ -101,10 +101,10 @@ namespace aten
         return lambda1 >= 0.0f && lambda2 >= 0.0f && lambda1 + lambda2 <= 1.0f;
     }
 
-    void sbvh::buildVoxel()
+    void sbvh::buildVoxel(const context& ctxt)
     {
         const auto& faces = aten::face::faces();
-        const auto& vertices = aten::VertexManager::getVertices();
+        const auto& vertices = ctxt.getVertices();
         const auto& mtrls = aten::material::getMaterials();
 
 #if 1

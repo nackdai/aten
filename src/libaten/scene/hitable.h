@@ -8,6 +8,7 @@
 #include "math/vec3.h"
 #include "material/material.h"
 #include "sampler/sampler.h"
+#include "scene/context.h"
 
 //#define ENABLE_TANGENTCOORD_IN_HITREC
 
@@ -84,6 +85,7 @@ namespace aten {
 
     public:
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const = 0;
@@ -134,12 +136,16 @@ namespace aten {
             int primid{ -1 };
         };
 
-        virtual void getSamplePosNormalArea(SamplePosNormalPdfResult* result, sampler* sampler) const
+        virtual void getSamplePosNormalArea(
+            const context& ctxt,
+            SamplePosNormalPdfResult* result, 
+            sampler* sampler) const
         {
             AT_ASSERT(false);
         }
 
         static void evalHitResult(
+            const context& ctxt,
             const hitable* obj,
             const ray& r,
             hitrecord& rec,
@@ -161,7 +167,7 @@ namespace aten {
                 rec.isVoxel = true;
             }
             else {
-                obj->evalHitResult(r, rec, isect);
+                obj->evalHitResult(ctxt, r, rec, isect);
                 rec.mtrlid = isect.mtrlid;
 
                 rec.isVoxel = false;
@@ -175,12 +181,13 @@ namespace aten {
         }
 
         static void evalHitResultForAreaLight(
+            const context& ctxt,
             const hitable* obj,
             const ray& r,
             hitrecord& rec,
             const Intersection& isect)
         {
-            obj->evalHitResult(r, rec, isect);
+            obj->evalHitResult(ctxt, r, rec, isect);
             rec.mtrlid = isect.mtrlid;
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
@@ -194,6 +201,7 @@ namespace aten {
 
         virtual void draw(
             FuncPreDraw func,
+            const context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
             int parentId,
@@ -252,6 +260,7 @@ namespace aten {
 
     private:
         virtual void evalHitResult(
+            const context& ctxt,
             const ray& r,
             hitrecord& rec,
             const Intersection& isect) const

@@ -426,19 +426,19 @@ namespace aten {
     }
 
     void GeomIndexBuffer::draw(
-        GeomVertexBuffer& vb,
+        const GeomVertexBuffer& vb,
         Primitive mode,
         uint32_t idxOffset,
-        uint32_t primNum)
+        uint32_t primNum) const
     {
         draw(vb.m_vao, mode, idxOffset, primNum);
     }
 
     void GeomIndexBuffer::draw(
-        GeomMultiVertexBuffer& vb,
+        const GeomMultiVertexBuffer& vb,
         Primitive mode,
         uint32_t idxOffset,
-        uint32_t primNum)
+        uint32_t primNum) const
     {
         draw(vb.m_vao, mode, idxOffset, primNum);
     }
@@ -447,7 +447,7 @@ namespace aten {
         uint32_t vao,
         Primitive mode,
         uint32_t idxOffset,
-        uint32_t primNum)
+        uint32_t primNum) const
     {
         AT_ASSERT(m_ibo > 0);
         AT_ASSERT(vao > 0);

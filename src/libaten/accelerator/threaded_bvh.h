@@ -57,6 +57,7 @@ namespace aten
          * @brief Bulid structure tree from the specified list.
          */
         virtual void build(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox) override;
@@ -65,6 +66,7 @@ namespace aten
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const override;
@@ -73,21 +75,14 @@ namespace aten
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             bool enableLod,
             Intersection& isect) const override
         {
-            return hit(r, t_min, t_max, isect);
+            return hit(ctxt, r, t_min, t_max, isect);
         }
-
-        virtual bool hitMultiLevel(
-            const accelerator::ResultIntersectTestByFrustum& fisect,
-            const ray& r,
-            real t_min, real t_max,
-            Intersection& isect) const override final;
-
-        virtual accelerator::ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f) override final;
 
         /**
          * @brief Draw all node's AABB in the structure tree.
@@ -151,6 +146,7 @@ namespace aten
          * @brief Build the tree for the bottom layer.
          */
         void buildAsNestedTree(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox);
@@ -159,6 +155,7 @@ namespace aten
          * @brief Build the tree for the top layer.
          */
         void buildAsTopLayerTree(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox);
@@ -196,16 +193,8 @@ namespace aten
          * @brief Test if a ray hits a object.
          */
         bool hit(
+            const context& ctxt,
             int exid,
-            const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
-            const ray& r,
-            real t_min, real t_max,
-            Intersection& isect) const;
-
-        bool hitMultiLevel(
-            int exid,
-            int nodeid,
-            int topid,
             const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
             const ray& r,
             real t_min, real t_max,

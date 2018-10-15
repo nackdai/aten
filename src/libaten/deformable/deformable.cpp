@@ -230,6 +230,7 @@ namespace aten
 
     void deformable::draw(
         aten::hitable::FuncPreDraw func,
+        const context& ctxt,
         const aten::mat4& mtxL2W,
         const aten::mat4& mtxPrevL2W,
         int parentId,

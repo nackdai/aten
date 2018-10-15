@@ -197,6 +197,7 @@ namespace AT_NAME {
     }
 
     aten::LightSampleResult ImageBasedLight::sample(
+        const aten::context& ctxt,
         const aten::vec3& org, 
         const aten::vec3& nml,
         aten::sampler* sampler) const

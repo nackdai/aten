@@ -112,7 +112,6 @@
 #include "renderer/erpt.h"
 #include "renderer/pssmlt.h"
 #include "renderer/aov.h"
-#include "renderer/sorted_pathtracing.h"
 #include "renderer/bdpt.h"
 #include "renderer/directlight.h"
 

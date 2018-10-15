@@ -1,6 +1,7 @@
 #pragma once
 
 #include "accelerator/bvh.h"
+#include "scene/context.h"
 
 namespace aten {
     struct QbvhNode {
@@ -109,22 +110,25 @@ namespace aten {
 
     public:
         virtual void build(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox) override final;
 
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const override;
 
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             bool enableLod,
             Intersection& isect) const override
         {
-            return hit(r, t_min, t_max, isect);
+            return hit(ctxt, r, t_min, t_max, isect);
         }
 
         std::vector<std::vector<QbvhNode>>& getNodes()
@@ -178,6 +182,7 @@ namespace aten {
             int children[4]);
 
         bool hit(
+            const context& ctxt,
             int exid,
             const std::vector<std::vector<QbvhNode>>& listQbvhNode,
             const ray& r,

@@ -3,6 +3,7 @@
 #include <vector>
 #include "scene/hitable.h"
 #include "math/frustum.h"
+#include "scene/context.h"
 
 namespace aten {
     /**
@@ -76,6 +77,7 @@ namespace aten {
          * @brief Bulid structure tree from the specified list.
          */
         virtual void build(
+            const context& ctxt,
             hitable** list,
             uint32_t num,
             aabb* bbox) = 0;
@@ -83,7 +85,7 @@ namespace aten {
         /**
          * @brief Build voxel data from the structure tree.
          */
-        virtual void buildVoxel()
+        virtual void buildVoxel(const context& ctxt)
         {
             // Nothing is done.
             AT_ASSERT(false);
@@ -93,6 +95,7 @@ namespace aten {
          * @brief Test if a ray hits a object.
          */
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             bool enableLod,
@@ -128,26 +131,12 @@ namespace aten {
             ResultIntersectTestByFrustum() {}
         };
 
-        virtual bool hitMultiLevel(
-            const ResultIntersectTestByFrustum& fisect,
-            const ray& r,
-            real t_min, real t_max,
-            Intersection& isect) const
-        {
-            AT_ASSERT(false);
-            return false;
-        }
-
-        virtual ResultIntersectTestByFrustum intersectTestByFrustum(const frustum& f)
-        {
-            AT_ASSERT(false);
-            return std::move(ResultIntersectTestByFrustum());
-        }
-
         /**
          * @brief Export the built structure data.
          */
-        virtual bool exportTree(const char* path)
+        virtual bool exportTree(
+            const context& ctxt,
+            const char* path)
         {
             AT_ASSERT(false);
             return false;

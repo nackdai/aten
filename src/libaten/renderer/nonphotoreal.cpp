@@ -3,6 +3,7 @@
 namespace aten
 {
     vec3 shadeNPR(
+        const context& ctxt,
         material* mtrl,
         const vec3& p,
         const vec3& normal,
@@ -19,7 +20,7 @@ namespace aten
         real cosShadow = 0;
 
         if (light) {
-            auto sampleres = light->sample(p, sampler);
+            auto sampleres = light->sample(ctxt, p, sampler);
 
             vec3 posLight = sampleres.pos;
             vec3 nmlLight = sampleres.nml;
@@ -32,7 +33,7 @@ namespace aten
 
             hitrecord tmpRec;
 
-            if (scene->hitLight(light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+            if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                 cosShadow = dot(normal, dirToLight);
             }
         }

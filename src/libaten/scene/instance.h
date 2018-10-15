@@ -5,6 +5,7 @@
 #include "math/mat4.h"
 #include "geometry/object.h"
 #include "deformable/deformable.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -15,15 +16,15 @@ namespace aten
             : m_param(GeometryType::Instance)
         {}
 
-        instance(OBJ* obj)
+        instance(OBJ* obj, const context& ctxt)
             : m_param(GeometryType::Instance)
         {
             m_obj = obj;
             setBoundingBox(m_obj->getBoundingbox());
         }
 
-        instance(OBJ* obj, const mat4& mtxL2W)
-            : instance(obj)
+        instance(OBJ* obj, const context& ctxt, const mat4& mtxL2W)
+            : instance(obj, ctxt)
         {
             m_mtxL2W = mtxL2W;
 
@@ -34,11 +35,12 @@ namespace aten
         }
 
         instance(
-            OBJ* obj, 
+            OBJ* obj,
+            const context& ctxt,
             const vec3& trans,
             const vec3& rot,
             const vec3& scale)
-            : instance(obj)
+            : instance(obj, ctxt)
         {
             m_trans = trans;
             m_rot = rot;
@@ -56,6 +58,7 @@ namespace aten
 
     public:
         virtual bool hit(
+            const context& ctxt,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect) const override final
@@ -70,7 +73,7 @@ namespace aten
             ray transformdRay(org, dir);
 
             // Hit test in local coordinate.
-            auto isHit = m_obj->hit(transformdRay, t_min, t_max, isect);
+            auto isHit = m_obj->hit(ctxt, transformdRay, t_min, t_max, isect);
 
             if (isHit) {
                 // returnTo this instance's id.
@@ -81,11 +84,12 @@ namespace aten
         }
 
         virtual void evalHitResult(
+            const context& ctxt,
             const ray& r,
             hitrecord& rec,
             const Intersection& isect) const override final
         {
-            m_obj->evalHitResult(r, m_mtxL2W, rec, isect);
+            m_obj->evalHitResult(ctxt, r, m_mtxL2W, rec, isect);
 
             // Transform local to world.
             rec.p = m_mtxL2W.apply(rec.p);
@@ -95,10 +99,11 @@ namespace aten
         }
 
         virtual void getSamplePosNormalArea(
+            const context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             sampler* sampler) const
         {
-            return m_obj->getSamplePosNormalArea(result, m_mtxL2W, sampler);
+            return m_obj->getSamplePosNormalArea(ctxt, result, m_mtxL2W, sampler);
         }
 
         virtual const hitable* getHasObject() const override final
@@ -131,12 +136,13 @@ namespace aten
 
         virtual void draw(
             aten::hitable::FuncPreDraw func,
+            const context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
             int parentId,
             uint32_t triOffset) override final
         {
-            m_obj->draw(func, m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
+            m_obj->draw(func, ctxt, m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
         }
 
         virtual void drawAABB(
@@ -198,6 +204,7 @@ namespace aten
 
     private:
         virtual void getSamplePosNormalArea(
+            const context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             const mat4& mtxL2W,
             sampler* sampler) const override final
@@ -207,6 +214,7 @@ namespace aten
         }
 
         virtual void evalHitResult(
+            const context& ctxt,
             const ray& r,
             const mat4& mtxL2W,
             hitrecord& rec,
@@ -262,18 +270,18 @@ namespace aten
     };
 
     template<>
-    inline instance<object>::instance(object* obj)
+    inline instance<object>::instance(object* obj, const context& ctxt)
         : m_param(GeometryType::Instance)
     {
         m_obj = obj;
-        m_obj->build();
+        m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
 
         m_param.shapeid = transformable::findIdx(obj);
     }
 
     template<>
-    inline instance<deformable>::instance(deformable* obj)
+    inline instance<deformable>::instance(deformable* obj, const context& ctxt)
         : m_param(GeometryType::Instance)
     {
         m_obj = obj;

@@ -5,6 +5,10 @@
 #include <random>
 #include <vector>
 
+// NOTE
+// Fast, Effective BVH Updates for Animated Scenes.
+// http://www.cs.utah.edu/~thiago/papers/rotations.pdf
+
 namespace aten
 {
     void bvhnode::itemChanged(hitable* sender)

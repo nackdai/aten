@@ -16,7 +16,7 @@ namespace AT_NAME
         faces.clear();
     }
 
-    void objshape::build()
+    void objshape::build(const context& ctxt)
     {
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
         aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
@@ -27,7 +27,7 @@ namespace AT_NAME
         int geomid = getGeomId();
 
         for (const auto f : faces) {
-            f->build(mtrlid, geomid);
+            f->build(ctxt, mtrlid, geomid);
 
             const auto& faceParam = f->getParam();
             param.area += faceParam.area;
@@ -76,6 +76,7 @@ namespace AT_NAME
 
     void objshape::draw(
         aten::hitable::FuncPreDraw func,
+        const context& ctxt,
         const aten::mat4& mtxL2W,
         const aten::mat4& mtxPrevL2W,
         int parentId)
@@ -84,14 +85,16 @@ namespace AT_NAME
             func(mtxL2W, mtxPrevL2W, parentId, m_baseTriIdx);
         }
 
-        auto& vb = VertexManager::getVB();
+        const auto& vb = ctxt.getVB();
 
         auto triNum = (uint32_t)faces.size();
 
         m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
     }
 
-    void objshape::draw(AT_NAME::FuncObjectMeshDraw func)
+    void objshape::draw(
+        AT_NAME::FuncObjectMeshDraw func,
+        const context& ctxt)
     {
         if (func) {
             int albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
@@ -104,7 +107,7 @@ namespace AT_NAME
             func(color, albedo, mtrlid);
         }
 
-        auto& vb = VertexManager::getVB();
+        const auto& vb = ctxt.getVB();
 
         auto triNum = (uint32_t)faces.size();
 

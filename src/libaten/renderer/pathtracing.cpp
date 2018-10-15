@@ -26,16 +26,7 @@ namespace aten
     // https://www.slideshare.net/shocker_0x15/ss-52688052
 
     PathTracing::Path PathTracing::radiance(
-        sampler* sampler,
-        const ray& inRay,
-        camera* cam,
-        CameraSampleResult& camsample,
-        scene* scene)
-    {
-        return radiance(sampler, m_maxDepth, inRay, cam, camsample, scene);
-    }
-
-    PathTracing::Path PathTracing::radiance(
+        const context& ctxt,
         sampler* sampler,
         uint32_t maxDepth,
         const ray& inRay,
@@ -56,8 +47,8 @@ namespace aten
             bool willContinue = true;
             Intersection isect;
 
-            if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
-                willContinue = shade(sampler, scene, cam, camsample, depth, path);
+            if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
+                willContinue = shade(ctxt, sampler, scene, cam, camsample, depth, path);
             }
             else {
                 shadeMiss(scene, depth, path);
@@ -91,6 +82,7 @@ namespace aten
     }
 
     bool PathTracing::shade(
+        const context& ctxt,
         sampler* sampler,
         scene* scene,
         camera* cam,
@@ -203,7 +195,7 @@ namespace aten
 
         // Non-Photo-Real.
         if (mtrl->isNPR()) {
-            path.contrib = shadeNPR(mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
+            path.contrib = shadeNPR(ctxt, mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
             path.isTerminate = true;
             return false;
         }
@@ -223,6 +215,7 @@ namespace aten
             LightSampleResult sampleres;
 
             auto light = scene->sampleLight(
+                ctxt,
                 path.rec.p,
                 orienting_normal,
                 sampler,
@@ -244,7 +237,7 @@ namespace aten
 
                 hitrecord tmpRec;
 
-                if (scene->hitLight(light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                     // Shadow ray hits the light.
                     auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -292,7 +285,7 @@ namespace aten
 #if 1
             if (m_virtualLight)
             {
-                auto sampleres = m_virtualLight->sample(path.rec.p, nullptr);
+                auto sampleres = m_virtualLight->sample(ctxt, path.rec.p, nullptr);
 
                 const vec3& posLight = sampleres.pos;
                 const vec3& nmlLight = sampleres.nml;
@@ -305,7 +298,7 @@ namespace aten
 
                 hitrecord tmpRec;
 
-                if (scene->hitLight(m_virtualLight, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                if (scene->hitLight(ctxt, m_virtualLight, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                     auto cosShadow = dot(orienting_normal, dirToLight);
                     auto dist2 = squared_length(sampleres.dir);
                     auto dist = aten::sqrt(dist2);
@@ -420,6 +413,7 @@ namespace aten
     static uint32_t frame = 0;
 
     void PathTracing::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -504,6 +498,7 @@ namespace aten
 #else
 
                         auto path = radiance(
+                            ctxt,
                             &rnd,
                             ray, 
                             camera,

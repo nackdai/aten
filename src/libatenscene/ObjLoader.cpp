@@ -18,10 +18,11 @@ namespace aten
 
     object* ObjLoader::load(
         const std::string& path,
+        context& ctxt,
         bool needComputeNormalOntime/*= false*/)
     {
         std::vector<object*> objs;
-        load(objs, path, needComputeNormalOntime);
+        load(objs, path, ctxt, needComputeNormalOntime);
 
         object* ret = (!objs.empty() ? objs[0] : nullptr);
         return ret;
@@ -30,10 +31,11 @@ namespace aten
     object* ObjLoader::load(
         const std::string& tag, 
         const std::string& path,
+        context& ctxt,
         bool needComputeNormalOntime/*= false*/)
     {
         std::vector<object*> objs;
-        load(objs, tag, path, needComputeNormalOntime);
+        load(objs, tag, path, ctxt, needComputeNormalOntime);
 
         object* ret = (!objs.empty() ? objs[0] : nullptr);
         return ret;
@@ -42,6 +44,7 @@ namespace aten
     void ObjLoader::load(
         std::vector<object*>& objs,
         const std::string& path,
+        context& ctxt,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
@@ -60,12 +63,14 @@ namespace aten
             fullpath = g_base + "/" + fullpath;
         }
 
-        load(objs, filename, fullpath, willSeparate, needComputeNormalOntime);
+        load(objs, filename, fullpath, ctxt, willSeparate, needComputeNormalOntime);
     }
 
     void ObjLoader::load(
         std::vector<object*>& objs,
-        const std::string& tag, const std::string& path,
+        const std::string& tag, 
+        const std::string& path,
+        context& ctxt,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
@@ -121,7 +126,7 @@ namespace aten
 
             auto vtxnum = shape.mesh.positions.size();
 
-            auto curVtxPos = VertexManager::getVertexNum();
+            auto curVtxPos = ctxt.getVertexNum();
 
             vec3 pmin = vec3(AT_MATH_INF);
             vec3 pmax = vec3(-AT_MATH_INF);
@@ -153,7 +158,7 @@ namespace aten
                     vtx.nml = aten::vec4(real(0), real(1), real(0), 1);
                 }
 
-                VertexManager::addVertex(vtx);
+                ctxt.addVertex(vtx);
 
                 pmin = vec3(
                     std::min(pmin.x, vtx.pos.x),
@@ -263,9 +268,9 @@ namespace aten
                 faceParam.idx[1] = shape.mesh.indices[i + 1] + curVtxPos;
                 faceParam.idx[2] = shape.mesh.indices[i + 2] + curVtxPos;
 
-                auto& v0 = VertexManager::getVertex(faceParam.idx[0]);
-                auto& v1 = VertexManager::getVertex(faceParam.idx[1]);
-                auto& v2 = VertexManager::getVertex(faceParam.idx[2]);
+                auto& v0 = ctxt.getVertex(faceParam.idx[0]);
+                auto& v1 = ctxt.getVertex(faceParam.idx[1]);
+                auto& v2 = ctxt.getVertex(faceParam.idx[2]);
 
                 if (v0.uv.z == real(1)
                     || v1.uv.z == real(1)
@@ -277,6 +282,7 @@ namespace aten
                 f->setParam(faceParam);
 
                 f->build(
+                    ctxt,
                     dstshape->getMaterial()->id(),
                     dstshape->getGeomId());
 
@@ -319,7 +325,7 @@ namespace aten
                 for (uint32_t i = 0; i < vtxnum; i += 2) {
                     uint32_t vpos = i / 2 + curVtxPos;
 
-                    auto& vtx = VertexManager::getVertex(vpos);
+                    auto& vtx = ctxt.getVertex(vpos);
 
                     vtx.uv.x = shape.mesh.texcoords[i + 0];
                     vtx.uv.y = shape.mesh.texcoords[i + 1];
@@ -333,7 +339,7 @@ namespace aten
                 for (uint32_t i = 0; i < vtxnum; i++) {
                     uint32_t vpos = i + curVtxPos;
 
-                    auto& vtx = VertexManager::getVertex(vpos);
+                    auto& vtx = ctxt.getVertex(vpos);
 
                     // Specify not have texture coordinates.
                     vtx.uv.z = real(-1);
@@ -351,7 +357,7 @@ namespace aten
             AssetManager::registerObj(tag, obj);
         }
 
-        auto vtxNum = aten::VertexManager::getVertexNum();
+        auto vtxNum = ctxt.getVertexNum();
 
         AT_PRINTF("(%s)\n", path.c_str());
         AT_PRINTF("    %d[vertices]\n", vtxNum);

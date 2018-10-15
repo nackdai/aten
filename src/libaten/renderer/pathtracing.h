@@ -13,6 +13,7 @@ namespace aten
         ~PathTracing() {}
 
         virtual void render(
+            const context& ctxt,
             Destination& dst,
             scene* scene,
             camera* camera) override;
@@ -50,13 +51,18 @@ namespace aten
         };
 
         Path radiance(
+            const context& ctxt,
             sampler* sampler,
             const ray& inRay,
             camera* cam,
             CameraSampleResult& camsample,
-            scene* scene);
+            scene* scene)
+        {
+            return std::move(radiance(ctxt, sampler, m_maxDepth, inRay, cam, camsample, scene));
+        }
 
         Path radiance(
+            const context& ctxt,
             sampler* sampler,
             uint32_t maxDepth,
             const ray& inRay,
@@ -65,6 +71,7 @@ namespace aten
             scene* scene);
 
         bool shade(
+            const context& ctxt,
             sampler* sampler,
             scene* scene,
             camera* cam,

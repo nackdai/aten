@@ -4,6 +4,7 @@
 
 namespace aten {
     bool scene::hitLight(
+        const context& ctxt,
         const Light* light,
         const vec3& lightPos,
         const ray& r,
@@ -11,7 +12,7 @@ namespace aten {
         hitrecord& rec)
     {
         Intersection isect;
-        bool isHit = this->hit(r, t_min, t_max, rec, isect);
+        bool isHit = this->hit(ctxt, r, t_min, t_max, rec, isect);
 
         real distToLight = length(lightPos - r.org);
         real distHitObjToRayOrg = length(rec.p - r.org);
@@ -34,6 +35,7 @@ namespace aten {
     }
 
     Light* scene::sampleLight(
+        const context& ctxt,
         const vec3& org,
         const vec3& nml,
         sampler* sampler,
@@ -49,7 +51,7 @@ namespace aten {
             uint32_t idx = (uint32_t)aten::clamp<real>(r * num, 0, num - 1);
             light = m_lights[idx];
 
-            sampleRes = light->sample(org, nml, sampler);
+            sampleRes = light->sample(ctxt, org, nml, sampler);
             selectPdf = real(1) / num;
         }
         else {
@@ -120,7 +122,8 @@ namespace aten {
 
     void scene::draw(
         aten::hitable::FuncPreDraw func,
-        std::function<bool(aten::hitable*)> funcIfDraw/*= nullptr*/)
+        std::function<bool(aten::hitable*)> funcIfDraw,
+        const context& ctxt) const
     {
         uint32_t triOffset = 0;
 
@@ -128,7 +131,7 @@ namespace aten {
             bool willDraw = funcIfDraw ? funcIfDraw(h) : true;
 
             if (willDraw) {
-                h->draw(func, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
+                h->draw(func, ctxt, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
             }
 
             auto item = h->getHasObject();

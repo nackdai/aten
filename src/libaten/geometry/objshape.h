@@ -7,6 +7,7 @@
 #include "math/mat4.h"
 #include "geometry/face.h"
 #include "visualizer/GeomDataBuffer.h"
+#include "scene/context.h"
 
 namespace AT_NAME
 {
@@ -19,7 +20,7 @@ namespace AT_NAME
         objshape() : param(aten::GeometryType::Polygon) {}
         virtual ~objshape();
 
-        void build();
+        void build(const aten::context& ctxt);
 
         void setMaterial(material* mtrl)
         {
@@ -39,11 +40,14 @@ namespace AT_NAME
 
         void draw(
             aten::hitable::FuncPreDraw func,
+            const aten::context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
             int parentId);
 
-        void draw(AT_NAME::FuncObjectMeshDraw func);
+        void draw(
+            AT_NAME::FuncObjectMeshDraw func,
+            const aten::context& ctxt);
 
         const std::vector<face*>& tris() const
         {

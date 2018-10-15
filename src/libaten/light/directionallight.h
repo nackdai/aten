@@ -24,7 +24,10 @@ namespace AT_NAME {
         virtual ~DirectionalLight() {}
 
     public:
-        virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
+        virtual aten::LightSampleResult sample(
+            const aten::context& ctxt,
+            const aten::vec3& org, 
+            aten::sampler* sampler) const override final
         {
             aten::LightSampleResult result;
             sample(&m_param, org, sampler, &result);

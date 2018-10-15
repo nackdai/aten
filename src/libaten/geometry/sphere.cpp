@@ -21,6 +21,7 @@ namespace AT_NAME
     }
 
     bool sphere::hit(
+        const aten::context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
         aten::Intersection& isect) const
@@ -99,6 +100,7 @@ namespace AT_NAME
     }
 
     void sphere::evalHitResult(
+        const aten::context& ctxt,
         const aten::ray& r, 
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
@@ -107,6 +109,7 @@ namespace AT_NAME
     }
 
     void sphere::evalHitResult(
+        const aten::context& ctxt,
         const aten::ray& r,
         const aten::mat4& mtxL2W,
         aten::hitrecord& rec,
@@ -151,10 +154,11 @@ namespace AT_NAME
     }
 
     void sphere::getSamplePosNormalArea(
+        const aten::context& ctxt,
         aten::hitable::SamplePosNormalPdfResult* result,
         aten::sampler* sampler) const
     {
-        return getSamplePosNormalArea(result, aten::mat4::Identity, sampler);
+        return getSamplePosNormalArea(ctxt, result, aten::mat4::Identity, sampler);
     }
 
     AT_DEVICE_API void sphere::getSamplePosNormalArea(
@@ -166,6 +170,7 @@ namespace AT_NAME
     }
 
     void sphere::getSamplePosNormalArea(
+        const aten::context& ctxt,
         aten::hitable::SamplePosNormalPdfResult* result,
         const aten::mat4& mtxL2W,
         aten::sampler* sampler) const

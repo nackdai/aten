@@ -22,11 +22,13 @@ namespace aten
 
     public:
         virtual void getSamplePosNormalArea(
+            const context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             const mat4& mtxL2W,
             sampler* sampler) const = 0;
 
         virtual void evalHitResult(
+            const context& ctxt,
             const ray& r,
             const mat4& mtxL2W,
             hitrecord& rec,

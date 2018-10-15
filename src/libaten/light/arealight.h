@@ -52,7 +52,10 @@ namespace AT_NAME {
             result->finalColor = param->le;
         }
 
-        virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final;
+        virtual aten::LightSampleResult sample(
+            const aten::context& ctxt,
+            const aten::vec3& org, 
+            aten::sampler* sampler) const override final;
 
         virtual const aten::hitable* getLightObject() const override final
         {
@@ -60,12 +63,13 @@ namespace AT_NAME {
         }
 
         virtual void getSamplePosNormalArea(
+            const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override final
         {
             if (m_obj) {
                 auto obj = getLightObject();
-                return obj->getSamplePosNormalArea(result, sampler);
+                return obj->getSamplePosNormalArea(ctxt, result, sampler);
             }
         }
 

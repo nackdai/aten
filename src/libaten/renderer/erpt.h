@@ -3,6 +3,7 @@
 #include "renderer/pathtracing.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -12,6 +13,7 @@ namespace aten
         ~ERPT() {}
 
         virtual void render(
+            const context& ctxt,
             Destination& dst,
             scene* scene,
             camera* camera) override final;
@@ -25,6 +27,7 @@ namespace aten
         };
 
         Path genPath(
+            const context& ctxt,
             scene* scene,
             sampler* sampler,
             int x, int y,

@@ -14,6 +14,7 @@ namespace aten
 
     public:
         virtual void render(
+            const context& ctxt,
             Destination& dst,
             scene* scene,
             camera* camera) override;
@@ -90,6 +91,7 @@ namespace aten
         };
 
         Result genEyePath(
+            const context& ctxt,
             std::vector<Vertex>& vs,
             int x, int y,
             sampler* sampler,
@@ -97,6 +99,7 @@ namespace aten
             camera* camera) const;
 
         Result genLightPath(
+            const context& ctxt,
             std::vector<Vertex>& vs,
             aten::Light* light,
             sampler* sampler,
@@ -119,7 +122,9 @@ namespace aten
             int numLightVtx) const;
 
         void combine(
-            int x, int y,
+            const context& ctxt,
+            int x, 
+            int y,
             std::vector<Result>& result,
             const std::vector<Vertex>& eye_vs,
             const std::vector<Vertex>& light_vs,

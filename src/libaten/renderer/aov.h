@@ -12,6 +12,7 @@ namespace aten
         virtual ~AOVRenderer() {}
 
         virtual void render(
+            const context& ctxt,
             Destination& dst,
             scene* scene,
             camera* camera) override;
@@ -27,6 +28,7 @@ namespace aten
         };
 
         Path radiance(
+            const context& ctxt,
             const ray& inRay,
             scene* scene,
             sampler* sampler);

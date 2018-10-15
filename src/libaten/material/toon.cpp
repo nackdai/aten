@@ -8,12 +8,18 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler) const
     {
+        // TODO
+#if 0
         auto* light = getTargetLight();
         AT_ASSERT(light);
 
         auto res = light->sample(ray.org, sampler);
         
         return std::move(res.dir);
+#else
+        AT_ASSERT(false);
+        return std::move(aten::vec3(0));
+#endif
     }
 
     aten::vec3 toon::bsdf(

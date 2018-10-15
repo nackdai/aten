@@ -6,7 +6,8 @@
 
 namespace aten {
     void DataCollector::collect(
-        scene& scene,
+        const context& ctxt,
+        const scene& scene,
         std::vector<aten::GeomParameter>& shapeparams,
         std::vector<aten::PrimitiveParamter>& primparams,
         std::vector<aten::LightParameter>& lightparams,
@@ -64,29 +65,17 @@ namespace aten {
             mtrlparms.push_back(m->param());
         }
 
-#if 1
         const auto& faces = aten::face::faces();
 
         for (auto f : faces) {
             primparams.push_back(f->getParam());
         }
-#else
-        for (auto s : shapes) {
-            s->collectTriangles(primparams);
-        }
-#endif
 
-        const auto& vtxs = aten::VertexManager::getVertices();
-#if 0
-        for (auto v : vtxs) {
-            vtxparams.push_back(v);
-        }
-#else
+        const auto& vtxs = ctxt.getVertices();
         std::copy(
             vtxs.begin(),
             vtxs.end(),
             std::back_inserter(vtxparams));
-#endif
     }
 
     void DataCollector::collectTriangles(

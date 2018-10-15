@@ -18,6 +18,7 @@ static aten::PinholeCamera g_camera;
 #endif
 
 static aten::AcceleratedScene<aten::sbvh> g_scene;
+static aten::context g_ctxt;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
@@ -104,7 +105,7 @@ void display(aten::window* wnd)
     timer.begin();
 
     // Trace rays.
-    g_tracer.render(dst, &g_scene, &g_camera);
+    g_tracer.render(g_ctxt, dst, &g_scene, &g_camera);
 
     auto elapsed = timer.end();
 
@@ -250,9 +251,9 @@ int main(int argc, char* argv[])
         WIDTH, HEIGHT);
 #endif
 
-    Scene::makeScene(&g_scene);
+    Scene::makeScene(g_ctxt, &g_scene);
 
-    g_scene.build();
+    g_scene.build(g_ctxt);
     //g_scene.getAccel()->computeVoxelLodErrorMetric(HEIGHT, fov, 4);
 
     //g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);

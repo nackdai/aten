@@ -22,6 +22,8 @@ static aten::RasterizeRenderer g_rasterizer;
 
 static aten::object* g_obj = nullptr;
 
+static aten::context g_ctxt;
+
 static std::vector<std::vector<aten::face*>> g_triangles;
 static std::vector<aten::material*> g_mtrls;
 
@@ -80,7 +82,7 @@ void onRun(aten::window* window)
         g_isUpdateBuffer = false;
     }
     else {
-        g_rasterizer.draw(g_obj, &g_camera, g_isWireFrame);
+        g_rasterizer.drawObject(g_ctxt, *g_obj, &g_camera, g_isWireFrame);
     }
 
     {
@@ -116,7 +118,7 @@ void onRun(aten::window* window)
             && !g_writer.isRunningThread();
 
         if (canRunThread) {
-            auto& vtxs = aten::VertexManager::getVertices();
+            auto& vtxs = g_ctxt.getVertices();
 
             if (ImGui::Button("Make LOD")) {
                 g_lodmaker.runOnThread(
@@ -300,7 +302,7 @@ aten::object* loadObj(const Options& opt)
 {
     std::vector<aten::object*> objs;
 
-    aten::ObjLoader::load(objs, opt.input);
+    aten::ObjLoader::load(objs, opt.input, g_ctxt);
 
     // NOTE
     // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
@@ -347,10 +349,10 @@ int main(int argc, char* argv[])
 
     aten::texture::initAllAsGLTexture();
 
-    g_obj->buildForRasterizeRendering();
+    g_obj->buildForRasterizeRendering(g_ctxt);
 
     {
-        auto& vtxs = aten::VertexManager::getVertices();
+        auto& vtxs = g_ctxt.getVertices();
 
         auto stride = sizeof(aten::vertex);
         auto vtxNum = (uint32_t)vtxs.size();

@@ -32,9 +32,10 @@ namespace aten {
         return m_shader.init(width, height, pathVS, pathGS, pathFS);
     }
 
-    void RasterizeRenderer::draw(
+    void RasterizeRenderer::drawScene(
         int frame,
-        scene* scene,
+        context& ctxt,
+        const scene* scene,
         const camera* cam,
         FBO* fbo/*= nullptr*/,
         shader* exShader/*= nullptr*/)
@@ -123,7 +124,7 @@ namespace aten {
             CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
         }
         
-        VertexManager::build();
+        ctxt.build();
 
         // For object (which means "not" deformable).
         scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
@@ -141,7 +142,7 @@ namespace aten {
         },
             [](hitable* target) {
                 return !target->isDeformable();
-        });
+        }, ctxt);
 
         // For deformable.
         if (exShader) {
@@ -168,7 +169,7 @@ namespace aten {
             },
                 [](hitable* target) {
                     return target->isDeformable();
-            });
+            }, ctxt);
         }
 
         if (fbo) {
@@ -308,8 +309,9 @@ namespace aten {
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
     }
 
-    void RasterizeRenderer::draw(
-        object* obj, 
+    void RasterizeRenderer::drawObject(
+        context& ctxt,
+        const object& obj, 
         const camera* cam,
         bool isWireFrame,
         const mat4& mtxL2W,
@@ -374,7 +376,7 @@ namespace aten {
         CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
         if (!s_isInitGlobalVB) {
-            VertexManager::build();
+            ctxt.build();
             s_isInitGlobalVB = true;
         }
 
@@ -382,7 +384,7 @@ namespace aten {
         auto hColor = m_shader.getHandle("color");
         auto hMtrlId = m_shader.getHandle("materialId");
 
-        obj->draw([&](const aten::vec3& color, const aten::texture* albedo, int mtrlid) {
+        obj.draw([&](const aten::vec3& color, const aten::texture* albedo, int mtrlid) {
             if (albedo) {
                 albedo->bindAsGLTexture(0, &m_shader);
                 CALL_GL_API(::glUniform1i(hHasAlbedo, true));
@@ -400,7 +402,7 @@ namespace aten {
             if (funcSetUniform) {
                 funcSetUniform(m_shader, color, albedo, mtrlid);
             }
-        });
+        }, ctxt);
 
         // –ß‚·.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));

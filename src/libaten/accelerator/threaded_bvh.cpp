@@ -15,26 +15,28 @@
 namespace aten
 {
     void ThreadedBVH::build(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
     {
         if (m_isNested) {
-            buildAsNestedTree(list, num, bbox);
+            buildAsNestedTree(ctxt, list, num, bbox);
         }
         else {
-            buildAsTopLayerTree(list, num, bbox);
+            buildAsTopLayerTree(ctxt, list, num, bbox);
         }
     }
 
     void ThreadedBVH::buildAsNestedTree(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
     {
         AT_ASSERT(m_isNested);
 
-        m_bvh.build(list, num, bbox);
+        m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
 
@@ -63,13 +65,14 @@ namespace aten
     }
 
     void ThreadedBVH::buildAsTopLayerTree(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
     {
         AT_ASSERT(!m_isNested);
 
-        m_bvh.build(list, num, bbox);
+        m_bvh.build(ctxt, list, num, bbox);
 
         setBoundingBox(m_bvh.getBoundingbox());
 
@@ -332,14 +335,16 @@ namespace aten
     }
 
     bool ThreadedBVH::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
     {
-        return hit(0, m_listThreadedBvhNode, r, t_min, t_max, isect);
+        return hit(ctxt, 0, m_listThreadedBvhNode, r, t_min, t_max, isect);
     }
 
     bool ThreadedBVH::hit(
+        const context& ctxt,
         int exid,
         const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
         const ray& r,
@@ -393,6 +398,7 @@ namespace aten
                     exid = AT_BVHNODE_MAIN_EXID(exid);
 
                     isHit = hit(
+                        ctxt,
                         exid,
                         listThreadedBvhNode,
                         transformedRay,
@@ -406,7 +412,7 @@ namespace aten
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
                     auto prim = (hitable*)prims[(int)node->primid];
-                    isHit = prim->hit(r, t_min, t_max, isectTmp);
+                    isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         // Set dummy to return if ray hit.
                         isectTmp.objid = s ? s->id() : 1;
@@ -414,7 +420,7 @@ namespace aten
                 }
                 else {
                     // Hit test for a shape.
-                    isHit = s->hit(r, t_min, t_max, isectTmp);
+                    isHit = s->hit(ctxt, r, t_min, t_max, isectTmp);
                 }
 
                 if (isHit) {

@@ -1,7 +1,10 @@
 #include "light/arealight.h"
 
 namespace AT_NAME {
-    aten::LightSampleResult AreaLight::sample(const aten::vec3& org, aten::sampler* sampler) const
+    aten::LightSampleResult AreaLight::sample(
+        const aten::context& ctxt,
+        const aten::vec3& org, 
+        aten::sampler* sampler) const
     {
         bool isHit = false;
         auto obj = getLightObject();
@@ -16,7 +19,7 @@ namespace AT_NAME {
             if (sampler) {
                 aten::hitable::SamplePosNormalPdfResult result;
 
-                obj->getSamplePosNormalArea(&result, sampler);
+                obj->getSamplePosNormalArea(ctxt, &result, sampler);
 
                 auto pos = result.pos;
                 auto dir = pos - org;
@@ -31,7 +34,7 @@ namespace AT_NAME {
                     isect.b = result.b;
                 }
                 else {
-                    obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, isect);
+                    obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
                 }
             }
             else {
@@ -40,10 +43,10 @@ namespace AT_NAME {
                 auto dir = pos - org;
                 r = aten::ray(org, dir);
 
-                obj->hit(r, AT_MATH_EPSILON, AT_MATH_INF, isect);
+                obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
             }
 
-            aten::hitable::evalHitResultForAreaLight(obj, r, rec, isect);
+            aten::hitable::evalHitResultForAreaLight(ctxt, obj, r, rec, isect);
 
             sample(
                 &rec,

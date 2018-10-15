@@ -33,6 +33,7 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
+static aten::context g_ctxt;
 
 static idaten::SVGFPathTracing g_tracer;
 static aten::visualizer* g_visualizer;
@@ -99,6 +100,7 @@ void update()
             std::vector<aten::vertex> vtxparams;
 
             aten::DataCollector::collect(
+                g_ctxt,
                 g_scene,
                 shapeparams,
                 primparams,
@@ -182,8 +184,9 @@ void onRun(aten::window* window)
 
     aten::GLProfiler::begin();
 
-    g_rasterizer.draw(
+    g_rasterizer.drawScene(
         g_tracer.frame(),
+        g_ctxt,
         &g_scene,
         &g_camera,
         &g_fbo);
@@ -515,8 +518,8 @@ int main()
         WIDTH, HEIGHT);
 #endif
 
-    Scene::makeScene(&g_scene);
-    g_scene.build();
+    Scene::makeScene(g_ctxt, &g_scene);
+    g_scene.build(g_ctxt);
 
 #ifndef TEST_FOR_GL_RENDER
 
@@ -541,6 +544,7 @@ int main()
         std::vector<aten::vertex> vtxparams;
 
         aten::DataCollector::collect(
+            g_ctxt,
             g_scene,
             shapeparams,
             primparams,
@@ -606,7 +610,7 @@ int main()
 
     g_rasterizer.release();
     g_rasterizerAABB.release();
-    aten::VertexManager::release();
+    g_ctxt.release();
 
     aten::window::terminate();
 }

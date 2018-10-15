@@ -22,6 +22,7 @@ namespace AT_NAME
 
     public:
         virtual bool hit(
+            const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
             aten::Intersection& isect) const override;
@@ -36,6 +37,7 @@ namespace AT_NAME
             aten::Intersection* isect);
 
         virtual void evalHitResult(
+            const aten::context& ctxt,
             const aten::ray& r, 
             aten::hitrecord& rec,
             const aten::Intersection& isect) const;
@@ -48,14 +50,18 @@ namespace AT_NAME
             const aten::Intersection* isect);
 
         virtual void getSamplePosNormalArea(
+            const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override;
 
         virtual int geomid() const override;
 
-        void build(int mtrlid, int geomid);
+        void build(
+            const aten::context& ctxt,
+            int mtrlid, 
+            int geomid);
 
-        aten::aabb computeAABB() const;
+        aten::aabb computeAABB(const aten::context& ctxt) const;
 
         const aten::PrimitiveParamter& getParam() const
         {

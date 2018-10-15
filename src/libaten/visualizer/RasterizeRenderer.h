@@ -7,10 +7,11 @@
 #include "visualizer/GeomDataBuffer.h"
 #include "math/mat4.h"
 #include "geometry/object.h"
+#include "scene/context.h"
+#include "scene/scene.h"
+#include "camera/camera.h"
 
 namespace aten {
-    class scene;
-    class camera;
     class accelerator;
 
     class RasterizeRenderer {
@@ -39,9 +40,10 @@ namespace aten {
             m_ib.clear();
         }
 
-        void draw(
+        void drawScene(
             int frame,
-            scene* scene,
+            context& ctxt,
+            const scene* scene,
             const camera* cam,
             FBO* fbo = nullptr,
             shader* exShader = nullptr);
@@ -56,8 +58,9 @@ namespace aten {
 
         using FuncSetUniform = std::function<void(shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)>;
 
-        void draw(
-            object* obj, 
+        void drawObject(
+            context& ctxt,
+            const object& obj, 
             const camera* cam,
             bool isWireFrame,
             const mat4& mtxL2W = mat4::Identity,

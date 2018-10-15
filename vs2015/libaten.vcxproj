@@ -239,7 +239,6 @@
     <ClInclude Include="..\3rdparty\imgui\imgui_internal.h" />
     <ClInclude Include="..\src\libaten\accelerator\accelerator.h" />
     <ClInclude Include="..\src\libaten\accelerator\bvh.h" />
-    <ClInclude Include="..\src\libaten\accelerator\CullingFrusta.h" />
     <ClInclude Include="..\src\libaten\accelerator\GpuPayloadDefs.h" />
     <ClInclude Include="..\src\libaten\accelerator\qbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\sbvh.h" />
@@ -346,7 +345,6 @@
     <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
     <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
-    <ClInclude Include="..\src\libaten\renderer\sorted_pathtracing.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
     <ClInclude Include="..\src\libaten\sampler\halton.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
@@ -355,6 +353,7 @@
     <ClInclude Include="..\src\libaten\sampler\sobolproxy.h" />
     <ClInclude Include="..\src\libaten\sampler\wanghash.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
+    <ClInclude Include="..\src\libaten\scene\context.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\instance.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
@@ -378,15 +377,12 @@
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
-    <ClCompile Include="..\src\libaten\accelerator\bvh_frustum.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp" />
-    <ClCompile Include="..\src\libaten\accelerator\CullingFrusta.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh_voxel.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp" />
-    <ClCompile Include="..\src\libaten\accelerator\ThreadedBvhFrustum.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\threaded_bvh.cpp" />
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp" />
     <ClCompile Include="..\src\libaten\camera\equirect.cpp" />
@@ -472,10 +468,10 @@
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\raytracing.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\sorted_pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
+    <ClCompile Include="..\src\libaten\scene\context.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\texture\texture.cpp" />

@@ -8,6 +8,7 @@
 #include "geometry/face.h"
 #include "geometry/objshape.h"
 #include "geometry/transformable.h"
+#include "scene/context.h"
 
 namespace AT_NAME
 {
@@ -20,11 +21,13 @@ namespace AT_NAME
 
     public:
         virtual bool hit(
+            const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
             aten::Intersection& isect) const override final;
 
         virtual void evalHitResult(
+            const aten::context& ctxt,
             const aten::ray& r,
             const aten::mat4& mtxL2W,
             aten::hitrecord& rec,
@@ -42,22 +45,27 @@ namespace AT_NAME
 
         virtual void draw(
             aten::hitable::FuncPreDraw func,
+            const aten::context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
             int parentId,
             uint32_t triOffset) override final;
 
-        void draw(AT_NAME::FuncObjectMeshDraw func);
+        void draw(
+            AT_NAME::FuncObjectMeshDraw func,
+            const aten::context& ctxt) const;
 
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtxL2W) override final;
 
-        bool exportInternalAccelTree(const char* path);
+        bool exportInternalAccelTree(
+            const aten::context& ctxt,
+            const char* path);
 
         bool importInternalAccelTree(const char* path, int offsetTriIdx = 0);
 
-        void buildForRasterizeRendering();
+        void buildForRasterizeRendering(const aten::context& ctxt);
 
         void gatherTrianglesAndMaterials(
             std::vector<std::vector<AT_NAME::face*>>& tris,
@@ -70,9 +78,10 @@ namespace AT_NAME
             return m_triangles;
         }
 
-        void build();
+        void build(const aten::context& ctxt);
 
         virtual void getSamplePosNormalArea(
+            const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             const aten::mat4& mtxL2W, 
             aten::sampler* sampler) const override final;
@@ -80,6 +89,12 @@ namespace AT_NAME
         void appendShape(objshape* shape)
         {
             shapes.push_back(shape);
+        }
+
+        objshape* getShape(uint32_t idx)
+        {
+            AT_ASSERT(idx < shapes.size());
+            return shapes[idx];
         }
 
     private:

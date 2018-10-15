@@ -142,6 +142,7 @@ namespace aten
     /////////////////////////////////////////////////////////////////
 
     PSSMLT::Path PSSMLT::genPath(
+        const context& ctxt,
         scene* scene,
         sampler* sampler,
         int x, int y,
@@ -170,7 +171,7 @@ namespace aten
 
         auto camsample = camera->sample(u, v, sampler);
 
-        auto path = radiance(sampler, camsample.r, camera, camsample, scene);
+        auto path = radiance(ctxt, sampler, camsample.r, camera, camsample, scene);
 
         auto pdfOnImageSensor = camsample.pdfOnImageSensor;
         auto pdfOnLens = camsample.pdfOnLens;
@@ -191,6 +192,7 @@ namespace aten
     }
 
     void PSSMLT::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -255,7 +257,7 @@ namespace aten
                 mlt.init();
 
                 // gen path.
-                seedPaths[i] = genPath(scene, &mlt, -1, -1, width, height, camera);
+                seedPaths[i] = genPath(ctxt, scene, &mlt, -1, -1, width, height, camera);
                 const auto& sample = seedPaths[i];
 
                 // Ç‹Ç∏ÇÕê∂ê¨Ç∑ÇÈÇæÇØÇ»ÇÃÇ≈ÅAÇ∑Ç◊ÇƒacceptÇ∑ÇÈ.
@@ -300,7 +302,7 @@ namespace aten
                 mlt.init();
 
                 // gen new path
-                Path newPath = genPath(scene, &mlt, -1, -1, width, height, camera);
+                Path newPath = genPath(ctxt, scene, &mlt, -1, -1, width, height, camera);
 
                 real I = color::luminance(newPath.contrib);
                 real oldI = color::luminance(oldPath.contrib);

@@ -86,6 +86,7 @@ namespace aten {
     }
 
     bool bvhnode::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
@@ -101,7 +102,7 @@ namespace aten {
             for (int i = 0; i < m_childrenNum; i++) {
                 Intersection isectTmp;
                 isectTmp.t = AT_MATH_INF;
-                auto res = m_children[i]->hit(r, t_min, t_max, isectTmp);
+                auto res = m_children[i]->hit(ctxt, r, t_min, t_max, isectTmp);
                 
                 if (res) {
                     if (isectTmp.t < isect.t) {
@@ -116,7 +117,7 @@ namespace aten {
             return isHit;
         }
         else if (m_item) {
-            return m_item->hit(r, t_min, t_max, isect);
+            return m_item->hit(ctxt, r, t_min, t_max, isect);
         }
 #endif
         else {
@@ -124,7 +125,7 @@ namespace aten {
             auto isHit = bbox.hit(r, t_min, t_max);
 
             if (isHit) {
-                isHit = bvh::onHit(this, r, t_min, t_max, isect);
+                isHit = bvh::onHit(ctxt, this, r, t_min, t_max, isect);
             }
 
             return isHit;
@@ -174,6 +175,7 @@ namespace aten {
     }
 
     void bvh::build(
+        const context& ctxt,
         hitable** list,
         uint32_t num,
         aabb* bbox)
@@ -191,15 +193,17 @@ namespace aten {
     }
 
     bool bvh::hit(
+        const context& ctxt,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
     {
-        bool isHit = onHit(m_root, r, t_min, t_max, isect);
+        bool isHit = onHit(ctxt, m_root, r, t_min, t_max, isect);
         return isHit;
     }
 
     bool bvh::onHit(
+        const context& ctxt,
         const bvhnode* root,
         const ray& r,
         real t_min, real t_max,
@@ -223,7 +227,7 @@ namespace aten {
 
             if (node->isLeaf()) {
                 Intersection isectTmp;
-                if (node->hit(r, t_min, t_max, isectTmp)) {
+                if (node->hit(ctxt, r, t_min, t_max, isectTmp)) {
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
                         t_max = isect.t;

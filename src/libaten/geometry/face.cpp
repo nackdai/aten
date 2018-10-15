@@ -27,13 +27,14 @@ namespace AT_NAME
     }
 
     bool face::hit(
+        const context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
         aten::Intersection& isect) const
     {
-        const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
-        const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param.idx[0]);
+        const auto& v1 = ctxt.getVertex(param.idx[1]);
+        const auto& v2 = ctxt.getVertex(param.idx[2]);
 
         bool isHit = hit(
             &param, 
@@ -82,13 +83,14 @@ namespace AT_NAME
     }
 
     void face::evalHitResult(
+        const context& ctxt,
         const aten::ray& r, 
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
-        const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
-        const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param.idx[0]);
+        const auto& v1 = ctxt.getVertex(param.idx[1]);
+        const auto& v2 = ctxt.getVertex(param.idx[2]);
 
         evalHitResult(v0, v1, v2, &rec, &isect);
 
@@ -129,11 +131,14 @@ namespace AT_NAME
         rec->v = uv.y;
     }
 
-    void face::build(int mtrlid, int geomid)
+    void face::build(
+        const context& ctxt,
+        int mtrlid, 
+        int geomid)
     {
-        const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
-        const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param.idx[0]);
+        const auto& v1 = ctxt.getVertex(param.idx[1]);
+        const auto& v2 = ctxt.getVertex(param.idx[2]);
 
         aten::vec3 vmax = aten::vec3(
             std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
@@ -157,6 +162,7 @@ namespace AT_NAME
     }
 
     void face::getSamplePosNormalArea(
+        const context& ctxt,
         aten::hitable::SamplePosNormalPdfResult* result,
         aten::sampler* sampler) const
     {
@@ -179,9 +185,9 @@ namespace AT_NAME
         real b = aten::sqrt(r0) * r1;
 #endif
 
-        const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
-        const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param.idx[0]);
+        const auto& v1 = ctxt.getVertex(param.idx[1]);
+        const auto& v2 = ctxt.getVertex(param.idx[2]);
 
         // èdêSç¿ïWån(barycentric coordinates).
         // v0äÓèÄ.
@@ -226,11 +232,11 @@ namespace AT_NAME
         return idx;
     }
 
-    aabb face::computeAABB() const
+    aabb face::computeAABB(const context& ctxt) const
     {
-        const auto& v0 = aten::VertexManager::getVertex(param.idx[0]);
-        const auto& v1 = aten::VertexManager::getVertex(param.idx[1]);
-        const auto& v2 = aten::VertexManager::getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param.idx[0]);
+        const auto& v1 = ctxt.getVertex(param.idx[1]);
+        const auto& v2 = ctxt.getVertex(param.idx[2]);
 
         auto vmin = aten::min(aten::min(v0.pos, v1.pos), v2.pos);
         auto vmax = aten::max(aten::max(v0.pos, v1.pos), v2.pos);

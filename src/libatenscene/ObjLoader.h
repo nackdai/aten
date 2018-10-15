@@ -4,8 +4,6 @@
 
 namespace aten
 {
-    class object;
-
     class ObjLoader {
     private:
         ObjLoader() {}
@@ -16,20 +14,25 @@ namespace aten
 
         static object* load(
             const std::string& path,
+            context& ctxt,
             bool needComputeNormalOntime = false);
         static object* load(
             const std::string& tag, 
             const std::string& path,
+            context& ctxt,
             bool needComputeNormalOntime = false);
 
         static void load(
             std::vector<object*>& objs,
             const std::string& path,
+            context& ctxt,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);
         static void load(
             std::vector<object*>& objs,
-            const std::string& tag, const std::string& path,
+            const std::string& tag, 
+            const std::string& path,
+            context& ctxt,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);
     };

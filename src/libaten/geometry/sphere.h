@@ -5,6 +5,7 @@
 #include "geometry/transformable.h"
 #include "geometry/geombase.h"
 #include "geometry/geomparam.h"
+#include "scene/context.h"
 
 namespace AT_NAME
 {
@@ -19,6 +20,7 @@ namespace AT_NAME
 
     public:
         virtual bool hit(
+            const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
             aten::Intersection& isect) const override final;
@@ -30,6 +32,7 @@ namespace AT_NAME
             aten::Intersection* isect);
 
         virtual void evalHitResult(
+            const aten::context& ctxt,
             const aten::ray& r, 
             aten::hitrecord& rec,
             const aten::Intersection& isect) const override final;
@@ -58,6 +61,7 @@ namespace AT_NAME
         }
 
         virtual void getSamplePosNormalArea(
+            const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override final;
 
@@ -72,12 +76,14 @@ namespace AT_NAME
         }
 
         virtual void evalHitResult(
+            const aten::context& ctxt,
             const aten::ray& r,
             const aten::mat4& mtxL2W,
             aten::hitrecord& rec,
             const aten::Intersection& isect) const override final;
 
         virtual void getSamplePosNormalArea(
+            const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;

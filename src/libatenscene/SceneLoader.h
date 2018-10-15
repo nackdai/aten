@@ -29,6 +29,8 @@ namespace aten
             std::vector<ProcInfo> postprocs;
         };
 
-        static SceneInfo load(const std::string& path);
+        static SceneInfo load(
+            const std::string& path,
+            context& ctxt);
     };
 }

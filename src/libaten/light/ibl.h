@@ -65,13 +65,17 @@ namespace AT_NAME {
             return m_avgIllum;
         }
 
-        virtual aten::LightSampleResult sample(const aten::vec3& org, aten::sampler* sampler) const override final
+        virtual aten::LightSampleResult sample(
+            const aten::context& ctxt,
+            const aten::vec3& org, 
+            aten::sampler* sampler) const override final
         {
             AT_ASSERT(false);
             return std::move(aten::LightSampleResult());
         }
 
         virtual aten::LightSampleResult sample(
+            const aten::context& ctxt,
             const aten::vec3& org,
             const aten::vec3& nml,
             aten::sampler* sampler) const override final;

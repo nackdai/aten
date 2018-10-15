@@ -21,16 +21,7 @@ namespace aten
     }
 
     DirectLightRenderer::Path DirectLightRenderer::radiance(
-        sampler* sampler,
-        const ray& inRay,
-        camera* cam,
-        CameraSampleResult& camsample,
-        scene* scene)
-    {
-        return radiance(sampler, m_maxDepth, inRay, cam, camsample, scene);
-    }
-
-    DirectLightRenderer::Path DirectLightRenderer::radiance(
+        const context& ctxt,
         sampler* sampler,
         uint32_t maxDepth,
         const ray& inRay,
@@ -50,8 +41,8 @@ namespace aten
             bool willContinue = true;
             Intersection isect;
 
-            if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
-                willContinue = shade(sampler, scene, cam, camsample, depth, path);
+            if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
+                willContinue = shade(ctxt, sampler, scene, cam, camsample, depth, path);
             }
             else {
                 shadeMiss(scene, depth, path);
@@ -69,6 +60,7 @@ namespace aten
     }
 
     bool DirectLightRenderer::shade(
+        const context& ctxt,
         sampler* sampler,
         scene* scene,
         camera* cam,
@@ -155,7 +147,7 @@ namespace aten
             for (int i = 0; i < lightNum; i++) {
                 auto light = scene->getLight(i);
 
-                auto sampleres = light->sample(path.rec.p, sampler);
+                auto sampleres = light->sample(ctxt, path.rec.p, sampler);
 
                 const vec3& posLight = sampleres.pos;
                 const vec3& nmlLight = sampleres.nml;
@@ -171,7 +163,7 @@ namespace aten
 
                 hitrecord tmpRec;
 
-                if (scene->hitLight(light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                     // Shadow ray hits the light.
                     auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -220,7 +212,7 @@ namespace aten
 
                         aten::Intersection tmpIsect;
 
-                        if (scene->hit(nextRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec, tmpIsect)) {
+                        if (scene->hit(ctxt, nextRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec, tmpIsect)) {
                             auto tmpmtrl = material::getMaterial(tmpRec.mtrlid);
 
                             // Implicit conection to light.
@@ -284,6 +276,7 @@ namespace aten
     }
 
     void DirectLightRenderer::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -336,7 +329,9 @@ namespace aten
                         auto ray = camsample.r;
 
                         auto path = radiance(
+                            ctxt,
                             &rnd,
+                            m_maxDepth,
                             ray,
                             camera,
                             camsample,

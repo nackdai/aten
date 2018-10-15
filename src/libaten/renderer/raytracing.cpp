@@ -5,6 +5,7 @@
 namespace aten
 {
     vec3 RayTracing::radiance(
+        const context& ctxt,
         const ray& inRay,
         scene* scene)
     {
@@ -19,7 +20,7 @@ namespace aten
             hitrecord rec;
             Intersection isect;
 
-            if (scene->hit(ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
+            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
                 auto mtrl = material::getMaterial(rec.mtrlid);
 
                 if (mtrl->isEmissive()) {
@@ -45,7 +46,7 @@ namespace aten
                 }
                 else if (mtrl->isNPR()) {
                     // Non-Photo-Real.
-                    contribution = shadeNPR(mtrl, rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
+                    contribution = shadeNPR(ctxt, mtrl, rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
                     return std::move(contribution);
                 }
                 else {
@@ -58,7 +59,7 @@ namespace aten
                             continue;
                         }
 
-                        auto sampleres = light->sample(rec.p, nullptr);
+                        auto sampleres = light->sample(ctxt, rec.p, nullptr);
 
                         vec3 dirToLight = sampleres.dir;
                         auto len = length(dirToLight);
@@ -73,7 +74,7 @@ namespace aten
 
                         hitrecord tmpRec;
 
-                        if (scene->hitLight(light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                        if (scene->hitLight(ctxt, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                             auto lightColor = sampleres.finalColor;
 
                             if (light->isInfinite()) {
@@ -118,6 +119,7 @@ namespace aten
     }
 
     void RayTracing::render(
+        const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
@@ -150,7 +152,7 @@ namespace aten
 
                     auto camsample = camera->sample(u, v, nullptr);
 
-                    auto col = radiance(camsample.r, scene);
+                    auto col = radiance(ctxt, camsample.r, scene);
 
                     dst.buffer->put(x, y, vec4(col, 1));
                 }

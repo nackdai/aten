@@ -26,6 +26,14 @@ namespace AT_NAME
             m_param.baseColor = albedo;
         }
 
+        // TODO
+        // Voxelレンダリング用にダミー...
+        lambert(const aten::vec3& albedo, bool local)
+            : material(aten::MaterialType::Lambert, MaterialAttributeLambert, local)
+        {
+            m_param.baseColor = albedo;
+        }
+
         virtual ~lambert() {}
 
     public:

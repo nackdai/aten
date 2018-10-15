@@ -506,6 +506,9 @@
     <ClInclude Include="..\src\libaten\scene\context.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\datalist.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

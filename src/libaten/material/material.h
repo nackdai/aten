@@ -6,6 +6,7 @@
 #include "texture/texture.h"
 #include "misc/value.h"
 #include "math/ray.h"
+#include "misc/datalist.h"
 
 #include "material/sample_texture.h"
 
@@ -248,13 +249,10 @@ namespace AT_NAME
     class material {
         friend class LayeredBSDF;
 
-        static std::vector<material*> g_materials;
-
     protected:
         material(
             aten::MaterialType type, 
-            const aten::MaterialAttribute& attrib,
-            bool local = false);
+            const aten::MaterialAttribute& attrib);
 
         material(
             aten::MaterialType type,
@@ -262,14 +260,12 @@ namespace AT_NAME
             const aten::vec3& clr,
             real ior = 1,
             aten::texture* albedoMap = nullptr,
-            aten::texture* normalMap = nullptr,
-            bool local = false);
+            aten::texture* normalMap = nullptr);
 
         material(
             aten::MaterialType type, 
             const aten::MaterialAttribute& attrib, 
-            aten::Values& val,
-            bool local = false);
+            aten::Values& val);
 
     public:
         virtual ~material();
@@ -487,6 +483,11 @@ namespace AT_NAME
             return m_name;
         }
 
+        aten::DataList<aten::material>::ListItem& getListItem()
+        {
+            return m_listItem;
+        }
+
         virtual bool edit(aten::IMaterialParamEditor* editor)
         {
             //AT_ASSERT(false);
@@ -499,34 +500,20 @@ namespace AT_NAME
             return std::move(ret);
         }
 
-        static uint32_t getMaterialNum();
-        static material* getMaterial(uint32_t idx);
-
-        // This is very dangerous, be very careful to use...
-        static bool deleteMaterial(material* mtrl, bool needDelete = false);
-
-        static void clearMaterialList();
-
-        // TODO
-        // マテリアルにIDを持たせているので、この関数は不要.
-        static int findMaterialIdx(material* mtrl);
-
-        static int findMaterialIdxByName(const char* name);
-
-        static const std::vector<material*>& getMaterials();
-
         static const char* getMaterialTypeName(aten::MaterialType type);
 
         static bool checkDefaultMaterialName(const std::string& name);
 
     private:
-        static int initMaterial(material* mtrl, bool local);
+        static void resetIdWhenAnyMaterialLeave(aten::material* mtrl);
 
     protected:
-        int m_id{ 0 };
+        int m_id{ -1 };
 
         aten::MaterialParameter m_param;
 
+        aten::DataList<aten::material>::ListItem m_listItem;
+        
         // For debug.
         std::string m_name;
     };

@@ -4,8 +4,6 @@
 
 namespace AT_NAME
 {
-    std::vector<material*> material::g_materials;
-
     static const char* g_mtrlTypeNames[] = {
         "emissive",
         "lambert",
@@ -24,79 +22,6 @@ namespace AT_NAME
         "layer",
     };
     AT_STATICASSERT(AT_COUNTOF(g_mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
-
-    uint32_t material::getMaterialNum()
-    {
-        return (uint32_t)g_materials.size();
-    }
-
-    material* material::getMaterial(uint32_t idx)
-    {
-        if (idx < g_materials.size()) {
-            return g_materials[idx];
-        }
-        return nullptr;
-    }
-
-    bool material::deleteMaterial(material* mtrl, bool needDelete/*= false*/)
-    {
-        auto found = std::find(g_materials.begin(), g_materials.end(), mtrl);
-        if (found != g_materials.end()) {
-            g_materials.erase(found);
-
-            // ID‚ÌU‚è’¼‚µ...
-            for (int i = 0; i < g_materials.size(); i++) {
-                g_materials[i]->m_id = i;
-            }
-
-            if (needDelete) {
-                delete mtrl;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    void material::clearMaterialList()
-    {
-        g_materials.clear();
-    }
-
-    int material::findMaterialIdx(material* mtrl)
-    {
-        auto found = std::find(g_materials.begin(), g_materials.end(), mtrl);
-        if (found != g_materials.end()) {
-            auto id = std::distance(g_materials.begin(), found);
-            AT_ASSERT(mtrl == g_materials[id]);
-            return id;
-        }
-        return -1;
-    }
-
-    int material::findMaterialIdxByName(const char* name)
-    {
-        std::string strname(name);
-
-        auto found = std::find_if(
-            g_materials.begin(), g_materials.end(),
-            [&](const material* mtrl) {
-            return mtrl->nameString() == strname;
-        });
-
-        if (found != g_materials.end()) {
-            const auto* mtrl = *found;
-            return mtrl->m_id;
-        }
-
-        return -1;
-    }
-
-    const std::vector<material*>& material::getMaterials()
-    {
-        return g_materials;
-    }
 
     const char* material::getMaterialTypeName(aten::MaterialType type)
     {
@@ -118,24 +43,17 @@ namespace AT_NAME
         return false;
     }
 
-    int material::initMaterial(material* mtrl, bool local)
+    void material::resetIdWhenAnyMaterialLeave(aten::material* mtrl)
     {
-        int id = -1;
-        if (!local) {
-            id = g_materials.size();
-            g_materials.push_back(mtrl);
-        }
-
-        return id;
+        mtrl->m_id = mtrl->m_listItem.currentIndex();
     }
 
     material::material(
         aten::MaterialType type, 
-        const aten::MaterialAttribute& attrib,
-        bool local/*= false*/)
+        const aten::MaterialAttribute& attrib)
         : m_param(type, attrib)
     {
-        m_id = initMaterial(this, local);
+        m_listItem.init(this, resetIdWhenAnyMaterialLeave);
     }
 
     material::material(
@@ -144,11 +62,10 @@ namespace AT_NAME
         const aten::vec3& clr,
         real ior/*= 1*/,
         aten::texture* albedoMap/*= nullptr*/,
-        aten::texture* normalMap/*= nullptr*/,
-        bool local/*= false*/)
-        : m_param(type, attrib)
+        aten::texture* normalMap/*= nullptr*/)
+        : material(type, attrib)
     {
-        m_id = initMaterial(this, local);
+        m_listItem.init(this, resetIdWhenAnyMaterialLeave);
 
         m_param.baseColor = clr;
         m_param.ior = ior;
@@ -159,11 +76,10 @@ namespace AT_NAME
     material::material(
         aten::MaterialType type, 
         const aten::MaterialAttribute& attrib, 
-        aten::Values& val,
-        bool local/*= false*/)
-        : m_param(type, attrib)
+        aten::Values& val)
+        : material(type, attrib)
     {
-        m_id = initMaterial(this, local);
+        m_listItem.init(this, resetIdWhenAnyMaterialLeave);
 
         m_param.baseColor = val.get("baseColor", m_param.baseColor);
         m_param.ior = val.get("ior", m_param.ior);
@@ -186,7 +102,7 @@ namespace AT_NAME
 
     material::~material()
     {
-        deleteMaterial(this);
+        m_listItem.leave();
     }
 
     NPRMaterial::NPRMaterial(

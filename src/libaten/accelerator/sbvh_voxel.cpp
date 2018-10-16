@@ -105,9 +105,7 @@ namespace aten
     {
         const auto& faces = aten::face::faces();
         const auto& vertices = ctxt.getVertices();
-        const auto& mtrls = aten::material::getMaterials();
 
-#if 1
         for (auto it = m_treelets.begin(); it != m_treelets.end(); it++) {
             auto& treelet = it->second;
 
@@ -147,64 +145,5 @@ namespace aten
 
             treelet.mtrlid = mtrlCandidateId;
         }
-#else
-        for (uint32_t i = 0; i < (uint32_t)m_treelets.size(); i++) {
-            auto& treelet = m_treelets[i];
-            treelet.enabled = true;
-
-            auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
-
-            auto center = sbvhNode.bbox.getCenter();
-
-            treelet.avgclr = aten::vec3(0);
-
-            uint32_t clrCnt = 0;
-
-            for (const auto tid : treelet.tris) {
-                const auto triparam = faces[tid]->param;
-
-                const auto& v0 = vertices[triparam.idx[0]];
-                const auto& v1 = vertices[triparam.idx[1]];
-                const auto& v2 = vertices[triparam.idx[2]];
-
-                float lambda1, lambda2;
-
-                if (!barycentric(v0.pos, v1.pos, v2.pos, center, lambda1, lambda2)) {
-                    lambda1 = std::min<float>(std::max<float>(lambda1, 0.0f), 1.0f);
-                    lambda2 = std::min<float>(std::max<float>(lambda2, 0.0f), 1.0f);
-                    float tau = lambda1 + lambda2;
-                    if (tau > 1.0f) {
-                        lambda1 /= tau;
-                        lambda2 /= tau;
-                    }
-                }
-
-                float lambda3 = 1.0f - lambda1 - lambda2;
-
-                auto uv = v0.uv * lambda1 + v1.uv * lambda2 + v2.uv * lambda3;
-
-                const auto mtrl = mtrls[triparam.mtrlid];
-
-                if (mtrl->isEmissive()) {
-                    // The treelet has a child which is light, it is disabled.
-                    treelet.enabled = false;
-
-                    auto& node = m_nodes[treelet.idxInBvhTree];
-                    node.isTreeletRoot = false;
-
-                    break;
-                }
-                else {
-                    auto color = mtrl->sampleAlbedoMap(uv.x, uv.y);
-                    color *= mtrl->color();
-
-                    treelet.avgclr += color;
-                    clrCnt++;
-                }
-            }
-
-            treelet.avgclr /= clrCnt;
-        }
-#endif
     }
 }

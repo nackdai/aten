@@ -46,7 +46,8 @@ namespace aten {
                 || type == GeometryType::Cube)
             {
                 auto param = s->getParam();
-                param.mtrl.idx = aten::material::findMaterialIdx((aten::material*)param.mtrl.ptr);
+                auto mtrl = reinterpret_cast<aten::material*>(param.mtrl.ptr);
+                param.mtrl.idx = mtrl->id();
                 shapeparams.push_back(param);
             }
         }
@@ -59,11 +60,7 @@ namespace aten {
             lightparams.push_back(param);
         }
 
-        const auto& mtrls = aten::material::getMaterials();
-
-        for (auto m : mtrls) {
-            mtrlparms.push_back(m->param());
-        }
+        ctxt.copyMaterialParameters(mtrlparms);
 
         const auto& faces = aten::face::faces();
 
@@ -71,11 +68,7 @@ namespace aten {
             primparams.push_back(f->getParam());
         }
 
-        const auto& vtxs = ctxt.getVertices();
-        std::copy(
-            vtxs.begin(),
-            vtxs.end(),
-            std::back_inserter(vtxparams));
+        ctxt.copyVertices(vtxparams);
     }
 
     void DataCollector::collectTriangles(

@@ -483,7 +483,7 @@ namespace AT_NAME
             return m_name;
         }
 
-        aten::DataList<aten::material>::ListItem& getListItem()
+        aten::DataList<AT_NAME::material>::ListItem& getListItem()
         {
             return m_listItem;
         }
@@ -505,14 +505,14 @@ namespace AT_NAME
         static bool checkDefaultMaterialName(const std::string& name);
 
     private:
-        static void resetIdWhenAnyMaterialLeave(aten::material* mtrl);
+        static void resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl);
 
     protected:
         int m_id{ -1 };
 
         aten::MaterialParameter m_param;
 
-        aten::DataList<aten::material>::ListItem m_listItem;
+        aten::DataList<AT_NAME::material>::ListItem m_listItem;
         
         // For debug.
         std::string m_name;

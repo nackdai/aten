@@ -116,7 +116,10 @@ namespace aten
         /**
          * @brief Import the exported structure data.
          */
-        virtual bool importTree(const char* path, int offsetTriIdx) override final;
+        virtual bool importTree(
+            const context& ctxt,
+            const char* path, 
+            int offsetTriIdx) override final;
 
         /**
          * @brief Return the top layer acceleration structure.

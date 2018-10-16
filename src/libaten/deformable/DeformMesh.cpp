@@ -24,18 +24,20 @@ namespace aten
     }
 
     void DeformMesh::render(
+        const context& ctxt,
         const SkeletonController& skeleton,
         IDeformMeshRenderHelper* helper)
     {
         bool isGPUSkinning = m_header.isGPUSkinning;
-        m_groups[0].render(skeleton, helper, isGPUSkinning);
+        m_groups[0].render(ctxt, skeleton, helper, isGPUSkinning);
     }
 
     void DeformMesh::getGeometryData(
+        const context& ctxt,
         std::vector<SkinningVertex>& vtx,
         std::vector<uint32_t>& idx,
         std::vector<aten::PrimitiveParamter>& tris) const
     {
-        m_groups[0].getGeometryData(vtx, idx, tris);
+        m_groups[0].getGeometryData(ctxt, vtx, idx, tris);
     }
 }

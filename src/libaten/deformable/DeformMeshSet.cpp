@@ -182,12 +182,13 @@ namespace aten
     }
 
     void DeformMeshSet::render(
+        const context& ctxt,
         const SkeletonController& skeleton,
         IDeformMeshRenderHelper* helper,
         bool isGPUSkinning)
     {
         // material...
-        helper->applyMaterial(m_desc.mtrl);
+        helper->applyMaterial(ctxt, m_desc.mtrl);
 
         for (auto& prim : m_prims) {
             prim.render(skeleton, helper, isGPUSkinning);

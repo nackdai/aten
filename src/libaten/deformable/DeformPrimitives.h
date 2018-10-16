@@ -10,6 +10,7 @@
 #include "visualizer/GeomDataBuffer.h"
 #include "math/mat4.h"
 #include "material/material.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -20,7 +21,7 @@ namespace aten
 
     public:
         virtual void applyMatrix(uint32_t idx, const mat4& mtx) = 0;
-        virtual void applyMaterial(const MeshMaterial& mtrlDesc) = 0;
+        virtual void applyMaterial(const context& ctxt, const MeshMaterial& mtrlDesc) = 0;
         virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) = 0;
     };
 

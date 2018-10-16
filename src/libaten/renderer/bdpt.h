@@ -42,7 +42,7 @@ namespace aten
             real v{ real(0) };
 
             hitable* obj{ nullptr };
-            material* mtrl{ nullptr };
+            const material* mtrl{ nullptr };
 
             aten::Light* light{ nullptr };
 
@@ -55,7 +55,7 @@ namespace aten
                 const vec3& th,
                 const vec3& _bsdf,
                 hitable* _obj,
-                material* _mtrl,
+                const material* _mtrl,
                 real _u, real _v)
                 : pos(p), nml(_nml), orienting_normal(_orienting_normal), objType(type), totalAreaPdf(_totalAreapdf), throughput(th),
                 bsdf(_bsdf), obj(_obj), mtrl(_mtrl), u(_u), v(_v)

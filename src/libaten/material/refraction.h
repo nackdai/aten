@@ -112,7 +112,7 @@ namespace AT_NAME
         };
 
         static RefractionSampling check(
-            material* mtrl,
+            const material* mtrl,
             const aten::vec3& in,
             const aten::vec3& normal,
             const aten::vec3& orienting_normal);

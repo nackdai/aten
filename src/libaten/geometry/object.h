@@ -63,7 +63,7 @@ namespace AT_NAME
             const aten::context& ctxt,
             const char* path);
 
-        bool importInternalAccelTree(const char* path, int offsetTriIdx = 0);
+        bool importInternalAccelTree(const char* path, const aten::context& ctxt, int offsetTriIdx);
 
         void buildForRasterizeRendering(const aten::context& ctxt);
 

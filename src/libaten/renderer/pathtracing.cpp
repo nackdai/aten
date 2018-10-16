@@ -92,7 +92,7 @@ namespace aten
     {
         uint32_t rrDepth = m_rrDepth;
 
-        material* mtrl = material::getMaterial(path.rec.mtrlid);
+        auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
 
 #if 1
         bool isBackfacing = dot(path.rec.normal, -path.ray.dir) < real(0);

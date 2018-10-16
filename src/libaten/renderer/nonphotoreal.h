@@ -11,7 +11,7 @@ namespace aten
 {
     vec3 shadeNPR(
         const context& ctxt,
-        material* mtrl,
+        const material* mtrl,
         const vec3& p,
         const vec3& normal,
         real u, real v,

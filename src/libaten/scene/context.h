@@ -42,6 +42,14 @@ public:
         return (uint32_t)m_vertices.size();
     }
 
+    void copyVertices(std::vector<vertex>& dst) const
+    {
+        std::copy(
+            m_vertices.begin(),
+            m_vertices.end(),
+            std::back_inserter(dst));
+    }
+
     void build();
 
     const aten::GeomVertexBuffer& getVB() const
@@ -55,12 +63,12 @@ public:
         m_vb.clear();
     }
 
-    DataList<aten::material>& getMaterials()
+    DataList<AT_NAME::material>& getMaterials()
     {
         return m_materials;
     }
 
-    const DataList<aten::material>& getMaterials() const
+    const DataList<AT_NAME::material>& getMaterials() const
     {
         return m_materials;
     }
@@ -70,20 +78,21 @@ public:
         return static_cast<uint32_t>(getMaterials().size());
     }
 
-    const material* getMaterial(uint32_t idx) const
+    const AT_NAME::material* getMaterial(uint32_t idx) const
     {
         AT_ASSERT(idx < getMaterialNum());
         return m_materials[idx];
     }
+
+    void copyMaterialParameters(std::vector<MaterialParameter>& dst) const;
 
     void clearMaterialList()
     {
 
     }
 
-    // TODO
-    // マテリアルにIDを持たせているので、この関数は不要.
-    int findMaterialIdx(material* mtrl);
+
+    const AT_NAME::material* findMaterialByName(const char* name) const;
 
     int findMaterialIdxByName(const char* name) const;
 
@@ -92,6 +101,6 @@ private:
 
     aten::GeomVertexBuffer m_vb;
 
-    DataList<aten::material> m_materials;
+    DataList<AT_NAME::material> m_materials;
 };
 }

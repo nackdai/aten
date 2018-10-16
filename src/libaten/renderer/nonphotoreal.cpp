@@ -4,7 +4,7 @@ namespace aten
 {
     vec3 shadeNPR(
         const context& ctxt,
-        material* mtrl,
+        const material* mtrl,
         const vec3& p,
         const vec3& normal,
         real u, real v,
@@ -12,7 +12,7 @@ namespace aten
         sampler* sampler)
     {
         AT_ASSERT(mtrl->isNPR());
-        NPRMaterial* nprMtrl = (NPRMaterial*)mtrl;
+        const NPRMaterial* nprMtrl = reinterpret_cast<const NPRMaterial*>(mtrl);
 
         auto light = nprMtrl->getTargetLight();
         AT_ASSERT(light);

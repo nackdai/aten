@@ -27,7 +27,7 @@ namespace aten
                 // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
                 vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
-                auto mtrl = material::getMaterial(rec.mtrlid);
+                auto mtrl = ctxt.getMaterial(rec.mtrlid);
 
                 // Apply normal map.
                 mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);

@@ -1251,7 +1251,7 @@ namespace aten
             for (auto it : m_treelets) {
                 const auto& treelet = it.second;
                 if (treelet.mtrlid >= 0) {
-                    const auto mtrl = aten::material::getMaterial(treelet.mtrlid);
+                    const auto mtrl = ctxt.getMaterial(treelet.mtrlid);
                     AT_ASSERT(mtrl);
 
                     mtrlMap.insert(std::make_pair(treelet.mtrlid, mtrl->nameString()));
@@ -1328,7 +1328,10 @@ namespace aten
         return true;
     }
 
-    bool sbvh::importTree(const char* path, int offsetTriIdx)
+    bool sbvh::importTree(
+        const context& ctxt,
+        const char* path, 
+        int offsetTriIdx)
     {
         FILE* fp = fopen(path, "rb");
         if (!fp) {
@@ -1390,7 +1393,7 @@ namespace aten
 
                         // Find material index by name.
                         const auto& name = found->second;
-                        int mtrlid = material::findMaterialIdxByName(name.c_str());
+                        int mtrlid = ctxt.findMaterialIdxByName(name.c_str());
                         AT_ASSERT(mtrlid >= 0);
 
                         // Replace current material index.

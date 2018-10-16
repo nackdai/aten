@@ -273,7 +273,7 @@ namespace AT_NAME
     }
 
     refraction::RefractionSampling refraction::check(
-        material* mtrl,
+        const material* mtrl,
         const aten::vec3& in,
         const aten::vec3& normal,
         const aten::vec3& orienting_normal)
@@ -333,7 +333,7 @@ namespace AT_NAME
         auto Re = fresnel;
         auto Tr = (1 - Re) * nn;
 
-        refraction* refr = static_cast<refraction*>(mtrl);
+        const refraction* refr = reinterpret_cast<const refraction*>(mtrl);
 
         if (refr->isIdealRefraction()) {
             return std::move(RefractionSampling(true, real(0), real(1), true));

@@ -21,7 +21,7 @@ namespace aten
             Intersection isect;
 
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
-                auto mtrl = material::getMaterial(rec.mtrlid);
+                auto mtrl = ctxt.getMaterial(rec.mtrlid);
 
                 if (mtrl->isEmissive()) {
                     auto emit = mtrl->color();

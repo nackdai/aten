@@ -63,14 +63,14 @@ public:
             return ret;
         }
 
-        Data& getData()
+        Data* getData()
         {
-            return *m_data;
+            return m_data;
         }
 
-        Data& operator->()
+        const Data* getData() const
         {
-            return *m_data;
+            return m_data;
         }
 
         int currentIndex() const
@@ -147,6 +147,11 @@ public:
     const Data* operator[](int idx) const
     {
         return m_list[idx]->m_data;
+    }
+
+    const std::vector<ListItem*>& getList() const
+    {
+        return m_list;
     }
 
 private:

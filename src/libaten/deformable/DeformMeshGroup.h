@@ -5,6 +5,7 @@
 #include "deformable/Skeleton.h"
 #include "misc/stream.h"
 #include "geometry/geomparam.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -26,11 +27,13 @@ namespace aten
             bool isGPUSkinning);
 
         void render(
+            const context& ctxt,
             const SkeletonController& skeleton,
             IDeformMeshRenderHelper* helper,
             bool isGPUSkinning);
 
         void getGeometryData(
+            const context& ctxt,
             std::vector<SkinningVertex>& vtx,
             std::vector<uint32_t>& idx,
             std::vector<aten::PrimitiveParamter>& tris) const;

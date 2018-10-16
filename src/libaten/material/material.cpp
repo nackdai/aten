@@ -43,7 +43,7 @@ namespace AT_NAME
         return false;
     }
 
-    void material::resetIdWhenAnyMaterialLeave(aten::material* mtrl)
+    void material::resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl)
     {
         mtrl->m_id = mtrl->m_listItem.currentIndex();
     }

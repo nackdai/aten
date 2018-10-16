@@ -18,22 +18,6 @@ namespace AT_NAME
             : material(aten::MaterialType::Lambert, MaterialAttributeLambert, val)
         {}
 
-        // TODO
-        // VoxelƒŒƒ“ƒ_ƒŠƒ“ƒO—p‚Éƒ_ƒ~[...
-        lambert(const aten::vec3& albedo, bool local)
-            : material(aten::MaterialType::Lambert, MaterialAttributeLambert, local)
-        {
-            m_param.baseColor = albedo;
-        }
-
-        // TODO
-        // Voxelãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ç”¨ã«ãƒ€ãƒŸãƒ¼...
-        lambert(const aten::vec3& albedo, bool local)
-            : material(aten::MaterialType::Lambert, MaterialAttributeLambert, local)
-        {
-            m_param.baseColor = albedo;
-        }
-
         virtual ~lambert() {}
 
     public:
@@ -54,8 +38,8 @@ namespace AT_NAME
             const aten::vec3& normal,
             aten::sampler* sampler)
         {
-            // normal‚Ì•ûŒü‚ðŠî€‚Æ‚µ‚½³‹K’¼ŒðŠî’ê(w, u, v)‚ðì‚é.
-            // ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŽŸ‚ÌƒŒƒC‚ð”ò‚Î‚·.
+            // normalã®æ–¹å‘ã‚’åŸºæº–ã¨ã—ãŸæ­£è¦ç›´äº¤åŸºåº•(w, u, v)ã‚’ä½œã‚‹.
+            // ã“ã®åŸºåº•ã«å¯¾ã™ã‚‹åŠçƒå†…ã§æ¬¡ã®ãƒ¬ã‚¤ã‚’é£›ã°ã™.
 #if 1
             auto n = normal;
             auto t = aten::getOrthoVector(n);
@@ -65,7 +49,7 @@ namespace AT_NAME
 
             n = normal;
 
-            // n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
+            // nã¨å¹³è¡Œã«ãªã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹.
             if (fabs(n.x) > AT_MATH_EPSILON) {
                 t = normalize(cross(aten::vec3(0.0, 1.0, 0.0), n));
             }
@@ -75,7 +59,7 @@ namespace AT_NAME
             b = cross(n, t);
 #endif
 
-            // ƒRƒTƒCƒ“€‚ðŽg‚Á‚½d“_“IƒTƒ“ƒvƒŠƒ“ƒO.
+            // ã‚³ã‚µã‚¤ãƒ³é …ã‚’ä½¿ã£ãŸé‡ç‚¹çš„ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°.
             const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
             const real r2 = sampler->nextSample();
             const real r2s = sqrt(r2);

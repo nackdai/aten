@@ -25,7 +25,7 @@ namespace aten
             real pdfb{ 1 };
 
             hitrecord rec;
-            material* prevMtrl{ nullptr };
+            const material* prevMtrl{ nullptr };
 
             aten::ray ray;
 

@@ -99,16 +99,18 @@ namespace aten
     }
 
     void DeformMeshGroup::render(
+        const context& ctxt,
         const SkeletonController& skeleton,
         IDeformMeshRenderHelper* helper,
         bool isGPUSkinning)
     {
         for (auto& mesh : m_meshs) {
-            mesh.render(skeleton, helper, isGPUSkinning);
+            mesh.render(ctxt, skeleton, helper, isGPUSkinning);
         }
     }
 
     void DeformMeshGroup::getGeometryData(
+        const context& ctxt,
         std::vector<SkinningVertex>& vtx,
         std::vector<uint32_t>& idx,
         std::vector<aten::PrimitiveParamter>& tris) const
@@ -125,31 +127,14 @@ namespace aten
             memcpy(&vtx[0], &m_vertices[0], size);
         }
 
-        const auto& mtrls = material::getMaterials();
-
         // Index.
         for (uint32_t i = 0; i < m_desc.numMeshSet; i++)
         {
             const auto& mtrlDesc = m_meshs[i].getDesc().mtrl;
 
-            // Find material.
-            auto found = std::find_if(
-                mtrls.begin(), mtrls.end(),
-                [&](const material* mtrl)->bool
-            {
-                if (mtrl->nameString() == mtrlDesc.name) {
-                    return true;
-                }
-
-                return false;
-            });
+            int32_t mtrlId = ctxt.findMaterialIdxByName(mtrlDesc.name);
 
             int32_t geomId = m_meshs[i].getGeomId();
-            int32_t mtrlId = -1;
-
-            if (found != mtrls.end()) {
-                mtrlId = std::distance(mtrls.begin(), found);
-            }
 
             const auto& prims = m_meshs[i].getPrimitives();
 

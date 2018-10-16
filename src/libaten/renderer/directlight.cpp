@@ -74,7 +74,7 @@ namespace aten
         // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
         vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
-        auto mtrl = material::getMaterial(path.rec.mtrlid);
+        auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
 
         // Apply normal map.
         mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
@@ -213,7 +213,7 @@ namespace aten
                         aten::Intersection tmpIsect;
 
                         if (scene->hit(ctxt, nextRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec, tmpIsect)) {
-                            auto tmpmtrl = material::getMaterial(tmpRec.mtrlid);
+                            auto tmpmtrl = ctxt.getMaterial(tmpRec.mtrlid);
 
                             // Implicit conection to light.
                             if (tmpmtrl->isEmissive()) {

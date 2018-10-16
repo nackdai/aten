@@ -4,6 +4,7 @@
 #include "deformable/Skeleton.h"
 #include "misc/stream.h"
 #include "geometry/geombase.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -40,6 +41,7 @@ namespace aten
         void setExternalVertexBuffer(GeomMultiVertexBuffer& vb);
 
         void render(
+            const context& ctxt,
             const SkeletonController& skeleton,
             IDeformMeshRenderHelper* helper,
             bool isGPUSkinning);

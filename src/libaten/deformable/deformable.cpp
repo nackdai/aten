@@ -106,25 +106,11 @@ namespace aten
             m_mtxs.push_back(mtx);
         }
 
-        virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final
+        virtual void applyMaterial(const context& ctxt, const MeshMaterial& mtrlDesc) override final
         {
-            const auto& mtrls = material::getMaterials();
+            const auto mtrl = ctxt.findMaterialByName(mtrlDesc.name);
 
-            // TODO
-            // Find material.
-            auto found = std::find_if(
-                mtrls.begin(), mtrls.end(),
-                [&](const material* mtrl)->bool
-            {
-                if (mtrl->nameString() == mtrlDesc.name) {
-                    return true;
-                }
-
-                return false;
-            });
-
-            if (found != mtrls.end()) {
-                const auto mtrl = *found;
+            if (mtrl) {
                 const auto& mtrlParam = mtrl->param();
 
                 auto albedo = const_cast<texture*>(texture::getTexture(mtrlParam.albedoMap));
@@ -155,13 +141,15 @@ namespace aten
         std::vector<mat4> m_mtxs;
     };
 
-    void deformable::render(shader* shd)
+    void deformable::render(
+        const context& ctxt,
+        shader* shd)
     {
         AT_ASSERT(shd);
 
         DeformMeshRenderHelper helper(shd);
 
-        m_mesh.render(m_sklController, &helper);
+        m_mesh.render(ctxt, m_sklController, &helper);
     }
 
     void deformable::update(const mat4& mtxL2W)
@@ -181,11 +169,12 @@ namespace aten
     }
 
     void deformable::getGeometryData(
+        const context& ctxt,
         std::vector<SkinningVertex>& vtx,
         std::vector<uint32_t>& idx,
         std::vector<aten::PrimitiveParamter>& tris) const
     {
-        m_mesh.getGeometryData(vtx, idx, tris);
+        m_mesh.getGeometryData(ctxt, vtx, idx, tris);
     }
 
     const std::vector<mat4>& deformable::getMatrices() const
@@ -214,7 +203,7 @@ namespace aten
         virtual ~DeformMeshRenderHelperEx() {}
 
         virtual void applyMatrix(uint32_t idx, const mat4& mtx) override final {}
-        virtual void applyMaterial(const MeshMaterial& mtrlDesc) override final {}
+        virtual void applyMaterial(const context& ctxt, const MeshMaterial& mtrlDesc) override final {}
         virtual void commitChanges(bool isGPUSkinning, uint32_t triOffset) override final
         {
             AT_ASSERT(isGPUSkinning)
@@ -247,7 +236,7 @@ namespace aten
             helper.globalTriOffset = triOffset;
         }
 
-        m_mesh.render(m_sklController, &helper);
+        m_mesh.render(ctxt, m_sklController, &helper);
     }
 
     //////////////////////////////////////////////////////////////
@@ -263,6 +252,7 @@ namespace aten
     }
 
     void DeformableRenderer::render(
+        const context& ctxt,
         const camera* cam,
         deformable* mdl)
     {
@@ -311,7 +301,7 @@ namespace aten
             // そのため、シェーダでは計算する必要がないので、シェーダに渡さない.
         }
 
-        mdl->render(&s_shd);
+        mdl->render(ctxt, &s_shd);
     }
 
     void DeformableRenderer::initDeformMeshReadHelper(DeformMeshReadHelper* helper)

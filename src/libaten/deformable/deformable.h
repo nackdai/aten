@@ -7,6 +7,7 @@
 #include "deformable/DeformAnimation.h"
 #include "geometry/transformable.h"
 #include "visualizer/shader.h"
+#include "scene/context.h"
 
 namespace aten
 {
@@ -31,11 +32,14 @@ namespace aten
             real time,
             DeformAnimation* anm);
 
-        void render(shader* shd);
+        void render(
+            const context& ctxt,
+            shader* shd);
 
         void build();
 
         void getGeometryData(
+            const context& ctxt,
             std::vector<SkinningVertex>& vtx,
             std::vector<uint32_t>& idx,
             std::vector<aten::PrimitiveParamter>& tris) const;
@@ -143,6 +147,7 @@ namespace aten
             const char* pathFS);
 
         static void render(
+            const context& ctxt,
             const camera* cam,
             deformable* mdl);
 

@@ -241,12 +241,12 @@ namespace AT_NAME
         return result;
     }
 
-    bool object::importInternalAccelTree(const char* path, int offsetTriIdx/*= 0*/)
+    bool object::importInternalAccelTree(const char* path, const context& ctxt, int offsetTriIdx)
     {
         AT_ASSERT(!m_accel);
 
         m_accel = aten::accelerator::createAccelerator();
-        return m_accel->importTree(path, offsetTriIdx);
+        return m_accel->importTree(ctxt, path, offsetTriIdx);
     }
 
     void object::gatherTrianglesAndMaterials(

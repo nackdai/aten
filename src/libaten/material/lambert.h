@@ -6,7 +6,9 @@
 namespace AT_NAME
 {
     class lambert : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         lambert(
             const aten::vec3& albedo = aten::vec3(0.5),
             aten::texture* albedoMap = nullptr,

@@ -6,7 +6,9 @@
 namespace AT_NAME
 {
     class LambertRefraction : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         LambertRefraction(
             const aten::vec3& albedo = aten::vec3(0.5),
             real ior = real(1),

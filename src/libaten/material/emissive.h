@@ -6,7 +6,9 @@
 namespace AT_NAME
 {
     class emissive : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         emissive()
             : material(aten::MaterialType::Emissive, MaterialAttributeEmissive)
         {}

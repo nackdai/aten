@@ -5,7 +5,9 @@
 namespace AT_NAME
 {
     class CarPaintBRDF : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         CarPaintBRDF(
             const aten::vec3& albedo = aten::vec3(0.5),
             real ior = real(1),
@@ -33,13 +35,44 @@ namespace AT_NAME
             m_param.carpaint.flake_intensity = real(1);
         }
 
+        CarPaintBRDF(
+            const aten::MaterialParameter& param,
+            aten::texture* roughnessMap = nullptr)
+            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, param.baseColor, param.ior, nullptr, nullptr)
+        {
+            // TODO
+            // Clamp parameters.
+            m_param.carpaint.clearcoatRoughness = param.carpaint.clearcoatRoughness;
+            m_param.carpaint.flakeLayerRoughness = param.carpaint.flakeLayerRoughness;
+            m_param.carpaint.flake_scale =  param.carpaint.flake_scale;
+            m_param.carpaint.flake_size = param.carpaint.flake_size;
+            m_param.carpaint.flake_size_variance = param.carpaint.flake_size_variance;
+            m_param.carpaint.flake_normal_orientation = param.carpaint.flake_normal_orientation;
+            m_param.carpaint.flake_reflection = param.carpaint.flake_reflection;
+            m_param.carpaint.flake_transmittance = param.carpaint.flake_transmittance;
+            m_param.carpaint.glitterColor = param.carpaint.glitterColor;
+            m_param.carpaint.flakeColor = param.carpaint.flakeColor;
+            m_param.carpaint.flake_intensity = param.carpaint.flake_intensity;
+
+            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+        }
+
         CarPaintBRDF(aten::Values& val)
             : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, val)
         {
             // TODO
-
-            m_param.roughness = val.get("roughness", m_param.roughness);
-            m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
+            // Clamp parameters.
+            m_param.carpaint.clearcoatRoughness = val.get("clearcoatRoughness", m_param.carpaint.clearcoatRoughness);
+            m_param.carpaint.flakeLayerRoughness = val.get("flakeLayerRoughness", m_param.carpaint.flakeLayerRoughness);
+            m_param.carpaint.flake_scale = val.get("flake_scale", m_param.carpaint.flake_scale);
+            m_param.carpaint.flake_size = val.get("flake_size", m_param.carpaint.flake_size);
+            m_param.carpaint.flake_size_variance = val.get("flake_size_variance", m_param.carpaint.flake_size_variance);
+            m_param.carpaint.flake_normal_orientation = val.get("flake_normal_orientation", m_param.carpaint.flake_normal_orientation);
+            m_param.carpaint.flake_reflection = val.get("flake_reflection", m_param.carpaint.flake_reflection);
+            m_param.carpaint.flake_transmittance = val.get("flake_transmittance", m_param.carpaint.flake_transmittance);
+            m_param.carpaint.glitterColor = val.get("glitterColor", m_param.carpaint.glitterColor);
+            m_param.carpaint.flakeColor = val.get("clearcoat", m_param.carpaint.flakeColor);
+            m_param.carpaint.flake_intensity = val.get("clearcoatGloss", m_param.carpaint.flake_intensity);
 
             auto roughnessMap = (aten::texture*)val.get("roughnessmap", nullptr);
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;

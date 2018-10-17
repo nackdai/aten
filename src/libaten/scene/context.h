@@ -63,6 +63,8 @@ public:
         m_vb.clear();
     }
 
+    void addMaterial(AT_NAME::material* mtrl);
+
     DataList<AT_NAME::material>& getMaterials()
     {
         return m_materials;
@@ -85,12 +87,6 @@ public:
     }
 
     void copyMaterialParameters(std::vector<MaterialParameter>& dst) const;
-
-    void clearMaterialList()
-    {
-
-    }
-
 
     const AT_NAME::material* findMaterialByName(const char* name) const;
 

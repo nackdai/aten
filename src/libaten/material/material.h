@@ -16,8 +16,6 @@ namespace AT_NAME {
 
 namespace aten
 {
-    struct hitrecord;
-
     struct MaterialAttribute {
         struct {
             uint32_t isEmissive : 1;
@@ -247,6 +245,7 @@ namespace AT_NAME
     };
 
     class material {
+        friend class context;
         friend class LayeredBSDF;
 
     protected:
@@ -483,11 +482,6 @@ namespace AT_NAME
             return m_name;
         }
 
-        aten::DataList<AT_NAME::material>::ListItem& getListItem()
-        {
-            return m_listItem;
-        }
-
         virtual bool edit(aten::IMaterialParamEditor* editor)
         {
             //AT_ASSERT(false);
@@ -502,10 +496,19 @@ namespace AT_NAME
 
         static const char* getMaterialTypeName(aten::MaterialType type);
 
-        static bool checkDefaultMaterialName(const std::string& name);
+        static aten::MaterialType getMaterialTypeFromMaterialTypeName(const std::string& name);
+
+        static bool isDefaultMaterialName(const std::string& name);
+
+        static bool isValidMaterialType(aten::MaterialType type);
 
     private:
         static void resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl);
+
+        aten::DataList<AT_NAME::material>::ListItem* getListItem()
+        {
+            return &m_listItem;
+        }
 
     protected:
         int m_id{ -1 };

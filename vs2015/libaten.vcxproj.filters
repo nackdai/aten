@@ -509,6 +509,9 @@
     <ClInclude Include="..\src\libaten\misc\datalist.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\material_factory.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -804,6 +807,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\context.cpp">
       <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\material_factory.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

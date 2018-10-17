@@ -29,7 +29,24 @@ namespace AT_NAME
         return g_mtrlTypeNames[type];
     }
 
-    bool material::checkDefaultMaterialName(const std::string& name)
+    aten::MaterialType material::getMaterialTypeFromMaterialTypeName(const std::string& name)
+    {
+        std::string lowerName = name;
+        std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+
+        for (int i = 0; i < AT_COUNTOF(g_mtrlTypeNames); i++) {
+            auto mtrlName = g_mtrlTypeNames[i];
+
+            if (lowerName == mtrlName) {
+                return static_cast<aten::MaterialType>(i);
+            }
+        }
+
+        AT_ASSERT(false);
+        return aten::MaterialType::MaterialTypeMax;
+    }
+
+    bool material::isDefaultMaterialName(const std::string& name)
     {
         auto lower = name;
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
@@ -41,6 +58,11 @@ namespace AT_NAME
         }
 
         return false;
+    }
+
+    bool material::isValidMaterialType(aten::MaterialType type)
+    {
+        return (0 <= type && type < aten::MaterialType::MaterialTypeMax);
     }
 
     void material::resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl)

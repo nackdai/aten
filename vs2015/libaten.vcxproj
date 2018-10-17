@@ -304,6 +304,7 @@
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h" />
     <ClInclude Include="..\src\libaten\material\layer.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
+    <ClInclude Include="..\src\libaten\material\material_factory.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
@@ -428,6 +429,7 @@
     <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <ClCompile Include="..\src\libaten\material\material.cpp" />
+    <ClCompile Include="..\src\libaten\material\material_factory.cpp" />
     <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\oren_nayar.cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />

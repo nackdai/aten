@@ -5,7 +5,9 @@
 namespace AT_NAME
 {
     class MicrofacetBlinn : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         MicrofacetBlinn(
             const aten::vec3& albedo = aten::vec3(0.5),
             real shininess = real(0.5), 

@@ -5,7 +5,9 @@
 namespace AT_NAME
 {
     class specular : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         specular(
             const aten::vec3& albedo = aten::vec3(0.5),
             real ior = real(0),

@@ -6,7 +6,9 @@
 namespace AT_NAME
 {
     class DisneyBRDF : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         DisneyBRDF(
             aten::vec3 baseColor = aten::vec3(0.5),
             real subsurface = real(0.5),

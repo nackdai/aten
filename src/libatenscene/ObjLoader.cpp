@@ -250,8 +250,18 @@ namespace aten
                                 normalMap = aten::ImageLoader::load(texname);
                             }
                         }
+
+                        aten::MaterialParameter mtrlParam;
+                        mtrlParam.baseColor = diffuse;
                         
-                        aten::material* mtrl = new aten::lambert(diffuse, albedoMap, normalMap);
+                        aten::material* mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+                            ctxt,
+                            aten::MaterialType::Lambert,
+                            mtrlParam,
+                            albedoMap, 
+                            normalMap,
+                            nullptr);
+
                         mtrl->setName(objmtrl.name.c_str());
 
                         dstshape->setMaterial(mtrl);

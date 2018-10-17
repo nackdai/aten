@@ -46,18 +46,7 @@ public:
             bool ret = false;
 
             if (m_belongedList) {
-                auto list = m_belongedList;
-                ret = list->remove(*this);
-
-                if (ret && m_funcWhenAnyLeave) {
-                    auto& realList = list->m_list;
-
-                    for each (auto& item in realList)
-                    {
-                        auto data = item->m_data;
-                        m_funcWhenAnyLeave(data);
-                    }
-                }
+                ret = m_belongedList->remove(this);
             }
 
             return ret;
@@ -78,10 +67,18 @@ public:
             int idx = -1;
 
             if (m_belongedList) {
-                idx = m_belongedList->currentIndex(*this);
+                idx = m_belongedList->currentIndex(this);
             }
 
             return idx;
+        }
+
+    private:
+        void doFuncWhenAnyLeave()
+        {
+            if (m_funcWhenAnyLeave) {
+                m_funcWhenAnyLeave(m_data);
+            }
         }
 
     private:
@@ -90,41 +87,58 @@ public:
         FuncWhenAnyLeave m_funcWhenAnyLeave{ nullptr };
     };
 
-    void add(ListItem& item)
+    void add(ListItem* item)
     {
-        item.leave();
-        item.m_blongedList = this;
+        AT_ASSERT(item);
+
+        item->leave();
+        item->m_belongedList = this;
 
         m_list.push_back(item);
     }
 
-    bool remove(ListItem& item)
+    bool remove(ListItem* item)
     {
-        if (item.m_belongedList != this) {
+        AT_ASSERT(item);
+
+        if (item->m_belongedList != this) {
             AT_ASSERT(false);
             return false;
         }
 
-        auto it = std::find(m_list.begin(), m_list.end(), &item);
-            
+        auto it = std::find(m_list.begin(), m_list.end(), item);
+
         if (it != m_list.end()) {
             m_list.erase(it);
-                
-            item.m_belongedList = nullptr;
+
+            // NOTE
+            // Disable in cuda to avoid nvcc error.
+            // If below code is enabled, nvcc occurs an error, but I don't know why.
+#ifndef __AT_CUDA__
+            for each (auto& item in m_list)
+            {
+                item->doFuncWhenAnyLeave();
+            }
+
+            item->m_belongedList = nullptr;
+#endif
 
             return true;
         }
+
         return false;
     }
 
-    int currentIndex(const ListItem& item)
+    int currentIndex(const ListItem* item)
     {
-        if (item.m_belongedList != this) {
+        AT_ASSERT(item);
+
+        if (item->m_belongedList != this) {
             AT_ASSERT(false);
             return -1;
         }
 
-        auto it = std::find(m_list.begin(), m_list.end(), &item);
+        auto it = std::find(m_list.begin(), m_list.end(), item);
 
         if (it != m_list.end()) {
             auto ret = std::distance(m_list.begin(), it);

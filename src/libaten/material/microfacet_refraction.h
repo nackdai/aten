@@ -9,7 +9,9 @@ namespace AT_NAME
     // https://agraphicsguy.wordpress.com/2015/11/11/glass-material-simulated-by-microfacet-bxdf/
 
     class MicrofacetRefraction : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         MicrofacetRefraction(
             const aten::vec3& albedo = aten::vec3(0.5),
             real roughness = real(0.5),

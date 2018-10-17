@@ -5,44 +5,6 @@
 
 namespace aten
 {
-    aten::material* createMaterial(aten::MaterialType type)
-    {
-        aten::material* mtrl = nullptr;
-
-        switch (type) {
-        case aten::MaterialType::Emissive:
-            mtrl = new aten::emissive();
-            break;
-        case aten::MaterialType::Lambert:
-            mtrl = new aten::lambert();
-            break;
-        case aten::MaterialType::OrneNayar:
-            mtrl = new aten::OrenNayar();
-            break;
-        case aten::MaterialType::Specular:
-            mtrl = new aten::specular();
-            break;
-        case aten::MaterialType::Refraction:
-            mtrl = new aten::refraction();
-            break;
-        case aten::MaterialType::Blinn:
-            mtrl = new aten::MicrofacetBlinn();
-            break;
-        case aten::MaterialType::GGX:
-            mtrl = new aten::MicrofacetGGX();
-            break;
-        case aten::MaterialType::Beckman:
-            mtrl = new aten::MicrofacetBeckman();
-            break;
-        default:
-            AT_ASSERT(false);
-            mtrl = new aten::lambert();
-            break;
-        }
-
-        return mtrl;
-    }
-
     class MaterialParamExporter : public aten::IMaterialParamEditor {
     public:
         MaterialParamExporter(
@@ -127,10 +89,15 @@ namespace aten
                 xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
             }
 
-            auto mtrl = createMaterial(info.param.type);
-            mtrl->copyParam(info.param);
+            auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameter(
+                info.param.type, 
+                info.param, 
+                nullptr, nullptr, nullptr);
 
             mtrl->edit(&paramExporter);
+
+            // Not use anymore...
+            delete mtrl;
 
             // TODO
             // texture...

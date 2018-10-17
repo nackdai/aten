@@ -32,5 +32,10 @@ namespace aten
         static SceneInfo load(
             const std::string& path,
             context& ctxt);
+
+    private:
+        static void readMaterials(
+            const void* xmlRoot,
+            context& ctxt);
     };
 }

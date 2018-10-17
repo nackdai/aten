@@ -22,7 +22,7 @@ namespace aten {
     bool MaterialLoader::addCreator(std::string type, MaterialCreator creator)
     {
         // Check if type is as same as default type.
-        bool isDefaultMaterialName = aten::material::checkDefaultMaterialName(type);
+        bool isDefaultMaterialName = aten::material::isDefaultMaterialName(type);
 
         if (isDefaultMaterialName) {
             AT_ASSERT(false);
@@ -342,7 +342,9 @@ namespace aten {
     //  - clearcoat [float]
     //  - clearcoatGloss [float]
 
-    bool MaterialLoader::load(const std::string& path)
+    bool MaterialLoader::load(
+        const std::string& path,
+        context& ctxt)
     {
         std::string fullpath = path;
         if (!g_base.empty()) {
@@ -360,7 +362,7 @@ namespace aten {
 
         auto root = xml.FirstChildElement("root");
         if (root) {
-            onLoad(root);
+            onLoad(root, ctxt);
         }
         else {
             // TODO
@@ -372,7 +374,9 @@ namespace aten {
         return true;
     }
 
-    void MaterialLoader::onLoad(const void* xmlRoot)
+    void MaterialLoader::onLoad(
+        const void* xmlRoot,
+        context& ctxt)
     {
         const tinyxml2::XMLElement* root = (const tinyxml2::XMLElement*)xmlRoot;
 
@@ -422,7 +426,7 @@ namespace aten {
                 }
 
                 // Create material;
-                mtrl = create(mtrlType, mtrlValues);
+                mtrl = create(mtrlType, ctxt, mtrlValues);
 
                 if (mtrl) {
                     AssetManager::registerMtrl(mtrlName, mtrl);
@@ -436,49 +440,30 @@ namespace aten {
     }
 #endif
 
-    MaterialLoader::MaterialCreator g_funcs[] = {
-        [](Values& values) { return new emissive(values); },            // emissive
-        [](Values& values) { return new lambert(values); },                // lambert
-        [](Values& values) { return new OrenNayar(values); },            // oren_nayar
-        [](Values& values) { return new specular(values); },            // specular
-        [](Values& values) { return new refraction(values); },            // refraction
-        [](Values& values) { return new MicrofacetBlinn(values); },        // blinn
-        [](Values& values) { return new MicrofacetGGX(values); },        // ggx
-        [](Values& values) { return new MicrofacetBeckman(values); },    // beckman
-        [](Values& values) { return new MicrofacetVelvet(values); },    // velvet
-        [](Values& values) { return new LambertRefraction(values); },    // lambert_rafraction
-        [](Values& values) { return new MicrofacetRefraction(values); },    // microfacet_rafraction
-        [](Values& values) { return new DisneyBRDF(values); },            // disney_brdf
-        [](Values& values) { return new CarPaintBRDF(values); },        // carpaint
-        [](Values& values) { return new toon(values); },                // toon
-        [](Values& values) { return nullptr; },                            // layer
-    };
-    AT_STATICASSERT(AT_COUNTOF(g_funcs) == (int)aten::MaterialType::MaterialTypeMax);
-
-    material* MaterialLoader::create(std::string type, Values& values)
+    material* MaterialLoader::create(
+        const std::string& type, 
+        context& ctxt,
+        Values& values)
     {
-        int mtrlNum = aten::MaterialType::MaterialTypeMax;
+        aten::material* mtrl = nullptr;
 
-        const char* mtrlName = aten::material::getMaterialTypeName(static_cast<aten::MaterialType>(0));
+        if (aten::material::isDefaultMaterialName(type)) {
 
-        // Check if default creators are registered.
-        if (g_creators.empty()
-            || g_creators.find(mtrlName) == g_creators.end())
-        {
-            // Register default type.
-            for (int i = 0; i < mtrlNum; i++) {
-                mtrlName = aten::material::getMaterialTypeName(static_cast<aten::MaterialType>(i));
-                g_creators.insert(std::pair<std::string, MaterialCreator>(mtrlName, g_funcs[i]));
+            auto mtrlType = aten::material::getMaterialTypeFromMaterialTypeName(type);
+
+            if (aten::material::isValidMaterialType(mtrlType)) {
+                mtrl = aten::MaterialFactory::createMaterialAndAddToCtxt(ctxt, mtrlType, values);
             }
         }
+        else {
+            auto it = g_creators.find(type);
 
-        material* mtrl = nullptr;
+            if (it != g_creators.end()) {
+                auto creator = it->second;
+                mtrl = creator(values);
 
-        auto it = g_creators.find(type);
-
-        if (it != g_creators.end()) {
-            auto creator = it->second;
-            mtrl = creator(values);
+                ctxt.addMaterial(mtrl);
+            }
         }
 
         return mtrl;

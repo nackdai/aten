@@ -6,8 +6,9 @@ namespace AT_NAME
 {
     class MicrofacetGGX : public material {
         friend class MicrofacetRefraction;
+        friend class MaterialFactory;
 
-    public:
+    private:
         MicrofacetGGX(
             const aten::vec3& albedo = aten::vec3(0.5),
             real roughness = real(0.5), 

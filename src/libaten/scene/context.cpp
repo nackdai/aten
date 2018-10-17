@@ -15,6 +15,12 @@ namespace aten
         }
     }
 
+    void context::addMaterial(aten::material* mtrl)
+    {
+        auto listItem = mtrl->getListItem();
+        m_materials.add(listItem);
+    }
+
     void context::copyMaterialParameters(std::vector<MaterialParameter>& dst) const
     {
         auto& materials = m_materials.getList();

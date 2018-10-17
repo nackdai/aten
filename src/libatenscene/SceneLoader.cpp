@@ -85,8 +85,12 @@ namespace aten
         }
     }
 
-    void readMaterials(const tinyxml2::XMLElement* root)
+    void SceneLoader::readMaterials(
+        const void* xmlRoot,
+        context& ctxt)
     {
+        const tinyxml2::XMLElement* root = reinterpret_cast<const tinyxml2::XMLElement*>(xmlRoot);
+
         auto mtrlRoot = root->FirstChildElement("materials");
         
         if (!mtrlRoot) {
@@ -128,10 +132,10 @@ namespace aten
 
             if (mtrlElem) {
                 root->InsertEndChild(mtrlElem);
-                MaterialLoader::onLoad(root);
+                MaterialLoader::onLoad(root, ctxt);
             }
             else if (!path.empty()) {
-                MaterialLoader::load(path);
+                MaterialLoader::load(path, ctxt);
             }
         }
     }
@@ -585,7 +589,7 @@ namespace aten
             ret.camera = readCamera(root, ret.dst.width, ret.dst.height);
 
             readTextures(root);
-            readMaterials(root);
+            readMaterials(root, ctxt);
             readObjects(root, ctxt, objs);
             readLights(root, objs, lights);
             readProcs(root, "preprocs", ret.preprocs);

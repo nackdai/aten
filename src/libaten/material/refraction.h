@@ -5,7 +5,9 @@
 namespace AT_NAME
 {
     class refraction : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         refraction(
             const aten::vec3& albedo = aten::vec3(0.5),
             real ior = real(1),

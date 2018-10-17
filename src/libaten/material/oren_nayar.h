@@ -6,7 +6,9 @@
 namespace AT_NAME
 {
     class OrenNayar : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         OrenNayar(
             const aten::vec3& albedo = aten::vec3(0.5),
             real roughness = real(0.5),

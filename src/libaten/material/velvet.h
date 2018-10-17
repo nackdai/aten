@@ -5,7 +5,9 @@
 namespace AT_NAME
 {
     class MicrofacetVelvet : public material {
-    public:
+        friend class MaterialFactory;
+
+    private:
         MicrofacetVelvet(
             const aten::vec3& albedo = aten::vec3(0.5),
             real roughness = real(0.5), 

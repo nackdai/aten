@@ -100,6 +100,7 @@ void VoxelViewer::bringVoxels(
 }
 
 void VoxelViewer::draw(
+    const aten::context& ctxt,
     const aten::camera* cam,
     std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList,
     bool isWireframe,
@@ -152,8 +153,6 @@ void VoxelViewer::draw(
 
     depth = (depth / aten::sbvh::VoxelDepth) * aten::sbvh::VoxelDepth;
 
-    const auto& mtrls = aten::material::getMaterials();
-
     auto& voxels = voxelList[depth];
 
     for (size_t i = 0; i < voxels.size(); i++) {
@@ -175,13 +174,9 @@ void VoxelViewer::draw(
 
             aten::vec3 color(real(0));
 
-            int mtrlid = (int)voxel.mtrlid;
-            AT_ASSERT(mtrlid >= 0);
+            const auto mtrl = ctxt.getMaterial(voxel.mtrlid);
 
-            if (mtrlid >= 0
-                && mtrls.size() > mtrlid)
-            {
-                const auto mtrl = mtrls[mtrlid];
+            if (mtrl) {
                 color = mtrl->color();
             }
 

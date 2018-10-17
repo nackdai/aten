@@ -22,6 +22,7 @@ public:
 
     // 取り出されたボクセルデータについて描画する.
     void draw(
+        const aten::context& ctxt,
         const aten::camera* cam,
         std::vector<std::vector<aten::ThreadedSbvhNode>>& voxelList,
         bool isWireframe,

@@ -58,9 +58,14 @@ void getCameraPosAndAt(
 
 void makeScene(aten::scene* scene)
 {
+    aten::MaterialParameter mtrlParam;
+    mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
+
+    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameter
+
     aten::AssetManager::registerMtrl(
         "m1",
-        new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+        new aten::lambert());
 
     auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", s_ctxt);
     auto teapot = new aten::instance<aten::object>(obj, s_ctxt, aten::mat4::Identity);

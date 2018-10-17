@@ -505,9 +505,10 @@ namespace AT_NAME
     private:
         static void resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl);
 
-        aten::DataList<AT_NAME::material>::ListItem* getListItem()
+        void addToDataList(aten::DataList<AT_NAME::material>& list)
         {
-            return &m_listItem;
+            list.add(&m_listItem);
+            m_id = m_listItem.currentIndex();
         }
 
     protected:

@@ -64,9 +64,34 @@ void getCameraPosAndAt(
 
 void makeScene(aten::scene* scene)
 {
-    aten::AssetManager::registerMtrl(
-        "m1",
-        new aten::CarPaintBRDF(aten::vec3(0.580000, 0.580000, 0.580000)));
+    aten::MaterialParameter mtrlParam;
+    {
+        mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
+
+        mtrlParam.carpaint.clearcoatRoughness = real(0.5);
+        mtrlParam.carpaint.flakeLayerRoughness = real(0.5);
+
+        mtrlParam.carpaint.flake_scale = real(100);
+        mtrlParam.carpaint.flake_size = real(0.01);
+        mtrlParam.carpaint.flake_size_variance = real(0.25);
+        mtrlParam.carpaint.flake_normal_orientation = real(0.5);
+
+        mtrlParam.carpaint.flake_reflection = real(0.5);
+        mtrlParam.carpaint.flake_transmittance = real(0.5);
+
+        mtrlParam.carpaint.glitterColor = mtrlParam.baseColor;
+        mtrlParam.carpaint.flakeColor = mtrlParam.baseColor;
+
+        mtrlParam.carpaint.flake_intensity = real(1);
+    }
+
+    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        g_ctxt,
+        aten::MaterialType::CarPaint,
+        mtrlParam,
+        nullptr, nullptr, nullptr);
+
+    aten::AssetManager::registerMtrl("m1", mtrl);
 
     auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt);
     auto teapot = new aten::instance<aten::object>(obj, g_ctxt, aten::mat4::Identity);
@@ -81,51 +106,7 @@ void makeScene(aten::scene* scene)
 
 aten::material* createMaterial(aten::MaterialType type)
 {
-    aten::material* mtrl = nullptr;
-
-    switch (type) {
-    case aten::MaterialType::Emissive:
-    case aten::MaterialType::Lambert:
-        mtrl = new aten::lambert();
-        break;
-    case aten::MaterialType::OrneNayar:
-        mtrl = new aten::OrenNayar();
-        break;
-    case aten::MaterialType::Specular:
-        mtrl = new aten::specular();
-        break;
-    case aten::MaterialType::Refraction:
-        mtrl = new aten::refraction();
-        break;
-    case aten::MaterialType::Blinn:
-        mtrl = new aten::MicrofacetBlinn();
-        break;
-    case aten::MaterialType::GGX:
-        mtrl = new aten::MicrofacetGGX();
-        break;
-    case aten::MaterialType::Beckman:
-        mtrl = new aten::MicrofacetBeckman();
-        break;
-    case aten::MaterialType::Velvet:
-        mtrl = new aten::MicrofacetVelvet();
-        break;
-    case aten::MaterialType::Lambert_Refraction:
-        mtrl = new aten::LambertRefraction();
-        break;
-    case aten::MaterialType::Microfacet_Refraction:
-        mtrl = new aten::MicrofacetRefraction();
-        break;
-    case aten::MaterialType::Disney:
-        mtrl = new aten::DisneyBRDF();
-        break;
-    case aten::MaterialType::CarPaint:
-        mtrl = new aten::CarPaintBRDF();
-        break;
-    default:
-        AT_ASSERT(false);
-        mtrl = new aten::lambert();
-        break;
-    }
+    aten::material* mtrl = aten::MaterialFactory::createMaterialWithDefaultValueAndAddToCtxt(g_ctxt, type);
 
     if (mtrl) {
         mtrl->setTextures(
@@ -222,7 +203,7 @@ void onRun(aten::window* window)
             g_tracer.reset();
         }
 
-        auto mtrl = aten::material::getMaterial(0);
+        auto mtrl = g_ctxt.getMaterial(0);
         bool needUpdateMtrl = false;
 
         static const char* items[] = {
@@ -242,7 +223,7 @@ void onRun(aten::window* window)
         };
         int mtrlType = (int)mtrl->param().type;
         if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
-            aten::material::deleteMaterial(mtrl, true);
+            g_ctxt.deleteAllMaterialsAndClearList();
             mtrl = createMaterial((aten::MaterialType)mtrlType);
             needUpdateMtrl = true;
         }

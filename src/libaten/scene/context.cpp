@@ -17,8 +17,13 @@ namespace aten
 
     void context::addMaterial(aten::material* mtrl)
     {
-        auto listItem = mtrl->getListItem();
-        m_materials.add(listItem);
+        AT_ASSERT(mtrl);
+        mtrl->addToDataList(m_materials);
+    }
+
+    void context::deleteAllMaterialsAndClearList()
+    {
+        m_materials.deleteAllDataAndClear();
     }
 
     void context::copyMaterialParameters(std::vector<MaterialParameter>& dst) const

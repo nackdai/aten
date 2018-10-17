@@ -80,11 +80,19 @@ public:
         return static_cast<uint32_t>(getMaterials().size());
     }
 
+    AT_NAME::material* getMaterial(uint32_t idx)
+    {
+        AT_ASSERT(idx < getMaterialNum());
+        return m_materials[idx];
+    }
+
     const AT_NAME::material* getMaterial(uint32_t idx) const
     {
         AT_ASSERT(idx < getMaterialNum());
         return m_materials[idx];
     }
+
+    void deleteAllMaterialsAndClearList();
 
     void copyMaterialParameters(std::vector<MaterialParameter>& dst) const;
 

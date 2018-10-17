@@ -63,7 +63,28 @@ namespace aten
 
     material* MaterialFactory::createMaterialWithDefaultValue(MaterialType type)
     {
-        return createMaterialWithMaterialParameter(type, MaterialParameter(), nullptr, nullptr, nullptr);
+        AT_ASSERT(material::isValidMaterialType(type));
+
+        std::function<material*()> funcs[] = {
+            []() { return new emissive(); },             // emissive
+            []() { return new lambert(); },              // lambert
+            []() { return new OrenNayar(); },            // oren_nayar
+            []() { return new specular(); },             // specular
+            []() { return new refraction(); },           // refraction
+            []() { return new MicrofacetBlinn(); },      // blinn
+            []() { return new MicrofacetGGX(); },        // ggx
+            []() { return new MicrofacetBeckman(); },    // beckman
+            []() { return new MicrofacetVelvet(); },     // velvet
+            []() { return new LambertRefraction(); },    // lambert_rafraction
+            []() { return new MicrofacetRefraction(); }, // microfacet_rafraction
+            []() { return new DisneyBRDF(); },           // disney_brdf
+            []() { return new CarPaintBRDF(); },         // carpaint
+            []() { return nullptr; },                    // toon
+            []() { return nullptr; },                    // layer
+        };
+        AT_STATICASSERT(AT_COUNTOF(funcs) == (int)aten::MaterialType::MaterialTypeMax);
+
+        return funcs[type]();
     }
 
     material* MaterialFactory::createMaterialWithMaterialParameter(
@@ -77,6 +98,8 @@ namespace aten
 
         switch (type) {
         case aten::MaterialType::Emissive:
+            mtrl = new aten::emissive(param.baseColor);
+            break;
         case aten::MaterialType::Lambert:
             mtrl = new aten::lambert(param.baseColor, albedoMap, normalMap);
             break;

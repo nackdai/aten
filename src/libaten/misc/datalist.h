@@ -148,6 +148,24 @@ public:
         return -1;
     }
 
+    void deleteAllDataAndClear()
+    {
+        auto it = m_list.begin();
+
+        while (it != m_list.end()) {
+            auto* item = *it;
+
+            it = m_list.erase(it);
+
+            item->m_belongedList = nullptr;
+
+            auto data = item->getData();
+            delete data;
+        }
+
+        m_list.clear();
+    }
+
     uint32_t size() const
     {
         return static_cast<uint32_t>(m_list.size());

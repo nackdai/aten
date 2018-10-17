@@ -19,6 +19,8 @@ struct Options {
 aten::deformable g_mdl;
 aten::DeformAnimation g_anm;
 
+aten::context g_ctxt;
+
 aten::Timeline g_timeline;
 
 static aten::PinholeCamera g_camera;
@@ -57,7 +59,7 @@ void onRun(aten::window* window)
         g_mdl.update(aten::mat4(), 0, nullptr);
     }
 
-    aten::DeformableRenderer::render(&g_camera, &g_mdl);
+    aten::DeformableRenderer::render(g_ctxt, &g_camera, &g_mdl);
 }
 
 void onClose()
@@ -250,7 +252,7 @@ int main(int argc, char* argv[])
 
     aten::ImageLoader::setBasePath(opt.texDir.c_str());
 
-    if (!aten::MaterialLoader::load(opt.mtrl.c_str())) {
+    if (!aten::MaterialLoader::load(opt.mtrl.c_str(), g_ctxt)) {
         return 0;
     }
 

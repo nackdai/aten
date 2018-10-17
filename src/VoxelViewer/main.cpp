@@ -67,6 +67,7 @@ void onRun(aten::window* window)
     }
 
     g_viewer.draw(
+        g_ctxt,
         &g_camera,
         g_voxels,
         g_isWireframe,
@@ -232,10 +233,18 @@ void loadObj(const Options& opt)
 
     aten::ObjLoader::load(g_objs, opt.input);
 #elif 1
-    aten::AssetManager::registerMtrl(
-        "m",
-        //new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
-        new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.2, 0.2));
+    aten::MaterialParameter mtrlParam;
+    mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
+    mtrlParam.ior = 0.2;
+    mtrlParam.roughness = 0.2;
+
+    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        g_ctxt,
+        aten::MaterialType::GGX,
+        mtrlParam,
+        nullptr, nullptr, nullptr);
+
+    aten::AssetManager::registerMtrl("m", mtrl);
 
     aten::ObjLoader::load(g_objs, opt.input, g_ctxt);
 #else

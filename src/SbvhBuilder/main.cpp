@@ -70,12 +70,18 @@ int main(int argc, char* argv[])
 
     aten::AssetManager::suppressWarnings();
 
+    aten::context ctxt;
+
     // TODO
     // Specify material by command line...
-    auto emit = new aten::emissive(aten::vec3(1));
+    aten::MaterialParameter mtrlParam;
+    mtrlParam.baseColor = aten::vec3(1);
+    auto emit = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        ctxt,
+        aten::MaterialType::Emissive,
+        mtrlParam,
+        nullptr, nullptr, nullptr);
     aten::AssetManager::registerMtrl("light", emit);
-
-    aten::context ctxt;
 
     std::vector<aten::object*> objs;
     aten::ObjLoader::load(objs, opt.input, ctxt);

@@ -32,14 +32,8 @@ build_all_configurations: Debug Release
 
 # Builds the Debug configuration...
 .PHONY: Debug
-Debug: create_folders x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o x64/Debug/libatenscene/src/libatenscene/AssetManager.o x64/Debug/libatenscene/src/libatenscene/ImageLoader.o x64/Debug/libatenscene/src/libatenscene/MaterialExporter.o x64/Debug/libatenscene/src/libatenscene/MaterialLoader.o x64/Debug/libatenscene/src/libatenscene/ObjLoader.o x64/Debug/libatenscene/src/libatenscene/ObjWriter.o x64/Debug/libatenscene/src/libatenscene/SceneLoader.o x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.o 
-	ar rcs x64/Debug/libatenscene.a x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o x64/Debug/libatenscene/src/libatenscene/AssetManager.o x64/Debug/libatenscene/src/libatenscene/ImageLoader.o x64/Debug/libatenscene/src/libatenscene/MaterialExporter.o x64/Debug/libatenscene/src/libatenscene/MaterialLoader.o x64/Debug/libatenscene/src/libatenscene/ObjLoader.o x64/Debug/libatenscene/src/libatenscene/ObjWriter.o x64/Debug/libatenscene/src/libatenscene/SceneLoader.o x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.o  $(Debug_Implicitly_Linked_Objects)
-
-# Compiles file ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc for the Debug configuration...
--include x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
-x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o: ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Debug_Include_Path) -o x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Debug_Include_Path) > x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
+Debug: create_folders x64/Debug/libatenscene/src/libatenscene/AssetManager.o x64/Debug/libatenscene/src/libatenscene/ImageLoader.o x64/Debug/libatenscene/src/libatenscene/MaterialExporter.o x64/Debug/libatenscene/src/libatenscene/MaterialLoader.o x64/Debug/libatenscene/src/libatenscene/ObjLoader.o x64/Debug/libatenscene/src/libatenscene/ObjWriter.o x64/Debug/libatenscene/src/libatenscene/SceneLoader.o x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.o x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o 
+	ar rcs x64/Debug/libatenscene.a x64/Debug/libatenscene/src/libatenscene/AssetManager.o x64/Debug/libatenscene/src/libatenscene/ImageLoader.o x64/Debug/libatenscene/src/libatenscene/MaterialExporter.o x64/Debug/libatenscene/src/libatenscene/MaterialLoader.o x64/Debug/libatenscene/src/libatenscene/ObjLoader.o x64/Debug/libatenscene/src/libatenscene/ObjWriter.o x64/Debug/libatenscene/src/libatenscene/SceneLoader.o x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.o x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o  $(Debug_Implicitly_Linked_Objects)
 
 # Compiles file ../src/libatenscene/AssetManager.cpp for the Debug configuration...
 -include x64/Debug/libatenscene/src/libatenscene/AssetManager.d
@@ -89,16 +83,16 @@ x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.o: ../3rdparty/tinyxml2/tinyxm
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../3rdparty/tinyxml2/tinyxml2.cpp $(Debug_Include_Path) -o x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../3rdparty/tinyxml2/tinyxml2.cpp $(Debug_Include_Path) > x64/Debug/libatenscene/3rdparty/tinyxml2/tinyxml2.d
 
+# Compiles file ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc for the Debug configuration...
+-include x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
+x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o: ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Debug_Include_Path) -o x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Debug_Include_Path) > x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
+
 # Builds the Release configuration...
 .PHONY: Release
-Release: create_folders x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o x64/Release/libatenscene/src/libatenscene/AssetManager.o x64/Release/libatenscene/src/libatenscene/ImageLoader.o x64/Release/libatenscene/src/libatenscene/MaterialExporter.o x64/Release/libatenscene/src/libatenscene/MaterialLoader.o x64/Release/libatenscene/src/libatenscene/ObjLoader.o x64/Release/libatenscene/src/libatenscene/ObjWriter.o x64/Release/libatenscene/src/libatenscene/SceneLoader.o x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.o 
-	ar rcs x64/Release/libatenscene.a x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o x64/Release/libatenscene/src/libatenscene/AssetManager.o x64/Release/libatenscene/src/libatenscene/ImageLoader.o x64/Release/libatenscene/src/libatenscene/MaterialExporter.o x64/Release/libatenscene/src/libatenscene/MaterialLoader.o x64/Release/libatenscene/src/libatenscene/ObjLoader.o x64/Release/libatenscene/src/libatenscene/ObjWriter.o x64/Release/libatenscene/src/libatenscene/SceneLoader.o x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.o  $(Release_Implicitly_Linked_Objects)
-
-# Compiles file ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc for the Release configuration...
--include x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
-x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o: ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Release_Include_Path) -o x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Release_Include_Path) > x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
+Release: create_folders x64/Release/libatenscene/src/libatenscene/AssetManager.o x64/Release/libatenscene/src/libatenscene/ImageLoader.o x64/Release/libatenscene/src/libatenscene/MaterialExporter.o x64/Release/libatenscene/src/libatenscene/MaterialLoader.o x64/Release/libatenscene/src/libatenscene/ObjLoader.o x64/Release/libatenscene/src/libatenscene/ObjWriter.o x64/Release/libatenscene/src/libatenscene/SceneLoader.o x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.o x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o 
+	ar rcs x64/Release/libatenscene.a x64/Release/libatenscene/src/libatenscene/AssetManager.o x64/Release/libatenscene/src/libatenscene/ImageLoader.o x64/Release/libatenscene/src/libatenscene/MaterialExporter.o x64/Release/libatenscene/src/libatenscene/MaterialLoader.o x64/Release/libatenscene/src/libatenscene/ObjLoader.o x64/Release/libatenscene/src/libatenscene/ObjWriter.o x64/Release/libatenscene/src/libatenscene/SceneLoader.o x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.o x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o  $(Release_Implicitly_Linked_Objects)
 
 # Compiles file ../src/libatenscene/AssetManager.cpp for the Release configuration...
 -include x64/Release/libatenscene/src/libatenscene/AssetManager.d
@@ -148,36 +142,42 @@ x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.o: ../3rdparty/tinyxml2/tiny
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../3rdparty/tinyxml2/tinyxml2.cpp $(Release_Include_Path) -o x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../3rdparty/tinyxml2/tinyxml2.cpp $(Release_Include_Path) > x64/Release/libatenscene/3rdparty/tinyxml2/tinyxml2.d
 
+# Compiles file ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc for the Release configuration...
+-include x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
+x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o: ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Release_Include_Path) -o x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.o
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../3rdparty/tinyobjloader_v09/tiny_obj_loader.cc $(Release_Include_Path) > x64/Release/libatenscene/3rdparty/tinyobjloader_v09/tiny_obj_loader.d
+
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders
 create_folders:
-	mkdir -p x64/Debug/libatenscene/3rdparty/tinyobjloader_v09
 	mkdir -p x64/Debug/libatenscene/src/libatenscene
 	mkdir -p x64/Debug/libatenscene/3rdparty/tinyxml2
+	mkdir -p x64/Debug/libatenscene/3rdparty/tinyobjloader_v09
 	mkdir -p x64/Debug
-	mkdir -p x64/Release/libatenscene/3rdparty/tinyobjloader_v09
 	mkdir -p x64/Release/libatenscene/src/libatenscene
 	mkdir -p x64/Release/libatenscene/3rdparty/tinyxml2
+	mkdir -p x64/Release/libatenscene/3rdparty/tinyobjloader_v09
 	mkdir -p x64/Release
 
 # Cleans intermediate and output files (objects, libraries, executables)...
 .PHONY: clean
 clean:
-	rm -f x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/*.o
-	rm -f x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/*.d
 	rm -f x64/Debug/libatenscene/src/libatenscene/*.o
 	rm -f x64/Debug/libatenscene/src/libatenscene/*.d
 	rm -f x64/Debug/libatenscene/3rdparty/tinyxml2/*.o
 	rm -f x64/Debug/libatenscene/3rdparty/tinyxml2/*.d
+	rm -f x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/*.o
+	rm -f x64/Debug/libatenscene/3rdparty/tinyobjloader_v09/*.d
 	rm -f x64/Debug/libatenscene/*.o
 	rm -f x64/Debug/libatenscene/*.d
 	rm -f x64/Debug/libatenscene.a
-	rm -f x64/Release/libatenscene/3rdparty/tinyobjloader_v09/*.o
-	rm -f x64/Release/libatenscene/3rdparty/tinyobjloader_v09/*.d
 	rm -f x64/Release/libatenscene/src/libatenscene/*.o
 	rm -f x64/Release/libatenscene/src/libatenscene/*.d
 	rm -f x64/Release/libatenscene/3rdparty/tinyxml2/*.o
 	rm -f x64/Release/libatenscene/3rdparty/tinyxml2/*.d
+	rm -f x64/Release/libatenscene/3rdparty/tinyobjloader_v09/*.o
+	rm -f x64/Release/libatenscene/3rdparty/tinyobjloader_v09/*.d
 	rm -f x64/Release/libatenscene/*.o
 	rm -f x64/Release/libatenscene/*.d
 	rm -f x64/Release/libatenscene.a

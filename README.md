@@ -100,7 +100,7 @@ And Idanten includes characters of aten, "id**aten**"
 
 ### Windows
 
-1. Install `CUDA 8.0` depended NVIDIA driver
+1. Install `CUDA 8.0` and depended NVIDIA driver
 2. Run `aten/3rdparty/Build3rdParty.bat Debug` or `aten/3rdparty/Build3rdParty.bat Release`
 3. Launch `aten/vs2015/aten.sln`
 4. Build porjects with `x64` (not support `x86`)

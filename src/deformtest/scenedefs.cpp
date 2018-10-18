@@ -171,7 +171,7 @@ void DeformInBoxScene::makeScene(
         mdl->read("unitychan_gpu.mdl");
 
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-        aten::MaterialLoader::load("unitychan_mtrl.xml");
+        aten::MaterialLoader::load("unitychan_mtrl.xml", ctxt);
 
         auto deformMdl = new aten::instance<aten::deformable>(mdl, ctxt, aten::mat4::Identity);
         scene->add(deformMdl);

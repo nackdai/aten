@@ -283,7 +283,7 @@ aten::object* loadObj(
     aten::ImageLoader::setBasePath(pathname);
 
     if (mtrlpath) {
-        aten::MaterialLoader::load(mtrlpath);
+        aten::MaterialLoader::load(mtrlpath, s_ctxt);
     }
 
     std::vector<aten::object*> objs;

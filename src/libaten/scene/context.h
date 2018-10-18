@@ -75,9 +75,9 @@ public:
         return m_materials;
     }
 
-    uint32_t getMaterialNum() const
+    int getMaterialNum() const
     {
-        return static_cast<uint32_t>(getMaterials().size());
+        return static_cast<int>(getMaterials().size());
     }
 
     AT_NAME::material* getMaterial(uint32_t idx)

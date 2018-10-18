@@ -22,8 +22,6 @@ int main()
     MaterialEditWindow::init(
         1280, 720,
         "MaterialEdit");
-
-    aten::material::clearMaterialList();
 #endif
 
     MaterialSelectWindow::init(
@@ -36,8 +34,6 @@ int main()
         //"../../asset/mansion/objs/room.obj");
 
     MaterialEditWindow::buildScene();
-
-    aten::material::clearMaterialList();
 
     MaterialSelectWindow::setFuncPickMtrlIdNotifier(
         MaterialEditWindow::notifyPickMtrlId);

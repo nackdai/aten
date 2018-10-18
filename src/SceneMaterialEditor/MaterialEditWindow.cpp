@@ -61,53 +61,13 @@ void makeScene(aten::scene* scene)
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
 
-    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameter
+    auto mtrl = aten::MaterialFactory::createMaterialWithDefaultValue(aten::MaterialType::Lambert);
 
-    aten::AssetManager::registerMtrl(
-        "m1",
-        new aten::lambert());
+    aten::AssetManager::registerMtrl("m1", mtrl);
 
     auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", s_ctxt);
     auto teapot = new aten::instance<aten::object>(obj, s_ctxt, aten::mat4::Identity);
     scene->add(teapot);
-}
-
-aten::material* createMaterial(aten::MaterialType type)
-{
-    aten::material* mtrl = nullptr;
-
-    switch (type) {
-    case aten::MaterialType::Emissive:
-        mtrl = new aten::emissive();
-        break;
-    case aten::MaterialType::Lambert:
-        mtrl = new aten::lambert();
-        break;
-    case aten::MaterialType::OrneNayar:
-        mtrl = new aten::OrenNayar();
-        break;
-    case aten::MaterialType::Specular:
-        mtrl = new aten::specular();
-        break;
-    case aten::MaterialType::Refraction:
-        mtrl = new aten::refraction();
-        break;
-    case aten::MaterialType::Blinn:
-        mtrl = new aten::MicrofacetBlinn();
-        break;
-    case aten::MaterialType::GGX:
-        mtrl = new aten::MicrofacetGGX();
-        break;
-    case aten::MaterialType::Beckman:
-        mtrl = new aten::MicrofacetBeckman();
-        break;
-    default:
-        AT_ASSERT(false);
-        mtrl = new aten::lambert();
-        break;
-    }
-
-    return mtrl;
 }
 
 class MaterialParamEditor : public aten::IMaterialParamEditor {
@@ -146,6 +106,19 @@ void MaterialEditWindow::notifyPickMtrlId(int mtrlid)
 {
     s_needUpdateMtrl = (s_pickedMtrlId != mtrlid);
     s_pickedMtrlId = mtrlid;
+}
+
+static void getMaterialsFromContext(
+    aten::context& ctxt,
+    std::vector<aten::material*>& mtrls,
+    std::vector<const char*>& mtrlNames)
+{
+    auto mtrlNum = ctxt.getMaterialNum();
+    for (int i = 0; i < mtrlNum; i++) {
+        auto mtrl = ctxt.getMaterial(i);
+        mtrls.push_back(mtrl);
+        mtrlNames.push_back(mtrl->name());
+    }
 }
 
 void MaterialEditWindow::buildScene()
@@ -217,11 +190,7 @@ void MaterialEditWindow::buildScene()
         }
     }
 
-    const auto& mtrls = aten::material::getMaterials();
-    for (const auto mtrl : mtrls) {
-        s_mtrls.push_back(const_cast<aten::material*>(mtrl));
-        s_mtrlNames.push_back(mtrl->name());
-    }
+    getMaterialsFromContext(s_ctxt, s_mtrls, s_mtrlNames);
 
     // Update material.
     std::vector<aten::MaterialParameter> params(1);
@@ -303,10 +272,7 @@ void MaterialEditWindow::onRun(aten::window* window)
         };
         int mtrlType = (int)mtrl->param().type;
         if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
-            auto newMtrl = createMaterial((aten::MaterialType)mtrlType);
-
-            // Avoid to keep global list.
-            aten::material::deleteMaterial(newMtrl);
+            auto newMtrl = aten::MaterialFactory::createMaterialWithDefaultValue((aten::MaterialType)mtrlType);
 
             newMtrl->copyParamEx(mtrl->param());
             newMtrl->setName(mtrl->name());

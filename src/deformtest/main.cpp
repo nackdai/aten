@@ -609,9 +609,9 @@ int main()
         std::vector<aten::SkinningVertex> vtx;
         std::vector<uint32_t> idx;
 
-        int vtxIdOffset = g_ctxt.getVertices().size();
+        int vtxIdOffset = g_ctxt.getVertexNum();
 
-        mdl->getGeometryData(vtx, idx, deformTris);
+        mdl->getGeometryData(g_ctxt, vtx, idx, deformTris);
 
         g_skinning.initWithTriangles(
             &vtx[0], vtx.size(),

@@ -18,6 +18,8 @@ aten::DeformAnimation g_anm;
 
 aten::Timeline g_timeline;
 
+aten::context g_ctxt;
+
 static aten::RasterizeRenderer g_rasterizerAABB;
 
 static aten::PinholeCamera g_camera;
@@ -74,7 +76,7 @@ void onRun(aten::window* window)
 #endif
     }
 
-    aten::DeformableRenderer::render(&g_camera, &g_mdl);
+    aten::DeformableRenderer::render(g_ctxt, &g_camera, &g_mdl);
 
     if (g_willTakeScreenShot)
     {
@@ -321,7 +323,7 @@ int main(int argc, char* argv[])
     g_timeline.start();
 
     aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-    aten::MaterialLoader::load("unitychan_mtrl.xml");
+    aten::MaterialLoader::load("unitychan_mtrl.xml", g_ctxt);
 
     auto textures = aten::texture::getTextures();
     for (auto tex : textures) {
@@ -347,7 +349,7 @@ int main(int argc, char* argv[])
         std::vector<uint32_t> idx;
         std::vector<aten::PrimitiveParamter> tris;
 
-        g_mdl.getGeometryData(vtx, idx, tris);
+        g_mdl.getGeometryData(g_ctxt, vtx, idx, tris);
 
 #if 0
         skinning.init(

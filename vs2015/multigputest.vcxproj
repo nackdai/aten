@@ -27,11 +27,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\common\scenedefs.cpp" />
     <ClCompile Include="..\src\multigputest\main.cpp" />
-    <ClCompile Include="..\src\multigputest\scenedefs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\multigputest\scenedefs.h" />
+    <ClInclude Include="..\src\common\scenedefs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8281FDD8-7A05-453B-A981-9995D979C8B2}</ProjectGuid>

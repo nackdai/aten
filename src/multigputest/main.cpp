@@ -12,7 +12,7 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#include "scenedefs.h"
+#include "../common/scenedefs.h"
 
 #define MULTI_GPU_SVGF
 #define GPU_NUM    (4)

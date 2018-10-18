@@ -252,10 +252,10 @@
   <ItemGroup>
     <ClCompile Include="..\src\appaten\main_denoise.cpp" />
     <ClCompile Include="..\src\appaten\main_test.cpp" />
-    <ClCompile Include="..\src\appaten\scenedefs.cpp" />
+    <ClCompile Include="..\src\common\scenedefs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\appaten\scenedefs.h" />
+    <ClInclude Include="..\src\common\scenedefs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

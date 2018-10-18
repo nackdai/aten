@@ -7,10 +7,57 @@ aten::instance<aten::object>* getMovableObj()
     return g_movableObj;
 }
 
+static aten::material* createMaterial(
+    aten::context& ctxt, 
+    aten::MaterialType type,
+    const aten::vec3& albedo,
+    aten::texture* albedoMap,
+    aten::texture* normalMap)
+{
+    aten::MaterialParameter param;
+    param.baseColor = albedo;
+
+    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        ctxt,
+        type,
+        param,
+        albedoMap,
+        normalMap,
+        nullptr);
+
+    return mtrl;
+}
+
+static aten::material* createMaterialWithParamter(
+    aten::context& ctxt,
+    aten::MaterialType type, 
+    const aten::MaterialParameter& param)
+{
+    return aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        ctxt,
+        type,
+        param,
+        nullptr, nullptr, nullptr);
+}
+
+static aten::material* createMaterial(
+    aten::context& ctxt,
+    aten::MaterialType type,
+    const aten::vec3& albedo)
+{
+    aten::MaterialParameter param;
+    param.baseColor = albedo;
+
+    return aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        ctxt,
+        type,
+        param,
+        nullptr, nullptr, nullptr);
+}
+
 void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = new aten::emissive(aten::vec3(36, 36, 36));
-    //auto emit = new aten::emissive(aten::vec3(3, 3, 3));
+    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 36, 36));
 
     auto light = new aten::sphere(
         aten::vec3(50.0, 75.0, 81.6),
@@ -22,27 +69,27 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto left = new aten::sphere(
         aten::vec3(r + 1, 40.8, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.75f, 0.25f, 0.25f)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75f, 0.25f, 0.25f)));
 
     auto right = new aten::sphere(
         aten::vec3(-r + 99, 40.8, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.25, 0.25, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.25, 0.75)));
 
     auto wall = new aten::sphere(
         aten::vec3(50, 40.8, r),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto floor = new aten::sphere(
         aten::vec3(50, r, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto ceil = new aten::sphere(
         aten::vec3(50, -r + 81.6, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     //auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
@@ -53,8 +100,8 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto green = new aten::sphere(
         aten::vec3(65, 20, 20),
         20,
-        new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
-        //new aten::lambert(aten::vec3(1, 1, 1), tex));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+        //createMaterial(ctxt, aten::vec3(1, 1, 1), tex));
 #else
     auto green = new aten::sphere(
         aten::vec3(65, 20, 20),
@@ -67,10 +114,10 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto mirror = new aten::sphere(
         aten::vec3(27, 16.5, 47),
         16.5,
-        new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
 #else
     auto spec = new aten::MicrofacetBlinn(aten::vec3(1, 1, 1), 200, 0.8);
-    auto diff = new aten::lambert(aten::vec3(0.0, 0.7, 0.0));
+    auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.0, 0.7, 0.0));
 
     auto layer = new aten::LayeredBSDF();
     layer->add(spec);
@@ -97,13 +144,11 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #else
     aten::AssetManager::registerMtrl(
         "m1",
-        //new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
-        new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
 
     aten::AssetManager::registerMtrl(
         "Material.001",
-        //new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
-        new aten::lambert(aten::vec3(0.2, 0.2, 0.7)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.2, 0.2, 0.7)));
 
     auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
@@ -157,7 +202,7 @@ void CornellBoxScene::getCameraPosAndAt(
 
 void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
+    auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
     int i = 1;
@@ -176,18 +221,21 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     s = new aten::sphere(
                         center,
                         0.2,
-                        new aten::lambert(aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
+                        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
                 }
                 else if (choose_mtrl < 0.95) {
                     // specular
                     s = new aten::sphere(
                         center,
                         0.2,
-                        new aten::specular(aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
+                        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
                 }
                 else {
                     // glass
-                    s = new aten::sphere(center, 0.2, new aten::refraction(aten::vec3(1), 1.5));
+                    s = new aten::sphere(
+                        center, 
+                        0.2, 
+                        new aten::refraction(aten::vec3(1), 1.5));
                 }
 
                 scene->add(s);
@@ -198,10 +246,10 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
     s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::refraction(aten::vec3(1), 1.5));
     scene->add(s);
 
-    s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, new aten::lambert(aten::vec3(0.4, 0.2, 0.1)));
+    s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.4, 0.2, 0.1)));
     scene->add(s);
 
-    s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
+    s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s);
 }
 
@@ -228,7 +276,7 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
     scene->add(s_beckman);
 
-    auto s_glass = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
+    auto s_glass = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s_glass);
 }
 
@@ -285,7 +333,7 @@ void ObjectScene::getCameraPosAndAt(
 
 void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = new aten::emissive(aten::vec3(36.0, 36.0, 36.0));
+    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36.0, 36.0, 36.0));
 
     auto light = new aten::sphere(
         aten::vec3(50.0, 90.0, 81.6),
@@ -297,13 +345,13 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto floor = new aten::sphere(
         aten::vec3(0, -r, 0),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     // óŒãÖ.
     auto green = new aten::sphere(
         aten::vec3(65, 20, 20),
         20,
-        new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
 
     //scene->add(light);
     scene->add(floor);
@@ -329,7 +377,7 @@ void PointLightScene::getCameraPosAndAt(
 
 void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = new aten::emissive(aten::vec3(36.0, 36.0, 36.0));
+    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36.0, 36.0, 36.0));
 
     auto light = new aten::sphere(
         aten::vec3(50.0, 90.0, 81.6),
@@ -341,13 +389,13 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto floor = new aten::sphere(
         aten::vec3(0, -r, 0),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     // óŒãÖ.
     auto green = new aten::sphere(
         aten::vec3(65, 20, 20),
         20,
-        new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
 
     //scene->add(light);
     scene->add(floor);
@@ -378,18 +426,18 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto floor = new aten::sphere(
         aten::vec3(0, -r, 0),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     // óŒãÖ.
     auto green = new aten::sphere(
         aten::vec3(65, 20, 20),
         20,
-        new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
 
     auto red = new aten::sphere(
         aten::vec3(25, 20, 20),
         20,
-        new aten::lambert(aten::vec3(0.75, 0.25, 0.25)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.25, 0.25)));
 
     //scene->add(light);
     scene->add(floor);
@@ -423,7 +471,7 @@ void SpotLightScene::getCameraPosAndAt(
 
 void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, new aten::lambert(aten::vec3(0.8, 0.8, 0.8)));
+    auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
 #if 1
@@ -443,14 +491,14 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     s = new aten::sphere(
                         center,
                         0.2,
-                        new aten::lambert(aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
+                        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48(), aten::drand48() * aten::drand48())));
                 }
                 else if (choose_mtrl < 0.95) {
                     // specular
                     s = new aten::sphere(
                         center,
                         0.2,
-                        new aten::specular(aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
+                        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()), 0.5 * (1 + aten::drand48()))));
                 }
                 else {
                     // glass
@@ -466,10 +514,10 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::refraction(aten::vec3(1), 1.5));
     scene->add(s);
 
-    s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, new aten::lambert(aten::vec3(0.8, 0.2, 0.1)));
+    s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.2, 0.1)));
     scene->add(s);
 
-    s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, new aten::specular(aten::vec3(0.7, 0.6, 0.5)));
+    s = new aten::sphere(aten::vec3(4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s);
 
     aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
@@ -518,13 +566,13 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(clr, 0.2, 0.2, albedo, nml, rough));
     scene->add(s_beckman);
 
-    auto s_lambert = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, new aten::lambert(clr, albedo, nml));
+    auto s_lambert = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, clr, albedo, nml));
     scene->add(s_lambert);
 
-    auto s_spec = new aten::sphere(aten::vec3(-3, +2, 0), 1.0, new aten::specular(clr, 0, nullptr, nml_2));
+    auto s_spec = new aten::sphere(aten::vec3(-3, +2, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, clr, nullptr, nml_2));
     scene->add(s_spec);
 
-    auto s_ref = new aten::sphere(aten::vec3(-1, +2, 0), 1.0, new aten::specular(clr, 0, nullptr, nml_2));
+    auto s_ref = new aten::sphere(aten::vec3(-1, +2, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, clr, nullptr, nml_2));
     scene->add(s_ref);
 #endif
 }
@@ -543,7 +591,7 @@ void TexturesScene::getCameraPosAndAt(
 
 void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto emit = new aten::emissive(aten::vec3(64.0, 64.0, 64.0));
+    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(64.0, 64.0, 64.0));
 
     auto light = new aten::sphere(
         aten::vec3(50.0, 90.0, 81.6),
@@ -555,34 +603,34 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto cube = new aten::cube(
         aten::vec3(50.0, 75.0 - cubeheight, 81.6),
         60, cubeheight, 60,
-        new aten::lambert(aten::vec3(0.5, 0.5, 0.5)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.5, 0.5, 0.5)));
 
     double r = 1e3;
 
     auto left = new aten::sphere(
         aten::vec3(r + 1, 40.8, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.75f, 0.25f, 0.25f)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75f, 0.25f, 0.25f)));
 
     auto right = new aten::sphere(
         aten::vec3(-r + 99, 40.8, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.25, 0.25, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.25, 0.75)));
 
     auto wall = new aten::sphere(
         aten::vec3(50, 40.8, r),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto floor = new aten::sphere(
         aten::vec3(50, r, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     auto ceil = new aten::sphere(
         aten::vec3(50, -r + 81.6, 81.6),
         r,
-        new aten::lambert(aten::vec3(0.75, 0.75, 0.75)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.75, 0.75, 0.75)));
 
     //auto tex = aten::ImageLoader::load("../../asset/earth.bmp");
 
@@ -590,14 +638,14 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto green = new aten::sphere(
         aten::vec3(65, 20, 20),
         20,
-        new aten::lambert(aten::vec3(0.25, 0.75, 0.25)));
-    //new aten::lambert(aten::vec3(1, 1, 1), tex));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.25, 0.75, 0.25)));
+    //createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(1, 1, 1), tex));
 
     // ãæ.
     auto mirror = new aten::sphere(
         aten::vec3(27, 16.5, 47),
         16.5,
-        new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
 
     // ÉKÉâÉX.
     auto glass = new aten::sphere(
@@ -652,7 +700,7 @@ void DisneyMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     }
 
     {
-        auto m = new aten::lambert(aten::vec3(0.82, 0.67, 0.16));
+        auto m = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.82, 0.67, 0.16));
         auto s = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, m);
         scene->add(s);
     }
@@ -705,7 +753,7 @@ void DisneyMaterialTestScene::getCameraPosAndAt(
 void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto spec = new aten::MicrofacetBlinn(aten::vec3(1, 1, 1), 200, 0.8);
-    auto diff = new aten::lambert(aten::vec3(0.7, 0.0, 0.0));
+    auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.7, 0.0, 0.0));
 
     auto layer = new aten::LayeredBSDF();
     layer->add(spec);
@@ -778,7 +826,7 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     // ãæ.
     auto mirror = new aten::sphere(
         1,
-        new aten::specular(aten::vec3(0.99, 0.99, 0.99)));
+        createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
     scene->add(new aten::instance<aten::sphere>(mirror, ctxt, mtxL2W));
 #endif
 
@@ -821,31 +869,31 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     aten::AssetManager::registerMtrl(
         "backWall",
-        new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
     aten::AssetManager::registerMtrl(
         "ceiling",
-        new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
     aten::AssetManager::registerMtrl(
         "floor",
-        new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
     aten::AssetManager::registerMtrl(
         "leftWall",
-        new aten::lambert(aten::vec3(0.504000, 0.052000, 0.040000)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000)));
 
-    auto emit = new aten::emissive(aten::vec3(36, 33, 24));
+    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
     aten::AssetManager::registerMtrl(
         "light",
         emit);
 
     aten::AssetManager::registerMtrl(
         "rightWall",
-        new aten::lambert(aten::vec3(0.112000, 0.360000, 0.072800)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
     aten::AssetManager::registerMtrl(
         "shortBox",
-        new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
     aten::AssetManager::registerMtrl(
         "tallBox",
-        new aten::lambert(aten::vec3(0.580000, 0.568000, 0.544000)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     std::vector<aten::object*> objs;
     aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true);
@@ -914,70 +962,70 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     aten::AssetManager::registerMtrl(
         "sp_00_luk_mali",
-        new aten::lambert(aten::vec3(0.745098, 0.709804, 0.674510), SP_LUK, SP_LUK_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.745098, 0.709804, 0.674510), SP_LUK, SP_LUK_nml));
     aten::AssetManager::registerMtrl(
         "sp_svod_kapitel",
-        new aten::lambert(aten::vec3(0.713726, 0.705882, 0.658824), _00_SKAP));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.713726, 0.705882, 0.658824), _00_SKAP, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_01_stub_baza_",
-        new aten::lambert(aten::vec3(0.784314, 0.784314, 0.784314)));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.784314, 0.784314, 0.784314)));
     aten::AssetManager::registerMtrl(
         "sp_01_stub_kut",
-        new aten::lambert(aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
     aten::AssetManager::registerMtrl(
         "sp_00_stup",
-        new aten::lambert(aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
     aten::AssetManager::registerMtrl(
         "sp_01_stub_baza",
-        new aten::lambert(aten::vec3(0.800000, 0.784314, 0.749020), _01_S_BA));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.800000, 0.784314, 0.749020), _01_S_BA, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_00_luk_mal1",
-        new aten::lambert(aten::vec3(0.745098, 0.709804, 0.674510), _01_ST_KP, _01_ST_KP_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.745098, 0.709804, 0.674510), _01_ST_KP, _01_ST_KP_nml));
     aten::AssetManager::registerMtrl(
         "sp_01_stub",
-        new aten::lambert(aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
     aten::AssetManager::registerMtrl(
         "sp_01_stup",
-        new aten::lambert(aten::vec3(0.827451, 0.800000, 0.768628), X01_ST));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.827451, 0.800000, 0.768628), X01_ST, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_vijenac",
-        new aten::lambert(aten::vec3(0.713726, 0.705882, 0.658824), _00_SKAP));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.713726, 0.705882, 0.658824), _00_SKAP, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_00_svod",
-        new aten::lambert(aten::vec3(0.941177, 0.866667, 0.737255), KAMEN_stup));    // TODO    specularÇ™Ç†ÇÈÇÃÇ≈ÅAlambertÇ≈Ç»Ç¢.
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.941177, 0.866667, 0.737255), KAMEN_stup, nullptr));    // TODO    specularÇ™Ç†ÇÈÇÃÇ≈ÅAlambertÇ≈Ç»Ç¢.
     aten::AssetManager::registerMtrl(
         "sp_02_reljef",
-        new aten::lambert(aten::vec3(0.529412, 0.498039, 0.490196), RELJEF, RELJEF_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.529412, 0.498039, 0.490196), RELJEF, RELJEF_nml));
     aten::AssetManager::registerMtrl(
         "sp_01_luk_a",
-        new aten::lambert(aten::vec3(0.745098, 0.709804, 0.674510), SP_LUK, SP_LUK_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.745098, 0.709804, 0.674510), SP_LUK, SP_LUK_nml));
     aten::AssetManager::registerMtrl(
         "sp_zid_vani",
-        new aten::lambert(aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
     aten::AssetManager::registerMtrl(
         "sp_01_stup_baza",
-        new aten::lambert(aten::vec3(0.800000, 0.784314, 0.749020), _01_S_BA));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.800000, 0.784314, 0.749020), _01_S_BA, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_00_zid",
-        new aten::lambert(aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
     aten::AssetManager::registerMtrl(
         "sp_00_prozor",
-        new aten::lambert(aten::vec3(1.000000, 1.000000, 1.000000), PROZOR1));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(1.000000, 1.000000, 1.000000), PROZOR1, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_00_vrata_krug",
-        new aten::lambert(aten::vec3(0.784314, 0.784314, 0.784314), VRATA_KR));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.784314, 0.784314, 0.784314), VRATA_KR, nullptr));
     aten::AssetManager::registerMtrl(
         "sp_00_pod",
-        new aten::lambert(aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
     aten::AssetManager::registerMtrl(
         "sp_00_vrata_kock",
-        new aten::lambert(aten::vec3(0.784314, 0.784314, 0.784314), VRATA_KO));
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.784314, 0.784314, 0.784314), VRATA_KO, nullptr));
 
     std::vector<aten::object*> objs;
 
     aten::ObjLoader::load(objs, "../../asset/sponza/sponza.obj", ctxt);
 
-    objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh");
+    objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh", ctxt, 0);
 
     auto sponza = new aten::instance<aten::object>(objs[0], ctxt, aten::mat4::Identity);
 
@@ -987,7 +1035,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
         objs.clear();
         aten::ObjLoader::load(objs, "../../asset/sponza/sponza_lod.obj", ctxt);
-        objs[0]->importInternalAccelTree("../../asset/sponza/sponza_lod.sbvh", offsetTriIdx);
+        objs[0]->importInternalAccelTree("../../asset/sponza/sponza_lod.sbvh", ctxt, offsetTriIdx);
         sponza->setLod(objs[0]);
     }
 #endif
@@ -1012,7 +1060,7 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #if 1
     aten::AssetManager::registerMtrl(
         "m1",
-        //new aten::lambert(aten::vec3(0.580000, 0.580000, 0.580000)));
+        //createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.580000, 0.580000)));
         //new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.5, 1.0));
         //new aten::MicrofacetRefraction(aten::vec3(0.7, 0.7, 0.7), 0.2, 3.7));
         new aten::LambertRefraction(aten::vec3(0.7, 0.7, 0.7), 1.0));

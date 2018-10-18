@@ -210,7 +210,7 @@ void onRun(aten::window* window)
         AT_PRINTF("[%d, %d]\n", info.ix, info.iy);
         AT_PRINTF("  nml[%f, %f, %f]\n", info.normal.x, info.normal.y, info.normal.z);
 
-        auto mtrl = aten::material::getMaterial(info.mtrlid);
+        auto mtrl = g_ctxt.getMaterial(info.mtrlid);
 
         AT_PRINTF("  mesh[%d] mtrl[%d](%s), tri[%d]\n", info.meshid, info.mtrlid, mtrl ? mtrl->name() : "none", info.triid);
     }

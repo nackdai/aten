@@ -7,7 +7,7 @@ void DemoScene::makeScene(
 {
     aten::ImageLoader::setBasePath("../../asset/mansion/objs");
 
-    aten::MaterialLoader::load("../../asset/mansion/objs/mansion_mtrl.xml");
+    aten::MaterialLoader::load("../../asset/mansion/objs/mansion_mtrl.xml", ctxt);
 
     static struct ObjInfo {
         const char* name;
@@ -46,7 +46,7 @@ void DemoScene::makeScene(
         sbvhpath = "../../asset/mansion/objs/" + sbvhpath + ".sbvh";
 
         aten::ObjLoader::load(objs, objpath.c_str(), ctxt, false, info.needComputeNormalOntime);
-        objs[0]->importInternalAccelTree(sbvhpath.c_str());
+        objs[0]->importInternalAccelTree(sbvhpath.c_str(), ctxt, 0);
 
         auto inst = new aten::instance<aten::object>(objs[0], ctxt, aten::mat4::Identity);
 

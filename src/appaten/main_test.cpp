@@ -2,7 +2,7 @@
 #include <vector>
 #include "aten.h"
 #include "atenscene.h"
-#include "scenedefs.h"
+#include "../common/scenedefs.h"
 
 static int WIDTH = 512;
 static int HEIGHT = 512;

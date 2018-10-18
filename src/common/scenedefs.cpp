@@ -28,18 +28,6 @@ static aten::material* createMaterial(
     return mtrl;
 }
 
-static aten::material* createMaterialWithParamter(
-    aten::context& ctxt,
-    aten::MaterialType type, 
-    const aten::MaterialParameter& param)
-{
-    return aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
-        ctxt,
-        type,
-        param,
-        nullptr, nullptr, nullptr);
-}
-
 static aten::material* createMaterial(
     aten::context& ctxt,
     aten::MaterialType type,
@@ -53,6 +41,35 @@ static aten::material* createMaterial(
         type,
         param,
         nullptr, nullptr, nullptr);
+}
+
+static aten::material* createMaterialWithParamter(
+    aten::context& ctxt,
+    aten::MaterialType type, 
+    const aten::MaterialParameter& param)
+{
+    return aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        ctxt,
+        type,
+        param,
+        nullptr, nullptr, nullptr);
+}
+
+static aten::material* createMaterialWithParamter(
+    aten::context& ctxt,
+    aten::MaterialType type,
+    const aten::MaterialParameter& param,
+    aten::texture* albedoMap,
+    aten::texture* normalMap,
+    aten::texture* roughnessMap)
+{
+    return aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
+        ctxt,
+        type,
+        param,
+        albedoMap, 
+        normalMap,
+        roughnessMap);
 }
 
 void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
@@ -205,6 +222,8 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
+    aten::MaterialParameter mtrlParam;
+
     int i = 1;
     for (int x = -11; x < 11; x++) {
         for (int z = -11; z < 11; z++) {
@@ -232,10 +251,13 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
                 }
                 else {
                     // glass
+                    mtrlParam.baseColor = aten::vec3(1);
+                    mtrlParam.ior = 1.5;
+
                     s = new aten::sphere(
                         center, 
                         0.2, 
-                        new aten::refraction(aten::vec3(1), 1.5));
+                        createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
                 }
 
                 scene->add(s);
@@ -243,7 +265,9 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
         }
     }
 
-    s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::refraction(aten::vec3(1), 1.5));
+    mtrlParam.baseColor = aten::vec3(1);
+    mtrlParam.ior = 1.5;
+    s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
     s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.4, 0.2, 0.1)));
@@ -267,13 +291,24 @@ void RandomScene::getCameraPosAndAt(
 
 void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto s_blinn = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+    aten::MaterialParameter mtrlParam;
+
+    mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
+    mtrlParam.shininess = 200;
+    mtrlParam.ior = 0.2;
+    auto s_blinn = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
     scene->add(s_blinn);
 
-    auto s_ggx = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+    mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
+    mtrlParam.roughness = 0.2;
+    mtrlParam.ior = 0.2;
+    auto s_ggx = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
     scene->add(s_ggx);
 
-    auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+    mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
+    mtrlParam.roughness = 0.2;
+    mtrlParam.ior = 0.2;
+    auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Beckman, mtrlParam));
     scene->add(s_beckman);
 
     auto s_glass = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
@@ -294,13 +329,18 @@ void MtrlTestScene::getCameraPosAndAt(
 
 void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
+    aten::MaterialParameter mtrlParam;
+    mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
+    mtrlParam.shininess = 200;
+    mtrlParam.ior = 0.2;
+
     aten::AssetManager::registerMtrl(
         "m1",
-        new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
 
     aten::AssetManager::registerMtrl(
         "Material.001",
-        new aten::MicrofacetBlinn(aten::vec3(0.7, 0.6, 0.5), 200, 0.2));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
 
     auto obj = aten::ObjLoader::load("../../asset/suzanne/suzanne.obj", ctxt);
     //auto obj = aten::ObjLoader::load("../../asset/teapot.obj");
@@ -474,6 +514,8 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto s = new aten::sphere(aten::vec3(0, -1000, 0), 1000, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
+    aten::MaterialParameter mtrlParam;
+
 #if 1
     int i = 1;
     for (int x = -5; x < 5; x++) {
@@ -502,7 +544,10 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
                 }
                 else {
                     // glass
-                    s = new aten::sphere(center, 0.2, new aten::refraction(aten::vec3(1), 1.5));
+                    mtrlParam.baseColor = aten::vec3(1);
+                    mtrlParam.ior = 1.5;
+
+                    s = new aten::sphere(center, 0.2, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
                 }
 
                 scene->add(s);
@@ -511,7 +556,9 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     }
 #endif
 
-    s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::refraction(aten::vec3(1), 1.5));
+    mtrlParam.baseColor = aten::vec3(1);
+    mtrlParam.ior = 1.5;
+    s = new aten::sphere(aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
     s = new aten::sphere(aten::vec3(-4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.2, 0.1)));
@@ -557,15 +604,30 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto nml_2 = aten::ImageLoader::load("../../asset/normalmap.png");
     aten::vec3 clr = aten::vec3(1, 1, 1);
 
-    auto s_blinn = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, new aten::MicrofacetBlinn(clr, 200, 0.2, albedo, nml));
+    aten::MaterialParameter mtrlParam;
+
+    mtrlParam.baseColor = clr;
+    mtrlParam.shininess = 200;
+    mtrlParam.ior = 0.2;
+    auto s_blinn = new aten::sphere(aten::vec3(-3, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam, albedo, nml, nullptr));
     scene->add(s_blinn);
+
 #if 1
-    auto s_ggx = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, new aten::MicrofacetGGX(clr, 0.2, 0.2, albedo, nml, rough));
+    mtrlParam.baseColor = clr;
+    mtrlParam.roughness = 0.2;
+    mtrlParam.ior = 0.2;
+    auto s_ggx = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam, albedo, nml, rough));
     scene->add(s_ggx);
 
-    auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBeckman(clr, 0.2, 0.2, albedo, nml, rough));
+    mtrlParam.baseColor = clr;
+    mtrlParam.roughness = 0.2;
+    mtrlParam.ior = 0.2;
+    auto s_beckman = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Beckman, mtrlParam, albedo, nml, rough));
     scene->add(s_beckman);
 
+    mtrlParam.baseColor = clr;
+    mtrlParam.roughness = 0.2;
+    mtrlParam.ior = 0.2;
     auto s_lambert = new aten::sphere(aten::vec3(+3, 0, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, clr, albedo, nml));
     scene->add(s_lambert);
 
@@ -648,10 +710,13 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
 
     // ƒKƒ‰ƒX.
+    aten::MaterialParameter mtrlParam;
+    mtrlParam.baseColor = aten::vec3(0.99, 0.99, 0.99);
+    mtrlParam.ior = 1.5;
     auto glass = new aten::sphere(
         aten::vec3(77, 16.5, 78),
         16.5,
-        new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
 
 #if 1
     scene->add(light);
@@ -688,13 +753,13 @@ void HideLightScene::getCameraPosAndAt(
 void DisneyMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     {
-        aten::MaterialParameter param;
-        param.baseColor = aten::vec3(0.82, 0.67, 0.16);
-        param.roughness = 0.3;
-        param.specular = 0.5;
-        param.metallic = 0.5;
+        aten::MaterialParameter mtrlParam;
+        mtrlParam.baseColor = aten::vec3(0.82, 0.67, 0.16);
+        mtrlParam.roughness = 0.3;
+        mtrlParam.specular = 0.5;
+        mtrlParam.metallic = 0.5;
 
-        auto m = new aten::DisneyBRDF(param);
+        auto m = createMaterialWithParamter(ctxt, aten::MaterialType::Disney, mtrlParam);;
         auto s = new aten::sphere(aten::vec3(0, 0, 0), 1.0, m);
         scene->add(s);
     }
@@ -752,7 +817,13 @@ void DisneyMaterialTestScene::getCameraPosAndAt(
 
 void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto spec = new aten::MicrofacetBlinn(aten::vec3(1, 1, 1), 200, 0.8);
+    aten::MaterialParameter mtrlParam;
+
+    mtrlParam.baseColor = aten::vec3(1, 1, 1);
+    mtrlParam.shininess = 200;
+    mtrlParam.ior = 0.8;
+    auto spec = createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam);
+    
     auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.7, 0.0, 0.0));
 
     auto layer = new aten::LayeredBSDF();
@@ -765,7 +836,10 @@ void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene
     auto s_diff = new aten::sphere(aten::vec3(-1, 0, 0), 1.0, diff);
     scene->add(s_diff);
 
-    auto s_spec = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, new aten::MicrofacetBlinn(aten::vec3(0.7, 0, 0), 200, 0.8));
+    mtrlParam.baseColor = aten::vec3(0.7, 0, 0);
+    mtrlParam.shininess = 200;
+    mtrlParam.ior = 0.8;
+    auto s_spec = new aten::sphere(aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
     scene->add(s_spec);
 }
 
@@ -818,6 +892,8 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     scene->add(instance);
 
+    aten::MaterialParameter mtrlParam;
+
     aten::mat4 mtxL2W;
 
 #if 1
@@ -833,19 +909,27 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #if 1
     mtxL2W.asTrans(aten::vec3(2.5, 0, 0));
 
+    mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
+    mtrlParam.roughness = 0.2;
+    mtrlParam.ior = 0.2;
+
     auto s_ggx = new aten::sphere(
         1.0, 
-        new aten::MicrofacetGGX(aten::vec3(0.7, 0.6, 0.5), 0.2, 0.2));
+        createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
     scene->add(new aten::instance<aten::sphere>(s_ggx, ctxt, mtxL2W));
 #endif
 
 #if 1
     mtxL2W.asTrans(aten::vec3(0, -1, 2));
 
+    mtrlParam.baseColor = aten::vec3(0.99, 0.99, 0.99);
+    mtrlParam.ior = 1.5;
+    mtrlParam.isIdealRefraction = true;
+
     // ƒKƒ‰ƒX.
     auto glass = new aten::sphere(
         0.5,
-        new aten::refraction(aten::vec3(0.99, 0.99, 0.99), 1.5, true));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(new aten::instance<aten::sphere>(glass, ctxt, mtxL2W));
 #endif
 
@@ -1057,24 +1141,19 @@ void SponzaScene::getCameraPosAndAt(
 
 void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-#if 1
+    aten::MaterialParameter mtrlParam;
+    mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
+    mtrlParam.ior = 1.3;
+
     aten::AssetManager::registerMtrl(
         "m1",
-        //createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.580000, 0.580000)));
-        //new aten::MicrofacetGGX(aten::vec3(0.7, 0.7, 0.7), 0.5, 1.0));
-        //new aten::MicrofacetRefraction(aten::vec3(0.7, 0.7, 0.7), 0.2, 3.7));
-        new aten::LambertRefraction(aten::vec3(0.7, 0.7, 0.7), 1.0));
-        //new aten::refraction(aten::vec3(0.7, 0.7, 0.7), 1.0));
+        createMaterialWithParamter(ctxt, aten::MaterialType::Lambert_Refraction, mtrlParam));
 
     std::vector<aten::object*> objs;
 
     aten::ObjLoader::load(objs, "../../asset/teapot/teapot.obj", ctxt);
     auto bunny = new aten::instance<aten::object>(objs[0], ctxt, aten::mat4::Identity);
     scene->add(bunny);
-#else
-    auto s_blinn = new aten::sphere(aten::vec3(0, 1, 0), 1.0, new aten::LambertRefraction(aten::vec3(0.7, 0.7, 0.7), 1.0));
-    scene->add(s_blinn);
-#endif
 }
 
 void BunnyScene::getCameraPosAndAt(

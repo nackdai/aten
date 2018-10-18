@@ -2,10 +2,10 @@
 
 struct QVertex {
     aten::vertex v;
-    uint32_t idx;
-    uint32_t orgIdx;
-    uint32_t grid[3];
-    int group;
+    uint32_t idx;       // vertex index.
+    uint32_t orgIdx;    // for debug. original vertex index.
+    uint32_t grid[3];   // grid index.
+    int group;          // triangle group.
     uint64_t hash;
 
     QVertex() {}
@@ -46,72 +46,36 @@ struct QVertex {
 
 using qit = std::vector<QVertex>::iterator;
 
-static void computeAverage(qit start, qit end)
+// Replaces the position of the vertex within the specified range 
+// with the position of the vertex closest to the average of the vertices within that range.
+static void replaceVtxPositionToClosestFromAvg(qit start, qit end)
 {
-    aten::vec4 pos(start->v.pos);
-    aten::vec3 nml(start->v.nml);
-    aten::vec3 uv(start->v.uv);
+    aten::vec4 avg(start->v.pos);
 
     uint32_t cnt = 1;
 
     for (auto q = start + 1; q != end; q++) {
-        pos += q->v.pos;
-        nml += q->v.nml;
-        uv += q->v.uv;
+        avg += q->v.pos;
 
         cnt++;
     }
 
-    real div = real(1) / cnt;
-
-    pos *= div;
-    nml *= div;
-    uv *= div;
-
-    pos.w = real(1);
-    nml = normalize(nml);
-
-    // NOTE
-    // z is used for checking to compute plane normal in real-time.
-    uv.z = uv.z >= 0 ? 1 : 0;
-
-    // ŒvŽZŒ‹‰Ê‚ð–ß‚·...
-    for (auto q = start; q != end; q++) {
-        q->v.pos = pos;
-        q->v.nml = nml;
-        q->v.uv = uv;
-    }
-}
-
-static void computeClosestFromAvg(qit start, qit end)
-{
-    aten::vec4 pos(start->v.pos);
-
-    uint32_t cnt = 1;
-
-    for (auto q = start + 1; q != end; q++) {
-        pos += q->v.pos;
-
-        cnt++;
-    }
-
-    real div = real(1) / cnt;
-
-    pos *= div;
+    avg /= cnt;
 
     real distMin = AT_MATH_INF;
 
     qit closest = start;
 
+    // Find out the closest vertex to the average.
     for (auto q = start; q != end; q++) {
-        auto d = (pos - q->v.pos).length();
+        auto d = (avg - q->v.pos).length();
         if (d < distMin) {
             distMin = d;
             closest = q;
         }
     }
 
-    // ŒvŽZŒ‹‰Ê‚ð–ß‚·...
+    // Replace to the closest vertex position.
     for (auto q = start; q != end; q++) {
         q->v = closest->v;
     }
@@ -213,11 +177,11 @@ void LodMaker::make(
                 end++;
             }
 
-            // TODO
-            // •½‹ÏŒvŽZ.
-            //computeAverage(start, end);
-            computeClosestFromAvg(start, end);
+            // Replaces the position of the vertex within the specified range 
+            // with the position of the vertex closest to the average of the vertices within that range.
+            replaceVtxPositionToClosestFromAvg(start, end);
 
+            // Find out if there is something not replaced. 
             for (auto q = start; q != end; q++) {
                 if (q == start) {
                     dstVertices.push_back(q->v);

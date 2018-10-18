@@ -42,8 +42,14 @@ build_all_configurations: Debug Release
 
 # Builds the Debug configuration...
 .PHONY: Debug
-Debug: create_folders x64/Debug/multigputest/src/multigputest/main.o x64/Debug/multigputest/src/multigputest/scenedefs.o 
-	g++ x64/Debug/multigputest/src/multigputest/main.o x64/Debug/multigputest/src/multigputest/scenedefs.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/multigputest/multigputest.exe
+Debug: create_folders x64/Debug/multigputest/src/common/scenedefs.o x64/Debug/multigputest/src/multigputest/main.o 
+	g++ x64/Debug/multigputest/src/common/scenedefs.o x64/Debug/multigputest/src/multigputest/main.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/multigputest/multigputest.exe
+
+# Compiles file ../src/common/scenedefs.cpp for the Debug configuration...
+-include x64/Debug/multigputest/src/common/scenedefs.d
+x64/Debug/multigputest/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/multigputest/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/multigputest/src/common/scenedefs.d
 
 # Compiles file ../src/multigputest/main.cpp for the Debug configuration...
 -include x64/Debug/multigputest/src/multigputest/main.d
@@ -51,16 +57,16 @@ x64/Debug/multigputest/src/multigputest/main.o: ../src/multigputest/main.cpp
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/multigputest/main.cpp $(Debug_Include_Path) -o x64/Debug/multigputest/src/multigputest/main.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/multigputest/main.cpp $(Debug_Include_Path) > x64/Debug/multigputest/src/multigputest/main.d
 
-# Compiles file ../src/multigputest/scenedefs.cpp for the Debug configuration...
--include x64/Debug/multigputest/src/multigputest/scenedefs.d
-x64/Debug/multigputest/src/multigputest/scenedefs.o: ../src/multigputest/scenedefs.cpp
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/multigputest/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/multigputest/src/multigputest/scenedefs.o
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/multigputest/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/multigputest/src/multigputest/scenedefs.d
-
 # Builds the Release configuration...
 .PHONY: Release
-Release: create_folders x64/Release/multigputest/src/multigputest/main.o x64/Release/multigputest/src/multigputest/scenedefs.o 
-	g++ x64/Release/multigputest/src/multigputest/main.o x64/Release/multigputest/src/multigputest/scenedefs.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/multigputest/multigputest.exe
+Release: create_folders x64/Release/multigputest/src/common/scenedefs.o x64/Release/multigputest/src/multigputest/main.o 
+	g++ x64/Release/multigputest/src/common/scenedefs.o x64/Release/multigputest/src/multigputest/main.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/multigputest/multigputest.exe
+
+# Compiles file ../src/common/scenedefs.cpp for the Release configuration...
+-include x64/Release/multigputest/src/common/scenedefs.d
+x64/Release/multigputest/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Release_Include_Path) -o x64/Release/multigputest/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Release_Include_Path) > x64/Release/multigputest/src/common/scenedefs.d
 
 # Compiles file ../src/multigputest/main.cpp for the Release configuration...
 -include x64/Release/multigputest/src/multigputest/main.d
@@ -68,28 +74,28 @@ x64/Release/multigputest/src/multigputest/main.o: ../src/multigputest/main.cpp
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/multigputest/main.cpp $(Release_Include_Path) -o x64/Release/multigputest/src/multigputest/main.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/multigputest/main.cpp $(Release_Include_Path) > x64/Release/multigputest/src/multigputest/main.d
 
-# Compiles file ../src/multigputest/scenedefs.cpp for the Release configuration...
--include x64/Release/multigputest/src/multigputest/scenedefs.d
-x64/Release/multigputest/src/multigputest/scenedefs.o: ../src/multigputest/scenedefs.cpp
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/multigputest/scenedefs.cpp $(Release_Include_Path) -o x64/Release/multigputest/src/multigputest/scenedefs.o
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/multigputest/scenedefs.cpp $(Release_Include_Path) > x64/Release/multigputest/src/multigputest/scenedefs.d
-
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders
 create_folders:
+	mkdir -p x64/Debug/multigputest/src/common
 	mkdir -p x64/Debug/multigputest/src/multigputest
 	mkdir -p ../src/multigputest
+	mkdir -p x64/Release/multigputest/src/common
 	mkdir -p x64/Release/multigputest/src/multigputest
 	mkdir -p ../src/multigputest
 
 # Cleans intermediate and output files (objects, libraries, executables)...
 .PHONY: clean
 clean:
+	rm -f x64/Debug/multigputest/src/common/*.o
+	rm -f x64/Debug/multigputest/src/common/*.d
 	rm -f x64/Debug/multigputest/src/multigputest/*.o
 	rm -f x64/Debug/multigputest/src/multigputest/*.d
 	rm -f x64/Debug/multigputest/*.o
 	rm -f x64/Debug/multigputest/*.d
 	rm -f ../src/multigputest/multigputest.exe
+	rm -f x64/Release/multigputest/src/common/*.o
+	rm -f x64/Release/multigputest/src/common/*.d
 	rm -f x64/Release/multigputest/src/multigputest/*.o
 	rm -f x64/Release/multigputest/src/multigputest/*.d
 	rm -f x64/Release/multigputest/*.o

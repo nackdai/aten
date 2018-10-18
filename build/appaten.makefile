@@ -32,8 +32,8 @@ build_all_configurations: Debug Release
 
 # Builds the Debug configuration...
 .PHONY: Debug
-Debug: create_folders x64/Debug/appaten/src/appaten/main_denoise.o x64/Debug/appaten/src/appaten/main_test.o x64/Debug/appaten/src/appaten/scenedefs.o 
-	g++ x64/Debug/appaten/src/appaten/main_denoise.o x64/Debug/appaten/src/appaten/main_test.o x64/Debug/appaten/src/appaten/scenedefs.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/appaten/appaten.exe
+Debug: create_folders x64/Debug/appaten/src/appaten/main_denoise.o x64/Debug/appaten/src/appaten/main_test.o x64/Debug/appaten/src/common/scenedefs.o 
+	g++ x64/Debug/appaten/src/appaten/main_denoise.o x64/Debug/appaten/src/appaten/main_test.o x64/Debug/appaten/src/common/scenedefs.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/appaten/appaten.exe
 
 # Compiles file ../src/appaten/main_denoise.cpp for the Debug configuration...
 -include x64/Debug/appaten/src/appaten/main_denoise.d
@@ -47,16 +47,16 @@ x64/Debug/appaten/src/appaten/main_test.o: ../src/appaten/main_test.cpp
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/appaten/main_test.cpp $(Debug_Include_Path) -o x64/Debug/appaten/src/appaten/main_test.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/appaten/main_test.cpp $(Debug_Include_Path) > x64/Debug/appaten/src/appaten/main_test.d
 
-# Compiles file ../src/appaten/scenedefs.cpp for the Debug configuration...
--include x64/Debug/appaten/src/appaten/scenedefs.d
-x64/Debug/appaten/src/appaten/scenedefs.o: ../src/appaten/scenedefs.cpp
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/appaten/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/appaten/src/appaten/scenedefs.o
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/appaten/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/appaten/src/appaten/scenedefs.d
+# Compiles file ../src/common/scenedefs.cpp for the Debug configuration...
+-include x64/Debug/appaten/src/common/scenedefs.d
+x64/Debug/appaten/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/appaten/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/appaten/src/common/scenedefs.d
 
 # Builds the Release configuration...
 .PHONY: Release
-Release: create_folders x64/Release/appaten/src/appaten/main_denoise.o x64/Release/appaten/src/appaten/main_test.o x64/Release/appaten/src/appaten/scenedefs.o 
-	g++ x64/Release/appaten/src/appaten/main_denoise.o x64/Release/appaten/src/appaten/main_test.o x64/Release/appaten/src/appaten/scenedefs.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/appaten/appaten.exe
+Release: create_folders x64/Release/appaten/src/appaten/main_denoise.o x64/Release/appaten/src/appaten/main_test.o x64/Release/appaten/src/common/scenedefs.o 
+	g++ x64/Release/appaten/src/appaten/main_denoise.o x64/Release/appaten/src/appaten/main_test.o x64/Release/appaten/src/common/scenedefs.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/appaten/appaten.exe
 
 # Compiles file ../src/appaten/main_denoise.cpp for the Release configuration...
 -include x64/Release/appaten/src/appaten/main_denoise.d
@@ -70,18 +70,20 @@ x64/Release/appaten/src/appaten/main_test.o: ../src/appaten/main_test.cpp
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/appaten/main_test.cpp $(Release_Include_Path) -o x64/Release/appaten/src/appaten/main_test.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/appaten/main_test.cpp $(Release_Include_Path) > x64/Release/appaten/src/appaten/main_test.d
 
-# Compiles file ../src/appaten/scenedefs.cpp for the Release configuration...
--include x64/Release/appaten/src/appaten/scenedefs.d
-x64/Release/appaten/src/appaten/scenedefs.o: ../src/appaten/scenedefs.cpp
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/appaten/scenedefs.cpp $(Release_Include_Path) -o x64/Release/appaten/src/appaten/scenedefs.o
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/appaten/scenedefs.cpp $(Release_Include_Path) > x64/Release/appaten/src/appaten/scenedefs.d
+# Compiles file ../src/common/scenedefs.cpp for the Release configuration...
+-include x64/Release/appaten/src/common/scenedefs.d
+x64/Release/appaten/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Release_Include_Path) -o x64/Release/appaten/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Release_Include_Path) > x64/Release/appaten/src/common/scenedefs.d
 
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders
 create_folders:
 	mkdir -p x64/Debug/appaten/src/appaten
+	mkdir -p x64/Debug/appaten/src/common
 	mkdir -p ../src/appaten
 	mkdir -p x64/Release/appaten/src/appaten
+	mkdir -p x64/Release/appaten/src/common
 	mkdir -p ../src/appaten
 
 # Cleans intermediate and output files (objects, libraries, executables)...
@@ -89,11 +91,15 @@ create_folders:
 clean:
 	rm -f x64/Debug/appaten/src/appaten/*.o
 	rm -f x64/Debug/appaten/src/appaten/*.d
+	rm -f x64/Debug/appaten/src/common/*.o
+	rm -f x64/Debug/appaten/src/common/*.d
 	rm -f x64/Debug/appaten/*.o
 	rm -f x64/Debug/appaten/*.d
 	rm -f ../src/appaten/appaten.exe
 	rm -f x64/Release/appaten/src/appaten/*.o
 	rm -f x64/Release/appaten/src/appaten/*.d
+	rm -f x64/Release/appaten/src/common/*.o
+	rm -f x64/Release/appaten/src/common/*.d
 	rm -f x64/Release/appaten/*.o
 	rm -f x64/Release/appaten/*.d
 	rm -f ../src/appaten/appaten.exe

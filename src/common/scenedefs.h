@@ -2,6 +2,8 @@
 #include "atenscene.h"
 
 aten::instance<aten::object>* getMovableObj();
+aten::instance<aten::deformable>* getDeformable();
+aten::DeformAnimation* getDeformAnm();
 
 class CornellBoxScene {
 public:
@@ -167,6 +169,30 @@ public:
         real& fov);
 };
 
+class DeformScene {
+public:
+    static void makeScene(
+        aten::context& ctxt,
+        aten::scene* scene);
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        real& fov);
+};
+
+class DeformInBoxScene {
+public:
+    static void makeScene(
+        aten::context& ctxt,
+        aten::scene* scene);
+
+    static void getCameraPosAndAt(
+        aten::vec3& pos,
+        aten::vec3& at,
+        real& fov);
+};
+
 //#define Scene CornellBoxScene
 //#define Scene RandomScene
 //#define Scene ObjectScene
@@ -183,3 +209,5 @@ public:
 //#define Scene ObjCornellBoxScene
 //#define Scene SponzaScene
 #define Scene BunnyScene
+//#define Scene DeformScene
+//#define Scene DeformInBoxScene

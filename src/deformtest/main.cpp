@@ -14,7 +14,7 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#include "scenedefs.h"
+#include "../common/scenedefs.h"
 
 //#pragma optimize( "", off)
 

@@ -94,7 +94,7 @@ void onRun(aten::window* window)
     timer.begin();
 
 #ifdef MULTI_GPU_SVGF
-    g_rasterizer.drawScene(
+    g_rasterizer.drawSceneForGBuffer(
         g_tracer[0].getRenderer().frame(),
         g_ctxt,
         &g_scene,

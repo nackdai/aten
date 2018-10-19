@@ -168,7 +168,7 @@ namespace AT_NAME {
             real& selectPdf,
             aten::LightSampleResult& sampleRes);
 
-        void draw(
+        void drawForGBuffer(
             aten::hitable::FuncPreDraw func,
             std::function<bool(aten::hitable*)> funcIfDraw,
             const aten::context& ctxt) const;

@@ -120,7 +120,7 @@ namespace aten {
 #endif
     }
 
-    void scene::draw(
+    void scene::drawForGBuffer(
         aten::hitable::FuncPreDraw func,
         std::function<bool(aten::hitable*)> funcIfDraw,
         const context& ctxt) const
@@ -131,7 +131,7 @@ namespace aten {
             bool willDraw = funcIfDraw ? funcIfDraw(h) : true;
 
             if (willDraw) {
-                h->draw(func, ctxt, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
+                h->drawForGBuffer(func, ctxt, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
             }
 
             auto item = h->getHasObject();

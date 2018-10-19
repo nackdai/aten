@@ -217,7 +217,7 @@ namespace aten
         uint32_t globalTriOffset;
     };
 
-    void deformable::draw(
+    void deformable::drawForGBuffer(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
         const aten::mat4& mtxL2W,

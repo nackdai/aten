@@ -184,7 +184,7 @@ void onRun(aten::window* window)
 
     aten::GLProfiler::begin();
 
-    g_rasterizer.drawScene(
+    g_rasterizer.drawSceneForGBuffer(
         g_tracer.frame(),
         g_ctxt,
         &g_scene,

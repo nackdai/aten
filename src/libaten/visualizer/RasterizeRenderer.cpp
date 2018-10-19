@@ -32,12 +32,12 @@ namespace aten {
         return m_shader.init(width, height, pathVS, pathGS, pathFS);
     }
 
-    void RasterizeRenderer::drawScene(
+    void RasterizeRenderer::drawSceneForGBuffer(
         int frame,
         context& ctxt,
         const scene* scene,
         const camera* cam,
-        FBO* fbo/*= nullptr*/,
+        FBO* fbo,
         shader* exShader/*= nullptr*/)
     {
         auto camparam = cam->param();
@@ -127,7 +127,7 @@ namespace aten {
         ctxt.build();
 
         // For object (which means "not" deformable).
-        scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
+        scene->drawForGBuffer([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
             auto hMtxL2W = m_shader.getHandle("mtxL2W");
             CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
 
@@ -154,7 +154,7 @@ namespace aten {
             hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
             CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, &m_mtxPrevW2C.a[0]));
 
-            scene->draw([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
+            scene->drawForGBuffer([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
                 auto hMtxL2W = exShader->getHandle("mtxL2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
 

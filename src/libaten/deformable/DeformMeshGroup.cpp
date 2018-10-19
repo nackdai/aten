@@ -9,7 +9,6 @@ namespace aten
 {
     bool DeformMeshGroup::read(
         FileInputStream* stream,
-        IDeformMeshReadHelper* helper,
         bool isGPUSkinning)
     {
         AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
@@ -57,7 +56,7 @@ namespace aten
             m_triangles = 0;
 
             for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
-                AT_VRETURN_FALSE(m_meshs[i].read(stream, helper, isGPUSkinning, m_vbs));
+                AT_VRETURN_FALSE(m_meshs[i].read(stream, isGPUSkinning));
 
                 for (auto& prim : m_meshs[i].m_prims) {
                     prim.setTriOffset(m_triangles);
@@ -69,7 +68,23 @@ namespace aten
             }
         }
 
-        if (isGPUSkinning) {
+        return true;
+    }
+
+    void DeformMeshGroup::initToRender(
+        shader* shd,
+        bool isGPUSkinning)
+    {
+        for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
+            m_meshs[i].initToRender(shd, isGPUSkinning, m_vbs);
+        }
+
+        if (m_vbForGPUSkinning.isInitialized()) {
+            return;
+        }
+
+        if (isGPUSkinning)
+        {
             // TODO
             // シェーダの input とどう合わせるか...
 
@@ -94,8 +109,6 @@ namespace aten
                 m.setExternalVertexBuffer(m_vbForGPUSkinning);
             }
         }
-
-        return true;
     }
 
     void DeformMeshGroup::render(

@@ -19,9 +19,9 @@ namespace aten
         ~DeformMesh() {}
 
     private:
-        bool read(
-            FileInputStream* stream,
-            IDeformMeshReadHelper* helper);
+        bool read(FileInputStream* stream);
+
+        void initToRender(shader* shd);
 
         void render(
             const context& ctxt,

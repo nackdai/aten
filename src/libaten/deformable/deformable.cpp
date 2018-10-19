@@ -12,24 +12,6 @@
 
 namespace aten
 {
-    class DeformMeshReadHelper : public IDeformMeshReadHelper {
-    public:
-        DeformMeshReadHelper() {}
-        virtual ~DeformMeshReadHelper() {}
-
-    public:
-        virtual void createVAO(
-            GeomVertexBuffer* vb,
-            const VertexAttrib* attribs,
-            uint32_t attribNum) override final
-        {
-            AT_ASSERT(m_shd);
-            vb->createVAOByAttribName(m_shd, attribs, attribNum);
-        }
-
-        shader* m_shd{ nullptr };
-    };
-
     deformable::~deformable()
     {
         if (m_accel) {
@@ -39,10 +21,6 @@ namespace aten
 
     bool deformable::read(const char* path)
     {
-        // TODO...
-        DeformMeshReadHelper helper;
-        DeformableRenderer::initDeformMeshReadHelper(&helper);
-
         FileInputStream file;
         AT_VRETURN_FALSE(file.open(path, "rb"));
 
@@ -57,7 +35,7 @@ namespace aten
             AT_VRETURN_FALSE(AT_STREAM_READ(stream, &meshChunkHeader, sizeof(meshChunkHeader)));
 
             if (meshChunkHeader.magicChunk == MdlChunkMagic::Mesh) {
-                AT_VRETURN_FALSE(m_mesh.read(stream, &helper));
+                AT_VRETURN_FALSE(m_mesh.read(stream));
             }
             else {
                 AT_VRETURN_FALSE(false);
@@ -239,16 +217,24 @@ namespace aten
         m_mesh.render(ctxt, m_sklController, &helper);
     }
 
-    //////////////////////////////////////////////////////////////
+    void deformable::initToRender(shader* shd)
+    {
+        if (m_isInitializedToRender) {
+            return;
+        }
 
-    shader DeformableRenderer::s_shd;
+        m_mesh.initToRender(shd);
+        m_isInitializedToRender = true;
+    }
+
+    //////////////////////////////////////////////////////////////
 
     bool DeformableRenderer::init(
         int width, int height,
         const char* pathVS,
         const char* pathFS)
     {
-        return s_shd.init(width, height, pathVS, pathFS);
+        return m_shd.init(width, height, pathVS, pathFS);
     }
 
     void DeformableRenderer::render(
@@ -268,7 +254,7 @@ namespace aten
         CALL_GL_API(::glBlendEquation(GL_FUNC_ADD));
         CALL_GL_API(::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        s_shd.prepareRender(nullptr, false);
+        m_shd.prepareRender(nullptr, false);
 
         {
             auto camparam = cam->param();
@@ -293,7 +279,7 @@ namespace aten
 
             aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
-            auto hMtxW2C = s_shd.getHandle("mtxW2C");
+            auto hMtxW2C = m_shd.getHandle("mtxW2C");
             CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
 
             // NOTE
@@ -301,12 +287,6 @@ namespace aten
             // そのため、シェーダでは計算する必要がないので、シェーダに渡さない.
         }
 
-        mdl->render(ctxt, &s_shd);
-    }
-
-    void DeformableRenderer::initDeformMeshReadHelper(DeformMeshReadHelper* helper)
-    {
-        //AT_ASSERT(s_shd.isValid());
-        helper->m_shd = &s_shd;
+        mdl->render(ctxt, &m_shd);
     }
 }

@@ -109,7 +109,7 @@ namespace aten {
             return m_vbo;
         }
 
-        bool isInitialized() const
+        virtual bool isInitialized() const
         {
             return m_vbo > 0;
         }
@@ -165,6 +165,11 @@ namespace aten {
         void endRead(uint32_t idx)
         {
             endMap(idx);
+        }
+
+        virtual bool isInitialized() const
+        {
+            return getHandleNum() > 0;
         }
 
     private:

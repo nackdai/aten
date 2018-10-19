@@ -80,15 +80,15 @@ public:
         return static_cast<int>(getMaterials().size());
     }
 
-    AT_NAME::material* getMaterial(uint32_t idx)
+    AT_NAME::material* getMaterial(int idx)
     {
-        AT_ASSERT(idx < getMaterialNum());
+        AT_ASSERT(0 <= idx && idx < getMaterialNum());
         return m_materials[idx];
     }
 
-    const AT_NAME::material* getMaterial(uint32_t idx) const
+    const AT_NAME::material* getMaterial(int idx) const
     {
-        AT_ASSERT(idx < getMaterialNum());
+        AT_ASSERT(0 <= idx && idx < getMaterialNum());
         return m_materials[idx];
     }
 

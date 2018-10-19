@@ -2,9 +2,7 @@
 
 namespace aten
 {
-    bool DeformMesh::read(
-        FileInputStream* stream,
-        IDeformMeshReadHelper* helper)
+    bool DeformMesh::read(FileInputStream* stream)
     {
         AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_header, sizeof(m_header)));
 
@@ -17,10 +15,19 @@ namespace aten
         m_groups.resize(m_header.numMeshGroup);
 
         for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
-            AT_VRETURN_FALSE(m_groups[i].read(stream, helper, isGPUSkinning));
+            AT_VRETURN_FALSE(m_groups[i].read(stream, isGPUSkinning));
         }
 
         return true;
+    }
+
+    void DeformMesh::initToRender(shader* shd)
+    {
+        bool isGPUSkinning = m_header.isGPUSkinning;
+
+        for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
+            m_groups[i].initToRender(shd, isGPUSkinning);
+        }
     }
 
     void DeformMesh::render(

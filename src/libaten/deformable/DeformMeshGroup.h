@@ -23,7 +23,10 @@ namespace aten
     private:
         bool read(
             FileInputStream* stream,
-            IDeformMeshReadHelper* helper,
+            bool isGPUSkinning);
+
+        void initToRender(
+            shader* shd,
             bool isGPUSkinning);
 
         void render(

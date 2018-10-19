@@ -3,6 +3,7 @@
 
 #include "aten.h"
 #include "atenscene.h"
+#include "idaten.h"
 
 static const int WIDTH = 1280;
 static const int HEIGHT = 720;
@@ -16,12 +17,14 @@ struct Options {
     std::string texDir;
 };
 
-aten::deformable g_mdl;
-aten::DeformAnimation g_anm;
+static aten::deformable g_mdl;
+static aten::DeformAnimation g_anm;
 
-aten::context g_ctxt;
+static idaten::Skinning g_skinning;
 
-aten::Timeline g_timeline;
+static aten::context g_ctxt;
+
+static aten::Timeline g_timeline;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -45,6 +48,16 @@ void onRun(aten::window* window)
         camparam.zfar = real(10000.0);
 
         g_isCameraDirty = false;
+    }
+
+    bool isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
+
+    aten::vec3 aabbMin, aabbMax;
+
+    if (isGPUSkinning) {
+        const auto& mtx = g_mdl.getMatrices();
+        g_skinning.update(&mtx[0], mtx.size());
+        g_skinning.compute(aabbMin, aabbMax);
     }
 
     if (g_enableAnm) {

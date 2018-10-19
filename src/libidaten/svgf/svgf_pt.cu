@@ -734,8 +734,8 @@ __global__ void shade(
     if (!shMtrls[threadIdx.x].attrib.isSingular) {
         // TODO
         // AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
-        //c = aten::abs(dot(orienting_normal, nextDir));
-        c = dot(orienting_normal, nextDir);
+        c = aten::abs(dot(orienting_normal, nextDir));
+        //c = dot(orienting_normal, nextDir);
     }
 
     if (pdfb > 0 && c > 0) {

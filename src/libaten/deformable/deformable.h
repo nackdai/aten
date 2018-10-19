@@ -8,12 +8,15 @@
 #include "geometry/transformable.h"
 #include "visualizer/shader.h"
 #include "scene/context.h"
+#include "camera/camera.h"
 
 namespace aten
 {
     /** メッシュデータ.
      */
     class deformable : public transformable {
+        friend class DeformableRenderer;
+
     public:
         deformable() 
             : m_param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
@@ -31,10 +34,6 @@ namespace aten
             const mat4& mtxL2W,
             real time,
             DeformAnimation* anm);
-
-        void render(
-            const context& ctxt,
-            shader* shd);
 
         void build();
 
@@ -114,13 +113,22 @@ namespace aten
         {
             // Not support.
             AT_ASSERT(false);
-        }        
+        }
+
+    private:
+        void render(
+            const context& ctxt,
+            shader* shd);
+
+        void initToRender(shader* shd);
 
     private:
         DeformMesh m_mesh;
 
         GeomParameter m_param;
         aten::accelerator* m_accel{ nullptr };
+
+        bool m_isInitializedToRender{ false };
 
         // TODO
         Skeleton m_skl;
@@ -129,32 +137,28 @@ namespace aten
 
     //////////////////////////////////////////////////////////////
 
-    class camera;
-    class DeformMeshReadHelper;
-
     // For debug.
     class DeformableRenderer {
-        friend class deformable;
-
+    public:
+        DeformableRenderer() {}
+        ~DeformableRenderer() {}
+            
     private:
-        DeformableRenderer();
-        ~DeformableRenderer();
+        DeformableRenderer(const DeformableRenderer& rhs) = delete;
+        const DeformableRenderer& operator=(const DeformableRenderer& rhs) = delete;
 
     public:
-        static bool init(
+        bool init(
             int width, int height,
             const char* pathVS,
             const char* pathFS);
 
-        static void render(
+        void render(
             const context& ctxt,
             const camera* cam,
             deformable* mdl);
 
     private:
-        static void initDeformMeshReadHelper(DeformMeshReadHelper* helper);
-
-    private:
-        static shader s_shd;
+        shader m_shd;
     };
 }

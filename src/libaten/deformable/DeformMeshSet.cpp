@@ -112,7 +112,35 @@ namespace aten
 
     bool DeformMeshSet::read(
         FileInputStream* stream,
-        IDeformMeshReadHelper* helper,
+        bool isGPUSkinning)
+     {
+        AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
+        
+        if (m_desc.numSubset > 0) {
+            if (m_desc.fmt > 0) {
+                uint32_t attribNum = 0;
+
+                for (uint32_t i = 0; i < (uint32_t)MeshVertexFormat::Num; i++) {
+                    if (m_desc.fmt & (1 << i)) {
+                        attribNum++;
+                    }
+                }
+
+                if (attribNum > 0) {
+                    m_prims.resize(m_desc.numSubset);
+
+                    for (auto& prim : m_prims) {
+                        AT_VRETURN_FALSE(prim.read(stream, isGPUSkinning));
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    void DeformMeshSet::initToRender(
+        shader* shd,
         bool isGPUSkinning,
         std::vector<GeomVertexBuffer>& vbs)
     {
@@ -126,52 +154,38 @@ namespace aten
             setVtxAttribBlendWeight,
         };
         AT_STATICASSERT(AT_COUNTOF(funcSetVtxAttrib) == (uint32_t)MeshVertexFormat::Num);
+        
+        // 頂点バッファのアトリビュートを作成.
 
-        AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_desc, sizeof(m_desc)));
+        uint32_t offset = 0;
+        uint32_t attribNum = 0;
 
-        if (m_desc.numSubset > 0) {
-            if (m_desc.fmt > 0) {
-                // TODO
-                // シェーダの input とどう合わせるか...
-
-                // 頂点バッファのアトリビュートを作成.
-
-                uint32_t offset = 0;
-                uint32_t attribNum = 0;
-
-                VertexAttrib attribs[(uint32_t)MeshVertexFormat::Num];
-
-                for (uint32_t i = 0; i < (uint32_t)MeshVertexFormat::Num; i++) {
-                    if (m_desc.fmt & (1 << i)) {
-                        offset = funcSetVtxAttrib[i](&attribs[attribNum], offset);
-                        attribs[attribNum].name = attribName[i];
-                        attribNum++;
-                    }
+        VertexAttrib attribs[(uint32_t)MeshVertexFormat::Num];
+        
+        for (uint32_t i = 0; i < (uint32_t)MeshVertexFormat::Num; i++) {
+            if (m_desc.fmt & (1 << i)) {
+                offset = funcSetVtxAttrib[i](&attribs[attribNum], offset);
+                attribs[attribNum].name = attribName[i];
+                attribNum++;
+            }
+        }
+        
+        if (attribNum > 0) {
+            for (auto& prim : m_prims) {
+                if (isGPUSkinning) {
+                    // Nothing...
                 }
-
-                if (attribNum > 0) {
-                    m_prims.resize(m_desc.numSubset);
-
-                    for (auto& prim : m_prims) {
-                        AT_VRETURN_FALSE(prim.read(stream, isGPUSkinning));
-
-                        if (isGPUSkinning) {
-                            // Nothing...
-                        }
-                        else {
-                            const auto& primDesc = prim.getDesc();
-                            auto& vb = vbs[primDesc.idxVB];
-
-                            helper->createVAO(&vb, attribs, attribNum);
-
-                            prim.setVB(&vb);
-                        }
-                    }
+                else {
+                    const auto& primDesc = prim.getDesc();
+                    auto& vb = vbs[primDesc.idxVB];
+                    
+                    AT_ASSERT(shd);
+                    vb.createVAOByAttribName(shd, attribs, attribNum);
+                    
+                    prim.setVB(&vb);
                 }
             }
         }
-
-        return true;
     }
 
     void DeformMeshSet::setExternalVertexBuffer(GeomMultiVertexBuffer& vb)

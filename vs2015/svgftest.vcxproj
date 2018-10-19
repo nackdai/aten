@@ -27,11 +27,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\common\scenedefs.cpp" />
     <ClCompile Include="..\src\svgftest\main.cpp" />
-    <ClCompile Include="..\src\svgftest\scenedefs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\svgftest\scenedefs.h" />
+    <ClInclude Include="..\src\common\scenedefs.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A913CD5C-95E0-4AB9-A0A6-DDAE9F7705A3}</ProjectGuid>

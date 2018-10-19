@@ -12,7 +12,7 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-#include "scenedefs.h"
+#include "../common/scenedefs.h"
 
 #define ENABLE_ENVMAP
 //#define ENABLE_NLM

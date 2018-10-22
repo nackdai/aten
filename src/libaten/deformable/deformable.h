@@ -12,6 +12,8 @@
 
 namespace aten
 {
+    class DeformableRenderer;
+
     /** メッシュデータ.
      */
     class deformable : public transformable {
@@ -27,6 +29,7 @@ namespace aten
         bool read(const char* path);
 
         void initGLResources(shader* shd);
+        void initGLResourcesWithDeformableRenderer(DeformableRenderer& renderer);
 
         void release();
 
@@ -139,6 +142,8 @@ namespace aten
 
     // For debug.
     class DeformableRenderer {
+        friend class deformable;
+
     public:
         DeformableRenderer() {}
         ~DeformableRenderer() {}
@@ -157,6 +162,12 @@ namespace aten
             const context& ctxt,
             const camera* cam,
             deformable* mdl);
+
+    private:
+        shader* getShader()
+        {
+            return &m_shd;
+        }
 
     private:
         shader m_shd;

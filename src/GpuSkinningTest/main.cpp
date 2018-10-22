@@ -13,12 +13,14 @@ static const char* TITLE = "GpuSkinningTest";
 static bool s_isGPUSkinning = true;
 static idaten::Skinning skinning;
 
-aten::deformable g_mdl;
-aten::DeformAnimation g_anm;
+static aten::deformable g_mdl;
+static aten::DeformAnimation g_anm;
 
-aten::Timeline g_timeline;
+static aten::DeformableRenderer g_renderer;
 
-aten::context g_ctxt;
+static aten::Timeline g_timeline;
+
+static aten::context g_ctxt;
 
 static aten::RasterizeRenderer g_rasterizerAABB;
 
@@ -76,7 +78,7 @@ void onRun(aten::window* window)
 #endif
     }
 
-    aten::DeformableRenderer::render(g_ctxt, &g_camera, &g_mdl);
+    g_renderer.render(g_ctxt, &g_camera, &g_mdl);
 
     if (g_willTakeScreenShot)
     {
@@ -300,23 +302,25 @@ int main(int argc, char* argv[])
         "../shader/simple3d_vs.glsl",
         "../shader/simple3d_fs.glsl");
 
-    s_isGPUSkinning = true;
+    g_mdl.read("unitychan_gpu.mdl");
+    g_anm.read("unitychan.anm");
+
+    s_isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
 
     if (s_isGPUSkinning) {
-        aten::DeformableRenderer::init(
+        g_renderer.init(
             WIDTH, HEIGHT,
             "drawobj_vs.glsl",
             "drawobj_fs.glsl");
     }
     else {
-        aten::DeformableRenderer::init(
+        g_renderer.init(
             WIDTH, HEIGHT,
             "../shader/skinning_vs.glsl",
             "../shader/skinning_fs.glsl");
     }
 
-    g_mdl.read("unitychan_gpu.mdl");
-    g_anm.read("unitychan.anm");
+    g_mdl.initGLResourcesWithDeformableRenderer(g_renderer);
 
     g_timeline.init(g_anm.getDesc().time, real(0));
     g_timeline.enableLoop(true);
@@ -351,17 +355,10 @@ int main(int argc, char* argv[])
 
         g_mdl.getGeometryData(g_ctxt, vtx, idx, tris);
 
-#if 0
-        skinning.init(
-            &vtx[0], vtx.size(),
-            &idx[0], idx.size(),
-            &vb);
-#else
         skinning.initWithTriangles(
             &vtx[0], vtx.size(),
             &tris[0], tris.size(),
             &vb);
-#endif
     }
 
     aten::window::run();

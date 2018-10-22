@@ -227,6 +227,12 @@ namespace aten
         m_isInitializedToRender = true;
     }
 
+    void deformable::initGLResourcesWithDeformableRenderer(DeformableRenderer& renderer)
+    {
+        auto shd = renderer.getShader();
+        initGLResources(shd);
+    }
+
     //////////////////////////////////////////////////////////////
 
     bool DeformableRenderer::init(

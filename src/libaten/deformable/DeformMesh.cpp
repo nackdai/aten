@@ -21,12 +21,12 @@ namespace aten
         return true;
     }
 
-    void DeformMesh::initToRender(shader* shd)
+    void DeformMesh::initGLResources(shader* shd)
     {
         bool isGPUSkinning = m_header.isGPUSkinning;
 
         for (uint32_t i = 0; i < m_header.numMeshGroup; i++) {
-            m_groups[i].initToRender(shd, isGPUSkinning);
+            m_groups[i].initGLResources(shd, isGPUSkinning);
         }
     }
 

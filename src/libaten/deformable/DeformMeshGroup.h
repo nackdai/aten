@@ -25,7 +25,7 @@ namespace aten
             FileInputStream* stream,
             bool isGPUSkinning);
 
-        void initToRender(
+        void initGLResources(
             shader* shd,
             bool isGPUSkinning);
 

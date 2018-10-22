@@ -139,7 +139,7 @@ namespace aten
         return true;
     }
 
-    void DeformMeshSet::initToRender(
+    void DeformMeshSet::initGLResources(
         shader* shd,
         bool isGPUSkinning,
         std::vector<GeomVertexBuffer>& vbs)

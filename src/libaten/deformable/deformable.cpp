@@ -217,13 +217,13 @@ namespace aten
         m_mesh.render(ctxt, m_sklController, &helper);
     }
 
-    void deformable::initToRender(shader* shd)
+    void deformable::initGLResources(shader* shd)
     {
         if (m_isInitializedToRender) {
             return;
         }
 
-        m_mesh.initToRender(shd);
+        m_mesh.initGLResources(shd);
         m_isInitializedToRender = true;
     }
 

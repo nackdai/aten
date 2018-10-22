@@ -71,12 +71,12 @@ namespace aten
         return true;
     }
 
-    void DeformMeshGroup::initToRender(
+    void DeformMeshGroup::initGLResources(
         shader* shd,
         bool isGPUSkinning)
     {
         for (uint32_t i = 0; i < m_desc.numMeshSet; i++) {
-            m_meshs[i].initToRender(shd, isGPUSkinning, m_vbs);
+            m_meshs[i].initGLResources(shd, isGPUSkinning, m_vbs);
         }
 
         if (m_vbForGPUSkinning.isInitialized()) {

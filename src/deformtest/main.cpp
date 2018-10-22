@@ -604,6 +604,8 @@ int main()
     {
         auto mdl = deform->getHasObjectAsRealType();
 
+        mdl->initGLResources(&g_shdRasterizeDeformable);
+
         auto& vb = mdl->getVBForGPUSkinning();
 
         std::vector<aten::SkinningVertex> vtx;

@@ -26,6 +26,8 @@ namespace aten
     public:
         bool read(const char* path);
 
+        void initGLResources(shader* shd);
+
         void release();
 
         void update(const mat4& mtxL2W);
@@ -119,8 +121,6 @@ namespace aten
         void render(
             const context& ctxt,
             shader* shd);
-
-        void initToRender(shader* shd);
 
     private:
         DeformMesh m_mesh;

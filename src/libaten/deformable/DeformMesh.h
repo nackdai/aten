@@ -21,7 +21,7 @@ namespace aten
     private:
         bool read(FileInputStream* stream);
 
-        void initToRender(shader* shd);
+        void initGLResources(shader* shd);
 
         void render(
             const context& ctxt,

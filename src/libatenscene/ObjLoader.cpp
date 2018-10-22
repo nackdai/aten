@@ -270,8 +270,6 @@ namespace aten
                     }
                 }
 
-                face* f = new face();
-
                 aten::PrimitiveParamter faceParam;
 
                 faceParam.idx[0] = shape.mesh.indices[i + 0] + curVtxPos;
@@ -289,14 +287,10 @@ namespace aten
                     faceParam.needNormal = 1;
                 }
 
-                f->setParam(faceParam);
+                faceParam.mtrlid = dstshape->getMaterial()->id();
+                faceParam.gemoid = dstshape->getGeomId();
 
-                f->build(
-                    ctxt,
-                    dstshape->getMaterial()->id(),
-                    dstshape->getGeomId());
-
-                ctxt.addTriangle(f);
+                auto f = face::create(faceParam, ctxt);
 
                 dstshape->addFace(f);
             }

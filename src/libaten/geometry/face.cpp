@@ -27,6 +27,21 @@ namespace AT_NAME
         m_listItem.leave();
     }
 
+    face* face::create(
+        const aten::PrimitiveParamter& param,
+        context& ctxt)
+    {
+        face* f = new face();
+
+        f->param = param;
+
+        f->build(ctxt, param.mtrlid, param.gemoid);
+
+        ctxt.addTriangle(f);
+
+        return f;
+    }
+
     bool face::hit(
         const context& ctxt,
         const aten::ray& r,

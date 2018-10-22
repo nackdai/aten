@@ -10,9 +10,6 @@ namespace AT_NAME
 {
     objshape::~objshape()
     {
-        for (auto f : faces) {
-            delete f;
-        }
         faces.clear();
     }
 

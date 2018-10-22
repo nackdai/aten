@@ -18,11 +18,15 @@ namespace AT_NAME
         static std::atomic<int> s_id;
         static std::vector<face*> s_faces;
 
-    public:
+    private:
         face();
         virtual ~face();
 
     public:
+        static face* create(
+            const aten::PrimitiveParamter& param,
+            context& ctxt);
+
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,

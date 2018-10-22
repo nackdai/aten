@@ -42,8 +42,14 @@ build_all_configurations: Debug Release
 
 # Builds the Debug configuration...
 .PHONY: Debug
-Debug: create_folders x64/Debug/idatentest/src/idatentest/main.o x64/Debug/idatentest/src/idatentest/scenedefs.o 
-	g++ x64/Debug/idatentest/src/idatentest/main.o x64/Debug/idatentest/src/idatentest/scenedefs.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/idatentest/idatentest.exe
+Debug: create_folders x64/Debug/idatentest/src/common/scenedefs.o x64/Debug/idatentest/src/idatentest/main.o 
+	g++ x64/Debug/idatentest/src/common/scenedefs.o x64/Debug/idatentest/src/idatentest/main.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/idatentest/idatentest.exe
+
+# Compiles file ../src/common/scenedefs.cpp for the Debug configuration...
+-include x64/Debug/idatentest/src/common/scenedefs.d
+x64/Debug/idatentest/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/idatentest/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/idatentest/src/common/scenedefs.d
 
 # Compiles file ../src/idatentest/main.cpp for the Debug configuration...
 -include x64/Debug/idatentest/src/idatentest/main.d
@@ -51,16 +57,16 @@ x64/Debug/idatentest/src/idatentest/main.o: ../src/idatentest/main.cpp
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/idatentest/main.cpp $(Debug_Include_Path) -o x64/Debug/idatentest/src/idatentest/main.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/idatentest/main.cpp $(Debug_Include_Path) > x64/Debug/idatentest/src/idatentest/main.d
 
-# Compiles file ../src/idatentest/scenedefs.cpp for the Debug configuration...
--include x64/Debug/idatentest/src/idatentest/scenedefs.d
-x64/Debug/idatentest/src/idatentest/scenedefs.o: ../src/idatentest/scenedefs.cpp
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/idatentest/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/idatentest/src/idatentest/scenedefs.o
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/idatentest/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/idatentest/src/idatentest/scenedefs.d
-
 # Builds the Release configuration...
 .PHONY: Release
-Release: create_folders x64/Release/idatentest/src/idatentest/main.o x64/Release/idatentest/src/idatentest/scenedefs.o 
-	g++ x64/Release/idatentest/src/idatentest/main.o x64/Release/idatentest/src/idatentest/scenedefs.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/idatentest/idatentest.exe
+Release: create_folders x64/Release/idatentest/src/common/scenedefs.o x64/Release/idatentest/src/idatentest/main.o 
+	g++ x64/Release/idatentest/src/common/scenedefs.o x64/Release/idatentest/src/idatentest/main.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/idatentest/idatentest.exe
+
+# Compiles file ../src/common/scenedefs.cpp for the Release configuration...
+-include x64/Release/idatentest/src/common/scenedefs.d
+x64/Release/idatentest/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Release_Include_Path) -o x64/Release/idatentest/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Release_Include_Path) > x64/Release/idatentest/src/common/scenedefs.d
 
 # Compiles file ../src/idatentest/main.cpp for the Release configuration...
 -include x64/Release/idatentest/src/idatentest/main.d
@@ -68,28 +74,28 @@ x64/Release/idatentest/src/idatentest/main.o: ../src/idatentest/main.cpp
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/idatentest/main.cpp $(Release_Include_Path) -o x64/Release/idatentest/src/idatentest/main.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/idatentest/main.cpp $(Release_Include_Path) > x64/Release/idatentest/src/idatentest/main.d
 
-# Compiles file ../src/idatentest/scenedefs.cpp for the Release configuration...
--include x64/Release/idatentest/src/idatentest/scenedefs.d
-x64/Release/idatentest/src/idatentest/scenedefs.o: ../src/idatentest/scenedefs.cpp
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/idatentest/scenedefs.cpp $(Release_Include_Path) -o x64/Release/idatentest/src/idatentest/scenedefs.o
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/idatentest/scenedefs.cpp $(Release_Include_Path) > x64/Release/idatentest/src/idatentest/scenedefs.d
-
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders
 create_folders:
+	mkdir -p x64/Debug/idatentest/src/common
 	mkdir -p x64/Debug/idatentest/src/idatentest
 	mkdir -p ../src/idatentest
+	mkdir -p x64/Release/idatentest/src/common
 	mkdir -p x64/Release/idatentest/src/idatentest
 	mkdir -p ../src/idatentest
 
 # Cleans intermediate and output files (objects, libraries, executables)...
 .PHONY: clean
 clean:
+	rm -f x64/Debug/idatentest/src/common/*.o
+	rm -f x64/Debug/idatentest/src/common/*.d
 	rm -f x64/Debug/idatentest/src/idatentest/*.o
 	rm -f x64/Debug/idatentest/src/idatentest/*.d
 	rm -f x64/Debug/idatentest/*.o
 	rm -f x64/Debug/idatentest/*.d
 	rm -f ../src/idatentest/idatentest.exe
+	rm -f x64/Release/idatentest/src/common/*.o
+	rm -f x64/Release/idatentest/src/common/*.d
 	rm -f x64/Release/idatentest/src/idatentest/*.o
 	rm -f x64/Release/idatentest/src/idatentest/*.d
 	rm -f x64/Release/idatentest/*.o

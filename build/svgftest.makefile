@@ -42,8 +42,14 @@ build_all_configurations: Debug Release
 
 # Builds the Debug configuration...
 .PHONY: Debug
-Debug: create_folders x64/Debug/svgftest/src/svgftest/main.o x64/Debug/svgftest/src/svgftest/scenedefs.o 
-	g++ x64/Debug/svgftest/src/svgftest/main.o x64/Debug/svgftest/src/svgftest/scenedefs.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/svgftest/svgftest.exe
+Debug: create_folders x64/Debug/svgftest/src/common/scenedefs.o x64/Debug/svgftest/src/svgftest/main.o 
+	g++ x64/Debug/svgftest/src/common/scenedefs.o x64/Debug/svgftest/src/svgftest/main.o  $(Debug_Library_Path) $(Debug_Libraries) -Wl,-rpath,./ -o ../src/svgftest/svgftest.exe
+
+# Compiles file ../src/common/scenedefs.cpp for the Debug configuration...
+-include x64/Debug/svgftest/src/common/scenedefs.d
+x64/Debug/svgftest/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/svgftest/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/svgftest/src/common/scenedefs.d
 
 # Compiles file ../src/svgftest/main.cpp for the Debug configuration...
 -include x64/Debug/svgftest/src/svgftest/main.d
@@ -51,16 +57,16 @@ x64/Debug/svgftest/src/svgftest/main.o: ../src/svgftest/main.cpp
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/svgftest/main.cpp $(Debug_Include_Path) -o x64/Debug/svgftest/src/svgftest/main.o
 	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/svgftest/main.cpp $(Debug_Include_Path) > x64/Debug/svgftest/src/svgftest/main.d
 
-# Compiles file ../src/svgftest/scenedefs.cpp for the Debug configuration...
--include x64/Debug/svgftest/src/svgftest/scenedefs.d
-x64/Debug/svgftest/src/svgftest/scenedefs.o: ../src/svgftest/scenedefs.cpp
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -c ../src/svgftest/scenedefs.cpp $(Debug_Include_Path) -o x64/Debug/svgftest/src/svgftest/scenedefs.o
-	$(CPP_COMPILER) $(Debug_Preprocessor_Definitions) $(Debug_Compiler_Flags) -MM ../src/svgftest/scenedefs.cpp $(Debug_Include_Path) > x64/Debug/svgftest/src/svgftest/scenedefs.d
-
 # Builds the Release configuration...
 .PHONY: Release
-Release: create_folders x64/Release/svgftest/src/svgftest/main.o x64/Release/svgftest/src/svgftest/scenedefs.o 
-	g++ x64/Release/svgftest/src/svgftest/main.o x64/Release/svgftest/src/svgftest/scenedefs.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/svgftest/svgftest.exe
+Release: create_folders x64/Release/svgftest/src/common/scenedefs.o x64/Release/svgftest/src/svgftest/main.o 
+	g++ x64/Release/svgftest/src/common/scenedefs.o x64/Release/svgftest/src/svgftest/main.o  $(Release_Library_Path) $(Release_Libraries) -Wl,-rpath,./ -o ../src/svgftest/svgftest.exe
+
+# Compiles file ../src/common/scenedefs.cpp for the Release configuration...
+-include x64/Release/svgftest/src/common/scenedefs.d
+x64/Release/svgftest/src/common/scenedefs.o: ../src/common/scenedefs.cpp
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/common/scenedefs.cpp $(Release_Include_Path) -o x64/Release/svgftest/src/common/scenedefs.o
+	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/common/scenedefs.cpp $(Release_Include_Path) > x64/Release/svgftest/src/common/scenedefs.d
 
 # Compiles file ../src/svgftest/main.cpp for the Release configuration...
 -include x64/Release/svgftest/src/svgftest/main.d
@@ -68,28 +74,28 @@ x64/Release/svgftest/src/svgftest/main.o: ../src/svgftest/main.cpp
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/svgftest/main.cpp $(Release_Include_Path) -o x64/Release/svgftest/src/svgftest/main.o
 	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/svgftest/main.cpp $(Release_Include_Path) > x64/Release/svgftest/src/svgftest/main.d
 
-# Compiles file ../src/svgftest/scenedefs.cpp for the Release configuration...
--include x64/Release/svgftest/src/svgftest/scenedefs.d
-x64/Release/svgftest/src/svgftest/scenedefs.o: ../src/svgftest/scenedefs.cpp
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -c ../src/svgftest/scenedefs.cpp $(Release_Include_Path) -o x64/Release/svgftest/src/svgftest/scenedefs.o
-	$(CPP_COMPILER) $(Release_Preprocessor_Definitions) $(Release_Compiler_Flags) -MM ../src/svgftest/scenedefs.cpp $(Release_Include_Path) > x64/Release/svgftest/src/svgftest/scenedefs.d
-
 # Creates the intermediate and output folders for each configuration...
 .PHONY: create_folders
 create_folders:
+	mkdir -p x64/Debug/svgftest/src/common
 	mkdir -p x64/Debug/svgftest/src/svgftest
 	mkdir -p ../src/svgftest
+	mkdir -p x64/Release/svgftest/src/common
 	mkdir -p x64/Release/svgftest/src/svgftest
 	mkdir -p ../src/svgftest
 
 # Cleans intermediate and output files (objects, libraries, executables)...
 .PHONY: clean
 clean:
+	rm -f x64/Debug/svgftest/src/common/*.o
+	rm -f x64/Debug/svgftest/src/common/*.d
 	rm -f x64/Debug/svgftest/src/svgftest/*.o
 	rm -f x64/Debug/svgftest/src/svgftest/*.d
 	rm -f x64/Debug/svgftest/*.o
 	rm -f x64/Debug/svgftest/*.d
 	rm -f ../src/svgftest/svgftest.exe
+	rm -f x64/Release/svgftest/src/common/*.o
+	rm -f x64/Release/svgftest/src/common/*.d
 	rm -f x64/Release/svgftest/src/svgftest/*.o
 	rm -f x64/Release/svgftest/src/svgftest/*.d
 	rm -f x64/Release/svgftest/*.o

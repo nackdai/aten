@@ -103,7 +103,6 @@ namespace aten
 
     void sbvh::buildVoxel(const context& ctxt)
     {
-        const auto& faces = aten::face::faces();
         const auto& vertices = ctxt.getVertices();
 
         for (auto it = m_treelets.begin(); it != m_treelets.end(); it++) {
@@ -116,7 +115,8 @@ namespace aten
             std::map<int, real> mtrlMap;
 
             for (const auto tid : treelet.tris) {
-                const auto& triparam = faces[tid]->getParam();
+                const auto tri = ctxt.getTriangle(tid);
+                const auto& triparam = tri->getParam();
 
                 auto found = mtrlMap.find(triparam.mtrlid);
 

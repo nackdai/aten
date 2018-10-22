@@ -13,6 +13,8 @@
 namespace AT_NAME
 {
     class face : public aten::hitable {
+        friend class context;
+
         static std::atomic<int> s_id;
         static std::vector<face*> s_faces;
 
@@ -75,18 +77,30 @@ namespace AT_NAME
 
         int getId() const
         {
-            return id;
+            return m_id;
         }
 
         static const std::vector<face*>& faces()
         {
+            AT_ASSERT(false);
             return s_faces;
         }
 
         static int findIdx(hitable* h);
+
+    private:
+        static void resetIdWhenAnyTriangleLeave(AT_NAME::face* tri);
+
+        void addToDataList(aten::DataList<AT_NAME::face>& list)
+        {
+            list.add(&m_listItem);
+            m_id = m_listItem.currentIndex();
+        }
     
     private:
         aten::PrimitiveParamter param;
-        int id{ -1 };
+        int m_id{ -1 };
+
+        aten::DataList<AT_NAME::face>::ListItem m_listItem;
     };
 }

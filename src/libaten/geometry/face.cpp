@@ -12,18 +12,19 @@ namespace AT_NAME
     std::atomic<int> face::s_id(0);
     std::vector<face*> face::s_faces;
 
+    void face::resetIdWhenAnyTriangleLeave(AT_NAME::face* tri)
+    {
+        tri->m_id = tri->m_listItem.currentIndex();
+    }
+
     face::face()
     {
-        id = s_id.fetch_add(1);
-        s_faces.push_back(this);
+        m_listItem.init(this, resetIdWhenAnyTriangleLeave);
     }
 
     face::~face()
     {
-        auto it = std::find(s_faces.begin(), s_faces.end(), this);
-        if (it != s_faces.end()) {
-            s_faces.erase(it);
-        }
+        m_listItem.leave();
     }
 
     bool face::hit(
@@ -45,9 +46,9 @@ namespace AT_NAME
 
         if (isHit) {
             // Temporary, notify triangle id to the parent object.
-            isect.objid = id;
+            isect.objid = m_id;
 
-            isect.primid = id;
+            isect.primid = m_id;
 
             isect.mtrlid = param.mtrlid;
         }
@@ -209,7 +210,7 @@ namespace AT_NAME
         result->a = a;
         result->b = b;
 
-        result->primid = id;
+        result->primid = m_id;
     }
 
     int face::geomid() const

@@ -62,11 +62,7 @@ namespace aten {
 
         ctxt.copyMaterialParameters(mtrlparms);
 
-        const auto& faces = aten::face::faces();
-
-        for (auto f : faces) {
-            primparams.push_back(f->getParam());
-        }
+        ctxt.copyPrimitiveParameters(primparams);
 
         ctxt.copyVertices(vtxparams);
     }

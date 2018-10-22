@@ -8,6 +8,11 @@
 #include "visualizer/GeomDataBuffer.h"
 #include "material/material.h"
 #include "misc/datalist.h"
+#include "geometry/geomparam.h"
+
+namespace AT_NAME {
+    class face;
+}
 
 namespace aten
 {
@@ -65,19 +70,9 @@ namespace aten
 
         void addMaterial(AT_NAME::material* mtrl);
 
-        DataList<AT_NAME::material>& getMaterials()
-        {
-            return m_materials;
-        }
-
-        const DataList<AT_NAME::material>& getMaterials() const
-        {
-            return m_materials;
-        }
-
         int getMaterialNum() const
         {
-            return static_cast<int>(getMaterials().size());
+            return static_cast<int>(m_materials.size());
         }
 
         AT_NAME::material* getMaterial(int idx)
@@ -100,11 +95,20 @@ namespace aten
 
         int findMaterialIdxByName(const char* name) const;
 
+        void addTriangle(AT_NAME::face* tri);
+
+        int getTriangleNum() const;
+
+        const AT_NAME::face* getTriangle(int idx) const;
+
+        void copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const;
+
     private:
         std::vector<aten::vertex> m_vertices;
 
         aten::GeomVertexBuffer m_vb;
 
         DataList<AT_NAME::material> m_materials;
+        DataList<AT_NAME::face> m_triangles;
     };
 }

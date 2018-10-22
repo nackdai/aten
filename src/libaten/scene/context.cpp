@@ -1,4 +1,5 @@
 #include "scene/context.h"
+#include "geometry/face.h"
 
 namespace aten
 {
@@ -65,5 +66,31 @@ namespace aten
             return mtrl->id();
         }
         return -1;
+    }
+
+    void context::addTriangle(AT_NAME::face* tri)
+    {
+        tri->addToDataList(m_triangles);
+    }
+
+    int context::getTriangleNum() const
+    {
+        return m_triangles.size();
+    }
+
+    const AT_NAME::face* context::getTriangle(int idx) const
+    {
+        AT_ASSERT(0 <= idx && idx < getTriangleNum());
+        return m_triangles[idx];
+    }
+
+    void context::copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const
+    {
+        auto& triangles = m_triangles.getList();
+
+        for (const auto item : triangles) {
+            const auto tri = item->getData();
+            dst.push_back(tri->getParam());
+        }
     }
 }

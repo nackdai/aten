@@ -296,6 +296,8 @@ namespace aten
                     dstshape->getMaterial()->id(),
                     dstshape->getGeomId());
 
+                ctxt.addTriangle(f);
+
                 dstshape->addFace(f);
             }
 

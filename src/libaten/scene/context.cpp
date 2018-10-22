@@ -93,4 +93,25 @@ namespace aten
             dst.push_back(tri->getParam());
         }
     }
+
+    int context::findTriIdxFromPointer(const void* p) const
+    {
+        auto& triangles = m_triangles.getList();
+
+        auto found = std::find_if(
+            triangles.begin(), triangles.end(),
+            [&](const aten::DataList<aten::face>::ListItem* item) {
+            const auto tri = item->getData();
+            return tri == p;
+        });
+
+        int id = -1;
+
+        if (found != triangles.end()) {
+            const auto tri = (*found)->getData();
+            id = tri->getId();
+        }
+
+        return id;
+    }
 }

@@ -9,9 +9,6 @@
 
 namespace AT_NAME
 {
-    std::atomic<int> face::s_id(0);
-    std::vector<face*> face::s_faces;
-
     void face::resetIdWhenAnyTriangleLeave(AT_NAME::face* tri)
     {
         tri->m_id = tri->m_listItem.currentIndex();
@@ -231,21 +228,6 @@ namespace AT_NAME
     int face::geomid() const
     {
         return param.gemoid;
-    }
-
-    int face::findIdx(hitable* h)
-    {
-        int idx = -1;
-
-        if (h) {
-            auto found = std::find(s_faces.begin(), s_faces.end(), h);
-            if (found != s_faces.end()) {
-                idx = std::distance(s_faces.begin(), found);
-                AT_ASSERT(h == s_faces[idx]);
-            }
-        }
-
-        return idx;
     }
 
     aabb face::computeAABB(const context& ctxt) const

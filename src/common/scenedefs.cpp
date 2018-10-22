@@ -1127,7 +1127,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
 #if 1
     {
-        int offsetTriIdx = aten::face::faces().size();
+        int offsetTriIdx = ctxt.getTriangleNum();
 
         objs.clear();
         aten::ObjLoader::load(objs, "../../asset/sponza/sponza_lod.obj", ctxt);

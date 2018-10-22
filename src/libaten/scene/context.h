@@ -103,6 +103,8 @@ namespace aten
 
         void copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const;
 
+        int findTriIdxFromPointer(const void* p) const;
+
     private:
         std::vector<aten::vertex> m_vertices;
 

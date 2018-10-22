@@ -92,7 +92,7 @@ namespace AT_NAME
         bool isHit = m_accel->hit(ctxt, r, t_min, t_max, false, isect);
 
         if (isHit) {
-            auto f = face::faces()[isect.objid];
+            auto f = ctxt.getTriangle(isect.objid);
 
             // é©êgÇÃIDÇï‘Ç∑.
             isect.objid = id();
@@ -107,7 +107,7 @@ namespace AT_NAME
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
-        auto f = face::faces()[isect.primid];
+        auto f = ctxt.getTriangle(isect.primid);
 
         auto& vtxs = ctxt.getVertices();
 

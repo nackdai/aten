@@ -176,6 +176,7 @@ namespace aten
          * @brief Convert the temporary description for the node of threaded bvh to final description.
          */
         void registerThreadedBvhNode(
+            const context& ctxt,
             bool isPrimitiveLeaf,
             const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
             std::vector<ThreadedBvhNode>& listThreadedBvhNode,

@@ -15,9 +15,6 @@ namespace AT_NAME
     class face : public aten::hitable {
         friend class context;
 
-        static std::atomic<int> s_id;
-        static std::vector<face*> s_faces;
-
     private:
         face();
         virtual ~face();
@@ -83,14 +80,6 @@ namespace AT_NAME
         {
             return m_id;
         }
-
-        static const std::vector<face*>& faces()
-        {
-            AT_ASSERT(false);
-            return s_faces;
-        }
-
-        static int findIdx(hitable* h);
 
     private:
         static void resetIdWhenAnyTriangleLeave(AT_NAME::face* tri);

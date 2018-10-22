@@ -986,7 +986,6 @@ namespace aten
         Intersection& isect) const
     {
         auto& shapes = transformable::getShapes();
-        auto& prims = face::faces();
 
         auto& mtxs = m_bvh.getMatrices();
 
@@ -1048,7 +1047,7 @@ namespace aten
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = (hitable*)prims[(int)node->primid];
+                    auto prim = ctxt.getTriangle((int)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();
@@ -1091,7 +1090,6 @@ namespace aten
         bool enableLod) const
     {
         auto& shapes = transformable::getShapes();
-        auto& prims = face::faces();
 
         real hitt = AT_MATH_INF;
 
@@ -1114,7 +1112,7 @@ namespace aten
                 Intersection isectTmp;
 
 #if (SBVH_TRIANGLE_NUM == 1)
-                auto prim = prims[(int)node->triid];
+                auto prim = ctxt.getTriangle((int)node->triid);
                 isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
 
                 if (isHit) {

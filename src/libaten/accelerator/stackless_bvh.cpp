@@ -67,7 +67,7 @@ namespace aten {
             // Index 0 is primiary tree, and Index N (N > 0) is nested tree.
             bool isPrimitiveLeaf = (i > 0);
 
-            registerThreadedBvhNode(isPrimitiveLeaf, listBvhNode[i], m_listStacklessBvhNode[i]);
+            registerThreadedBvhNode(ctxt, isPrimitiveLeaf, listBvhNode[i], m_listStacklessBvhNode[i]);
         }
     }
 
@@ -103,6 +103,7 @@ namespace aten {
     }
 
     void StacklessBVH::registerThreadedBvhNode(
+        const context& ctxt,
         bool isPrimitiveLeaf,
         const std::vector<StacklessBvhNodeEntry>& listBvhNode,
         std::vector<StacklessBvhNode>& listStacklessBvhNode)
@@ -170,7 +171,7 @@ namespace aten {
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
-                    stacklessBvhNode.primid = (float)face::findIdx(item);
+                    stacklessBvhNode.primid = (float)ctxt.findTriIdxFromPointer(item);
                     stacklessBvhNode.exid = -1.0f;
                 }
                 else {
@@ -216,7 +217,6 @@ namespace aten {
         Intersection& isect) const
     {
         auto& shapes = transformable::getShapes();
-        auto& prims = face::faces();
 
         real hitt = AT_MATH_INF;
 
@@ -268,7 +268,7 @@ namespace aten {
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = (hitable*)prims[(int)node->primid];
+                    auto prim = ctxt.getTriangle((int)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();

@@ -86,6 +86,7 @@ namespace aten {
             std::map<hitable*, accelerator*>& nestedBvhMap);
 
         void registerThreadedBvhNode(
+            const context& ctxt,
             bool isPrimitiveLeaf,
             const std::vector<StacklessBvhNodeEntry>& listBvhNode,
             std::vector<StacklessBvhNode>& listStacklessBvhNode);

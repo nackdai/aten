@@ -52,6 +52,7 @@ namespace aten
 
         // Register bvh node for gpu.
         registerThreadedBvhNode(
+            ctxt,
             true,
             threadedBvhNodeEntries,
             m_listThreadedBvhNode[0],
@@ -115,6 +116,7 @@ namespace aten
 
         // Register bvh node for gpu.
         registerThreadedBvhNode(
+            ctxt,
             false,
             threadedBvhNodeEntries,
             m_listThreadedBvhNode[0],
@@ -166,6 +168,7 @@ namespace aten
     }
 
     void ThreadedBVH::registerThreadedBvhNode(
+        const context& ctxt,
         bool isPrimitiveLeaf,
         const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
         std::vector<ThreadedBvhNode>& threadedBvhNodes,
@@ -206,7 +209,7 @@ namespace aten
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
-                    gpunode.primid = (float)face::findIdx(item);
+                    gpunode.primid = (float)ctxt.findTriIdxFromPointer(item);
                     gpunode.exid = -1.0f;
                 }
                 else {
@@ -352,7 +355,6 @@ namespace aten
         Intersection& isect) const
     {
         auto& shapes = transformable::getShapes();
-        auto& prims = face::faces();
 
         real hitt = AT_MATH_INF;
 
@@ -411,7 +413,7 @@ namespace aten
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = (hitable*)prims[(int)node->primid];
+                    auto prim = ctxt.getTriangle((int)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         // Set dummy to return if ray hit.

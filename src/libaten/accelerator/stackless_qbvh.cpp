@@ -61,6 +61,7 @@ namespace aten
             bool isPrimitiveLeafBvh = (i > 0);
 
             auto numNodes = convertFromBvh(
+                ctxt,
                 isPrimitiveLeafBvh,
                 listBvhNode[i],
                 m_listQbvhNode[i]);
@@ -99,6 +100,7 @@ namespace aten
     }
 
     uint32_t StacklessQbvh::convertFromBvh(
+        const context& ctxt,
         bool isPrimitiveLeaf,
         std::vector<BvhNode>& listBvhNode,
         std::vector<StacklessQbvhNode>& listQbvhNode)
@@ -204,7 +206,7 @@ namespace aten
 
             if (numChildren == 0) {
                 // No children, so it is a leaf.
-                setQbvhNodeLeafParams(isPrimitiveLeaf, bvhNode, qbvhNode);
+                setQbvhNodeLeafParams(ctxt, isPrimitiveLeaf, bvhNode, qbvhNode);
                 continue;
             }
 
@@ -231,6 +233,7 @@ namespace aten
     }
 
     void StacklessQbvh::setQbvhNodeLeafParams(
+        const context& ctxt,
         bool isPrimitiveLeaf,
         const BvhNode& bvhNode,
         StacklessQbvhNode& qbvhNode)
@@ -277,7 +280,7 @@ namespace aten
 
             if (isPrimitiveLeaf) {
                 // Leaves of this tree are primitive.
-                qbvhNode.primid = (float)face::findIdx(item);
+                qbvhNode.primid = (float)ctxt.findTriIdxFromPointer(item);
                 qbvhNode.exid = -1.0f;
             }
             else {
@@ -507,7 +510,6 @@ namespace aten
         Intersection& isect) const
     {
         auto& shapes = transformable::getShapes();
-        auto& prims = face::faces();
 
         int nodeid = 0;
         uint32_t bitstack = 0;
@@ -560,7 +562,7 @@ namespace aten
                         isectTmp);
                 }
                 else if (pnode->primid >= 0) {
-                    auto f = prims[(int)pnode->primid];
+                    auto f = ctxt.getTriangle((int)pnode->primid);
                     isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
                     if (isHit) {

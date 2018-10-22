@@ -1,16 +1,22 @@
+#include <cmdline.h>
+#include <imgui.h>
+
 #include "aten.h"
 #include "atenscene.h"
-
 #include "idaten.h"
-
-#include <imgui.h>
 
 static const int WIDTH = 1280;
 static const int HEIGHT = 720;
 
-static const char* TITLE = "GpuSkinningTest";
+static const char* TITLE = "MdlViewer";
 
-static bool s_isGPUSkinning = true;
+struct Options {
+    std::string input;
+    std::string anm;
+    std::string mtrl;
+    std::string texDir;
+};
+
 static idaten::Skinning skinning;
 
 static aten::deformable g_mdl;
@@ -58,24 +64,12 @@ void onRun(aten::window* window)
 
     aten::vec3 aabbMin, aabbMax;
 
-    if (s_isGPUSkinning) {
+    bool isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
+
+    if (isGPUSkinning) {
         const auto& mtx = g_mdl.getMatrices();
         skinning.update(&mtx[0], mtx.size());
         skinning.compute(aabbMin, aabbMax);
-#if 0
-        auto& vb = g_mdl.getVBForGPUSkinning();
-        auto num = vb.getVtxNum();
-
-        std::vector<aten::vec4> pos(num);
-        std::vector<aten::vec4> nml(num);
-
-        //skinning.getComputedResult(&pos[0], &nml[0], num);
-
-        auto v = vb.beginRead(0);
-        memcpy(&pos[0], v, sizeof(aten::vec4) * num);
-
-        int xxx = 0;
-#endif
     }
 
     g_renderer.render(g_ctxt, &g_camera, &g_mdl);
@@ -199,20 +193,19 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-#if 0
 bool parseOption(
     int argc, char* argv[],
-    cmdline::parser& cmd,
     Options& opt)
 {
-    {
-        cmd.add<std::string>("input", 'i', "input filename", true);
-        cmd.add<std::string>("output", 'o', "output filename base", false, "result");
-        cmd.add<std::string>("type", 't', "export type(m = model, a = animation)", true, "m");
-        cmd.add<std::string>("base", 'b', "input filename for animation base model", false);
-        cmd.add<std::string>("gpu", 'g', "export for gpu skinning");
+    cmdline::parser cmd;
 
-        cmd.add<std::string>("help", '?', "print usage", false);
+    {
+        cmd.add<std::string>("input", 'i', "input model filename", true);
+        cmd.add<std::string>("anm", 'a', "animation filename", false);
+        cmd.add<std::string>("mtrl", 'm', "material filename", true);
+        cmd.add<std::string>("path", 'p', "texture directory path", true);
+
+        cmd.add("help", '?', "print usage");
     }
 
     bool isCmdOk = cmd.parse(argc, argv);
@@ -223,67 +216,48 @@ bool parseOption(
     }
 
     if (!isCmdOk) {
-        std::cerr << cmd.error() << std::endl << cmd.usage();
+        std::cerr << cmd.error_full() << std::endl << cmd.usage();
         return false;
     }
 
     if (cmd.exist("input")) {
         opt.input = cmd.get<std::string>("input");
-
-        std::string ext;
-
-        aten::getStringsFromPath(
-            opt.input,
-            opt.inputBasepath,
-            ext,
-            opt.inputFilename);
     }
     else {
         std::cerr << cmd.error() << std::endl << cmd.usage();
         return false;
     }
 
-    if (cmd.exist("output")) {
-        opt.output = cmd.get<std::string>("output");
+    if (cmd.exist("anm")) {
+        opt.anm = cmd.get<std::string>("anm");
     }
 
-    {
-        auto type = cmd.get<std::string>("type");
-        if (type == "m") {
-            opt.isExportModel = true;
-        }
-        else if (type == "a") {
-            opt.isExportModel = false;
-        }
+    if (cmd.exist("mtrl")) {
+        opt.mtrl = cmd.get<std::string>("mtrl");
+    }
+    else {
+        std::cerr << cmd.error() << std::endl << cmd.usage();
+        return false;
     }
 
-    if (!opt.isExportModel) {
-        // For animation.
-        if (cmd.exist("base")) {
-            opt.anmBaseMdl = cmd.get<std::string>("base");
-        }
-        else {
-            std::cerr << cmd.error() << std::endl << cmd.usage();
-            return false;
-        }
+    if (cmd.exist("path")) {
+        opt.texDir = cmd.get<std::string>("path");
     }
-
-    opt.isExportForGPUSkinning = cmd.exist("gpu");
+    else {
+        std::cerr << cmd.error() << std::endl << cmd.usage();
+        return false;
+    }
 
     return true;
 }
-#endif
 
 int main(int argc, char* argv[])
 {
-#if 0
     Options opt;
-    cmdline::parser cmd;
 
-    if (!parseOption(argc, argv, cmd, opt)) {
+    if (!parseOption(argc, argv, opt)) {
         return 0;
     }
-#endif
 
     aten::SetCurrentDirectoryFromExe();
 
@@ -302,12 +276,12 @@ int main(int argc, char* argv[])
         "../shader/simple3d_vs.glsl",
         "../shader/simple3d_fs.glsl");
 
-    g_mdl.read("unitychan_gpu.mdl");
-    g_anm.read("unitychan.anm");
+    g_mdl.read(opt.input.c_str());
+    g_anm.read(opt.anm.c_str());
 
-    s_isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
+    bool isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
 
-    if (s_isGPUSkinning) {
+    if (isGPUSkinning) {
         g_renderer.init(
             WIDTH, HEIGHT,
             "drawobj_vs.glsl",
@@ -326,8 +300,11 @@ int main(int argc, char* argv[])
     g_timeline.enableLoop(true);
     g_timeline.start();
 
-    aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-    aten::MaterialLoader::load("unitychan_mtrl.xml", g_ctxt);
+    aten::ImageLoader::setBasePath(opt.texDir.c_str());
+
+    if (!aten::MaterialLoader::load(opt.mtrl.c_str(), g_ctxt)) {
+        return 0;
+    }
 
     auto textures = aten::texture::getTextures();
     for (auto tex : textures) {
@@ -346,7 +323,7 @@ int main(int argc, char* argv[])
         vfov,
         WIDTH, HEIGHT);
 
-    if (s_isGPUSkinning) {
+    if (isGPUSkinning) {
         auto& vb = g_mdl.getVBForGPUSkinning();
 
         std::vector<aten::SkinningVertex> vtx;

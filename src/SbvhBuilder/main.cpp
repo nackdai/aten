@@ -76,8 +76,7 @@ int main(int argc, char* argv[])
     // Specify material by command line...
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(1);
-    auto emit = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
-        ctxt,
+    auto emit = ctxt.createMaterialWithMaterialParameter(
         aten::MaterialType::Emissive,
         mtrlParam,
         nullptr, nullptr, nullptr);

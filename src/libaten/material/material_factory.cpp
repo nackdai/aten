@@ -144,45 +144,4 @@ namespace aten
 
         return mtrl;
     }
-
-    material* MaterialFactory::createMaterialAndAddToCtxt(
-        context& ctxt,
-        MaterialType type,
-        Values& value)
-    {
-        auto mtrl = createMaterial(type, value);
-        addMaterialToContext(ctxt, mtrl);
-        return mtrl;
-    }
-
-    material* MaterialFactory::createMaterialWithDefaultValueAndAddToCtxt(
-        context& ctxt,
-        MaterialType type)
-    {
-        auto mtrl = createMaterialWithDefaultValue(type);
-        addMaterialToContext(ctxt, mtrl);
-        return mtrl;
-    }
-
-    material* MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
-        context& ctxt,
-        MaterialType type,
-        const MaterialParameter& param,
-        aten::texture* albedoMap,
-        aten::texture* normalMap,
-        aten::texture* roughnessMap)
-    {
-        auto mtrl = createMaterialWithMaterialParameter(type, param, albedoMap, normalMap, roughnessMap);
-        addMaterialToContext(ctxt, mtrl);
-        return mtrl;
-    }
-
-    void MaterialFactory::addMaterialToContext(
-        context& ctxt,
-        aten::material* mtrl)
-    {
-        if (mtrl) {
-            ctxt.addMaterial(mtrl);
-        }
-    }
 }

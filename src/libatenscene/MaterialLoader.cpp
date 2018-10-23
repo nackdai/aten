@@ -452,7 +452,7 @@ namespace aten {
             auto mtrlType = aten::material::getMaterialTypeFromMaterialTypeName(type);
 
             if (aten::material::isValidMaterialType(mtrlType)) {
-                mtrl = aten::MaterialFactory::createMaterialAndAddToCtxt(ctxt, mtrlType, values);
+                mtrl = ctxt.createMaterial(mtrlType, values);
             }
         }
         else {

@@ -254,8 +254,7 @@ namespace aten
                         aten::MaterialParameter mtrlParam;
                         mtrlParam.baseColor = diffuse;
                         
-                        aten::material* mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
-                            ctxt,
+                        aten::material* mtrl = ctxt.createMaterialWithMaterialParameter(
                             aten::MaterialType::Lambert,
                             mtrlParam,
                             albedoMap, 

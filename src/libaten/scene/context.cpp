@@ -1,5 +1,6 @@
 #include "scene/context.h"
 #include "geometry/face.h"
+#include "material/material_factory.h"
 
 namespace aten
 {
@@ -14,6 +15,54 @@ namespace aten
                 0,
                 &m_vertices[0]);
         }
+    }
+
+    AT_NAME::material* context::createMaterial(
+        aten::MaterialType type,
+        aten::Values& value)
+    {
+        auto mtrl = MaterialFactory::createMaterial(type, value);
+        AT_ASSERT(mtrl);
+
+        if (mtrl) {
+            addMaterial(mtrl);
+        }
+
+        return mtrl;
+    }
+
+    AT_NAME::material* context::createMaterialWithDefaultValue(aten::MaterialType type)
+    {
+        auto mtrl = MaterialFactory::createMaterialWithDefaultValue(type);
+        AT_ASSERT(mtrl);
+
+        if (mtrl) {
+            addMaterial(mtrl);
+        }
+
+        return mtrl;
+    }
+
+    AT_NAME::material* context::createMaterialWithMaterialParameter(
+        aten::MaterialType type, 
+        const aten::MaterialParameter& param,
+        aten::texture* albedoMap, 
+        aten::texture* normalMap, 
+        aten::texture* roughnessMap)
+    {
+        auto mtrl = MaterialFactory::createMaterialWithMaterialParameter(
+            type,
+            param,
+            albedoMap,
+            normalMap,
+            roughnessMap);
+        AT_ASSERT(mtrl);
+
+        if (mtrl) {
+            addMaterial(mtrl);
+        }
+
+        return mtrl;
     }
 
     void context::addMaterial(aten::material* mtrl)
@@ -68,7 +117,7 @@ namespace aten
         return -1;
     }
 
-    AT_NAME::face * context::createTriangle(const PrimitiveParamter & param)
+    AT_NAME::face* context::createTriangle(const aten::PrimitiveParamter& param)
     {
         auto f = AT_NAME::face::create(*this, param);
         AT_ASSERT(f);

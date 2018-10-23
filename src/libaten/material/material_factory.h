@@ -26,27 +26,5 @@ namespace aten
             aten::texture* albedoMap,
             aten::texture* normalMap,
             aten::texture* roughnessMap);
-
-        static material* createMaterialAndAddToCtxt(
-            context& ctxt,
-            MaterialType type, 
-            Values& value);
-
-        static material* createMaterialWithDefaultValueAndAddToCtxt(
-            context& ctxt, 
-            MaterialType type);
-
-        static material* createMaterialWithMaterialParameterAndAddToCtxt(
-            context& ctxt,
-            MaterialType type,
-            const MaterialParameter& param,
-            aten::texture* albedoMap,
-            aten::texture* normalMap,
-            aten::texture* roughnessMap);
-
-    private:
-        static void addMaterialToContext(
-            context& ctxt,
-            aten::material* mtrl);
     };
 }

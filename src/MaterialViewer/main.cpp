@@ -85,8 +85,7 @@ void makeScene(aten::scene* scene)
         mtrlParam.carpaint.flake_intensity = real(1);
     }
 
-    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
-        g_ctxt,
+    auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
         aten::MaterialType::CarPaint,
         mtrlParam,
         nullptr, nullptr, nullptr);
@@ -106,7 +105,7 @@ void makeScene(aten::scene* scene)
 
 aten::material* createMaterial(aten::MaterialType type)
 {
-    aten::material* mtrl = aten::MaterialFactory::createMaterialWithDefaultValueAndAddToCtxt(g_ctxt, type);
+    aten::material* mtrl = g_ctxt.createMaterialWithDefaultValue(type);
 
     if (mtrl) {
         mtrl->setTextures(

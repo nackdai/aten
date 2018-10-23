@@ -68,6 +68,19 @@ namespace aten
             m_vb.clear();
         }
 
+        AT_NAME::material* createMaterial(
+            aten::MaterialType type,
+            aten::Values& value);
+
+        AT_NAME::material* createMaterialWithDefaultValue(aten::MaterialType type);
+
+        AT_NAME::material* createMaterialWithMaterialParameter(
+            aten::MaterialType type,
+            const aten::MaterialParameter& param,
+            aten::texture* albedoMap,
+            aten::texture* normalMap,
+            aten::texture* roughnessMap);
+
         void addMaterial(AT_NAME::material* mtrl);
 
         int getMaterialNum() const
@@ -95,7 +108,7 @@ namespace aten
 
         int findMaterialIdxByName(const char* name) const;
 
-        AT_NAME::face* createTriangle(const PrimitiveParamter& param);
+        AT_NAME::face* createTriangle(const aten::PrimitiveParamter& param);
 
         void addTriangle(AT_NAME::face* tri);
 

@@ -238,8 +238,7 @@ void loadObj(const Options& opt)
     mtrlParam.ior = 0.2;
     mtrlParam.roughness = 0.2;
 
-    auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameterAndAddToCtxt(
-        g_ctxt,
+    auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
         aten::MaterialType::GGX,
         mtrlParam,
         nullptr, nullptr, nullptr);

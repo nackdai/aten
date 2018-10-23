@@ -161,11 +161,13 @@ namespace aten {
             std::map<hitable*, accelerator*>& nestedBvhMap);
 
         uint32_t convertFromBvh(
+            const context& ctxt,
             bool isPrimitiveLeaf,
             std::vector<BvhNode>& listBvhNode,
             std::vector<QbvhNode>& listQbvhNode);
 
         void setQbvhNodeLeafParams(
+            const context& ctxt,
             bool isPrimitiveLeaf,
             const BvhNode& bvhNode,
             QbvhNode& qbvhNode);

@@ -3,8 +3,12 @@
 namespace AT_NAME
 {
     cube::cube(const aten::vec3& center, real w, real h, real d, material* mtrl)
-        : m_param(center, aten::vec3(w, h, d), mtrl)
+        : aten::transformable(aten::GeometryType::Cube)
     {
+        m_param.center = center;
+        m_param.size = aten::vec3(w, h, d);
+        m_param.mtrl.ptr = mtrl;
+
         setBoundingBox(
             aten::aabb(
                 center - m_param.size * real(0.5),

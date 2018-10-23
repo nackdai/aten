@@ -1,6 +1,7 @@
 #include "scene/context.h"
 #include "geometry/face.h"
 #include "material/material_factory.h"
+#include "geometry/transformable.h"
 
 namespace aten
 {
@@ -171,6 +172,90 @@ namespace aten
         if (found != triangles.end()) {
             const auto tri = (*found)->getData();
             id = tri->getId();
+        }
+
+        return id;
+    }
+
+    int context::getTransformableNum() const
+    {
+        return m_transformables.size();
+    }
+
+    const aten::transformable * context::getTransformable(int idx) const
+    {
+        AT_ASSERT(0 <= idx && idx < getTransformableNum());
+        return m_transformables[idx];
+    }
+
+    void context::traverseTransformables(std::function<void(aten::transformable*, aten::GeometryType)> func) const
+    {
+        auto& shapes = m_transformables.getList();
+
+        for (auto s : shapes) {
+            auto t = s->getData();
+
+            auto type = t->getType();
+
+            func(t, type);
+        }
+    }
+
+    void context::copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const
+    {
+        traverseTransformables([&](aten::transformable* t, aten::GeometryType type) {
+            if (type == GeometryType::Instance) {
+                aten::mat4 mtxL2W, mtxW2L;
+                t->getMatrices(mtxL2W, mtxW2L);
+
+                if (!mtxL2W.isIdentity()) {
+                    auto& param = t->getParam();
+                    param.mtxid = (int)(dst.size() / 2);
+
+                    dst.push_back(mtxL2W);
+                    dst.push_back(mtxW2L);
+                }
+            }
+        });
+    }
+
+    int context::findTransformableIdxFromPointer(const void* p) const
+    {
+        auto& shapes = m_transformables.getList();
+
+        auto found = std::find_if(
+            shapes.begin(), shapes.end(),
+            [&](const aten::DataList<aten::transformable>::ListItem* item) {
+            const auto t = item->getData();
+            return t == p;
+        });
+
+        int id = -1;
+
+        if (found != shapes.end()) {
+            const auto t = (*found)->getData();
+            id = t->id();
+        }
+
+        return id;
+    }
+
+    int context::findPolygonalTransformableIdxFromPointer(const void* p) const
+    {
+        auto& shapes = m_transformables.getList();
+
+        auto found = std::find_if(
+            shapes.begin(), shapes.end(),
+            [&](const aten::DataList<aten::transformable>::ListItem* item) {
+            const auto t = item->getData();
+            return t == p && t->getType() == aten::GeometryType::Polygon;
+        });
+
+        int id = -1;
+
+        if (found != shapes.end()) {
+            const auto t = (*found)->getData();
+            id = t->id();
         }
 
         return id;

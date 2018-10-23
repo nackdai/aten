@@ -15,7 +15,7 @@ namespace AT_NAME
     class object : public aten::transformable {
     public:
         object() 
-            : param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
+            : transformable(aten::GeometryType::Polygon)
         {}
         virtual ~object();
 
@@ -32,11 +32,6 @@ namespace AT_NAME
             const aten::mat4& mtxL2W,
             aten::hitrecord& rec,
             const aten::Intersection& isect) const override final;
-
-        virtual const aten::GeomParameter& getParam() const override final
-        {
-            return param;
-        }
 
         virtual aten::accelerator* getInternalAccelerator() override final
         {
@@ -104,7 +99,6 @@ namespace AT_NAME
 
     private:
         std::vector<objshape*> shapes;
-        aten::GeomParameter param;
 
         aten::accelerator* m_accel{ nullptr };
         uint32_t m_triangles{ 0 };

@@ -14,17 +14,13 @@ namespace aten {
         std::vector<aten::MaterialParameter>& mtrlparms,
         std::vector<aten::vertex>& vtxparams)
     {
-        const auto& shapes = aten::transformable::getShapes();
-
-        // Not gurantee order of the object which the instance has.
-        for (auto s : shapes) {
-            auto type = s->getParam().type;
-
+        // Not guarantee order of the object which the instance has.
+        ctxt.traverseTransformables([&](aten::transformable* s, aten::GeometryType type) {
             if (type == GeometryType::Instance) {
                 auto param = s->getParam();
                 auto obj = s->getHasObject();
-                
-                auto idx = aten::transformable::findIdxAsHitable(obj);
+
+                auto idx = ctxt.findTransformableIdxFromPointer(obj);
 
                 // Specify the index of the object which the instance has.
                 param.shapeid = idx;
@@ -37,8 +33,7 @@ namespace aten {
             else if (type == GeometryType::Polygon) {
                 auto param = s->getParam();
 
-                auto idx = aten::transformable::findIdxAsHitable(s);
-                param.shapeid = idx;
+                param.shapeid = s->id();
 
                 shapeparams.push_back(param);
             }
@@ -50,7 +45,7 @@ namespace aten {
                 param.mtrl.idx = mtrl->id();
                 shapeparams.push_back(param);
             }
-        }
+        });
 
         auto lightNum = scene.lightNum();
 
@@ -68,16 +63,13 @@ namespace aten {
     }
 
     void DataCollector::collectTriangles(
+        const context& ctxt,
         std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
         std::vector<int>& triIdOffsets)
     {
-        const auto& shapes = aten::transformable::getShapesPolygonObjList();
-
         int triangleCount = 0;
 
-        for (const auto s : shapes) {
-            auto type = s->getParam().type;
-
+        ctxt.traverseTransformables([&](aten::transformable* s, aten::GeometryType type) {
             if (type == GeometryType::Polygon) {
                 triangles.push_back(std::vector<aten::PrimitiveParamter>());
                 int pos = triangles.size() - 1;
@@ -87,6 +79,6 @@ namespace aten {
                 triIdOffsets.push_back(triangleCount);
                 triangleCount += triangles[pos].size();
             }
-        }
+        });
     }
 }

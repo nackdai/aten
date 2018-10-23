@@ -44,6 +44,7 @@ namespace aten
 
         // Convert to linear list.
         registerBvhNodeToLinearList(
+            ctxt,
             m_bvh.getRoot(),
             threadedBvhNodeEntries);
 
@@ -78,12 +79,13 @@ namespace aten
         setBoundingBox(m_bvh.getBoundingbox());
 
         // Gather local-world matrix.
-        transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
 
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
         // Register to linear list to traverse bvhnode easily.
         registerBvhNodeToLinearList(
+            ctxt,
             m_bvh.getRoot(),
             threadedBvhNodeEntries);
 
@@ -196,7 +198,7 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.shapeid = (float)transformable::findIdxAsHitable(item);
+                gpunode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
 
                 // インスタンスの実体を取得.
                 auto internalObj = item->getHasObject();
@@ -354,8 +356,6 @@ namespace aten
         real t_min, real t_max,
         Intersection& isect) const
     {
-        auto& shapes = transformable::getShapes();
-
         real hitt = AT_MATH_INF;
 
         int nodeid = 0;
@@ -376,7 +376,7 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = node->shapeid >= 0 ? shapes[(int)node->shapeid] : nullptr;
+                auto s = node->shapeid >= 0 ? ctxt.getTransformable((int)node->shapeid) : nullptr;
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
@@ -447,7 +447,7 @@ namespace aten
         return (isect.objid >= 0);
     }
 
-    void ThreadedBVH::update()
+    void ThreadedBVH::update(const context& ctxt)
     {
         m_bvh.update();
 
@@ -457,11 +457,11 @@ namespace aten
         // More efficient. ex) Gather only transformed object etc...
         // Gather local-world matrix.
         m_mtxs.clear();
-        transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
 
         auto root = m_bvh.getRoot();
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
-        registerBvhNodeToLinearList(root, threadedBvhNodeEntries);
+        registerBvhNodeToLinearList(ctxt, root, threadedBvhNodeEntries);
 
         std::vector<int> listParentId;
         listParentId.reserve(threadedBvhNodeEntries.size());
@@ -486,7 +486,7 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.shapeid = (float)transformable::findIdxAsHitable(item);
+                gpunode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
                 AT_ASSERT(gpunode.shapeid >= 0);
 
                 // インスタンスの実体を取得.
@@ -522,6 +522,7 @@ namespace aten
     }
 
     void ThreadedBVH::registerBvhNodeToLinearList(
+        const context& ctxt,
         bvhnode* node,
         std::vector<ThreadedBvhNodeEntry>& nodes)
     {
@@ -535,10 +536,10 @@ namespace aten
         mat4 mtxL2W;
 
         auto item = node->getItem();
-        auto idx = transformable::findIdxAsHitable(item);
+        auto idx = ctxt.findTransformableIdxFromPointer(item);
 
         if (idx >= 0) {
-            auto t = transformable::getShape(idx);
+            auto t = ctxt.getTransformable(idx);
 
             mat4 mtxW2L;
             t->getMatrices(mtxL2W, mtxW2L);
@@ -550,8 +551,8 @@ namespace aten
 
                 // NOTE
                 // 0 is for top layer, so need to add 1.
-                int exid = transformable::findIdxFromPolygonObjList(obj) + 1;
-                int subexid = subobj ? transformable::findIdxFromPolygonObjList(subobj) + 1 : -1;
+                int exid = ctxt.findPolygonalTransformableIdxFromPointer(obj) + 1;
+                int subexid = subobj ? ctxt.findPolygonalTransformableIdxFromPointer(subobj) + 1 : -1;
 
                 node->setExternalId(exid);
                 node->setSubExternalId(subexid);
@@ -575,7 +576,7 @@ namespace aten
 
         nodes.push_back(ThreadedBvhNodeEntry(node, mtxL2W));
 
-        registerBvhNodeToLinearList(node->getLeft(), nodes);
-        registerBvhNodeToLinearList(node->getRight(), nodes);
+        registerBvhNodeToLinearList(ctxt, node->getLeft(), nodes);
+        registerBvhNodeToLinearList(ctxt, node->getRight(), nodes);
     }
 }

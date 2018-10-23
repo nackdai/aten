@@ -73,6 +73,11 @@ public:
             return idx;
         }
 
+        Data* operator->()
+        {
+            return m_data;
+        }
+
     private:
         void doFuncWhenAnyLeave()
         {

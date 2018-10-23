@@ -13,11 +13,11 @@ namespace aten
     class instance : public transformable {
     public:
         instance()
-            : m_param(GeometryType::Instance)
+            : transformable(GeometryType::Instance)
         {}
 
         instance(OBJ* obj, const context& ctxt)
-            : m_param(GeometryType::Instance)
+            : transformable(GeometryType::Instance)
         {
             m_obj = obj;
             setBoundingBox(m_obj->getBoundingbox());
@@ -224,11 +224,6 @@ namespace aten
             AT_ASSERT(false);
         }
 
-        virtual const GeomParameter& getParam() const override final
-        {
-            return m_param;
-        }
-
         void updateMatrix()
         {
             mat4 mtxTrans;
@@ -265,29 +260,27 @@ namespace aten
         vec3 m_scale{ aten::vec3(1, 1, 1) };
 
         bool m_isDirty{ false };
-
-        GeomParameter m_param;
     };
 
     template<>
     inline instance<object>::instance(object* obj, const context& ctxt)
-        : m_param(GeometryType::Instance)
+        : transformable(GeometryType::Instance)
     {
         m_obj = obj;
         m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
 
-        m_param.shapeid = transformable::findIdx(obj);
+        m_param.shapeid = ctxt.findTransformableIdxFromPointer(obj);
     }
 
     template<>
     inline instance<deformable>::instance(deformable* obj, const context& ctxt)
-        : m_param(GeometryType::Instance)
+        : transformable(GeometryType::Instance)
     {
         m_obj = obj;
         m_obj->build();
         setBoundingBox(m_obj->getBoundingbox());
 
-        m_param.shapeid = transformable::findIdx(obj);
+        m_param.shapeid = ctxt.findTransformableIdxFromPointer(obj);
     }
 }

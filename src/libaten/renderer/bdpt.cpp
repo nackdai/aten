@@ -99,7 +99,7 @@ namespace aten
             vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
             auto mtrl = ctxt.getMaterial(rec.mtrlid);
-            auto obj = transformable::getShape(isect.objid);
+            auto obj = ctxt.getTransformable(isect.objid);
 
             // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
             auto rrProb = aten::russianRoulette(mtrl);
@@ -361,7 +361,7 @@ namespace aten
             vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
             auto mtrl = ctxt.getMaterial(rec.mtrlid);
-            auto obj = transformable::getShape(isect.objid);
+            auto obj = ctxt.getTransformable(isect.objid);
 
             // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
             auto rrProb = aten::russianRoulette(mtrl);

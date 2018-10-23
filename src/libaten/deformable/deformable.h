@@ -21,7 +21,7 @@ namespace aten
 
     public:
         deformable() 
-            : m_param(aten::GeometryType::Polygon), transformable(aten::GeometryType::Polygon)
+            : transformable(aten::GeometryType::Polygon)
         {}
         ~deformable();
 
@@ -66,11 +66,6 @@ namespace aten
         GeomMultiVertexBuffer& getVBForGPUSkinning()
         {
             return m_mesh.getVBForGPUSkinning();
-        }
-
-        virtual const aten::GeomParameter& getParam() const override final
-        {
-            return m_param;
         }
 
         virtual aten::accelerator* getInternalAccelerator() override final
@@ -128,7 +123,6 @@ namespace aten
     private:
         DeformMesh m_mesh;
 
-        GeomParameter m_param;
         aten::accelerator* m_accel{ nullptr };
 
         bool m_isInitializedToRender{ false };

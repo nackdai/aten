@@ -70,11 +70,6 @@ namespace AT_NAME
             const aten::GeomParameter* param,
             aten::sampler* sampler);
 
-        virtual const aten::GeomParameter& getParam() const override final
-        {
-            return m_param;
-        }
-
         virtual void evalHitResult(
             const aten::context& ctxt,
             const aten::ray& r,

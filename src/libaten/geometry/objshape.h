@@ -17,7 +17,10 @@ namespace AT_NAME
         friend class object;
 
     public:
-        objshape() : param(aten::GeometryType::Polygon) {}
+        objshape()
+        {
+            param.type = aten::GeometryType::Polygon;
+        }
         virtual ~objshape();
 
         void build(const aten::context& ctxt);

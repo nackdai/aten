@@ -16,6 +16,8 @@ namespace AT_NAME {
 
 namespace aten
 {
+    class transformable;
+
     class context {
     public:
         context() {}
@@ -120,6 +122,18 @@ namespace aten
 
         int findTriIdxFromPointer(const void* p) const;
 
+        int getTransformableNum() const;
+
+        const aten::transformable* getTransformable(int idx) const;
+
+        void traverseTransformables(std::function<void(aten::transformable*, aten::GeometryType)> func) const;
+
+        void copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const;
+
+        int findTransformableIdxFromPointer(const void* p) const;
+
+        int findPolygonalTransformableIdxFromPointer(const void* p) const;
+
     private:
         std::vector<aten::vertex> m_vertices;
 
@@ -127,5 +141,6 @@ namespace aten
 
         DataList<AT_NAME::material> m_materials;
         DataList<AT_NAME::face> m_triangles;
+        DataList<aten::transformable> m_transformables;
     };
 }

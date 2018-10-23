@@ -24,7 +24,7 @@ namespace aten
     };
 
     template <typename INHERIT>
-    class geom : public INHERIT, public geombase {
+    class geom : public virtual INHERIT, public geombase {
     protected:
         geom() {}
         virtual ~geom() {}

@@ -31,9 +31,9 @@ namespace AT_NAME
             m_accel = aten::accelerator::createAccelerator();
         }
 
-        param.primid = shapes[0]->faces[0]->getId();
+        m_param.primid = shapes[0]->faces[0]->getId();
 
-        param.area = 0;
+        m_param.area = 0;
         m_triangles = 0;
 
         // Avoid sorting objshape list in bvh::build directly.
@@ -44,7 +44,7 @@ namespace AT_NAME
         for (const auto s : shapes) {
             s->build(ctxt);
 
-            param.area += s->param.area;
+            m_param.area += s->param.area;
             m_triangles += (uint32_t)s->faces.size();
 
             tmp.insert(tmp.end(), s->faces.begin(), s->faces.end());
@@ -52,7 +52,7 @@ namespace AT_NAME
             aabb::merge(bbox, s->m_aabb);
         }
 
-        param.primnum = m_triangles;
+        m_param.primnum = m_triangles;
 
         m_accel->asNested();
         m_accel->build(ctxt, (hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
@@ -69,9 +69,9 @@ namespace AT_NAME
             return;
         }
 
-        param.primid = shapes[0]->faces[0]->getId();
+        m_param.primid = shapes[0]->faces[0]->getId();
 
-        param.area = 0;
+        m_param.area = 0;
         m_triangles = 0;
 
         for (const auto s : shapes) {
@@ -80,7 +80,7 @@ namespace AT_NAME
             m_triangles += (uint32_t)s->faces.size();
         }
 
-        param.primnum = m_triangles;
+        m_param.primnum = m_triangles;
     }
 
     bool object::hit(
@@ -139,7 +139,7 @@ namespace AT_NAME
         real ratio = scaledLen / orignalLen;
         ratio = ratio * ratio;
 
-        rec.area = param.area * ratio;
+        rec.area = m_param.area * ratio;
 
         rec.mtrlid = isect.mtrlid;
     }
@@ -182,7 +182,7 @@ namespace AT_NAME
         real ratio = scaledLen / orignalLen;
         ratio = ratio * ratio;
 
-        auto area = param.area * ratio;
+        auto area = m_param.area * ratio;
 
         f->getSamplePosNormalArea(ctxt, result, sampler);
 

@@ -344,7 +344,7 @@ namespace aten {
         /**
          * @brief Return the root of the nested tree which the specified node has.
          */
-        static bvhnode* getNestedNode(bvhnode* node, aten::mat4* mtxL2W);
+        static bvhnode* getNestedNode(bvhnode* node);
 
         /**
          * @brief Convert the tree to the linear list.
@@ -368,11 +368,10 @@ namespace aten {
             auto pnode = root;
 
             auto original = pnode;
-            aten::mat4 mtxL2WForChild;
 
             // ネストしている場合にはネストさきのツリーのルートノードを取得.
             // ネストしていない場合は同じものが返ってくる.
-            pnode = getNestedNode(original, &mtxL2WForChild);
+            pnode = getNestedNode(original);
 
             if (pnode != original) {
                 // ネストしている.

@@ -39,11 +39,6 @@ namespace AT_NAME
             aten::hitable::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override final;
 
-        virtual const aten::GeomParameter& getParam() const override final
-        {
-            return m_param;
-        }
-
         virtual void evalHitResult(
             const context& ctxt,
             const aten::ray& r,
@@ -77,8 +72,5 @@ namespace AT_NAME
         Face getRandomPosOn(aten::vec3& pos, aten::sampler* sampler) const;
 
         static Face findFace(const aten::vec3& d);
-
-    private:
-        aten::GeomParameter m_param;
     };
 }

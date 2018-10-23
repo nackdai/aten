@@ -104,7 +104,7 @@ namespace aten {
         /**
          * @brief Update the structure tree.
          */
-        virtual void update()
+        virtual void update(const context& ctxt)
         {
             AT_ASSERT(false);
         }

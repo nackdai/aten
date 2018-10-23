@@ -25,6 +25,7 @@ namespace aten {
             std::vector<aten::vertex>& vtxparams);
 
         static void collectTriangles(
+            const context& ctxt,
             std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
             std::vector<int>& triIdOffsets);
     };

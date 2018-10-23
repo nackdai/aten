@@ -12,8 +12,12 @@ namespace AT_NAME
     }
 
     sphere::sphere(const aten::vec3& center, real radius, material* mtrl)
-        : m_param(center, radius, mtrl)
+        : aten::transformable(aten::GeometryType::Sphere)
     {
+        m_param.center = center;
+        m_param.radius = radius;
+        m_param.mtrl.ptr = mtrl;
+
         auto _min = center - radius;
         auto _max = center + radius;
 

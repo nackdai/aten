@@ -18,7 +18,7 @@ namespace aten
         setBoundingBox(m_bvh.getBoundingbox());
 
         // Gather local-world matrix.
-        transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
 
         std::vector<accelerator*> listBvh;
         std::map<hitable*, accelerator*> nestedBvhMap;
@@ -260,12 +260,12 @@ namespace aten
             hitable* item = node->getItem();
 
             // 自分自身のIDを取得.
-            qbvhNode.shapeid = (float)transformable::findIdxAsHitable(item);
+            qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
 
             // もしなかったら、ネストしているので親のIDを取得.
             if (qbvhNode.shapeid < 0) {
                 if (nestParent) {
-                    qbvhNode.shapeid = (float)transformable::findIdxAsHitable(nestParent);
+                    qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(nestParent);
                 }
             }
 
@@ -509,8 +509,6 @@ namespace aten
         real t_min, real t_max,
         Intersection& isect) const
     {
-        auto& shapes = transformable::getShapes();
-
         int nodeid = 0;
         uint32_t bitstack = 0;
 
@@ -534,7 +532,7 @@ namespace aten
 
                 bool isHit = false;
 
-                auto s = shapes[(int)pnode->shapeid];
+                auto s = ctxt.getTransformable((int)pnode->shapeid);
 
                 if (pnode->exid >= 0) {
                     // Traverse external StacklessQbvh.

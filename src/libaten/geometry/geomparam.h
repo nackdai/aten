@@ -19,7 +19,7 @@ namespace aten
     struct GeomParameter {
         GeometryType type{ GeometryType::GeometryTypeMax };
 
-        real area;
+        real area{ real(0) };
 
         int shapeid{ -1 };    ///< Own index in array.
         int mtxid{ -1 };    ///< Index of matrix which the shape refer.
@@ -36,26 +36,11 @@ namespace aten
 
         aten::UnionIdxPtr mtrl;
 
-        AT_DEVICE_API GeomParameter(GeometryType _type)
-            : type(_type)
+        AT_DEVICE_API GeomParameter()
         {
+            center = aten::vec3(real(0));
             mtrl.ptr = nullptr;
         }
-
-        // sphere.
-        AT_DEVICE_API GeomParameter(const vec3& c, real r, AT_NAME::material* m)
-            : center(c), radius(r), type(GeometryType::Sphere)
-        {
-            mtrl.ptr = m;
-        }
-
-        // cube.
-        AT_DEVICE_API GeomParameter(const vec3& c, const vec3& s, AT_NAME::material* m)
-            : center(c), size(s), type(GeometryType::Cube)
-        {
-            mtrl.ptr = m;
-        }
-
         ~GeomParameter() {}
     };
     AT_STATICASSERT((sizeof(GeomParameter) % 16) == 0);

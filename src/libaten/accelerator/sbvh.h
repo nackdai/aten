@@ -139,7 +139,7 @@ namespace aten
         /**
          * @brief Update the structure tree.
          */
-        virtual void update() override final;
+        virtual void update(const context& ctxt) override final;
 
         /**
          * @brief Return all nodes.

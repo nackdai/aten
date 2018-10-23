@@ -23,7 +23,7 @@ namespace aten {
         setBoundingBox(m_bvh.getBoundingbox());
 
         // Gather local-world matrix.
-        transformable::gatherAllTransformMatrixAndSetMtxIdx(m_mtxs);
+        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
 
         std::vector<accelerator*> listBvh;
         std::map<hitable*, accelerator*> nestedBvhMap;
@@ -151,12 +151,12 @@ namespace aten {
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                stacklessBvhNode.shapeid = (float)transformable::findIdxAsHitable(item);
+                stacklessBvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
 
                 // もしなかったら、ネストしているので親のIDを取得.
                 if (stacklessBvhNode.shapeid < 0) {
                     if (nestParent) {
-                        stacklessBvhNode.shapeid = (float)transformable::findIdxAsHitable(nestParent);
+                        stacklessBvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(nestParent);
                     }
                 }
 
@@ -216,8 +216,6 @@ namespace aten {
         real t_min, real t_max,
         Intersection& isect) const
     {
-        auto& shapes = transformable::getShapes();
-
         real hitt = AT_MATH_INF;
 
         int nodeid = 0;
@@ -239,7 +237,7 @@ namespace aten {
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = shapes[(int)node->shapeid];
+                auto s = ctxt.getTransformable((int)node->shapeid);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.

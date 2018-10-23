@@ -6,18 +6,15 @@
 #include "scene/hitable.h"
 #include "math/mat4.h"
 #include "geometry/geomparam.h"
+#include "misc/datalist.h"
 
 namespace aten
 {
     class transformable : public hitable {
-        static std::vector<transformable*> g_transformables;
-        static std::vector<transformable*> g_transformablesPolygonObjList;
-
-    public:
+    protected:
         transformable();
         virtual ~transformable();
 
-    protected:
         transformable(GeometryType type);
 
     public:
@@ -34,10 +31,19 @@ namespace aten
             hitrecord& rec,
             const Intersection& isect) const = 0;
 
-        virtual const GeomParameter& getParam() const
+        GeometryType getType() const
         {
-            AT_ASSERT(false);
-            return std::move(GeomParameter(GeometryType::GeometryTypeMax));
+            return m_type;
+        }
+
+        const GeomParameter& getParam() const
+        {
+            return m_param;
+        }
+
+        GeomParameter& getParam()
+        {
+            return m_param;
         }
 
         virtual void getMatrices(
@@ -58,21 +64,21 @@ namespace aten
             // Nothing is done...
         }
 
-        static uint32_t getShapeNum();
-        
-        static transformable* getShape(uint32_t idx);
-        static transformable* getShapeAsHitable(const hitable* shape);
-
-        static int findIdx(const transformable* shape);
-        static int findIdxAsHitable(const hitable* shape);
-        static int findIdxFromPolygonObjList(const hitable* shape);
-        
-        static const std::vector<transformable*>& getShapes();
-        static const std::vector<transformable*>& getShapesPolygonObjList();
-
-        static void gatherAllTransformMatrixAndSetMtxIdx(std::vector<aten::mat4>& mtxs);
-
     private:
+        static void resetIdWhenAnyTransformableLeave(aten::transformable* obj);
+
+        void addToDataList(aten::DataList<aten::transformable>& list)
+        {
+            list.add(&m_listItem);
+            m_id = m_listItem.currentIndex();
+        }
+
+    protected:
         int m_id{ -1 };
+        GeometryType m_type{ GeometryTypeMax };
+
+        GeomParameter m_param;
+
+        DataList<transformable>::ListItem m_listItem;
     };
 }

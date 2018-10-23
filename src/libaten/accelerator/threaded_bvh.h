@@ -97,7 +97,7 @@ namespace aten
         /**
          * @brief Update the structure tree.
          */
-        virtual void update() override;
+        virtual void update(const context& ctxt) override;
 
         /**
          * @brief Return all nodes.
@@ -205,6 +205,7 @@ namespace aten
          * @brief Convert the tree to the linear list.
          */
         void registerBvhNodeToLinearList(
+            const context& ctxt,
             bvhnode* node,
             std::vector<ThreadedBvhNodeEntry>& nodes);
 

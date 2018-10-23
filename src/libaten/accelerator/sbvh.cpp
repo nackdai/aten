@@ -985,8 +985,6 @@ namespace aten
         bool enableLod,
         Intersection& isect) const
     {
-        auto& shapes = transformable::getShapes();
-
         auto& mtxs = m_bvh.getMatrices();
 
         const auto& topLayerBvhNode = m_bvh.getNodes()[0];
@@ -1012,7 +1010,7 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = shapes[(int)node->shapeid];
+                auto s = ctxt.getTransformable((int)node->shapeid);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
@@ -1089,8 +1087,6 @@ namespace aten
         Intersection& isect,
         bool enableLod) const
     {
-        auto& shapes = transformable::getShapes();
-
         real hitt = AT_MATH_INF;
 
         int nodeid = 0;
@@ -1471,9 +1467,9 @@ namespace aten
         }
     }
 
-    void sbvh::update()
+    void sbvh::update(const context& ctxt)
     {
-        m_bvh.update();
+        m_bvh.update(ctxt);
 
         // Only for top layer...
 

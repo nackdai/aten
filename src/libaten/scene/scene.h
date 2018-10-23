@@ -227,7 +227,7 @@ namespace AT_NAME {
             // TODO
 #ifndef __AT_CUDA__
             if (isHit) {
-                auto obj = transformable::getShape(isect.objid);
+                auto obj = ctxt.getTransformable(isect.objid);
                 aten::hitable::evalHitResult(ctxt, obj, r, rec, isect);
             }
 #endif

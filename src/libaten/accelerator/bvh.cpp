@@ -636,7 +636,7 @@ namespace aten {
 #endif
     }
 
-    bvhnode* bvh::getNestedNode(bvhnode* node, aten::mat4* mtxL2W)
+    bvhnode* bvh::getNestedNode(bvhnode* node)
     {
         bvhnode* ret = nullptr;
 
@@ -645,18 +645,11 @@ namespace aten {
             if (item) {
                 auto internalObj = const_cast<hitable*>(item->getHasObject());
                 if (internalObj) {
-                    auto t = transformable::getShapeAsHitable(item);
-
-                    if (mtxL2W) {
-                        aten::mat4 mtxW2L;
-                        t->getMatrices(*mtxL2W, mtxW2L);
-                    }
-
                     auto accel = internalObj->getInternalAccelerator();
 
                     // NOTE
                     // 本来ならこのキャストは不正だが、BVHであることは自明なので.
-                    auto bvh = *(aten::bvh**)&accel;
+                    auto bvh = *reinterpret_cast<aten::bvh**>(&accel);
 
                     ret = bvh->getRoot();
                 }

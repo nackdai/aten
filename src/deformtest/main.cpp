@@ -208,7 +208,7 @@ void update(int frame)
                 vtxparams);
 
             auto accel = g_scene.getAccel();
-            accel->update();
+            accel->update(g_ctxt);
 
             const auto& nodes = g_scene.getAccel()->getNodes();
             const auto& mtxs = g_scene.getAccel()->getMatrices();
@@ -715,7 +715,7 @@ int main()
         std::vector<std::vector<aten::PrimitiveParamter>> triangles;
         std::vector<int> triIdOffsets;
 
-        aten::DataCollector::collectTriangles(triangles, triIdOffsets);
+        aten::DataCollector::collectTriangles(g_ctxt, triangles, triIdOffsets);
 
         uint32_t maxTriNum = 0;
         for (const auto& tris : triangles) {

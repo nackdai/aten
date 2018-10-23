@@ -90,7 +90,7 @@ void update()
         obj->update();
 
         auto accel = g_scene.getAccel();
-        accel->update();
+        accel->update(g_ctxt);
 
         {
             std::vector<aten::GeomParameter> shapeparams;

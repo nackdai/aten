@@ -1,7 +1,6 @@
 #pragma once
 
 #include "material/material.h"
-#include "scene/context.h"
 
 namespace aten
 {

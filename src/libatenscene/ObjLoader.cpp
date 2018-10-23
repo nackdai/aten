@@ -290,7 +290,7 @@ namespace aten
                 faceParam.mtrlid = dstshape->getMaterial()->id();
                 faceParam.gemoid = dstshape->getGeomId();
 
-                auto f = face::create(faceParam, ctxt);
+                auto f = ctxt.createTriangle(faceParam);
 
                 dstshape->addFace(f);
             }

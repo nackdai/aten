@@ -20,10 +20,6 @@ namespace AT_NAME
         virtual ~face();
 
     public:
-        static face* create(
-            const aten::PrimitiveParamter& param,
-            context& ctxt);
-
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
@@ -83,6 +79,10 @@ namespace AT_NAME
 
     private:
         static void resetIdWhenAnyTriangleLeave(AT_NAME::face* tri);
+
+        static face* create(
+            const context& ctxt,
+            const aten::PrimitiveParamter& param);
 
         void addToDataList(aten::DataList<AT_NAME::face>& list)
         {

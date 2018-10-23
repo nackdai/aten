@@ -68,6 +68,18 @@ namespace aten
         return -1;
     }
 
+    AT_NAME::face * context::createTriangle(const PrimitiveParamter & param)
+    {
+        auto f = AT_NAME::face::create(*this, param);
+        AT_ASSERT(f);
+        
+        if (f) {
+            addTriangle(f);
+        }
+
+        return f;
+    }
+
     void context::addTriangle(AT_NAME::face* tri)
     {
         tri->addToDataList(m_triangles);

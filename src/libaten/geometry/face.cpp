@@ -25,16 +25,14 @@ namespace AT_NAME
     }
 
     face* face::create(
-        const aten::PrimitiveParamter& param,
-        context& ctxt)
+        const context& ctxt,
+        const aten::PrimitiveParamter& param)
     {
         face* f = new face();
 
         f->param = param;
 
         f->build(ctxt, param.mtrlid, param.gemoid);
-
-        ctxt.addTriangle(f);
 
         return f;
     }

@@ -95,6 +95,8 @@ namespace aten
 
         int findMaterialIdxByName(const char* name) const;
 
+        AT_NAME::face* createTriangle(const PrimitiveParamter& param);
+
         void addTriangle(AT_NAME::face* tri);
 
         int getTriangleNum() const;

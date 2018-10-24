@@ -33,7 +33,7 @@ namespace aten
 
         GeometryType getType() const
         {
-            return m_type;
+            return m_param.type;
         }
 
         const GeomParameter& getParam() const
@@ -75,7 +75,6 @@ namespace aten
 
     protected:
         int m_id{ -1 };
-        GeometryType m_type{ GeometryTypeMax };
 
         GeomParameter m_param;
 

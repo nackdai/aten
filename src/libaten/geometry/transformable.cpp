@@ -16,7 +16,6 @@ namespace aten
         : transformable()
     {
         m_param.type = type;
-        m_type = type;
     }
 
     transformable::~transformable()

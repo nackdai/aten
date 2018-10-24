@@ -909,6 +909,7 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     // ‹¾.
     auto mirror = new aten::sphere(
+        aten::vec3(0),
         1,
         createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.99, 0.99, 0.99)));
     scene->add(new aten::instance<aten::sphere>(mirror, ctxt, mtxL2W));
@@ -922,6 +923,7 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.ior = 0.2;
 
     auto s_ggx = new aten::sphere(
+        aten::vec3(0),
         1.0, 
         createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
     scene->add(new aten::instance<aten::sphere>(s_ggx, ctxt, mtxL2W));
@@ -936,6 +938,7 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     // ƒKƒ‰ƒX.
     auto glass = new aten::sphere(
+        aten::vec3(0),
         0.5,
         createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(new aten::instance<aten::sphere>(glass, ctxt, mtxL2W));

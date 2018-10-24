@@ -11,10 +11,6 @@ namespace AT_NAME
     class cube : public aten::geom<aten::transformable> {
     public:
         cube(const aten::vec3& center, real w, real h, real d, material* mtrl);
-        cube(real w, real h, real d, material* m)
-            : cube(aten::vec3(0), w, h, d, m)
-        {}
-
         virtual ~cube() {}
 
     public:

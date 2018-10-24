@@ -12,10 +12,6 @@ namespace aten
     template <typename OBJ>
     class instance : public transformable {
     public:
-        instance()
-            : transformable(GeometryType::Instance)
-        {}
-
         instance(OBJ* obj, const context& ctxt)
             : transformable(GeometryType::Instance)
         {

@@ -122,6 +122,8 @@ namespace aten
 
         int findTriIdxFromPointer(const void* p) const;
 
+        void addTransformable(aten::transformable* t);
+
         int getTransformableNum() const;
 
         const aten::transformable* getTransformable(int idx) const;
@@ -132,7 +134,7 @@ namespace aten
 
         int findTransformableIdxFromPointer(const void* p) const;
 
-        int findPolygonalTransformableIdxFromPointer(const void* p) const;
+        int findPolygonalTransformableOrderFromPointer(const void* p) const;
 
     private:
         std::vector<aten::vertex> m_vertices;

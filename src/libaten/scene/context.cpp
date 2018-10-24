@@ -177,6 +177,11 @@ namespace aten
         return id;
     }
 
+    void context::addTransformable(aten::transformable* t)
+    {
+        t->addToDataList(m_transformables);
+    }
+
     int context::getTransformableNum() const
     {
         return m_transformables.size();
@@ -240,24 +245,27 @@ namespace aten
         return id;
     }
 
-    int context::findPolygonalTransformableIdxFromPointer(const void* p) const
+    int context::findPolygonalTransformableOrderFromPointer(const void* p) const
     {
         auto& shapes = m_transformables.getList();
 
-        auto found = std::find_if(
-            shapes.begin(), shapes.end(),
-            [&](const aten::DataList<aten::transformable>::ListItem* item) {
+        int order = -1;
+
+        for (const auto item : shapes) {
             const auto t = item->getData();
-            return t == p && t->getType() == aten::GeometryType::Polygon;
-        });
 
-        int id = -1;
+            auto type = t->getType();
+            if (type == aten::GeometryType::Polygon) {
+                order++;
+            }
 
-        if (found != shapes.end()) {
-            const auto t = (*found)->getData();
-            id = t->id();
+            if (t == p) {
+                break;
+            }
         }
 
-        return id;
+        AT_ASSERT(order >= 0);
+
+        return order;
     }
 }

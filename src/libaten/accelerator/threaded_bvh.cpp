@@ -551,8 +551,8 @@ namespace aten
 
                 // NOTE
                 // 0 is for top layer, so need to add 1.
-                int exid = ctxt.findPolygonalTransformableIdxFromPointer(obj) + 1;
-                int subexid = subobj ? ctxt.findPolygonalTransformableIdxFromPointer(subobj) + 1 : -1;
+                int exid = ctxt.findPolygonalTransformableOrderFromPointer(obj) + 1;
+                int subexid = subobj ? ctxt.findPolygonalTransformableOrderFromPointer(subobj) + 1 : -1;
 
                 node->setExternalId(exid);
                 node->setSubExternalId(subexid);

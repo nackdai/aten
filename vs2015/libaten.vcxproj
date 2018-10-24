@@ -283,6 +283,7 @@
     <ClInclude Include="..\src\libaten\geometry\objshape.h" />
     <ClInclude Include="..\src\libaten\geometry\sphere.h" />
     <ClInclude Include="..\src\libaten\geometry\transformable.h" />
+    <ClInclude Include="..\src\libaten\geometry\transformable_factory.h" />
     <ClInclude Include="..\src\libaten\geometry\vertex.h" />
     <ClInclude Include="..\src\libaten\hdr\gamma.h" />
     <ClInclude Include="..\src\libaten\hdr\hdr.h" />

@@ -13,10 +13,14 @@
 namespace AT_NAME
 {
     class object : public aten::transformable {
-    public:
+        friend class TransformableFactory;
+
+    private:
         object() 
             : transformable(aten::GeometryType::Polygon)
         {}
+
+    public:
         virtual ~object();
 
     public:

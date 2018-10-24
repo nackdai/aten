@@ -11,6 +11,8 @@
 namespace aten
 {
     class transformable : public hitable {
+        friend class context;
+
     protected:
         transformable();
         virtual ~transformable();

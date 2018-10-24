@@ -253,7 +253,7 @@ void loadObj(const Options& opt)
 #endif
 
     for (auto obj : g_objs) {
-        auto instance = new aten::instance<aten::object>(obj, g_ctxt, aten::mat4::Identity);
+        auto instance = aten::TransformableFactory::createInstance<aten::object>(g_ctxt, obj, aten::mat4::Identity);
         g_scene.add(instance);
     }
 

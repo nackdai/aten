@@ -11,7 +11,9 @@ namespace aten
 {
     template <typename OBJ>
     class instance : public transformable {
-    public:
+        friend class TransformableFactory;
+
+    private:
         instance(OBJ* obj, const context& ctxt)
             : transformable(GeometryType::Instance)
         {

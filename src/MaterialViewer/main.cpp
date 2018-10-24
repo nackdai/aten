@@ -93,7 +93,7 @@ void makeScene(aten::scene* scene)
     aten::AssetManager::registerMtrl("m1", mtrl);
 
     auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt);
-    auto teapot = new aten::instance<aten::object>(obj, g_ctxt, aten::mat4::Identity);
+    auto teapot = aten::TransformableFactory::createInstance<aten::object>(g_ctxt, obj, aten::mat4::Identity);
     scene->add(teapot);
 
     // TODO

@@ -9,8 +9,12 @@
 namespace AT_NAME
 {
     class cube : public aten::geom<aten::transformable> {
-    public:
+        friend class TransformableFactory;
+
+    private:
         cube(const aten::vec3& center, real w, real h, real d, material* mtrl);
+
+    public:
         virtual ~cube() {}
 
     public:

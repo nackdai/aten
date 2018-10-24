@@ -10,8 +10,12 @@
 namespace AT_NAME
 {
     class sphere : public aten::geom<aten::transformable> {
-    public:
+        friend class TransformableFactory;
+
+    private:
         sphere(const aten::vec3& center, real radius, material* mtrl);
+
+    public:
         virtual ~sphere() {}
 
     public:

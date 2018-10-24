@@ -100,6 +100,7 @@
 #include "geometry/sphere.h"
 #include "geometry/cube.h"
 #include "geometry/transformable.h"
+#include "geometry/transformable_factory.h"
 
 #include "deformable/deformable.h"
 #include "deformable/DeformAnimation.h"

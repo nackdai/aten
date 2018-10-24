@@ -18,11 +18,14 @@ namespace aten
      */
     class deformable : public transformable {
         friend class DeformableRenderer;
+        friend class TransformableFactory;
 
-    public:
+    private:
         deformable() 
             : transformable(aten::GeometryType::Polygon)
         {}
+
+    public:
         ~deformable();
 
     public:

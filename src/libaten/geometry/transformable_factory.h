@@ -6,6 +6,7 @@
 #include "geometry/object.h"
 #include "scene/instance.h"
 #include "scene/context.h"
+#include "deformable/deformable.h"
 
 namespace aten
 {
@@ -92,6 +93,16 @@ namespace aten
             const vec3& scale)
         {
             auto ret = new instance<T>(obj, ctxt, trans, rot, scale);
+            AT_ASSERT(ret);
+
+            ctxt.addTransformable(ret);
+
+            return ret;
+        }
+
+        static deformable* createDeformable(context& ctxt)
+        {
+            auto ret = new deformable();
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);

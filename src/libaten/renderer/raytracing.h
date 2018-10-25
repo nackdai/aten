@@ -12,7 +12,7 @@ namespace aten
         RayTracing() {}
         virtual ~RayTracing() {}
 
-        virtual void render(
+        virtual void onRender(
             const context& ctxt,
             Destination& dst,
             scene* scene,

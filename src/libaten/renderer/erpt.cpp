@@ -160,7 +160,7 @@ namespace aten
         return std::move(retPath);
     }
 
-    void ERPT::render(
+    void ERPT::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

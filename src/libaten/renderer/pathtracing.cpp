@@ -412,7 +412,7 @@ namespace aten
 
     static uint32_t frame = 0;
 
-    void PathTracing::render(
+    void PathTracing::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

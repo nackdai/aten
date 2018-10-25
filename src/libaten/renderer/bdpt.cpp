@@ -863,7 +863,7 @@ namespace aten
         }
     }
 
-    void BDPT::render(
+    void BDPT::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

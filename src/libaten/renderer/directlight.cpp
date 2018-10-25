@@ -275,7 +275,7 @@ namespace aten
         }
     }
 
-    void DirectLightRenderer::render(
+    void DirectLightRenderer::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

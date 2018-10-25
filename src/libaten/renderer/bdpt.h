@@ -13,7 +13,7 @@ namespace aten
         ~BDPT() {}
 
     public:
-        virtual void render(
+        virtual void onRender(
             const context& ctxt,
             Destination& dst,
             scene* scene,

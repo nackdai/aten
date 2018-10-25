@@ -12,7 +12,7 @@ namespace aten
         DirectLightRenderer() {}
         ~DirectLightRenderer() {}
 
-        virtual void render(
+        virtual void onRender(
             const context& ctxt,
             Destination& dst,
             scene* scene,

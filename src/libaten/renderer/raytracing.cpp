@@ -118,7 +118,7 @@ namespace aten
         return contribution;
     }
 
-    void RayTracing::render(
+    void RayTracing::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

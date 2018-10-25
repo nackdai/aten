@@ -117,7 +117,7 @@ namespace aten
         return std::move(path);
     }
 
-    void AOVRenderer::render(
+    void AOVRenderer::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

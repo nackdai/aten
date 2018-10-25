@@ -191,7 +191,7 @@ namespace aten
         return std::move(retPath);
     }
 
-    void PSSMLT::render(
+    void PSSMLT::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,

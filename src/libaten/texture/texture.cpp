@@ -7,13 +7,16 @@
 #include "visualizer/shader.h"
 #include "misc/color.h"
 
-namespace aten {
-    std::vector<texture*> texture::g_textures;
+namespace aten
+{
+    void texture::resetIdWhenAnyTextureLeave(aten::texture* tex)
+    {
+        tex->m_id = tex->m_listItem.currentIndex();
+    }
 
     texture::texture()
     {
-        m_id = (int)g_textures.size();
-        g_textures.push_back(this);
+        m_listItem.init(this, resetIdWhenAnyTextureLeave);
     }
 
     texture::texture(uint32_t width, uint32_t height, uint32_t channels, const char* name/*= nullptr*/)
@@ -25,10 +28,7 @@ namespace aten {
 
     texture::~texture()
     {
-        auto found = std::find(g_textures.begin(), g_textures.end(), this);
-        if (found != g_textures.end()) {
-            g_textures.erase(found);
-        }
+        m_listItem.leave();
 
         releaseAsGLTexture();
     }
@@ -44,17 +44,6 @@ namespace aten {
 
             m_colors.resize(width * height);
         }
-    }
-
-    const texture* texture::getTexture(int id)
-    {
-        AT_ASSERT(g_textures.size() > id);
-        return g_textures[id];
-    }
-
-    const std::vector<texture*>& texture::getTextures()
-    {
-        return g_textures;
     }
 
     bool texture::initAsGLTexture()
@@ -181,13 +170,6 @@ namespace aten {
                 GL_RGBA,
                 GL_FLOAT,
                 clearclr));
-        }
-    }
-
-    void texture::initAllAsGLTexture()
-    {
-        for (auto tex : g_textures) {
-            tex->initAsGLTexture();
         }
     }
 

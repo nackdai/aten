@@ -9,6 +9,7 @@
 #include "material/material.h"
 #include "misc/datalist.h"
 #include "geometry/geomparam.h"
+#include "texture/texture.h"
 
 namespace AT_NAME {
     class face;
@@ -136,7 +137,27 @@ namespace aten
 
         int findPolygonalTransformableOrderFromPointer(const void* p) const;
 
+        const texture* getTexture(int idx) const;
+
+        static void pinContext(context* ctxt)
+        {
+            s_pinnedCtxt = ctxt;
+        }
+
+        static void removePinnedContext()
+        {
+            s_pinnedCtxt = nullptr;
+        }
+
+        static const context* getPinnedContext()
+        {
+            AT_ASSERT(s_pinnedCtxt);
+            return s_pinnedCtxt;
+        }
+
     private:
+        static context* s_pinnedCtxt;
+
         std::vector<aten::vertex> m_vertices;
 
         aten::GeomVertexBuffer m_vb;
@@ -144,5 +165,6 @@ namespace aten
         DataList<AT_NAME::material> m_materials;
         DataList<AT_NAME::face> m_triangles;
         DataList<aten::transformable> m_transformables;
+        DataList<aten::texture> m_textures;
     };
 }

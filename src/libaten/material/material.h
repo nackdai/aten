@@ -8,8 +8,6 @@
 #include "math/ray.h"
 #include "misc/datalist.h"
 
-#include "material/sample_texture.h"
-
 namespace AT_NAME {
     class Light;
 }
@@ -196,10 +194,10 @@ namespace aten
         void editTex(const char* name, int texid)
         {
             if (texid >= 0) {
-                auto tex = aten::texture::getTexture(texid);
+                /*auto tex = aten::texture::getTexture(texid);
                 if (tex) {
                     edit(name, tex->name());
-                }
+                }*/
             }
         }
 
@@ -326,7 +324,7 @@ namespace AT_NAME
 
         virtual AT_DEVICE_MTRL_API aten::vec3 sampleAlbedoMap(real u, real v) const
         {
-            return std::move(sampleTexture(m_param.albedoMap, u, v, real(1)));
+            return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, real(1)));
         }
 
         virtual AT_DEVICE_MTRL_API void applyNormalMap(
@@ -486,12 +484,6 @@ namespace AT_NAME
         {
             //AT_ASSERT(false);
             return false;
-        }
-
-        static inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, real defaultValue, int lod = 0)
-        {
-            auto ret = AT_NAME::sampleTexture(texid, u, v, aten::vec3(defaultValue), lod);
-            return std::move(ret);
         }
 
         static const char* getMaterialTypeName(aten::MaterialType type);

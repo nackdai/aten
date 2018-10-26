@@ -209,5 +209,5 @@ namespace AT_NAME
         real u, real v) const
     {
         applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
-    }    
+    }
 }

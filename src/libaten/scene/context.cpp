@@ -5,6 +5,8 @@
 
 namespace aten
 {
+    context* context::s_pinnedCtxt = nullptr;
+
     void context::build()
     {
         if (!m_vertices.empty()
@@ -267,5 +269,10 @@ namespace aten
         AT_ASSERT(order >= 0);
 
         return order;
+    }
+    const texture* context::getTexture(int idx) const
+    {
+        AT_ASSERT(0 <= idx && idx < m_textures.size());
+        return m_textures[idx];
     }
 }

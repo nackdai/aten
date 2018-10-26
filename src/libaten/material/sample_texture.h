@@ -17,6 +17,9 @@ namespace AT_NAME {
 #endif
 }
 #else
+
+#include "scene/context.h"
+
 namespace AT_NAME {
     inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue, int lod = 0)
     {
@@ -24,7 +27,8 @@ namespace AT_NAME {
 
         // TODO
         if (texid >= 0) {
-            auto tex = aten::texture::getTexture(texid);
+            const auto ctxt = aten::context::getPinnedContext();
+            auto tex = ctxt->getTexture(texid);
             if (tex) {
                 ret = tex->at(u, v);
             }

@@ -1,4 +1,5 @@
 #include "material/ggx.h"
+#include "material/sample_texture.h"
 
 namespace AT_NAME
 {
@@ -16,10 +17,10 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = material::sampleTexture(
+        auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            param->roughness);
+            aten::vec3(param->roughness));
 
         auto ret = pdf(roughness.r, normal, wi, wo);
         return ret;
@@ -41,10 +42,10 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler)
     {
-        auto roughness = material::sampleTexture(
+        auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            param->roughness);
+            aten::vec3(param->roughness));
 
         aten::vec3 dir = sampleDirection(roughness.r, normal, wi, sampler);
 
@@ -67,13 +68,13 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = material::sampleTexture(
+        auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            param->roughness);
+            aten::vec3(param->roughness));
 
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         real fresnel = 1;
         real ior = param->ior;
@@ -90,10 +91,10 @@ namespace AT_NAME
         real u, real v,
         const aten::vec3& externalAlbedo)
     {
-        auto roughness = material::sampleTexture(
+        auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            param->roughness);
+            aten::vec3(param->roughness));
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -312,16 +313,16 @@ namespace AT_NAME
         real u, real v,
         bool isLightPath/*= false*/)
     {
-        auto roughness = material::sampleTexture(
+        auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            param->roughness);
+            aten::vec3(param->roughness));
 
         result->dir = sampleDirection(roughness.r, wi, normal, sampler);
         result->pdf = pdf(roughness.r, normal, wi, result->dir);
 
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         real fresnel = 1;
         real ior = param->ior;
@@ -341,10 +342,10 @@ namespace AT_NAME
         const aten::vec3& externalAlbedo,
         bool isLightPath/*= false*/)
     {
-        auto roughness = material::sampleTexture(
+        auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            param->roughness);
+            aten::vec3(param->roughness));
 
         result->dir = sampleDirection(roughness.r, wi, normal, sampler);
         result->pdf = pdf(roughness.r, normal, wi, result->dir);

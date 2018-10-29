@@ -53,7 +53,7 @@ namespace aten
     //        </postprocs>
     // </scene>
 
-    void readTextures(const tinyxml2::XMLElement* root)
+    void readTextures(const tinyxml2::XMLElement* root, aten::context& ctxt)
     {
         auto texRoot = root->FirstChildElement("textures");
 
@@ -77,10 +77,10 @@ namespace aten
             }
 
             if (!tag.empty()) {
-                ImageLoader::load(tag, path);
+                ImageLoader::load(tag, path, ctxt);
             }
             else {
-                ImageLoader::load(path);
+                ImageLoader::load(path, ctxt);
             }
         }
     }
@@ -590,7 +590,7 @@ namespace aten
             
             ret.camera = readCamera(root, ret.dst.width, ret.dst.height);
 
-            readTextures(root);
+            readTextures(root, ctxt);
             readMaterials(root, ctxt);
             readObjects(root, ctxt, objs);
             readLights(root, objs, lights);

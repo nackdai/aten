@@ -636,10 +636,10 @@ void ManyLightScene::getCameraPosAndAt(
 
 void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto albedo = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_D.tga");
-    auto nml = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_N.tga");
-    auto rough = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_R.tga");
-    auto nml_2 = aten::ImageLoader::load("../../asset/normalmap.png");
+    auto albedo = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_D.tga", ctxt);
+    auto nml = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_N.tga", ctxt);
+    auto rough = aten::ImageLoader::load("../../asset/pbr_textures/Brick_baked/T_Brick_Baked_R.tga", ctxt);
+    auto nml_2 = aten::ImageLoader::load("../../asset/normalmap.png", ctxt);
     aten::vec3 clr = aten::vec3(1, 1, 1);
 
     aten::MaterialParameter mtrlParam;
@@ -1069,34 +1069,34 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto SP_LUK = aten::ImageLoader::load("../../asset/sponza/sp_luk.JPG");
-    auto SP_LUK_nml = aten::ImageLoader::load("../../asset/sponza/sp_luk-nml.png");
+    auto SP_LUK = aten::ImageLoader::load("../../asset/sponza/sp_luk.JPG", ctxt);
+    auto SP_LUK_nml = aten::ImageLoader::load("../../asset/sponza/sp_luk-nml.png", ctxt);
 
-    auto _00_SKAP = aten::ImageLoader::load("../../asset/sponza/00_skap.JPG");
+    auto _00_SKAP = aten::ImageLoader::load("../../asset/sponza/00_skap.JPG", ctxt);
 
-    auto _01_STUB = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
-    auto _01_STUB_nml = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
+    auto _01_STUB = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG", ctxt);
+    auto _01_STUB_nml = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png", ctxt);
 
-    auto _01_S_BA = aten::ImageLoader::load("../../asset/sponza/01_S_ba.JPG");
+    auto _01_S_BA = aten::ImageLoader::load("../../asset/sponza/01_S_ba.JPG", ctxt);
 
-    auto _01_ST_KP = aten::ImageLoader::load("../../asset/sponza/01_St_kp.JPG");
-    auto _01_ST_KP_nml = aten::ImageLoader::load("../../asset/sponza/01_St_kp-nml.png");
+    auto _01_ST_KP = aten::ImageLoader::load("../../asset/sponza/01_St_kp.JPG", ctxt);
+    auto _01_ST_KP_nml = aten::ImageLoader::load("../../asset/sponza/01_St_kp-nml.png", ctxt);
 
-    auto X01_ST = aten::ImageLoader::load("../../asset/sponza/x01_st.JPG");
+    auto X01_ST = aten::ImageLoader::load("../../asset/sponza/x01_st.JPG", ctxt);
 
-    auto KAMEN_stup = aten::ImageLoader::load("../../asset/sponza/KAMEN-stup.JPG");
+    auto KAMEN_stup = aten::ImageLoader::load("../../asset/sponza/KAMEN-stup.JPG", ctxt);
 
-    auto RELJEF = aten::ImageLoader::load("../../asset/sponza/reljef.JPG");
-    auto RELJEF_nml = aten::ImageLoader::load("../../asset/sponza/reljef-nml.png");
+    auto RELJEF = aten::ImageLoader::load("../../asset/sponza/reljef.JPG", ctxt);
+    auto RELJEF_nml = aten::ImageLoader::load("../../asset/sponza/reljef-nml.png", ctxt);
 
-    auto KAMEN = aten::ImageLoader::load("../../asset/sponza/KAMEN.JPG");
-    auto KAMEN_nml = aten::ImageLoader::load("../../asset/sponza/KAMEN-nml.png");
+    auto KAMEN = aten::ImageLoader::load("../../asset/sponza/KAMEN.JPG", ctxt);
+    auto KAMEN_nml = aten::ImageLoader::load("../../asset/sponza/KAMEN-nml.png", ctxt);
 
-    auto PROZOR1 = aten::ImageLoader::load("../../asset/sponza/prozor1.JPG");
+    auto PROZOR1 = aten::ImageLoader::load("../../asset/sponza/prozor1.JPG", ctxt);
 
-    auto VRATA_KR = aten::ImageLoader::load("../../asset/sponza/vrata_kr.JPG");
+    auto VRATA_KR = aten::ImageLoader::load("../../asset/sponza/vrata_kr.JPG", ctxt);
 
-    auto VRATA_KO = aten::ImageLoader::load("../../asset/sponza/vrata_ko.JPG");
+    auto VRATA_KO = aten::ImageLoader::load("../../asset/sponza/vrata_ko.JPG", ctxt);
 
     aten::AssetManager::registerMtrl(
         "sp_00_luk_mali",

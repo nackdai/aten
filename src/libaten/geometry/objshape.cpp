@@ -95,7 +95,7 @@ namespace AT_NAME
     {
         if (func) {
             int albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
-            const aten::texture* albedo = albedoTexId >= 0 ? aten::texture::getTexture(albedoTexId) : nullptr;
+            const aten::texture* albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 
             auto color = m_mtrl ? m_mtrl->param().baseColor : vec3(1);
 

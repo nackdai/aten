@@ -5,7 +5,7 @@
 
 namespace aten
 {
-    context* context::s_pinnedCtxt = nullptr;
+    const context* context::s_pinnedCtxt = nullptr;
 
     void context::build()
     {
@@ -270,9 +270,27 @@ namespace aten
 
         return order;
     }
+    
+    texture* context::createTexture(uint32_t width, uint32_t height, uint32_t channels, const char* name)
+    {
+        auto ret = texture::create(width, height, channels, name);
+        AT_ASSERT(ret);
+
+        addTexture(ret);
+
+        return ret;
+    }
+
     const texture* context::getTexture(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < m_textures.size());
         return m_textures[idx];
+    }
+
+    void context::addTexture(texture* tex)
+    {
+        AT_ASSERT(tex);
+
+        tex->addToDataList(m_textures);
     }
 }

@@ -557,7 +557,7 @@ int main()
 
         std::vector<idaten::TextureResource> tex;
         {
-            auto texs = aten::texture::getTextures();
+            auto texs = g_ctxt.getTextures();
 
             for (const auto t : texs) {
                 tex.push_back(

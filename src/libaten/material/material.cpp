@@ -1,6 +1,7 @@
 #include <atomic>
 #include "material/material.h"
 #include "light/light.h"
+#include "material/sample_texture.h"
 
 namespace AT_NAME
 {
@@ -203,11 +204,16 @@ namespace AT_NAME
         return fresnel;
     }
 
+    AT_DEVICE_MTRL_API aten::vec3 material::sampleAlbedoMap(real u, real v) const
+    {
+        return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec3(real(1))));
+    }
+
     AT_DEVICE_MTRL_API void material::applyNormalMap(
         const aten::vec3& orgNml,
         aten::vec3& newNml,
         real u, real v) const
     {
-        applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
+        AT_NAME::applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
     }
 }

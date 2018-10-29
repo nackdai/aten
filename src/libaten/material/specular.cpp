@@ -1,4 +1,5 @@
 #include "material/specular.h"
+#include "material/sample_texture.h"
 
 namespace AT_NAME
 {
@@ -65,7 +66,7 @@ namespace AT_NAME
         }
 #endif
 
-        bsdf *= sampleTexture(param->albedoMap, u, v, real(1));
+        bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         if (param->ior > real(0)) {
             real nc = real(1);        // ^‹ó‚Ì‹üÜ—¦.

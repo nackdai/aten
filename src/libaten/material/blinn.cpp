@@ -1,5 +1,6 @@
 #include "math/math.h"
 #include "material/blinn.h"
+#include "material/sample_texture.h"
 
 namespace AT_NAME
 {
@@ -121,7 +122,7 @@ namespace AT_NAME
         albedo *= sampleTexture(
             param->albedoMap,
             u, v,
-            real(1));
+            aten::vec3(real(1)));
 
         auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
         return std::move(ret);
@@ -258,7 +259,7 @@ namespace AT_NAME
         albedo *= sampleTexture(
             param->albedoMap,
             u, v,
-            real(1));
+            aten::vec3(real(1)));
 
         result->bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;

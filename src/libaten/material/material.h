@@ -322,38 +322,12 @@ namespace AT_NAME
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
-        virtual AT_DEVICE_MTRL_API aten::vec3 sampleAlbedoMap(real u, real v) const
-        {
-            return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, real(1)));
-        }
+        virtual AT_DEVICE_MTRL_API aten::vec3 sampleAlbedoMap(real u, real v) const;
 
         virtual AT_DEVICE_MTRL_API void applyNormalMap(
             const aten::vec3& orgNml,
             aten::vec3& newNml,
             real u, real v) const;
-
-        static AT_DEVICE_MTRL_API void applyNormalMap(
-            const int normalMapIdx,
-            const aten::vec3& orgNml,
-            aten::vec3& newNml,
-            real u, real v)
-        {
-            if (normalMapIdx >= 0) {
-                auto nml = sampleTexture(normalMapIdx, u, v, real(0));
-                nml = real(2) * nml - aten::vec3(1);    // [0, 1] -> [-1, 1].
-                nml = normalize(nml);
-
-                aten::vec3 n = normalize(orgNml);
-                aten::vec3 t = aten::getOrthoVector(n);
-                aten::vec3 b = cross(n, t);
-
-                newNml = nml.z * n + nml.x * t + nml.y * b;
-                newNml = normalize(newNml);
-            }
-            else {
-                newNml = normalize(orgNml);
-            }
-        }
 
         virtual AT_DEVICE_MTRL_API real computeFresnel(
             const aten::vec3& normal,

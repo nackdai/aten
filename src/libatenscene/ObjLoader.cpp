@@ -237,7 +237,7 @@ namespace aten
 
                             if (!albedoMap) {
                                 std::string texname = pathname + "/" + objmtrl.diffuse_texname;
-                                albedoMap = aten::ImageLoader::load(texname);
+                                albedoMap = aten::ImageLoader::load(texname, ctxt);
                             }
                         }
 
@@ -247,7 +247,7 @@ namespace aten
 
                             if (!normalMap) {
                                 std::string texname = pathname + "/" + objmtrl.bump_texname;
-                                normalMap = aten::ImageLoader::load(texname);
+                                normalMap = aten::ImageLoader::load(texname, ctxt);
                             }
                         }
 

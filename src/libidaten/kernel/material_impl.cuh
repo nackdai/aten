@@ -31,7 +31,7 @@ AT_CUDA_INLINE __device__ void sampleLayerMaterial(
         // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
         if (i > 0) {
             auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
-            AT_NAME::material::applyNormalMap(normalMap, normal, appliedNml, u, v);
+            AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
         }
 
         AT_NAME::MaterialSampling sampleres;
@@ -93,7 +93,7 @@ AT_CUDA_INLINE __device__ real sampleLayerPDF(
         // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
         if (i > 0) {
             auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
-            AT_NAME::material::applyNormalMap(normalMap, normal, appliedNml, u, v);
+            AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
         }
 
         auto p = samplePDF(ctxt, param, appliedNml, wi, wo, u, v);
@@ -156,7 +156,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
         // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
         if (i > 0) {
             auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
-            AT_NAME::material::applyNormalMap(normalMap, normal, appliedNml, u, v);
+            AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
         }
 
         auto b = sampleBSDF(ctxt, param, appliedNml, wi, wo, u, v);

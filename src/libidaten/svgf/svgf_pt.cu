@@ -515,7 +515,7 @@ __global__ void shade(
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
         // texture color, meshid.
-        auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
+        auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1.0f));
 #if 0
         aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
 #else
@@ -544,7 +544,7 @@ __global__ void shade(
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
         // texture color.
-        auto texcolor = AT_NAME::material::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, 1.0f);
+        auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1.0f));
 #if 0
         aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
 #else
@@ -596,7 +596,7 @@ __global__ void shade(
         auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
-    AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+    AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
     auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1), bounce);
 

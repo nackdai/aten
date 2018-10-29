@@ -202,6 +202,7 @@ bool ObjWriter::write(
 }
 
 bool ObjWriter::writeMaterial(
+    const aten::context& ctxt,
     const std::string& mtrlPath,
     const std::vector<aten::material*>& mtrls)
 {
@@ -221,13 +222,13 @@ bool ObjWriter::writeMaterial(
         fprintf(fp, "illum 2\n");
 
         if (param.albedoMap >= 0) {
-            auto albedo = aten::texture::getTexture(param.albedoMap);
+            auto albedo = ctxt.getTexture(param.albedoMap);
             fprintf(fp, "map_Ka %s\n", albedo->name());
             fprintf(fp, "map_Kd %s\n", albedo->name());
         }
 
         if (param.normalMap >= 0) {
-            auto normal = aten::texture::getTexture(param.normalMap);
+            auto normal = ctxt.getTexture(param.normalMap);
             fprintf(fp, "map_bump %s\n", normal->name());
             fprintf(fp, "bump %s\n", normal->name());
         }

@@ -2,6 +2,7 @@
 
 #include "material/material.h"
 #include "texture/texture.h"
+#include "material/sample_texture.h"
 
 namespace AT_NAME
 {
@@ -84,7 +85,7 @@ namespace AT_NAME
             albedo *= sampleTexture(
                 param->albedoMap,
                 u, v,
-                real(1));
+                aten::vec3(real(1)));
 
             aten::vec3 ret = albedo / AT_MATH_PI;
             return ret;

@@ -73,6 +73,7 @@ namespace aten {
             const std::vector<uint32_t>& idxNums);
 
         void draw(
+            const context& ctxt,
             const std::vector<vertex>& vtxs,
             const std::vector<std::vector<int>>& idxs,
             const std::vector<material*>& mtrls,

@@ -1,6 +1,7 @@
 #include "material/carpaint.h"
 #include "material/ggx.h"
 #include "material/FlakesNormal.h"
+#include "material/sample_texture.h"
 
 //#pragma optimize( "", off)
 
@@ -301,7 +302,7 @@ namespace AT_NAME
         real u, real v)
     {
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         aten::vec3 ret = bsdf(param, normal, wi, wo, u, v, albedo);
         return std::move(ret);
@@ -489,7 +490,7 @@ namespace AT_NAME
         bool isLightPath/*= false*/)
     {
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         sample(
             result,

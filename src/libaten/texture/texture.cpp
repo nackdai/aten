@@ -33,6 +33,14 @@ namespace aten
         releaseAsGLTexture();
     }
 
+    texture* texture::create(uint32_t width, uint32_t height, uint32_t channels, const char* name)
+    {
+        texture* ret = new texture(width, height, channels, name);
+        AT_ASSERT(ret);
+
+        return ret;
+    }
+
     void texture::init(uint32_t width, uint32_t height, uint32_t channels)
     {
         if (m_colors.empty()) {

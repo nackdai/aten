@@ -44,7 +44,9 @@ namespace aten
             scene* scene,
             camera* camera)
         {
+            context::pinContext(&ctxt);
             onRender(ctxt, dst, scene, camera);
+            context::removePinnedContext();
         }
 
         void setBG(background* bg)

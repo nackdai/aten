@@ -1,4 +1,5 @@
 #include "material/lambert_refraction.h"
+#include "material/sample_texture.h"
 
 //#pragma optimize( "", off)
 
@@ -58,7 +59,7 @@ namespace AT_NAME
             albedo *= sampleTexture(
                 param->albedoMap,
                 u, v,
-                real(1));
+                aten::vec3(real(1)));
 
             aten::vec3 ret = albedo / AT_MATH_PI;
             return ret;

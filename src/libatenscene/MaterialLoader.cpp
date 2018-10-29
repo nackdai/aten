@@ -126,7 +126,7 @@ namespace aten {
     using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
 #else
     template <typename TYPE>
-    aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e)
+    aten::PolymorphicValue getValue(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         AT_ASSERT(false);
         PolymorphicValue ret;
@@ -134,7 +134,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e)
+    aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         aten::PolymorphicValue v;
 
@@ -151,7 +151,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e)
+    aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         aten::PolymorphicValue v;
         v.val.f = (real)e->DoubleText();
@@ -159,7 +159,7 @@ namespace aten {
     }
 
     template <>
-    aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e)
+    aten::PolymorphicValue getValue<texture*>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         auto s = e->GetText();
 
@@ -173,7 +173,7 @@ namespace aten {
             extname,
             filename);
 
-        auto tex = ImageLoader::load(s);
+        auto tex = ImageLoader::load(s, ctxt);
 
         aten::PolymorphicValue v;
         v.val.p = tex;
@@ -181,7 +181,7 @@ namespace aten {
         return std::move(v);
     }
 
-    using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*)>;
+    using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&)>;
 #endif
 
     static GetValueFromFile g_funcGetValueFromFile[] = {
@@ -412,7 +412,7 @@ namespace aten {
                         auto funcGetValue = g_funcGetValueFromFile[(int)paramType];
 
                         // Get value from json.
-                        auto value = funcGetValue(child);
+                        auto value = funcGetValue(child, ctxt);
 
                         mtrlValues.add(paramName, value);
                     }

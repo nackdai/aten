@@ -2,6 +2,7 @@
 
 #include <string>
 #include "texture/texture.h"
+#include "scene/context.h"
 
 namespace aten {
     class ImageLoader {
@@ -12,7 +13,13 @@ namespace aten {
     public:
         static void setBasePath(const std::string& base);
 
-        static texture* load(const std::string& path);
-        static texture* load(const std::string& tag, const std::string& path);
+        static texture* load(
+            const std::string& path,
+            context& ctxt);
+
+        static texture* load(
+            const std::string& tag, 
+            const std::string& path,
+            context& ctxt);
     };
 }

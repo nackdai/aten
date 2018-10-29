@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
 
     //g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
 
-    g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+    g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     //g_envmap = aten::ImageLoader::load("../../asset/envmap/harbor.hdr");
     g_bg.init(g_envmap);
 

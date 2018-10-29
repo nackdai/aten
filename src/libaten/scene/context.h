@@ -137,9 +137,13 @@ namespace aten
 
         int findPolygonalTransformableOrderFromPointer(const void* p) const;
 
+        texture* createTexture(uint32_t width, uint32_t height, uint32_t channels, const char* name);
+
         const texture* getTexture(int idx) const;
 
-        static void pinContext(context* ctxt)
+        void addTexture(texture* tex);
+
+        static void pinContext(const context* ctxt)
         {
             s_pinnedCtxt = ctxt;
         }
@@ -156,7 +160,7 @@ namespace aten
         }
 
     private:
-        static context* s_pinnedCtxt;
+        static const context* s_pinnedCtxt;
 
         std::vector<aten::vertex> m_vertices;
 

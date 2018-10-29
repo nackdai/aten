@@ -15,9 +15,11 @@ namespace aten
 
     public:
         texture();
-        texture(uint32_t width, uint32_t height, uint32_t channels, const char* name = nullptr);
-
+        texture(uint32_t width, uint32_t height, uint32_t channels, const char* name);
         ~texture();
+        
+    private:
+        static texture* create(uint32_t width, uint32_t height, uint32_t channels, const char* name);
 
     public:
         void init(uint32_t width, uint32_t height, uint32_t channels);

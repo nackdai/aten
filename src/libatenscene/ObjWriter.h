@@ -21,6 +21,7 @@ public:
         const std::vector<aten::material*>& mtrls);
 
     static bool writeMaterial(
+        const aten::context& ctxt,
         const std::string& mtrlPath,
         const std::vector<aten::material*>& mtrls);
 

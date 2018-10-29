@@ -432,6 +432,7 @@ namespace aten {
     }
 
     void RasterizeRenderer::draw(
+        const context& ctxt,
         const std::vector<vertex>& vtxs,
         const std::vector<std::vector<int>>& idxs,
         const std::vector<material*>& mtrls,
@@ -531,7 +532,7 @@ namespace aten {
                 auto m = mtrls[i];
                 
                 int albedoTexId = m ? m->param().albedoMap : -1;
-                const aten::texture* albedo = albedoTexId >= 0 ? aten::texture::getTexture(albedoTexId) : nullptr;
+                const aten::texture* albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 
                 if (albedo) {
                     albedo->bindAsGLTexture(0, &m_shader);

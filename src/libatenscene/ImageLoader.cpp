@@ -15,7 +15,9 @@ namespace aten {
         g_base = removeTailPathSeparator(base);
     }
 
-    texture* ImageLoader::load(const std::string& path)
+    texture* ImageLoader::load(
+        const std::string& path,
+        context& ctxt)
     {
         std::string pathname;
         std::string extname;
@@ -27,7 +29,7 @@ namespace aten {
             extname,
             filename);
 
-        auto tex = load(filename, path);
+        auto tex = load(filename, path, ctxt);
 
         return tex;
     }
@@ -64,7 +66,10 @@ namespace aten {
         }
     }
 
-    texture* ImageLoader::load(const std::string& tag, const std::string& path)
+    texture* ImageLoader::load(
+        const std::string& tag, 
+        const std::string& path,
+        context& ctxt)
     {
         std::string fullpath = path;
         if (!g_base.empty()) {
@@ -98,7 +103,7 @@ namespace aten {
         if (stbi_is_hdr(fullpath.c_str())) {
             auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);
             if (src) {
-                tex = new texture(width, height, channels, texname.c_str());
+                tex = ctxt.createTexture(width, height, channels, texname.c_str());
                 real norm = real(1);
                 read<float>(src, tex, width, height, channels, norm);
 
@@ -108,7 +113,7 @@ namespace aten {
         else {
             auto src = stbi_load(fullpath.c_str(), &width, &height, &channels, 0);
             if (src) {
-                tex = new texture(width, height, channels, texname.c_str());
+                tex = ctxt.createTexture(width, height, channels, texname.c_str());
                 real norm = real(1) / real(255);
 
                 read<stbi_uc>(src, tex, width, height, channels, norm);

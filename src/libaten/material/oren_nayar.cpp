@@ -1,5 +1,6 @@
 #include "material/oren_nayar.h"
 #include "material/lambert.h"
+#include "material/sample_texture.h"
 
 //#pragma optimize( "", off)
 
@@ -137,10 +138,10 @@ namespace AT_NAME {
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec3(param->roughness));
 
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         auto bsdf = computeBsdf(
             roughness.r,
@@ -161,7 +162,7 @@ namespace AT_NAME {
         real u, real v,
         const aten::vec3& externalAlbedo)
     {
-        auto roughness = material::sampleTexture(param->roughnessMap, u, v, param->roughness);
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec3(param->roughness));
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;

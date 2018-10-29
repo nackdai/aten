@@ -425,7 +425,7 @@ __global__ void shade(
             ix * sizeof(float4), iy,
             cudaBoundaryModeTrap);
 
-        auto albedo = AT_NAME::material::sampleTexture(mtrl.albedoMap, rec.u, rec.v, 1.0f);
+        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec3(1.0f));
 
         surf2Dwrite(
             make_float4(albedo.x, albedo.y, albedo.z, 1),
@@ -480,7 +480,7 @@ __global__ void shade(
         auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
-    AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+    AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
     shadowRays[idx].isActive = false;
 

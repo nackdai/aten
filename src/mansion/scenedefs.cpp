@@ -48,7 +48,7 @@ void DemoScene::makeScene(
         aten::ObjLoader::load(objs, objpath.c_str(), ctxt, false, info.needComputeNormalOntime);
         objs[0]->importInternalAccelTree(sbvhpath.c_str(), ctxt, 0);
 
-        auto inst = new aten::instance<aten::object>(objs[0], ctxt, aten::mat4::Identity);
+        auto inst = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[0], aten::mat4::Identity);
 
         scene->add(inst);
     }

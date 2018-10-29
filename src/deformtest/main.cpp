@@ -585,7 +585,7 @@ int main()
     g_scene.build(g_ctxt);
 
 #ifdef ENABLE_ENVMAP
-    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     aten::envmap bg;
     bg.init(envmap);
     aten::ImageBasedLight ibl(&bg);
@@ -656,9 +656,10 @@ int main()
 
         std::vector<idaten::TextureResource> tex;
         {
-            auto texs = aten::texture::getTextures();
+            auto texNum = g_ctxt.getTextureNum();
 
-            for (const auto t : texs) {
+            for (int i = 0; i < texNum; i++) {
+                auto t = g_ctxt.getTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
             }

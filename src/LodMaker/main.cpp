@@ -72,6 +72,7 @@ void onRun(aten::window* window)
 
     if (canDisplayLod) {
         g_rasterizer.draw(
+            g_ctxt,
             g_lodVtx,
             g_lodIdx,
             g_mtrls,
@@ -347,7 +348,7 @@ int main(int argc, char* argv[])
 
     g_obj = loadObj(g_opt);
 
-    aten::texture::initAllAsGLTexture();
+    g_ctxt.initAllTexAsGLTexture();
 
     g_obj->buildForRasterizeRendering(g_ctxt);
 

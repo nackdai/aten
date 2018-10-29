@@ -128,7 +128,7 @@ void MaterialEditWindow::buildScene()
     {
         aten::ImageLoader::setBasePath("./");
 
-        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr");
+        auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", s_ctxt);
         aten::envmap bg;
         bg.init(envmap);
         aten::ImageBasedLight ibl(&bg);
@@ -156,9 +156,10 @@ void MaterialEditWindow::buildScene()
 
             std::vector<idaten::TextureResource> tex;
             {
-                auto texs = aten::texture::getTextures();
+                auto texNum = s_ctxt.getTextureNum();
 
-                for (const auto t : texs) {
+                for (int i = 0; i < texNum; i++) {
+                    auto t = s_ctxt.getTexture(i);
                     tex.push_back(
                         idaten::TextureResource(t->colors(), t->width(), t->height()));
                 }

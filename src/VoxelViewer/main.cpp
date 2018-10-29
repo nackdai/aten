@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
 
     loadObj(g_opt);
 
-    aten::texture::initAllAsGLTexture();
+    g_ctxt.initAllTexAsGLTexture();
 
     // TODO
     aten::vec3 pos(0, 1, 3);

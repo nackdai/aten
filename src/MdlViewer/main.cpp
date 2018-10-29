@@ -19,7 +19,7 @@ struct Options {
 
 static idaten::Skinning skinning;
 
-static aten::deformable g_mdl;
+static aten::deformable* g_mdl{ nullptr };
 static aten::DeformAnimation g_anm;
 
 static aten::DeformableRenderer g_renderer;
@@ -59,20 +59,20 @@ void onRun(aten::window* window)
     g_timeline.advance(1.0f / 60.0f);
 
     
-    g_mdl.update(aten::mat4(), g_timeline.getTime(), &g_anm);
+    g_mdl->update(aten::mat4(), g_timeline.getTime(), &g_anm);
     //g_mdl.update(aten::mat4(), nullptr, 0);
 
     aten::vec3 aabbMin, aabbMax;
 
-    bool isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
+    bool isGPUSkinning = g_mdl->isEnabledForGPUSkinning();
 
     if (isGPUSkinning) {
-        const auto& mtx = g_mdl.getMatrices();
+        const auto& mtx = g_mdl->getMatrices();
         skinning.update(&mtx[0], mtx.size());
         skinning.compute(aabbMin, aabbMax);
     }
 
-    g_renderer.render(g_ctxt, &g_camera, &g_mdl);
+    g_renderer.render(g_ctxt, &g_camera, g_mdl);
 
     if (g_willTakeScreenShot)
     {
@@ -276,10 +276,12 @@ int main(int argc, char* argv[])
         "../shader/simple3d_vs.glsl",
         "../shader/simple3d_fs.glsl");
 
-    g_mdl.read(opt.input.c_str());
+    g_mdl = aten::TransformableFactory::createDeformable(g_ctxt);
+
+    g_mdl->read(opt.input.c_str());
     g_anm.read(opt.anm.c_str());
 
-    bool isGPUSkinning = g_mdl.isEnabledForGPUSkinning();
+    bool isGPUSkinning = g_mdl->isEnabledForGPUSkinning();
 
     if (isGPUSkinning) {
         g_renderer.init(
@@ -294,7 +296,7 @@ int main(int argc, char* argv[])
             "../shader/skinning_fs.glsl");
     }
 
-    g_mdl.initGLResourcesWithDeformableRenderer(g_renderer);
+    g_mdl->initGLResourcesWithDeformableRenderer(g_renderer);
 
     g_timeline.init(g_anm.getDesc().time, real(0));
     g_timeline.enableLoop(true);
@@ -306,8 +308,10 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    auto textures = aten::texture::getTextures();
-    for (auto tex : textures) {
+    auto texNum = g_ctxt.getTextureNum();
+
+    for (int i = 0; i < texNum; i++) {
+        auto tex = g_ctxt.getTexture(i);
         tex->initAsGLTexture();
     }
 
@@ -324,13 +328,13 @@ int main(int argc, char* argv[])
         WIDTH, HEIGHT);
 
     if (isGPUSkinning) {
-        auto& vb = g_mdl.getVBForGPUSkinning();
+        auto& vb = g_mdl->getVBForGPUSkinning();
 
         std::vector<aten::SkinningVertex> vtx;
         std::vector<uint32_t> idx;
         std::vector<aten::PrimitiveParamter> tris;
 
-        g_mdl.getGeometryData(g_ctxt, vtx, idx, tris);
+        g_mdl->getGeometryData(g_ctxt, vtx, idx, tris);
 
         skinning.initWithTriangles(
             &vtx[0], vtx.size(),
@@ -340,7 +344,8 @@ int main(int argc, char* argv[])
 
     aten::window::run();
 
-    g_mdl.release();
+    g_mdl->release();
+    delete g_mdl;
 
     aten::window::terminate();
 

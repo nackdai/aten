@@ -322,7 +322,7 @@ bool MaterialSelectWindow::init(
 
     s_obj = loadObj(objpath, mtrlpath);
 
-    aten::texture::initAllAsGLTexture();
+    s_ctxt.initAllTexAsGLTexture();
 
     s_obj->buildForRasterizeRendering(s_ctxt);
 

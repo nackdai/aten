@@ -281,9 +281,20 @@ namespace aten
         return ret;
     }
 
+    int context::getTextureNum() const
+    {
+        return m_textures.size();;
+    }
+
     const texture* context::getTexture(int idx) const
     {
-        AT_ASSERT(0 <= idx && idx < m_textures.size());
+        AT_ASSERT(0 <= idx && idx < getTextureNum());
+        return m_textures[idx];
+    }
+
+    texture* context::getTexture(int idx)
+    {
+        AT_ASSERT(0 <= idx && idx < getTextureNum());
         return m_textures[idx];
     }
 
@@ -292,5 +303,15 @@ namespace aten
         AT_ASSERT(tex);
 
         tex->addToDataList(m_textures);
+    }
+
+    void context::initAllTexAsGLTexture()
+    {
+        auto num = getTextureNum();
+
+        for (int i = 0; i < num; i++) {
+            auto tex = m_textures[i];
+            tex->initAsGLTexture();
+        }
     }
 }

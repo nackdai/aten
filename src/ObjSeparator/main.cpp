@@ -210,6 +210,7 @@ int main(int argc, char* argv[])
         mtrls);
 
     ObjWriter::writeMaterial(
+        ctxt,
         "result.mtl",
         mtrlListForExport);
 

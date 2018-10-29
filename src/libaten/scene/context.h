@@ -139,9 +139,14 @@ namespace aten
 
         texture* createTexture(uint32_t width, uint32_t height, uint32_t channels, const char* name);
 
+        int getTextureNum() const;
+
         const texture* getTexture(int idx) const;
+        texture* getTexture(int idx);
 
         void addTexture(texture* tex);
+
+        void initAllTexAsGLTexture();
 
         static void pinContext(const context* ctxt)
         {

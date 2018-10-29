@@ -419,7 +419,7 @@ int main()
     Scene::makeScene(g_ctxt, &g_scene);
     g_scene.build(g_ctxt);
 
-    auto envmap = aten::ImageLoader::load("../../asset/mansion/HDR_040_Field.hdr");
+    auto envmap = aten::ImageLoader::load("../../asset/mansion/HDR_040_Field.hdr", g_ctxt);
     aten::envmap bg;
     bg.init(envmap);
     aten::ImageBasedLight ibl(&bg);
@@ -451,9 +451,10 @@ int main()
 
         std::vector<idaten::TextureResource> tex;
         {
-            auto texs = aten::texture::getTextures();
+            auto texNum = g_ctxt.getTextureNum();
 
-            for (const auto t : texs) {
+            for (int i = 0; i < texNum; i++) {
+                auto t = g_ctxt.getTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
             }

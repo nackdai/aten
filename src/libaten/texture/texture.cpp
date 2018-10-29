@@ -23,7 +23,9 @@ namespace aten
         : texture()
     {
         init(width, height, channels);
-        m_name = name;
+        if (name) {
+            m_name = name;
+        }
     }
 
     texture::~texture()

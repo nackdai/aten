@@ -290,7 +290,7 @@ int main()
         "../shader/fullscreen_vs.glsl", "../shader/atrous_final_fs.glsl");
 
 #ifdef ENABLE_ATROUS
-    aten::visualizer::addPostProc(&atrous);
+    g_visualizer->addPostProc(&atrous);
 #endif
     g_visualizer->addPostProc(&gamma);
     //aten::visualizer::addPostProc(&blitter);

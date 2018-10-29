@@ -76,9 +76,9 @@ void onRun(aten::window* window)
 #endif
     }
 
-    atrous.getPositionMap().clearAsGLTexture(aten::vec4(real(1)));
-    atrous.getNormalMap().clearAsGLTexture(aten::vec4(real(0), real(0), real(0), real(-1)));
-    atrous.getAlbedoMap().clearAsGLTexture(aten::vec4(real(1)));
+    atrous.getPositionMap()->clearAsGLTexture(aten::vec4(real(1)));
+    atrous.getNormalMap()->clearAsGLTexture(aten::vec4(real(0), real(0), real(0), real(-1)));
+    atrous.getAlbedoMap()->clearAsGLTexture(aten::vec4(real(1)));
 
     aten::timer timer;
     timer.begin();
@@ -284,6 +284,7 @@ int main()
     blitter.setIsRenderRGB(true);
 
     atrous.init(
+        g_ctxt,
         WIDTH, HEIGHT,
         "../shader/fullscreen_vs.glsl", "../shader/atrous_fs.glsl",
         "../shader/fullscreen_vs.glsl", "../shader/atrous_final_fs.glsl");
@@ -395,9 +396,9 @@ int main()
 
 #if 1
         g_tracer.enableRenderAOV(
-            atrous.getPositionMap().getGLTexHandle(),
-            atrous.getNormalMap().getGLTexHandle(),
-            atrous.getAlbedoMap().getGLTexHandle(),
+            atrous.getPositionMap()->getGLTexHandle(),
+            atrous.getNormalMap()->getGLTexHandle(),
+            atrous.getAlbedoMap()->getGLTexHandle(),
             aten::vec3(real(1)));
 #endif
     }

@@ -4,17 +4,18 @@
 
 namespace aten {
     bool ATrousDenoiser::init(
+        context& ctxt,
         int width, int height,
         const char* vsPath, const char* fsPath,
         const char* finalVsPath, const char* finalFsPath)
     {
-        m_normal.init(width, height, 4);
-        m_pos.init(width, height, 4);
-        m_albedo.init(width, height, 4);
+        m_normal = ctxt.createTexture(width, height, 4, nullptr);
+        m_pos = ctxt.createTexture(width, height, 4, nullptr);
+        m_albedo = ctxt.createTexture(width, height, 4, nullptr);
 
-        m_normal.initAsGLTexture();
-        m_pos.initAsGLTexture();
-        m_albedo.initAsGLTexture();
+        m_normal->initAsGLTexture();
+        m_pos->initAsGLTexture();
+        m_albedo->initAsGLTexture();
 
         for (int i = 0; i < ITER; i++) {
             auto res = m_pass[i].init(
@@ -69,8 +70,8 @@ namespace aten {
         }
 
         // Bind G-Buffer.
-        m_body->m_normal.bindAsGLTexture(1, this);
-        m_body->m_pos.bindAsGLTexture(2, this);
+        m_body->m_normal->bindAsGLTexture(1, this);
+        m_body->m_pos->bindAsGLTexture(2, this);
 
         int stepScale = 1 << m_idx;
         float clrSigmaScale = pow(2.0f, m_idx);
@@ -103,7 +104,7 @@ namespace aten {
         }
 #else
         // albedo.
-        m_body->m_albedo.bindAsGLTexture(1, this);
+        m_body->m_albedo->bindAsGLTexture(1, this);
 #endif
     }
 }

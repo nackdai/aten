@@ -2,6 +2,7 @@
 
 #include "visualizer/MultiPassPostProc.h"
 #include "texture/texture.h"
+#include "scene/context.h"
 
 namespace aten {
     class ATrousDenoiser : public MultiPassPostProc {
@@ -11,19 +12,20 @@ namespace aten {
 
     public:
         bool init(
+            context& ctxt,
             int width, int height,
             const char* vsPath, const char* fsPath,
             const char* finalVsPath, const char* finalFsPath);
 
-        texture& getNormalMap()
+        texture* getNormalMap()
         {
             return m_normal;
         }
-        texture& getPositionMap()
+        texture* getPositionMap()
         {
             return m_pos;
         }
-        texture& getAlbedoMap()
+        texture* getAlbedoMap()
         {
             return m_albedo;
         }
@@ -75,9 +77,9 @@ namespace aten {
 
         static const int ITER = 5;
 
-        texture m_pos;
-        texture m_normal;
-        texture m_albedo;
+        texture* m_pos{ nullptr };
+        texture* m_normal{ nullptr };
+        texture* m_albedo{ nullptr };
 
         ATrousPass m_pass[ITER];
         ATrousFinalPass m_final;

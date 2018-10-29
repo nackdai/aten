@@ -13,9 +13,11 @@ namespace aten
     class texture {
         friend class context;
 
-    public:
+    private:
         texture();
         texture(uint32_t width, uint32_t height, uint32_t channels, const char* name);
+
+    public:
         ~texture();
         
     private:

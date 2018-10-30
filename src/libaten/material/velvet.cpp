@@ -1,5 +1,6 @@
 ﻿#include "material/velvet.h"
 #include "math/math.h"
+#include "material/sample_texture.h"
 
 namespace AT_NAME
 {
@@ -56,7 +57,7 @@ namespace AT_NAME
         real u, real v)
     {
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         real fresnel = 1;
         real ior = param->ior;
@@ -271,7 +272,7 @@ namespace AT_NAME
         result->pdf = pdf(param->roughness, normal, wi, result->dir);
 
         auto albedo = param->baseColor;
-        albedo *= material::sampleTexture(param->albedoMap, u, v, real(1));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         real fresnel = 1;
         real ior = param->ior;

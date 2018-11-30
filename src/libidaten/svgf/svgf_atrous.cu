@@ -14,80 +14,6 @@
 
 #include "aten4idaten.h"
 
-// NOTE
-// ddx, ddy
-// http://mosapui.blog116.fc2.com/blog-entry-35.html
-// https://www.gamedev.net/forums/topic/478820-derivative-instruction-details-ddx-ddy-or-dfdx-dfdy-etc/
-// http://d.hatena.ne.jp/umonist/20110616/p1
-// http://monsho.blog63.fc2.com/blog-entry-105.html
-
-inline __device__ float ddx(
-    int x, int y,
-    int w, int h,
-    const float4* __restrict__ aovNormalDepth)
-{
-    // NOTE
-    // 2x2 pixelごとに計算する.
-
-    int leftX = x; 
-    int rightX = x + 1;
-
-#if 0
-    if ((x & 0x01) == 1) {
-        leftX = x - 1;
-        rightX = x;
-    }
-#else
-    int offset = (x & 0x01);
-    leftX -= offset;
-    rightX -= offset;
-#endif
-
-    rightX = min(rightX, w - 1);
-
-    const int idxL = getIdx(leftX, y, w);
-    const int idxR = getIdx(rightX, y, w);
-
-
-    float left = aovNormalDepth[idxL].w;
-    float right = aovNormalDepth[idxR].w;
-
-    return right - left;
-}
-
-inline __device__ float ddy(
-    int x, int y,
-    int w, int h,
-    const float4* __restrict__ aovNormalDepth)
-{
-    // NOTE
-    // 2x2 pixelごとに計算する.
-
-    int topY = y;
-    int bottomY = y + 1;
-
-#if 0
-    if ((y & 0x01) == 1) {
-        topY = y - 1;
-        bottomY = y;
-    }
-#else
-    int offset = (y & 0x01);
-    topY -= offset;
-    bottomY -= offset;
-#endif
-
-    bottomY = min(bottomY, h - 1);
-
-    int idxT = getIdx(x, topY, w);
-    int idxB = getIdx(x, bottomY, w);
-
-    float top = aovNormalDepth[idxT].w;
-    float bottom = aovNormalDepth[idxB].w;
-
-    return bottom - top;
-}
-
 inline __device__ float gaussFilter3x3(
     int ix, int iy,
     int w, int h,
@@ -132,61 +58,6 @@ inline __device__ float gaussFilter3x3(
     return sum;
 }
 
-// https://software.intel.com/en-us/node/503873
-inline __device__ float4 RGB2YCoCg(float4 c)
-{
-    // Y = R/4 + G/2 + B/4
-    // Co = R/2 - B/2
-    // Cg = -R/4 + G/2 - B/4
-    return make_float4(
-        c.x / 4.0 + c.y / 2.0 + c.z / 4.0,
-        c.x / 2.0 - c.z / 2.0,
-        -c.x / 4.0 + c.y / 2.0 - c.z / 4.0,
-        c.w);
-}
-
-inline __device__ float4 YCoCg2RGB(float4 c)
-{
-    // R = Y + Co - Cg
-    // G = Y + Cg
-    // B = Y - Co - Cg
-    return clamp(
-        make_float4(
-            c.x + c.y - c.z,
-            c.x + c.z,
-            c.x - c.y - c.z,
-            c.w),
-        0, 1);
-}
-
-// http://graphicrants.blogspot.jp/2013/12/tone-mapping.html
-inline __device__ float4 map(float4 clr)
-{
-    float lum = RGB2YCoCg(clr).x;
-    return clr / (1 + lum);
-}
-
-inline __device__ float4 unmap(float4 clr)
-{
-    float lum = RGB2YCoCg(clr).x;
-    return clr / (1 - lum);
-}
-
-inline __device__ float _C(float3 x1, float3 x2, float sigma)
-{
-    float a = length(x1 - x2) / sigma;
-    a *= a;
-    return expf(-0.5f * a);
-}
-
-inline __device__ float _C(float x1, float x2, float sigma)
-{
-    float a = fabs(x1 - x2) / sigma;
-    a *= a;
-    return expf(-0.5f * a);
-}
-
-
 __global__ void atrousFilter(
     idaten::TileDomain tileDomain,
     bool isFirstIter, bool isFinalIter,
@@ -199,7 +70,8 @@ __global__ void atrousFilter(
     const float4* __restrict__ clrVarBuffer,
     float4* nextClrVarBuffer,
     int stepScale,
-    int width, int height)
+    int width, int height,
+    float cameraDistance)
 {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -219,12 +91,6 @@ __global__ void atrousFilter(
     float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
     float centerDepth = normalDepth.w;
     int centerMeshId = (int)texclrMeshid.w;
-
-#if 0
-    float tmpDdzX = ddx(ix, iy, width, height, aovNormalDepth);
-    float tmpDdzY = ddy(ix, iy, width, height, aovNormalDepth);
-    float2 ddZ = make_float2(tmpDdzX, tmpDdzY);
-#endif
 
     float4 centerColor;
 
@@ -252,11 +118,6 @@ __global__ void atrousFilter(
         return;
     }
 
-    if (isFirstIter) {
-        centerColor = map(centerColor);
-        centerColor = RGB2YCoCg(centerColor);
-    }
-
     float centerLum = AT_NAME::color::luminance(centerColor.x, centerColor.y, centerColor.z);
 
     // ガウスフィルタ3x3
@@ -277,138 +138,102 @@ __global__ void atrousFilter(
 
     float2 p = make_float2(ix, iy);
 
-    // NOTE
-    // 5x5
+    static const float h[] = {
+        2.0 / 3.0,  2.0 / 3.0,  2.0 / 3.0,  2.0 / 3.0,
+        1.0 / 6.0,  1.0 / 6.0,  1.0 / 6.0,  1.0 / 6.0,
+        4.0 / 9.0,  4.0 / 9.0,  4.0 / 9.0,  4.0 / 9.0,
+        1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,
+        1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,  1.0 / 9.0,
+        1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0,
+    };
 
-    float4 sumC = make_float4(0, 0, 0, 0);
-    float weightC = 0;
+    static const int offsetx[] = {
+        1,  0, -1, 0,
+        2,  0, -2, 0,
+        1, -1, -1, 1,
+        1, -1, -1, 1,
+        2, -2, -2, 2,
+        2, -2, -2, 2,
+    };
+    static const int offsety[] = {
+        0, 1,  0, -1,
+        0, 2,  0, -2,
+        1, 1, -1, -1,
+        2, 2, -2, -2,
+        1, 1, -1, -1,
+        2, 2, -2, -2,
+    };
 
-    float sumV = 0;
-    float weightV = 0;
+    float4 sumC = centerColor;
+    float sumV = centerColor.w;
+    float weight = 1.0f;
 
     int pos = 0;
 
-    static const float h[] = {
-        1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
-        1.0 / 64.0,  1.0 / 16.0, 3.0 / 32.0,  1.0 / 16.0, 1.0 / 64.0,
-        3.0 / 128.0, 3.0 / 32.0, 9.0 / 64.0,  3.0 / 32.0, 3.0 / 128.0,
-        1.0 / 64.0,  1.0 / 16.0, 3.0 / 32.0,  1.0 / 16.0, 1.0 / 64.0,
-        1.0 / 256.0, 1.0 / 64.0, 3.0 / 128.0, 1.0 / 64.0, 1.0 / 256.0,
-    };
-
-#if 0
-    int R = 2;
-
-    for (int y = -R; y <= R; y++) {
-        for (int x = -R; x <= R; x++) {
-            int xx = clamp(ix + x * stepScale, 0, width - 1);
-            int yy = clamp(iy + y * stepScale, 0, height - 1);
-#else
-    static const int offsetx[] = {
-        -2, -1, 0, 1, 2,
-        -2, -1, 0, 1, 2,
-        -2, -1, 0, 1, 2,
-        -2, -1, 0, 1, 2,
-        -2, -1, 0, 1, 2,
-    };
-    static const int offsety[] = {
-        -2, -2, -2, -2, -2,
-        -1, -1, -1, -1, -1,
-         0,  0,  0,  0,  0,
-         1,  1,  1,  1,  1,
-         2,  2,  2,  2,  2,
-    };
+    float pixelDistanceRatio = (centerDepth / cameraDistance) * height;
 
 #pragma unroll
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 24; i++)
     {
-            int xx = clamp(ix + offsetx[i] * stepScale, 0, width - 1);
-            int yy = clamp(iy + offsety[i] * stepScale, 0, height - 1);
-#endif
+        int xx = clamp(ix + offsetx[i] * stepScale, 0, width - 1);
+        int yy = clamp(iy + offsety[i] * stepScale, 0, height - 1);
 
-            float2 q = make_float2(xx, yy);
+        float2 u = make_float2(offsetx[i] * stepScale, offsety[i] * stepScale);
+        float2 q = make_float2(xx, yy);
 
-            const int qidx = getIdx(xx, yy, width);
+        const int qidx = getIdx(xx, yy, width);
 
-            normalDepth = aovNormalDepth[qidx];
-            texclrMeshid = aovTexclrMeshid[qidx];
+        normalDepth = aovNormalDepth[qidx];
+        texclrMeshid = aovTexclrMeshid[qidx];
 
-            float3 normal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
+        float3 normal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 
-            float depth = normalDepth.w;
-            int meshid = (int)texclrMeshid.w;
+        float depth = normalDepth.w;
+        int meshid = (int)texclrMeshid.w;
 
-            float4 color;
-            float variance;
+        float4 color;
+        float variance;
 
-            if (isFirstIter) {
-                color = aovColorVariance[qidx];
-                variance = color.w;
-
-                color = map(color);
-                color = RGB2YCoCg(color);
-            }
-            else {
-                color = clrVarBuffer[qidx];
-                variance = color.w;
-            }
-
-            int _idx = getIdx(xx, iy, width);
-            float depthX = aovNormalDepth[_idx].w;
-
-            _idx = getIdx(ix, yy, width);
-            float depthY = aovNormalDepth[_idx].w;
-
-            float2 ddZ = make_float2(depthX - centerDepth, depthY - centerDepth);
-
-            float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
-
-            float Wz = min(expf(-fabs(centerDepth - depth) / (sigmaZ * fabs(dot(ddZ, p - q)) + 0.000001f)), 1.0f);
-
-            float Wn = powf(max(0.0f, dot(centerNormal, normal)), sigmaN);
-
-            float Wl = min(expf(-fabs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
-
-            float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
-
-            float W = Wz * Wn * Wl * Wm;
-            
-            sumC += h[pos] * W * color;
-            weightC += h[pos] * W;
-
-#if 1
-            Wz = _C(depth, centerDepth, 0.1f);
-            Wn = _C(normal, centerNormal, 0.1f);
-            Wl = _C(lum, centerLum, 0.1f);
-            W = Wz * Wn * Wl * Wm;
-#endif
-
-            sumV += (h[pos] * h[pos]) * (W * W) * variance;
-            weightV += h[pos] * W;
-
-            pos++;
+        if (isFirstIter) {
+            color = aovColorVariance[qidx];
+            variance = color.w;
         }
+        else {
+            color = clrVarBuffer[qidx];
+            variance = color.w;
+        }
+
+        float lum = AT_NAME::color::luminance(color.x, color.y, color.z);
+
+        float Wz = 3.0f * fabs(centerDepth - depth) / (pixelDistanceRatio * length(u) + 0.000001f);
+
+        float Wn = powf(max(0.0f, dot(centerNormal, normal)), sigmaN);
+
+        float Wl = min(expf(-fabs(centerLum - lum) / (sigmaL * sqrGaussedVarLum + 0.000001f)), 1.0f);
+
+        float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
+
+        float W = expf(-Wl * Wl - Wz) * Wn * Wm * h[i];
+            
+        sumC += W * color;
+        sumV += W * W * variance;
+
+        weight += W;
+
+        pos++;
     }
 
-    if (weightC > 0.0) {
-        sumC /= weightC;
-    }
-    if (weightV > 0.0) {
-        sumV /= (weightV * weightV);
-    }
+    sumC /= weight;
+    sumV /= (weight * weight);
 
     nextClrVarBuffer[idx] = make_float4(sumC.x, sumC.y, sumC.z, sumV);
 
     if (isFirstIter) {
         // Store color temporary.
-        sumC = YCoCg2RGB(sumC);
-        tmpBuffer[idx] = unmap(sumC);
+        tmpBuffer[idx] = sumC;
     }
     
     if (isFinalIter) {
-        sumC = isFirstIter ? sumC : YCoCg2RGB(sumC);
-        sumC = unmap(sumC);
-
         texclrMeshid = aovTexclrMeshid[idx];
         sumC *= texclrMeshid;
 
@@ -476,6 +301,8 @@ namespace idaten
         bool isFirstIter = iterCnt == 0 ? true : false;
         bool isFinalIter = iterCnt == maxIterCnt - 1 ? true : false;
 
+        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
+
         int stepScale = 1 << iterCnt;
 
         atrousFilter << <grid, block, 0, m_stream >> > (
@@ -489,7 +316,8 @@ namespace idaten
             m_aovMomentTemporalWeight[curaov].ptr(),
             m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
             stepScale,
-            width, height);
+            width, height,
+            cameraDistance);
         checkCudaKernel(atrousFilter);
     }
 

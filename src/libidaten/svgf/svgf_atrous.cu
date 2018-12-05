@@ -1,11 +1,6 @@
 #include "svgf/svgf.h"
 
 #include "kernel/context.cuh"
-#include "kernel/light.cuh"
-#include "kernel/material.cuh"
-#include "kernel/intersect.cuh"
-#include "kernel/bvh.cuh"
-#include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"

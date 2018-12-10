@@ -18,7 +18,6 @@ __device__ inline bool isEqualInt2(const int2& a, const int2& b)
 
 __global__ void createGradient(
     idaten::TileDomain tileDomain,
-    cudaSurfaceObject_t dst,
     int tileSize,
     float4* outGradient,
     const float4* __restrict__ curAovColorUnfiltered,
@@ -102,12 +101,6 @@ __global__ void createGradient(
 
     outGradient[idx].z = moments.x;
     outGradient[idx].w = variance;
-
-    surf2Dwrite(
-        outGradient[idx].y >= 0.0f ? make_float4(outGradient[idx].y, 0.0f, 0.0f, 1.0f) : make_float4(0.0f, abs(outGradient[idx].y), 0.0f, 1.0f),
-        dst,
-        ix * sizeof(float4), iy,
-        cudaBoundaryModeTrap);
 }
 
 namespace idaten

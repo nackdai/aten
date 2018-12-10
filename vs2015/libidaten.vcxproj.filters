@@ -262,6 +262,9 @@
     <ClInclude Include="..\src\libidaten\cuda\cudadefs.h">
       <Filter>cuda</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\asvgf\asvgf.h">
+      <Filter>asvgf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -311,6 +314,9 @@
     </Filter>
     <Filter Include="multigpu">
       <UniqueIdentifier>{a022af60-efd8-427a-82ab-061b0ca6a84c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asvgf">
+      <UniqueIdentifier>{bc7a64b0-b385-4825-804f-ef99928647c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -480,6 +486,15 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\velvet.cpp">
       <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_CreateGradient.cu">
+      <Filter>asvgf</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_AtrousGradient.cu">
+      <Filter>asvgf</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_debug.cu">
+      <Filter>asvgf</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

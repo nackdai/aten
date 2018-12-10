@@ -16,13 +16,11 @@ __device__ inline bool isEqualInt2(const int2& a, const int2& b)
 
 #define AT_IS_INBOUND(x, a, b)  (((a) <= (x)) && ((x) <= (b)))
 
-__global__ void createGradient(
+__global__ void createGradientSample(
     idaten::TileDomain tileDomain,
     int tileSize,
-    float4* outGradient,
-    const float4* __restrict__ curAovColorUnfiltered,
-    const float4* __restrict__ prevAovColorUnfiltered,
-    const float4* __restrict__ curAovTexclrMeshid,
+    idaten::SVGFPathTracing::Path* paths,
+    int4* gradientSample,
     int width, int height,
     int widthInRealRes, int heightInRealRes)
 {
@@ -38,18 +36,61 @@ __global__ void createGradient(
 
     const int idx = getIdx(ix, iy, width);
 
-    // TODO
-    int2 tilePos;
+    // Keep previous sample.
+    auto prevSample = gradientSample[idx];
+
+    int xx = aten::clamp(ix * tileSize, 0, widthInRealRes - 1);
+    int yy = aten::clamp(iy * tileSize, 0, heightInRealRes - 1);
+
+    const int idxInRealRes = getIdx(xx, yy, widthInRealRes);
+
+    // Sample random.
+    aten::vec2 r = paths->sampler[idxInRealRes].nextSample2D();
+
+    // Position in tile.
+    gradientSample[idx].x = aten::clamp((int)(r.x * tileSize), 0, tileSize);
+    gradientSample[idx].y = aten::clamp((int)(r.y * tileSize), 0, tileSize);
+
+    int2 prevTilePos = make_int2(prevSample.x, prevSample.y);
+    int2 prevPosInRealRes = make_int2(ix, iy) * tileSize + prevTilePos;
+
+    bool isInRes = AT_IS_INBOUND(prevPosInRealRes.x, 0, widthInRealRes - 1);
+    isInRes &= AT_IS_INBOUND(prevPosInRealRes.y, 0, heightInRealRes - 1);
+
+    int prevIdx = getIdx(prevPosInRealRes.x, prevPosInRealRes.y, widthInRealRes);
+
+    gradientSample[idx].z = isInRes ? prevIdx : -1;
+}
+
+__global__ void createGradient(
+    idaten::TileDomain tileDomain,
+    int tileSize,
+    float4* outGradient,
+    const float4* __restrict__ curAovColorUnfiltered,
+    const float4* __restrict__ prevAovColorUnfiltered,
+    const float4* __restrict__ curAovTexclrMeshid,
+    const int4* __restrict__ gradientSample,
+    int width, int height,
+    int widthInRealRes, int heightInRealRes)
+{
+    int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        return;
+    }
+
+    ix += tileDomain.x;
+    iy += tileDomain.y;
+
+    const int idx = getIdx(ix, iy, width);
+
+    int2 tilePos = make_int2(gradientSample[idx].x, gradientSample[idx].y);
 
     int2 posInRealRes = make_int2(ix, iy) * tileSize + tilePos;
 
-    bool isInRes = AT_IS_INBOUND(posInRealRes.x, 0, widthInRealRes - 1)
-        && AT_IS_INBOUND(posInRealRes.y, 0, heightInRealRes - 1);
-
-    if (!isInRes) {
-        posInRealRes.x = aten::clamp(posInRealRes.x, 0, widthInRealRes - 1);
-        posInRealRes.y = aten::clamp(posInRealRes.y, 0, heightInRealRes - 1);
-    }
+    posInRealRes.x = aten::clamp(posInRealRes.x, 0, widthInRealRes - 1);
+    posInRealRes.y = aten::clamp(posInRealRes.y, 0, heightInRealRes - 1);
 
     const int curIdxInRealRes = getIdx(posInRealRes.x, posInRealRes.y, widthInRealRes);
 
@@ -58,10 +99,9 @@ __global__ void createGradient(
 
     outGradient[idx] = make_float4(0.0f);
 
-    if (isInRes) {
-        // TODO
-        const int prevIdxInRealRes = 0;
+    const int prevIdxInRealRes = gradientSample[idx].z;
 
+    if (prevIdxInRealRes >= 0) {
         auto prevColor = prevAovColorUnfiltered[prevIdxInRealRes];
         float prevLum = AT_NAME::color::luminance(prevColor.x, prevColor.y, prevColor.z);
 

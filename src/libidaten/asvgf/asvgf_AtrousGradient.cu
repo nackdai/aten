@@ -55,7 +55,6 @@ inline __device__ float _gaussFilter3x3(
 
 __global__ void atrousGradient(
     idaten::TileDomain tileDomain,
-    cudaSurfaceObject_t dst,
     int tileSize,
     const float4* __restrict__ gradient,
     const float4* __restrict__ curAovNormalDepth,
@@ -89,11 +88,34 @@ __global__ void atrousGradient(
     float sumVariance = centerVariance;
     float sumW = 1.0f;
 
+#if 0
     static const int r = 1;
     
-    for (int yy = -r; yy <= r; yy ++) {
-        for (int xx = -r; xx <= r; xx++) {
-            if (xx != 0 || yy != 0) {
+    for (int yy = -r; yy <= r; yy ++)
+    {
+        for (int xx = -r; xx <= r; xx++)
+        {
+            if (xx != 0 || yy != 0)
+#else
+    static const int offsetx[] = {
+        -1, -1, -1,
+         0,  0,
+         1,  1,  1,
+    };
+    static const int offsety[] = {
+        -1, 0, 1,
+        -1, 1,
+        -1, 0, 1,
+    };
+
+#pragma unroll
+    for (int i = 0; i < 8; i++) {
+        {
+            int xx = offsetx[i];
+            int yy = offsety[i];
+
+#endif
+            {
                 int x = aten::clamp(ix + xx * stepScale, 0, width - 1);
                 int y = aten::clamp(iy + yy * stepScale, 0, height - 1);
 
@@ -109,7 +131,7 @@ __global__ void atrousGradient(
                 float Wl = abs(luminance - centerLum) / (sqrGaussedVarLum + 1e-10f);
                 float Wz = abs(depth - centerDepth) / (cameraDistance * length(offset) * tileSize + 1e-2f);
 
-                float w = expf(-Wl * Wl - Wz) * h[i];
+                float w = expf(-Wl * Wl - Wz);
 
                 sumClr += color * w;
                 sumLum += luminance * w;
@@ -124,12 +146,6 @@ __global__ void atrousGradient(
     sumVariance /= (sumW * sumW);
 
     nextTo[idx] = make_float4(sumClr.x, sumClr.y, sumLum, sumVariance);
-
-    surf2Dwrite(
-        nextTo[idx].y >= 0.0f ? make_float4(nextTo[idx].y, 0.0f, 0.0f, 1.0f) : make_float4(0.0f, abs(nextTo[idx].y), 0.0f, 1.0f),
-        dst,
-        ix * sizeof(float4), iy,
-        cudaBoundaryModeTrap);
 }
 
 namespace idaten

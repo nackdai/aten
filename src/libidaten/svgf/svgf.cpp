@@ -63,7 +63,7 @@ namespace idaten
         m_tmpBuf.init(width * height);
     }
 
-    void SVGFPathTracing::update(
+    void SVGFPathTracing::updateBVH(
         const std::vector<aten::GeomParameter>& geoms,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
         const std::vector<aten::mat4>& mtxs)

@@ -125,7 +125,7 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void update(
+        void updateBVH(
             const std::vector<aten::GeomParameter>& geoms,
             const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
             const std::vector<aten::mat4>& mtxs);
@@ -242,7 +242,7 @@ namespace idaten
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);
         
-        void onDenoise(
+        virtual void onDenoise(
             const TileDomain& tileDomain,
             int width, int height,
             cudaSurfaceObject_t outputSurf);

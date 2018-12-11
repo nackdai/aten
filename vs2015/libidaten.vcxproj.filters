@@ -371,6 +371,9 @@
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libidaten\asvgf\asvgf.cpp">
+      <Filter>asvgf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">

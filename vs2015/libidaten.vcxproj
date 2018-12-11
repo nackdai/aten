@@ -189,6 +189,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
+    <ClCompile Include="..\src\libidaten\asvgf\asvgf.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp" />
     <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp" />
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp" />

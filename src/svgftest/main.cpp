@@ -35,7 +35,8 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 static aten::context g_ctxt;
 
-static idaten::SVGFPathTracing g_tracer;
+//static idaten::SVGFPathTracing g_tracer;
+static idaten::AdvancedSVGFPathTracing g_tracer;
 static aten::visualizer* g_visualizer;
 
 static float g_avgcuda = 0.0f;
@@ -112,7 +113,7 @@ void update()
             const auto& mtxs = g_scene.getAccel()->getMatrices();
 
 #ifndef TEST_FOR_GL_RENDER
-            g_tracer.update(
+            g_tracer.updateBVH(
                 shapeparams,
                 nodes, 
                 mtxs);

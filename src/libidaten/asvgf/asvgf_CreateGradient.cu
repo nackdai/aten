@@ -57,8 +57,10 @@ __global__ void createGradientSample(
     bool isInRes = AT_IS_INBOUND(prevPosInRealRes.x, 0, widthInRealRes - 1);
     isInRes &= AT_IS_INBOUND(prevPosInRealRes.y, 0, heightInRealRes - 1);
 
+    // Compute previous sample positon in real resolution.
     int prevIdx = getIdx(prevPosInRealRes.x, prevPosInRealRes.y, widthInRealRes);
 
+    // If previous sample positon is in rasolution, keep it.
     gradientSample[idx].z = isInRes ? prevIdx : -1;
 }
 
@@ -101,6 +103,7 @@ __global__ void createGradient(
 
     const int prevIdxInRealRes = gradientSample[idx].z;
 
+    // Only previous sample position is in resolution.
     if (prevIdxInRealRes >= 0) {
         auto prevColor = prevAovColorUnfiltered[prevIdxInRealRes];
         float prevLum = AT_NAME::color::luminance(prevColor.x, prevColor.y, prevColor.z);
@@ -113,6 +116,7 @@ __global__ void createGradient(
     float sumW = 1.0f;
     int centerMeshId = (int)curAovTexclrMeshid[curIdxInRealRes].w;
 
+    // Compute moment and variance in a tile.
     for (int yy = 0; yy < tileSize; yy++) {
         for (int xx = 0; xx < tileSize; xx++) {
             int2 p = make_int2(ix, iy) * tileSize + make_int2(xx, yy);
@@ -145,5 +149,59 @@ __global__ void createGradient(
 
 namespace idaten
 {
+    void AdvancedSVGFPathTracing::onSampleGradient(int width, int height)
+    {
+        // TODO
+        // •ªŠ„•`‰æ.
 
+        int tiledW = getTiledResolution(width);
+        int tiledH = getTiledResolution(height);
+
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (tiledW + block.x - 1) / block.x,
+            (tiledH + block.y - 1) / block.y);
+
+        createGradientSample << <grid, block >> > (
+            m_tileDomain,
+            m_tileSize,
+            m_paths.ptr(),
+            m_gradientSample.ptr(),
+            tiledW, tiledH,
+            width, height);
+
+        checkCudaKernel(createGradientSample);
+    }
+
+    void AdvancedSVGFPathTracing::onCreateGradient(int width, int height)
+    {
+        // TODO
+        // •ªŠ„•`‰æ.
+
+        int tiledW = getTiledResolution(width);
+        int tiledH = getTiledResolution(height);
+
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (tiledW + block.x - 1) / block.x,
+            (tiledH + block.y - 1) / block.y);
+
+        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
+
+        int curaov = getCurAovs();
+        int prevaov = getPrevAovs();
+
+        createGradient << <grid, block >> > (
+            m_tileDomain,
+            m_tileSize,
+            m_gradient[0].ptr(),
+            m_aovColorVariance[curaov].ptr(),
+            m_aovColorVariance[prevaov].ptr(),
+            m_aovTexclrMeshid[curaov].ptr(),
+            m_gradientSample.ptr(),
+            tiledW, tiledH,
+            width, height);
+
+        checkCudaKernel(createGradient);
+    }
 }

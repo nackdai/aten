@@ -49,5 +49,26 @@ __global__ void displayTiledImageOnRealRes(
 
 namespace idaten
 {
+    void AdvancedSVGFPathTracing::displayTiledData(
+        int width, int height,
+        TypedCudaMemory<float4>& src,
+        cudaSurfaceObject_t outputSurf)
+    {
+        // TODO
+        // •ªŠ„•`‰æ.
 
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
+
+        displayTiledImageOnRealRes << <grid, block >> > (
+            m_tileDomain,
+            m_tileSize,
+            outputSurf,
+            src.ptr(),
+            width, height);
+
+        checkCudaKernel(displayTiledImageOnRealRes);
+    }
 }

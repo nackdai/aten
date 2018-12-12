@@ -47,19 +47,30 @@ namespace idaten
     {
         m_tileDomain = tileDomain;
 
-        // Sample Gradient.
-        onSampleGradient(width, height);
+        if (m_mode == Mode::SVGF
+            || m_mode == Mode::TF
+            || m_mode == Mode::VAR)
+        {
+            // Sample Gradient.
+            onSampleGradient(width, height);
 
-        // Create Gradient.
-        onCreateGradient(width, height);
+            if (isFirstFrame()) {
+                // Nothing is done...
+                return;
+            }
+            else {
+                // Create Gradient.
+                onCreateGradient(width, height);
 
-        displayTiledData(width, height, m_gradient[0], outputSurf);
+                displayTiledData(width, height, m_gradient[0], outputSurf);
 
-        // TODO
-        // Atrous Gradient.
+                // TODO
+                // Atrous Gradient.
 
-        // TODO
-        // Temporal Reprojection.
+                // TODO
+                // Temporal Reprojection.
+            }
+        }
 
         if (m_mode == Mode::SVGF
             || m_mode == Mode::VAR)

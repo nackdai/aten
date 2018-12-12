@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "defs.h"
 
 namespace idaten {
@@ -104,6 +105,12 @@ namespace idaten {
         uint32_t stride()
         {
             return (uint32_t)sizeof(_T);
+        }
+
+        uint32_t readFromDeviceToHost(std::vector<_T>& host)
+        {
+            host.resize(m_num);
+            return readByNum(&host[0], m_num);
         }
 
     private:

@@ -68,7 +68,7 @@ __global__ void createGradient(
     idaten::TileDomain tileDomain,
     int tileSize,
     float4* outGradient,
-    const float4* __restrict__ curAovColorUnfiltered,
+    const idaten::SVGFPathTracing::Path* __restrict__ paths,
     const float4* __restrict__ prevAovColorUnfiltered,
     const float4* __restrict__ curAovTexclrMeshid,
     const int4* __restrict__ gradientSample,
@@ -96,7 +96,7 @@ __global__ void createGradient(
 
     const int curIdxInRealRes = getIdx(posInRealRes.x, posInRealRes.y, widthInRealRes);
 
-    auto curColor = curAovColorUnfiltered[curIdxInRealRes];
+    auto curColor = paths->contrib[curIdxInRealRes].v;
     float curLum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
 
     outGradient[idx] = make_float4(0.0f);
@@ -127,7 +127,7 @@ __global__ void createGradient(
             if (!isEqualInt2(posInRealRes, p)) {
                 int pidx = getIdx(p.x, p.y, widthInRealRes);
 
-                auto clr = curAovColorUnfiltered[pidx];
+                auto clr = paths->contrib[pidx].v;
                 int meshId = (int)curAovTexclrMeshid[pidx].w;
 
                 float l = AT_NAME::color::luminance(clr.x, clr.y, clr.z);
@@ -149,6 +149,8 @@ __global__ void createGradient(
 
 namespace idaten
 {
+#pragma optimize( "", off)
+
     void AdvancedSVGFPathTracing::onSampleGradient(int width, int height)
     {
         // TODO
@@ -195,7 +197,7 @@ namespace idaten
             m_tileDomain,
             m_tileSize,
             m_gradient[0].ptr(),
-            m_aovColorVariance[curaov].ptr(),
+            m_paths.ptr(),
             m_aovColorVariance[prevaov].ptr(),
             m_aovTexclrMeshid[curaov].ptr(),
             m_gradientSample.ptr(),

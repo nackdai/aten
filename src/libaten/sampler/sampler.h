@@ -8,10 +8,10 @@
 #undef AT_PURE_VIRTUAL
 #undef AT_INHERIT
 
-#define AT_VIRTUAL(f)                    f
-#define AT_VIRTUAL_OVERRIDE(f)            f
+#define AT_VIRTUAL(f)                   f
+#define AT_VIRTUAL_OVERRIDE(f)          f
 #define AT_VIRTUAL_OVERRIDE_FINAL(f)    f
-#define AT_PURE_VIRTUAL(f)                f
+#define AT_PURE_VIRTUAL(f)              f
 #define AT_INHERIT(c)
 
 #include "sampler/wanghash.h"
@@ -19,7 +19,7 @@
 #include "sampler/cmj.h"
 
 #define IDATEN_SAMPLER_SOBOL    (0)
-#define IDATEN_SAMPLER_CMJ        (1)
+#define IDATEN_SAMPLER_CMJ      (1)
 
 #define IDATEN_SAMPLER    IDATEN_SAMPLER_CMJ
 

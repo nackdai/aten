@@ -14,56 +14,6 @@ __device__ inline bool isEqualInt2(const int2& a, const int2& b)
     return (a.x == b.x) && (a.y == b.y);
 }
 
-#define AT_IS_INBOUND(x, a, b)  (((a) <= (x)) && ((x) <= (b)))
-
-__global__ void createGradientSample(
-    idaten::TileDomain tileDomain,
-    int tileSize,
-    idaten::SVGFPathTracing::Path* paths,
-    int4* gradientSample,
-    int width, int height,
-    int widthInRealRes, int heightInRealRes)
-{
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
-        return;
-    }
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
-
-    const int idx = getIdx(ix, iy, width);
-
-    // Keep previous sample.
-    auto prevSample = gradientSample[idx];
-
-    int xx = aten::clamp(ix * tileSize, 0, widthInRealRes - 1);
-    int yy = aten::clamp(iy * tileSize, 0, heightInRealRes - 1);
-
-    const int idxInRealRes = getIdx(xx, yy, widthInRealRes);
-
-    // Sample random.
-    aten::vec2 r = paths->sampler[idxInRealRes].nextSample2D();
-
-    // Position in tile.
-    gradientSample[idx].x = aten::clamp((int)(r.x * tileSize), 0, tileSize);
-    gradientSample[idx].y = aten::clamp((int)(r.y * tileSize), 0, tileSize);
-
-    int2 prevTilePos = make_int2(prevSample.x, prevSample.y);
-    int2 prevPosInRealRes = make_int2(ix, iy) * tileSize + prevTilePos;
-
-    bool isInRes = AT_IS_INBOUND(prevPosInRealRes.x, 0, widthInRealRes - 1);
-    isInRes &= AT_IS_INBOUND(prevPosInRealRes.y, 0, heightInRealRes - 1);
-
-    // Compute previous sample positon in real resolution.
-    int prevIdx = getIdx(prevPosInRealRes.x, prevPosInRealRes.y, widthInRealRes);
-
-    // If previous sample positon is in rasolution, keep it.
-    gradientSample[idx].z = isInRes ? prevIdx : -1;
-}
-
 __global__ void createGradient(
     idaten::TileDomain tileDomain,
     int tileSize,
@@ -149,8 +99,6 @@ __global__ void createGradient(
 
 namespace idaten
 {
-#pragma optimize( "", off)
-
     void AdvancedSVGFPathTracing::onSampleGradient(int width, int height)
     {
         // TODO

@@ -37,8 +37,10 @@ __global__ void createGradient(
 
     const int idx = getIdx(ix, iy, width);
 
+    // Get positon in a tile.
     int2 tilePos = make_int2(gradientSample[idx].x, gradientSample[idx].y);
 
+    // Convert tile positon to real resolution position.
     int2 posInRealRes = make_int2(ix, iy) * tileSize + tilePos;
 
     posInRealRes.x = aten::clamp(posInRealRes.x, 0, widthInRealRes - 1);
@@ -51,6 +53,7 @@ __global__ void createGradient(
 
     outGradient[idx] = make_float4(0.0f);
 
+    // Get previous frame index in real resolution.
     const int prevIdxInRealRes = gradientSample[idx].z;
 
     // Only previous sample position is in resolution.
@@ -99,30 +102,6 @@ __global__ void createGradient(
 
 namespace idaten
 {
-    void AdvancedSVGFPathTracing::onSampleGradient(int width, int height)
-    {
-        // TODO
-        // •ªŠ„•`‰æ.
-
-        int tiledW = getTiledResolution(width);
-        int tiledH = getTiledResolution(height);
-
-        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 grid(
-            (tiledW + block.x - 1) / block.x,
-            (tiledH + block.y - 1) / block.y);
-
-        createGradientSample << <grid, block >> > (
-            m_tileDomain,
-            m_tileSize,
-            m_paths.ptr(),
-            m_gradientSample.ptr(),
-            tiledW, tiledH,
-            width, height);
-
-        checkCudaKernel(createGradientSample);
-    }
-
     void AdvancedSVGFPathTracing::onCreateGradient(int width, int height)
     {
         // TODO

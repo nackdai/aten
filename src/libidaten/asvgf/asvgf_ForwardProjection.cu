@@ -49,7 +49,7 @@ __global__ void doForwardProjection(
     int gradientTileSize,
     float cameraDistance,
     cudaSurfaceObject_t motionDetphBuffer,
-    uint32_t* executedIdxArray)
+    int* executedIdxArray)
 {
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -111,11 +111,19 @@ __global__ void doForwardProjection(
         idxCur.y % gradientTileSize);
 
     // NOTE
-    // w is not used.
-    gradientSample[idx] = make_int4(tilePos.x, tilePos.y, prevIdx, 0);
+    // Atomic functions for CUDA.
+    // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?CUDA%A5%A2%A5%C8%A5%DF%A5%C3%A5%AF%B4%D8%BF%F4
 
-    uint32_t res = atomicAdd(&executedIdxArray[idx], 1);
-    if (res == 0) {
-        // TODO
+    int res = atomicCAS(&executedIdxArray[idx], -1, idx);
+    if (res < 0) {
+        // NOTE
+        // w is not used.
+        gradientSample[idx] = make_int4(tilePos.x, tilePos.y, prevIdx, 0);
+
+        // Rng seed.
+
+        // Mesh id.
+
+        // Albedo.
     }
 }

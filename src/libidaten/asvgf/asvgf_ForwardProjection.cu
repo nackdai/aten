@@ -13,14 +13,17 @@
 // https://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm
 inline __device__ void encryptTea(uint2& arg)
 {
-    const unsigned int key[] = {
-        0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e
+    const uint32_t key[] = {
+        0xa341316c, 
+        0xc8013ea4, 
+        0xad90777d, 
+        0x7e95761e,
     };
 
-    unsigned int v0 = arg.x;
-    unsigned int v1 = arg.y;
-    unsigned int sum = 0;
-    unsigned int delta = 0x9e3779b9;
+    uint32_t v0 = arg.x;
+    uint32_t v1 = arg.y;
+    uint32_t sum = 0;
+    uint32_t delta = 0x9e3779b9;
 
     for (int i = 0; i < 16; i++) {
         sum += delta;
@@ -34,8 +37,8 @@ inline __device__ void encryptTea(uint2& arg)
 
 inline __device__ bool testReprojectedDepth(float z1, float z2, float dz)
 {
-    float z_diff = abs(z1 - z2);
-    return z_diff < 2.0 * (dz + 1e-3f);
+    float diffZ = abs(z1 - z2);
+    return diffZ < 2.0 * (dz + 1e-3f);
 }
 
 #define AT_IS_INBOUND(x, a, b)  (((a) <= (x)) && ((x) <= (b)))
@@ -65,28 +68,28 @@ __global__ void doForwardProjection(
     encryptTea(teaArg);
     teaArg.x %= gradientTileSize;
     teaArg.y %= gradientTileSize;
-    int2 idxPrev = make_int2(
+    int2 prevPos = make_int2(
         ix * gradientTileSize + teaArg.x,
         iy * gradientTileSize + teaArg.y);
 
     float4 motionDepth;
-    surf2Dread(&motionDepth, motionDetphBuffer, idxPrev.x * sizeof(float4), idxPrev.y);
+    surf2Dread(&motionDepth, motionDetphBuffer, prevPos.x * sizeof(float4), prevPos.y);
 
     // NOTE
     // motion = prev - cur
     //  => -motion = cur - prev
     //  => prev + (-motion) = prev + (cur - prev) = cur
-    int2 idxCur = make_int2(idxPrev.x - motionDepth.x, idxPrev.y - motionDepth.y);
+    int2 curPos = make_int2(prevPos.x - motionDepth.x, prevPos.y - motionDepth.y);
 
-    // Check if idx is in screen.
-    if (!AT_IS_INBOUND(idxCur.x, 0, width)
-        || !AT_IS_INBOUND(idxCur.y, 0, height))
+    // Check if position is in screen.
+    if (!AT_IS_INBOUND(curPos.x, 0, width)
+        || !AT_IS_INBOUND(curPos.y, 0, height))
     {
         return;
     }
 
-    int curIdx = getIdx(idxCur.x, idxCur.y, width);
-    int prevIdx = getIdx(idxPrev.x, idxPrev.y, width);
+    int curIdx = getIdx(curPos.x, curPos.y, width);
+    int prevIdx = getIdx(prevPos.x, prevPos.y, width);
 
     float4 curNmlDepth = curAovNormalDepth[curIdx];
     float4 prevNmlDepth = curAovNormalDepth[prevIdx];
@@ -107,8 +110,8 @@ __global__ void doForwardProjection(
     }
 
     int2 tilePos = make_int2(
-        idxCur.x % gradientTileSize,
-        idxCur.y % gradientTileSize);
+        curPos.x % gradientTileSize,
+        curPos.y % gradientTileSize);
 
     // NOTE
     // Atomic functions for CUDA.

@@ -41,12 +41,14 @@ inline __device__ bool testReprojectedDepth(float z1, float z2, float dz)
     return diffZ < 2.0 * (dz + 1e-3f);
 }
 
-#define AT_IS_INBOUND(x, a, b)  (((a) <= (x)) && ((x) <= (b)))
+#define AT_IS_INBOUND(x, a, b)  (((a) <= (x)) && ((x) < (b)))
 
 __global__ void doForwardProjection(
     int4* gradientSample,
     const float4* __restrict__ curAovNormalDepth,
     const float4* __restrict__ prevAovNormalDepth,
+    float4* curAovTexclrMeshid,
+    const float4* __restrict__ prevAovTexclrMeshid,
     int frame,
     int width, int height,
     int gradientTileSize,
@@ -118,15 +120,43 @@ __global__ void doForwardProjection(
     // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?CUDA%A5%A2%A5%C8%A5%DF%A5%C3%A5%AF%B4%D8%BF%F4
 
     int res = atomicCAS(&executedIdxArray[idx], -1, idx);
+
     if (res < 0) {
         // NOTE
         // w is not used.
-        gradientSample[idx] = make_int4(tilePos.x, tilePos.y, prevIdx, 0);
+        int downSizedWidth = (width + gradientTileSize - 1) / gradientTileSize;
+        int downSizedIdx = getIdx(
+            curPos.x / gradientTileSize,
+            curPos.y / gradientTileSize,
+            downSizedWidth);
+        gradientSample[downSizedIdx] = make_int4(tilePos.x, tilePos.y, prevIdx, 0);
 
-        // Rng seed.
+        // Albedo and Mesh id.
+        curAovTexclrMeshid[curIdx] = prevAovTexclrMeshid[prevIdx];
 
-        // Mesh id.
+        // NOTE
+        // Do swap previous/current Rng seed later.
+    }
+}
 
-        // Albedo.
+__global__ void swapRngSeedValue(
+    const int* __restrict__ executedIdxArray,
+    int width, int height)
+{
+    int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (ix >= width || iy >= height) {
+        return;
+    }
+
+    int idx = getIdx(ix, iy, width);
+
+    int res = executedIdxArray[idx];
+
+    if (res >= 0) {
+        // Forward Projected, so keep previous rng seed.
+
+
     }
 }

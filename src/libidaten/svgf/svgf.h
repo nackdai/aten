@@ -365,8 +365,6 @@ namespace idaten
         aten::mat4 m_mtxV2W;
         aten::mat4 m_mtxPrevW2V;
 
-        idaten::TypedCudaMemory<aten::mat4> m_mtxs;
-
         uint32_t m_frame{ 1 };
 
         // For A-trous wavelet.

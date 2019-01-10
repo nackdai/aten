@@ -32,8 +32,6 @@ namespace idaten
             int width, int height,
             cudaSurfaceObject_t outputSurf) override final;
 
-        void onSampleGradient(int width, int height);
-
         void onCreateGradient(int width, int height);
 
         void displayTiledData(
@@ -43,14 +41,16 @@ namespace idaten
 
         int getTiledResolution(int x) const
         {
-            AT_ASSERT(m_tileSize > 0);
-            return (x + m_tileSize - 1) / m_tileSize;
+            AT_ASSERT(m_gradiendTileSize > 0);
+            return (x + m_gradiendTileSize - 1) / m_gradiendTileSize;
         }
 
     protected:
-        int m_tileSize{ 3 };
+        int m_gradiendTileSize{ 3 };
 
         TypedCudaMemory<int4> m_gradientSample;
-        TypedCudaMemory<float4> m_gradient[2];
+        TypedCudaMemory<float4> m_gradient;
+
+        TypedCudaMemory<int> m_rngSeed[2];
     };
 }

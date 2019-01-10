@@ -34,8 +34,7 @@ namespace idaten
         int tiledW = getTiledResolution(width);
         int tiledH = getTiledResolution(height);
 
-        m_gradient[0].init(tiledW * tiledH);
-        m_gradient[1].init(tiledW * tiledH);
+        m_gradient.init(tiledW * tiledH);
 
         m_gradientSample.init(tiledW * tiledH);
     }
@@ -51,9 +50,6 @@ namespace idaten
             || m_mode == Mode::TF
             || m_mode == Mode::VAR)
         {
-            // Sample Gradient.
-            onSampleGradient(width, height);
-
             if (isFirstFrame()) {
                 // Nothing is done...
                 return;
@@ -62,7 +58,7 @@ namespace idaten
                 // Create Gradient.
                 onCreateGradient(width, height);
 
-                displayTiledData(width, height, m_gradient[0], outputSurf);
+                displayTiledData(width, height, m_gradient, outputSurf);
 
                 // TODO
                 // Atrous Gradient.

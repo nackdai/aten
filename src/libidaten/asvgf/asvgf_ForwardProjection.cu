@@ -49,6 +49,8 @@ __global__ void doForwardProjection(
     const float4* __restrict__ prevAovNormalDepth,
     float4* curAovTexclrMeshid,
     const float4* __restrict__ prevAovTexclrMeshid,
+    int* curRngSeed,
+    const int* __restrict__ prevRngSeed,
     int frame,
     int width, int height,
     int gradientTileSize,
@@ -134,29 +136,7 @@ __global__ void doForwardProjection(
         // Albedo and Mesh id.
         curAovTexclrMeshid[curIdx] = prevAovTexclrMeshid[prevIdx];
 
-        // NOTE
-        // Do swap previous/current Rng seed later.
-    }
-}
-
-__global__ void swapRngSeedValue(
-    const int* __restrict__ executedIdxArray,
-    int width, int height)
-{
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (ix >= width || iy >= height) {
-        return;
-    }
-
-    int idx = getIdx(ix, iy, width);
-
-    int res = executedIdxArray[idx];
-
-    if (res >= 0) {
-        // Forward Projected, so keep previous rng seed.
-
-
+        // Rng seed later.
+        curRngSeed[curIdx] = prevRngSeed[prevIdx];
     }
 }

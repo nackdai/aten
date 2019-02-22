@@ -70,5 +70,8 @@ namespace idaten
     private:
         bool m_isMipmap{ false };
         int m_mipmapLevel{ 0 };
+
+        cudaArray_t m_array{ nullptr };
+        cudaChannelFormatDesc m_channelFmtDesc;
     };
 }

@@ -103,7 +103,9 @@ namespace idaten
         // NOTE
         // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?%A5%EA%A5%CB%A5%A2%A5%E1%A5%E2%A5%EA%A4%C8CUDA%C7%DB%CE%F3
         // http://www.orangeowlsolutions.com/archives/613
+        // http://developer.download.nvidia.com/CUDA/training/texture_webinar_aug_2011.pdf
 
+#if 0
         // NOTE
         // 2Dテクスチャの場合は、pitchのアラインメントを考慮しないといけない.
         // cudaMallocPitch はアラインメントを考慮した処理になっている.
@@ -126,6 +128,22 @@ namespace idaten
         m_resDesc.res.pitch2D.width = width;
         m_resDesc.res.pitch2D.height = height;
         m_resDesc.res.pitch2D.pitchInBytes = dstPitch;
+#else
+        m_channelFmtDesc.f = cudaChannelFormatKindFloat;
+        m_channelFmtDesc.x = 32;
+        m_channelFmtDesc.y = 32;
+        m_channelFmtDesc.z = 32;
+        m_channelFmtDesc.w = 32;
+
+        checkCudaErrors(cudaMallocArray(&m_array, &m_channelFmtDesc, width, height));
+
+        size_t size = width * height * sizeof(float4);
+        checkCudaErrors(cudaMemcpyToArrayAsync(m_array, 0, 0, p, size, cudaMemcpyHostToDevice));
+
+        memset(&m_resDesc, 0, sizeof(m_resDesc));
+        m_resDesc.resType = cudaResourceTypeArray;
+        m_resDesc.res.array.array = m_array;
+#endif
     }
 
     cudaTextureObject_t CudaTexture::bind()

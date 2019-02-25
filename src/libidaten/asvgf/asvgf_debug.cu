@@ -64,7 +64,7 @@ namespace idaten
 
         displayTiledImageOnRealRes << <grid, block >> > (
             m_tileDomain,
-            m_tileSize,
+            m_gradientTileSize,
             outputSurf,
             src.ptr(),
             width, height);

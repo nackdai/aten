@@ -122,8 +122,8 @@ namespace idaten
 
         createGradient << <grid, block >> > (
             m_tileDomain,
-            m_tileSize,
-            m_gradient[0].ptr(),
+            m_gradientTileSize,
+            m_gradient.ptr(),
             m_paths.ptr(),
             m_aovColorVariance[prevaov].ptr(),
             m_aovTexclrMeshid[curaov].ptr(),

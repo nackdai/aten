@@ -41,12 +41,12 @@ namespace idaten
 
         int getTiledResolution(int x) const
         {
-            AT_ASSERT(m_gradiendTileSize > 0);
-            return (x + m_gradiendTileSize - 1) / m_gradiendTileSize;
+            AT_ASSERT(m_gradientTileSize > 0);
+            return (x + m_gradientTileSize - 1) / m_gradientTileSize;
         }
 
     protected:
-        int m_gradiendTileSize{ 3 };
+        int m_gradientTileSize{ 3 };
 
         TypedCudaMemory<int4> m_gradientSample;
         TypedCudaMemory<float4> m_gradient;

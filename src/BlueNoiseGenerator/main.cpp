@@ -200,9 +200,11 @@ float compute(
     return ret;
 }
 
-
 int main(int argc, char* argv[])
 {
+    aten::timer::init();
+    aten::timer time;
+
     int W = 256;
     int H = 256;
 
@@ -214,6 +216,8 @@ int main(int argc, char* argv[])
 
     auto seedHash_0 = computeHash(0);
     auto seedHash_1 = computeHash(1);
+
+    time.begin();
 
     for (int y = 0; y < H; y++) {
         for (int x = 0; x < W; x++) {
@@ -236,11 +240,40 @@ int main(int argc, char* argv[])
 
     float blueNoiseDistribution = initialDistribution;
 
-    const int iteration = 100;
+    auto elapsed = time.end();
+    AT_PRINTF("Initial Exec %f[ms]\n", elapsed);
+
+    const int iteration = 200;
 
     // Ä‚«‚È‚Ü‚µ–@.
 
+    static const char* MS = "ms";
+    static const char* SEC = "sec";
+    static const int LOG_TIMING = 3;
+
+    time.begin();
+
     for (int i = 0; i < iteration; i++) {
+        if (i > 0 && i % LOG_TIMING == 0) {
+            auto elapsedFromPrev = time.end();
+            elapsed += elapsedFromPrev;
+            float ratio = real(100) * real(i) / iteration;
+
+            auto allElapsed = elapsed;
+
+            const char* TimeElapsed = (elapsedFromPrev > real(1000) ? SEC : MS);
+            const char* TimeAllElapsed = (allElapsed > real(1000) ? SEC : MS);
+
+            elapsedFromPrev = (elapsedFromPrev > real(1000) ? elapsedFromPrev / real(1000) : elapsedFromPrev);
+            allElapsed = (allElapsed > real(1000) ? allElapsed / real(1000) : allElapsed);
+
+            AT_PRINTF(
+                "Percent:%f[%%] Elapsed:%f(%s) AllElapsed:%f(%s)\n", 
+                ratio, elapsedFromPrev, TimeElapsed, allElapsed, TimeAllElapsed);
+
+            time.begin();
+        }
+
         int y0 = static_cast<int>(getRandomFloat(i * 4 + 0) * H);
         int y1 = static_cast<int>(getRandomFloat(i * 4 + 1) * H);
         int x0 = static_cast<int>(getRandomFloat(i * 4 + 2) * W);
@@ -262,6 +295,7 @@ int main(int argc, char* argv[])
         blueNoise.at(x1, y1) = proposalBuffer.at(x1, y1);
     }
 
+#if 0
     // Check length.
     for (int y = 0; y < H; y++) {
         for (int x = 1; x < W - 1; x++) {
@@ -272,6 +306,7 @@ int main(int argc, char* argv[])
             AT_PRINTF("%f\n", l);
         }
     }
+#endif
 
     // Export to image data.
 

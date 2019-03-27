@@ -85,10 +85,12 @@
     <ClInclude Include="..\src\libidaten\idaten.h" />
     <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
     <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\context.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\idaten_sampler.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersecttype.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh" />

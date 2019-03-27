@@ -265,6 +265,12 @@
     <ClInclude Include="..\src\libidaten\asvgf\asvgf.h">
       <Filter>asvgf</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\idaten_sampler.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

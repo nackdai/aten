@@ -17,7 +17,8 @@ namespace aten {
 
     texture* ImageLoader::load(
         const std::string& path,
-        context& ctxt)
+        context& ctxt,
+        ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
     {
         std::string pathname;
         std::string extname;
@@ -29,7 +30,7 @@ namespace aten {
             extname,
             filename);
 
-        auto tex = load(filename, path, ctxt);
+        auto tex = load(filename, path, ctxt, fmt);
 
         return tex;
     }
@@ -69,7 +70,8 @@ namespace aten {
     texture* ImageLoader::load(
         const std::string& tag, 
         const std::string& path,
-        context& ctxt)
+        context& ctxt,
+        ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
     {
         std::string fullpath = path;
         if (!g_base.empty()) {
@@ -111,12 +113,26 @@ namespace aten {
             }
         }
         else {
-            auto src = stbi_load(fullpath.c_str(), &width, &height, &channels, 0);
+            void* src = nullptr;
+
+            if (fmt == ImgFormat::Fmt8Bit) {
+                src = stbi_load(fullpath.c_str(), &width, &height, &channels, 0);
+            }
+            else {
+                src = stbi_load_16(fullpath.c_str(), &width, &height, &channels, 0);
+            }
+
             if (src) {
                 tex = ctxt.createTexture(width, height, channels, texname.c_str());
-                real norm = real(1) / real(255);
 
-                read<stbi_uc>(src, tex, width, height, channels, norm);
+                if (fmt == ImgFormat::Fmt8Bit) {
+                    real norm = real(1) / real(255);
+                    read<stbi_uc>((stbi_uc*)src, tex, width, height, channels, norm);
+                }
+                else {
+                    real norm = real(1) / real(65535);
+                    read<uint16_t>((uint16_t*)src, tex, width, height, channels, norm);
+                }
 
                 STBI_FREE(src);
             }

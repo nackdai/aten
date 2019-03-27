@@ -15,7 +15,7 @@ namespace aten {
 
         AT_VIRTUAL(AT_DEVICE_API ~WangHash() {})
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
         {
             m_seed = seed;
         }

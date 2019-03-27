@@ -16,14 +16,14 @@ namespace aten {
         }
         AT_VIRTUAL(AT_DEVICE_API ~Sobol() {})
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
         {
             m_idx = (seed == 0 ? 1 : seed);
             m_dimension = 0;
 #ifdef __CUDACC__
             m_matrices = data;
 #else
-            m_matrices = data ? data : sobol::Matrices::matrices;
+            m_matrices = data ? reinterpret_cast<const unsigned int*>(data) : sobol::Matrices::matrices;
 #endif
         }
 

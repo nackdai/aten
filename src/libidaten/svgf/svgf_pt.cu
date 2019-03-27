@@ -27,8 +27,8 @@ __global__ void genPath(
     int sample, int maxSamples,
     unsigned int frame,
     const aten::CameraParameter* __restrict__ camera,
-    const unsigned int* sobolmatrices,
-    unsigned int* random)
+    const void* samplerValues,
+    const unsigned int* __restrict__ random)
 {
     auto ix = blockIdx.x * blockDim.x + threadIdx.x;
     auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -48,7 +48,7 @@ __global__ void genPath(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    paths->sampler[idx].init(frame, 0, scramble, sobolmatrices);
+    paths->sampler[idx].init(frame, 0, scramble, samplerValues);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
     auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));

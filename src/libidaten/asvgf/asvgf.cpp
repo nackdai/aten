@@ -23,24 +23,22 @@ namespace idaten
         }
 
         auto imgSize = W * H;
-        auto bytes = imgSize * 4 * sizeof(float);  // 4 is count of channel (RGBA)
+        auto bytes = imgSize * sizeof(float4);
         auto num = noises.size();
 
-        std::vector<float> tmp(m_bluenoise.num());
+        std::vector<float4> tmp(m_bluenoise.num());
 
         for (int n = 0; n < num; n++) {
             const auto noise = noises[n];
-            const float* data = reinterpret_cast<const float*>(noise->colors());
+            const float4* data = reinterpret_cast<const float4*>(noise->colors());
 
-            for (int c = 0; c < 4; c++) {
-                for (int i = 0; i < imgSize; i++) {
-                    int pos = n * (imgSize * 4) + (i * 4) + c;
-                    tmp[pos] = data[i * 4 + c];
-                }
+            for (int i = 0; i < imgSize; i++) {
+                int pos = n * imgSize + i;
+                tmp[pos] = data[i];
             }
         }
 
-        m_bluenoise.init(W * H * 4 * num);
+        m_bluenoise.init(W * H * num);
         m_bluenoise.write(&tmp, bytes);
 
         return true;

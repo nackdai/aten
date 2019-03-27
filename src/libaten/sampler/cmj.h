@@ -12,10 +12,10 @@ namespace aten {
         AT_VIRTUAL(AT_DEVICE_API ~CMJ() {});
 
     public:
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const unsigned int* data = nullptr))
+        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
         {
             AT_ASSERT(false);
-            init(seed, 0, 0, data);
+            init(seed, 0, 0, reinterpret_cast<const unsigned int*>(data));
         }
 
         AT_DEVICE_API void init(

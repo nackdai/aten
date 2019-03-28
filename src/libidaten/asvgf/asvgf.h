@@ -13,6 +13,6 @@ namespace idaten
         bool setBlueNoises(std::vector<aten::texture*>& noises);
 
     protected:
-        TypedCudaMemory<float> m_bluenoise;
+        CudaLeyered2DTexture m_bluenoise;
     };
 }

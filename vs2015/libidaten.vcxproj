@@ -90,7 +90,6 @@
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\context.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\idaten_sampler.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersecttype.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh" />
@@ -192,6 +191,7 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <ClCompile Include="..\src\libidaten\asvgf\asvgf.cpp" />
+    <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp" />
     <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp" />
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp" />

@@ -22,24 +22,12 @@ namespace idaten
             }
         }
 
-        auto imgSize = W * H;
-        auto bytes = imgSize * sizeof(float4);
-        auto num = noises.size();
-
-        std::vector<float4> tmp(m_bluenoise.num());
-
-        for (int n = 0; n < num; n++) {
-            const auto noise = noises[n];
-            const float4* data = reinterpret_cast<const float4*>(noise->colors());
-
-            for (int i = 0; i < imgSize; i++) {
-                int pos = n * imgSize + i;
-                tmp[pos] = data[i];
-            }
+        std::vector<const aten::vec4*> data;
+        for (const auto n : noises) {
+            data.push_back(n->colors());
         }
 
-        m_bluenoise.init(W * H * num);
-        m_bluenoise.write(&tmp, bytes);
+        m_bluenoise.init(data, W, H);
 
         return true;
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "math/vec4.h"
 #include "cuda/cudadefs.h"
 #include "cuda/cudautil.h"
@@ -53,7 +55,7 @@ namespace idaten
     class CudaTexture : public CudaTextureResource {
     public:
         CudaTexture() {}
-        ~CudaTexture() {}
+        virtual ~CudaTexture() final {}
 
     public:
         void init(
@@ -73,5 +75,22 @@ namespace idaten
 
         cudaArray_t m_array{ nullptr };
         cudaChannelFormatDesc m_channelFmtDesc;
+    };
+
+    class CudaLeyered2DTexture : public CudaTextureResource {
+    public:
+        CudaLeyered2DTexture() {}
+        virtual ~CudaLeyered2DTexture() final {}
+
+    public:
+        void init(
+            std::vector<const aten::vec4*>& p,
+            uint32_t width,
+            uint32_t height);
+
+        virtual cudaTextureObject_t bind() override final;
+
+    private:
+        cudaArray_t m_array{ nullptr };
     };
 }

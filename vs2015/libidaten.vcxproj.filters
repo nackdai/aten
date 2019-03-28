@@ -265,9 +265,6 @@
     <ClInclude Include="..\src\libidaten\asvgf\asvgf.h">
       <Filter>asvgf</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\idaten_sampler.h">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
@@ -379,6 +376,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\asvgf\asvgf.cpp">
       <Filter>asvgf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp">
+      <Filter>cuda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

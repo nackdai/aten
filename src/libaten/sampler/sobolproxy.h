@@ -21,7 +21,7 @@ namespace aten {
             m_idx = (seed == 0 ? 1 : seed);
             m_dimension = 0;
 #ifdef __CUDACC__
-            m_matrices = data;
+            m_matrices = reinterpret_cast<const unsigned int*>(data);
 #else
             m_matrices = data ? reinterpret_cast<const unsigned int*>(data) : sobol::Matrices::matrices;
 #endif

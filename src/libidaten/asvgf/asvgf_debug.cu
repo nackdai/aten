@@ -9,6 +9,7 @@
 
 #include "aten4idaten.h"
 
+#if 0
 __global__ void displayTiledImageOnRealRes(
     idaten::TileDomain tileDomain,
     int tileSize, 
@@ -72,3 +73,4 @@ namespace idaten
         checkCudaKernel(displayTiledImageOnRealRes);
     }
 }
+#endif

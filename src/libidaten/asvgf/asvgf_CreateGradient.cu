@@ -9,6 +9,7 @@
 
 #include "aten4idaten.h"
 
+#if 0
 __device__ inline bool isEqualInt2(const int2& a, const int2& b)
 {
     return (a.x == b.x) && (a.y == b.y);
@@ -134,3 +135,4 @@ namespace idaten
         checkCudaKernel(createGradient);
     }
 }
+#endif

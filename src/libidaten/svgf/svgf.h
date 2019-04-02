@@ -5,7 +5,7 @@
 #include "cuda/cudaGLresource.h"
 
 #include "kernel/renderer.h"
-#include "kernel/idaten_sampler.h"
+#include "sampler/sampler.h"
 
 namespace idaten
 {

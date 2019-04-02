@@ -4,32 +4,24 @@
 #include "cuda/helper_math.h"
 
 #include "types.h"
-#include "kernel/idaten_sampler.h"
 
 namespace idaten {
-    class BlueNoiseSampler AT_INHERIT(sampler) {
+    class BlueNoiseSampler {
     public:
-        AT_DEVICE_API BlueNoiseSampler() {}
-        AT_VIRTUAL(AT_DEVICE_API ~BlueNoiseSampler() {});
+        __device__ BlueNoiseSampler() {}
+        __device__ ~BlueNoiseSampler() {};
 
     public:
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
-        {
-            AT_ASSERT(false);
-            m_seed = seed;
-            m_noise = reinterpret_cast<const float4*>(data);
-        }
-
-        void init(
+        __device__ void init(
             uint32_t seed,
             uint16_t bounce,
             uint16_t resW,
             uint16_t resH,
             uint16_t num,
-            const float4* data)
+            cudaTextureObject_t noisetex)
         {
             m_seed = seed;
-            m_noise = reinterpret_cast<const float4*>(data);
+            m_noise = noisetex;
 
             m_dimension = 2 + 15 + 30 * bounce;
             m_noiseResW = resW;
@@ -37,13 +29,13 @@ namespace idaten {
             m_noiseNum = num;
         }
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
+        AT_DEVICE_API real nextSample()
         {
             float r = sample();
             return r;
         }
 
-        AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API aten::vec2 nextSample2D())
+        AT_DEVICE_API aten::vec2 nextSample2D()
         {
             aten::vec2 r;
             r.x = sample();
@@ -54,6 +46,8 @@ namespace idaten {
     private:
         AT_DEVICE_API float sample()
         {
+            // http://developer.download.nvidia.com/CUDA/training/texture_webinar_aug_2011.pdf
+
             uint3 p = make_uint3(m_seed, m_seed >> 10, m_seed >> 20);
             p.z = (p.z * 13 + m_dimension);
 
@@ -61,16 +55,19 @@ namespace idaten {
             p.y &= m_noiseResH - 1;
             p.z &= m_noiseNum - 1;
 
-            uint32_t size = m_noiseResW * m_noiseResH;
-            auto i = p.y * m_noiseResW + p.x;
-
-            auto pos = p.z * size + i;
-
-            float ret = m_noise[pos].x;
+            real u = p.x / (real)m_noiseResW;
+            real v = p.y / (real)m_noiseResH;
 
             m_dimension++;
 
-            return ret;
+#ifdef __CUDACC__
+            //float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
+
+            //return ret.x;
+            return real(1);
+#else
+            return real(1);
+#endif
         }
 
     private:
@@ -81,6 +78,6 @@ namespace idaten {
         uint16_t m_noiseNum{ 0 };
         uint16_t m_dimension{ 0 };
 
-        const float4* m_noise{ nullptr };
+        cudaTextureObject_t m_noise;
     };
 }

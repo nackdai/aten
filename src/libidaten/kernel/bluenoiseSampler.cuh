@@ -60,11 +60,9 @@ namespace idaten {
 
             m_dimension++;
 
-#ifdef __CUDACC__
-            //float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
-
-            //return ret.x;
-            return real(1);
+#ifdef __CUDA_ARCH__ 
+            float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
+            return ret.x;
 #else
             return real(1);
 #endif

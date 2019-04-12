@@ -31,4 +31,15 @@ namespace idaten
 
         return true;
     }
+
+    void AdvancedSVGFPathTracing::render(
+        const TileDomain& tileDomain,
+        int maxSamples,
+        int maxBounce)
+    {
+        CudaGLResourceMapper rscmap(&m_glimg);
+        auto outputSurf = m_glimg.bind();
+
+        onDebug(tileDomain.w, tileDomain.h, outputSurf);
+    }
 }

@@ -63,7 +63,7 @@ namespace idaten
             tex_desc.filterMode = cudaFilterModePoint;
             tex_desc.addressMode[0] = cudaAddressModeWrap;
             tex_desc.addressMode[1] = cudaAddressModeWrap;
-            tex_desc.normalizedCoords = 0;
+            tex_desc.normalizedCoords = true;
 
             checkCudaErrors(cudaCreateTextureObject(&m_tex, &m_resDesc, &tex_desc, nullptr));
         }

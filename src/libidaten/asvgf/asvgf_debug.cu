@@ -50,8 +50,8 @@ namespace idaten
 
         displayBluenoiseTexture << <grid, block >> > (
             outputSurf,
-            tex,
-            width, height);
+            width, height,
+            tex);
 
         checkCudaKernel(displayBluenoiseTexture);
 

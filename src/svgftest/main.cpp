@@ -36,7 +36,6 @@ static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 static aten::context g_ctxt;
 
 static idaten::SVGFPathTracing g_tracer;
-//static idaten::AdvancedSVGFPathTracing g_tracer;
 static aten::visualizer* g_visualizer;
 
 static float g_avgcuda = 0.0f;

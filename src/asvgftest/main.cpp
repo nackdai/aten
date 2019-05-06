@@ -35,7 +35,6 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 static aten::context g_ctxt;
 
-//static idaten::SVGFPathTracing g_tracer;
 static idaten::AdvancedSVGFPathTracing g_tracer;
 static aten::visualizer* g_visualizer;
 
@@ -604,6 +603,14 @@ int main()
 
     g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
     g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
+
+    auto bluenoise = aten::ImageLoader::load(
+        "../../asset/bluenoise/256_256/HDR_RGBA_0000.png",
+        g_ctxt,
+        aten::ImageLoader::ImgFormat::Fmt16Bit);
+    std::vector<decltype(bluenoise)> noises;
+    noises.push_back(bluenoise);
+    g_tracer.setBlueNoises(noises);
 #endif
 
     aten::window::run();

@@ -31,7 +31,7 @@ namespace idaten {
         }
 
         uint32_t write(const void* p, uint32_t sizeBytes, uint32_t offsetBytes = 0);
-        uint32_t read(void* p, uint32_t size);
+        uint32_t read(void* p, uint32_t bytes);
 
         operator void*()
         {

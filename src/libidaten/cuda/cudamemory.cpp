@@ -49,20 +49,20 @@ namespace idaten {
         return sizeBytes;
     }
 
-    uint32_t CudaMemory::read(void* p, uint32_t size)
+    uint32_t CudaMemory::read(void* p, uint32_t bytes)
     {
-        if (size == 0) {
-            size = m_bytes;
+        if (bytes == 0) {
+            bytes = m_bytes;
         }
 
-        if (size > m_bytes) {
+        if (bytes > m_bytes) {
             AT_ASSERT(false);
             return 0;
         }
 
-        checkCudaErrors(cudaMemcpy(p, m_device, size, cudaMemcpyDeviceToHost));
+        checkCudaErrors(cudaMemcpy(p, m_device, bytes, cudaMemcpyDeviceToHost));
 
-        return size;
+        return bytes;
     }
 
     void CudaMemory::free()

@@ -9,7 +9,6 @@ And Idanten includes characters of aten, "id**aten**"
 
 ## Features
 
-
 - Rendering algorithms
   - Ray Tracing
   - Next Event Estimation Path Tracing
@@ -18,6 +17,11 @@ And Idanten includes characters of aten, "id**aten**"
   - Energy Re-distribution Path Tracing
   - AOV
     - albedo, depth, normal, geometry id.
+- Acceralation
+  - BVH
+  - SBVH
+  - TopLayer, BottomLayer
+  - Transform(Translate, Rotate, Scale) objects
 - Materials
   - Emissive
   - Lambert
@@ -53,6 +57,7 @@ And Idanten includes characters of aten, "id**aten**"
   - Birateral
   - Practical Noise Reduction for Progressive Stochastic Ray Tracing with Perceptual Control
   - Robust Image Denoising using a Virtual Flash Image for Monte Carlo Ray Tracing
+  - [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
 - PostEffect
   - Simple Bloom
   - Reinherd Tone Mapping
@@ -63,7 +68,7 @@ And Idanten includes characters of aten, "id**aten**"
 - Others
   - Instancing
   - Scene Definition by XML
-  - Deformation (Experimental)
+  - Deformation
 
 ## Limitations
   
@@ -78,10 +83,8 @@ And Idanten includes characters of aten, "id**aten**"
 
 ## Under Construction Works
 
-- GPGPU
-  - idaten is GPGPU project.
 - More efficient denoise filter
-  - [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
+  - [Gradient Estimation for Real-Time Adaptive Temporal Filtering](https://cg.ivd.kit.edu/atf.php)
 
 ## Future Works
 

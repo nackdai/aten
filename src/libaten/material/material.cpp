@@ -147,12 +147,12 @@ namespace AT_NAME
     }
 
     // NOTE
-    // Schlick �ɂ��t���l�����˗��̋ߎ�.
+    // Schlickによるフレネル反射率の近似.
     // http://yokotakenji.me/log/math/4501/
     // https://en.wikipedia.org/wiki/Schlick%27s_approximation
 
     // NOTE
-    // �t���l�����˗��ɂ���.
+    // フレネル反射率について.
     // http://d.hatena.ne.jp/hanecci/20130525/p3
 
     real schlick(
@@ -161,7 +161,7 @@ namespace AT_NAME
         real ni, real nt)
     {
         // NOTE
-        // Fschlick(v,h) �� R0 + (1 - R0)(1 - cos��)^5
+        // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
         // R0 = ((n1 - n2) / (n1 + n2))^2
 
         auto r0 = (ni - nt) / (ni + nt);
@@ -184,7 +184,7 @@ namespace AT_NAME
         aten::vec3 n = normal;
 
         if (isEnter) {
-            // ���C���o�Ă����̂ŁA�S������.
+            // レイが出ていくので、全部反対.
             auto tmp = nt;
             nt = real(1);
             ni = tmp;

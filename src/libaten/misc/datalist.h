@@ -120,7 +120,7 @@ public:
             // Disable in cuda to avoid nvcc error.
             // If below code is enabled, nvcc occurs an error, but I don't know why.
 #ifndef __AT_CUDA__
-            for each (auto& item in m_list)
+            for (auto& item : m_list)
             {
                 item->doFuncWhenAnyLeave();
             }

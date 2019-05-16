@@ -137,7 +137,7 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_random;
 
         bool m_enableAOV{ false };
-        aten::vec3 m_posRange{ aten::vec3(real(1)) };
+        aten::vec3 m_posRange{ real(1) };
         idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc;
         std::vector<idaten::CudaGLSurface> m_aovs;
 

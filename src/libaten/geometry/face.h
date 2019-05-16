@@ -81,7 +81,7 @@ namespace AT_NAME
         static void resetIdWhenAnyTriangleLeave(AT_NAME::face* tri);
 
         static face* create(
-            const context& ctxt,
+            const aten::context& ctxt,
             const aten::PrimitiveParamter& param);
 
         void addToDataList(aten::DataList<AT_NAME::face>& list)

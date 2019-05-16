@@ -52,7 +52,7 @@ namespace AT_NAME
         auto lower = name;
         std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-        for each (const char* mtrl_name in g_mtrlTypeNames) {
+        for (const char* mtrl_name : g_mtrlTypeNames) {
             if (lower == mtrl_name) {
                 return true;
             }
@@ -147,12 +147,12 @@ namespace AT_NAME
     }
 
     // NOTE
-    // Schlick ‚É‚æ‚éƒtƒŒƒlƒ‹”½Ë—¦‚Ì‹ß—.
+    // Schlick ï¿½É‚ï¿½ï¿½tï¿½ï¿½ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½Ë—ï¿½ï¿½Ì‹ßï¿½.
     // http://yokotakenji.me/log/math/4501/
     // https://en.wikipedia.org/wiki/Schlick%27s_approximation
 
     // NOTE
-    // ƒtƒŒƒlƒ‹”½Ë—¦‚É‚Â‚¢‚Ä.
+    // ï¿½tï¿½ï¿½ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½Ë—ï¿½ï¿½É‚Â‚ï¿½ï¿½ï¿½.
     // http://d.hatena.ne.jp/hanecci/20130525/p3
 
     real schlick(
@@ -161,7 +161,7 @@ namespace AT_NAME
         real ni, real nt)
     {
         // NOTE
-        // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+        // Fschlick(v,h) ï¿½ï¿½ R0 + (1 - R0)(1 - cosï¿½ï¿½)^5
         // R0 = ((n1 - n2) / (n1 + n2))^2
 
         auto r0 = (ni - nt) / (ni + nt);
@@ -184,7 +184,7 @@ namespace AT_NAME
         aten::vec3 n = normal;
 
         if (isEnter) {
-            // ƒŒƒC‚ªo‚Ä‚¢‚­‚Ì‚ÅA‘S•””½‘Î.
+            // ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½oï¿½Ä‚ï¿½ï¿½ï¿½ï¿½Ì‚ÅAï¿½Sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
             auto tmp = nt;
             nt = real(1);
             ni = tmp;

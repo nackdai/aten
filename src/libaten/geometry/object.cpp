@@ -10,14 +10,7 @@ namespace AT_NAME
 {
     object::~object()
     {
-        for (auto s : shapes) {
-            delete s;
-        }
-        shapes.clear();
-
-        if (m_accel) {
-            delete m_accel;
-        }
+        m_shapes.clear();
     }
 
     void object::build(const context& ctxt)
@@ -28,10 +21,10 @@ namespace AT_NAME
         }
 
         if (!m_accel) {
-            m_accel = aten::accelerator::createAccelerator();
+            m_accel.reset(aten::accelerator::createAccelerator());
         }
 
-        m_param.primid = shapes[0]->faces[0]->getId();
+        m_param.primid = m_shapes[0]->faces[0]->getId();
 
         m_param.area = 0;
         m_triangles = 0;
@@ -41,7 +34,7 @@ namespace AT_NAME
 
         aabb bbox;
 
-        for (const auto s : shapes) {
+        for (const auto& s : m_shapes) {
             s->build(ctxt);
 
             m_param.area += s->param.area;
@@ -69,12 +62,12 @@ namespace AT_NAME
             return;
         }
 
-        m_param.primid = shapes[0]->faces[0]->getId();
+        m_param.primid = m_shapes[0]->faces[0]->getId();
 
         m_param.area = 0;
         m_triangles = 0;
 
-        for (const auto s : shapes) {
+        for (const auto& s : m_shapes) {
             s->build(ctxt);
 
             m_triangles += (uint32_t)s->faces.size();
@@ -151,8 +144,8 @@ namespace AT_NAME
         aten::sampler* sampler) const
     {
         auto r = sampler->nextSample();
-        int shapeidx = (int)(r * (shapes.size() - 1));
-        auto objshape = shapes[shapeidx];
+        int shapeidx = (int)(r * (m_shapes.size() - 1));
+        auto& objshape = m_shapes[shapeidx];
 
         r = sampler->nextSample();
         int faceidx = (int)(r * (objshape->faces.size() - 1));
@@ -202,7 +195,7 @@ namespace AT_NAME
 
         int objid = (parentId < 0 ? id() : parentId);
 
-        for (auto s : shapes) {
+        for (auto& s : m_shapes) {
             s->drawForGBuffer(func, ctxt, mtxL2W, mtxPrevL2W, objid);
         }
     }
@@ -211,7 +204,7 @@ namespace AT_NAME
         AT_NAME::FuncObjectMeshDraw func,
         const context& ctxt) const
     {
-        for (auto s : shapes) {
+        for (auto& s : m_shapes) {
             s->draw(func, ctxt);
         }
     }
@@ -229,7 +222,7 @@ namespace AT_NAME
     {
         bool result = false;
 
-        m_accel = aten::accelerator::createAccelerator();
+        m_accel.reset(aten::accelerator::createAccelerator());
         m_accel->enableExporting();
 
         build(ctxt);
@@ -245,7 +238,7 @@ namespace AT_NAME
     {
         AT_ASSERT(!m_accel);
 
-        m_accel = aten::accelerator::createAccelerator();
+        m_accel.reset(aten::accelerator::createAccelerator());
         return m_accel->importTree(ctxt, path, offsetTriIdx);
     }
 
@@ -253,10 +246,10 @@ namespace AT_NAME
         std::vector<std::vector<AT_NAME::face*>>& tris,
         std::vector<AT_NAME::material*>& mtrls)
     {
-        tris.resize(shapes.size());
+        tris.resize(m_shapes.size());
 
-        for (int i = 0; i < shapes.size(); i++) {
-            auto shape = shapes[i];
+        for (int i = 0; i < m_shapes.size(); i++) {
+            auto& shape = m_shapes[i];
 
             for (auto face : shape->faces) {
                 tris[i].push_back(face);
@@ -268,7 +261,7 @@ namespace AT_NAME
 
     void object::collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
     {
-        for (const auto objshape : shapes) {
+        for (const auto& objshape : m_shapes) {
             const auto& tris = objshape->tris();
 
             triangles.reserve(tris.size());

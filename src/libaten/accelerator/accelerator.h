@@ -30,15 +30,15 @@ namespace aten {
         friend class deformable;
         template<typename ACCEL> friend class AcceleratedScene;
 
-    private:
-        accelerator() {}
-
     protected:
         accelerator(AccelType type)
         {
             m_type = type;
         }
-        virtual ~accelerator() {}
+
+    public:
+        accelerator() = delete;
+        virtual ~accelerator() = default;
 
     private:
         static AccelType s_internalType;

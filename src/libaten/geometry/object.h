@@ -1,6 +1,6 @@
 #pragma once
 
-#include <atomic>
+#include <memory>
 
 #include "types.h"
 #include "material/material.h"
@@ -39,7 +39,7 @@ namespace AT_NAME
 
         virtual aten::accelerator* getInternalAccelerator() override final
         {
-            return m_accel;
+            return m_accel.get();
         }
 
         virtual void drawForGBuffer(
@@ -87,24 +87,24 @@ namespace AT_NAME
 
         void appendShape(objshape* shape)
         {
-            shapes.push_back(shape);
+            m_shapes.push_back(std::shared_ptr<objshape>(shape));
         }
 
         uint32_t getShapeNum() const
         {
-            return static_cast<uint32_t>(shapes.size());
+            return static_cast<uint32_t>(m_shapes.size());
         }
 
         objshape* getShape(uint32_t idx)
         {
             AT_ASSERT(idx < getShapeNum());
-            return shapes[idx];
+            return m_shapes[idx].get();
         }
 
     private:
-        std::vector<objshape*> shapes;
+        std::vector<std::shared_ptr<objshape>> m_shapes;
 
-        aten::accelerator* m_accel{ nullptr };
+        std::shared_ptr<aten::accelerator> m_accel;
         uint32_t m_triangles{ 0 };
     };
 }

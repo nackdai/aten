@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "types.h"
 #include "accelerator/bvh.h"
 #include "math/mat4.h"
@@ -15,9 +17,8 @@ namespace aten
 
     private:
         instance(OBJ* obj, const context& ctxt)
-            : transformable(GeometryType::Instance)
+            : transformable(GeometryType::Instance), m_obj(std::move(obj))
         {
-            m_obj = obj;
             setBoundingBox(m_obj->getBoundingbox());
         }
 
@@ -106,17 +107,17 @@ namespace aten
 
         virtual const hitable* getHasObject() const override final
         {
-            return m_obj;
+            return m_obj.get();
         }
 
         OBJ* getHasObjectAsRealType()
         {
-            return m_obj;
+            return m_obj.get();
         }
 
         virtual const hitable* getHasSecondObject() const override final
         {
-            return m_lod;
+            return m_lod.get();
         }
 
         virtual void getMatrices(
@@ -168,7 +169,7 @@ namespace aten
 
         void setLod(OBJ* obj)
         {
-            m_lod = obj;
+            m_lod.reset(std::move(obj));
         }
 
         vec3 getTrans()
@@ -246,8 +247,8 @@ namespace aten
         }
 
     private:
-        OBJ* m_obj{ nullptr };
-        OBJ* m_lod{ nullptr };
+        std::shared_ptr<OBJ> m_obj;
+        std::shared_ptr<OBJ> m_lod;
 
         mat4 m_mtxL2W;
         mat4 m_mtxW2L;    // inverted.
@@ -262,9 +263,8 @@ namespace aten
 
     template<>
     inline instance<object>::instance(object* obj, const context& ctxt)
-        : transformable(GeometryType::Instance)
+        : transformable(GeometryType::Instance), m_obj(std::move(obj))
     {
-        m_obj = obj;
         m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
 
@@ -273,9 +273,8 @@ namespace aten
 
     template<>
     inline instance<deformable>::instance(deformable* obj, const context& ctxt)
-        : transformable(GeometryType::Instance)
+        : transformable(GeometryType::Instance), m_obj(std::move(obj))
     {
-        m_obj = obj;
         m_obj->build();
         setBoundingBox(m_obj->getBoundingbox());
 

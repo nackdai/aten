@@ -213,7 +213,7 @@ void update(int frame)
             const auto& nodes = g_scene.getAccel()->getNodes();
             const auto& mtxs = g_scene.getAccel()->getMatrices();
 
-            g_tracer.update(
+            g_tracer.updateBVH(
                 shapeparams,
                 nodes,
                 mtxs);

@@ -183,9 +183,9 @@ namespace aten {
     };
 
     class window {
-    private:
+    protected:
         window(GLFWwindow* wnd, int32_t id);
-        ~window() {}
+        virtual ~window() = default;
 
     public:
         using OnRun = std::function<void(window*)>;

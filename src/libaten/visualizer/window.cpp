@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <memory>
 
 #include "visualizer/atengl.h"
 #include "visualizer/window.h"
@@ -11,7 +12,14 @@
 
 namespace aten
 {
-    static std::vector<window*> g_windows;
+    class windowImpl : public window {
+    public:
+        windowImpl(GLFWwindow* wnd, int32_t id) : window(wnd, id) {}
+        virtual ~windowImpl() = default;
+    };
+
+
+    static std::vector<std::shared_ptr<windowImpl>> g_windows;
 
     static std::vector<int> g_mouseX;
     static std::vector<int> g_mouseY;
@@ -21,7 +29,7 @@ namespace aten
         auto found = std::find_if(
             g_windows.begin(),
             g_windows.end(),
-            [&](window* wnd)
+            [&](std::shared_ptr<windowImpl>& wnd)
         {
             if (wnd->getNativeHandle() == w) {
                 return true;
@@ -30,7 +38,7 @@ namespace aten
         });
 
         if (found != g_windows.end()) {
-            return *found;
+            return (*found).get();
         }
 
         return nullptr;
@@ -297,7 +305,7 @@ namespace aten
         CALL_GL_API(::glViewport(0, 0, width, height));
         CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
 
-        window* ret = new window(glfwWindow, g_windows.size());
+        windowImpl* ret = new windowImpl(glfwWindow, g_windows.size());
         {
             ret->m_onRun = onRun;
             ret->m_onClose = _onClose;
@@ -308,7 +316,7 @@ namespace aten
 
             ret->m_imguiCtxt = ImGui::GetCurrentContext();
         }
-        g_windows.push_back(ret);
+        g_windows.push_back(std::shared_ptr<windowImpl>(std::move(ret)));
 
         g_mouseX.resize(g_windows.size());
         g_mouseY.resize(g_windows.size());
@@ -321,7 +329,7 @@ namespace aten
         bool running = true;
 
         while (running) {
-            for (auto wnd : g_windows) {
+            for (auto& wnd : g_windows) {
                 auto glfwWnd = wnd->m_wnd;
 
                 ::glfwMakeContextCurrent(glfwWnd);
@@ -333,7 +341,7 @@ namespace aten
                 // For imgui.
                 ImGui_ImplGlfwGL3_NewFrame(glfwWnd);
 
-                wnd->m_onRun(wnd);
+                wnd->m_onRun(wnd.get());
 
                 ::glfwSwapBuffers(glfwWnd);
 
@@ -375,8 +383,6 @@ namespace aten
             else {
                 ImGui::DestroyContext((ImGuiContext*)wnd->m_imguiCtxt);
             }
-            
-            delete wnd;
         }
 
         if (defaultImguiCtxt) {

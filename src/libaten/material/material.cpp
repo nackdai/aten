@@ -147,12 +147,12 @@ namespace AT_NAME
     }
 
     // NOTE
-    // Schlick‚É‚æ‚éƒtƒŒƒlƒ‹”½Ë—¦‚Ì‹ß—.
+    // Schlickã«ã‚ˆã‚‹ãƒ•ãƒ¬ãƒãƒ«åå°„ç‡ã®è¿‘ä¼¼.
     // http://yokotakenji.me/log/math/4501/
     // https://en.wikipedia.org/wiki/Schlick%27s_approximation
 
     // NOTE
-    // ƒtƒŒƒlƒ‹”½Ë—¦‚É‚Â‚¢‚Ä.
+    // ãƒ•ãƒ¬ãƒãƒ«åå°„ç‡ã«ã¤ã„ã¦.
     // http://d.hatena.ne.jp/hanecci/20130525/p3
 
     real schlick(
@@ -161,7 +161,7 @@ namespace AT_NAME
         real ni, real nt)
     {
         // NOTE
-        // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+        // Fschlick(v,h) â‰’ R0 + (1 - R0)(1 - cosÎ˜)^5
         // R0 = ((n1 - n2) / (n1 + n2))^2
 
         auto r0 = (ni - nt) / (ni + nt);
@@ -184,7 +184,7 @@ namespace AT_NAME
         aten::vec3 n = normal;
 
         if (isEnter) {
-            // ƒŒƒC‚ªo‚Ä‚¢‚­‚Ì‚ÅA‘S•””½‘Î.
+            // ãƒ¬ã‚¤ãŒå‡ºã¦ã„ãã®ã§ã€å…¨éƒ¨åå¯¾.
             auto tmp = nt;
             nt = real(1);
             ni = tmp;

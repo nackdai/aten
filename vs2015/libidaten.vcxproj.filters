@@ -508,5 +508,8 @@
     <CudaCompile Include="..\src\libidaten\asvgf\asvgf_ForwardProjection.cu">
       <Filter>asvgf</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_pt.cu">
+      <Filter>asvgf</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

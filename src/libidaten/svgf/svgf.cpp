@@ -356,7 +356,7 @@ namespace idaten
             //int seed = 0;
 
             onGenPath(
-                i, maxSamples,
+                maxBounce,
                 seed,
                 vtxTexPos,
                 vtxTexNml);

@@ -37,9 +37,13 @@ namespace idaten
         int maxSamples,
         int maxBounce)
     {
+#if 0
         CudaGLResourceMapper rscmap(&m_glimg);
         auto outputSurf = m_glimg.bind();
 
         onDebug(tileDomain.w, tileDomain.h, outputSurf);
+#else
+        SVGFPathTracing::render(tileDomain, maxSamples, maxBounce);
+#endif
     }
 }

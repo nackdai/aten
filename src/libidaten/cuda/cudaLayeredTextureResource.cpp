@@ -51,6 +51,10 @@ namespace idaten
         memcpyParams.kind = cudaMemcpyHostToDevice;
         checkCudaErrors(cudaMemcpy3DAsync(&memcpyParams));
 
+        m_width = width;
+        m_height = height;
+        m_layerNum = layerNum;
+
         memset(&m_resDesc, 0, sizeof(m_resDesc));
         m_resDesc.resType = cudaResourceTypeArray;
         m_resDesc.res.array.array = m_array;

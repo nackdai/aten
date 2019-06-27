@@ -18,6 +18,24 @@ namespace idaten
             int maxBounce) override;
 
     protected:
+        void onGenPath(
+            int maxBounce,
+            int seed,
+            cudaTextureObject_t texVtxPos,
+            cudaTextureObject_t texVtxNml) final;
+
+        void onShade(
+            cudaSurfaceObject_t outputSurf,
+            int width, int height,
+            int bounce, int rrBounce,
+            cudaTextureObject_t texVtxPos,
+            cudaTextureObject_t texVtxNml) final;
+
+        void AdvancedSVGFPathTracing::onGather(
+            cudaSurfaceObject_t outputSurf,
+            int width, int height,
+            int maxSamples) final;
+
         void onDebug(
             int width, int height,
             cudaSurfaceObject_t outputSurf);

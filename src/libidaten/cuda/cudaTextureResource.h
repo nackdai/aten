@@ -90,7 +90,25 @@ namespace idaten
 
         virtual cudaTextureObject_t bind() override final;
 
+        int getWidth() const
+        {
+            return m_width;
+        }
+
+        int getHeight() const
+        {
+            return m_height;
+        }
+
+        int getLayerNum() const
+        {
+            return m_layerNum;
+        }
+
     private:
         cudaArray_t m_array{ nullptr };
+        int m_width{ 0 };
+        int m_height{ 0 };
+        int m_layerNum{ 0 };
     };
 }

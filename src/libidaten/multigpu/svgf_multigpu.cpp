@@ -158,7 +158,7 @@ namespace idaten
             m_tileDomain = tileDomain;
 
             onGenPath(
-                i, maxSamples,
+                maxBounce,
                 seed,
                 vtxTexPos,
                 vtxTexNml);

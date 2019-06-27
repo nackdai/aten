@@ -249,7 +249,7 @@ namespace idaten
             cudaSurfaceObject_t outputSurf);
 
         virtual void onGenPath(
-            int sample, int maxSamples,
+            int maxBounce,
             int seed,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
@@ -276,6 +276,10 @@ namespace idaten
             int bounce, int rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
+
+        void onShadeByShadowRay(
+            int bounce,
+            cudaTextureObject_t texVtxPos);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,

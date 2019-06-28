@@ -21,8 +21,8 @@ namespace idaten {
             uint16_t noiseTexNum,
             cudaTextureObject_t noisetex)
         {
-            m_seed = (x & resW) << 0;
-            m_seed |= (y & resH) << 10;
+            m_seed = (x % resW) << 0;
+            m_seed |= (y % resH) << 10;
             m_seed |= (frame) << 20;
 
             m_noise = noisetex;

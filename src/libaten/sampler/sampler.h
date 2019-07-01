@@ -17,14 +17,19 @@
 #include "sampler/wanghash.h"
 #include "sampler/sobolproxy.h"
 #include "sampler/cmj.h"
+
+#ifdef AT_CUDA
 #include "kernel/bluenoiseSampler.cuh"
+#else
+#include "sampler/bluenoiseSampler.h"
+#endif
 
 #define IDATEN_SAMPLER_WANGHASH     (0)
 #define IDATEN_SAMPLER_SOBOL        (1)
 #define IDATEN_SAMPLER_CMJ          (2)
 #define IDATEN_SAMPLER_BLUENOISE    (3)
 
-#define IDATEN_SAMPLER    IDATEN_SAMPLER_CMJ
+#define IDATEN_SAMPLER    IDATEN_SAMPLER_BLUENOISE
 
 namespace aten {
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
@@ -34,7 +39,11 @@ namespace aten {
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_WANGHASH
     using sampler = WangHash;
 #else
+#ifdef AT_CUDA
     using sampler = idaten::BlueNoiseSampler;
+#else
+    using sampler = aten::BlueNoiseSampler;
+#endif
 #endif
 }
 

@@ -30,6 +30,11 @@ namespace aten
             m_lightDir = dir;
         }
 
+        void registerBlueNoiseTex(const std::shared_ptr<texture>& tex)
+        {
+            m_noisetex.push_back(std::move(tex));
+        }
+
     protected:
         struct Path {
             vec3 contrib;
@@ -94,5 +99,7 @@ namespace aten
 
         PointLight* m_virtualLight{ nullptr };
         vec3 m_lightDir;
+
+        std::vector<std::shared_ptr<texture>> m_noisetex;
     };
 }

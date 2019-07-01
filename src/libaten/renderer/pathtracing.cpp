@@ -7,6 +7,7 @@
 #include "sampler/sobolproxy.h"
 #include "sampler/wanghash.h"
 #include "sampler/cmj.h"
+#include "sampler/bluenoiseSampler.h"
 
 #include "material/lambert.h"
 
@@ -475,9 +476,17 @@ namespace aten
                         //XorShift rnd(scramble + t.milliSeconds);
                         //Halton rnd(scramble + t.milliSeconds);
                         //Sobol rnd;
+                        //WangHash rnd(scramble + t.milliSeconds);
+#if 0
                         CMJ rnd;
                         rnd.init(frame, i, scramble);
-                        //WangHash rnd(scramble + t.milliSeconds);
+#else
+                        BlueNoiseSampler rnd;
+                        for (auto tex : m_noisetex) {
+                            rnd.registerNoiseTexture(tex);
+                        }
+                        rnd.init(x, y, frame, m_maxDepth, 1);
+#endif
 
                         real u = real(x + rnd.nextSample()) / real(width);
                         real v = real(y + rnd.nextSample()) / real(height);

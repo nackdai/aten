@@ -81,7 +81,7 @@ void update()
 
 void display(aten::window* wnd)
 {
-    update();
+    //update();
 
     g_camera.update();
 
@@ -126,9 +126,11 @@ void display(aten::window* wnd)
 
     g_visualizer->render(g_buffer.image(), g_camera.needRevert());
 
+#if 0
     g_rasterizerAABB.drawAABB(
         &g_camera,
         g_scene.getAccel());
+#endif
 
 #ifdef ENABLE_EVERY_FRAME_SC
     {
@@ -264,6 +266,19 @@ int main(int argc, char* argv[])
 
     aten::ImageBasedLight ibl(&g_bg);
     g_scene.addImageBasedLight(&ibl);
+
+    char buf[8] = { 0 };
+    for (int i = 0; i < 128; i++) {
+        std::string path("../../asset/bluenoise/256_256/HDR_RGBA_");
+        snprintf(buf, sizeof(buf), "%04d\0", i);
+        path += buf;
+        path += ".png";
+
+        std::shared_ptr<aten::texture> tex(aten::ImageLoader::load(
+            path,
+            g_ctxt));
+        g_tracer.registerBlueNoiseTex(tex);
+    }
 
     //g_tracer.setBG(&g_staticbg);
 

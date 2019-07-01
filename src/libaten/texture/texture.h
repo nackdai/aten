@@ -56,7 +56,7 @@ namespace aten
                 break;
             }
 
-            return ret;
+            return std::move(ret);
         }
 
         real& operator()(uint32_t x, uint32_t y, uint32_t c)

@@ -21,6 +21,7 @@ namespace idaten
         auto totalSize = imgSize * layerNum;
         std::vector<aten::vec4> hostMem(totalSize);
 
+        // Copy to 1D array memory.
         for (int n = 0; n < layerNum; n++) {
             for (int i = 0; i < imgSize; i++) {
                 hostMem[n * imgSize + i] = p[n][i];

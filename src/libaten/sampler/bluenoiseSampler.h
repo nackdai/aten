@@ -49,7 +49,7 @@ namespace aten {
             m_noise.push_back(std::move(noisetex));
         }
 
-        real nextSample() final
+        virtual real nextSample() final
         {
             float r = sample();
             return r;

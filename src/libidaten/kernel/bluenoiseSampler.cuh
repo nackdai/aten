@@ -4,12 +4,13 @@
 #include "cuda/helper_math.h"
 
 #include "types.h"
+#include "math/vec2.h"
 
 namespace idaten {
-    class BlueNoiseSampler {
+    class BlueNoiseSamplerGPU {
     public:
-        __device__ BlueNoiseSampler() {}
-        __device__ ~BlueNoiseSampler() {};
+        __device__ BlueNoiseSamplerGPU() {}
+        __device__ ~BlueNoiseSamplerGPU() {};
 
     public:
         __device__ void init(
@@ -77,7 +78,7 @@ namespace idaten {
             float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
             return aten::cmpMin(ret.x, 0.9999999999999f);
 #else
-            return real(0.35);
+            return real(1.0f);
 #endif
         }
 

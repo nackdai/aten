@@ -19,9 +19,12 @@
 
 //#define TEST_FOR_GL_RENDER
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static constexpr int WIDTH = 1280;
+static constexpr int HEIGHT = 720;
 static const char* TITLE = "svgf";
+
+// Max 128.
+static constexpr int BLUNOISE_TEX_NUM = 128;
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -604,12 +607,20 @@ int main()
     g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
     g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
 
-    auto bluenoise = aten::ImageLoader::load(
-        "../../asset/bluenoise/256_256/HDR_RGBA_0000.png",
-        g_ctxt,
-        aten::ImageLoader::ImgFormat::Fmt16Bit);
-    std::vector<decltype(bluenoise)> noises;
-    noises.push_back(bluenoise);
+    std::vector<aten::texture*> noises;
+    char buf[8] = { 0 };
+    for (int i = 0; i < BLUNOISE_TEX_NUM; i++) {
+        std::string path("../../asset/bluenoise/256_256/HDR_RGBA_");
+        snprintf(buf, sizeof(buf), "%04d\0", i);
+        path += buf;
+        path += ".png";
+
+        auto bluenoise = aten::ImageLoader::load(
+            path,
+            g_ctxt,
+            aten::ImageLoader::ImgFormat::Fmt16Bit);
+        noises.push_back(bluenoise);
+    }
     g_tracer.setBlueNoises(noises);
 #endif
 

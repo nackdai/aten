@@ -53,7 +53,9 @@ __global__ void genPathASVGF(
     auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
     paths->sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_BLUENOISE
+    auto seed = random[idx];
     paths->sampler[idx].init(
+        //seed,
         ix, iy, frame,
         maxBounces,
         idaten::SVGFPathTracing::ShadowRayNum,
@@ -166,8 +168,8 @@ __global__ void hitTestASVGF(
         }
 
         // TODO
-        // ‹ß‹——£‚ÅVoxel‚É‚·‚é‚Æ•i¿‚ª—‚¿‚é.
-        // ‚µ‚©‚à“¯‚¶ƒIƒuƒWƒFƒNƒgŠÔ‚¾‚Æ‚»‚ê‚ª‹N‚±‚è‚â‚·‚¢.
+        // è¿‘è·é›¢ã§Voxelã«ã™ã‚‹ã¨å“è³ªãŒè½ã¡ã‚‹.
+        // ã—ã‹ã‚‚åŒã˜ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆé–“ã ã¨ãã‚ŒãŒèµ·ã“ã‚Šã‚„ã™ã„.
         //bool enableLod = (bounce >= 2);
         bool enableLod = false;
         int depth = 9;
@@ -276,8 +278,8 @@ __global__ void shadeASVGF(
 
     bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-    // Œğ·ˆÊ’u‚Ì–@ü.
-    // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+    // äº¤å·®ä½ç½®ã®æ³•ç·š.
+    // ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
     aten::vec3 orienting_normal = rec.normal;
 
     if (rec.mtrlid >= 0) {
@@ -308,9 +310,9 @@ __global__ void shadeASVGF(
 
     // Render AOVs.
     // NOTE
-    // Œµ–§‚É–@ü‚ğAOV‚É•Û‚·‚é‚È‚çA–@üƒ}ƒbƒv“K—pŒã‚·‚é‚×‚«.
-    // ‚µ‚©‚µAtemporal reprojectionAatrous‚È‚Ç‚ÌƒtƒBƒ‹ƒ^“K—p‚É–@ü‚ğQÆ‚·‚éÛ‚ÉA–@üƒ}ƒbƒv‚ª×‚©‚·‚¬‚Ä‚Í‚¶‚©‚ê‚Ä‚µ‚Ü‚¤‚±‚Æ‚ª‚ ‚é.
-    // ‚»‚ê‚É‚æ‚èAƒtƒBƒ‹ƒ^‚ª‚¨‚à‚Á‚½‚æ‚¤‚É‚©‚©‚ç‚¸ƒtƒBƒ‹ƒ^‚Ì•i¿‚ª‰º‚ª‚Á‚Ä‚µ‚Ü‚¤–â‘è‚ª”­¶‚·‚é.
+    // å³å¯†ã«æ³•ç·šã‚’AOVã«ä¿æŒã™ã‚‹ãªã‚‰ã€æ³•ç·šãƒãƒƒãƒ—é©ç”¨å¾Œã™ã‚‹ã¹ã.
+    // ã—ã‹ã—ã€temporal reprojectionã€atrousãªã©ã®ãƒ•ã‚£ãƒ«ã‚¿é©ç”¨æ™‚ã«æ³•ç·šã‚’å‚ç…§ã™ã‚‹éš›ã«ã€æ³•ç·šãƒãƒƒãƒ—ãŒç´°ã‹ã™ãã¦ã¯ã˜ã‹ã‚Œã¦ã—ã¾ã†ã“ã¨ãŒã‚ã‚‹.
+    // ãã‚Œã«ã‚ˆã‚Šã€ãƒ•ã‚£ãƒ«ã‚¿ãŒãŠã‚‚ã£ãŸã‚ˆã†ã«ã‹ã‹ã‚‰ãšãƒ•ã‚£ãƒ«ã‚¿ã®å“è³ªãŒä¸‹ãŒã£ã¦ã—ã¾ã†å•é¡ŒãŒç™ºç”Ÿã™ã‚‹.
     if (bounce == 0) {
         int ix = idx % tileDomain.w;
         int iy = idx / tileDomain.w;
@@ -405,7 +407,7 @@ __global__ void shadeASVGF(
     // Apply normal map.
     int normalMap = shMtrls[threadIdx.x].normalMap;
     if (shMtrls[threadIdx.x].type == aten::MaterialType::Layer) {
-        // Å•\‘w‚Ì NormalMap ‚ğ“K—p.
+        // æœ€è¡¨å±¤ã® NormalMap ã‚’é©ç”¨.
         auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
@@ -474,10 +476,10 @@ __global__ void shadeASVGF(
                 if (light.attrib.isSingular || light.attrib.isInfinite) {
                     if (pdfLight > real(0) && cosShadow >= 0) {
                         // TODO
-                        // ƒWƒIƒƒgƒŠƒ^[ƒ€‚Ìˆµ‚¢‚É‚Â‚¢‚Ä.
-                        // singular light ‚Ìê‡‚ÍAfinalColor ‚É‹——£‚ÌœZ‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é.
-                        // inifinite light ‚Ìê‡‚ÍA–³ŒÀ‰“•û‚É‚È‚èApdfLight‚ÉŠÜ‚Ü‚ê‚é‹——£¬•ª‚Æ‘Å‚¿Á‚µ‚ ‚¤H.
-                        // i‘Å‚¿Á‚µ‚ ‚¤‚Ì‚ÅApdfLight‚É‚Í‹——£¬•ª‚ÍŠÜ‚ñ‚Å‚¢‚È‚¢j.
+                        // ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚¿ãƒ¼ãƒ ã®æ‰±ã„ã«ã¤ã„ã¦.
+                        // singular light ã®å ´åˆã¯ã€finalColor ã«è·é›¢ã®é™¤ç®—ãŒå«ã¾ã‚Œã¦ã„ã‚‹.
+                        // inifinite light ã®å ´åˆã¯ã€ç„¡é™é æ–¹ã«ãªã‚Šã€pdfLightã«å«ã¾ã‚Œã‚‹è·é›¢æˆåˆ†ã¨æ‰“ã¡æ¶ˆã—ã‚ã†ï¼Ÿ.
+                        // ï¼ˆæ‰“ã¡æ¶ˆã—ã‚ã†ã®ã§ã€pdfLightã«ã¯è·é›¢æˆåˆ†ã¯å«ã‚“ã§ã„ãªã„ï¼‰.
                         auto misW = pdfLight / (pdfb + pdfLight);
 
                         shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
@@ -546,7 +548,7 @@ __global__ void shadeASVGF(
     real c = 1;
     if (!shMtrls[threadIdx.x].attrib.isSingular) {
         // TODO
-        // AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
+        // AMDã®ã¯absã—ã¦ã„ã‚‹ãŒ....
         c = aten::abs(dot(orienting_normal, nextDir));
         //c = dot(orienting_normal, nextDir);
     }
@@ -593,6 +595,8 @@ namespace idaten
         auto blueNoiseResH = m_bluenoise.getHeight();
         auto blueNoiseLayerNum = m_bluenoise.getLayerNum();
 
+        int curRngSeed = (m_frame & 0x01);
+
         genPathASVGF << <grid, block, 0, m_stream >> > (
             m_tileDomain,
             isFillAOV,
@@ -604,7 +608,7 @@ namespace idaten
             m_cam.ptr(),
             blueNoise,
             blueNoiseResW, blueNoiseResH, blueNoiseLayerNum,
-            m_random.ptr());
+            m_rngSeed[curRngSeed].ptr());
 
         checkCudaKernel(genPath);
     }

@@ -70,6 +70,8 @@ namespace idaten
     protected:
         CudaLeyered2DTexture m_bluenoise;
 
+        bool m_isGeneratedRngSeed{ false };
+
         // xy: bary centric
         // z : object id
         // w : primitive id

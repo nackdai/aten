@@ -75,6 +75,26 @@ namespace idaten
 
         onDebug(tileDomain.w, tileDomain.h, outputSurf);
 #else
+        int width = tileDomain.w;
+        int height = tileDomain.h;
+
+        int tiledWidth = width / GradientTileSize;
+        int tiledHeight = height / GradientTileSize;
+
+        m_rngSeed[0].init(width * height);
+        m_rngSeed[1].init(width * height);
+
+        m_gradientIndices.init(tiledWidth * tiledHeight);
+
+        if (m_isGeneratedRngSeed) {
+            auto vtxPos = m_vtxparamsPos.bind();
+            //onForwardProjection(width, height, vtxPos);
+        }
+        else {
+            onInitRngSeeds(width, height);
+            m_isGeneratedRngSeed = true;
+        }
+
         SVGFPathTracing::render(tileDomain, maxSamples, maxBounce);
 #endif
     }

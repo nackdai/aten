@@ -1,4 +1,4 @@
-﻿#include "material/velvet.h"
+#include "material/velvet.h"
 #include "math/math.h"
 #include "material/sample_texture.h"
 

@@ -149,8 +149,8 @@ namespace AT_NAME
         auto reflect = wi - 2 * dot(nml, wi) * nml;
         reflect = normalize(reflect);
 
-        real nc = real(1);        // �^��̋��ܗ�.
-        real nt = param->ior;    // ���̓����̋��ܗ�.
+        real nc = real(1);        // 真空の屈折率.
+        real nt = param->ior;    // 物体内部の屈折率.
         real nnt = into ? nc / nt : nt / nc;
         real ddn = dot(wi, nml);
 
@@ -168,7 +168,7 @@ namespace AT_NAME
         if (cos2t < real(0)) {
             //AT_PRINTF("Reflection in refraction...\n");
 
-            // �S����.
+            // 全反射.
             result->pdf = real(1);
             result->bsdf = albedo;
             result->dir = reflect;
@@ -193,14 +193,14 @@ namespace AT_NAME
 #endif
         refract = normalize(refract);
 
-        // Schlick�ɂ��Fresnel�̔��ˌW���̋ߎ����g��.
+        // SchlickによるFresnelの反射係数の近似を使う.
         const real a = nt - nc;
         const real b = nt + nc;
         const real r0 = (a * a) / (b * b);
 
         const real c = 1 - (into ? -ddn : dot(refract, -nml));
 
-        // ���˕����̌������˂���ray.dir�̕����ɉ^�Ԋ����B�����ɋ��ܕ����̌������˂�������ɉ^�Ԋ���.
+        // 反射方向の光が反射してray.dirの方向に運ぶ割合。同時に屈折方向の光が反射する方向に運ぶ割合.
         const real fresnel = r0 + (1 - r0) * aten::pow(c, 5);
 
         auto Re = fresnel;
@@ -214,10 +214,10 @@ namespace AT_NAME
         if (param->isIdealRefraction) {
             result->dir = refract;
 
-            // ���C�̉^�ԕ��ˋP�x�͋��ܗ��̈قȂ镨�̊Ԃ��ړ�����Ƃ��A���ܗ��̔�̓��̕������ω�����.
+            // レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
             if (isLightPath) {
                 // TODO
-                // �v�m�F...
+                // 要確認...
                 nnt = into ? nt / nc : nc / nt;
             }
             else {
@@ -236,7 +236,7 @@ namespace AT_NAME
             auto prob = real(0.25) + real(0.5) * Re;
 
             if (r < prob) {
-                // ����.
+                // 反射.
                 result->dir = reflect;
                 result->bsdf = Re * albedo;
                 result->bsdf /= prob;
@@ -246,13 +246,13 @@ namespace AT_NAME
                 result->fresnel = Re;
             }
             else {
-                // ����.
+                // 屈折.
                 result->dir = refract;
 
-                // ���C�̉^�ԕ��ˋP�x�͋��ܗ��̈قȂ镨�̊Ԃ��ړ�����Ƃ��A���ܗ��̔�̓��̕������ω�����.
+                // レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
                 if (isLightPath) {
                     // TODO
-                    // �v�m�F...
+                    // 要確認...
                     nnt = into ? nt / nc : nc / nt;
                 }
                 else {
@@ -283,10 +283,10 @@ namespace AT_NAME
             return std::move(RefractionSampling(false, real(0), real(0)));
         }
 
-        // ���C�����˂��Ă��鑤�̕��̂̋��ܗ�.
-        real ni = real(1);    // �^��
+        // レイが入射してくる側の物体の屈折率.
+        real ni = real(1);    // 真空
 
-        // ���̓����̋��ܗ�.
+        // 物体内部の屈折率.
         real nt = mtrl->ior();
 
         bool into = (dot(normal, orienting_normal) > real(0));
@@ -325,10 +325,10 @@ namespace AT_NAME
 
         const auto c = 1 - (into ? -cos_i : dot(refract, -normal));
 
-        // ���˕����̌������˂���ray.dir�̕����ɉ^�Ԋ����B�����ɋ��ܕ����̌������˂�������ɉ^�Ԋ���.
+        // 反射方向の光が反射してray.dirの方向に運ぶ割合。同時に屈折方向の光が反射する方向に運ぶ割合.
         auto fresnel = r0 + (1 - r0) * aten::pow(c, 5);
 
-        // ���C�̉^�ԕ��ˋP�x�͋��ܗ��̈قȂ镨�̊Ԃ��ړ�����Ƃ��A���ܗ��̔�̓��̕������ω�����.
+        // レイの運ぶ放射輝度は屈折率の異なる物体間を移動するとき、屈折率の比の二乗の分だけ変化する.
         real nn = nnt * nnt;
 
         auto Re = fresnel;

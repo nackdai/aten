@@ -296,7 +296,7 @@ namespace AT_NAME
                 auto t = aten::getOrthoVector(n);
                 auto b = cross(n, t);
 
-                // ƒRƒTƒCƒ“€‚ğg‚Á‚½d“_“IƒTƒ“ƒvƒŠƒ“ƒO.
+                // ã‚³ã‚µã‚¤ãƒ³é …ã‚’ä½¿ã£ãŸé‡ç‚¹çš„ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°.
                 r1 = 2 * AT_MATH_PI * r1;
                 auto r2s = aten::sqrt(r2);
 
@@ -399,7 +399,7 @@ namespace AT_NAME
         // clearcoat (ior = 1.5 -> F0 = 0.04)
         const auto Dr = GTR1(NdotH, aten::mix(real(0.1), real(0.001), clearcoatGloss));
         const auto Fr = aten::mix(real(0.04), real(real(1)), FH);
-        const auto Gr = smithG_GGX(NdotL, real(0.25)) * smithG_GGX(NdotV, real(0.25));    // ˜_•¶“à‚Å0.25Œˆ‚ß‚¤‚¿‚Æ‹LÚ.
+        const auto Gr = smithG_GGX(NdotL, real(0.25)) * smithG_GGX(NdotV, real(0.25));    // è«–æ–‡å†…ã§0.25æ±ºã‚ã†ã¡ã¨è¨˜è¼‰.
 
         auto ret = ((1 / AT_MATH_PI) * aten::mix(Fd, ss, subsurface) * Cdlin + Fsheen) * (1 - metalic)    // diffuse
             + Gs * Fs * Ds                        // specular

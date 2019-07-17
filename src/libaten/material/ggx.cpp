@@ -249,10 +249,10 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        // ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
-        real ni = real(1);    // ^‹ó
+        // ãƒ¬ã‚¤ãŒå…¥å°„ã—ã¦ãã‚‹å´ã®ç‰©ä½“ã®å±ˆæŠ˜ç‡.
+        real ni = real(1);    // çœŸç©º
 
-        real nt = ior;        // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        real nt = ior;        // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
         aten::vec3 V = -wi;
         aten::vec3 L = wo;
@@ -260,7 +260,7 @@ namespace AT_NAME
         aten::vec3 H = normalize(L + V);
 
         // TODO
-        // Desney‚¾‚Æabs‚µ‚Ä‚È‚¢‚ªAAMD‚Ì‚Í‚µ‚Ä‚¢‚é....
+        // Desneyã ã¨absã—ã¦ãªã„ãŒã€AMDã®ã¯ã—ã¦ã„ã‚‹....
         auto NdotH = aten::abs(dot(N, H));
         auto VdotH = aten::abs(dot(V, H));
         auto NdotL = aten::abs(dot(N, L));
@@ -283,7 +283,7 @@ namespace AT_NAME
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
             // NOTE
-            // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+            // Fschlick(v,h) â‰’ R0 + (1 - R0)(1 - cosÎ˜)^5
             // R0 = ((n1 - n2) / (n1 + n2))^2
 
             auto r0 = (ni - nt) / (ni + nt);

@@ -87,10 +87,10 @@ namespace AT_NAME {
         real tanBeta = aten::cmpMin(tanThetaO, tanThetaI);
 
         // NOTE
-        // cos(ƒÓi - ƒÓr) = cosƒÓi * cosƒÓr + sinƒÓi * sinƒÓr
+        // cos(Ï†i - Ï†r) = cosÏ†i * cosÏ†r + sinÏ†i * sinÏ†r
         
         // NOTE
-        // NTBÀ•WŒn‚É‚¨‚¢‚ÄAv = (x, y, z) = (sinƒÓAcosƒÓAcosƒÆ).
+        // NTBåº§æ¨™ç³»ã«ãŠã„ã¦ã€v = (x, y, z) = (sinÏ†ã€cosÏ†ã€cosÎ¸).
 
         auto n = normal;
         auto t = aten::getOrthoVector(n);

@@ -29,13 +29,13 @@ namespace AT_NAME
             bool into = (dot(in, normal) > real(0));
             const auto& nml = into ? normal : -normal;
 
-            // normal‚Ì•ûŒü‚ðŠî€‚Æ‚µ‚½³‹K’¼ŒðŠî’ê(w, u, v)‚ðì‚é.
-            // ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŽŸ‚ÌƒŒƒC‚ð”ò‚Î‚·.
+            // normalã®æ–¹å‘ã‚’åŸºæº–ã¨ã—ãŸæ­£è¦ç›´äº¤åŸºåº•(w, u, v)ã‚’ä½œã‚‹.
+            // ã“ã®åŸºåº•ã«å¯¾ã™ã‚‹åŠçƒå†…ã§æ¬¡ã®ãƒ¬ã‚¤ã‚’é£›ã°ã™.
             auto n = nml;
             auto t = aten::getOrthoVector(n);
             auto b = cross(n, t);
 
-            // ƒRƒTƒCƒ“€‚ðŽg‚Á‚½d“_“IƒTƒ“ƒvƒŠƒ“ƒO.
+            // ã‚³ã‚µã‚¤ãƒ³é …ã‚’ä½¿ã£ãŸé‡ç‚¹çš„ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°.
             const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
             const real r2 = sampler->nextSample();
             const real r2s = sqrt(r2);

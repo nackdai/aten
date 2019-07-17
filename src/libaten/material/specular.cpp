@@ -69,17 +69,17 @@ namespace AT_NAME
         bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
         if (param->ior > real(0)) {
-            real nc = real(1);        // ^‹ó‚Ì‹üÜ—¦.
-            real nt = param->ior;    // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+            real nc = real(1);        // çœŸç©ºã®å±ˆæŠ˜ç‡.
+            real nt = param->ior;    // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
-                                    // Schlick‚É‚æ‚éFresnel‚Ì”½ËŒW”‚Ì‹ß—‚ğg‚¤.
+                                    // Schlickã«ã‚ˆã‚‹Fresnelã®åå°„ä¿‚æ•°ã®è¿‘ä¼¼ã‚’ä½¿ã†.
             const real a = nt - nc;
             const real b = nt + nc;
             const real r0 = (a * a) / (b * b);
 
             const real c = dot(normal, wo);
 
-            // ”½Ë•ûŒü‚ÌŒõ‚ª”½Ë‚µ‚Äray.dir‚Ì•ûŒü‚É‰^‚ÔŠ„‡B“¯‚É‹üÜ•ûŒü‚ÌŒõ‚ª”½Ë‚·‚é•ûŒü‚É‰^‚ÔŠ„‡.
+            // åå°„æ–¹å‘ã®å…‰ãŒåå°„ã—ã¦ray.dirã®æ–¹å‘ã«é‹ã¶å‰²åˆã€‚åŒæ™‚ã«å±ˆæŠ˜æ–¹å‘ã®å…‰ãŒåå°„ã™ã‚‹æ–¹å‘ã«é‹ã¶å‰²åˆ.
             const real fresnel = r0 + (1 - r0) * aten::pow(c, 5);
 
             bsdf *= fresnel;

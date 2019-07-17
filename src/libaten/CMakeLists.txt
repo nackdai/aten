@@ -1,0 +1,288 @@
+set(PROJECT_NAME aten)
+
+project(${PROJECT_NAME})
+
+# Output Variables
+set(OUTPUT_DEBUG Debug)
+set(OUTPUT_RELEASE Release)
+
+# Defines Flags for Windows and Linux. 
+if(MSVC)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /W3 /MD /MDd /Od /EHsc /openmp")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /W3 /GL /Od /Oi /Gy /EHsc /openmp")
+endif(MSVC)
+if(NOT MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  endif()
+endif(NOT MSVC)
+
+# Definition of Macros
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_definitions(-D__AT_DEBUG__ )
+endif()
+
+# Add library to build.
+add_library(${PROJECT_NAME} STATIC
+  ../../3rdparty/imgui/imgui.cpp
+  ../../3rdparty/imgui/imgui_draw.cpp
+  accelerator/GpuPayloadDefs.h
+  accelerator/accelerator.cpp
+  accelerator/accelerator.h
+  accelerator/bvh.cpp
+  accelerator/bvh.h
+  accelerator/bvh_update.cpp
+  accelerator/qbvh.cpp
+  accelerator/qbvh.h
+  accelerator/sbvh.cpp
+  accelerator/sbvh.h
+  accelerator/sbvh_voxel.cpp
+  accelerator/stackless_bvh.cpp
+  accelerator/stackless_bvh.h
+  accelerator/stackless_qbvh.cpp
+  accelerator/stackless_qbvh.h
+  accelerator/threaded_bvh.cpp
+  accelerator/threaded_bvh.h
+  aten.h
+  aten_namespace.h
+  aten_virtual.h
+  camera/CameraOperator.cpp
+  camera/CameraOperator.h
+  camera/camera.h
+  camera/equirect.cpp
+  camera/equirect.h
+  camera/pinhole.cpp
+  camera/pinhole.h
+  camera/thinlens.cpp
+  camera/thinlens.h
+  deformable/ANMFormat.h
+  deformable/DeformAnimation.cpp
+  deformable/DeformAnimation.h
+  deformable/DeformAnimationInterp.cpp
+  deformable/DeformAnimationInterp.h
+  deformable/DeformMesh.cpp
+  deformable/DeformMesh.h
+  deformable/DeformMeshGroup.cpp
+  deformable/DeformMeshGroup.h
+  deformable/DeformMeshSet.cpp
+  deformable/DeformMeshSet.h
+  deformable/DeformPrimitives.cpp
+  deformable/DeformPrimitives.h
+  deformable/MDLFormat.h
+  deformable/MSHFormat.h
+  deformable/SKLFormat.h
+  deformable/Skeleton.cpp
+  deformable/Skeleton.h
+  deformable/SkinningVertex.h
+  deformable/deformable.cpp
+  deformable/deformable.h
+  defs.h
+  filter/GeometryRendering/GeometryRendering.cpp
+  filter/GeometryRendering/GeometryRendering.h
+  filter/PracticalNoiseReduction/PracticalNoiseReduction.cpp
+  filter/PracticalNoiseReduction/PracticalNoiseReduction.h
+  filter/PracticalNoiseReduction/PracticalNoiseReductionBilateral.cpp
+  filter/PracticalNoiseReduction/PracticalNoiseReductionBilateral.h
+  filter/VirtualFlashImage/VirtualFlashImage.cpp
+  filter/VirtualFlashImage/VirtualFlashImage.h
+  filter/VirtualFlashImage/t_table.dat
+  filter/atrous.cpp
+  filter/atrous.h
+  filter/bilateral.cpp
+  filter/bilateral.h
+  filter/nlm.cpp
+  filter/nlm.h
+  filter/taa.cpp
+  filter/taa.h
+  geometry/cube.cpp
+  geometry/cube.h
+  geometry/face.cpp
+  geometry/face.h
+  geometry/geombase.cpp
+  geometry/geombase.h
+  geometry/geomparam.h
+  geometry/object.cpp
+  geometry/object.h
+  geometry/objshape.cpp
+  geometry/objshape.h
+  geometry/sphere.cpp
+  geometry/sphere.h
+  geometry/transformable.cpp
+  geometry/transformable.h
+  geometry/transformable_factory.h
+  geometry/vertex.cpp
+  geometry/vertex.h
+  hdr/gamma.cpp
+  hdr/gamma.h
+  hdr/hdr.cpp
+  hdr/hdr.h
+  hdr/tonemap.cpp
+  hdr/tonemap.h
+  light/arealight.cpp
+  light/arealight.h
+  light/directionallight.h
+  light/ibl.cpp
+  light/ibl.h
+  light/light.cpp
+  light/light.h
+  light/pointlight.h
+  light/spotlight.h
+  material/FlakesNormal.cpp
+  material/FlakesNormal.h
+  material/beckman.cpp
+  material/beckman.h
+  material/blinn.cpp
+  material/blinn.h
+  material/carpaint.cpp
+  material/carpaint.h
+  material/disney_brdf.cpp
+  material/disney_brdf.h
+  material/emissive.h
+  material/ggx.cpp
+  material/ggx.h
+  material/lambert.h
+  material/lambert_refraction.cpp
+  material/lambert_refraction.h
+  material/layer.cpp
+  material/layer.h
+  material/material.cpp
+  material/material.h
+  material/material_factory.cpp
+  material/material_factory.h
+  material/microfacet_refraction.cpp
+  material/microfacet_refraction.h
+  material/oren_nayar.cpp
+  material/oren_nayar.h
+  material/refraction.cpp
+  material/refraction.h
+  material/sample_texture.h
+  material/specular.cpp
+  material/specular.h
+  material/toon.cpp
+  material/toon.h
+  material/velvet.cpp
+  material/velvet.h
+  math/aabb.h
+  math/frustum.h
+  math/intersect.h
+  math/mat4.cpp
+  math/mat4.h
+  math/math.h
+  math/quaternion.h
+  math/ray.h
+  math/vec2.h
+  math/vec3.h
+  math/vec4.h
+  misc/bitflag.h
+  misc/color.cpp
+  misc/color.h
+  misc/datalist.h
+  misc/key.h
+  misc/omputil.cpp
+  misc/omputil.h
+  misc/stream.h
+  misc/thread.cpp
+  misc/thread.h
+  misc/timeline.cpp
+  misc/timeline.h
+  misc/timer.h
+  misc/value.h
+  os/linux/misc/timer_linux.cpp
+  os/linux/system_linux.cpp
+  os/system.h
+  posteffect/BloomEffect.cpp
+  posteffect/BloomEffect.h
+  proxy/DataCollector.cpp
+  proxy/DataCollector.h
+  renderer/aov.cpp
+  renderer/aov.h
+  renderer/background.h
+  renderer/bdpt.cpp
+  renderer/bdpt.h
+  renderer/directlight.cpp
+  renderer/directlight.h
+  renderer/envmap.cpp
+  renderer/envmap.h
+  renderer/erpt.cpp
+  renderer/erpt.h
+  renderer/film.cpp
+  renderer/film.h
+  renderer/nonphotoreal.cpp
+  renderer/nonphotoreal.h
+  renderer/pathtracing.cpp
+  renderer/pathtracing.h
+  renderer/pssmlt.cpp
+  renderer/pssmlt.h
+  renderer/raytracing.cpp
+  renderer/raytracing.h
+  renderer/renderer.h
+  sampler/cmj.h
+  sampler/halton.cpp
+  sampler/halton.h
+  sampler/sampler.cpp
+  sampler/sampler.h
+  sampler/samplerinterface.h
+  sampler/sobol.cpp
+  sampler/sobol.h
+  sampler/sobolproxy.h
+  sampler/wanghash.h
+  sampler/xorshift.h
+  scene/context.cpp
+  scene/context.h
+  scene/hitable.cpp
+  scene/hitable.h
+  scene/instance.h
+  scene/scene.cpp
+  scene/scene.h
+  texture/texture.cpp
+  texture/texture.h
+  types.h
+  ui/imgui_impl_glfw_gl3.cpp
+  ui/imgui_impl_glfw_gl3.h
+  visualizer/GLProfiler.cpp
+  visualizer/GLProfiler.h
+  visualizer/GeomDataBuffer.cpp
+  visualizer/GeomDataBuffer.h
+  visualizer/MultiPassPostProc.cpp
+  visualizer/MultiPassPostProc.h
+  visualizer/RasterizeRenderer.cpp
+  visualizer/RasterizeRenderer.h
+  visualizer/atengl.h
+  visualizer/blitter.cpp
+  visualizer/blitter.h
+  visualizer/fbo.cpp
+  visualizer/fbo.h
+  visualizer/pixelformat.h
+  visualizer/shader.cpp
+  visualizer/shader.h
+  visualizer/visualizer.cpp
+  visualizer/visualizer.h
+  visualizer/window.cpp
+  visualizer/window.h)
+
+target_include_directories(${PROJECT_NAME}
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${stb_INCLUDE_DIRECTORIES}
+    ${imgui_INCLUDE_DIRECTORIES})
+
+if(MSVC)
+  target_link_libraries(${PROJECT_NAME} PRIVATE glfw3.lib glew32d.lib OpenGL32.lib Shlwapi.lib )
+endif(MSVC)
+if(NOT MSVC)
+  target_link_libraries(${PROJECT_NAME} PRIVATE glfw glew glm) 
+endif(NOT MSVC)
+
+# Defines outputs , depending Debug or Release.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  install(TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}"   # Static libraries
+    LIBRARY DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}"   # Non-DLL shared libraries
+    RUNTIME DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}")  # Exectutable or DLL
+else()
+  install(TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}"   # Static libraries
+    LIBRARY DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}"   # Non-DLL shared libraries
+    RUNTIME DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}")  # Exectutable or DLL
+endif()

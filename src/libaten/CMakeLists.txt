@@ -241,17 +241,13 @@ add_library(${PROJECT_NAME} STATIC
   visualizer/window.h)
 
 target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
     ${stb_INCLUDE_DIRECTORIES}
     ${imgui_INCLUDE_DIRECTORIES})
 
-if(MSVC)
-  target_link_libraries(${PROJECT_NAME} PRIVATE glfw3.lib glew32d.lib OpenGL32.lib Shlwapi.lib )
-endif(MSVC)
-if(NOT MSVC)
-  target_link_libraries(${PROJECT_NAME} PRIVATE glfw glew glm) 
-endif(NOT MSVC)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glew glm) 
 
 # Defines outputs , depending Debug or Release.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

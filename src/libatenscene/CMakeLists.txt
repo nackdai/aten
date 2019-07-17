@@ -4,6 +4,7 @@ project(${PROJECT_NAME})
 
 # Add library to build.
 add_library(${PROJECT_NAME} STATIC
+  ../../3rdparty/tinyxml2/tinyxml2.cpp
   AssetManager.cpp
   AssetManager.h
   ImageLoader.cpp
@@ -22,18 +23,18 @@ add_library(${PROJECT_NAME} STATIC
   utility.h)
 
 target_include_directories(${PROJECT_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ../libaten
     ${stb_INCLUDE_DIRECTORIES}
-    ${imgui_INCLUDE_DIRECTORIES})
+    ${imgui_INCLUDE_DIRECTORIES}
+    ${tinyobjloader_INCLUDE_DIRECTORIES}
+    ${tinyxml2_INCLUDE_DIRECTORIES})
 
-if(MSVC)
-  target_link_libraries(${PROJECT_NAME} PRIVATE glfw3.lib glew32d.lib OpenGL32.lib Shlwapi.lib )
-endif(MSVC)
-if(NOT MSVC)
-  target_link_libraries(${PROJECT_NAME} PRIVATE glfw glew glm) 
-endif(NOT MSVC)
+target_link_libraries(${PROJECT_NAME} 
+  PUBLIC
+    aten
+    glm)
 
 # Defines outputs , depending Debug or Release.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

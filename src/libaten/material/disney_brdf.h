@@ -152,7 +152,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real outsideIor = 1) const
+            real outsideIor = 1) const final
         {
             return computeFresnel(&m_param, normal, wi, wo, outsideIor);
         }

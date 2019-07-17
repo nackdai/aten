@@ -39,7 +39,7 @@ namespace AT_NAME
             const aten::context& ctxt,
             const aten::ray& r, 
             aten::hitrecord& rec,
-            const aten::Intersection& isect) const;
+            const aten::Intersection& isect) const final;
 
         static void evalHitResult(
             const aten::vertex& v0,

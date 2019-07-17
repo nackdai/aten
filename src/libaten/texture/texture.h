@@ -1,6 +1,8 @@
 #pragma once
 
+#include <string>
 #include <vector>
+
 #include "defs.h"
 #include "types.h"
 #include "math/vec3.h"

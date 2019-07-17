@@ -167,7 +167,7 @@ namespace aten {
             endMap(idx);
         }
 
-        virtual bool isInitialized() const
+        virtual bool isInitialized() const final
         {
             return getHandleNum() > 0;
         }

@@ -162,7 +162,7 @@ namespace AT_NAME {
         virtual const aten::CameraParameter& param() const
         {
             AT_ASSERT(false);
-            return aten::CameraParameter();
+            return std::move(aten::CameraParameter());
         }
     };
 }

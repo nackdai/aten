@@ -100,7 +100,7 @@ namespace aten
         virtual void getSamplePosNormalArea(
             const context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
-            sampler* sampler) const
+            sampler* sampler) const final
         {
             return m_obj->getSamplePosNormalArea(ctxt, result, m_mtxL2W, sampler);
         }

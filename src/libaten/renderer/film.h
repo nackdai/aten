@@ -68,7 +68,7 @@ namespace aten
         virtual ~FilmProgressive() {}
 
     public:
-        virtual void clear()
+        virtual void clear() final
         {
             // Nothing is done...
         }

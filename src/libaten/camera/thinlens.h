@@ -52,12 +52,12 @@ namespace aten {
             const vec3& posOnLens,
             const vec3& posOnObjectPlane) const override final;
 
-        virtual bool needRevert() const
+        virtual bool needRevert() const final
         {
             return true;
         }
 
-        virtual bool isPinhole() const
+        virtual bool isPinhole() const final
         {
             return false;
         }
@@ -84,22 +84,22 @@ namespace aten {
             const ray& ray,
             int& px, int& py) const override final;
 
-        virtual real getImageSensorWidth() const
+        virtual real getImageSensorWidth() const final
         {
             return m_imagesensor.width;
         }
 
-        virtual real getImageSensorHeight() const
+        virtual real getImageSensorHeight() const final
         {
             return m_imagesensor.height;
         }
 
     private:
-        // 解像度.
+        // 隗｣蜒丞ｺｦ.
         int m_imageWidthPx;
         int m_imageHeightPx;
 
-        // イメージセンサ.
+        // 繧､繝｡繝ｼ繧ｸ繧ｻ繝ｳ繧ｵ.
         struct ImageSensor {
             vec3 center;
             vec3 dir;
@@ -111,11 +111,11 @@ namespace aten {
             real height;
         } m_imagesensor;
 
-        // 物理的なピクセルサイズ.
+        // 迚ｩ逅�逧�縺ｪ繝斐け繧ｻ繝ｫ繧ｵ繧､繧ｺ.
         real m_pixelWidth;
         real m_pixelHeight;
 
-        // レンズ.
+        // 繝ｬ繝ｳ繧ｺ.
         struct Lens {
             vec3 center;
             vec3 u;
@@ -135,10 +135,10 @@ namespace aten {
         real m_imageSensorToLensDistance;
         real m_lensToObjectplaneDistance;
 
-        // イメージセンサの感度
+        // 繧､繝｡繝ｼ繧ｸ繧ｻ繝ｳ繧ｵ縺ｮ諢溷ｺｦ
         real m_W;
 
-        vec3 m_at;    // 注視点.
+        vec3 m_at;    // 豕ｨ隕也せ.
         vec3 m_vup;
         real m_Wscale;
     };

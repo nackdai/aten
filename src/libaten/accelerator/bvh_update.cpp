@@ -381,6 +381,11 @@ namespace aten
                 this->setDepth(m_depth);
                 this->propageteDepthToChildren();
                 break;
+            case Rot::None:
+            case Rot::LL_RR:
+            case Rot::LL_RL:
+            case Rot::Num:
+                break;
             }
         }
     }

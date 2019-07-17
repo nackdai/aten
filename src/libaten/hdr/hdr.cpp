@@ -18,7 +18,7 @@ namespace aten
         }
     };
 
-    // double‚ÌRGB—v‘f‚ð.hdrƒtƒH[ƒ}ƒbƒg—p‚É•ÏŠ·.
+    // doubleã®RGBè¦ç´ ã‚’.hdrãƒ•ã‚©ãƒ¼ãƒžãƒƒãƒˆç”¨ã«å¤‰æ›.
     static HDRPixel get_hdr_pixel(const vec4& color)
     {
         double d = std::max(color.x, std::max(color.y, color.z));
@@ -41,19 +41,19 @@ namespace aten
     {
         FILE *fp = fopen(filename.c_str(), "wb");
         if (fp == NULL) {
-            AT_PRINTF("Error: %s\n", filename);
+            AT_PRINTF("Error: %sÂ¥n", filename.c_str());
             return false;
         }
 
-        // .hdrƒtƒH[ƒ}ƒbƒg‚É]‚Á‚Äƒf[ƒ^‚ð‘‚«‚¾‚·.
-        // ƒwƒbƒ_.
+        // .hdrãƒ•ã‚©ãƒ¼ãƒžãƒƒãƒˆã«å¾“ã£ã¦ãƒ‡ãƒ¼ã‚¿ã‚’æ›¸ãã ã™.
+        // ãƒ˜ãƒƒãƒ€.
         unsigned char ret = 0x0a;
         fprintf(fp, "#?RADIANCE%c", (unsigned char)ret);
         fprintf(fp, "# Made with 100%% pure HDR Shop%c", ret);
         fprintf(fp, "FORMAT=32-bit_rle_rgbe%c", ret);
         fprintf(fp, "EXPOSURE=1.0000000000000%c%c", ret, ret);
 
-        // ‹P“x’l‘‚«o‚µ.
+        // è¼åº¦å€¤æ›¸ãå‡ºã—.
         fprintf(fp, "-Y %d +X %d%c", height, width, ret);
 
         for (int i = height - 1; i >= 0; i--) {

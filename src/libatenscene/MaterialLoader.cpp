@@ -26,7 +26,7 @@ namespace aten {
 
         if (isDefaultMaterialName) {
             AT_ASSERT(false);
-            AT_PRINTF("Same as default type [%s]\n", type);
+            AT_PRINTF("Same as default type [%s]\n", type.c_str());
             return false;
         }
 
@@ -396,7 +396,7 @@ namespace aten {
                     mtrl = AssetManager::getMtrl(mtrlName);
 
                     if (mtrl) {
-                        AT_PRINTF("There is same tag material. [%s]\n", mtrlName);
+                        AT_PRINTF("There is same tag material. [%s]\n", mtrlName.c_str());
                         break;
                     }
                 }

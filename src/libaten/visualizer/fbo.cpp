@@ -1,4 +1,3 @@
-#pragma once
 #include "visualizer/atengl.h"
 #include "visualizer/fbo.h"
 

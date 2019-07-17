@@ -65,7 +65,7 @@ namespace aten
         visualizer* ret = new visualizer();
 
         ret->m_tex = createTexture(width, height, ret->m_fmt);
-        AT_VRETURN(ret->m_tex != 0, false);
+        AT_VRETURN(ret->m_tex != 0, nullptr);
 
         ret->m_width = width;
         ret->m_height = height;
@@ -228,7 +228,7 @@ namespace aten
             postproc->prepareRender(prevPostproc, pixels, willRevert);
             auto& fbo = postproc->getFbo();
 
-            // Å‰‚Ì‚P‰ñ‚¾‚¯”½“]‚·‚ê‚Î‚¢‚¢‚Ì‚Å.
+            // ï¿½Åï¿½ï¿½Ì‚Pï¿½ñ‚¾‚ï¿½ï¿½ï¿½ï¿½]ï¿½ï¿½ï¿½ï¿½Î‚ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½.
             willRevert = false;
 
             if (fbo.isValid()) {
@@ -293,7 +293,7 @@ namespace aten
             postproc->prepareRender(prevPostproc, nullptr, willRevert);
             auto& fbo = postproc->getFbo();
 
-            // Å‰‚Ì‚P‰ñ‚¾‚¯”½“]‚·‚ê‚Î‚¢‚¢‚Ì‚Å.
+            // ï¿½Åï¿½ï¿½Ì‚Pï¿½ñ‚¾‚ï¿½ï¿½ï¿½ï¿½]ï¿½ï¿½ï¿½ï¿½Î‚ï¿½ï¿½ï¿½ï¿½Ì‚ï¿½.
             willRevert = false;
 
             if (fbo.isValid()) {

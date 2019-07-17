@@ -18,7 +18,7 @@ namespace aten
         virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
         {
             char buf[32];
-            sprintf(buf, "%.3f\0", param);
+            snprintf(buf, AT_COUNTOF(buf), "%.3f", param);
 
             auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
             xmlMtrlAttribElem->SetText(buf);
@@ -30,7 +30,7 @@ namespace aten
         virtual bool edit(const char* name, aten::vec3& param) override final
         {
             char buf[64];
-            sprintf(buf, "%.3f %.3f %.3f\0", param.x, param.y, param.z);
+            snprintf(buf, AT_COUNTOF(buf), "%.3f %.3f %.3f", param.x, param.y, param.z);
 
             auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
             xmlMtrlAttribElem->SetText(buf);

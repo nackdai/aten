@@ -222,7 +222,7 @@ namespace aten
         OnKey _onKey/*= nullptr*/)
     {
         auto result = ::glfwInit();
-        AT_VRETURN(result, false);
+        AT_VRETURN(result, nullptr);
 
         // Not specify version.
         // Default value sepcify latest version.
@@ -233,7 +233,7 @@ namespace aten
         ::glfwWindowHint(GLFW_MAXIMIZED, GL_FALSE);
 
         if (g_windows.size() >= 1) {
-            // �Q�߈ȍ~.
+            // ２つめ以降.
             //::glfwWindowHint(GLFW_FLOATING, GL_TRUE);
         }
 
@@ -245,11 +245,11 @@ namespace aten
 
         if (!glfwWindow) {
             ::glfwTerminate();
-            AT_VRETURN(false, false);
+            AT_VRETURN(false, nullptr);
         }
 
         if (g_windows.size() >= 1) {
-            // �Q�߈ȍ~.
+            // ２つめ以降.
             auto imguiCtxt = ImGui::CreateContext();
             ImGui::SetCurrentContext(imguiCtxt);
         }
@@ -294,7 +294,7 @@ namespace aten
         AT_ASSERT(result == GLEW_OK);
 
         auto version = ::glGetString(GL_VERSION);
-        AT_PRINTF("GL Version(%s)\n", version);
+        AT_PRINTF("GL Version(%s)¥n", version);
 
         CALL_GL_API(::glClipControl(
             GL_LOWER_LEFT,

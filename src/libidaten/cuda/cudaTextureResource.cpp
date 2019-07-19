@@ -27,14 +27,14 @@ namespace idaten
         uint32_t memberNumInItem,
         uint32_t numOfContaints)
     {
-        auto size = sizeof(float4) * memberNumInItem * numOfContaints;
+        m_size = sizeof(float4) * memberNumInItem * numOfContaints;
 
         if (!m_buffer) {
-            checkCudaErrors(cudaMalloc(&m_buffer, size));
+            checkCudaErrors(cudaMalloc(&m_buffer, m_size));
         }
 
         if (p) {
-            checkCudaErrors(cudaMemcpyAsync(m_buffer, p, size, cudaMemcpyDefault));
+            checkCudaErrors(cudaMemcpyAsync(m_buffer, p, m_size, cudaMemcpyDefault));
         }
 
         // Make Resource description:

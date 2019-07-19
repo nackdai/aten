@@ -10,7 +10,7 @@
 
 // TEA = Tiny Encryption Algorithm.
 // https://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm
-inline __device__ void encryptTea(uint2& arg)
+inline __host__ __device__ void encryptTea(uint2& arg)
 {
     const uint32_t key[] = {
         0xa341316c, 
@@ -32,6 +32,110 @@ inline __device__ void encryptTea(uint2& arg)
 
     arg.x = v0;
     arg.y = v1;
+}
+
+void _onForwardProjection(
+    int ix, int iy,
+    uint32_t frame,
+    int width, int height,
+    int tiledWidth, int tiledHeight,
+    const aten::GeomParameter* shapes,
+    const aten::PrimitiveParamter* prims,
+    const float4* vtxPos,
+    const aten::mat4* matrices,
+    const float4* visibilityBuf,
+    aten::mat4 mtxW2C,
+    unsigned int* rngBuffer_0,
+    unsigned int* rngBuffer_1)
+{
+    if (ix >= tiledWidth || iy >= tiledHeight) {
+        return;
+    }
+
+    int idx = getIdx(ix, iy, tiledWidth);
+
+    // Compute random position in 3x3 tile.
+    uint2 tea = make_uint2(idx, frame);
+    encryptTea(tea);
+    tea.x %= idaten::AdvancedSVGFPathTracing::GradientTileSize;
+    tea.y %= idaten::AdvancedSVGFPathTracing::GradientTileSize;
+
+    // Transform to real screen resolution.
+    int2 pos = make_int2(
+        ix * idaten::AdvancedSVGFPathTracing::GradientTileSize + tea.x,
+        iy * idaten::AdvancedSVGFPathTracing::GradientTileSize + tea.y);
+
+    // Not allowed over than screen resolution.
+    if (pos.x >= width || pos.y >= height) {
+        return;
+    }
+
+    // Index to sample previous frame information.
+    int idxPrev = getIdx(pos.x, pos.y, width);
+
+    float4 visBuf = visibilityBuf[idxPrev];
+
+    // XY is bary centroid, and -1 is invalid value (no hit).
+    if (visBuf.x < 0.0f || visBuf.y < 0.0f) {
+        return;
+    }
+
+    uint32_t objid = *(uint32_t*)(&visBuf.z);
+    uint32_t primid = *(uint32_t*)(&visBuf.w);
+
+    const auto* s = &shapes[objid];
+    const auto* t = &prims[primid];
+
+    float4 p0 = vtxPos[t->idx[0]];
+    float4 p1 = vtxPos[t->idx[1]];
+    float4 p2 = vtxPos[t->idx[2]];
+
+    float4 _p = p0 * visBuf.x + p1 * visBuf.y + p2 * (1.0f - visBuf.x - visBuf.y);
+    aten::vec4 pos_cur(_p.x, _p.y, _p.z, 1.0f);
+
+    // Transform to clip coordinate.
+    auto mtxL2W = matrices[s->mtxid * 2];
+    pos_cur = mtxW2C.apply(mtxL2W.apply(pos_cur));
+    pos_cur /= pos_cur.w;
+
+    if (!AT_MATH_IS_IN_BOUND(pos_cur.x, -pos_cur.w, pos_cur.w)
+        || !AT_MATH_IS_IN_BOUND(pos_cur.y, -pos_cur.w, pos_cur.w)
+        || !AT_MATH_IS_IN_BOUND(pos_cur.z, -pos_cur.w, pos_cur.w))
+    {
+        // Not in screen.
+        return;
+    }
+
+    /* pixel coordinate of forward projected sample */
+    int2 ipos_curr = make_int2(
+        (pos_cur.x * 0.5 + 0.5) * width,
+        (pos_cur.y * 0.5 + 0.5) * height);
+
+    int2 pos_grad = make_int2(
+        ipos_curr.x / idaten::AdvancedSVGFPathTracing::GradientTileSize,
+        ipos_curr.y / idaten::AdvancedSVGFPathTracing::GradientTileSize);
+    int2 pos_stratum = make_int2(
+        ipos_curr.x % idaten::AdvancedSVGFPathTracing::GradientTileSize,
+        ipos_curr.y % idaten::AdvancedSVGFPathTracing::GradientTileSize);
+
+    uint32_t gradient_idx =
+        (1 << 31) // mark sample as busy.
+        | (pos_stratum.x << (idaten::AdvancedSVGFPathTracing::StratumOffsetShift * 0)) // encode pos in.
+        | (pos_stratum.y << (idaten::AdvancedSVGFPathTracing::StratumOffsetShift * 1)) // current frame.
+        | (idxPrev << (idaten::AdvancedSVGFPathTracing::StratumOffsetShift * 2));      // pos in prev frame.
+
+
+    int idxInGradIdxBuffer = getIdx(pos_grad.x, pos_grad.y, tiledWidth);
+
+    int idxCurr = getIdx(ipos_curr.x, ipos_curr.y, width);
+
+    // Forward project rng seed.
+    if ((frame & 0x01) == 0) {
+        rngBuffer_0[idxCurr] = rngBuffer_1[idxPrev];
+    }
+    else {
+        rngBuffer_1[idxCurr] = rngBuffer_0[idxPrev];
+    }
 }
 
 __global__ void forwardProjection(
@@ -101,8 +205,11 @@ __global__ void forwardProjection(
     aten::vec4 pos_cur(_p.x, _p.y, _p.z, 1.0f);
 
     // Transform to clip coordinate.
-    auto mtxL2W = matrices[s->mtxid * 2];
-    pos_cur = mtxW2C.apply(mtxL2W.apply(pos_cur));
+    if (s->mtxid >= 0) {
+        auto mtxL2W = matrices[s->mtxid * 2];
+        pos_cur = mtxL2W.apply(pos_cur);
+    }
+    pos_cur = mtxW2C.apply(pos_cur);
     pos_cur /= pos_cur.w;
 
     // Transform previous position to predicted current position.
@@ -195,6 +302,51 @@ namespace idaten {
 
         int curRngSeed = (m_frame & 0x01);
         int prevRngSeed = 1 - curRngSeed;
+
+#if 0
+        {
+            std::vector<float4> vtx(m_vtxparamsPos.size() / sizeof(float4));
+            m_vtxparamsPos.read(vtx.data(), sizeof(float4) * vtx.size());
+
+            std::vector<aten::GeomParameter> shapeparam(m_shapeparam.num());
+            m_shapeparam.readByNum(shapeparam.data(), shapeparam.size());
+
+            std::vector<aten::PrimitiveParamter> primparams(m_primparams.num());
+            m_primparams.readByNum(primparams.data(), primparams.size());
+
+            std::vector<aten::mat4> mtxparams(m_mtxparams.num());
+            m_mtxparams.readByNum(mtxparams.data(), mtxparams.size());
+
+            std::vector<float4> visibilityBuffer(m_visibilityBuffer.num());
+            m_visibilityBuffer.readByNum(visibilityBuffer.data(), visibilityBuffer.size());
+
+            std::vector<uint32_t> rngSeed[2];
+
+            rngSeed[0].resize(m_rngSeed[0].num());
+            m_rngSeed[0].readByNum(rngSeed[0].data(), rngSeed[0].size());
+
+            rngSeed[1].resize(m_rngSeed[1].num());
+            m_rngSeed[1].readByNum(rngSeed[1].data(), rngSeed[1].size());
+
+            for (int iy = 0; iy < height; iy++) {
+                for (int ix = 0; ix < width; ix++) {
+                    _onForwardProjection(
+                        ix, iy,
+                        m_frame,
+                        width, height,
+                        tiledWidth, tiledHeight,
+                        shapeparam.data(),
+                        primparams.data(),
+                        vtx.data(),
+                        mtxparams.data(),
+                        visibilityBuffer.data(),
+                        mtxW2C,
+                        rngSeed[curRngSeed].data(),
+                        rngSeed[prevRngSeed].data());
+                }
+            }
+        }
+#endif
 
         forwardProjection << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_frame,

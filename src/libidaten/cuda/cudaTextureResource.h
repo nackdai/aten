@@ -30,6 +30,11 @@ namespace idaten
 
         void read(void* p, uint32_t bytes);
 
+        size_t size() const
+        {
+            return m_size;
+        }
+
     private:
         void onInit(
             const aten::vec4* p,
@@ -38,6 +43,7 @@ namespace idaten
 
     protected:
         void* m_buffer{ nullptr };
+        size_t m_size{ 0 };
         cudaResourceDesc m_resDesc;
         cudaTextureObject_t m_tex{ 0 };
     };

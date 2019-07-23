@@ -1,16 +1,19 @@
 set(PROJECT_NAME idaten)
 
-find_package(CUDA REQUIRED)
-
-message("-- CUDA --")
-message("Version: " ${CUDA_VERSION})
-message("Library: " ${CUDA_CUDA_LIBRARY})
-message("Runtime: " ${CUDA_CUDART_LIBRARY})
-
 project(${PROJECT_NAME})
 
+# https://gist.github.com/erikzenker/713c4ff76949058d5d5d
+
+set(
+    CUDA_NVCC_FLAGS
+    ${CUDA_NVCC_FLAGS};
+    "-ccbin " ${CMAKE_CXX_COMPILER}
+    " -rdc=true --compile -cudart static -G -g -gencode arch=compute_60,code=sm_60  -Xcompiler ,-O0 -g -std=c++11")
+
+message(${CUDA_NVCC_FLAGS})
+
 # Add library to build.
-add_library(${PROJECT_NAME} STATIC
+cuda_add_library(${PROJECT_NAME} STATIC
   idaten.h
   idaten_namespace.h
   aten4idaten.h
@@ -47,8 +50,6 @@ add_library(${PROJECT_NAME} STATIC
   kernel/bvh.cuh
   kernel/bvh_impl.cuh
   kernel/context.cuh
-  kernel/directlight.cu
-  kernel/directlight.h
   kernel/idatendefs.cuh
   kernel/intersect.cu
   kernel/intersect.cuh
@@ -109,7 +110,6 @@ target_include_directories(${PROJECT_NAME}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_link_libraries(${PROJECT_NAME} 
-  PUBLIC
     aten
     glm)
 

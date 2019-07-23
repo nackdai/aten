@@ -20,4 +20,5 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 add_subdirectory(libaten)
-add_subdirectory(libatenscene)
+#add_subdirectory(libatenscene)
+add_subdirectory(libidaten)

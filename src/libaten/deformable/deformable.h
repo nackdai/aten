@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "deformable/MDLFormat.h"
 #include "deformable/DeformMesh.h"
 #include "deformable/Skeleton.h"
@@ -26,7 +28,7 @@ namespace aten
         {}
 
     public:
-        ~deformable();
+        ~deformable() = default;
 
     public:
         bool read(const char* path);
@@ -73,7 +75,7 @@ namespace aten
 
         virtual aten::accelerator* getInternalAccelerator() override final
         {
-            return m_accel;
+            return m_accel.get();
         }
 
         virtual uint32_t getTriangleCount() const override final
@@ -126,7 +128,7 @@ namespace aten
     private:
         DeformMesh m_mesh;
 
-        aten::accelerator* m_accel{ nullptr };
+        std::shared_ptr<accelerator> m_accel;
 
         bool m_isInitializedToRender{ false };
 
@@ -142,10 +144,9 @@ namespace aten
         friend class deformable;
 
     public:
-        DeformableRenderer() {}
-        ~DeformableRenderer() {}
+        DeformableRenderer() = default;
+        ~DeformableRenderer() = default;
             
-    private:
         DeformableRenderer(const DeformableRenderer& rhs) = delete;
         const DeformableRenderer& operator=(const DeformableRenderer& rhs) = delete;
 

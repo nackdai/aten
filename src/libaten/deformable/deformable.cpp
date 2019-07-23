@@ -12,13 +12,6 @@
 
 namespace aten
 {
-    deformable::~deformable()
-    {
-        if (m_accel) {
-            delete m_accel;
-        }
-    }
-
     bool deformable::read(const char* path)
     {
         FileInputStream file;
@@ -163,7 +156,7 @@ namespace aten
     void deformable::build()
     {
         if (!m_accel) {
-            m_accel = accelerator::createAccelerator(AccelType::UserDefs);
+            m_accel.reset(accelerator::createAccelerator(AccelType::UserDefs));
         }
 
         const auto& desc = m_mesh.getDesc();

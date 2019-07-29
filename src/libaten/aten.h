@@ -75,6 +75,7 @@
 #include "visualizer/GLProfiler.h"
 
 #include "scene/scene.h"
+#include "scene/AcceleratedScene.h"
 #include "scene/instance.h"
 
 #include "accelerator/accelerator.h"

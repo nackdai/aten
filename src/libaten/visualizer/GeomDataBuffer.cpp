@@ -79,7 +79,7 @@ namespace aten {
                     attribs[i].type,
                     GL_FALSE,
                     m_vtxStride,
-                    (void*)(offset + attribs[i].offset)));
+                    reinterpret_cast<void*>(offset + attribs[i].offset)));
             }
         }
     }
@@ -138,7 +138,7 @@ namespace aten {
                 attribs[i].type,
                 GL_FALSE,
                 m_vtxStride,
-                (void*)(m_vtxOffset + attribs[i].offset)));
+                reinterpret_cast<void*>(m_vtxOffset + attribs[i].offset)));
 #else
             if (attribs[i].name) {
                 GLint loc = -1;
@@ -153,7 +153,7 @@ namespace aten {
                         attribs[i].type,
                         attribs[i].needNormalize ? GL_TRUE : GL_FALSE,
                         m_vtxStride,
-                        (void*)(m_vtxOffset + attribs[i].offset)));
+                        reinterpret_cast<void*>(m_vtxOffset + attribs[i].offset)));
                 }
             }
 #endif
@@ -317,7 +317,7 @@ namespace aten {
                 attribs[i].type,
                 GL_FALSE,
                 elementSize,
-                (void*)(attribs[i].offset)));
+                reinterpret_cast<void*>(attribs[i].offset)));
         }
         
         m_vtxNum = vtxNum;

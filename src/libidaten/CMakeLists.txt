@@ -2,15 +2,28 @@ set(PROJECT_NAME idaten)
 
 project(${PROJECT_NAME})
 
+find_package(CUDA REQUIRED)
+
+set(CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
+
+message("-- CUDA --")
+message("Version: " ${CUDA_VERSION})
+message("Library: " ${CUDA_CUDA_LIBRARY})
+message("Runtime: " ${CUDA_CUDART_LIBRARY})
+message("Host Compiler: " ${CUDA_HOST_COMPILER})
+
 # https://gist.github.com/erikzenker/713c4ff76949058d5d5d
 
 set(
     CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS};
     "-ccbin " ${CMAKE_CXX_COMPILER}
-    " -rdc=true --compile -cudart static -G -g -gencode arch=compute_60,code=sm_60  -Xcompiler ,-O0 -g -std=c++11")
+    #" -rdc=true --compile -cudart static --machine 64 -G -g -gencode arch=compute_60,code=sm_60 -x cu -Xcompiler ,-O0 -g -std=c++14 -D__CORRECT_ISO_CPP11_MATH_H_PROTO")
+    " -rdc=true -gencode arch=compute_60,code=sm_60 -Xcompiler ,-O0 -g -std=c++14 -D__CORRECT_ISO_CPP11_MATH_H_PROTO")
 
 message(${CUDA_NVCC_FLAGS})
+
+add_definitions(-D__AT_CUDA__)
 
 # Add library to build.
 cuda_add_library(${PROJECT_NAME} STATIC
@@ -65,14 +78,9 @@ cuda_add_library(${PROJECT_NAME} STATIC
   kernel/pathtracing.h
   kernel/pathtracing_impl.cu
   kernel/pt_common.h
-  kernel/pt_ex.h
-  kernel/pt_geometryrendering.cu
-  kernel/pt_temporarlreprojection.cu
   kernel/qbvh.cu
   kernel/qbvh.cuh
   kernel/qbvh_impl.cuh
-  kernel/raytracing.cu
-  kernel/raytracing.h
   kernel/renderer.cpp
   kernel/renderer.h
   kernel/sample_texture_impl.cu
@@ -80,8 +88,6 @@ cuda_add_library(${PROJECT_NAME} STATIC
   kernel/sbvh.cu
   kernel/sbvh.cuh
   kernel/sbvh_impl.cuh
-  kernel/ssrt.cu
-  kernel/ssrt.h
   kernel/stackless_bvh.cu
   kernel/stackless_bvh.cuh
   kernel/stackless_bvh_impl.cuh

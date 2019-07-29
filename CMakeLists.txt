@@ -12,12 +12,7 @@ if(NOT CMAKE_BUILD_TYPE)
   message(STATUS "Build type not specified: Use Release by default.")
 endif(NOT CMAKE_BUILD_TYPE)
 
-find_package(CUDA REQUIRED)
-
-message("-- CUDA --")
-message("Version: " ${CUDA_VERSION})
-message("Library: " ${CUDA_CUDA_LIBRARY})
-message("Runtime: " ${CUDA_CUDART_LIBRARY})
+message("Build Type: " ${CMAKE_BUILD_TYPE})
 
 add_subdirectory(3rdparty)
 add_subdirectory(src)

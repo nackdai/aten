@@ -20,12 +20,12 @@ namespace aten {
 
             m_origin = origin;
 
-            // カメラ座標ベクトル.
+            // 繧ｫ繝｡繝ｩ蠎ｧ讓吶�吶け繝医Ν.
             m_dir = normalize(lookat - origin);
             m_right = normalize(cross(m_dir, up));
             m_up = cross(m_right, m_dir);
 
-            // 値を保持.
+            // 蛟､繧剃ｿ晄戟.
             m_at = lookat;
             m_width = (real)width;
             m_height = (real)height;

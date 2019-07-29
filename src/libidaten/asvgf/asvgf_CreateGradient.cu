@@ -106,7 +106,7 @@ namespace idaten
     void AdvancedSVGFPathTracing::onCreateGradient(int width, int height)
     {
         // TODO
-        // •ªŠ„•`‰æ.
+        // åˆ†å‰²æç”».
 
         int tiledW = getTiledResolution(width);
         int tiledH = getTiledResolution(height);

@@ -12,7 +12,7 @@ namespace aten {
     public:
         static const uint32_t MaxPrimeNumbers = 10000000;
 
-        // ‘f”¶¬.
+        // ç´ æ•°ç”Ÿæˆ.
         static void makePrimeNumbers(uint32_t maxNumber = MaxPrimeNumbers);
 
     public:

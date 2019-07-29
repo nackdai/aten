@@ -23,7 +23,7 @@ namespace aten {
         bool operator==(const Asset& rhs) const
         {
             // NOTE
-            // ƒ|ƒCƒ“ƒ^‚Ì”äŠr‚È‚Ì‚ÅA‚Ç‚ê‚Å‚à‚¢‚¢.
+            // ãƒã‚¤ãƒ³ã‚¿ã®æ¯”è¼ƒãªã®ã§ã€ã©ã‚Œã§ã‚‚ã„ã„.
             return tex == rhs.tex;
         }
     };

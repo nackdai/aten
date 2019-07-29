@@ -30,7 +30,7 @@ namespace aten
         m_globalMatrix.resize(numJoint);
         m_needUpdateJointFlag.resize(numJoint);
 
-        // ƒAƒjƒ[ƒVƒ‡ƒ“ƒpƒ‰ƒ[ƒ^‚Ì’†‚ÅXV‚ª•K—v‚Èƒpƒ‰ƒ[ƒ^ƒtƒ‰ƒO.
+        // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ä¸­ã§æ›´æ–°ãŒå¿…è¦ãªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ•ãƒ©ã‚°.
         for (uint32_t i = 0; i < numJoint; i++) {
             m_needUpdateJointFlag[i] = joints[i].validAnmParam;
             m_globalPose[i] = joints[i].pose;
@@ -61,7 +61,7 @@ namespace aten
                 mtxJoint = mtxParent * mtxJoint;
             }
             else {
-                // ƒ‹[ƒg‚É‘Î‚µ‚Ä‚ÍAL2Wƒ}ƒgƒŠƒNƒX‚ğŒvZ‚·‚é.
+                // ãƒ«ãƒ¼ãƒˆã«å¯¾ã—ã¦ã¯ã€L2Wãƒãƒˆãƒªã‚¯ã‚¹ã‚’è¨ˆç®—ã™ã‚‹.
                 mtxJoint = mtxL2W * mtxJoint;
             }
         }
@@ -82,12 +82,12 @@ namespace aten
         const auto& joint = joints[idx];
         const auto& pose = m_globalPose[idx];
 
-        // ŒvZ‚·‚éƒpƒ‰ƒ[ƒ^‚ğ”»’è‚·‚éƒtƒ‰ƒO.
+        // è¨ˆç®—ã™ã‚‹ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’åˆ¤å®šã™ã‚‹ãƒ•ãƒ©ã‚°.
         Bit32Flag flag(
             joint.validParam
             | m_needUpdateJointFlag[idx]);
 
-        // ”O‚Ì‚½‚ßŸ‚ÉŒü‚¯‚ÄƒŠƒZƒbƒg‚µ‚Ä‚¨‚­.
+        // å¿µã®ãŸã‚æ¬¡ã«å‘ã‘ã¦ãƒªã‚»ãƒƒãƒˆã—ã¦ãŠã.
         m_needUpdateJointFlag[idx] = 0;
 
         mat4& mtxJoint = m_globalMatrix[idx];
@@ -134,24 +134,24 @@ namespace aten
         const vec4& src)
     {
         switch (paramType) {
-        case AnmTransformType::ParamX:    // X‚Ì‚İ.
+        case AnmTransformType::ParamX:    // Xã®ã¿.
             dst[0] = src.x;
             break;
-        case AnmTransformType::ParamY:    // Y‚Ì‚İ.
+        case AnmTransformType::ParamY:    // Yã®ã¿.
             dst[1] = src.y;
             break;
-        case AnmTransformType::ParamZ:    // Z‚Ì‚İ.
+        case AnmTransformType::ParamZ:    // Zã®ã¿.
             dst[2] = src.z;
             break;
-        case AnmTransformType::ParamW:    // W‚Ì‚İ.
+        case AnmTransformType::ParamW:    // Wã®ã¿.
             dst[3] = src.w;
             break;
-        case AnmTransformType::ParamXYZ:  // XYZ‚Ì‚İ.
+        case AnmTransformType::ParamXYZ:  // XYZã®ã¿.
             dst[0] = src.x;
             dst[1] = src.y;
             dst[2] = src.z;
             break;
-        case AnmTransformType::ParamXYZW: // XYZW‚·‚×‚Ä.
+        case AnmTransformType::ParamXYZW: // XYZWã™ã¹ã¦.
             dst[0] = src.x;
             dst[1] = src.y;
             dst[2] = src.z;

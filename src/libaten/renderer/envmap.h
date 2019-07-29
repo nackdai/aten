@@ -47,7 +47,7 @@ namespace AT_NAME
             dir.x = xz * aten::sin(phi);
             dir.z = xz * aten::cos(phi);
 
-            // îOÇÃÇΩÇﬂ...
+            // Âøµ„ÅÆ„Åü„ÇÅ...
             dir = normalize(dir);
 
             return std::move(dir);

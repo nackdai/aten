@@ -85,7 +85,7 @@ __global__ void temporalReprojection(
 	const auto aov = aovs[idx];
 
 	if (aov.meshid < 0) {
-		// ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI‚í‚è.
+		// èƒŒæ™¯ãªã®ã§ã€ãã®ã¾ã¾å‡ºåŠ›ã—ã¦çµ‚ã‚ã‚Š.
 		float4 clr = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 		clr.w = 1;
 
@@ -102,7 +102,7 @@ __global__ void temporalReprojection(
 
 	float3 centerNormal = aov.normal;
 
-	// ¡‰ñ‚ÌƒtƒŒ[ƒ€‚ÌƒsƒNƒZƒ‹ƒJƒ‰[.
+	// ä»Šå›ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚«ãƒ©ãƒ¼.
 	float4 cur = make_float4(path.contrib.x, path.contrib.y, path.contrib.z, 0) / path.samples;
 	cur.w = 1;
 
@@ -115,7 +115,7 @@ __global__ void temporalReprojection(
 			int xx = clamp(ix + x, 0, width - 1);
 			int yy = clamp(iy + y, 0, height - 1);
 
-			// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒNƒŠƒbƒv‹óŠÔÀ•W‚ğŒvZ.
+			// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¯ãƒªãƒƒãƒ—ç©ºé–“åº§æ¨™ã‚’è¨ˆç®—.
 			aten::vec4 prevPos;
 			computePrevPos(
 				xx, yy,
@@ -124,12 +124,12 @@ __global__ void temporalReprojection(
 				&prevPos,
 				mtxs);
 
-			// [0, 1]‚Ì”ÍˆÍ“à‚É“ü‚Á‚Ä‚¢‚é‚©.
+			// [0, 1]ã®ç¯„å›²å†…ã«å…¥ã£ã¦ã„ã‚‹ã‹.
 			bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 			bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
 			if (isInsideX && isInsideY) {
-				// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒXƒNƒŠ[ƒ“À•W.
+				// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™.
 				int px = (int)(prevPos.x * width - 0.5f);
 				int py = (int)(prevPos.y * height - 0.5f);
 
@@ -150,7 +150,7 @@ __global__ void temporalReprojection(
 				float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
 				float Wm = aov.meshid == prevAov.meshid ? 1.0f : 0.0f;
 
-				// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒsƒNƒZƒ‹ƒJƒ‰[‚ğæ“¾.
+				// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚«ãƒ©ãƒ¼ã‚’å–å¾—.
 				float4 prev;
 				surf2Dread(&prev, outSurface, px * sizeof(float4), py);
 
@@ -166,7 +166,7 @@ __global__ void temporalReprojection(
 		cur = 0.2 * cur + 0.8 * sum;
 	}
 #else
-	// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒNƒŠƒbƒv‹óŠÔÀ•W‚ğŒvZ.
+	// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¯ãƒªãƒƒãƒ—ç©ºé–“åº§æ¨™ã‚’è¨ˆç®—.
 	aten::vec4 prevPos;
 	computePrevPos(
 		ix, iy,
@@ -175,12 +175,12 @@ __global__ void temporalReprojection(
 		&prevPos,
 		mtxs);
 
-	// [0, 1]‚Ì”ÍˆÍ“à‚É“ü‚Á‚Ä‚¢‚é‚©.
+	// [0, 1]ã®ç¯„å›²å†…ã«å…¥ã£ã¦ã„ã‚‹ã‹.
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
 	if (isInsideX && isInsideY) {
-		// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒXƒNƒŠ[ƒ“À•W.
+		// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™.
 		int px = (int)(prevPos.x * width - 0.5f);
 		int py = (int)(prevPos.y * height - 0.5f);
 
@@ -194,16 +194,16 @@ __global__ void temporalReprojection(
 
 		// TODO
 		// For trial.
-		// Z‚Ì•„†‚ğ³Šm‚É•œŒ³‚Å‚«‚Ä‚¢‚È‚¢.
+		// Zã®ç¬¦å·ã‚’æ­£ç¢ºã«å¾©å…ƒã§ãã¦ã„ãªã„.
 		float3 prevNormal = make_float3(prevAov.z, prevAov.w, 0);
 		prevNormal.z = sqrtf(1 - clamp(dot(prevNormal, prevNormal), 0.0f, 1.0f));
 
-		// ‘O‚ÌƒtƒŒ[ƒ€‚Æ‚Ì[“x·‚ª”ÍˆÍ“à && ƒ}ƒeƒŠƒAƒ‹ID‚ª“¯‚¶‚©‚Ç‚¤‚©.
+		// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã¨ã®æ·±åº¦å·®ãŒç¯„å›²å†… && ãƒãƒ†ãƒªã‚¢ãƒ«IDãŒåŒã˜ã‹ã©ã†ã‹.
 		if (abs(1 - centerDepth / prevDepth) < 0.05
 			&& dot(centerNormal, prevNormal) > 0.98
 			&& aov.x == prevAov.x)
 		{
-			// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒsƒNƒZƒ‹ƒJƒ‰[‚ğæ“¾.
+			// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚«ãƒ©ãƒ¼ã‚’å–å¾—.
 			float4 prev;
 			surf2Dread(&prev, outSurface, px * sizeof(float4), py);
 
@@ -260,7 +260,7 @@ __global__ void makePathMask(
 
 	const auto centerDepth = aten::clamp(aov.y, camera->znear, camera->zfar);
 
-	// ‘O‚ÌƒtƒŒ[ƒ€‚Å‚ÌƒNƒŠƒbƒv‹óŠÔÀ•W‚ğæ“¾.
+	// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã§ã®ã‚¯ãƒªãƒƒãƒ—ç©ºé–“åº§æ¨™ã‚’å–å¾—.
 	aten::vec4 prevPos;
 	computePrevPos(
 		ix, iy,
@@ -269,12 +269,12 @@ __global__ void makePathMask(
 		&prevPos,
 		mtxs);
 
-	// [0, 1]‚Ì”ÍˆÍ“à‚É“ü‚Á‚Ä‚¢‚é‚©.
+	// [0, 1]ã®ç¯„å›²å†…ã«å…¥ã£ã¦ã„ã‚‹ã‹.
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
 	if (isInsideX && isInsideY) {
-		// ƒXƒNƒŠ[ƒ“À•W‚É•ÏŠ·.
+		// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã«å¤‰æ›.
 		int px = (int)(prevPos.x * width - 0.5f);
 		int py = (int)(prevPos.y * height - 0.5f);
 
@@ -286,11 +286,11 @@ __global__ void makePathMask(
 		const auto prevAov = prevAOVs[pidx];
 		const auto prevDepth = aten::clamp(prevAov.y, camera->znear, camera->zfar);
 
-		// ‘O‚ÌƒtƒŒ[ƒ€‚Æ‚Ì[“x·‚ª”ÍˆÍ“à && ƒ}ƒeƒŠƒAƒ‹ID‚ª“¯‚¶‚©‚Ç‚¤‚©.
+		// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã¨ã®æ·±åº¦å·®ãŒç¯„å›²å†… && ãƒãƒ†ãƒªã‚¢ãƒ«IDãŒåŒã˜ã‹ã©ã†ã‹.
 		if (abs(1 - centerDepth / prevDepth) < 0.05
 			&& aov.x == prevAov.x)
 		{
-			// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒsƒNƒZƒ‹‚ª—˜—p‚Å‚«‚é‚Ì‚ÅAƒpƒX‚ÍI—¹.
+			// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒ”ã‚¯ã‚»ãƒ«ãŒåˆ©ç”¨ã§ãã‚‹ã®ã§ã€ãƒ‘ã‚¹ã¯çµ‚äº†.
 			path.isKill = true;
 			path.isTerminate = true;
 			return;
@@ -430,7 +430,7 @@ namespace idaten
 			texVtxNml);
 #else
 		if (m_isFirstRender) {
-			// Å‰‚ÌƒtƒŒ[ƒ€‚ÍQÆ‚Å‚«‚é‰ß‹‚ÌƒtƒŒ[ƒ€‚ª‚È‚¢‚Ì‚ÅA•’Ê‚Éˆ—‚·‚é.
+			// æœ€åˆã®ãƒ•ãƒ¬ãƒ¼ãƒ ã¯å‚ç…§ã§ãã‚‹éå»ã®ãƒ•ãƒ¬ãƒ¼ãƒ ãŒãªã„ã®ã§ã€æ™®é€šã«å‡¦ç†ã™ã‚‹.
 			PathTracingGeometryRendering::onGenPath(
 				width, height,
 				sample, maxSamples,
@@ -440,7 +440,7 @@ namespace idaten
 		}
 		else {
 			if (sample == 0) {
-				// ‚PƒpƒX–Ú‚Å‚ÍAAOV‚ğƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚é.
+				// ï¼‘ãƒ‘ã‚¹ç›®ã§ã¯ã€AOVã‚’ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚°ã™ã‚‹.
 				PathTracingGeometryRendering::onGenPath(
 					width, height,
 					sample, maxSamples,
@@ -450,7 +450,7 @@ namespace idaten
 			}
 			else
 			{
-				// 2ƒtƒŒ[ƒ€–ÚˆÈ~‚ÍAƒeƒ“ƒ|ƒ‰ƒ‹ƒŠƒvƒƒWƒFƒNƒVƒ‡ƒ“‚ÌŒ„ŠÔ‚Ì‚İ‚É”ò‚Î‚·.
+				// 2ãƒ•ãƒ¬ãƒ¼ãƒ ç›®ä»¥é™ã¯ã€ãƒ†ãƒ³ãƒãƒ©ãƒ«ãƒªãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³ã®éš™é–“ã®ã¿ã«é£›ã°ã™.
 
 				int cur = m_curAOV;
 				int prev = 1 - cur;

@@ -131,8 +131,8 @@ namespace AT_NAME
         real b = isect->b;
         real c = 1 - a - b;
 
-        // dSÀ•WŒn(barycentric coordinates).
-        // v0Šî€.
+        // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+        // v0åŸºæº–.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
         rec->p = c * v0.pos + a * v1.pos + b * v2.pos;
         rec->normal = c * v0.nml + a * v1.nml + b * v2.nml;
@@ -163,7 +163,7 @@ namespace AT_NAME
 
         setBoundingBox(aten::aabb(vmin, vmax));
 
-        // OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+        // ä¸‰è§’å½¢ã®é¢ç© = ï¼’è¾ºã®å¤–ç©ã®é•·ã• / 2;
         auto e0 = v1.pos - v0.pos;
         auto e1 = v2.pos - v0.pos;
         param.area = real(0.5) * cross(e0, e1).length();
@@ -200,15 +200,15 @@ namespace AT_NAME
         const auto& v1 = ctxt.getVertex(param.idx[1]);
         const auto& v2 = ctxt.getVertex(param.idx[2]);
 
-        // dSÀ•WŒn(barycentric coordinates).
-        // v0Šî€.
+        // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+        // v0åŸºæº–.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
         aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
         
         aten::vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
         n = normalize(n);
 
-        // OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+        // ä¸‰è§’å½¢ã®é¢ç© = ï¼’è¾ºã®å¤–ç©ã®é•·ã• / 2;
         auto e0 = v1.pos - v0.pos;
         auto e1 = v2.pos - v0.pos;
         auto area = real(0.5) * cross(e0, e1).length();

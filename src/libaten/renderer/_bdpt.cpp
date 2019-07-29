@@ -80,7 +80,7 @@ namespace aten
 				int pixelx;
 				int pixely;
 
-				// ƒŒƒ“ƒY‚ÆŒğ·”»’è.
+				// ãƒ¬ãƒ³ã‚ºã¨äº¤å·®åˆ¤å®š.
 				auto lens_t = camera->hitOnLens(
 					ray,
 					posOnLens,
@@ -89,7 +89,7 @@ namespace aten
 					pixelx, pixely);
 
 				if (AT_MATH_EPSILON < lens_t && lens_t < rec.t) {
-					// ƒŒƒC‚ªƒŒƒ“ƒY‚Éƒqƒbƒg•ƒCƒ[ƒWƒZƒ“ƒT‚Éƒqƒbƒg.
+					// ãƒ¬ã‚¤ãŒãƒ¬ãƒ³ã‚ºã«ãƒ’ãƒƒãƒˆï¼†ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã«ãƒ’ãƒƒãƒˆ.
 					const vec3& camnml = camera->getDir();
 
 					Vertex vtx(
@@ -131,7 +131,7 @@ namespace aten
 			real c = 1;
 			if (!rec.mtrl->isSingular()) {
 				// TODO
-				// AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
+				// AMDã®ã¯absã—ã¦ã„ã‚‹ãŒ....
 				//c = aten::abs(dot(orienting_normal, nextDir));
 				c = dot(orienting_normal, nextDir);
 			}
@@ -163,7 +163,7 @@ namespace aten
 
 		auto camsample = camera->sample(u, v, sampler);
 
-		// ƒJƒƒ‰.
+		// ã‚«ãƒ¡ãƒ©.
 		vs.push_back(Vertex(
 			camsample.posOnLens,
 			camsample.nmlOnLens,
@@ -212,7 +212,7 @@ namespace aten
 
 		hitable* lightobj = const_cast<hitable*>(light->getLightObject());
 
-		// ŒõŒ¹.
+		// å…‰æº.
 		vs.push_back(Vertex(
 			pos,
 			nml,
@@ -224,13 +224,13 @@ namespace aten
 
 		vec3 dir;
 		{
-			// normal‚Ì•ûŒü‚ğŠî€‚Æ‚µ‚½³‹K’¼ŒğŠî’ê(w, u, v)‚ğì‚é.
-			// ‚±‚ÌŠî’ê‚É‘Î‚·‚é”¼‹…“à‚ÅŸ‚ÌƒŒƒC‚ğ”ò‚Î‚·.
+			// normalã®æ–¹å‘ã‚’åŸºæº–ã¨ã—ãŸæ­£è¦ç›´äº¤åŸºåº•(w, u, v)ã‚’ä½œã‚‹.
+			// ã“ã®åŸºåº•ã«å¯¾ã™ã‚‹åŠçƒå†…ã§æ¬¡ã®ãƒ¬ã‚¤ã‚’é£›ã°ã™.
 			vec3 n, t, b;
 
 			n = nml;
 
-			// n‚Æ•½s‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚é.
+			// nã¨å¹³è¡Œã«ãªã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹.
 			if (fabs(n.x) > AT_MATH_EPSILON) {
 				t = normalize(cross(vec3(0.0, 1.0, 0.0), n));
 			}
@@ -239,7 +239,7 @@ namespace aten
 			}
 			b = cross(n, t);
 
-			// ƒRƒTƒCƒ“€‚ğg‚Á‚½d“_“IƒTƒ“ƒvƒŠƒ“ƒO.
+			// ã‚³ã‚µã‚¤ãƒ³é …ã‚’ä½¿ã£ãŸé‡ç‚¹çš„ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°.
 			const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
 			const real r2 = sampler->nextSample();
 			const real r2s = sqrt(r2);
@@ -295,8 +295,8 @@ namespace aten
 		py = -1;
 
 		if ((numEye == 0) && (numLight >= 2)) {
-			// eyepath ‚Í‘¶İ‚µ‚È‚¢. lightpath ‚ª‚Q‚ÂˆÈã.
-			// => lightpath ‚ªƒJƒƒ‰‚É’¼Úƒqƒbƒg‚µ‚Ä‚¢‚é‰Â”\«.
+			// eyepath ã¯å­˜åœ¨ã—ãªã„. lightpath ãŒï¼’ã¤ä»¥ä¸Š.
+			// => lightpath ãŒã‚«ãƒ¡ãƒ©ã«ç›´æ¥ãƒ’ãƒƒãƒˆã—ã¦ã„ã‚‹å¯èƒ½æ€§.
 
 			if (camera->isPinhole()) {
 				result = false;
@@ -325,12 +325,12 @@ namespace aten
 				if (AT_MATH_EPSILON < lens_t
 					&& lens_t < rec.t)
 				{
-					// ƒŒƒC‚ªƒŒƒ“ƒY‚Éƒqƒbƒg•ƒCƒ[ƒWƒZƒ“ƒT‚Éƒqƒbƒg.
+					// ãƒ¬ã‚¤ãŒãƒ¬ãƒ³ã‚ºã«ãƒ’ãƒƒãƒˆï¼†ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã«ãƒ’ãƒƒãƒˆ.
 					px = aten::clamp(px, 0, m_width - 1);
 					px = aten::clamp(px, 0, m_height - 1);
 				}
 				else {
-					// lightƒTƒuƒpƒX‚ğ’¼ÚƒŒƒ“ƒY‚É‚Â‚È‚°‚æ‚¤‚Æ‚µ‚½‚ªAÕ•Á‚³‚ê‚½‚èƒCƒ[ƒWƒZƒ“ƒT‚Éƒqƒbƒg‚µ‚È‚©‚Á‚½ê‡AI‚í‚è.
+					// lightã‚µãƒ–ãƒ‘ã‚¹ã‚’ç›´æ¥ãƒ¬ãƒ³ã‚ºã«ã¤ãªã’ã‚ˆã†ã¨ã—ãŸãŒã€é®è”½ã•ã‚ŒãŸã‚Šã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã«ãƒ’ãƒƒãƒˆã—ãªã‹ã£ãŸå ´åˆã€çµ‚ã‚ã‚Š.
 					result = false;
 				}
 			}
@@ -338,8 +338,8 @@ namespace aten
 		else if ((numEye >= 2) && (numLight == 0)) {
 			// direct hit to the light source
 
-			// eyepath ‚ª‚Q‚ÂˆÈã. lightpath ‚ª‚Í‘¶İ‚µ‚È‚¢.
-			// => eyepath ‚ªƒ‰ƒCƒg‚É’¼Úƒqƒbƒg‚µ‚Ä‚¢‚é‰Â”\«.
+			// eyepath ãŒï¼’ã¤ä»¥ä¸Š. lightpath ãŒã¯å­˜åœ¨ã—ãªã„.
+			// => eyepath ãŒãƒ©ã‚¤ãƒˆã«ç›´æ¥ãƒ’ãƒƒãƒˆã—ã¦ã„ã‚‹å¯èƒ½æ€§.
 
 			const Vertex& endEye = eyepath[numEye - 1];
 			
@@ -354,8 +354,8 @@ namespace aten
 			if ((numEye == 1) && (numLight >= 1)) {
 				// light tracing
 
-				// eyepath ‚ª‚P‚Â‚¾‚¯iƒJƒƒ‰ãj.lightpath ‚ª‚P‚ÂˆÈã.
-				// => ƒJƒƒ‰‚©‚ç’¼Úƒqƒbƒg‚µ‚Ä‚¢‚é‰Â”\«.
+				// eyepath ãŒï¼‘ã¤ã ã‘ï¼ˆã‚«ãƒ¡ãƒ©ä¸Šï¼‰.lightpath ãŒï¼‘ã¤ä»¥ä¸Š.
+				// => ã‚«ãƒ¡ãƒ©ã‹ã‚‰ç›´æ¥ãƒ’ãƒƒãƒˆã—ã¦ã„ã‚‹å¯èƒ½æ€§.
 
 				const auto& eye = eyepath[0];
 				auto dir = normalize(endLight.pos - eye.pos);
@@ -380,7 +380,7 @@ namespace aten
 				if ((endEye.mtrl && endEye.mtrl->isSingular())
 					|| (endLight.mtrl && endLight.mtrl->isSingular()))
 				{
-					// ’[“_‚ªƒXƒyƒLƒ…ƒ‰‚âƒŒƒ“ƒY‚¾‚Á‚½ê‡‚Íd‚İ‚ªƒ[ƒ‚É‚È‚èƒpƒX‘S‘Ì‚ÌŠñ—^‚àƒ[ƒ‚É‚È‚é‚Ì‚ÅAˆ—I‚í‚è.
+					// ç«¯ç‚¹ãŒã‚¹ãƒšã‚­ãƒ¥ãƒ©ã‚„ãƒ¬ãƒ³ã‚ºã ã£ãŸå ´åˆã¯é‡ã¿ãŒã‚¼ãƒ­ã«ãªã‚Šãƒ‘ã‚¹å…¨ä½“ã®å¯„ä¸ã‚‚ã‚¼ãƒ­ã«ãªã‚‹ã®ã§ã€å‡¦ç†çµ‚ã‚ã‚Š.
 					return false;
 				}
 
@@ -424,7 +424,7 @@ namespace aten
 			const auto& vtx = vs[i];
 
 			if (i == 0) {
-				// ƒJƒƒ‰.
+				// ã‚«ãƒ¡ãƒ©.
 
 				const auto& next = vs[i + 1];
 
@@ -451,7 +451,7 @@ namespace aten
 				}
 			}
 			else if (i == (num - 1)) {
-				// ŒõŒ¹.
+				// å…‰æº.
 				if (vtx.mtrl && vtx.mtrl->isEmissive()) {
 					auto emit = vtx.mtrl->color();
 					f *= emit;
@@ -555,7 +555,7 @@ namespace aten
 					const auto& vtx = vs[i];
 
 					if (i == 0) {
-						// ƒJƒƒ‰ã‚Ì‚P“_‚ğƒTƒ“ƒvƒ‹‚·‚éPDF.
+						// ã‚«ãƒ¡ãƒ©ä¸Šã®ï¼‘ç‚¹ã‚’ã‚µãƒ³ãƒ—ãƒ«ã™ã‚‹PDF.
 
 						const auto& next = vs[i + 1];
 
@@ -583,7 +583,7 @@ namespace aten
 
 						if (vtx.mtrl) {
 							if (vtx.mtrl->isEmissive()) {
-								// Š®‘SŠgU–Ê‚Æ‚·‚é.
+								// å®Œå…¨æ‹¡æ•£é¢ã¨ã™ã‚‹.
 								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
 							}
 							else if (vtx.mtrl->isSingular()) {
@@ -599,7 +599,7 @@ namespace aten
 							}
 						}
 						else if (vtx.light) {
-							// Š®‘SŠgU–Ê‚Æ‚·‚é.
+							// å®Œå…¨æ‹¡æ•£é¢ã¨ã™ã‚‹.
 							pdf = lambert::pdf(vtx.nml, wo);
 						}
 
@@ -616,15 +616,15 @@ namespace aten
 				// sampling from the light source
 				for (int i = -1; i <= numLightVertices - 2; i++) {
 					if (i == -1) {
-						// ƒ‰ƒCƒgã‚Ì‚P“_‚ğƒTƒ“ƒvƒŠƒ“ƒO‚·‚éPDF.
+						// ãƒ©ã‚¤ãƒˆä¸Šã®ï¼‘ç‚¹ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹PDF.
 						// PDF of sampling the light position (assume area-based sampling)
 						const auto& lightSrc = vs[vs.size() - 1];
 						auto sampleLightPdf = lightSrc.sampleLightPdf;
 						totalPdf = totalPdf * sampleLightPdf;
 					}
 					else if (i == 0) {
-						// ƒ‰ƒCƒg‚Ìƒ}ƒeƒŠƒAƒ‹‚ÌPDF.
-						// Š®‘SŠgU–Ê‚Æ‚·‚é.
+						// ãƒ©ã‚¤ãƒˆã®ãƒãƒ†ãƒªã‚¢ãƒ«ã®PDF.
+						// å®Œå…¨æ‹¡æ•£é¢ã¨ã™ã‚‹.
 						auto wo = normalize(vs[pathLength - 1].pos - vs[pathLength].pos);
 
 						const auto& vtx = vs[pathLength];
@@ -651,7 +651,7 @@ namespace aten
 
 						if (vtx.mtrl) {
 							if (vtx.mtrl->isEmissive()) {
-								// Š®‘SŠgU–Ê‚Æ‚·‚é.
+								// å®Œå…¨æ‹¡æ•£é¢ã¨ã™ã‚‹.
 								pdf = vtx.mtrl->pdf(vtx.nml, wi, wo, vtx.u, vtx.v);
 							}
 							else if (vtx.mtrl->isSingular()) {
@@ -675,7 +675,7 @@ namespace aten
 						else {
 							// Hit on lens.
 
-							// ƒV[ƒ“ã‚Ì“_‚©‚çƒŒƒ“ƒY‚É“ü‚éƒŒƒC.
+							// ã‚·ãƒ¼ãƒ³ä¸Šã®ç‚¹ã‹ã‚‰ãƒ¬ãƒ³ã‚ºã«å…¥ã‚‹ãƒ¬ã‚¤.
 							ray r(next.pos, -wo);
 
 							vec3 posOnLens;
@@ -691,14 +691,14 @@ namespace aten
 								x, y);
 
 							if (lens_t > AT_MATH_EPSILON) {
-								// ƒŒƒC‚ªƒŒƒ“ƒY‚Éƒqƒbƒg•ƒCƒ[ƒWƒZƒ“ƒT‚Éƒqƒbƒg.
+								// ãƒ¬ã‚¤ãŒãƒ¬ãƒ³ã‚ºã«ãƒ’ãƒƒãƒˆï¼†ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã«ãƒ’ãƒƒãƒˆ.
 
 								real imagesensorWidth = camera->getImageSensorWidth();
 								real imagesensorHeight = camera->getImageSensorHeight();
 								real pdfImage = real(1) / (imagesensorWidth * imagesensorHeight);
 
-								// ƒCƒ[ƒWƒZƒ“ƒTã‚ÌƒTƒ“ƒvƒŠƒ“ƒOŠm—¦–§“x‚ğŒvZ.
-								// ƒCƒ[ƒWƒZƒ“ƒT‚Ì–ÊÏ‘ª“x‚ÉŠÖ‚·‚éŠm—¦–§“x‚ğƒV[ƒ“ã‚ÌƒTƒ“ƒvƒŠƒ“ƒOŠm—¦–§“xi–ÊÏ‘ª“x‚ÉŠÖ‚·‚éŠm—¦–§“xj‚É•ÏŠ·‚³‚ê‚Ä‚¢‚é.
+								// ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µä¸Šã®ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ç¢ºç‡å¯†åº¦ã‚’è¨ˆç®—.
+								// ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã®é¢ç©æ¸¬åº¦ã«é–¢ã™ã‚‹ç¢ºç‡å¯†åº¦ã‚’ã‚·ãƒ¼ãƒ³ä¸Šã®ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ç¢ºç‡å¯†åº¦ï¼ˆé¢ç©æ¸¬åº¦ã«é–¢ã™ã‚‹ç¢ºç‡å¯†åº¦ï¼‰ã«å¤‰æ›ã•ã‚Œã¦ã„ã‚‹.
 								const real imageSensorAreaPdf = camera->convertImageSensorPdfToScenePdf(
 									pdfImage,
 									next.pos,
@@ -788,7 +788,7 @@ namespace aten
 					sampledPath[i] = eyepath[i];
 				}
 				for (int i = 0; i < numLightVertices; i++) {
-					// lightpath ‚Í 0 ‚ªƒ‰ƒCƒg‚ÌˆÊ’u‚ÅAƒ‰ƒCƒg‚©‚çn‚Ü‚é‚Ì‚ÅAsubpaths ‚É‚ÍÅŒã‚ªI’[iƒ‰ƒCƒgj‚É‚È‚é‚æ‚¤‚ÉŠi”[‚·‚é.
+					// lightpath ã¯ 0 ãŒãƒ©ã‚¤ãƒˆã®ä½ç½®ã§ã€ãƒ©ã‚¤ãƒˆã‹ã‚‰å§‹ã¾ã‚‹ã®ã§ã€subpaths ã«ã¯æœ€å¾ŒãŒçµ‚ç«¯ï¼ˆãƒ©ã‚¤ãƒˆï¼‰ã«ãªã‚‹ã‚ˆã†ã«æ ¼ç´ã™ã‚‹.
 					sampledPath[pathLength - i] = lightpath[i];
 				}
 				auto numSampledPath = numEyeVertices + numLightVertices;

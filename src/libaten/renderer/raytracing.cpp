@@ -29,8 +29,8 @@ namespace aten
                     return std::move(contribution);
                 }
 
-                // Œğ·ˆÊ’u‚Ì–@ü.
-                // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+                // äº¤å·®ä½ç½®ã®æ³•ç·š.
+                // ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
                 const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
                 if (mtrl->isSingular() || mtrl->isTranslucent()) {

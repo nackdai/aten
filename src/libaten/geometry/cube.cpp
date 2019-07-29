@@ -22,7 +22,7 @@ namespace AT_NAME
         auto z = aten::abs(d.z);
 
         if (x > y && x > z) {
-            // XŽ²‚É•½s‚È–Ê.
+            // Xè»¸ã«å¹³è¡Œãªé¢.
             if (d.x > 0) {
                 return Face::POS_X;
             }
@@ -31,7 +31,7 @@ namespace AT_NAME
             }
         }
         else if (y > x && y > z) {
-            // YŽ²‚É•½s‚È–Ê.
+            // Yè»¸ã«å¹³è¡Œãªé¢.
             if (d.y > 0) {
                 return Face::POS_Y;
             }
@@ -40,7 +40,7 @@ namespace AT_NAME
             }
         }
         else {
-            // ZŽ²‚É•½s‚È–Ê.
+            // Zè»¸ã«å¹³è¡Œãªé¢.
             if (d.z > 0) {
                 return Face::POS_Z;
             }

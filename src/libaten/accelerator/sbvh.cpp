@@ -57,24 +57,24 @@ namespace aten
         {
             const auto numItemsInBlocks = numItems / blockNum;
 
-            // ‚Q‚Â‚ÌƒuƒƒbƒN‚ğ‚P‚Â‚Éƒ}[ƒW‚·‚é.
+            // ï¼’ã¤ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’ï¼‘ã¤ã«ãƒãƒ¼ã‚¸ã™ã‚‹.
 #pragma omp parallel num_threads(blockNum / 2)
             {
                 const auto idx = ::omp_get_thread_num();
 
-                // ‚Q‚Â‚ÌƒuƒƒbƒN‚ğ‚P‚Â‚Éƒ}[ƒW‚·‚é‚Ì‚ÅAnumItemsInBlocks * 2 ‚Æ‚È‚é.
+                // ï¼’ã¤ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’ï¼‘ã¤ã«ãƒãƒ¼ã‚¸ã™ã‚‹ã®ã§ã€numItemsInBlocks * 2 ã¨ãªã‚‹.
                 auto startPos = idx * numItemsInBlocks * 2;
 
-                // ’†ŠÔ’n“_‚È‚Ì‚ÅAnumItemsInBlocks * 2 ‚Ì”¼•ª‚Å numItemsInBlocks ‚Æ‚È‚é.
+                // ä¸­é–“åœ°ç‚¹ãªã®ã§ã€numItemsInBlocks * 2 ã®åŠåˆ†ã§ numItemsInBlocks ã¨ãªã‚‹.
                 auto pivot = startPos + numItemsInBlocks;
 
-                // I’[.
+                // çµ‚ç«¯.
                 auto endPos = (idx + 1 == blockNum / 2 ? numItems : pivot + numItemsInBlocks);
 
                 std::inplace_merge(first + startPos, first + pivot, first + endPos);
             }
 
-            // ‚Q‚Â‚ğ‚P‚Â‚Éƒ}[ƒW‚·‚é‚Ì‚ÅA”¼•ª‚É‚È‚é.
+            // ï¼’ã¤ã‚’ï¼‘ã¤ã«ãƒãƒ¼ã‚¸ã™ã‚‹ã®ã§ã€åŠåˆ†ã«ãªã‚‹.
             blockNum = (blockNum + 1) / 2;
         }
     }
@@ -147,8 +147,8 @@ namespace aten
         const auto& nestedBvh = m_bvh.getNestedAccel();
 
         // NOTE
-        // GPGPUˆ——p‚É threaded bvh(top layer) ‚Æ sbvh ‚ğ“¯‚¶ƒƒ‚ƒŠ‹óŠÔã‚ÉŠi”[‚·‚é‚½‚ßA‚P‚Â‚ÌƒŠƒXƒg‚ÅŠÇ—‚·‚é.
-        // ‚»‚Ì‚½‚ßA+1‚·‚é.
+        // GPGPUå‡¦ç†ç”¨ã« threaded bvh(top layer) ã¨ sbvh ã‚’åŒã˜ãƒ¡ãƒ¢ãƒªç©ºé–“ä¸Šã«æ ¼ç´ã™ã‚‹ãŸã‚ã€ï¼‘ã¤ã®ãƒªã‚¹ãƒˆã§ç®¡ç†ã™ã‚‹.
+        // ãã®ãŸã‚ã€+1ã™ã‚‹.
         m_threadedNodes.resize(nestedBvh.size() + 1);
 
         // Copy top layer bvh nodes to the array which SBVH has.
@@ -219,7 +219,7 @@ namespace aten
         // Set as bounding box.
         setBoundingBox(rootBox);
 
-        // Reference‚ÌƒCƒ“ƒfƒbƒNƒXƒŠƒXƒg‚ğì¬.
+        // Referenceã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒªã‚¹ãƒˆã‚’ä½œæˆ.
         std::vector<uint32_t> refIndices(m_refs.size());
         std::iota(refIndices.begin(), refIndices.end(), 0);
 
@@ -342,7 +342,7 @@ namespace aten
 
                     usedAxis = bestAxis;
 
-                    // bestAxis‚ÉŠî‚Ã‚¢‚Äbbox‚ÌˆÊ’u‚É‰‚¶‚Äƒ\[ƒg.
+                    // bestAxisã«åŸºã¥ã„ã¦bboxã®ä½ç½®ã«å¿œã˜ã¦ã‚½ãƒ¼ãƒˆ.
                     mergeSort(
                         node.refIds.begin(),
                         node.refIds.end(),
@@ -350,12 +350,12 @@ namespace aten
                         return m_refs[a].bbox.getCenter()[bestAxis] < m_refs[b].bbox.getCenter()[bestAxis];
                     });
 
-                    // •ªŠ„AABB‚Ì‘å‚«‚³‚ğƒŠƒZƒbƒg.
+                    // åˆ†å‰²AABBã®å¤§ãã•ã‚’ãƒªã‚»ãƒƒãƒˆ.
                     objLeftBB.empty();
                     objRightBB.empty();
 
                     // distribute in left and right child evenly.
-                    // ”¼•ª‚¸‚Â‰E‚Æ¶‚É‹Ï“™‚É•ªŠ„.
+                    // åŠåˆ†ãšã¤å³ã¨å·¦ã«å‡ç­‰ã«åˆ†å‰².
                     for (int i = 0; i < node.refIds.size(); i++) {
                         const auto id = node.refIds[i];
                         const auto& ref = m_refs[id];
@@ -393,7 +393,7 @@ namespace aten
             node.setChild(leftIdx, rightIdx);
 
             // copy node data to left and right children.
-            // ‚±‚±‚Å push_back ‚·‚é‚±‚Æ‚ÅAstd::vector “à•”‚Ìƒƒ‚ƒŠ\‘¢‚ª•Ï‚í‚é‚±‚Æ‚ª‚ ‚é‚Ì‚ÅAQÆ‚Å‚ ‚é node ‚Ì•ÏX‚Í‚±‚Ì‘O‚Ü‚Å‚ÉI‚í‚ç‚¹‚é‚±‚Æ.
+            // ã“ã“ã§ push_back ã™ã‚‹ã“ã¨ã§ã€std::vector å†…éƒ¨ã®ãƒ¡ãƒ¢ãƒªæ§‹é€ ãŒå¤‰ã‚ã‚‹ã“ã¨ãŒã‚ã‚‹ã®ã§ã€å‚ç…§ã§ã‚ã‚‹ node ã®å¤‰æ›´ã¯ã“ã®å‰ã¾ã§ã«çµ‚ã‚ã‚‰ã›ã‚‹ã“ã¨.
             m_nodes.push_back(SBVHNode());
             m_nodes.push_back(SBVHNode());
 
@@ -468,36 +468,36 @@ namespace aten
 
             // distribute references in the bins based on the centroids.
             for (uint32_t i = 0; i < refNum; i++) {
-                // ƒm[ƒh‚ÉŠÜ‚Ü‚ê‚éOŠpŒ`‚ÌAABB‚É‚Â‚¢‚ÄŒvZ.
+                // ãƒãƒ¼ãƒ‰ã«å«ã¾ã‚Œã‚‹ä¸‰è§’å½¢ã®AABBã«ã¤ã„ã¦è¨ˆç®—.
 
                 auto id = node.refIds[i];
                 const auto& ref = m_refs[id];
 
                 auto center = ref.bbox.getCenter();
 
-                // •ªŠ„î•ñ(bins)‚Ö‚ÌƒCƒ“ƒfƒbƒNƒX.
-                // Å¬’[“_‚©‚çOŠpŒ`AABB‚Ì’†S‚Ö‚Ì‹——£‚ğ²‚Ì’·‚³‚Å³‹K‰»‚·‚é‚±‚Æ‚ÅŒvZ.
+                // åˆ†å‰²æƒ…å ±(bins)ã¸ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹.
+                // æœ€å°ç«¯ç‚¹ã‹ã‚‰ä¸‰è§’å½¢AABBã®ä¸­å¿ƒã¸ã®è·é›¢ã‚’è»¸ã®é•·ã•ã§æ­£è¦åŒ–ã™ã‚‹ã“ã¨ã§è¨ˆç®—.
                 int binIdx = (int)(m_numBins * ((center[dim] - centroidMin[dim]) * invLen));
 
                 binIdx = std::min<int>(binIdx, m_numBins - 1);
                 AT_ASSERT(binIdx >= 0);
 
-                bins[binIdx].start += 1;    // Bin‚ÉŠÜ‚Ü‚ê‚éOŠpŒ`‚Ì”‚ğ‘‚â‚·.
+                bins[binIdx].start += 1;    // Binã«å«ã¾ã‚Œã‚‹ä¸‰è§’å½¢ã®æ•°ã‚’å¢—ã‚„ã™.
                 bins[binIdx].bbox.expand(ref.bbox);
             }
 
-            // Œã‚ë‚©‚ç•ªŠ„î•ñ‚ğ’~Ï‚·‚é.
+            // å¾Œã‚ã‹ã‚‰åˆ†å‰²æƒ…å ±ã‚’è“„ç©ã™ã‚‹.
             bins[m_numBins - 1].accum = bins[m_numBins - 1].bbox;
             bins[m_numBins - 1].end = bins[m_numBins - 1].start;
 
             for (int i = m_numBins - 2; i >= 0; i--) {
-                // ‚±‚±‚Ü‚Å‚ÌAABB‘S‘ÌƒTƒCƒY.
+                // ã“ã“ã¾ã§ã®AABBå…¨ä½“ã‚µã‚¤ã‚º.
                 bins[i].accum = bins[i + 1].accum;
 
-                // ©•ª©g‚ÌAABB‚ğŠÜ‚ß‚é.
+                // è‡ªåˆ†è‡ªèº«ã®AABBã‚’å«ã‚ã‚‹.
                 bins[i].accum.expand(bins[i].bbox);
 
-                // ‚±‚±‚Ü‚Å‚ÌOŠpŒ`”.
+                // ã“ã“ã¾ã§ã®ä¸‰è§’å½¢æ•°.
                 bins[i].end = bins[i].start + bins[i + 1].end;
             }
 
@@ -506,12 +506,12 @@ namespace aten
 
             // find split.
             for (uint32_t i = 0; i < m_numBins - 1; i++) {
-                // ˆê‚Â‚¸‚Â”ÍˆÍ‚ğL‚°‚Ä‚¢‚­.
+                // ä¸€ã¤ãšã¤ç¯„å›²ã‚’åºƒã’ã¦ã„ã.
                 leftBox.expand(bins[i].bbox);
 
                 auto leftArea = leftBox.computeSurfaceArea();
 
-                // i ‚©‚çæ‚Ì‘S‘Ì”ÍˆÍ‚ª‰E‘¤‚É‚È‚é.
+                // i ã‹ã‚‰å…ˆã®å…¨ä½“ç¯„å›²ãŒå³å´ã«ãªã‚‹.
                 auto rightArea = bins[i + 1].accum.computeSurfaceArea();
 
                 int rightCount = bins[i + 1].end;
@@ -533,7 +533,7 @@ namespace aten
 
                     leftBB = leftBox;
 
-                    // i ‚©‚çæ‚Ì‘S‘Ì”ÍˆÍ‚ª‰E‘¤‚É‚È‚é.
+                    // i ã‹ã‚‰å…ˆã®å…¨ä½“ç¯„å›²ãŒå³å´ã«ãªã‚‹.
                     rightBB = bins[i + 1].accum;
                 }
             }
@@ -573,7 +573,7 @@ namespace aten
 
             const auto invLen = real(1) / segmentLength;
 
-            // •ªŠ„î•ñ“–‚½‚è‚Ì²‚Ì’·‚³.
+            // åˆ†å‰²æƒ…å ±å½“ãŸã‚Šã®è»¸ã®é•·ã•.
             const auto lenghthPerBin = segmentLength / (float)m_numBins;
 
             // clear bins;
@@ -591,7 +591,7 @@ namespace aten
 
                 // split each triangle into references.
                 // each triangle will be recorded into multiple bins.
-                // OŠpŒ`‚ª“ü‚é•ªŠ„î•ñ‚ÌƒCƒ“ƒfƒbƒNƒX”ÍˆÍ‚ğŒvZ.
+                // ä¸‰è§’å½¢ãŒå…¥ã‚‹åˆ†å‰²æƒ…å ±ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç¯„å›²ã‚’è¨ˆç®—.
                 int binStartIdx = (int)(m_numBins * ((triMin - boxMin[dim]) * invLen));
                 int binEndIdx = (int)(m_numBins * ((triMax - boxMin[dim]) * invLen));
 
@@ -616,7 +616,7 @@ namespace aten
                     }
                 }
 
-                // •ªŠ„î•ñ‚ªæ‚èˆµ‚¤OŠpŒ`”‚ğXV.
+                // åˆ†å‰²æƒ…å ±ãŒå–ã‚Šæ‰±ã†ä¸‰è§’å½¢æ•°ã‚’æ›´æ–°.
                 bins[binStartIdx].start++;
                 bins[binEndIdx].end++;
             }
@@ -626,13 +626,13 @@ namespace aten
             bins[m_numBins - 1].accum = bins[m_numBins - 1].bbox;
 
             for (int n = m_numBins - 2; n >= 0; n--) {
-                // ‚±‚±‚Ü‚Å‚ÌAABB‘S‘ÌƒTƒCƒY.
+                // ã“ã“ã¾ã§ã®AABBå…¨ä½“ã‚µã‚¤ã‚º.
                 bins[n].accum = bins[n + 1].accum;
 
-                // ©•ª©g‚ÌAABB‚ğŠÜ‚ß‚é.
+                // è‡ªåˆ†è‡ªèº«ã®AABBã‚’å«ã‚ã‚‹.
                 bins[n].accum.expand(bins[n].bbox);
 
-                // ‚±‚±‚Ü‚Å‚ÌOŠpŒ`”.
+                // ã“ã“ã¾ã§ã®ä¸‰è§’å½¢æ•°.
                 bins[n].end += bins[n + 1].end;
             }
 
@@ -697,11 +697,11 @@ namespace aten
             const auto refMax = ref.bbox.maxPos()[axis];
 
             if (refMax <= splitPlane) {
-                // •ªŠ„ˆÊ’u‚æ‚è¶.
+                // åˆ†å‰²ä½ç½®ã‚ˆã‚Šå·¦.
                 leftList.push_back(refIdx);
             }
             else if (refMin >= splitPlane) {
-                // •ªŠ„ˆÊ’u‚æ‚è‰E.
+                // åˆ†å‰²ä½ç½®ã‚ˆã‚Šå³.
                 rightList.push_back(refIdx);
             }
             else {
@@ -710,10 +710,10 @@ namespace aten
                 // check possible unsplit.
 
                 // NOTE
-                // ˜_•¶‚æ‚è.
+                // è«–æ–‡ã‚ˆã‚Š.
                 // Csplit = SA(B1) * N1 + SA(B2) * N2
-                //     C1 = SA(B1 ¾ B¢) * N1 + SA(B2) * (N2 - 1)
-                //     C2 = SA(B1) * (N1 - 1) + SA(B2 ¾ B¢) * N2
+                //     C1 = SA(B1 âˆª Bâ–³) * N1 + SA(B2) * (N2 - 1)
+                //     C2 = SA(B1) * (N1 - 1) + SA(B2 âˆª Bâ–³) * N2
 
                 aabb leftUnsplitBB = leftBB;
                 leftUnsplitBB.expand(ref.bbox);
@@ -746,18 +746,18 @@ namespace aten
                 }
                 else {
                     // push left and right.
-                    // “ñ‚Â‚É•ªŠ„.
+                    // äºŒã¤ã«åˆ†å‰².
 
                     Reference leftRef(m_refs[refIdx]);
 
-                    // ƒoƒEƒ“ƒfƒBƒ“ƒOƒ{ƒbƒNƒX‚ğXV.
+                    // ãƒã‚¦ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ãƒœãƒƒã‚¯ã‚¹ã‚’æ›´æ–°.
                     if (leftRef.bbox.maxPos()[axis] > splitPlane) {
                         leftRef.bbox.maxPos()[axis] = splitPlane;
                     }
 
                     Reference rightRef(m_refs[refIdx]);
 
-                    // ƒoƒEƒ“ƒfƒBƒ“ƒOƒ{ƒbƒNƒX‚ğXV.
+                    // ãƒã‚¦ãƒ³ãƒ‡ã‚£ãƒ³ã‚°ãƒœãƒƒã‚¯ã‚¹ã‚’æ›´æ–°.
                     if (rightRef.bbox.minPos()[axis] < splitPlane) {
                         rightRef.bbox.minPos()[axis] = splitPlane;
                     }
@@ -802,18 +802,18 @@ namespace aten
 
             auto center = ref.bbox.getCenter();
 
-            // •ªŠ„î•ñ(bins)‚Ö‚ÌƒCƒ“ƒfƒbƒNƒX.
-            // Å¬’[“_‚©‚çOŠpŒ`AABB‚Ì’†S‚Ö‚Ì‹——£‚ğ²‚Ì’·‚³‚Å³‹K‰»‚·‚é‚±‚Æ‚ÅŒvZ.
+            // åˆ†å‰²æƒ…å ±(bins)ã¸ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹.
+            // æœ€å°ç«¯ç‚¹ã‹ã‚‰ä¸‰è§’å½¢AABBã®ä¸­å¿ƒã¸ã®è·é›¢ã‚’è»¸ã®é•·ã•ã§æ­£è¦åŒ–ã™ã‚‹ã“ã¨ã§è¨ˆç®—.
             int binIdx = (int)(m_numBins * ((center[axis] - bbCentroid.minPos()[axis]) * invLen));
 
             binIdx = aten::clamp<int>(binIdx, 0, m_numBins - 1);
 
             if (binIdx <= splitBin) {
-                // bin index‚ªsplitBin‚æ‚è¬‚³‚¢‚Ì‚Å¶.
+                // bin indexãŒsplitBinã‚ˆã‚Šå°ã•ã„ã®ã§å·¦.
                 leftList.push_back(id);
             }
             else {
-                // bin index‚ªsplitBin‚æ‚è‘å‚«‚¢‚Ì‚Å‰E.
+                // bin indexãŒsplitBinã‚ˆã‚Šå¤§ãã„ã®ã§å³.
                 rightList.push_back(id);
             }
         }
@@ -895,8 +895,8 @@ namespace aten
                 thrededNode.refIdListEnd = thrededNode.refIdListStart + (float)sbvhNode.refIds.size();
 #endif
 
-                // QÆ‚·‚éOŠpŒ`ƒCƒ“ƒfƒbƒNƒX‚ğ”z—ñ‚ÉŠi”[.
-                // •ªŠ„‚µ‚Ä‚¢‚é‚Ì‚ÅAd•¡‚·‚éê‡‚à‚ ‚é‚Ì‚ÅA•Ê”z—ñ‚ÉŠi”[‚µ‚Ä‚¢‚­.
+                // å‚ç…§ã™ã‚‹ä¸‰è§’å½¢ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’é…åˆ—ã«æ ¼ç´.
+                // åˆ†å‰²ã—ã¦ã„ã‚‹ã®ã§ã€é‡è¤‡ã™ã‚‹å ´åˆã‚‚ã‚ã‚‹ã®ã§ã€åˆ¥é…åˆ—ã«æ ¼ç´ã—ã¦ã„ã.
                 for (int i = 0; i < sbvhNode.refIds.size(); i++) {
                     const auto refId = sbvhNode.refIds[i];
                     const auto& ref = m_refs[refId];
@@ -1159,7 +1159,7 @@ namespace aten
                     isectTmp.isVoxel = true;
 
                     // TODO
-                    // L2Wƒ}ƒgƒŠƒNƒX.
+                    // L2Wãƒãƒˆãƒªã‚¯ã‚¹.
 
                     isectTmp.t = t_result;
 
@@ -1172,7 +1172,7 @@ namespace aten
                     // Dummy value, return ray hit voxel.
                     isectTmp.objid = 1;
 
-                    // LOD‚Éƒqƒbƒg‚µ‚½‚Ì‚ÅAq‹ŸiÚ×j‚Í’Tõ‚µ‚È‚¢‚æ‚¤‚É‚·‚é.
+                    // LODã«ãƒ’ãƒƒãƒˆã—ãŸã®ã§ã€å­ä¾›ï¼ˆè©³ç´°ï¼‰ã¯æ¢ç´¢ã—ãªã„ã‚ˆã†ã«ã™ã‚‹.
                     isHit = false;
 
                     if (isectTmp.t < isect.t) {

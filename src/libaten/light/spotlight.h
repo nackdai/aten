@@ -102,35 +102,35 @@ namespace AT_NAME {
 
 #if 0
             if (rho > cosHalfTheta) {
-                // �{�e���ɓ����Ă��� -> �ő�����C�g�̉e�����󂯂�.
+                // 本影内に入っている -> 最大限ライトの影響を受ける.
                 spot = 1;
             }
             else if (rho <= cosHalfPhi) {
-                // ���e�O�ɏo�Ă��� -> ���C�g�̉e����S���󂯂Ȃ�.
+                // 半影外に出ている -> ライトの影響を全く受けない.
                 spot = 0;
             }
             else {
-                // �{�e�̊O�A���e�̒�.
+                // 本影の外、半影の中.
                 spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
                 spot = aten::pow(spot, param->falloff);
             }
 #else
             if (rho > cosHalfPhi) {
-                // ���e��.
+                // 半影内.
                 if (rho > cosHalfTheta) {
-                    // �{�e���ɓ����Ă��� -> �ő�����C�g�̉e�����󂯂�.
+                    // 本影内に入っている -> 最大限ライトの影響を受ける.
                     spot = 1;
                 }
                 else {
-                    // �{�e�̊O�A���e�̒�.
+                    // 本影の外、半影の中.
                     spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
                 }
             }
 #endif
 
-            // ������.
+            // 減衰率.
             // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
-            // ��L�ɂ��ƁAL = Le / dist2 �Ő��������A3D�O���t�B�b�N�X�ł͌����ړI�ɂ��܂��낵���Ȃ��̂ŁA���������g���Čv�Z����.
+            // 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
             auto dist2 = aten::squared_length(result->dir);
             auto dist = aten::sqrt(dist2);
             real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;

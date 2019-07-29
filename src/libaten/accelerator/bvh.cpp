@@ -272,10 +272,10 @@ namespace aten {
         // http://qiita.com/omochi64/items/9336f57118ba918f82ec
 
 #if 1
-        // ‚ ‚éH
+        // ã‚ã‚‹ï¼Ÿ
         AT_ASSERT(num > 0);
 
-        // ‘S‘Ì‚ğ•¢‚¤AABB‚ğŒvZ.
+        // å…¨ä½“ã‚’è¦†ã†AABBã‚’è¨ˆç®—.
         root->m_aabb = list[0]->getBoundingbox();
         for (uint32_t i = 1; i < num; i++) {
             auto bbox = list[i]->getBoundingbox();
@@ -283,7 +283,7 @@ namespace aten {
         }
 
         if (num == 1) {
-            // ‚PŒÂ‚µ‚©‚È‚¢‚Ì‚ÅA‚±‚ê‚¾‚¯‚ÅI—¹.
+            // ï¼‘å€‹ã—ã‹ãªã„ã®ã§ã€ã“ã‚Œã ã‘ã§çµ‚äº†.
             root->m_left = new bvhnode(parent, list[0], this);
 
             root->m_left->setBoundingBox(list[0]->getBoundingbox());
@@ -292,7 +292,7 @@ namespace aten {
             return;
         }
         else if (num == 2) {
-            // ‚QŒÂ‚¾‚¯‚Ì‚Æ‚«‚Í“K“–‚Éƒ\[ƒg‚µ‚ÄAI—¹.
+            // ï¼’å€‹ã ã‘ã®ã¨ãã¯é©å½“ã«ã‚½ãƒ¼ãƒˆã—ã¦ã€çµ‚äº†.
             auto bbox = list[0]->getBoundingbox();
             bbox = aabb::merge(bbox, list[1]->getBoundingbox());
 
@@ -312,71 +312,71 @@ namespace aten {
             return;
         }
 
-        // Triangle‚Æray‚Ìƒqƒbƒg‚É‚©‚©‚éˆ—ŠÔ‚ÌŒ©Ï‚à‚è.
-        static const real T_tri = 1;  // “K“–.
+        // Triangleã¨rayã®ãƒ’ãƒƒãƒˆã«ã‹ã‹ã‚‹å‡¦ç†æ™‚é–“ã®è¦‹ç©ã‚‚ã‚Š.
+        static const real T_tri = 1;  // é©å½“.
 
-        // AABB‚Æray‚Ìƒqƒbƒg‚É‚©‚©‚éˆ—ŠÔ‚ÌŒ©Ï‚à‚è.
-        static const real T_aabb = 1;  // “K“–.
+        // AABBã¨rayã®ãƒ’ãƒƒãƒˆã«ã‹ã‹ã‚‹å‡¦ç†æ™‚é–“ã®è¦‹ç©ã‚‚ã‚Š.
+        static const real T_aabb = 1;  // é©å½“.
 
-        // —Ìˆæ•ªŠ„‚ğ‚¹‚¸Apolygons ‚ğŠÜ‚Ş—tƒm[ƒh‚ğ\’z‚·‚éê‡‚ğb’è‚Ì bestCost ‚É‚·‚é.
+        // é ˜åŸŸåˆ†å‰²ã‚’ã›ãšã€polygons ã‚’å«ã‚€è‘‰ãƒãƒ¼ãƒ‰ã‚’æ§‹ç¯‰ã™ã‚‹å ´åˆã‚’æš«å®šã® bestCost ã«ã™ã‚‹.
         //auto bestCost = T_tri * num;
-        uint32_t bestCost = UINT32_MAX;    // ŒÀŠE‚Ü‚Å•ªŠ„‚µ‚½‚¢‚Ì‚ÅA“K“–‚É‘å‚«‚¢’l‚É‚µ‚Ä‚¨‚­.
+        uint32_t bestCost = UINT32_MAX;    // é™ç•Œã¾ã§åˆ†å‰²ã—ãŸã„ã®ã§ã€é©å½“ã«å¤§ãã„å€¤ã«ã—ã¦ãŠã.
 
-        // •ªŠ„‚ÉÅ‚à—Ç‚¢² (0:x, 1:y, 2:z)
+        // åˆ†å‰²ã«æœ€ã‚‚è‰¯ã„è»¸ (0:x, 1:y, 2:z)
         int bestAxis = -1;
 
-        // Å‚à—Ç‚¢•ªŠ„êŠ
+        // æœ€ã‚‚è‰¯ã„åˆ†å‰²å ´æ‰€
         int bestSplitIndex = -1;
 
-        // ƒm[ƒh‘S‘Ì‚ÌAABB‚Ì•\–ÊÏ
+        // ãƒãƒ¼ãƒ‰å…¨ä½“ã®AABBã®è¡¨é¢ç©
         auto rootSurfaceArea = root->m_aabb.computeSurfaceArea();
 
         for (int axis = 0; axis < 3; axis++) {
-            // ƒ|ƒŠƒSƒ“ƒŠƒXƒg‚ğA‚»‚ê‚¼‚ê‚ÌAABB‚Ì’†SÀ•W‚ğg‚¢Aaxis ‚Åƒ\[ƒg‚·‚é.
+            // ãƒãƒªã‚´ãƒ³ãƒªã‚¹ãƒˆã‚’ã€ãã‚Œãã‚Œã®AABBã®ä¸­å¿ƒåº§æ¨™ã‚’ä½¿ã„ã€axis ã§ã‚½ãƒ¼ãƒˆã™ã‚‹.
             sortList(list, num, axis);
 
-            // AABB‚Ì•\–ÊÏƒŠƒXƒgBs1SA[i], s2SA[i] ‚ÍA
-            // uS1‘¤‚ÉiŒÂAS2‘¤‚É(polygons.size()-i)ŒÂƒ|ƒŠƒSƒ“‚ª‚ ‚é‚æ‚¤‚É•ªŠ„v‚µ‚½‚Æ‚«‚Ì•\–ÊÏ
+            // AABBã®è¡¨é¢ç©ãƒªã‚¹ãƒˆã€‚s1SA[i], s2SA[i] ã¯ã€
+            // ã€ŒS1å´ã«iå€‹ã€S2å´ã«(polygons.size()-i)å€‹ãƒãƒªã‚´ãƒ³ãŒã‚ã‚‹ã‚ˆã†ã«åˆ†å‰²ã€ã—ãŸã¨ãã®è¡¨é¢ç©
             std::vector<real> s1SurfaceArea(num + 1, AT_MATH_INF);
             std::vector<real> s2SurfaceArea(num + 1, AT_MATH_INF);
 
-            // •ªŠ„‚³‚ê‚½2‚Â‚Ì—Ìˆæ.
-            std::vector<hitable*> s1;                    // ‰E‘¤.
-            std::vector<hitable*> s2(list, list + num);    // ¶‘¤.
+            // åˆ†å‰²ã•ã‚ŒãŸ2ã¤ã®é ˜åŸŸ.
+            std::vector<hitable*> s1;                    // å³å´.
+            std::vector<hitable*> s2(list, list + num);    // å·¦å´.
 
             // NOTE
-            // s2‘¤‚©‚çæ‚èo‚µ‚ÄAs1‚ÉŠi”[‚·‚é‚½‚ßAs2‚ÉƒŠƒXƒg‚ğ‘S•”“ü‚ê‚é.
+            // s2å´ã‹ã‚‰å–ã‚Šå‡ºã—ã¦ã€s1ã«æ ¼ç´ã™ã‚‹ãŸã‚ã€s2ã«ãƒªã‚¹ãƒˆã‚’å…¨éƒ¨å…¥ã‚Œã‚‹.
 
             aabb s1bbox;
 
-            // ‰Â”\‚È•ªŠ„•û–@‚É‚Â‚¢‚ÄAs1‘¤‚Ì AABB ‚Ì•\–ÊÏ‚ğŒvZ.
+            // å¯èƒ½ãªåˆ†å‰²æ–¹æ³•ã«ã¤ã„ã¦ã€s1å´ã® AABB ã®è¡¨é¢ç©ã‚’è¨ˆç®—.
             for (uint32_t i = 0; i <= num; i++) {
                 s1SurfaceArea[i] = s1bbox.computeSurfaceArea();
 
                 if (s2.size() > 0) {
-                    // s2‘¤‚ÅAaxis ‚É‚Â‚¢‚ÄÅ¶ (Å¬ˆÊ’u) ‚É‚¢‚éƒ|ƒŠƒSƒ“‚ğs1‚ÌÅ‰E (Å‘åˆÊ’u) ‚ÉˆÚ‚·
+                    // s2å´ã§ã€axis ã«ã¤ã„ã¦æœ€å·¦ (æœ€å°ä½ç½®) ã«ã„ã‚‹ãƒãƒªã‚´ãƒ³ã‚’s1ã®æœ€å³ (æœ€å¤§ä½ç½®) ã«ç§»ã™
                     auto p = s2.front();
                     s1.push_back(p);
                     pop_front(s2);
 
-                    // ˆÚ‚µ‚½ƒ|ƒŠƒSƒ“‚ÌAABB‚ğƒ}[ƒW‚µ‚Äs1‚ÌAABB‚Æ‚·‚é.
+                    // ç§»ã—ãŸãƒãƒªã‚´ãƒ³ã®AABBã‚’ãƒãƒ¼ã‚¸ã—ã¦s1ã®AABBã¨ã™ã‚‹.
                     auto bbox = p->getBoundingbox();
                     s1bbox = aabb::merge(s1bbox, bbox);
                 }
             }
 
-            // ‹t‚És2‘¤‚ÌAABB‚Ì•\–ÊÏ‚ğŒvZ‚µ‚Â‚ÂASAH ‚ğŒvZ.
+            // é€†ã«s2å´ã®AABBã®è¡¨é¢ç©ã‚’è¨ˆç®—ã—ã¤ã¤ã€SAH ã‚’è¨ˆç®—.
             aabb s2bbox;
 
             for (int i = num; i >= 0; i--) {
                 s2SurfaceArea[i] = s2bbox.computeSurfaceArea();
 
                 if (s1.size() > 0 && s2.size() > 0) {
-                    // SAH-based cost ‚ÌŒvZ.
+                    // SAH-based cost ã®è¨ˆç®—.
                     auto cost =    2 * T_aabb
                         + (s1SurfaceArea[i] * s1.size() + s2SurfaceArea[i] * s2.size()) * T_tri / rootSurfaceArea;
 
-                    // Å—ÇƒRƒXƒg‚ªXV‚³‚ê‚½‚©.
+                    // æœ€è‰¯ã‚³ã‚¹ãƒˆãŒæ›´æ–°ã•ã‚ŒãŸã‹.
                     if (cost < bestCost) {
                         bestCost = cost;
                         bestAxis = axis;
@@ -385,15 +385,15 @@ namespace aten {
                 }
 
                 if (s1.size() > 0) {
-                    // s1‘¤‚ÅAaxis ‚É‚Â‚¢‚ÄÅ‰E‚É‚¢‚éƒ|ƒŠƒSƒ“‚ğs2‚ÌÅ¶‚ÉˆÚ‚·.
+                    // s1å´ã§ã€axis ã«ã¤ã„ã¦æœ€å³ã«ã„ã‚‹ãƒãƒªã‚´ãƒ³ã‚’s2ã®æœ€å·¦ã«ç§»ã™.
                     auto p = s1.back();
                     
-                    // æ“ª‚É‘}“ü.
+                    // å…ˆé ­ã«æŒ¿å…¥.
                     s2.insert(s2.begin(), p); 
 
                     s1.pop_back();
 
-                    // ˆÚ‚µ‚½ƒ|ƒŠƒSƒ“‚ÌAABB‚ğƒ}[ƒW‚µ‚ÄS2‚ÌAABB‚Æ‚·‚é.
+                    // ç§»ã—ãŸãƒãƒªã‚´ãƒ³ã®AABBã‚’ãƒãƒ¼ã‚¸ã—ã¦S2ã®AABBã¨ã™ã‚‹.
                     auto bbox = p->getBoundingbox();
                     s2bbox = aabb::merge(s2bbox, bbox);
                 }
@@ -401,24 +401,24 @@ namespace aten {
         }
 
         if (bestAxis >= 0) {
-            // bestAxis ‚ÉŠî‚Ã‚«A¶‰E‚É•ªŠ„.
-            // bestAxis ‚Åƒ\[ƒg.
+            // bestAxis ã«åŸºã¥ãã€å·¦å³ã«åˆ†å‰².
+            // bestAxis ã§ã‚½ãƒ¼ãƒˆ.
             sortList(list, num, bestAxis);
 
-            // ¶‰E‚Ìqƒm[ƒh‚ğì¬.
+            // å·¦å³ã®å­ãƒãƒ¼ãƒ‰ã‚’ä½œæˆ.
             root->m_left = new bvhnode(root, nullptr, this);
             root->m_right = new bvhnode(root, nullptr, this);
 
             root->m_left->setDepth(depth + 1);
             root->m_right->setDepth(depth + 1);
 
-            // ƒŠƒXƒg‚ğ•ªŠ„.
+            // ãƒªã‚¹ãƒˆã‚’åˆ†å‰².
             int leftListNum = bestSplitIndex;
             int rightListNum = num - leftListNum;
 
             AT_ASSERT(rightListNum > 0);
 
-            // Ä‹Aˆ—
+            // å†å¸°å‡¦ç†
             buildBySAH(root->m_left, list, leftListNum, depth + 1, root->m_left);
             buildBySAH(root->m_right, list + leftListNum, rightListNum, depth + 1, root->m_right);
         }
@@ -444,7 +444,7 @@ namespace aten {
 
         while (info.node != nullptr)
         {
-            // ‘S‘Ì‚ğ•¢‚¤AABB‚ğŒvZ.
+            // å…¨ä½“ã‚’è¦†ã†AABBã‚’è¨ˆç®—.
             info.node->setBoundingBox(info.list[0]->getBoundingbox());
             for (uint32_t i = 1; i < info.num; i++) {
                 auto bbox = info.list[i]->getBoundingbox();
@@ -485,7 +485,7 @@ namespace aten {
             }
 #else
             if (info.num == 1) {
-                // ‚PŒÂ‚µ‚©‚È‚¢‚Ì‚ÅA‚±‚ê‚¾‚¯‚ÅI—¹.
+                // ï¼‘å€‹ã—ã‹ãªã„ã®ã§ã€ã“ã‚Œã ã‘ã§çµ‚äº†.
                 info.node->m_left = new bvhnode(info.node, info.list[0]);
 
                 info.node->m_left->setBoundingBox(info.list[0]->getBoundingbox());
@@ -495,7 +495,7 @@ namespace aten {
                 continue;
             }
             else if (info.num == 2) {
-                // ‚QŒÂ‚¾‚¯‚Ì‚Æ‚«‚Í“K“–‚Éƒ\[ƒg‚µ‚ÄAI—¹.
+                // ï¼’å€‹ã ã‘ã®ã¨ãã¯é©å½“ã«ã‚½ãƒ¼ãƒˆã—ã¦ã€çµ‚äº†.
 
                 auto bbox = info.list[0]->getBoundingbox();
                 bbox = aabb::merge(bbox, info.list[1]->getBoundingbox());
@@ -516,71 +516,71 @@ namespace aten {
             }            
 #endif
 
-            // Triangle‚Æray‚Ìƒqƒbƒg‚É‚©‚©‚éˆ—ŠÔ‚ÌŒ©Ï‚à‚è.
-            static const real T_tri = 1;  // “K“–.
+            // Triangleã¨rayã®ãƒ’ãƒƒãƒˆã«ã‹ã‹ã‚‹å‡¦ç†æ™‚é–“ã®è¦‹ç©ã‚‚ã‚Š.
+            static const real T_tri = 1;  // é©å½“.
 
-            // AABB‚Æray‚Ìƒqƒbƒg‚É‚©‚©‚éˆ—ŠÔ‚ÌŒ©Ï‚à‚è.
-            static const real T_aabb = 1;  // “K“–.
+            // AABBã¨rayã®ãƒ’ãƒƒãƒˆã«ã‹ã‹ã‚‹å‡¦ç†æ™‚é–“ã®è¦‹ç©ã‚‚ã‚Š.
+            static const real T_aabb = 1;  // é©å½“.
 
-            // —Ìˆæ•ªŠ„‚ğ‚¹‚¸Apolygons ‚ğŠÜ‚Ş—tƒm[ƒh‚ğ\’z‚·‚éê‡‚ğb’è‚Ì bestCost ‚É‚·‚é.
+            // é ˜åŸŸåˆ†å‰²ã‚’ã›ãšã€polygons ã‚’å«ã‚€è‘‰ãƒãƒ¼ãƒ‰ã‚’æ§‹ç¯‰ã™ã‚‹å ´åˆã‚’æš«å®šã® bestCost ã«ã™ã‚‹.
             //auto bestCost = T_tri * num;
-            uint32_t bestCost = UINT32_MAX;    // ŒÀŠE‚Ü‚Å•ªŠ„‚µ‚½‚¢‚Ì‚ÅA“K“–‚É‘å‚«‚¢’l‚É‚µ‚Ä‚¨‚­.
+            uint32_t bestCost = UINT32_MAX;    // é™ç•Œã¾ã§åˆ†å‰²ã—ãŸã„ã®ã§ã€é©å½“ã«å¤§ãã„å€¤ã«ã—ã¦ãŠã.
 
-            // •ªŠ„‚ÉÅ‚à—Ç‚¢² (0:x, 1:y, 2:z)
+            // åˆ†å‰²ã«æœ€ã‚‚è‰¯ã„è»¸ (0:x, 1:y, 2:z)
             int bestAxis = -1;
 
-            // Å‚à—Ç‚¢•ªŠ„êŠ
+            // æœ€ã‚‚è‰¯ã„åˆ†å‰²å ´æ‰€
             int bestSplitIndex = -1;
 
-            // ƒm[ƒh‘S‘Ì‚ÌAABB‚Ì•\–ÊÏ
+            // ãƒãƒ¼ãƒ‰å…¨ä½“ã®AABBã®è¡¨é¢ç©
             auto rootSurfaceArea = info.node->getBoundingbox().computeSurfaceArea();
 
             for (int axis = 0; axis < 3; axis++) {
-                // ƒ|ƒŠƒSƒ“ƒŠƒXƒg‚ğA‚»‚ê‚¼‚ê‚ÌAABB‚Ì’†SÀ•W‚ğg‚¢Aaxis ‚Åƒ\[ƒg‚·‚é.
+                // ãƒãƒªã‚´ãƒ³ãƒªã‚¹ãƒˆã‚’ã€ãã‚Œãã‚Œã®AABBã®ä¸­å¿ƒåº§æ¨™ã‚’ä½¿ã„ã€axis ã§ã‚½ãƒ¼ãƒˆã™ã‚‹.
                 sortList(info.list, info.num, axis);
 
-                // AABB‚Ì•\–ÊÏƒŠƒXƒgBs1SA[i], s2SA[i] ‚ÍA
-                // uS1‘¤‚ÉiŒÂAS2‘¤‚É(polygons.size()-i)ŒÂƒ|ƒŠƒSƒ“‚ª‚ ‚é‚æ‚¤‚É•ªŠ„v‚µ‚½‚Æ‚«‚Ì•\–ÊÏ
+                // AABBã®è¡¨é¢ç©ãƒªã‚¹ãƒˆã€‚s1SA[i], s2SA[i] ã¯ã€
+                // ã€ŒS1å´ã«iå€‹ã€S2å´ã«(polygons.size()-i)å€‹ãƒãƒªã‚´ãƒ³ãŒã‚ã‚‹ã‚ˆã†ã«åˆ†å‰²ã€ã—ãŸã¨ãã®è¡¨é¢ç©
                 std::vector<real> s1SurfaceArea(info.num + 1, AT_MATH_INF);
                 std::vector<real> s2SurfaceArea(info.num + 1, AT_MATH_INF);
 
-                // •ªŠ„‚³‚ê‚½2‚Â‚Ì—Ìˆæ.
-                std::vector<hitable*> s1;                    // ‰E‘¤.
-                std::vector<hitable*> s2(info.list, info.list + info.num);    // ¶‘¤.
+                // åˆ†å‰²ã•ã‚ŒãŸ2ã¤ã®é ˜åŸŸ.
+                std::vector<hitable*> s1;                    // å³å´.
+                std::vector<hitable*> s2(info.list, info.list + info.num);    // å·¦å´.
 
                 // NOTE
-                // s2‘¤‚©‚çæ‚èo‚µ‚ÄAs1‚ÉŠi”[‚·‚é‚½‚ßAs2‚ÉƒŠƒXƒg‚ğ‘S•”“ü‚ê‚é.
+                // s2å´ã‹ã‚‰å–ã‚Šå‡ºã—ã¦ã€s1ã«æ ¼ç´ã™ã‚‹ãŸã‚ã€s2ã«ãƒªã‚¹ãƒˆã‚’å…¨éƒ¨å…¥ã‚Œã‚‹.
 
                 aabb s1bbox;
 
-                // ‰Â”\‚È•ªŠ„•û–@‚É‚Â‚¢‚ÄAs1‘¤‚Ì AABB ‚Ì•\–ÊÏ‚ğŒvZ.
+                // å¯èƒ½ãªåˆ†å‰²æ–¹æ³•ã«ã¤ã„ã¦ã€s1å´ã® AABB ã®è¡¨é¢ç©ã‚’è¨ˆç®—.
                 for (uint32_t i = 0; i <= info.num; i++) {
                     s1SurfaceArea[i] = s1bbox.computeSurfaceArea();
 
                     if (s2.size() > 0) {
-                        // s2‘¤‚ÅAaxis ‚É‚Â‚¢‚ÄÅ¶ (Å¬ˆÊ’u) ‚É‚¢‚éƒ|ƒŠƒSƒ“‚ğs1‚ÌÅ‰E (Å‘åˆÊ’u) ‚ÉˆÚ‚·
+                        // s2å´ã§ã€axis ã«ã¤ã„ã¦æœ€å·¦ (æœ€å°ä½ç½®) ã«ã„ã‚‹ãƒãƒªã‚´ãƒ³ã‚’s1ã®æœ€å³ (æœ€å¤§ä½ç½®) ã«ç§»ã™
                         auto p = s2.front();
                         s1.push_back(p);
                         pop_front(s2);
 
-                        // ˆÚ‚µ‚½ƒ|ƒŠƒSƒ“‚ÌAABB‚ğƒ}[ƒW‚µ‚Äs1‚ÌAABB‚Æ‚·‚é.
+                        // ç§»ã—ãŸãƒãƒªã‚´ãƒ³ã®AABBã‚’ãƒãƒ¼ã‚¸ã—ã¦s1ã®AABBã¨ã™ã‚‹.
                         auto bbox = p->getBoundingbox();
                         s1bbox = aabb::merge(s1bbox, bbox);
                     }
                 }
 
-                // ‹t‚És2‘¤‚ÌAABB‚Ì•\–ÊÏ‚ğŒvZ‚µ‚Â‚ÂASAH ‚ğŒvZ.
+                // é€†ã«s2å´ã®AABBã®è¡¨é¢ç©ã‚’è¨ˆç®—ã—ã¤ã¤ã€SAH ã‚’è¨ˆç®—.
                 aabb s2bbox;
 
                 for (int i = info.num; i >= 0; i--) {
                     s2SurfaceArea[i] = s2bbox.computeSurfaceArea();
 
                     if (s1.size() > 0 && s2.size() > 0) {
-                        // SAH-based cost ‚ÌŒvZ.
+                        // SAH-based cost ã®è¨ˆç®—.
                         auto cost = 2 * T_aabb
                             + (s1SurfaceArea[i] * s1.size() + s2SurfaceArea[i] * s2.size()) * T_tri / rootSurfaceArea;
 
-                        // Å—ÇƒRƒXƒg‚ªXV‚³‚ê‚½‚©.
+                        // æœ€è‰¯ã‚³ã‚¹ãƒˆãŒæ›´æ–°ã•ã‚ŒãŸã‹.
                         if (cost < bestCost) {
                             bestCost = cost;
                             bestAxis = axis;
@@ -589,15 +589,15 @@ namespace aten {
                     }
 
                     if (s1.size() > 0) {
-                        // s1‘¤‚ÅAaxis ‚É‚Â‚¢‚ÄÅ‰E‚É‚¢‚éƒ|ƒŠƒSƒ“‚ğs2‚ÌÅ¶‚ÉˆÚ‚·.
+                        // s1å´ã§ã€axis ã«ã¤ã„ã¦æœ€å³ã«ã„ã‚‹ãƒãƒªã‚´ãƒ³ã‚’s2ã®æœ€å·¦ã«ç§»ã™.
                         auto p = s1.back();
 
-                        // æ“ª‚É‘}“ü.
+                        // å…ˆé ­ã«æŒ¿å…¥.
                         s2.insert(s2.begin(), p);
 
                         s1.pop_back();
 
-                        // ˆÚ‚µ‚½ƒ|ƒŠƒSƒ“‚ÌAABB‚ğƒ}[ƒW‚µ‚ÄS2‚ÌAABB‚Æ‚·‚é.
+                        // ç§»ã—ãŸãƒãƒªã‚´ãƒ³ã®AABBã‚’ãƒãƒ¼ã‚¸ã—ã¦S2ã®AABBã¨ã™ã‚‹.
                         auto bbox = p->getBoundingbox();
                         s2bbox = aabb::merge(s2bbox, bbox);
                     }
@@ -605,15 +605,15 @@ namespace aten {
             }
 
             if (bestAxis >= 0) {
-                // bestAxis ‚ÉŠî‚Ã‚«A¶‰E‚É•ªŠ„.
-                // bestAxis ‚Åƒ\[ƒg.
+                // bestAxis ã«åŸºã¥ãã€å·¦å³ã«åˆ†å‰².
+                // bestAxis ã§ã‚½ãƒ¼ãƒˆ.
                 sortList(info.list, info.num, bestAxis);
 
-                // ¶‰E‚Ìqƒm[ƒh‚ğì¬.
+                // å·¦å³ã®å­ãƒãƒ¼ãƒ‰ã‚’ä½œæˆ.
                 info.node->m_left = new bvhnode(info.node);
                 info.node->m_right = new bvhnode(info.node);
 
-                // ƒŠƒXƒg‚ğ•ªŠ„.
+                // ãƒªã‚¹ãƒˆã‚’åˆ†å‰².
                 int leftListNum = bestSplitIndex;
                 int rightListNum = info.num - leftListNum;
 
@@ -648,7 +648,7 @@ namespace aten {
                     auto accel = internalObj->getInternalAccelerator();
 
                     // NOTE
-                    // –{—ˆ‚È‚ç‚±‚ÌƒLƒƒƒXƒg‚Í•s³‚¾‚ªABVH‚Å‚ ‚é‚±‚Æ‚Í©–¾‚È‚Ì‚Å.
+                    // æœ¬æ¥ãªã‚‰ã“ã®ã‚­ãƒ£ã‚¹ãƒˆã¯ä¸æ­£ã ãŒã€BVHã§ã‚ã‚‹ã“ã¨ã¯è‡ªæ˜ãªã®ã§.
                     auto bvh = *reinterpret_cast<aten::bvh**>(&accel);
 
                     ret = bvh->getRoot();

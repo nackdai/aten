@@ -97,7 +97,7 @@ __global__ void atrousFilter(
     }
 
     if (centerMeshId < 0) {
-        // 背景なので、そのまま出力して終了.
+        // 閭梧勹縺ｪ縺ｮ縺ｧ縲√◎縺ｮ縺ｾ縺ｾ蜃ｺ蜉帙＠縺ｦ邨ゆｺ�.
         nextClrVarBuffer[idx] = make_float4(centerColor.x, centerColor.y, centerColor.z, 0.0f);
 
         if (isFinalIter) {
@@ -115,7 +115,7 @@ __global__ void atrousFilter(
 
     float centerLum = AT_NAME::color::luminance(centerColor.x, centerColor.y, centerColor.z);
 
-    // ガウスフィルタ3x3
+    // 繧ｬ繧ｦ繧ｹ繝輔ぅ繝ｫ繧ｿ3x3
     float gaussedVarLum;
     
     if (isFirstIter) {

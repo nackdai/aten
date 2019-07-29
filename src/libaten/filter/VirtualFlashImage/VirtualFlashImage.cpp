@@ -16,7 +16,7 @@
 /////////////////////////////////////////////////////
 // t-distribution value.
 // [0: 80%, 1: 90%, 2: 95%, 3: 98%, 4: 99%, 5: 99.8%]
-// M—Š‹æŠÔ‚ğŒvZ‚·‚é‚½‚ß‚Ìt-•ª•z‚Ìƒe[ƒuƒ‹.
+// ä¿¡é ¼åŒºé–“ã‚’è¨ˆç®—ã™ã‚‹ãŸã‚ã®t-åˆ†å¸ƒã®ãƒ†ãƒ¼ãƒ–ãƒ«.
 static const real ttable[][6] = {
 #include "filter/VirtualFlashImage/t_table.dat"
 };
@@ -30,7 +30,7 @@ namespace aten {
         int filter_size, 
         real std_d)
     {
-        // ƒKƒEƒXƒtƒBƒ‹ƒ^ŒW”.
+        // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿ä¿‚æ•°.
         // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
         real std_d2 = 2.0f * std_d * std_d;
 
@@ -38,27 +38,27 @@ namespace aten {
 
         int cIdx = cy * width + cx;
 
-        // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEŠJnˆÊ’u.
+        // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦é–‹å§‹ä½ç½®.
         int startWindow_x = std::max(0, cx - halfWindowSize);
         int startWindow_y = std::max(0, cy - halfWindowSize);
 
-        // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEI—¹ˆÊ’u.
+        // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦çµ‚äº†ä½ç½®.
         int endWindow_x = std::min(width - 1, cx + halfWindowSize);
         int endWindow_y = std::min(height - 1, cy + halfWindowSize);
 
         real sumWeight = 0.0;
 
-        // o—Íƒoƒbƒtƒ@‰Šú‰».
+        // å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡åˆæœŸåŒ–.
         _out[cIdx] = vec4(0);
 
         for (int iy = startWindow_y; iy <= endWindow_y; ++iy) {
             for (int ix = startWindow_x; ix <= endWindow_x; ++ix) {
                 int idx = iy * width + ix;
 
-                // ƒsƒNƒZƒ‹‹——£‚Ì‚Qæ.
+                // ãƒ”ã‚¯ã‚»ãƒ«è·é›¢ã®ï¼’ä¹—.
                 real imageDist = (real)(cx - ix) * (cx - ix) + (cy - iy) * (cy - iy);
 
-                // ƒKƒEƒXƒtƒBƒ‹ƒ^.
+                // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿.
                 // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
                 real weight = aten::exp(-imageDist / std_d2);
 
@@ -92,8 +92,8 @@ namespace aten {
         int cx, int cy,
         const vec4* _in,
         const vec4* _flash,
-        const vec4* _std,        // •W€•Î·.
-        const vec4* _stdFlash,    // Flash‰æ‘œ‚Ì•W€•Î·.
+        const vec4* _std,        // æ¨™æº–åå·®.
+        const vec4* _stdFlash,    // Flashç”»åƒã®æ¨™æº–åå·®.
         vec4* _out, 
         int width, int height, 
         int filter_size, real std_d,
@@ -102,17 +102,17 @@ namespace aten {
         vec4* _stdresult)
     {
         int halfWindowSize = filter_size / 2;
-        int _df = std::min(numSamples - 1, MAX_DF);    // ©—R“x.
+        int _df = std::min(numSamples - 1, MAX_DF);    // è‡ªç”±åº¦.
 
         const real RANGE_CONSTANCE = real(2.0);
 
         real arrWeights[49];
         int arrIdx[49];
 
-        // M—Š‹æŠÔ‚ÌŠî€’l.
+        // ä¿¡é ¼åŒºé–“ã®åŸºæº–å€¤.
         vec4 CI;
 
-        // ƒKƒEƒXƒtƒBƒ‹ƒ^ŒW”.
+        // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿ä¿‚æ•°.
         // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
         real std_d2 = 2 * std_d * std_d;
 
@@ -129,7 +129,7 @@ namespace aten {
 
         const auto& curFlash = _flash[cIdx];
 
-        // Flash‰æ‘œ‚Ì’†S‚ÌM—Š‹æŠÔ‚ğŒvZ.
+        // Flashç”»åƒã®ä¸­å¿ƒã®ä¿¡é ¼åŒºé–“ã‚’è¨ˆç®—.
 #ifdef CI_FOR_FLASH
         CI = _tvalue[_df] * sf;
         const vec4 CI_center_low = curFlash - CI - AT_MATH_EPSILON;
@@ -145,15 +145,15 @@ namespace aten {
 
         const auto& curImg = _in[cIdx];
 
-        // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEŠJnˆÊ’u.
+        // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦é–‹å§‹ä½ç½®.
         int startWindow_x = std::max(0, cx - halfWindowSize);
         int startWindow_y = std::max(0, cy - halfWindowSize);
 
-        // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEI—¹ˆÊ’u.
+        // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦çµ‚äº†ä½ç½®.
         int endWindow_x = std::min(width - 1, cx + halfWindowSize);
         int endWindow_y = std::min(height - 1, cy + halfWindowSize);
 
-        // ’†S‚Ì•ªU
+        // ä¸­å¿ƒã®åˆ†æ•£
         const auto cvar = _std[cIdx] * _std[cIdx];
 
         int numNeighboors = 0;
@@ -165,10 +165,10 @@ namespace aten {
 
                 const auto& tarImg = _in[idx];
 
-                // •ªU.
+                // åˆ†æ•£.
                 const auto var = _std[idx] * _std[idx];
 
-                // ©—R“x.
+                // è‡ªç”±åº¦.
                 int df[4];
                 {
                     const vec4 denominator = (cvar * cvar + var * var) / (real)(numSamples - 1);
@@ -185,7 +185,7 @@ namespace aten {
                     }
                 }
 
-                // M—Š‹æŠÔ‚ğŒvZ.
+                // ä¿¡é ¼åŒºé–“ã‚’è¨ˆç®—.
                 CI = vec4(
                     _tvalue[df[0]] * aten::sqrt(aten::abs(cvar[0] + var[0])),
                     _tvalue[df[1]] * aten::sqrt(aten::abs(cvar[1] + var[1])),
@@ -201,7 +201,7 @@ namespace aten {
 
                 arrIdx[numNeighboors] = idx;
 
-                // ƒsƒNƒZƒ‹‹——£‚ğƒKƒEƒXƒtƒBƒ‹ƒ^.
+                // ãƒ”ã‚¯ã‚»ãƒ«è·é›¢ã‚’ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿.
                 const auto imageDist = (real)(cx - ix) * (cx - ix) + (cy - iy) * (cy - iy);
                 real weight = aten::exp(-imageDist / std_d2);
 
@@ -215,7 +215,7 @@ namespace aten {
                 real countPass = 0;
                 real colorDist = 0;
 
-                // Flash‰æ‘œ‚ÌF‹——£‚É‚Â‚¢‚ÄNonLocalMeanƒtƒBƒ‹ƒ^?
+                // Flashç”»åƒã®è‰²è·é›¢ã«ã¤ã„ã¦NonLocalMeanãƒ•ã‚£ãƒ«ã‚¿?
                 for (int yy = -halfPatchSize; yy <= halfPatchSize; ++yy) {
                     for (int xx = -halfPatchSize; xx <= halfPatchSize; ++xx) {
                         int ccx = aten::clamp(cx + xx, 0, width - 1);
@@ -285,13 +285,13 @@ namespace aten {
         const real* _tvalue)
     {
         const int halfWindowSize = filter_size / 2;
-        const int _df = std::min<int>(numSamples - 1, MAX_DF);    // ©—R“x.
+        const int _df = std::min<int>(numSamples - 1, MAX_DF);    // è‡ªç”±åº¦.
 
         const real RANGE_CONSTANCE = real(2);
 
         const real std_d2 = 2.0f * std_d * std_d;
 
-        // M—Š‹æŠÔ.
+        // ä¿¡é ¼åŒºé–“.
         vec4 CI;
 
         const int cIdx = cy * width + cx;
@@ -307,7 +307,7 @@ namespace aten {
 
         const auto tvalue = _tvalue[_df];
 
-        // Flash‰æ‘œ‚Ì’†S‚ÌM—Š‹æŠÔ‚ğŒvZ.
+        // Flashç”»åƒã®ä¸­å¿ƒã®ä¿¡é ¼åŒºé–“ã‚’è¨ˆç®—.
 #ifdef CI_FOR_FLASH
         const auto& curColor = _flash[cIdx];
         CI = tvalue * vec4(sf.x, sf.y, sf.z, 0);
@@ -317,7 +317,7 @@ namespace aten {
 
         const auto& curImg = _image[cIdx];
 
-        // “ü—Í‰æ‘œ‚Ì’†S‚ÌM—Š‹æŠÔ‚ğŒvZ.
+        // å…¥åŠ›ç”»åƒã®ä¸­å¿ƒã®ä¿¡é ¼åŒºé–“ã‚’è¨ˆç®—.
         CI = tvalue * vec4(std.x, std.y, std.z, 0);
         const auto CI_min = curImg - CI - AT_MATH_EPSILON;
         const auto CI_max = curImg + CI + AT_MATH_EPSILON;
@@ -329,11 +329,11 @@ namespace aten {
         int halfPatchSize = MAX_HALF_PATCH_SIZE;
 #endif
 
-        // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEŠJnˆÊ’u.
+        // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦é–‹å§‹ä½ç½®.
         int startWindow_x = std::max(0, cx - halfWindowSize);
         int startWindow_y = std::max(0, cy - halfWindowSize);
 
-        // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEI—¹ˆÊ’u.
+        // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦çµ‚äº†ä½ç½®.
         int endWindow_x = std::min(width - 1, cx + halfWindowSize);
         int endWindow_y = std::min(height - 1, cy + halfWindowSize);
 
@@ -409,7 +409,7 @@ namespace aten {
         std::vector<vec4> stdSrc(width * height);
         std::vector<vec4> stdFlash(width * height);
 
-        // •W€•Î·‚ğŒvZ.
+        // æ¨™æº–åå·®ã‚’è¨ˆç®—.
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 auto pos = y * width + x;
@@ -419,7 +419,7 @@ namespace aten {
             }
         }
 
-        // •W€•Î·‚ÉƒKƒEƒXƒtƒBƒ‹ƒ^‚ğ‚©‚¯‚é.
+        // æ¨™æº–åå·®ã«ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿ã‚’ã‹ã‘ã‚‹.
         {
             std::vector<vec4> tmp(width * height);
 
@@ -442,7 +442,7 @@ namespace aten {
 
         const auto numSamples = m_numSamples;
 
-        int df = std::min<uint32_t>(numSamples - 1, MAX_DF);    // ©—R“x.
+        int df = std::min<uint32_t>(numSamples - 1, MAX_DF);    // è‡ªç”±åº¦.
 
         std::vector<real> tvalue(MAX_DF + 1);
         std::vector<real> tvalue2(MAX_DF + 1);

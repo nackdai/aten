@@ -101,7 +101,7 @@ namespace aten {
             for (int x = 0; x < width; x++) {
                 auto dst = imgDst + (y * width + x);
 
-                // ’–Ú—Ìˆæ.
+                // æ³¨ç›®é ˜åŸŸ.
                 auto focus = sampleArea(imgSrc, x, y, width, height);
 
                 vec3 sum = vec3(0, 0, 0);
@@ -109,14 +109,14 @@ namespace aten {
 
                 for (int sx = x - kHalfSupport; sx <= x + kHalfSupport; ++sx) {
                     for (int sy = y - kHalfSupport; sy <= y + kHalfSupport; ++sy) {
-                        // ‘ŠŽ—“x‚ð’²‚×‚é‘ÎÛ—Ìˆæ.
+                        // ç›¸ä¼¼åº¦ã‚’èª¿ã¹ã‚‹å¯¾è±¡é ˜åŸŸ.
                         auto target = sampleArea(imgSrc, sx, sy, width, height);
 
-                        // ƒmƒ‹ƒ€i‘ŠŽ—“xjŒvŽZ.
+                        // ãƒŽãƒ«ãƒ ï¼ˆç›¸ä¼¼åº¦ï¼‰è¨ˆç®—.
                         auto dist2 = computeDistanceSquared(focus, target);
 
                         // NOTE
-                        // Z(p) = sum(exp(-max(|v(p) - v(q)|^2 - 2ƒÐ^2, 0) / h^2))
+                        // Z(p) = sum(exp(-max(|v(p) - v(q)|^2 - 2Ïƒ^2, 0) / h^2))
                         auto arg = -std::max(dist2 - 2 * sigma * sigma, real(0)) / (param_h * param_h);
 
                         auto weight = exp(arg);
@@ -172,7 +172,7 @@ namespace aten {
         }
 
         // TODO
-        // “ü—ÍƒeƒNƒXƒ`ƒƒ‚ÌƒTƒCƒY‚ÍƒXƒNƒŠ[ƒ“‚Æ“¯‚¶...
+        // å…¥åŠ›ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚µã‚¤ã‚ºã¯ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã¨åŒã˜...
         auto hTexel = getHandle("texel");
         if (hTexel >= 0) {
             CALL_GL_API(glUniform2f(hTexel, 1.0f / m_width, 1.0f / m_height));

@@ -227,7 +227,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
                         t_max = isect->t;
                     }
 
-                    // LOD�Ƀq�b�g�����̂ŁA�q���i�ڍׁj�͒T�����Ȃ��悤�ɂ���.
+                    // LODにヒットしたので、子供（詳細）は探索しないようにする.
                     isHit = false;
 
                     if (Type == idaten::IntersectType::Closer

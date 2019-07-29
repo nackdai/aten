@@ -127,13 +127,13 @@ __global__ void temporalReprojection(
     const float centerDepth = nmlDepth.w;
     const int centerMeshId = (int)texclrMeshId.w;
 
-    // ¡‰ñ‚ÌƒtƒŒ[ƒ€‚ÌƒsƒNƒZƒ‹ƒJƒ‰[.
+    // ä»Šå›ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚«ãƒ©ãƒ¼.
     auto contrib = contribs[idx];
     float4 curColor = make_float4(contrib.x, contrib.y, contrib.z, 1.0f) / contrib.w;
     //curColor.w = 1;
 
     if (centerMeshId < 0) {
-        // ”wŒi‚È‚Ì‚ÅA‚»‚Ì‚Ü‚Üo—Í‚µ‚ÄI‚í‚è.
+        // èƒŒæ™¯ãªã®ã§ã€ãã®ã¾ã¾å‡ºåŠ›ã—ã¦çµ‚ã‚ã‚Š.
         surf2Dwrite(
             curColor,
             dst,
@@ -162,7 +162,7 @@ __global__ void temporalReprojection(
             float4 motionDepth;
             surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
-            // ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒXƒNƒŠ[ƒ“À•W.
+            // å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™.
             int px = (int)(xx + motionDepth.x * width);
             int py = (int)(yy + motionDepth.y * height);
 
@@ -179,13 +179,13 @@ __global__ void temporalReprojection(
             float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
             // TODO
-            // “¯‚¶ƒƒbƒVƒ…ã‚Å‚àƒ‰ƒCƒg‚Ì‚»‚Î‚Ì–¾‚é‚­‚È‚Á‚½ƒsƒNƒZƒ‹‚ğE‚Á‚Ä‚µ‚Ü‚¤ê‡‚Ì‘Îô‚ª•K—v.
+            // åŒã˜ãƒ¡ãƒƒã‚·ãƒ¥ä¸Šã§ã‚‚ãƒ©ã‚¤ãƒˆã®ãã°ã®æ˜ã‚‹ããªã£ãŸãƒ”ã‚¯ã‚»ãƒ«ã‚’æ‹¾ã£ã¦ã—ã¾ã†å ´åˆã®å¯¾ç­–ãŒå¿…è¦.
 
             float Wz = clamp((zThreshold - abs(1 - centerDepth / prevDepth)) / zThreshold, 0.0f, 1.0f);
             float Wn = clamp((dot(centerNormal, prevNormal) - nThreshold) / (1.0f - nThreshold), 0.0f, 1.0f);
             float Wm = centerMeshId == prevMeshId ? 1.0f : 0.0f;
 
-            // ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒsƒNƒZƒ‹ƒJƒ‰[‚ğæ“¾.
+            // å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚«ãƒ©ãƒ¼ã‚’å–å¾—.
             float4 prev = prevAovColorVariance[pidx];
             //float4 prev = sampleBilinear(prevAovColorVariance, prevPos.x, prevPos.y, width, height);
 
@@ -220,24 +220,24 @@ __global__ void temporalReprojection(
     curAovColorVariance[idx].z = curColor.z;
 
     // TODO
-    // Œ»ƒtƒŒ[ƒ€‚Æ‰ß‹ƒtƒŒ[ƒ€‚ª“¯—¦‚Å‰ÁZ‚³‚ê‚é‚½‚ßA‚Ç‚¿‚ç‚©‚É‹­‚¢‰e‹¿‚ª‚Å‚é‚Æ‰e‹¿‚ªã‚Ü‚é‚Ü‚Å‚É”ñí‚ÉŠÔ‚ª‚©‚©‚é.
+    // ç¾ãƒ•ãƒ¬ãƒ¼ãƒ ã¨éå»ãƒ•ãƒ¬ãƒ¼ãƒ ãŒåŒç‡ã§åŠ ç®—ã•ã‚Œã‚‹ãŸã‚ã€ã©ã¡ã‚‰ã‹ã«å¼·ã„å½±éŸ¿ãŒã§ã‚‹ã¨å½±éŸ¿ãŒå¼±ã¾ã‚‹ã¾ã§ã«éå¸¸ã«æ™‚é–“ãŒã‹ã‹ã‚‹.
     // ex) 
     // f0 = 100, f1 = 0, f2 = 0
-    // avg = (f0 + f1 + f2) / 3 = 33.3 <- ”ñí‚É‘å‚«‚¢’l‚ªc‚è‘±‚¯‚é.
+    // avg = (f0 + f1 + f2) / 3 = 33.3 <- éå¸¸ã«å¤§ãã„å€¤ãŒæ®‹ã‚Šç¶šã‘ã‚‹.
 
     // accumulate moments.
     {
         float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
         float3 centerMoment = make_float3(lum * lum, lum, 0);
 
-        // ÏZƒtƒŒ[ƒ€”‚ÌƒŠƒZƒbƒg.
+        // ç©ç®—ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã®ãƒªã‚»ãƒƒãƒˆ.
         int frame = 1;
 
         if (weight > 0.0f) {
             auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
             float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
-            // ÏZƒtƒŒ[ƒ€”‚ğ‚P‘‚â‚·.
+            // ç©ç®—ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã‚’ï¼‘å¢—ã‚„ã™.
             frame = (int)prevMoment.z + 1;
 
             centerMoment += prevMoment;
@@ -397,13 +397,13 @@ __global__ void medianFilter(
         float lum = AT_NAME::color::luminance(curColor.x, curColor.y, curColor.z);
         float3 centerMoment = make_float3(lum * lum, lum, 0);
 
-        // ÏZƒtƒŒ[ƒ€”‚ÌƒŠƒZƒbƒg.
+        // ç©ç®—ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã®ãƒªã‚»ãƒƒãƒˆ.
         int frame = 1;
 
         auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
         float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
-        // ÏZƒtƒŒ[ƒ€”‚ğ‚P‘‚â‚·.
+        // ç©ç®—ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã‚’ï¼‘å¢—ã‚„ã™.
         frame = (int)prevMoment.z + 1;
 
         centerMoment += prevMoment;

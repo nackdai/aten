@@ -7,21 +7,21 @@ namespace aten {
     static real plane_intersection(const vec3& normal, const vec3& pos, const ray& ray)
     {
         /*
-            ƒŒƒC‚Ì•û’ö® : x = p + t v
-            •½–Ê‚Ì•û’ö® : (p - p0)En = 0
-            p  : ƒŒƒC‚Ìo‚é“_
-            v  : ƒŒƒC‚Ì•ûŒü
-            p0 : •½–Êã‚Ì‚P“_
-            n  : –@üƒxƒNƒgƒ‹
+            ãƒ¬ã‚¤ã®æ–¹ç¨‹å¼ : x = p + t v
+            å¹³é¢ã®æ–¹ç¨‹å¼ : (p - p0)ãƒ»n = 0
+            p  : ãƒ¬ã‚¤ã®å‡ºã‚‹ç‚¹
+            v  : ãƒ¬ã‚¤ã®æ–¹å‘
+            p0 : å¹³é¢ä¸Šã®ï¼‘ç‚¹
+            n  : æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
 
-            ˜A—§‚µ‚½Œ‹‰ÊAƒŒƒC‚Ìi‚ñ‚¾‹——£t‚Í
+            é€£ç«‹ã—ãŸçµæœã€ãƒ¬ã‚¤ã®é€²ã‚“ã è·é›¢tã¯
 
-            (p0 - p)En
+            (p0 - p)ãƒ»n
             t = ------------
-            vEn
+            vãƒ»n
 
-            vEn=0 ‚Ì‚ÍAƒŒƒC‚Æ•½–Ê‚ª•½s‚Éi‚ñ‚Å‚¢‚é‚Ì‚ÅAŒğ‚í‚ç‚È‚¢.
-            t<0‚Ì‚ÍA‹ü‚ÌŒã‚ë‘¤‚ÉŒğ“_‚ª‚ ‚é‚Ì‚ÅA‚â‚Í‚èŒğ‚í‚é‚±‚Æ‚ª‚È‚¢.
+            vãƒ»n=0 ã®æ™‚ã¯ã€ãƒ¬ã‚¤ã¨å¹³é¢ãŒå¹³è¡Œã«é€²ã‚“ã§ã„ã‚‹ã®ã§ã€äº¤ã‚ã‚‰ãªã„.
+            t<0ã®æ™‚ã¯ã€è¦–ç·šã®å¾Œã‚å´ã«äº¤ç‚¹ãŒã‚ã‚‹ã®ã§ã€ã‚„ã¯ã‚Šäº¤ã‚ã‚‹ã“ã¨ãŒãªã„.
         */
 
         real vn = dot(ray.dir, normal);
@@ -36,10 +36,10 @@ namespace aten {
     }
 
     // NOTE
-    // xI : ƒCƒ[ƒWƒZƒ“ƒT[ã‚Ì“_.
-    // x0 : ƒŒƒ“ƒYã‚Ì“_.
-    // xV : ƒIƒuƒWƒFƒNƒgƒvƒŒ[ƒ“ã‚Ì“_.
-    // x1 : ƒV[ƒ““à‚Ì“_.
+    // xI : ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µãƒ¼ä¸Šã®ç‚¹.
+    // x0 : ãƒ¬ãƒ³ã‚ºä¸Šã®ç‚¹.
+    // xV : ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ä¸Šã®ç‚¹.
+    // x1 : ã‚·ãƒ¼ãƒ³å†…ã®ç‚¹.
 
     void ThinLensCamera::init(
         int width, int height,
@@ -50,7 +50,7 @@ namespace aten {
         real lensRadius,
         real W_scale)
     {
-        // ’l‚ğ•Û.
+        // å€¤ã‚’ä¿æŒ.
         m_at = lookat;
         m_vup = vup;
         m_Wscale = W_scale;
@@ -61,11 +61,11 @@ namespace aten {
         m_imageSensorToLensDistance = imageSensorToLensDistance;
         m_lensToObjectplaneDistance = lensToObjectplaneDistance;
 
-        // ƒCƒ[ƒWƒZƒ“ƒT‚ÌƒTƒCƒY.
+        // ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã®ã‚µã‚¤ã‚º.
         m_imagesensor.width = imageSensorSize * m_imageWidthPx / m_imageHeightPx;
         m_imagesensor.height = imageSensorSize;
 
-        // ‚PƒsƒNƒZƒ‹‚Ì•¨—ƒTƒCƒY.
+        // ï¼‘ãƒ”ã‚¯ã‚»ãƒ«ã®ç‰©ç†ã‚µã‚¤ã‚º.
         m_pixelWidth = m_imagesensor.width / m_imageWidthPx;
         m_pixelHeight = m_imagesensor.height / m_imageHeightPx;
 
@@ -76,7 +76,7 @@ namespace aten {
 
         m_imagesensor.lower_left = m_imagesensor.center - 0.5f * m_imagesensor.u - 0.5f * m_imagesensor.v;
 
-        // ƒIƒuƒWƒFƒNƒgƒvƒŒ[ƒ“‚ÍƒCƒ[ƒWƒZƒ“ƒT[‚Æ•½s‚È‚Ì‚ÅAƒCƒ[ƒWƒZƒ“ƒT[‚Æ“¯‚¶•ûŒü‚ğg‚¦‚Î‚¢‚¢.
+        // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ã¯ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µãƒ¼ã¨å¹³è¡Œãªã®ã§ã€ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µãƒ¼ã¨åŒã˜æ–¹å‘ã‚’ä½¿ãˆã°ã„ã„.
         m_objectplane.center = m_imagesensor.center + (m_imageSensorToLensDistance + m_lensToObjectplaneDistance) * m_imagesensor.dir;
         m_objectplane.normal = m_imagesensor.dir;
         m_objectplane.u = m_imagesensor.u;
@@ -84,14 +84,14 @@ namespace aten {
 
         m_objectplane.lower_left = m_objectplane.center - 0.5f * m_objectplane.u - 0.5f * m_objectplane.v;
 
-        // ƒŒƒ“ƒY‚ÍƒCƒ[ƒWƒZƒ“ƒT[‚Æ•½s‚È‚Ì‚ÅAƒCƒ[ƒWƒZƒ“ƒT[‚Æ“¯‚¶•ûŒü‚ğg‚¦‚Î‚¢‚¢.
+        // ãƒ¬ãƒ³ã‚ºã¯ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µãƒ¼ã¨å¹³è¡Œãªã®ã§ã€ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µãƒ¼ã¨åŒã˜æ–¹å‘ã‚’ä½¿ãˆã°ã„ã„.
         m_lens.center = m_imagesensor.center + m_imageSensorToLensDistance * m_imagesensor.dir;
         m_lens.u = lensRadius * normalize(m_imagesensor.u);
         m_lens.v = lensRadius * normalize(m_imagesensor.v);
         m_lens.normal = m_imagesensor.dir;
         m_lens.radius = lensRadius;
 
-        // W(xI <- x0) ƒZƒ“ƒT‚ÌƒZƒ“ƒVƒeƒBƒrƒeƒB‚ÍŠÈ’P‚Ì‚½‚ß’è”‚É‚µ‚Ä‚¨‚­.
+        // W(xI <- x0) ã‚»ãƒ³ã‚µã®ã‚»ãƒ³ã‚·ãƒ†ã‚£ãƒ“ãƒ†ã‚£ã¯ç°¡å˜ã®ãŸã‚å®šæ•°ã«ã—ã¦ãŠã.
         m_W = W_scale / (m_pixelWidth * m_pixelHeight);
     }
 
@@ -119,20 +119,20 @@ namespace aten {
 
         CameraSampleResult result;
 
-        // ƒCƒ[ƒWƒZƒ“ƒTã‚ÌÀ•WA[-0,5, 0.5]‚Ì”ÍˆÍi0,0)‚ªƒCƒ[ƒWƒZƒ“ƒT’†‰›‚ğ¦‚·.
+        // ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µä¸Šã®åº§æ¨™ã€[-0,5, 0.5]ã®ç¯„å›²ï¼ˆ0,0)ãŒã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µä¸­å¤®ã‚’ç¤ºã™.
         result.posOnImageSensor = m_imagesensor.center + s * m_imagesensor.u + t * m_imagesensor.v;
 
-        // ƒIƒuƒWƒFƒNƒgƒvƒŒ[ƒ“ã‚ÌÀ•WŒvZ
-        // ƒIƒuƒWƒFƒNƒgƒvƒŒ[ƒ“‚ÌƒTƒCƒY‚ÍAƒŒƒ“ƒY‚ÌŒö®‚Ì”{—¦ŒvZim=b/aj
+        // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ä¸Šã®åº§æ¨™è¨ˆç®—
+        // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ã®ã‚µã‚¤ã‚ºã¯ã€ãƒ¬ãƒ³ã‚ºã®å…¬å¼ã®å€ç‡è¨ˆç®—ï¼ˆm=b/aï¼‰
         real ratio = m_lensToObjectplaneDistance / m_imageSensorToLensDistance;
 
-        // ƒZƒ“ƒT[‚ÆƒIƒuƒWƒFƒNƒgƒvƒŒ[ƒ“‚ÌŒü‚«‚Í”½‘Î‚É‚È‚é‚Ì‚ÅAƒ}ƒCƒiƒX‚·‚é?
+        // ã‚»ãƒ³ã‚µãƒ¼ã¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ—ãƒ¬ãƒ¼ãƒ³ã®å‘ãã¯åå¯¾ã«ãªã‚‹ã®ã§ã€ãƒã‚¤ãƒŠã‚¹ã™ã‚‹?
         real u_on_objectplane = -ratio * s;
         real v_on_objectplane = -ratio * t;
         result.posOnObjectplane = m_objectplane.center + u_on_objectplane * m_objectplane.u + v_on_objectplane * m_objectplane.v;
 
         // NOTE
-        // lens.uAlens.v ‚É lens.radius ‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é‚Ì‚ÅAƒŒƒ“ƒY‚Ì”¼Œa‚É‚Â‚¢‚Äl—¶‚·‚é•K—v‚ª‚È‚¢.
+        // lens.uã€lens.v ã« lens.radius ãŒå«ã¾ã‚Œã¦ã„ã‚‹ã®ã§ã€ãƒ¬ãƒ³ã‚ºã®åŠå¾„ã«ã¤ã„ã¦è€ƒæ…®ã™ã‚‹å¿…è¦ãŒãªã„.
         real r0 = sqrt(sampler->nextSample());
         real r1 = sampler->nextSample() * real(2.0) * AT_MATH_PI;
         real u = r0 * cos(r1);
@@ -140,10 +140,10 @@ namespace aten {
         result.posOnLens = m_lens.center + u * m_lens.u + v * m_lens.v;
         result.nmlOnLens = m_lens.normal;
 
-        // ƒsƒNƒZƒ‹“à‚Ìˆê“_‚ğƒTƒ“ƒvƒŠƒ“ƒO‚·‚éŠm—¦–§“xŠÖ”i–ÊÏ‘ª“xj
+        // ãƒ”ã‚¯ã‚»ãƒ«å†…ã®ä¸€ç‚¹ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹ç¢ºç‡å¯†åº¦é–¢æ•°ï¼ˆé¢ç©æ¸¬åº¦ï¼‰
         result.pdfOnImageSensor = real(1.0) / (m_pixelWidth * m_pixelHeight);
 
-        // ƒŒƒ“ƒYã‚Ìˆê“_‚ğƒTƒ“ƒvƒŠƒ“ƒO‚·‚éŠm—¦–§“xŠÖ”i–ÊÏ‘ª“xj
+        // ãƒ¬ãƒ³ã‚ºä¸Šã®ä¸€ç‚¹ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹ç¢ºç‡å¯†åº¦é–¢æ•°ï¼ˆé¢ç©æ¸¬åº¦ï¼‰
         result.pdfOnLens = real(1.0) / (AT_MATH_PI * m_lens.radius * m_lens.radius);
 
         result.r = ray(
@@ -160,7 +160,7 @@ namespace aten {
         vec3& posOnImageSensor,
         int& x, int& y) const
     {
-        // ƒŒƒ“ƒY‚Æ”»’è
+        // ãƒ¬ãƒ³ã‚ºã¨åˆ¤å®š
         auto lens_t = plane_intersection(m_lens.normal, m_lens.center, r);
 
         if (AT_MATH_EPSILON < lens_t)
@@ -198,7 +198,7 @@ namespace aten {
         return -AT_MATH_INF;
     }
 
-    // ƒCƒ[ƒWƒZƒ“ƒTã‚ÌƒTƒ“ƒvƒŠƒ“ƒOŠm—¦–§“xiƒCƒ[ƒWƒZƒ“ƒT‚Ì–ÊÏ‘ª“x‚ÉŠÖ‚·‚éŠm—¦–§“xj‚ğƒV[ƒ“ã‚ÌƒTƒ“ƒvƒŠƒ“ƒOŠm—¦–§“xi–ÊÏ‘ª“x‚ÉŠÖ‚·‚éŠm—¦–§“xj‚É•ÏŠ·‚·‚é.
+    // ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µä¸Šã®ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ç¢ºç‡å¯†åº¦ï¼ˆã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã®é¢ç©æ¸¬åº¦ã«é–¢ã™ã‚‹ç¢ºç‡å¯†åº¦ï¼‰ã‚’ã‚·ãƒ¼ãƒ³ä¸Šã®ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ç¢ºç‡å¯†åº¦ï¼ˆé¢ç©æ¸¬åº¦ã«é–¢ã™ã‚‹ç¢ºç‡å¯†åº¦ï¼‰ã«å¤‰æ›ã™ã‚‹.
     real ThinLensCamera::convertImageSensorPdfToScenePdf(
         real pdfImage,
         const vec3& hitPoint,
@@ -212,9 +212,9 @@ namespace aten {
 
         // NOTE
         // https://www.slideshare.net/h013/edubpt-v100
-        // ƒCƒ[ƒWƒZƒ“ƒTã‚ÌŠm—§–§“x‚ğ–ÊÏ‘ª“x‚É•ÏŠ·.
+        // ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µä¸Šã®ç¢ºç«‹å¯†åº¦ã‚’é¢ç©æ¸¬åº¦ã«å¤‰æ›.
         // p111
-        // Pa = (B/A)^2 * (r''/r)^2 * (cosƒ¦'/cosƒ¦'') * Pij
+        // Pa = (B/A)^2 * (r''/r)^2 * (cosÎ˜'/cosÎ˜'') * Pij
 
         const vec3& x0 = posOnLens;
         const vec3& xI = posOnImageSensor;
@@ -235,10 +235,10 @@ namespace aten {
         // (r''/r')^2
         auto r2 = (squared_length(x0_xV) / squared_length(x0_x1));
 
-        // (cosƒ¦'/cosƒ¦'')
+        // (cosÎ˜'/cosÎ˜'')
         auto c2 = (dot(normalize(-x0_x1), hitpointNml) / dot(normalize(x0_x1), normalize(m_imagesensor.dir)));
 
-        // ƒCƒ[ƒWƒZƒ“ƒT‚Ì–ÊÏ‘ª“x‚ÉŠÖ‚·‚éŠm—¦–§“x.
+        // ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã®é¢ç©æ¸¬åº¦ã«é–¢ã™ã‚‹ç¢ºç‡å¯†åº¦.
         //auto pdfOnImageSensor = 1.0 / (m_imagesensor.width * m_imagesensor.height);
 
         auto pdf = pdfImage * ba2 * r2 * c2;
@@ -256,8 +256,8 @@ namespace aten {
 
         const vec3 x0_xI = posOnImagesensor - posOnLens;
 
-        // ƒZƒ“ƒTã‚Ì“_‚Ì”¼‹…Ï•ª‚ğAƒŒƒ“ƒYã‚Ì“_‚ÌÏ•ª‚É•Ï”•ÏŠ·‚µ‚½‚É“±“ü‚³‚ê‚éŒW”
-        // (cosƒ¦)^2/r^2
+        // ã‚»ãƒ³ã‚µä¸Šã®ç‚¹ã®åŠçƒç©åˆ†ã‚’ã€ãƒ¬ãƒ³ã‚ºä¸Šã®ç‚¹ã®ç©åˆ†ã«å¤‰æ•°å¤‰æ›ã—ãŸæ™‚ã«å°å…¥ã•ã‚Œã‚‹ä¿‚æ•°
+        // (cosÎ˜)^2/r^2
         const real cos = dot(normalize(-m_imagesensor.dir), normalize(x0_xI));
         const real len2 = squared_length(x0_xI);
         
@@ -275,8 +275,8 @@ namespace aten {
         const vec3& posOnLens,
         const vec3& posOnObjectPlane) const
     {
-        // Šô‰½“I‚ÈŒW”ŒvZ + ƒZƒ“ƒT[ƒZƒ“ƒVƒeƒBƒrƒeƒB‚Ì€‚ğŒvZ‚·‚é.
-        // x1 -> x0‚Ö‚Ì•úË‹P“x‚ªÅI“I‚ÉƒCƒ[ƒWƒZƒ“ƒT‚É—^‚¦‚éŠñ—^“x.
+        // å¹¾ä½•çš„ãªä¿‚æ•°è¨ˆç®— + ã‚»ãƒ³ã‚µãƒ¼ã‚»ãƒ³ã‚·ãƒ†ã‚£ãƒ“ãƒ†ã‚£ã®é …ã‚’è¨ˆç®—ã™ã‚‹.
+        // x1 -> x0ã¸ã®æ”¾å°„è¼åº¦ãŒæœ€çµ‚çš„ã«ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚»ãƒ³ã‚µã«ä¸ãˆã‚‹å¯„ä¸åº¦.
 
         const vec3& x0 = posOnLens;
         const vec3& xI = posOnImageSensor;

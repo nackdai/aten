@@ -11,8 +11,8 @@ namespace aten {
         // NOTE
         // http://d.hatena.ne.jp/Zellij/20131207/p1
 
-        // dSÀ•WŒn(barycentric coordinates).
-        // v0Šî€.
+        // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+        // v0åŸºæº–.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
         real a, b;
 
@@ -53,7 +53,7 @@ namespace aten {
         // http://kanamori.cs.tsukuba.ac.jp/jikken/inner/triangle_intersection.pdf
 
         // NOTE
-        // À‘•‚µ‚Ä‚İ‚Ä‘¬“x“I‚É•Ï‰»‚ª‚È‚©‚Á‚½‚ªAƒƒ‚‚Æ‚µ‚Ä.
+        // å®Ÿè£…ã—ã¦ã¿ã¦é€Ÿåº¦çš„ã«å¤‰åŒ–ãŒãªã‹ã£ãŸãŒã€ãƒ¡ãƒ¢ã¨ã—ã¦.
         // Fast    Minimum Storage RayTriangle    Intersection.
         // https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 

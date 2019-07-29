@@ -90,7 +90,7 @@ namespace aten
         {
             if (node->isLeaf()) {
                 // NOTE
-                // 0 ‚Íƒx[ƒXƒcƒŠ[‚È‚Ì‚ÅA+1 ‚·‚é.
+                // 0 ã¯ãƒ™ãƒ¼ã‚¹ãƒ„ãƒªãƒ¼ãªã®ã§ã€+1 ã™ã‚‹.
                 node->setExternalId(exid);
             }
         });
@@ -198,10 +198,10 @@ namespace aten
             for (int i = 0; i < numChildren; i++) {
                 auto ch = children[i];
 
-                // ©•ª©g‚ÌID‚ğæ“¾.
+                // è‡ªåˆ†è‡ªèº«ã®IDã‚’å–å¾—.
                 qbvhNode.shapeidx[i] = (float)transformable::findIdxAsHitable(ch);
 
-                // ‚à‚µ‚È‚©‚Á‚½‚çAƒlƒXƒg‚µ‚Ä‚¢‚é‚Ì‚Åe‚ÌID‚ğæ“¾.
+                // ã‚‚ã—ãªã‹ã£ãŸã‚‰ã€ãƒã‚¹ãƒˆã—ã¦ã„ã‚‹ã®ã§è¦ªã®IDã‚’å–å¾—.
                 if (qbvhNode.shapeidx[i] < 0) {
                     if (nestParent) {
                         qbvhNode.shapeid = (float)transformable::findIdxAsHitable(nestParent);
@@ -209,7 +209,7 @@ namespace aten
                     }
                 }
 
-                // ƒCƒ“ƒXƒ^ƒ“ƒX‚ÌÀ‘Ì‚ğæ“¾.
+                // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®å®Ÿä½“ã‚’å–å¾—.
                 auto internalObj = ch->getHasObject();
 
                 if (internalObj) {
@@ -245,17 +245,17 @@ namespace aten
 #else
             hitable* item = node->getItem();
 
-            // ©•ª©g‚ÌID‚ğæ“¾.
+            // è‡ªåˆ†è‡ªèº«ã®IDã‚’å–å¾—.
             qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
 
-            // ‚à‚µ‚È‚©‚Á‚½‚çAƒlƒXƒg‚µ‚Ä‚¢‚é‚Ì‚Åe‚ÌID‚ğæ“¾.
+            // ã‚‚ã—ãªã‹ã£ãŸã‚‰ã€ãƒã‚¹ãƒˆã—ã¦ã„ã‚‹ã®ã§è¦ªã®IDã‚’å–å¾—.
             if (qbvhNode.shapeid < 0) {
                 if (nestParent) {
                     qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(nestParent);
                 }
             }
 
-            // ƒCƒ“ƒXƒ^ƒ“ƒX‚ÌÀ‘Ì‚ğæ“¾.
+            // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®å®Ÿä½“ã‚’å–å¾—.
             auto internalObj = item->getHasObject();
 
             if (internalObj) {

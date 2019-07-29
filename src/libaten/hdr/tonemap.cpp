@@ -7,8 +7,8 @@
 namespace aten
 {
     // NOTE
-    // Reinherd ‚Ì•½‹Ï‹P“xŒvZ.
-    // Lavg = exp(1/N * ƒ°log(ƒÂ + L(x, y)))
+    // Reinherd ã®å¹³å‡è¼åº¦è¨ˆç®—.
+    // Lavg = exp(1/N * Î£log(Î´ + L(x, y)))
 
     // NOTE
     // HDR

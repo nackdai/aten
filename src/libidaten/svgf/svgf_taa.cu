@@ -21,10 +21,10 @@ inline __device__ float3 clipAABB(
 
 	float3 halfsize = 0.5 * (aabb_max - aabb_min) + 0.00000001f;
 
-	// ’†S‚©‚ç‚Ì‘Š‘ÎˆÊ’u.
+	// ä¸­å¿ƒã‹ã‚‰ã®ç›¸å¯¾ä½ç½®.
 	float3 clip = q - center;
 
-	// ‘Š‘ÎˆÊ’u‚Ì³‹K‰».
+	// ç›¸å¯¾ä½ç½®ã®æ­£è¦åŒ–.
 	float3 unit = clip / halfsize;
 
 	float3 abs_unit = make_float3(fabsf(unit.x), fabsf(unit.y), fabsf(unit.z));
@@ -32,7 +32,7 @@ inline __device__ float3 clipAABB(
 	float ma_unit = max(abs_unit.x, max(abs_unit.y, abs_unit.z));
 
 	if (ma_unit > 1.0) {
-		// ƒNƒŠƒbƒvˆÊ’u.
+		// ã‚¯ãƒªãƒƒãƒ—ä½ç½®.
 		return center + clip / ma_unit;
 	}
 	else {
@@ -211,7 +211,7 @@ inline __device__ float4 PDsrand4(float2 n)
 }
 
 // TODO
-// temporal reporjection‚Ì‚à‚Ì‚Æ“ˆê‚·‚é‚×‚«.
+// temporal reporjectionã®ã‚‚ã®ã¨çµ±ä¸€ã™ã‚‹ã¹ã.
 inline __device__ void computePrevScreenPos(
 	int ix, int iy,
 	float centerDepth,
@@ -295,12 +295,12 @@ __global__ void temporalAA(
 		&prevPos,
 		mtxC2V, mtxPrevV2C);
 
-	// [0, 1]‚Ì”ÍˆÍ“à‚É“ü‚Á‚Ä‚¢‚é‚©.
+	// [0, 1]ã®ç¯„å›²å†…ã«å…¥ã£ã¦ã„ã‚‹ã‹.
 	bool isInsideX = (0.0 <= prevPos.x) && (prevPos.x <= 1.0);
 	bool isInsideY = (0.0 <= prevPos.y) && (prevPos.y <= 1.0);
 
 	if (isInsideX && isInsideY) {
-		// ‘O‚ÌƒtƒŒ[ƒ€‚ÌƒXƒNƒŠ[ƒ“À•W.
+		// å‰ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™.
 		int px = (int)(prevPos.x * width - 0.5f);
 		int py = (int)(prevPos.y * height - 0.5f);
 

@@ -27,7 +27,7 @@ namespace AT_NAME
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
             // NOTE
-            // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+            // Fschlick(v,h) â‰’ R0 + (1 - R0)(1 - cosÎ˜)^5
             // R0 = ((n1 - n2) / (n1 + n2))^2
 
             auto r0 = (ni - nt) / (ni + nt);
@@ -191,7 +191,7 @@ namespace AT_NAME
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
             // NOTE
-            // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+            // Fschlick(v,h) â‰’ R0 + (1 - R0)(1 - cosÎ˜)^5
             // R0 = ((n1 - n2) / (n1 + n2))^2
 
             auto r0 = (ni - nt) / (ni + nt);
@@ -247,7 +247,7 @@ namespace AT_NAME
                 auto T = aten::getOrthoVector(N);
                 auto B = cross(N, T);
 
-                // ƒRƒTƒCƒ“€‚ğg‚Á‚½d“_“IƒTƒ“ƒvƒŠƒ“ƒO.
+                // ã‚³ã‚µã‚¤ãƒ³é …ã‚’ä½¿ã£ãŸé‡ç‚¹çš„ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°.
                 r1 = 2 * AT_MATH_PI * r1;
                 auto r2s = aten::sqrt(r2);
 
@@ -334,7 +334,7 @@ namespace AT_NAME
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
             // NOTE
-            // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+            // Fschlick(v,h) â‰’ R0 + (1 - R0)(1 - cosÎ˜)^5
             // R0 = ((n1 - n2) / (n1 + n2))^2
 
             auto r0 = (ni - nt) / (ni + nt);

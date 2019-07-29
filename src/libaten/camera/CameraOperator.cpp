@@ -18,10 +18,10 @@ namespace aten {
         real offsetY = (real)(y1 - y2);
         offsetY *= scale;
 
-        // ˆÚ“®ƒxƒNƒgƒ‹.
+        // ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«.
         aten::vec3 offset(offsetX, offsetY, real(0));
 
-        // ƒJƒƒ‰‚Ì‰ñ“]‚ğl—¶‚·‚é.
+        // ã‚«ãƒ¡ãƒ©ã®å›è»¢ã‚’è€ƒæ…®ã™ã‚‹.
         aten::vec3 dir = at - pos;
         dir = normalize(dir);
         dir.y = real(0);
@@ -39,7 +39,7 @@ namespace aten {
         camera& camera,
         real offset)
     {
-        // ƒJƒƒ‰‚ÌŒü‚¢‚Ä‚¢‚é•ûŒü(Z²)‚É‰ˆ‚Á‚ÄˆÚ“®.
+        // ã‚«ãƒ¡ãƒ©ã®å‘ã„ã¦ã„ã‚‹æ–¹å‘(Zè»¸)ã«æ²¿ã£ã¦ç§»å‹•.
 
         auto& pos = camera.getPos();
         auto& at = camera.getAt();
@@ -55,13 +55,13 @@ namespace aten {
         camera& camera,
         real offset)
     {
-        // ƒJƒƒ‰‚ÌŒü‚¢‚Ä‚¢‚é•ûŒü‚Ì‰E²(-X²(‰EèÀ•W‚È‚Ì‚Å))‚É‰ˆ‚Á‚ÄˆÚ“®.
+        // ã‚«ãƒ¡ãƒ©ã®å‘ã„ã¦ã„ã‚‹æ–¹å‘ã®å³è»¸(-Xè»¸(å³æ‰‹åº§æ¨™ãªã®ã§))ã«æ²¿ã£ã¦ç§»å‹•.
         auto vz = camera.getDir();
 
         vec3 vup(0, 1, 0);
         if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
-            // UPƒxƒNƒgƒ‹‚Æ‚ÌŠOÏ‚ğŒvZ‚Å‚«‚È‚¢‚Ì‚ÅA
-            // V‚µ‚¢UPƒxƒNƒgƒ‹‚ğ‚Å‚Á‚¿‚ ‚°‚éEEE
+            // UPãƒ™ã‚¯ãƒˆãƒ«ã¨ã®å¤–ç©ã‚’è¨ˆç®—ã§ããªã„ã®ã§ã€
+            // æ–°ã—ã„UPãƒ™ã‚¯ãƒˆãƒ«ã‚’ã§ã£ã¡ã‚ã’ã‚‹ãƒ»ãƒ»ãƒ»
             vup = vec3(real(0), real(0), -vz.y);
         }
 
@@ -69,7 +69,7 @@ namespace aten {
         vx = normalize(vx);
 
         vx *= offset;
-        vx *= real(-1);    // -X²‚É•ÏŠ·.
+        vx *= real(-1);    // -Xè»¸ã«å¤‰æ›.
 
         auto& pos = camera.getPos();
         auto& at = camera.getAt();
@@ -82,13 +82,13 @@ namespace aten {
         camera& camera,
         real offset)
     {
-        // ƒJƒƒ‰‚ÌŒü‚¢‚Ä‚¢‚é•ûŒü‚Ì‰E²(Y²)‚É‰ˆ‚Á‚ÄˆÚ“®.
+        // ã‚«ãƒ¡ãƒ©ã®å‘ã„ã¦ã„ã‚‹æ–¹å‘ã®å³è»¸(Yè»¸)ã«æ²¿ã£ã¦ç§»å‹•.
         auto vz = camera.getDir();
 
         vec3 vup(0, 1, 0);
         if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
-            // UPƒxƒNƒgƒ‹‚Æ‚ÌŠOÏ‚ğŒvZ‚Å‚«‚È‚¢‚Ì‚ÅA
-            // V‚µ‚¢UPƒxƒNƒgƒ‹‚ğ‚Å‚Á‚¿‚ ‚°‚éEEE
+            // UPãƒ™ã‚¯ãƒˆãƒ«ã¨ã®å¤–ç©ã‚’è¨ˆç®—ã§ããªã„ã®ã§ã€
+            // æ–°ã—ã„UPãƒ™ã‚¯ãƒˆãƒ«ã‚’ã§ã£ã¡ã‚ã’ã‚‹ãƒ»ãƒ»ãƒ»
             vup = vec3(real(0), real(0), -vz.y);
         }
 
@@ -113,19 +113,19 @@ namespace aten {
         auto& pos = camera.getPos();
         auto& at = camera.getAt();
 
-        // ‹“_‚Æ’‹“_‚Ì‹——£.
+        // è¦–ç‚¹ã¨æ³¨è¦–ç‚¹ã®è·é›¢.
         real len = length(pos - at);
 
-        // ‹“_‚©‚ç’‹“_‚Ö‚Ì•ûŒü.
+        // è¦–ç‚¹ã‹ã‚‰æ³¨è¦–ç‚¹ã¸ã®æ–¹å‘.
         auto dir = pos - at;
         dir = normalize(dir);
 
-        // ƒXƒP[ƒŠƒ“ƒO.
-        // ’‹“_‚Ü‚Å‚Ì‹——£‚É‰‚¶‚é.
+        // ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°.
+        // æ³¨è¦–ç‚¹ã¾ã§ã®è·é›¢ã«å¿œã˜ã‚‹.
         auto distScale = scale * len * 0.01f;
         dir *= distScale;
 
-        // V‚µ‚¢‹“_.
+        // æ–°ã—ã„è¦–ç‚¹.
         pos += dir;
     }
 
@@ -137,10 +137,10 @@ namespace aten {
         real z = real(0);
         real dist = aten::sqrt(x * x + y * y);
 
-        // r * 1/ã2 ‚Ì“_‚Å‘o‹Èü‚ÆÚ‚·‚é“à‘¤‚ÆŠO‘¤
+        // r * 1/âˆš2 ã®ç‚¹ã§åŒæ›²ç·šã¨æ¥ã™ã‚‹å†…å´ã¨å¤–å´
 
         if (dist < radius * real(0.70710678118654752440)) {
-            // “à‘¤
+            // å†…å´
 
             // NOTE
             // r * r = x * x + y * y + z * z
@@ -148,7 +148,7 @@ namespace aten {
             z = aten::sqrt(radius * radius - dist * dist);
         }
         else {
-            // ŠO‘¤
+            // å¤–å´
             real t = radius * radius * 0.5f;
             z = t / dist;
         }
@@ -182,8 +182,8 @@ namespace aten {
         real x2 = normalizeHorizontal(_x2, (real)width);
         real y2 = normalizeVertical(_y2, (real)height);
 
-        // ƒXƒNƒŠ[ƒ“ã‚Ì‚Q“_‚©‚çƒgƒ‰ƒbƒNƒ{[ƒ‹ã‚Ì“_‚ğŒvZ‚·‚é.
-        // GLUT‚Æ“¯‚¶•û–@.
+        // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ä¸Šã®ï¼’ç‚¹ã‹ã‚‰ãƒˆãƒ©ãƒƒã‚¯ãƒœãƒ¼ãƒ«ä¸Šã®ç‚¹ã‚’è¨ˆç®—ã™ã‚‹.
+        // GLUTã¨åŒã˜æ–¹æ³•.
 
         aten::vec3 v1(
             x1, y1,
@@ -195,7 +195,7 @@ namespace aten {
             projectionToSphere(radius, x2, y2));
         v2 = normalize(v2);
 
-        // ‰ñ“]².
+        // å›è»¢è»¸.
         auto axis = cross(v1, v2);
         axis = normalize(axis);
 
@@ -203,17 +203,17 @@ namespace aten {
         aten::mat4 transform;
         transform.asRotateFromVector(dir, aten::vec3(0, 1, 0));
 
-        // ƒJƒƒ‰‚Ì‰ñ“]ó‘Ô‚É‡‚í‚¹‚Ä²‚à‰ñ“].
+        // ã‚«ãƒ¡ãƒ©ã®å›è»¢çŠ¶æ…‹ã«åˆã‚ã›ã¦è»¸ã‚‚å›è»¢.
         transform.applyXYZ(axis);
 
-        // ‰ñ“]‚ÌŠp“x
+        // å›è»¢ã®è§’åº¦
         // NOTE
-        // V1EV2 = |V1||V2|cosƒÆ = cosƒÆ (|V1| = |V2| = 1)
-        // ƒÆ = acos(cosƒÆ)
-        // => ƒÆ = acos(cosƒÆ) = acos(V1EV2)
+        // V1ãƒ»V2 = |V1||V2|cosÎ¸ = cosÎ¸ (|V1| = |V2| = 1)
+        // Î¸ = acos(cosÎ¸)
+        // => Î¸ = acos(cosÎ¸) = acos(V1ãƒ»V2)
         real theta = aten::acos(dot(v1, v2));
 
-        // ‰ñ“].
+        // å›è»¢.
         aten::mat4 mtxRot;
         mtxRot.asRotateByAxis(theta, axis);
 

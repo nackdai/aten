@@ -9,10 +9,10 @@
 
 namespace aten
 {
-    // A Simple and Robust Mutation Strategy for the Metropolis‚ğQÆ.
-    // Kelemen style MLT—pƒf[ƒ^\‘¢.
-    // Kelemen style‚Å‚ÍƒpƒX¶¬‚Ég‚¤—”‚Ì‹óŠÔ‚Å•ÏˆÙ‚³‚¹‚½‚è‚·‚é.
-    // ‚»‚Ìˆê‚Âˆê‚Â‚ÌƒTƒ“ƒvƒ‹‚Ìƒf[ƒ^\‘¢.
+    // A Simple and Robust Mutation Strategy for the Metropolisã‚’å‚ç…§.
+    // Kelemen style MLTç”¨ãƒ‡ãƒ¼ã‚¿æ§‹é€ .
+    // Kelemen styleã§ã¯ãƒ‘ã‚¹ç”Ÿæˆã«ä½¿ã†ä¹±æ•°ã®ç©ºé–“ã§å¤‰ç•°ã•ã›ãŸã‚Šã™ã‚‹.
+    // ãã®ä¸€ã¤ä¸€ã¤ã®ã‚µãƒ³ãƒ—ãƒ«ã®ãƒ‡ãƒ¼ã‚¿æ§‹é€ .
     struct PrimarySample {
         int modify_time{ 0 };
         real value;
@@ -24,11 +24,11 @@ namespace aten
         }
     };
 
-    // Kelemen MLT‚É‚¨‚¢‚ÄAƒpƒX¶¬‚Ég‚¤Šeí—”‚Íprimary space‚©‚ç‚à‚Á‚Ä‚­‚é.
-    // PrimarySample()‚ğ’Êí‚Ìrand01()‚Ì‘ã‚í‚è‚Ég‚Á‚ÄƒpƒX¶¬‚·‚éB¡‰ñ‚Í•’Ê‚ÌƒpƒXƒgƒŒ[ƒX‚ğg‚Á‚½Bi‘o•ûŒüƒpƒXƒgƒŒ“™‚àg‚¦‚éj.
-    // Metropolis–@‚È‚Ì‚ÅŒ»İ‚Ìó‘Ô‚©‚çŸ‚Ìó‘Ô‚Ö‚Æ‘JˆÚ‚ğ‚·‚é‚ª‚±‚Ì‘JˆÚ‚Ì‹óŠÔ‚ª]—ˆ‚Ìƒ[ƒ‹ƒh‹óŠÔ‚Å‚Í‚È‚­
-    // ƒpƒX‚ğ¶¬‚·‚é‚Ì‚Ég‚í‚ê‚é—”‚Ì‹óŠÔ‚É‚È‚Á‚Ä‚¢‚é.
-    // —”‹óŠÔ‚É‚¨‚¯‚é•ÏˆÙiMutate()j‚ÌŒ‹‰Ê‚ğg‚Á‚ÄÄ‚Ñ“¯‚¶‚æ‚¤‚ÉƒpƒXƒgƒŒ‚ÅƒpƒX‚ğ¶¬‚·‚é‚Æ‚»‚ÌƒpƒX‚Í©‘R‚É•ÏˆÙŒã‚ÌƒpƒX‚É‚È‚Á‚Ä‚¢‚é.
+    // Kelemen MLTã«ãŠã„ã¦ã€ãƒ‘ã‚¹ç”Ÿæˆã«ä½¿ã†å„ç¨®ä¹±æ•°ã¯primary spaceã‹ã‚‰ã‚‚ã£ã¦ãã‚‹.
+    // PrimarySample()ã‚’é€šå¸¸ã®rand01()ã®ä»£ã‚ã‚Šã«ä½¿ã£ã¦ãƒ‘ã‚¹ç”Ÿæˆã™ã‚‹ã€‚ä»Šå›ã¯æ™®é€šã®ãƒ‘ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¹ã‚’ä½¿ã£ãŸã€‚ï¼ˆåŒæ–¹å‘ãƒ‘ã‚¹ãƒˆãƒ¬ç­‰ã‚‚ä½¿ãˆã‚‹ï¼‰.
+    // Metropolisæ³•ãªã®ã§ç¾åœ¨ã®çŠ¶æ…‹ã‹ã‚‰æ¬¡ã®çŠ¶æ…‹ã¸ã¨é·ç§»ã‚’ã™ã‚‹ãŒã“ã®é·ç§»ã®ç©ºé–“ãŒå¾“æ¥ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã§ã¯ãªã
+    // ãƒ‘ã‚¹ã‚’ç”Ÿæˆã™ã‚‹ã®ã«ä½¿ã‚ã‚Œã‚‹ä¹±æ•°ã®ç©ºé–“ã«ãªã£ã¦ã„ã‚‹.
+    // ä¹±æ•°ç©ºé–“ã«ãŠã‘ã‚‹å¤‰ç•°ï¼ˆMutate()ï¼‰ã®çµæœã‚’ä½¿ã£ã¦å†ã³åŒã˜ã‚ˆã†ã«ãƒ‘ã‚¹ãƒˆãƒ¬ã§ãƒ‘ã‚¹ã‚’ç”Ÿæˆã™ã‚‹ã¨ãã®ãƒ‘ã‚¹ã¯è‡ªç„¶ã«å¤‰ç•°å¾Œã®ãƒ‘ã‚¹ã«ãªã£ã¦ã„ã‚‹.
     class MLTSampler : public sampler {
     public:
         MLTSampler(sampler* rnd)
@@ -57,12 +57,12 @@ namespace aten
         std::vector<PrimarySample> u;
         std::stack<PrimarySample> stack;
 
-        // accept ‚³‚ê‚½ mutation ‚Ì‰ñ”.
+        // accept ã•ã‚ŒãŸ mutation ã®å›æ•°.
         int globalTime{ 0 };
 
         int largeStep{ 0 };
 
-        // ÅŒã‚É large step ‚ª accept ‚³‚ê‚½ time.
+        // æœ€å¾Œã« large step ãŒ accept ã•ã‚ŒãŸ time.
         int largeStepTime{ 0 };
 
         int usedRandCoords{ 0 };
@@ -131,10 +131,10 @@ namespace aten
 
     void MLTSampler::clearStack()
     {
-        // ƒXƒ^ƒbƒN‹ó‚É‚·‚é.
+        // ã‚¹ã‚¿ãƒƒã‚¯ç©ºã«ã™ã‚‹.
         while (!stack.empty()) {
             // std::stack doesn't have clear function...
-            // ‹ó‚É‚È‚é‚Ü‚Åƒ|ƒbƒv‚·‚é.
+            // ç©ºã«ãªã‚‹ã¾ã§ãƒãƒƒãƒ—ã™ã‚‹.
             stack.pop();
         }
     }
@@ -203,8 +203,8 @@ namespace aten
 
         int mltNum = dst.mltNum;
 
-        // •ÏˆÙ‰ñ”.
-        // MLT‚ÍƒsƒNƒZƒ‹”‚Å‚Í‰ñ‚³‚È‚¢‚Ì‚ÅAÅ’á‚Å‚à‰æ‘f”ˆÈã‚Í‰ñ‚é‚æ‚¤‚É‚µ‚È‚¢‚Æ‰æ‚ª–„‚Ü‚ç‚È‚¢.
+        // å¤‰ç•°å›æ•°.
+        // MLTã¯ãƒ”ã‚¯ã‚»ãƒ«æ•°ã§ã¯å›ã•ãªã„ã®ã§ã€æœ€ä½ã§ã‚‚ç”»ç´ æ•°ä»¥ä¸Šã¯å›ã‚‹ã‚ˆã†ã«ã—ãªã„ã¨ç”»ãŒåŸ‹ã¾ã‚‰ãªã„.
         int mutation = samples * width * height;
 
         m_maxDepth = dst.maxDepth;
@@ -233,16 +233,16 @@ namespace aten
             }
 
             // TODO
-            // sobol ‚â halton sequence ‚ÍƒXƒeƒbƒv”‚ª‘½‚·‚¬‚ÄƒI[ƒo[ƒtƒ[‚µ‚Ä‚µ‚Ü‚¤...
+            // sobol ã‚„ halton sequence ã¯ã‚¹ãƒ†ãƒƒãƒ—æ•°ãŒå¤šã™ãã¦ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã—ã¦ã—ã¾ã†...
             //XorShift rnd(4 * mltNum + mi + 1 + time.milliSeconds);
             CMJ rnd;
             rnd.init(time.milliSeconds, mi, 4 * mltNum + mi + 1);
             MLTSampler mlt(&rnd);
 
-            // ‚½‚­‚³‚ñƒpƒX‚ğ¶¬‚·‚é.
-            // ‚±‚ÌƒpƒX‚©‚çMLT‚Åg‚¤Å‰‚ÌƒpƒX‚ğ“¾‚éB(Markov Chain Monte Carlo‚Å‚ ‚Á‚½j.
+            // ãŸãã•ã‚“ãƒ‘ã‚¹ã‚’ç”Ÿæˆã™ã‚‹.
+            // ã“ã®ãƒ‘ã‚¹ã‹ã‚‰MLTã§ä½¿ã†æœ€åˆã®ãƒ‘ã‚¹ã‚’å¾—ã‚‹ã€‚(Markov Chain Monte Carloã§ã‚ã£ãŸï¼‰.
 
-            // “K“–‚É‘½‚ß‚Ì”.
+            // é©å½“ã«å¤šã‚ã®æ•°.
             int seedPathMax = width * height;
             if (seedPathMax <= 0) {
                 seedPathMax = 1;
@@ -260,18 +260,18 @@ namespace aten
                 seedPaths[i] = genPath(ctxt, scene, &mlt, -1, -1, width, height, camera);
                 const auto& sample = seedPaths[i];
 
-                // ‚Ü‚¸‚Í¶¬‚·‚é‚¾‚¯‚È‚Ì‚ÅA‚·‚×‚Äaccept‚·‚é.
+                // ã¾ãšã¯ç”Ÿæˆã™ã‚‹ã ã‘ãªã®ã§ã€ã™ã¹ã¦acceptã™ã‚‹.
                 mlt.globalTime++;
 
-                // ¶¬‚Ì‚İ‚È‚Ì‚ÅƒXƒ^ƒbƒN‚ğ‹ó‚É‚·‚é?
+                // ç”Ÿæˆã®ã¿ãªã®ã§ã‚¹ã‚¿ãƒƒã‚¯ã‚’ç©ºã«ã™ã‚‹?
                 mlt.clearStack();
 
                 // sum I.
                 sumI += color::luminance(sample.contrib);
             }
 
-            // Å‰‚ÌƒpƒX‚ğ‹‚ß‚é.
-            // ‹P“x’l‚ÉŠî‚Ã‚­d“_ƒTƒ“ƒvƒŠƒ“ƒO‚É‚æ‚Á‚Ä‘I‚ñ‚Å‚¢‚é.
+            // æœ€åˆã®ãƒ‘ã‚¹ã‚’æ±‚ã‚ã‚‹.
+            // è¼åº¦å€¤ã«åŸºã¥ãé‡ç‚¹ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã«ã‚ˆã£ã¦é¸ã‚“ã§ã„ã‚‹.
             int selecetdPath = 0;
             {
                 auto cost = rnd.nextSample() * sumI;
@@ -326,7 +326,7 @@ namespace aten
                     // accept.
                     accept++;
 
-                    // •ÏˆÙ‚·‚é.
+                    // å¤‰ç•°ã™ã‚‹.
                     oldPath = newPath;
 
                     if (mlt.largeStep) {

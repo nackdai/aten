@@ -11,7 +11,7 @@ namespace aten {
         int filter_size,
         real std_d)
     {
-        // ƒKƒEƒXƒtƒBƒ‹ƒ^ŒW”.
+        // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿ä¿‚æ•°.
         // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
         real std_d2 = 2.0f * std_d * std_d;
 
@@ -24,27 +24,27 @@ namespace aten {
             for (int cx = 0; cx < width; cx++) {
                 int cIdx = cy * width + cx;
 
-                // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEŠJnˆÊ’u.
+                // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦é–‹å§‹ä½ç½®.
                 int startWindow_x = std::max(0, cx - halfWindowSize);
                 int startWindow_y = std::max(0, cy - halfWindowSize);
 
-                // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEI—¹ˆÊ’u.
+                // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦çµ‚äº†ä½ç½®.
                 int endWindow_x = std::min(width - 1, cx + halfWindowSize);
                 int endWindow_y = std::min(height - 1, cy + halfWindowSize);
 
                 real sumWeight = 0.0;
 
-                // o—Íƒoƒbƒtƒ@‰Šú‰».
+                // å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡åˆæœŸåŒ–.
                 _out[cIdx] = vec4(0);
 
                 for (int iy = startWindow_y; iy <= endWindow_y; ++iy) {
                     for (int ix = startWindow_x; ix <= endWindow_x; ++ix) {
                         int idx = iy * width + ix;
 
-                        // ƒsƒNƒZƒ‹‹——£‚Ì‚Qæ.
+                        // ãƒ”ã‚¯ã‚»ãƒ«è·é›¢ã®ï¼’ä¹—.
                         real imageDist = (real)(cx - ix) * (cx - ix) + (cy - iy) * (cy - iy);
 
-                        // ƒKƒEƒXƒtƒBƒ‹ƒ^.
+                        // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿.
                         // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
                         real weight = aten::exp(-imageDist / std_d2);
 
@@ -99,8 +99,8 @@ namespace aten {
         vec4* dst)
     {
         // NOTE
-        // direct, idx ‚Í“™”{.
-        // indirect ‚Í 1 / ratio.
+        // direct, idx ã¯ç­‰å€.
+        // indirect ã¯ 1 / ratio.
 
         std::vector<vec4> fitelred(width * height);
 
@@ -109,13 +109,13 @@ namespace aten {
         auto mwidth = width / ratio;
         auto mheight = height / ratio;
 
-        // QÆ“_ˆÊ’u.
+        // å‚ç…§ç‚¹ä½ç½®.
         Pos refPos[4];
 
-        // QÆ“_ƒWƒIƒƒgƒŠƒCƒ“ƒfƒbƒNƒX.
+        // å‚ç…§ç‚¹ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹.
         Idx refIdx[4];
 
-        // QÆ“_F.
+        // å‚ç…§ç‚¹è‰².
         vec4 refClr[4];
 
         enum {
@@ -155,7 +155,7 @@ namespace aten {
                 int mx = x / ratio;
                 int my = y / ratio;
 
-                // QÆ“_‚ğŒvZ.
+                // å‚ç…§ç‚¹ã‚’è¨ˆç®—.
                 {
                     refPos[UPPER_LEFT].x = mx;
                     refPos[UPPER_LEFT].y = my + 1;
@@ -175,7 +175,7 @@ namespace aten {
                 const auto& c = baseSampler(refPos[LOWER_RIGHT].x, refPos[LOWER_RIGHT].y);
                 const auto& d = baseSampler(refPos[UPPER_RIGHT].x, refPos[UPPER_RIGHT].y);
 
-                // Šî€“_i¶‰ºj‚©‚ç‚Ì”ä—¦‚ğŒvZ.
+                // åŸºæº–ç‚¹ï¼ˆå·¦ä¸‹ï¼‰ã‹ã‚‰ã®æ¯”ç‡ã‚’è¨ˆç®—.
                 real u = aten::abs(x - refPos[LOWER_LEFT].x * ratio) / (real)ratio;
                 real v = aten::abs(y - refPos[LOWER_LEFT].y * ratio) / (real)ratio;
 
@@ -183,7 +183,7 @@ namespace aten {
                 AT_ASSERT(real(0) <= v && v <= real(1));
 
 #if 0
-                // ˆêŸ•âŠÔ–@‚ÅŒvZ.
+                // ä¸€æ¬¡è£œé–“æ³•ã§è¨ˆç®—.
                 vec4 l = (1 - u) * v * a + (1 - u) * (1 - v) * b + u * (1 - v) * c + u * v * d;
 #else
                 u = aten::clamp(u, AT_MATH_EPSILON, real(1));

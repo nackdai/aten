@@ -7,7 +7,7 @@ namespace aten
     {
         static char buf[_MAX_PATH];
 
-        // ÀsƒvƒƒOƒ‰ƒ€‚Ìƒtƒ‹ƒpƒX‚ğæ“¾
+        // å®Ÿè¡Œãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®ãƒ•ãƒ«ãƒ‘ã‚¹ã‚’å–å¾—
         {
             DWORD result = ::GetModuleFileName(
                 NULL,
@@ -16,11 +16,11 @@ namespace aten
             AT_ASSERT(result > 0);
         }
 
-        // ƒtƒ@ƒCƒ‹–¼‚ğæ‚èœ‚­
+        // ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å–ã‚Šé™¤ã
         auto result = ::PathRemoveFileSpec(buf);
         AT_ASSERT(result);
 
-        // ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ‚ğİ’è
+        // ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’è¨­å®š
         result = ::SetCurrentDirectory(buf);
         AT_ASSERT(result);
 

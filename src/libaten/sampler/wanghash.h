@@ -4,7 +4,7 @@
 #include "sampler/samplerinterface.h"
 
 namespace aten {
-    // Wang's hash による乱数ジェネレータ.
+    // Wang's hash 縺ｫ繧医ｋ荵ｱ謨ｰ繧ｸ繧ｧ繝阪Ξ繝ｼ繧ｿ.
     class WangHash AT_INHERIT(sampler) {
     public:
         AT_DEVICE_API WangHash() {}

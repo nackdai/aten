@@ -123,7 +123,7 @@ __global__ void geometryRender(
 		make_int2(min(mx + 1, mwidth - 1), my),							// lower-right.
 	};
 
-	// Šî€“_i¶‰ºj‚©‚ç‚Ì”ä—¦‚ğŒvZ.
+	// åŸºæº–ç‚¹ï¼ˆå·¦ä¸‹ï¼‰ã‹ã‚‰ã®æ¯”ç‡ã‚’è¨ˆç®—.
 	real u = aten::abs<int>(ix - pos[ReferPos::LowerLeft].x * ratio) / (real)ratio;
 	real v = aten::abs<int>(iy - pos[ReferPos::LowerLeft].y * ratio) / (real)ratio;
 

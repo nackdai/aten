@@ -1,4 +1,4 @@
-﻿#include "kernel/LBVHBuilder.h"
+#include "kernel/LBVHBuilder.h"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"

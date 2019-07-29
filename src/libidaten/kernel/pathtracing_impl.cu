@@ -387,8 +387,8 @@ __global__ void shade(
 
     bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-    // Œğ·ˆÊ’u‚Ì–@ü.
-    // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+    // äº¤å·®ä½ç½®ã®æ³•ç·š.
+    // ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
     aten::vec3 orienting_normal = rec.normal;
 
     if (mtrl.type != aten::MaterialType::Layer) {
@@ -475,7 +475,7 @@ __global__ void shade(
     // Apply normal map.
     int normalMap = mtrl.normalMap;
     if (mtrl.type == aten::MaterialType::Layer) {
-        // Å•\‘w‚Ì NormalMap ‚ğ“K—p.
+        // æœ€è¡¨å±¤ã® NormalMap ã‚’é©ç”¨.
         auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
@@ -539,10 +539,10 @@ __global__ void shade(
             if (light.attrib.isSingular || light.attrib.isInfinite) {
                 if (pdfLight > real(0) && cosShadow >= 0) {
                     // TODO
-                    // ƒWƒIƒƒgƒŠƒ^[ƒ€‚Ìˆµ‚¢‚É‚Â‚¢‚Ä.
-                    // singular light ‚Ìê‡‚ÍAfinalColor ‚É‹——£‚ÌœZ‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é.
-                    // inifinite light ‚Ìê‡‚ÍA–³ŒÀ‰“•û‚É‚È‚èApdfLight‚ÉŠÜ‚Ü‚ê‚é‹——£¬•ª‚Æ‘Å‚¿Á‚µ‚ ‚¤H.
-                    // i‘Å‚¿Á‚µ‚ ‚¤‚Ì‚ÅApdfLight‚É‚Í‹——£¬•ª‚ÍŠÜ‚ñ‚Å‚¢‚È‚¢j.
+                    // ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚¿ãƒ¼ãƒ ã®æ‰±ã„ã«ã¤ã„ã¦.
+                    // singular light ã®å ´åˆã¯ã€finalColor ã«è·é›¢ã®é™¤ç®—ãŒå«ã¾ã‚Œã¦ã„ã‚‹.
+                    // inifinite light ã®å ´åˆã¯ã€ç„¡é™é æ–¹ã«ãªã‚Šã€pdfLightã«å«ã¾ã‚Œã‚‹è·é›¢æˆåˆ†ã¨æ‰“ã¡æ¶ˆã—ã‚ã†ï¼Ÿ.
+                    // ï¼ˆæ‰“ã¡æ¶ˆã—ã‚ã†ã®ã§ã€pdfLightã«ã¯è·é›¢æˆåˆ†ã¯å«ã‚“ã§ã„ãªã„ï¼‰.
                     auto misW = pdfLight / (pdfb + pdfLight);
                     shadowRays[idx].lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                 }
@@ -604,7 +604,7 @@ __global__ void shade(
     real c = 1;
     if (!mtrl.attrib.isSingular) {
         // TODO
-        // AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
+        // AMDã®ã¯absã—ã¦ã„ã‚‹ãŒ....
         c = aten::abs(dot(orienting_normal, nextDir));
         //c = dot(orienting_normal, nextDir);
     }

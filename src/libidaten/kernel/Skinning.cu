@@ -110,8 +110,8 @@ __global__ void getMinMax(
 
     // NOTE
     // http://yusuke-ujitoko.hatenablog.com/entry/2016/02/05/012618
-    // �J�[�l���Ăяo���̂Ƃ��Ɏw��ł���̂�1�̐�����.
-    // ������shared memory���g�������Ƃ��́Ashared memory�̃T�C�Y�̍��v���w�肵�āA�J�[�l�������Ő؂蕪����K�v������.
+    // カーネル呼び出しのときに指定できるのは1つの数だけ.
+    // 複数のshared memoryを使いたいときは、shared memoryのサイズの合計を指定して、カーネル内部で切り分ける必要がある.
 
 #ifdef MINMAX_TEST
     extern __shared__ uint32_t minPos[];

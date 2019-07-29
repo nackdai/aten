@@ -62,7 +62,7 @@ struct ObjFace {
 static inline void writeFace(FILE* fp, const ObjFace& f)
 {
     // NOTE
-    // obj ‚Í 1 Šî“_‚È‚Ì‚ÅA+1 ‚·‚é.
+    // obj ã¯ 1 åŸºç‚¹ãªã®ã§ã€+1 ã™ã‚‹.
 
     // NOTE
     // pos/uv/nml.

@@ -40,7 +40,7 @@ namespace AT_NAME {
             result->pos = rec->p;
 
             // TODO
-            // AMD‚ÌProRender(Baikal)‚Å‚Í‚± dist2/–ÊÏ ‚Æ‚È‚Á‚Ä‚¢‚é‚ª...
+            // AMDã®ProRender(Baikal)ã§ã¯ã“ dist2/é¢ç© ã¨ãªã£ã¦ã„ã‚‹ãŒ...
             auto dist2 = aten::squared_length(rec->p - org);
             result->pdf = 1 / rec->area;
 

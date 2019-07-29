@@ -446,8 +446,8 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     real b = isect->b;
     real c = 1 - a - b;
 
-    // dSÀ•WŒn(barycentric coordinates).
-    // v0Šî€.
+    // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+    // v0åŸºæº–.
     // p = (1 - a - b)*v0 + a*v1 + b*v2
     auto p = c * p0 + a * p1 + b * p2;
     auto n = c * n0 + a * n1 + b * n2;

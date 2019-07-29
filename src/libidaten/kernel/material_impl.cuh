@@ -28,7 +28,7 @@ AT_CUDA_INLINE __device__ void sampleLayerMaterial(
         aten::vec3 appliedNml = normal;
 
         // NOTE
-        // ŠO•”‚Å‚ÍÅ•\‘w‚Ì NormalMap ‚ª“K—p‚³‚ê‚Ä‚¢‚é‚Ì‚ÅA‰º‘wƒŒƒCƒ„[‚Ìƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚É–@üƒ}ƒbƒv‚ğ“K—p‚·‚é.
+        // å¤–éƒ¨ã§ã¯æœ€è¡¨å±¤ã® NormalMap ãŒé©ç”¨ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¸‹å±¤ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«æ³•ç·šãƒãƒƒãƒ—ã‚’é©ç”¨ã™ã‚‹.
         if (i > 0) {
             auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
             AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
@@ -78,7 +78,7 @@ AT_CUDA_INLINE __device__ real sampleLayerPDF(
     real pdf = 0;
 
     real weight = 1;
-    real ior = 1;    // ^‹ó‚©‚çn‚ß‚é.
+    real ior = 1;    // çœŸç©ºã‹ã‚‰å§‹ã‚ã‚‹.
 
     for (int i = 0; i < AT_COUNTOF(mtrl->layer); i++) {
         if (mtrl->layer[i] < 0) {
@@ -90,7 +90,7 @@ AT_CUDA_INLINE __device__ real sampleLayerPDF(
         aten::vec3 appliedNml = normal;
 
         // NOTE
-        // ŠO•”‚Å‚ÍÅ•\‘w‚Ì NormalMap ‚ª“K—p‚³‚ê‚Ä‚¢‚é‚Ì‚ÅA‰º‘wƒŒƒCƒ„[‚Ìƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚É–@üƒ}ƒbƒv‚ğ“K—p‚·‚é.
+        // å¤–éƒ¨ã§ã¯æœ€è¡¨å±¤ã® NormalMap ãŒé©ç”¨ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¸‹å±¤ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«æ³•ç·šãƒãƒƒãƒ—ã‚’é©ç”¨ã™ã‚‹.
         if (i > 0) {
             auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
             AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
@@ -108,7 +108,7 @@ AT_CUDA_INLINE __device__ real sampleLayerPDF(
             break;
         }
 
-        // ã‘w‚Ì’l‚ğ‰º‘w‚Ég‚¤.
+        // ä¸Šå±¤ã®å€¤ã‚’ä¸‹å±¤ã«ä½¿ã†.
         ior = param->ior;
     }
 
@@ -141,7 +141,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
     aten::vec3 bsdf;
 
     real weight = 1;
-    real ior = 1;    // ^‹ó‚©‚çn‚ß‚é.
+    real ior = 1;    // çœŸç©ºã‹ã‚‰å§‹ã‚ã‚‹.
 
     for (int i = 0; i < AT_COUNTOF(mtrl->layer); i++) {
         if (mtrl->layer[i] < 0) {
@@ -153,7 +153,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
         aten::vec3 appliedNml = normal;
 
         // NOTE
-        // ŠO•”‚Å‚ÍÅ•\‘w‚Ì NormalMap ‚ª“K—p‚³‚ê‚Ä‚¢‚é‚Ì‚ÅA‰º‘wƒŒƒCƒ„[‚Ìƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚É–@üƒ}ƒbƒv‚ğ“K—p‚·‚é.
+        // å¤–éƒ¨ã§ã¯æœ€è¡¨å±¤ã® NormalMap ãŒé©ç”¨ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¸‹å±¤ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«æ³•ç·šãƒãƒƒãƒ—ã‚’é©ç”¨ã™ã‚‹.
         if (i > 0) {
             auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
             AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
@@ -173,7 +173,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
             break;
         }
 
-        // ã‘w‚Ì’l‚ğ‰º‘w‚Ég‚¤.
+        // ä¸Šå±¤ã®å€¤ã‚’ä¸‹å±¤ã«ä½¿ã†.
         ior = param->ior;
     }
 

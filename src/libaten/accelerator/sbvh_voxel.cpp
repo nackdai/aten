@@ -18,7 +18,7 @@ namespace aten
         }
 
         // NOTE
-        // root�m�[�h�͑ΏۊO.
+        // rootノードは対象外.
 
         // Find the node for treelet root.
         for (uint32_t i = 1; i < (uint32_t)m_nodes.size(); i++) {

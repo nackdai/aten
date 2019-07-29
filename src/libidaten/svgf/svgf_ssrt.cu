@@ -79,8 +79,8 @@ __global__ void hitTestPrimaryRayInScreenSpace(
         real b = data.w;
         real c = 1 - a - b;
 
-        // dSÀ•WŒn(barycentric coordinates).
-        // v0Šî€.
+        // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+        // v0åŸºæº–.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
         auto p = c * p0 + a * p1 + b * p2;
         aten::vec4 vp(p.x, p.y, p.z, 1.0f);

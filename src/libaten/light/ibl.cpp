@@ -16,7 +16,7 @@ namespace AT_NAME {
         m_avgIllum = 0;
 
         // NOTE
-        // ���}�b�v�́A�����~���i= �ܓx�o�x�}�b�v�j�̂�.
+        // 環境マップは、正距円筒（= 緯度経度マップ）のみ.
 
         // NOTE
         //    0 1 2 3 4
@@ -26,13 +26,13 @@ namespace AT_NAME {
         // 1 |h|i|j|k|l|...
         //   +-+-+-+-+-+
         //
-        // V�����i�c�����j��PDF�͂P�񕪂̍��v�l�ƂȂ�.
-        // �@pdfV_0 = a + b + c + d + e + ....
-        // �@pdfV_1 = h + i + j + k + l + ....
+        // V方向（縦方向）のPDFは１列分の合計値となる.
+        // 　pdfV_0 = a + b + c + d + e + ....
+        // 　pdfV_1 = h + i + j + k + l + ....
         //
-        // U�����i�������j��PDF�͂P�s�N�Z�����̒l�ƂȂ�.
-        // �@pdfU_00 = a, pdfU_01 = b, ...
-        // �@pdfU_10 = h, pdfU_11 = i, ...
+        // U方向（横方向）のPDFは１ピクセルずつの値となる.
+        // 　pdfU_00 = a, pdfU_01 = b, ...
+        // 　pdfU_10 = h, pdfU_11 = i, ...
 
         real totalWeight = 0;
 
@@ -40,16 +40,16 @@ namespace AT_NAME {
 
         for (uint32_t y = 0; y < height; y++) {
             // NOTE
-            // �����~���́A�ܓx�����ɂ��Ă͋ɂقǘc�ނ̂ŁA���̕␳.
-            // �ܓx������ [0, pi].
-            // 0.5 �����̂́A�s�N�Z�����S�_���T���v������̂ƁA�[���ɂȂ�Ȃ��悤�ɂ��邽��.
-            // sin(0) = 0 �� scale�l���[���ɂȂ�̂�����邽��.
+            // 正距円筒は、緯度方向については極ほど歪むので、その補正.
+            // 緯度方向は [0, pi].
+            // 0.5 足すのは、ピクセル中心点をサンプルするのと、ゼロにならないようにするため.
+            // sin(0) = 0 で scale値がゼロになるのを避けるため.
             real scale = aten::sin(AT_MATH_PI * (real)(y + 0.5) / height);
 
-            // v������pdf.
+            // v方向のpdf.
             real pdfV = 0;
 
-            // u������pdf.
+            // u方向のpdf.
             std::vector<real>& pdfU = m_cdfU[y];
 
             for (uint32_t x = 0; x < width; x++) {
@@ -62,14 +62,14 @@ namespace AT_NAME {
                 m_avgIllum += illum * scale;
                 totalWeight += scale;
 
-                // �P�񕪂̍��v�l���v�Z.
+                // １列分の合計値を計算.
                 pdfV += illum * scale;
 
-                // �܂���pdf�𒙂߂�.
+                // まずはpdfを貯める.
                 pdfU.push_back(illum * scale);
             }
 
-            // �܂���pdf�𒙂߂�.
+            // まずはpdfを貯める.
             m_cdfV.push_back(pdfV);
         }
 
@@ -223,7 +223,7 @@ namespace AT_NAME {
         real v = (real)(y + 0.5) / height;
 
         // NOTE
-        // p(w) = p(u, v) * (w * h) / (2��^2 * sin(��))
+        // p(w) = p(u, v) * (w * h) / (2π^2 * sin(θ))
         auto pi2 = AT_MATH_PI * AT_MATH_PI;
         auto theta = AT_MATH_PI * v;
         result.pdf = (pdfU * pdfV) * ((width * height) / (pi2 * aten::sin(theta)));

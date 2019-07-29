@@ -171,8 +171,8 @@ namespace idaten
         auto vtxTexNml = m_vtxparamsNml.bind();
 
         // TODO
-        // Texture�������̃o�C���h�ɂ��擾�����cudaTextureObject_t�͕ω����Ȃ��̂�,�l����x�ێ����Ă����΂���.
-        // �����_�ł͍ŏ��ɐݒ肳�ꂽ���̂��ω����Ȃ��O��ł��邪�A����ւ��Ȃǂ̕ύX���������ꍇ�͂��̌���ł͂Ȃ��̂ŁA��������̑Ή����K�v.
+        // Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
+        // 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.
 
         if (!m_isListedTextureObject)
         {

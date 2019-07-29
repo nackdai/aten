@@ -51,7 +51,7 @@ namespace AT_NAME
             newNml = orgNml;
         }
         else {
-            // Å•\‘w‚Ì NormalMap ‚ğ“K—p.
+            // æœ€è¡¨å±¤ã® NormalMap ã‚’é©ç”¨.
             auto mtrl = m_layer[0];
             mtrl->applyNormalMap(orgNml, newNml, u, v);
         }
@@ -73,7 +73,7 @@ namespace AT_NAME
             return real(1);
         }
         else {
-            // Å•\‘w‚ÌƒtƒŒƒlƒ‹‚ğ•Ô‚·.
+            // æœ€è¡¨å±¤ã®ãƒ•ãƒ¬ãƒãƒ«ã‚’è¿”ã™.
             auto mtrl = m_layer[0];
             auto f = mtrl->computeFresnel(normal, wi, wo, outsideIor);
             return f;
@@ -83,7 +83,7 @@ namespace AT_NAME
     bool LayeredBSDF::add(material* mtrl)
     {
         // TODO
-        // GPU‘¤‚Æˆ—‚ğ‡‚í‚¹‚é‚½‚ßA‚R‘w‚Ü‚Å‚É‚·‚é.
+        // GPUå´ã¨å‡¦ç†ã‚’åˆã‚ã›ã‚‹ãŸã‚ã€ï¼“å±¤ã¾ã§ã«ã™ã‚‹.
         if (m_layer.size() > 3) {
             AT_ASSERT(false);
             return false;
@@ -126,7 +126,7 @@ namespace AT_NAME
             aten::vec3 appliedNml = normal;
 
             // NOTE
-            // ŠO•”‚Å‚ÍÅ•\‘w‚Ì NormalMap ‚ª“K—p‚³‚ê‚Ä‚¢‚é‚Ì‚ÅA‰º‘wƒŒƒCƒ„[‚Ìƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚É–@üƒ}ƒbƒv‚ğ“K—p‚·‚é.
+            // å¤–éƒ¨ã§ã¯æœ€è¡¨å±¤ã® NormalMap ãŒé©ç”¨ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¸‹å±¤ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«æ³•ç·šãƒãƒƒãƒ—ã‚’é©ç”¨ã™ã‚‹.
             if (i > 0) {
                 mtrl->applyNormalMap(normal, appliedNml, u, v);
             }
@@ -168,7 +168,7 @@ namespace AT_NAME
         real pdf = 0;
 
         real weight = 1;
-        real ior = 1;    // ^‹ó‚©‚çn‚ß‚é.
+        real ior = 1;    // çœŸç©ºã‹ã‚‰å§‹ã‚ã‚‹.
 
         for (int i = 0; i < num; i++) {
             auto mtrl = m_layer[i];
@@ -176,7 +176,7 @@ namespace AT_NAME
             aten::vec3 appliedNml = normal;
 
             // NOTE
-            // ŠO•”‚Å‚ÍÅ•\‘w‚Ì NormalMap ‚ª“K—p‚³‚ê‚Ä‚¢‚é‚Ì‚ÅA‰º‘wƒŒƒCƒ„[‚Ìƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚É–@üƒ}ƒbƒv‚ğ“K—p‚·‚é.
+            // å¤–éƒ¨ã§ã¯æœ€è¡¨å±¤ã® NormalMap ãŒé©ç”¨ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¸‹å±¤ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«æ³•ç·šãƒãƒƒãƒ—ã‚’é©ç”¨ã™ã‚‹.
             if (i > 0) {
                 mtrl->applyNormalMap(normal, appliedNml, u, v);
             }
@@ -193,7 +193,7 @@ namespace AT_NAME
                 break;
             }
 
-            // ã‘w‚Ì’l‚ğ‰º‘w‚Ég‚¤.
+            // ä¸Šå±¤ã®å€¤ã‚’ä¸‹å±¤ã«ä½¿ã†.
             ior = mtrl->ior();
         }
 
@@ -227,7 +227,7 @@ namespace AT_NAME
         aten::vec3 bsdf;
 
         real weight = 1;
-        real ior = 1;    // ^‹ó‚©‚çn‚ß‚é.
+        real ior = 1;    // çœŸç©ºã‹ã‚‰å§‹ã‚ã‚‹.
 
         for (int i = 0; i < num; i++) {
             auto mtrl = m_layer[i];
@@ -235,7 +235,7 @@ namespace AT_NAME
             aten::vec3 appliedNml = normal;
 
             // NOTE
-            // ŠO•”‚Å‚ÍÅ•\‘w‚Ì NormalMap ‚ª“K—p‚³‚ê‚Ä‚¢‚é‚Ì‚ÅA‰º‘wƒŒƒCƒ„[‚Ìƒ}ƒeƒŠƒAƒ‹‚²‚Æ‚É–@üƒ}ƒbƒv‚ğ“K—p‚·‚é.
+            // å¤–éƒ¨ã§ã¯æœ€è¡¨å±¤ã® NormalMap ãŒé©ç”¨ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¸‹å±¤ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒãƒ†ãƒªã‚¢ãƒ«ã”ã¨ã«æ³•ç·šãƒãƒƒãƒ—ã‚’é©ç”¨ã™ã‚‹.
             if (i > 0) {
                 mtrl->applyNormalMap(normal, appliedNml, u, v);
             }
@@ -254,7 +254,7 @@ namespace AT_NAME
                 break;
             }
 
-            // ã‘w‚Ì’l‚ğ‰º‘w‚Ég‚¤.
+            // ä¸Šå±¤ã®å€¤ã‚’ä¸‹å±¤ã«ä½¿ã†.
             ior = mtrl->ior();
         }
 

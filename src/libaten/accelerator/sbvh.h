@@ -24,13 +24,13 @@ namespace aten
 
 #if (SBVH_TRIANGLE_NUM == 1)
         // NOTE
-        // triid‚М€К’u‚рThreadedBvhNode‚ЖЌ‡‚н‚№‚й.
+        // triidгЃ®дЅЌзЅ®г‚’ThreadedBvhNodeгЃЁеђ€г‚ЏгЃ›г‚‹.
 
         // NOTE
-        // ThreadedBvhNode ‚Е‚Н isleaf ‚М€К’u‚Й shapeid ‚Є‚ў‚ДGPU‚Е‚Н shapeid ‚рЊ©‚ДѓЉЃ[ѓtѓmЃ[ѓh‚©‚З‚¤‚©”»’и‚µ‚Д‚ў‚й.
-        // ‚»‚М‚Ѕ‚ЯЃAЌЕЏ‰‚Мfloat‚ЕѓЉЃ[ѓtѓmЃ[ѓh‚©‚З‚¤‚©‚р”»’и‚·‚й‚ж‚¤‚Й‚·‚й.
-        // isVoxel ‚М•”•Є‚Н ThreadedBvhNode ‚Е‚Н exid ‚И‚М‚ЕЃA‚±‚±‚НЏн‚Йѓ}ѓCѓiѓX‚Й‚И‚й‚ж‚¤‚Й‚·‚й.
-        // ‚Ѕ‚ѕ‚µЃAѓ}ѓCѓiѓX‚Е‚ ‚и‚і‚¦‚·‚к‚О‚ў‚ў‚М‚ЕЃA‚±‚±‚Е‚Н -1 ‚ж‚иЏ¬‚і‚ўђ”‚р”»’и‚Ми‡’l‚Й‚µ‚В‚ВЃAdepth’l‚Ж‚µ‚Д€µ‚¤.
+        // ThreadedBvhNode гЃ§гЃЇ isleaf гЃ®дЅЌзЅ®гЃ« shapeid гЃЊгЃ„гЃ¦GPUгЃ§гЃЇ shapeid г‚’и¦‹гЃ¦гѓЄгѓјгѓ•гѓЋгѓјгѓ‰гЃ‹гЃ©гЃ†гЃ‹е€¤е®љгЃ—гЃ¦гЃ„г‚‹.
+        // гЃќгЃ®гЃџг‚ЃгЂЃжњЂе€ќгЃ®floatгЃ§гѓЄгѓјгѓ•гѓЋгѓјгѓ‰гЃ‹гЃ©гЃ†гЃ‹г‚’е€¤е®љгЃ™г‚‹г‚€гЃ†гЃ«гЃ™г‚‹.
+        // isVoxel гЃ®йѓЁе€†гЃЇ ThreadedBvhNode гЃ§гЃЇ exid гЃЄгЃ®гЃ§гЂЃгЃ“гЃ“гЃЇеёёгЃ«гѓћг‚¤гѓЉг‚№гЃ«гЃЄг‚‹г‚€гЃ†гЃ«гЃ™г‚‹.
+        // гЃџгЃ гЃ—гЂЃгѓћг‚¤гѓЉг‚№гЃ§гЃ‚г‚ЉгЃ•гЃ€гЃ™г‚ЊгЃ°гЃ„гЃ„гЃ®гЃ§гЂЃгЃ“гЃ“гЃ§гЃЇ -1 г‚€г‚Ље°ЏгЃ•гЃ„ж•°г‚’е€¤е®љгЃ®й–ѕеЂ¤гЃ«гЃ—гЃ¤гЃ¤гЂЃdepthеЂ¤гЃЁгЃ—гЃ¦ж‰±гЃ†.
 
         float isleaf{ -1 };        ///< Flag if the node is leaf.
         float triid{ -1 };        ///< Index of the triangle.
@@ -57,7 +57,7 @@ namespace aten
     };
 
     // NOTE
-    // GPGPUЏ€—ќ—p‚Й—ј•ы‚р“Ї‚¶ѓЃѓ‚ѓЉ‹уЉФЏг‚ЙЉi”[‚·‚й‚Ѕ‚ЯЃA“Ї‚¶ѓTѓCѓY‚Е‚И‚ў‚Ж‚ў‚Ї‚И‚ў.
+    // GPGPUе‡¦зђ†з”ЁгЃ«дёЎж–№г‚’еђЊгЃгѓЎгѓўгѓЄз©єй–“дёЉгЃ«ж јзґЌгЃ™г‚‹гЃџг‚ЃгЂЃеђЊгЃг‚µг‚¤г‚єгЃ§гЃЄгЃ„гЃЁгЃ„гЃ‘гЃЄгЃ„.
     AT_STATICASSERT(sizeof(ThreadedSbvhNode) == sizeof(ThreadedBvhNode));
 
     /**
@@ -245,7 +245,7 @@ namespace aten
             bool isTreeletRoot{ false };
         };
 
-        // •ЄЉ„Џо•с.
+        // е€†е‰Іжѓ…е ±.
         struct Bin {
             Bin() {}
 
@@ -262,22 +262,22 @@ namespace aten
             int end{ 0 };
         };
 
-        // •ЄЉ„ЋOЉpЊ`Џо•с.
+        // е€†е‰Ідё‰и§’еЅўжѓ…е ±.
         struct Reference {
             Reference() {}
 
             Reference(int id) : triid(id) {}
 
-            // •ЄЉ„Њі‚МЋOЉpЊ`ѓCѓ“ѓfѓbѓNѓX.
+            // е€†е‰Іе…ѓгЃ®дё‰и§’еЅўг‚¤гѓігѓ‡гѓѓг‚Їг‚№.
             int triid;
 
-            // •ЄЉ„‚µ‚ЅЊг‚МAABB.
+            // е€†е‰ІгЃ—гЃџеѕЊгЃ®AABB.
             aabb bbox;
         };
 
         /**
          * @brief Find a potential object split, but it does not split.
-         * ‚ґ‚Б‚­‚и•ЄЉ„ѓeѓXѓg.
+         * гЃ–гЃЈгЃЏг‚Ље€†е‰Ігѓ†г‚№гѓ€.
          * @param [in, out] node The node which we want to split.
          * @param [out] cost Cost to split.
          * @param [out] leftBB AABB of the potential left child nodes.
@@ -295,7 +295,7 @@ namespace aten
 
         /**
          * @brief Find a potential spatial split, but it does not split.
-         * ‚ж‚иЏЪЌЧ•ЄЉ„ѓeѓXѓg.
+         * г‚€г‚Љи©ізґ°е€†е‰Ігѓ†г‚№гѓ€.
          * @param [in, out] node The node which we want to split.
          * @param [out] leftCount Count of triangles in the left child nodes.
          * @param [out] rightCount Count of triangles in the right child nodes.
@@ -316,7 +316,7 @@ namespace aten
 
         /**
          * @biref Do the binned sah split actually with the result of findSpatialSplit.
-         * ‚ж‚иЏЪЌЧ•ЄЉ„ѓeѓXѓg‚ЙЉо‚Г‚ў‚ДЋАЌЫ‚Й•ЄЉ„‚·‚й.
+         * г‚€г‚Љи©ізґ°е€†е‰Ігѓ†г‚№гѓ€гЃ«еџєгЃҐгЃ„гЃ¦е®џйљ›гЃ«е€†е‰ІгЃ™г‚‹.
          * @param [in, out] node The node which we want to split.
          * @param [in] splitPlane Position of the axis along which the split will run.
          * @param [in] axis Axis (xyz) along which the split will run.
@@ -342,7 +342,7 @@ namespace aten
 
         /**
          * @biref Do the binned sah split actually with the result of findObjectSplit.
-         * ‚ґ‚Б‚­‚и•ЄЉ„ѓeѓXѓg‚ЙЉо‚Г‚ў‚ДЋАЌЫ‚Й•ЄЉ„‚·‚й.
+         * гЃ–гЃЈгЃЏг‚Ље€†е‰Ігѓ†г‚№гѓ€гЃ«еџєгЃҐгЃ„гЃ¦е®џйљ›гЃ«е€†е‰ІгЃ™г‚‹.
          * @param [in, out] node The node which we want to split.
          * @param [in] Index of the bin to split.
          * @param [in] axis Axis (xyz) along which the split will run.
@@ -377,10 +377,10 @@ namespace aten
     private:
         ThreadedBVH m_bvh;
 
-        // •ЄЉ„ЌЕ‘еђ”.
+        // е€†е‰ІжњЂе¤§ж•°.
         uint32_t m_numBins{ 16 };
 
-        // ѓmЃ[ѓh“–‚Ѕ‚и‚МЌЕ‘еЋOЉpЊ`ђ”.
+        // гѓЋгѓјгѓ‰еЅ“гЃџг‚ЉгЃ®жњЂе¤§дё‰и§’еЅўж•°.
         uint32_t m_maxTriangles{ SBVH_TRIANGLE_NUM };
 
         uint32_t m_refIndexNum{ 0 };
@@ -389,8 +389,8 @@ namespace aten
 
         std::vector<SBVHNode> m_nodes;
 
-        // ЋOЉpЊ`Џо•сѓЉѓXѓg.
-        // ‚±‚±‚Е‚ў‚¤ЋOЉpЊ`Џо•с‚Ж‚Н•ЄЉ„‚і‚к‚Ѕ or ‚і‚к‚Д‚ў‚И‚ўЋOЉpЊ`‚МЏо•с.
+        // дё‰и§’еЅўжѓ…е ±гѓЄг‚№гѓ€.
+        // гЃ“гЃ“гЃ§гЃ„гЃ†дё‰и§’еЅўжѓ…е ±гЃЁгЃЇе€†е‰ІгЃ•г‚ЊгЃџ or гЃ•г‚ЊгЃ¦гЃ„гЃЄгЃ„дё‰и§’еЅўгЃ®жѓ…е ±.
         std::vector<Reference> m_refs;
 
         // For layer.

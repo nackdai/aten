@@ -109,8 +109,8 @@ namespace idaten
 
 #if 0
         // NOTE
-        // 2DƒeƒNƒXƒ`ƒƒ‚Ìê‡‚ÍApitch‚ÌƒAƒ‰ƒCƒ“ƒƒ“ƒg‚ðl—¶‚µ‚È‚¢‚Æ‚¢‚¯‚È‚¢.
-        // cudaMallocPitch ‚ÍƒAƒ‰ƒCƒ“ƒƒ“ƒg‚ðl—¶‚µ‚½ˆ—‚É‚È‚Á‚Ä‚¢‚é.
+        // 2Dãƒ†ã‚¯ã‚¹ãƒãƒ£ã®å ´åˆã¯ã€pitchã®ã‚¢ãƒ©ã‚¤ãƒ³ãƒ¡ãƒ³ãƒˆã‚’è€ƒæ…®ã—ãªã„ã¨ã„ã‘ãªã„.
+        // cudaMallocPitch ã¯ã‚¢ãƒ©ã‚¤ãƒ³ãƒ¡ãƒ³ãƒˆã‚’è€ƒæ…®ã—ãŸå‡¦ç†ã«ãªã£ã¦ã„ã‚‹.
 
         size_t dstPitch = 0;
         size_t srcPitch = sizeof(float4) * width;

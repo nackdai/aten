@@ -112,7 +112,7 @@ namespace aten {
             // https://cesium.com/blog/2017/02/02/tighter-frustum-culling-and-why-you-may-want-to-disregard-it/
 
             // TODO
-            // ‚±‚Ì•û–@‚Å‚Í intersecting‚Æinside‚Ìˆá‚¢‚ğ”»’è‚Å‚«‚È‚¢‚Æv‚í‚ê‚é...
+            // ã“ã®æ–¹æ³•ã§ã¯ intersectingã¨insideã®é•ã„ã‚’åˆ¤å®šã§ããªã„ã¨æ€ã‚ã‚Œã‚‹...
 
             if (intersecting) {
                 auto center = (minbox + maxbox) * real(0.5);
@@ -126,8 +126,8 @@ namespace aten {
                 };
 
                 // NOTE
-                // AABB‚È‚Ì‚ÅAx, y, z ²‚É•½s‚È²‚É‚È‚é.
-                // ‚½‚¾‚µA³‹K‰»‚·‚é•K—v‚ª‚È‚¢‚Ì‚ÅA‘å‚«‚³‚ªAABB‚Ìƒn[ƒtƒTƒCƒY‚É‚È‚é.
+                // AABBãªã®ã§ã€x, y, z è»¸ã«å¹³è¡Œãªè»¸ã«ãªã‚‹.
+                // ãŸã ã—ã€æ­£è¦åŒ–ã™ã‚‹å¿…è¦ãŒãªã„ã®ã§ã€å¤§ãã•ãŒAABBã®ãƒãƒ¼ãƒ•ã‚µã‚¤ã‚ºã«ãªã‚‹.
 
                 auto size = maxbox - minbox;
                 vec3 axis[] = {

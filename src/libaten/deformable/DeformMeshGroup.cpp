@@ -86,7 +86,7 @@ namespace aten
         if (isGPUSkinning)
         {
             // TODO
-            // ƒVƒF[ƒ_‚Ì input ‚Æ‚Ç‚¤‡‚í‚¹‚é‚©...
+            // ã‚·ã‚§ãƒ¼ãƒ€ã® input ã¨ã©ã†åˆã‚ã›ã‚‹ã‹...
 
             // NOTE
             // VBOs will be created for each attributes.
@@ -129,7 +129,7 @@ namespace aten
         std::vector<aten::PrimitiveParamter>& tris) const
     {
         // TODO
-        // ’¸“_ƒtƒH[ƒ}ƒbƒgŒÅ’è...
+        // é ‚ç‚¹ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆå›ºå®š...
         AT_ASSERT(sizeof(uint8_t) * m_vertices.size() == sizeof(SkinningVertex) * m_vtxTotalNum);
 
         // Vertex.

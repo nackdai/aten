@@ -39,7 +39,7 @@ namespace aten {
         uint32_t height;
     };
 
-    // F‹——£‚Ìd‚İŒvZ.
+    // è‰²è·é›¢ã®é‡ã¿è¨ˆç®—.
     static inline real kernelR(real cdist, real sigmaR)
     {
         //auto w = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaR) * exp(-0.5f * (cdist * cdist) / (sigmaR * sigmaR));
@@ -47,7 +47,7 @@ namespace aten {
         return w;
     }
 
-    // [“x‚Ìd‚İŒvZ.
+    // æ·±åº¦ã®é‡ã¿è¨ˆç®—.
     static inline real kernelD(real ddist, real sigmaD)
     {
         //auto w = 1.0f / sqrtf(2.0f * AT_MATH_PI * sigmaD) * exp(-0.5f * (ddist * ddist) / (sigmaD * sigmaD));
@@ -74,7 +74,7 @@ namespace aten {
         //int r = int(::ceilf(4.0f * sigmaS));
         int r = 3;
 
-        // ƒsƒNƒZƒ‹‹——£‚Ìd‚İ.
+        // ãƒ”ã‚¯ã‚»ãƒ«è·é›¢ã®é‡ã¿.
         std::vector<std::vector<real>> distW;
         {
             distW.resize(1 + r);
@@ -105,7 +105,7 @@ namespace aten {
 #endif
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                // ’†S“_.
+                // ä¸­å¿ƒç‚¹.
                 const auto& p = srcSampler(x, y);
                 const real dc = depthSampler(x, y).w;
 
@@ -115,7 +115,7 @@ namespace aten {
                 vec3 denom2 = vec3(p.x * p.x, p.y * p.y, p.z * p.z);
 
                 // (u, 0)
-                // ‰¡•ûŒü.
+                // æ¨ªæ–¹å‘.
                 for (int u = 1; u <= r; u++) {
                     const auto& p0 = srcSampler(x - u, y);
                     const auto& p1 = srcSampler(x + u, y);
@@ -142,7 +142,7 @@ namespace aten {
                 }
 
                 // (0, v)
-                // c•ûŒü.
+                // ç¸¦æ–¹å‘.
                 for (int v = 1; v <= r; v++) {
                     const auto& p0 = srcSampler(x, y - v);
                     const auto& p1 = srcSampler(x, y + v);

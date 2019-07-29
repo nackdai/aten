@@ -22,28 +22,28 @@ namespace AT_NAME
             real flakeMapAspect)
         {
             // NOTE
-            // size : map�T�C�Y�̒��ӂɐ�߂銄��.
+            // size : mapサイズの長辺に占める割合.
             //  ex) w = 1280, h = 720, size = 0.5 -> flake radius = (w > h ? h : w) * size = 720 * 0.5 = 360
-            // scale : �T�C�Y�� 1 / scale �ɂ���.
+            // scale : サイズを 1 / scale にする.
 
             // NOTE
-            // ��ʂɐ�߂�flake�̖ʐϊ����͈ȉ��̂悤�ɂȂ�.
+            // 画面に占めるflakeの面積割合は以下のようになる.
             //     (Pi * radius * radius) * N / (w * h)
             //       radius : flake radius
             //       N : Number of flake
             //       w : map width
             //       h : map height
-            // �����ŁAw > h �Ƃ��āAradius = (w > h ? h : w) * size  / scale = size / scale * h �𓖂Ă͂߂�.
+            // ここで、w > h として、radius = (w > h ? h : w) * size  / scale = size / scale * h を当てはめる.
             //     Density = Pi * (size / scale * h)^2 * N / (w * h)
             //             = Pi * (size / scale)^2 * N * h / w
-            // scale = 1 �̏ꍇ�A�}�b�v�S�̂�flake����P�ƂȂ�ƍl���邱�Ƃ��ł���.
-            // �܂�AIf scale = 1, N = 1 �ƂȂ�.
-            // scale���傫���Ȃ��Ă��A���ꂪ�c����scale�J��Ԃ���邾���Ȃ̂ŁA�}�b�v�ɐ�߂�flake�̖ʐϊ����͕ς��Ȃ�.
+            // scale = 1 の場合、マップ全体にflakeが約１つとなると考えることができる.
+            // つまり、If scale = 1, N = 1 となる.
+            // scaleが大きくなっても、これが縦横にscale個繰り返されるだけなので、マップに占めるflakeの面積割合は変わらない.
             //     Density = Pi * (size / scale)^2 * N * h / w
             //             = Pi * size^2 * h / w
 
             // TODO
-            // aspect = w / h �̑O��Ȃ̂ŁAh / w ���擾���������ߋt���ɂ���.
+            // aspect = w / h の前提なので、h / w を取得したいため逆数にする.
             auto aspect = real(1) / flakeMapAspect;
 
             auto D = AT_MATH_PI * flake_size * flake_size * aspect;

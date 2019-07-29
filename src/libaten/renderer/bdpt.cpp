@@ -63,7 +63,7 @@ namespace aten
 
         auto camsample = camera->sample(u, v, sampler);
 
-        // �����Y��̒��_�ix0�j�𒸓_���X�g�ɒǉ�.
+        // レンズ上の頂点（x0）を頂点リストに追加.
         vs.push_back(Vertex(
             camsample.posOnLens,
             camsample.nmlOnLens,
@@ -94,31 +94,31 @@ namespace aten
                 break;
             }
 
-            // �����ʒu�̖@��.
-            // ���̂���̃��C�̓��o���l��.
+            // 交差位置の法線.
+            // 物体からのレイの入出を考慮.
             vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
             auto mtrl = ctxt.getMaterial(rec.mtrlid);
             auto obj = ctxt.getTransformable(isect.objid);
 
-            // ���V�A�����[���b�g�ɂ���āA�V�������_���u���ۂɁv�T���v�����O���A��������̂��ǂ��������肷��.
+            // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
             auto rrProb = aten::russianRoulette(mtrl);
             auto rr = sampler->nextSample();
             if (rr >= rrProb) {
                 break;
             }
 
-            // �V�������_���T���v�����O���ꂽ�̂ŁA�g�[�^���̊m�����x�ɏ�Z����.
+            // 新しい頂点がサンプリングされたので、トータルの確率密度に乗算する.
             totalAreaPdf *= rrProb;
 
             const vec3 toNextVtx = ray.org - rec.p;
 
             if (depth == 0) {
                 // NOTE
-                // �����_�����O�������Q.
+                // レンダリング方程式２.
                 // http://rayspace.xyz/CG/contents/LTE2.html
 
-                // x1�̃T���v�����O�m�����x�̓C���[�W�Z���T��̃T���v�����O�m�����x��ϊ����邱�Ƃŋ��߂�,
+                // x1のサンプリング確率密度はイメージセンサ上のサンプリング確率密度を変換することで求める,
                 auto pdfOnImageSensor = camera->convertImageSensorPdfToScenePdf(
                     camsample.pdfOnImageSensor,
                     rec.p,
@@ -129,8 +129,8 @@ namespace aten
 
                 totalAreaPdf *= pdfOnImageSensor;
 
-                // �􉽓I�ȌW���v�Z + �Z���T�[�Z���V�e�B�r�e�B�̍����v�Z����
-                // x1 -> x0�ւ̕��ˋP�x���ŏI�I�ɃC���[�W�Z���T�ɗ^�����^�x
+                // 幾何的な係数計算 + センサーセンシティビティの項を計算する
+                // x1 -> x0への放射輝度が最終的にイメージセンサに与える寄与度
                 auto W_dash = camera->getWdash(
                     rec.p,
                     orienting_normal,
@@ -141,7 +141,7 @@ namespace aten
                 throughput = W_dash * throughput;
             }
             else {
-                // �V�������_���T���v�����O���邽�߂̊m�����x�֐��͗��̊p���x�Ɋւ�����̂ł��������߁A�����ʐϑ��x�Ɋւ���m�����x�֐��ɕϊ�����.
+                // 新しい頂点をサンプリングするための確率密度関数は立体角測度に関するものであったため、これを面積速度に関する確率密度関数に変換する.
                 const real c = dot(normalize(toNextVtx), orienting_normal);
                 const real dist2 = squared_length(toNextVtx);
                 const real areaPdf = sampledPdf * (c / dist2);
@@ -153,7 +153,7 @@ namespace aten
                 // Nothing is done...
             }
             else {
-                // �W�I���g���^�[��.
+                // ジオメトリターム.
                 const real c0 = dot(normalize(toNextVtx), orienting_normal);
                 const real c1 = dot(normalize(-toNextVtx), prevNormal);
                 const real dist2 = squared_length(toNextVtx);
@@ -161,7 +161,7 @@ namespace aten
                 throughput = G * throughput;
             }
 
-            // �����Ƀq�b�g�����炻���ŒǐՏI��.
+            // 光源にヒットしたらそこで追跡終了.
             if (mtrl->isEmissive()) {
                 vec3 bsdf = lambert::bsdf(&mtrl->param(), rec.u, rec.v);
 
@@ -197,7 +197,7 @@ namespace aten
                 sampledBsdf /= costerm;
             }
 
-            // �V�������_�𒸓_���X�g�ɒǉ�����.
+            // 新しい頂点を頂点リストに追加する.
             vs.push_back(Vertex(
                 rec.p,
                 rec.normal,
@@ -212,8 +212,8 @@ namespace aten
 
             throughput *= sampledBsdf;
             
-            // refraction�̔��ˁA���܂̊m�����|�����킹��.
-            // refraction�ȊO�ł� 1 �Ȃ̂ŉe���͂Ȃ�.
+            // refractionの反射、屈折の確率を掛け合わせる.
+            // refraction以外では 1 なので影響はない.
             totalAreaPdf *= sampling.subpdf;
 
             vec3 nextDir = normalize(sampling.dir);
@@ -238,17 +238,17 @@ namespace aten
         // TODO
         // Only AreaLight...
 
-        // ������ɃT���v���_�����iy0�j.
+        // 光源上にサンプル点生成（y0）.
         aten::hitable::SamplePosNormalPdfResult res;
         light->getSamplePosNormalArea(ctxt, &res, sampler);
         auto posOnLight = res.pos;
         auto nmlOnLight = res.nml;
         auto pdfOnLight = real(1) / res.area;
 
-        // �m�����x�̐ς�ێ��i�ʐϑ��x�Ɋւ���m�����x�j.
+        // 確率密度の積を保持（面積測度に関する確率密度）.
         auto totalAreaPdf = pdfOnLight;
 
-        // ������ɐ������ꂽ���_�𒸓_���X�g�ɒǉ�.
+        // 光源上に生成された頂点を頂点リストに追加.
         vs.push_back(Vertex(
             posOnLight,
             nmlOnLight,
@@ -259,13 +259,13 @@ namespace aten
             light->getLe(),
             light));
 
-        // ���݂̕��ˋP�x�i�����e�J�����ϕ��̃X���[�v�b�g�j.
-        // �{���͎��̒��_�iy1�j�����܂�Ȃ��ƌ������炻�̕����ւ̕��ˋP�x�l�͌��܂�Ȃ����A����͊��S�g�U���������肵�Ă���̂ŁA�����Ɉ˂炸�Ɉ��̒l�ɂȂ�.
+        // 現在の放射輝度（モンテカルロ積分のスループット）.
+        // 本当は次の頂点（y1）が決まらないと光源からその方向への放射輝度値は決まらないが、今回は完全拡散光源を仮定しているので、方向に依らずに一定の値になる.
         vec3 throughput = light->getLe();
 
         int depth = 0;
 
-        // ���S�g�U���������肵�Ă���̂ŁADiffuse�ʂɂ�����T���v�����O���@�Ɠ������̂������Ď��̕��������߂�.
+        // 完全拡散光源を仮定しているので、Diffuse面におけるサンプリング方法と同じものをつかって次の方向を決める.
         nmlOnLight = normalize(nmlOnLight);
         vec3 dir = lambert::sampleDirection(nmlOnLight, sampler);
         real sampledPdf = lambert::pdf(nmlOnLight, dir);
@@ -289,7 +289,7 @@ namespace aten
                 int pixelx;
                 int pixely;
 
-                // �����Y�ƌ�������.
+                // レンズと交差判定.
                 auto lens_t = camera->hitOnLens(
                     ray,
                     posOnLens,
@@ -298,7 +298,7 @@ namespace aten
                     pixelx, pixely);
 
                 if (AT_MATH_EPSILON < lens_t && lens_t < isect.t) {
-                    // ���C�������Y�Ƀq�b�g���C���[�W�Z���T�Ƀq�b�g.
+                    // レイがレンズにヒット＆イメージセンサにヒット.
 
                     pixelx = aten::clamp(pixelx, 0, m_width - 1);
                     pixely = aten::clamp(pixely, 0, m_height - 1);
@@ -309,7 +309,7 @@ namespace aten
 
                     const vec3& camnml = camera->getDir();
 
-                    // �����Y�̏�̓_�̃T���v�����O�m�����v�Z�B
+                    // レンズの上の点のサンプリング確率を計算。
                     {
                         const real c = dot(dir, camnml);
                         const real areaPdf = sampledPdf * c / dist2;
@@ -317,7 +317,7 @@ namespace aten
                         totalAreaPdf *= areaPdf;
                     }
 
-                    // �W�I���g���^�[��
+                    // ジオメトリターム
                     {
                         const real c0 = dot(dir, camnml);
                         const real c1 = dot(-dir, prevNormal);
@@ -326,7 +326,7 @@ namespace aten
                         throughput *= G;
                     }
 
-                    // �����Y��ɐ������ꂽ�_�𒸓_���X�g�ɒǉ��i��{�I�Ɏg��Ȃ��j.
+                    // レンズ上に生成された点を頂点リストに追加（基本的に使わない）.
                     vs.push_back(Vertex(
                         posOnLens,
                         camnml,
@@ -341,7 +341,7 @@ namespace aten
 
                     const real W_dash = camera->getWdash(
                         ray.org,
-                        vec3(real(0), real(1), real(0)),    // pinhole�̂Ƃ��͂����ɂ��Ȃ�.�܂��Athinlens�̂Ƃ��͎g��Ȃ��̂ŁA�K���Ȓl�ł���.
+                        vec3(real(0), real(1), real(0)),    // pinholeのときはここにこない.また、thinlensのときは使わないので、適当な値でいい.
                         posOnImageSensor,
                         posOnLens,
                         posOnObjectPlane);
@@ -356,37 +356,37 @@ namespace aten
                 break;
             }
 
-            // �����ʒu�̖@��.
-            // ���̂���̃��C�̓��o���l��.
+            // 交差位置の法線.
+            // 物体からのレイの入出を考慮.
             vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
             auto mtrl = ctxt.getMaterial(rec.mtrlid);
             auto obj = ctxt.getTransformable(isect.objid);
 
-            // ���V�A�����[���b�g�ɂ���āA�V�������_���u���ۂɁv�T���v�����O���A��������̂��ǂ��������肷��.
+            // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
             auto rrProb = aten::russianRoulette(mtrl);
             auto rr = sampler->nextSample();
             if (rr >= rrProb) {
                 break;
             }
 
-            // �V�������_���T���v�����O���ꂽ�̂ŁA�g�[�^���̊m�����x�ɏ�Z����.
+            // 新しい頂点がサンプリングされたので、トータルの確率密度に乗算する.
             totalAreaPdf *= rrProb;
 
             const vec3 toNextVtx = ray.org - rec.p;
 
             {
-                // �V�������_���T���v�����O���邽�߂̊m�����x�֐��͗��̊p���x�Ɋւ�����̂ł��������߁A�����ʐϑ��x�Ɋւ���m�����x�֐��ɕϊ�����.
+                // 新しい頂点をサンプリングするための確率密度関数は立体角測度に関するものであったため、これを面積測度に関する確率密度関数に変換する.
                 const real c = dot(normalize(toNextVtx), orienting_normal);
                 const real dist2 = squared_length(toNextVtx);
                 const real areaPdf = sampledPdf * (c / dist2);
 
-                // �S�Ă̒��_���T���v�����O����m�����x�̑��v���o���B
+                // 全ての頂点をサンプリングする確率密度の総計を出す。
                 totalAreaPdf *= areaPdf;
             }
 
             {
-                // �W�I���g���^�[��.
+                // ジオメトリターム.
                 const real c0 = dot(normalize(toNextVtx), orienting_normal);
                 const real c1 = dot(normalize(-toNextVtx), prevNormal);
                 const real dist2 = squared_length(toNextVtx);
@@ -412,7 +412,7 @@ namespace aten
                 sampledBsdf = vec3(real(0));
             }
 
-            // �V�������_�𒸓_���X�g�ɒǉ�����.
+            // 新しい頂点を頂点リストに追加する.
             vs.push_back(Vertex(
                 rec.p,
                 rec.normal,
@@ -427,8 +427,8 @@ namespace aten
 
             throughput *= sampledBsdf;
 
-            // refraction�̔��ˁA���܂̊m�����|�����킹��.
-            // refraction�ȊO�ł� 1 �Ȃ̂ŉe���͂Ȃ�.
+            // refractionの反射、屈折の確率を掛け合わせる.
+            // refraction以外では 1 なので影響はない.
             totalAreaPdf *= sampling.subpdf;
 
             vec3 nextDir = normalize(sampling.dir);
@@ -442,13 +442,13 @@ namespace aten
         return std::move(Result(vec3(), -1, -1, false));
     }
 
-    // ���_from���璸�_next���T���v�����O�����Ƃ���Ƃ��A�ʐϑ��x�Ɋւ���T���v�����O�m�����x���v�Z����.
+    // 頂点fromから頂点nextをサンプリングしたとするとき、面積測度に関するサンプリング確率密度を計算する.
     real BDPT::computAreaPdf(
         camera* camera,
         const std::vector<const Vertex*>& vs,
-        const int prev_idx,            // ���_cur�̑O�̒��_�̃C���f�b�N�X.
-        const int cur_idx,          // ���_cur�̃C���f�b�N�X.
-        const int next_idx) const   // ���_next�̃C���f�b�N�X.
+        const int prev_idx,            // 頂点curの前の頂点のインデックス.
+        const int cur_idx,          // 頂点curのインデックス.
+        const int next_idx) const   // 頂点nextのインデックス.
     {
         const Vertex& curVtx = *vs[cur_idx];
         const Vertex& nextVtx = *vs[next_idx];
@@ -463,15 +463,15 @@ namespace aten
 
         real pdf = real(0);
 
-        // ���_from�̃I�u�W�F�N�g�̎�ނɂ���āA���̎��̒��_�̃T���v�����O�m�����x�̌v�Z���@���ς��.
+        // 頂点fromのオブジェクトの種類によって、その次の頂点のサンプリング確率密度の計算方法が変わる.
         if (curVtx.objType == ObjectType::Light) {
             // TODO
-            // Light�͊��S�g�U�ʂƂ��Ĉ���.
+            // Lightは完全拡散面として扱う.
             pdf = lambert::pdf(curVtx.orienting_normal, normalizedTo);
         }
         else if (curVtx.objType == ObjectType::Lens) {
-            // �����Y��̓_����V�[����̓_���T���v�����O����Ƃ��̖ʐϑ��x�Ɋւ���m�����x���v�Z.
-            // �C���[�W�Z���T��̓_�̃T���v�����O�m�����x�����ɕϊ�����.
+            // レンズ上の点からシーン上の点をサンプリングするときの面積測度に関する確率密度を計算.
+            // イメージセンサ上の点のサンプリング確率密度を元に変換する.
 
             if (camera->isPinhole()) {
                 // TODO
@@ -480,7 +480,7 @@ namespace aten
                 return real(1);
             }
 
-            // �V�[����̓_���烌���Y�ɓ��郌�C.
+            // シーン上の点からレンズに入るレイ.
             ray r(nextVtx.pos, -normalizedTo);
 
             vec3 posOnLens;
@@ -496,14 +496,14 @@ namespace aten
                 x, y);
 
             if (lens_t > AT_MATH_EPSILON) {
-                // ���C�������Y�Ƀq�b�g���C���[�W�Z���T�Ƀq�b�g.
+                // レイがレンズにヒット＆イメージセンサにヒット.
 
                 real imagesensorWidth = camera->getImageSensorWidth();
                 real imagesensorHeight = camera->getImageSensorHeight();
                 real pdfImage = real(1) / (imagesensorWidth * imagesensorHeight);
 
-                // �C���[�W�Z���T��̃T���v�����O�m�����x���v�Z.
-                // �C���[�W�Z���T�̖ʐϑ��x�Ɋւ���m�����x���V�[����̃T���v�����O�m�����x�i�ʐϑ��x�Ɋւ���m�����x�j�ɕϊ�����Ă���.
+                // イメージセンサ上のサンプリング確率密度を計算.
+                // イメージセンサの面積測度に関する確率密度をシーン上のサンプリング確率密度（面積測度に関する確率密度）に変換されている.
                 const real imageSensorAreaPdf = camera->convertImageSensorPdfToScenePdf(
                     pdfImage,
                     nextVtx.pos,
@@ -525,10 +525,10 @@ namespace aten
 
                 if (curVtx.mtrl->isSingular()) {
                     if (curVtx.mtrl->isTranslucent()) {
-                        // cur���_�̂ЂƂO�̒��_�Ɋ�Â��āA���̂ɓ��荞��ł���̂��A����Ƃ��o�čs���̂��𔻒肷��.
+                        // cur頂点のひとつ前の頂点に基づいて、物体に入り込んでいるのか、それとも出て行くのかを判定する.
                         const vec3 intoCurVtxDir = normalize(curVtx.pos - prevVtx->pos);
 
-                        // prevVtx ���� curVtx �ւ̃x�N�g�����A�X�y�L�������̂ɓ���̂��A����Ƃ��o��̂�.
+                        // prevVtx から curVtx へのベクトルが、スペキュラ物体に入るのか、それとも出るのか.
                         const bool into = dot(intoCurVtxDir, curVtx.nml) < real(0);
 
                         const vec3 from_new_orienting_normal = into ? curVtx.nml : -curVtx.nml;
@@ -540,17 +540,17 @@ namespace aten
                             from_new_orienting_normal);
 
                         if (sampling.isIdealRefraction) {
-                            // ����.
+                            // 屈折.
                             pdf = real(1);
                         }
                         else if (sampling.isRefraction) {
-                            // ���� or ����.
+                            // 反射 or 屈折.
                             pdf = dot(from_new_orienting_normal, normalizedTo) > real(0)
-                                ? sampling.probReflection                // ����.
-                                : real(1) - sampling.probReflection;    // ����.
+                                ? sampling.probReflection                // 反射.
+                                : real(1) - sampling.probReflection;    // 屈折.
                         }
                         else {
-                            // �S����.
+                            // 全反射.
                             pdf = real(1);
                         }
                     }
@@ -564,12 +564,12 @@ namespace aten
             }
         }
 
-        // ���̒��_�̖@�����A���݂̒��_����̕����x�N�g���Ɋ�Â��ĉ��߂ċ��߂�.
+        // 次の頂点の法線を、現在の頂点からの方向ベクトルに基づいて改めて求める.
         const vec3 next_new_orienting_normal = dot(to, nextVtx.nml) < 0.0
             ? nextVtx.nml
             : -nextVtx.nml;
 
-        // ���̊p���x�Ɋւ���m�����x��ʐϑ��x�Ɋւ���m�����x�ɕϊ�.
+        // 立体角測度に関する確率密度を面積測度に関する確率密度に変換.
         const real c = dot(-normalizedTo, next_new_orienting_normal);
         const real dist2 = squared_length(to);
         pdf *= c / dist2;
@@ -589,33 +589,33 @@ namespace aten
         // https://www.slideshare.net/h013/edubpt-v100
         // p157 - p167
 
-        // ������̃T���v�����O�m��.
+        // 光源上のサンプリング確率.
         const auto& beginLight = light_vs[0];
         const real areaPdf_y0 = beginLight.totalAreaPdf;
 
-        // �J������̃T���v�����O�m��.
+        // カメラ上のサンプリング確率.
         const auto& beginEye = eye_vs[0];
         const real areaPdf_x0 = beginEye.totalAreaPdf;
 
         std::vector<const Vertex*> vs(numEyeVtx + numLightVtx);
 
-        // ���_�����ɕ��ׂ�B
+        // 頂点を一列に並べる。
         // vs[0] = y0, vs[1] = y1, ... vs[k-1] = x1, vs[k] = x0
         
-        // light�T�u�p�X.
+        // lightサブパス.
         for (int i = 0; i < numLightVtx; ++i) {
             vs[i] = &light_vs[i];
         }
 
-        // eye�T�u�p�X.
+        // eyeサブパス.
         for (int i = numEyeVtx - 1; i >= 0; --i) {
             vs[numLightVtx + numEyeVtx - 1 - i] = &eye_vs[i];
         }
 
-        // �I�_�̃C���f�b�N�X.
+        // 終点のインデックス.
         const int k = numLightVtx + numEyeVtx - 1;
 
-        // pi1/pi ���v�Z.
+        // pi1/pi を計算.
         std::vector<real> pi1_pi(numLightVtx + numEyeVtx);
         {
             {
@@ -625,7 +625,7 @@ namespace aten
                 pi1_pi[0] = areaPdf_y0 / (areaPdf_y1 * rr);
             }
 
-            // ���V�A�����[���b�g�̊m���͑ł����������̂ł���Ȃ��H
+            // ロシアンルーレットの確率は打ち消しあうのでいらない？
             for (int i = 1; i < k; i++)
             {
                 auto a = computAreaPdf(camera, vs, i - 2, i - 1, i);
@@ -641,20 +641,20 @@ namespace aten
             }
         }
 
-        // p�����߂�
+        // pを求める
         std::vector<real> p(numEyeVtx + numLightVtx + 1);
         {
-            // �^�񒆂�totalAreaPdf���Z�b�g.
+            // 真ん中にtotalAreaPdfをセット.
             p[numLightVtx] = totalAreaPdf;
 
-            // �^�񒆂��N�_�ɔ������v�Z.
+            // 真ん中を起点に半分ずつ計算.
 
-            // light�T�u�p�X.
+            // lightサブパス.
             for (int i = numLightVtx; i <= k; ++i) {
                 p[i + 1] = p[i] * pi1_pi[i];
             }
 
-            // eye�T�u�p�X.
+            // eyeサブパス.
             for (int i = numLightVtx - 1; i >= 0; --i) {
                 p[i] = p[i + 1] / pi1_pi[i];
             }
@@ -662,7 +662,7 @@ namespace aten
             for (int i = 0; i < vs.size(); ++i) {
                 const auto& vtx = *vs[i];
 
-                // ��������ӂɌ��܂�̂ŁA�e�����y�ڂ��Ȃ�.
+                // 方向が一意に決まるので、影響を及ぼさない.
                 if (vtx.mtrl && vtx.mtrl->isSingular()) {
                     p[i] = 0.0;
                     p[i + 1] = 0.0;
@@ -704,33 +704,33 @@ namespace aten
                 int targetX = x;
                 int targetY = y;
 
-                // ���ꂼ��̃p�X�̒[�_.
+                // それぞれのパスの端点.
                 const Vertex& eye_end = eye_vs[numEyeVtx - 1];
                 const Vertex& light_end = light_vs[numLightVtx - 1];
 
-                // �g�[�^���̊m�����x�v�Z.
+                // トータルの確率密度計算.
                 const real totalAreaPdf = eye_end.totalAreaPdf * light_end.totalAreaPdf;
                 if (totalAreaPdf == 0) {
-                    // �����Ȃ������̂ŁA�������Ȃ�.
+                    // 何もなかったので、何もしない.
                     continue;
                 }
 
-                // MC�X���[�v�b�g.
+                // MCスループット.
                 vec3 eyeThroughput = eye_end.throughput;
                 vec3 lightThroughput = light_end.throughput;
 
-                // ���_��ڑ����邱�ƂŐV������������鍀.
+                // 頂点を接続することで新しく導入される項.
                 vec3 throughput = vec3(1);
 
-                // numLightVtx == 1�̂Ƃ��A�񊮑S�g�U�����̏ꍇ�͑���̒��_�̈ʒu�����MC�X���[�v�b�g���ω����邽�߉��߂Č�������̕��ˋP�x�l���v�Z����.
+                // numLightVtx == 1のとき、非完全拡散光源の場合は相手の頂点の位置次第でMCスループットが変化するため改めて光源からの放射輝度値を計算する.
                 if (numLightVtx == 1) {
                     // TODO
-                    // ����͊��S�g�U�����Ȃ̂ŒP����emission�̒l������.
+                    // 今回は完全拡散光源なので単純にemissionの値を入れる.
                     const auto& lightVtx = light_vs[0];
                     lightThroughput = lightVtx.light->getLe();
                 }
 
-                // �[�_�Ԃ��ڑ��ł��邩.
+                // 端点間が接続できるか.
                 const vec3 lightEndToEyeEnd = eye_end.pos - light_end.pos;
                 ray r(light_end.pos, normalize(lightEndToEyeEnd));
 
@@ -743,7 +743,7 @@ namespace aten
                         break;
                     }
                     else {
-                        // light�T�u�p�X�𒼐ڃ����Y�ɂȂ���.
+                        // lightサブパスを直接レンズにつなげる.
                         vec3 posOnLens;
                         vec3 posOnObjectplane;
                         vec3 posOnImagesensor;
@@ -759,7 +759,7 @@ namespace aten
                         if (AT_MATH_EPSILON < lens_t
                             && lens_t < isect.t)
                         {
-                            // ���C�������Y�Ƀq�b�g���C���[�W�Z���T�Ƀq�b�g.
+                            // レイがレンズにヒット＆イメージセンサにヒット.
                             targetX = aten::clamp(px, 0, m_width - 1);
                             targetY = aten::clamp(py, 0, m_height - 1);
 
@@ -773,24 +773,24 @@ namespace aten
                             throughput *= W_dash;
                         }
                         else {
-                            // light�T�u�p�X�𒼐ڃ����Y�ɂȂ��悤�Ƃ������A�Օ����ꂽ��C���[�W�Z���T�Ƀq�b�g���Ȃ������ꍇ�A�I���.
+                            // lightサブパスを直接レンズにつなげようとしたが、遮蔽されたりイメージセンサにヒットしなかった場合、終わり.
                             continue;
                         }
                     }
                 }
                 else if (eye_end.objType == ObjectType::Light) {
-                    // eye�T�u�p�X�̒[�_�������i���˗�0�j�������ꍇ�͏d�݂��[���ɂȂ�p�X�S�̂̊�^���[���ɂȂ�̂ŁA�����I���.
-                    // �����͔��˗�0��z�肵�Ă���.
+                    // eyeサブパスの端点が光源（反射率0）だった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
+                    // 光源は反射率0を想定している.
                     continue;
                 }
                 else {
                     if (eye_end.mtrl->isSingular()) {
-                        // eye�T�u�p�X�̒[�_���X�y�L�����₾�����ꍇ�͏d�݂��[���ɂȂ�p�X�S�̂̊�^���[���ɂȂ�̂ŁA�����I���.
-                        // �X�y�L�����̏ꍇ�͔��˕����ň�ӂɌ��܂�Aligh�T�u�p�X�̒[�_�ւ̕�������v����m�����[��.
+                        // eyeサブパスの端点がスペキュラやだった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
+                        // スペキュラの場合は反射方向で一意に決まり、lighサブパスの端点への方向が一致する確率がゼロ.
                         continue;
                     }
                     else {
-                        // �[�_���m���ʂ̕��̂ŎՕ�����邩�ǂ����𔻒肷��B�Օ�����Ă����珈���I���.
+                        // 端点同士が別の物体で遮蔽されるかどうかを判定する。遮蔽されていたら処理終わり.
                         const real len = length(eye_end.pos - rec.p);
                         if (len >= AT_MATH_EPSILON) {
                             continue;
@@ -802,18 +802,18 @@ namespace aten
                 }
 
                 if (light_end.objType == ObjectType::Lens) {
-                    // light�T�u�p�X�̒[�_�������Y�������ꍇ�͏d�݂��[���ɂȂ�p�X�S�̂̊�^���[���ɂȂ�̂ŁA�����I���.
-                    // �����Y��̓X�y�L�����Ƃ݂Ȃ�.
+                    // lightサブパスの端点がレンズだった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
+                    // レンズ上はスペキュラとみなす.
                     continue;
                 }
                 else if (light_end.objType == ObjectType::Light) {
-                    // �����̔��˗�0�����肵�Ă��邽�߁A���C�g�g���[�V���O�̎��A�ŏ��̒��_�ȊO�͌�����ɒ��_��������Ȃ�.
-                    // num_light_vertex == 1�ȊO�ł����ɓ����Ă��邱�Ƃ͖���.
+                    // 光源の反射率0を仮定しているため、ライトトレーシングの時、最初の頂点以外は光源上に頂点生成されない.
+                    // num_light_vertex == 1以外でここに入ってくることは無い.
                 }
                 else {
                     if (light_end.mtrl->isSingular()) {
-                        // eye�T�u�p�X�̒[�_���X�y�L�����₾�����ꍇ�͏d�݂��[���ɂȂ�p�X�S�̂̊�^���[���ɂȂ�̂ŁA�����I���.
-                        // �X�y�L�����̏ꍇ�͔��˕����ň�ӂɌ��܂�Aligh�T�u�p�X�̒[�_�ւ̕�������v����m�����[��.
+                        // eyeサブパスの端点がスペキュラやだった場合は重みがゼロになりパス全体の寄与もゼロになるので、処理終わり.
+                        // スペキュラの場合は反射方向で一意に決まり、lighサブパスの端点への方向が一致する確率がゼロ.
                         continue;
                     }
                     else {
@@ -822,7 +822,7 @@ namespace aten
                     }
                 }
 
-                // �[�_�Ԃ̃W�I���g���t�@�N�^
+                // 端点間のジオメトリファクタ
                 {
                     real cx = dot(normalize(-lightEndToEyeEnd), eye_end.orienting_normal);
                     cx = std::max(cx, real(0));
@@ -848,12 +848,12 @@ namespace aten
                     continue;
                 }
 
-                // �ŏI�I�ȃ����e�J�����R���g���r���[�V���� =
-                //    MIS�d��.
-                //    * ���_��ڑ����邱�ƂŐV������������鍀.
-                //  * eye�T�u�p�X�X���[�v�b�g.
-                //    * light�T�u�p�X�X���[�v�b�g.
-                //    / �p�X�̃T���v�����O�m�����x�̑��v.
+                // 最終的なモンテカルロコントリビューション =
+                //    MIS重み.
+                //    * 頂点を接続することで新しく導入される項.
+                //  * eyeサブパススループット.
+                //    * lightサブパススループット.
+                //    / パスのサンプリング確率密度の総計.
                 const vec3 contrib = misWeight * throughput * eyeThroughput * lightThroughput / totalAreaPdf;
                 result.push_back(Result(
                     contrib,
@@ -990,12 +990,12 @@ namespace aten
                                     image[idx][pos] += vec4(res.contrib, 1);
                                 }
                                 else {
-                                    // ����ꂽ�T���v���ɂ��āA�T���v�������݂̉�f�ix,y)���甭�˂��ꂽeye�T�u�p�X���܂ނ��̂������ꍇ
-                                    // Ixy �̃����e�J��������l��samples[i].value���̂��̂Ȃ̂ŁA���̂܂ܑ����B���̌�A���̉摜�o�͎��ɔ��˂��ꂽ�񐔂̑��v�iiteration_per_thread * num_threads)�Ŋ���.
+                                    // 得られたサンプルについて、サンプルが現在の画素（x,y)から発射されたeyeサブパスを含むものだった場合
+                                    // Ixy のモンテカルロ推定値はsamples[i].valueそのものなので、そのまま足す。その後、下の画像出力時に発射された回数の総計（iteration_per_thread * num_threads)で割る.
                                     //
-                                    // ����ꂽ�T���v���ɂ��āA���݂̉�f���甭�˂��ꂽeye�T�u�p�X���܂ނ��̂ł͂Ȃ������ꍇ�ilight�T�u�p�X���ʂ̉�f(x',y')�ɓ��B�����ꍇ�j��
-                                    // Ix'y' �̃����e�J��������l��V���������킯�����A���̏ꍇ�A�摜�S�̂ɑ΂��Č���������T���v���𐶐����A���܂���x'y'�Ƀq�b�g�����ƍl���邽��
-                                    // ���̂悤�ȃT���v���ɂ��Ă͍ŏI�I�Ɍ������甭�˂����񐔂̑��v�Ŋ����āA��f�ւ̊�^�Ƃ���K�v������.
+                                    // 得られたサンプルについて、現在の画素から発射されたeyeサブパスを含むものではなかった場合（lightサブパスが別の画素(x',y')に到達した場合）は
+                                    // Ix'y' のモンテカルロ推定値を新しく得たわけだが、この場合、画像全体に対して光源側からサンプルを生成し、たまたまx'y'にヒットしたと考えるため
+                                    // このようなサンプルについては最終的に光源から発射した回数の総計で割って、画素への寄与とする必要がある.
                                     image[idx][pos] += vec4(res.contrib * divPixelProb, 1);
                                 }
                             }

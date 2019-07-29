@@ -41,7 +41,7 @@ __global__ void varianceEstimation(
     int centerMeshId = (int)texclrMeshid.w;
 
     if (centerMeshId < 0) {
-        // ”wŒi‚È‚Ì‚ÅA•ªŽU‚Íƒ[ƒ.
+        // èƒŒæ™¯ãªã®ã§ã€åˆ†æ•£ã¯ã‚¼ãƒ­.
         aovMomentTemporalWeight[idx].x = 0;
         aovMomentTemporalWeight[idx].y = 0;
         aovMomentTemporalWeight[idx].z = 1;
@@ -65,8 +65,8 @@ __global__ void varianceEstimation(
     float4 color = centerColor;
 
     if (frame < 4) {
-        // ÏŽZƒtƒŒ[ƒ€”‚ª‚S–¢–ž or Disoccluded‚³‚ê‚Ä‚¢‚é.
-        // 7x7birateral filter‚Å‹P“x‚ðŒvŽZ.
+        // ç©ç®—ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ãŒï¼”æœªæº€ or Disoccludedã•ã‚Œã¦ã„ã‚‹.
+        // 7x7birateral filterã§è¼åº¦ã‚’è¨ˆç®—.
 
         float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 

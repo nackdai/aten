@@ -11,7 +11,7 @@
 // https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch39.html
 // https://github.com/bcrusco/CUDA-Path-Tracer/blob/master/stream_compaction/efficient.cu
 
-// ƒuƒƒbƒN’PˆÊ‚ÅŒvZ‚µ‚½ exclusiveScan ‚Ì‘˜a’l‚ğ‘«‚µ‚½‚à‚Ì‚ğŒvZ‚·‚é.
+// ãƒ–ãƒ­ãƒƒã‚¯å˜ä½ã§è¨ˆç®—ã—ãŸ exclusiveScan ã®ç·å’Œå€¤ã‚’è¶³ã—ãŸã‚‚ã®ã‚’è¨ˆç®—ã™ã‚‹.
 __global__ void computeBlockCount(
     int* dst,
     int num,    // block count per grid used in exclusiveScan.
@@ -33,7 +33,7 @@ __global__ void computeBlockCount(
     }
 }
 
-// ƒuƒƒbƒN‚²‚Æ‚É‘O‚ÌƒuƒƒbƒN‚Ü‚Å‚Ì exclusiveScan ‚Ì‘˜a’l‚ğ‘«‚µ‚½‚à‚Ì‚ğ‰ÁZ‚·‚é.
+// ãƒ–ãƒ­ãƒƒã‚¯ã”ã¨ã«å‰ã®ãƒ–ãƒ­ãƒƒã‚¯ã¾ã§ã® exclusiveScan ã®ç·å’Œå€¤ã‚’è¶³ã—ãŸã‚‚ã®ã‚’åŠ ç®—ã™ã‚‹.
 __global__ void incrementBlocks(
     int* data,
     int num,

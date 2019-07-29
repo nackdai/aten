@@ -404,7 +404,7 @@ namespace aten {
             }
         }, ctxt);
 
-        // –ß‚·.
+        // æˆ»ã™.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
     }
 
@@ -512,7 +512,7 @@ namespace aten {
         }
         else if (updateBuffer) {
             // TODO
-            // Å‰‚ÉÅ‘å”ƒoƒbƒtƒ@‚ğƒAƒƒP[ƒg‚µ‚Ä‚¨‚©‚È‚¢‚Æ‚¢‚¯‚È‚¢...
+            // æœ€åˆã«æœ€å¤§æ•°ãƒãƒƒãƒ•ã‚¡ã‚’ã‚¢ãƒ­ã‚±ãƒ¼ãƒˆã—ã¦ãŠã‹ãªã„ã¨ã„ã‘ãªã„...
 
             m_vb.update(vtxs.size(), &vtxs[0]);
 
@@ -546,7 +546,7 @@ namespace aten {
             }
         }
 
-        // –ß‚·.
+        // æˆ»ã™.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
     }
 }

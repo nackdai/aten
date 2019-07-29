@@ -68,7 +68,7 @@ namespace AT_NAME
 
     private:
         // TODO
-        // GPGPU������ꍇ�͍l���Ȃ��Ƃ����Ȃ�....
+        // GPGPU化する場合は考えないといけない....
         ComputeToonShadeFunc m_func;
     };
 }

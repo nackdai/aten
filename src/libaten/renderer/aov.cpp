@@ -23,8 +23,8 @@ namespace aten
             Intersection isect;
 
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, false, rec, isect)) {
-                // Œğ·ˆÊ’u‚Ì–@ü.
-                // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+                // äº¤å·®ä½ç½®ã®æ³•ç·š.
+                // ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
                 vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
                 auto mtrl = ctxt.getMaterial(rec.mtrlid);
@@ -148,7 +148,7 @@ namespace aten
                         // [-1, 1] -> [0, 1]
                         auto normal = (path.normal + real(1)) * real(0.5);
 
-                        // [-‡, ‡] -> [-d, d]
+                        // [-âˆ, âˆ] -> [-d, d]
                         real depth = std::min(aten::abs(path.depth), dst.geominfo.depthMax);
                         depth *= path.depth < 0 ? -1 : 1;
 

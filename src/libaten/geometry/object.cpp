@@ -87,7 +87,7 @@ namespace AT_NAME
         if (isHit) {
             auto f = ctxt.getTriangle(isect.objid);
 
-            // ©g‚ÌID‚ğ•Ô‚·.
+            // è‡ªèº«ã®IDã‚’è¿”ã™.
             isect.objid = id();
         }
         return isHit;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "material/material.h"
 #include "texture/texture.h"

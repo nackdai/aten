@@ -70,13 +70,13 @@ __global__ void shade(
 
 	aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
 
-	// �����ʒu�̖@��.
-	// ���̂���̃��C�̓��o���l��.
+	// 交差位置の法線.
+	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 	// Apply normal map.
 	if (mtrl.type == aten::MaterialType::Layer) {
-		// �ŕ\�w�� NormalMap ��K�p.
+		// 最表層の NormalMap を適用.
 		auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
 		auto normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
 		AT_NAME::material::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
@@ -202,10 +202,10 @@ __global__ void shade(
 				if (light.attrib.isSingular || light.attrib.isInfinite) {
 					if (pdfLight > real(0) && cosShadow >= 0) {
 						// TODO
-						// �W�I���g���^�[���̈����ɂ���.
-						// singular light �̏ꍇ�́AfinalColor �ɋ����̏��Z���܂܂�Ă���.
-						// inifinite light �̏ꍇ�́A���������ɂȂ�ApdfLight�Ɋ܂܂�鋗�������Ƒł����������H.
-						// �i�ł����������̂ŁApdfLight�ɂ͋��������͊܂�ł��Ȃ��j.
+						// ジオメトリタームの扱いについて.
+						// singular light の場合は、finalColor に距離の除算が含まれている.
+						// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+						// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 						auto misW = pdfLight / (pdfb + pdfLight);
 						path.contrib += (misW * bsdf * path.throughput * emit * cosShadow / pdfLight);
 					}

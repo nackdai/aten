@@ -137,7 +137,7 @@ namespace aten
         AT_ASSERT(shd);
 
         // NOTE
-        // shader‚ÍƒoƒCƒ“ƒh‚³‚ê‚Ä‚¢‚é‚±‚Æ.
+        // shaderã¯ãƒã‚¤ãƒ³ãƒ‰ã•ã‚Œã¦ã„ã‚‹ã“ã¨.
 
         std::string texuniform = std::string("s") + std::to_string(stage);
         auto handle = shd->getHandle(texuniform.c_str());

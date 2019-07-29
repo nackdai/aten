@@ -73,10 +73,10 @@ namespace aten
         if (m_primarySamples.size() <= m_usedRandCoords) {
             const int now_max = (const int)m_primarySamples.size();
 
-            // Šg’£‚·‚é.
+            // æ‹¡å¼µã™ã‚‹.
             m_primarySamples.resize((uint32_t)(m_primarySamples.size() * 1.5));
 
-            // Šg’£‚µ‚½•”•ª‚É’l‚ğ“ü‚ê‚é.
+            // æ‹¡å¼µã—ãŸéƒ¨åˆ†ã«å€¤ã‚’å…¥ã‚Œã‚‹.
             for (int i = now_max; i < m_primarySamples.size(); i++) {
                 m_primarySamples[i] = m_rnd->nextSample();
             }
@@ -109,11 +109,11 @@ namespace aten
         camera* camera,
         bool willImagePlaneMutation)
     {
-        // ƒXƒNƒŠ[ƒ“ã‚Å‚ÌƒpƒX‚Ì•ÏˆÙ—Ê.
+        // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ä¸Šã§ã®ãƒ‘ã‚¹ã®å¤‰ç•°é‡.
         static const int image_plane_mutation_value = 10;
 
 #if 0
-        // ƒXƒNƒŠ[ƒ“ã‚Å•ÏˆÙ‚·‚é.
+        // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ä¸Šã§å¤‰ç•°ã™ã‚‹.
         auto s1 = sampler->nextSample();
         auto s2 = sampler->nextSample();
 
@@ -123,7 +123,7 @@ namespace aten
         }
 #else
         if (willImagePlaneMutation) {
-            // ƒXƒNƒŠ[ƒ“ã‚Å•ÏˆÙ‚·‚é.
+            // ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ä¸Šã§å¤‰ç•°ã™ã‚‹.
             auto s1 = sampler->nextSample();
             auto s2 = sampler->nextSample();
 
@@ -184,7 +184,7 @@ namespace aten
 
         auto time = timer::getSystemTime();
 
-        // ed‚ğŒvZ.
+        // edã‚’è¨ˆç®—.
         std::vector<vec3> tmpSumI(threadNum);
 
 #ifdef ENABLE_OMP
@@ -236,16 +236,16 @@ namespace aten
                     
 
                     // TODO
-                    // sobol ‚â halton sequence ‚ÍƒXƒeƒbƒv”‚ª‘½‚·‚¬‚ÄƒI[ƒo[ƒtƒ[‚µ‚Ä‚µ‚Ü‚¤...
+                    // sobol ã‚„ halton sequence ã¯ã‚¹ãƒ†ãƒƒãƒ—æ•°ãŒå¤šã™ãã¦ã‚ªãƒ¼ãƒãƒ¼ãƒ•ãƒ­ãƒ¼ã—ã¦ã—ã¾ã†...
                     //XorShift rnd((y * height * 4 + x * 4) * samples + i + 1 + time.milliSeconds);
                     CMJ rnd;
                     rnd.init(time.milliSeconds, i, scramble);
                     ERPTSampler X(&rnd);
 
-                    // Œ»İ‚ÌƒXƒNƒŠ[ƒ“ã‚Ì‚ ‚é“_‚©‚ç‚ÌƒpƒX‚É‚æ‚é•úË‹P“x‚ğ‹‚ß‚é.
+                    // ç¾åœ¨ã®ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ä¸Šã®ã‚ã‚‹ç‚¹ã‹ã‚‰ã®ãƒ‘ã‚¹ã«ã‚ˆã‚‹æ”¾å°„è¼åº¦ã‚’æ±‚ã‚ã‚‹.
                     auto newSample = genPath(ctxt, scene, &X, x, y, width, height, camera, false);
 
-                    // ƒpƒX‚ªŒõŒ¹‚É’¼Úƒqƒbƒg‚µ‚Ä‚½ê‡AƒGƒlƒ‹ƒM[•ª”z‚µ‚È‚¢‚ÅA‚»‚Ì‚Ü‚Ü‰æ‘œ‚É‘—‚é.
+                    // ãƒ‘ã‚¹ãŒå…‰æºã«ç›´æ¥ãƒ’ãƒƒãƒˆã—ã¦ãŸå ´åˆã€ã‚¨ãƒãƒ«ã‚®ãƒ¼åˆ†é…ã—ãªã„ã§ã€ãã®ã¾ã¾ç”»åƒã«é€ã‚‹.
                     if (newSample.isTerminate) {
                         int pos = newSample.y * width + newSample.x;
                         image[pos] += newSample.contrib / (real)samples;
@@ -260,7 +260,7 @@ namespace aten
                         auto illum = color::luminance(e);
                         const int numChains = (int)std::floor(r + illum / (mutation * ed));;
 
-                        // üˆÍ‚É•ª”z‚·‚éƒGƒlƒ‹ƒM[.
+                        // å‘¨å›²ã«åˆ†é…ã™ã‚‹ã‚¨ãƒãƒ«ã‚®ãƒ¼.
                         const vec3 depositValue = (e / illum * ed) / (real)samples;
 
                         for (int nc = 0; nc < numChains; nc++) {
@@ -268,9 +268,9 @@ namespace aten
                             Path Ypath = newSample;
 
                             // Consecutive sample filtering.
-                            // ‚ ‚é“_‚É‹É’[‚ÉƒGƒlƒ‹ƒM[‚ª•ª”z‚³‚ê‚é‚ÆAƒXƒ|ƒbƒgƒmƒCƒY‚É‚È‚Á‚Ä‚µ‚Ü‚¤.
-                            // Unbiased‚É‚·‚é‚É‚Í‚»‚ê‚àd•û‚È‚¢‚ªAŒ»À“I‚É‚ÍŒ©‹ê‚µ‚¢‚Ì‚Å‚ ‚é“_‚É‘Î‚·‚é•ª”z‰ñ”‚ğ§ŒÀ‚·‚é‚±‚Æ‚Å‚»‚Ì‚æ‚¤‚ÈƒmƒCƒY‚ğ—}‚¦‚é.
-                            // Biased‚É‚È‚é‚ªAŒ©‚½–Ú‚Í—Ç‚­‚È‚é.
+                            // ã‚ã‚‹ç‚¹ã«æ¥µç«¯ã«ã‚¨ãƒãƒ«ã‚®ãƒ¼ãŒåˆ†é…ã•ã‚Œã‚‹ã¨ã€ã‚¹ãƒãƒƒãƒˆãƒã‚¤ã‚ºã«ãªã£ã¦ã—ã¾ã†.
+                            // Unbiasedã«ã™ã‚‹ã«ã¯ãã‚Œã‚‚ä»•æ–¹ãªã„ãŒã€ç¾å®Ÿçš„ã«ã¯è¦‹è‹¦ã—ã„ã®ã§ã‚ã‚‹ç‚¹ã«å¯¾ã™ã‚‹åˆ†é…å›æ•°ã‚’åˆ¶é™ã™ã‚‹ã“ã¨ã§ãã®ã‚ˆã†ãªãƒã‚¤ã‚ºã‚’æŠ‘ãˆã‚‹.
+                            // Biasedã«ãªã‚‹ãŒã€è¦‹ãŸç›®ã¯è‰¯ããªã‚‹.
                             static const int MaxStack = 10;
                             int stack_num = 0;
                             int now_x = x;
@@ -282,7 +282,7 @@ namespace aten
 
                                 Path Zpath = genPath(ctxt, scene, &Z, x, y, width, height, camera, true);
 
-                                // ‚¢‚éH
+                                // ã„ã‚‹ï¼Ÿ
                                 //Z.reset();
 
                                 auto lfz = color::luminance(Zpath.contrib);
@@ -300,22 +300,22 @@ namespace aten
 
                                 // Consecutive sample filtering
                                 if (now_x == Ypath.x && now_y == Ypath.y) {
-                                    // mutation‚ªreject‚³‚ê‚½‰ñ”‚ğƒJƒEƒ“ƒg.
+                                    // mutationãŒrejectã•ã‚ŒãŸå›æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆ.
                                     stack_num++;
                                 }
                                 else {
-                                    // mutation‚ªaccept‚³‚ê‚½‚Ì‚Åreject‰ñ”‚ğƒŠƒZƒbƒg.
+                                    // mutationãŒacceptã•ã‚ŒãŸã®ã§rejectå›æ•°ã‚’ãƒªã‚»ãƒƒãƒˆ.
                                     now_x = Ypath.x;
                                     now_y = Ypath.y;
                                     stack_num = 0;
                                 }
 
-                                // ƒGƒlƒ‹ƒM[‚ğRedistribution‚·‚é.
-                                // “¯‚¶ŒÂŠ‚É•ª”z‚³‚ê‘±‚¯‚È‚¢‚æ‚¤‚ÉãŒÀ‚ğ§ŒÀ.
+                                // ã‚¨ãƒãƒ«ã‚®ãƒ¼ã‚’Redistributionã™ã‚‹.
+                                // åŒã˜å€‹æ‰€ã«åˆ†é…ã•ã‚Œç¶šã‘ãªã„ã‚ˆã†ã«ä¸Šé™ã‚’åˆ¶é™.
                                 if (stack_num < MaxStack) {
 #if 1
                                     if (!Ypath.isTerminate) {
-                                        // ˜_•¶‚Æ‚ÍˆÙ‚È‚é‚ªAŒõŒ¹‚É’¼Úƒqƒbƒg‚µ‚½‚Æ‚«‚Í•ª”z‚µ‚È‚¢‚Å‚İ‚é.
+                                        // è«–æ–‡ã¨ã¯ç•°ãªã‚‹ãŒã€å…‰æºã«ç›´æ¥ãƒ’ãƒƒãƒˆã—ãŸã¨ãã¯åˆ†é…ã—ãªã„ã§ã¿ã‚‹.
                                         int pos = Ypath.y * width + Ypath.x;
                                         image[pos] += depositValue;
                                     }

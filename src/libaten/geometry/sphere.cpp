@@ -53,7 +53,7 @@ namespace AT_NAME
         const aten::vec3 p_o = param->center - r.org;
         const real b = dot(p_o, r.dir);
 
-        // ”»•Ê®.
+        // åˆ¤åˆ¥å¼.
         const real D4 = b * b - dot(p_o, p_o) + param->radius * param->radius;
 
         if (D4 < real(0)) {
@@ -76,7 +76,7 @@ namespace AT_NAME
         }
 #elif 1
         // TODO
-        // maxUlps ‚Ì’l‚É‚æ‚Á‚ÄARandomScene‚Ìreflaction‚ª‚¤‚Ü‚­‚¢‚©‚È‚¢‚±‚Æ‚ª‚ ‚é...
+        // maxUlps ã®å€¤ã«ã‚ˆã£ã¦ã€RandomSceneã®reflactionãŒã†ã¾ãã„ã‹ãªã„ã“ã¨ãŒã‚ã‚‹...
         bool close = aten::isClose(aten::abs(b), sqrt_D4, 2500);
 
         if (t1 > AT_MATH_EPSILON && !close) {
@@ -139,7 +139,7 @@ namespace AT_NAME
         const aten::Intersection* isect)
     {
         rec->p = r.org + isect->t * r.dir;
-        rec->normal = (rec->p - param->center) / param->radius; // ³‹K‰»‚µ‚Ä–@ü‚ğ“¾‚é
+        rec->normal = (rec->p - param->center) / param->radius; // æ­£è¦åŒ–ã—ã¦æ³•ç·šã‚’å¾—ã‚‹
 
         rec->mtrlid = isect->mtrlid;
 

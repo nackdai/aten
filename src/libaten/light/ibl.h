@@ -54,7 +54,7 @@ namespace AT_NAME {
             auto pdf = illum / avgIllum;
 
             // NOTE
-            // ”¼Œa‚P‚Ì‹…‚Ì–ÊÏ‚ÅŠ„‚é.
+            // åŠå¾„ï¼‘ã®çƒã®é¢ç©ã§å‰²ã‚‹.
             pdf /= (4 * AT_MATH_PI);
 
             return pdf;
@@ -86,11 +86,11 @@ namespace AT_NAME {
     private:
         real m_avgIllum{ real(0) };
 
-        // v•ûŒü‚Ìcdf(cumulative distribution function = —İÏ•ª•zŠÖ” = sum of pdf).
+        // væ–¹å‘ã®cdf(cumulative distribution function = ç´¯ç©åˆ†å¸ƒé–¢æ•° = sum of pdf).
         std::vector<real> m_cdfV;
 
-        // u•ûŒü‚Ìcdf(cumulative distribution function = —İÏ•ª•zŠÖ” = sum of pdf).
-        // —ñ‚²‚Æ‚É•Û‚·‚é.
+        // uæ–¹å‘ã®cdf(cumulative distribution function = ç´¯ç©åˆ†å¸ƒé–¢æ•° = sum of pdf).
+        // åˆ—ã”ã¨ã«ä¿æŒã™ã‚‹.
         std::vector<std::vector<real>> m_cdfU;
     };
 }

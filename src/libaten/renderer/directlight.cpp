@@ -70,8 +70,8 @@ namespace aten
     {
         uint32_t rrDepth = m_rrDepth;
 
-        // Œğ·ˆÊ’u‚Ì–@ü.
-        // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+        // äº¤å·®ä½ç½®ã®æ³•ç·š.
+        // ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
         vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
         auto mtrl = ctxt.getMaterial(path.rec.mtrlid);

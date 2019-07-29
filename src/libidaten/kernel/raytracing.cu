@@ -180,8 +180,8 @@ __global__ void raytracing(
 	auto obj = &ctxt.shapes[path.isect.objid];
 	evalHitResult(&ctxt, obj, path.ray, &rec, &path.isect);
 
-	// Œğ·ˆÊ’u‚Ì–@ü.
-	// •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+	// äº¤å·®ä½ç½®ã®æ³•ç·š.
+	// ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
 	const aten::vec3 orienting_normal = dot(rec.normal, path.ray.dir) < 0.0 ? rec.normal : -rec.normal;
 
 	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {

@@ -4,7 +4,7 @@
 #include "sampler/samplerinterface.h"
 
 namespace aten {
-    // Xor-Shift による乱数ジェネレータ.
+    // Xor-Shift 縺ｫ繧医ｋ荵ｱ謨ｰ繧ｸ繧ｧ繝阪Ξ繝ｼ繧ｿ.
     class XorShift : public sampler {
     public:
         XorShift() {}

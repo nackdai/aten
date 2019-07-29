@@ -369,12 +369,12 @@ namespace aten {
 
             auto original = pnode;
 
-            // ƒlƒXƒg‚µ‚Ä‚¢‚éê‡‚É‚ÍƒlƒXƒg‚³‚«‚ÌƒcƒŠ[‚Ìƒ‹[ƒgƒm[ƒh‚ðŽæ“¾.
-            // ƒlƒXƒg‚µ‚Ä‚¢‚È‚¢ê‡‚Í“¯‚¶‚à‚Ì‚ª•Ô‚Á‚Ä‚­‚é.
+            // ãƒã‚¹ãƒˆã—ã¦ã„ã‚‹å ´åˆã«ã¯ãƒã‚¹ãƒˆã•ãã®ãƒ„ãƒªãƒ¼ã®ãƒ«ãƒ¼ãƒˆãƒŽãƒ¼ãƒ‰ã‚’å–å¾—.
+            // ãƒã‚¹ãƒˆã—ã¦ã„ãªã„å ´åˆã¯åŒã˜ã‚‚ã®ãŒè¿”ã£ã¦ãã‚‹.
             pnode = getNestedNode(original);
 
             if (pnode != original) {
-                // ƒlƒXƒg‚µ‚Ä‚¢‚é.
+                // ãƒã‚¹ãƒˆã—ã¦ã„ã‚‹.
                 {
                     original->setParent(parentNode);
                     original->setTraversalOrder((int)listBvhNode.size());

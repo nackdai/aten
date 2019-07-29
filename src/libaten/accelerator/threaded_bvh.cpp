@@ -98,7 +98,7 @@ namespace aten
                 auto accel = it->second;
 
                 // NOTE
-                // 0 ‚ÍãˆÊƒŒƒCƒ„[‚ÅŽg—p‚µ‚Ä‚¢‚é‚Ì‚ÅA-1‚·‚é.
+                // 0 ã¯ä¸Šä½ãƒ¬ã‚¤ãƒ¤ãƒ¼ã§ä½¿ç”¨ã—ã¦ã„ã‚‹ã®ã§ã€-1ã™ã‚‹.
                 m_nestedBvh[exid - 1] = accel;
             }
 
@@ -197,10 +197,10 @@ namespace aten
             if (node->isLeaf()) {
                 hitable* item = node->getItem();
 
-                // Ž©•ªŽ©g‚ÌID‚ðŽæ“¾.
+                // è‡ªåˆ†è‡ªèº«ã®IDã‚’å–å¾—.
                 gpunode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
 
-                // ƒCƒ“ƒXƒ^ƒ“ƒX‚ÌŽÀ‘Ì‚ðŽæ“¾.
+                // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®å®Ÿä½“ã‚’å–å¾—.
                 auto internalObj = item->getHasObject();
 
                 if (internalObj) {
@@ -485,11 +485,11 @@ namespace aten
             if (node->isLeaf()) {
                 hitable* item = node->getItem();
 
-                // Ž©•ªŽ©g‚ÌID‚ðŽæ“¾.
+                // è‡ªåˆ†è‡ªèº«ã®IDã‚’å–å¾—.
                 gpunode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
                 AT_ASSERT(gpunode.shapeid >= 0);
 
-                // ƒCƒ“ƒXƒ^ƒ“ƒX‚ÌŽÀ‘Ì‚ðŽæ“¾.
+                // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®å®Ÿä½“ã‚’å–å¾—.
                 auto internalObj = item->getHasObject();
 
                 if (internalObj) {

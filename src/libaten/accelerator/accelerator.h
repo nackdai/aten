@@ -123,7 +123,7 @@ namespace aten {
             int ep{ -1 };    ///< Entry Point.
             int ex{ -1 };    ///< Layer Id.
 
-            // 1‚Âã‚ÌƒŒƒCƒ„[‚Ö‚Ì–ß‚èæ‚Ìƒm[ƒhID.
+            // 1ã¤ä¸Šã®ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¸ã®æˆ»ã‚Šå…ˆã®ãƒãƒ¼ãƒ‰ID.
             int top{ -1 };    ///< Upper layer id.
 
             int padding;

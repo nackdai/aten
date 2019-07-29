@@ -132,8 +132,8 @@ namespace AT_NAME
 
         bool into = (NdotI >= real(0));
 
-        real etai = real(1);    // ^‹ó‚Ì‹üÜ—¦.
-        real etat = ior;        // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        real etai = real(1);    // çœŸç©ºã®å±ˆæŠ˜ç‡.
+        real etat = ior;        // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
         if (!into) {
             auto tmp = etai;
@@ -181,8 +181,8 @@ namespace AT_NAME
 
         bool into = (NdotI >= real(0));
 
-        real etai = real(1);    // ^‹ó‚Ì‹üÜ—¦.
-        real etat = ior;        // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        real etai = real(1);    // çœŸç©ºã®å±ˆæŠ˜ç‡.
+        real etat = ior;        // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
         real sign = real(1);
 
         if (!into) {
@@ -240,8 +240,8 @@ namespace AT_NAME
 
         bool into = (NdotI >= real(0));
 
-        real etai = real(1);    // ^‹ó‚Ì‹üÜ—¦.
-        real etat = ior;        // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        real etai = real(1);    // çœŸç©ºã®å±ˆæŠ˜ç‡.
+        real etat = ior;        // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
         if (!into) {
             auto tmp = etai;
@@ -270,7 +270,7 @@ namespace AT_NAME
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
             // NOTE
-            // Fschlick(v,h) à R0 + (1 - R0)(1 - cosƒ¦)^5
+            // Fschlick(v,h) â‰’ R0 + (1 - R0)(1 - cosÎ˜)^5
             // R0 = ((n1 - n2) / (n1 + n2))^2
 
             auto r0 = (etai - etat) / (etai + etat);

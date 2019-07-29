@@ -84,9 +84,9 @@ namespace aten {
                 // ray : r = p + t * v
                 // plane of AABB : x(t) = p(x) + t * v(x)
                 //  t = (p(x) - x(t)) / v(x)
-                // x���̖ʂ͎�O�Ɖ�������̂ŁA���ꂼ��� t ���v�Z.
-                // t ��x���̖ʂ̎�O�Ɖ��� x �͈͓̔��ł���΁A���C��AABB��ʂ�.
-                // �����xyz���ɂ��Čv�Z����.
+                // x軸の面は手前と奥があるので、それぞれの t を計算.
+                // t がx軸の面の手前と奥の x の範囲内であれば、レイがAABBを通る.
+                // これをxyz軸について計算する.
 
                 auto t0 = (_min[i] - r.org[i]) * inv;
                 auto t1 = (_max[i] - r.org[i]) * inv;
@@ -250,7 +250,7 @@ namespace aten {
             auto dy = aten::abs(vMax.y - vMin.y);
             auto dz = aten::abs(vMax.z - vMin.z);
 
-            // �U�ʂ̖ʐς��v�Z���邪�AAABB�͑Ώ̂Ȃ̂ŁA�R�ʂ̖ʐς��v�Z���ĂQ�{����΂���.
+            // ６面の面積を計算するが、AABBは対称なので、３面の面積を計算して２倍すればいい.
             auto area = dx * dy;
             area += dy * dz;
             area += dz * dx;

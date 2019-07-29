@@ -31,7 +31,7 @@ namespace aten
 
     static inline int32_t getExecuteFilePath(char* path, size_t pathBufSize)
     {
-        // ŽÀsƒvƒƒOƒ‰ƒ€‚Ìƒtƒ‹ƒpƒX‚ðŽæ“¾
+        // å®Ÿè¡Œãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®ãƒ•ãƒ«ãƒ‘ã‚¹ã‚’å–å¾—
         int32_t result = readlink("/proc/self/exe", path, pathBufSize);
         AT_VRETURN(result > 0, 0);
 
@@ -42,13 +42,13 @@ namespace aten
     {
         static char path[256];
 
-        // ŽÀsƒvƒƒOƒ‰ƒ€‚Ìƒtƒ‹ƒpƒX‚ðŽæ“¾
+        // å®Ÿè¡Œãƒ—ãƒ­ã‚°ãƒ©ãƒ ã®ãƒ•ãƒ«ãƒ‘ã‚¹ã‚’å–å¾—
         int pathSize = aten::getExecuteFilePath(path, sizeof(path));
         AT_VRETURN_FALSE(pathSize > 0);
 
         char* tmp = const_cast<char*>(path);
 
-        // ƒtƒ@ƒCƒ‹–¼‚ðŽæ‚èœ‚­
+        // ãƒ•ã‚¡ã‚¤ãƒ«åã‚’å–ã‚Šé™¤ã
         char* p = ::strrchr(tmp, '/');
         AT_VRETURN_FALSE(p != nullptr);
 
@@ -57,7 +57,7 @@ namespace aten
         tmp[diff] = 0;
         p = tmp;
 
-        // ƒJƒŒƒ“ƒgƒfƒBƒŒƒNƒgƒŠ‚ðÝ’è
+        // ã‚«ãƒ¬ãƒ³ãƒˆãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’è¨­å®š
         int result = ::chdir(p);
         AT_ASSERT(result >= 0);
 

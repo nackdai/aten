@@ -8,7 +8,7 @@ namespace AT_NAME {
         real vfov,    // vertical fov.
         uint32_t width, uint32_t height)
     {
-        // 値を保持.
+        // 蛟､繧剃ｿ晄戟.
         m_at = lookat;
         m_vfov = vfov;
 
@@ -21,14 +21,14 @@ namespace AT_NAME {
 
         m_param.origin = origin;
 
-        // カメラ座標ベクトル.
+        // 繧ｫ繝｡繝ｩ蠎ｧ讓吶�吶け繝医Ν.
         m_param.dir = normalize(lookat - origin);
         m_param.right = normalize(cross(m_param.dir, up));
         m_param.up = cross(m_param.right, m_param.dir);
 
         m_param.center = origin + m_param.dir;
 
-        // スクリーンのUVベクトル.
+        // 繧ｹ繧ｯ繝ｪ繝ｼ繝ｳ縺ｮUV繝吶け繝医Ν.
         m_param.u = half_width * m_param.right;
         m_param.v = half_height * m_param.up;
 
@@ -86,14 +86,14 @@ namespace AT_NAME {
         const aten::ray& ray,
         int& px, int& py) const
     {
-        // dir 方向へのスクリーン距離.
+        // dir 譁ｹ蜷代∈縺ｮ繧ｹ繧ｯ繝ｪ繝ｼ繝ｳ霍晞屬.
         //     /|
         //  x / |
         //   /  |
-        //  / θ|
+        //  / ﾎｸ|
         // +----+
         //    d
-        // cosθ = x / d => x = d / cosθ
+        // cosﾎｸ = x / d => x = d / cosﾎｸ
 
         real c = dot(ray.dir, m_param.dir);
         real dist = m_param.dist / c;

@@ -199,8 +199,8 @@ namespace aten
         }
 
         // NOTE
-        // left‚©‚çtraverse‚·‚é‚Ì‚ÅA‚à‚µAŠO‚µ‚½Žž‚Étraverse‚ª‘±‚­‚æ‚¤‚É‚·‚é‚É‚ÍAleft‚ªÌ—p‚³‚ê‚â‚·‚­‚È‚ç‚È‚¢‚Æ‚¢‚¯‚È‚¢.
-        // ‚»‚±‚ÅAƒXƒ^ƒbƒN‚ÌÅŒã‚Éleft‚ªÏ‚Ü‚ê‚â‚·‚­‚È‚é‚æ‚¤‚Éæ‚Éright‚©‚ç’Tõ‚·‚é.
+        // leftã‹ã‚‰traverseã™ã‚‹ã®ã§ã€ã‚‚ã—ã€å¤–ã—ãŸæ™‚ã«traverseãŒç¶šãã‚ˆã†ã«ã™ã‚‹ã«ã¯ã€leftãŒæŽ¡ç”¨ã•ã‚Œã‚„ã™ããªã‚‰ãªã„ã¨ã„ã‘ãªã„.
+        // ãã“ã§ã€ã‚¹ã‚¿ãƒƒã‚¯ã®æœ€å¾Œã«leftãŒç©ã¾ã‚Œã‚„ã™ããªã‚‹ã‚ˆã†ã«å…ˆã«rightã‹ã‚‰æŽ¢ç´¢ã™ã‚‹.
         auto s0 = findCandidates(node->getRight(), instanceNode, f, stack);
         auto s1 = findCandidates(node->getLeft(), instanceNode, f, stack);
 

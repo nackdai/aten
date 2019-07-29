@@ -149,8 +149,8 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 		real b = data.w;
 		real c = 1 - a - b;
 
-		// �d�S���W�n(barycentric coordinates).
-		// v0�.
+		// 重心座標系(barycentric coordinates).
+		// v0基準.
 		// p = (1 - a - b)*v0 + a*v1 + b*v2
 		auto p = c * p0 + a * p1 + b * p2;
 		aten::vec4 vp(p.x, p.y, p.z, 1.0f);
@@ -173,7 +173,7 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 
 inline __device__ bool intersectsDepthBuffer(float z, float minZ, float maxZ, float zThickness)
 {
-	// �w��͈͓��i���C�̎n�_�ƏI�_�j�� z ������΁A����̓��C�Ƀq�b�g�����Ƃ݂Ȃ���.
+	// 指定範囲内（レイの始点と終点）に z があれば、それはレイにヒットしたとみなせる.
 	z += zThickness;
 	return (maxZ >= z) && (minZ - zThickness <= z);
 }
@@ -248,7 +248,7 @@ inline __device__ bool traceScreenSpaceRay(
 #endif
 
 	// If the line is degenerate, make it cover at least one pixel to avoid handling zero-pixel extent as a special case later.
-	// 2�_�Ԃ̋�����������x�����悤�ɂ���.
+	// 2点間の距離がある程度離れるようにする.
 	P1 += aten::squared_length(P0 - P1) < 0.0001f
 		? aten::vec3(0.01f)
 		: aten::vec3(0.0f);
@@ -319,15 +319,15 @@ inline __device__ bool traceScreenSpaceRay(
 
 	for (; (stepCount < maxSteps) && !breakLoop; ++stepCount)
 	{
-		// �O���Z�̍ő�l�����̍ŏ��l�ɂȂ�.
+		// 前回のZの最大値が次の最小値になる.
 		rayZMin = prevZMaxEstimate;
 
-		// ����Z�̍ő�l���v�Z����.
-		// �������A1/2 pixel�� �]�T����������.
-		// Q��w�����ŏ��Z����Ă��āA������1/w�ŏ��Z����̂ŁA���iView���W�n�j�ɖ߂邱�ƂɂȂ�.
+		// 次のZの最大値を計算する.
+		// ただし、1/2 pixel分 余裕を持たせる.
+		// Qはw成分で除算されていて、そこに1/wで除算するので、元（View座標系）に戻ることになる.
 		rayZMax = -(PQk.z + dPQk.z * 0.5f) / (PQk.w + dPQk.w * 0.5f);
 
-		// ���Ɍ����čő�l��ێ�.
+		// 次に向けて最大値を保持.
 		prevZMaxEstimate = rayZMax;
 
 		float tmpMin = rayZMin;
@@ -349,13 +349,13 @@ inline __device__ bool traceScreenSpaceRay(
 		printf("    [%d] %d, %d\n", stepCount, ix, iy);
 #endif
 
-		// �I�_�ɓ��B������.
+		// 終点に到達したか.
 		bool b0 = ((PQk.x * stepDir) <= end);
 
-		// �����Ȃ��Ƃ���ɓ��B���ĂȂ���.
+		// 何もないところに到達してないか.
 		bool b1 = (sceneZMax != 0.0);
 
-		// �V�[�����̌����_�ł̐[�x�l���擾.
+		// シーン内の現時点での深度値を取得.
 		float4 data;
 		surf2Dread(&data, depth, ix * sizeof(float4), iy);
 
@@ -736,8 +736,8 @@ __global__ void shade(
 
 	bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
 
-	// �����ʒu�̖@��.
-	// ���̂���̃��C�̓��o���l��.
+	// 交差位置の法線.
+	// 物体からのレイの入出を考慮.
 	aten::vec3 orienting_normal = rec.normal;
 
 	if (mtrl.type != aten::MaterialType::Layer) {
@@ -782,7 +782,7 @@ __global__ void shade(
 	// Apply normal map.
 	int normalMap = mtrl.normalMap;
 	if (mtrl.type == aten::MaterialType::Layer) {
-		// �ŕ\�w�� NormalMap ��K�p.
+		// 最表層の NormalMap を適用.
 		auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
 		normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
 	}
@@ -873,10 +873,10 @@ __global__ void shade(
 			if (light.attrib.isSingular || light.attrib.isInfinite) {
 				if (pdfLight > real(0) && cosShadow >= 0) {
 					// TODO
-					// �W�I���g���^�[���̈����ɂ���.
-					// singular light �̏ꍇ�́AfinalColor �ɋ����̏��Z���܂܂�Ă���.
-					// inifinite light �̏ꍇ�́A���������ɂȂ�ApdfLight�Ɋ܂܂�鋗�������Ƒł����������H.
-					// �i�ł����������̂ŁApdfLight�ɂ͋��������͊܂�ł��Ȃ��j.
+					// ジオメトリタームの扱いについて.
+					// singular light の場合は、finalColor に距離の除算が含まれている.
+					// inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 					auto misW = pdfLight / (pdfb + pdfLight);
 #ifdef SEPARATE_SHADOWRAY_HITTEST
 					shadowRays[idx].lightcontrib = 
@@ -948,7 +948,7 @@ __global__ void shade(
 	real c = 1;
 	if (!mtrl.attrib.isSingular) {
 		// TODO
-		// AMD�̂�abs���Ă��邪....
+		// AMDのはabsしているが....
 		//c = aten::abs(dot(orienting_normal, nextDir));
 		c = dot(orienting_normal, nextDir);
 	}

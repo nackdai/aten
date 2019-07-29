@@ -40,7 +40,7 @@ namespace aten {
         uint32_t height;
     };
 
-    // F‹——£‚Ìd‚İŒvZ.
+    // è‰²è·é›¢ã®é‡ã¿è¨ˆç®—.
     static inline real kernelR(real cdist, real sigmaR)
     {
         auto w = real(1) / aten::sqrt(real(2) * AT_MATH_PI * sigmaR) * aten::exp(real(-0.5) * (cdist * cdist) / (sigmaR * sigmaR));
@@ -63,7 +63,7 @@ namespace aten {
     {
         int r = int(aten::ceil(real(4.0) * sigmaS));
 
-        // ƒsƒNƒZƒ‹‹——£‚Ìd‚İ.
+        // ãƒ”ã‚¯ã‚»ãƒ«è·é›¢ã®é‡ã¿.
         std::vector<std::vector<real>> distW;
         {
             distW.resize(1 + r);
@@ -88,14 +88,14 @@ namespace aten {
 #endif
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                // ’†S“_.
+                // ä¸­å¿ƒç‚¹.
                 const auto& p = srcSampler(x, y);
 
                 vec3 numer = vec3(1.0f, 1.0f, 1.0f);
                 vec3 denom = vec3(p.x, p.y, p.z);
 
                 // (u, 0)
-                // ‰¡•ûŒü.
+                // æ¨ªæ–¹å‘.
                 for (int u = 1; u <= r; u++) {
                     const auto& p0 = srcSampler(x - u, y);
                     const auto& p1 = srcSampler(x + u, y);
@@ -114,7 +114,7 @@ namespace aten {
                 }
 
                 // (0, v)
-                // c•ûŒü.
+                // ç¸¦æ–¹å‘.
                 for (int v = 1; v <= r; v++) {
                     const auto& p0 = srcSampler(x, y - v);
                     const auto& p1 = srcSampler(x, y + v);
@@ -228,7 +228,7 @@ namespace aten {
         }
 
         // TODO
-        // “ü—ÍƒeƒNƒXƒ`ƒƒ‚ÌƒTƒCƒY‚ÍƒXƒNƒŠ[ƒ“‚Æ“¯‚¶...
+        // å…¥åŠ›ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®ã‚µã‚¤ã‚ºã¯ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã¨åŒã˜...
         auto hTexel = getHandle("texel");
         if (hTexel >= 0) {
             CALL_GL_API(glUniform2f(hTexel, 1.0f / m_width, 1.0f / m_height));

@@ -338,7 +338,7 @@ namespace aten
             }
             else {
                 // NOTE
-                // positions �ɂ� x,y,z ���΂�΂�ɓ����Ă���̂ŁA3 �Ŋ��邱�ƂłP���_������ɂȂ�.
+                // positions には x,y,z がばらばらに入っているので、3 で割ることで１頂点あたりになる.
                 vtxnum = shape.mesh.positions.size() / 3;
 
                 for (uint32_t i = 0; i < vtxnum; i++) {

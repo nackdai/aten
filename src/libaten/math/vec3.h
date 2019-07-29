@@ -265,14 +265,14 @@ namespace aten {
         return res.f;
     }
 
-    // ’¼sƒxƒNƒgƒ‹‚ðŒvŽZ.
+    // ç›´è¡Œãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®—.
     inline AT_DEVICE_API vec3 getOrthoVector(const vec3& n)
     {
         vec3 p;
 
         // NOTE
-        // dot‚ðŒvŽZ‚µ‚½‚Æ‚«‚Éƒ[ƒ‚É‚È‚é‚æ‚¤‚ÈƒxƒNƒgƒ‹.
-        // k ‚Í normalize ŒvŽZ—p.
+        // dotã‚’è¨ˆç®—ã—ãŸã¨ãã«ã‚¼ãƒ­ã«ãªã‚‹ã‚ˆã†ãªãƒ™ã‚¯ãƒˆãƒ«.
+        // k ã¯ normalize è¨ˆç®—ç”¨.
 
 #if 0
         if (aten::abs(n.z) > real(0.707106781186547524401)) {

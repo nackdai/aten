@@ -46,13 +46,13 @@ namespace aten {
 
     mat4& mat4::invert()
     {
-        // Gauss/Jordan–@‚Å‹‚ß‚é
+        // Gauss/Jordanæ³•ã§æ±‚ã‚ã‚‹
         mat4 mtx = *this;
         mat4 dst;
 
         for (int i = 0; i < 4; ++i) {
-            // ƒsƒ{ƒbƒg‘I‘ğ.
-            // NOTE: ‘ÎÛ‚Æ‚È‚é—ñ’†‚ÌÅ‘å’l‚ª‘ÎŠp’l‚É‚È‚é‚æ‚¤‚És‚ğ“ü‚ê‘Ö‚¦‚é.
+            // ãƒ”ãƒœãƒƒãƒˆé¸æŠ.
+            // NOTE: å¯¾è±¡ã¨ãªã‚‹åˆ—ä¸­ã®æœ€å¤§å€¤ãŒå¯¾è§’å€¤ã«ãªã‚‹ã‚ˆã†ã«è¡Œã‚’å…¥ã‚Œæ›¿ãˆã‚‹.
             real f = aten::abs(mtx.m[i][i]);
             for (int j = i + 1; j < 4; ++j) {
                 if (f < aten::abs(mtx.m[j][i])) {
@@ -62,12 +62,12 @@ namespace aten {
                 }
             }
 
-            // ‘ÎÛ‚Æ‚È‚és‚Ì‘ÎŠp’l‚ğ 1 ‚É‚·‚é.
+            // å¯¾è±¡ã¨ãªã‚‹è¡Œã®å¯¾è§’å€¤ã‚’ 1 ã«ã™ã‚‹.
             f = 1.0f / mtx.m[i][i];
             mtx.v[i] = scale(mtx.v[i], f);
             dst.v[i] = scale(dst.v[i], f);
 
-            // ‘ÎÛ‚Æ‚È‚ç‚È‚¢—ñ‚Ì’l‚ğ 0 ‚É‚·‚é.
+            // å¯¾è±¡ã¨ãªã‚‰ãªã„åˆ—ã®å€¤ã‚’ 0 ã«ã™ã‚‹.
             for (int j = 0; j < 4; ++j) {
                 if (j != i) {
                     real temp = mtx.m[j][i];
@@ -127,8 +127,8 @@ namespace aten {
 
         vec3 vup = up;
         if (aten::abs(vz.x) < AT_MATH_EPSILON && aten::abs(vz.z) < AT_MATH_EPSILON) {
-            // UPƒxƒNƒgƒ‹‚Æ‚ÌŠOÏ‚ğŒvZ‚Å‚«‚È‚¢‚Ì‚ÅA
-            // V‚µ‚¢UPƒxƒNƒgƒ‹‚ğ‚Å‚Á‚¿‚ ‚°‚éEEE
+            // UPãƒ™ã‚¯ãƒˆãƒ«ã¨ã®å¤–ç©ã‚’è¨ˆç®—ã§ããªã„ã®ã§ã€
+            // æ–°ã—ã„UPãƒ™ã‚¯ãƒˆãƒ«ã‚’ã§ã£ã¡ã‚ã’ã‚‹ãƒ»ãƒ»ãƒ»
             if (up.y > 0.0f) {
                 vup = vec3(real(0), real(0), -vz.y);
             }

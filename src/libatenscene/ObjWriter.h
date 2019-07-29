@@ -4,8 +4,8 @@
 #include "aten.h"
 
 // TODO
-// namespace ‚ÅˆÍ‚¤‚Æ fatal error c1001 ‚ª”­¶‚·‚é.
-// Œ´ˆö‚ª‚í‚©‚ç‚È‚¢‚½‚ßAwork around ‚Å‚Í‚ ‚é‚ª namespace ‚ğg—p‚µ‚È‚¢‚æ‚¤‚É‚·‚é...
+// namespace ã§å›²ã†ã¨ fatal error c1001 ãŒç™ºç”Ÿã™ã‚‹.
+// åŸå› ãŒã‚ã‹ã‚‰ãªã„ãŸã‚ã€work around ã§ã¯ã‚ã‚‹ãŒ namespace ã‚’ä½¿ç”¨ã—ãªã„ã‚ˆã†ã«ã™ã‚‹...
 
 class ObjWriter {
 public:

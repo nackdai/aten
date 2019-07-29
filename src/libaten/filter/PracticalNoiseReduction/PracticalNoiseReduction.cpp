@@ -93,7 +93,7 @@ namespace aten {
         int filter_size,
         real std_d)
     {
-        // ƒKƒEƒXƒtƒBƒ‹ƒ^ŒW”.
+        // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿ä¿‚æ•°.
         // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
         real std_d2 = 2.0f * std_d * std_d;
 
@@ -106,27 +106,27 @@ namespace aten {
             for (int cx = 0; cx < width; cx++) {
                 int cIdx = cy * width + cx;
 
-                // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEŠJnˆÊ’u.
+                // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦é–‹å§‹ä½ç½®.
                 int startWindow_x = std::max(0, cx - halfWindowSize);
                 int startWindow_y = std::max(0, cy - halfWindowSize);
 
-                // ŒvZ”ÍˆÍƒEƒCƒ“ƒhƒEI—¹ˆÊ’u.
+                // è¨ˆç®—ç¯„å›²ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦çµ‚äº†ä½ç½®.
                 int endWindow_x = std::min(width - 1, cx + halfWindowSize);
                 int endWindow_y = std::min(height - 1, cy + halfWindowSize);
 
                 real sumWeight = 0.0;
 
-                // o—Íƒoƒbƒtƒ@‰Šú‰».
+                // å‡ºåŠ›ãƒãƒƒãƒ•ã‚¡åˆæœŸåŒ–.
                 _out[cIdx] = vec4(0);
 
                 for (int iy = startWindow_y; iy <= endWindow_y; ++iy) {
                     for (int ix = startWindow_x; ix <= endWindow_x; ++ix) {
                         int idx = iy * width + ix;
 
-                        // ƒsƒNƒZƒ‹‹——£‚Ì‚Qæ.
+                        // ãƒ”ã‚¯ã‚»ãƒ«è·é›¢ã®ï¼’ä¹—.
                         real imageDist = (real)(cx - ix) * (cx - ix) + (cy - iy) * (cy - iy);
 
-                        // ƒKƒEƒXƒtƒBƒ‹ƒ^.
+                        // ã‚¬ã‚¦ã‚¹ãƒ•ã‚£ãƒ«ã‚¿.
                         // g(x) = exp(-1/2 * x^2/d^2) = exp(-(x * x) / (2 * d * d))
                         real weight = aten::exp(-imageDist / std_d2);
 

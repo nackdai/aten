@@ -47,7 +47,7 @@ namespace AT_NAME {
             result->nml = aten::vec3();    // Not used...
 
             // TODO
-            // ƒV[ƒ“‚ÌAABB‚ð•¢‚¤‹…ã‚É”z’u‚³‚ê‚é‚æ‚¤‚É‚·‚é‚×‚«.
+            // ã‚·ãƒ¼ãƒ³ã®AABBã‚’è¦†ã†çƒä¸Šã«é…ç½®ã•ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹ã¹ã.
             result->pos = org + real(100000) * real(0.5) * result->dir;
 
             result->le = param->le;

@@ -43,8 +43,8 @@ namespace idaten
         m_canSSRTHitTest = false;
 
         // TODO
-        // Texture�������̃o�C���h�ɂ��擾�����cudaTextureObject_t�͕ω����Ȃ��̂�,�l����x�ێ����Ă����΂���.
-        // �����_�ł͍ŏ��ɐݒ肳�ꂽ���̂��ω����Ȃ��O��ł��邪�A����ւ��Ȃǂ̕ύX���������ꍇ�͂��̌���ł͂Ȃ��̂ŁA��������̑Ή����K�v.
+        // Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
+        // 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.
 
         if (!m_isListedTextureObject)
         {
@@ -169,7 +169,7 @@ namespace idaten
             int offsetY = m_tileDomain.y;
 
             // NOTE
-            // ���������ł̓I�t�Z�b�g�����Ȃ�.
+            // ここから先ではオフセットさせない.
             m_tileDomain.x = 0;
             m_tileDomain.y = 0;
 
@@ -222,7 +222,7 @@ namespace idaten
         auto outputSurf = m_glimg.bind();
 
         // NOTE
-        // render�Ő؂�ւ����Ă��邪�A�{����denoise��ɐ؂�ւ���̂ŁA�����ň�x���ɖ߂�.
+        // renderで切り替えられているが、本来はdenoise後に切り替えるので、ここで一度元に戻す.
         auto keepCurAovPos = m_curAOVPos;
         m_curAOVPos = 1 - m_curAOVPos;
 
@@ -269,7 +269,7 @@ namespace idaten
         auto offset = srcTileDomain.y * dstTileDomain.w + srcTileDomain.x;
 
         // NOTE
-        // ���łɐ؂�ւ����Ă��邪�A�؂�ւ��O�̂��̂��Q�Ƃ������̂ŁA���ɖ߂�.
+        // すでに切り替えられているが、切り替え前のものを参照したいので、元に戻す.
         auto cur = 1 - m_curAOVPos;
         
         // Notmal & Depth.

@@ -9,7 +9,7 @@ namespace aten {
         ~KeyValue();
 
     public:
-        // V‚µ‚¢ƒL[’l‚ğ¶¬‚·‚é
+        // æ–°ã—ã„ã‚­ãƒ¼å€¤ã‚’ç”Ÿæˆã™ã‚‹
         static uint32_t gen(const char* str)
         {
             return genValue<uint32_t>(str);

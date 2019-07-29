@@ -6,7 +6,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     const aten::GeomParameter* shape,
     aten::sampler* sampler)
 {
-    // CPUƒR[ƒh‚Æˆ—‚ð‡‚í‚¹‚é‚½‚ß‚Ìƒ_ƒ~[.
+    // CPUã‚³ãƒ¼ãƒ‰ã¨å‡¦ç†ã‚’åˆã‚ã›ã‚‹ãŸã‚ã®ãƒ€ãƒŸãƒ¼.
     int dummy = sampler->nextSample();
 
     int r = sampler->nextSample();
@@ -51,15 +51,15 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     real b = aten::sqrt(r0) * r1;
 #endif
 
-    // dSÀ•WŒn(barycentric coordinates).
-    // v0Šî€.
+    // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+    // v0åŸºæº–.
     // p = (1 - a - b)*v0 + a*v1 + b*v2
     aten::vec3 p = (1 - a - b) * p0 + a * p1 + b * p2;
 
     aten::vec3 n = (1 - a - b) * n0 + a * n1 + b * n2;
     n = normalize(n);
 
-    // ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+    // ä¸‰è§’å½¢ã®é¢ç© = ï¼’è¾ºã®å¤–ç©ã®é•·ã• / 2;
     auto e0 = p1 - p0;
     auto e1 = p2 - p0;
     auto area = real(0.5) * cross(e0, e1).length();
@@ -202,7 +202,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 #endif
 
     // TODO
-    // ƒV[ƒ“‚ÌAABB‚ð•¢‚¤‹…ã‚É”z’u‚³‚ê‚é‚æ‚¤‚É‚·‚é‚×‚«.
+    // ã‚·ãƒ¼ãƒ³ã®AABBã‚’è¦†ã†çƒä¸Šã«é…ç½®ã•ã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹ã¹ã.
     result->pos = org + real(100000) * result->dir;
 
     result->pdf = dot(normal, result->dir) / AT_MATH_PI;

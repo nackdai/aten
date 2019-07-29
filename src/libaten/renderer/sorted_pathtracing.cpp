@@ -79,7 +79,7 @@ namespace aten
             path.isHit = false;
 
             if (path.isAlive) {
-                // ‰Šú‰».
+                // åˆæœŸåŒ–.
                 path.rec = hitrecord();
                 path.ray = ray;
 
@@ -163,8 +163,8 @@ namespace aten
 
             uint32_t rrDepth = m_rrDepth;
 
-            // Œğ·ˆÊ’u‚Ì–@ü.
-            // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ğl—¶.
+            // äº¤å·®ä½ç½®ã®æ³•ç·š.
+            // ç‰©ä½“ã‹ã‚‰ã®ãƒ¬ã‚¤ã®å…¥å‡ºã‚’è€ƒæ…®.
             vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 
             auto mtrl = material::getMaterial(path.rec.mtrlid);
@@ -253,10 +253,10 @@ namespace aten
                     if (light->isSingular() || light->isInfinite()) {
                         if (pdfLight > real(0)) {
                             // TODO
-                            // ƒWƒIƒƒgƒŠƒ^[ƒ€‚Ìˆµ‚¢‚É‚Â‚¢‚Ä.
-                            // singular light ‚Ìê‡‚ÍAfinalColor ‚É‹——£‚ÌœZ‚ªŠÜ‚Ü‚ê‚Ä‚¢‚é.
-                            // inifinite light ‚Ìê‡‚ÍA–³ŒÀ‰“•û‚É‚È‚èApdfLight‚ÉŠÜ‚Ü‚ê‚é‹——£¬•ª‚Æ‘Å‚¿Á‚µ‚ ‚¤H.
-                            // i‘Å‚¿Á‚µ‚ ‚¤‚Ì‚ÅApdfLight‚É‚Í‹——£¬•ª‚ÍŠÜ‚ñ‚Å‚¢‚È‚¢j.
+                            // ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚¿ãƒ¼ãƒ ã®æ‰±ã„ã«ã¤ã„ã¦.
+                            // singular light ã®å ´åˆã¯ã€finalColor ã«è·é›¢ã®é™¤ç®—ãŒå«ã¾ã‚Œã¦ã„ã‚‹.
+                            // inifinite light ã®å ´åˆã¯ã€ç„¡é™é æ–¹ã«ãªã‚Šã€pdfLightã«å«ã¾ã‚Œã‚‹è·é›¢æˆåˆ†ã¨æ‰“ã¡æ¶ˆã—ã‚ã†ï¼Ÿ.
+                            // ï¼ˆæ‰“ã¡æ¶ˆã—ã‚ã†ã®ã§ã€pdfLightã«ã¯è·é›¢æˆåˆ†ã¯å«ã‚“ã§ã„ãªã„ï¼‰.
                             auto misW = pdfLight / (pdfb + pdfLight);
                             path.lightcontrib  = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                         }
@@ -309,7 +309,7 @@ namespace aten
             real c = 1;
             if (!mtrl->isSingular()) {
                 // TODO
-                // AMD‚Ì‚Íabs‚µ‚Ä‚¢‚é‚ª....
+                // AMDã®ã¯absã—ã¦ã„ã‚‹ãŒ....
                 //c = aten::abs(dot(orienting_normal, nextDir));
                 c = dot(orienting_normal, nextDir);
             }

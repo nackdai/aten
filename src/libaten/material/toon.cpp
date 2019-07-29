@@ -69,7 +69,7 @@ namespace AT_NAME
             coeff = m_func(c);
         }
         else {
-            // ìKìñ...
+            // ÈÅ©ÂΩì...
             if (c < 0.5) {
                 coeff = 0;
             }
@@ -79,7 +79,7 @@ namespace AT_NAME
         }
 
         // TODO
-        // äÆëSÇ…âeÇ…Ç»ÇÁÇ»Ç¢ÇÊÇ§Ç…ÇµÇƒÇ›ÇÈ.
+        // ÂÆåÂÖ®„Å´ÂΩ±„Å´„Å™„Çâ„Å™„ÅÑ„Çà„ÅÜ„Å´„Åó„Å¶„Åø„Çã.
         coeff = std::max<real>(coeff, real(0.05));
         //coeff = aten::clamp<real>(coeff, 0.05, 1);
 

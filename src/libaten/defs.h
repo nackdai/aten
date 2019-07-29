@@ -125,7 +125,7 @@ namespace aten {
 #endif
 
 #ifdef __AT_CUDA__
-#include <host_defines.h>
+#include <cuda_runtime_api.h>
 #include "idaten_namespace.h"
 
 #define AT_DEVICE_API        __host__ __device__

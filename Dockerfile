@@ -17,8 +17,6 @@ RUN mv cmake-3.15.0-Linux-x86_64 cmake
 RUN mv cmake /usr/local
 ENV PATH /usr/local/cmake/bin:${PATH}
 
-RUN apt-get install -y ninja
-
 # clang
 # https://solarianprogrammer.com/2017/12/13/linux-wsl-install-clang-libcpp-compile-cpp-17-programs/
 RUN apt-get install -y build-essential xz-utils curl

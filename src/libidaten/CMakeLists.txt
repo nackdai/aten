@@ -4,26 +4,20 @@ project(${PROJECT_NAME})
 
 find_package(CUDA REQUIRED)
 
-set(CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
-
 message("-- CUDA --")
 message("Version: " ${CUDA_VERSION})
 message("Library: " ${CUDA_CUDA_LIBRARY})
 message("Runtime: " ${CUDA_CUDART_LIBRARY})
-message("Host Compiler: " ${CUDA_HOST_COMPILER})
-
-# https://gist.github.com/erikzenker/713c4ff76949058d5d5d
 
 set(
     CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS};
     "-ccbin " ${CMAKE_CXX_COMPILER}
-    #" -rdc=true --compile -cudart static --machine 64 -G -g -gencode arch=compute_60,code=sm_60 -x cu -Xcompiler ,-O0 -g -std=c++14 -D__CORRECT_ISO_CPP11_MATH_H_PROTO")
-    " -rdc=true -gencode arch=compute_60,code=sm_60 -Xcompiler ,-O0 -g -std=c++14 -D__CORRECT_ISO_CPP11_MATH_H_PROTO")
-
-message(${CUDA_NVCC_FLAGS})
+    "-O0 -g -rdc=true -gencode arch=compute_60,code=sm_60 -std=c++14")
 
 add_definitions(-D__AT_CUDA__)
+
+cuda_compile(CUDA_TEXTURE_RESOURCE cuda/cudaTextureResource.cpp OPTIONS -x cu)
 
 # Add library to build.
 cuda_add_library(${PROJECT_NAME} STATIC
@@ -39,7 +33,7 @@ cuda_add_library(${PROJECT_NAME} STATIC
   cuda/cudaGLresource.cpp
   cuda/cudaGLresource.h
   cuda/cudaLayeredTextureResource.cpp
-  cuda/cudaTextureResource.cpp
+  ${CUDA_TEXTURE_RESOURCE}
   cuda/cudaTextureResource.h
   cuda/cudadefs.h
   cuda/cudainit.h
@@ -107,7 +101,6 @@ cuda_add_library(${PROJECT_NAME} STATIC
   svgf/svgf_init.cu
   svgf/svgf_pt.cu
   svgf/svgf_ssrt.cu
-  svgf/svgf_taa.cu
   svgf/svgf_tile.cu
   svgf/svgf_tp.cu)
 

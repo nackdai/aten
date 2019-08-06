@@ -287,9 +287,9 @@ EOT
   BOOL wglCopyImageSubDataNV (HGLRC hSrcRC, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, HGLRC hDstRC, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei width, GLsizei height, GLsizei depth)
 EOT
 
-# Filter glProgramParameteri from GL_ARB_separate_shader_objects
-#    grep -v "glProgramParameteri" $1/GL_ARB_separate_shader_objects > tmp
-#    mv tmp $1/GL_ARB_separate_shader_objects
+# Filter glProgramUniform from GL_EXT_separate_shader_objects
+    cat $1/GL_EXT_separate_shader_objects | grep -v "glProgramUniform" | grep -v "glProgramParameteri" > tmp
+    mv tmp $1/GL_EXT_separate_shader_objects
 
 # Filter out EXT functions from GL_ARB_viewport_array
     grep -v "EXT" $1/GL_ARB_viewport_array > tmp
@@ -496,9 +496,13 @@ EOT
     grep -v 'glBlendBarrierKHR' $1/GL_KHR_blend_equation_advanced_coherent > tmp
     mv tmp $1/GL_KHR_blend_equation_advanced_coherent
 
-# Filter out GL_NONE enum from GL_KHR_robustness
+# Filter out GL_NONE enum from GL_KHR_context_flush_control
     grep -v 'GL_NONE' $1/GL_KHR_context_flush_control > tmp
     mv tmp $1/GL_KHR_context_flush_control
+
+# Filter out GL_NONE enum from GL_EGL_KHR_context_flush_control
+    grep -v 'GL_NONE' $1/GL_EGL_KHR_context_flush_control > tmp
+    mv tmp $1/GL_EGL_KHR_context_flush_control
 
 # Filter out CoverageModulation from NV_framebuffer_mixed_samples
 # Superset of EXT_raster_multisample
@@ -511,6 +515,93 @@ EOT
 
     grep -v "RasterSamplesEXT" $1/GL_NV_framebuffer_mixed_samples > tmp
     mv tmp $1/GL_NV_framebuffer_mixed_samples
+
+# Filter out glNamedBufferStorageEXT from GL_ARB_buffer_storage
+
+    grep -v "glNamedBufferStorageEXT" $1/GL_ARB_buffer_storage > tmp
+    mv tmp $1/GL_ARB_buffer_storage
+
+# Filter out glFramebufferTextureEXT from GL_EXT_geometry_point_size
+# and GL_EXT_geometry_shader
+
+    grep -v "glFramebufferTextureEXT" $1/GL_EXT_geometry_point_size > tmp
+    mv tmp $1/GL_EXT_geometry_point_size
+
+    grep -v "glFramebufferTextureEXT" $1/GL_EXT_geometry_shader > tmp
+    mv tmp $1/GL_EXT_geometry_shader
+
+# Filter out glBindFragDataLocationEXT from GL_EXT_blend_func_extended
+
+    grep -v "glBindFragDataLocationEXT" $1/GL_EXT_blend_func_extended > tmp
+    mv tmp $1/GL_EXT_blend_func_extended
+
+# Filter out glDrawArraysInstancedEXT and glDrawElementsInstancedEXT from GL_EXT_blend_func_extended
+
+    grep -v "glDrawArraysInstancedEXT" $1/GL_EXT_instanced_arrays > tmp
+    mv tmp $1/GL_EXT_instanced_arrays
+
+    grep -v "glDrawElementsInstancedEXT" $1/GL_EXT_instanced_arrays > tmp
+    mv tmp $1/GL_EXT_instanced_arrays
+
+# Filter out glRenderbufferStorageMultisampleEXT from GL_EXT_multisampled_render_to_texture
+
+    grep -v "glRenderbufferStorageMultisampleEXT" $1/GL_EXT_multisampled_render_to_texture > tmp
+    mv tmp $1/GL_EXT_multisampled_render_to_texture
+
+# Filter out glTexturePageCommitmentEXT from GL_ARB_sparse_texture
+
+    grep -v "glTexturePageCommitmentEXT" $1/GL_ARB_sparse_texture > tmp
+    mv tmp $1/GL_ARB_sparse_texture
+
+# Filter out TextureStorage* from GL_ARB_texture_storage
+
+    grep -v "TextureStorage" $1/GL_ARB_texture_storage > tmp
+    mv tmp $1/GL_ARB_texture_storage
+
+# Filter out functions from GL_EXT_occlusion_query_boolean
+
+    grep -v "(" $1/GL_EXT_occlusion_query_boolean > tmp
+    mv tmp $1/GL_EXT_occlusion_query_boolean
+
+# Filter out duplicate enums from GL_EXT_protected_textures
+
+    cat $1/GL_EXT_protected_textures | grep -v GL_TRUE | grep -v GL_FALSE > tmp
+    mv tmp $1/GL_EXT_protected_textures
+
+# Filter out duplicate enums from GL_EXT_robustness
+
+    cat $1/GL_EXT_robustness | grep -v GL_NO_ERROR > tmp
+    mv tmp $1/GL_EXT_robustness
+
+# Filter  GL_EXT_shader_framebuffer_fetch_non_coherent
+
+    grep -v "FramebufferFetchBarrierEXT" $1/GL_EXT_shader_framebuffer_fetch_non_coherent > tmp
+    mv tmp $1/GL_EXT_shader_framebuffer_fetch_non_coherent
+
+# Filter GL_EXT_tessellation_shader
+
+    grep -v "PatchParameteriEXT" $1/GL_EXT_tessellation_shader > tmp
+    mv tmp $1/GL_EXT_tessellation_shader
+
+# Filter GL_EXT_texture_buffer
+
+    grep -v "TexBuffer" $1/GL_EXT_texture_buffer > tmp
+    mv tmp $1/GL_EXT_texture_buffer
+
+# Filter GL_EXT_texture_border_clamp
+
+    grep -v "TexParameter" $1/GL_EXT_texture_border_clamp > tmp
+    mv tmp $1/GL_EXT_texture_border_clamp
+
+# Filter GL_EXT_disjoint_timer_query
+
+    cat $1/GL_EXT_disjoint_timer_query | grep -v GetQueryObjecti64v | grep -v GetQueryObjectui64v > tmp
+    mv tmp $1/GL_EXT_disjoint_timer_query
+
+# Filter GL_NV_read_buffer_front
+
+    grep -v "ReadBufferNV" $1/GL_NV_read_buffer_front > tmp
+    mv tmp $1/GL_NV_read_buffer_front
 
 # Append GLVULKANPROCNV to GL_NV_draw_vulkan_image
 # Probably ought to be explicitly mentioned in the spec language

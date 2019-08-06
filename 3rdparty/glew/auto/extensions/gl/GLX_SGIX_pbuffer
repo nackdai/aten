@@ -1,5 +1,5 @@
 GLX_SGIX_pbuffer
-http://www.opengl.org/registry/specs/SGIX/pbuffer.txt
+https://www.khronos.org/registry/OpenGL/extensions/SGIX/GLX_SGIX_pbuffer.txt
 GLX_SGIX_pbuffer
 
 	GLX_FRONT_LEFT_BUFFER_BIT_SGIX 0x00000001

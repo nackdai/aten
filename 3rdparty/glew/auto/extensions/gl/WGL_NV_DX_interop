@@ -1,5 +1,5 @@
 WGL_NV_DX_interop
-http://www.opengl.org/registry/specs/NV/DX_interop.txt
+https://www.khronos.org/registry/OpenGL/extensions/NV/WGL_NV_DX_interop.txt
 WGL_NV_DX_interop
 
 	WGL_ACCESS_READ_ONLY_NV 0x0000

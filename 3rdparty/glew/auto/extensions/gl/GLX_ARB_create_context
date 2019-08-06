@@ -1,5 +1,5 @@
 GLX_ARB_create_context
-http://www.opengl.org/registry/specs/ARB/glx_create_context.txt
+https://www.khronos.org/registry/OpenGL/extensions/ARB/GLX_ARB_create_context.txt
 GLX_ARB_create_context
 
 	GLX_CONTEXT_DEBUG_BIT_ARB 0x0001

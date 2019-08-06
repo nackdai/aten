@@ -1,5 +1,5 @@
 GLX_MESA_query_renderer
-http://www.opengl.org/registry/specs/MESA/glx_query_renderer.txt
+https://www.khronos.org/registry/OpenGL/extensions/MESA/GLX_MESA_query_renderer.txt
 GLX_MESA_query_renderer
 
 	GLX_RENDERER_VENDOR_ID_MESA 0x8183

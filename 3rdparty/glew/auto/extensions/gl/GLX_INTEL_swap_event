@@ -1,5 +1,5 @@
 GLX_INTEL_swap_event
-http://www.opengl.org/registry/specs/INTEL/swap_event.txt
+https://www.khronos.org/registry/OpenGL/extensions/INTEL/GLX_INTEL_swap_event.txt
 GLX_INTEL_swap_event
 
 	GLX_EXCHANGE_COMPLETE_INTEL 0x8180

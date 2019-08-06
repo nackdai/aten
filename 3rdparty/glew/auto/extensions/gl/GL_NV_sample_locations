@@ -1,5 +1,5 @@
 GL_NV_sample_locations
-http://www.opengl.org/registry/specs/NV/sample_locations.txt
+https://www.khronos.org/registry/OpenGL/extensions/NV/NV_sample_locations.txt
 GL_NV_sample_locations
 
 	GL_SAMPLE_LOCATION_NV 0x8E50

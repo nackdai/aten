@@ -1,5 +1,5 @@
 GLX_SGIX_fbconfig
-http://www.opengl.org/registry/specs/SGIX/fbconfig.txt
+https://www.khronos.org/registry/OpenGL/extensions/SGIX/GLX_SGIX_fbconfig.txt
 GLX_SGIX_fbconfig
 
 	GLX_RGBA_BIT_SGIX 0x00000001

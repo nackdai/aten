@@ -1,5 +1,5 @@
 GL_ARB_buffer_storage
-http://www.opengl.org/registry/specs/ARB/buffer_storage.txt
+https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_buffer_storage.txt
 GL_ARB_buffer_storage
 
 	GL_MAP_READ_BIT 0x0001
@@ -12,4 +12,3 @@ GL_ARB_buffer_storage
 	GL_BUFFER_IMMUTABLE_STORAGE 0x821F
 	GL_BUFFER_STORAGE_FLAGS 0x8220
 	void glBufferStorage (GLenum target, GLsizeiptr size, const void *data, GLbitfield flags)
-	void glNamedBufferStorageEXT (GLuint buffer, GLsizeiptr size, const void *data, GLbitfield flags)

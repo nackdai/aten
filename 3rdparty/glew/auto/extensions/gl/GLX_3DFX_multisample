@@ -1,5 +1,5 @@
 GLX_3DFX_multisample
-http://www.opengl.org/registry/specs/3DFX/3dfx_multisample.txt
+https://www.khronos.org/registry/OpenGL/extensions/3DFX/3DFX_multisample.txt
 GLX_3DFX_multisample
 
 	GLX_SAMPLE_BUFFERS_3DFX 0x8050

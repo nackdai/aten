@@ -1,5 +1,7 @@
 # GLEW - The OpenGL Extension Wrangler Library
 
+The OpenGL Extension Wrangler Library (GLEW) is a cross-platform open-source C/C++ extension loading library. GLEW provides efficient run-time mechanisms for determining which OpenGL extensions are supported on the target platform. OpenGL core and extension functionality is exposed in a single header file. GLEW has been tested on a variety of operating systems, including Windows, Linux, Mac OS X, FreeBSD, Irix, and Solaris.
+
 ![](http://glew.sourceforge.net/glew.png)
 
 http://glew.sourceforge.net/
@@ -12,28 +14,24 @@ https://github.com/nigels-com/glew
 
 ## Downloads
 
-Current release is [2.0.0](https://sourceforge.net/projects/glew/files/glew/2.0.0/).
+Current release is [2.1.0](https://sourceforge.net/projects/glew/files/glew/2.1.0/).
 [(Change Log)](http://glew.sourceforge.net/log.html)
 
 Sources available as 
-[ZIP](https://sourceforge.net/projects/glew/files/glew/2.0.0/glew-2.0.0.zip/download) or
-[TGZ](https://sourceforge.net/projects/glew/files/glew/2.0.0/glew-2.0.0.tgz/download).
+[ZIP](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip/download) or
+[TGZ](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.tgz/download).
 
-Windows binaries for [32-bit and 64-bit](https://sourceforge.net/projects/glew/files/glew/2.0.0/glew-2.0.0-win32.zip/download).
+Windows binaries for [32-bit and 64-bit](https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0-win32.zip/download).
 
 ### Recent snapshots
 
 Snapshots may contain new features, bug-fixes or new OpenGL extensions ahead of tested, official releases.
 
-[glew-20160708.tgz](http://sourceforge.net/projects/glew/files/glew/snapshots/glew-20160708.tgz/download)
-*GLEW 2.0.0 RC: Core context, EGL support, no MX*
-
-[glew-20160402.tgz](http://sourceforge.net/projects/glew/files/glew/snapshots/glew-20160402.tgz/download)
-*GLEW 2.0.0 RC: Core context, EGL support, no MX*
-
 ## Build
 
-From a downloaded tarball or zip archive:
+It is highly recommended to build from a tgz or zip release snapshot.
+The code generation workflow is a complex brew of gnu make, perl and python, that works best on Linux or Mac.
+For most end-users of GLEW the official releases are the best choice, with first class support.
 
 ### Linux and Mac
 
@@ -41,9 +39,9 @@ From a downloaded tarball or zip archive:
 
 ##### Install build tools
 
-Debian/Ubuntu/Mint:    `$ sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev libosmesa-dev git`
+Debian/Ubuntu/Mint:    `$ sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev`
 
-RedHat/CentOS/Fedora:  `$ sudo yum install libXmu-devel libXi-devel libGL-devel git`
+RedHat/CentOS/Fedora:  `$ sudo yum install libXmu-devel libXi-devel libGL-devel`
 
 ##### Build
 
@@ -51,9 +49,27 @@ RedHat/CentOS/Fedora:  `$ sudo yum install libXmu-devel libXi-devel libGL-devel 
 	$ sudo make install
 	$ make clean
 
-Targets:    `all, glew.lib, glew.bin, clean, install, uninstall`
+Targets:    `all, glew.lib (sub-targets: glew.lib.shared, glew.lib.static), glew.bin, clean, install, uninstall`
 
 Variables:  `SYSTEM=linux-clang, GLEW_DEST=/usr/local, STRIP=`
+
+_Note: may need to make **auto** folder_
+
+##### Linux EGL
+
+	$ sudo apt install libegl1-mesa-dev
+	$ make SYSTEM=linux-egl
+
+##### Linux OSMesa
+
+	$ sudo apt install libosmesa-dev
+	$ make SYSTEM=linux-osmesa
+
+##### Linux mingw-w64
+
+	$ sudo apt install mingw-w64
+	$ make SYSTEM=linux-mingw32
+	$ make SYSTEM=linux-mingw64
 
 #### Using cmake
 
@@ -61,9 +77,9 @@ Variables:  `SYSTEM=linux-clang, GLEW_DEST=/usr/local, STRIP=`
 
 ##### Install build tools
 
-Debian/Ubuntu/Mint:   `$ sudo apt-get install build-essential libXmu-dev libXi-dev libgl-dev git cmake`
+Debian/Ubuntu/Mint:   `$ sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev cmake git`
 
-RedHat/CentOS/Fedora: `$ sudo yum install libXmu-devel libXi-devel libGL-devel git cmake`
+RedHat/CentOS/Fedora: `$ sudo yum install libXmu-devel libXi-devel libGL-devel cmake git`
 
 ##### Build
 
@@ -92,9 +108,9 @@ RedHat/CentOS/Fedora: `$ sudo yum install libXmu-devel libXi-devel libGL-devel g
 
 #### Visual Studio
 
-Use the provided Visual Studio project file in build/vc12/
+Use the provided Visual Studio project file in build/vc15/
 
-Projects for vc6 and vc10 are also provided
+Projects for vc6, vc10, vc12 and vc14 are also provided
 
 #### MSYS/Mingw
 
@@ -124,8 +140,8 @@ Alternative toolchain:  `SYSTEM=msys, SYSTEM=msys-win32, SYSTEM=msys-win64`
 ## glewinfo
 
 `glewinfo` is a command-line tool useful for inspecting the capabilities of an
-OpenGL implementation and GLEW support for that.  Please include the output of
-`glewinfo` with bug reports, as appropriate.	
+OpenGL implementation and GLEW support for that.  Please include `glewinfo.txt`
+with bug reports, as appropriate.	
 
 	---------------------------
 	    GLEW Extension Info
@@ -150,7 +166,7 @@ OpenGL implementation and GLEW support for that.  Please include the output of
 
 ## Code Generation
 
-A Unix or Mac environment is neded for building GLEW from scratch to
+A Unix or Mac environment is needed for building GLEW from scratch to
 include new extensions, or customize the code generation. The extension
 data is regenerated from the top level source directory with:
 
@@ -179,6 +195,21 @@ The acronym GLEW originates from Aaron Lefohn.
 Pasi K&auml;rkk&auml;inen identified and fixed several problems with
 GLX and SDL.  Nate Robins created the `wglinfo` utility, to
 which modifications were made by Michael Wimmer.  
+
+## Contributions
+
+GLEW welcomes community contributions.  Typically these are co-ordinated
+via [Issues](https://github.com/nigels-com/glew/issues) or 
+[Pull Requests](https://github.com/nigels-com/glew/pulls) in the
+GitHub web interface.
+
+Be sure to mention platform and compiler toolchain details when filing
+a bug report.  The output of `glewinfo` can be quite useful for discussion
+also.
+
+Generally GLEW is released once a year, around the time of the Siggraph
+computer graphics conference.  If you're not using the current release
+version of GLEW, be sure to check if the issue or bug is fixed there.
 
 ## Copyright and Licensing
 

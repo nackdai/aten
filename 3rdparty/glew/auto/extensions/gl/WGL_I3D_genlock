@@ -1,5 +1,5 @@
 WGL_I3D_genlock
-http://www.opengl.org/registry/specs/I3D/wgl_genlock.txt
+https://www.khronos.org/registry/OpenGL/extensions/I3D/WGL_I3D_genlock.txt
 WGL_I3D_genlock
 
 	WGL_GENLOCK_SOURCE_MULTIVIEW_I3D 0x2044

@@ -1,4 +1,8 @@
+#ifndef GLEW_INCLUDE
 #include <GL/glew.h>
+#else
+#include GLEW_INCLUDE
+#endif
 
 #if defined(GLEW_OSMESA)
 #  define GLAPI extern
@@ -6,6 +10,14 @@
 #elif defined(GLEW_EGL)
 #  include <GL/eglew.h>
 #elif defined(_WIN32)
+/*
+ * If NOGDI is defined, wingdi.h won't be included by windows.h, and thus
+ * wglGetProcAddress won't be declared. It will instead be implicitly declared,
+ * potentially incorrectly, which we don't want.
+ */
+#  if defined(NOGDI)
+#    undef NOGDI
+#  endif
 #  include <GL/wglew.h>
 #elif !defined(__ANDROID__) && !defined(__native_client__) && !defined(__HAIKU__) && (!defined(__APPLE__) || defined(GLEW_APPLE_GLX))
 #  include <GL/glxew.h>

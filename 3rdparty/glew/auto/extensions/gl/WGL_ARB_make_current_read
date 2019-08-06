@@ -1,5 +1,5 @@
 WGL_ARB_make_current_read
-http://www.opengl.org/registry/specs/ARB/wgl_make_current_read.txt
+https://www.khronos.org/registry/OpenGL/extensions/ARB/WGL_ARB_make_current_read.txt
 WGL_ARB_make_current_read
 
 	HDC wglGetCurrentReadDCARB (VOID)

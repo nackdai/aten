@@ -14,14 +14,14 @@ if(NOT MSVC)
   endif()
 endif(NOT MSVC)
 
-message("CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
-message("CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
-message("CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
-
 # Definition of Macros
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-D__AT_DEBUG__ )
 endif()
+
+message("CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shader DESTINATION ${CMAKE_BINARY_DIR})
 
 add_subdirectory(libaten)
 add_subdirectory(libatenscene)

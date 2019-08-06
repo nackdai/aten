@@ -1,6 +1,6 @@
 # Header only libralies
 set(tinyobjloader_INCLUDE_DIRECTORIES
-  ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader_v09 CACHE PATH "tinyobjloader path")
+  ${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader CACHE PATH "tinyobjloader path")
 set(stb_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/stb CACHE PATH "stb path")
 set(cmdline_INCLUDE_DIRECTORIES
@@ -13,4 +13,4 @@ set(tinyxml2_INCLUDE_DIRECTORIES
 add_subdirectory(glew/build/cmake)
 add_subdirectory(glfw)
 add_subdirectory(glm)
-add_subdirectory(tinyobjloader_v09)
+add_subdirectory(tinyobjloader)

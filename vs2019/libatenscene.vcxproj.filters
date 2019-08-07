@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="picojson">
+      <UniqueIdentifier>{0ff00e85-4cb5-4040-895e-35519496c388}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{5406530b-8b5b-438e-9acf-2a4d5cbe79a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{e56bef65-8f7c-48a9-83c5-9373f76f3b6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tinyxml2">
+      <UniqueIdentifier>{6d0b32f2-36b4-4edf-a447-161149658b39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tinyobjloader">
+      <UniqueIdentifier>{3433b1f9-39f7-4259-b6e6-d37dcfb10a9c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
+      <Filter>tinyobjloader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\AssetManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\ImageLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\MaterialLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\ObjLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\SceneLoader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp">
+      <Filter>tinyxml2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\MaterialExporter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libatenscene\ObjWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
+      <Filter>tinyobjloader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\atenscene.h" />
+    <ClInclude Include="..\3rdparty\picojson\picojson.h">
+      <Filter>picojson</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\AssetManager.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ImageLoader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\MaterialLoader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ObjLoader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\utility.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\SceneLoader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h">
+      <Filter>tinyxml2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\MaterialExporter.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\ObjWriter.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

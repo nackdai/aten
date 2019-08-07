@@ -2,26 +2,27 @@
 
 set CURDIR=%CD%
 
-cd /d %~dp0
+set BASEDIR=%~dp0
 
-set MSBUILD="C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
+cd /d %BASEDIR%
+
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsMSBuildCmd.bat"
 
 set TARGET=Build
 set CONFIG=%1
-set PLATFORM=%2
 
 if not defined CONFIG (
     set CONFIG=Debug
 )
 
-if not defined PLATFORM (
-    set PLATFORM=x64
-)
+set PLATFORM=x64
+
+set VS="Visual Studio 16 2019"
+
 
 rem glfw =============================
 
-set BUILD_DIR=glfw\%PLATFORM%
-set ROOT=..\..
+set BUILD_DIR=glfw\x64
 
 if not exist %BUILD_DIR% (
     mkdir %BUILD_DIR%
@@ -29,37 +30,46 @@ if not exist %BUILD_DIR% (
 
 if not exist %BUILD_DIR%\GLFW.sln (
     cd %BUILD_DIR%
-    if %PLATFORM% == Win32 (
-        %ROOT%\cmake\bin\cmake.exe -G "Visual Studio 14 2015" ..\
-    ) else (
-        %ROOT%\cmake\bin\cmake.exe -G "Visual Studio 14 2015 Win64" ..\
-    )
-    cd %ROOT%
+    cmake -G %VS% ..\
+    cd %BASEDIR%
 )
 
-%MSBUILD% %BUILD_DIR%\GLFW.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+MSBuild %BUILD_DIR%\GLFW.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 
 rem glew =============================
 
-set BUILD_DIR=glew\build\vc14
+set BUILD_DIR=glew\build\vc16
 
-%MSBUILD% %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+if not exist %BUILD_DIR% (
+    mkdir %BUILD_DIR%
+)
+
+if not exist %BUILD_DIR%\glew.sln (
+    cd %BUILD_DIR%
+    cmake -G %VS% ..\cmake
+    cd %BASEDIR%
+)
+
+MSBuild %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+xcopy /Y /D %BUILD_DIR%\lib\%CONFIG% glew\lib\%CONFIG%\%PLATFORM%\
+xcopy /Y /D %BUILD_DIR%\bin\%CONFIG% glew\bin\%CONFIG%\%PLATFORM%\
 
 rem makeitso =========================
 
-set BUILD_DIR=makeitso
+rem set BUILD_DIR=makeitso
 
-%MSBUILD% %BUILD_DIR%\MakeItSoLib\MakeItSoLib.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
-%MSBUILD% %BUILD_DIR%\SolutionParser_VS2015\SolutionParser_VS2015.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
-%MSBUILD% %BUILD_DIR%\MakeItSo\MakeItSo.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
+rem %MSBUILD% %BUILD_DIR%\MakeItSoLib\MakeItSoLib.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
+rem %MSBUILD% %BUILD_DIR%\SolutionParser_VS2015\SolutionParser_VS2015.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
+rem %MSBUILD% %BUILD_DIR%\MakeItSo\MakeItSo.csproj /t:%TARGET% /p:Configuration=Release /p:Platform=x86 || goto error
 
 rem end ==============================
 
 rem Copy files for Profile configuration ==============================
 if %CONFIG% == Release (
-   cd /d %~dp0
-   xcopy /Y /D glfw\%PLATFORM%\src\Release glfw\%PLATFORM%\src\Profile\
-   xcopy /Y /D glew\lib\Release\%PLATFORM% glew\lib\Profile\%PLATFORM%\
+   cd /d %BASEDIR%
+   xcopy /Y /D /E glfw\%PLATFORM%\src\Release glfw\%PLATFORM%\src\Profile\
+   xcopy /Y /D /E glew\lib\Release\%PLATFORM% glew\lib\Profile\%PLATFORM%\
+   xcopy /Y /D /E glew\bin\Release\%PLATFORM% glew\bin\Profile\%PLATFORM%\
 )
 
 cd /d %CURDIR%

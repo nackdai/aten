@@ -89,6 +89,7 @@
     <ClInclude Include="..\src\libidaten\kernel\bvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\context.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\GenMipMaps.h" />
     <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersect.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\intersecttype.h" />
@@ -329,6 +330,11 @@
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudaGLresource.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp" />
+    <CudaCompile Include="..\src\libidaten\kernel\GenMipMaps.cu">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\LBVHBuilder.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>

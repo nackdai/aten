@@ -268,6 +268,9 @@
     <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\GenMipMaps.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -510,6 +513,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\asvgf\asvgf_pt.cu">
       <Filter>asvgf</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\GenMipMaps.cu">
+      <Filter>kernel</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

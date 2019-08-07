@@ -88,16 +88,15 @@ __global__ void genPath(
 // https://gist.github.com/guozhou/b972bb42bbc5cba1f062#file-persistent-cpp-L15
 
 // NOTE
-// compute capability 6.0
-// http://homepages.math.uic.edu/~jan/mcs572/performance_considerations.pdf
-// p3
+// compute capability 7.5
+// https://en.wikipedia.org/wiki/CUDA
 
-#define NUM_SM                64    // no. of streaming multiprocessors
-#define NUM_WARP_PER_SM        64    // maximum no. of resident warps per SM
-#define NUM_BLOCK_PER_SM    32    // maximum no. of resident blocks per SM
-#define NUM_BLOCK            (NUM_SM * NUM_BLOCK_PER_SM)
-#define NUM_WARP_PER_BLOCK    (NUM_WARP_PER_SM / NUM_BLOCK_PER_SM)
-#define WARP_SIZE            32
+#define NUM_SM				30    // no. of streaming multiprocessors
+#define NUM_WARP_PER_SM     32    // maximum no. of resident warps per SM
+#define NUM_BLOCK_PER_SM    16    // maximum no. of resident blocks per SM
+#define NUM_BLOCK           (NUM_SM * NUM_BLOCK_PER_SM)
+#define NUM_WARP_PER_BLOCK  (NUM_WARP_PER_SM / NUM_BLOCK_PER_SM)
+#define WARP_SIZE           32
 
 __device__ unsigned int g_headDev = 0;
 
@@ -969,6 +968,7 @@ namespace idaten
                 m_hitDistLimit);
 
             checkCudaKernel(hitTest);
+			cudaDeviceSynchronize();
         }
     }
 

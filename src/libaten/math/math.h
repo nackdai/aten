@@ -1,7 +1,8 @@
 #pragma once
 
-#include <math.h>
+#include <cmath>
 #include <algorithm>
+
 #include "types.h"
 #include "defs.h"
 

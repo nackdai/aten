@@ -31,7 +31,7 @@ namespace idaten
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml) final;
 
-        void AdvancedSVGFPathTracing::onGather(
+        void onGather(
             cudaSurfaceObject_t outputSurf,
             int width, int height,
             int maxSamples) final;

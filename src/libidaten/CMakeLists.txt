@@ -2,6 +2,10 @@ set(PROJECT_NAME idaten)
 
 project(${PROJECT_NAME})
 
+#set(BUILD_SHARED_LIBS OFF)
+set(CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_VERBOSE_BUILD ON)
+
 find_package(CUDA REQUIRED)
 
 message("-- CUDA --")
@@ -9,18 +13,46 @@ message("Version: " ${CUDA_VERSION})
 message("Library: " ${CUDA_CUDA_LIBRARY})
 message("Runtime: " ${CUDA_CUDART_LIBRARY})
 
+#if (CMAKE_BUILD_TYPE_UPPER STREQUAL "RELEASE")
+#elseif (CMAKE_BUILD_TYPE_UPPER STREQUAL "DEBUG")
+#endif (CMAKE_BUILD_TYPE_UPPER STREQUAL "RELEASE")
+
 set(
     CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS};
-    "-ccbin " ${CMAKE_CXX_COMPILER}
-    "-O0 -g -rdc=true -gencode arch=compute_60,code=sm_60 -std=c++14")
+    ${CUDA_NVCC_FLAGS} -rdc=true -gencode arch=compute_60,code=sm_60 -std=c++14)
+
+message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 
 add_definitions(-D__AT_CUDA__)
 
-cuda_compile(CUDA_TEXTURE_RESOURCE cuda/cudaTextureResource.cpp OPTIONS -x cu)
+#cuda_compile(CUDA_TEXTURE_RESOURCE cuda/cudaTextureResource.cpp OPTIONS -x cu)
 
 # Add library to build.
 cuda_add_library(${PROJECT_NAME} STATIC
+  ../libaten/material/carpaint.cpp
+  ../libaten/material/FlakesNormal.cpp
+  ../libaten/material/velvet.cpp
+  ../libaten/material/lambert_refraction.cpp
+  ../libaten/material/microfacet_refraction.cpp
+  ../libaten/os/linux/misc/timer_linux.cpp
+  ../libaten/material/disney_brdf.cpp
+  ../libaten/geometry/sphere.cpp
+  ../libaten/material/layer.cpp
+  ../libaten/misc/color.cpp
+  ../libaten/renderer/envmap.cpp
+  ../libaten/sampler/sobol.cpp
+  ../libaten/camera/pinhole.cpp
+  ../libaten/light/arealight.cpp
+  ../libaten/light/ibl.cpp
+  ../libaten/light/light.cpp
+  ../libaten/material/beckman.cpp
+  ../libaten/material/blinn.cpp
+  ../libaten/material/ggx.cpp
+  ../libaten/material/material.cpp
+  ../libaten/material/oren_nayar.cpp
+  ../libaten/material/refraction.cpp
+  ../libaten/material/specular.cpp
+  ../libaten/math/mat4.cpp
   idaten.h
   idaten_namespace.h
   aten4idaten.h
@@ -33,7 +65,7 @@ cuda_add_library(${PROJECT_NAME} STATIC
   cuda/cudaGLresource.cpp
   cuda/cudaGLresource.h
   cuda/cudaLayeredTextureResource.cpp
-  ${CUDA_TEXTURE_RESOURCE}
+  cuda/cudaTextureResource.cpp
   cuda/cudaTextureResource.h
   cuda/cudadefs.h
   cuda/cudainit.h
@@ -42,6 +74,8 @@ cuda_add_library(${PROJECT_NAME} STATIC
   cuda/cudautil.h
   cuda/helper_math.h
   cuda/multigpu.h
+  kernel/GenMipMaps.cu
+  kernel/GenMipMaps.h
   kernel/LBVHBuilder.cu
   kernel/LBVHBuilder.h
   kernel/MortonCode.cuh
@@ -103,6 +137,10 @@ cuda_add_library(${PROJECT_NAME} STATIC
   svgf/svgf_ssrt.cu
   svgf/svgf_tile.cu
   svgf/svgf_tp.cu)
+
+set_target_properties(${PROJECT_NAME} 
+  PROPERTIES
+    CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC

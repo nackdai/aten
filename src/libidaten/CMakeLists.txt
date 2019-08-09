@@ -2,7 +2,6 @@ set(PROJECT_NAME idaten)
 
 project(${PROJECT_NAME})
 
-#set(BUILD_SHARED_LIBS OFF)
 set(CUDA_SEPARABLE_COMPILATION ON)
 set(CUDA_VERBOSE_BUILD ON)
 
@@ -25,19 +24,26 @@ message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 
 add_definitions(-D__AT_CUDA__)
 
-#cuda_compile(CUDA_TEXTURE_RESOURCE cuda/cudaTextureResource.cpp OPTIONS -x cu)
+set_source_files_properties(../libaten/material/material.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/beckman.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/blinn.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/ggx.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/oren_nayar.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/refraction.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/specular.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/carpaint.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/FlakesNormal.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/velvet.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/lambert_refraction.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/microfacet_refraction.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/disney_brdf.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/geometry/sphere.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/camera/pinhole.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 
 # Add library to build.
 cuda_add_library(${PROJECT_NAME} STATIC
-  ../libaten/material/carpaint.cpp
-  ../libaten/material/FlakesNormal.cpp
-  ../libaten/material/velvet.cpp
-  ../libaten/material/lambert_refraction.cpp
-  ../libaten/material/microfacet_refraction.cpp
   ../libaten/os/linux/misc/timer_linux.cpp
-  ../libaten/material/disney_brdf.cpp
   ../libaten/geometry/sphere.cpp
-  ../libaten/material/layer.cpp
   ../libaten/misc/color.cpp
   ../libaten/renderer/envmap.cpp
   ../libaten/sampler/sobol.cpp
@@ -52,6 +58,13 @@ cuda_add_library(${PROJECT_NAME} STATIC
   ../libaten/material/oren_nayar.cpp
   ../libaten/material/refraction.cpp
   ../libaten/material/specular.cpp
+  ../libaten/material/carpaint.cpp
+  ../libaten/material/FlakesNormal.cpp
+  ../libaten/material/velvet.cpp
+  ../libaten/material/lambert_refraction.cpp
+  ../libaten/material/microfacet_refraction.cpp
+  ../libaten/material/layer.cpp
+  ../libaten/material/disney_brdf.cpp
   ../libaten/math/mat4.cpp
   idaten.h
   idaten_namespace.h

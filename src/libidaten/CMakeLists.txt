@@ -3,6 +3,7 @@ set(PROJECT_NAME idaten)
 project(${PROJECT_NAME})
 
 set(CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_PROPAGATE_HOST_FLAGS ON)
 set(CUDA_VERBOSE_BUILD ON)
 
 find_package(CUDA REQUIRED)
@@ -12,13 +13,9 @@ message("Version: " ${CUDA_VERSION})
 message("Library: " ${CUDA_CUDA_LIBRARY})
 message("Runtime: " ${CUDA_CUDART_LIBRARY})
 
-#if (CMAKE_BUILD_TYPE_UPPER STREQUAL "RELEASE")
-#elseif (CMAKE_BUILD_TYPE_UPPER STREQUAL "DEBUG")
-#endif (CMAKE_BUILD_TYPE_UPPER STREQUAL "RELEASE")
-
 set(
     CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS} -rdc=true -gencode arch=compute_60,code=sm_60 -std=c++14)
+    ${CUDA_NVCC_FLAGS} -rdc=true -use_fast_math -gencode arch=compute_60,code=sm_60 -std=c++14)
 
 message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 

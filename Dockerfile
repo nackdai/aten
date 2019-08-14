@@ -4,8 +4,6 @@ ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
 ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
 
 RUN apt-get update
-RUN apt-get install -y libglfw3-dev
-RUN apt-get install -y libglew-dev
 
 # cmake
 # https://www.osetc.com/en/how-to-install-the-latest-version-of-cmake-on-ubuntu-16-04-18-04-linux.html
@@ -24,6 +22,11 @@ RUN curl -SL http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ub
 RUN mv clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04 clang_8.0.0
 RUN mv clang_8.0.0 /usr/local
 ENV PATH /usr/local/clang_8.0.0/bin:${PATH}
+
+#RUN apt-get install -y libglfw3-dev
+#RUN apt-get install -y libglew-dev
+RUN apt-get install -y xorg-dev
+RUN apt-get install -y libglu1-mesa-dev
 
 RUN apt-get install -y gcc
 RUN apt-get install -y g++

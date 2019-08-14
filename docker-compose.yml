@@ -1,3 +1,12 @@
+# Build image
+# $ docker-compose build
+
+# Ensure that your host can accept X forwarded connections
+# $ xhost +local:aten_aten
+
+# Run container
+# $ docker-compose run aten
+
 version: "2.4"
 services:
   aten:

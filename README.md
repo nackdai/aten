@@ -103,28 +103,37 @@ And Idanten includes characters of aten, "id**aten**"
 
 ### Windows
 
-1. Install `CUDA 8.0` and depended NVIDIA driver
-2. Run `aten/3rdparty/Build3rdParty.bat Debug` or `aten/3rdparty/Build3rdParty.bat Release`
-3. Launch `aten/vs2015/aten.sln`
+1. Install `CUDA 10.1` and depended NVIDIA driver
+2. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
+3. Launch `aten/vs2019/aten.sln`
 4. Build porjects with `x64` (not support `x86`)
 
-I confirmed with Visual Studio 2015 on Windows10.
+I confirmed with Visual Studio 2019 on Windows10.
 
-Supoort just only `CUDA 8.0`.
+Supoort just only `CUDA 10.1`.
 
 ### Linux
 
-1. Install `CUDA 8.0` or later and depended NVIDIA driver
-2. Install `libglfw3`, `libglew`
-
-`sudo apt-get install libglfw3-dev`
-
-`sudo apt-get install libglew-dev`
-
+1. Install `CUDA 10.1` or later and depended NVIDIA driver
+2. Install `cmake` `3.10.0` or later
 3. `cd aten/build`
-4. Run make `make Debug` or `make Release`
+4. `cmake -D CMAKE_BUILD_TYPE=<Debug|Release> ..`
+5. Run make `make`
 
-I confirmed on Ubuntu16.04.
+I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
+
+#### Docker
+
+You can build and run executable aten application on Docker container.
+
+1. Install `Docker` and `docker-compose`
+2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
+3. Build docker image `docker-compose build`
+4. Ensure that your host can accept X forwarded connections `xhost +local:aten_aten`
+5. Run docker container `docker-compose run aten`
+6. `cd aten/build`
+5. `cmake -D CMAKE_BUILD_TYPE=<Debug|Release> ..`
+6. Run make `make`
 
 ## Gallery
 

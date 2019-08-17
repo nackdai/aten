@@ -2,11 +2,11 @@ set(PROJECT_NAME idaten)
 
 project(${PROJECT_NAME})
 
+find_package(CUDA REQUIRED)
+
 set(CUDA_SEPARABLE_COMPILATION ON)
 set(CUDA_PROPAGATE_HOST_FLAGS ON)
 set(CUDA_VERBOSE_BUILD ON)
-
-find_package(CUDA REQUIRED)
 
 message("-- CUDA --")
 message("Version: " ${CUDA_VERSION})
@@ -159,9 +159,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
     aten
     glm)
-
-set_target_properties(${PROJECT_NAME}
-  PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 # Defines outputs , depending Debug or Release.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

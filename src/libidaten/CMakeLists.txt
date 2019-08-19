@@ -15,7 +15,7 @@ message("Runtime: " ${CUDA_CUDART_LIBRARY})
 
 set(
     CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS} -rdc=true -use_fast_math -gencode arch=compute_60,code=sm_60 -gencode arch=compute_75,code=sm_75 -std=c++14)
+    ${CUDA_NVCC_FLAGS} -rdc=true -use_fast_math -gencode arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY} -std=c++14)
 
 message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 

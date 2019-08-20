@@ -221,9 +221,9 @@ namespace aten
 #else
 // TODO
 // For linux, to avoid token concat error.
-#define AT_EDIT_MATERIAL_PARAM(e, param, name) false
-#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max) false
-#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name) false
+#define AT_EDIT_MATERIAL_PARAM(e, param, name)  false
+#define AT_EDIT_MATERIAL_PARAM_RANGE(e, param, name, _min, _max)    false
+#define AT_EDIT_MATERIAL_PARAM_TEXTURE(e, param, name)
 #endif
 
 namespace AT_NAME

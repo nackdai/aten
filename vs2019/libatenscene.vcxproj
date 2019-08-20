@@ -27,7 +27,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc" />
     <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="..\src\libatenscene\AssetManager.cpp" />
     <ClCompile Include="..\src\libatenscene\ImageLoader.cpp" />
@@ -39,7 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\3rdparty\picojson\picojson.h" />
-    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h" />
     <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="..\src\libatenscene\AssetManager.h" />
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
@@ -163,15 +161,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\bin\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -223,7 +221,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
@@ -233,8 +231,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\bin\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
@@ -244,7 +242,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader_v09;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libaten;$(ProjectDir)..\3rdparty\tinyobjloader;$(ProjectDir)..\3rdparty\picojson;$(ProjectDir)..\3rdparty\stb;$(ProjectDir)..\3rdparty\tinyxml2;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
@@ -254,8 +252,8 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\bin\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

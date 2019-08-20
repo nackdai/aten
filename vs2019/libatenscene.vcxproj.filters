@@ -13,14 +13,8 @@
     <Filter Include="tinyxml2">
       <UniqueIdentifier>{6d0b32f2-36b4-4edf-a447-161149658b39}</UniqueIdentifier>
     </Filter>
-    <Filter Include="tinyobjloader">
-      <UniqueIdentifier>{3433b1f9-39f7-4259-b6e6-d37dcfb10a9c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.cc">
-      <Filter>tinyobjloader</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libatenscene\AssetManager.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -47,9 +41,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\3rdparty\tinyobjloader_v09\tiny_obj_loader.h">
-      <Filter>tinyobjloader</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
     <ClInclude Include="..\3rdparty\picojson\picojson.h">
       <Filter>picojson</Filter>

@@ -30,7 +30,7 @@ if not exist %BUILD_DIR% (
 
 if not exist %BUILD_DIR%\GLFW.sln (
     cd %BUILD_DIR%
-    cmake -G %VS% ..\
+    cmake -D GLFW_BUILD_DOCS=FALSE -D GLFW_BUILD_EXAMPLES=FALSE -D GLFW_BUILD_TESTS=FALSE -G %VS% ..\
     cd %BASEDIR%
 )
 
@@ -46,13 +46,29 @@ if not exist %BUILD_DIR% (
 
 if not exist %BUILD_DIR%\glew.sln (
     cd %BUILD_DIR%
-    cmake -G %VS% ..\cmake
+    cmake -D BUILD_UTILS=FALSE -G %VS% ..\cmake
     cd %BASEDIR%
 )
 
 MSBuild %BUILD_DIR%\glew.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 xcopy /Y /D %BUILD_DIR%\lib\%CONFIG% glew\lib\%CONFIG%\%PLATFORM%\
 xcopy /Y /D %BUILD_DIR%\bin\%CONFIG% glew\bin\%CONFIG%\%PLATFORM%\
+
+rem tinyobjloader ====================
+
+set BUILD_DIR=tinyobjloader\bin
+
+if not exist %BUILD_DIR% (
+    mkdir %BUILD_DIR%
+)
+
+if not exist %BUILD_DIR%\GLFW.sln (
+    cd %BUILD_DIR%
+    cmake -G %VS% ..\
+    cd %BASEDIR%
+)
+
+MSBuild %BUILD_DIR%\tinyobjloader.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 
 rem makeitso =========================
 
@@ -70,6 +86,7 @@ if %CONFIG% == Release (
    xcopy /Y /D /E glfw\%PLATFORM%\src\Release glfw\%PLATFORM%\src\Profile\
    xcopy /Y /D /E glew\lib\Release\%PLATFORM% glew\lib\Profile\%PLATFORM%\
    xcopy /Y /D /E glew\bin\Release\%PLATFORM% glew\bin\Profile\%PLATFORM%\
+   xcopy /Y /D /E tinyobjloader\bin\Release tinyobjloader\bin\Profile\
 )
 
 cd /d %CURDIR%

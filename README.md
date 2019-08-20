@@ -115,10 +115,13 @@ Supoort just only `CUDA 10.1`.
 ### Linux
 
 1. Install `CUDA 10.1` or later and depended NVIDIA driver
-2. Install `cmake` `3.10.0` or later
+2. Install applications (You can find what you need in `Dockerfile`)
+    * Install `cmake` `3.10.0` or later
+    * Install `clang 8.0.0`
+    * Install `ninja-build`
 3. `cd aten/build`
-4. `cmake -D CMAKE_BUILD_TYPE=<Debug|Release> ..`
-5. Run make `make`
+4. `./RunCMake.sh`
+5. Run make `ninja`
 
 I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
 
@@ -129,11 +132,12 @@ You can build and run executable aten application on Docker container.
 1. Install `Docker` and `docker-compose`
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
 3. Build docker image `docker-compose build`
-4. Ensure that your host can accept X forwarded connections `xhost +local:aten_aten`
-5. Run docker container `docker-compose run aten`
-6. `cd aten/build`
-5. `cmake -D CMAKE_BUILD_TYPE=<Debug|Release> ..`
-6. Run make `make`
+4. Run docker container `docker-compose run aten`
+5. `cd aten/build`
+6. `./RunCMake.sh`
+7. Run make `ninja`
+
+If you would like to run built applications in docker, you need to ensure that your host can accept X forwarded connections `xhost +local:aten_aten`
 
 ## Gallery
 

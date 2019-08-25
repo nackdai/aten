@@ -1,5 +1,6 @@
-#include <string.h>
+#include <string>
 #include <vector>
+
 #include "visualizer/atengl.h"
 #include "visualizer/shader.h"
 

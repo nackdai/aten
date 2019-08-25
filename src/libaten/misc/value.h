@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string.h>
 #include <string>
 #include <map>
+
 #include "types.h"
 #include "math/vec3.h"
 

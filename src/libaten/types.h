@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <climits>
 
 //#define TYPE_DOUBLE

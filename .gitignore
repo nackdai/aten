@@ -2,3 +2,14 @@ build/*/*
 
 CMakeFiles
 CMakeCache.txt
+
+*.exe
+*.dll
+*.iobj
+*.ipdb
+*.pdb
+*.user
+imgui.ini
+
+*/.vs
+*/x64

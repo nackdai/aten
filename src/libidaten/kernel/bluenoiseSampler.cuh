@@ -13,6 +13,31 @@ namespace idaten {
         __device__ ~BlueNoiseSamplerGPU() {};
 
     public:
+        __device__ static inline uint32_t makeSeed(
+            uint32_t x, uint32_t y, uint32_t frame,
+            uint32_t resW,
+            uint32_t resH)
+        {
+            auto seed = (x % resW) << 0;
+            seed |= (y % resH) << 10;
+            seed |= (frame) << 20;
+            return seed;
+        }
+
+        __device__ static inline uint32_t computeMaxSampleNum(uint32_t maxBounceNum)
+        {
+            // NOTE
+            // (1) Generate Ray : 2
+            // Bounce : N
+            //  Shadow Ray : 2
+            //   (2) Sample light : 1
+            //   (3) Sample point on light : 4 (for area light)
+            //  (4) Smple BRDF direction : 2
+            //  (5) Russian roulette : 1
+            auto maxSampleNum = 2 + maxBounceNum * (2 * (1 + 4) + 2 + 1);
+            return maxSampleNum;
+        }
+
         __device__ void init(
             uint32_t x, uint32_t y, uint32_t frame,
             uint32_t maxBounceNum,
@@ -22,9 +47,7 @@ namespace idaten {
             uint16_t noiseTexNum,
             cudaTextureObject_t noisetex)
         {
-            m_seed = (x % resW) << 0;
-            m_seed |= (y % resH) << 10;
-            m_seed |= (frame) << 20;
+            m_seed = makeSeed(x, y, frame, resW, resH);
 
             m_noise = noisetex;
 
@@ -32,15 +55,27 @@ namespace idaten {
             m_noiseResH = resH;
             m_noiseTexNum = noiseTexNum;
 
-            // NOTE
-            // (1) Generate Ray : 2
-            // Bounce : N
-            //  Shadow Ray : 2
-            //   (2) Sample light : 1
-            //   (3) Sample point on light : 4 (for area light)
-            //  (4) Smple BRDF direction : 2
-            //  (5) Russian roulette : 1
-            m_maxSampleNum = 2 + maxBounceNum * (2 * (1 + 4) + 2 + 1);
+            m_maxSampleNum = computeMaxSampleNum(maxBounceNum);
+        }
+
+        __device__ void init(
+            uint32_t seed,
+            uint32_t maxBounceNum,
+            uint32_t shadowRayNum,  // TODO Only for NEE.
+            uint32_t resW,
+            uint32_t resH,
+            uint16_t noiseTexNum,
+            cudaTextureObject_t noisetex)
+        {
+            m_seed = seed;
+
+            m_noise = noisetex;
+
+            m_noiseResW = resW;
+            m_noiseResH = resH;
+            m_noiseTexNum = noiseTexNum;
+
+            m_maxSampleNum = computeMaxSampleNum(maxBounceNum);
         }
 
         AT_DEVICE_API real nextSample()

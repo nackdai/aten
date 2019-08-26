@@ -7,6 +7,8 @@ namespace idaten
     class AdvancedSVGFPathTracing : public SVGFPathTracing {
     public:
         static const uint32_t InvalidValue = 0xffffffff;
+        static const uint32_t GradientTileSize = 3;
+        static const uint32_t StratumOffsetShift = 3;
 
     public:
         AdvancedSVGFPathTracing() {}
@@ -55,10 +57,11 @@ namespace idaten
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml) final;
 
-        void onGather(
-            cudaSurfaceObject_t outputSurf,
+        void onInitRngSeeds(int width, int height);
+
+        void onForwardProjection(
             int width, int height,
-            int maxSamples) final;
+            cudaTextureObject_t texVtxPos);
 
         void onDebug(
             int width, int height,
@@ -67,6 +70,12 @@ namespace idaten
     protected:
         CudaLeyered2DTexture m_bluenoise;
 
+        // xy: bary centric
+        // z : object id
+        // w : primitive id
         idaten::TypedCudaMemory<float4> m_visibilityBuffer;
+
+        idaten::TypedCudaMemory<uint32_t> m_gradientIndices;
+        idaten::TypedCudaMemory<uint32_t> m_rngSeed[2];
     };
 }

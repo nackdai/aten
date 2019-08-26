@@ -1,13 +1,12 @@
 #include "asvgf/asvgf.h"
 
 #include "kernel/pt_common.h"
+#include "kernel/context.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
-
-#include "aten4idaten.h"
 
 // TEA = Tiny Encryption Algorithm.
 // https://en.wikipedia.org/wiki/Tiny_Encryption_Algorithm
@@ -35,108 +34,183 @@ inline __device__ void encryptTea(uint2& arg)
     arg.y = v1;
 }
 
-inline __device__ bool testReprojectedDepth(float z1, float z2, float dz)
-{
-    float diffZ = abs(z1 - z2);
-    return diffZ < 2.0 * (dz + 1e-3f);
-}
-
-#define AT_IS_INBOUND(x, a, b)  (((a) <= (x)) && ((x) < (b)))
-
-__global__ void doForwardProjection(
-    int4* gradientSample,
-    const float4* __restrict__ curAovNormalDepth,
-    const float4* __restrict__ prevAovNormalDepth,
-    float4* curAovTexclrMeshid,
-    const float4* __restrict__ prevAovTexclrMeshid,
-    int* curRngSeed,
-    const int* __restrict__ prevRngSeed,
-    int frame,
+__global__ void forwardProjection(
+    uint32_t frame,
     int width, int height,
-    int gradientTileSize,
-    float cameraDistance,
+    int tiledWidth, int tiledHeight,
+    const aten::GeomParameter* __restrict__ shapes,
+    const aten::PrimitiveParamter* __restrict__ prims,
+    cudaTextureObject_t vtxPos,
+    const aten::mat4* __restrict__ matrices,
+    const float4* __restrict__ visibilityBuf,
+    aten::mat4 mtxW2C,
     cudaSurfaceObject_t motionDetphBuffer,
-    int* executedIdxArray)
+    unsigned int* gradientIndicices,
+    unsigned int* rngBuffer_0,
+    unsigned int* rngBuffer_1)
 {
+    // NOE
+    // This kernel is called with 1/3 screen resolution.
+
     int ix = blockIdx.x * blockDim.x + threadIdx.x;
     int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= width || iy >= height) {
+    if (ix >= tiledWidth || iy >= tiledHeight) {
         return;
     }
 
-    int idx = getIdx(ix, iy, width);
+    int idx = getIdx(ix, iy, tiledWidth);
 
-    // Compute randomized position as previous position.
-    uint2 teaArg = make_uint2(idx, frame);
-    encryptTea(teaArg);
-    teaArg.x %= gradientTileSize;
-    teaArg.y %= gradientTileSize;
-    int2 prevPos = make_int2(
-        ix * gradientTileSize + teaArg.x,
-        iy * gradientTileSize + teaArg.y);
+    // Compute random position in 3x3 tile.
+    uint2 tea = make_uint2(idx, frame);
+    encryptTea(tea);
+    tea.x %= idaten::AdvancedSVGFPathTracing::GradientTileSize;
+    tea.y %= idaten::AdvancedSVGFPathTracing::GradientTileSize;
 
+    // Transform to real screen resolution.
+    int2 pos = make_int2(
+        ix * idaten::AdvancedSVGFPathTracing::GradientTileSize + tea.x,
+        iy * idaten::AdvancedSVGFPathTracing::GradientTileSize + tea.y);
+
+    // Not allowed over than screen resolution.
+    if (pos.x >= width || pos.y >= height) {
+        return;
+    }
+
+    // Index to sample previous frame information.
+    int idxPrev = getIdx(pos.x, pos.y, width);
+
+    float4 visBuf = visibilityBuf[idxPrev];
+
+    // XY is bary centroid, and -1 is invalid value (no hit).
+    if (visBuf.x < 0.0f || visBuf.y < 0.0f) {
+        return;
+    }
+
+    uint32_t objid = __float_as_uint(visBuf.z);
+    uint32_t primid = __float_as_uint(visBuf.w);
+
+    const auto* s = &shapes[objid];
+    const auto* t = &prims[primid];
+
+    float4 p0 = tex1Dfetch<float4>(vtxPos, t->idx[0]);
+    float4 p1 = tex1Dfetch<float4>(vtxPos, t->idx[1]);
+    float4 p2 = tex1Dfetch<float4>(vtxPos, t->idx[2]);
+
+    float4 _p = p0 * visBuf.x + p1 * visBuf.y + p2 * (1.0f - visBuf.x - visBuf.y);
+    aten::vec4 pos_cur(_p.x, _p.y, _p.z, 1.0f);
+
+    // Transform to clip coordinate.
+    auto mtxL2W = matrices[s->mtxid * 2];
+    pos_cur = mtxW2C.apply(mtxL2W.apply(pos_cur));
+    pos_cur /= pos_cur.w;
+
+    // Transform previous position to predicted current position.
     float4 motionDepth;
-    surf2Dread(&motionDepth, motionDetphBuffer, prevPos.x * sizeof(float4), prevPos.y);
+    surf2Dread(&motionDepth, motionDetphBuffer, pos.x * sizeof(float4), pos.y);
 
-    // NOTE
-    // motion = prev - cur
-    //  => -motion = cur - prev
-    //  => prev + (-motion) = prev + (cur - prev) = cur
-    int2 curPos = make_int2(prevPos.x - motionDepth.x, prevPos.y - motionDepth.y);
+    pos_cur.x += motionDepth.x;
+    pos_cur.y += motionDepth.y;
 
-    // Check if position is in screen.
-    if (!AT_IS_INBOUND(curPos.x, 0, width)
-        || !AT_IS_INBOUND(curPos.y, 0, height))
+    if (!AT_MATH_IS_IN_BOUND(pos_cur.x, -pos_cur.w, pos_cur.w)
+        || !AT_MATH_IS_IN_BOUND(pos_cur.y, -pos_cur.w, pos_cur.w)
+        || !AT_MATH_IS_IN_BOUND(pos_cur.z, -pos_cur.w, pos_cur.w))
     {
+        // Not in screen.
         return;
     }
 
-    int curIdx = getIdx(curPos.x, curPos.y, width);
-    int prevIdx = getIdx(prevPos.x, prevPos.y, width);
+    /* pixel coordinate of forward projected sample */
+    int2 ipos_curr = make_int2(
+        (pos_cur.x * 0.5 + 0.5) * width,
+        (pos_cur.y * 0.5 + 0.5) * height);
 
-    float4 curNmlDepth = curAovNormalDepth[curIdx];
-    float4 prevNmlDepth = curAovNormalDepth[prevIdx];
+    int2 pos_grad = make_int2(
+        ipos_curr.x / idaten::AdvancedSVGFPathTracing::GradientTileSize,
+        ipos_curr.y / idaten::AdvancedSVGFPathTracing::GradientTileSize);
+    int2 pos_stratum = make_int2(
+        ipos_curr.x % idaten::AdvancedSVGFPathTracing::GradientTileSize,
+        ipos_curr.y % idaten::AdvancedSVGFPathTracing::GradientTileSize);
 
-    float pixelDistanceRatio = (curNmlDepth.w / cameraDistance) * height;
-
-    bool accept = testReprojectedDepth(curNmlDepth.w, prevNmlDepth.w, pixelDistanceRatio);
-    if (!accept) {
-        return;
-    }
-
-    // Remove depth.
-    curNmlDepth.w = prevNmlDepth.w = 0;
-
-    accept = (dot(curNmlDepth, prevNmlDepth) > 0.9f);
-    if (!accept) {
-        return;
-    }
-
-    int2 tilePos = make_int2(
-        curPos.x % gradientTileSize,
-        curPos.y % gradientTileSize);
+    uint32_t gradient_idx =
+        (1 << 31) // mark sample as busy.
+        | (pos_stratum.x << (idaten::AdvancedSVGFPathTracing::StratumOffsetShift * 0)) // encode pos in.
+        | (pos_stratum.y << (idaten::AdvancedSVGFPathTracing::StratumOffsetShift * 1)) // current frame.
+        | (idxPrev << (idaten::AdvancedSVGFPathTracing::StratumOffsetShift * 2));      // pos in prev frame.
 
     // NOTE
     // Atomic functions for CUDA.
     // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?CUDA%A5%A2%A5%C8%A5%DF%A5%C3%A5%AF%B4%D8%BF%F4
+    // atomicCAS(unsigned int* address, unsigned int compare, unsigned int val) {
+    //     *address = (old == compare) ? val : old;
+    //     return *address;
+    // }
 
-    int res = atomicCAS(&executedIdxArray[idx], -1, idx);
+    int idxInGradIdxBuffer = getIdx(pos_grad.x, pos_grad.y, tiledWidth);
 
-    if (res < 0) {
-        // NOTE
-        // w is not used.
-        int downSizedWidth = (width + gradientTileSize - 1) / gradientTileSize;
-        int downSizedIdx = getIdx(
-            curPos.x / gradientTileSize,
-            curPos.y / gradientTileSize,
-            downSizedWidth);
-        gradientSample[downSizedIdx] = make_int4(tilePos.x, tilePos.y, prevIdx, 0);
+    // Check if this sample is allowed to become a gradient sample.
+    if (atomicCAS(&gradientIndicices[idxInGradIdxBuffer], 0U, gradient_idx) != 0U) {
+        return;
+    }
 
-        // Albedo and Mesh id.
-        curAovTexclrMeshid[curIdx] = prevAovTexclrMeshid[prevIdx];
+    int idxCurr = getIdx(ipos_curr.x, ipos_curr.y, width);
 
-        // Rng seed later.
-        curRngSeed[curIdx] = prevRngSeed[prevIdx];
+    // Forward project rng seed.
+    if ((frame & 0x01) == 0) {
+        rngBuffer_0[idxCurr] = rngBuffer_1[idxPrev];
+    }
+    else {
+        rngBuffer_1[idxCurr] = rngBuffer_0[idxPrev];
+    }
+
+    // TODO
+}
+
+namespace idaten {
+    void AdvancedSVGFPathTracing::onForwardProjection(
+        int width, int height,
+        cudaTextureObject_t texVtxPos)
+    {
+        int tiledWidth = width / GradientTileSize;
+        int tiledHeight = height / GradientTileSize;
+
+        m_mtxW2V.lookat(
+            m_camParam.origin,
+            m_camParam.center,
+            m_camParam.up);
+
+        m_mtxV2C.perspective(
+            m_camParam.znear,
+            m_camParam.zfar,
+            m_camParam.vfov,
+            m_camParam.aspect);
+
+        aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
+
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
+        dim3 threadPerBlock(64);
+
+        CudaGLResourceMapper rscmap(&m_motionDepthBuffer);
+        auto motionDepthBuffer = m_motionDepthBuffer.bind();
+
+        int curRngSeed = (m_frame & 0x01);
+        int prevRngSeed = 1 - curRngSeed;
+
+        forwardProjection << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+            m_frame,
+            width, height,
+            tiledWidth, tiledHeight,
+            m_shapeparam.ptr(),
+            m_primparams.ptr(),
+            texVtxPos,
+            m_mtxparams.ptr(),
+            m_visibilityBuffer.ptr(),
+            mtxW2C,
+            motionDepthBuffer,
+            m_gradientIndices.ptr(),
+            m_rngSeed[curRngSeed].ptr(),
+            m_rngSeed[prevRngSeed].ptr());
+
+        checkCudaKernel(forwardProjection);
     }
 }

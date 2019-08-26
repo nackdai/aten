@@ -42,6 +42,8 @@
     #define AT_MATH_FUNC2(func, v0, v1)    func##f(v0, v1)
 #endif
 
+#define AT_MATH_IS_IN_BOUND(x, a, b)    ((a) <= (x) && (x) <= (b))
+
 namespace aten {
     inline AT_DEVICE_API real sqrt(real f)
     {

@@ -86,14 +86,10 @@ namespace idaten
 
         m_gradientIndices.init(tiledWidth * tiledHeight);
 
-        if (m_isGeneratedRngSeed) {
-            auto vtxPos = m_vtxparamsPos.bind();
-            onForwardProjection(width, height, vtxPos);
-        }
-        else {
-            onInitRngSeeds(width, height);
-            m_isGeneratedRngSeed = true;
-        }
+        onInitRngSeeds(width, height);
+
+        auto vtxPos = m_vtxparamsPos.bind();
+        onForwardProjection(width, height, vtxPos);
 
         SVGFPathTracing::render(tileDomain, maxSamples, maxBounce);
 #endif

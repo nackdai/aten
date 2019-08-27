@@ -21,7 +21,7 @@
 
 static constexpr int WIDTH = 1280;
 static constexpr int HEIGHT = 720;
-static const char* TITLE = "svgf";
+static const char* TITLE = "asvgf";
 
 // Max 128.
 static constexpr int BLUNOISE_TEX_NUM = 128;

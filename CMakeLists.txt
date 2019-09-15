@@ -14,6 +14,8 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 message("Build Type: " ${CMAKE_BUILD_TYPE})
 
+message("CUDA_TARGET_COMPUTE_CAPABILITY: " ${CUDA_TARGET_COMPUTE_CAPABILITY})
+
 # Get compute capability dynamicaly
 # https://stackoverflow.com/questions/35485087/determining-which-gencode-compute-arch-values-i-need-for-nvcc-within-cmaks
 if (NOT CUDA_TARGET_COMPUTE_CAPABILITY)

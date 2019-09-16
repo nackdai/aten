@@ -1,3 +1,4 @@
+#include <memory.h>
 #include <memory>
 
 #include "cuda/cudaTextureResource.h"

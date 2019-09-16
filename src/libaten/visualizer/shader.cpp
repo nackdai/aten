@@ -1,4 +1,4 @@
-#include <string>
+#include <string.h>
 #include <vector>
 
 #include "visualizer/atengl.h"

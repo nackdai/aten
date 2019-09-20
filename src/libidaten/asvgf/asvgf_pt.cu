@@ -89,9 +89,13 @@ __global__ void genPathASVGF(
     paths->contrib[idx].samples += 1;
 }
 
-#define NUM_SM              64  // no. of streaming multiprocessors
-#define NUM_WARP_PER_SM     64  // maximum no. of resident warps per SM
-#define NUM_BLOCK_PER_SM    32  // maximum no. of resident blocks per SM
+// NOTE
+// compute capability 7.5
+// https://en.wikipedia.org/wiki/CUDA
+
+#define NUM_SM				30    // no. of streaming multiprocessors
+#define NUM_WARP_PER_SM     32    // maximum no. of resident warps per SM
+#define NUM_BLOCK_PER_SM    16    // maximum no. of resident blocks per SM
 #define NUM_BLOCK           (NUM_SM * NUM_BLOCK_PER_SM)
 #define NUM_WARP_PER_BLOCK  (NUM_WARP_PER_SM / NUM_BLOCK_PER_SM)
 #define WARP_SIZE           32
@@ -576,7 +580,6 @@ __global__ void shadeASVGF(
 
 namespace idaten
 {
-#pragma optimize( "", off)
     void AdvancedSVGFPathTracing::onGenPath(
         int maxBounce,
         int seed,

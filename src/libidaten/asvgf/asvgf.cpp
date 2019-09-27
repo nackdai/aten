@@ -62,6 +62,7 @@ namespace idaten
             texs, envmapRsc);
 
         m_visibilityBuffer.init(width * height);
+        m_forwaredWorldCoord.init(width * height);
     }
 
     void AdvancedSVGFPathTracing::render(

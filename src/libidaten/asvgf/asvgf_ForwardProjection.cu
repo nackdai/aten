@@ -91,16 +91,16 @@ void _onForwardProjection(
     float4 p2 = vtxPos[t->idx[2]];
 
     float4 _p = p0 * visBuf.x + p1 * visBuf.y + p2 * (1.0f - visBuf.x - visBuf.y);
-    aten::vec4 pos_cur(_p.x, _p.y, _p.z, 1.0f);
+    aten::vec4 pos_cur_world(_p.x, _p.y, _p.z, 1.0f);
 
     // Transform to clip coordinate.
     auto mtxL2W = matrices[s->mtxid * 2];
-    pos_cur = mtxW2C.apply(mtxL2W.apply(pos_cur));
-    pos_cur /= pos_cur.w;
+    pos_cur_world = mtxW2C.apply(mtxL2W.apply(pos_cur_world));
+    pos_cur_world /= pos_cur_world.w;
 
-    if (!AT_MATH_IS_IN_BOUND(pos_cur.x, -pos_cur.w, pos_cur.w)
-        || !AT_MATH_IS_IN_BOUND(pos_cur.y, -pos_cur.w, pos_cur.w)
-        || !AT_MATH_IS_IN_BOUND(pos_cur.z, -pos_cur.w, pos_cur.w))
+    if (!AT_MATH_IS_IN_BOUND(pos_cur_world.x, -pos_cur_world.w, pos_cur_world.w)
+        || !AT_MATH_IS_IN_BOUND(pos_cur_world.y, -pos_cur_world.w, pos_cur_world.w)
+        || !AT_MATH_IS_IN_BOUND(pos_cur_world.z, -pos_cur_world.w, pos_cur_world.w))
     {
         // Not in screen.
         return;
@@ -108,8 +108,8 @@ void _onForwardProjection(
 
     /* pixel coordinate of forward projected sample */
     int2 ipos_curr = make_int2(
-        (pos_cur.x * 0.5 + 0.5) * width,
-        (pos_cur.y * 0.5 + 0.5) * height);
+        (pos_cur_world.x * 0.5 + 0.5) * width,
+        (pos_cur_world.y * 0.5 + 0.5) * height);
 
     int2 pos_grad = make_int2(
         ipos_curr.x / idaten::AdvancedSVGFPathTracing::GradientTileSize,
@@ -147,6 +147,7 @@ __global__ void forwardProjection(
     cudaTextureObject_t vtxPos,
     const aten::mat4* __restrict__ matrices,
     const float4* __restrict__ visibilityBuf,
+    float4* m_forwaredWorldCoord,
     aten::mat4 mtxW2C,
     cudaSurfaceObject_t motionDetphBuffer,
     unsigned int* gradientIndicices,
@@ -202,26 +203,26 @@ __global__ void forwardProjection(
     float4 p2 = tex1Dfetch<float4>(vtxPos, t->idx[2]);
 
     float4 _p = p0 * visBuf.x + p1 * visBuf.y + p2 * (1.0f - visBuf.x - visBuf.y);
-    aten::vec4 pos_cur(_p.x, _p.y, _p.z, 1.0f);
+    aten::vec4 pos_cur_world(_p.x, _p.y, _p.z, 1.0f);
 
     // Transform to clip coordinate.
     if (s->mtxid >= 0) {
         auto mtxL2W = matrices[s->mtxid * 2];
-        pos_cur = mtxL2W.apply(pos_cur);
+        pos_cur_world = mtxL2W.apply(pos_cur_world);
     }
-    pos_cur = mtxW2C.apply(pos_cur);
-    pos_cur /= pos_cur.w;
+    aten::vec4 pos_clip = mtxW2C.apply(pos_cur_world);
+    pos_clip /= pos_clip.w;
 
     // Transform previous position to predicted current position.
     float4 motionDepth;
     surf2Dread(&motionDepth, motionDetphBuffer, pos.x * sizeof(float4), pos.y);
 
-    pos_cur.x += motionDepth.x;
-    pos_cur.y += motionDepth.y;
+    pos_clip.x += motionDepth.x;
+    pos_clip.y += motionDepth.y;
 
-    if (!AT_MATH_IS_IN_BOUND(pos_cur.x, -pos_cur.w, pos_cur.w)
-        || !AT_MATH_IS_IN_BOUND(pos_cur.y, -pos_cur.w, pos_cur.w)
-        || !AT_MATH_IS_IN_BOUND(pos_cur.z, -pos_cur.w, pos_cur.w))
+    if (!AT_MATH_IS_IN_BOUND(pos_clip.x, -pos_clip.w, pos_clip.w)
+        || !AT_MATH_IS_IN_BOUND(pos_clip.y, -pos_clip.w, pos_clip.w)
+        || !AT_MATH_IS_IN_BOUND(pos_clip.z, -pos_clip.w, pos_clip.w))
     {
         // Not in screen.
         return;
@@ -229,8 +230,8 @@ __global__ void forwardProjection(
 
     /* pixel coordinate of forward projected sample */
     int2 ipos_curr = make_int2(
-        (pos_cur.x * 0.5 + 0.5) * width,
-        (pos_cur.y * 0.5 + 0.5) * height);
+        (pos_clip.x * 0.5 + 0.5) * width,
+        (pos_clip.y * 0.5 + 0.5) * height);
 
     int2 pos_grad = make_int2(
         ipos_curr.x / idaten::AdvancedSVGFPathTracing::GradientTileSize,
@@ -270,7 +271,8 @@ __global__ void forwardProjection(
         rngBuffer_1[idxCurr] = rngBuffer_0[idxPrev];
     }
 
-    // TODO
+    // forwared world coordinate with gradient index.
+    m_forwaredWorldCoord[idxInGradIdxBuffer] = make_float4(pos_cur_world.x, pos_cur_world.y, pos_cur_world.z, 1.0f);
 }
 
 namespace idaten {
@@ -357,6 +359,7 @@ namespace idaten {
             texVtxPos,
             m_mtxparams.ptr(),
             m_visibilityBuffer.ptr(),
+            m_forwaredWorldCoord.ptr(),
             mtxW2C,
             motionDepthBuffer,
             m_gradientIndices.ptr(),

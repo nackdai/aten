@@ -75,6 +75,8 @@ namespace idaten
         // w : primitive id
         idaten::TypedCudaMemory<float4> m_visibilityBuffer;
 
+        idaten::TypedCudaMemory<float4> m_forwaredWorldCoord;
+
         idaten::TypedCudaMemory<uint32_t> m_gradientIndices;
         idaten::TypedCudaMemory<uint32_t> m_rngSeed[2];
     };

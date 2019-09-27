@@ -532,6 +532,9 @@
     <CudaCompile Include="..\src\libidaten\asvgf\asvgf_rng_seed.cu">
       <Filter>asvgf</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_hittest.cu">
+      <Filter>asvgf</Filter>
+    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\ao\ao.cu">
       <Filter>ao</Filter>
     </CudaCompile>

@@ -271,6 +271,12 @@
     <ClInclude Include="..\src\libidaten\kernel\GenMipMaps.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\ao\ao.h">
+      <Filter>ao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h">
+      <Filter>kernel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -323,6 +329,9 @@
     </Filter>
     <Filter Include="asvgf">
       <UniqueIdentifier>{bc7a64b0-b385-4825-804f-ef99928647c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ao">
+      <UniqueIdentifier>{d62712a7-6048-4953-8529-944e40f98a46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -382,6 +391,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp">
       <Filter>cuda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\ao\ao.cpp">
+      <Filter>ao</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -516,6 +528,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\GenMipMaps.cu">
       <Filter>kernel</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\ao\ao.cu">
+      <Filter>ao</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

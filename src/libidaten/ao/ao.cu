@@ -227,7 +227,7 @@ __global__ void shadeMissAO(
 }
 
 __global__ void shadeAO(
-    int num_ao_rays, float ao_radius,
+    int ao_num_rays, float ao_radius,
     idaten::TileDomain tileDomain,
     unsigned int frame,
     idaten::AORenderer::Path* paths,
@@ -235,6 +235,7 @@ __global__ void shadeAO(
     int* hitnum,
     const aten::Intersection* __restrict__ isects,
     aten::ray* rays,
+    int bounce, int rrBounce,
     const aten::GeomParameter* __restrict__ shapes, int geomnum,
     aten::MaterialParameter* mtrls,
     cudaTextureObject_t* nodes,
@@ -271,32 +272,26 @@ __global__ void shadeAO(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    path.sampler.init(frame, 0, scramble, sobolmatrices);
+    path.sampler.init(frame, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
-    auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-    path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+    auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+    path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
 #endif
 
-    const auto& isect = isects[idx];
-
-    // Reconstruction world coordnate.
-    aten::vec3 world_pos = ray.org + ray.dir * isects[idx].t;
-
     aten::hitrecord rec;
+
+    const auto& isect = isects[idx];
 
     auto obj = &ctxt.shapes[isect.objid];
     evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
     aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
 
-    bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
-
     // 交差位置の法線.
     // 物体からのレイの入出を考慮.
     aten::vec3 orienting_normal = rec.normal;
 
-#if 0
     // Apply normal map.
     int normalMap = mtrl.normalMap;
     if (mtrl.type == aten::MaterialType::Layer) {
@@ -305,26 +300,27 @@ __global__ void shadeAO(
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
     AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
-#endif
 
     aten::vec3 ao_color(0.0f);
 
-    for (int i = 0; i < num_ao_rays; i++) {
-        // Compute hemisphere ray.
-        aten::ray ao_ray;
+    for (int i = 0; i < ao_num_rays; i++) {
+        auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &path.sampler);
+        auto pdfb = AT_NAME::lambert::pdf(orienting_normal, nextDir);
 
-        // Closest hit.
+        real c = dot(orienting_normal, nextDir);
+
+        auto ao_ray = aten::ray(rec.p, nextDir);
+
         aten::Intersection isectTmp;
 
-        bool isHit = intersectCloser(&ctxt, ao_ray, &isectTmp, ao_radius);
+        bool isHit = intersectClosest(&ctxt, ao_ray, &isectTmp, ao_radius);
 
-        if (isHit) {
-            aten::vec3 ao;
-            ao_color += ao;
+        if (c > 0.0f) {
+            ao_color += aten::vec3(isectTmp.t / ao_radius * c / pdfb);
         }
     }
 
-    ao_color /= num_ao_rays;
+    ao_color /= ao_num_rays;
     path.contrib = ao_color;
 }
 
@@ -454,7 +450,7 @@ namespace idaten {
         auto& hitcount = m_compaction.getCount();
 
         shadeAO << <blockPerGrid, threadPerBlock >> > (
-        //shade<true> << <1, 1 >> > (
+            //shade<true> << <1, 1 >> > (
             m_ao_num_rays, m_ao_radius,
             m_tileDomain,
             m_frame,
@@ -462,6 +458,7 @@ namespace idaten {
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
+            bounce, rrBounce,
             m_shapeparam.ptr(), m_shapeparam.num(),
             m_mtrlparam.ptr(),
             m_nodetex.ptr(),

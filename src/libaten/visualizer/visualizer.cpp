@@ -228,7 +228,7 @@ namespace aten
             postproc->prepareRender(prevPostproc, pixels, willRevert);
             auto& fbo = postproc->getFbo();
 
-            // �ŏ��̂P�񂾂����]����΂����̂�.
+            // 最初の１回だけ反転すればいいので.
             willRevert = false;
 
             if (fbo.isValid()) {
@@ -293,7 +293,7 @@ namespace aten
             postproc->prepareRender(prevPostproc, nullptr, willRevert);
             auto& fbo = postproc->getFbo();
 
-            // �ŏ��̂P�񂾂����]����΂����̂�.
+            // 最初の１回だけ反転すればいいので.
             willRevert = false;
 
             if (fbo.isValid()) {

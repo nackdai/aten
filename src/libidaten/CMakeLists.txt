@@ -66,6 +66,9 @@ cuda_add_library(${PROJECT_NAME} STATIC
   idaten.h
   idaten_namespace.h
   aten4idaten.h
+  ao/ao.cpp
+  ao/ao.cu
+  ao/ao.h
   asvgf/asvgf.cpp
   asvgf/asvgf.h
   asvgf/asvgf_AtrousGradient.cu

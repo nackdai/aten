@@ -69,12 +69,14 @@ cuda_add_library(${PROJECT_NAME} STATIC
   ao/ao.cpp
   ao/ao.cu
   ao/ao.h
-  asvgf/asvgf.cpp
-  asvgf/asvgf.h
   asvgf/asvgf_AtrousGradient.cu
   asvgf/asvgf_CreateGradient.cu
-  asvgf/asvgf_ForwardProjection.cu
   asvgf/asvgf_debug.cu
+  asvgf/asvgf_ForwardProjection.cu
+  asvgf/asvgf_pt.cu
+  asvgf/asvgf_rng_seed.cu
+  asvgf/asvgf.cpp
+  asvgf/asvgf.h
   cuda/cudaGLresource.cpp
   cuda/cudaGLresource.h
   cuda/cudaLayeredTextureResource.cpp

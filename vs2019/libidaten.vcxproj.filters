@@ -538,5 +538,8 @@
     <CudaCompile Include="..\src\libidaten\ao\ao.cu">
       <Filter>ao</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_raygen.cu">
+      <Filter>asvgf</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

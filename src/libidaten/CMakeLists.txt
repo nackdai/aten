@@ -73,7 +73,9 @@ cuda_add_library(${PROJECT_NAME} STATIC
   asvgf/asvgf_CreateGradient.cu
   asvgf/asvgf_debug.cu
   asvgf/asvgf_ForwardProjection.cu
+  asvgf/asvgf_hittest.cu
   asvgf/asvgf_pt.cu
+  asvgf/asvgf_raygen.cu
   asvgf/asvgf_rng_seed.cu
   asvgf/asvgf.cpp
   asvgf/asvgf.h

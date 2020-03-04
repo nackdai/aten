@@ -23,6 +23,7 @@ __global__ void genPathASVGF(
     aten::ray* rays,
     int width, int height,
     int maxBounces,
+    int sample,
     unsigned int frame,
     const aten::CameraParameter* __restrict__ camera,
     cudaTextureObject_t blueNoise,
@@ -47,16 +48,21 @@ __global__ void genPathASVGF(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    paths->sampler[idx].init(frame, 0, scramble, samplerValues);
+    paths->sampler[idx].init(frame + sample, 0, scramble, samplerValues);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
-    auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-    paths->sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+    auto scramble = rnd * 0x1fe3434f
+        * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+    paths->sampler[idx].init(
+        (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+        0,
+        scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_BLUENOISE
     auto seed = random[idx];
     paths->sampler[idx].init(
         //seed,
-        ix, iy, frame,
+        ix, iy,
+        frame + sample,
         maxBounces,
         idaten::SVGFPathTracing::ShadowRayNum,
         blueNoiseResW, blueNoiseResH, blueNoiseLayerNum,
@@ -92,7 +98,7 @@ __global__ void genPathASVGF(
 namespace idaten
 {
     void AdvancedSVGFPathTracing::onGenPath(
-        int maxBounce,
+        int sample, int maxBounce,
         int seed,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
@@ -118,6 +124,7 @@ namespace idaten
             m_rays.ptr(),
             m_tileDomain.w, m_tileDomain.h,
             maxBounce,
+            sample,
             m_frame,
             m_cam.ptr(),
             blueNoise,

@@ -27,6 +27,7 @@ __global__ void shadeASVGF(
     int* hitnum,
     const aten::Intersection* __restrict__ isects,
     aten::ray* rays,
+    int sample,
     int frame,
     int bounce, int rrBounce,
     const aten::GeomParameter* __restrict__ shapes, int geomnum,
@@ -70,11 +71,15 @@ __global__ void shadeASVGF(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    paths->sampler[idx].init(frame, 4 + bounce * 300, scramble);
+    paths->sampler[idx].init(frame + sample, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
-    auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-    paths->sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+    auto scramble = rnd * 0x1fe3434f
+        * (((frame + sample) + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+    paths->sampler[idx].init(
+        (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+        4 + bounce * 300,
+        scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_BLUENOISE
     // Not need to do.
 #endif
@@ -389,6 +394,7 @@ namespace idaten
     void AdvancedSVGFPathTracing::onShade(
         cudaSurfaceObject_t outputSurf,
         int width, int height,
+        int sample,
         int bounce, int rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
@@ -431,6 +437,7 @@ namespace idaten
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
+            sample,
             m_frame,
             bounce, rrBounce,
             m_shapeparam.ptr(), m_shapeparam.num(),

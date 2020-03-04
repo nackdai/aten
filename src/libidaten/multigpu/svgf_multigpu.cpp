@@ -158,7 +158,7 @@ namespace idaten
             m_tileDomain = tileDomain;
 
             onGenPath(
-                maxBounce,
+                i, maxBounce,
                 seed,
                 vtxTexPos,
                 vtxTexNml);
@@ -193,6 +193,7 @@ namespace idaten
                 onShade(
                     outputSurf,
                     width, height,
+                    i,
                     bounce, rrBounce,
                     vtxTexPos, vtxTexNml);
 

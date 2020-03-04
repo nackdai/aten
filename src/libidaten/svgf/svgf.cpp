@@ -356,7 +356,7 @@ namespace idaten
             //int seed = 0;
 
             onGenPath(
-                maxBounce,
+                i, maxBounce,
                 seed,
                 vtxTexPos,
                 vtxTexNml);
@@ -381,6 +381,7 @@ namespace idaten
                 onShade(
                     outputSurf,
                     width, height,
+                    i,
                     bounce, rrBounce,
                     vtxTexPos, vtxTexNml);
 

@@ -477,10 +477,11 @@ namespace aten
                         //Halton rnd(scramble + t.milliSeconds);
                         //Sobol rnd;
                         //WangHash rnd(scramble + t.milliSeconds);
-#if 0
+#if 1
                         CMJ rnd;
                         rnd.init(frame, i, scramble);
 #else
+                        // Experimental
                         BlueNoiseSampler rnd;
                         for (auto tex : m_noisetex) {
                             rnd.registerNoiseTexture(tex);

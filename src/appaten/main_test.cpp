@@ -267,6 +267,8 @@ int main(int argc, char* argv[])
     aten::ImageBasedLight ibl(&g_bg);
     g_scene.addImageBasedLight(&ibl);
 
+#if 0
+    // Experimental
     char buf[8] = { 0 };
     for (int i = 0; i < 128; i++) {
         std::string path("../../asset/bluenoise/256_256/HDR_RGBA_");
@@ -279,6 +281,7 @@ int main(int argc, char* argv[])
             g_ctxt));
         g_tracer.registerBlueNoiseTex(tex);
     }
+#endif
 
     //g_tracer.setBG(&g_staticbg);
 

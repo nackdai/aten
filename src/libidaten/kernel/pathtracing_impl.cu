@@ -21,7 +21,7 @@ __global__ void genPath(
     idaten::TileDomain tileDomain,
     idaten::PathTracing::Path* paths,
     aten::ray* rays,
-    int sample, int maxSamples,
+    int sample,
     unsigned int frame,
     const aten::CameraParameter* __restrict__ camera,
     const unsigned int* sobolmatrices,
@@ -46,11 +46,15 @@ __global__ void genPath(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    path.sampler.init(frame, 0, scramble, sobolmatrices);
+    path.sampler.init(frame + sample, 0, scramble, sobolmatrices);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
-    auto scramble = rnd * 0x1fe3434f * ((frame + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-    path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 0, scramble);
+    auto scramble = rnd * 0x1fe3434f
+        * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+    path.sampler.init(
+        (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+        0,
+        scramble);
 #endif
 
     ix += tileDomain.x;
@@ -306,6 +310,7 @@ __global__ void shadeMissWithEnvmap(
 __global__ void shade(
     bool needAOV,
     idaten::TileDomain tileDomain,
+    int sample,
     unsigned int frame,
     cudaSurfaceObject_t* aovs,
     float3 posRange,
@@ -355,11 +360,15 @@ __global__ void shade(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    path.sampler.init(frame, 4 + bounce * 300, scramble);
+    path.sampler.init(frame + sample, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
-    auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-    path.sampler.init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + bounce * 300, scramble);
+    auto scramble = rnd * 0x1fe3434f
+        * (((frame + sample) + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
+    path.sampler.init(
+        (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
+        4 + bounce * 300,
+        scramble);
 #endif
 
     aten::hitrecord rec;
@@ -738,7 +747,7 @@ namespace idaten {
             m_tileDomain,
             m_paths.ptr(),
             m_rays.ptr(),
-            sample, maxSamples,
+            sample,
             m_frame,
             m_cam.ptr(),
             m_sobolMatrices.ptr(),
@@ -811,6 +820,7 @@ namespace idaten {
 
     void PathTracing::onShade(
         int width, int height,
+        int sample,
         int bounce, int rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
@@ -827,6 +837,7 @@ namespace idaten {
         //shade<true> << <1, 1 >> > (
             enableAOV,
             m_tileDomain,
+            sample,
             m_frame,
             m_aovCudaRsc.ptr(), posRange,
             m_paths.ptr(),

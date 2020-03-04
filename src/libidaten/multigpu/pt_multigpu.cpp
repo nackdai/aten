@@ -101,6 +101,7 @@ namespace idaten
 
                 onShade(
                     width, height,
+                    i,
                     bounce, rrBounce,
                     vtxTexPos, vtxTexNml);
 

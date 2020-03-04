@@ -115,6 +115,7 @@ namespace idaten
 
         virtual void onShade(
             int width, int height,
+            int sample,
             int bounce, int rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);

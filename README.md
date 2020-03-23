@@ -1,9 +1,9 @@
 # aten
 
-This is easy, simple ray tracing renderer.<br>
+This is easy, simple ray tracing renderer.</br>
 Aten is Egyptian sun god.
 
-Idaten(path tracing on GPGPU) is under construction.<br>
+Idaten(path tracing on GPGPU) is under construction.</br>
 Idaten is Japanese god, it runs fast.
 And Idanten includes characters of aten, "id**aten**"
 
@@ -101,7 +101,16 @@ And Idanten includes characters of aten, "id**aten**"
 
 ## How To Build
 
-### Windows
+### Prepearing
+
+You also should get submodules in `3rdparty` directory.
+To do that, follow as below:
+
+```shell
+git submodule update --init --recursive
+```
+
+### Build on Windows
 
 1. Install `CUDA 10.1` and depended NVIDIA driver
 2. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
@@ -112,32 +121,118 @@ I confirmed with Visual Studio 2019 on Windows10.
 
 Supoort just only `CUDA 10.1`.
 
-### Linux
+### Build on Linux
 
 1. Install `CUDA 10.1` or later and depended NVIDIA driver
-2. Install applications (You can find what you need in `Dockerfile`)
-    * Install `cmake` `3.10.0` or later
-    * Install `clang 8.0.0`
-    * Install `ninja-build`
-3. `cd aten/build`
-4. `./RunCMake.sh`
-5. Run make `ninja`
+1. Install applications (You can find what you need in `Dockerfile`)
+    1. Install `cmake` `3.10.0` or later
+    1. Install `clang 8.0.0`
+    1. Install `ninja-build`
+1. `cd aten/build`
+1. `./RunCMake.sh <Build Type> <Compute Capability>`
+1. Run make `ninja`
+
+#### What is RunCMake.sh
+
+`RunCMake.sh` is a scirpt to help you to build `aten` with CMake.
+It needs 2 arguments as below:
+
+1. Build Type: `Debug` or `Release`
+1. Compute Capability: It depends on your GPU. But, you need to specify it
+without `.`. For example, if `Comnpute Capability` is `7.5`, please specify
+like `75`.
+
+Example to run `RunCMake.sh` is below:
+
+```shell
+./RunCMake.sh Release 75
+```
 
 I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
 
-#### Docker
+#### Build on Docker
 
 You can build and run executable aten application on Docker container.
 
-1. Install `Docker` and `docker-compose`
-2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
-3. Build docker image `docker-compose build`
-4. Run docker container `docker-compose run aten`
-5. `cd aten/build`
-6. `./RunCMake.sh`
-7. Run make `ninja`
+##### Build on only Docker
 
-If you would like to run built applications in docker, you need to ensure that your host can accept X forwarded connections `xhost +local:aten_aten`
+1. Install `Docker`
+1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
+1. Move to `aten` directory
+1. Build docker image like below:
+
+```shell
+docker build -t <Any name> .
+```
+
+1. Run docker container like below:
+
+```shell
+docker run -it -rm -v ${PWD}:/aten <Image name>:latest bash
+```
+
+1. `cd /aten/build`
+1. `./RunCMake.sh <Build Type> <Compute Capability>`
+1. Run make `ninja`
+
+##### Build with docker-compose
+
+1. Install `Docker` and `docker-compose`
+1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
+1. Build docker image `docker-compose build`
+1. Run docker container `docker-compose run aten`
+1. `cd aten/build`
+1. `./RunCMake.sh <Build Type> <Compute Capability>`
+1. Run make `ninja`
+
+#### How to specify variable to RunCMake.sh
+
+If you use `RunCMake.sh`, you can use like
+`./RunCMake.sh <Build Type> <Compute Capability>`. `Build Type` can be
+specified with `Debug` or `Release`. `Comnpute Capability` depends on your GPU.
+But, specified without `.`. For example, if `Comnpute Capability` is `7.5`,
+please specify like `75`. Example is below:
+
+```shell
+./RunCMake.sh Release 75
+ ```
+
+ You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
+
+## How to run
+
+### Run on Windows
+
+Please find `exe` files and run them. You can find them in each directories
+where source files are in.
+
+### Run on Linux
+
+Please find execution files and run them. You can find them in the directories
+in the directory which you built the applications. And the directories have
+same name as execution file.
+
+### Run on Docker
+
+If you would like to run built applications in docker, you need to ensure that
+your host can accept X forwarded connections
+`xhost +local:<Docker container name>`.
+
+And, run docker container like below:
+
+```shell
+docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
+```
+
+### Run with docker-compose
+
+You alse need to ensure your host as [Run on Docker](#Run-on-Docker).
+
+And, run docker container via docker-compose like below:
+
+```shell
+docker-compose run aten
+```
 
 ## Gallery
 

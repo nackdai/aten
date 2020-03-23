@@ -171,7 +171,9 @@ docker build -t <Any name> .
 docker run -it -rm -v ${PWD}:/aten <Image name>:latest bash
 ```
 
-1. `cd /aten/build`
+1. `mkdir aten/build`
+1. `cd aten/build`
+1. `cp ../scripts/RunCMake.sh .`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
@@ -181,7 +183,9 @@ docker run -it -rm -v ${PWD}:/aten <Image name>:latest bash
 1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
 1. Build docker image `docker-compose build`
 1. Run docker container `docker-compose run aten`
+1. `mkdir aten/build`
 1. `cd aten/build`
+1. `cp ../scripts/RunCMake.sh .`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
@@ -198,6 +202,8 @@ please specify like `75`. Example is below:
  ```
 
  You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
+ If you can specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
+ `get_cuda_sm.sh` run and `Comnpute Capability` is specified.
 
 ## How to run
 

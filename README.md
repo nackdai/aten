@@ -132,6 +132,8 @@ Supoort just only `CUDA 10.1`.
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
+I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
+
 #### What is RunCMake.sh
 
 `RunCMake.sh` is a scirpt to help you to build `aten` with CMake.
@@ -152,11 +154,9 @@ Example to run `RunCMake.sh` is below:
 ```
 
 You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
-If you can specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
+If you don't specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
 `get_cuda_sm.sh` run and `Comnpute Capability` is specified.
 
-
-I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
 
 #### Build on Docker
 

@@ -135,6 +135,9 @@ Supoort just only `CUDA 10.1`.
 #### What is RunCMake.sh
 
 `RunCMake.sh` is a scirpt to help you to build `aten` with CMake.
+It is located in `scripts` directory. If you would like to use it.
+Copy it to the build directory you want.
+
 It needs 2 arguments as below:
 
 1. Build Type: `Debug` or `Release`
@@ -147,6 +150,11 @@ Example to run `RunCMake.sh` is below:
 ```shell
 ./RunCMake.sh Release 75
 ```
+
+You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
+If you can specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
+`get_cuda_sm.sh` run and `Comnpute Capability` is specified.
+
 
 I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
 
@@ -188,23 +196,7 @@ docker run -it -rm -v ${PWD}:/aten <Image name>:latest bash
 1. `cp ../scripts/RunCMake.sh .`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
-
-#### How to specify variable to RunCMake.sh
-
-If you use `RunCMake.sh`, you can use like
-`./RunCMake.sh <Build Type> <Compute Capability>`. `Build Type` can be
-specified with `Debug` or `Release`. `Comnpute Capability` depends on your GPU.
-But, specified without `.`. For example, if `Comnpute Capability` is `7.5`,
-please specify like `75`. Example is below:
-
-```shell
-./RunCMake.sh Release 75
- ```
-
- You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
- If you can specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
- `get_cuda_sm.sh` run and `Comnpute Capability` is specified.
-
+ 
 ## How to run
 
 ### Run on Windows

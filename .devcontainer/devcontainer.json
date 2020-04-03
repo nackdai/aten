@@ -1,0 +1,31 @@
+{
+    "name": "aten dev container",
+    // For using docker-compose
+    "dockerComposeFile": ["docker-compose.yml", "docker-compose.extend.yml"],
+    "service": "aten",
+    "workspaceFolder": "/aten",
+    "shutdownAction": "stopCompose",
+    // For using Dockerfile
+    /*
+    "dockerFile": "Dockerfile",
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined",
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "-v",
+        "/tmp/.X11-unix:/tmp/.X11-unix:rw",
+        "--runtime=nvidia",        
+        "-e",
+        "DISPLAY"
+    ],
+    */
+    "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "kriegalex.vscode-cudacpp"
+    ],
+    "initializeCommand": ["xhost", "+local:aten_devcontainer_aten"]
+}

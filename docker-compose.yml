@@ -1,17 +1,9 @@
-# Build image
-# $ docker-compose build
-
-# Ensure that your host can accept X forwarded connections
-# $ xhost +local:aten_aten
-
-# Run container
-# $ docker-compose run aten
-
 version: "2.4"
 services:
   aten:
     build:
       context: "./"
+      dockerfile: Dockerfile
       args:
         - http_proxy=${http_proxy}
         - https_proxy=${https_proxy}
@@ -21,5 +13,5 @@ services:
       - "DISPLAY"
     volumes:
       - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
-      - "./:/aten"
+      - "../:/aten"
     network_mode: bridge

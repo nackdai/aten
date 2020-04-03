@@ -1,5 +1,3 @@
-# docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY aten:latest bash
-
 FROM nvidia/cudagl:10.1-devel-ubuntu18.04 
 
 ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
@@ -7,17 +5,17 @@ ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPA
 
 RUN apt-get update && apt-get install -y \
     build-essential \
+    clang-8 \
     curl \
+    gdb \
     git \
     libglu1-mesa-dev \
+    lld-8 \
+    lldb-8 \
     ninja-build \
     wget \
     xorg-dev \
-    xz-utils \
-    clang-8 \
-    lldb-8 \
-    lld-8 \
-    gdb
+    xz-utils
 
 RUN wget https://github.com/Kitware/CMake/releases/download/v3.15.2/cmake-3.15.2-Linux-x86_64.sh \
     && sh ./cmake-3.15.2-Linux-x86_64.sh --skip-license \

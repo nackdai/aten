@@ -165,25 +165,25 @@ You can build and run executable aten application on Docker container.
 ##### Build on only Docker
 
 1. Install `Docker`
-1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
-1. Move to `aten` directory
-1. Build docker image like below:
+2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
+3. Move to `aten` directory
+4. Build docker image like below:
 
 ```shell
 docker build -t <Any name> .
 ```
 
-1. Run docker container like below:
+5. Run docker container like below:
 
 ```shell
-docker run -it -rm -v ${PWD}:/aten <Image name>:latest bash
+docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image name>:latest bash
 ```
 
-1. `mkdir aten/build`
-1. `cd aten/build`
-1. `cp ../scripts/RunCMake.sh .`
-1. `./RunCMake.sh <Build Type> <Compute Capability>`
-1. Run make `ninja`
+6. `mkdir aten/build`
+7. `cd aten/build`
+8. `cp ../scripts/RunCMake.sh .`
+9. `./RunCMake.sh <Build Type> <Compute Capability>`
+10. Run make `ninja`
 
 ##### Build with docker-compose
 

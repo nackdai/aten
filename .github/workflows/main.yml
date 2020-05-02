@@ -1,27 +1,64 @@
-# Get GITHUB_TOKEN via secrets.GITHUB_TOKEN automatically
-# Get owner/repository_name via github.repository
-
-on: [push]
+on: [push, pull_request]
 
 env:
   IMAGE_NAME: aten
 
 jobs:
+  set_vars:
+    name: set_variables
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Get branch name
+        id: branch_name
+        # https://stackoverflow.com/questions/60300169/how-to-get-branch-name-on-github-action
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+      - name: Set Variables
+        run: |
+          if [ "${{ steps.branch_name.outputs.short_ref }}" == "master" ]; then BASE_COMMIT="${{ github.event.before }}"; else BASE_COMMIT="HEAD~1"; fi
+          if [ "${{ github.event_name }}" == "pull_request" ]; then BASE_COMMIT="origin/master"; fi
+          echo ${BASE_COMMIT} > base_commit.txt
+      - name: Upload variables to artifact
+        # https://help.github.com/en/actions/configuring-and-managing-workflows/persisting-workflow-data-using-artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: base_commit
+          path: base_commit.txt
   build_docker:
     name: build_docker
     runs-on: ubuntu-18.04
+    needs: set_vars
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Build image
-        run: docker build -t aten .
-      - name: Push image
+        with:
+          # actions/checkout fetch-depth default is 1. It means number of
+          # commits to fetch is just only 1. To refer HEAD~1, need 2 commits
+          fetch-depth: 2 
+      - name: Download variables from artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: base_commit
+      - name: Get variables 
+        id: get_var
         run: |
+          value=`cat base_commit/base_commit.txt`
+          echo "base_commit=$value"
+          echo ::set-output name=base_commit::$value
+      - name: Get diff files
+        id: getfile
+        uses: ./.github/actions/run_git
+        with:
+          # https://github.community/t5/GitHub-Actions/Check-pushed-file-changes-with-git-diff-tree-in-GitHub-Actions/td-p/41481
+          command: 'git diff --name-only ${{ steps.get_var.outputs.base_commit }} HEAD'
+      - name: Build and push image
+        if: contains(steps.getfile.outputs.result, '.devcontainer/Dockerfile') == 'true'
+        run: |
+          docker build -t aten .
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
           docker tag aten docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
           docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
-  ci:
-    name: ci
+  build:
+    name: build
     runs-on: ubuntu-18.04
     needs: build_docker
     steps:

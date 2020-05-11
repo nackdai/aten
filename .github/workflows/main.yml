@@ -4,7 +4,7 @@ env:
   IMAGE_NAME: aten
 
 jobs:
-  set_vars:
+  set_vars: # Get base commit to get pushed files
     name: set_variables
     runs-on: ubuntu-18.04
     steps:
@@ -38,7 +38,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: base_commit
-      - name: Get variables 
+      - name: Get variables # Parse base commit from artifact
         id: get_var
         run: |
           value=`cat base_commit/base_commit.txt`
@@ -50,7 +50,7 @@ jobs:
         with:
           # https://github.community/t5/GitHub-Actions/Check-pushed-file-changes-with-git-diff-tree-in-GitHub-Actions/td-p/41481
           command: 'git diff --name-only ${{ steps.get_var.outputs.base_commit }} HEAD'
-      - name: Build and push image
+      - name: Build and push image  # Run this step if Dockerfile is in pushed files
         if: contains(steps.getfile.outputs.result, '.devcontainer/Dockerfile') == 'true'
         run: |
           docker build -t aten .

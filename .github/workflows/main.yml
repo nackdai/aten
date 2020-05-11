@@ -1,4 +1,7 @@
-on: [push]
+on:
+  push:
+    paths-ignore:
+    - '.circleci/**'
 
 env:
   IMAGE_NAME: aten

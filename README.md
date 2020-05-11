@@ -2,6 +2,8 @@
 
 ![](https://github.com/nackdai/aten/workflows/.github/workflows/main.yml/badge.svg)
 
+[![CircleCI](https://circleci.com/gh/nackdai/aten.svg?style=svg)](https://circleci.com/gh/nackdai/aten)
+
 This is easy, simple ray tracing renderer.</br>
 Aten is Egyptian sun god.
 

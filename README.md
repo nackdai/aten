@@ -1,5 +1,7 @@
 # aten
 
+![](https://github.com/nackdai/aten/workflows/.github/workflows/main.yml/badge.svg)
+
 This is easy, simple ray tracing renderer.</br>
 Aten is Egyptian sun god.
 

@@ -1,4 +1,4 @@
-on: [push, pull_request]
+on: [push]
 
 env:
   IMAGE_NAME: aten
@@ -15,7 +15,7 @@ jobs:
       - name: Set Variables
         run: |
           if [ "${{ steps.branch_name.outputs.short_ref }}" == "master" ]; then BASE_COMMIT="${{ github.event.before }}"; else BASE_COMMIT="HEAD~1"; fi
-          if [ "${{ github.event_name }}" == "pull_request" ]; then BASE_COMMIT="origin/master"; fi
+          if [ "${{ github.event_name }}" == "pull_request" ]; then BASE_COMMIT="${{ github.base_ref }}"; fi
           echo ${BASE_COMMIT} > base_commit.txt
       - name: Upload variables to artifact
         # https://help.github.com/en/actions/configuring-and-managing-workflows/persisting-workflow-data-using-artifacts

@@ -16,8 +16,10 @@ jobs:
         # https://stackoverflow.com/questions/60300169/how-to-get-branch-name-on-github-action
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
       - name: Set Variables
+        # https://developer.github.com/v3/activity/events/types/#pushevent
+        # github.event.size : The number of commits in the push.
         run: |
-          if [ "${{ steps.branch_name.outputs.short_ref }}" == "master" ]; then BASE_COMMIT="${{ github.event.before }}"; else BASE_COMMIT="HEAD~1"; fi
+          if [ "${{ steps.branch_name.outputs.short_ref }}" == "master" ]; then BASE_COMMIT="HEAD~${{ github.event.size }}"; else BASE_COMMIT="HEAD~1"; fi
           if [ "${{ github.event_name }}" == "pull_request" ]; then BASE_COMMIT="${{ github.base_ref }}"; fi
           echo ${BASE_COMMIT} > base_commit.txt
       - name: Upload variables to artifact
@@ -33,10 +35,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        env:
+          # https://developer.github.com/v3/activity/events/types/#pushevent
+          # github.event.size : The number of commits in the push.
+          COMMIT_SIZE: ${{ github.event.size }}
         with:
           # actions/checkout fetch-depth default is 1. It means number of
           # commits to fetch is just only 1. To refer HEAD~1, need 2 commits
-          fetch-depth: 2 
+          fetch-depth: $COMMIT_SIZE
       - name: Download variables from artifact
         uses: actions/download-artifact@v1
         with:

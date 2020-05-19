@@ -1,0 +1,31 @@
+{
+  "name": "javascript-action",
+  "version": "1.0.0",
+  "description": "JavaScript Action Template",
+  "main": "index.js",
+  "scripts": {
+    "package": "ncc build index.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actions/javascript-action.git"
+  },
+  "keywords": [
+    "GitHub",
+    "Actions",
+    "JavaScript"
+  ],
+  "author": "GitHub",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/actions/javascript-action/issues"
+  },
+  "homepage": "https://github.com/actions/javascript-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@actions/github": "^1.1.0"
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.22.2"
+  }
+}

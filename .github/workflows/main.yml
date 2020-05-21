@@ -2,6 +2,13 @@ on:
   push:
     paths-ignore:
     - '.circleci/**'
+    - '.devcontainer/*.json'
+    - '.devcontainer/*.yml'
+    - 'asset/**'
+    - 'docs/**'
+    - 'gallery/**'
+    - 'vs2015/**'
+    - 'vs2019/**'
 
 env:
   IMAGE_NAME: aten

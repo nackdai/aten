@@ -1,13 +1,15 @@
 # aten
 
-![](https://github.com/nackdai/aten/workflows/.github/workflows/main.yml/badge.svg)
+![](https://github.com/nackdai/aten/workflows/.github/workflows/CI/badge.svg)
 
 [![CircleCI](https://circleci.com/gh/nackdai/aten.svg?style=svg)](https://circleci.com/gh/nackdai/aten)
 
-This is easy, simple ray tracing renderer.</br>
+This is easy, simple ray tracing renderer.
+
 Aten is Egyptian sun god.
 
-Idaten(path tracing on GPGPU) is under construction.</br>
+Idaten(path tracing on GPGPU) is under construction.
+
 Idaten is Japanese god, it runs fast.
 And Idanten includes characters of aten, "id**aten**"
 

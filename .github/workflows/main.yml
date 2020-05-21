@@ -7,110 +7,162 @@ env:
   IMAGE_NAME: aten
 
 jobs:
-  set_vars: # Get base commit to get pushed files
-    name: set_variables
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Get branch name
-        id: branch_name
-        # https://stackoverflow.com/questions/60300169/how-to-get-branch-name-on-github-action
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - name: Get commit length
-        id: get_commit_length
-        uses: ./.github/actions/get_commit_length
-      - name: Set base commit
-        run: |
-          if [ "${{ steps.branch_name.outputs.short_ref }}" == "master" ]; then BASE_COMMIT="HEAD~${{ steps.get_commit_length.outputs.commit_length }}"; else BASE_COMMIT="HEAD~1"; fi
-          if [ "${{ github.event_name }}" == "pull_request" ]; then BASE_COMMIT="${{ github.base_ref }}"; fi
-          echo ${BASE_COMMIT} > base_commit.txt
-      - name: Upload base commit to artifact
-        # https://help.github.com/en/actions/configuring-and-managing-workflows/persisting-workflow-data-using-artifacts
-        # When use v1, "Path does not exist" error happened
-        # According to https://github.com/actions/upload-artifact/issues/43
-        # in v2, that error doesn't happened
-        uses: actions/upload-artifact@v2
-        with:
-          name: base_commit
-          path: base_commit.txt
-      - name: Set fetch depth
-        # To specify HEAD~N, need to checkout with fetch-depth N+1
-        run: |
-          echo ${{ steps.get_commit_length.outputs.commit_length }}
-          expr ${{ steps.get_commit_length.outputs.commit_length }} + 1 > fetch_depth.txt
-      - name: Upload fetch depth to artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: fetch_depth
-          path: fetch_depth.txt
+#  set_vars: # Get base commit to get pushed files
+#    name: set_variables
+#    runs-on: ubuntu-18.04
+#    
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Get branch name
+#        id: branch_name
+#        # https://stackoverflow.com/questions/60300169/how-to-get-branch-name-on-github-action
+#        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+#
+#      - name: Get commit length
+#        id: get_commit_length
+#        uses: ./.github/actions/get_commit_length
+#
+#      - name: Set base commit
+#        run: |
+#          if [ "${{ steps.branch_name.outputs.short_ref }}" == "master" ]; then BASE_COMMIT="HEAD~${{ steps.get_commit_length.outputs.commit_length }}"; else BASE_COMMIT="HEAD~1"; fi
+#          if [ "${{ github.event_name }}" == "pull_request" ]; then BASE_COMMIT="${{ github.base_ref }}"; fi
+#          echo ${BASE_COMMIT} > base_commit.txt
+#
+#      - name: Upload base commit to artifact
+#        # https://help.github.com/en/actions/configuring-and-managing-workflows/persisting-workflow-data-using-artifacts
+#        # When use v1, "Path does not exist" error happened
+#        # According to https://github.com/actions/upload-artifact/issues/43
+#        # in v2, that error doesn't happened
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: base_commit
+#          path: base_commit.txt
+#
+#      - name: Set fetch depth
+#        # To specify HEAD~N, need to checkout with fetch-depth N+1
+#        run: |
+#          echo ${{ steps.get_commit_length.outputs.commit_length }}
+#          expr ${{ steps.get_commit_length.outputs.commit_length }} + 1 > fetch_depth.txt
+#
+#      - name: Upload fetch depth to artifact
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: fetch_depth
+#          path: fetch_depth.txt
+#
+#  build_docker:
+#    name: build_docker
+#    runs-on: ubuntu-18.04
+#    needs: set_vars
+#
+#    steps:
+#      - name: Download fetch depth from artifact
+#        # Ideally, upload/download version should be same
+#        # But, when using v2, "No such file or directory" error happend
+#        # WHen using v1, that error doesn't happen
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: fetch_depth
+#     
+#      - name: Get fetch depth
+#        id: get_fetch_depth
+#        run: |
+#          value=`cat fetch_depth/fetch_depth.txt`
+#          echo "fetch_depth=$value"
+#          echo ::set-output name=fetch_depth::$value
+#     
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#        with:
+#          # actions/checkout fetch-depth default is 1. It means number of
+#          # commits to fetch is just only 1. To refer HEAD~1, need 2 commits
+#          # Acording to https://github.community/t5/GitHub-Actions/How-to-pass-environment-variable-to-an-input/td-p/32003
+#          # we can't pass environment variable to an input 
+#          fetch-depth: ${{ steps.get_fetch_depth.outputs.fetch_depth }}
+#     
+#      - name: Download base commit from artifact
+#        uses: actions/download-artifact@v1
+#        with:
+#          name: base_commit
+#     
+#      - name: Get base commit # Parse base commit from artifact
+#        id: get_base_commit
+#        run: |
+#          value=`cat base_commit/base_commit.txt`
+#          echo "base_commit=$value"
+#          echo ::set-output name=base_commit::$value
+#     
+#      - name: Get diff files
+#        id: getfile
+#        uses: ./.github/actions/run_git
+#        with:
+#          # https://github.community/t5/GitHub-Actions/Check-pushed-file-changes-with-git-diff-tree-in-GitHub-Actions/td-p/41481
+#          command: 'git diff --name-only ${{ steps.get_base_commit.outputs.base_commit }} HEAD'
+#     
+#      - name: Build and push image  # Run this step if Dockerfile is in pushed files
+#        if: contains(steps.getfile.outputs.result, '.devcontainer/Dockerfile') == 'true'
+#        run: |
+#          docker build -t aten .
+#          docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
+#          docker tag aten docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+#          docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+
   build_docker:
     name: build_docker
     runs-on: ubuntu-18.04
-    needs: set_vars
-    steps:
-      - name: Download fetch depth from artifact
-        # Ideally, upload/download version should be same
-        # But, when using v2, "No such file or directory" error happend
-        # WHen using v1, that error doesn't happen
-        uses: actions/download-artifact@v1
-        with:
-          name: fetch_depth
-      - name: Get fetch depth
-        id: get_fetch_depth
-        run: |
-          value=`cat fetch_depth/fetch_depth.txt`
-          echo "fetch_depth=$value"
-          echo ::set-output name=fetch_depth::$value
-      - name: Checkout
+
+    steps:     
+      - name: Checkout 
         uses: actions/checkout@v2
-        with:
-          # actions/checkout fetch-depth default is 1. It means number of
-          # commits to fetch is just only 1. To refer HEAD~1, need 2 commits
-          # Acording to https://github.community/t5/GitHub-Actions/How-to-pass-environment-variable-to-an-input/td-p/32003
-          # we can't pass environment variable to an input 
-          fetch-depth: ${{ steps.get_fetch_depth.outputs.fetch_depth }}
-      - name: Download base commit from artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: base_commit
-      - name: Get base commit # Parse base commit from artifact
-        id: get_base_commit
-        run: |
-          value=`cat base_commit/base_commit.txt`
-          echo "base_commit=$value"
-          echo ::set-output name=base_commit::$value
+
       - name: Get diff files
         id: getfile
-        uses: ./.github/actions/run_git
+        uses: ./.github/actions/get_changed_files
         with:
-          # https://github.community/t5/GitHub-Actions/Check-pushed-file-changes-with-git-diff-tree-in-GitHub-Actions/td-p/41481
-          command: 'git diff --name-only ${{ steps.get_base_commit.outputs.base_commit }} HEAD'
-      - name: Build and push image  # Run this step if Dockerfile is in pushed files
-        if: contains(steps.getfile.outputs.result, '.devcontainer/Dockerfile') == 'true'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dump
+        run: echo ${{ steps.getfile.outputs.modified }}
+
+      # Run below step if Dockerfile is in modified files
+      - name: Checkout 
+        if: contains(steps.getfile.outputs.modified, '.devcontainer/Dockerfile') == 'true'
+        uses: actions/checkout@v2
+     
+      - name: Build and push image
+        if: contains(steps.getfile.outputs.modified, '.devcontainer/Dockerfile') == 'true'
         run: |
           docker build -t aten .
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
           docker tag aten docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
           docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+
   build:
     name: build
     runs-on: ubuntu-18.04
     needs: build_docker
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           submodules: true
+    
       - name: Login registry
         run: docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
+    
       - name: Pull image
         run: docker pull docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+      
       - name: Run image
         run: docker run -it -d --name $IMAGE_NAME -v $GITHUB_WORKSPACE:/workspace -w /workspace docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+      
       - name: Configure
         run: |
           docker exec $IMAGE_NAME bash -c 'mkdir build'
           docker exec $IMAGE_NAME bash -c 'cd build && cp ../scripts/RunCMake.sh ./ && ./RunCMake.sh Release 75'
+      
       - name: Build
-        run: docker exec $IMAGE_NAME bash -c 'cd build && ninja'
+        run: docker exec $IMAGE_NAME bash -c 'cd build && ninja -j 4'

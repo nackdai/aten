@@ -1,5 +1,5 @@
-build/*
-out
+build
+npm_modules
 
 CMakeFiles
 CMakeCache.txt

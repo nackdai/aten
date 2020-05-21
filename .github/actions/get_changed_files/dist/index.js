@@ -494,32 +494,79 @@ module.exports = require("os");
 /***/ 104:
 /***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-// https://github.com/GsActions/commit-message-checker
-
+const { context, GitHub } = __webpack_require__(469);
 const core = __webpack_require__(470);
-const github = __webpack_require__(469);
 
-try {
-  let commit_length = 0;
+const commits = context.payload.commits.filter(c => c.distinct);
+const repo = context.payload.repository;
+const org = repo.organization;
+const owner = org || repo.owner;
 
-  if (
-    github.context.payload &&
-    github.context.payload.commits &&
-    github.context.payload.commits.length) {
-    console.log(github.context.payload.commits);
-    commit_length = github.context.payload.commits.length;
-  }
+const FILES = [];
+const FILES_MODIFIED = [];
+const FILES_ADDED = [];
+const FILES_DELETED = [];
+const FILES_RENAMED = [];
 
-  if (commit_length == 0) {
-    throw new Error(`No commits found in the payload.`);
-  }
+const gh = new GitHub(core.getInput('token'));
+const args = { owner: owner.name, repo: repo.name };
 
-  console.log("commit_length:", commit_length);
-  core.setOutput("commit_length", commit_length);
-} catch (error) {
-  core.error(error);
-  core.setFailed(error.message);
+function isAdded(file) {
+  return 'added' === file.status;
 }
+
+function isDeleted(file) {
+  return 'deleted' === file.status;
+}
+
+function isModified(file) {
+  return 'modified' === file.status;
+}
+
+function isRenamed(file) {
+  return 'renamed' === file.status;
+}
+
+async function processCommit(commit) {
+  args.ref = commit.id;
+  result = await gh.repos.getCommit(args);
+
+  if (result && result.data) {
+    const files = result.data.files;
+
+    files.forEach(file => {
+      console.log("filename: ", file.filename);
+      console.log("Satus: ", file.status);
+
+      if (isModified(file)) {
+        console.log("Modified");
+        FILES.push(file.filename);
+        FILES_MODIFIED.push(file.filename);
+      }
+      if (isAdded(file)) {
+        FILES.push(file.filename);
+        FILES_ADDED.push(file.filename);
+      }
+      if (isRenamed(file)){
+        FILES.push(file.filename);
+        FILES_RENAMED.push(file.filename);
+      } 
+
+      isDeleted(file) && FILES_DELETED.push(file.filename);
+    });
+  }
+}
+
+Promise.all(commits.map(processCommit)).then(() => {
+  console.log("Done promise");
+  console.log(FILES_MODIFIED);
+  console.log(JSON.stringify(FILES_MODIFIED, 4));
+
+  //process.stdout.write(`::set-output name=modified::${JSON.stringify(FILES_MODIFIED, 4)}`);
+  core.setOutput("modified", FILES_MODIFIED);
+
+  process.exit(0);
+});
 
 
 /***/ }),

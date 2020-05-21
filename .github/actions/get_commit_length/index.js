@@ -10,6 +10,7 @@ try {
     github.context.payload &&
     github.context.payload.commits &&
     github.context.payload.commits.length) {
+    console.log(github.context.payload.commits);
     commit_length = github.context.payload.commits.length;
   }
 

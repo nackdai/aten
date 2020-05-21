@@ -31,7 +31,7 @@ docker build -t <Image Name> .
 
 ## How to run
 
-As I mentioned in [this](#How-to-realize), the container depends on
+As I mentioned in [How-to-realize](#How-to-realize), the container depends on
 `DooD`. We need to mount `docker.sock`, therfore we have to specify volume like
 below:
 
@@ -43,4 +43,4 @@ According to [this](https://qiita.com/comefigo/items/6394a43b3bd97cde7b17)
 (**sorry this also is Japanese**), we can mount same volume without minding
 whether Windows or Linux.
 
-About `act`, pleaser refer [this](https://github.com/nektos/act)
+About `act`, pleaser refer [act github repository](https://github.com/nektos/act)

@@ -1,5 +1,5 @@
 build
-npm_modules
+node_modules
 
 CMakeFiles
 CMakeCache.txt

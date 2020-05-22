@@ -6,6 +6,7 @@ on:
     - '.circleci/**'
     - '.devcontainer/*.json'
     - '.devcontainer/*.yml'
+    - '.gitignore'
     - 'asset/**'
     - 'docs/**'
     - 'gallery/**'
@@ -136,10 +137,6 @@ jobs:
         run: echo ${{ steps.getfile.outputs.modified }}
 
       # Run below step if Dockerfile is in modified files
-      - name: Checkout 
-        if: contains(steps.getfile.outputs.modified, '.devcontainer/Dockerfile') == 'true'
-        uses: actions/checkout@v2
-     
       - name: Build and push image
         if: contains(steps.getfile.outputs.modified, '.devcontainer/Dockerfile') == 'true'
         run: |

@@ -11,6 +11,7 @@ const FILES_MODIFIED = [];
 const FILES_ADDED = [];
 const FILES_DELETED = [];
 const FILES_RENAMED = [];
+const FILES_ADDED_MODIFIED = [];
 
 const gh = new GitHub(core.getInput('token'));
 const args = { owner: owner.name, repo: repo.name };
@@ -42,10 +43,12 @@ async function processCommit(commit) {
       if (isModified(file)) {
         FILES.push(file.filename);
         FILES_MODIFIED.push(file.filename);
+        FILES_ADDED_MODIFIED.push(file.filename);
       }
       if (isAdded(file)) {
         FILES.push(file.filename);
         FILES_ADDED.push(file.filename);
+        FILES_ADDED_MODIFIED.push(file.filename);
       }
       if (isRenamed(file)) {
         FILES.push(file.filename);
@@ -63,6 +66,7 @@ Promise.all(commits.map(processCommit)).then(() => {
   core.setOutput("deleted", FILES_DELETED);
   core.setOutput("modified", FILES_MODIFIED);
   core.setOutput("renamed", FILES_RENAMED);
+  core.setOutput("added_modified", FILES_ADDED_MODIFIED);
 
   process.exit(0);
 });

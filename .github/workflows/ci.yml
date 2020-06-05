@@ -13,9 +13,6 @@ on:
     - 'vs2015/**'
     - 'vs2019/**'
 
-env:
-  IMAGE_NAME: aten
-
 jobs:
 #  set_vars: # Get base commit to get pushed files
 #    name: set_variables
@@ -116,8 +113,8 @@ jobs:
 #        run: |
 #          docker build -t aten .
 #          docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
-#          docker tag aten docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
-#          docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+#          docker tag aten docker.pkg.github.com/${{ github.repository }}/aten:latest
+#          docker push docker.pkg.github.com/${{ github.repository }}/aten:latest
 
   build_docker:
     name: build_docker
@@ -134,16 +131,24 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dump
-        run: echo ${{ steps.getfile.outputs.modified }}
+        run: echo ${{ steps.getfile.outputs.added_modified }}
 
       # Run below step if Dockerfile is in modified files
-      - name: Build and push image
-        if: contains(steps.getfile.outputs.modified, '.devcontainer/Dockerfile') == 'true'
+      - name: Build and push build image
+        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true
         run: |
           docker build -t aten .
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
-          docker tag aten docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
-          docker push docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+          docker tag aten docker.pkg.github.com/${{ github.repository }}/aten:latest
+          docker push docker.pkg.github.com/${{ github.repository }}/aten:latest
+
+      - name: Build and push dev image
+        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true || contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true
+        run: |
+          docker build -t aten_dev --build-arg=aten:latest ./env/dev
+          docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
+          docker tag aten docker.pkg.github.com/${{ github.repository }}/aten_dev:latest
+          docker push docker.pkg.github.com/${{ github.repository }}/aten_dev:latest
 
   build:
     name: build
@@ -160,15 +165,15 @@ jobs:
         run: docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
     
       - name: Pull image
-        run: docker pull docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+        run: docker pull docker.pkg.github.com/${{ github.repository }}/aten_dev:latest
       
       - name: Run image
-        run: docker run -it -d --name $IMAGE_NAME -v $GITHUB_WORKSPACE:/workspace -w /workspace docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME:latest
+        run: docker run -it -d --name aten_dev -v $GITHUB_WORKSPACE:/workspace -w /workspace docker.pkg.github.com/${{ github.repository }}/aten_dev:latest
       
       - name: Configure
         run: |
-          docker exec $IMAGE_NAME bash -c 'mkdir build'
-          docker exec $IMAGE_NAME bash -c 'cd build && cp ../scripts/RunCMake.sh ./ && ./RunCMake.sh Release 75'
+          docker exec aten_dev bash -c 'mkdir build'
+          docker exec aten_dev bash -c 'cd build && cp ../scripts/RunCMake.sh ./ && ./RunCMake.sh Release 75'
       
       - name: Build
-        run: docker exec $IMAGE_NAME bash -c 'cd build && ninja -j 4'
+        run: docker exec aten_dev bash -c 'cd build && ninja -j 4'

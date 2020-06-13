@@ -1,1 +1,1 @@
-../env/aten/Dockerfile
+../env/dev/Dockerfile

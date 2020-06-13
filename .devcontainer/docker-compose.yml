@@ -1,1 +1,18 @@
-../env/aten/docker-compose.yml
+version: "2.4"
+services:
+  aten:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        - base_from=aten:latest
+        - http_proxy=${http_proxy}
+        - https_proxy=${https_proxy}
+    container_name: aten-docker
+    runtime: nvidia
+    environment:
+      - "DISPLAY"
+    volumes:
+      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+      - "../:/aten"
+    network_mode: bridge

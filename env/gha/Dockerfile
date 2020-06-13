@@ -22,6 +22,7 @@ RUN apt-get update \
 # https://github.com/nektos/act
 RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
 
+# https://github.com/nodesource/distributions
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash \
     && apt-get install -y nodejs
 

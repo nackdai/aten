@@ -30,7 +30,14 @@ RUN git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv \
     && echo 'eval "$(pyenv init -)"' >> ~/.bashrc \
     && eval "$(pyenv init -)" \
     && pyenv install -v ${python_version} \
-    && pyenv global ${python_version}
+    && pyenv global ${python_version} \
+    && pip install pre-commit
+
+# https://github.com/nodesource/distributions
+ARG nodejs_version=14
+RUN curl -sL https://deb.nodesource.com/setup_${nodejs_version}.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs
 
 # Clean up
 RUN apt-get autoremove -y \

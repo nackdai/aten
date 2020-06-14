@@ -15,7 +15,7 @@ void main()
     highp vec2 uv = gl_FragCoord.xy * texel;
 
     oColour = texture2D(image, uv);
-    
+
     highp vec4 bloom = texture2D(bloomtex, uv);
 
     oColour += bloom * 0.4;

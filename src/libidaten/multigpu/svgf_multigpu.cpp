@@ -272,15 +272,15 @@ namespace idaten
         // NOTE
         // すでに切り替えられているが、切り替え前のものを参照したいので、元に戻す.
         auto cur = 1 - m_curAOVPos;
-        
+
         // Notmal & Depth.
         {
             auto src = from.m_aovNormalDepth[cur].ptr();
             auto dst = this->m_aovNormalDepth[cur].ptr();
-        
+
             auto stride = this->m_aovNormalDepth[cur].stride();
             auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
-            
+
             checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
         }
 
@@ -294,7 +294,7 @@ namespace idaten
 
             checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
         }
-        
+
         // Color & Variance.
         if (this->isFirstFrame())
         {

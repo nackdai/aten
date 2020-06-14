@@ -145,7 +145,7 @@ namespace AT_NAME
 
         // Expression(16)
         const auto ht = -(etai * in + etat * out);
-        
+
         const auto wh = normalize(ht);
 
         auto OdotWh = aten::abs(dot(out, wh));

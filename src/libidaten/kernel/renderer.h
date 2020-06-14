@@ -98,7 +98,7 @@ namespace idaten
         idaten::TypedCudaMemory<aten::PrimitiveParamter> m_primparams;
 
         idaten::TypedCudaMemory<aten::mat4> m_mtxparams;
-        
+
         std::vector<idaten::CudaTextureResource> m_nodeparam;
         idaten::TypedCudaMemory<cudaTextureObject_t> m_nodetex;
 

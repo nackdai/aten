@@ -19,7 +19,7 @@ namespace aten
         ~Timeline() {}
 
     public:
-        /** Initialize timeline. 
+        /** Initialize timeline.
          */
         void init(
             real duration,
@@ -80,7 +80,7 @@ namespace aten
         void autoReverse(bool enable);
 
         /** Get whether timeline is reverse when timeline is loop.
-         */ 
+         */
         bool willReverse() const;
 
         /** Get whether timeline is posed.

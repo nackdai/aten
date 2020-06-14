@@ -6,7 +6,7 @@
 namespace AT_NAME {
     class AreaLight : public Light {
     public:
-        AreaLight() 
+        AreaLight()
             : Light(aten::LightType::Area, LightAttributeArea)
         {}
         AreaLight(aten::transformable* obj, const aten::vec3& le)
@@ -22,7 +22,7 @@ namespace AT_NAME {
             : Light(aten::LightType::Area, LightAttributeArea, val)
         {
             m_obj = (aten::transformable*)val.get("object", m_obj);
-            
+
             m_param.objid = (m_obj ? m_obj->id() : -1);
             m_param.le = val.get("color", m_param.le);
         }
@@ -54,7 +54,7 @@ namespace AT_NAME {
 
         virtual aten::LightSampleResult sample(
             const aten::context& ctxt,
-            const aten::vec3& org, 
+            const aten::vec3& org,
             aten::sampler* sampler) const override final;
 
         virtual const aten::hitable* getLightObject() const override final

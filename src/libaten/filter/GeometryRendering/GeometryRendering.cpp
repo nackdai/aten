@@ -1,7 +1,7 @@
 #include <vector>
 #include "filter/GeometryRendering/GeometryRendering.h"
 
-//#pragma optimize( "", off) 
+//#pragma optimize( "", off)
 
 namespace aten {
     static void gaussianFilter(

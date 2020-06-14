@@ -30,7 +30,7 @@ namespace aten {
 #endif
 
     void initSampler(
-        uint32_t width, uint32_t height, 
+        uint32_t width, uint32_t height,
         int seed = 0,
         bool needInitHalton = false);
 

@@ -20,7 +20,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API real refraction::pdf(
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v) const
@@ -96,7 +96,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v) const
@@ -113,7 +113,7 @@ namespace AT_NAME
         bool isLightPath/*= false*/) const
     {
         MaterialSampling ret;
-        
+
         sample(
             &ret,
             &m_param,

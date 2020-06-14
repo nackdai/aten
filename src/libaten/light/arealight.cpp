@@ -3,7 +3,7 @@
 namespace AT_NAME {
     aten::LightSampleResult AreaLight::sample(
         const aten::context& ctxt,
-        const aten::vec3& org, 
+        const aten::vec3& org,
         aten::sampler* sampler) const
     {
         bool isHit = false;

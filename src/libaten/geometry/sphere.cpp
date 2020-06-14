@@ -105,7 +105,7 @@ namespace AT_NAME
 
     void sphere::evalHitResult(
         const aten::context& ctxt,
-        const aten::ray& r, 
+        const aten::ray& r,
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
@@ -124,7 +124,7 @@ namespace AT_NAME
 
     void sphere::evalHitResult(
         const aten::GeomParameter* param,
-        const aten::ray& r, 
+        const aten::ray& r,
         aten::hitrecord* rec,
         const aten::Intersection* isect)
     {
@@ -134,7 +134,7 @@ namespace AT_NAME
     void sphere::evalHitResult(
         const aten::GeomParameter* param,
         const aten::ray& r,
-        const aten::mat4& mtxL2W, 
+        const aten::mat4& mtxL2W,
         aten::hitrecord* rec,
         const aten::Intersection* isect)
     {

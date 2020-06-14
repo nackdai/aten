@@ -145,7 +145,7 @@ namespace aten
         auto sa = computeSurfaceArea(left) + computeSurfaceArea(right);
 
         std::vector<Opt> opts(Rot::Num);
-        
+
         for (int r = Rot::None; r < Rot::Num; r++) {
             switch (r) {
             case Rot::None:
@@ -284,7 +284,7 @@ namespace aten
 
         // Perform the best rotation.
         if (bestRot.rot == Rot::None) {
-            // If the best rotation is no-rotation... we check our parents anyhow.. 
+            // If the best rotation is no-rotation... we check our parents anyhow..
             if (m_parent) {
                 bvh->addToRefit(m_parent);
             }
@@ -321,7 +321,7 @@ namespace aten
                     swap->m_parent = right;
                     refitChildren(right, false);
                     break;
-                case Rot::L_RR: 
+                case Rot::L_RR:
                     swap = left;
                     left = right->m_right;
                     left->m_parent = this;

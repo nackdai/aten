@@ -14,7 +14,7 @@ namespace AT_NAME
         AT_ASSERT(light);
 
         auto res = light->sample(ray.org, sampler);
-        
+
         return std::move(res.dir);
 #else
         AT_ASSERT(false);

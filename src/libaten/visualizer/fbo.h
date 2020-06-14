@@ -14,8 +14,8 @@ namespace aten {
 
     public:
         bool init(
-            int width, 
-            int height, 
+            int width,
+            int height,
             PixelFormat fmt,
             bool needDepth = false);
 

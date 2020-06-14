@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 # Get compute capability dynamicaly
 # https://stackoverflow.com/questions/35485087/determining-which-gencode-compute-arch-values-i-need-for-nvcc-within-cmaks
@@ -26,7 +26,7 @@ CUDA_CUDART_LIBRARY=${CUDA_CUDART_LIBRARY:-${cuda_root}/lib64/libcudart.so}
 generated_binary="/tmp/cuda-compute-version-helper-$$-$timestamp"
 
 # create a 'here document' that is code we compile and use to probe the card
-source_code="$(cat << EOF 
+source_code="$(cat << EOF
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 
@@ -36,8 +36,8 @@ int main()
         cudaError_t status;
         int device_count;
         status = cudaGetDeviceCount(&device_count);
-        if (status != cudaSuccess) { 
-                fprintf(stderr,"cudaGetDeviceCount() failed: %s\n", cudaGetErrorString(status)); 
+        if (status != cudaSuccess) {
+                fprintf(stderr,"cudaGetDeviceCount() failed: %s\n", cudaGetErrorString(status));
                 return -1;
         }
         if (${device_index} >= device_count) {
@@ -45,8 +45,8 @@ int main()
                 return -1;
         }
         status = cudaGetDeviceProperties(&prop, ${device_index});
-        if (status != cudaSuccess) { 
-                fprintf(stderr,"cudaGetDeviceProperties() for device ${device_index} failed: %s\n", cudaGetErrorString(status)); 
+        if (status != cudaSuccess) {
+                fprintf(stderr,"cudaGetDeviceProperties() for device ${device_index} failed: %s\n", cudaGetErrorString(status));
                 return -1;
         }
         int v = prop.major * 10 + prop.minor;

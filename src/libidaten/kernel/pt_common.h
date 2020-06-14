@@ -27,4 +27,3 @@ inline AT_DEVICE_API int getIdx(int ix, int iy, int width)
     return iy * width + ix;
 #endif
 }
-

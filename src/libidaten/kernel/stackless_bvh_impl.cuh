@@ -12,7 +12,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
 
     int nodeid = 0;
     uint32_t bitstack = 0;
-    
+
     float4 node0;    // xyz: boxmin_0, w: parent
     float4 node1;    // xyz: boxmax_0, w: sibling
     float4 node2;    // xyz: boxmax_1, w: child_0
@@ -60,7 +60,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
                 isect->objid = (int)attrib.x;
                 isect->primid = (int)attrib.y;
                 isect->mtrlid = prim.mtrlid;
-                
+
                 //isect->meshid = (int)attrib.w;
                 isect->meshid = prim.gemoid;
 

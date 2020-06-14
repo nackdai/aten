@@ -118,7 +118,7 @@ namespace aten
          */
         virtual bool importTree(
             const context& ctxt,
-            const char* path, 
+            const char* path,
             int offsetTriIdx) override final;
 
         /**
@@ -148,7 +148,7 @@ namespace aten
         {
             return m_threadedNodes;
         }
-        
+
         /**
          * @brief Return all matrices to transform the node.
          */
@@ -403,7 +403,7 @@ namespace aten
         struct SbvhTreelet {
             // Node index in the tree.
             uint32_t idxInBvhTree;
-            
+
             // Flag if the treelet is enabled.
             // If a treelet has a child which is light, it is disabled.
             bool enabled{ true };

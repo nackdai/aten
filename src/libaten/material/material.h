@@ -248,7 +248,7 @@ namespace AT_NAME
 
     protected:
         material(
-            aten::MaterialType type, 
+            aten::MaterialType type,
             const aten::MaterialAttribute& attrib);
 
         material(
@@ -260,8 +260,8 @@ namespace AT_NAME
             aten::texture* normalMap = nullptr);
 
         material(
-            aten::MaterialType type, 
-            const aten::MaterialAttribute& attrib, 
+            aten::MaterialType type,
+            const aten::MaterialAttribute& attrib,
             aten::Values& val);
 
     public:
@@ -401,7 +401,7 @@ namespace AT_NAME
         {
             return m_param;
         }
-        aten::MaterialParameter& param() 
+        aten::MaterialParameter& param()
         {
             return m_param;
         }
@@ -421,7 +421,7 @@ namespace AT_NAME
             m_param.baseColor = param.baseColor;
             m_param.ior = param.ior;
             m_param.shininess = param.shininess;
-            m_param.roughness = param.roughness;            
+            m_param.roughness = param.roughness;
             m_param.subsurface = param.subsurface;
             m_param.metallic = param.metallic;
             m_param.specular = param.specular;
@@ -483,7 +483,7 @@ namespace AT_NAME
         aten::MaterialParameter m_param;
 
         aten::DataList<AT_NAME::material>::ListItem m_listItem;
-        
+
         // For debug.
         std::string m_name;
     };

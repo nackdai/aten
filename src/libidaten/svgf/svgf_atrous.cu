@@ -117,7 +117,7 @@ __global__ void atrousFilter(
 
     // ガウスフィルタ3x3
     float gaussedVarLum;
-    
+
     if (isFirstIter) {
         gaussedVarLum = gaussFilter3x3(ix, iy, width, height, aovColorVariance);
     }
@@ -209,7 +209,7 @@ __global__ void atrousFilter(
         float Wm = meshid == centerMeshId ? 1.0f : 0.0f;
 
         float W = expf(-Wl * Wl - Wz) * Wn * Wm * h[i];
-            
+
         sumC += W * color;
         sumV += W * W * variance;
 
@@ -227,7 +227,7 @@ __global__ void atrousFilter(
         // Store color temporary.
         tmpBuffer[idx] = sumC;
     }
-    
+
     if (isFinalIter) {
         texclrMeshid = aovTexclrMeshid[idx];
         sumC *= texclrMeshid;

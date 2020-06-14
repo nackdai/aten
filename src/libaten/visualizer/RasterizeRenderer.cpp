@@ -123,7 +123,7 @@ namespace aten {
             CALL_GL_API(::glClearStencil(0));
             CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
         }
-        
+
         ctxt.build();
 
         // For object (which means "not" deformable).
@@ -269,7 +269,7 @@ namespace aten {
         CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, &mtxL2W.a[0]));
         m_boxvb.draw(aten::Primitive::Lines, 0, 12);
     }
-    
+
     void RasterizeRenderer::prepareForDrawAABB(const camera* cam)
     {
         // Initialize vb.
@@ -311,7 +311,7 @@ namespace aten {
 
     void RasterizeRenderer::drawObject(
         context& ctxt,
-        const object& obj, 
+        const object& obj,
         const camera* cam,
         bool isWireFrame,
         const mat4& mtxL2W,
@@ -530,7 +530,7 @@ namespace aten {
 
             if (triNum > 0) {
                 auto m = mtrls[i];
-                
+
                 int albedoTexId = m ? m->param().albedoMap : -1;
                 const aten::texture* albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 

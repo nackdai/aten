@@ -77,7 +77,7 @@ And Idanten includes characters of aten, "id**aten**"
   - Deformation
 
 ## Limitations
-  
+
 - Not optimisation by SIMD
   - This should be easy, simple, to avoid difficult to understand, so not use SIMD.
 - Bi-Directional Path Tracing
@@ -202,7 +202,7 @@ docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtim
 1. `cp ../scripts/RunCMake.sh .`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
- 
+
 ## How to run
 
 ### Run on Windows

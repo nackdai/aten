@@ -10,8 +10,8 @@
 // http://www.cse.uaa.alaska.edu/~ssiewert/a490dmis_code/CUDA/cuda_work/samples/2_Graphics/bindlessTexture/bindlessTexture_kernel.cu
 
 __global__ void genMipmap(
-    cudaSurfaceObject_t mipOutput, 
-    cudaTextureObject_t mipInput, 
+    cudaSurfaceObject_t mipOutput,
+    cudaTextureObject_t mipInput,
     int imageW, int imageH)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;

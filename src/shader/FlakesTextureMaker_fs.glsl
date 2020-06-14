@@ -52,7 +52,7 @@ void main()
 
     float flake_scale = 1;
     vec2 p = ndcPos * 1.0 / flake_scale;
-    
+
     vec2 c = voronoi((14.0 + 6.0 * sin(0.2 * u_time)) * p);
 
     vec3 nv = vec3(0, 0, 1);

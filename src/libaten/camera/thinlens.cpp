@@ -260,7 +260,7 @@ namespace aten {
         // (cosΘ)^2/r^2
         const real cos = dot(normalize(-m_imagesensor.dir), normalize(x0_xI));
         const real len2 = squared_length(x0_xI);
-        
+
         const real G = (cos * cos) / len2;
 
         real ret = m_W * G;

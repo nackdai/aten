@@ -879,7 +879,7 @@ __global__ void shade(
 					// （打ち消しあうので、pdfLightには距離成分は含んでいない）.
 					auto misW = pdfLight / (pdfb + pdfLight);
 #ifdef SEPARATE_SHADOWRAY_HITTEST
-					shadowRays[idx].lightcontrib = 
+					shadowRays[idx].lightcontrib =
 #else
 					path.contrib +=
 #endif
@@ -928,7 +928,7 @@ __global__ void shade(
 			russianProb = p;
 		}
 	}
-			
+
 	AT_NAME::MaterialSampling sampling;
 
 	sampleMaterial(
@@ -1022,9 +1022,9 @@ __global__ void hitShadowRay(
 		if (isHit) {
 			hitobj = &ctxt.shapes[isectTmp.objid];
 		}
-		
+
 		isHit = AT_NAME::scene::hitLight(
-			isHit, 
+			isHit,
 			light->attrib,
 			lightobj,
 			shadowRay.distToLight,
@@ -1205,7 +1205,7 @@ namespace idaten {
 					bounce,
 					vtxTexPos,
 					vtxTexNml);
-				
+
 				onShadeMiss(width, height, bounce);
 
 				int hitcount = 0;
@@ -1297,8 +1297,8 @@ namespace idaten {
 			hitTestPrimaryRayInScreenSpace << <grid, block >> > (
 				gbuffer,
 				m_paths.ptr(),
-				m_isects.ptr(), 
-				m_hitbools.ptr(), 
+				m_isects.ptr(),
+				m_hitbools.ptr(),
 				width, height,
 				campos,
 				m_shapeparam.ptr(),

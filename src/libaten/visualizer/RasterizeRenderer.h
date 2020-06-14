@@ -60,7 +60,7 @@ namespace aten {
 
         void drawObject(
             context& ctxt,
-            const object& obj, 
+            const object& obj,
             const camera* cam,
             bool isWireFrame,
             const mat4& mtxL2W = mat4::Identity,
@@ -88,7 +88,7 @@ namespace aten {
 
     private:
         void prepareForDrawAABB(const camera* cam);
-        
+
     private:
         shader m_shader;
         GeomVertexBuffer m_boxvb;

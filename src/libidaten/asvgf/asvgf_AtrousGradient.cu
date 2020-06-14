@@ -90,7 +90,7 @@ __global__ void atrousGradient(
 
 #if 0
     static const int r = 1;
-    
+
     for (int yy = -r; yy <= r; yy ++)
     {
         for (int xx = -r; xx <= r; xx++)

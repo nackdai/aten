@@ -16,7 +16,7 @@ namespace idaten
     public:
         void init(
             const aten::vec4* p,
-            uint32_t memberNumInItem, 
+            uint32_t memberNumInItem,
             uint32_t numOfContaints);
 
         virtual cudaTextureObject_t bind();

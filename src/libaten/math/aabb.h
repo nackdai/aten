@@ -50,9 +50,9 @@ namespace aten {
             real* t_result = nullptr) const
         {
             return hit(
-                r, 
+                r,
                 m_min, m_max,
-                t_min, t_max, 
+                t_min, t_max,
                 t_result);
         }
 

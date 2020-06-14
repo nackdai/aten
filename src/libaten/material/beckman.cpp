@@ -131,7 +131,7 @@ namespace AT_NAME
 
     AT_DEVICE_MTRL_API real MicrofacetBeckman::pdf(
         const real roughness,
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo)
     {

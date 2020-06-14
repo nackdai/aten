@@ -16,7 +16,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 
     stack[stackpos] = 0;
     stackpos++;
-    
+
     while (stackpos > beginStackPos) {
         int nodeid = stack[stackpos - 1];
         stackpos -= 1;

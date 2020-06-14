@@ -127,7 +127,7 @@ namespace aten {
                     }
                 }
             }
-            
+
             *this = tmp;
 
             return *this;
@@ -223,7 +223,7 @@ namespace aten {
                     tmp.m[i][j] = this->m[j][i];
                 }
             }
-            
+
             *this = tmp;
 
             return *this;
@@ -252,7 +252,7 @@ namespace aten {
             m00 = s;
             m11 = s;
             m22 = s;
-            
+
             return *this;
         }
 

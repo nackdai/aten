@@ -342,7 +342,7 @@ __global__ void shadeASVGF(
             russianProb = max(p, 0.01f);
         }
     }
-            
+
     AT_NAME::MaterialSampling sampling;
 
     sampleMaterial(

@@ -72,7 +72,7 @@ namespace AT_NAME
     }
 
     material::material(
-        aten::MaterialType type, 
+        aten::MaterialType type,
         const aten::MaterialAttribute& attrib)
         : m_param(type, attrib)
     {
@@ -97,8 +97,8 @@ namespace AT_NAME
     }
 
     material::material(
-        aten::MaterialType type, 
-        const aten::MaterialAttribute& attrib, 
+        aten::MaterialType type,
+        const aten::MaterialAttribute& attrib,
         aten::Values& val)
         : material(type, attrib)
     {
@@ -106,7 +106,7 @@ namespace AT_NAME
 
         m_param.baseColor = val.get("baseColor", m_param.baseColor);
         m_param.ior = val.get("ior", m_param.ior);
-        
+
         auto albedoMap = (aten::texture*)val.get<void*>("albedoMap", nullptr);
         auto normalMap = (aten::texture*)val.get<void*>("normalMap", nullptr);
 
@@ -198,7 +198,7 @@ namespace AT_NAME
         auto sint2 = eta * eta * sini2;
 
         auto fresnel = schlick(
-            in, 
+            in,
             n, ni, nt);
 
         return fresnel;

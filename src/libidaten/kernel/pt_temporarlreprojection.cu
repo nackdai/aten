@@ -224,7 +224,7 @@ __global__ void temporalReprojection(
 		cur,
 		outSurface,
 		ix * sizeof(float4), iy,
-		cudaBoundaryModeTrap);	
+		cudaBoundaryModeTrap);
 }
 
 __global__ void makePathMask(

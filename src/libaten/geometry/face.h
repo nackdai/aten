@@ -37,7 +37,7 @@ namespace AT_NAME
 
         virtual void evalHitResult(
             const aten::context& ctxt,
-            const aten::ray& r, 
+            const aten::ray& r,
             aten::hitrecord& rec,
             const aten::Intersection& isect) const final;
 
@@ -57,7 +57,7 @@ namespace AT_NAME
 
         void build(
             const aten::context& ctxt,
-            int mtrlid, 
+            int mtrlid,
             int geomid);
 
         aten::aabb computeAABB(const aten::context& ctxt) const;
@@ -89,7 +89,7 @@ namespace AT_NAME
             list.add(&m_listItem);
             m_id = m_listItem.currentIndex();
         }
-    
+
     private:
         aten::PrimitiveParamter param;
         int m_id{ -1 };

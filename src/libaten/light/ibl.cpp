@@ -122,16 +122,16 @@ namespace AT_NAME {
         auto envmap = getEnvMap();
 
         auto clr = envmap->sample(r);
-        
+
         auto pdf = samplePdf(clr, m_avgIllum);
 
         return pdf;
     }
 
     static int samplePdfAndCdf(
-        real r, 
-        const std::vector<real>& cdf, 
-        real& outPdf, 
+        real r,
+        const std::vector<real>& cdf,
+        real& outPdf,
         real& outCdf)
     {
         outPdf = 0;
@@ -198,7 +198,7 @@ namespace AT_NAME {
 
     aten::LightSampleResult ImageBasedLight::sample(
         const aten::context& ctxt,
-        const aten::vec3& org, 
+        const aten::vec3& org,
         const aten::vec3& nml,
         aten::sampler* sampler) const
     {

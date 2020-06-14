@@ -10,7 +10,7 @@ namespace AT_NAME
     private:
         MicrofacetBeckman(
             const aten::vec3& albedo = aten::vec3(0.5),
-            real roughness = real(0.5), 
+            real roughness = real(0.5),
             real ior = real(1),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
@@ -92,7 +92,7 @@ namespace AT_NAME
 
         virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
             const aten::ray& ray,
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             real u, real v,
             aten::sampler* sampler) const override final;
 
@@ -111,7 +111,7 @@ namespace AT_NAME
             bool isLightPath = false) const override final;
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
-        
+
     private:
         static AT_DEVICE_MTRL_API real pdf(
             const real roughness,

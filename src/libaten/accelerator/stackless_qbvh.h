@@ -37,7 +37,7 @@ namespace aten {
             leftChildrenIdx = rhs.leftChildrenIdx;
             isLeaf = rhs.isLeaf;
             numChildren = rhs.numChildren;
-            
+
             sib[0] = rhs.sib[0];
             sib[1] = rhs.sib[1];
             sib[2] = rhs.sib[2];

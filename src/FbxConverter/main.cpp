@@ -125,8 +125,8 @@ int main(int argc, char* argv[])
         }
 
         MdlExporter::exportMdl(
-            48, 
-            output.c_str(), 
+            48,
+            output.c_str(),
             &importer,
             opt.isExportForGPUSkinning);
 
@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
     }
     else {
         aten::FbxImporter importer;
-        
+
         importer.open(opt.input.c_str(), true);
         importer.readBaseModel(opt.anmBaseMdl.c_str());
 

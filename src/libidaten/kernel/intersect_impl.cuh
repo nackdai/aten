@@ -77,7 +77,7 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
     real W = Bx * Ay - By * Ax;
 
     // Peform edge tests.
-    // Moving this test before 
+    // Moving this test before
     // and the end of the previous conditional gives higher performance.
     if ((U < real(0) || V < real(0) || W < real(0))
         && (U > real(0) || V > real(0) || W > real(0)))
@@ -358,7 +358,7 @@ AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
     float4 oy = make_float4(-org.y * invdy.x);
     float4 oz = make_float4(-org.z * invdz.x);
 
-    // X 
+    // X
     auto fx = bmaxx * invdx + ox;
     auto nx = bminx * invdx + ox;
 
@@ -410,8 +410,8 @@ AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
 inline __device__ float4 cross(float4 a, float4 b)
 {
     return make_float4(
-        a.y * b.z - a.z * b.y, 
-        a.z * b.x - a.x * b.z, 
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
         a.x * b.y - a.y * b.x,
         0);
 }

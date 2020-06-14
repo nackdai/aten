@@ -29,7 +29,7 @@ namespace aten {
         std::map<hitable*, accelerator*> nestedBvhMap;
 
         std::vector<std::vector<StacklessBvhNodeEntry>> listBvhNode;
-        
+
         // Register to linear list to traverse bvhnode easily.
         auto root = m_bvh.getRoot();
         listBvhNode.push_back(std::vector<StacklessBvhNodeEntry>());
@@ -140,7 +140,7 @@ namespace aten {
                 else if (right == node) {
                     sibling = left;
                 }
-                
+
                 stacklessBvhNode.sibling = (float)(sibling ? sibling->getTraversalOrder() : -1);
             }
             else {

@@ -40,7 +40,7 @@ namespace idaten
         checkCudaErrors(
             cudaMalloc3DArray(
                 &m_array,
-                &channelDesc, 
+                &channelDesc,
                 make_cudaExtent(width, height, layerNum),
                 cudaArrayLayered));
 

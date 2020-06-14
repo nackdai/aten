@@ -16,7 +16,7 @@ namespace AT_NAME
         friend class TransformableFactory;
 
     private:
-        object() 
+        object()
             : transformable(aten::GeometryType::Polygon)
         {}
 
@@ -82,7 +82,7 @@ namespace AT_NAME
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,
             aten::hitable::SamplePosNormalPdfResult* result,
-            const aten::mat4& mtxL2W, 
+            const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 
         void appendShape(objshape* shape)

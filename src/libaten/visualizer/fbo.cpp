@@ -3,8 +3,8 @@
 
 namespace aten {
     bool FBO::init(
-        int width, 
-        int height, 
+        int width,
+        int height,
         PixelFormat fmt,
         bool needDepth/*= false*/)
     {
@@ -48,7 +48,7 @@ namespace aten {
 
         if (needDepth) {
             CALL_GL_API(::glGenTextures(1, &m_depth));
-        
+
             CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_depth));
 
             CALL_GL_API(::glTexImage2D(

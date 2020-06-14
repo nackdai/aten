@@ -233,7 +233,7 @@ namespace aten
                 auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
                 for (uint32_t i = 0; i < samples; i++) {
-                    
+
 
                     // TODO
                     // sobol や halton sequence はステップ数が多すぎてオーバーフローしてしまう...

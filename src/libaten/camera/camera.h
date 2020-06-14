@@ -128,7 +128,7 @@ namespace AT_NAME {
         virtual const aten::vec3& getPos() const = 0;
 
         /**
-         * @brief Return camera's point of gaze 
+         * @brief Return camera's point of gaze
          */
         virtual const aten::vec3& getDir() const = 0;
 

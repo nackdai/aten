@@ -386,7 +386,7 @@ namespace aten
     }
 
     void visualizer::getTextureData(
-        uint32_t gltex, 
+        uint32_t gltex,
         std::vector<TColor<uint8_t, 4>>& dst)
     {
         CALL_GL_API(::glFlush());

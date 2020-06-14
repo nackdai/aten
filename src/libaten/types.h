@@ -12,4 +12,3 @@
     using real = float;
     #define AT_IS_TYPE_DOUBLE    (false)
 #endif
-

@@ -42,7 +42,7 @@ void main()
         prevCSPos = mtxPrevW2C * prevWorldPos[i];
 
         depth = gl_Position.w;
-        
+
         normal = worldNormal[i];
         uv = vUV[i];
         baryCentric = weight[i];

@@ -12,7 +12,7 @@
 namespace idaten
 {
     class CudaTextureResource;
-    
+
     class LBVHBuilder {
     public:
         LBVHBuilder() {}
@@ -45,7 +45,7 @@ namespace idaten
 
             int left;
             int right;
-            
+
             int parent;
             bool isLeaf;
         };

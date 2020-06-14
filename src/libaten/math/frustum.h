@@ -138,7 +138,7 @@ namespace aten {
 
                 for (int i = 0; i < 3; i++) {
                     const auto& a = axis[i];
-                    
+
                     auto axisLengthSquared = squared_length(a);
 
                     int out1 = 0;

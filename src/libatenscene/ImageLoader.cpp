@@ -68,7 +68,7 @@ namespace aten {
     }
 
     texture* ImageLoader::load(
-        const std::string& tag, 
+        const std::string& tag,
         const std::string& path,
         context& ctxt,
         ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)

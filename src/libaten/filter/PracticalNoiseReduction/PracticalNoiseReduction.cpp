@@ -6,7 +6,7 @@
 //#define TEST_filter
 
 #ifdef TEST_filter
-#pragma optimize( "", off ) 
+#pragma optimize( "", off )
 #endif
 
 namespace aten {
@@ -44,7 +44,7 @@ namespace aten {
                 for (int yy = 0; yy < 3; yy++) {
                     for (int xx = 0; xx < 3; xx++) {
                         int bufPos = yy * 3 + xx;
-                        
+
                         int imgx = aten::clamp<int>(x + xx - 1, 0, width - 1);
                         int imgy = aten::clamp<int>(y + yy - 1, 0, height - 1);
                         int imgPos = imgx + imgy * width;
@@ -54,7 +54,7 @@ namespace aten {
                         bufB[bufPos] = src[imgPos].b;
                     }
                 }
-                
+
 #if 0
                 std::sort(bufR, bufR + size);
                 std::sort(bufG, bufG + size);
@@ -76,7 +76,7 @@ namespace aten {
                         _swap(bufR[inner], maxPixR);
                         _swap(bufG[inner], maxPixG);
                         _swap(bufB[inner], maxPixB);
-                    }    
+                    }
                 }
 
                 int pos = y * width + x;
@@ -240,9 +240,9 @@ namespace aten {
         PracticalNoiseReductionBilateralFilter filter;
         filter.setParam(stdS, stdC, stdD);
         filter(
-            in, 
+            in,
             m_nml_depth,
-            width, height, 
+            width, height,
             &filtered[0],
             &var_filtered[0]);
 #endif
@@ -253,7 +253,7 @@ namespace aten {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int pos = y * width + x;
-                
+
                 const vec4& Lf = filtered[pos];
                 const vec4& Llv = m_direct[pos];
 

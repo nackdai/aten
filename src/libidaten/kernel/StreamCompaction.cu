@@ -16,7 +16,7 @@ __global__ void computeBlockCount(
     int* dst,
     int num,    // block count per grid used in exclusiveScan.
     int stride,    // thread count per block used in exclusiveScan.
-    const int* src0, 
+    const int* src0,
     const int* src1)
 {
     int index = (blockIdx.x * blockDim.x) + threadIdx.x;

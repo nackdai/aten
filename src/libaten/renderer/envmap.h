@@ -70,7 +70,7 @@ namespace AT_NAME
 
             return std::move(uv);
         }
-        
+
     private:
         aten::texture* m_envmap;
         real m_mult{ real(1) };

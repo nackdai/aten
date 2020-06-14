@@ -16,7 +16,7 @@ namespace idaten
     public:
         void init(
             aten::SkinningVertex* vertices,
-            uint32_t vtxNum, 
+            uint32_t vtxNum,
             uint32_t* indices,
             uint32_t idxNum,
             const aten::GeomMultiVertexBuffer* vb);
@@ -38,7 +38,7 @@ namespace idaten
             bool isRestart = true);
 
         bool getComputedResult(
-            aten::vec4* pos, 
+            aten::vec4* pos,
             aten::vec4* nml,
             uint32_t num);
 

@@ -242,7 +242,7 @@ namespace idaten
             cudaSurfaceObject_t outputSurf,
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);
-        
+
         virtual void onDenoise(
             const TileDomain& tileDomain,
             int width, int height,

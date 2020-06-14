@@ -29,7 +29,7 @@ namespace aten
     }
 
     object* ObjLoader::load(
-        const std::string& tag, 
+        const std::string& tag,
         const std::string& path,
         context& ctxt,
         bool needComputeNormalOntime/*= false*/)
@@ -68,7 +68,7 @@ namespace aten
 
     void ObjLoader::load(
         std::vector<object*>& objs,
-        const std::string& tag, 
+        const std::string& tag,
         const std::string& path,
         context& ctxt,
         bool willSeparate/*= false*/,
@@ -179,7 +179,7 @@ namespace aten
                 std::max(shapemax.y, pmax.y),
                 std::max(shapemax.z, pmax.z));
 
-            aten::objshape* dstshape = nullptr; 
+            aten::objshape* dstshape = nullptr;
             int mtrlidx = -1;
 
             auto idxnum = shape.mesh.indices.size();
@@ -253,11 +253,11 @@ namespace aten
 
                         aten::MaterialParameter mtrlParam;
                         mtrlParam.baseColor = diffuse;
-                        
+
                         aten::material* mtrl = ctxt.createMaterialWithMaterialParameter(
                             aten::MaterialType::Lambert,
                             mtrlParam,
-                            albedoMap, 
+                            albedoMap,
                             normalMap,
                             nullptr);
 

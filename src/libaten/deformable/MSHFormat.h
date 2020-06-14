@@ -66,7 +66,7 @@ namespace aten
     // | +--------------------+ |
     // |        ・・・          |
     // +------------------------+
-    
+
     struct MeshHeader {
         uint32_t magic{ 0 };
         uint32_t version{ 0 };

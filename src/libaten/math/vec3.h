@@ -277,14 +277,14 @@ namespace aten {
 #if 0
         if (aten::abs(n.z) > real(0.707106781186547524401)) {
             real k = aten::sqrt(n.y * n.y + n.z * n.z);
-            p.x = 0; 
-            p.y = -n.z / k; 
+            p.x = 0;
+            p.y = -n.z / k;
             p.z = n.y / k;
         }
         else {
             real k = aten::sqrt(n.x * n.x + n.y * n.y);
-            p.x = -n.y / k; 
-            p.y = n.x / k; 
+            p.x = -n.y / k;
+            p.y = n.x / k;
             p.z = 0;
         }
 #else

@@ -143,7 +143,7 @@ __global__ void geometryRender(
 	real sumWeight = 0;
 
 	aten::vec3 denom;
-	
+
 	for (int i = 0; i < 4; i++) {
 		auto midx = getIdx(pos[i].x * ratio, pos[i].y * ratio, width);
 		int refMtrlIdx = aovs[midx].mtrlid;

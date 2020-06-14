@@ -70,7 +70,7 @@ namespace aten
                 const vec3& th,
                 const vec3& _bsdf,
                 aten::Light* _light)
-                : pos(p), nml(_nml), orienting_normal(_orienting_normal), objType(type), totalAreaPdf(_totalAreapdf), throughput(th), 
+                : pos(p), nml(_nml), orienting_normal(_orienting_normal), objType(type), totalAreaPdf(_totalAreapdf), throughput(th),
                 bsdf(_bsdf), light(_light)
             {}
         };
@@ -123,7 +123,7 @@ namespace aten
 
         void combine(
             const context& ctxt,
-            int x, 
+            int x,
             int y,
             std::vector<Result>& result,
             const std::vector<Vertex>& eye_vs,

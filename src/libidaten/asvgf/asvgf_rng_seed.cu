@@ -32,7 +32,7 @@ __global__ void initRngSeedsForASVGF(
 namespace idaten {
     void AdvancedSVGFPathTracing::onInitRngSeeds(int width, int height)
     {
-        
+
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 

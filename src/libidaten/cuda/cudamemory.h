@@ -24,7 +24,7 @@ namespace idaten {
         {
             return m_device;
         }
-        
+
         uint32_t bytes() const
         {
             return m_bytes;

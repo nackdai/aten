@@ -26,7 +26,7 @@ namespace aten
             vec3 lightcontrib;
             vec3 lightPos;
             Light* targetLight;
-            
+
             struct {
                 uint32_t isHit        : 1;
                 uint32_t isAlive    : 1;

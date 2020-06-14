@@ -21,8 +21,8 @@ namespace aten
     public:
         static sphere* createSphere(
             context& ctxt,
-            const aten::vec3& center, 
-            real radius, 
+            const aten::vec3& center,
+            real radius,
             material* mtrl)
         {
             sphere* ret = new sphere(center, radius, mtrl);

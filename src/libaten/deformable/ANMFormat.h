@@ -54,11 +54,11 @@ namespace aten
         RotateX   = Rotate | ParamX,
         RotateY   = Rotate | ParamY,
         RotateZ   = Rotate | ParamZ,
-        
+
         QuaternionXYZW = Quaternion | ParamXYZW,
         QuaternionXYZ  = Quaternion | ParamXYZ,
         QuaternionW    = Quaternion | ParamW,
-        
+
         ScaleXYZ = Scale | ParamXYZ,
         ScaleX   = Scale | ParamX,
         ScaleY   = Scale | ParamY,
@@ -114,7 +114,7 @@ namespace aten
      */
     struct AnmKey {
         float keyTime{ 0.0f };         ///< キー時間.
-        
+
         uint8_t numParams{ 0 };     ///< アニメーションパラメータ数。位置、回転、スケールによって異なる.
         uint8_t stride{ 0 };        ///< １パラメータあたりのバイトサイズ.
         uint8_t reserved[2];

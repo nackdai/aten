@@ -72,9 +72,9 @@ bool VoxelViewer::init(
 
     // vertex buffer.
     m_vb.init(
-        sizeof(aten::vec4), 
-        AT_COUNTOF(VoxelVtxs), 
-        0, 
+        sizeof(aten::vec4),
+        AT_COUNTOF(VoxelVtxs),
+        0,
         attribs,
         AT_COUNTOF(attribs),
         VoxelVtxs);

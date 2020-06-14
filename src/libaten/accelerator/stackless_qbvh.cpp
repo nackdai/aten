@@ -302,7 +302,7 @@ namespace aten
             const auto& bvhNode = listBvhNode[childIdx];
 
             const auto node = bvhNode.node;
-            
+
             auto bbox = node->getBoundingbox();
             bbox = aten::aabb::transform(bbox, bvhNode.mtxL2W);
 
@@ -416,7 +416,7 @@ namespace aten
         aten::vec4 minus_inf(-AT_MATH_INF);
         aten::vec4 plus_inf(AT_MATH_INF);
 
-        // X 
+        // X
         auto fx = bmaxx * invdx + ox;
         auto nx = bminx * invdx + ox;
 

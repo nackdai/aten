@@ -141,8 +141,8 @@ namespace aten
                     // NODE
                     // m_listThreadedBvhNode[0] is for top layer.
                     std::copy(
-                        threadedBvhNodes.begin(), 
-                        threadedBvhNodes.end(), 
+                        threadedBvhNodes.begin(),
+                        threadedBvhNodes.end(),
                         std::back_inserter(m_listThreadedBvhNode[i + 1]));
                 }
             }
@@ -160,7 +160,7 @@ namespace aten
         }
 
         for (const auto& n : nodes) {
-            fprintf(fp, "%d %d %d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n", 
+            fprintf(fp, "%d %d %d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n",
                 (int)n.hit, (int)n.miss, (int)n.shapeid, (int)n.primid, (int)n.exid, (int)n.meshid,
                 n.boxmin.x, n.boxmin.y, n.boxmin.z,
                 n.boxmax.x, n.boxmax.y, n.boxmax.z);
@@ -563,7 +563,7 @@ namespace aten
                 if (m_mapNestedBvh.find(exid) == m_mapNestedBvh.end()) {
                     m_mapNestedBvh.insert(std::pair<int, accelerator*>(exid, accel));
                 }
-                
+
                 if (subobj) {
                     accel = subobj->getInternalAccelerator();
 

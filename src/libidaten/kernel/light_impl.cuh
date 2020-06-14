@@ -2,7 +2,7 @@
 
 AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::hitable::SamplePosNormalPdfResult* result,
-    Context* ctxt, 
+    Context* ctxt,
     const aten::GeomParameter* shape,
     aten::sampler* sampler)
 {
@@ -27,7 +27,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::vec3 p0 = aten::vec3(_p0.x, _p0.y, _p0.z);
     aten::vec3 p1 = aten::vec3(_p1.x, _p1.y, _p1.z);
     aten::vec3 p2 = aten::vec3(_p2.x, _p2.y, _p2.z);
-    
+
     aten::vec3 n0 = aten::vec3(_n0.x, _n0.y, _n0.z);
     aten::vec3 n1 = aten::vec3(_n1.x, _n1.y, _n1.z);
     aten::vec3 n2 = aten::vec3(_n2.x, _n2.y, _n2.z);

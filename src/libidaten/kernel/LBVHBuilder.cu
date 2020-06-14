@@ -20,7 +20,7 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
     int index1, int index2,
     T key1)
 {
-    // No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one 
+    // No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one
     // thread per internal node)
     if (index2 < 0 || index2 >= numOfElems)
     {
@@ -48,7 +48,7 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
     int index1, int index2,
     uint64_t key1)
 {
-    // No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one 
+    // No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one
     // thread per internal node)
     if (index2 < 0 || index2 >= numOfElems)
     {
@@ -220,7 +220,7 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 }
 
 __forceinline__ __device__ int3 findSpan(
-    const uint32_t* mortonCodes, 
+    const uint32_t* mortonCodes,
     uint32_t numPrims,
     int idx)
 {
@@ -257,7 +257,7 @@ __forceinline__ __device__ int3 findSpan(
         }
     } while (t > 1);
 
-    // Pack span 
+    // Pack span
     int3 span;
     span.x = min(idx, idx + l * d);
     span.y = max(idx, idx + l * d);
@@ -339,7 +339,7 @@ __global__ void buildTree(
         child->parent = idx;
         child->isLeaf = false;
     }
-    
+
     if (split + 1 == range.y) {
         node->right = split + 1 + numOfElems - 1;
 
@@ -556,7 +556,7 @@ __global__ void computeBoudingBox(
     uint32_t* executedIdxArray)
 {
     const int idx = threadIdx.x + blockIdx.x * blockDim.x;
-    
+
     const int firstThreadIdxInBlock = blockIdx.x * blockDim.x;
     const int lastThreadIdxInBlock = firstThreadIdxInBlock + blockDim.x - 1;
 
@@ -607,7 +607,7 @@ __global__ void computeBoudingBox(
     gpunode->boxmax = aten::vec3(aabbMax.x, aabbMax.y, aabbMax.z);
 
 #if 0
-    printf("Vtx(%d : %d %d %d) [%f, %f, %f] [%f, %f, %f] [%f, %f, %f]\n", 
+    printf("Vtx(%d : %d %d %d) [%f, %f, %f] [%f, %f, %f] [%f, %f, %f]\n",
         triId,
         prim.idx[0], prim.idx[1], prim.idx[2],
         v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);

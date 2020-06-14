@@ -10,7 +10,7 @@
 #define BDPT_DEBUG
 
 #ifdef BDPT_DEBUG
-#pragma optimize( "", off) 
+#pragma optimize( "", off)
 #endif
 
 namespace aten
@@ -342,7 +342,7 @@ namespace aten
 			// => eyepath がライトに直接ヒットしている可能性.
 
 			const Vertex& endEye = eyepath[numEye - 1];
-			
+
 			result = (endEye.mtrl && endEye.mtrl->isEmissive());
 			firstRayDir = normalize(eyepath[1].pos - eyepath[0].pos);
 			eyeOrg = eyepath[0].pos;
@@ -470,9 +470,9 @@ namespace aten
 
 				const vec3 wi = normalize(vtx.pos - fromVtx.pos);
 				const vec3 wo = normalize(toVtx.pos - vtx.pos);
-				
+
 				vec3 brdf(0);
-				
+
 				if (vtx.mtrl) {
 					brdf = vtx.mtrl->bsdf(vtx.nml, wi, wo, vtx.u, vtx.v);
 				}
@@ -514,9 +514,9 @@ namespace aten
 		}
 		inline void add(const real b)
 		{
-			y = b - carry; 
-			const real t = sum + y; 
-			carry = (t - sum) - y; 
+			y = b - carry;
+			const real t = sum + y;
+			carry = (t - sum) - y;
 			sum = t;
 		}
 	};
@@ -568,7 +568,7 @@ namespace aten
 							camsample.posOnImageSensor,
 							camsample.posOnLens,
 							camsample.posOnObjectplane);
-						
+
 						totalPdf *= pdf;
 					}
 					else {
@@ -636,7 +636,7 @@ namespace aten
 						const real dist2 = dv.squared_length();
 						dv.normalize();
 						const real c = dot(vtx.nml, dv);
-						
+
 						totalPdf *= pdf * aten::abs(c / dist2);
 					}
 					else {
@@ -732,8 +732,8 @@ namespace aten
 		const std::vector<Vertex>& vs,
 		const CameraSampleResult& camsample,
 		camera* camera,
-		const int numEyeVertices, 
-		const int numLightVertices, 
+		const int numEyeVertices,
+		const int numLightVertices,
 		const int pathLength)
 	{
 		const real p_i = computePDF(vs, camsample, camera, pathLength, numEyeVertices, numLightVertices);
@@ -811,7 +811,7 @@ namespace aten
 
 				// store the pixel contribution
 				result.push_back(Result(
-					c, 
+					c,
 					x, y,
 					numEyeVertices < 1 ? false : true));
 			}

@@ -164,7 +164,7 @@ namespace AT_NAME
         real u, real v) const
     {
         auto num = m_layer.size();
-        
+
         real pdf = 0;
 
         real weight = 1;
@@ -210,7 +210,7 @@ namespace AT_NAME
         AT_ASSERT(num > 0);
 
         auto mtrl = m_layer[0];
-        
+
         auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler);
 
         return std::move(dir);

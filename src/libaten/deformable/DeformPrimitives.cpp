@@ -28,7 +28,7 @@ namespace aten
             // Not need to keep indices data.
             m_indices.clear();
         }
-        
+
         return true;
     }
 

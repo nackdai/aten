@@ -1,5 +1,5 @@
 fail_fast: true
-exclude: .*3rdparty/.*
+exclude: (.*3rdparty/.*|.*vs2015/.*|.*vs2019/.*|.*asset/.*|.*docs/.*|.*gallery/.*)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -8,10 +8,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: detect-private-key
-      - id: mixed-line-ending
-        args: ['--fix=crlf']
 
-repos:
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.10
     hooks:

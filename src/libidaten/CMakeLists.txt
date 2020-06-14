@@ -13,32 +13,53 @@ message("Version: " ${CUDA_VERSION})
 message("Library: " ${CUDA_CUDA_LIBRARY})
 message("Runtime: " ${CUDA_CUDART_LIBRARY})
 
-set(
-    CUDA_NVCC_FLAGS
-    ${CUDA_NVCC_FLAGS} -rdc=true -use_fast_math -gencode arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY} -std=c++14)
+set(CUDA_NVCC_FLAGS
+    ${CUDA_NVCC_FLAGS}
+    -rdc=true
+    -use_fast_math
+    -gencode
+    arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY}
+    -std=c++14)
 
 message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 
 add_definitions(-D__AT_CUDA__)
 
-set_source_files_properties(../libaten/material/material.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/beckman.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/blinn.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/ggx.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/oren_nayar.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/refraction.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/specular.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/carpaint.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/FlakesNormal.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/velvet.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/lambert_refraction.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/microfacet_refraction.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/material/disney_brdf.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/geometry/sphere.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-set_source_files_properties(../libaten/camera/pinhole.cpp PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/material.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/beckman.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/blinn.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/ggx.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/oren_nayar.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/refraction.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/specular.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/carpaint.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/FlakesNormal.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/velvet.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/lambert_refraction.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/microfacet_refraction.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/material/disney_brdf.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/geometry/sphere.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(../libaten/camera/pinhole.cpp
+                            PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 
 # Add library to build.
-cuda_add_library(${PROJECT_NAME} STATIC
+cuda_add_library(
+  ${PROJECT_NAME}
+  STATIC
   ../libaten/os/linux/misc/timer_linux.cpp
   ../libaten/geometry/sphere.cpp
   ../libaten/misc/color.cpp
@@ -155,27 +176,29 @@ cuda_add_library(${PROJECT_NAME} STATIC
   svgf/svgf_tile.cu
   svgf/svgf_tp.cu)
 
-set_target_properties(${PROJECT_NAME} 
-  PROPERTIES
-    CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-target_include_directories(${PROJECT_NAME}
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+target_include_directories(
+  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
-target_link_libraries(${PROJECT_NAME} 
-    aten
-    glm)
+target_link_libraries(${PROJECT_NAME} aten glm)
 
 # Defines outputs , depending Debug or Release.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  install(TARGETS ${PROJECT_NAME}
-    ARCHIVE DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}"   # Static libraries
-    LIBRARY DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}"   # Non-DLL shared libraries
-    RUNTIME DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}")  # Exectutable or DLL
+  install(
+    TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}" # Static libraries
+    LIBRARY DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}" # Non-DLL shared
+                                                              # libraries
+    RUNTIME DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_DEBUG}") # Exectutable or
+                                                               # DLL
 else()
-  install(TARGETS ${PROJECT_NAME}
-    ARCHIVE DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}"   # Static libraries
-    LIBRARY DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}"   # Non-DLL shared libraries
-    RUNTIME DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}")  # Exectutable or DLL
+  install(
+    TARGETS ${PROJECT_NAME}
+    ARCHIVE DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}" # Static
+                                                                # libraries
+    LIBRARY DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}" # Non-DLL shared
+                                                                # libraries
+    RUNTIME DESTINATION "${CMAKE_BINARY_DIR}/${OUTPUT_RELEASE}") # Exectutable
+                                                                 # or DLL
 endif()

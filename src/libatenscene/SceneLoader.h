@@ -19,7 +19,7 @@ namespace aten
 
         struct SceneInfo {
             aten::scene* scene{ nullptr };
-            
+
             aten::camera* camera{ nullptr };
 
             std::string rendererType;

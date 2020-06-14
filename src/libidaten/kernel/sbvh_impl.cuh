@@ -11,7 +11,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
     aten::Intersection isectTmp;
 
     int nodeid = 0;
-    
+
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
     float4 attrib;    // x:shapeid, y:primid, z:exid,    w:meshid

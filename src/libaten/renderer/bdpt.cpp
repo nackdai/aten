@@ -211,7 +211,7 @@ namespace aten
                 rec.u, rec.v));
 
             throughput *= sampledBsdf;
-            
+
             // refractionの反射、屈折の確率を掛け合わせる.
             // refraction以外では 1 なので影響はない.
             totalAreaPdf *= sampling.subpdf;
@@ -601,7 +601,7 @@ namespace aten
 
         // 頂点を一列に並べる。
         // vs[0] = y0, vs[1] = y1, ... vs[k-1] = x1, vs[k] = x0
-        
+
         // lightサブパス.
         for (int i = 0; i < numLightVtx; ++i) {
             vs[i] = &light_vs[i];
@@ -686,7 +686,7 @@ namespace aten
 
     void BDPT::combine(
         const context& ctxt,
-        int x, 
+        int x,
         int y,
         std::vector<Result>& result,
         const std::vector<Vertex>& eye_vs,
@@ -925,7 +925,7 @@ namespace aten
                         std::vector<Vertex> lightvs;
 
                         auto eyeRes = genEyePath(ctxt, eyevs, x, y, &rnd, scene, camera);
-                        
+
 #if 0
                         if (eyeRes.isTerminate) {
                             int pos = eyeRes.y * m_width + eyeRes.x;
@@ -964,9 +964,9 @@ namespace aten
                             }
 
                             combine(
-                                ctxt, 
+                                ctxt,
                                 x, y,
-                                result, 
+                                result,
                                 eyevs,
                                 lightvs,
                                 scene,

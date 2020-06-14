@@ -441,7 +441,7 @@ namespace aten {
 #endif
 
     material* MaterialLoader::create(
-        const std::string& type, 
+        const std::string& type,
         context& ctxt,
         Values& values)
     {

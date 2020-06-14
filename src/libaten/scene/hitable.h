@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <vector>
 #include <functional>
@@ -138,7 +138,7 @@ namespace aten {
 
         virtual void getSamplePosNormalArea(
             const context& ctxt,
-            SamplePosNormalPdfResult* result, 
+            SamplePosNormalPdfResult* result,
             sampler* sampler) const
         {
             AT_ASSERT(false);

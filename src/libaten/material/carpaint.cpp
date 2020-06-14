@@ -400,7 +400,7 @@ namespace AT_NAME
             auto G = G1_lh * G1_vh;
 
             auto D = 1 / (m * m * cos4) * aten::exp(-tan2 / (m * m)) / (4 * c);
-            
+
             auto denom = 4 * inCostheta * outCosTheta;
 
             auto r = param->carpaint.flake_reflection;
@@ -438,7 +438,7 @@ namespace AT_NAME
 
                 aten::vec3 n = normalize(normal + f);
                 auto c = aten::abs(dot(n, -wi));
-            
+
                 bsdf += param->carpaint.flake_intensity * param->carpaint.flakeColor * (1 - F) * density * aten::pow(c, 16);
 #endif
             }
@@ -465,7 +465,7 @@ namespace AT_NAME
         bool isLightPath/*= false*/) const
     {
         MaterialSampling ret;
-        
+
         sample(
             &ret,
             &m_param,
@@ -516,7 +516,7 @@ namespace AT_NAME
         bool isLightPath/*= false*/)
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);
-        
+
         const auto& wo = result->dir;
 
         result->pdf = pdf(param, normal, wi, wo, u, v);
@@ -532,7 +532,7 @@ namespace AT_NAME
         bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size, 0.01, 1);
         bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size_variance, 0, 1);
         bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_normal_orientation, 0, 1);
-        
+
         bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_reflection, 0, 1);
         bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_transmittance, 0, 1);
 

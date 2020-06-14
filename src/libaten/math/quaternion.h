@@ -133,8 +133,8 @@ namespace aten
 
         // 球面線形補間
         static quaternion slerp(
-            const quaternion& quat1, 
-            const quaternion& quat2, 
+            const quaternion& quat1,
+            const quaternion& quat2,
             real t)
         {
             // NOTE
@@ -330,7 +330,7 @@ namespace aten
             // Sy = sin(yaw/2), Sp = sin(pitch/2), Sr = sin(roll/2)
             //
             // QpitchQroll = (CpCr) + (SpCr)i + (-SpSR)j + (CpSr)k
-            // QyawQpirchQroll = (CyCpCr + SySpSr) 
+            // QyawQpirchQroll = (CyCpCr + SySpSr)
             //                      + (CySpCr + SyCpCr)i
             //                      + (-CySpSr + SyCpCr)j
             //                      + (CyCpSr - SySpCr)k
@@ -396,7 +396,7 @@ namespace aten
 
             // TODO
             // MatrixFromQuatの結果はZXYの回転順番であることを常に保障する？
-            
+
             // NOTE
             // m[0][0] = CzCy + SzSxSy  m[0][1] = SzCx m[0][2] = -CzSy + SzSxCy m[0][3] = 0
             // m[1][0] = -SzCy + CzSxSy m[1][1] = CzCx m[1][2] = SzSy + CzSxCy  m[1][3] = 0

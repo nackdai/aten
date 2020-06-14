@@ -37,7 +37,7 @@ private:
 
     static aten::object* s_obj;
     static aten::RasterizeRenderer s_rasterizer;
-    
+
     static aten::Blitter s_blitter;
     static aten::visualizer* s_visualizer;
 

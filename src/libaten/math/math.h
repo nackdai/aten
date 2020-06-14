@@ -289,7 +289,7 @@ namespace aten {
         // Make sure maxUlps is non-negative and small enough that the
         // default NAN won't compare as equal to anything.
         AT_ASSERT(maxUlps > 0 && maxUlps < 4 * 1024 * 1024);
-        
+
         // Make aInt lexicographically ordered as a twos-complement int
         int aInt = *(int*)&A;
         if (aInt < 0) {

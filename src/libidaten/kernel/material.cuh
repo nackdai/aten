@@ -43,7 +43,7 @@ __device__ aten::vec3 sampleDirection(
     const aten::vec3& wi,
     real u, real v,
     aten::sampler* sampler);
-    
+
 __device__ aten::vec3 sampleBSDF(
     const Context* ctxt,
     const aten::MaterialParameter* mtrl,

@@ -20,7 +20,7 @@ aten::DeformAnimation* getDeformAnm()
 }
 
 static aten::material* createMaterial(
-    aten::context& ctxt, 
+    aten::context& ctxt,
     aten::MaterialType type,
     const aten::vec3& albedo,
     aten::texture* albedoMap,
@@ -55,7 +55,7 @@ static aten::material* createMaterial(
 
 static aten::material* createMaterialWithParamter(
     aten::context& ctxt,
-    aten::MaterialType type, 
+    aten::MaterialType type,
     const aten::MaterialParameter& param)
 {
     return ctxt.createMaterialWithMaterialParameter(
@@ -75,7 +75,7 @@ static aten::material* createMaterialWithParamter(
     return ctxt.createMaterialWithMaterialParameter(
         type,
         param,
-        albedoMap, 
+        albedoMap,
         normalMap,
         roughnessMap);
 }
@@ -237,8 +237,8 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto s = aten::TransformableFactory::createSphere(
         ctxt,
-        aten::vec3(0, -1000, 0), 
-        1000, 
+        aten::vec3(0, -1000, 0),
+        1000,
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
@@ -278,8 +278,8 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
                     s = aten::TransformableFactory::createSphere(
                         ctxt,
-                        center, 
-                        0.2, 
+                        center,
+                        0.2,
                         createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
                 }
 
@@ -519,9 +519,9 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::Light* l = new aten::SpotLight(
         aten::vec3(65, 90, 20),
         aten::vec3(0, -1, 0),
-        aten::vec3(36.0, 36.0, 36.0), 
+        aten::vec3(36.0, 36.0, 36.0),
         0, 0.1, 0,
-        Deg2Rad(30), 
+        Deg2Rad(30),
         Deg2Rad(60),
         1);
     //aten::Light* l = new aten::AreaLight(light, emit->color());
@@ -545,8 +545,8 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto s = aten::TransformableFactory::createSphere(
         ctxt,
-        aten::vec3(0, -1000, 0), 
-        1000, 
+        aten::vec3(0, -1000, 0),
+        1000,
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.8, 0.8, 0.8)));
     scene->add(s);
 
@@ -871,7 +871,7 @@ void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene
     mtrlParam.shininess = 200;
     mtrlParam.ior = 0.8;
     auto spec = createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam);
-    
+
     auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.7, 0.0, 0.0));
 
     auto layer = new aten::LayeredBSDF();
@@ -966,7 +966,7 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto s_ggx = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(0),
-        1.0, 
+        1.0,
         createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
     scene->add(aten::TransformableFactory::createInstance<aten::sphere>(ctxt, s_ggx, mtxL2W));
 #endif

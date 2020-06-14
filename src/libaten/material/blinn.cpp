@@ -39,7 +39,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API real MicrofacetBlinn::pdf(
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,    /* in */
         const aten::vec3& wo,    /* out */
         real u, real v) const
@@ -328,7 +328,7 @@ namespace AT_NAME
             sampler,
             u, v,
             isLightPath);
-        
+
         return std::move(ret);
     }
 

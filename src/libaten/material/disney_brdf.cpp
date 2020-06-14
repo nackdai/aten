@@ -66,7 +66,7 @@ namespace AT_NAME
         // A trick to avoid fireflies from RadeonRaySDK.
         auto f = sqr(sqr(HdotX / ax) + sqr(HdotY / ay) + NdotH * NdotH);
         f = AT_MATH_PI * ax * ay * f * f;
-        
+
         f = aten::clamp<real>(1 / f, 0, 10);
 
         return f;
@@ -119,10 +119,10 @@ namespace AT_NAME
         const aten::vec3& N = normal;
         const aten::vec3& V = -wi;
         const aten::vec3& L = wo;
-        
+
         const aten::vec3 X = aten::getOrthoVector(N);
         const aten::vec3 Y = normalize(cross(N, X));
-        
+
         // TODO
         const auto anisotropic = mtrl->anisotropic;
         const auto roughness = mtrl->roughness;
@@ -162,7 +162,7 @@ namespace AT_NAME
 
         aten::vec3 c_spec0 = mix(
             specular * real(0.1) * mix(aten::vec3(1), c_tint, specular_tint),
-            cd_lin, 
+            cd_lin,
             metallic);
 
         real cs_lum = dot(c_spec0, aten::vec3(0.3f, 0.6f, 0.1f));

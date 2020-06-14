@@ -170,7 +170,7 @@ namespace AT_NAME
 
     AT_DEVICE_MTRL_API real MicrofacetVelvet::pdf(
         real roughness,
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo)
     {
@@ -252,7 +252,7 @@ namespace AT_NAME
         auto denom = 4 * NdotL * NdotV;
 
         auto bsdf = denom > AT_MATH_EPSILON ? albedo * G * D / denom : aten::vec3(0);
-        
+
         fresnel = real(0);
 
         return std::move(bsdf);
@@ -314,7 +314,7 @@ namespace AT_NAME
         bool isLightPath/*= false*/) const
     {
         MaterialSampling ret;
-        
+
         sample(
             &ret,
             &m_param,

@@ -56,7 +56,7 @@ namespace AT_NAME
         virtual void evalHitResult(
             const context& ctxt,
             const aten::ray& r,
-            aten::hitrecord& rec, 
+            aten::hitrecord& rec,
             const aten::Intersection& isect) const override final;
 
     private:

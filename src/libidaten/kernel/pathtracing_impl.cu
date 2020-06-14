@@ -579,7 +579,7 @@ __global__ void shade(
             russianProb = p;
         }
     }
-            
+
     AT_NAME::MaterialSampling sampling;
 
     sampleMaterial(
@@ -673,9 +673,9 @@ __global__ void hitShadowRay(
         if (isHit) {
             hitobj = &ctxt.shapes[isectTmp.objid];
         }
-        
+
         isHit = AT_NAME::scene::hitLight(
-            isHit, 
+            isHit,
             light->attrib,
             lightobj,
             shadowRay.distToLight,

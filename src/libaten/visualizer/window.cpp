@@ -281,7 +281,7 @@ namespace aten
             wheelCallback);
 
         ::glfwSetWindowFocusCallback(
-            glfwWindow, 
+            glfwWindow,
             onFocusWindow);
 
         // For imgui.
@@ -345,7 +345,7 @@ namespace aten
 
                 ::glfwSwapBuffers(glfwWnd);
 
-                if (wnd->id() == 0 
+                if (wnd->id() == 0
                     && glfwWindowShouldClose(glfwWnd))
                 {
                     running = false;

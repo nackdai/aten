@@ -82,12 +82,12 @@ namespace aten
         // 指定された関節の名前を取得.
         const char* getJointName(uint32_t nIdx);
 
-        // 親関節へのインデックスを取得.    
+        // 親関節へのインデックスを取得.
         int32_t getJointParent(
             uint32_t nIdx,
             const std::vector<aten::JointParam>& tvJoint);
 
-        // 指定された関節の逆マトリクスを取得.  
+        // 指定された関節の逆マトリクスを取得.
         void getJointInvMtx(
             uint32_t nIdx,
             aten::mat4& mtx);

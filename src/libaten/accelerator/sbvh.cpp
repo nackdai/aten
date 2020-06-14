@@ -43,7 +43,7 @@ namespace aten
 #pragma omp parallel num_threads(numThreads)
         {
             const auto idx = ::omp_get_thread_num();
-        
+
             const auto startPos = idx * numItemPerThread;
             const auto endPos = (idx + 1 == numThreads ? numItems : startPos + numItemPerThread);
 
@@ -1324,7 +1324,7 @@ namespace aten
 
     bool sbvh::importTree(
         const context& ctxt,
-        const char* path, 
+        const char* path,
         int offsetTriIdx)
     {
         FILE* fp = fopen(path, "rb");
@@ -1476,7 +1476,7 @@ namespace aten
         const auto& toplayer = m_bvh.getNodes()[0];
 
         AT_ASSERT(m_threadedNodes[0].size() == toplayer.size());
-        
+
         memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
     }
 }

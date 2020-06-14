@@ -25,9 +25,9 @@ namespace aten {
     static void gaussianFilter(
         int cx, int cy,
         vec4 *_in,
-        vec4 *_out, 
-        int width, int height, 
-        int filter_size, 
+        vec4 *_out,
+        int width, int height,
+        int filter_size,
         real std_d)
     {
         // ガウスフィルタ係数.
@@ -94,11 +94,11 @@ namespace aten {
         const vec4* _flash,
         const vec4* _std,        // 標準偏差.
         const vec4* _stdFlash,    // Flash画像の標準偏差.
-        vec4* _out, 
-        int width, int height, 
+        vec4* _out,
+        int width, int height,
         int filter_size, real std_d,
-        int numSamples, 
-        const real* _tvalue, 
+        int numSamples,
+        const real* _tvalue,
         vec4* _stdresult)
     {
         int halfWindowSize = filter_size / 2;
@@ -136,10 +136,10 @@ namespace aten {
         const vec4 CI_center_high = curFlash + CI + AT_MATH_EPSILON;
 #endif
 
-#ifdef ADAPTIVE_PATCH    
+#ifdef ADAPTIVE_PATCH
         int h = (int)(adaptiveRange * 2048);
         int halfPatchSize = std::min<int>(h, MAX_HALF_PATCH_SIZE);
-#else    
+#else
         int halfPatchSize = MAX_HALF_PATCH_SIZE;
 #endif
 
@@ -276,12 +276,12 @@ namespace aten {
         int cx, int cy,
         const vec4* _image,
         const vec4* _flash,
-        const vec4* _std, 
-        const vec4* _stdFlash, 
-        vec4* _out, 
-        int width, int height, 
-        int filter_size, real std_d, 
-        int numSamples, 
+        const vec4* _std,
+        const vec4* _stdFlash,
+        vec4* _out,
+        int width, int height,
+        int filter_size, real std_d,
+        int numSamples,
         const real* _tvalue)
     {
         const int halfWindowSize = filter_size / 2;
@@ -322,10 +322,10 @@ namespace aten {
         const auto CI_min = curImg - CI - AT_MATH_EPSILON;
         const auto CI_max = curImg + CI + AT_MATH_EPSILON;
 
-#ifdef ADAPTIVE_PATCH    
+#ifdef ADAPTIVE_PATCH
         real h = adaptiveRange * 2048.0f;
         int halfPatchSize = std::min((int)h, MAX_HALF_PATCH_SIZE);
-#else    
+#else
         int halfPatchSize = MAX_HALF_PATCH_SIZE;
 #endif
 

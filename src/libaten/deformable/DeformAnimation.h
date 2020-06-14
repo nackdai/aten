@@ -30,7 +30,7 @@ namespace aten
             SkeletonController* skl,
             float time);
 
-        /** 
+        /**
          * @brief 指定されたスケルトンの指定されたジョイントにアニメーションを適用する.
          */
         void applyAnimationByIdx(

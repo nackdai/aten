@@ -21,7 +21,7 @@ namespace AT_NAME {
             : Light(aten::LightType::IBL, LightAttributeIBL, val)
         {
             aten::texture* tex = (aten::texture*)val.get("envmap", nullptr);
-            
+
             AT_NAME::envmap* bg = new AT_NAME::envmap();
             bg->init(tex);
 
@@ -67,7 +67,7 @@ namespace AT_NAME {
 
         virtual aten::LightSampleResult sample(
             const aten::context& ctxt,
-            const aten::vec3& org, 
+            const aten::vec3& org,
             aten::sampler* sampler) const override final
         {
             AT_ASSERT(false);

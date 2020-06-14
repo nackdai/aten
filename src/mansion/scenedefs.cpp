@@ -22,7 +22,7 @@ void DemoScene::makeScene(
         { "lamp_body", false },
         { "mirror", true },
         { "pc", false },
-        { "room", true }, 
+        { "room", true },
         { "side_table", true },
         { "sofa_0", true },
         { "pillow_0", false },

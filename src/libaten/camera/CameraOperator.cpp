@@ -28,7 +28,7 @@ namespace aten {
 
         aten::mat4 mtxRot;
         mtxRot.asRotateFromVector(dir, aten::vec3(0, 1, 0));
-        
+
         mtxRot.applyXYZ(offset);
 
         pos += offset;

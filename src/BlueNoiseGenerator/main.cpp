@@ -40,7 +40,7 @@ bool parseOption(
 }
 
 uint32_t genRandomUint(
-    uint32_t input, 
+    uint32_t input,
     uint32_t scramble = 0)
 {
     input ^= scramble;
@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
             allElapsed = (allElapsed > real(1000) ? allElapsed / real(1000) : allElapsed);
 
             AT_PRINTF(
-                "Percent:%f[%%] Elapsed:%f(%s) AllElapsed:%f(%s)\n", 
+                "Percent:%f[%%] Elapsed:%f(%s) AllElapsed:%f(%s)\n",
                 ratio, elapsedFromPrev, TimeElapsed, allElapsed, TimeAllElapsed);
 
             time.begin();

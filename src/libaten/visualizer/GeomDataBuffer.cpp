@@ -158,7 +158,7 @@ namespace aten {
             }
 #endif
 
-            
+
         }
     }
 
@@ -319,7 +319,7 @@ namespace aten {
                 elementSize,
                 reinterpret_cast<void*>(attribs[i].offset)));
         }
-        
+
         m_vtxNum = vtxNum;
     }
 

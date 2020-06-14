@@ -19,11 +19,11 @@ layout(location = 0) out highp vec4 oColour;
 
 // NOTE
 // How to compute offset.
-// +-------+-------+ 
+// +-------+-------+
 // |       |       |
 // |   2   |@  1   |
 // |       |       |
-// +-------+-------+ 
+// +-------+-------+
 // The offset value is interpolated gauss weight value between 1 and 2.
 // The offset value is offset from 1.
 //   Offset = Weight2 / (Weight1 + Weight2)
@@ -31,11 +31,11 @@ layout(location = 0) out highp vec4 oColour;
 const highp vec2 offset[7] = vec2[7]
 (
     vec2(0.0, 0.0),
-    vec2(0.0, 1.4073334),  
-    vec2(0.0, 3.2942150),  
-    vec2(0.0, 5.2018132),  
-    vec2(0.0, -1.4073334),  
-    vec2(0.0, -3.2942150),  
+    vec2(0.0, 1.4073334),
+    vec2(0.0, 3.2942150),
+    vec2(0.0, 5.2018132),
+    vec2(0.0, -1.4073334),
+    vec2(0.0, -3.2942150),
     vec2(0.0, -5.2018132)
 );
 

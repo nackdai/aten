@@ -21,7 +21,7 @@ namespace aten
     {
         bool ret = false;
         m_dataMgr = new FbxDataManager();
-    
+
         if (isOpenForAnm) {
             ret = m_dataMgr->openForAnm(pszName);
         }
@@ -347,7 +347,7 @@ namespace aten
                 vec.y = static_cast<float>(vtx.clr.mGreen);
                 vec.z = static_cast<float>(vtx.clr.mBlue);
                 vec.w = static_cast<float>(vtx.clr.mAlpha);
-    #endif       
+    #endif
                 return true;
             }
         }
@@ -605,7 +605,7 @@ namespace aten
                     num++;
                     channel.type[pos++] = ParamType::Rotate;
                 }
-            
+
                 // Scale.
                 if (!(s == vOne)) {
                     num++;
@@ -750,7 +750,7 @@ namespace aten
         channel.isChecked = true;
 
         auto type = channel.type[nChannelIdx];
-    
+
         // NOTE
         // Rotation -> Scale -> Translate
 
@@ -902,7 +902,7 @@ namespace aten
     };
 
     void FbxImporter::getLambertParams(
-        void* mtrl, 
+        void* mtrl,
         std::vector<MaterialParam>& list)
     {
         fbxsdk::FbxSurfaceLambert* lambert = (fbxsdk::FbxSurfaceLambert*)mtrl;
@@ -939,7 +939,7 @@ namespace aten
     }
 
     void FbxImporter::getPhongParams(
-        void* mtrl, 
+        void* mtrl,
         std::vector<MaterialParam>& list)
     {
         getLambertParams(mtrl, list);

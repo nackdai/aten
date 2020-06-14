@@ -106,7 +106,7 @@ __forceinline__ __device__ T onComputeMortonCode(
     // Normalize [0, 1].
     const auto size = sceneBbox.size();
     const auto bboxMin = sceneBbox.minPos();
-    
+
     aten::vec3 center = (vmin + vmax) * 0.5f;
     center = (center - bboxMin) / size;
 

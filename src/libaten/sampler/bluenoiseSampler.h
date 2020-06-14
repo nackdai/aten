@@ -91,7 +91,7 @@ namespace aten {
         uint32_t m_seed{ 0 };
 
         uint32_t m_maxSampleNum{ 0 };
-        
+
         uint16_t m_noiseResW{ 0 };
         uint16_t m_noiseResH{ 0 };
         uint16_t m_noiseTexNum{ 0 };

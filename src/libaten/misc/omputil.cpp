@@ -3,7 +3,7 @@
 
 namespace aten {
     uint32_t OMPUtil::g_threadnum = 1;
-    
+
     void OMPUtil::setThreadNum(uint32_t num)
     {
 #ifdef ENABLE_OMP

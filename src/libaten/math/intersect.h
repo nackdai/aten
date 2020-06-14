@@ -80,7 +80,7 @@ namespace aten {
 
         result.a = beta;
         result.b = gamma;
-        
+
         result.t = t;
 
         return std::move(result);
@@ -126,7 +126,7 @@ namespace aten {
         real W = Bx * Ay - By * Ax;
 
         // Peform edge tests.
-        // Moving this test before 
+        // Moving this test before
         // and the end of the previous conditional gives higher performance.
         if ((U < real(0) || V < real(0) || W < real(0))
             && (U > real(0) || V > real(0) || W > real(0)))

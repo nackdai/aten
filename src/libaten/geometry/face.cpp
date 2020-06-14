@@ -48,10 +48,10 @@ namespace AT_NAME
         const auto& v2 = ctxt.getVertex(param.idx[2]);
 
         bool isHit = hit(
-            &param, 
+            &param,
             v0.pos, v1.pos, v2.pos,
-            r, 
-            t_min, t_max, 
+            r,
+            t_min, t_max,
             &isect);
 
         if (isHit) {
@@ -95,7 +95,7 @@ namespace AT_NAME
 
     void face::evalHitResult(
         const context& ctxt,
-        const aten::ray& r, 
+        const aten::ray& r,
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
@@ -144,7 +144,7 @@ namespace AT_NAME
 
     void face::build(
         const context& ctxt,
-        int mtrlid, 
+        int mtrlid,
         int geomid)
     {
         const auto& v0 = ctxt.getVertex(param.idx[0]);
@@ -204,7 +204,7 @@ namespace AT_NAME
         // v0基準.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
         aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
-        
+
         aten::vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
         n = normalize(n);
 

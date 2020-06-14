@@ -109,7 +109,7 @@ namespace idaten {
 
             m_sampleCount++;
 
-#ifdef __CUDA_ARCH__ 
+#ifdef __CUDA_ARCH__
             float4 ret = tex2DLayered<float4>(m_noise, u, v, p.z);
             return aten::cmpMin(ret.x, 0.9999999999999f);
 #else
@@ -121,7 +121,7 @@ namespace idaten {
         uint32_t m_seed{ 0 };
 
         uint32_t m_maxSampleNum{ 0 };
-        
+
         uint16_t m_noiseResW{ 0 };
         uint16_t m_noiseResH{ 0 };
         uint16_t m_noiseTexNum{ 0 };

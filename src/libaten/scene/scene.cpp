@@ -101,7 +101,7 @@ namespace aten {
         }
 
         auto r = sampler->nextSample() * sumCost;
-        
+
         real sum = 0;
 
         for (int i = 0; i < costs.size(); i++) {

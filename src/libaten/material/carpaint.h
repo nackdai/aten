@@ -25,7 +25,7 @@ namespace AT_NAME
             m_param.carpaint.flake_size = real(0.01);
             m_param.carpaint.flake_size_variance = real(0.25);
             m_param.carpaint.flake_normal_orientation = real(0.5);
-            
+
             m_param.carpaint.flake_reflection = real(0.5);
             m_param.carpaint.flake_transmittance = real(0.5);
 
@@ -132,19 +132,19 @@ namespace AT_NAME
             bool isLightPath = false);
 
         virtual AT_DEVICE_MTRL_API real pdf(
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v) const override final;
 
         virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
             const aten::ray& ray,
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             real u, real v,
             aten::sampler* sampler) const override final;
 
         virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v) const override final;

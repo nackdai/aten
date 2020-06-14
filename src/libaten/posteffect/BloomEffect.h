@@ -15,7 +15,7 @@ namespace aten {
             PixelFormat inFmt, PixelFormat outFmt,
             const char* pathVS,
             const char* pathFS_4x4,
-            const char* pathFS_2x2, 
+            const char* pathFS_2x2,
             const char* pathFS_HBlur,
             const char* pathFS_VBlur,
             const char* pathFS_GaussBlur,

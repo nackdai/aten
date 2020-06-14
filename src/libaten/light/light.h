@@ -159,12 +159,12 @@ namespace AT_NAME
 
         virtual aten::LightSampleResult sample(
             const aten::context& ctxt,
-            const aten::vec3& org, 
+            const aten::vec3& org,
             aten::sampler* sampler) const = 0;
 
         virtual aten::LightSampleResult sample(
             const aten::context& ctxt,
-            const aten::vec3& org, 
+            const aten::vec3& org,
             const aten::vec3& nml,
             aten::sampler* sampler) const
         {

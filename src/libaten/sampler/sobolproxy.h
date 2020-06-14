@@ -28,7 +28,7 @@ namespace aten {
         }
 
         AT_DEVICE_API void init(
-            uint32_t index, 
+            uint32_t index,
             uint32_t dimension,
             uint32_t scramble,
             const unsigned int* data = nullptr)

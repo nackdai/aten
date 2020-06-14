@@ -55,7 +55,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
     uint32_t bitstack = 0;
 
     int skipCode = 0;
-    
+
     for (;;) {
         // x : leftChildrenIdx, y ; isLeaf, z : numChildren, w : parent
         float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
@@ -95,7 +95,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
                 isect->objid = (int)attrib.x;
                 isect->primid = (int)attrib.y;
                 isect->mtrlid = prim.mtrlid;
-                
+
                 //isect->meshid = (int)attrib.w;
                 isect->meshid = prim.gemoid;
 

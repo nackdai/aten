@@ -412,7 +412,7 @@ namespace aten
         if (m_tmpbuffer.size() == 0) {
             m_tmpbuffer.resize(m_width * m_height);
         }
-        
+
         vec4* color = &m_tmpbuffer[0];
         memset(color, 0, m_tmpbuffer.size() * sizeof(vec4));
 

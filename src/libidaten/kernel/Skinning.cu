@@ -73,7 +73,7 @@ __global__ void setTriangleParam(
 
     auto a = v1 - v0;
     auto b = v2 - v0;
-        
+
     tri->area = length(cross(a, b));
 
     tri->idx[0] += indexOffset;

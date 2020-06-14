@@ -72,8 +72,8 @@ namespace idaten
 
         // Only for top layer...
         m_nodeparam[0].init(
-            (aten::vec4*)&nodes[0][0], 
-            sizeof(aten::GPUBvhNode) / sizeof(float4), 
+            (aten::vec4*)&nodes[0][0],
+            sizeof(aten::GPUBvhNode) / sizeof(float4),
             nodes[0].size());
 
         if (!mtxs.empty()) {

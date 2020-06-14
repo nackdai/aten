@@ -108,7 +108,7 @@ void display()
 
     denoiser.setParam(
         16,
-        varImage->image(), 
+        varImage->image(),
         flash->image(),
         varFlash->image());
 
@@ -198,7 +198,7 @@ void display()
         //g_pathtracer.render(dst, &g_scene, &g_camera);
     }
 
-    
+
     {
         aten::Destination dst;
         {

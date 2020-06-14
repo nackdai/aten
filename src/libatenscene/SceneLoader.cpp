@@ -18,14 +18,14 @@ namespace aten
 
     // NOTE
     // <scene width=<uint> height=<uint>>
-    //        <camera 
+    //        <camera
     //            type=<string>
     //            org=<vec3>
-    //            at=<vec3> 
+    //            at=<vec3>
     //            vfov=<real>
     //            sensorsize=<real>
     //            dist_sensor_lens=<real>
-    //            dist_lens_focus=<real> 
+    //            dist_lens_focus=<real>
     //            lens_r=<real>
     //            w_scale=<real>
     //        />
@@ -92,7 +92,7 @@ namespace aten
         const tinyxml2::XMLElement* root = reinterpret_cast<const tinyxml2::XMLElement*>(xmlRoot);
 
         auto mtrlRoot = root->FirstChildElement("materials");
-        
+
         if (!mtrlRoot) {
             return;
         }
@@ -201,7 +201,7 @@ namespace aten
                 std::string attrName(attr->Name());
 
                 if (attrName == "name") {
-                    tag = attr->Value();        
+                    tag = attr->Value();
                 }
                 else if (attrName == "material") {
                     mtrl = AssetManager::getMtrl(attr->Value());
@@ -257,8 +257,8 @@ namespace aten
                 }
                 else if (attrName == "scale"
                     || attrName == "radius"
-                    || attrName == "width" 
-                    || attrName == "height" 
+                    || attrName == "width"
+                    || attrName == "height"
                     || attrName == "depth")
                 {
                     auto v = getValue<real>(attr);
@@ -587,7 +587,7 @@ namespace aten
             }
 
             readRenderParams(root, ret);
-            
+
             ret.camera = readCamera(root, ret.dst.width, ret.dst.height);
 
             readTextures(root, ctxt);

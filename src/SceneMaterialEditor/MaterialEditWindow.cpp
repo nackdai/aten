@@ -451,7 +451,7 @@ bool MaterialEditWindow::init(
     s_wnd->asCurrent();
 
     s_visualizer = aten::visualizer::init(s_width, s_height);
-    
+
     s_gamma.init(
         s_width, s_height,
         "../shader/fullscreen_vs.glsl",

@@ -29,7 +29,7 @@ namespace AT_NAME {
     }
 
     AT_DEVICE_MTRL_API real OrenNayar::pdf(
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v) const
@@ -50,7 +50,7 @@ namespace AT_NAME {
 
     AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
         const aten::ray& ray,
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         real u, real v,
         aten::sampler* sampler) const
     {
@@ -88,7 +88,7 @@ namespace AT_NAME {
 
         // NOTE
         // cos(φi - φr) = cosφi * cosφr + sinφi * sinφr
-        
+
         // NOTE
         // NTB座標系において、v = (x, y, z) = (sinφ、cosφ、cosθ).
 
@@ -102,7 +102,7 @@ namespace AT_NAME {
         if (!aten::isValid(cosAzimuth)) {
             cosAzimuth = real(0);
         }
-        
+
         const real a = roughness;
         const real a2 = a * a;
         const real A = real(1) - real(0.5) * (a2 / (a2 + real(0.33)));
@@ -150,7 +150,7 @@ namespace AT_NAME {
             wi,
             wo,
             u, v);
-        
+
         return std::move(bsdf);
     }
 
@@ -227,7 +227,7 @@ namespace AT_NAME {
         bool isLightPath/*= false*/) const
     {
         MaterialSampling ret;
-        
+
         sample(
             &ret,
             &m_param,

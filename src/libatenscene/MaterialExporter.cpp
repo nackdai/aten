@@ -72,7 +72,7 @@ namespace aten
 
         for (uint32_t i = 0; i < mtrlNum; i++) {
             const auto& info = mtrls[i];
-            
+
             auto xmlMtrlElement = xmlDoc.NewElement("material");
 
             MaterialParamExporter paramExporter(xmlDoc, xmlMtrlElement);
@@ -90,8 +90,8 @@ namespace aten
             }
 
             auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameter(
-                info.param.type, 
-                info.param, 
+                info.param.type,
+                info.param,
                 nullptr, nullptr, nullptr);
 
             mtrl->edit(&paramExporter);

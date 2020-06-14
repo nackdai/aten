@@ -58,4 +58,3 @@ inline AT_DEVICE_API float sample(
 } // namespace sobol
 
 #endif
-

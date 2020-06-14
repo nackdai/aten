@@ -58,7 +58,7 @@ bool GeometryChunkExporter::exportGeometry(
 
     // GPUスキニング向けの出力をするかどうか.
     m_isExportForGPUSkinning = isExportForGPUSkinning;
-    
+
     {
         // TODO
         // version, magic number...
@@ -297,7 +297,7 @@ void GeometryChunkExporter::bindJointToTriangle(
         std::sort(tvJointInfo.begin(), tvJointInfo.end());
 
         AT_ASSERT(sTri.joint.size() > 0);
-        
+
         // 三角形に影響を与える関節数は最大４まで
         // それを超えた場合は一番影響が小さいもの（ウエイトが小さいもの）を削除する
         // If num of skin is over 4, num of skin is limited to 4 by weight.
@@ -366,7 +366,7 @@ struct FuncFindIncludedJointIdx {
 
         std::set<uint32_t>::const_iterator it = master.joint.begin();
         for (; it != master.joint.end(); it++) {
-            uint32_t jointIdx = *it; 
+            uint32_t jointIdx = *it;
 
             std::set<uint32_t>::const_iterator itRhs = rhs.joint.begin();
             for (; itRhs != rhs.joint.end(); itRhs++) {
@@ -750,7 +750,7 @@ uint32_t GeometryChunkExporter::exportVertices(
 
             aten::MeshVertex sVtxInfo;
 
-            // Blank MeshVertex. 
+            // Blank MeshVertex.
             AT_VRETURN(seekHelper.skip(sizeof(sVtxInfo)), 0);
 
             AT_VRETURN(
@@ -882,7 +882,7 @@ bool GeometryChunkExporter::exportVertices(
                 // 指定された頂点における指定フォーマットのデータを取得.
                 bool bIsExist = pImporter->getVertex(
                     nVtxIdx,
-                    vec, 
+                    vec,
                     (aten::MeshVertexFormat)nVtxFmt);
 
                 // NOTE
@@ -930,7 +930,7 @@ bool GeometryChunkExporter::exportVertices(
 
                 aten::vec4 vecJoint(0);
                 aten::vec4 vecWeight(0);
-                
+
                 for (uint32_t n = 0; n < (uint32_t)sSkin.joint.size(); n++) {
                     if (m_isExportForGPUSkinning) {
                         // GPUスキニング向けに全体を通じた関節インデックスで出力.
@@ -974,7 +974,7 @@ bool GeometryChunkExporter::exportMesh(
             sMeshInfo.fmt = sMesh.fmt;
         }
 
-        // Blank MeshSet. 
+        // Blank MeshSet.
         IoStreamSeekHelper seekHelper(pOut);
         AT_VRETURN_FALSE(seekHelper.skip(sizeof(sMeshInfo)));
 
@@ -1041,7 +1041,7 @@ void GeometryChunkExporter::getMinMaxPos(
             // Get vertex's position.
             bool bIsExist = pImporter->getVertex(
                 sTri.vtx[n],
-                vec, 
+                vec,
                 aten::MeshVertexFormat::Position);
             AT_ASSERT(bIsExist);
 
@@ -1073,7 +1073,7 @@ bool GeometryChunkExporter::exportPrimitiveSet(
     // のべ所属関節インデックス数
     m_Header.numAllJointIndices += sSubsetInfo.numJoints;
 
-    // Blank PrimitiveSet. 
+    // Blank PrimitiveSet.
     IoStreamSeekHelper seekHelper(pOut);
     AT_VRETURN_FALSE(seekHelper.skip(sizeof(sSubsetInfo)));
 

@@ -14,7 +14,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API real specular::pdf(
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v) const
@@ -105,7 +105,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
-        const aten::vec3& normal, 
+        const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v) const
@@ -122,9 +122,9 @@ namespace AT_NAME
         bool isLightPath/*= false*/) const
     {
         MaterialSampling ret;
-        
+
         sample(
-            &ret, 
+            &ret,
             &m_param,
             normal,
             ray.dir,

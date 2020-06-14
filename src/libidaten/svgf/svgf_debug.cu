@@ -166,7 +166,7 @@ __global__ void pickPixel(
 
     if (isHit) {
         const auto idx = getIdx(ix, iy, width);
-        
+
         auto normalDepth = aovNormalDepth[idx];
         auto texclrMeshid = aovTexclrMeshid[idx];
 

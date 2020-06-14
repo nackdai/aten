@@ -69,7 +69,7 @@ namespace AT_NAME {
 
         virtual aten::LightSampleResult sample(
             const aten::context& ctxt,
-            const aten::vec3& org, 
+            const aten::vec3& org,
             aten::sampler* sampler) const override final
         {
             aten::LightSampleResult result;
@@ -138,7 +138,7 @@ namespace AT_NAME {
             // TODO
             // Is it correct?
             attn = aten::cmpMax(attn, real(1));
-            
+
             result->le = param->le;
             result->intensity = spot / attn;
             result->finalColor = param->le * spot / attn;

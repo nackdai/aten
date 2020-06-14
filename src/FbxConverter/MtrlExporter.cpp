@@ -16,7 +16,7 @@ bool MtrlExporter::exportMaterial(
 
     auto xmlDecl = xmlDoc.NewDeclaration();
     xmlDoc.InsertFirstChild(xmlDecl);
-    
+
     auto xmlRoot = xmlDoc.NewElement("root");
 
     auto mtrlNum = pImporter->getMaterialNum();
@@ -41,7 +41,7 @@ bool MtrlExporter::exportMaterial(
                 xmlMtrlAttribElem->SetText("lambert");
                 xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);
             }
-            
+
             if (!mtrl.tex.empty()) {
                 // TODO
                 // レイヤーテクスチャは許していない.
@@ -86,7 +86,7 @@ bool MtrlExporter::exportMaterial(
 
             if (!isExportedAlbedoColor) {
                 sprintf(buf, "1.0 1.0 1.0");
-                
+
                 auto xmlMtrlAttribElem = xmlDoc.NewElement("baseColor");
                 xmlMtrlAttribElem->SetText(buf);
                 xmlMtrlElement->InsertEndChild(xmlMtrlAttribElem);

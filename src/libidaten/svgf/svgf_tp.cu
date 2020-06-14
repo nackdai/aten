@@ -70,7 +70,7 @@ inline __device__ int getLinearIdx(int x, int y, int w, int h)
 
 // Bilinear sampler
 inline __device__ float4 sampleBilinear(
-    const float4* buffer, 
+    const float4* buffer,
     float uvx, float uvy,
     int w, int h)
 {
@@ -194,7 +194,7 @@ __global__ void temporalReprojection(
             weight += W;
         }
     }
-    
+
     if (weight > 0.0f) {
         sum /= weight;
         weight /= 9;
@@ -221,7 +221,7 @@ __global__ void temporalReprojection(
 
     // TODO
     // 現フレームと過去フレームが同率で加算されるため、どちらかに強い影響がでると影響が弱まるまでに非常に時間がかかる.
-    // ex) 
+    // ex)
     // f0 = 100, f1 = 0, f2 = 0
     // avg = (f0 + f1 + f2) / 3 = 33.3 <- 非常に大きい値が残り続ける.
 
@@ -347,7 +347,7 @@ inline __device__ float3 medianFilter(
 
             auto s = src[pidx];
             v[pos] = make_float3(s.x, s.y, s.z);
-            
+
             pos++;
         }
     }
@@ -438,7 +438,7 @@ namespace idaten
 
         CudaGLResourceMapper rscmap(&m_motionDepthBuffer);
         auto motionDepthBuffer = m_motionDepthBuffer.bind();
-        
+
         temporalReprojection << <grid, block, 0, m_stream >> > (
         //temporalReprojection << <1, 1 >> > (
             m_tileDomain,

@@ -375,7 +375,7 @@ __global__ void shadeMissWithEnvmap(
 
             emit *= envmapMultiplyer;
         }
-        
+
         auto contrib = paths->throughput[idx].throughput * misW * emit;
         paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 
@@ -706,7 +706,7 @@ __global__ void shade(
             russianProb = max(p, 0.01f);
         }
     }
-            
+
     AT_NAME::MaterialSampling sampling;
 
     sampleMaterial(

@@ -23,7 +23,7 @@ namespace aten
         friend class TransformableFactory;
 
     private:
-        deformable() 
+        deformable()
             : transformable(aten::GeometryType::Polygon)
         {}
 
@@ -146,7 +146,7 @@ namespace aten
     public:
         DeformableRenderer() = default;
         ~DeformableRenderer() = default;
-            
+
         DeformableRenderer(const DeformableRenderer& rhs) = delete;
         const DeformableRenderer& operator=(const DeformableRenderer& rhs) = delete;
 

@@ -13,9 +13,9 @@
 inline __host__ __device__ void encryptTea(uint2& arg)
 {
     const uint32_t key[] = {
-        0xa341316c, 
-        0xc8013ea4, 
-        0xad90777d, 
+        0xa341316c,
+        0xc8013ea4,
+        0xad90777d,
         0x7e95761e,
     };
 

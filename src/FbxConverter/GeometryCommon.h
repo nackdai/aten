@@ -32,7 +32,7 @@ struct TriangleParam {
     uint32_t computeKey() const;
 
     /** OŠpŒ`‚É‰e‹¿‚ğ—^‚¦‚éŠÖß”‚ğæ“¾.
-     */ 
+     */
     uint32_t getJointNum() const;
 
     /** w’è‚³‚ê‚½ŠÖß‚ğíœ.

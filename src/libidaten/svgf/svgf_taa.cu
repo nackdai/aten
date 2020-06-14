@@ -184,7 +184,7 @@ inline __device__ float3 clipColor(
 	auto ex = 0.25 * 0.5 * (cmax.x - cmin.x);
 	float2 chroma_extent = make_float2(ex, ex);
 	float2 chroma_center = make_float2(clr0.y, clr0.z);
-	
+
 	cmin.y = chroma_center.x - chroma_extent.x;
 	cmin.z = chroma_center.y - chroma_extent.y;
 

@@ -12,7 +12,7 @@ namespace aten
             m_joints.resize(m_header.numJoint);
             AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_joints[0], sizeof(JointParam) * m_header.numJoint));
         }
-        
+
         return true;
     }
 

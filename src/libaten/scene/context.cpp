@@ -47,10 +47,10 @@ namespace aten
     }
 
     AT_NAME::material* context::createMaterialWithMaterialParameter(
-        aten::MaterialType type, 
+        aten::MaterialType type,
         const aten::MaterialParameter& param,
-        aten::texture* albedoMap, 
-        aten::texture* normalMap, 
+        aten::texture* albedoMap,
+        aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
         auto mtrl = MaterialFactory::createMaterialWithMaterialParameter(
@@ -124,7 +124,7 @@ namespace aten
     {
         auto f = AT_NAME::face::create(*this, param);
         AT_ASSERT(f);
-        
+
         if (f) {
             addTriangle(f);
         }
@@ -270,7 +270,7 @@ namespace aten
 
         return order;
     }
-    
+
     texture* context::createTexture(uint32_t width, uint32_t height, uint32_t channels, const char* name)
     {
         auto ret = texture::create(width, height, channels, name);

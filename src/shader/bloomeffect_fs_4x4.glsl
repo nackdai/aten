@@ -74,7 +74,7 @@ void main()
     float yy = max(vYUV.x - threshold, 0.0f);
 
     yy = yy * fMiddleGrey / (adaptedLum + 0.00001);
-    
+
     // x' = (1 - exp(2 * x)) ^ 1.5
     float fY = pow(1.0f - exp(-yy * 2.0f), 1.5f);
 

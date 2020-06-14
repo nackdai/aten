@@ -103,7 +103,7 @@ namespace aten {
                 Intersection isectTmp;
                 isectTmp.t = AT_MATH_INF;
                 auto res = m_children[i]->hit(ctxt, r, t_min, t_max, isectTmp);
-                
+
                 if (res) {
                     if (isectTmp.t < isect.t) {
                         isect = isectTmp;
@@ -387,9 +387,9 @@ namespace aten {
                 if (s1.size() > 0) {
                     // s1側で、axis について最右にいるポリゴンをs2の最左に移す.
                     auto p = s1.back();
-                    
+
                     // 先頭に挿入.
-                    s2.insert(s2.begin(), p); 
+                    s2.insert(s2.begin(), p);
 
                     s1.pop_back();
 
@@ -513,7 +513,7 @@ namespace aten {
                 info = stacks.back();
                 stacks.pop_back();
                 continue;
-            }            
+            }
 #endif
 
             // Triangleとrayのヒットにかかる処理時間の見積もり.

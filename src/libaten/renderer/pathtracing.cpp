@@ -208,7 +208,7 @@ namespace aten
                 return false;
             }
         }
-        
+
         // Explicit conection to light.
         if (!mtrl->isSingularOrTranslucent())
         {
@@ -510,7 +510,7 @@ namespace aten
                         auto path = radiance(
                             ctxt,
                             &rnd,
-                            ray, 
+                            ray,
                             camera,
                             camsample,
                             scene);

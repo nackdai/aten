@@ -11,8 +11,8 @@ struct QVertex {
     QVertex() {}
 
     QVertex(
-        aten::vertex _v, 
-        uint32_t i, 
+        aten::vertex _v,
+        uint32_t i,
         uint32_t original,
         int g,
         uint64_t h,
@@ -46,7 +46,7 @@ struct QVertex {
 
 using qit = std::vector<QVertex>::iterator;
 
-// Replaces the position of the vertex within the specified range 
+// Replaces the position of the vertex within the specified range
 // with the position of the vertex closest to the average of the vertices within that range.
 static void replaceVtxPositionToClosestFromAvg(qit start, qit end)
 {
@@ -177,11 +177,11 @@ void LodMaker::make(
                 end++;
             }
 
-            // Replaces the position of the vertex within the specified range 
+            // Replaces the position of the vertex within the specified range
             // with the position of the vertex closest to the average of the vertices within that range.
             replaceVtxPositionToClosestFromAvg(start, end);
 
-            // Find out if there is something not replaced. 
+            // Find out if there is something not replaced.
             for (auto q = start; q != end; q++) {
                 if (q == start) {
                     dstVertices.push_back(q->v);

@@ -400,7 +400,7 @@ int main()
 #if (GPU_NUM == 4)
     g_tracer[2].init(2);
     g_tracer[3].init(3);
-    
+
     g_tracer[2].setPeerAccess(3);
     g_tracer[3].setPeerAccess(2);
 

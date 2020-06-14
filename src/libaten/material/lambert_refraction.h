@@ -70,7 +70,7 @@ namespace AT_NAME
         }
 
         virtual AT_DEVICE_MTRL_API real pdf(
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v) const override final
@@ -89,7 +89,7 @@ namespace AT_NAME
         }
 
         virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v) const override final

@@ -746,7 +746,7 @@ int main()
             // NOTE
             // 0 is for top layer.
             g_lbvh.build(
-                nodes[i + 1],    
+                nodes[i + 1],
                 tris,
                 triIdOffset,
                 sceneBbox,

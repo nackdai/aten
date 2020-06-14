@@ -117,7 +117,7 @@ void update()
 #ifndef TEST_FOR_GL_RENDER
             g_tracer.updateBVH(
                 shapeparams,
-                nodes, 
+                nodes,
                 mtxs);
 #endif
         }

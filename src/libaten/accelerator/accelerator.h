@@ -147,7 +147,7 @@ namespace aten {
          */
         virtual bool importTree(
             const context& ctxt,
-            const char* path, 
+            const char* path,
             int offsetTriIdx)
         {
             AT_ASSERT(false);

@@ -54,7 +54,7 @@ bool FbxDataManager::open(const char* path)
                 gatherNodes(m_scene->GetRootNode());
                 gatherMeshes();
                 gatherClusters();
-                
+
                 return true;
             }
         }
@@ -127,8 +127,8 @@ void FbxDataManager::close()
     }
 
     if (m_manager) {
-        // Delete the FBX SDK manager. All the objects that have been allocated 
-        // using the FBX SDK manager and that haven't been explicitly destroyed 
+        // Delete the FBX SDK manager. All the objects that have been allocated
+        // using the FBX SDK manager and that haven't been explicitly destroyed
         // are automatically destroyed at the same time.
         m_manager->Destroy();
     }
@@ -324,7 +324,7 @@ const Node& FbxDataManager::getNode(uint32_t idx)
 uint32_t FbxDataManager::getNodeIndex(const FbxNode* node) const
 {
     auto it = std::find_if(
-        m_nodes.begin(), 
+        m_nodes.begin(),
         m_nodes.end(),
         [&](const Node& n) {
         return n.fbxNode == node;
@@ -704,7 +704,7 @@ void FbxDataManager::gatherPos(std::map<FbxMesh*, std::vector<PosData>>& posList
         auto it = posList.find(fbxMesh);
 
         auto& list = it->second;
-        
+
         auto polygonCnt = fbxMesh->GetPolygonCount();
 
         for (int p = 0; p < polygonCnt; p++)

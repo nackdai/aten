@@ -26,7 +26,7 @@ struct PosData {
 
     FbxMesh* fbxMesh{ nullptr };
     FbxSurfaceMaterial* mtrl{ nullptr };
-};    
+};
 
 struct NormalData {
     uint32_t idxInMesh;

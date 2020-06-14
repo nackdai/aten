@@ -11,7 +11,7 @@ namespace AT_NAME
     private:
         MicrofacetGGX(
             const aten::vec3& albedo = aten::vec3(0.5),
-            real roughness = real(0.5), 
+            real roughness = real(0.5),
             real ior = real(1),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
@@ -86,19 +86,19 @@ namespace AT_NAME
             bool isLightPath = false);
 
         virtual AT_DEVICE_MTRL_API real pdf(
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v) const override final;
 
         virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
             const aten::ray& ray,
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             real u, real v,
             aten::sampler* sampler) const override final;
 
         virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
-            const aten::vec3& normal, 
+            const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v) const override final;
@@ -119,8 +119,8 @@ namespace AT_NAME
             real roughness);
 
         static AT_DEVICE_MTRL_API real computeGGXSmithG1(
-            real roughness, 
-            const aten::vec3& v, 
+            real roughness,
+            const aten::vec3& v,
             const aten::vec3& n);
 
     private:

@@ -235,7 +235,7 @@ namespace idaten {
                 onHitTest(
                     width, height,
                     vtxTexPos);
-                
+
                 onShadeMiss(width, height, bounce);
 
                 m_compaction.compact(

@@ -138,8 +138,8 @@ void MaterialSelectWindow::onRun(aten::window* window)
         }
 
         AT_PRINTF(
-            "(%d, %d)[%d]->(%s)\n", 
-            s_prevX, s_prevY, 
+            "(%d, %d)[%d]->(%s)\n",
+            s_prevX, s_prevY,
             mtrlid,
             mtrl ? mtrl->name() : "none");
 #endif

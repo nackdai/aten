@@ -140,7 +140,7 @@ namespace AT_NAME
     void object::getSamplePosNormalArea(
         const context& ctxt,
         aten::hitable::SamplePosNormalPdfResult* result,
-        const aten::mat4& mtxL2W, 
+        const aten::mat4& mtxL2W,
         aten::sampler* sampler) const
     {
         auto r = sampler->nextSample();

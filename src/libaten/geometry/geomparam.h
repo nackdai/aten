@@ -53,7 +53,7 @@ namespace aten
                 real area;
             };
         };
-        
+
         union {
             aten::vec4 v1;
             struct{

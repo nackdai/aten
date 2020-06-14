@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     // Not use.
     // But specify internal accelerator type in constructor...
     aten::AcceleratedScene<aten::sbvh> scene;
-    
+
     try {
         static char buf[2048] = { 0 };
 

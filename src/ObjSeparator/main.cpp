@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
             if (mtrlName == name) {
                 shapes.push_back(shape);
                 mtrls.push_back(const_cast<aten::material*>(mtrl));
-                
+
                 break;
             }
         }
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
         const auto& vtxs = ctxt.getVertices();
         for (auto idx : tmpIndices) {
             const auto v = vtxs[idx];
-            
+
             int newIdx = vertices.size();
             vertices.push_back(v);
 

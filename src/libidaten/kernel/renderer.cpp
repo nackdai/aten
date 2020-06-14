@@ -65,8 +65,8 @@ namespace idaten {
         for (int i = 0; i < nodes.size(); i++) {
             if (!nodes[i].empty()) {
                 m_nodeparam[i].init(
-                    (aten::vec4*)&nodes[i][0], 
-                    sizeof(aten::GPUBvhNode) / sizeof(float4), 
+                    (aten::vec4*)&nodes[i][0],
+                    sizeof(aten::GPUBvhNode) / sizeof(float4),
                     nodes[i].size());
             }
         }

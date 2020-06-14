@@ -58,7 +58,7 @@ namespace aten
 
             if (n) {
                 candidate = n;
-                
+
                 result.ep = candidate->getTraversalOrder();
                 result.ex = exid;
                 result.top = instanceNode->getTraversalOrder();

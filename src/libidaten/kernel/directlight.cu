@@ -148,7 +148,7 @@ __global__ void shade(
 		path.pdfb = pdfb;
 		path.isSingular = true;
 	}
-	else 
+	else
 	{
 		for (int i = 0; i < lightnum; i++)
 		{

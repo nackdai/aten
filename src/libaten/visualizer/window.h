@@ -224,14 +224,14 @@ namespace aten {
                 m_onClose();
             }
         }
-        
+
         void onMouseBtn(bool left, bool press, int x, int y)
         {
             if (m_onMouseBtn) {
                 m_onMouseBtn(left, press, x, y);
             }
         }
-        
+
         void onMouseMove(int x, int y)
         {
             if (m_onMouseMove) {

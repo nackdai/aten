@@ -17,7 +17,7 @@ namespace aten
             context& ctxt,
             bool needComputeNormalOntime = false);
         static object* load(
-            const std::string& tag, 
+            const std::string& tag,
             const std::string& path,
             context& ctxt,
             bool needComputeNormalOntime = false);
@@ -30,7 +30,7 @@ namespace aten
             bool needComputeNormalOntime = false);
         static void load(
             std::vector<object*>& objs,
-            const std::string& tag, 
+            const std::string& tag,
             const std::string& path,
             context& ctxt,
             bool willSeparate = false,

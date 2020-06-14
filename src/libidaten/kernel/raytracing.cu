@@ -98,7 +98,7 @@ __global__ void hitTestRayTracing(
 		ctxt.vtxPos = vtxPos;
 		ctxt.matrices = matrices;
 	}
-	
+
 	aten::Intersection isect;
 
 	bool isHit = intersectClosest(&ctxt, path.ray, &isect);
@@ -171,7 +171,7 @@ __global__ void raytracing(
 		path.isTerminate = true;
 		//p[idx] = make_float4(contrib.x, contrib.y, contrib.z, 1);
 		surf2Dwrite(make_float4(contrib.x, contrib.y, contrib.z, 1), outSurface, ix * sizeof(float4), iy, cudaBoundaryModeTrap);
-		
+
 		return;
 	}
 
@@ -186,12 +186,12 @@ __global__ void raytracing(
 
 	if (mtrl->attrib.isSingular || mtrl->attrib.isTranslucent) {
 		AT_NAME::MaterialSampling sampling;
-			
+
 		sampleMaterial(
 			&sampling,
 			&ctxt,
 			mtrl,
-			orienting_normal, 
+			orienting_normal,
 			path.ray.dir,
 			rec.normal,
 			nullptr,

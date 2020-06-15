@@ -2,6 +2,9 @@ version: "2.4"
 services:
   aten:
     build:
+      # docker-compose newer then ver3 supports out of context build.
+      # But, it doesn't support 'runtime'.
+      # Therefore, context is root directory and this specifies dockerfile.
       context: ..
       dockerfile: .devcontainer/Dockerfile
       args:

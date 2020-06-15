@@ -26,7 +26,8 @@ CUDA_CUDART_LIBRARY=${CUDA_CUDART_LIBRARY:-${cuda_root}/lib64/libcudart.so}
 generated_binary="/tmp/cuda-compute-version-helper-$$-$timestamp"
 
 # create a 'here document' that is code we compile and use to probe the card
-source_code="$(cat << EOF
+source_code="$(
+  cat <<EOF
 #include <stdio.h>
 #include <cuda_runtime_api.h>
 
@@ -60,4 +61,4 @@ echo "$source_code" | $gcc_binary -x c++ -I"$CUDA_INCLUDE_DIRS" -o "$generated_b
 
 # Run binary and clean
 $generated_binary
-rm $generated_binary
+rm "$generated_binary"

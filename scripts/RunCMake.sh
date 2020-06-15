@@ -8,8 +8,8 @@ echo "Build Type is [${build_type}]"
 echo "Compute Capability is [${compute_capability}]"
 
 cmake \
--D CMAKE_BUILD_TYPE=${build_type} \
--D CMAKE_CXX_COMPILER=/usr/bin/clang++-8 \
--D CUDA_HOST_COMPILER=/usr/bin/clang-8 \
--D CUDA_TARGET_COMPUTE_CAPABILITY=${compute_capability} \
--L -G Ninja ..
+  -D CMAKE_BUILD_TYPE="${build_type}" \
+  -D CMAKE_CXX_COMPILER=/usr/bin/clang++-8 \
+  -D CUDA_HOST_COMPILER=/usr/bin/clang-8 \
+  -D CUDA_TARGET_COMPUTE_CAPABILITY="${compute_capability}" \
+  -L -G Ninja ..

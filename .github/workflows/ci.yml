@@ -150,7 +150,7 @@ jobs:
       # If building dev image is necessary but base image is not built.
       # Try to Pull base image.
       - name: Check if building base image run for building dev image
-        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true && steps.build_base_image.outcome != 'success'
+        if: contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true && steps.build_base_image.outcome != 'success'
         run: |
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
           docker pull docker.pkg.github.com/${{ github.repository }}/aten:latest
@@ -159,7 +159,7 @@ jobs:
       # If outcome of building base image is success, we can treat base image is updated.
       - name: Build and push dev image
         #if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true || contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true
-        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true || steps.build_base_image.outcome == 'success'
+        if: contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
         run: |
           docker build -t aten_dev --build-arg base_from=docker.pkg.github.com/${{ github.repository }}/aten:latest -f ./env/dev/Dockerfile .
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}

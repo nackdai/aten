@@ -1,6 +1,6 @@
 # aten
 
-![](https://github.com/nackdai/aten/workflows/.github/workflows/CI/badge.svg)
+![CI](https://github.com/nackdai/aten/workflows/CI/badge.svg)
 
 [![CircleCI](https://circleci.com/gh/nackdai/aten.svg?style=svg)](https://circleci.com/gh/nackdai/aten)
 

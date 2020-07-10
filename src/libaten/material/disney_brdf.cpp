@@ -7,6 +7,7 @@ namespace AT_NAME
     // NOTE
     // http://project-asura.com/blog/archives/1972
     // https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
+    // Physically-Based Shading at Disney
     // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
 
     inline AT_DEVICE_API real sqr(real f)
@@ -32,6 +33,7 @@ namespace AT_NAME
     inline AT_DEVICE_API real GTR1(real NdotH, real a)
     {
         // NOTE
+        // Physically-Based Shading at Disney
         // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
         // p25 equation(4)
 
@@ -46,6 +48,7 @@ namespace AT_NAME
     inline AT_DEVICE_API real GTR2(real NdotH, real a)
     {
         // NOTE
+        // Physically-Based Shading at Disney
         // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
         // p25 equation(8)
 
@@ -57,6 +60,7 @@ namespace AT_NAME
     inline AT_DEVICE_API real GTR2_aniso(real NdotH, real HdotX, real HdotY, real ax, real ay)
     {
         // NOTE
+        // Physically-Based Shading at Disney
         // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
         // p25 equation(13)
 
@@ -216,6 +220,7 @@ namespace AT_NAME
             const auto a = aten::mix(real(0.1), real(0.001), clearcoatGloss);
 
             // NOTE
+            // Physically-Based Shading at Disney
             // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
             // p25 (4) (5)
 
@@ -266,6 +271,7 @@ namespace AT_NAME
                 auto b = cross(n, t);
 
                 // NOTE
+                // Physically-Based Shading at Disney
                 // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
                 // p25 (14)
 

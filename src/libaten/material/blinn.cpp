@@ -5,6 +5,7 @@
 namespace AT_NAME
 {
     // NOTE
+    // Microfacet Models for Refraction through Rough Surfaces
     // http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
     // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
@@ -16,6 +17,7 @@ namespace AT_NAME
         real u, real v)
     {
         // NOTE
+        // An Overview of BRDF Models
         // http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
         // Half-angle based
 
@@ -56,6 +58,7 @@ namespace AT_NAME
         aten::sampler* sampler)
     {
         // NOTE
+        // An Overview of BRDF Models
         // http://digibug.ugr.es/bitstream/10481/19751/1/rmontes_LSI-2012-001TR.pdf
         // Lobe Distribution Sampling
 

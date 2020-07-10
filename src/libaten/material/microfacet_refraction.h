@@ -5,6 +5,7 @@
 namespace AT_NAME
 {
     // NOTE
+    // Microfacet Models for Refraction through Rough Surfaces
     // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
     // https://agraphicsguy.wordpress.com/2015/11/11/glass-material-simulated-by-microfacet-bxdf/
 

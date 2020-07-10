@@ -107,6 +107,7 @@ namespace idaten
         // NOTE
         // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?%A5%EA%A5%CB%A5%A2%A5%E1%A5%E2%A5%EA%A4%C8CUDA%C7%DB%CE%F3
         // http://www.orangeowlsolutions.com/archives/613
+        // Textures & Surfaces CUDA Webinar
         // http://developer.download.nvidia.com/CUDA/training/texture_webinar_aug_2011.pdf
 
 #if 0

@@ -2,6 +2,7 @@
 
 // NOTE
 // http://www.cs.virginia.edu/~gfx/courses/2007/ImageSynthesis/assignments/envsample.pdf
+// Importance Sampling for Production Rendering
 // http://www.igorsklyar.com/system/documents/papers/4/fiscourse.comp.pdf
 
 namespace AT_NAME {

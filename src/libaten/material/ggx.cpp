@@ -4,6 +4,7 @@
 namespace AT_NAME
 {
     // NOTE
+    // Microfacet Models for Refraction through Rough Surfaces
     // http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
     // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 

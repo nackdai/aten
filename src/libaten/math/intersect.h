@@ -54,7 +54,7 @@ namespace aten {
 
         // NOTE
         // 実装してみて速度的に変化がなかったが、メモとして.
-        // Fast    Minimum Storage RayTriangle    Intersection.
+        // Fast Minimum Storage Ray Triangle Intersection.
         // https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 
         vec3 e1 = v1 - v0;
@@ -88,6 +88,7 @@ namespace aten {
         intersectResult result;
 
         // NOTE
+        // Watertight Ray/Triangle Intersection
         // http://jcgt.org/published/0002/01/05/paper.pdf
 
         // calculate dimension where ray direction is maximal.

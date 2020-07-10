@@ -3,6 +3,7 @@
 //#pragma optimize( "", off)
 
 // NOTE
+// Stackless Multi-BVH Traversal for CPU, MIC and GPU Ray Tracing
 // http://cg.iit.bme.hu/~afra/publications/afra2013cgf_mbvhsl.pdf
 
 namespace aten

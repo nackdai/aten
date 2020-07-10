@@ -4,6 +4,7 @@
 namespace AT_NAME
 {
     // NOTE
+    // Physically Based Shader Design in Arnold
     // https://www.solidangle.com/research/physically_based_shader_design_in_arnold.pdf
 
     aten::vec3 LayeredBSDF::sampleAlbedoMap(real u, real v) const

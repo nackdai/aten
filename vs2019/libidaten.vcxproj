@@ -696,7 +696,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>
       </Include>
-      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -783,7 +783,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
-      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
       <FastMath>true</FastMath>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>
@@ -814,7 +814,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
-      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" --expt-relaxed-constexpr %(AdditionalOptions)</AdditionalOptions>
       <GenerateLineInfo>true</GenerateLineInfo>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>

@@ -268,6 +268,28 @@ namespace aten {
         return n + 1;
     }
 
+#ifdef TYPE_DOUBLE
+    inline AT_DEVICE_API int64_t floatAsInt(double f)
+    {
+        return *(int64_t*)&f;
+    }
+
+    inline AT_DEVICE_API double intAsFloat(int64_t n)
+    {
+        return *(double*)&n;
+    }
+#else
+    inline AT_DEVICE_API int32_t floatAsInt(float f)
+    {
+        return *(int32_t*)&f;
+    }
+
+    inline AT_DEVICE_API float intAsFloat(int32_t n)
+    {
+        return *(float*)&n;
+    }
+#endif
+
     template <typename TYPE>
     inline AT_DEVICE_API TYPE mix(const TYPE& x, const TYPE& y, real a)
     {

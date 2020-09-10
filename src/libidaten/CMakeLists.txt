@@ -17,6 +17,7 @@ set(CUDA_NVCC_FLAGS
     ${CUDA_NVCC_FLAGS}
     -rdc=true
     -use_fast_math
+    --expt-relaxed-constexpr
     -gencode
     arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY}
     -std=c++14)

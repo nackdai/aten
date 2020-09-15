@@ -28,3 +28,6 @@
 [submodule "3rdparty/makeitso"]
 	path = 3rdparty/makeitso
 	url = https://github.com/nackdai/makeitso.git
+[submodule "asset/models"]
+	path = asset/models
+	url = https://github.com/rdbruijne/models.git

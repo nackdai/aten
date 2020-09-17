@@ -178,7 +178,6 @@ int main(int argc, char* argv[])
         WIDTH, HEIGHT,
         "../shader/fullscreen_vs.glsl",
         "../shader/fullscreen_fs.glsl");
-    blitter.setIsRenderRGB(true);
 
     aten::TonemapPostProc tonemap;
     tonemap.init(

@@ -247,7 +247,6 @@ int main()
         WIDTH, HEIGHT,
         "../shader/fullscreen_vs.glsl",
         "../shader/fullscreen_fs.glsl");
-    blitter.setIsRenderRGB(true);
 
     g_visualizer->addPostProc(&blitter);
 

@@ -22,18 +22,6 @@ namespace aten {
         {
             return PixelFormat::rgba32f;
         }
-
-        void setIsRenderRGB(bool f)
-        {
-            m_isRenderRGB = f;
-        }
-        bool isRenderRGB() const
-        {
-            return m_isRenderRGB;
-        }
-
-    private:
-        bool m_isRenderRGB{ true };
     };
 
 }

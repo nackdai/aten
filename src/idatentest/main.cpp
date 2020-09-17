@@ -281,7 +281,6 @@ int main()
         WIDTH, HEIGHT,
         "../shader/fullscreen_vs.glsl",
         "../shader/fullscreen_fs.glsl");
-    blitter.setIsRenderRGB(true);
 
     atrous.init(
         g_ctxt,

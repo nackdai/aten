@@ -189,7 +189,11 @@ namespace aten
 
                 int m = shape.mesh.material_ids[mtrlpos];
 
-                if (mtrlidx != m) {
+                if (m < 0 && !dstshape) {
+                    dstshape = new aten::objshape();
+                    dstshape->setMaterial(AssetManager::getMtrlByIdx(0));
+                }
+                else if (mtrlidx != m) {
                     if (dstshape) {
                         // Check if emmisive object.
                         auto mtrl = dstshape->getMaterial();

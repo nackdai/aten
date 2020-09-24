@@ -114,6 +114,23 @@ namespace aten {
         return asset.mtrl;
     }
 
+    material* AssetManager::getMtrlByIdx(uint32_t idx)
+    {
+        const auto& assets = g_assets[AssetType::Material];
+        if (idx < assets.size()) {
+            uint32_t pos = 0;
+            for (auto it = assets.begin(); it != assets.end(); it++, pos++) {
+                if (pos == idx) {
+                    return it->second.mtrl;
+                }
+            }
+        }
+        else {
+            AT_ASSERT(false);
+            return nullptr;
+        }
+    }
+
     bool AssetManager::removeMtrl(material* mtrl)
     {
         return removeAsset(AssetManager::AssetType::Material, Asset(mtrl));
@@ -149,6 +166,12 @@ namespace aten {
     bool AssetManager::removeObj(object* obj)
     {
         return removeAsset(AssetManager::AssetType::Object, Asset(obj));
+    }
+
+    uint32_t AssetManager::getAssetNum(AssetManager::AssetType type)
+    {
+        auto& assets = g_assets[type];
+        return static_cast<uint32_t>(assets.size());
     }
 
     void AssetManager::removeAllMtrls()

@@ -21,6 +21,7 @@ namespace aten {
 
         static bool registerMtrl(const std::string& name, material* mtrl);
         static material* getMtrl(const std::string& name);
+        static material* getMtrlByIdx(uint32_t idx);
         static bool removeMtrl(material* mtrl);
 
         static bool registerTex(const std::string& name, texture* tex);
@@ -30,6 +31,8 @@ namespace aten {
         static bool registerObj(const std::string& name, object* obj);
         static object* getObj(const std::string& name);
         static bool removeObj(object* obj);
+
+        static uint32_t getAssetNum(AssetType type);
 
         static void removeAllMtrls();
         static void removeAllTextures();

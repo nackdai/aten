@@ -549,4 +549,10 @@ namespace aten {
         // 戻す.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
     }
+    
+    void RasterizeRenderer::setColor(const vec4& color)
+    {
+        auto hColor = m_shader.getHandle("color");
+        CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
+    }
 }

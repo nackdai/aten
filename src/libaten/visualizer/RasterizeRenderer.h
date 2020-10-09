@@ -81,6 +81,8 @@ namespace aten {
             bool isWireFrame,
             bool updateBuffer);
 
+        void setColor(const vec4& color);
+
         static void reset()
         {
             s_isInitGlobalVB = false;

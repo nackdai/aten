@@ -452,7 +452,7 @@ namespace aten {
         /**
          * @brief Update the tree.
          */
-        virtual void update() override;
+        virtual void update(const context& ctxt) override;
 
     private:
         /**

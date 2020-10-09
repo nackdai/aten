@@ -449,7 +449,7 @@ namespace aten
 
     void ThreadedBVH::update(const context& ctxt)
     {
-        m_bvh.update();
+        m_bvh.update(ctxt);
 
         setBoundingBox(m_bvh.getBoundingbox());
 

@@ -390,7 +390,7 @@ namespace aten
         }
     }
 
-    void bvh::update()
+    void bvh::update(const context& ctxt)
     {
         std::vector<bvhnode*> sweepNodes;
         sweepNodes.reserve(m_refitNodes.size());

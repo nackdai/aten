@@ -379,7 +379,7 @@ namespace idaten
         idaten::TypedCudaMemory<float4> m_tmpBuf;
 
         // Distance limitation to kill path.
-        float m_hitDistLimit{ AT_MATH_INF };
+        real m_hitDistLimit{ AT_MATH_INF };
 
         // G-Buffer rendered by OpenGL.
         idaten::CudaGLSurface m_gbuffer;

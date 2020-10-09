@@ -47,20 +47,24 @@ namespace aten {
         const vec3& v1,
         const vec3& v2)
     {
-#if 1
         // NOTE
         // http://qiita.com/edo_m18/items/2bd885b13bd74803a368
         // http://kanamori.cs.tsukuba.ac.jp/jikken/inner/triangle_intersection.pdf
+        // https://pheema.hatenablog.jp/entry/ray-triangle-intersection
 
         // NOTE
         // 実装してみて速度的に変化がなかったが、メモとして.
         // Fast Minimum Storage Ray Triangle Intersection.
         // https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 
+#if 1
         vec3 e1 = v1 - v0;
         vec3 e2 = v2 - v0;
         vec3 r = ray.org - v0;
         vec3 d = ray.dir;
+
+        // NOTE
+        // To avoid 'if' for GPU computing, I don't run 'if' confition to check 'u', 'v' here.
 
         vec3 u = cross(d, e2);
         vec3 v = cross(r, e1);

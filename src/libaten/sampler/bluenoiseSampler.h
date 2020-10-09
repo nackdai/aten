@@ -84,7 +84,7 @@ namespace aten {
 
             auto noise = m_noise[z]->at(u, v);
 
-            return aten::cmpMin(noise.x, 0.9999999999999f);
+            return aten::cmpMin<real>(noise.x, 0.9999999999999f);
         }
 
     private:

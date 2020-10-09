@@ -279,7 +279,7 @@ namespace aten
             aten::mat4 mtxW2C = mtxV2C * mtxW2V;
 
             auto hMtxW2C = m_shd.getHandle("mtxW2C");
-            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, &mtxW2C.a[0]));
+            CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
 
             // NOTE
             // グローバルマトリクス計算時にルートに local to world マトリクスは乗算済み.

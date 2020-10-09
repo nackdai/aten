@@ -192,6 +192,18 @@ namespace aten {
 #else
 #ifdef TYPE_DOUBLE
     using vec3 = glm::dvec3;
+
+    inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
+    {
+        vec3 ret(t * v.x, t * v.y, t * v.z);
+        return std::move(ret);
+    }
+
+    inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
+    {
+        vec3 ret(t * v.x, t * v.y, t * v.z);
+        return std::move(ret);
+    }
 #else
     using vec3 = glm::vec3;
 #endif

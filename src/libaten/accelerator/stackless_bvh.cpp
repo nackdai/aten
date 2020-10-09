@@ -286,7 +286,7 @@ namespace aten {
                 }
             }
             else {
-                float t[2];
+                real t[2];
                 bool hit[2];
 
                 hit[0] = aten::aabb::hit(r, node->boxmin_0, node->boxmax_0, t_min, t_max, &t[0]);

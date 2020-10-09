@@ -282,7 +282,7 @@ namespace aten
                 needComputeSpatial = (overlapCost / rootSurfaceArea) >= areaAlpha;
             }
 
-            float spatialCost = AT_MATH_INF;
+            real spatialCost = AT_MATH_INF;
             aabb spatialLeftBB;
             aabb spatialRightBB;
             real spatialSplitPlane = real(0);
@@ -1147,7 +1147,7 @@ namespace aten
             {
                 int voxeldepth = AT_GET_VOXEL_DEPTH(node->voxeldepth);
 
-                float t_result = 0.0f;
+                real t_result = 0.0f;
                 aten::vec3 nml;
                 isHit = aten::aabb::hit(r, node->boxmin, node->boxmax, t_min, t_max, t_result, nml);
 

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <climits>
 
-//#define TYPE_DOUBLE
+#define TYPE_DOUBLE
 
 #ifdef TYPE_DOUBLE
     using real = double;

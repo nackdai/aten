@@ -68,11 +68,12 @@ namespace AT_NAME
 
         bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
 
+#if 0
         if (param->ior > real(0)) {
-            real nc = real(1);        // 真空の屈折率.
-            real nt = param->ior;    // 物体内部の屈折率.
+            real nc = real(1);      // 真空の屈折率.
+            real nt = param->ior;   // 物体内部の屈折率.
 
-                                    // SchlickによるFresnelの反射係数の近似を使う.
+            // SchlickによるFresnelの反射係数の近似を使う.
             const real a = nt - nc;
             const real b = nt + nc;
             const real r0 = (a * a) / (b * b);
@@ -84,6 +85,7 @@ namespace AT_NAME
 
             bsdf *= fresnel;
         }
+#endif
 
         return std::move(bsdf);
     }

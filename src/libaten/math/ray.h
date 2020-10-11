@@ -11,7 +11,15 @@ namespace aten
         }
         AT_DEVICE_API ray(const vec3& o, const vec3& d)
         {
+            // TODO
             dir = normalize(d);
+            org = o + AT_MATH_EPSILON * dir;
+        }
+        AT_DEVICE_API ray(const vec3& o, const vec3& d, const vec3& normal)
+        {
+            dir = normalize(d);
+
+            AT_ASSERT(dot(dir, normal) >= real(0.0));
 
             static constexpr real origin = real(1.0) / real(32.0);
             static constexpr real float_scale = real(1.0) / real(65536.0);
@@ -41,9 +49,9 @@ namespace aten
             //         小数点から上の暗黙の1 + 小数点以下の上位 e (=1) bit
             //         つまり、11 = 3
             // int i = (int)ff = 3
-            auto of_ix = (int32_t)(int_scale * d.x);
-            auto of_iy = (int32_t)(int_scale * d.y);
-            auto of_iz = (int32_t)(int_scale * d.z);
+            auto of_ix = (int32_t)(int_scale * normal.x);
+            auto of_iy = (int32_t)(int_scale * normal.y);
+            auto of_iz = (int32_t)(int_scale * normal.z);
 
             // NOTE
             // intの場合：負の数は２進数でみたときに値が小さいほどintとしての値が大きくなる（２の補数）.
@@ -56,9 +64,9 @@ namespace aten
                 intAsFloat(floatAsInt(o.z) + (o.z < real(0) ? -of_iz : of_iz)));
 
             org = vec3(
-                aten::abs(o.x) < origin ? org.x = o.x + float_scale * d.x : p_i.x,
-                aten::abs(o.y) < origin ? org.y = o.y + float_scale * d.y : p_i.y,
-                aten::abs(o.z) < origin ? org.z = o.z + float_scale * d.z : p_i.z);
+                aten::abs(o.x) < origin ? org.x = o.x + float_scale * normal.x : p_i.x,
+                aten::abs(o.y) < origin ? org.y = o.y + float_scale * normal.y : p_i.y,
+                aten::abs(o.z) < origin ? org.z = o.z + float_scale * normal.z : p_i.z);
         }
 
         vec3 org;

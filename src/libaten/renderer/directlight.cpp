@@ -136,7 +136,7 @@ namespace aten
             path.pdfb = pdfb;
 
             // Make next ray.
-            path.ray = aten::ray(path.rec.p, nextDir);
+            path.ray = aten::ray(path.rec.p, nextDir, path.rec.normal);
 
             return true;
         }
@@ -156,7 +156,7 @@ namespace aten
                 auto lightobj = sampleres.obj;
 
                 vec3 dirToLight = normalize(sampleres.dir);
-                aten::ray shadowRay(path.rec.p, dirToLight);
+                aten::ray shadowRay(path.rec.p, dirToLight, path.rec.normal);
 
                 auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
                 auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
@@ -208,7 +208,7 @@ namespace aten
                             throughput *= bsdf * c / pdfb;
                         }
 
-                        ray nextRay = aten::ray(path.rec.p, nextDir);
+                        ray nextRay = aten::ray(path.rec.p, nextDir, path.rec.normal);
 
                         aten::Intersection tmpIsect;
 

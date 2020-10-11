@@ -42,7 +42,7 @@ namespace aten
                     throughput *= bsdf;
 
                     // Make next ray.
-                    ray = aten::ray(rec.p, nextDir);
+                    ray = aten::ray(rec.p, nextDir, orienting_normal);
                 }
                 else if (mtrl->isNPR()) {
                     // Non-Photo-Real.
@@ -70,7 +70,7 @@ namespace aten
 
                         auto albedo = mtrl->color();
 
-                        aten::ray shadowRay(rec.p, dirToLight);
+                        aten::ray shadowRay(rec.p, dirToLight, orienting_normal);
 
                         hitrecord tmpRec;
 

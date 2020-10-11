@@ -16,8 +16,10 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X    (171)
-#define BREAK_Y    (511 - 503)
+//#define BREAK_X    (21)
+//#define BREAK_Y    (356)
+#define BREAK_X    (482)
+#define BREAK_Y    (511-257)
 #pragma optimize( "", off)
 #endif
 
@@ -169,6 +171,8 @@ namespace aten
 #endif
         }
 
+        auto normal = orienting_normal;
+
         if (!mtrl->isTranslucent() && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
@@ -231,52 +235,61 @@ namespace aten
 
                 vec3 dirToLight = normalize(sampleres.dir);
 
+                // TODO
+                // Do we need to consider offset for shadow ray?
+#if 0
                 auto shadowRayOrg = path.rec.p + AT_MATH_EPSILON * orienting_normal;
                 auto tmp = path.rec.p + dirToLight - shadowRayOrg;
                 auto shadowRayDir = normalize(tmp);
-                aten::ray shadowRay(shadowRayOrg, shadowRayDir);
+#else
+                auto shadowRayOrg = path.rec.p;
+                auto shadowRayDir = dirToLight;
+#endif
+                if (dot(orienting_normal, shadowRayDir) > real(0.0f)) {
+                    aten::ray shadowRay(shadowRayOrg, shadowRayDir, orienting_normal);
 
-                hitrecord tmpRec;
+                    hitrecord tmpRec;
 
-                if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-                    // Shadow ray hits the light.
-                    auto cosShadow = dot(orienting_normal, dirToLight);
+                    if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                        // Shadow ray hits the light.
+                        auto cosShadow = dot(orienting_normal, dirToLight);
 
-                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-                    auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                        auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                        auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
-                    bsdf *= path.throughput;
+                        bsdf *= path.throughput;
 
-                    // Get light color.
-                    auto emit = sampleres.finalColor;
+                        // Get light color.
+                        auto emit = sampleres.finalColor;
 
-                    if (light->isSingular() || light->isInfinite()) {
-                        if (pdfLight > real(0) && cosShadow >= 0) {
-                            // TODO
-                            // ジオメトリタームの扱いについて.
-                            // singular light の場合は、finalColor に距離の除算が含まれている.
-                            // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-                            // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                            auto misW = pdfLight / (pdfb + pdfLight);
-                            path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
-                        }
-                    }
-                    else {
-                        auto cosLight = dot(nmlLight, -dirToLight);
-
-                        if (cosShadow >= 0 && cosLight >= 0) {
-                            auto dist2 = squared_length(sampleres.dir);
-                            auto G = cosShadow * cosLight / dist2;
-
-                            if (pdfb > real(0) && pdfLight > real(0)) {
-                                // Convert pdf from steradian to area.
-                                // http://www.slideshare.net/h013/edubpt-v100
-                                // p31 - p35
-                                pdfb = pdfb * cosLight / dist2;
-
+                        if (light->isSingular() || light->isInfinite()) {
+                            if (pdfLight > real(0) && cosShadow >= 0) {
+                                // TODO
+                                // ジオメトリタームの扱いについて.
+                                // singular light の場合は、finalColor に距離の除算が含まれている.
+                                // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
+                                // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
                                 auto misW = pdfLight / (pdfb + pdfLight);
+                                path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+                            }
+                        }
+                        else {
+                            auto cosLight = dot(nmlLight, -dirToLight);
 
-                                path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+                            if (cosShadow >= 0 && cosLight >= 0) {
+                                auto dist2 = squared_length(sampleres.dir);
+                                auto G = cosShadow * cosLight / dist2;
+
+                                if (pdfb > real(0) && pdfLight > real(0)) {
+                                    // Convert pdf from steradian to area.
+                                    // http://www.slideshare.net/h013/edubpt-v100
+                                    // p31 - p35
+                                    pdfb = pdfb * cosLight / dist2;
+
+                                    auto misW = pdfLight / (pdfb + pdfLight);
+
+                                    path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+                                }
                             }
                         }
                     }
@@ -295,7 +308,7 @@ namespace aten
                 auto lightobj = sampleres.obj;
 
                 vec3 dirToLight = normalize(sampleres.dir);
-                aten::ray shadowRay(path.rec.p, dirToLight);
+                aten::ray shadowRay(path.rec.p, dirToLight, normal);
 
                 hitrecord tmpRec;
 
@@ -381,7 +394,7 @@ namespace aten
         path.pdfb = pdfb;
 
         // Make next ray.
-        path.ray = aten::ray(path.rec.p, nextDir);
+        path.ray = aten::ray(path.rec.p, nextDir, orienting_normal);
 
         return true;
     }

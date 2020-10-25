@@ -40,6 +40,10 @@ namespace aten {
             m_ib.clear();
         }
 
+        void clearBuffer(const vec4& clearColor);
+
+        void prepareDraw(const camera* cam);
+
         void drawSceneForGBuffer(
             int frame,
             context& ctxt,

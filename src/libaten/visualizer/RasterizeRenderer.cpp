@@ -32,6 +32,44 @@ namespace aten {
         return m_shader.init(width, height, pathVS, pathGS, pathFS);
     }
 
+    void RasterizeRenderer::clearBuffer(const vec4& clearColor)
+    {
+        CALL_GL_API(::glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a));
+        CALL_GL_API(::glClearDepthf(1.0f));
+        CALL_GL_API(::glClearStencil(0));
+        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+    }
+
+    void RasterizeRenderer::prepareDraw(const camera* cam)
+    {
+        auto camparam = cam->param();
+
+        // TODO
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
+
+        mat4 mtxW2V;
+        mat4 mtxV2C;
+
+        mtxW2V.lookat(
+            camparam.origin,
+            camparam.center,
+            camparam.up);
+
+        mtxV2C.perspective(
+            camparam.znear,
+            camparam.zfar,
+            camparam.vfov,
+            camparam.aspect);
+
+        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+        m_shader.prepareRender(nullptr, false);
+
+        auto hMtxW2C = m_shader.getHandle("mtxW2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
+    }
+
     void RasterizeRenderer::drawSceneForGBuffer(
         int frame,
         context& ctxt,

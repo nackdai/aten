@@ -1034,7 +1034,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     std::vector<aten::object*> objs;
-    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true);
+    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::object>(
         ctxt,

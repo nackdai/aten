@@ -312,6 +312,8 @@ namespace aten {
             p.y = -n.x / k;
             p.z = 0;
         }
+
+        p = normalize(p);
 #endif
 
         return std::move(p);

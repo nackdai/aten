@@ -69,11 +69,10 @@ namespace AT_NAME
         auto r2 = sampler->nextSample();
 
 #if 1
-        // Sample halfway vector first, then reflect wi around that
-        auto costheta = aten::pow(r1, 1 / (param->shininess + 1));
+        // Sample half vector.
+        auto costheta = aten::pow(r1, 1 / (param->shininess + 2));
         auto sintheta = aten::sqrt(1 - costheta * costheta);
 
-        // phi = 2*PI*ksi2
         auto cosphi = aten::cos(AT_MATH_PI_2 * r2);
         auto sinphi = aten::sqrt(real(1) - cosphi * cosphi);
 #else
@@ -92,10 +91,21 @@ namespace AT_NAME
         auto t = aten::getOrthoVector(normal);
         auto b = normalize(cross(n, t));
 
-        auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
-        w = normalize(w);
+        // Compute half vector around normal.
+        auto wh = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
+        wh = normalize(wh);
 
-        auto dir = wi - 2 * dot(wi, w) * w;
+        // NOTE
+        // In ideal spcular case,
+        //    wo = -wi + 2 * dot(n, wi) * n
+        // (wi direction to eye)
+        // In microface case, we can treat half vector like normal.
+        // And then, the formula is same.
+        //    wo = -wi + 2 * dot(h, wi) * h
+        // But, in this function wi is into the surface.
+        // i.e. opposite direction to eye, so already wi = -wi
+        // Therefore, below code is a little bit different -(minus) position.
+        auto dir = wi + 2 * dot(-wi, wh) * wh;
 
         return std::move(dir);
     }

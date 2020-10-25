@@ -9,6 +9,7 @@ namespace aten
         AT_DEVICE_API ray()
         {
         }
+        [[deprecated("TODO: need to replace new constructor with offset")]]
         AT_DEVICE_API ray(const vec3& o, const vec3& d)
         {
             // TODO

@@ -16,10 +16,8 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-//#define BREAK_X    (21)
-//#define BREAK_Y    (356)
-#define BREAK_X    (482)
-#define BREAK_Y    (511-257)
+#define BREAK_X    (28)
+#define BREAK_Y    (182)
 #pragma optimize( "", off)
 #endif
 
@@ -171,8 +169,6 @@ namespace aten
 #endif
         }
 
-        auto normal = orienting_normal;
-
         if (!mtrl->isTranslucent() && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
@@ -308,7 +304,7 @@ namespace aten
                 auto lightobj = sampleres.obj;
 
                 vec3 dirToLight = normalize(sampleres.dir);
-                aten::ray shadowRay(path.rec.p, dirToLight, normal);
+                aten::ray shadowRay(path.rec.p, dirToLight, orienting_normal);
 
                 hitrecord tmpRec;
 

@@ -264,6 +264,8 @@ int main(int argc, char* argv[])
     g_bg.init(g_envmap);
 
     aten::ImageBasedLight ibl(&g_bg);
+    // NOTE
+    // BDPT doesn't support IBL yet.
     g_scene.addImageBasedLight(&ibl);
 
 #if 0

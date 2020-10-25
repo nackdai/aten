@@ -27,7 +27,7 @@ namespace AT_NAME
             const auto& in = -wi;
 
             bool into = (dot(in, normal) > real(0));
-            const auto& nml = into ? normal : -normal;
+            const auto nml = into ? normal : -normal;
 
             // normalの方向を基準とした正規直交基底(w, u, v)を作る.
             // この基底に対する半球内で次のレイを飛ばす.

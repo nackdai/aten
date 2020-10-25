@@ -72,7 +72,7 @@ namespace AT_NAME
             const real z = aten::sqrt(real(1) - r2);
 
             aten::vec3 dir = normalize((t * x + b * y + n * z));
-            //AT_ASSERT(dot(normal, dir) >= 0);
+            AT_ASSERT(dot(normal, dir) >= 0);
 
             return std::move(dir);
         }

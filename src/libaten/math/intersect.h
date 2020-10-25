@@ -52,8 +52,6 @@ namespace aten {
         // http://kanamori.cs.tsukuba.ac.jp/jikken/inner/triangle_intersection.pdf
         // https://pheema.hatenablog.jp/entry/ray-triangle-intersection
 
-        // NOTE
-        // 実装してみて速度的に変化がなかったが、メモとして.
         // Fast Minimum Storage Ray Triangle Intersection.
         // https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 

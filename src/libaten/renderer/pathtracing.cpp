@@ -396,6 +396,12 @@ namespace aten
             orienting_normal = -orienting_normal;
         }
 
+        // TODO
+        // Terminate to compute radiance before computing shadow ray.
+        if (dot(orienting_normal, nextDir) <= real(0)) {
+            return false;
+        }
+
         // Make next ray.
         path.ray = aten::ray(path.rec.p, nextDir, orienting_normal);
 

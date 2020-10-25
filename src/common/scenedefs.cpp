@@ -877,6 +877,7 @@ void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene
     auto layer = new aten::LayeredBSDF();
     layer->add(spec);
     layer->add(diff);
+    ctxt.addMaterial(layer);
 
     auto s_layer = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, 0, 0), 1.0, layer);
     scene->add(s_layer);

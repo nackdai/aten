@@ -23,9 +23,6 @@
 
 namespace aten
 {
-    // NOTE
-    // https://www.slideshare.net/shocker_0x15/ss-52688052
-
     PathTracing::Path PathTracing::radiance(
         const context& ctxt,
         sampler* sampler,

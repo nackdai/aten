@@ -38,6 +38,9 @@ static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
+static int g_renderMode = 0;    // 0: AO, 1: TexView
+static int g_viewTexIdx = 0;
+
 void onRun(aten::window* window)
 {
     if (g_isCameraDirty) {
@@ -56,10 +59,17 @@ void onRun(aten::window* window)
     aten::timer timer;
     timer.begin();
 
-    g_tracer.render(
-        idaten::TileDomain(0, 0, WIDTH, HEIGHT),
-        1,
-        5);
+    if (g_renderMode == 0) {
+        // AO
+        g_tracer.render(
+            idaten::TileDomain(0, 0, WIDTH, HEIGHT),
+            1,
+            5);
+    }
+    else {
+        // Texture Viewer
+        g_tracer.viewTextures(g_viewTexIdx, WIDTH, HEIGHT);
+    }
 
     auto cudaelapsed = timer.end();
 
@@ -92,12 +102,20 @@ void onRun(aten::window* window)
         if (prevSamples != g_maxSamples || prevDepth != g_maxBounce) {
             g_tracer.reset();
         }
-#endif
 
         bool enableProgressive = g_tracer.isProgressive();
 
         if (ImGui::Checkbox("Progressive", &enableProgressive)) {
             g_tracer.enableProgressive(enableProgressive);
+        }
+#endif
+
+        static const char* items[] = { "AO", "Tex" };
+
+        ImGui::Combo("mode", &g_renderMode, items, AT_COUNTOF(items));
+        if (g_renderMode == 1) {
+            auto maxTexIdx = g_tracer.getRegisteredTextureNum() - 1;
+            ImGui::SliderInt("TexIdx", &g_viewTexIdx, 0, maxTexIdx);
         }
 
         window->drawImGui();

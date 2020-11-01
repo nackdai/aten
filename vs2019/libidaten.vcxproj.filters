@@ -541,5 +541,8 @@
     <CudaCompile Include="..\src\libidaten\asvgf\asvgf_raygen.cu">
       <Filter>asvgf</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\kernel\tex_viewer.cu">
+      <Filter>kernel\renderer</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

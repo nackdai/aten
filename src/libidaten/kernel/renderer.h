@@ -63,6 +63,15 @@ namespace idaten
 
         void updateCamera(const aten::CameraParameter& camera);
 
+        void viewTextures(
+            uint32_t idx,
+            int screenWidth, int screenHeight);
+
+        uint32_t getRegisteredTextureNum() const
+        {
+            return static_cast<uint32_t>(m_texRsc.size());
+        }
+
         virtual void enableRenderAOV(
             GLuint gltexPosition,
             GLuint gltexNormal,

@@ -161,6 +161,7 @@ cuda_add_library(
   kernel/stackless_qbvh.cu
   kernel/stackless_qbvh.cuh
   kernel/stackless_qbvh_impl.cuh
+  kernel/tex_viewer.cu
   multigpu/pt_multigpu.cpp
   multigpu/pt_multigpu.h
   multigpu/renderer_multigpu.h

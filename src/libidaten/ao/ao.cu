@@ -293,7 +293,7 @@ __global__ void shadeAO(
     aten::vec3 orienting_normal = rec.normal;
 
     // Apply normal map.
-    int normalMap = mtrl.normalMap;
+    int normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
     if (mtrl.type == aten::MaterialType::Layer) {
         // 最表層の NormalMap を適用.
         auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
@@ -315,8 +315,13 @@ __global__ void shadeAO(
 
         bool isHit = intersectClosest(&ctxt, ao_ray, &isectTmp, ao_radius);
 
-        if (c > 0.0f) {
-            ao_color += aten::vec3(isectTmp.t / ao_radius * c / pdfb);
+        if (isHit) {
+            if (c > 0.0f) {
+                ao_color += aten::vec3(isectTmp.t / ao_radius * c / pdfb);
+            }
+        }
+        else {
+            ao_color = aten::vec3(1.0f);
         }
     }
 

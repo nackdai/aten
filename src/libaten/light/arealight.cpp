@@ -23,6 +23,11 @@ namespace AT_NAME {
 
                 auto pos = result.pos;
                 auto dir = pos - org;
+
+                // NOTE
+                // Just do hit test if ray hits the specified object directly.
+                // We don't need to mind self-intersection.
+                // Therefore, we don't need to add offset.
                 r = aten::ray(org, dir);
 
                 if (result.primid >= 0) {
@@ -41,6 +46,11 @@ namespace AT_NAME {
                 auto pos = obj->getBoundingbox().getCenter();
 
                 auto dir = pos - org;
+
+                // NOTE
+                // Just do hit test if ray hits the specified object directly.
+                // We don't need to mind self-intersection.
+                // Therefore, we don't need to add offset.
                 r = aten::ray(org, dir);
 
                 obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);

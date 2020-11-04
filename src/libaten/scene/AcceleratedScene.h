@@ -54,6 +54,7 @@ namespace aten {
             aten::hitrecord& rec,
             aten::Intersection& isect) const final
         {
+            isect.t = t_max;
             auto isHit = m_accel.hit(ctxt, r, t_min, t_max, enableLod, isect);
 
             // TODO

@@ -170,6 +170,13 @@ namespace aten
             orienting_normal = -orienting_normal;
         }
 
+        // Get normal to add ray offset.
+        // In refraction material case, new ray direction might be computed with inverted normal.
+        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+        auto rayBasedNormal = (!isBackfacing && mtrl->isTranslucent())
+            ? -orienting_normal
+            : orienting_normal;
+
         // Apply normal map.
         mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
@@ -238,8 +245,9 @@ namespace aten
                 auto shadowRayOrg = path.rec.p;
                 auto shadowRayDir = dirToLight;
 #endif
-                if (dot(orienting_normal, shadowRayDir) > real(0.0f)) {
-                    aten::ray shadowRay(shadowRayOrg, shadowRayDir, orienting_normal);
+
+                if (dot(shadowRayDir, rayBasedNormal) > real(0)) {
+                    aten::ray shadowRay(shadowRayOrg, shadowRayDir, rayBasedNormal);
 
                     hitrecord tmpRec;
 
@@ -301,7 +309,7 @@ namespace aten
                 auto lightobj = sampleres.obj;
 
                 vec3 dirToLight = normalize(sampleres.dir);
-                aten::ray shadowRay(path.rec.p, dirToLight, orienting_normal);
+                aten::ray shadowRay(path.rec.p, dirToLight, rayBasedNormal);
 
                 hitrecord tmpRec;
 
@@ -366,14 +374,13 @@ namespace aten
         if (!mtrl->isSingular()) {
             // TODO
             // AMDのはabsしているが....
-            c = aten::abs(dot(orienting_normal, nextDir));
-            //c = dot(orienting_normal, nextDir);
+            //c = aten::abs(dot(orienting_normal, nextDir));
+            c = dot(orienting_normal, nextDir);
         }
 #else
         auto c = dot(orienting_normal, nextDir);
 #endif
 
-        //if (pdfb > 0) {
         if (pdfb > 0 && c > 0) {
             path.throughput *= bsdf * c / pdfb;
             path.throughput /= russianProb;
@@ -386,21 +393,12 @@ namespace aten
 
         path.pdfb = pdfb;
 
-
-        // In refraction material case, new ray direction might be computed with inverted normal.
-        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        if (!isBackfacing && mtrl->isTranslucent()) {
-            orienting_normal = -orienting_normal;
-        }
-
-        // TODO
-        // Terminate to compute radiance before computing shadow ray.
         if (dot(orienting_normal, nextDir) <= real(0)) {
             return false;
         }
 
         // Make next ray.
-        path.ray = aten::ray(path.rec.p, nextDir, orienting_normal);
+        path.ray = aten::ray(path.rec.p, nextDir, rayBasedNormal);
 
         return true;
     }

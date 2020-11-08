@@ -126,6 +126,11 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
         }
 
         auto dir = result.pos - org;
+
+        // NOTE
+        // Just do hit test if ray hits the specified object directly.
+        // We don't need to mind self-intersection.
+        // Therefore, we don't need to add offset.
         r = aten::ray(org, dir);
 
         if (result.primid >= 0) {
@@ -147,7 +152,13 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
         // Only for sphere...
         auto pos = s->center;
         auto dir = pos - org;
+
+        // NOTE
+        // Just do hit test if ray hits the specified object directly.
+        // We don't need to mind self-intersection.
+        // Therefore, we don't need to add offset.
         r = aten::ray(org, dir);
+
         AT_NAME::sphere::hit(s, r, AT_MATH_EPSILON, AT_MATH_INF, &isect);
     }
 

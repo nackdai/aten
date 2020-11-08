@@ -9,12 +9,10 @@ namespace aten
         AT_DEVICE_API ray()
         {
         }
-        [[deprecated("TODO: need to replace new constructor with offset")]]
         AT_DEVICE_API ray(const vec3& o, const vec3& d)
         {
-            // TODO
             dir = normalize(d);
-            org = o + AT_MATH_EPSILON * dir;
+            org = o;
         }
         AT_DEVICE_API ray(const vec3& o, const vec3& d, const vec3& normal)
         {

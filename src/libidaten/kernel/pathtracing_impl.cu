@@ -515,7 +515,8 @@ __global__ void shade(
         auto tmp = rec.p + dirToLight - shadowRayOrg;
         auto shadowRayDir = normalize(tmp);
 
-        shadowRays[idx].isActive = true;
+        bool isShadowRayActive = false;
+
         shadowRays[idx].r = aten::ray(shadowRayOrg, shadowRayDir);
         shadowRays[idx].targetLightId = lightidx;
         shadowRays[idx].distToLight = distToLight;
@@ -540,6 +541,7 @@ __global__ void shade(
                     // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
                     auto misW = pdfLight / (pdfb + pdfLight);
                     shadowRays[idx].lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+                    isShadowRayActive = true;
                 }
             }
             else {
@@ -557,9 +559,12 @@ __global__ void shade(
 
                         auto misW = pdfLight / (pdfb + pdfLight);
                         shadowRays[idx].lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+                        isShadowRayActive = true;
                     }
                 }
             }
+
+            shadowRays[idx].isActive = isShadowRayActive;
         }
     }
 
@@ -600,8 +605,8 @@ __global__ void shade(
     if (!mtrl.attrib.isSingular) {
         // TODO
         // AMDのはabsしているが....
-        c = aten::abs(dot(orienting_normal, nextDir));
-        //c = dot(orienting_normal, nextDir);
+        //c = aten::abs(dot(orienting_normal, nextDir));
+        c = dot(orienting_normal, nextDir);
     }
 
     if (pdfb > 0 && c > 0) {
@@ -610,6 +615,12 @@ __global__ void shade(
     }
     else {
         path.isTerminate = true;
+    }
+
+    // In refraction material case, new ray direction might be computed with inverted normal.
+    // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+    if (!isBackfacing && mtrl.attrib.isTranslucent) {
+        orienting_normal = -orienting_normal;
     }
 
     // Make next ray.

@@ -635,7 +635,8 @@ __global__ void shade(
             auto tmp = rec.p + dirToLight - shadowRayOrg;
             auto shadowRayDir = normalize(tmp);
 
-            shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = true;
+            bool isShadowRayActive = false;
+
             shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].rayorg = shadowRayOrg;
             shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].raydir = shadowRayDir;
             shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].targetLightId = lightidx;
@@ -663,6 +664,8 @@ __global__ void shade(
 
                         shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
                             (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;
+
+                        isShadowRayActive = true;
                     }
                 }
                 else {
@@ -682,10 +685,14 @@ __global__ void shade(
 
                             shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
                                 (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;;
+
+                            isShadowRayActive = true;
                         }
                     }
                 }
             }
+
+            shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = isShadowRayActive;
         }
     }
 #endif
@@ -728,8 +735,8 @@ __global__ void shade(
     if (!shMtrls[threadIdx.x].attrib.isSingular) {
         // TODO
         // AMDのはabsしているが....
-        c = aten::abs(dot(orienting_normal, nextDir));
-        //c = dot(orienting_normal, nextDir);
+        //c = aten::abs(dot(orienting_normal, nextDir));
+        c = dot(orienting_normal, nextDir);
     }
 
     if (pdfb > 0 && c > 0) {
@@ -740,8 +747,14 @@ __global__ void shade(
         paths->attrib[idx].isTerminate = true;
     }
 
+    // In refraction material case, new ray direction might be computed with inverted normal.
+    // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+    if (!isBackfacing && shMtrls[threadIdx.x].attrib.isTranslucent) {
+        orienting_normal = -orienting_normal;
+    }
+
     // Make next ray.
-    rays[idx] = aten::ray(rec.p, nextDir);
+    rays[idx] = aten::ray(rec.p, nextDir, orienting_normal);
 
     paths->throughput[idx].pdfb = pdfb;
     paths->attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;

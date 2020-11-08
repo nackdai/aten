@@ -170,13 +170,6 @@ namespace aten
             orienting_normal = -orienting_normal;
         }
 
-        // Get normal to add ray offset.
-        // In refraction material case, new ray direction might be computed with inverted normal.
-        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        auto rayBasedNormal = (!isBackfacing && mtrl->isTranslucent())
-            ? -orienting_normal
-            : orienting_normal;
-
         // Apply normal map.
         mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
 
@@ -246,8 +239,8 @@ namespace aten
                 auto shadowRayDir = dirToLight;
 #endif
 
-                if (dot(shadowRayDir, rayBasedNormal) > real(0)) {
-                    aten::ray shadowRay(shadowRayOrg, shadowRayDir, rayBasedNormal);
+                if (dot(shadowRayDir, orienting_normal) > real(0)) {
+                    aten::ray shadowRay(shadowRayOrg, shadowRayDir, orienting_normal);
 
                     hitrecord tmpRec;
 
@@ -309,7 +302,7 @@ namespace aten
                 auto lightobj = sampleres.obj;
 
                 vec3 dirToLight = normalize(sampleres.dir);
-                aten::ray shadowRay(path.rec.p, dirToLight, rayBasedNormal);
+                aten::ray shadowRay(path.rec.p, dirToLight, orienting_normal);
 
                 hitrecord tmpRec;
 
@@ -393,7 +386,14 @@ namespace aten
 
         path.pdfb = pdfb;
 
-        if (dot(orienting_normal, nextDir) <= real(0)) {
+        // Get normal to add ray offset.
+        // In refraction material case, new ray direction might be computed with inverted normal.
+        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+        auto rayBasedNormal = (!isBackfacing && mtrl->isTranslucent())
+            ? -orienting_normal
+            : orienting_normal;
+
+        if (dot(rayBasedNormal, nextDir) <= real(0)) {
             return false;
         }
 

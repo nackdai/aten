@@ -29,9 +29,21 @@ namespace aten
                     return std::move(contribution);
                 }
 
+                auto isBackfacing = dot(rec.normal, -ray.dir) < real(0.0);
+
                 // 交差位置の法線.
                 // 物体からのレイの入出を考慮.
-                const vec3 orienting_normal = dot(rec.normal, ray.dir) < 0.0 ? rec.normal : -rec.normal;
+                vec3 orienting_normal = rec.normal;
+                if (!mtrl->isTranslucent() && isBackfacing) {
+                    orienting_normal = -orienting_normal;
+                }
+
+                // Get normal to add ray offset.
+                // In refraction material case, new ray direction might be computed with inverted normal.
+                // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+                auto rayBasedNormal = (!isBackfacing && mtrl->isTranslucent())
+                    ? -orienting_normal
+                    : orienting_normal;
 
                 if (mtrl->isSingular() || mtrl->isTranslucent()) {
                     auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
@@ -42,7 +54,7 @@ namespace aten
                     throughput *= bsdf;
 
                     // Make next ray.
-                    ray = aten::ray(rec.p, nextDir, orienting_normal);
+                    ray = aten::ray(rec.p, nextDir, rayBasedNormal);
                 }
                 else if (mtrl->isNPR()) {
                     // Non-Photo-Real.
@@ -59,14 +71,31 @@ namespace aten
                             continue;
                         }
 
+                        // TODO
+                        // In area light case, we don't specify sampler.
+                        // So, in area light sampler, center of light is choosed
+                        // as the position which ray try to reach to the light.
+                        // But, if the light is square angle and it is composed of 2 triangles,
+                        // center of the light might be edge of border of 2 triangles.
+                        // Therefore, the ray might not hit any tirangles of the light.
+                        // エリアライトの場合に、samplerがnullptrのときはライトのAABBの中心が
+                        // レイの向かう先として選択される。
+                        // その場合に、もしエリアライトが正方形で二つの三角形から構成されていたときに
+                        // 中心位置は三角形の境目に位置していることになり、誤差等によりヒットしない可能性がある.
                         auto sampleres = light->sample(ctxt, rec.p, nullptr);
+
+                        if (!light->isSingular() && !sampleres.obj) {
+                            continue;
+                        }
 
                         vec3 dirToLight = sampleres.dir;
                         auto len = length(dirToLight);
 
                         dirToLight = normalize(dirToLight);
 
-                        auto lightobj = sampleres.obj;
+                        if (dot(orienting_normal, dirToLight) < real(0)) {
+                            continue;
+                        }
 
                         auto albedo = mtrl->color();
 
@@ -142,7 +171,7 @@ namespace aten
                 for (int x = 0; x < width; x++) {
                     //if (x == 419 && y == 107) {
                     //if (x == 408 && y == 112) {
-                    if (x == 378 && y == 480 - 355) {
+                    if (x == 259 && y == 0) {
                         int xxx = 0;
                     }
                     int pos = y * width + x;

@@ -28,6 +28,7 @@ namespace AT_NAME {
                 // Just do hit test if ray hits the specified object directly.
                 // We don't need to mind self-intersection.
                 // Therefore, we don't need to add offset.
+                // i.e. We don't normal to add offset.
                 r = aten::ray(org, dir);
 
                 if (result.primid >= 0) {
@@ -37,9 +38,12 @@ namespace AT_NAME {
 
                     isect.a = result.a;
                     isect.b = result.b;
+
+                    // We can treat as hit.
+                    isHit = true;
                 }
                 else {
-                    obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
+                    isHit = obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
                 }
             }
             else {
@@ -51,21 +55,24 @@ namespace AT_NAME {
                 // Just do hit test if ray hits the specified object directly.
                 // We don't need to mind self-intersection.
                 // Therefore, we don't need to add offset.
+                // i.e. We don't normal to add offset.
                 r = aten::ray(org, dir);
 
-                obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
+                isHit = obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
             }
 
-            aten::hitable::evalHitResultForAreaLight(ctxt, obj, r, rec, isect);
+            if (isHit) {
+                aten::hitable::evalHitResultForAreaLight(ctxt, obj, r, rec, isect);
 
-            sample(
-                &rec,
-                &this->param(),
-                org,
-                sampler,
-                &result);
+                sample(
+                    &rec,
+                    &this->param(),
+                    org,
+                    sampler,
+                    &result);
 
-            result.obj = m_obj;
+                result.obj = m_obj;
+            }
         }
 
         return std::move(result);

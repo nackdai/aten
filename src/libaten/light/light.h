@@ -24,10 +24,10 @@ namespace aten {
         uint32_t isIBL : 1;
     };
 
-    #define LightAttributeArea            aten::LightAttribute{ false, false, false }
-    #define LightAttributeSingluar        aten::LightAttribute{ true,  false, false }
-    #define LightAttributeDirectional    aten::LightAttribute{ true,  true,  false }
-    #define LightAttributeIBL            aten::LightAttribute{ false, true,  true }
+    #define LightAttributeArea          aten::LightAttribute{ false, false, false }
+    #define LightAttributeSingluar      aten::LightAttribute{ true,  false, false }
+    #define LightAttributeDirectional   aten::LightAttribute{ true,  true,  false }
+    #define LightAttributeIBL           aten::LightAttribute{ false, true,  true }
 
     enum LightType : int {
         Area,

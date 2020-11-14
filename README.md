@@ -163,7 +163,6 @@ You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
 If you don't specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
 `get_cuda_sm.sh` run and `Comnpute Capability` is specified.
 
-
 #### Build on Docker
 
 You can build and run executable aten application on Docker container.
@@ -237,6 +236,11 @@ And, run docker container via docker-compose like below:
 ```shell
 docker-compose run aten
 ```
+
+## For VSCode development
+
+You can open this project on VSCode devcontainer.
+If you face on devcontainer build failure, it might be due to docker-compose version. In that case, please update docker-compose.
 
 ## Gallery
 

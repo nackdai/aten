@@ -206,7 +206,7 @@ namespace AT_NAME
 
     AT_DEVICE_MTRL_API aten::vec3 material::sampleAlbedoMap(real u, real v) const
     {
-        return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec3(real(1))));
+        return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1))));
     }
 
     AT_DEVICE_MTRL_API void material::applyNormalMap(

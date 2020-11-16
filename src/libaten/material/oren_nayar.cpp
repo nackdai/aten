@@ -138,10 +138,10 @@ namespace AT_NAME {
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec3(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
 
         auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         auto bsdf = computeBsdf(
             roughness.r,
@@ -160,9 +160,9 @@ namespace AT_NAME {
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v,
-        const aten::vec3& externalAlbedo)
+        const aten::vec4& externalAlbedo)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec3(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -210,7 +210,7 @@ namespace AT_NAME {
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
         real u, real v,
-        const aten::vec3& externalAlbedo,
+        const aten::vec4& externalAlbedo,
         bool isLightPath/*= false*/)
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);

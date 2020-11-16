@@ -28,7 +28,7 @@ namespace aten
     public:
         void init(uint32_t width, uint32_t height, uint32_t channels);
 
-        vec3 at(real u, real v) const
+        vec4 at(real u, real v) const
         {
             u -= floor(u);
             v -= floor(v);
@@ -42,11 +42,13 @@ namespace aten
 
             // TODO
             // Note use alpha channel...
-            uint32_t ch = std::min<uint32_t>(m_channels, 3);
+            uint32_t ch = std::min<uint32_t>(m_channels, 4);
 
-            vec3 ret;
+            vec4 ret;
 
             switch (ch) {
+            case 4:
+                ret[3] = clr[4];
             case 3:
                 ret[2] = clr[2];
             case 2:

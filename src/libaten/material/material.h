@@ -69,7 +69,7 @@ namespace aten
     struct MaterialParameter {
         MaterialType type;
 
-        aten::vec3 baseColor;            // サーフェイスカラー，通常テクスチャマップによって供給される.
+        aten::vec4 baseColor;            // サーフェイスカラー，通常テクスチャマップによって供給される.
 
         // NOTE
         // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
@@ -190,6 +190,7 @@ namespace aten
     public:
         virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) = 0;
         virtual bool edit(const char* name, vec3& param) = 0;
+        virtual bool edit(const char* name, vec4& param) = 0;
 
         void editTex(const char* name, int texid)
         {

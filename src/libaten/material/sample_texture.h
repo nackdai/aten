@@ -21,9 +21,9 @@ namespace AT_NAME {
 #include "scene/context.h"
 
 namespace AT_NAME {
-    inline AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue, int lod = 0)
+    inline AT_DEVICE_MTRL_API aten::vec4 sampleTexture(const int texid, real u, real v, const aten::vec4& defaultValue, int lod = 0)
     {
-        aten::vec3 ret = defaultValue;
+        aten::vec4 ret = defaultValue;
 
         // TODO
         if (texid >= 0) {
@@ -47,7 +47,7 @@ namespace AT_NAME {
         real u, real v)
     {
         if (normalMapIdx >= 0) {
-            auto nml = sampleTexture(normalMapIdx, u, v, aten::vec3(real(0)));
+            auto nml = aten::vec3(sampleTexture(normalMapIdx, u, v, aten::vec4(real(0))));
             nml = real(2) * nml - aten::vec3(1);    // [0, 1] -> [-1, 1].
             nml = normalize(nml);
 

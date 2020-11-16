@@ -135,7 +135,7 @@ namespace AT_NAME
         albedo *= sampleTexture(
             param->albedoMap,
             u, v,
-            aten::vec3(real(1)));
+            aten::vec4(real(1)));
 
         auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
         return std::move(ret);
@@ -147,7 +147,7 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v,
-        const aten::vec3& externalAlbedo)
+        const aten::vec4& externalAlbedo)
     {
         real fresnel = 1;
         real ior = param->ior;
@@ -272,7 +272,7 @@ namespace AT_NAME
         albedo *= sampleTexture(
             param->albedoMap,
             u, v,
-            aten::vec3(real(1)));
+            aten::vec4(real(1)));
 
         result->bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
@@ -304,7 +304,7 @@ namespace AT_NAME
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
         real u, real v,
-        const aten::vec3& externalAlbedo,
+        const aten::vec4& externalAlbedo,
         bool isLightPath/*= false*/)
     {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);

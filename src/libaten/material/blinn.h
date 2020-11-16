@@ -55,7 +55,7 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v,
-            const aten::vec3& externalAbledo);
+            const aten::vec4& externalAbledo);
 
         static AT_DEVICE_MTRL_API void sample(
             MaterialSampling* result,
@@ -75,7 +75,7 @@ namespace AT_NAME
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
             real u, real v,
-            const aten::vec3& externalAlbedo,
+            const aten::vec4& externalAlbedo,
             bool isLightPath = false);
 
         virtual AT_DEVICE_MTRL_API real pdf(

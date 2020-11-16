@@ -55,11 +55,11 @@ namespace AT_NAME
             const aten::MaterialParameter* param,
             real u, real v)
         {
-            aten::vec3 albedo = param->baseColor;
+            auto albedo = param->baseColor;
             albedo *= sampleTexture(
                 param->albedoMap,
                 u, v,
-                aten::vec3(real(1)));
+                aten::vec4(real(1)));
 
             aten::vec3 ret = albedo / AT_MATH_PI;
             return ret;

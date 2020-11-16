@@ -70,11 +70,11 @@ namespace AT_NAME
     {
         AT_ASSERT(false);
 
-        aten::vec3 albedo = param->baseColor;
+        auto albedo = param->baseColor;
         albedo *= sampleTexture(
             param->albedoMap,
             u, v,
-            aten::vec3(real(1)));
+            aten::vec4(real(1)));
 
         return std::move(albedo);
     }

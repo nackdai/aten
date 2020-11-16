@@ -57,7 +57,7 @@ namespace AT_NAME
         real u, real v)
     {
         auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         real fresnel = 1;
         real ior = param->ior;
@@ -72,7 +72,7 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v,
-        const aten::vec3& externalAlbedo)
+        const aten::vec4& externalAlbedo)
     {
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -272,7 +272,7 @@ namespace AT_NAME
         result->pdf = pdf(param->roughness, normal, wi, result->dir);
 
         auto albedo = param->baseColor;
-        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
+        albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         real fresnel = 1;
         real ior = param->ior;
@@ -289,7 +289,7 @@ namespace AT_NAME
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
         real u, real v,
-        const aten::vec3& externalAlbedo,
+        const aten::vec4& externalAlbedo,
         bool isLightPath/*= false*/)
     {
         result->dir = sampleDirection(param->roughness, wi, normal, sampler);

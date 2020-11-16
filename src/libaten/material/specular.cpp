@@ -56,7 +56,7 @@ namespace AT_NAME
         auto c = dot(normal, wo);
 
 #if 1
-        aten::vec3 bsdf = param->baseColor;
+        auto bsdf = param->baseColor;
 #else
         aten::vec3 bsdf;
 
@@ -66,7 +66,7 @@ namespace AT_NAME
         }
 #endif
 
-        bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec3(real(1)));
+        bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
 #if 0
         if (param->ior > real(0)) {

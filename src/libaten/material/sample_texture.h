@@ -10,7 +10,7 @@
 #include "cuda/helper_math.h"
 
 namespace AT_NAME {
-    AT_DEVICE_MTRL_API aten::vec3 sampleTexture(const int texid, real u, real v, const aten::vec3& defaultValue, int lod = 0);
+    AT_DEVICE_MTRL_API aten::vec4 sampleTexture(const int texid, real u, real v, const aten::vec4& defaultValue, int lod = 0);
 
 #ifndef __AT_DEBUG__
 #include "kernel/sample_texture_impl.cuh"

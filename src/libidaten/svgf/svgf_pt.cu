@@ -509,7 +509,7 @@ __global__ void shade(
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
         // texture color, meshid.
-        auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1.0f));
+        auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 #if 0
         aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
 #else
@@ -538,7 +538,7 @@ __global__ void shade(
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
 
         // texture color.
-        auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1.0f));
+        auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 #if 0
         aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
 #else
@@ -570,7 +570,7 @@ __global__ void shade(
                 }
             }
 
-            auto contrib = paths->throughput[idx].throughput * weight * shMtrls[threadIdx.x].baseColor;
+            auto contrib = paths->throughput[idx].throughput * weight * static_cast<aten::vec3>(shMtrls[threadIdx.x].baseColor);
             paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
         }
 
@@ -592,7 +592,7 @@ __global__ void shade(
     }
     AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
-    auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec3(1), bounce);
+    auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
 #if 1
 #pragma unroll

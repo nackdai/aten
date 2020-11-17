@@ -26,7 +26,7 @@ __global__ void textureViewer(
     float u = ix / (float)width;
     float v = iy / (float)height;
 
-    auto texclr = AT_NAME::sampleTexture(textures[texIdx], u, v, aten::vec3(1.0f));
+    auto texclr = AT_NAME::sampleTexture(textures[texIdx], u, v, aten::vec4(1.0f));
 
     surf2Dwrite(
         make_float4(texclr.r, texclr.g, texclr.b, 1.0f),

@@ -140,6 +140,19 @@ public:
         return ret;
     }
 
+    virtual bool edit(const char* name, aten::vec4& param) override final
+    {
+        float f[4] = { param.x, param.y, param.z, param.w };
+        bool ret = ImGui::ColorEdit4(name, f);
+
+        param.x = f[0];
+        param.y = f[1];
+        param.z = f[2];
+        param.w = f[3];
+
+        return ret;
+    }
+
     virtual void edit(const char* name, const char* str) override final
     {
         std::string s(str);

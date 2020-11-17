@@ -39,6 +39,21 @@ namespace aten
             return true;
         }
 
+        virtual bool edit(const char* name, aten::vec4& param) override final
+        {
+            char buf[64];
+            snprintf(
+                buf, AT_COUNTOF(buf),
+                "%.3f %.3f %.3f %.3f",
+                param.x, param.y, param.z, param.w);
+
+            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
+            xmlMtrlAttribElem->SetText(buf);
+            m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
+
+            return true;
+        }
+
         virtual void edit(const char* name, const char* str) override final
         {
             std::string s(str);

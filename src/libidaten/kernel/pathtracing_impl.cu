@@ -419,7 +419,7 @@ __global__ void shade(
             ix * sizeof(float4), iy,
             cudaBoundaryModeTrap);
 
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec3(1.0f));
+        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
         surf2Dwrite(
             make_float4(albedo.x, albedo.y, albedo.z, 1),
@@ -455,7 +455,7 @@ __global__ void shade(
                 }
             }
 
-            path.contrib += path.throughput * weight * mtrl.baseColor;
+            path.contrib += path.throughput * weight * static_cast<aten::vec3>(mtrl.baseColor);
         }
 
         // When ray hit the light, tracing will finish.

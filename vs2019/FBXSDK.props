@@ -2,7 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <FBXSDK>C:\Program Files\Autodesk\FBX\FBX SDK\2018.1.1</FBXSDK>
+    <FBXSDK>C:\Program Files\Autodesk\FBX\FBX SDK\2020.0.1</FBXSDK>
+    <FBXSDK_LIB>$(FBXSDK)\lib\vs2017</FBXSDK_LIB>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup>
@@ -12,7 +13,7 @@
     <Link>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(FBXSDK)\lib\vs2015\x64\$(Configuration)\libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(FBXSDK_LIB)\x64\$(Configuration)\libfbxsdk-md.lib;$(FBXSDK_LIB)\x64\$(Configuration)\libxml2-md.lib;$(FBXSDK_LIB)\x64\$(Configuration)\zlib-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>copy /B /Y $(FBXSDK)\lib\vs2015\x64\$(Configuration)\*.dll $(OutputPath)</Command>
@@ -22,6 +23,9 @@
     <BuildMacro Include="FBXSDK">
       <Value>$(FBXSDK)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+    <BuildMacro Include="FBXSDK_LIB">
+      <Value>$(FBXSDK_LIB)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

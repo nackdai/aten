@@ -601,12 +601,19 @@ __global__ void shade(
     auto pdfb = sampling.pdf;
     auto bsdf = sampling.bsdf;
 
+    // Get normal to add ray offset.
+    // In refraction material case, new ray direction might be computed with inverted normal.
+    // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+    auto rayBasedNormal = (!isBackfacing && mtrl.attrib.isTranslucent)
+        ? -orienting_normal
+        : orienting_normal;
+
     real c = 1;
     if (!mtrl.attrib.isSingular) {
         // TODO
         // AMDのはabsしているが....
         //c = aten::abs(dot(orienting_normal, nextDir));
-        c = dot(orienting_normal, nextDir);
+        c = dot(rayBasedNormal, nextDir);
     }
 
     if (pdfb > 0 && c > 0) {
@@ -617,14 +624,8 @@ __global__ void shade(
         path.isTerminate = true;
     }
 
-    // In refraction material case, new ray direction might be computed with inverted normal.
-    // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-    if (!isBackfacing && mtrl.attrib.isTranslucent) {
-        orienting_normal = -orienting_normal;
-    }
-
     // Make next ray.
-    rays[idx] = aten::ray(rec.p, nextDir);
+    rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
 
     path.pdfb = pdfb;
     path.isSingular = mtrl.attrib.isSingular;

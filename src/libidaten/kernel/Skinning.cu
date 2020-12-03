@@ -113,6 +113,14 @@ __global__ void getMinMax(
     // カーネル呼び出しのときに指定できるのは1つの数だけ.
     // 複数のshared memoryを使いたいときは、shared memoryのサイズの合計を指定して、カーネル内部で切り分ける必要がある.
 
+    // NOTE
+    // We can't specify shared memory size as kernel parameter to templated variable.
+    // Shared memory variable which is specified memory size as kernel parameter is declared with "extern"
+    // And, the shared memory variable is disclosed.
+    // Therefore, it conflicts in each template functions.
+    // Of course, it makes same case even in other functions which are not template functions.
+    // https://stackoverflow.com/questions/20497209/getting-cuda-error-declaration-is-incompatible-with-previous-variable-name
+
 #ifdef MINMAX_TEST
     extern __shared__ uint32_t minPos[];
     __shared__ uint32_t* maxPos;

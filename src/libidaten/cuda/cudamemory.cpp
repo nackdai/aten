@@ -23,7 +23,9 @@ namespace idaten {
 
     void CudaMemory::init(uint32_t bytes)
     {
-        if (m_bytes == 0) {
+        if (m_bytes != bytes) {
+            free();
+
             checkCudaErrors(cudaMalloc((void**)&m_device, bytes));
             m_bytes = bytes;
 

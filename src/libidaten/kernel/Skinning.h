@@ -42,8 +42,6 @@ namespace idaten
             aten::vec4* nml,
             uint32_t num);
 
-        void runMinMaxTest();
-
         std::vector<CudaGLBuffer>& getInteropVBO()
         {
             return m_interopVBO;

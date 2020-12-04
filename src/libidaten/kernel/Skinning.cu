@@ -83,28 +83,16 @@ __global__ void setTriangleParam(
 
 // NOTE
 // http://www.cuvilib.com/Reduction.pdf
-// https://github.com/AJcodes/cuda_minmax/blob/master/cuda_minmax/kernel.cu
 
-//#define MINMAX_TEST
-
+template <int BLOCK_SIZE>
 __global__ void getMinMax(
     bool isFinalIter,
     uint32_t num,
-#ifdef MINMAX_TEST
-    const uint32_t* __restrict__ src,
-    uint32_t* dstMin,
-    uint32_t* dstMax)
-#else
     const aten::vec4* __restrict__ src,
     aten::vec3* dstMin,
     aten::vec3* dstMax)
-#endif
 {
     const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (idx >= num) {
-        return;
-    }
 
     const auto tid = threadIdx.x;
 
@@ -121,29 +109,8 @@ __global__ void getMinMax(
     // Of course, it makes same case even in other functions which are not template functions.
     // https://stackoverflow.com/questions/20497209/getting-cuda-error-declaration-is-incompatible-with-previous-variable-name
 
-#ifdef MINMAX_TEST
-    extern __shared__ uint32_t minPos[];
-    __shared__ uint32_t* maxPos;
-
-    if (tid == 0) {
-        maxPos = minPos + blockDim.x;
-    }
-
-    if (isFinalIter) {
-        minPos[tid] = dstMin[idx];
-        maxPos[tid] = dstMax[idx];
-    }
-    else {
-        minPos[tid] = src[idx];
-        maxPos[tid] = src[idx];
-    }
-#else
-    extern __shared__ aten::vec3 minPos[];
-    __shared__ aten::vec3* maxPos;
-
-    if (tid == 0) {
-        maxPos = minPos + blockDim.x;
-    }
+    __shared__ aten::vec3 minPos[BLOCK_SIZE];
+    __shared__ aten::vec3 maxPos[BLOCK_SIZE];
 
     if (isFinalIter) {
         minPos[tid] = dstMin[idx];
@@ -154,36 +121,23 @@ __global__ void getMinMax(
         minPos[tid] = pos;
         maxPos[tid] = pos;
     }
-#endif
+
+    if (idx >= num) {
+        minPos[tid] = aten::vec3(FLT_MAX);
+        maxPos[tid] = aten::vec3(-FLT_MAX);
+    }
     __syncthreads();
 
     for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
-        if (tid < s && tid + s < num) {
-#ifdef MINMAX_TEST
-            auto _min = min(minPos[tid], minPos[tid + s]);
-            auto _max = max(maxPos[tid], maxPos[tid + s]);
-
-            printf("[tid]%d [s]%d [tid + s]%d min(%d, %d)>%d, max(%d, %d)>%d\n",
-                tid, s, tid + s,
-                minPos[tid], minPos[tid + s], _min,
-                maxPos[tid], maxPos[tid + s], _max);
-
-            minPos[tid] = _min;
-            maxPos[tid] = _max;
-
-            printf("   [%d] (%d(%d), %d(%d))\n", tid, minPos[tid], _min, maxPos[tid], _max);
-#else
+        //if (tid < s && tid + s < num) {
+        if (tid < s) {
             minPos[tid] = aten::min(minPos[tid], minPos[tid + s]);
             maxPos[tid] = aten::max(maxPos[tid], maxPos[tid + s]);
-#endif
         }
         __syncthreads();
     }
 
     if (tid == 0) {
-#ifdef MINMAX_TEST
-        printf("[tid]%d [min]%d max[%d]\n", tid, minPos[0], maxPos[0]);
-#endif
         dstMin[blockIdx.x] = minPos[0];
         dstMax[blockIdx.x] = maxPos[0];
     }
@@ -357,7 +311,7 @@ namespace idaten
 
             auto sharedMemSize = block.x * sizeof(aten::vertex) * 2;
 
-            getMinMax << <grid, block, sharedMemSize >> > (
+            getMinMax <256> << <grid, block >> > (
                 false,
                 num,
                 src,
@@ -368,7 +322,7 @@ namespace idaten
 
             num = grid.x;
 
-            getMinMax << <1, block, sharedMemSize >> > (
+            getMinMax <256> << <1, block >> > (
                 true,
                 num,
                 src,
@@ -376,10 +330,10 @@ namespace idaten
                 m_maxBuf.ptr());
 
             checkCudaKernel(getMinMaxFinal);
-
-            m_minBuf.readByNum(&aabbMin, 1);
-            m_maxBuf.readByNum(&aabbMax, 1);
         }
+
+        m_minBuf.readByNum(&aabbMin, 1);
+        m_maxBuf.readByNum(&aabbMax, 1);
 
         if (!m_interopVBO.empty()) {
             m_interopVBO[0].unmap();
@@ -407,56 +361,5 @@ namespace idaten
         AT_ASSERT(offset >= 0);
         m_prevVtxOffset = m_curVtxOffset;
         m_curVtxOffset = offset;
-    }
-
-    void Skinning::runMinMaxTest()
-    {
-#ifdef MINMAX_TEST
-        uint32_t data[] = {
-            2, 4, 7, 9, 10, 3, 4, 1,
-        };
-
-        auto num = AT_COUNTOF(data);
-
-        TypedCudaMemory<uint32_t> buf;
-        buf.init(AT_COUNTOF(data));
-        buf.writeByNum(data, AT_COUNTOF(data));
-
-        dim3 block(256, 1, 1);
-        dim3 grid((num + block.x - 1) / block.x, 1, 1);
-
-        TypedCudaMemory<uint32_t> _min;
-        TypedCudaMemory<uint32_t> _max;
-        _min.init(grid.x);
-        _max.init(grid.x);
-
-        auto sharedMemSize = block.x * sizeof(uint32_t) * 2;
-
-        getMinMax << <grid, block, sharedMemSize >> > (
-            false,
-            num,
-            buf.ptr(),
-            _min.ptr(),
-            _max.ptr());
-
-        checkCudaKernel(getMinMax);
-
-        num = grid.x;
-
-        getMinMax << <1, block, sharedMemSize >> > (
-            true,
-            num,
-            buf.ptr(),
-            _min.ptr(),
-            _max.ptr());
-
-        checkCudaKernel(getMinMaxFinal);
-
-        std::vector<uint32_t> tmpMin(_min.maxNum());
-        std::vector<uint32_t> tmpMax(_max.maxNum());
-
-        _min.read(&tmpMin[0], sizeof(uint32_t) * tmpMin.size());
-        _max.read(&tmpMax[0], sizeof(uint32_t) * tmpMax.size());
-#endif
     }
 }

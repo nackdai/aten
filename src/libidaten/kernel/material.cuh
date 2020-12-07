@@ -26,7 +26,7 @@ __device__ void sampleMaterial(
     const aten::vec3& orgnormal,
     aten::sampler* sampler,
     float u, float v,
-    const aten::vec3& externalAlbedo);
+    const aten::vec4& externalAlbedo);
 
 __device__ real samplePDF(
     const Context* ctxt,
@@ -59,7 +59,7 @@ __device__ aten::vec3 sampleBSDF(
     const aten::vec3& wi,
     const aten::vec3& wo,
     real u, real v,
-    const aten::vec3& externalAlbedo);
+    const aten::vec4& externalAlbedo);
 
 
 __device__ real computeFresnel(

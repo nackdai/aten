@@ -1306,10 +1306,10 @@ void DeformInBoxScene::makeScene(
 
     {
         aten::deformable* mdl = aten::TransformableFactory::createDeformable(ctxt);
-        mdl->read("unitychan_gpu.mdl");
+        mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
-        aten::MaterialLoader::load("unitychan_mtrl.xml", ctxt);
+        aten::MaterialLoader::load("../../asset/converted_unitychan/unitychan_mtrl.xml", ctxt);
 
         auto deformMdl = aten::TransformableFactory::createInstance<aten::deformable>(ctxt, mdl, aten::mat4::Identity);
         scene->add(deformMdl);
@@ -1319,7 +1319,7 @@ void DeformInBoxScene::makeScene(
         aten::ImageLoader::setBasePath("./");
 
         s_deformAnm = new aten::DeformAnimation();
-        s_deformAnm->read("unitychan.anm");
+        s_deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
     }
 }
 

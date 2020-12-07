@@ -14,7 +14,7 @@ namespace aten {
             real f;
             int i;
             bool b;
-            vec3 v;
+            vec4 v;
             void* p;
 
             _value() {}
@@ -52,6 +52,11 @@ namespace aten {
             val.v = _v;
             return *this;
         }
+        PolymorphicValue& operator=(const vec4& _v)
+        {
+            val.v = _v;
+            return *this;
+        }
         PolymorphicValue& operator=(void* _p)
         {
             val.p = _p;
@@ -71,6 +76,10 @@ namespace aten {
             return val.b;
         }
         operator vec3() const
+        {
+            return val.v;
+        }
+        operator vec4() const
         {
             return val.v;
         }
@@ -121,6 +130,11 @@ namespace aten {
     }
     template <>
     inline vec3 PolymorphicValue::getAs() const
+    {
+        return val.v;
+    }
+    template <>
+    inline vec4 PolymorphicValue::getAs() const
     {
         return val.v;
     }

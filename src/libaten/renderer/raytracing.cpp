@@ -24,7 +24,7 @@ namespace aten
                 auto mtrl = ctxt.getMaterial(rec.mtrlid);
 
                 if (mtrl->isEmissive()) {
-                    auto emit = mtrl->color();
+                    auto emit = static_cast<aten::vec3>(mtrl->color());
                     contribution += throughput * emit;
                     return std::move(contribution);
                 }
@@ -97,7 +97,7 @@ namespace aten
                             continue;
                         }
 
-                        auto albedo = mtrl->color();
+                        auto albedo = static_cast<aten::vec3>(mtrl->color());
 
                         aten::ray shadowRay(rec.p, dirToLight, orienting_normal);
 

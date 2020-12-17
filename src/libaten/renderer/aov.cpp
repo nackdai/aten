@@ -85,7 +85,7 @@ namespace aten
                     }
 
                     path.albedo = mtrl->color();
-                    path.albedo *= mtrl->sampleAlbedoMap(rec.u, rec.v);
+                    path.albedo *= static_cast<aten::vec3>(mtrl->sampleAlbedoMap(rec.u, rec.v));
                     path.albedo *= throughput;
                     break;
                 }

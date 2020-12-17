@@ -204,7 +204,7 @@ namespace AT_NAME
         return fresnel;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 material::sampleAlbedoMap(real u, real v) const
+    AT_DEVICE_MTRL_API aten::vec4 material::sampleAlbedoMap(real u, real v) const
     {
         return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1))));
     }

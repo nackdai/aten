@@ -15,7 +15,7 @@ namespace AT_NAME
     public:
         bool add(material* mtrl);
 
-        virtual aten::vec3 sampleAlbedoMap(real u, real v) const override final;
+        virtual aten::vec4 sampleAlbedoMap(real u, real v) const override final;
 
         virtual bool isGlossy() const override final;
 

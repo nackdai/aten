@@ -88,7 +88,7 @@ namespace aten
                 return false;
             }
             else if (path.prevMtrl && path.prevMtrl->isSingular()) {
-                auto emit = mtrl->color();
+                auto emit = static_cast<aten::vec3>(mtrl->color());
                 path.contrib += path.throughput * emit;
                 return false;
             }
@@ -106,7 +106,7 @@ namespace aten
 
                     auto misW = path.pdfb / (pdfLight + path.pdfb);
 
-                    auto emit = mtrl->color();
+                    auto emit = static_cast<aten::vec3>(mtrl->color());
 
                     path.contrib += path.throughput * misW * emit;
 
@@ -227,7 +227,7 @@ namespace aten
 
                                     auto misW = pdfb / (pdfLight + pdfb);
 
-                                    auto emit = mtrl->color();
+                                    auto emit = static_cast<aten::vec3>(mtrl->color());
 
                                     path.contrib += throughput * misW * emit;
                                 }

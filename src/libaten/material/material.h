@@ -308,7 +308,7 @@ namespace AT_NAME
             return m_param.attrib.isNPR;
         }
 
-        const aten::vec3& color() const
+        const aten::vec4& color() const
         {
             return m_param.baseColor;
         }
@@ -323,7 +323,7 @@ namespace AT_NAME
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
-        virtual AT_DEVICE_MTRL_API aten::vec3 sampleAlbedoMap(real u, real v) const;
+        virtual AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(real u, real v) const;
 
         virtual AT_DEVICE_MTRL_API void applyNormalMap(
             const aten::vec3& orgNml,

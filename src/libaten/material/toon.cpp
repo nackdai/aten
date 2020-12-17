@@ -60,7 +60,7 @@ namespace AT_NAME
     {
         const real c = aten::clamp<real>(cosShadow, 0, 1);
 
-        aten::vec3 albedo = color();
+        aten::vec4 albedo = color();
         albedo *= sampleAlbedoMap(u, v);
 
         real coeff = 1;

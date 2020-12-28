@@ -27,6 +27,7 @@ namespace idaten
             aten::sampler sampler;
 
             real pdfb;
+            real accumulatedAlpha;
             int samples;
 
             bool isHit;

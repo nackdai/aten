@@ -102,6 +102,9 @@ namespace aten
         vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 #endif
 
+        auto multipliedAlbedo = mtrl->sampleAlbedoMap(path.rec.u, path.rec.v) * mtrl->color();
+        auto alpha = aten::clamp(multipliedAlbedo.a, real(0), real(1));
+
         // Implicit conection to light.
         if (mtrl->isEmissive()) {
 #if 0
@@ -142,7 +145,10 @@ namespace aten
             if (!isBackfacing) {
                 real weight = 1.0f;
 
-                if (depth > 0 && !(path.prevMtrl && path.prevMtrl->isSingularOrTranslucent())) {
+                if (depth > 0
+                    && !(path.prevMtrl && path.prevMtrl->isSingularOrTranslucent())
+                    && alpha >= real(1))
+                {
                     auto cosLight = dot(orienting_normal, -path.ray.dir);
                     auto dist2 = aten::squared_length(path.rec.p - path.ray.org);
 
@@ -158,12 +164,35 @@ namespace aten
                     }
                 }
 
-                path.contrib += path.throughput * weight * mtrl->color();
+                auto emit = static_cast<aten::vec3>(mtrl->color());
+                path.contrib += path.throughput * weight * emit;
             }
 
             path.isTerminate = true;
             return false;
 #endif
+        }
+
+        auto alphaR = sampler->nextSample();
+        if (alphaR > alpha) {
+            path.prevMtrl = mtrl;
+            path.pdfb = real(1);
+
+            auto nmlForAlphaBlend = dot(path.ray.dir, orienting_normal) < real(0)
+                ? -orienting_normal
+                : orienting_normal;
+
+            path.ray = aten::ray(path.rec.p, path.ray.dir, nmlForAlphaBlend);
+
+            path.throughput += path.accumulatedAlpha * alpha * static_cast<vec3>(multipliedAlbedo);
+            path.accumulatedAlpha *= real(1) - alpha;
+
+            return true;
+        }
+
+        if (alpha == real(1)) {
+            // Reset alpha blend.
+            path.accumulatedAlpha = real(1);
         }
 
         if (!mtrl->isTranslucent() && isBackfacing) {
@@ -405,23 +434,27 @@ namespace aten
         Path& path)
     {
         auto ibl = scene->getIBL();
+        aten::vec3 emit(real(0));
+        real misW = real(1);
+
         if (ibl) {
             if (depth == 0) {
-                auto bg = ibl->getEnvMap()->sample(path.ray);
-                path.contrib += path.throughput * bg;
+                emit = ibl->getEnvMap()->sample(path.ray);
+                misW = real(1);
                 path.isTerminate = true;
             }
             else {
+                emit = ibl->getEnvMap()->sample(path.ray);
                 auto pdfLight = ibl->samplePdf(path.ray);
-                auto misW = path.pdfb / (pdfLight + path.pdfb);
-                auto emit = ibl->getEnvMap()->sample(path.ray);
-                path.contrib += path.throughput * misW * emit;
+                misW = path.pdfb / (pdfLight + path.pdfb);
             }
         }
         else {
-            auto bg = sampleBG(path.ray);
-            path.contrib += path.throughput * bg;
+            emit = sampleBG(path.ray);
+            misW = real(1);
         }
+
+        path.contrib += path.throughput * misW * emit * path.accumulatedAlpha;
     }
 
     static uint32_t frame = 0;

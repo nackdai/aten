@@ -70,6 +70,7 @@ __global__ void genPath(
 
     path.throughput = aten::vec3(1);
     path.pdfb = 0.0f;
+    path.accumulatedAlpha = 1.0f;
     path.isTerminate = false;
     path.isSingular = false;
 
@@ -241,7 +242,7 @@ __global__ void shadeMiss(
 #endif
         }
 
-        path.contrib += path.throughput * bg;
+        path.contrib += path.throughput * bg * path.accumulatedAlpha;
 
         path.isTerminate = true;
     }
@@ -301,7 +302,7 @@ __global__ void shadeMissWithEnvmap(
             emit *= envmapMultiplyer;
         }
 
-        path.contrib += path.throughput * misW * emit;
+        path.contrib += path.throughput * misW * emit * path.accumulatedAlpha;
 
         path.isTerminate = true;
     }
@@ -392,6 +393,8 @@ __global__ void shade(
         mtrl.roughnessMap = (int)(mtrl.roughnessMap >= 0 ? ctxt.textures[mtrl.roughnessMap] : -1);
     }
 
+    auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
+
 #if 1
     if (needAOV) {
         int ix = idx % tileDomain.w;
@@ -418,8 +421,6 @@ __global__ void shade(
             aovs[1],
             ix * sizeof(float4), iy,
             cudaBoundaryModeTrap);
-
-        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
         surf2Dwrite(
             make_float4(albedo.x, albedo.y, albedo.z, 1),
@@ -460,6 +461,29 @@ __global__ void shade(
 
         // When ray hit the light, tracing will finish.
         path.isTerminate = true;
+        return;
+    }
+
+    auto multipliedAlbedo = albedo * mtrl.baseColor;
+    AT_NAME::AlphaBlendedMaterialSampling smplAlphaBlend;
+    auto isAlphaBlended = AT_NAME::material::sampleAlphaBlend(
+        smplAlphaBlend,
+        path.accumulatedAlpha,
+        multipliedAlbedo,
+        ray,
+        rec.p,
+        orienting_normal,
+        &path.sampler,
+        rec.u, rec.v);
+
+    if (isAlphaBlended) {
+        path.pdfb = smplAlphaBlend.pdf;
+
+        rays[idx] = smplAlphaBlend.ray;
+
+        path.throughput += smplAlphaBlend.bsdf;
+        path.accumulatedAlpha *= real(1) - smplAlphaBlend.alpha;
+
         return;
     }
 
@@ -617,11 +641,16 @@ __global__ void shade(
     }
 
     if (pdfb > 0 && c > 0) {
-        path.throughput *= bsdf * c / pdfb;
+        path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;
         path.throughput /= russianProb;
     }
     else {
         path.isTerminate = true;
+    }
+
+    if (!isAlphaBlended) {
+        // Reset alpha blend.
+        path.accumulatedAlpha = real(1);
     }
 
     // Make next ray.

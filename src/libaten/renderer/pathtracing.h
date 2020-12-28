@@ -37,9 +37,10 @@ namespace aten
 
     protected:
         struct Path {
-            vec3 contrib;
-            vec3 throughput;
-            real pdfb{ 1 };
+            vec3 contrib{ real(0) };
+            vec3 throughput{ real(1) };
+            real pdfb{ real(1) };
+            real accumulatedAlpha{ real(1) };
 
             hitrecord rec;
             const material* prevMtrl{ nullptr };
@@ -47,12 +48,6 @@ namespace aten
             aten::ray ray;
 
             bool isTerminate{ false };
-
-            Path()
-            {
-                contrib = vec3(0);
-                throughput = vec3(1);
-            }
         };
 
         Path radiance(

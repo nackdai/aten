@@ -1009,12 +1009,15 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::AssetManager::registerMtrl(
         "backWall",
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+
     aten::AssetManager::registerMtrl(
         "ceiling",
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+
     aten::AssetManager::registerMtrl(
         "floor",
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+
     aten::AssetManager::registerMtrl(
         "leftWall",
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000)));
@@ -1324,6 +1327,80 @@ void DeformInBoxScene::makeScene(
 }
 
 void DeformInBoxScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    real& fov)
+{
+    pos = aten::vec3(0.f, 1.f, 3.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45;
+}
+
+/////////////////////////////////////////////////////
+
+void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
+{
+    auto back = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
+    back->param().baseColor = 0.3f;
+    aten::AssetManager::registerMtrl(
+        "backWall",
+        back);
+
+    aten::AssetManager::registerMtrl(
+        "ceiling",
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+
+    aten::AssetManager::registerMtrl(
+        "floor",
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+
+    auto left = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000));
+    left->param().baseColor.a = 0.5f;
+    aten::AssetManager::registerMtrl(
+        "leftWall",
+        left);
+
+    auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
+    aten::AssetManager::registerMtrl(
+        "light",
+        emit);
+
+    aten::AssetManager::registerMtrl(
+        "rightWall",
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
+    aten::AssetManager::registerMtrl(
+        "shortBox",
+        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
+
+    auto tall = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
+    tall->param().baseColor = 0.2f;
+    aten::AssetManager::registerMtrl(
+        "tallBox",
+        tall);
+
+    std::vector<aten::object*> objs;
+    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true, true);
+
+    auto light = aten::TransformableFactory::createInstance<aten::object>(
+        ctxt,
+        objs[0],
+        aten::vec3(0),
+        aten::vec3(0),
+        aten::vec3(1));
+    scene->add(light);
+
+    g_movableObj = light;
+
+    auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+    scene->addLight(areaLight);
+
+    for (int i = 1; i < objs.size(); i++) {
+        auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[i], aten::mat4::Identity);
+        scene->add(box);
+    }
+}
+
+void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
     aten::vec3& pos,
     aten::vec3& at,
     real& fov)

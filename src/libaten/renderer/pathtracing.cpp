@@ -169,10 +169,12 @@ namespace aten
 #endif
         }
 
+        auto multipliedAlbedo = mtrl->sampleMultipliedAlbedo(path.rec.u, path.rec.v);
         AlphaBlendedMaterialSampling smplAlphaBlend;
-        auto isAlphaBlended = mtrl->sampleAlphaBlend(
+        auto isAlphaBlended = material::sampleAlphaBlend(
             smplAlphaBlend,
             path.accumulatedAlpha,
+            multipliedAlbedo,
             path.ray,
             path.rec.p,
             orienting_normal,

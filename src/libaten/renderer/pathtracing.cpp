@@ -102,9 +102,6 @@ namespace aten
         vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
 #endif
 
-        auto multipliedAlbedo = mtrl->sampleAlbedoMap(path.rec.u, path.rec.v) * mtrl->color();
-        auto alpha = aten::clamp(multipliedAlbedo.a, real(0), real(1));
-
         // Implicit conection to light.
         if (mtrl->isEmissive()) {
 #if 0
@@ -146,8 +143,7 @@ namespace aten
                 real weight = 1.0f;
 
                 if (depth > 0
-                    && !(path.prevMtrl && path.prevMtrl->isSingularOrTranslucent())
-                    && alpha >= real(1))
+                    && !(path.prevMtrl && path.prevMtrl->isSingularOrTranslucent()))
                 {
                     auto cosLight = dot(orienting_normal, -path.ray.dir);
                     auto dist2 = aten::squared_length(path.rec.p - path.ray.org);
@@ -173,26 +169,26 @@ namespace aten
 #endif
         }
 
-        auto alphaR = sampler->nextSample();
-        if (alphaR > alpha) {
+        AlphaBlendedMaterialSampling smplAlphaBlend;
+        auto isAlphaBlended = mtrl->sampleAlphaBlend(
+            smplAlphaBlend,
+            path.accumulatedAlpha,
+            path.ray,
+            path.rec.p,
+            orienting_normal,
+            sampler,
+            path.rec.u, path.rec.v);
+
+        if (isAlphaBlended) {
             path.prevMtrl = mtrl;
-            path.pdfb = real(1);
+            path.pdfb = smplAlphaBlend.pdf;
 
-            auto nmlForAlphaBlend = dot(path.ray.dir, orienting_normal) < real(0)
-                ? -orienting_normal
-                : orienting_normal;
+            path.ray = smplAlphaBlend.ray;
 
-            path.ray = aten::ray(path.rec.p, path.ray.dir, nmlForAlphaBlend);
-
-            path.throughput += path.accumulatedAlpha * alpha * static_cast<vec3>(multipliedAlbedo);
-            path.accumulatedAlpha *= real(1) - alpha;
+            path.throughput += smplAlphaBlend.bsdf;
+            path.accumulatedAlpha *= real(1) - smplAlphaBlend.alpha;
 
             return true;
-        }
-
-        if (alpha == real(1)) {
-            // Reset alpha blend.
-            path.accumulatedAlpha = real(1);
         }
 
         if (!mtrl->isTranslucent() && isBackfacing) {
@@ -411,11 +407,16 @@ namespace aten
 #endif
 
         if (pdfb > 0 && c > 0) {
-            path.throughput *= bsdf * c / pdfb;
+            path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;
             path.throughput /= russianProb;
         }
         else {
             return false;
+        }
+
+        if (!isAlphaBlended) {
+            // Reset alpha blend.
+            path.accumulatedAlpha = real(1);
         }
 
         path.prevMtrl = mtrl;

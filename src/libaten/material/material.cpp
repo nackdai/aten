@@ -204,24 +204,22 @@ namespace AT_NAME
         return fresnel;
     }
 
-    AT_DEVICE_MTRL_API real material::sampleAlpha(real u, real v) const
+    AT_DEVICE_MTRL_API aten::vec4 material::sampleMultipliedAlbedo(real u, real v) const
     {
-        auto multipliedAlbedo = sampleAlbedoMap(u, v) * m_param.baseColor;
-        auto alpha = aten::clamp(multipliedAlbedo.a, real(0), real(1));
-        return alpha;
+        return sampleAlbedoMap(u, v) * m_param.baseColor;
     }
-
 
     AT_DEVICE_MTRL_API bool material::sampleAlphaBlend(
         AlphaBlendedMaterialSampling& result,
         real accumulatedAlpha,
+        const aten::vec4& multipliedAlbedo,
         const aten::ray& ray,
         const aten::vec3& point,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
-        real u, real v) const
+        real u, real v)
     {
-        auto alpha = sampleAlpha(u, v);
+        auto alpha = aten::clamp(multipliedAlbedo.a, real(0), real(1));
 
         auto alphaR = sampler->nextSample();
 
@@ -234,9 +232,7 @@ namespace AT_NAME
 
             result.ray = aten::ray(point, ray.dir, nmlForAlphaBlend);
 
-            auto multipliedAlbedo = sampleAlbedoMap(u, v) * m_param.baseColor;
-
-            result.bsdf = accumulatedAlpha * alpha * static_cast<vec3>(multipliedAlbedo);
+            result.bsdf = accumulatedAlpha * alpha * static_cast<aten::vec3>(multipliedAlbedo);
             result.alpha = alpha;
 
             return true;

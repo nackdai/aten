@@ -192,6 +192,32 @@ namespace AT_NAME
         return std::move(dir);
     }
 
+    static AT_DEVICE_MTRL_API real sampleBeckman_G(
+        const aten::vec3& n, const aten::vec3& v, const aten::vec3& m,
+        real alpha)
+    {
+        // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+
+        auto vm = dot(v, m);
+        auto vn = dot(v, n);
+
+        bool is_valid = (vn > real(0)) && (vm / vn > real(0));
+
+        if (is_valid) {
+            auto a = vn / (alpha * aten::sqrt(real(1) - vn * vn));
+            auto a2 = a * a;
+
+            if (a < real(1.6)) {
+                return (real(3.535) * a + real() * a2) / (real(1) + real(2.276) * a + real(2.577) * a2);
+            }
+            else {
+                return real(1);
+            }
+        }
+
+        return real(0);
+    }
+
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
         const aten::vec3& albedo,
         const real roughness,
@@ -225,21 +251,7 @@ namespace AT_NAME
         real D = sampleBeckman_D(H, N, a);
 
         // Compute G.
-        real G(1);
-        {
-            // NOTE
-            // http://graphicrants.blogspot.jp/2013/08/specular-brdf-reference.html
-
-            auto c = NdotV < real(1) ? NdotV / (a * aten::sqrt(real(1) - NdotV * NdotV)) : real(0);
-            auto c2 = c * c;
-
-            if (c < real(1.6)) {
-                G = (real(3.535) * c + real(2.181) * c2) / (real(1) + real(2.276) * c + real(2.577) * c2);
-            }
-            else {
-                G = real(1);
-            }
-        }
+        real G = sampleBeckman_G(V, N, H, a) * sampleBeckman_G(L, N, H, a);
 
         real F(1);
         {

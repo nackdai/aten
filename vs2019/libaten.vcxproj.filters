@@ -103,6 +103,9 @@
     <Filter Include="system">
       <UniqueIdentifier>{4edb64a1-5f78-49a9-b1e5-94c410785824}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ui\imgui\backends">
+      <UniqueIdentifier>{35433dfa-cf83-4e0a-b2e2-f1a8d4338caa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -338,9 +341,6 @@
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\ui\imgui_impl_glfw_gl3.h">
-      <Filter>ui</Filter>
-    </ClInclude>
     <ClInclude Include="..\3rdparty\imgui\imconfig.h">
       <Filter>ui\imgui</Filter>
     </ClInclude>
@@ -521,6 +521,12 @@
     <ClInclude Include="..\src\libaten\renderer\aorenderer.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\backends\imgui_impl_glfw.h">
+      <Filter>ui\imgui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="..\3rdparty\imgui\backends\imgui_impl_opengl3.h">
+      <Filter>ui\imgui\backends</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -663,9 +669,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\CameraOperator.cpp">
       <Filter>camera</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\ui\imgui_impl_glfw_gl3.cpp">
-      <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="..\3rdparty\imgui\imgui.cpp">
       <Filter>ui\imgui</Filter>
@@ -822,6 +825,18 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_glfw.cpp">
+      <Filter>ui\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_opengl3.cpp">
+      <Filter>ui\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_tables.cpp">
+      <Filter>ui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdparty\imgui\imgui_widgets.cpp">
+      <Filter>ui\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

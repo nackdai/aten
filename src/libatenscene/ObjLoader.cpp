@@ -89,23 +89,16 @@ namespace aten
 
         std::string mtrlBasePath = pathname + "/";
 
+        tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> mtrls;
-        std::string err;
-
-        // TODO
-        // mtl_basepath
-
-        //auto flags = tinyobj::triangulation | tinyobj::calculate_normals;
-        auto flags = tinyobj::triangulation;
+        std::string err, warn;
 
         auto result = tinyobj::LoadObj(
-            shapes, mtrls,
-            err,
-            path.c_str(), mtrlBasePath.c_str(),
-            flags);
+            &attrib, &shapes, &mtrls,
+            &warn, &err,
+            path.c_str(), mtrlBasePath.c_str());
 
-        //AT_VRETURN(result, );
         if (!result) {
             AT_PRINTF("LoadObj Err[%s]\n", path.c_str());
             return;
@@ -124,42 +117,86 @@ namespace aten
             //AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
             //AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
 
-            auto vtxnum = shape.mesh.positions.size();
-
             auto curVtxPos = ctxt.getVertexNum();
 
             vec3 pmin = vec3(AT_MATH_INF);
             vec3 pmax = vec3(-AT_MATH_INF);
 
-            // positions and normals.
-            for (uint32_t i = 0; i < vtxnum; i += 3) {
+            auto face_num = shape.mesh.num_face_vertices.size();
+
+            // TODO
+            // Avoid duplicate.
+            std::vector<tinyobj::index_t> vtx_info_list;
+
+            std::vector<aten::PrimitiveParamter> face_parameters;
+
+            // Aggregate vertex indices.
+            for (uint32_t i = 0; i < face_num; i++) {
+                // Loading as triangle is specified, so vertex num per face have to be 3.
+                AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
+
+                aten::PrimitiveParamter faceParam;
+
+                const auto& idx_0 = shape.mesh.indices[i * 3 + 0];
+                const auto& idx_1 = shape.mesh.indices[i * 3 + 1];
+                const auto& idx_2 = shape.mesh.indices[i * 3 + 2];
+
+                vtx_info_list.push_back(idx_0);
+                auto it = vtx_info_list.back();
+                faceParam.idx[0] = vtx_info_list.size() - 1 + curVtxPos;
+
+                vtx_info_list.push_back(idx_1);
+                it = vtx_info_list.back();
+                faceParam.idx[1] = vtx_info_list.size() - 1 + curVtxPos;
+
+                vtx_info_list.push_back(idx_2);
+                it = vtx_info_list.back();
+                faceParam.idx[2] = vtx_info_list.size() - 1 + curVtxPos;
+
+                face_parameters.push_back(faceParam);
+            }
+
+            // Vertices.
+            for (const auto& idx : vtx_info_list) {
                 vertex vtx;
 
-                vtx.pos.x = shape.mesh.positions[i + 0];
-                vtx.pos.y = shape.mesh.positions[i + 1];
-                vtx.pos.z = shape.mesh.positions[i + 2];
+                vtx.pos.x = attrib.vertices[idx.vertex_index * 3 + 0];
+                vtx.pos.y = attrib.vertices[idx.vertex_index * 3 + 1];
+                vtx.pos.z = attrib.vertices[idx.vertex_index * 3 + 2];
                 vtx.pos.w = real(0);
 
-                if (shape.mesh.normals.empty()) {
+                // NOTE
+                // If vtx.uv.z == 1, normal will be computed during rendering.
+
+                if (idx.normal_index < 0) {
                     // Flag not to specify normal.
                     vtx.uv.z = real(1);
                 }
                 else {
-                    vtx.nml.x = shape.mesh.normals[i + 0];
-                    vtx.nml.y = shape.mesh.normals[i + 1];
-                    vtx.nml.z = shape.mesh.normals[i + 2];
+                    vtx.nml.x = attrib.normals[idx.normal_index * 3 + 0];
+                    vtx.nml.y = attrib.normals[idx.normal_index * 3 + 1];
+                    vtx.nml.z = attrib.normals[idx.normal_index * 3 + 2];
                     vtx.uv.z = needComputeNormalOntime ? real(1) : real(0);
                 }
 
                 if (std::isnan(vtx.nml.x) || std::isnan(vtx.nml.y) || std::isnan(vtx.nml.z))
                 {
-                    // TODO
-                    // work around...
+                    // If one of normal elements is NaN, normal will be computed during rendering.
                     vtx.nml = aten::vec4(real(0), real(1), real(0), 1);
+                }
+
+                if (idx.texcoord_index >= 0) {
+                    vtx.uv.x = attrib.texcoords[idx.texcoord_index * 2 + 0];
+                    vtx.uv.y = attrib.texcoords[idx.texcoord_index * 2 + 1];
+                }
+                else {
+                    // Specify not have texture coordinates.
+                    vtx.uv.z = real(-1);
                 }
 
                 ctxt.addVertex(vtx);
 
+                // To compute bouding box, store min/max position.
                 pmin = vec3(
                     std::min(pmin.x, vtx.pos.x),
                     std::min(pmin.y, vtx.pos.y),
@@ -170,6 +207,7 @@ namespace aten
                     std::max(pmax.z, vtx.pos.z));
             }
 
+            // Compute bounding box.
             shapemin = vec3(
                 std::min(shapemin.x, pmin.x),
                 std::min(shapemin.y, pmin.y),
@@ -179,53 +217,64 @@ namespace aten
                 std::max(shapemax.y, pmax.y),
                 std::max(shapemax.z, pmax.z));
 
-            aten::objshape* dstshape = nullptr;
-            int mtrlidx = -1;
+            aten::objshape* dst_shape = nullptr;
+            int prev_mtrl_idx = -1;
 
-            auto idxnum = shape.mesh.indices.size();
+            // One shape has one material.It means another shape would be created if different material appear.
+            for (uint32_t i = 0; i < face_num; i++) {
+                // Loading as triangle is specified, so vertex num per face have to be 3.
+                AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
-            for (uint32_t i = 0; i < idxnum; i += 3) {
-                int mtrlpos = i / 3;
+                int m = shape.mesh.material_ids[i];
 
-                int m = shape.mesh.material_ids[mtrlpos];
-
-                if (m < 0 && !dstshape) {
-                    dstshape = new aten::objshape();
-                    dstshape->setMaterial(AssetManager::getMtrlByIdx(0));
+                if (m < 0 && !dst_shape) {
+                    // If a material doesn't exist.
+                    dst_shape = new aten::objshape();
+                    dst_shape->setMaterial(AssetManager::getMtrlByIdx(0));
                 }
-                else if (mtrlidx != m) {
-                    if (dstshape) {
-                        // Check if emmisive object.
-                        auto mtrl = dstshape->getMaterial();
+                else if (prev_mtrl_idx != m) {
+                    // If different material appear.
+
+                    if (dst_shape) {
+                        // If the shape already exist.
+
+                        auto mtrl = dst_shape->getMaterial();
 
                         if (willSeparate) {
-                            obj->appendShape(dstshape);
+                            // Split the object if it has different materials
+                            obj->appendShape(dst_shape);
                             obj->setBoundingBox(aten::aabb(pmin, pmax));
                             objs.push_back(obj);
 
+                            // Create new object for next steps after here.
                             obj = aten::TransformableFactory::createObject(ctxt);
                         }
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
+                            // Export the object which has an emissive material as the emissive object.
                             auto emitobj = aten::TransformableFactory::createObject(ctxt);
-                            emitobj->appendShape(dstshape);
+                            emitobj->appendShape(dst_shape);
                             emitobj->setBoundingBox(aten::aabb(pmin, pmax));
                             objs.push_back(emitobj);
                         }
                         else {
-                            obj->appendShape(dstshape);
+                            // When different material appear, register the shape to the object.
+                            // And, create new shape and shift to it later.
+                            obj->appendShape(dst_shape);
                         }
                     }
 
-                    dstshape = new aten::objshape();
-                    mtrlidx = m;
+                    // Create new shape for new material.
+                    dst_shape = new aten::objshape();
+                    prev_mtrl_idx = m;
 
-                    if (mtrlidx >= 0) {
-                        const auto mtrl = mtrls[mtrlidx];
-                        dstshape->setMaterial(AssetManager::getMtrl(mtrl.name));
+                    if (prev_mtrl_idx >= 0) {
+                        // Apply new materil to the shape.
+                        const auto& mtrl = mtrls[prev_mtrl_idx];
+                        dst_shape->setMaterial(AssetManager::getMtrl(mtrl.name));
                     }
 
-                    if (!dstshape->getMaterial()) {
-                        // No material, set dummy material....
+                    if (!dst_shape->getMaterial()) {
+                        // If the shape doesn't have a material until here, set dummy material....
 
                         // Only lambertian.
                         const auto& objmtrl = mtrls[m];
@@ -267,45 +316,43 @@ namespace aten
 
                         mtrl->setName(objmtrl.name.c_str());
 
-                        dstshape->setMaterial(mtrl);
+                        dst_shape->setMaterial(mtrl);
 
                         AssetManager::registerMtrl(mtrl->name(), mtrl);
                     }
                 }
 
-                aten::PrimitiveParamter faceParam;
+                auto& face_param = face_parameters[i];
 
-                faceParam.idx[0] = shape.mesh.indices[i + 0] + curVtxPos;
-                faceParam.idx[1] = shape.mesh.indices[i + 1] + curVtxPos;
-                faceParam.idx[2] = shape.mesh.indices[i + 2] + curVtxPos;
-
-                auto& v0 = ctxt.getVertex(faceParam.idx[0]);
-                auto& v1 = ctxt.getVertex(faceParam.idx[1]);
-                auto& v2 = ctxt.getVertex(faceParam.idx[2]);
+                auto& v0 = ctxt.getVertex(face_param.idx[0]);
+                auto& v1 = ctxt.getVertex(face_param.idx[1]);
+                auto& v2 = ctxt.getVertex(face_param.idx[2]);
 
                 if (v0.uv.z == real(1)
                     || v1.uv.z == real(1)
                     || v2.uv.z == real(1))
                 {
-                    faceParam.needNormal = 1;
+                    face_param.needNormal = 1;
                 }
 
-                faceParam.mtrlid = dstshape->getMaterial()->id();
-                faceParam.gemoid = dstshape->getGeomId();
+                face_param.mtrlid = dst_shape->getMaterial()->id();
+                face_param.gemoid = dst_shape->getGeomId();
 
-                auto f = ctxt.createTriangle(faceParam);
+                auto f = ctxt.createTriangle(face_param);
 
-                dstshape->addFace(f);
+                dst_shape->addFace(f);
             }
 
             // Keep polygon counts.
-            numPolygons += idxnum / 3;
+            numPolygons++;
 
+            // Register the shape to the object.
             {
-                auto mtrl = dstshape->getMaterial();
+                const auto& mtrl = dst_shape->getMaterial();
 
                 if (willSeparate) {
-                    obj->appendShape(dstshape);
+                    // Split the object for each shape.
+                    obj->appendShape(dst_shape);
                     obj->setBoundingBox(aten::aabb(pmin, pmax));
                     objs.push_back(obj);
 
@@ -317,41 +364,14 @@ namespace aten
                     }
                 }
                 else if (mtrl->param().type == aten::MaterialType::Emissive) {
+                    // Export the object which has an emissive material as the emissive object.
                     auto emitobj = aten::TransformableFactory::createObject(ctxt);
-                    emitobj->appendShape(dstshape);
+                    emitobj->appendShape(dst_shape);
                     emitobj->setBoundingBox(aten::aabb(pmin, pmax));
                     objs.push_back(emitobj);
                 }
                 else {
-                    obj->appendShape(dstshape);
-                }
-            }
-
-            // texture cooridnates.
-            vtxnum = shape.mesh.texcoords.size();
-
-            if (vtxnum > 0) {
-                for (uint32_t i = 0; i < vtxnum; i += 2) {
-                    uint32_t vpos = i / 2 + curVtxPos;
-
-                    auto& vtx = ctxt.getVertex(vpos);
-
-                    vtx.uv.x = shape.mesh.texcoords[i + 0];
-                    vtx.uv.y = shape.mesh.texcoords[i + 1];
-                }
-            }
-            else {
-                // NOTE
-                // positions には x,y,z がばらばらに入っているので、3 で割ることで１頂点あたりになる.
-                vtxnum = shape.mesh.positions.size() / 3;
-
-                for (uint32_t i = 0; i < vtxnum; i++) {
-                    uint32_t vpos = i + curVtxPos;
-
-                    auto& vtx = ctxt.getVertex(vpos);
-
-                    // Specify not have texture coordinates.
-                    vtx.uv.z = real(-1);
+                    obj->appendShape(dst_shape);
                 }
             }
         }

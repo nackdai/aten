@@ -234,6 +234,8 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\3rdparty\imgui\backends\imgui_impl_glfw.h" />
+    <ClInclude Include="..\3rdparty\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="..\3rdparty\imgui\imconfig.h" />
     <ClInclude Include="..\3rdparty\imgui\imgui.h" />
     <ClInclude Include="..\3rdparty\imgui\imgui_internal.h" />
@@ -364,7 +366,6 @@
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
-    <ClInclude Include="..\src\libaten\ui\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="..\src\libaten\visualizer\atengl.h" />
     <ClInclude Include="..\src\libaten\visualizer\blitter.h" />
     <ClInclude Include="..\src\libaten\visualizer\fbo.h" />
@@ -378,8 +379,12 @@
     <ClInclude Include="..\src\libaten\visualizer\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui.cpp" />
     <ClCompile Include="..\3rdparty\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\3rdparty\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp" />
@@ -482,7 +487,6 @@
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\texture\texture.cpp" />
-    <ClCompile Include="..\src\libaten\ui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\fbo.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\GeomDataBuffer.cpp" />

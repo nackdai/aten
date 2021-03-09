@@ -242,9 +242,10 @@ void onRun(aten::window* window)
             ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
         }
 
-        if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
-            || ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
-        {
+        auto is_input_samples = ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
+        auto is_input_bounce = ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
+
+        if (is_input_samples || is_input_bounce) {
             g_tracer.reset();
         }
 

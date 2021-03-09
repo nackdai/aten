@@ -8,7 +8,8 @@
 #include <GLFW/glfw3.h>
 
 #include <imgui.h>
-#include "ui/imgui_impl_glfw_gl3.h"
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 
 namespace aten
 {
@@ -140,7 +141,7 @@ namespace aten
         }
 
         // For imgui.
-        ImGui_ImplGlfwGL3_KeyCallback(window, key, scancode, action, mods);
+        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
     }
 
     static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
@@ -170,7 +171,7 @@ namespace aten
         }
 
         // For imgui.
-        ImGui_ImplGlfwGL3_MouseButtonCallback(window, button, action, mods);
+        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
     }
 
     static void motionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -196,7 +197,7 @@ namespace aten
         }
 
         // For imgui.
-        ImGui_ImplGlfwGL3_ScrollCallback(window, xoffset, yoffset);
+        ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
     }
 
     static void onFocusWindow(GLFWwindow* window, int focused)
@@ -254,10 +255,6 @@ namespace aten
             ImGui::SetCurrentContext(imguiCtxt);
         }
 
-        // For imgui.
-        bool succeeded = ImGui_ImplGlfwGL3_Init(glfwWindow);
-        AT_ASSERT(succeeded);
-
         SetCurrentDirectoryFromExe();
 
         ::glfwSetWindowCloseCallback(
@@ -285,7 +282,7 @@ namespace aten
             onFocusWindow);
 
         // For imgui.
-        ::glfwSetCharCallback(glfwWindow, ImGui_ImplGlfwGL3_CharCallback);
+        ::glfwSetCharCallback(glfwWindow, ImGui_ImplGlfw_CharCallback);
 
         ::glfwMakeContextCurrent(glfwWindow);
         ::glfwSwapInterval(1);
@@ -304,6 +301,19 @@ namespace aten
 
         CALL_GL_API(::glViewport(0, 0, width, height));
         CALL_GL_API(::glDepthRangef(0.0f, 1.0f));
+
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+
+        // For imgui.
+        bool succeeded = ImGui_ImplGlfw_InitForOpenGL(glfwWindow, false);
+        AT_ASSERT(succeeded);
+
+        succeeded = ImGui_ImplOpenGL3_Init("#version 400");
+        AT_ASSERT(succeeded);
 
         windowImpl* ret = new windowImpl(glfwWindow, g_windows.size());
         {
@@ -339,7 +349,9 @@ namespace aten
                 ImGui::SetCurrentContext((ImGuiContext*)wnd->m_imguiCtxt);
 
                 // For imgui.
-                ImGui_ImplGlfwGL3_NewFrame(glfwWnd);
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplGlfw_NewFrame();
+                ImGui::NewFrame();
 
                 wnd->m_onRun(wnd.get());
 
@@ -368,7 +380,9 @@ namespace aten
     void window::terminate()
     {
         // For imgui.
-        ImGui_ImplGlfwGL3_Shutdown();
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
 
         ImGuiContext* defaultImguiCtxt = nullptr;
 
@@ -403,6 +417,7 @@ namespace aten
 
         ImGui::SetCurrentContext((ImGuiContext*)m_imguiCtxt);
         ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     bool window::isInitialized()

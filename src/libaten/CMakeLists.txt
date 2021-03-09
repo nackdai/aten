@@ -7,6 +7,10 @@ add_library(
   ${PROJECT_NAME} STATIC
   ../../3rdparty/imgui/imgui.cpp
   ../../3rdparty/imgui/imgui_draw.cpp
+  ../../3rdparty/imgui/imgui_tables.cpp
+  ../../3rdparty/imgui/imgui_widgets.cpp
+  ../../3rdparty/imgui/backends/imgui_impl_glfw.cpp
+  ../../3rdparty/imgui/backends/imgui_impl_opengl3.cpp
   accelerator/GpuPayloadDefs.h
   accelerator/accelerator.cpp
   accelerator/accelerator.h
@@ -218,8 +222,6 @@ add_library(
   texture/texture.cpp
   texture/texture.h
   types.h
-  ui/imgui_impl_glfw_gl3.cpp
-  ui/imgui_impl_glfw_gl3.h
   visualizer/GLProfiler.cpp
   visualizer/GLProfiler.h
   visualizer/GeomDataBuffer.cpp

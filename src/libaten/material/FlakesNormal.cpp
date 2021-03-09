@@ -107,9 +107,9 @@ namespace AT_NAME
     static inline AT_DEVICE_MTRL_API aten::vec3 cellnoise(const aten::vec3& p)
     {
         aten::vec4 iv;
-        iv[0] = floor(p.x);
-        iv[1] = floor(p.y);
-        iv[2] = floor(p.z);
+        iv[0] = aten::floor(p.x);
+        iv[1] = aten::floor(p.y);
+        iv[2] = aten::floor(p.z);
 
         aten::vec3 result = hash3(iv);
 

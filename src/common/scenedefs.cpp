@@ -1321,3 +1321,44 @@ void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
     at = aten::vec3(0.f, 1.f, 0.f);
     fov = 45;
 }
+
+/////////////////////////////////////////////////////
+
+void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
+{
+    std::vector<aten::object*> objs;
+
+    aten::ObjLoader::load(
+        objs, "../../asset/models/sponza/sponza.obj", ctxt,
+        [&](const std::string& name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> aten::material* {
+                auto albedo_map = albedo.empty()
+                    ? nullptr
+                    : aten::ImageLoader::load("../../asset/models/sponza/" + albedo, ctxt);
+                auto nml_map = nml.empty()
+                    ? nullptr
+                    : aten::ImageLoader::load("../../asset/models/sponza/" + nml, ctxt);
+
+                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map, nml_map);
+                mtrl->setName(name.c_str());
+                aten::AssetManager::registerMtrl(name, mtrl);
+                return mtrl;
+        });
+
+    objs[0]->importInternalAccelTree("../../asset/crytek_sponza/sponza.sbvh", ctxt, 0);
+
+    auto sponza = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[0], aten::mat4::Identity);
+
+    scene->add(sponza);
+}
+
+void CryteckSponzaScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    real& fov)
+{
+    pos = aten::vec3(0.f, 1.f, 3.f);
+    at = aten::vec3(0.f, 1.f, 0.f);
+    fov = 45;
+}

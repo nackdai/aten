@@ -60,6 +60,8 @@ static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
 static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
 static bool g_showAABB = false;
 
+static float g_moveMultiply = 1.0f;
+
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
 
@@ -282,6 +284,8 @@ void onRun(aten::window* window)
         }
 #endif
 
+        ImGui::SliderFloat("MoveMultiply", &g_moveMultiply, 1.0f, 100.0f);
+
         auto cam = g_camera.param();
         ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
         ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
@@ -359,7 +363,7 @@ void onMouseWheel(int delta)
 
 void onKey(bool press, aten::Key key)
 {
-    static const real offset = real(0.1);
+    static const real offset_base = real(0.1);
 
     if (press) {
         if (key == aten::Key::Key_F1) {
@@ -393,6 +397,8 @@ void onKey(bool press, aten::Key key)
             return;
         }
     }
+
+    auto offset = offset_base * g_moveMultiply;
 
     if (press) {
         switch (key) {

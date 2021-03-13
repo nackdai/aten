@@ -59,6 +59,8 @@ static int g_cntScreenShot = 0;
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
 
+static float g_moveMultiply = 1.0f;
+
 void onRun(aten::window* window)
 {
     if (g_isCameraDirty) {
@@ -130,6 +132,8 @@ void onRun(aten::window* window)
             g_tracer.enableProgressive(enableProgressive);
         }
 
+        ImGui::SliderFloat("MoveMultiply", &g_moveMultiply, 1.0f, 100.0f);
+
         window->drawImGui();
     }
 }
@@ -189,7 +193,7 @@ void onMouseWheel(int delta)
 
 void onKey(bool press, aten::Key key)
 {
-    static const real offset = real(0.1);
+    static const real offset_base = real(0.1);
 
     if (press) {
         if (key == aten::Key::Key_F1) {
@@ -201,6 +205,8 @@ void onKey(bool press, aten::Key key)
             return;
         }
     }
+
+    auto offset = offset_base * g_moveMultiply;
 
     if (press) {
         switch (key) {

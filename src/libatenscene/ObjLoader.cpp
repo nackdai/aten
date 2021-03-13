@@ -19,10 +19,11 @@ namespace aten
     object* ObjLoader::load(
         const std::string& path,
         context& ctxt,
+        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         std::vector<object*> objs;
-        load(objs, path, ctxt, needComputeNormalOntime);
+        load(objs, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
 
         object* ret = (!objs.empty() ? objs[0] : nullptr);
         return ret;
@@ -32,10 +33,11 @@ namespace aten
         const std::string& tag,
         const std::string& path,
         context& ctxt,
+        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
         std::vector<object*> objs;
-        load(objs, tag, path, ctxt, needComputeNormalOntime);
+        load(objs, tag, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
 
         object* ret = (!objs.empty() ? objs[0] : nullptr);
         return ret;
@@ -45,6 +47,7 @@ namespace aten
         std::vector<object*>& objs,
         const std::string& path,
         context& ctxt,
+        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
@@ -63,7 +66,7 @@ namespace aten
             fullpath = g_base + "/" + fullpath;
         }
 
-        load(objs, filename, fullpath, ctxt, willSeparate, needComputeNormalOntime);
+        load(objs, filename, fullpath, ctxt, callback_crate_mtrl, willSeparate, needComputeNormalOntime);
     }
 
     void ObjLoader::load(
@@ -71,6 +74,7 @@ namespace aten
         const std::string& tag,
         const std::string& path,
         context& ctxt,
+        ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
@@ -113,9 +117,6 @@ namespace aten
 
         for (int p = 0; p < shapes.size(); p++) {
             const auto& shape = shapes[p];
-
-            //AT_ASSERT(shape.mesh.positions.size() == shape.mesh.normals.size());
-            //AT_ASSERT(shape.mesh.positions.size() / 3 == shape.mesh.texcoords.size() / 2);
 
             auto curVtxPos = ctxt.getVertexNum();
 
@@ -270,7 +271,20 @@ namespace aten
                     if (prev_mtrl_idx >= 0) {
                         // Apply new materil to the shape.
                         const auto& mtrl = mtrls[prev_mtrl_idx];
-                        dst_shape->setMaterial(AssetManager::getMtrl(mtrl.name));
+
+                        auto aten_mtrl = AssetManager::getMtrl(mtrl.name);
+
+                        if (!aten_mtrl && callback_crate_mtrl) {
+                            aten_mtrl = callback_crate_mtrl(
+                                mtrl.name,
+                                ctxt,
+                                MaterialType::Lambert,
+                                aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
+                                mtrl.diffuse_texname,
+                                mtrl.bump_texname);
+                        }
+
+                        dst_shape->setMaterial(aten_mtrl);
                     }
 
                     if (!dst_shape->getMaterial()) {
@@ -279,40 +293,53 @@ namespace aten
                         // Only lambertian.
                         const auto& objmtrl = mtrls[m];
 
-                        aten::vec3 diffuse(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]);
+                        aten::material* mtrl = nullptr;
 
-                        aten::texture* albedoMap = nullptr;
-                        aten::texture* normalMap = nullptr;
-
-                        // Albedo map.
-                        if (!objmtrl.diffuse_texname.empty()) {
-                            albedoMap = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
-
-                            if (!albedoMap) {
-                                std::string texname = pathname + "/" + objmtrl.diffuse_texname;
-                                albedoMap = aten::ImageLoader::load(texname, ctxt);
-                            }
+                        if (callback_crate_mtrl) {
+                            mtrl = callback_crate_mtrl(
+                                objmtrl.name,
+                                ctxt,
+                                MaterialType::Lambert,
+                                aten::vec3(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]),
+                                objmtrl.diffuse_texname,
+                                objmtrl.bump_texname);
                         }
+                        else {
+                            aten::vec3 diffuse(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]);
 
-                        // Normal map.
-                        if (!objmtrl.bump_texname.empty()) {
-                            normalMap = AssetManager::getTex(objmtrl.bump_texname.c_str());
+                            aten::texture* albedoMap = nullptr;
+                            aten::texture* normalMap = nullptr;
 
-                            if (!normalMap) {
-                                std::string texname = pathname + "/" + objmtrl.bump_texname;
-                                normalMap = aten::ImageLoader::load(texname, ctxt);
+                            // Albedo map.
+                            if (!objmtrl.diffuse_texname.empty()) {
+                                albedoMap = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
+
+                                if (!albedoMap) {
+                                    std::string texname = pathname + "/" + objmtrl.diffuse_texname;
+                                    albedoMap = aten::ImageLoader::load(texname, ctxt);
+                                }
                             }
+
+                            // Normal map.
+                            if (!objmtrl.bump_texname.empty()) {
+                                normalMap = AssetManager::getTex(objmtrl.bump_texname.c_str());
+
+                                if (!normalMap) {
+                                    std::string texname = pathname + "/" + objmtrl.bump_texname;
+                                    normalMap = aten::ImageLoader::load(texname, ctxt);
+                                }
+                            }
+
+                            aten::MaterialParameter mtrlParam;
+                            mtrlParam.baseColor = diffuse;
+
+                            mtrl = ctxt.createMaterialWithMaterialParameter(
+                                aten::MaterialType::Lambert,
+                                mtrlParam,
+                                albedoMap,
+                                normalMap,
+                                nullptr);
                         }
-
-                        aten::MaterialParameter mtrlParam;
-                        mtrlParam.baseColor = diffuse;
-
-                        aten::material* mtrl = ctxt.createMaterialWithMaterialParameter(
-                            aten::MaterialType::Lambert,
-                            mtrlParam,
-                            albedoMap,
-                            normalMap,
-                            nullptr);
 
                         mtrl->setName(objmtrl.name.c_str());
 

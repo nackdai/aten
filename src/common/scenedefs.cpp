@@ -1006,39 +1006,25 @@ void ToonShadeTestScene::getCameraPosAndAt(
 
 void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    aten::AssetManager::registerMtrl(
-        "backWall",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
-
-    aten::AssetManager::registerMtrl(
-        "ceiling",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
-
-    aten::AssetManager::registerMtrl(
-        "floor",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
-
-    aten::AssetManager::registerMtrl(
-        "leftWall",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000)));
-
     auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));
     aten::AssetManager::registerMtrl(
         "light",
         emit);
 
-    aten::AssetManager::registerMtrl(
-        "rightWall",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
-    aten::AssetManager::registerMtrl(
-        "shortBox",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
-    aten::AssetManager::registerMtrl(
-        "tallBox",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
-
     std::vector<aten::object*> objs;
-    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true, true);
+    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt,
+        [&](const std::string& name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> aten::material* {
+                (void)albedo;
+                (void)nml;
+
+                auto mtrl = createMaterial(ctxt, type, mtrl_clr);
+                mtrl->setName(name.c_str());
+                aten::AssetManager::registerMtrl(name, mtrl);
+                return mtrl;
+        },
+        true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::object>(
         ctxt,
@@ -1073,99 +1059,25 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    auto SP_LUK = aten::ImageLoader::load("../../asset/sponza/sp_luk.JPG", ctxt);
-    auto SP_LUK_nml = aten::ImageLoader::load("../../asset/sponza/sp_luk-nml.png", ctxt);
-
-    auto _00_SKAP = aten::ImageLoader::load("../../asset/sponza/00_skap.JPG", ctxt);
-
-    auto _01_STUB = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG", ctxt);
-    auto _01_STUB_nml = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png", ctxt);
-
-    auto _01_S_BA = aten::ImageLoader::load("../../asset/sponza/01_S_ba.JPG", ctxt);
-
-    auto _01_ST_KP = aten::ImageLoader::load("../../asset/sponza/01_St_kp.JPG", ctxt);
-    auto _01_ST_KP_nml = aten::ImageLoader::load("../../asset/sponza/01_St_kp-nml.png", ctxt);
-
-    auto X01_ST = aten::ImageLoader::load("../../asset/sponza/x01_st.JPG", ctxt);
-
-    auto KAMEN_stup = aten::ImageLoader::load("../../asset/sponza/KAMEN-stup.JPG", ctxt);
-
-    auto RELJEF = aten::ImageLoader::load("../../asset/sponza/reljef.JPG", ctxt);
-    auto RELJEF_nml = aten::ImageLoader::load("../../asset/sponza/reljef-nml.png", ctxt);
-
-    auto KAMEN = aten::ImageLoader::load("../../asset/sponza/KAMEN.JPG", ctxt);
-    auto KAMEN_nml = aten::ImageLoader::load("../../asset/sponza/KAMEN-nml.png", ctxt);
-
-    auto PROZOR1 = aten::ImageLoader::load("../../asset/sponza/prozor1.JPG", ctxt);
-
-    auto VRATA_KR = aten::ImageLoader::load("../../asset/sponza/vrata_kr.JPG", ctxt);
-
-    auto VRATA_KO = aten::ImageLoader::load("../../asset/sponza/vrata_ko.JPG", ctxt);
-
-    aten::AssetManager::registerMtrl(
-        "sp_00_luk_mali",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.745098, 0.709804, 0.674510), SP_LUK, SP_LUK_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_svod_kapitel",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.713726, 0.705882, 0.658824), _00_SKAP, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_01_stub_baza_",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.784314, 0.784314, 0.784314)));
-    aten::AssetManager::registerMtrl(
-        "sp_01_stub_kut",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_00_stup",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_01_stub_baza",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.800000, 0.784314, 0.749020), _01_S_BA, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_00_luk_mal1",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.745098, 0.709804, 0.674510), _01_ST_KP, _01_ST_KP_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_01_stub",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.737255, 0.709804, 0.670588), _01_STUB, _01_STUB_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_01_stup",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.827451, 0.800000, 0.768628), X01_ST, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_vijenac",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.713726, 0.705882, 0.658824), _00_SKAP, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_00_svod",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.941177, 0.866667, 0.737255), KAMEN_stup, nullptr));    // TODO    specularÇ™Ç†ÇÈÇÃÇ≈ÅAlambertÇ≈Ç»Ç¢.
-    aten::AssetManager::registerMtrl(
-        "sp_02_reljef",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.529412, 0.498039, 0.490196), RELJEF, RELJEF_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_01_luk_a",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.745098, 0.709804, 0.674510), SP_LUK, SP_LUK_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_zid_vani",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_01_stup_baza",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.800000, 0.784314, 0.749020), _01_S_BA, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_00_zid",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_00_prozor",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(1.000000, 1.000000, 1.000000), PROZOR1, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_00_vrata_krug",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.784314, 0.784314, 0.784314), VRATA_KR, nullptr));
-    aten::AssetManager::registerMtrl(
-        "sp_00_pod",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.627451, 0.572549, 0.560784), KAMEN, KAMEN_nml));
-    aten::AssetManager::registerMtrl(
-        "sp_00_vrata_kock",
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.784314, 0.784314, 0.784314), VRATA_KO, nullptr));
-
     std::vector<aten::object*> objs;
 
-    aten::ObjLoader::load(objs, "../../asset/sponza/sponza.obj", ctxt);
+    aten::ObjLoader::load(
+        objs, "../../asset/sponza/sponza.obj", ctxt,
+        [&](const std::string& name, aten::context& ctxt,
+            aten::MaterialType type, const aten::vec3& mtrl_clr,
+            const std::string& albedo, const std::string& nml) -> aten::material* {
+                auto albedo_map = albedo.empty()
+                    ? nullptr
+                    : aten::ImageLoader::load("../../asset/sponza/" + albedo, ctxt);
+                auto nml_map = nml.empty()
+                    ? nullptr
+                    : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
+
+                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map, nml_map);
+                mtrl->setName(name.c_str());
+                aten::AssetManager::registerMtrl(name, mtrl);
+                return mtrl;
+        });
 
     objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh", ctxt, 0);
 
@@ -1289,7 +1201,7 @@ void DeformInBoxScene::makeScene(
 
         std::vector<aten::object*> objs;
 
-        aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", ctxt, false);
+        aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", ctxt, nullptr, false);
 
         auto light = aten::TransformableFactory::createInstance<aten::object>(
             ctxt,
@@ -1379,7 +1291,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         tall);
 
     std::vector<aten::object*> objs;
-    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, true, true);
+    aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::object>(
         ctxt,

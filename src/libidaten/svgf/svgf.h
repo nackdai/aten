@@ -12,11 +12,11 @@ namespace idaten
     class SVGFPathTracing : public Renderer {
     public:
         enum Mode {
-            SVGF,            // Spatio-temporal Variance Guided Filter.
-            TF,                // Temporal Filter.
-            PT,                // Path Tracing.
-            VAR,            // Variance (For debug).
-            AOVar,            // Arbitrary Output Variables.
+            SVGF,   // Spatio-temporal Variance Guided Filter.
+            TF,     // Temporal Filter.
+            PT,     // Path Tracing.
+            VAR,    // Variance (For debug).
+            AOVar,  // Arbitrary Output Variables.
         };
 
         enum AOVMode {
@@ -198,16 +198,22 @@ namespace idaten
             m_hitDistLimit = d;
         }
 
-        void getTemporalFilterThreshold(float& nTh, float& zTh)
+        float getTemporalFilterDepthThreshold() const
         {
-            nTh = m_nmlThresholdTF;
-            zTh = m_depthThresholdTF;
+            return m_depthThresholdTF;
+        }
+        float getTemporalFilterNormalThreshold() const
+        {
+            return m_nmlThresholdTF;
         }
 
-        void setTemporalFilterThreshold(float nTh, float zTh)
+        void setTemporalFilterDepthThreshold(float th)
         {
-            m_nmlThresholdTF = nTh;
-            m_depthThresholdTF = zTh;
+            m_depthThresholdTF = aten::clamp(th, 0.01f, 1.0f);
+        }
+        void setTemporalFilterNormalThreshold(float th)
+        {
+            m_nmlThresholdTF = aten::clamp(th, 0.0f, 1.0f);
         }
 
         bool canSSRTHitTest() const
@@ -226,7 +232,7 @@ namespace idaten
         }
         void setAtrousIterCount(uint32_t c)
         {
-            m_atrousMaxIterCnt = c;
+            m_atrousMaxIterCnt = aten::clamp(c, 0U, 5U);
         }
 
     protected:

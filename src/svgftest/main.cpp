@@ -284,6 +284,11 @@ void onRun(aten::window* window)
         }
 #endif
 
+        auto nmlThreshold = g_tracer.getTemporalFilterNormalThreshold();
+        if (ImGui::SliderFloat("Normal Threshold", &nmlThreshold, 0.0f, 1.0f)) {
+            g_tracer.setTemporalFilterNormalThreshold(nmlThreshold);
+        }
+
         ImGui::SliderFloat("MoveMultiply", &g_moveMultiply, 1.0f, 100.0f);
 
         auto cam = g_camera.param();

@@ -260,9 +260,10 @@ PSSMLT 10spp 10mlt 10mutation
 
 ![PSSMLT](gallery/pssmlt_10spp_10mutation_10mlt.png)
 
-GPGPU 1spp
+SVGG 1spp
 
-![GPGPU_1spp](gallery/gpgpu_1spp.png)
+![SVGF_sponza](gallery/svgf_1spp_sponza.png)
+![SVGF_cryteksponza](gallery/svgf_1spp_cryteksponza.png)
 
 Deformation
 

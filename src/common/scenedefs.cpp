@@ -1102,8 +1102,13 @@ void SponzaScene::getCameraPosAndAt(
     aten::vec3& at,
     real& fov)
 {
+#if 1
     pos = aten::vec3(0.f, 1.f, 3.f);
     at = aten::vec3(0.f, 1.f, 0.f);
+#else
+    pos = aten::vec3(-3.09f, 3.40f, -0.13f);
+    at = aten::vec3(-2.09f, 3.33f, -0.13f);
+#endif
     fov = 45;
 }
 
@@ -1358,7 +1363,12 @@ void CryteckSponzaScene::getCameraPosAndAt(
     aten::vec3& at,
     real& fov)
 {
+#if 0
     pos = aten::vec3(0.f, 1.f, 3.f);
     at = aten::vec3(0.f, 1.f, 0.f);
+#else
+    pos = aten::vec3(-354.4f, 359.6f, -41.2f);
+    at = aten::vec3(-353.4f, 359.4f, -41.2f);
+#endif
     fov = 45;
 }

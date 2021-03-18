@@ -35,8 +35,6 @@ void onRun(aten::window* window)
         if (b0 || b1 || b2 || b3) {
             aten::FlakesNormalMapMaker::setParemter(flakeParam);
         }
-
-        window->drawImGui();
     }
 }
 

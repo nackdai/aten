@@ -212,8 +212,6 @@ namespace aten {
 
         static void terminate();
 
-        void drawImGui();
-
         static bool isInitialized();
 
         GLFWwindow* getNativeHandle();
@@ -259,6 +257,8 @@ namespace aten {
         }
 
     private:
+        void drawImGui();
+
         GLFWwindow* m_wnd{ nullptr };
         int32_t m_id{ -1 };
 

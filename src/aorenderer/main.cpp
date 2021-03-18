@@ -117,8 +117,6 @@ void onRun(aten::window* window)
             auto maxTexIdx = g_tracer.getRegisteredTextureNum() - 1;
             ImGui::SliderInt("TexIdx", &g_viewTexIdx, 0, maxTexIdx);
         }
-
-        window->drawImGui();
     }
 }
 

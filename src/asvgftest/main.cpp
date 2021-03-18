@@ -287,8 +287,6 @@ void onRun(aten::window* window)
         auto cam = g_camera.param();
         ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
         ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
-
-        window->drawImGui();
     }
 
     idaten::SVGFPathTracing::PickedInfo info;

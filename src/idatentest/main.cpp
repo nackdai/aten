@@ -133,8 +133,6 @@ void onRun(aten::window* window)
         }
 
         ImGui::SliderFloat("MoveMultiply", &g_moveMultiply, 1.0f, 100.0f);
-
-        window->drawImGui();
     }
 }
 

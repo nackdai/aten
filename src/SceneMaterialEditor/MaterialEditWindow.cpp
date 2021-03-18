@@ -319,8 +319,6 @@ void MaterialEditWindow::onRun(aten::window* window)
         if (ImGui::Button("Export")) {
             aten::MaterialExporter::exportMaterial("material.xml", s_mtrls);
         }
-
-        window->drawImGui();
     }
 }
 

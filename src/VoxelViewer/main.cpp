@@ -83,8 +83,6 @@ void onRun(aten::window* window)
         ImGui::SliderInt("Depth", &g_drawVoxelDepth, 1, sbvh->getMaxDepth());
         ImGui::Checkbox("Wireframe,", &g_isWireframe);
         ImGui::Checkbox("Draw mesh,", &g_drawMesh);
-
-        window->drawImGui();
     }
 }
 

@@ -354,6 +354,8 @@ namespace aten
 
                 wnd->m_onRun(wnd.get());
 
+                wnd->drawImGui();
+
                 ::glfwSwapBuffers(glfwWnd);
 
                 if (wnd->id() == 0

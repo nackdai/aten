@@ -34,9 +34,6 @@ static bool g_isMouseRBtnDown = false;
 static int g_prevX = 0;
 static int g_prevY = 0;
 
-aten::GeomVertexBuffer m_vb;
-aten::GeomIndexBuffer m_ib;
-
 void onRun(aten::window* window)
 {
     if (g_isCameraDirty) {
@@ -54,9 +51,6 @@ void onRun(aten::window* window)
         *g_obj,
         &g_camera,
         false);
-
-    g_rasterizer.setColor(aten::vec4(0, 0, 0, 1));
-    m_ib.draw(m_vb, aten::Primitive::Lines, 0, 1);
 
     if (g_willTakeScreenShot)
     {
@@ -167,7 +161,6 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-// TODO
 aten::object* loadObj(
     const char* objpath,
     const char* mtrlpath)
@@ -182,10 +175,18 @@ aten::object* loadObj(
         extname,
         filename);
 
-    aten::ImageLoader::setBasePath(pathname);
-
     if (mtrlpath) {
         aten::MaterialLoader::load(mtrlpath, g_ctxt);
+    }
+    else {
+        aten::MaterialParameter param;
+        param.baseColor = aten::vec3(1, 1, 1);;
+
+        auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
+            aten::MaterialType::Lambert,
+            param,
+            nullptr, nullptr, nullptr);
+        aten::AssetManager::registerMtrl("dummy", mtrl);
     }
 
     std::vector<aten::object*> objs;
@@ -238,30 +239,6 @@ bool parseOption(
 
 int main(int argc, char* argv[])
 {
-    aten::vec3 nml0;
-    {
-        aten::vec4 v0(-1.010, 0, 0.990, 0);
-        aten::vec4 v1(-0.990, 0, -1.040, 0);
-        aten::vec4 v2(-1.020, 1.990, -1.040, 0);
-
-        aten::vec4 e0 = normalize(v1 - v0);
-        aten::vec4 e1 = normalize(v2 - v0);
-
-        nml0 = normalize(aten::cross(e0, e1));
-    }
-
-    aten::vec3 nml1;
-    {
-        aten::vec4 v0(-1.010, 0, 0.990, 0);
-        aten::vec4 v1(-1.020, 1.990, -1.040, 0);
-        aten::vec4 v2(-1.020, 1.990, 0.990, 0);
-
-        aten::vec4 e0 = normalize(v1 - v0);
-        aten::vec4 e1 = normalize(v2 - v0);
-
-        nml1 = normalize(aten::cross(e0, e1));
-    }
-
     Options opt;
 
 #if 0
@@ -282,7 +259,10 @@ int main(int argc, char* argv[])
         onMouseWheel,
         onKey);
 
-    g_obj = loadObj("../../asset/cornellbox/orig.obj", nullptr);
+    g_obj = loadObj("../../asset/models/ModernRoom/modernroom_t.obj", nullptr);
+    //g_obj = loadObj("../../asset/dragon/dragon.obj", nullptr);
+    //g_obj = loadObj("../../asset/models/plane/plane.obj", nullptr);
+    //g_obj = loadObj("../../asset/cornellbox/orig.obj", nullptr);
 
     g_ctxt.initAllTexAsGLTexture();
 
@@ -290,10 +270,8 @@ int main(int argc, char* argv[])
 
     g_rasterizer.init(
         WIDTH, HEIGHT,
-        "drawobj_vs.glsl",
-        "drawobj_fs.glsl");
-
-    //aten::ImageLoader::setBasePath(opt.texDir.c_str());
+        "../shader/drawobj_vs.glsl",
+        "../shader/drawobj_fs.glsl");
 
     auto texNum = g_ctxt.getTextureNum();
 
@@ -302,35 +280,9 @@ int main(int argc, char* argv[])
         tex->initAsGLTexture();
     }
 
-    {
-        auto p0 = aten::vec4(-1.01717770f, 1.43442011f, 0.316223562f, 1.0f);
-        auto dir = aten::vec4(-0.00947688520f, 0.651779234f, 0.758349597f, 0.0f);
-
-        aten::vertex vtxs[] =  {
-            {
-                p0,
-                {0.0f, 0.0f, 0.0f},
-                {0.0f, 0.0f, 0.0f},
-            },
-            {
-                p0 + dir,
-                {0.0f, 0.0f, 0.0f},
-                {0.0f, 0.0f, 0.0f},
-            },
-        };
-        int idxs[] = { 0, 1 };
-
-        m_vb.init(
-            sizeof(aten::vertex),
-            AT_COUNTOF(vtxs),
-            0,
-            &vtxs[0]);
-        m_ib.init((uint32_t)AT_COUNTOF(idxs), &idxs[0]);
-    }
-
     // TODO
-    aten::vec3 pos(0.f, 1.f, 3.f);
-    aten::vec3 at(0.f, 1.f, 0.f);
+    aten::vec3 pos(0.f, 100.0f, 300.0f);
+    aten::vec3 at(0.f, 0.f, 0.f);
     real vfov = real(45);
 
     g_camera.init(

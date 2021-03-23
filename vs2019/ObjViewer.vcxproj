@@ -27,10 +27,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\ObjViewer\drawobj_fs.glsl" />
-    <None Include="..\src\ObjViewer\drawobj_vs.glsl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\src\ObjViewer\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

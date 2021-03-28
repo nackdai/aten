@@ -168,6 +168,15 @@ namespace AT_NAME {
             real& selectPdf,
             aten::LightSampleResult& sampleRes);
 
+        Light* sampleLight(
+            const aten::context& ctxt,
+            const aten::vec3& org,
+            const aten::vec3& nml,
+            std::function<aten::vec3(const aten::vec3&)> compute_brdf,
+            aten::sampler* sampler,
+            real& selectPdf,
+            aten::LightSampleResult& sampleRes);
+
         void drawForGBuffer(
             aten::hitable::FuncPreDraw func,
             std::function<bool(aten::hitable*)> funcIfDraw,

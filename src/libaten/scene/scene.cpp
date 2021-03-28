@@ -61,7 +61,6 @@ namespace aten {
         return light;
 #else
         // Resampled Importance Sampling.
-        // For reducing variance...maybe...
 
         std::vector<LightSampleResult> samples(m_lights.size());
         std::vector<real> costs(m_lights.size());
@@ -71,7 +70,7 @@ namespace aten {
         for (int i = 0; i < m_lights.size(); i++) {
             const auto light = m_lights[i];
 
-            samples[i] = light->sample(org, nml, sampler);
+            samples[i] = light->sample(ctxt, org, nml, sampler);
 
             const auto& lightsample = samples[i];
 
@@ -118,6 +117,75 @@ namespace aten {
 
         return nullptr;
 #endif
+    }
+
+    Light* scene::sampleLight(
+        const aten::context& ctxt,
+        const aten::vec3& org,
+        const aten::vec3& nml,
+        std::function<aten::vec3(const aten::vec3&)> compute_brdf,
+        aten::sampler* sampler,
+        real& selectPdf,
+        aten::LightSampleResult& sampleRes)
+    {
+        // Resampled Importance Sampling.
+
+        std::vector<LightSampleResult> samples(m_lights.size());
+        std::vector<real> costs(m_lights.size());
+
+        real sumCost = 0;
+
+        for (int i = 0; i < m_lights.size(); i++) {
+            const auto light = m_lights[i];
+
+            samples[i] = light->sample(ctxt, org, nml, sampler);
+
+            const auto& lightsample = samples[i];
+
+            vec3 posLight = lightsample.pos;
+            vec3 nmlLight = lightsample.nml;
+            real pdfLight = lightsample.pdf;
+            vec3 dirToLight = normalize(lightsample.dir);
+
+            auto brdf = compute_brdf(dirToLight);
+
+            auto cosShadow = dot(nml, dirToLight);
+            auto dist2 = squared_length(lightsample.dir);
+            auto dist = aten::sqrt(dist2);
+
+            auto illum = color::luminance(brdf);
+
+            if (cosShadow > 0) {
+                if (light->isSingular() || light->isInfinite()) {
+                    costs[i] = illum * cosShadow / pdfLight;
+                }
+                else {
+                    costs[i] = illum * cosShadow / dist2 / pdfLight;
+                }
+                sumCost += costs[i];
+            }
+            else {
+                costs[i] = 0;
+            }
+        }
+
+        auto r = sampler->nextSample() * sumCost;
+
+        real sum = 0;
+
+        for (int i = 0; i < costs.size(); i++) {
+            const auto c = costs[i];
+            sum += c;
+
+            if (r <= sum && c > 0) {
+                auto light = m_lights[i];
+                sampleRes = samples[i];
+                selectPdf = c / sumCost;
+                return light;
+            }
+        }
+
+        return nullptr;
     }
 
     void scene::drawForGBuffer(

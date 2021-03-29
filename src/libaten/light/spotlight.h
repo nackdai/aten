@@ -9,15 +9,15 @@ namespace AT_NAME {
             : Light(aten::LightType::Spot, LightAttributeSingluar)
         {}
         SpotLight(
-            const aten::vec3& pos,    // light position.
-            const aten::vec3& dir,    // light direction from the position.
-            const aten::vec3& le,        // light color.
+            const aten::vec3& pos,  // light position.
+            const aten::vec3& dir,  // light direction from the position.
+            const aten::vec3& le,   // light color.
             real constAttn,
             real linearAttn,
             real expAttn,
             real innerAngle,    // Umbra angle of spotlight in radians.
             real outerAngle,    // Penumbra angle of spotlight in radians.
-            real falloff)        // Falloff factor.
+            real falloff)       // Falloff factor.
             : Light(aten::LightType::Spot, LightAttributeSingluar)
         {
             m_param.pos = pos;
@@ -88,7 +88,7 @@ namespace AT_NAME {
 
             result->pos = param->pos;
             result->dir = normalize(((aten::vec3)param->pos) - org);
-            result->nml = aten::vec3();    // Not used...
+            result->nml = param->dir;   // already normalized
 
             // NOTE
             // https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx

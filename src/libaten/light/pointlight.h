@@ -64,12 +64,14 @@ namespace AT_NAME {
             // PDF to sample area.
             result->pdf = real(1);
 
-            result->pos = param->pos;
             result->dir = ((aten::vec3)param->pos) - org;
-            result->nml = aten::vec3();    // Not used...
 
             auto dist2 = aten::squared_length(result->dir);
             auto dist = aten::sqrt(dist2);
+
+            result->pos = param->pos;
+            result->dir = normalize(result->dir);
+            result->nml = -result->dir;
 
             // 減衰率.
             // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html

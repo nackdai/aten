@@ -70,6 +70,22 @@ if not exist %BUILD_DIR%\GLFW.sln (
 
 MSBuild %BUILD_DIR%\tinyobjloader.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 
+rem assimp ==========================
+
+set BUILD_DIR=assimp\build
+
+if not exist %BUILD_DIR% (
+    mkdir %BUILD_DIR%
+)
+
+if not exist %BUILD_DIR%\Assimp.sln (
+    cd %BUILD_DIR%
+    cmake -D ASSIMP_BUILD_TESTS=FALSE -D ASSIMP_INSTALL=FALSE -D ASSIMP_INSTALL_PDB=FALSE -D LIBRARY_SUFFIX= -G %VS% ..\
+    cd %BASEDIR%
+)
+
+MSBuild %BUILD_DIR%\Assimp.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+
 rem makeitso =========================
 
 rem set BUILD_DIR=makeitso

@@ -31,3 +31,6 @@
 [submodule "asset/models"]
 	path = asset/models
 	url = https://github.com/rdbruijne/models.git
+[submodule "3rdparty/assimp"]
+	path = 3rdparty/assimp
+	url = https://github.com/assimp/assimp.git

@@ -135,8 +135,16 @@ namespace aten {
 
         real sumCost = 0;
 
-        for (int i = 0; i < m_lights.size(); i++) {
-            const auto light = m_lights[i];
+        static constexpr auto MaxLightCount = 32U;
+
+        const auto max_light_num = static_cast<decltype(MaxLightCount)>(m_lights.size());
+        const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
+
+        for (auto i = 0U; i < light_cnt; i++) {
+            const auto r = sampler->nextSample();
+            const auto light_pos = aten::clamp<decltype(max_light_num)>(r * max_light_num, 0, max_light_num - 1);
+
+            const auto light = m_lights[light_pos];
 
             samples[i] = light->sample(ctxt, org, nml, sampler);
 
@@ -151,22 +159,32 @@ namespace aten {
 
             auto cosShadow = dot(nml, dirToLight);
             auto dist2 = squared_length(lightsample.dir);
-            auto dist = aten::sqrt(dist2);
 
-            auto illum = color::luminance(brdf);
+            auto light_energy = color::luminance(lightsample.finalColor);
+            auto brdf_energy = color::luminance(brdf);
+
+            auto energy = brdf_energy * light_energy;
+
+            real cost = real(0);
 
             if (cosShadow > 0) {
-                if (light->isSingular() || light->isInfinite()) {
-                    costs[i] = illum * cosShadow / pdfLight;
+                if (light->isInfinite()) {
+                    cost = energy * cosShadow / pdfLight;
                 }
                 else {
-                    costs[i] = illum * cosShadow / dist2 / pdfLight;
+                    auto cosLight = dot(nmlLight, -dirToLight);
+
+                    if (light->isSingular()) {
+                        cost = energy * cosShadow * cosLight / pdfLight;
+                    }
+                    else {
+                        cost = energy * cosShadow * cosLight / dist2 / pdfLight;
+                    }
                 }
-                sumCost += costs[i];
             }
-            else {
-                costs[i] = 0;
-            }
+
+            costs[i] = cost;
+            sumCost += cost;
         }
 
         auto r = sampler->nextSample() * sumCost;

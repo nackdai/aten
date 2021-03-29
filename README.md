@@ -260,7 +260,7 @@ PSSMLT 10spp 10mlt 10mutation
 
 ![PSSMLT](gallery/pssmlt_10spp_10mutation_10mlt.png)
 
-SVGG 1spp
+SVGF 1spp
 
 ![SVGF_sponza](gallery/svgf_1spp_sponza.png)
 ![SVGF_cryteksponza](gallery/svgf_1spp_cryteksponza.png)

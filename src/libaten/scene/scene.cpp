@@ -71,19 +71,83 @@ namespace aten {
     {
         // Resampled Importance Sampling.
 
-        std::vector<LightSampleResult> samples(m_lights.size());
-        std::vector<real> costs(m_lights.size());
-
-        real sumCost = 0;
-
         static constexpr auto MaxLightCount = 32U;
 
         const auto max_light_num = static_cast<decltype(MaxLightCount)>(m_lights.size());
         const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
 
+#if 1
+        // Reservoir
+
+        auto r = sampler->nextSample();
+        auto w_sum = real(0);
+
+        aten::Light* selected_light = nullptr;
+        real selected_cost = real(0);
+
         for (auto i = 0U; i < light_cnt; i++) {
-            const auto r = sampler->nextSample();
-            const auto light_pos = aten::clamp<decltype(max_light_num)>(r * max_light_num, 0, max_light_num - 1);
+            const auto r_light = sampler->nextSample();
+            const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
+
+            const auto light = m_lights[light_pos];
+
+            const auto lightsample = light->sample(ctxt, org, nml, sampler);
+
+            vec3 posLight = lightsample.pos;
+            vec3 nmlLight = lightsample.nml;
+            real pdfLight = lightsample.pdf;
+            vec3 dirToLight = normalize(lightsample.dir);
+
+            auto brdf = compute_brdf(dirToLight);
+
+            auto cosShadow = dot(nml, dirToLight);
+            auto dist2 = squared_length(lightsample.dir);
+
+            auto light_energy = color::luminance(lightsample.finalColor);
+            auto brdf_energy = color::luminance(brdf);
+
+            auto energy = brdf_energy * light_energy;
+
+            real cost = real(0);
+
+            if (cosShadow > 0) {
+                if (light->isInfinite()) {
+                    cost = energy * cosShadow / pdfLight;
+                }
+                else {
+                    auto cosLight = dot(nmlLight, -dirToLight);
+
+                    if (light->isSingular()) {
+                        cost = energy * cosShadow * cosLight / pdfLight;
+                    }
+                    else {
+                        cost = energy * cosShadow * cosLight / dist2 / pdfLight;
+                    }
+                }
+            }
+
+            w_sum += cost;
+
+            if (cost > 0 && r < cost / w_sum) {
+                selected_light = light;
+                sampleRes = lightsample;
+                selected_cost = cost;
+            }
+        }
+
+        if (selected_cost > 0) {
+            selectPdf = selected_cost / w_sum;
+            return selected_light;
+        }
+#else
+        std::vector<LightSampleResult> samples(m_lights.size());
+        std::vector<real> costs(m_lights.size());
+
+        real sumCost = 0;
+
+        for (auto i = 0U; i < light_cnt; i++) {
+            const auto r_light = sampler->nextSample();
+            const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
             const auto light = m_lights[light_pos];
 
@@ -145,6 +209,7 @@ namespace aten {
         }
 
         return nullptr;
+#endif
     }
 
     void scene::drawForGBuffer(

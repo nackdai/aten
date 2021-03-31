@@ -65,6 +65,8 @@ void getCameraPosAndAt(
 void makeScene(aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
+#if 0
+    // CarPaint material doesn't work well
     {
         mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
 
@@ -84,9 +86,12 @@ void makeScene(aten::scene* scene)
 
         mtrlParam.carpaint.flake_intensity = real(1);
     }
+#else
+    mtrlParam.type = aten::MaterialType::Lambert;
+    mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
+#endif
 
     auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
-        aten::MaterialType::CarPaint,
         mtrlParam,
         nullptr, nullptr, nullptr);
 
@@ -272,8 +277,6 @@ void onRun(aten::window* window)
             g_tracer.updateMaterial(params);
             g_tracer.reset();
         }
-
-        window->drawImGui();
     }
 #else
     aten::Destination dst;

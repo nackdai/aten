@@ -47,14 +47,12 @@ namespace aten
     }
 
     AT_NAME::material* context::createMaterialWithMaterialParameter(
-        aten::MaterialType type,
         const aten::MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
         auto mtrl = MaterialFactory::createMaterialWithMaterialParameter(
-            type,
             param,
             albedoMap,
             normalMap,

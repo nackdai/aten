@@ -25,6 +25,7 @@ namespace aten
 
         MaterialParameter param;
         {
+            param.type = type;
             param.baseColor = value.get("baseColor", param.baseColor);
             param.ior = value.get("ior", param.ior);
         }
@@ -58,7 +59,7 @@ namespace aten
             param.isIdealRefraction = value.get("isIdealRefraction", param.isIdealRefraction);
         }
 
-        return createMaterialWithMaterialParameter(type, param, albedoMap, normalMap, roughnessMap);
+        return createMaterialWithMaterialParameter(param, albedoMap, normalMap, roughnessMap);
     }
 
     material* MaterialFactory::createMaterialWithDefaultValue(MaterialType type)
@@ -88,7 +89,6 @@ namespace aten
     }
 
     material* MaterialFactory::createMaterialWithMaterialParameter(
-        MaterialType type,
         const MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
@@ -96,7 +96,7 @@ namespace aten
     {
         aten::material* mtrl = nullptr;
 
-        switch (type) {
+        switch (param.type) {
         case aten::MaterialType::Emissive:
             mtrl = new aten::emissive(param.baseColor);
             break;
@@ -138,6 +138,7 @@ namespace aten
             break;
         default:
             AT_ASSERT(false);
+            AT_PRINTF("No material type [%f(%d)]\n", __FILE__, __LINE__);
             mtrl = new aten::lambert();
             break;
         }

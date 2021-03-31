@@ -20,7 +20,6 @@ namespace aten
         static material* createMaterialWithDefaultValue(MaterialType type);
 
         static material* createMaterialWithMaterialParameter(
-            MaterialType type,
             const MaterialParameter& param,
             aten::texture* albedoMap,
             aten::texture* normalMap,

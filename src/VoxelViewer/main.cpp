@@ -232,12 +232,12 @@ void loadObj(const Options& opt)
     aten::ObjLoader::load(g_objs, opt.input);
 #elif 1
     aten::MaterialParameter mtrlParam;
+    mtrlParam.type = aten::MaterialType::GGX;
     mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
     mtrlParam.ior = 0.2;
     mtrlParam.roughness = 0.2;
 
     auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
-        aten::MaterialType::GGX,
         mtrlParam,
         nullptr, nullptr, nullptr);
 

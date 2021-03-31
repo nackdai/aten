@@ -159,8 +159,6 @@ void onRun(aten::window* window)
                 ImGui::Text("Making LOD...");
             }
         }
-
-        window->drawImGui();
     }
 }
 

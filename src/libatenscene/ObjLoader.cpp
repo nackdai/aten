@@ -125,6 +125,9 @@ namespace aten
 
             auto face_num = shape.mesh.num_face_vertices.size();
 
+            // Keep polygon counts.
+            numPolygons += face_num;
+
             // TODO
             // Avoid duplicate.
             std::vector<tinyobj::index_t> vtx_info_list;
@@ -331,10 +334,10 @@ namespace aten
                             }
 
                             aten::MaterialParameter mtrlParam;
+                            mtrlParam.type = aten::MaterialType::Lambert;
                             mtrlParam.baseColor = diffuse;
 
                             mtrl = ctxt.createMaterialWithMaterialParameter(
-                                aten::MaterialType::Lambert,
                                 mtrlParam,
                                 albedoMap,
                                 normalMap,
@@ -369,9 +372,6 @@ namespace aten
 
                 dst_shape->addFace(f);
             }
-
-            // Keep polygon counts.
-            numPolygons++;
 
             // Register the shape to the object.
             {

@@ -180,10 +180,10 @@ aten::object* loadObj(
     }
     else {
         aten::MaterialParameter param;
+        param.type = aten::MaterialType::Lambert;
         param.baseColor = aten::vec3(1, 1, 1);;
 
         auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
-            aten::MaterialType::Lambert,
             param,
             nullptr, nullptr, nullptr);
         aten::AssetManager::registerMtrl("dummy", mtrl);

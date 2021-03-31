@@ -105,7 +105,6 @@ namespace aten
             }
 
             auto mtrl = aten::MaterialFactory::createMaterialWithMaterialParameter(
-                info.param.type,
                 info.param,
                 nullptr, nullptr, nullptr);
 

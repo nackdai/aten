@@ -69,7 +69,7 @@ namespace aten
     struct MaterialParameter {
         MaterialType type;
 
-        aten::vec4 baseColor;            // サーフェイスカラー，通常テクスチャマップによって供給される.
+        aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
 
         // NOTE
         // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
@@ -78,43 +78,43 @@ namespace aten
         // - eta
         //   屈折率の比.
         //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
-        real ior{ 1.0 };                // 屈折率.
+        real ior{ 1.0 };    // 屈折率.
 
 #if 0
-        real roughness{ 0.5 };            // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+        real roughness{ 0.5 };   // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
         real shininess{ 1.0 };
 
-        real subsurface{ 0.0 };            // 表面下の近似を用いてディフューズ形状を制御する.
-        real metallic{ 0.0 };            // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-        real specular{ 0.5 };            // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-        real specularTint{ 0.0 };        // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-        real anisotropic{ 0.0 };        // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-        real sheen{ 0.0 };                // 追加的なグレージングコンポーネント，主に布に対して意図している.
-        real sheenTint{ 0.5 };            // 基本色に向かう光沢色合いの量.
-        real clearcoat{ 0.0 };            // 第二の特別な目的のスペキュラーローブ.
-        real clearcoatGloss{ 1.0 };        // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+        real subsurface{ 0.0 };     // 表面下の近似を用いてディフューズ形状を制御する.
+        real metallic{ 0.0 };       // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+        real specular{ 0.5 };       // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+        real specularTint{ 0.0 };   // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+        real anisotropic{ 0.0 };    // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+        real sheen{ 0.0 };          // 追加的なグレージングコンポーネント，主に布に対して意図している.
+        real sheenTint{ 0.5 };      // 基本色に向かう光沢色合いの量.
+        real clearcoat{ 0.0 };      // 第二の特別な目的のスペキュラーローブ.
+        real clearcoatGloss{ 1.0 }; // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 #else
         union {
             struct {
-                real roughness;            // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+                real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
                 real shininess;
                 real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
-                real metallic;            // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-                real specular;            // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-                real specularTint;        // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-                real anisotropic;        // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-                real sheen;                // 追加的なグレージングコンポーネント，主に布に対して意図している.
-                real sheenTint;            // 基本色に向かう光沢色合いの量.
-                real clearcoat;            // 第二の特別な目的のスペキュラーローブ.
+                real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+                real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+                real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+                real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+                real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
+                real sheenTint;         // 基本色に向かう光沢色合いの量.
+                real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
                 real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
             };
             struct {
                 real clearcoatRoughness;
                 real flakeLayerRoughness;
-                real flake_scale;                // Smaller values zoom into the flake map, larger values zoom out.
+                real flake_scale;               // Smaller values zoom into the flake map, larger values zoom out.
                 real flake_size;                // Relative size of the flakes
-                real flake_size_variance;        // 0.0 makes all flakes the same size, 1.0 assigns random size between 0 and the given flake size
-                real flake_normal_orientation;    // Blend between the flake normals (0.0) and the surface normal (1.0)
+                real flake_size_variance;       // 0.0 makes all flakes the same size, 1.0 assigns random size between 0 and the given flake size
+                real flake_normal_orientation;  // Blend between the flake normals (0.0) and the surface normal (1.0)
                 real flake_reflection;
                 real flake_transmittance;
                 aten::vec3 glitterColor;

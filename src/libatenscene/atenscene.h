@@ -10,3 +10,4 @@
 #include "utility.h"
 #include "MaterialExporter.h"
 #include "ObjWriter.h"
+#include "AssimpImporter.h"

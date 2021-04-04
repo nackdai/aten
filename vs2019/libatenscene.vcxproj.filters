@@ -39,6 +39,9 @@
     <ClCompile Include="..\src\libatenscene\ObjWriter.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libatenscene\AssimpImporter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libatenscene\atenscene.h" />
@@ -70,6 +73,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\ObjWriter.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libatenscene\AssimpImporter.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

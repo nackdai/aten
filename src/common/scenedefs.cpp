@@ -27,10 +27,10 @@ static aten::material* createMaterial(
     aten::texture* normalMap)
 {
     aten::MaterialParameter param;
+    param.type = type;
     param.baseColor = albedo;
 
     auto mtrl = ctxt.createMaterialWithMaterialParameter(
-        type,
         param,
         albedoMap,
         normalMap,
@@ -45,10 +45,10 @@ static aten::material* createMaterial(
     const aten::vec3& albedo)
 {
     aten::MaterialParameter param;
+    param.type = type;
     param.baseColor = albedo;
 
     return ctxt.createMaterialWithMaterialParameter(
-        type,
         param,
         nullptr, nullptr, nullptr);
 }
@@ -58,9 +58,11 @@ static aten::material* createMaterialWithParamter(
     aten::MaterialType type,
     const aten::MaterialParameter& param)
 {
+    aten::MaterialParameter mtrl_param = param;
+    mtrl_param.type = type;
+
     return ctxt.createMaterialWithMaterialParameter(
-        type,
-        param,
+        mtrl_param,
         nullptr, nullptr, nullptr);
 }
 
@@ -72,9 +74,11 @@ static aten::material* createMaterialWithParamter(
     aten::texture* normalMap,
     aten::texture* roughnessMap)
 {
+    aten::MaterialParameter mtrl_param = param;
+    mtrl_param.type = type;
+
     return ctxt.createMaterialWithMaterialParameter(
-        type,
-        param,
+        mtrl_param,
         albedoMap,
         normalMap,
         roughnessMap);

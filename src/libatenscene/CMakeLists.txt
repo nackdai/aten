@@ -8,6 +8,8 @@ add_library(
   ../../3rdparty/tinyxml2/tinyxml2.cpp
   AssetManager.cpp
   AssetManager.h
+  AssimpImporter.cpp
+  AssimpImporter.h
   ImageLoader.cpp
   ImageLoader.h
   MaterialExporter.cpp
@@ -29,7 +31,7 @@ target_include_directories(
   PRIVATE ${stb_INCLUDE_DIRECTORIES} ${imgui_INCLUDE_DIRECTORIES}
           ${tinyobjloader_INCLUDE_DIRECTORIES} ${tinyxml2_INCLUDE_DIRECTORIES})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC aten glm tinyobjloader)
+target_link_libraries(${PROJECT_NAME} PUBLIC aten glm tinyobjloader assimp)
 
 # Defines outputs , depending Debug or Release.
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

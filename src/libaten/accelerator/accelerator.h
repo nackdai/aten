@@ -1,6 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <vector>
+
 #include "scene/hitable.h"
 #include "math/frustum.h"
 #include "scene/context.h"
@@ -12,12 +14,12 @@ namespace aten {
      */
     enum class AccelType {
         Bvh,            ///< BVH.
-        Qbvh,            ///< QBVH.
-        Sbvh,            ///< SBVH.
+        Qbvh,           ///< QBVH.
+        Sbvh,           ///< SBVH.
         ThreadedBvh,    ///< Threaded BVH.
-        StacklessBvh,    ///< Stackless BVH.
-        StacklessQbvh,    ///< Stackless QBVH.
-        UserDefs,        ///< User defined.
+        StacklessBvh,   ///< Stackless BVH.
+        StacklessQbvh,  ///< Stackless QBVH.
+        UserDefs,       ///< User defined.
 
         Default,        ///< Default type.
     };
@@ -31,10 +33,7 @@ namespace aten {
         template<typename ACCEL> friend class AcceleratedScene;
 
     protected:
-        accelerator(AccelType type)
-        {
-            m_type = type;
-        }
+        accelerator(AccelType type) : accel_type_{ type } {}
 
     public:
         accelerator() = delete;
@@ -42,12 +41,12 @@ namespace aten {
 
     private:
         static AccelType s_internalType;
-        static std::function<accelerator*()> s_userDefsInternalAccelCreator;
+        static std::function<std::unique_ptr<accelerator>()> s_userDefsInternalAccelCreator;
 
         /**
          * @brief Return a created acceleration structure for internal used.
          */
-        static accelerator* createAccelerator(AccelType type = AccelType::Default);
+        static std::unique_ptr<accelerator> createAccelerator(AccelType type = AccelType::Default);
 
         /**
          * @brief Set the acceleration structure type for internal used.
@@ -64,14 +63,15 @@ namespace aten {
          */
         void asNested()
         {
-            m_isNested = true;
+            is_nested_ = true;
         }
 
     public:
         /**
          * @brief Set a function to create user defined acceleration structure for internal used.
          */
-        static void setUserDefsInternalAccelCreator(std::function<accelerator*()> creator);
+        static void setUserDefsInternalAccelCreator(
+            std::function<std::unique_ptr<accelerator>()> creator);
 
         /**
          * @brief Bulid structure tree from the specified list.
@@ -159,27 +159,27 @@ namespace aten {
          */
         AccelType getAccelType()
         {
-            return m_type;
+            return accel_type_;
         }
 
     protected:
         bool isExporting() const
         {
-            return m_isExporting;
+            return is_exporting_;
         }
         void enableExporting()
         {
-            m_isExporting = true;
+            is_exporting_ = true;
         }
 
     protected:
         // Type about acceleration structure.
-        AccelType m_type{ AccelType::Bvh };
+        AccelType accel_type_{ AccelType::Bvh };
 
         // Flag whether accelerator is nested.
-        bool m_isNested{ false };
+        bool is_nested_{ false };
 
         // Flag whether accelerator is exporting structure data.
-        bool m_isExporting{ false };
+        bool is_exporting_{ false };
     };
 }

@@ -182,7 +182,7 @@ namespace aten
         return std::move(v);
     }
 
-    material* findMaterialInObject(
+    std::shared_ptr<material> findMaterialInObject(
         const tinyxml2::XMLElement* root,
         const std::string& objtag)
     {
@@ -192,7 +192,7 @@ namespace aten
             return nullptr;
         }
 
-        material* mtrl = nullptr;
+        std::shared_ptr<material> mtrl;
 
         for (auto elem = objRoot->FirstChildElement("object"); elem != nullptr; elem = elem->NextSiblingElement("object")) {
             std::string tag;
@@ -216,7 +216,7 @@ namespace aten
             }
         }
 
-        return mtrl;
+        return std::move(mtrl);
     }
 
     void readObjects(
@@ -237,7 +237,7 @@ namespace aten
 
             Values val;
 
-            material* mtrl = nullptr;
+            std::shared_ptr<material> mtrl;
 
             for (auto attr = elem->FirstAttribute(); attr != nullptr; attr = attr->Next()) {
                 std::string attrName(attr->Name());
@@ -275,7 +275,7 @@ namespace aten
                 throw new std::exception();
             }
 
-            object* obj = nullptr;
+            std::shared_ptr<object> obj;
 
             if (type == "object") {
                 obj = ObjLoader::load(path, ctxt);
@@ -356,7 +356,7 @@ namespace aten
                     auto envmap = AssetManager::getTex(attr->Value());
                     if (envmap) {
                         PolymorphicValue v;
-                        v.val.p = envmap;
+                        v = envmap;
                         val.add(attrName, v);
                     }
                 }

@@ -231,9 +231,9 @@ public:
 //#define Scene LayeredMaterialTestScene
 //#define Scene ToonShadeTestScene
 //#define Scene ObjCornellBoxScene
-//#define Scene SponzaScene
+#define Scene SponzaScene
 //#define Scene BunnyScene
 //#define Scene DeformScene
 //#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
-#define Scene CryteckSponzaScene
+//#define Scene CryteckSponzaScene

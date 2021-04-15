@@ -15,7 +15,7 @@
 
 namespace aten
 {
-    material* MaterialFactory::createMaterial(
+    std::shared_ptr<material> MaterialFactory::createMaterial(
         MaterialType type,
         Values& value)
     {
@@ -62,7 +62,7 @@ namespace aten
         return createMaterialWithMaterialParameter(param, albedoMap, normalMap, roughnessMap);
     }
 
-    material* MaterialFactory::createMaterialWithDefaultValue(MaterialType type)
+    std::shared_ptr<material> MaterialFactory::createMaterialWithDefaultValue(MaterialType type)
     {
         AT_ASSERT(material::isValidMaterialType(type));
 
@@ -85,10 +85,11 @@ namespace aten
         };
         AT_STATICASSERT(AT_COUNTOF(funcs) == (int)aten::MaterialType::MaterialTypeMax);
 
-        return funcs[type]();
+        std::shared_ptr<material> ret(funcs[type]());
+        return ret;
     }
 
-    material* MaterialFactory::createMaterialWithMaterialParameter(
+    std::shared_ptr<material> MaterialFactory::createMaterialWithMaterialParameter(
         const MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
@@ -143,6 +144,8 @@ namespace aten
             break;
         }
 
-        return mtrl;
+        std::shared_ptr<material> ret(mtrl);
+
+        return ret;
     }
 }

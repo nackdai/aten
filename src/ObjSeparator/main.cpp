@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
     aten::context ctxt;
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
     aten::ObjLoader::load(
         objs,
         "../../asset/mansion/interior_bundled4_chairmove_1163769_606486_2.obj",
@@ -89,10 +89,10 @@ int main(int argc, char* argv[])
         "Silver",
     };
 
-    auto obj = objs[0];
+    auto& obj = objs[0];
 
     std::vector<aten::objshape*> shapes;
-    std::vector<aten::material*> mtrls;
+    std::vector<std::shared_ptr<aten::material>> mtrls;
 
     auto num = obj->getShapeNum();
 
@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
         for (auto name : names) {
             if (mtrlName == name) {
                 shapes.push_back(shape);
-                mtrls.push_back(const_cast<aten::material*>(mtrl));
+                mtrls.push_back(mtrl);
 
                 break;
             }
@@ -195,9 +195,9 @@ int main(int argc, char* argv[])
 
     // 重複を許さないマテリアルリストの作成.
     std::vector<aten::material*> mtrlListForExport;
-    for (const auto mtrl : mtrls) {
-        if (std::find(mtrlListForExport.begin(), mtrlListForExport.end(), mtrl) == mtrlListForExport.end()) {
-            mtrlListForExport.push_back(mtrl);
+    for (auto& mtrl : mtrls) {
+        if (std::find(mtrlListForExport.begin(), mtrlListForExport.end(), mtrl.get()) == mtrlListForExport.end()) {
+            mtrlListForExport.push_back(mtrl.get());
         }
     }
 
@@ -207,7 +207,9 @@ int main(int argc, char* argv[])
         "result.mtl",
         vertices,
         indices,
-        mtrls);
+        [&mtrls](uint32_t idx) {
+            return mtrls[idx]->name();
+        });
 
     ObjWriter::writeMaterial(
         ctxt,

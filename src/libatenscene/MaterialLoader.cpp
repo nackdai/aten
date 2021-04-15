@@ -176,7 +176,7 @@ namespace aten {
         auto tex = ImageLoader::load(s, ctxt);
 
         aten::PolymorphicValue v;
-        v.val.p = tex;
+        v = tex;
 
         return std::move(v);
     }
@@ -381,7 +381,7 @@ namespace aten {
         const tinyxml2::XMLElement* root = (const tinyxml2::XMLElement*)xmlRoot;
 
         for (auto elem = root->FirstChildElement("material"); elem != nullptr; elem = elem->NextSiblingElement("material")) {
-            material* mtrl = nullptr;
+            std::shared_ptr<material> mtrl;
             std::string mtrlName;
             std::string mtrlType;
             Values mtrlValues;
@@ -440,12 +440,12 @@ namespace aten {
     }
 #endif
 
-    material* MaterialLoader::create(
+    std::shared_ptr<material> MaterialLoader::create(
         const std::string& type,
         context& ctxt,
         Values& values)
     {
-        aten::material* mtrl = nullptr;
+        std::shared_ptr<material> mtrl;
 
         if (aten::material::isDefaultMaterialName(type)) {
 
@@ -460,12 +460,12 @@ namespace aten {
 
             if (it != g_creators.end()) {
                 auto creator = it->second;
-                mtrl = creator(values);
+                mtrl.reset(creator(values));
 
                 ctxt.addMaterial(mtrl);
             }
         }
 
-        return mtrl;
+        return std::move(mtrl);
     }
 }

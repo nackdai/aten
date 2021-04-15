@@ -13,7 +13,7 @@ namespace AT_NAME
         virtual ~LayeredBSDF() {}
 
     public:
-        bool add(material* mtrl);
+        bool add(std::shared_ptr<material> mtrl);
 
         virtual aten::vec4 sampleAlbedoMap(real u, real v) const override final;
 
@@ -57,6 +57,6 @@ namespace AT_NAME
             bool isLightPath = false) const override final;
 
     private:
-        std::vector<material*> m_layer;
+        std::vector<std::shared_ptr<material>> m_layer;
     };
 }

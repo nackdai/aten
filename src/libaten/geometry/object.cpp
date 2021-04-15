@@ -21,7 +21,7 @@ namespace AT_NAME
         }
 
         if (!m_accel) {
-            m_accel.reset(aten::accelerator::createAccelerator());
+            m_accel = aten::accelerator::createAccelerator();
         }
 
         m_param.primid = m_shapes[0]->faces[0]->getId();
@@ -222,7 +222,7 @@ namespace AT_NAME
     {
         bool result = false;
 
-        m_accel.reset(aten::accelerator::createAccelerator());
+        m_accel = aten::accelerator::createAccelerator();
         m_accel->enableExporting();
 
         build(ctxt);
@@ -238,7 +238,7 @@ namespace AT_NAME
     {
         AT_ASSERT(!m_accel);
 
-        m_accel.reset(aten::accelerator::createAccelerator());
+        m_accel = aten::accelerator::createAccelerator();
         return m_accel->importTree(ctxt, path, offsetTriIdx);
     }
 
@@ -255,7 +255,7 @@ namespace AT_NAME
                 tris[i].push_back(face);
             }
 
-            mtrls.push_back(shape->m_mtrl);
+            mtrls.push_back(shape->m_mtrl.get());
         }
     }
 

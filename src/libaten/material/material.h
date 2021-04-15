@@ -274,7 +274,7 @@ namespace AT_NAME
             aten::Values& val);
 
     public:
-        virtual ~material();
+        virtual ~material() = default;
 
         bool isEmissive() const
         {
@@ -490,20 +490,15 @@ namespace AT_NAME
         static bool isValidMaterialType(aten::MaterialType type);
 
     private:
-        static void resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl);
-
-        void addToDataList(aten::DataList<AT_NAME::material>& list)
+        void updateIndex(int id)
         {
-            list.add(&m_listItem);
-            m_id = m_listItem.currentIndex();
+            m_id = id;
         }
 
     protected:
         int m_id{ -1 };
 
         aten::MaterialParameter m_param;
-
-        aten::DataList<AT_NAME::material>::ListItem m_listItem;
 
         // For debug.
         std::string m_name;

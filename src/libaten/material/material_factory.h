@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "material/material.h"
 
 namespace aten
@@ -13,13 +15,13 @@ namespace aten
         const MaterialFactory& operator=(const MaterialFactory& rhs) = delete;
 
     public:
-        static material* createMaterial(
+        static std::shared_ptr<material> createMaterial(
             MaterialType type,
             Values& value);
 
-        static material* createMaterialWithDefaultValue(MaterialType type);
+        static std::shared_ptr<material> createMaterialWithDefaultValue(MaterialType type);
 
-        static material* createMaterialWithMaterialParameter(
+        static std::shared_ptr<material> createMaterialWithMaterialParameter(
             const MaterialParameter& param,
             aten::texture* albedoMap,
             aten::texture* normalMap,

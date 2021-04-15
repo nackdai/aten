@@ -6,7 +6,7 @@ aten::RasterizeRenderer MaterialSelectWindow::s_rasterizer;
 
 static aten::context s_ctxt;
 
-aten::object* MaterialSelectWindow::s_obj = nullptr;
+std::shared_ptr<aten::object> MaterialSelectWindow::s_obj;
 
 aten::Blitter MaterialSelectWindow::s_blitter;
 aten::visualizer* MaterialSelectWindow::s_visualizer = nullptr;
@@ -266,7 +266,7 @@ void MaterialSelectWindow::onKey(bool press, aten::Key key)
 }
 
 // TODO
-aten::object* loadObj(
+std::shared_ptr<aten::object> loadObj(
     const char* objpath,
     const char* mtrlpath)
 {
@@ -286,7 +286,7 @@ aten::object* loadObj(
         aten::MaterialLoader::load(mtrlpath, s_ctxt);
     }
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
 
     aten::ObjLoader::load(objs, objpath, s_ctxt);
 
@@ -294,9 +294,7 @@ aten::object* loadObj(
     // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
     AT_ASSERT(objs.size() == 1);
 
-    auto obj = objs[0];
-
-    return obj;
+    return objs[0];
 }
 
 bool MaterialSelectWindow::init(

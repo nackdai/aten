@@ -21,25 +21,25 @@ namespace aten
 
         real area{ real(0) };
 
-        int shapeid{ -1 };    ///< Own index in array.
+        int padding[2];
+
+        int shapeid{ -1 };  ///< Own index in array.
         int mtxid{ -1 };    ///< Index of matrix which the shape refer.
-        int primid{ -1 };    ///< First index of triangles which the shape has.
-        int primnum{ 0 };    ///< Number of triangles which the shape has.
+        int primid{ -1 };   ///< First index of triangles which the shape has.
+        int primnum{ 0 };   ///< Number of triangles which the shape has.
+
+        struct {
+            int idx{ -1 };
+        } mtrl;
 
         vec3 center;
-        union {
-            vec3 size;        // cube.
-            real radius;    // shpere.
-        };
 
-        real padding[2];
-
-        aten::UnionIdxPtr mtrl;
+        vec3 size;      // cube.
+        real radius;    // shpere.
 
         AT_DEVICE_API GeomParameter()
         {
             center = aten::vec3(real(0));
-            mtrl.ptr = nullptr;
         }
         ~GeomParameter() {}
     };

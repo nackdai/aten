@@ -1,3 +1,5 @@
+#include <type_traits>
+
 #include "scene/context.h"
 #include "geometry/face.h"
 #include "material/material_factory.h"
@@ -20,7 +22,7 @@ namespace aten
         }
     }
 
-    AT_NAME::material* context::createMaterial(
+    std::shared_ptr<AT_NAME::material> context::createMaterial(
         aten::MaterialType type,
         aten::Values& value)
     {
@@ -34,7 +36,7 @@ namespace aten
         return mtrl;
     }
 
-    AT_NAME::material* context::createMaterialWithDefaultValue(aten::MaterialType type)
+    std::shared_ptr<AT_NAME::material> context::createMaterialWithDefaultValue(aten::MaterialType type)
     {
         auto mtrl = MaterialFactory::createMaterialWithDefaultValue(type);
         AT_ASSERT(mtrl);
@@ -46,7 +48,7 @@ namespace aten
         return mtrl;
     }
 
-    AT_NAME::material* context::createMaterialWithMaterialParameter(
+    std::shared_ptr<AT_NAME::material> context::createMaterialWithMaterialParameter(
         const aten::MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
@@ -66,43 +68,44 @@ namespace aten
         return mtrl;
     }
 
-    void context::addMaterial(aten::material* mtrl)
+    void context::addMaterial(std::shared_ptr<AT_NAME::material>& mtrl)
     {
         AT_ASSERT(mtrl);
-        mtrl->addToDataList(m_materials);
+        m_materials.push_back(mtrl);
+        mtrl->updateIndex(m_materials.size() - 1);
+    }
+
+    void context::addMaterial(AT_NAME::material* mtrl)
+    {
+        std::shared_ptr<std::remove_pointer<decltype(mtrl)>::type> m(mtrl);
+        addMaterial(m);
     }
 
     void context::deleteAllMaterialsAndClearList()
     {
-        m_materials.deleteAllDataAndClear();
+        m_materials.clear();
     }
 
     void context::copyMaterialParameters(std::vector<MaterialParameter>& dst) const
     {
-        auto& materials = m_materials.getList();
-
-        for (const auto item : materials) {
-            auto mtrl = item->getData();
+        for (const auto& mtrl : m_materials) {
             dst.push_back(mtrl->param());
         }
     }
 
-    const material* context::findMaterialByName(const char* name) const
+    const std::shared_ptr<AT_NAME::material>& context::findMaterialByName(const char* name) const
     {
         std::string strname(name);
 
-        auto& materials = m_materials.getList();
-
         auto found = std::find_if(
-            materials.begin(), materials.end(),
-            [&](const aten::DataList<aten::material>::ListItem* item) {
-            auto mtrl = item->getData();
-            return mtrl->nameString() == strname;
-        });
+            m_materials.begin(), m_materials.end(),
+            [&](const std::shared_ptr<AT_NAME::material>& mtrl) {
+                return mtrl->nameString() == strname;
+            }
+        );
 
-        if (found != materials.end()) {
-            auto* item = *found;
-            auto mtrl = item->getData();
+        if (found != m_materials.end()) {
+            const auto& mtrl = *found;
             return mtrl;
         }
 
@@ -111,7 +114,7 @@ namespace aten
 
     int context::findMaterialIdxByName(const char* name) const
     {
-        auto mtrl = findMaterialByName(name);
+        const auto& mtrl = findMaterialByName(name);
         if (mtrl) {
             return mtrl->id();
         }

@@ -26,9 +26,5 @@ namespace aten
         static bool exportMaterial(
             const char* lpszOutFile,
             const std::vector<MtrlExportInfo>& mtrls);
-
-        static bool exportMaterial(
-            const char* lpszOutFile,
-            const std::vector<aten::material*>& mtrls);
     };
 }

@@ -20,7 +20,7 @@ namespace aten
         uint32_t num,
         aabb* bbox)
     {
-        if (m_isNested) {
+        if (is_nested_) {
             buildAsNestedTree(ctxt, list, num, bbox);
         }
         else {
@@ -34,7 +34,7 @@ namespace aten
         uint32_t num,
         aabb* bbox)
     {
-        AT_ASSERT(m_isNested);
+        AT_ASSERT(is_nested_);
 
         m_bvh.build(ctxt, list, num, bbox);
 
@@ -72,7 +72,7 @@ namespace aten
         uint32_t num,
         aabb* bbox)
     {
-        AT_ASSERT(!m_isNested);
+        AT_ASSERT(!is_nested_);
 
         m_bvh.build(ctxt, list, num, bbox);
 

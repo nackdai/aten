@@ -35,7 +35,7 @@ private:
     static aten::PinholeCamera s_camera;
     static bool s_isCameraDirty;
 
-    static aten::object* s_obj;
+    static std::shared_ptr<aten::object> s_obj;
     static aten::RasterizeRenderer s_rasterizer;
 
     static aten::Blitter s_blitter;

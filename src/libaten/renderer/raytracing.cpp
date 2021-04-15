@@ -58,7 +58,7 @@ namespace aten
                 }
                 else if (mtrl->isNPR()) {
                     // Non-Photo-Real.
-                    contribution = shadeNPR(ctxt, mtrl, rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
+                    contribution = shadeNPR(ctxt, mtrl.get(), rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
                     return std::move(contribution);
                 }
                 else {

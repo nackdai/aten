@@ -156,7 +156,7 @@ namespace aten
     void deformable::build()
     {
         if (!m_accel) {
-            m_accel.reset(accelerator::createAccelerator(AccelType::UserDefs));
+            m_accel = accelerator::createAccelerator(AccelType::UserDefs);
         }
 
         const auto& desc = m_mesh.getDesc();

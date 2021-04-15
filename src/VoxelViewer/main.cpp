@@ -18,7 +18,7 @@ struct Options {
     std::string inputFilename;
 } g_opt;
 
-static std::vector<aten::object*> g_objs;
+static std::vector<std::shared_ptr<aten::object>> g_objs;
 static aten::AcceleratedScene<aten::sbvh> g_scene;
 static aten::context g_ctxt;
 

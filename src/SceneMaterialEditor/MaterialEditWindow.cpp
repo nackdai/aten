@@ -41,7 +41,7 @@ int MaterialEditWindow::s_height = 0;
 
 int MaterialEditWindow::s_pickedMtrlId = 0;
 bool MaterialEditWindow::s_needUpdateMtrl = false;
-std::vector<aten::material*> MaterialEditWindow::s_mtrls;
+std::vector<std::shared_ptr<aten::material>> MaterialEditWindow::s_mtrls;
 std::vector<const char*> MaterialEditWindow::s_mtrlNames;
 
 MaterialEditWindow::FuncPickMtrlIdNotifier MaterialEditWindow::s_pickMtrlIdNotifier;
@@ -123,7 +123,7 @@ void MaterialEditWindow::notifyPickMtrlId(int mtrlid)
 
 static void getMaterialsFromContext(
     aten::context& ctxt,
-    std::vector<aten::material*>& mtrls,
+    std::vector<std::shared_ptr<aten::material>>& mtrls,
     std::vector<const char*>& mtrlNames)
 {
     auto mtrlNum = ctxt.getMaterialNum();
@@ -143,7 +143,7 @@ void MaterialEditWindow::buildScene()
 
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", s_ctxt);
         aten::envmap bg;
-        bg.init(envmap);
+        bg.init(envmap.get());
         aten::ImageBasedLight ibl(&bg);
 
         s_scene.addImageBasedLight(&ibl);
@@ -317,7 +317,13 @@ void MaterialEditWindow::onRun(aten::window* window)
         }
 
         if (ImGui::Button("Export")) {
-            aten::MaterialExporter::exportMaterial("material.xml", s_mtrls);
+            std::vector<aten::MtrlExportInfo> mtrlInfos;
+
+            for (const auto& mtrl : s_mtrls) {
+                mtrlInfos.push_back(aten::MtrlExportInfo(mtrl->name(), mtrl->param()));
+            }
+
+            aten::MaterialExporter::exportMaterial("material.xml", mtrlInfos);
         }
     }
 }

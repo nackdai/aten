@@ -327,7 +327,7 @@ int main()
 #ifdef ENABLE_ENVMAP
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     aten::envmap bg;
-    bg.init(envmap);
+    bg.init(envmap.get());
     aten::ImageBasedLight ibl(&bg);
 
     g_scene.addImageBasedLight(&ibl);

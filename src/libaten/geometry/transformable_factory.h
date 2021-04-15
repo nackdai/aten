@@ -23,7 +23,7 @@ namespace aten
             context& ctxt,
             const aten::vec3& center,
             real radius,
-            material* mtrl)
+            const std::shared_ptr<material>& mtrl)
         {
             sphere* ret = new sphere(center, radius, mtrl);
             AT_ASSERT(ret);
@@ -37,7 +37,7 @@ namespace aten
             context& ctxt,
             const aten::vec3& center,
             real w, real h, real d,
-            material* mtrl)
+            const std::shared_ptr<material>& mtrl)
         {
             cube* ret = new cube(center, w, h, d, mtrl);
             AT_ASSERT(ret);
@@ -57,10 +57,10 @@ namespace aten
             return ret;
         }
 
-        template<class T>
+        template <typename T, typename OBJ>
         static instance<T>* createInstance(
             context& ctxt,
-            T* obj)
+            OBJ& obj)
         {
             auto ret = new instance<T>(obj, ctxt);
             AT_ASSERT(ret);
@@ -70,10 +70,10 @@ namespace aten
             return ret;
         }
 
-        template<class T>
+        template <typename T, typename OBJ>
         static instance<T>* createInstance(
             context& ctxt,
-            T* obj,
+            OBJ& obj,
             const mat4& mtxL2W)
         {
             auto ret = new instance<T>(obj, ctxt, mtxL2W);
@@ -84,10 +84,10 @@ namespace aten
             return ret;
         }
 
-        template<class T>
+        template <typename T, typename OBJ>
         static instance<T>* createInstance(
             context& ctxt,
-            T* obj,
+            OBJ& obj,
             const vec3& trans,
             const vec3& rot,
             const vec3& scale)

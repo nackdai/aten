@@ -19,7 +19,7 @@ aten::DeformAnimation* getDeformAnm()
     return s_deformAnm;
 }
 
-static aten::material* createMaterial(
+static std::shared_ptr<aten::material> createMaterial(
     aten::context& ctxt,
     aten::MaterialType type,
     const aten::vec3& albedo,
@@ -39,7 +39,7 @@ static aten::material* createMaterial(
     return mtrl;
 }
 
-static aten::material* createMaterial(
+static std::shared_ptr<aten::material> createMaterial(
     aten::context& ctxt,
     aten::MaterialType type,
     const aten::vec3& albedo)
@@ -53,7 +53,7 @@ static aten::material* createMaterial(
         nullptr, nullptr, nullptr);
 }
 
-static aten::material* createMaterialWithParamter(
+static std::shared_ptr<aten::material> createMaterialWithParamter(
     aten::context& ctxt,
     aten::MaterialType type,
     const aten::MaterialParameter& param)
@@ -66,7 +66,7 @@ static aten::material* createMaterialWithParamter(
         nullptr, nullptr, nullptr);
 }
 
-static aten::material* createMaterialWithParamter(
+static std::shared_ptr<aten::material> createMaterialWithParamter(
     aten::context& ctxt,
     aten::MaterialType type,
     const aten::MaterialParameter& param,
@@ -651,32 +651,80 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtrlParam.baseColor = clr;
     mtrlParam.shininess = 200;
     mtrlParam.ior = 0.2;
-    auto s_blinn = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam, albedo, nml, nullptr));
+
+    auto blinn = createMaterialWithParamter(
+        ctxt, aten::MaterialType::Blinn, mtrlParam,
+        albedo.get(), nml.get(), nullptr);
+
+    auto s_blinn = aten::TransformableFactory::createSphere(
+        ctxt,
+        aten::vec3(-3, 0, 0),
+        1.0,
+        blinn);
     scene->add(s_blinn);
 
 #if 1
     mtrlParam.baseColor = clr;
     mtrlParam.roughness = 0.2;
     mtrlParam.ior = 0.2;
-    auto s_ggx = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam, albedo, nml, rough));
+
+    auto ggx = createMaterialWithParamter(
+        ctxt, aten::MaterialType::GGX, mtrlParam,
+        albedo.get(), nml.get(), rough.get());
+
+    auto s_ggx = aten::TransformableFactory::createSphere(
+        ctxt,
+        aten::vec3(-1, 0, 0),
+        1.0,
+        ggx);
     scene->add(s_ggx);
 
     mtrlParam.baseColor = clr;
     mtrlParam.roughness = 0.2;
     mtrlParam.ior = 0.2;
-    auto s_beckman = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Beckman, mtrlParam, albedo, nml, rough));
+
+    auto beckman = createMaterialWithParamter(
+        ctxt, aten::MaterialType::Beckman, mtrlParam,
+        albedo.get(), nml.get(), rough.get());
+
+    auto s_beckman = aten::TransformableFactory::createSphere(
+        ctxt,
+        aten::vec3(+1, 0, 0),
+        1.0,
+        beckman);
     scene->add(s_beckman);
 
     mtrlParam.baseColor = clr;
     mtrlParam.roughness = 0.2;
     mtrlParam.ior = 0.2;
-    auto s_lambert = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+3, 0, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Lambert, clr, albedo, nml));
+
+    auto lambert = createMaterial(
+        ctxt, aten::MaterialType::Lambert, clr,
+        albedo.get(), nml.get());
+
+    auto s_lambert = aten::TransformableFactory::createSphere(
+        ctxt,
+        aten::vec3(+3, 0, 0),
+        1.0,
+        lambert);
     scene->add(s_lambert);
 
-    auto s_spec = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, +2, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, clr, nullptr, nml_2));
+    auto specular = createMaterial(
+        ctxt, aten::MaterialType::Specular, clr,
+        nullptr, nml_2.get());
+
+    auto s_spec = aten::TransformableFactory::createSphere(
+        ctxt,
+        aten::vec3(-3, +2, 0),
+        1.0,
+        specular);
     scene->add(s_spec);
 
-    auto s_ref = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-1, +2, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, clr, nullptr, nml_2));
+    auto s_ref = aten::TransformableFactory::createSphere(
+        ctxt,
+        aten::vec3(-1, +2, 0),
+        1.0,
+        specular);
     scene->add(s_ref);
 #endif
 }
@@ -878,9 +926,9 @@ void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene
 
     auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.7, 0.0, 0.0));
 
-    auto layer = new aten::LayeredBSDF();
-    layer->add(spec);
-    layer->add(diff);
+    std::shared_ptr<aten::material> layer(new aten::LayeredBSDF());
+    std::dynamic_pointer_cast<aten::LayeredBSDF>(layer)->add(spec);
+    std::dynamic_pointer_cast<aten::LayeredBSDF>(layer)->add(diff);
     ctxt.addMaterial(layer);
 
     auto s_layer = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, 0, 0), 1.0, layer);
@@ -1015,11 +1063,11 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         "light",
         emit);
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
     aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt,
         [&](const std::string& name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
-            const std::string& albedo, const std::string& nml) -> aten::material* {
+            const std::string& albedo, const std::string& nml) -> auto {
                 (void)albedo;
                 (void)nml;
 
@@ -1063,13 +1111,13 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
 
     aten::ObjLoader::load(
         objs, "../../asset/sponza/sponza.obj", ctxt,
         [&](const std::string& name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
-            const std::string& albedo, const std::string& nml) -> aten::material* {
+            const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
                     ? nullptr
                     : aten::ImageLoader::load("../../asset/sponza/" + albedo, ctxt);
@@ -1077,7 +1125,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     ? nullptr
                     : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
 
-                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map, nml_map);
+                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 mtrl->setName(name.c_str());
                 aten::AssetManager::registerMtrl(name, mtrl);
                 return mtrl;
@@ -1128,7 +1176,7 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
         "m1",
         createMaterialWithParamter(ctxt, aten::MaterialType::Lambert_Refraction, mtrlParam));
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
 
     aten::ObjLoader::load(objs, "../../asset/teapot/teapot.obj", ctxt);
     auto bunny = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[0], aten::mat4::Identity);
@@ -1208,7 +1256,7 @@ void DeformInBoxScene::makeScene(
             "rightWall",
             createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
 
-        std::vector<aten::object*> objs;
+        std::vector<std::shared_ptr<aten::object>> objs;
 
         aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", ctxt, nullptr, false);
 
@@ -1299,7 +1347,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         "tallBox",
         tall);
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
     aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
 
     auto light = aten::TransformableFactory::createInstance<aten::object>(
@@ -1335,13 +1383,13 @@ void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
 
 void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
 
     aten::ObjLoader::load(
         objs, "../../asset/models/sponza/sponza.obj", ctxt,
         [&](const std::string& name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
-            const std::string& albedo, const std::string& nml) -> aten::material* {
+            const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
                     ? nullptr
                     : aten::ImageLoader::load("../../asset/models/sponza/" + albedo, ctxt);
@@ -1349,7 +1397,7 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     ? nullptr
                     : aten::ImageLoader::load("../../asset/models/sponza/" + nml, ctxt);
 
-                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map, nml_map);
+                auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
                 mtrl->setName(name.c_str());
                 aten::AssetManager::registerMtrl(name, mtrl);
                 return mtrl;

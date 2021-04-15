@@ -17,12 +17,19 @@ namespace aten
 
     private:
         instance(OBJ* obj, const context& ctxt)
-            : transformable(GeometryType::Instance), m_obj(std::move(obj))
+            : transformable(GeometryType::Instance), m_obj(obj)
         {
             setBoundingBox(m_obj->getBoundingbox());
         }
 
-        instance(OBJ* obj, const context& ctxt, const mat4& mtxL2W)
+        instance(std::shared_ptr<OBJ>& obj, const context& ctxt)
+            : transformable(GeometryType::Instance), m_obj(obj)
+        {
+            setBoundingBox(m_obj->getBoundingbox());
+        }
+
+        template <typename T>
+        instance(T&& obj, const context& ctxt, const mat4& mtxL2W)
             : instance(obj, ctxt)
         {
             m_mtxL2W = mtxL2W;
@@ -33,8 +40,9 @@ namespace aten
             setBoundingBox(getTransformedBoundingBox());
         }
 
+        template <typename T>
         instance(
-            OBJ* obj,
+            T& obj,
             const context& ctxt,
             const vec3& trans,
             const vec3& rot,
@@ -53,7 +61,7 @@ namespace aten
             setBoundingBox(getTransformedBoundingBox());
         }
 
-        virtual ~instance() {}
+        virtual ~instance() = default;
 
     public:
         virtual bool hit(
@@ -167,9 +175,9 @@ namespace aten
             }
         }
 
-        void setLod(OBJ* obj)
+        void setLod(std::shared_ptr<OBJ>& obj)
         {
-            m_lod.reset(std::move(obj));
+            m_lod = obj;
         }
 
         vec3 getTrans()
@@ -263,12 +271,18 @@ namespace aten
 
     template<>
     inline instance<object>::instance(object* obj, const context& ctxt)
-        : transformable(GeometryType::Instance), m_obj(std::move(obj))
+        : transformable(GeometryType::Instance), m_obj(obj)
     {
         m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
+    }
 
-        m_param.shapeid = ctxt.findTransformableIdxFromPointer(obj);
+    template<>
+    inline instance<object>::instance(std::shared_ptr<object>& obj, const context& ctxt)
+        : transformable(GeometryType::Instance), m_obj(obj)
+    {
+        m_obj->build(ctxt);
+        setBoundingBox(m_obj->getBoundingbox());
     }
 
     template<>
@@ -277,7 +291,5 @@ namespace aten
     {
         m_obj->build();
         setBoundingBox(m_obj->getBoundingbox());
-
-        m_param.shapeid = ctxt.findTransformableIdxFromPointer(obj);
     }
 }

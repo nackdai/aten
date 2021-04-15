@@ -108,9 +108,9 @@ void makeScene(aten::scene* scene)
     obj->getShape(0)->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
 
-aten::material* createMaterial(aten::MaterialType type)
+std::shared_ptr<aten::material> createMaterial(aten::MaterialType type)
 {
-    aten::material* mtrl = g_ctxt.createMaterialWithDefaultValue(type);
+    auto mtrl = g_ctxt.createMaterialWithDefaultValue(type);
 
     if (mtrl) {
         mtrl->setTextures(
@@ -471,7 +471,7 @@ int main()
 
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     aten::envmap bg;
-    bg.init(envmap);
+    bg.init(envmap.get());
     aten::ImageBasedLight ibl(&bg);
 
     g_scene.addImageBasedLight(&ibl);

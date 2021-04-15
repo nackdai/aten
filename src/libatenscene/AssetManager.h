@@ -1,14 +1,15 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <functional>
 #include "aten.h"
 
 namespace aten {
     class AssetManager {
     private:
-        AssetManager() {}
-        ~AssetManager() {}
+        AssetManager() = delete;
+        ~AssetManager() = delete;
 
     public:
         enum AssetType {
@@ -20,23 +21,18 @@ namespace aten {
         };
 
         static bool registerMtrl(const std::string& name, material* mtrl);
-        static material* getMtrl(const std::string& name);
-        static material* getMtrlByIdx(uint32_t idx);
-        static bool removeMtrl(material* mtrl);
+        static bool registerMtrl(const std::string& name, const std::shared_ptr<material>& mtrl);
+        static const std::shared_ptr<material>& getMtrl(const std::string& name);
+        static const std::shared_ptr<material>& getMtrlByIdx(uint32_t idx);
 
         static bool registerTex(const std::string& name, texture* tex);
-        static texture* getTex(const std::string& name);
-        static bool removeTex(texture* tex);
+        static const std::shared_ptr<texture>& getTex(const std::string& name);
 
         static bool registerObj(const std::string& name, object* obj);
-        static object* getObj(const std::string& name);
-        static bool removeObj(object* obj);
+        static bool registerObj(const std::string& name, const std::shared_ptr<object>& obj);
+        static const std::shared_ptr<object>& getObj(const std::string& name);
 
         static uint32_t getAssetNum(AssetType type);
-
-        static void removeAllMtrls();
-        static void removeAllTextures();
-        static void removeAllObjs();
 
         static void suppressWarnings();
     };

@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
         nullptr, nullptr, nullptr);
     aten::AssetManager::registerMtrl("light", emit);
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
     aten::ObjLoader::load(objs, opt.input, ctxt);
 
     if (objs.empty()) {
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
         static char buf[2048] = { 0 };
 
         for (int i = 0; i < objs.size(); i++) {
-            auto obj = objs[i];
+            auto& obj = objs[i];
 
             std::string output;
 

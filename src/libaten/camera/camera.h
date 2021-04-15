@@ -53,8 +53,8 @@ namespace AT_NAME {
      */
     class camera {
     public:
-        camera() {}
-        virtual ~camera() {}
+        camera() = default;
+        virtual ~camera() = default;
 
         /**
          * @brief Update transformed camera parmaters.

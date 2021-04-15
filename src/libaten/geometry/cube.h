@@ -12,7 +12,18 @@ namespace AT_NAME
         friend class TransformableFactory;
 
     private:
-        cube(const aten::vec3& center, real w, real h, real d, material* mtrl);
+        template <typename MTRL>
+        cube(const aten::vec3& center, real w, real h, real d, const MTRL& mtrl)
+            : aten::transformable(aten::GeometryType::Cube, mtrl)
+        {
+            m_param.center = center;
+            m_param.size = aten::vec3(w, h, d);
+
+            setBoundingBox(
+                aten::aabb(
+                    center - m_param.size * real(0.5),
+                    center + m_param.size * real(0.5)));
+        }
 
     public:
         virtual ~cube() {}

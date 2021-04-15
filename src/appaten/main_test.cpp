@@ -22,7 +22,7 @@ static aten::context g_ctxt;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static aten::envmap g_bg;
-static aten::texture* g_envmap;
+static std::shared_ptr<aten::texture> g_envmap;
 
 //static aten::RayTracing g_tracer;
 static aten::PathTracing g_tracer;
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
 
     g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     //g_envmap = aten::ImageLoader::load("../../asset/envmap/harbor.hdr");
-    g_bg.init(g_envmap);
+    g_bg.init(g_envmap.get());
 
     aten::ImageBasedLight ibl(&g_bg);
     // NOTE

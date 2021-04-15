@@ -110,9 +110,6 @@ namespace aten
 
             mtrl->edit(&paramExporter);
 
-            // Not use anymore...
-            delete mtrl;
-
             // TODO
             // texture...
 
@@ -125,18 +122,5 @@ namespace aten
         ret = (xmlRes == tinyxml2::XML_SUCCESS);
 
         return true;
-    }
-
-    bool MaterialExporter::exportMaterial(
-        const char* lpszOutFile,
-        const std::vector<aten::material*>& mtrls)
-    {
-        std::vector<MtrlExportInfo> mtrlInfos;
-
-        for (const auto mtrl : mtrls) {
-            mtrlInfos.push_back(MtrlExportInfo(mtrl->name(), mtrl->param()));
-        }
-
-        return exportMaterial(lpszOutFile, mtrlInfos);
     }
 }

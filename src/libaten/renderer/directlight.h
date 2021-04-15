@@ -25,7 +25,7 @@ namespace aten
             real pdfb{ 1 };
 
             hitrecord rec;
-            const material* prevMtrl{ nullptr };
+            std::shared_ptr<material> prevMtrl;
 
             aten::ray ray;
 

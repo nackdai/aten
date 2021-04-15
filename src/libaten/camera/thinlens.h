@@ -7,8 +7,8 @@
 namespace aten {
     class ThinLensCamera : public camera {
     public:
-        ThinLensCamera() {}
-        virtual ~ThinLensCamera() {}
+        ThinLensCamera() = default;
+        virtual ~ThinLensCamera() = default;
 
     public:
         void init(

@@ -18,6 +18,8 @@ namespace aten
         virtual ~transformable();
 
         transformable(GeometryType type);
+        transformable(GeometryType type, AT_NAME::material* mtrl);
+        transformable(GeometryType type, const std::shared_ptr<AT_NAME::material>& mtrl);
 
     public:
         virtual void getSamplePosNormalArea(
@@ -61,6 +63,11 @@ namespace aten
             return m_id;
         }
 
+        std::shared_ptr<AT_NAME::material>& getMaterial()
+        {
+            return mtrl_;
+        }
+
         virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
         {
             // Nothing is done...
@@ -76,6 +83,7 @@ namespace aten
         }
 
     protected:
+        std::shared_ptr<AT_NAME::material> mtrl_;
         int m_id{ -1 };
 
         GeomParameter m_param;

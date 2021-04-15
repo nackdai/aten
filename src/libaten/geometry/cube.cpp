@@ -2,19 +2,6 @@
 
 namespace AT_NAME
 {
-    cube::cube(const aten::vec3& center, real w, real h, real d, material* mtrl)
-        : aten::transformable(aten::GeometryType::Cube)
-    {
-        m_param.center = center;
-        m_param.size = aten::vec3(w, h, d);
-        m_param.mtrl.ptr = mtrl;
-
-        setBoundingBox(
-            aten::aabb(
-                center - m_param.size * real(0.5),
-                center + m_param.size * real(0.5)));
-    }
-
     cube::Face cube::findFace(const aten::vec3& d)
     {
         auto x = aten::abs(d.x);
@@ -68,7 +55,7 @@ namespace AT_NAME
             isect.face = findFace(dir);
 
             isect.objid = id();
-            isect.mtrlid = ((material*)m_param.mtrl.ptr)->id();
+            isect.mtrlid = mtrl_->id();
         }
 
         return isHit;

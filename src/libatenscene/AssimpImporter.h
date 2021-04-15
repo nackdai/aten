@@ -7,7 +7,7 @@ namespace aten
     class AssimpImporter {
     public:
         using FuncCreateMaterial = std::function<
-            aten::material* (
+            std::shared_ptr<aten::material> (
                 const std::string& name,
                 context& ctxt,
                 const MaterialParameter& mtrl_param,
@@ -16,7 +16,7 @@ namespace aten
 
         static bool load(
             const std::string& path,
-            std::vector<std::unique_ptr<aten::object>>& objs,
+            std::vector<std::shared_ptr<aten::object>>& objs,
             context& ctxt,
             FuncCreateMaterial func_create_mtrl);
 
@@ -31,7 +31,7 @@ namespace aten
 
         bool loadModel(
             const std::string& path,
-            std::vector<std::unique_ptr<aten::object>>& objs,
+            std::vector<std::shared_ptr<aten::object>>& objs,
             context& ctxt,
             FuncCreateMaterial func_create_mtrl);
 

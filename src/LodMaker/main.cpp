@@ -20,7 +20,7 @@ struct Options {
 
 static aten::RasterizeRenderer g_rasterizer;
 
-static aten::object* g_obj = nullptr;
+static std::shared_ptr<aten::object> g_obj;
 
 static aten::context g_ctxt;
 
@@ -148,7 +148,9 @@ void onRun(aten::window* window)
                     "lod.obj",
                     mtrlname,
                     g_lodVtx, g_lodIdx,
-                    g_mtrls);
+                    [&](uint32_t idx) {
+                        return g_mtrls[idx]->name();
+                    });
             }
         }
         else {
@@ -297,9 +299,9 @@ bool parseOption(
 }
 
 // TODO
-aten::object* loadObj(const Options& opt)
+std::shared_ptr<aten::object> loadObj(const Options& opt)
 {
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
 
     aten::ObjLoader::load(objs, opt.input, g_ctxt);
 
@@ -307,9 +309,7 @@ aten::object* loadObj(const Options& opt)
     // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
     AT_ASSERT(objs.size() == 1);
 
-    auto obj = objs[0];
-
-    return obj;
+    return std::move(objs[0]);
 }
 
 int main(int argc, char* argv[])

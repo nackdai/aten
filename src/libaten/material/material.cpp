@@ -66,17 +66,11 @@ namespace AT_NAME
         return (0 <= type && type < aten::MaterialType::MaterialTypeMax);
     }
 
-    void material::resetIdWhenAnyMaterialLeave(AT_NAME::material* mtrl)
-    {
-        mtrl->m_id = mtrl->m_listItem.currentIndex();
-    }
-
     material::material(
         aten::MaterialType type,
         const aten::MaterialAttribute& attrib)
         : m_param(type, attrib)
     {
-        m_listItem.init(this, resetIdWhenAnyMaterialLeave);
     }
 
     material::material(
@@ -88,8 +82,6 @@ namespace AT_NAME
         aten::texture* normalMap/*= nullptr*/)
         : material(type, attrib)
     {
-        m_listItem.init(this, resetIdWhenAnyMaterialLeave);
-
         m_param.baseColor = clr;
         m_param.ior = ior;
 
@@ -102,8 +94,6 @@ namespace AT_NAME
         aten::Values& val)
         : material(type, attrib)
     {
-        m_listItem.init(this, resetIdWhenAnyMaterialLeave);
-
         m_param.baseColor = val.get("baseColor", m_param.baseColor);
         m_param.ior = val.get("ior", m_param.ior);
 
@@ -121,11 +111,6 @@ namespace AT_NAME
         m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
         m_param.normalMap = normalMap ? normalMap->id() : -1;
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-    }
-
-    material::~material()
-    {
-        m_listItem.leave();
     }
 
     NPRMaterial::NPRMaterial(

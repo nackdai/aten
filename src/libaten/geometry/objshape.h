@@ -25,16 +25,16 @@ namespace AT_NAME
 
         void build(const aten::context& ctxt);
 
-        void setMaterial(material* mtrl)
+        void setMaterial(const std::shared_ptr<material>& mtrl)
         {
             m_mtrl = mtrl;
         }
 
-        const material* getMaterial() const
+        const std::shared_ptr<material>& getMaterial() const
         {
             return m_mtrl;
         }
-        material* getMaterial()
+        std::shared_ptr<material>& getMaterial()
         {
             return m_mtrl;
         }
@@ -61,7 +61,7 @@ namespace AT_NAME
         aten::aabb m_aabb;
 
     private:
-        material* m_mtrl{ nullptr };
+        std::shared_ptr<material> m_mtrl;
         std::vector<face*> faces;
 
         aten::GeomIndexBuffer m_ib;

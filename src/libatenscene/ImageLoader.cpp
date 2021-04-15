@@ -15,7 +15,7 @@ namespace aten {
         g_base = removeTailPathSeparator(base);
     }
 
-    texture* ImageLoader::load(
+    std::shared_ptr<texture> ImageLoader::load(
         const std::string& path,
         context& ctxt,
         ImgFormat fmt/*= ImgFormat::Fmt8Bit*/)
@@ -30,9 +30,7 @@ namespace aten {
             extname,
             filename);
 
-        auto tex = load(filename, path, ctxt, fmt);
-
-        return tex;
+        return load(filename, path, ctxt, fmt);
     }
 
     template <typename TYPE>
@@ -67,7 +65,7 @@ namespace aten {
         }
     }
 
-    texture* ImageLoader::load(
+    std::shared_ptr<texture> ImageLoader::load(
         const std::string& tag,
         const std::string& path,
         context& ctxt,
@@ -90,12 +88,14 @@ namespace aten {
 
         std::string texname = filename + extname;
 
-        texture* tex = AssetManager::getTex(tag);
+        auto& stored_tex = AssetManager::getTex(tag);
 
-        if (tex) {
+        if (stored_tex) {
             AT_PRINTF("There is same tag texture. [%s]\n", tag.c_str());
-            return tex;
+            return stored_tex;
         }
+
+        texture* tex = nullptr;
 
         real* dst = nullptr;
         int width = 0;
@@ -139,6 +139,7 @@ namespace aten {
         }
 
         if (tex) {
+            // Store as shared_ptr
             AssetManager::registerTex(tag, tex);
         }
         else {
@@ -147,6 +148,10 @@ namespace aten {
             return nullptr;
         }
 
-        return tex;
+        // Get as shared_ptr
+        auto& ret = AssetManager::getTex(tag);
+        AT_ASSERT(ret);
+
+        return ret;
     }
 }

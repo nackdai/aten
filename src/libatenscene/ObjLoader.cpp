@@ -16,35 +16,33 @@ namespace aten
         g_base = removeTailPathSeparator(base);
     }
 
-    object* ObjLoader::load(
+    std::shared_ptr<object> ObjLoader::load(
         const std::string& path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        std::vector<object*> objs;
+        std::vector<std::shared_ptr<object>> objs;
         load(objs, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
 
-        object* ret = (!objs.empty() ? objs[0] : nullptr);
-        return ret;
+        return (!objs.empty() ? objs[0] : nullptr);
     }
 
-    object* ObjLoader::load(
+    std::shared_ptr<object> ObjLoader::load(
         const std::string& tag,
         const std::string& path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        std::vector<object*> objs;
+        std::vector<std::shared_ptr<object>> objs;
         load(objs, tag, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
 
-        object* ret = (!objs.empty() ? objs[0] : nullptr);
-        return ret;
+        return (!objs.empty() ? objs[0] : nullptr);
     }
 
     void ObjLoader::load(
-        std::vector<object*>& objs,
+        std::vector<std::shared_ptr<object>>& objs,
         const std::string& path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
@@ -70,7 +68,7 @@ namespace aten
     }
 
     void ObjLoader::load(
-        std::vector<object*>& objs,
+        std::vector<std::shared_ptr<object>>& objs,
         const std::string& tag,
         const std::string& path,
         context& ctxt,
@@ -78,10 +76,10 @@ namespace aten
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        object* obj = AssetManager::getObj(tag);
-        if (obj) {
+        auto& asset_obj = AssetManager::getObj(tag);
+        if (asset_obj) {
             AT_PRINTF("There is same tag object. [%s]\n", tag.c_str());
-            objs.push_back(obj);
+            objs.push_back(asset_obj);
             return;
         }
 
@@ -108,7 +106,8 @@ namespace aten
             return;
         }
 
-        obj = aten::TransformableFactory::createObject(ctxt);
+        std::shared_ptr<object> obj(
+            aten::TransformableFactory::createObject(ctxt));
 
         vec3 shapemin = vec3(AT_MATH_INF);
         vec3 shapemax = vec3(-AT_MATH_INF);
@@ -242,23 +241,24 @@ namespace aten
                     if (dst_shape) {
                         // If the shape already exist.
 
-                        auto mtrl = dst_shape->getMaterial();
+                        auto& mtrl = dst_shape->getMaterial();
 
                         if (willSeparate) {
                             // Split the object if it has different materials
                             obj->appendShape(dst_shape);
                             obj->setBoundingBox(aten::aabb(pmin, pmax));
-                            objs.push_back(obj);
+                            objs.push_back(std::move(obj));
 
                             // Create new object for next steps after here.
-                            obj = aten::TransformableFactory::createObject(ctxt);
+                            obj.reset(aten::TransformableFactory::createObject(ctxt));
                         }
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             // Export the object which has an emissive material as the emissive object.
-                            auto emitobj = aten::TransformableFactory::createObject(ctxt);
+                            std::shared_ptr<object> emitobj(
+                                aten::TransformableFactory::createObject(ctxt));
                             emitobj->appendShape(dst_shape);
                             emitobj->setBoundingBox(aten::aabb(pmin, pmax));
-                            objs.push_back(emitobj);
+                            objs.push_back(std::move(emitobj));
                         }
                         else {
                             // When different material appear, register the shape to the object.
@@ -275,19 +275,22 @@ namespace aten
                         // Apply new materil to the shape.
                         const auto& mtrl = mtrls[prev_mtrl_idx];
 
-                        auto aten_mtrl = AssetManager::getMtrl(mtrl.name);
+                        auto& aten_mtrl = AssetManager::getMtrl(mtrl.name);
 
                         if (!aten_mtrl && callback_crate_mtrl) {
-                            aten_mtrl = callback_crate_mtrl(
-                                mtrl.name,
-                                ctxt,
-                                MaterialType::Lambert,
-                                aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
-                                mtrl.diffuse_texname,
-                                mtrl.bump_texname);
+                            std::shared_ptr<material> new_mtrl(
+                                callback_crate_mtrl(
+                                    mtrl.name,
+                                    ctxt,
+                                    MaterialType::Lambert,
+                                    aten::vec3(mtrl.diffuse[0], mtrl.diffuse[1], mtrl.diffuse[2]),
+                                    mtrl.diffuse_texname,
+                                    mtrl.bump_texname));
+                            dst_shape->setMaterial(new_mtrl);
                         }
-
-                        dst_shape->setMaterial(aten_mtrl);
+                        else {
+                            dst_shape->setMaterial(aten_mtrl);
+                        }
                     }
 
                     if (!dst_shape->getMaterial()) {
@@ -296,16 +299,16 @@ namespace aten
                         // Only lambertian.
                         const auto& objmtrl = mtrls[m];
 
-                        aten::material* mtrl = nullptr;
+                        std::shared_ptr<aten::material> mtrl;
 
                         if (callback_crate_mtrl) {
                             mtrl = callback_crate_mtrl(
-                                objmtrl.name,
-                                ctxt,
-                                MaterialType::Lambert,
-                                aten::vec3(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]),
-                                objmtrl.diffuse_texname,
-                                objmtrl.bump_texname);
+                                    objmtrl.name,
+                                    ctxt,
+                                    MaterialType::Lambert,
+                                    aten::vec3(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]),
+                                    objmtrl.diffuse_texname,
+                                    objmtrl.bump_texname);
                         }
                         else {
                             aten::vec3 diffuse(objmtrl.diffuse[0], objmtrl.diffuse[1], objmtrl.diffuse[2]);
@@ -315,21 +318,29 @@ namespace aten
 
                             // Albedo map.
                             if (!objmtrl.diffuse_texname.empty()) {
-                                albedoMap = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
+                                auto& tex = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
 
-                                if (!albedoMap) {
+                                if (tex) {
+                                    albedoMap = tex.get();
+                                }
+                                else {
                                     std::string texname = pathname + "/" + objmtrl.diffuse_texname;
-                                    albedoMap = aten::ImageLoader::load(texname, ctxt);
+                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt);
+                                    albedoMap = loaded_img.get();
                                 }
                             }
 
                             // Normal map.
                             if (!objmtrl.bump_texname.empty()) {
-                                normalMap = AssetManager::getTex(objmtrl.bump_texname.c_str());
+                                auto& tex = AssetManager::getTex(objmtrl.bump_texname.c_str());
 
-                                if (!normalMap) {
+                                if (tex) {
+                                    normalMap = tex.get();
+                                }
+                                else {
                                     std::string texname = pathname + "/" + objmtrl.bump_texname;
-                                    normalMap = aten::ImageLoader::load(texname, ctxt);
+                                    auto loaded_img = aten::ImageLoader::load(texname, ctxt);
+                                    normalMap = loaded_img.get();
                                 }
                             }
 
@@ -384,18 +395,21 @@ namespace aten
                     objs.push_back(obj);
 
                     if (p + 1 < shapes.size()) {
-                        obj = aten::TransformableFactory::createObject(ctxt);
+                        obj.reset(aten::TransformableFactory::createObject(ctxt));
                     }
                     else {
+                        // NOTE
+                        // https://stackoverflow.com/questions/16151550/c11-when-clearing-shared-ptr-should-i-use-reset-or-set-to-nullptr
                         obj = nullptr;
                     }
                 }
                 else if (mtrl->param().type == aten::MaterialType::Emissive) {
                     // Export the object which has an emissive material as the emissive object.
-                    auto emitobj = aten::TransformableFactory::createObject(ctxt);
+                    std::shared_ptr<object> emitobj(
+                        aten::TransformableFactory::createObject(ctxt));
                     emitobj->appendShape(dst_shape);
                     emitobj->setBoundingBox(aten::aabb(pmin, pmax));
-                    objs.push_back(emitobj);
+                    objs.push_back(std::move(emitobj));
                 }
                 else {
                     obj->appendShape(dst_shape);
@@ -407,10 +421,11 @@ namespace aten
             AT_ASSERT(obj);
 
             obj->setBoundingBox(aten::aabb(shapemin, shapemax));
-            objs.push_back(obj);
 
             // TODO
             AssetManager::registerObj(tag, obj);
+
+            objs.push_back(std::move(obj));
         }
 
         auto vtxNum = ctxt.getVertexNum();

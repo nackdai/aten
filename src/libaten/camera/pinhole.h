@@ -11,8 +11,8 @@ namespace AT_NAME {
      */
     class PinholeCamera : public camera {
     public:
-        PinholeCamera() {}
-        virtual ~PinholeCamera() {}
+        PinholeCamera() = default;
+        virtual ~PinholeCamera() = default;
 
         /**
          * @brief Initialize the camera.

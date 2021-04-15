@@ -6,8 +6,8 @@
 namespace aten {
     class CameraOperator {
     private:
-        CameraOperator();
-        ~CameraOperator();
+        CameraOperator() = delete;
+        ~CameraOperator() = delete;
 
     public:
         static void move(

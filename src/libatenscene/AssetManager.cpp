@@ -4,27 +4,70 @@
 
 namespace aten {
     struct Asset {
-        union {
-            texture* tex;
-            material* mtrl;
-            object* obj;
-        };
+        std::shared_ptr<texture> tex;
+        std::shared_ptr<material> mtrl;
+        std::shared_ptr<object> obj;
 
         AssetManager::AssetType type;
 
-        Asset()
+        Asset() = default;
+        ~Asset() = default;
+        Asset(texture* t)
+            : tex(t), type(AssetManager::AssetType::Texture) {}
+        Asset(material* m)
+            : mtrl(m), type(AssetManager::AssetType::Material) {}
+        Asset(object* o)
+            : obj(o), type(AssetManager::AssetType::Object) {}
+
+        Asset(const std::shared_ptr<material>& m)
+            : mtrl(m), type(AssetManager::AssetType::Material) {}
+        Asset(const std::shared_ptr<object>& o)
+            : obj(o), type(AssetManager::AssetType::Object) {}
+
+        Asset(const Asset& rhs) = delete;
+        Asset& operator=(const Asset& rhs) = delete;
+        Asset& operator=(Asset&& rhs) = delete;
+
+        Asset(Asset&& rhs)
         {
-            tex = nullptr;
+            type = rhs.type;
+
+            switch (type) {
+            case AssetManager::AssetType::Texture:
+                tex = std::move(rhs.tex);
+                break;
+            case AssetManager::AssetType::Material:
+                mtrl = std::move(rhs.mtrl);
+                break;
+            case AssetManager::AssetType::Object:
+                obj = std::move(rhs.obj);
+                break;
+            default:
+                AT_ASSERT(false);
+                break;
+            }
         }
-        Asset(texture* t) : tex(t), type(AssetManager::AssetType::Texture) {}
-        Asset(material* m) : mtrl(m), type(AssetManager::AssetType::Material) {}
-        Asset(object* o) : obj(o), type(AssetManager::AssetType::Object) {}
 
         bool operator==(const Asset& rhs) const
         {
-            // NOTE
-            // ポインタの比較なので、どれでもいい.
-            return tex == rhs.tex;
+            bool ret = false;
+
+            switch (type) {
+            case AssetManager::AssetType::Texture:
+                ret = tex == rhs.tex;
+                break;
+            case AssetManager::AssetType::Material:
+                ret = mtrl == rhs.mtrl;
+                break;
+            case AssetManager::AssetType::Object:
+                ret = obj == rhs.obj;
+                break;
+            default:
+                AT_ASSERT(false);
+                break;
+            }
+
+            return ret;
         }
     };
 
@@ -39,9 +82,10 @@ namespace aten {
         "Object",
     };
 
+    template <typename T>
     static bool registerAsset(
         const std::string& name,
-        const Asset& asset,
+        T* asset,
         AssetManager::AssetType type)
     {
         auto& mapAsset = g_assets[type];
@@ -52,12 +96,31 @@ namespace aten {
             return false;
         }
 
-        mapAsset.insert(std::pair<std::string, Asset>(name, asset));
+        mapAsset.insert(std::pair<std::string, Asset>(name, Asset(asset)));
 
         return true;
     }
 
-    static Asset& getAsset(
+    template <typename T>
+    static bool registerAsset(
+        const std::string& name,
+        const std::shared_ptr<T>& asset,
+        AssetManager::AssetType type)
+    {
+        auto& mapAsset = g_assets[type];
+
+        auto it = mapAsset.find(name);
+        if (it != mapAsset.end()) {
+            AT_PRINTF("Registered already [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
+            return false;
+        }
+
+        mapAsset.insert(std::pair<std::string, Asset>(name, Asset(asset)));
+
+        return true;
+    }
+
+    static const Asset& getAsset(
         const std::string& name,
         AssetManager::AssetType type)
     {
@@ -81,40 +144,27 @@ namespace aten {
         return asset;
     }
 
-    static bool removeAsset(
-        AssetManager::AssetType type,
-        const Asset& asset)
-    {
-        auto found = std::find_if(
-            g_assets[type].begin(),
-            g_assets[type].end(),
-            [&](std::pair<std::string, Asset> it)
-        {
-            return asset == it.second;
-        });
-
-        if (found != g_assets[type].end()) {
-            g_assets[type].erase(found);
-            return true;
-        }
-
-        return false;
-    }
-
     bool AssetManager::registerMtrl(const std::string& name, material* mtrl)
     {
         mtrl->setName(name.c_str());
 
-        return registerAsset(name, Asset(mtrl), AssetType::Material);
+        return registerAsset(name, mtrl, AssetType::Material);
     }
 
-    material* AssetManager::getMtrl(const std::string& name)
+    bool AssetManager::registerMtrl(const std::string& name, const std::shared_ptr<material>& mtrl)
+    {
+        mtrl->setName(name.c_str());
+
+        return registerAsset(name, mtrl, AssetType::Material);
+    }
+
+    const std::shared_ptr<material>& AssetManager::getMtrl(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Material);
         return asset.mtrl;
     }
 
-    material* AssetManager::getMtrlByIdx(uint32_t idx)
+    const std::shared_ptr<material>& AssetManager::getMtrlByIdx(uint32_t idx)
     {
         const auto& assets = g_assets[AssetType::Material];
         if (idx < assets.size()) {
@@ -131,80 +181,37 @@ namespace aten {
         }
     }
 
-    bool AssetManager::removeMtrl(material* mtrl)
-    {
-        return removeAsset(AssetManager::AssetType::Material, Asset(mtrl));
-    }
-
     bool AssetManager::registerTex(const std::string& name, texture* tex)
     {
-        return registerAsset(name, Asset(tex), AssetType::Texture);
+        return registerAsset(name, tex, AssetType::Texture);
     }
 
-    texture* AssetManager::getTex(const std::string& name)
+    const std::shared_ptr<texture>& AssetManager::getTex(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Texture);
         return asset.tex;
     }
 
-    bool AssetManager::removeTex(texture* tex)
-    {
-        return removeAsset(AssetManager::AssetType::Texture, Asset(tex));
-    }
-
     bool AssetManager::registerObj(const std::string& name, object* obj)
     {
-        return registerAsset(name, Asset(obj), AssetType::Object);
+        return registerAsset(name, obj, AssetType::Object);
     }
 
-    object* AssetManager::getObj(const std::string& name)
+    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<object>& obj)
+    {
+        return registerAsset(name, obj, AssetType::Object);
+    }
+
+    const std::shared_ptr<object>& AssetManager::getObj(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Object);
         return asset.obj;
-    }
-
-    bool AssetManager::removeObj(object* obj)
-    {
-        return removeAsset(AssetManager::AssetType::Object, Asset(obj));
     }
 
     uint32_t AssetManager::getAssetNum(AssetManager::AssetType type)
     {
         auto& assets = g_assets[type];
         return static_cast<uint32_t>(assets.size());
-    }
-
-    void AssetManager::removeAllMtrls()
-    {
-        auto& assets = g_assets[AssetManager::AssetType::Material];
-
-        for (auto it = assets.begin(); it != assets.end(); it++) {
-            auto mtrl = it->second.mtrl;
-            delete mtrl;
-            assets.erase(it);
-        }
-    }
-
-    void AssetManager::removeAllTextures()
-    {
-        auto& assets = g_assets[AssetManager::AssetType::Texture];
-
-        for (auto it = assets.begin(); it != assets.end(); it++) {
-            auto tex = it->second.tex;
-            delete tex;
-            assets.erase(it);
-        }
-    }
-
-    void AssetManager::removeAllObjs()
-    {
-        auto& assets = g_assets[AssetManager::AssetType::Object];
-
-        for (auto it = assets.begin(); it != assets.end(); it++) {
-            auto obj = it->second.obj;
-            delete obj;
-            assets.erase(it);
-        }
     }
 
     void AssetManager::suppressWarnings()

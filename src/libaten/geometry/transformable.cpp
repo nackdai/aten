@@ -18,6 +18,20 @@ namespace aten
         m_param.type = type;
     }
 
+    transformable::transformable(GeometryType type, material* mtrl)
+        : transformable()
+    {
+        mtrl_.reset(mtrl);
+        m_param.type = type;
+    }
+
+    transformable::transformable(GeometryType type, const std::shared_ptr<material>& mtrl)
+        : transformable()
+    {
+        mtrl_ = mtrl;
+        m_param.type = type;
+    }
+
     transformable::~transformable()
     {
         m_listItem.leave();

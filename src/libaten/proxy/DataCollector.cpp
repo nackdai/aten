@@ -41,8 +41,7 @@ namespace aten {
                 || type == GeometryType::Cube)
             {
                 auto param = s->getParam();
-                auto mtrl = reinterpret_cast<aten::material*>(param.mtrl.ptr);
-                param.mtrl.idx = mtrl->id();
+                param.mtrl.idx = s->getMaterial()->id();
                 shapeparams.push_back(param);
             }
         });

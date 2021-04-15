@@ -24,7 +24,7 @@ namespace aten
         return p;
     }
 
-    static inline real russianRoulette(const material* mtrl)
+    static inline real russianRoulette(const std::shared_ptr<material>& mtrl)
     {
         if (mtrl->isEmissive()) {
             return 1;
@@ -534,7 +534,7 @@ namespace aten
                         const vec3 from_new_orienting_normal = into ? curVtx.nml : -curVtx.nml;
 
                         auto sampling = refraction::check(
-                            curVtx.mtrl,
+                            curVtx.mtrl.get(),
                             intoCurVtxDir,
                             curVtx.nml,
                             from_new_orienting_normal);

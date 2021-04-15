@@ -220,7 +220,7 @@ namespace aten
 
         // Non-Photo-Real.
         if (mtrl->isNPR()) {
-            path.contrib = shadeNPR(ctxt, mtrl, path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
+            path.contrib = shadeNPR(ctxt, mtrl.get(), path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
             path.isTerminate = true;
             return false;
         }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string.h>
-#include <string>
 #include <map>
+#include <memory>
+#include <string>
 
 #include "types.h"
 #include "math/vec3.h"
@@ -15,20 +15,21 @@ namespace aten {
             int i;
             bool b;
             vec4 v;
-            void* p;
 
             _value() {}
             ~_value() {}
         };
 
         _value val;
+        std::shared_ptr<void> p;
 
         PolymorphicValue()
         {
         }
         PolymorphicValue(const PolymorphicValue& rhs)
         {
-            memcpy(&val, &rhs.val, sizeof(_value));
+            val = rhs.val;
+            p = rhs.p;
         }
         ~PolymorphicValue() {}
 
@@ -57,9 +58,17 @@ namespace aten {
             val.v = _v;
             return *this;
         }
-        PolymorphicValue& operator=(void* _p)
+        template <typename T>
+        PolymorphicValue& operator=(T* _p)
         {
-            val.p = _p;
+            p.reset();
+            p = std::shared_ptr<void>(_p);
+            return *this;
+        }
+        template <typename T>
+        PolymorphicValue& operator=(std::shared_ptr<T>& _p)
+        {
+            p = _p;
             return *this;
         }
 
@@ -85,14 +94,14 @@ namespace aten {
         }
         operator void*() const
         {
-            return val.p;
+            return p.get();
         }
 
         template <typename TYPE>
         TYPE getAs() const
         {
             AT_ASSERT(false);
-            return *(TYPE*)val.p;
+            return *(TYPE*)p.get();
         }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -141,7 +150,7 @@ namespace aten {
     template <>
     inline void* PolymorphicValue::getAs() const
     {
-        return val.p;
+        return p.get();
     }
 
     class Values : public std::map<std::string, PolymorphicValue> {

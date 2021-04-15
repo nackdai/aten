@@ -11,7 +11,7 @@ namespace aten
 {
     bool AssimpImporter::load(
         const std::string& path,
-        std::vector<std::unique_ptr<aten::object>>& objs,
+        std::vector<std::shared_ptr<aten::object>>& objs,
         context& ctxt,
         FuncCreateMaterial func_create_mtrl)
     {
@@ -50,10 +50,10 @@ namespace aten
         std::string mtrl_name(name.C_Str());
         AT_PRINTF("%s\n", mtrl_name.c_str());
 
-        auto mtrl = aten::AssetManager::getMtrl(mtrl_name);
-        if (mtrl) {
+        auto& stored_mtrl = aten::AssetManager::getMtrl(mtrl_name);
+        if (stored_mtrl) {
             // The specified material already exists
-            return std::move(std::string(mtrl->name()));
+            return std::move(std::string(stored_mtrl->name()));
         }
 
         MaterialParameter mtrl_param;
@@ -111,7 +111,7 @@ namespace aten
 
         AssetManager::registerMtrl(mtrl_name, mtrl);
 #else
-        mtrl = func_create_mtrl(mtrl_name, ctxt, mtrl_param, albedo_tex_name, normal_tex_name);
+        auto mtrl = func_create_mtrl(mtrl_name, ctxt, mtrl_param, albedo_tex_name, normal_tex_name);
         if (mtrl) {
             aten::AssetManager::registerMtrl(mtrl_name, mtrl);
             return std::move(mtrl_name);
@@ -123,7 +123,7 @@ namespace aten
 
     bool createObject(
         context& ctxt,
-        std::vector<std::unique_ptr<aten::object>>& objs,
+        std::vector<std::shared_ptr<aten::object>>& objs,
         const aiNode* assimp_node,
         const aiScene* assimp_scene,
         const std::vector<std::string>& mtrl_list)
@@ -301,7 +301,7 @@ namespace aten
 
     bool AssimpImporter::loadModel(
         const std::string& path,
-        std::vector<std::unique_ptr<aten::object>>& objs,
+        std::vector<std::shared_ptr<aten::object>>& objs,
         context& ctxt,
         FuncCreateMaterial func_create_mtrl)
     {

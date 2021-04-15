@@ -114,7 +114,7 @@ namespace aten {
     };
     //AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
 
-    const size_t LightParameter_float4_size = sizeof(LightParameter) / sizeof(aten::vec4);
+    static constexpr size_t LightParameter_float4_size = sizeof(LightParameter) / sizeof(aten::vec4);
 }
 
 namespace AT_NAME

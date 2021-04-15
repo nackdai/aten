@@ -19,7 +19,7 @@ static aten::context g_ctxt;
 
 static aten::RasterizeRenderer g_rasterizer;
 
-aten::object* g_obj = nullptr;
+std::shared_ptr<aten::object> g_obj;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -161,7 +161,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-aten::object* loadObj(
+decltype(auto) loadObj(
     const char* objpath,
     const char* mtrlpath)
 {
@@ -189,7 +189,7 @@ aten::object* loadObj(
         aten::AssetManager::registerMtrl("dummy", mtrl);
     }
 
-    std::vector<aten::object*> objs;
+    std::vector<std::shared_ptr<aten::object>> objs;
 
     aten::ObjLoader::load(objs, objpath, g_ctxt);
 
@@ -197,9 +197,7 @@ aten::object* loadObj(
     // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
     AT_ASSERT(objs.size() == 1);
 
-    auto obj = objs[0];
-
-    return obj;
+    return objs[0];
 }
 
 bool parseOption(

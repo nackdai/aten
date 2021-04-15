@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "aten.h"
 
 namespace aten {
@@ -21,7 +23,7 @@ namespace aten {
             const std::string& path,
             context& ctxt);
 
-        static material* create(
+        static std::shared_ptr<material> create(
             const std::string& type,
             context& ctxt,
             Values& values);

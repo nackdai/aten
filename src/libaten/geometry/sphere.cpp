@@ -11,19 +11,6 @@ namespace AT_NAME
         v = (phi + AT_MATH_PI_HALF) / AT_MATH_PI;
     }
 
-    sphere::sphere(const aten::vec3& center, real radius, material* mtrl)
-        : aten::transformable(aten::GeometryType::Sphere)
-    {
-        m_param.center = center;
-        m_param.radius = radius;
-        m_param.mtrl.ptr = mtrl;
-
-        auto _min = center - radius;
-        auto _max = center + radius;
-
-        setBoundingBox(aten::aabb(_min, _max));
-    }
-
     bool sphere::hit(
         const aten::context& ctxt,
         const aten::ray& r,
@@ -34,7 +21,7 @@ namespace AT_NAME
 
         if (isHit) {
             isect.objid = id();
-            isect.mtrlid = ((material*)m_param.mtrl.ptr)->id();
+            isect.mtrlid = mtrl_->id();
         }
 
         return isHit;

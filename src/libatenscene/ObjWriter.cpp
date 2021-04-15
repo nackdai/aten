@@ -88,12 +88,6 @@ static inline void writeFace(FILE* fp, const ObjFace& f)
     writeLineFeed(fp);
 }
 
-static inline void writeMaterrialTag(FILE* fp, const aten::material* mtrl)
-{
-    auto name = mtrl->name();
-    fprintf(fp, "usemtl %s\n", name);
-}
-
 static inline void replaceIndex(ObjVertex& v, int idx)
 {
     v.pos = v.pos >= 0 ? idx : -1;
@@ -106,10 +100,8 @@ bool ObjWriter::write(
     const std::string& mtrlPath,
     const std::vector<aten::vertex>& vertices,
     const std::vector<std::vector<int>>& indices,
-    const std::vector<aten::material*>& mtrls)
+    std::function<const char* (uint32_t)> func_get_mtrl_name)
 {
-    AT_ASSERT(mtrls.size() == indices.size());
-
     std::string mtrlPathName;
     std::string extname;
     std::string filename;
@@ -181,13 +173,15 @@ bool ObjWriter::write(
     for (uint32_t i = 0; i < triGroup.size(); i++) {
         const auto& tris = triGroup[i];
 
-        const auto mtrl = mtrls[i];
-
         // TODO
         // Write dummy group name...
         fprintf(fp, "g %d\n", i);
 
-        writeMaterrialTag(fp, mtrl);
+        auto mtrl_name = func_get_mtrl_name(i);
+
+        if (mtrl_name) {
+            fprintf(fp, "usemtl %s\n", mtrl_name);
+        }
 
         for (const auto& t : tris) {
             writeFace(fp, t);
@@ -247,23 +241,17 @@ bool ObjWriter::runOnThread(
     const std::string& mtrlPath,
     const std::vector<aten::vertex>& vertices,
     const std::vector<std::vector<int>>& indices,
-    const std::vector<aten::material*>& mtrls)
+    FuncGetMtrlName func_get_mtrl_name)
 {
     if (m_isRunning) {
         // Not finish yet.
         return false;
     }
 
-    if (m_param) {
-        delete m_param;
-        m_param = nullptr;
-    }
-    m_param = new WriteParams(funcFinish, path, mtrlPath, vertices, indices, mtrls);
-
     static std::vector<std::vector<int>> tmpIdx;
 
     if (!m_thread.isRunning()) {
-        m_thread.start([&](void* data) {
+        m_thread.start([&, funcFinish, path, mtrlPath, func_get_mtrl_name](void* data) {
             while (1) {
                 m_sema.wait();
 
@@ -272,14 +260,14 @@ bool ObjWriter::runOnThread(
                 }
 
                 write(
-                    m_param->path,
-                    m_param->mtrlPath,
-                    m_param->vertices,
-                    m_param->indices,
-                    m_param->mtrls);
+                    path,
+                    mtrlPath,
+                    vertices,
+                    indices,
+                    func_get_mtrl_name);
 
-                if (m_param->funcFinish) {
-                    m_param->funcFinish();
+                if (funcFinish) {
+                    funcFinish();
                 }
 
                 m_isRunning = false;
@@ -302,7 +290,4 @@ void ObjWriter::terminate()
     m_sema.notify();
 
     m_thread.join();
-
-    delete m_param;
-    m_param = nullptr;
 }

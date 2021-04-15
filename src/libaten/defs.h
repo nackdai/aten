@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <utility>
+#include <cstring>
 
 #include "types.h"
 
@@ -39,6 +40,7 @@ namespace aten {
 #include <time.h>
 #include <unistd.h>
 #include <utility>
+#include <cstring>
 
 #include "types.h"
 

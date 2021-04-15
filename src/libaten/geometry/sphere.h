@@ -13,7 +13,18 @@ namespace AT_NAME
         friend class TransformableFactory;
 
     private:
-        sphere(const aten::vec3& center, real radius, material* mtrl);
+        template <typename MTRL>
+        sphere(const aten::vec3& center, real radius, const MTRL& mtrl)
+            : aten::transformable(aten::GeometryType::Sphere, mtrl)
+        {
+            m_param.center = center;
+            m_param.radius = radius;
+
+            auto _min = center - radius;
+            auto _max = center + radius;
+
+            setBoundingBox(aten::aabb(_min, _max));
+        }
 
     public:
         virtual ~sphere() {}

@@ -5,7 +5,7 @@
 
 namespace aten {
     AccelType accelerator::s_internalType = AccelType::Bvh;
-    std::function<accelerator*()> accelerator::s_userDefsInternalAccelCreator = nullptr;
+    std::function<std::unique_ptr<accelerator>()> accelerator::s_userDefsInternalAccelCreator = nullptr;
 
     void accelerator::setInternalAccelType(AccelType type)
     {
@@ -17,16 +17,17 @@ namespace aten {
         return s_internalType;
     }
 
-    void accelerator::setUserDefsInternalAccelCreator(std::function<accelerator*()> creator)
+    void accelerator::setUserDefsInternalAccelCreator(
+        std::function<std::unique_ptr<accelerator>()> creator)
     {
         if (creator) {
             s_userDefsInternalAccelCreator = creator;
         }
     }
 
-    accelerator* accelerator::createAccelerator(AccelType type/*= AccelType::Default*/)
+    std::unique_ptr<accelerator> accelerator::createAccelerator(AccelType type/*= AccelType::Default*/)
     {
-        accelerator* ret = nullptr;
+        std::unique_ptr<accelerator> ret;
 
         type = (type == AccelType::Default ? s_internalType : type);
 
@@ -38,18 +39,18 @@ namespace aten {
         else {
             switch (type) {
             case AccelType::Sbvh:
-                ret = new sbvh();
+                ret = std::make_unique<sbvh>();
                 break;
             case AccelType::ThreadedBvh:
-                ret = new ThreadedBVH();
+                ret = std::make_unique<ThreadedBVH>();
                 break;
             default:
-                ret = new bvh();
+                ret = std::make_unique<bvh>();
                 AT_ASSERT(false);
                 break;
             }
         }
 
-        return ret;
+        return std::move(ret);
     }
 }

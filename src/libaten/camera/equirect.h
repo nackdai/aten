@@ -8,8 +8,8 @@
 namespace aten {
     class EquirectCamera : public camera {
     public:
-        EquirectCamera() {}
-        virtual ~EquirectCamera() {}
+        EquirectCamera() = default;
+        virtual ~EquirectCamera() = default;
 
         void init(
             vec3 origin, vec3 lookat, vec3 up,

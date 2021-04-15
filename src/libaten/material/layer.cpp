@@ -81,7 +81,7 @@ namespace AT_NAME
         }
     }
 
-    bool LayeredBSDF::add(material* mtrl)
+    bool LayeredBSDF::add(std::shared_ptr<material> mtrl)
     {
         // TODO
         // GPU側と処理を合わせるため、３層までにする.

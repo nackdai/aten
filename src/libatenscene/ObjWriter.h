@@ -13,12 +13,14 @@ public:
     ~ObjWriter() {}
 
 public:
+    using FuncGetMtrlName = std::function<const char* (uint32_t)>;
+
     static bool write(
         const std::string& path,
         const std::string& mtrlPath,
         const std::vector<aten::vertex>& vertices,
         const std::vector<std::vector<int>>& indices,
-        const std::vector<aten::material*>& mtrls);
+        FuncGetMtrlName func_get_mtrl_name);
 
     static bool writeMaterial(
         const aten::context& ctxt,
@@ -31,7 +33,7 @@ public:
         const std::string& mtrlPath,
         const std::vector<aten::vertex>& vertices,
         const std::vector<std::vector<int>>& indices,
-        const std::vector<aten::material*>& mtrls);
+        FuncGetMtrlName func_get_mtrl_name);
 
     void terminate();
 
@@ -41,32 +43,6 @@ public:
     }
 
 private:
-    struct WriteParams {
-        std::function<void()> funcFinish;
-
-        std::string path;
-        std::string mtrlPath;
-        const std::vector<aten::vertex>& vertices;
-        const std::vector<std::vector<int>>& indices;
-        const std::vector<aten::material*>& mtrls;
-
-        WriteParams(
-            std::function<void()> _func,
-            const std::string& _path,
-            const std::string& _mtrlPath,
-            const std::vector<aten::vertex>& _vertices,
-            const std::vector<std::vector<int>>& _indices,
-            const std::vector<aten::material*>& _mtrls)
-            : path(_path), vertices(_vertices), indices(_indices), mtrls(_mtrls)
-        {
-            funcFinish = _func;
-            path = _path;
-            mtrlPath = _mtrlPath;
-        }
-    };
-
-    WriteParams* m_param{ nullptr };
-
     aten::Thread m_thread;
     aten::Semaphore m_sema;
 

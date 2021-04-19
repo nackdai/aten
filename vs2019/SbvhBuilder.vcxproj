@@ -136,6 +136,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -155,6 +156,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -175,6 +177,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -197,6 +200,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -219,6 +223,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -241,6 +246,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -163,6 +163,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -182,6 +183,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -203,6 +205,7 @@ copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -225,6 +228,7 @@ copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjecDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -247,6 +251,7 @@ copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -270,6 +275,7 @@ copy /B /Y "$(FBXSDK_LIB)\x64\$(Configuration)\*.dll" $(OutputPath)</Command>
       <AdditionalIncludeDirectories>$(ProjectDir)../src/libaten;$(ProjectDir)../src/libatenscene;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\NvTriStrip\include;$(ProjectDir)..\3rdparty\tinyxml2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <DisableSpecificWarnings>4996;4819</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

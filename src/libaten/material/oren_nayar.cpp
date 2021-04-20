@@ -45,7 +45,7 @@ namespace AT_NAME {
         aten::sampler* sampler)
     {
         auto dir = lambert::sampleDirection(normal, sampler);
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
@@ -54,7 +54,7 @@ namespace AT_NAME {
         real u, real v,
         aten::sampler* sampler) const
     {
-        return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     inline AT_DEVICE_MTRL_API aten::vec3 computeBsdf(
@@ -151,7 +151,7 @@ namespace AT_NAME {
             wo,
             u, v);
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
@@ -175,7 +175,7 @@ namespace AT_NAME {
             wo,
             u, v);
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
@@ -184,7 +184,7 @@ namespace AT_NAME {
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API void OrenNayar::sample(
@@ -238,7 +238,7 @@ namespace AT_NAME {
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     bool OrenNayar::edit(aten::IMaterialParamEditor* editor)

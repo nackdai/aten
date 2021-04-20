@@ -45,7 +45,7 @@ namespace AT_NAME
 
         aten::vec3 dir = sampleDirection(roughness.r, param->ior, normal, wi, sampler);
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::sampleDirection(
@@ -54,7 +54,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler) const
     {
-        return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
@@ -76,7 +76,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
@@ -99,7 +99,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
@@ -108,7 +108,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API real MicrofacetRefraction::pdf(
@@ -176,7 +176,7 @@ namespace AT_NAME
         auto NdotI = dot(nml, in);
 
         if (NdotI == 0) {
-            return std::move(aten::vec3(0));
+            return aten::vec3(0);
         }
 
         bool into = (NdotI >= real(0));
@@ -206,14 +206,14 @@ namespace AT_NAME
         const auto d = 1 - eta * eta * aten::cmpMax(real(0), 1 - c * c);
 
         if (d <= 0) {
-            return std::move(aten::vec3(0));
+            return aten::vec3(0);
         }
 
         const auto t = (eta * c - aten::sqrt(d));
         auto wo = t * m - eta * in;
         wo = normalize(wo);
 
-        return std::move(wo);
+        return wo;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
@@ -235,7 +235,7 @@ namespace AT_NAME
 
         if (NdotI * NdotO >= 0) {
             // Incomling ray and Outgoing ray are same direction.
-            return std::move(aten::vec3(0));
+            return aten::vec3(0);
         }
 
         bool into = (NdotI >= real(0));
@@ -297,7 +297,7 @@ namespace AT_NAME
 
         fresnel = F;
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API void MicrofacetRefraction::sample(
@@ -384,7 +384,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     bool MicrofacetRefraction::edit(aten::IMaterialParamEditor* editor)

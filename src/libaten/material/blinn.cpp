@@ -107,7 +107,7 @@ namespace AT_NAME
         // Therefore, below code is a little bit different -(minus) position.
         auto dir = wi + 2 * dot(-wi, wh) * wh;
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::sampleDirection(
@@ -117,7 +117,7 @@ namespace AT_NAME
         aten::sampler* sampler) const
     {
         auto dir = sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
@@ -138,7 +138,7 @@ namespace AT_NAME
             aten::vec4(real(1)));
 
         auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
@@ -157,7 +157,7 @@ namespace AT_NAME
         albedo *= externalAlbedo;
 
         auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
@@ -167,7 +167,7 @@ namespace AT_NAME
         real u, real v) const
     {
         auto ret = bsdf(&m_param, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
@@ -246,7 +246,7 @@ namespace AT_NAME
 
         fresnel = F;
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API void MicrofacetBlinn::sample(
@@ -342,7 +342,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     bool MicrofacetBlinn::edit(aten::IMaterialParamEditor* editor)

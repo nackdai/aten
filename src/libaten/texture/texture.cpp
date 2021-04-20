@@ -9,18 +9,7 @@
 
 namespace aten
 {
-    void texture::resetIdWhenAnyTextureLeave(aten::texture* tex)
-    {
-        tex->m_id = tex->m_listItem.currentIndex();
-    }
-
-    texture::texture()
-    {
-        m_listItem.init(this, resetIdWhenAnyTextureLeave);
-    }
-
     texture::texture(uint32_t width, uint32_t height, uint32_t channels, const char* name/*= nullptr*/)
-        : texture()
     {
         init(width, height, channels);
         if (name) {
@@ -30,14 +19,13 @@ namespace aten
 
     texture::~texture()
     {
-        m_listItem.leave();
-
         releaseAsGLTexture();
     }
 
-    texture* texture::create(uint32_t width, uint32_t height, uint32_t channels, const char* name)
+    std::shared_ptr<texture> texture::create(
+        uint32_t width, uint32_t height, uint32_t channels, const char* name)
     {
-        texture* ret = new texture(width, height, channels, name);
+        auto ret = std::make_shared<texture>(width, height, channels, name);
         AT_ASSERT(ret);
 
         return ret;

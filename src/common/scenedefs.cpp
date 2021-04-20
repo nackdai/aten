@@ -1,20 +1,20 @@
 #include "scenedefs.h"
 
-static aten::instance<aten::object>* g_movableObj = nullptr;
-static aten::instance<aten::deformable>* s_deformMdl = nullptr;
-static aten::DeformAnimation* s_deformAnm = nullptr;
+static std::shared_ptr<aten::instance<aten::object>> g_movableObj;
+static std::shared_ptr<aten::instance<aten::deformable>> s_deformMdl;
+static std::shared_ptr<aten::DeformAnimation> s_deformAnm;
 
-aten::instance<aten::object>* getMovableObj()
+std::shared_ptr<aten::instance<aten::object>> getMovableObj()
 {
     return g_movableObj;
 }
 
-aten::instance<aten::deformable>* getDeformable()
+std::shared_ptr<aten::instance<aten::deformable>> getDeformable()
 {
     return s_deformMdl;
 }
 
-aten::DeformAnimation* getDeformAnm()
+std::shared_ptr<aten::DeformAnimation> getDeformAnm()
 {
     return s_deformAnm;
 }
@@ -217,9 +217,9 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(glass);
 
 #if 1
-    aten::Light* l = new aten::AreaLight(light, emit->color());
+    auto l = std::make_shared<aten::AreaLight>(light, emit->color());
 #else
-    aten::Light* l = new aten::AreaLight(glass, emit->color());
+    auto l = std::make_shared<aten::AreaLight>(glass, emit->color());
 #endif
 
     scene->addLight(l);
@@ -427,7 +427,12 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(floor);
     scene->add(green);
 
-    aten::Light* l = new aten::PointLight(aten::vec3(50.0, 90.0, 81.6), aten::vec3(36.0, 36.0, 36.0), 0, 0.1, 0);
+    auto l = std::make_shared<aten::PointLight>(
+        aten::vec3(50.0, 90.0, 81.6),
+        aten::vec3(36.0, 36.0, 36.0),
+        real(0),
+        real(0.1),
+        real(0));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
     scene->addLight(l);
@@ -474,7 +479,7 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(floor);
     scene->add(green);
 
-    aten::Light* l = new aten::DirectionalLight(aten::vec3(1, -1, 1), aten::vec3(36.0, 36.0, 36.0));
+    auto l = std::make_shared<aten::DirectionalLight>(aten::vec3(1, -1, 1), aten::vec3(36.0, 36.0, 36.0));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
     scene->addLight(l);
@@ -520,14 +525,14 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(green);
     scene->add(red);
 
-    aten::Light* l = new aten::SpotLight(
+    auto l = std::make_shared<aten::SpotLight>(
         aten::vec3(65, 90, 20),
         aten::vec3(0, -1, 0),
         aten::vec3(36.0, 36.0, 36.0),
-        0, 0.1, 0,
-        Deg2Rad(30),
-        Deg2Rad(60),
-        1);
+        real(0), real(0.1), real(0),
+        real(Deg2Rad(30)),
+        real(Deg2Rad(60)),
+        real(1));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
     scene->addLight(l);
@@ -609,17 +614,20 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(4, 1, 0), 1.0, createMaterial(ctxt, aten::MaterialType::Specular, aten::vec3(0.7, 0.6, 0.5)));
     scene->add(s);
 
-    aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
-    aten::Light* point = new aten::PointLight(aten::vec3(0, 10, -1), aten::vec3(0.0, 0.0, 1.0), 0, 0.5, 0.02);
-    aten::Light* spot = new aten::SpotLight(
+    auto dir = std::make_shared<aten::DirectionalLight>(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
+    auto point = std::make_shared<aten::PointLight>(
+        aten::vec3(0, 10, -1),
+        aten::vec3(0.0, 0.0, 1.0),
+        real(0), real(0.5), real(0.02));
+    auto spot = std::make_shared<aten::SpotLight>(
         aten::vec3(0, 5, 0),
         aten::vec3(0, -1, 0),
         //aten::vec3(0.2, 0.2, 0.2),
         aten::vec3(0.0, 1.0, 0.0),
-        0, 0.1, 0,
-        Deg2Rad(30),
-        Deg2Rad(60),
-        1);
+        real(0), real(0.1), real(0),
+        real(Deg2Rad(30)),
+        real(Deg2Rad(60)),
+        real(1));
 
     scene->addLight(dir);
     scene->addLight(spot);
@@ -832,7 +840,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(glass);
 #endif
 
-    aten::Light* l = new aten::AreaLight(light, emit->color());
+    auto l = std::make_shared<aten::AreaLight>(light, emit->color());
 
     scene->addLight(l);
 #endif
@@ -958,8 +966,8 @@ void LayeredMaterialTestScene::getCameraPosAndAt(
 
 void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    aten::Light* l = new aten::DirectionalLight(aten::vec3(1, -1, -1), aten::vec3(36.0, 36.0, 36.0));
-    auto toonmtrl = new aten::toon(aten::vec3(0.25, 0.75, 0.25), l);
+    auto l = std::make_shared<aten::DirectionalLight>(aten::vec3(1, -1, -1), aten::vec3(36.0, 36.0, 36.0));
+    auto toonmtrl = std::make_shared<aten::toon>(aten::vec3(0.25, 0.75, 0.25), l);
 
     toonmtrl->setComputeToonShadeFunc([](real c)->real {
         real ret = 1;
@@ -1088,7 +1096,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     g_movableObj = light;
 
-    auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
     scene->addLight(areaLight);
 
     for (int i = 1; i < objs.size(); i++) {
@@ -1199,7 +1207,7 @@ void DeformScene::makeScene(
     aten::context& ctxt,
     aten::scene* scene)
 {
-    aten::deformable* mdl = aten::TransformableFactory::createDeformable(ctxt);
+    auto mdl = aten::TransformableFactory::createDeformable(ctxt);
     mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
     aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
@@ -1212,7 +1220,7 @@ void DeformScene::makeScene(
 
     aten::ImageLoader::setBasePath("./");
 
-    s_deformAnm = new aten::DeformAnimation();
+    s_deformAnm = std::make_shared<aten::DeformAnimation>();
     s_deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
 }
 
@@ -1268,7 +1276,7 @@ void DeformInBoxScene::makeScene(
             aten::vec3(1));
         scene->add(light);
 
-        auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+        auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
         scene->addLight(areaLight);
 
         auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[1], aten::mat4::Identity);
@@ -1277,7 +1285,7 @@ void DeformInBoxScene::makeScene(
 #endif
 
     {
-        aten::deformable* mdl = aten::TransformableFactory::createDeformable(ctxt);
+        auto mdl = aten::TransformableFactory::createDeformable(ctxt);
         mdl->read("../../asset/converted_unitychan/unitychan_gpu.mdl");
 
         aten::ImageLoader::setBasePath("../../asset/unitychan/Texture");
@@ -1290,7 +1298,7 @@ void DeformInBoxScene::makeScene(
 
         aten::ImageLoader::setBasePath("./");
 
-        s_deformAnm = new aten::DeformAnimation();
+        s_deformAnm = std::make_shared<aten::DeformAnimation>();
         s_deformAnm->read("../../asset/converted_unitychan/unitychan_WAIT00.anm");
     }
 }
@@ -1360,7 +1368,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
 
     g_movableObj = light;
 
-    auto areaLight = new aten::AreaLight(light, emit->param().baseColor);
+    auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
     scene->addLight(areaLight);
 
     for (int i = 1; i < objs.size(); i++) {

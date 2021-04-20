@@ -32,11 +32,11 @@ namespace aten
                 assimp_mtrl->GetTexture(texture_type, 0, &assimp_string);
                 std::string str(assimp_string.data);
 
-                return std::move(str);
+                return str;
             }
         }
 
-        return std::move(std::string());
+        return std::string();
     }
 
     const std::string createMaterial(
@@ -53,7 +53,7 @@ namespace aten
         auto& stored_mtrl = aten::AssetManager::getMtrl(mtrl_name);
         if (stored_mtrl) {
             // The specified material already exists
-            return std::move(std::string(stored_mtrl->name()));
+            return std::string(stored_mtrl->name());
         }
 
         MaterialParameter mtrl_param;
@@ -114,10 +114,10 @@ namespace aten
         auto mtrl = func_create_mtrl(mtrl_name, ctxt, mtrl_param, albedo_tex_name, normal_tex_name);
         if (mtrl) {
             aten::AssetManager::registerMtrl(mtrl_name, mtrl);
-            return std::move(mtrl_name);
+            return mtrl_name;
         }
 
-        return std::move(std::string());
+        return std::string();
 #endif
     }
 
@@ -144,8 +144,8 @@ namespace aten
                 transform_mtx.d1, transform_mtx.d2, transform_mtx.d3, transform_mtx.d4
             );
 
-            std::unique_ptr<aten::object> obj(aten::TransformableFactory::createObject(ctxt));
-            auto shape = std::make_unique<aten::objshape>();
+            auto obj = aten::TransformableFactory::createObject(ctxt);
+            auto shape = std::make_shared<aten::objshape>();
 
             aten::vec3 obj_min(AT_MATH_INF);
             aten::vec3 obj_max(-AT_MATH_INF);
@@ -272,17 +272,14 @@ namespace aten
 
                 if (mtrl->param().type == aten::MaterialType::Emissive) {
                     // Export the object which has an emissive material as the emissive object.
-                    std::unique_ptr<decltype(obj)::element_type> emit_obj(
-                        std::move(aten::TransformableFactory::createObject(ctxt)));
-                    emit_obj->appendShape(shape.get());
+                    auto emit_obj = aten::TransformableFactory::createObject(ctxt);
+                    emit_obj->appendShape(shape);
                     emit_obj->setBoundingBox(aten::aabb(aabb_min, aabb_max));
                     objs.push_back(std::move(emit_obj));
                 }
                 else {
-                    obj->appendShape(shape.get());
+                    obj->appendShape(shape);
                 }
-
-                shape.release();
             }
 
             obj->setBoundingBox(aten::aabb(obj_min, obj_max));

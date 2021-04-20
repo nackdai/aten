@@ -12,7 +12,7 @@ namespace AT_NAME
     class sphere : public aten::geom<aten::transformable> {
         friend class TransformableFactory;
 
-    private:
+    public:
         template <typename MTRL>
         sphere(const aten::vec3& center, real radius, const MTRL& mtrl)
             : aten::transformable(aten::GeometryType::Sphere, mtrl)
@@ -26,7 +26,6 @@ namespace AT_NAME
             setBoundingBox(aten::aabb(_min, _max));
         }
 
-    public:
         virtual ~sphere() {}
 
     public:

@@ -69,7 +69,6 @@ cuda_add_library(
   ../libaten/camera/pinhole.cpp
   ../libaten/light/arealight.cpp
   ../libaten/light/ibl.cpp
-  ../libaten/light/light.cpp
   ../libaten/material/beckman.cpp
   ../libaten/material/blinn.cpp
   ../libaten/material/ggx.cpp

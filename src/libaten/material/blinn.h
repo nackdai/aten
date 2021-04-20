@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class MicrofacetBlinn : public material {
@@ -19,11 +23,7 @@ namespace AT_NAME
             m_param.shininess = shininess;
         }
 
-        MicrofacetBlinn(aten::Values& val)
-            : material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, val)
-        {
-            m_param.shininess = val.get("shininess", m_param.shininess);
-        }
+        MicrofacetBlinn(aten::Values& val);
 
         virtual ~MicrofacetBlinn() {}
 

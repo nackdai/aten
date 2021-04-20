@@ -41,10 +41,10 @@ namespace aten
             real u{ real(0) };
             real v{ real(0) };
 
-            const hitable* obj{ nullptr };
+            std::shared_ptr<hitable> obj;
             std::shared_ptr<material> mtrl;
 
-            aten::Light* light{ nullptr };
+            std::shared_ptr<aten::Light> light;
 
             Vertex(
                 const vec3& p,
@@ -54,8 +54,8 @@ namespace aten
                 real _totalAreapdf,
                 const vec3& th,
                 const vec3& _bsdf,
-                const hitable* _obj,
-                const std::shared_ptr<material>& _mtrl,
+                const std::shared_ptr<hitable> _obj,
+                const std::shared_ptr<material> _mtrl,
                 real _u, real _v)
                 : pos(p), nml(_nml), orienting_normal(_orienting_normal), objType(type), totalAreaPdf(_totalAreapdf), throughput(th),
                 bsdf(_bsdf), obj(_obj), mtrl(_mtrl), u(_u), v(_v)
@@ -69,7 +69,7 @@ namespace aten
                 real _totalAreapdf,
                 const vec3& th,
                 const vec3& _bsdf,
-                aten::Light* _light)
+                std::shared_ptr<aten::Light> _light)
                 : pos(p), nml(_nml), orienting_normal(_orienting_normal), objType(type), totalAreaPdf(_totalAreapdf), throughput(th),
                 bsdf(_bsdf), light(_light)
             {}
@@ -101,7 +101,7 @@ namespace aten
         Result genLightPath(
             const context& ctxt,
             std::vector<Vertex>& vs,
-            aten::Light* light,
+            std::shared_ptr<aten::Light> light,
             sampler* sampler,
             scene* scene,
             camera* camera) const;

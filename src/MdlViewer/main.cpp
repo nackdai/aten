@@ -19,7 +19,7 @@ struct Options {
 
 static idaten::Skinning skinning;
 
-static aten::deformable* g_mdl{ nullptr };
+static std::shared_ptr<aten::deformable> g_mdl;
 static aten::DeformAnimation g_anm;
 
 static aten::DeformableRenderer g_renderer;
@@ -72,7 +72,7 @@ void onRun(aten::window* window)
         skinning.compute(aabbMin, aabbMax);
     }
 
-    g_renderer.render(g_ctxt, &g_camera, g_mdl);
+    g_renderer.render(g_ctxt, &g_camera, g_mdl.get());
 
     if (g_willTakeScreenShot)
     {
@@ -345,7 +345,6 @@ int main(int argc, char* argv[])
     aten::window::run();
 
     g_mdl->release();
-    delete g_mdl;
 
     aten::window::terminate();
 

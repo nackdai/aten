@@ -37,10 +37,10 @@ public:
     ~Lbvh() {}
 
 public:
-    static accelerator* create()
+    static std::shared_ptr<accelerator> create()
     {
-        auto ret = new Lbvh();
-        return ret;
+        auto ret = std::make_shared<Lbvh>();
+        return std::reinterpret_pointer_cast<accelerator>(ret);
     }
 
     virtual void build(
@@ -136,7 +136,7 @@ void update(int frame)
         if (anm) {
             aten::mat4 mtxL2W;
             mtxL2W.asScale(0.01);
-            mdl->update(mtxL2W, g_timeline.getTime(), anm);
+            mdl->update(mtxL2W, g_timeline.getTime(), anm.get());
         }
         else {
             mdl->update(aten::mat4(), 0, nullptr);
@@ -583,11 +583,12 @@ int main()
 
 #ifdef ENABLE_ENVMAP
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-    aten::envmap bg;
-    bg.init(envmap);
-    aten::ImageBasedLight ibl(&bg);
+    auto bg = std::make_shared<aten::envmap>();
+    bg->init(envmap);
 
-    g_scene.addImageBasedLight(&ibl);
+    auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
+
+    g_scene.addImageBasedLight(ibl);
 #endif
 
     uint32_t advanceVtxNum = 0;
@@ -665,7 +666,7 @@ int main()
 #ifdef ENABLE_ENVMAP
         for (auto& l : lightparams) {
             if (l.type == aten::LightType::IBL) {
-                l.envmap.idx = envmap->id();
+                l.idx = envmap->id();
             }
         }
 #endif
@@ -687,7 +688,7 @@ int main()
             mtxs,
             tex,
 #ifdef ENABLE_ENVMAP
-            idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+            idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
 #else
             idaten::EnvmapResource());
 #endif

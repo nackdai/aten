@@ -17,15 +17,15 @@ namespace aten {
             const char* vsPath, const char* fsPath,
             const char* finalVsPath, const char* finalFsPath);
 
-        texture* getNormalMap()
+        std::shared_ptr<texture> getNormalMap()
         {
             return m_normal;
         }
-        texture* getPositionMap()
+        std::shared_ptr<texture> getPositionMap()
         {
             return m_pos;
         }
-        texture* getAlbedoMap()
+        std::shared_ptr<texture> getAlbedoMap()
         {
             return m_albedo;
         }
@@ -77,9 +77,9 @@ namespace aten {
 
         static const int ITER = 5;
 
-        texture* m_pos{ nullptr };
-        texture* m_normal{ nullptr };
-        texture* m_albedo{ nullptr };
+        std::shared_ptr<texture> m_pos;
+        std::shared_ptr<texture> m_normal;
+        std::shared_ptr<texture> m_albedo;
 
         ATrousPass m_pass[ITER];
         ATrousFinalPass m_final;

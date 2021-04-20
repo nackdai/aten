@@ -89,7 +89,7 @@ namespace aten {
             v.val.v[i] = a[i].get<double>();
         }
 
-        return std::move(v);
+        return v;
     }
 
     template <>
@@ -97,7 +97,7 @@ namespace aten {
     {
         aten::PolymorphicValue v;
         v.val.f = val.get<double>();
-        return std::move(v);
+        return v;
     }
 
     template <>
@@ -120,7 +120,7 @@ namespace aten {
         aten::PolymorphicValue v;
         v.val.p = tex;
 
-        return std::move(v);
+        return v;
     }
 
     using GetValueFromFile = std::function<aten::PolymorphicValue(picojson::value&)>;
@@ -136,26 +136,29 @@ namespace aten {
     template <>
     aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
-        aten::PolymorphicValue v;
+        aten::PolymorphicValue val;
 
         std::string text(e->GetText());
 
         std::vector<std::string> values;
         int num = split(text, values, ' ');
 
+        aten::vec4 v;
         for (int i = 0; i < std::min<int>(num, 3); i++) {
-            v.val.v[i] = (real)atof(values[i].c_str());
+            v[i] = (real)atof(values[i].c_str());
         }
 
-        return std::move(v);
+        val = v;
+
+        return val;
     }
 
     template <>
     aten::PolymorphicValue getValue<real>(const tinyxml2::XMLElement* e, aten::context& ctxt)
     {
         aten::PolymorphicValue v;
-        v.val.f = (real)e->DoubleText();
-        return std::move(v);
+        v = (real)e->DoubleText();
+        return v;
     }
 
     template <>
@@ -178,7 +181,7 @@ namespace aten {
         aten::PolymorphicValue v;
         v = tex;
 
-        return std::move(v);
+        return v;
     }
 
     using GetValueFromFile = std::function<aten::PolymorphicValue(const tinyxml2::XMLElement*, aten::context&)>;
@@ -466,6 +469,6 @@ namespace aten {
             }
         }
 
-        return std::move(mtrl);
+        return mtrl;
     }
 }

@@ -15,11 +15,10 @@ namespace AT_NAME
     class face : public aten::hitable {
         friend class context;
 
-    private:
-        face();
-        virtual ~face();
-
     public:
+        face() = default;
+        virtual ~face() {}
+
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
@@ -78,22 +77,17 @@ namespace AT_NAME
         }
 
     private:
-        static void resetIdWhenAnyTriangleLeave(AT_NAME::face* tri);
-
-        static face* create(
+        static std::shared_ptr<face> create(
             const aten::context& ctxt,
             const aten::PrimitiveParamter& param);
 
-        void addToDataList(aten::DataList<AT_NAME::face>& list)
+        void updateIndex(int id)
         {
-            list.add(&m_listItem);
-            m_id = m_listItem.currentIndex();
+            m_id = id;
         }
 
     private:
         aten::PrimitiveParamter param;
         int m_id{ -1 };
-
-        aten::DataList<AT_NAME::face>::ListItem m_listItem;
     };
 }

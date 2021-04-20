@@ -49,7 +49,7 @@ namespace AT_NAME
         auto reflect = wi - 2 * dot(nml, wi) * nml;
         reflect = normalize(reflect);
 
-        return std::move(reflect);
+        return reflect;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 refraction::sampleDirection(
@@ -58,7 +58,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler) const
     {
-        return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
@@ -76,7 +76,7 @@ namespace AT_NAME
             u, v,
             aten::vec4(real(1)));
 
-        return std::move(albedo);
+        return albedo;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
@@ -92,7 +92,7 @@ namespace AT_NAME
         aten::vec3 albedo = param->baseColor;
         albedo *= externalAlbedo;
 
-        return std::move(albedo);
+        return albedo;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 refraction::bsdf(
@@ -101,7 +101,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     MaterialSampling refraction::sample(
@@ -124,7 +124,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API void refraction::sample(
@@ -280,7 +280,7 @@ namespace AT_NAME
         const aten::vec3& orienting_normal)
     {
         if (!mtrl->isSingular() || !mtrl->isTranslucent()) {
-            return std::move(RefractionSampling(false, real(0), real(0)));
+            return RefractionSampling(false, real(0), real(0));
         }
 
         // レイが入射してくる側の物体の屈折率.
@@ -306,7 +306,7 @@ namespace AT_NAME
         aten::vec3 albedo = mtrl->color();
 
         if (cos_t_2 < real(0)) {
-            return std::move(RefractionSampling(false, real(1), real(0)));
+            return RefractionSampling(false, real(1), real(0));
         }
 
         aten::vec3 n = into ? normal : -normal;
@@ -337,11 +337,11 @@ namespace AT_NAME
         const refraction* refr = reinterpret_cast<const refraction*>(mtrl);
 
         if (refr->isIdealRefraction()) {
-            return std::move(RefractionSampling(true, real(0), real(1), true));
+            return RefractionSampling(true, real(0), real(1), true);
         }
         else {
             auto prob = 0.25 + 0.5 * Re;
-            return std::move(RefractionSampling(true, real(prob), real(1 - prob)));
+            return RefractionSampling(true, real(prob), real(1 - prob));
         }
     }
 

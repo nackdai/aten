@@ -24,7 +24,7 @@ namespace aten
         return p;
     }
 
-    static inline real russianRoulette(const std::shared_ptr<material>& mtrl)
+    static inline real russianRoulette(const std::shared_ptr<material> mtrl)
     {
         if (mtrl->isEmissive()) {
             return 1;
@@ -180,7 +180,7 @@ namespace aten
                 vec3 emit = mtrl->color();
                 vec3 contrib = throughput * emit / totalAreaPdf;
 
-                return std::move(Result(contrib, x, y, true));
+                return Result(contrib, x, y, true);
             }
 
             auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v);
@@ -224,13 +224,13 @@ namespace aten
             depth++;
         }
 
-        return std::move(Result(vec3(), -1, -1, false));
+        return Result(vec3(), -1, -1, false);
     }
 
     BDPT::Result BDPT::genLightPath(
         const context& ctxt,
         std::vector<Vertex>& vs,
-        aten::Light* light,
+        std::shared_ptr<aten::Light> light,
         sampler* sampler,
         scene* scene,
         camera* camera) const
@@ -348,7 +348,7 @@ namespace aten
 
                     const vec3 contrib = throughput * W_dash / totalAreaPdf;
 
-                    return std::move(Result(contrib, pixelx, pixely, true));
+                    return Result(contrib, pixelx, pixely, true);
                 }
             }
 
@@ -439,7 +439,7 @@ namespace aten
             depth++;
         }
 
-        return std::move(Result(vec3(), -1, -1, false));
+        return Result(vec3(), -1, -1, false);
     }
 
     // 頂点fromから頂点nextをサンプリングしたとするとき、面積測度に関するサンプリング確率密度を計算する.

@@ -78,7 +78,7 @@ namespace aten
 
                             hitrecord tmpRec;
 
-                            if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                            if (scene->hitLight(ctxt, light.get(), posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                                 path.visibility = 1;
                             }
                         }
@@ -114,7 +114,7 @@ namespace aten
             depth++;
         }
 
-        return std::move(path);
+        return path;
     }
 
     void AOVRenderer::onRender(

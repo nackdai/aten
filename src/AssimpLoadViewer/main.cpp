@@ -231,7 +231,7 @@ std::shared_ptr<aten::object> loadObj(
     // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
     AT_ASSERT(objs.size() == 1);
 
-    return std::move(objs[0]);
+    return objs[0];
 }
 
 bool parseOption(

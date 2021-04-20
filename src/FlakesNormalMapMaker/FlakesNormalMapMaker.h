@@ -43,9 +43,9 @@ namespace aten {
             }
         };
 
-        static Parameter getParameter()
+        static const Parameter& getParameter()
         {
-            return std::move(s_param);
+            return s_param;
         }
         static void setParemter(const Parameter& param)
         {

@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class refraction : public material {
@@ -18,11 +22,7 @@ namespace AT_NAME
             m_param.isIdealRefraction = isIdealRefraction;
         }
 
-        refraction(aten::Values& val)
-            : material(aten::MaterialType::Refraction, MaterialAttributeRefraction, val)
-        {
-            m_param.isIdealRefraction = val.get("isIdealRefraction", m_param.isIdealRefraction);
-        }
+        refraction(aten::Values& val);
 
         virtual ~refraction() {}
 

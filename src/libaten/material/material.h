@@ -4,12 +4,15 @@
 #include "math/vec3.h"
 #include "sampler/sampler.h"
 #include "texture/texture.h"
-#include "misc/value.h"
 #include "math/ray.h"
 #include "misc/datalist.h"
 
 namespace AT_NAME {
     class Light;
+}
+
+namespace aten {
+    class Values;
 }
 
 namespace aten
@@ -508,7 +511,7 @@ namespace AT_NAME
     protected:
         NPRMaterial(
             aten::MaterialType type,
-            const aten::vec3& e, AT_NAME::Light* light);
+            const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light);
 
         NPRMaterial(aten::MaterialType type, aten::Values& val)
             : material(type, MaterialAttributeNPR, val)
@@ -526,16 +529,16 @@ namespace AT_NAME
             return real(1);
         }
 
-        void setTargetLight(AT_NAME::Light* light);
+        void setTargetLight(std::shared_ptr<AT_NAME::Light> light);
 
-        const AT_NAME::Light* getTargetLight() const;
+        const std::shared_ptr<AT_NAME::Light> getTargetLight() const;
 
         virtual aten::vec3 bsdf(
             real cosShadow,
             real u, real v) const = 0;
 
     private:
-        AT_NAME::Light* m_targetLight{ nullptr };
+        std::shared_ptr<AT_NAME::Light> m_targetLight;
     };
 
 

@@ -24,7 +24,7 @@ namespace aten {
             ret.x = nextSample();
             ret.y = nextSample();
 
-            return std::move(ret);
+            return ret;
         }
     };
 #endif

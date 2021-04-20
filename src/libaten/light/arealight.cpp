@@ -7,7 +7,7 @@ namespace AT_NAME {
         aten::sampler* sampler) const
     {
         bool isHit = false;
-        auto obj = getLightObject();
+        const auto& obj = getLightObject();
 
         aten::LightSampleResult result;
 
@@ -62,7 +62,7 @@ namespace AT_NAME {
             }
 
             if (isHit) {
-                aten::hitable::evalHitResultForAreaLight(ctxt, obj, r, rec, isect);
+                aten::hitable::evalHitResultForAreaLight(ctxt, obj.get(), r, rec, isect);
 
                 sample(
                     &rec,
@@ -71,10 +71,10 @@ namespace AT_NAME {
                     sampler,
                     &result);
 
-                result.obj = m_obj;
+                result.obj = m_obj.get();
             }
         }
 
-        return std::move(result);
+        return result;
     }
 }

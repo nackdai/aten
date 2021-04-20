@@ -15,15 +15,13 @@ namespace AT_NAME
     class object : public aten::transformable {
         friend class TransformableFactory;
 
-    private:
+    public:
         object()
             : transformable(aten::GeometryType::Polygon)
         {}
 
-    public:
         virtual ~object();
 
-    public:
         virtual bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
@@ -85,9 +83,10 @@ namespace AT_NAME
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 
-        void appendShape(objshape* shape)
+        void appendShape(const std::shared_ptr<objshape> shape)
         {
-            m_shapes.push_back(std::shared_ptr<objshape>(shape));
+            AT_ASSERT(shape);
+            m_shapes.push_back(shape);
         }
 
         uint32_t getShapeNum() const

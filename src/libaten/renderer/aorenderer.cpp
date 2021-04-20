@@ -43,7 +43,7 @@ namespace aten
             shadeMiss(path);
         }
 
-        return std::move(path);
+        return path;
     }
 
     bool AORenderer::shade(

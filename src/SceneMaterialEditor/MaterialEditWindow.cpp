@@ -142,11 +142,12 @@ void MaterialEditWindow::buildScene()
         aten::ImageLoader::setBasePath("./");
 
         auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", s_ctxt);
-        aten::envmap bg;
-        bg.init(envmap.get());
-        aten::ImageBasedLight ibl(&bg);
+        auto bg = std::make_shared<aten::envmap>();
+        bg->init(envmap);
 
-        s_scene.addImageBasedLight(&ibl);
+        auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
+
+        s_scene.addImageBasedLight(ibl);
 
         {
             std::vector<aten::GeomParameter> shapeparams;
@@ -180,7 +181,7 @@ void MaterialEditWindow::buildScene()
 
             for (auto& l : lightparams) {
                 if (l.type == aten::LightType::IBL) {
-                    l.envmap.idx = envmap->id();
+                    l.idx = envmap->id();
                 }
             }
 
@@ -200,7 +201,7 @@ void MaterialEditWindow::buildScene()
                 vtxparams, 0,
                 mtxs,
                 tex,
-                idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+                idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
         }
     }
 

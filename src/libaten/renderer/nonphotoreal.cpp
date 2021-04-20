@@ -33,13 +33,13 @@ namespace aten
 
             hitrecord tmpRec;
 
-            if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+            if (scene->hitLight(ctxt, light.get(), posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                 cosShadow = dot(normal, dirToLight);
             }
         }
 
         auto ret = nprMtrl->bsdf(cosShadow, u, v);
 
-        return std::move(ret);
+        return ret;
     }
 }

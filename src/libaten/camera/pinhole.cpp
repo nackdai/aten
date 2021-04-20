@@ -56,7 +56,7 @@ namespace AT_NAME {
     {
         CameraSampleResult result;
         sample(&result, &m_param, s, t);
-        return std::move(result);
+        return result;
     }
 
     AT_DEVICE_API void PinholeCamera::sample(

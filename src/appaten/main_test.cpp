@@ -21,7 +21,7 @@ static aten::AcceleratedScene<aten::sbvh> g_scene;
 static aten::context g_ctxt;
 
 static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
-static aten::envmap g_bg;
+static std::shared_ptr<aten::envmap> g_bg;
 static std::shared_ptr<aten::texture> g_envmap;
 
 //static aten::RayTracing g_tracer;
@@ -261,12 +261,15 @@ int main(int argc, char* argv[])
 
     g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     //g_envmap = aten::ImageLoader::load("../../asset/envmap/harbor.hdr");
-    g_bg.init(g_envmap.get());
+    g_bg = std::make_shared<aten::envmap>();
+    g_bg->init(g_envmap);
 
-    aten::ImageBasedLight ibl(&g_bg);
-    // NOTE
-    // BDPT doesn't support IBL yet.
-    g_scene.addImageBasedLight(&ibl);
+    if constexpr (!std::is_same<decltype(g_tracer), aten::BDPT>::value) {
+        auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
+        // NOTE
+        // BDPT doesn't support IBL yet.
+        g_scene.addImageBasedLight(ibl);
+    }
 
 #if 0
     // Experimental

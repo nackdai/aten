@@ -22,15 +22,13 @@ namespace aten
         friend class DeformableRenderer;
         friend class TransformableFactory;
 
-    private:
+    public:
         deformable()
             : transformable(aten::GeometryType::Polygon)
         {}
 
-    public:
         ~deformable() = default;
 
-    public:
         bool read(const char* path);
 
         void initGLResources(shader* shd);

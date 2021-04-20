@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class MicrofacetGGX : public material {
@@ -22,15 +26,7 @@ namespace AT_NAME
             m_param.roughness = aten::clamp<real>(roughness, 0, 1);
         }
 
-        MicrofacetGGX(aten::Values& val)
-            : material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, val)
-        {
-            m_param.roughness = val.get("roughness", m_param.roughness);
-            m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
-
-            auto roughnessMap = (aten::texture*)val.get("roughnessmap", nullptr);
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-        }
+        MicrofacetGGX(aten::Values& val);
 
         virtual ~MicrofacetGGX() {}
 

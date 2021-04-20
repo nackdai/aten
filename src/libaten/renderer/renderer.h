@@ -66,7 +66,7 @@ namespace aten
             if (m_bg) {
                 return m_bg->sample(inRay);
             }
-            return std::move(vec3());
+            return vec3();
         }
 
         bool hasBG() const

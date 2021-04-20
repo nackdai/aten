@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     // NOTE
@@ -24,10 +28,7 @@ namespace AT_NAME
         {
         }
 
-        MicrofacetRefraction(aten::Values& val)
-            : material(aten::MaterialType::Microfacet_Refraction, MaterialAttributeRefraction, val)
-        {
-        }
+        MicrofacetRefraction(aten::Values& val);
 
     public:
         static AT_DEVICE_MTRL_API real pdf(

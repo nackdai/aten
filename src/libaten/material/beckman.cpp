@@ -39,7 +39,7 @@ namespace AT_NAME
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
         aten::vec3 dir = sampleDirection(roughness.r, wi, normal, sampler);
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
@@ -49,7 +49,7 @@ namespace AT_NAME
         aten::sampler* sampler) const
     {
         auto dir = sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
@@ -68,7 +68,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
@@ -88,7 +88,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
@@ -98,7 +98,7 @@ namespace AT_NAME
         real u, real v) const
     {
         auto ret = bsdf(&m_param, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     static AT_DEVICE_MTRL_API real sampleBeckman_D(
@@ -189,7 +189,7 @@ namespace AT_NAME
 
         auto dir = in - real(2) * dot(in, w) * w;
 
-        return std::move(dir);
+        return dir;
     }
 
     static AT_DEVICE_MTRL_API real sampleBeckman_G(
@@ -275,7 +275,7 @@ namespace AT_NAME
 
         fresnel = F;
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API void MicrofacetBeckman::sample(
@@ -360,7 +360,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     bool MicrofacetBeckman::edit(aten::IMaterialParamEditor* editor)

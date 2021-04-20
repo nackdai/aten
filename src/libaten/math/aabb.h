@@ -41,7 +41,7 @@ namespace aten {
         AT_DEVICE_API vec3 size() const
         {
             vec3 size = m_max - m_min;
-            return std::move(size);
+            return size;
         }
 
         AT_DEVICE_API bool hit(
@@ -223,7 +223,7 @@ namespace aten {
         vec3 getCenter() const
         {
             vec3 center = (m_min + m_max) * real(0.5);
-            return std::move(center);
+            return center;
         }
 
         static vec3 computeFaceSurfaceArea(
@@ -234,7 +234,7 @@ namespace aten {
             auto dy = aten::abs(vMax.y - vMin.y);
             auto dz = aten::abs(vMax.z - vMin.z);
 
-            return std::move(vec3(dy * dz, dz * dx, dx * dy));
+            return vec3(dy * dz, dz * dx, dx * dy);
         }
 
         vec3 computeFaceSurfaceArea() const
@@ -326,7 +326,7 @@ namespace aten {
 
             aabb _aabb(_min, _max);
 
-            return std::move(_aabb);
+            return _aabb;
         }
 
         static aabb transform(const aabb& box, const aten::mat4& mtxL2W)
@@ -365,7 +365,7 @@ namespace aten {
 
             aabb ret(newMin + center, newMax + center);
 
-            return std::move(ret);
+            return ret;
         }
 
     private:

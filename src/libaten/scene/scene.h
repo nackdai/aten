@@ -20,7 +20,7 @@ namespace AT_NAME {
         virtual void build(const aten::context& ctxt)
         {}
 
-        void add(aten::hitable* s)
+        void add(const std::shared_ptr<aten::hitable> s)
         {
             m_list.push_back(s);
         }
@@ -43,12 +43,12 @@ namespace AT_NAME {
             return hit(ctxt, r, t_min, t_max, false, rec, isect);
         }
 
-        void addLight(Light* l)
+        void addLight(const std::shared_ptr<Light> l)
         {
             m_lights.push_back(l);
         }
 
-        void addImageBasedLight(ImageBasedLight* l)
+        void addImageBasedLight(const std::shared_ptr<ImageBasedLight> l)
         {
             if (m_ibl != l) {
                 m_ibl = l;
@@ -64,18 +64,18 @@ namespace AT_NAME {
             return (uint32_t)m_lights.size();
         }
 
-        const Light* getLight(uint32_t i) const
+        const std::shared_ptr<Light> getLight(uint32_t i) const
         {
             return m_lights[i];
         }
 
         // TODO
-        Light* getLight(uint32_t i)
+        std::shared_ptr<Light> getLight(uint32_t i)
         {
             return m_lights[i];
         }
 
-        ImageBasedLight* getIBL()
+        std::shared_ptr<ImageBasedLight> getIBL()
         {
             return m_ibl;
         }
@@ -160,7 +160,7 @@ namespace AT_NAME {
 #endif
         }
 
-        Light* sampleLight(
+        std::shared_ptr<Light> sampleLight(
             const aten::context& ctxt,
             const aten::vec3& org,
             const aten::vec3& nml,
@@ -168,7 +168,7 @@ namespace AT_NAME {
             real& selectPdf,
             aten::LightSampleResult& sampleRes);
 
-        Light* sampleLight(
+        std::shared_ptr<Light> sampleLight(
             const aten::context& ctxt,
             const aten::vec3& org,
             const aten::vec3& nml,
@@ -179,13 +179,13 @@ namespace AT_NAME {
 
         void drawForGBuffer(
             aten::hitable::FuncPreDraw func,
-            std::function<bool(aten::hitable*)> funcIfDraw,
+            std::function<bool(std::shared_ptr<aten::hitable>)> funcIfDraw,
             const aten::context& ctxt) const;
 
     protected:
-        std::vector<aten::hitable*> m_list;
+        std::vector<std::shared_ptr<aten::hitable>> m_list;
 
-        std::vector<Light*> m_lights;
-        ImageBasedLight* m_ibl{ nullptr };
+        std::vector<std::shared_ptr<Light>> m_lights;
+        std::shared_ptr<ImageBasedLight> m_ibl;
     };
 }

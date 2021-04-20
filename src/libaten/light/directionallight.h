@@ -2,6 +2,10 @@
 
 #include "light/light.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME {
     class DirectionalLight : public Light {
     public:
@@ -17,9 +21,7 @@ namespace AT_NAME {
             m_param.le = le;
         }
 
-        DirectionalLight(aten::Values& val)
-            : Light(aten::LightType::Direction, LightAttributeDirectional, val)
-        {}
+        DirectionalLight(aten::Values& val);
 
         virtual ~DirectionalLight() {}
 
@@ -31,7 +33,7 @@ namespace AT_NAME {
         {
             aten::LightSampleResult result;
             sample(&m_param, org, sampler, &result);
-            return std::move(result);
+            return result;
         }
 
         static AT_DEVICE_API void sample(

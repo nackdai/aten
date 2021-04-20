@@ -55,7 +55,7 @@ namespace AT_NAME
         }
     }
 
-    void objshape::addFace(face* f)
+    void objshape::addFace(const std::shared_ptr<face> f)
     {
         const auto& faceParam = f->getParam();
 
@@ -95,13 +95,13 @@ namespace AT_NAME
     {
         if (func) {
             int albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
-            const aten::texture* albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
+            const auto albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 
             auto color = m_mtrl ? m_mtrl->param().baseColor : vec3(1);
 
             auto mtrlid = m_mtrl ? m_mtrl->id() : -1;
 
-            func(color, albedo, mtrlid);
+            func(color, albedo.get(), mtrlid);
         }
 
         const auto& vb = ctxt.getVB();

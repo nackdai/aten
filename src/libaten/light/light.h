@@ -1,21 +1,24 @@
 #pragma once
 
-#include "scene/hitable.h"
 #include "math/vec3.h"
 #include "sampler/sampler.h"
-#include "misc/value.h"
+#include "scene/hitable.h"
+
+namespace aten {
+    class Values;
+}
 
 namespace aten {
     struct LightSampleResult {
-        vec3 pos;                    // light position.
-        vec3 dir;                    // light direction from the position.
-        vec3 nml;                    // light object surface normal.
+        vec3 pos;                   // light position.
+        vec3 dir;                   // light direction from the position.
+        vec3 nml;                   // light object surface normal.
         vec3 le;                    // light color.
         vec3 finalColor;            // le * intensity
-        real intensity{ real(1) };    // light intensity(include attenuation).
+        real intensity{ real(1) };  // light intensity(include attenuation).
         real pdf{ real(0) };        // light sampling pdf.
 
-        void* obj{ nullptr };    // light object(only for area light)
+        void* obj{ nullptr };       // light object(only for area light)
     };
 
     struct LightAttribute {
@@ -75,14 +78,11 @@ namespace aten {
 
             struct{
                 int objid;
-                UnionIdxPtr envmap;
+                int idx;
             };
         };
 
-        AT_DEVICE_API LightParameter()
-        {
-            envmap.ptr = nullptr;
-        }
+        AT_DEVICE_API LightParameter() {}
 
         AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
             : attrib(_attrib), type(_type)
@@ -96,7 +96,7 @@ namespace aten {
             falloff = real(0);
 
             objid = -1;
-            envmap.ptr = nullptr;
+            idx = -1;
         }
 
         AT_DEVICE_API LightParameter(const LightParameter& rhs)
@@ -109,7 +109,7 @@ namespace aten {
             v1 = rhs.v1;
 
             objid = rhs.objid;
-            envmap = rhs.envmap;
+            idx = rhs.idx;
         }
     };
     //AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
@@ -121,10 +121,12 @@ namespace AT_NAME
 {
     class Light {
     protected:
-        Light(aten::LightType type, const aten::LightAttribute& attrib);
-        Light(aten::LightType type, const aten::LightAttribute& attrib, aten::Values& val);
+        Light(aten::LightType type, const aten::LightAttribute& attrib)
+            : m_param(type, attrib)
+        {}
+        Light(aten::LightType type, const aten::LightAttribute& attrib, const aten::Values& val);
 
-        virtual ~Light();
+        virtual ~Light() {}
 
     public:
         void setPos(const aten::vec3& pos)
@@ -168,7 +170,7 @@ namespace AT_NAME
             const aten::vec3& nml,
             aten::sampler* sampler) const
         {
-            return std::move(sample(ctxt, org, sampler));
+            return sample(ctxt, org, sampler);
         }
 
         bool isSingular() const
@@ -186,7 +188,7 @@ namespace AT_NAME
             return m_param.attrib.isIBL;
         }
 
-        virtual const aten::hitable* getLightObject() const
+        virtual const std::shared_ptr<aten::hitable> getLightObject() const
         {
             return nullptr;
         }

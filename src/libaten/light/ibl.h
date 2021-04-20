@@ -1,9 +1,14 @@
 #pragma once
 
 #include <vector>
+
 #include "light/light.h"
-#include "renderer/envmap.h"
 #include "misc/color.h"
+#include "renderer/envmap.h"
+
+namespace aten {
+    class Values;
+}
 
 namespace AT_NAME {
     class ImageBasedLight : public Light {
@@ -11,38 +16,29 @@ namespace AT_NAME {
         ImageBasedLight()
             : Light(aten::LightType::IBL, LightAttributeIBL)
         {}
-        ImageBasedLight(AT_NAME::envmap* envmap)
+        ImageBasedLight(const std::shared_ptr<AT_NAME::envmap> envmap)
             : Light(aten::LightType::IBL, LightAttributeIBL)
         {
             setEnvMap(envmap);
         }
 
-        ImageBasedLight(aten::Values& val)
-            : Light(aten::LightType::IBL, LightAttributeIBL, val)
-        {
-            aten::texture* tex = (aten::texture*)val.get("envmap", nullptr);
-
-            AT_NAME::envmap* bg = new AT_NAME::envmap();
-            bg->init(tex);
-
-            setEnvMap(bg);
-        }
+        ImageBasedLight(aten::Values& val);
 
         virtual ~ImageBasedLight() {}
 
     public:
-        void setEnvMap(AT_NAME::envmap* envmap)
+        void setEnvMap(const std::shared_ptr<AT_NAME::envmap> envmap)
         {
-            if (m_param.envmap.ptr != envmap) {
-                m_param.envmap.ptr = envmap;
+            if (m_envmap != envmap) {
+                m_envmap = envmap;
 
                 preCompute();
             }
         }
 
-        const AT_NAME::envmap* getEnvMap() const
+        const std::shared_ptr<AT_NAME::envmap> getEnvMap() const
         {
-            return (AT_NAME::envmap*)m_param.envmap.ptr;
+            return m_envmap;
         }
 
         real samplePdf(const aten::ray& r) const;
@@ -71,7 +67,7 @@ namespace AT_NAME {
             aten::sampler* sampler) const override final
         {
             AT_ASSERT(false);
-            return std::move(aten::LightSampleResult());
+            return aten::LightSampleResult();
         }
 
         virtual aten::LightSampleResult sample(
@@ -84,6 +80,8 @@ namespace AT_NAME {
         void preCompute();
 
     private:
+        std::shared_ptr<envmap> m_envmap;
+
         real m_avgIllum{ real(0) };
 
         // v方向のcdf(cumulative distribution function = 累積分布関数 = sum of pdf).

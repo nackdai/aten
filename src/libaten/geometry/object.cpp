@@ -40,7 +40,9 @@ namespace AT_NAME
             m_param.area += s->param.area;
             m_triangles += (uint32_t)s->faces.size();
 
-            tmp.insert(tmp.end(), s->faces.begin(), s->faces.end());
+            for (const auto f : s->faces) {
+                tmp.push_back(f.get());
+            }
 
             aabb::merge(bbox, s->m_aabb);
         }
@@ -252,7 +254,7 @@ namespace AT_NAME
             auto& shape = m_shapes[i];
 
             for (auto face : shape->faces) {
-                tris[i].push_back(face);
+                tris[i].push_back(face.get());
             }
 
             mtrls.push_back(shape->m_mtrl.get());

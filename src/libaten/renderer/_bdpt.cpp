@@ -148,7 +148,7 @@ namespace aten
 			depth++;
 		}
 
-		return std::move(contrib);
+		return ontrib;
 	}
 
 	BDPT::Result BDPT::genEyePath(
@@ -192,7 +192,7 @@ namespace aten
 			res.y = y;
 		}
 
-		return std::move(res);
+		return res;
 	}
 
 	BDPT::Result BDPT::genLightPath(
@@ -274,7 +274,7 @@ namespace aten
 			lightRes.y = endLight.y;
 		}
 
-		return std::move(lightRes);
+		return lightRes;
 	}
 
 	bool BDPT::isConnectable(

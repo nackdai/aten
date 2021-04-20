@@ -90,7 +90,7 @@ namespace aten
             }
         }
 
-        return std::move(result);
+        return result;;
     }
 
     bvhnode* bvh::traverse(

@@ -6,6 +6,8 @@
 
 namespace aten
 {
+    class Values;
+
     class MaterialFactory {
     private:
         MaterialFactory() = delete;

@@ -1,9 +1,9 @@
 #include "aten.h"
 #include "atenscene.h"
 
-aten::instance<aten::object>* getMovableObj();
-aten::instance<aten::deformable>* getDeformable();
-aten::DeformAnimation* getDeformAnm();
+std::shared_ptr<aten::instance<aten::object>> getMovableObj();
+std::shared_ptr<aten::instance<aten::deformable>> getDeformable();
+std::shared_ptr<aten::DeformAnimation> getDeformAnm();
 
 class CornellBoxScene {
 public:

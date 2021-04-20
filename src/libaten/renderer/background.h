@@ -26,12 +26,12 @@ namespace aten
     public:
         virtual vec3 sample(const ray& inRay) const override final
         {
-            return std::move(m_color);
+            return m_color;
         }
 
         virtual vec3 sample(real u, real v) const override final
         {
-            return std::move(m_color);
+            return m_color;
         }
 
     private:

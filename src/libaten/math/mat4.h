@@ -84,7 +84,7 @@ namespace aten {
             ret.m10 = -m10; ret.m11 = -m11; ret.m12 = -m12; ret.m13 = -m13;
             ret.m20 = -m20; ret.m21 = -m21; ret.m22 = -m22; ret.m23 = -m23;
             ret.m30 = -m30; ret.m31 = -m31; ret.m32 = -m32; ret.m33 = -m33;
-            return std::move(ret);
+            return ret;
         }
 
         inline AT_DEVICE_API real* operator[](int i)
@@ -155,7 +155,7 @@ namespace aten {
             ret.z = v[2].x * p.x + v[2].y * p.y + v[2].z * p.z + v[2].w * p.w;
             ret.w = v[3].x * p.x + v[3].y * p.y + v[3].z * p.z + v[3].w * p.w;
 
-            return std::move(ret);
+            return ret;
         }
 
         inline AT_DEVICE_API vec3 apply(const vec3& p) const
@@ -177,7 +177,7 @@ namespace aten {
             ret.z = v[2].x * p.x + v[2].y * p.y + v[2].z * p.z + v[2].w;
 #endif
 
-            return std::move(ret);
+            return ret;
         }
         inline AT_DEVICE_API vec3 applyXYZ(const vec3& p) const
         {
@@ -196,7 +196,7 @@ namespace aten {
             ret.z = v[2].x * p.x + v[2].y * p.y + v[2].z * p.z;
 #endif
 
-            return std::move(ret);
+            return ret;
         }
 
         inline ray applyRay(const ray& r) const
@@ -210,7 +210,7 @@ namespace aten {
 
             ray transformdRay(org, dir);
 
-            return std::move(transformdRay);
+            return transformdRay;
         }
 
         mat4& invert();
@@ -337,51 +337,51 @@ namespace aten {
     {
         mat4 ret = m1;
         ret += m2;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API mat4 operator-(const mat4& m1, const mat4& m2)
     {
         mat4 ret = m1;
         ret -= m2;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API mat4 operator*(const mat4& m1, const mat4& m2)
     {
         mat4 ret = m1;
         ret *= m2;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator*(const mat4& m, const vec3 v)
     {
         vec3 ret = m.apply(v);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator*(const mat4& m, const vec4 v)
     {
         vec4 ret = m.apply(v);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API mat4 operator*(real t, const mat4& m)
     {
         mat4 ret = m;
         ret *= t;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API mat4 operator*(const mat4& m, real t)
     {
         mat4 ret = t * m;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API mat4 operator/(const mat4& m, real t)
     {
         mat4 ret = m * (1 / t);
-        return std::move(ret);
+        return ret;
     }
 }

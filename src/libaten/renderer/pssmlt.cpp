@@ -188,7 +188,7 @@ namespace aten
         retPath.isTerminate = path.isTerminate;
         retPath.weight = 1 / (1 / weight);
 
-        return std::move(retPath);
+        return retPath;
     }
 
     void PSSMLT::onRender(

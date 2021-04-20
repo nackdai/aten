@@ -104,61 +104,61 @@ namespace aten {
     inline AT_DEVICE_API vec3 operator+(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator+(const vec3& v1, real f)
     {
         vec3 ret = aten::vec3(v1.x + f, v1.y + f, v1.z + f);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator-(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator-(const vec3& v1, real f)
     {
         vec3 ret = aten::vec3(v1.x - f, v1.y - f, v1.z - f);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator*(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator/(const vec3& v1, const vec3& v2)
     {
         vec3 ret = aten::vec3(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
     {
         vec3 ret = aten::vec3(t * v.x, t * v.y, t * v.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
     {
         vec3 ret = aten::vec3(t * v.x, t * v.y, t * v.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator/(const vec3& v, real t)
     {
         vec3 ret = aten::vec3(v.x / t, v.y / t, v.z / t);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator/(real t, const vec3& v)
     {
         vec3 ret = aten::vec3(t / v.x, t / v.y, t / v.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API real dot(const vec3& v1, const vec3& v2)
@@ -174,14 +174,14 @@ namespace aten {
             v1.a[2] * v2.a[0] - v1.a[0] * v2.a[2],
             v1.a[0] * v2.a[1] - v1.a[1] * v2.a[0]);
 
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 normalize(const vec3& v)
     {
         auto invLen = aten::rsqrt(dot(v, v));
         auto ret = v * invLen;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API real length(const vec3& v)
@@ -196,13 +196,13 @@ namespace aten {
     inline AT_DEVICE_API vec3 operator*(real t, const vec3& v)
     {
         vec3 ret(t * v.x, t * v.y, t * v.z);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 operator*(const vec3& v, real t)
     {
         vec3 ret(t * v.x, t * v.y, t * v.z);
-        return std::move(ret);
+        return ret;
     }
 #else
     using vec3 = glm::vec3;
@@ -227,7 +227,7 @@ namespace aten {
             aten::cmpMin(a.x, b.x),
             aten::cmpMin(a.y, b.y),
             aten::cmpMin(a.z, b.z));
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 max(const vec3& a, const vec3& b)
@@ -236,7 +236,7 @@ namespace aten {
             aten::cmpMax(a.x, b.x),
             aten::cmpMax(a.y, b.y),
             aten::cmpMax(a.z, b.z));
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 pow(const vec3& v, real a)
@@ -246,13 +246,13 @@ namespace aten {
             pow(v.y, a),
             pow(v.z, a));
 
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec3 mix(const vec3& v0, const vec3& v1, real a)
     {
         vec3 ret = v0 * (real(1) - a) + v1 * a;
-        return std::move(ret);
+        return ret;
     }
 
     union _vec3_cmp_res {
@@ -316,7 +316,7 @@ namespace aten {
         p = normalize(p);
 #endif
 
-        return std::move(p);
+        return p;
     }
 
     inline bool isInvalid(const vec3& v)

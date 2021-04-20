@@ -84,7 +84,7 @@ namespace aten
             if (mtrl) {
                 const auto& mtrlParam = mtrl->param();
 
-                auto albedo = const_cast<texture*>(ctxt.getTexture(mtrlParam.albedoMap));
+                auto albedo = ctxt.getTexture(mtrlParam.albedoMap);
                 if (albedo) {
                     albedo->initAsGLTexture();
                     albedo->bindAsGLTexture(0, m_shd);

@@ -1,6 +1,7 @@
 #include <atomic>
-#include "material/material.h"
+
 #include "light/light.h"
+#include "material/material.h"
 #include "material/sample_texture.h"
 
 namespace AT_NAME
@@ -88,21 +89,6 @@ namespace AT_NAME
         setTextures(albedoMap, normalMap, nullptr);
     }
 
-    material::material(
-        aten::MaterialType type,
-        const aten::MaterialAttribute& attrib,
-        aten::Values& val)
-        : material(type, attrib)
-    {
-        m_param.baseColor = val.get("baseColor", m_param.baseColor);
-        m_param.ior = val.get("ior", m_param.ior);
-
-        auto albedoMap = (aten::texture*)val.get<void*>("albedoMap", nullptr);
-        auto normalMap = (aten::texture*)val.get<void*>("normalMap", nullptr);
-
-        setTextures(albedoMap, normalMap, nullptr);
-    }
-
     void material::setTextures(
         aten::texture* albedoMap,
         aten::texture* normalMap,
@@ -115,18 +101,18 @@ namespace AT_NAME
 
     NPRMaterial::NPRMaterial(
         aten::MaterialType type,
-        const aten::vec3& e, AT_NAME::Light* light)
+        const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light)
         : material(type, MaterialAttributeNPR, e)
     {
         setTargetLight(light);
     }
 
-    void NPRMaterial::setTargetLight(AT_NAME::Light* light)
+    void NPRMaterial::setTargetLight(std::shared_ptr<AT_NAME::Light> light)
     {
         m_targetLight = light;
     }
 
-    const AT_NAME::Light* NPRMaterial::getTargetLight() const
+    const std::shared_ptr<AT_NAME::Light> NPRMaterial::getTargetLight() const
     {
         return m_targetLight;
     }
@@ -228,7 +214,7 @@ namespace AT_NAME
 
     AT_DEVICE_MTRL_API aten::vec4 material::sampleAlbedoMap(real u, real v) const
     {
-        return std::move(AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1))));
+        return AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1)));
     }
 
     AT_DEVICE_MTRL_API void material::applyNormalMap(

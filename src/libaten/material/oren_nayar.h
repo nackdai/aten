@@ -3,6 +3,10 @@
 #include "material/material.h"
 #include "texture/texture.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class OrenNayar : public material {
@@ -21,15 +25,7 @@ namespace AT_NAME
             m_param.roughness = aten::clamp<real>(roughness, 0, 1);
         }
 
-        OrenNayar(aten::Values& val)
-            : material(aten::MaterialType::OrneNayar, MaterialAttributeLambert, val)
-        {
-            m_param.roughness = val.get("roughness", m_param.roughness);
-            m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
-
-            auto roughnessMap = (aten::texture*)val.get("roughnessmap", nullptr);
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-        }
+        OrenNayar(aten::Values& val);
 
         virtual ~OrenNayar() {}
 

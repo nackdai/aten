@@ -4,6 +4,10 @@
 #include "texture/texture.h"
 #include "material/sample_texture.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class lambert : public material {
@@ -17,9 +21,7 @@ namespace AT_NAME
             : material(aten::MaterialType::Lambert, MaterialAttributeLambert, albedo, 0, albedoMap, normalMap)
         {}
 
-        lambert(aten::Values& val)
-            : material(aten::MaterialType::Lambert, MaterialAttributeLambert, val)
-        {}
+        lambert(aten::Values& val);
 
         virtual ~lambert() {}
 
@@ -74,7 +76,7 @@ namespace AT_NAME
             aten::vec3 dir = normalize((t * x + b * y + n * z));
             AT_ASSERT(dot(normal, dir) >= 0);
 
-            return std::move(dir);
+            return dir;
         }
 
         static AT_DEVICE_MTRL_API aten::vec3 bsdf(
@@ -152,7 +154,7 @@ namespace AT_NAME
             real u, real v,
             aten::sampler* sampler) const override final
         {
-            return std::move(sampleDirection(normal, sampler));
+            return sampleDirection(normal, sampler);
         }
 
         virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
@@ -162,7 +164,7 @@ namespace AT_NAME
             real u, real v) const override final
         {
             auto ret = bsdf(&m_param, u, v);
-            return std::move(ret);
+            return ret;
         }
 
         virtual AT_DEVICE_MTRL_API MaterialSampling sample(
@@ -185,7 +187,7 @@ namespace AT_NAME
                 u, v,
                 isLightPath);
 
-            return std::move(ret);
+            return ret;
         }
 
         virtual AT_DEVICE_MTRL_API real computeFresnel(

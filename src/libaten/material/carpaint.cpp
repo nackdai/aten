@@ -143,7 +143,7 @@ namespace AT_NAME
         auto d = dot(in, nml);
         auto refract = -nnt * (in - d * nml) - aten::sqrt(real(1) - nnt * nnt * (1 - ddn * ddn)) * nml;
 
-        return std::move(refract);
+        return refract;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaintBRDF::sampleDirection(
@@ -282,7 +282,7 @@ namespace AT_NAME
         }
 #endif
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaintBRDF::sampleDirection(
@@ -291,7 +291,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler) const
     {
-        return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaintBRDF::bsdf(
@@ -305,7 +305,7 @@ namespace AT_NAME
         albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         aten::vec3 ret = bsdf(param, normal, wi, wo, u, v, albedo);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaintBRDF::bsdf(
@@ -444,7 +444,7 @@ namespace AT_NAME
             }
         }
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaintBRDF::bsdf(
@@ -453,7 +453,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API MaterialSampling CarPaintBRDF::sample(
@@ -476,7 +476,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API void CarPaintBRDF::sample(

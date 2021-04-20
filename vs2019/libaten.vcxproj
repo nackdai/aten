@@ -433,7 +433,7 @@
     <ClCompile Include="..\src\libaten\hdr\tonemap.cpp" />
     <ClCompile Include="..\src\libaten\light\arealight.cpp" />
     <ClCompile Include="..\src\libaten\light\ibl.cpp" />
-    <ClCompile Include="..\src\libaten\light\light.cpp" />
+    <ClCompile Include="..\src\libaten\light\light_instantiate_from_value.cpp" />
     <ClCompile Include="..\src\libaten\material\beckman.cpp" />
     <ClCompile Include="..\src\libaten\material\blinn.cpp" />
     <ClCompile Include="..\src\libaten\material\carpaint.cpp" />
@@ -444,6 +444,7 @@
     <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <ClCompile Include="..\src\libaten\material\material.cpp" />
     <ClCompile Include="..\src\libaten\material\material_factory.cpp" />
+    <ClCompile Include="..\src\libaten\material\material_instantiate_from_value.cpp" />
     <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\oren_nayar.cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />

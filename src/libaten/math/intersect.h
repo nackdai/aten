@@ -85,7 +85,7 @@ namespace aten {
 
         result.t = t;
 
-        return std::move(result);
+        return result;;
 #else
         intersectResult result;
 
@@ -134,14 +134,14 @@ namespace aten {
         if ((U < real(0) || V < real(0) || W < real(0))
             && (U > real(0) || V > real(0) || W > real(0)))
         {
-            return std::move(result);
+            return result;;
         }
 
         // calculate dterminant.
         real det = U + V + W;
 
         if (det == real(0)) {
-            return std::move(result);
+            return result;;
         }
 
         // Calculate scaled z-coordinated of vertice
@@ -166,7 +166,7 @@ namespace aten {
         result.b = gamma;
         result.t = t;
 
-        return std::move(result);
+        return result;;
 #endif
     }
 }

@@ -30,9 +30,9 @@ namespace aten
             m_lightDir = dir;
         }
 
-        void registerBlueNoiseTex(const std::shared_ptr<texture>& tex)
+        void registerBlueNoiseTex(const std::shared_ptr<texture> tex)
         {
-            m_noisetex.push_back(std::move(tex));
+            m_noisetex.push_back(tex);
         }
 
     protected:
@@ -58,7 +58,7 @@ namespace aten
             CameraSampleResult& camsample,
             scene* scene)
         {
-            return std::move(radiance(ctxt, sampler, m_maxDepth, inRay, cam, camsample, scene));
+            return radiance(ctxt, sampler, m_maxDepth, inRay, cam, camsample, scene);
         }
 
         Path radiance(

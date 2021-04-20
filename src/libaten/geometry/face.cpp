@@ -9,26 +9,11 @@
 
 namespace AT_NAME
 {
-    void face::resetIdWhenAnyTriangleLeave(AT_NAME::face* tri)
-    {
-        tri->m_id = tri->m_listItem.currentIndex();
-    }
-
-    face::face()
-    {
-        m_listItem.init(this, resetIdWhenAnyTriangleLeave);
-    }
-
-    face::~face()
-    {
-        m_listItem.leave();
-    }
-
-    face* face::create(
+    std::shared_ptr<face> face::create(
         const context& ctxt,
         const aten::PrimitiveParamter& param)
     {
-        face* f = new face();
+        auto f = std::make_shared<face>();
 
         f->param = param;
 

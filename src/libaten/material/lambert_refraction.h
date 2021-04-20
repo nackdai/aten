@@ -3,6 +3,10 @@
 #include "material/material.h"
 #include "texture/texture.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class LambertRefraction : public material {
@@ -16,9 +20,7 @@ namespace AT_NAME
             : material(aten::MaterialType::Lambert_Refraction, MaterialAttributeTransmission, albedo, ior, nullptr, normalMap)
         {}
 
-        LambertRefraction(aten::Values& val)
-            : material(aten::MaterialType::Lambert_Refraction, MaterialAttributeTransmission, val)
-        {}
+        LambertRefraction(aten::Values& val);
 
         virtual ~LambertRefraction() {}
 
@@ -85,7 +87,7 @@ namespace AT_NAME
             real u, real v,
             aten::sampler* sampler) const override final
         {
-            return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+            return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
         }
 
         virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
@@ -95,7 +97,7 @@ namespace AT_NAME
             real u, real v) const override final
         {
             auto ret = bsdf(&m_param, u, v);
-            return std::move(ret);
+            return ret;
         }
 
         virtual AT_DEVICE_MTRL_API MaterialSampling sample(
@@ -118,7 +120,7 @@ namespace AT_NAME
                 u, v,
                 isLightPath);
 
-            return std::move(ret);
+            return ret;
         }
 
         virtual AT_DEVICE_MTRL_API real computeFresnel(

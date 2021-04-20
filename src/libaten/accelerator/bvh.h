@@ -1,12 +1,13 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <stack>
 
-#include "scene/hitable.h"
-#include "geometry/transformable.h"
-#include "geometry/object.h"
 #include "accelerator/accelerator.h"
+#include "geometry/object.h"
+#include "geometry/transformable.h"
+#include "scene/hitable.h"
 
 namespace aten {
     class bvh;
@@ -328,9 +329,9 @@ namespace aten {
         virtual const aabb& getBoundingbox() const override
         {
             if (m_root) {
-                return std::move(m_root->getBoundingbox());
+                return m_root->getBoundingbox();
             }
-            return std::move(aabb());
+            return aabb();
         }
 
         /**

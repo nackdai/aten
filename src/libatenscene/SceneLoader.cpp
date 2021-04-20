@@ -152,34 +152,37 @@ namespace aten
     template <>
     aten::PolymorphicValue getValue<vec3>(const tinyxml2::XMLAttribute* a)
     {
-        aten::PolymorphicValue v;
+        aten::PolymorphicValue val;
 
         std::string text(a->Value());
 
         std::vector<std::string> values;
         int num = split(text, values, ' ');
 
+        aten::vec4 v;
         for (int i = 0; i < std::min<int>(num, 3); i++) {
-            v.val.v[i] = (real)atof(values[i].c_str());
+            v[i] = (real)atof(values[i].c_str());
         }
 
-        return std::move(v);
+        val = v;
+
+        return val;
     }
 
     template <>
     aten::PolymorphicValue getValue<real>(const tinyxml2::XMLAttribute* a)
     {
         aten::PolymorphicValue v;
-        v.val.f = (real)a->DoubleValue();
-        return std::move(v);
+        v = (real)a->DoubleValue();
+        return v;
     }
 
     template <>
     aten::PolymorphicValue getValue<int>(const tinyxml2::XMLAttribute* a)
     {
         aten::PolymorphicValue v;
-        v.val.i = a->IntValue();
-        return std::move(v);
+        v = a->IntValue();
+        return v;
     }
 
     std::shared_ptr<material> findMaterialInObject(
@@ -216,13 +219,13 @@ namespace aten
             }
         }
 
-        return std::move(mtrl);
+        return mtrl;
     }
 
     void readObjects(
         const tinyxml2::XMLElement* root,
         context& ctxt,
-        std::map<std::string, transformable*>& objs)
+        std::map<std::string, std::shared_ptr<transformable>>& objs)
     {
         auto objRoot = root->FirstChildElement("objects");
 
@@ -297,7 +300,7 @@ namespace aten
 
             if (obj) {
                 auto instance = aten::TransformableFactory::createInstance<aten::object>(ctxt, obj, mtxL2W);
-                objs.insert(std::pair<std::string, transformable*>(tag, instance));
+                objs.insert(std::pair<std::string, std::shared_ptr<transformable>>(tag, instance));
             }
             else {
                 if (type == "cube") {
@@ -308,7 +311,7 @@ namespace aten
                         val.get("height", real(1)),
                         val.get("depth", real(1)),
                         mtrl);
-                    objs.insert(std::pair<std::string, transformable*>(tag, cube));
+                    objs.insert(std::pair<std::string, std::shared_ptr<transformable>>(tag, cube));
                 }
                 else if (type == "sphere") {
                     auto sphere = aten::TransformableFactory::createSphere(
@@ -316,7 +319,7 @@ namespace aten
                         val.get("center", vec3(0)),
                         val.get("radius", real(1)),
                         mtrl);
-                    objs.insert(std::pair<std::string, transformable*>(tag, sphere));
+                    objs.insert(std::pair<std::string, std::shared_ptr<transformable>>(tag, sphere));
                 }
                 else {
                     // TODO
@@ -328,8 +331,8 @@ namespace aten
 
     void readLights(
         const tinyxml2::XMLElement* root,
-        const std::map<std::string, transformable*>& objs,
-        std::vector<Light*>& lights)
+        const std::map<std::string, std::shared_ptr<transformable>>& objs,
+        std::vector<std::shared_ptr<Light>>& lights)
     {
         auto lightRoot = root->FirstChildElement("lights");
 
@@ -369,7 +372,7 @@ namespace aten
                 }
             }
 
-            Light* light = nullptr;
+            std::shared_ptr<Light> light;
 
             if (type == "area") {
                 if (!objtag.empty()) {
@@ -377,22 +380,22 @@ namespace aten
                     if (it != objs.end()) {
                         auto mtrl = findMaterialInObject(root, objtag);
                         if (mtrl) {
-                            light = new AreaLight(it->second, mtrl->color());
+                            light = std::make_shared<AreaLight>(it->second, mtrl->color());
                         }
                     }
                 }
             }
             else if (type == "point") {
-                light = new PointLight(val);
+                light = std::make_shared<PointLight>(val);
             }
             else if (type == "spot") {
-                light = new SpotLight(val);
+                light = std::make_shared<SpotLight>(val);
             }
             else if (type == "dir") {
-                light = new DirectionalLight(val);
+                light = std::make_shared<DirectionalLight>(val);
             }
             else if (type == "ibl") {
-                light = new ImageBasedLight(val);
+                light = std::make_shared<ImageBasedLight>(val);
             }
 
             if (light) {
@@ -431,7 +434,7 @@ namespace aten
         }
     }
 
-    camera* readCamera(
+    std::shared_ptr<camera> readCamera(
         const tinyxml2::XMLElement* root,
         uint32_t width, uint32_t height)
     {
@@ -462,10 +465,10 @@ namespace aten
             }
         }
 
-        camera* cam = nullptr;
+        std::shared_ptr<camera> cam;
 
         if (type == "pinhole") {
-            auto pinhole = new PinholeCamera();
+            auto pinhole = std::make_shared<PinholeCamera>();
             pinhole->init(
                 val.get("org", vec3(0)),
                 val.get("at", vec3(0, 0, -1)),
@@ -475,7 +478,7 @@ namespace aten
             cam = pinhole;
         }
         else if (type == "thinlens") {
-            auto thinlens = new ThinLensCamera();
+            auto thinlens = std::make_shared<ThinLensCamera>();
             thinlens->init(
                 width, height,
                 val.get("org", vec3(0)),
@@ -489,7 +492,7 @@ namespace aten
             cam = thinlens;
         }
         else if (type == "equirect") {
-            auto equirect = new EquirectCamera();
+            auto equirect = std::make_shared<EquirectCamera>();
             equirect->init(
                 val.get("org", vec3(0)),
                 val.get("at", vec3(0, 0, -1)),
@@ -557,8 +560,8 @@ namespace aten
             ret.dst.height = 0;
         }
 
-        std::map<std::string, transformable*> objs;
-        std::vector<Light*> lights;
+        std::map<std::string, std::shared_ptr<transformable>> objs;
+        std::vector<std::shared_ptr<Light>> lights;
 
         auto root = xml.FirstChildElement("scene");
         if (!root) {
@@ -599,7 +602,7 @@ namespace aten
         }
 
         // TODO
-        ret.scene = new aten::AcceleratedScene<aten::bvh>();
+        ret.scene = std::make_shared<aten::AcceleratedScene<aten::bvh>>();
 
         for (auto it = objs.begin(); it != objs.end(); it++) {
             auto obj = it->second;
@@ -611,13 +614,14 @@ namespace aten
             auto light = *it;
             if (light->isIBL()) {
                 // TODO
-                ret.scene->addImageBasedLight((ImageBasedLight*)light);
+                ret.scene->addImageBasedLight(
+                    std::static_pointer_cast<ImageBasedLight>(light));
             }
             else {
                 ret.scene->addLight(light);
             }
         }
 
-        return std::move(ret);
+        return ret;
     }
 }

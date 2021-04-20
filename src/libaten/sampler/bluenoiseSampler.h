@@ -44,9 +44,9 @@ namespace aten {
             m_maxSampleNum = 2 + maxBounceNum * (2 * (1 + 4) + 2 + 1);
         }
 
-        void registerNoiseTexture(const std::shared_ptr<texture>& noisetex)
+        void registerNoiseTexture(const std::shared_ptr<texture> noisetex)
         {
-            m_noise.push_back(std::move(noisetex));
+            m_noise.push_back(noisetex);
         }
 
         virtual real nextSample() final
@@ -60,7 +60,7 @@ namespace aten {
             aten::vec2 r;
             r.x = sample();
             r.y = sample();
-            return std::move(r);
+            return r;
         }
 
     private:

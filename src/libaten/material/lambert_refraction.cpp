@@ -48,7 +48,7 @@ namespace AT_NAME
 
             dir = -dir;
 
-            return std::move(dir);
+            return dir;
         }
 
         AT_DEVICE_MTRL_API aten::vec3 LambertRefraction::bsdf(

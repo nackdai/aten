@@ -26,7 +26,7 @@ namespace aten
                 if (mtrl->isEmissive()) {
                     auto emit = static_cast<aten::vec3>(mtrl->color());
                     contribution += throughput * emit;
-                    return std::move(contribution);
+                    return contribution;
                 }
 
                 auto isBackfacing = dot(rec.normal, -ray.dir) < real(0.0);
@@ -59,7 +59,7 @@ namespace aten
                 else if (mtrl->isNPR()) {
                     // Non-Photo-Real.
                     contribution = shadeNPR(ctxt, mtrl.get(), rec.p, orienting_normal, rec.u, rec.v, scene, nullptr);
-                    return std::move(contribution);
+                    return contribution;
                 }
                 else {
                     auto lightNum = scene->lightNum();
@@ -103,7 +103,7 @@ namespace aten
 
                         hitrecord tmpRec;
 
-                        if (scene->hitLight(ctxt, light, sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                        if (scene->hitLight(ctxt, light.get(), sampleres.pos, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                             auto lightColor = sampleres.finalColor;
 
                             if (light->isInfinite()) {
@@ -138,7 +138,7 @@ namespace aten
                     contribution += throughput * bg;
                 }
 
-                return std::move(contribution);
+                return contribution;
             }
 
             depth++;

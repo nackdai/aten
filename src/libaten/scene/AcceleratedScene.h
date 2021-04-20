@@ -36,10 +36,9 @@ namespace aten {
                 // To keep order, copy m_list data to another list.
                 // This is work around...
                 if (m_tmp.empty()) {
-                    std::copy(
-                        m_list.begin(),
-                        m_list.end(),
-                        std::back_inserter(m_tmp));
+                    for (auto& i : m_list) {
+                        m_tmp.push_back(i.get());
+                    }
                 }
 
                 m_accel.build(ctxt, &m_tmp[0], (uint32_t)m_tmp.size(), &bbox);
@@ -61,7 +60,7 @@ namespace aten {
 #ifndef __AT_CUDA__
             if (isHit) {
                 auto obj = ctxt.getTransformable(isect.objid);
-                aten::hitable::evalHitResult(ctxt, obj, r, rec, isect);
+                aten::hitable::evalHitResult(ctxt, obj.get(), r, rec, isect);
             }
 #endif
 

@@ -28,9 +28,8 @@ namespace aten
     window* findWindow(GLFWwindow* w)
     {
         auto found = std::find_if(
-            g_windows.begin(),
-            g_windows.end(),
-            [&](std::shared_ptr<windowImpl>& wnd)
+            g_windows.begin(), g_windows.end(),
+            [&](const std::shared_ptr<windowImpl> wnd)
         {
             if (wnd->getNativeHandle() == w) {
                 return true;

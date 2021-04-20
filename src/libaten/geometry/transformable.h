@@ -14,12 +14,11 @@ namespace aten
         friend class context;
 
     protected:
-        transformable();
-        virtual ~transformable();
+        transformable() = default;
+        virtual ~transformable() {}
 
         transformable(GeometryType type);
-        transformable(GeometryType type, AT_NAME::material* mtrl);
-        transformable(GeometryType type, const std::shared_ptr<AT_NAME::material>& mtrl);
+        transformable(GeometryType type, const std::shared_ptr<AT_NAME::material> mtrl);
 
     public:
         virtual void getSamplePosNormalArea(
@@ -63,7 +62,7 @@ namespace aten
             return m_id;
         }
 
-        std::shared_ptr<AT_NAME::material>& getMaterial()
+        std::shared_ptr<AT_NAME::material> getMaterial()
         {
             return mtrl_;
         }
@@ -74,12 +73,9 @@ namespace aten
         }
 
     private:
-        static void resetIdWhenAnyTransformableLeave(aten::transformable* obj);
-
-        void addToDataList(aten::DataList<aten::transformable>& list)
+        void updateIndex(int id)
         {
-            list.add(&m_listItem);
-            m_id = m_listItem.currentIndex();
+            m_id = id;
         }
 
     protected:
@@ -87,7 +83,5 @@ namespace aten
         int m_id{ -1 };
 
         GeomParameter m_param;
-
-        DataList<transformable>::ListItem m_listItem;
     };
 }

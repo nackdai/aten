@@ -37,7 +37,7 @@ namespace AT_NAME
     {
         aten::vec3 dir = sampleDirection(param->roughness, normal, wi, sampler);
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::sampleDirection(
@@ -46,7 +46,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler) const
     {
-        return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
@@ -63,7 +63,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, param->roughness, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
@@ -81,7 +81,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, param->roughness, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
@@ -90,7 +90,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     static AT_DEVICE_MTRL_API inline real sampleVelvet_D(
@@ -222,7 +222,7 @@ namespace AT_NAME
 
         aten::vec3 dir = normalize((t * x + b * y + n * z));
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetVelvet::bsdf(
@@ -255,7 +255,7 @@ namespace AT_NAME
 
         fresnel = real(0);
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API void MicrofacetVelvet::sample(
@@ -325,7 +325,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     bool MicrofacetVelvet::edit(aten::IMaterialParamEditor* editor)

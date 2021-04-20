@@ -12,16 +12,11 @@ namespace aten {
 
         Asset() = default;
         ~Asset() = default;
-        Asset(texture* t)
+        Asset(const std::shared_ptr<texture> t)
             : tex(t), type(AssetManager::AssetType::Texture) {}
-        Asset(material* m)
+        Asset(const std::shared_ptr<material> m)
             : mtrl(m), type(AssetManager::AssetType::Material) {}
-        Asset(object* o)
-            : obj(o), type(AssetManager::AssetType::Object) {}
-
-        Asset(const std::shared_ptr<material>& m)
-            : mtrl(m), type(AssetManager::AssetType::Material) {}
-        Asset(const std::shared_ptr<object>& o)
+        Asset(const std::shared_ptr<object> o)
             : obj(o), type(AssetManager::AssetType::Object) {}
 
         Asset(const Asset& rhs) = delete;
@@ -85,26 +80,7 @@ namespace aten {
     template <typename T>
     static bool registerAsset(
         const std::string& name,
-        T* asset,
-        AssetManager::AssetType type)
-    {
-        auto& mapAsset = g_assets[type];
-
-        auto it = mapAsset.find(name);
-        if (it != mapAsset.end()) {
-            AT_PRINTF("Registered already [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
-            return false;
-        }
-
-        mapAsset.insert(std::pair<std::string, Asset>(name, Asset(asset)));
-
-        return true;
-    }
-
-    template <typename T>
-    static bool registerAsset(
-        const std::string& name,
-        const std::shared_ptr<T>& asset,
+        const std::shared_ptr<T> asset,
         AssetManager::AssetType type)
     {
         auto& mapAsset = g_assets[type];
@@ -144,27 +120,20 @@ namespace aten {
         return asset;
     }
 
-    bool AssetManager::registerMtrl(const std::string& name, material* mtrl)
+    bool AssetManager::registerMtrl(const std::string& name, const std::shared_ptr<material> mtrl)
     {
         mtrl->setName(name.c_str());
 
         return registerAsset(name, mtrl, AssetType::Material);
     }
 
-    bool AssetManager::registerMtrl(const std::string& name, const std::shared_ptr<material>& mtrl)
-    {
-        mtrl->setName(name.c_str());
-
-        return registerAsset(name, mtrl, AssetType::Material);
-    }
-
-    const std::shared_ptr<material>& AssetManager::getMtrl(const std::string& name)
+    const std::shared_ptr<material> AssetManager::getMtrl(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Material);
         return asset.mtrl;
     }
 
-    const std::shared_ptr<material>& AssetManager::getMtrlByIdx(uint32_t idx)
+    const std::shared_ptr<material> AssetManager::getMtrlByIdx(uint32_t idx)
     {
         const auto& assets = g_assets[AssetType::Material];
         if (idx < assets.size()) {
@@ -175,34 +144,28 @@ namespace aten {
                 }
             }
         }
-        else {
-            AT_ASSERT(false);
-            return nullptr;
-        }
+
+        AT_ASSERT(false);
+        return nullptr;
     }
 
-    bool AssetManager::registerTex(const std::string& name, texture* tex)
+    bool AssetManager::registerTex(const std::string& name, std::shared_ptr<texture> tex)
     {
         return registerAsset(name, tex, AssetType::Texture);
     }
 
-    const std::shared_ptr<texture>& AssetManager::getTex(const std::string& name)
+    const std::shared_ptr<texture> AssetManager::getTex(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Texture);
         return asset.tex;
     }
 
-    bool AssetManager::registerObj(const std::string& name, object* obj)
+    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<object> obj)
     {
         return registerAsset(name, obj, AssetType::Object);
     }
 
-    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<object>& obj)
-    {
-        return registerAsset(name, obj, AssetType::Object);
-    }
-
-    const std::shared_ptr<object>& AssetManager::getObj(const std::string& name)
+    const std::shared_ptr<object> AssetManager::getObj(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Object);
         return asset.obj;

@@ -34,7 +34,7 @@ namespace AT_NAME {
             }
         }
 
-        return std::move(ret);
+        return ret;
     }
 }
 #endif

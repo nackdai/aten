@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class CarPaintBRDF : public material {
@@ -57,26 +61,7 @@ namespace AT_NAME
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
         }
 
-        CarPaintBRDF(aten::Values& val)
-            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, val)
-        {
-            // TODO
-            // Clamp parameters.
-            m_param.carpaint.clearcoatRoughness = val.get("clearcoatRoughness", m_param.carpaint.clearcoatRoughness);
-            m_param.carpaint.flakeLayerRoughness = val.get("flakeLayerRoughness", m_param.carpaint.flakeLayerRoughness);
-            m_param.carpaint.flake_scale = val.get("flake_scale", m_param.carpaint.flake_scale);
-            m_param.carpaint.flake_size = val.get("flake_size", m_param.carpaint.flake_size);
-            m_param.carpaint.flake_size_variance = val.get("flake_size_variance", m_param.carpaint.flake_size_variance);
-            m_param.carpaint.flake_normal_orientation = val.get("flake_normal_orientation", m_param.carpaint.flake_normal_orientation);
-            m_param.carpaint.flake_reflection = val.get("flake_reflection", m_param.carpaint.flake_reflection);
-            m_param.carpaint.flake_transmittance = val.get("flake_transmittance", m_param.carpaint.flake_transmittance);
-            m_param.carpaint.glitterColor = val.get("glitterColor", m_param.carpaint.glitterColor);
-            m_param.carpaint.flakeColor = val.get("clearcoat", m_param.carpaint.flakeColor);
-            m_param.carpaint.flake_intensity = val.get("clearcoatGloss", m_param.carpaint.flake_intensity);
-
-            auto roughnessMap = (aten::texture*)val.get("roughnessmap", nullptr);
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-        }
+        CarPaintBRDF(aten::Values& val);
 
         virtual ~CarPaintBRDF() {}
 

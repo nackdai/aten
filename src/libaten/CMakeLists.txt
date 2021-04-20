@@ -108,7 +108,7 @@ add_library(
   light/directionallight.h
   light/ibl.cpp
   light/ibl.h
-  light/light.cpp
+  light/light_instantiate_from_value.cpp
   light/light.h
   light/pointlight.h
   light/spotlight.h
@@ -132,6 +132,7 @@ add_library(
   material/layer.h
   material/material.cpp
   material/material.h
+  material/material_instantiate_from_value.cpp
   material/material_factory.cpp
   material/material_factory.h
   material/microfacet_refraction.cpp

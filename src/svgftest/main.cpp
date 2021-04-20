@@ -534,11 +534,11 @@ int main()
 
 #ifdef ENABLE_ENVMAP
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-    aten::envmap bg;
-    bg.init(envmap.get());
-    aten::ImageBasedLight ibl(&bg);
+    auto bg = std::make_shared<aten::envmap>();
+    bg->init(envmap);
+    auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
 
-    g_scene.addImageBasedLight(&ibl);
+    g_scene.addImageBasedLight(ibl);
 #endif
 
     {
@@ -578,7 +578,7 @@ int main()
 #ifdef ENABLE_ENVMAP
         for (auto& l : lightparams) {
             if (l.type == aten::LightType::IBL) {
-                l.envmap.idx = envmap->id();
+                l.idx = envmap->id();
             }
         }
 #endif
@@ -600,7 +600,7 @@ int main()
             mtxs,
             tex,
 #ifdef ENABLE_ENVMAP
-            idaten::EnvmapResource(envmap->id(), ibl.getAvgIlluminace(), real(1)));
+            idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
 #else
             idaten::EnvmapResource());
 #endif

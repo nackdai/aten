@@ -180,6 +180,6 @@ namespace AT_NAME
 
         aten::vec4 ret = aten::vec4(result, alpha);
 
-        return std::move(ret);
+        return ret;
     }
 }

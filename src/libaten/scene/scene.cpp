@@ -19,22 +19,22 @@ namespace aten {
 
         const auto& param = light->param();
 
-        auto lightobj = param.objid >= 0 ? ctxt.getTransformable(param.objid) : nullptr;
-        auto hitobj = isect.objid >= 0 ? ctxt.getTransformable(isect.objid) : nullptr;
+        const auto lightobj = param.objid >= 0 ? ctxt.getTransformable(param.objid) : nullptr;
+        const auto hitobj = isect.objid >= 0 ? ctxt.getTransformable(isect.objid) : nullptr;
 
         isHit = scene::hitLight(
             isHit,
             param.attrib,
-            lightobj,
+            lightobj.get(),
             distToLight,
             distHitObjToRayOrg,
             isect.t,
-            hitobj);
+            hitobj.get());
 
         return isHit;
     }
 
-    Light* scene::sampleLight(
+    std::shared_ptr<Light> scene::sampleLight(
         const context& ctxt,
         const vec3& org,
         const vec3& nml,
@@ -42,7 +42,7 @@ namespace aten {
         real& selectPdf,
         LightSampleResult& sampleRes)
     {
-        Light* light = nullptr;
+        std::shared_ptr<Light> light;
 
         auto num = m_lights.size();
         if (num > 0) {
@@ -60,7 +60,7 @@ namespace aten {
         return light;
     }
 
-    Light* scene::sampleLight(
+    std::shared_ptr<Light> scene::sampleLight(
         const aten::context& ctxt,
         const aten::vec3& org,
         const aten::vec3& nml,
@@ -82,7 +82,7 @@ namespace aten {
         auto r = sampler->nextSample();
         auto w_sum = real(0);
 
-        aten::Light* selected_light = nullptr;
+        std::shared_ptr<Light> selected_light;
         real selected_cost = real(0);
 
         for (auto i = 0U; i < light_cnt; i++) {
@@ -139,6 +139,8 @@ namespace aten {
             selectPdf = selected_cost / w_sum;
             return selected_light;
         }
+
+        return std::shared_ptr<Light>();
 #else
         std::vector<LightSampleResult> samples(m_lights.size());
         std::vector<real> costs(m_lights.size());
@@ -214,7 +216,7 @@ namespace aten {
 
     void scene::drawForGBuffer(
         aten::hitable::FuncPreDraw func,
-        std::function<bool(aten::hitable*)> funcIfDraw,
+        std::function<bool(std::shared_ptr<aten::hitable>)> funcIfDraw,
         const context& ctxt) const
     {
         uint32_t triOffset = 0;

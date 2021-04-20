@@ -3,155 +3,121 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <variant>
 
 #include "types.h"
 #include "math/vec3.h"
 
+template<typename T> struct is_shared_ptr : std::false_type {};
+template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+
 namespace aten {
     class PolymorphicValue {
     public:
-        union _value {
-            real f;
-            int i;
-            bool b;
-            vec4 v;
+        PolymorphicValue() = default;
+        ~PolymorphicValue() = default;
 
-            _value() {}
-            ~_value() {}
-        };
-
-        _value val;
-        std::shared_ptr<void> p;
-
-        PolymorphicValue()
-        {
-        }
         PolymorphicValue(const PolymorphicValue& rhs)
         {
-            val = rhs.val;
-            p = rhs.p;
+            val_ = rhs.val_;
+            type_hash_ = rhs.type_hash_;
         }
-        ~PolymorphicValue() {}
 
-        PolymorphicValue& operator=(real _f)
+        PolymorphicValue(PolymorphicValue&& rhs)
         {
-            val.f = _f;
+            val_ = std::move(rhs.val_);
+            type_hash_ = rhs.type_hash_;
+        }
+        PolymorphicValue& operator=(const PolymorphicValue& rhs) = delete;
+        PolymorphicValue& operator=(PolymorphicValue&& rhs) = delete;
+
+        PolymorphicValue& operator=(real f)
+        {
+            val_ = f;
             return *this;
         }
-        PolymorphicValue& operator=(int _i)
+        PolymorphicValue& operator=(int i)
         {
-            val.i = _i;
+            val_ = i;
             return *this;
         }
-        PolymorphicValue& operator=(bool _b)
+        PolymorphicValue& operator=(bool b)
         {
-            val.b = _b;
+            val_ = b;
             return *this;
         }
-        PolymorphicValue& operator=(const vec3& _v)
+        PolymorphicValue& operator=(const vec4& v)
         {
-            val.v = _v;
-            return *this;
-        }
-        PolymorphicValue& operator=(const vec4& _v)
-        {
-            val.v = _v;
-            return *this;
-        }
-        template <typename T>
-        PolymorphicValue& operator=(T* _p)
-        {
-            p.reset();
-            p = std::shared_ptr<void>(_p);
+            val_ = v;
             return *this;
         }
         template <typename T>
-        PolymorphicValue& operator=(std::shared_ptr<T>& _p)
+        PolymorphicValue& operator=(const std::shared_ptr<T> _p)
         {
-            p = _p;
+            type_hash_ = typeid(T).hash_code();
+            val_ = _p;
             return *this;
         }
 
         operator real() const
         {
-            return val.f;
+            return std::get<0>(val_);
         }
         operator int() const
         {
-            return val.i;
+            return std::get<1>(val_);
         }
         operator bool() const
         {
-            return val.b;
-        }
-        operator vec3() const
-        {
-            return val.v;
+            return std::get<2>(val_);
         }
         operator vec4() const
         {
-            return val.v;
+            return std::get<3>(val_);
         }
-        operator void*() const
+        operator vec3() const
         {
-            return p.get();
+            return static_cast<vec3>(std::get<3>(val_));
         }
-
-        template <typename TYPE>
-        TYPE getAs() const
+        template <typename T>
+        operator std::shared_ptr<T>() const
         {
-            AT_ASSERT(false);
-            return *(TYPE*)p.get();
+            assert(type_hash_ > 0 && type_hash_ == typeid(T).hash_code());
+            return std::reinterpret_pointer_cast<T>(std::get<4>(val_));
         }
 
-#if defined(_WIN32) || defined(_WIN64)
-        template <>
-        real PolymorphicValue::getAs() const;
+        template <typename T>
+        auto getAs() const -> std::enable_if_t<is_shared_ptr<T>::value, T>
+        {
+            assert(type_hash_ > 0 && type_hash_ == typeid(typename T::element_type).hash_code());
+            return std::reinterpret_pointer_cast<typename T::element_type>(std::get<4>(val_));
+        }
 
-        template <>
-        int PolymorphicValue::getAs() const;
+        template <typename T>
+        auto getAs() const -> std::enable_if_t<!is_shared_ptr<T>::value, T>
+        {
+            //return static_cast<T>(*this);
+            if constexpr (std::is_same_v<T, real>) {
+                return this->operator real();
+            }
+            else if constexpr (std::is_same_v<T, bool>) {
+                return this->operator bool();
+            }
+            else if constexpr (std::is_same_v<T, vec4>) {
+                return this->operator vec4();
+            }
+            else if constexpr (std::is_same_v<T, vec3>) {
+                return this->operator vec3();
+            }
+            else {
+                return this->operator int();
+            }
+        }
 
-        template <>
-        bool PolymorphicValue::getAs() const;
-
-        template <>
-        vec3 PolymorphicValue::getAs() const;
-
-        template <>
-        void* PolymorphicValue::getAs() const;
-#endif
+    private:
+        std::variant<real, int, bool, vec4, std::shared_ptr<void>> val_;
+        std::size_t type_hash_{ 0 };
     };
-
-    template <>
-    inline real PolymorphicValue::getAs() const
-    {
-        return val.f;
-    }
-    template <>
-    inline int PolymorphicValue::getAs() const
-    {
-        return val.i;
-    }
-    template <>
-    inline bool PolymorphicValue::getAs() const
-    {
-        return val.b;
-    }
-    template <>
-    inline vec3 PolymorphicValue::getAs() const
-    {
-        return val.v;
-    }
-    template <>
-    inline vec4 PolymorphicValue::getAs() const
-    {
-        return val.v;
-    }
-    template <>
-    inline void* PolymorphicValue::getAs() const
-    {
-        return p.get();
-    }
 
     class Values : public std::map<std::string, PolymorphicValue> {
     public:
@@ -164,16 +130,27 @@ namespace aten {
         }
 
         template <typename TYPE>
-        TYPE get(std::string s, const TYPE& defaultValue)
+        TYPE get(std::string s, const TYPE& defaultValue) const
         {
             auto it = find(s);
             if (it != end()) {
-                PolymorphicValue v = it->second;
-                TYPE ret = v.getAs<TYPE>();
-                return ret;
+                const PolymorphicValue& v = it->second;
+                return v.getAs<TYPE>();
             }
 
             return defaultValue;
+        }
+
+        template <typename TYPE>
+        std::shared_ptr<TYPE> get(std::string s) const
+        {
+            auto it = find(s);
+            if (it != end()) {
+                const PolymorphicValue& v = it->second;
+                return v.getAs<std::shared_ptr<TYPE>>();
+            }
+
+            return std::shared_ptr<TYPE>();
         }
     };
 }

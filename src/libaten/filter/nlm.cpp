@@ -44,7 +44,7 @@ namespace aten {
             }
         }
 
-        return std::move(ret);
+        return ret;
     }
 
     vec3 samplePixel(
@@ -65,7 +65,7 @@ namespace aten {
 
         auto ret = *p;
 
-        return std::move(ret);
+        return ret;
     }
 
     static real computeDistanceSquared(const Template& a, const Template& b)

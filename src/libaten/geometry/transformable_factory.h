@@ -19,13 +19,13 @@ namespace aten
         const TransformableFactory& operator=(const TransformableFactory& rhs) = delete;
 
     public:
-        static sphere* createSphere(
+        static std::shared_ptr<sphere> createSphere(
             context& ctxt,
             const aten::vec3& center,
             real radius,
-            const std::shared_ptr<material>& mtrl)
+            const std::shared_ptr<material> mtrl)
         {
-            sphere* ret = new sphere(center, radius, mtrl);
+            auto ret = std::make_shared<sphere>(center, radius, mtrl);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);
@@ -33,13 +33,13 @@ namespace aten
             return ret;
         }
 
-        static cube* createCube(
+        static std::shared_ptr<cube> createCube(
             context& ctxt,
             const aten::vec3& center,
             real w, real h, real d,
-            const std::shared_ptr<material>& mtrl)
+            const std::shared_ptr<material> mtrl)
         {
-            cube* ret = new cube(center, w, h, d, mtrl);
+            auto ret = std::make_shared<cube>(center, w, h, d, mtrl);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);
@@ -47,9 +47,9 @@ namespace aten
             return ret;
         }
 
-        static object* createObject(context& ctxt)
+        static std::shared_ptr<object> createObject(context& ctxt)
         {
-            object* ret = new object();
+            auto ret = std::make_shared<object>();
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);
@@ -57,12 +57,12 @@ namespace aten
             return ret;
         }
 
-        template <typename T, typename OBJ>
-        static instance<T>* createInstance(
+        template <typename T>
+        static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
-            OBJ& obj)
+            const std::shared_ptr<T> obj)
         {
-            auto ret = new instance<T>(obj, ctxt);
+            auto ret = std::make_shared<instance<T>>(obj, ctxt);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);
@@ -70,13 +70,13 @@ namespace aten
             return ret;
         }
 
-        template <typename T, typename OBJ>
-        static instance<T>* createInstance(
+        template <typename T>
+        static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
-            OBJ& obj,
+            const std::shared_ptr<T> obj,
             const mat4& mtxL2W)
         {
-            auto ret = new instance<T>(obj, ctxt, mtxL2W);
+            auto ret = std::make_shared<instance<T>>(obj, ctxt, mtxL2W);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);
@@ -84,15 +84,15 @@ namespace aten
             return ret;
         }
 
-        template <typename T, typename OBJ>
-        static instance<T>* createInstance(
+        template <typename T>
+        static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
-            OBJ& obj,
+            const std::shared_ptr<T> obj,
             const vec3& trans,
             const vec3& rot,
             const vec3& scale)
         {
-            auto ret = new instance<T>(obj, ctxt, trans, rot, scale);
+            auto ret = std::make_shared<instance<T>>(obj, ctxt, trans, rot, scale);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);
@@ -100,9 +100,9 @@ namespace aten
             return ret;
         }
 
-        static deformable* createDeformable(context& ctxt)
+        static std::shared_ptr<deformable> createDeformable(context& ctxt)
         {
-            auto ret = new deformable();
+            auto ret = std::make_shared<deformable>();
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);

@@ -5,7 +5,7 @@
 
 namespace aten {
     AccelType accelerator::s_internalType = AccelType::Bvh;
-    std::function<std::unique_ptr<accelerator>()> accelerator::s_userDefsInternalAccelCreator = nullptr;
+    std::function<std::shared_ptr<accelerator>()> accelerator::s_userDefsInternalAccelCreator;
 
     void accelerator::setInternalAccelType(AccelType type)
     {
@@ -18,16 +18,16 @@ namespace aten {
     }
 
     void accelerator::setUserDefsInternalAccelCreator(
-        std::function<std::unique_ptr<accelerator>()> creator)
+        std::function<std::shared_ptr<accelerator>()> creator)
     {
         if (creator) {
             s_userDefsInternalAccelCreator = creator;
         }
     }
 
-    std::unique_ptr<accelerator> accelerator::createAccelerator(AccelType type/*= AccelType::Default*/)
+    std::shared_ptr<accelerator> accelerator::createAccelerator(AccelType type/*= AccelType::Default*/)
     {
-        std::unique_ptr<accelerator> ret;
+        std::shared_ptr<accelerator> ret;
 
         type = (type == AccelType::Default ? s_internalType : type);
 
@@ -39,18 +39,18 @@ namespace aten {
         else {
             switch (type) {
             case AccelType::Sbvh:
-                ret = std::make_unique<sbvh>();
+                ret = std::make_shared<sbvh>();
                 break;
             case AccelType::ThreadedBvh:
-                ret = std::make_unique<ThreadedBVH>();
+                ret = std::make_shared<ThreadedBVH>();
                 break;
             default:
-                ret = std::make_unique<bvh>();
+                ret = std::make_shared<bvh>();
                 AT_ASSERT(false);
                 break;
             }
         }
 
-        return std::move(ret);
+        return ret;
     }
 }

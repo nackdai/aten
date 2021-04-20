@@ -15,10 +15,10 @@ namespace AT_NAME
 
         auto res = light->sample(ray.org, sampler);
 
-        return std::move(res.dir);
+        return res.dir;
 #else
         AT_ASSERT(false);
-        return std::move(aten::vec3(0));
+        return aten::vec3(0);
 #endif
     }
 
@@ -30,7 +30,7 @@ namespace AT_NAME
     {
         real cosShadow = dot(normal, wo);
         auto ret = bsdf(cosShadow, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     MaterialSampling toon::sample(
@@ -51,7 +51,7 @@ namespace AT_NAME
 
         ret.fresnel = 1;
 
-        return std::move(ret);
+        return ret;
     }
 
     aten::vec3 toon::bsdf(
@@ -85,6 +85,6 @@ namespace AT_NAME
 
         aten::vec3 bsdf = albedo * coeff;
 
-        return std::move(bsdf);
+        return bsdf;
     }
 }

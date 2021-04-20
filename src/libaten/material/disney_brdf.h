@@ -3,6 +3,10 @@
 #include "material/material.h"
 #include "texture/texture.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class DisneyBRDF : public material {
@@ -68,25 +72,7 @@ namespace AT_NAME
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
         }
 
-        DisneyBRDF(aten::Values& val)
-            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, val)
-        {
-            // TODO
-            // Clamp parameters.
-            m_param.subsurface = val.get("subsurface", m_param.subsurface);
-            m_param.metallic = val.get("metallic", m_param.metallic);
-            m_param.specular = val.get("specular", m_param.specular);
-            m_param.specularTint = val.get("specularTint", m_param.specularTint);
-            m_param.roughness = val.get("roughness", m_param.roughness);
-            m_param.anisotropic = val.get("anisotropic", m_param.anisotropic);
-            m_param.sheen = val.get("sheen", m_param.sheen);
-            m_param.sheenTint = val.get("sheenTint", m_param.sheenTint);
-            m_param.clearcoat = val.get("clearcoat", m_param.clearcoat);
-            m_param.clearcoatGloss = val.get("clearcoatGloss", m_param.clearcoatGloss);
-            m_param.roughnessMap = val.get("roughnessmap", m_param.roughnessMap);
-
-            m_param.ior = val.get("ior", m_param.ior);
-        }
+        DisneyBRDF(aten::Values& val);
 
         virtual ~DisneyBRDF() {}
 

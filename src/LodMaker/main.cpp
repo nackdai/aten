@@ -306,10 +306,10 @@ std::shared_ptr<aten::object> loadObj(const Options& opt)
     aten::ObjLoader::load(objs, opt.input, g_ctxt);
 
     // NOTE
-    // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
+    // ï¼‘ã¤ã—ã‹ã‚†ã‚‹ã•ãªã„.
     AT_ASSERT(objs.size() == 1);
 
-    return std::move(objs[0]);
+    return objs[0];
 }
 
 int main(int argc, char* argv[])

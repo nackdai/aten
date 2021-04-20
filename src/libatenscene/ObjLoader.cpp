@@ -220,7 +220,7 @@ namespace aten
                 std::max(shapemax.y, pmax.y),
                 std::max(shapemax.z, pmax.z));
 
-            aten::objshape* dst_shape = nullptr;
+            std::shared_ptr<aten::objshape> dst_shape;
             int prev_mtrl_idx = -1;
 
             // One shape has one material.It means another shape would be created if different material appear.
@@ -232,7 +232,7 @@ namespace aten
 
                 if (m < 0 && !dst_shape) {
                     // If a material doesn't exist.
-                    dst_shape = new aten::objshape();
+                    dst_shape = std::make_shared<aten::objshape>();
                     dst_shape->setMaterial(AssetManager::getMtrlByIdx(0));
                 }
                 else if (prev_mtrl_idx != m) {
@@ -241,7 +241,7 @@ namespace aten
                     if (dst_shape) {
                         // If the shape already exist.
 
-                        auto& mtrl = dst_shape->getMaterial();
+                        auto mtrl = dst_shape->getMaterial();
 
                         if (willSeparate) {
                             // Split the object if it has different materials
@@ -250,7 +250,7 @@ namespace aten
                             objs.push_back(std::move(obj));
 
                             // Create new object for next steps after here.
-                            obj.reset(aten::TransformableFactory::createObject(ctxt));
+                            obj = aten::TransformableFactory::createObject(ctxt);
                         }
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             // Export the object which has an emissive material as the emissive object.
@@ -268,7 +268,7 @@ namespace aten
                     }
 
                     // Create new shape for new material.
-                    dst_shape = new aten::objshape();
+                    dst_shape = std::make_shared<aten::objshape>();
                     prev_mtrl_idx = m;
 
                     if (prev_mtrl_idx >= 0) {
@@ -395,7 +395,7 @@ namespace aten
                     objs.push_back(obj);
 
                     if (p + 1 < shapes.size()) {
-                        obj.reset(aten::TransformableFactory::createObject(ctxt));
+                        obj = aten::TransformableFactory::createObject(ctxt);
                     }
                     else {
                         // NOTE

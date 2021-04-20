@@ -649,9 +649,6 @@
     <ClCompile Include="..\src\libaten\renderer\film.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\light\light.cpp">
-      <Filter>light</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\light\arealight.cpp">
       <Filter>light</Filter>
     </ClCompile>
@@ -837,6 +834,12 @@
     </ClCompile>
     <ClCompile Include="..\3rdparty\imgui\imgui_widgets.cpp">
       <Filter>ui\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\material_instantiate_from_value.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\light\light_instantiate_from_value.cpp">
+      <Filter>light</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -179,7 +179,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
     int lod)
 {
     // TODO
-    int envmapidx = light->envmap.idx;
+    int envmapidx = light->idx;
 
 #if 0
     real u = sampler->nextSample();

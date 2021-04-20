@@ -30,7 +30,7 @@ namespace aten {
         ret[2] *= f;
         ret[3] *= f;
 
-        return std::move(ret);
+        return ret;
     }
 
     inline vec4 sub(const vec4& v1, const vec4& v2)
@@ -41,7 +41,7 @@ namespace aten {
         ret[2] -= v2[2];
         ret[3] -= v2[3];
 
-        return std::move(ret);
+        return ret;
     }
 
     mat4& mat4::invert()

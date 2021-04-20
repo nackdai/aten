@@ -43,6 +43,6 @@ namespace AT_NAME {
         ret.second = tmp->tm_sec;
         ret.milliSeconds = tv.tv_usec / 1000;
 
-        return std::move(ret);
+        return ret;
     }
 }

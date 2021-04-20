@@ -18,9 +18,9 @@ namespace aten
         };
 
         struct SceneInfo {
-            aten::scene* scene{ nullptr };
+            std::shared_ptr<aten::scene> scene;
 
-            aten::camera* camera{ nullptr };
+            std::shared_ptr<aten::camera> camera;
 
             std::string rendererType;
             aten::Destination dst;

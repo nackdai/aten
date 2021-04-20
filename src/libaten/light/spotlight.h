@@ -2,6 +2,10 @@
 
 #include "light/light.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME {
     class SpotLight : public Light {
     public:
@@ -28,21 +32,7 @@ namespace AT_NAME {
             setSpotlightFactor(innerAngle, outerAngle, falloff);
         }
 
-        SpotLight(aten::Values& val)
-            : Light(aten::LightType::Spot, LightAttributeSingluar, val)
-        {
-            m_param.constAttn = val.get("constAttn", m_param.constAttn);
-            m_param.linearAttn = val.get("linearAttn", m_param.linearAttn);
-            m_param.expAttn = val.get("expAttn", m_param.expAttn);
-
-            setAttenuation(m_param.constAttn, m_param.linearAttn, m_param.expAttn);
-
-            m_param.innerAngle = val.get("innerAngle", m_param.innerAngle);
-            m_param.outerAngle = val.get("outerAngle", m_param.outerAngle);
-            m_param.falloff = val.get("falloff", m_param.falloff);
-
-            setSpotlightFactor(m_param.innerAngle, m_param.outerAngle, m_param.falloff);
-        }
+        SpotLight(aten::Values& val);
 
         virtual ~SpotLight() {}
 
@@ -74,7 +64,7 @@ namespace AT_NAME {
         {
             aten::LightSampleResult result;
             sample(&m_param, org, sampler, &result);
-            return std::move(result);
+            return result;
         }
 
         static AT_DEVICE_API void sample(

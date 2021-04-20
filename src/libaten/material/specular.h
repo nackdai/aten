@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class specular : public material {
@@ -16,9 +20,7 @@ namespace AT_NAME
             : material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, ior, albedoMap, normalMap)
         {}
 
-        specular(aten::Values& val)
-            : material(aten::MaterialType::Specular, MaterialAttributeSpecular, val)
-        {}
+        specular(aten::Values& val);
 
         virtual ~specular() {}
 

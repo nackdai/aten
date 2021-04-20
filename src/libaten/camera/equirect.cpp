@@ -20,6 +20,6 @@ namespace aten {
         result.posOnImageSensor = m_origin;
         result.r = ray(m_origin, dir);
 
-        return std::move(result);
+        return result;
     }
 }

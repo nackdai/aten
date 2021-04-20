@@ -127,7 +127,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerDirection(
 
     auto dir = sampleDirection(ctxt, param, normal, wi, u, v, sampler);
 
-    return std::move(dir);
+    return dir;
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
@@ -177,7 +177,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
         ior = param->ior;
     }
 
-    return std::move(bsdf);
+    return bsdf;
 }
 
 //////////////////////////////////////////////////////////
@@ -401,7 +401,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
         break;
     }
 
-    return std::move(aten::vec3(0, 1, 0));
+    return aten::vec3(0, 1, 0);
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
@@ -445,7 +445,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         break;
     }
 
-    return std::move(aten::vec3());
+    return aten::vec3();
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
@@ -490,7 +490,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         break;
     }
 
-    return std::move(aten::vec3());
+    return aten::vec3();
 }
 
 AT_CUDA_INLINE __device__ real computeFresnel(

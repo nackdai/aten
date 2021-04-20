@@ -47,7 +47,7 @@ namespace aten {
 
         inline AT_DEVICE_API operator vec3() const
         {
-            return std::move(v);
+            return v;
         }
         inline AT_DEVICE_API real operator[](int i) const
         {
@@ -168,55 +168,55 @@ namespace aten {
     inline AT_DEVICE_API vec4 operator+(const vec4& v1, const vec4& v2)
     {
         vec4 ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator+(const vec4 v1, real f)
     {
         vec4 ret(v1.x + f, v1.y + f, v1.z + f, v1.w + f);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator-(const vec4& v1, const vec4& v2)
     {
         vec4 ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator-(const vec4& v1, real f)
     {
         vec4 ret(v1.x - f, v1.y - f, v1.z - f, v1.w - f);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator*(const vec4& v1, const vec4& v2)
     {
         vec4 ret(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z, v1.w * v2.w);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator/(const vec4& v1, const vec4& v2)
     {
         vec4 ret(v1.x / v2.x, v1.y / v2.y, v1.z / v2.z, v1.w / v2.w);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator*(real t, const vec4& v)
     {
         vec4 ret(t * v.x, t * v.y, t * v.z, t * v.w);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator*(const vec4& v, real t)
     {
         vec4 ret(t * v.x, t * v.y, t * v.z, t * v.w);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 operator/(const vec4& v, real t)
     {
         vec4 ret(v.x / t, v.y / t, v.z / t, v.w / t);
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API real dot(const vec4& v1, const vec4& v2)
@@ -233,14 +233,14 @@ namespace aten {
             v1.p[0] * v2.p[1] - v1.p[1] * v2.p[0],
             0);
 
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 normalize(const vec4& v)
     {
         auto invLen = aten::rsqrt(dot(v, v));
         auto ret = v * invLen;
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 sqrt(const vec4& v)
@@ -250,7 +250,7 @@ namespace aten {
             aten::sqrt(v.y),
             aten::sqrt(v.z),
             aten::sqrt(v.w));
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 abs(const vec4& v)
@@ -260,7 +260,7 @@ namespace aten {
             aten::abs(v.y),
             aten::abs(v.z),
             aten::abs(v.w));
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 min(const vec4& a, const vec4& b)
@@ -270,7 +270,7 @@ namespace aten {
             aten::cmpMin(a.y, b.y),
             aten::cmpMin(a.z, b.z),
             aten::cmpMin(a.w, b.w));
-        return std::move(ret);
+        return ret;
     }
 
     inline AT_DEVICE_API vec4 max(const vec4& a, const vec4& b)
@@ -280,7 +280,7 @@ namespace aten {
             aten::cmpMax(a.y, b.y),
             aten::cmpMax(a.z, b.z),
             aten::cmpMax(a.w, b.w));
-        return std::move(ret);
+        return ret;
     }
 
     union _vec4_cmp_res {

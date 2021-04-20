@@ -76,7 +76,7 @@ namespace AT_NAME {
 
             aten::vec3 ycbcr = aten::vec3(y, cb, cr);
 
-            return std::move(ycbcr);
+            return ycbcr;
         }
 
         static real RGBtoY(const aten::vec3& rgb)
@@ -93,7 +93,7 @@ namespace AT_NAME {
 
             aten::vec3 rgb = aten::vec3(r, g, b);
 
-            return std::move(rgb);
+            return rgb;
         }
 
         // RGB -> sRGB
@@ -109,7 +109,7 @@ namespace AT_NAME {
 
             aten::vec3 xyz = aten::vec3(x, y, z);
 
-            return std::move(xyz);
+            return xyz;
         }
     };
 }

@@ -7,12 +7,12 @@ namespace AT_NAME
 {
     class envmap : public aten::background {
     public:
-        envmap() {}
+        envmap() = default;
         virtual ~envmap() {}
 
     public:
         void init(
-            aten::texture* envmap,
+            const std::shared_ptr<aten::texture> envmap,
             real mult = real(1))
         {
             m_envmap = envmap;
@@ -23,7 +23,7 @@ namespace AT_NAME
 
         virtual aten::vec3 sample(real u, real v) const override final;
 
-        const aten::texture* getTexture() const
+        const std::shared_ptr<aten::texture> getTexture() const
         {
             return m_envmap;
         }
@@ -50,7 +50,7 @@ namespace AT_NAME
             // 念のため...
             dir = normalize(dir);
 
-            return std::move(dir);
+            return dir;
         }
 
         static AT_DEVICE_API aten::vec3 convertDirectionToUV(const aten::vec3& dir)
@@ -68,11 +68,11 @@ namespace AT_NAME
 
             aten::vec3 uv = aten::vec3(u, v, 0);
 
-            return std::move(uv);
+            return uv;
         }
 
     private:
-        aten::texture* m_envmap;
+        std::shared_ptr<aten::texture> m_envmap;
         real m_mult{ real(1) };
     };
 }

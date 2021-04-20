@@ -1,7 +1,13 @@
 #pragma once
 
-#include "light/light.h"
+#include <memory>
+
 #include "geometry/transformable.h"
+#include "light/light.h"
+
+namespace aten {
+    class Values;
+}
 
 namespace AT_NAME {
     class AreaLight : public Light {
@@ -9,7 +15,7 @@ namespace AT_NAME {
         AreaLight()
             : Light(aten::LightType::Area, LightAttributeArea)
         {}
-        AreaLight(aten::transformable* obj, const aten::vec3& le)
+        AreaLight(const std::shared_ptr<aten::transformable> obj, const aten::vec3& le)
             : Light(aten::LightType::Area, LightAttributeArea)
         {
             m_obj = obj;
@@ -18,14 +24,7 @@ namespace AT_NAME {
             m_param.le = le;
         }
 
-        AreaLight(aten::Values& val)
-            : Light(aten::LightType::Area, LightAttributeArea, val)
-        {
-            m_obj = (aten::transformable*)val.get("object", m_obj);
-
-            m_param.objid = (m_obj ? m_obj->id() : -1);
-            m_param.le = val.get("color", m_param.le);
-        }
+        AreaLight(const aten::Values& val);
 
         virtual ~AreaLight() {}
 
@@ -57,9 +56,9 @@ namespace AT_NAME {
             const aten::vec3& org,
             aten::sampler* sampler) const override final;
 
-        virtual const aten::hitable* getLightObject() const override final
+        virtual const std::shared_ptr<aten::hitable> getLightObject() const override final
         {
-            return (aten::hitable*)m_obj;
+            return std::static_pointer_cast<aten::hitable>(m_obj);
         }
 
         virtual void getSamplePosNormalArea(
@@ -74,6 +73,6 @@ namespace AT_NAME {
         }
 
     private:
-        aten::transformable* m_obj{ nullptr };
+        std::shared_ptr<aten::transformable> m_obj;
     };
 }

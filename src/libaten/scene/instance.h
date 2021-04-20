@@ -15,21 +15,14 @@ namespace aten
     class instance : public transformable {
         friend class TransformableFactory;
 
-    private:
-        instance(OBJ* obj, const context& ctxt)
+    public:
+        instance(std::shared_ptr<OBJ> obj, const context& ctxt)
             : transformable(GeometryType::Instance), m_obj(obj)
         {
             setBoundingBox(m_obj->getBoundingbox());
         }
 
-        instance(std::shared_ptr<OBJ>& obj, const context& ctxt)
-            : transformable(GeometryType::Instance), m_obj(obj)
-        {
-            setBoundingBox(m_obj->getBoundingbox());
-        }
-
-        template <typename T>
-        instance(T&& obj, const context& ctxt, const mat4& mtxL2W)
+        instance(std::shared_ptr<OBJ> obj, const context& ctxt, const mat4& mtxL2W)
             : instance(obj, ctxt)
         {
             m_mtxL2W = mtxL2W;
@@ -40,9 +33,8 @@ namespace aten
             setBoundingBox(getTransformedBoundingBox());
         }
 
-        template <typename T>
         instance(
-            T& obj,
+            std::shared_ptr<OBJ> obj,
             const context& ctxt,
             const vec3& trans,
             const vec3& rot,
@@ -63,7 +55,6 @@ namespace aten
 
         virtual ~instance() = default;
 
-    public:
         virtual bool hit(
             const context& ctxt,
             const ray& r,
@@ -138,7 +129,7 @@ namespace aten
 
         virtual aabb getTransformedBoundingBox() const override
         {
-            return std::move(aabb::transform(m_obj->getBoundingbox(), m_mtxL2W));
+            return aabb::transform(m_obj->getBoundingbox(), m_mtxL2W);
         }
 
         virtual void drawForGBuffer(
@@ -175,7 +166,7 @@ namespace aten
             }
         }
 
-        void setLod(std::shared_ptr<OBJ>& obj)
+        void setLod(std::shared_ptr<OBJ> obj)
         {
             m_lod = obj;
         }
@@ -270,7 +261,7 @@ namespace aten
     };
 
     template<>
-    inline instance<object>::instance(object* obj, const context& ctxt)
+    inline instance<object>::instance(std::shared_ptr<object> obj, const context& ctxt)
         : transformable(GeometryType::Instance), m_obj(obj)
     {
         m_obj->build(ctxt);
@@ -278,16 +269,8 @@ namespace aten
     }
 
     template<>
-    inline instance<object>::instance(std::shared_ptr<object>& obj, const context& ctxt)
+    inline instance<deformable>::instance(std::shared_ptr<deformable> obj, const context& ctxt)
         : transformable(GeometryType::Instance), m_obj(obj)
-    {
-        m_obj->build(ctxt);
-        setBoundingBox(m_obj->getBoundingbox());
-    }
-
-    template<>
-    inline instance<deformable>::instance(deformable* obj, const context& ctxt)
-        : transformable(GeometryType::Instance), m_obj(std::move(obj))
     {
         m_obj->build();
         setBoundingBox(m_obj->getBoundingbox());

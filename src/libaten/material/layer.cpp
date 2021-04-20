@@ -23,7 +23,7 @@ namespace AT_NAME
             albedo *= c * a;
         }
 
-        return std::move(albedo);
+        return albedo;
     }
 
     bool LayeredBSDF::isGlossy() const
@@ -116,7 +116,7 @@ namespace AT_NAME
 
         if (num == 0) {
             AT_ASSERT(false);
-            return std::move(ret);
+            return ret;
         }
 
         real weight = 1;
@@ -155,7 +155,7 @@ namespace AT_NAME
             }
         }
 
-        return std::move(ret);
+        return ret;
     }
 
     real LayeredBSDF::pdf(
@@ -214,7 +214,7 @@ namespace AT_NAME
 
         auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler);
 
-        return std::move(dir);
+        return dir;
     }
 
     aten::vec3 LayeredBSDF::bsdf(
@@ -259,6 +259,6 @@ namespace AT_NAME
             ior = mtrl->ior();
         }
 
-        return std::move(bsdf);
+        return bsdf;
     }
 }

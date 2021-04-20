@@ -178,7 +178,7 @@ namespace aten {
             auto hPrimId = m_shader.getHandle("primid");
             CALL_GL_API(::glUniform1i(hPrimId, primid));
             },
-            [](hitable* target) {
+            [](std::shared_ptr<hitable> target) {
                 return !target->isDeformable();
             }, ctxt);
 
@@ -205,7 +205,7 @@ namespace aten {
                 auto hPrimId = exShader->getHandle("primid");
                 CALL_GL_API(::glUniform1i(hPrimId, primid));
                 },
-                [](hitable* target) {
+                [](std::shared_ptr<hitable> target) {
                     return target->isDeformable();
                 }, ctxt);
         }
@@ -570,7 +570,7 @@ namespace aten {
                 auto m = mtrls[i];
 
                 int albedoTexId = m ? m->param().albedoMap : -1;
-                const aten::texture* albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
+                const auto& albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 
                 if (albedo) {
                     albedo->bindAsGLTexture(0, &m_shader);

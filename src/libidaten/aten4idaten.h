@@ -35,7 +35,6 @@
 #include "misc/color.h"
 #include "misc/timer.h"
 #include "misc/omputil.h"
-#include "misc/value.h"
 #include "misc/stream.h"
 
 #include "light/light.h"

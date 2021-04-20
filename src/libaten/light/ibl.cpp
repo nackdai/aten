@@ -307,6 +307,6 @@ namespace AT_NAME {
         result.pos = aten::vec3();
         result.nml = aten::vec3();
 
-        return std::move(result);
+        return result;
     }
 }

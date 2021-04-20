@@ -40,7 +40,7 @@ namespace aten {
         {
             vec2 r = sample2D();
             m_dimension++;
-            return std::move(r);
+            return r;
         }
 
         enum {
@@ -105,16 +105,16 @@ namespace aten {
             float jx = randfloat(s, p * 0xa399d265);
             float jy = randfloat(s, p * 0x711ad6a5);
 
-            return std::move(vec2(
+            return vec2(
                 (s % n + (sy + jx) / n) / n,
-                (s / n + (sx + jy) / n) / n));
+                (s / n + (sx + jy) / n) / n);
         }
 
         AT_DEVICE_API vec2 sample2D()
         {
             int idx = permute(m_idx, CMJ_DIM * CMJ_DIM, 0xa399d265 * m_dimension * m_scramble);
             auto ret = cmj(idx, CMJ_DIM, m_dimension * m_scramble);
-            return std::move(ret);
+            return ret;
         }
 
     private:

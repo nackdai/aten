@@ -2,6 +2,10 @@
 
 #include "material/material.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class MicrofacetBeckman : public material {
@@ -21,15 +25,7 @@ namespace AT_NAME
             m_param.roughness = aten::clamp<real>(roughness, 0, 1);
         }
 
-        MicrofacetBeckman(aten::Values& val)
-            : material(aten::MaterialType::Beckman,  MaterialAttributeMicrofacet, val)
-        {
-            m_param.roughness = val.get("roughness", m_param.roughness);
-            m_param.roughness = aten::clamp<real>(m_param.roughness, 0, 1);
-
-            auto roughnessMap = (aten::texture*)val.get("roughnessmap", nullptr);
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-        }
+        MicrofacetBeckman(aten::Values& val);
 
         virtual ~MicrofacetBeckman() {}
 

@@ -11,7 +11,7 @@ namespace AT_NAME
     class cube : public aten::geom<aten::transformable> {
         friend class TransformableFactory;
 
-    private:
+    public:
         template <typename MTRL>
         cube(const aten::vec3& center, real w, real h, real d, const MTRL& mtrl)
             : aten::transformable(aten::GeometryType::Cube, mtrl)
@@ -25,7 +25,6 @@ namespace AT_NAME
                     center + m_param.size * real(0.5)));
         }
 
-    public:
         virtual ~cube() {}
 
     public:

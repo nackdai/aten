@@ -150,7 +150,7 @@ namespace aten {
             result.posOnLens,
             normalize(result.posOnObjectplane - result.posOnLens));
 
-        return std::move(result);
+        return result;
     }
 
     real ThinLensCamera::hitOnLens(

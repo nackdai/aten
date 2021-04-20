@@ -133,7 +133,7 @@ namespace aten
 #endif
 
         if (x < 0 || width <= x || y < 0 || height <= y) {
-            return std::move(Path());
+            return Path();
         }
 
         real u = x / (real)width;
@@ -157,7 +157,7 @@ namespace aten
         retPath.y = y;
         retPath.isTerminate = path.isTerminate;
 
-        return std::move(retPath);
+        return retPath;
     }
 
     void ERPT::onRender(

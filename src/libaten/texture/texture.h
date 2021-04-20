@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -15,15 +16,15 @@ namespace aten
     class texture {
         friend class context;
 
-    private:
-        texture();
+    public:
+        texture() = default;
         texture(uint32_t width, uint32_t height, uint32_t channels, const char* name);
 
-    public:
         ~texture();
 
     private:
-        static texture* create(uint32_t width, uint32_t height, uint32_t channels, const char* name);
+        static std::shared_ptr<texture> create(
+            uint32_t width, uint32_t height, uint32_t channels, const char* name);
 
     public:
         void init(uint32_t width, uint32_t height, uint32_t channels);
@@ -58,7 +59,7 @@ namespace aten
                 break;
             }
 
-            return std::move(ret);
+            return ret;
         }
 
         real& operator()(uint32_t x, uint32_t y, uint32_t c)
@@ -128,12 +129,9 @@ namespace aten
         bool exportAsPNG(const std::string& filename);
 
     private:
-        static void resetIdWhenAnyTextureLeave(aten::texture* tex);
-
-        void addToDataList(aten::DataList<aten::texture>& list)
+        void updateIndex(int id)
         {
-            list.add(&m_listItem);
-            m_id = m_listItem.currentIndex();
+            m_id = id;
         }
 
     private:
@@ -150,7 +148,5 @@ namespace aten
         uint32_t m_gltex{ 0 };
 
         std::string m_name;
-
-        DataList<texture>::ListItem m_listItem;
     };
 }

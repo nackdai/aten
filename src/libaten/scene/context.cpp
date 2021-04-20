@@ -68,7 +68,7 @@ namespace aten
         return mtrl;
     }
 
-    void context::addMaterial(std::shared_ptr<AT_NAME::material>& mtrl)
+    void context::addMaterial(std::shared_ptr<AT_NAME::material> mtrl)
     {
         AT_ASSERT(mtrl);
         m_materials.push_back(mtrl);
@@ -93,13 +93,13 @@ namespace aten
         }
     }
 
-    const std::shared_ptr<AT_NAME::material>& context::findMaterialByName(const char* name) const
+    const std::shared_ptr<AT_NAME::material> context::findMaterialByName(const char* name) const
     {
         std::string strname(name);
 
         auto found = std::find_if(
             m_materials.begin(), m_materials.end(),
-            [&](const std::shared_ptr<AT_NAME::material>& mtrl) {
+            [&](const std::shared_ptr<AT_NAME::material> mtrl) {
                 return mtrl->nameString() == strname;
             }
         );
@@ -121,7 +121,7 @@ namespace aten
         return -1;
     }
 
-    AT_NAME::face* context::createTriangle(const aten::PrimitiveParamter& param)
+    std::shared_ptr<AT_NAME::face> context::createTriangle(const aten::PrimitiveParamter& param)
     {
         auto f = AT_NAME::face::create(*this, param);
         AT_ASSERT(f);
@@ -133,9 +133,11 @@ namespace aten
         return f;
     }
 
-    void context::addTriangle(AT_NAME::face* tri)
+    void context::addTriangle(std::shared_ptr<AT_NAME::face> tri)
     {
-        tri->addToDataList(m_triangles);
+        AT_ASSERT(tri);
+        m_triangles.push_back(tri);
+        tri->updateIndex(m_triangles.size() - 1);
     }
 
     int context::getTriangleNum() const
@@ -143,7 +145,7 @@ namespace aten
         return m_triangles.size();
     }
 
-    const AT_NAME::face* context::getTriangle(int idx) const
+    const std::shared_ptr<AT_NAME::face> context::getTriangle(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < getTriangleNum());
         return m_triangles[idx];
@@ -151,38 +153,34 @@ namespace aten
 
     void context::copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const
     {
-        auto& triangles = m_triangles.getList();
-
-        for (const auto item : triangles) {
-            const auto tri = item->getData();
+        for (const auto& tri : m_triangles) {
             dst.push_back(tri->getParam());
         }
     }
 
     int context::findTriIdxFromPointer(const void* p) const
     {
-        auto& triangles = m_triangles.getList();
-
         auto found = std::find_if(
-            triangles.begin(), triangles.end(),
-            [&](const aten::DataList<aten::face>::ListItem* item) {
-            const auto tri = item->getData();
-            return tri == p;
+            m_triangles.begin(), m_triangles.end(),
+            [&](const std::shared_ptr<AT_NAME::face> face) {
+            return face.get() == p;
         });
 
         int id = -1;
 
-        if (found != triangles.end()) {
-            const auto tri = (*found)->getData();
+        if (found != m_triangles.end()) {
+            const auto& tri = *found;
             id = tri->getId();
         }
 
         return id;
     }
 
-    void context::addTransformable(aten::transformable* t)
+    void context::addTransformable(std::shared_ptr<aten::transformable> t)
     {
-        t->addToDataList(m_transformables);
+        AT_ASSERT(t);
+        m_transformables.push_back(t);
+        t->updateIndex(m_transformables.size() - 1);
     }
 
     int context::getTransformableNum() const
@@ -190,28 +188,24 @@ namespace aten
         return m_transformables.size();
     }
 
-    const aten::transformable * context::getTransformable(int idx) const
+    const std::shared_ptr<aten::transformable> context::getTransformable(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < getTransformableNum());
         return m_transformables[idx];
     }
 
-    void context::traverseTransformables(std::function<void(aten::transformable*, aten::GeometryType)> func) const
+    void context::traverseTransformables(
+        std::function<void(const std::shared_ptr<aten::transformable>, aten::GeometryType)> func) const
     {
-        auto& shapes = m_transformables.getList();
-
-        for (auto s : shapes) {
-            auto t = s->getData();
-
+        for (const auto& t : m_transformables) {
             auto type = t->getType();
-
             func(t, type);
         }
     }
 
     void context::copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const
     {
-        traverseTransformables([&](aten::transformable* t, aten::GeometryType type) {
+        traverseTransformables([&dst](const std::shared_ptr<aten::transformable> t, aten::GeometryType type) {
             if (type == GeometryType::Instance) {
                 aten::mat4 mtxL2W, mtxW2L;
                 t->getMatrices(mtxL2W, mtxW2L);
@@ -229,19 +223,16 @@ namespace aten
 
     int context::findTransformableIdxFromPointer(const void* p) const
     {
-        auto& shapes = m_transformables.getList();
-
         auto found = std::find_if(
-            shapes.begin(), shapes.end(),
-            [&](const aten::DataList<aten::transformable>::ListItem* item) {
-            const auto t = item->getData();
-            return t == p;
+            m_transformables.begin(), m_transformables.end(),
+            [&](const std::shared_ptr<aten::transformable> t) {
+            return t.get() == p;
         });
 
         int id = -1;
 
-        if (found != shapes.end()) {
-            const auto t = (*found)->getData();
+        if (found != m_transformables.end()) {
+            const auto& t = *found;
             id = t->id();
         }
 
@@ -250,19 +241,15 @@ namespace aten
 
     int context::findPolygonalTransformableOrderFromPointer(const void* p) const
     {
-        auto& shapes = m_transformables.getList();
-
         int order = -1;
 
-        for (const auto item : shapes) {
-            const auto t = item->getData();
-
+        for (const auto& t : m_transformables) {
             auto type = t->getType();
             if (type == aten::GeometryType::Polygon) {
                 order++;
             }
 
-            if (t == p) {
+            if (t.get() == p) {
                 break;
             }
         }
@@ -272,7 +259,8 @@ namespace aten
         return order;
     }
 
-    texture* context::createTexture(uint32_t width, uint32_t height, uint32_t channels, const char* name)
+    std::shared_ptr<texture> context::createTexture(
+        uint32_t width, uint32_t height, uint32_t channels, const char* name)
     {
         auto ret = texture::create(width, height, channels, name);
         AT_ASSERT(ret);
@@ -287,23 +275,23 @@ namespace aten
         return m_textures.size();;
     }
 
-    const texture* context::getTexture(int idx) const
+    const std::shared_ptr<texture> context::getTexture(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < getTextureNum());
         return m_textures[idx];
     }
 
-    texture* context::getTexture(int idx)
+    std::shared_ptr<texture> context::getTexture(int idx)
     {
         AT_ASSERT(0 <= idx && idx < getTextureNum());
         return m_textures[idx];
     }
 
-    void context::addTexture(texture* tex)
+    void context::addTexture(std::shared_ptr<texture> tex)
     {
         AT_ASSERT(tex);
-
-        tex->addToDataList(m_textures);
+        m_textures.push_back(tex);
+        tex->updateIndex(m_textures.size() - 1);
     }
 
     void context::initAllTexAsGLTexture()

@@ -32,7 +32,7 @@ namespace AT_NAME
         auto reflect = wi - 2 * dot(normal, wi) * normal;
         reflect = normalize(reflect);
 
-        return std::move(reflect);
+        return reflect;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 specular::sampleDirection(
@@ -43,7 +43,7 @@ namespace AT_NAME
     {
         const aten::vec3& in = ray.dir;
 
-        return std::move(sampleDirection(&m_param, normal, in, u, v, sampler));
+        return sampleDirection(&m_param, normal, in, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
@@ -87,7 +87,7 @@ namespace AT_NAME
         }
 #endif
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
@@ -103,7 +103,7 @@ namespace AT_NAME
         aten::vec3 bsdf = param->baseColor;
         bsdf *= externalAlbedo;
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
@@ -112,7 +112,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API MaterialSampling specular::sample(
@@ -135,7 +135,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API void specular::sample(

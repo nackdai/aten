@@ -154,7 +154,7 @@ namespace aten
             auto sdiv = aten::sin(theta);
 
             if (sdiv == real(0)) {
-                return std::move(quat1);
+                return quat1;
             }
 
             auto s0 = aten::sin((real(1) - t) * theta);
@@ -162,7 +162,7 @@ namespace aten
 
             quaternion ret = s0 / sdiv * quat1 + s1 / sdiv * quat2;
 
-            return std::move(ret);
+            return ret;
         }
 
         // 角度と任意軸からクオータニオンを設定する
@@ -239,7 +239,7 @@ namespace aten
             mtx.m[3][3] = 1.0f;
 #endif
 
-            return std::move(mtx);
+            return mtx;
         }
 
         // 行列からクオータニオンを計算する
@@ -386,7 +386,7 @@ namespace aten
             ret.z = axis.z * s;
             ret.w = aten::cos(angle * real(0.5));
 
-            return std::move(ret);
+            return ret;
         }
 
         // クオータニオンからオイラー角を計算する
@@ -440,7 +440,7 @@ namespace aten
                 angle.z = ::atan2f(Sz, Cz);
             }
 
-            return std::move(angle);
+            return angle;
         }
     };
 
@@ -448,14 +448,14 @@ namespace aten
     inline quaternion<FType> operator+(const quaternion<FType>& v1, const quaternion<FType>& v2)
     {
         quaternion<FType> ret(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
-        return std::move(ret);
+        return ret;
     }
 
     template <typename FType>
     inline quaternion<FType> operator-(const quaternion<FType>& v1, const quaternion<FType>& v2)
     {
         quaternion<FType> ret(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
-        return std::move(ret);
+        return ret;
     }
 
     template <typename FType>
@@ -469,28 +469,28 @@ namespace aten
 
         dst.w = v1.w * v2.w - v1.x * v2.x - v1.y * v2.y - v1.z * v2.z;
 
-        return std::move(dst);
+        return dst;
     }
 
     template <typename FType>
     inline quaternion<FType> operator*(const quaternion<FType>& v, real t)
     {
         quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
-        return std::move(ret);
+        return ret;
     }
 
     template <typename FType>
     inline quaternion<FType> operator*(real t, const quaternion<FType>& v)
     {
         quaternion<FType> ret(t * v.x, t * v.y, t * v.z, t * v.w);
-        return std::move(ret);
+        return ret;
     }
 
     template <typename FType>
     inline quaternion<FType> operator/(const quaternion<FType>& v, real t)
     {
         quaternion<FType> ret(v.x / t, v.y / t, v.z / t, v.w / t);
-        return std::move(ret);
+        return ret;
     }
 
     using quat = quaternion<real>;

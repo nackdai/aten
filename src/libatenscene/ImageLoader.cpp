@@ -95,7 +95,7 @@ namespace aten {
             return stored_tex;
         }
 
-        texture* tex = nullptr;
+        std::shared_ptr<texture> tex;
 
         real* dst = nullptr;
         int width = 0;
@@ -107,7 +107,7 @@ namespace aten {
             if (src) {
                 tex = ctxt.createTexture(width, height, channels, texname.c_str());
                 real norm = real(1);
-                read<float>(src, tex, width, height, channels, norm);
+                read<float>(src, tex.get(), width, height, channels, norm);
 
                 STBI_FREE(src);
             }
@@ -127,11 +127,11 @@ namespace aten {
 
                 if (fmt == ImgFormat::Fmt8Bit) {
                     real norm = real(1) / real(255);
-                    read<stbi_uc>((stbi_uc*)src, tex, width, height, channels, norm);
+                    read<stbi_uc>((stbi_uc*)src, tex.get(), width, height, channels, norm);
                 }
                 else {
                     real norm = real(1) / real(65535);
-                    read<uint16_t>((uint16_t*)src, tex, width, height, channels, norm);
+                    read<uint16_t>((uint16_t*)src, tex.get(), width, height, channels, norm);
                 }
 
                 STBI_FREE(src);

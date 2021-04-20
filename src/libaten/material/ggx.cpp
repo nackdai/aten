@@ -50,7 +50,7 @@ namespace AT_NAME
 
         aten::vec3 dir = sampleDirection(roughness.r, normal, wi, sampler);
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleDirection(
@@ -59,7 +59,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler) const
     {
-        return std::move(sampleDirection(&m_param, normal, ray.dir, u, v, sampler));
+        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
@@ -81,7 +81,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
@@ -104,7 +104,7 @@ namespace AT_NAME
         real ior = param->ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return std::move(ret);
+        return ret;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
@@ -113,7 +113,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v) const
     {
-        return std::move(bsdf(&m_param, normal, wi, wo, u, v));
+        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API real MicrofacetGGX::sampleGGX_D(
@@ -205,7 +205,7 @@ namespace AT_NAME
 
         auto dir = in - 2 * dot(in, w) * w;
 
-        return std::move(dir);
+        return dir;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleNormal(
@@ -237,7 +237,7 @@ namespace AT_NAME
         auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
         w = normalize(w);
 
-        return std::move(w);
+        return w;
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
@@ -301,7 +301,7 @@ namespace AT_NAME
 
         fresnel = F;
 
-        return std::move(bsdf);
+        return bsdf;
     }
 
     AT_DEVICE_MTRL_API void MicrofacetGGX::sample(
@@ -381,7 +381,7 @@ namespace AT_NAME
             u, v,
             isLightPath);
 
-        return std::move(ret);
+        return ret;
     }
 
     bool MicrofacetGGX::edit(aten::IMaterialParamEditor* editor)

@@ -89,7 +89,7 @@ namespace idaten {
             aten::vec2 r;
             r.x = sample();
             r.y = sample();
-            return std::move(r);
+            return r;
         }
 
     private:

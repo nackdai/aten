@@ -76,7 +76,7 @@ namespace aten
             depth++;
         }
 
-        return std::move(path);
+        return path;
     }
 
     bool PathTracing::shade(
@@ -276,7 +276,7 @@ namespace aten
 
                     hitrecord tmpRec;
 
-                    if (scene->hitLight(ctxt, light, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
+                    if (scene->hitLight(ctxt, light.get(), posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
                         // Shadow ray hits the light.
                         auto cosShadow = dot(orienting_normal, dirToLight);
 

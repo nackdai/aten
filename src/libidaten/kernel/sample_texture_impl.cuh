@@ -16,5 +16,5 @@ AT_CUDA_INLINE AT_DEVICE_MTRL_API aten::vec4 sampleTexture(
     }
 #endif
 
-    return std::move(ret);
+    return ret;
 }

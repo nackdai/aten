@@ -12,6 +12,7 @@
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/carpaint.h"
+#include "misc/value.h"
 
 namespace aten
 {
@@ -19,9 +20,9 @@ namespace aten
         MaterialType type,
         Values& value)
     {
-        aten::texture* albedoMap = (aten::texture*)value.get<void*>("albedoMap", nullptr);
-        aten::texture* normalMap = (aten::texture*)value.get<void*>("normalMap", nullptr);
-        aten::texture* roughnessMap = (aten::texture*)value.get<void*>("roughnessMap", nullptr);
+        auto albedoMap = value.get<texture>("albedoMap");
+        auto normalMap = value.get<texture>("normalMap");
+        auto roughnessMap = value.get<texture>("roughnessMap");
 
         MaterialParameter param;
         {
@@ -59,7 +60,8 @@ namespace aten
             param.isIdealRefraction = value.get("isIdealRefraction", param.isIdealRefraction);
         }
 
-        return createMaterialWithMaterialParameter(param, albedoMap, normalMap, roughnessMap);
+        return createMaterialWithMaterialParameter(
+            param, albedoMap.get(), normalMap.get(), roughnessMap.get());
     }
 
     std::shared_ptr<material> MaterialFactory::createMaterialWithDefaultValue(MaterialType type)

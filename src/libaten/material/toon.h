@@ -4,25 +4,27 @@
 #include "material/material.h"
 #include "light/light.h"
 
+namespace aten {
+    class Values;
+}
+
 namespace AT_NAME
 {
     class toon : public NPRMaterial {
     public:
         using ComputeToonShadeFunc = std::function<real(real)>;
 
-        toon(const aten::vec3& e, AT_NAME::Light* light)
+        toon(const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light)
             : NPRMaterial(aten::MaterialType::Toon, e, light)
         {
         }
-        toon(const aten::vec3& e, AT_NAME::Light* light, ComputeToonShadeFunc func)
+        toon(const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light, ComputeToonShadeFunc func)
             : NPRMaterial(aten::MaterialType::Toon, e, light)
         {
             setComputeToonShadeFunc(func);
         }
 
-        toon(aten::Values& val)
-            : NPRMaterial(aten::MaterialType::Toon, val)
-        {}
+        toon(aten::Values& val);
 
         virtual ~toon() {}
 

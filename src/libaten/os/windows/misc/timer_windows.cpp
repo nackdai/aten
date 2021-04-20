@@ -52,6 +52,6 @@ namespace AT_NAME {
         ret.second = time.wSecond;
         ret.milliSeconds = time.wMilliseconds;
 
-        return std::move(ret);
+        return ret;
     }
 }

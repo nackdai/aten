@@ -41,12 +41,12 @@ namespace aten {
 
     private:
         static AccelType s_internalType;
-        static std::function<std::unique_ptr<accelerator>()> s_userDefsInternalAccelCreator;
+        static std::function<std::shared_ptr<accelerator>()> s_userDefsInternalAccelCreator;
 
         /**
          * @brief Return a created acceleration structure for internal used.
          */
-        static std::unique_ptr<accelerator> createAccelerator(AccelType type = AccelType::Default);
+        static std::shared_ptr<accelerator> createAccelerator(AccelType type = AccelType::Default);
 
         /**
          * @brief Set the acceleration structure type for internal used.
@@ -71,7 +71,7 @@ namespace aten {
          * @brief Set a function to create user defined acceleration structure for internal used.
          */
         static void setUserDefsInternalAccelCreator(
-            std::function<std::unique_ptr<accelerator>()> creator);
+            std::function<std::shared_ptr<accelerator>()> creator);
 
         /**
          * @brief Bulid structure tree from the specified list.

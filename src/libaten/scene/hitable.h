@@ -101,7 +101,7 @@ namespace aten {
 
         virtual aabb getTransformedBoundingBox() const
         {
-            return std::move(m_aabb);
+            return m_aabb;
         }
 
         virtual const hitable* getHasObject() const

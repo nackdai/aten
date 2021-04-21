@@ -3,6 +3,7 @@
 
 #include "accelerator/stackless_bvh.h"
 #include "accelerator/bvh.h"
+#include "accelerator/bvh_util.h"
 #include "geometry/transformable.h"
 #include "geometry/object.h"
 
@@ -81,7 +82,7 @@ namespace aten {
         std::vector<accelerator*>& listBvh,
         std::map<hitable*, accelerator*>& nestedBvhMap)
     {
-        bvh::registerBvhNodeToLinearList<StacklessBvhNodeEntry>(
+        registerBvhNodeToLinearListRecursively<StacklessBvhNodeEntry>(
             root,
             parentNode,
             nestParent,

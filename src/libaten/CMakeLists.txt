@@ -16,7 +16,10 @@ add_library(
   accelerator/accelerator.h
   accelerator/bvh.cpp
   accelerator/bvh.h
+  accelerator/bvh_node.cpp
+  accelerator/bvh_node.h
   accelerator/bvh_update.cpp
+  accelerator/bvh_util.h
   accelerator/qbvh.cpp
   accelerator/qbvh.h
   accelerator/sbvh.cpp

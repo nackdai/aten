@@ -527,6 +527,12 @@
     <ClInclude Include="..\3rdparty\imgui\backends\imgui_impl_opengl3.h">
       <Filter>ui\imgui\backends</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\accelerator\bvh_node.h">
+      <Filter>accelerator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\accelerator\bvh_util.h">
+      <Filter>accelerator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -840,6 +846,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\light\light_instantiate_from_value.cpp">
       <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\accelerator\bvh_node.cpp">
+      <Filter>accelerator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

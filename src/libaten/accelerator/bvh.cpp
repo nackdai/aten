@@ -2,8 +2,10 @@
 #include <vector>
 
 #include "accelerator/bvh.h"
-#include "geometry/transformable.h"
+#include "accelerator/bvh_node.h"
+#include "accelerator/bvh_util.h"
 #include "geometry/object.h"
+#include "geometry/transformable.h"
 
 //#define TEST_NODE_LIST
 //#pragma optimize( "", off)
@@ -200,6 +202,19 @@ namespace aten {
     {
         bool isHit = onHit(ctxt, m_root, r, t_min, t_max, isect);
         return isHit;
+    }
+
+    const aabb& bvh::getBoundingbox() const
+    {
+        if (m_root) {
+            return m_root->getBoundingbox();
+        }
+        return aabb();
+    }
+
+    bvhnode* bvh::getRoot()
+    {
+        return m_root;
     }
 
     bool bvh::onHit(
@@ -634,33 +649,6 @@ namespace aten {
             }
         }
 #endif
-    }
-
-    bvhnode* bvh::getNestedNode(bvhnode* node)
-    {
-        bvhnode* ret = nullptr;
-
-        if (node) {
-            auto item = node->getItem();
-            if (item) {
-                auto internalObj = const_cast<hitable*>(item->getHasObject());
-                if (internalObj) {
-                    auto accel = internalObj->getInternalAccelerator();
-
-                    // NOTE
-                    // 本来ならこのキャストは不正だが、BVHであることは自明なので.
-                    auto bvh = *reinterpret_cast<aten::bvh**>(&accel);
-
-                    ret = bvh->getRoot();
-                }
-            }
-
-            if (!ret) {
-                ret = node;
-            }
-        }
-
-        return ret;
     }
 
     void bvh::drawAABB(

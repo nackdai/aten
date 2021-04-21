@@ -5,6 +5,7 @@
 #include <omp.h>
 
 #include "accelerator/sbvh.h"
+#include "accelerator/bvh_util.h"
 
 //#pragma optimize( "", off)
 

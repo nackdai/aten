@@ -4,6 +4,7 @@
 
 #include "accelerator/threaded_bvh.h"
 #include "accelerator/bvh.h"
+#include "accelerator/bvh_util.h"
 #include "geometry/transformable.h"
 #include "geometry/object.h"
 

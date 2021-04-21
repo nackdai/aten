@@ -11,21 +11,21 @@ namespace aten
      * @brief Description for the node in threaded BVH.
      */
     struct ThreadedBvhNode {
-        aten::vec3 boxmin;        ///< AABB min position.
+        aten::vec3 boxmin;      ///< AABB min position.
         float hit{ -1 };        ///< Link index if ray hit.
 
-        aten::vec3 boxmax;        ///< AABB max position.
-        float miss{ -1 };        ///< Link index if ray miss.
+        aten::vec3 boxmax;      ///< AABB max position.
+        float miss{ -1 };       ///< Link index if ray miss.
 
         float shapeid{ -1 };    ///< Object index.
-        float primid{ -1 };        ///< Triangle index.
+        float primid{ -1 };     ///< Triangle index.
 
         ///< External bvh index.
         union {
             float exid{ -1 };
             struct {
-                uint32_t mainExid : 15;        ///< External bvh index.
-                uint32_t lodExid : 15;        ///< LOD bvh index.
+                uint32_t mainExid : 15;     ///< External bvh index.
+                uint32_t lodExid : 15;      ///< LOD bvh index.
                 uint32_t hasLod : 1;        ///< Flag if the node has LOD.
                 uint32_t noExternal : 1;    ///< Flag if the node does not have external bvh.
             };

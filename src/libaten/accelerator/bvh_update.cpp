@@ -1,4 +1,5 @@
 #include "accelerator/bvh.h"
+#include "accelerator/bvh_node.h"
 #include "geometry/transformable.h"
 #include "geometry/object.h"
 

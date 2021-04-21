@@ -247,6 +247,8 @@
     <ClInclude Include="..\3rdparty\imgui\imgui_internal.h" />
     <ClInclude Include="..\src\libaten\accelerator\accelerator.h" />
     <ClInclude Include="..\src\libaten\accelerator\bvh.h" />
+    <ClInclude Include="..\src\libaten\accelerator\bvh_node.h" />
+    <ClInclude Include="..\src\libaten\accelerator\bvh_util.h" />
     <ClInclude Include="..\src\libaten\accelerator\GpuPayloadDefs.h" />
     <ClInclude Include="..\src\libaten\accelerator\qbvh.h" />
     <ClInclude Include="..\src\libaten\accelerator\sbvh.h" />
@@ -393,6 +395,7 @@
     <ClCompile Include="..\3rdparty\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\accelerator.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp" />
+    <ClCompile Include="..\src\libaten\accelerator\bvh_node.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\qbvh.cpp" />
     <ClCompile Include="..\src\libaten\accelerator\sbvh.cpp" />

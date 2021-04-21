@@ -1,4 +1,5 @@
 #include "accelerator/qbvh.h"
+#include "accelerator/bvh_util.h"
 
 //#pragma optimize( "", off)
 
@@ -74,7 +75,7 @@ namespace aten
         std::vector<accelerator*>& listBvh,
         std::map<hitable*, accelerator*>& nestedBvhMap)
     {
-        bvh::registerBvhNodeToLinearList<BvhNode>(
+        registerBvhNodeToLinearListRecursively<BvhNode>(
             root,
             parentNode,
             nestParent,

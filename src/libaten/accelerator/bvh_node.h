@@ -18,11 +18,10 @@ namespace aten {
     class bvhnode {
         friend class bvh;
 
-    private:
-        bvhnode(bvhnode* parent, hitable* item, bvh* bvh);
+    public:
+        bvhnode(const std::shared_ptr<bvhnode>& parent, hitable* item, bvh* bvh);
         virtual ~bvhnode() {}
 
-    public:
         /**
          * @brief Test if a ray hits the node.
          */
@@ -66,23 +65,36 @@ namespace aten {
         /**
          * @brief Return a left child node.
          */
-        bvhnode* getLeft()
+        const std::shared_ptr<bvhnode>& getLeft() const
         {
             return m_left;
+        }
+        bvhnode* getLeft()
+        {
+            return m_left.get();
         }
 
         /**
         * @brief Return a right child node.
         */
-        bvhnode* getRight()
+        const std::shared_ptr<bvhnode>& getRight() const
         {
             return m_right;
         }
+        bvhnode* getRight()
+        {
+            return m_right.get();
+        }
 
+        void setParent(const std::shared_ptr<bvhnode>& parent)
+        {
+            m_parent = parent.get();
+        }
         void setParent(bvhnode* parent)
         {
             m_parent = parent;
         }
+
         bvhnode* getParent()
         {
             return m_parent;
@@ -212,7 +224,7 @@ namespace aten {
         /**
          * @brief This function will be called when the item which the node has move/rotates/scales.
          */
-        void itemChanged(hitable* sender);
+        void itemChanged(const hitable* sender);
 
         /**
          * @brief Try to rotate the position in the tree.
@@ -223,6 +235,11 @@ namespace aten {
          * @brief Re-fit children's AABB.
          */
         static void refitChildren(bvhnode* node, bool propagate);
+
+        static void refitChildren(const std::shared_ptr<bvhnode>& node, bool propagate)
+        {
+            refitChildren(node.get(), propagate);
+        }
 
         void setIsCandidate(bool c)
         {
@@ -241,10 +258,14 @@ namespace aten {
             const aten::mat4& mtxL2W) const;
 
     protected:
-        bvhnode* m_left{ nullptr };
-        bvhnode* m_right{ nullptr };
+        std::shared_ptr<bvhnode> m_left;
+        std::shared_ptr<bvhnode> m_right;
 
-        bvhnode* m_parent{ nullptr };
+        // NOTE
+        // To avoid circular reference, I can't use shared_ptr for this.
+        // On the other hand, I need to replace this value frequently for bvh updating.
+        // Therefore, it is difficult to define this as weak_ptr.
+        bvhnode* m_parent;
 
         aabb m_aabb;
 

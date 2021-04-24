@@ -64,6 +64,11 @@ namespace aten {
         /**
          * @brief Return the root node of the tree.
          */
+        const std::shared_ptr<bvhnode>& getRoot() const;
+
+        /**
+         * @brief Return the root node of the tree.
+         */
         bvhnode* getRoot();
 
         /**
@@ -101,11 +106,11 @@ namespace aten {
          * @brief Build the tree with Sufrace Area Heuristic.
          */
         void buildBySAH(
-            bvhnode* root,
+            const std::shared_ptr<bvhnode>& root,
             hitable** list,
             uint32_t num,
             int depth,
-            bvhnode* parent);
+            const std::shared_ptr<bvhnode>& parent);
 
         struct Candidate {
             bvhnode* node{ nullptr };
@@ -130,7 +135,7 @@ namespace aten {
 
     protected:
         // Root node.
-        bvhnode* m_root{ nullptr };
+        std::shared_ptr<bvhnode> m_root;
 
         // Array of the node which will be re-fitted.
         std::vector<bvhnode*> m_refitNodes;

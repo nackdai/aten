@@ -10,8 +10,8 @@
 //#pragma optimize( "", off)
 
 namespace aten {
-    bvhnode::bvhnode(bvhnode* parent, hitable* item, bvh* bvh)
-        : m_parent(parent)
+    bvhnode::bvhnode(const std::shared_ptr<bvhnode>& parent, hitable* item, bvh* bvh)
+        : m_parent(parent.get())
     {
         m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
         m_item = item;

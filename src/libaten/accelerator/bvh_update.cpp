@@ -12,7 +12,7 @@
 
 namespace aten
 {
-    void bvhnode::itemChanged(hitable* sender)
+    void bvhnode::itemChanged(const hitable* sender)
     {
         AT_ASSERT(m_item == sender);
 
@@ -39,8 +39,8 @@ namespace aten
         do {
             auto oldbox = node->getBoundingbox();
 
-            auto left = node->getLeft();
-            auto right = node->getRight();
+            const auto& left = node->getLeft();
+            const auto& right = node->getRight();
 
             // Start with the left box.
             auto newbox = left->getBoundingbox();
@@ -58,7 +58,7 @@ namespace aten
         } while (propagate && node != nullptr);
     }
 
-    inline real computeSurfaceArea(bvhnode* node)
+    inline real computeSurfaceArea(const bvhnode* node)
     {
         if (!node) {
             return real(0);
@@ -68,9 +68,14 @@ namespace aten
         return ret;
     }
 
+    inline real computeSurfaceArea(const std::shared_ptr<bvhnode>& node)
+    {
+        return computeSurfaceArea(node.get());
+    }
+
     inline bool checkInvalidRotateChildToGrandChild(
-        bvhnode* node0,
-        bvhnode* node1)
+        const std::shared_ptr<bvhnode>& node0,
+        const std::shared_ptr<bvhnode>& node1)
     {
         bool b0 = (node0 == nullptr);
         bool b1 = (node1 == nullptr);
@@ -81,8 +86,8 @@ namespace aten
     }
 
     inline bool checkInvalidRotateGrandChildToGrandChild(
-        bvhnode* node0,
-        bvhnode* node1)
+        const std::shared_ptr<bvhnode>& node0,
+        const std::shared_ptr<bvhnode>& node1)
     {
         bool b0 = (node0 == nullptr);
         bool b1 = (node1 == nullptr);
@@ -307,7 +312,7 @@ namespace aten
                 //    2. update the depth (if child-to-grandchild)
                 //    3. update the parent pointers
                 //    4. refit the boundary box
-                bvhnode* swap = nullptr;
+                decltype(left) swap;
 
                 switch (bestRot.rot) {
                 case Rot::None:
@@ -319,7 +324,7 @@ namespace aten
                     left = right->m_left;
                     left->m_parent = this;
                     right->m_left = swap;
-                    swap->m_parent = right;
+                    swap->m_parent = right.get();
                     refitChildren(right, false);
                     break;
                 case Rot::L_RR:
@@ -327,7 +332,7 @@ namespace aten
                     left = right->m_right;
                     left->m_parent = this;
                     right->m_right = swap;
-                    swap->m_parent = right;
+                    swap->m_parent = right.get();
                     refitChildren(right, false);
                     break;
                 case Rot::R_LL:
@@ -335,7 +340,7 @@ namespace aten
                     right = left->m_left;
                     right->m_parent = this;
                     left->m_left = swap;
-                    swap->m_parent = left;
+                    swap->m_parent = left.get();
                     refitChildren(left, false);
                     break;
                 case Rot::R_LR:
@@ -343,7 +348,7 @@ namespace aten
                     right = left->m_right;
                     right->m_parent = this;
                     left->m_right = swap;
-                    swap->m_parent = left;
+                    swap->m_parent = left.get();
                     refitChildren(left, false);
                     break;
 
@@ -352,8 +357,8 @@ namespace aten
                     swap = left->m_left;
                     left->m_left = right->m_right;
                     right->m_right = swap;
-                    left->m_left->m_parent = left;
-                    swap->m_parent = right;
+                    left->m_left->m_parent = left.get();
+                    swap->m_parent = right.get();
                     refitChildren(left, false);
                     refitChildren(right, false);
                     break;
@@ -361,8 +366,8 @@ namespace aten
                     swap = left->m_left;
                     left->m_left = right->m_left;
                     right->m_left = swap;
-                    left->m_left->m_parent = left;
-                    swap->m_parent = right;
+                    left->m_left->m_parent = left.get();
+                    swap->m_parent = right.get();
                     refitChildren(left, false);
                     refitChildren(right, false);
                     break;

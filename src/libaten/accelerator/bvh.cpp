@@ -1,3 +1,4 @@
+#include <array>
 #include <random>
 #include <vector>
 
@@ -74,90 +75,6 @@ namespace aten {
         }
     }
 
-    bvhnode::bvhnode(bvhnode* parent, hitable* item, bvh* bvh)
-        : m_parent(parent)
-    {
-        m_children[0] = m_children[1] = m_children[2] = m_children[3] = nullptr;
-        m_item = item;
-
-        if (m_item) {
-            m_item->setFuncNotifyChanged(std::bind(&bvhnode::itemChanged, this, std::placeholders::_1));
-        }
-
-        m_bvh = bvh;
-    }
-
-    bool bvhnode::hit(
-        const context& ctxt,
-        const ray& r,
-        real t_min, real t_max,
-        Intersection& isect) const
-    {
-#if 0
-        if (m_item) {
-            return m_item->hit(r, t_min, t_max, isect);
-        }
-#else
-        if (m_childrenNum > 0) {
-            bool isHit = false;
-
-            for (int i = 0; i < m_childrenNum; i++) {
-                Intersection isectTmp;
-                isectTmp.t = AT_MATH_INF;
-                auto res = m_children[i]->hit(ctxt, r, t_min, t_max, isectTmp);
-
-                if (res) {
-                    if (isectTmp.t < isect.t) {
-                        isect = isectTmp;
-                        t_max = isect.t;
-
-                        isHit = true;
-                    }
-                }
-            }
-
-            return isHit;
-        }
-        else if (m_item) {
-            return m_item->hit(ctxt, r, t_min, t_max, isect);
-        }
-#endif
-        else {
-            auto bbox = getBoundingbox();
-            auto isHit = bbox.hit(r, t_min, t_max);
-
-            if (isHit) {
-                isHit = bvh::onHit(ctxt, this, r, t_min, t_max, isect);
-            }
-
-            return isHit;
-        }
-    }
-
-    void bvhnode::drawAABB(
-        aten::hitable::FuncDrawAABB func,
-        const aten::mat4& mtxL2W) const
-    {
-        if (m_item && m_item->getHasObject()) {
-            m_item->drawAABB(func, mtxL2W);
-        }
-        else {
-            auto transofrmedBox = aten::aabb::transform(m_aabb, mtxL2W);
-
-            aten::mat4 mtxScale;
-            mtxScale.asScale(transofrmedBox.size());
-
-            aten::mat4 mtxTrans;
-            mtxTrans.asTrans(transofrmedBox.minPos());
-
-            aten::mat4 mtx = mtxTrans * mtxScale;
-
-            func(mtx);
-        }
-    }
-
-    ///////////////////////////////////////////////////////
-
     inline int findLongestAxis(const aabb& bbox)
     {
         const auto& minP = bbox.minPos();
@@ -190,7 +107,7 @@ namespace aten {
 
         sortList(list, num, axis);
 
-        m_root = new bvhnode(nullptr, nullptr, this);
+        m_root = std::make_shared<bvhnode>(nullptr, nullptr, this);
         buildBySAH(m_root, list, num, 0, m_root);
     }
 
@@ -200,7 +117,7 @@ namespace aten {
         real t_min, real t_max,
         Intersection& isect) const
     {
-        bool isHit = onHit(ctxt, m_root, r, t_min, t_max, isect);
+        bool isHit = onHit(ctxt, m_root.get(), r, t_min, t_max, isect);
         return isHit;
     }
 
@@ -212,9 +129,14 @@ namespace aten {
         return aabb();
     }
 
-    bvhnode* bvh::getRoot()
+    const std::shared_ptr<bvhnode>& bvh::getRoot() const
     {
         return m_root;
+    }
+
+    bvhnode* bvh::getRoot()
+    {
+        return m_root.get();
     }
 
     bool bvh::onHit(
@@ -229,8 +151,8 @@ namespace aten {
 
         // TODO
         // stack size.
-        static const uint32_t stacksize = 64;
-        const bvhnode* stackbuf[stacksize];
+        static const size_t stacksize = 64;
+        std::array<const bvhnode*, stacksize> stackbuf;
 
         stackbuf[0] = root;
         int stackpos = 1;
@@ -252,10 +174,10 @@ namespace aten {
             else {
                 if (node->getBoundingbox().hit(r, t_min, t_max)) {
                     if (node->m_left) {
-                        stackbuf[stackpos++] = node->m_left;
+                        stackbuf[stackpos++] = node->m_left.get();
                     }
                     if (node->m_right) {
-                        stackbuf[stackpos++] = node->m_right;
+                        stackbuf[stackpos++] = node->m_right.get();
                     }
 
                     if (stackpos > stacksize) {
@@ -277,11 +199,11 @@ namespace aten {
     }
 
     void bvh::buildBySAH(
-        bvhnode* root,
+        const std::shared_ptr<bvhnode>& root,
         hitable** list,
         uint32_t num,
-        int depth/*= 0*/,
-        bvhnode* parent/*= nullptr*/)
+        int depth,
+        const std::shared_ptr<bvhnode>& parent)
     {
         // NOTE
         // http://qiita.com/omochi64/items/9336f57118ba918f82ec
@@ -299,7 +221,7 @@ namespace aten {
 
         if (num == 1) {
             // １個しかないので、これだけで終了.
-            root->m_left = new bvhnode(parent, list[0], this);
+            root->m_left = std::make_shared<bvhnode>(parent, list[0], this);
 
             root->m_left->setBoundingBox(list[0]->getBoundingbox());
             root->m_left->setDepth(depth + 1);
@@ -315,8 +237,8 @@ namespace aten {
 
             sortList(list, num, axis);
 
-            root->m_left = new bvhnode(parent, list[0], this);
-            root->m_right = new bvhnode(parent, list[1], this);
+            root->m_left = std::make_shared<bvhnode>(parent, list[0], this);
+            root->m_right = std::make_shared<bvhnode>(parent, list[1], this);
 
             root->m_left->setBoundingBox(list[0]->getBoundingbox());
             root->m_right->setBoundingBox(list[1]->getBoundingbox());
@@ -421,8 +343,8 @@ namespace aten {
             sortList(list, num, bestAxis);
 
             // 左右の子ノードを作成.
-            root->m_left = new bvhnode(root, nullptr, this);
-            root->m_right = new bvhnode(root, nullptr, this);
+            root->m_left = std::make_shared<bvhnode>(root, nullptr, this);
+            root->m_right = std::make_shared<bvhnode>(root, nullptr, this);
 
             root->m_left->setDepth(depth + 1);
             root->m_right->setDepth(depth + 1);
@@ -655,10 +577,10 @@ namespace aten {
         aten::hitable::FuncDrawAABB func,
         const aten::mat4& mtxL2W)
     {
-        bvhnode* node = m_root;
+        auto node = m_root;
 
-        static const uint32_t stacksize = 64;
-        const bvhnode* stackbuf[stacksize];
+        static const size_t stacksize = 64;
+        std::array<std::shared_ptr<bvhnode>, stacksize> stackbuf;
 
         stackbuf[0] = m_root;
         int stackpos = 1;

@@ -1246,7 +1246,7 @@ namespace aten
             for (auto it : m_treelets) {
                 const auto& treelet = it.second;
                 if (treelet.mtrlid >= 0) {
-                    const auto mtrl = ctxt.getMaterial(treelet.mtrlid);
+                    const auto& mtrl = ctxt.getMaterial(treelet.mtrlid);
                     AT_ASSERT(mtrl);
 
                     mtrlMap.insert(std::make_pair(treelet.mtrlid, mtrl->nameString()));

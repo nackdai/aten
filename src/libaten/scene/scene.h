@@ -20,7 +20,7 @@ namespace AT_NAME {
         virtual void build(const aten::context& ctxt)
         {}
 
-        void add(const std::shared_ptr<aten::hitable> s)
+        void add(const std::shared_ptr<aten::hitable>& s)
         {
             m_list.push_back(s);
         }
@@ -43,12 +43,12 @@ namespace AT_NAME {
             return hit(ctxt, r, t_min, t_max, false, rec, isect);
         }
 
-        void addLight(const std::shared_ptr<Light> l)
+        void addLight(const std::shared_ptr<Light>& l)
         {
             m_lights.push_back(l);
         }
 
-        void addImageBasedLight(const std::shared_ptr<ImageBasedLight> l)
+        void addImageBasedLight(const std::shared_ptr<ImageBasedLight>& l)
         {
             if (m_ibl != l) {
                 m_ibl = l;
@@ -64,13 +64,12 @@ namespace AT_NAME {
             return (uint32_t)m_lights.size();
         }
 
-        const std::shared_ptr<Light> getLight(uint32_t i) const
+        std::shared_ptr<Light> getLight(uint32_t i)
         {
             return m_lights[i];
         }
 
-        // TODO
-        std::shared_ptr<Light> getLight(uint32_t i)
+        std::shared_ptr<const Light> getLight(uint32_t i) const
         {
             return m_lights[i];
         }
@@ -179,7 +178,7 @@ namespace AT_NAME {
 
         void drawForGBuffer(
             aten::hitable::FuncPreDraw func,
-            std::function<bool(std::shared_ptr<aten::hitable>)> funcIfDraw,
+            std::function<bool(const std::shared_ptr<aten::hitable>&)> funcIfDraw,
             const aten::context& ctxt) const;
 
     protected:

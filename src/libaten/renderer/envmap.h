@@ -12,7 +12,7 @@ namespace AT_NAME
 
     public:
         void init(
-            const std::shared_ptr<aten::texture> envmap,
+            const std::shared_ptr<aten::texture>& envmap,
             real mult = real(1))
         {
             m_envmap = envmap;
@@ -23,7 +23,7 @@ namespace AT_NAME
 
         virtual aten::vec3 sample(real u, real v) const override final;
 
-        const std::shared_ptr<aten::texture> getTexture() const
+        const std::shared_ptr<aten::texture>& getTexture() const
         {
             return m_envmap;
         }

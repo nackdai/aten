@@ -64,7 +64,7 @@ namespace aten {
         /**
          * @brief Return the root node of the tree.
          */
-        const std::shared_ptr<bvhnode>& getRoot() const;
+        std::shared_ptr<bvhnode> getRoot() const;
 
         /**
          * @brief Return the root node of the tree.

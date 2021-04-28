@@ -30,7 +30,7 @@ namespace aten
             m_lightDir = dir;
         }
 
-        void registerBlueNoiseTex(const std::shared_ptr<texture> tex)
+        void registerBlueNoiseTex(const std::shared_ptr<texture>& tex)
         {
             m_noisetex.push_back(tex);
         }

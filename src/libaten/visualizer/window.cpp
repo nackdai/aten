@@ -29,7 +29,7 @@ namespace aten
     {
         auto found = std::find_if(
             g_windows.begin(), g_windows.end(),
-            [&](const std::shared_ptr<windowImpl> wnd)
+            [&](const std::shared_ptr<windowImpl>& wnd)
         {
             if (wnd->getNativeHandle() == w) {
                 return true;
@@ -324,7 +324,7 @@ namespace aten
 
             ret->m_imguiCtxt = ImGui::GetCurrentContext();
         }
-        g_windows.push_back(std::shared_ptr<windowImpl>(std::move(ret)));
+        g_windows.push_back(std::shared_ptr<windowImpl>(ret));
 
         g_mouseX.resize(g_windows.size());
         g_mouseY.resize(g_windows.size());

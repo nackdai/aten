@@ -80,7 +80,7 @@ namespace aten {
             return static_cast<vec3>(std::get<3>(val_));
         }
         template <typename T>
-        operator std::shared_ptr<T>() const
+        operator const std::shared_ptr<T>&() const
         {
             assert(type_hash_ > 0 && type_hash_ == typeid(T).hash_code());
             return std::reinterpret_pointer_cast<T>(std::get<4>(val_));

@@ -85,7 +85,7 @@ namespace aten
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
-        void addMaterial(std::shared_ptr<AT_NAME::material> mtrl);
+        void addMaterial(const std::shared_ptr<AT_NAME::material>& mtrl);
 
         void addMaterial(AT_NAME::material* mtrl);
 
@@ -94,13 +94,7 @@ namespace aten
             return static_cast<int>(m_materials.size());
         }
 
-        std::shared_ptr<AT_NAME::material> getMaterial(int idx)
-        {
-            AT_ASSERT(0 <= idx && idx < getMaterialNum());
-            return m_materials[idx];
-        }
-
-        const std::shared_ptr<AT_NAME::material> getMaterial(int idx) const
+        std::shared_ptr<AT_NAME::material> getMaterial(int idx) const
         {
             AT_ASSERT(0 <= idx && idx < getMaterialNum());
             return m_materials[idx];
@@ -110,30 +104,30 @@ namespace aten
 
         void copyMaterialParameters(std::vector<MaterialParameter>& dst) const;
 
-        const std::shared_ptr<AT_NAME::material> findMaterialByName(const char* name) const;
+        std::shared_ptr<const AT_NAME::material> findMaterialByName(const char* name) const;
 
         int findMaterialIdxByName(const char* name) const;
 
         std::shared_ptr<AT_NAME::face> createTriangle(const aten::PrimitiveParamter& param);
 
-        void addTriangle(std::shared_ptr<AT_NAME::face> tri);
+        void addTriangle(const std::shared_ptr<AT_NAME::face>& tri);
 
         int getTriangleNum() const;
 
-        const std::shared_ptr<AT_NAME::face> getTriangle(int idx) const;
+        std::shared_ptr<const AT_NAME::face> getTriangle(int idx) const;
 
         void copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const;
 
         int findTriIdxFromPointer(const void* p) const;
 
-        void addTransformable(std::shared_ptr<aten::transformable> t);
+        void addTransformable(const std::shared_ptr<aten::transformable>& t);
 
         int getTransformableNum() const;
 
-        const std::shared_ptr<aten::transformable> getTransformable(int idx) const;
+        std::shared_ptr<const aten::transformable> getTransformable(int idx) const;
 
         void traverseTransformables(
-            std::function<void(const std::shared_ptr<aten::transformable>, aten::GeometryType)> func) const;
+            std::function<void(const std::shared_ptr<aten::transformable>&, aten::GeometryType)> func) const;
 
         void copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const;
 
@@ -146,10 +140,9 @@ namespace aten
 
         int getTextureNum() const;
 
-        const std::shared_ptr<texture> getTexture(int idx) const;
-        std::shared_ptr<texture> getTexture(int idx);
+        std::shared_ptr<texture> getTexture(int idx) const;
 
-        void addTexture(std::shared_ptr<texture> tex);
+        void addTexture(const std::shared_ptr<texture>& tex);
 
         void initAllTexAsGLTexture();
 

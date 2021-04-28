@@ -7,7 +7,7 @@ namespace aten
         m_param.type = type;
     }
 
-    transformable::transformable(GeometryType type, const std::shared_ptr<material> mtrl)
+    transformable::transformable(GeometryType type, const std::shared_ptr<material>& mtrl)
     {
         mtrl_ = mtrl;
         m_param.type = type;

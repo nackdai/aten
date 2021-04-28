@@ -50,7 +50,7 @@ namespace aten
         std::string mtrl_name(name.C_Str());
         AT_PRINTF("%s\n", mtrl_name.c_str());
 
-        auto& stored_mtrl = aten::AssetManager::getMtrl(mtrl_name);
+        auto stored_mtrl = aten::AssetManager::getMtrl(mtrl_name);
         if (stored_mtrl) {
             // The specified material already exists
             return std::string(stored_mtrl->name());

@@ -511,7 +511,8 @@ namespace AT_NAME
     protected:
         NPRMaterial(
             aten::MaterialType type,
-            const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light);
+            const aten::vec3& e,
+            const std::shared_ptr<AT_NAME::Light>& light);
 
         NPRMaterial(aten::MaterialType type, aten::Values& val)
             : material(type, MaterialAttributeNPR, val)
@@ -529,9 +530,9 @@ namespace AT_NAME
             return real(1);
         }
 
-        void setTargetLight(std::shared_ptr<AT_NAME::Light> light);
+        void setTargetLight(const std::shared_ptr<AT_NAME::Light>& light);
 
-        const std::shared_ptr<AT_NAME::Light> getTargetLight() const;
+        std::shared_ptr<const AT_NAME::Light> getTargetLight() const;
 
         virtual aten::vec3 bsdf(
             real cosShadow,

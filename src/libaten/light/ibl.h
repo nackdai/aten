@@ -16,7 +16,7 @@ namespace AT_NAME {
         ImageBasedLight()
             : Light(aten::LightType::IBL, LightAttributeIBL)
         {}
-        ImageBasedLight(const std::shared_ptr<AT_NAME::envmap> envmap)
+        ImageBasedLight(const std::shared_ptr<AT_NAME::envmap>& envmap)
             : Light(aten::LightType::IBL, LightAttributeIBL)
         {
             setEnvMap(envmap);
@@ -27,7 +27,7 @@ namespace AT_NAME {
         virtual ~ImageBasedLight() {}
 
     public:
-        void setEnvMap(const std::shared_ptr<AT_NAME::envmap> envmap)
+        void setEnvMap(const std::shared_ptr<AT_NAME::envmap>& envmap)
         {
             if (m_envmap != envmap) {
                 m_envmap = envmap;
@@ -36,7 +36,7 @@ namespace AT_NAME {
             }
         }
 
-        const std::shared_ptr<AT_NAME::envmap> getEnvMap() const
+        std::shared_ptr<const AT_NAME::envmap> getEnvMap() const
         {
             return m_envmap;
         }

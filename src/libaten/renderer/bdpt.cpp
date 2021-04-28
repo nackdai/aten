@@ -24,12 +24,12 @@ namespace aten
         return p;
     }
 
-    static inline real russianRoulette(const std::shared_ptr<material> mtrl)
+    static inline real russianRoulette(const material& mtrl)
     {
-        if (mtrl->isEmissive()) {
+        if (mtrl.isEmissive()) {
             return 1;
         }
-        real p = russianRoulette(mtrl->color());
+        real p = russianRoulette(mtrl.color());
         return p;
     }
 
@@ -38,7 +38,7 @@ namespace aten
         real pdf = real(0);
 
         if (vtx.mtrl) {
-            pdf = aten::russianRoulette(vtx.mtrl);
+            pdf = aten::russianRoulette(*vtx.mtrl);
         }
         else if (vtx.light) {
             pdf = aten::russianRoulette(vtx.light->getLe());
@@ -102,7 +102,7 @@ namespace aten
             auto obj = ctxt.getTransformable(isect.objid);
 
             // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
-            auto rrProb = aten::russianRoulette(mtrl);
+            auto rrProb = aten::russianRoulette(*mtrl);
             auto rr = sampler->nextSample();
             if (rr >= rrProb) {
                 break;
@@ -230,7 +230,7 @@ namespace aten
     BDPT::Result BDPT::genLightPath(
         const context& ctxt,
         std::vector<Vertex>& vs,
-        std::shared_ptr<aten::Light> light,
+        const std::shared_ptr<aten::Light>& light,
         sampler* sampler,
         scene* scene,
         camera* camera) const
@@ -364,7 +364,7 @@ namespace aten
             auto obj = ctxt.getTransformable(isect.objid);
 
             // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
-            auto rrProb = aten::russianRoulette(mtrl);
+            auto rrProb = aten::russianRoulette(*mtrl);
             auto rr = sampler->nextSample();
             if (rr >= rrProb) {
                 break;

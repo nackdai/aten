@@ -42,22 +42,21 @@ namespace aten {
         real& selectPdf,
         LightSampleResult& sampleRes)
     {
-        std::shared_ptr<Light> light;
-
         auto num = m_lights.size();
+
         if (num > 0) {
             auto r = sampler->nextSample();
             uint32_t idx = (uint32_t)aten::clamp<real>(r * num, 0, num - 1);
-            light = m_lights[idx];
+            const auto& light = m_lights[idx];
 
             sampleRes = light->sample(ctxt, org, nml, sampler);
             selectPdf = real(1) / num;
-        }
-        else {
-            selectPdf = 1;
+
+            return light;
         }
 
-        return light;
+        selectPdf = 1;
+        return nullptr;
     }
 
     std::shared_ptr<Light> scene::sampleLight(
@@ -82,14 +81,14 @@ namespace aten {
         auto r = sampler->nextSample();
         auto w_sum = real(0);
 
-        std::shared_ptr<Light> selected_light;
+        int32_t selected_light_idx = -1;
         real selected_cost = real(0);
 
         for (auto i = 0U; i < light_cnt; i++) {
             const auto r_light = sampler->nextSample();
             const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
-            const auto light = m_lights[light_pos];
+            const auto& light = m_lights[light_pos];
 
             const auto lightsample = light->sample(ctxt, org, nml, sampler);
 
@@ -129,7 +128,7 @@ namespace aten {
             w_sum += cost;
 
             if (cost > 0 && r < cost / w_sum) {
-                selected_light = light;
+                selected_light_idx = light_pos;
                 sampleRes = lightsample;
                 selected_cost = cost;
             }
@@ -137,10 +136,10 @@ namespace aten {
 
         if (selected_cost > 0) {
             selectPdf = selected_cost / w_sum;
-            return selected_light;
+            return m_lights[selected_light_idx];;
         }
 
-        return std::shared_ptr<Light>();
+        return nullptr;
 #else
         std::vector<LightSampleResult> samples(m_lights.size());
         std::vector<real> costs(m_lights.size());
@@ -216,7 +215,7 @@ namespace aten {
 
     void scene::drawForGBuffer(
         aten::hitable::FuncPreDraw func,
-        std::function<bool(std::shared_ptr<aten::hitable>)> funcIfDraw,
+        std::function<bool(const std::shared_ptr<aten::hitable>&)> funcIfDraw,
         const context& ctxt) const
     {
         uint32_t triOffset = 0;

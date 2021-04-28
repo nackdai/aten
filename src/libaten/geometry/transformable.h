@@ -18,7 +18,7 @@ namespace aten
         virtual ~transformable() {}
 
         transformable(GeometryType type);
-        transformable(GeometryType type, const std::shared_ptr<AT_NAME::material> mtrl);
+        transformable(GeometryType type, const std::shared_ptr<AT_NAME::material>& mtrl);
 
     public:
         virtual void getSamplePosNormalArea(
@@ -62,7 +62,7 @@ namespace aten
             return m_id;
         }
 
-        std::shared_ptr<AT_NAME::material> getMaterial()
+        std::shared_ptr<const AT_NAME::material> getMaterial()
         {
             return mtrl_;
         }

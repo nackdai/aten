@@ -129,7 +129,7 @@ namespace aten {
         return aabb();
     }
 
-    const std::shared_ptr<bvhnode>& bvh::getRoot() const
+    std::shared_ptr<bvhnode> bvh::getRoot() const
     {
         return m_root;
     }

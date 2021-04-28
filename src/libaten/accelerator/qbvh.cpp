@@ -454,7 +454,7 @@ namespace aten
         aten::vec4 v2z;
 
         for (int i = 0; i < qnode.numChildren; i++) {
-            auto f = ctxt.getTriangle((int)primidx[i]);
+            const auto& f = ctxt.getTriangle((int)primidx[i]);
 
             const auto& faceParam = f->getParam();
 
@@ -638,7 +638,7 @@ namespace aten
                     }
                 }
 #else
-                auto s = ctxt.getTransformable((int)pnode->shapeid);
+                const auto& s = ctxt.getTransformable((int)pnode->shapeid);
 
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.

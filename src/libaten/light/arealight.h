@@ -15,7 +15,7 @@ namespace AT_NAME {
         AreaLight()
             : Light(aten::LightType::Area, LightAttributeArea)
         {}
-        AreaLight(const std::shared_ptr<aten::transformable> obj, const aten::vec3& le)
+        AreaLight(const std::shared_ptr<aten::transformable>& obj, const aten::vec3& le)
             : Light(aten::LightType::Area, LightAttributeArea)
         {
             m_obj = obj;
@@ -56,7 +56,7 @@ namespace AT_NAME {
             const aten::vec3& org,
             aten::sampler* sampler) const override final;
 
-        virtual const std::shared_ptr<aten::hitable> getLightObject() const override final
+        virtual std::shared_ptr<const aten::hitable> getLightObject() const override final
         {
             return std::static_pointer_cast<aten::hitable>(m_obj);
         }

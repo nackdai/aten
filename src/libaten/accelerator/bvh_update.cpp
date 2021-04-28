@@ -74,8 +74,8 @@ namespace aten
     }
 
     inline bool checkInvalidRotateChildToGrandChild(
-        const std::shared_ptr<bvhnode>& node0,
-        const std::shared_ptr<bvhnode>& node1)
+        const std::shared_ptr<const bvhnode>& node0,
+        const std::shared_ptr<const bvhnode>& node1)
     {
         bool b0 = (node0 == nullptr);
         bool b1 = (node1 == nullptr);
@@ -86,8 +86,8 @@ namespace aten
     }
 
     inline bool checkInvalidRotateGrandChildToGrandChild(
-        const std::shared_ptr<bvhnode>& node0,
-        const std::shared_ptr<bvhnode>& node1)
+        const std::shared_ptr<const bvhnode>& node0,
+        const std::shared_ptr<const bvhnode>& node1)
     {
         bool b0 = (node0 == nullptr);
         bool b1 = (node1 == nullptr);

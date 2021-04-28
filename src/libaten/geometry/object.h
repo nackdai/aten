@@ -83,7 +83,7 @@ namespace AT_NAME
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 
-        void appendShape(const std::shared_ptr<objshape> shape)
+        void appendShape(const std::shared_ptr<objshape>& shape)
         {
             AT_ASSERT(shape);
             m_shapes.push_back(shape);

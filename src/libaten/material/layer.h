@@ -13,7 +13,7 @@ namespace AT_NAME
         virtual ~LayeredBSDF() {}
 
     public:
-        bool add(std::shared_ptr<material> mtrl);
+        bool add(const std::shared_ptr<material>& mtrl);
 
         virtual aten::vec4 sampleAlbedoMap(real u, real v) const override final;
 

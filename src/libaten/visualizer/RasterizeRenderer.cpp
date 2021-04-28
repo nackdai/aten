@@ -178,7 +178,7 @@ namespace aten {
             auto hPrimId = m_shader.getHandle("primid");
             CALL_GL_API(::glUniform1i(hPrimId, primid));
             },
-            [](std::shared_ptr<hitable> target) {
+            [](const std::shared_ptr<hitable>& target) {
                 return !target->isDeformable();
             }, ctxt);
 
@@ -205,7 +205,7 @@ namespace aten {
                 auto hPrimId = exShader->getHandle("primid");
                 CALL_GL_API(::glUniform1i(hPrimId, primid));
                 },
-                [](std::shared_ptr<hitable> target) {
+                [](const std::shared_ptr<hitable>& target) {
                     return target->isDeformable();
                 }, ctxt);
         }

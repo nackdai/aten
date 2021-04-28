@@ -120,20 +120,20 @@ namespace aten {
         return asset;
     }
 
-    bool AssetManager::registerMtrl(const std::string& name, const std::shared_ptr<material> mtrl)
+    bool AssetManager::registerMtrl(const std::string& name, const std::shared_ptr<material>& mtrl)
     {
         mtrl->setName(name.c_str());
 
         return registerAsset(name, mtrl, AssetType::Material);
     }
 
-    const std::shared_ptr<material> AssetManager::getMtrl(const std::string& name)
+    std::shared_ptr<material> AssetManager::getMtrl(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Material);
         return asset.mtrl;
     }
 
-    const std::shared_ptr<material> AssetManager::getMtrlByIdx(uint32_t idx)
+    std::shared_ptr<material> AssetManager::getMtrlByIdx(uint32_t idx)
     {
         const auto& assets = g_assets[AssetType::Material];
         if (idx < assets.size()) {
@@ -149,23 +149,23 @@ namespace aten {
         return nullptr;
     }
 
-    bool AssetManager::registerTex(const std::string& name, std::shared_ptr<texture> tex)
+    bool AssetManager::registerTex(const std::string& name, const std::shared_ptr<texture>& tex)
     {
         return registerAsset(name, tex, AssetType::Texture);
     }
 
-    const std::shared_ptr<texture> AssetManager::getTex(const std::string& name)
+    std::shared_ptr<texture> AssetManager::getTex(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Texture);
         return asset.tex;
     }
 
-    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<object> obj)
+    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<object>& obj)
     {
         return registerAsset(name, obj, AssetType::Object);
     }
 
-    const std::shared_ptr<object> AssetManager::getObj(const std::string& name)
+    std::shared_ptr<object> AssetManager::getObj(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Object);
         return asset.obj;

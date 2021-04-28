@@ -14,11 +14,15 @@ namespace AT_NAME
     public:
         using ComputeToonShadeFunc = std::function<real(real)>;
 
-        toon(const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light)
+        toon(const aten::vec3& e,
+            const std::shared_ptr<AT_NAME::Light>& light)
             : NPRMaterial(aten::MaterialType::Toon, e, light)
         {
         }
-        toon(const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light, ComputeToonShadeFunc func)
+        toon(
+            const aten::vec3& e,
+            std::shared_ptr<AT_NAME::Light>& light,
+            ComputeToonShadeFunc func)
             : NPRMaterial(aten::MaterialType::Toon, e, light)
         {
             setComputeToonShadeFunc(func);

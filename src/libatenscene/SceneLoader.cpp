@@ -465,8 +465,6 @@ namespace aten
             }
         }
 
-        std::shared_ptr<camera> cam;
-
         if (type == "pinhole") {
             auto pinhole = std::make_shared<PinholeCamera>();
             pinhole->init(
@@ -475,7 +473,7 @@ namespace aten
                 val.get("up", vec3(0, 1, 0)),
                 val.get("vfov", real(30)),
                 width, height);
-            cam = pinhole;
+            return pinhole;
         }
         else if (type == "thinlens") {
             auto thinlens = std::make_shared<ThinLensCamera>();
@@ -489,7 +487,7 @@ namespace aten
                 val.get("dist_lens_focus", real(130.0)),
                 val.get("lens_r", real(1.0)),
                 val.get("w_scale", real(1.0)));
-            cam = thinlens;
+            return thinlens;
         }
         else if (type == "equirect") {
             auto equirect = std::make_shared<EquirectCamera>();
@@ -498,10 +496,10 @@ namespace aten
                 val.get("at", vec3(0, 0, -1)),
                 val.get("up", vec3(0, 1, 0)),
                 width, height);
-            cam = equirect;
+            return equirect;
         }
 
-        return cam;
+        return nullptr;
     }
 
     void readRenderParams(

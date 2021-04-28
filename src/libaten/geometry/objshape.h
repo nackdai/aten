@@ -25,12 +25,12 @@ namespace AT_NAME
 
         void build(const aten::context& ctxt);
 
-        void setMaterial(const std::shared_ptr<material> mtrl)
+        void setMaterial(const std::shared_ptr<material>& mtrl)
         {
             m_mtrl = mtrl;
         }
 
-        const std::shared_ptr<material> getMaterial() const
+        const std::shared_ptr<material>& getMaterial() const
         {
             return m_mtrl;
         }
@@ -39,7 +39,7 @@ namespace AT_NAME
             return m_mtrl;
         }
 
-        void addFace(const std::shared_ptr<face> f);
+        void addFace(const std::shared_ptr<face>& f);
 
         void drawForGBuffer(
             aten::hitable::FuncPreDraw func,

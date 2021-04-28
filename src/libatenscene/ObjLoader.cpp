@@ -76,7 +76,7 @@ namespace aten
         bool willSeparate/*= false*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        auto& asset_obj = AssetManager::getObj(tag);
+        auto asset_obj = AssetManager::getObj(tag);
         if (asset_obj) {
             AT_PRINTF("There is same tag object. [%s]\n", tag.c_str());
             objs.push_back(asset_obj);
@@ -275,7 +275,7 @@ namespace aten
                         // Apply new materil to the shape.
                         const auto& mtrl = mtrls[prev_mtrl_idx];
 
-                        auto& aten_mtrl = AssetManager::getMtrl(mtrl.name);
+                        auto aten_mtrl = AssetManager::getMtrl(mtrl.name);
 
                         if (!aten_mtrl && callback_crate_mtrl) {
                             std::shared_ptr<material> new_mtrl(
@@ -318,7 +318,7 @@ namespace aten
 
                             // Albedo map.
                             if (!objmtrl.diffuse_texname.empty()) {
-                                auto& tex = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
+                                auto tex = AssetManager::getTex(objmtrl.diffuse_texname.c_str());
 
                                 if (tex) {
                                     albedoMap = tex.get();
@@ -332,7 +332,7 @@ namespace aten
 
                             // Normal map.
                             if (!objmtrl.bump_texname.empty()) {
-                                auto& tex = AssetManager::getTex(objmtrl.bump_texname.c_str());
+                                auto tex = AssetManager::getTex(objmtrl.bump_texname.c_str());
 
                                 if (tex) {
                                     normalMap = tex.get();

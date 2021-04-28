@@ -68,7 +68,7 @@ namespace aten
         return mtrl;
     }
 
-    void context::addMaterial(std::shared_ptr<AT_NAME::material> mtrl)
+    void context::addMaterial(const std::shared_ptr<AT_NAME::material>& mtrl)
     {
         AT_ASSERT(mtrl);
         m_materials.push_back(mtrl);
@@ -93,7 +93,7 @@ namespace aten
         }
     }
 
-    const std::shared_ptr<AT_NAME::material> context::findMaterialByName(const char* name) const
+    std::shared_ptr<const AT_NAME::material> context::findMaterialByName(const char* name) const
     {
         std::string strname(name);
 
@@ -114,7 +114,7 @@ namespace aten
 
     int context::findMaterialIdxByName(const char* name) const
     {
-        const auto& mtrl = findMaterialByName(name);
+        auto mtrl = findMaterialByName(name);
         if (mtrl) {
             return mtrl->id();
         }
@@ -133,7 +133,7 @@ namespace aten
         return f;
     }
 
-    void context::addTriangle(std::shared_ptr<AT_NAME::face> tri)
+    void context::addTriangle(const std::shared_ptr<AT_NAME::face>& tri)
     {
         AT_ASSERT(tri);
         m_triangles.push_back(tri);
@@ -145,7 +145,7 @@ namespace aten
         return m_triangles.size();
     }
 
-    const std::shared_ptr<AT_NAME::face> context::getTriangle(int idx) const
+    std::shared_ptr<const AT_NAME::face> context::getTriangle(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < getTriangleNum());
         return m_triangles[idx];
@@ -176,7 +176,7 @@ namespace aten
         return id;
     }
 
-    void context::addTransformable(std::shared_ptr<aten::transformable> t)
+    void context::addTransformable(const std::shared_ptr<aten::transformable>& t)
     {
         AT_ASSERT(t);
         m_transformables.push_back(t);
@@ -188,14 +188,14 @@ namespace aten
         return m_transformables.size();
     }
 
-    const std::shared_ptr<aten::transformable> context::getTransformable(int idx) const
+    std::shared_ptr<const aten::transformable> context::getTransformable(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < getTransformableNum());
         return m_transformables[idx];
     }
 
     void context::traverseTransformables(
-        std::function<void(const std::shared_ptr<aten::transformable>, aten::GeometryType)> func) const
+        std::function<void(const std::shared_ptr<aten::transformable>&, aten::GeometryType)> func) const
     {
         for (const auto& t : m_transformables) {
             auto type = t->getType();
@@ -205,7 +205,7 @@ namespace aten
 
     void context::copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const
     {
-        traverseTransformables([&dst](const std::shared_ptr<aten::transformable> t, aten::GeometryType type) {
+        traverseTransformables([&dst](const std::shared_ptr<aten::transformable>& t, aten::GeometryType type) {
             if (type == GeometryType::Instance) {
                 aten::mat4 mtxL2W, mtxW2L;
                 t->getMatrices(mtxL2W, mtxW2L);
@@ -225,7 +225,7 @@ namespace aten
     {
         auto found = std::find_if(
             m_transformables.begin(), m_transformables.end(),
-            [&](const std::shared_ptr<aten::transformable> t) {
+            [&](const std::shared_ptr<aten::transformable>& t) {
             return t.get() == p;
         });
 
@@ -275,19 +275,13 @@ namespace aten
         return m_textures.size();;
     }
 
-    const std::shared_ptr<texture> context::getTexture(int idx) const
+    std::shared_ptr<texture> context::getTexture(int idx) const
     {
         AT_ASSERT(0 <= idx && idx < getTextureNum());
         return m_textures[idx];
     }
 
-    std::shared_ptr<texture> context::getTexture(int idx)
-    {
-        AT_ASSERT(0 <= idx && idx < getTextureNum());
-        return m_textures[idx];
-    }
-
-    void context::addTexture(std::shared_ptr<texture> tex)
+    void context::addTexture(const std::shared_ptr<texture>& tex)
     {
         AT_ASSERT(tex);
         m_textures.push_back(tex);

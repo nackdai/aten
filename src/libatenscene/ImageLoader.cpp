@@ -88,7 +88,7 @@ namespace aten {
 
         std::string texname = filename + extname;
 
-        auto& stored_tex = AssetManager::getTex(tag);
+        auto stored_tex = AssetManager::getTex(tag);
 
         if (stored_tex) {
             AT_PRINTF("There is same tag texture. [%s]\n", tag.c_str());
@@ -149,7 +149,7 @@ namespace aten {
         }
 
         // Get as shared_ptr
-        auto& ret = AssetManager::getTex(tag);
+        auto ret = AssetManager::getTex(tag);
         AT_ASSERT(ret);
 
         return ret;

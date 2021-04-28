@@ -101,18 +101,19 @@ namespace AT_NAME
 
     NPRMaterial::NPRMaterial(
         aten::MaterialType type,
-        const aten::vec3& e, std::shared_ptr<AT_NAME::Light> light)
+        const aten::vec3& e,
+        const std::shared_ptr<AT_NAME::Light>& light)
         : material(type, MaterialAttributeNPR, e)
     {
         setTargetLight(light);
     }
 
-    void NPRMaterial::setTargetLight(std::shared_ptr<AT_NAME::Light> light)
+    void NPRMaterial::setTargetLight(const std::shared_ptr<AT_NAME::Light>& light)
     {
         m_targetLight = light;
     }
 
-    const std::shared_ptr<AT_NAME::Light> NPRMaterial::getTargetLight() const
+    std::shared_ptr<const AT_NAME::Light> NPRMaterial::getTargetLight() const
     {
         return m_targetLight;
     }

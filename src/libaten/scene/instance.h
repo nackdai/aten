@@ -16,13 +16,13 @@ namespace aten
         friend class TransformableFactory;
 
     public:
-        instance(std::shared_ptr<OBJ> obj, const context& ctxt)
+        instance(const std::shared_ptr<OBJ>& obj, const context& ctxt)
             : transformable(GeometryType::Instance), m_obj(obj)
         {
             setBoundingBox(m_obj->getBoundingbox());
         }
 
-        instance(std::shared_ptr<OBJ> obj, const context& ctxt, const mat4& mtxL2W)
+        instance(const std::shared_ptr<OBJ>& obj, const context& ctxt, const mat4& mtxL2W)
             : instance(obj, ctxt)
         {
             m_mtxL2W = mtxL2W;
@@ -166,7 +166,7 @@ namespace aten
             }
         }
 
-        void setLod(std::shared_ptr<OBJ> obj)
+        void setLod(const std::shared_ptr<OBJ>& obj)
         {
             m_lod = obj;
         }
@@ -261,7 +261,7 @@ namespace aten
     };
 
     template<>
-    inline instance<object>::instance(std::shared_ptr<object> obj, const context& ctxt)
+    inline instance<object>::instance(const std::shared_ptr<object>& obj, const context& ctxt)
         : transformable(GeometryType::Instance), m_obj(obj)
     {
         m_obj->build(ctxt);
@@ -269,7 +269,7 @@ namespace aten
     }
 
     template<>
-    inline instance<deformable>::instance(std::shared_ptr<deformable> obj, const context& ctxt)
+    inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, const context& ctxt)
         : transformable(GeometryType::Instance), m_obj(obj)
     {
         m_obj->build();

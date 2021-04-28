@@ -65,7 +65,7 @@ namespace aten {
         /**
          * @brief Return a left child node.
          */
-        const std::shared_ptr<bvhnode>& getLeft() const
+        std::shared_ptr<const bvhnode> getLeft() const
         {
             return m_left;
         }
@@ -77,7 +77,7 @@ namespace aten {
         /**
         * @brief Return a right child node.
         */
-        const std::shared_ptr<bvhnode>& getRight() const
+        std::shared_ptr<const bvhnode> getRight() const
         {
             return m_right;
         }

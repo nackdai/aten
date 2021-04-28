@@ -15,7 +15,7 @@ namespace aten {
         std::vector<aten::vertex>& vtxparams)
     {
         // Not guarantee order of the object which the instance has.
-        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable> s, aten::GeometryType type) {
+        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
             if (type == GeometryType::Instance) {
                 auto param = s->getParam();
                 auto obj = s->getHasObject();
@@ -49,7 +49,7 @@ namespace aten {
         auto lightNum = scene.lightNum();
 
         for (uint32_t i = 0; i < lightNum; i++) {
-            const auto& l = scene.getLight(i);
+            auto l = scene.getLight(i);
             auto param = l->param();
             lightparams.push_back(param);
         }
@@ -68,7 +68,7 @@ namespace aten {
     {
         int triangleCount = 0;
 
-        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable> s, aten::GeometryType type) {
+        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
             if (type == GeometryType::Polygon) {
                 triangles.push_back(std::vector<aten::PrimitiveParamter>());
                 int pos = triangles.size() - 1;

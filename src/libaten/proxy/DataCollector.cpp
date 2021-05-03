@@ -71,7 +71,7 @@ namespace aten {
         ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
             if (type == GeometryType::Polygon) {
                 triangles.push_back(std::vector<aten::PrimitiveParamter>());
-                int pos = triangles.size() - 1;
+                auto pos = triangles.size() - 1;
 
                 s->collectTriangles(triangles[pos]);
 

@@ -8,20 +8,20 @@
 namespace aten {
     class shader;
 
-    enum Primitive {
+    enum class Primitive {
         Triangles,
         Lines,
     };
 
     struct VertexAttrib {
-        int type;
-        int num;
-        int size;
-        int offset;
+        int type{ 0 };
+        int num{ 0 };
+        int size{ 0 };
+        int offset{ 0 };
         bool needNormalize{ false };
         const char* name{ nullptr };
 
-        VertexAttrib() {}
+        VertexAttrib() = default;
         VertexAttrib(int t, int n, int s, int o)
             : type(t), num(n), size(s), offset(o)
         {}
@@ -39,14 +39,14 @@ namespace aten {
 
     public:
         void init(
-            uint32_t stride,
+            size_t stride,
             uint32_t vtxNum,
             uint32_t offset,
             const void* data,
             bool isDynamic = false);
 
         void init(
-            uint32_t stride,
+            size_t stride,
             uint32_t vtxNum,
             uint32_t offset,
             const VertexAttrib* attribs,
@@ -55,7 +55,7 @@ namespace aten {
             bool isDynamic = false);
 
         void initNoVAO(
-            uint32_t stride,
+            size_t stride,
             uint32_t vtxNum,
             uint32_t offset,
             const void* data);
@@ -99,11 +99,6 @@ namespace aten {
             return m_vtxNum;
         }
 
-        uint32_t getStride() const
-        {
-            return m_vtxStride;
-        }
-
         virtual uint32_t getVBOHandle() const
         {
             return m_vbo;
@@ -122,7 +117,7 @@ namespace aten {
         uint32_t m_vbo{ 0 };
         uint32_t m_vao{ 0 };
 
-        uint32_t m_vtxStride{ 0 };
+        size_t m_vtxStride{ 0 };
         uint32_t m_vtxNum{ 0 };
         uint32_t m_vtxOffset{ 0 };
 

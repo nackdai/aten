@@ -21,7 +21,7 @@ namespace aten
 
         real area{ real(0) };
 
-        int padding[2];
+        int padding[2]{ 0, 0 };
 
         int shapeid{ -1 };  ///< Own index in array.
         int mtxid{ -1 };    ///< Index of matrix which the shape refer.
@@ -32,16 +32,13 @@ namespace aten
             int idx{ -1 };
         } mtrl;
 
-        vec3 center;
+        vec3 center{ real(0) };
 
-        vec3 size;      // cube.
-        real radius;    // shpere.
+        vec3 size;          // cube.
+        real radius{ 0 };   // shpere.
 
-        AT_DEVICE_API GeomParameter()
-        {
-            center = aten::vec3(real(0));
-        }
-        ~GeomParameter() {}
+        GeomParameter() = default;
+        ~GeomParameter() = default;
     };
     AT_STATICASSERT((sizeof(GeomParameter) % 16) == 0);
 

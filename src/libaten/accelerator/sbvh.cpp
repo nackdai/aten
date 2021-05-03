@@ -230,11 +230,11 @@ namespace aten
         const real areaAlpha = real(1e-5);
 
         struct SBVHEntry {
-            SBVHEntry() {}
+            SBVHEntry() = default;
             SBVHEntry(uint32_t id, uint32_t d) : nodeIdx(id), depth(d) {}
 
-            uint32_t nodeIdx;
-            uint32_t depth;
+            uint32_t nodeIdx{ 0 };
+            uint32_t depth{ 0 };
         } stack[128];
 
         int stackpos = 1;
@@ -1383,7 +1383,7 @@ namespace aten
 
                     // Re-set material id.
                     if (node.mtrlid >= 0) {
-                        auto found = mtrlMap.find(node.mtrlid);
+                        auto found = mtrlMap.find(static_cast<int>(node.mtrlid));
                         AT_ASSERT(found != mtrlMap.end());
 
                         // Find material index by name.

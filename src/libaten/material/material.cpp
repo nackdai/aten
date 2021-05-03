@@ -28,7 +28,7 @@ namespace AT_NAME
     const char* material::getMaterialTypeName(aten::MaterialType type)
     {
         AT_ASSERT(static_cast<int>(type) < AT_COUNTOF(g_mtrlTypeNames));
-        return g_mtrlTypeNames[type];
+        return g_mtrlTypeNames[static_cast<int>(type)];
     }
 
     aten::MaterialType material::getMaterialTypeFromMaterialTypeName(const std::string& name)
@@ -64,7 +64,8 @@ namespace AT_NAME
 
     bool material::isValidMaterialType(aten::MaterialType type)
     {
-        return (0 <= type && type < aten::MaterialType::MaterialTypeMax);
+        return (0 <= static_cast<int>(type)
+            && static_cast<int>(type) < static_cast<int>(aten::MaterialType::MaterialTypeMax));
     }
 
     material::material(

@@ -23,7 +23,7 @@ namespace aten {
             type_hash_ = rhs.type_hash_;
         }
 
-        PolymorphicValue(PolymorphicValue&& rhs)
+        PolymorphicValue(PolymorphicValue&& rhs) noexcept
         {
             val_ = std::move(rhs.val_);
             type_hash_ = rhs.type_hash_;

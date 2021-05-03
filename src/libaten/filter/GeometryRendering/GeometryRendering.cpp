@@ -147,8 +147,8 @@ namespace aten {
         // |
         // +-----> +x
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (decltype(height) y = 0; y < height; y++) {
+            for (decltype(width) x = 0; x < width; x++) {
                 int xx = x % ratio;
                 int yy = y % ratio;
 

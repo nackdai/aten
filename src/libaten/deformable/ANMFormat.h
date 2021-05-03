@@ -129,6 +129,7 @@ namespace aten
         AnmKey()
         {
             value = 0;
+            params = nullptr;
         }
     };
 

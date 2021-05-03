@@ -6,8 +6,8 @@
 namespace aten {
     class GeometryRendering : public visualizer::PreProc{
     public:
-        GeometryRendering() {}
-        virtual ~GeometryRendering() {}
+        GeometryRendering() = default;
+        virtual ~GeometryRendering() = default;
 
     public:
         virtual void operator()(
@@ -47,6 +47,6 @@ namespace aten {
         uint32_t m_ratio{ 1 };
         vec4* m_direct{ nullptr };
         vec4* m_indirect{ nullptr };
-        vec4* m_idx;
+        vec4* m_idx{ nullptr };
     };
 }

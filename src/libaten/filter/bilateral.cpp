@@ -86,6 +86,8 @@ namespace aten {
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
+        // NOTE
+        // index variable in OpenMP 'for' statement must have signed integral type
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // 中心点.

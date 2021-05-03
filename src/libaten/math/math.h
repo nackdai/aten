@@ -112,7 +112,7 @@ namespace aten {
     template <typename T>
     inline AT_DEVICE_API T abs(T f)
     {
-        return ::abs(f);
+        return static_cast<T>(abs<real>(static_cast<real>(f)));
     }
 
     template <>
@@ -332,7 +332,7 @@ namespace aten {
             bInt = 0x80000000 - bInt;
         }
 
-        int intDiff = abs(aInt - bInt);
+        int intDiff = aten::abs<int>(aInt - bInt);
         if (intDiff <= maxUlps) {
             return true;
         }

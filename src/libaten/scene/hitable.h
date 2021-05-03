@@ -52,8 +52,8 @@ namespace aten {
             // For triangle.
             struct {
                 int primid;
-                real a, b;    // barycentric
-                int face;    // for cube.
+                real a, b;  // barycentric
+                int face;   // for cube.
             };
             // Fox voxel.
             struct {
@@ -67,6 +67,10 @@ namespace aten {
         AT_DEVICE_API Intersection()
         {
             primid = -1;
+            a = b = real(0);
+            face = -1;
+
+            nml_x = nml_y = nml_z = real(0);
             isVoxel = 0;
         }
     };

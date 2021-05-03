@@ -4,7 +4,7 @@
 
 namespace aten {
     void GeomVertexBuffer::init(
-        uint32_t stride,
+        size_t stride,
         uint32_t vtxNum,
         uint32_t offset,
         const void* data,
@@ -32,7 +32,7 @@ namespace aten {
     }
 
     void GeomVertexBuffer::init(
-        uint32_t stride,
+        size_t stride,
         uint32_t vtxNum,
         uint32_t offset,
         const VertexAttrib* attribs,
@@ -78,14 +78,14 @@ namespace aten {
                     attribs[i].num,
                     attribs[i].type,
                     GL_FALSE,
-                    m_vtxStride,
+                    static_cast<GLsizei>(m_vtxStride),
                     reinterpret_cast<void*>(offset + attribs[i].offset)));
             }
         }
     }
 
     void GeomVertexBuffer::initNoVAO(
-        uint32_t stride,
+        size_t stride,
         uint32_t vtxNum,
         uint32_t offset,
         const void* data)
@@ -152,7 +152,7 @@ namespace aten {
                         attribs[i].num,
                         attribs[i].type,
                         attribs[i].needNormalize ? GL_TRUE : GL_FALSE,
-                        m_vtxStride,
+                        static_cast<GLsizei>(m_vtxStride),
                         reinterpret_cast<void*>(m_vtxOffset + attribs[i].offset)));
                 }
             }
@@ -213,7 +213,9 @@ namespace aten {
 
         auto vtxNum = computeVtxNum(mode, primNum);
 
-        CALL_GL_API(::glDrawArrays(prims[mode], idxOffset, vtxNum));
+        const int prim_idx = static_cast<int>(mode);
+
+        CALL_GL_API(::glDrawArrays(prims[prim_idx], idxOffset, vtxNum));
     }
 
     void* GeomVertexBuffer::beginMap(bool isRead)
@@ -459,8 +461,10 @@ namespace aten {
 
         auto idxNum = computeVtxNum(mode, primNum);
 
+        const int prim_idx = static_cast<int>(mode);
+
         CALL_GL_API(::glDrawElements(
-            prims[mode],
+            prims[prim_idx],
             idxNum,
             GL_UNSIGNED_INT,
             (const GLvoid*)offsetByte));

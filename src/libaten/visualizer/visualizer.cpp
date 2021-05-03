@@ -326,14 +326,17 @@ namespace aten
         const void* clearclr = nullptr;
 
         switch (m_fmt) {
-        case rgba8:
+        case PixelFormat::rgba8:
             clearclr = clearclr_uc;
             break;
-        case rgba32f:
+        case PixelFormat::rgba32f:
             clearclr = clearclr_ui;
             break;
-        case rgba16f:
+        case PixelFormat::rgba16f:
             clearclr = clearclr_us;
+            break;
+        default:
+            AT_ASSERT(false);
             break;
         }
 
@@ -372,8 +375,10 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
+        // NOTE
+        // index variable in OpenMP 'for' statement must have signed integral type
         for (int y = 0; y < height; y++) {
-            int yy = height - 1 - y;
+            auto yy = height - 1 - y;
 
             memcpy(
                 &dst[yy * width],
@@ -399,7 +404,7 @@ namespace aten
             0,
             GL_RGBA,
             GL_UNSIGNED_BYTE,
-            size,
+            static_cast<GLsizei>(size),
             &dst[0]));
     }
 }

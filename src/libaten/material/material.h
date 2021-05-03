@@ -49,7 +49,7 @@ namespace aten
     #define MaterialAttributeTransmission    aten::MaterialAttribute(false, false, true,  false, false)
     #define MaterialAttributeNPR            aten::MaterialAttribute(false, false, false, false, true)
 
-    enum MaterialType : int {
+    enum class MaterialType : int {
         Emissive,
         Lambert,
         OrneNayar,

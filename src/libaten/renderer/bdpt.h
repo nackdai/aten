@@ -9,8 +9,8 @@ namespace aten
 {
     class BDPT : public Renderer {
     public:
-        BDPT() {}
-        ~BDPT() {}
+        BDPT() = default;
+        ~BDPT() = default;
 
     public:
         virtual void onRender(
@@ -20,7 +20,7 @@ namespace aten
             camera* camera) override;
 
     private:
-        enum ObjectType {
+        enum class ObjectType {
             Light,
             Lens,
             Object,
@@ -136,7 +136,7 @@ namespace aten
     private:
         int m_maxDepth{ 1 };
 
-        int m_width;
-        int m_height;
+        int m_width{ 0 };
+        int m_height{ 0 };
     };
 }

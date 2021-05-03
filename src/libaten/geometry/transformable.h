@@ -73,9 +73,11 @@ namespace aten
         }
 
     private:
-        void updateIndex(int id)
+        template <typename T>
+        auto updateIndex(T id)
+            -> std::enable_if_t<(std::is_signed<T>::value && !std::is_floating_point<T>::value) || std::is_same<T, std::size_t>::value, void>
         {
-            m_id = id;
+            m_id = static_cast<decltype(m_id)>(id);
         }
 
     protected:

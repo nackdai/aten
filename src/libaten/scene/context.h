@@ -112,7 +112,10 @@ namespace aten
 
         void addTriangle(const std::shared_ptr<AT_NAME::face>& tri);
 
-        int getTriangleNum() const;
+        uint32_t getTriangleNum() const
+        {
+            return static_cast<uint32_t>(m_triangles.size());
+        }
 
         std::shared_ptr<const AT_NAME::face> getTriangle(int idx) const;
 
@@ -121,8 +124,6 @@ namespace aten
         int findTriIdxFromPointer(const void* p) const;
 
         void addTransformable(const std::shared_ptr<aten::transformable>& t);
-
-        int getTransformableNum() const;
 
         std::shared_ptr<const aten::transformable> getTransformable(int idx) const;
 

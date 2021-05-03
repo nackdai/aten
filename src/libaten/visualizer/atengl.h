@@ -36,8 +36,10 @@ namespace aten {
             GL_RGBA16F,
         };
 
-        glinternal = glpixelinternal[fmt];
-        glfmt = glpixelfmt[fmt];
-        gltype = glpixeltype[fmt];
+        int idx = static_cast<int>(fmt);
+
+        glinternal = glpixelinternal[idx];
+        glfmt = glpixelfmt[idx];
+        gltype = glpixeltype[idx];
     }
 }

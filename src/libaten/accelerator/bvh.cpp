@@ -126,7 +126,8 @@ namespace aten {
         if (m_root) {
             return m_root->getBoundingbox();
         }
-        return aabb();
+        static const aabb tmp;
+        return tmp;
     }
 
     std::shared_ptr<bvhnode> bvh::getRoot() const
@@ -257,7 +258,7 @@ namespace aten {
 
         // 領域分割をせず、polygons を含む葉ノードを構築する場合を暫定の bestCost にする.
         //auto bestCost = T_tri * num;
-        uint32_t bestCost = UINT32_MAX;    // 限界まで分割したいので、適当に大きい値にしておく.
+        real bestCost = std::numeric_limits<real>::max();    // 限界まで分割したいので、適当に大きい値にしておく.
 
         // 分割に最も良い軸 (0:x, 1:y, 2:z)
         int bestAxis = -1;

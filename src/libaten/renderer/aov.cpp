@@ -176,10 +176,15 @@ namespace aten
                         albedo.z = std::min<real>(albedo.z, 1);
                     }
 
-                    dst.geominfo.albedo_vis->put(x, y, vec4(albedo, path.visibility));
+                    dst.geominfo.albedo_vis->put(x, y, vec4(albedo, static_cast<real>(path.visibility)));
                 }
                 if (dst.geominfo.ids) {
-                    dst.geominfo.ids->put(x, y, vec4(path.shapeid, path.mtrlid, 0, 0));
+                    dst.geominfo.ids->put(
+                        x, y,
+                        vec4(
+                            static_cast<real>(path.shapeid),
+                            static_cast<real>(path.mtrlid),
+                            real(0), real(0)));
                 }
             }
         }

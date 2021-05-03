@@ -47,16 +47,17 @@ namespace aten
 
             vec4 ret;
 
-            switch (ch) {
-            case 4:
+            if (ch >= 4) {
                 ret[3] = clr[4];
-            case 3:
+            }
+            if (ch >= 3) {
                 ret[2] = clr[2];
-            case 2:
+            }
+            if (ch >= 2) {
                 ret[1] = clr[1];
-            case 1:
+            }
+            if (ch >= 1) {
                 ret[0] = clr[0];
-                break;
             }
 
             return ret;
@@ -129,9 +130,11 @@ namespace aten
         bool exportAsPNG(const std::string& filename);
 
     private:
-        void updateIndex(int id)
+        template <typename T>
+        auto updateIndex(T id)
+            -> std::enable_if_t<(std::is_signed<T>::value && !std::is_floating_point<T>::value) || std::is_same<T, std::size_t>::value, void>
         {
-            m_id = id;
+            m_id = static_cast<decltype(m_id)>(id);
         }
 
     private:

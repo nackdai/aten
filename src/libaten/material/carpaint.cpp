@@ -19,7 +19,6 @@ namespace AT_NAME
 
         aten::vec3 V = -wi;
         aten::vec3 L = wo;
-        aten::vec3 N = normal;
         aten::vec3 H = normalize(L + V);
 
         real F(1);
@@ -185,7 +184,6 @@ namespace AT_NAME
         {
             aten::vec3 V = -wi;
             aten::vec3 L = dir;
-            aten::vec3 N = normal;
             aten::vec3 H = normalize(L + V);
 
             // http://d.hatena.ne.jp/hanecci/20130525/p3

@@ -890,7 +890,7 @@ namespace aten
 
         std::vector<std::vector<vec4>> image(threadnum);
 
-        for (int i = 0; i < threadnum; i++) {
+        for (decltype(threadnum) i = 0; i < threadnum; i++) {
             image[i].resize(m_width * m_height);
         }
 
@@ -1010,13 +1010,13 @@ namespace aten
 
         std::vector<vec4> tmp(m_width * m_height);
 
-        for (int i = 0; i < threadnum; i++) {
+        for (decltype(threadnum) i = 0; i < threadnum; i++) {
             auto& img = image[i];
             for (int y = 0; y < m_height; y++) {
                 for (int x = 0; x < m_width; x++) {
                     int pos = y * m_width + x;
 
-                    auto clr = img[pos] / samples;
+                    auto clr = img[pos] / static_cast<real>(samples);
                     clr.w = 1;
 
                     tmp[pos] += clr;

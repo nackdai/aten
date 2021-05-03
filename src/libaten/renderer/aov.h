@@ -21,7 +21,7 @@ namespace aten
         struct Path {
             vec3 normal;
             vec3 albedo;
-            real depth;
+            real depth{ 0 };
             uint32_t shapeid{ 0 };
             uint32_t mtrlid{ 0 };
             uint32_t visibility{ 0 };

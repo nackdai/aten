@@ -120,15 +120,15 @@ namespace aten {
         }
 
         struct ResultIntersectTestByFrustum {
-            int ep{ -1 };    ///< Entry Point.
-            int ex{ -1 };    ///< Layer Id.
+            int ep{ -1 };   ///< Entry Point.
+            int ex{ -1 };   ///< Layer Id.
 
             // 1つ上のレイヤーへの戻り先のノードID.
-            int top{ -1 };    ///< Upper layer id.
+            int top{ -1 };  ///< Upper layer id.
 
-            int padding;
+            int padding{ 0 };
 
-            ResultIntersectTestByFrustum() {}
+            ResultIntersectTestByFrustum() = default;
         };
 
         /**

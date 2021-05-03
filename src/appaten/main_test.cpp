@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
     aten::BloomEffect bloom;
     bloom.init(
         WIDTH, HEIGHT,
-        aten::rgba32f, aten::rgba32f,
+        aten::PixelFormat::rgba32f, aten::PixelFormat::rgba32f,
         "../shader/fullscreen_vs.glsl",
         "../shader/bloomeffect_fs_4x4.glsl",
         "../shader/bloomeffect_fs_2x2.glsl",

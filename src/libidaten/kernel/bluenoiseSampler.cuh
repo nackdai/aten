@@ -9,8 +9,8 @@
 namespace idaten {
     class BlueNoiseSamplerGPU {
     public:
-        __device__ BlueNoiseSamplerGPU() {}
-        __device__ ~BlueNoiseSamplerGPU() {};
+        BlueNoiseSamplerGPU() = default;
+        ~BlueNoiseSamplerGPU() = default;
 
     public:
         __device__ static inline uint32_t makeSeed(

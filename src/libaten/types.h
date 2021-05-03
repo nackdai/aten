@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <climits>
+#include <limits>
 
 //#define TYPE_DOUBLE
 

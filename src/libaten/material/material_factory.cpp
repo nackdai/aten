@@ -87,7 +87,7 @@ namespace aten
         };
         AT_STATICASSERT(AT_COUNTOF(funcs) == (int)aten::MaterialType::MaterialTypeMax);
 
-        std::shared_ptr<material> ret(funcs[type]());
+        std::shared_ptr<material> ret(funcs[static_cast<int>(type)]());
         return ret;
     }
 

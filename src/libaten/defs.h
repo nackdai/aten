@@ -109,13 +109,6 @@ namespace aten {
 
 #define AT_STATICASSERT(b)    static_assert(b, "")
 
-namespace aten {
-    union UnionIdxPtr {
-        int idx;
-        void* ptr;
-    };
-}
-
 #include "aten_virtual.h"
 
 #ifndef __AT_DEBUG__

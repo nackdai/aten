@@ -12,7 +12,7 @@ namespace aten {
     class BlueNoiseSampler AT_INHERIT(sampler) {
     public:
         BlueNoiseSampler() = default;
-        ~BlueNoiseSampler() {}
+        AT_VIRTUAL(~BlueNoiseSampler() = default;)
 
     public:
         void init(
@@ -31,7 +31,7 @@ namespace aten {
 
             m_noiseResW = resW;
             m_noiseResH = resH;
-            m_noiseTexNum = m_noise.size();
+            m_noiseTexNum = static_cast<decltype(m_noiseTexNum)>(m_noise.size());
 
             // NOTE
             // (1) Generate Ray : 2
@@ -49,13 +49,13 @@ namespace aten {
             m_noise.push_back(noisetex);
         }
 
-        virtual real nextSample() final
+        AT_VIRTUAL_OVERRIDE_FINAL(real nextSample())
         {
             float r = sample();
             return r;
         }
 
-        aten::vec2 nextSample2D()
+        AT_VIRTUAL_OVERRIDE_FINAL(aten::vec2 nextSample2D())
         {
             aten::vec2 r;
             r.x = sample();

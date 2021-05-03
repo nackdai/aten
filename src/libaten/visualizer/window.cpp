@@ -313,7 +313,7 @@ namespace aten
         succeeded = ImGui_ImplOpenGL3_Init("#version 400");
         AT_ASSERT(succeeded);
 
-        windowImpl* ret = new windowImpl(glfwWindow, g_windows.size());
+        windowImpl* ret = new windowImpl(glfwWindow, static_cast<int32_t>(g_windows.size()));
         {
             ret->m_onRun = onRun;
             ret->m_onClose = _onClose;

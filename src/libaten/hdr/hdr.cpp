@@ -31,7 +31,11 @@ namespace aten
         double m = frexp(d, &e); // d = m * 2^e
         d = m * 256.0 / d;
 
-        return HDRPixel(color.x * d, color.y * d, color.z * d, e + 128);
+        return HDRPixel(
+            static_cast<uint8_t>(color.x * d),
+            static_cast<uint8_t>(color.y * d),
+            static_cast<uint8_t>(color.z * d),
+            e + 128);
     }
 
     bool HDRExporter::save(

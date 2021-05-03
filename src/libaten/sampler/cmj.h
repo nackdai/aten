@@ -8,8 +8,8 @@ namespace aten {
     // http://graphics.pixar.com/library/MultiJitteredSampling/paper.pdf
     class CMJ AT_INHERIT(sampler) {
     public:
-        AT_DEVICE_API CMJ() {}
-        AT_VIRTUAL(AT_DEVICE_API ~CMJ() {});
+        CMJ() = default;
+        AT_VIRTUAL(~CMJ() = default;)
 
     public:
         AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API void init(uint32_t seed, const void* data = nullptr))
@@ -118,8 +118,8 @@ namespace aten {
         }
 
     private:
-        uint32_t m_idx;
-        uint32_t m_dimension;
-        uint32_t m_scramble;
+        uint32_t m_idx{ 0 };
+        uint32_t m_dimension{ 0 };
+        uint32_t m_scramble{ 0 };
     };
 }

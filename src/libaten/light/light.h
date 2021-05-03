@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/vec3.h"
+#include "math/vec4.h"
 #include "sampler/sampler.h"
 #include "scene/hitable.h"
 
@@ -32,7 +33,7 @@ namespace aten {
     #define LightAttributeDirectional   aten::LightAttribute{ true,  true,  false }
     #define LightAttributeIBL           aten::LightAttribute{ false, true,  true }
 
-    enum LightType : int {
+    enum class LightType : int {
         Area,
         IBL,
         Direction,
@@ -82,7 +83,9 @@ namespace aten {
             };
         };
 
-        AT_DEVICE_API LightParameter() {}
+        AT_DEVICE_API LightParameter()
+            : v0(0), v1(0), v2(0)
+        {};
 
         AT_DEVICE_API LightParameter(LightType _type, const LightAttribute& _attrib)
             : attrib(_attrib), type(_type)

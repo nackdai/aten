@@ -140,14 +140,9 @@ namespace aten
         tri->updateIndex(m_triangles.size() - 1);
     }
 
-    int context::getTriangleNum() const
-    {
-        return m_triangles.size();
-    }
-
     std::shared_ptr<const AT_NAME::face> context::getTriangle(int idx) const
     {
-        AT_ASSERT(0 <= idx && idx < getTriangleNum());
+        AT_ASSERT(0 <= idx && idx < m_triangles.size());
         return m_triangles[idx];
     }
 
@@ -183,14 +178,9 @@ namespace aten
         t->updateIndex(m_transformables.size() - 1);
     }
 
-    int context::getTransformableNum() const
-    {
-        return m_transformables.size();
-    }
-
     std::shared_ptr<const aten::transformable> context::getTransformable(int idx) const
     {
-        AT_ASSERT(0 <= idx && idx < getTransformableNum());
+        AT_ASSERT(0 <= idx && idx < m_transformables.size());
         return m_transformables[idx];
     }
 
@@ -272,7 +262,7 @@ namespace aten
 
     int context::getTextureNum() const
     {
-        return m_textures.size();;
+        return m_textures.size();
     }
 
     std::shared_ptr<texture> context::getTexture(int idx) const

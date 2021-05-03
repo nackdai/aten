@@ -1,7 +1,7 @@
 #pragma once
 
 namespace aten {
-    enum PixelFormat {
+    enum class PixelFormat : int {
         rgba8,
         rgba32f,
         rgba16f,

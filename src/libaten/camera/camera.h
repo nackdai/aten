@@ -12,25 +12,25 @@ namespace aten {
      * @brief Description of camera.
      */
     struct CameraParameter {
-        vec3 origin;    ///< Camera origin.
+        vec3 origin;        ///< Camera origin.
 
-        real aspect;    ///< Aspect of screen size.
-        vec3 center;    ///< origin + dir.
+        real aspect{ 0 };   ///< Aspect of screen size.
+        vec3 center;        ///< origin + dir.
 
-        vec3 u;            ///< Axis (right) of screen.
-        vec3 v;            ///< Axis (up) of screen.
+        vec3 u;             ///< Axis (right) of screen.
+        vec3 v;             ///< Axis (up) of screen.
 
-        vec3 dir;        ///< Camera direction vector (z).
-        vec3 right;        ///< Camera right vector (x).
-        vec3 up;        ///< Camera up vector(y).
+        vec3 dir;           ///< Camera direction vector (z).
+        vec3 right;         ///< Camera right vector (x).
+        vec3 up;            ///< Camera up vector(y).
 
-        real dist;        ///< Distance to the clip plane.
-        real vfov;        ///< Vertical Field of View.
-        int width;        ///< Screen width.
-        int height;        ///< Screen height.
+        real dist{ 0 };     ///< Distance to the clip plane.
+        real vfov{ 0 };     ///< Vertical Field of View.
+        int width{ 0 };     ///< Screen width.
+        int height{ 0 };    ///< Screen height.
 
-        real znear;        ///< Z Near plane.
-        real zfar;        ///< Z Far plane.
+        real znear{ 0 };    ///< Z Near plane.
+        real zfar{ 0 };     ///< Z Far plane.
     };
 };
 
@@ -162,7 +162,8 @@ namespace AT_NAME {
         virtual const aten::CameraParameter& param() const
         {
             AT_ASSERT(false);
-            return aten::CameraParameter();
+            static const aten::CameraParameter tmp;
+            return tmp;
         }
     };
 }

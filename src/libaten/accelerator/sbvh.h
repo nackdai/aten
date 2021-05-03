@@ -264,12 +264,12 @@ namespace aten
 
         // 分割三角形情報.
         struct Reference {
-            Reference() {}
+            Reference() = default;
 
             Reference(int id) : triid(id) {}
 
             // 分割元の三角形インデックス.
-            int triid;
+            int triid{ -1 };
 
             // 分割した後のAABB.
             aabb bbox;

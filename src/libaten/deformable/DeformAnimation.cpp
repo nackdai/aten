@@ -18,7 +18,10 @@ namespace aten
         // ノード情報読み込み.
         {
             m_nodes.resize(m_header.numNodes);
-            AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_nodes[0], sizeof(AnmNode) * m_nodes.size()));
+            AT_VRETURN_FALSE(
+                AT_STREAM_READ(
+                    stream, &m_nodes[0],
+                    static_cast<uint32_t>(sizeof(AnmNode) * m_nodes.size())));
 
             // ノードを探索しやすくするためにハッシュに登録.
             for (uint32_t i = 0; i < m_header.numNodes; i++) {
@@ -30,7 +33,10 @@ namespace aten
         // チャンネル情報読み込み.
         {
             m_channels.resize(m_header.numChannels);
-            AT_VRETURN_FALSE(AT_STREAM_READ(stream, &m_channels[0], sizeof(AnmChannel) * m_channels.size()));
+            AT_VRETURN_FALSE(
+                AT_STREAM_READ(
+                    stream, &m_channels[0],
+                    static_cast<uint32_t>(sizeof(AnmChannel) * m_channels.size())));
         }
 
         m_keys.resize(m_header.numKeys);
@@ -51,7 +57,10 @@ namespace aten
 
                     // キー情報のパラメータ読み込み.
                     keyParam.resize(key.numParams);
-                    AT_VRETURN_FALSE(AT_STREAM_READ(stream, &keyParam[0], sizeof(float) * keyParam.size()));
+                    AT_VRETURN_FALSE(
+                        AT_STREAM_READ(
+                            stream, &keyParam[0],
+                            static_cast<uint32_t>(sizeof(float) * keyParam.size())));
 
                     // パラメータへのポインタへ実データを割り当てる.
                     key.params = &keyParam[0];

@@ -142,8 +142,16 @@ namespace idaten
 
         checkCudaErrors(cudaMallocArray(&m_array, &m_channelFmtDesc, width, height));
 
+#if 0
+        // NOTE
+        // cudaMemcpyToArrayAsync is deprecated
         size_t size = width * height * sizeof(float4);
         checkCudaErrors(cudaMemcpyToArrayAsync(m_array, 0, 0, p, size, cudaMemcpyHostToDevice));
+#else
+        auto pitch = width * sizeof(float4);
+        checkCudaErrors(
+            cudaMemcpy2DToArrayAsync(m_array, 0, 0, p, pitch, width, height, cudaMemcpyHostToDevice));
+#endif
 
         memset(&m_resDesc, 0, sizeof(m_resDesc));
         m_resDesc.resType = cudaResourceTypeArray;

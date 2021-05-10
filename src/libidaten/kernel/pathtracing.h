@@ -99,6 +99,22 @@ namespace idaten
             return m_frame;
         }
 
+        enum class AovMode : int {
+            None,
+            Normal,
+            Albedo,
+        };
+
+        void setAovMode(AovMode mode)
+        {
+            aov_mode_ = mode;
+        }
+
+        AovMode getAovMode() const
+        {
+            return aov_mode_;
+        }
+
     protected:
         virtual void onGenPath(
             int width, int height,
@@ -126,6 +142,12 @@ namespace idaten
             idaten::TypedCudaMemory<idaten::PathTracing::Path>& paths,
             int width, int height);
 
+        void displayAov(
+            cudaSurfaceObject_t outputSurf,
+            int width, int height);
+
+        void copyAovToGLSurface(int width, int height);
+
     protected:
         idaten::TypedCudaMemory<idaten::PathTracing::Path> m_paths;
         idaten::TypedCudaMemory<aten::Intersection> m_isects;
@@ -137,6 +159,12 @@ namespace idaten
 
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
+
+        // For AOV
+        AovMode aov_mode_{ AovMode::None };
+        idaten::TypedCudaMemory<float4> aov_position_;
+        idaten::TypedCudaMemory<float4> aov_nml_;
+        idaten::TypedCudaMemory<float3> aov_albedo_;
 
         // To export to GL.
         bool need_export_gl_{ false };

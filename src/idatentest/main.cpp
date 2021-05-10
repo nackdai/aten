@@ -108,6 +108,16 @@ void onRun(aten::window* window)
             g_tracer.reset();
         }
 
+        if constexpr (std::is_same<decltype(g_tracer), idaten::PathTracing>::value) {
+            static constexpr char* items[] = { "None", "Normal", "Albedo" };
+
+            auto aov_mode = g_tracer.getAovMode();
+
+            if (ImGui::Combo("mode", reinterpret_cast<int*>(&aov_mode), items, std::size(items))) {
+                g_tracer.setAovMode(aov_mode);
+            }
+        }
+
         bool enableProgressive = g_tracer.isProgressive();
 
         if (ImGui::Checkbox("Progressive", &enableProgressive)) {

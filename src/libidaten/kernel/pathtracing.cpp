@@ -218,6 +218,10 @@ namespace idaten {
             gl_surface_cuda_rscs_.writeByNum(tmp.data(), (uint32_t)tmp.size());
         }
 
+        aov_position_.init(width * height);
+        aov_nml_.init(width * height);
+        aov_albedo_.init(width * height);
+
         static const int rrBounce = 3;
 
         auto time = AT_NAME::timer::getSystemTime();
@@ -253,7 +257,16 @@ namespace idaten {
             }
         }
 
-        onGather(outputSurf, m_paths, width, height);
+        if (need_export_gl_) {
+            copyAovToGLSurface(width, height);
+        }
+
+        if (aov_mode_ == AovMode::None) {
+            onGather(outputSurf, m_paths, width, height);
+        }
+        else {
+            displayAov(outputSurf, width, height);
+        }
 
         checkCudaErrors(cudaDeviceSynchronize());
 

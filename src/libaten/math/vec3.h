@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __NVCC__
+#pragma diag_suppress = esa_on_defaulted_function_ignored
+#endif
+
 #include "glm/glm.hpp"
 
 #include "defs.h"
@@ -328,3 +332,7 @@ namespace aten {
         return b0 || b1 || b2;
     }
 }
+
+#ifdef __NVCC__
+#pragma diag_default = esa_on_defaulted_function_ignored
+#endif

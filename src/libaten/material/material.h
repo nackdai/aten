@@ -40,13 +40,13 @@ namespace aten
         {}
     };
 
-    //                                                                  Em     Si      Tr    Gl    NPR
-    #define MaterialAttributeMicrofacet        aten::MaterialAttribute(false, false, false, true,  false)
+    //                                                                Em     Si      Tr    Gl    NPR
+    #define MaterialAttributeMicrofacet     aten::MaterialAttribute(false, false, false, true,  false)
     #define MaterialAttributeLambert        aten::MaterialAttribute(false, false, false, false, false)
-    #define MaterialAttributeEmissive        aten::MaterialAttribute(true,  false, false, false, false)
-    #define MaterialAttributeSpecular        aten::MaterialAttribute(false, true,  false, true,  false)
-    #define MaterialAttributeRefraction        aten::MaterialAttribute(false, true,  true,  true,  false)
-    #define MaterialAttributeTransmission    aten::MaterialAttribute(false, false, true,  false, false)
+    #define MaterialAttributeEmissive       aten::MaterialAttribute(true,  false, false, false, false)
+    #define MaterialAttributeSpecular       aten::MaterialAttribute(false, true,  false, true,  false)
+    #define MaterialAttributeRefraction     aten::MaterialAttribute(false, true,  true,  true,  false)
+    #define MaterialAttributeTransmission   aten::MaterialAttribute(false, false, true,  false, false)
     #define MaterialAttributeNPR            aten::MaterialAttribute(false, false, false, false, true)
 
     enum class MaterialType : int {
@@ -62,7 +62,6 @@ namespace aten
         Lambert_Refraction,
         Microfacet_Refraction,
         Disney,
-        CarPaint,
         Toon,
         Layer,
 
@@ -83,8 +82,7 @@ namespace aten
         //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
         real ior{ 1.0 };    // 屈折率.
 
-#if 0
-        real roughness{ 0.5 };   // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+        real roughness{ 0.5 };      // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
         real shininess{ 1.0 };
 
         real subsurface{ 0.0 };     // 表面下の近似を用いてディフューズ形状を制御する.
@@ -96,36 +94,6 @@ namespace aten
         real sheenTint{ 0.5 };      // 基本色に向かう光沢色合いの量.
         real clearcoat{ 0.0 };      // 第二の特別な目的のスペキュラーローブ.
         real clearcoatGloss{ 1.0 }; // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
-#else
-        union {
-            struct {
-                real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
-                real shininess;
-                real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
-                real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-                real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-                real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-                real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-                real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
-                real sheenTint;         // 基本色に向かう光沢色合いの量.
-                real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
-                real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
-            };
-            struct {
-                real clearcoatRoughness;
-                real flakeLayerRoughness;
-                real flake_scale;               // Smaller values zoom into the flake map, larger values zoom out.
-                real flake_size;                // Relative size of the flakes
-                real flake_size_variance;       // 0.0 makes all flakes the same size, 1.0 assigns random size between 0 and the given flake size
-                real flake_normal_orientation;  // Blend between the flake normals (0.0) and the surface normal (1.0)
-                real flake_reflection;
-                real flake_transmittance;
-                aten::vec3 glitterColor;
-                aten::vec3 flakeColor;
-                real flake_intensity;
-            } carpaint;
-        };
-#endif
 
         MaterialAttribute attrib;
 
@@ -148,19 +116,6 @@ namespace aten
             albedoMap = -1;
             normalMap = -1;
             roughnessMap = -1;
-
-            roughness = real(0.5);
-            shininess = real(1.0);
-
-            subsurface = real(0.0);
-            metallic = real(0.0);
-            specular = real(0.5);
-            specularTint = real(0.0);
-            anisotropic = real(0.0);
-            sheen = real(0.0);
-            sheenTint = real(0.5);
-            clearcoat = real(0.0);
-            clearcoatGloss = real(1.0);
         }
         AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
             : type(_type), attrib(_attrib)
@@ -169,19 +124,6 @@ namespace aten
             albedoMap = -1;
             normalMap = -1;
             roughnessMap = -1;
-
-            roughness = real(0.5);
-            shininess = real(1.0);
-
-            subsurface = real(0.0);
-            metallic = real(0.0);
-            specular = real(0.5);
-            specularTint = real(0.0);
-            anisotropic = real(0.0);
-            sheen = real(0.0);
-            sheenTint = real(0.5);
-            clearcoat = real(0.0);
-            clearcoatGloss = real(1.0);
         }
     };
 

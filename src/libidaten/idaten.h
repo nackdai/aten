@@ -9,7 +9,6 @@
 #include "kernel/Skinning.h"
 
 #include "svgf/svgf.h"
-#include "asvgf/asvgf.h"
 
 #include "cuda/cudainit.h"
 #include "cuda/multigpu.h"

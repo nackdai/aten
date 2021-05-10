@@ -223,9 +223,6 @@
     <ClInclude Include="..\src\libidaten\kernel\RadixSort.h">
       <Filter>kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\carpaint.h">
-      <Filter>aten\material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h">
       <Filter>aten\material</Filter>
     </ClInclude>
@@ -261,9 +258,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libidaten\cuda\cudadefs.h">
       <Filter>cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\asvgf\asvgf.h">
-      <Filter>asvgf</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh">
       <Filter>kernel</Filter>
@@ -327,9 +321,6 @@
     <Filter Include="multigpu">
       <UniqueIdentifier>{a022af60-efd8-427a-82ab-061b0ca6a84c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="asvgf">
-      <UniqueIdentifier>{bc7a64b0-b385-4825-804f-ef99928647c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ao">
       <UniqueIdentifier>{d62712a7-6048-4953-8529-944e40f98a46}</UniqueIdentifier>
     </Filter>
@@ -379,9 +370,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libidaten\asvgf\asvgf.cpp">
-      <Filter>asvgf</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp">
       <Filter>cuda</Filter>
@@ -478,9 +466,6 @@
     <CudaCompile Include="..\src\libidaten\kernel\RadixSort.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libaten\material\carpaint.cpp">
-      <Filter>aten\material</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\Skinning.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
@@ -505,35 +490,11 @@
     <CudaCompile Include="..\src\libaten\material\velvet.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_CreateGradient.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_AtrousGradient.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_debug.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_ForwardProjection.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_pt.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\GenMipMaps.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_rng_seed.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_hittest.cu">
-      <Filter>asvgf</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\ao\ao.cu">
       <Filter>ao</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\asvgf\asvgf_raygen.cu">
-      <Filter>asvgf</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\tex_viewer.cu">
       <Filter>kernel\renderer</Filter>

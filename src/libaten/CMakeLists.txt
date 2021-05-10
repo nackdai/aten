@@ -121,8 +121,6 @@ add_library(
   material/beckman.h
   material/blinn.cpp
   material/blinn.h
-  material/carpaint.cpp
-  material/carpaint.h
   material/disney_brdf.cpp
   material/disney_brdf.h
   material/emissive.h

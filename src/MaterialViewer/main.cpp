@@ -65,31 +65,8 @@ void getCameraPosAndAt(
 void makeScene(aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
-#if 0
-    // CarPaint material doesn't work well
-    {
-        mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
-
-        mtrlParam.carpaint.clearcoatRoughness = real(0.5);
-        mtrlParam.carpaint.flakeLayerRoughness = real(0.5);
-
-        mtrlParam.carpaint.flake_scale = real(100);
-        mtrlParam.carpaint.flake_size = real(0.01);
-        mtrlParam.carpaint.flake_size_variance = real(0.25);
-        mtrlParam.carpaint.flake_normal_orientation = real(0.5);
-
-        mtrlParam.carpaint.flake_reflection = real(0.5);
-        mtrlParam.carpaint.flake_transmittance = real(0.5);
-
-        mtrlParam.carpaint.glitterColor = mtrlParam.baseColor;
-        mtrlParam.carpaint.flakeColor = mtrlParam.baseColor;
-
-        mtrlParam.carpaint.flake_intensity = real(1);
-    }
-#else
     mtrlParam.type = aten::MaterialType::Lambert;
     mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
-#endif
 
     auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
         mtrlParam,
@@ -236,7 +213,6 @@ void onRun(aten::window* window)
             "LambertRefraction",
             "MicrofacetRefraction",
             "Disney",
-            "CarPaint",
         };
         int mtrlType = (int)mtrl->param().type;
         if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {

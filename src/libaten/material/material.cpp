@@ -19,7 +19,6 @@ namespace AT_NAME
         "lambert_refraction",
         "microfacet_refraction",
         "disney_brdf",
-        "carpaint",
         "toon",
         "layer",
     };

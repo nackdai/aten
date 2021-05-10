@@ -205,9 +205,9 @@ __global__ void hitTest(
 }
 
 __global__ void shadeMiss(
-    bool isFirstBounce, bool needAOV,
+    bool isFirstBounce,
     idaten::TileDomain tileDomain,
-    cudaSurfaceObject_t* aovs,
+    float3* aov_albedo,
     idaten::PathTracing::Path* paths)
 {
     const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -228,13 +228,7 @@ __global__ void shadeMiss(
         if (isFirstBounce) {
             path.isKill = true;
 
-            if (needAOV) {
-                surf2Dwrite(
-                    make_float4(bg.x, bg.y, bg.z, 1),
-                    aovs[2],
-                    ix * sizeof(float4), iy,
-                    cudaBoundaryModeTrap);
-            }
+            aov_albedo[idx] = make_float3(bg.x, bg.y, bg.z);
 
 #ifdef ENABLE_SEPARATE_ALBEDO
             // For exporting separated albedo.
@@ -249,9 +243,9 @@ __global__ void shadeMiss(
 }
 
 __global__ void shadeMissWithEnvmap(
-    bool isFirstBounce, bool needAOV,
+    bool isFirstBounce,
     idaten::TileDomain tileDomain,
-    cudaSurfaceObject_t* aovs,
+    float3* aov_albedo,
     cudaTextureObject_t* textures,
     int envmapIdx,
     real envmapAvgIllum,
@@ -279,16 +273,11 @@ __global__ void shadeMissWithEnvmap(
         auto emit = aten::vec3(bg.x, bg.y, bg.z);
 
         float misW = 1.0f;
+
         if (isFirstBounce) {
             path.isKill = true;
 
-            if (needAOV) {
-                surf2Dwrite(
-                    make_float4(emit.x, emit.y, emit.z, 1),
-                    aovs[2],
-                    ix * sizeof(float4), iy,
-                    cudaBoundaryModeTrap);
-            }
+            aov_albedo[idx] = make_float3(emit.x, emit.y, emit.z);
 
 #ifdef ENABLE_SEPARATE_ALBEDO
             // For exporting separated albedo.
@@ -298,9 +287,9 @@ __global__ void shadeMissWithEnvmap(
         else {
             auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
             misW = path.pdfb / (pdfLight + path.pdfb);
-
-            emit *= envmapMultiplyer;
         }
+
+        emit *= envmapMultiplyer;
 
         path.contrib += path.throughput * misW * emit * path.accumulatedAlpha;
 
@@ -309,12 +298,11 @@ __global__ void shadeMissWithEnvmap(
 }
 
 __global__ void shade(
-    bool needAOV,
+    bool is_first_bounce,
     idaten::TileDomain tileDomain,
     int sample,
     unsigned int frame,
-    cudaSurfaceObject_t* aovs,
-    float3 posRange,
+    float4* aov_position, float4* aov_normal, float3* aov_albedo,
     idaten::PathTracing::Path* paths,
     int* hitindices,
     int* hitnum,
@@ -395,40 +383,14 @@ __global__ void shade(
 
     auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
-#if 1
-    if (needAOV) {
-        int ix = idx % tileDomain.w;
-        int iy = idx / tileDomain.w;
-
-        ix += tileDomain.x;
-        iy += tileDomain.y;
-
-        auto p = make_float3(rec.p.x, rec.p.y, rec.p.z);
-        p /= posRange;
-
+    // AOV
+    if (is_first_bounce) {
         auto n = (orienting_normal + 1.0f) * 0.5f;
 
-        // position
-        surf2Dwrite(
-            make_float4(p.x, p.y, p.z, rec.mtrlid),
-            aovs[0],
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-
-        // normal
-        surf2Dwrite(
-            make_float4(n.x, n.y, n.z, isect.meshid),
-            aovs[1],
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-
-        surf2Dwrite(
-            make_float4(albedo.x, albedo.y, albedo.z, 1),
-            aovs[2],
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
+        aov_position[idx] = make_float4(rec.p.x, rec.p.y, rec.p.z, rec.mtrlid);
+        aov_normal[idx] = make_float4(n.x, n.y, n.z, isect.meshid);
+        aov_albedo[idx] = make_float3(albedo.x, albedo.y, albedo.z);
     }
-#endif
 
 #ifdef ENABLE_SEPARATE_ALBEDO
     // For exporting separated albedo.
@@ -772,6 +734,81 @@ __global__ void gather(
         cudaBoundaryModeTrap);
 }
 
+__global__ void DisplayAOV(
+    int width, int height,
+    cudaSurfaceObject_t outSurface,
+    idaten::PathTracing::AovMode mode,
+    float4* aov_nml, float3* aov_albedo)
+{
+    const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (ix >= width || iy >= height) {
+        return;
+    }
+
+    const auto idx = getIdx(ix, iy, width);
+
+    if (mode == idaten::PathTracing::AovMode::Normal) {
+        auto nml = aov_nml[idx];
+        surf2Dwrite(
+            make_float4(nml.x, nml.y, nml.z, 1),
+            outSurface,
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
+    }
+    else if (mode == idaten::PathTracing::AovMode::Albedo) {
+        auto albedo = aov_albedo[idx];
+        surf2Dwrite(
+            make_float4(albedo.x, albedo.y, albedo.z, 1),
+            outSurface,
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
+    }
+}
+
+__global__ void CopyAovToGLSurface(
+    int width, int height,
+    float4* aov_position, float4* aov_nml, float3* aov_albedo,
+    aten::vec3 position_range,
+    cudaSurfaceObject_t* gl_rscs)
+{
+    const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+    const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (ix >= width || iy >= height) {
+        return;
+    }
+
+    const auto idx = getIdx(ix, iy, width);
+
+    auto position = aov_position[idx];
+    auto nml = aov_nml[idx];
+    auto albedo = aov_albedo[idx];
+
+    position.x /= position_range.x;
+    position.y /= position_range.y;
+    position.z /= position_range.z;
+
+    surf2Dwrite(
+        position,
+        gl_rscs[0],
+        ix * sizeof(float4), iy,
+        cudaBoundaryModeTrap);
+
+    surf2Dwrite(
+        nml,
+        gl_rscs[1],
+        ix * sizeof(float4), iy,
+        cudaBoundaryModeTrap);
+
+    surf2Dwrite(
+        make_float4(albedo.x, albedo.y, albedo.z, 1),
+        gl_rscs[2],
+        ix * sizeof(float4), iy,
+        cudaBoundaryModeTrap);
+}
+
 namespace idaten {
     void PathTracing::onGenPath(
         int width, int height,
@@ -834,15 +871,13 @@ namespace idaten {
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        bool can_export_gl = (bounce == 0 && need_export_gl_);
-
         bool isFirstBounce = bounce == 0;
 
         if (m_envmapRsc.idx >= 0) {
             shadeMissWithEnvmap << <grid, block >> > (
-                isFirstBounce, can_export_gl,
+                isFirstBounce,
                 m_tileDomain,
-                gl_surface_cuda_rscs_.ptr(),
+                aov_albedo_.ptr(),
                 m_tex.ptr(),
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
                 m_paths.ptr(),
@@ -850,9 +885,9 @@ namespace idaten {
         }
         else {
             shadeMiss << <grid, block >> > (
-                isFirstBounce, can_export_gl,
+                isFirstBounce,
                 m_tileDomain,
-                gl_surface_cuda_rscs_.ptr(),
+                aov_albedo_.ptr(),
                 m_paths.ptr());
         }
 
@@ -869,18 +904,17 @@ namespace idaten {
         dim3 blockPerGrid((m_tileDomain.w * m_tileDomain.h + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
-        bool can_export_gl = (bounce == 0 && need_export_gl_);
-        float3 posRange = make_float3(position_range_.x, position_range_.y, position_range_.z);
-
         auto& hitcount = m_compaction.getCount();
+
+        bool is_first_bounce = bounce == 0;
 
         shade << <blockPerGrid, threadPerBlock >> > (
         //shade<true> << <1, 1 >> > (
-            can_export_gl,
+            is_first_bounce,
             m_tileDomain,
             sample,
             m_frame,
-            gl_surface_cuda_rscs_.ptr(), posRange,
+            aov_position_.ptr(), aov_nml_.ptr(), aov_albedo_.ptr(),
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
@@ -930,5 +964,39 @@ namespace idaten {
             outputSurf,
             paths.ptr(),
             m_enableProgressive);
+    }
+
+    void PathTracing::displayAov(
+        cudaSurfaceObject_t outputSurf,
+        int width, int height)
+    {
+        AT_ASSERT(aov_mode_ != AovMode::None);
+
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
+
+        DisplayAOV << <grid, block >> > (
+            width, height,
+            outputSurf,
+            aov_mode_,
+            aov_nml_.ptr(), aov_albedo_.ptr());
+    }
+
+    void PathTracing::copyAovToGLSurface(int width, int height)
+    {
+        AT_ASSERT(need_export_gl_);
+
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
+
+        CopyAovToGLSurface << <grid, block >> > (
+            width, height,
+            aov_position_.ptr(), aov_nml_.ptr(), aov_albedo_.ptr(),
+            position_range_,
+            gl_surface_cuda_rscs_.ptr());
     }
 }

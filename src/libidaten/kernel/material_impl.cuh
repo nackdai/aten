@@ -229,9 +229,6 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
-    case aten::MaterialType::CarPaint:
-        AT_NAME::CarPaintBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
-        break;
     case aten::MaterialType::Layer:
         sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
         break;
@@ -289,9 +286,6 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
-    case aten::MaterialType::CarPaint:
-        AT_NAME::CarPaintBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
-        break;
     case aten::MaterialType::Layer:
         sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
         break;
@@ -347,9 +341,6 @@ AT_CUDA_INLINE __device__ real samplePDF(
     case aten::MaterialType::Disney:
         pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
         break;
-    case aten::MaterialType::CarPaint:
-        pdf = AT_NAME::CarPaintBRDF::pdf(mtrl, normal, wi, wo, u, v);
-        break;
     case aten::MaterialType::Layer:
         pdf = sampleLayerPDF(ctxt, mtrl, normal, wi, wo, u, v);
         break;
@@ -393,8 +384,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
         return AT_NAME::MicrofacetRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
-    case aten::MaterialType::CarPaint:
-        return AT_NAME::CarPaintBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Layer:
         return sampleLayerDirection(ctxt, mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Toon:
@@ -437,8 +426,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
-    case aten::MaterialType::CarPaint:
-        return AT_NAME::CarPaintBRDF::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Layer:
         return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Toon:
@@ -482,8 +469,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
-    case aten::MaterialType::CarPaint:
-        return AT_NAME::CarPaintBRDF::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Layer:
         return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Toon:

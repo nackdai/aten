@@ -19,7 +19,6 @@
 #include "material/beckman.h"
 #include "material/oren_nayar.h"
 #include "material/disney_brdf.h"
-#include "material/carpaint.h"
 #include "material/velvet.h"
 #include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"

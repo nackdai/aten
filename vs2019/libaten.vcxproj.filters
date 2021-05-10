@@ -476,9 +476,6 @@
     <ClInclude Include="..\src\libaten\misc\timeline.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\carpaint.h">
-      <Filter>material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h">
       <Filter>material</Filter>
     </ClInclude>
@@ -780,9 +777,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh_update.cpp">
       <Filter>accelerator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\carpaint.cpp">
-      <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp">
       <Filter>material</Filter>

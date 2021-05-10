@@ -306,7 +306,6 @@
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
     <ClInclude Include="..\src\libaten\material\blinn.h" />
-    <ClInclude Include="..\src\libaten\material\carpaint.h" />
     <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h" />
@@ -439,7 +438,6 @@
     <ClCompile Include="..\src\libaten\light\light_instantiate_from_value.cpp" />
     <ClCompile Include="..\src\libaten\material\beckman.cpp" />
     <ClCompile Include="..\src\libaten\material\blinn.cpp" />
-    <ClCompile Include="..\src\libaten\material\carpaint.cpp" />
     <ClCompile Include="..\src\libaten\material\disney_brdf.cpp" />
     <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />

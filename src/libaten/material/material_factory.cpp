@@ -11,7 +11,6 @@
 #include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
-#include "material/carpaint.h"
 #include "misc/value.h"
 
 namespace aten
@@ -31,34 +30,19 @@ namespace aten
             param.ior = value.get("ior", param.ior);
         }
 
-        if (type == MaterialType::CarPaint) {
-            param.carpaint.clearcoatRoughness = value.get("clearcoatRoughness", param.carpaint.clearcoatRoughness);
-            param.carpaint.flakeLayerRoughness = value.get("flakeLayerRoughness", param.carpaint.flakeLayerRoughness);
-            param.carpaint.flake_scale = value.get("flake_scale", param.carpaint.flake_scale);
-            param.carpaint.flake_size = value.get("flake_size", param.carpaint.flake_size);
-            param.carpaint.flake_size_variance = value.get("flake_size_variance", param.carpaint.flake_size_variance);
-            param.carpaint.flake_normal_orientation = value.get("flake_normal_orientation", param.carpaint.flake_normal_orientation);
-            param.carpaint.flake_reflection = value.get("flake_reflection", param.carpaint.flake_reflection);
-            param.carpaint.flake_transmittance = value.get("flake_transmittance", param.carpaint.flake_transmittance);
-            param.carpaint.glitterColor = value.get("glitterColor", param.carpaint.glitterColor);
-            param.carpaint.flakeColor = value.get("clearcoat", param.carpaint.flakeColor);
-            param.carpaint.flake_intensity = value.get("clearcoatGloss", param.carpaint.flake_intensity);
-        }
-        else {
-            param.roughness = value.get("roughness", param.roughness);
-            param.shininess = value.get("shininess", param.shininess);
-            param.subsurface = value.get("subsurface", param.subsurface);
-            param.metallic = value.get("metallic", param.metallic);
-            param.specular = value.get("specular", param.specular);
-            param.specularTint = value.get("specularTint", param.specularTint);
-            param.anisotropic = value.get("anisotropic", param.anisotropic);
-            param.sheen = value.get("sheen", param.sheen);
-            param.sheenTint = value.get("sheenTint", param.sheenTint);
-            param.clearcoat = value.get("clearcoat", param.clearcoat);
-            param.clearcoatGloss = value.get("clearcoatGloss", param.clearcoatGloss);
+        param.roughness = value.get("roughness", param.roughness);
+        param.shininess = value.get("shininess", param.shininess);
+        param.subsurface = value.get("subsurface", param.subsurface);
+        param.metallic = value.get("metallic", param.metallic);
+        param.specular = value.get("specular", param.specular);
+        param.specularTint = value.get("specularTint", param.specularTint);
+        param.anisotropic = value.get("anisotropic", param.anisotropic);
+        param.sheen = value.get("sheen", param.sheen);
+        param.sheenTint = value.get("sheenTint", param.sheenTint);
+        param.clearcoat = value.get("clearcoat", param.clearcoat);
+        param.clearcoatGloss = value.get("clearcoatGloss", param.clearcoatGloss);
 
-            param.isIdealRefraction = value.get("isIdealRefraction", param.isIdealRefraction);
-        }
+        param.isIdealRefraction = value.get("isIdealRefraction", param.isIdealRefraction);
 
         return createMaterialWithMaterialParameter(
             param, albedoMap.get(), normalMap.get(), roughnessMap.get());
@@ -81,7 +65,6 @@ namespace aten
             []() { return new LambertRefraction(); },    // lambert_rafraction
             []() { return new MicrofacetRefraction(); }, // microfacet_rafraction
             []() { return new DisneyBRDF(); },           // disney_brdf
-            []() { return new CarPaintBRDF(); },         // carpaint
             []() { return nullptr; },                    // toon
             []() { return nullptr; },                    // layer
         };
@@ -135,9 +118,6 @@ namespace aten
             break;
         case aten::MaterialType::Disney:
             mtrl = new aten::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);
-            break;
-        case aten::MaterialType::CarPaint:
-            mtrl = new aten::CarPaintBRDF(param, roughnessMap);
             break;
         default:
             AT_ASSERT(false);

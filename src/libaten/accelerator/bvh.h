@@ -112,27 +112,6 @@ namespace aten {
             int depth,
             const std::shared_ptr<bvhnode>& parent);
 
-        struct Candidate {
-            bvhnode* node{ nullptr };
-            bvhnode* instanceNode{ nullptr };
-
-            Candidate(bvhnode* n, bvhnode* i = nullptr)
-            {
-                node = n;
-                instanceNode = i;
-            }
-        };
-
-        bool findCandidates(
-            bvhnode* node,
-            bvhnode* instanceNode,
-            const frustum& f,
-            std::stack<Candidate>* stack);
-
-        bvhnode* traverse(
-            bvhnode* root,
-            const frustum& f);
-
     protected:
         // Root node.
         std::shared_ptr<bvhnode> m_root;

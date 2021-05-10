@@ -84,7 +84,8 @@ __global__ void setTriangleParam(
 // NOTE
 // http://www.cuvilib.com/Reduction.pdf
 
-template <int BLOCK_SIZE>
+static constexpr uint32_t BLOCK_SIZE = 256;
+
 __global__ void getMinMax(
     bool isFinalIter,
     uint32_t num,
@@ -303,7 +304,7 @@ namespace idaten
             auto src = dstPos;
             auto num = m_vertices.num();
 
-            dim3 block(256);
+            dim3 block(BLOCK_SIZE);
             dim3 grid((num + block.x - 1) / block.x);
 
             m_minBuf.init(grid.x);
@@ -311,7 +312,7 @@ namespace idaten
 
             auto sharedMemSize = block.x * sizeof(aten::vertex) * 2;
 
-            getMinMax <256> << <grid, block >> > (
+            getMinMax << <grid, block >> > (
                 false,
                 num,
                 src,
@@ -322,7 +323,7 @@ namespace idaten
 
             num = grid.x;
 
-            getMinMax <256> << <1, block >> > (
+            getMinMax << <1, block >> > (
                 true,
                 num,
                 src,

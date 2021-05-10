@@ -8,7 +8,7 @@
 
 namespace aten
 {
-    enum GeometryType : int {
+    enum class GeometryType : int {
         Polygon,
         Instance,
         Sphere,

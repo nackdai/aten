@@ -72,15 +72,6 @@ namespace idaten
             return static_cast<uint32_t>(m_texRsc.size());
         }
 
-        virtual void enableRenderAOV(
-            GLuint gltexPosition,
-            GLuint gltexNormal,
-            GLuint gltexAlbedo,
-            const aten::vec3& posRange)
-        {
-            // Nothing is done...
-        }
-
         std::vector<idaten::CudaTextureResource>& getCudaTextureResourceForBvhNodes()
         {
             return m_nodeparam;

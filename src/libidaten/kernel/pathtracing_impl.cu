@@ -834,15 +834,15 @@ namespace idaten {
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        bool enableAOV = (bounce == 0 && m_enableAOV);
+        bool can_export_gl = (bounce == 0 && need_export_gl_);
 
         bool isFirstBounce = bounce == 0;
 
         if (m_envmapRsc.idx >= 0) {
             shadeMissWithEnvmap << <grid, block >> > (
-                isFirstBounce, enableAOV,
+                isFirstBounce, can_export_gl,
                 m_tileDomain,
-                m_aovCudaRsc.ptr(),
+                gl_surface_cuda_rscs_.ptr(),
                 m_tex.ptr(),
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
                 m_paths.ptr(),
@@ -850,9 +850,9 @@ namespace idaten {
         }
         else {
             shadeMiss << <grid, block >> > (
-                isFirstBounce, enableAOV,
+                isFirstBounce, can_export_gl,
                 m_tileDomain,
-                m_aovCudaRsc.ptr(),
+                gl_surface_cuda_rscs_.ptr(),
                 m_paths.ptr());
         }
 
@@ -869,18 +869,18 @@ namespace idaten {
         dim3 blockPerGrid((m_tileDomain.w * m_tileDomain.h + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
-        bool enableAOV = (bounce == 0 && m_enableAOV);
-        float3 posRange = make_float3(m_posRange.x, m_posRange.y, m_posRange.z);
+        bool can_export_gl = (bounce == 0 && need_export_gl_);
+        float3 posRange = make_float3(position_range_.x, position_range_.y, position_range_.z);
 
         auto& hitcount = m_compaction.getCount();
 
         shade << <blockPerGrid, threadPerBlock >> > (
         //shade<true> << <1, 1 >> > (
-            enableAOV,
+            can_export_gl,
             m_tileDomain,
             sample,
             m_frame,
-            m_aovCudaRsc.ptr(), posRange,
+            gl_surface_cuda_rscs_.ptr(), posRange,
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),

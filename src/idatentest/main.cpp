@@ -15,8 +15,6 @@
 #include "../common/scenedefs.h"
 
 #define ENABLE_ENVMAP
-//#define ENABLE_GEOMRENDERING
-//#define ENABLE_TEMPORAL
 //#define ENABLE_ATROUS
 
 static int WIDTH = 1280;
@@ -38,17 +36,7 @@ static aten::context g_ctxt;
 aten::ATrousDenoiser atrous;
 
 //static idaten::RayTracing g_tracer;
-
-#if defined(ENABLE_GEOMRENDERING) && defined(ENABLE_TEMPORAL)
-// TODO
-static idaten::PathTracingTemporalReprojectionGeomtryRendering g_tracer;
-#elif defined(ENABLE_GEOMRENDERING)
-static idaten::PathTracingGeometryRendering g_tracer;
-#elif defined(ENABLE_TEMPORAL)
-static idaten::PathTracingTemporalReprojection g_tracer;
-#else
 static idaten::PathTracing g_tracer;
-#endif
 
 static aten::visualizer* g_visualizer;
 
@@ -73,9 +61,7 @@ void onRun(aten::window* window)
         g_tracer.updateCamera(camparam);
         g_isCameraDirty = false;
 
-#ifndef ENABLE_TEMPORAL
         g_visualizer->clear();
-#endif
     }
 
     atrous.getPositionMap()->clearAsGLTexture(aten::vec4(real(1)));
@@ -86,11 +72,7 @@ void onRun(aten::window* window)
     timer.begin();
 
     g_tracer.render(
-#ifdef ENABLE_GEOMRENDERING
-        idaten::TileDomain(0, 0, WIDTH >> 1, HEIGHT >> 1),
-#else
         idaten::TileDomain(0, 0, WIDTH, HEIGHT),
-#endif
         g_maxSamples,
         g_maxBounce);
 
@@ -241,11 +223,7 @@ void onKey(bool press, aten::Key key)
                 at,
                 aten::vec3(0, 1, 0),
                 vfov,
-#ifdef ENABLE_GEOMRENDERING
-                WIDTH >> 1, HEIGHT >> 1);
-#else
                 WIDTH, HEIGHT);
-#endif
         }
             break;
         default:
@@ -307,21 +285,13 @@ int main()
         at,
         aten::vec3(0, 1, 0),
         vfov,
-#ifdef ENABLE_GEOMRENDERING
-        WIDTH >> 1, HEIGHT >> 1);
-#else
         WIDTH, HEIGHT);
-#endif
 
     Scene::makeScene(g_ctxt, &g_scene);
     g_scene.build(g_ctxt);
 
     g_tracer.getCompaction().init(
-#ifdef ENABLE_GEOMRENDERING
-        (WIDTH >> 1) * (HEIGHT >> 1),
-#else
         WIDTH * HEIGHT,
-#endif
         1024);
 
 #ifdef ENABLE_ENVMAP
@@ -378,11 +348,7 @@ int main()
 
         g_tracer.update(
             aten::visualizer::getTexHandle(),
-#ifdef ENABLE_GEOMRENDERING
-            WIDTH >> 1, HEIGHT >> 1,
-#else
             WIDTH, HEIGHT,
-#endif
             camparam,
             shapeparams,
             mtrlparms,
@@ -398,7 +364,7 @@ int main()
 #endif
 
 #if 1
-        g_tracer.enableRenderAOV(
+        g_tracer.enableExportToGLTextures(
             atrous.getPositionMap()->getGLTexHandle(),
             atrous.getNormalMap()->getGLTexHandle(),
             atrous.getAlbedoMap()->getGLTexHandle(),

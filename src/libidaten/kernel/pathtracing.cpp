@@ -124,7 +124,7 @@ namespace idaten {
         }
     }
 
-    void PathTracing::enableRenderAOV(
+    void PathTracing::enableExportToGLTextures(
         GLuint gltexPosition,
         GLuint gltexNormal,
         GLuint gltexAlbedo,
@@ -133,17 +133,17 @@ namespace idaten {
         AT_ASSERT(gltexPosition > 0);
         AT_ASSERT(gltexNormal > 0);
 
-        if (!m_enableAOV) {
-            m_enableAOV = true;
+        if (!need_export_gl_) {
+            need_export_gl_ = true;
 
-            m_posRange = posRange;
+            position_range_ = posRange;
 
-            m_aovs.resize(3);
-            m_aovs[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
-            m_aovs[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
-            m_aovs[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
+            gl_surfaces_.resize(3);
+            gl_surfaces_[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
+            gl_surfaces_[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
+            gl_surfaces_[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
 
-            m_aovCudaRsc.init(3);
+            gl_surface_cuda_rscs_.init(3);
         }
     }
 
@@ -209,13 +209,13 @@ namespace idaten {
             m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
-        if (m_enableAOV) {
+        if (need_export_gl_) {
             std::vector<cudaSurfaceObject_t> tmp;
-            for (int i = 0; i < m_aovs.size(); i++) {
-                m_aovs[i].map();
-                tmp.push_back(m_aovs[i].bind());
+            for (int i = 0; i < gl_surfaces_.size(); i++) {
+                gl_surfaces_[i].map();
+                tmp.push_back(gl_surfaces_[i].bind());
             }
-            m_aovCudaRsc.writeByNum(&tmp[0], (uint32_t)tmp.size());
+            gl_surface_cuda_rscs_.writeByNum(tmp.data(), (uint32_t)tmp.size());
         }
 
         static const int rrBounce = 3;
@@ -271,9 +271,9 @@ namespace idaten {
                 m_texRsc[i].unbind();
             }
 
-            for (int i = 0; i < m_aovs.size(); i++) {
-                m_aovs[i].unbind();
-                m_aovs[i].unmap();
+            for (int i = 0; i < gl_surfaces_.size(); i++) {
+                gl_surfaces_[i].unbind();
+                gl_surfaces_[i].unmap();
             }
         }
 

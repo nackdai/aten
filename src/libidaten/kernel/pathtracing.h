@@ -79,11 +79,11 @@ namespace idaten
 
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
 
-        virtual void enableRenderAOV(
+        void enableExportToGLTextures(
             GLuint gltexPosition,
             GLuint gltexNormal,
             GLuint gltexAlbedo,
-            const aten::vec3& posRange) override;
+            const aten::vec3& posRange);
 
         void enableProgressive(bool enable)
         {
@@ -138,10 +138,11 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
 
-        bool m_enableAOV{ false };
-        aten::vec3 m_posRange{ real(1) };
-        idaten::TypedCudaMemory<cudaSurfaceObject_t> m_aovCudaRsc;
-        std::vector<idaten::CudaGLSurface> m_aovs;
+        // To export to GL.
+        bool need_export_gl_{ false };
+        aten::vec3 position_range_{ real(1) };
+        idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
+        std::vector<idaten::CudaGLSurface> gl_surfaces_;
 
         uint32_t m_frame{ 1 };
 

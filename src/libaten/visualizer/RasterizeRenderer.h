@@ -71,6 +71,17 @@ namespace aten {
             FBO* fbo = nullptr,
             FuncSetUniform funcSetUniform = nullptr);
 
+        using FuncObjRenderer = std::function<void(const object&)>;
+
+        void drawObjects(
+            context& ctxt,
+            std::function<void(FuncObjRenderer)> funcRenderObjs,
+            const camera* cam,
+            bool isWireFrame,
+            const mat4& mtxL2W = mat4::Identity,
+            FBO* fbo = nullptr,
+            FuncSetUniform funcSetUniform = nullptr);
+
         void initBuffer(
             uint32_t vtxStride,
             uint32_t vtxNum,

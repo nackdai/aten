@@ -100,10 +100,27 @@ namespace AT_NAME
             return m_shapes[idx].get();
         }
 
+        const std::vector<std::shared_ptr<objshape>>& getShapes() const
+        {
+            return m_shapes;
+        }
+
+        void setName(const char* name)
+        {
+            name_.assign(name);
+        }
+
+        const char* getName()
+        {
+            return name_.empty() ? nullptr : name_.c_str();
+        }
+
     private:
         std::vector<std::shared_ptr<objshape>> m_shapes;
 
         std::shared_ptr<aten::accelerator> m_accel;
         uint32_t m_triangles{ 0 };
+
+        std::string name_;
     };
 }

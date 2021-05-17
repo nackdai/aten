@@ -117,6 +117,10 @@ namespace aten
         for (int p = 0; p < shapes.size(); p++) {
             const auto& shape = shapes[p];
 
+            if (obj && obj->getName() == nullptr) {
+                obj->setName(shape.name.c_str());
+            }
+
             auto curVtxPos = ctxt.getVertexNum();
 
             vec3 pmin = vec3(AT_MATH_INF);
@@ -243,15 +247,6 @@ namespace aten
 
                         auto mtrl = dst_shape->getMaterial();
 
-                        if (willSeparate) {
-                            // Split the object if it has different materials
-                            obj->appendShape(dst_shape);
-                            obj->setBoundingBox(aten::aabb(pmin, pmax));
-                            objs.push_back(std::move(obj));
-
-                            // Create new object for next steps after here.
-                            obj = aten::TransformableFactory::createObject(ctxt);
-                        }
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             // Export the object which has an emissive material as the emissive object.
                             std::shared_ptr<object> emitobj(

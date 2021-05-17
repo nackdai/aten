@@ -446,6 +446,107 @@ namespace aten {
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
     }
 
+    void RasterizeRenderer::drawObjects(
+        context& ctxt,
+        std::function<void(FuncObjRenderer)> funcRenderObjs,
+        const camera* cam,
+        bool isWireFrame,
+        const mat4& mtxL2W/*= mat4::Identity*/,
+        FBO* fbo/*= nullptr*/,
+        FuncSetUniform funcSetUniform/*= nullptr*/)
+    {
+        auto camparam = cam->param();
+
+        // TODO
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
+
+        mat4 mtxW2V;
+        mat4 mtxV2C;
+
+        mtxW2V.lookat(
+            camparam.origin,
+            camparam.center,
+            camparam.up);
+
+        mtxV2C.perspective(
+            camparam.znear,
+            camparam.zfar,
+            camparam.vfov,
+            camparam.aspect);
+
+        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+        m_shader.prepareRender(nullptr, false);
+
+        // Not modify local to world matrix...
+        auto hMtxL2W = m_shader.getHandle("mtxL2W");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
+
+        auto hMtxW2C = m_shader.getHandle("mtxW2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
+
+        if (fbo) {
+            AT_ASSERT(fbo->isValid());
+            fbo->bindFBO(true);
+        }
+        else {
+            // Set default frame buffer.
+            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+        }
+
+        if (isWireFrame) {
+            CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
+        }
+        else {
+            CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+        }
+
+        CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+        CALL_GL_API(::glEnable(GL_CULL_FACE));
+
+        // TODO
+        // Will modify to specify clear color.
+        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
+        CALL_GL_API(::glClearDepthf(1.0f));
+        CALL_GL_API(::glClearStencil(0));
+        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+
+        if (!s_isInitGlobalVB) {
+            ctxt.build();
+            s_isInitGlobalVB = true;
+        }
+
+        auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
+        auto hColor = m_shader.getHandle("color");
+        auto hMtrlId = m_shader.getHandle("materialId");
+
+        funcRenderObjs([&](const object& obj) {
+            obj.draw([&](const aten::vec3& color, const aten::texture* albedo, int mtrlid) {
+                if (albedo) {
+                    albedo->bindAsGLTexture(0, &m_shader);
+                    CALL_GL_API(::glUniform1i(hHasAlbedo, true));
+                }
+                else {
+                    CALL_GL_API(::glUniform1i(hHasAlbedo, false));
+                }
+
+                CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));
+
+                if (hMtrlId >= 0) {
+                    CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
+                }
+
+                if (funcSetUniform) {
+                    funcSetUniform(m_shader, color, albedo, mtrlid);
+                }
+                }, ctxt);
+            });
+
+        // 戻す.
+        CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+    }
+
     void RasterizeRenderer::initBuffer(
         uint32_t vtxStride,
         uint32_t vtxNum,

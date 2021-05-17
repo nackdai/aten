@@ -8,7 +8,7 @@
 static const int WIDTH = 1280;
 static const int HEIGHT = 720;
 
-static const char* TITLE = "MdlViewer";
+static const char* TITLE = "ObjViewer";
 
 struct Options {
     std::string input;
@@ -19,7 +19,8 @@ static aten::context g_ctxt;
 
 static aten::RasterizeRenderer g_rasterizer;
 
-std::shared_ptr<aten::object> g_obj;
+std::vector<std::shared_ptr<aten::object>> g_objs;
+std::vector<bool> g_objenable;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -29,10 +30,15 @@ static int g_cntScreenShot = 0;
 
 static bool g_willShowGUI = true;
 
+static bool g_isWireFrame = false;
+
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
 static int g_prevX = 0;
 static int g_prevY = 0;
+
+static int obj_min = 0;
+static int obj_max = 20;
 
 void onRun(aten::window* window)
 {
@@ -46,11 +52,69 @@ void onRun(aten::window* window)
         g_isCameraDirty = false;
     }
 
-    g_rasterizer.drawObject(
+    obj_min = std::min<int>(obj_min, static_cast<int>(g_objs.size()));
+    obj_max = std::min<int>(obj_max, static_cast<int>(g_objs.size()));
+
+    g_rasterizer.drawObjects(
         g_ctxt,
-        *g_obj,
+        [&] (aten::RasterizeRenderer::FuncObjRenderer func) {
+            for (size_t i = obj_min; i < obj_max; i++) {
+                auto is_enable = g_objenable[i];
+
+                if (is_enable) {
+                    auto& obj = g_objs[i];
+                    func(*obj);
+                }
+            }
+        },
         &g_camera,
-        false);
+        g_isWireFrame);
+
+    if (ImGui::Button("Export")) {
+        decltype(g_objs) export_objs;
+        for (size_t i = obj_min; i < obj_max; i++) {
+            auto is_enable = g_objenable[i];
+
+            if (is_enable) {
+                export_objs.push_back(g_objs[i]);
+            }
+        }
+        aten::ObjWriter::writeObjects(
+            "sponza.obj",
+            "sponza.mtl",
+            g_ctxt,
+            export_objs);
+    }
+
+    ImGui::SliderInt("min", &obj_min, 0, obj_max);
+    ImGui::SliderInt("max", &obj_max, obj_min, static_cast<int>(g_objs.size() - 1));
+
+    if (!g_objs.empty()) {
+        if (ImGui::Button("all_enable")) {
+            for (auto& is_enable : g_objenable) {
+                is_enable = true;
+            }
+        }
+
+        if (ImGui::Button("all_disable")) {
+            for (auto& is_enable : g_objenable) {
+                is_enable = false;
+            }
+        }
+    }
+
+    for (size_t i = obj_min; i < obj_max; i++) {
+        const auto& obj = g_objs[i];
+        auto mtrl_name = obj->getShape(0)->getMaterial()->name();
+
+        std::string name = obj->getName();
+        name += mtrl_name;
+
+        bool is_enable = g_objenable.at(i);
+        if (ImGui::Checkbox(name.c_str(), &is_enable)) {
+            g_objenable[i] = is_enable;
+        }
+    }
 
     if (g_willTakeScreenShot)
     {
@@ -127,6 +191,10 @@ void onKey(bool press, aten::Key key)
             g_willTakeScreenShot = true;
             return;
         }
+        else if (key == aten::Key::Key_F3) {
+            g_isWireFrame = !g_isWireFrame;
+            return;
+        }
     }
 
     if (press) {
@@ -161,9 +229,10 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-decltype(auto) loadObj(
+void loadObj(
     const char* objpath,
-    const char* mtrlpath)
+    const char* mtrlpath,
+    std::vector<std::shared_ptr<aten::object>>& objs)
 {
     std::string pathname;
     std::string extname;
@@ -189,15 +258,7 @@ decltype(auto) loadObj(
         aten::AssetManager::registerMtrl("dummy", mtrl);
     }
 
-    std::vector<std::shared_ptr<aten::object>> objs;
-
-    aten::ObjLoader::load(objs, objpath, g_ctxt);
-
-    // NOTE
-    // ‚P‚Â‚µ‚©‚ä‚é‚³‚È‚¢.
-    AT_ASSERT(objs.size() == 1);
-
-    return objs[0];
+    aten::ObjLoader::load(objs, objpath, g_ctxt, nullptr, true);
 }
 
 bool parseOption(
@@ -257,14 +318,18 @@ int main(int argc, char* argv[])
         onMouseWheel,
         onKey);
 
-    g_obj = loadObj("../../asset/models/ModernRoom/modernroom_t.obj", nullptr);
-    //g_obj = loadObj("../../asset/dragon/dragon.obj", nullptr);
-    //g_obj = loadObj("../../asset/models/plane/plane.obj", nullptr);
-    //g_obj = loadObj("../../asset/cornellbox/orig.obj", nullptr);
+    loadObj("../../asset/models/sponza/sponza.obj", nullptr, g_objs);
+    //loadObj("../../asset/dragon/dragon.obj", nullptr, g_objs);
+    //loadObj("../../asset/models/plane/plane.obj", nullptr, g_objs);
+    //loadObj("../../asset/cornellbox/orig.obj", nullptr, g_objs);
+
+    g_objenable.resize(g_objs.size(), true);
 
     g_ctxt.initAllTexAsGLTexture();
 
-    g_obj->buildForRasterizeRendering(g_ctxt);
+    for (auto& obj : g_objs) {
+        obj->buildForRasterizeRendering(g_ctxt);
+    }
 
     g_rasterizer.init(
         WIDTH, HEIGHT,

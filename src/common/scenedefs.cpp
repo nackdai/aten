@@ -1,5 +1,7 @@
 #include "scenedefs.h"
 
+#include <array>
+
 static std::shared_ptr<aten::instance<aten::object>> g_movableObj;
 static std::shared_ptr<aten::instance<aten::deformable>> s_deformMdl;
 static std::shared_ptr<aten::DeformAnimation> s_deformAnm;
@@ -1430,5 +1432,69 @@ void CryteckSponzaScene::getCameraPosAndAt(
     pos = aten::vec3(-354.4f, 359.6f, -41.2f);
     at = aten::vec3(-353.4f, 359.4f, -41.2f);
 #endif
+    fov = 45;
+}
+
+/////////////////////////////////////////////////////
+
+void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
+{
+    CryteckSponzaScene::makeScene(ctxt, scene);
+
+    constexpr int32_t step = 5;
+    const aten::vec3 min_pos(-1137, 192, -494);
+    const aten::vec3 max_pos(558, 1219, 369);
+
+    aten::vec3 step_v = max_pos - min_pos;
+
+    step_v /= step;
+
+    aten::vec3 pos = min_pos;
+
+    std::array<aten::vec3, 3> color = {
+        aten::vec3(36.0, 0.0, 0.0),
+        aten::vec3(0.0, 36.0, 0.0),
+        aten::vec3(0.0, 0.0, 36.0),
+    };
+
+    size_t num = 0;
+
+    for (int32_t z = 0; z < step; z++) {
+        for (int32_t y = 0; y < step; y++) {
+            for (int32_t x = 0; x < step; x++) {
+                auto l = std::make_shared<aten::PointLight>(
+                    pos,
+                    color[num % color.size()],
+                    real(0),
+                    real(0.1),
+                    real(0));
+
+                scene->addLight(l);
+
+                pos.x += step_v.x;
+                num++;
+            }
+            pos.y += step_v.y;
+        }
+        pos.z += step_v.z;
+    }
+
+    auto l = std::make_shared<aten::PointLight>(
+        aten::vec3(-353.4f, 359.4f, -41.2f),
+        aten::vec3(36.0, 36.0, 36.0),
+        real(0),
+        real(0.1),
+        real(0));
+
+    scene->addLight(l);
+}
+
+void ManyLightCryteckSponzaScene::getCameraPosAndAt(
+    aten::vec3& pos,
+    aten::vec3& at,
+    real& fov)
+{
+    pos = aten::vec3(-354.4f, 359.6f, -41.2f);
+    at = aten::vec3(-353.4f, 359.4f, -41.2f);
     fov = 45;
 }

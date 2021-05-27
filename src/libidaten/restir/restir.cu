@@ -169,17 +169,7 @@ __global__ void hitTest(
 
         bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod, depth);
 
-#if 0
-        isects[idx].t = isect.t;
-        isects[idx].objid = isect.objid;
-        isects[idx].mtrlid = isect.mtrlid;
-        isects[idx].meshid = isect.meshid;
-        isects[idx].primid = isect.primid;
-        isects[idx].a = isect.a;
-        isects[idx].b = isect.b;
-#else
         isects[idx] = isect;
-#endif
 
         if (bounce >= 1
             && !paths->attrib[idx].isSingular
@@ -235,18 +225,7 @@ __global__ void hitTest(
 
     bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
 
-#if 0
-    isects[idx].t = isect.t;
-    isects[idx].objid = isect.objid;
-    isects[idx].mtrlid = isect.mtrlid;
-    isects[idx].meshid = isect.meshid;
-    isects[idx].area = isect.area;
-    isects[idx].primid = isect.primid;
-    isects[idx].a = isect.a;
-    isects[idx].b = isect.b;
-#else
     isects[idx] = isect;
-#endif
 
     if (bounce >= 1
         && !paths->attrib[idx].isSingular
@@ -827,19 +806,6 @@ __global__ void gather(
 
     contribs[idx] = c;
 
-#if 0
-    auto n = aovs[idx].moments.w;
-
-    auto m = aovs[idx].moments / n;
-
-    auto var = m.x - m.y * m.y;
-
-    surf2Dwrite(
-        make_float4(var, var, var, 1),
-        dst,
-        ix * sizeof(float4), iy,
-        cudaBoundaryModeTrap);
-#else
     if (dst) {
         surf2Dwrite(
             make_float4(contrib, 0),
@@ -847,7 +813,6 @@ __global__ void gather(
             ix * sizeof(float4), iy,
             cudaBoundaryModeTrap);
     }
-#endif
 }
 
 namespace idaten

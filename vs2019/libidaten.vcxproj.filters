@@ -271,6 +271,12 @@
     <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\restir\restir.h">
+      <Filter>restir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\pt_params.h">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -324,6 +330,9 @@
     <Filter Include="ao">
       <UniqueIdentifier>{d62712a7-6048-4953-8529-944e40f98a46}</UniqueIdentifier>
     </Filter>
+    <Filter Include="restir">
+      <UniqueIdentifier>{b99f5c3d-55a5-47c9-ae13-6d0cabffccc9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
@@ -376,6 +385,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\ao\ao.cpp">
       <Filter>ao</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libidaten\restir\restir.cpp">
+      <Filter>restir</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -498,6 +510,18 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\tex_viewer.cu">
       <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\restir\restir.cu">
+      <Filter>restir</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\restir\restir_init.cu">
+      <Filter>restir</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\restir\restir_ssrt.cu">
+      <Filter>restir</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\restir\restir_debug.cu">
+      <Filter>restir</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

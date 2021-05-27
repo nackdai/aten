@@ -17,3 +17,5 @@
 #include "multigpu/svgf_multigpu.h"
 
 #include "ao/ao.h"
+
+#include "restir/restir.h"

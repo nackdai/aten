@@ -297,7 +297,7 @@ namespace idaten
             }
         }
 
-        if (m_mode == Mode::ReSTIR) {
+        if (m_mode == Mode::ReSTIR || m_mode == Mode::PT) {
             onGather(outputSurf, width, height, maxSamples);
         }
         else if (m_mode == Mode::AOVar) {

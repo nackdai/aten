@@ -14,6 +14,7 @@ namespace idaten
     public:
         enum Mode {
             ReSTIR,
+            PT,
             AOVar,  // Arbitrary Output Variables.
         };
 
@@ -198,14 +199,10 @@ namespace idaten
             int width, int height,
             int maxSamples);
 
-        void onCopyFromTmpBufferToAov(int width, int height);
-
         void onDisplayAOV(
             cudaSurfaceObject_t outputSurf,
             int width, int height,
             cudaTextureObject_t texVtxPos);
-
-        void onCopyBufferForTile(int width, int height);
 
         void pick(
             int ix, int iy,

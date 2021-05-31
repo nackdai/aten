@@ -238,6 +238,7 @@ void onRun(aten::window* window)
             }
         }
 
+#if 0
         bool enableTAA = g_taa.isEnableTAA();
         bool canShowTAADiff = g_taa.canShowTAADiff();
 
@@ -247,6 +248,9 @@ void onRun(aten::window* window)
         if (ImGui::Checkbox("Show TAA Diff", &canShowTAADiff)) {
             g_taa.showTAADiff(canShowTAADiff);
         }
+#else
+        g_taa.enableTAA(false);
+#endif
 
         ImGui::Checkbox("Show AABB", &g_showAABB);
 

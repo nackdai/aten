@@ -359,6 +359,33 @@ __global__ void shadeMissWithEnvmap(
     }
 }
 
+class ComputeBrdfFunctor {
+public:
+    __device__ ComputeBrdfFunctor(
+        Context& ctxt,
+        const aten::MaterialParameter& mtrl,
+        const aten::vec3& orienting_normal,
+        const aten::vec3& ray_dir,
+        float u, float v,
+        const aten::vec4& albedo)
+        : ctxt_(ctxt), mtrl_(mtrl), orienting_normal_(orienting_normal),
+        ray_dir_(ray_dir), u_(u), v_(v), albedo_(albedo) {}
+
+    AT_CUDA_INLINE __device__ aten::vec3 operator()(const aten::vec3& dir_to_light) {
+        return sampleBSDF(
+            &ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_, albedo_);
+    }
+
+private:
+    Context& ctxt_;
+    const aten::MaterialParameter& mtrl_;
+    const aten::vec3& orienting_normal_;
+    const aten::vec3& ray_dir_;
+    float u_;
+    float v_;
+    const aten::vec4& albedo_;
+};
+
 __global__ void shade(
     idaten::TileDomain tileDomain,
     float4* aovNormalDepth,
@@ -522,6 +549,9 @@ __global__ void shade(
         orienting_normal = -orienting_normal;
     }
 
+    ComputeBrdfFunctor compute_brdf_functor(
+        ctxt, shMtrls[threadIdx.x], orienting_normal, ray.dir, rec.u, rec.v, albedo);
+
 #pragma unroll
     for (int i = 0; i < idaten::ReSTIRPathTracing::ShadowRayNum; i++) {
         shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].isActive = false;
@@ -536,12 +566,8 @@ __global__ void shade(
             real lightSelectPdf = 1;
             aten::LightSampleResult sampleres;
 
-            // TODO
-            // Importance sampling.
-            int lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
-            lightSelectPdf = 1.0f / lightnum;
-
             aten::LightParameter light;
+#if 0
             light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
             light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
             light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
@@ -550,7 +576,17 @@ __global__ void shade(
             light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
             //auto light = ctxt.lights[lightidx];
 
+            int lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
+            lightSelectPdf = 1.0f / lightnum;
+
             sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+#else
+
+            auto lightidx = sampleLightWithReservoirRIP(
+                &sampleres, lightSelectPdf, &light,
+                compute_brdf_functor,
+                &ctxt, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+#endif
 
             const auto& posLight = sampleres.pos;
             const auto& nmlLight = sampleres.nml;

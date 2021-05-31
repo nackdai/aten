@@ -253,3 +253,84 @@ AT_CUDA_INLINE __device__ void sampleLight(
         break;
     }
 }
+
+template <typename ComputeBrdfFunctor>
+AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
+    aten::LightSampleResult* result,
+    real& lightSelectPdf,
+    aten::LightParameter* target_light,
+    ComputeBrdfFunctor& compute_brdf,
+    Context* ctxt,
+    const aten::vec3& org,
+    const aten::vec3& normal,
+    aten::sampler* sampler,
+    int lod/*= 0*/)
+{
+    constexpr auto MaxLightCount = 32U;
+
+    const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt->lightnum);
+    const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
+
+    // Reservoir
+
+    auto r = sampler->nextSample();
+    auto w_sum = real(0);
+
+    int32_t selected_light_idx = -1;
+    real selected_cost = real(0);
+
+    for (auto i = 0U; i < light_cnt; i++) {
+        const auto r_light = sampler->nextSample();
+        const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
+
+        const auto& light = ctxt->lights[light_pos];
+
+        aten::LightSampleResult lightsample;
+        sampleLight(&lightsample, ctxt, &light, org, normal, sampler, lod);
+
+        aten::vec3 nmlLight = lightsample.nml;
+        real pdfLight = lightsample.pdf;
+        aten::vec3 dirToLight = normalize(lightsample.dir);
+
+        auto brdf = compute_brdf(dirToLight);
+
+        auto cosShadow = dot(normal, dirToLight);
+        auto dist2 = aten::squared_length(lightsample.dir);
+
+        auto light_energy = AT_NAME::color::luminance(lightsample.finalColor);
+        auto brdf_energy = AT_NAME::color::luminance(brdf);
+
+        auto energy = brdf_energy * light_energy;
+
+        real cost = real(0);
+
+        if (cosShadow > 0) {
+            if (light.attrib.isInfinite) {
+                cost = energy * cosShadow / pdfLight;
+            }
+            else {
+                auto cosLight = dot(nmlLight, -dirToLight);
+
+                if (light.attrib.isSingular) {
+                    cost = energy * cosShadow * cosLight / pdfLight;
+                }
+                else {
+                    cost = energy * cosShadow * cosLight / dist2 / pdfLight;
+                }
+            }
+        }
+
+        w_sum += cost;
+
+        if (cost > 0 && r < cost / w_sum) {
+            *result = lightsample;
+            *target_light = light;
+            selected_light_idx = light_pos;
+            selected_cost = cost;
+        }
+    }
+
+    lightSelectPdf = selected_cost / w_sum;
+
+    return selected_light_idx;
+}

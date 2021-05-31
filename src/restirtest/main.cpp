@@ -224,7 +224,7 @@ void onRun(aten::window* window)
             g_tracer.reset();
         }
 
-        static const char* items[] = { "ReSTIR", "AOV" };
+        static const char* items[] = { "ReSTIR", "PT", "AOV" };
 
         if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items))) {
             g_tracer.setMode((idaten::ReSTIRPathTracing::Mode)g_curMode);

@@ -38,7 +38,7 @@ namespace idaten
             int mtrlid;
         };
 
-        static constexpr int ShadowRayNum = 2;
+        static constexpr int ShadowRayNum = 1;
 
         ReSTIRPathTracing() = default;
         virtual ~ReSTIRPathTracing() = default;

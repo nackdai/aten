@@ -289,12 +289,17 @@ namespace aten
                         auto emit = sampleres.finalColor;
 
                         if (light->isSingular() || light->isInfinite()) {
+                            auto cosLight = light->isSingular()
+                                ? dot(nmlLight, -dirToLight)
+                                : real(1.0);
+
                             if (pdfLight > real(0) && cosShadow >= 0) {
                                 // TODO
                                 // ジオメトリタームの扱いについて.
                                 // singular light の場合は、finalColor に距離の除算が含まれている.
                                 // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
                                 // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
+                                pdfb = pdfb * cosLight;
                                 auto misW = pdfLight / (pdfb + pdfLight);
                                 path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                             }

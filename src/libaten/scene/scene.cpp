@@ -102,7 +102,7 @@ namespace aten {
             auto cosShadow = dot(nml, dirToLight);
             auto dist2 = squared_length(lightsample.dir);
 
-            auto light_energy = color::luminance(lightsample.finalColor);
+            auto light_energy = color::luminance(lightsample.le);
             auto brdf_energy = color::luminance(brdf);
 
             auto energy = brdf_energy * light_energy;
@@ -115,13 +115,7 @@ namespace aten {
                 }
                 else {
                     auto cosLight = dot(nmlLight, -dirToLight);
-
-                    if (light->isSingular()) {
-                        cost = energy * cosShadow * cosLight / pdfLight;
-                    }
-                    else {
-                        cost = energy * cosShadow * cosLight / dist2 / pdfLight;
-                    }
+                    cost = energy * cosShadow * cosLight / dist2 / pdfLight;
                 }
             }
 

@@ -7,7 +7,7 @@
 
 __device__ void sampleLight(
     aten::LightSampleResult* result,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     const aten::vec3& normal,
@@ -20,7 +20,7 @@ __device__ int sampleLightWithReservoirRIP(
     real& lightSelectPdf,
     aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::vec3& org,
     const aten::vec3& normal,
     aten::sampler* sampler,

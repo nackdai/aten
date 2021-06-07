@@ -9,7 +9,7 @@
 
 __device__ void sampleMaterial(
     AT_NAME::MaterialSampling* result,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -19,7 +19,7 @@ __device__ void sampleMaterial(
 
 __device__ void sampleMaterial(
     AT_NAME::MaterialSampling* result,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -29,7 +29,7 @@ __device__ void sampleMaterial(
     const aten::vec4& externalAlbedo);
 
 __device__ real samplePDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -37,7 +37,7 @@ __device__ real samplePDF(
     real u, real v);
 
 __device__ aten::vec3 sampleDirection(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -45,7 +45,7 @@ __device__ aten::vec3 sampleDirection(
     aten::sampler* sampler);
 
 __device__ aten::vec3 sampleBSDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -53,7 +53,7 @@ __device__ aten::vec3 sampleBSDF(
     real u, real v);
 
 __device__ aten::vec3 sampleBSDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,

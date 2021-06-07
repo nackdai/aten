@@ -117,7 +117,7 @@ __global__ void hitTest(
         restir::g_headDev = 0;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -201,7 +201,7 @@ __global__ void hitTest(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -362,7 +362,7 @@ __global__ void shadeMissWithEnvmap(
 class ComputeBrdfFunctor {
 public:
     __device__ ComputeBrdfFunctor(
-        Context& ctxt,
+        idaten::Context& ctxt,
         const aten::MaterialParameter& mtrl,
         const aten::vec3& orienting_normal,
         const aten::vec3& ray_dir,
@@ -371,13 +371,13 @@ public:
         : ctxt_(ctxt), mtrl_(mtrl), orienting_normal_(orienting_normal),
         ray_dir_(ray_dir), u_(u), v_(v), albedo_(albedo) {}
 
-    AT_CUDA_INLINE __device__ aten::vec3 operator()(const aten::vec3& dir_to_light) {
+    inline __device__ aten::vec3 operator()(const aten::vec3& dir_to_light) {
         return sampleBSDF(
             &ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_, albedo_);
     }
 
 private:
-    Context& ctxt_;
+    idaten::Context& ctxt_;
     const aten::MaterialParameter& mtrl_;
     const aten::vec3& orienting_normal_;
     const aten::vec3& ray_dir_;
@@ -418,7 +418,7 @@ __global__ void shade(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -752,7 +752,7 @@ __global__ void hitShadowRay(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;

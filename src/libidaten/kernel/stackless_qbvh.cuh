@@ -8,18 +8,18 @@
 #include "kernel/intersecttype.h"
 
 __device__ bool intersectClosestStacklessQBVH(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect);
 
 __device__ bool intersectCloserStacklessQBVH(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     const float t_max);
 
 __device__ bool intersectAnyStacklessQBVH(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect);
 

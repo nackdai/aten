@@ -100,7 +100,7 @@ __global__ void hitTestAO(
         headDev_AO = 0;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -168,7 +168,7 @@ __global__ void hitTestAO(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -252,7 +252,7 @@ __global__ void shadeAO(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;

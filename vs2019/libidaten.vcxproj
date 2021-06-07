@@ -87,6 +87,7 @@
     <ClInclude Include="..\src\libidaten\kernel\bluenoiseSampler.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\bvh_impl.cuh" />
+    <ClInclude Include="..\src\libidaten\kernel\compute_brdf_functor_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\context.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\GenMipMaps.h" />
     <ClInclude Include="..\src\libidaten\kernel\idatendefs.cuh" />

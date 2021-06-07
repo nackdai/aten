@@ -254,7 +254,6 @@ AT_CUDA_INLINE __device__ void sampleLight(
     }
 }
 
-template <typename ComputeBrdfFunctor>
 AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
     real& lightSelectPdf,

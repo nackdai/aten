@@ -105,7 +105,7 @@ __global__ void hitTest(
         headDev = 0;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -173,7 +173,7 @@ __global__ void hitTest(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -327,7 +327,7 @@ __global__ void shade(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -641,7 +641,7 @@ __global__ void hitShadowRay(
         return;
     }
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;

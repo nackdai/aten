@@ -61,7 +61,7 @@ __global__ void fillAOV(
     AT_NAME::CameraSampleResult camsample;
     AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
@@ -151,7 +151,7 @@ __global__ void pickPixel(
     AT_NAME::CameraSampleResult camsample;
     AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
 
-    Context ctxt;
+    idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;

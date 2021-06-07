@@ -5,7 +5,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
     int* stack,
     int beginStackPos,
     cudaTextureObject_t nodes,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -100,7 +100,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectQBVH(
     cudaTextureObject_t nodes,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -213,7 +213,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectQBVH(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     const float t_max/*= AT_MATH_INF*/)
@@ -231,7 +231,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectCloserQBVH(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     const float t_max)
@@ -249,7 +249,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserQBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectAnyQBVH(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect)
 {

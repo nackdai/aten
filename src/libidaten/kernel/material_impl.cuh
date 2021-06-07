@@ -8,7 +8,7 @@
 
 AT_CUDA_INLINE __device__ void sampleLayerMaterial(
     AT_NAME::MaterialSampling* result,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -68,7 +68,7 @@ AT_CUDA_INLINE __device__ void sampleLayerMaterial(
 }
 
 AT_CUDA_INLINE __device__ real sampleLayerPDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -116,7 +116,7 @@ AT_CUDA_INLINE __device__ real sampleLayerPDF(
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleLayerDirection(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -131,7 +131,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerDirection(
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -184,7 +184,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
 
 AT_CUDA_INLINE __device__ void sampleMaterial(
     AT_NAME::MaterialSampling* result,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -239,7 +239,7 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
 
 AT_CUDA_INLINE __device__ void sampleMaterial(
     AT_NAME::MaterialSampling* result,
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -295,7 +295,7 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
 }
 
 AT_CUDA_INLINE __device__ real samplePDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -352,7 +352,7 @@ AT_CUDA_INLINE __device__ real samplePDF(
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -394,7 +394,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,
@@ -436,7 +436,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
 }
 
 AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
-    const Context* ctxt,
+    const idaten::Context* ctxt,
     const aten::MaterialParameter* mtrl,
     const aten::vec3& normal,
     const aten::vec3& wi,

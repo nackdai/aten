@@ -2,7 +2,7 @@
 
 AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::hitable::SamplePosNormalPdfResult* result,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::GeomParameter* shape,
     aten::sampler* sampler)
 {
@@ -99,7 +99,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 
 AT_CUDA_INLINE __device__  void sampleAreaLight(
     aten::LightSampleResult* result,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     aten::sampler* sampler)
@@ -171,7 +171,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 
 AT_CUDA_INLINE __device__  void sampleImageBasedLight(
     aten::LightSampleResult* result,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     const aten::vec3& normal,
@@ -228,7 +228,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 
 AT_CUDA_INLINE __device__ void sampleLight(
     aten::LightSampleResult* result,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     const aten::vec3& normal,
@@ -260,7 +260,7 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     real& lightSelectPdf,
     aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,
-    Context* ctxt,
+    idaten::Context* ctxt,
     const aten::vec3& org,
     const aten::vec3& normal,
     aten::sampler* sampler,

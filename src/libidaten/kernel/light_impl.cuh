@@ -256,6 +256,7 @@ AT_CUDA_INLINE __device__ void sampleLight(
 
 AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
+    idaten::Reservoir& reservoir,
     real& lightSelectPdf,
     aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,
@@ -277,6 +278,9 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
 
     int32_t selected_light_idx = -1;
     real selected_cost = real(0);
+
+    lightSelectPdf = real(0);
+    reservoir.m = real(0);
 
     for (auto i = 0U; i < light_cnt; i++) {
         const auto r_light = sampler->nextSample();
@@ -329,7 +333,10 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
         }
     }
 
-    lightSelectPdf = selected_cost / w_sum;
+    if (w_sum > 0) {
+        lightSelectPdf = selected_cost / w_sum;
+    }
+    reservoir.w = lightSelectPdf;
 
     return selected_light_idx;
 }

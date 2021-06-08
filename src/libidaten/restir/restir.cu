@@ -362,6 +362,7 @@ __global__ void shadeMissWithEnvmap(
 __global__ void shade(
     idaten::TileDomain tileDomain,
     bool is_restir,
+    idaten::Reservoir* reservoir,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
@@ -545,9 +546,14 @@ __global__ void shade(
 
             if (is_restir) {
                 lightidx = sampleLightWithReservoirRIP(
-                    &sampleres, lightSelectPdf, &light,
+                    &sampleres, reservoir[idx],
+                    lightSelectPdf, &light,
                     compute_brdf_functor,
                     &ctxt, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+
+                if (lightidx < 0) {
+                    continue;
+                }
             }
             else {
                 lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
@@ -975,6 +981,7 @@ namespace idaten
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
             is_restir,
+            m_reservoir.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
             mtxW2C,

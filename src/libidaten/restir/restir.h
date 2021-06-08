@@ -235,6 +235,8 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
 
+        idaten::TypedCudaMemory<Reservoir> m_reservoir;
+
         // Current AOV buffer position.
         int m_curAOVPos{ 0 };
 

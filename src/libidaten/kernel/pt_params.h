@@ -53,4 +53,10 @@ namespace idaten {
         aten::vec3 lightcontrib;
         uint32_t targetLightId;
     };
+
+    struct Reservoir {
+        real w;
+        real m;
+        real padding[2];
+    };
 }

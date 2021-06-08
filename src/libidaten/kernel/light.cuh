@@ -2,6 +2,7 @@
 
 #include "kernel/context.cuh"
 #include "kernel/intersect.cuh"
+#include "kernel/pt_params.h"
 
 #include "aten4idaten.h"
 
@@ -40,6 +41,7 @@ private:
 
 __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
+    idaten::Reservoir& reservoir,
     real& lightSelectPdf,
     aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,

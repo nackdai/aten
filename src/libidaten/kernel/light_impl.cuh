@@ -280,7 +280,6 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     real selected_cost = real(0);
 
     lightSelectPdf = real(0);
-    reservoir.m = real(0);
 
     for (auto i = 0U; i < light_cnt; i++) {
         const auto r_light = sampler->nextSample();
@@ -334,9 +333,14 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     }
 
     if (w_sum > 0) {
-        lightSelectPdf = selected_cost / w_sum;
+        // NOTE
+        // 論文的には、w_sum / M を掛けるのに対して
+        // path tracingの内部では、1 / lightSelectPdf で計算しているので
+        // ここでは逆数にしておくことで、最終的に掛け算になるようにする.
+        lightSelectPdf = light_cnt / w_sum;
     }
-    reservoir.w = lightSelectPdf;
+    reservoir.m = light_cnt;
+    reservoir.w = w_sum;
 
     return selected_light_idx;
 }

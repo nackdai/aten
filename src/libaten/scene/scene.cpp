@@ -129,7 +129,12 @@ namespace aten {
         }
 
         if (selected_cost > 0) {
-            selectPdf = selected_cost / w_sum;
+            // NOTE
+            // 論文的には、w_sum / M を掛けるのに対して
+            // path tracingの内部では、1 / lightSelectPdf で計算しているので
+            // ここでは逆数にしておくことで、最終的に掛け算になるようにする.
+            selectPdf = light_cnt / w_sum;
+
             return m_lights[selected_light_idx];;
         }
 

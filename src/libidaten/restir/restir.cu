@@ -408,7 +408,7 @@ __global__ void shade(
 
     idx = hitindices[idx];
 
-    __shared__ idaten::ShadowRay shShadowRays[64 * idaten::ReSTIRPathTracing::ShadowRayNum];
+    __shared__ idaten::ShadowRay shShadowRays[64];
     __shared__ aten::MaterialParameter shMtrls[64];
 
     const auto ray = rays[idx];
@@ -527,49 +527,42 @@ __global__ void shade(
     ComputeBrdfFunctor compute_brdf_functor(
         ctxt, shMtrls[threadIdx.x], orienting_normal, ray.dir, rec.u, rec.v, albedo);
 
-#pragma unroll
-    for (int i = 0; i < idaten::ReSTIRPathTracing::ShadowRayNum; i++) {
-        shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].isActive = false;
-    }
+    shShadowRays[threadIdx.x].isActive = false;
 
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
         auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 
-        for (int i = 0; i < idaten::ReSTIRPathTracing::ShadowRayNum; i++) {
-            real lightSelectPdf = 1;
-            aten::LightSampleResult sampleres;
+        real lightSelectPdf = 1;
+        aten::LightSampleResult sampleres;
 
-            int lightidx = 0;
-            aten::LightParameter light;
+        int lightidx = 0;
+        aten::LightParameter light;
 
-            if (is_restir) {
-                lightidx = sampleLightWithReservoirRIP(
-                    &sampleres, reservoir[idx],
-                    lightSelectPdf, &light,
-                    compute_brdf_functor,
-                    &ctxt, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+        if (is_restir) {
+            lightidx = sampleLightWithReservoirRIP(
+                &sampleres, reservoir[idx],
+                lightSelectPdf, &light,
+                compute_brdf_functor,
+                &ctxt, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+        }
+        else {
+            lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
+            lightSelectPdf = 1.0f / lightnum;
 
-                if (lightidx < 0) {
-                    continue;
-                }
-            }
-            else {
-                lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
-                lightSelectPdf = 1.0f / lightnum;
+            light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
+            light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
+            light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
+            light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
+            light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
+            light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
+            //auto light = ctxt.lights[lightidx];
 
-                light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
-                light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
-                light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
-                light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
-                light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
-                light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
-                //auto light = ctxt.lights[lightidx];
+            sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+        }
 
-                sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
-            }
-
+        if (lightidx >= 0) {
             const auto& posLight = sampleres.pos;
             const auto& nmlLight = sampleres.nml;
             real pdfLight = sampleres.pdf;
@@ -582,11 +575,11 @@ __global__ void shade(
 
             bool isShadowRayActive = false;
 
-            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].rayorg = shadowRayOrg;
-            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].raydir = shadowRayDir;
-            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].targetLightId = lightidx;
-            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].distToLight = distToLight;
-            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].lightcontrib = aten::vec3(0);
+            shShadowRays[threadIdx.x].rayorg = shadowRayOrg;
+            shShadowRays[threadIdx.x].raydir = shadowRayDir;
+            shShadowRays[threadIdx.x].targetLightId = lightidx;
+            shShadowRays[threadIdx.x].distToLight = distToLight;
+            shShadowRays[threadIdx.x].lightcontrib = aten::vec3(0);
             {
                 auto cosShadow = dot(orienting_normal, dirToLight);
 
@@ -607,8 +600,8 @@ __global__ void shade(
                         // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
                         auto misW = pdfLight / (pdfb + pdfLight);
 
-                        shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].lightcontrib =
-                            (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)idaten::ReSTIRPathTracing::ShadowRayNum;
+                        shShadowRays[threadIdx.x].lightcontrib =
+                            (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
 
                         isShadowRayActive = true;
                     }
@@ -628,8 +621,8 @@ __global__ void shade(
 
                             auto misW = pdfLight / (pdfb + pdfLight);
 
-                            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].lightcontrib =
-                                (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)idaten::ReSTIRPathTracing::ShadowRayNum;;
+                            shShadowRays[threadIdx.x].lightcontrib =
+                                (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
 
                             isShadowRayActive = true;
                         }
@@ -637,9 +630,11 @@ __global__ void shade(
                 }
             }
 
-            shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i].isActive = isShadowRayActive;
+            shShadowRays[threadIdx.x].isActive = isShadowRayActive;
         }
     }
+
+    shadowRays[idx] = shShadowRays[threadIdx.x];
 
     real russianProb = real(1);
 
@@ -704,11 +699,6 @@ __global__ void shade(
     paths->throughput[idx].pdfb = pdfb;
     paths->attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
     paths->attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
-
-#pragma unroll
-    for (int i = 0; i < idaten::ReSTIRPathTracing::ShadowRayNum; i++) {
-        shadowRays[idx * idaten::ReSTIRPathTracing::ShadowRayNum + i] = shShadowRays[threadIdx.x * idaten::ReSTIRPathTracing::ShadowRayNum + i];
-    }
 }
 
 __global__ void hitShadowRay(
@@ -747,52 +737,50 @@ __global__ void hitShadowRay(
     idx = hitindices[idx];
 
 #pragma unroll
-    for (int i = 0; i < idaten::ReSTIRPathTracing::ShadowRayNum; i++) {
-        const auto& shadowRay = shadowRays[idx * idaten::ReSTIRPathTracing::ShadowRayNum + i];
+    const auto& shadowRay = shadowRays[idx];
 
-        if (!shadowRay.isActive) {
-            continue;
-        }
-        auto targetLightId = shadowRay.targetLightId;
-        auto distToLight = shadowRay.distToLight;
+    if (!shadowRay.isActive) {
+        return;
+    }
+    auto targetLightId = shadowRay.targetLightId;
+    auto distToLight = shadowRay.distToLight;
 
-        auto light = ctxt.lights[targetLightId];
-        auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
+    auto light = ctxt.lights[targetLightId];
+    auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
 
-        real distHitObjToRayOrg = AT_MATH_INF;
+    real distHitObjToRayOrg = AT_MATH_INF;
 
-        // Ray aim to the area light.
-        // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-        const aten::GeomParameter* hitobj = lightobj;
+    // Ray aim to the area light.
+    // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+    const aten::GeomParameter* hitobj = lightobj;
 
-        aten::Intersection isectTmp;
+    aten::Intersection isectTmp;
 
-        bool isHit = false;
+    bool isHit = false;
 
-        aten::ray r(shadowRay.rayorg, shadowRay.raydir);
+    aten::ray r(shadowRay.rayorg, shadowRay.raydir);
 
-        // TODO
-        bool enableLod = (bounce >= 2);
+    // TODO
+    bool enableLod = (bounce >= 2);
 
-        isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
+    isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
 
-        if (isHit) {
-            hitobj = &ctxt.shapes[isectTmp.objid];
-        }
+    if (isHit) {
+        hitobj = &ctxt.shapes[isectTmp.objid];
+    }
 
-        isHit = AT_NAME::scene::hitLight(
-            isHit,
-            light.attrib,
-            lightobj,
-            distToLight,
-            distHitObjToRayOrg,
-            isectTmp.t,
-            hitobj);
+    isHit = AT_NAME::scene::hitLight(
+        isHit,
+        light.attrib,
+        lightobj,
+        distToLight,
+        distHitObjToRayOrg,
+        isectTmp.t,
+        hitobj);
 
-        if (isHit) {
-            auto contrib = shadowRay.lightcontrib;
-            paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-        }
+    if (isHit) {
+        auto contrib = shadowRay.lightcontrib;
+        paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
     }
 }
 
@@ -981,7 +969,7 @@ namespace idaten
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
             is_restir,
-            m_reservoir.ptr(),
+            m_reservoirs.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
             mtxW2C,

@@ -152,7 +152,7 @@ namespace idaten
         m_isects.init(width * height);
         m_rays.init(width * height);
 
-        m_shadowRays.init(width * height * ShadowRayNum);
+        m_shadowRays.init(width * height);
 
         onInit(width, height);
 

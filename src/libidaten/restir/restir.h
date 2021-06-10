@@ -39,8 +39,6 @@ namespace idaten
             int mtrlid;
         };
 
-        static constexpr int ShadowRayNum = 1;
-
         ReSTIRPathTracing() = default;
         virtual ~ReSTIRPathTracing() = default;
 
@@ -235,7 +233,7 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
 
-        idaten::TypedCudaMemory<Reservoir> m_reservoir;
+        idaten::TypedCudaMemory<Reservoir> m_reservoirs;
 
         // Current AOV buffer position.
         int m_curAOVPos{ 0 };

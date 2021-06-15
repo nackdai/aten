@@ -54,6 +54,19 @@ namespace idaten {
         uint32_t targetLightId;
     };
 
+    struct ReSTIRIntermedidate {
+        aten::vec3 light_sample_nml;
+        struct {
+            uint32_t is_backfacing : 1;
+        };
+
+        aten::vec3 light_final_clr;
+        real light_dist2;
+
+        aten::vec3 wi;
+        int mtrl_idx;
+    };
+
     struct Reservoir {
         real w;
         real m;

@@ -70,6 +70,8 @@ namespace idaten {
 
         virtual ~TypedCudaMemory() {}
 
+        using type = _T;
+
     public:
         void init(uint32_t num)
         {

@@ -514,7 +514,7 @@
     <CudaCompile Include="..\src\libidaten\kernel\tex_viewer.cu">
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\restir\restir.cu">
+    <CudaCompile Include="..\src\libidaten\restir\restir_pt.cu">
       <Filter>restir</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\restir\restir_init.cu">

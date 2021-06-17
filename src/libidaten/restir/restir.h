@@ -188,7 +188,19 @@ namespace idaten
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
+        void onShadeReSTIR(
+            cudaSurfaceObject_t outputSurf,
+            int width, int height,
+            int sample,
+            int bounce, int rrBounce,
+            cudaTextureObject_t texVtxPos,
+            cudaTextureObject_t texVtxNml);
+
         void onShadeByShadowRay(
+            int bounce,
+            cudaTextureObject_t texVtxPos);
+
+        void onShadeByShadowRayReSTIR(
             int bounce,
             cudaTextureObject_t texVtxPos);
 

@@ -257,6 +257,8 @@ namespace idaten
         // Set bounce count to 1 forcibly, aov render mode.
         maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
 
+        bool is_restir = m_mode == Mode::ReSTIR;
+
         auto time = AT_NAME::timer::getSystemTime();
 
         for (int i = 0; i < maxSamples; i++) {
@@ -286,12 +288,22 @@ namespace idaten
 
                 //AT_PRINTF("%d\n", hitcount);
 
-                onShade(
-                    outputSurf,
-                    width, height,
-                    i,
-                    bounce, rrBounce,
-                    vtxTexPos, vtxTexNml);
+                if (is_restir) {
+                    onShadeReSTIR(
+                        outputSurf,
+                        width, height,
+                        i,
+                        bounce, rrBounce,
+                        vtxTexPos, vtxTexNml);
+                }
+                else {
+                    onShade(
+                        outputSurf,
+                        width, height,
+                        i,
+                        bounce, rrBounce,
+                        vtxTexPos, vtxTexNml);
+                }
 
                 bounce++;
             }

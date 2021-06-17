@@ -322,13 +322,15 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
             }
         }
 
-        w_sum += cost;
+        if (cost > 0) {
+            w_sum += cost;
 
-        if (cost > 0 && r < cost / w_sum) {
-            *result = lightsample;
-            *target_light = light;
-            selected_light_idx = light_pos;
-            selected_cost = cost;
+            if (r < cost / w_sum) {
+                *result = lightsample;
+                *target_light = light;
+                selected_light_idx = light_pos;
+                selected_cost = cost;
+            }
         }
     }
 

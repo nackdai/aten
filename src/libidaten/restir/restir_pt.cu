@@ -363,7 +363,6 @@ __global__ void shade(
     idaten::TileDomain tileDomain,
     bool is_restir,
     idaten::Reservoir* reservoirs,
-    idaten::ReSTIRIntermedidate* intermediates,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
@@ -411,7 +410,6 @@ __global__ void shade(
 
     __shared__ idaten::ShadowRay shShadowRays[64];
     __shared__ aten::MaterialParameter shMtrls[64];
-    __shared__ idaten::ReSTIRIntermedidate shIntermediates[64];
 
     const auto ray = rays[idx];
 
@@ -530,7 +528,6 @@ __global__ void shade(
         ctxt, shMtrls[threadIdx.x], orienting_normal, ray.dir, rec.u, rec.v, albedo);
 
     shShadowRays[threadIdx.x].isActive = false;
-    shIntermediates[threadIdx.x].is_backfacing = isBackfacing;
 
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
@@ -634,21 +631,10 @@ __global__ void shade(
             }
 
             shShadowRays[threadIdx.x].isActive = isShadowRayActive;
-
-            if (light.attrib.isSingular || light.attrib.isInfinite) {
-                // Nothing to do...
-            }
-            else {
-                shIntermediates[threadIdx.x].light_dist2 = aten::squared_length(sampleres.dir);
-            }
-
-            shIntermediates[threadIdx.x].light_sample_nml = nmlLight;
-            shIntermediates[threadIdx.x].light_final_clr = sampleres.finalColor;
         }
     }
 
     shadowRays[idx] = shShadowRays[threadIdx.x];
-    intermediates[idx] = shIntermediates[threadIdx.x];
 
     real russianProb = real(1);
 
@@ -750,7 +736,6 @@ __global__ void hitShadowRay(
 
     idx = hitindices[idx];
 
-#pragma unroll
     const auto& shadowRay = shadowRays[idx];
 
     if (!shadowRay.isActive) {
@@ -984,7 +969,6 @@ namespace idaten
             m_tileDomain,
             is_restir,
             m_reservoirs.ptr(),
-            m_intermediates.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
             mtxW2C,

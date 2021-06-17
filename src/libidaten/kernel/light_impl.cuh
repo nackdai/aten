@@ -341,8 +341,11 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
         // ここでは逆数にしておくことで、最終的に掛け算になるようにする.
         lightSelectPdf = light_cnt / w_sum;
     }
+
     reservoir.m = light_cnt;
     reservoir.w = w_sum;
+    reservoir.light_pdf = selected_light_idx > 0 ? result->pdf : 0.0f;
+    reservoir.light_idx = selected_light_idx;
 
     return selected_light_idx;
 }

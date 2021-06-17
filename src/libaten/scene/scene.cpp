@@ -119,12 +119,14 @@ namespace aten {
                 }
             }
 
-            w_sum += cost;
+            if (cost > 0) {
+                w_sum += cost;
 
-            if (cost > 0 && r < cost / w_sum) {
-                selected_light_idx = light_pos;
-                sampleRes = lightsample;
-                selected_cost = cost;
+                if (r < cost / w_sum) {
+                    selected_light_idx = light_pos;
+                    sampleRes = lightsample;
+                    selected_cost = cost;
+                }
             }
         }
 

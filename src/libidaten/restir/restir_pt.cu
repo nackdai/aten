@@ -361,7 +361,6 @@ __global__ void shadeMissWithEnvmap(
 
 __global__ void shade(
     idaten::TileDomain tileDomain,
-    bool is_restir,
     idaten::Reservoir* reservoirs,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
@@ -534,33 +533,21 @@ __global__ void shade(
     {
         auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
 
-        real lightSelectPdf = 1;
         aten::LightSampleResult sampleres;
-
-        int lightidx = 0;
         aten::LightParameter light;
 
-        if (is_restir) {
-            lightidx = sampleLightWithReservoirRIP(
-                &sampleres, reservoirs[idx],
-                lightSelectPdf, &light,
-                compute_brdf_functor,
-                &ctxt, rec.p, orienting_normal, &paths->sampler[idx], bounce);
-        }
-        else {
-            lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
-            lightSelectPdf = 1.0f / lightnum;
+        auto lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
+        auto lightSelectPdf = 1.0f / lightnum;
 
-            light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
-            light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
-            light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
-            light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
-            light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
-            light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
-            //auto light = ctxt.lights[lightidx];
+        light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
+        light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
+        light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
+        light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
+        light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
+        light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
+        //auto light = ctxt.lights[lightidx];
 
-            sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
-        }
+        sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
 
         if (lightidx >= 0) {
             const auto& posLight = sampleres.pos;
@@ -963,11 +950,8 @@ namespace idaten
 
         auto& hitcount = m_compaction.getCount();
 
-        bool is_restir = m_mode == Mode::ReSTIR;
-
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            is_restir,
             m_reservoirs.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),

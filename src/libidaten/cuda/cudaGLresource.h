@@ -116,21 +116,19 @@ namespace idaten
 
     //////////////////////////////////////////////////////////////////////////
 
+    template <typename GLRSC>
     class CudaGLResourceMapper {
     public:
-        CudaGLResourceMapper(CudaGLResource* rsc)
+        CudaGLResourceMapper(GLRSC& rsc) : m_rsc(rsc)
         {
-            m_rsc = rsc;
-            m_rsc->map();
+            m_rsc.map();
         }
         ~CudaGLResourceMapper()
         {
-            if (m_rsc) {
-                m_rsc->unmap();
-            }
+            m_rsc.unmap();
         }
 
     private:
-        CudaGLResource* m_rsc;
+        CudaGLResource& m_rsc;
     };
 }

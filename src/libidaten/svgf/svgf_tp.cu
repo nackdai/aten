@@ -436,7 +436,7 @@ namespace idaten
         int curaov = getCurAovs();
         int prevaov = getPrevAovs();
 
-        CudaGLResourceMapper rscmap(&m_motionDepthBuffer);
+        CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
         auto motionDepthBuffer = m_motionDepthBuffer.bind();
 
         temporalReprojection << <grid, block, 0, m_stream >> > (

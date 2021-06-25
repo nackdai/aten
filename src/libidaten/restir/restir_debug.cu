@@ -197,7 +197,7 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        CudaGLResourceMapper rscmap(&m_motionDepthBuffer);
+        CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
         auto gbuffer = m_motionDepthBuffer.bind();
 
         fillAOV << <grid, block >> > (

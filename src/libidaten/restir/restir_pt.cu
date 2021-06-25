@@ -361,7 +361,6 @@ __global__ void shadeMissWithEnvmap(
 
 __global__ void shade(
     idaten::TileDomain tileDomain,
-    idaten::Reservoir* reservoirs,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
@@ -952,7 +951,6 @@ namespace idaten
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            m_reservoirs.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
             mtxW2C,

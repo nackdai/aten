@@ -344,6 +344,9 @@ __global__ void shade(
 
     idx = hitindices[idx];
 
+    // Deactive shadow ray
+    shadowRays[idx].isActive = false;
+
     auto& path = paths[idx];
     const auto& ray = rays[idx];
 
@@ -461,8 +464,6 @@ __global__ void shade(
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
     AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
-
-    shadowRays[idx].isActive = false;
 
     // Explicit conection to light.
     if (!(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))

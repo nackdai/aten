@@ -26,7 +26,7 @@ namespace AT_NAME
         virtual ~lambert() {}
 
     public:
-        static AT_DEVICE_MTRL_API real pdf(
+        static AT_DEVICE_API real pdf(
             const aten::vec3& normal,
             const aten::vec3& wo)
         {
@@ -93,7 +93,7 @@ namespace AT_NAME
             return ret;
         }
 
-        static AT_DEVICE_MTRL_API aten::vec3 bsdf(
+        static AT_DEVICE_API aten::vec3 bsdf(
             const aten::MaterialParameter* param,
             const aten::vec3& externalAlbedo)
         {

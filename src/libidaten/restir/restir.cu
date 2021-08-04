@@ -412,8 +412,6 @@ __global__ void computeShadowRayContribution(
         ctxt.textures = textures;
     }
 
-    idx = hitindices[idx];
-
     __shared__ aten::MaterialParameter shMtrls[64];
 
     const auto& reservoir = reservoirs[idx];

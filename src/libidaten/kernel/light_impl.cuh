@@ -344,7 +344,7 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
 
     reservoir.m = light_cnt;
     reservoir.w = w_sum;
-    reservoir.light_pdf = selected_light_idx > 0 ? result->pdf : 0.0f;
+    reservoir.light_pdf = selected_light_idx >= 0 ? result->pdf : 0.0f;
     reservoir.light_idx = selected_light_idx;
 
     return selected_light_idx;

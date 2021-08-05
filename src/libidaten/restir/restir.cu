@@ -227,6 +227,8 @@ __global__ void shade(
         }
     }
 
+    shIntermediates[threadIdx.x].setNml(orienting_normal);
+
     shadowRays[idx] = shShadowRays[threadIdx.x];
     intermediates[idx] = shIntermediates[threadIdx.x];
 
@@ -441,10 +443,12 @@ __global__ void computeShadowRayContribution(
 
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        auto normal_depth = aovNormalDepth[idx];
         auto albedo_meshid = aovTexclrMeshid[idx];
 
-        const aten::vec3 orienting_normal(normal_depth.x, normal_depth.y, normal_depth.z);
+        const aten::vec3 orienting_normal(
+            intermediates[idx].nml_x,
+            intermediates[idx].nml_y,
+            intermediates[idx].nml_z);
         const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
         int lightidx = reservoir.light_idx;

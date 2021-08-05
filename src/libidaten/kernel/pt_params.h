@@ -56,18 +56,26 @@ namespace idaten {
 
     struct ReSTIRIntermedidate {
         aten::vec3 light_sample_nml;
-        int mtrl_idx;
-
-        aten::vec3 light_color;
         struct {
             uint32_t is_voxel : 1;
+            uint32_t mtrl_idx : 16;
         };
 
+        aten::vec3 light_color;
+        float nml_x;
+
         aten::vec3 wi;
-        float padding_1;
+        float nml_y;
 
         aten::vec3 throughput;
-        float padding_2;
+        float nml_z;
+
+        __host__ __device__ void setNml(const aten::vec3& nml)
+        {
+            nml_x = nml.x;
+            nml_y = nml.y;
+            nml_z = nml.z;
+        }
     };
 
     struct Reservoir {

@@ -281,6 +281,8 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
 
     lightSelectPdf = real(0);
 
+    float light_select_pdf = 1.0f / max_light_num;
+
     for (auto i = 0U; i < light_cnt; i++) {
         const auto r_light = sampler->nextSample();
         const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
@@ -320,6 +322,8 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
                     cost = energy * cosShadow * cosLight / dist2 / pdfLight;
                 }
             }
+
+            cost /= light_select_pdf;
         }
 
         if (cost > 0) {

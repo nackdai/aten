@@ -529,5 +529,8 @@
     <CudaCompile Include="..\src\libidaten\restir\restir.cu">
       <Filter>restir</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\restir\restir_reuse.cu">
+      <Filter>restir</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

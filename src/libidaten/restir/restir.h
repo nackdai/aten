@@ -205,6 +205,10 @@ namespace idaten
             int bounce,
             cudaTextureObject_t texVtxPos);
 
+        int computelReuse(
+            int width, int height,
+            int bounce);
+
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
             int width, int height,

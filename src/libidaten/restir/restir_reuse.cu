@@ -94,17 +94,16 @@ __global__ void computeSpatialReuse(
     idaten::Reservoir* dst_reservoirs,
     const idaten::ReSTIRIntermedidate* __restrict__ intermediates,
     idaten::ReSTIRIntermedidate* dst_intermediates,
-    int width, int height,
-    int* hitindices,
-    int* hitnum)
+    int width, int height)
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+    auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (idx >= *hitnum) {
+    if (ix >= width || iy >= height) {
         return;
     }
 
-    idx = hitindices[idx];
+    auto idx = getIdx(ix, iy, width);
 
     OnComputeSpatialReuse(
         idx,
@@ -125,8 +124,6 @@ namespace idaten {
         dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
-        auto& hitcount = m_compaction.getCount();
-
         int target_idx = 0;
 
         if (bounce == 0) {
@@ -136,8 +133,7 @@ namespace idaten {
                 m_reservoirs[1].ptr(),
                 m_intermediates[0].ptr(),
                 m_intermediates[1].ptr(),
-                width, height,
-                m_hitidx.ptr(), hitcount.ptr());
+                width, height);
 
             checkCudaKernel(computeSpatialReuse);
 

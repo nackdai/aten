@@ -288,7 +288,7 @@ namespace idaten
 
                 //AT_PRINTF("%d\n", hitcount);
 
-                if (is_restir) {
+                if (is_restir && bounce == 0) {
                     onShadeReSTIR(
                         outputSurf,
                         width, height,

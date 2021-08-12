@@ -281,7 +281,10 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
 
     lightSelectPdf = real(0);
 
-    float light_select_pdf = 1.0f / max_light_num;
+    // NOTE
+    // equation(6) における、w = p_hat / p の p.
+    // p_hat が importance sampling で samplingするが、p は単なるsamplingなので何でもいいはず.
+    float p = 1.0f / max_light_num;
 
     for (auto i = 0U; i < light_cnt; i++) {
         const auto r_light = sampler->nextSample();
@@ -323,7 +326,7 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
                 }
             }
 
-            cost /= light_select_pdf;
+            cost /= p;
         }
 
         if (cost > 0) {

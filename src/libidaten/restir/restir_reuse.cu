@@ -21,56 +21,32 @@ __host__ __device__ void OnComputeSpatialReuse(
     int ix = idx % width;
     int iy = idx / width;
 
-    static const int pos_x[] = {
-        -1,
-         0,
-         1,
-
-        -1,
-         1,
-
-        -1,
-         0,
-         1,
-    };
-
-    static const int pos_y[] = {
-        -1,
-        -1,
-        -1,
-
-         0,
-         0,
-
-         1,
-         1,
-         1,
-    };
-
     int reuse_idx = -1;
     auto new_reservoir = reservoirs[idx];
 
     auto r = sampler->nextSample();
 
 #pragma unroll
-    for (int i = 0; i < AT_COUNTOF(pos_x); i++) {
-        const auto x = ix + pos_x[i];
-        const auto y = iy + pos_y[i];
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            const auto xx = ix + x;
+            const auto yy = iy + y;
 
-        if (AT_MATH_IS_IN_BOUND(x, 0, width - 1)
-            && AT_MATH_IS_IN_BOUND(y, 0, height - 1))
-        {
-            auto new_idx = getIdx(x, y, width);
-            const auto& reservoir = reservoirs[new_idx];
+            if (AT_MATH_IS_IN_BOUND(xx, 0, width - 1)
+                && AT_MATH_IS_IN_BOUND(yy, 0, height - 1))
+            {
+                auto new_idx = getIdx(xx, yy, width);
+                const auto& reservoir = reservoirs[new_idx];
 
-            if (reservoir.w > 0.0f) {
-                new_reservoir.w += reservoir.w;
-                new_reservoir.m += reservoir.m;
+                if (reservoir.w > 0.0f) {
+                    new_reservoir.w += reservoir.w;
+                    new_reservoir.m += reservoir.m;
 
-                if (r <= reservoir.w / new_reservoir.w) {
-                    new_reservoir.light_pdf = reservoir.light_pdf;
-                    new_reservoir.light_idx = reservoir.light_idx;
-                    reuse_idx = new_idx;
+                    if (r <= reservoir.w / new_reservoir.w) {
+                        new_reservoir.light_pdf = reservoir.light_pdf;
+                        new_reservoir.light_idx = reservoir.light_idx;
+                        reuse_idx = new_idx;
+                    }
                 }
             }
         }
@@ -121,25 +97,26 @@ namespace idaten {
         int width, int height,
         int bounce)
     {
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
-        dim3 threadPerBlock(64);
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (m_tileDomain.w + block.x - 1) / block.x,
+            (m_tileDomain.h + block.y - 1) / block.y);
 
-        int target_idx = 0;
+        int src_idx = 0;
+        int dst_idx = 1;
 
         if (bounce == 0) {
-            computeSpatialReuse << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+            computeSpatialReuse << <grid, block, 0, m_stream >> > (
                 m_paths.ptr(),
-                m_reservoirs[0].ptr(),
-                m_reservoirs[1].ptr(),
-                m_intermediates[0].ptr(),
-                m_intermediates[1].ptr(),
+                m_reservoirs[src_idx].ptr(),
+                m_reservoirs[dst_idx].ptr(),
+                m_intermediates[src_idx].ptr(),
+                m_intermediates[dst_idx].ptr(),
                 width, height);
 
             checkCudaKernel(computeSpatialReuse);
-
-            target_idx = 1;
         }
 
-        return target_idx;
+        return dst_idx;
     }
 }

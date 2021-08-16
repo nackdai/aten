@@ -58,6 +58,7 @@ namespace idaten {
         aten::vec3 light_sample_nml;
         struct {
             uint32_t is_voxel : 1;
+            uint32_t is_mtrl_valid : 1;
             uint32_t mtrl_idx : 16;
         };
 

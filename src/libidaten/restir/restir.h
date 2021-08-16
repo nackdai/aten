@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <tuple>
+
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
@@ -26,6 +29,15 @@ namespace idaten
             BaryCentric,
             Motion,
             ObjId,
+        };
+
+        struct NormalMaterialStorage {
+            aten::vec3 normal;
+            struct {
+                uint32_t is_voxel : 1;
+                uint32_t is_mtrl_valid : 1;
+                uint32_t mtrl_idx : 16;
+            };
         };
 
         struct PickedInfo {
@@ -205,7 +217,7 @@ namespace idaten
             int bounce,
             cudaTextureObject_t texVtxPos);
 
-        int computelReuse(
+        std::tuple<int, int> computelReuse(
             int width, int height,
             int bounce);
 
@@ -231,6 +243,19 @@ namespace idaten
 
         void setStream(cudaStream_t stream);
 
+        int getCurBufNmlMtrlPos() const
+        {
+            return m_curBufNmlMtrlPos;
+        }
+        int getPrevBufNmlMtrlPos() const
+        {
+            return 1 - m_curBufNmlMtrlPos;
+        }
+        void updateCurBufNmlMtrlPos()
+        {
+            m_curBufNmlMtrlPos = 1 - m_curBufNmlMtrlPos;
+        }
+
     protected:
         bool m_isInitPash{ false };
         idaten::TypedCudaMemory<Path> m_paths;
@@ -250,8 +275,15 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
 
-        idaten::TypedCudaMemory<ReSTIRIntermedidate>  m_intermediates[2];
-        idaten::TypedCudaMemory<Reservoir> m_reservoirs[2];
+        // 0: src, 1: dst
+        std::array<idaten::TypedCudaMemory<ReSTIRIntermedidate>, 2>  m_intermediates;
+
+        // 0: current src, 1: temporaly dst, 2: dst (previous result in next frame)
+        std::array<idaten::TypedCudaMemory<Reservoir>, 3> m_reservoirs;
+
+        // Keep current result and reuse it as previous result.
+        std::array<idaten::TypedCudaMemory<NormalMaterialStorage>, 2> m_bufNmlMtrl;
+        int m_curBufNmlMtrlPos{ 0 };
 
         // Current AOV buffer position.
         int m_curAOVPos{ 0 };

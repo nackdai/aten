@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "restir/restir.h"
 
 #include "aten4idaten.h"
@@ -17,6 +19,7 @@ __global__ void shade(
     idaten::TileDomain tileDomain,
     idaten::Reservoir* reservoirs,
     idaten::ReSTIRIntermedidate* intermediates,
+    idaten::ReSTIRPathTracing::NormalMaterialStorage* nml_mtrl_buf,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
@@ -97,12 +100,17 @@ __global__ void shade(
     if (rec.mtrlid >= 0) {
         shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
 
+        // This kernel doesn't have to be called except first bounce.
+        // And, in that case, hit material should not be voxel.
+        // Therefore, we can ignore voxel check at all.
+#if 0
         if (rec.isVoxel) {
             // Replace to lambert.
             const auto& albedo = ctxt.mtrls[rec.mtrlid].baseColor;
             shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
             shMtrls[threadIdx.x].baseColor = albedo;
         }
+#endif
 
         if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
             shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
@@ -139,6 +147,7 @@ __global__ void shade(
     shIntermediates[threadIdx.x].wi = ray.dir;
     shIntermediates[threadIdx.x].mtrl_idx = rec.mtrlid;
     shIntermediates[threadIdx.x].is_voxel = rec.isVoxel;
+    shIntermediates[threadIdx.x].is_mtrl_valid = (rec.mtrlid >= 0);
     shIntermediates[threadIdx.x].throughput = paths->throughput[idx].throughput;
 
     reservoirs[idx].light_idx = -1;
@@ -159,6 +168,11 @@ __global__ void shade(
 
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
         aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.mtrlid);
+
+        nml_mtrl_buf[idx].normal = orienting_normal;
+        nml_mtrl_buf[idx].mtrl_idx = rec.mtrlid;
+        nml_mtrl_buf[idx].is_voxel = rec.isVoxel;
+        nml_mtrl_buf[idx].is_mtrl_valid = (rec.mtrlid >= 0);
     }
 
     // Implicit conection to light.
@@ -419,7 +433,7 @@ __global__ void computeShadowRayContribution(
     const auto& reservoir = reservoirs[idx];
     const auto& intermediate = intermediates[idx];
 
-    if (intermediate.mtrl_idx >= 0) {
+    if (intermediate.is_mtrl_valid) {
         shMtrls[threadIdx.x] = ctxt.mtrls[intermediate.mtrl_idx];
 
         if (intermediate.is_voxel) {
@@ -559,10 +573,13 @@ namespace idaten
 
         auto& hitcount = m_compaction.getCount();
 
+        int curBufNmlMtrlPos = getCurBufNmlMtrlPos();
+
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
             m_reservoirs[0].ptr(),
             m_intermediates[0].ptr(),
+            m_bufNmlMtrl[curBufNmlMtrlPos].ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
             mtxW2C,
@@ -617,11 +634,13 @@ namespace idaten
 
         checkCudaKernel(hitShadowRay);
 
-        int target_idx = computelReuse(width, height, bounce);
+        const auto target_idx = computelReuse(width, height, bounce);
+        const auto reservior_idx = std::get<0>(target_idx);
+        const auto intermediate_idx = std::get<1>(target_idx);
 
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_reservoirs[target_idx].ptr(),
-            m_intermediates[target_idx].ptr(),
+            m_reservoirs[reservior_idx].ptr(),
+            m_intermediates[intermediate_idx].ptr(),
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),
             m_aovNormalDepth.ptr(),

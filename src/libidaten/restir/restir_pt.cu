@@ -22,6 +22,7 @@ __global__ void genPath(
     bool isFillAOV,
     idaten::Path* paths,
     aten::ray* rays,
+    idaten::Reservoir* reservoirs,
     int width, int height,
     int sample,
     unsigned int frame,
@@ -82,6 +83,12 @@ __global__ void genPath(
     paths->attrib[idx].isSingular = false;
 
     paths->contrib[idx].samples += 1;
+
+    // Clear reservoir.
+    reservoirs[idx].w = 0.0f;
+    reservoirs[idx].m = 0;
+    reservoirs[idx].light_idx = -1;
+    reservoirs[idx].light_pdf = 0.0f;
 
     // Accumulate value, so do not reset.
     //path.contrib = aten::vec3(0);
@@ -826,6 +833,7 @@ namespace idaten
             isFillAOV,
             m_paths.ptr(),
             m_rays.ptr(),
+            m_reservoirs[0].ptr(),
             m_tileDomain.w, m_tileDomain.h,
             sample,
             m_frame,

@@ -269,7 +269,7 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     constexpr auto MaxLightCount = 32U;
 
     const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt->lightnum);
-    const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
+    const auto max_light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
 
     // Reservoir
 
@@ -284,9 +284,11 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     // NOTE
     // equation(6) における、w = p_hat / p の p.
     // p_hat が importance sampling で samplingするが、p は単なるsamplingなので何でもいいはず.
-    float p = 1.0f / max_light_num;
+    float p = 1.0f / max_light_cnt;
 
-    for (auto i = 0U; i < light_cnt; i++) {
+    int active_light_num = 0;
+
+    for (auto i = 0U; i < max_light_cnt; i++) {
         const auto r_light = sampler->nextSample();
         const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
@@ -331,6 +333,7 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
 
         if (cost > 0) {
             w_sum += cost;
+            active_light_num++;
 
             if (r < cost / w_sum) {
                 *result = lightsample;
@@ -346,10 +349,10 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
         // 論文的には、w_sum / M を掛けるのに対して
         // path tracingの内部では、1 / lightSelectPdf で計算しているので
         // ここでは逆数にしておくことで、最終的に掛け算になるようにする.
-        lightSelectPdf = light_cnt / w_sum;
+        lightSelectPdf = active_light_num / w_sum;
     }
 
-    reservoir.m = light_cnt;
+    reservoir.m = active_light_num;
     reservoir.w = w_sum;
     reservoir.light_pdf = selected_light_idx >= 0 ? result->pdf : 0.0f;
     reservoir.light_idx = selected_light_idx;

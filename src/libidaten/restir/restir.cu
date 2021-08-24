@@ -389,11 +389,13 @@ __global__ void hitShadowRay(
         hitobj);
 
     if (isHit) {
-        reservoirs[idx].light_idx = targetLightId;
+        reservoirs[idx].w = 0.0f;
+        reservoirs[idx].m = 0;
+        reservoirs[idx].light_idx = -1;
+        reservoirs[idx].light_pdf = 0.0f;
     }
     else {
-        reservoirs[idx].light_idx = -1;
-        reservoirs[idx].w = 0.0f;
+        reservoirs[idx].light_idx = targetLightId;
     }
 }
 

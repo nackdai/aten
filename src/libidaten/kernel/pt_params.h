@@ -77,6 +77,21 @@ namespace idaten {
             nml_y = nml.y;
             nml_z = nml.z;
         }
+
+        __host__ __device__ void clear()
+        {
+            light_sample_nml.x = light_sample_nml.y = light_sample_nml.z = 0.0f;
+
+            is_voxel = false;
+            is_mtrl_valid = false;
+            mtrl_idx = 0;
+
+            light_color.x = light_color.y = light_color.z = 0.0f;
+            wi.x = wi.y = wi.z = 0.0f;
+            throughput.x = throughput.y = throughput.z = 0.0f;
+
+            nml_x = nml_y = nml_z = 0.0f;
+        }
     };
 
     struct Reservoir {

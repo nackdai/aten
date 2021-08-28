@@ -14,7 +14,7 @@
 
 #include "../common/scenedefs.h"
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -53,8 +53,9 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
-static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
+static auto g_curMode = idaten::ReSTIRPathTracing::Mode::ReSTIR;
+static auto g_curReSTIRMode = idaten::ReSTIRPathTracing::ReSTIRMode::ReSTIR;
+static auto g_curAOVMode = idaten::ReSTIRPathTracing::AOVMode::WireFrame;
 static bool g_showAABB = false;
 
 static float g_moveMultiply = 1.0f;
@@ -226,15 +227,23 @@ void onRun(aten::window* window)
 
         static const char* items[] = { "ReSTIR", "PT", "AOV" };
 
-        if (ImGui::Combo("mode", &g_curMode, items, AT_COUNTOF(items))) {
-            g_tracer.setMode((idaten::ReSTIRPathTracing::Mode)g_curMode);
+        if (ImGui::Combo("mode", (int*)&g_curMode, items, AT_COUNTOF(items))) {
+            g_tracer.setMode(g_curMode);
+        }
+
+        if (g_curMode == idaten::ReSTIRPathTracing::Mode::ReSTIR) {
+            static const char* restir_items[] = { "ReSTIR", "SpatialReuse" };
+
+            if (ImGui::Combo("restir mode", (int*)&g_curReSTIRMode, restir_items, AT_COUNTOF(restir_items))) {
+                g_tracer.setReSTIRMode(g_curReSTIRMode);
+            }
         }
 
         if (g_curMode == idaten::ReSTIRPathTracing::Mode::AOVar) {
             static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
 
-            if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
-                g_tracer.setAOVMode((idaten::ReSTIRPathTracing::AOVMode)g_curAOVMode);
+            if (ImGui::Combo("aov", (int*)&g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
+                g_tracer.setAOVMode(g_curAOVMode);
             }
         }
 

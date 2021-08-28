@@ -15,10 +15,15 @@ namespace idaten
 {
     class ReSTIRPathTracing : public Renderer {
     public:
-        enum Mode {
+        enum class Mode {
             ReSTIR,
             PT,
             AOVar,  // Arbitrary Output Variables.
+        };
+
+        enum class ReSTIRMode {
+            ReSTIR,
+            SpatialReuse,
         };
 
         enum AOVMode {
@@ -103,6 +108,19 @@ namespace idaten
             }
         }
 
+        ReSTIRMode getReSTIRMode() const
+        {
+            return m_restirMode;
+        }
+        void setReSTIRMode(ReSTIRMode mode)
+        {
+            const auto prev = m_restirMode;
+            m_restirMode = mode;
+            if (prev != m_restirMode) {
+                reset();
+            }
+        }
+
         AOVMode getAOVMode() const
         {
             return m_aovMode;
@@ -115,6 +133,7 @@ namespace idaten
         virtual void reset() override final
         {
             m_frame = 1;
+            m_curBufNmlMtrlPos = 0;
         }
 
         uint32_t frame() const
@@ -317,6 +336,7 @@ namespace idaten
         PickedInfo m_pickedInfo;
 
         Mode m_mode{ Mode::ReSTIR };
+        ReSTIRMode m_restirMode{ ReSTIRMode::ReSTIR };
         AOVMode m_aovMode{ AOVMode::WireFrame };
 
         TileDomain m_tileDomain;

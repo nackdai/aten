@@ -309,34 +309,36 @@ namespace idaten {
                 }
             }
 #elif 1
-            if (m_frame > 1) {
-                int curBufNmlMtrlPos = getCurBufNmlMtrlPos();
-                int prevBufNmlMtrlPos = getPrevBufNmlMtrlPos();
+            if (m_restirMode == ReSTIRMode::ReSTIR) {
+                if (m_frame > 1) {
+                    int curBufNmlMtrlPos = getCurBufNmlMtrlPos();
+                    int prevBufNmlMtrlPos = getPrevBufNmlMtrlPos();
 
-                CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
-                auto motionDepthBuffer = m_motionDepthBuffer.bind();
+                    CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
+                    auto motionDepthBuffer = m_motionDepthBuffer.bind();
 
-                computeTemporalReuse << <grid, block, 0, m_stream >> > (
-                    m_paths.ptr(),
-                    m_reservoirs[TEMPORAL_REUSE_RESERVOIR_SRC_IDX].ptr(),
-                    m_reservoirs[TEMPORAL_REUSE_RESERVOIR_PREV_FRAME_IDX].ptr(),
-                    m_reservoirs[TEMPORAL_REUSE_RESERVOIR_DST_IDX].ptr(),
-                    m_intermediates[spatial_resue_intermediate_src_idx].ptr(),
-                    m_intermediates[spatial_resue_intermediate_dst_idx].ptr(),
-                    m_bufNmlMtrl[curBufNmlMtrlPos].ptr(),
-                    m_bufNmlMtrl[prevBufNmlMtrlPos].ptr(),
-                    motionDepthBuffer,
-                    width, height);
+                    computeTemporalReuse << <grid, block, 0, m_stream >> > (
+                        m_paths.ptr(),
+                        m_reservoirs[TEMPORAL_REUSE_RESERVOIR_SRC_IDX].ptr(),
+                        m_reservoirs[TEMPORAL_REUSE_RESERVOIR_PREV_FRAME_IDX].ptr(),
+                        m_reservoirs[TEMPORAL_REUSE_RESERVOIR_DST_IDX].ptr(),
+                        m_intermediates[spatial_resue_intermediate_src_idx].ptr(),
+                        m_intermediates[spatial_resue_intermediate_dst_idx].ptr(),
+                        m_bufNmlMtrl[curBufNmlMtrlPos].ptr(),
+                        m_bufNmlMtrl[prevBufNmlMtrlPos].ptr(),
+                        motionDepthBuffer,
+                        width, height);
 
-                checkCudaKernel(computeTemporalReuse);
+                    checkCudaKernel(computeTemporalReuse);
 
-                updateCurBufNmlMtrlPos();
+                    updateCurBufNmlMtrlPos();
 
-                spatial_resue_reservoir_src_idx = TEMPORAL_REUSE_RESERVOIR_DST_IDX;
+                    spatial_resue_reservoir_src_idx = TEMPORAL_REUSE_RESERVOIR_DST_IDX;
 
-                std::swap(
-                    spatial_resue_intermediate_src_idx,
-                    spatial_resue_intermediate_dst_idx);
+                    std::swap(
+                        spatial_resue_intermediate_src_idx,
+                        spatial_resue_intermediate_dst_idx);
+                }
             }
 #endif
 

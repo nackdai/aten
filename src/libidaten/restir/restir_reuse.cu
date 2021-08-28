@@ -32,8 +32,6 @@ __host__ __device__ void OnComputeTemporalReuse(
     const auto& cur_nml = cur_nml_mtrl_buf[idx].normal;
     const auto& cur_mtrl_idx = cur_nml_mtrl_buf[idx].mtrl_idx;
 
-    auto r = sampler[idx].nextSample();
-
     // 前のフレームのスクリーン座標.
     int px = (int)(ix + motionDepth.x * width);
     int py = (int)(iy + motionDepth.y * height);
@@ -63,10 +61,13 @@ __host__ __device__ void OnComputeTemporalReuse(
                     prev_reservoir.m = 20 * new_reservoir.m;
                 }
 
-                new_reservoir.w += prev_reservoir.w;
-                new_reservoir.m += prev_reservoir.m;
+                auto w_sum = new_reservoir.w + prev_reservoir.w;
 
-                if (r <= prev_reservoir.w / new_reservoir.w) {
+                if (w_sum > 0.0f
+                    && sampler[idx].nextSample() <= prev_reservoir.w / w_sum)
+                {
+                    new_reservoir.w = w_sum;
+                    new_reservoir.m += prev_reservoir.m;
                     new_reservoir.light_pdf = prev_reservoir.light_pdf;
                     new_reservoir.light_idx = prev_reservoir.light_idx;
                     reuse_idx = pidx;

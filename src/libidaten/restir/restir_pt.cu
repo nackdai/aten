@@ -23,6 +23,7 @@ __global__ void genPath(
     idaten::Path* paths,
     aten::ray* rays,
     idaten::Reservoir* reservoirs,
+    idaten::ReSTIRIntermedidate* intermediates,
     int width, int height,
     int sample,
     unsigned int frame,
@@ -89,6 +90,9 @@ __global__ void genPath(
     reservoirs[idx].m = 0;
     reservoirs[idx].light_idx = -1;
     reservoirs[idx].light_pdf = 0.0f;
+
+    // Clear intermedisate data.
+    intermediates[idx].clear();
 
     // Accumulate value, so do not reset.
     //path.contrib = aten::vec3(0);
@@ -834,6 +838,7 @@ namespace idaten
             m_paths.ptr(),
             m_rays.ptr(),
             m_reservoirs[0].ptr(),
+            m_intermediates[0].ptr(),
             m_tileDomain.w, m_tileDomain.h,
             sample,
             m_frame,

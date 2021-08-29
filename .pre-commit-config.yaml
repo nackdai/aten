@@ -3,7 +3,7 @@ exclude: (.*3rdparty/.*|.*vs2015/.*|.*vs2019/.*|.*asset/.*|.*docs/.*|.*gallery/.
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0
+    rev: v4.0.1
     hooks:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
@@ -14,7 +14,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 2.1.1
+    rev: 2.1.5
     hooks:
       - id: shfmt
         args: [-i, "2", -ci]

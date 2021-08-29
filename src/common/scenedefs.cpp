@@ -1442,8 +1442,10 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
     CryteckSponzaScene::makeScene(ctxt, scene);
 
     constexpr int32_t step = 5;
-    const aten::vec3 min_pos(-1137, 192, -494);
-    const aten::vec3 max_pos(558, 1219, 369);
+
+    const auto& aabb = scene->getBoundingBox();
+    const auto& min_pos = aabb.minPos();
+    const auto& max_pos = aabb.maxPos();
 
     aten::vec3 step_v = max_pos - min_pos;
 
@@ -1459,8 +1461,10 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
 
     size_t num = 0;
 
-    for (int32_t z = 0; z < step; z++) {
-        for (int32_t y = 0; y < step; y++) {
+    for (int32_t y = 0; y < step; y++) {
+        pos.z = 0.0f;
+        for (int32_t z = 0; z < step; z++) {
+            pos.x = 0.0f;
             for (int32_t x = 0; x < step; x++) {
                 auto l = std::make_shared<aten::PointLight>(
                     pos,
@@ -1474,9 +1478,9 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
                 pos.x += step_v.x;
                 num++;
             }
-            pos.y += step_v.y;
+            pos.z += step_v.z;
         }
-        pos.z += step_v.z;
+        pos.y += step_v.y;
     }
 
     auto l = std::make_shared<aten::PointLight>(

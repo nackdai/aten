@@ -56,6 +56,7 @@ static int g_maxBounce = 5;
 static auto g_curMode = idaten::ReSTIRPathTracing::Mode::ReSTIR;
 static auto g_curReSTIRMode = idaten::ReSTIRPathTracing::ReSTIRMode::ReSTIR;
 static auto g_curAOVMode = idaten::ReSTIRPathTracing::AOVMode::WireFrame;
+static auto g_enableProgressive = false;
 static bool g_showAABB = false;
 
 static float g_moveMultiply = 1.0f;
@@ -245,6 +246,10 @@ void onRun(aten::window* window)
             if (ImGui::Combo("aov", (int*)&g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
                 g_tracer.setAOVMode(g_curAOVMode);
             }
+        }
+
+        if (ImGui::Checkbox("Progressive", &g_enableProgressive)) {
+            g_tracer.setEnableProgressive(g_enableProgressive);
         }
 
 #if 0

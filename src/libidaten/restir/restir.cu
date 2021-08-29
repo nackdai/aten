@@ -605,37 +605,6 @@ namespace idaten
 
         checkCudaKernel(shade);
 
-#if 0
-        std::vector<ReSTIRIntermedidate> intermediate;
-        m_intermediates[0].readFromDeviceToHost(intermediate);
-
-        std::vector<decltype(m_lightparam)::type> lightparam;
-        m_lightparam.readFromDeviceToHost(lightparam);
-
-        std::vector<Reservoir> reservoir;
-        m_reservoirs[0].readFromDeviceToHost(reservoir);
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                auto idx = y * width + x;
-
-                const auto& i = intermediate[idx];
-                if ((i.light_sample_nml.x <= -1 || i.light_sample_nml.x >= 1)
-                    || (i.light_sample_nml.y <= -1 || i.light_sample_nml.y >= 1)
-                    || (i.light_sample_nml.z <= -1 || i.light_sample_nml.z >= 1))
-                {
-                    aten::LightSampleResult result;
-                    const auto& r = reservoir[idx];
-                    idaten::PointLight::sample(
-                        &lightparam[r.light_idx],
-                        i.org,
-                        nullptr,
-                        &result);
-                }
-            }
-        }
-#endif
-
         onShadeByShadowRayReSTIR(
             width, height,
             bounce, texVtxPos);
@@ -684,31 +653,5 @@ namespace idaten
             m_shadowRays.ptr());
 
         checkCudaKernel(computeShadowRayContribution);
-
-#if 0
-        std::vector<Reservoir> restir;
-        m_reservoirs[reservior_idx].readFromDeviceToHost(restir);
-
-        std::vector<ReSTIRIntermedidate> intermediate;
-        m_intermediates[intermediate_idx].readFromDeviceToHost(intermediate);
-
-        std::vector<decltype(m_pathContrib)::type> contrib;
-        m_pathContrib.readFromDeviceToHost(contrib);
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                auto idx = y * width + x;
-
-                const auto& c = contrib[idx];
-
-                if (!AT_MATH_IS_IN_BOUND(c.v.x, 0, 4)
-                    || !AT_MATH_IS_IN_BOUND(c.v.y, 0, 4)
-                    || !AT_MATH_IS_IN_BOUND(c.v.z, 0, 4))
-                {
-                    AT_PRINTF("(%f, %f, %f} [%d/%d]\n", c.v.x, c.v.y, c.v.z, x, y);
-                }
-            }
-        }
-#endif
     }
 }

@@ -90,26 +90,6 @@ __host__ __device__ void OnComputeTemporalReuse(
 }
 #endif
 
-__global__ void getMotionDepthBuffer(
-    cudaSurfaceObject_t motionDetphBuffer,
-    float4* dstMotionDepth,
-    int width, int height)
-{
-    auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-    auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (ix >= width || iy >= height) {
-        return;
-    }
-
-    auto idx = getIdx(ix, iy, width);
-
-    float4 motionDepth;
-    surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
-
-    dstMotionDepth[idx] = motionDepth;
-}
-
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
     const idaten::Reservoir* __restrict__ cur_reservoirs,
@@ -250,65 +230,6 @@ namespace idaten {
         int spatial_resue_intermediate_dst_idx = 1;
 
         if (bounce == 0) {
-#if 0
-            if (m_frame > 1) {
-                idaten::TypedCudaMemory<float4> tmpMotionDepthBuf;
-                tmpMotionDepthBuf.init(width * height);
-
-                CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
-                auto motionDepthBuffer = m_motionDepthBuffer.bind();
-
-                getMotionDepthBuffer << <grid, block, 0, m_stream >> > (
-                    motionDepthBuffer,
-                    tmpMotionDepthBuf.ptr(),
-                    width, height);
-
-                std::vector<float4> motionDepthBuf;
-                tmpMotionDepthBuf.readFromDeviceToHost(motionDepthBuf);
-
-                std::vector<decltype(m_pathSampler)::type> sampler;
-                m_pathSampler.readFromDeviceToHost(sampler);
-
-                std::array<std::vector<Reservoir>, 3> reservoir;
-                for (int i = 0; i < 3; i++) {
-                    m_reservoirs[i].readFromDeviceToHost(reservoir[i]);
-                }
-
-                std::array<std::vector<ReSTIRIntermedidate>, 2> intermediate;
-                for (int i = 0; i < 2; i++) {
-                    m_intermediates[i].readFromDeviceToHost(intermediate[i]);
-                }
-
-                std::array<std::vector<NormalMaterialStorage>, 2> nml_mtrl_buf;
-                for (int i = 0; i < 2; i++) {
-                    m_bufNmlMtrl[i].readFromDeviceToHost(nml_mtrl_buf[i]);
-                }
-
-                int curBufNmlMtrlPos = getCurBufNmlMtrlPos();
-                int prevBufNmlMtrlPos = getPrevBufNmlMtrlPos();
-
-                constexpr int xx = 43;
-                constexpr int yy = 719 - 718;
-
-                for (int i = 0; i < motionDepthBuf.size(); i++) {
-                    int ix = i % 1280;
-                    int iy = i / 1280;
-
-                    OnComputeTemporalReuse(
-                        i,
-                        sampler.data(),
-                        reservoir[TEMPORAL_REUSE_RESERVOIR_SRC_IDX].data(),
-                        reservoir[TEMPORAL_REUSE_RESERVOIR_PREV_FRAME_IDX].data(),
-                        reservoir[TEMPORAL_REUSE_RESERVOIR_DST_IDX].data(),
-                        intermediate[spatial_resue_intermediate_src_idx].data(),
-                        intermediate[spatial_resue_intermediate_dst_idx].data(),
-                        nml_mtrl_buf[curBufNmlMtrlPos].data(),
-                        nml_mtrl_buf[prevBufNmlMtrlPos].data(),
-                        motionDepthBuf[i],
-                        width, height);
-                }
-            }
-#elif 1
             if (m_restirMode == ReSTIRMode::ReSTIR) {
                 if (m_frame > 1) {
                     int curBufNmlMtrlPos = getCurBufNmlMtrlPos();
@@ -340,7 +261,6 @@ namespace idaten {
                         spatial_resue_intermediate_dst_idx);
                 }
             }
-#endif
 
             computeSpatialReuse << <grid, block, 0, m_stream >> > (
                 m_paths.ptr(),

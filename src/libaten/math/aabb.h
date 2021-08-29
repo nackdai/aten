@@ -270,6 +270,11 @@ namespace aten {
             m_max.x = m_max.y = m_max.z = -AT_MATH_INF;
         }
 
+        bool isEmpty() const
+        {
+            return m_min.x == AT_MATH_INF;
+        }
+
         bool isValid() const
         {
             return (aten::cmpGEQ(m_min, m_max) & 0x07) == 0;
@@ -310,6 +315,23 @@ namespace aten {
             auto v1 = box.volume();
 
             return v1 / (v0 + AT_MATH_EPSILON);
+        }
+
+        void merge(const aabb& b)
+        {
+            if (isEmpty()) {
+                m_min = b.m_min;
+                m_max = b.m_max;
+            }
+            else {
+                m_min.x = std::min(m_min.x, b.m_min.x);
+                m_min.y = std::min(m_min.y, b.m_min.y);
+                m_min.z = std::min(m_min.z, b.m_min.z);
+
+                m_max.x = std::max(m_max.x, b.m_max.x);
+                m_max.y = std::max(m_max.y, b.m_max.y);
+                m_max.z = std::max(m_max.z, b.m_max.z);
+            }
         }
 
         static aabb merge(const aabb& box0, const aabb& box1)

@@ -785,6 +785,7 @@ __global__ void gather(
     cudaSurfaceObject_t dst,
     const idaten::Path* __restrict__ paths,
     float4* contribs,
+    bool enableProgressive,
     int width, int height)
 {
     auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -799,18 +800,32 @@ __global__ void gather(
     float4 c = paths->contrib[idx].v;
     int sample = c.w;
 
-    float3 contrib = make_float3(c.x, c.y, c.z) / sample;
-    //contrib.w = sample;
+    float4 contrib = c;
 
     ix += tileDomain.x;
     iy += tileDomain.y;
     idx = getIdx(ix, iy, width);
 
-    contribs[idx] = c;
+    if (enableProgressive) {
+        float4 data;
+        surf2Dread(&data, dst, ix * sizeof(float4), iy);
+
+        // First data.w value is 0.
+        int n = data.w;
+        contrib = n * data + make_float4(c.x, c.y, c.z, 0) / sample;
+        contrib /= (n + 1);
+        contrib.w = n + 1;
+    }
+    else {
+        contrib /= sample;
+        contrib.w = 1;
+    }
+
+    contribs[idx] = contrib;
 
     if (dst) {
         surf2Dwrite(
-            make_float4(contrib, 0),
+            contrib,
             dst,
             ix * sizeof(float4), iy,
             cudaBoundaryModeTrap);
@@ -1030,6 +1045,7 @@ namespace idaten
             outputSurf,
             m_paths.ptr(),
             m_tmpBuf.ptr(),
+            m_enableProgressive,
             width, height);
 
         checkCudaKernel(gather);

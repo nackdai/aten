@@ -175,6 +175,15 @@ namespace idaten
             m_canSSRTHitTest = f;
         }
 
+        bool isEnableProgressive() const
+        {
+            return m_enableProgressive;
+        }
+        void setEnableProgressive(bool b)
+        {
+            m_enableProgressive = b;
+        }
+
     protected:
         void onInit(int width, int height);
 
@@ -343,6 +352,8 @@ namespace idaten
 
         bool m_isListedTextureObject{ false };
         bool m_canSSRTHitTest{ true };
+
+        bool m_enableProgressive{ false };
 
         cudaStream_t m_stream{ (cudaStream_t)0 };
     };

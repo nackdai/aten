@@ -784,7 +784,6 @@ __global__ void gather(
     idaten::TileDomain tileDomain,
     cudaSurfaceObject_t dst,
     const idaten::Path* __restrict__ paths,
-    float4* contribs,
     bool enableProgressive,
     int width, int height)
 {
@@ -820,8 +819,6 @@ __global__ void gather(
         contrib /= sample;
         contrib.w = 1;
     }
-
-    contribs[idx] = contrib;
 
     if (dst) {
         surf2Dwrite(
@@ -1044,7 +1041,6 @@ namespace idaten
             m_tileDomain,
             outputSurf,
             m_paths.ptr(),
-            m_tmpBuf.ptr(),
             m_enableProgressive,
             width, height);
 

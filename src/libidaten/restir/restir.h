@@ -313,10 +313,7 @@ namespace idaten
         std::array<idaten::TypedCudaMemory<NormalMaterialStorage>, 2> m_bufNmlMtrl;
         int m_curBufNmlMtrlPos{ 0 };
 
-        // Current AOV buffer position.
-        int m_curAOVPos{ 0 };
-
-        // AOV buffer. Current frame and previous frame.
+        // AOV buffe
         idaten::TypedCudaMemory<float4> m_aovNormalDepth;
         idaten::TypedCudaMemory<float4> m_aovTexclrMeshid;
 
@@ -329,8 +326,6 @@ namespace idaten
         aten::mat4 m_mtxPrevW2V;
 
         uint32_t m_frame{ 1 };
-
-        idaten::TypedCudaMemory<float4> m_tmpBuf;
 
         // Distance limitation to kill path.
         real m_hitDistLimit{ AT_MATH_INF };

@@ -51,8 +51,6 @@ namespace idaten
 
         m_aovNormalDepth.init(width * height);
         m_aovTexclrMeshid.init(width * height);
-
-        m_tmpBuf.init(width * height);
     }
 
     void ReSTIRPathTracing::updateBVH(

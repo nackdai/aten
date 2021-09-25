@@ -42,7 +42,6 @@ private:
 __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
     idaten::Reservoir& reservoir,
-    real& lightSelectPdf,
     aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,
     idaten::Context* ctxt,

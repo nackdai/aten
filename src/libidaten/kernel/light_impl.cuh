@@ -257,7 +257,6 @@ AT_CUDA_INLINE __device__ void sampleLight(
 AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
     idaten::Reservoir& reservoir,
-    real& lightSelectPdf,
     aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,
     idaten::Context* ctxt,
@@ -271,22 +270,10 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt->lightnum);
     const auto max_light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
 
-    // Reservoir
-
-    auto r = sampler->nextSample();
-    auto w_sum = real(0);
+    real w_sum = real(0);
 
     int32_t selected_light_idx = -1;
     real selected_cost = real(0);
-
-    lightSelectPdf = real(0);
-
-    // NOTE
-    // equation(6) における、w = p_hat / p の p.
-    // p_hat が importance sampling で samplingするが、p は単なるsamplingなので何でもいいはず.
-    float p = 1.0f / max_light_cnt;
-
-    int active_light_num = 0;
 
     for (auto i = 0U; i < max_light_cnt; i++) {
         const auto r_light = sampler->nextSample();
@@ -306,56 +293,53 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
         auto cosShadow = dot(normal, dirToLight);
         auto dist2 = aten::squared_length(lightsample.dir);
 
-        auto light_energy = AT_NAME::color::luminance(lightsample.finalColor);
-        auto brdf_energy = AT_NAME::color::luminance(brdf);
-
-        auto energy = brdf_energy * light_energy;
-
-        real cost = real(0);
+        decltype(brdf) energy = brdf * lightsample.finalColor;
 
         if (cosShadow > 0) {
             if (light.attrib.isInfinite) {
-                cost = energy * cosShadow / pdfLight;
+                energy = energy * cosShadow;
             }
             else {
                 auto cosLight = dot(nmlLight, -dirToLight);
 
-                if (light.attrib.isSingular) {
-                    cost = energy * cosShadow * cosLight / pdfLight;
-                }
-                else {
-                    cost = energy * cosShadow * cosLight / dist2 / pdfLight;
+                if (cosLight > 0) {
+                    if (light.attrib.isSingular) {
+                        energy = energy * cosShadow * cosLight;
+                    }
+                    else {
+                        energy = energy * cosShadow * cosLight / dist2;
+                    }
                 }
             }
 
-            cost /= p;
+            energy /= pdfLight;
         }
 
-        if (cost > 0) {
-            w_sum += cost;
-            active_light_num++;
+        auto cost = (energy.x + energy.y + energy.z) / 3;
 
-            if (r < cost / w_sum) {
-                *result = lightsample;
-                *target_light = light;
-                selected_light_idx = light_pos;
-                selected_cost = cost;
-            }
+        w_sum += cost;
+
+        auto r = sampler->nextSample();
+
+        if (r < cost / w_sum) {
+            *result = lightsample;
+            *target_light = light;
+            selected_light_idx = light_pos;
+            selected_cost = cost;
         }
     }
 
-    if (w_sum > 0) {
-        // NOTE
-        // 論文的には、w_sum / M を掛けるのに対して
-        // path tracingの内部では、1 / lightSelectPdf で計算しているので
-        // ここでは逆数にしておくことで、最終的に掛け算になるようにする.
-        lightSelectPdf = active_light_num / w_sum;
-    }
-
-    reservoir.m = active_light_num;
+    reservoir.m = max_light_cnt;
     reservoir.w = w_sum;
-    reservoir.light_pdf = selected_light_idx >= 0 ? result->pdf : 0.0f;
     reservoir.light_idx = selected_light_idx;
+    reservoir.light_pdf = w_sum / (selected_cost * max_light_cnt);
+
+    if (!isfinite(reservoir.light_pdf)) {
+        reservoir.light_pdf = real(0);
+        reservoir.light_idx = -1;
+
+        selected_light_idx = -1;
+    }
 
     return selected_light_idx;
 }

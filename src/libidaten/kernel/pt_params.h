@@ -78,6 +78,13 @@ namespace idaten {
             nml_z = nml.z;
         }
 
+        __host__ __device__ void getNml(aten::vec3& nml) const
+        {
+            nml.x = nml_x;
+            nml.y = nml_y;
+            nml.z = nml_z;
+        }
+
         __host__ __device__ void clear()
         {
             light_sample_nml.x = light_sample_nml.y = light_sample_nml.z = 0.0f;

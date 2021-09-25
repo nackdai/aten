@@ -207,15 +207,18 @@ __global__ void shade(
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        real lightSelectPdf = 1;
         aten::LightSampleResult sampleres;
         aten::LightParameter light;
 
         auto lightidx = sampleLightWithReservoirRIP(
-            &sampleres, reservoirs[idx],
-            lightSelectPdf, &light,
+            &sampleres,
+            reservoirs[idx],
+            &light,
             compute_brdf_functor,
-            &ctxt, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+            &ctxt,
+            rec.p, orienting_normal,
+            &paths->sampler[idx],
+            bounce);
 
         if (lightidx >= 0) {
             const auto& posLight = sampleres.pos;
@@ -469,12 +472,6 @@ __global__ void computeShadowRayContribution(
 
         int lightidx = reservoir.light_idx;
 
-        // NOTE
-        // 論文的には、w_sum / M を掛けるのに対して
-        // path tracingの内部では、1 / lightSelectPdf で計算しているので
-        // ここでは逆数にしておくことで、最終的に掛け算になるようにする.
-        real lightSelectPdf = reservoir.m / reservoir.w;
-
         if (lightidx >= 0) {
             const auto& light = lights[lightidx];
 
@@ -510,8 +507,7 @@ __global__ void computeShadowRayContribution(
                         // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
                         auto misW = pdfLight / (pdfb + pdfLight);
 
-                        lightcontrib =
-                            (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+                        lightcontrib = misW * bsdf * emit * cosShadow / pdfLight;
                     }
                 }
                 else {
@@ -529,8 +525,7 @@ __global__ void computeShadowRayContribution(
 
                             auto misW = pdfLight / (pdfb + pdfLight);
 
-                            lightcontrib =
-                                (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+                            lightcontrib = misW * (bsdf * emit * G) / pdfLight;
                         }
                     }
                 }

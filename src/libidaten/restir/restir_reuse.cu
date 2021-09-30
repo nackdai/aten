@@ -1,6 +1,9 @@
 #include "restir/restir.h"
 
 #include "kernel/pt_common.h"
+#include "kernel/context.cuh"
+#include "kernel/material.cuh"
+#include "kernel/light.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -9,89 +12,66 @@
 
 #include "aten4idaten.h"
 
-#if 1
-__host__ __device__ void OnComputeTemporalReuse(
-    int idx,
-    aten::sampler* sampler,
-    const idaten::Reservoir* cur_reservoirs,
-    const idaten::Reservoir* prev_reservoirs,
-    idaten::Reservoir* dst_reservoirs,
-    const idaten::ReSTIRIntermedidate* intermediates,
-    idaten::ReSTIRIntermedidate* dst_intermediates,
-    const idaten::ReSTIRPathTracing::NormalMaterialStorage* cur_nml_mtrl_buf,
-    const idaten::ReSTIRPathTracing::NormalMaterialStorage* prev_nml_mtrl_buf,
-    float4 motionDepth,
-    int width, int height)
+__device__ float computeEnergyCost(
+    idaten::Context& ctxt,
+    const aten::vec4 albedo,
+    const idaten::Reservoir neighbor_reservoir,
+    const idaten::ReSTIRIntermedidate& cur_info,
+    const idaten::ReSTIRIntermedidate& neighbor_info)
 {
-    int ix = idx % width;
-    int iy = idx / width;
-
-    int reuse_idx = -1;
-    auto new_reservoir = cur_reservoirs[idx];
-
-    const auto& cur_nml = cur_nml_mtrl_buf[idx].normal;
-    const auto& cur_mtrl_idx = cur_nml_mtrl_buf[idx].mtrl_idx;
-
-    // 前のフレームのスクリーン座標.
-    int px = (int)(ix + motionDepth.x * width);
-    int py = (int)(iy + motionDepth.y * height);
-
-    if (AT_MATH_IS_IN_BOUND(px, 0, width - 1)
-        && AT_MATH_IS_IN_BOUND(py, 0, height - 1))
-    {
-        int pidx = getIdx(px, py, width);
-
-        const auto& prev_nml = prev_nml_mtrl_buf[pidx].normal;
-        const auto& prev_mtrl_idx = prev_nml_mtrl_buf[pidx].mtrl_idx;
-
-        // TODO
-        // Compare normal and material type
-        // Even if material index is different, if the material type is same, it's ok.
-
-        {
-            auto prev_reservoir = prev_reservoirs[pidx];
-
-            if (prev_reservoir.w > 0.0f) {
-                // NOTE
-                // Prev frameの情報は放っておくと、m の数が増え続けるので、どこかで抑制が必要.
-                // そこで、単純に一定数以上になったら、そこで打ち止めにする.
-                if (prev_reservoir.m > 20 * new_reservoir.m)
-                {
-                    prev_reservoir.w *= 20 * new_reservoir.m / prev_reservoir.m;
-                    prev_reservoir.m = 20 * new_reservoir.m;
-                }
-
-                auto w_sum = new_reservoir.w + prev_reservoir.w;
-
-                if (w_sum > 0.0f
-                    && sampler[idx].nextSample() <= prev_reservoir.w / w_sum)
-                {
-                    new_reservoir.w = w_sum;
-                    new_reservoir.m += prev_reservoir.m;
-                    new_reservoir.light_pdf = prev_reservoir.light_pdf;
-                    new_reservoir.light_idx = prev_reservoir.light_idx;
-                    reuse_idx = pidx;
-                }
-            }
-        }
-    }
-
-    dst_intermediates[idx] = intermediates[idx];
-
-    if (reuse_idx >= 0) {
-        dst_reservoirs[idx] = new_reservoir;
-
-        dst_intermediates[idx].light_sample_nml = intermediates[reuse_idx].light_sample_nml;
-        dst_intermediates[idx].light_color = intermediates[reuse_idx].light_color;
+    aten::MaterialParameter mtrl;
+    if (cur_info.is_mtrl_valid) {
+        mtrl = ctxt.mtrls[cur_info.mtrl_idx];
     }
     else {
-        dst_reservoirs[idx] = cur_reservoirs[idx];
+        mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
+        mtrl.baseColor = aten::vec3(1.0f);
     }
+
+    const aten::vec3 orienting_normal(
+        cur_info.nml_x,
+        cur_info.nml_y,
+        cur_info.nml_z);
+
+    auto dir_to_light = neighbor_info.light_pos - cur_info.p;
+    auto dist_to_light = length(dir_to_light);
+    dir_to_light /= dist_to_light;
+
+    auto bsdf = sampleBSDF(
+        &ctxt,
+        &mtrl,
+        orienting_normal,
+        cur_info.wi,
+        dir_to_light,
+        cur_info.u, cur_info.v,
+        albedo);
+
+    const auto neighbor_light_idx = neighbor_reservoir.light_idx;
+
+    aten::vec3 energy;
+    computeLighting(
+        energy,
+        ctxt.lights[neighbor_light_idx],
+        orienting_normal,
+        neighbor_info.light_sample_nml,
+        neighbor_reservoir.light_pdf,
+        neighbor_info.light_color,
+        dir_to_light,
+        dist_to_light);
+
+    energy = energy * bsdf;
+
+    auto cost = (energy.x + energy.y + energy.z) / 3;
+
+    return cost;
 }
-#endif
 
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    cudaTextureObject_t* textures,
+    const float4* __restrict__ aovTexclrMeshid,
     const idaten::Reservoir* __restrict__ cur_reservoirs,
     const idaten::Reservoir* __restrict__ prev_reservoirs,
     idaten::Reservoir* dst_reservoirs,
@@ -114,57 +94,111 @@ __global__ void computeTemporalReuse(
     float4 motionDepth;
     surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
-    OnComputeTemporalReuse(
-        idx,
-        paths->sampler,
-        cur_reservoirs, prev_reservoirs, dst_reservoirs,
-        intermediates, dst_intermediates,
-        cur_nml_mtrl_buf, prev_nml_mtrl_buf,
-        motionDepth,
-        width, height);
-}
-
-__host__ __device__ void OnComputeSpatialReuse(
-    int idx,
-    aten::sampler* sampler,
-    const idaten::Reservoir* reservoirs,
-    idaten::Reservoir* dst_reservoirs,
-    const idaten::ReSTIRIntermedidate* intermediates,
-    idaten::ReSTIRIntermedidate* dst_intermediates,
-    int width, int height)
-{
-    int ix = idx % width;
-    int iy = idx / width;
+    idaten::Context ctxt;
+    {
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+        ctxt.textures = textures;
+    }
 
     int reuse_idx = -1;
-    auto new_reservoir = reservoirs[idx];
+    auto new_reservoir = cur_reservoirs[idx];
 
-    auto r = sampler->nextSample();
+    const auto& cur_nml = cur_nml_mtrl_buf[idx].normal;
+    const auto& cur_mtrl_idx = cur_nml_mtrl_buf[idx].mtrl_idx;
 
-#pragma unroll
-    for (int y = -1; y <= 1; y++) {
-        for (int x = -1; x <= 1; x++) {
-            const auto xx = ix + x;
-            const auto yy = iy + y;
+    const auto& albedo_meshid = aovTexclrMeshid[idx];
+    const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-            if (AT_MATH_IS_IN_BOUND(xx, 0, width - 1)
-                && AT_MATH_IS_IN_BOUND(yy, 0, height - 1))
-            {
-                auto new_idx = getIdx(xx, yy, width);
-                const auto& reservoir = reservoirs[new_idx];
+    auto& sampler = paths->sampler[idx];
 
-                if (reservoir.w > 0.0f) {
-                    new_reservoir.w += reservoir.w;
-                    new_reservoir.m += reservoir.m;
+    // 前のフレームのスクリーン座標.
+    int px = (int)(ix + motionDepth.x * width);
+    int py = (int)(iy + motionDepth.y * height);
 
-                    if (r <= reservoir.w / new_reservoir.w) {
-                        new_reservoir.light_pdf = reservoir.light_pdf;
-                        new_reservoir.light_idx = reservoir.light_idx;
-                        reuse_idx = new_idx;
-                    }
+    if (AT_MATH_IS_IN_BOUND(px, 0, width - 1)
+        && AT_MATH_IS_IN_BOUND(py, 0, height - 1))
+    {
+        int prev_idx = getIdx(px, py, width);
+
+        const auto& prev_nml = prev_nml_mtrl_buf[prev_idx].normal;
+        const auto& prev_mtrl_idx = prev_nml_mtrl_buf[prev_idx].mtrl_idx;
+
+        // TODO
+        // Compare normal and material type
+        // Even if material index is different, if the material type is same, it's ok.
+
+        {
+            const auto& prev_reservoir = prev_reservoirs[prev_idx];
+
+            if (prev_reservoir.light_idx > 0) {
+                const auto& cur_info = intermediates[idx];
+                const auto& prev_info = intermediates[prev_idx];
+
+                aten::MaterialParameter mtrl;
+                if (cur_info.is_mtrl_valid) {
+                    mtrl = mtrls[cur_info.mtrl_idx];
+                }
+                else {
+                    mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
+                    mtrl.baseColor = aten::vec3(1.0f);
+                }
+
+                const aten::vec3 orienting_normal(
+                    cur_info.nml_x,
+                    cur_info.nml_y,
+                    cur_info.nml_z);
+
+                auto dir_to_light = prev_info.light_pos - cur_info.p;
+                auto dist_to_light = length(dir_to_light);
+                dir_to_light /= dist_to_light;
+
+                auto bsdf = sampleBSDF(
+                    &ctxt,
+                    &mtrl,
+                    orienting_normal,
+                    cur_info.wi,
+                    dir_to_light,
+                    cur_info.u, cur_info.v,
+                    albedo);
+
+                const auto prev_light_idx = prev_reservoir.light_idx;
+
+                aten::vec3 energy;
+                computeLighting(
+                    energy,
+                    lights[prev_light_idx],
+                    orienting_normal,
+                    prev_info.light_sample_nml,
+                    prev_reservoir.light_pdf,
+                    prev_info.light_color,
+                    dir_to_light,
+                    dist_to_light);
+
+                energy = energy * bsdf;
+
+                auto cost = (energy.x + energy.y + energy.z) / 3;
+
+                auto w_sum = new_reservoir.w + cost;
+
+                if (w_sum > 0.0f
+                    && sampler.nextSample() <= cost / w_sum)
+                {
+                    new_reservoir.w = w_sum;
+                    new_reservoir.m += min(prev_reservoir.m, 20 * new_reservoir.m);
+                    new_reservoir.selected_cost = cost;
+                    new_reservoir.pdf = w_sum / (cost * new_reservoir.m);
+                    new_reservoir.light_pdf = prev_reservoir.light_pdf;
+                    new_reservoir.light_idx = prev_reservoir.light_idx;
+                    reuse_idx = prev_idx;
                 }
             }
         }
+    }
+
+    if (!isfinite(new_reservoir.pdf)) {
+        new_reservoir.light_pdf = real(0);
+        new_reservoir.light_idx = -1;
     }
 
     dst_intermediates[idx] = intermediates[idx];
@@ -176,12 +210,16 @@ __host__ __device__ void OnComputeSpatialReuse(
         dst_intermediates[idx].light_color = intermediates[reuse_idx].light_color;
     }
     else {
-        dst_reservoirs[idx] = reservoirs[idx];
+        dst_reservoirs[idx] = cur_reservoirs[idx];
     }
 }
 
 __global__ void computeSpatialReuse(
     idaten::Path* paths,
+    const aten::LightParameter* __restrict__ lights,
+    const aten::MaterialParameter* __restrict__ mtrls,
+    cudaTextureObject_t* textures,
+    const float4* __restrict__ aovTexclrMeshid,
     const idaten::Reservoir* __restrict__ reservoirs,
     idaten::Reservoir* dst_reservoirs,
     const idaten::ReSTIRIntermedidate* __restrict__ intermediates,
@@ -197,15 +235,77 @@ __global__ void computeSpatialReuse(
 
     auto idx = getIdx(ix, iy, width);
 
-    OnComputeSpatialReuse(
-        idx,
-        &paths->sampler[idx],
-        reservoirs,
-        dst_reservoirs,
-        intermediates,
-        dst_intermediates,
-        width, height
-    );
+    idaten::Context ctxt;
+    {
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights,
+        ctxt.textures = textures;
+    }
+
+    int reuse_idx = -1;
+    auto new_reservoir = reservoirs[idx];
+
+    const auto& cur_info = intermediates[idx];
+
+    const auto& albedo_meshid = aovTexclrMeshid[idx];
+    const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+
+    auto& sampler = paths->sampler[idx];
+
+#pragma unroll
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            const auto xx = ix + x;
+            const auto yy = iy + y;
+
+            if (AT_MATH_IS_IN_BOUND(xx, 0, width - 1)
+                && AT_MATH_IS_IN_BOUND(yy, 0, height - 1))
+            {
+                auto neighbor_idx = getIdx(xx, yy, width);
+                const auto& neighbor_reservoir = reservoirs[neighbor_idx];
+
+                const auto& neighbor_info = intermediates[neighbor_idx];
+
+                auto cost = computeEnergyCost(
+                    ctxt,
+                    albedo,
+                    neighbor_reservoir,
+                    cur_info,
+                    neighbor_info);
+
+                auto w_sum = new_reservoir.w + cost;
+
+                if (w_sum > 0.0f
+                    && sampler.nextSample() <= cost / w_sum)
+                {
+                    new_reservoir.w = w_sum;
+                    new_reservoir.m += neighbor_reservoir.m;
+                    new_reservoir.selected_cost = cost;
+                    new_reservoir.pdf = w_sum / (cost * new_reservoir.m);
+                    new_reservoir.light_pdf = neighbor_reservoir.light_pdf;
+                    new_reservoir.light_idx = neighbor_reservoir.light_idx;
+                    reuse_idx = neighbor_idx;
+                }
+            }
+        }
+    }
+
+    if (!isfinite(new_reservoir.pdf)) {
+        new_reservoir.light_pdf = real(0);
+        new_reservoir.light_idx = -1;
+    }
+
+    dst_intermediates[idx] = intermediates[idx];
+
+    if (reuse_idx >= 0) {
+        dst_reservoirs[idx] = new_reservoir;
+
+        dst_intermediates[idx].light_sample_nml = intermediates[reuse_idx].light_sample_nml;
+        dst_intermediates[idx].light_color = intermediates[reuse_idx].light_color;
+    }
+    else {
+        dst_reservoirs[idx] = reservoirs[idx];
+    }
 }
 
 namespace idaten {
@@ -240,6 +340,10 @@ namespace idaten {
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
                         m_paths.ptr(),
+                        m_lightparam.ptr(),
+                        m_mtrlparam.ptr(),
+                        m_tex.ptr(),
+                        m_aovTexclrMeshid.ptr(),
                         m_reservoirs[TEMPORAL_REUSE_RESERVOIR_SRC_IDX].ptr(),
                         m_reservoirs[TEMPORAL_REUSE_RESERVOIR_PREV_FRAME_IDX].ptr(),
                         m_reservoirs[TEMPORAL_REUSE_RESERVOIR_DST_IDX].ptr(),
@@ -264,6 +368,10 @@ namespace idaten {
 
             computeSpatialReuse << <grid, block, 0, m_stream >> > (
                 m_paths.ptr(),
+                m_lightparam.ptr(),
+                m_mtrlparam.ptr(),
+                m_tex.ptr(),
+                m_aovTexclrMeshid.ptr(),
                 m_reservoirs[spatial_resue_reservoir_src_idx].ptr(),
                 m_reservoirs[spatial_resue_reservoir_dst_idx].ptr(),
                 m_intermediates[spatial_resue_intermediate_src_idx].ptr(),

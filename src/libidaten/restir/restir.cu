@@ -243,6 +243,10 @@ __global__ void shade(
             shIntermediates[threadIdx.x].is_mtrl_valid = (rec.mtrlid >= 0);
             shIntermediates[threadIdx.x].throughput = paths->throughput[idx].throughput;
             shIntermediates[threadIdx.x].setNml(orienting_normal);
+            shIntermediates[threadIdx.x].u = rec.u;
+            shIntermediates[threadIdx.x].v = rec.v;
+            shIntermediates[threadIdx.x].p = rec.p;
+            shIntermediates[threadIdx.x].light_pos = posLight;
         }
     }
 
@@ -392,10 +396,7 @@ __global__ void hitShadowRay(
         hitobj);
 
     if (isHit) {
-        reservoirs[idx].w = 0.0f;
-        reservoirs[idx].m = 0;
-        reservoirs[idx].light_idx = -1;
-        reservoirs[idx].light_pdf = 0.0f;
+        reservoirs[idx].clear();
     }
     else {
         reservoirs[idx].light_idx = targetLightId;
@@ -475,6 +476,7 @@ __global__ void computeShadowRayContribution(
         if (lightidx >= 0) {
             const auto& light = lights[lightidx];
 
+            auto select_pdf = reservoir.pdf;
             auto pdfLight = reservoir.light_pdf;
 
             auto nmlLight = intermediate.light_sample_nml;
@@ -507,7 +509,7 @@ __global__ void computeShadowRayContribution(
                         // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
                         auto misW = pdfLight / (pdfb + pdfLight);
 
-                        lightcontrib = misW * bsdf * emit * cosShadow / pdfLight;
+                        lightcontrib = misW * bsdf * emit * cosShadow / pdfLight * select_pdf;
                     }
                 }
                 else {
@@ -525,7 +527,7 @@ __global__ void computeShadowRayContribution(
 
                             auto misW = pdfLight / (pdfb + pdfLight);
 
-                            lightcontrib = misW * (bsdf * emit * G) / pdfLight;
+                            lightcontrib = misW * (bsdf * emit * G) / pdfLight * select_pdf;
                         }
                     }
                 }

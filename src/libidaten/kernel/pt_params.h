@@ -71,6 +71,12 @@ namespace idaten {
         aten::vec3 throughput;
         float nml_z;
 
+        float u;
+        float v;
+
+        aten::vec3 p;
+        aten::vec3 light_pos;
+
         __host__ __device__ void setNml(const aten::vec3& nml)
         {
             nml_x = nml.x;
@@ -104,7 +110,19 @@ namespace idaten {
     struct Reservoir {
         float w;
         float m;
+        float selected_cost;
+        float pdf;
         float light_pdf;
         int light_idx;
+
+        __host__ __device__ void clear()
+        {
+            w = 0.0f;
+            m = 0;
+            selected_cost = 0.0f;
+            pdf = 0.0f;
+            light_pdf = 0.0f;
+            light_idx = -1;
+        }
     };
 }

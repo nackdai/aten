@@ -254,6 +254,44 @@ AT_CUDA_INLINE __device__ void sampleLight(
     }
 }
 
+AT_CUDA_INLINE __device__ void computeLighting(
+    aten::vec3& energy,
+    const aten::LightParameter& light,
+    const aten::vec3& normal,
+    const aten::vec3& nmlLight,
+    float pdfLight,
+    const aten::vec3& light_color,
+    const aten::vec3& dirToLight,
+    float distToLight)
+{
+    auto cosShadow = dot(normal, dirToLight);
+
+    energy.r = 0.0f;
+    energy.g = 0.0f;
+    energy.b = 0.0f;
+
+    if (cosShadow > 0) {
+        if (light.attrib.isInfinite) {
+            energy = light_color * cosShadow;
+        }
+        else {
+            auto cosLight = dot(nmlLight, -dirToLight);
+
+            if (cosLight > 0) {
+                if (light.attrib.isSingular) {
+                    energy = light_color * cosShadow * cosLight;
+                }
+                else {
+                    auto dist2 = distToLight * distToLight;
+                    energy = light_color * cosShadow * cosLight / dist2;
+                }
+            }
+        }
+
+        energy /= pdfLight;
+    }
+}
+
 AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
     idaten::Reservoir& reservoir,
@@ -331,10 +369,19 @@ AT_CUDA_INLINE __device__ int sampleLightWithReservoirRIP(
 
     reservoir.m = max_light_cnt;
     reservoir.w = w_sum;
+    reservoir.selected_cost = selected_cost;
     reservoir.light_idx = selected_light_idx;
-    reservoir.light_pdf = w_sum / (selected_cost * max_light_cnt);
+    reservoir.light_pdf = result->pdf;
 
-    if (!isfinite(reservoir.light_pdf)) {
+    // NOTE
+    // Exp.(6)
+    //   f(y) / p(y) *(w_sum / M) = f(y) * (w_sum / (p(y) * M))
+    // p(y) : selected_cost
+    // w_sum : w_sum
+    // M : max_light_cnt
+    reservoir.pdf = w_sum / (selected_cost * max_light_cnt);
+
+    if (!isfinite(reservoir.pdf)) {
         reservoir.light_pdf = real(0);
         reservoir.light_idx = -1;
 

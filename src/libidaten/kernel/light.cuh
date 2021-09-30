@@ -39,6 +39,16 @@ private:
     const aten::vec4& albedo_;
 };
 
+__device__ void computeLighting(
+    aten::vec3& energy,
+    const aten::LightParameter& light,
+    const aten::vec3& normal,
+    const aten::vec3& nmlLight,
+    float pdfLight,
+    const aten::vec3& light_color,
+    const aten::vec3& dirToLight,
+    float distToLight);
+
 __device__ int sampleLightWithReservoirRIP(
     aten::LightSampleResult* result,
     idaten::Reservoir& reservoir,

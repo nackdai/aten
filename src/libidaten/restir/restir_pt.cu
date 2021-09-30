@@ -86,10 +86,7 @@ __global__ void genPath(
     paths->contrib[idx].samples += 1;
 
     // Clear reservoir.
-    reservoirs[idx].w = 0.0f;
-    reservoirs[idx].m = 0;
-    reservoirs[idx].light_idx = -1;
-    reservoirs[idx].light_pdf = 0.0f;
+    reservoirs[idx].clear();
 
     // Clear intermedisate data.
     intermediates[idx].clear();

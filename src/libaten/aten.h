@@ -114,7 +114,6 @@
 #include "renderer/pssmlt.h"
 #include "renderer/aov.h"
 #include "renderer/bdpt.h"
-#include "renderer/directlight.h"
 #include "renderer/aorenderer.h"
 
 #include "posteffect/BloomEffect.h"

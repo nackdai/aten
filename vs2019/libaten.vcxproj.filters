@@ -356,9 +356,6 @@
     <ClInclude Include="..\src\libaten\renderer\aov.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\directlight.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\filter\taa.h">
       <Filter>filter</Filter>
     </ClInclude>
@@ -680,9 +677,6 @@
       <Filter>texture</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\aov.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\directlight.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\filter\taa.cpp">

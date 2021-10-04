@@ -186,8 +186,6 @@ add_library(
   renderer/background.h
   renderer/bdpt.cpp
   renderer/bdpt.h
-  renderer/directlight.cpp
-  renderer/directlight.h
   renderer/envmap.cpp
   renderer/envmap.h
   renderer/erpt.cpp

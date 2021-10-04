@@ -349,7 +349,6 @@
     <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\bdpt.h" />
-    <ClInclude Include="..\src\libaten\renderer\directlight.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
@@ -480,7 +479,6 @@
     <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp" />
     <ClCompile Include="..\src\libaten\renderer\aov.cpp" />
     <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\directlight.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />

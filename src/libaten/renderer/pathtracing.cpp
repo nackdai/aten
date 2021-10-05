@@ -92,53 +92,14 @@ namespace aten
 
         auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
 
-#if 1
         bool isBackfacing = dot(path.rec.normal, -path.ray.dir) < real(0);
 
         // 交差位置の法線.
         // 物体からのレイの入出を考慮.
         vec3 orienting_normal = path.rec.normal;
-#else
-        vec3 orienting_normal = dot(path.rec.normal, path.ray.dir) < 0.0 ? path.rec.normal : -path.rec.normal;
-#endif
 
         // Implicit conection to light.
         if (mtrl->isEmissive()) {
-#if 0
-            if (depth == 0) {
-                // Ray hits the light directly.
-                path.contrib = mtrl->color();
-                path.isTerminate = true;
-                return false;
-            }
-            else if (path.prevMtrl && path.prevMtrl->isSingular()) {
-                auto emit = mtrl->color();
-                path.contrib += path.throughput * emit;
-                return false;
-            }
-            else {
-                auto cosLight = dot(orienting_normal, -path.ray.dir);
-                auto dist2 = squared_length(path.rec.p - path.ray.org);
-
-                if (cosLight >= 0) {
-                    auto pdfLight = 1 / path.rec.area;
-
-                    // Convert pdf area to sradian.
-                    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                    // p31 - p35
-                    pdfLight = pdfLight * dist2 / cosLight;
-
-                    auto misW = path.pdfb / (pdfLight + path.pdfb);
-
-                    auto emit = mtrl->color();
-
-                    path.contrib += path.throughput * misW * emit;
-
-                    // When ray hit the light, tracing will finish.
-                    return false;
-                }
-            }
-#else
             if (!isBackfacing) {
                 real weight = 1.0f;
 
@@ -166,7 +127,6 @@ namespace aten
 
             path.isTerminate = true;
             return false;
-#endif
         }
 
         auto multipliedAlbedo = mtrl->sampleMultipliedAlbedo(path.rec.u, path.rec.v);
@@ -406,7 +366,6 @@ namespace aten
             ? -orienting_normal
             : orienting_normal;
 
-#if 1
         real c = 1;
         if (!mtrl->isSingular()) {
             // TODO
@@ -414,9 +373,6 @@ namespace aten
             //c = aten::abs(dot(orienting_normal, nextDir));
             c = dot(rayBasedNormal, nextDir);
         }
-#else
-        auto c = dot(orienting_normal, nextDir);
-#endif
 
         if (pdfb > 0 && c > 0) {
             path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;

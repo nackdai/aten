@@ -124,7 +124,7 @@ namespace aten
                     auto pdfLight = 1 / path.rec.area;
 
                     // Convert pdf area to sradian.
-                    // http://www.slideshare.net/h013/edubpt-v100
+                    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
                     // p31 - p35
                     pdfLight = pdfLight * dist2 / cosLight;
 
@@ -152,7 +152,7 @@ namespace aten
                         auto pdfLight = 1 / path.rec.area;
 
                         // Convert pdf area to sradian.
-                        // http://www.slideshare.net/h013/edubpt-v100
+                        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
                         // p31 - p35
                         pdfLight = pdfLight * dist2 / cosLight;
 
@@ -313,7 +313,7 @@ namespace aten
 
                                 if (pdfb > real(0) && pdfLight > real(0)) {
                                     // Convert pdf from steradian to area.
-                                    // http://www.slideshare.net/h013/edubpt-v100
+                                    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
                                     // p31 - p35
                                     pdfb = pdfb * cosLight / dist2;
 

@@ -586,7 +586,7 @@ namespace aten
         int numLightVtx) const
     {
         // NOTE
-        // https://www.slideshare.net/h013/edubpt-v100
+        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
         // p157 - p167
 
         // 光源上のサンプリング確率.

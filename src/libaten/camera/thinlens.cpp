@@ -2,7 +2,7 @@
 
 namespace aten {
     // NOTE
-    // https://www.slideshare.net/h013/edubpt-v100
+    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
 
     static real plane_intersection(const vec3& normal, const vec3& pos, const ray& ray)
     {
@@ -211,7 +211,7 @@ namespace aten {
         // http://rayspace.xyz/CG/contents/DoF.html
 
         // NOTE
-        // https://www.slideshare.net/h013/edubpt-v100
+        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
         // イメージセンサ上の確立密度を面積測度に変換.
         // p111
         // Pa = (B/A)^2 * (r''/r)^2 * (cosΘ'/cosΘ'') * Pij
@@ -251,7 +251,7 @@ namespace aten {
         const vec3& posOnLens) const
     {
         // NOTE
-        // https://www.slideshare.net/h013/edubpt-v100
+        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
         // p54 - p62
 
         const vec3 x0_xI = posOnImagesensor - posOnLens;

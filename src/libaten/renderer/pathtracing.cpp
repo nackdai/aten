@@ -11,8 +11,6 @@
 
 #include "material/lambert.h"
 
-//#define Deterministic_Path_Termination
-
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
@@ -41,7 +39,6 @@ namespace aten
         while (depth < maxDepth) {
             path.rec = hitrecord();
 
-#if 1
             bool willContinue = true;
             Intersection isect;
 
@@ -60,18 +57,6 @@ namespace aten
             if (!willContinue) {
                 break;
             }
-#else
-            if (scene->hit(path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec)) {
-                bool willContinue = shade(sampler, scene, cam, depth, path);
-                if (!willContinue) {
-                    break;
-                }
-            }
-            else {
-                shadeMiss(scene, depth, path);
-                break;
-            }
-#endif
 
             depth++;
         }
@@ -328,13 +313,6 @@ namespace aten
 #endif
         }
 
-#ifdef Deterministic_Path_Termination
-        real russianProb = real(1);
-
-        if (depth > 1) {
-            russianProb = real(0.5);
-        }
-#else
         real russianProb = real(1);
 
         if (depth > rrDepth) {
@@ -351,7 +329,6 @@ namespace aten
                 russianProb = p;
             }
         }
-#endif
 
         auto sampling = mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
 
@@ -448,16 +425,6 @@ namespace aten
             m_rrDepth = m_maxDepth - 1;
         }
 
-#ifdef Deterministic_Path_Termination
-        // For DeterministicPathTermination.
-        std::vector<uint32_t> depths;
-        for (uint32_t s = 0; s < samples; s++) {
-            auto maxdepth = (aten::clz((samples - 1) - s) - aten::clz(samples)) + 1;
-            maxdepth = std::min<int>(maxdepth, m_maxDepth);
-            depths.push_back(maxdepth);
-        }
-#endif
-
         auto time = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -511,17 +478,6 @@ namespace aten
 
                         auto ray = camsample.r;
 
-#ifdef Deterministic_Path_Termination
-                        auto maxDepth = depths[i];
-                        auto path = radiance(
-                            &sampler,
-                            maxDepth,
-                            ray,
-                            camera,
-                            camsample,
-                            scene);
-#else
-
                         auto path = radiance(
                             ctxt,
                             &rnd,
@@ -529,7 +485,6 @@ namespace aten
                             camera,
                             camsample,
                             scene);
-#endif
 
                         if (isInvalidColor(path.contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);

@@ -47,7 +47,6 @@ namespace AT_NAME {
             result->nml = rec->normal;
 
             result->le = param->le;
-            result->intensity = 1;
             result->finalColor = param->le;
         }
 

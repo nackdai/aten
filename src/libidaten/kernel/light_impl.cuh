@@ -222,8 +222,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
     auto le = tex2DLod<float4>(ctxt->textures[envmapidx], u, v, lod);
 
     result->le = aten::vec3(le.x, le.y, le.z);
-    result->intensity = 1.0f;
-    result->finalColor = result->le * result->intensity;
+    result->finalColor = result->le;
 }
 
 AT_CUDA_INLINE __device__ void sampleLight(

@@ -73,9 +73,6 @@ namespace AT_NAME {
             aten::sampler* sampler,
             aten::LightSampleResult* result)
         {
-            // PDF to sample area.
-            result->pdf = real(1);
-
             result->pos = param->pos;
             result->dir = normalize(((aten::vec3)param->pos) - org);
             result->nml = param->dir;   // already normalized
@@ -85,53 +82,51 @@ namespace AT_NAME {
 
             auto rho = dot(-((aten::vec3)param->dir), result->dir);
 
-            auto cosHalfTheta = aten::cos(param->innerAngle * real(0.5));
-            auto cosHalfPhi = aten::cos(param->outerAngle * real(0.5));
+            auto cosHalfInnter = aten::cos(param->innerAngle * real(0.5));
+            auto cosHalfOuter = aten::cos(param->outerAngle * real(0.5));
 
-            real spot = 0;
+            if (rho > cosHalfOuter) {
+                real spot = 0;
 
-#if 0
-            if (rho > cosHalfTheta) {
-                // 本影内に入っている -> 最大限ライトの影響を受ける.
-                spot = 1;
-            }
-            else if (rho <= cosHalfPhi) {
-                // 半影外に出ている -> ライトの影響を全く受けない.
-                spot = 0;
-            }
-            else {
-                // 本影の外、半影の中.
-                spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
-                spot = aten::pow(spot, param->falloff);
-            }
-#else
-            if (rho > cosHalfPhi) {
                 // 半影内.
-                if (rho > cosHalfTheta) {
+                if (rho > cosHalfInnter) {
                     // 本影内に入っている -> 最大限ライトの影響を受ける.
                     spot = 1;
                 }
                 else {
                     // 本影の外、半影の中.
-                    spot = (rho - cosHalfPhi) / (cosHalfTheta - cosHalfPhi);
+                    // spot = real(1) - (cosHalfInnter - rho) / (cosHalfInnter - cosHalfOuter);
+                    // 計算したい式は上の式だが、これを展開すると下の式になる.
+                    spot = (rho - cosHalfOuter) / (cosHalfInnter - cosHalfOuter);
                 }
-            }
+
+                result->pdf = real(1);
+
+#if 0
+                // 減衰率.
+                // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
+                // 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
+                auto dist2 = aten::squared_length(result->dir);
+                auto dist = aten::sqrt(dist2);
+                real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
+
+                // TODO
+                // Is it correct?
+                attn = aten::cmpMax(attn, real(1));
+
+                result->le = param->le;
+                result->finalColor = param->le * spot / attn;
+#else
+                result->le = param->le;
+                result->finalColor = param->le * spot;
+
 #endif
-
-            // 減衰率.
-            // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html
-            // 上記によると、L = Le / dist2 で正しいが、3Dグラフィックスでは見た目的にあまりよろしくないので、減衰率を使って計算する.
-            auto dist2 = aten::squared_length(result->dir);
-            auto dist = aten::sqrt(dist2);
-            real attn = param->constAttn + param->linearAttn * dist + param->expAttn * dist2;
-
-            // TODO
-            // Is it correct?
-            attn = aten::cmpMax(attn, real(1));
-
-            result->le = param->le;
-            result->intensity = spot / attn;
-            result->finalColor = param->le * spot / attn;
+            }
+            else {
+                result->pdf = real(0);
+                aten::set(result->le, 0, 0, 0);
+                aten::set(result->finalColor, 0, 0, 0);
+            }
         }
     };
 }

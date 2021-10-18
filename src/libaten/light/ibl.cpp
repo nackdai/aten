@@ -233,8 +233,7 @@ namespace AT_NAME {
         result.dir = AT_NAME::envmap::convertUVToDirection(u, v);
 
         result.le = envmap->sample(u, v);
-        result.intensity = real(1);
-        result.finalColor = result.le * result.intensity;
+        result.finalColor = result.le;
 #elif 0
         auto uv = AT_NAME::envmap::convertDirectionToUV(nml);
 

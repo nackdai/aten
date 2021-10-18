@@ -57,7 +57,6 @@ namespace AT_NAME {
             aten::sampler* sampler,
             aten::LightSampleResult* result)
         {
-            // PDF to sample area.
             result->pdf = real(1);
 
             result->dir = ((aten::vec3)param->pos) - org;
@@ -79,7 +78,6 @@ namespace AT_NAME {
             attn = aten::cmpMax(attn, real(1));
 
             result->le = param->le;
-            result->intensity = 1 / attn;
             result->finalColor = param->le / attn;
         }
     };

@@ -585,11 +585,10 @@ __global__ void shade(
                 // Get light color.
                 auto emit = sampleres.finalColor;
 
-                if (light.attrib.isSingular || light.attrib.isInfinite) {
+                if (light.attrib.isInfinite) {
                     if (pdfLight > real(0) && cosShadow >= 0) {
                         // TODO
                         // ジオメトリタームの扱いについて.
-                        // singular light の場合は、finalColor に距離の除算が含まれている.
                         // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
                         // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
                         auto misW = pdfLight / (pdfb + pdfLight);
@@ -613,7 +612,9 @@ __global__ void shade(
                             // p31 - p35
                             pdfb = pdfb * cosLight / dist2;
 
-                            auto misW = pdfLight / (pdfb + pdfLight);
+                            auto misW = light.attrib.isSingular
+                                ? real(1)
+                                : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
 
                             shShadowRays[threadIdx.x].lightcontrib =
                                 (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;

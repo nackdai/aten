@@ -49,6 +49,7 @@
 #include "geometry/sphere.h"
 
 #include "renderer/envmap.h"
+#include "renderer/renderer_utility.h"
 
 #include "sampler/sampler.h"
 #include "sampler/wanghash.h"

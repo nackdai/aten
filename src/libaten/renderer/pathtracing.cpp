@@ -2,6 +2,7 @@
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/nonphotoreal.h"
+#include "renderer/renderer_utility.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -233,18 +234,12 @@ namespace aten
                         // Get light color.
                         auto emit = sampleres.finalColor;
 
-                        if (light->isSingular() || light->isInfinite()) {
-                            auto cosLight = light->isSingular()
-                                ? dot(nmlLight, -dirToLight)
-                                : real(1.0);
-
+                        if (light->isInfinite()) {
                             if (pdfLight > real(0) && cosShadow >= 0) {
                                 // TODO
                                 // ジオメトリタームの扱いについて.
-                                // singular light の場合は、finalColor に距離の除算が含まれている.
                                 // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
                                 // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                                pdfb = pdfb * cosLight;
                                 auto misW = pdfLight / (pdfb + pdfLight);
                                 path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                             }
@@ -262,7 +257,9 @@ namespace aten
                                     // p31 - p35
                                     pdfb = pdfb * cosLight / dist2;
 
-                                    auto misW = pdfLight / (pdfb + pdfLight);
+                                    auto misW = light->isSingular()
+                                        ? real(1)
+                                        : aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
 
                                     path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
                                 }

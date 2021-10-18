@@ -213,6 +213,13 @@ namespace aten {
 #endif
 #endif
 
+    inline AT_DEVICE_API void set(vec3& v, real x, real y, real z)
+    {
+        v.x = x;
+        v.y = y;
+        v.z = z;
+    }
+
     inline AT_DEVICE_API real squared_length(const vec3& v)
     {
         auto ret = dot(v, v);

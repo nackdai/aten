@@ -46,14 +46,13 @@ namespace AT_NAME {
             result->pdf = real(1);
 
             result->dir = -normalize(param->dir);
-            result->nml = aten::vec3();    // Not used...
+            result->nml = normalize(param->dir);
 
             // TODO
             // シーンのAABBを覆う球上に配置されるようにするべき.
             result->pos = org + real(100000) * real(0.5) * result->dir;
 
             result->le = param->le;
-            result->intensity = real(1);
             result->finalColor = param->le;
         }
     };

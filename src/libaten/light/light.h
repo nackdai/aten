@@ -16,7 +16,6 @@ namespace aten {
         vec3 nml;                   // light object surface normal.
         vec3 le;                    // light color.
         vec3 finalColor;            // le * intensity
-        real intensity{ real(1) };  // light intensity(include attenuation).
         real pdf{ real(0) };        // light sampling pdf.
 
         void* obj{ nullptr };       // light object(only for area light)

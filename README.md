@@ -2,8 +2,6 @@
 
 ![CI](https://github.com/nackdai/aten/workflows/CI/badge.svg)
 
-[![CircleCI](https://circleci.com/gh/nackdai/aten.svg?style=svg)](https://circleci.com/gh/nackdai/aten)
-
 This is easy, simple ray tracing renderer.
 
 Aten is Egyptian sun god.
@@ -116,7 +114,7 @@ To do that, follow as below:
 git submodule update --init --recursive
 ```
 
-### Build on Windows
+### Windows
 
 1. Install `CUDA 10.1` and depended NVIDIA driver
 2. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
@@ -127,10 +125,10 @@ I confirmed with Visual Studio 2019 on Windows10.
 
 Supoort just only `CUDA 10.1`.
 
-### Build on Linux
+### Linux
 
 1. Install `CUDA 10.1` or later and depended NVIDIA driver
-1. Install applications (You can find what you need in `Dockerfile`)
+1. Install applications (You can find what you need in `env/aten/Dockerfile`)
     1. Install `cmake` `3.10.0` or later
     1. Install `clang 8.0.0`
     1. Install `ninja-build`
@@ -163,59 +161,79 @@ You can get `Comnpute Capability` with running `get_cuda_sm.sh`.
 If you don't specify `Comnpute Capability`, while configuring `CMakeLists.txt`,
 `get_cuda_sm.sh` run and `Comnpute Capability` is specified.
 
-#### Build on Docker
+### Docker (on Linux)
+
+**Docker version is 20.10.9**
 
 You can build and run executable aten application on Docker container.
-
-##### Build on only Docker
 
 1. Install `Docker`
 2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
 3. Move to `aten` directory
-4. Build docker image like below:
+4. Build docker image like the following:
 
 ```shell
-docker build -t <Any name> .
+docker build -t <Any name> ./env/aten/
 ```
 
-5. Run docker container like below:
+5. Run docker container like the following:
 
 ```shell
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image name>:latest bash
 ```
 
-6. `mkdir aten/build`
-7. `cd aten/build`
-8. `cp ../scripts/RunCMake.sh .`
-9. `./RunCMake.sh <Build Type> <Compute Capability>`
-10. Run make `ninja`
+6. In the docker container, run the following commands:
 
-##### Build with docker-compose
+```shell
+mkdir aten/build
+cd aten/build
+cp ../scripts/RunCMake.sh .
+./RunCMake.sh <Build Type> <Compute Capability>
+ninja
+```
+
+##### docker-compose
+
+**docker-compose version is v2.0.1**
 
 1. Install `Docker` and `docker-compose`
-1. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
-1. Build docker image `docker-compose build`
-1. Run docker container `docker-compose run aten`
-1. `mkdir aten/build`
-1. `cd aten/build`
-1. `cp ../scripts/RunCMake.sh .`
-1. `./RunCMake.sh <Build Type> <Compute Capability>`
-1. Run make `ninja`
+2. Install [nvidia-docker2](https://github.com/NVIDIA/nvidia-docker).
+3. Build docker image like the following:
+
+```shell
+docker-compose -f .devcontainer/docker-compose.yml build`
+```
+
+4. Run docker container like the following:
+
+```shell
+docker-compose .devcontainer/docker-compose.yml run aten
+```
+
+5. In the docker container, run the following commands:
+
+```shell
+mkdir aten/build
+cd aten/build
+cp ../scripts/RunCMake.sh .
+./RunCMake.sh <Build Type> <Compute Capability>
+ninja
+```
 
 ## How to run
 
-### Run on Windows
+### Windows
 
 Please find `exe` files and run them. You can find them in each directories
 where source files are in.
 
-### Run on Linux
+### Linux
 
 Please find execution files and run them. You can find them in the directories
 in the directory which you built the applications. And the directories have
 same name as execution file.
 
-### Run on Docker
+### Docker (on Linux)
 
 If you would like to run built applications in docker, you need to ensure that
 your host can accept X forwarded connections
@@ -227,14 +245,14 @@ And, run docker container like below:
 docker run -it --rm -v ${PWD}:/work -v /tmp/.X11-unix:/tmp/.X11-unix:rw --runtime=nvidia -e DISPLAY <Image Name>:latest bash
 ```
 
-### Run with docker-compose
+#### docker-compose
 
-You alse need to ensure your host as [Run on Docker](#Run-on-Docker).
+You also need to ensure your host as [Run on Docker](#Run-on-Docker).
 
 And, run docker container via docker-compose like below:
 
 ```shell
-docker-compose run aten
+docker-compose -f .devcontainer/docker-compose.yml run aten
 ```
 
 ## For VSCode development

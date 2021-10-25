@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3.8"
 services:
   base:
     build:
@@ -21,7 +21,13 @@ services:
         - http_proxy=${http_proxy}
         - https_proxy=${https_proxy}
     container_name: aten-docker
-    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     environment:
       - "DISPLAY"
     volumes:

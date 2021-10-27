@@ -1,6 +1,8 @@
 build
 node_modules
 
+.vscode
+
 CMakeFiles
 CMakeCache.txt
 
@@ -10,7 +12,19 @@ CMakeCache.txt
 *.ipdb
 *.pdb
 *.user
+*.ilk
 imgui.ini
 
 */.vs
 */x64
+
+3rdparty/**/lib
+3rdparty/**/bin
+
+src/**/*.png
+src/**/*.obj
+src/**/*.fbx
+src/**/*.mdl
+src/**/*.anm
+src/**/*.sbvh
+src/**/*.hdr

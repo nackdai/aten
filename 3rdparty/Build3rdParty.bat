@@ -56,7 +56,7 @@ xcopy /Y /D %BUILD_DIR%\bin\%CONFIG% glew\bin\%CONFIG%\%PLATFORM%\
 
 rem tinyobjloader ====================
 
-set BUILD_DIR=tinyobjloader\bin
+set BUILD_DIR=tinyobjloader\build
 
 if not exist %BUILD_DIR% (
     mkdir %BUILD_DIR%

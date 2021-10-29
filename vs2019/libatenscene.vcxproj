@@ -172,7 +172,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\bin\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\build\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib;assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -238,7 +238,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\bin\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\build\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib;assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
@@ -260,7 +260,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\bin\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\tinyobjloader\build\$(Configuration);$(ProjectDir)..\3rdparty\assimp\build\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenGL32.lib;Shlwapi.lib;tinyobjloader.lib;assimp.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>

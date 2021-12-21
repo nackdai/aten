@@ -12,6 +12,7 @@
 
 #include "aten4idaten.h"
 
+#if 0
 __device__ float computeEnergyCost(
     idaten::Context& ctxt,
     const aten::vec4 albedo,
@@ -307,12 +308,14 @@ __global__ void computeSpatialReuse(
         dst_reservoirs[idx] = reservoirs[idx];
     }
 }
+#endif
 
 namespace idaten {
     std::tuple<int, int> ReSTIRPathTracing::computelReuse(
         int width, int height,
         int bounce)
     {
+#if 0
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
             (m_tileDomain.w + block.x - 1) / block.x,
@@ -384,5 +387,8 @@ namespace idaten {
         return std::make_tuple(
             spatial_resue_reservoir_dst_idx,
             spatial_resue_intermediate_dst_idx);
+#else
+        return std::make_tuple(0, 0);
+#endif
     }
 }

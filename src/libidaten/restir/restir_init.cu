@@ -33,7 +33,7 @@ namespace idaten
             m_pathAttrib.init(width * height);
             m_pathSampler.init(width * height);
 
-            for (auto& i : m_intermediates) {
+            for (auto& i : m_restir_infos) {
                 i.init(width * height);
             }
             for (auto& r : m_reservoirs) {

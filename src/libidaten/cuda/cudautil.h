@@ -82,7 +82,8 @@ namespace idaten {
 // This will output the proper CUDA error strings in the event that a CUDA host call returns an error.
 #define checkCudaErrors(val)    idaten::cuda::check((val), #val, __FILE__, __LINE__)
 
-#ifdef __AT_DEBUG__
+//#ifdef __AT_DEBUG__
+#if 1
 #define checkCudaKernel(kernel)    {\
     auto err = cudaGetLastError();\
     if (err != cudaSuccess) {\

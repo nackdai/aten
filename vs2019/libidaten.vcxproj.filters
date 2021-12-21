@@ -277,8 +277,14 @@
     <ClInclude Include="..\src\libidaten\kernel\pt_params.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\compute_brdf_functor_impl.cuh">
-      <Filter>kernel</Filter>
+    <ClInclude Include="..\src\libidaten\restir\reservior.h">
+      <Filter>restir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\restir\restir_sample_light.cuh">
+      <Filter>restir</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\restir\restir_info.h">
+      <Filter>restir</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

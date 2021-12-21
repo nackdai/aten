@@ -106,23 +106,4 @@ namespace idaten {
             nml_x = nml_y = nml_z = 0.0f;
         }
     };
-
-    struct Reservoir {
-        float w;
-        float m;
-        float selected_cost;
-        float pdf;
-        float light_pdf;
-        int light_idx;
-
-        __host__ __device__ void clear()
-        {
-            w = 0.0f;
-            m = 0;
-            selected_cost = 0.0f;
-            pdf = 0.0f;
-            light_pdf = 0.0f;
-            light_idx = -1;
-        }
-    };
 }

@@ -11,6 +11,9 @@
 #include "kernel/renderer.h"
 #include "sampler/sampler.h"
 
+#include "reservior.h"
+#include "restir_info.h"
+
 namespace idaten
 {
     class ReSTIRPathTracing : public Renderer {
@@ -304,7 +307,7 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_random;
 
         // 0: src, 1: dst
-        std::array<idaten::TypedCudaMemory<ReSTIRIntermedidate>, 2>  m_intermediates;
+        std::array<idaten::TypedCudaMemory<ReSTIRInfo>, 2>  m_restir_infos;
 
         // 0: current src, 1: temporaly dst, 2: dst (previous result in next frame)
         std::array<idaten::TypedCudaMemory<Reservoir>, 3> m_reservoirs;

@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "restir/restir.h"
+#include "restir/restir_sample_light.cuh"
 
 #include "aten4idaten.h"
 #include "kernel/accelerator.cuh"
@@ -18,7 +19,7 @@
 __global__ void shade(
     idaten::TileDomain tileDomain,
     idaten::Reservoir* reservoirs,
-    idaten::ReSTIRIntermedidate* intermediates,
+    idaten::ReSTIRInfo* restir_infos,
     idaten::ReSTIRPathTracing::NormalMaterialStorage* nml_mtrl_buf,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
@@ -67,7 +68,6 @@ __global__ void shade(
 
     __shared__ idaten::ShadowRay shShadowRays[64];
     __shared__ aten::MaterialParameter shMtrls[64];
-    __shared__ idaten::ReSTIRIntermedidate shIntermediates[64];
 
     const auto ray = rays[idx];
 
@@ -144,9 +144,8 @@ __global__ void shade(
 
     shShadowRays[threadIdx.x].isActive = false;
 
-    shIntermediates[threadIdx.x].clear();
-
-    reservoirs[idx].light_idx = -1;
+    auto& restir_info = restir_infos[idx];
+    restir_info.clear();
 
     if (bounce == 0) {
         // Store AOV.
@@ -207,12 +206,12 @@ __global__ void shade(
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        aten::LightSampleResult sampleres;
         aten::LightParameter light;
 
+        auto& reservoir = reservoirs[idx];
+
         auto lightidx = sampleLightWithReservoirRIP(
-            &sampleres,
-            reservoirs[idx],
+            reservoir,
             &light,
             compute_brdf_functor,
             &ctxt,
@@ -221,11 +220,11 @@ __global__ void shade(
             bounce);
 
         if (lightidx >= 0) {
-            const auto& posLight = sampleres.pos;
-            const auto& nmlLight = sampleres.nml;
-            real pdfLight = sampleres.pdf;
+            const auto& posLight = reservoir.light_sample_.pos;
+            const auto& nmlLight = reservoir.light_sample_.nml;
+            real pdfLight = reservoir.light_sample_.pdf;
 
-            auto dirToLight = normalize(sampleres.dir);
+            auto dirToLight = normalize(reservoir.light_sample_.dir);
             auto distToLight = length(posLight - rec.p);
 
             shShadowRays[threadIdx.x].rayorg = rec.p;
@@ -235,23 +234,18 @@ __global__ void shade(
             shShadowRays[threadIdx.x].lightcontrib = aten::vec3(0);
             shShadowRays[threadIdx.x].isActive = true;
 
-            shIntermediates[threadIdx.x].light_sample_nml = nmlLight;
-            shIntermediates[threadIdx.x].light_color = sampleres.finalColor;
-            shIntermediates[threadIdx.x].wi = ray.dir;
-            shIntermediates[threadIdx.x].mtrl_idx = rec.mtrlid;
-            shIntermediates[threadIdx.x].is_voxel = rec.isVoxel;
-            shIntermediates[threadIdx.x].is_mtrl_valid = (rec.mtrlid >= 0);
-            shIntermediates[threadIdx.x].throughput = paths->throughput[idx].throughput;
-            shIntermediates[threadIdx.x].setNml(orienting_normal);
-            shIntermediates[threadIdx.x].u = rec.u;
-            shIntermediates[threadIdx.x].v = rec.v;
-            shIntermediates[threadIdx.x].p = rec.p;
-            shIntermediates[threadIdx.x].light_pos = posLight;
+            restir_info.wi = ray.dir;
+            restir_info.mtrl_idx = rec.mtrlid;
+            restir_info.is_voxel = rec.isVoxel;
+            restir_info.throughput = paths->throughput[idx].throughput;
+            restir_info.nml = orienting_normal;
+            restir_info.u = rec.u;
+            restir_info.v = rec.v;
+            restir_info.p = rec.p;
         }
     }
 
     shadowRays[idx] = shShadowRays[threadIdx.x];
-    intermediates[idx] = shIntermediates[threadIdx.x];
 
     real russianProb = real(1);
 
@@ -398,14 +392,11 @@ __global__ void hitShadowRay(
     if (isHit) {
         reservoirs[idx].clear();
     }
-    else {
-        reservoirs[idx].light_idx = targetLightId;
-    }
 }
 
 __global__ void computeShadowRayContribution(
     const idaten::Reservoir* __restrict__ reservoirs,
-    const idaten::ReSTIRIntermedidate* __restrict__ intermediates,
+    const idaten::ReSTIRInfo* __restrict__ restir_infos,
     idaten::Path* paths,
     int* hitindices,
     int* hitnum,
@@ -437,14 +428,14 @@ __global__ void computeShadowRayContribution(
     __shared__ aten::MaterialParameter shMtrls[64];
 
     const auto& reservoir = reservoirs[idx];
-    const auto& intermediate = intermediates[idx];
+    const auto& restir_info = restir_infos[idx];
 
-    if (intermediate.is_mtrl_valid) {
-        shMtrls[threadIdx.x] = ctxt.mtrls[intermediate.mtrl_idx];
+    if (restir_info.isMtrlValid()) {
+        shMtrls[threadIdx.x] = ctxt.mtrls[restir_info.mtrl_idx];
 
-        if (intermediate.is_voxel) {
+        if (restir_info.is_voxel) {
             // Replace to lambert.
-            const auto& albedo = ctxt.mtrls[intermediate.mtrl_idx].baseColor;
+            const auto& albedo = ctxt.mtrls[restir_info.mtrl_idx].baseColor;
             shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
             shMtrls[threadIdx.x].baseColor = albedo;
         }
@@ -463,25 +454,17 @@ __global__ void computeShadowRayContribution(
 
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        auto albedo_meshid = aovTexclrMeshid[idx];
+        if (reservoir.isValid()) {
+            const auto& orienting_normal = restir_info.nml;
 
-        const aten::vec3 orienting_normal(
-            intermediates[idx].nml_x,
-            intermediates[idx].nml_y,
-            intermediates[idx].nml_z);
-        const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+            const auto& albedo_meshid = aovTexclrMeshid[idx];
+            const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-        int lightidx = reservoir.light_idx;
+            const auto& light = lights[reservoir.light_idx_];
 
-        if (lightidx >= 0) {
-            const auto& light = lights[lightidx];
-
-            auto select_pdf = reservoir.pdf;
-            auto pdfLight = reservoir.light_pdf;
-
-            auto nmlLight = intermediate.light_sample_nml;
-            auto dirToLight = shadowRays[idx].raydir;
-            auto distToLight = shadowRays[idx].distToLight;
+            const auto& nmlLight = reservoir.light_sample_.nml;
+            const auto& dirToLight = shadowRays[idx].raydir;
+            const auto& distToLight = shadowRays[idx].distToLight;
 
             aten::vec3 lightcontrib;
             {
@@ -492,24 +475,23 @@ __global__ void computeShadowRayContribution(
                 float u = 0.0f;
                 float v = 0.0f;
 
-                real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, intermediate.wi, dirToLight, u, v);
-                auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, intermediate.wi, dirToLight, u, v, albedo);
+                auto bsdf = sampleBSDF(
+                    &ctxt,
+                    &shMtrls[threadIdx.x],
+                    orienting_normal,
+                    restir_info.wi,
+                    dirToLight,
+                    u, v,
+                    albedo);
 
-                bsdf *= intermediate.throughput;
+                bsdf *= restir_info.throughput;
 
                 // Get light color.
-                auto emit = intermediate.light_color;
+                auto emit = reservoir.light_sample_.finalColor;
 
                 if (light.attrib.isSingular || light.attrib.isInfinite) {
-                    if (pdfLight > real(0) && cosShadow >= 0) {
-                        // TODO
-                        // ジオメトリタームの扱いについて.
-                        // singular light の場合は、finalColor に距離の除算が含まれている.
-                        // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-                        // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                        auto misW = pdfLight / (pdfb + pdfLight);
-
-                        lightcontrib = misW * bsdf * emit * cosShadow / pdfLight * select_pdf;
+                    if (cosShadow >= 0) {
+                        lightcontrib = bsdf * emit * cosShadow * reservoir.pdf_;
                     }
                 }
                 else {
@@ -519,16 +501,7 @@ __global__ void computeShadowRayContribution(
                         auto dist2 = distToLight * distToLight;
                         auto G = cosShadow * cosLight / dist2;
 
-                        if (pdfb > real(0) && pdfLight > real(0)) {
-                            // Convert pdf from steradian to area.
-                            // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                            // p31 - p35
-                            pdfb = pdfb * cosLight / dist2;
-
-                            auto misW = pdfLight / (pdfb + pdfLight);
-
-                            lightcontrib = misW * (bsdf * emit * G) / pdfLight * select_pdf;
-                        }
+                        lightcontrib = (bsdf * emit * G) * reservoir.pdf_;
                     }
                 }
             }
@@ -577,7 +550,7 @@ namespace idaten
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
             m_reservoirs[0].ptr(),
-            m_intermediates[0].ptr(),
+            m_restir_infos[0].ptr(),
             m_bufNmlMtrl[curBufNmlMtrlPos].ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
@@ -635,11 +608,11 @@ namespace idaten
 
         const auto target_idx = computelReuse(width, height, bounce);
         const auto reservior_idx = std::get<0>(target_idx);
-        const auto intermediate_idx = std::get<1>(target_idx);
+        const auto restir_info_idx = std::get<1>(target_idx);
 
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs[reservior_idx].ptr(),
-            m_intermediates[intermediate_idx].ptr(),
+            m_restir_infos[restir_info_idx].ptr(),
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),
             m_aovNormalDepth.ptr(),

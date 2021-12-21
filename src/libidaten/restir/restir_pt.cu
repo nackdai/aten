@@ -22,8 +22,7 @@ __global__ void genPath(
     bool isFillAOV,
     idaten::Path* paths,
     aten::ray* rays,
-    idaten::Reservoir* reservoirs,
-    idaten::ReSTIRIntermedidate* intermediates,
+    idaten::ReSTIRInfo* restir_info,
     int width, int height,
     int sample,
     unsigned int frame,
@@ -85,11 +84,8 @@ __global__ void genPath(
 
     paths->contrib[idx].samples += 1;
 
-    // Clear reservoir.
-    reservoirs[idx].clear();
-
-    // Clear intermedisate data.
-    intermediates[idx].clear();
+    // Clear restir info.
+    restir_info[idx].clear();
 
     // Accumulate value, so do not reset.
     //path.contrib = aten::vec3(0);
@@ -530,9 +526,6 @@ __global__ void shade(
         orienting_normal = -orienting_normal;
     }
 
-    ComputeBrdfFunctor compute_brdf_functor(
-        ctxt, shMtrls[threadIdx.x], orienting_normal, ray.dir, rec.u, rec.v, albedo);
-
     shShadowRays[threadIdx.x].isActive = false;
 
     // Explicit conection to light.
@@ -847,8 +840,7 @@ namespace idaten
             isFillAOV,
             m_paths.ptr(),
             m_rays.ptr(),
-            m_reservoirs[0].ptr(),
-            m_intermediates[0].ptr(),
+            m_restir_infos[0].ptr(),
             m_tileDomain.w, m_tileDomain.h,
             sample,
             m_frame,

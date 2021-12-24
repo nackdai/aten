@@ -18,17 +18,11 @@ namespace aten
             scene* scene,
             camera* camera) override;
 
-        void registerBlueNoiseTex(const std::shared_ptr<texture>& tex)
-        {
-            m_noisetex.push_back(tex);
-        }
-
     protected:
         struct Path {
             vec3 contrib{ real(0) };
             vec3 throughput{ real(1) };
             real pdfb{ real(1) };
-            real accumulatedAlpha{ real(1) };
 
             hitrecord rec;
             std::shared_ptr<material> prevMtrl;
@@ -79,7 +73,5 @@ namespace aten
         uint32_t m_rrDepth{ 1 };
 
         uint32_t m_startDepth{ 0 };
-
-        std::vector<std::shared_ptr<texture>> m_noisetex;
     };
 }

@@ -3,12 +3,7 @@
 #include "misc/timer.h"
 #include "renderer/nonphotoreal.h"
 #include "renderer/renderer_utility.h"
-#include "sampler/xorshift.h"
-#include "sampler/halton.h"
-#include "sampler/sobolproxy.h"
-#include "sampler/wanghash.h"
 #include "sampler/cmj.h"
-#include "sampler/bluenoiseSampler.h"
 
 #include "material/lambert.h"
 
@@ -113,30 +108,6 @@ namespace aten
 
             path.isTerminate = true;
             return false;
-        }
-
-        auto multipliedAlbedo = mtrl->sampleMultipliedAlbedo(path.rec.u, path.rec.v);
-        AlphaBlendedMaterialSampling smplAlphaBlend;
-        auto isAlphaBlended = material::sampleAlphaBlend(
-            smplAlphaBlend,
-            path.accumulatedAlpha,
-            multipliedAlbedo,
-            path.ray,
-            path.rec.p,
-            orienting_normal,
-            sampler,
-            path.rec.u, path.rec.v);
-
-        if (isAlphaBlended) {
-            path.prevMtrl = mtrl;
-            path.pdfb = smplAlphaBlend.pdf;
-
-            path.ray = smplAlphaBlend.ray;
-
-            path.throughput += smplAlphaBlend.bsdf;
-            path.accumulatedAlpha *= real(1) - smplAlphaBlend.alpha;
-
-            return true;
         }
 
         if (!mtrl->isTranslucent() && isBackfacing) {
@@ -283,16 +254,11 @@ namespace aten
         }
 
         if (pdfb > 0 && c > 0) {
-            path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;
+            path.throughput *= bsdf * c / pdfb;
             path.throughput /= russianProb;
         }
         else {
             return false;
-        }
-
-        if (!isAlphaBlended) {
-            // Reset alpha blend.
-            path.accumulatedAlpha = real(1);
         }
 
         path.prevMtrl = mtrl;
@@ -331,7 +297,7 @@ namespace aten
             misW = real(1);
         }
 
-        path.contrib += path.throughput * misW * emit * path.accumulatedAlpha;
+        path.contrib += path.throughput * misW * emit;
     }
 
     static uint32_t frame = 0;
@@ -386,21 +352,8 @@ namespace aten
                     for (uint32_t i = 0; i < samples; i++) {
                         auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
-                        //XorShift rnd(scramble + t.milliSeconds);
-                        //Halton rnd(scramble + t.milliSeconds);
-                        //Sobol rnd;
-                        //WangHash rnd(scramble + t.milliSeconds);
-#if 1
                         CMJ rnd;
                         rnd.init(frame, i, scramble);
-#else
-                        // Experimental
-                        BlueNoiseSampler rnd;
-                        for (auto tex : m_noisetex) {
-                            rnd.registerNoiseTexture(tex);
-                        }
-                        rnd.init(x, y, frame, m_maxDepth, 1);
-#endif
 
                         real u = real(x + rnd.nextSample()) / real(width);
                         real v = real(y + rnd.nextSample()) / real(height);

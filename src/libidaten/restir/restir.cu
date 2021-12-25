@@ -66,7 +66,6 @@ __global__ void shade(
 
     idx = hitindices[idx];
 
-    __shared__ idaten::ShadowRay shShadowRays[64];
     __shared__ aten::MaterialParameter shMtrls[64];
 
     const auto ray = rays[idx];
@@ -142,7 +141,7 @@ __global__ void shade(
         orienting_normal = -orienting_normal;
     }
 
-    shShadowRays[threadIdx.x].isActive = false;
+    shadowRays[idx].isActive = false;
 
     auto& restir_info = restir_infos[idx];
     restir_info.clear();
@@ -222,30 +221,60 @@ __global__ void shade(
         if (lightidx >= 0) {
             const auto& posLight = reservoir.light_sample_.pos;
             const auto& nmlLight = reservoir.light_sample_.nml;
-            real pdfLight = reservoir.light_sample_.pdf;
+
+            auto lightSelectPdf = reservoir.pdf_;
+
+            auto lightobj = reservoir.light_sample_.obj;
 
             auto dirToLight = normalize(reservoir.light_sample_.dir);
             auto distToLight = length(posLight - rec.p);
 
-            shShadowRays[threadIdx.x].rayorg = rec.p;
-            shShadowRays[threadIdx.x].raydir = dirToLight;
-            shShadowRays[threadIdx.x].targetLightId = lightidx;
-            shShadowRays[threadIdx.x].distToLight = distToLight;
-            shShadowRays[threadIdx.x].lightcontrib = aten::vec3(0);
-            shShadowRays[threadIdx.x].isActive = true;
+            aten::Intersection isectTmp;
 
-            restir_info.wi = ray.dir;
-            restir_info.mtrl_idx = rec.mtrlid;
-            restir_info.is_voxel = rec.isVoxel;
-            restir_info.throughput = paths->throughput[idx].throughput;
-            restir_info.nml = orienting_normal;
-            restir_info.u = rec.u;
-            restir_info.v = rec.v;
-            restir_info.p = rec.p;
+            auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
+            auto tmp = rec.p + dirToLight - shadowRayOrg;
+            auto shadowRayDir = normalize(tmp);
+
+            bool isShadowRayActive = false;
+
+            shadowRays[idx].rayorg = shadowRayOrg;
+            shadowRays[idx].raydir = shadowRayDir;
+            shadowRays[idx].targetLightId = lightidx;
+            shadowRays[idx].distToLight = distToLight;
+            shadowRays[idx].lightcontrib = aten::vec3(0);
+            {
+                auto cosShadow = dot(orienting_normal, dirToLight);
+
+                real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+                auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
+
+                bsdf *= paths->throughput[idx].throughput;
+
+                // Get light color.
+                auto emit = reservoir.light_sample_.finalColor;
+
+                if (light.attrib.isInfinite) {
+                    if (cosShadow >= 0) {
+                        shadowRays[idx].lightcontrib = (bsdf * emit * cosShadow) * lightSelectPdf;
+                        isShadowRayActive = true;
+                    }
+                }
+                else {
+                    auto cosLight = dot(nmlLight, -dirToLight);
+
+                    if (cosShadow >= 0 && cosLight >= 0) {
+                        auto dist2 = aten::squared_length(reservoir.light_sample_.dir);
+                        auto G = cosShadow * cosLight / dist2;
+
+                        shadowRays[idx].lightcontrib = (bsdf * emit * G) * lightSelectPdf;
+                        isShadowRayActive = true;
+                    }
+                }
+
+                shadowRays[idx].isActive = isShadowRayActive;
+            }
         }
     }
-
-    shadowRays[idx] = shShadowRays[threadIdx.x];
 
     real russianProb = real(1);
 
@@ -353,6 +382,7 @@ __global__ void hitShadowRay(
     if (!shadowRay.isActive) {
         return;
     }
+
     auto targetLightId = shadowRay.targetLightId;
     auto distToLight = shadowRay.distToLight;
 
@@ -390,7 +420,8 @@ __global__ void hitShadowRay(
         hitobj);
 
     if (isHit) {
-        reservoirs[idx].clear();
+        auto contrib = shadowRay.lightcontrib;
+        paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
     }
 }
 
@@ -489,7 +520,7 @@ __global__ void computeShadowRayContribution(
                 // Get light color.
                 auto emit = reservoir.light_sample_.finalColor;
 
-                if (light.attrib.isSingular || light.attrib.isInfinite) {
+                if (light.attrib.isInfinite) {
                     if (cosShadow >= 0) {
                         lightcontrib = bsdf * emit * cosShadow * reservoir.pdf_;
                     }
@@ -606,6 +637,7 @@ namespace idaten
 
         checkCudaKernel(hitShadowRay);
 
+#if 0
         const auto target_idx = computelReuse(width, height, bounce);
         const auto reservior_idx = std::get<0>(target_idx);
         const auto restir_info_idx = std::get<1>(target_idx);
@@ -623,5 +655,6 @@ namespace idaten
             m_shadowRays.ptr());
 
         checkCudaKernel(computeShadowRayContribution);
+#endif
     }
 }

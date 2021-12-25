@@ -169,7 +169,7 @@ namespace AT_NAME {
             real& selectPdf,
             aten::LightSampleResult& sampleRes);
 
-        std::shared_ptr<Light> sampleLight(
+        std::shared_ptr<Light> sampleLightWithReservoir(
             const aten::context& ctxt,
             const aten::vec3& org,
             const aten::vec3& nml,

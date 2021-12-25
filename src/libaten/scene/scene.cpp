@@ -59,7 +59,42 @@ namespace aten {
         return nullptr;
     }
 
-    std::shared_ptr<Light> scene::sampleLight(
+    struct Reservoir {
+        float w_sum_{ 0.0f };
+        float sample_weight_{ 0.0f };
+        uint32_t m_{ 0 };
+        int light_idx_{ 0 };
+        float pdf_{ 0.0f };
+        float target_density_{ 0.0f };
+        aten::LightSampleResult light_sample_;
+
+        void clear()
+        {
+            w_sum_ = 0.0f;
+            sample_weight_ = 0.0f;
+            m_ = 0;
+            light_idx_ = -1;
+            pdf_ = 0.0f;
+            target_density_ = 0.0f;
+        }
+
+        bool update(
+            const aten::LightSampleResult& light_sample,
+            int new_target_idx, float weight, float u)
+        {
+            w_sum_ += weight;
+            bool is_accepted = u < weight / w_sum_;
+            if (is_accepted) {
+                light_sample_ = light_sample;
+                light_idx_ = new_target_idx;
+                sample_weight_ = weight;
+            }
+            m_++;
+            return is_accepted;
+        }
+    };
+
+    std::shared_ptr<Light> scene::sampleLightWithReservoir(
         const aten::context& ctxt,
         const aten::vec3& org,
         const aten::vec3& nml,
@@ -75,14 +110,12 @@ namespace aten {
         const auto max_light_num = static_cast<decltype(MaxLightCount)>(m_lights.size());
         const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
 
-#if 1
-        // Reservoir
+        Reservoir reservoir;
+        reservoir.clear();
 
-        auto r = sampler->nextSample();
-        auto w_sum = real(0);
+        real selected_target_density = real(0);
 
-        int32_t selected_light_idx = -1;
-        real selected_cost = real(0);
+        real lightSelectProb = real(1) / max_light_num;
 
         for (auto i = 0U; i < light_cnt; i++) {
             const auto r_light = sampler->nextSample();
@@ -90,128 +123,70 @@ namespace aten {
 
             const auto& light = m_lights[light_pos];
 
-            const auto lightsample = light->sample(ctxt, org, nml, sampler);
+            auto lightsample = light->sample(ctxt, org, nml, sampler);
 
-            vec3 posLight = lightsample.pos;
-            vec3 nmlLight = lightsample.nml;
-            real pdfLight = lightsample.pdf;
-            vec3 dirToLight = normalize(lightsample.dir);
+            aten::vec3 nmlLight = lightsample.nml;
+            aten::vec3 dirToLight = normalize(lightsample.dir);
 
             auto brdf = compute_brdf(dirToLight);
 
             auto cosShadow = dot(nml, dirToLight);
-            auto dist2 = squared_length(lightsample.dir);
+            auto cosLight = dot(nmlLight, -dirToLight);
+            auto dist2 = aten::squared_length(lightsample.dir);
 
-            auto light_energy = color::luminance(lightsample.le);
-            auto brdf_energy = color::luminance(brdf);
+            auto energy = brdf * lightsample.finalColor;
 
-            auto energy = brdf_energy * light_energy;
+            cosShadow = aten::abs(cosShadow);
 
-            real cost = real(0);
-
-            if (cosShadow > 0) {
-                if (light->isInfinite()) {
-                    cost = energy * cosShadow / pdfLight;
+            if (cosShadow > 0 && cosLight > 0) {
+                if (light->isSingular()) {
+                    energy = energy * cosShadow;
                 }
                 else {
-                    auto cosLight = dot(nmlLight, -dirToLight);
-                    cost = energy * cosShadow * cosLight / dist2 / pdfLight;
+                    energy = energy * cosShadow * cosLight / dist2;
                 }
             }
-
-            if (cost > 0) {
-                w_sum += cost;
-
-                if (r < cost / w_sum) {
-                    selected_light_idx = light_pos;
-                    sampleRes = lightsample;
-                    selected_cost = cost;
-                }
+            else {
+                energy.x = energy.y = energy.z = 0.0f;
             }
-        }
 
-        if (selected_cost > 0) {
+            auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
+            auto sampling_density = lightsample.pdf * lightSelectProb;  // q
+
             // NOTE
-            // ˜_•¶“I‚É‚ÍAw_sum / M ‚ðŠ|‚¯‚é‚Ì‚É‘Î‚µ‚Ä
-            // path tracing‚Ì“à•”‚Å‚ÍA1 / lightSelectPdf ‚ÅŒvŽZ‚µ‚Ä‚¢‚é‚Ì‚Å
-            // ‚±‚±‚Å‚Í‹t”‚É‚µ‚Ä‚¨‚­‚±‚Æ‚ÅAÅI“I‚ÉŠ|‚¯ŽZ‚É‚È‚é‚æ‚¤‚É‚·‚é.
-            selectPdf = light_cnt / w_sum;
+            // p_hat(xi) / q(xi)
+            auto weight = sampling_density > 0
+                ? target_density / sampling_density
+                : 0.0f;
 
-            return m_lights[selected_light_idx];;
-        }
+            auto r = sampler->nextSample();
 
-        return nullptr;
-#else
-        std::vector<LightSampleResult> samples(m_lights.size());
-        std::vector<real> costs(m_lights.size());
-
-        real sumCost = 0;
-
-        for (auto i = 0U; i < light_cnt; i++) {
-            const auto r_light = sampler->nextSample();
-            const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
-
-            const auto light = m_lights[light_pos];
-
-            samples[i] = light->sample(ctxt, org, nml, sampler);
-
-            const auto& lightsample = samples[i];
-
-            vec3 posLight = lightsample.pos;
-            vec3 nmlLight = lightsample.nml;
-            real pdfLight = lightsample.pdf;
-            vec3 dirToLight = normalize(lightsample.dir);
-
-            auto brdf = compute_brdf(dirToLight);
-
-            auto cosShadow = dot(nml, dirToLight);
-            auto dist2 = squared_length(lightsample.dir);
-
-            auto light_energy = color::luminance(lightsample.finalColor);
-            auto brdf_energy = color::luminance(brdf);
-
-            auto energy = brdf_energy * light_energy;
-
-            real cost = real(0);
-
-            if (cosShadow > 0) {
-                if (light->isInfinite()) {
-                    cost = energy * cosShadow / pdfLight;
-                }
-                else {
-                    auto cosLight = dot(nmlLight, -dirToLight);
-
-                    if (light->isSingular()) {
-                        cost = energy * cosShadow * cosLight / pdfLight;
-                    }
-                    else {
-                        cost = energy * cosShadow * cosLight / dist2 / pdfLight;
-                    }
-                }
-            }
-
-            costs[i] = cost;
-            sumCost += cost;
-        }
-
-        auto r = sampler->nextSample() * sumCost;
-
-        real sum = 0;
-
-        for (int i = 0; i < costs.size(); i++) {
-            const auto c = costs[i];
-            sum += c;
-
-            if (r <= sum && c > 0) {
-                auto light = m_lights[i];
-                sampleRes = samples[i];
-                selectPdf = c / sumCost;
-                return light;
+            if (reservoir.update(lightsample, light_pos, weight, r)) {
+                selected_target_density = target_density;
             }
         }
 
-        return nullptr;
-#endif
+        if (selected_target_density > 0.0f) {
+            reservoir.target_density_ = selected_target_density;
+            // NOTE
+            // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xz) * M)
+            reservoir.pdf_ = reservoir.w_sum_ / (reservoir.target_density_ * reservoir.m_);
+        }
+
+        if (!isfinite(reservoir.pdf_)) {
+            reservoir.pdf_ = 0.0f;
+            reservoir.target_density_ = 0.0f;
+            reservoir.light_idx_ = -1;
+        }
+
+        if (reservoir.light_idx_ < 0) {
+            return nullptr;
+        }
+
+        selectPdf = reservoir.pdf_;
+        sampleRes = reservoir.light_sample_;
+
+        return m_lights[reservoir.light_idx_];
     }
 
     void scene::drawForGBuffer(

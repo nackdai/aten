@@ -130,17 +130,15 @@ namespace aten
             real lightSelectPdf = 1;
             LightSampleResult sampleres;
 
-            auto light = scene->sampleLight(
+            auto light = scene->sampleLightWithReservoir(
                 ctxt,
                 path.rec.p,
                 orienting_normal,
-#if 1
                 [&](const aten::vec3& dir_to_light) -> aten::vec3 {
                     return mtrl->bsdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v);
                 },
-#endif
                 sampler,
-                    lightSelectPdf, sampleres);
+                lightSelectPdf, sampleres);
 
             if (light) {
                 const vec3& posLight = sampleres.pos;
@@ -180,13 +178,8 @@ namespace aten
                         auto emit = sampleres.finalColor;
 
                         if (light->isInfinite()) {
-                            if (pdfLight > real(0) && cosShadow >= 0) {
-                                // TODO
-                                // ジオメトリタームの扱いについて.
-                                // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-                                // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                                auto misW = pdfLight / (pdfb + pdfLight);
-                                path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+                            if (cosShadow >= 0) {
+                                path.contrib += (bsdf * emit * cosShadow) * lightSelectPdf;
                             }
                         }
                         else {
@@ -195,19 +188,7 @@ namespace aten
                             if (cosShadow >= 0 && cosLight >= 0) {
                                 auto dist2 = squared_length(sampleres.dir);
                                 auto G = cosShadow * cosLight / dist2;
-
-                                if (pdfb > real(0) && pdfLight > real(0)) {
-                                    // Convert pdf from steradian to area.
-                                    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                                    // p31 - p35
-                                    pdfb = pdfb * cosLight / dist2;
-
-                                    auto misW = light->isSingular()
-                                        ? real(1)
-                                        : aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-
-                                    path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
-                                }
+                                path.contrib += (bsdf * emit * G) * lightSelectPdf;
                             }
                         }
                     }

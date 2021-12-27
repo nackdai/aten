@@ -65,8 +65,7 @@ namespace AT_NAME {
             auto dist = aten::sqrt(dist2);
 
             result->pos = param->pos;
-            result->dir = normalize(result->dir);
-            result->nml = -result->dir;
+            result->nml = normalize(-result->dir);
 
             // 減衰率.
             // http://ogldev.atspace.co.uk/www/tutorial20/tutorial20.html

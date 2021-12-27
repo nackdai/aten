@@ -74,13 +74,15 @@ namespace AT_NAME {
             aten::LightSampleResult* result)
         {
             result->pos = param->pos;
-            result->dir = normalize(((aten::vec3)param->pos) - org);
+            result->dir = ((aten::vec3)param->pos) - org;
             result->nml = param->dir;   // already normalized
+
+            auto light_dir = normalize(result->dir);
 
             // NOTE
             // https://msdn.microsoft.com/ja-jp/library/bb172279(v=vs.85).aspx
 
-            auto rho = dot(-((aten::vec3)param->dir), result->dir);
+            auto rho = dot(-((aten::vec3)param->dir), light_dir);
 
             auto cosHalfInnter = aten::cos(param->innerAngle * real(0.5));
             auto cosHalfOuter = aten::cos(param->outerAngle * real(0.5));

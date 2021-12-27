@@ -177,7 +177,9 @@ namespace aten
                         // Get light color.
                         auto emit = sampleres.finalColor;
 
-                        if (light->isInfinite()) {
+                        cosShadow = aten::abs(cosShadow);
+
+                        if (light->isInfinite() || light->isSingular()) {
                             if (cosShadow >= 0) {
                                 path.contrib += (bsdf * emit * cosShadow) * lightSelectPdf;
                             }

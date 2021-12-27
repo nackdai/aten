@@ -229,13 +229,9 @@ namespace aten
                         // Get light color.
                         auto emit = sampleres.finalColor;
 
-                        if (light->isInfinite()) {
+                        if (light->isInfinite() || light->isSingular()) {
                             if (pdfLight > real(0) && cosShadow >= 0) {
-                                // TODO
-                                // ジオメトリタームの扱いについて.
-                                // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-                                // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                                auto misW = pdfLight / (pdfb + pdfLight);
+                                auto misW = aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                                 path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                             }
                         }
@@ -251,11 +247,7 @@ namespace aten
                                     // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
                                     // p31 - p35
                                     pdfb = pdfb * cosLight / dist2;
-
-                                    auto misW = light->isSingular()
-                                        ? real(1)
-                                        : aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-
+                                    auto misW = aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                                     path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
                                 }
                             }

@@ -19,8 +19,9 @@ public:
         ray_dir_(ray_dir), u_(u), v_(v), albedo_(albedo) {}
 
     inline __device__ aten::vec3 operator()(const aten::vec3& dir_to_light) {
-        return sampleBSDF(
-            &ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_, albedo_);
+        auto pdf = samplePDF(&ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_);
+        auto bsdf = sampleBSDF(&ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_, albedo_);
+        return bsdf / pdf;
     }
 
 private:
@@ -73,7 +74,6 @@ inline __device__ void computeLighting(
 
 inline __device__ int sampleLightWithReservoirRIP(
     idaten::Reservoir& reservoir,
-    aten::LightParameter* target_light,
     ComputeBrdfFunctor& compute_brdf,
     idaten::Context* ctxt,
     const aten::vec3& org,
@@ -84,13 +84,15 @@ inline __device__ int sampleLightWithReservoirRIP(
     constexpr auto MaxLightCount = 32U;
 
     const auto max_light_num = static_cast<decltype(MaxLightCount)>(ctxt->lightnum);
-    const auto max_light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
+    const auto light_cnt = aten::cmpMin(MaxLightCount, max_light_num);
 
     reservoir.clear();
 
     real selected_target_density = real(0);
 
-    for (auto i = 0U; i < max_light_cnt; i++) {
+    real lightSelectProb = real(1) / max_light_num;
+
+    for (auto i = 0U; i < light_cnt; i++) {
         const auto r_light = sampler->nextSample();
         const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
@@ -110,7 +112,7 @@ inline __device__ int sampleLightWithReservoirRIP(
 
         auto energy = brdf * lightsample.finalColor;
 
-        cosLight = aten::abs(cosLight);
+        cosShadow = aten::abs(cosShadow);
 
         if (cosShadow > 0 && cosLight > 0) {
             if (light.attrib.isSingular) {
@@ -125,7 +127,7 @@ inline __device__ int sampleLightWithReservoirRIP(
         }
 
         auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
-        auto sampling_density = lightsample.pdf;    // q
+        auto sampling_density = lightsample.pdf * lightSelectProb;  // q
 
         // NOTE
         // p_hat(xi) / q(xi)

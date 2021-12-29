@@ -205,13 +205,10 @@ __global__ void shade(
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        aten::LightParameter light;
-
         auto& reservoir = reservoirs[idx];
 
         auto lightidx = sampleLightWithReservoirRIP(
             reservoir,
-            &light,
             compute_brdf_functor,
             &ctxt,
             rec.p, orienting_normal,
@@ -219,6 +216,8 @@ __global__ void shade(
             bounce);
 
         if (lightidx >= 0) {
+            const auto& light = ctxt.lights[lightidx];
+
             const auto& posLight = reservoir.light_sample_.pos;
             const auto& nmlLight = reservoir.light_sample_.nml;
 
@@ -253,7 +252,9 @@ __global__ void shade(
                 // Get light color.
                 auto emit = reservoir.light_sample_.finalColor;
 
-                if (light.attrib.isInfinite) {
+                cosShadow = aten::abs(cosShadow);
+
+                if (light.attrib.isInfinite || light.attrib.isSingular) {
                     if (cosShadow >= 0) {
                         shadowRays[idx].lightcontrib = (bsdf * emit * cosShadow) * lightSelectPdf;
                         isShadowRayActive = true;

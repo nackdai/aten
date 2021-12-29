@@ -519,7 +519,7 @@ __global__ void shade(
             // Get light color.
             auto emit = sampleres.finalColor;
 
-            if (light.attrib.isInfinite) {
+            if (light.attrib.isInfinite || light.attrib.isSingular) {
                 if (pdfLight > real(0) && cosShadow >= 0) {
                     // TODO
                     // ジオメトリタームの扱いについて.
@@ -542,11 +542,7 @@ __global__ void shade(
                         // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
                         // p31 - p35
                         pdfb = pdfb * cosLight / dist2;
-
-                        auto misW = light.attrib.isSingular
-                            ? real(1)
-                            : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-
+                        auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                         shadowRays[idx].lightcontrib = (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
                         isShadowRayActive = true;
                     }

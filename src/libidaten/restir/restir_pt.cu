@@ -580,7 +580,9 @@ __global__ void shade(
 
                 if (light.attrib.isInfinite || light.attrib.isSingular) {
                     if (pdfLight > real(0) && cosShadow >= 0) {
-                        auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                        auto misW = light.attrib.isSingular
+                            ? 1.0f
+                            : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
 
                         shShadowRays[threadIdx.x].lightcontrib =
                             (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;

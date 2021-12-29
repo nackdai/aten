@@ -231,7 +231,9 @@ namespace aten
 
                         if (light->isInfinite() || light->isSingular()) {
                             if (pdfLight > real(0) && cosShadow >= 0) {
-                                auto misW = aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                                auto misW = light->isSingular()
+                                    ? real(1)
+                                    : aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                                 path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                             }
                         }

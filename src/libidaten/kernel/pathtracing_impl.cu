@@ -521,11 +521,9 @@ __global__ void shade(
 
             if (light.attrib.isInfinite || light.attrib.isSingular) {
                 if (pdfLight > real(0) && cosShadow >= 0) {
-                    // TODO
-                    // ジオメトリタームの扱いについて.
-                    // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-                    // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                    auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                    auto misW = light.attrib.isSingular
+                        ? 1.0f
+                        : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                     shadowRays[idx].lightcontrib = (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                     isShadowRayActive = true;
                 }

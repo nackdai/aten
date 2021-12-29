@@ -135,7 +135,9 @@ namespace aten
                 path.rec.p,
                 orienting_normal,
                 [&](const aten::vec3& dir_to_light) -> aten::vec3 {
-                    return mtrl->bsdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v);
+                    auto pdf = mtrl->pdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v);
+                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v);
+                    return bsdf / pdf;
                 },
                 sampler,
                 lightSelectPdf, sampleres);

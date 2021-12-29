@@ -99,17 +99,12 @@ __global__ void shade(
     if (rec.mtrlid >= 0) {
         shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
 
-        // This kernel doesn't have to be called except first bounce.
-        // And, in that case, hit material should not be voxel.
-        // Therefore, we can ignore voxel check at all.
-#if 0
         if (rec.isVoxel) {
             // Replace to lambert.
             const auto& albedo = ctxt.mtrls[rec.mtrlid].baseColor;
             shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
             shMtrls[threadIdx.x].baseColor = albedo;
         }
-#endif
 
         if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
             shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
@@ -243,20 +238,10 @@ __global__ void shade(
             shadowRays[idx].lightcontrib = aten::vec3(0);
             {
                 auto cosShadow = dot(orienting_normal, dirToLight);
-
-                real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-                auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-
-                bsdf *= paths->throughput[idx].throughput;
-
-                // Get light color.
-                auto emit = reservoir.light_sample_.finalColor;
-
                 cosShadow = aten::abs(cosShadow);
 
                 if (light.attrib.isInfinite || light.attrib.isSingular) {
                     if (cosShadow >= 0) {
-                        shadowRays[idx].lightcontrib = (bsdf * emit * cosShadow) * lightSelectPdf;
                         isShadowRayActive = true;
                     }
                 }
@@ -264,16 +249,20 @@ __global__ void shade(
                     auto cosLight = dot(nmlLight, -dirToLight);
 
                     if (cosShadow >= 0 && cosLight >= 0) {
-                        auto dist2 = aten::squared_length(reservoir.light_sample_.dir);
-                        auto G = cosShadow * cosLight / dist2;
-
-                        shadowRays[idx].lightcontrib = (bsdf * emit * G) * lightSelectPdf;
                         isShadowRayActive = true;
                     }
                 }
 
                 shadowRays[idx].isActive = isShadowRayActive;
             }
+
+            restir_info.nml = orienting_normal;
+            restir_info.is_voxel = rec.isVoxel;
+            restir_info.mtrl_idx = rec.mtrlid;
+            restir_info.throughput = paths->throughput[idx].throughput;
+            restir_info.wi = ray.dir;
+            restir_info.u = rec.u;
+            restir_info.v = rec.v;
         }
     }
 
@@ -420,9 +409,8 @@ __global__ void hitShadowRay(
         isectTmp.t,
         hitobj);
 
-    if (isHit) {
-        auto contrib = shadowRay.lightcontrib;
-        paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
+    if (!isHit) {
+        reservoirs[idx].clear();
     }
 }
 
@@ -463,11 +451,12 @@ __global__ void computeShadowRayContribution(
     const auto& restir_info = restir_infos[idx];
 
     if (restir_info.isMtrlValid()) {
-        shMtrls[threadIdx.x] = ctxt.mtrls[restir_info.mtrl_idx];
+        auto mtrl_idx = restir_info.mtrl_idx;
+        shMtrls[threadIdx.x] = ctxt.mtrls[mtrl_idx];
 
         if (restir_info.is_voxel) {
             // Replace to lambert.
-            const auto& albedo = ctxt.mtrls[restir_info.mtrl_idx].baseColor;
+            const auto& albedo = ctxt.mtrls[mtrl_idx].baseColor;
             shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
             shMtrls[threadIdx.x].baseColor = albedo;
         }
@@ -521,7 +510,9 @@ __global__ void computeShadowRayContribution(
                 // Get light color.
                 auto emit = reservoir.light_sample_.finalColor;
 
-                if (light.attrib.isInfinite) {
+                cosShadow = aten::abs(cosShadow);
+
+                if (light.attrib.isInfinite || light.attrib.isSingular) {
                     if (cosShadow >= 0) {
                         lightcontrib = bsdf * emit * cosShadow * reservoir.pdf_;
                     }
@@ -638,7 +629,6 @@ namespace idaten
 
         checkCudaKernel(hitShadowRay);
 
-#if 0
         const auto target_idx = computelReuse(width, height, bounce);
         const auto reservior_idx = std::get<0>(target_idx);
         const auto restir_info_idx = std::get<1>(target_idx);
@@ -656,6 +646,5 @@ namespace idaten
             m_shadowRays.ptr());
 
         checkCudaKernel(computeShadowRayContribution);
-#endif
     }
 }

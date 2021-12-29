@@ -653,14 +653,9 @@ __global__ void shade(
                 // Get light color.
                 auto emit = sampleres.finalColor;
 
-                if (light.attrib.isInfinite) {
+                if (light.attrib.isInfinite || light.attrib.isSingular) {
                     if (pdfLight > real(0) && cosShadow >= 0) {
-                        // TODO
-                        // ジオメトリタームの扱いについて.
-                        // inifinite light の場合は、無限遠方になり、pdfLightに含まれる距離成分と打ち消しあう？.
-                        // （打ち消しあうので、pdfLightには距離成分は含んでいない）.
-                        auto misW = pdfLight / (pdfb + pdfLight);
-
+                        auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                         shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
                             (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;
 
@@ -680,9 +675,7 @@ __global__ void shade(
                             // p31 - p35
                             pdfb = pdfb * cosLight / dist2;
 
-                            auto misW = light.attrib.isSingular
-                                ? real(1)
-                                : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                            auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
 
                             shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib =
                                 (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf / (float)idaten::SVGFPathTracing::ShadowRayNum;;

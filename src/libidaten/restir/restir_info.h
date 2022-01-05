@@ -21,6 +21,9 @@ namespace idaten {
         aten::vec3 throughput;
         float v;
 
+        aten::vec3 p;
+        float padding_1;
+
         __host__ __device__ void clear()
         {
             nml.x = nml.y = nml.z = 0.0f;

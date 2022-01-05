@@ -31,7 +31,7 @@ namespace idaten {
 
         __host__ __device__ bool update(
             const aten::LightSampleResult& light_sample,
-            int new_target_idx, float weight, float u)
+            int new_target_idx, float weight, uint32_t m, float u)
         {
             w_sum_ += weight;
             bool is_accepted = u < weight / w_sum_;
@@ -40,8 +40,15 @@ namespace idaten {
                 light_idx_ = new_target_idx;
                 sample_weight_ = weight;
             }
-            m_++;
+            m_ += m;
             return is_accepted;
+        }
+
+        __host__ __device__ bool update(
+            const aten::LightSampleResult& light_sample,
+            int new_target_idx, float weight, float u)
+        {
+            return update(light_sample, new_target_idx, weight, 1, u);
         }
     };
 }

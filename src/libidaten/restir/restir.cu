@@ -123,7 +123,17 @@ __global__ void shade(
     shadowRays[idx].isActive = false;
 
     auto& restir_info = restir_infos[idx];
-    restir_info.clear();
+    {
+        restir_info.clear();
+        restir_info.nml = orienting_normal;
+        restir_info.is_voxel = rec.isVoxel;
+        restir_info.mtrl_idx = rec.mtrlid;
+        restir_info.throughput = paths->throughput[idx].throughput;
+        restir_info.wi = ray.dir;
+        restir_info.u = rec.u;
+        restir_info.v = rec.v;
+        restir_info.p = rec.p;
+    }
 
     if (bounce == 0) {
         // Store AOV.
@@ -239,14 +249,6 @@ __global__ void shade(
 
                 shadowRays[idx].isActive = isShadowRayActive;
             }
-
-            restir_info.nml = orienting_normal;
-            restir_info.is_voxel = rec.isVoxel;
-            restir_info.mtrl_idx = rec.mtrlid;
-            restir_info.throughput = paths->throughput[idx].throughput;
-            restir_info.wi = ray.dir;
-            restir_info.u = rec.u;
-            restir_info.v = rec.v;
         }
     }
 
@@ -394,7 +396,10 @@ __global__ void hitShadowRay(
         hitobj);
 
     if (!isHit) {
-        reservoirs[idx].clear();
+        reservoirs[idx].w_sum_ = 0.0f;
+        reservoirs[idx].pdf_ = 0.0f;
+        reservoirs[idx].target_density_ = 0.0f;
+        reservoirs[idx].light_idx_ = -1;
     }
 }
 
@@ -459,6 +464,7 @@ __global__ void computeShadowRayContribution(
                 auto cosShadow = dot(orienting_normal, dirToLight);
 
                 // TODO
+                // 計算済みのalbedoを与えているため
                 // u,v は samplePDF/sampleBSDF 内部では利用されていない
                 float u = 0.0f;
                 float v = 0.0f;

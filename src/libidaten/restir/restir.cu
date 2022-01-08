@@ -537,7 +537,7 @@ namespace idaten
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            m_reservoirs[0].ptr(),
+            m_reservoirs[m_curReservoirPos].ptr(),
             m_restir_infos.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
@@ -581,7 +581,7 @@ namespace idaten
             bounce,
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),
-            m_reservoirs[0].ptr(),
+            m_reservoirs[m_curReservoirPos].ptr(),
             m_shadowRays.ptr(),
             m_shapeparam.ptr(), m_shapeparam.num(),
             m_mtrlparam.ptr(),

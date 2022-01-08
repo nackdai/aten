@@ -836,7 +836,7 @@ namespace idaten
             isFillAOV,
             m_paths.ptr(),
             m_rays.ptr(),
-            m_restir_infos[0].ptr(),
+            m_restir_infos.ptr(),
             m_tileDomain.w, m_tileDomain.h,
             sample,
             m_frame,

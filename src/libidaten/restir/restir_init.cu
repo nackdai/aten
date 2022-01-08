@@ -33,14 +33,10 @@ namespace idaten
             m_pathAttrib.init(width * height);
             m_pathSampler.init(width * height);
 
-            for (auto& i : m_restir_infos) {
-                i.init(width * height);
-            }
+            m_restir_infos.init(width * height);
+
             for (auto& r : m_reservoirs) {
                 r.init(width * height);
-            }
-            for (auto& b : m_bufNmlMtrl) {
-                b.init(width * height);
             }
 
             initReSTIR << <1, 1, 0, m_stream >> > (

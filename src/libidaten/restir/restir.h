@@ -295,12 +295,8 @@ namespace idaten
 
         idaten::TypedCudaMemory<ReSTIRInfo> m_restir_infos;
 
-        enum class RervoirsPos {
-            Current,
-            Previous,
-            Destination = Previous,
-        };
         std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
+        int m_curReservoirPos = 0;
 
         // AOV buffe
         idaten::TypedCudaMemory<float4> m_aovNormalDepth;

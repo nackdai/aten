@@ -12,7 +12,133 @@
 
 #include "aten4idaten.h"
 
-#if 1
+#if 0
+__host__ void computeTemporalReuse(
+    int ix, int iy,
+    aten::sampler* samplers,
+    const aten::LightParameter* lights,
+    const aten::MaterialParameter* mtrls,
+    const float4* aovTexclrMeshid,
+    idaten::Reservoir* reservoirs,
+    const idaten::Reservoir* prev_reservoirs,
+    const idaten::ReSTIRInfo* infos,
+    int width, int height)
+{
+    if (ix >= width || iy >= height) {
+        return;
+    }
+
+    auto idx = getIdx(ix, iy, width);
+
+    idaten::Context ctxt;
+    {
+        ctxt.mtrls = mtrls;
+        ctxt.lights = lights;
+    }
+
+    auto& sampler = samplers[idx];
+
+    const auto& self_info = infos[idx];
+
+    const auto& normal = self_info.nml;
+
+    const auto& albedo_meshid = aovTexclrMeshid[idx];
+    const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
+
+    auto& comibined_reservoir = reservoirs[idx];
+
+    float selected_target_density = comibined_reservoir.isValid()
+        ? comibined_reservoir.target_density_
+        : 0.0f;
+
+    const auto maxM = 20 * comibined_reservoir.m_;
+
+    // 前のフレームのスクリーン座標.
+    int px = ix;// (int)(ix + motionDepth.x * width);
+    int py = iy;// (int)(iy + motionDepth.y * height);
+
+    bool is_acceptable = AT_MATH_IS_IN_BOUND(px, 0, width - 1)
+        && AT_MATH_IS_IN_BOUND(py, 0, height - 1);
+
+    if (is_acceptable)
+    {
+        aten::LightSampleResult lightsample;
+
+        auto neighbor_idx = getIdx(px, py, width);
+        const auto& neighbor_reservoir = prev_reservoirs[neighbor_idx];
+
+        auto m = std::min(neighbor_reservoir.m_, maxM);
+
+        if (neighbor_reservoir.isValid()) {
+            const auto& neighbor_info = infos[neighbor_idx];
+
+            const auto& neighbor_normal = neighbor_info.nml;
+
+
+            const auto light_pos = neighbor_reservoir.light_idx_;
+
+            const auto& light = ctxt.lights[light_pos];
+
+            // TODO
+            // Only point light
+            AT_NAME::PointLight::sample(&light, self_info.p, &sampler, &lightsample);
+
+            aten::vec3 nmlLight = lightsample.nml;
+            aten::vec3 dirToLight = normalize(lightsample.dir);
+
+            // TODO
+                // Only lambert
+            auto pdf = AT_NAME::lambert::pdf(normal, dirToLight);
+            auto brdf = AT_NAME::lambert::bsdf(&mtrls[self_info.mtrl_idx], albedo);
+            brdf /= pdf;
+
+            auto cosShadow = dot(normal, dirToLight);
+            auto cosLight = dot(nmlLight, -dirToLight);
+            auto dist2 = aten::squared_length(lightsample.dir);
+
+            auto energy = brdf * lightsample.finalColor;
+
+            cosShadow = aten::abs(cosShadow);
+
+            if (cosShadow > 0 && cosLight > 0) {
+                if (light.attrib.isSingular) {
+                    energy = energy * cosShadow * cosLight;
+                }
+                else {
+                    energy = energy * cosShadow * cosLight / dist2;
+                }
+            }
+            else {
+                energy.x = energy.y = energy.z = 0.0f;
+            }
+
+            auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
+
+            auto weight = target_density * neighbor_reservoir.pdf_ * m;
+
+            auto r = sampler.nextSample();
+
+            if (comibined_reservoir.update(lightsample, light_pos, weight, m, r)) {
+                selected_target_density = target_density;
+            }
+        }
+        else {
+            comibined_reservoir.update(lightsample, -1, 0.0f, m, 0.0f);
+        }
+    }
+
+    if (selected_target_density > 0.0f) {
+        comibined_reservoir.target_density_ = selected_target_density;
+        // NOTE
+        // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
+        comibined_reservoir.pdf_ = comibined_reservoir.w_sum_ / (comibined_reservoir.target_density_ * comibined_reservoir.m_);
+    }
+
+    if (!isfinite(comibined_reservoir.pdf_)) {
+        comibined_reservoir.clear();
+    }
+}
+#else
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
     const aten::LightParameter* __restrict__ lights,
@@ -68,8 +194,8 @@ __global__ void computeTemporalReuse(
     surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
     // 前のフレームのスクリーン座標.
-    int px = ix;// (int)(ix + motionDepth.x * width);
-    int py = iy;// (int)(iy + motionDepth.y * height);
+    int px = (int)(ix + motionDepth.x * width);
+    int py = (int)(iy + motionDepth.y * height);
 
     bool is_acceptable = AT_MATH_IS_IN_BOUND(px, 0, width - 1)
         && AT_MATH_IS_IN_BOUND(py, 0, height - 1);
@@ -590,13 +716,24 @@ namespace idaten {
         return std::make_tuple(0, 0);
 #else
         if (bounce == 0) {
-            const auto cur_idx = static_cast<int>(RervoirsPos::Current);
-            const auto prev_idx = static_cast<int>(RervoirsPos::Previous);
-            const auto dst_idx = static_cast<int>(RervoirsPos::Destination);
+            const auto cur_idx = m_curReservoirPos;
+            const auto prev_idx = (m_curReservoirPos + 1) & 0x01;
+            const auto dst_idx = (m_curReservoirPos + 1) & 0x01;
+
+            m_curReservoirPos = (m_curReservoirPos + 1) & 0x01;
 #if 1
             if (m_restirMode == ReSTIRMode::ReSTIR
                 || m_restirMode == ReSTIRMode::TemporalReuse) {
                 if (m_frame > 1) {
+#if 1
+#if 0
+                    decltype(m_reservoirs)::value_type::vector_type reservoirs;
+                    m_reservoirs[0].readFromDeviceToHost(reservoirs);
+
+                    decltype(m_reservoirs)::value_type::vector_type prev_reservoirs;
+                    m_reservoirs[1].readFromDeviceToHost(prev_reservoirs);
+#endif
+
                     CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
                     auto motionDepthBuffer = m_motionDepthBuffer.bind();
 
@@ -611,8 +748,47 @@ namespace idaten {
                         m_restir_infos.ptr(),
                         motionDepthBuffer,
                         width, height);
+#else
+                    decltype(m_pathSampler)::vector_type samplers;
+                    m_pathSampler.readFromDeviceToHost(samplers);
 
-                    checkCudaKernel(computeTemporalReuse);
+                    decltype(m_lightparam)::vector_type lights;
+                    m_lightparam.readFromDeviceToHost(lights);
+
+                    decltype(m_mtrlparam)::vector_type mtrls;
+                    m_mtrlparam.readFromDeviceToHost(mtrls);
+
+                    decltype(m_aovTexclrMeshid)::vector_type aov;
+                    m_aovTexclrMeshid.readFromDeviceToHost(aov);
+
+                    decltype(m_reservoirs)::value_type::vector_type reservoirs;
+                    m_reservoirs[0].readFromDeviceToHost(reservoirs);
+
+                    decltype(m_reservoirs)::value_type::vector_type prev_reservoirs;
+                    m_reservoirs[1].readFromDeviceToHost(prev_reservoirs);
+
+                    decltype(m_restir_infos)::vector_type infos;
+                    m_restir_infos.readFromDeviceToHost(infos);
+
+                    for (int iy = 0; iy < height; iy++) {
+                        for (int ix = 0; ix < width; ix++) {
+                            computeTemporalReuse(
+                                ix, iy,
+                                samplers.data(),
+                                lights.data(),
+                                mtrls.data(),
+                                aov.data(),
+                                reservoirs.data(),
+                                prev_reservoirs.data(),
+                                infos.data(),
+                                width, height);
+                        }
+                    }
+
+                    int x = 0;
+#endif
+
+                    //checkCudaKernel(computeTemporalReuse);
                 }
             }
 #endif
@@ -632,11 +808,11 @@ namespace idaten {
 
                 checkCudaKernel(computeSpatialReuse);
 
-                return static_cast<int>(RervoirsPos::Destination);
+                return dst_idx;
             }
         }
 
-        return static_cast<int>(RervoirsPos::Current);
+        return m_curReservoirPos;
 #endif
     }
 }

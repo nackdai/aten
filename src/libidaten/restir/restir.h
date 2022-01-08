@@ -295,6 +295,21 @@ namespace idaten
 
         idaten::TypedCudaMemory<ReSTIRInfo> m_restir_infos;
 
+        // NOTE
+        // previous と spatial destination は使いまわすので２で足りる.
+        // 最初の temporal reuse で previous を参照したら
+        // 後段の spatila reuse では不要なので、spatial destination にすることができる.
+        // e.g.
+        //  - frame 1
+        //     cur:0
+        //     prev:N/A (最初なので temporal は skip)
+        //     spatial_dst:1
+        //     pos=0 -> pos=1(for next)
+        //  - frame 2
+        //     cur:1(=pos)
+        //     prev:0
+        //     spatial_dst:0 (prev:0 は参照済みなので、新しいもので埋めてもいい)
+        //     pos=1 -> pos=0(for next)
         std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
         int m_curReservoirPos = 0;
 

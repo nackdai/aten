@@ -27,6 +27,7 @@ namespace idaten
         enum class ReSTIRMode {
             ReSTIR,
             SpatialReuse,
+            TemporalReuse,
         };
 
         enum AOVMode {
@@ -136,7 +137,6 @@ namespace idaten
         virtual void reset() override final
         {
             m_frame = 1;
-            m_curBufNmlMtrlPos = 0;
         }
 
         uint32_t frame() const
@@ -248,7 +248,7 @@ namespace idaten
             int bounce,
             cudaTextureObject_t texVtxPos);
 
-        std::tuple<int, int> computelReuse(
+        int computelReuse(
             int width, int height,
             int bounce);
 
@@ -274,19 +274,6 @@ namespace idaten
 
         void setStream(cudaStream_t stream);
 
-        int getCurBufNmlMtrlPos() const
-        {
-            return m_curBufNmlMtrlPos;
-        }
-        int getPrevBufNmlMtrlPos() const
-        {
-            return 1 - m_curBufNmlMtrlPos;
-        }
-        void updateCurBufNmlMtrlPos()
-        {
-            m_curBufNmlMtrlPos = 1 - m_curBufNmlMtrlPos;
-        }
-
     protected:
         bool m_isInitPash{ false };
         idaten::TypedCudaMemory<Path> m_paths;
@@ -306,15 +293,14 @@ namespace idaten
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
 
-        // 0: src, 1: dst
-        std::array<idaten::TypedCudaMemory<ReSTIRInfo>, 2>  m_restir_infos;
+        idaten::TypedCudaMemory<ReSTIRInfo> m_restir_infos;
 
-        // 0: current src, 1: temporaly dst, 2: dst (previous result in next frame)
-        std::array<idaten::TypedCudaMemory<Reservoir>, 3> m_reservoirs;
-
-        // Keep current result and reuse it as previous result.
-        std::array<idaten::TypedCudaMemory<NormalMaterialStorage>, 2> m_bufNmlMtrl;
-        int m_curBufNmlMtrlPos{ 0 };
+        enum class RervoirsPos {
+            Current,
+            Previous,
+            Destination = Previous,
+        };
+        std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
 
         // AOV buffe
         idaten::TypedCudaMemory<float4> m_aovNormalDepth;

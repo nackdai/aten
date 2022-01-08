@@ -20,7 +20,6 @@ __global__ void shade(
     idaten::TileDomain tileDomain,
     idaten::Reservoir* reservoirs,
     idaten::ReSTIRInfo* restir_infos,
-    idaten::ReSTIRPathTracing::NormalMaterialStorage* nml_mtrl_buf,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
@@ -151,11 +150,6 @@ __global__ void shade(
 
         aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
         aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.mtrlid);
-
-        nml_mtrl_buf[idx].normal = orienting_normal;
-        nml_mtrl_buf[idx].mtrl_idx = rec.mtrlid;
-        nml_mtrl_buf[idx].is_voxel = rec.isVoxel;
-        nml_mtrl_buf[idx].is_mtrl_valid = (rec.mtrlid >= 0);
     }
 
     // Implicit conection to light.
@@ -541,13 +535,10 @@ namespace idaten
 
         auto& hitcount = m_compaction.getCount();
 
-        int curBufNmlMtrlPos = getCurBufNmlMtrlPos();
-
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
             m_reservoirs[0].ptr(),
-            m_restir_infos[0].ptr(),
-            m_bufNmlMtrl[curBufNmlMtrlPos].ptr(),
+            m_restir_infos.ptr(),
             m_aovNormalDepth.ptr(),
             m_aovTexclrMeshid.ptr(),
             mtxW2C,
@@ -603,12 +594,10 @@ namespace idaten
         checkCudaKernel(hitShadowRay);
 
         const auto target_idx = computelReuse(width, height, bounce);
-        const auto reservior_idx = std::get<0>(target_idx);
-        const auto restir_info_idx = std::get<1>(target_idx);
 
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_reservoirs[reservior_idx].ptr(),
-            m_restir_infos[restir_info_idx].ptr(),
+            m_reservoirs[target_idx].ptr(),
+            m_restir_infos.ptr(),
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),
             m_aovNormalDepth.ptr(),

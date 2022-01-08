@@ -12,88 +12,27 @@
 
 #include "aten4idaten.h"
 
-#if 0
-__device__ float computeEnergyCost(
-    idaten::Context& ctxt,
-    const aten::vec4 albedo,
-    const idaten::Reservoir neighbor_reservoir,
-    const idaten::ReSTIRIntermedidate& cur_info,
-    const idaten::ReSTIRIntermedidate& neighbor_info)
-{
-    aten::MaterialParameter mtrl;
-    if (cur_info.is_mtrl_valid) {
-        mtrl = ctxt.mtrls[cur_info.mtrl_idx];
-    }
-    else {
-        mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
-        mtrl.baseColor = aten::vec3(1.0f);
-    }
-
-    const aten::vec3 orienting_normal(
-        cur_info.nml_x,
-        cur_info.nml_y,
-        cur_info.nml_z);
-
-    auto dir_to_light = neighbor_info.light_pos - cur_info.p;
-    auto dist_to_light = length(dir_to_light);
-    dir_to_light /= dist_to_light;
-
-    auto bsdf = sampleBSDF(
-        &ctxt,
-        &mtrl,
-        orienting_normal,
-        cur_info.wi,
-        dir_to_light,
-        cur_info.u, cur_info.v,
-        albedo);
-
-    const auto neighbor_light_idx = neighbor_reservoir.light_idx;
-
-    aten::vec3 energy;
-    computeLighting(
-        energy,
-        ctxt.lights[neighbor_light_idx],
-        orienting_normal,
-        neighbor_info.light_sample_nml,
-        neighbor_reservoir.light_pdf,
-        neighbor_info.light_color,
-        dir_to_light,
-        dist_to_light);
-
-    energy = energy * bsdf;
-
-    auto cost = (energy.x + energy.y + energy.z) / 3;
-
-    return cost;
-}
-
+#if 1
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
     const aten::LightParameter* __restrict__ lights,
     const aten::MaterialParameter* __restrict__ mtrls,
     cudaTextureObject_t* textures,
     const float4* __restrict__ aovTexclrMeshid,
-    const idaten::Reservoir* __restrict__ cur_reservoirs,
+    idaten::Reservoir* reservoirs,
     const idaten::Reservoir* __restrict__ prev_reservoirs,
-    idaten::Reservoir* dst_reservoirs,
-    const idaten::ReSTIRIntermedidate* __restrict__ intermediates,
-    idaten::ReSTIRIntermedidate* dst_intermediates,
-    const idaten::ReSTIRPathTracing::NormalMaterialStorage* __restrict__ cur_nml_mtrl_buf,
-    const idaten::ReSTIRPathTracing::NormalMaterialStorage* __restrict__ prev_nml_mtrl_buf,
+    const idaten::ReSTIRInfo* __restrict__ infos,
     cudaSurfaceObject_t motionDetphBuffer,
     int width, int height)
 {
-    auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-    auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= width || iy >= height) {
         return;
     }
 
     auto idx = getIdx(ix, iy, width);
-
-    float4 motionDepth;
-    surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
     idaten::Context ctxt;
     {
@@ -102,116 +41,132 @@ __global__ void computeTemporalReuse(
         ctxt.textures = textures;
     }
 
-    int reuse_idx = -1;
-    auto new_reservoir = cur_reservoirs[idx];
+    const auto& self_info = infos[idx];
+    aten::MaterialParameter mtrl;
+    gatherMaterialInfo(
+        mtrl,
+        &ctxt,
+        self_info.mtrl_idx,
+        self_info.is_voxel);
 
-    const auto& cur_nml = cur_nml_mtrl_buf[idx].normal;
-    const auto& cur_mtrl_idx = cur_nml_mtrl_buf[idx].mtrl_idx;
+    const auto& normal = self_info.nml;
+
+    auto& sampler = paths->sampler[idx];
 
     const auto& albedo_meshid = aovTexclrMeshid[idx];
     const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-    auto& sampler = paths->sampler[idx];
+    auto& comibined_reservoir = reservoirs[idx];
+
+    float selected_target_density = comibined_reservoir.isValid()
+        ? comibined_reservoir.target_density_
+        : 0.0f;
+
+    const auto maxM = 20 * comibined_reservoir.m_;
+
+    float4 motionDepth;
+    surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
     // 前のフレームのスクリーン座標.
-    int px = (int)(ix + motionDepth.x * width);
-    int py = (int)(iy + motionDepth.y * height);
+    int px = ix;// (int)(ix + motionDepth.x * width);
+    int py = iy;// (int)(iy + motionDepth.y * height);
 
-    if (AT_MATH_IS_IN_BOUND(px, 0, width - 1)
-        && AT_MATH_IS_IN_BOUND(py, 0, height - 1))
+    bool is_acceptable = AT_MATH_IS_IN_BOUND(px, 0, width - 1)
+        && AT_MATH_IS_IN_BOUND(py, 0, height - 1);
+
+    if (is_acceptable)
     {
-        int prev_idx = getIdx(px, py, width);
+        aten::LightSampleResult lightsample;
 
-        const auto& prev_nml = prev_nml_mtrl_buf[prev_idx].normal;
-        const auto& prev_mtrl_idx = prev_nml_mtrl_buf[prev_idx].mtrl_idx;
+        auto neighbor_idx = getIdx(px, py, width);
+        const auto& neighbor_reservoir = prev_reservoirs[neighbor_idx];
 
-        // TODO
-        // Compare normal and material type
-        // Even if material index is different, if the material type is same, it's ok.
+        auto m = std::min(neighbor_reservoir.m_, maxM);
 
-        {
-            const auto& prev_reservoir = prev_reservoirs[prev_idx];
+        if (neighbor_reservoir.isValid()) {
+            const auto& neighbor_info = infos[neighbor_idx];
 
-            if (prev_reservoir.light_idx > 0) {
-                const auto& cur_info = intermediates[idx];
-                const auto& prev_info = intermediates[prev_idx];
+            const auto& neighbor_normal = neighbor_info.nml;
 
-                aten::MaterialParameter mtrl;
-                if (cur_info.is_mtrl_valid) {
-                    mtrl = mtrls[cur_info.mtrl_idx];
+            aten::MaterialParameter neightbor_mtrl;
+            gatherMaterialInfo(
+                neightbor_mtrl,
+                &ctxt,
+                neighbor_info.mtrl_idx,
+                neighbor_info.is_voxel);
+
+            // Check how close with neighbor pixel.
+            is_acceptable = (mtrl.type == neightbor_mtrl.type)
+                && (dot(normal, neighbor_normal) >= 0.95f);
+
+            if (is_acceptable) {
+                const auto light_pos = neighbor_reservoir.light_idx_;
+
+                const auto& light = ctxt.lights[light_pos];
+
+                sampleLight(&lightsample, &ctxt, &light, self_info.p, neighbor_normal, &sampler, 0);
+
+                aten::vec3 nmlLight = lightsample.nml;
+                aten::vec3 dirToLight = normalize(lightsample.dir);
+
+                auto pdf = samplePDF(
+                    &ctxt, &neightbor_mtrl,
+                    normal,
+                    self_info.wi, dirToLight,
+                    self_info.u, self_info.v);
+                auto brdf = sampleBSDF(
+                    &ctxt, &neightbor_mtrl,
+                    normal,
+                    self_info.wi, dirToLight,
+                    self_info.u, self_info.v,
+                    albedo);
+                brdf /= pdf;
+
+                auto cosShadow = dot(normal, dirToLight);
+                auto cosLight = dot(nmlLight, -dirToLight);
+                auto dist2 = aten::squared_length(lightsample.dir);
+
+                auto energy = brdf * lightsample.finalColor;
+
+                cosShadow = aten::abs(cosShadow);
+
+                if (cosShadow > 0 && cosLight > 0) {
+                    if (light.attrib.isSingular) {
+                        energy = energy * cosShadow * cosLight;
+                    }
+                    else {
+                        energy = energy * cosShadow * cosLight / dist2;
+                    }
                 }
                 else {
-                    mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
-                    mtrl.baseColor = aten::vec3(1.0f);
+                    energy.x = energy.y = energy.z = 0.0f;
                 }
 
-                const aten::vec3 orienting_normal(
-                    cur_info.nml_x,
-                    cur_info.nml_y,
-                    cur_info.nml_z);
+                auto target_density = (energy.x + energy.y + energy.z) / 3; // p_hat
 
-                auto dir_to_light = prev_info.light_pos - cur_info.p;
-                auto dist_to_light = length(dir_to_light);
-                dir_to_light /= dist_to_light;
+                auto weight = target_density * neighbor_reservoir.pdf_ * m;
 
-                auto bsdf = sampleBSDF(
-                    &ctxt,
-                    &mtrl,
-                    orienting_normal,
-                    cur_info.wi,
-                    dir_to_light,
-                    cur_info.u, cur_info.v,
-                    albedo);
+                auto r = sampler.nextSample();
 
-                const auto prev_light_idx = prev_reservoir.light_idx;
-
-                aten::vec3 energy;
-                computeLighting(
-                    energy,
-                    lights[prev_light_idx],
-                    orienting_normal,
-                    prev_info.light_sample_nml,
-                    prev_reservoir.light_pdf,
-                    prev_info.light_color,
-                    dir_to_light,
-                    dist_to_light);
-
-                energy = energy * bsdf;
-
-                auto cost = (energy.x + energy.y + energy.z) / 3;
-
-                auto w_sum = new_reservoir.w + cost;
-
-                if (w_sum > 0.0f
-                    && sampler.nextSample() <= cost / w_sum)
-                {
-                    new_reservoir.w = w_sum;
-                    new_reservoir.m += min(prev_reservoir.m, 20 * new_reservoir.m);
-                    new_reservoir.selected_cost = cost;
-                    new_reservoir.pdf = w_sum / (cost * new_reservoir.m);
-                    new_reservoir.light_pdf = prev_reservoir.light_pdf;
-                    new_reservoir.light_idx = prev_reservoir.light_idx;
-                    reuse_idx = prev_idx;
+                if (comibined_reservoir.update(lightsample, light_pos, weight, m, r)) {
+                    selected_target_density = target_density;
                 }
             }
         }
+        else {
+            comibined_reservoir.update(lightsample, -1, 0.0f, m, 0.0f);
+        }
     }
 
-    if (!isfinite(new_reservoir.pdf)) {
-        new_reservoir.light_pdf = real(0);
-        new_reservoir.light_idx = -1;
+    if (selected_target_density > 0.0f) {
+        comibined_reservoir.target_density_ = selected_target_density;
+        // NOTE
+        // 1/p_hat(xz) * (1/M * w_sum) = w_sum / (p_hat(xi) * M)
+        comibined_reservoir.pdf_ = comibined_reservoir.w_sum_ / (comibined_reservoir.target_density_ * comibined_reservoir.m_);
     }
 
-    dst_intermediates[idx] = intermediates[idx];
-
-    if (reuse_idx >= 0) {
-        dst_reservoirs[idx] = new_reservoir;
-
-        dst_intermediates[idx].light_sample_nml = intermediates[reuse_idx].light_sample_nml;
-        dst_intermediates[idx].light_color = intermediates[reuse_idx].light_color;
-    }
-    else {
-        dst_reservoirs[idx] = cur_reservoirs[idx];
+    if (!isfinite(comibined_reservoir.pdf_)) {
+        comibined_reservoir.clear();
     }
 }
 #endif
@@ -362,8 +317,8 @@ __global__ void computeSpatialReuse(
     const idaten::ReSTIRInfo* __restrict__ infos,
     int width, int height)
 {
-    auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-    auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= width || iy >= height) {
         return;
@@ -418,8 +373,8 @@ __global__ void computeSpatialReuse(
 
 #pragma unroll
     for (int i = 0; i < AT_COUNTOF(offset_x); i++) {
-        const auto xx = ix + offset_x[i];
-        const auto yy = iy + offset_y[i];
+        const int xx = ix + offset_x[i];
+        const int yy = iy + offset_y[i];
 
         bool is_acceptable = AT_MATH_IS_IN_BOUND(xx, 0, width - 1)
             && AT_MATH_IS_IN_BOUND(yy, 0, height - 1);
@@ -522,7 +477,7 @@ __global__ void computeSpatialReuse(
 #endif
 
 namespace idaten {
-    std::tuple<int, int> ReSTIRPathTracing::computelReuse(
+    int ReSTIRPathTracing::computelReuse(
         int width, int height,
         int bounce)
     {
@@ -562,8 +517,6 @@ namespace idaten {
                         m_reservoirs[TEMPORAL_REUSE_RESERVOIR_DST_IDX].ptr(),
                         m_intermediates[spatial_resue_intermediate_src_idx].ptr(),
                         m_intermediates[spatial_resue_intermediate_dst_idx].ptr(),
-                        m_bufNmlMtrl[curBufNmlMtrlPos].ptr(),
-                        m_bufNmlMtrl[prevBufNmlMtrlPos].ptr(),
                         motionDepthBuffer,
                         width, height);
 
@@ -637,23 +590,53 @@ namespace idaten {
         return std::make_tuple(0, 0);
 #else
         if (bounce == 0) {
-            computeSpatialReuse << <grid, block, 0, m_stream >> > (
-                m_paths.ptr(),
-                m_lightparam.ptr(),
-                m_mtrlparam.ptr(),
-                m_tex.ptr(),
-                m_aovTexclrMeshid.ptr(),
-                m_reservoirs[0].ptr(),
-                m_reservoirs[1].ptr(),
-                m_restir_infos[0].ptr(),
-                width, height);
+            const auto cur_idx = static_cast<int>(RervoirsPos::Current);
+            const auto prev_idx = static_cast<int>(RervoirsPos::Previous);
+            const auto dst_idx = static_cast<int>(RervoirsPos::Destination);
+#if 1
+            if (m_restirMode == ReSTIRMode::ReSTIR
+                || m_restirMode == ReSTIRMode::TemporalReuse) {
+                if (m_frame > 1) {
+                    CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
+                    auto motionDepthBuffer = m_motionDepthBuffer.bind();
 
-            checkCudaKernel(computeSpatialReuse);
+                    computeTemporalReuse << <grid, block, 0, m_stream >> > (
+                        m_paths.ptr(),
+                        m_lightparam.ptr(),
+                        m_mtrlparam.ptr(),
+                        m_tex.ptr(),
+                        m_aovTexclrMeshid.ptr(),
+                        m_reservoirs[cur_idx].ptr(),
+                        m_reservoirs[prev_idx].ptr(),
+                        m_restir_infos.ptr(),
+                        motionDepthBuffer,
+                        width, height);
 
-            return std::make_tuple(1, 0);
+                    checkCudaKernel(computeTemporalReuse);
+                }
+            }
+#endif
+
+            if (m_restirMode == ReSTIRMode::ReSTIR
+                || m_restirMode == ReSTIRMode::SpatialReuse) {
+                computeSpatialReuse << <grid, block, 0, m_stream >> > (
+                    m_paths.ptr(),
+                    m_lightparam.ptr(),
+                    m_mtrlparam.ptr(),
+                    m_tex.ptr(),
+                    m_aovTexclrMeshid.ptr(),
+                    m_reservoirs[cur_idx].ptr(),
+                    m_reservoirs[dst_idx].ptr(),
+                    m_restir_infos.ptr(),
+                    width, height);
+
+                checkCudaKernel(computeSpatialReuse);
+
+                return static_cast<int>(RervoirsPos::Destination);
+            }
         }
 
-        return std::make_tuple(0, 0);
+        return static_cast<int>(RervoirsPos::Current);
 #endif
     }
 }

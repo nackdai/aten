@@ -141,14 +141,17 @@ cuda_add_library(
   multigpu/renderer_multigpu.h
   multigpu/svgf_multigpu.cpp
   multigpu/svgf_multigpu.h
+  restir/reservior.h
+  restir/restir.cu
   restir/restir_debug.cu
   restir/restir_init.cu
-  restir/restir_pt.cu
   restir/restir_reuse.cu
   restir/restir_ssrt.cu
   restir/restir.cpp
-  restir/restir.cu
   restir/restir.h
+  restir/restir_info.h
+  restir/restir_pt.cu
+  restir/restir_sample_light.cuh
   svgf/svgf.cpp
   svgf/svgf.h
   svgf/svgf_VarianceEstimation.cu

@@ -121,7 +121,7 @@ namespace aten
             break;
         default:
             AT_ASSERT(false);
-            AT_PRINTF("No material type [%f(%d)]\n", __FILE__, __LINE__);
+            AT_PRINTF("No material type [%s(%d)]\n", __FILE__, __LINE__);
             mtrl = new aten::lambert();
             break;
         }

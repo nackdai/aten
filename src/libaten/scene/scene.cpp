@@ -173,7 +173,7 @@ namespace aten {
             reservoir.pdf_ = reservoir.w_sum_ / (reservoir.target_density_ * reservoir.m_);
         }
 
-        if (!isfinite(reservoir.pdf_)) {
+        if (!std::isfinite(reservoir.pdf_)) {
             reservoir.pdf_ = 0.0f;
             reservoir.target_density_ = 0.0f;
             reservoir.light_idx_ = -1;

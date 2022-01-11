@@ -118,7 +118,7 @@ namespace idaten {
             }
             m_tex.init(texs.size());
 
-            AT_ASSERT(envmapRsc.idx < texs.size());
+            //AT_ASSERT(envmapRsc.idx < texs.size());
             if (envmapRsc.idx < texs.size()) {
                 m_envmapRsc = envmapRsc;
             }

@@ -6,9 +6,9 @@
 #include "kernel/intersect.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
-#include "kernel/persistent_thread.h"
 #include "kernel/pt_common.h"
 #include "kernel/StreamCompaction.h"
+#include "kernel/pt_standard_impl.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -89,159 +89,6 @@ __global__ void genPath(
 
     // Accumulate value, so do not reset.
     //path.contrib = aten::vec3(0);
-}
-
-namespace restir {
-    __device__ unsigned int g_headDev = 0;
-}
-
-__global__ void hitTest(
-    idaten::TileDomain tileDomain,
-    idaten::Path* paths,
-    aten::Intersection* isects,
-    aten::ray* rays,
-    int* hitbools,
-    int width, int height,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
-    const aten::LightParameter* __restrict__ lights, int lightnum,
-    cudaTextureObject_t* nodes,
-    const aten::PrimitiveParamter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    aten::mat4* matrices,
-    int bounce,
-    float hitDistLimit)
-{
-#ifdef ENABLE_PERSISTENT_THREAD
-    // warp-wise head index of tasks in a block
-    __shared__ volatile unsigned int headBlock[NUM_WARP_PER_BLOCK];
-
-    volatile unsigned int& headWarp = headBlock[threadIdx.y];
-
-    if (blockIdx.x == 0 && threadIdx.x == 0) {
-        restir::g_headDev = 0;
-    }
-
-    idaten::Context ctxt;
-    {
-        ctxt.geomnum = geomnum;
-        ctxt.shapes = shapes;
-        ctxt.lightnum = lightnum;
-        ctxt.lights = lights;
-        ctxt.nodes = nodes;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.matrices = matrices;
-    }
-
-    do
-    {
-        // let lane 0 fetch [wh, wh + WARP_SIZE - 1] for a warp
-        if (threadIdx.x == 0) {
-            headWarp = atomicAdd(&restir::g_headDev, WARP_SIZE);
-        }
-        // task index per thread in a warp
-        unsigned int idx = headWarp + threadIdx.x;
-
-        if (idx >= tileDomain.w * tileDomain.h) {
-            return;
-        }
-
-        paths->attrib[idx].isHit = false;
-
-        hitbools[idx] = 0;
-
-        if (paths->attrib[idx].isTerminate) {
-            continue;
-        }
-
-        aten::Intersection isect;
-
-        float t_max = AT_MATH_INF;
-
-        if (bounce >= 1
-            && !paths->attrib[idx].isSingular)
-        {
-            t_max = hitDistLimit;
-        }
-
-        // TODO
-        // 近距離でVoxelにすると品質が落ちる.
-        // しかも同じオブジェクト間だとそれが起こりやすい.
-        //bool enableLod = (bounce >= 2);
-        bool enableLod = false;
-        int depth = 9;
-
-        bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod, depth);
-
-        isects[idx] = isect;
-
-        if (bounce >= 1
-            && !paths->attrib[idx].isSingular
-            && isect.t > hitDistLimit)
-        {
-            isHit = false;
-            paths->attrib[idx].isTerminate = true;
-        }
-
-        paths->attrib[idx].isHit = isHit;
-
-        hitbools[idx] = isHit ? 1 : 0;
-    } while (true);
-#else
-    const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-    const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
-        return;
-    }
-
-    const auto idx = getIdx(ix, iy, tileDomain.w);
-
-    paths->attrib[idx].isHit = false;
-
-    hitbools[idx] = 0;
-
-    if (paths->attrib[idx].isTerminate) {
-        return;
-    }
-
-    idaten::Context ctxt;
-    {
-        ctxt.geomnum = geomnum;
-        ctxt.shapes = shapes;
-        ctxt.lightnum = lightnum;
-        ctxt.lights = lights;
-        ctxt.nodes = nodes;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.matrices = matrices;
-    }
-
-    aten::Intersection isect;
-
-    float t_max = AT_MATH_INF;
-
-    if (bounce >= 1
-        && !paths->attrib[idx].isSingular)
-    {
-        t_max = hitDistLimit;
-    }
-
-    bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max);
-
-    isects[idx] = isect;
-
-    if (bounce >= 1
-        && !paths->attrib[idx].isSingular
-        && isect.t > hitDistLimit)
-    {
-        isHit = false;
-    }
-
-    paths->attrib[idx].isHit = isHit;
-
-    hitbools[idx] = isHit ? 1 : 0;
-#endif
 }
 
 __global__ void shadeMiss(
@@ -853,37 +700,16 @@ namespace idaten
         cudaTextureObject_t texVtxPos)
     {
         if (bounce == 0 && m_canSSRTHitTest) {
-            onScreenSpaceHitTest(width, height, bounce, texVtxPos);
+            hitTestOnScreenSpace(
+                width, height,
+                m_gbuffer,
+                texVtxPos);
         }
         else {
-#ifdef ENABLE_PERSISTENT_THREAD
-            hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK), 0, m_stream >> > (
-#else
-            dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-            dim3 grid(
-                (m_tileDomain.w + block.x - 1) / block.x,
-                (m_tileDomain.h + block.y - 1) / block.y);
-
-            hitTest << <grid, block >> > (
-#endif
-                //hitTest << <1, 1 >> > (
-                m_tileDomain,
-                m_paths.ptr(),
-                m_isects.ptr(),
-                m_rays.ptr(),
-                m_hitbools.ptr(),
+            hitTest(
                 width, height,
-                m_shapeparam.ptr(), m_shapeparam.num(),
-                m_lightparam.ptr(), m_lightparam.num(),
-                m_nodetex.ptr(),
-                m_primparams.ptr(),
-                texVtxPos,
-                m_mtxparams.ptr(),
                 bounce,
-                m_hitDistLimit);
-
-            checkCudaKernel(hitTest);
-			cudaDeviceSynchronize();
+                texVtxPos);
         }
     }
 

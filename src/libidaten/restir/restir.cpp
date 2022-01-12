@@ -1,11 +1,12 @@
 #include "restir/restir.h"
 
-#include "kernel/StreamCompaction.h"
-
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
+
+#include "kernel/StreamCompaction.h"
+#include "kernel/pt_standard_impl.h"
 
 #include "aten4idaten.h"
 
@@ -152,7 +153,7 @@ namespace idaten
 
         m_shadowRays.init(width * height);
 
-        onInit(width, height);
+        initPath(width, height);
 
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
@@ -203,7 +204,7 @@ namespace idaten
             width * height,
             1024);
 
-        onClear();
+        clearPath();
 
         onRender(
             tileDomain,

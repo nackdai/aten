@@ -8,7 +8,7 @@
 
 __global__ void copyBufferForTile(
     idaten::TileDomain tileDomain,
-    const idaten::SVGFPathTracing::Path* paths,
+    const idaten::Path* paths,
     float4* contribs,
     int width, int height)
 {

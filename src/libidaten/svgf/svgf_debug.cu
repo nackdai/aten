@@ -134,7 +134,7 @@ __global__ void pickPixel(
     int ix, int iy,
     int width, int height,
     const aten::CameraParameter* __restrict__ camera,
-    const idaten::SVGFPathTracing::Path* __restrict__ paths,
+    const idaten::Path* __restrict__ paths,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
     const aten::GeomParameter* __restrict__ shapes, int geomnum,

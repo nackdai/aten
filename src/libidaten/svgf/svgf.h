@@ -3,7 +3,7 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
-
+#include "kernel/pt_params.h"
 #include "kernel/renderer.h"
 #include "sampler/sampler.h"
 
@@ -30,64 +30,6 @@ namespace idaten
         };
 
         static const int ShadowRayNum = 2;
-
-#ifdef __AT_CUDA__
-        struct PathThroughput {
-            aten::vec3 throughput;
-            real pdfb;
-        };
-
-        struct PathContrib {
-            union {
-                float4 v;
-                struct {
-                    float3 contrib;
-                    float samples;
-                };
-            };
-        };
-
-        struct PathAttribute {
-            union {
-                float4 v;
-                struct {
-                    bool isHit;
-                    bool isTerminate;
-                    bool isSingular;
-                    bool isKill;
-
-                    aten::MaterialType mtrlType;
-                };
-            };
-        };
-
-        struct Path {
-            PathThroughput* throughput;
-            PathContrib* contrib;
-            PathAttribute* attrib;
-            aten::sampler* sampler;
-        };
-
-        struct ShadowRay {
-            aten::vec3 rayorg;
-
-            aten::vec3 raydir;
-            aten::vec3 lightcontrib;
-            real distToLight;
-
-            uint8_t targetLightId;
-
-            struct {
-                uint32_t isActive : 1;
-            };
-        };
-#else
-        struct Path;
-        struct PathThroughput;
-        struct PathContrib;
-        struct PathAttribute;
-        struct ShadowRay;
-#endif
 
         struct PickedInfo {
             int ix{ -1 };

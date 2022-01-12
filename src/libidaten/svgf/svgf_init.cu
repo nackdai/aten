@@ -8,10 +8,10 @@
 #include "aten4idaten.h"
 
 __global__ void initSVGF(
-    idaten::SVGFPathTracing::Path* path,
-    idaten::SVGFPathTracing::PathThroughput* throughput,
-    idaten::SVGFPathTracing::PathContrib* contrib,
-    idaten::SVGFPathTracing::PathAttribute* attrib,
+    idaten::Path* path,
+    idaten::PathThroughput* throughput,
+    idaten::PathContrib* contrib,
+    idaten::PathAttribute* attrib,
     aten::sampler* sampler)
 {
     path->throughput = throughput;

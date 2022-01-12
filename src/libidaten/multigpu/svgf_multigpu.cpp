@@ -4,6 +4,8 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+#include "kernel/pt_standard_impl.h"
+
 #include "aten4idaten.h"
 
 namespace idaten
@@ -34,7 +36,7 @@ namespace idaten
 
         m_shadowRays.init(width * height * ShadowRayNum);
 
-        onInit(width, height);
+        initPath(width, height);
 
         auto vtxTexPos = m_vtxparamsPos.bind();
         auto vtxTexNml = m_vtxparamsNml.bind();
@@ -91,7 +93,7 @@ namespace idaten
             width * height,
             1024);
 
-        onClear();
+        clearPath();
 
         onRender(
             tileDomain,

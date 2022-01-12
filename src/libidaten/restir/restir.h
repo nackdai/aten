@@ -8,7 +8,7 @@
 #include "cuda/cudaGLresource.h"
 
 #include "kernel/pt_params.h"
-#include "kernel/renderer.h"
+#include "kernel/pt_standard_impl.h"
 #include "sampler/sampler.h"
 
 #include "reservior.h"
@@ -16,7 +16,7 @@
 
 namespace idaten
 {
-    class ReSTIRPathTracing : public Renderer {
+    class ReSTIRPathTracing : public StandardPT {
     public:
         enum class Mode {
             ReSTIR,
@@ -188,9 +188,21 @@ namespace idaten
         }
 
     protected:
-        void onInit(int width, int height);
+        virtual bool initPath(
+            int width, int height) override final
+        {
+            if (StandardPT::initPath(width, height)) {
+                m_restir_infos.init(width * height);
 
-        void onClear();
+                for (auto& r : m_reservoirs) {
+                    r.init(width * height);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
         void onRender(
             const TileDomain& tileDomain,
@@ -208,11 +220,6 @@ namespace idaten
             cudaTextureObject_t texVtxNml);
 
         virtual void onHitTest(
-            int width, int height,
-            int bounce,
-            cudaTextureObject_t texVtxPos);
-
-        virtual void onScreenSpaceHitTest(
             int width, int height,
             int bounce,
             cudaTextureObject_t texVtxPos);
@@ -275,21 +282,6 @@ namespace idaten
         void setStream(cudaStream_t stream);
 
     protected:
-        bool m_isInitPash{ false };
-        idaten::TypedCudaMemory<Path> m_paths;
-        idaten::TypedCudaMemory<PathThroughput> m_pathThroughput;
-        idaten::TypedCudaMemory<PathContrib> m_pathContrib;
-        idaten::TypedCudaMemory<PathAttribute> m_pathAttrib;
-        idaten::TypedCudaMemory<aten::sampler> m_pathSampler;
-
-        idaten::TypedCudaMemory<aten::Intersection> m_isects;
-        idaten::TypedCudaMemory<aten::ray> m_rays;
-
-        idaten::TypedCudaMemory<int> m_hitbools;
-        idaten::TypedCudaMemory<int> m_hitidx;
-
-        idaten::TypedCudaMemory<ShadowRay> m_shadowRays;
-
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
 
@@ -325,11 +317,6 @@ namespace idaten
         aten::mat4 m_mtxV2W;
         aten::mat4 m_mtxPrevW2V;
 
-        uint32_t m_frame{ 1 };
-
-        // Distance limitation to kill path.
-        real m_hitDistLimit{ AT_MATH_INF };
-
         // G-Buffer rendered by OpenGL.
         idaten::CudaGLSurface m_gbuffer;
         idaten::CudaGLSurface m_motionDepthBuffer;
@@ -343,13 +330,9 @@ namespace idaten
         ReSTIRMode m_restirMode{ ReSTIRMode::ReSTIR };
         AOVMode m_aovMode{ AOVMode::WireFrame };
 
-        TileDomain m_tileDomain;
-
         bool m_isListedTextureObject{ false };
         bool m_canSSRTHitTest{ true };
 
         bool m_enableProgressive{ false };
-
-        cudaStream_t m_stream{ (cudaStream_t)0 };
     };
 }

@@ -1,11 +1,12 @@
 #include "svgf/svgf.h"
 
-#include "kernel/StreamCompaction.h"
-
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
+
+#include "kernel/StreamCompaction.h"
+#include "kernel/pt_standard_impl.h"
 
 #include "aten4idaten.h"
 
@@ -162,7 +163,7 @@ namespace idaten
 
         m_shadowRays.init(width * height * ShadowRayNum);
 
-        onInit(width, height);
+        initPath(width, height);
 
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
@@ -225,7 +226,7 @@ namespace idaten
                     int x = nx * w;
                     int y = ny * h;
 
-                    onClear();
+                    clearPath();
 
                     onRender(
                         TileDomain(x, y, w, h),
@@ -280,7 +281,7 @@ namespace idaten
                 width * height,
                 1024);
 
-            onClear();
+            clearPath();
 
             TileDomain tileDomain(0, 0, width, height);
 

@@ -182,9 +182,6 @@ __global__ void shade(
         return;
     }
 
-    ComputeBrdfFunctor compute_brdf_functor(
-        ctxt, shMtrls[threadIdx.x], orienting_normal, ray.dir, rec.u, rec.v, albedo);
-
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
@@ -192,9 +189,11 @@ __global__ void shade(
 
         auto lightidx = sampleLightWithReservoirRIP(
             reservoir,
-            compute_brdf_functor,
+            shMtrls[threadIdx.x],
             &ctxt,
             rec.p, orienting_normal,
+            ray.dir,
+            rec.u, rec.v, albedo,
             &paths->sampler[idx],
             bounce);
 

@@ -6,78 +6,15 @@
 
 #include "reservior.h"
 
-class ComputeBrdfFunctor {
-public:
-    __device__ ComputeBrdfFunctor(
-        idaten::Context& ctxt,
-        const aten::MaterialParameter& mtrl,
-        const aten::vec3& orienting_normal,
-        const aten::vec3& ray_dir,
-        float u, float v,
-        const aten::vec4& albedo)
-        : ctxt_(ctxt), mtrl_(mtrl), orienting_normal_(orienting_normal),
-        ray_dir_(ray_dir), u_(u), v_(v), albedo_(albedo) {}
-
-    inline __device__ aten::vec3 operator()(const aten::vec3& dir_to_light) {
-        auto pdf = samplePDF(&ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_);
-        auto bsdf = sampleBSDF(&ctxt_, &mtrl_, orienting_normal_, ray_dir_, dir_to_light, u_, v_, albedo_);
-        return bsdf / pdf;
-    }
-
-private:
-    idaten::Context& ctxt_;
-    const aten::MaterialParameter& mtrl_;
-    const aten::vec3& orienting_normal_;
-    const aten::vec3& ray_dir_;
-    float u_;
-    float v_;
-    const aten::vec4& albedo_;
-};
-
-inline __device__ void computeLighting(
-    aten::vec3& energy,
-    const aten::LightParameter& light,
-    const aten::vec3& normal,
-    const aten::vec3& nmlLight,
-    float pdfLight,
-    const aten::vec3& light_color,
-    const aten::vec3& dirToLight,
-    float distToLight)
-{
-    auto cosShadow = dot(normal, dirToLight);
-
-    energy.r = 0.0f;
-    energy.g = 0.0f;
-    energy.b = 0.0f;
-
-    if (cosShadow > 0) {
-        if (light.attrib.isInfinite) {
-            energy = light_color * cosShadow;
-        }
-        else {
-            auto cosLight = dot(nmlLight, -dirToLight);
-
-            if (cosLight > 0) {
-                if (light.attrib.isSingular) {
-                    energy = light_color * cosShadow * cosLight;
-                }
-                else {
-                    auto dist2 = distToLight * distToLight;
-                    energy = light_color * cosShadow * cosLight / dist2;
-                }
-            }
-        }
-
-        energy /= pdfLight;
-    }
-}
-
 inline __device__ int sampleLightWithReservoirRIP(
     idaten::Reservoir& reservoir,
-    ComputeBrdfFunctor& compute_brdf,
+    const aten::MaterialParameter& mtrl,
     idaten::Context* ctxt,
     const aten::vec3& org,
     const aten::vec3& normal,
+    const aten::vec3& ray_dir,
+    float u, float v,
+    const aten::vec4& albedo,
     aten::sampler* sampler,
     int lod = 0)
 {
@@ -104,7 +41,9 @@ inline __device__ int sampleLightWithReservoirRIP(
         aten::vec3 nmlLight = lightsample.nml;
         aten::vec3 dirToLight = normalize(lightsample.dir);
 
-        auto brdf = compute_brdf(dirToLight);
+        auto pdf = samplePDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v);
+        auto brdf = sampleBSDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v, albedo);
+        brdf /= pdf;
 
         auto cosShadow = dot(normal, dirToLight);
         auto cosLight = dot(nmlLight, -dirToLight);

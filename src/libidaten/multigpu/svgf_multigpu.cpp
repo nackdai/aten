@@ -159,7 +159,8 @@ namespace idaten
 
             m_tileDomain = tileDomain;
 
-            onGenPath(
+            generatePath(
+                m_mode == Mode::AOVar,
                 i, maxBounce,
                 seed,
                 vtxTexPos,

@@ -43,12 +43,7 @@ namespace idaten
             mtxs,
             texs, envmapRsc);
 
-        m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-        m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
-
-        auto& r = aten::getRandom();
-        m_random.init(width * height);
-        m_random.writeByNum(&r[0], width * height);
+        initSamplerParameter(width, height);
 
         for (int i = 0; i < 2; i++) {
             m_aovNormalDepth[i].init(width * height);
@@ -356,7 +351,8 @@ namespace idaten
             int seed = time.milliSeconds;
             //int seed = 0;
 
-            onGenPath(
+            generatePath(
+                m_mode == Mode::AOVar,
                 i, maxBounce,
                 seed,
                 vtxTexPos,

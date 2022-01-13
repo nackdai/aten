@@ -18,77 +18,6 @@
 #include "aten4idaten.h"
 
 namespace svgf {
-
-    __global__ void genPath(
-        idaten::TileDomain tileDomain,
-        bool isFillAOV,
-        idaten::Path* paths,
-        aten::ray* rays,
-        int width, int height,
-        int sample,
-        unsigned int frame,
-        const aten::CameraParameter* __restrict__ camera,
-        const void* samplerValues,
-        const unsigned int* __restrict__ random)
-    {
-        auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-        auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (ix >= width || iy >= height) {
-            return;
-        }
-
-        const auto idx = getIdx(ix, iy, width);
-
-        paths->attrib[idx].isHit = false;
-
-        if (paths->attrib[idx].isKill) {
-            paths->attrib[idx].isTerminate = true;
-            return;
-        }
-
-#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
-        auto scramble = random[idx] * 0x1fe3434f;
-        paths->sampler[idx].init(frame + sample, 0, scramble, samplerValues);
-#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
-        auto rnd = random[idx];
-        auto scramble = rnd * 0x1fe3434f
-            * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths->sampler[idx].init(
-            (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
-            0,
-            scramble);
-#endif
-
-        float r1 = paths->sampler[idx].nextSample();
-        float r2 = paths->sampler[idx].nextSample();
-
-        if (isFillAOV) {
-            r1 = r2 = 0.5f;
-        }
-
-        ix += tileDomain.x;
-        iy += tileDomain.y;
-
-        float s = (ix + r1) / (float)(camera->width);
-        float t = (iy + r2) / (float)(camera->height);
-
-        AT_NAME::CameraSampleResult camsample;
-        AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
-
-        rays[idx] = camsample.r;
-
-        paths->throughput[idx].throughput = aten::vec3(1);
-        paths->throughput[idx].pdfb = 0.0f;
-        paths->attrib[idx].isTerminate = false;
-        paths->attrib[idx].isSingular = false;
-
-        paths->contrib[idx].samples += 1;
-
-        // Accumulate value, so do not reset.
-        //path.contrib = aten::vec3(0);
-    }
-
     __global__ void shade(
         idaten::TileDomain tileDomain,
         float4* aovNormalDepth,
@@ -618,34 +547,6 @@ namespace svgf {
 
 namespace idaten
 {
-    void SVGFPathTracing::onGenPath(
-        int sample, int maxBounce,
-        int seed,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
-    {
-        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
-
-        bool isFillAOV = m_mode == Mode::AOVar;
-
-        svgf::genPath << <grid, block, 0, m_stream >> > (
-            m_tileDomain,
-            isFillAOV,
-            m_paths.ptr(),
-            m_rays.ptr(),
-            m_tileDomain.w, m_tileDomain.h,
-            sample,
-            m_frame,
-            m_cam.ptr(),
-            m_sobolMatrices.ptr(),
-            m_random.ptr());
-
-        checkCudaKernel(genPath);
-    }
-
     void SVGFPathTracing::onHitTest(
         int width, int height,
         int bounce,

@@ -370,7 +370,7 @@ namespace idaten
                     bounce,
                     vtxTexPos);
 
-                onShadeMiss(width, height, bounce);
+                missShade(width, height, bounce);
 
                 int hitcount = 0;
                 m_compaction.compact(

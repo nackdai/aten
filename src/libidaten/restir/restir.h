@@ -224,11 +224,19 @@ namespace idaten
             int bounce,
             cudaTextureObject_t texVtxPos);
 
-        virtual void onShadeMiss(
+        void missShade(
             int width, int height,
             int bounce,
             int offsetX = -1,
-            int offsetY = -1);
+            int offsetY = -1)
+        {
+            StandardPT::missShade(
+                width, height,
+                bounce,
+                m_aovNormalDepth,
+                m_aovTexclrMeshid,
+                offsetX, offsetY);
+        }
 
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
@@ -305,7 +313,7 @@ namespace idaten
         std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
         int m_curReservoirPos = 0;
 
-        // AOV buffe
+        // AOV buffer
         idaten::TypedCudaMemory<float4> m_aovNormalDepth;
         idaten::TypedCudaMemory<float4> m_aovTexclrMeshid;
 

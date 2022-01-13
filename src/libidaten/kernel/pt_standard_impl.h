@@ -47,6 +47,14 @@ namespace idaten {
             idaten::CudaGLSurface& gbuffer,
             cudaTextureObject_t texVtxPos);
 
+        virtual void missShade(
+            int width, int height,
+            int bounce,
+            idaten::TypedCudaMemory<float4>& aovNormalDepth,
+            idaten::TypedCudaMemory<float4>& aovTexclrMeshid,
+            int offsetX = -1,
+            int offsetY = -1);
+
     protected:
         uint32_t m_frame{ 1 };
 

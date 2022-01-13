@@ -8,7 +8,7 @@
 #include "kernel/material.cuh"
 #include "kernel/pt_common.h"
 #include "kernel/StreamCompaction.h"
-#include "kernel/pt_standard_impl.h"
+#include "kernel/pt_standard_impl.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -377,41 +377,12 @@ __global__ void hitShadowRay(
     if (!shadowRay.isActive) {
         return;
     }
-    auto targetLightId = shadowRay.targetLightId;
-    auto distToLight = shadowRay.distToLight;
-
-    auto light = ctxt.lights[targetLightId];
-    auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
-
-    real distHitObjToRayOrg = AT_MATH_INF;
-
-    // Ray aim to the area light.
-    // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-    const aten::GeomParameter* hitobj = lightobj;
-
-    aten::Intersection isectTmp;
-
-    bool isHit = false;
-
-    aten::ray r(shadowRay.rayorg, shadowRay.raydir);
 
     // TODO
     bool enableLod = (bounce >= 2);
 
-    isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
-
-    if (isHit) {
-        hitobj = &ctxt.shapes[isectTmp.objid];
-    }
-
-    isHit = AT_NAME::scene::hitLight(
-        isHit,
-        light.attrib,
-        lightobj,
-        distToLight,
-        distHitObjToRayOrg,
-        isectTmp.t,
-        hitobj);
+    auto isHit = kernel::hitShadowRay(
+        enableLod, ctxt, shadowRay);
 
     if (isHit) {
         auto contrib = shadowRay.lightcontrib;

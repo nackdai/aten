@@ -32,10 +32,30 @@ namespace idaten {
         }
 
     protected:
+        virtual void initSamplerParameter(
+            int width, int height)
+        {
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
+            m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
+            m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
+#endif
+
+            auto& r = aten::getRandom();
+            m_random.init(width * height);
+            m_random.writeByNum(&r[0], width * height);
+        }
+
         virtual bool initPath(
             int width, int height);
 
         virtual void clearPath();
+
+        virtual void generatePath(
+            bool needFillAOV,
+            int sample, int maxBounce,
+            int seed,
+            cudaTextureObject_t texVtxPos,
+            cudaTextureObject_t texVtxNml);
 
         virtual void hitTest(
             int width, int height,
@@ -79,5 +99,8 @@ namespace idaten {
 
         // Distance limitation to kill path.
         real m_hitDistLimit{ AT_MATH_INF };
+
+        idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
+        idaten::TypedCudaMemory<unsigned int> m_random;
     };
 }

@@ -213,12 +213,6 @@ namespace idaten
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);
 
-        virtual void onGenPath(
-            int sample, int maxBounce,
-            int seed,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
-
         virtual void onHitTest(
             int width, int height,
             int bounce,
@@ -290,9 +284,6 @@ namespace idaten
         void setStream(cudaStream_t stream);
 
     protected:
-        idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
-        idaten::TypedCudaMemory<unsigned int> m_random;
-
         idaten::TypedCudaMemory<ReSTIRInfo> m_restir_infos;
 
         // NOTE

@@ -289,6 +289,9 @@
     <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.h">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.cuh">
+      <Filter>kernel\renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

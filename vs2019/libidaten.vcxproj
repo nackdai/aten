@@ -103,6 +103,7 @@
     <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h" />
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h" />
     <ClInclude Include="..\src\libidaten\kernel\pt_params.h" />
+    <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.h" />
     <ClInclude Include="..\src\libidaten\kernel\qbvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\qbvh_impl.cuh" />

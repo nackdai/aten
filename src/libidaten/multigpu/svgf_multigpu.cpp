@@ -181,7 +181,7 @@ namespace idaten
                     bounce,
                     vtxTexPos);
 
-                onShadeMiss(
+                missShade(
                     width, height, bounce,
                     offsetX, offsetY);
 

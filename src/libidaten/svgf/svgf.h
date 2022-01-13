@@ -193,11 +193,21 @@ namespace idaten
             int bounce,
             cudaTextureObject_t texVtxPos);
 
-        virtual void onShadeMiss(
+        void missShade(
             int width, int height,
             int bounce,
             int offsetX = -1,
-            int offsetY = -1);
+            int offsetY = -1)
+        {
+            int curaov = getCurAovs();
+
+            StandardPT::missShade(
+                width, height,
+                bounce,
+                m_aovNormalDepth[curaov],
+                m_aovTexclrMeshid[curaov],
+                offsetX, offsetY);
+        }
 
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,

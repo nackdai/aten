@@ -266,6 +266,8 @@ namespace idaten
                 vtxTexPos,
                 vtxTexNml);
 
+            initReSTIR(width, height);
+
             int bounce = 0;
 
             while (bounce < maxBounce) {

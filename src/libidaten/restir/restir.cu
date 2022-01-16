@@ -17,6 +17,24 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+__global__ void initReSTIRParameters(
+    int width, int height,
+    idaten::Reservoir* reservoirs,
+    idaten::ReSTIRInfo* restir_infos)
+{
+    auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+    auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (ix >= width || iy >= height) {
+        return;
+    }
+
+    const auto idx = getIdx(ix, iy, width);
+
+    reservoirs[idx].clear();
+    restir_infos[idx].clear();
+}
+
 __global__ void shade(
     idaten::TileDomain tileDomain,
     idaten::Reservoir* reservoirs,
@@ -481,6 +499,21 @@ __global__ void computeShadowRayContribution(
 
 namespace idaten
 {
+    void ReSTIRPathTracing::initReSTIR(int width, int height)
+    {
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (m_tileDomain.w + block.x - 1) / block.x,
+            (m_tileDomain.h + block.y - 1) / block.y);
+
+        initReSTIRParameters << < grid, block, 0, m_stream >> > (
+            width, height,
+            m_reservoirs[m_curReservoirPos].ptr(),
+            m_restir_infos.ptr());
+
+        checkCudaKernel(initReSTIRParameters);
+    }
+
     void ReSTIRPathTracing::onShadeReSTIR(
         cudaSurfaceObject_t outputSurf,
         int width, int height,
@@ -542,13 +575,15 @@ namespace idaten
 
         onShadeByShadowRayReSTIR(
             width, height,
-            bounce, texVtxPos);
+            bounce,
+            texVtxPos, texVtxNml);
     }
 
     void ReSTIRPathTracing::onShadeByShadowRayReSTIR(
         int width, int height,
         int bounce,
-        cudaTextureObject_t texVtxPos)
+        cudaTextureObject_t texVtxPos,
+        cudaTextureObject_t texVtxNml)
     {
         dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -571,7 +606,11 @@ namespace idaten
 
         checkCudaKernel(hitShadowRay);
 
-        const auto target_idx = computelReuse(width, height, bounce);
+        const auto target_idx = computelReuse(
+            width, height,
+            bounce,
+            texVtxPos,
+            texVtxNml);
 
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs[target_idx].ptr(),

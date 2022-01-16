@@ -204,6 +204,8 @@ namespace idaten
             return false;
         }
 
+        void initReSTIR(int width, int height);
+
         void onRender(
             const TileDomain& tileDomain,
             int width, int height,
@@ -255,11 +257,14 @@ namespace idaten
         void onShadeByShadowRayReSTIR(
             int width, int height,
             int bounce,
-            cudaTextureObject_t texVtxPos);
+            cudaTextureObject_t texVtxPos,
+            cudaTextureObject_t texVtxNml);
 
         int computelReuse(
             int width, int height,
-            int bounce);
+            int bounce,
+            cudaTextureObject_t texVtxPos,
+            cudaTextureObject_t texVtxNml);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,

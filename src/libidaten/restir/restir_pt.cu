@@ -130,28 +130,16 @@ __global__ void shade(
 
     // Implicit conection to light.
     if (shMtrls[threadIdx.x].attrib.isEmissive) {
-        if (!isBackfacing) {
-            float weight = 1.0f;
-
-            if (bounce > 0 && !paths->attrib[idx].isSingular) {
-                auto cosLight = dot(orienting_normal, -ray.dir);
-                auto dist2 = aten::squared_length(rec.p - ray.org);
-
-                if (cosLight >= 0) {
-                    auto pdfLight = 1 / rec.area;
-
-                    // Convert pdf area to sradian.
-                    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                    // p31 - p35
-                    pdfLight = pdfLight * dist2 / cosLight;
-
-                    weight = paths->throughput[idx].pdfb / (pdfLight + paths->throughput[idx].pdfb);
-                }
-            }
-
-            auto contrib = paths->throughput[idx].throughput * weight * static_cast<aten::vec3>(shMtrls[threadIdx.x].baseColor);
-            paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-        }
+        kernel::hitImplicitLight(
+            isBackfacing,
+            bounce,
+            paths->contrib[idx],
+            paths->attrib[idx],
+            paths->throughput[idx],
+            ray,
+            rec.p, orienting_normal,
+            rec.area,
+            shMtrls[threadIdx.x]);
 
         // When ray hit the light, tracing will finish.
         paths->attrib[idx].isTerminate = true;

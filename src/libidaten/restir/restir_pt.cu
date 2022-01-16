@@ -93,27 +93,11 @@ __global__ void shade(
     // 物体からのレイの入出を考慮.
     aten::vec3 orienting_normal = rec.normal;
 
-    if (rec.mtrlid >= 0) {
-        shMtrls[threadIdx.x] = ctxt.mtrls[rec.mtrlid];
-
-        if (rec.isVoxel) {
-            // Replace to lambert.
-            const auto& albedo = ctxt.mtrls[rec.mtrlid].baseColor;
-            shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
-            shMtrls[threadIdx.x].baseColor = albedo;
-        }
-
-        if (shMtrls[threadIdx.x].type != aten::MaterialType::Layer) {
-            shMtrls[threadIdx.x].albedoMap = (int)(shMtrls[threadIdx.x].albedoMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].albedoMap] : -1);
-            shMtrls[threadIdx.x].normalMap = (int)(shMtrls[threadIdx.x].normalMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].normalMap] : -1);
-            shMtrls[threadIdx.x].roughnessMap = (int)(shMtrls[threadIdx.x].roughnessMap >= 0 ? ctxt.textures[shMtrls[threadIdx.x].roughnessMap] : -1);
-        }
-    }
-    else {
-        // TODO
-        shMtrls[threadIdx.x] = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
-        shMtrls[threadIdx.x].baseColor = aten::vec3(1.0f);
-    }
+    gatherMaterialInfo(
+        shMtrls[threadIdx.x],
+        &ctxt,
+        rec.mtrlid,
+        rec.isVoxel);
 
     auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 

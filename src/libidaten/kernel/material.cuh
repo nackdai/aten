@@ -73,13 +73,15 @@ __device__ real computeFresnel(
 #include "kernel/material_impl.cuh"
 #endif
 
-inline __device__ void gatherMaterialInfo(
+inline __device__ bool gatherMaterialInfo(
     aten::MaterialParameter& dst_mtrl,
     const idaten::Context* ctxt,
     const int mtrl_id,
     const bool is_voxel)
 {
-    if (mtrl_id >= 0) {
+    bool is_valid_mtrl = mtrl_id >= 0;
+
+    if (is_valid_mtrl) {
         dst_mtrl = ctxt->mtrls[mtrl_id];
 
         if (is_voxel) {
@@ -100,4 +102,6 @@ inline __device__ void gatherMaterialInfo(
         dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
         dst_mtrl.baseColor = aten::vec3(1.0f);
     }
+
+    return is_valid_mtrl;
 }

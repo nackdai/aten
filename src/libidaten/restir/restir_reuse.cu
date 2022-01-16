@@ -14,8 +14,13 @@
 
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
-    const aten::LightParameter* __restrict__ lights,
+    const aten::GeomParameter* __restrict__ shapes, int geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::PrimitiveParamter* __restrict__ prims,
+    cudaTextureObject_t vtxPos,
+    cudaTextureObject_t vtxNml,
+    const aten::mat4* __restrict__ matrices,
     cudaTextureObject_t* textures,
     const float4* __restrict__ aovTexclrMeshid,
     idaten::Reservoir* reservoirs,
@@ -33,10 +38,21 @@ __global__ void computeTemporalReuse(
 
     auto idx = getIdx(ix, iy, width);
 
+    if (paths->attrib[idx].isTerminate) {
+        return;
+    }
+
     idaten::Context ctxt;
     {
+        ctxt.geomnum = geomnum;
+        ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
+        ctxt.lightnum = lightnum;
         ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.vtxPos = vtxPos;
+        ctxt.vtxNml = vtxNml;
+        ctxt.matrices = matrices;
         ctxt.textures = textures;
     }
 
@@ -90,14 +106,15 @@ __global__ void computeTemporalReuse(
             const auto& neighbor_normal = neighbor_info.nml;
 
             aten::MaterialParameter neightbor_mtrl;
-            gatherMaterialInfo(
+            auto is_valid_mtrl = gatherMaterialInfo(
                 neightbor_mtrl,
                 &ctxt,
                 neighbor_info.mtrl_idx,
                 neighbor_info.is_voxel);
 
             // Check how close with neighbor pixel.
-            is_acceptable = (mtrl.type == neightbor_mtrl.type)
+            is_acceptable = is_valid_mtrl
+                && (mtrl.type == neightbor_mtrl.type)
                 && (dot(normal, neighbor_normal) >= 0.95f);
 
             if (is_acceptable) {
@@ -173,8 +190,13 @@ __global__ void computeTemporalReuse(
 
 __global__ void computeSpatialReuse(
     idaten::Path* paths,
-    const aten::LightParameter* __restrict__ lights,
+    const aten::GeomParameter* __restrict__ shapes, int geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
+    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::PrimitiveParamter* __restrict__ prims,
+    cudaTextureObject_t vtxPos,
+    cudaTextureObject_t vtxNml,
+    const aten::mat4* __restrict__ matrices,
     cudaTextureObject_t* textures,
     const float4* __restrict__ aovTexclrMeshid,
     const idaten::Reservoir* __restrict__ reservoirs,
@@ -191,10 +213,21 @@ __global__ void computeSpatialReuse(
 
     auto idx = getIdx(ix, iy, width);
 
+    if (paths->attrib[idx].isTerminate) {
+        return;
+    }
+
     idaten::Context ctxt;
     {
+        ctxt.geomnum = geomnum;
+        ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
+        ctxt.lightnum = lightnum;
         ctxt.lights = lights;
+        ctxt.prims = prims;
+        ctxt.vtxPos = vtxPos;
+        ctxt.vtxNml = vtxNml;
+        ctxt.matrices = matrices;
         ctxt.textures = textures;
     }
 
@@ -257,14 +290,15 @@ __global__ void computeSpatialReuse(
                 const auto& neighbor_normal = neighbor_info.nml;
 
                 aten::MaterialParameter neightbor_mtrl;
-                gatherMaterialInfo(
+                auto is_valid_mtrl = gatherMaterialInfo(
                     neightbor_mtrl,
                     &ctxt,
                     neighbor_info.mtrl_idx,
                     neighbor_info.is_voxel);
 
                 // Check how close with neighbor pixel.
-                is_acceptable = (mtrl.type == neightbor_mtrl.type)
+                is_acceptable = is_valid_mtrl
+                    && (mtrl.type == neightbor_mtrl.type)
                     && (dot(normal, neighbor_normal) >= 0.95f);
 
                 if (is_acceptable) {
@@ -343,7 +377,9 @@ __global__ void computeSpatialReuse(
 namespace idaten {
     int ReSTIRPathTracing::computelReuse(
         int width, int height,
-        int bounce)
+        int bounce,
+        cudaTextureObject_t texVtxPos,
+        cudaTextureObject_t texVtxNml)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -374,7 +410,6 @@ namespace idaten {
             const auto dst_idx = (m_curReservoirPos + 1) & 0x01;
 
             m_curReservoirPos = (m_curReservoirPos + 1) & 0x01;
-
             if (m_restirMode == ReSTIRMode::ReSTIR
                 || m_restirMode == ReSTIRMode::TemporalReuse) {
                 if (m_frame > 1) {
@@ -383,8 +418,12 @@ namespace idaten {
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
                         m_paths.ptr(),
-                        m_lightparam.ptr(),
+                        m_shapeparam.ptr(), m_shapeparam.num(),
                         m_mtrlparam.ptr(),
+                        m_lightparam.ptr(), m_lightparam.num(),
+                        m_primparams.ptr(),
+                        texVtxPos, texVtxNml,
+                        m_mtxparams.ptr(),
                         m_tex.ptr(),
                         m_aovTexclrMeshid.ptr(),
                         m_reservoirs[cur_idx].ptr(),
@@ -401,8 +440,12 @@ namespace idaten {
                 || m_restirMode == ReSTIRMode::SpatialReuse) {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
                     m_paths.ptr(),
-                    m_lightparam.ptr(),
+                    m_shapeparam.ptr(), m_shapeparam.num(),
                     m_mtrlparam.ptr(),
+                    m_lightparam.ptr(), m_lightparam.num(),
+                    m_primparams.ptr(),
+                    texVtxPos, texVtxNml,
+                    m_mtxparams.ptr(),
                     m_tex.ptr(),
                     m_aovTexclrMeshid.ptr(),
                     m_reservoirs[cur_idx].ptr(),

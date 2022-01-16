@@ -85,4 +85,31 @@ namespace kernel {
         // When ray hit the light, tracing will finish.
         path_attrib.isTerminate = true;
     }
+
+    inline __device__ float executeRussianProbability(
+        int bounce,
+        int rrBounce,
+        idaten::PathAttribute& path_attrib,
+        idaten::PathThroughput& path_throughput,
+        aten::sampler& sampler)
+    {
+        float russianProb = 1.0f;
+
+        if (bounce > rrBounce) {
+            auto t = normalize(path_throughput.throughput);
+            auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
+
+            russianProb = sampler.nextSample();
+
+            if (russianProb >= p) {
+                //shPaths[threadIdx.x].contrib = aten::vec3(0);
+                path_attrib.isTerminate = true;
+            }
+            else {
+                russianProb = max(p, 0.01f);
+            }
+        }
+
+        return russianProb;
+    }
 }

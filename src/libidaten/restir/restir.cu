@@ -252,22 +252,11 @@ __global__ void shade(
         }
     }
 
-    real russianProb = real(1);
-
-    if (bounce > rrBounce) {
-        auto t = normalize(paths->throughput[idx].throughput);
-        auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
-
-        russianProb = paths->sampler[idx].nextSample();
-
-        if (russianProb >= p) {
-            //shPaths[threadIdx.x].contrib = aten::vec3(0);
-            paths->attrib[idx].isTerminate = true;
-        }
-        else {
-            russianProb = max(p, 0.01f);
-        }
-    }
+    const auto russianProb = kernel::executeRussianProbability(
+        bounce, rrBounce,
+        paths->attrib[idx],
+        paths->throughput[idx],
+        paths->sampler[idx]);
 
     AT_NAME::MaterialSampling sampling;
 

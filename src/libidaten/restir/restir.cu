@@ -332,6 +332,12 @@ __global__ void hitShadowRay(
         return;
     }
 
+    idx = hitindices[idx];
+
+    if (paths->attrib[idx].isTerminate) {
+        return;
+    }
+
     idaten::Context ctxt;
     {
         ctxt.geomnum = geomnum;
@@ -344,8 +350,6 @@ __global__ void hitShadowRay(
         ctxt.vtxPos = vtxPos;
         ctxt.matrices = matrices;
     }
-
-    idx = hitindices[idx];
 
     const auto& shadowRay = shadowRays[idx];
 
@@ -387,6 +391,10 @@ __global__ void computeShadowRayContribution(
     }
 
     idx = hitindices[idx];
+
+    if (paths->attrib[idx].isTerminate) {
+        return;
+    }
 
     if (lightnum <= 0) {
         return;

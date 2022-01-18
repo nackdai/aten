@@ -155,91 +155,33 @@ __global__ void shade(
     // Explicit conection to light.
     if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
     {
-        auto shadowRayOrg = rec.p + AT_MATH_EPSILON * orienting_normal;
-
-        aten::LightSampleResult sampleres;
-        aten::LightParameter light;
-
         auto lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
-        auto lightSelectPdf = 1.0f / lightnum;
 
+        aten::LightParameter light;
         light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
         light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
         light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
         light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
         light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
         light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
-        //auto light = ctxt.lights[lightidx];
 
-        sampleLight(&sampleres, &ctxt, &light, rec.p, orienting_normal, &paths->sampler[idx], bounce);
+        auto lightSelectPdf = 1.0f / lightnum;
 
-        if (lightidx >= 0) {
-            const auto& posLight = sampleres.pos;
-            const auto& nmlLight = sampleres.nml;
-            real pdfLight = sampleres.pdf;
+        auto isShadowRayActive = kernel::fillShadowRay(
+            shShadowRays[threadIdx.x],
+            ctxt,
+            bounce,
+            paths->sampler[idx],
+            paths->throughput[idx],
+            lightidx,
+            light,
+            shMtrls[threadIdx.x],
+            ray,
+            rec.p, orienting_normal,
+            rec.u, rec.v, albedo,
+            lightSelectPdf);
 
-            auto dirToLight = normalize(sampleres.dir);
-            auto distToLight = length(posLight - rec.p);
-
-            auto tmp = rec.p + dirToLight - shadowRayOrg;
-            auto shadowRayDir = normalize(tmp);
-
-            bool isShadowRayActive = false;
-
-            shShadowRays[threadIdx.x].rayorg = shadowRayOrg;
-            shShadowRays[threadIdx.x].raydir = shadowRayDir;
-            shShadowRays[threadIdx.x].targetLightId = lightidx;
-            shShadowRays[threadIdx.x].distToLight = distToLight;
-            shShadowRays[threadIdx.x].lightcontrib = aten::vec3(0);
-            {
-                auto cosShadow = dot(orienting_normal, dirToLight);
-
-                real pdfb = samplePDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-                auto bsdf = sampleBSDF(&ctxt, &shMtrls[threadIdx.x], orienting_normal, ray.dir, dirToLight, rec.u, rec.v, albedo);
-
-                bsdf *= paths->throughput[idx].throughput;
-
-                // Get light color.
-                auto emit = sampleres.finalColor;
-
-                if (light.attrib.isInfinite || light.attrib.isSingular) {
-                    if (pdfLight > real(0) && cosShadow >= 0) {
-                        auto misW = light.attrib.isSingular
-                            ? 1.0f
-                            : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-
-                        shShadowRays[threadIdx.x].lightcontrib =
-                            (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
-
-                        isShadowRayActive = true;
-                    }
-                }
-                else {
-                    auto cosLight = dot(nmlLight, -dirToLight);
-
-                    if (cosShadow >= 0 && cosLight >= 0) {
-                        auto dist2 = aten::squared_length(sampleres.dir);
-                        auto G = cosShadow * cosLight / dist2;
-
-                        if (pdfb > real(0) && pdfLight > real(0)) {
-                            // Convert pdf from steradian to area.
-                            // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                            // p31 - p35
-                            pdfb = pdfb * cosLight / dist2;
-
-                            auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-
-                            shShadowRays[threadIdx.x].lightcontrib =
-                                (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
-
-                            isShadowRayActive = true;
-                        }
-                    }
-                }
-            }
-
-            shShadowRays[threadIdx.x].isActive = isShadowRayActive;
-        }
+        shShadowRays[threadIdx.x].isActive = isShadowRayActive;
     }
 
     shadowRays[idx] = shShadowRays[threadIdx.x];

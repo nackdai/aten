@@ -18,9 +18,9 @@
 namespace pt {
     __global__ void shade(
         idaten::TileDomain tileDomain,
-        float4* aovNormalDepth,
-        float4* aovTexclrMeshid,
-        aten::mat4 mtxW2C,
+        float4* aovPos,
+        float4* aovNormal,
+        float4* aovTexclr,
         int width, int height,
         idaten::Path* paths,
         const int* __restrict__ hitindices,
@@ -119,14 +119,13 @@ namespace pt {
             ix += tileDomain.x;
             iy += tileDomain.y;
 
+            auto n = (orienting_normal + 1.0f) * 0.5f;
+
             const auto _idx = getIdx(ix, iy, width);
 
-            // World coordinate to Clip coordinate.
-            aten::vec4 pos = aten::vec4(rec.p, 1);
-            pos = mtxW2C.apply(pos);
-
-            aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
-            aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.mtrlid);
+            aovPos[_idx] = make_float4(rec.p.x, rec.p.y, rec.p.z, 1.0f);
+            aovNormal[_idx] = make_float4(n.x, n.y, n.z, 0.0f);
+            aovTexclr[_idx] = make_float4(albedo.x, albedo.y, albedo.z, 1.0f);
         }
 
         // Implicit conection to light.
@@ -365,25 +364,6 @@ namespace idaten
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
-        m_mtxW2V.lookat(
-            m_camParam.origin,
-            m_camParam.center,
-            m_camParam.up);
-
-        m_mtxV2C.perspective(
-            m_camParam.znear,
-            m_camParam.zfar,
-            m_camParam.vfov,
-            m_camParam.aspect);
-
-        m_mtxC2V = m_mtxV2C;
-        m_mtxC2V.invert();
-
-        m_mtxV2W = m_mtxW2V;
-        m_mtxV2W.invert();
-
-        aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
-
         dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
@@ -391,9 +371,9 @@ namespace idaten
 
         pt::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            m_aovNormalDepth.ptr(),
-            m_aovTexclrMeshid.ptr(),
-            mtxW2C,
+            aov_position_.ptr(),
+            aov_nml_.ptr(),
+            aov_albedo_.ptr(),
             width, height,
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),

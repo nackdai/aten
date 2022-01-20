@@ -100,8 +100,8 @@ namespace idaten
             StandardPT::missShade(
                 width, height,
                 bounce,
-                m_aovNormalDepth,
-                m_aovTexclrMeshid,
+                aov_nml_,
+                aov_albedo_,
                 offsetX, offsetY);
         }
 
@@ -132,24 +132,17 @@ namespace idaten
     protected:
         Mode m_mode{ Mode::PT };
 
-        // AOV buffer
-        idaten::TypedCudaMemory<float4> m_aovNormalDepth;
-        idaten::TypedCudaMemory<float4> m_aovTexclrMeshid;
+        idaten::TypedCudaMemory<float4> aov_position_;
+        idaten::TypedCudaMemory<float4> aov_nml_;
+        idaten::TypedCudaMemory<float4> aov_albedo_;
 
-        aten::mat4 m_mtxW2V;    // World - View.
-        aten::mat4 m_mtxV2C;    // View - Clip.
-        aten::mat4 m_mtxC2V;    // Clip - View.
-
-        // View - World.
-        aten::mat4 m_mtxV2W;
-        aten::mat4 m_mtxPrevW2V;
-
-        // G-Buffer rendered by OpenGL.
-        idaten::CudaGLSurface m_gbuffer;
-        idaten::CudaGLSurface m_motionDepthBuffer;
+        // To export to GL.
+        bool need_export_gl_{ false };
+        aten::vec3 position_range_{ real(1) };
+        idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
+        std::vector<idaten::CudaGLSurface> gl_surfaces_;
 
         bool m_isListedTextureObject{ false };
-
         bool m_enableProgressive{ false };
     };
 }

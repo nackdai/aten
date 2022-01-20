@@ -175,7 +175,11 @@
     <ClCompile Include="..\src\libidaten\ao\ao.cpp" />
     <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp" />
-    <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp" />
+    <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp" />
     <ClCompile Include="..\src\libidaten\restir\restir.cpp" />
     <ClCompile Include="..\src\libidaten\svgf\svgf.cpp" />

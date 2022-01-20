@@ -52,6 +52,14 @@ namespace idaten
             TypedCudaMemory<aten::PrimitiveParamter>& triangles,
             uint32_t triOffsetCount);
 
+        void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
+
+        void enableExportToGLTextures(
+            GLuint gltexPosition,
+            GLuint gltexNormal,
+            GLuint gltexAlbedo,
+            const aten::vec3& posRange);
+
         virtual void reset() override final
         {
             m_frame = 1;
@@ -121,6 +129,8 @@ namespace idaten
             cudaSurfaceObject_t outputSurf,
             int width, int height,
             int maxSamples);
+
+        void copyAovToGLSurface(int width, int height);
 
         bool isFirstFrame() const
         {

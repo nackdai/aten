@@ -45,8 +45,9 @@ namespace idaten
 
         initSamplerParameter(width, height);
 
-        m_aovNormalDepth.init(width * height);
-        m_aovTexclrMeshid.init(width * height);
+        aov_position_.init(width * height);
+        aov_nml_.init(width * height);
+        aov_albedo_.init(width * height);
     }
 
     void PathTracing::updateBVH(
@@ -201,8 +202,6 @@ namespace idaten
             vtxTexNml);
 
         {
-            m_mtxPrevW2V = m_mtxW2V;
-
             m_frame++;
 
             {

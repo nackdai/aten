@@ -341,6 +341,48 @@ namespace pt {
                 cudaBoundaryModeTrap);
         }
     }
+
+    __global__ void CopyAovToGLSurface(
+        int width, int height,
+        float4* aov_position, float4* aov_nml, float4* aov_albedo,
+        aten::vec3 position_range,
+        cudaSurfaceObject_t* gl_rscs)
+    {
+        const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (ix >= width || iy >= height) {
+            return;
+        }
+
+        const auto idx = getIdx(ix, iy, width);
+
+        auto position = aov_position[idx];
+        auto nml = aov_nml[idx];
+        auto albedo = aov_albedo[idx];
+
+        position.x /= position_range.x;
+        position.y /= position_range.y;
+        position.z /= position_range.z;
+
+        surf2Dwrite(
+            position,
+            gl_rscs[0],
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
+
+        surf2Dwrite(
+            nml,
+            gl_rscs[1],
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
+
+        surf2Dwrite(
+            make_float4(albedo.x, albedo.y, albedo.z, 1),
+            gl_rscs[2],
+            ix * sizeof(float4), iy,
+            cudaBoundaryModeTrap);
+    }
 }
 
 namespace idaten
@@ -440,5 +482,21 @@ namespace idaten
             width, height);
 
         checkCudaKernel(gather);
+    }
+
+    void PathTracing::copyAovToGLSurface(int width, int height)
+    {
+        AT_ASSERT(need_export_gl_);
+
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
+
+        pt::CopyAovToGLSurface << <grid, block >> > (
+            width, height,
+            aov_position_.ptr(), aov_nml_.ptr(), aov_albedo_.ptr(),
+            position_range_,
+            gl_surface_cuda_rscs_.ptr());
     }
 }

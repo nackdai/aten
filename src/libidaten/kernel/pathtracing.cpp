@@ -1,13 +1,19 @@
 #include "kernel/pathtracing.h"
-#include "kernel/StreamCompaction.h"
-#include "kernel/pt_common.h"
+
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
+
+#include "kernel/StreamCompaction.h"
+#include "kernel/pt_standard_impl.h"
+
 #include "aten4idaten.h"
 
-namespace idaten {
+//#pragma optimize( "", off)
+
+namespace idaten
+{
     void PathTracing::update(
         GLuint gltex,
         int width, int height,
@@ -37,18 +43,13 @@ namespace idaten {
             mtxs,
             texs, envmapRsc);
 
-        m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-        m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
+        initSamplerParameter(width, height);
 
-        auto& r = aten::getRandom();
-
-        m_random.init(width * height);
-        m_random.writeByNum(&r[0], width * height);
-
-        m_paths.init(width * height);
+        m_aovNormalDepth.init(width * height);
+        m_aovTexclrMeshid.init(width * height);
     }
 
-    void PathTracing::update(
+    void PathTracing::updateBVH(
         const std::vector<aten::GeomParameter>& geoms,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
         const std::vector<aten::mat4>& mtxs)
@@ -113,43 +114,7 @@ namespace idaten {
         }
     }
 
-    void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
-    {
-        AT_ASSERT(mtrls.size() <= m_mtrlparam.num());
-
-        if (mtrls.size() <= m_mtrlparam.num()) {
-            m_mtrlparam.writeByNum(&mtrls[0], (uint32_t)mtrls.size());
-
-            reset();
-        }
-    }
-
-    void PathTracing::enableExportToGLTextures(
-        GLuint gltexPosition,
-        GLuint gltexNormal,
-        GLuint gltexAlbedo,
-        const aten::vec3& posRange)
-    {
-        AT_ASSERT(gltexPosition > 0);
-        AT_ASSERT(gltexNormal > 0);
-
-        if (!need_export_gl_) {
-            need_export_gl_ = true;
-
-            position_range_ = posRange;
-
-            gl_surfaces_.resize(3);
-            gl_surfaces_[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
-            gl_surfaces_[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
-            gl_surfaces_[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
-
-            gl_surface_cuda_rscs_.init(3);
-        }
-    }
-
-#ifdef __AT_DEBUG__
     static bool doneSetStackSize = false;
-#endif
 
     void PathTracing::render(
         const TileDomain& tileDomain,
@@ -165,89 +130,144 @@ namespace idaten {
         }
 #endif
 
-        m_tileDomain = tileDomain;
-
         int bounce = 0;
 
         int width = tileDomain.w;
         int height = tileDomain.h;
 
-        m_compaction.init(width * height, 1024);
-
         m_isects.init(width * height);
         m_rays.init(width * height);
 
-        m_hitbools.init(width * height);
-        m_hitidx.init(width * height);
-
         m_shadowRays.init(width * height);
 
-        checkCudaErrors(cudaMemset(m_paths.ptr(), 0, m_paths.bytes()));
+        initPath(width, height);
 
-        m_glimg.map();
+        CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
 
         auto vtxTexPos = m_vtxparamsPos.bind();
         auto vtxTexNml = m_vtxparamsNml.bind();
 
+        // TODO
+        // Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
+        // 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.
+
+        if (!m_isListedTextureObject)
         {
-            std::vector<cudaTextureObject_t> tmp;
+            {
+                std::vector<cudaTextureObject_t> tmp;
+                for (int i = 0; i < m_nodeparam.size(); i++) {
+                    auto nodeTex = m_nodeparam[i].bind();
+                    tmp.push_back(nodeTex);
+                }
+                m_nodetex.writeByNum(&tmp[0], tmp.size());
+            }
+
+            if (!m_texRsc.empty())
+            {
+                std::vector<cudaTextureObject_t> tmp;
+                for (int i = 0; i < m_texRsc.size(); i++) {
+                    auto cudaTex = m_texRsc[i].bind();
+                    tmp.push_back(cudaTex);
+                }
+                m_tex.writeByNum(&tmp[0], tmp.size());
+            }
+
+            m_isListedTextureObject = true;
+        }
+        else {
             for (int i = 0; i < m_nodeparam.size(); i++) {
                 auto nodeTex = m_nodeparam[i].bind();
-                tmp.push_back(nodeTex);
             }
-            m_nodetex.writeByNum(&tmp[0], (uint32_t)tmp.size());
-        }
-
-        if (!m_texRsc.empty())
-        {
-            std::vector<cudaTextureObject_t> tmp;
             for (int i = 0; i < m_texRsc.size(); i++) {
                 auto cudaTex = m_texRsc[i].bind();
-                tmp.push_back(cudaTex);
             }
-            m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
-        if (need_export_gl_) {
-            std::vector<cudaSurfaceObject_t> tmp;
-            for (int i = 0; i < gl_surfaces_.size(); i++) {
-                gl_surfaces_[i].map();
-                tmp.push_back(gl_surfaces_[i].bind());
-            }
-            gl_surface_cuda_rscs_.writeByNum(tmp.data(), (uint32_t)tmp.size());
-        }
+        m_hitbools.init(width * height);
+        m_hitidx.init(width * height);
 
-        aov_position_.init(width * height);
-        aov_nml_.init(width * height);
-        aov_albedo_.init(width * height);
+        m_compaction.init(
+            width * height,
+            1024);
+
+        clearPath();
+
+        onRender(
+            tileDomain,
+            width, height, maxSamples, maxBounce,
+            outputSurf,
+            vtxTexPos,
+            vtxTexNml);
+
+        {
+            m_mtxPrevW2V = m_mtxW2V;
+
+            m_frame++;
+
+            {
+                m_vtxparamsPos.unbind();
+                m_vtxparamsNml.unbind();
+
+                for (int i = 0; i < m_nodeparam.size(); i++) {
+                    m_nodeparam[i].unbind();
+                }
+
+                for (int i = 0; i < m_texRsc.size(); i++) {
+                    m_texRsc[i].unbind();
+                }
+            }
+        }
+    }
+
+    void PathTracing::onRender(
+        const TileDomain& tileDomain,
+        int width, int height,
+        int maxSamples,
+        int maxBounce,
+        cudaSurfaceObject_t outputSurf,
+        cudaTextureObject_t vtxTexPos,
+        cudaTextureObject_t vtxTexNml)
+    {
+        m_tileDomain = tileDomain;
 
         static const int rrBounce = 3;
+
+        // Set bounce count to 1 forcibly, aov render mode.
+        maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
 
         auto time = AT_NAME::timer::getSystemTime();
 
         for (int i = 0; i < maxSamples; i++) {
-            onGenPath(
-                width, height,
-                i, maxSamples,
+            int seed = time.milliSeconds;
+            //int seed = 0;
+
+            generatePath(
+                m_mode == Mode::AOVar,
+                i, maxBounce,
+                seed,
                 vtxTexPos,
                 vtxTexNml);
 
-            bounce = 0;
+            int bounce = 0;
 
             while (bounce < maxBounce) {
                 onHitTest(
                     width, height,
+                    bounce,
                     vtxTexPos);
 
-                onShadeMiss(width, height, bounce);
+                missShade(width, height, bounce);
 
+                int hitcount = 0;
                 m_compaction.compact(
                     m_hitidx,
-                    m_hitbools,
-                    nullptr);
+                    m_hitbools);
+
+                //AT_PRINTF("%d\n", hitcount);
 
                 onShade(
+                    outputSurf,
                     width, height,
                     i,
                     bounce, rrBounce,
@@ -257,40 +277,19 @@ namespace idaten {
             }
         }
 
-        if (need_export_gl_) {
-            copyAovToGLSurface(width, height);
+        if (m_mode == Mode::PT) {
+            onGather(outputSurf, width, height, maxSamples);
         }
-
-        if (aov_mode_ == AovMode::None) {
-            onGather(outputSurf, m_paths, width, height);
+        else if (m_mode == Mode::AOVar) {
         }
         else {
-            displayAov(outputSurf, width, height);
+            AT_ASSERT(false);
         }
+    }
 
-        checkCudaErrors(cudaDeviceSynchronize());
-
-        m_frame++;
-
-        {
-            m_vtxparamsPos.unbind();
-            m_vtxparamsNml.unbind();
-
-            for (int i = 0; i < m_nodeparam.size(); i++) {
-                m_nodeparam[i].unbind();
-            }
-
-            for (int i = 0; i < m_texRsc.size(); i++) {
-                m_texRsc[i].unbind();
-            }
-
-            for (int i = 0; i < gl_surfaces_.size(); i++) {
-                gl_surfaces_[i].unbind();
-                gl_surfaces_[i].unmap();
-            }
-        }
-
-        m_glimg.unbind();
-        m_glimg.unmap();
+    void PathTracing::setStream(cudaStream_t stream)
+    {
+        m_stream = stream;
+        m_compaction.setStream(stream);
     }
 }

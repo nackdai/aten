@@ -3,48 +3,23 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
-#include "kernel/renderer.h"
+
+#include "kernel/pt_params.h"
+#include "kernel/pt_standard_impl.h"
+#include "sampler/sampler.h"
 
 namespace idaten
 {
-    class PathTracing : public Renderer {
+    class PathTracing : public StandardPT {
     public:
-        struct ShadowRay {
-            aten::ray r;
-            aten::vec3 lightcontrib;
-            real distToLight;
-            int targetLightId;
-
-            struct {
-                uint32_t isActive : 1;
-            };
+        enum class Mode {
+            PT,
+            AOVar,  // Arbitrary Output Variables.
         };
 
-#ifdef __AT_CUDA__
-        struct Path {
-            aten::vec3 throughput;
-            aten::vec3 contrib;
-            aten::sampler sampler;
+        PathTracing() = default;
+        virtual ~PathTracing() = default;
 
-            real pdfb;
-            real accumulatedAlpha;
-            int samples;
-
-            bool isHit;
-            bool isTerminate;
-            bool isSingular;
-            bool isKill;
-        };
-        AT_STATICASSERT((sizeof(Path) % 4) == 0);
-#else
-        struct Path;
-#endif
-
-    public:
-        PathTracing() {}
-        virtual ~PathTracing() {}
-
-    public:
         virtual void render(
             const TileDomain& tileDomain,
             int maxSamples,
@@ -66,7 +41,7 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void update(
+        void updateBVH(
             const std::vector<aten::GeomParameter>& geoms,
             const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
             const std::vector<aten::mat4>& mtxs);
@@ -77,105 +52,104 @@ namespace idaten
             TypedCudaMemory<aten::PrimitiveParamter>& triangles,
             uint32_t triOffsetCount);
 
-        void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
-
-        void enableExportToGLTextures(
-            GLuint gltexPosition,
-            GLuint gltexNormal,
-            GLuint gltexAlbedo,
-            const aten::vec3& posRange);
-
-        void enableProgressive(bool enable)
+        virtual void reset() override final
         {
-            m_enableProgressive = enable;
-        }
-        bool isProgressive() const
-        {
-            return m_enableProgressive;
+            m_frame = 1;
         }
 
-        int frame() const
+        uint32_t frame() const
         {
             return m_frame;
         }
 
-        enum class AovMode : int {
-            None,
-            Normal,
-            Albedo,
-        };
-
-        void setAovMode(AovMode mode)
+        void setHitDistanceLimit(float d)
         {
-            aov_mode_ = mode;
+            m_hitDistLimit = d;
         }
 
-        AovMode getAovMode() const
+        bool isEnableProgressive() const
         {
-            return aov_mode_;
+            return m_enableProgressive;
+        }
+        void setEnableProgressive(bool b)
+        {
+            m_enableProgressive = b;
         }
 
     protected:
-        virtual void onGenPath(
+        void onRender(
+            const TileDomain& tileDomain,
             int width, int height,
-            int sample, int maxSamples,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int maxSamples,
+            int maxBounce,
+            cudaSurfaceObject_t outputSurf,
+            cudaTextureObject_t vtxTexPos,
+            cudaTextureObject_t vtxTexNml);
 
         virtual void onHitTest(
             int width, int height,
+            int bounce,
             cudaTextureObject_t texVtxPos);
 
-        virtual void onShadeMiss(
+        void missShade(
             int width, int height,
-            int bounce);
+            int bounce,
+            int offsetX = -1,
+            int offsetY = -1)
+        {
+            StandardPT::missShade(
+                width, height,
+                bounce,
+                m_aovNormalDepth,
+                m_aovTexclrMeshid,
+                offsetX, offsetY);
+        }
 
         virtual void onShade(
+            cudaSurfaceObject_t outputSurf,
             int width, int height,
             int sample,
             int bounce, int rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
+        void onShadeByShadowRay(
+            int bounce,
+            cudaTextureObject_t texVtxPos);
+
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
-            idaten::TypedCudaMemory<idaten::PathTracing::Path>& paths,
-            int width, int height);
+            int width, int height,
+            int maxSamples);
 
-        void displayAov(
-            cudaSurfaceObject_t outputSurf,
-            int width, int height);
+        bool isFirstFrame() const
+        {
+            return (m_frame == 1);
+        }
 
-        void copyAovToGLSurface(int width, int height);
+        void setStream(cudaStream_t stream);
 
     protected:
-        idaten::TypedCudaMemory<idaten::PathTracing::Path> m_paths;
-        idaten::TypedCudaMemory<aten::Intersection> m_isects;
-        idaten::TypedCudaMemory<aten::ray> m_rays;
-        idaten::TypedCudaMemory<idaten::PathTracing::ShadowRay> m_shadowRays;
+        Mode m_mode{ Mode::PT };
 
-        idaten::TypedCudaMemory<int> m_hitbools;
-        idaten::TypedCudaMemory<int> m_hitidx;
+        // AOV buffer
+        idaten::TypedCudaMemory<float4> m_aovNormalDepth;
+        idaten::TypedCudaMemory<float4> m_aovTexclrMeshid;
 
-        idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
-        idaten::TypedCudaMemory<unsigned int> m_random;
+        aten::mat4 m_mtxW2V;    // World - View.
+        aten::mat4 m_mtxV2C;    // View - Clip.
+        aten::mat4 m_mtxC2V;    // Clip - View.
 
-        // For AOV
-        AovMode aov_mode_{ AovMode::None };
-        idaten::TypedCudaMemory<float4> aov_position_;
-        idaten::TypedCudaMemory<float4> aov_nml_;
-        idaten::TypedCudaMemory<float3> aov_albedo_;
+        // View - World.
+        aten::mat4 m_mtxV2W;
+        aten::mat4 m_mtxPrevW2V;
 
-        // To export to GL.
-        bool need_export_gl_{ false };
-        aten::vec3 position_range_{ real(1) };
-        idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
-        std::vector<idaten::CudaGLSurface> gl_surfaces_;
+        // G-Buffer rendered by OpenGL.
+        idaten::CudaGLSurface m_gbuffer;
+        idaten::CudaGLSurface m_motionDepthBuffer;
 
-        uint32_t m_frame{ 1 };
+        bool m_isListedTextureObject{ false };
 
         bool m_enableProgressive{ false };
-
-        idaten::TileDomain m_tileDomain;
     };
 }

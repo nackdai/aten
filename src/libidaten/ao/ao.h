@@ -54,11 +54,11 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void enableProgressive(bool enable)
+        void setEnableProgressive(bool enable)
         {
             m_enableProgressive = enable;
         }
-        bool isProgressive() const
+        bool isEnableProgressive() const
         {
             return m_enableProgressive;
         }

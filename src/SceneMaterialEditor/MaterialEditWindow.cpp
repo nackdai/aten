@@ -259,10 +259,10 @@ void MaterialEditWindow::onRun(aten::window* window)
             s_tracer.reset();
         }
 
-        bool isProgressive = s_tracer.isProgressive();
+        bool isEnableProgressive = s_tracer.isEnableProgressive();
 
-        if (ImGui::Checkbox("Progressive", &isProgressive)) {
-            s_tracer.enableProgressive(isProgressive);
+        if (ImGui::Checkbox("Progressive", &isEnableProgressive)) {
+            s_tracer.setEnableProgressive(isEnableProgressive);
             s_tracer.reset();
         }
 

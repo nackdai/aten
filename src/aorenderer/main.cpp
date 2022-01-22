@@ -103,10 +103,10 @@ void onRun(aten::window* window)
             g_tracer.reset();
         }
 
-        bool enableProgressive = g_tracer.isProgressive();
+        bool enableProgressive = g_tracer.isEnableProgressive();
 
         if (ImGui::Checkbox("Progressive", &enableProgressive)) {
-            g_tracer.enableProgressive(enableProgressive);
+            g_tracer.setEnableProgressive(enableProgressive);
         }
 #endif
 

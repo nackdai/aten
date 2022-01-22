@@ -31,7 +31,7 @@ static LodMaker g_lodmaker;
 static std::vector<aten::vertex> g_lodVtx;
 static std::vector<std::vector<int>> g_lodIdx;
 
-static ObjWriter g_writer;
+static aten::ObjWriter g_writer;
 
 static int g_GridX = 16;
 static int g_GridY = 16;

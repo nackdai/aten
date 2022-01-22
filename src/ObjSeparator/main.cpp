@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
     }
 
     // Export to obj.
-    ObjWriter::write(
+    aten::ObjWriter::write(
         "result.obj",
         "result.mtl",
         vertices,
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
             return mtrls[idx]->name();
         });
 
-    ObjWriter::writeMaterial(
+    aten::ObjWriter::writeMaterial(
         ctxt,
         "result.mtl",
         mtrlListForExport);

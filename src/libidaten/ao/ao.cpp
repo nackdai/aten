@@ -37,15 +37,7 @@ namespace idaten {
             mtxs,
             texs, envmapRsc);
 
-        m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-        m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
-
-        auto& r = aten::getRandom();
-
-        m_random.init(width * height);
-        m_random.writeByNum(&r[0], width * height);
-
-        m_paths.init(width * height);
+        initSamplerParameter(width, height);
     }
 
 #ifdef __AT_DEBUG__
@@ -81,8 +73,6 @@ namespace idaten {
         m_hitbools.init(width * height);
         m_hitidx.init(width * height);
 
-        checkCudaErrors(cudaMemset(m_paths.ptr(), 0, m_paths.bytes()));
-
         m_glimg.map();
         auto outputSurf = m_glimg.bind();
 
@@ -108,22 +98,29 @@ namespace idaten {
             m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
+        initPath(width, height);
+        clearPath();
+
         static const int rrBounce = 3;
 
         auto time = AT_NAME::timer::getSystemTime();
 
         for (int i = 0; i < maxSamples; i++) {
-            onGenPath(
-                width, height,
-                i, maxSamples,
+            int seed = time.milliSeconds;
+
+            generatePath(
+                false,
+                i, maxBounce,
+                seed,
                 vtxTexPos,
                 vtxTexNml);
 
             bounce = 0;
 
             while (bounce < maxBounce) {
-                onHitTest(
+                hitTest(
                     width, height,
+                    bounce,
                     vtxTexPos);
 
                 onShadeMiss(width, height, bounce);
@@ -142,7 +139,7 @@ namespace idaten {
             }
         }
 
-        onGather(outputSurf, m_paths, width, height);
+        onGather(outputSurf, width, height);
 
         checkCudaErrors(cudaDeviceSynchronize());
 

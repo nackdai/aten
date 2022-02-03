@@ -3,33 +3,13 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
-#include "kernel/renderer.h"
+#include "kernel/pt_standard_impl.h"
 
 namespace idaten
 {
-    class AORenderer : public Renderer {
+    class AORenderer : public StandardPT {
     public:
-#ifdef __AT_CUDA__
-        struct Path {
-            aten::vec3 throughput;
-            aten::vec3 contrib;
-            aten::sampler sampler;
-
-            real pdfb;
-            int samples;
-
-            bool isHit;
-            bool isTerminate;
-            bool isSingular;
-            bool isKill;
-        };
-        AT_STATICASSERT((sizeof(Path) % 4) == 0);
-#else
-        struct Path;
-#endif
-
-    public:
-        AORenderer() {}
+        AORenderer() = default;
         virtual ~AORenderer() {}
 
     public:
@@ -63,11 +43,6 @@ namespace idaten
             return m_enableProgressive;
         }
 
-        int frame() const
-        {
-            return m_frame;
-        }
-
         int getNumRays() const
         {
             return m_ao_num_rays;
@@ -87,16 +62,6 @@ namespace idaten
         }
 
     protected:
-        virtual void onGenPath(
-            int width, int height,
-            int sample, int maxSamples,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
-
-        virtual void onHitTest(
-            int width, int height,
-            cudaTextureObject_t texVtxPos);
-
         virtual void onShadeMiss(
             int width, int height,
             int bounce);
@@ -109,25 +74,10 @@ namespace idaten
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
-            idaten::TypedCudaMemory<idaten::AORenderer::Path>& paths,
             int width, int height);
 
     protected:
-        idaten::TypedCudaMemory<idaten::AORenderer::Path> m_paths;
-        idaten::TypedCudaMemory<aten::Intersection> m_isects;
-        idaten::TypedCudaMemory<aten::ray> m_rays;
-
-        idaten::TypedCudaMemory<int> m_hitbools;
-        idaten::TypedCudaMemory<int> m_hitidx;
-
-        idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
-        idaten::TypedCudaMemory<unsigned int> m_random;
-
-        uint32_t m_frame{ 1 };
-
         bool m_enableProgressive{ false };
-
-        idaten::TileDomain m_tileDomain;
 
         int m_ao_num_rays{ 1 };
         float m_ao_radius{ 1.0f };

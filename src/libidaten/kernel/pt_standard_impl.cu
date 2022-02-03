@@ -14,7 +14,10 @@
 #include "kernel/renderer.h"
 #include "kernel/pt_standard_impl.h"
 
-#define ENABLE_PERSISTENT_THREAD
+// TODO
+// persistend thread works with CUDA 10.1.
+// But, it doesn't work with CUDA 11 or later.
+//#define ENABLE_PERSISTENT_THREAD
 
 namespace idaten {
 namespace kernel {
@@ -98,6 +101,8 @@ namespace kernel {
         paths->contrib[idx].samples += 1;
     }
 
+    // NOTE
+    // https://research.nvidia.com/sites/default/files/pubs/2009-08_Understanding-the-Efficiency/aila2009hpg_paper.pdf
 
     __device__ unsigned int g_headDev = 0;
 
@@ -119,13 +124,25 @@ namespace kernel {
     {
 #ifdef ENABLE_PERSISTENT_THREAD
         // warp-wise head index of tasks in a block
-        __shared__ volatile unsigned int headBlock[NUM_WARP_PER_BLOCK];
-
-        volatile unsigned int& headWarp = headBlock[threadIdx.y];
+        __shared__ volatile unsigned int nextRayArray[NUM_WARP_PER_BLOCK];
+        __shared__ volatile unsigned int rayCountArray[NUM_WARP_PER_BLOCK];
 
         if (blockIdx.x == 0 && threadIdx.x == 0) {
             g_headDev = 0;
         }
+
+        if (threadIdx.x == 0) {
+            for (int i = 0; i < NUM_WARP_PER_BLOCK; i++) {
+                rayCountArray[i] = 0;
+            }
+        }
+
+        int size = tileDomain.w * tileDomain.h;
+
+        __syncthreads();
+
+        volatile auto& localPoolNextRay = nextRayArray[threadIdx.y];
+        volatile auto& localPoolRayCount = rayCountArray[threadIdx.y];
 
         idaten::Context ctxt;
         {
@@ -142,14 +159,21 @@ namespace kernel {
         do
         {
             // let lane 0 fetch [wh, wh + WARP_SIZE - 1] for a warp
-            if (threadIdx.x == 0) {
-                headWarp = atomicAdd(&g_headDev, WARP_SIZE);
+            if (localPoolRayCount == 0 && threadIdx.x == 0) {
+                localPoolNextRay = atomicAdd(&g_headDev, WARP_SIZE);
+                localPoolRayCount = WARP_SIZE;
             }
-            // task index per thread in a warp
-            unsigned int idx = headWarp + threadIdx.x;
 
-            if (idx >= tileDomain.w * tileDomain.h) {
+            // task index per thread in a warp
+            unsigned int idx = localPoolNextRay + threadIdx.x;
+
+            if (idx >= size) {
                 return;
+            }
+
+            if (threadIdx.x == 0) {
+                localPoolNextRay += WARP_SIZE;
+                localPoolRayCount -= WARP_SIZE;
             }
 
             paths->attrib[idx].isHit = false;

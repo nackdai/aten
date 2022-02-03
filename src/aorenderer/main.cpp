@@ -109,14 +109,6 @@ void onRun(aten::window* window)
             g_tracer.setEnableProgressive(enableProgressive);
         }
 #endif
-
-        static const char* items[] = { "AO", "Tex" };
-
-        ImGui::Combo("mode", &g_renderMode, items, AT_COUNTOF(items));
-        if (g_renderMode == 1) {
-            auto maxTexIdx = g_tracer.getRegisteredTextureNum() - 1;
-            ImGui::SliderInt("TexIdx", &g_viewTexIdx, 0, maxTexIdx);
-        }
     }
 }
 

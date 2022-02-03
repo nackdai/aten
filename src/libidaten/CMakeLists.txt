@@ -119,6 +119,10 @@ cuda_add_library(
   kernel/pathtracing.h
   kernel/pathtracing_impl.cu
   kernel/pt_common.h
+  kernel/pt_params.h
+  kernel/pt_standard_impl.cu
+  kernel/pt_standard_impl.cuh
+  kernel/pt_standard_impl.h
   kernel/qbvh.cu
   kernel/qbvh.cuh
   kernel/qbvh_impl.cuh
@@ -136,7 +140,7 @@ cuda_add_library(
   kernel/stackless_qbvh.cuh
   kernel/stackless_qbvh_impl.cuh
   kernel/tex_viewer.cu
-  multigpu/pt_multigpu.cpp
+  # TODO multigpu/pt_multigpu.cpp
   multigpu/pt_multigpu.h
   multigpu/renderer_multigpu.h
   multigpu/svgf_multigpu.cpp
@@ -144,9 +148,7 @@ cuda_add_library(
   restir/reservior.h
   restir/restir.cu
   restir/restir_debug.cu
-  restir/restir_init.cu
   restir/restir_reuse.cu
-  restir/restir_ssrt.cu
   restir/restir.cpp
   restir/restir.h
   restir/restir_info.h
@@ -157,9 +159,7 @@ cuda_add_library(
   svgf/svgf_VarianceEstimation.cu
   svgf/svgf_atrous.cu
   svgf/svgf_debug.cu
-  svgf/svgf_init.cu
   svgf/svgf_pt.cu
-  svgf/svgf_ssrt.cu
   svgf/svgf_tile.cu
   svgf/svgf_tp.cu)
 

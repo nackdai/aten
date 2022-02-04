@@ -13,7 +13,7 @@ const FILES_DELETED = [];
 const FILES_RENAMED = [];
 const FILES_ADDED_MODIFIED = [];
 
-const gh = new GitHub(core.getInput('token'));
+const gh = new github.GitHub(core.getInput('token'));
 const args = { owner: owner.name, repo: repo.name };
 
 function isAdded(file) {

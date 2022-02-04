@@ -40,6 +40,8 @@ RUN apt-get update && apt-get install -y ca-certificates \
     && curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
     && apt-get update \
     && apt-get install -y nodejs
+# https://stackoverflow.com/questions/69692842/error-message-error0308010cdigital-envelope-routinesunsupported
+ENV NODE_OPTIONS --openssl-legacy-provider
 
 # Install shfmt
 # https://github.com/mvdan/sh

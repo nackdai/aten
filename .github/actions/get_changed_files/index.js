@@ -1,4 +1,4 @@
-const { context, GitHub } = require('@actions/github');
+const { context, gitHub } = require('@actions/github');
 const core = require('@actions/core');
 
 const commits = context.payload.commits.filter(c => c.distinct);
@@ -13,7 +13,7 @@ const FILES_DELETED = [];
 const FILES_RENAMED = [];
 const FILES_ADDED_MODIFIED = [];
 
-const gh = new github.GitHub(core.getInput('token'));
+const gh = new github.getOctokit(core.getInput('token'));
 const args = { owner: owner.name, repo: repo.name };
 
 function isAdded(file) {

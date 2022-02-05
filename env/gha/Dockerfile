@@ -23,8 +23,15 @@ RUN apt-get update \
 RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
 
 # https://github.com/nodesource/distributions
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash \
-    && apt-get install -y nodejs
+# https://github.com/nodesource/distributions/issues/1266
+ARG npm_version=8.4.1
+RUN apt-get update && apt-get install -y ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs \
+    && npm install -g npm@${npm_version}
+# https://stackoverflow.com/questions/69692842/error-message-error0308010cdigital-envelope-routinesunsupported
+ENV NODE_OPTIONS --openssl-legacy-provider
 
 # Clean up
 RUN apt-get autoremove -y \

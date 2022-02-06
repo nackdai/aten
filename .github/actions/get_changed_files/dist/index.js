@@ -8468,7 +8468,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const { context, gitHub } = __nccwpck_require__(5438);
+const { context, getOctokit } = __nccwpck_require__(5438);
 const core = __nccwpck_require__(2186);
 
 const commits = context.payload.commits.filter(c => c.distinct);
@@ -8483,7 +8483,7 @@ const FILES_DELETED = [];
 const FILES_RENAMED = [];
 const FILES_ADDED_MODIFIED = [];
 
-const gh = new github.getOctokit(core.getInput('token'));
+const gh = getOctokit(core.getInput('token'));
 const args = { owner: owner.name, repo: repo.name };
 
 function isAdded(file) {
@@ -8504,7 +8504,7 @@ function isRenamed(file) {
 
 async function processCommit(commit) {
   args.ref = commit.id;
-  result = await gh.repos.getCommit(args);
+  result = await gh.rest.repos.getCommit(args);
 
   if (result && result.data) {
     const files = result.data.files;

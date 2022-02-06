@@ -1,4 +1,4 @@
-const { context, GitHub } = require('@actions/github');
+const { context, getOctokit } = require('@actions/github');
 const core = require('@actions/core');
 
 const commits = context.payload.commits.filter(c => c.distinct);
@@ -13,7 +13,7 @@ const FILES_DELETED = [];
 const FILES_RENAMED = [];
 const FILES_ADDED_MODIFIED = [];
 
-const gh = new GitHub(core.getInput('token'));
+const gh = getOctokit(core.getInput('token'));
 const args = { owner: owner.name, repo: repo.name };
 
 function isAdded(file) {
@@ -34,7 +34,7 @@ function isRenamed(file) {
 
 async function processCommit(commit) {
   args.ref = commit.id;
-  result = await gh.repos.getCommit(args);
+  result = await gh.rest.repos.getCommit(args);
 
   if (result && result.data) {
     const files = result.data.files;

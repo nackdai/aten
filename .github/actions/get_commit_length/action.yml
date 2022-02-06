@@ -1,9 +1,0 @@
-name: 'commit length getter'
-description: 'Get commit length'
-# nothing to input
-outputs:
-  commit_length:
-    description: 'Length of commits'
-runs:
-  using: 'node12'
-  main: 'dist/index.js'

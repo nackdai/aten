@@ -4,13 +4,11 @@ on:
   push:
     paths-ignore:
     - '.circleci/**'
-    - '.devcontainer/*.json'
-    - '.devcontainer/*.yml'
+    - '.devcontainer/**'
     - '.gitignore'
     - 'asset/**'
     - 'docs/**'
     - 'gallery/**'
-    - 'vs2015/**'
     - 'vs2019/**'
 
 jobs:
@@ -22,19 +20,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get diff files
-        id: getfile
-        uses: ./.github/actions/get_changed_files
+      - name: Get modified files
+        id: changed-files
+        uses: tj-actions/changed-files@v14.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dump
-        run: echo ${{ steps.getfile.outputs.added_modified }}
+        run: echo ${{ steps.changed-files.outputs.modified_files }}
 
-      # Run below step if Dockerfile is in modified files
+      # Run the following step if Dockerfile is modified
       - name: Build and push base image
         id: build_base_image
-        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true
+        if: contains(steps.changed-files.outputs.modified_files, 'env/aten/Dockerfile') == true
         run: |
           docker build -t aten ./env/aten/
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
@@ -44,20 +42,19 @@ jobs:
       - name: Check outcome of building base image
         run: echo ${{ steps.build_base_image.outcome }}
 
-      # To build dev image, base image is necessary.
-      # If building dev image is necessary but base image is not built.
-      # Try to Pull base image.
+      # In order to build dev image, base image is necessary.
+      # If building the dev image is necessary but the base image is not built in the previous step.
+      # Try to pull the base image.
       - name: Check if building base image run for building dev image
-        if: contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true && steps.build_base_image.outcome != 'success'
+        if: contains(steps.changed-files.outputs.modified_files, 'env/dev/Dockerfile') == true && steps.build_base_image.outcome != 'success'
         run: |
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}
           docker pull docker.pkg.github.com/${{ github.repository }}/aten:latest
 
-      # dev image is build from base image.
-      # If outcome of building base image is success, we can treat base image is updated.
+      # If Dockerfile for the dev image is modified or the base image is updated,
+      # It is necessary to build the dev image.
       - name: Build and push dev image
-        #if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true || contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true
-        if: contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
+        if: contains(steps.changed-files.outputs.modified_files, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
         run: |
           docker build -t aten_dev --build-arg base_from=docker.pkg.github.com/${{ github.repository }}/aten:latest -f ./env/dev/Dockerfile .
           docker login docker.pkg.github.com --username $GITHUB_ACTOR --password-stdin <<< ${{ secrets.GITHUB_TOKEN }}

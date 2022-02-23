@@ -13,14 +13,14 @@ And Idanten includes characters of aten, "id**aten**"
 
 ## Features
 
+**Some features are only supported by either.**
+
 - Rendering algorithms
   - Ray Tracing
   - Next Event Estimation Path Tracing
   - Bi-Directional Path Tracing
   - Primary Sample Space Metropolis Light Transport
   - Energy Re-distribution Path Tracing
-  - AOV
-    - albedo, depth, normal, geometry id.
 - Acceralation
   - BVH
   - SBVH
@@ -34,9 +34,8 @@ And Idanten includes characters of aten, "id**aten**"
   - Microfacet Blinn
   - Microfacet Beckman
   - Microfacet GGX
+  - OrenNayar
   - Disney BRDF
-  - Car Paint (Experimental)
-  - Toon(Non Photoreal)
   - Layer
 - Lights
   - Polygonal Light(Area Light)
@@ -61,11 +60,10 @@ And Idanten includes characters of aten, "id**aten**"
   - Birateral
   - Practical Noise Reduction for Progressive Stochastic Ray Tracing with Perceptual Control
   - Robust Image Denoising using a Virtual Flash Image for Monte Carlo Ray Tracing
-  - [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
 - PostEffect
   - Simple Bloom
   - Reinherd Tone Mapping
-- Cameras
+- Camera
   - Pinhole
   - Thin Lens(DoF)
   - 360 view
@@ -73,6 +71,9 @@ And Idanten includes characters of aten, "id**aten**"
   - Instancing
   - Scene Definition by XML
   - Deformation
+- [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
+- [Spatiotemporal reservoir resampling for real-time ray tracing
+with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pubs/2020-07_Spatiotemporal-reservoir-resampling/ReSTIR.pdf)
 
 ## Limitations
 
@@ -84,11 +85,6 @@ And Idanten includes characters of aten, "id**aten**"
   - Can not specify all definitions.
 - Not support texture alpha yet.
 - There are some Japanese comments...
-
-## Under Construction Works
-
-- More efficient denoise filter
-  - [Gradient Estimation for Real-Time Adaptive Temporal Filtering](https://cg.ivd.kit.edu/atf.php)
 
 ## Future Works
 
@@ -116,27 +112,27 @@ git submodule update --init --recursive
 
 ### Windows
 
-1. Install `CUDA 10.1` and depended NVIDIA driver
+1. Install `CUDA 11.3` and depended NVIDIA driver
 2. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
 3. Launch `aten/vs2019/aten.sln`
 4. Build porjects with `x64` (not support `x86`)
 
 I confirmed with Visual Studio 2019 on Windows10.
 
-Supoort just only `CUDA 10.1`.
+Supoort just only `CUDA 11.3`.
 
 ### Linux
 
-1. Install `CUDA 10.1` or later and depended NVIDIA driver
+1. Install `CUDA 11.2` or later and depended NVIDIA driver
 1. Install applications (You can find what you need in `env/aten/Dockerfile`)
-    1. Install `cmake` `3.10.0` or later
+    1. Install `cmake` `3.21.3` or later
     1. Install `clang 8.0.0`
     1. Install `ninja-build`
 1. `cd aten/build`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
-I confirmed on Ubuntu16.04 LTS and 18.04 LTS.
+I confirmed on 18.04 LTS and 20.04 LTS.
 
 #### What is RunCMake.sh
 
@@ -286,5 +282,9 @@ SVGF 1spp
 Deformation
 
 ![Deformation](gallery/deform.png)
+
+ReSTIR
+
+![ReSTIR](gallery/compare_restir.png)
 
 (c) Unity Technologies Japan/UCL

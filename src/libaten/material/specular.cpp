@@ -53,18 +53,14 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto c = dot(normal, wo);
+        // NOTE
+        // https://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission#SpecularReflection
 
-#if 1
         auto bsdf = param->baseColor;
-#else
-        aten::vec3 bsdf;
 
         // For canceling cosine factor.
-        if (c > 0) {
-            bsdf = m_color / c;
-        }
-#endif
+        auto c = dot(normal, wo);
+        bsdf /= abs(c);
 
         bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 

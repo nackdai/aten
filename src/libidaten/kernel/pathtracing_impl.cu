@@ -216,13 +216,7 @@ namespace pt {
             ? -orienting_normal
             : orienting_normal;
 
-        real c = 1;
-        if (!shMtrls[threadIdx.x].attrib.isSingular) {
-            // TODO
-            // AMDのはabsしているが....
-            //c = aten::abs(dot(orienting_normal, nextDir));
-            c = dot(rayBasedNormal, nextDir);
-        }
+        auto c = abs(dot(rayBasedNormal, nextDir));
 
         if (pdfb > 0 && c > 0) {
             paths->throughput[idx].throughput *= bsdf * c / pdfb;

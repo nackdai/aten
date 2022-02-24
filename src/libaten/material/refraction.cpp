@@ -149,6 +149,10 @@ namespace AT_NAME
         auto reflect = wi - 2 * dot(nml, wi) * nml;
         reflect = normalize(reflect);
 
+        // NOTE
+        // https://www.pbr-book.org/3ed-2018/Reflection_Models/Specular_Reflection_and_Transmission#SpecularReflection
+        auto cos_factor_reflect = abs(dot(normal, reflect));
+
         real nc = real(1);        // 真空の屈折率.
         real nt = param->ior;    // 物体内部の屈折率.
         real nnt = into ? nc / nt : nt / nc;
@@ -170,7 +174,7 @@ namespace AT_NAME
 
             // 全反射.
             result->pdf = real(1);
-            result->bsdf = albedo;
+            result->bsdf = albedo / cos_factor_reflect;
             result->dir = reflect;
             result->fresnel = real(1);
 
@@ -238,7 +242,7 @@ namespace AT_NAME
             if (r < prob) {
                 // 反射.
                 result->dir = reflect;
-                result->bsdf = Re * albedo;
+                result->bsdf = Re * albedo / cos_factor_reflect;
                 result->bsdf /= prob;
 
                 result->subpdf = prob;

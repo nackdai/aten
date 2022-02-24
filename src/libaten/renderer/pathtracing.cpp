@@ -329,13 +329,7 @@ namespace aten
             ? -orienting_normal
             : orienting_normal;
 
-        real c = 1;
-        if (!mtrl->isSingular()) {
-            // TODO
-            // AMDのはabsしているが....
-            //c = aten::abs(dot(orienting_normal, nextDir));
-            c = dot(rayBasedNormal, nextDir);
-        }
+        auto c = aten::abs(dot(orienting_normal, static_cast<vec3>(nextDir)));
 
         if (pdfb > 0 && c > 0) {
             path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;

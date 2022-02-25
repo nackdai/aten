@@ -533,6 +533,9 @@
     <ClInclude Include="..\src\libaten\renderer\restir.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\retroreflective.h">
+      <Filter>material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -846,6 +849,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\restir.cpp">
       <Filter>renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\material\retroreflective.cpp">
+      <Filter>material</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

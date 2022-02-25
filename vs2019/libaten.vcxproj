@@ -318,6 +318,7 @@
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
+    <ClInclude Include="..\src\libaten\material\retroreflective.h" />
     <ClInclude Include="..\src\libaten\material\sample_texture.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
     <ClInclude Include="..\src\libaten\material\toon.h" />
@@ -450,6 +451,7 @@
     <ClCompile Include="..\src\libaten\material\microfacet_refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\oren_nayar.cpp" />
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
+    <ClCompile Include="..\src\libaten\material\retroreflective.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
     <ClCompile Include="..\src\libaten\material\toon.cpp" />
     <ClCompile Include="..\src\libaten\material\velvet.cpp" />

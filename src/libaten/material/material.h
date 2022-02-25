@@ -61,6 +61,7 @@ namespace aten
         Velvet,
         Lambert_Refraction,
         Microfacet_Refraction,
+        Retroreflective,
         Disney,
         Toon,
         Layer,

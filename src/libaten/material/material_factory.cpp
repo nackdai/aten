@@ -11,6 +11,7 @@
 #include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
+#include "material/retroreflective.h"
 #include "misc/value.h"
 
 namespace aten
@@ -52,6 +53,9 @@ namespace aten
     {
         AT_ASSERT(material::isValidMaterialType(type));
 
+        // NOTE
+        // ctor is private. So, create an instance with new.
+        // And then, pass it to shared_ptr.
         std::function<material*()> funcs[] = {
             []() { return new emissive(); },             // emissive
             []() { return new lambert(); },              // lambert
@@ -64,6 +68,7 @@ namespace aten
             []() { return new MicrofacetVelvet(); },     // velvet
             []() { return new LambertRefraction(); },    // lambert_rafraction
             []() { return new MicrofacetRefraction(); }, // microfacet_rafraction
+            []() { return new Retroreflective(); },      // retroreflective
             []() { return new DisneyBRDF(); },           // disney_brdf
             []() { return nullptr; },                    // toon
             []() { return nullptr; },                    // layer

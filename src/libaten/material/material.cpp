@@ -18,6 +18,7 @@ namespace AT_NAME
         "velvet",
         "lambert_refraction",
         "microfacet_refraction",
+        "retroreflective",
         "disney_brdf",
         "toon",
         "layer",

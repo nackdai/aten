@@ -72,6 +72,11 @@ namespace aten {
             return *this;
         }
 
+        inline const real* data() const
+        {
+            return a;
+        }
+
         inline AT_DEVICE_API const mat4& operator+() const
         {
             return *this;
@@ -323,6 +328,10 @@ namespace aten {
             real znear, real zfar,
             real vfov,
             real aspect);
+
+        mat4& otrho(
+            real width, real height,
+            real znear, real zfar);
 
         void dump() const
         {

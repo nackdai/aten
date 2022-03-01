@@ -193,7 +193,7 @@ namespace aten {
         real aspect)
     {
         /*
-        * D3DXMatrixPerspectiveFovRH
+        * D3DXMatrixPerspectiveFovIRI
         *
         * xScale     0          0              0
         * 0        yScale       0              0
@@ -218,6 +218,30 @@ namespace aten {
         m[3][2] = -1.0f;
 
         m[3][3] = 0.0f;
+
+        return *this;
+    }
+
+    mat4& mat4::otrho(
+        real width, real height,
+        real znear, real zfar)
+    {
+        /*
+        * D3DXMatrixOrthoIRI
+        *
+        * 2/w   0       0         0
+        *  0   2/h      0         0
+        *  0    0    1/(zn-zf) zn/(zn-zf)
+        *  0    0       0         1
+        */
+
+        m[0][0] = real(2) / width;
+        m[1][1] = real(2) / height;
+
+        m[2][2] = real(1) / (znear - zfar);
+        m[2][3] = znear / (znear - zfar);
+
+        m[3][3] = 1.0f;
 
         return *this;
     }

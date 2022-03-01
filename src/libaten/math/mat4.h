@@ -329,7 +329,7 @@ namespace aten {
             real vfov,
             real aspect);
 
-        mat4& otrho(
+        mat4& ortho(
             real width, real height,
             real znear, real zfar);
 

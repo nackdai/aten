@@ -222,7 +222,7 @@ namespace aten {
         return *this;
     }
 
-    mat4& mat4::otrho(
+    mat4& mat4::ortho(
         real width, real height,
         real znear, real zfar)
     {

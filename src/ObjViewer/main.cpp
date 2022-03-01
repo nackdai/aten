@@ -21,6 +21,7 @@ static aten::RasterizeRenderer g_rasterizer;
 
 std::vector<std::shared_ptr<aten::object>> g_objs;
 std::vector<bool> g_objenable;
+aten::aabb g_obj_aabb;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -86,6 +87,11 @@ void onRun(aten::window* window)
             export_objs);
     }
 
+    const auto& aabb_max = g_obj_aabb.maxPos();
+    const auto& aabb_min = g_obj_aabb.minPos();
+    ImGui::Text("max(%.3f, %.3f, %.3f)", aabb_max.x, aabb_max.y, aabb_max.z);
+    ImGui::Text("min(%.3f, %.3f, %.3f)", aabb_min.x, aabb_min.y, aabb_min.z);
+
     ImGui::SliderInt("min", &obj_min, 0, obj_max);
     ImGui::SliderInt("max", &obj_max, obj_min, static_cast<int>(g_objs.size() - 1));
 
@@ -107,7 +113,11 @@ void onRun(aten::window* window)
         const auto& obj = g_objs[i];
         auto mtrl_name = obj->getShape(0)->getMaterial()->name();
 
-        std::string name = obj->getName();
+        const auto name_ptr = obj->getName();
+        std::string name;
+        if (name_ptr != nullptr) {
+            name = name_ptr;
+        }
         name += mtrl_name;
 
         bool is_enable = g_objenable.at(i);
@@ -259,6 +269,12 @@ void loadObj(
     }
 
     aten::ObjLoader::load(objs, objpath, g_ctxt, nullptr, true);
+
+    g_obj_aabb.empty();
+    for (const auto& obj : objs) {
+        const auto& aabb = obj->getBoundingbox();
+        g_obj_aabb.expand(aabb);
+    }
 }
 
 bool parseOption(
@@ -318,7 +334,8 @@ int main(int argc, char* argv[])
         onMouseWheel,
         onKey);
 
-    loadObj("../../asset/models/sponza/sponza.obj", nullptr, g_objs);
+    //loadObj("../../asset/models/sponza/sponza.obj", nullptr, g_objs);
+    loadObj("../../asset/bunny/bunny.obj", nullptr, g_objs);
     //loadObj("../../asset/dragon/dragon.obj", nullptr, g_objs);
     //loadObj("../../asset/models/plane/plane.obj", nullptr, g_objs);
     //loadObj("../../asset/cornellbox/orig.obj", nullptr, g_objs);

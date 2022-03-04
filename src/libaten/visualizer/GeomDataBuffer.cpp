@@ -180,9 +180,10 @@ namespace aten {
             data));
     }
 
-    static GLenum prims[] = {
+    static constexpr GLenum prims[] = {
         GL_TRIANGLES,
         GL_LINES,
+        GL_POINTS,
     };
 
     inline uint32_t computeVtxNum(Primitive mode, uint32_t primNum)
@@ -196,6 +197,12 @@ namespace aten {
             break;
         case Primitive::Lines:
             vtxNum = primNum * 2;
+            break;
+        case Primitive::Points:
+            vtxNum = primNum;
+            break;
+        default:
+            AT_ASSERT(false);
             break;
         }
 

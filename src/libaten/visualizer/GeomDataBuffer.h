@@ -11,6 +11,7 @@ namespace aten {
     enum class Primitive {
         Triangles,
         Lines,
+        Points,
     };
 
     struct VertexAttrib {

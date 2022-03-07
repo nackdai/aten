@@ -180,6 +180,7 @@ namespace AT_NAME
         const aten::vec3& wo)
     {
         // NOTE
+        // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 
         auto wh = normalize(-wi + wo);

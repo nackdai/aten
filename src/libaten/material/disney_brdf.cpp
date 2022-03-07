@@ -8,7 +8,7 @@ namespace AT_NAME
     // http://project-asura.com/blog/archives/1972
     // https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
     // Physically-Based Shading at Disney
-    // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
+    // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 
     inline AT_DEVICE_API real sqr(real f)
     {
@@ -34,7 +34,7 @@ namespace AT_NAME
     {
         // NOTE
         // Physically-Based Shading at Disney
-        // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
+        // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
         // p25 equation(4)
 
         if (a >= 1) {
@@ -49,7 +49,7 @@ namespace AT_NAME
     {
         // NOTE
         // Physically-Based Shading at Disney
-        // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
+        // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
         // p25 equation(8)
 
         real a2 = a * a ;
@@ -61,7 +61,7 @@ namespace AT_NAME
     {
         // NOTE
         // Physically-Based Shading at Disney
-        // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
+        // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
         // p25 equation(13)
 
 #if 0
@@ -272,7 +272,7 @@ namespace AT_NAME
 
                 // NOTE
                 // Physically-Based Shading at Disney
-                // https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
+                // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
                 // p25 (14)
 
                 const auto f = aten::sqrt(r2 / (real(1) - r2));

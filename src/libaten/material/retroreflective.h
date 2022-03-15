@@ -23,15 +23,19 @@ namespace AT_NAME
 
     private:
         Retroreflective(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            real ior = real(0),
+            const MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, ior, albedoMap, normalMap)
-        {}
+            : material(
+                aten::MaterialType::Retroreflective, MaterialAttributeRetroreflective,
+                param.baseColor, param.retroreflective.ior_mirror, albedoMap, normalMap)
+        {
+            m_param = param;
+        }
 
         Retroreflective(aten::Values& val);
 
+        Retroreflective() = default;
         virtual ~Retroreflective() = default;
 
     public:

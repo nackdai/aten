@@ -10,6 +10,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
+        AT_ASSERT(false);
         return real(1);
     }
 
@@ -53,12 +54,24 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto c = dot(normal, wo);
+        auto output = normalize(wo);
 
-        auto bsdf = param->baseColor;
-        bsdf *= sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        // Mirror
+        auto reflect_dir = wi - 2 * dot(normal, wi) * normal;
+        reflect_dir = normalize(reflect_dir);
+        if (dot(output, reflect_dir) == 0) {
 
-        return bsdf;
+        }
+
+
+        // Retroreflective
+        auto retroreflective_dir = -wi;
+        if (dot(output, retroreflective_dir) == 0) {
+        }
+
+        // Diffuse
+
+        return aten::vec3();
     }
 
     AT_DEVICE_MTRL_API aten::vec3 Retroreflective::bsdf(

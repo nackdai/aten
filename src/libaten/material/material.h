@@ -40,14 +40,15 @@ namespace aten
         {}
     };
 
-    //                                                                Em     Si      Tr    Gl    NPR
-    #define MaterialAttributeMicrofacet     aten::MaterialAttribute(false, false, false, true,  false)
-    #define MaterialAttributeLambert        aten::MaterialAttribute(false, false, false, false, false)
-    #define MaterialAttributeEmissive       aten::MaterialAttribute(true,  false, false, false, false)
-    #define MaterialAttributeSpecular       aten::MaterialAttribute(false, true,  false, true,  false)
-    #define MaterialAttributeRefraction     aten::MaterialAttribute(false, true,  true,  true,  false)
-    #define MaterialAttributeTransmission   aten::MaterialAttribute(false, false, true,  false, false)
-    #define MaterialAttributeNPR            aten::MaterialAttribute(false, false, false, false, true)
+    //                                                                    Em     Si      Tr    Gl    NPR
+    #define MaterialAttributeMicrofacet         aten::MaterialAttribute(false, false, false, true,  false)
+    #define MaterialAttributeLambert            aten::MaterialAttribute(false, false, false, false, false)
+    #define MaterialAttributeEmissive           aten::MaterialAttribute(true,  false, false, false, false)
+    #define MaterialAttributeSpecular           aten::MaterialAttribute(false, true,  false, true,  false)
+    #define MaterialAttributeRefraction         aten::MaterialAttribute(false, true,  true,  true,  false)
+    #define MaterialAttributeTransmission       aten::MaterialAttribute(false, false, true,  false, false)
+    #define MaterialAttributeNPR                aten::MaterialAttribute(false, false, false, false, true)
+    #define MaterialAttributeRetroreflective    aten::MaterialAttribute(false, true,  false, true,  true)
 
     enum class MaterialType : int {
         Emissive,
@@ -69,32 +70,49 @@ namespace aten
         MaterialTypeMax,
     };
 
+    struct RetroreflectiveParameter {
+        real ior_mirror;
+        real ior_retroreflective;
+        real ior_diffuse;
+        real padding;
+
+        aten::vec4 clr_specular;
+        aten::vec4 crl_diffuse;
+    };
+
     struct MaterialParameter {
         MaterialType type;
 
-        aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
+        union {
+            struct {
+                aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
 
-        // NOTE
-        // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
-        // - Index Of Refraction
-        //     Water's index of refraction is a mild 1.3; diamond's is a high 2.4.
-        // - eta
-        //   屈折率の比.
-        //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
-        real ior{ 1.0 };    // 屈折率.
 
-        real roughness{ 0.5 };      // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
-        real shininess{ 1.0 };
+                // NOTE
+                // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
+                // - Index Of Refraction
+                //     Water's index of refraction is a mild 1.3; diamond's is a high 2.4.
+                // - eta
+                //   屈折率の比.
+                //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
+                real ior;               // 屈折率.
 
-        real subsurface{ 0.0 };     // 表面下の近似を用いてディフューズ形状を制御する.
-        real metallic{ 0.0 };       // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-        real specular{ 0.5 };       // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-        real specularTint{ 0.0 };   // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-        real anisotropic{ 0.0 };    // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-        real sheen{ 0.0 };          // 追加的なグレージングコンポーネント，主に布に対して意図している.
-        real sheenTint{ 0.5 };      // 基本色に向かう光沢色合いの量.
-        real clearcoat{ 0.0 };      // 第二の特別な目的のスペキュラーローブ.
-        real clearcoatGloss{ 1.0 }; // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+                real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+                real shininess;
+
+                real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
+                real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+                real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+                real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+                real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+                real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
+                real sheenTint;         // 基本色に向かう光沢色合いの量.
+                real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
+                real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
+            };
+
+            RetroreflectiveParameter retroreflective;
+        };
 
         MaterialAttribute attrib;
 
@@ -111,21 +129,56 @@ namespace aten
             int layer[3];
         };
 
+        AT_DEVICE_API void Init()
+        {
+            ior = 1.0;
+
+            roughness = 0.5;
+            shininess = 1.0;
+
+            subsurface = 0.0;
+            metallic = 0.0;
+            specular = 0.5;
+            specularTint = 0.0;
+            anisotropic = 0.0;
+            sheen = 0.0;
+            sheenTint = 0.5;
+            clearcoat = 0.0;
+            clearcoatGloss = 1.0;
+        }
+
+        AT_DEVICE_API void InitAsRetroreflective()
+        {
+            retroreflective.ior_mirror = 1.0;
+            retroreflective.ior_retroreflective = 1.0;
+            retroreflective.ior_diffuse = 1.0;
+        }
+
         AT_DEVICE_API MaterialParameter()
         {
             isIdealRefraction = false;
             albedoMap = -1;
             normalMap = -1;
             roughnessMap = -1;
+
+            Init();
         }
         AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
-            : type(_type), attrib(_attrib)
+            : MaterialParameter()
         {
-            isIdealRefraction = false;
-            albedoMap = -1;
-            normalMap = -1;
-            roughnessMap = -1;
+            type = _type;
+            attrib = _attrib;
+
+            if (type == MaterialType::Retroreflective) {
+                InitAsRetroreflective();
+            }
         }
+
+        // NOTE
+        // In order to avoid:
+        // error C2280 : 'aten::MaterialParameter::MaterialParameter(const aten::MaterialParameter &)' : attempting to reference a deleted function
+        // `default` doesn't work.
+        MaterialParameter(const MaterialParameter& rhs) {}
     };
 
     class IMaterialParamEditor {
@@ -220,6 +273,7 @@ namespace AT_NAME
             aten::Values& val);
 
     public:
+        material() = default;
         virtual ~material() = default;
 
         bool isEmissive() const

@@ -131,6 +131,7 @@ namespace aten
 
         AT_DEVICE_API void Init()
         {
+            baseColor.set(real(0), real(0), real(0), real(1));
             ior = 1.0;
 
             roughness = 0.5;

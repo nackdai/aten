@@ -226,7 +226,7 @@ namespace AT_NAME
         real D = aten::exp(-x * x);
 #else
         // NOTE
-        // http://simonstechblog.blogspot.jp/2011/12/microfacet-bsdf.html
+        // http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
         real D = (a + 2) / (2 * AT_MATH_PI);
         D *= aten::pow(aten::cmpMax((real)0, NdotH), a);
 #endif
@@ -235,7 +235,7 @@ namespace AT_NAME
         real G(1);
         {
             // Cook-Torrance geometry function.
-            // http://simonstechblog.blogspot.jp/2011/12/microfacet-bsdf.html
+            // http://simonstechblog.blogspot.jp/2011/12/microfacet-brdf.html
 
             auto G1 = 2 * NdotH * NdotL / VdotH;
             auto G2 = 2 * NdotH * NdotV / VdotH;

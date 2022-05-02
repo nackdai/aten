@@ -9,9 +9,11 @@ static const real Pos = real(1) / sqrt(2);
 
 const std::array<aten::vec4, MeasureEffectiveRetroreflectiveArea::VtxNum>
 MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
+    // Fron face.
     aten::vec4(   0,  Pos,    0, 1),
     aten::vec4(   0,    0,  Pos, 1),
     aten::vec4( Pos,    0,    0, 1),
+    // Back face.
     aten::vec4(-Pos,    0,    0, 1),
     aten::vec4(   0, -Pos,    0, 1),
     aten::vec4(   0,    0, -Pos, 1),
@@ -82,6 +84,7 @@ bool MeasureEffectiveRetroreflectiveArea::init(
     }
 
 #if 1
+    // The arguments to pass for GenRay are just for debug visibility.
     auto ray = GenRay(Deg2Rad(30), Deg2Rad(-162));
     std::vector<aten::vec4> ps;
 
@@ -149,30 +152,30 @@ real MeasureEffectiveRetroreflectiveArea::HitTest(real theta, real phi)
 {
     auto d = GenRay(theta, phi);
 
-    size_t tri0_hit_cnt = 0;
-    size_t hit_cnt = 0;
+    size_t front_face_hit_cnt = 0;
+    size_t both_face_hit_cnt = 0;
 
     for (const auto& org : ray_orgs_) {
         aten::ray ray(org, d);
 
-        auto hit_res_tri0 = aten::intersectTriangle(
+        auto hit_res_front_face = aten::intersectTriangle(
             ray,
             TriangleVtxs[0], TriangleVtxs[1], TriangleVtxs[2]);
 
-        auto hit_res_tri1 = aten::intersectTriangle(
+        auto hit_res_back_face = aten::intersectTriangle(
             ray,
             TriangleVtxs[3], TriangleVtxs[4], TriangleVtxs[5]);
 
-        if (hit_res_tri0.isIntersect) {
-            tri0_hit_cnt++;
+        if (hit_res_front_face.isIntersect) {
+            front_face_hit_cnt++;
 
-            if (hit_res_tri1.isIntersect) {
-                hit_cnt++;
+            if (hit_res_back_face.isIntersect) {
+                both_face_hit_cnt++;
             }
         }
     }
 
-    real hit_rate = real(hit_cnt) / real(tri0_hit_cnt);
+    real hit_rate = real(both_face_hit_cnt) / real(front_face_hit_cnt);
 
     return hit_rate;
 }

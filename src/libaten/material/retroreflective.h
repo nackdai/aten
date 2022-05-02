@@ -11,6 +11,7 @@
 // https://hal.inria.fr/hal-01083366/document
 // https://dl.acm.org/doi/pdf/10.1145/3095140.3095176
 // https://www.researchgate.net/publication/323012340_A_retroreflective_BRDF_model_based_on_prismatic_sheeting_and_microfacet_theory
+// https://texeltalk.blogspot.com/2021/01/a-retro-reflective-shader-for-unity.html
 
 namespace aten {
     class Values;

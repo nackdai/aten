@@ -148,7 +148,7 @@ void ComputeERA()
 {
     AT_PRINTF("\n");
 
-    constexpr int Step = 20;
+    constexpr int Step = 40;
 
     const real ThetaMin = 0;
     const real ThetaMax = AT_MATH_PI_HALF;
@@ -192,7 +192,7 @@ void ComputeERA()
     for (const auto it : AvgERA) {
         const auto theta = it.first;
         const auto hit_rate = it.second.x;
-        AT_PRINTF("%.3f, %.3f\n", theta, hit_rate);
+        AT_PRINTF("{real(%.3f), real(%.3f)},\n", theta, hit_rate);
     }
 }
 

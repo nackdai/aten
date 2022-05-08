@@ -101,7 +101,7 @@ namespace AT_NAME
         return ret;
     }
 
-    static AT_DEVICE_MTRL_API real sampleBeckman_D(
+    AT_DEVICE_MTRL_API real MicrofacetBeckman::sampleBeckman_D(
         const aten::vec3& wh,    // half
         const aten::vec3& n,    // normal
         real roughness)
@@ -158,12 +158,20 @@ namespace AT_NAME
         const aten::vec3& normal,
         aten::sampler* sampler)
     {
-        // NOTE
-        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
-
         auto r1 = sampler->nextSample();
         auto r2 = sampler->nextSample();
 
+        return sampleDirection(roughness, in, normal, r1, r2);
+    }
+
+    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
+        const real roughness,
+        const aten::vec3& in,
+        const aten::vec3& normal,
+        real r1, real r2)
+    {
+        // NOTE
+        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         auto a = roughness;
         auto a2 = a * a;
 
@@ -202,7 +210,7 @@ namespace AT_NAME
         return dir;
     }
 
-    static AT_DEVICE_MTRL_API real sampleBeckman_G(
+    AT_DEVICE_MTRL_API real MicrofacetBeckman::sampleBeckman_G(
         const aten::vec3& n, const aten::vec3& v, const aten::vec3& m,
         real alpha)
     {

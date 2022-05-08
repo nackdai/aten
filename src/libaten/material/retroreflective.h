@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "material/material.h"
 
 // NOTE
@@ -28,11 +29,11 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
             : material(
-                aten::MaterialType::Retroreflective, MaterialAttributeRetroreflective,
-                param.baseColor, param.retroreflective.ior_mirror, albedoMap, normalMap)
+                aten::MaterialType::Retroreflective, MaterialAttributeRetroreflective)
         {
             m_param = param;
         }
+
 
         Retroreflective(aten::Values& val);
 
@@ -116,25 +117,10 @@ namespace AT_NAME
             real u, real v,
             bool isLightPath = false) const override final;
 
-        virtual AT_DEVICE_MTRL_API real computeFresnel(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor = 1) const override final
-        {
-            return computeFresnel(&m_param, normal, wi, wo, outsideIor);
-        }
-
-        static AT_DEVICE_MTRL_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor)
-        {
-            return real(1);
-        }
-
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
+
+        static AT_DEVICE_MTRL_API real getEffectiveRetroreflectiveArea(
+            const aten::vec3& into_prismatic_sheet_dir,
+            const aten::vec3& normal);
     };
 }

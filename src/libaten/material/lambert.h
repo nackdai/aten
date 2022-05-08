@@ -41,7 +41,7 @@ namespace AT_NAME
 
         static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
             const aten::vec3& normal,
-            aten::sampler* sampler)
+            real r1, real r2)
         {
             // normalの方向を基準とした正規直交基底(w, u, v)を作る.
             // この基底に対する半球内で次のレイを飛ばす.
@@ -65,8 +65,7 @@ namespace AT_NAME
 #endif
 
             // コサイン項を使った重点的サンプリング.
-            const real r1 = 2 * AT_MATH_PI * sampler->nextSample();
-            const real r2 = sampler->nextSample();
+            r1 = 2 * AT_MATH_PI * r1;
             const real r2s = sqrt(r2);
 
             const real x = aten::cos(r1) * r2s;
@@ -77,6 +76,16 @@ namespace AT_NAME
             AT_ASSERT(dot(normal, dir) >= 0);
 
             return dir;
+        }
+
+        static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+            const aten::vec3& normal,
+            aten::sampler* sampler)
+        {
+            const auto r1 = sampler->nextSample();
+            const auto r2 = sampler->nextSample();
+
+            return sampleDirection(normal, r1, r2);
         }
 
         static AT_DEVICE_MTRL_API aten::vec3 bsdf(

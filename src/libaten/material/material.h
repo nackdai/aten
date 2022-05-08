@@ -70,48 +70,40 @@ namespace aten
         MaterialTypeMax,
     };
 
-    struct RetroreflectiveParameter {
-        real ior_mirror;
-        real ior_retroreflective;
-        real ior_diffuse;
-        real padding;
-
-        aten::vec4 clr_specular;
-        aten::vec4 crl_diffuse;
-    };
-
     struct MaterialParameter {
         MaterialType type;
 
+        aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
+
+
+        // NOTE
+        // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
+        // - Index Of Refraction
+        //     Water's index of refraction is a mild 1.3; diamond's is a high 2.4.
+        // - eta
+        //   屈折率の比.
+        //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
+        real ior;               // 屈折率.
+
+        real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
+
+        real shininess;
+
+        real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
+        real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
+        real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
+        real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
+        real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
+
         union {
             struct {
-                aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
-
-
-                // NOTE
-                // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
-                // - Index Of Refraction
-                //     Water's index of refraction is a mild 1.3; diamond's is a high 2.4.
-                // - eta
-                //   屈折率の比.
-                //   ex) eta = 1.0 / 1.4  : air/glass's index of refraction.
-                real ior;               // 屈折率.
-
-                real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
-                real shininess;
-
-                real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
-                real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
-                real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
-                real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
-                real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
                 real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
                 real sheenTint;         // 基本色に向かう光沢色合いの量.
                 real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
                 real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
             };
 
-            RetroreflectiveParameter retroreflective;
+            aten::vec3 subColor;
         };
 
         MaterialAttribute attrib;
@@ -148,13 +140,6 @@ namespace aten
             clearcoatGloss = 1.0;
         }
 
-        AT_DEVICE_API void InitAsRetroreflective()
-        {
-            retroreflective.ior_mirror = 1.0;
-            retroreflective.ior_retroreflective = 1.0;
-            retroreflective.ior_diffuse = 1.0;
-        }
-
         AT_DEVICE_API MaterialParameter()
         {
             isIdealRefraction = false;
@@ -164,15 +149,12 @@ namespace aten
 
             Init();
         }
+
         AT_DEVICE_API MaterialParameter(MaterialType _type, const MaterialAttribute& _attrib)
             : MaterialParameter()
         {
             type = _type;
             attrib = _attrib;
-
-            if (type == MaterialType::Retroreflective) {
-                InitAsRetroreflective();
-            }
         }
 
         // NOTE

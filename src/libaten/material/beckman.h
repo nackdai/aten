@@ -10,6 +10,7 @@ namespace AT_NAME
 {
     class MicrofacetBeckman : public material {
         friend class MaterialFactory;
+        friend class Retroreflective;
 
     private:
         MicrofacetBeckman(
@@ -121,6 +122,12 @@ namespace AT_NAME
             const aten::vec3& normal,
             aten::sampler* sampler);
 
+        static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+            const real roughness,
+            const aten::vec3& in,
+            const aten::vec3& normal,
+            real r1, real r2);
+
         static AT_DEVICE_MTRL_API aten::vec3 bsdf(
             const aten::vec3& albedo,
             const real roughness,
@@ -130,5 +137,14 @@ namespace AT_NAME
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
+
+        static AT_DEVICE_MTRL_API real sampleBeckman_D(
+            const aten::vec3& wh,    // half
+            const aten::vec3& n,    // normal
+            real roughness);
+
+        static AT_DEVICE_MTRL_API real sampleBeckman_G(
+            const aten::vec3& n, const aten::vec3& v, const aten::vec3& m,
+            real alpha);
     };
 }

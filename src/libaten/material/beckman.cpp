@@ -167,17 +167,22 @@ namespace AT_NAME
         auto a = roughness;
         auto a2 = a * a;
 
-        auto theta = aten::sqrt(-a2 * aten::log(1 - r1 * real(0.99)));
-        theta = aten::atan(theta);
-        theta = ((theta >= real(0)) ? theta : (theta + 2 * AT_MATH_PI));
+        auto tan_theta_2 = -a2 * aten::log(1 - r1 * real(0.99));
 
         auto phi = real(2) * AT_MATH_PI * r2;
 
-        auto costheta = aten::cos(theta);
-        auto sintheta = aten::sqrt(real(1) - costheta * costheta);
+        // NOTE
+        // tan = sin / cos
+        // tan^2 = sin^2 / con^2 = (1 - cos^2) / cos^2 = 1 / cos^2 - 1
+        // tan^2 + 1 = 1 / cos^2
+        // cos^2 = 1 / (tan^2 + 1)
+        // cos = sqrt(1 / (tan^2 + 1))
+
+        auto costheta = aten::sqrt(real(1) / (tan_theta_2 + real(1)));
+        auto sintheta = aten::sqrt(aten::cmpMax(real(0), real(1) - costheta * costheta));
 
         auto cosphi = aten::cos(phi);
-        auto sinphi = aten::sqrt(1 - cosphi * cosphi);
+        auto sinphi = aten::sin(phi);
 
         // Ortho normal base.
         auto n = normal;
@@ -185,7 +190,12 @@ namespace AT_NAME
         auto b = normalize(cross(n, t));
 
         auto w = t * sintheta * cosphi + b * sintheta * sinphi + n * costheta;
+
         w = normalize(w);
+
+        if (dot(-in, w) < real(0)) {
+            w = -w;
+        }
 
         auto dir = in - real(2) * dot(in, w) * w;
 

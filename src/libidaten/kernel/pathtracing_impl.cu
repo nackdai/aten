@@ -216,7 +216,7 @@ namespace pt {
             ? -orienting_normal
             : orienting_normal;
 
-        auto c = abs(dot(rayBasedNormal, nextDir));
+        auto c = dot(rayBasedNormal, nextDir);
 
         if (pdfb > 0 && c > 0) {
             paths->throughput[idx].throughput *= bsdf * c / pdfb;
@@ -224,6 +224,7 @@ namespace pt {
         }
         else {
             paths->attrib[idx].isTerminate = true;
+            return;
         }
 
         // Make next ray.

@@ -292,6 +292,9 @@
     <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.cuh">
       <Filter>kernel\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\retroreflective.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -534,6 +537,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\kernel\pt_standard_impl.cu">
       <Filter>kernel\renderer</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\retroreflective.cpp">
+      <Filter>aten\material</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

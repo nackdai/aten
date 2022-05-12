@@ -25,7 +25,7 @@ namespace AT_NAME
 
     private:
         Retroreflective(
-            const MaterialParameter& param,
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
             : material(

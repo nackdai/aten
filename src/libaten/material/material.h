@@ -156,12 +156,6 @@ namespace aten
             type = _type;
             attrib = _attrib;
         }
-
-        // NOTE
-        // In order to avoid:
-        // error C2280 : 'aten::MaterialParameter::MaterialParameter(const aten::MaterialParameter &)' : attempting to reference a deleted function
-        // `default` doesn't work.
-        MaterialParameter(const MaterialParameter& rhs) {}
     };
 
     class IMaterialParamEditor {

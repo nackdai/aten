@@ -272,7 +272,7 @@ namespace svgf {
             ? -orienting_normal
             : orienting_normal;
 
-        auto c = abs(dot(orienting_normal, nextDir));
+        auto c = dot(orienting_normal, nextDir);
 
         if (pdfb > 0 && c > 0) {
             paths->throughput[idx].throughput *= bsdf * c / pdfb;
@@ -280,6 +280,7 @@ namespace svgf {
         }
         else {
             paths->attrib[idx].isTerminate = true;
+            return;
         }
 
         // Make next ray.

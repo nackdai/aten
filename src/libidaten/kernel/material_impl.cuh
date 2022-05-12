@@ -226,6 +226,9 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     case aten::MaterialType::Microfacet_Refraction:
         AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
+    case aten::MaterialType::Retroreflective:
+        AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+        break;
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
@@ -283,6 +286,9 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     case aten::MaterialType::Microfacet_Refraction:
         AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
         break;
+    case aten::MaterialType::Retroreflective:
+        AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+        break;
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
@@ -338,6 +344,9 @@ AT_CUDA_INLINE __device__ real samplePDF(
     case aten::MaterialType::Microfacet_Refraction:
         pdf = AT_NAME::MicrofacetRefraction::pdf(mtrl, normal, wi, wo, u, v);
         break;
+    case aten::MaterialType::Retroreflective:
+        pdf = AT_NAME::Retroreflective::pdf(mtrl, normal, wi, wo, u, v);
+        break;
     case aten::MaterialType::Disney:
         pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
         break;
@@ -382,6 +391,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
         return AT_NAME::LambertRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Microfacet_Refraction:
         return AT_NAME::MicrofacetRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
+    case aten::MaterialType::Retroreflective:
+        return AT_NAME::Retroreflective::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Layer:
@@ -424,6 +435,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::LambertRefraction::bsdf(mtrl, u, v);
     case aten::MaterialType::Microfacet_Refraction:
         return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v);
+    case aten::MaterialType::Retroreflective:
+        return AT_NAME::Retroreflective::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Layer:
@@ -467,6 +480,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::LambertRefraction::bsdf(mtrl, externalAlbedo);
     case aten::MaterialType::Microfacet_Refraction:
         return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+    case aten::MaterialType::Retroreflective:
+        return AT_NAME::Retroreflective::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Layer:

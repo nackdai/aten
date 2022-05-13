@@ -33,6 +33,7 @@ set_source_files_properties(
   ../libaten/material/ggx.cpp
   ../libaten/material/oren_nayar.cpp
   ../libaten/material/refraction.cpp
+  ../libaten/material/retroreflective.cpp
   ../libaten/material/specular.cpp
   ../libaten/material/FlakesNormal.cpp
   ../libaten/material/velvet.cpp
@@ -61,6 +62,7 @@ cuda_add_library(
   ../libaten/material/material.cpp
   ../libaten/material/oren_nayar.cpp
   ../libaten/material/refraction.cpp
+  ../libaten/material/retroreflective.cpp
   ../libaten/material/specular.cpp
   ../libaten/material/FlakesNormal.cpp
   ../libaten/material/velvet.cpp

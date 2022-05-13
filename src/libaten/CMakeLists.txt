@@ -142,6 +142,8 @@ add_library(
   material/oren_nayar.h
   material/refraction.cpp
   material/refraction.h
+  material/retroreflective.cpp
+  material/retroreflective.h
   material/sample_texture.h
   material/specular.cpp
   material/specular.h

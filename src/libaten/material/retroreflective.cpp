@@ -36,9 +36,9 @@ namespace AT_NAME
         const aten::vec3 V = -wi;
         const aten::vec3 N = normal;
 
-        // ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
-        const real ni = real(1);      // ^‹ó
-        const real nt = param->ior;   // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        // ãƒ¬ã‚¤ãŒå…¥å°„ã—ã¦ãã‚‹å´ã®ç‰©ä½“ã®å±ˆæŠ˜ç‡.
+        const real ni = real(1);      // çœŸç©º
+        const real nt = param->ior;   // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
         const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness)).r;
 
@@ -97,9 +97,9 @@ namespace AT_NAME
         const aten::vec3 V = -wi;
         const aten::vec3 N = normal;
 
-        // ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
-        const real ni = real(1);      // ^‹ó
-        const real nt = param->ior;   // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        // ãƒ¬ã‚¤ãŒå…¥å°„ã—ã¦ãã‚‹å´ã®ç‰©ä½“ã®å±ˆæŠ˜ç‡.
+        const real ni = real(1);      // çœŸç©º
+        const real nt = param->ior;   // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
         const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness)).r;
 
@@ -264,9 +264,9 @@ namespace AT_NAME
 
         real fresnel = 1;
 
-        // ƒŒƒC‚ª“üË‚µ‚Ä‚­‚é‘¤‚Ì•¨‘Ì‚Ì‹üÜ—¦.
-        const real ni = real(1);      // ^‹ó
-        const real nt = param->ior;   // •¨‘Ì“à•”‚Ì‹üÜ—¦.
+        // ãƒ¬ã‚¤ãŒå…¥å°„ã—ã¦ãã‚‹å´ã®ç‰©ä½“ã®å±ˆæŠ˜ç‡.
+        const real ni = real(1);      // çœŸç©º
+        const real nt = param->ior;   // ç‰©ä½“å†…éƒ¨ã®å±ˆæŠ˜ç‡.
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5

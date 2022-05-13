@@ -212,6 +212,7 @@ void onRun(aten::window* window)
             "Velvet",
             "LambertRefraction",
             "MicrofacetRefraction",
+            "Retroreflective",
             "Disney",
         };
         int mtrlType = (int)mtrl->param().type;

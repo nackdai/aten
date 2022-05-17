@@ -272,6 +272,7 @@ namespace AT_NAME
         real G = sampleBeckman_G(V, N, H, a) * sampleBeckman_G(L, N, H, a);
 
         real F(1);
+#if 0
         {
             // http://d.hatena.ne.jp/hanecci/20130525/p3
 
@@ -282,10 +283,25 @@ namespace AT_NAME
             auto r0 = (ni - nt) / (ni + nt);
             r0 = r0 * r0;
 
-            auto LdotH = aten::abs(dot(L, H));
+            auto LdotH = aten::cmpMax(real(0), dot(L, H));
 
             F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
         }
+#else
+        {
+            const auto cosi = dot(H, L);
+
+            const auto nnt = ni / nt;
+            const auto sini2 = real(1.0) - cosi * cosi;
+            const auto sint2 = nnt * nnt * sini2;
+            const auto cost = aten::sqrt(aten::cmpMax(real(0.0), real(1.0) - sint2));
+
+            const auto rp = (nt * cosi - ni * cost) / (nt * cosi + ni * cost);
+            const auto rs = (ni * cosi - nt * cost) / (ni * cosi + nt * cost);
+
+            F = (rp * rp + rs * rs) * real(0.5);
+        }
+#endif
 
         auto denom = real(4) * NdotL * NdotV;
 

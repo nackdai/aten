@@ -291,17 +291,7 @@ namespace AT_NAME
         {
             const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, roughness);
             const auto G = MicrofacetBeckman::sampleBeckman_G(V, N, H, roughness) * MicrofacetBeckman::sampleBeckman_G(L, N, H, roughness);
-            real F(1);
-            {
-                // http://d.hatena.ne.jp/hanecci/20130525/p3
-
-                auto r0 = (ni - nt) / (ni + nt);
-                r0 = r0 * r0;
-
-                auto LdotB = aten::abs(dot(L, B));
-
-                F = r0 + (1 - r0) * aten::pow((1 - LdotB), 5);
-            }
+            const auto F = real(1) - fresnel;
             const auto denom = real(4) * dot(N, L) * dot(N, V);
 
             retroreflective = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : aten::vec3(0);
@@ -313,7 +303,9 @@ namespace AT_NAME
         // Diffuse
         const auto diffuse = static_cast<aten::vec3>(albedo) / AT_MATH_PI;
 
-        const auto bsdf = era * (fresnel * beckman + (real(1) - fresnel) * retroreflective) + (real(1) - era) * diffuse;
+        // NOTE
+        // Fresnel term is already computed in both bsdf (beckman & retroreflective) term.
+        const auto bsdf = era * (beckman + retroreflective) + (real(1) - era) * diffuse;
         return bsdf;
     }
 

@@ -48,7 +48,6 @@ namespace aten
     #define MaterialAttributeRefraction         aten::MaterialAttribute(false, true,  true,  true,  false)
     #define MaterialAttributeTransmission       aten::MaterialAttribute(false, false, true,  false, false)
     #define MaterialAttributeNPR                aten::MaterialAttribute(false, false, false, false, true)
-    #define MaterialAttributeRetroreflective    aten::MaterialAttribute(false, true,  false, true,  true)
 
     enum class MaterialType : int {
         Emissive,

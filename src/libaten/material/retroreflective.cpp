@@ -12,7 +12,7 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi)
     {
-        const auto cosi = dot(normal, wi);
+        const auto cosi = dot(normal, -wi);
 
         const auto nnt = ni / nt;
         const auto sini2 = real(1.0) - cosi * cosi;
@@ -51,6 +51,10 @@ namespace AT_NAME
 
         const auto era = getEffectiveRetroreflectiveArea(refract, N);
 
+        // NOTE
+        // Ideally, we should use half vector(H).
+        // But, we use N(normal) to sample the output direction.
+        // In order to align how to compute the ouput, we use N(normal) here as well.
         const auto fresnel = computeFresnelEx(ni, nt, N, wi);
 
         const auto beckmanPdf = MicrofacetBeckman::pdf(param, normal, wi, wo, u, v);
@@ -119,6 +123,10 @@ namespace AT_NAME
         aten::vec3 dir;
 
         if (r0 < era) {
+            // NOTE
+            // Ideally, we should use half vector(H). But, in order to compute H, we need L(output vector).
+            // But, we are computing H in this API. And, we still don't know it yet.
+            // Therefore, we can't use H at this moment and we need to use N(normal) here.
             const auto fresnel = computeFresnelEx(ni, nt, N, wi);
 
             r0 /= era;
@@ -164,7 +172,8 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        return aten::vec3();
+        const auto albedo = AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        return bsdf(param, normal, wi, wo, u, v, albedo);
     }
 
     AT_DEVICE_MTRL_API real Retroreflective::getEffectiveRetroreflectiveArea(
@@ -177,31 +186,31 @@ namespace AT_NAME
 
         constexpr size_t TableSize = 25;
         constexpr std::array<std::array<real, 2>, TableSize>  EffectiveRetroreflectiveAreaTable = { {
-            {real(0.000), real(0.672)},
-            {real(2.250), real(0.669)},
-            {real(4.500), real(0.662)},
-            {real(6.750), real(0.651)},
-            {real(9.000), real(0.634)},
-            {real(11.250), real(0.612)},
-            {real(13.500), real(0.589)},
-            {real(15.750), real(0.559)},
-            {real(18.000), real(0.526)},
-            {real(20.250), real(0.484)},
-            {real(22.500), real(0.438)},
-            {real(24.750), real(0.389)},
-            {real(27.000), real(0.336)},
-            {real(29.250), real(0.281)},
-            {real(31.500), real(0.223)},
-            {real(33.750), real(0.161)},
-            {real(36.000), real(0.128)},
-            {real(38.250), real(0.109)},
-            {real(40.500), real(0.092)},
-            {real(42.750), real(0.072)},
-            {real(45.000), real(0.047)},
-            {real(47.250), real(0.034)},
-            {real(49.500), real(0.018)},
-            {real(51.750), real(0.008)},
-            {real(54.000), real(0.001)},
+            {Deg2Rad(real(0.000)), real(0.672)},
+            {Deg2Rad(real(2.250)), real(0.669)},
+            {Deg2Rad(real(4.500)), real(0.662)},
+            {Deg2Rad(real(6.750)), real(0.651)},
+            {Deg2Rad(real(9.000)), real(0.634)},
+            {Deg2Rad(real(11.250)), real(0.612)},
+            {Deg2Rad(real(13.500)), real(0.589)},
+            {Deg2Rad(real(15.750)), real(0.559)},
+            {Deg2Rad(real(18.000)), real(0.526)},
+            {Deg2Rad(real(20.250)), real(0.484)},
+            {Deg2Rad(real(22.500)), real(0.438)},
+            {Deg2Rad(real(24.750)), real(0.389)},
+            {Deg2Rad(real(27.000)), real(0.336)},
+            {Deg2Rad(real(29.250)), real(0.281)},
+            {Deg2Rad(real(31.500)), real(0.223)},
+            {Deg2Rad(real(33.750)), real(0.161)},
+            {Deg2Rad(real(36.000)), real(0.128)},
+            {Deg2Rad(real(38.250)), real(0.109)},
+            {Deg2Rad(real(40.500)), real(0.092)},
+            {Deg2Rad(real(42.750)), real(0.072)},
+            {Deg2Rad(real(45.000)), real(0.047)},
+            {Deg2Rad(real(47.250)), real(0.034)},
+            {Deg2Rad(real(49.500)), real(0.018)},
+            {Deg2Rad(real(51.750)), real(0.008)},
+            {Deg2Rad(real(54.000)), real(0.001)},
         } };
 
         // Inverse normal to align the vector into the prismatic sheet.
@@ -221,18 +230,15 @@ namespace AT_NAME
         if (idx >= TableSize) {
             return real(0.0);
         }
-        else if (idx == TableSize - 1) {
-            auto d = EffectiveRetroreflectiveAreaTable[idx][0];
-            t = (d - theta) / Step;
-
-            a = EffectiveRetroreflectiveAreaTable[idx][1];
-        }
         else {
             auto d = EffectiveRetroreflectiveAreaTable[idx][0];
-            t = (d - theta) / Step;
+            t = aten::cmpMin(real(1), aten::abs(d - theta) / Step);
 
             a = EffectiveRetroreflectiveAreaTable[idx][1];
-            b = EffectiveRetroreflectiveAreaTable[idx + 1][1];
+            if (idx < TableSize - 1) {
+                // Not end of the table.
+                b = EffectiveRetroreflectiveAreaTable[idx + 1][1];
+            }
         }
 
         const auto result = a * (1 - t) + b * t;

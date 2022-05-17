@@ -121,6 +121,9 @@ namespace aten
         case aten::MaterialType::Microfacet_Refraction:
             mtrl = new aten::MicrofacetRefraction(param.baseColor, param.roughness, param.ior, albedoMap, normalMap, roughnessMap);
             break;
+        case aten::MaterialType::Retroreflective:
+            mtrl = new aten::Retroreflective(param.baseColor, param.ior, albedoMap, normalMap, roughnessMap);
+            break;
         case aten::MaterialType::Disney:
             mtrl = new aten::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);
             break;

@@ -4,7 +4,6 @@
 #include "material/material.h"
 
 // NOTE
-// çƒãAîΩéÀ
 // https://www.ccs-inc.co.jp/guide/column/light_color_part2/vol04.html
 // https://www.3mcompany.jp/3M/ja_JP/road-safety-jp/resources/road-transportation-safety-center-blog/full-story/~/road-signs-retroreflectivity/?storyid=70a0ffaa-7ee2-4636-ae2b-094b7c8359a6
 // https://en.wikipedia.org/wiki/Retroreflector
@@ -25,19 +24,18 @@ namespace AT_NAME
 
     private:
         Retroreflective(
-            const aten::MaterialParameter& param,
+            const aten::vec3& albedo = aten::vec3(0.5),
+            real ior = real(3),
             aten::texture* albedoMap = nullptr,
-            aten::texture* normalMap = nullptr)
+            aten::texture* normalMap = nullptr,
+            aten::texture* roughnessMap = nullptr)
             : material(
-                aten::MaterialType::Retroreflective, MaterialAttributeRetroreflective)
+                aten::MaterialType::Retroreflective, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
         {
-            m_param = param;
         }
-
 
         Retroreflective(aten::Values& val);
 
-        Retroreflective() = default;
         virtual ~Retroreflective() = default;
 
     public:

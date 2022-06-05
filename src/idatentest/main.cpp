@@ -18,7 +18,7 @@
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
-static const char* TITLE = "ReSTIR";
+static const char* TITLE = "idaten";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -39,10 +39,6 @@ static float g_avgcuda = 0.0f;
 static float g_avgupdate = 0.0f;
 
 static bool g_enableUpdate = false;
-
-static aten::TAA g_taa;
-
-static aten::FBO g_fbo;
 
 static aten::RasterizeRenderer g_rasterizer;
 static aten::RasterizeRenderer g_rasterizerAABB;
@@ -166,7 +162,7 @@ void onRun(aten::window* window)
         g_ctxt,
         &g_scene,
         &g_camera,
-        &g_fbo);
+        nullptr);
 
     auto rasterizerTime = aten::GLProfiler::end();
 
@@ -226,56 +222,11 @@ void onRun(aten::window* window)
             g_tracer.reset();
         }
 
-#if 0
-        static const char* items[] = { "ReSTIR", "PT", "AOV" };
-
-        if (ImGui::Combo("mode", (int*)&g_curMode, items, AT_COUNTOF(items))) {
-            g_tracer.setMode(g_curMode);
-        }
-
-        if (g_curMode == idaten::ReSTIRPathTracing::Mode::ReSTIR) {
-            static const char* restir_items[] = { "ReSTIR", "SpatialReuse" };
-
-            if (ImGui::Combo("restir mode", (int*)&g_curReSTIRMode, restir_items, AT_COUNTOF(restir_items))) {
-                g_tracer.setReSTIRMode(g_curReSTIRMode);
-            }
-        }
-
-        if (g_curMode == idaten::ReSTIRPathTracing::Mode::AOVar) {
-            static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
-
-            if (ImGui::Combo("aov", (int*)&g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
-                g_tracer.setAOVMode(g_curAOVMode);
-            }
-        }
-#endif
-
         if (ImGui::Checkbox("Progressive", &g_enableProgressive)) {
             g_tracer.setEnableProgressive(g_enableProgressive);
         }
 
-#if 0
-        bool enableTAA = g_taa.isEnableTAA();
-        bool canShowTAADiff = g_taa.canShowTAADiff();
-
-        if (ImGui::Checkbox("Enable TAA", &enableTAA)) {
-            g_taa.enableTAA(enableTAA);
-        }
-        if (ImGui::Checkbox("Show TAA Diff", &canShowTAADiff)) {
-            g_taa.showTAADiff(canShowTAADiff);
-        }
-#else
-        g_taa.enableTAA(false);
-#endif
-
         ImGui::Checkbox("Show AABB", &g_showAABB);
-
-#if 0
-        bool canSSRTHitTest = g_tracer.canSSRTHitTest();
-        if (ImGui::Checkbox("Can SSRT Hit", &canSSRTHitTest)) {
-            g_tracer.setCanSSRTHitTest(canSSRTHitTest);
-        }
-#endif
 
         ImGui::SliderFloat("MoveMultiply", &g_moveMultiply, 1.0f, 100.0f);
 
@@ -455,12 +406,6 @@ int main()
         "../shader/fullscreen_vs.glsl",
         "../shader/fullscreen_fs.glsl");
 
-    g_taa.init(
-        WIDTH, HEIGHT,
-        "../shader/fullscreen_vs.glsl", "../shader/taa_fs.glsl",
-        "../shader/fullscreen_vs.glsl", "../shader/taa_final_fs.glsl");
-
-    g_visualizer->addPostProc(&g_taa);
     g_visualizer->addPostProc(&gamma);
     //aten::visualizer::addPostProc(&blitter);
 
@@ -473,14 +418,6 @@ int main()
         WIDTH, HEIGHT,
         "../shader/simple3d_vs.glsl",
         "../shader/simple3d_fs.glsl");
-
-    g_fbo.asMulti(2);
-    g_fbo.init(
-        WIDTH, HEIGHT,
-        aten::PixelFormat::rgba32f,
-        true);
-
-    g_taa.setMotionDepthBufferHandle(g_fbo.getTexHandle(1));
 
     aten::vec3 pos, at;
     real vfov;

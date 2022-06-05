@@ -226,7 +226,7 @@ namespace AT_NAME
             auto a2 = a * a;
 
             if (a < real(1.6)) {
-                return (real(3.535) * a + real() * a2) / (real(1) + real(2.276) * a + real(2.577) * a2);
+                return (real(3.535) * a + real(2.181) * a2) / (real(1) + real(2.276) * a + real(2.577) * a2);
             }
             else {
                 return real(1);

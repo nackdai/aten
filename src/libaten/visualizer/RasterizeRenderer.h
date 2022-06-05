@@ -103,6 +103,11 @@ namespace aten {
             s_isInitGlobalVB = false;
         }
 
+        shader& getShader()
+        {
+            return m_shader;
+        }
+
     private:
         void prepareForDrawAABB(const camera* cam);
 

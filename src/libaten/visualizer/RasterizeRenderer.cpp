@@ -523,12 +523,14 @@ namespace aten {
 
         funcRenderObjs([&](const object& obj) {
             obj.draw([&](const aten::vec3& color, const aten::texture* albedo, int mtrlid) {
-                if (albedo) {
-                    albedo->bindAsGLTexture(0, &m_shader);
-                    CALL_GL_API(::glUniform1i(hHasAlbedo, true));
-                }
-                else {
-                    CALL_GL_API(::glUniform1i(hHasAlbedo, false));
+                if (hHasAlbedo >= 0) {
+                    if (albedo) {
+                        albedo->bindAsGLTexture(0, &m_shader);
+                        CALL_GL_API(::glUniform1i(hHasAlbedo, true));
+                    }
+                    else {
+                        CALL_GL_API(::glUniform1i(hHasAlbedo, false));
+                    }
                 }
 
                 CALL_GL_API(::glUniform4f(hColor, color.x, color.y, color.z, 1.0f));

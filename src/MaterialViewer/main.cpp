@@ -14,7 +14,7 @@
 
 #define GPU_RENDERING
 
-#define ENABLE_ENVMAP
+//#define ENABLE_ENVMAP
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -72,7 +72,7 @@ void makeScene(aten::scene* scene)
         mtrlParam,
         nullptr, nullptr, nullptr);
 
-    aten::AssetManager::registerMtrl("m1", mtrl);
+    aten::AssetManager::registerMtrl("m", mtrl);
 
     auto obj = aten::ObjLoader::load("../../asset/teapot/teapot.obj", g_ctxt);
     auto teapot = aten::TransformableFactory::createInstance<aten::object>(g_ctxt, obj, aten::mat4::Identity);
@@ -378,11 +378,7 @@ void onKey(bool press, aten::Key key)
                 at,
                 aten::vec3(0, 1, 0),
                 vfov,
-#ifdef ENABLE_GEOMRENDERING
-                WIDTH >> 1, HEIGHT >> 1);
-#else
                 WIDTH, HEIGHT);
-#endif
         }
             break;
         default:
@@ -446,6 +442,7 @@ int main()
         WIDTH * HEIGHT,
         1024);
 
+#ifdef ENABLE_ENVMAP
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
     auto bg = std::make_shared<aten::envmap>();
     bg->init(envmap);
@@ -453,6 +450,15 @@ int main()
     auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
 
     g_scene.addImageBasedLight(ibl);
+#else
+    auto l = std::make_shared<aten::PointLight>(
+        aten::vec3(0.0, 0.0, 50.0),
+        aten::vec3(10.0, 0.0, 0.0),
+        real(0),
+        real(0.1),
+        real(0));
+    g_scene.addLight(l);
+#endif
 
     {
         std::vector<aten::GeomParameter> shapeparams;
@@ -484,11 +490,13 @@ int main()
             }
         }
 
+#ifdef ENABLE_ENVMAP
         for (auto& l : lightparams) {
             if (l.type == aten::LightType::IBL) {
                 l.idx = envmap->id();
             }
         }
+#endif
 
         auto camparam = g_camera.param();
         camparam.znear = real(0.1);
@@ -506,7 +514,11 @@ int main()
             vtxparams, 0,
             mtxs,
             tex,
+#ifdef ENABLE_ENVMAP
             idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
+#else
+            idaten::EnvmapResource());
+#endif
     }
 
     aten::window::run();

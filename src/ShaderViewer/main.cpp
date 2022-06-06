@@ -210,7 +210,7 @@ void loadObj(
         auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
             param,
             nullptr, nullptr, nullptr);
-        aten::AssetManager::registerMtrl("m", mtrl);
+        aten::AssetManager::registerMtrl("m1", mtrl);
     }
 
     aten::ObjLoader::load(objs, objpath, g_ctxt, nullptr, true);

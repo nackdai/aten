@@ -9,10 +9,10 @@ namespace AT_NAME
     // API name...
     static AT_DEVICE_MTRL_API real computeFresnelEx(
         real ni, real nt,
-        const aten::vec3& normal,
-        const aten::vec3& wi)
+        const aten::vec3& wi,
+        const aten::vec3& normal)
     {
-        const auto cosi = dot(normal, -wi);
+        const auto cosi = dot(normal, wi);
 
         const auto nnt = ni / nt;
         const auto sini2 = real(1.0) - cosi * cosi;
@@ -24,6 +24,32 @@ namespace AT_NAME
 
         const auto Rsp = (rp * rp + rs * rs) * real(0.5);
         return Rsp;
+    }
+
+    // TODO
+    // standardize API
+    static AT_DEVICE_MTRL_API real computeFresnelShlick(
+        real ni, real nt,
+        const aten::vec3& wi,
+        const aten::vec3& n)
+    {
+        float F = 1;
+        {
+            // http://d.hatena.ne.jp/hanecci/20130525/p3
+
+            // NOTE
+            // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
+            // R0 = ((n1 - n2) / (n1 + n2))^2
+
+            float r0 = (ni - nt) / (ni + nt);
+            r0 = r0 * r0;
+
+            float c = aten::abs(dot(wi, n));
+
+            F = r0 + (1 - r0) * pow((1 - c), 5);
+        }
+
+        return F;
     }
 
     AT_DEVICE_MTRL_API real Retroreflective::pdf(
@@ -55,7 +81,7 @@ namespace AT_NAME
         // Ideally, we should use half vector(H).
         // But, we use N(normal) to sample the output direction.
         // In order to align how to compute the ouput, we use N(normal) here as well.
-        const auto fresnel = computeFresnelEx(ni, nt, N, wi);
+        const auto fresnel = computeFresnelEx(ni, nt, V, N);
 
         const auto beckmanPdf = MicrofacetBeckman::pdf(param, normal, wi, wo, u, v);
         const auto diffusePdf = lambert::pdf(N, wo);
@@ -77,7 +103,7 @@ namespace AT_NAME
             retrofractivePdf = denom > 0 ? (D * costheta) / denom : 0;
         }
 
-        const auto pdf = era * (fresnel * beckmanPdf + (real(1) - fresnel) * retrofractivePdf) + (real(1) - era) * diffusePdf;
+        const auto pdf = fresnel * beckmanPdf + (real(1) - fresnel) * (era * retrofractivePdf + (real(1) - era) * diffusePdf);
 
         return pdf;
     }
@@ -114,6 +140,11 @@ namespace AT_NAME
         auto refract = -nnt * (V - d * N) - aten::sqrt(real(1) - nnt * nnt * (1 - d * d)) * N;
         refract = normalize(refract);
 
+        // NOTE
+        // Ideally, we should use half vector(H). But, in order to compute H, we need L(output vector).
+        // But, we are computing H in this API. And, we still don't know it yet.
+        // Therefore, we can't use H at this moment and we need to use N(normal) here.
+        const auto fresnel = computeFresnelEx(ni, nt, V, N);
         const auto era = getEffectiveRetroreflectiveArea(refract, N);
 
         const auto sample = sampler->nextSample2D();
@@ -122,33 +153,26 @@ namespace AT_NAME
 
         aten::vec3 dir;
 
-        if (r0 < era) {
-            // NOTE
-            // Ideally, we should use half vector(H). But, in order to compute H, we need L(output vector).
-            // But, we are computing H in this API. And, we still don't know it yet.
-            // Therefore, we can't use H at this moment and we need to use N(normal) here.
-            const auto fresnel = computeFresnelEx(ni, nt, N, wi);
-
-            r0 /= era;
-
-            if (r1 < fresnel) {
-                // Beckman
-                r1 /= fresnel;
-            }
-            else {
-                // Retroreflective
-                r1 -= fresnel;
-                r1 /= (real(1) - fresnel);
-            }
-
+        if (r0 < fresnel) {
+            // Beckman
+            r0 /= fresnel;
             dir = MicrofacetBeckman::sampleDirection(roughness, wi, N, r0, r1);
         }
         else {
-            // Diffuse
-            r0 -= era;
-            r0 /= (real(1) - era);
+            r0 -= fresnel;
+            r0 /= (real(1) - fresnel);
 
-            dir = lambert::sampleDirection(N, r0, r1);
+            if (r1 < era) {
+                // Retroreflective
+                r1 /= era;
+                dir = MicrofacetBeckman::sampleDirection(roughness, wi, N, r0, r1);
+            }
+            else {
+                // Diffuse
+                r1 -= era;
+                r1 /= (real(1) - era);
+                dir = lambert::sampleDirection(N, r0, r1);
+            }
         }
 
         return dir;
@@ -284,28 +308,26 @@ namespace AT_NAME
         const auto era = getEffectiveRetroreflectiveArea(refract, N);
 
         // Beckman
-        const auto beckman = MicrofacetBeckman::bsdf(albedo, roughness, nt, fresnel, normal, wi, wo, u, v);
+        const auto beckman = MicrofacetBeckman::bsdf(aten::vec3(real(1.0)), roughness, nt, fresnel, normal, wi, wo, u, v);
 
         // Retroreflective
         aten::vec3 retroreflective;
         {
             const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, roughness);
             const auto G = MicrofacetBeckman::sampleBeckman_G(V, N, H, roughness) * MicrofacetBeckman::sampleBeckman_G(L, N, H, roughness);
-            const auto F = real(1) - fresnel;
+            const auto F = computeFresnelShlick(ni, nt, V, B);
             const auto denom = real(4) * dot(N, L) * dot(N, V);
 
-            retroreflective = denom > AT_MATH_EPSILON ? albedo * F * G * D / denom : aten::vec3(0);
+            retroreflective = denom > AT_MATH_EPSILON ? aten::vec3(F * G * D / denom) : aten::vec3(0);
         }
 
         // TODO
         // Use sub color?
 
         // Diffuse
-        const auto diffuse = static_cast<aten::vec3>(albedo) / AT_MATH_PI;
+        const auto diffuse = static_cast<aten::vec3>(real(1.0)) / AT_MATH_PI;
 
-        // NOTE
-        // Fresnel term is already computed in both bsdf (beckman & retroreflective) term.
-        const auto bsdf = era * (beckman + retroreflective) + (real(1) - era) * diffuse;
+        const auto bsdf = albedo * (beckman + (1 - fresnel) * (era * retroreflective + (real(1) - era) * diffuse));
         return bsdf;
     }
 

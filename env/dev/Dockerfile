@@ -1,7 +1,8 @@
-ARG base_from=ubuntu:18.04
+ARG base_from=ubuntu:20.04
 FROM ${base_from}
 
 ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     make \
     build-essential \

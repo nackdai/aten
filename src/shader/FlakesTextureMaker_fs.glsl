@@ -5,6 +5,8 @@ precision highp int;
 uniform vec4 u_resolution;
 uniform float u_time;
 
+layout(location = 0) out vec4 outColor;
+
 #if 0
 vec2 hash(vec2 p)
 {
@@ -70,7 +72,7 @@ void main()
     }
 
     // encode normal vector
-    gl_FragColor = vec4(nv * 0.5 + 0.5, 1.0);
+    outColor = vec4(nv * 0.5 + 0.5, 1.0);
 }
 #else
 float bits_to_01(uint bits)
@@ -266,7 +268,7 @@ void main()
         result,
         alpha);
 
-    gl_FragColor.xyz = result;
-    gl_FragColor.w = alpha;
+    outColor.xyz = result;
+    outColor.w = alpha;
 }
 #endif

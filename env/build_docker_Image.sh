@@ -4,11 +4,14 @@ set -eu
 set -o pipefail
 
 function finally() {
-    popd
-    exit 0
+  popd
+  exit 0
 }
 
-SCRIPT_DIR=$(cd $(dirname $0); pwd)
+SCRIPT_DIR=$(
+  cd "$(dirname "${0}")"
+  pwd
+)
 
 pushd "${SCRIPT_DIR}"
 

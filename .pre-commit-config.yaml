@@ -19,6 +19,7 @@ repos:
       - id: shfmt
         args: [-i, "2", -ci]
       - id: shellcheck
+        args: [-e, SC2230]
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.10

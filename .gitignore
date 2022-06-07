@@ -29,3 +29,5 @@ src/**/*.mdl
 src/**/*.anm
 src/**/*.sbvh
 src/**/*.hdr
+
+.cache

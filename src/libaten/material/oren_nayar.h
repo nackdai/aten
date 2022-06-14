@@ -22,7 +22,7 @@ namespace AT_NAME
             : material(aten::MaterialType::OrneNayar, MaterialAttributeLambert, albedo, 1, albedoMap, normalMap)
         {
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-            m_param.roughness = aten::clamp<real>(roughness, 0, 1);
+            m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);
         }
 
         OrenNayar(aten::Values& val);

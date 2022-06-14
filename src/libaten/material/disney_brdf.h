@@ -32,18 +32,18 @@ namespace AT_NAME
             : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, baseColor, 1, albedoMap, normalMap)
         {
             m_param.baseColor = baseColor;
-            m_param.subsurface = aten::clamp<real>(subsurface, 0, 1);
-            m_param.metallic = aten::clamp<real>(metallic, 0, 1);
-            m_param.specular = aten::clamp<real>(specular, 0, 1);
-            m_param.specularTint = aten::clamp<real>(specularTint, 0, 1);
-            m_param.roughness = aten::clamp<real>(roughness, 0, 1);
-            m_param.anisotropic = aten::clamp<real>(anisotropic, 0, 1);
-            m_param.sheen = aten::clamp<real>(sheen, 0, 1);
-            m_param.sheenTint = aten::clamp<real>(sheenTint, 0, 1);
-            m_param.clearcoat = aten::clamp<real>(clearcoat, 0, 1);
-            m_param.clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
+            m_param.standard.subsurface = aten::clamp<real>(subsurface, 0, 1);
+            m_param.standard.metallic = aten::clamp<real>(metallic, 0, 1);
+            m_param.standard.specular = aten::clamp<real>(specular, 0, 1);
+            m_param.standard.specularTint = aten::clamp<real>(specularTint, 0, 1);
+            m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);
+            m_param.standard.anisotropic = aten::clamp<real>(anisotropic, 0, 1);
+            m_param.standard.sheen = aten::clamp<real>(sheen, 0, 1);
+            m_param.standard.sheenTint = aten::clamp<real>(sheenTint, 0, 1);
+            m_param.standard.clearcoat = aten::clamp<real>(clearcoat, 0, 1);
+            m_param.standard.clearcoatGloss = aten::clamp<real>(clearcoatGloss, 0, 1);
 
-            m_param.ior = ior;
+            m_param.standard.ior = ior;
 
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
         }
@@ -56,18 +56,18 @@ namespace AT_NAME
             : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, param.baseColor, 1, albedoMap, normalMap)
         {
             m_param.baseColor = param.baseColor;
-            m_param.subsurface = aten::clamp<real>(param.subsurface, 0, 1);
-            m_param.metallic = aten::clamp<real>(param.metallic, 0, 1);
-            m_param.specular = aten::clamp<real>(param.specular, 0, 1);
-            m_param.specularTint = aten::clamp<real>(param.specularTint, 0, 1);
-            m_param.roughness = aten::clamp<real>(param.roughness, 0, 1);
-            m_param.anisotropic = aten::clamp<real>(param.anisotropic, 0, 1);
-            m_param.sheen = aten::clamp<real>(param.sheen, 0, 1);
-            m_param.sheenTint = aten::clamp<real>(param.sheenTint, 0, 1);
-            m_param.clearcoat = aten::clamp<real>(param.clearcoat, 0, 1);
-            m_param.clearcoatGloss = aten::clamp<real>(param.clearcoatGloss, 0, 1);
+            m_param.standard.subsurface = aten::clamp<real>(param.standard.subsurface, 0, 1);
+            m_param.standard.metallic = aten::clamp<real>(param.standard.metallic, 0, 1);
+            m_param.standard.specular = aten::clamp<real>(param.standard.specular, 0, 1);
+            m_param.standard.specularTint = aten::clamp<real>(param.standard.specularTint, 0, 1);
+            m_param.standard.roughness = aten::clamp<real>(param.standard.roughness, 0, 1);
+            m_param.standard.anisotropic = aten::clamp<real>(param.standard.anisotropic, 0, 1);
+            m_param.standard.sheen = aten::clamp<real>(param.standard.sheen, 0, 1);
+            m_param.standard.sheenTint = aten::clamp<real>(param.standard.sheenTint, 0, 1);
+            m_param.standard.clearcoat = aten::clamp<real>(param.standard.clearcoat, 0, 1);
+            m_param.standard.clearcoatGloss = aten::clamp<real>(param.standard.clearcoatGloss, 0, 1);
 
-            m_param.ior = param.ior;
+            m_param.standard.ior = param.standard.ior;
 
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
         }

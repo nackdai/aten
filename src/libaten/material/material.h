@@ -62,6 +62,7 @@ namespace aten
         Lambert_Refraction,
         Microfacet_Refraction,
         Retroreflective,
+        CarPaint,
         Disney,
         Toon,
         Layer,
@@ -69,12 +70,7 @@ namespace aten
         MaterialTypeMax,
     };
 
-    struct MaterialParameter {
-        MaterialType type;
-
-        aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
-
-
+    struct StandardMaterialParameter {
         // NOTE
         // https://www.cs.uaf.edu/2012/spring/cs481/section/0/lecture/02_14_refraction.html
         // - Index Of Refraction
@@ -87,42 +83,18 @@ namespace aten
         real roughness;         // 表面の粗さで，ディフューズとスペキュラーレスポンスの両方を制御します.
 
         real shininess;
-
         real subsurface;        // 表面下の近似を用いてディフューズ形状を制御する.
         real metallic;          // 金属度(0 = 誘電体, 1 = 金属)。これは2つの異なるモデルの線形ブレンドです。金属モデルはディフューズコンポーネントを持たず，また色合い付けされた入射スペキュラーを持ち，基本色に等しくなります.
         real specular;          // 入射鏡面反射量。これは明示的な屈折率の代わりにあります.
         real specularTint;      // 入射スペキュラーを基本色に向かう色合いをアーティスティックな制御するための譲歩。グレージングスペキュラーはアクロマティックのままです.
         real anisotropic;       // 異方性の度合い。これはスペキュラーハイライトのアスペクト比を制御します(0 = 等方性, 1 = 最大異方性).
-
-        union {
-            struct {
-                real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
-                real sheenTint;         // 基本色に向かう光沢色合いの量.
-                real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
-                real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
-            };
-
-            aten::vec3 subColor;
-        };
-
-        MaterialAttribute attrib;
-
-        struct {
-            uint32_t isIdealRefraction : 1;
-        };
-
-        union {
-            struct {
-                int albedoMap;
-                int normalMap;
-                int roughnessMap;
-            };
-            int layer[3];
-        };
+        real sheen;             // 追加的なグレージングコンポーネント，主に布に対して意図している.
+        real sheenTint;         // 基本色に向かう光沢色合いの量.
+        real clearcoat;         // 第二の特別な目的のスペキュラーローブ.
+        real clearcoatGloss;    // クリアコートの光沢度を制御する(0 = “サテン”風, 1 = “グロス”風).
 
         AT_DEVICE_API void Init()
         {
-            baseColor.set(real(0), real(0), real(0), real(1));
             ior = 1.0;
 
             roughness = 0.5;
@@ -139,8 +111,101 @@ namespace aten
             clearcoatGloss = 1.0;
         }
 
+        AT_DEVICE_API StandardMaterialParameter()
+        {
+            Init();
+        }
+
+        AT_DEVICE_API auto& operator=(const StandardMaterialParameter& rhs)
+        {
+            ior = rhs.ior;
+            shininess = rhs.shininess;
+            roughness = rhs.roughness;
+            subsurface = rhs.subsurface;
+            metallic = rhs.metallic;
+            specular = rhs.specular;
+            specularTint = rhs.specularTint;
+            anisotropic = rhs.anisotropic;
+            sheen = rhs.sheen;
+            sheenTint = rhs.sheenTint;
+            clearcoat = rhs.clearcoat;
+            clearcoatGloss = rhs.clearcoatGloss;
+
+            return *this;
+        }
+    };
+
+    struct CarPaintMaterialParameter {
+        aten::vec3 clearcoat_color;
+        real ior;
+
+        aten::vec3 flakesColor;
+        real clearcoat_roughness;
+
+        aten::vec3 diffuseColor;
+        real padding;
+
+        AT_DEVICE_API void Init()
+        {
+            clearcoat_color.r = real(0);
+            clearcoat_color.g = real(0);
+            clearcoat_color.b = real(0);
+
+            flakesColor = clearcoat_color;
+            diffuseColor = clearcoat_color;
+
+            ior = 1.0;
+            clearcoat_roughness = 0.5;
+        }
+
+        AT_DEVICE_API CarPaintMaterialParameter()
+        {
+            Init();
+        }
+
+        AT_DEVICE_API auto& operator=(const CarPaintMaterialParameter& rhs)
+        {
+            clearcoat_color = rhs.clearcoat_color;
+            flakesColor = rhs.flakesColor;
+            diffuseColor = rhs.diffuseColor;
+            ior = rhs.ior;
+            clearcoat_roughness = rhs.clearcoat_roughness;
+            return *this;
+        }
+    };
+
+    struct MaterialParameter {
+        aten::vec4 baseColor;   // サーフェイスカラー，通常テクスチャマップによって供給される.
+        MaterialType type;
+
+        MaterialAttribute attrib;
+
+        struct {
+            uint32_t isIdealRefraction : 1;
+        };
+
+        union {
+            struct {
+                int albedoMap;
+                int normalMap;
+                int roughnessMap;
+            };
+            int layer[3];
+        };
+
+        union {
+            StandardMaterialParameter standard;
+            CarPaintMaterialParameter carpaint;
+        };
+
+        AT_DEVICE_API void Init()
+        {
+            standard.Init();
+        }
+
         AT_DEVICE_API MaterialParameter()
         {
+            baseColor.set(real(0), real(0), real(0), real(1));
             isIdealRefraction = false;
             albedoMap = -1;
             normalMap = -1;
@@ -154,6 +219,37 @@ namespace aten
         {
             type = _type;
             attrib = _attrib;
+
+            // TODO
+            // multiple initialization.
+            if (type == MaterialType::CarPaint) {
+                carpaint.Init();
+            }
+        }
+
+        AT_DEVICE_API auto& operator=(const MaterialParameter& rhs)
+        {
+            AT_ASSERT(type == rhs.type);
+
+            baseColor = rhs.baseColor;
+
+            type = rhs.type;
+
+            attrib = rhs.attrib;
+
+            isIdealRefraction = rhs.isIdealRefraction;
+            albedoMap = rhs.albedoMap;
+            normalMap = rhs.normalMap;
+            roughnessMap = rhs.roughnessMap;
+
+            if (type == MaterialType::CarPaint) {
+                carpaint = rhs.carpaint;
+            }
+            else {
+                standard = rhs.standard;
+            }
+
+            return *this;
         }
     };
 
@@ -278,9 +374,9 @@ namespace AT_NAME
             bool isGlossy = m_param.attrib.isGlossy;
 
             if (isGlossy) {
-                isGlossy = (m_param.roughness == real(1) ? false : true);
+                isGlossy = (m_param.standard.roughness == real(1) ? false : true);
                 if (!isGlossy) {
-                    isGlossy = (m_param.shininess == 0 ? false : true);
+                    isGlossy = (m_param.standard.shininess == 0 ? false : true);
                 }
             }
 
@@ -347,7 +443,7 @@ namespace AT_NAME
             aten::vec3 H = normalize(L + V);
 
             auto ni = outsideIor;
-            auto nt = mtrl->ior;
+            auto nt = mtrl->standard.ior;
 
             // NOTE
             // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
@@ -391,7 +487,7 @@ namespace AT_NAME
 
         real ior() const
         {
-            return m_param.ior;
+            return m_param.standard.ior;
         }
 
         const aten::MaterialParameter& param() const
@@ -415,25 +511,7 @@ namespace AT_NAME
         // TODO
         void copyParamEx(const aten::MaterialParameter& param)
         {
-            m_param.baseColor = param.baseColor;
-            m_param.ior = param.ior;
-            m_param.shininess = param.shininess;
-            m_param.roughness = param.roughness;
-            m_param.subsurface = param.subsurface;
-            m_param.metallic = param.metallic;
-            m_param.specular = param.specular;
-            m_param.specularTint = param.specularTint;
-            m_param.anisotropic = param.anisotropic;
-            m_param.sheen = param.sheen;
-            m_param.sheenTint = param.sheenTint;
-            m_param.clearcoat = param.clearcoat;
-            m_param.clearcoatGloss = param.clearcoatGloss;
-
-            m_param.albedoMap = param.albedoMap;
-            m_param.normalMap = param.normalMap;
-            m_param.roughnessMap = param.roughnessMap;
-
-            m_param.attrib = param.attrib;
+            m_param = param;
         }
 
         void setName(const char* name)

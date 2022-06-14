@@ -138,7 +138,7 @@ namespace AT_NAME {
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
         auto albedo = param->baseColor;
         albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
@@ -162,7 +162,7 @@ namespace AT_NAME {
         real u, real v,
         const aten::vec4& externalAlbedo)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -243,7 +243,7 @@ namespace AT_NAME {
 
     bool OrenNayar::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param, roughness);
+        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

@@ -329,7 +329,7 @@ namespace aten
             ? -orienting_normal
             : orienting_normal;
 
-        auto c = dot(orienting_normal, static_cast<vec3>(nextDir));
+        auto c = dot(rayBasedNormal, static_cast<vec3>(nextDir));
 
         if (pdfb > 0 && c > 0) {
             path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;

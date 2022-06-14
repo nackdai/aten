@@ -29,7 +29,7 @@ namespace AT_NAME
 
         auto costheta = dot(normal, wh);
 
-        auto n = param->shininess;
+        auto n = param->standard.shininess;
 
         auto c = dot(wo, wh);
 
@@ -70,7 +70,7 @@ namespace AT_NAME
 
 #if 1
         // Sample half vector.
-        auto costheta = aten::pow(r1, 1 / (param->shininess + 2));
+        auto costheta = aten::pow(r1, 1 / (param->standard.shininess + 2));
         auto sintheta = aten::sqrt(1 - costheta * costheta);
 
         auto cosphi = aten::cos(AT_MATH_PI_2 * r2);
@@ -128,8 +128,8 @@ namespace AT_NAME
         real u, real v)
     {
         real fresnel = 1;
-        real ior = param->ior;
-        real shininess = param->shininess;
+        real ior = param->standard.ior;
+        real shininess = param->standard.shininess;
 
         auto albedo = param->baseColor;
         albedo *= sampleTexture(
@@ -150,8 +150,8 @@ namespace AT_NAME
         const aten::vec4& externalAlbedo)
     {
         real fresnel = 1;
-        real ior = param->ior;
-        real shininess = param->shininess;
+        real ior = param->standard.ior;
+        real shininess = param->standard.shininess;
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -265,8 +265,8 @@ namespace AT_NAME
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
 
         real fresnel = 1;
-        real ior = param->ior;
-        real shininess = param->shininess;
+        real ior = param->standard.ior;
+        real shininess = param->standard.shininess;
 
         auto albedo = param->baseColor;
         albedo *= sampleTexture(
@@ -312,8 +312,8 @@ namespace AT_NAME
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
 
         real fresnel = 1;
-        real ior = param->ior;
-        real shininess = param->shininess;
+        real ior = param->standard.ior;
+        real shininess = param->standard.shininess;
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -347,8 +347,8 @@ namespace AT_NAME
 
     bool MicrofacetBlinn::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, shininess, real(0), real(1000));
-        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, shininess, real(0), real(1000));
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
         auto b2 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

@@ -230,7 +230,7 @@ public:
 };
 
 //#define Scene CornellBoxScene
-//#define Scene RandomScene
+#define Scene RandomScene
 //#define Scene ObjectScene
 //#define Scene MtrlTestScene
 //#define Scene PointLightScene
@@ -249,4 +249,4 @@ public:
 //#define Scene DeformInBoxScene
 //#define Scene AlphaBlendedObjCornellBoxScene
 //#define Scene CryteckSponzaScene
-#define Scene ManyLightCryteckSponzaScene
+//#define Scene ManyLightCryteckSponzaScene

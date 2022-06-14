@@ -64,9 +64,9 @@ namespace AT_NAME
 
         // レイが入射してくる側の物体の屈折率.
         const real ni = real(1);      // 真空
-        const real nt = param->ior;   // 物体内部の屈折率.
+        const real nt = param->standard.ior;   // 物体内部の屈折率.
 
-        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness)).r;
+        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness)).r;
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
@@ -129,9 +129,9 @@ namespace AT_NAME
 
         // レイが入射してくる側の物体の屈折率.
         const real ni = real(1);      // 真空
-        const real nt = param->ior;   // 物体内部の屈折率.
+        const real nt = param->standard.ior;   // 物体内部の屈折率.
 
-        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness)).r;
+        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness)).r;
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
@@ -287,7 +287,7 @@ namespace AT_NAME
         // back vector
         const aten::vec3 B = normalize(L + V_dash);
 
-        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness)).r;
+        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness)).r;
 
         aten::vec3 albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -296,7 +296,7 @@ namespace AT_NAME
 
         // レイが入射してくる側の物体の屈折率.
         const real ni = real(1);      // 真空
-        const real nt = param->ior;   // 物体内部の屈折率.
+        const real nt = param->standard.ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
@@ -396,7 +396,7 @@ namespace AT_NAME
 
     bool Retroreflective::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

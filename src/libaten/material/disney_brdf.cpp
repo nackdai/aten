@@ -128,14 +128,14 @@ namespace AT_NAME
         const aten::vec3 Y = normalize(cross(N, X));
 
         // TODO
-        const auto anisotropic = mtrl->anisotropic;
-        const auto roughness = mtrl->roughness;
-        const auto clearcoatGloss = mtrl->clearcoatGloss;
-        const auto clearcoat = mtrl->clearcoat;
+        const auto anisotropic = mtrl->standard.anisotropic;
+        const auto roughness = mtrl->standard.roughness;
+        const auto clearcoatGloss = mtrl->standard.clearcoatGloss;
+        const auto clearcoat = mtrl->standard.clearcoat;
         const auto baseColor = mtrl->baseColor;
-        const auto specular = mtrl->specular;
-        const auto specular_tint = mtrl->specularTint;
-        const auto metallic = mtrl->metallic;
+        const auto specular = mtrl->standard.specular;
+        const auto specular_tint = mtrl->standard.specularTint;
+        const auto metallic = mtrl->standard.metallic;
 
         const auto ax = aten::cmpMax<real>(real(0.001), roughness * roughness * (1 + anisotropic));    // roughness for x direction.
         const auto ay = aten::cmpMax<real>(real(0.001), roughness * roughness * (1 - anisotropic));    // roughness for y direction.
@@ -194,14 +194,14 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler)
     {
-        const auto roughness = mtrl->roughness;
-        const auto anisotropic = mtrl->anisotropic;
-        const auto clearcoat = mtrl->clearcoat;
-        const auto clearcoatGloss = mtrl->clearcoatGloss;
+        const auto roughness = mtrl->standard.roughness;
+        const auto anisotropic = mtrl->standard.anisotropic;
+        const auto clearcoat = mtrl->standard.clearcoat;
+        const auto clearcoatGloss = mtrl->standard.clearcoatGloss;
         const auto baseColor = mtrl->baseColor;
-        const auto specular = mtrl->specular;
-        const auto specular_tint = mtrl->specularTint;
-        const auto metallic = mtrl->metallic;
+        const auto specular = mtrl->standard.specular;
+        const auto specular_tint = mtrl->standard.specularTint;
+        const auto metallic = mtrl->standard.metallic;
 
         const auto ax = aten::cmpMax(real(0.001), roughness * roughness * (real(1) + anisotropic));
         const auto ay = aten::cmpMax(real(0.001), roughness * roughness * (real(1) - anisotropic));
@@ -341,16 +341,16 @@ namespace AT_NAME
         const aten::vec3 Y = normalize(cross(N, X));
 
         const auto baseColor = mtrl->baseColor;
-        const auto subsurface = mtrl->subsurface;
-        const auto metalic = mtrl->metallic;
-        const auto specular = mtrl->specular;
-        const auto specularTint = mtrl->specularTint;
-        const auto roughness = mtrl->roughness;
-        const auto anisotropic = mtrl->anisotropic;
-        const auto sheen = mtrl->sheen;
-        const auto sheenTint = mtrl->sheenTint;
-        const auto clearcoat = mtrl->clearcoat;
-        const auto clearcoatGloss = mtrl->clearcoatGloss;
+        const auto subsurface = mtrl->standard.subsurface;
+        const auto metalic = mtrl->standard.metallic;
+        const auto specular = mtrl->standard.specular;
+        const auto specularTint = mtrl->standard.specularTint;
+        const auto roughness = mtrl->standard.roughness;
+        const auto anisotropic = mtrl->standard.anisotropic;
+        const auto sheen = mtrl->standard.sheen;
+        const auto sheenTint = mtrl->standard.sheenTint;
+        const auto clearcoat = mtrl->standard.clearcoat;
+        const auto clearcoatGloss = mtrl->standard.clearcoatGloss;
 
         auto NdotL = dot(N, L);
         auto NdotV = dot(N, V);
@@ -472,17 +472,17 @@ namespace AT_NAME
 
     bool DisneyBRDF::edit(aten::IMaterialParamEditor* editor)
     {
-        bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, subsurface, 0, 1);
-        bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, metallic, 0, 1);
-        bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, specular, 0, 1);
-        bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, specularTint, 0, 1);
-        bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, roughness, 0, 1);
-        bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, anisotropic, 0, 1);
-        bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, sheen, 0, 1);
-        bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, sheenTint, 0, 1);
-        bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, clearcoat, 0, 1);
-        bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, clearcoatGloss, 0, 1);
-        bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+        bool b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, subsurface, 0, 1);
+        bool b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, metallic, 0, 1);
+        bool b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specular, 0, 1);
+        bool b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, specularTint, 0, 1);
+        bool b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, roughness, 0, 1);
+        bool b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, anisotropic, 0, 1);
+        bool b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheen, 0, 1);
+        bool b7 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, sheenTint, 0, 1);
+        bool b8 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoat, 0, 1);
+        bool b9 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, clearcoatGloss, 0, 1);
+        bool b10 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
         bool b11 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

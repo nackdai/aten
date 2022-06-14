@@ -19,6 +19,7 @@ namespace AT_NAME
         "lambert_refraction",
         "microfacet_refraction",
         "retroreflective",
+        "carpaint",
         "disney_brdf",
         "toon",
         "layer",
@@ -85,7 +86,7 @@ namespace AT_NAME
         : material(type, attrib)
     {
         m_param.baseColor = clr;
-        m_param.ior = ior;
+        m_param.standard.ior = ior;
 
         setTextures(albedoMap, normalMap, nullptr);
     }

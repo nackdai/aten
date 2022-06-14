@@ -20,7 +20,7 @@ namespace AT_NAME
             aten::texture* normalMap = nullptr)
             : material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
         {
-            m_param.shininess = shininess;
+            m_param.standard.shininess = shininess;
         }
 
         MicrofacetBlinn(aten::Values& val);

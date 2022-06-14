@@ -280,7 +280,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
                 else {
                     // glass
                     mtrlParam.baseColor = aten::vec3(1);
-                    mtrlParam.ior = 1.5;
+                    mtrlParam.standard.ior = 1.5;
 
                     s = aten::TransformableFactory::createSphere(
                         ctxt,
@@ -295,7 +295,7 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
     }
 
     mtrlParam.baseColor = aten::vec3(1);
-    mtrlParam.ior = 1.5;
+    mtrlParam.standard.ior = 1.5;
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
@@ -323,20 +323,20 @@ void MtrlTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
-    mtrlParam.shininess = 200;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.shininess = 200;
+    mtrlParam.standard.ior = 0.2;
     auto s_blinn = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
     scene->add(s_blinn);
 
     mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
-    mtrlParam.roughness = 0.2;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
     auto s_ggx = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::GGX, mtrlParam));
     scene->add(s_ggx);
 
     mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
-    mtrlParam.roughness = 0.2;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
     auto s_beckman = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Beckman, mtrlParam));
     scene->add(s_beckman);
 
@@ -360,8 +360,8 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
-    mtrlParam.shininess = 200;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.shininess = 200;
+    mtrlParam.standard.ior = 0.2;
 
     aten::AssetManager::registerMtrl(
         "m1",
@@ -594,7 +594,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
                 else {
                     // glass
                     mtrlParam.baseColor = aten::vec3(1);
-                    mtrlParam.ior = 1.5;
+                    mtrlParam.standard.ior = 1.5;
 
                     s = aten::TransformableFactory::createSphere(ctxt, center, 0.2, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
                 }
@@ -606,7 +606,7 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 #endif
 
     mtrlParam.baseColor = aten::vec3(1);
-    mtrlParam.ior = 1.5;
+    mtrlParam.standard.ior = 1.5;
     s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 1, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Refraction, mtrlParam));
     scene->add(s);
 
@@ -659,8 +659,8 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = clr;
-    mtrlParam.shininess = 200;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.shininess = 200;
+    mtrlParam.standard.ior = 0.2;
 
     auto blinn = createMaterialWithParamter(
         ctxt, aten::MaterialType::Blinn, mtrlParam,
@@ -675,8 +675,8 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
 #if 1
     mtrlParam.baseColor = clr;
-    mtrlParam.roughness = 0.2;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
 
     auto ggx = createMaterialWithParamter(
         ctxt, aten::MaterialType::GGX, mtrlParam,
@@ -690,8 +690,8 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(s_ggx);
 
     mtrlParam.baseColor = clr;
-    mtrlParam.roughness = 0.2;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
 
     auto beckman = createMaterialWithParamter(
         ctxt, aten::MaterialType::Beckman, mtrlParam,
@@ -705,8 +705,8 @@ void TexturesScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->add(s_beckman);
 
     mtrlParam.baseColor = clr;
-    mtrlParam.roughness = 0.2;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
 
     auto lambert = createMaterial(
         ctxt, aten::MaterialType::Lambert, clr,
@@ -821,7 +821,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     // ƒKƒ‰ƒX.
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.99, 0.99, 0.99);
-    mtrlParam.ior = 1.5;
+    mtrlParam.standard.ior = 1.5;
     auto glass = aten::TransformableFactory::createSphere(
         ctxt,
         aten::vec3(77, 16.5, 78),
@@ -865,9 +865,9 @@ void DisneyMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     {
         aten::MaterialParameter mtrlParam;
         mtrlParam.baseColor = aten::vec3(0.82, 0.67, 0.16);
-        mtrlParam.roughness = 0.3;
-        mtrlParam.specular = 0.5;
-        mtrlParam.metallic = 0.5;
+        mtrlParam.standard.roughness = 0.3;
+        mtrlParam.standard.specular = 0.5;
+        mtrlParam.standard.metallic = 0.5;
 
         auto m = createMaterialWithParamter(ctxt, aten::MaterialType::Disney, mtrlParam);;
         auto s = aten::TransformableFactory::createSphere(ctxt, aten::vec3(0, 0, 0), 1.0, m);
@@ -930,8 +930,8 @@ void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene
     aten::MaterialParameter mtrlParam;
 
     mtrlParam.baseColor = aten::vec3(1, 1, 1);
-    mtrlParam.shininess = 200;
-    mtrlParam.ior = 0.8;
+    mtrlParam.standard.shininess = 200;
+    mtrlParam.standard.ior = 0.8;
     auto spec = createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam);
 
     auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.7, 0.0, 0.0));
@@ -948,8 +948,8 @@ void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene
     scene->add(s_diff);
 
     mtrlParam.baseColor = aten::vec3(0.7, 0, 0);
-    mtrlParam.shininess = 200;
-    mtrlParam.ior = 0.8;
+    mtrlParam.standard.shininess = 200;
+    mtrlParam.standard.ior = 0.8;
     auto s_spec = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
     scene->add(s_spec);
 }
@@ -1023,8 +1023,8 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtxL2W.asTrans(aten::vec3(2.5, 0, 0));
 
     mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
-    mtrlParam.roughness = 0.2;
-    mtrlParam.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
 
     auto s_ggx = aten::TransformableFactory::createSphere(
         ctxt,
@@ -1038,7 +1038,7 @@ void ToonShadeTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     mtxL2W.asTrans(aten::vec3(0, -1, 2));
 
     mtrlParam.baseColor = aten::vec3(0.99, 0.99, 0.99);
-    mtrlParam.ior = 1.5;
+    mtrlParam.standard.ior = 1.5;
     mtrlParam.isIdealRefraction = true;
 
     // ƒKƒ‰ƒX.
@@ -1180,7 +1180,7 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
     mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
-    mtrlParam.ior = 1.3;
+    mtrlParam.standard.ior = 1.3;
 
     aten::AssetManager::registerMtrl(
         "m1",

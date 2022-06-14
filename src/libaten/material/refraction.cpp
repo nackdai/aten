@@ -154,7 +154,7 @@ namespace AT_NAME
         auto cos_factor_reflect = abs(dot(normal, reflect));
 
         real nc = real(1);        // 真空の屈折率.
-        real nt = param->ior;    // 物体内部の屈折率.
+        real nt = param->standard.ior;    // 物体内部の屈折率.
         real nnt = into ? nc / nt : nt / nc;
         real ddn = dot(wi, nml);
 
@@ -351,7 +351,7 @@ namespace AT_NAME
 
     bool refraction::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);

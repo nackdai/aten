@@ -15,7 +15,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
         auto ret = pdf(roughness.r, normal, wi, wo);
         return ret;
     }
@@ -37,7 +37,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
         aten::vec3 dir = sampleDirection(roughness.r, wi, normal, sampler);
         return dir;
     }
@@ -59,13 +59,13 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
         auto albedo = param->baseColor;
         albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         real fresnel = 1;
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
         return ret;
@@ -79,13 +79,13 @@ namespace AT_NAME
         real u, real v,
         const aten::vec4& externalAlbedo)
     {
-        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->roughness));
+        auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
 
         real fresnel = 1;
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
         return ret;
@@ -325,14 +325,14 @@ namespace AT_NAME
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            aten::vec4(param->roughness));
+            aten::vec4(param->standard.roughness));
 
         result->dir = sampleDirection(roughness.r, wi, normal, sampler);
         result->pdf = pdf(roughness.r, normal, wi, result->dir);
 
         real fresnel = real(1);
 
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
         auto albedo = param->baseColor;
         albedo *= sampleTexture(
@@ -358,14 +358,14 @@ namespace AT_NAME
         auto roughness = AT_NAME::sampleTexture(
             param->roughnessMap,
             u, v,
-            aten::vec4(param->roughness));
+            aten::vec4(param->standard.roughness));
 
         result->dir = sampleDirection(roughness.r, wi, normal, sampler);
         result->pdf = pdf(roughness.r, normal, wi, result->dir);
 
         real fresnel = real(1);
 
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
@@ -399,8 +399,8 @@ namespace AT_NAME
 
     bool MicrofacetBeckman::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param, roughness);
-        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param, ior, real(0.01), real(10));
+        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
         auto b2 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

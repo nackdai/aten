@@ -91,13 +91,13 @@ namespace aten
             float ior = 0.0f;
             if (assimp_mtrl->Get(AI_MATKEY_REFRACTI, ior) == AI_SUCCESS) {
                 mtrl_param.type = MaterialType::Refraction;
-                mtrl_param.ior = ior;
+                mtrl_param.standard.ior = ior;
             }
 
             float shininess = 0.0f;
             if (assimp_mtrl->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
                 mtrl_param.type = MaterialType::Blinn;
-                mtrl_param.shininess = shininess;
+                mtrl_param.standard.shininess = shininess;
             }
         }
 

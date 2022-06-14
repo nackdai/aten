@@ -23,7 +23,7 @@ namespace AT_NAME
             : material(aten::MaterialType::GGX, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
         {
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-            m_param.roughness = aten::clamp<real>(roughness, 0, 1);
+            m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);
         }
 
         MicrofacetGGX(aten::Values& val);

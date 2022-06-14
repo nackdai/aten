@@ -15,7 +15,7 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
-        auto ret = pdf(param->roughness, normal, wi, wo);
+        auto ret = pdf(param->standard.roughness, normal, wi, wo);
         return ret;
     }
 
@@ -35,7 +35,7 @@ namespace AT_NAME
         real u, real v,
         aten::sampler* sampler)
     {
-        aten::vec3 dir = sampleDirection(param->roughness, normal, wi, sampler);
+        aten::vec3 dir = sampleDirection(param->standard.roughness, normal, wi, sampler);
 
         return dir;
     }
@@ -60,9 +60,9 @@ namespace AT_NAME
         albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         real fresnel = 1;
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
-        aten::vec3 ret = bsdf(albedo, param->roughness, ior, fresnel, normal, wi, wo, u, v);
+        aten::vec3 ret = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, wo, u, v);
         return ret;
     }
 
@@ -78,9 +78,9 @@ namespace AT_NAME
         albedo *= externalAlbedo;
 
         real fresnel = 1;
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
-        aten::vec3 ret = bsdf(albedo, param->roughness, ior, fresnel, normal, wi, wo, u, v);
+        aten::vec3 ret = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, wo, u, v);
         return ret;
     }
 
@@ -268,16 +268,16 @@ namespace AT_NAME
         real u, real v,
         bool isLightPath/*= false*/)
     {
-        result->dir = sampleDirection(param->roughness, wi, normal, sampler);
-        result->pdf = pdf(param->roughness, normal, wi, result->dir);
+        result->dir = sampleDirection(param->standard.roughness, wi, normal, sampler);
+        result->pdf = pdf(param->standard.roughness, normal, wi, result->dir);
 
         auto albedo = param->baseColor;
         albedo *= AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
 
         real fresnel = 1;
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
-        result->bsdf = bsdf(albedo, param->roughness, ior, fresnel, normal, wi, result->dir, u, v);
+        result->bsdf = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
     }
 
@@ -292,16 +292,16 @@ namespace AT_NAME
         const aten::vec4& externalAlbedo,
         bool isLightPath/*= false*/)
     {
-        result->dir = sampleDirection(param->roughness, wi, normal, sampler);
-        result->pdf = pdf(param->roughness, normal, wi, result->dir);
+        result->dir = sampleDirection(param->standard.roughness, wi, normal, sampler);
+        result->pdf = pdf(param->standard.roughness, normal, wi, result->dir);
 
         auto albedo = param->baseColor;
         albedo *= externalAlbedo;
 
         real fresnel = 1;
-        real ior = param->ior;
+        real ior = param->standard.ior;
 
-        result->bsdf = bsdf(albedo, param->roughness, ior, fresnel, normal, wi, result->dir, u, v);
+        result->bsdf = bsdf(albedo, param->standard.roughness, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
     }
 
@@ -330,7 +330,7 @@ namespace AT_NAME
 
     bool MicrofacetVelvet::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param, roughness);
+        auto b0 = AT_EDIT_MATERIAL_PARAM(editor, m_param.standard, roughness);
         auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);

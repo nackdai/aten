@@ -28,20 +28,20 @@ namespace aten
         {
             param.type = type;
             param.baseColor = value.get("baseColor", param.baseColor);
-            param.ior = value.get("ior", param.ior);
+            param.standard.ior = value.get("ior", param.standard.ior);
         }
 
-        param.roughness = value.get("roughness", param.roughness);
-        param.shininess = value.get("shininess", param.shininess);
-        param.subsurface = value.get("subsurface", param.subsurface);
-        param.metallic = value.get("metallic", param.metallic);
-        param.specular = value.get("specular", param.specular);
-        param.specularTint = value.get("specularTint", param.specularTint);
-        param.anisotropic = value.get("anisotropic", param.anisotropic);
-        param.sheen = value.get("sheen", param.sheen);
-        param.sheenTint = value.get("sheenTint", param.sheenTint);
-        param.clearcoat = value.get("clearcoat", param.clearcoat);
-        param.clearcoatGloss = value.get("clearcoatGloss", param.clearcoatGloss);
+        param.standard.roughness = value.get("roughness", param.standard.roughness);
+        param.standard.shininess = value.get("shininess", param.standard.shininess);
+        param.standard.subsurface = value.get("subsurface", param.standard.subsurface);
+        param.standard.metallic = value.get("metallic", param.standard.metallic);
+        param.standard.specular = value.get("specular", param.standard.specular);
+        param.standard.specularTint = value.get("specularTint", param.standard.specularTint);
+        param.standard.anisotropic = value.get("anisotropic", param.standard.anisotropic);
+        param.standard.sheen = value.get("sheen", param.standard.sheen);
+        param.standard.sheenTint = value.get("sheenTint", param.standard.sheenTint);
+        param.standard.clearcoat = value.get("clearcoat", param.standard.clearcoat);
+        param.standard.clearcoatGloss = value.get("clearcoatGloss", param.standard.clearcoatGloss);
 
         param.isIdealRefraction = value.get("isIdealRefraction", param.isIdealRefraction);
 
@@ -69,6 +69,7 @@ namespace aten
             []() { return new LambertRefraction(); },    // lambert_rafraction
             []() { return new MicrofacetRefraction(); }, // microfacet_rafraction
             []() { return new Retroreflective(); },      // retroreflective
+            []() { return nullptr; },                    // carpaint
             []() { return new DisneyBRDF(); },           // disney_brdf
             []() { return nullptr; },                    // toon
             []() { return nullptr; },                    // layer
@@ -95,34 +96,34 @@ namespace aten
             mtrl = new aten::lambert(param.baseColor, albedoMap, normalMap);
             break;
         case aten::MaterialType::OrneNayar:
-            mtrl = new aten::OrenNayar(param.baseColor, param.roughness, albedoMap, normalMap);
+            mtrl = new aten::OrenNayar(param.baseColor, param.standard.roughness, albedoMap, normalMap);
             break;
         case aten::MaterialType::Specular:
-            mtrl = new aten::specular(param.baseColor, param.ior, albedoMap, normalMap);
+            mtrl = new aten::specular(param.baseColor, param.standard.ior, albedoMap, normalMap);
             break;
         case aten::MaterialType::Refraction:
-            mtrl = new aten::refraction(param.baseColor, param.ior, param.isIdealRefraction, normalMap);
+            mtrl = new aten::refraction(param.baseColor, param.standard.ior, param.isIdealRefraction, normalMap);
             break;
         case aten::MaterialType::Blinn:
-            mtrl = new aten::MicrofacetBlinn(param.baseColor, param.shininess, param.ior, albedoMap, normalMap);
+            mtrl = new aten::MicrofacetBlinn(param.baseColor, param.standard.shininess, param.standard.ior, albedoMap, normalMap);
             break;
         case aten::MaterialType::GGX:
-            mtrl = new aten::MicrofacetGGX(param.baseColor, param.roughness, param.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new aten::MicrofacetGGX(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Beckman:
-            mtrl = new aten::MicrofacetBeckman(param.baseColor, param.roughness, param.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new aten::MicrofacetBeckman(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Velvet:
-            mtrl = new aten::MicrofacetVelvet(param.baseColor, param.roughness, albedoMap, normalMap);
+            mtrl = new aten::MicrofacetVelvet(param.baseColor, param.standard.roughness, albedoMap, normalMap);
             break;
         case aten::MaterialType::Lambert_Refraction:
-            mtrl = new aten::LambertRefraction(param.baseColor, param.ior, normalMap);
+            mtrl = new aten::LambertRefraction(param.baseColor, param.standard.ior, normalMap);
             break;
         case aten::MaterialType::Microfacet_Refraction:
-            mtrl = new aten::MicrofacetRefraction(param.baseColor, param.roughness, param.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new aten::MicrofacetRefraction(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Retroreflective:
-            mtrl = new aten::Retroreflective(param.baseColor, param.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new aten::Retroreflective(param.baseColor, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Disney:
             mtrl = new aten::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);

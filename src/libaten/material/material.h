@@ -229,8 +229,6 @@ namespace aten
 
         AT_DEVICE_API auto& operator=(const MaterialParameter& rhs)
         {
-            AT_ASSERT(type == rhs.type);
-
             baseColor = rhs.baseColor;
 
             type = rhs.type;

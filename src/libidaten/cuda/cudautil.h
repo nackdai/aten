@@ -88,10 +88,12 @@ namespace idaten {
     auto err = cudaGetLastError();\
     if (err != cudaSuccess) {\
         AT_PRINTF("Cuda Kernel Err(%s) [%s]\n", (#kernel), cudaGetErrorString(err));\
+        AT_ASSERT(false);\
     }\
     err = cudaDeviceSynchronize();\
     if (cudaSuccess != err) {\
         AT_PRINTF("Cuda Kernel Err with Sync(%s) [%s]\n", (#kernel), cudaGetErrorString(err));\
+        AT_ASSERT(false);\
     }\
 }
 #else

@@ -57,14 +57,31 @@ namespace aten {
 #define DEBUG_BREAK()    __builtin_trap()
 #endif
 
+#ifdef __AT_CUDA__
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include "idaten_namespace.h"
+
+#define AT_DEVICE_API        __host__ __device__
+#define AT_DEVICE_MTRL_API    __device__
+#else
+#include "aten_namespace.h"
+
+#define AT_DEVICE_API
+#define AT_DEVICE_MTRL_API
+#endif
+
+#include <assert.h>
+
 #ifdef __CUDACC__
     #ifdef __AT_DEBUG__
         #define AT_ASSERT(b)\
             if (!(b)) {\
                 printf("assert : %s(%d)\n", __FILE__, __LINE__);\
+                assert(false);\
             }
     #else
-        #define AT_ASSERT(b)
+        #define AT_ASSERT(b)    assert(false);
     #endif
 #else
     #ifdef __AT_DEBUG__
@@ -117,17 +134,4 @@ namespace aten {
 
 #ifdef ENABLE_OMP
 #include <omp.h>
-#endif
-
-#ifdef __AT_CUDA__
-#include <cuda_runtime_api.h>
-#include "idaten_namespace.h"
-
-#define AT_DEVICE_API        __host__ __device__
-#define AT_DEVICE_MTRL_API    __device__
-#else
-#include "aten_namespace.h"
-
-#define AT_DEVICE_API
-#define AT_DEVICE_MTRL_API
 #endif

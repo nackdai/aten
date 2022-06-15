@@ -109,7 +109,7 @@ AT_CUDA_INLINE __device__ real sampleLayerPDF(
         }
 
         // 上層の値を下層に使う.
-        ior = param->ior;
+        ior = param->standard.ior;
     }
 
     return pdf;
@@ -174,7 +174,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
         }
 
         // 上層の値を下層に使う.
-        ior = param->ior;
+        ior = param->standard.ior;
     }
 
     return bsdf;

@@ -109,7 +109,6 @@ namespace AT_NAME
 
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
 
-    private:
         static AT_DEVICE_MTRL_API real pdf(
             const real roughness,
             const aten::vec3& normal,

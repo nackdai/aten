@@ -137,7 +137,7 @@ namespace aten
 
     struct CarPaintMaterialParameter {
         aten::vec3 clearcoat_color;
-        real ior;
+        real clearcoat_ior;
 
         aten::vec3 flakesColor;
         real clearcoat_roughness;
@@ -154,7 +154,7 @@ namespace aten
             flakesColor = clearcoat_color;
             diffuseColor = clearcoat_color;
 
-            ior = 1.0;
+            clearcoat_ior = 1.0;
             clearcoat_roughness = 0.5;
         }
 
@@ -168,7 +168,7 @@ namespace aten
             clearcoat_color = rhs.clearcoat_color;
             flakesColor = rhs.flakesColor;
             diffuseColor = rhs.diffuseColor;
-            ior = rhs.ior;
+            clearcoat_ior = rhs.clearcoat_ior;
             clearcoat_roughness = rhs.clearcoat_roughness;
             return *this;
         }

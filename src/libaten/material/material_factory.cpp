@@ -12,6 +12,7 @@
 #include "material/microfacet_refraction.h"
 #include "material/disney_brdf.h"
 #include "material/retroreflective.h"
+#include "material/car_paint.h"
 #include "misc/value.h"
 
 namespace aten
@@ -69,7 +70,7 @@ namespace aten
             []() { return new LambertRefraction(); },    // lambert_rafraction
             []() { return new MicrofacetRefraction(); }, // microfacet_rafraction
             []() { return new Retroreflective(); },      // retroreflective
-            []() { return nullptr; },                    // carpaint
+            []() { return new CarPaint(); },             // carpaint
             []() { return new DisneyBRDF(); },           // disney_brdf
             []() { return nullptr; },                    // toon
             []() { return nullptr; },                    // layer
@@ -124,6 +125,9 @@ namespace aten
             break;
         case aten::MaterialType::Retroreflective:
             mtrl = new aten::Retroreflective(param.baseColor, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            break;
+        case aten::MaterialType::CarPaint:
+            mtrl = new aten::CarPaint(param, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Disney:
             mtrl = new aten::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);

@@ -216,24 +216,17 @@ namespace AT_NAME
     {
         // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
 
-        auto vm = dot(v, m);
-        auto vn = dot(v, n);
+        auto vn = aten::abs(dot(v, n));
 
-        bool is_valid = (vn > real(0)) && (vm / vn > real(0));
+        auto a = vn / (alpha * aten::sqrt(real(1) - vn * vn));
+        auto a2 = a * a;
 
-        if (is_valid) {
-            auto a = vn / (alpha * aten::sqrt(real(1) - vn * vn));
-            auto a2 = a * a;
-
-            if (a < real(1.6)) {
-                return (real(3.535) * a + real(2.181) * a2) / (real(1) + real(2.276) * a + real(2.577) * a2);
-            }
-            else {
-                return real(1);
-            }
+        if (a < real(1.6)) {
+            return (real(3.535) * a + real(2.181) * a2) / (real(1) + real(2.276) * a + real(2.577) * a2);
         }
-
-        return real(0);
+        else {
+            return real(1);
+        }
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(

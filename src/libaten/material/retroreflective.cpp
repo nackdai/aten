@@ -5,53 +5,6 @@
 
 namespace AT_NAME
 {
-    // TODO
-    // API name...
-    static AT_DEVICE_MTRL_API real computeFresnelEx(
-        real ni, real nt,
-        const aten::vec3& wi,
-        const aten::vec3& normal)
-    {
-        const auto cosi = dot(normal, wi);
-
-        const auto nnt = ni / nt;
-        const auto sini2 = real(1.0) - cosi * cosi;
-        const auto sint2 = nnt * nnt * sini2;
-        const auto cost = aten::sqrt(aten::cmpMax(real(0.0), real(1.0) - sint2));
-
-        const auto rp = (nt * cosi - ni * cost) / (nt * cosi + ni * cost);
-        const auto rs = (ni * cosi - nt * cost) / (ni * cosi + nt * cost);
-
-        const auto Rsp = (rp * rp + rs * rs) * real(0.5);
-        return Rsp;
-    }
-
-    // TODO
-    // standardize API
-    static AT_DEVICE_MTRL_API real computeFresnelShlick(
-        real ni, real nt,
-        const aten::vec3& wi,
-        const aten::vec3& n)
-    {
-        float F = 1;
-        {
-            // http://d.hatena.ne.jp/hanecci/20130525/p3
-
-            // NOTE
-            // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
-            // R0 = ((n1 - n2) / (n1 + n2))^2
-
-            float r0 = (ni - nt) / (ni + nt);
-            r0 = r0 * r0;
-
-            float c = aten::abs(dot(wi, n));
-
-            F = r0 + (1 - r0) * pow((1 - c), 5);
-        }
-
-        return F;
-    }
-
     AT_DEVICE_MTRL_API real Retroreflective::pdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -81,7 +34,7 @@ namespace AT_NAME
         // Ideally, we should use half vector(H).
         // But, we use N(normal) to sample the output direction.
         // In order to align how to compute the ouput, we use N(normal) here as well.
-        const auto fresnel = computeFresnelEx(ni, nt, V, N);
+        const auto fresnel = material::computeFresnel(ni, nt, V, N);
 
         const auto beckmanPdf = MicrofacetBeckman::pdf(param, normal, wi, wo, u, v);
         const auto diffusePdf = lambert::pdf(N, wo);
@@ -144,7 +97,7 @@ namespace AT_NAME
         // Ideally, we should use half vector(H). But, in order to compute H, we need L(output vector).
         // But, we are computing H in this API. And, we still don't know it yet.
         // Therefore, we can't use H at this moment and we need to use N(normal) here.
-        const auto fresnel = computeFresnelEx(ni, nt, V, N);
+        const auto fresnel = material::computeFresnel(ni, nt, V, N);
         const auto era = getEffectiveRetroreflectiveArea(refract, N);
 
         const auto sample = sampler->nextSample2D();
@@ -315,7 +268,7 @@ namespace AT_NAME
         {
             const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, roughness);
             const auto G = MicrofacetBeckman::sampleBeckman_G(V, N, H, roughness) * MicrofacetBeckman::sampleBeckman_G(L, N, H, roughness);
-            const auto F = computeFresnelShlick(ni, nt, V, B);
+            const auto F = material::computeFresnelShlick(ni, nt, V, B);
             const auto denom = real(4) * dot(N, L) * dot(N, V);
 
             retroreflective = denom > AT_MATH_EPSILON ? aten::vec3(F * G * D / denom) : aten::vec3(0);

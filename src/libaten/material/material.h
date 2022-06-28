@@ -426,35 +426,7 @@ namespace AT_NAME
             const aten::vec3& wo,
             real outsideIor = 1) const
         {
-            return computeFresnel(&m_param, normal, wi, wo, outsideIor);
-        }
-
-        static AT_DEVICE_MTRL_API real computeFresnel(
-            const aten::MaterialParameter* mtrl,
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor)
-        {
-            aten::vec3 V = -wi;
-            aten::vec3 L = wo;
-            aten::vec3 H = normalize(L + V);
-
-            auto ni = outsideIor;
-            auto nt = mtrl->standard.ior;
-
-            // NOTE
-            // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
-            // R0 = ((n1 - n2) / (n1 + n2))^2
-
-            auto r0 = (ni - nt) / (ni + nt);
-            r0 = r0 * r0;
-
-            auto LdotH = aten::abs(dot(L, H));
-
-            auto F = r0 + (1 - r0) * aten::pow((1 - LdotH), 5);
-
-            return F;
+            return computeFresnel(outsideIor, m_param.standard.ior, wi, normal);
         }
 
         virtual AT_DEVICE_MTRL_API real pdf(
@@ -541,6 +513,49 @@ namespace AT_NAME
 
         static bool isValidMaterialType(aten::MaterialType type);
 
+        static AT_DEVICE_MTRL_API real computeFresnel(
+            real ni, real nt,
+            const aten::vec3& wi,
+            const aten::vec3& normal)
+        {
+            const auto cosi = dot(normal, wi);
+
+            const auto nnt = ni / nt;
+            const auto sini2 = real(1.0) - cosi * cosi;
+            const auto sint2 = nnt * nnt * sini2;
+            const auto cost = aten::sqrt(aten::cmpMax(real(0.0), real(1.0) - sint2));
+
+            const auto rp = (nt * cosi - ni * cost) / (nt * cosi + ni * cost);
+            const auto rs = (ni * cosi - nt * cost) / (ni * cosi + nt * cost);
+
+            const auto Rsp = (rp * rp + rs * rs) * real(0.5);
+            return Rsp;
+        }
+
+        static AT_DEVICE_MTRL_API real computeFresnelShlick(
+            real ni, real nt,
+            const aten::vec3& wi,
+            const aten::vec3& n)
+        {
+            float F = 1;
+            {
+                // http://d.hatena.ne.jp/hanecci/20130525/p3
+
+                // NOTE
+                // Fschlick(v,h) ≒ R0 + (1 - R0)(1 - cosΘ)^5
+                // R0 = ((n1 - n2) / (n1 + n2))^2
+
+                float r0 = (ni - nt) / (ni + nt);
+                r0 = r0 * r0;
+
+                float c = aten::abs(dot(wi, n));
+
+                F = r0 + (1 - r0) * pow((1 - c), 5);
+            }
+
+            return F;
+        }
+
     private:
         void updateIndex(int id)
         {
@@ -590,15 +605,4 @@ namespace AT_NAME
     private:
         std::shared_ptr<AT_NAME::Light> m_targetLight;
     };
-
-
-    real schlick(
-        const aten::vec3& in,
-        const aten::vec3& normal,
-        real ni, real nt);
-
-    real computFresnel(
-        const aten::vec3& in,
-        const aten::vec3& normal,
-        real ni, real nt);
 }

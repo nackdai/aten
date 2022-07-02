@@ -115,7 +115,7 @@ namespace aten
         }
 
         // Apply normal map.
-        mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
+        auto pre_sampled_r = mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v, orienting_normal, sampler);
 
         // Non-Photo-Real.
         if (mtrl->isNPR()) {
@@ -217,7 +217,7 @@ namespace aten
             }
         }
 
-        auto sampling = mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
+        auto sampling = mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, pre_sampled_r, path.rec.u, path.rec.v);
 
         auto nextDir = normalize(sampling.dir);
         auto pdfb = sampling.pdf;

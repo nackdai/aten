@@ -162,11 +162,14 @@ namespace AT_NAME
         return AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1)));
     }
 
-    AT_DEVICE_MTRL_API void material::applyNormalMap(
+    AT_DEVICE_MTRL_API real material::applyNormalMap(
         const aten::vec3& orgNml,
         aten::vec3& newNml,
-        real u, real v) const
+        real u, real v,
+        const aten::vec3& wi,
+        aten::sampler* sampler) const
     {
         AT_NAME::applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
+        return real(-1);
     }
 }

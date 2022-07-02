@@ -30,7 +30,7 @@ namespace aten
                 auto mtrl = ctxt.getMaterial(rec.mtrlid);
 
                 // Apply normal map.
-                mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v);
+                (void)mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v, ray.dir, nullptr);
 
                 if (depth == 0) {
                     path.normal = orienting_normal;
@@ -46,7 +46,7 @@ namespace aten
                     break;
                 }
                 else if (mtrl->isSingular()) {
-                    auto sample = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
+                    auto sample = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, real(0), rec.u, rec.v);
 
                     const auto& nextDir = sample.dir;
                     throughput *= sample.bsdf;

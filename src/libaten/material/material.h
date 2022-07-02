@@ -415,10 +415,12 @@ namespace AT_NAME
 
         virtual AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(real u, real v) const;
 
-        virtual AT_DEVICE_MTRL_API void applyNormalMap(
+        virtual AT_DEVICE_MTRL_API real applyNormalMap(
             const aten::vec3& orgNml,
             aten::vec3& newNml,
-            real u, real v) const;
+            real u, real v,
+            const aten::vec3& wi,
+            aten::sampler* sampler) const;
 
         virtual AT_DEVICE_MTRL_API real computeFresnel(
             const aten::vec3& normal,
@@ -452,6 +454,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
+            real pre_sampled_r,
             real u, real v,
             bool isLightPath = false) const = 0;
 

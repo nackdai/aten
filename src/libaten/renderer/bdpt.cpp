@@ -101,6 +101,8 @@ namespace aten
             auto mtrl = ctxt.getMaterial(rec.mtrlid);
             auto obj = ctxt.getTransformable(isect.objid);
 
+            auto pre_sampled_r = mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v, ray.dir, sampler);
+
             // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
             auto rrProb = aten::russianRoulette(*mtrl);
             auto rr = sampler->nextSample();
@@ -183,7 +185,7 @@ namespace aten
                 return Result(contrib, x, y, true);
             }
 
-            auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v);
+            auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, pre_sampled_r, rec.u, rec.v);
 
             sampledPdf = sampling.pdf;
             auto sampledBsdf = sampling.bsdf;

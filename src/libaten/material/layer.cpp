@@ -41,11 +41,14 @@ namespace AT_NAME
         return false;
     }
 
-    void LayeredBSDF::applyNormalMap(
+    real LayeredBSDF::applyNormalMap(
         const aten::vec3& orgNml,
         aten::vec3& newNml,
-        real u, real v) const
+        real u, real v,
+        const aten::vec3& wi,
+        aten::sampler* sampler) const
     {
+        real r = real(0);
         auto num = m_layer.size();
 
         if (num == 0) {
@@ -54,8 +57,10 @@ namespace AT_NAME
         else {
             // 最表層の NormalMap を適用.
             auto mtrl = m_layer[0];
-            mtrl->applyNormalMap(orgNml, newNml, u, v);
+            r = mtrl->applyNormalMap(orgNml, newNml, u, v, wi, sampler);
         }
+
+        return r;
     }
 
     real LayeredBSDF::computeFresnel(
@@ -107,6 +112,7 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
+        real pre_sampled_r,
         real u, real v,
         bool isLightPath/*= false*/) const
     {
@@ -126,13 +132,15 @@ namespace AT_NAME
 
             aten::vec3 appliedNml = normal;
 
+            real r{ 0 };
+
             // NOTE
             // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
             if (i > 0) {
-                mtrl->applyNormalMap(normal, appliedNml, u, v);
+                r = mtrl->applyNormalMap(normal, appliedNml, u, v, ray.dir, sampler);
             }
 
-            auto sampleres = mtrl->sample(ray, appliedNml, orgnormal, sampler, u, v);
+            auto sampleres = mtrl->sample(ray, appliedNml, orgnormal, sampler, r, u, v);
 
             const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
 
@@ -179,7 +187,7 @@ namespace AT_NAME
             // NOTE
             // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
             if (i > 0) {
-                mtrl->applyNormalMap(normal, appliedNml, u, v);
+                mtrl->applyNormalMap(normal, appliedNml, u, v, aten::vec3(real(0)), nullptr);
             }
 
             auto p = mtrl->pdf(appliedNml, wi, wo, u, v);
@@ -238,7 +246,7 @@ namespace AT_NAME
             // NOTE
             // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
             if (i > 0) {
-                mtrl->applyNormalMap(normal, appliedNml, u, v);
+                mtrl->applyNormalMap(normal, appliedNml, u, v, aten::vec3(0), nullptr);
             }
 
             auto b = mtrl->bsdf(appliedNml, wi, wo, u, v);

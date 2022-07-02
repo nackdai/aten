@@ -46,7 +46,7 @@ namespace aten
                     : orienting_normal;
 
                 if (mtrl->isSingular() || mtrl->isTranslucent()) {
-                    auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, rec.u, rec.v);
+                    auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, nullptr, real(0), rec.u, rec.v);
 
                     auto nextDir = normalize(sampling.dir);
                     auto bsdf = sampling.bsdf;

@@ -171,6 +171,7 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
+        real pre_sampled_r,
         real u, real v,
         bool isLightPath/*= false*/) const
     {
@@ -220,17 +221,38 @@ namespace AT_NAME
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
     }
 
-    AT_DEVICE_MTRL_API void CarPaint::applyNormalMap(
+    AT_DEVICE_MTRL_API real CarPaint::applyNormalMap(
         const aten::vec3& orgNml,
         aten::vec3& newNml,
-        real u, real v) const
+        real u, real v,
+        const aten::vec3& wi,
+        aten::sampler* sampler) const
     {
-        auto flakes_nml = FlakesNormal::gen(u, v);
-        if (flakes_nml.a > real(0)) {
-            applyTangentSpaceCoord(orgNml, flakes_nml, newNml);
+        const aten::vec3 V = -wi;
+        const aten::vec3 N = normalize(orgNml);
+
+        if (sampler) {
+            auto r0 = sampler->nextSample();
+
+            auto fresnel = material::computeFresnel(real(1), m_param.carpaint.clearcoat_ior, V, N);
+
+            if (r0 <= fresnel) {
+                newNml = N;
+            }
+            else {
+                auto flakes_nml = FlakesNormal::gen(u, v);
+                if (flakes_nml.a > real(0)) {
+                    applyTangentSpaceCoord(orgNml, flakes_nml, newNml);
+                }
+                else {
+                    newNml = N;
+                }
+            }
+            return r0;
         }
         else {
-            newNml = normalize(orgNml);
+            newNml = N;
+            return real(0);
         }
     }
 

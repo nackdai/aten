@@ -19,10 +19,12 @@ namespace AT_NAME
 
         virtual bool isGlossy() const override final;
 
-        virtual void applyNormalMap(
+        virtual real applyNormalMap(
             const aten::vec3& orgNml,
             aten::vec3& newNml,
-            real u, real v) const override final;
+            real u, real v,
+            const aten::vec3& wi,
+            aten::sampler* sampler) const override final;
 
         virtual real computeFresnel(
             const aten::vec3& normal,
@@ -53,6 +55,7 @@ namespace AT_NAME
             const aten::vec3& normal,
             const aten::vec3& orgnormal,
             aten::sampler* sampler,
+            real pre_sampled_r,
             real u, real v,
             bool isLightPath = false) const override final;
 

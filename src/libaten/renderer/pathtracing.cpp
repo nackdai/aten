@@ -144,7 +144,10 @@ namespace aten
         }
 
         // Apply normal map.
-        mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
+        auto pre_sampled_r = mtrl->applyNormalMap(
+            orienting_normal, orienting_normal,
+            path.rec.u, path.rec.v,
+            path.ray.dir, sampler);
 
 #if 0
         if (depth == 0) {
@@ -316,7 +319,11 @@ namespace aten
             }
         }
 
-        auto sampling = mtrl->sample(path.ray, orienting_normal, path.rec.normal, sampler, path.rec.u, path.rec.v);
+        auto sampling = mtrl->sample(
+            path.ray,
+            orienting_normal, path.rec.normal,
+            sampler, pre_sampled_r,
+            path.rec.u, path.rec.v);
 
         auto nextDir = normalize(sampling.dir);
         auto pdfb = sampling.pdf;

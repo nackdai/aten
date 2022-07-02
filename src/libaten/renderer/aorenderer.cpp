@@ -59,7 +59,7 @@ namespace aten
         auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
 
         // Apply normal map.
-        mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v);
+        (void)mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v, path.ray.dir, nullptr);
 
         aten::vec3 ao_color(0.0f);
 

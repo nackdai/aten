@@ -213,14 +213,15 @@ namespace AT_NAME
         const aten::ray& ray,
         const aten::vec3& normal,
         real u, real v,
-        aten::sampler* sampler) const
+        aten::sampler* sampler,
+        real pre_sampled_r) const
     {
         auto num = m_layer.size();
         AT_ASSERT(num > 0);
 
         auto mtrl = m_layer[0];
 
-        auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler);
+        auto dir = mtrl->sampleDirection(ray, normal, u, v, sampler, pre_sampled_r);
 
         return dir;
     }
@@ -229,7 +230,8 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v) const
+        real u, real v,
+        real pre_sampled_r) const
     {
         auto num = m_layer.size();
 
@@ -249,7 +251,7 @@ namespace AT_NAME
                 mtrl->applyNormalMap(normal, appliedNml, u, v, aten::vec3(0), nullptr);
             }
 
-            auto b = mtrl->bsdf(appliedNml, wi, wo, u, v);
+            auto b = mtrl->bsdf(appliedNml, wi, wo, u, v, pre_sampled_r);
             auto f = mtrl->computeFresnel(appliedNml, wi, wo, ior);
 
             f = aten::clamp<real>(f, 0, 1);

@@ -28,12 +28,20 @@ namespace AT_NAME
         const aten::vec3& wo,
         real u, real v)
     {
+        const auto& V = -wi;
         const auto& N = normal;
+
+        auto fresnel = material::computeFresnel(
+            real(1), param->carpaint.clearcoat_ior,
+            V, N);
+
+        auto beckman_pdf = MicrofacetBeckman::pdf(
+            param->carpaint.clearcoat_roughness,
+            N, wi, wo);
 
         auto flakes_beckman_pdf = MicrofacetBeckman::pdf(
             real(1),  // TODO
-            N,
-            wi, wo);
+            N, wi, wo);
 
         // TODO
         // Enable to specify flake size.
@@ -41,7 +49,7 @@ namespace AT_NAME
 
         auto diffuse_pdf = lambert::pdf(N, wo);
 
-        auto pdf = flakes_density * flakes_beckman_pdf + (1 - flakes_density) * diffuse_pdf;
+        auto pdf = fresnel * beckman_pdf + (real(1) - fresnel) * (flakes_density * flakes_beckman_pdf + (1 - flakes_density) * diffuse_pdf);
         pdf = aten::clamp(pdf, real(0), real(1));
 
         return pdf;
@@ -61,14 +69,18 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         real u, real v,
-        aten::sampler* sampler)
+        aten::sampler* sampler,
+        real pre_sampled_r)
     {
         const aten::vec3 V = -wi;
         const aten::vec3 N = normal;
 
-        const auto sample = sampler->nextSample2D();
-        auto r0 = sample.x;
-        auto r1 = sample.y;
+        auto r0 = pre_sampled_r;
+        auto r1 = sampler->nextSample();
+
+        auto fresnel = material::computeFresnel(
+            real(1), param->carpaint.clearcoat_ior,
+            V, N);
 
         // TODO
         // Enable to specify flake size.
@@ -76,16 +88,28 @@ namespace AT_NAME
 
         aten::vec3 dir;
 
-        if (r0 < flakes_density) {
-            // Flakes
-            r0 /= flakes_density;
-            dir = MicrofacetBeckman::sampleDirection(real(1), wi, N, r0, r1);
+        if (r0 < fresnel) {
+            r0 /= fresnel;
+            dir = MicrofacetBeckman::sampleDirection(
+                param->carpaint.clearcoat_roughness,
+                wi, N,
+                r0, r1);
         }
         else {
-            // Diffuse
-            r0 -= flakes_density;
-            r0 /= (real(1) - flakes_density);
-            dir = lambert::sampleDirection(N, r0, r1);
+            r0 -= fresnel;
+            r0 /= (real(1) - fresnel);
+
+            if (r1 < flakes_density) {
+                // Flakes
+                r1 /= flakes_density;
+                dir = MicrofacetBeckman::sampleDirection(real(1), wi, N, r0, r1);
+            }
+            else {
+                // Diffuse
+                r1 -= flakes_density;
+                r1 /= (real(1) - flakes_density);
+                dir = lambert::sampleDirection(N, r0, r1);
+            }
         }
 
         return dir;
@@ -95,22 +119,12 @@ namespace AT_NAME
         const aten::ray& ray,
         const aten::vec3& normal,
         real u, real v,
-        aten::sampler* sampler) const
+        aten::sampler* sampler,
+        real pre_sampled_r) const
     {
         const aten::vec3& in = ray.dir;
 
-        return sampleDirection(&m_param, normal, in, u, v, sampler);
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
-        const aten::MaterialParameter* param,
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v)
-    {
-        const auto albedo = AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
-        return bsdf(param, normal, wi, wo, u, v, albedo);
+        return sampleDirection(&m_param, normal, in, u, v, sampler, pre_sampled_r);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
@@ -119,38 +133,67 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& wo,
         real u, real v,
-        const aten::vec3& externalAlbedo)
+        real pre_sampled_r)
+    {
+        const auto albedo = AT_NAME::sampleTexture(param->albedoMap, u, v, aten::vec4(real(1)));
+        return bsdf(param, normal, wi, wo, u, v, albedo, pre_sampled_r);
+    }
+
+    AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
+        const aten::MaterialParameter* param,
+        const aten::vec3& normal,
+        const aten::vec3& wi,
+        const aten::vec3& wo,
+        real u, real v,
+        const aten::vec3& externalAlbedo,
+        real pre_sampled_r)
     {
         const aten::vec3 V = -wi;
         const aten::vec3 L = wo;
         const aten::vec3 N = normal;
         const aten::vec3 H = normalize(L + V);
 
-        const bool is_on_flakes = FlakesNormal::gen(u, v).a > real(0);
+        auto fresnel = material::computeFresnel(
+            real(1), param->carpaint.clearcoat_ior,
+            V, N);
 
         aten::vec3 bsdf;
 
-        if (is_on_flakes) {
-            // Flakes
-
-            // TODO
-            // flakes color
-            const aten::vec3 flakes_color(real(1), real(1), real(0));
-
-            real fresnel{ real(0) };
-
+        if (pre_sampled_r < fresnel) {
             bsdf = MicrofacetBeckman::bsdf(
-                flakes_color,
-                real(1),  // TODO
-                real(10),   // TODO
+                param->carpaint.clearcoat_color,
+                param->carpaint.clearcoat_roughness,
+                param->carpaint.clearcoat_ior,
                 fresnel,
                 N,
                 wi, wo,
                 u, v);
         }
         else {
-            // Diffuse
-            bsdf = param->baseColor / AT_MATH_PI;
+            const bool is_on_flakes = FlakesNormal::gen(u, v).a > real(0);
+
+            if (is_on_flakes) {
+                // Flakes
+
+                // TODO
+                // flakes color
+                const aten::vec3 flakes_color(real(3), real(3), real(0));
+
+                real fresnel{ real(0) };
+
+                bsdf = MicrofacetBeckman::bsdf(
+                    flakes_color,
+                    real(1),  // TODO
+                    real(10),   // TODO
+                    fresnel,
+                    N,
+                    wi, wo,
+                    u, v);
+            }
+            else {
+                // Diffuse
+                bsdf = param->baseColor / AT_MATH_PI;
+            }
         }
 
         bsdf = externalAlbedo * bsdf;
@@ -161,9 +204,10 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v) const
+        real u, real v,
+        real pre_sampled_r) const
     {
-        return bsdf(&m_param, normal, wi, wo, u, v);
+        return bsdf(&m_param, normal, wi, wo, u, v, pre_sampled_r);
     }
 
     AT_DEVICE_MTRL_API MaterialSampling CarPaint::sample(
@@ -183,7 +227,7 @@ namespace AT_NAME
             normal,
             ray.dir,
             orgnormal,
-            sampler,
+            sampler, pre_sampled_r,
             u, v,
             isLightPath);
 
@@ -197,12 +241,13 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
+        real pre_sampled_r,
         real u, real v,
         bool isLightPath/*= false*/)
     {
-        result->dir = sampleDirection(param, normal, wi, u, v, sampler);
+        result->dir = sampleDirection(param, normal, wi, u, v, sampler, pre_sampled_r);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
-        result->bsdf = bsdf(param, normal, wi, result->dir, u, v);
+        result->bsdf = bsdf(param, normal, wi, result->dir, u, v, pre_sampled_r);
     }
 
     AT_DEVICE_MTRL_API void CarPaint::sample(
@@ -212,13 +257,14 @@ namespace AT_NAME
         const aten::vec3& wi,
         const aten::vec3& orgnormal,
         aten::sampler* sampler,
+        real pre_sampled_r,
         real u, real v,
         const aten::vec3& externalAlbedo,
         bool isLightPath/*= false*/)
     {
-        result->dir = sampleDirection(param, normal, wi, u, v, sampler);
+        result->dir = sampleDirection(param, normal, wi, u, v, sampler, pre_sampled_r);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
-        result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
+        result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo, pre_sampled_r);
     }
 
     AT_DEVICE_MTRL_API real CarPaint::applyNormalMap(
@@ -236,7 +282,7 @@ namespace AT_NAME
 
             auto fresnel = material::computeFresnel(real(1), m_param.carpaint.clearcoat_ior, V, N);
 
-            if (r0 <= fresnel) {
+            if (r0 < fresnel) {
                 newNml = N;
             }
             else {

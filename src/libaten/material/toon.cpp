@@ -6,7 +6,8 @@ namespace AT_NAME
         const aten::ray& ray,
         const aten::vec3& normal,
         real u, real v,
-        aten::sampler* sampler) const
+        aten::sampler* sampler,
+        real pre_sampled_r) const
     {
         // TODO
 #if 0
@@ -26,7 +27,8 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v) const
+        real u, real v,
+        real pre_sampled_r) const
     {
         real cosShadow = dot(normal, wo);
         auto ret = bsdf(cosShadow, u, v);
@@ -46,9 +48,9 @@ namespace AT_NAME
 
         const aten::vec3& in = ray.dir;
 
-        ret.dir = sampleDirection(ray, normal, u, v, sampler);
+        ret.dir = sampleDirection(ray, normal, u, v, sampler, pre_sampled_r);
         ret.pdf = pdf(normal, in, ret.dir, u, v);
-        ret.bsdf = bsdf(normal, in, ret.dir, u, v);
+        ret.bsdf = bsdf(normal, in, ret.dir, u, v, pre_sampled_r);
 
         ret.fresnel = 1;
 

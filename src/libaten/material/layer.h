@@ -42,13 +42,15 @@ namespace AT_NAME
             const aten::ray& ray,
             const aten::vec3& normal,
             real u, real v,
-            aten::sampler* sampler) const override final;
+            aten::sampler* sampler,
+            real pre_sampled_r) const override final;
 
         virtual aten::vec3 bsdf(
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v) const override final;
+            real u, real v,
+            real pre_sampled_r) const override final;
 
         virtual MaterialSampling sample(
             const aten::ray& ray,

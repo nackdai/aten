@@ -441,13 +441,15 @@ namespace AT_NAME
             const aten::ray& ray,
             const aten::vec3& normal,
             real u, real v,
-            aten::sampler* sampler) const = 0;
+            aten::sampler* sampler,
+            real pre_sampled_r) const = 0;
 
         virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
-            real u, real v) const = 0;
+            real u, real v,
+            real pre_sampled_r) const = 0;
 
         virtual AT_DEVICE_MTRL_API MaterialSampling sample(
             const aten::ray& ray,

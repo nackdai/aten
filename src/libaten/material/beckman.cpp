@@ -46,7 +46,8 @@ namespace AT_NAME
         const aten::ray& ray,
         const aten::vec3& normal,
         real u, real v,
-        aten::sampler* sampler) const
+        aten::sampler* sampler,
+        real pre_sampled_r) const
     {
         auto dir = sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
         return dir;
@@ -95,7 +96,8 @@ namespace AT_NAME
         const aten::vec3& normal,
         const aten::vec3& wi,
         const aten::vec3& wo,
-        real u, real v) const
+        real u, real v,
+        real pre_sampled_r) const
     {
         auto ret = bsdf(&m_param, normal, wi, wo, u, v);
         return ret;

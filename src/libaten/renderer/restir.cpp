@@ -136,7 +136,7 @@ namespace aten
                 orienting_normal,
                 [&](const aten::vec3& dir_to_light) -> aten::vec3 {
                     auto pdf = mtrl->pdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v);
-                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v);
+                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dir_to_light, path.rec.u, path.rec.v, pre_sampled_r);
                     return bsdf / pdf;
                 },
                 sampler,
@@ -171,7 +171,7 @@ namespace aten
                         // Shadow ray hits the light.
                         auto cosShadow = dot(orienting_normal, dirToLight);
 
-                        auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                        auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
                         auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
                         bsdf *= path.throughput;

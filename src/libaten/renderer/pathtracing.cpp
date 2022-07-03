@@ -224,7 +224,7 @@ namespace aten
                         // Shadow ray hits the light.
                         auto cosShadow = dot(orienting_normal, dirToLight);
 
-                        auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                        auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
                         auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
                         bsdf *= path.throughput;
@@ -282,7 +282,7 @@ namespace aten
                     auto dist2 = squared_length(sampleres.dir);
                     auto dist = aten::sqrt(dist2);
 
-                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
                     auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
                     // Get light color.

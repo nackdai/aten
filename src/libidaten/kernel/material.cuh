@@ -5,6 +5,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 #include "kernel/context.cuh"
+#include "material/sample_texture.h"
 #include "aten4idaten.h"
 
 __device__ void sampleMaterial(
@@ -15,6 +16,7 @@ __device__ void sampleMaterial(
     const aten::vec3& wi,
     const aten::vec3& orgnormal,
     aten::sampler* sampler,
+    real pre_sampled_r,
     float u, float v);
 
 __device__ void sampleMaterial(
@@ -25,6 +27,7 @@ __device__ void sampleMaterial(
     const aten::vec3& wi,
     const aten::vec3& orgnormal,
     aten::sampler* sampler,
+    real pre_sampled_r,
     float u, float v,
     const aten::vec4& externalAlbedo);
 
@@ -42,15 +45,8 @@ __device__ aten::vec3 sampleDirection(
     const aten::vec3& normal,
     const aten::vec3& wi,
     real u, real v,
-    aten::sampler* sampler);
-
-__device__ aten::vec3 sampleBSDF(
-    const idaten::Context* ctxt,
-    const aten::MaterialParameter* dst_mtrl,
-    const aten::vec3& normal,
-    const aten::vec3& wi,
-    const aten::vec3& wo,
-    real u, real v);
+    aten::sampler* sampler,
+    real pre_sampled_r);
 
 __device__ aten::vec3 sampleBSDF(
     const idaten::Context* ctxt,
@@ -59,8 +55,26 @@ __device__ aten::vec3 sampleBSDF(
     const aten::vec3& wi,
     const aten::vec3& wo,
     real u, real v,
-    const aten::vec4& externalAlbedo);
+    real pre_sampled_r);
 
+__device__ aten::vec3 sampleBSDF(
+    const idaten::Context* ctxt,
+    const aten::MaterialParameter* dst_mtrl,
+    const aten::vec3& normal,
+    const aten::vec3& wi,
+    const aten::vec3& wo,
+    real u, real v,
+    const aten::vec4& externalAlbedo,
+    real pre_sampled_r);
+
+__device__ real applyNormal(
+    const aten::MaterialParameter* mtrl,
+    const int normalMapIdx,
+    const aten::vec3& orgNml,
+    aten::vec3& newNml,
+    real u, real v,
+    const aten::vec3& wi,
+    aten::sampler* sampler);
 
 __device__ real computeFresnel(
     const aten::MaterialParameter* dst_mtrl,

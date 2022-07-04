@@ -108,7 +108,13 @@ __global__ void shade(
         auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
-    AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+    const auto pre_sampled_r = applyNormal(
+        &shMtrls[threadIdx.x],
+        normalMap,
+        orienting_normal, orienting_normal,
+        rec.u, rec.v,
+        ray.dir,
+        &paths->sampler[idx]);
 
     if (bounce == 0) {
         // Store AOV.
@@ -202,6 +208,7 @@ __global__ void shade(
         ray.dir,
         rec.normal,
         &paths->sampler[idx],
+        pre_sampled_r,
         rec.u, rec.v,
         albedo);
 

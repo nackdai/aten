@@ -137,6 +137,14 @@ namespace AT_NAME
             const aten::vec3& wi,
             aten::sampler* sampler) const override final;
 
+        static AT_DEVICE_MTRL_API real applyNormalMap(
+            const aten::MaterialParameter* param,
+            const aten::vec3& orgNml,
+            aten::vec3& newNml,
+            real u, real v,
+            const aten::vec3& wi,
+            aten::sampler* sampler);
+
         virtual bool edit(aten::IMaterialParamEditor* editor) override final;
     };
 }

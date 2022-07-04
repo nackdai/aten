@@ -193,7 +193,13 @@ namespace svgf {
             auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
             normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
         }
-        AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+        auto pre_sample_r = applyNormal(
+            &shMtrls[threadIdx.x],
+            normalMap,
+            orienting_normal, orienting_normal,
+            rec.u, rec.v,
+            ray.dir,
+            &paths->sampler[idx]);
 
         auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
@@ -258,6 +264,7 @@ namespace svgf {
             ray.dir,
             rec.normal,
             &paths->sampler[idx],
+            pre_sample_r,
             rec.u, rec.v,
             albedo);
 

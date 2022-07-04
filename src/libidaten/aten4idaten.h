@@ -23,6 +23,7 @@
 #include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"
 #include "material/retroreflective.h"
+#include "material/car_paint.h"
 
 #include "math/math.h"
 #include "math/vec3.h"

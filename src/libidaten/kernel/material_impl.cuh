@@ -14,6 +14,7 @@ AT_CUDA_INLINE __device__ void sampleLayerMaterial(
     const aten::vec3& wi,
     const aten::vec3& orgnormal,
     aten::sampler* sampler,
+    real pre_sampled_r,
     float u, float v)
 {
     real weight = 1;
@@ -43,6 +44,7 @@ AT_CUDA_INLINE __device__ void sampleLayerMaterial(
             wi,
             orgnormal,
             sampler,
+            pre_sampled_r,
             u, v);
 
         const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
@@ -121,11 +123,12 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerDirection(
     const aten::vec3& normal,
     const aten::vec3& wi,
     real u, real v,
-    aten::sampler* sampler)
+    aten::sampler* sampler,
+    real pre_sampled_r)
 {
     auto* param = &ctxt->mtrls[mtrl->layer[0]];
 
-    auto dir = sampleDirection(ctxt, param, normal, wi, u, v, sampler);
+    auto dir = sampleDirection(ctxt, param, normal, wi, u, v, sampler, pre_sampled_r);
 
     return dir;
 }
@@ -136,7 +139,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
     const aten::vec3& normal,
     const aten::vec3& wi,
     const aten::vec3& wo,
-    real u, real v)
+    real u, real v,
+    real pre_sampled_r)
 {
     aten::vec3 bsdf;
 
@@ -159,7 +163,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
             AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
         }
 
-        auto b = sampleBSDF(ctxt, param, appliedNml, wi, wo, u, v);
+        auto b = sampleBSDF(ctxt, param, appliedNml, wi, wo, u, v, pre_sampled_r);
         auto f = computeFresnel(param, appliedNml, wi, wo, ior);
 
         f = aten::clamp<real>(f, 0, 1);
@@ -190,6 +194,7 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     const aten::vec3& wi,
     const aten::vec3& orgnormal,
     aten::sampler* sampler,
+    real pre_sampled_r,
     float u, float v)
 {
     switch (mtrl->type) {
@@ -229,11 +234,14 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     case aten::MaterialType::Retroreflective:
         AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
+    case aten::MaterialType::CarPaint:
+        AT_NAME::CarPaint::sample(result, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v, false);
+        break;
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
     case aten::MaterialType::Layer:
-        sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
+        sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v);
         break;
     case aten::MaterialType::Toon:
         break;
@@ -248,6 +256,7 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     const aten::vec3& wi,
     const aten::vec3& orgnormal,
     aten::sampler* sampler,
+    real pre_sampled_r,
     float u, float v,
     const aten::vec4& externalAlbedo)
 {
@@ -287,13 +296,16 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
         AT_NAME::MicrofacetRefraction::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
         break;
     case aten::MaterialType::Retroreflective:
-        AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
+        AT_NAME::Retroreflective::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, externalAlbedo, false);
+        break;
+    case aten::MaterialType::CarPaint:
+        AT_NAME::CarPaint::sample(result, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v, externalAlbedo, false);
         break;
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
     case aten::MaterialType::Layer:
-        sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, u, v);
+        sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v);
         break;
     case aten::MaterialType::Toon:
         break;
@@ -347,6 +359,9 @@ AT_CUDA_INLINE __device__ real samplePDF(
     case aten::MaterialType::Retroreflective:
         pdf = AT_NAME::Retroreflective::pdf(mtrl, normal, wi, wo, u, v);
         break;
+    case aten::MaterialType::CarPaint:
+        pdf = AT_NAME::CarPaint::pdf(mtrl, normal, wi, wo, u, v);
+        break;
     case aten::MaterialType::Disney:
         pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
         break;
@@ -366,7 +381,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
     const aten::vec3& normal,
     const aten::vec3& wi,
     real u, real v,
-    aten::sampler* sampler)
+    aten::sampler* sampler,
+    real pre_sampled_r)
 {
     switch (mtrl->type) {
     case aten::MaterialType::Emissive:
@@ -393,10 +409,12 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
         return AT_NAME::MicrofacetRefraction::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Retroreflective:
         return AT_NAME::Retroreflective::sampleDirection(mtrl, normal, wi, u, v, sampler);
+    case aten::MaterialType::CarPaint:
+        return AT_NAME::CarPaint::sampleDirection(mtrl, normal, wi, u, v, sampler, pre_sampled_r);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
     case aten::MaterialType::Layer:
-        return sampleLayerDirection(ctxt, mtrl, normal, wi, u, v, sampler);
+        return sampleLayerDirection(ctxt, mtrl, normal, wi, u, v, sampler, pre_sampled_r);
     case aten::MaterialType::Toon:
         break;
     }
@@ -410,7 +428,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
     const aten::vec3& normal,
     const aten::vec3& wi,
     const aten::vec3& wo,
-    real u, real v)
+    real u, real v,
+    real pre_sampled_r)
 {
     switch (mtrl->type) {
     case aten::MaterialType::Emissive:
@@ -437,10 +456,12 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Retroreflective:
         return AT_NAME::Retroreflective::bsdf(mtrl, normal, wi, wo, u, v);
+    case aten::MaterialType::CarPaint:
+        return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Layer:
-        return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v);
+        return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v, pre_sampled_r);
     case aten::MaterialType::Toon:
         break;
     }
@@ -455,7 +476,8 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
     const aten::vec3& wi,
     const aten::vec3& wo,
     real u, real v,
-    const aten::vec4& externalAlbedo)
+    const aten::vec4& externalAlbedo,
+    real pre_sampled_r)
 {
     switch (mtrl->type) {
     case aten::MaterialType::Emissive:
@@ -482,15 +504,40 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::MicrofacetRefraction::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
     case aten::MaterialType::Retroreflective:
         return AT_NAME::Retroreflective::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo);
+    case aten::MaterialType::CarPaint:
+        return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo, pre_sampled_r);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
     case aten::MaterialType::Layer:
-        return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v);
+        return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v, pre_sampled_r);
     case aten::MaterialType::Toon:
         break;
     }
 
     return aten::vec3();
+}
+
+AT_CUDA_INLINE __device__ real applyNormal(
+    const aten::MaterialParameter* mtrl,
+    const int normalMapIdx,
+    const aten::vec3& orgNml,
+    aten::vec3& newNml,
+    real u, real v,
+    const aten::vec3& wi,
+    aten::sampler* sampler)
+{
+    if (mtrl->type == aten::MaterialType::CarPaint) {
+        return AT_NAME::CarPaint::applyNormalMap(
+            mtrl,
+            orgNml, newNml,
+            u, v,
+            wi,
+            sampler);
+    }
+    else {
+        AT_NAME::applyNormalMap(normalMapIdx, orgNml, newNml, u, v);
+        return real(-1);
+    }
 }
 
 AT_CUDA_INLINE __device__ real computeFresnel(
@@ -500,27 +547,7 @@ AT_CUDA_INLINE __device__ real computeFresnel(
     const aten::vec3& wo,
     real outsideIor/*= 1*/)
 {
-    switch (mtrl->type) {
-    case aten::MaterialType::Blinn:
-    case aten::MaterialType::GGX:
-    case aten::MaterialType::Beckman:
-        return AT_NAME::material::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::Emissive:
-        return AT_NAME::emissive::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::Lambert:
-        return AT_NAME::lambert::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::OrneNayar:
-        return AT_NAME::OrenNayar::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::Specular:
-        return AT_NAME::specular::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::Refraction:
-        return AT_NAME::refraction::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::Disney:
-        return AT_NAME::DisneyBRDF::computeFresnel(mtrl, normal, wi, wo, outsideIor);
-    case aten::MaterialType::Layer:
-    case aten::MaterialType::Toon:
-        return real(1);
-    }
+    // TODO
 
     return real(1);
 }

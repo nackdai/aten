@@ -127,7 +127,8 @@ namespace kernel {
         const aten::vec3& hit_nml,
         real hit_u, real hit_v,
         const aten::vec4& external_albedo,
-        real lightSelectPdf)
+        real lightSelectPdf,
+        real pre_sampled_r = real(0))
     {
         bool isShadowRayActive = false;
 
@@ -154,7 +155,7 @@ namespace kernel {
             auto cosShadow = dot(hit_nml, dirToLight);
 
             real pdfb = samplePDF(&ctxt, &mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v);
-            auto bsdf = sampleBSDF(&ctxt, &mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo);
+            auto bsdf = sampleBSDF(&ctxt, &mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r);
 
             bsdf *= throughtput.throughput;
 

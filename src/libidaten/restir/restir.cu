@@ -129,7 +129,13 @@ __global__ void shade(
         auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
         normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
     }
-    AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+    const auto pre_sampled_r = applyNormal(
+        &shMtrls[threadIdx.x],
+        normalMap,
+        orienting_normal, orienting_normal,
+        rec.u, rec.v,
+        ray.dir,
+        &paths->sampler[idx]);
 
     if (!shMtrls[threadIdx.x].attrib.isTranslucent
         && !shMtrls[threadIdx.x].attrib.isEmissive
@@ -151,6 +157,7 @@ __global__ void shade(
         restir_info.u = rec.u;
         restir_info.v = rec.v;
         restir_info.p = rec.p;
+        restir_info.pre_sampled_r = pre_sampled_r;
     }
 
     if (bounce == 0) {
@@ -268,6 +275,7 @@ __global__ void shade(
         ray.dir,
         rec.normal,
         &paths->sampler[idx],
+        pre_sampled_r,
         rec.u, rec.v,
         albedo);
 
@@ -438,7 +446,8 @@ __global__ void computeShadowRayContribution(
                     restir_info.wi,
                     dirToLight,
                     u, v,
-                    albedo);
+                    albedo,
+                    restir_info.pre_sampled_r);
 
                 bsdf *= restir_info.throughput;
 

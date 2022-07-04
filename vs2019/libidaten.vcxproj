@@ -39,6 +39,7 @@
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />
     <ClInclude Include="..\src\libaten\material\blinn.h" />
+    <ClInclude Include="..\src\libaten\material\car_paint.h" />
     <ClInclude Include="..\src\libaten\material\disney_brdf.h" />
     <ClInclude Include="..\src\libaten\material\emissive.h" />
     <ClInclude Include="..\src\libaten\material\FlakesNormal.h" />
@@ -167,6 +168,11 @@
     <CudaCompile Include="..\src\libaten\material\retroreflective.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\car_paint.cpp">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
     <ClCompile Include="..\src\libaten\os\linux\misc\timer_linux.cpp">

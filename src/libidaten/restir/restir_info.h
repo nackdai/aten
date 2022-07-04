@@ -22,7 +22,7 @@ namespace idaten {
         float v;
 
         aten::vec3 p;
-        float padding_1;
+        float pre_sampled_r;
 
         __host__ __device__ void clear()
         {
@@ -35,6 +35,8 @@ namespace idaten {
             throughput.x = throughput.y = throughput.z = 0.0f;
 
             u = v = 0.0f;
+
+            pre_sampled_r = 0.0f;
         }
 
         __host__ __device__ bool isMtrlValid() const

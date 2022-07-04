@@ -295,6 +295,9 @@
     <ClInclude Include="..\src\libaten\material\retroreflective.h">
       <Filter>aten\material</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\material\car_paint.h">
+      <Filter>aten\material</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -539,6 +542,9 @@
       <Filter>kernel\renderer</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\retroreflective.cpp">
+      <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libaten\material\car_paint.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>
   </ItemGroup>

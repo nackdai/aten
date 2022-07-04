@@ -109,7 +109,13 @@ namespace pt {
             auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
             normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
         }
-        AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
+        auto pre_sampled_r = applyNormal(
+            &shMtrls[threadIdx.x],
+            normalMap,
+            orienting_normal, orienting_normal,
+            rec.u, rec.v,
+            ray.dir,
+            &paths->sampler[idx]);
 
         if (bounce == 0) {
             // Store AOV.
@@ -179,7 +185,8 @@ namespace pt {
                 ray,
                 rec.p, orienting_normal,
                 rec.u, rec.v, albedo,
-                lightSelectPdf);
+                lightSelectPdf,
+                pre_sampled_r);
 
             shShadowRays[threadIdx.x].isActive = isShadowRayActive;
         }
@@ -201,7 +208,7 @@ namespace pt {
             orienting_normal,
             ray.dir,
             rec.normal,
-            &paths->sampler[idx],
+            &paths->sampler[idx], pre_sampled_r,
             rec.u, rec.v,
             albedo);
 

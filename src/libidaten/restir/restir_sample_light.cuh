@@ -16,6 +16,7 @@ inline __device__ int sampleLightWithReservoirRIP(
     float u, float v,
     const aten::vec4& albedo,
     aten::sampler* sampler,
+    real pre_sampled_r,
     int lod = 0)
 {
     constexpr auto MaxLightCount = 32U;
@@ -42,7 +43,7 @@ inline __device__ int sampleLightWithReservoirRIP(
         aten::vec3 dirToLight = normalize(lightsample.dir);
 
         auto pdf = samplePDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v);
-        auto brdf = sampleBSDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v, albedo);
+        auto brdf = sampleBSDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
         brdf /= pdf;
 
         auto cosShadow = dot(normal, dirToLight);

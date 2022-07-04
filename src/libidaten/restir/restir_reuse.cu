@@ -137,7 +137,8 @@ __global__ void computeTemporalReuse(
                     normal,
                     self_info.wi, dirToLight,
                     self_info.u, self_info.v,
-                    albedo);
+                    albedo,
+                    self_info.pre_sampled_r);
                 brdf /= pdf;
 
                 auto cosShadow = dot(normal, dirToLight);
@@ -321,7 +322,8 @@ __global__ void computeSpatialReuse(
                         normal,
                         self_info.wi, dirToLight,
                         self_info.u, self_info.v,
-                        albedo);
+                        albedo,
+                        self_info.pre_sampled_r);
                     brdf /= pdf;
 
                     auto cosShadow = dot(normal, dirToLight);

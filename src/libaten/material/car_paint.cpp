@@ -43,9 +43,9 @@ namespace AT_NAME
             real(1),  // TODO
             N, wi, wo);
 
-        // TODO
-        // Enable to specify flake size.
-        auto flakes_density = FlakesNormal::computeFlakeDensity(real(0.25), real(1));
+        auto flakes_density = FlakesNormal::computeFlakeDensity(
+            param->carpaint.flake_size,
+            real(1));
 
         auto diffuse_pdf = lambert::pdf(N, wo);
 
@@ -82,9 +82,9 @@ namespace AT_NAME
             real(1), param->carpaint.clearcoat_ior,
             V, N);
 
-        // TODO
-        // Enable to specify flake size.
-        auto flakes_density = FlakesNormal::computeFlakeDensity(real(0.25), real(1));
+        auto flakes_density = FlakesNormal::computeFlakeDensity(
+            param->carpaint.flake_size,
+            real(1));
 
         aten::vec3 dir;
 
@@ -170,19 +170,20 @@ namespace AT_NAME
                 u, v);
         }
         else {
-            const bool is_on_flakes = FlakesNormal::gen(u, v).a > real(0);
+            const bool is_on_flakes = FlakesNormal::gen(
+                u, v,
+                param->carpaint.flake_scale,
+                param->carpaint.flake_size,
+                param->carpaint.flake_size_variance,
+                param->carpaint.flake_normal_orientation
+            ).a > real(0);
 
             if (is_on_flakes) {
                 // Flakes
-
-                // TODO
-                // flakes color
-                const aten::vec3 flakes_color(real(3), real(3), real(0));
-
                 real fresnel{ real(0) };
 
                 bsdf = MicrofacetBeckman::bsdf(
-                    flakes_color,
+                    param->carpaint.flakes_color * param->carpaint.flake_color_multiplier,
                     real(1),  // TODO
                     real(10),   // TODO
                     fresnel,
@@ -192,7 +193,7 @@ namespace AT_NAME
             }
             else {
                 // Diffuse
-                bsdf = param->baseColor / AT_MATH_PI;
+                bsdf = param->carpaint.diffuse_color / AT_MATH_PI;
             }
         }
 
@@ -297,7 +298,13 @@ namespace AT_NAME
                 newNml = N;
             }
             else {
-                auto flakes_nml = FlakesNormal::gen(u, v);
+                auto flakes_nml = FlakesNormal::gen(
+                    u, v,
+                    param->carpaint.flake_scale,
+                    param->carpaint.flake_size,
+                    param->carpaint.flake_size_variance,
+                    param->carpaint.flake_normal_orientation
+                );
                 if (flakes_nml.a > real(0)) {
                     applyTangentSpaceCoord(orgNml, flakes_nml, newNml);
                 }
@@ -315,12 +322,20 @@ namespace AT_NAME
 
     bool CarPaint::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
-        auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoat_ior, real(0.01), real(10));
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, clearcoat_roughness, real(0.01), real(1.0));
+        auto b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_scale, real(100), real(1000));
+        auto b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size, real(0.1), real(1.0));
+        auto b4 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_size_variance, real(0.0), real(1.0));
+        auto b5 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_normal_orientation, real(0.0), real(1.0));
+        auto b6 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.carpaint, flake_color_multiplier, real(0.1), real(10.0));
+        auto b7 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, clearcoat_color);
+        auto b8 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, flakes_color);
+        auto b9 = AT_EDIT_MATERIAL_PARAM(editor, m_param.carpaint, diffuse_color);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
 
-        return b0 || b1;
+        return b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7 || b8 || b9;
     }
 }

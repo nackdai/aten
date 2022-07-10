@@ -139,23 +139,31 @@ namespace aten
         aten::vec3 clearcoat_color;
         real clearcoat_ior;
 
-        aten::vec3 flakesColor;
+        aten::vec3 flakes_color;
         real clearcoat_roughness;
 
-        aten::vec3 diffuseColor;
-        real padding;
+        aten::vec3 diffuse_color;
+        real flake_scale;
+
+        real flake_size;
+        real flake_size_variance;
+        real flake_normal_orientation;
+        real flake_color_multiplier;
 
         AT_DEVICE_API void Init()
         {
-            clearcoat_color.r = real(0);
-            clearcoat_color.g = real(0);
-            clearcoat_color.b = real(0);
+            aten::set(clearcoat_color, real(1), real(1), real(1));
+            aten::set(flakes_color, real(1), real(1), real(0));
+            aten::set(diffuse_color, real(1), real(0), real(1));
 
-            flakesColor = clearcoat_color;
-            diffuseColor = clearcoat_color;
+            clearcoat_ior = real(3.0);
+            clearcoat_roughness = real(0.25);
 
-            clearcoat_ior = 1.0;
-            clearcoat_roughness = 0.5;
+            flake_scale = real(400.0);
+            flake_size = real(0.25);
+            flake_size_variance = real(0.7);
+            flake_normal_orientation = real(0.5);
+            flake_color_multiplier = real(1.0);
         }
 
         AT_DEVICE_API CarPaintMaterialParameter()
@@ -166,10 +174,15 @@ namespace aten
         AT_DEVICE_API auto& operator=(const CarPaintMaterialParameter& rhs)
         {
             clearcoat_color = rhs.clearcoat_color;
-            flakesColor = rhs.flakesColor;
-            diffuseColor = rhs.diffuseColor;
+            flakes_color = rhs.flakes_color;
+            diffuse_color = rhs.diffuse_color;
             clearcoat_ior = rhs.clearcoat_ior;
             clearcoat_roughness = rhs.clearcoat_roughness;
+            flake_scale = rhs.flake_scale;
+            flake_size = rhs.flake_size;
+            flake_size_variance = rhs.flake_size_variance;
+            flake_normal_orientation = rhs.flake_normal_orientation;
+            flake_color_multiplier = rhs.flake_color_multiplier;
             return *this;
         }
     };

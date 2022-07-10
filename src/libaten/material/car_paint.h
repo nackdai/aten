@@ -14,19 +14,22 @@ namespace AT_NAME
 
     private:
         CarPaint(
-            aten::vec3 baseColor = aten::vec3(0.5),
-            real clearcoat_roughness = real(0.5),
-            real clearcoat_ior = real(0.5),
+            aten::texture* albedoMap = nullptr,
+            aten::texture* normalMap = nullptr,
+            aten::texture* roughnessMap = nullptr)
+            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, aten::vec3(real(1)), 1, albedoMap, normalMap)
+        {
+            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+        }
+
+        CarPaint(
+            aten::vec3 baseColor,
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
             : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, baseColor, 1, albedoMap, normalMap)
         {
             m_param.baseColor = baseColor;
-
-            m_param.carpaint.clearcoat_roughness = aten::clamp<real>(clearcoat_roughness, 0, 1);
-            m_param.carpaint.clearcoat_ior = clearcoat_ior;
-
             m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
         }
 

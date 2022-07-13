@@ -3,6 +3,11 @@
 set -eu
 set -o pipefail
 
+# TODO
+# Usage:
+# run_pre_commit.sh <dir_to_run_pre_commit>
+# ex) ./scripts.run_pre_commit.sh ./
+
 work_dir=$(realpath "${1}")
 
 aten_dev_image="$(docker images -q aten_dev:latest 2>/dev/null)"

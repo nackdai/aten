@@ -20,7 +20,7 @@ set(CUDA_NVCC_FLAGS
     --expt-relaxed-constexpr
     -gencode
     arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY}
-    -std=c++14)
+    -Xcompiler=-std=c++14)
 
 message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 
@@ -30,6 +30,7 @@ set_source_files_properties(
   ../libaten/material/material.cpp
   ../libaten/material/beckman.cpp
   ../libaten/material/blinn.cpp
+  ../libaten/material/car_paint.cpp
   ../libaten/material/ggx.cpp
   ../libaten/material/oren_nayar.cpp
   ../libaten/material/refraction.cpp
@@ -58,6 +59,7 @@ cuda_add_library(
   ../libaten/light/ibl.cpp
   ../libaten/material/beckman.cpp
   ../libaten/material/blinn.cpp
+  ../libaten/material/car_paint.cpp
   ../libaten/material/ggx.cpp
   ../libaten/material/material.cpp
   ../libaten/material/oren_nayar.cpp

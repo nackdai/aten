@@ -8,13 +8,10 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
 RUN apt-get update && apt-get install -y \
     build-essential \
-    clang-8 \
     curl \
     gdb \
     git \
     libglu1-mesa-dev \
-    lld-8 \
-    lldb-8 \
     lsb-release \
     ninja-build \
     software-properties-common \
@@ -22,11 +19,16 @@ RUN apt-get update && apt-get install -y \
     xorg-dev \
     xz-utils
 
-# TODO
-# CUDA 10.1 requires the clang version is less than 9.
-#RUN curl -fL https://apt.llvm.org/llvm.sh | bash -s 11 \
-#    && apt-get update \
-#    && apt-get install -y clang-tidy-11
+# NOTE: It seems that there are some bugs for combination cuda and clang. In order to be stable, we install clang-9.
+# https://forums.developer.nvidia.com/t/cuda-is-not-compatible-with-current-versions-of-libc/190930
+# https://forums.developer.nvidia.com/t/building-with-clang-cuda-11-3-0-works-but-with-cuda-11-3-1-fails-regression/182176/3
+
+# https://apt.llvm.org/
+# NOTE: When we specify 'all' option, installing some of packages is failed.
+ARG clang_version=9
+RUN curl -fL https://apt.llvm.org/llvm.sh | bash -s ${clang_version} \
+    && apt-get update \
+    && apt-get install -y clang-tidy-${clang_version} libc++-${clang_version}-dev libc++abi-${clang_version}-dev
 
 ARG cmake_version=3.21.3
 RUN curl -fL https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh > cmake.sh  \

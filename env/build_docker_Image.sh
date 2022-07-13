@@ -3,6 +3,11 @@
 set -eu
 set -o pipefail
 
+# TODO
+# Usage:
+# build_docker_iamge.sh <docker_file_stored_dir>
+# ex) ./env/build_docker_iamge.sh ./env
+
 function finally() {
   popd
   exit 0

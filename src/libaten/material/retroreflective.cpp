@@ -17,9 +17,7 @@ namespace AT_NAME
 
         // レイが入射してくる側の物体の屈折率.
         const real ni = real(1);      // 真空
-        const real nt = param->standard.ior;   // 物体内部の屈折率.
-
-        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness)).r;
+        const real nt = param->retrorelective.clearcoat_ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
@@ -36,7 +34,9 @@ namespace AT_NAME
         // In order to align how to compute the ouput, we use N(normal) here as well.
         const auto fresnel = material::computeFresnel(ni, nt, V, N);
 
-        const auto beckmanPdf = MicrofacetBeckman::pdf(param, normal, wi, wo, u, v);
+        const auto beckmanPdf = MicrofacetBeckman::pdf(
+            param->retrorelective.clearcoat_roughness,
+            normal, wi, wo);
         const auto diffusePdf = lambert::pdf(N, wo);
 
         auto retrofractivePdf = real(1.0);
@@ -49,7 +49,7 @@ namespace AT_NAME
 
             const auto costheta = aten::abs(dot(B, N));
 
-            const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, roughness);
+            const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, param->retrorelective.retrorelective_roughness);
 
             const auto denom = 4 * aten::abs(dot(L, B));
 
@@ -82,9 +82,7 @@ namespace AT_NAME
 
         // レイが入射してくる側の物体の屈折率.
         const real ni = real(1);      // 真空
-        const real nt = param->standard.ior;   // 物体内部の屈折率.
-
-        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness)).r;
+        const real nt = param->retrorelective.clearcoat_ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
@@ -109,7 +107,10 @@ namespace AT_NAME
         if (r0 < fresnel) {
             // Beckman
             r0 /= fresnel;
-            dir = MicrofacetBeckman::sampleDirection(roughness, wi, N, r0, r1);
+            dir = MicrofacetBeckman::sampleDirection(
+                param->retrorelective.clearcoat_roughness,
+                wi, N,
+                r0, r1);
         }
         else {
             r0 -= fresnel;
@@ -118,7 +119,10 @@ namespace AT_NAME
             if (r1 < era) {
                 // Retroreflective
                 r1 /= era;
-                dir = MicrofacetBeckman::sampleDirection(roughness, wi, N, r0, r1);
+                dir = MicrofacetBeckman::sampleDirection(
+                    param->retrorelective.retrorelective_roughness,
+                    wi, N,
+                    r0, r1);
             }
             else {
                 // Diffuse
@@ -241,11 +245,6 @@ namespace AT_NAME
         // back vector
         const aten::vec3 B = normalize(L + V_dash);
 
-        const auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness)).r;
-
-        aten::vec3 albedo = param->baseColor;
-        albedo *= externalAlbedo;
-
         real fresnel = 1;
 
         // レイが入射してくる側の物体の屈折率.
@@ -262,26 +261,33 @@ namespace AT_NAME
         const auto era = getEffectiveRetroreflectiveArea(refract, N);
 
         // Beckman
-        const auto beckman = MicrofacetBeckman::bsdf(aten::vec3(real(1.0)), roughness, nt, fresnel, normal, wi, wo, u, v);
+        const auto beckman = MicrofacetBeckman::bsdf(
+            param->retrorelective.clearcoat_color,
+            param->retrorelective.clearcoat_roughness,
+            param->retrorelective.clearcoat_ior,
+            fresnel,
+            normal, wi, wo,
+            u, v);
 
         // Retroreflective
         aten::vec3 retroreflective;
         {
+            const auto roughness = param->retrorelective.retrorelective_roughness;
             const auto D = MicrofacetBeckman::sampleBeckman_D(B, N, roughness);
             const auto G = MicrofacetBeckman::sampleBeckman_G(V, N, H, roughness) * MicrofacetBeckman::sampleBeckman_G(L, N, H, roughness);
-            const auto F = material::computeFresnelShlick(ni, nt, V, B);
+            const auto F = material::computeFresnelShlick(
+                ni, param->retrorelective.retrorelective_ior,
+                V, B);
             const auto denom = real(4) * dot(N, L) * dot(N, V);
 
             retroreflective = denom > AT_MATH_EPSILON ? aten::vec3(F * G * D / denom) : aten::vec3(0);
+            retroreflective = param->retrorelective.retrorelective_color * retroreflective;
         }
 
-        // TODO
-        // Use sub color?
-
         // Diffuse
-        const auto diffuse = static_cast<aten::vec3>(real(1.0)) / AT_MATH_PI;
+        const auto diffuse = param->retrorelective.diffuse_color / AT_MATH_PI;
 
-        const auto bsdf = albedo * (beckman + (1 - fresnel) * (era * retroreflective + (real(1) - era) * diffuse));
+        const auto bsdf = externalAlbedo * (beckman + (1 - fresnel) * (era * retroreflective + (real(1) - era) * diffuse));
         return bsdf;
     }
 
@@ -352,12 +358,17 @@ namespace AT_NAME
 
     bool Retroreflective::edit(aten::IMaterialParamEditor* editor)
     {
-        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.standard, ior, real(0.01), real(10));
-        auto b1 = AT_EDIT_MATERIAL_PARAM(editor, m_param, baseColor);
+        auto b0 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.retrorelective, clearcoat_ior, real(0.01), real(10));
+        auto b1 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.retrorelective, clearcoat_roughness, real(0.01), real(1.0));
+        auto b2 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.retrorelective, retrorelective_ior, real(0.01), real(10));
+        auto b3 = AT_EDIT_MATERIAL_PARAM_RANGE(editor, m_param.retrorelective, retrorelective_roughness, real(0.01), real(1.0));
+        auto b4 = AT_EDIT_MATERIAL_PARAM(editor, m_param.retrorelective, clearcoat_color);
+        auto b5 = AT_EDIT_MATERIAL_PARAM(editor, m_param.retrorelective, retrorelective_color);
+        auto b6 = AT_EDIT_MATERIAL_PARAM(editor, m_param.retrorelective, diffuse_color);
 
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, albedoMap);
         AT_EDIT_MATERIAL_PARAM_TEXTURE(editor, m_param, normalMap);
 
-        return b0 || b1;
+        return b0 || b1 || b2 || b3 || b4 || b5 || b6;
     }
 }

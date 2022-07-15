@@ -17,9 +17,9 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, aten::vec3(real(1)), 1, albedoMap, normalMap)
+            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet)
         {
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+            setTextures(albedoMap, normalMap, roughnessMap);
         }
 
         CarPaint(
@@ -27,10 +27,10 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet, baseColor, 1, albedoMap, normalMap)
+            : material(aten::MaterialType::CarPaint, MaterialAttributeMicrofacet)
         {
             m_param.baseColor = baseColor;
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+            setTextures(albedoMap, normalMap, roughnessMap);
         }
 
         CarPaint(

@@ -124,7 +124,7 @@ namespace aten
             mtrl = new aten::MicrofacetRefraction(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Retroreflective:
-            mtrl = new aten::Retroreflective(param.baseColor, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new aten::Retroreflective(albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::CarPaint:
             mtrl = new aten::CarPaint(param, albedoMap, normalMap, roughnessMap);

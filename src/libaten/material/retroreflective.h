@@ -24,14 +24,12 @@ namespace AT_NAME
 
     private:
         Retroreflective(
-            const aten::vec3& albedo = aten::vec3(0.5),
-            real ior = real(3),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(
-                aten::MaterialType::Retroreflective, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
+            : material(aten::MaterialType::Retroreflective, MaterialAttributeMicrofacet)
         {
+            setTextures(albedoMap, normalMap, roughnessMap);
         }
 
         Retroreflective(aten::Values& val);

@@ -14,8 +14,6 @@
 
 #define GPU_RENDERING
 
-//#define ENABLE_ENVMAP
-
 static int WIDTH = 1280;
 static int HEIGHT = 720;
 static const char* TITLE = "MaterialViewer";
@@ -51,6 +49,15 @@ static int g_maxBounce = 5;
 
 static bool g_enableAlbedoMap = true;
 static bool g_enableNormalMap = true;
+
+static struct SceneLight {
+    bool is_envmap{ true };
+
+    std::shared_ptr<aten::texture> envmap_texture;
+    std::shared_ptr<aten::envmap> envmap;
+    std::shared_ptr<aten::ImageBasedLight> ibl;
+    std::shared_ptr<aten::PointLight> point_light;
+} g_scene_light;
 
 void getCameraPosAndAt(
     aten::vec3& pos,
@@ -144,6 +151,53 @@ public:
 
 static MaterialParamEditor g_mtrlParamEditor;
 
+void mershallLightParameter(std::vector<aten::LightParameter>& lightparams)
+{
+    if (g_scene_light.is_envmap) {
+        auto result = std::find_if(
+            lightparams.begin(), lightparams.end(),
+            [](const auto& l) {
+                return l.type == aten::LightType::IBL;
+            }
+        );
+        if (result != lightparams.end()) {
+            result->idx = g_scene_light.envmap_texture->id();
+        }
+        result = std::remove_if(lightparams.begin(), lightparams.end(),
+            [](const auto& l) {
+                return l.type != aten::LightType::IBL;
+            }
+        );
+        lightparams.erase(result, lightparams.end());
+    }
+    else {
+        auto result = std::remove_if(lightparams.begin(), lightparams.end(),
+            [](const auto& l) {
+                return l.type == aten::LightType::IBL;
+            }
+        );
+        lightparams.erase(result, lightparams.end());
+    }
+}
+
+void updateLightParameter()
+{
+    std::vector<aten::LightParameter> lightparams;
+
+    auto lightNum = g_scene.lightNum();
+
+    for (uint32_t i = 0; i < lightNum; i++) {
+        auto l = g_scene.getLight(i);
+        auto param = l->param();
+        lightparams.push_back(param);
+    }
+
+    mershallLightParameter(lightparams);
+
+    g_tracer.updateLight(lightparams);
+    g_tracer.setEnableEnvmap(g_scene_light.is_envmap);
+}
+
 void onRun(aten::window* window)
 {
 #ifdef GPU_RENDERING
@@ -184,6 +238,19 @@ void onRun(aten::window* window)
 
     if (g_willShowGUI)
     {
+        bool need_renderer_reset = false;
+
+        constexpr char* light_types[] = { "IBL", "PointLight" };
+        int lighttype = g_scene_light.is_envmap ? 0 : 1;
+        if (ImGui::Combo("light", &lighttype, light_types, AT_COUNTOF(light_types))) {
+            auto next_is_envmap = lighttype == 0;
+            if (g_scene_light.is_envmap != next_is_envmap) {
+                g_scene_light.is_envmap = next_is_envmap;
+                updateLightParameter();
+                need_renderer_reset = true;
+            }
+        }
+
         if (ImGui::SliderInt("Samples", &g_maxSamples, 1, 100)
             || ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10))
         {
@@ -200,7 +267,7 @@ void onRun(aten::window* window)
         auto mtrl = g_ctxt.getMaterial(0);
         bool needUpdateMtrl = false;
 
-        static const char* items[] = {
+        constexpr char* mtrl_types[] = {
             "Emissive",
             "Lambert",
             "OrneNayar",
@@ -217,7 +284,7 @@ void onRun(aten::window* window)
             "Disney",
         };
         int mtrlType = (int)mtrl->param().type;
-        if (ImGui::Combo("mode", &mtrlType, items, AT_COUNTOF(items))) {
+        if (ImGui::Combo("mode", &mtrlType, mtrl_types, AT_COUNTOF(mtrl_types))) {
             g_ctxt.deleteAllMaterialsAndClearList();
             mtrl = createMaterial((aten::MaterialType)mtrlType);
             needUpdateMtrl = true;
@@ -253,6 +320,10 @@ void onRun(aten::window* window)
             std::vector<aten::MaterialParameter> params(1);
             params[0] = mtrl->param();
             g_tracer.updateMaterial(params);
+            need_renderer_reset = true;
+        }
+
+        if (need_renderer_reset) {
             g_tracer.reset();
         }
     }
@@ -443,84 +514,76 @@ int main()
         WIDTH * HEIGHT,
         1024);
 
-#ifdef ENABLE_ENVMAP
-    auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-    auto bg = std::make_shared<aten::envmap>();
-    bg->init(envmap);
-
-    auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
-
-    g_scene.addImageBasedLight(ibl);
-#else
-    auto l = std::make_shared<aten::PointLight>(
-        aten::vec3(0.0, 0.0, 50.0),
-        aten::vec3(10.0, 0.0, 0.0),
-        real(0),
-        real(0.1),
-        real(0));
-    g_scene.addLight(l);
-#endif
-
     {
-        std::vector<aten::GeomParameter> shapeparams;
-        std::vector<aten::PrimitiveParamter> primparams;
-        std::vector<aten::LightParameter> lightparams;
-        std::vector<aten::MaterialParameter> mtrlparms;
-        std::vector<aten::vertex> vtxparams;
+        // IBL
+        g_scene_light.envmap_texture = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
+        g_scene_light.envmap = std::make_shared<aten::envmap>();
+        g_scene_light.envmap->init(g_scene_light.envmap_texture);
+        g_scene_light.ibl = std::make_shared<aten::ImageBasedLight>(g_scene_light.envmap);
+        g_scene.addImageBasedLight(g_scene_light.ibl);
 
-        aten::DataCollector::collect(
-            g_ctxt,
-            g_scene,
-            shapeparams,
-            primparams,
-            lightparams,
-            mtrlparms,
-            vtxparams);
-
-        const auto& nodes = g_scene.getAccel()->getNodes();
-        const auto& mtxs = g_scene.getAccel()->getMatrices();
-
-        std::vector<idaten::TextureResource> tex;
-        {
-            auto texNum = g_ctxt.getTextureNum();
-
-            for (int i = 0; i < texNum; i++) {
-                auto t = g_ctxt.getTexture(i);
-                tex.push_back(
-                    idaten::TextureResource(t->colors(), t->width(), t->height()));
-            }
-        }
-
-#ifdef ENABLE_ENVMAP
-        for (auto& l : lightparams) {
-            if (l.type == aten::LightType::IBL) {
-                l.idx = envmap->id();
-            }
-        }
-#endif
-
-        auto camparam = g_camera.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
-
-        g_tracer.update(
-            aten::visualizer::getTexHandle(),
-            WIDTH, HEIGHT,
-            camparam,
-            shapeparams,
-            mtrlparms,
-            lightparams,
-            nodes,
-            primparams, 0,
-            vtxparams, 0,
-            mtxs,
-            tex,
-#ifdef ENABLE_ENVMAP
-            idaten::EnvmapResource(envmap->id(), ibl->getAvgIlluminace(), real(1)));
-#else
-            idaten::EnvmapResource());
-#endif
+        // PointLight
+        g_scene_light.point_light = std::make_shared<aten::PointLight>(
+            aten::vec3(0.0, 0.0, 50.0),
+            aten::vec3(10.0, 0.0, 0.0),
+            real(0),
+            real(0.1),
+            real(0));
+        g_scene.addLight(g_scene_light.point_light);
     }
+
+    std::vector<aten::GeomParameter> shapeparams;
+    std::vector<aten::PrimitiveParamter> primparams;
+    std::vector<aten::LightParameter> lightparams;
+    std::vector<aten::MaterialParameter> mtrlparms;
+    std::vector<aten::vertex> vtxparams;
+
+    aten::DataCollector::collect(
+        g_ctxt,
+        g_scene,
+        shapeparams,
+        primparams,
+        lightparams,
+        mtrlparms,
+        vtxparams);
+
+    const auto& nodes = g_scene.getAccel()->getNodes();
+    const auto& mtxs = g_scene.getAccel()->getMatrices();
+
+    std::vector<idaten::TextureResource> tex;
+    {
+        auto texNum = g_ctxt.getTextureNum();
+
+        for (int i = 0; i < texNum; i++) {
+            auto t = g_ctxt.getTexture(i);
+            tex.push_back(
+                idaten::TextureResource(t->colors(), t->width(), t->height()));
+        }
+    }
+
+    mershallLightParameter(lightparams);
+
+    auto camparam = g_camera.param();
+    camparam.znear = real(0.1);
+    camparam.zfar = real(10000.0);
+
+    g_tracer.update(
+        aten::visualizer::getTexHandle(),
+        WIDTH, HEIGHT,
+        camparam,
+        shapeparams,
+        mtrlparms,
+        lightparams,
+        nodes,
+        primparams, 0,
+        vtxparams, 0,
+        mtxs,
+        tex,
+        g_scene_light.is_envmap
+        ? idaten::EnvmapResource(g_scene_light.envmap_texture->id(), g_scene_light.ibl->getAvgIlluminace(), real(1))
+        : idaten::EnvmapResource());
+
+    g_tracer.setEnableEnvmap(g_scene_light.is_envmap);
 
     aten::window::run();
 

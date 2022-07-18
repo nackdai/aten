@@ -31,6 +31,11 @@ namespace idaten {
             m_hitDistLimit = d;
         }
 
+        void setEnableEnvmap(bool b)
+        {
+            m_enableEnvmap = b;
+        }
+
     protected:
         virtual void initSamplerParameter(
             int width, int height)
@@ -102,5 +107,7 @@ namespace idaten {
 
         idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
         idaten::TypedCudaMemory<unsigned int> m_random;
+
+        bool m_enableEnvmap{ true };
     };
 }

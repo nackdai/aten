@@ -653,7 +653,7 @@ namespace idaten
         offsetX = offsetX < 0 ? m_tileDomain.x : offsetX;
         offsetY = offsetY < 0 ? m_tileDomain.y : offsetY;
 
-        if (m_envmapRsc.idx >= 0) {
+        if (m_enableEnvmap && m_envmapRsc.idx >= 0) {
             kernel::shadeMissWithEnvmap << <grid, block, 0, m_stream >> > (
                 m_tileDomain,
                 offsetX, offsetY,

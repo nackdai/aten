@@ -53,6 +53,7 @@ namespace idaten
             uint32_t triOffsetCount);
 
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
+        void updateLight(const std::vector<aten::LightParameter>& lights);
 
         void enableExportToGLTextures(
             GLuint gltexPosition,

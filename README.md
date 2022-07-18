@@ -36,6 +36,8 @@ And Idanten includes characters of aten, "id**aten**"
   - Microfacet GGX
   - OrenNayar
   - Disney BRDF
+  - CarPaint (Experimental)
+  - Retroreflective (Experimental)
   - Layer
 - Lights
   - Polygonal Light(Area Light)
@@ -113,22 +115,23 @@ git submodule update --init --recursive
 ### Windows
 
 1. Install `CUDA 11.3` and depended NVIDIA driver
-2. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
-3. Launch `aten/vs2019/aten.sln`
-4. Build porjects with `x64` (not support `x86`)
+1. Run `aten/3rdparty/Build3rdParty.bat <Debug|Release>`
+1. Launch `aten/vs2019/aten.sln`
+1. Build porjects with `x64` (not support `x86`)
 
 I confirmed with Visual Studio 2019 on Windows10.
 
-Supoort just only `CUDA 11.3`.
+Supoort just only `CUDA 11.7.0`.
 
 ### Linux
 
-1. Install `CUDA 11.2` or later and depended NVIDIA driver
+1. Install `CUDA 11.2.2` and depended NVIDIA driver
 1. Install applications (You can find what you need in `env/aten/Dockerfile`)
     1. Install `cmake` `3.21.3` or later
-    1. Install `clang 8.0.0`
+    1. Install `clang 9.0.0`
     1. Install `ninja-build`
 1. `cd aten/build`
+1. `cp ../scripts/RunCMake.sh ./`
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
@@ -274,7 +277,7 @@ PSSMLT 10spp 10mlt 10mutation
 
 ![PSSMLT](gallery/pssmlt_10spp_10mutation_10mlt.png)
 
-SVGF 1spp
+SVGF (1spp/5bounds)
 
 ![SVGF_sponza](gallery/svgf_1spp_sponza.png)
 ![SVGF_cryteksponza](gallery/svgf_1spp_cryteksponza.png)
@@ -283,8 +286,16 @@ Deformation
 
 ![Deformation](gallery/deform.png)
 
-ReSTIR
+(c) Unity Technologies Japan/UCL
+
+ReSTIR (1spp/5bounds/126point lights w/o environment map)
 
 ![ReSTIR](gallery/compare_restir.png)
 
-(c) Unity Technologies Japan/UCL
+CarPaint
+
+![CarPaint](gallery/car_paint.png)
+
+Retroreflective
+
+![Retroreflective](gallery/retroreflective.gif)

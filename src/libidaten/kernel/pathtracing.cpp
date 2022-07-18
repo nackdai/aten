@@ -74,7 +74,16 @@ namespace idaten
 
         if (mtrls.size() <= m_mtrlparam.num()) {
             m_mtrlparam.writeByNum(&mtrls[0], (uint32_t)mtrls.size());
+            reset();
+        }
+    }
 
+    void PathTracing::updateLight(const std::vector<aten::LightParameter>& lights)
+    {
+        AT_ASSERT(lights.size() <= m_lightparam.num());
+
+        if (lights.size() <= m_lightparam.num()) {
+            m_lightparam.writeByNum(&lights[0], (uint32_t)lights.size());
             reset();
         }
     }

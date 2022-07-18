@@ -52,12 +52,15 @@ namespace idaten
 
     class CudaGLSurface : public CudaGLResource {
     public:
-        CudaGLSurface() {}
+        CudaGLSurface() = default;
         CudaGLSurface(GLuint gltex, CudaGLRscRegisterType type)
         {
             init(gltex, type);
         }
-        ~CudaGLSurface() {}
+        ~CudaGLSurface() {
+            unbind();
+            m_gltex = 0;
+        }
 
     public:
         void init(GLuint gltex, CudaGLRscRegisterType type);

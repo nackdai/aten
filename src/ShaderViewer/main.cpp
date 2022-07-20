@@ -273,8 +273,9 @@ int main(int argc, char* argv[])
         onMouseWheel,
         onKey);
 
-    loadObj("../../asset/sphere/sphere.obj", nullptr, g_objs);
+    //loadObj("../../asset/sphere/sphere.obj", nullptr, g_objs);
     //loadObj("../../asset/cube/cube.obj", nullptr, g_objs);
+    loadObj("../../asset/teapot/teapot.obj", nullptr, g_objs);
 
     g_objenable.resize(g_objs.size(), true);
 

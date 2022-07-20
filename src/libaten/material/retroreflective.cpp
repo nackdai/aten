@@ -249,7 +249,7 @@ namespace AT_NAME
 
         // レイが入射してくる側の物体の屈折率.
         const real ni = real(1);      // 真空
-        const real nt = param->standard.ior;   // 物体内部の屈折率.
+        const real nt = param->retrorelective.clearcoat_ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5

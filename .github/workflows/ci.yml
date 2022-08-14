@@ -17,7 +17,7 @@ env:
 jobs:
   cancel:
     name: cancel
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.8.0
@@ -26,7 +26,8 @@ jobs:
 
   build_docker:
     name: build_docker
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
+    needs: cancel
 
     steps:
       - name: Checkout
@@ -70,7 +71,7 @@ jobs:
 
   lint:
     name: lint
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
     needs: build_docker
     container:
       image: ghcr.io/${{ github.repository }}/aten_dev:latest
@@ -92,7 +93,7 @@ jobs:
 
   build:
     name: build
-    runs-on: ${{ env.RUNS_ON }}
+    runs-on: $RUNS_ON
     needs: lint
     container:
       image: ghcr.io/${{ github.repository }}/aten_dev:latest

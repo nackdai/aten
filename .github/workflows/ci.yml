@@ -86,8 +86,13 @@ jobs:
       # Unfortunately, it seems that docker exec don't run .bashrc.
       # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.
       - name: lint
+        shell: bash
         run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
+          cur=$(pwd)
+          echo "${cur}"
+          workspace=$GITHUB_WORKSPACE
+          echo "${workspace}"
+          git config --global --add safe.directory "${workspace}"
           eval "$(pyenv init --path)"
           pre-commit run -a
 

@@ -20,7 +20,7 @@ jobs:
         uses: styfle/cancel-workflow-action@0.10.0
         with:
           all_but_latest: true
-          access_token: ${{ github.GITHUB_TOKEN }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
 
   build_docker:
     name: build_docker

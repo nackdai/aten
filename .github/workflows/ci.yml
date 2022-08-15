@@ -87,6 +87,7 @@ jobs:
           node --version
           which pyenv
           pyenv --version
+          eval "$(pyenv init --path)"
           which pre-commit
 
       - name: Set permission

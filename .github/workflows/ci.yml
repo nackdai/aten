@@ -41,6 +41,7 @@ jobs:
         run: echo ${{ steps.getfile.outputs.added_modified }}
 
       - name: Login to GitHub Container Registry
+        if: contains(steps.getfile.outputs.added_modified, 'Dockerfile') == true
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -88,6 +89,7 @@ jobs:
           which pyenv
           pyenv --version
           eval "$(pyenv init --path)"
+          echo ${PATH}
           which pre-commit
 
       - name: Set permission

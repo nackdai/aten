@@ -50,7 +50,7 @@ jobs:
       # Run the following step if Dockerfile is modified.
       - name: Build and push base image
         id: build_base_image
-        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true || contains(steps.getfile.outputs.added_modified, 'ci.yml') == true
+        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true
         run: |
           docker build -t ghcr.io/${{ github.repository }}/aten:latest ./env/aten/
           docker push ghcr.io/${{ github.repository }}/aten:latest
@@ -67,8 +67,8 @@ jobs:
             -f ./env/dev/Dockerfile .
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest
 
-  lint:
-    name: lint
+  ci:
+    name: ci
     runs-on: ubuntu-20.04
     needs: build_docker
     container:
@@ -80,30 +80,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: true
 
       # Unfortunately, it seems that docker exec don't run .bashrc.
       # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.
       - name: lint
         run: |
           git config --global --add safe.directory ./
-          eval "$(pyenv init --path)
+          eval "$(pyenv init --path)"
           pre-commit run -a
-
-  build:
-    name: build
-    runs-on: ubuntu-20.04
-    needs: lint
-    container:
-      image: ghcr.io/${{ github.repository }}/aten_dev:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: true
 
       - name: Configure
         run: |

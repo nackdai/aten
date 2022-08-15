@@ -79,20 +79,6 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Check in docker container
-        shell: bash
-        run: |
-          which npm
-          npm --version
-          which node
-          node --version
-          which pyenv
-          pyenv --version
-          pyenv init --path
-          eval "$(HOME=/root pyenv init --path)"
-          echo ${PATH}
-          which pre-commit
-
       - name: Set permission
         shell: bash
         run: |
@@ -103,12 +89,19 @@ jobs:
         with:
           submodules: true
 
-      # Unfortunately, it seems that docker exec don't run .bashrc.
-      # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.
+      # It seems that .bashrc is not enabled in the docker container.
+      # So, in order to eanble pyenv, need to call eval for enabling pyenv.
+      # 'pyenv init --path' sets PATH to enable to execute pre-commit.
+      # HOME is expected as '/root' for 'pyenv init --path' in aten_dev:latest container.
+      # But, HOME is spcified as '/github/home' forcibly by GHA.
+      # It causes unexpected PATH settings in 'pyenv init --path'.
+      # So, need to specify 'HOME=/root' for 'pyenv init --path'.
+      # If docker container is run via 'docker run' and run commands via `docker exec`,
+      # we can expect HOME is '/root'.
       - name: lint
         run: |
           git config --global --add safe.directory ${GITHUB_WORKSPACE}
-          eval "$(pyenv init --path)"
+          eval "$(HOME=/root pyenv init --path)"
           pre-commit run -a
 
       - name: Configure

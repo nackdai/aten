@@ -88,6 +88,11 @@ jobs:
         with:
           submodules: true
 
+      - name: Check
+        run: |
+          python3 --version
+          which clang-9
+
       # Unfortunately, it seems that docker exec don't run .bashrc.
       # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.
       - name: lint

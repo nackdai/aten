@@ -87,7 +87,7 @@ jobs:
       # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.
       - name: lint
         run: |
-          git config --global --add safe.directory ./
+          git config --global --add safe.directory $GITHUB_WORKSPACE
           eval "$(pyenv init --path)"
           pre-commit run -a
 

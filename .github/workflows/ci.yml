@@ -89,7 +89,7 @@ jobs:
           which pyenv
           pyenv --version
           pyenv init --path
-          HOME=/root eval "$(pyenv init --path)"
+          eval "$(HOME=/root pyenv init --path)"
           echo ${PATH}
           which pre-commit
 

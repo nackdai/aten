@@ -81,7 +81,7 @@ jobs:
       - name: Set permission
         shell: bash
         run: |
-          sudo chown -R $(id -u):$(id -g) ${GITHUB_WORKSPACE} || true
+          chown -R $(id -u):$(id -g) ${GITHUB_WORKSPACE}
 
       - name: Checkout
         uses: actions/checkout@v2

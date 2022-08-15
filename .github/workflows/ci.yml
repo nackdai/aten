@@ -78,6 +78,11 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
+      - name: Set permission
+        shell: bash
+        run: |
+          sudo chown -R $(id -u):$(id -g) ${GITHUB_WORKSPACE} || true
+
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -86,13 +91,8 @@ jobs:
       # Unfortunately, it seems that docker exec don't run .bashrc.
       # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.
       - name: lint
-        shell: bash
         run: |
-          cur=$(pwd)
-          echo "${cur}"
-          workspace=$GITHUB_WORKSPACE
-          echo "${workspace}"
-          git config --global --add safe.directory "${workspace}"
+          git config --global --add safe.directory ${GITHUB_WORKSPACE}
           eval "$(pyenv init --path)"
           pre-commit run -a
 

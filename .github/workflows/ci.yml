@@ -88,6 +88,7 @@ jobs:
           node --version
           which pyenv
           pyenv --version
+          pyenv init --path
           eval "$(pyenv init --path)"
           echo ${PATH}
           which pre-commit

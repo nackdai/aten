@@ -78,6 +78,17 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
+      - name: Check in docker container
+        shell: bash
+        run: |
+          which npm
+          npm --version
+          which node
+          node --version
+          which pyenv
+          pyenv --version
+          which pre-commit
+
       - name: Set permission
         shell: bash
         run: |
@@ -87,11 +98,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-
-      - name: Check in docker container
-        shell: bash
-        run: |
-          ls /.dockerenv && echo "Found dockerenv" || echo "No dockerenv"
 
       # Unfortunately, it seems that docker exec don't run .bashrc.
       # Therefore, for enabling pyenv, we need to call eval for enabling pyenv.

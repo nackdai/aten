@@ -14,8 +14,7 @@ on:
     paths:
       - '*.yml'
       - '*.cpp'
-    paths-ignore:
-      - 'scripts/**'
+      - '!scripts/**'
 
 jobs:
   cancel:

@@ -35,3 +35,11 @@ jobs:
       - name: Result PR
         run: |
           echo ${{ steps.PR.outputs.number }}
+
+      - name: Commit Len
+        id: commit_len
+        uses: ./.github/actions/get_commit_length
+
+      - name: Result commit len
+        run: |
+          echo ${{ steps.commit_len.outputs.commit_length }}

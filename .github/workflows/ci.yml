@@ -10,11 +10,6 @@ on:
       - 'gallery/**'
       - 'vs2015/**'
       - 'vs2019/**'
-  pull_request:
-    paths:
-      - '*.yml'
-      - '*.cpp'
-      - '!scripts/**'
 
 jobs:
   cancel:
@@ -32,6 +27,10 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Test
+      - name: Get PR
+        id: PR
+        uses: 8BitJonny/gh-get-current-pr@2.1.0
+
+      - name: Result PR
         run: |
-          echo Test
+          echo ${{ steps.PR.outcome }}

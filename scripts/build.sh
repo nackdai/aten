@@ -18,7 +18,7 @@ echo "Compute Capability is [${compute_capability}]"
 work_dir=$(realpath "${3}")
 
 aten_image="$(docker images -q aten:latest 2>/dev/null)"
-# Test
+
 CONTAINER_NAME="aten"
 WORKSPACE="/work"
 

@@ -14,16 +14,6 @@ on:
     types: [opened, reopened]
 
 jobs:
-  cancel:
-    name: cancel
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          all_but_latest: true
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-
   ci:
     name: ci
     runs-on: ubuntu-20.04
@@ -47,3 +37,13 @@ jobs:
       - name: Result commit len
         run: |
           echo ${{ steps.commit_len.outputs.commit_length }}
+
+      - name: Files in PR/push
+        id: file_list
+        uses: jitterbit/get-changed-files@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dump
+        run: |
+          echo ${{ steps.file_list.outputs.all }}

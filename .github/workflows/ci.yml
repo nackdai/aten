@@ -10,6 +10,7 @@ on:
       - 'gallery/**'
       - 'vs2015/**'
       - 'vs2019/**'
+  pull_request:
 
 jobs:
   cancel:

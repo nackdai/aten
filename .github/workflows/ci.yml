@@ -33,4 +33,4 @@ jobs:
 
       - name: Result PR
         run: |
-          echo ${{ steps.PR.outcome }}
+          echo ${{ steps.PR.outputs.number }}

@@ -33,15 +33,14 @@ jobs:
 
       - name: Get diff files
         id: getfile
-        uses: ./.github/actions/get_changed_files
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Dump
-        run: echo ${{ steps.getfile.outputs.added_modified }}
+        run: |
+          git fetch origin main
+          files=$(git diff origin/main HEAD --name-only)
+          echo "${files}"
+          echo "::set-output name=diff_files::${files}"
 
       - name: Login to GitHub Container Registry
-        if: contains(steps.getfile.outputs.added_modified, 'Dockerfile') == true
+        if: contains(steps.getfile.outputs.diff_files, 'Dockerfile') == true
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -51,7 +50,7 @@ jobs:
       # Run the following step if Dockerfile is modified.
       - name: Build and push base image
         id: build_base_image
-        if: contains(steps.getfile.outputs.added_modified, 'env/aten/Dockerfile') == true
+        if: contains(steps.getfile.outputs.diff_files, 'env/aten/Dockerfile') == true
         run: |
           docker build -t ghcr.io/${{ github.repository }}/aten:latest ./env/aten/
           docker push ghcr.io/${{ github.repository }}/aten:latest
@@ -61,7 +60,7 @@ jobs:
 
       # Build the dev image based on base image.
       - name: Build and push dev image
-        if: contains(steps.getfile.outputs.added_modified, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
+        if: contains(steps.getfile.outputs.diff_files, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
         run: |
           docker build -t ghcr.io/${{ github.repository }}/aten_dev:latest \
             --build-arg base_from=ghcr.io/${{ github.repository }}/aten:latest \

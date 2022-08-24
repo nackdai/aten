@@ -59,38 +59,28 @@ namespace aten {
             return *this;
         }
 
-        operator real() const
+        template <typename T>
+        operator T() const
         {
-            return std::get<0>(val_);
-        }
-        operator int() const
-        {
-            return std::get<1>(val_);
-        }
-        operator bool() const
-        {
-            return std::get<2>(val_);
-        }
-        operator vec4() const
-        {
-            return std::get<3>(val_);
+            assert(std::holds_alternative<T>(val_));
+            return std::get<T>(val_);
         }
         operator vec3() const
         {
-            return static_cast<vec3>(std::get<3>(val_));
+            return static_cast<vec3>(this->operator vec4());
         }
         template <typename T>
         operator const std::shared_ptr<T>&() const
         {
             assert(type_hash_ > 0 && type_hash_ == typeid(T).hash_code());
-            return std::reinterpret_pointer_cast<T>(std::get<4>(val_));
+            return std::reinterpret_pointer_cast<T>(std::get<std::shared_ptr<void>>(val_));
         }
 
         template <typename T>
         auto getAs() const -> std::enable_if_t<is_shared_ptr<T>::value, T>
         {
             assert(type_hash_ > 0 && type_hash_ == typeid(typename T::element_type).hash_code());
-            return std::reinterpret_pointer_cast<typename T::element_type>(std::get<4>(val_));
+            return std::reinterpret_pointer_cast<typename T::element_type>(std::get<std::shared_ptr<void>>(val_));
         }
 
         template <typename T>

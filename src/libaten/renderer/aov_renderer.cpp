@@ -1,4 +1,4 @@
-#include "renderer/aov.h"
+#include "renderer/aov_renderer.h"
 #include "sampler/xorshift.h"
 
 namespace aten

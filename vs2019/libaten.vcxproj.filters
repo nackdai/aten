@@ -353,7 +353,7 @@
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\aov.h">
+    <ClInclude Include="..\src\libaten\renderer\aov_renderer.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\filter\taa.h">
@@ -688,7 +688,7 @@
     <ClCompile Include="..\src\libaten\texture\texture.cpp">
       <Filter>texture</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\aov.cpp">
+    <ClCompile Include="..\src\libaten\renderer\aov_renderer.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\filter\taa.cpp">

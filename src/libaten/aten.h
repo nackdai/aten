@@ -112,7 +112,7 @@
 #include "renderer/pathtracing.h"
 #include "renderer/erpt.h"
 #include "renderer/pssmlt.h"
-#include "renderer/aov.h"
+#include "renderer/aov_renderer.h"
 #include "renderer/bdpt.h"
 #include "renderer/aorenderer.h"
 #include "renderer/restir.h"

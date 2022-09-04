@@ -348,6 +348,7 @@
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h" />
     <ClInclude Include="..\src\libaten\renderer\aorenderer.h" />
+    <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\aov_renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\bdpt.h" />

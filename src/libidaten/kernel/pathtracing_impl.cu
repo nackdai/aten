@@ -485,20 +485,4 @@ namespace idaten
 
         checkCudaKernel(gather);
     }
-
-    void PathTracing::copyAovToGLSurface(int width, int height)
-    {
-        AT_ASSERT(need_export_gl_);
-
-        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 grid(
-            (width + block.x - 1) / block.x,
-            (height + block.y - 1) / block.y);
-
-        pt::CopyAovToGLSurface << <grid, block >> > (
-            width, height,
-            aov_position_.ptr(), aov_nml_.ptr(), aov_albedo_.ptr(),
-            position_range_,
-            gl_surface_cuda_rscs_.ptr());
-    }
 }

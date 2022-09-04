@@ -7,6 +7,7 @@
 #include "kernel/pt_params.h"
 #include "kernel/pt_standard_impl.h"
 #include "sampler/sampler.h"
+#include "renderer/aov.h"
 
 namespace idaten
 {
@@ -54,12 +55,6 @@ namespace idaten
 
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
         void updateLight(const std::vector<aten::LightParameter>& lights);
-
-        void enableExportToGLTextures(
-            GLuint gltexPosition,
-            GLuint gltexNormal,
-            GLuint gltexAlbedo,
-            const aten::vec3& posRange);
 
         virtual void reset() override final
         {
@@ -131,8 +126,6 @@ namespace idaten
             int width, int height,
             int maxSamples);
 
-        void copyAovToGLSurface(int width, int height);
-
         bool isFirstFrame() const
         {
             return (m_frame == 1);
@@ -148,8 +141,6 @@ namespace idaten
         idaten::TypedCudaMemory<float4> aov_albedo_;
 
         // To export to GL.
-        bool need_export_gl_{ false };
-        aten::vec3 position_range_{ real(1) };
         idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
         std::vector<idaten::CudaGLSurface> gl_surfaces_;
 

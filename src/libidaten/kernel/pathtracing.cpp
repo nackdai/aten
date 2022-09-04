@@ -88,29 +88,6 @@ namespace idaten
         }
     }
 
-    void PathTracing::enableExportToGLTextures(
-        GLuint gltexPosition,
-        GLuint gltexNormal,
-        GLuint gltexAlbedo,
-        const aten::vec3& posRange)
-    {
-        AT_ASSERT(gltexPosition > 0);
-        AT_ASSERT(gltexNormal > 0);
-
-        if (!need_export_gl_) {
-            need_export_gl_ = true;
-
-            position_range_ = posRange;
-
-            gl_surfaces_.resize(3);
-            gl_surfaces_[0].init(gltexPosition, CudaGLRscRegisterType::WriteOnly);
-            gl_surfaces_[1].init(gltexNormal, CudaGLRscRegisterType::WriteOnly);
-            gl_surfaces_[2].init(gltexAlbedo, CudaGLRscRegisterType::WriteOnly);
-
-            gl_surface_cuda_rscs_.init(3);
-        }
-    }
-
     void PathTracing::updateGeometry(
         std::vector<CudaGLBuffer>& vertices,
         uint32_t vtxOffsetCount,
@@ -317,10 +294,6 @@ namespace idaten
 
                 bounce++;
             }
-        }
-
-        if (need_export_gl_) {
-            copyAovToGLSurface(width, height);
         }
 
         if (m_mode == Mode::PT) {

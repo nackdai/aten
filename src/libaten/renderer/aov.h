@@ -16,7 +16,7 @@ namespace aten
     template <template <typename T> typename Buffer, int N>
     class AOVHostBuffer {
     public:
-        static_assert(N > 0);
+        static_assert(N > 0, "Empty buffer is not allowed");
 
         static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > AOVType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
@@ -33,7 +33,7 @@ namespace aten
         template <int M>
         BufferType& get()
         {
-            static_assert(M < N);
+            static_assert(M < N, "Over access AOV buffer");
             return aovs_[M];
         }
 

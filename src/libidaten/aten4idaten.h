@@ -50,6 +50,7 @@
 #include "geometry/geomparam.h"
 #include "geometry/sphere.h"
 
+#include "renderer/aov.h"
 #include "renderer/envmap.h"
 #include "renderer/renderer_utility.h"
 

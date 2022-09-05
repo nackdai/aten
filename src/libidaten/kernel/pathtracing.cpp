@@ -45,9 +45,9 @@ namespace idaten
 
         initSamplerParameter(width, height);
 
-        aov_position_.init(width * height);
-        aov_nml_.init(width * height);
-        aov_albedo_.init(width * height);
+        aov_.traverse([width, height](auto& buffer) {
+            buffer.init(width * height);
+        });
     }
 
     void PathTracing::updateBVH(

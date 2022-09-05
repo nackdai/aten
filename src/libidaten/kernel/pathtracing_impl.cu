@@ -18,7 +18,6 @@
 namespace pt {
     __global__ void shade(
         idaten::TileDomain tileDomain,
-        float4* aovPos,
         float4* aovNormal,
         float4* aovTexclr,
         int width, int height,
@@ -129,7 +128,6 @@ namespace pt {
 
             const auto _idx = getIdx(ix, iy, width);
 
-            aovPos[_idx] = make_float4(rec.p.x, rec.p.y, rec.p.z, 1.0f);
             aovNormal[_idx] = make_float4(n.x, n.y, n.z, 0.0f);
             aovTexclr[_idx] = make_float4(albedo.x, albedo.y, albedo.z, 1.0f);
         }
@@ -415,9 +413,8 @@ namespace idaten
 
         pt::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            aov_position_.ptr(),
-            aov_nml_.ptr(),
-            aov_albedo_.ptr(),
+            aov_.normal_depth().ptr(),
+            aov_.albedo_meshid().ptr(),
             width, height,
             m_paths.ptr(),
             m_hitidx.ptr(), hitcount.ptr(),

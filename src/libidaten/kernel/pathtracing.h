@@ -104,8 +104,8 @@ namespace idaten
             StandardPT::missShade(
                 width, height,
                 bounce,
-                aov_nml_,
-                aov_albedo_,
+                aov_.normal_depth(),
+                aov_.albedo_meshid(),
                 offsetX, offsetY);
         }
 
@@ -136,9 +136,7 @@ namespace idaten
     protected:
         Mode m_mode{ Mode::PT };
 
-        idaten::TypedCudaMemory<float4> aov_position_;
-        idaten::TypedCudaMemory<float4> aov_nml_;
-        idaten::TypedCudaMemory<float4> aov_albedo_;
+        AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, aten::AOVType::NumBasicAov> aov_;
 
         // To export to GL.
         idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;

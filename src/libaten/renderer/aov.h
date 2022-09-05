@@ -5,22 +5,23 @@
 #include "defs.h"
 #include "math/vec4.h"
 
-namespace aten
-{
+namespace aten {
     struct AOVType {
         static constexpr int NormalDepth{ 0 };
         static constexpr int AlbedoMeshId{ 1 };
         static constexpr int NumBasicAov{ 2 };
     };
+}
 
-    template <template <typename T> typename Buffer, int N>
+namespace AT_NAME
+{
+    template <typename BufferType, int N>
     class AOVHostBuffer {
     public:
         static_assert(N > 0, "Empty buffer is not allowed");
 
-        static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > AOVType::AlbedoMeshId);
+        static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > aten::AOVType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
-        using BufferType = typename Buffer<vec4>;
 
         AOVHostBuffer() = default;
         ~AOVHostBuffer() = default;
@@ -39,13 +40,13 @@ namespace aten
 
         BufferType& normal_depth()
         {
-            return get<static_cast<int>(AOVType::NormalDepth)>();
+            return get<static_cast<int>(aten::AOVType::NormalDepth)>();
         }
 
         [[nodiscard]] auto albedo_meshid() -> std::conditional_t<IsEnoughBufferSizeForAlbedoMeshId, BufferType&, void>
         {
             if constexpr (IsEnoughBufferSizeForAlbedoMeshId) {
-                return get<static_cast<int>(AOVType::AlbedoMeshId)>();
+                return get<static_cast<int>(aten::AOVType::AlbedoMeshId)>();
             }
             else {
                 return;

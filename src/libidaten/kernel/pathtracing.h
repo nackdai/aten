@@ -136,7 +136,7 @@ namespace idaten
     protected:
         Mode m_mode{ Mode::PT };
 
-        AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, aten::AOVType::NumBasicAov> aov_;
+        AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, aten::AOVBufferType::NumBasicAovBuffer> aov_;
 
         // To export to GL.
         idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;

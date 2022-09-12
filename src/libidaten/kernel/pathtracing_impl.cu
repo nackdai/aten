@@ -18,8 +18,8 @@
 namespace pt {
     __global__ void shade(
         idaten::TileDomain tileDomain,
-        float4* aovNormal,
-        float4* aovTexclr,
+        float4* aovNormalDepth,
+        float4* aovAlbedoMeshId,
         int width, int height,
         idaten::Path* paths,
         const int* __restrict__ hitindices,
@@ -128,8 +128,9 @@ namespace pt {
 
             const auto _idx = getIdx(ix, iy, width);
 
-            aovNormal[_idx] = make_float4(n.x, n.y, n.z, 0.0f);
-            aovTexclr[_idx] = make_float4(albedo.x, albedo.y, albedo.z, 1.0f);
+            AT_NAME::FillBasicAOVs(
+                aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
+                aovAlbedoMeshId[idx], albedo, isect);
         }
 
         // Implicit conection to light.
@@ -340,48 +341,6 @@ namespace pt {
                 ix * sizeof(float4), iy,
                 cudaBoundaryModeTrap);
         }
-    }
-
-    __global__ void CopyAovToGLSurface(
-        int width, int height,
-        float4* aov_position, float4* aov_nml, float4* aov_albedo,
-        aten::vec3 position_range,
-        cudaSurfaceObject_t* gl_rscs)
-    {
-        const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-        const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (ix >= width || iy >= height) {
-            return;
-        }
-
-        const auto idx = getIdx(ix, iy, width);
-
-        auto position = aov_position[idx];
-        auto nml = aov_nml[idx];
-        auto albedo = aov_albedo[idx];
-
-        position.x /= position_range.x;
-        position.y /= position_range.y;
-        position.z /= position_range.z;
-
-        surf2Dwrite(
-            position,
-            gl_rscs[0],
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-
-        surf2Dwrite(
-            nml,
-            gl_rscs[1],
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-
-        surf2Dwrite(
-            make_float4(albedo.x, albedo.y, albedo.z, 1),
-            gl_rscs[2],
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
     }
 }
 

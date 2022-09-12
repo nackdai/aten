@@ -6,10 +6,18 @@
 #include "math/vec4.h"
 
 namespace aten {
+    struct AOVBufferType {
+        static constexpr uint32_t NormalDepth{ 0 };
+        static constexpr uint32_t AlbedoMeshId{ 1 };
+        static constexpr uint32_t NumBasicAovBuffer{ 2 };
+    };
+
     struct AOVType {
-        static constexpr int NormalDepth{ 0 };
-        static constexpr int AlbedoMeshId{ 1 };
-        static constexpr int NumBasicAov{ 2 };
+        static constexpr uint32_t Normal{ 0 };
+        static constexpr uint32_t Depth{ 1 };
+        static constexpr uint32_t Albedo{ 2 };
+        static constexpr uint32_t MeshId{ 3 };
+        static constexpr uint32_t NumBasicAovType{ 4 };
     };
 }
 
@@ -20,7 +28,7 @@ namespace AT_NAME
     public:
         static_assert(N > 0, "Empty buffer is not allowed");
 
-        static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > aten::AOVType::AlbedoMeshId);
+        static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > aten::AOVBufferType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
 
         AOVHostBuffer() = default;
@@ -40,13 +48,13 @@ namespace AT_NAME
 
         BufferType& normal_depth()
         {
-            return get<static_cast<int>(aten::AOVType::NormalDepth)>();
+            return get<static_cast<int>(aten::AOVBufferType::NormalDepth)>();
         }
 
         [[nodiscard]] auto albedo_meshid() -> std::conditional_t<IsEnoughBufferSizeForAlbedoMeshId, BufferType&, void>
         {
             if constexpr (IsEnoughBufferSizeForAlbedoMeshId) {
-                return get<static_cast<int>(aten::AOVType::AlbedoMeshId)>();
+                return get<static_cast<int>(aten::AOVBufferType::AlbedoMeshId)>();
             }
             else {
                 return;
@@ -64,14 +72,14 @@ namespace AT_NAME
         std::array<BufferType, N> aovs_;
     };
 
-    template <typename BufferType, typename DataType>
+    template <typename BufferType, typename TNormal, typename TAlbedo>
     inline AT_DEVICE_API void FillBasicAOVs(
         BufferType& aovNormalDepth,
-        const DataType& normal,
+        const TNormal& normal,
         const aten::hitrecord& rec,
         const aten::mat4& mtxW2C,
         BufferType& aovAlbedoMeshId,
-        const DataType& albedo,
+        const TAlbedo& albedo,
         const aten::Intersection& isect)
     {
         // World coordinate to Clip coordinate.
@@ -89,11 +97,11 @@ namespace AT_NAME
         aovAlbedoMeshId.w = isect.meshid;
     }
 
-    template <typename BufferType, typename DataType>
+    template <typename BufferType, typename TBg>
     inline AT_DEVICE_API void FillBasicAOVsIfHitMiss(
         BufferType& aovNormalDepth,
         BufferType& aovAlbedoMeshId,
-        const DataType& bg)
+        const TBg& bg)
     {
         aovNormalDepth.x = real(0);
         aovNormalDepth.y = real(0);

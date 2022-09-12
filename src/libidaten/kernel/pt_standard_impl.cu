@@ -13,6 +13,7 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/renderer.h"
 #include "kernel/pt_standard_impl.h"
+#include "renderer/aov.h"
 
 // TODO
 // persistend thread works with CUDA 10.1.
@@ -391,7 +392,7 @@ namespace kernel {
         idaten::TileDomain tileDomain,
         int bounce,
         float4* aovNormalDepth,
-        float4* aovTexclrMeshid,
+        float4* aovAlbedoMeshid,
         idaten::Path* paths,
         int width, int height)
     {
@@ -416,8 +417,9 @@ namespace kernel {
                 const auto _idx = getIdx(ix, iy, width);
 
                 // Export bg color to albedo buffer.
-                aovTexclrMeshid[_idx] = make_float4(bg.x, bg.y, bg.z, -1);
-                aovNormalDepth[_idx].w = -1;
+                AT_NAME::FillBasicAOVsIfHitMiss(
+                    aovNormalDepth[idx],
+                    aovAlbedoMeshid[idx], bg);
 
                 // For exporting separated albedo.
                 bg = aten::vec3(1, 1, 1);
@@ -436,7 +438,7 @@ namespace kernel {
         int bounce,
         const aten::CameraParameter* __restrict__ camera,
         float4* aovNormalDepth,
-        float4* aovTexclrMeshid,
+        float4* aovAlbedoMeshid,
         cudaTextureObject_t* textures,
         int envmapIdx,
         real envmapAvgIllum,
@@ -489,8 +491,9 @@ namespace kernel {
                 const auto _idx = getIdx(ix, iy, width);
 
                 // Export envmap to albedo buffer.
-                aovTexclrMeshid[_idx] = make_float4(emit.x, emit.y, emit.z, -1);
-                aovNormalDepth[_idx].w = -1;
+                AT_NAME::FillBasicAOVsIfHitMiss(
+                    aovNormalDepth[idx],
+                    aovAlbedoMeshid[idx], emit);
             }
             else {
                 auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);

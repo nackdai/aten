@@ -62,7 +62,7 @@ if not exist %BUILD_DIR% (
     mkdir %BUILD_DIR%
 )
 
-if not exist %BUILD_DIR%\GLFW.sln (
+if not exist %BUILD_DIR%\tinyobjloader.sln (
     cd %BUILD_DIR%
     cmake -G %VS% ..\
     cd %BASEDIR%
@@ -85,6 +85,22 @@ if not exist %BUILD_DIR%\Assimp.sln (
 )
 
 MSBuild %BUILD_DIR%\Assimp.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
+
+rem googletest =======================
+
+set BUILD_DIR=googletest\build
+
+if not exist %BUILD_DIR% (
+    mkdir %BUILD_DIR%
+)
+
+if not exist %BUILD_DIR%\googletest-distribution.sln (
+    cd %BUILD_DIR%
+    cmake -D BUILD_SHARED_LIBS=TRUE -G %VS% ..\
+    cd %BASEDIR%
+)
+
+MSBuild %BUILD_DIR%\googletest-distribution.sln /t:%TARGET% /p:Configuration=%CONFIG% /p:Platform=%PLATFORM% || goto error
 
 rem makeitso =========================
 

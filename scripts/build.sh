@@ -6,7 +6,7 @@ set -o pipefail
 # TODO
 # Usage:
 # build.sh <build_config> <compute_capability> <source_code_root_dir>
-# ex) build.sh Release 75
+# ex) build.sh Release 75 .
 
 build_type=${1:-Release}
 

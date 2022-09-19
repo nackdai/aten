@@ -18,6 +18,7 @@ add_subdirectory(glew/build/cmake)
 add_subdirectory(glfw)
 add_subdirectory(glm)
 add_subdirectory(tinyobjloader)
+add_subdirectory(googletest)
 
 # options for assimp
 option(ASSIMP_BUILD_TESTS "" OFF)

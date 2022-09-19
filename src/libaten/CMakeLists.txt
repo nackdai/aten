@@ -185,8 +185,9 @@ add_library(
   posteffect/BloomEffect.h
   proxy/DataCollector.cpp
   proxy/DataCollector.h
-  renderer/aov.cpp
   renderer/aov.h
+  renderer/aov_renderer.cpp
+  renderer/aov_renderer.h
   renderer/background.h
   renderer/bdpt.cpp
   renderer/bdpt.h

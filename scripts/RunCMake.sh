@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -eu
+set -o pipefail
+
 build_type=${1:-Release}
 
 compute_capability=${2}

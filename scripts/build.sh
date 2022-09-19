@@ -6,7 +6,7 @@ set -o pipefail
 # TODO
 # Usage:
 # build.sh <build_config> <compute_capability> <source_code_root_dir>
-# ex) build.sh Release 75 .
+# ex) ./scripts/build.sh Release 75 .
 
 build_type=${1:-Release}
 
@@ -29,10 +29,14 @@ cmake_cmd="cmake \
   -D CUDA_TARGET_COMPUTE_CAPABILITY=${compute_capability} \
   -L -G Ninja .."
 
-if [[ -n "${aten_image}" ]]; then
+function finally() {
   docker kill "${CONTAINER_NAME}" >/dev/null 2>&1 || true
   docker container rm "${CONTAINER_NAME}" >/dev/null 2>&1 || true
+}
 
+trap finally EXIT ERR
+
+if [[ -n "${aten_image}" ]]; then
   docker run -it -d \
     --name "${CONTAINER_NAME}" \
     -v "${work_dir}":"${WORKSPACE}" \
@@ -42,11 +46,3 @@ if [[ -n "${aten_image}" ]]; then
   docker exec "${CONTAINER_NAME}" bash -c "cd ${WORKSPACE} && mkdir -p build && cd build && ${cmake_cmd}"
   docker exec "${CONTAINER_NAME}" bash -c "cd build && ninja -j 4"
 fi
-
-function finally() {
-  docker kill "${CONTAINER_NAME}" >/dev/null 2>&1 || true
-  docker container rm "${CONTAINER_NAME}" >/dev/null 2>&1 || true
-  exit 0
-}
-
-trap finally EXIT

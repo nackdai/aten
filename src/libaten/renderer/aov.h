@@ -64,7 +64,8 @@ namespace AT_NAME
     public:
         static_assert(N > 0, "Empty buffer is not allowed");
 
-        using BufferType = BUFFER_TYPE;
+        using buffer_type = BUFFER_TYPE;
+        using buffer_value_type = typename BUFFER_TYPE::value_type;
         static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > aten::AOVBufferType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
 
@@ -77,18 +78,18 @@ namespace AT_NAME
         AOVHostBuffer& operator=(AOVHostBuffer&&) = delete;
 
         template <int32_t M>
-        BUFFER_TYPE& get()
+        buffer_type& get()
         {
             static_assert(M < N, "Over access AOV buffer");
             return aovs_[M];
         }
 
-        BUFFER_TYPE& normal_depth()
+        buffer_type& normal_depth()
         {
             return get<static_cast<int32_t>(aten::AOVBufferType::NormalDepth)>();
         }
 
-        [[nodiscard]] auto albedo_meshid() -> std::conditional_t<IsEnoughBufferSizeForAlbedoMeshId, BUFFER_TYPE&, void>
+        [[nodiscard]] auto albedo_meshid() -> std::conditional_t<IsEnoughBufferSizeForAlbedoMeshId, buffer_type&, void>
         {
             if constexpr (IsEnoughBufferSizeForAlbedoMeshId) {
                 return get<static_cast<int32_t>(aten::AOVBufferType::AlbedoMeshId)>();
@@ -98,7 +99,7 @@ namespace AT_NAME
             }
         }
 
-        void traverse(std::function<void(BUFFER_TYPE&)> func)
+        void traverse(std::function<void(buffer_type&)> func)
         {
             for (auto& aov : aovs_) {
                 func(aov);
@@ -106,16 +107,16 @@ namespace AT_NAME
         }
 
     protected:
-        std::array<BUFFER_TYPE, N> aovs_;
+        std::array<buffer_type, N> aovs_;
     };
 
-    template <typename BUFFER_TYPE, typename TNormal, typename TAlbedo>
+    template <typename BUFFER_VALUE_TYPE, typename TNormal, typename TAlbedo>
     inline AT_DEVICE_API void FillBasicAOVs(
-        BUFFER_TYPE& aovNormalDepth,
+        BUFFER_VALUE_TYPE& aovNormalDepth,
         const TNormal& normal,
         const aten::hitrecord& rec,
         const aten::mat4& mtxW2C,
-        BUFFER_TYPE& aovAlbedoMeshId,
+        BUFFER_VALUE_TYPE& aovAlbedoMeshId,
         const TAlbedo& albedo,
         const aten::Intersection& isect)
     {
@@ -131,13 +132,13 @@ namespace AT_NAME
         aovAlbedoMeshId.x = albedo.x;
         aovAlbedoMeshId.y = albedo.y;
         aovAlbedoMeshId.z = albedo.z;
-        aovAlbedoMeshId.w = isect.meshid;
+        aovAlbedoMeshId.w = static_cast<real>(isect.meshid);
     }
 
-    template <typename BUFFER_TYPE, typename TBg>
+    template <typename BUFFER_VALUE_TYPE, typename TBg>
     inline AT_DEVICE_API void FillBasicAOVsIfHitMiss(
-        BUFFER_TYPE& aovNormalDepth,
-        BUFFER_TYPE& aovAlbedoMeshId,
+        BUFFER_VALUE_TYPE& aovNormalDepth,
+        BUFFER_VALUE_TYPE& aovAlbedoMeshId,
         const TBg& bg)
     {
         aovNormalDepth.x = real(0);
@@ -151,9 +152,9 @@ namespace AT_NAME
         aovAlbedoMeshId.w = -1;
     }
 
-    template <typename BUFFER_TYPE>
+    template <typename BUFFER_VALUE_TYPE>
     inline AT_DEVICE_API void FillBaryCentricAOV(
-        BUFFER_TYPE& aovBuffer,
+        BUFFER_VALUE_TYPE& aovBuffer,
         const aten::Intersection& isect)
     {
         aovBuffer.x = isect.a;
@@ -161,8 +162,8 @@ namespace AT_NAME
         aovBuffer.z = real(1) - isect.a - isect.b;
     }
 
-    template <typename BUFFER_TYPE>
-    inline AT_DEVICE_API void FillBaryCentricAOVIfHitMiss(BUFFER_TYPE& aovBuffer)
+    template <typename BUFFER_VALUE_TYPE>
+    inline AT_DEVICE_API void FillBaryCentricAOVIfHitMiss(BUFFER_VALUE_TYPE& aovBuffer)
     {
         aovBuffer.x = real(0);
         aovBuffer.y = real(0);

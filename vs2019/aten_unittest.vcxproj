@@ -167,6 +167,9 @@
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)..\3rdparty\googletest\build\bin\$(Configuration)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -238,6 +241,9 @@
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)..\3rdparty\googletest\build\bin\$(Configuration)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
     <ClCompile>
@@ -263,6 +269,9 @@
     <PreBuildEvent>
       <Command>copy /B /Y $(ProjectDir)..\3rdparty\glew\bin\$(Configuration)\$(PlatformName)\glew32*.dll $(OutputPath)</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(ProjectDir)..\3rdparty\googletest\build\bin\$(Configuration)\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,116 +1,16 @@
 name: CI
 
 on:
-  push:
-    paths-ignore:
-    - '.devcontainer/*.json'
-    - '.devcontainer/*.yml'
-    - '.gitignore'
-    - 'asset/**'
-    - 'gallery/**'
-    - 'vs2015/**'
-    - 'vs2019/**'
+  pull_request:
+    paths:
+      - '**.cpp'
 
 jobs:
-  cancel:
-    name: cancel
+  test:
+    name: test
     runs-on: ubuntu-20.04
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          all_but_latest: true
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-
-  build_docker:
-    name: build_docker
-    runs-on: ubuntu-20.04
-    needs: cancel
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Get diff files
-        id: getfile
+      - name: test
         run: |
-          git fetch origin main
-          files=$(git diff origin/main HEAD --name-only)
-          echo "${files}"
-          echo "::set-output name=diff_files::${files}"
-
-      - name: Login to GitHub Container Registry
-        if: contains(steps.getfile.outputs.diff_files, 'Dockerfile') == true
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Run the following step if Dockerfile is modified.
-      - name: Build and push base image
-        id: build_base_image
-        if: contains(steps.getfile.outputs.diff_files, 'env/aten/Dockerfile') == true
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/aten:latest ./env/aten/
-          docker push ghcr.io/${{ github.repository }}/aten:latest
-
-      - name: Check outcome of building base image
-        run: echo ${{ steps.build_base_image.outcome }}
-
-      # Build the dev image based on base image.
-      - name: Build and push dev image
-        if: contains(steps.getfile.outputs.diff_files, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/aten_dev:latest \
-            --build-arg base_from=ghcr.io/${{ github.repository }}/aten:latest \
-            -f ./env/dev/Dockerfile .
-          docker push ghcr.io/${{ github.repository }}/aten_dev:latest
-
-  ci:
-    name: ci
-    runs-on: ubuntu-20.04
-    needs: build_docker
-    container:
-      image: ghcr.io/${{ github.repository }}/aten_dev:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - name: Set permission
-        shell: bash
-        run: |
-          chown -R $(id -u):$(id -g) ${GITHUB_WORKSPACE}
-
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-
-      # It seems that .bashrc is not enabled in the docker container.
-      # So, in order to eanble pyenv, need to call eval for enabling pyenv.
-      # 'pyenv init --path' sets PATH to enable to execute pre-commit.
-      # HOME is expected as '/root' for 'pyenv init --path' in aten_dev:latest container.
-      # But, HOME is spcified as '/github/home' forcibly by GHA.
-      # It causes unexpected PATH settings in 'pyenv init --path'.
-      # So, need to specify 'HOME=/root' for 'pyenv init --path'.
-      # If docker container is run via 'docker run' and run commands via `docker exec`,
-      # we can expect HOME is '/root'.
-      - name: lint
-        run: |
-          git config --global --add safe.directory ${GITHUB_WORKSPACE}
-          eval "$(HOME=/root pyenv init --path)"
-          pre-commit run -a
-
-      - name: Configure
-        run: |
-          mkdir -p build
-          cd build
-          cp ../scripts/RunCMake.sh ./
-          ./RunCMake.sh Release 75
-
-      - name: Build
-        run: |
-          cd build
-          ninja -j 4
+          echo "Test"

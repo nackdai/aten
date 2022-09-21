@@ -10,6 +10,8 @@
 # NOTE
 # ${VAR:-aaa} -> If there is not variable VAR, return VAR as "aaa"
 
+# Test
+
 device_index=${1:-0}
 timestamp=$(date +%s.%N)
 

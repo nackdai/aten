@@ -1,4 +1,3 @@
-// Test
 #if 0
 #include <vector>
 #include "aten.h"

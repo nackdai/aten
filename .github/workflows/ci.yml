@@ -1,7 +1,9 @@
 name: CI
 
 on:
-  push:
+  pull_request:
+    branches:
+      - '*'
     paths-ignore:
     - '.devcontainer/*.json'
     - '.devcontainer/*.yml'
@@ -10,6 +12,9 @@ on:
     - 'gallery/**'
     - 'vs2015/**'
     - 'vs2019/**'
+  push:
+    branches:
+      - 'main'
 
 jobs:
   cancel:

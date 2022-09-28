@@ -197,7 +197,8 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov = getCurAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
 
         CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
         auto gbuffer = m_motionDepthBuffer.bind();
@@ -207,8 +208,8 @@ namespace idaten
             outputSurf,
             m_aovMode,
             width, height,
-            m_aovNormalDepth[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().ptr(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             gbuffer,
             m_cam.ptr(),
             m_shapeparam.ptr(), m_shapeparam.num(),
@@ -226,7 +227,8 @@ namespace idaten
         if (m_willPicklPixel) {
             m_pick.init(1);
 
-            int curaov = getCurAovs();
+            int curaov_idx = getCurAovs();
+            auto& curaov = aov_[curaov_idx];
 
             pickPixel << <1, 1 >> > (
                 m_pick.ptr(),
@@ -234,8 +236,8 @@ namespace idaten
                 width, height,
                 m_cam.ptr(),
                 m_paths.ptr(),
-                m_aovNormalDepth[curaov].ptr(),
-                m_aovTexclrMeshid[curaov].ptr(),
+                curaov.get<AOVBuffer::NormalDepth>().ptr(),
+                curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
                 m_shapeparam.ptr(), m_shapeparam.num(),
                 m_nodetex.ptr(),
                 m_primparams.ptr(),

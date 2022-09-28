@@ -288,7 +288,8 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov = getCurAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
 
         int cur = iterCnt & 0x01;
         int next = 1 - cur;
@@ -305,10 +306,10 @@ namespace idaten
             isFirstIter, isFinalIter,
             outputSurf,
             m_tmpBuf.ptr(),
-            m_aovNormalDepth[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
-            m_aovColorVariance[curaov].ptr(),
-            m_aovMomentTemporalWeight[curaov].ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().ptr(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            curaov.get<AOVBuffer::ColorVariance>().ptr(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
             m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
             stepScale,
             width, height,
@@ -323,12 +324,13 @@ namespace idaten
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int curaov = getCurAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
 
         // Copy color from temporary buffer to AOV buffer for next temporal reprojection.
         copyFromBufferToAov << <grid, block, 0, m_stream >> > (
             m_tmpBuf.ptr(),
-            m_aovColorVariance[curaov].ptr(),
+            curaov.get<AOVBuffer::ColorVariance>().ptr(),
             width, height);
         checkCudaKernel(copyFromBufferToAov);
     }

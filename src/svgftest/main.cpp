@@ -258,7 +258,7 @@ void onRun(aten::window* window)
         }
 
         if (g_curMode == idaten::SVGFPathTracing::Mode::AOVar) {
-            static const char* aovitems[] = { "Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId" };
+            static const char* aovitems[] = { "Normal", "Depth", "TexColor", "ObjId", "Wire", "Barycentric", "Motion" };
 
             if (ImGui::Combo("aov", &g_curAOVMode, aovitems, AT_COUNTOF(aovitems))) {
                 g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);

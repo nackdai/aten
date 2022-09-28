@@ -5,8 +5,7 @@
 #include "defs.h"
 #include "math/vec4.h"
 
-// https://marycore.jp/prog/cpp/extends-enum/
-namespace aten {
+namespace AT_NAME {
     struct AOVBufferType {
         enum Type {
             NormalDepth,
@@ -17,16 +16,16 @@ namespace aten {
         static constexpr int32_t NumBasicAovBuffer = static_cast<int32_t>(Type::end_of_AOVBufferType + 1);
         static constexpr int32_t BeginOfInheritType = static_cast<int32_t>(Type::end_of_AOVBufferType + 1);
 
-        AOVBufferType() = default;
-        ~AOVBufferType() = default;
-        AOVBufferType(int32_t type) : type_(static_cast<Type>(type)) {}
+        AT_DEVICE_API AOVBufferType() = default;
+        AT_DEVICE_API ~AOVBufferType() = default;
+        AT_DEVICE_API AOVBufferType(int32_t type) : type_(static_cast<Type>(type)) {}
 
-        Type type() const { return type_; }
+        AT_DEVICE_API Type type() const { return type_; }
 
-        friend bool operator==(const AOVBufferType& lhs, const AOVBufferType& rhs) {
+        AT_DEVICE_API friend bool operator==(const AOVBufferType& lhs, const AOVBufferType& rhs) {
             return lhs.type() == rhs.type();
         }
-        friend bool operator!=(const AOVBufferType& lhs, const AOVBufferType& rhs) {
+        AT_DEVICE_API friend bool operator!=(const AOVBufferType& lhs, const AOVBufferType& rhs) {
             return lhs.type() != rhs.type();
         }
     };
@@ -42,16 +41,16 @@ namespace aten {
 
         static constexpr int32_t BeginOfInheritType = static_cast<int32_t>(Type::end_of_AOVType + 1);
 
-        AOVType() = default;
-        ~AOVType() = default;
-        AOVType(int32_t type) : type_(static_cast<Type>(type)) {}
+        AT_DEVICE_API AOVType() = default;
+        AT_DEVICE_API ~AOVType() = default;
+        AT_DEVICE_API AOVType(int32_t type) : type_(static_cast<Type>(type)) {}
 
-        Type type() const { return type_; }
+        AT_DEVICE_API Type type() const { return type_; }
 
-        friend bool operator==(const AOVType& lhs, const AOVType& rhs) {
+        AT_DEVICE_API friend bool operator==(const AOVType& lhs, const AOVType& rhs) {
             return lhs.type() == rhs.type();
         }
-        friend bool operator!=(const AOVType& lhs, const AOVType& rhs) {
+        AT_DEVICE_API friend bool operator!=(const AOVType& lhs, const AOVType& rhs) {
             return lhs.type() != rhs.type();
         }
     };
@@ -66,7 +65,7 @@ namespace AT_NAME
 
         using buffer_type = BUFFER_TYPE;
         using buffer_value_type = typename BUFFER_TYPE::value_type;
-        static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > aten::AOVBufferType::AlbedoMeshId);
+        static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > AT_NAME::AOVBufferType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
 
         AOVHostBuffer() = default;
@@ -86,13 +85,13 @@ namespace AT_NAME
 
         buffer_type& normal_depth()
         {
-            return get<static_cast<int32_t>(aten::AOVBufferType::NormalDepth)>();
+            return get<static_cast<int32_t>(AT_NAME::AOVBufferType::NormalDepth)>();
         }
 
         [[nodiscard]] auto albedo_meshid() -> std::conditional_t<IsEnoughBufferSizeForAlbedoMeshId, buffer_type&, void>
         {
             if constexpr (IsEnoughBufferSizeForAlbedoMeshId) {
-                return get<static_cast<int32_t>(aten::AOVBufferType::AlbedoMeshId)>();
+                return get<static_cast<int32_t>(AT_NAME::AOVBufferType::AlbedoMeshId)>();
             }
             else {
                 return;

@@ -142,16 +142,17 @@ namespace idaten
 
         float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
 
-        int curaov = getCurAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
 
         varianceEstimation << <grid, block, 0, m_stream >> > (
         //varianceEstimation << <1, 1 >> > (
             m_tileDomain,
             outputSurf,
-            m_aovNormalDepth[curaov].ptr(),
-            m_aovMomentTemporalWeight[curaov].ptr(),
-            m_aovColorVariance[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().ptr(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
+            curaov.get<AOVBuffer::ColorVariance>().ptr(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             m_mtxC2V,
             width, height,
             cameraDistance);

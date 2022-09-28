@@ -474,12 +474,13 @@ namespace idaten
 
         auto& hitcount = m_compaction.getCount();
 
-        int curaov = getCurAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
 
         svgf::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            m_aovNormalDepth[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().ptr(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             mtxW2C,
             width, height,
             m_paths.ptr(),
@@ -539,13 +540,14 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov = getCurAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
 
         svgf::gather << <grid, block, 0, m_stream >> > (
             m_tileDomain,
             outputSurf,
-            m_aovColorVariance[curaov].ptr(),
-            m_aovMomentTemporalWeight[curaov].ptr(),
+            curaov.get<AOVBuffer::ColorVariance>().ptr(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
             m_paths.ptr(),
             m_tmpBuf.ptr(),
             width, height);

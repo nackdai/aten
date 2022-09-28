@@ -19,14 +19,21 @@ namespace idaten
             AOVar,  // Arbitrary Output Variables.
         };
 
-        enum AOVMode {
-            Normal,
-            TexColor,
-            Depth,
-            WireFrame,
-            BaryCentric,
-            Motion,
-            ObjId,
+        struct AOVMode : public AT_NAME::AOVType {
+            enum Type {
+                ObjId = AT_NAME::AOVType::MeshId,
+                TexColor = AT_NAME::AOVType::Albedo,
+                WireFrame = AT_NAME::AOVType::BeginOfInheritType,
+                BaryCentric,
+                Motion,
+                end_of_AOVMode = Motion,
+            };
+
+            static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVMode) + 1;
+
+            AT_DEVICE_API AOVMode() : AT_NAME::AOVType(AT_NAME::AOVType::Normal) {}
+            AT_DEVICE_API ~AOVMode() = default;
+            AT_DEVICE_API AOVMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
         };
 
         static const int ShadowRayNum = 2;
@@ -193,13 +200,14 @@ namespace idaten
             int offsetX = -1,
             int offsetY = -1)
         {
-            int curaov = getCurAovs();
+            int curaov_idx = getCurAovs();
+            auto& curaov = aov_[curaov_idx];
 
             StandardPT::missShade(
                 width, height,
                 bounce,
-                m_aovNormalDepth[curaov],
-                m_aovTexclrMeshid[curaov],
+                curaov.get<AOVBuffer::NormalDepth>(),
+                curaov.get<AOVBuffer::AlbedoMeshId>(),
                 offsetX, offsetY);
         }
 
@@ -272,11 +280,22 @@ namespace idaten
         // Current AOV buffer position.
         int m_curAOVPos{ 0 };
 
-        // AOV buffer. Current frame and previous frame.
-        idaten::TypedCudaMemory<float4> m_aovNormalDepth[2];
-        idaten::TypedCudaMemory<float4> m_aovTexclrMeshid[2];
-        idaten::TypedCudaMemory<float4> m_aovColorVariance[2];
-        idaten::TypedCudaMemory<float4> m_aovMomentTemporalWeight[2];
+        struct AOVBuffer : public AT_NAME::AOVBufferType {
+            enum Type {
+                ColorVariance = AT_NAME::AOVBufferType::BeginOfInheritType,
+                MomentTemporalWeight,
+                end_of_AOVBuffer = MomentTemporalWeight,
+            };
+
+            static constexpr size_t Num = static_cast<size_t>(Type::end_of_AOVBuffer) + 1;
+
+            AT_DEVICE_API AOVBuffer() = default;
+            AT_DEVICE_API ~AOVBuffer() = default;
+            AT_DEVICE_API AOVBuffer(int32_t type) : AT_NAME::AOVBufferType(static_cast<Type>(type)) {}
+        };
+
+        using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AOVBuffer::Num>;
+        std::array<AOVHostBuffer, 2> aov_;  // AOV buffer. Current frame and previous frame.
 
         aten::mat4 m_mtxW2V;        // World - View.
         aten::mat4 m_mtxV2C;        // View - Clip.

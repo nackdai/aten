@@ -433,8 +433,11 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov = getCurAovs();
-        int prevaov = getPrevAovs();
+        int curaov_idx = getCurAovs();
+        auto& curaov = aov_[curaov_idx];
+
+        int prevaov_idx = getPrevAovs();
+        auto& prevaov = aov_[prevaov_idx];
 
         CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);
         auto motionDepthBuffer = m_motionDepthBuffer.bind();
@@ -446,14 +449,14 @@ namespace idaten
             m_depthThresholdTF,
             m_tmpBuf.ptr(),
             m_cam.ptr(),
-            m_aovNormalDepth[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
-            m_aovColorVariance[curaov].ptr(),
-            m_aovMomentTemporalWeight[curaov].ptr(),
-            m_aovNormalDepth[prevaov].ptr(),
-            m_aovTexclrMeshid[prevaov].ptr(),
-            m_aovColorVariance[prevaov].ptr(),
-            m_aovMomentTemporalWeight[prevaov].ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().ptr(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            curaov.get<AOVBuffer::ColorVariance>().ptr(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
+            prevaov.get<AOVBuffer::NormalDepth>().ptr(),
+            prevaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            prevaov.get<AOVBuffer::ColorVariance>().ptr(),
+            prevaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
             motionDepthBuffer,
             outputSurf,
             width, height);
@@ -474,8 +477,8 @@ namespace idaten
 
         dilateWeight << <grid, block, 0, m_stream >> > (
             m_tileDomain,
-            m_aovMomentTemporalWeight[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             width, height);
         checkCudaKernel(dilateWeight);
     }

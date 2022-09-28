@@ -278,10 +278,10 @@ namespace idaten
 
         // Notmal & Depth.
         {
-            auto src = from.m_aovNormalDepth[cur].ptr();
-            auto dst = this->m_aovNormalDepth[cur].ptr();
+            auto src = from.aov_[cur].normal_depth().ptr();
+            auto dst = this->aov_[cur].normal_depth().ptr();
 
-            auto stride = this->m_aovNormalDepth[cur].stride();
+            auto stride = this->aov_[cur].normal_depth().stride();
             auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
             checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
@@ -289,10 +289,10 @@ namespace idaten
 
         // Texture color & Temporal weight.
         {
-            auto src = from.m_aovTexclrMeshid[cur].ptr();
-            auto dst = this->m_aovTexclrMeshid[cur].ptr();
+            auto src = from.aov_[cur].albedo_meshid().ptr();
+            auto dst = this->aov_[cur].albedo_meshid().ptr();
 
-            auto stride = this->m_aovTexclrMeshid[cur].stride();
+            auto stride = this->aov_[cur].albedo_meshid().stride();
             auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
             checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
@@ -301,10 +301,10 @@ namespace idaten
         // Color & Variance.
         if (this->isFirstFrame())
         {
-            auto src = from.m_aovColorVariance[cur].ptr();
-            auto dst = this->m_aovColorVariance[cur].ptr();
+            auto src = from.aov_[cur].get<idaten::SVGFPathTracing::AOVBuffer::ColorVariance>().ptr();
+            auto dst = this->aov_[cur].get<idaten::SVGFPathTracing::AOVBuffer::ColorVariance>().ptr();
 
-            auto stride = this->m_aovColorVariance[cur].stride();
+            auto stride = this->aov_[cur].get<idaten::SVGFPathTracing::AOVBuffer::ColorVariance>().stride();
             auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
             checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));
@@ -313,10 +313,10 @@ namespace idaten
         // Moment & Mesh id.
         if (this->isFirstFrame())
         {
-            auto src = from.m_aovMomentTemporalWeight[cur].ptr();
-            auto dst = this->m_aovMomentTemporalWeight[cur].ptr();
+            auto src = from.aov_[cur].get<idaten::SVGFPathTracing::AOVBuffer::MomentTemporalWeight>().ptr();
+            auto dst = this->aov_[cur].get<idaten::SVGFPathTracing::AOVBuffer::MomentTemporalWeight>().ptr();
 
-            auto stride = this->m_aovMomentTemporalWeight[cur].stride();
+            auto stride = this->aov_[cur].get<idaten::SVGFPathTracing::AOVBuffer::MomentTemporalWeight>().stride();
             auto bytes = srcTileDomain.w * srcTileDomain.h * stride;
 
             checkCudaErrors(cudaMemcpyAsync(dst + offset, src, bytes, cudaMemcpyDefault, stream));

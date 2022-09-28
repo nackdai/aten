@@ -399,8 +399,8 @@ namespace idaten
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_tileDomain,
-            m_aovNormalDepth.ptr(),
-            m_aovTexclrMeshid.ptr(),
+            aov_.normal_depth().ptr(),
+            aov_.albedo_meshid().ptr(),
             mtxW2C,
             width, height,
             m_paths.ptr(),

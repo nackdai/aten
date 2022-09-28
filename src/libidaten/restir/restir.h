@@ -229,8 +229,8 @@ namespace idaten
             StandardPT::missShade(
                 width, height,
                 bounce,
-                m_aovNormalDepth,
-                m_aovTexclrMeshid,
+                aov_.normal_depth(),
+                aov_.albedo_meshid(),
                 offsetX, offsetY);
         }
 
@@ -310,8 +310,8 @@ namespace idaten
         int m_curReservoirPos = 0;
 
         // AOV buffer
-        idaten::TypedCudaMemory<float4> m_aovNormalDepth;
-        idaten::TypedCudaMemory<float4> m_aovTexclrMeshid;
+        using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer>;
+        AOVHostBuffer aov_;
 
         aten::mat4 m_mtxW2V;    // World - View.
         aten::mat4 m_mtxV2C;    // View - Clip.

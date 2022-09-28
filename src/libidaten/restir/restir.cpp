@@ -45,8 +45,7 @@ namespace idaten
 
         initSamplerParameter(width, height);
 
-        m_aovNormalDepth.init(width * height);
-        m_aovTexclrMeshid.init(width * height);
+        aov_.traverse([&width, &height](auto& buffer) { buffer.init(width * height); });
     }
 
     void ReSTIRPathTracing::updateBVH(

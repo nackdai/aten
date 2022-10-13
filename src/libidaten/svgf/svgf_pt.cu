@@ -108,28 +108,15 @@ namespace svgf {
         // しかし、temporal reprojection、atrousなどのフィルタ適用時に法線を参照する際に、法線マップが細かすぎてはじかれてしまうことがある.
         // それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
         if (bounce == 0) {
-            int ix = idx % tileDomain.w;
-            int iy = idx / tileDomain.w;
+            const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
 
-            ix += tileDomain.x;
-            iy += tileDomain.y;
-
-            const auto _idx = getIdx(ix, iy, width);
-
-            // World coordinate to Clip coordinate.
-            aten::vec4 pos = aten::vec4(rec.p, 1);
-            pos = mtxW2C.apply(pos);
-
-            // normal, depth
-            aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
-
-            // texture color, meshid.
+            // texture color
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
-#if 0
-            aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
-#else
-            aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.mtrlid);
-#endif
+
+            AT_NAME::FillBasicAOVs(
+                aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
+                aovTexclrMeshid[_idx], texcolor, isect);
+            aovTexclrMeshid[_idx].w = isect.mtrlid;
 
             // For exporting separated albedo.
             shMtrls[threadIdx.x].albedoMap = -1;
@@ -137,28 +124,15 @@ namespace svgf {
         // TODO
         // How to deal Refraction?
         else if (bounce == 1 && paths->attrib[idx].mtrlType == aten::MaterialType::Specular) {
-            int ix = idx % tileDomain.w;
-            int iy = idx / tileDomain.w;
-
-            ix += tileDomain.x;
-            iy += tileDomain.y;
-
-            const auto _idx = getIdx(ix, iy, width);
-
-            // World coordinate to Clip coordinate.
-            aten::vec4 pos = aten::vec4(rec.p, 1);
-            pos = mtxW2C.apply(pos);
-
-            // normal, depth
-            aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
+            const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
 
             // texture color.
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
-#if 0
-            aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.meshid);
-#else
-            aovTexclrMeshid[_idx] = make_float4(texcolor.x, texcolor.y, texcolor.z, isect.mtrlid);
-#endif
+
+            AT_NAME::FillBasicAOVs(
+                aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
+                aovTexclrMeshid[_idx], texcolor, isect);
+            aovTexclrMeshid[_idx].w = isect.mtrlid;
 
             // For exporting separated albedo.
             shMtrls[threadIdx.x].albedoMap = -1;

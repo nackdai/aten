@@ -379,14 +379,6 @@ namespace AT_NAME
         {}
     };
 
-    struct AlphaBlendedMaterialSampling {
-        real alpha{ real(1) };
-        real pdf{ real(1) };
-
-        aten::ray ray;
-        aten::vec3 bsdf;
-    };
-
     class material {
         friend class context;
         friend class LayeredBSDF;
@@ -462,18 +454,6 @@ namespace AT_NAME
         {
             return m_id;
         }
-
-        AT_DEVICE_MTRL_API aten::vec4 sampleMultipliedAlbedo(real u, real v) const;
-
-        static AT_DEVICE_MTRL_API bool sampleAlphaBlend(
-            AlphaBlendedMaterialSampling& result,
-            real accumulatedAlpha,
-            const aten::vec4& multipliedAlbedo,
-            const aten::ray& ray,
-            const aten::vec3& point,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real u, real v);
 
         void setTextures(
             aten::texture* albedoMap,

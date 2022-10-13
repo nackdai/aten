@@ -115,30 +115,6 @@ namespace aten
             return false;
         }
 
-        auto multipliedAlbedo = mtrl->sampleMultipliedAlbedo(path.rec.u, path.rec.v);
-        AlphaBlendedMaterialSampling smplAlphaBlend;
-        auto isAlphaBlended = material::sampleAlphaBlend(
-            smplAlphaBlend,
-            path.accumulatedAlpha,
-            multipliedAlbedo,
-            path.ray,
-            path.rec.p,
-            orienting_normal,
-            sampler,
-            path.rec.u, path.rec.v);
-
-        if (isAlphaBlended) {
-            path.prevMtrl = mtrl;
-            path.pdfb = smplAlphaBlend.pdf;
-
-            path.ray = smplAlphaBlend.ray;
-
-            path.throughput += smplAlphaBlend.bsdf;
-            path.accumulatedAlpha *= real(1) - smplAlphaBlend.alpha;
-
-            return true;
-        }
-
         if (!mtrl->isTranslucent() && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
@@ -291,16 +267,11 @@ namespace aten
         auto c = dot(rayBasedNormal, static_cast<vec3>(nextDir));
 
         if (pdfb > 0 && c > 0) {
-            path.throughput *= path.accumulatedAlpha * bsdf * c / pdfb;
+            path.throughput *= bsdf * c / pdfb;
             path.throughput /= russianProb;
         }
         else {
             return false;
-        }
-
-        if (!isAlphaBlended) {
-            // Reset alpha blend.
-            path.accumulatedAlpha = real(1);
         }
 
         path.prevMtrl = mtrl;
@@ -339,7 +310,7 @@ namespace aten
             misW = real(1);
         }
 
-        path.contrib += path.throughput * misW * emit * path.accumulatedAlpha;
+        path.contrib += path.throughput * misW * emit;
     }
 
     static uint32_t frame = 0;

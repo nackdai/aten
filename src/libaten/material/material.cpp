@@ -120,43 +120,6 @@ namespace AT_NAME
         return m_targetLight;
     }
 
-    AT_DEVICE_MTRL_API aten::vec4 material::sampleMultipliedAlbedo(real u, real v) const
-    {
-        return sampleAlbedoMap(u, v) * m_param.baseColor;
-    }
-
-    AT_DEVICE_MTRL_API bool material::sampleAlphaBlend(
-        AlphaBlendedMaterialSampling& result,
-        real accumulatedAlpha,
-        const aten::vec4& multipliedAlbedo,
-        const aten::ray& ray,
-        const aten::vec3& point,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real u, real v)
-    {
-        auto alpha = aten::clamp(multipliedAlbedo.a, real(0), real(1));
-
-        auto alphaR = sampler->nextSample();
-
-        if (alphaR > alpha) {
-            result.pdf = real(1);
-
-            auto nmlForAlphaBlend = dot(ray.dir, orgnormal) < real(0)
-                ? -orgnormal
-                : orgnormal;
-
-            result.ray = aten::ray(point, ray.dir, nmlForAlphaBlend);
-
-            result.bsdf = accumulatedAlpha * alpha * static_cast<aten::vec3>(multipliedAlbedo);
-            result.alpha = alpha;
-
-            return true;
-        }
-
-        return false;
-    }
-
     AT_DEVICE_MTRL_API aten::vec4 material::sampleAlbedoMap(real u, real v) const
     {
         return AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1)));

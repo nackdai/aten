@@ -28,7 +28,6 @@ namespace aten
             vec3 contrib{ real(0) };
             vec3 throughput{ real(1) };
             real pdfb{ real(1) };
-            real accumulatedAlpha{ real(1) };
 
             hitrecord rec;
             std::shared_ptr<material> prevMtrl;

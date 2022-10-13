@@ -46,15 +46,6 @@
     <Filter Include="filter">
       <UniqueIdentifier>{64490d9c-6f13-4ebf-893d-3eb9ba99d0af}</UniqueIdentifier>
     </Filter>
-    <Filter Include="filter\PracticalNoiseReduction">
-      <UniqueIdentifier>{cb807cd1-c9cb-422a-bc38-5a0bda6cdd8c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="filter\VirtualFlashImage">
-      <UniqueIdentifier>{f98c9a8a-4449-4f7a-8fb7-9137ac70c22d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="filter\GeometryRendering">
-      <UniqueIdentifier>{b9e179d2-f6c3-40a5-b5d8-054e7c1145e1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="shader\filter">
       <UniqueIdentifier>{c918e933-8b6e-4c2b-bde0-32b7f83c9547}</UniqueIdentifier>
     </Filter>
@@ -289,18 +280,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\filter\nlm.h">
       <Filter>filter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.h">
-      <Filter>filter\VirtualFlashImage</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h">
-      <Filter>filter\PracticalNoiseReduction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.h">
-      <Filter>filter\PracticalNoiseReduction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.h">
-      <Filter>filter\GeometryRendering</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\camera\equirect.h">
       <Filter>camera</Filter>
@@ -646,18 +625,6 @@
     <ClCompile Include="..\src\libaten\filter\bilateral.cpp">
       <Filter>filter</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.cpp">
-      <Filter>filter\VirtualFlashImage</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp">
-      <Filter>filter\PracticalNoiseReduction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.cpp">
-      <Filter>filter\PracticalNoiseReduction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp">
-      <Filter>filter\GeometryRendering</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\camera\equirect.cpp">
       <Filter>camera</Filter>
     </ClCompile>
@@ -893,9 +860,6 @@
     </None>
     <None Include="..\src\shader\nlm_fs.glsl">
       <Filter>shader\filter</Filter>
-    </None>
-    <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat">
-      <Filter>filter\VirtualFlashImage</Filter>
     </None>
     <None Include="..\src\shader\atrous_final_fs.glsl">
       <Filter>shader\atrous</Filter>

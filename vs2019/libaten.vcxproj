@@ -279,12 +279,8 @@
     <ClInclude Include="..\src\libaten\defs.h" />
     <ClInclude Include="..\src\libaten\filter\atrous.h" />
     <ClInclude Include="..\src\libaten\filter\bilateral.h" />
-    <ClInclude Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.h" />
     <ClInclude Include="..\src\libaten\filter\nlm.h" />
-    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.h" />
-    <ClInclude Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.h" />
     <ClInclude Include="..\src\libaten\filter\taa.h" />
-    <ClInclude Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.h" />
     <ClInclude Include="..\src\libaten\geometry\cube.h" />
     <ClInclude Include="..\src\libaten\geometry\face.h" />
     <ClInclude Include="..\src\libaten\geometry\geombase.h" />
@@ -420,12 +416,8 @@
     <ClCompile Include="..\src\libaten\deformable\Skeleton.cpp" />
     <ClCompile Include="..\src\libaten\filter\atrous.cpp" />
     <ClCompile Include="..\src\libaten\filter\bilateral.cpp" />
-    <ClCompile Include="..\src\libaten\filter\GeometryRendering\GeometryRendering.cpp" />
     <ClCompile Include="..\src\libaten\filter\nlm.cpp" />
-    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReduction.cpp" />
-    <ClCompile Include="..\src\libaten\filter\PracticalNoiseReduction\PracticalNoiseReductionBilateral.cpp" />
     <ClCompile Include="..\src\libaten\filter\taa.cpp" />
-    <ClCompile Include="..\src\libaten\filter\VirtualFlashImage\VirtualFlashImage.cpp" />
     <ClCompile Include="..\src\libaten\geometry\cube.cpp" />
     <ClCompile Include="..\src\libaten\geometry\face.cpp" />
     <ClCompile Include="..\src\libaten\geometry\geombase.cpp" />
@@ -512,7 +504,6 @@
     <ClCompile Include="..\src\libaten\visualizer\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\src\libaten\filter\VirtualFlashImage\t_table.dat" />
     <None Include="..\src\shader\atrous_final_fs.glsl" />
     <None Include="..\src\shader\atrous_fs.glsl" />
     <None Include="..\src\shader\bilateral_fs.glsl" />

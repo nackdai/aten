@@ -13,10 +13,6 @@
 #include "filter/atrous.h"
 #include "filter/taa.h"
 
-#include "filter/PracticalNoiseReduction/PracticalNoiseReduction.h"
-#include "filter/VirtualFlashImage/VirtualFlashImage.h"
-#include "filter/GeometryRendering/GeometryRendering.h"
-
 #include "material/emissive.h"
 #include "material/lambert.h"
 #include "material/specular.h"

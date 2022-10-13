@@ -174,14 +174,6 @@ namespace aten
             return false;
         }
 
-        if (m_virtualLight) {
-            if (mtrl->isGlossy()
-                && (path.prevMtrl && !path.prevMtrl->isGlossy()))
-            {
-                return false;
-            }
-        }
-
         // Explicit conection to light.
         if (!mtrl->isSingularOrTranslucent())
         {
@@ -260,46 +252,6 @@ namespace aten
                     }
                 }
             }
-
-#if 1
-            if (m_virtualLight)
-            {
-                auto sampleres = m_virtualLight->sample(ctxt, path.rec.p, nullptr);
-
-                const vec3& posLight = sampleres.pos;
-                const vec3& nmlLight = sampleres.nml;
-                real pdfLight = sampleres.pdf;
-
-                auto lightobj = sampleres.obj;
-
-                vec3 dirToLight = normalize(sampleres.dir);
-                aten::ray shadowRay(path.rec.p, dirToLight, orienting_normal);
-
-                hitrecord tmpRec;
-
-                if (scene->hitLight(ctxt, m_virtualLight, posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-                    auto cosShadow = dot(orienting_normal, dirToLight);
-                    auto dist2 = squared_length(sampleres.dir);
-                    auto dist = aten::sqrt(dist2);
-
-                    auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
-                    auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
-
-                    // Get light color.
-                    auto emit = sampleres.finalColor;
-
-                    auto c = dot(m_lightDir, -dirToLight);
-                    real visible = (real)(c > real(0) ? 1 : 0);
-
-                    auto misW = pdfLight / (pdfb + pdfLight);
-                    path.contrib += visible * misW * bsdf * emit * cosShadow / pdfLight;
-                }
-
-                if (!mtrl->isGlossy()) {
-                    return false;
-                }
-            }
-#endif
         }
 
         real russianProb = real(1);

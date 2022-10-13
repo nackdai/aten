@@ -565,6 +565,10 @@ namespace AT_NAME
 
         static bool isValidMaterialType(aten::MaterialType type);
 
+        static AT_DEVICE_MTRL_API bool isTranparencyByAlpha(
+            const aten::MaterialParameter& param,
+            real u, real v);
+
         static AT_DEVICE_MTRL_API real computeFresnel(
             real ni, real nt,
             const aten::vec3& wi,

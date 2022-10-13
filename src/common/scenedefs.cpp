@@ -1320,7 +1320,7 @@ void DeformInBoxScene::getCameraPosAndAt(
 void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto back = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
-    back->param().baseColor = 0.3f;
+    back->param().baseColor.a = 0.0f;
     aten::AssetManager::registerMtrl(
         "backWall",
         back);
@@ -1334,7 +1334,6 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     auto left = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000));
-    left->param().baseColor.a = 0.5f;
     aten::AssetManager::registerMtrl(
         "leftWall",
         left);
@@ -1352,7 +1351,6 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     auto tall = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
-    tall->param().baseColor = 0.2f;
     aten::AssetManager::registerMtrl(
         "tallBox",
         tall);

@@ -199,4 +199,19 @@ namespace kernel {
 
         return isShadowRayActive;
     }
+
+    inline __device__ int adjustIndexWithTiledomain(
+        int base_idx,
+        const idaten::TileDomain& tileDomain,
+        int width)
+    {
+        int ix = base_idx % tileDomain.w;
+        int iy = base_idx / tileDomain.w;
+
+        ix += tileDomain.x;
+        iy += tileDomain.y;
+
+        const auto idx = getIdx(ix, iy, width);
+        return idx;
+    }
 }

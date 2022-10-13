@@ -118,19 +118,11 @@ namespace pt {
 
         if (bounce == 0) {
             // Store AOV.
-            int ix = idx % tileDomain.w;
-            int iy = idx / tileDomain.w;
-
-            ix += tileDomain.x;
-            iy += tileDomain.y;
-
-            auto n = (orienting_normal + 1.0f) * 0.5f;
-
-            const auto _idx = getIdx(ix, iy, width);
+            const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
 
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
-                aovAlbedoMeshId[idx], albedo, isect);
+                aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
+                aovAlbedoMeshId[_idx], albedo, isect);
         }
 
         // Implicit conection to light.

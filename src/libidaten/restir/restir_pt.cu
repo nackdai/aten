@@ -118,20 +118,12 @@ __global__ void shade(
 
     if (bounce == 0) {
         // Store AOV.
-        int ix = idx % tileDomain.w;
-        int iy = idx / tileDomain.w;
+        const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
 
-        ix += tileDomain.x;
-        iy += tileDomain.y;
-
-        const auto _idx = getIdx(ix, iy, width);
-
-        // World coordinate to Clip coordinate.
-        aten::vec4 pos = aten::vec4(rec.p, 1);
-        pos = mtxW2C.apply(pos);
-
-        aovNormalDepth[_idx] = make_float4(orienting_normal.x, orienting_normal.y, orienting_normal.z, pos.w);
-        aovTexclrMeshid[_idx] = make_float4(albedo.x, albedo.y, albedo.z, isect.mtrlid);
+        AT_NAME::FillBasicAOVs(
+            aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
+            aovTexclrMeshid[_idx], albedo, isect);
+        aovTexclrMeshid[_idx].w = isect.mtrlid;
     }
 
     // Implicit conection to light.

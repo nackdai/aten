@@ -135,4 +135,13 @@ namespace AT_NAME
         AT_NAME::applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
         return real(-1);
     }
+
+    AT_DEVICE_MTRL_API bool material::isTranparencyByAlpha(
+        const aten::MaterialParameter& param,
+        real u, real v)
+    {
+        auto albedo{ AT_NAME::sampleTexture(param.albedoMap, u, v, aten::vec4(real(1))) };
+        albedo *= param.baseColor;
+        return albedo.a == real(0);
+    }
 }

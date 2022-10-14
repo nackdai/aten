@@ -115,16 +115,6 @@ namespace aten
             return false;
         }
 
-        // TODO: Support translucent.
-        // Check transparency.
-        if (AT_NAME::material::isTranparencyByAlpha(mtrl->param(), path.rec.u, path.rec.v)) {
-            // Just through the object.
-            // NOTE
-            // Ray go through to the opposite direction. So, we need to specify inverted normal.
-            path.ray = aten::ray(path.rec.p, path.ray.dir, -orienting_normal);
-            return true;
-        }
-
         if (!mtrl->isTranslucent() && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
@@ -152,6 +142,16 @@ namespace aten
             path.throughput /= areaPdf;
         }
 #endif
+
+        // TODO: Support translucent.
+        // Check transparency.
+        if (AT_NAME::material::isTranparencyByAlpha(mtrl->param(), path.rec.u, path.rec.v)) {
+            // Just through the object.
+            // NOTE
+            // Ray go through to the opposite direction. So, we need to specify inverted normal.
+            path.ray = aten::ray(path.rec.p, path.ray.dir, -orienting_normal);
+            return true;
+        }
 
         // Non-Photo-Real.
         if (mtrl->isNPR()) {

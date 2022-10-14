@@ -149,6 +149,18 @@ namespace pt {
 
         shShadowRays[threadIdx.x].isActive = false;
 
+        // TODO: Support translucent.
+        // Check transparency.
+        if (AT_NAME::material::isTranparencyByAlpha(shMtrls[threadIdx.x], rec.u, rec.v)) {
+            // Just through the object.
+            // NOTE
+            // Ray go through to the opposite direction. So, we need to specify inverted normal.
+            rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
+            paths->attrib[idx].isSingular = true;
+            shadowRays[idx].isActive = false;
+            return;
+        }
+
         // Explicit conection to light.
         if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {

@@ -95,7 +95,7 @@ namespace kernel {
         rays[idx] = camsample.r;
 
         paths->throughput[idx].throughput = aten::vec3(1);
-        paths->throughput[idx].pdfb = 0.0f;
+        paths->throughput[idx].pdfb = 1.0f;
         paths->attrib[idx].isTerminate = false;
         paths->attrib[idx].isSingular = false;
 

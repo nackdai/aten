@@ -65,15 +65,6 @@ add_library(
   deformable/deformable.cpp
   deformable/deformable.h
   defs.h
-  filter/GeometryRendering/GeometryRendering.cpp
-  filter/GeometryRendering/GeometryRendering.h
-  filter/PracticalNoiseReduction/PracticalNoiseReduction.cpp
-  filter/PracticalNoiseReduction/PracticalNoiseReduction.h
-  filter/PracticalNoiseReduction/PracticalNoiseReductionBilateral.cpp
-  filter/PracticalNoiseReduction/PracticalNoiseReductionBilateral.h
-  filter/VirtualFlashImage/VirtualFlashImage.cpp
-  filter/VirtualFlashImage/VirtualFlashImage.h
-  filter/VirtualFlashImage/t_table.dat
   filter/atrous.cpp
   filter/atrous.h
   filter/bilateral.cpp

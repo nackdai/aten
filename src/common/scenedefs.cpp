@@ -1334,6 +1334,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     auto left = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.504000, 0.052000, 0.040000));
+    left->param().baseColor.a = 0.5f;
     aten::AssetManager::registerMtrl(
         "leftWall",
         left);
@@ -1351,6 +1352,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
     auto tall = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
+    tall->param().baseColor.a = 0.25f;
     aten::AssetManager::registerMtrl(
         "tallBox",
         tall);

@@ -256,7 +256,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\appaten\main_test.cpp" />
+    <ClCompile Include="..\src\appaten\main.cpp" />
     <ClCompile Include="..\src\common\scenedefs.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -143,14 +143,22 @@ namespace aten
         }
 #endif
 
-        // TODO: Support translucent.
-        // Check transparency.
-        if (AT_NAME::material::isTranparencyByAlpha(mtrl->param(), path.rec.u, path.rec.v)) {
-            // Just through the object.
-            // NOTE
-            // Ray go through to the opposite direction. So, we need to specify inverted normal.
-            path.ray = aten::ray(path.rec.p, path.ray.dir, -orienting_normal);
-            return true;
+        // Check transparency or translucency.
+        // NOTE:
+        // If the material itself is originally translucent, we don't care alpha translucency.
+        if (!mtrl->isTranslucent()
+            && AT_NAME::material::isOpaqueByAlpha(mtrl->param(), path.rec.u, path.rec.v))
+        {
+            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl->param(), path.rec.u, path.rec.v);
+            auto r = sampler->nextSample();
+
+            if (r >= alpha) {
+                // Just through the object.
+                // NOTE
+                // Ray go through to the opposite direction. So, we need to specify inverted normal.
+                path.ray = aten::ray(path.rec.p, path.ray.dir, -orienting_normal);
+                return true;
+            }
         }
 
         // Non-Photo-Real.

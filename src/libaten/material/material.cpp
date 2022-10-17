@@ -136,12 +136,28 @@ namespace AT_NAME
         return real(-1);
     }
 
-    AT_DEVICE_MTRL_API bool material::isTranparencyByAlpha(
+    AT_DEVICE_MTRL_API bool material::isTransparencyByAlpha(
+        const aten::MaterialParameter& param,
+        real u, real v)
+    {
+        auto alpha = getTranslucentAlpha(param, u, v);
+        return alpha == real(0);
+    }
+
+    AT_DEVICE_MTRL_API bool material::isOpaqueByAlpha(
+        const aten::MaterialParameter& param,
+        real u, real v)
+    {
+        auto alpha = getTranslucentAlpha(param, u, v);
+        return alpha < real(1);
+    }
+
+    AT_DEVICE_MTRL_API real material::getTranslucentAlpha(
         const aten::MaterialParameter& param,
         real u, real v)
     {
         auto albedo{ AT_NAME::sampleTexture(param.albedoMap, u, v, aten::vec4(real(1))) };
         albedo *= param.baseColor;
-        return albedo.a == real(0);
+        return albedo.a;
     }
 }

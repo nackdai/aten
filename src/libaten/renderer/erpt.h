@@ -7,6 +7,8 @@
 
 namespace aten
 {
+    // Energy Redistribution Path Tracing
+    // http://www.cs.columbia.edu/~batty/misc/ERPT-report.pdf
     class ERPT : public PathTracing {
     public:
         ERPT() {}

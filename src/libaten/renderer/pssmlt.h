@@ -7,6 +7,7 @@
 
 namespace aten
 {
+    // Primary Sample Space Metropolis Light Transport
     class PSSMLT : public PathTracing {
     public:
         PSSMLT() {}

@@ -2,6 +2,9 @@
 
 #include "aten.h"
 
+// NOTE
+// https://dl.acm.org/doi/pdf/10.1145/3095140.3095176
+
 class MeasureEffectiveRetroreflectiveArea {
 public:
     MeasureEffectiveRetroreflectiveArea() = default;

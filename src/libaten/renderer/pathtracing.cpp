@@ -1,8 +1,8 @@
 #include "renderer/pathtracing.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "renderer/nonphotoreal.h"
 #include "renderer/renderer_utility.h"
+#include "renderer/feature_line.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -12,11 +12,11 @@
 
 #include "material/lambert.h"
 
-//#define RELEASE_DEBUG
+#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X    (28)
-#define BREAK_Y    (182)
+#define BREAK_X    (-1)
+#define BREAK_Y    (-1)
 #pragma optimize( "", off)
 #endif
 
@@ -29,7 +29,8 @@ namespace aten
         const ray& inRay,
         camera* cam,
         CameraSampleResult& camsample,
-        scene* scene)
+        scene* scene,
+        aten::hitrecord* first_hrec/*= nullptr*/)
     {
         uint32_t depth = 0;
         uint32_t rrDepth = m_rrDepth;
@@ -44,6 +45,10 @@ namespace aten
             Intersection isect;
 
             if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
+                if (depth == 0 && first_hrec) {
+                    *first_hrec = path.rec;
+                }
+
                 willContinue = shade(ctxt, sampler, scene, cam, camsample, depth, path);
             }
             else {
@@ -160,13 +165,6 @@ namespace aten
                 path.throughput *= static_cast<aten::vec3>(mtrl->color());
                 return true;
             }
-        }
-
-        // Non-Photo-Real.
-        if (mtrl->isNPR()) {
-            path.contrib = shadeNPR(ctxt, mtrl.get(), path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
-            path.isTerminate = true;
-            return false;
         }
 
         // Explicit conection to light.
@@ -380,6 +378,7 @@ namespace aten
                         DEBUG_BREAK();
                     }
 #endif
+                    aten::hitrecord hrec;
 
                     for (uint32_t i = 0; i < samples; i++) {
                         auto scramble = aten::getRandom(pos) * 0x1fe3434f;
@@ -410,10 +409,12 @@ namespace aten
                         auto path = radiance(
                             ctxt,
                             &rnd,
+                            m_maxDepth,
                             ray,
                             camera,
                             camsample,
-                            scene);
+                            scene,
+                            &hrec);
 
                         if (isInvalidColor(path.contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
@@ -439,6 +440,17 @@ namespace aten
                     }
 
                     col /= (real)cnt;
+
+                    if (hrec.mtrlid >= 0) {
+                        const auto mtrl = ctxt.getMaterial(hrec.mtrlid);
+                        if (mtrl && mtrl->isNPR()) {
+                            col = FeatureLine::renderFeatureLine(
+                                col,
+                                x, y, width, height,
+                                hrec,
+                                ctxt, *scene, *camera);
+                        }
+                    }
 
                     dst.buffer->put(x, y, vec4(col, 1));
 

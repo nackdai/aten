@@ -18,8 +18,10 @@ namespace aten {
 
     struct hitrecord {
         vec3 p;
+        real area{ real(1) };
 
         vec3 normal;
+        int mtrlid{ -1 };
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
         // tangent coordinate.
@@ -31,9 +33,7 @@ namespace aten {
         real u{ real(0) };
         real v{ real(0) };
 
-        real area{ real(1) };
-
-        int mtrlid{ -1 };
+        int meshid{ -1 };
 
         bool isVoxel{ false };
         uint8_t padding[3];
@@ -173,6 +173,7 @@ namespace aten {
             else {
                 obj->evalHitResult(ctxt, r, rec, isect);
                 rec.mtrlid = isect.mtrlid;
+                rec.meshid = isect.meshid;
 
                 rec.isVoxel = false;
             }
@@ -193,6 +194,7 @@ namespace aten {
         {
             obj->evalHitResult(ctxt, r, rec, isect);
             rec.mtrlid = isect.mtrlid;
+            rec.meshid = isect.meshid;
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
             // tangent coordinate.

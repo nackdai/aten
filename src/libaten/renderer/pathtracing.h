@@ -55,7 +55,8 @@ namespace aten
             const ray& inRay,
             camera* cam,
             CameraSampleResult& camsample,
-            scene* scene);
+            scene* scene,
+            aten::hitrecord* first_hrec = nullptr);
 
         bool shade(
             const context& ctxt,

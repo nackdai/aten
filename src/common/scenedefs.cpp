@@ -1351,7 +1351,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         "shortBox",
         createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000)));
 
-    auto tall = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.580000, 0.568000, 0.544000));
+    auto tall = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.0000, 0.000, 1.0000));
     tall->param().baseColor.a = 0.25f;
     aten::AssetManager::registerMtrl(
         "tallBox",

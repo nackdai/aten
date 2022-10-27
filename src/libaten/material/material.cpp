@@ -136,15 +136,7 @@ namespace AT_NAME
         return real(-1);
     }
 
-    AT_DEVICE_MTRL_API bool material::isTransparencyByAlpha(
-        const aten::MaterialParameter& param,
-        real u, real v)
-    {
-        auto alpha = getTranslucentAlpha(param, u, v);
-        return alpha == real(0);
-    }
-
-    AT_DEVICE_MTRL_API bool material::isOpaqueByAlpha(
+    AT_DEVICE_MTRL_API bool material::isTranslucentByAlpha(
         const aten::MaterialParameter& param,
         real u, real v)
     {

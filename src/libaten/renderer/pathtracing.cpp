@@ -147,7 +147,7 @@ namespace aten
         // NOTE:
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (!mtrl->isTranslucent()
-            && AT_NAME::material::isOpaqueByAlpha(mtrl->param(), path.rec.u, path.rec.v))
+            && AT_NAME::material::isTranslucentByAlpha(mtrl->param(), path.rec.u, path.rec.v))
         {
             const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl->param(), path.rec.u, path.rec.v);
             auto r = sampler->nextSample();
@@ -157,6 +157,7 @@ namespace aten
                 // NOTE
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
                 path.ray = aten::ray(path.rec.p, path.ray.dir, -orienting_normal);
+                path.throughput *= static_cast<aten::vec3>(mtrl->color());
                 return true;
             }
         }

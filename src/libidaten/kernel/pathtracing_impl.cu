@@ -153,9 +153,8 @@ namespace pt {
         // NOTE:
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (!shMtrls[threadIdx.x].attrib.isTranslucent
-            && AT_NAME::material::isOpaqueByAlpha(shMtrls[threadIdx.x], rec.u, rec.v))
+            && AT_NAME::material::isTranslucentByAlpha(shMtrls[threadIdx.x], rec.u, rec.v))
         {
-
             const auto alpha = AT_NAME::material::getTranslucentAlpha(shMtrls[threadIdx.x], rec.u, rec.v);
             auto r = paths->sampler[idx].nextSample();
 
@@ -164,6 +163,7 @@ namespace pt {
                 // NOTE
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
                 rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
+                paths->throughput[idx].throughput *= static_cast<aten::vec3>(shMtrls[threadIdx.x].baseColor);
                 paths->attrib[idx].isSingular = true;
                 shadowRays[idx].isActive = false;
                 return;

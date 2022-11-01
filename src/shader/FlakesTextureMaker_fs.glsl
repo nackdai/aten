@@ -189,6 +189,7 @@ vec3 cellnoise(vec3 p)
     return result;
 }
 
+// NOTE
 // https://docs.chaosgroup.com/display/OSLShaders/Flakes+normal+map
 
 uniform float flake_scale = 50.0;               // Smaller values zoom into the flake map, larger values zoom out.

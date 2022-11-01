@@ -20,6 +20,8 @@ namespace AT_NAME
         const real nt = param->retrorelective.clearcoat_ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
+
+        // NOTE
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
         const auto nnt = ni / nt;
         const auto d = dot(V, N);
@@ -85,6 +87,8 @@ namespace AT_NAME
         const real nt = param->retrorelective.clearcoat_ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
+
+        // NOTE
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
         const auto nnt = ni / nt;
         const auto d = dot(V, N);
@@ -252,6 +256,8 @@ namespace AT_NAME
         const real nt = param->retrorelective.clearcoat_ior;   // 物体内部の屈折率.
 
         // Compute the vector into the prismatic sheet.
+
+        // NOTE
         // https://qiita.com/mebiusbox2/items/315e10031d15173f0aa5
         const auto nnt = ni / nt;
         const auto d = dot(V, N);

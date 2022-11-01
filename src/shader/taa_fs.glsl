@@ -35,6 +35,7 @@ vec3 YCbCr2RGB(vec3 ycc)
     return vec3(dot(ycc, YCbCr2R), dot(ycc, YCbCr2G), dot(ycc, YCbCr2B));
 }
 
+// NOTE
 // https://software.intel.com/en-us/node/503873
 vec3 RGB2YCoCg(vec3 c)
 {
@@ -60,6 +61,7 @@ vec3 YCoCg2RGB(vec3 c)
         0, 1);
 }
 
+// NOTE
 // http://graphicrants.blogspot.jp/2013/12/tone-mapping.html
 vec3 map(vec3 clr)
 {
@@ -73,6 +75,7 @@ vec3 unmap(vec3 clr)
     return clr / (1 - lum);
 }
 
+// NOTE
 // http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
 vec3 clipAABB(
     vec3 aabb_min,
@@ -118,6 +121,7 @@ vec4 sampleColor(sampler2D s, vec2 uv)
 
 void main()
 {
+    // NOTE
     // http://twvideo01.ubm-us.net/o1/vault/gdc2016/Presentations/Pedersen_LasseJonFuglsang_TemporalReprojectionAntiAliasing.pdf
     // https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader
     // http://t-pot.com/program/152_TAA/

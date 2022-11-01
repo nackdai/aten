@@ -271,6 +271,7 @@ namespace aten {
 #ifdef TYPE_DOUBLE
     inline AT_DEVICE_API int64_t floatAsInt(double f)
     {
+        // NOTE
         // Accroding C# implementaion
         // DoubleToInt64Bits
         // https://referencesource.microsoft.com/#mscorlib/system/bitconverter.cs,db20ea77a561c0ac,references
@@ -280,6 +281,7 @@ namespace aten {
 
     inline AT_DEVICE_API double intAsFloat(int64_t n)
     {
+        // NOTE
         // Accroding C# implementaion
         // Int64BitsToDouble
         // https://referencesource.microsoft.com/#mscorlib/system/bitconverter.cs,db20ea77a561c0ac,references

@@ -262,6 +262,7 @@ void main()
     outColor.a = 1.0;
 }
 
+// NOTE
 // https://developpaper.com/pbr-brdf-disney-unity-1/
 // https://gist.github.com/D4KU/dc9467e2f77bdb2069dac964f2d1e7ec
 // https://github.com/synthesis-labs/polaris-streams-3d/blob/master/unity-client/Library/PackageCache/com.unity.render-pipelines.lightweight%405.7.2/ShaderLibrary/Lighting.hlsl

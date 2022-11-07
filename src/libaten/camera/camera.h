@@ -165,5 +165,11 @@ namespace AT_NAME {
             static const aten::CameraParameter tmp;
             return tmp;
         }
+
+        virtual real computePixelWidthAtDistance(real distanceFromCamera) const
+        {
+            AT_ASSERT(false);
+            return real(0);
+        }
     };
 }

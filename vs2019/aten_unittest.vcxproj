@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\aten_unittest\aov_host_buffer.cpp" />
+    <ClCompile Include="..\src\aten_unittest\pinhole_camera.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{AE027FDF-561A-40BC-B5A8-8833D11353C9}</ProjectGuid>

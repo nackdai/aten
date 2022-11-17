@@ -9,8 +9,8 @@ namespace aten
 {
     class PathTracing : public Renderer {
     public:
-        PathTracing() {}
-        ~PathTracing() {}
+        PathTracing() = default;
+        ~PathTracing() = default;
 
         virtual void onRender(
             const context& ctxt,
@@ -21,6 +21,10 @@ namespace aten
         void registerBlueNoiseTex(const std::shared_ptr<texture>& tex)
         {
             m_noisetex.push_back(tex);
+        }
+
+        virtual void enableFeatureLine(bool e) override {
+            enable_feature_line_ = e;
         }
 
     protected:
@@ -58,6 +62,15 @@ namespace aten
             scene* scene,
             aten::hitrecord* first_hrec = nullptr);
 
+        Path radiance_with_feature_line(
+            const context& ctxt,
+            sampler* sampler,
+            uint32_t maxDepth,
+            const ray& inRay,
+            camera* cam,
+            CameraSampleResult& camsample,
+            scene* scene);
+
         bool shade(
             const context& ctxt,
             sampler* sampler,
@@ -81,5 +94,7 @@ namespace aten
         uint32_t m_startDepth{ 0 };
 
         std::vector<std::shared_ptr<texture>> m_noisetex;
+
+        bool enable_feature_line_{ false };
     };
 }

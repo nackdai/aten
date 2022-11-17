@@ -9,6 +9,7 @@ static const char* TITLE = "app";
 
 //#define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_DOF
+//#define ENABLE_FEATURE_LINE
 
 #ifdef ENABLE_DOF
 static aten::ThinLensCamera g_camera;
@@ -269,6 +270,10 @@ int main(int argc, char* argv[])
         // BDPT doesn't support IBL yet.
         g_scene.addImageBasedLight(ibl);
     }
+
+#ifdef ENABLE_FEATURE_LINE
+    g_tracer.enableFeatureLine(true);
+#endif
 
 #if 0
     // Experimental

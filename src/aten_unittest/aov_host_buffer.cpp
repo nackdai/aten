@@ -3,7 +3,8 @@
 #include "aten.h"
 #include "renderer/aov.h"
 
-TEST(aov_test, CompareAOVBufferTypeTest) {
+TEST(aov_test, CompareAOVBufferTypeTest)
+{
     aten::AOVBufferType type;
 
     ASSERT_TRUE(type == aten::AOVBufferType::NormalDepth);
@@ -13,7 +14,8 @@ TEST(aov_test, CompareAOVBufferTypeTest) {
     ASSERT_FALSE(type == aten::AOVBufferType::AlbedoMeshId);
 }
 
-TEST(aov_test, CompareAOVTypeTest) {
+TEST(aov_test, CompareAOVTypeTest)
+{
     aten::AOVType type;
 
     ASSERT_TRUE(type == aten::AOVType::Normal);
@@ -23,7 +25,8 @@ TEST(aov_test, CompareAOVTypeTest) {
     ASSERT_FALSE(type == aten::AOVType::Depth);
 }
 
-TEST(aov_test, InheritAOVBufferTypeTest) {
+TEST(aov_test, InheritAOVBufferTypeTest)
+{
     struct Inheritance : public aten::AOVBufferType {
         enum Type {
             A = aten::AOVBufferType::BeginOfInheritType,
@@ -46,7 +49,8 @@ TEST(aov_test, InheritAOVBufferTypeTest) {
     ASSERT_TRUE(type != aten::AOVBufferType::NormalDepth);
 }
 
-TEST(aov_test, AOVHostBufferTest) {
+TEST(aov_test, AOVHostBufferTest)
+{
     aten::AOVHostBuffer<std::vector<aten::vec4>, 2> aov;
 
     ASSERT_EQ(decltype(aov)::NumAOV, 2);
@@ -66,7 +70,8 @@ TEST(aov_test, AOVHostBufferTest) {
     ASSERT_EQ(aov.get<aten::AOVBufferType::AlbedoMeshId>()[0].x, static_cast<real>(1));
 }
 
-TEST(aov_test, FillBasicAOVsTest) {
+TEST(aov_test, FillBasicAOVsTest)
+{
     aten::vec4 aovNormalDepth;
 
     aten::vec3 normal(real(1), real(2), real(3));
@@ -104,7 +109,8 @@ TEST(aov_test, FillBasicAOVsTest) {
     ASSERT_EQ(aovAlbedoMeshId.w, isect.meshid);
 }
 
-TEST(aov_test, FillBasicAOVsIfHitMissTest) {
+TEST(aov_test, FillBasicAOVsIfHitMissTest)
+{
     aten::vec4 aovNormalDepth;
     aten::vec4 aovAlbedoMeshId;
 
@@ -126,7 +132,8 @@ TEST(aov_test, FillBasicAOVsIfHitMissTest) {
     ASSERT_EQ(aovAlbedoMeshId.w, real(-1));
 }
 
-TEST(aov_test, FillBaryCentricAOVTest) {
+TEST(aov_test, FillBaryCentricAOVTest)
+{
     aten::vec4 aovBuffer;
 
     aten::Intersection isect;
@@ -140,7 +147,8 @@ TEST(aov_test, FillBaryCentricAOVTest) {
     ASSERT_FLOAT_EQ(aovBuffer.z, real(1) - isect.a - isect.b);
 }
 
-TEST(aov_test, FillBaryCentricAOVIfHitMissTest) {
+TEST(aov_test, FillBaryCentricAOVIfHitMissTest)
+{
     aten::vec4 aovBuffer;
 
     FillBaryCentricAOVIfHitMiss(aovBuffer);

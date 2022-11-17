@@ -34,8 +34,8 @@ namespace aten
 
     class Renderer {
     protected:
-        Renderer() {}
-        virtual ~Renderer() {}
+        Renderer() = default;
+        virtual ~Renderer() = default;
 
     public:
         void render(
@@ -52,6 +52,10 @@ namespace aten
         void setBG(background* bg)
         {
             m_bg = bg;
+        }
+
+        virtual void enableFeatureLine(bool e) {
+            (void)e;
         }
 
     protected:

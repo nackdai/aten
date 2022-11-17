@@ -1,3 +1,5 @@
+#include <array>
+
 #include "renderer/pathtracing.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
@@ -12,7 +14,7 @@
 
 #include "material/lambert.h"
 
-#define RELEASE_DEBUG
+//#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
 #define BREAK_X    (-1)
@@ -65,6 +67,262 @@ namespace aten
             }
 
             depth++;
+        }
+
+        return path;
+    }
+
+    PathTracing::Path PathTracing::radiance_with_feature_line(
+        const context& ctxt,
+        sampler* sampler,
+        uint32_t maxDepth,
+        const ray& inRay,
+        camera* cam,
+        CameraSampleResult& camsample,
+        scene* scene)
+    {
+        uint32_t depth = 0;
+        uint32_t rrDepth = m_rrDepth;
+
+        Path path;
+        path.ray = inRay;
+
+        const auto& cam_org = cam->param().origin;
+
+        const auto pixel_width = cam->computePixelWidthAtDistance(1);
+
+        constexpr size_t SampleRayNum = 8;
+
+        // TODO: These value should be configurable.
+        constexpr real FeatureLineWidth = 1;
+        constexpr real ThresholdAlbedo = 0.1f;
+        constexpr real ThresholdNormal = 0.1f;
+        static const aten::vec3 LineColor(0, 1, 0);
+
+        std::array<FeatureLine::SampleRayDesc, SampleRayNum> sample_ray_descs;
+        std::array<aten::ray, SampleRayNum> sample_rays;
+        aten::FeatureLine::Disc prev_disc;
+        aten::hitrecord prev_query_ray_hrec;
+
+        auto disc = aten::FeatureLine::generateDisc(path.ray, FeatureLineWidth, pixel_width);
+        for (size_t i = 0; i < SampleRayNum; i++) {
+            sample_rays[i] = aten::FeatureLine::generateSampleRay(sample_ray_descs[i], *sampler, path.ray, disc);
+        }
+
+        real accumulated_hit_point_distance = 1;
+
+        aten::vec3 sample_ray_hit_pos;
+
+        while (depth < maxDepth) {
+            path.rec = hitrecord();
+
+            bool willContinue = true;
+            Intersection isect;
+
+            auto closest_sample_ray_distance = std::numeric_limits<real>::max();
+            int32_t closest_sample_ray_idx = -1;
+            real hit_point_distance = 0;
+
+            if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
+                // disc.centerはquery_ray.orgに一致する.
+                // ただし、最初だけは、query_ray.orgはカメラ視点になっているが、
+                // accumulated_hit_point_distanceでカメラとdiscの距離がすでに含まれている.
+                hit_point_distance = length(path.rec.p - disc.center);
+
+                prev_disc = disc;
+                disc = aten::FeatureLine::computeNextDisc(
+                    path.rec.p,
+                    path.ray.dir,
+                    prev_disc.radius,
+                    hit_point_distance,
+                    accumulated_hit_point_distance);
+
+                for (size_t i = 0; i < SampleRayNum; i++) {
+                    if (sample_ray_descs[i].is_terminated) {
+                        continue;
+                    }
+
+                    if (depth > 0) {
+                        // Generate next sample ray.
+                        const auto res_next_sample_ray = aten::FeatureLine::computeNextSampleRay(
+                            sample_ray_descs[i],
+                            prev_disc, disc);
+                        const auto is_sample_ray_valid = std::get<0>(res_next_sample_ray);
+                        if (!is_sample_ray_valid) {
+                            sample_ray_descs[i].is_terminated = true;
+                            continue;
+                        }
+                        sample_rays[i] = std::get<1>(res_next_sample_ray);
+                    }
+
+                    Intersection isect_sample_ray;
+                    hitrecord hrec_sample;
+
+                    if (scene->hit(ctxt, sample_rays[i], AT_MATH_EPSILON, AT_MATH_INF, hrec_sample, isect_sample_ray)) {
+                        // If sample ray hit with the different mesh from query ray one, this sample ray won't bounce in next loop.
+                        sample_ray_descs[i].is_terminated = isect_sample_ray.meshid != isect.meshid;
+                        sample_ray_descs[i].prev_ray_hit_pos = hrec_sample.p;
+                        sample_ray_descs[i].prev_ray_hit_nml = hrec_sample.normal;
+
+                        const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenPointAndRay(
+                            hrec_sample.p, path.ray, nullptr);
+
+                        if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
+                            const auto is_line_width = aten::FeatureLine::isInLineWidth(
+                                FeatureLineWidth,
+                                path.ray,
+                                hrec_sample.p,
+                                accumulated_hit_point_distance - 1, // NOTE: -1 is for initial camera distance.
+                                pixel_width);
+                            if (is_line_width) {
+                                const auto query_albedo = ctxt.getMaterial(path.rec.mtrlid)->sampleAlbedoMap(path.rec.u, path.rec.v);
+                                const auto sample_albedo = ctxt.getMaterial(hrec_sample.mtrlid)->sampleAlbedoMap(path.rec.u, path.rec.v);
+                                const auto query_depth = length(path.rec.p - cam_org);
+                                const auto sample_depth = length(hrec_sample.p - cam_org);
+
+                                const auto is_feature_line = aten::FeatureLine::evaluateMetrics(
+                                    path.ray.org,
+                                    path.rec, hrec_sample,
+                                    query_albedo, sample_albedo,
+                                    query_depth, sample_depth,
+                                    ThresholdAlbedo, ThresholdNormal,
+                                    2);
+
+                                if (is_feature_line) {
+                                    closest_sample_ray_idx = i;
+                                    closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        const auto query_hit_plane = aten::FeatureLine::computePlane(path.rec);
+                        const auto res_sample_ray_dummy_hit = aten::FeatureLine::computeRayHitPosOnPlane(
+                            query_hit_plane, sample_rays[i]);
+
+                        const auto is_hit_sample_ray_dummy_plane = std::get<0>(res_sample_ray_dummy_hit);
+                        if (is_hit_sample_ray_dummy_plane) {
+                            const auto sample_ray_dummy_hit_pos = std::get<1>(res_sample_ray_dummy_hit);
+                            const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenPointAndRay(
+                                sample_ray_dummy_hit_pos, path.ray, nullptr);
+
+                            if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
+                                const auto is_line_width = aten::FeatureLine::isInLineWidth(
+                                    FeatureLineWidth,
+                                    path.ray,
+                                    sample_ray_dummy_hit_pos,
+                                    accumulated_hit_point_distance - 1, // NOTE: -1 is for initial camera distance.
+                                    pixel_width);
+                                if (is_line_width) {
+                                    // If sample ray doesn't hit anything, it is forcibly feature line.
+                                    closest_sample_ray_idx = i;
+                                    closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                                }
+                            }
+                        }
+
+                        sample_ray_descs[i].is_terminated = true;
+                    }
+
+                    const auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
+                    if (!mtrl->param().attrib.isGlossy) {
+                        // In non glossy material case, sample ray doesn't bounce anymore.
+                        // TODO
+                        // Even if material is glossy, how glossy depends on parameter (e.g. roughness etc).
+                        // So, I need to consider how to indetify if sample ray bounce is necessary based on material.
+                        sample_ray_descs[i].is_terminated = true;
+                    }
+                }
+
+                if (closest_sample_ray_idx < 0) {
+                    willContinue = shade(ctxt, sampler, scene, cam, camsample, depth, path);
+                }
+            }
+            else {
+                if (depth > 0) {
+                    // Make dummy point to compute next sample ray.
+                    const auto dummy_query_hit_pos = path.ray.org + real(100) * path.ray.dir;
+                    hit_point_distance = length(dummy_query_hit_pos - disc.center);
+
+                    prev_disc = disc;
+                    disc = aten::FeatureLine::computeNextDisc(
+                        dummy_query_hit_pos,
+                        path.ray.dir,
+                        prev_disc.radius,
+                        hit_point_distance,
+                        accumulated_hit_point_distance);
+
+                    for (size_t i = 0; i < SampleRayNum; i++) {
+                        if (sample_ray_descs[i].is_terminated) {
+                            continue;
+                        }
+
+                        // Generate next sample ray.
+                        const auto res_next_sample_ray = aten::FeatureLine::computeNextSampleRay(
+                            sample_ray_descs[i],
+                            prev_disc, disc);
+                        const auto is_sample_ray_valid = std::get<0>(res_next_sample_ray);
+                        if (!is_sample_ray_valid) {
+                            sample_ray_descs[i].is_terminated = true;
+                            continue;
+                        }
+                        sample_rays[i] = std::get<1>(res_next_sample_ray);
+                    }
+                }
+
+                for (size_t i = 0; i < SampleRayNum; i++) {
+                    if (sample_ray_descs[i].is_terminated) {
+                        continue;
+                    }
+
+                    Intersection isect_sample_ray;
+                    hitrecord hrec_sample;
+
+                    if (scene->hit(ctxt, sample_rays[i], AT_MATH_EPSILON, AT_MATH_INF, hrec_sample, isect_sample_ray)) {
+                        const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenPointAndRay(
+                            hrec_sample.p, path.ray, nullptr);
+
+                        if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
+                            const auto is_line_width = aten::FeatureLine::isInLineWidth(
+                                FeatureLineWidth,
+                                path.ray,
+                                hrec_sample.p,
+                                accumulated_hit_point_distance - 1, // NOTE: -1 is for initial camera distance.
+                                pixel_width);
+                            if (is_line_width) {
+                                // If sample ray doesn't hit anything, it is forcibly feature line.
+                                closest_sample_ray_idx = i;
+                                closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                            }
+                        }
+                    }
+                }
+
+
+                if (closest_sample_ray_idx < 0) {
+                    shadeMiss(scene, depth, path);
+                }
+                willContinue = false;
+            }
+
+            if (depth < m_startDepth && !path.isTerminate) {
+                path.contrib = vec3(0);
+            }
+            else if (closest_sample_ray_idx >= 0) {
+                auto pdf_feature_line = real(1) / SampleRayNum;
+                pdf_feature_line = pdf_feature_line * (closest_sample_ray_distance * closest_sample_ray_distance);
+                const auto weight = path.pdfb / (path.pdfb + pdf_feature_line);
+                path.contrib += path.throughput * weight * LineColor;
+            }
+
+            if (!willContinue) {
+                break;
+            }
+
+            depth++;
+
+            prev_query_ray_hrec = path.rec;
+            accumulated_hit_point_distance += hit_point_distance;
         }
 
         return path;
@@ -406,15 +664,28 @@ namespace aten
 
                         auto ray = camsample.r;
 
-                        auto path = radiance(
-                            ctxt,
-                            &rnd,
-                            m_maxDepth,
-                            ray,
-                            camera,
-                            camsample,
-                            scene,
-                            &hrec);
+                        Path path;
+                        if (enable_feature_line_) {
+                            path = radiance_with_feature_line(
+                                ctxt,
+                                &rnd,
+                                m_maxDepth,
+                                ray,
+                                camera,
+                                camsample,
+                                scene);
+                        }
+                        else {
+                            path = radiance(
+                                ctxt,
+                                &rnd,
+                                m_maxDepth,
+                                ray,
+                                camera,
+                                camsample,
+                                scene,
+                                &hrec);
+                        }
 
                         if (isInvalidColor(path.contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
@@ -441,6 +712,7 @@ namespace aten
 
                     col /= (real)cnt;
 
+#if 0
                     if (hrec.mtrlid >= 0) {
                         const auto mtrl = ctxt.getMaterial(hrec.mtrlid);
                         if (mtrl && mtrl->isNPR()) {
@@ -451,6 +723,7 @@ namespace aten
                                 ctxt, *scene, *camera);
                         }
                     }
+#endif
 
                     dst.buffer->put(x, y, vec4(col, 1));
 

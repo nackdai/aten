@@ -43,6 +43,13 @@ namespace aten {
             m20 = _m20; m21 = _m21; m22 = _m22; m23 = _m23;
             m30 = _m30; m31 = _m31; m32 = _m32; m33 = _m33;
         }
+        AT_DEVICE_API mat4(const vec3& x, const vec3& y, const vec3& z)
+        {
+            m00 = x.x; m01 = y.x; m02 = z.x; m03 = 0;
+            m10 = x.y; m11 = y.y; m12 = z.y; m13 = 0;
+            m20 = x.z; m21 = y.z; m22 = z.z; m23 = 0;
+            m30 = 0.0; m31 = 0.0; m32 = 0.0; m33 = 1;
+        }
 
         inline AT_DEVICE_API mat4& identity()
         {

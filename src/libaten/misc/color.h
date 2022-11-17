@@ -58,7 +58,7 @@ namespace AT_NAME {
 
         static inline AT_DEVICE_API real luminance(const aten::vec3& v)
         {
-            real ret = dot(aten::vec3(real(0.2126), real(0.7152), real(0.0722)), v);
+            real ret = luminance(v.r, v.g, v.b);
             return ret;
         }
 

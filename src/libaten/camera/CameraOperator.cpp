@@ -122,7 +122,7 @@ namespace aten {
 
         // スケーリング.
         // 注視点までの距離に応じる.
-        auto distScale = scale * len * 0.01f;
+        auto distScale = std::min(scale * len * 0.01f, len);
         dir *= distScale;
 
         // 新しい視点.

@@ -1081,10 +1081,26 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
                 (void)albedo;
                 (void)nml;
 
-                auto mtrl = createMaterial(ctxt, type, mtrl_clr);
-                mtrl->setName(name.c_str());
-                aten::AssetManager::registerMtrl(name, mtrl);
-                return mtrl;
+                if (name == "floor") {
+                    //type = aten::MaterialType::GGX;
+                    type = aten::MaterialType::Specular;
+
+                    aten::MaterialParameter mtrlParam;
+                    mtrlParam.baseColor = aten::vec3(0.7, 0.6, 0.5);
+                    mtrlParam.standard.roughness = 0.1;
+                    mtrlParam.standard.ior = 0.01;
+
+                    auto mtrl = createMaterialWithParamter(ctxt, type, mtrlParam);
+                    mtrl->setName(name.c_str());
+                    aten::AssetManager::registerMtrl(name, mtrl);
+                    return mtrl;
+                }
+                else {
+                    auto mtrl = createMaterial(ctxt, type, mtrl_clr);
+                    mtrl->setName(name.c_str());
+                    aten::AssetManager::registerMtrl(name, mtrl);
+                    return mtrl;
+                }
         },
         true, true);
 

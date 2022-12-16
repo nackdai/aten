@@ -3,7 +3,7 @@
 #include "aten.h"
 #include "renderer/feature_line.h"
 
-TEST(feature_line_test, GenerateDiscTest)
+TEST(feature_line_test, GenerateDisc)
 {
     constexpr real line_width = real(2);
     constexpr real pixel_width = real(3);
@@ -32,7 +32,7 @@ TEST(feature_line_test, GenerateDiscTest)
     EXPECT_FLOAT_EQ(disc.radius, expected_disc_radius);
 }
 
-TEST(feature_line_test, ComputeNextDiscTest)
+TEST(feature_line_test, ComputeNextDisc)
 {
     aten::vec3 query_ray_hit_pos(1, 2, 3);
     aten::vec3 ray_dir(0, 1, 0);
@@ -54,11 +54,40 @@ TEST(feature_line_test, ComputeNextDiscTest)
     EXPECT_FLOAT_EQ(disc.normal.y, -1);
     EXPECT_FLOAT_EQ(disc.normal.z, 0);
 
+    EXPECT_FLOAT_EQ(disc.accumulated_distance, accumulatedDistanceFromCameraWithoutCurrentHitDistance);
+
     constexpr auto expected_radius = (current_hit_distance + accumulatedDistanceFromCameraWithoutCurrentHitDistance) / accumulatedDistanceFromCameraWithoutCurrentHitDistance;
     EXPECT_NEAR(disc.radius, expected_radius, 1e-7);
 }
 
-TEST(feature_line_test, ComputePlaneTest)
+TEST(feature_line_test, StoreRayToDescAndGet)
+{
+    aten::ray ray(
+        aten::vec3(1, 2, 3),
+        aten::vec3(4, 5, 6));
+
+    aten::FeatureLine::SampleRayDesc desc;
+    aten::FeatureLine::storeRayToDesc(desc, ray);
+
+    EXPECT_FLOAT_EQ(desc.ray_org_x, ray.org.x);
+    EXPECT_FLOAT_EQ(desc.ray_org_y, ray.org.y);
+    EXPECT_FLOAT_EQ(desc.ray_org_z, ray.org.z);
+
+    EXPECT_FLOAT_EQ(desc.ray_dir.x, ray.dir.x);
+    EXPECT_FLOAT_EQ(desc.ray_dir.y, ray.dir.y);
+    EXPECT_FLOAT_EQ(desc.ray_dir.z, ray.dir.z);
+
+    const auto stored_ray = aten::FeatureLine::getRayFromDesc(desc);
+
+    EXPECT_FLOAT_EQ(stored_ray.org.x, ray.org.x);
+    EXPECT_FLOAT_EQ(stored_ray.org.y, ray.org.y);
+    EXPECT_FLOAT_EQ(stored_ray.org.z, ray.org.z);
+    EXPECT_FLOAT_EQ(stored_ray.dir.x, ray.dir.x);
+    EXPECT_FLOAT_EQ(stored_ray.dir.y, ray.dir.y);
+    EXPECT_FLOAT_EQ(stored_ray.dir.z, ray.dir.z);
+}
+
+TEST(feature_line_test, ComputePlane)
 {
     aten::hitrecord hrec;
     hrec.normal = aten::vec3(0, 1, 0);
@@ -74,7 +103,7 @@ TEST(feature_line_test, ComputePlaneTest)
     EXPECT_FLOAT_EQ(plane.w, d);
 }
 
-TEST(feature_line_test, ComputeRayHitPosOnPlaneTest)
+TEST(feature_line_test, ComputeRayHitPosOnPlane)
 {
     aten::ray ray;
     aten::vec4 plane(0, 1, 0, 0);
@@ -116,7 +145,7 @@ TEST(feature_line_test, ComputeRayHitPosOnPlaneTest)
     EXPECT_FALSE(is_hit);
 }
 
-TEST(feature_line_test, GenerateSampleRayTest)
+TEST(feature_line_test, GenerateSampleRay)
 {
     constexpr auto sampler_r0 = real(0.5);
     constexpr auto sampler_r1 = real(0.6);
@@ -170,7 +199,7 @@ TEST(feature_line_test, GenerateSampleRayTest)
     EXPECT_FLOAT_EQ(expected_v, sample_ray_desc.v);
 }
 
-TEST(feature_line_test, ComputeNextSampleRayTest)
+TEST(feature_line_test, ComputeNextSampleRay)
 {
     aten::FeatureLine::Disc disc;
     disc.radius = real(1);
@@ -215,7 +244,7 @@ TEST(feature_line_test, ComputeNextSampleRayTest)
     EXPECT_FLOAT_EQ(sample_ray.org.z, expected_sample_ray.org.z);
 }
 
-TEST(feature_line_test, ComputePosOnDiscTest)
+TEST(feature_line_test, ComputePosOnDisc)
 {
     aten::FeatureLine::Disc disc;
     disc.radius = real(1);
@@ -241,7 +270,7 @@ TEST(feature_line_test, ComputePosOnDiscTest)
     EXPECT_FLOAT_EQ(expected_pos.z, result.z);
 }
 
-TEST(feature_line_test, ComputeDistanceBetweenPointAndRayTest)
+TEST(feature_line_test, ComputeDistanceBetweenPointAndRay)
 {
     const aten::ray ray(
         aten::vec3(0, 0, 0),
@@ -253,7 +282,24 @@ TEST(feature_line_test, ComputeDistanceBetweenPointAndRayTest)
     EXPECT_FLOAT_EQ(result, 1);
 }
 
-TEST(feature_line_test, ComputeThresholdDepthTest)
+TEST(feature_line_test, ComputeDistanceBetweenProjectedPosOnRayAndRayOrg)
+{
+    const aten::ray ray(
+        aten::vec3(0, 0, 0),
+        aten::vec3(1, 0, 0));
+    const aten::vec3 point(1, 1, 0);
+
+    aten::vec3 pos_on_ray;
+    (void)aten::FeatureLine::computeDistanceBetweenPointAndRay(point, ray, &pos_on_ray);
+    const auto expected_distance = length(pos_on_ray - ray.org);
+
+    const auto result = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(point, ray);
+
+    EXPECT_FLOAT_EQ(result, expected_distance);
+}
+
+
+TEST(feature_line_test, ComputeThresholdDepth)
 {
     const aten::vec3 p(0, 0, 0);
 
@@ -297,7 +343,7 @@ TEST(feature_line_test, ComputeThresholdDepthTest)
     EXPECT_FLOAT_EQ(threshold_flt_max, FLT_MAX);
 }
 
-TEST(feature_line_test, EvaluateFeatureLineMetricsTest)
+TEST(feature_line_test, EvaluateFeatureLineMetrics)
 {
     // Mesh Id.
     auto is_mesh = aten::FeatureLine::evaluateMeshIdMetric(0, 1);
@@ -356,7 +402,7 @@ TEST(feature_line_test, EvaluateFeatureLineMetricsTest)
     EXPECT_FALSE(is_depth);
 }
 
-TEST(feature_line_test, IsInLineWidthTest)
+TEST(feature_line_test, IsInLineWidth)
 {
     const aten::ray ray(
         aten::vec3(0, 0, 0),

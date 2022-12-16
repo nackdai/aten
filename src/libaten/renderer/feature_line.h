@@ -11,7 +11,7 @@
 #include "misc/color.h"
 #include "sampler/sampler.h"
 
-namespace aten
+namespace AT_NAME
 {
     class FeatureLine {
     private:
@@ -36,55 +36,7 @@ namespace aten
             const aten::hitrecord& hrec,
             const context& ctxt,
             const scene& scene,
-            const camera& camera)
-        {
-            // NOTE
-            // Ray Tracing NPR-Style Feature Lines
-            // http://www.sci.utah.edu/publications/choudhury09/NPR-lines.NPAR09.pdf
-
-            constexpr auto M = 24;
-            constexpr auto N = 2;
-            constexpr auto radius = real(2.0);
-
-            uint32_t edge_strengh_measurement = 0;
-
-            for (int32_t n = 0; n < N; n++) {
-                const auto sample_in_n = (N - n) * 8;
-                for (int32_t i = 0; i < sample_in_n; i++) {
-                    const auto theta = (AT_MATH_PI_2 * i) / sample_in_n;
-                    const auto stencil_pos_x = radius * (N - n) * aten::cos(theta);
-                    const auto stencil_pos_y = radius * (N - n) * aten::sin(theta);
-
-                    const auto u = (x + stencil_pos_x) / real(width);
-                    const auto v = (y + stencil_pos_y) / real(height);
-
-                    // TODO
-                    // Specify sampler as nullptr forcibly at this moment...
-                    const auto stencil_ray = camera.sample(u, v, nullptr).r;
-
-                    aten::hitrecord hrec_stencil;
-                    aten::Intersection isect;
-
-                    if (scene.hit(ctxt, stencil_ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_stencil, isect)) {
-                        if (hrec.meshid != hrec_stencil.meshid) {
-                            edge_strengh_measurement++;
-                        }
-                        else {
-                            const auto d = dot(hrec.normal, hrec_stencil.normal);
-                            if (d < real(0.25)) {
-                                edge_strengh_measurement++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            auto edge_strengh = aten::clamp(
-                1.0f - aten::abs(edge_strengh_measurement - M * real(0.5)) / (M * real(0.5)),
-                0.0f, 1.0f);
-            const auto result = color * (real(1) - edge_strengh);
-            return result;
-        }
+            const camera& camera);
 
         // NOTE
         // The following functions for "Physically-based Feature Line Rendering":
@@ -98,7 +50,7 @@ namespace aten
             real radius{ real(0) }; ///< Disc radius.
 
             aten::vec3 normal;      ///< Normal of disc.
-            real padding{ 0 };
+            real accumulated_distance{ 0 };   ///< Accumulated distance at disc.
         };
 
         /**
@@ -109,7 +61,7 @@ namespace aten
         * @param[in] pixel_width Pixel width at distance 1 from camera.
         * @return Generated disc.
         */
-        static inline Disc generateDisc(
+        static inline AT_DEVICE_MTRL_API Disc generateDisc(
             const aten::ray& query_ray,
             real line_width,
             real pixel_width)
@@ -144,7 +96,7 @@ namespace aten
         * @param[in] accumulatedDistanceFromCameraWithout_current_hit_distance Accumulated hit distance by query ray from camera without current hit distance.
         * @return Computed disc.
         */
-        static inline Disc computeNextDisc(
+        static inline AT_DEVICE_MTRL_API Disc computeNextDisc(
             const aten::vec3& query_ray_hit_pos,
             const aten::vec3& query_ray_dir,
             real previous_disc_radius,
@@ -162,6 +114,8 @@ namespace aten
             // Disc normal should be opposite from query ray from 2nd disc.
             disc.normal = -query_ray_dir;
 
+            disc.accumulated_distance = accumulatedDistanceFromCameraWithout_current_hit_distance;
+
             return disc;
         }
 
@@ -175,11 +129,42 @@ namespace aten
             uint8_t padding_0[3]{ 0, 0, 0 };
 
             aten::vec3 prev_ray_hit_pos;    ///< Hit point in previous bounce.
-            real padding_1{ 0 };
+            real ray_org_x;          ///< Origin X of sample ray.
 
             aten::vec3 prev_ray_hit_nml;    ///< Normal at hit point in previous bounce.
-            real padding_2{ 0 };
+            real ray_org_y;          ///< Origin Y of sample ray.
+
+            aten::vec3 ray_dir;      ///< Direction of sample ray.
+            real ray_org_z;          ///< Origin Z of sample ray.
         };
+
+        /**
+        * @brief Store sample ray to sample ray description.
+        * @param desc[out] Ray description. to store sample ray.
+        * @param ray[in] Ray to be stored.
+        */
+        static inline AT_DEVICE_MTRL_API void storeRayToDesc(
+            SampleRayDesc& desc,
+            const aten::ray& ray)
+        {
+            desc.ray_org_x = ray.org.x;
+            desc.ray_org_y = ray.org.y;
+            desc.ray_org_z = ray.org.z;
+            desc.ray_dir = ray.dir;
+        }
+
+        /**
+        * @brief Get stored ray from sample ray description.
+        * @param desc[in] Sample ray description to store ray.
+        * @return Stored ray.
+        */
+        static inline AT_DEVICE_MTRL_API aten::ray getRayFromDesc(const SampleRayDesc& desc)
+        {
+            aten::ray sample_ray(
+                aten::vec3(desc.ray_org_x, desc.ray_org_y, desc.ray_org_z),
+                desc.ray_dir);
+            return sample_ray;
+        }
 
         /**
         * @brief Generate sample ray.
@@ -189,9 +174,9 @@ namespace aten
         * @param[in] first_disc First target disc.
         * @return Generated sample ray.
         */
-        static inline ray generateSampleRay(
+        static inline AT_DEVICE_MTRL_API aten::ray generateSampleRay(
             SampleRayDesc& sample_ray_desc,
-            AT_NAME::sampler& sampler,
+            aten::sampler& sampler,
             const aten::ray& query_ray,
             const Disc& first_disc)
         {
@@ -208,7 +193,7 @@ namespace aten
             // In generation timing, the origin point is the same as query ray.
             const aten::vec3 org = query_ray.org;
 
-            const aten::vec3 ray_dir = static_cast<vec3>(pos_on_disc) - org;
+            const aten::vec3 ray_dir = static_cast<aten::vec3>(pos_on_disc) - org;
 
             aten::ray sample_ray(org, ray_dir);
 
@@ -223,7 +208,7 @@ namespace aten
         * @return First variable is flag to describe if sample ray exists. Second one is next sample ray.
         *         Third one is ray target position on next disc.
         */
-        static inline std::tuple<bool, aten::ray, aten::vec3> computeNextSampleRay(
+        static inline AT_DEVICE_MTRL_API std::tuple<bool, aten::ray, aten::vec3> computeNextSampleRay(
             const SampleRayDesc& sample_ray_desc,
             const Disc& prev_disc,
             const Disc& next_disc)
@@ -255,7 +240,7 @@ namespace aten
             //   This normal is at sample ray hit position in previous bounce.
             //   "sample ray hit position in previous bounce." = origin point of next sample ray.
             aten::ray next_sample_ray(prev_org, ray_dir, sample_ray_desc.prev_ray_hit_nml);
-            if (isInvalid(next_sample_ray.dir)) {
+            if (aten::isInvalid(next_sample_ray.dir)) {
                 return std::make_tuple(false, aten::ray(), aten::vec3());
             }
 
@@ -269,7 +254,7 @@ namespace aten
         * @param[in] disc Disc which ray aims to hit.
         * @return Hit position by ray on disc.
         */
-        static inline aten::vec4 computePosOnDisc(
+        static inline AT_DEVICE_MTRL_API aten::vec4 computePosOnDisc(
             const real u, const real v,
             const Disc& disc)
         {
@@ -301,7 +286,7 @@ namespace aten
         * @param[in] hrec Hit record to compute plane.
         * @return Computed plane as vec4 <Normal of plane, D>.
         */
-        static inline aten::vec4 computePlane(const aten::hitrecord& hrec)
+        static inline AT_DEVICE_MTRL_API aten::vec4 computePlane(const aten::hitrecord& hrec)
         {
             // NOTE:
             // Plane:
@@ -320,7 +305,7 @@ namespace aten
         * @param[in] ray Ray.
         * @return First variable is flag to describe if ray hits to plane. Second one is hit position on plane.
         */
-        static inline std::tuple<bool, aten::vec3> computeRayHitPosOnPlane(
+        static inline AT_DEVICE_MTRL_API std::tuple<bool, aten::vec3> computeRayHitPosOnPlane(
             const aten::vec4& plane,
             const aten::ray& ray)
         {
@@ -365,7 +350,7 @@ namespace aten
         * @param[out] hit_point Storage to get projected point on ray. If this value is null, point can't be stored.
         * @return Distance between point and ray.
         */
-        static inline real computeDistanceBetweenPointAndRay(
+        static inline AT_DEVICE_MTRL_API real computeDistanceBetweenPointAndRay(
             const aten::vec3& point,
             const aten::ray& ray,
             aten::vec3* hit_point)
@@ -396,6 +381,22 @@ namespace aten
         }
 
         /**
+        * @brief Compute distance between projected point on ray and origin of ray.
+        * @param point[in] Point to be projected on ray.
+        * @param ray[in] Ray which point is projected on.
+        * @return Dstance between projected point on ray and origin of ray.
+        */
+        static inline AT_DEVICE_MTRL_API real computeDistanceBetweenProjectedPosOnRayAndRayOrg(
+            const aten::vec3& point,
+            const aten::ray& ray)
+        {
+            aten::vec3 sample_pos_on_query_ray;
+            (void)computeDistanceBetweenPointAndRay(point, ray, &sample_pos_on_query_ray);
+            const auto distance_sample_pos_on_ray = length(sample_pos_on_query_ray - ray.org);
+            return distance_sample_pos_on_ray;
+        }
+
+        /**
         * @brief Evaluate feature line metrics.
         * @param[in] p Start point of query ray.
         * @param[in] scale_factor Scale factor for depth threshold.
@@ -410,7 +411,7 @@ namespace aten
         * @param[in] scale_factor_threshold_depth Scale factor to compute depth threshold.
         * @return If metric is valid, return true. Otherwise, return false.
         */
-        static inline bool evaluateMetrics(
+        static inline AT_DEVICE_MTRL_API bool evaluateMetrics(
             const aten::vec3& p,
             const aten::hitrecord& hrec_query,
             const aten::hitrecord& hrec_sample,
@@ -447,7 +448,7 @@ namespace aten
         * @param[in] hrec_sample Mesh id at sample ray hit point.
         * @return If metric is valid, return true. Otherwise, return false.
         */
-        static inline bool evaluateMeshIdMetric(
+        static inline AT_DEVICE_MTRL_API bool evaluateMeshIdMetric(
             const int mesh_id_query,
             const int mesh_id_sample)
         {
@@ -462,14 +463,14 @@ namespace aten
         * @param[in] albedo_s Albedo at sample ray hit point.
         * @return If metric is valid, return true. Otherwise, return false.
         */
-        static inline bool evaluateAlbedoMetric(
+        static inline AT_DEVICE_MTRL_API bool evaluateAlbedoMetric(
             const real threshold_albedo,
             const aten::vec4& albedo_q,
             const aten::vec4& albedo_s)
         {
             const auto lum_q = AT_NAME::color::luminance(albedo_q);
             const auto lum_s = AT_NAME::color::luminance(albedo_s);
-            const auto is_albedo = AT_NAME::abs(lum_q - lum_s) > threshold_albedo;
+            const auto is_albedo = aten::abs(lum_q - lum_s) > threshold_albedo;
             return is_albedo;
         }
 
@@ -480,7 +481,7 @@ namespace aten
         * @param[in] normal_sample Albedo at sample ray hit point.
         * @return If metric is valid, return true. Otherwise, return false.
         */
-        static inline bool evaluateNormalMetric(
+        static inline AT_DEVICE_MTRL_API bool evaluateNormalMetric(
             const real threshold_normal,
             const aten::vec3& normal_query,
             const aten::vec3& normal_sample)
@@ -499,7 +500,7 @@ namespace aten
         * @param[in] depth_s Depth at sample ray hit point.
         * @return If metric is valid, return true. Otherwise, return false.
         */
-        static inline bool evaluateDepthMetric(
+        static inline AT_DEVICE_MTRL_API bool evaluateDepthMetric(
             const aten::vec3& p,
             const real scale_factor,
             const aten::hitrecord& hrec_query,
@@ -512,7 +513,7 @@ namespace aten
                 scale_factor,
                 hrec_query, hrec_sample,
                 depth_q, depth_s);
-            const auto is_depth = AT_NAME::abs(depth_q - depth_s) > threshold_depth;
+            const auto is_depth = aten::abs(depth_q - depth_s) > threshold_depth;
             return is_depth;
         }
 
@@ -526,7 +527,7 @@ namespace aten
         * @param[in] depth_s Depth at sample ray hit point.
         * @return Threshold for depth.
         */
-        static inline real computeThresholdDepth(
+        static inline AT_DEVICE_MTRL_API real computeThresholdDepth(
             const aten::vec3& p,
             const real scale_factor,
             const aten::hitrecord& hrec_query,
@@ -552,7 +553,7 @@ namespace aten
             const auto& n_closest = length(p_q) > length(p_s) ? hrec_sample.normal : hrec_query.normal;
 
             const auto max_depth = std::max(depth_q, depth_s);
-            const auto div = AT_NAME::abs(dot(p_q, n_closest));
+            const auto div = aten::abs(dot(p_q, n_closest));
 
             if (div == real(0)) {
                 return FLT_MAX;
@@ -572,7 +573,7 @@ namespace aten
         * @param[in] pixelWidth Pixel width at distance 1 from camera.
         * @return If feature line width in 3D is valid based on line width in 2D, return true. Otherwise, return false.
         */
-        static inline bool isInLineWidth(
+        static inline AT_DEVICE_MTRL_API bool isInLineWidth(
             const real screen_line_width,
             const aten::ray& query_ray,
             const aten::vec3& sample_hit_point,

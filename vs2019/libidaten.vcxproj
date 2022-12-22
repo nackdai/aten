@@ -64,8 +64,10 @@
     <ClInclude Include="..\src\libaten\math\vec4.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
+    <ClInclude Include="..\src\libaten\misc\tuple.h" />
     <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
+    <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\sobol.h" />
@@ -124,6 +126,7 @@
     <ClInclude Include="..\src\libidaten\multigpu\pt_multigpu.h" />
     <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h" />
     <ClInclude Include="..\src\libidaten\multigpu\svgf_multigpu.h" />
+    <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h" />
     <ClInclude Include="..\src\libidaten\restir\reservior.h" />
     <ClInclude Include="..\src\libidaten\restir\restir.h" />
     <ClInclude Include="..\src\libidaten\restir\restir_info.h" />
@@ -394,6 +397,13 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\npr\npr_pathtracing.cu">
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
+      <AdditionalCompilerOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </AdditionalCompilerOptions>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
     <CudaCompile Include="..\src\libidaten\restir\restir.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
@@ -646,7 +656,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;__AT_DEBUG__;__AT_CUDA__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\thrust;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -733,7 +743,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;__AT_CUDA__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\thrust;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -765,7 +775,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;__AT_CUDA__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glew\include;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\thrust;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>

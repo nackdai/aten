@@ -513,9 +513,6 @@ AT_CUDA_INLINE __device__ void evalHitResult(
         rec->p = r.org + isect->t * r.dir;
         rec->p = rec->p + AT_MATH_EPSILON * rec->normal;
 
-        // Material id.
-        rec->mtrlid = isect->mtrlid;
-
         // Flag if voxel or not.
         rec->isVoxel = true;
     }
@@ -532,10 +529,11 @@ AT_CUDA_INLINE __device__ void evalHitResult(
             // TODO
         }
 
-        rec->mtrlid = isect->mtrlid;
-
         rec->isVoxel = false;
     }
+
+    rec->mtrlid = isect->mtrlid;
+    rec->meshid = isect->meshid;
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
     // tangent coordinate.

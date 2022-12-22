@@ -95,7 +95,7 @@ namespace idaten
             int bounce,
             cudaTextureObject_t texVtxPos);
 
-        void missShade(
+        virtual void missShade(
             int width, int height,
             int bounce,
             int offsetX = -1,

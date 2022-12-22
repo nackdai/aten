@@ -301,6 +301,15 @@
     <ClInclude Include="..\src\libaten\renderer\aov.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\feature_line.h">
+      <Filter>aten\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h">
+      <Filter>npr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\misc\tuple.h">
+      <Filter>aten\misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">
@@ -356,6 +365,9 @@
     </Filter>
     <Filter Include="restir">
       <UniqueIdentifier>{b99f5c3d-55a5-47c9-ae13-6d0cabffccc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="npr">
+      <UniqueIdentifier>{db67bb99-c664-43cc-bfcd-148039fcd272}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -549,6 +561,9 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\car_paint.cpp">
       <Filter>aten\material</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\libidaten\npr\npr_pathtracing.cu">
+      <Filter>npr</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

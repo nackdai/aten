@@ -1,7 +1,5 @@
 #pragma once
 
-#include <tuple>
-
 #include "defs.h"
 #include "math/math.h"
 #include "scene/hitable.h"
@@ -9,6 +7,7 @@
 #include "scene/context.h"
 #include "camera/camera.h"
 #include "misc/color.h"
+#include "misc/tuple.h"
 #include "sampler/sampler.h"
 
 namespace AT_NAME
@@ -74,8 +73,8 @@ namespace AT_NAME
 
             // Query ray has to hit to plane at distance 1 from camera based on camera direction.
             const auto res_pos_on_plane = computeRayHitPosOnPlane(plane, query_ray);
-            const auto is_hit = std::get<0>(res_pos_on_plane);
-            const auto hit_pos_on_plane = std::get<1>(res_pos_on_plane);
+            const auto is_hit = aten::get<0>(res_pos_on_plane);
+            const auto hit_pos_on_plane = aten::get<1>(res_pos_on_plane);
             AT_ASSERT(is_hit);
 
             // Hit point is the disc center.
@@ -208,7 +207,7 @@ namespace AT_NAME
         * @return First variable is flag to describe if sample ray exists. Second one is next sample ray.
         *         Third one is ray target position on next disc.
         */
-        static inline AT_DEVICE_MTRL_API std::tuple<bool, aten::ray, aten::vec3> computeNextSampleRay(
+        static inline AT_DEVICE_MTRL_API aten::tuple<bool, aten::ray, aten::vec3> computeNextSampleRay(
             const SampleRayDesc& sample_ray_desc,
             const Disc& prev_disc,
             const Disc& next_disc)
@@ -233,7 +232,7 @@ namespace AT_NAME
             const auto d = dot(ray_dir, sample_ray_desc.prev_ray_hit_nml);
             if (d < 0) {
                 // Not allow bounce to the different direction from normal.
-                return std::make_tuple(false, aten::ray(), aten::vec3());
+                return aten::make_tuple<bool, aten::ray, aten::vec3>(false, aten::ray(), aten::vec3());
             }
 
             // Normal is necessary to avoid self hit.
@@ -241,10 +240,10 @@ namespace AT_NAME
             //   "sample ray hit position in previous bounce." = origin point of next sample ray.
             aten::ray next_sample_ray(prev_org, ray_dir, sample_ray_desc.prev_ray_hit_nml);
             if (aten::isInvalid(next_sample_ray.dir)) {
-                return std::make_tuple(false, aten::ray(), aten::vec3());
+                return aten::make_tuple<bool, aten::ray, aten::vec3>(false, aten::ray(), aten::vec3());
             }
 
-            return std::make_tuple(true, next_sample_ray, pos_on_next_disc);
+            return aten::make_tuple<bool, aten::ray, aten::vec3>(true, next_sample_ray, pos_on_next_disc);
         }
 
         /**
@@ -305,7 +304,7 @@ namespace AT_NAME
         * @param[in] ray Ray.
         * @return First variable is flag to describe if ray hits to plane. Second one is hit position on plane.
         */
-        static inline AT_DEVICE_MTRL_API std::tuple<bool, aten::vec3> computeRayHitPosOnPlane(
+        static inline AT_DEVICE_MTRL_API aten::tuple<bool, aten::vec3> computeRayHitPosOnPlane(
             const aten::vec4& plane,
             const aten::ray& ray)
         {
@@ -332,7 +331,7 @@ namespace AT_NAME
             // LV
             const auto div = dot(L, V);
             if (div == 0) {
-                return std::make_tuple(false, aten::vec3());
+                return aten::make_tuple<bool, aten::vec3>(false, aten::vec3());
             }
 
             // t = -LQ / LV
@@ -340,7 +339,7 @@ namespace AT_NAME
             t = -t / div;
 
             aten::vec3 pos = ray.org + t * ray.dir;
-            return std::make_tuple(t >= 0, pos);
+            return aten::make_tuple<bool, aten::vec3>(t >= 0, pos);
         }
 
         /**

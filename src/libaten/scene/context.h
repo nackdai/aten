@@ -4,6 +4,7 @@
 #include <iterator>
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include "geometry/vertex.h"
 #include "visualizer/GeomDataBuffer.h"

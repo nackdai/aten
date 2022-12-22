@@ -171,5 +171,22 @@ namespace AT_NAME {
             AT_ASSERT(false);
             return real(0);
         }
+
+        static AT_DEVICE_API real computePixelWidthAtDistance(
+            const aten::CameraParameter& param,
+            real distanceFromCamera)
+        {
+            AT_ASSERT(distanceFromCamera > real(0));
+            distanceFromCamera = aten::abs(distanceFromCamera);
+
+            // Compute horizontal FoV.
+            auto hfov = param.vfov * param.height / real(param.width);
+            hfov = Deg2Rad(hfov);
+
+            auto half_width = aten::tan(hfov / 2) * distanceFromCamera;
+            auto width = half_width * 2;
+            auto pixel_width = width / real(param.width);
+            return pixel_width;
+        }
     };
 }

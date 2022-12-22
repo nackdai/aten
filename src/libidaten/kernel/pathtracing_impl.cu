@@ -46,6 +46,13 @@ namespace pt {
             return;
         }
 
+        idx = hitindices[idx];
+
+        if (paths->attrib[idx].isKill || paths->attrib[idx].isTerminate) {
+            paths->attrib[idx].isTerminate = true;
+            return;
+        }
+
         idaten::Context ctxt;
         {
             ctxt.geomnum = geomnum;
@@ -59,8 +66,6 @@ namespace pt {
             ctxt.matrices = matrices;
             ctxt.textures = textures;
         }
-
-        idx = hitindices[idx];
 
         __shared__ idaten::ShadowRay shShadowRays[64];
         __shared__ aten::MaterialParameter shMtrls[64];
@@ -274,6 +279,13 @@ namespace pt {
             return;
         }
 
+        idx = hitindices[idx];
+
+        if (paths->attrib[idx].isKill || paths->attrib[idx].isTerminate) {
+            paths->attrib[idx].isTerminate = true;
+            return;
+        }
+
         idaten::Context ctxt;
         {
             ctxt.geomnum = geomnum;
@@ -286,8 +298,6 @@ namespace pt {
             ctxt.vtxPos = vtxPos;
             ctxt.matrices = matrices;
         }
-
-        idx = hitindices[idx];
 
         const auto& shadowRay = shadowRays[idx];
 

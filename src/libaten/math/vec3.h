@@ -330,7 +330,7 @@ namespace aten {
         return p;
     }
 
-    inline bool isInvalid(const vec3& v)
+    inline AT_DEVICE_API bool isInvalid(const vec3& v)
     {
         bool b0 = isInvalid(v.x);
         bool b1 = isInvalid(v.y);

@@ -338,6 +338,7 @@
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timeline.h" />
     <ClInclude Include="..\src\libaten\misc\timer.h" />
+    <ClInclude Include="..\src\libaten\misc\tuple.h" />
     <ClInclude Include="..\src\libaten\misc\value.h" />
     <ClInclude Include="..\src\libaten\os\system.h" />
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h" />
@@ -480,6 +481,7 @@
     <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
+    <ClCompile Include="..\src\libaten\renderer\feature_line.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
     <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />

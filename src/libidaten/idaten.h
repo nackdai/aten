@@ -19,3 +19,5 @@
 #include "ao/ao.h"
 
 #include "restir/restir.h"
+
+#include "npr/npr_pathtracing.h"

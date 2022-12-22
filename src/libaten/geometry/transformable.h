@@ -6,7 +6,6 @@
 #include "scene/hitable.h"
 #include "math/mat4.h"
 #include "geometry/geomparam.h"
-#include "misc/datalist.h"
 
 namespace aten
 {

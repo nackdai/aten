@@ -8,7 +8,6 @@
 #include "types.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
-#include "misc/datalist.h"
 #include "visualizer/shader.h"
 
 namespace aten

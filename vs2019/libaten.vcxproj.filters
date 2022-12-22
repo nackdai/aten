@@ -479,9 +479,6 @@
     <ClInclude Include="..\src\libaten\scene\context.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\misc\datalist.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\material_factory.h">
       <Filter>material</Filter>
     </ClInclude>

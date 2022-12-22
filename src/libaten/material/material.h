@@ -5,7 +5,6 @@
 #include "sampler/sampler.h"
 #include "texture/texture.h"
 #include "math/ray.h"
-#include "misc/datalist.h"
 
 namespace AT_NAME {
     class Light;

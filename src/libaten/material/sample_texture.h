@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "math/vec3.h"
+#include "math/vec4.h"
 #include "texture/texture.h"
 
 #ifdef __AT_CUDA__

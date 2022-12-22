@@ -8,7 +8,6 @@
 #include "geometry/vertex.h"
 #include "visualizer/GeomDataBuffer.h"
 #include "material/material.h"
-#include "misc/datalist.h"
 #include "geometry/geomparam.h"
 #include "texture/texture.h"
 

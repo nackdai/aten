@@ -71,11 +71,12 @@ And Idanten includes characters of aten, "id**aten**"
   - 360 view
 - Others
   - Instancing
-  - Scene Definition by XML
   - Deformation
+  - Alpha blending
 - [Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination](https://cg.ivd.kit.edu/svgf.php)
 - [Spatiotemporal reservoir resampling for real-time ray tracing
 with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pubs/2020-07_Spatiotemporal-reservoir-resampling/ReSTIR.pdf)
+- [Physically-based Feature Line Rendering](http://lines.rexwe.st/)
 
 ## Limitations
 
@@ -85,7 +86,6 @@ with dynamic direct lighting](https://research.nvidia.com/sites/default/files/pu
   - Only Area Light
 - Scene Definition by XML
   - Can not specify all definitions.
-- Not support texture alpha yet.
 - There are some Japanese comments...
 
 ## Future Works
@@ -135,7 +135,7 @@ Supoort just only `CUDA 11.7.0`.
 1. `./RunCMake.sh <Build Type> <Compute Capability>`
 1. Run make `ninja`
 
-I confirmed on 18.04 LTS and 20.04 LTS.
+I confirmed on 20.04 LTS.
 
 #### What is RunCMake.sh
 
@@ -299,3 +299,11 @@ CarPaint
 Retroreflective
 
 ![Retroreflective](gallery/retroreflective.gif)
+
+AlphaBlending
+
+![AlphaBlending](gallery/alpha_blend.png)
+
+Physically-based Feature Line Rendering
+
+![FeatureLine](gallery/feature_line.png)

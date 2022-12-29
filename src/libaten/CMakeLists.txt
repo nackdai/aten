@@ -158,7 +158,6 @@ add_library(
   misc/bitflag.h
   misc/color.cpp
   misc/color.h
-  misc/datalist.h
   misc/key.h
   misc/omputil.cpp
   misc/omputil.h
@@ -168,6 +167,7 @@ add_library(
   misc/timeline.cpp
   misc/timeline.h
   misc/timer.h
+  misc/tuple.h
   misc/value.h
   os/linux/misc/timer_linux.cpp
   os/linux/system_linux.cpp
@@ -186,6 +186,8 @@ add_library(
   renderer/envmap.h
   renderer/erpt.cpp
   renderer/erpt.h
+  renderer/feature_line.cpp
+  renderer/feature_line.h
   renderer/film.cpp
   renderer/film.h
   renderer/nonphotoreal.cpp

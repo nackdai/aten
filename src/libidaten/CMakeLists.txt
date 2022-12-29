@@ -149,6 +149,8 @@ cuda_add_library(
   multigpu/renderer_multigpu.h
   multigpu/svgf_multigpu.cpp
   multigpu/svgf_multigpu.h
+  npr/npr_pathtracing.cu
+  npr/npr_pathtracing.h
   restir/reservior.h
   restir/restir.cu
   restir/restir_debug.cu

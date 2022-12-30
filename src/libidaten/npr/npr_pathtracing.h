@@ -25,6 +25,12 @@ namespace idaten
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml) override;
 
+        virtual void missShade(
+            int width, int height,
+            int bounce,
+            int offsetX = -1,
+            int offsetY = -1) override;
+
     protected:
         idaten::TypedCudaMemory<SampleRayInfo> sample_ray_infos_;
         real feature_line_width_{ real(1) };

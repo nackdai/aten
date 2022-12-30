@@ -3,6 +3,7 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/context.cuh"
 #include "kernel/intersect.cuh"
+#include "kernel/pt_common.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -17,8 +18,7 @@ namespace npr_pt {
         const int* __restrict__ hitindices,
         int* hitnum,
         real FeatureLineWidth,
-        real pixel_width
-    )
+        real pixel_width)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -42,7 +42,25 @@ namespace npr_pt {
         sample_ray_info.disc.accumulated_distance = 1;
     }
 
+    inline __device__ void computeFeatureLineContrib(
+        real closest_sample_ray_distance,
+        idaten::Path* paths,
+        int idx,
+        const aten::vec3& line_color)
+    {
+        auto pdf_feature_line = real(1) / idaten::NPRPathTracing::SampleRayNum;
+        pdf_feature_line = pdf_feature_line * (closest_sample_ray_distance * closest_sample_ray_distance);
+        const auto pdfb = paths->throughput[idx].pdfb;
+        const auto weight = pdfb / (pdfb + pdf_feature_line);
+        const auto contrib = paths->throughput[idx].throughput * weight * line_color;
+
+        paths->contrib[idx].contrib = make_float3(contrib.x, contrib.y, contrib.z);
+        paths->attrib[idx].isKill = true;
+        paths->attrib[idx].isTerminate = true;
+    }
+
     __global__ void shadeSampleRay(
+        aten::vec3 line_color,  // TODO
         real FeatureLineWidth,
         real pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
@@ -204,6 +222,43 @@ namespace npr_pt {
                     }
                 }
             }
+            else {
+                const auto query_hit_plane = AT_NAME::FeatureLine::computePlane(rec);
+                const auto res_sample_ray_dummy_hit = AT_NAME::FeatureLine::computeRayHitPosOnPlane(
+                    query_hit_plane, sample_ray);
+
+                const auto is_hit_sample_ray_dummy_plane = aten::get<0>(res_sample_ray_dummy_hit);
+                if (is_hit_sample_ray_dummy_plane) {
+                    const auto sample_ray_dummy_hit_pos = aten::get<1>(res_sample_ray_dummy_hit);
+
+                    const auto distance_sample_pos_on_query_ray = AT_NAME::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
+                        sample_ray_dummy_hit_pos, query_ray);
+
+                    const auto is_line_width = AT_NAME::FeatureLine::isInLineWidth(
+                        FeatureLineWidth,
+                        query_ray,
+                        sample_ray_dummy_hit_pos,
+                        disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
+                        pixel_width);
+                    if (is_line_width) {
+                        // If sample ray doesn't hit anything, it is forcibly feature line.
+                        if (distance_sample_pos_on_query_ray < closest_sample_ray_distance
+                            && distance_sample_pos_on_query_ray < distance_query_ray_hit)
+                        {
+                            // Deal with sample hit point as FeatureLine.
+                            closest_sample_ray_idx = i;
+                            closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                        }
+                        else if (distance_query_ray_hit < closest_sample_ray_distance) {
+                            // Deal with query hit point as FeatureLine.
+                            closest_sample_ray_idx = idaten::NPRPathTracing::SampleRayNum;
+                            closest_sample_ray_distance = distance_query_ray_hit;
+                        }
+                    }
+                }
+
+                sample_ray_info.descs[i].is_terminated = true;
+            }
 #endif
             const auto& mtrl = ctxt.mtrls[rec.mtrlid];
             if (!mtrl.attrib.isGlossy) {
@@ -216,13 +271,139 @@ namespace npr_pt {
         }
 
         if (closest_sample_ray_idx >= 0) {
-            paths->contrib[idx].contrib = make_float3(0, 1, 0);
-            paths->attrib[idx].isKill = true;
-            paths->attrib[idx].isTerminate = true;
+            computeFeatureLineContrib(closest_sample_ray_distance, paths, idx, line_color);
         }
 
         disc.accumulated_distance += hit_point_distance;
         sample_ray_info.disc = disc;
+    }
+
+    __global__ void shadeMissSampleRay(
+        int width, int height,
+        aten::vec3 line_color,  // TODO
+        real FeatureLineWidth,
+        real pixel_width,
+        idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
+        int depth,
+        const int* __restrict__ hitindices,
+        int* hitnum,
+        idaten::Path* paths,
+        const aten::CameraParameter* __restrict__ camera,
+        const aten::Intersection* __restrict__ isects,
+        const aten::ray* __restrict__ rays,
+        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        const aten::MaterialParameter* __restrict__ mtrls,
+        const aten::LightParameter* __restrict__ lights, int lightnum,
+        cudaTextureObject_t* nodes,
+        const aten::PrimitiveParamter* __restrict__ prims,
+        cudaTextureObject_t vtxPos,
+        cudaTextureObject_t vtxNml,
+        const aten::mat4* __restrict__ matrices,
+        cudaTextureObject_t* textures)
+    {
+        auto ix = blockIdx.x * blockDim.x + threadIdx.x;
+        auto iy = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (ix >= width || iy >= height) {
+            return;
+        }
+
+        const auto idx = getIdx(ix, iy, width);
+
+        if (paths->attrib[idx].isTerminate || paths->attrib[idx].isHit) {
+            return;
+        }
+
+        idaten::Context ctxt;
+        {
+            ctxt.geomnum = geomnum;
+            ctxt.shapes = shapes;
+            ctxt.mtrls = mtrls;
+            ctxt.lightnum = lightnum;
+            ctxt.lights = lights;
+            ctxt.nodes = nodes;
+            ctxt.prims = prims;
+            ctxt.vtxPos = vtxPos;
+            ctxt.vtxNml = vtxNml;
+            ctxt.matrices = matrices;
+            ctxt.textures = textures;
+        }
+
+        const auto& query_ray = rays[idx];
+
+        constexpr real ThresholdAlbedo = 0.1f;
+        constexpr real ThresholdNormal = 0.1f;
+
+        auto closest_sample_ray_distance = std::numeric_limits<real>::max();
+        int32_t closest_sample_ray_idx = -1;
+        real hit_point_distance = 0;
+
+        auto& sample_ray_info = sample_ray_infos[idx];
+
+        auto disc = sample_ray_infos->disc;
+
+        // Make dummy point to compute next sample ray.
+        const auto prev_disc = disc;
+        {
+            const auto dummy_query_hit_pos = query_ray.org + real(100) * query_ray.dir;
+            const auto hit_point_distance = length(dummy_query_hit_pos - disc.center);
+
+            disc = AT_NAME::FeatureLine::computeNextDisc(
+                dummy_query_hit_pos,
+                query_ray.dir,
+                prev_disc.radius,
+                hit_point_distance,
+                disc.accumulated_distance);
+        }
+
+        for (size_t i = 0; i < idaten::NPRPathTracing::SampleRayNum; i++) {
+            if (sample_ray_info.descs[i].is_terminated) {
+                continue;
+            }
+
+            auto sample_ray = AT_NAME::FeatureLine::getRayFromDesc(sample_ray_info.descs[i]);
+
+            // Generate next sample ray.
+            const auto res_next_sample_ray = AT_NAME::FeatureLine::computeNextSampleRay(
+                sample_ray_info.descs[i],
+                prev_disc, disc);
+            const auto is_sample_ray_valid = aten::get<0>(res_next_sample_ray);
+            if (!is_sample_ray_valid) {
+                sample_ray_info.descs[i].is_terminated = true;
+                continue;
+            }
+            sample_ray = aten::get<1>(res_next_sample_ray);
+
+            aten::Intersection isect_sample_ray;
+            aten::hitrecord hrec_sample;
+
+            auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
+            if (is_hit) {
+                auto obj = &ctxt.shapes[isect_sample_ray.objid];
+                evalHitResult(&ctxt, obj, sample_ray, &hrec_sample, &isect_sample_ray);
+
+                const auto distance_sample_pos_on_query_ray = AT_NAME::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
+                    hrec_sample.p, query_ray);
+
+                if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
+                    const auto is_line_width = AT_NAME::FeatureLine::isInLineWidth(
+                        FeatureLineWidth,
+                        query_ray,
+                        hrec_sample.p,
+                        disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
+                        pixel_width);
+                    if (is_line_width) {
+                        // If sample ray doesn't hit anything, it is forcibly feature line.
+                        closest_sample_ray_idx = i;
+                        closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                    }
+                }
+            }
+        }
+
+        if (closest_sample_ray_idx >= 0) {
+            computeFeatureLineContrib(closest_sample_ray_distance, paths, idx, line_color);
+        }
     }
 }
 
@@ -259,6 +440,7 @@ namespace idaten {
         }
 
         npr_pt::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+            aten::vec3(0, 1, 0),
             feature_line_width_,
             pixel_width,
             sample_ray_infos_.ptr(),
@@ -285,5 +467,56 @@ namespace idaten {
             sample,
             bounce, rrBounce,
             texVtxPos, texVtxNml);
+    }
+
+    void NPRPathTracing::missShade(
+        int width, int height,
+        int bounce,
+        int offsetX,
+        int offsetY)
+    {
+        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+        dim3 grid(
+            (m_tileDomain.w + block.x - 1) / block.x,
+            (m_tileDomain.h + block.y - 1) / block.y);
+
+        if (sample_ray_infos_.empty()) {
+            sample_ray_infos_.init(width * height);
+        }
+
+        if (bounce > 0) {
+            auto& hitcount = m_compaction.getCount();
+
+            auto texVtxPos = m_vtxparamsPos.bind();
+            auto texVtxNml = m_vtxparamsNml.bind();
+
+            const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_camParam, 1);
+
+            // Sample ray hit miss never happen at 1st bounce.
+            npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
+                width, height,
+                aten::vec3(0, 1, 0),
+                feature_line_width_,
+                pixel_width,
+                sample_ray_infos_.ptr(),
+                bounce,
+                m_hitidx.ptr(),
+                hitcount.ptr(),
+                m_paths.ptr(),
+                m_cam.ptr(),
+                m_isects.ptr(),
+                m_rays.ptr(),
+                m_shapeparam.ptr(), m_shapeparam.num(),
+                m_mtrlparam.ptr(),
+                m_lightparam.ptr(), m_lightparam.num(),
+                m_nodetex.ptr(),
+                m_primparams.ptr(),
+                texVtxPos, texVtxNml,
+                m_mtxparams.ptr(),
+                m_tex.ptr());
+            checkCudaKernel(shadeMissSampleRay);
+        }
+
+        PathTracing::missShade(width, height, bounce, offsetX, offsetY);
     }
 }

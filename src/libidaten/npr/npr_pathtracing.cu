@@ -416,85 +416,31 @@ namespace idaten {
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
-        dim3 threadPerBlock(64);
+        if (is_enable_feature_line_) {
+            dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+            dim3 threadPerBlock(64);
 
-        if (sample_ray_infos_.empty()) {
-            sample_ray_infos_.init(width * height);
-        }
+            if (sample_ray_infos_.empty()) {
+                sample_ray_infos_.init(width * height);
+            }
 
-        auto& hitcount = m_compaction.getCount();
-
-        const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_camParam, 1);
-
-        if (bounce == 0) {
-            npr_pt::generateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-                sample_ray_infos_.ptr(),
-                m_paths.ptr(),
-                m_rays.ptr(),
-                m_hitidx.ptr(),
-                hitcount.ptr(),
-                feature_line_width_,
-                pixel_width);
-            checkCudaKernel(generateSampleRay);
-        }
-
-        npr_pt::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            aten::vec3(0, 1, 0),
-            feature_line_width_,
-            pixel_width,
-            sample_ray_infos_.ptr(),
-            bounce,
-            m_hitidx.ptr(),
-            hitcount.ptr(),
-            m_paths.ptr(),
-            m_cam.ptr(),
-            m_isects.ptr(),
-            m_rays.ptr(),
-            m_shapeparam.ptr(), m_shapeparam.num(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
-            texVtxPos, texVtxNml,
-            m_mtxparams.ptr(),
-            m_tex.ptr());
-        checkCudaKernel(shadeSampleRay);
-
-        PathTracing::onShade(
-            outputSurf,
-            width, height,
-            sample,
-            bounce, rrBounce,
-            texVtxPos, texVtxNml);
-    }
-
-    void NPRPathTracing::missShade(
-        int width, int height,
-        int bounce,
-        int offsetX,
-        int offsetY)
-    {
-        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
-
-        if (sample_ray_infos_.empty()) {
-            sample_ray_infos_.init(width * height);
-        }
-
-        if (bounce > 0) {
             auto& hitcount = m_compaction.getCount();
-
-            auto texVtxPos = m_vtxparamsPos.bind();
-            auto texVtxNml = m_vtxparamsNml.bind();
 
             const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_camParam, 1);
 
-            // Sample ray hit miss never happen at 1st bounce.
-            npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
-                width, height,
+            if (bounce == 0) {
+                npr_pt::generateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
+                    sample_ray_infos_.ptr(),
+                    m_paths.ptr(),
+                    m_rays.ptr(),
+                    m_hitidx.ptr(),
+                    hitcount.ptr(),
+                    feature_line_width_,
+                    pixel_width);
+                checkCudaKernel(generateSampleRay);
+            }
+
+            npr_pt::shadeSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                 aten::vec3(0, 1, 0),
                 feature_line_width_,
                 pixel_width,
@@ -514,7 +460,65 @@ namespace idaten {
                 texVtxPos, texVtxNml,
                 m_mtxparams.ptr(),
                 m_tex.ptr());
-            checkCudaKernel(shadeMissSampleRay);
+            checkCudaKernel(shadeSampleRay);
+        }
+
+        PathTracing::onShade(
+            outputSurf,
+            width, height,
+            sample,
+            bounce, rrBounce,
+            texVtxPos, texVtxNml);
+    }
+
+    void NPRPathTracing::missShade(
+        int width, int height,
+        int bounce,
+        int offsetX,
+        int offsetY)
+    {
+        if (is_enable_feature_line_) {
+            dim3 block(BLOCK_SIZE, BLOCK_SIZE);
+            dim3 grid(
+                (m_tileDomain.w + block.x - 1) / block.x,
+                (m_tileDomain.h + block.y - 1) / block.y);
+
+            if (sample_ray_infos_.empty()) {
+                sample_ray_infos_.init(width * height);
+            }
+
+            if (bounce > 0) {
+                auto& hitcount = m_compaction.getCount();
+
+                auto texVtxPos = m_vtxparamsPos.bind();
+                auto texVtxNml = m_vtxparamsNml.bind();
+
+                const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_camParam, 1);
+
+                // Sample ray hit miss never happen at 1st bounce.
+                npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
+                    width, height,
+                    aten::vec3(0, 1, 0),
+                    feature_line_width_,
+                    pixel_width,
+                    sample_ray_infos_.ptr(),
+                    bounce,
+                    m_hitidx.ptr(),
+                    hitcount.ptr(),
+                    m_paths.ptr(),
+                    m_cam.ptr(),
+                    m_isects.ptr(),
+                    m_rays.ptr(),
+                    m_shapeparam.ptr(), m_shapeparam.num(),
+                    m_mtrlparam.ptr(),
+                    m_lightparam.ptr(), m_lightparam.num(),
+                    m_nodetex.ptr(),
+                    m_primparams.ptr(),
+                    texVtxPos, texVtxNml,
+                    m_mtxparams.ptr(),
+                    m_tex.ptr());
+                checkCudaKernel(shadeMissSampleRay);
+            }
         }
 
         PathTracing::missShade(width, height, bounce, offsetX, offsetY);

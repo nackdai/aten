@@ -16,6 +16,26 @@ namespace idaten
             AT_NAME::FeatureLine::Disc disc;
         };
 
+        bool isEnableFatureLine() const
+        {
+            return is_enable_feature_line_;
+        }
+
+        void enableFatureLine(bool b)
+        {
+            is_enable_feature_line_ = b;
+        }
+
+        real getFeatureLineWidth() const
+        {
+            return feature_line_width_;
+        }
+
+        void setFeatureLineWidth(real w)
+        {
+            feature_line_width_ = std::max(w, 1.0f);
+        }
+
     protected:
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
@@ -34,5 +54,6 @@ namespace idaten
     protected:
         idaten::TypedCudaMemory<SampleRayInfo> sample_ray_infos_;
         real feature_line_width_{ real(1) };
+        bool is_enable_feature_line_{ false };
     };
 }

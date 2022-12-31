@@ -15,6 +15,7 @@
 #include "../common/scenedefs.h"
 
 #define ENABLE_ENVMAP
+#define ENABLE_NPR
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
@@ -32,7 +33,11 @@ static bool g_isCameraDirty = false;
 static aten::AcceleratedScene<aten::GPUBvh> g_scene;
 static aten::context g_ctxt;
 
+#ifdef ENABLE_NPR
+static idaten::NPRPathTracing g_tracer;
+#else
 static idaten::PathTracing g_tracer;
+#endif
 static aten::visualizer* g_visualizer;
 
 static float g_avgcuda = 0.0f;
@@ -49,13 +54,12 @@ static int g_cntScreenShot = 0;
 
 static int g_maxSamples = 1;
 static int g_maxBounce = 5;
-static auto g_curMode = idaten::ReSTIRPathTracing::Mode::ReSTIR;
-static auto g_curReSTIRMode = idaten::ReSTIRPathTracing::ReSTIRMode::ReSTIR;
-static auto g_curAOVMode = idaten::ReSTIRPathTracing::AOVMode::WireFrame;
 static auto g_enableProgressive = false;
 static bool g_showAABB = false;
 
 static float g_moveMultiply = 1.0f;
+
+static float g_distanceLimitRatio = 1.0f;
 
 static bool g_enableFrameStep = false;
 static bool g_frameStep = false;
@@ -228,11 +232,30 @@ void onRun(aten::window* window)
 
         ImGui::Checkbox("Show AABB", &g_showAABB);
 
+        if (ImGui::SliderFloat("Distance Limit Ratio", &g_distanceLimitRatio, 0.1f, 1.0f)) {
+            auto aabb = g_scene.getAccel()->getBoundingbox();
+            auto d = aabb.getDiagonalLenght();
+            g_tracer.setHitDistanceLimit(d * g_distanceLimitRatio);
+        }
+
         ImGui::SliderFloat("MoveMultiply", &g_moveMultiply, 1.0f, 100.0f);
 
         auto cam = g_camera.param();
         ImGui::Text("Pos %f/%f/%f", cam.origin.x, cam.origin.y, cam.origin.z);
         ImGui::Text("At  %f/%f/%f", cam.center.x, cam.center.y, cam.center.z);
+
+#ifdef ENABLE_NPR
+        auto is_enable_feature_line = g_tracer.isEnableFatureLine();
+        if (ImGui::Checkbox("FeatureLine on/off", &is_enable_feature_line)) {
+            g_tracer.enableFatureLine(is_enable_feature_line);
+        }
+        if (is_enable_feature_line) {
+            auto line_width = g_tracer.getFeatureLineWidth();
+            if (ImGui::SliderFloat("LineWidth", &line_width, 1, 10)) {
+                g_tracer.setFeatureLineWidth(line_width);
+            }
+        }
+#endif
     }
 }
 
@@ -445,7 +468,7 @@ int main()
     {
         auto aabb = g_scene.getAccel()->getBoundingbox();
         auto d = aabb.getDiagonalLenght();
-        g_tracer.setHitDistanceLimit(d * 0.25f);
+        g_tracer.setHitDistanceLimit(d * g_distanceLimitRatio);
 
         std::vector<aten::GeomParameter> shapeparams;
         std::vector<aten::PrimitiveParamter> primparams;

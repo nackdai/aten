@@ -241,11 +241,6 @@ namespace aten
         const camera* cam,
         deformable* mdl)
     {
-        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
 
         // For Alpha Blend.

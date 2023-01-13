@@ -53,6 +53,12 @@ void onRun(aten::window* window)
         g_isCameraDirty = false;
     }
 
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
     obj_min = std::min<int>(obj_min, static_cast<int>(g_objs.size()));
     obj_max = std::min<int>(obj_max, static_cast<int>(g_objs.size()));
 

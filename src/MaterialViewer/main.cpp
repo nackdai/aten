@@ -221,6 +221,12 @@ void onRun(aten::window* window)
         g_maxSamples,
         g_maxBounce);
 
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
     g_visualizer->render(false);
 
     if (g_willTakeScreenShot)
@@ -342,6 +348,12 @@ void onRun(aten::window* window)
     }
 
     g_cpuPT.render(dst, &g_scene, &g_camera);
+
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
 
     g_visualizer->render(g_buffer.image(), g_camera.needRevert());
 #endif

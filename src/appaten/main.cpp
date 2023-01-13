@@ -9,7 +9,7 @@ static const char* TITLE = "app";
 
 //#define ENABLE_EVERY_FRAME_SC
 //#define ENABLE_DOF
-//#define ENABLE_FEATURE_LINE
+#define ENABLE_FEATURE_LINE
 
 #ifdef ENABLE_DOF
 static aten::ThinLensCamera g_camera;
@@ -124,7 +124,13 @@ void display(aten::window* wnd)
             WIDTH, HEIGHT);
     }
 
-    g_visualizer->render(g_buffer.image(), g_camera.needRevert());
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
+    g_visualizer->renderPixelData(g_buffer.image(), g_camera.needRevert());
 
 #if 0
     g_rasterizerAABB.drawAABB(

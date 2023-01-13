@@ -99,7 +99,7 @@ void onRun(aten::window* window)
         g_ctxt,
         &g_scene,
         &g_camera,
-        &g_fbo);
+        g_fbo);
 
     for (int i = 0; i < AT_COUNTOF(g_tracer); i++) {
         g_tracer[i].getRenderer().setMode((idaten::SVGFPathTracing::Mode)g_curMode);
@@ -124,6 +124,12 @@ void onRun(aten::window* window)
     g_tracer[0].postRender(WIDTH, HEIGHT);
 
     auto cudaelapsed = timer.end();
+
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
 
     g_visualizer->render(false);
 

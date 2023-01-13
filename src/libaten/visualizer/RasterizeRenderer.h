@@ -18,10 +18,27 @@ namespace aten {
         static bool s_isInitGlobalVB;
 
     public:
-        RasterizeRenderer() {}
-        ~RasterizeRenderer() {}
+        RasterizeRenderer() = default;
+        ~RasterizeRenderer() = default;
+
+        RasterizeRenderer(const RasterizeRenderer&) = delete;
+        RasterizeRenderer(RasterizeRenderer&&) = delete;
+        const RasterizeRenderer& operator=(const RasterizeRenderer&) = delete;
+        const RasterizeRenderer& operator=(RasterizeRenderer&&) = delete;
 
     public:
+        enum Buffer {
+            Color = 0x001,
+            Depth = 0x010,
+            Sencil = 0x100,
+        };
+
+        static void clearBuffer(
+            uint32_t clear_buffer_mask,
+            aten::vec4& clear_color,
+            float clear_depth,
+            int clear_stencil);
+
         bool init(
             int width, int height,
             const char* pathVS,
@@ -40,8 +57,6 @@ namespace aten {
             m_ib.clear();
         }
 
-        void clearBuffer(const vec4& clearColor);
-
         void prepareDraw(const camera* cam);
 
         void drawSceneForGBuffer(
@@ -49,7 +64,7 @@ namespace aten {
             context& ctxt,
             const scene* scene,
             const camera* cam,
-            FBO* fbo,
+            FBO& fbo,
             shader* exShader = nullptr);
 
         void drawAABB(

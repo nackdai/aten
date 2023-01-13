@@ -22,6 +22,12 @@ static bool g_willShowGUI = true;
 
 void onRun(aten::window* window)
 {
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
     g_visualizer->render(false);
 
     if (g_willShowGUI) {

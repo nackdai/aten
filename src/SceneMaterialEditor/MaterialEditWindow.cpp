@@ -236,6 +236,12 @@ void MaterialEditWindow::onRun(aten::window* window)
         s_maxSamples,
         s_maxBounce);
 
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
     s_visualizer->render(false);
 
     if (s_willTakeScreenShot)

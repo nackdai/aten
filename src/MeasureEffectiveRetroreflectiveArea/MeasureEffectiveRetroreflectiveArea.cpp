@@ -5,7 +5,7 @@
 #include "visualizer/atengl.h"
 #include "math/intersect.h"
 
-static const real Pos = real(1) / sqrt(2);
+static const real Pos = real(1) / aten::sqrt(2);
 
 const std::array<aten::vec4, MeasureEffectiveRetroreflectiveArea::VtxNum>
 MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
@@ -186,10 +186,11 @@ void MeasureEffectiveRetroreflectiveArea::draw(
 {
     m_shader.prepareRender(nullptr, false);
 
-    CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-    CALL_GL_API(::glClearDepthf(1.0f));
-    CALL_GL_API(::glClearStencil(0));
-    CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
 
     CALL_GL_API(::glEnable(GL_DEPTH_TEST));
     //CALL_GL_API(::glEnable(GL_CULL_FACE));

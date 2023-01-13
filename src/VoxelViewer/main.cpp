@@ -66,6 +66,12 @@ void onRun(aten::window* window)
         g_viewer.bringVoxels(nodes[1], g_voxels);
     }
 
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
     g_viewer.draw(
         g_ctxt,
         &g_camera,
@@ -234,8 +240,8 @@ void loadObj(const Options& opt)
     aten::MaterialParameter mtrlParam;
     mtrlParam.type = aten::MaterialType::GGX;
     mtrlParam.baseColor = aten::vec3(0.7, 0.7, 0.7);
-    mtrlParam.ior = 0.2;
-    mtrlParam.roughness = 0.2;
+    mtrlParam.standard.ior = 0.2;
+    mtrlParam.standard.roughness = 0.2;
 
     auto mtrl = g_ctxt.createMaterialWithMaterialParameter(
         mtrlParam,

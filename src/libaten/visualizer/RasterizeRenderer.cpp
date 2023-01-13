@@ -9,6 +9,32 @@
 namespace aten {
     bool RasterizeRenderer::s_isInitGlobalVB = false;
 
+    void RasterizeRenderer::clearBuffer(
+        uint32_t clear_buffer_mask,
+        aten::vec4& clear_color,
+        float clear_depth,
+        int clear_stencil)
+    {
+        GLbitfield clear_mask = 0;
+
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Color)) {
+            clear_mask |= GL_COLOR_BUFFER_BIT;
+            CALL_GL_API(::glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a));
+        }
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Depth)) {
+            clear_mask |= GL_DEPTH_BUFFER_BIT;
+            CALL_GL_API(::glClearDepthf(clear_depth));
+        }
+        if (clear_buffer_mask & static_cast<uint32_t>(Buffer::Sencil)) {
+            clear_mask |= GL_STENCIL_BUFFER_BIT;
+            CALL_GL_API(::glClearStencil(clear_stencil));
+        }
+
+        AT_ASSERT(clear_mask > 0);
+
+        CALL_GL_API(::glClear(clear_mask));
+    }
+
     bool RasterizeRenderer::init(
         int width, int height,
         const char* pathVS,
@@ -30,14 +56,6 @@ namespace aten {
         m_height = height;
 
         return m_shader.init(width, height, pathVS, pathGS, pathFS);
-    }
-
-    void RasterizeRenderer::clearBuffer(const vec4& clearColor)
-    {
-        CALL_GL_API(::glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
     }
 
     void RasterizeRenderer::prepareDraw(const camera* cam)
@@ -75,9 +93,12 @@ namespace aten {
         context& ctxt,
         const scene* scene,
         const camera* cam,
-        FBO* fbo,
+        FBO& fbo,
         shader* exShader/*= nullptr*/)
     {
+        AT_ASSERT(scene);
+        AT_ASSERT(cam);
+
         auto camparam = cam->param();
 
         // TODO
@@ -131,36 +152,22 @@ namespace aten {
         auto hPrevMtxW2C = m_shader.getHandle("mtxPrevW2C");
         CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat*)&m_mtxPrevW2C.a[0]));
 
-        if (fbo) {
-            AT_ASSERT(fbo->isValid());
-            fbo->bindFBO(true);
-        }
-        else {
-            // Set default frame buffer.
-            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-        }
+        AT_ASSERT(fbo.isValid());
+        fbo.bindFBO(true);
 
         {
             CALL_GL_API(::glEnable(GL_DEPTH_TEST));
             //CALL_GL_API(::glEnable(GL_CULL_FACE));
         }
 
-        // Clear.
-        if (fbo) {
-            float clr[] = { -1.0f, -1.0f, -1.0f, -1.0f };
-            CALL_GL_API(glClearNamedFramebufferfv(fbo->getHandle(), GL_COLOR, 0, clr));
-            CALL_GL_API(glClearNamedFramebufferfv(fbo->getHandle(), GL_COLOR, 1, clr));
+        // Clear buffer
+        float clr[] = { -1.0f, -1.0f, -1.0f, -1.0f };
+        CALL_GL_API(glClearNamedFramebufferfv(fbo.getHandle(), GL_COLOR, 0, clr));
+        CALL_GL_API(glClearNamedFramebufferfv(fbo.getHandle(), GL_COLOR, 1, clr));
 
-            CALL_GL_API(::glClearDepthf(1.0f));
-            CALL_GL_API(::glClearStencil(0));
-            CALL_GL_API(::glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-        }
-        else {
-            CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-            CALL_GL_API(::glClearDepthf(1.0f));
-            CALL_GL_API(::glClearStencil(0));
-            CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-        }
+        clearBuffer(
+            Buffer::Depth | Buffer::Sencil,
+            aten::vec4(), 1.0f, 0);
 
         ctxt.build();
 
@@ -210,10 +217,8 @@ namespace aten {
                 }, ctxt);
         }
 
-        if (fbo) {
-            // Set default frame buffer.
-            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-        }
+        // Set default frame buffer.
+        CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 
         {
             CALL_GL_API(::glDisable(GL_DEPTH_TEST));
@@ -406,13 +411,6 @@ namespace aten {
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
         CALL_GL_API(::glEnable(GL_CULL_FACE));
 
-        // TODO
-        // Will modify to specify clear color.
-        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
-
         if (!s_isInitGlobalVB) {
             ctxt.build();
             s_isInitGlobalVB = true;
@@ -504,13 +502,6 @@ namespace aten {
 
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
         CALL_GL_API(::glEnable(GL_CULL_FACE));
-
-        // TODO
-        // Will modify to specify clear color.
-        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
         if (!s_isInitGlobalVB) {
             ctxt.build();
@@ -626,13 +617,6 @@ namespace aten {
 
         CALL_GL_API(::glEnable(GL_DEPTH_TEST));
         CALL_GL_API(::glEnable(GL_CULL_FACE));
-
-        // TODO
-        // Will modify to specify clear color.
-        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
         if (!m_isInitBuffer) {
             m_vb.init(

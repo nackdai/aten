@@ -159,17 +159,6 @@ void onRun(aten::window* window)
         g_visualizer->clear();
     }
 
-    aten::GLProfiler::begin();
-
-    g_rasterizer.drawSceneForGBuffer(
-        g_tracer.frame(),
-        g_ctxt,
-        &g_scene,
-        &g_camera,
-        nullptr);
-
-    auto rasterizerTime = aten::GLProfiler::end();
-
     aten::timer timer;
     timer.begin();
 
@@ -184,6 +173,12 @@ void onRun(aten::window* window)
     g_avgcuda /= (float)frame;
 
     aten::GLProfiler::begin();
+
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
 
     g_visualizer->render(false);
 
@@ -214,10 +209,6 @@ void onRun(aten::window* window)
         ImGui::Text("cuda : %.3f ms (avg : %.3f ms)", cudaelapsed, g_avgcuda);
         ImGui::Text("update : %.3f ms (avg : %.3f ms)", updateTime, g_avgupdate);
         ImGui::Text("%.3f Mrays/sec", (WIDTH * HEIGHT * g_maxSamples) / real(1000 * 1000) * (real(1000) / cudaelapsed));
-
-        if (aten::GLProfiler::isEnabled()) {
-            ImGui::Text("GL : [rasterizer %.3f ms] [visualizer %.3f ms]", rasterizerTime, visualizerTime);
-        }
 
         auto is_input_samples = ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
         auto is_input_bounce = ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);

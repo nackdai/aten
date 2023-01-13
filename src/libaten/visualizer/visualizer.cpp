@@ -171,7 +171,7 @@ namespace aten
         return textureimage;
     }
 
-    void visualizer::render(
+    void visualizer::renderPixelData(
         const vec4* pixels,
         bool revert)
     {
@@ -179,11 +179,6 @@ namespace aten
 
         // Do pre processes.
         const void* textureimage = doPreProcs(pixels);
-
-        CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
 
         CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 
@@ -246,20 +241,13 @@ namespace aten
 
     void visualizer::render(bool revert)
     {
-        render(m_tex, revert);
+        renderGLTexture(m_tex, revert);
     }
 
-    void visualizer::render(uint32_t gltex, bool revert)
+    void visualizer::renderGLTexture(uint32_t gltex, bool revert)
     {
-        // For using written OpenGL texture resource by GPGPU directly.
-        // So, not handle pixel data pointer directly.
-
-        CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-
-        CALL_GL_API(::glClearColor(0.0f, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT));
+        // This API uses rendered OpenGL texture resource by GPGPU directly.
+        // So, do not handle pixel data pointer directly.
 
         CALL_GL_API(::glActiveTexture(GL_TEXTURE0));
 

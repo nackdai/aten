@@ -17,8 +17,6 @@
 #define ENABLE_ENVMAP
 //#define ENABLE_NLM
 
-//#define TEST_FOR_GL_RENDER
-
 static int WIDTH = 1280;
 static int HEIGHT = 720;
 static const char* TITLE = "svgf";
@@ -113,38 +111,14 @@ void update()
             const auto& nodes = g_scene.getAccel()->getNodes();
             const auto& mtxs = g_scene.getAccel()->getMatrices();
 
-#ifndef TEST_FOR_GL_RENDER
             g_tracer.updateBVH(
                 shapeparams,
                 nodes,
                 mtxs);
-#endif
         }
     }
 }
 
-#ifdef TEST_FOR_GL_RENDER
-void onRun()
-{
-    update();
-
-    if (g_isCameraDirty) {
-        g_camera.update();
-
-        auto camparam = g_camera.param();
-        camparam.znear = real(0.1);
-        camparam.zfar = real(10000.0);
-
-        g_isCameraDirty = false;
-    }
-
-    g_rasterizer.draw(
-        g_tracer.frame(),
-        &g_scene,
-        &g_camera,
-        &g_fbo);
-}
-#else
 void onRun(aten::window* window)
 {
     if (g_enableFrameStep && !g_frameStep) {
@@ -191,7 +165,7 @@ void onRun(aten::window* window)
         g_ctxt,
         &g_scene,
         &g_camera,
-        &g_fbo);
+        g_fbo);
 
     auto rasterizerTime = aten::GLProfiler::end();
 
@@ -209,6 +183,12 @@ void onRun(aten::window* window)
     g_avgcuda /= (float)frame;
 
     aten::GLProfiler::begin();
+
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
 
     g_visualizer->render(false);
 
@@ -304,7 +284,6 @@ void onRun(aten::window* window)
         AT_PRINTF("  mesh[%d] mtrl[%d], tri[%d]\n", info.meshid, info.mtrlid, info.triid);
     }
 }
-#endif
 
 void onClose()
 {
@@ -438,11 +417,7 @@ void onKey(bool press, aten::Key key)
                 at,
                 aten::vec3(0, 1, 0),
                 vfov,
-#ifdef ENABLE_GEOMRENDERING
-                WIDTH >> 1, HEIGHT >> 1);
-#else
                 WIDTH, HEIGHT);
-#endif
         }
             break;
         default:
@@ -521,16 +496,10 @@ int main()
         at,
         aten::vec3(0, 1, 0),
         vfov,
-#ifdef ENABLE_GEOMRENDERING
-        WIDTH >> 1, HEIGHT >> 1);
-#else
         WIDTH, HEIGHT);
-#endif
 
     Scene::makeScene(g_ctxt, &g_scene);
     g_scene.build(g_ctxt);
-
-#ifndef TEST_FOR_GL_RENDER
 
 #ifdef ENABLE_ENVMAP
     auto envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
@@ -612,7 +581,6 @@ int main()
 
     g_tracer.setMode((idaten::SVGFPathTracing::Mode)g_curMode);
     g_tracer.setAOVMode((idaten::SVGFPathTracing::AOVMode)g_curAOVMode);
-#endif
 
     aten::window::run();
 

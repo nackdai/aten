@@ -94,12 +94,12 @@ namespace aten {
 
         bool addPostProc(PostProc* postproc);
 
-        void render(
+        void renderPixelData(
             const vec4* pixels,
             bool revert);
 
         void render(bool revert);
-        void render(uint32_t gltex, bool revert);
+        void renderGLTexture(uint32_t gltex, bool revert);
 
         void clear();
 

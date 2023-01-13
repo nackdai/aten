@@ -72,6 +72,12 @@ void onRun(aten::window* window)
         skinning.compute(aabbMin, aabbMax);
     }
 
+    aten::RasterizeRenderer::clearBuffer(
+        aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        1.0f,
+        0);
+
     g_renderer.render(g_ctxt, &g_camera, g_mdl.get());
 
     if (g_willTakeScreenShot)

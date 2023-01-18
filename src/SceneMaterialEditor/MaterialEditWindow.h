@@ -7,8 +7,8 @@
 
 class MaterialEditWindow {
 private:
-    MaterialEditWindow();
-    ~MaterialEditWindow();
+    MaterialEditWindow() = default;
+    ~MaterialEditWindow() = default;
 
 public:
     static bool init(

@@ -395,10 +395,11 @@ namespace aten {
         if (fbo) {
             AT_ASSERT(fbo->isValid());
             fbo->bindFBO(true);
-        }
-        else {
-            // Set default frame buffer.
-            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+
+            clearBuffer(
+                Buffer::Color | Buffer::Depth | Buffer::Sencil,
+                aten::vec4(0, 0.5f, 1.0f, 1.0f),
+                1.0f, 0);
         }
 
         if (isWireFrame) {
@@ -442,6 +443,11 @@ namespace aten {
 
         // 戻す.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+
+        if (fbo) {
+            // Return to default.
+            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+        }
     }
 
     void RasterizeRenderer::drawObjects(

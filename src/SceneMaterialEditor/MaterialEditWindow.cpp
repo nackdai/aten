@@ -59,9 +59,12 @@ void getCameraPosAndAt(
 void makeScene(aten::scene* scene)
 {
     aten::MaterialParameter mtrlParam;
+    mtrlParam.type = aten::MaterialType::Lambert;
     mtrlParam.baseColor = aten::vec3(0.580000, 0.580000, 0.580000);
 
-    auto mtrl = aten::MaterialFactory::createMaterialWithDefaultValue(aten::MaterialType::Lambert);
+    auto mtrl = s_ctxt.createMaterialWithMaterialParameter(
+        mtrlParam,
+        nullptr, nullptr, nullptr);
 
     aten::AssetManager::registerMtrl("m1", mtrl);
 

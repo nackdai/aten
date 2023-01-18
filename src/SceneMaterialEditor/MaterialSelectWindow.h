@@ -4,8 +4,8 @@
 
 class MaterialSelectWindow {
 private:
-    MaterialSelectWindow();
-    ~MaterialSelectWindow();
+    MaterialSelectWindow() = default;
+    ~MaterialSelectWindow() = default;
 
 public:
     static bool init(

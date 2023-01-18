@@ -250,7 +250,7 @@ namespace aten
 
         if (g_windows.size() >= 1) {
             // ２つめ以降.
-            auto imguiCtxt = ImGui::CreateContext();
+            auto imguiCtxt = ImGui::GetCurrentContext();
             ImGui::SetCurrentContext(imguiCtxt);
         }
 

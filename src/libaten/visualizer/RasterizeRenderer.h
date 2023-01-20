@@ -39,6 +39,8 @@ namespace aten {
             float clear_depth,
             int clear_stencil);
 
+        static void beginRender(FBO* fbo = nullptr);
+
         bool init(
             int width, int height,
             const char* pathVS,
@@ -82,9 +84,7 @@ namespace aten {
             const object& obj,
             const camera* cam,
             bool isWireFrame,
-            const mat4& mtxL2W = mat4::Identity,
-            FBO* fbo = nullptr,
-            FuncSetUniform funcSetUniform = nullptr);
+            const mat4& mtxL2W = mat4::Identity);
 
         using FuncObjRenderer = std::function<void(const object&)>;
 
@@ -93,9 +93,7 @@ namespace aten {
             std::function<void(FuncObjRenderer)> funcRenderObjs,
             const camera* cam,
             bool isWireFrame,
-            const mat4& mtxL2W = mat4::Identity,
-            FBO* fbo = nullptr,
-            FuncSetUniform funcSetUniform = nullptr);
+            const mat4& mtxL2W = mat4::Identity);
 
         void initBuffer(
             uint32_t vtxStride,
@@ -110,6 +108,11 @@ namespace aten {
             const camera* cam,
             bool isWireFrame,
             bool updateBuffer);
+
+        void fillSceneDepthBuffer(
+            context& ctxt,
+            const scene* scene,
+            const camera* cam);
 
         void setColor(const vec4& color);
 

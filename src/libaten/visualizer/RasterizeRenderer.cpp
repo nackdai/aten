@@ -35,6 +35,18 @@ namespace aten {
         CALL_GL_API(::glClear(clear_mask));
     }
 
+    void RasterizeRenderer::beginRender(FBO* fbo/*= nullptr*/)
+    {
+        if (fbo) {
+            AT_ASSERT(fbo->isValid());
+            fbo->bindFBO(true);
+        }
+        else {
+            // Set default frame buffer.
+            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+        }
+    }
+
     bool RasterizeRenderer::init(
         int width, int height,
         const char* pathVS,
@@ -357,9 +369,7 @@ namespace aten {
         const object& obj,
         const camera* cam,
         bool isWireFrame,
-        const mat4& mtxL2W,
-        FBO* fbo/*= nullptr*/,
-        FuncSetUniform funcSetUniform/*= nullptr*/)
+        const mat4& mtxL2W)
     {
         auto camparam = cam->param();
 
@@ -391,16 +401,6 @@ namespace aten {
 
         auto hMtxW2C = m_shader.getHandle("mtxW2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
-
-        if (fbo) {
-            AT_ASSERT(fbo->isValid());
-            fbo->bindFBO(true);
-
-            clearBuffer(
-                Buffer::Color | Buffer::Depth | Buffer::Sencil,
-                aten::vec4(0, 0.5f, 1.0f, 1.0f),
-                1.0f, 0);
-        }
 
         if (isWireFrame) {
             CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
@@ -435,19 +435,10 @@ namespace aten {
             if (hMtrlId >= 0) {
                 CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
             }
-
-            if (funcSetUniform) {
-                funcSetUniform(m_shader, color, albedo, mtrlid);
-            }
             }, ctxt);
 
         // 戻す.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
-
-        if (fbo) {
-            // Return to default.
-            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-        }
     }
 
     void RasterizeRenderer::drawObjects(
@@ -455,9 +446,7 @@ namespace aten {
         std::function<void(FuncObjRenderer)> funcRenderObjs,
         const camera* cam,
         bool isWireFrame,
-        const mat4& mtxL2W/*= mat4::Identity*/,
-        FBO* fbo/*= nullptr*/,
-        FuncSetUniform funcSetUniform/*= nullptr*/)
+        const mat4& mtxL2W/*= mat4::Identity*/)
     {
         auto camparam = cam->param();
 
@@ -489,15 +478,6 @@ namespace aten {
 
         auto hMtxW2C = m_shader.getHandle("mtxW2C");
         CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
-
-        if (fbo) {
-            AT_ASSERT(fbo->isValid());
-            fbo->bindFBO(true);
-        }
-        else {
-            // Set default frame buffer.
-            CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
-        }
 
         if (isWireFrame) {
             CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE));
@@ -534,10 +514,6 @@ namespace aten {
 
                 if (hMtrlId >= 0) {
                     CALL_GL_API(::glUniform1i(hMtrlId, mtrlid));
-                }
-
-                if (funcSetUniform) {
-                    funcSetUniform(m_shader, color, albedo, mtrlid);
                 }
                 }, ctxt);
             });
@@ -679,6 +655,69 @@ namespace aten {
 
         // 戻す.
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
+    }
+
+    void RasterizeRenderer::fillSceneDepthBuffer(
+        context& ctxt,
+        const scene* scene,
+        const camera* cam)
+    {
+        auto camparam = cam->param();
+
+        // TODO
+        camparam.znear = real(0.1);
+        camparam.zfar = real(10000.0);
+
+        mat4 mtxW2V;
+        mat4 mtxV2C;
+
+        mtxW2V.lookat(
+            camparam.origin,
+            camparam.center,
+            camparam.up);
+
+        mtxV2C.perspective(
+            camparam.znear,
+            camparam.zfar,
+            camparam.vfov,
+            camparam.aspect);
+
+        aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+
+        m_shader.prepareRender(nullptr, false);
+
+        auto hMtxW2C = m_shader.getHandle("mtxW2C");
+        CALL_GL_API(::glUniformMatrix4fv(hMtxW2C, 1, GL_TRUE, (const GLfloat*)&mtxW2C.a[0]));
+
+        // Set default frame buffer.
+        CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+
+        {
+            CALL_GL_API(::glEnable(GL_DEPTH_TEST));
+            //CALL_GL_API(::glEnable(GL_CULL_FACE));
+        }
+
+        // Clear.
+        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
+        CALL_GL_API(::glClearDepthf(1.0f));
+        CALL_GL_API(::glClearStencil(0));
+        CALL_GL_API(::glClear(GL_DEPTH_BUFFER_BIT));
+
+        ctxt.build();
+
+        scene->drawForGBuffer(
+            [&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
+                auto hMtxL2W = m_shader.getHandle("mtxL2W");
+                CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
+            },
+            [](const std::shared_ptr<hitable>& target) {
+                return true;
+            }, ctxt);
+
+        {
+            CALL_GL_API(::glDisable(GL_DEPTH_TEST));
+            CALL_GL_API(::glDisable(GL_CULL_FACE));
+        }
     }
 
     void RasterizeRenderer::setColor(const vec4& color)

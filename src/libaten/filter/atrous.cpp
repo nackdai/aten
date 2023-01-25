@@ -54,7 +54,7 @@ namespace aten {
         // Bind source tex handle.
         if (m_idx == 0)
         {
-            GLuint srcTexHandle = visualizer::getTexHandle();
+            GLuint srcTexHandle = m_body->getVisualizer()->getTexHandle();
             auto prevPass = m_body->getPrevPass();
             if (prevPass) {
                 srcTexHandle = prevPass->getFbo().getTexHandle();

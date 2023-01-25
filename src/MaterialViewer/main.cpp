@@ -35,7 +35,7 @@ static idaten::PathTracing g_tracer;
 static aten::PathTracing g_cpuPT;
 static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
 
-static aten::visualizer* g_visualizer;
+static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static aten::texture* g_albedoMap = nullptr;
 static aten::texture* g_normalMap = nullptr;
@@ -580,7 +580,7 @@ int main()
     camparam.zfar = real(10000.0);
 
     g_tracer.update(
-        aten::visualizer::getTexHandle(),
+        g_visualizer->getTexHandle(),
         WIDTH, HEIGHT,
         camparam,
         shapeparams,

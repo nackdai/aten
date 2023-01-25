@@ -32,7 +32,7 @@ static aten::PathTracing g_tracer;
 //static aten::PSSMLT g_tracer;
 //static aten::GeometryInfoRenderer g_tracer;
 
-static aten::visualizer* g_visualizer;
+static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
 //static aten::Film g_buffer(WIDTH, HEIGHT);

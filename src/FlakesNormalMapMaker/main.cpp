@@ -16,7 +16,7 @@ struct Options {
     int height{ 720 };
 } g_opt;
 
-static aten::visualizer* g_visualizer;
+static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static bool g_willShowGUI = true;
 

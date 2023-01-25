@@ -54,9 +54,9 @@ namespace aten {
     private:
         class BloomEffectPass : public visualizer::PostProc {
         public:
-            BloomEffectPass() {}
+            BloomEffectPass() = delete;
             BloomEffectPass(BloomEffect* body) : m_body(body) {}
-            virtual ~BloomEffectPass() {}
+            virtual ~BloomEffectPass() = default;
 
         public:
             bool init(
@@ -90,7 +90,6 @@ namespace aten {
 
         class BloomEffectFinalPass : public BloomEffectPass {
         public:
-            BloomEffectFinalPass() {}
             BloomEffectFinalPass(BloomEffect* body) : BloomEffectPass(body) {}
             virtual ~BloomEffectFinalPass() {}
 
@@ -98,6 +97,11 @@ namespace aten {
                 const void* pixels,
                 bool revert) override;
         };
+
+        visualizer* getVisualizer()
+        {
+            return PostProc::getVisualizer();
+        }
 
         PixelFormat m_fmtIn;
         PixelFormat m_fmtOut;

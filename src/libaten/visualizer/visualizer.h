@@ -10,11 +10,10 @@
 
 namespace aten {
     class visualizer {
-    private:
-        visualizer() {}
-        ~visualizer() {}
-
     public:
+        visualizer() = default;
+        ~visualizer() = default;
+
         class PreProc {
         protected:
             PreProc() {}
@@ -30,6 +29,8 @@ namespace aten {
         };
 
         class PostProc : public shader {
+            friend class visualizer;
+
         protected:
             PostProc() {}
             virtual ~PostProc() {}
@@ -79,16 +80,27 @@ namespace aten {
                 prepareRender(pixels, revert);
             }
 
-        private:
+        protected:
+            void setVisualizer(aten::visualizer* visualizer)
+            {
+                m_visualizer = visualizer;
+            }
+
+            visualizer* getVisualizer()
+            {
+                return m_visualizer;
+            }
+
             FBO m_fbo;
             PostProc* m_prevPass{ nullptr };
+            aten::visualizer* m_visualizer{ nullptr };
         };
 
     public:
         PixelFormat getPixelFormat();
 
-        static uint32_t getTexHandle();
-        static visualizer* init(int width, int height);
+        uint32_t getTexHandle();
+        static std::shared_ptr<visualizer> init(int width, int height);
 
         void addPreProc(PreProc* preproc);
 
@@ -116,8 +128,6 @@ namespace aten {
         const void* convertTextureData(const void* textureimage);
 
     private:
-        static visualizer* s_curVisualizer;
-
         uint32_t m_tex{ 0 };
 
         int m_width{ 0 };

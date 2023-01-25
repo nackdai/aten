@@ -27,4 +27,28 @@ namespace aten {
             y = _y;
         }
     };
+
+    inline AT_DEVICE_API vec2 operator+(const vec2& v1, const vec2& v2)
+    {
+        vec2 ret(v1.x + v2.x, v1.y + v2.y);
+        return ret;
+    }
+
+    inline AT_DEVICE_API vec2 operator-(const vec2& v1, const vec2& v2)
+    {
+        vec2 ret(v1.x - v2.x, v1.y - v2.y);
+        return ret;
+    }
+
+    inline AT_DEVICE_API vec2 operator*(const vec2& v, float f)
+    {
+        vec2 ret(v.x * f, v.y * f);
+        return ret;
+    }
+
+    inline AT_DEVICE_API vec2 operator/(const vec2& v1, const vec2& v2)
+    {
+        vec2 ret(v1.x / v2.x, v1.y / v2.y);
+        return ret;
+    }
 }

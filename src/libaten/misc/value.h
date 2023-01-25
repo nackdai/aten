@@ -17,6 +17,28 @@ namespace aten {
         PolymorphicValue() = default;
         ~PolymorphicValue() = default;
 
+        PolymorphicValue(real f)
+        {
+            *this = f;
+        }
+        PolymorphicValue(int i)
+        {
+            *this = i;
+        }
+        PolymorphicValue(bool b)
+        {
+            *this = b;
+        }
+        PolymorphicValue(const vec4& v)
+        {
+            *this = v;
+        }
+        template <typename T>
+        PolymorphicValue(const std::shared_ptr<T> _p)
+        {
+            *this = _p;
+        }
+
         PolymorphicValue(const PolymorphicValue& rhs)
         {
             val_ = rhs.val_;
@@ -109,10 +131,12 @@ namespace aten {
         std::size_t type_hash_{ 0 };
     };
 
-    class Values : public std::map<std::string, PolymorphicValue> {
+    class Values : public std::unordered_map<std::string, PolymorphicValue> {
     public:
-        Values() {}
-        ~Values() {}
+        using std::unordered_map<std::string, PolymorphicValue>::unordered_map;
+
+        Values() = default;
+        ~Values() = default;
 
         void add(std::string& name, const PolymorphicValue& val)
         {

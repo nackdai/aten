@@ -1,6 +1,8 @@
 #include <cmdline.h>
 #include <imgui.h>
 
+#include "magnifier.h"
+
 #include "aten.h"
 #include "atenscene.h"
 #include "idaten.h"
@@ -10,17 +12,16 @@ static const int HEIGHT = 720;
 
 static const char* TITLE = "ShaderViewer";
 
-struct Options {
-    std::string input;
-    std::string texDir;
-};
-
 static aten::context g_ctxt;
 
 static aten::RasterizeRenderer g_rasterizer;
 
 std::vector<std::shared_ptr<aten::object>> g_objs;
 std::vector<bool> g_objenable;
+
+std::shared_ptr<aten::visualizer> g_visualizer;
+std::shared_ptr<aten::FBO> g_fbo;
+std::shared_ptr<Magnifier> g_magnifier;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -49,6 +50,8 @@ void onRun(aten::window* window)
         g_isCameraDirty = false;
     }
 
+    aten::RasterizeRenderer::beginRender(g_fbo);
+
     aten::RasterizeRenderer::clearBuffer(
         aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
         aten::vec4(0, 0.5f, 1.0f, 1.0f),
@@ -76,6 +79,26 @@ void onRun(aten::window* window)
         },
         &g_camera,
         g_isWireFrame);
+
+    if (g_visualizer) {
+        aten::Values values{
+            {"center_pos", aten::PolymorphicValue(aten::vec4(WIDTH * 0.5f, HEIGHT * 0.5f, 0, 0))},
+            {"magnification", aten::PolymorphicValue(0.5f)},
+            {"radius", aten::PolymorphicValue(200.0f)},
+            {"circle_line_width", aten::PolymorphicValue(2.0f)},
+            {"circle_line_color", aten::PolymorphicValue(aten::vec4(1, 0, 0, 0))},
+        };
+        g_magnifier->setParam(values);
+
+        aten::RasterizeRenderer::beginRender();
+        aten::RasterizeRenderer::clearBuffer(
+            aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
+            aten::vec4(0, 0.5f, 1.0f, 1.0f),
+            1.0f,
+            0);
+        g_fbo->bindAsTexture();
+        g_visualizer->renderGLTexture(g_fbo->getTexHandle(), g_camera.needRevert());
+    }
 
     if (g_willTakeScreenShot)
     {
@@ -224,28 +247,21 @@ void loadObj(
 
 bool parseOption(
     int argc, char* argv[],
-    Options& opt)
+    cmdline::parser& cmd)
 {
-    cmdline::parser cmd;
-
     {
-        cmd.add<std::string>("input", 'i', "input model filename", true);
-
-        cmd.add("help", '?', "print usage");
+        cmd.add<std::string>("input", 'i', "input model filename", false);
+        cmd.add("full_screen", 'f', "full screen rendering");
     }
 
     bool isCmdOk = cmd.parse(argc, argv);
-
-    if (cmd.exist("help")) {
-        std::cerr << cmd.usage();
-        return false;
-    }
 
     if (!isCmdOk) {
         std::cerr << cmd.error_full() << std::endl << cmd.usage();
         return false;
     }
 
+#if 0
     if (cmd.exist("input")) {
         opt.input = cmd.get<std::string>("input");
     }
@@ -253,19 +269,18 @@ bool parseOption(
         std::cerr << cmd.error() << std::endl << cmd.usage();
         return false;
     }
+#endif
 
     return true;
 }
 
 int main(int argc, char* argv[])
 {
-    Options opt;
+    cmdline::parser cmd;
 
-#if 0
-    if (!parseOption(argc, argv, opt)) {
+    if (!parseOption(argc, argv, cmd)) {
         return 0;
     }
-#endif
 
     aten::SetCurrentDirectoryFromExe();
 
@@ -295,6 +310,20 @@ int main(int argc, char* argv[])
         WIDTH, HEIGHT,
         "shader/vs.glsl",
         "shader/retroreflective.glsl");
+
+    if (cmd.exist("full_screen")) {
+        g_visualizer = aten::visualizer::init(WIDTH, HEIGHT);
+
+        g_fbo = std::make_shared<decltype(g_fbo)::element_type>();
+        g_fbo->init(WIDTH, HEIGHT, aten::PixelFormat::rgba8);
+
+        g_magnifier = std::make_shared<decltype(g_magnifier)::element_type>();
+        g_magnifier->init(
+            WIDTH, HEIGHT,
+            "shader/fullscreen_vs.glsl",
+            "shader/magnifier.glsl");
+        g_visualizer->addPostProc(g_magnifier.get());
+    }
 
     auto texNum = g_ctxt.getTextureNum();
 

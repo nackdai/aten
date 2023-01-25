@@ -9,8 +9,6 @@
 
 namespace aten
 {
-    visualizer* visualizer::s_curVisualizer = nullptr;
-
     PixelFormat visualizer::getPixelFormat()
     {
         return m_fmt;
@@ -56,23 +54,18 @@ namespace aten
 
     uint32_t visualizer::getTexHandle()
     {
-        AT_ASSERT(s_curVisualizer);
-        return s_curVisualizer->m_tex;
+        return m_tex;
     }
 
-    visualizer* visualizer::init(int width, int height)
+    std::shared_ptr<visualizer> visualizer::init(int width, int height)
     {
-        visualizer* ret = new visualizer();
+        auto ret = std::make_shared<visualizer>();
 
         ret->m_tex = createTexture(width, height, ret->m_fmt);
         AT_VRETURN(ret->m_tex != 0, nullptr);
 
         ret->m_width = width;
         ret->m_height = height;
-
-        if (!s_curVisualizer) {
-            s_curVisualizer = ret;
-        }
 
         return ret;
     }
@@ -100,6 +93,7 @@ namespace aten
             AT_VRETURN(fbo.init(m_width, m_height, outFmt), false);
         }
 
+        postproc->setVisualizer(this);
         m_postprocs.push_back(postproc);
 
         return true;
@@ -175,8 +169,6 @@ namespace aten
         const vec4* pixels,
         bool revert)
     {
-        s_curVisualizer = this;
-
         // Do pre processes.
         const void* textureimage = doPreProcs(pixels);
 

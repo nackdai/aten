@@ -102,6 +102,11 @@ namespace aten {
             TAA* m_body{ nullptr };
         };
 
+        visualizer* getVisualizer()
+        {
+            return PostProc::getVisualizer();
+        }
+
     private:
         TAAPass m_taa;
         FinalPass m_final;

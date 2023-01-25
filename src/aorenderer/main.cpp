@@ -32,7 +32,7 @@ static aten::context g_ctxt;
 
 static idaten::AORenderer g_tracer;
 
-static aten::visualizer* g_visualizer;
+static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
@@ -317,7 +317,7 @@ int main()
         camparam.zfar = real(10000.0);
 
         g_tracer.update(
-            aten::visualizer::getTexHandle(),
+            g_visualizer->getTexHandle(),
             WIDTH, HEIGHT,
             camparam,
             shapeparams,

@@ -77,6 +77,11 @@ namespace aten {
 
         static const int ITER = 5;
 
+        visualizer* getVisualizer()
+        {
+            return PostProc::getVisualizer();
+        }
+
         std::shared_ptr<texture> m_pos;
         std::shared_ptr<texture> m_normal;
         std::shared_ptr<texture> m_albedo;

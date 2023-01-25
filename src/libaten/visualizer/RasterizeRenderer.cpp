@@ -39,7 +39,7 @@ namespace aten {
     {
         if (fbo) {
             AT_ASSERT(fbo->isValid());
-            fbo->bindFBO(true);
+            fbo->bindFBO();
         }
         else {
             // Set default frame buffer.

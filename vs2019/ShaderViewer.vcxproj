@@ -30,8 +30,13 @@
     <ClCompile Include="..\src\ShaderViewer\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\src\ShaderViewer\shader\fullscreen_vs.glsl" />
+    <None Include="..\src\ShaderViewer\shader\magnifier.glsl" />
     <None Include="..\src\ShaderViewer\shader\retroreflective.glsl" />
     <None Include="..\src\ShaderViewer\shader\vs.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\ShaderViewer\magnifier.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{41D75A2E-AD16-434B-9E87-F3F675BC8475}</ProjectGuid>
@@ -165,7 +170,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;__AT_DEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -263,7 +268,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -299,7 +304,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\cmdline;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\src\libaten;$(ProjectDir)..\src\libatenscene;$(ProjectDir)..\src\libidaten;$(ProjectDir)..\3rdparty\glm;$(ProjectDir)..\3rdparty\imgui;$(ProjectDir)..\3rdparty\cmdline;$(ProjectDir)..\3rdparty\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>

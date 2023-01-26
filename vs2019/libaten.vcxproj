@@ -257,7 +257,6 @@
     <ClInclude Include="..\src\libaten\accelerator\threaded_bvh.h" />
     <ClInclude Include="..\src\libaten\aten.h" />
     <ClInclude Include="..\src\libaten\aten_namespace.h" />
-    <ClInclude Include="..\src\libaten\aten_virtual.h" />
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\CameraOperator.h" />
     <ClInclude Include="..\src\libaten\camera\equirect.h" />

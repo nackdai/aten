@@ -5,6 +5,12 @@
 #include "types.h"
 #include "math/vec2.h"
 
+#ifndef __AT_CUDA__
+#define AT_VIRTUAL(f)                   virtual f
+#define AT_VIRTUAL_OVERRIDE_FINAL(f)    virtual f override final
+#define AT_INHERIT(c)    : public c
+#endif
+
 namespace aten {
 #ifndef __AT_CUDA__
     class sampler {

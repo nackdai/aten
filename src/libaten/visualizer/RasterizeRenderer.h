@@ -113,7 +113,7 @@ namespace aten {
             bool isWireFrame,
             bool updateBuffer);
 
-        void fillSceneDepthBuffer(
+        void renderSceneDepth(
             context& ctxt,
             const scene* scene,
             const camera* cam);

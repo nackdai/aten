@@ -53,7 +53,7 @@ namespace aten
 
         const std::vector<mat4>& getMatrices() const;
 
-        virtual void drawForGBuffer(
+        virtual void render(
             aten::hitable::FuncPreDraw func,
             const context& ctxt,
             const aten::mat4& mtxL2W,

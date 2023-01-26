@@ -189,7 +189,7 @@ namespace aten {
         return m_lights[reservoir.light_idx_];
     }
 
-    void scene::drawForGBuffer(
+    void scene::render(
         aten::hitable::FuncPreDraw func,
         std::function<bool(const std::shared_ptr<aten::hitable>&)> funcIfDraw,
         const context& ctxt) const
@@ -200,7 +200,7 @@ namespace aten {
             bool willDraw = funcIfDraw ? funcIfDraw(h) : true;
 
             if (willDraw) {
-                h->drawForGBuffer(func, ctxt, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
+                h->render(func, ctxt, aten::mat4::Identity, aten::mat4::Identity, -1, triOffset);
             }
 
             auto item = h->getHasObject();

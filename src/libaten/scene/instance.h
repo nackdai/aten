@@ -132,7 +132,7 @@ namespace aten
             return aabb::transform(m_obj->getBoundingbox(), m_mtxL2W);
         }
 
-        virtual void drawForGBuffer(
+        virtual void render(
             aten::hitable::FuncPreDraw func,
             const context& ctxt,
             const aten::mat4& mtxL2W,
@@ -140,7 +140,7 @@ namespace aten
             int parentId,
             uint32_t triOffset) override final
         {
-            m_obj->drawForGBuffer(func, ctxt, m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
+            m_obj->render(func, ctxt, m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
         }
 
         virtual void drawAABB(

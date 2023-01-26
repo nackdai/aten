@@ -205,7 +205,7 @@ namespace aten {
 
         using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int parentId, int basePrimId)>;
 
-        virtual void drawForGBuffer(
+        virtual void render(
             FuncPreDraw func,
             const context& ctxt,
             const aten::mat4& mtxL2W,

@@ -7,9 +7,11 @@ precision highp int;
 https://shobomaru.wordpress.com/2014/12/31/shader-only-fullscreen-quad/
 */
 
-void main()
-{
-    int x = (gl_VertexID & 1) * 2 - 1;
-    int y = (gl_VertexID & 2) * 2 - 1;
-    gl_Position = vec4(x, y, 0, 1);
+layout(location = 0) out vec2 uv;
+
+void main() {
+    float x = (gl_VertexID & 1) != 0 ? 1.0 : 0.0;
+    float y = (gl_VertexID & 2) != 0 ? 1.0 : 0.0;
+    gl_Position = vec4(vec2(x, y) * 2.0 - 1.0, 0, 1);
+    uv = vec2(x, y);
 }

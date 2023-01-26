@@ -12,6 +12,7 @@
 #include "filter/bilateral.h"
 #include "filter/atrous.h"
 #include "filter/taa.h"
+#include "filter/magnifier.h"
 
 #include "material/emissive.h"
 #include "material/lambert.h"

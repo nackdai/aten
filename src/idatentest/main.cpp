@@ -185,6 +185,10 @@ void onRun(aten::window* window)
     auto visualizerTime = aten::GLProfiler::end();
 
     if (g_showAABB) {
+        g_rasterizerAABB.renderSceneDepth(
+            g_ctxt,
+            &g_scene,
+            &g_camera);
         g_rasterizerAABB.drawAABB(
             &g_camera,
             g_scene.getAccel());

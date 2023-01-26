@@ -232,11 +232,6 @@ namespace aten {
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 
-        {
-            CALL_GL_API(::glDisable(GL_DEPTH_TEST));
-            CALL_GL_API(::glDisable(GL_CULL_FACE));
-        }
-
         m_mtxPrevW2C = mtxW2C;
     }
 
@@ -657,7 +652,7 @@ namespace aten {
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
     }
 
-    void RasterizeRenderer::fillSceneDepthBuffer(
+    void RasterizeRenderer::renderSceneDepth(
         context& ctxt,
         const scene* scene,
         const camera* cam)
@@ -692,16 +687,14 @@ namespace aten {
         // Set default frame buffer.
         CALL_GL_API(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 
-        {
-            CALL_GL_API(::glEnable(GL_DEPTH_TEST));
-            //CALL_GL_API(::glEnable(GL_CULL_FACE));
-        }
+        CALL_GL_API(::glEnable(GL_DEPTH_TEST));
 
-        // Clear.
-        CALL_GL_API(::glClearColor(0, 0.5f, 1.0f, 1.0f));
-        CALL_GL_API(::glClearDepthf(1.0f));
-        CALL_GL_API(::glClearStencil(0));
-        CALL_GL_API(::glClear(GL_DEPTH_BUFFER_BIT));
+        // No need color rendering.
+        CALL_GL_API(::glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE));
+
+        clearBuffer(
+            Buffer::Depth | Buffer::Sencil,
+            aten::vec4(), 1.0f, 0);
 
         ctxt.build();
 
@@ -711,13 +704,12 @@ namespace aten {
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
             },
             [](const std::shared_ptr<hitable>& target) {
+                (void)target;
                 return true;
             }, ctxt);
 
-        {
-            CALL_GL_API(::glDisable(GL_DEPTH_TEST));
-            CALL_GL_API(::glDisable(GL_CULL_FACE));
-        }
+        // Revert state.
+        CALL_GL_API(::glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE));
     }
 
     void RasterizeRenderer::setColor(const vec4& color)

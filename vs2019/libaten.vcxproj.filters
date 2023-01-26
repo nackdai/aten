@@ -524,6 +524,9 @@
     <ClInclude Include="..\src\libaten\misc\tuple.h">
       <Filter>misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\filter\magnifier.h">
+      <Filter>filter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -835,6 +838,9 @@
     <ClCompile Include="..\src\libaten\renderer\feature_line.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libaten\filter\magnifier.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\shader\tonemap_fs.glsl">
@@ -913,6 +919,9 @@
       <Filter>shader\skinning</Filter>
     </None>
     <None Include="..\src\shader\srgb_fs.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="..\src\shader\magnifier_fs.glsl">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

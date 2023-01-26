@@ -41,7 +41,7 @@ namespace AT_NAME
 
         void addFace(const std::shared_ptr<face>& f);
 
-        void drawForGBuffer(
+        void render(
             aten::hitable::FuncPreDraw func,
             const aten::context& ctxt,
             const aten::mat4& mtxL2W,

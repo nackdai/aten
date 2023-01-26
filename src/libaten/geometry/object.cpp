@@ -184,7 +184,7 @@ namespace AT_NAME
         result->area = area;
     }
 
-    void object::drawForGBuffer(
+    void object::render(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
         const aten::mat4& mtxL2W,
@@ -198,7 +198,7 @@ namespace AT_NAME
         int objid = (parentId < 0 ? id() : parentId);
 
         for (auto& s : m_shapes) {
-            s->drawForGBuffer(func, ctxt, mtxL2W, mtxPrevL2W, objid);
+            s->render(func, ctxt, mtxL2W, mtxPrevL2W, objid);
         }
     }
 

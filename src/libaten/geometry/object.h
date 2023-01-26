@@ -40,7 +40,7 @@ namespace AT_NAME
             return m_accel.get();
         }
 
-        virtual void drawForGBuffer(
+        virtual void render(
             aten::hitable::FuncPreDraw func,
             const aten::context& ctxt,
             const aten::mat4& mtxL2W,

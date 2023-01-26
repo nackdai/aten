@@ -92,9 +92,9 @@ namespace aten {
 
         using FuncObjRenderer = std::function<void(const object&)>;
 
-        void drawObjects(
+        void drawWithOutsideRenderFunc(
             context& ctxt,
-            std::function<void(FuncObjRenderer)> funcRenderObjs,
+            std::function<void(FuncObjRenderer)> renderFunc,
             const camera* cam,
             bool isWireFrame,
             const mat4& mtxL2W = mat4::Identity);

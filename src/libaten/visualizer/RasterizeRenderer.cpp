@@ -184,7 +184,7 @@ namespace aten {
         ctxt.build();
 
         // For object (which means "not" deformable).
-        scene->drawForGBuffer([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
+        scene->render([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
             auto hMtxL2W = m_shader.getHandle("mtxL2W");
             CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
 
@@ -211,7 +211,7 @@ namespace aten {
             hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
             CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat*)&m_mtxPrevW2C.a[0]));
 
-            scene->drawForGBuffer([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
+            scene->render([&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
                 auto hMtxL2W = exShader->getHandle("mtxL2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
 
@@ -441,9 +441,9 @@ namespace aten {
         CALL_GL_API(::glPolygonMode(GL_FRONT_AND_BACK, GL_FILL));
     }
 
-    void RasterizeRenderer::drawObjects(
+    void RasterizeRenderer::drawWithOutsideRenderFunc(
         context& ctxt,
-        std::function<void(FuncObjRenderer)> funcRenderObjs,
+        std::function<void(FuncObjRenderer)> renderFunc,
         const camera* cam,
         bool isWireFrame,
         const mat4& mtxL2W/*= mat4::Identity*/)
@@ -498,7 +498,7 @@ namespace aten {
         auto hColor = m_shader.getHandle("color");
         auto hMtrlId = m_shader.getHandle("materialId");
 
-        funcRenderObjs([&](const object& obj) {
+        renderFunc([&](const object& obj) {
             obj.draw([&](const aten::vec3& color, const aten::texture* albedo, int mtrlid) {
                 if (hHasAlbedo >= 0) {
                     if (albedo) {
@@ -705,7 +705,7 @@ namespace aten {
 
         ctxt.build();
 
-        scene->drawForGBuffer(
+        scene->render(
             [&](const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int objid, int primid) {
                 auto hMtxL2W = m_shader.getHandle("mtxL2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));

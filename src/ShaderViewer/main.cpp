@@ -63,7 +63,7 @@ void onRun(aten::window* window)
     obj_min = std::min<int>(obj_min, static_cast<int>(g_objs.size()));
     obj_max = std::min<int>(obj_max, static_cast<int>(g_objs.size()));
 
-    g_rasterizer.drawObjects(
+    g_rasterizer.drawWithOutsideRenderFunc(
         g_ctxt,
         [&] (aten::RasterizeRenderer::FuncObjRenderer func) {
             auto& shader = g_rasterizer.getShader();

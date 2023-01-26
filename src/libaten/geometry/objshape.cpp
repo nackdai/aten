@@ -71,7 +71,7 @@ namespace AT_NAME
         m_baseTriIdx = std::min(f->getId(), m_baseTriIdx);
     }
 
-    void objshape::drawForGBuffer(
+    void objshape::render(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
         const aten::mat4& mtxL2W,

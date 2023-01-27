@@ -244,7 +244,7 @@ namespace idaten
                 texVtxPos,
                 m_mtxparams.ptr());
 
-            m_pick.readByNum(&m_pickedInfo);
+            m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 
             m_willPicklPixel = false;
         }

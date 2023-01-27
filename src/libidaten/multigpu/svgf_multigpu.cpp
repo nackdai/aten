@@ -56,7 +56,7 @@ namespace idaten
                     auto nodeTex = m_nodeparam[i].bind();
                     tmp.push_back(nodeTex);
                 }
-                m_nodetex.writeByNum(&tmp[0], tmp.size());
+                m_nodetex.writeFromHostToDeviceByNum(&tmp[0], tmp.size());
             }
 
             if (!m_texRsc.empty())
@@ -66,7 +66,7 @@ namespace idaten
                     auto cudaTex = m_texRsc[i].bind();
                     tmp.push_back(cudaTex);
                 }
-                m_tex.writeByNum(&tmp[0], tmp.size());
+                m_tex.writeFromHostToDeviceByNum(&tmp[0], tmp.size());
             }
 
             m_isListedTextureObject = true;

@@ -34,20 +34,20 @@ namespace idaten {
 #endif
 
         m_cam.init(sizeof(camera));
-        m_cam.writeByNum(&camera, 1);
+        m_cam.writeFromHostToDeviceByNum(&camera, 1);
         m_camParam = camera;
 
         m_shapeparam.init(shapes.size());
-        m_shapeparam.writeByNum(&shapes[0], shapes.size());
+        m_shapeparam.writeFromHostToDeviceByNum(&shapes[0], shapes.size());
 
         m_mtrlparam.init(mtrls.size());
-        m_mtrlparam.writeByNum(&mtrls[0], mtrls.size());
+        m_mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], mtrls.size());
 
         AT_ASSERT_LOG(!lights.empty(), "No Lights!!");
 
         if (!lights.empty()) {
             m_lightparam.init(lights.size());
-            m_lightparam.writeByNum(&lights[0], lights.size());
+            m_lightparam.writeFromHostToDeviceByNum(&lights[0], lights.size());
         }
 
         if (prims.empty()) {
@@ -55,12 +55,12 @@ namespace idaten {
         }
         else {
             m_primparams.init(prims.size() + advancePrimNum);
-            m_primparams.writeByNum(&prims[0], prims.size());
+            m_primparams.writeFromHostToDeviceByNum(&prims[0], prims.size());
         }
 
         if (!mtxs.empty()) {
             m_mtxparams.init(mtxs.size());
-            m_mtxparams.writeByNum(&mtxs[0], mtxs.size());
+            m_mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
         }
 
         m_nodeparam.resize(nodes.size());
@@ -127,7 +127,7 @@ namespace idaten {
 
     void Renderer::updateCamera(const aten::CameraParameter& camera)
     {
-        m_cam.writeByNum(&camera, 1);
+        m_cam.writeFromHostToDeviceByNum(&camera, 1);
 
         m_camParam = camera;
     }

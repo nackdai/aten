@@ -832,7 +832,7 @@ namespace idaten
             auto num = numInternalNode + numLeaves;
             threadedBvhNodes->clear();
             threadedBvhNodes->resize(num);
-            m_nodes.readByNum(&(*threadedBvhNodes)[0], num);
+            m_nodes.readFromDeviceToHostByNum(&(*threadedBvhNodes)[0], num);
         }
 
         dst.init(
@@ -855,7 +855,7 @@ namespace idaten
         uint32_t numOfElems = (uint32_t)tris.size();
 
         triangles.init(numOfElems);
-        triangles.writeByNum(&tris[0], (uint32_t)tris.size());
+        triangles.writeFromHostToDeviceByNum(&tris[0], (uint32_t)tris.size());
 
         auto vtxPos = texRscVtxPos.bind();
 
@@ -923,7 +923,7 @@ namespace idaten
         }
 
         std::vector<LBVHNode> tmp0(nodesLbvh.num());
-        nodesLbvh.readByNum(&tmp0[0]);
+        nodesLbvh.readFromDeviceToHostByNum(&tmp0[0]);
 
         TypedCudaMemory<aten::ThreadedBvhNode> nodes;
         nodes.init(numInternalNode + numLeaves);
@@ -944,7 +944,7 @@ namespace idaten
                 nodes.ptr());
         }
         std::vector<aten::ThreadedBvhNode> tmp1(nodes.num());
-        nodes.read(&tmp1[0], 0);
+        nodes.readFromDeviceToHostByNum(&tmp1[0], 0);
 
         int xx = 0;
 #else

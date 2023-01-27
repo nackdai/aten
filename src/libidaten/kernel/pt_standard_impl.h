@@ -36,18 +36,20 @@ namespace idaten {
             m_enableEnvmap = b;
         }
 
+        aten::tuple<aten::ray, aten::vec3> getDebugInfo(uint32_t x, uint32_t y);
+
     protected:
         virtual void initSamplerParameter(
             int width, int height)
         {
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
             m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
-            m_sobolMatrices.writeByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
+            m_sobolMatrices.writeFromHostToDeviceByNum(sobol::Matrices::matrices, m_sobolMatrices.num());
 #endif
 
             auto& r = aten::getRandom();
             m_random.init(width * height);
-            m_random.writeByNum(&r[0], width * height);
+            m_random.writeFromHostToDeviceByNum(&r[0], width * height);
         }
 
         virtual bool initPath(

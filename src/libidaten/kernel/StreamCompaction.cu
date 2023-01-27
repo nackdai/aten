@@ -152,7 +152,7 @@ namespace idaten
             std::iota(iota.begin(), iota.end(), 0);
 
             m_iota.init(iota.size());
-            m_iota.writeByNum(&iota[0], iota.size());
+            m_iota.writeFromHostToDeviceByNum(&iota[0], iota.size());
 
             m_counts.init(1);
         }
@@ -311,7 +311,7 @@ namespace idaten
             m_iota.ptr());
 
         if (result) {
-            m_counts.readByNum(result);
+            m_counts.readFromDeviceToHostByNum(result);
         }
     }
 
@@ -335,7 +335,7 @@ namespace idaten
 
         idaten::TypedCudaMemory<int> src;
         src.init(x.size());
-        src.writeByNum(&x[0], x.size());
+        src.writeFromHostToDeviceByNum(&x[0], x.size());
 
         idaten::TypedCudaMemory<int> dst;
         dst.init(x.size());
@@ -343,7 +343,7 @@ namespace idaten
         scan(blocksize, src, dst);
 
         std::vector<int> buffer(x.size());
-        dst.readByNum(&buffer[0]);
+        dst.readFromDeviceToHostByNum(&buffer[0]);
 
         int xxx = 0;
 #else
@@ -360,18 +360,18 @@ namespace idaten
 
         idaten::TypedCudaMemory<int> bools;
         bools.init(num);
-        bools.writeByNum(b, num);
+        bools.writeFromHostToDeviceByNum(b, num);
 
         idaten::TypedCudaMemory<int> indices;
         indices.init(num);
 
         scan(blocksize, bools, indices);
 
-        indices.readByNum(&buffer[0]);
+        indices.readFromDeviceToHostByNum(&buffer[0]);
 
         idaten::TypedCudaMemory<int> values;
         values.init(num);
-        values.writeByNum(v, num);
+        values.writeFromHostToDeviceByNum(v, num);
 
         idaten::TypedCudaMemory<int> dst;
         dst.init(num);
@@ -389,10 +389,10 @@ namespace idaten
             indices.ptr(),
             values.ptr());
 
-        dst.readByNum(&buffer[0]);
+        dst.readFromDeviceToHostByNum(&buffer[0]);
 
         int _count = -1;
-        count.readByNum(&_count);
+        count.readFromDeviceToHostByNum(&_count);
 
         int xxx = 0;
 #endif

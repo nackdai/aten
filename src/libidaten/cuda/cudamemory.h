@@ -30,8 +30,8 @@ namespace idaten {
             return m_bytes;
         }
 
-        uint32_t write(const void* p, uint32_t sizeBytes, uint32_t offsetBytes = 0);
-        uint32_t read(void* p, uint32_t bytes);
+        uint32_t writeFromHostToDeviceByBytes(const void* p, uint32_t sizeBytes, uint32_t offsetBytes = 0);
+        uint32_t readFromDeviceToHostByBytes(void* p, uint32_t bytes);
 
         operator void*()
         {
@@ -79,15 +79,15 @@ namespace idaten {
             m_num = num;
         }
 
-        uint32_t writeByNum(const _T* p, uint32_t num)
+        uint32_t writeFromHostToDeviceByNum(const _T* p, uint32_t num)
         {
-            auto ret = CudaMemory::write(p, sizeof(_T) * num);
+            auto ret = CudaMemory::writeFromHostToDeviceByBytes(p, sizeof(_T) * num);
             return ret;
         }
 
-        uint32_t readByNum(void* p, uint32_t num = 0)
+        uint32_t readFromDeviceToHostByNum(void* p, uint32_t num = 0)
         {
-            return CudaMemory::read(p, sizeof(_T) * num);
+            return CudaMemory::readFromDeviceToHostByBytes(p, sizeof(_T) * num);
         }
 
         uint32_t num() const
@@ -112,7 +112,7 @@ namespace idaten {
         uint32_t readFromDeviceToHost(std::vector<_T>& host)
         {
             host.resize(m_num);
-            return readByNum(&host[0], m_num);
+            return readFromDeviceToHostByNum(&host[0], m_num);
         }
 
     private:

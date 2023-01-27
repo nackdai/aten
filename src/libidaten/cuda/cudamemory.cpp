@@ -13,7 +13,7 @@ namespace idaten {
     CudaMemory::CudaMemory(const void* p, uint32_t bytes)
     {
         init(bytes);
-        write(p, bytes);
+        writeFromHostToDeviceByBytes(p, bytes);
     }
 
     CudaMemory::~CudaMemory()
@@ -33,7 +33,7 @@ namespace idaten {
         }
     }
 
-    uint32_t CudaMemory::write(const void* p, uint32_t sizeBytes, uint32_t offsetBytes/*= 0*/)
+    uint32_t CudaMemory::writeFromHostToDeviceByBytes(const void* p, uint32_t sizeBytes, uint32_t offsetBytes/*= 0*/)
     {
         if (!m_device) {
             init(sizeBytes);
@@ -51,7 +51,7 @@ namespace idaten {
         return sizeBytes;
     }
 
-    uint32_t CudaMemory::read(void* p, uint32_t bytes)
+    uint32_t CudaMemory::readFromDeviceToHostByBytes(void* p, uint32_t bytes)
     {
         if (bytes == 0) {
             bytes = m_bytes;

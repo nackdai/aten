@@ -154,10 +154,10 @@ namespace idaten
         const aten::GeomMultiVertexBuffer* vb)
     {
         m_vertices.init(vtxNum);
-        m_vertices.writeByNum(vertices, vtxNum);
+        m_vertices.writeFromHostToDeviceByNum(vertices, vtxNum);
 
         m_indices.init(idxNum);
-        m_indices.writeByNum(indices, idxNum);
+        m_indices.writeFromHostToDeviceByNum(indices, idxNum);
 
         if (vb) {
             auto handles = vb->getVBOHandles();
@@ -185,10 +185,10 @@ namespace idaten
         const aten::GeomMultiVertexBuffer* vb)
     {
         m_vertices.init(vtxNum);
-        m_vertices.writeByNum(vertices, vtxNum);
+        m_vertices.writeFromHostToDeviceByNum(vertices, vtxNum);
 
         m_triangles.init(triNum);
-        m_triangles.writeByNum(tris, triNum);
+        m_triangles.writeFromHostToDeviceByNum(tris, triNum);
 
         if (vb) {
             auto handles = vb->getVBOHandles();
@@ -221,7 +221,7 @@ namespace idaten
 
         AT_ASSERT(m_matrices.num() >= mtxNum);
 
-        m_matrices.writeByNum(matrices, mtxNum);
+        m_matrices.writeFromHostToDeviceByNum(matrices, mtxNum);
     }
 
     void Skinning::compute(
@@ -333,8 +333,8 @@ namespace idaten
             checkCudaKernel(getMinMaxFinal);
         }
 
-        m_minBuf.readByNum(&aabbMin, 1);
-        m_maxBuf.readByNum(&aabbMax, 1);
+        m_minBuf.readFromDeviceToHostByNum(&aabbMin, 1);
+        m_maxBuf.readFromDeviceToHostByNum(&aabbMax, 1);
 
         if (!m_interopVBO.empty()) {
             m_interopVBO[0].unmap();
@@ -351,8 +351,8 @@ namespace idaten
         AT_ASSERT(m_dstPos.bytes() > 0);
         AT_ASSERT(m_dstNml.bytes() > 0);
 
-        m_dstPos.readByNum(pos, num);
-        m_dstNml.readByNum(nml, num);
+        m_dstPos.readFromDeviceToHostByNum(pos, num);
+        m_dstNml.readFromDeviceToHostByNum(nml, num);
 
         return true;
     }

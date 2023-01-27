@@ -37,12 +37,12 @@ namespace idaten
 
         if (resultHostKeys) {
             resultHostKeys->resize(num);
-            keys.readByNum(resultHostKeys, num);
+            keys.readFromDeviceToHostByNum(resultHostKeys, num);
         }
 
         if (resultHostValues) {
             resultHostValues->resize(num);
-            values.readByNum(resultHostValues, num);
+            values.readFromDeviceToHostByNum(resultHostValues, num);
         }
     }
 

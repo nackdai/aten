@@ -50,7 +50,7 @@ namespace idaten
                 auto cudaTex = m_texRsc[i].bind();
                 tmp.push_back(cudaTex);
             }
-            m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
+            m_tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);

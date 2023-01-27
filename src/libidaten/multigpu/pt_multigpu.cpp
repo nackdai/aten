@@ -52,7 +52,7 @@ namespace idaten
                 auto nodeTex = m_nodeparam[i].bind();
                 tmp.push_back(nodeTex);
             }
-            m_nodetex.writeByNum(&tmp[0], (uint32_t)tmp.size());
+            m_nodetex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
         if (!m_texRsc.empty())
@@ -62,7 +62,7 @@ namespace idaten
                 auto cudaTex = m_texRsc[i].bind();
                 tmp.push_back(cudaTex);
             }
-            m_tex.writeByNum(&tmp[0], (uint32_t)tmp.size());
+            m_tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
         if (need_export_gl_) {
@@ -71,7 +71,7 @@ namespace idaten
                 gl_surfaces_[i].map();
                 tmp.push_back(gl_surfaces_[i].bind());
             }
-            gl_surface_cuda_rscs_.writeByNum(&tmp[0], (uint32_t)tmp.size());
+            gl_surface_cuda_rscs_.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
         static const int rrBounce = 3;

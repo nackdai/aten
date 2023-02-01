@@ -16,7 +16,7 @@
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
-static const char* TITLE = "AORenderer";
+static const char *TITLE = "AORenderer";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -38,12 +38,13 @@ static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
 static int g_cntScreenShot = 0;
 
-static int g_renderMode = 0;    // 0: AO, 1: TexView
+static int g_renderMode = 0; // 0: AO, 1: TexView
 static int g_viewTexIdx = 0;
 
-void onRun(aten::window* window)
+void onRun(aten::window *window)
 {
-    if (g_isCameraDirty) {
+    if (g_isCameraDirty)
+    {
         g_camera.update();
 
         auto camparam = g_camera.param();
@@ -59,29 +60,33 @@ void onRun(aten::window* window)
     aten::timer timer;
     timer.begin();
 
-    if (g_renderMode == 0) {
+    if (g_renderMode == 0)
+    {
         // AO
         g_tracer.render(
             idaten::TileDomain(0, 0, WIDTH, HEIGHT),
             1,
             5);
     }
-    else {
+    else
+    {
         // Texture Viewer
         g_tracer.viewTextures(g_viewTexIdx, WIDTH, HEIGHT);
     }
 
     auto cudaelapsed = timer.end();
 
+    aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
     aten::RasterizeRenderer::clearBuffer(
         aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        clear_color,
         1.0f,
         0);
 
     g_visualizer->render(false);
 
-    if (g_willTakeScreenShot) {
+    if (g_willTakeScreenShot)
+    {
         static char buffer[1024];
         ::sprintf(buffer, "sc_%d.png\0", g_cntScreenShot);
 
@@ -120,7 +125,6 @@ void onRun(aten::window* window)
 
 void onClose()
 {
-
 }
 
 bool g_isMouseLBtnDown = false;
@@ -133,7 +137,8 @@ void onMouseBtn(bool left, bool press, int x, int y)
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
 
-    if (press) {
+    if (press)
+    {
         g_prevX = x;
         g_prevY = y;
 
@@ -144,7 +149,8 @@ void onMouseBtn(bool left, bool press, int x, int y)
 
 void onMouseMove(int x, int y)
 {
-    if (g_isMouseLBtnDown) {
+    if (g_isMouseLBtnDown)
+    {
         aten::CameraOperator::rotate(
             g_camera,
             WIDTH, HEIGHT,
@@ -152,7 +158,8 @@ void onMouseMove(int x, int y)
             x, y);
         g_isCameraDirty = true;
     }
-    else if (g_isMouseRBtnDown) {
+    else if (g_isMouseRBtnDown)
+    {
         aten::CameraOperator::move(
             g_camera,
             g_prevX, g_prevY,
@@ -175,19 +182,24 @@ void onKey(bool press, aten::Key key)
 {
     static const real offset = real(0.1);
 
-    if (press) {
-        if (key == aten::Key::Key_F1) {
+    if (press)
+    {
+        if (key == aten::Key::Key_F1)
+        {
             g_willShowGUI = !g_willShowGUI;
             return;
         }
-        else if (key == aten::Key::Key_F2) {
+        else if (key == aten::Key::Key_F2)
+        {
             g_willTakeScreenShot = true;
             return;
         }
     }
 
-    if (press) {
-        switch (key) {
+    if (press)
+    {
+        switch (key)
+        {
         case aten::Key::Key_W:
         case aten::Key::Key_UP:
             aten::CameraOperator::moveForward(g_camera, offset);
@@ -223,7 +235,7 @@ void onKey(bool press, aten::Key key)
                 vfov,
                 WIDTH, HEIGHT);
         }
-            break;
+        break;
         default:
             break;
         }
@@ -298,14 +310,15 @@ int main()
             mtrlparms,
             vtxparams);
 
-        const auto& nodes = g_scene.getAccel()->getNodes();
-        const auto& mtxs = g_scene.getAccel()->getMatrices();
+        const auto &nodes = g_scene.getAccel()->getNodes();
+        const auto &mtxs = g_scene.getAccel()->getMatrices();
 
         std::vector<idaten::TextureResource> tex;
         {
             auto texNum = g_ctxt.getTextureNum();
 
-            for (int i = 0; i < texNum; i++) {
+            for (int i = 0; i < texNum; i++)
+            {
                 auto t = g_ctxt.getTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));

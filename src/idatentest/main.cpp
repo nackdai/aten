@@ -19,7 +19,7 @@
 
 static int WIDTH = 1280;
 static int HEIGHT = 720;
-static const char* TITLE = "idaten";
+static const char *TITLE = "idaten";
 
 #ifdef ENABLE_OMP
 static uint32_t g_threadnum = 8;
@@ -73,15 +73,17 @@ void update()
 
     auto obj = getMovableObj();
 
-    if (obj) {
+    if (obj)
+    {
         auto t = obj->getTrans();
 
-        if (y >= -0.1f) {
+        if (y >= -0.1f)
+        {
             d = -0.01f;
         }
-        else if (y <= -1.5f) {
+        else if (y <= -1.5f)
+        {
             d = 0.01f;
-
         }
 
         y += d;
@@ -109,8 +111,8 @@ void update()
                 mtrlparms,
                 vtxparams);
 
-            const auto& nodes = g_scene.getAccel()->getNodes();
-            const auto& mtxs = g_scene.getAccel()->getMatrices();
+            const auto &nodes = g_scene.getAccel()->getNodes();
+            const auto &mtxs = g_scene.getAccel()->getMatrices();
 
             g_tracer.updateBVH(
                 shapeparams,
@@ -120,9 +122,10 @@ void update()
     }
 }
 
-void onRun(aten::window* window)
+void onRun(aten::window *window)
 {
-    if (g_enableFrameStep && !g_frameStep) {
+    if (g_enableFrameStep && !g_frameStep)
+    {
         return;
     }
 
@@ -136,7 +139,8 @@ void onRun(aten::window* window)
         aten::timer timer;
         timer.begin();
 
-        if (g_enableUpdate) {
+        if (g_enableUpdate)
+        {
             update();
         }
 
@@ -146,7 +150,8 @@ void onRun(aten::window* window)
         g_avgupdate /= (float)frame;
     }
 
-    if (g_isCameraDirty) {
+    if (g_isCameraDirty)
+    {
         g_camera.update();
 
         auto camparam = g_camera.param();
@@ -174,9 +179,10 @@ void onRun(aten::window* window)
 
     aten::GLProfiler::begin();
 
+    aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
     aten::RasterizeRenderer::clearBuffer(
         aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        clear_color,
         1.0f,
         0);
 
@@ -184,7 +190,8 @@ void onRun(aten::window* window)
 
     auto visualizerTime = aten::GLProfiler::end();
 
-    if (g_showAABB) {
+    if (g_showAABB)
+    {
         g_rasterizerAABB.renderSceneDepth(
             g_ctxt,
             &g_scene,
@@ -217,17 +224,20 @@ void onRun(aten::window* window)
         auto is_input_samples = ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
         auto is_input_bounce = ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
 
-        if (is_input_samples || is_input_bounce) {
+        if (is_input_samples || is_input_bounce)
+        {
             g_tracer.reset();
         }
 
-        if (ImGui::Checkbox("Progressive", &g_enableProgressive)) {
+        if (ImGui::Checkbox("Progressive", &g_enableProgressive))
+        {
             g_tracer.setEnableProgressive(g_enableProgressive);
         }
 
         ImGui::Checkbox("Show AABB", &g_showAABB);
 
-        if (ImGui::SliderFloat("Distance Limit Ratio", &g_distanceLimitRatio, 0.1f, 1.0f)) {
+        if (ImGui::SliderFloat("Distance Limit Ratio", &g_distanceLimitRatio, 0.1f, 1.0f))
+        {
             auto aabb = g_scene.getAccel()->getBoundingbox();
             auto d = aabb.getDiagonalLenght();
             g_tracer.setHitDistanceLimit(d * g_distanceLimitRatio);
@@ -241,12 +251,15 @@ void onRun(aten::window* window)
 
 #ifdef ENABLE_NPR
         auto is_enable_feature_line = g_tracer.isEnableFatureLine();
-        if (ImGui::Checkbox("FeatureLine on/off", &is_enable_feature_line)) {
+        if (ImGui::Checkbox("FeatureLine on/off", &is_enable_feature_line))
+        {
             g_tracer.enableFatureLine(is_enable_feature_line);
         }
-        if (is_enable_feature_line) {
+        if (is_enable_feature_line)
+        {
             auto line_width = g_tracer.getFeatureLineWidth();
-            if (ImGui::SliderFloat("LineWidth", &line_width, 1, 10)) {
+            if (ImGui::SliderFloat("LineWidth", &line_width, 1, 10))
+            {
                 g_tracer.setFeatureLineWidth(line_width);
             }
         }
@@ -256,7 +269,6 @@ void onRun(aten::window* window)
 
 void onClose()
 {
-
 }
 
 bool g_isMouseLBtnDown = false;
@@ -269,7 +281,8 @@ void onMouseBtn(bool left, bool press, int x, int y)
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
 
-    if (press) {
+    if (press)
+    {
         g_prevX = x;
         g_prevY = y;
 
@@ -280,7 +293,8 @@ void onMouseBtn(bool left, bool press, int x, int y)
 
 void onMouseMove(int x, int y)
 {
-    if (g_isMouseLBtnDown) {
+    if (g_isMouseLBtnDown)
+    {
         aten::CameraOperator::rotate(
             g_camera,
             WIDTH, HEIGHT,
@@ -288,7 +302,8 @@ void onMouseMove(int x, int y)
             x, y);
         g_isCameraDirty = true;
     }
-    else if (g_isMouseRBtnDown) {
+    else if (g_isMouseRBtnDown)
+    {
         aten::CameraOperator::move(
             g_camera,
             g_prevX, g_prevY,
@@ -311,34 +326,43 @@ void onKey(bool press, aten::Key key)
 {
     static const real offset_base = real(0.1);
 
-    if (press) {
-        if (key == aten::Key::Key_F1) {
+    if (press)
+    {
+        if (key == aten::Key::Key_F1)
+        {
             g_willShowGUI = !g_willShowGUI;
             return;
         }
-        else if (key == aten::Key::Key_F2) {
+        else if (key == aten::Key::Key_F2)
+        {
             g_willTakeScreenShot = true;
             return;
         }
-        else if (key == aten::Key::Key_F3) {
+        else if (key == aten::Key::Key_F3)
+        {
             g_enableFrameStep = !g_enableFrameStep;
             return;
         }
-        else if (key == aten::Key::Key_F4) {
+        else if (key == aten::Key::Key_F4)
+        {
             g_enableUpdate = !g_enableUpdate;
             return;
         }
-        else if (key == aten::Key::Key_F5) {
+        else if (key == aten::Key::Key_F5)
+        {
             aten::GLProfiler::trigger();
             return;
         }
-        else if (key == aten::Key::Key_SPACE) {
-            if (g_enableFrameStep) {
+        else if (key == aten::Key::Key_SPACE)
+        {
+            if (g_enableFrameStep)
+            {
                 g_frameStep = true;
                 return;
             }
         }
-        else if (key == aten::Key::Key_CONTROL) {
+        else if (key == aten::Key::Key_CONTROL)
+        {
             g_pickPixel = true;
             return;
         }
@@ -346,8 +370,10 @@ void onKey(bool press, aten::Key key)
 
     auto offset = offset_base * g_moveMultiply;
 
-    if (press) {
-        switch (key) {
+    if (press)
+    {
+        switch (key)
+        {
         case aten::Key::Key_W:
         case aten::Key::Key_UP:
             aten::CameraOperator::moveForward(g_camera, offset);
@@ -425,7 +451,7 @@ int main()
         "../shader/fullscreen_fs.glsl");
 
     g_visualizer->addPostProc(&gamma);
-    //aten::visualizer::addPostProc(&blitter);
+    // aten::visualizer::addPostProc(&blitter);
 
     g_rasterizer.init(
         WIDTH, HEIGHT,
@@ -480,14 +506,15 @@ int main()
             mtrlparms,
             vtxparams);
 
-        const auto& nodes = g_scene.getAccel()->getNodes();
-        const auto& mtxs = g_scene.getAccel()->getMatrices();
+        const auto &nodes = g_scene.getAccel()->getNodes();
+        const auto &mtxs = g_scene.getAccel()->getMatrices();
 
         std::vector<idaten::TextureResource> tex;
         {
             auto texNum = g_ctxt.getTextureNum();
 
-            for (int i = 0; i < texNum; i++) {
+            for (int i = 0; i < texNum; i++)
+            {
                 auto t = g_ctxt.getTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
@@ -495,8 +522,10 @@ int main()
         }
 
 #ifdef ENABLE_ENVMAP
-        for (auto& l : lightparams) {
-            if (l.type == aten::LightType::IBL) {
+        for (auto &l : lightparams)
+        {
+            if (l.type == aten::LightType::IBL)
+            {
                 l.idx = envmap->id();
             }
         }

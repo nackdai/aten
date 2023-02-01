@@ -5,10 +5,10 @@
 
 static int WIDTH = 512;
 static int HEIGHT = 512;
-static const char* TITLE = "app";
+static const char *TITLE = "app";
 
-//#define ENABLE_EVERY_FRAME_SC
-//#define ENABLE_DOF
+// #define ENABLE_EVERY_FRAME_SC
+// #define ENABLE_DOF
 #define ENABLE_FEATURE_LINE
 
 #ifdef ENABLE_DOF
@@ -24,18 +24,18 @@ static aten::StaticColorBG g_staticbg(aten::vec3(0.25, 0.25, 0.25));
 static std::shared_ptr<aten::envmap> g_bg;
 static std::shared_ptr<aten::texture> g_envmap;
 
-//static aten::RayTracing g_tracer;
+// static aten::RayTracing g_tracer;
 static aten::PathTracing g_tracer;
-//static aten::BDPT g_tracer;
-//static aten::SortedPathTracing g_tracer;
-//static aten::ERPT g_tracer;
-//static aten::PSSMLT g_tracer;
-//static aten::GeometryInfoRenderer g_tracer;
+// static aten::BDPT g_tracer;
+// static aten::SortedPathTracing g_tracer;
+// static aten::ERPT g_tracer;
+// static aten::PSSMLT g_tracer;
+// static aten::GeometryInfoRenderer g_tracer;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static aten::FilmProgressive g_buffer(WIDTH, HEIGHT);
-//static aten::Film g_buffer(WIDTH, HEIGHT);
+// static aten::Film g_buffer(WIDTH, HEIGHT);
 
 static aten::RasterizeRenderer g_rasterizerAABB;
 
@@ -57,15 +57,17 @@ void update()
 
     auto obj = getMovableObj();
 
-    if (obj) {
+    if (obj)
+    {
         auto t = obj->getTrans();
 
-        if (y >= 0.0f) {
+        if (y >= 0.0f)
+        {
             d = -0.1f;
         }
-        else if (y <= -0.5f) {
+        else if (y <= -0.5f)
+        {
             d = 0.1f;
-
         }
 
         y += d;
@@ -79,9 +81,9 @@ void update()
     }
 }
 
-void display(aten::window* wnd)
+void display(aten::window *wnd)
 {
-    //update();
+    // update();
 
     g_camera.update();
 
@@ -114,7 +116,8 @@ void display(aten::window* wnd)
 
     AT_PRINTF("Elapsed %f[ms] / Avg %f[ms]\n", elapsed, g_avgElapsed);
 
-    if (!isExportedHdr) {
+    if (!isExportedHdr)
+    {
         isExportedHdr = true;
 
         // Export to hdr format.
@@ -124,9 +127,10 @@ void display(aten::window* wnd)
             WIDTH, HEIGHT);
     }
 
+    aten::vec4 clear_color(0, 0.5f, 1.0f, 1.0f);
     aten::RasterizeRenderer::clearBuffer(
         aten::RasterizeRenderer::Buffer::Color | aten::RasterizeRenderer::Buffer::Depth | aten::RasterizeRenderer::Buffer::Sencil,
-        aten::vec4(0, 0.5f, 1.0f, 1.0f),
+        clear_color,
         1.0f,
         0);
 
@@ -149,7 +153,7 @@ void display(aten::window* wnd)
     g_frameNo++;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     aten::initSampler(WIDTH, HEIGHT, 0, true);
 
@@ -222,11 +226,11 @@ int main(int argc, char* argv[])
         "../shader/fullscreen_vs.glsl",
         "../shader/gamma_fs.glsl");
 
-    //aten::visualizer::addPostProc(&bishd);
-    //aten::visualizer::addPostProc(&blitter);
+    // aten::visualizer::addPostProc(&bishd);
+    // aten::visualizer::addPostProc(&blitter);
     g_visualizer->addPostProc(&gamma);
-    //aten::visualizer::addPostProc(&tonemap);
-    //aten::visualizer::addPostProc(&bloom);
+    // aten::visualizer::addPostProc(&tonemap);
+    // aten::visualizer::addPostProc(&bloom);
 
     g_rasterizerAABB.init(
         WIDTH, HEIGHT,
@@ -244,11 +248,11 @@ int main(int argc, char* argv[])
         WIDTH, HEIGHT,
         lookfrom, lookat,
         aten::vec3(0, 1, 0),
-        30.0,    // image sensor size
-        40.0,    // distance image sensor to lens
-        130.0,    // distance lens to object plane
-        5.0,    // lens radius
-        28.0);    // W scale
+        30.0,  // image sensor size
+        40.0,  // distance image sensor to lens
+        130.0, // distance lens to object plane
+        5.0,   // lens radius
+        28.0); // W scale
 #else
     g_camera.init(
         lookfrom,
@@ -261,16 +265,17 @@ int main(int argc, char* argv[])
     Scene::makeScene(g_ctxt, &g_scene);
 
     g_scene.build(g_ctxt);
-    //g_scene.getAccel()->computeVoxelLodErrorMetric(HEIGHT, fov, 4);
+    // g_scene.getAccel()->computeVoxelLodErrorMetric(HEIGHT, fov, 4);
 
-    //g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
+    // g_tracer.setVirtualLight(g_camera.getPos(), g_camera.getDir(), aten::vec3(36.0, 36.0, 36.0)* 2);
 
     g_envmap = aten::ImageLoader::load("../../asset/envmap/studio015.hdr", g_ctxt);
-    //g_envmap = aten::ImageLoader::load("../../asset/envmap/harbor.hdr");
+    // g_envmap = aten::ImageLoader::load("../../asset/envmap/harbor.hdr");
     g_bg = std::make_shared<aten::envmap>();
     g_bg->init(g_envmap);
 
-    if constexpr (!std::is_same<decltype(g_tracer), aten::BDPT>::value) {
+    if constexpr (!std::is_same<decltype(g_tracer), aten::BDPT>::value)
+    {
         auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
         // NOTE
         // BDPT doesn't support IBL yet.
@@ -297,11 +302,11 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    //g_tracer.setBG(&g_staticbg);
+    // g_tracer.setBG(&g_staticbg);
 
-    //aten::NonLocalMeanFilter filter;
-    //aten::BilateralFilter filter;
-    //aten::visualizer::addPreProc(&filter);
+    // aten::NonLocalMeanFilter filter;
+    // aten::BilateralFilter filter;
+    // aten::visualizer::addPreProc(&filter);
 
     aten::window::run();
 

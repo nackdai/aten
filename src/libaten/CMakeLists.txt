@@ -33,7 +33,6 @@ add_library(
   accelerator/threaded_bvh.h
   aten.h
   aten_namespace.h
-  aten_virtual.h
   camera/CameraOperator.cpp
   camera/CameraOperator.h
   camera/camera.h
@@ -71,6 +70,8 @@ add_library(
   filter/bilateral.h
   filter/nlm.cpp
   filter/nlm.h
+  filter/magnifier.cpp
+  filter/magnifier.h
   filter/taa.cpp
   filter/taa.h
   geometry/cube.cpp

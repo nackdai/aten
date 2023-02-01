@@ -67,6 +67,24 @@ namespace idaten {
         return bytes;
     }
 
+    uint32_t CudaMemory::readFromDeviceToHostByBytesWithOffset(void* p, uint32_t bytes, uint32_t offset_bytes)
+    {
+        if (bytes == 0) {
+            bytes = m_bytes;
+        }
+
+        if (bytes + offset_bytes > m_bytes) {
+            AT_ASSERT(false);
+            return 0;
+        }
+
+        // NOTE
+        // https://stackoverflow.com/questions/64989922/cuda-is-it-safe-to-copy-a-single-element-from-device-memory-by-array-offset
+        checkCudaErrors(cudaMemcpy(p, m_device + offset_bytes, bytes, cudaMemcpyDeviceToHost));
+
+        return bytes;
+    }
+
     void CudaMemory::free()
     {
         if (m_device) {

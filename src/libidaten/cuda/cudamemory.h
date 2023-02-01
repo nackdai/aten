@@ -32,6 +32,7 @@ namespace idaten {
 
         uint32_t writeFromHostToDeviceByBytes(const void* p, uint32_t sizeBytes, uint32_t offsetBytes = 0);
         uint32_t readFromDeviceToHostByBytes(void* p, uint32_t bytes);
+        uint32_t readFromDeviceToHostByBytesWithOffset(void* p, uint32_t bytes, uint32_t offset_bytes);
 
         operator void*()
         {
@@ -48,7 +49,7 @@ namespace idaten {
         static uint32_t getHeapSize();
 
     private:
-        void* m_device{ nullptr };
+        uint8_t* m_device{ nullptr };
         uint32_t m_bytes{ 0 };
     };
 
@@ -113,6 +114,13 @@ namespace idaten {
         {
             host.resize(m_num);
             return readFromDeviceToHostByNum(&host[0], m_num);
+        }
+
+        uint32_t readFromDeviceToHostByNumWithOffset(_T* host, uint32_t num, uint32_t offset_num)
+        {
+            auto bytes = sizeof(_T) * num;
+            auto offset_bytes = sizeof(_T) * offset_num;
+            return CudaMemory::readFromDeviceToHostByBytesWithOffset(&host[0], bytes, offset_bytes);
         }
 
     private:

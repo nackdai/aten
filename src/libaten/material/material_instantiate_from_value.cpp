@@ -10,7 +10,6 @@
 #include "material/oren_nayar.h"
 #include "material/refraction.h"
 #include "material/specular.h"
-#include "material/toon.h"
 #include "material/velvet.h"
 #include "misc/value.h"
 
@@ -110,10 +109,6 @@ namespace AT_NAME {
 
     specular::specular(aten::Values& val)
         : material(aten::MaterialType::Specular, MaterialAttributeSpecular, val)
-    {}
-
-    toon::toon(aten::Values& val)
-        : NPRMaterial(aten::MaterialType::Toon, val)
     {}
 
     MicrofacetVelvet::MicrofacetVelvet(aten::Values& val)

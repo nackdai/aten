@@ -22,31 +22,28 @@ namespace aten
             uint32_t isSingular : 1;
             uint32_t isTranslucent : 1;
             uint32_t isGlossy : 1;
-            uint32_t isNPR : 1;
         };
 
         AT_DEVICE_API MaterialAttribute(
             bool _isEmissive = false,
             bool _isSingular = false,
             bool _isTranslucent = false,
-            bool _isGlossy = false,
-            bool _isNPR = false)
+            bool _isGlossy = false)
             : isEmissive(_isEmissive), isSingular(_isSingular), isTranslucent(_isTranslucent),
-            isGlossy(_isGlossy), isNPR(_isNPR)
+            isGlossy(_isGlossy)
         {}
         AT_DEVICE_API MaterialAttribute(const MaterialAttribute& type)
-            : MaterialAttribute(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy, type.isNPR)
+            : MaterialAttribute(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy)
         {}
     };
 
-    //                                                                    Em     Si      Tr    Gl    NPR
-    #define MaterialAttributeMicrofacet         aten::MaterialAttribute(false, false, false, true,  false)
-    #define MaterialAttributeLambert            aten::MaterialAttribute(false, false, false, false, false)
-    #define MaterialAttributeEmissive           aten::MaterialAttribute(true,  false, false, false, false)
-    #define MaterialAttributeSpecular           aten::MaterialAttribute(false, true,  false, true,  false)
-    #define MaterialAttributeRefraction         aten::MaterialAttribute(false, true,  true,  true,  false)
-    #define MaterialAttributeTransmission       aten::MaterialAttribute(false, false, true,  false, false)
-    #define MaterialAttributeNPR                aten::MaterialAttribute(false, false, false, false, true)
+    //                                                                    Em     Si      Tr    Gl
+    #define MaterialAttributeMicrofacet         aten::MaterialAttribute(false, false, false, true)
+    #define MaterialAttributeLambert            aten::MaterialAttribute(false, false, false, false)
+    #define MaterialAttributeEmissive           aten::MaterialAttribute(true,  false, false, false)
+    #define MaterialAttributeSpecular           aten::MaterialAttribute(false, true,  false, true)
+    #define MaterialAttributeRefraction         aten::MaterialAttribute(false, true,  true,  true)
+    #define MaterialAttributeTransmission       aten::MaterialAttribute(false, false, true,  false)
 
     enum class MaterialType : int {
         Emissive,
@@ -63,7 +60,6 @@ namespace aten
         Retroreflective,
         CarPaint,
         Disney,
-        Toon,
         Layer,
 
         MaterialTypeMax,
@@ -440,11 +436,6 @@ namespace AT_NAME
             return isGlossy;
         }
 
-        bool isNPR() const
-        {
-            return m_param.attrib.isNPR;
-        }
-
         const aten::vec4& color() const
         {
             return m_param.baseColor;
@@ -621,40 +612,5 @@ namespace AT_NAME
 
         // For debug.
         std::string m_name;
-    };
-
-    class NPRMaterial : public material {
-    protected:
-        NPRMaterial(
-            aten::MaterialType type,
-            const aten::vec3& e,
-            const std::shared_ptr<AT_NAME::Light>& light);
-
-        NPRMaterial(aten::MaterialType type, aten::Values& val)
-            : material(type, MaterialAttributeNPR, val)
-        {}
-
-        virtual ~NPRMaterial() {}
-
-    public:
-        virtual AT_DEVICE_MTRL_API real computeFresnel(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor = 1) const override final
-        {
-            return real(1);
-        }
-
-        void setTargetLight(const std::shared_ptr<AT_NAME::Light>& light);
-
-        std::shared_ptr<const AT_NAME::Light> getTargetLight() const;
-
-        virtual aten::vec3 bsdf(
-            real cosShadow,
-            real u, real v) const = 0;
-
-    private:
-        std::shared_ptr<AT_NAME::Light> m_targetLight;
     };
 }

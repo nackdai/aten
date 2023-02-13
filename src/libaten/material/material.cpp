@@ -21,7 +21,6 @@ namespace AT_NAME
         "retroreflective",
         "carpaint",
         "disney_brdf",
-        "toon",
         "layer",
     };
     AT_STATICASSERT(AT_COUNTOF(g_mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
@@ -99,25 +98,6 @@ namespace AT_NAME
         m_param.albedoMap = albedoMap ? albedoMap->id() : -1;
         m_param.normalMap = normalMap ? normalMap->id() : -1;
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
-    }
-
-    NPRMaterial::NPRMaterial(
-        aten::MaterialType type,
-        const aten::vec3& e,
-        const std::shared_ptr<AT_NAME::Light>& light)
-        : material(type, MaterialAttributeNPR, e)
-    {
-        setTargetLight(light);
-    }
-
-    void NPRMaterial::setTargetLight(const std::shared_ptr<AT_NAME::Light>& light)
-    {
-        m_targetLight = light;
-    }
-
-    std::shared_ptr<const AT_NAME::Light> NPRMaterial::getTargetLight() const
-    {
-        return m_targetLight;
     }
 
     AT_DEVICE_MTRL_API aten::vec4 material::sampleAlbedoMap(real u, real v) const

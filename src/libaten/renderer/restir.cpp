@@ -1,7 +1,6 @@
 #include "renderer/restir.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "renderer/nonphotoreal.h"
 #include "renderer/renderer_utility.h"
 #include "sampler/cmj.h"
 
@@ -116,13 +115,6 @@ namespace aten
 
         // Apply normal map.
         auto pre_sampled_r = mtrl->applyNormalMap(orienting_normal, orienting_normal, path.rec.u, path.rec.v, orienting_normal, sampler);
-
-        // Non-Photo-Real.
-        if (mtrl->isNPR()) {
-            path.contrib = shadeNPR(ctxt, mtrl.get(), path.rec.p, orienting_normal, path.rec.u, path.rec.v, scene, sampler);
-            path.isTerminate = true;
-            return false;
-        }
 
         // Explicit conection to light.
         if (!mtrl->isSingularOrTranslucent())

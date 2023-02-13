@@ -925,47 +925,6 @@ void DisneyMaterialTestScene::getCameraPosAndAt(
 
 /////////////////////////////////////////////////////
 
-void LayeredMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
-{
-    aten::MaterialParameter mtrlParam;
-
-    mtrlParam.baseColor = aten::vec3(1, 1, 1);
-    mtrlParam.standard.shininess = 200;
-    mtrlParam.standard.ior = 0.8;
-    auto spec = createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam);
-
-    auto diff = createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.7, 0.0, 0.0));
-
-    std::shared_ptr<aten::material> layer(new aten::LayeredBSDF());
-    std::dynamic_pointer_cast<aten::LayeredBSDF>(layer)->add(spec);
-    std::dynamic_pointer_cast<aten::LayeredBSDF>(layer)->add(diff);
-    ctxt.addMaterial(layer);
-
-    auto s_layer = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-3, 0, 0), 1.0, layer);
-    scene->add(s_layer);
-
-    auto s_diff = aten::TransformableFactory::createSphere(ctxt, aten::vec3(-1, 0, 0), 1.0, diff);
-    scene->add(s_diff);
-
-    mtrlParam.baseColor = aten::vec3(0.7, 0, 0);
-    mtrlParam.standard.shininess = 200;
-    mtrlParam.standard.ior = 0.8;
-    auto s_spec = aten::TransformableFactory::createSphere(ctxt, aten::vec3(+1, 0, 0), 1.0, createMaterialWithParamter(ctxt, aten::MaterialType::Blinn, mtrlParam));
-    scene->add(s_spec);
-}
-
-void LayeredMaterialTestScene::getCameraPosAndAt(
-    aten::vec3& pos,
-    aten::vec3& at,
-    real& fov)
-{
-    pos = aten::vec3(0, 0, 13);
-    at = aten::vec3(0, 0, 0);
-    fov = 30;
-}
-
-/////////////////////////////////////////////////////
-
 void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
     auto emit = createMaterial(ctxt, aten::MaterialType::Emissive, aten::vec3(36, 33, 24));

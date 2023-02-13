@@ -23,7 +23,6 @@
 #include "material/beckman.h"
 #include "material/disney_brdf.h"
 #include "material/oren_nayar.h"
-#include "material/layer.h"
 #include "material/velvet.h"
 #include "material/lambert_refraction.h"
 #include "material/microfacet_refraction.h"

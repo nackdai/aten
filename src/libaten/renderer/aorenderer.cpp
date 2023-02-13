@@ -1,7 +1,6 @@
 #include "renderer/aorenderer.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "renderer/nonphotoreal.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"

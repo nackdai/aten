@@ -72,7 +72,6 @@ namespace aten
             []() { return new Retroreflective(); },      // retroreflective
             []() { return new CarPaint(); },             // carpaint
             []() { return new DisneyBRDF(); },           // disney_brdf
-            []() { return nullptr; },                    // toon
             []() { return nullptr; },                    // layer
         };
         AT_STATICASSERT(AT_COUNTOF(funcs) == (int)aten::MaterialType::MaterialTypeMax);

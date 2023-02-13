@@ -263,12 +263,6 @@
     <ClInclude Include="..\src\libaten\material\layer.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\toon.h">
-      <Filter>material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\nonphotoreal.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\scene\instance.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -608,12 +602,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\layer.cpp">
       <Filter>material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\toon.cpp">
-      <Filter>material</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp">
-      <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\hitable.cpp">
       <Filter>scene</Filter>

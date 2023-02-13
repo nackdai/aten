@@ -318,7 +318,6 @@
     <ClInclude Include="..\src\libaten\material\retroreflective.h" />
     <ClInclude Include="..\src\libaten\material\sample_texture.h" />
     <ClInclude Include="..\src\libaten\material\specular.h" />
-    <ClInclude Include="..\src\libaten\material\toon.h" />
     <ClInclude Include="..\src\libaten\material\velvet.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h" />
     <ClInclude Include="..\src\libaten\math\frustum.h" />
@@ -351,7 +350,6 @@
     <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
-    <ClInclude Include="..\src\libaten\renderer\nonphotoreal.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
@@ -448,7 +446,6 @@
     <ClCompile Include="..\src\libaten\material\refraction.cpp" />
     <ClCompile Include="..\src\libaten\material\retroreflective.cpp" />
     <ClCompile Include="..\src\libaten\material\specular.cpp" />
-    <ClCompile Include="..\src\libaten\material\toon.cpp" />
     <ClCompile Include="..\src\libaten\material\velvet.cpp" />
     <ClCompile Include="..\src\libaten\math\mat4.cpp" />
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
@@ -481,7 +478,6 @@
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\feature_line.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\restir.cpp" />

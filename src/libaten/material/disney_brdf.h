@@ -29,7 +29,7 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, baseColor, 1, albedoMap, normalMap)
+            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, baseColor, 1)
         {
             m_param.baseColor = baseColor;
             m_param.standard.subsurface = aten::clamp<real>(subsurface, 0, 1);
@@ -45,7 +45,7 @@ namespace AT_NAME
 
             m_param.standard.ior = ior;
 
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+            setTextures(albedoMap, normalMap, roughnessMap);
         }
 
         DisneyBRDF(
@@ -53,7 +53,7 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, param.baseColor, 1, albedoMap, normalMap)
+            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, param.baseColor, 1)
         {
             m_param.baseColor = param.baseColor;
             m_param.standard.subsurface = aten::clamp<real>(param.standard.subsurface, 0, 1);
@@ -69,7 +69,7 @@ namespace AT_NAME
 
             m_param.standard.ior = param.standard.ior;
 
-            m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
+            setTextures(albedoMap, normalMap, roughnessMap);
         }
 
         DisneyBRDF(aten::Values& val);

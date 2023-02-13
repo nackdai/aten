@@ -18,8 +18,9 @@ namespace AT_NAME
             real ior = real(1),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, albedo, ior, albedoMap, normalMap)
+            : material(aten::MaterialType::Blinn, MaterialAttributeMicrofacet, albedo, ior)
         {
+            setTextures(albedoMap, normalMap, nullptr);
             m_param.standard.shininess = shininess;
         }
 

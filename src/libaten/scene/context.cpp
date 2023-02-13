@@ -2,7 +2,6 @@
 
 #include "scene/context.h"
 #include "geometry/face.h"
-#include "material/material_factory.h"
 #include "geometry/transformable.h"
 
 namespace aten
@@ -26,7 +25,7 @@ namespace aten
         aten::MaterialType type,
         aten::Values& value)
     {
-        auto mtrl = MaterialFactory::createMaterial(type, value);
+        auto mtrl = material::createMaterial(type, value);
         AT_ASSERT(mtrl);
 
         if (mtrl) {
@@ -38,7 +37,7 @@ namespace aten
 
     std::shared_ptr<AT_NAME::material> context::createMaterialWithDefaultValue(aten::MaterialType type)
     {
-        auto mtrl = MaterialFactory::createMaterialWithDefaultValue(type);
+        auto mtrl = material::createMaterialWithDefaultValue(type);
         AT_ASSERT(mtrl);
 
         if (mtrl) {
@@ -54,7 +53,7 @@ namespace aten
         aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
-        auto mtrl = MaterialFactory::createMaterialWithMaterialParameter(
+        auto mtrl = material::createMaterialWithMaterialParameter(
             param,
             albedoMap,
             normalMap,

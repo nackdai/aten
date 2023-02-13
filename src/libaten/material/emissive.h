@@ -10,7 +10,7 @@ namespace aten {
 namespace AT_NAME
 {
     class emissive : public material {
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         emissive()

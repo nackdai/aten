@@ -9,7 +9,7 @@ namespace aten {
 namespace AT_NAME
 {
     class MicrofacetVelvet : public material {
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         MicrofacetVelvet(

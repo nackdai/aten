@@ -11,7 +11,7 @@ namespace aten {
 namespace AT_NAME
 {
     class lambert : public material {
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         lambert(

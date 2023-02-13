@@ -9,7 +9,7 @@ namespace aten {
 namespace AT_NAME
 {
     class MicrofacetBeckman : public material {
-        friend class MaterialFactory;
+        friend class material;
         friend class Retroreflective;
 
     private:

@@ -481,15 +481,6 @@ namespace AT_NAME
             const aten::vec3& wi,
             aten::sampler* sampler) const;
 
-        virtual AT_DEVICE_MTRL_API real computeFresnel(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real outsideIor = 1) const
-        {
-            return computeFresnel(outsideIor, m_param.standard.ior, wi, normal);
-        }
-
         virtual AT_DEVICE_MTRL_API real pdf(
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -533,22 +524,7 @@ namespace AT_NAME
             return m_param;
         }
 
-        void copyParam(const aten::MaterialParameter& param)
-        {
-            AT_ASSERT(m_param.type == param.type);
-
-            if (m_param.type == param.type) {
-                m_param = param;
-            }
-        }
-
-        // TODO
-        void copyParamEx(const aten::MaterialParameter& param)
-        {
-            m_param = param;
-        }
-
-        void setName(const char* name)
+        void setName(std::string_view name)
         {
             m_name = name;
         }
@@ -571,7 +547,7 @@ namespace AT_NAME
 
         static const char* getMaterialTypeName(aten::MaterialType type);
 
-        static aten::MaterialType getMaterialTypeFromMaterialTypeName(const std::string& name);
+        static aten::MaterialType getMaterialTypeFromMaterialTypeName(std::string_view name);
 
         static bool isDefaultMaterialName(const std::string& name);
 

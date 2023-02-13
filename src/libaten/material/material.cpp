@@ -146,9 +146,9 @@ namespace AT_NAME
         return mtrl_type_info[static_cast<size_t>(type)].name.c_str();
     }
 
-    aten::MaterialType material::getMaterialTypeFromMaterialTypeName(const std::string& name)
+    aten::MaterialType material::getMaterialTypeFromMaterialTypeName(std::string_view name)
     {
-        std::string lowerName = name;
+        std::string lowerName{ name };
         std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
 
         for (size_t i = 0; i < mtrl_type_info.size(); i++) {

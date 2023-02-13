@@ -240,6 +240,7 @@ namespace aten
         MaterialAttribute attrib;
 
         struct {
+            uint32_t id : 16;
             uint32_t isIdealRefraction : 1;
         };
 
@@ -451,7 +452,7 @@ namespace AT_NAME
 
         int id() const
         {
-            return m_id;
+            return m_param.id;
         }
 
         void setTextures(
@@ -615,15 +616,7 @@ namespace AT_NAME
             return F;
         }
 
-    private:
-        void updateIndex(int id)
-        {
-            m_id = id;
-        }
-
     protected:
-        int m_id{ -1 };
-
         aten::MaterialParameter m_param;
 
         // For debug.

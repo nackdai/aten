@@ -373,20 +373,24 @@ namespace AT_NAME
 
     class material {
         friend class context;
-        friend class LayeredBSDF;
 
     protected:
         material(
             aten::MaterialType type,
-            const aten::MaterialAttribute& attrib);
+            const aten::MaterialAttribute& attrib)
+            : m_param(type, attrib)
+        {}
 
         material(
             aten::MaterialType type,
             const aten::MaterialAttribute& attrib,
             const aten::vec3& clr,
-            real ior = 1,
-            aten::texture* albedoMap = nullptr,
-            aten::texture* normalMap = nullptr);
+            real ior = 1)
+            : material(type, attrib)
+        {
+            m_param.baseColor = clr;
+            m_param.standard.ior = ior;
+        }
 
         material(
             aten::MaterialType type,

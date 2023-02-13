@@ -17,8 +17,9 @@ namespace AT_NAME
             real roughness = real(0.5),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Velvet, MaterialAttributeMicrofacet, albedo, 0, albedoMap, normalMap)
+            : material(aten::MaterialType::Velvet, MaterialAttributeMicrofacet, albedo, 0)
         {
+            setTextures(albedoMap, normalMap, nullptr);
             m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);
         }
 

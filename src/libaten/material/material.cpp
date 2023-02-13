@@ -67,28 +67,6 @@ namespace AT_NAME
             && static_cast<int>(type) < static_cast<int>(aten::MaterialType::MaterialTypeMax));
     }
 
-    material::material(
-        aten::MaterialType type,
-        const aten::MaterialAttribute& attrib)
-        : m_param(type, attrib)
-    {
-    }
-
-    material::material(
-        aten::MaterialType type,
-        const aten::MaterialAttribute& attrib,
-        const aten::vec3& clr,
-        real ior/*= 1*/,
-        aten::texture* albedoMap/*= nullptr*/,
-        aten::texture* normalMap/*= nullptr*/)
-        : material(type, attrib)
-    {
-        m_param.baseColor = clr;
-        m_param.standard.ior = ior;
-
-        setTextures(albedoMap, normalMap, nullptr);
-    }
-
     void material::setTextures(
         aten::texture* albedoMap,
         aten::texture* normalMap,

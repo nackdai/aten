@@ -17,8 +17,10 @@ namespace AT_NAME
             real ior = real(0),
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, ior, albedoMap, normalMap)
-        {}
+            : material(aten::MaterialType::Specular, MaterialAttributeSpecular, albedo, ior)
+        {
+            setTextures(albedoMap, normalMap, nullptr);
+        }
 
         specular(aten::Values& val);
 

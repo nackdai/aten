@@ -10,7 +10,7 @@ namespace AT_NAME
 {
     class MicrofacetGGX : public material {
         friend class MicrofacetRefraction;
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         MicrofacetGGX(

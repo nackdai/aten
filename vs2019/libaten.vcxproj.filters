@@ -463,9 +463,6 @@
     <ClInclude Include="..\src\libaten\scene\context.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\material\material_factory.h">
-      <Filter>material</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\transformable_factory.h">
       <Filter>geometry</Filter>
     </ClInclude>
@@ -767,9 +764,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\context.cpp">
       <Filter>scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\material\material_factory.cpp">
-      <Filter>material</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp">
       <Filter>renderer</Filter>

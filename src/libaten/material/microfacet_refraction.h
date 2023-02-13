@@ -14,7 +14,7 @@ namespace AT_NAME
     // https://agraphicsguy.wordpress.com/2015/11/11/glass-material-simulated-by-microfacet-bxdf/
 
     class MicrofacetRefraction : public material {
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         MicrofacetRefraction(

@@ -20,7 +20,7 @@ namespace aten {
 namespace AT_NAME
 {
     class Retroreflective : public material {
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         Retroreflective(

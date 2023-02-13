@@ -10,7 +10,7 @@ namespace aten {
 namespace AT_NAME
 {
     class CarPaint : public material {
-        friend class MaterialFactory;
+        friend class material;
 
     private:
         CarPaint(

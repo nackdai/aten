@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <functional>
+
 #include "types.h"
 #include "math/vec3.h"
 #include "sampler/sampler.h"
@@ -374,6 +377,12 @@ namespace AT_NAME
     class material {
         friend class context;
 
+        struct MaterialInfo {
+            std::string name;
+            std::function<material* ()> func;
+        };
+        static const std::array<MaterialInfo, static_cast<size_t>(aten::MaterialType::MaterialTypeMax)> mtrl_type_info;
+
     protected:
         material(
             aten::MaterialType type,
@@ -398,6 +407,18 @@ namespace AT_NAME
             aten::Values& val);
 
     public:
+        static std::shared_ptr<material> createMaterial(
+            MaterialType type,
+            Values& value);
+
+        static std::shared_ptr<material> createMaterialWithDefaultValue(MaterialType type);
+
+        static std::shared_ptr<material> createMaterialWithMaterialParameter(
+            const MaterialParameter& param,
+            aten::texture* albedoMap,
+            aten::texture* normalMap,
+            aten::texture* roughnessMap);
+
         material() = default;
         virtual ~material() = default;
 

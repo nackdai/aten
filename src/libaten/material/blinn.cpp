@@ -40,16 +40,6 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetBlinn::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,    /* in */
-        const aten::vec3& wo,    /* out */
-        real u, real v) const
-    {
-        auto ret = pdf(&m_param, normal, wi, wo, u, v);
-        return ret;
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -110,17 +100,6 @@ namespace AT_NAME
         return dir;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        auto dir = sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
-        return dir;
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -158,17 +137,6 @@ namespace AT_NAME
         albedo *= externalAlbedo;
 
         auto ret = bsdf(albedo, shininess, ior, fresnel, normal, wi, wo, u, v);
-        return ret;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBlinn::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        auto ret = bsdf(&m_param, normal, wi, wo, u, v);
         return ret;
     }
 
@@ -322,30 +290,6 @@ namespace AT_NAME
 
         result->bsdf = bsdf(albedo, shininess, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling MicrofacetBlinn::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     bool MicrofacetBlinn::edit(aten::IMaterialParamEditor* editor)

@@ -28,15 +28,6 @@ namespace AT_NAME {
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API real OrenNayar::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -46,16 +37,6 @@ namespace AT_NAME {
     {
         auto dir = lambert::sampleDirection(normal, sampler);
         return dir;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 OrenNayar::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     inline AT_DEVICE_MTRL_API aten::vec3 computeBsdf(
@@ -179,16 +160,6 @@ namespace AT_NAME {
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 OrenNayar::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API void OrenNayar::sample(
         MaterialSampling* result,
         const aten::MaterialParameter* param,
@@ -218,30 +189,6 @@ namespace AT_NAME {
         result->dir = sampleDirection(param, normal, wi, u, v, sampler);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo);
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling OrenNayar::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     bool OrenNayar::edit(aten::IMaterialParamEditor* editor)

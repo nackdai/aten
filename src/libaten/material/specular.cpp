@@ -13,15 +13,6 @@ namespace AT_NAME
         return real(1);
     }
 
-    AT_DEVICE_MTRL_API real specular::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 specular::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -33,18 +24,6 @@ namespace AT_NAME
         reflect = normalize(reflect);
 
         return reflect;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 specular::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        const aten::vec3& in = ray.dir;
-
-        return sampleDirection(&m_param, normal, in, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
@@ -101,40 +80,6 @@ namespace AT_NAME
         bsdf *= externalAlbedo;
 
         return bsdf;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 specular::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v);
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling specular::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     AT_DEVICE_MTRL_API void specular::sample(

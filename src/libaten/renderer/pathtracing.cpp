@@ -12,7 +12,7 @@
 #include "sampler/cmj.h"
 #include "sampler/bluenoiseSampler.h"
 
-#include "material/lambert.h"
+#include "material/material_impl.h"
 
 //#define RELEASE_DEBUG
 
@@ -175,8 +175,12 @@ namespace aten
                             disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
                             pixel_width);
                         if (is_line_width) {
-                            const auto query_albedo = ctxt.getMaterial(path.rec.mtrlid)->sampleAlbedoMap(path.rec.u, path.rec.v);
-                            const auto sample_albedo = ctxt.getMaterial(hrec_sample.mtrlid)->sampleAlbedoMap(path.rec.u, path.rec.v);
+                            const auto query_albedo = material::sampleAlbedoMap(
+                                &ctxt.getMaterial(path.rec.mtrlid)->param(),
+                                path.rec.u, path.rec.v);
+                            const auto sample_albedo = material::sampleAlbedoMap(
+                                &ctxt.getMaterial(hrec_sample.mtrlid)->param(),
+                                path.rec.u, path.rec.v);
                             const auto query_depth = length(path.rec.p - cam_org);
                             const auto sample_depth = length(hrec_sample.p - cam_org);
 
@@ -398,7 +402,9 @@ namespace aten
         }
 
         // Apply normal map.
-        auto pre_sampled_r = mtrl->applyNormalMap(
+        auto pre_sampled_r = material::applyNormal(
+            &mtrl->param(),
+            mtrl->param().normalMap,
             orienting_normal, orienting_normal,
             path.rec.u, path.rec.v,
             path.ray.dir, sampler);
@@ -482,8 +488,12 @@ namespace aten
                         // Shadow ray hits the light.
                         auto cosShadow = dot(orienting_normal, dirToLight);
 
-                        auto bsdf = mtrl->bsdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
-                        auto pdfb = mtrl->pdf(orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                        auto bsdf = material::sampleBSDF(
+                            &mtrl->param(),
+                            orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
+                        auto pdfb = material::samplePDF(
+                            &mtrl->param(),
+                            orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
 
                         bsdf *= path.throughput;
 
@@ -537,9 +547,13 @@ namespace aten
             }
         }
 
-        auto sampling = mtrl->sample(
-            path.ray,
-            orienting_normal, path.rec.normal,
+        aten::MaterialSampling sampling;
+        material::sampleMaterial(
+            &sampling,
+            &mtrl->param(),
+            orienting_normal,
+            path.ray.dir,
+            path.rec.normal,
             sampler, pre_sampled_r,
             path.rec.u, path.rec.v);
 

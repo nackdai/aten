@@ -310,6 +310,7 @@
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
+    <ClInclude Include="..\src\libaten\material\material_impl.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
@@ -352,7 +353,6 @@
     <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer_utility.h" />
-    <ClInclude Include="..\src\libaten\renderer\restir.h" />
     <ClInclude Include="..\src\libaten\sampler\bluenoiseSampler.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
     <ClInclude Include="..\src\libaten\sampler\halton.h" />
@@ -476,7 +476,6 @@
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\restir.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />

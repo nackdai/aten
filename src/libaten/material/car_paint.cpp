@@ -55,15 +55,6 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API real CarPaint::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 CarPaint::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -113,18 +104,6 @@ namespace AT_NAME
         }
 
         return dir;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 CarPaint::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        const aten::vec3& in = ray.dir;
-
-        return sampleDirection(&m_param, normal, in, u, v, sampler, pre_sampled_r);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
@@ -201,40 +180,6 @@ namespace AT_NAME
         return bsdf;
     }
 
-    AT_DEVICE_MTRL_API aten::vec3 CarPaint::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v, pre_sampled_r);
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling CarPaint::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler, pre_sampled_r,
-            u, v,
-            isLightPath);
-
-        return ret;
-    }
-
     AT_DEVICE_MTRL_API void CarPaint::sample(
         MaterialSampling* result,
         const aten::MaterialParameter* param,
@@ -266,16 +211,6 @@ namespace AT_NAME
         result->dir = sampleDirection(param, normal, wi, u, v, sampler, pre_sampled_r);
         result->pdf = pdf(param, normal, wi, result->dir, u, v);
         result->bsdf = bsdf(param, normal, wi, result->dir, u, v, externalAlbedo, pre_sampled_r);
-    }
-
-    AT_DEVICE_MTRL_API real CarPaint::applyNormalMap(
-        const aten::vec3& orgNml,
-        aten::vec3& newNml,
-        real u, real v,
-        const aten::vec3& wi,
-        aten::sampler* sampler) const
-    {
-        return applyNormalMap(&m_param, orgNml, newNml, u, v, wi, sampler);
     }
 
     AT_DEVICE_MTRL_API real CarPaint::applyNormalMap(

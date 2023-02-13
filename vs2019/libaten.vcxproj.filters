@@ -487,9 +487,6 @@
     <ClInclude Include="..\src\libaten\renderer\renderer_utility.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\restir.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\retroreflective.h">
       <Filter>material</Filter>
     </ClInclude>
@@ -507,6 +504,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\filter\magnifier.h">
       <Filter>filter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\material_impl.h">
+      <Filter>material</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -788,9 +788,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh_node.cpp">
       <Filter>accelerator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\restir.cpp">
-      <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\material\retroreflective.cpp">
       <Filter>material</Filter>

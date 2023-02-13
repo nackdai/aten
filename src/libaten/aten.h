@@ -107,7 +107,6 @@
 #include "renderer/pssmlt.h"
 #include "renderer/bdpt.h"
 #include "renderer/aorenderer.h"
-#include "renderer/restir.h"
 
 #include "posteffect/BloomEffect.h"
 

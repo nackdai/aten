@@ -472,44 +472,6 @@ namespace AT_NAME
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
-        virtual AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(real u, real v) const;
-
-        virtual AT_DEVICE_MTRL_API real applyNormalMap(
-            const aten::vec3& orgNml,
-            aten::vec3& newNml,
-            real u, real v,
-            const aten::vec3& wi,
-            aten::sampler* sampler) const;
-
-        virtual AT_DEVICE_MTRL_API real pdf(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v) const = 0;
-
-        virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
-            const aten::ray& ray,
-            const aten::vec3& normal,
-            real u, real v,
-            aten::sampler* sampler,
-            real pre_sampled_r) const = 0;
-
-        virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            real pre_sampled_r) const = 0;
-
-        virtual AT_DEVICE_MTRL_API MaterialSampling sample(
-            const aten::ray& ray,
-            const aten::vec3& normal,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real pre_sampled_r,
-            real u, real v,
-            bool isLightPath = false) const = 0;
-
         real ior() const
         {
             return m_param.standard.ior;
@@ -603,6 +565,78 @@ namespace AT_NAME
 
             return F;
         }
+
+        static inline AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(
+            const aten::MaterialParameter* mtrl,
+            real u, real v,
+            uint32_t lod = 0);
+
+        static inline AT_DEVICE_MTRL_API void sampleMaterial(
+            AT_NAME::MaterialSampling* result,
+            const aten::MaterialParameter* dst_mtrl,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& orgnormal,
+            aten::sampler* sampler,
+            real pre_sampled_r,
+#ifdef __CUDACC__
+            float u, float v);
+#else
+            float u, float v,
+            bool is_light_path = false);
+#endif
+
+        static inline AT_DEVICE_MTRL_API void sampleMaterialWithExternalAlbedo(
+            AT_NAME::MaterialSampling* result,
+            const aten::MaterialParameter* dst_mtrl,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& orgnormal,
+            aten::sampler* sampler,
+            real pre_sampled_r,
+            float u, float v,
+            const aten::vec4& externalAlbedo);
+
+        static inline AT_DEVICE_MTRL_API real samplePDF(
+            const aten::MaterialParameter* dst_mtrl,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            real u, real v);
+
+        static inline AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+            const aten::MaterialParameter* dst_mtrl,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            real u, real v,
+            aten::sampler* sampler,
+            real pre_sampled_r);
+
+        static inline AT_DEVICE_MTRL_API aten::vec3 sampleBSDF(
+            const aten::MaterialParameter* dst_mtrl,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            real u, real v,
+            real pre_sampled_r);
+
+        static inline AT_DEVICE_MTRL_API aten::vec3 sampleBSDF(
+            const aten::MaterialParameter* dst_mtrl,
+            const aten::vec3& normal,
+            const aten::vec3& wi,
+            const aten::vec3& wo,
+            real u, real v,
+            const aten::vec4& externalAlbedo,
+            real pre_sampled_r);
+
+        static inline AT_DEVICE_MTRL_API real applyNormal(
+            const aten::MaterialParameter* mtrl,
+            const int normalMapIdx,
+            const aten::vec3& orgNml,
+            aten::vec3& newNml,
+            real u, real v,
+            const aten::vec3& wi,
+            aten::sampler* sampler);
 
     protected:
         aten::MaterialParameter m_param;

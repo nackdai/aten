@@ -63,15 +63,6 @@ namespace AT_NAME
         return pdf;
     }
 
-    AT_DEVICE_MTRL_API real Retroreflective::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 Retroreflective::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -137,18 +128,6 @@ namespace AT_NAME
         }
 
         return dir;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 Retroreflective::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        const aten::vec3& in = ray.dir;
-
-        return sampleDirection(&m_param, normal, in, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 Retroreflective::bsdf(
@@ -295,40 +274,6 @@ namespace AT_NAME
 
         const auto bsdf = externalAlbedo * (beckman + (1 - fresnel) * (era * retroreflective + (real(1) - era) * diffuse));
         return bsdf;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 Retroreflective::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v);
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling Retroreflective::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     AT_DEVICE_MTRL_API void Retroreflective::sample(

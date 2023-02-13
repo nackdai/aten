@@ -22,15 +22,6 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetRefraction::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -46,16 +37,6 @@ namespace AT_NAME
         aten::vec3 dir = sampleDirection(roughness.r, param->standard.ior, normal, wi, sampler);
 
         return dir;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
@@ -101,16 +82,6 @@ namespace AT_NAME
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
         return ret;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetRefraction::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API real MicrofacetRefraction::pdf(
@@ -364,30 +335,6 @@ namespace AT_NAME
 
         result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling MicrofacetRefraction::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     bool MicrofacetRefraction::edit(aten::IMaterialParamEditor* editor)

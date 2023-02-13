@@ -105,15 +105,6 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API real DisneyBRDF::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,    /* in */
-        const aten::vec3& wo,    /* out */
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
-    AT_DEVICE_MTRL_API real DisneyBRDF::pdf(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,    /* in */
@@ -176,16 +167,6 @@ namespace AT_NAME
         auto ret = clearcoatPdf * clearcoat + (1.f - clearcoat) * (cs_w * specularPdf + (1.f - cs_w) * diffusePdf);
 
         return ret;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::sampleDirection(
@@ -319,16 +300,6 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v);
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 DisneyBRDF::bsdf(
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,
@@ -417,21 +388,6 @@ namespace AT_NAME
             // A trick to avoid fireflies from RadeonRaySDK.
             + aten::clamp<real>(clearcoat * Gr * Fr * Dr, real(0), real(0.5));    // clearcoat.
 #endif
-
-        return ret;
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling DisneyBRDF::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-        sample(&ret, &m_param, normal, ray.dir, orgnormal, sampler, u, v, isLightPath);
 
         return ret;
     }

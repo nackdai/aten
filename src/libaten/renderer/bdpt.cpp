@@ -1,13 +1,13 @@
 #include "renderer/bdpt.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "material/lambert.h"
-#include "material/refraction.h"
 #include "geometry/transformable.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
 #include "sampler/cmj.h"
+
+#include "material/material_impl.h"
 
 //#define BDPT_DEBUG
 
@@ -101,7 +101,10 @@ namespace aten
             auto mtrl = ctxt.getMaterial(rec.mtrlid);
             auto obj = ctxt.getTransformable(isect.objid);
 
-            auto pre_sampled_r = mtrl->applyNormalMap(orienting_normal, orienting_normal, rec.u, rec.v, ray.dir, sampler);
+            auto pre_sampled_r = material::applyNormal(
+                &mtrl->param(),
+                mtrl->param().normalMap,
+                orienting_normal, orienting_normal, rec.u, rec.v, ray.dir, sampler);
 
             // ロシアンルーレットによって、新しい頂点を「実際に」サンプリングし、生成するのかどうかを決定する.
             auto rrProb = aten::russianRoulette(*mtrl);
@@ -185,7 +188,11 @@ namespace aten
                 return Result(contrib, x, y, true);
             }
 
-            auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, pre_sampled_r, rec.u, rec.v);
+            aten::MaterialSampling sampling;
+            material::sampleMaterial(
+                &sampling,
+                &mtrl->param(),
+                orienting_normal, ray.dir, rec.normal, sampler, pre_sampled_r, rec.u, rec.v);
 
             sampledPdf = sampling.pdf;
             auto sampledBsdf = sampling.bsdf;
@@ -397,7 +404,11 @@ namespace aten
                 throughput = G * throughput;
             }
 
-            auto sampling = mtrl->sample(ray, orienting_normal, rec.normal, sampler, rec.u, rec.v, true);
+            aten::MaterialSampling sampling;
+            material::sampleMaterial(
+                &sampling,
+                &mtrl->param(),
+                orienting_normal, ray.dir, rec.normal, sampler, rec.u, rec.v, true);
 
             sampledPdf = sampling.pdf;
             auto sampledBsdf = sampling.bsdf;
@@ -561,7 +572,9 @@ namespace aten
                     }
                 }
                 else {
-                    pdf = curVtx.mtrl->pdf(curVtx.orienting_normal, wi, wo, curVtx.u, curVtx.v);
+                    pdf = material::samplePDF(
+                        &curVtx.mtrl->param(),
+                        curVtx.orienting_normal, wi, wo, curVtx.u, curVtx.v);
                 }
             }
         }

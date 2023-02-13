@@ -345,7 +345,6 @@
     <ClInclude Include="..\src\libaten\proxy\DataCollector.h" />
     <ClInclude Include="..\src\libaten\renderer\aorenderer.h" />
     <ClInclude Include="..\src\libaten\renderer\aov.h" />
-    <ClInclude Include="..\src\libaten\renderer\aov_renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
     <ClInclude Include="..\src\libaten\renderer\bdpt.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
@@ -355,7 +354,6 @@
     <ClInclude Include="..\src\libaten\renderer\nonphotoreal.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
-    <ClInclude Include="..\src\libaten\renderer\raytracing.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer_utility.h" />
     <ClInclude Include="..\src\libaten\renderer\restir.h" />
@@ -478,7 +476,6 @@
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp" />
     <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\aov_renderer.cpp" />
     <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
@@ -487,7 +484,6 @@
     <ClCompile Include="..\src\libaten\renderer\nonphotoreal.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\raytracing.cpp" />
     <ClCompile Include="..\src\libaten\renderer\restir.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />

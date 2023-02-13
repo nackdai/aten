@@ -143,9 +143,6 @@
     <ClInclude Include="..\src\libaten\misc\color.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\raytracing.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h">
       <Filter>renderer</Filter>
     </ClInclude>
@@ -330,9 +327,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\sample_texture.h">
       <Filter>material</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\aov_renderer.h">
-      <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\filter\taa.h">
       <Filter>filter</Filter>
@@ -663,9 +657,6 @@
     <ClCompile Include="..\src\libaten\texture\texture.cpp">
       <Filter>texture</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\aov_renderer.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\filter\taa.cpp">
       <Filter>filter</Filter>
     </ClCompile>
@@ -769,9 +760,6 @@
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\raytracing.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole.cpp">

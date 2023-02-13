@@ -194,22 +194,6 @@ namespace AT_NAME
         m_param.roughnessMap = roughnessMap ? roughnessMap->id() : -1;
     }
 
-    AT_DEVICE_MTRL_API aten::vec4 material::sampleAlbedoMap(real u, real v) const
-    {
-        return AT_NAME::sampleTexture(m_param.albedoMap, u, v, aten::vec4(real(1)));
-    }
-
-    AT_DEVICE_MTRL_API real material::applyNormalMap(
-        const aten::vec3& orgNml,
-        aten::vec3& newNml,
-        real u, real v,
-        const aten::vec3& wi,
-        aten::sampler* sampler) const
-    {
-        AT_NAME::applyNormalMap(m_param.normalMap, orgNml, newNml, u, v);
-        return real(-1);
-    }
-
     AT_DEVICE_MTRL_API bool material::isTranslucentByAlpha(
         const aten::MaterialParameter& param,
         real u, real v)

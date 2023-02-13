@@ -27,15 +27,6 @@ namespace AT_NAME
         return ret;
     }
 
-    AT_DEVICE_MTRL_API real MicrofacetGGX::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        return pdf(&m_param, normal, wi, wo, u, v);
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -51,16 +42,6 @@ namespace AT_NAME
         aten::vec3 dir = sampleDirection(roughness.r, normal, wi, sampler);
 
         return dir;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        return sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
     }
 
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
@@ -106,16 +87,6 @@ namespace AT_NAME
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
         return ret;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetGGX::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        return bsdf(&m_param, normal, wi, wo, u, v);
     }
 
     AT_DEVICE_MTRL_API real MicrofacetGGX::sampleGGX_D(
@@ -362,30 +333,6 @@ namespace AT_NAME
 
         result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling MicrofacetGGX::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     bool MicrofacetGGX::edit(aten::IMaterialParamEditor* editor)

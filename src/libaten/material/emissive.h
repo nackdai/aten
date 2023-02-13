@@ -26,58 +26,6 @@ namespace AT_NAME
         virtual ~emissive() {}
 
     public:
-        virtual AT_DEVICE_MTRL_API real pdf(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v) const override final
-        {
-            return emissive::pdf(&m_param, normal, wi, wo, u, v);
-        }
-
-        virtual AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
-            const aten::ray& ray,
-            const aten::vec3& normal,
-            real u, real v,
-            aten::sampler* sampler,
-            real pre_sampled_r) const override final
-        {
-            return emissive::sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
-        }
-
-        virtual AT_DEVICE_MTRL_API aten::vec3 bsdf(
-            const aten::vec3& normal,
-            const aten::vec3& wi,
-            const aten::vec3& wo,
-            real u, real v,
-            real pre_sampled_r) const override final
-        {
-            return emissive::bsdf(&m_param, normal, wi, wo, u, v);
-        }
-
-        virtual AT_DEVICE_MTRL_API MaterialSampling sample(
-            const aten::ray& ray,
-            const aten::vec3& normal,
-            const aten::vec3& orgnormal,
-            aten::sampler* sampler,
-            real pre_sampled_r,
-            real u, real v,
-            bool isLightPath = false) const override final
-        {
-            MaterialSampling ret;
-
-            sample(
-                &ret,
-                &m_param,
-                normal,
-                ray.dir,
-                orgnormal,
-                sampler,
-                u, v,
-                isLightPath);
-
-            return ret;
-        }
 
         static AT_DEVICE_MTRL_API real pdf(
             const aten::MaterialParameter* param,

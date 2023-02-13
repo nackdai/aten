@@ -20,16 +20,6 @@ namespace AT_NAME
         return ret;
     }
 
-    real MicrofacetBeckman::pdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v) const
-    {
-        auto ret = pdf(&m_param, normal, wi, wo, u, v);
-        return ret;
-    }
-
     AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
         const aten::MaterialParameter* param,
         const aten::vec3& normal,
@@ -39,17 +29,6 @@ namespace AT_NAME
     {
         auto roughness = AT_NAME::sampleTexture(param->roughnessMap, u, v, aten::vec4(param->standard.roughness));
         aten::vec3 dir = sampleDirection(roughness.r, wi, normal, sampler);
-        return dir;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::sampleDirection(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        real u, real v,
-        aten::sampler* sampler,
-        real pre_sampled_r) const
-    {
-        auto dir = sampleDirection(&m_param, normal, ray.dir, u, v, sampler);
         return dir;
     }
 
@@ -89,17 +68,6 @@ namespace AT_NAME
         real ior = param->standard.ior;
 
         aten::vec3 ret = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, wo, u, v);
-        return ret;
-    }
-
-    AT_DEVICE_MTRL_API aten::vec3 MicrofacetBeckman::bsdf(
-        const aten::vec3& normal,
-        const aten::vec3& wi,
-        const aten::vec3& wo,
-        real u, real v,
-        real pre_sampled_r) const
-    {
-        auto ret = bsdf(&m_param, normal, wi, wo, u, v);
         return ret;
     }
 
@@ -367,30 +335,6 @@ namespace AT_NAME
 
         result->bsdf = bsdf(albedo, roughness.r, ior, fresnel, normal, wi, result->dir, u, v);
         result->fresnel = fresnel;
-    }
-
-    AT_DEVICE_MTRL_API MaterialSampling MicrofacetBeckman::sample(
-        const aten::ray& ray,
-        const aten::vec3& normal,
-        const aten::vec3& orgnormal,
-        aten::sampler* sampler,
-        real pre_sampled_r,
-        real u, real v,
-        bool isLightPath/*= false*/) const
-    {
-        MaterialSampling ret;
-
-        sample(
-            &ret,
-            &m_param,
-            normal,
-            ray.dir,
-            orgnormal,
-            sampler,
-            u, v,
-            isLightPath);
-
-        return ret;
     }
 
     bool MicrofacetBeckman::edit(aten::IMaterialParamEditor* editor)

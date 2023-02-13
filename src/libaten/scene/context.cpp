@@ -72,7 +72,7 @@ namespace aten
     {
         AT_ASSERT(mtrl);
         m_materials.push_back(mtrl);
-        mtrl->updateIndex(m_materials.size() - 1);
+        mtrl->param().id = m_materials.size() - 1;
     }
 
     void context::addMaterial(AT_NAME::material* mtrl)

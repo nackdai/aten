@@ -60,7 +60,6 @@ namespace aten
         Retroreflective,
         CarPaint,
         Disney,
-        Layer,
 
         MaterialTypeMax,
     };
@@ -240,13 +239,10 @@ namespace aten
             uint32_t isIdealRefraction : 1;
         };
 
-        union {
-            struct {
-                int albedoMap;
-                int normalMap;
-                int roughnessMap;
-            };
-            int layer[3];
+        struct {
+            int albedoMap;
+            int normalMap;
+            int roughnessMap;
         };
 
         union {

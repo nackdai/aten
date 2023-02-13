@@ -309,7 +309,6 @@
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h" />
-    <ClInclude Include="..\src\libaten\material\layer.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\material_factory.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
@@ -437,7 +436,6 @@
     <ClCompile Include="..\src\libaten\material\FlakesNormal.cpp" />
     <ClCompile Include="..\src\libaten\material\ggx.cpp" />
     <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp" />
-    <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <ClCompile Include="..\src\libaten\material\material.cpp" />
     <ClCompile Include="..\src\libaten\material\material_factory.cpp" />
     <ClCompile Include="..\src\libaten\material\material_instantiate_from_value.cpp" />

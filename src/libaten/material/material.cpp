@@ -21,7 +21,6 @@ namespace AT_NAME
         "retroreflective",
         "carpaint",
         "disney_brdf",
-        "layer",
     };
     AT_STATICASSERT(AT_COUNTOF(g_mtrlTypeNames) == (int)aten::MaterialType::MaterialTypeMax);
 

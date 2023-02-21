@@ -2,190 +2,6 @@
 
 #include "kernel/idatendefs.cuh"
 
-//////////////////////////////////////////////////////////
-
-// For layered material....
-
-AT_CUDA_INLINE __device__ void sampleLayerMaterial(
-    AT_NAME::MaterialSampling* result,
-    const idaten::Context* ctxt,
-    const aten::MaterialParameter* mtrl,
-    const aten::vec3& normal,
-    const aten::vec3& wi,
-    const aten::vec3& orgnormal,
-    aten::sampler* sampler,
-    real pre_sampled_r,
-    float u, float v)
-{
-    real weight = 1;
-
-    for (int i = 0; i < AT_COUNTOF(mtrl->layer); i++) {
-        if (mtrl->layer[i] < 0) {
-            break;
-        }
-
-        auto* param = &ctxt->mtrls[mtrl->layer[i]];
-
-        aten::vec3 appliedNml = normal;
-
-        // NOTE
-        // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
-        if (i > 0) {
-            auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
-            AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
-        }
-
-        AT_NAME::MaterialSampling sampleres;
-        sampleMaterial(
-            &sampleres,
-            ctxt,
-            param,
-            appliedNml,
-            wi,
-            orgnormal,
-            sampler,
-            pre_sampled_r,
-            u, v);
-
-        const auto f = aten::clamp<real>(sampleres.fresnel, 0, 1);
-
-        result->pdf += weight * f * sampleres.pdf;
-
-        // bsdf includes fresnale value.
-        result->bsdf += weight * sampleres.bsdf;
-        //ret.bsdf += weight * f * sampleres.bsdf;
-
-        // TODO
-        // ret.fresnel
-
-        weight = aten::clamp<real>(weight - f, 0, 1);
-        if (weight <= 0) {
-            break;
-        }
-
-        if (i == 0) {
-            result->dir = sampleres.dir;
-        }
-    }
-}
-
-AT_CUDA_INLINE __device__ real sampleLayerPDF(
-    const idaten::Context* ctxt,
-    const aten::MaterialParameter* mtrl,
-    const aten::vec3& normal,
-    const aten::vec3& wi,
-    const aten::vec3& wo,
-    real u, real v)
-{
-    real pdf = 0;
-
-    real weight = 1;
-    real ior = 1;    // 真空から始める.
-
-    for (int i = 0; i < AT_COUNTOF(mtrl->layer); i++) {
-        if (mtrl->layer[i] < 0) {
-            break;
-        }
-
-        auto* param = &ctxt->mtrls[mtrl->layer[i]];
-
-        aten::vec3 appliedNml = normal;
-
-        // NOTE
-        // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
-        if (i > 0) {
-            auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
-            AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
-        }
-
-        auto p = samplePDF(ctxt, param, appliedNml, wi, wo, u, v);
-        auto f = computeFresnel(param, appliedNml, wi, wo, ior);
-
-        f = aten::clamp<real>(f, 0, 1);
-
-        pdf += weight * p;
-
-        weight = aten::clamp<real>(weight - f, 0, 1);
-        if (weight <= 0) {
-            break;
-        }
-
-        // 上層の値を下層に使う.
-        ior = param->standard.ior;
-    }
-
-    return pdf;
-}
-
-AT_CUDA_INLINE __device__ aten::vec3 sampleLayerDirection(
-    const idaten::Context* ctxt,
-    const aten::MaterialParameter* mtrl,
-    const aten::vec3& normal,
-    const aten::vec3& wi,
-    real u, real v,
-    aten::sampler* sampler,
-    real pre_sampled_r)
-{
-    auto* param = &ctxt->mtrls[mtrl->layer[0]];
-
-    auto dir = sampleDirection(ctxt, param, normal, wi, u, v, sampler, pre_sampled_r);
-
-    return dir;
-}
-
-AT_CUDA_INLINE __device__ aten::vec3 sampleLayerBSDF(
-    const idaten::Context* ctxt,
-    const aten::MaterialParameter* mtrl,
-    const aten::vec3& normal,
-    const aten::vec3& wi,
-    const aten::vec3& wo,
-    real u, real v,
-    real pre_sampled_r)
-{
-    aten::vec3 bsdf;
-
-    real weight = 1;
-    real ior = 1;    // 真空から始める.
-
-    for (int i = 0; i < AT_COUNTOF(mtrl->layer); i++) {
-        if (mtrl->layer[i] < 0) {
-            break;
-        }
-
-        auto* param = &ctxt->mtrls[mtrl->layer[i]];
-
-        aten::vec3 appliedNml = normal;
-
-        // NOTE
-        // 外部では最表層の NormalMap が適用されているので、下層レイヤーのマテリアルごとに法線マップを適用する.
-        if (i > 0) {
-            auto normalMap = (int)(param->normalMap >= 0 ? ctxt->textures[param->normalMap] : -1);
-            AT_NAME::applyNormalMap(normalMap, normal, appliedNml, u, v);
-        }
-
-        auto b = sampleBSDF(ctxt, param, appliedNml, wi, wo, u, v, pre_sampled_r);
-        auto f = computeFresnel(param, appliedNml, wi, wo, ior);
-
-        f = aten::clamp<real>(f, 0, 1);
-
-        // bsdf includes fresnel value.
-        bsdf += weight * b;
-        //bsdf += weight * f * b;
-
-        weight = aten::clamp<real>(weight - f, 0, 1);
-        if (weight <= 0) {
-            break;
-        }
-
-        // 上層の値を下層に使う.
-        ior = param->standard.ior;
-    }
-
-    return bsdf;
-}
-
-//////////////////////////////////////////////////////////
-
 AT_CUDA_INLINE __device__ void sampleMaterial(
     AT_NAME::MaterialSampling* result,
     const idaten::Context* ctxt,
@@ -239,11 +55,6 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
         break;
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
-        break;
-    case aten::MaterialType::Layer:
-        sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v);
-        break;
-    case aten::MaterialType::Toon:
         break;
     }
 }
@@ -304,11 +115,6 @@ AT_CUDA_INLINE __device__ void sampleMaterial(
     case aten::MaterialType::Disney:
         AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
         break;
-    case aten::MaterialType::Layer:
-        sampleLayerMaterial(result, ctxt, mtrl, normal, wi, orgnormal, sampler, pre_sampled_r, u, v);
-        break;
-    case aten::MaterialType::Toon:
-        break;
     }
 }
 
@@ -365,11 +171,6 @@ AT_CUDA_INLINE __device__ real samplePDF(
     case aten::MaterialType::Disney:
         pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
         break;
-    case aten::MaterialType::Layer:
-        pdf = sampleLayerPDF(ctxt, mtrl, normal, wi, wo, u, v);
-        break;
-    case aten::MaterialType::Toon:
-        break;
     }
 
     return pdf;
@@ -413,10 +214,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleDirection(
         return AT_NAME::CarPaint::sampleDirection(mtrl, normal, wi, u, v, sampler, pre_sampled_r);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
-    case aten::MaterialType::Layer:
-        return sampleLayerDirection(ctxt, mtrl, normal, wi, u, v, sampler, pre_sampled_r);
-    case aten::MaterialType::Toon:
-        break;
     }
 
     return aten::vec3(0, 1, 0);
@@ -460,10 +257,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
-    case aten::MaterialType::Layer:
-        return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v, pre_sampled_r);
-    case aten::MaterialType::Toon:
-        break;
     }
 
     return aten::vec3();
@@ -508,10 +301,6 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
         return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo, pre_sampled_r);
     case aten::MaterialType::Disney:
         return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
-    case aten::MaterialType::Layer:
-        return sampleLayerBSDF(ctxt, mtrl, normal, wi, wo, u, v, pre_sampled_r);
-    case aten::MaterialType::Toon:
-        break;
     }
 
     return aten::vec3();

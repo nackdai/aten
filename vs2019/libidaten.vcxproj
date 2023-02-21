@@ -46,7 +46,6 @@
     <ClInclude Include="..\src\libaten\material\ggx.h" />
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h" />
-    <ClInclude Include="..\src\libaten\material\layer.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
@@ -221,7 +220,6 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
-    <ClCompile Include="..\src\libaten\material\layer.cpp" />
     <ClCompile Include="..\src\libaten\misc\color.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
@@ -673,7 +671,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <Include>
       </Include>
-      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012 %(AdditionalOptions)</AdditionalOptions>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -763,7 +761,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
-      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012 %(AdditionalOptions)</AdditionalOptions>
       <FastMath>true</FastMath>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>
@@ -795,7 +793,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>
       </Include>
       <PtxAsOptionV>true</PtxAsOptionV>
-      <AdditionalOptions>--use_fast_math -Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xcompiler "/wd 4819" --expt-relaxed-constexpr  --expt-extended-lambda -std=c++17 -Xcompiler "/std:c++17" --diag-suppress 20012 %(AdditionalOptions)</AdditionalOptions>
       <GenerateLineInfo>true</GenerateLineInfo>
       <CodeGeneration>compute_75,sm_75</CodeGeneration>
     </CudaCompile>

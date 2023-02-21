@@ -162,11 +162,6 @@ namespace svgf {
 
         // Apply normal map.
         int normalMap = shMtrls[threadIdx.x].normalMap;
-        if (shMtrls[threadIdx.x].type == aten::MaterialType::Layer) {
-            // 最表層の NormalMap を適用.
-            auto* topmtrl = &ctxt.mtrls[shMtrls[threadIdx.x].layer[0]];
-            normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
-        }
         auto pre_sample_r = applyNormal(
             &shMtrls[threadIdx.x],
             normalMap,

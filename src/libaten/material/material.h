@@ -2,6 +2,7 @@
 
 #include <array>
 #include <functional>
+#include <string>
 
 #include "types.h"
 #include "math/vec3.h"
@@ -408,13 +409,13 @@ namespace AT_NAME
 
     public:
         static std::shared_ptr<material> createMaterial(
-            MaterialType type,
-            Values& value);
+            aten::MaterialType type,
+            aten::Values& value);
 
-        static std::shared_ptr<material> createMaterialWithDefaultValue(MaterialType type);
+        static std::shared_ptr<material> createMaterialWithDefaultValue(aten::MaterialType type);
 
         static std::shared_ptr<material> createMaterialWithMaterialParameter(
-            const MaterialParameter& param,
+            const aten::MaterialParameter& param,
             aten::texture* albedoMap,
             aten::texture* normalMap,
             aten::texture* roughnessMap);

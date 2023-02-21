@@ -108,11 +108,6 @@ namespace ao {
 
         // Apply normal map.
         int normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
-        if (mtrl.type == aten::MaterialType::Layer) {
-            // 最表層の NormalMap を適用.
-            auto* topmtrl = &ctxt.mtrls[mtrl.layer[0]];
-            normalMap = (int)(topmtrl->normalMap >= 0 ? ctxt.textures[topmtrl->normalMap] : -1);
-        }
         AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
         float3 ao_color = make_float3(0.0f);

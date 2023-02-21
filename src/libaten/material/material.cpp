@@ -39,14 +39,14 @@ namespace AT_NAME
     } };
 
     std::shared_ptr<material> material::createMaterial(
-        MaterialType type,
-        Values& value)
+        aten::MaterialType type,
+        aten::Values& value)
     {
-        auto albedoMap = value.get<texture>("albedoMap");
-        auto normalMap = value.get<texture>("normalMap");
-        auto roughnessMap = value.get<texture>("roughnessMap");
+        auto albedoMap = value.get<aten::texture>("albedoMap");
+        auto normalMap = value.get<aten::texture>("normalMap");
+        auto roughnessMap = value.get<aten::texture>("roughnessMap");
 
-        MaterialParameter param;
+        aten::MaterialParameter param;
         {
             param.type = type;
             param.baseColor = value.get("baseColor", param.baseColor);
@@ -71,7 +71,7 @@ namespace AT_NAME
             param, albedoMap.get(), normalMap.get(), roughnessMap.get());
     }
 
-    std::shared_ptr<material> material::createMaterialWithDefaultValue(MaterialType type)
+    std::shared_ptr<material> material::createMaterialWithDefaultValue(aten::MaterialType type)
     {
         AT_ASSERT(material::isValidMaterialType(type));
         std::shared_ptr<material> ret(mtrl_type_info[static_cast<size_t>(type)].func());
@@ -79,60 +79,60 @@ namespace AT_NAME
     }
 
     std::shared_ptr<material> material::createMaterialWithMaterialParameter(
-        const MaterialParameter& param,
+        const aten::MaterialParameter& param,
         aten::texture* albedoMap,
         aten::texture* normalMap,
         aten::texture* roughnessMap)
     {
-        aten::material* mtrl = nullptr;
+        AT_NAME::material* mtrl = nullptr;
 
         switch (param.type) {
         case aten::MaterialType::Emissive:
-            mtrl = new aten::emissive(param.baseColor);
+            mtrl = new AT_NAME::emissive(param.baseColor);
             break;
         case aten::MaterialType::Lambert:
-            mtrl = new aten::lambert(param.baseColor, albedoMap, normalMap);
+            mtrl = new AT_NAME::lambert(param.baseColor, albedoMap, normalMap);
             break;
         case aten::MaterialType::OrneNayar:
-            mtrl = new aten::OrenNayar(param.baseColor, param.standard.roughness, albedoMap, normalMap);
+            mtrl = new AT_NAME::OrenNayar(param.baseColor, param.standard.roughness, albedoMap, normalMap);
             break;
         case aten::MaterialType::Specular:
-            mtrl = new aten::specular(param.baseColor, param.standard.ior, albedoMap, normalMap);
+            mtrl = new AT_NAME::specular(param.baseColor, param.standard.ior, albedoMap, normalMap);
             break;
         case aten::MaterialType::Refraction:
-            mtrl = new aten::refraction(param.baseColor, param.standard.ior, param.isIdealRefraction, normalMap);
+            mtrl = new AT_NAME::refraction(param.baseColor, param.standard.ior, param.isIdealRefraction, normalMap);
             break;
         case aten::MaterialType::Blinn:
-            mtrl = new aten::MicrofacetBlinn(param.baseColor, param.standard.shininess, param.standard.ior, albedoMap, normalMap);
+            mtrl = new AT_NAME::MicrofacetBlinn(param.baseColor, param.standard.shininess, param.standard.ior, albedoMap, normalMap);
             break;
         case aten::MaterialType::GGX:
-            mtrl = new aten::MicrofacetGGX(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::MicrofacetGGX(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Beckman:
-            mtrl = new aten::MicrofacetBeckman(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::MicrofacetBeckman(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Velvet:
-            mtrl = new aten::MicrofacetVelvet(param.baseColor, param.standard.roughness, albedoMap, normalMap);
+            mtrl = new AT_NAME::MicrofacetVelvet(param.baseColor, param.standard.roughness, albedoMap, normalMap);
             break;
         case aten::MaterialType::Lambert_Refraction:
-            mtrl = new aten::LambertRefraction(param.baseColor, param.standard.ior, normalMap);
+            mtrl = new AT_NAME::LambertRefraction(param.baseColor, param.standard.ior, normalMap);
             break;
         case aten::MaterialType::Microfacet_Refraction:
-            mtrl = new aten::MicrofacetRefraction(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::MicrofacetRefraction(param.baseColor, param.standard.roughness, param.standard.ior, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Retroreflective:
-            mtrl = new aten::Retroreflective(albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::Retroreflective(albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::CarPaint:
-            mtrl = new aten::CarPaint(param, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::CarPaint(param, albedoMap, normalMap, roughnessMap);
             break;
         case aten::MaterialType::Disney:
-            mtrl = new aten::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);
+            mtrl = new AT_NAME::DisneyBRDF(param, albedoMap, normalMap, roughnessMap);
             break;
         default:
             AT_ASSERT(false);
             AT_PRINTF("No material type [%s(%d)]\n", __FILE__, __LINE__);
-            mtrl = new aten::lambert();
+            mtrl = new AT_NAME::lambert();
             break;
         }
 

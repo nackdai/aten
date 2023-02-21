@@ -393,7 +393,7 @@ namespace AT_NAME
     }
 
     AT_DEVICE_MTRL_API void DisneyBRDF::sample(
-        MaterialSampling* result,
+        AT_NAME::MaterialSampling* result,
         const aten::MaterialParameter* mtrl,
         const aten::vec3& normal,
         const aten::vec3& wi,

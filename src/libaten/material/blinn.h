@@ -59,7 +59,7 @@ namespace AT_NAME
             const aten::vec4& externalAbledo);
 
         static AT_DEVICE_MTRL_API void sample(
-            MaterialSampling* result,
+            AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -69,7 +69,7 @@ namespace AT_NAME
             bool isLightPath = false);
 
         static AT_DEVICE_MTRL_API void sample(
-            MaterialSampling* result,
+            AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* param,
             const aten::vec3& normal,
             const aten::vec3& wi,

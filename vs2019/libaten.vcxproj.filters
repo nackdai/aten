@@ -364,9 +364,6 @@
     <ClInclude Include="..\src\libaten\geometry\vertex.h">
       <Filter>geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\geometry\cube.h">
-      <Filter>geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\face.h">
       <Filter>geometry</Filter>
     </ClInclude>
@@ -661,12 +658,6 @@
       <Filter>geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\sphere.cpp">
-      <Filter>geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\geometry\vertex.cpp">
-      <Filter>geometry</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\geometry\cube.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\geombase.cpp">

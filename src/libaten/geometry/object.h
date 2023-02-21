@@ -64,10 +64,6 @@ namespace AT_NAME
 
         void buildForRasterizeRendering(const aten::context& ctxt);
 
-        void gatherTrianglesAndMaterials(
-            std::vector<std::vector<AT_NAME::face*>>& tris,
-            std::vector<AT_NAME::material*>& mtrls);
-
         virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const override final;
 
         virtual uint32_t getTriangleCount() const override final

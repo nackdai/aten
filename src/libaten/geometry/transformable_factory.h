@@ -33,20 +33,6 @@ namespace aten
             return ret;
         }
 
-        static std::shared_ptr<cube> createCube(
-            context& ctxt,
-            const aten::vec3& center,
-            real w, real h, real d,
-            const std::shared_ptr<material> mtrl)
-        {
-            auto ret = std::make_shared<cube>(center, w, h, d, mtrl);
-            AT_ASSERT(ret);
-
-            ctxt.addTransformable(ret);
-
-            return ret;
-        }
-
         static std::shared_ptr<object> createObject(context& ctxt)
         {
             auto ret = std::make_shared<object>();

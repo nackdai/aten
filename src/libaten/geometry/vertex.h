@@ -15,11 +15,4 @@ namespace aten
         // z == -1, there is no texture coordinate.
         vec3 uv;
     };
-
-    struct CompressedVertex {
-        // NOTE
-        // pos.w == uv.x, nml.w == uv.y.
-        vec4 pos;
-        vec4 nml;
-    };
 }

@@ -10,7 +10,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
 {
     aten::Intersection isectTmp;
 
-    int nodeid = 0;
+    int32_t nodeid = 0;
 
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
@@ -34,7 +34,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
         bool isHit = false;
 
         if (attrib.y >= 0) {
-            int primidx = (int)attrib.y;
+            int32_t primidx = (int32_t)attrib.y;
             aten::PrimitiveParamter prim;
             prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
@@ -52,7 +52,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
                 isect->primid = primidx;
                 isect->mtrlid = prim.mtrlid;
 
-                //isect->meshid = (int)attrib.w;
+                //isect->meshid = (int32_t)attrib.w;
                 isect->meshid = prim.gemoid;
 
                 t_max = isect->t;
@@ -69,10 +69,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
         }
 
         if (isHit) {
-            nodeid = (int)node0.w;
+            nodeid = (int32_t)node0.w;
         }
         else {
-            nodeid = (int)node1.w;
+            nodeid = (int32_t)node1.w;
         }
     }
 
@@ -88,14 +88,14 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
     float t_min, float t_max,
     aten::Intersection* isect,
     bool enableLod,
-    int depth)
+    int32_t depth)
 {
     aten::Intersection isectTmp;
 
     isect->t = t_max;
     isect->isVoxel = false;
 
-    int nodeid = 0;
+    int32_t nodeid = 0;
 
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
@@ -111,10 +111,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
     bool isTraverseRootTree = true;
 
-    int toplayerHit = -1;
-    int toplayerMiss = -1;
-    int objid = 0;
-    int meshid = 0;
+    int32_t toplayerHit = -1;
+    int32_t toplayerMiss = -1;
+    int32_t objid = 0;
+    int32_t meshid = 0;
 
     while (nodeid >= 0) {
         node0 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 0);    // xyz : boxmin, z: hit
@@ -129,7 +129,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 #ifdef ENABLE_PLANE_LOOP_SBVH
         if (attrib.x >= 0) {
             // Leaf.
-            const auto* s = &ctxt->shapes[(int)attrib.x];
+            const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {    // exid
                 if (s->mtxid >= 0) {
@@ -142,18 +142,18 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
                     transformedRay = r;
                 }
 
-                int exid = __float_as_int(attrib.z);
+                int32_t exid = __float_as_int(attrib.z);
                 bool hasLod = AT_BVHNODE_HAS_LOD(exid);
                 exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
                 //exid = AT_BVHNODE_MAIN_EXID(exid);
 
                 node = ctxt->nodes[exid];
 
-                objid = (int)attrib.x;
-                meshid = (int)attrib.w;
+                objid = (int32_t)attrib.x;
+                meshid = (int32_t)attrib.w;
 
-                toplayerHit = (int)node0.w;
-                toplayerMiss = (int)node1.w;
+                toplayerHit = (int32_t)node0.w;
+                toplayerMiss = (int32_t)node1.w;
 
                 isHit = true;
                 node0.w = 0.0f;
@@ -161,7 +161,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
                 isTraverseRootTree = false;
             }
             else if (attrib.y >= 0) {
-                int primidx = (int)attrib.y;
+                int32_t primidx = (int32_t)attrib.y;
                 aten::PrimitiveParamter prim;
                 prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
                 prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
@@ -196,7 +196,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
         // TODO
         else if (enableLod && !isTraverseRootTree && AT_IS_VOXEL(attrib.z)) {
             // Voxel
-            const int voxeldepth = (int)AT_GET_VOXEL_DEPTH(attrib.z);
+            const int32_t voxeldepth = (int32_t)AT_GET_VOXEL_DEPTH(attrib.z);
 
             if (voxeldepth == 3) {
                 aten::vec3 nml;
@@ -245,10 +245,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
         }
 
         if (isHit) {
-            nodeid = (int)node0.w;
+            nodeid = (int32_t)node0.w;
         }
         else {
-            nodeid = (int)node1.w;
+            nodeid = (int32_t)node1.w;
         }
 
         if (nodeid < 0) {
@@ -263,7 +263,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 #else
         if (attrib.x >= 0) {
             // Leaf.
-            const auto* s = &ctxt->shapes[(int)attrib.x];
+            const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {    // exid
                                     //if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
@@ -278,7 +278,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
                         transformedRay = r;
                     }
 
-                    isHit = intersectSBVHTriangles<Type>(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+                    isHit = intersectSBVHTriangles<Type>(ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
                 }
             }
             else {
@@ -296,8 +296,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
+                isect->objid = (int32_t)attrib.x;
+                isect->meshid = (isect->meshid < 0 ? (int32_t)attrib.w : isect->meshid);
 
                 t_max = isect->t;
 
@@ -314,10 +314,10 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
         }
 
         if (isHit) {
-            nodeid = (int)node0.w;
+            nodeid = (int32_t)node0.w;
         }
         else {
-            nodeid = (int)node1.w;
+            nodeid = (int32_t)node1.w;
         }
 #endif
     }
@@ -331,7 +331,7 @@ AT_CUDA_INLINE __device__ bool intersectClosestSBVH(
     aten::Intersection* isect,
     float t_max/*= AT_MATH_INF*/,
     bool enableLod/*= false*/,
-    int depth/*= -1*/)
+    int32_t depth/*= -1*/)
 {
     float t_min = AT_MATH_EPSILON;
 
@@ -352,7 +352,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserSBVH(
     aten::Intersection* isect,
     const float t_max,
     bool enableLod/*= false*/,
-    int depth/*= -1*/)
+    int32_t depth/*= -1*/)
 {
     float t_min = AT_MATH_EPSILON;
 
@@ -372,7 +372,7 @@ AT_CUDA_INLINE __device__ bool intersectAnySBVH(
     const aten::ray& r,
     aten::Intersection* isect,
     bool enableLod/*= false*/,
-    int depth/*= -1*/)
+    int32_t depth/*= -1*/)
 {
     float t_min = AT_MATH_EPSILON;
     float t_max = AT_MATH_INF;

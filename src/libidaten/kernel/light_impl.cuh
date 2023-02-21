@@ -7,12 +7,12 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::sampler* sampler)
 {
     // CPUコードと処理を合わせるためのダミー.
-    int dummy = sampler->nextSample();
+    int32_t dummy = sampler->nextSample();
 
-    int r = sampler->nextSample();
-    int basePrimIdx = aten::cmpMin(r * shape->primnum, shape->primnum - 1);
+    int32_t r = sampler->nextSample();
+    int32_t basePrimIdx = aten::cmpMin(r * shape->primnum, shape->primnum - 1);
 
-    int primidx = basePrimIdx + shape->primid;
+    int32_t primidx = basePrimIdx + shape->primid;
 
     const aten::PrimitiveParamter* prim = &ctxt->prims[primidx];
 
@@ -176,10 +176,10 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
     const aten::vec3& org,
     const aten::vec3& normal,
     aten::sampler* sampler,
-    int lod)
+    int32_t lod)
 {
     // TODO
-    int envmapidx = light->idx;
+    int32_t envmapidx = light->idx;
 
 #if 0
     real u = sampler->nextSample();
@@ -232,7 +232,7 @@ AT_CUDA_INLINE __device__ void sampleLight(
     const aten::vec3& org,
     const aten::vec3& normal,
     aten::sampler* sampler,
-    int lod/*= 0*/)
+    int32_t lod/*= 0*/)
 {
     switch (light->type) {
     case aten::LightType::Area:

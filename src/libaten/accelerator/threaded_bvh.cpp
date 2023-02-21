@@ -49,7 +49,7 @@ namespace aten
             m_bvh.getRoot(),
             threadedBvhNodeEntries);
 
-        std::vector<int> listParentId;
+        std::vector<int32_t> listParentId;
         m_listThreadedBvhNode.resize(1);
 
         // Register bvh node for gpu.
@@ -95,7 +95,7 @@ namespace aten
             m_nestedBvh.resize(m_mapNestedBvh.size());
 
             for (auto it = m_mapNestedBvh.begin(); it != m_mapNestedBvh.end(); it++) {
-                int exid = it->first;
+                int32_t exid = it->first;
                 auto accel = it->second;
 
                 // NOTE
@@ -106,7 +106,7 @@ namespace aten
             m_mapNestedBvh.clear();
         }
 
-        std::vector<int> listParentId;
+        std::vector<int32_t> listParentId;
 
         if (m_enableLayer) {
             // NOTE
@@ -130,7 +130,7 @@ namespace aten
 
         // Copy nested threaded bvh nodes to top layer tree.
         if (m_enableLayer) {
-            for (int i = 0; i < m_nestedBvh.size(); i++) {
+            for (int32_t i = 0; i < m_nestedBvh.size(); i++) {
                 auto node = m_nestedBvh[i];
 
                 // TODO
@@ -162,7 +162,7 @@ namespace aten
 
         for (const auto& n : nodes) {
             fprintf(fp, "%d %d %d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n",
-                (int)n.hit, (int)n.miss, (int)n.shapeid, (int)n.primid, (int)n.exid, (int)n.meshid,
+                (int32_t)n.hit, (int32_t)n.miss, (int32_t)n.shapeid, (int32_t)n.primid, (int32_t)n.exid, (int32_t)n.meshid,
                 n.boxmin.x, n.boxmin.y, n.boxmin.z,
                 n.boxmax.x, n.boxmax.y, n.boxmax.z);
         }
@@ -175,7 +175,7 @@ namespace aten
         bool isPrimitiveLeaf,
         const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
         std::vector<ThreadedBvhNode>& threadedBvhNodes,
-        std::vector<int>& listParentId)
+        std::vector<int32_t>& listParentId)
     {
         threadedBvhNodes.reserve(threadedBvhNodeEntries.size());
         listParentId.reserve(threadedBvhNodeEntries.size());
@@ -192,7 +192,7 @@ namespace aten
             bbox = aten::aabb::transform(bbox, entry.mtxL2W);
 
             auto parent = node->getParent();
-            int parentId = parent ? parent->getTraversalOrder() : -1;
+            int32_t parentId = parent ? parent->getTraversalOrder() : -1;
             listParentId.push_back(parentId);
 
             if (node->isLeaf()) {
@@ -241,12 +241,12 @@ namespace aten
 
     void ThreadedBVH::setOrder(
         const std::vector<ThreadedBvhNodeEntry>& threadedBvhNodeEntries,
-        const std::vector<int>& listParentId,
+        const std::vector<int32_t>& listParentId,
         std::vector<ThreadedBvhNode>& threadedBvhNodes)
     {
         auto num = threadedBvhNodes.size();
 
-        for (int n = 0; n < num; n++) {
+        for (int32_t n = 0; n < num; n++) {
             auto node = threadedBvhNodeEntries[n].node;
             auto& gpunode = threadedBvhNodes[n];
 
@@ -351,7 +351,7 @@ namespace aten
 
     bool ThreadedBVH::hit(
         const context& ctxt,
-        int exid,
+        int32_t exid,
         const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
         const ray& r,
         real t_min, real t_max,
@@ -359,7 +359,7 @@ namespace aten
     {
         real hitt = AT_MATH_INF;
 
-        int nodeid = 0;
+        int32_t nodeid = 0;
 
         for (;;) {
             const ThreadedBvhNode* node = nullptr;
@@ -377,13 +377,13 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = node->shapeid >= 0 ? ctxt.getTransformable((int)node->shapeid) : nullptr;
+                auto s = node->shapeid >= 0 ? ctxt.getTransformable((int32_t)node->shapeid) : nullptr;
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->getParam();
 
-                    int mtxid = param.mtxid;
+                    int32_t mtxid = param.mtxid;
 
                     aten::ray transformedRay;
 
@@ -396,8 +396,8 @@ namespace aten
                         transformedRay = r;
                     }
 
-                    //int exid = node->mainExid;
-                    int exid = *(int*)(&node->exid);
+                    //int32_t exid = node->mainExid;
+                    int32_t exid = *(int32_t*)(&node->exid);
                     exid = AT_BVHNODE_MAIN_EXID(exid);
 
                     isHit = hit(
@@ -414,7 +414,7 @@ namespace aten
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = ctxt.getTriangle((int)node->primid);
+                    auto prim = ctxt.getTriangle((int32_t)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         // Set dummy to return if ray hit.
@@ -438,10 +438,10 @@ namespace aten
             }
 
             if (isHit) {
-                nodeid = (int)node->hit;
+                nodeid = (int32_t)node->hit;
             }
             else {
-                nodeid = (int)node->miss;
+                nodeid = (int32_t)node->miss;
             }
         }
 
@@ -464,7 +464,7 @@ namespace aten
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
         registerBvhNodeToLinearList(ctxt, root, threadedBvhNodeEntries);
 
-        std::vector<int> listParentId;
+        std::vector<int32_t> listParentId;
         listParentId.reserve(threadedBvhNodeEntries.size());
 
         m_listThreadedBvhNode[0].clear();
@@ -480,7 +480,7 @@ namespace aten
             auto bbox = node->getBoundingbox();
 
             auto parent = node->getParent();
-            int parentId = parent ? parent->getTraversalOrder() : -1;
+            int32_t parentId = parent ? parent->getTraversalOrder() : -1;
             listParentId.push_back(parentId);
 
             if (node->isLeaf()) {
@@ -499,8 +499,8 @@ namespace aten
 
                 gpunode.meshid = (float)item->geomid();
 
-                int exid = node->getExternalId();
-                int subexid = node->getSubExternalId();
+                int32_t exid = node->getExternalId();
+                int32_t subexid = node->getSubExternalId();
 
                 if (exid < 0) {
                     gpunode.exid = -1.0f;
@@ -531,7 +531,7 @@ namespace aten
             return;
         }
 
-        int order = nodes.size();
+        int32_t order = nodes.size();
         node->setTraversalOrder(order);
 
         mat4 mtxL2W;
@@ -552,8 +552,8 @@ namespace aten
 
                 // NOTE
                 // 0 is for top layer, so need to add 1.
-                int exid = ctxt.findPolygonalTransformableOrderFromPointer(obj) + 1;
-                int subexid = subobj ? ctxt.findPolygonalTransformableOrderFromPointer(subobj) + 1 : -1;
+                int32_t exid = ctxt.findPolygonalTransformableOrderFromPointer(obj) + 1;
+                int32_t subexid = subobj ? ctxt.findPolygonalTransformableOrderFromPointer(subobj) + 1 : -1;
 
                 node->setExternalId(exid);
                 node->setSubExternalId(subexid);
@@ -562,14 +562,14 @@ namespace aten
 
                 // Keep nested bvh.
                 if (m_mapNestedBvh.find(exid) == m_mapNestedBvh.end()) {
-                    m_mapNestedBvh.insert(std::pair<int, accelerator*>(exid, accel));
+                    m_mapNestedBvh.insert(std::pair<int32_t, accelerator*>(exid, accel));
                 }
 
                 if (subobj) {
                     accel = subobj->getInternalAccelerator();
 
                     if (m_mapNestedBvh.find(subexid) == m_mapNestedBvh.end()) {
-                        m_mapNestedBvh.insert(std::pair<int, accelerator*>(subexid, accel));
+                        m_mapNestedBvh.insert(std::pair<int32_t, accelerator*>(subexid, accel));
                     }
                 }
             }

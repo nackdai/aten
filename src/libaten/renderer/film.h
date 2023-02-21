@@ -9,23 +9,23 @@ namespace aten
     class Film {
     public:
         Film() {}
-        Film(int w, int h);
+        Film(int32_t w, int32_t h);
         virtual ~Film() {}
 
     public:
-        void init(int w, int h);
+        void init(int32_t w, int32_t h);
 
         virtual void clear();
 
-        void put(int x, int y, const vec3& v);
-        void put(int i, const vec3& v);
+        void put(int32_t x, int32_t y, const vec3& v);
+        void put(int32_t i, const vec3& v);
 
-        void put(int x, int y, const vec4& v);
-        virtual void put(int i, const vec4& v);
+        void put(int32_t x, int32_t y, const vec4& v);
+        virtual void put(int32_t i, const vec4& v);
 
-        virtual void add(int i, const vec4& v);
+        virtual void add(int32_t i, const vec4& v);
 
-        const vec4& at(int x, int y) const;
+        const vec4& at(int32_t x, int32_t y) const;
 
         vec4* image()
         {
@@ -55,14 +55,14 @@ namespace aten
 
     protected:
         std::vector<vec4> m_image;
-        int m_width{ 0 };
-        int m_height{ 0 };
+        int32_t m_width{ 0 };
+        int32_t m_height{ 0 };
     };
 
     class FilmProgressive : public Film {
     public:
         FilmProgressive() {}
-        FilmProgressive(int w, int h)
+        FilmProgressive(int32_t w, int32_t h)
             : Film(w, h)
         {}
         virtual ~FilmProgressive() {}
@@ -73,9 +73,9 @@ namespace aten
             // Nothing is done...
         }
 
-        virtual void put(int i, const vec4& v) override final;
+        virtual void put(int32_t i, const vec4& v) override final;
 
-        virtual void add(int i, const vec4& v) override final
+        virtual void add(int32_t i, const vec4& v) override final
         {
             put(i, v);
         }

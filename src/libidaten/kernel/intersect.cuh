@@ -17,9 +17,9 @@ __device__ bool hitTriangle(
     const aten::ray& ray,
     aten::Intersection* isect);
 
-__device__ int hit4Triangles1Ray(
+__device__ int32_t hit4Triangles1Ray(
     const idaten::Context* ctxt,
-    float4 primIdx, int num,
+    float4 primIdx, int32_t num,
     float4* resultT,
     float4* resultA,
     float4* resultB,
@@ -42,7 +42,7 @@ __device__ bool hitAABB(
     real* t_result,
     aten::vec3* nml);
 
-__device__ int hit4AABBWith1Ray(
+__device__ int32_t hit4AABBWith1Ray(
     aten::vec4* result,
     const aten::vec3& org,
     const aten::vec3& dir,

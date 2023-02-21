@@ -21,9 +21,9 @@ namespace aten {
             m_idx = (seed == 0 ? 1 : seed);
             m_dimension = 0;
 #ifdef __CUDACC__
-            m_matrices = reinterpret_cast<const unsigned int*>(data);
+            m_matrices = reinterpret_cast<const uint32_t*>(data);
 #else
-            m_matrices = data ? reinterpret_cast<const unsigned int*>(data) : sobol::Matrices::matrices;
+            m_matrices = data ? reinterpret_cast<const uint32_t*>(data) : sobol::Matrices::matrices;
 #endif
         }
 
@@ -31,7 +31,7 @@ namespace aten {
             uint32_t index,
             uint32_t dimension,
             uint32_t scramble,
-            const unsigned int* data = nullptr)
+            const uint32_t* data = nullptr)
         {
             m_idx = index;
             m_dimension = dimension;
@@ -62,6 +62,6 @@ namespace aten {
         uint32_t m_idx{ 0 };
         uint32_t m_dimension{ 0 };
         uint32_t m_scramble{ 0 };
-        const unsigned int* m_matrices{ nullptr };
+        const uint32_t* m_matrices{ nullptr };
     };
 }

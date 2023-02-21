@@ -335,7 +335,7 @@ namespace AT_NAME
 
     AT_DEVICE_MTRL_API real material::applyNormal(
         const aten::MaterialParameter* mtrl,
-        const int normalMapIdx,
+        const int32_t normalMapIdx,
         const aten::vec3& orgNml,
         aten::vec3& newNml,
         real u, real v,

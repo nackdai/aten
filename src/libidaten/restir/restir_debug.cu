@@ -19,12 +19,12 @@ __global__ void fillAOV(
     idaten::TileDomain tileDomain,
     cudaSurfaceObject_t dst,
     idaten::ReSTIRPathTracing::AOVMode mode,
-    int width, int height,
+    int32_t width, int32_t height,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
     cudaSurfaceObject_t motionDetphBuffer,
     const aten::CameraParameter* __restrict__ camera,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
+    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     cudaTextureObject_t* nodes,
     const aten::PrimitiveParamter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
@@ -106,9 +106,9 @@ __global__ void fillAOV(
     }
     else if (mode == idaten::ReSTIRPathTracing::AOVMode::ObjId) {
 #if 0
-        int objid = isect.meshid;
+        int32_t objid = isect.meshid;
 #else
-        int objid = isect.mtrlid;
+        int32_t objid = isect.mtrlid;
 #endif
         if (objid >= 0) {
             objid %= AT_COUNTOF(colors);
@@ -131,13 +131,13 @@ __global__ void fillAOV(
 
 __global__ void pickPixel(
     idaten::ReSTIRPathTracing::PickedInfo* dst,
-    int ix, int iy,
-    int width, int height,
+    int32_t ix, int32_t iy,
+    int32_t width, int32_t height,
     const aten::CameraParameter* __restrict__ camera,
     const idaten::Path* __restrict__ paths,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
+    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     cudaTextureObject_t* nodes,
     const aten::PrimitiveParamter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
@@ -175,7 +175,7 @@ __global__ void pickPixel(
         dst->color = aten::vec3(paths->contrib[idx].contrib.x, paths->contrib[idx].contrib.y, paths->contrib[idx].contrib.z);
         dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
         dst->depth = normalDepth.w;
-        dst->meshid = (int)texclrMeshid.w;
+        dst->meshid = (int32_t)texclrMeshid.w;
         dst->triid = isect.primid;
         dst->mtrlid = isect.mtrlid;
     }
@@ -189,7 +189,7 @@ namespace idaten
 {
     void ReSTIRPathTracing::onDisplayAOV(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
+        int32_t width, int32_t height,
         cudaTextureObject_t texVtxPos)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
@@ -217,8 +217,8 @@ namespace idaten
     }
 
     void ReSTIRPathTracing::pick(
-        int ix, int iy,
-        int width, int height,
+        int32_t ix, int32_t iy,
+        int32_t width, int32_t height,
         cudaTextureObject_t texVtxPos)
     {
         if (m_willPicklPixel) {

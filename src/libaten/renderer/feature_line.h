@@ -31,8 +31,8 @@ namespace AT_NAME
          */
         static aten::vec3 renderFeatureLine(
             const aten::vec3 &color,
-            int x, int y,
-            int width, int height,
+            int32_t x, int32_t y,
+            int32_t width, int32_t height,
             const aten::hitrecord &hrec,
             const aten::context &ctxt,
             const AT_NAME::scene &scene,
@@ -455,8 +455,8 @@ namespace AT_NAME
          * @return If metric is valid, return true. Otherwise, return false.
          */
         static inline AT_DEVICE_MTRL_API bool evaluateMeshIdMetric(
-            const int mesh_id_query,
-            const int mesh_id_sample)
+            const int32_t mesh_id_query,
+            const int32_t mesh_id_sample)
         {
             const auto is_mesh = (mesh_id_query != mesh_id_sample);
             return is_mesh;

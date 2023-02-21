@@ -8,7 +8,7 @@ namespace aten
         HDRPixel(const unsigned char r_ = 0, const unsigned char g_ = 0, const unsigned char b_ = 0, const unsigned char e_ = 0) :
             r(r_), g(g_), b(b_), e(e_) {};
 
-        unsigned char get(int idx) {
+        unsigned char get(int32_t idx) {
             switch (idx) {
             case 0: return r;
             case 1: return g;
@@ -27,7 +27,7 @@ namespace aten
             return HDRPixel();
         }
 
-        int e;
+        int32_t e;
         double m = frexp(d, &e); // d = m * 2^e
         d = m * 256.0 / d;
 
@@ -41,7 +41,7 @@ namespace aten
     bool HDRExporter::save(
         const std::string& filename,
         const vec4* image,
-        const int width, const int height)
+        const int32_t width, const int32_t height)
     {
         FILE *fp = fopen(filename.c_str(), "wb");
         if (fp == NULL) {
@@ -60,9 +60,9 @@ namespace aten
         // 輝度値書き出し.
         fprintf(fp, "-Y %d +X %d%c", height, width, ret);
 
-        for (int i = height - 1; i >= 0; i--) {
+        for (int32_t i = height - 1; i >= 0; i--) {
             std::vector<HDRPixel> line;
-            for (int j = 0; j < width; j++) {
+            for (int32_t j = 0; j < width; j++) {
                 HDRPixel p = get_hdr_pixel(image[j + i * width]);
                 line.push_back(p);
             }
@@ -70,12 +70,12 @@ namespace aten
             fprintf(fp, "%c%c", 0x02, 0x02);
             fprintf(fp, "%c%c", (width >> 8) & 0xFF, width & 0xFF);
 
-            for (int i = 0; i < 4; i++) {
-                for (int cursor = 0; cursor < width;) {
-                    const int cursor_move = std::min(127, width - cursor);
+            for (int32_t i = 0; i < 4; i++) {
+                for (int32_t cursor = 0; cursor < width;) {
+                    const int32_t cursor_move = std::min(127, width - cursor);
                     fprintf(fp, "%c", cursor_move);
 
-                    for (int j = cursor; j < cursor + cursor_move; j++) {
+                    for (int32_t j = cursor; j < cursor + cursor_move; j++) {
                         fprintf(fp, "%c", line[j].get(i));
                     }
 

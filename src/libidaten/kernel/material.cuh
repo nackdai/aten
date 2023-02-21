@@ -69,7 +69,7 @@ __device__ aten::vec3 sampleBSDF(
 
 __device__ real applyNormal(
     const aten::MaterialParameter* mtrl,
-    const int normalMapIdx,
+    const int32_t normalMapIdx,
     const aten::vec3& orgNml,
     aten::vec3& newNml,
     real u, real v,
@@ -90,7 +90,7 @@ __device__ real computeFresnel(
 inline __device__ bool gatherMaterialInfo(
     aten::MaterialParameter& dst_mtrl,
     const idaten::Context* ctxt,
-    const int mtrl_id,
+    const int32_t mtrl_id,
     const bool is_voxel)
 {
     bool is_valid_mtrl = mtrl_id >= 0;

@@ -14,9 +14,9 @@
 
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
+    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
-    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::PrimitiveParamter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
     cudaTextureObject_t vtxNml,
@@ -27,10 +27,10 @@ __global__ void computeTemporalReuse(
     const idaten::Reservoir* __restrict__ prev_reservoirs,
     const idaten::ReSTIRInfo* __restrict__ infos,
     cudaSurfaceObject_t motionDetphBuffer,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= width || iy >= height) {
         return;
@@ -85,8 +85,8 @@ __global__ void computeTemporalReuse(
     surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
     // 前のフレームのスクリーン座標.
-    int px = (int)(ix + motionDepth.x * width);
-    int py = (int)(iy + motionDepth.y * height);
+    int32_t px = (int32_t)(ix + motionDepth.x * width);
+    int32_t py = (int32_t)(iy + motionDepth.y * height);
 
     bool is_acceptable = AT_MATH_IS_IN_BOUND(px, 0, width - 1)
         && AT_MATH_IS_IN_BOUND(py, 0, height - 1);
@@ -191,9 +191,9 @@ __global__ void computeTemporalReuse(
 
 __global__ void computeSpatialReuse(
     idaten::Path* paths,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
+    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
-    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::PrimitiveParamter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
     cudaTextureObject_t vtxNml,
@@ -203,10 +203,10 @@ __global__ void computeSpatialReuse(
     const idaten::Reservoir* __restrict__ reservoirs,
     idaten::Reservoir* dst_reservoirs,
     const idaten::ReSTIRInfo* __restrict__ infos,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= width || iy >= height) {
         return;
@@ -247,12 +247,12 @@ __global__ void computeSpatialReuse(
     const auto& albedo_meshid = aovTexclrMeshid[idx];
     const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
 
-    static const int offset_x[] = {
+    static const int32_t offset_x[] = {
         -1,  0,  1,
         -1,  1,
         -1,  0,  1,
     };
-    static const int offset_y[] = {
+    static const int32_t offset_y[] = {
         -1, -1, -1,
          0,  0,
          1,  1,  1,
@@ -271,9 +271,9 @@ __global__ void computeSpatialReuse(
     }
 
 #pragma unroll
-    for (int i = 0; i < AT_COUNTOF(offset_x); i++) {
-        const int xx = ix + offset_x[i];
-        const int yy = iy + offset_y[i];
+    for (int32_t i = 0; i < AT_COUNTOF(offset_x); i++) {
+        const int32_t xx = ix + offset_x[i];
+        const int32_t yy = iy + offset_y[i];
 
         bool is_acceptable = AT_MATH_IS_IN_BOUND(xx, 0, width - 1)
             && AT_MATH_IS_IN_BOUND(yy, 0, height - 1);
@@ -377,9 +377,9 @@ __global__ void computeSpatialReuse(
 }
 
 namespace idaten {
-    int ReSTIRPathTracing::computelReuse(
-        int width, int height,
-        int bounce,
+    int32_t ReSTIRPathTracing::computelReuse(
+        int32_t width, int32_t height,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {

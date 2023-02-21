@@ -250,9 +250,9 @@ void RandomScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     aten::MaterialParameter mtrlParam;
 
-    int i = 1;
-    for (int x = -11; x < 11; x++) {
-        for (int z = -11; z < 11; z++) {
+    int32_t i = 1;
+    for (int32_t x = -11; x < 11; x++) {
+        for (int32_t z = -11; z < 11; z++) {
             auto choose_mtrl = aten::drand48();
 
             aten::vec3 center = aten::vec3(
@@ -564,9 +564,9 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     aten::MaterialParameter mtrlParam;
 
 #if 1
-    int i = 1;
-    for (int x = -5; x < 5; x++) {
-        for (int z = -5; z < 5; z++) {
+    int32_t i = 1;
+    for (int32_t x = -5; x < 5; x++) {
+        for (int32_t z = -5; z < 5; z++) {
             auto choose_mtrl = aten::drand48();
 
             aten::vec3 center = aten::vec3(
@@ -990,7 +990,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
     scene->addLight(areaLight);
 
-    for (int i = 1; i < objs.size(); i++) {
+    for (int32_t i = 1; i < objs.size(); i++) {
         auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[i], aten::mat4::Identity);
         scene->add(box);
     }
@@ -1036,7 +1036,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
 #if 1
     {
-        int offsetTriIdx = ctxt.getTriangleNum();
+        int32_t offsetTriIdx = ctxt.getTriangleNum();
 
         objs.clear();
         aten::ObjLoader::load(objs, "../../asset/sponza/sponza_lod.obj", ctxt);
@@ -1262,7 +1262,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
     scene->addLight(areaLight);
 
-    for (int i = 1; i < objs.size(); i++) {
+    for (int32_t i = 1; i < objs.size(); i++) {
         auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[i], aten::mat4::Identity);
         scene->add(box);
     }

@@ -84,7 +84,7 @@ namespace AT_NAME {
 
     void PinholeCamera::revertRayToPixelPos(
         const aten::ray& ray,
-        int& px, int& py) const
+        int32_t& px, int32_t& py) const
     {
         // dir 方向へのスクリーン距離.
         //     /|
@@ -103,8 +103,8 @@ namespace AT_NAME {
         real u = dot(screenPos, m_param.right) + m_param.width * real(0.5);
         real v = dot(screenPos, m_param.up) + m_param.height * real(0.5);
 
-        px = (int)u;
-        py = (int)v;
+        px = (int32_t)u;
+        py = (int32_t)v;
     }
 
     real PinholeCamera::convertImageSensorPdfToScenePdf(
@@ -172,10 +172,10 @@ namespace AT_NAME {
         aten::vec3& posOnLens,
         aten::vec3& posOnObjectPlane,
         aten::vec3& posOnImageSensor,
-        int& x, int& y) const
+        int32_t& x, int32_t& y) const
     {
-        int px;
-        int py;
+        int32_t px;
+        int32_t py;
 
         revertRayToPixelPos(r, px, py);
 

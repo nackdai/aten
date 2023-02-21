@@ -5,15 +5,15 @@
 #include <cmdline.h>
 #include <imgui.h>
 
-int WIDTH = 1280;
-int HEIGHT = 720;
+int32_t WIDTH = 1280;
+int32_t HEIGHT = 720;
 
 static const char* TITLE = "FlakesNormalMapMaker";
 
 struct Options {
     std::string output;
-    int width{ 1280 };
-    int height{ 720 };
+    int32_t width{ 1280 };
+    int32_t height{ 720 };
 } g_opt;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
@@ -49,15 +49,15 @@ void onClose()
 
 }
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
 }
 
@@ -66,7 +66,7 @@ void onKey(bool press, aten::Key key)
 }
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     cmdline::parser& cmd,
     Options& opt)
 {
@@ -103,7 +103,7 @@ bool parseOption(
     return true;
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     aten::SetCurrentDirectoryFromExe();
 

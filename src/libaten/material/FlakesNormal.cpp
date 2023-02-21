@@ -44,7 +44,7 @@ namespace AT_NAME
 
     static inline AT_DEVICE_MTRL_API uint32_t inthash(aten::vec4& k)
     {
-        int N = 4;
+        int32_t N = 4;
 
         // now hash the data!
         uint32_t len = N;
@@ -88,7 +88,7 @@ namespace AT_NAME
 
     static inline AT_DEVICE_MTRL_API aten::vec3 hash3(aten::vec4& k)
     {
-        int N = 4;
+        int32_t N = 4;
 
         aten::vec3 result;
 
@@ -143,9 +143,9 @@ namespace AT_NAME
         aten::vec3 base = floor(position);
 
         aten::vec3 nearestCell(0.0, 0.0, 1.0);
-        int nearestCellIndex = -1;
+        int32_t nearestCellIndex = -1;
 
-        for (int cellIndex = 0; cellIndex < 9; ++cellIndex) {
+        for (int32_t cellIndex = 0; cellIndex < 9; ++cellIndex) {
             aten::vec3 cellCenter = base + cellCenters[cellIndex];
 
             aten::vec3 centerOffset = cellnoise(cellCenter) * real(2.0) - real(1.0);

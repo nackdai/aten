@@ -13,7 +13,7 @@ __device__ bool intersectBVH(
     aten::Intersection* isect,
     float t_max = AT_MATH_INF,
     bool enableLod = false,
-    int depth = -1);
+    int32_t depth = -1);
 
 __device__ bool intersectCloserBVH(
     const idaten::Context* ctxt,
@@ -21,14 +21,14 @@ __device__ bool intersectCloserBVH(
     aten::Intersection* isect,
     const float t_max,
     bool enableLod = false,
-    int depth = -1);
+    int32_t depth = -1);
 
 __device__ bool intersectAnyBVH(
     const idaten::Context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     bool enableLod = false,
-    int depth = -1);
+    int32_t depth = -1);
 
 #ifndef __AT_DEBUG__
 #include "kernel/bvh_impl.cuh"

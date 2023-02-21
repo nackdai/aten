@@ -85,12 +85,12 @@ namespace aten {
             // Inside.
             bool intersecting = false;
 
-            for (int i = 0; i < AT_COUNTOF(m_plane); i++) {
+            for (int32_t i = 0; i < AT_COUNTOF(m_plane); i++) {
                 const vec4& p = m_plane[i];
 
-                int px = (p.x > real(0.0));
-                int py = (p.y > real(0.0));
-                int pz = (p.z > real(0.0));
+                int32_t px = (p.x > real(0.0));
+                int32_t py = (p.y > real(0.0));
+                int32_t pz = (p.z > real(0.0));
 
                 vec3 vmax(b[px].x, b[py].y, b[pz].z);
                 vec3 vmin(b[1 - px].x, b[1 - py].y, b[1 - pz].z);
@@ -136,19 +136,19 @@ namespace aten {
                     vec3(real(0), real(0), size.z * real(0.5)),
                 };
 
-                for (int i = 0; i < 3; i++) {
+                for (int32_t i = 0; i < 3; i++) {
                     const auto& a = axis[i];
 
                     auto axisLengthSquared = squared_length(a);
 
-                    int out1 = 0;
-                    int out2 = 0;
+                    int32_t out1 = 0;
+                    int32_t out2 = 0;
 
                     if (axisLengthSquared == real(0)) {
                         continue;
                     }
 
-                    for (int n = 0; n < AT_COUNTOF(diff); n++) {
+                    for (int32_t n = 0; n < AT_COUNTOF(diff); n++) {
                         auto proj = dot(diff[n], a);
 
                         if (proj >= axisLengthSquared) {

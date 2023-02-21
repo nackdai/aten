@@ -111,7 +111,7 @@ namespace aten {
         /**
          * @brief Return an order to traversal tree for threaded bvh.
          */
-        int getTraversalOrder() const
+        int32_t getTraversalOrder() const
         {
             return m_traverseOrder;
         }
@@ -119,7 +119,7 @@ namespace aten {
         /**
          * @brief Set an order to traversal tree for threaded bvh.
          */
-        void setTraversalOrder(int order)
+        void setTraversalOrder(int32_t order)
         {
             m_traverseOrder = order;
         }
@@ -127,7 +127,7 @@ namespace aten {
         /**
          * @brief Return the index of an external tree.
          */
-        int getExternalId() const
+        int32_t getExternalId() const
         {
             return m_externalId;
         }
@@ -135,7 +135,7 @@ namespace aten {
         /**
         * @brief Set the index of an external tree.
         */
-        void setExternalId(int exid)
+        void setExternalId(int32_t exid)
         {
             m_externalId = exid;
         }
@@ -143,7 +143,7 @@ namespace aten {
         /**
          * @brief Return the index of an external sub tree (it is for LOD).
          */
-        int getSubExternalId() const
+        int32_t getSubExternalId() const
         {
             return m_subExternalId;
         }
@@ -151,7 +151,7 @@ namespace aten {
         /**
          * @brief Set the index of an external sub tree (it is for LOD).
          */
-        void setSubExternalId(int exid)
+        void setSubExternalId(int32_t exid)
         {
             m_subExternalId = exid;
         }
@@ -159,7 +159,7 @@ namespace aten {
         /**
          * @brief Return count of children which the node has, for multi bvh.
          */
-        int getChildrenNum() const
+        int32_t getChildrenNum() const
         {
             return m_childrenNum;
         }
@@ -167,7 +167,7 @@ namespace aten {
         /**
          * @brief Set count of children which the node has, for multi bvh.
          */
-        void setChildrenNum(int num)
+        void setChildrenNum(int32_t num)
         {
             AT_ASSERT((0 <= num) && (num <= 4));
             m_childrenNum = num;
@@ -184,7 +184,7 @@ namespace aten {
         /**
          * @brief Register a child to the children array.
          */
-        void registerChild(hitable* child, int idx)
+        void registerChild(hitable* child, int32_t idx)
         {
             m_children[idx] = child;
         }
@@ -193,7 +193,7 @@ namespace aten {
         /**
          * @brief Set depth in the tree which the node belonges to.
          */
-        void setDepth(int depth)
+        void setDepth(int32_t depth)
         {
             m_depth = depth;
         }
@@ -216,7 +216,7 @@ namespace aten {
         /**
          * @brief Return depth in the tree which the node belonges to.
          */
-        int getDepth() const
+        int32_t getDepth() const
         {
             return m_depth;
         }
@@ -278,19 +278,19 @@ namespace aten {
         };
 
         // Order to traversal tree for threaded bvh
-        int m_traverseOrder{ -1 };
+        int32_t m_traverseOrder{ -1 };
 
         // Index of an external tree
-        int m_externalId{ -1 };
+        int32_t m_externalId{ -1 };
 
         // Count of children which the node has, for multi bvh.
-        int m_childrenNum{ 0 };
+        int32_t m_childrenNum{ 0 };
 
         // Index of an external sub tree (it is for LOD).
-        int m_subExternalId{ -1 };
+        int32_t m_subExternalId{ -1 };
 
         // Depth in the tree which the node belonges to
-        int m_depth{ 0 };
+        int32_t m_depth{ 0 };
 
         // BVH which the node belongs to.
         bvh* m_bvh{ nullptr };

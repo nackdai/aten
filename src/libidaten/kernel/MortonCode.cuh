@@ -6,12 +6,12 @@
 #include "cuda/cudaTextureResource.h"
 #include "aten4idaten.h"
 
-__forceinline__ __device__ float4 getFloat4(cudaTextureObject_t tex, int idx)
+__forceinline__ __device__ float4 getFloat4(cudaTextureObject_t tex, int32_t idx)
 {
     return tex1Dfetch<float4>(tex, idx);
 }
 
-__forceinline__ __device__ float4 getFloat4(float4* data, int idx)
+__forceinline__ __device__ float4 getFloat4(float4* data, int32_t idx)
 {
     return data[idx];
 }
@@ -98,7 +98,7 @@ __forceinline__ __device__ __host__ uint64_t computeMortonCode(float x, float y,
 
 template <typename T>
 __forceinline__ __device__ T onComputeMortonCode(
-    int a0, int a1, int a2,
+    int32_t a0, int32_t a1, int32_t a2,
     const aten::vec3& vmin,
     const aten::vec3& vmax,
     const aten::aabb& sceneBbox)
@@ -117,7 +117,7 @@ __forceinline__ __device__ T onComputeMortonCode(
 
 template <uint64_t>
 __forceinline__ __device__ uint64_t onComputeExtendedMortonCode(
-    int a0, int a1, int a2,
+    int32_t a0, int32_t a1, int32_t a2,
     const aten::vec3& vmin,
     const aten::vec3& vmax,
     const aten::aabb& sceneBbox)
@@ -141,12 +141,12 @@ __forceinline__ __device__ uint64_t onComputeExtendedMortonCode(
 
 template <typename T, typename M>
 __global__ void genMortonCode(
-    int a0, int a1, int a2,
-    int numberOfTris,
+    int32_t a0, int32_t a1, int32_t a2,
+    int32_t numberOfTris,
     const aten::aabb sceneBbox,
     const aten::PrimitiveParamter* __restrict__ tris,
     T vtxPos,
-    int vtxOffset,
+    int32_t vtxOffset,
     M* mortonCodes,
     uint32_t* indices)
 {

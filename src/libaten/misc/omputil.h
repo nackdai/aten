@@ -17,7 +17,7 @@ namespace aten {
             return g_threadnum;
         }
 
-        static int getThreadIdx();
+        static int32_t getThreadIdx();
 
     private:
         static uint32_t g_threadnum;

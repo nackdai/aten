@@ -2,7 +2,7 @@
 
 namespace aten
 {
-    std::atomic<int> geombase::g_id(0);
+    std::atomic<int32_t> geombase::g_id(0);
 
     geombase::geombase()
     {

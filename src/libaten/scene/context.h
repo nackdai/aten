@@ -31,12 +31,12 @@ namespace aten
             m_vertices.push_back(vtx);
         }
 
-        const aten::vertex& getVertex(int idx) const
+        const aten::vertex& getVertex(int32_t idx) const
         {
             return m_vertices[idx];
         }
 
-        aten::vertex& getVertex(int idx)
+        aten::vertex& getVertex(int32_t idx)
         {
             return m_vertices[idx];
         }
@@ -89,12 +89,12 @@ namespace aten
 
         void addMaterial(AT_NAME::material* mtrl);
 
-        int getMaterialNum() const
+        int32_t getMaterialNum() const
         {
-            return static_cast<int>(m_materials.size());
+            return static_cast<int32_t>(m_materials.size());
         }
 
-        std::shared_ptr<AT_NAME::material> getMaterial(int idx) const
+        std::shared_ptr<AT_NAME::material> getMaterial(int32_t idx) const
         {
             AT_ASSERT(0 <= idx && idx < getMaterialNum());
             return m_materials[idx];
@@ -106,7 +106,7 @@ namespace aten
 
         std::shared_ptr<const AT_NAME::material> findMaterialByName(const char* name) const;
 
-        int findMaterialIdxByName(const char* name) const;
+        int32_t findMaterialIdxByName(const char* name) const;
 
         std::shared_ptr<AT_NAME::face> createTriangle(const aten::PrimitiveParamter& param);
 
@@ -117,31 +117,31 @@ namespace aten
             return static_cast<uint32_t>(m_triangles.size());
         }
 
-        std::shared_ptr<const AT_NAME::face> getTriangle(int idx) const;
+        std::shared_ptr<const AT_NAME::face> getTriangle(int32_t idx) const;
 
         void copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const;
 
-        int findTriIdxFromPointer(const void* p) const;
+        int32_t findTriIdxFromPointer(const void* p) const;
 
         void addTransformable(const std::shared_ptr<aten::transformable>& t);
 
-        std::shared_ptr<const aten::transformable> getTransformable(int idx) const;
+        std::shared_ptr<const aten::transformable> getTransformable(int32_t idx) const;
 
         void traverseTransformables(
             std::function<void(const std::shared_ptr<aten::transformable>&, aten::GeometryType)> func) const;
 
         void copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const;
 
-        int findTransformableIdxFromPointer(const void* p) const;
+        int32_t findTransformableIdxFromPointer(const void* p) const;
 
-        int findPolygonalTransformableOrderFromPointer(const void* p) const;
+        int32_t findPolygonalTransformableOrderFromPointer(const void* p) const;
 
         std::shared_ptr<texture> createTexture(
             uint32_t width, uint32_t height, uint32_t channels, const char* name);
 
-        int getTextureNum() const;
+        int32_t getTextureNum() const;
 
-        std::shared_ptr<texture> getTexture(int idx) const;
+        std::shared_ptr<texture> getTexture(int32_t idx) const;
 
         void addTexture(const std::shared_ptr<texture>& tex);
 

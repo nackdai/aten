@@ -220,7 +220,7 @@ namespace aten {
 
         auto vtxNum = computeVtxNum(mode, primNum);
 
-        const int prim_idx = static_cast<int>(mode);
+        const int32_t prim_idx = static_cast<int32_t>(mode);
 
         CALL_GL_API(::glDrawArrays(prims[prim_idx], idxOffset, vtxNum));
     }
@@ -468,7 +468,7 @@ namespace aten {
 
         auto idxNum = computeVtxNum(mode, primNum);
 
-        const int prim_idx = static_cast<int>(mode);
+        const int32_t prim_idx = static_cast<int32_t>(mode);
 
         CALL_GL_API(::glDrawElements(
             prims[prim_idx],

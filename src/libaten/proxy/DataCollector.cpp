@@ -64,9 +64,9 @@ namespace aten {
     void DataCollector::collectTriangles(
         const context& ctxt,
         std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
-        std::vector<int>& triIdOffsets)
+        std::vector<int32_t>& triIdOffsets)
     {
-        int triangleCount = 0;
+        int32_t triangleCount = 0;
 
         ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
             if (type == GeometryType::Polygon) {

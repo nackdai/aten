@@ -10,8 +10,8 @@
 #include "aten4idaten.h"
 
 inline __device__ float gaussFilter3x3(
-    int ix, int iy,
-    int w, int h,
+    int32_t ix, int32_t iy,
+    int32_t w, int32_t h,
     const float4* __restrict__ var)
 {
     static const float kernel[] = {
@@ -20,13 +20,13 @@ inline __device__ float gaussFilter3x3(
         1.0 / 16.0, 1.0 / 8.0, 1.0 / 16.0,
     };
 
-    static const int offsetx[] = {
+    static const int32_t offsetx[] = {
         -1, 0, 1,
         -1, 0, 1,
         -1, 0, 1,
     };
 
-    static const int offsety[] = {
+    static const int32_t offsety[] = {
         -1, -1, -1,
         0, 0, 0,
         1, 1, 1,
@@ -34,14 +34,14 @@ inline __device__ float gaussFilter3x3(
 
     float sum = 0;
 
-    int pos = 0;
+    int32_t pos = 0;
 
 #pragma unroll
-    for (int i = 0; i < 9; i++) {
-        int xx = clamp(ix + offsetx[i], 0, w - 1);
-        int yy = clamp(iy + offsety[i], 0, h - 1);
+    for (int32_t i = 0; i < 9; i++) {
+        int32_t xx = clamp(ix + offsetx[i], 0, w - 1);
+        int32_t yy = clamp(iy + offsety[i], 0, h - 1);
 
-        int idx = getIdx(xx, yy, w);
+        int32_t idx = getIdx(xx, yy, w);
 
         float tmp = var[idx].w;
 
@@ -64,12 +64,12 @@ __global__ void atrousFilter(
     const float4* __restrict__ aovMomentTemporalWeight,
     const float4* __restrict__ clrVarBuffer,
     float4* nextClrVarBuffer,
-    int stepScale,
-    int width, int height,
+    int32_t stepScale,
+    int32_t width, int32_t height,
     float cameraDistance)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= tileDomain.w || iy >= tileDomain.h) {
         return;
@@ -78,14 +78,14 @@ __global__ void atrousFilter(
     ix += tileDomain.x;
     iy += tileDomain.y;
 
-    const int idx = getIdx(ix, iy, width);
+    const int32_t idx = getIdx(ix, iy, width);
 
     auto normalDepth = aovNormalDepth[idx];
     auto texclrMeshid = aovTexclrMeshid[idx];
 
     float3 centerNormal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
     float centerDepth = normalDepth.w;
-    int centerMeshId = (int)texclrMeshid.w;
+    int32_t centerMeshId = (int32_t)texclrMeshid.w;
 
     float4 centerColor;
 
@@ -142,7 +142,7 @@ __global__ void atrousFilter(
         1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0, 1.0 / 36.0,
     };
 
-    static const int offsetx[] = {
+    static const int32_t offsetx[] = {
         1,  0, -1, 0,
         2,  0, -2, 0,
         1, -1, -1, 1,
@@ -150,7 +150,7 @@ __global__ void atrousFilter(
         2, -2, -2, 2,
         2, -2, -2, 2,
     };
-    static const int offsety[] = {
+    static const int32_t offsety[] = {
         0, 1,  0, -1,
         0, 2,  0, -2,
         1, 1, -1, -1,
@@ -163,20 +163,20 @@ __global__ void atrousFilter(
     float sumV = centerColor.w;
     float weight = 1.0f;
 
-    int pos = 0;
+    int32_t pos = 0;
 
     float pixelDistanceRatio = (centerDepth / cameraDistance) * height;
 
 #pragma unroll
-    for (int i = 0; i < 24; i++)
+    for (int32_t i = 0; i < 24; i++)
     {
-        int xx = clamp(ix + offsetx[i] * stepScale, 0, width - 1);
-        int yy = clamp(iy + offsety[i] * stepScale, 0, height - 1);
+        int32_t xx = clamp(ix + offsetx[i] * stepScale, 0, width - 1);
+        int32_t yy = clamp(iy + offsety[i] * stepScale, 0, height - 1);
 
         float2 u = make_float2(offsetx[i] * stepScale, offsety[i] * stepScale);
         float2 q = make_float2(xx, yy);
 
-        const int qidx = getIdx(xx, yy, width);
+        const int32_t qidx = getIdx(xx, yy, width);
 
         normalDepth = aovNormalDepth[qidx];
         texclrMeshid = aovTexclrMeshid[qidx];
@@ -184,7 +184,7 @@ __global__ void atrousFilter(
         float3 normal = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
 
         float depth = normalDepth.w;
-        int meshid = (int)texclrMeshid.w;
+        int32_t meshid = (int32_t)texclrMeshid.w;
 
         float4 color;
         float variance;
@@ -243,16 +243,16 @@ __global__ void atrousFilter(
 __global__ void copyFromBufferToAov(
     const float4* __restrict__ src,
     float4* aovColorVariance,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= width || iy >= height) {
         return;
     }
 
-    const int idx = getIdx(ix, iy, width);
+    const int32_t idx = getIdx(ix, iy, width);
 
     float4 s = src[idx];
 
@@ -265,11 +265,11 @@ namespace idaten
 {
     void SVGFPathTracing::onAtrousFilter(
         cudaSurfaceObject_t outputSurf,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         m_atrousMaxIterCnt = aten::clamp(m_atrousMaxIterCnt, 0U, 5U);
 
-        for (int i = 0; i < m_atrousMaxIterCnt; i++) {
+        for (int32_t i = 0; i < m_atrousMaxIterCnt; i++) {
             onAtrousFilterIter(
                 i, m_atrousMaxIterCnt,
                 outputSurf,
@@ -281,25 +281,25 @@ namespace idaten
         uint32_t iterCnt,
         uint32_t maxIterCnt,
         cudaSurfaceObject_t outputSurf,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov_idx = getCurAovs();
+        int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
-        int cur = iterCnt & 0x01;
-        int next = 1 - cur;
+        int32_t cur = iterCnt & 0x01;
+        int32_t next = 1 - cur;
 
         bool isFirstIter = iterCnt == 0 ? true : false;
         bool isFinalIter = iterCnt == maxIterCnt - 1 ? true : false;
 
         float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
 
-        int stepScale = 1 << iterCnt;
+        int32_t stepScale = 1 << iterCnt;
 
         atrousFilter << <grid, block, 0, m_stream >> > (
             m_tileDomain,
@@ -317,14 +317,14 @@ namespace idaten
         checkCudaKernel(atrousFilter);
     }
 
-    void SVGFPathTracing::onCopyFromTmpBufferToAov(int width, int height)
+    void SVGFPathTracing::onCopyFromTmpBufferToAov(int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
             (width + block.x - 1) / block.x,
             (height + block.y - 1) / block.y);
 
-        int curaov_idx = getCurAovs();
+        int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
         // Copy color from temporary buffer to AOV buffer for next temporal reprojection.

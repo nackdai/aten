@@ -16,8 +16,8 @@ namespace aten {
         // Replace \\->/
         std::replace(filepath.begin(), filepath.end(), '\\', '/');
 
-        int pathPos = (int)filepath.find_last_of("/") + 1;
-        int extPos = (int)filepath.find_last_of(".");
+        int32_t pathPos = (int32_t)filepath.find_last_of("/") + 1;
+        int32_t extPos = (int32_t)filepath.find_last_of(".");
 
         pathname = filepath.substr(0, pathPos - 1);
         extname = filepath.substr(extPos, filepath.size() - extPos);

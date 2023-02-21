@@ -18,16 +18,16 @@ namespace aten {
         ~Sampler() {}
 
     public:
-        vec4& operator()(int x, int y) const
+        vec4& operator()(int32_t x, int32_t y) const
         {
-            x = aten::clamp<int>(x, 0, width - 1);
-            y = aten::clamp<int>(y, 0, height - 1);
+            x = aten::clamp<int32_t>(x, 0, width - 1);
+            y = aten::clamp<int32_t>(y, 0, height - 1);
 
             auto pos = y * width + x;
             return src[pos];
         }
 
-        void set(int x, int y, const vec4& v)
+        void set(int32_t x, int32_t y, const vec4& v)
         {
             if (src) {
                 (*this)(x, y) = v;
@@ -49,7 +49,7 @@ namespace aten {
 
     static inline real kernelS(
         const std::vector<std::vector<real>>& distW,
-        int u, int v)
+        int32_t u, int32_t v)
     {
         auto w = distW[v][u];
         return w;
@@ -61,7 +61,7 @@ namespace aten {
         real sigmaS, real sigmaR,
         vec4* dst)
     {
-        int r = int(aten::ceil(real(4.0) * sigmaS));
+        int32_t r = int32_t(aten::ceil(real(4.0) * sigmaS));
 
         // ピクセル距離の重み.
         std::vector<std::vector<real>> distW;
@@ -71,10 +71,10 @@ namespace aten {
             // TODO
             auto _sigmaS = sigmaS * 256;
 
-            for (int v = 0; v <= r; v++) {
+            for (int32_t v = 0; v <= r; v++) {
                 distW[v].resize(1 + r);
 
-                for (int u = 0; u <= r; u++) {
+                for (int32_t u = 0; u <= r; u++) {
                     distW[v][u] = (float)(real(1) / aten::sqrt(real(2) * AT_MATH_PI * sigmaS) * aten::exp(real(-0.5) * (u * u + v * v) / (_sigmaS * _sigmaS)));
                 }
             }
@@ -88,8 +88,8 @@ namespace aten {
 #endif
         // NOTE
         // index variable in OpenMP 'for' statement must have signed integral type
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int32_t y = 0; y < height; y++) {
+            for (int32_t x = 0; x < width; x++) {
                 // 中心点.
                 const auto& p = srcSampler(x, y);
 
@@ -98,7 +98,7 @@ namespace aten {
 
                 // (u, 0)
                 // 横方向.
-                for (int u = 1; u <= r; u++) {
+                for (int32_t u = 1; u <= r; u++) {
                     const auto& p0 = srcSampler(x - u, y);
                     const auto& p1 = srcSampler(x + u, y);
 
@@ -117,7 +117,7 @@ namespace aten {
 
                 // (0, v)
                 // 縦方向.
-                for (int v = 1; v <= r; v++) {
+                for (int32_t v = 1; v <= r; v++) {
                     const auto& p0 = srcSampler(x, y - v);
                     const auto& p1 = srcSampler(x, y + v);
 
@@ -134,8 +134,8 @@ namespace aten {
                     denom += kernelS(distW, 0, v) * (wr0 * vec3(p0) + wr1 * vec3(p1));
                 }
 
-                for (int v = 1; v <= r; v++) {
-                    for (int u = 1; u <= r; u++) {
+                for (int32_t v = 1; v <= r; v++) {
+                    for (int32_t u = 1; u <= r; u++) {
                         const auto& p00 = srcSampler(x - u, y - v);
                         const auto& p01 = srcSampler(x - u, y + v);
                         const auto& p10 = srcSampler(x + u, y - v);
@@ -205,7 +205,7 @@ namespace aten {
             CALL_GL_API(glUniform1f(hSigmaR, (GLfloat)m_sigmaR));
         }
 
-        int radius = (int)aten::ceil(real(4.0) * m_sigmaS);
+        int32_t radius = (int32_t)aten::ceil(real(4.0) * m_sigmaS);
 
         auto hRadius = getHandle("radius");
         if (hRadius >= 0) {
@@ -215,8 +215,8 @@ namespace aten {
         if (m_radius != radius) {
             auto _sigmaS = m_sigmaS * 256;
 
-            for (int v = 0; v <= radius; v++) {
-                for (int u = 0; u <= radius; u++) {
+            for (int32_t v = 0; v <= radius; v++) {
+                for (int32_t u = 0; u <= radius; u++) {
                     distW[v][u] = (float)(real(1) / aten::sqrt(real(2) * AT_MATH_PI * m_sigmaS) * aten::exp(real(-0.5) * (u * u + v * v) / (_sigmaS * _sigmaS)));
                 }
             }

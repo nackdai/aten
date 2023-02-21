@@ -9,8 +9,8 @@
 #include "MtrlExporter.h"
 #include "AnmExporter.h"
 
-static const int WIDTH = 1280;
-static const int HEIGHT = 720;
+static const int32_t WIDTH = 1280;
+static const int32_t HEIGHT = 720;
 
 static const char* TITLE = "FbxConverter";
 
@@ -28,7 +28,7 @@ struct Options {
 };
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     Options& opt)
 {
     cmdline::parser cmd;
@@ -101,7 +101,7 @@ bool parseOption(
     return true;
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
 #if 1
     Options opt;

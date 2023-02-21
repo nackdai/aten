@@ -289,7 +289,7 @@ namespace aten
                     vec.z = static_cast<float>(nml.mData[2]);
                 },
                     [&](uint32_t idx) {
-                    int index = vtxNormal->GetIndexArray().GetAt(idx);
+                    int32_t index = vtxNormal->GetIndexArray().GetAt(idx);
                     const FbxVector4& nml = vtxNormal->GetDirectArray().GetAt(index);
                     vec.x = static_cast<float>(nml.mData[0]);
                     vec.y = static_cast<float>(nml.mData[1]);
@@ -335,7 +335,7 @@ namespace aten
                     vec.w = static_cast<float>(clr.mAlpha);
                 },
                     [&](uint32_t idx) {
-                    int index = vtxClr->GetIndexArray().GetAt(idx);
+                    int32_t index = vtxClr->GetIndexArray().GetAt(idx);
                     const FbxColor& clr = vtxClr->GetDirectArray().GetAt(index);
                     vec.x = static_cast<float>(clr.mRed);
                     vec.y = static_cast<float>(clr.mGreen);
@@ -1012,15 +1012,15 @@ namespace aten
             // http://marupeke296.com/FBX_No7_TextureMaterial.html
 
             // プロパティが持っているレイヤードテクスチャの枚数をチェック.
-            int layerNum = prop.GetSrcObjectCount<fbxsdk::FbxLayeredTexture>();
+            int32_t layerNum = prop.GetSrcObjectCount<fbxsdk::FbxLayeredTexture>();
 
             if (layerNum > 0) {
                 // TODO
             }
             else {
-                int textureCount = prop.GetSrcObjectCount<fbxsdk::FbxTexture>();
+                int32_t textureCount = prop.GetSrcObjectCount<fbxsdk::FbxTexture>();
 
-                for (int n = 0; n < textureCount; n++)
+                for (int32_t n = 0; n < textureCount; n++)
                 {
                     fbxsdk::FbxTexture* texture = FbxCast<fbxsdk::FbxTexture>(prop.GetSrcObject<fbxsdk::FbxTexture>(n));
 
@@ -1081,7 +1081,7 @@ namespace aten
 
         std::vector<MaterialTex> tmpTexList;
 
-        for (int i = 0; i < entryCount; ++i)
+        for (int32_t i = 0; i < entryCount; ++i)
         {
             auto entry = rootTable->GetEntry(i);
 
@@ -1102,7 +1102,7 @@ namespace aten
 
                 auto num = fbxProperty.GetSrcObjectCount<FbxFileTexture>();
 
-                for (int n = 0; n < num; n++)
+                for (int32_t n = 0; n < num; n++)
                 {
                     auto texFile = fbxProperty.GetSrcObject<FbxFileTexture>(n);
                     std::string texName = texFile->GetFileName();
@@ -1147,11 +1147,11 @@ namespace aten
                     param.values.push_back(v);
                 }
                 else if (dataType == fbxsdk::eFbxInt || dataType == fbxsdk::eFbxEnum) {
-                    int v = fbxProperty.Get<int>();
+                    int32_t v = fbxProperty.Get<int32_t>();
                     param.values.push_back((float)v);
                 }
                 else if (dataType == fbxsdk::eFbxUInt) {
-                    unsigned int v = fbxProperty.Get<unsigned int>();
+                    uint32_t v = fbxProperty.Get<uint32_t>();
                     param.values.push_back((float)v);
                 }
                 else if (dataType == fbxsdk::eFbxFloat) {
@@ -1183,8 +1183,8 @@ namespace aten
                 else if (dataType == fbxsdk::eFbxDouble4x4) {
                     FbxDouble4x4 v = fbxProperty.Get<FbxDouble4x4>();
 
-                    for (int i = 0; i < 4; i++) {
-                        for (int n = 0; n < 4; n++) {
+                    for (int32_t i = 0; i < 4; i++) {
+                        for (int32_t n = 0; n < 4; n++) {
                             param.values.push_back((float)v.mData[i].mData[n]);
                         }
                     }

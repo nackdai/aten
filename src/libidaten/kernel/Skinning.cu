@@ -28,8 +28,8 @@ __global__ void computeSkinning(
     aten::vec4 resultPos(0);
     aten::vec4 resultNml(0);
 
-    for (int i = 0; i < 4; i++) {
-        int idx = int(vtx->blendIndex[i]);
+    for (int32_t i = 0; i < 4; i++) {
+        int32_t idx = int32_t(vtx->blendIndex[i]);
         float weight = vtx->blendWeight[i];
 
         aten::mat4 mtx = matrices[idx];
@@ -56,7 +56,7 @@ __global__ void computeSkinning(
 __global__ void setTriangleParam(
     uint32_t triNum,
     aten::PrimitiveParamter* triangles,
-    int indexOffset,
+    int32_t indexOffset,
     const aten::vec4* __restrict__ pos)
 {
     const auto idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -129,7 +129,7 @@ __global__ void getMinMax(
     }
     __syncthreads();
 
-    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
+    for (uint32_t s = blockDim.x / 2; s > 0; s >>= 1) {
         //if (tid < s && tid + s < num) {
         if (tid < s) {
             minPos[tid] = aten::min(minPos[tid], minPos[tid + s]);
@@ -164,7 +164,7 @@ namespace idaten
 
             m_interopVBO.resize(handles.size());
 
-            for (int i = 0; i < handles.size(); i++) {
+            for (int32_t i = 0; i < handles.size(); i++) {
                 auto glvbo = handles[i];
                 m_interopVBO[i].init(glvbo, CudaGLRscRegisterType::WriteOnly);
             }
@@ -199,7 +199,7 @@ namespace idaten
 
             m_interopVBO.resize(handles.size());
 
-            for (int i = 0; i < handles.size(); i++) {
+            for (int32_t i = 0; i < handles.size(); i++) {
                 auto glvbo = handles[i];
                 m_interopVBO[i].init(glvbo, CudaGLRscRegisterType::ReadWrite);
             }
@@ -357,7 +357,7 @@ namespace idaten
         return true;
     }
 
-    void Skinning::setVtxOffset(int offset)
+    void Skinning::setVtxOffset(int32_t offset)
     {
         AT_ASSERT(offset >= 0);
         m_prevVtxOffset = m_curVtxOffset;

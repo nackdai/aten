@@ -18,7 +18,7 @@ bool FbxDataManager::open(const char* path)
 
     auto importer = FbxImporter::Create(m_manager, "");
 
-    int fileFormat = -1;
+    int32_t fileFormat = -1;
 
     if (m_manager->GetIOPluginRegistry()->DetectReaderFileFormat(path, fileFormat)) {
         if (importer->Initialize(path, fileFormat)) {
@@ -75,7 +75,7 @@ bool FbxDataManager::openForAnm(const char* path, bool nodeOnly/*= false*/)
 
     FbxImporter* importer = FbxImporter::Create(m_manager, "");
 
-    int fileFormat = -1;
+    int32_t fileFormat = -1;
 
     if (m_manager->GetIOPluginRegistry()->DetectReaderFileFormat(path, fileFormat)) {
         if (importer->Initialize(path, fileFormat)) {
@@ -149,7 +149,7 @@ void FbxDataManager::loadMaterial()
         // シーンに含まれるメッシュの解析
         auto meshCount = m_scene->GetMemberCount<FbxMesh>();
 
-        for (int i = 0; i < meshCount; ++i)
+        for (int32_t i = 0; i < meshCount; ++i)
         {
             FbxMesh* fbxMesh = m_scene->GetMember<FbxMesh>(i);
 
@@ -158,7 +158,7 @@ void FbxDataManager::loadMaterial()
             }
 
             // メッシュに含まれるポリゴン（三角形）の数.
-            const int polygonCount = fbxMesh->GetPolygonCount();
+            const int32_t polygonCount = fbxMesh->GetPolygonCount();
 
             auto& materialIndices = fbxMesh->GetElementMaterial()->GetIndexArray();
 
@@ -166,10 +166,10 @@ void FbxDataManager::loadMaterial()
 
             if (mtrlCnt == polygonCount)
             {
-                for (int i = 0; i < polygonCount; i++)
+                for (int32_t i = 0; i < polygonCount; i++)
                 {
                     // メッシュに含まれるポリゴン（三角形）が所属しているマテリアルへのインデックス.
-                    const int materialIdx = materialIndices.GetAt(i);
+                    const int32_t materialIdx = materialIndices.GetAt(i);
 
                     // マテリアル本体を取得.
                     auto material = m_scene->GetMaterial(materialIdx);
@@ -392,7 +392,7 @@ void FbxDataManager::gatherNodes(FbxNode* node)
 #else
     // ノードを集める.
     auto nodeCount = m_scene->GetNodeCount();
-    for (int i = 0; i < nodeCount; ++i)
+    for (int32_t i = 0; i < nodeCount; ++i)
     {
         auto fbxNode = m_scene->GetNode(i);
         m_nodes.push_back(Node(fbxNode));
@@ -406,7 +406,7 @@ void FbxDataManager::gatherMeshes()
     // シーンに含まれるメッシュの解析
     auto meshCount = m_scene->GetMemberCount<FbxMesh>();
 
-    for (int i = 0; i < meshCount; ++i)
+    for (int32_t i = 0; i < meshCount; ++i)
     {
         FbxMesh* mesh = m_scene->GetMember<FbxMesh>(i);
         m_fbxMeshes.push_back(mesh);
@@ -418,18 +418,18 @@ void FbxDataManager::gatherClusters()
     for each (FbxMesh* mesh in m_fbxMeshes)
     {
         // メッシュに含まれるスキニング情報数.
-        int skinCount = mesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
+        int32_t skinCount = mesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
 
-        for (int n = 0; n < skinCount; n++) {
+        for (int32_t n = 0; n < skinCount; n++) {
             // スキニング情報を取得.
             FbxDeformer* deformer = mesh->GetDeformer(n, FbxDeformer::EDeformerType::eSkin);
 
             FbxSkin* skin = (FbxSkin*)deformer;
 
             // スキニングに影響を与えるボーンの数.
-            int boneCount = skin->GetClusterCount();
+            int32_t boneCount = skin->GetClusterCount();
 
-            for (int b = 0; b < boneCount; b++) {
+            for (int32_t b = 0; b < boneCount; b++) {
                 FbxCluster* cluster = skin->GetCluster(b);
 
                 auto it = std::find(m_clusters.begin(), m_clusters.end(), cluster);
@@ -446,7 +446,7 @@ fbxsdk::FbxSurfaceMaterial* FbxDataManager::getMaterial(FbxMesh* fbxMesh, uint32
     fbxsdk::FbxSurfaceMaterial* material = nullptr;
 
     // メッシュに含まれるポリゴン（三角形）の数.
-    const int polygonCount = fbxMesh->GetPolygonCount();
+    const int32_t polygonCount = fbxMesh->GetPolygonCount();
 
     auto& materialIndices = fbxMesh->GetElementMaterial()->GetIndexArray();
 
@@ -473,7 +473,7 @@ void FbxDataManager::gatherFaces()
     // シーンに含まれるメッシュの解析
     auto meshCount = m_scene->GetMemberCount<FbxMesh>();
 
-    for (int i = 0; i < meshCount; ++i)
+    for (int32_t i = 0; i < meshCount; ++i)
     {
         FbxMesh* fbxMesh = m_scene->GetMember<FbxMesh>(i);
 
@@ -485,17 +485,17 @@ void FbxDataManager::gatherFaces()
         auto& indices = m_indices[fbxMesh];
 
         // メッシュに含まれるポリゴン（三角形）の数.
-        const int polygonCount = fbxMesh->GetPolygonCount();
+        const int32_t polygonCount = fbxMesh->GetPolygonCount();
 
         auto& materialIndices = fbxMesh->GetElementMaterial()->GetIndexArray();
 
         const auto cntMtrl = materialIndices.GetCount();
 
         // メッシュに含まれるポリゴン（三角形）ごとにどのマテリアルに所属しているのかを調べる.
-        for (int i = 0; i < polygonCount; i++)
+        for (int32_t i = 0; i < polygonCount; i++)
         {
 #if 0
-            int materialIdx = -1;
+            int32_t materialIdx = -1;
 
             // メッシュに含まれるポリゴン（三角形）が所属しているマテリアルへのインデックス.
             if (cntMtrl == polygonCount) {
@@ -707,12 +707,12 @@ void FbxDataManager::gatherPos(std::map<FbxMesh*, std::vector<PosData>>& posList
 
         auto polygonCnt = fbxMesh->GetPolygonCount();
 
-        for (int p = 0; p < polygonCnt; p++)
+        for (int32_t p = 0; p < polygonCnt; p++)
         {
             for (uint32_t i = 0; i < 3; i++)
             {
 #if 0
-                int materialIdx = -1;
+                int32_t materialIdx = -1;
 
                 // メッシュに含まれるポリゴン（三角形）が所属しているマテリアルへのインデックス.
                 if (cntMtrl == polygonCnt) {
@@ -777,7 +777,7 @@ void FbxDataManager::gatherUV(std::map<FbxMesh*, std::vector<UVData>>& uvList)
             for (uint32_t n = 0; n < 3; n++)
             {
 #if 0
-                int materialIdx = -1;
+                int32_t materialIdx = -1;
 
                 // メッシュに含まれるポリゴン（三角形）が所属しているマテリアルへのインデックス.
                 if (cntMtrl == polygonCnt) {
@@ -794,7 +794,7 @@ void FbxDataManager::gatherUV(std::map<FbxMesh*, std::vector<UVData>>& uvList)
                 auto material = getMaterial(fbxMesh, p);
 #endif
 
-                int lUVIndex = layerUV->GetIndexArray().GetAt(UVIndex);
+                int32_t lUVIndex = layerUV->GetIndexArray().GetAt(UVIndex);
 
                 // 取得したインデックスから UV を取得する
                 FbxVector2 lVec2 = layerUV->GetDirectArray().GetAt(lUVIndex);
@@ -846,7 +846,7 @@ void FbxDataManager::gatherNormal(std::map<FbxMesh*, std::vector<NormalData>>& n
                 for (uint32_t n = 0; n < 3; n++)
                 {
 #if 0
-                    int materialIdx = -1;
+                    int32_t materialIdx = -1;
 
                     // メッシュに含まれるポリゴン（三角形）が所属しているマテリアルへのインデックス.
                     if (cntMtrl == polygonCnt) {
@@ -863,7 +863,7 @@ void FbxDataManager::gatherNormal(std::map<FbxMesh*, std::vector<NormalData>>& n
                     auto material = getMaterial(fbxMesh, p);
 #endif
 
-                    int lNmlIndex = (referenceMode == FbxGeometryElement::eIndexToDirect
+                    int32_t lNmlIndex = (referenceMode == FbxGeometryElement::eIndexToDirect
                         ? layerNml->GetIndexArray().GetAt(idxNml)
                         : idxNml);
 
@@ -894,7 +894,7 @@ void FbxDataManager::gatherNormal(std::map<FbxMesh*, std::vector<NormalData>>& n
             {
                 auto material = getMaterial(fbxMesh, idx.polygonIdxInMesh);
 
-                int lNmlIndex = (referenceMode == FbxGeometryElement::eIndexToDirect
+                int32_t lNmlIndex = (referenceMode == FbxGeometryElement::eIndexToDirect
                     ? layerNml->GetIndexArray().GetAt(idx.idxInMesh)
                     : idx.idxInMesh);
 
@@ -953,7 +953,7 @@ void FbxDataManager::gatherColor(std::map<FbxMesh*, std::vector<ColorData>>& clr
             for (uint32_t n = 0; n < 3; n++)
             {
 #if 0
-                int materialIdx = -1;
+                int32_t materialIdx = -1;
 
                 // メッシュに含まれるポリゴン（三角形）が所属しているマテリアルへのインデックス.
                 if (cntMtrl == polygonCnt) {
@@ -970,7 +970,7 @@ void FbxDataManager::gatherColor(std::map<FbxMesh*, std::vector<ColorData>>& clr
                 auto material = getMaterial(fbxMesh, p);
 #endif
 
-                int lNmlIndex = layerClr->GetIndexArray().GetAt(idxClr);
+                int32_t lNmlIndex = layerClr->GetIndexArray().GetAt(idxClr);
 
                 // 取得したインデックスから法線を取得する
                 FbxColor color = layerClr->GetDirectArray().GetAt(lNmlIndex);
@@ -1008,7 +1008,7 @@ void FbxDataManager::gatherSkin(std::vector<SkinData>& skinList)
         fbxsdk::FbxMesh* fbxMesh = m_fbxMeshes[m];
 
         // メッシュに含まれるスキニング情報数.
-        int skinCount = fbxMesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
+        int32_t skinCount = fbxMesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
 
         // スキニングされてない場合、親ノードへ強制的にスキニングする.
         if (skinCount == 0) {
@@ -1017,7 +1017,7 @@ void FbxDataManager::gatherSkin(std::vector<SkinData>& skinList)
                 if (node->getMesh() == mesh) {
                     return node;
                 }
-                for (int i = 0; i < node->GetChildCount(); i++) {
+                for (int32_t i = 0; i < node->GetChildCount(); i++) {
                     auto n = findNodeByMesh(node->GetChild(i), mesh);
                     if (n) {
                         return n;
@@ -1040,7 +1040,7 @@ void FbxDataManager::gatherSkin(std::vector<SkinData>& skinList)
             clusterToRoot->SetTransformLinkMatrix(mtxBase);
             clusterToRoot->SetLinkMode(FbxCluster::eTotalOne);
 
-            for (int p = 0; p < fbxMesh->GetControlPointsCount(); p++) {
+            for (int32_t p = 0; p < fbxMesh->GetControlPointsCount(); p++) {
                 clusterToRoot->AddControlPointIndex(p, 1.0f);
             }
 
@@ -1058,22 +1058,22 @@ void FbxDataManager::gatherSkin(std::vector<SkinData>& skinList)
         AT_PRINTF("Mesh Node (%s)\n", fbxMesh->GetNode()->GetName());
 
         // メッシュに含まれるスキニング情報数.
-        int skinCount = fbxMesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
+        int32_t skinCount = fbxMesh->GetDeformerCount(FbxDeformer::EDeformerType::eSkin);
 
-        for (int n = 0; n < skinCount; n++) {
+        for (int32_t n = 0; n < skinCount; n++) {
             // スキニング情報を取得.
             FbxDeformer* deformer = fbxMesh->GetDeformer(n, FbxDeformer::EDeformerType::eSkin);
 
             FbxSkin* skin = (FbxSkin*)deformer;
 
             // スキニングに影響を与えるボーンの数.
-            int boneCount = skin->GetClusterCount();
+            int32_t boneCount = skin->GetClusterCount();
 
-            for (int b = 0; b < boneCount; b++) {
+            for (int32_t b = 0; b < boneCount; b++) {
                 FbxCluster* cluster = skin->GetCluster(b);
 
                 // ボーンが影響を与える頂点数.
-                int influencedVtxNum = cluster->GetControlPointIndicesCount();
+                int32_t influencedVtxNum = cluster->GetControlPointIndicesCount();
 
                 // ボーンと関連づいているノード.
                 FbxNode* targetNode = cluster->GetLink();
@@ -1084,8 +1084,8 @@ void FbxDataManager::gatherSkin(std::vector<SkinData>& skinList)
 
                 AT_PRINTF("    skin[%d] : bone [%d] ([%d]%s)\n", n, b, nodeIdx, targetNode->GetName());
 
-                for (int v = 0; v < influencedVtxNum; v++) {
-                    int vtxIdxInMesh = cluster->GetControlPointIndices()[v];
+                for (int32_t v = 0; v < influencedVtxNum; v++) {
+                    int32_t vtxIdxInMesh = cluster->GetControlPointIndices()[v];
                     float weight = (float)cluster->GetControlPointWeights()[v];
 
                     auto it = std::find(skinList.begin(), skinList.end(), SkinData(vtxIdxInMesh, fbxMesh));

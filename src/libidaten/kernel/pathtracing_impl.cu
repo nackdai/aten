@@ -20,27 +20,27 @@ namespace pt {
         idaten::TileDomain tileDomain,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshId,
-        int width, int height,
+        int32_t width, int32_t height,
         idaten::Path* paths,
-        const int* __restrict__ hitindices,
-        int* hitnum,
+        const int32_t* __restrict__ hitindices,
+        int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
-        int sample,
-        int frame,
-        int bounce, int rrBounce,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        int32_t sample,
+        int32_t frame,
+        int32_t bounce, int32_t rrBounce,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         cudaTextureObject_t vtxNml,
         const aten::mat4* __restrict__ matrices,
         cudaTextureObject_t* textures,
-        unsigned int* random,
+        uint32_t* random,
         idaten::ShadowRay* shadowRays)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -107,7 +107,7 @@ namespace pt {
         auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
         // Apply normal map.
-        int normalMap = shMtrls[threadIdx.x].normalMap;
+        int32_t normalMap = shMtrls[threadIdx.x].normalMap;
         auto pre_sampled_r = applyNormal(
             &shMtrls[threadIdx.x],
             normalMap,
@@ -173,7 +173,7 @@ namespace pt {
         // Explicit conection to light.
         if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {
-            auto lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
+            auto lightidx = aten::cmpMin<int32_t>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
 
             aten::LightParameter light;
             light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
@@ -255,20 +255,20 @@ namespace pt {
     }
 
     __global__ void hitShadowRay(
-        int bounce,
+        int32_t bounce,
         idaten::Path* paths,
-        int* hitindices,
-        int* hitnum,
+        int32_t* hitindices,
+        int32_t* hitnum,
         const idaten::ShadowRay* __restrict__ shadowRays,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         aten::MaterialParameter* mtrls,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         const aten::mat4* __restrict__ matrices)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -317,7 +317,7 @@ namespace pt {
         cudaSurfaceObject_t dst,
         const idaten::Path* __restrict__ paths,
         bool enableProgressive,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -329,7 +329,7 @@ namespace pt {
         auto idx = getIdx(ix, iy, tileDomain.w);
 
         float4 c = paths->contrib[idx].v;
-        int sample = c.w;
+        int32_t sample = c.w;
 
         float4 contrib = c;
 
@@ -342,7 +342,7 @@ namespace pt {
             surf2Dread(&data, dst, ix * sizeof(float4), iy);
 
             // First data.w value is 0.
-            int n = data.w;
+            int32_t n = data.w;
             contrib = n * data + make_float4(c.x, c.y, c.z, 0) / sample;
             contrib /= (n + 1);
             contrib.w = n + 1;
@@ -365,8 +365,8 @@ namespace pt {
 namespace idaten
 {
     void PathTracing::onHitTest(
-        int width, int height,
-        int bounce,
+        int32_t width, int32_t height,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
         hitTest(
@@ -377,9 +377,9 @@ namespace idaten
 
     void PathTracing::onShade(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
-        int sample,
-        int bounce, int rrBounce,
+        int32_t width, int32_t height,
+        int32_t sample,
+        int32_t bounce, int32_t rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
@@ -416,7 +416,7 @@ namespace idaten
     }
 
     void PathTracing::onShadeByShadowRay(
-        int bounce,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
         dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
@@ -442,8 +442,8 @@ namespace idaten
 
     void PathTracing::onGather(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
-        int maxSamples)
+        int32_t width, int32_t height,
+        int32_t maxSamples)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(

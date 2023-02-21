@@ -157,7 +157,7 @@ namespace aten {
     }
 
     template <>
-    inline AT_DEVICE_API int cmpMax(int a, int b)
+    inline AT_DEVICE_API int32_t cmpMax(int32_t a, int32_t b)
     {
         return max(a, b);
     }
@@ -183,7 +183,7 @@ namespace aten {
     }
 
     template <>
-    inline AT_DEVICE_API int cmpMin(int a, int b)
+    inline AT_DEVICE_API int32_t cmpMin(int32_t a, int32_t b)
     {
         return min(a, b);
     }
@@ -226,15 +226,15 @@ namespace aten {
         return b;
     }
 
-    inline int clz(uint32_t x)
+    inline int32_t clz(uint32_t x)
     {
         // NOTE
         // NLZ
         // http://www.nminoru.jp/~nminoru/programming/bitcount.html
 
-        int y, m, n;
+        int32_t y, m, n;
 
-        y = -(int)(x >> 16);
+        y = -(int32_t)(x >> 16);
         m = (y >> 16) & 16;
         n = 16 - m;
         x = x >> m;
@@ -317,7 +317,7 @@ namespace aten {
     }
 
     // Neary Equal.
-    inline AT_DEVICE_API bool isClose(real A, real B, int maxUlps)
+    inline AT_DEVICE_API bool isClose(real A, real B, int32_t maxUlps)
     {
 #ifdef TYPE_DOUBLE
         // TODO
@@ -330,19 +330,19 @@ namespace aten {
         // default NAN won't compare as equal to anything.
         AT_ASSERT(maxUlps > 0 && maxUlps < 4 * 1024 * 1024);
 
-        // Make aInt lexicographically ordered as a twos-complement int
-        int aInt = *(int*)&A;
+        // Make aInt lexicographically ordered as a twos-complement int32_t
+        int32_t aInt = *(int32_t*)&A;
         if (aInt < 0) {
             aInt = 0x80000000 - aInt;
         }
 
-        // Make bInt lexicographically ordered as a twos-complement int
-        int bInt = *(int*)&B;
+        // Make bInt lexicographically ordered as a twos-complement int32_t
+        int32_t bInt = *(int32_t*)&B;
         if (bInt < 0) {
             bInt = 0x80000000 - bInt;
         }
 
-        int intDiff = aten::abs<int>(aInt - bInt);
+        int32_t intDiff = aten::abs<int32_t>(aInt - bInt);
         if (intDiff <= maxUlps) {
             return true;
         }

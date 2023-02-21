@@ -77,7 +77,7 @@ namespace AT_NAME {
         // For vertical.
         {
             real sum = 0;
-            for (int i = 0; i < m_cdfV.size(); i++) {
+            for (int32_t i = 0; i < m_cdfV.size(); i++) {
                 sum += m_cdfV[i];
                 if (i > 0) {
                     m_cdfV[i] += m_cdfV[i - 1];
@@ -85,7 +85,7 @@ namespace AT_NAME {
             }
             if (sum > 0) {
                 real invSum = 1 / sum;
-                for (int i = 0; i < m_cdfV.size(); i++) {
+                for (int32_t i = 0; i < m_cdfV.size(); i++) {
                     m_cdfV[i] *= invSum;
                     m_cdfV[i] = aten::clamp<real>(m_cdfV[i], 0, 1);
                 }
@@ -129,7 +129,7 @@ namespace AT_NAME {
         return pdf;
     }
 
-    static int samplePdfAndCdf(
+    static int32_t samplePdfAndCdf(
         real r,
         const std::vector<real>& cdf,
         real& outPdf,
@@ -142,11 +142,11 @@ namespace AT_NAME {
         // cdf is normalized to [0, 1].
 
 #if 1
-        int idxTop = 0;
-        int idxTail = (int)cdf.size() - 1;
+        int32_t idxTop = 0;
+        int32_t idxTail = (int32_t)cdf.size() - 1;
 
         for (;;) {
-            int idxMid = (idxTop + idxTail) >> 1;
+            int32_t idxMid = (idxTop + idxTail) >> 1;
             auto midCdf = cdf[idxMid];
 
             if (r < midCdf) {
@@ -160,7 +160,7 @@ namespace AT_NAME {
                 auto topCdf = cdf[idxTop];
                 auto tailCdf = cdf[idxTail];
 
-                int idx = 0;
+                int32_t idx = 0;
 
                 if (r <= topCdf) {
                     outPdf = topCdf;
@@ -175,7 +175,7 @@ namespace AT_NAME {
             }
         }
 #else
-        for (int i = 0; i < cdf.size(); i++) {
+        for (int32_t i = 0; i < cdf.size(); i++) {
             if (r <= cdf[i]) {
                 auto idx = i;
 
@@ -214,8 +214,8 @@ namespace AT_NAME {
         real pdfU, pdfV;
         real cdfU, cdfV;
 
-        int y = samplePdfAndCdf(r1, m_cdfV, pdfV, cdfV);
-        int x = samplePdfAndCdf(r2, m_cdfU[y], pdfU, cdfU);
+        int32_t y = samplePdfAndCdf(r1, m_cdfV, pdfV, cdfV);
+        int32_t x = samplePdfAndCdf(r2, m_cdfU[y], pdfU, cdfU);
 
         auto width = envmap->getTexture()->width();
         auto height = envmap->getTexture()->height();

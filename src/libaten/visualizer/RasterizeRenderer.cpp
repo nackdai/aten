@@ -14,7 +14,7 @@ namespace aten
         uint32_t clear_buffer_mask,
         aten::vec4 &clear_color,
         float clear_depth,
-        int clear_stencil)
+        int32_t clear_stencil)
     {
         GLbitfield clear_mask = 0;
 
@@ -54,7 +54,7 @@ namespace aten
     }
 
     bool RasterizeRenderer::init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char *pathVS,
         const char *pathFS)
     {
@@ -65,7 +65,7 @@ namespace aten
     }
 
     bool RasterizeRenderer::init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char *pathVS,
         const char *pathGS,
         const char *pathFS)
@@ -107,7 +107,7 @@ namespace aten
     }
 
     void RasterizeRenderer::drawSceneForGBuffer(
-        int frame,
+        int32_t frame,
         context &ctxt,
         const scene *scene,
         const camera *cam,
@@ -192,7 +192,7 @@ namespace aten
         ctxt.build();
 
         // For object (which means "not" deformable).
-        scene->render([&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int objid, int primid)
+        scene->render([&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int32_t objid, int32_t primid)
                       {
             auto hMtxL2W = m_shader.getHandle("mtxL2W");
             CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
@@ -222,7 +222,7 @@ namespace aten
             hPrevMtxW2C = exShader->getHandle("mtxPrevW2C");
             CALL_GL_API(::glUniformMatrix4fv(hPrevMtxW2C, 1, GL_TRUE, (const GLfloat *)&m_mtxPrevW2C.a[0]));
 
-            scene->render([&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int objid, int primid)
+            scene->render([&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int32_t objid, int32_t primid)
                           {
                 auto hMtxL2W = exShader->getHandle("mtxL2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat*)&mtxL2W.a[0]));
@@ -434,7 +434,7 @@ namespace aten
         auto hColor = m_shader.getHandle("color");
         auto hMtrlId = m_shader.getHandle("materialId");
 
-        obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int mtrlid)
+        obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int32_t mtrlid)
                  {
             if (albedo) {
                 albedo->bindAsGLTexture(0, &m_shader);
@@ -516,7 +516,7 @@ namespace aten
         auto hMtrlId = m_shader.getHandle("materialId");
 
         renderFunc([&](const object &obj)
-                   { obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int mtrlid)
+                   { obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int32_t mtrlid)
                               {
                 if (hHasAlbedo >= 0) {
                     if (albedo) {
@@ -554,7 +554,7 @@ namespace aten
 
             m_ib.resize(idxNums.size());
 
-            for (int i = 0; i < idxNums.size(); i++)
+            for (int32_t i = 0; i < idxNums.size(); i++)
             {
                 auto num = idxNums[i];
                 m_ib[i].init(num, nullptr);
@@ -567,7 +567,7 @@ namespace aten
     void RasterizeRenderer::draw(
         const context &ctxt,
         const std::vector<vertex> &vtxs,
-        const std::vector<std::vector<int>> &idxs,
+        const std::vector<std::vector<int32_t>> &idxs,
         const std::vector<material *> &mtrls,
         const camera *cam,
         bool isWireFrame,
@@ -631,7 +631,7 @@ namespace aten
 
             m_ib.resize(idxs.size());
 
-            for (int i = 0; i < idxs.size(); i++)
+            for (int32_t i = 0; i < idxs.size(); i++)
             {
                 if (!idxs[i].empty())
                 {
@@ -648,7 +648,7 @@ namespace aten
 
             m_vb.update(vtxs.size(), &vtxs[0]);
 
-            for (int i = 0; i < idxs.size(); i++)
+            for (int32_t i = 0; i < idxs.size(); i++)
             {
                 if (!idxs[i].empty())
                 {
@@ -659,7 +659,7 @@ namespace aten
 
         auto hHasAlbedo = m_shader.getHandle("hasAlbedo");
 
-        for (int i = 0; i < m_ib.size(); i++)
+        for (int32_t i = 0; i < m_ib.size(); i++)
         {
             auto triNum = (uint32_t)idxs[i].size() / 3;
 
@@ -667,7 +667,7 @@ namespace aten
             {
                 auto m = mtrls[i];
 
-                int albedoTexId = m ? m->param().albedoMap : -1;
+                int32_t albedoTexId = m ? m->param().albedoMap : -1;
                 const auto &albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 
                 if (albedo)
@@ -736,7 +736,7 @@ namespace aten
         ctxt.build();
 
         scene->render(
-            [&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int objid, int primid)
+            [&](const aten::mat4 &mtxL2W, const aten::mat4 &mtxPrevL2W, int32_t objid, int32_t primid)
             {
                 auto hMtxL2W = m_shader.getHandle("mtxL2W");
                 CALL_GL_API(::glUniformMatrix4fv(hMtxL2W, 1, GL_TRUE, (const GLfloat *)&mtxL2W.a[0]));

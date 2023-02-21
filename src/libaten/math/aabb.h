@@ -372,7 +372,7 @@ namespace aten {
             vec3 newMin = vec3(AT_MATH_INF);
             vec3 newMax = vec3(-AT_MATH_INF);
 
-            for (int i = 0; i < 8; i++) {
+            for (int32_t i = 0; i < 8; i++) {
                 vec3 v = mtxL2W.apply(pts[i]);
 
                 newMin = vec3(

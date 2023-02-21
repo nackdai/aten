@@ -99,15 +99,15 @@ namespace aten {
             return ret;
         }
 
-        inline AT_DEVICE_API real* operator[](int i)
+        inline AT_DEVICE_API real* operator[](int32_t i)
         {
             return m[i];
         }
-        inline AT_DEVICE_API real operator()(int i, int j) const
+        inline AT_DEVICE_API real operator()(int32_t i, int32_t j) const
         {
             return m[i][j];
         }
-        inline AT_DEVICE_API real& operator()(int i, int j)
+        inline AT_DEVICE_API real& operator()(int32_t i, int32_t j)
         {
             return m[i][j];
         }
@@ -131,10 +131,10 @@ namespace aten {
         inline AT_DEVICE_API mat4& operator*=(const mat4& mtx)
         {
             mat4 tmp;
-            for (int i = 0; i < 4; ++i) {
-                for (int j = 0; j < 4; ++j) {
+            for (int32_t i = 0; i < 4; ++i) {
+                for (int32_t j = 0; j < 4; ++j) {
                     tmp.m[i][j] = 0.0f;
-                    for (int k = 0; k < 4; ++k) {
+                    for (int32_t k = 0; k < 4; ++k) {
                         tmp.m[i][j] += this->m[i][k] * mtx.m[k][j];
                     }
                 }
@@ -176,9 +176,9 @@ namespace aten {
             vec4 t(v.x, v.y, v.z, 1);
             vec4 ret;
 
-            for (int r = 0; r < 4; r++) {
+            for (int32_t r = 0; r < 4; r++) {
                 ret[r] = 0;
-                for (int c = 0; c < 4; c++) {
+                for (int32_t c = 0; c < 4; c++) {
                     ret[r] += m[r][c] * t[c];
                 }
             }
@@ -196,9 +196,9 @@ namespace aten {
             vec3 ret;
 
 #if 0
-            for (int r = 0; r < 3; r++) {
+            for (int32_t r = 0; r < 3; r++) {
                 ret[r] = 0;
-                for (int c = 0; c < 3; c++) {
+                for (int32_t c = 0; c < 3; c++) {
                     ret[r] += m[r][c] * v[c];
                 }
             }
@@ -230,8 +230,8 @@ namespace aten {
         inline AT_DEVICE_API mat4& transpose()
         {
             mat4 tmp;
-            for (int i = 0; i < 4; ++i) {
-                for (int j = 0; j < 4; ++j) {
+            for (int32_t i = 0; i < 4; ++i) {
+                for (int32_t j = 0; j < 4; ++j) {
                     tmp.m[i][j] = this->m[j][i];
                 }
             }

@@ -40,13 +40,13 @@ namespace aten {
     }
 
     struct ObjVertex {
-        int pos{ -1 };
-        int nml{ -1 };
-        int uv{ -1 };
+        int32_t pos{ -1 };
+        int32_t nml{ -1 };
+        int32_t uv{ -1 };
 
         ObjVertex() {}
 
-        ObjVertex(int p, int n, int u)
+        ObjVertex(int32_t p, int32_t n, int32_t u)
         {
             pos = p;
             nml = n;
@@ -70,7 +70,7 @@ namespace aten {
 
         fprintf(fp, "f ");
 
-        for (int i = 0; i < AT_COUNTOF(ObjFace::vtx); i++) {
+        for (int32_t i = 0; i < AT_COUNTOF(ObjFace::vtx); i++) {
             fprintf(fp, "%d/", f.vtx[i].pos + 1);
 
             if (f.vtx[i].uv >= 0) {
@@ -89,7 +89,7 @@ namespace aten {
         writeLineFeed(fp);
     }
 
-    static inline void replaceIndex(ObjVertex& v, int idx)
+    static inline void replaceIndex(ObjVertex& v, int32_t idx)
     {
         v.pos = v.pos >= 0 ? idx : -1;
         v.nml = v.nml >= 0 ? idx : -1;
@@ -100,7 +100,7 @@ namespace aten {
         const std::string& path,
         const std::string& mtrlPath,
         const std::vector<aten::vertex>& vertices,
-        const std::vector<std::vector<int>>& indices,
+        const std::vector<std::vector<int32_t>>& indices,
         ObjWriter::FuncGetMtrlName func_get_mtrl_name)
     {
         std::string mtrlPathName;
@@ -249,7 +249,7 @@ namespace aten {
 
                     ObjFace face;
 
-                    for (int i = 0; i < 3; i++) {
+                    for (int32_t i = 0; i < 3; i++) {
                         const auto& v = ctxt.getVertex(tri_param.idx[i]);
 
                         face.vtx[i].pos = writeVertexPosition(fp, v) ? vtx_idx : -1;
@@ -342,7 +342,7 @@ namespace aten {
         const std::string& path,
         const std::string& mtrlPath,
         const std::vector<aten::vertex>& vertices,
-        const std::vector<std::vector<int>>& indices,
+        const std::vector<std::vector<int32_t>>& indices,
         FuncGetMtrlName func_get_mtrl_name)
     {
         if (m_isRunning) {
@@ -350,7 +350,7 @@ namespace aten {
             return false;
         }
 
-        static std::vector<std::vector<int>> tmpIdx;
+        static std::vector<std::vector<int32_t>> tmpIdx;
 
         if (!m_thread.isRunning()) {
             m_thread.start([&](void* data) {

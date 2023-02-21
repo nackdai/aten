@@ -1,10 +1,10 @@
 #include "kernel/idatendefs.cuh"
 
 AT_CUDA_INLINE AT_DEVICE_MTRL_API aten::vec4 sampleTexture(
-    const int texid,
+    const int32_t texid,
     real u, real v,
     const aten::vec4& defaultValue,
-    int lod/*= 0*/)
+    int32_t lod/*= 0*/)
 {
     auto ret = defaultValue;
 

@@ -14,8 +14,8 @@ namespace aten {
 
     public:
         bool init(
-            int width,
-            int height,
+            int32_t width,
+            int32_t height,
             PixelFormat fmt,
             bool needDepth = false);
 
@@ -50,7 +50,7 @@ namespace aten {
 
         void asMulti(uint32_t num);
 
-        using FuncPrepareFbo = std::function<void(const uint32_t*, int, std::vector<uint32_t>&)>;
+        using FuncPrepareFbo = std::function<void(const uint32_t*, int32_t, std::vector<uint32_t>&)>;
         void setPrepareFboFunction(FuncPrepareFbo func)
         {
             m_func = func;
@@ -59,7 +59,7 @@ namespace aten {
     protected:
         uint32_t m_fbo{ 0 };
 
-        int m_num{ 1 };
+        int32_t m_num{ 1 };
         std::vector<uint32_t> m_tex;
 
         std::vector<uint32_t> m_comps;

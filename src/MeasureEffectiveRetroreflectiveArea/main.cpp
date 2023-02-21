@@ -7,8 +7,8 @@
 #include "atenscene.h"
 #include "MeasureEffectiveRetroreflectiveArea.h"
 
-static const int WIDTH = 512;
-static const int HEIGHT = 512;
+static const int32_t WIDTH = 512;
+static const int32_t HEIGHT = 512;
 
 static const char* TITLE = "MeasureEffectiveRetroreflectiveArea";
 
@@ -22,14 +22,14 @@ static bool g_isCameraDirty = false;
 
 static bool g_willShowGUI = true;
 
-static int g_drawVoxelDepth = 1;
+static int32_t g_drawVoxelDepth = 1;
 static bool g_drawMesh = false;
 static bool g_isWireframe = false;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
-static int g_prevX = 0;
-static int g_prevY = 0;
+static int32_t g_prevX = 0;
+static int32_t g_prevY = 0;
 
 static std::vector<std::vector<aten::ThreadedSbvhNode>> g_voxels;
 
@@ -58,7 +58,7 @@ void onClose()
 
 }
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -72,7 +72,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -95,7 +95,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -148,7 +148,7 @@ void ComputeERA()
 {
     AT_PRINTF("\n");
 
-    constexpr int Step = 40;
+    constexpr int32_t Step = 40;
 
     const real ThetaMin = 0;
     const real ThetaMax = AT_MATH_PI_HALF;
@@ -160,10 +160,10 @@ void ComputeERA()
 
     std::map<real, aten::vec2> AvgERA;
 
-    for (int phi_cnt = 0; phi_cnt < Step; phi_cnt++)
+    for (int32_t phi_cnt = 0; phi_cnt < Step; phi_cnt++)
     {
         const auto phi = PhiMin + PhiStep * phi_cnt;
-        for (int theta_cnt = 0; theta_cnt < Step; theta_cnt++)
+        for (int32_t theta_cnt = 0; theta_cnt < Step; theta_cnt++)
         {
             const auto theta = ThetaMin + ThetaStep * theta_cnt;
 
@@ -196,7 +196,7 @@ void ComputeERA()
     }
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     // TODO
 #if 0

@@ -5,8 +5,8 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-static const int WIDTH = 1280;
-static const int HEIGHT = 720;
+static const int32_t WIDTH = 1280;
+static const int32_t HEIGHT = 720;
 
 static const char* TITLE = "MdlViewer";
 
@@ -34,15 +34,15 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
 static bool g_willShowGUI = true;
 static bool g_willShowAABB = true;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
-static int g_prevX = 0;
-static int g_prevY = 0;
+static int32_t g_prevX = 0;
+static int32_t g_prevY = 0;
 
 void onRun(aten::window* window)
 {
@@ -105,7 +105,7 @@ void onClose()
 
 }
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -119,7 +119,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -142,7 +142,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -200,7 +200,7 @@ void onKey(bool press, aten::Key key)
 }
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     Options& opt)
 {
     cmdline::parser cmd;
@@ -257,7 +257,7 @@ bool parseOption(
     return true;
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     Options opt;
 
@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
 
     auto texNum = g_ctxt.getTextureNum();
 
-    for (int i = 0; i < texNum; i++) {
+    for (int32_t i = 0; i < texNum; i++) {
         auto tex = g_ctxt.getTexture(i);
         tex->initAsGLTexture();
     }

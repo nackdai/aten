@@ -16,8 +16,8 @@
 
 // #define ENABLE_ENVMAP
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int32_t WIDTH = 1280;
+static int32_t HEIGHT = 720;
 static const char *TITLE = "ReSTIR";
 
 #ifdef ENABLE_OMP
@@ -49,10 +49,10 @@ static aten::RasterizeRenderer g_rasterizerAABB;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
-static int g_maxSamples = 1;
-static int g_maxBounce = 5;
+static int32_t g_maxSamples = 1;
+static int32_t g_maxBounce = 5;
 static auto g_curMode = idaten::ReSTIRPathTracing::Mode::ReSTIR;
 static auto g_curReSTIRMode = idaten::ReSTIRPathTracing::ReSTIRMode::ReSTIR;
 static auto g_curAOVMode = idaten::ReSTIRPathTracing::AOVMode::WireFrame;
@@ -243,7 +243,7 @@ void onRun(aten::window *window)
 
         static const char *items[] = {"ReSTIR", "PT", "AOV"};
 
-        if (ImGui::Combo("mode", (int *)&g_curMode, items, AT_COUNTOF(items)))
+        if (ImGui::Combo("mode", (int32_t *)&g_curMode, items, AT_COUNTOF(items)))
         {
             g_tracer.setMode(g_curMode);
         }
@@ -252,7 +252,7 @@ void onRun(aten::window *window)
         {
             static const char *restir_items[] = {"ReSTIR", "SpatialReuse"};
 
-            if (ImGui::Combo("restir mode", (int *)&g_curReSTIRMode, restir_items, AT_COUNTOF(restir_items)))
+            if (ImGui::Combo("restir mode", (int32_t *)&g_curReSTIRMode, restir_items, AT_COUNTOF(restir_items)))
             {
                 g_tracer.setReSTIRMode(g_curReSTIRMode);
             }
@@ -262,7 +262,7 @@ void onRun(aten::window *window)
         {
             static const char *aovitems[] = {"Normal", "TexColor", "Depth", "Wire", "Barycentric", "Motion", "ObjId"};
 
-            if (ImGui::Combo("aov", (int *)&g_curAOVMode, aovitems, AT_COUNTOF(aovitems)))
+            if (ImGui::Combo("aov", (int32_t *)&g_curAOVMode, aovitems, AT_COUNTOF(aovitems)))
             {
                 g_tracer.setAOVMode(g_curAOVMode);
             }
@@ -319,10 +319,10 @@ void onClose()
 
 bool g_isMouseLBtnDown = false;
 bool g_isMouseRBtnDown = false;
-int g_prevX = 0;
-int g_prevY = 0;
+int32_t g_prevX = 0;
+int32_t g_prevY = 0;
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -343,7 +343,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown)
     {
@@ -368,7 +368,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -470,7 +470,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-int main()
+int32_t main()
 {
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
@@ -579,7 +579,7 @@ int main()
         {
             auto texNum = g_ctxt.getTextureNum();
 
-            for (int i = 0; i < texNum; i++)
+            for (int32_t i = 0; i < texNum; i++)
             {
                 auto t = g_ctxt.getTexture(i);
                 tex.push_back(

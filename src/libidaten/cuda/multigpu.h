@@ -15,7 +15,7 @@ namespace idaten
         ~GpuProxy() {}
 
     public:
-        void init(int deviceId)
+        void init(int32_t deviceId)
         {
 #ifdef ENABLE_MULTI_GPU_EMULATE
             CUdevice device = 0;
@@ -31,7 +31,7 @@ namespace idaten
             m_deviceId = deviceId;
         }
 
-        void setPeerAccess(int peerAccessDeviceId)
+        void setPeerAccess(int32_t peerAccessDeviceId)
         {
             AT_ASSERT(m_deviceId >= 0);
 
@@ -44,7 +44,7 @@ namespace idaten
             if (m_deviceId != peerAccessDeviceId)
             {
                 // Check for peer access between participating GPUs.
-                int canAccessPeer = 0;
+                int32_t canAccessPeer = 0;
                 checkCudaErrors(cudaDeviceCanAccessPeer(&canAccessPeer, m_deviceId, peerAccessDeviceId));
 
                 AT_ASSERT(canAccessPeer > 0);
@@ -71,14 +71,14 @@ namespace idaten
 
         void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce)
+            int32_t maxSamples,
+            int32_t maxBounce)
         {
             setCurrent();
             m_renderer.render(tileDomain, maxSamples, maxBounce);
         }
 
-        void postRender(int width = 0, int height = 0)
+        void postRender(int32_t width = 0, int32_t height = 0)
         {
             setCurrent();
             m_renderer.postRender(width, height);
@@ -105,7 +105,7 @@ namespace idaten
             m_renderer.copy(from.m_renderer, from.m_stream);
         }
 
-        static void swapCopy(GpuProxy* proxies, int num)
+        static void swapCopy(GpuProxy* proxies, int32_t num)
         {
             // TODO
             AT_ASSERT(num == 4);
@@ -160,7 +160,7 @@ namespace idaten
         }
 
     private:
-        int m_deviceId{ -1 };
+        int32_t m_deviceId{ -1 };
         CUcontext m_context{ 0 };
         cudaStream_t m_stream{ 0 };
 

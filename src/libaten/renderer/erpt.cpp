@@ -32,7 +32,7 @@ namespace aten
     private:
         sampler* m_rnd{ nullptr };
 
-        int m_usedRandCoords{ 0 };
+        int32_t m_usedRandCoords{ 0 };
 
         std::vector<real> m_primarySamples;
     };
@@ -40,10 +40,10 @@ namespace aten
     ERPTSampler::ERPTSampler(sampler* rnd)
         : m_rnd(rnd)
     {
-        static const int initsize = 32;
+        static const int32_t initsize = 32;
         m_primarySamples.resize(initsize);
 
-        for (int i = 0; i < m_primarySamples.size(); i++) {
+        for (int32_t i = 0; i < m_primarySamples.size(); i++) {
             m_primarySamples[i] = rnd->nextSample();
         }
     }
@@ -71,13 +71,13 @@ namespace aten
     real ERPTSampler::nextSample()
     {
         if (m_primarySamples.size() <= m_usedRandCoords) {
-            const int now_max = (const int)m_primarySamples.size();
+            const int32_t now_max = (const int32_t)m_primarySamples.size();
 
             // 拡張する.
             m_primarySamples.resize((uint32_t)(m_primarySamples.size() * 1.5));
 
             // 拡張した部分に値を入れる.
-            for (int i = now_max; i < m_primarySamples.size(); i++) {
+            for (int32_t i = now_max; i < m_primarySamples.size(); i++) {
                 m_primarySamples[i] = m_rnd->nextSample();
             }
         }
@@ -91,7 +91,7 @@ namespace aten
 
     void ERPTSampler::mutate()
     {
-        for (int i = 0; i < m_primarySamples.size(); i++) {
+        for (int32_t i = 0; i < m_primarySamples.size(); i++) {
             auto prev = m_primarySamples[i];
             auto mutated = mutate(prev);
             m_primarySamples[i] = mutated;
@@ -104,13 +104,13 @@ namespace aten
         const context& ctxt,
         scene* scene,
         sampler* sampler,
-        int x, int y,
-        int width, int height,
+        int32_t x, int32_t y,
+        int32_t width, int32_t height,
         camera* camera,
         bool willImagePlaneMutation)
     {
         // スクリーン上でのパスの変異量.
-        static const int image_plane_mutation_value = 10;
+        static const int32_t image_plane_mutation_value = 10;
 
 #if 0
         // スクリーン上で変異する.
@@ -118,8 +118,8 @@ namespace aten
         auto s2 = sampler->nextSample();
 
         if (willImagePlaneMutation) {
-            x += int(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
-            y += int(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
+            x += int32_t(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
+            y += int32_t(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
         }
 #else
         if (willImagePlaneMutation) {
@@ -127,8 +127,8 @@ namespace aten
             auto s1 = sampler->nextSample();
             auto s2 = sampler->nextSample();
 
-            x += int(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
-            y += int(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
+            x += int32_t(image_plane_mutation_value * 2 * s1 - image_plane_mutation_value + 0.5);
+            y += int32_t(image_plane_mutation_value * 2 * s2 - image_plane_mutation_value + 0.5);
         }
 #endif
 
@@ -166,8 +166,8 @@ namespace aten
         scene* scene,
         camera* camera)
     {
-        int width = dst.width;
-        int height = dst.height;
+        int32_t width = dst.width;
+        int32_t height = dst.height;
         uint32_t samples = dst.sample;
         uint32_t mutation = dst.mutation;
 
@@ -190,11 +190,11 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < height; y++) {
+        for (int32_t y = 0; y < height; y++) {
             auto idx = OMPUtil::getThreadIdx();
 
-            for (int x = 0; x < width; x++) {
-                int pos = y * width + x;
+            for (int32_t x = 0; x < width; x++) {
+                int32_t pos = y * width + x;
 
                 auto scramble = aten::getRandom(pos) * 0x1fe3434f;
                 XorShift rnd(scramble + time.milliSeconds);
@@ -217,7 +217,7 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < height; y++) {
+        for (int32_t y = 0; y < height; y++) {
             AT_PRINTF("Rendering (%f)%%\n", 100.0 * y / (height - 1));
 
             auto idx = OMPUtil::getThreadIdx();
@@ -228,7 +228,7 @@ namespace aten
                 memset(&image[0], 0, sizeof(vec3) * width * height);
             }
 
-            for (int x = 0; x < width; x++) {
+            for (int32_t x = 0; x < width; x++) {
                 auto pos = y * width + x;
                 auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
@@ -247,7 +247,7 @@ namespace aten
 
                     // パスが光源に直接ヒットしてた場合、エネルギー分配しないで、そのまま画像に送る.
                     if (newSample.isTerminate) {
-                        int pos = newSample.y * width + newSample.x;
+                        int32_t pos = newSample.y * width + newSample.x;
                         image[pos] += newSample.contrib / (real)samples;
                         continue;
                     }
@@ -258,12 +258,12 @@ namespace aten
                     if (l > 0) {
                         auto r = rnd.nextSample();
                         auto illum = color::luminance(e);
-                        const int numChains = (int)std::floor(r + illum / (mutation * ed));;
+                        const int32_t numChains = (int32_t)std::floor(r + illum / (mutation * ed));;
 
                         // 周囲に分配するエネルギー.
                         const vec3 depositValue = (e / illum * ed) / (real)samples;
 
-                        for (int nc = 0; nc < numChains; nc++) {
+                        for (int32_t nc = 0; nc < numChains; nc++) {
                             ERPTSampler Y = X;
                             Path Ypath = newSample;
 
@@ -271,10 +271,10 @@ namespace aten
                             // ある点に極端にエネルギーが分配されると、スポットノイズになってしまう.
                             // Unbiasedにするにはそれも仕方ないが、現実的には見苦しいのである点に対する分配回数を制限することでそのようなノイズを抑える.
                             // Biasedになるが、見た目は良くなる.
-                            static const int MaxStack = 10;
-                            int stack_num = 0;
-                            int now_x = x;
-                            int now_y = y;
+                            static const int32_t MaxStack = 10;
+                            int32_t stack_num = 0;
+                            int32_t now_x = x;
+                            int32_t now_y = y;
 
                             for (uint32_t m = 0; m < mutation; m++) {
                                 ERPTSampler Z = Y;
@@ -316,11 +316,11 @@ namespace aten
 #if 1
                                     if (!Ypath.isTerminate) {
                                         // 論文とは異なるが、光源に直接ヒットしたときは分配しないでみる.
-                                        int pos = Ypath.y * width + Ypath.x;
+                                        int32_t pos = Ypath.y * width + Ypath.x;
                                         image[pos] += depositValue;
                                     }
 #else
-                                    int pos = Ypath.y * width + Ypath.x;
+                                    int32_t pos = Ypath.y * width + Ypath.x;
                                     image[pos] += depositValue;
 #endif
                                 }
@@ -333,7 +333,7 @@ namespace aten
 
         for (uint32_t n = 0; n < threadNum; n++) {
             auto& image = acuumImage[n];
-            for (int i = 0; i < width * height; i++) {
+            for (int32_t i = 0; i < width * height; i++) {
                 dst.buffer->add(i, vec4(image[i], 1));
             }
         }

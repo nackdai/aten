@@ -37,17 +37,17 @@ namespace aten {
     static void read(
         TYPE* src,
         texture* tex,
-        int width,
-        int height,
-        int channel,
+        int32_t width,
+        int32_t height,
+        int32_t channel,
         real norm)
     {
-        int skipChannel = channel;
+        int32_t skipChannel = channel;
 
 #pragma omp parallel for
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int idx = y * width + x;
+        for (int32_t y = 0; y < height; y++) {
+            for (int32_t x = 0; x < width; x++) {
+                int32_t idx = y * width + x;
                 idx *= skipChannel;
 
                 switch (channel) {
@@ -98,9 +98,9 @@ namespace aten {
         std::shared_ptr<texture> tex;
 
         real* dst = nullptr;
-        int width = 0;
-        int height = 0;
-        int channels = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+        int32_t channels = 0;
 
         if (stbi_is_hdr(fullpath.c_str())) {
             auto src = stbi_loadf(fullpath.c_str(), &width, &height, &channels, 0);

@@ -13,13 +13,13 @@
 
 // ブロック単位で計算した exclusiveScan の総和値を足したものを計算する.
 __global__ void computeBlockCount(
-    int* dst,
-    int num,    // block count per grid used in exclusiveScan.
-    int stride,    // thread count per block used in exclusiveScan.
-    const int* src0,
-    const int* src1)
+    int32_t* dst,
+    int32_t num,    // block count per grid used in exclusiveScan.
+    int32_t stride,    // thread count per block used in exclusiveScan.
+    const int32_t* src0,
+    const int32_t* src1)
 {
-    int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    int32_t index = (blockIdx.x * blockDim.x) + threadIdx.x;
 
     if (index >= num) {
         return;
@@ -35,11 +35,11 @@ __global__ void computeBlockCount(
 
 // ブロックごとに前のブロックまでの exclusiveScan の総和値を足したものを加算する.
 __global__ void incrementBlocks(
-    int* data,
-    int num,
-    const int* incr)    // value to increment for each blocks.
+    int32_t* data,
+    int32_t num,
+    const int32_t* incr)    // value to increment for each blocks.
 {
-    int index = (blockIdx.x * blockDim.x) + threadIdx.x;
+    int32_t index = (blockIdx.x * blockDim.x) + threadIdx.x;
 
     if (index >= num) {
         return;
@@ -48,12 +48,12 @@ __global__ void incrementBlocks(
     data[index] += incr[blockIdx.x];
 }
 
-__global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
+__global__ void exclusiveScan(int32_t* dst, int32_t num, int32_t stride, const int32_t* src)
 {
-    extern __shared__ int temp[];
+    extern __shared__ int32_t temp[];
 
-    int index = threadIdx.x;
-    int offset = 1;
+    int32_t index = threadIdx.x;
+    int32_t offset = 1;
 
     auto n = blockIdx.x * blockDim.x + threadIdx.x;
     if (n * 2 >= num) {
@@ -65,12 +65,12 @@ __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
     temp[2 * index + 1] = src[2 * index + 1 + (blockIdx.x * blockDim.x * 2)];
 
     // Up sweep
-    for (int d = stride >> 1; d > 0; d >>= 1) {
+    for (int32_t d = stride >> 1; d > 0; d >>= 1) {
         __syncthreads();
 
         if (index < d) {
-            int ai = offset * (2 * index + 1) - 1;
-            int bi = offset * (2 * index + 2) - 1;
+            int32_t ai = offset * (2 * index + 1) - 1;
+            int32_t bi = offset * (2 * index + 2) - 1;
             temp[bi] += temp[ai];
         }
         offset *= 2;
@@ -82,14 +82,14 @@ __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
     }
 
     // Down sweep
-    for (int d = 1; d < stride; d *= 2) {
+    for (int32_t d = 1; d < stride; d *= 2) {
         offset >>= 1;
         __syncthreads();
 
         if (index < d && offset > 0) {
-            int ai = offset * (2 * index + 1) - 1;
-            int bi = offset * (2 * index + 2) - 1;
-            int t = temp[ai];
+            int32_t ai = offset * (2 * index + 1) - 1;
+            int32_t bi = offset * (2 * index + 2) - 1;
+            int32_t t = temp[ai];
             temp[ai] = temp[bi];
             temp[bi] += t;
         }
@@ -102,21 +102,21 @@ __global__ void exclusiveScan(int* dst, int num, int stride, const int* src)
 }
 
 __global__ void scatter(
-    int* dst,
-    int* count,
-    int num,
-    const int* bools,
-    const int* indices,
-    const int* src)
+    int32_t* dst,
+    int32_t* count,
+    int32_t num,
+    const int32_t* bools,
+    const int32_t* indices,
+    const int32_t* src)
 {
-    int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+    int32_t idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
     if (idx >= num) {
         return;
     }
 
     if (bools[idx] > 0) {
-        int pos = indices[idx];
+        int32_t pos = indices[idx];
         dst[pos] = src[idx];
     }
 
@@ -127,20 +127,20 @@ __global__ void scatter(
 
 namespace idaten
 {
-    idaten::TypedCudaMemory<int>& StreamCompaction::getCount()
+    idaten::TypedCudaMemory<int32_t>& StreamCompaction::getCount()
     {
         return m_counts;
     }
 
     void StreamCompaction::init(
-        int maxInputNum,
-        int blockSize)
+        int32_t maxInputNum,
+        int32_t blockSize)
     {
         if (m_maxInputNum == 0) {
             m_maxInputNum = maxInputNum;
             m_blockSize = blockSize;
 
-            int blockPerGrid = (maxInputNum - 1) / blockSize + 1;
+            int32_t blockPerGrid = (maxInputNum - 1) / blockSize + 1;
 
             m_increments.init(blockPerGrid);
             m_tmp.init(blockPerGrid);
@@ -148,7 +148,7 @@ namespace idaten
 
             m_indices.init(m_maxInputNum);
 
-            std::vector<int> iota(m_maxInputNum);
+            std::vector<int32_t> iota(m_maxInputNum);
             std::iota(iota.begin(), iota.end(), 0);
 
             m_iota.init(iota.size());
@@ -173,15 +173,15 @@ namespace idaten
     }
 
     void StreamCompaction::scan(
-        const int blocksize,
-        idaten::TypedCudaMemory<int>& src,
-        idaten::TypedCudaMemory<int>& dst)
+        const int32_t blocksize,
+        idaten::TypedCudaMemory<int32_t>& src,
+        idaten::TypedCudaMemory<int32_t>& dst)
     {
         AT_ASSERT(dst.num() <= m_maxInputNum);
 
-        int blockPerGrid = (dst.num() - 1) / blocksize + 1;
+        int32_t blockPerGrid = (dst.num() - 1) / blocksize + 1;
 
-        exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int), m_stream >> > (
+        exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> > (
             dst.ptr(),
             dst.num(),
             blocksize,
@@ -194,8 +194,8 @@ namespace idaten
             return;
         }
 
-        int tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
-        int tmpBlockSize = blockPerGrid;
+        int32_t tmpBlockPerGrid = (blockPerGrid - 1) / blocksize + 1;
+        int32_t tmpBlockSize = blockPerGrid;
 
         computeBlockCount << <tmpBlockPerGrid, tmpBlockSize, 0, m_stream >> > (
             m_increments.ptr(),
@@ -206,24 +206,24 @@ namespace idaten
 
         checkCudaKernel(computeBlockCount);
 
-        idaten::TypedCudaMemory<int>* input = &m_increments;
-        idaten::TypedCudaMemory<int>* output = &m_tmp;
+        idaten::TypedCudaMemory<int32_t>* input = &m_increments;
+        idaten::TypedCudaMemory<int32_t>* output = &m_tmp;
 
-        idaten::TypedCudaMemory<int>* tmpptr = &m_tmp;
+        idaten::TypedCudaMemory<int32_t>* tmpptr = &m_tmp;
 
-        int elementNum = blockPerGrid;
+        int32_t elementNum = blockPerGrid;
 
-        int count = 1;
-        int innerBlockPerGrid = 0;
+        int32_t count = 1;
+        int32_t innerBlockPerGrid = 0;
 
-        std::vector<int> stackBlockPerGrid;
+        std::vector<int32_t> stackBlockPerGrid;
 
         // Scan blocks.
         for (;;) {
             innerBlockPerGrid = (elementNum - 1) / blocksize + 1;
             stackBlockPerGrid.push_back(elementNum);
 
-            exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int), m_stream >> >(
+            exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> >(
                 m_work.ptr(),
                 m_work.num(),
                 blocksize,
@@ -237,8 +237,8 @@ namespace idaten
                 break;
             }
 
-            int innerTmpBlockPerGrid = (innerBlockPerGrid - 1) / blocksize + 1;
-            int innerTmpBlockSize = innerBlockPerGrid;
+            int32_t innerTmpBlockPerGrid = (innerBlockPerGrid - 1) / blocksize + 1;
+            int32_t innerTmpBlockSize = innerBlockPerGrid;
 
             computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize, 0, m_stream >> > (
                 output->ptr(),
@@ -262,7 +262,7 @@ namespace idaten
         input = tmpptr;
         output = &m_increments;
 
-        for (int i = count - 1; i >= 0; i--) {
+        for (int32_t i = count - 1; i >= 0; i--) {
             // blocks per grid.
             auto bpg = stackBlockPerGrid[i];
 
@@ -281,7 +281,7 @@ namespace idaten
             output = p;
         }
 
-        idaten::TypedCudaMemory<int>* incrResult = (count & 0x1 == 0 ? tmpptr : &m_increments);
+        idaten::TypedCudaMemory<int32_t>* incrResult = (count & 0x1 == 0 ? tmpptr : &m_increments);
 #endif
 
         incrementBlocks << <blockPerGrid, blocksize, 0, m_stream >> > (
@@ -293,14 +293,14 @@ namespace idaten
     }
 
     void StreamCompaction::compact(
-        idaten::TypedCudaMemory<int>& dst,
-        idaten::TypedCudaMemory<int>& bools,
-        int* result/*= nullptr*/)
+        idaten::TypedCudaMemory<int32_t>& dst,
+        idaten::TypedCudaMemory<int32_t>& bools,
+        int32_t* result/*= nullptr*/)
     {
         scan(m_blockSize, bools, m_indices);
 
-        int num = dst.num();
-        int blockPerGrid = (num - 1) / m_blockSize + 1;
+        int32_t num = dst.num();
+        int32_t blockPerGrid = (num - 1) / m_blockSize + 1;
 
         scatter << <blockPerGrid, m_blockSize, 0, m_stream >> > (
             dst.ptr(),
@@ -320,66 +320,66 @@ namespace idaten
     void StreamCompaction::compact()
     {
 #if 1
-        const int blocksize = m_blockSize;
+        const int32_t blocksize = m_blockSize;
 
-        int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
-        //int f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
-        //int f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
-        //int f[] = { 0, 25, 25, 25 };
+        int32_t f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3, 3, 1, 7, 0, 4, 1, 6, 3 };
+        //int32_t f[] = { 3, 1, 7, 0, 4, 1, 6, 3, 3, 1 };
+        //int32_t f[] = { 3, 1, 7, 0, 4, 1, 6, 3 };
+        //int32_t f[] = { 0, 25, 25, 25 };
 
-        //int c = aten::nextPow2(AT_COUNTOF(f));
-        int c = AT_COUNTOF(f);
+        //int32_t c = aten::nextPow2(AT_COUNTOF(f));
+        int32_t c = AT_COUNTOF(f);
 
-        std::vector<int> x(c);
-        memcpy(&x[0], f, sizeof(int) * AT_COUNTOF(f));
+        std::vector<int32_t> x(c);
+        memcpy(&x[0], f, sizeof(int32_t) * AT_COUNTOF(f));
 
-        idaten::TypedCudaMemory<int> src;
+        idaten::TypedCudaMemory<int32_t> src;
         src.init(x.size());
         src.writeFromHostToDeviceByNum(&x[0], x.size());
 
-        idaten::TypedCudaMemory<int> dst;
+        idaten::TypedCudaMemory<int32_t> dst;
         dst.init(x.size());
 
         scan(blocksize, src, dst);
 
-        std::vector<int> buffer(x.size());
+        std::vector<int32_t> buffer(x.size());
         dst.readFromDeviceToHostByNum(&buffer[0]);
 
-        int xxx = 0;
+        int32_t xxx = 0;
 #else
-        const int blocksize = m_blockSize;
+        const int32_t blocksize = m_blockSize;
 
-        int b[] = { 1, 0, 1, 0, 1, 0, 1, 0 };
-        int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+        int32_t b[] = { 1, 0, 1, 0, 1, 0, 1, 0 };
+        int32_t v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
         AT_ASSERT(AT_COUNTOF(b) == AT_COUNTOF(v));
 
-        int num = AT_COUNTOF(b);
+        int32_t num = AT_COUNTOF(b);
 
-        std::vector<int> buffer(num);
+        std::vector<int32_t> buffer(num);
 
-        idaten::TypedCudaMemory<int> bools;
+        idaten::TypedCudaMemory<int32_t> bools;
         bools.init(num);
         bools.writeFromHostToDeviceByNum(b, num);
 
-        idaten::TypedCudaMemory<int> indices;
+        idaten::TypedCudaMemory<int32_t> indices;
         indices.init(num);
 
         scan(blocksize, bools, indices);
 
         indices.readFromDeviceToHostByNum(&buffer[0]);
 
-        idaten::TypedCudaMemory<int> values;
+        idaten::TypedCudaMemory<int32_t> values;
         values.init(num);
         values.writeFromHostToDeviceByNum(v, num);
 
-        idaten::TypedCudaMemory<int> dst;
+        idaten::TypedCudaMemory<int32_t> dst;
         dst.init(num);
 
-        idaten::TypedCudaMemory<int> count;
+        idaten::TypedCudaMemory<int32_t> count;
         count.init(1);
 
-        int blockPerGrid = (num - 1) / blocksize + 1;
+        int32_t blockPerGrid = (num - 1) / blocksize + 1;
 
         scatter << <blockPerGrid, blocksize >> > (
             dst.ptr(),
@@ -391,10 +391,10 @@ namespace idaten
 
         dst.readFromDeviceToHostByNum(&buffer[0]);
 
-        int _count = -1;
+        int32_t _count = -1;
         count.readFromDeviceToHostByNum(&_count);
 
-        int xxx = 0;
+        int32_t xxx = 0;
 #endif
     }
 #endif

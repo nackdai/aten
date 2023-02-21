@@ -129,8 +129,8 @@ namespace AT_NAME
 
     void face::build(
         const context& ctxt,
-        int mtrlid,
-        int geomid)
+        int32_t mtrlid,
+        int32_t geomid)
     {
         const auto& v0 = ctxt.getVertex(param.idx[0]);
         const auto& v1 = ctxt.getVertex(param.idx[1]);
@@ -208,7 +208,7 @@ namespace AT_NAME
         result->primid = m_id;
     }
 
-    int face::geomid() const
+    int32_t face::geomid() const
     {
         return param.gemoid;
     }

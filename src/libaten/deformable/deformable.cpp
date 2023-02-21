@@ -108,7 +108,7 @@ namespace aten
         }
 
         shader* m_shd{ nullptr };
-        int m_handleMtxJoint{ -1 };
+        int32_t m_handleMtxJoint{ -1 };
         std::vector<mat4> m_mtxs;
     };
 
@@ -184,7 +184,7 @@ namespace aten
         aten::hitable::FuncPreDraw func;
         aten::mat4 mtxL2W;
         aten::mat4 mtxPrevL2W;
-        int objid;
+        int32_t objid;
         uint32_t globalTriOffset;
     };
 
@@ -193,10 +193,10 @@ namespace aten
         const context& ctxt,
         const aten::mat4& mtxL2W,
         const aten::mat4& mtxPrevL2W,
-        int parentId,
+        int32_t parentId,
         uint32_t triOffset)
     {
-        int objid = (parentId < 0 ? id() : parentId);
+        int32_t objid = (parentId < 0 ? id() : parentId);
 
         DeformMeshRenderHelperEx helper;
         {
@@ -229,7 +229,7 @@ namespace aten
     //////////////////////////////////////////////////////////////
 
     bool DeformableRenderer::init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char* pathVS,
         const char* pathFS)
     {

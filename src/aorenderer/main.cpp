@@ -14,8 +14,8 @@
 
 #include "../common/scenedefs.h"
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int32_t WIDTH = 1280;
+static int32_t HEIGHT = 720;
 static const char *TITLE = "AORenderer";
 
 #ifdef ENABLE_OMP
@@ -36,10 +36,10 @@ static std::shared_ptr<aten::visualizer> g_visualizer;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
-static int g_renderMode = 0; // 0: AO, 1: TexView
-static int g_viewTexIdx = 0;
+static int32_t g_renderMode = 0; // 0: AO, 1: TexView
+static int32_t g_viewTexIdx = 0;
 
 void onRun(aten::window *window)
 {
@@ -104,8 +104,8 @@ void onRun(aten::window *window)
         ImGui::Text("cuda : %.3f ms", cudaelapsed);
 
 #if 0
-        int prevSamples = g_maxSamples;
-        int prevDepth = g_maxBounce;
+        int32_t prevSamples = g_maxSamples;
+        int32_t prevDepth = g_maxBounce;
 
         ImGui::SliderInt("Samples", &g_maxSamples, 1, 100);
         ImGui::SliderInt("Bounce", &g_maxBounce, 1, 10);
@@ -129,10 +129,10 @@ void onClose()
 
 bool g_isMouseLBtnDown = false;
 bool g_isMouseRBtnDown = false;
-int g_prevX = 0;
-int g_prevY = 0;
+int32_t g_prevX = 0;
+int32_t g_prevY = 0;
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -147,7 +147,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown)
     {
@@ -172,7 +172,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -244,7 +244,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-int main()
+int32_t main()
 {
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
@@ -317,7 +317,7 @@ int main()
         {
             auto texNum = g_ctxt.getTextureNum();
 
-            for (int i = 0; i < texNum; i++)
+            for (int32_t i = 0; i < texNum; i++)
             {
                 auto t = g_ctxt.getTexture(i);
                 tex.push_back(

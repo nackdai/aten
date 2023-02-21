@@ -63,7 +63,7 @@ namespace aten {
         float w_sum_{ 0.0f };
         float sample_weight_{ 0.0f };
         uint32_t m_{ 0 };
-        int light_idx_{ 0 };
+        int32_t light_idx_{ 0 };
         float pdf_{ 0.0f };
         float target_density_{ 0.0f };
         aten::LightSampleResult light_sample_;
@@ -80,7 +80,7 @@ namespace aten {
 
         bool update(
             const aten::LightSampleResult& light_sample,
-            int new_target_idx, float weight, float u)
+            int32_t new_target_idx, float weight, float u)
         {
             w_sum_ += weight;
             bool is_accepted = u < weight / w_sum_;

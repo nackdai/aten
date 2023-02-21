@@ -14,8 +14,8 @@
 
 #define GPU_RENDERING
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int32_t WIDTH = 1280;
+static int32_t HEIGHT = 720;
 static const char* TITLE = "MaterialViewer";
 
 #ifdef ENABLE_OMP
@@ -42,10 +42,10 @@ static aten::texture* g_normalMap = nullptr;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
-static int g_maxSamples = 1;
-static int g_maxBounce = 5;
+static int32_t g_maxSamples = 1;
+static int32_t g_maxBounce = 5;
 
 static bool g_enableAlbedoMap = true;
 static bool g_enableNormalMap = true;
@@ -247,7 +247,7 @@ void onRun(aten::window* window)
         bool need_renderer_reset = false;
 
         constexpr char* light_types[] = { "IBL", "PointLight" };
-        int lighttype = g_scene_light.is_envmap ? 0 : 1;
+        int32_t lighttype = g_scene_light.is_envmap ? 0 : 1;
         if (ImGui::Combo("light", &lighttype, light_types, AT_COUNTOF(light_types))) {
             auto next_is_envmap = lighttype == 0;
             if (g_scene_light.is_envmap != next_is_envmap) {
@@ -289,7 +289,7 @@ void onRun(aten::window* window)
             "CarPaint",
             "Disney",
         };
-        int mtrlType = (int)mtrl->param().type;
+        int32_t mtrlType = (int32_t)mtrl->param().type;
         if (ImGui::Combo("mode", &mtrlType, mtrl_types, AT_COUNTOF(mtrl_types))) {
             g_ctxt.deleteAllMaterialsAndClearList();
             mtrl = createMaterial((aten::MaterialType)mtrlType);
@@ -366,10 +366,10 @@ void onClose()
 
 bool g_isMouseLBtnDown = false;
 bool g_isMouseRBtnDown = false;
-int g_prevX = 0;
-int g_prevY = 0;
+int32_t g_prevX = 0;
+int32_t g_prevY = 0;
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -383,7 +383,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -406,7 +406,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -473,7 +473,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-int main()
+int32_t main()
 {
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
@@ -566,7 +566,7 @@ int main()
     {
         auto texNum = g_ctxt.getTextureNum();
 
-        for (int i = 0; i < texNum; i++) {
+        for (int32_t i = 0; i < texNum; i++) {
             auto t = g_ctxt.getTexture(i);
             tex.push_back(
                 idaten::TextureResource(t->colors(), t->width(), t->height()));

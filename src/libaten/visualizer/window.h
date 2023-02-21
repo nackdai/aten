@@ -190,13 +190,13 @@ namespace aten {
     public:
         using OnRun = std::function<void(window*)>;
         using OnClose = std::function<void()>;
-        using OnMouseBtn = std::function<void(bool left, bool press, int x, int y)>;
-        using OnMouseMove = std::function<void(int x, int y)>;
-        using OnMouseWheel = std::function<void(int delta)>;
+        using OnMouseBtn = std::function<void(bool left, bool press, int32_t x, int32_t y)>;
+        using OnMouseMove = std::function<void(int32_t x, int32_t y)>;
+        using OnMouseWheel = std::function<void(int32_t delta)>;
         using OnKey = std::function<void(bool press, Key key)>;
 
         static window* init(
-            int width, int height, const char* title,
+            int32_t width, int32_t height, const char* title,
             OnRun onRun,
             OnClose _onClose = nullptr,
             OnMouseBtn _onMouseBtn = nullptr,
@@ -223,21 +223,21 @@ namespace aten {
             }
         }
 
-        void onMouseBtn(bool left, bool press, int x, int y)
+        void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
         {
             if (m_onMouseBtn) {
                 m_onMouseBtn(left, press, x, y);
             }
         }
 
-        void onMouseMove(int x, int y)
+        void onMouseMove(int32_t x, int32_t y)
         {
             if (m_onMouseMove) {
                 m_onMouseMove(x, y);
             }
         }
 
-        void onMouseWheel(int delta)
+        void onMouseWheel(int32_t delta)
         {
             if (m_onMouseWheel) {
                 m_onMouseWheel(delta);

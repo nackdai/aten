@@ -59,7 +59,7 @@ static const uint32_t VoxelWireFrameIdxs[] = {
 
 
 bool VoxelViewer::init(
-    int width, int height,
+    int32_t width, int32_t height,
     const char* pathVS,
     const char* pathFS)
 {
@@ -93,7 +93,7 @@ void VoxelViewer::bringVoxels(
 {
     for (const auto& node : nodes) {
         if (AT_IS_VOXEL(node.voxeldepth)) {
-            int depth = AT_GET_VOXEL_DEPTH(node.voxeldepth);
+            int32_t depth = AT_GET_VOXEL_DEPTH(node.voxeldepth);
             voxelList[depth].push_back(node);
         }
     }
@@ -144,7 +144,7 @@ void VoxelViewer::draw(
 
     // NOTE
     // BoxÇ»ÇÃÇ≈ÅAÇPñ ìñÇΩÇËéOäpå`ÇQÇ¬Ç≈ÅAÇUñ .
-    static const int PrimCnt = 2 * 6;
+    static const int32_t PrimCnt = 2 * 6;
 
     depth = (depth / aten::sbvh::VoxelDepth) * aten::sbvh::VoxelDepth;
 
@@ -153,7 +153,7 @@ void VoxelViewer::draw(
     for (size_t i = 0; i < voxels.size(); i++) {
         const auto& voxel = voxels[i];
 
-        auto voxeldepth = (int)AT_GET_VOXEL_DEPTH(voxel.voxeldepth);
+        auto voxeldepth = (int32_t)AT_GET_VOXEL_DEPTH(voxel.voxeldepth);
         AT_ASSERT(voxeldepth == depth);
 
         if (voxeldepth == depth) {

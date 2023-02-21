@@ -51,7 +51,7 @@ namespace aten
             std::sort(first + startPos, first + endPos, cmp);
         }
 
-        int blockNum = numThreads;
+        int32_t blockNum = numThreads;
 
         // Merge blocks.
         while (blockNum >= 2)
@@ -115,7 +115,7 @@ namespace aten
 
             // Offset triangle index.
 #pragma omp parallel for
-            for (int i = 0; i < m_threadedNodes[0].size(); i++) {
+            for (int32_t i = 0; i < m_threadedNodes[0].size(); i++) {
                 auto& node = m_threadedNodes[0][i];
                 if (node.isLeaf()) {
                     node.triid += m_offsetTriIdx;
@@ -158,7 +158,7 @@ namespace aten
         memcpy(&m_threadedNodes[0][0], &toplayer[0], toplayer.size() * sizeof(ThreadedSbvhNode));
 
         // Convert to threaded bvh.
-        for (int i = 0; i < nestedBvh.size(); i++) {
+        for (int32_t i = 0; i < nestedBvh.size(); i++) {
             auto accel = nestedBvh[i];
 
             auto box = accel->getBoundingbox();
@@ -170,10 +170,10 @@ namespace aten
 
                 bvh->buildVoxel(ctxt);
 
-                std::vector<int> indices;
+                std::vector<int32_t> indices;
                 bvh->convert(
                     m_threadedNodes[i + 1],
-                    (int)m_refIndices.size(),
+                    (int32_t)m_refIndices.size(),
                     indices);
 
                 m_refIndices.insert(m_refIndices.end(), indices.begin(), indices.end());
@@ -207,7 +207,7 @@ namespace aten
             m_refs[i].triid = i;
             m_refs[i].bbox = tris[i]->computeAABB(ctxt);
 
-            m_offsetTriIdx = std::min<int>(m_offsetTriIdx, tris[i]->getId());
+            m_offsetTriIdx = std::min<int32_t>(m_offsetTriIdx, tris[i]->getId());
 
             rootBox.expand(m_refs[i].bbox);
         }
@@ -237,7 +237,7 @@ namespace aten
             uint32_t depth{ 0 };
         } stack[128];
 
-        int stackpos = 1;
+        int32_t stackpos = 1;
         stack[0] = SBVHEntry(0, 0);
 
         m_nodes.reserve(m_refs.size() * 3);
@@ -266,8 +266,8 @@ namespace aten
             real objCost = 0.0f;
             aabb objLeftBB;
             aabb objRightBB;
-            int sahBin = -1;
-            int sahComponent = -1;
+            int32_t sahBin = -1;
+            int32_t sahComponent = -1;
             findObjectSplit(node, objCost, objLeftBB, objRightBB, sahBin, sahComponent);
 
             // check whether the object split produces overlapping nodes
@@ -287,9 +287,9 @@ namespace aten
             aabb spatialLeftBB;
             aabb spatialRightBB;
             real spatialSplitPlane = real(0);
-            int spatialDimension = -1;
-            int leftCnt = 0;
-            int rightCnt = 0;
+            int32_t spatialDimension = -1;
+            int32_t leftCnt = 0;
+            int32_t rightCnt = 0;
 
             if (needComputeSpatial) {
                 findSpatialSplit(
@@ -307,7 +307,7 @@ namespace aten
             // if we have compute the spatial cost and it is better than the binned sah cost,
             // then do the split.
 
-            int usedAxis = 0;
+            int32_t usedAxis = 0;
 
             if (needComputeSpatial && spatialCost <= objCost) {
                 // use spatial split.
@@ -337,7 +337,7 @@ namespace aten
 
                     auto maxVal = std::max(std::max(axisDelta.x, axisDelta.y), axisDelta.z);
 
-                    int bestAxis = (maxVal == axisDelta.x
+                    int32_t bestAxis = (maxVal == axisDelta.x
                         ? 0
                         : maxVal == axisDelta.y ? 1 : 2);
 
@@ -357,7 +357,7 @@ namespace aten
 
                     // distribute in left and right child evenly.
                     // 半分ずつ右と左に均等に分割.
-                    for (int i = 0; i < node.refIds.size(); i++) {
+                    for (int32_t i = 0; i < node.refIds.size(); i++) {
                         const auto id = node.refIds[i];
                         const auto& ref = m_refs[id];
 
@@ -417,8 +417,8 @@ namespace aten
     }
 
     inline real evalPreSplitCost(
-        real leftBoxArea, int numLeft,
-        real rightBoxArea, int numRight)
+        real leftBoxArea, int32_t numLeft,
+        real rightBoxArea, int32_t numRight)
     {
         return leftBoxArea * numLeft + rightBoxArea * numRight;
     }
@@ -428,8 +428,8 @@ namespace aten
         real& cost,
         aabb& leftBB,
         aabb& rightBB,
-        int& splitBinPos,
-        int& axis)
+        int32_t& splitBinPos,
+        int32_t& axis)
     {
         std::vector<Bin> bins(m_numBins);
 
@@ -453,7 +453,7 @@ namespace aten
         auto centroidMax = bbCentroid.maxPos();
 
         // for each dimension check the best splits.
-        for (int dim = 0; dim < 3; ++dim)
+        for (int32_t dim = 0; dim < 3; ++dim)
         {
             // Skip empty axis.
             if ((centroidMax[dim] - centroidMin[dim]) == 0.0f) {
@@ -478,9 +478,9 @@ namespace aten
 
                 // 分割情報(bins)へのインデックス.
                 // 最小端点から三角形AABBの中心への距離を軸の長さで正規化することで計算.
-                int binIdx = (int)(m_numBins * ((center[dim] - centroidMin[dim]) * invLen));
+                int32_t binIdx = (int32_t)(m_numBins * ((center[dim] - centroidMin[dim]) * invLen));
 
-                binIdx = std::min<int>(binIdx, m_numBins - 1);
+                binIdx = std::min<int32_t>(binIdx, m_numBins - 1);
                 AT_ASSERT(binIdx >= 0);
 
                 bins[binIdx].start += 1;    // Binに含まれる三角形の数を増やす.
@@ -491,7 +491,7 @@ namespace aten
             bins[m_numBins - 1].accum = bins[m_numBins - 1].bbox;
             bins[m_numBins - 1].end = bins[m_numBins - 1].start;
 
-            for (int i = m_numBins - 2; i >= 0; i--) {
+            for (int32_t i = m_numBins - 2; i >= 0; i--) {
                 // ここまでのAABB全体サイズ.
                 bins[i].accum = bins[i + 1].accum;
 
@@ -515,8 +515,8 @@ namespace aten
                 // i から先の全体範囲が右側になる.
                 auto rightArea = bins[i + 1].accum.computeSurfaceArea();
 
-                int rightCount = bins[i + 1].end;
-                int leftCount = refNum - rightCount;
+                int32_t rightCount = bins[i + 1].end;
+                int32_t leftCount = refNum - rightCount;
 
                 if (leftCount == 0) {
                     continue;
@@ -544,11 +544,11 @@ namespace aten
     void sbvh::findSpatialSplit(
         SBVHNode& node,
         real& cost,
-        int& retLeftCount,
-        int& retRightCount,
+        int32_t& retLeftCount,
+        int32_t& retRightCount,
         aabb& leftBB,
         aabb& rightBB,
-        int& bestAxis,
+        int32_t& bestAxis,
         real& splitPlane)
     {
         cost = AT_MATH_INF;
@@ -564,7 +564,7 @@ namespace aten
         const auto boxMax = box.maxPos();
 
         // check along each dimension
-        for (int dim = 0; dim < 3; ++dim)
+        for (int32_t dim = 0; dim < 3; ++dim)
         {
             const auto segmentLength = boxMax[dim] - boxMin[dim];
 
@@ -593,15 +593,15 @@ namespace aten
                 // split each triangle into references.
                 // each triangle will be recorded into multiple bins.
                 // 三角形が入る分割情報のインデックス範囲を計算.
-                int binStartIdx = (int)(m_numBins * ((triMin - boxMin[dim]) * invLen));
-                int binEndIdx = (int)(m_numBins * ((triMax - boxMin[dim]) * invLen));
+                int32_t binStartIdx = (int32_t)(m_numBins * ((triMin - boxMin[dim]) * invLen));
+                int32_t binEndIdx = (int32_t)(m_numBins * ((triMax - boxMin[dim]) * invLen));
 
-                binStartIdx = aten::clamp<int>(binStartIdx, 0, m_numBins - 1);
-                binEndIdx = aten::clamp<int>(binEndIdx, 0, m_numBins - 1);
+                binStartIdx = aten::clamp<int32_t>(binStartIdx, 0, m_numBins - 1);
+                binEndIdx = aten::clamp<int32_t>(binEndIdx, 0, m_numBins - 1);
 
                 //AT_ASSERT(binStartIdx <= binEndIdx);
 
-                for (int n = binStartIdx; n <= binEndIdx; n++) {
+                for (int32_t n = binStartIdx; n <= binEndIdx; n++) {
                     const auto binMin = boxMin[dim] + n * lenghthPerBin;
                     const auto binMax = boxMin[dim] + (n + 1) * lenghthPerBin;
                     AT_ASSERT(binMin <= binMax);
@@ -626,7 +626,7 @@ namespace aten
 
             bins[m_numBins - 1].accum = bins[m_numBins - 1].bbox;
 
-            for (int n = m_numBins - 2; n >= 0; n--) {
+            for (int32_t n = m_numBins - 2; n >= 0; n--) {
                 // ここまでのAABB全体サイズ.
                 bins[n].accum = bins[n + 1].accum;
 
@@ -637,12 +637,12 @@ namespace aten
                 bins[n].end += bins[n + 1].end;
             }
 
-            int leftCount = 0;
+            int32_t leftCount = 0;
             auto leftBox = bins[0].bbox;
 
             // find split.
             for (uint32_t n = 0; n < m_numBins - 1; n++) {
-                const int rightCount = bins[n + 1].end;
+                const int32_t rightCount = bins[n + 1].end;
                 leftCount += bins[n].start;
 
                 leftBox.expand(bins[n].bbox);
@@ -673,10 +673,10 @@ namespace aten
     void sbvh::spatialSort(
         SBVHNode& node,
         real splitPlane,
-        int axis,
+        int32_t axis,
         real splitCost,
-        int leftCnt,
-        int rightCnt,
+        int32_t leftCnt,
+        int32_t rightCnt,
         aabb& leftBB,
         aabb& rightBB,
         std::vector<uint32_t>& leftList,
@@ -775,8 +775,8 @@ namespace aten
 
     void sbvh::objectSort(
         SBVHNode& node,
-        int splitBin,
-        int axis,
+        int32_t splitBin,
+        int32_t axis,
         std::vector<uint32_t>& leftList,
         std::vector<uint32_t>& rightList)
     {
@@ -787,7 +787,7 @@ namespace aten
         const auto refNum = node.refIds.size();
 
         // compute the aabb of all centroids.
-        for (int i = 0; i < refNum; i++) {
+        for (int32_t i = 0; i < refNum; i++) {
             const auto id = node.refIds[i];
             const auto& ref = m_refs[id];
             auto centroid = ref.bbox.getCenter();
@@ -797,7 +797,7 @@ namespace aten
         const auto invLen = real(1) / (bbCentroid.maxPos()[axis] - bbCentroid.minPos()[axis]);
 
         // distribute to left and right based on the provided split bin
-        for (int i = 0; i < refNum; i++) {
+        for (int32_t i = 0; i < refNum; i++) {
             const auto id = node.refIds[i];
             const auto& ref = m_refs[id];
 
@@ -805,9 +805,9 @@ namespace aten
 
             // 分割情報(bins)へのインデックス.
             // 最小端点から三角形AABBの中心への距離を軸の長さで正規化することで計算.
-            int binIdx = (int)(m_numBins * ((center[axis] - bbCentroid.minPos()[axis]) * invLen));
+            int32_t binIdx = (int32_t)(m_numBins * ((center[axis] - bbCentroid.minPos()[axis]) * invLen));
 
-            binIdx = aten::clamp<int>(binIdx, 0, m_numBins - 1);
+            binIdx = aten::clamp<int32_t>(binIdx, 0, m_numBins - 1);
 
             if (binIdx <= splitBin) {
                 // bin indexがsplitBinより小さいので左.
@@ -822,8 +822,8 @@ namespace aten
 
     void sbvh::convert(
         std::vector<ThreadedSbvhNode>& nodes,
-        int offset,
-        std::vector<int>& indices) const
+        int32_t offset,
+        std::vector<int32_t>& indices) const
     {
         if (m_threadedNodes.size() > 0
             && m_threadedNodes[0].size() > 0)
@@ -840,24 +840,24 @@ namespace aten
         nodes.resize(m_nodes.size());
 
         // in order traversal to index nodes
-        std::vector<int> inOrderIndices;
+        std::vector<int32_t> inOrderIndices;
         getOrderIndex(inOrderIndices);
 
         struct ThreadedEntry {
             ThreadedEntry() {}
 
-            ThreadedEntry(int idx, int _parentSiblind)
+            ThreadedEntry(int32_t idx, int32_t _parentSiblind)
                 : nodeIdx(idx), parentSibling(_parentSiblind)
             {}
 
-            int nodeIdx{ -1 };
-            int parentSibling{ -1 };
+            int32_t nodeIdx{ -1 };
+            int32_t parentSibling{ -1 };
         } stack[128];
 
-        int stackpos = 1;
+        int32_t stackpos = 1;
 
-        int refIndicesCount = 0;
-        int nodeCount = 0;
+        int32_t refIndicesCount = 0;
+        int32_t nodeCount = 0;
 
         stack[0] = ThreadedEntry(0, -1);
 
@@ -898,7 +898,7 @@ namespace aten
 
                 // 参照する三角形インデックスを配列に格納.
                 // 分割しているので、重複する場合もあるので、別配列に格納していく.
-                for (int i = 0; i < sbvhNode.refIds.size(); i++) {
+                for (int32_t i = 0; i < sbvhNode.refIds.size(); i++) {
                     const auto refId = sbvhNode.refIds[i];
                     const auto& ref = m_refs[refId];
 
@@ -945,18 +945,18 @@ namespace aten
 
     }
 
-    void sbvh::getOrderIndex(std::vector<int>& indices) const
+    void sbvh::getOrderIndex(std::vector<int32_t>& indices) const
     {
         // Traverse the tree and register index to the list.
 
         indices.reserve(m_nodes.size());
 
-        int stack[128] = { 0 };
+        int32_t stack[128] = { 0 };
 
-        int stackpos = 1;
+        int32_t stackpos = 1;
 
         while (stackpos > 0) {
-            int idx = stack[stackpos - 1];
+            int32_t idx = stack[stackpos - 1];
             stackpos -= 1;
 
             const auto& sbvhNode = m_nodes[idx];
@@ -992,7 +992,7 @@ namespace aten
 
         real hitt = AT_MATH_INF;
 
-        int nodeid = 0;
+        int32_t nodeid = 0;
 
         for (;;) {
             const ThreadedBvhNode* node = nullptr;
@@ -1011,13 +1011,13 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = ctxt.getTransformable((int)node->shapeid);
+                auto s = ctxt.getTransformable((int32_t)node->shapeid);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->getParam();
 
-                    int mtxid = param.mtxid;
+                    int32_t mtxid = param.mtxid;
 
                     aten::ray transformedRay;
 
@@ -1030,8 +1030,8 @@ namespace aten
                         transformedRay = r;
                     }
 
-                    //int exid = node->mainExid;
-                    int exid = *(int*)(&node->exid);
+                    //int32_t exid = node->mainExid;
+                    int32_t exid = *(int32_t*)(&node->exid);
                     bool hasLod = AT_BVHNODE_HAS_LOD(exid);
                     exid = hasLod && enableLod ? AT_BVHNODE_LOD_EXID(exid) : AT_BVHNODE_MAIN_EXID(exid);
                     //exid = AT_BVHNODE_LOD_EXID(exid);
@@ -1046,7 +1046,7 @@ namespace aten
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = ctxt.getTriangle((int)node->primid);
+                    auto prim = ctxt.getTriangle((int32_t)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();
@@ -1070,10 +1070,10 @@ namespace aten
             }
 
             if (isHit) {
-                nodeid = (int)node->hit;
+                nodeid = (int32_t)node->hit;
             }
             else {
-                nodeid = (int)node->miss;
+                nodeid = (int32_t)node->miss;
             }
         }
 
@@ -1082,7 +1082,7 @@ namespace aten
 
     bool sbvh::hit(
         const context& ctxt,
-        int exid,
+        int32_t exid,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect,
@@ -1090,7 +1090,7 @@ namespace aten
     {
         real hitt = AT_MATH_INF;
 
-        int nodeid = 0;
+        int32_t nodeid = 0;
 
         for (;;) {
             const ThreadedSbvhNode* node = nullptr;
@@ -1109,7 +1109,7 @@ namespace aten
                 Intersection isectTmp;
 
 #if (SBVH_TRIANGLE_NUM == 1)
-                auto prim = ctxt.getTriangle((int)node->triid);
+                auto prim = ctxt.getTriangle((int32_t)node->triid);
                 isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
 
                 if (isHit) {
@@ -1117,13 +1117,13 @@ namespace aten
                     isectTmp.meshid = primParam.gemoid;
                 }
 #else
-                int start = (int)node->refIdListStart;
-                int end = (int)node->refIdListEnd;
+                int32_t start = (int32_t)node->refIdListStart;
+                int32_t end = (int32_t)node->refIdListEnd;
 
                 auto tmpTmax = t_max;
 
-                for (int i = start; i < end; i++) {
-                    int triid = m_refIndices[i];
+                for (int32_t i = start; i < end; i++) {
+                    int32_t triid = m_refIndices[i];
 
                     auto prim = prims[triid];
                     auto hit = prim->hit(r, t_min, tmpTmax, isectTmp);
@@ -1146,7 +1146,7 @@ namespace aten
 #if 1
             else if (enableLod && AT_IS_VOXEL(node->voxeldepth))
             {
-                int voxeldepth = AT_GET_VOXEL_DEPTH(node->voxeldepth);
+                int32_t voxeldepth = AT_GET_VOXEL_DEPTH(node->voxeldepth);
 
                 real t_result = 0.0f;
                 aten::vec3 nml;
@@ -1188,10 +1188,10 @@ namespace aten
             }
 
             if (isHit) {
-                nodeid = (int)node->hit;
+                nodeid = (int32_t)node->hit;
             }
             else {
-                nodeid = (int)node->miss;
+                nodeid = (int32_t)node->miss;
             }
         }
 
@@ -1226,7 +1226,7 @@ namespace aten
             buildVoxel(ctxt);
         }
 
-        std::vector<int> indices;
+        std::vector<int32_t> indices;
         convert(
             m_threadedNodes[0],
             0,
@@ -1241,7 +1241,7 @@ namespace aten
         }
 
         // Gather material information.
-        std::map<int, std::string> mtrlMap;
+        std::map<int32_t, std::string> mtrlMap;
         {
             for (auto it : m_treelets) {
                 const auto& treelet = it.second;
@@ -1291,15 +1291,15 @@ namespace aten
             static const uint8_t zeros[4] = { 0 };
 
             for (auto it : mtrlMap) {
-                int mtrlid = it.first;
+                int32_t mtrlid = it.first;
                 const auto& name = it.second;
 
                 // id.
                 fwrite(&mtrlid, sizeof(mtrlid), 1, fp);
 
-                int len = (int)name.length();
-                int alinedLen = ((len + 3) / 4) * 4;
-                int fillZeroLen = alinedLen - len;
+                int32_t len = (int32_t)name.length();
+                int32_t alinedLen = ((len + 3) / 4) * 4;
+                int32_t fillZeroLen = alinedLen - len;
 
                 // String size.
                 fwrite(&alinedLen, sizeof(alinedLen), 1, fp);
@@ -1326,7 +1326,7 @@ namespace aten
     bool sbvh::importTree(
         const context& ctxt,
         const char* path,
-        int offsetTriIdx)
+        int32_t offsetTriIdx)
     {
         FILE* fp = fopen(path, "rb");
         if (!fp) {
@@ -1343,19 +1343,19 @@ namespace aten
         // Check magic number.
 
         // Read material information.
-        std::map<int, std::string> mtrlMap;
+        std::map<int32_t, std::string> mtrlMap;
         {
             // TODO
             static char tmpbuf[128] = { 0 };
 
-            for (int i = 0; i < header.cntMtrlForVoxel; i++)
+            for (int32_t i = 0; i < header.cntMtrlForVoxel; i++)
             {
                 // id.
-                int mtrlid = -1;
+                int32_t mtrlid = -1;
                 fread(&mtrlid, sizeof(mtrlid), 1, fp);
 
                 // String size.
-                int len = 0;
+                int32_t len = 0;
                 fread(&len, sizeof(len), 1, fp);
 
                 AT_ASSERT(0 < len && len < AT_COUNTOF(tmpbuf));
@@ -1383,12 +1383,12 @@ namespace aten
 
                     // Re-set material id.
                     if (node.mtrlid >= 0) {
-                        auto found = mtrlMap.find(static_cast<int>(node.mtrlid));
+                        auto found = mtrlMap.find(static_cast<int32_t>(node.mtrlid));
                         AT_ASSERT(found != mtrlMap.end());
 
                         // Find material index by name.
                         const auto& name = found->second;
-                        int mtrlid = ctxt.findMaterialIdxByName(name.c_str());
+                        int32_t mtrlid = ctxt.findMaterialIdxByName(name.c_str());
                         AT_ASSERT(mtrlid >= 0);
 
                         // Replace current material index.
@@ -1434,19 +1434,19 @@ namespace aten
         const aten::mat4& mtxL2W)
     {
         // TODO
-        //int nodeListSize = m_threadedNodes.size();
-        int nodeListSize = 1;
+        //int32_t nodeListSize = m_threadedNodes.size();
+        int32_t nodeListSize = 1;
 
         static const uint32_t stacksize = 64;
         const ThreadedSbvhNode* stackbuf[stacksize];
 
-        for (int i = 0; i < nodeListSize; i++) {
+        for (int32_t i = 0; i < nodeListSize; i++) {
             const auto& nodes = m_threadedNodes[i];
 
             auto* node = &nodes[0];
 
             stackbuf[0] = node;
-            int stackpos = 1;
+            int32_t stackpos = 1;
 
             while (stackpos > 0) {
                 node = stackbuf[stackpos - 1];
@@ -1455,8 +1455,8 @@ namespace aten
 
                 _drawAABB(node, func, mtxL2W);
 
-                int hit = (int)node->hit;
-                int miss = (int)node->miss;
+                int32_t hit = (int32_t)node->hit;
+                int32_t miss = (int32_t)node->miss;
 
                 if (hit >= 0) {
                     stackbuf[stackpos++] = &nodes[hit];

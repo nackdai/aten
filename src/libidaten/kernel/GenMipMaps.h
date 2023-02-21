@@ -7,6 +7,6 @@ namespace idaten
 {
     void generateMipMaps(
         cudaMipmappedArray_t mipmapArray,
-        int width, int height,
-        int maxLevel);
+        int32_t width, int32_t height,
+        int32_t maxLevel);
 }

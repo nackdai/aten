@@ -78,7 +78,7 @@ namespace aten
         return true;
     }
 
-    bool texture::initAsGLTexture(int width, int height)
+    bool texture::initAsGLTexture(int32_t width, int32_t height)
     {
         m_width = width;
         m_height = height;
@@ -172,9 +172,9 @@ namespace aten
     }
 
     void texture::getDataAsGLTexture(
-        int& width,
-        int& height,
-        int& channel,
+        int32_t& width,
+        int32_t& height,
+        int32_t& channel,
         std::vector<vec4>& dst) const
     {
         if (m_gltex > 0) {
@@ -184,7 +184,7 @@ namespace aten
 
             dst.resize(m_width * m_height);
 
-            int bufsize = m_width * m_height * sizeof(float) * 4;
+            int32_t bufsize = m_width * m_height * sizeof(float) * 4;
 
             CALL_GL_API(::glGetTextureImage(
                 m_gltex,
@@ -205,9 +205,9 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < m_height; y++) {
-            for (int x = 0; x < m_width; x++) {
-                int idx = y * m_width + x;
+        for (int32_t y = 0; y < m_height; y++) {
+            for (int32_t x = 0; x < m_width; x++) {
+                int32_t idx = y * m_width + x;
 
                 m_colors[idx] += rhs.m_colors[idx];
             }
@@ -222,15 +222,15 @@ namespace aten
 
         std::vector<ScreenShotImageType> dst(m_width * m_height);
 
-        static const int bpp = sizeof(ScreenShotImageType);
-        const int pitch = m_width * bpp;
+        static const int32_t bpp = sizeof(ScreenShotImageType);
+        const int32_t pitch = m_width * bpp;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < m_height; y++) {
-            for (int x = 0; x < m_width; x++) {
-                int yy = m_height - 1 - y;
+        for (int32_t y = 0; y < m_height; y++) {
+            for (int32_t x = 0; x < m_width; x++) {
+                int32_t yy = m_height - 1 - y;
 
                 dst[yy * m_width + x].r() = (uint8_t)aten::clamp(m_colors[y * m_width + x].x * real(255), real(0), real(255));
                 dst[yy * m_width + x].g() = (uint8_t)aten::clamp(m_colors[y * m_width + x].y * real(255), real(0), real(255));

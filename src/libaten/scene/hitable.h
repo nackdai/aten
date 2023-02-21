@@ -21,7 +21,7 @@ namespace aten {
         real area{ real(1) };
 
         vec3 normal;
-        int mtrlid{ -1 };
+        int32_t mtrlid{ -1 };
 
 #ifdef ENABLE_TANGENTCOORD_IN_HITREC
         // tangent coordinate.
@@ -33,7 +33,7 @@ namespace aten {
         real u{ real(0) };
         real v{ real(0) };
 
-        int meshid{ -1 };
+        int32_t meshid{ -1 };
 
         bool isVoxel{ false };
         uint8_t padding[3];
@@ -42,25 +42,25 @@ namespace aten {
     struct Intersection {
         real t{ AT_MATH_INF };
 
-        int objid{ -1 };
+        int32_t objid{ -1 };
 
-        int mtrlid{ -1 };
+        int32_t mtrlid{ -1 };
 
-        int meshid{ -1 };
+        int32_t meshid{ -1 };
 
         union {
             // For triangle.
             struct {
-                int primid;
+                int32_t primid;
                 real a, b;  // barycentric
-                int face;   // for cube.
+                int32_t face;   // for cube.
             };
             // Fox voxel.
             struct {
                 real nml_x;
                 real nml_y;
                 real nml_z;
-                int isVoxel;
+                int32_t isVoxel;
             };
         };
 
@@ -123,7 +123,7 @@ namespace aten {
             return (getHasObject() != nullptr);
         }
 
-        virtual int geomid() const
+        virtual int32_t geomid() const
         {
             return -1;
         }
@@ -137,7 +137,7 @@ namespace aten {
 
             real a;
             real b;
-            int primid{ -1 };
+            int32_t primid{ -1 };
         };
 
         virtual void getSamplePosNormalArea(
@@ -203,14 +203,14 @@ namespace aten {
 #endif
         }
 
-        using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int parentId, int basePrimId)>;
+        using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int32_t parentId, int32_t basePrimId)>;
 
         virtual void render(
             FuncPreDraw func,
             const context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
-            int parentId,
+            int32_t parentId,
             uint32_t triOffset)
         {
             // For rasterize rendering.

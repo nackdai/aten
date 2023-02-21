@@ -18,7 +18,7 @@
 #include "cuda/cudamemory.h"
 
 __global__ void initReSTIRParameters(
-    int width, int height,
+    int32_t width, int32_t height,
     idaten::Reservoir* reservoirs,
     idaten::ReSTIRInfo* restir_infos)
 {
@@ -42,27 +42,27 @@ __global__ void shade(
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
-    int width, int height,
+    int32_t width, int32_t height,
     idaten::Path* paths,
-    const int* __restrict__ hitindices,
-    int* hitnum,
+    const int32_t* __restrict__ hitindices,
+    int32_t* hitnum,
     const aten::Intersection* __restrict__ isects,
     aten::ray* rays,
-    int sample,
-    int frame,
-    int bounce, int rrBounce,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
+    int32_t sample,
+    int32_t frame,
+    int32_t bounce, int32_t rrBounce,
+    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
-    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::PrimitiveParamter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
     cudaTextureObject_t vtxNml,
     const aten::mat4* __restrict__ matrices,
     cudaTextureObject_t* textures,
-    unsigned int* random,
+    uint32_t* random,
     idaten::ShadowRay* shadowRays)
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx >= *hitnum) {
         return;
@@ -123,7 +123,7 @@ __global__ void shade(
     auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
     // Apply normal map.
-    int normalMap = shMtrls[threadIdx.x].normalMap;
+    int32_t normalMap = shMtrls[threadIdx.x].normalMap;
     const auto pre_sampled_r = applyNormal(
         &shMtrls[threadIdx.x],
         normalMap,
@@ -157,8 +157,8 @@ __global__ void shade(
 
     if (bounce == 0) {
         // Store AOV.
-        int ix = idx % tileDomain.w;
-        int iy = idx / tileDomain.w;
+        int32_t ix = idx % tileDomain.w;
+        int32_t iy = idx / tileDomain.w;
 
         ix += tileDomain.x;
         iy += tileDomain.y;
@@ -305,21 +305,21 @@ __global__ void shade(
 }
 
 __global__ void hitShadowRay(
-    int bounce,
+    int32_t bounce,
     idaten::Path* paths,
-    int* hitindices,
-    int* hitnum,
+    int32_t* hitindices,
+    int32_t* hitnum,
     idaten::Reservoir* reservoirs,
     const idaten::ShadowRay* __restrict__ shadowRays,
-    const aten::GeomParameter* __restrict__ shapes, int geomnum,
+    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     aten::MaterialParameter* mtrls,
-    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     cudaTextureObject_t* nodes,
     const aten::PrimitiveParamter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
     const aten::mat4* __restrict__ matrices)
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx >= *hitnum) {
         return;
@@ -368,16 +368,16 @@ __global__ void computeShadowRayContribution(
     const idaten::Reservoir* __restrict__ reservoirs,
     const idaten::ReSTIRInfo* __restrict__ restir_infos,
     idaten::Path* paths,
-    int* hitindices,
-    int* hitnum,
+    int32_t* hitindices,
+    int32_t* hitnum,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
-    const aten::LightParameter* __restrict__ lights, int lightnum,
+    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::MaterialParameter* __restrict__ mtrls,
     cudaTextureObject_t* textures,
     const idaten::ShadowRay* __restrict__ shadowRays)
 {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx >= *hitnum) {
         return;
@@ -475,7 +475,7 @@ __global__ void computeShadowRayContribution(
 
 namespace idaten
 {
-    void ReSTIRPathTracing::initReSTIR(int width, int height)
+    void ReSTIRPathTracing::initReSTIR(int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -492,9 +492,9 @@ namespace idaten
 
     void ReSTIRPathTracing::onShadeReSTIR(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
-        int sample,
-        int bounce, int rrBounce,
+        int32_t width, int32_t height,
+        int32_t sample,
+        int32_t bounce, int32_t rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
@@ -556,8 +556,8 @@ namespace idaten
     }
 
     void ReSTIRPathTracing::onShadeByShadowRayReSTIR(
-        int width, int height,
-        int bounce,
+        int32_t width, int32_t height,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {

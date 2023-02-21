@@ -22,8 +22,8 @@ namespace aten
 
     private:
         struct Path {
-            int x{ 0 };
-            int y{ 0 };
+            int32_t x{ 0 };
+            int32_t y{ 0 };
             vec3 contrib;
             bool isTerminate{ false };
         };
@@ -32,8 +32,8 @@ namespace aten
             const context& ctxt,
             scene* scene,
             sampler* sampler,
-            int x, int y,
-            int width, int height,
+            int32_t x, int32_t y,
+            int32_t width, int32_t height,
             camera* camera,
             bool willImagePlaneMutation);
     };

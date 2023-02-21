@@ -23,27 +23,27 @@ namespace svgf {
         float4* aovNormalDepth,
         float4* aovTexclrMeshid,
         aten::mat4 mtxW2C,
-        int width, int height,
+        int32_t width, int32_t height,
         idaten::Path* paths,
-        const int* __restrict__ hitindices,
-        int* hitnum,
+        const int32_t* __restrict__ hitindices,
+        int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
-        int sample,
-        int frame,
-        int bounce, int rrBounce,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        int32_t sample,
+        int32_t frame,
+        int32_t bounce, int32_t rrBounce,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         cudaTextureObject_t vtxNml,
         const aten::mat4* __restrict__ matrices,
         cudaTextureObject_t* textures,
-        unsigned int* random,
+        uint32_t* random,
         idaten::ShadowRay* shadowRays)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -161,7 +161,7 @@ namespace svgf {
         }
 
         // Apply normal map.
-        int normalMap = shMtrls[threadIdx.x].normalMap;
+        int32_t normalMap = shMtrls[threadIdx.x].normalMap;
         auto pre_sample_r = applyNormal(
             &shMtrls[threadIdx.x],
             normalMap,
@@ -174,17 +174,17 @@ namespace svgf {
 
 #if 1
 #pragma unroll
-        for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+        for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
             shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = false;
         }
 
         // Explicit conection to light.
         if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {
-            for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+            for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
                 // TODO
                 // Importance sampling.
-                int lightidx = aten::cmpMin<int>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
+                int32_t lightidx = aten::cmpMin<int32_t>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
 
                 aten::LightParameter light;
                 light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
@@ -267,26 +267,26 @@ namespace svgf {
         paths->attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
 
 #pragma unroll
-        for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+        for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
             shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i] = shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i];
         }
     }
 
     __global__ void hitShadowRay(
-        int bounce,
+        int32_t bounce,
         idaten::Path* paths,
-        int* hitindices,
-        int* hitnum,
+        int32_t* hitindices,
+        int32_t* hitnum,
         const idaten::ShadowRay* __restrict__ shadowRays,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         aten::MaterialParameter* mtrls,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         const aten::mat4* __restrict__ matrices)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -311,7 +311,7 @@ namespace svgf {
         bool enableLod = (bounce >= 2);
 
 #pragma unroll
-        for (int i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
+        for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
             const auto& shadowRay = shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i];
 
             if (!shadowRay.isActive) {
@@ -335,7 +335,7 @@ namespace svgf {
         float4* aovMomentTemporalWeight,
         const idaten::Path* __restrict__ paths,
         float4* contribs,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -347,7 +347,7 @@ namespace svgf {
         auto idx = getIdx(ix, iy, tileDomain.w);
 
         float4 c = paths->contrib[idx].v;
-        int sample = c.w;
+        int32_t sample = c.w;
 
         float3 contrib = make_float3(c.x, c.y, c.z) / sample;
         //contrib.w = sample;
@@ -393,8 +393,8 @@ namespace svgf {
 namespace idaten
 {
     void SVGFPathTracing::onHitTest(
-        int width, int height,
-        int bounce,
+        int32_t width, int32_t height,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
         if (bounce == 0 && m_canSSRTHitTest) {
@@ -413,9 +413,9 @@ namespace idaten
 
     void SVGFPathTracing::onShade(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
-        int sample,
-        int bounce, int rrBounce,
+        int32_t width, int32_t height,
+        int32_t sample,
+        int32_t bounce, int32_t rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
@@ -443,7 +443,7 @@ namespace idaten
 
         auto& hitcount = m_compaction.getCount();
 
-        int curaov_idx = getCurAovs();
+        int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
         svgf::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
@@ -475,7 +475,7 @@ namespace idaten
     }
 
     void SVGFPathTracing::onShadeByShadowRay(
-        int bounce,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
         dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
@@ -501,15 +501,15 @@ namespace idaten
 
     void SVGFPathTracing::onGather(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
-        int maxSamples)
+        int32_t width, int32_t height,
+        int32_t maxSamples)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov_idx = getCurAovs();
+        int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
         svgf::gather << <grid, block, 0, m_stream >> > (

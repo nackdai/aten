@@ -77,15 +77,15 @@ namespace aten
 
         struct Result {
             vec3 contrib;
-            int x;
-            int y;
+            int32_t x;
+            int32_t y;
 
             union {
                 bool isTerminate;
                 bool isStartFromPixel;
             };
 
-            Result(vec3 c, int _x, int _y, bool _isTerminate)
+            Result(vec3 c, int32_t _x, int32_t _y, bool _isTerminate)
                 : contrib(c), x(_x), y(_y), isTerminate(_isTerminate)
             {}
         };
@@ -93,7 +93,7 @@ namespace aten
         Result genEyePath(
             const context& ctxt,
             std::vector<Vertex>& vs,
-            int x, int y,
+            int32_t x, int32_t y,
             sampler* sampler,
             scene* scene,
             camera* camera) const;
@@ -109,22 +109,22 @@ namespace aten
         real computAreaPdf(
             camera* camera,
             const std::vector<const Vertex*>& vs,
-            const int prev_from_idx,
-            const int from_idx,
-            const int next_idx) const;
+            const int32_t prev_from_idx,
+            const int32_t from_idx,
+            const int32_t next_idx) const;
 
         real computeMISWeight(
             camera* camera,
             real totalAreaPdf,
             const std::vector<Vertex>& eye_vs,
-            int numEyeVtx,
+            int32_t numEyeVtx,
             const std::vector<Vertex>& light_vs,
-            int numLightVtx) const;
+            int32_t numLightVtx) const;
 
         void combine(
             const context& ctxt,
-            int x,
-            int y,
+            int32_t x,
+            int32_t y,
             std::vector<Result>& result,
             const std::vector<Vertex>& eye_vs,
             const std::vector<Vertex>& light_vs,
@@ -134,9 +134,9 @@ namespace aten
         static inline real russianRoulette(const Vertex& vtx);
 
     private:
-        int m_maxDepth{ 1 };
+        int32_t m_maxDepth{ 1 };
 
-        int m_width{ 0 };
-        int m_height{ 0 };
+        int32_t m_width{ 0 };
+        int32_t m_height{ 0 };
     };
 }

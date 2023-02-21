@@ -11,17 +11,17 @@ namespace idaten {
 
     public:
         void init(
-            int maxInputNum,
-            int blockSize);
+            int32_t maxInputNum,
+            int32_t blockSize);
 
         void clear();
 
         void compact(
-            idaten::TypedCudaMemory<int>& dst,
-            idaten::TypedCudaMemory<int>& bools,
-            int* result = nullptr);
+            idaten::TypedCudaMemory<int32_t>& dst,
+            idaten::TypedCudaMemory<int32_t>& bools,
+            int32_t* result = nullptr);
 
-        idaten::TypedCudaMemory<int>& getCount();
+        idaten::TypedCudaMemory<int32_t>& getCount();
 
         void setStream(cudaStream_t stream)
         {
@@ -35,21 +35,21 @@ namespace idaten {
 
     private:
         void scan(
-            const int blocksize,
-            idaten::TypedCudaMemory<int>& src,
-            idaten::TypedCudaMemory<int>& dst);
+            const int32_t blocksize,
+            idaten::TypedCudaMemory<int32_t>& src,
+            idaten::TypedCudaMemory<int32_t>& dst);
 
     private:
-        int m_maxInputNum{ 0 };
-        int m_blockSize{ 0 };
+        int32_t m_maxInputNum{ 0 };
+        int32_t m_blockSize{ 0 };
 
-        idaten::TypedCudaMemory<int> m_increments;
-        idaten::TypedCudaMemory<int> m_tmp;
-        idaten::TypedCudaMemory<int> m_work;
+        idaten::TypedCudaMemory<int32_t> m_increments;
+        idaten::TypedCudaMemory<int32_t> m_tmp;
+        idaten::TypedCudaMemory<int32_t> m_work;
 
-        idaten::TypedCudaMemory<int> m_indices;
-        idaten::TypedCudaMemory<int> m_iota;
-        idaten::TypedCudaMemory<int> m_counts;
+        idaten::TypedCudaMemory<int32_t> m_indices;
+        idaten::TypedCudaMemory<int32_t> m_iota;
+        idaten::TypedCudaMemory<int32_t> m_counts;
 
         cudaStream_t m_stream{ (cudaStream_t)0 };
     };

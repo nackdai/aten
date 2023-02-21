@@ -9,25 +9,25 @@
 namespace idaten
 {
     struct TileDomain {
-        int x;
-        int y;
-        int w;
-        int h;
+        int32_t x;
+        int32_t y;
+        int32_t w;
+        int32_t h;
 
         TileDomain() {}
-        TileDomain(int _x, int _y, int _w, int _h)
+        TileDomain(int32_t _x, int32_t _y, int32_t _w, int32_t _h)
             : x(_x), y(_y), w(_w), h(_h)
         {}
     };
 
     struct EnvmapResource {
-        int idx{ -1 };
+        int32_t idx{ -1 };
         real avgIllum;
         real multiplyer{ real(1) };
 
         EnvmapResource() {}
 
-        EnvmapResource(int i, real illum, real mul = real(1))
+        EnvmapResource(int32_t i, real illum, real mul = real(1))
             : idx(i), avgIllum(illum), multiplyer(mul)
         {}
     };
@@ -40,12 +40,12 @@ namespace idaten
     public:
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) = 0;
+            int32_t maxSamples,
+            int32_t maxBounce) = 0;
 
         virtual void update(
             GLuint gltex,
-            int width, int height,
+            int32_t width, int32_t height,
             const aten::CameraParameter& camera,
             const std::vector<aten::GeomParameter>& shapes,
             const std::vector<aten::MaterialParameter>& mtrls,
@@ -65,7 +65,7 @@ namespace idaten
 
         void viewTextures(
             uint32_t idx,
-            int screenWidth, int screenHeight);
+            int32_t screenWidth, int32_t screenHeight);
 
         uint32_t getRegisteredTextureNum() const
         {

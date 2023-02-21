@@ -119,7 +119,7 @@ namespace AT_NAME
 
         Face face = Face::POS_X;
 
-        for (int i = 0; i < 6; i++) {
+        for (int32_t i = 0; i < 6; i++) {
             if (th <= r1 && r1 < th + d) {
                 face = (Face)i;
                 break;

@@ -32,7 +32,7 @@ namespace aten {
     #define LightAttributeDirectional   aten::LightAttribute{ true,  true,  false }
     #define LightAttributeIBL           aten::LightAttribute{ false, true,  true }
 
-    enum class LightType : int {
+    enum class LightType : int32_t {
         Area,
         IBL,
         Direction,
@@ -77,8 +77,8 @@ namespace aten {
             aten::vec4 v2;
 
             struct{
-                int objid;
-                int idx;
+                int32_t objid;
+                int32_t idx;
             };
         };
 

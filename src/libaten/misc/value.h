@@ -21,7 +21,7 @@ namespace aten {
         {
             *this = f;
         }
-        PolymorphicValue(int i)
+        PolymorphicValue(int32_t i)
         {
             *this = i;
         }
@@ -58,7 +58,7 @@ namespace aten {
             val_ = f;
             return *this;
         }
-        PolymorphicValue& operator=(int i)
+        PolymorphicValue& operator=(int32_t i)
         {
             val_ = i;
             return *this;
@@ -122,12 +122,12 @@ namespace aten {
                 return this->operator vec3();
             }
             else {
-                return this->operator int();
+                return this->operator int32_t();
             }
         }
 
     private:
-        std::variant<real, int, bool, vec4, std::shared_ptr<void>> val_;
+        std::variant<real, int32_t, bool, vec4, std::shared_ptr<void>> val_;
         std::size_t type_hash_{ 0 };
     };
 

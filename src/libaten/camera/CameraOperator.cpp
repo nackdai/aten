@@ -5,8 +5,8 @@
 namespace aten {
     void CameraOperator::move(
         camera& camera,
-        int x1, int y1,
-        int x2, int y2,
+        int32_t x1, int32_t y1,
+        int32_t x2, int32_t y2,
         real scale/*= real(1)*/)
     {
         auto& pos = camera.getPos();
@@ -156,13 +156,13 @@ namespace aten {
         return z;
     }
 
-    static inline real normalizeHorizontal(int x, real width)
+    static inline real normalizeHorizontal(int32_t x, real width)
     {
         real ret = (real(2) * x - width) / width;
         return ret;
     }
 
-    static inline real normalizeVertical(int y, real height)
+    static inline real normalizeVertical(int32_t y, real height)
     {
         real ret = (height - real(2) * y) / height;
         return ret;
@@ -170,9 +170,9 @@ namespace aten {
 
     void CameraOperator::rotate(
         camera& camera,
-        int width, int height,
-        int _x1, int _y1,
-        int _x2, int _y2)
+        int32_t width, int32_t height,
+        int32_t _x1, int32_t _y1,
+        int32_t _x2, int32_t _y2)
     {
         static const real radius = real(0.8);
 

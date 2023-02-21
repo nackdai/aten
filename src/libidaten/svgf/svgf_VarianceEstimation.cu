@@ -17,11 +17,11 @@ __global__ void varianceEstimation(
     float4* aovColorVariance,
     float4* aovTexclrMeshid,
     aten::mat4 mtxC2V,
-    int width, int height,
+    int32_t width, int32_t height,
     float cameraDistance)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= tileDomain.w || iy >= tileDomain.h) {
         return;
@@ -30,7 +30,7 @@ __global__ void varianceEstimation(
     ix += tileDomain.x;
     iy += tileDomain.y;
 
-    const int idx = getIdx(ix, iy, width);
+    const int32_t idx = getIdx(ix, iy, width);
 
     auto normalDepth = aovNormalDepth[idx];
     auto texclrMeshid = aovTexclrMeshid[idx];
@@ -38,7 +38,7 @@ __global__ void varianceEstimation(
     auto centerColor = aovColorVariance[idx];
 
     float centerDepth = aovNormalDepth[idx].w;
-    int centerMeshId = (int)texclrMeshid.w;
+    int32_t centerMeshId = (int32_t)texclrMeshid.w;
 
     if (centerMeshId < 0) {
         // 背景なので、分散はゼロ.
@@ -57,7 +57,7 @@ __global__ void varianceEstimation(
 
     float3 centerMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
-    int frame = (int)centerMoment.z;
+    int32_t frame = (int32_t)centerMoment.z;
 
     centerMoment /= centerMoment.z;
 
@@ -75,22 +75,22 @@ __global__ void varianceEstimation(
 
         float radius = frame > 1 ? 2 : 3;
 
-        for (int v = -radius; v <= radius; v++)
+        for (int32_t v = -radius; v <= radius; v++)
         {
-            for (int u = -radius; u <= radius; u++)
+            for (int32_t u = -radius; u <= radius; u++)
             {
                 if (u != 0 || v != 0) {
-                    int xx = clamp(ix + u, 0, width - 1);
-                    int yy = clamp(iy + v, 0, height - 1);
+                    int32_t xx = clamp(ix + u, 0, width - 1);
+                    int32_t yy = clamp(iy + v, 0, height - 1);
 
-                    int pidx = getIdx(xx, yy, width);
+                    int32_t pidx = getIdx(xx, yy, width);
                     normalDepth = aovNormalDepth[pidx];
                     texclrMeshid = aovTexclrMeshid[pidx];
                     momentTemporalWeight = aovMomentTemporalWeight[pidx];
 
                     float3 sampleNml = make_float3(normalDepth.x, normalDepth.y, normalDepth.z);
                     float sampleDepth = normalDepth.w;
-                    int sampleMeshId = (int)texclrMeshid.w;
+                    int32_t sampleMeshId = (int32_t)texclrMeshid.w;
                     auto sampleColor = aovColorVariance[pidx];
 
                     float3 moment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
@@ -133,7 +133,7 @@ namespace idaten
 {
     void SVGFPathTracing::onVarianceEstimation(
         cudaSurfaceObject_t outputSurf,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -142,7 +142,7 @@ namespace idaten
 
         float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
 
-        int curaov_idx = getCurAovs();
+        int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
         varianceEstimation << <grid, block, 0, m_stream >> > (

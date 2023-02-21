@@ -12,10 +12,10 @@
 __global__ void genMipmap(
     cudaSurfaceObject_t mipOutput,
     cudaTextureObject_t mipInput,
-    int imageW, int imageH)
+    int32_t imageW, int32_t imageH)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t x = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t y = blockIdx.y * blockDim.y + threadIdx.y;
 
     float px = 1.0 / float(imageW);
     float py = 1.0 / float(imageH);
@@ -42,10 +42,10 @@ __global__ void genMipmap(
 namespace idaten {
     void generateMipMaps(
         cudaMipmappedArray_t mipmapArray,
-        int width, int height,
-        int maxLevel)
+        int32_t width, int32_t height,
+        int32_t maxLevel)
     {
-        int level = 0;
+        int32_t level = 0;
 
         //while (width != 1 || height != 1)
         while (level + 1 < maxLevel)

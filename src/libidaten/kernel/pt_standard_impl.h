@@ -40,7 +40,7 @@ namespace idaten {
 
     protected:
         virtual void initSamplerParameter(
-            int width, int height)
+            int32_t width, int32_t height)
         {
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
             m_sobolMatrices.init(AT_COUNTOF(sobol::Matrices::matrices));
@@ -53,34 +53,34 @@ namespace idaten {
         }
 
         virtual bool initPath(
-            int width, int height);
+            int32_t width, int32_t height);
 
         virtual void clearPath();
 
         virtual void generatePath(
             bool needFillAOV,
-            int sample, int maxBounce,
-            int seed,
+            int32_t sample, int32_t maxBounce,
+            int32_t seed,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         virtual void hitTest(
-            int width, int height,
-            int bounce,
+            int32_t width, int32_t height,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         virtual void hitTestOnScreenSpace(
-            int width, int height,
+            int32_t width, int32_t height,
             idaten::CudaGLSurface& gbuffer,
             cudaTextureObject_t texVtxPos);
 
         virtual void missShade(
-            int width, int height,
-            int bounce,
+            int32_t width, int32_t height,
+            int32_t bounce,
             idaten::TypedCudaMemory<float4>& aovNormalDepth,
             idaten::TypedCudaMemory<float4>& aovTexclrMeshid,
-            int offsetX = -1,
-            int offsetY = -1);
+            int32_t offsetX = -1,
+            int32_t offsetY = -1);
 
     protected:
         uint32_t m_frame{ 1 };
@@ -99,16 +99,16 @@ namespace idaten {
         idaten::TypedCudaMemory<aten::Intersection> m_isects;
         idaten::TypedCudaMemory<aten::ray> m_rays;
 
-        idaten::TypedCudaMemory<int> m_hitbools;
-        idaten::TypedCudaMemory<int> m_hitidx;
+        idaten::TypedCudaMemory<int32_t> m_hitbools;
+        idaten::TypedCudaMemory<int32_t> m_hitidx;
 
         idaten::TypedCudaMemory<ShadowRay> m_shadowRays;
 
         // Distance limitation to kill path.
         real m_hitDistLimit{ AT_MATH_INF };
 
-        idaten::TypedCudaMemory<unsigned int> m_sobolMatrices;
-        idaten::TypedCudaMemory<unsigned int> m_random;
+        idaten::TypedCudaMemory<uint32_t> m_sobolMatrices;
+        idaten::TypedCudaMemory<uint32_t> m_random;
 
         bool m_enableEnvmap{ true };
     };

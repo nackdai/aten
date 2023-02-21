@@ -15,7 +15,7 @@ namespace aten
     // http://t-pot.com/program/123_ToneMapping/index.html
 
     std::tuple<real, real> TonemapPreProc::computeAvgAndMaxLum(
-        int width, int height,
+        int32_t width, int32_t height,
         const vec4* src)
     {
         auto threadnum = OMPUtil::getThreadNum();
@@ -26,16 +26,16 @@ namespace aten
 #pragma omp parallel
 #endif
         {
-            int cnt = 0;
+            int32_t cnt = 0;
 
             auto idx = OMPUtil::getThreadIdx();
 
 #ifdef ENABLE_OMP
 #pragma omp for
 #endif
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int pos = y * width + x;
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    int32_t pos = y * width + x;
 
                     const vec3& s = src[pos];
 
@@ -105,9 +105,9 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int h = 0; h < height; h++) {
-            for (int w = 0; w < width; w++) {
-                int pos = h * width + w;
+        for (int32_t h = 0; h < height; h++) {
+            for (int32_t w = 0; w < width; w++) {
+                int32_t pos = h * width + w;
 
                 const vec3& s = src[pos];
                 auto& d = dst[pos];
@@ -126,9 +126,9 @@ namespace aten
 
 #if 0
                 // Convert to uint8.
-                int ir = int(255.9f * rgb.r);
-                int ig = int(255.9f * rgb.g);
-                int ib = int(255.9f * rgb.b);
+                int32_t ir = int32_t(255.9f * rgb.r);
+                int32_t ig = int32_t(255.9f * rgb.g);
+                int32_t ib = int32_t(255.9f * rgb.b);
 
                 d.r = aten::clamp(ir, 0, 255);
                 d.g = aten::clamp(ig, 0, 255);

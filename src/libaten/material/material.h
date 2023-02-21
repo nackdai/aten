@@ -49,7 +49,7 @@ namespace aten
     #define MaterialAttributeRefraction         aten::MaterialAttribute(false, true,  true,  true)
     #define MaterialAttributeTransmission       aten::MaterialAttribute(false, false, true,  false)
 
-    enum class MaterialType : int {
+    enum class MaterialType : int32_t {
         Emissive,
         Lambert,
         OrneNayar,
@@ -244,9 +244,9 @@ namespace aten
         };
 
         struct {
-            int albedoMap;
-            int normalMap;
-            int roughnessMap;
+            int32_t albedoMap;
+            int32_t normalMap;
+            int32_t roughnessMap;
         };
 
         union {
@@ -324,7 +324,7 @@ namespace aten
         virtual bool edit(const char* name, vec3& param) = 0;
         virtual bool edit(const char* name, vec4& param) = 0;
 
-        void editTex(const char* name, int texid)
+        void editTex(const char* name, int32_t texid)
         {
             if (texid >= 0) {
                 /*auto tex = aten::texture::getTexture(texid);
@@ -463,7 +463,7 @@ namespace AT_NAME
             return m_param.baseColor;
         }
 
-        int id() const
+        int32_t id() const
         {
             return m_param.id;
         }
@@ -632,7 +632,7 @@ namespace AT_NAME
 
         static inline AT_DEVICE_MTRL_API real applyNormal(
             const aten::MaterialParameter* mtrl,
-            const int normalMapIdx,
+            const int32_t normalMapIdx,
             const aten::vec3& orgNml,
             aten::vec3& newNml,
             real u, real v,

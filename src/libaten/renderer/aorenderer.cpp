@@ -108,8 +108,8 @@ namespace aten
     {
         frame++;
 
-        int width = dst.width;
-        int height = dst.height;
+        int32_t width = dst.width;
+        int32_t height = dst.height;
 
         auto time = timer::getSystemTime();
 
@@ -124,9 +124,9 @@ namespace aten
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int pos = y * width + x;
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    int32_t pos = y * width + x;
 
 #ifdef RELEASE_DEBUG
                     if (x == BREAK_X && y == BREAK_Y) {

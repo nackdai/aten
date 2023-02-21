@@ -13,7 +13,7 @@ namespace aten
 
     public:
         static std::tuple<real, real> computeAvgAndMaxLum(
-            int width, int height,
+            int32_t width, int32_t height,
             const vec4* src);
 
         virtual void operator()(

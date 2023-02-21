@@ -52,7 +52,7 @@ namespace idaten
             return m_triangles;
         }
 
-        void setVtxOffset(int offset);
+        void setVtxOffset(int32_t offset);
 
     private:
         TypedCudaMemory<aten::SkinningVertex> m_vertices;
@@ -70,7 +70,7 @@ namespace idaten
 
         std::vector<CudaGLBuffer> m_interopVBO;
 
-        int m_prevVtxOffset{ 0 };
-        int m_curVtxOffset{ 0 };
+        int32_t m_prevVtxOffset{ 0 };
+        int32_t m_curVtxOffset{ 0 };
     };
 }

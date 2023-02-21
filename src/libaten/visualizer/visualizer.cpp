@@ -14,7 +14,7 @@ namespace aten
         return m_fmt;
     }
 
-    static GLuint createTexture(int width, int height, PixelFormat fmt)
+    static GLuint createTexture(int32_t width, int32_t height, PixelFormat fmt)
     {
         GLuint tex = 0;
 
@@ -57,7 +57,7 @@ namespace aten
         return m_tex;
     }
 
-    std::shared_ptr<visualizer> visualizer::init(int width, int height)
+    std::shared_ptr<visualizer> visualizer::init(int32_t width, int32_t height)
     {
         auto ret = std::make_shared<visualizer>();
 
@@ -114,7 +114,7 @@ namespace aten
             const vec4* src = (const vec4*)textureimage;
             vec4* dst = nullptr;
 
-            for (int i = 0; i < m_preprocs.size(); i++) {
+            for (int32_t i = 0; i < m_preprocs.size(); i++) {
                 auto& buf = m_preprocBuffer[bufpos];
                 if (buf.empty()) {
                     buf.resize(m_width * m_height);
@@ -146,9 +146,9 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < m_height; y++) {
-            for (int x = 0; x < m_width; x++) {
-                int pos = y * m_width + x;
+        for (int32_t y = 0; y < m_height; y++) {
+            for (int32_t x = 0; x < m_width; x++) {
+                int32_t pos = y * m_width + x;
 
                 auto& s = src[pos];
                 auto& d = m_tmp[pos];
@@ -198,7 +198,7 @@ namespace aten
 
         bool willRevert = revert;
 
-        for (int i = 0; i < m_postprocs.size(); i++) {
+        for (int32_t i = 0; i < m_postprocs.size(); i++) {
             auto* postproc = m_postprocs[i];
             PostProc* prevPostproc = nullptr;
 
@@ -256,7 +256,7 @@ namespace aten
 
         bool willRevert = revert;
 
-        for (int i = 0; i < m_postprocs.size(); i++) {
+        for (int32_t i = 0; i < m_postprocs.size(); i++) {
             auto* postproc = m_postprocs[i];
             PostProc* prevPostproc = nullptr;
 
@@ -349,15 +349,15 @@ namespace aten
         // up-side-down.
         std::vector<ScreenShotImageType> dst(width * height);
 
-        static const int bpp = sizeof(ScreenShotImageType);
-        const int pitch = width * bpp;
+        static const int32_t bpp = sizeof(ScreenShotImageType);
+        const int32_t pitch = width * bpp;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
         // NOTE
         // index variable in OpenMP 'for' statement must have signed integral type
-        for (int y = 0; y < height; y++) {
+        for (int32_t y = 0; y < height; y++) {
             auto yy = height - 1 - y;
 
             memcpy(

@@ -102,7 +102,7 @@ namespace idaten
 
     void CudaTexture::init(
         const aten::vec4* p,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         // NOTE
         // http://www.slis.tsukuba.ac.jp/~fujisawa.makoto.fu/cgi-bin/wiki/index.php?%A5%EA%A5%CB%A5%A2%A5%E1%A5%E2%A5%EA%A4%C8CUDA%C7%DB%CE%F3
@@ -206,11 +206,11 @@ namespace idaten
 
     ////////////////////////////////////////////////////////////////////////////////////
 
-    static inline int getMipMapLevels(int width, int height)
+    static inline int32_t getMipMapLevels(int32_t width, int32_t height)
     {
-        int sz = std::max(width, height);
+        int32_t sz = std::max(width, height);
 
-        int levels = 0;
+        int32_t levels = 0;
 
         while (sz)
         {
@@ -223,8 +223,8 @@ namespace idaten
 
     void CudaTexture::initAsMipmap(
         const aten::vec4* p,
-        int width, int height,
-        int level)
+        int32_t width, int32_t height,
+        int32_t level)
     {
         level = std::min(level, getMipMapLevels(width, height));
 

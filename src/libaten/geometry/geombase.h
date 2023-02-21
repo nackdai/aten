@@ -8,19 +8,19 @@ namespace aten
 {
     class geombase {
     protected:
-        static std::atomic<int> g_id;
+        static std::atomic<int32_t> g_id;
 
         geombase();
         virtual ~geombase() {}
 
     public:
-        int getGeomId() const
+        int32_t getGeomId() const
         {
             return m_geomid;
         }
 
     protected:
-        int m_geomid{ -1 };
+        int32_t m_geomid{ -1 };
     };
 
     template <typename INHERIT>
@@ -30,7 +30,7 @@ namespace aten
         virtual ~geom() {}
 
     public:
-        virtual int geomid() const override
+        virtual int32_t geomid() const override
         {
             return m_geomid;
         }

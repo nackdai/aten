@@ -74,14 +74,14 @@ namespace idaten
 
         if (resultHostKeys) {
             thrust::host_vector<uint32_t> hostKeys = deviceKeys;
-            for (int i = 0; i < num; i++) {
+            for (int32_t i = 0; i < num; i++) {
                 resultHostKeys->push_back(hostKeys[i]);
             }
         }
 
         if (resultHostValues) {
             thrust::host_vector<uint32_t> hostValues = deviceValues;
-            for (int i = 0; i < num; i++) {
+            for (int32_t i = 0; i < num; i++) {
                 resultHostValues->push_back(hostValues[i]);
             }
         }

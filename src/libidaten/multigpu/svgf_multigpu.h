@@ -19,10 +19,10 @@ namespace idaten
     public:
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) override final;
+            int32_t maxSamples,
+            int32_t maxBounce) override final;
 
-        virtual void postRender(int width, int height) override final;
+        virtual void postRender(int32_t width, int32_t height) override final;
 
     protected:
         void copy(
@@ -32,9 +32,9 @@ namespace idaten
     private:
         void onRender(
             const TileDomain& tileDomain,
-            int width, int height,
-            int maxSamples,
-            int maxBounce,
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
             cudaSurfaceObject_t outputSurf,
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);

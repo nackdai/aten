@@ -20,8 +20,8 @@ namespace AT_NAME
 
         param.area = 0;
 
-        int mtrlid = getMaterial()->id();
-        int geomid = getGeomId();
+        int32_t mtrlid = getMaterial()->id();
+        int32_t geomid = getGeomId();
 
         for (const auto f : faces) {
             f->build(ctxt, mtrlid, geomid);
@@ -59,11 +59,11 @@ namespace AT_NAME
     {
         const auto& faceParam = f->getParam();
 
-        int idx0 = faceParam.idx[0];
-        int idx1 = faceParam.idx[1];
-        int idx2 = faceParam.idx[2];
+        int32_t idx0 = faceParam.idx[0];
+        int32_t idx1 = faceParam.idx[1];
+        int32_t idx2 = faceParam.idx[2];
 
-        int baseIdx = std::min(idx0, std::min(idx1, idx2));
+        int32_t baseIdx = std::min(idx0, std::min(idx1, idx2));
         m_baseIdx = std::min(baseIdx, m_baseIdx);
 
         faces.push_back(f);
@@ -76,7 +76,7 @@ namespace AT_NAME
         const context& ctxt,
         const aten::mat4& mtxL2W,
         const aten::mat4& mtxPrevL2W,
-        int parentId)
+        int32_t parentId)
     {
         if (func) {
             func(mtxL2W, mtxPrevL2W, parentId, m_baseTriIdx);
@@ -94,7 +94,7 @@ namespace AT_NAME
         const context& ctxt)
     {
         if (func) {
-            int albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
+            int32_t albedoTexId = m_mtrl ? m_mtrl->param().albedoMap : -1;
             const auto albedo = albedoTexId >= 0 ? ctxt.getTexture(albedoTexId) : nullptr;
 
             auto color = m_mtrl ? m_mtrl->param().baseColor : vec3(1);

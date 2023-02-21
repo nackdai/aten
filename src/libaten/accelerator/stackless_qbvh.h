@@ -132,17 +132,17 @@ namespace aten {
         void fillQbvhNode(
             StacklessQbvhNode& qbvhNode,
             std::vector<BvhNode>& listBvhNode,
-            int children[4],
-            int numChildren);
+            int32_t children[4],
+            int32_t numChildren);
 
-        int getChildren(
+        int32_t getChildren(
             std::vector<BvhNode>& listBvhNode,
-            int bvhNodeIdx,
-            int children[4]);
+            int32_t bvhNodeIdx,
+            int32_t children[4]);
 
         bool hit(
             const context& ctxt,
-            int exid,
+            int32_t exid,
             const std::vector<std::vector<StacklessQbvhNode>>& listQbvhNode,
             const ray& r,
             real t_min, real t_max,

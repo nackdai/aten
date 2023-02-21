@@ -8,7 +8,7 @@ namespace aten {
 
     void initSampler(
         uint32_t width, uint32_t height,
-        int seed/*= 0*/,
+        int32_t seed/*= 0*/,
         bool needInitHalton/*= false*/)
     {
         // TODO

@@ -3,8 +3,8 @@
 
 namespace aten {
     bool FBO::init(
-        int width,
-        int height,
+        int32_t width,
+        int32_t height,
         PixelFormat fmt,
         bool needDepth/*= false*/)
     {
@@ -21,7 +21,7 @@ namespace aten {
 
         CALL_GL_API(glGenTextures(m_num, &m_tex[0]));
 
-        for (int i = 0; i < m_num; i++) {
+        for (int32_t i = 0; i < m_num; i++) {
             CALL_GL_API(glBindTexture(GL_TEXTURE_2D, m_tex[i]));
 
             GLenum pixelfmt = 0;
@@ -91,7 +91,7 @@ namespace aten {
         }
         else {
             if (m_comps.empty()) {
-                for (int i = 0; i < m_num; i++) {
+                for (int32_t i = 0; i < m_num; i++) {
                     CALL_GL_API(glFramebufferTexture2D(
                         GL_FRAMEBUFFER,
                         GL_COLOR_ATTACHMENT0 + i,

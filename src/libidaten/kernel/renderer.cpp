@@ -3,7 +3,7 @@
 namespace idaten {
     void Renderer::update(
         GLuint gltex,
-        int width, int height,
+        int32_t width, int32_t height,
         const aten::CameraParameter& camera,
         const std::vector<aten::GeomParameter>& shapes,
         const std::vector<aten::MaterialParameter>& mtrls,
@@ -64,7 +64,7 @@ namespace idaten {
         }
 
         m_nodeparam.resize(nodes.size());
-        for (int i = 0; i < nodes.size(); i++) {
+        for (int32_t i = 0; i < nodes.size(); i++) {
             if (!nodes[i].empty()) {
                 m_nodeparam[i].init(
                     (aten::vec4*)&nodes[i][0],
@@ -101,7 +101,7 @@ namespace idaten {
         }
 
         if (!texs.empty()) {
-            for (int i = 0; i < texs.size(); i++) {
+            for (int32_t i = 0; i < texs.size(); i++) {
                 m_texRsc.push_back(idaten::CudaTexture());
 
                 // TODO

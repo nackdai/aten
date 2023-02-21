@@ -53,7 +53,7 @@ namespace aten
     BDPT::Result BDPT::genEyePath(
         const context& ctxt,
         std::vector<Vertex>& vs,
-        int x, int y,
+        int32_t x, int32_t y,
         sampler* sampler,
         scene* scene,
         camera* camera) const
@@ -76,7 +76,7 @@ namespace aten
             nullptr,
             0, 0));
 
-        int depth = 0;
+        int32_t depth = 0;
 
         ray ray = camsample.r;
 
@@ -272,7 +272,7 @@ namespace aten
         // 本当は次の頂点（y1）が決まらないと光源からその方向への放射輝度値は決まらないが、今回は完全拡散光源を仮定しているので、方向に依らずに一定の値になる.
         vec3 throughput = light->getLe();
 
-        int depth = 0;
+        int32_t depth = 0;
 
         // 完全拡散光源を仮定しているので、Diffuse面におけるサンプリング方法と同じものをつかって次の方向を決める.
         nmlOnLight = normalize(nmlOnLight);
@@ -295,8 +295,8 @@ namespace aten
                 vec3 posOnImageSensor;
                 vec3 posOnLens;
                 vec3 posOnObjectPlane;
-                int pixelx;
-                int pixely;
+                int32_t pixelx;
+                int32_t pixely;
 
                 // レンズと交差判定.
                 auto lens_t = camera->hitOnLens(
@@ -459,9 +459,9 @@ namespace aten
     real BDPT::computAreaPdf(
         camera* camera,
         const std::vector<const Vertex*>& vs,
-        const int prev_idx,            // 頂点curの前の頂点のインデックス.
-        const int cur_idx,          // 頂点curのインデックス.
-        const int next_idx) const   // 頂点nextのインデックス.
+        const int32_t prev_idx,            // 頂点curの前の頂点のインデックス.
+        const int32_t cur_idx,          // 頂点curのインデックス.
+        const int32_t next_idx) const   // 頂点nextのインデックス.
     {
         const Vertex& curVtx = *vs[cur_idx];
         const Vertex& nextVtx = *vs[next_idx];
@@ -499,7 +499,7 @@ namespace aten
             vec3 posOnLens;
             vec3 posOnObjectplane;
             vec3 posOnImagesensor;
-            int x, y;
+            int32_t x, y;
 
             auto lens_t = camera->hitOnLens(
                 r,
@@ -596,9 +596,9 @@ namespace aten
         camera* camera,
         real totalAreaPdf,
         const std::vector<Vertex>& eye_vs,
-        int numEyeVtx,
+        int32_t numEyeVtx,
         const std::vector<Vertex>& light_vs,
-        int numLightVtx) const
+        int32_t numLightVtx) const
     {
         // NOTE
         // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
@@ -618,17 +618,17 @@ namespace aten
         // vs[0] = y0, vs[1] = y1, ... vs[k-1] = x1, vs[k] = x0
 
         // lightサブパス.
-        for (int i = 0; i < numLightVtx; ++i) {
+        for (int32_t i = 0; i < numLightVtx; ++i) {
             vs[i] = &light_vs[i];
         }
 
         // eyeサブパス.
-        for (int i = numEyeVtx - 1; i >= 0; --i) {
+        for (int32_t i = numEyeVtx - 1; i >= 0; --i) {
             vs[numLightVtx + numEyeVtx - 1 - i] = &eye_vs[i];
         }
 
         // 終点のインデックス.
-        const int k = numLightVtx + numEyeVtx - 1;
+        const int32_t k = numLightVtx + numEyeVtx - 1;
 
         // pi1/pi を計算.
         std::vector<real> pi1_pi(numLightVtx + numEyeVtx);
@@ -641,7 +641,7 @@ namespace aten
             }
 
             // ロシアンルーレットの確率は打ち消しあうのでいらない？
-            for (int i = 1; i < k; i++)
+            for (int32_t i = 1; i < k; i++)
             {
                 auto a = computAreaPdf(camera, vs, i - 2, i - 1, i);
                 auto b = computAreaPdf(camera, vs, i + 2, i + 1, i);
@@ -665,16 +665,16 @@ namespace aten
             // 真ん中を起点に半分ずつ計算.
 
             // lightサブパス.
-            for (int i = numLightVtx; i <= k; ++i) {
+            for (int32_t i = numLightVtx; i <= k; ++i) {
                 p[i + 1] = p[i] * pi1_pi[i];
             }
 
             // eyeサブパス.
-            for (int i = numLightVtx - 1; i >= 0; --i) {
+            for (int32_t i = numLightVtx - 1; i >= 0; --i) {
                 p[i] = p[i + 1] / pi1_pi[i];
             }
 
-            for (int i = 0; i < vs.size(); ++i) {
+            for (int32_t i = 0; i < vs.size(); ++i) {
                 const auto& vtx = *vs[i];
 
                 // 方向が一意に決まるので、影響を及ぼさない.
@@ -687,7 +687,7 @@ namespace aten
 
         // Power-heuristic
         real misWeight = real(0);
-        for (int i = 0; i < p.size(); ++i) {
+        for (int32_t i = 0; i < p.size(); ++i) {
             const real v = p[i] / p[numLightVtx];
             misWeight += v * v; // beta = 2
         }
@@ -701,23 +701,23 @@ namespace aten
 
     void BDPT::combine(
         const context& ctxt,
-        int x,
-        int y,
+        int32_t x,
+        int32_t y,
         std::vector<Result>& result,
         const std::vector<Vertex>& eye_vs,
         const std::vector<Vertex>& light_vs,
         scene* scene,
         camera* camera) const
     {
-        const int eyeNum = (int)eye_vs.size();
-        const int lightNum = (int)light_vs.size();
+        const int32_t eyeNum = (int32_t)eye_vs.size();
+        const int32_t lightNum = (int32_t)light_vs.size();
 
-        for (int numEyeVtx = 1; numEyeVtx <= eyeNum; ++numEyeVtx)
+        for (int32_t numEyeVtx = 1; numEyeVtx <= eyeNum; ++numEyeVtx)
         {
-            for (int numLightVtx = 1; numLightVtx <= lightNum; ++numLightVtx)
+            for (int32_t numLightVtx = 1; numLightVtx <= lightNum; ++numLightVtx)
             {
-                int targetX = x;
-                int targetY = y;
+                int32_t targetX = x;
+                int32_t targetY = y;
 
                 // それぞれのパスの端点.
                 const Vertex& eye_end = eye_vs[numEyeVtx - 1];
@@ -762,7 +762,7 @@ namespace aten
                         vec3 posOnLens;
                         vec3 posOnObjectplane;
                         vec3 posOnImagesensor;
-                        int px, py;
+                        int32_t px, py;
 
                         const auto lens_t = camera->hitOnLens(
                             r,
@@ -920,9 +920,9 @@ namespace aten
 #if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
 #pragma omp for
 #endif
-            for (int y = 0; y < m_height; y++) {
-                for (int x = 0; x < m_width; x++) {
-                    int pos = y * m_width + x;
+            for (int32_t y = 0; y < m_height; y++) {
+                for (int32_t x = 0; x < m_width; x++) {
+                    int32_t pos = y * m_width + x;
 
                     for (uint32_t i = 0; i < samples; i++) {
                         auto scramble = aten::getRandom(pos) * 0x1fe3434f;
@@ -943,7 +943,7 @@ namespace aten
 
 #if 0
                         if (eyeRes.isTerminate) {
-                            int pos = eyeRes.y * m_width + eyeRes.x;
+                            int32_t pos = eyeRes.y * m_width + eyeRes.x;
                             image[idx][pos] += vec4(eyeRes.contrib, 1);
                         }
 #else
@@ -957,7 +957,7 @@ namespace aten
                                     camera,
                                     eyevs[eyevs.size() - 1].totalAreaPdf,
                                     eyevs,
-                                    (const int)eyevs.size(),   // num_eye_vertex
+                                    (const int32_t)eyevs.size(),   // num_eye_vertex
                                     lightvs,
                                     0);                         // num_light_vertex
 
@@ -972,7 +972,7 @@ namespace aten
                                     eyevs,
                                     0,                            // num_eye_vertex
                                     lightvs,
-                                    (const int)lightvs.size());    // num_light_vertex
+                                    (const int32_t)lightvs.size());    // num_light_vertex
 
                                 const vec3 contrib = misWeight * lightRes.contrib;
                                 result.push_back(Result(contrib, lightRes.x, lightRes.y, false));
@@ -988,7 +988,7 @@ namespace aten
                                 camera);
 
 #if 1
-                            for (int i = 0; i < (int)result.size(); i++) {
+                            for (int32_t i = 0; i < (int32_t)result.size(); i++) {
                                 const auto& res = result[i];
 
                                 // TODO
@@ -999,7 +999,7 @@ namespace aten
                                     continue;
                                 }
 
-                                const int pos = res.y * m_width + res.x;
+                                const int32_t pos = res.y * m_width + res.x;
 
                                 if (res.isStartFromPixel) {
                                     image[idx][pos] += vec4(res.contrib, 1);
@@ -1027,9 +1027,9 @@ namespace aten
 
         for (decltype(threadnum) i = 0; i < threadnum; i++) {
             auto& img = image[i];
-            for (int y = 0; y < m_height; y++) {
-                for (int x = 0; x < m_width; x++) {
-                    int pos = y * m_width + x;
+            for (int32_t y = 0; y < m_height; y++) {
+                for (int32_t x = 0; x < m_width; x++) {
+                    int32_t pos = y * m_width + x;
 
                     auto clr = img[pos] / static_cast<real>(samples);
                     clr.w = 1;
@@ -1042,9 +1042,9 @@ namespace aten
 #if defined(ENABLE_OMP) && !defined(BDPT_DEBUG)
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < m_height; y++) {
-            for (int x = 0; x < m_width; x++) {
-                int pos = y * m_width + x;
+        for (int32_t y = 0; y < m_height; y++) {
+            for (int32_t x = 0; x < m_width; x++) {
+                int32_t pos = y * m_width + x;
 
                 auto clr = tmp[pos];
                 clr.w = 1;

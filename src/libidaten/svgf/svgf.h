@@ -36,17 +36,17 @@ namespace idaten
             AT_DEVICE_API AOVMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
         };
 
-        static const int ShadowRayNum = 2;
+        static const int32_t ShadowRayNum = 2;
 
         struct PickedInfo {
-            int ix{ -1 };
-            int iy{ -1 };
+            int32_t ix{ -1 };
+            int32_t iy{ -1 };
             aten::vec3 color;
             aten::vec3 normal;
             float depth;
-            int meshid;
-            int triid;
-            int mtrlid;
+            int32_t meshid;
+            int32_t triid;
+            int32_t mtrlid;
         };
 
     public:
@@ -56,12 +56,12 @@ namespace idaten
     public:
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) override;
+            int32_t maxSamples,
+            int32_t maxBounce) override;
 
         virtual void update(
             GLuint gltex,
-            int width, int height,
+            int32_t width, int32_t height,
             const aten::CameraParameter& camera,
             const std::vector<aten::GeomParameter>& shapes,
             const std::vector<aten::MaterialParameter>& mtrls,
@@ -118,7 +118,7 @@ namespace idaten
             m_curAOVPos = 0;
         }
 
-        void willPickPixel(int ix, int iy)
+        void willPickPixel(int32_t ix, int32_t iy)
         {
             m_willPicklPixel = true;
             m_pickedInfo.ix = ix;
@@ -177,30 +177,30 @@ namespace idaten
     protected:
         void onRender(
             const TileDomain& tileDomain,
-            int width, int height,
-            int maxSamples,
-            int maxBounce,
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
             cudaSurfaceObject_t outputSurf,
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);
 
         virtual void onDenoise(
             const TileDomain& tileDomain,
-            int width, int height,
+            int32_t width, int32_t height,
             cudaSurfaceObject_t outputSurf);
 
         virtual void onHitTest(
-            int width, int height,
-            int bounce,
+            int32_t width, int32_t height,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         void missShade(
-            int width, int height,
-            int bounce,
-            int offsetX = -1,
-            int offsetY = -1)
+            int32_t width, int32_t height,
+            int32_t bounce,
+            int32_t offsetX = -1,
+            int32_t offsetY = -1)
         {
-            int curaov_idx = getCurAovs();
+            int32_t curaov_idx = getCurAovs();
             auto& curaov = aov_[curaov_idx];
 
             StandardPT::missShade(
@@ -213,58 +213,58 @@ namespace idaten
 
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int sample,
-            int bounce, int rrBounce,
+            int32_t width, int32_t height,
+            int32_t sample,
+            int32_t bounce, int32_t rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         void onShadeByShadowRay(
-            int bounce,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int maxSamples);
+            int32_t width, int32_t height,
+            int32_t maxSamples);
 
         void onTemporalReprojection(
             cudaSurfaceObject_t outputSurf,
-            int width, int height);
+            int32_t width, int32_t height);
 
         void onVarianceEstimation(
             cudaSurfaceObject_t outputSurf,
-            int width, int height);
+            int32_t width, int32_t height);
 
         void onAtrousFilter(
             cudaSurfaceObject_t outputSurf,
-            int width, int height);
+            int32_t width, int32_t height);
 
         void onAtrousFilterIter(
             uint32_t iterCnt,
             uint32_t maxIterCnt,
             cudaSurfaceObject_t outputSurf,
-            int width, int height);
+            int32_t width, int32_t height);
 
-        void onCopyFromTmpBufferToAov(int width, int height);
+        void onCopyFromTmpBufferToAov(int32_t width, int32_t height);
 
         void onDisplayAOV(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
+            int32_t width, int32_t height,
             cudaTextureObject_t texVtxPos);
 
-        void onCopyBufferForTile(int width, int height);
+        void onCopyBufferForTile(int32_t width, int32_t height);
 
         void pick(
-            int ix, int iy,
-            int width, int height,
+            int32_t ix, int32_t iy,
+            int32_t width, int32_t height,
             cudaTextureObject_t texVtxPos);
 
-        int getCurAovs()
+        int32_t getCurAovs()
         {
             return m_curAOVPos;
         }
-        int getPrevAovs()
+        int32_t getPrevAovs()
         {
             return 1 - m_curAOVPos;
         }
@@ -278,7 +278,7 @@ namespace idaten
 
     protected:
         // Current AOV buffer position.
-        int m_curAOVPos{ 0 };
+        int32_t m_curAOVPos{ 0 };
 
         struct AOVBuffer : public AT_NAME::AOVBufferType {
             enum Type {

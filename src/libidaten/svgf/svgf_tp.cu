@@ -12,9 +12,9 @@
 //#define ENABLE_MEDIAN_FILTER
 
 inline __device__ void computePrevScreenPos(
-    int ix, int iy,
+    int32_t ix, int32_t iy,
     float centerDepth,
-    int width, int height,
+    int32_t width, int32_t height,
     aten::vec4* prevPos,
     const aten::mat4* __restrict__ mtxs)
 {
@@ -62,9 +62,9 @@ inline __device__ void computePrevScreenPos(
     *prevPos = *prevPos * 0.5 + 0.5;    // [-1, 1] -> [0, 1]
 }
 
-inline __device__ int getLinearIdx(int x, int y, int w, int h)
+inline __device__ int32_t getLinearIdx(int32_t x, int32_t y, int32_t w, int32_t h)
 {
-    int max_buffer_size = w * h;
+    int32_t max_buffer_size = w * h;
     return clamp(y * w + x, 0, max_buffer_size - 1);
 }
 
@@ -72,18 +72,18 @@ inline __device__ int getLinearIdx(int x, int y, int w, int h)
 inline __device__ float4 sampleBilinear(
     const float4* buffer,
     float uvx, float uvy,
-    int w, int h)
+    int32_t w, int32_t h)
 {
     float2 uv = make_float2(uvx, uvy) * make_float2(w, h) - make_float2(0.5f, 0.5f);
 
-    int x = floor(uv.x);
-    int y = floor(uv.y);
+    int32_t x = floor(uv.x);
+    int32_t y = floor(uv.y);
 
     float2 uv_ratio = uv - make_float2(x, y);
     float2 uv_inv = make_float2(1.f, 1.f) - uv_ratio;
 
-    int x1 = clamp(x + 1, 0, w - 1);
-    int y1 = clamp(y + 1, 0, h - 1);
+    int32_t x1 = clamp(x + 1, 0, w - 1);
+    int32_t y1 = clamp(y + 1, 0, h - 1);
 
     float4 r = (buffer[getLinearIdx(x, y, w, h)] * uv_inv.x + buffer[getLinearIdx(x1, y, w, h)] * uv_ratio.x) * uv_inv.y +
         (buffer[getLinearIdx(x, y1, w, h)] * uv_inv.x + buffer[getLinearIdx(x1, y1, w, h)] * uv_ratio.x) * uv_ratio.y;
@@ -107,10 +107,10 @@ __global__ void temporalReprojection(
     const float4* __restrict__ prevAovMomentTemporalWeight,
     cudaSurfaceObject_t motionDetphBuffer,
     cudaSurfaceObject_t dst,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= tileDomain.w || iy >= tileDomain.h) {
         return;
@@ -125,7 +125,7 @@ __global__ void temporalReprojection(
     auto texclrMeshId = curAovTexclrMeshid[idx];
 
     const float centerDepth = nmlDepth.w;
-    const int centerMeshId = (int)texclrMeshId.w;
+    const int32_t centerMeshId = (int32_t)texclrMeshId.w;
 
     // 今回のフレームのピクセルカラー.
     auto contrib = contribs[idx];
@@ -154,28 +154,28 @@ __global__ void temporalReprojection(
     aten::vec4 centerPrevPos;
 
 #pragma unroll
-    for (int y = -1; y <= 1; y++) {
-        for (int x = -1; x <= 1; x++) {
-            int xx = clamp(ix + x, 0, width - 1);
-            int yy = clamp(iy + y, 0, height - 1);
+    for (int32_t y = -1; y <= 1; y++) {
+        for (int32_t x = -1; x <= 1; x++) {
+            int32_t xx = clamp(ix + x, 0, width - 1);
+            int32_t yy = clamp(iy + y, 0, height - 1);
 
             float4 motionDepth;
             surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
 
             // 前のフレームのスクリーン座標.
-            int px = (int)(xx + motionDepth.x * width);
-            int py = (int)(yy + motionDepth.y * height);
+            int32_t px = (int32_t)(xx + motionDepth.x * width);
+            int32_t py = (int32_t)(yy + motionDepth.y * height);
 
             px = clamp(px, 0, width - 1);
             py = clamp(py, 0, height - 1);
 
-            int pidx = getIdx(px, py, width);
+            int32_t pidx = getIdx(px, py, width);
 
             nmlDepth = prevAovNormalDepth[pidx];
             texclrMeshId = prevAovTexclrMeshid[pidx];
 
             const float prevDepth = nmlDepth.w;
-            const int prevMeshId = (int)texclrMeshId.w;
+            const int32_t prevMeshId = (int32_t)texclrMeshId.w;
             float3 prevNormal = make_float3(nmlDepth.x, nmlDepth.y, nmlDepth.z);
 
             // TODO
@@ -231,14 +231,14 @@ __global__ void temporalReprojection(
         float3 centerMoment = make_float3(lum * lum, lum, 0);
 
         // 積算フレーム数のリセット.
-        int frame = 1;
+        int32_t frame = 1;
 
         if (weight > 0.0f) {
             auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
             float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
             // 積算フレーム数を１増やす.
-            frame = (int)prevMoment.z + 1;
+            frame = (int32_t)prevMoment.z + 1;
 
             centerMoment += prevMoment;
         }
@@ -262,10 +262,10 @@ __global__ void dilateWeight(
     idaten::TileDomain tileDomain,
     float4* aovMomentTemporalWeight,
     const float4* __restrict__ aovTexclrMeshid,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= tileDomain.w || iy >= tileDomain.h) {
         return;
@@ -276,7 +276,7 @@ __global__ void dilateWeight(
 
     auto idx = getIdx(ix, iy, width);
 
-    const int centerMeshId = (int)aovTexclrMeshid[idx].w;
+    const int32_t centerMeshId = (int32_t)aovTexclrMeshid[idx].w;
 
     if (centerMeshId < 0) {
         // This pixel is background, so nothing is done.
@@ -285,15 +285,15 @@ __global__ void dilateWeight(
 
     float temporalWeight = aovMomentTemporalWeight[idx].w;
 
-    for (int y = -1; y <= 1; y++) {
-        for (int x = -1; x <= 1; x++) {
-            int xx = ix + x;
-            int yy = iy + y;
+    for (int32_t y = -1; y <= 1; y++) {
+        for (int32_t x = -1; x <= 1; x++) {
+            int32_t xx = ix + x;
+            int32_t yy = iy + y;
 
             if ((0 <= xx) && (xx < width)
                 && (0 <= yy) && (yy < height))
             {
-                int pidx = getIdx(xx, yy, width);
+                int32_t pidx = getIdx(xx, yy, width);
                 float w = aovMomentTemporalWeight[pidx].w;
                 temporalWeight = min(temporalWeight, w);
             }
@@ -330,20 +330,20 @@ inline __device__ float3 max(float3 a, float3 b)
 #define mnmx6(a, b, c, d, e, f) s2(a, d); s2(b, e); s2(c, f); mn3(a, b, c); mx3(d, e, f); // 7 exchanges
 
 inline __device__ float3 medianFilter(
-    int ix, int iy,
+    int32_t ix, int32_t iy,
     const float4* src,
-    int width, int height)
+    int32_t width, int32_t height)
 {
     float3 v[9];
 
-    int pos = 0;
+    int32_t pos = 0;
 
-    for (int y = -1; y <= 1; y++) {
-        for (int x = -1; x <= 1; x++) {
-            int xx = clamp(ix + x, 0, width - 1);
-            int yy = clamp(iy + y, 0, height - 1);
+    for (int32_t y = -1; y <= 1; y++) {
+        for (int32_t x = -1; x <= 1; x++) {
+            int32_t xx = clamp(ix + x, 0, width - 1);
+            int32_t yy = clamp(iy + y, 0, height - 1);
 
-            int pidx = getIdx(xx, yy, width);
+            int32_t pidx = getIdx(xx, yy, width);
 
             auto s = src[pidx];
             v[pos] = make_float3(s.x, s.y, s.z);
@@ -368,10 +368,10 @@ __global__ void medianFilter(
     float4* curAovMomentTemporalWeight,
     const float4* __restrict__ curAovTexclrMeshid,
     const float4* __restrict__ prevAovMomentTemporalWeight,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= width || iy >= height) {
         return;
@@ -379,7 +379,7 @@ __global__ void medianFilter(
 
     auto idx = getIdx(ix, iy, width);
 
-    const int centerMeshId = curAovTexclrMeshid[idx].w;
+    const int32_t centerMeshId = curAovTexclrMeshid[idx].w;
 
     if (centerMeshId < 0) {
         // This pixel is background, so nothing is done.
@@ -398,13 +398,13 @@ __global__ void medianFilter(
         float3 centerMoment = make_float3(lum * lum, lum, 0);
 
         // 積算フレーム数のリセット.
-        int frame = 1;
+        int32_t frame = 1;
 
         auto momentTemporalWeight = prevAovMomentTemporalWeight[idx];;
         float3 prevMoment = make_float3(momentTemporalWeight.x, momentTemporalWeight.y, momentTemporalWeight.z);
 
         // 積算フレーム数を１増やす.
-        frame = (int)prevMoment.z + 1;
+        frame = (int32_t)prevMoment.z + 1;
 
         centerMoment += prevMoment;
 
@@ -426,17 +426,17 @@ namespace idaten
 {
     void SVGFPathTracing::onTemporalReprojection(
         cudaSurfaceObject_t outputSurf,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        int curaov_idx = getCurAovs();
+        int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
-        int prevaov_idx = getPrevAovs();
+        int32_t prevaov_idx = getPrevAovs();
         auto& prevaov = aov_[prevaov_idx];
 
         CudaGLResourceMapper<decltype(m_motionDepthBuffer)> rscmap(m_motionDepthBuffer);

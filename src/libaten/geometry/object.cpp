@@ -244,23 +244,6 @@ namespace AT_NAME
         return m_accel->importTree(ctxt, path, offsetTriIdx);
     }
 
-    void object::gatherTrianglesAndMaterials(
-        std::vector<std::vector<AT_NAME::face*>>& tris,
-        std::vector<AT_NAME::material*>& mtrls)
-    {
-        tris.resize(m_shapes.size());
-
-        for (int32_t i = 0; i < m_shapes.size(); i++) {
-            auto& shape = m_shapes[i];
-
-            for (auto face : shape->faces) {
-                tris[i].push_back(face.get());
-            }
-
-            mtrls.push_back(shape->m_mtrl.get());
-        }
-    }
-
     void object::collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
     {
         for (const auto& objshape : m_shapes) {

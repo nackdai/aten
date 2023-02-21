@@ -52,7 +52,7 @@ namespace aten {
         std::vector<aten::accelerator*>& listBvh,
         std::map<hitable*, aten::accelerator*>& nestedBvhMap,
         std::function<void(std::vector<_T>&, aten::bvhnode*, aten::hitable*, const aten::mat4&)> funcRegisterToList,
-        std::function<void(aten::bvhnode*, int, int)> funcIfInstanceNode)
+        std::function<void(aten::bvhnode*, int32_t, int32_t)> funcIfInstanceNode)
     {
         if (!root) {
             return;
@@ -70,7 +70,7 @@ namespace aten {
             // ネストしている.
             {
                 original->setParent(parentNode);
-                original->setTraversalOrder((int)listBvhNode.size());
+                original->setTraversalOrder((int32_t)listBvhNode.size());
                 funcRegisterToList(listBvhNode, original, nestParent, mtxL2W);
             }
 
@@ -87,9 +87,9 @@ namespace aten {
                 internalSecondItem,
             };
 
-            int exids[2] = { -1, -1 };
+            int32_t exids[2] = { -1, -1 };
 
-            for (int i = 0; i < AT_COUNTOF(items); i++) {
+            for (int32_t i = 0; i < AT_COUNTOF(items); i++) {
                 auto item = items[i];
 
                 if (item == nullptr) {
@@ -105,7 +105,7 @@ namespace aten {
                 if (found == listBvh.end()) {
                     listBvh.push_back(nestedBvh);
 
-                    int exid = (int)listBvh.size() - 1;
+                    int32_t exid = (int32_t)listBvh.size() - 1;
                     AT_ASSERT(exid >= 0);
 
                     exids[i] = exid;
@@ -124,7 +124,7 @@ namespace aten {
         }
         else {
             pnode->setParent(parentNode);
-            pnode->setTraversalOrder((int)listBvhNode.size());
+            pnode->setTraversalOrder((int32_t)listBvhNode.size());
             funcRegisterToList(listBvhNode, pnode, nestParent, mtxL2W);
 
             aten::bvhnode* pleft = pnode->getLeft();

@@ -5,7 +5,7 @@
 namespace aten {
     bool ATrousDenoiser::init(
         context& ctxt,
-        int width, int height,
+        int32_t width, int32_t height,
         const char* vsPath, const char* fsPath,
         const char* finalVsPath, const char* finalFsPath)
     {
@@ -17,7 +17,7 @@ namespace aten {
         m_pos->initAsGLTexture();
         m_albedo->initAsGLTexture();
 
-        for (int i = 0; i < ITER; i++) {
+        for (int32_t i = 0; i < ITER; i++) {
             auto res = m_pass[i].init(
                 width, height,
                 vsPath, fsPath);
@@ -73,7 +73,7 @@ namespace aten {
         m_body->m_normal->bindAsGLTexture(1, this);
         m_body->m_pos->bindAsGLTexture(2, this);
 
-        int stepScale = 1 << m_idx;
+        int32_t stepScale = 1 << m_idx;
         float clrSigmaScale = pow(2.0f, static_cast<real>(m_idx));
 
         auto hStepScale = this->getHandle("stepScale");
@@ -98,7 +98,7 @@ namespace aten {
 
 #if 0
         // detail.
-        for (int i = 0; i < ITER; i++) {
+        for (int32_t i = 0; i < ITER; i++) {
             auto detailTex = m_body->m_pass[i].getFbo().getTexHandle(1);
             texture::bindAsGLTexture(tex, i + 1, this);
         }

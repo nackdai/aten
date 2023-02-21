@@ -10,7 +10,7 @@ struct Options {
 };
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     cmdline::parser& cmd,
     Options& opt)
 {
@@ -52,7 +52,7 @@ bool parseOption(
     return true;
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     Options opt;
     cmdline::parser cmd;
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     auto num = obj->getShapeNum();
 
-    for (int i = 0; i < num; i++) {
+    for (int32_t i = 0; i < num; i++) {
         const auto shape = obj->getShape(i);
         auto mtrl = shape->getMaterial();
 
@@ -113,10 +113,10 @@ int main(int argc, char* argv[])
     }
 
     struct IndexMapper {
-        int orgIdx;
-        int newIdx;
+        int32_t orgIdx;
+        int32_t newIdx;
 
-        IndexMapper(int o, int n) : orgIdx(o), newIdx(n) {}
+        IndexMapper(int32_t o, int32_t n) : orgIdx(o), newIdx(n) {}
     };
 
     std::vector<IndexMapper> indexMapList;
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
     std::vector<aten::vertex> vertices;
     {
         // Gather indices for gathering vertices.
-        std::vector<int> tmpIndices(shapes.size());
+        std::vector<int32_t> tmpIndices(shapes.size());
 
         for (auto shape : shapes) {
             const auto& tris = shape->tris();
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
             for (auto tri : tris) {
                 const auto& triParam = tri->getParam();
 
-                for (int i = 0; i < 3; i++) {
+                for (int32_t i = 0; i < 3; i++) {
                     auto idx = triParam.idx[i];
                     auto found = std::find(tmpIndices.begin(), tmpIndices.end(), idx);
                     if (found == tmpIndices.end()) {
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
         for (auto idx : tmpIndices) {
             const auto v = vtxs[idx];
 
-            int newIdx = vertices.size();
+            int32_t newIdx = vertices.size();
             vertices.push_back(v);
 
             // Keep index map.
@@ -159,16 +159,16 @@ int main(int argc, char* argv[])
     }
 
     // Gather indices.
-    std::vector<std::vector<int>> indices(shapes.size());
+    std::vector<std::vector<int32_t>> indices(shapes.size());
     {
-        for (int s = 0; s < shapes.size(); s++) {
+        for (int32_t s = 0; s < shapes.size(); s++) {
             auto shape = shapes[s];
             const auto& tris = shape->tris();
 
             for (auto tri : tris) {
                 const auto& triParam = tri->getParam();
 
-                for (int i = 0; i < 3; i++) {
+                for (int32_t i = 0; i < 3; i++) {
                     auto idx = triParam.idx[i];
 
                     auto found = std::find_if(
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 
                     AT_ASSERT(found != indexMapList.end());
 
-                    int newIdx = found->newIdx;
+                    int32_t newIdx = found->newIdx;
                     indices[s].push_back(newIdx);
                 }
             }

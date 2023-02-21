@@ -42,13 +42,13 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
     // http://jcgt.org/published/0002/01/05/paper.pdf
 
     // calculate dimension where ray direction is maximal.
-    int kz = aten::maxDim(ray.dir);
-    int kx = (kz + 1) % 3;
-    int ky = (kx + 1) % 3;
+    int32_t kz = aten::maxDim(ray.dir);
+    int32_t kx = (kz + 1) % 3;
+    int32_t ky = (kx + 1) % 3;
 
     // swap kx and ky dimension to preserve windin direction of triangles.
     if (ray.dir[kz] < real(0)) {
-        int tmp = kx;
+        int32_t tmp = kx;
         kx = ky;
         ky = tmp;
     }
@@ -127,7 +127,7 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
 }
 
 // Compare Less EQual
-inline __device__ int cmpLEQ(const float4& a, const float4& b)
+inline __device__ int32_t cmpLEQ(const float4& a, const float4& b)
 {
     aten::_vec4_cmp_res res;
 
@@ -141,7 +141,7 @@ inline __device__ int cmpLEQ(const float4& a, const float4& b)
 }
 
 // Compare Greater EQual
-inline __device__ int cmpGEQ(const float4& a, const float4& b)
+inline __device__ int32_t cmpGEQ(const float4& a, const float4& b)
 {
     aten::_vec4_cmp_res res;
 
@@ -154,9 +154,9 @@ inline __device__ int cmpGEQ(const float4& a, const float4& b)
     return res.f;
 }
 
-AT_CUDA_INLINE __device__ int hit4Triangles1Ray(
+AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
     const idaten::Context* ctxt,
-    float4 primIdx, int num,
+    float4 primIdx, int32_t num,
     float4* resultT,
     float4* resultA,
     float4* resultB,
@@ -166,8 +166,8 @@ AT_CUDA_INLINE __device__ int hit4Triangles1Ray(
 {
     float4 v2x, v2y, v2z;
 
-    for (int i = 0; i < num; i++) {
-        int pidx = (int)*((float*)&primIdx + i);
+    for (int32_t i = 0; i < num; i++) {
+        int32_t pidx = (int32_t)*((float*)&primIdx + i);
         const auto* prim = &ctxt->prims[pidx];
         float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
 
@@ -230,17 +230,17 @@ AT_CUDA_INLINE __device__ int hit4Triangles1Ray(
     float4 _zero = make_float4(0);
     float4 _one = make_float4(1);
 
-    int res_b0 = cmpGEQ(beta, _zero);        // beta >= 0
-    int res_b1 = cmpLEQ(beta, _one);        // beta <= 1
+    int32_t res_b0 = cmpGEQ(beta, _zero);        // beta >= 0
+    int32_t res_b1 = cmpLEQ(beta, _one);        // beta <= 1
 
-    int res_g0 = cmpGEQ(gamma, _zero);        // gamma >= 0
-    int res_g1 = cmpLEQ(gamma, _one);        // gamma <= 1
+    int32_t res_g0 = cmpGEQ(gamma, _zero);        // gamma >= 0
+    int32_t res_g1 = cmpLEQ(gamma, _one);        // gamma <= 1
 
-    int res_bg1 = cmpLEQ(beta + gamma, _one);    // beta + gammma <= 1
+    int32_t res_bg1 = cmpLEQ(beta + gamma, _one);    // beta + gammma <= 1
 
-    int res_t0 = cmpGEQ(t, _zero);        // t >= 0
+    int32_t res_t0 = cmpGEQ(t, _zero);        // t >= 0
 
-    int ret = res_b0 & res_b1 & res_g0 & res_g1 & res_bg1 & res_t0;
+    int32_t ret = res_b0 & res_b1 & res_g0 & res_g1 & res_bg1 & res_t0;
 
     return ret;
 }
@@ -341,7 +341,7 @@ AT_CUDA_INLINE __device__ bool hitAABB(
 }
 
 
-AT_CUDA_INLINE __device__ int hit4AABBWith1Ray(
+AT_CUDA_INLINE __device__ int32_t hit4AABBWith1Ray(
     aten::vec4* result,
     const aten::vec3& org,
     const aten::vec3& dir,
@@ -423,7 +423,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     aten::hitrecord* rec,
     const aten::Intersection* isect)
 {
-    int primidx = isect->primid;
+    int32_t primidx = isect->primid;
     aten::PrimitiveParamter prim;
     prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
     prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];

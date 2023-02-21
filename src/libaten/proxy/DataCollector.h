@@ -27,6 +27,6 @@ namespace aten {
         static void collectTriangles(
             const context& ctxt,
             std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
-            std::vector<int>& triIdOffsets);
+            std::vector<int32_t>& triIdOffsets);
     };
 }

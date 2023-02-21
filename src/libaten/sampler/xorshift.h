@@ -8,16 +8,16 @@ namespace aten {
     class XorShift : public sampler {
     public:
         XorShift() {}
-        XorShift(const unsigned int initial_seed)
+        XorShift(const uint32_t initial_seed)
         {
             init(initial_seed);
         }
 
         virtual ~XorShift() {}
 
-        unsigned int next()
+        uint32_t next()
         {
-            const unsigned int t = m_seed_[0] ^ (m_seed_[0] << 11);
+            const uint32_t t = m_seed_[0] ^ (m_seed_[0] << 11);
             m_seed_[0] = m_seed_[1];
             m_seed_[1] = m_seed_[2];
             m_seed_[2] = m_seed_[3];
@@ -33,13 +33,13 @@ namespace aten {
 
         virtual void init(uint32_t initial_seed, const void* data = nullptr) override final
         {
-            unsigned int s = initial_seed;
-            for (int i = 1; i <= 4; i++) {
+            uint32_t s = initial_seed;
+            for (int32_t i = 1; i <= 4; i++) {
                 m_seed_[i - 1] = s = 1812433253U * (s ^ (s >> 30)) + i;
             }
         }
 
     private:
-        unsigned int m_seed_[4];
+        uint32_t m_seed_[4];
     };
 }

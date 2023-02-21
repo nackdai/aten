@@ -5,8 +5,8 @@
 #include "atenscene.h"
 #include "VoxelViewer.h"
 
-static const int WIDTH = 1280;
-static const int HEIGHT = 720;
+static const int32_t WIDTH = 1280;
+static const int32_t HEIGHT = 720;
 
 static const char* TITLE = "VoxelViewer";
 
@@ -30,14 +30,14 @@ static bool g_isCameraDirty = false;
 
 static bool g_willShowGUI = true;
 
-static int g_drawVoxelDepth = 1;
+static int32_t g_drawVoxelDepth = 1;
 static bool g_drawMesh = false;
 static bool g_isWireframe = false;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
-static int g_prevX = 0;
-static int g_prevY = 0;
+static int32_t g_prevX = 0;
+static int32_t g_prevY = 0;
 
 static std::vector<std::vector<aten::ThreadedSbvhNode>> g_voxels;
 
@@ -97,7 +97,7 @@ void onClose()
 
 }
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -111,7 +111,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -134,7 +134,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -184,7 +184,7 @@ void onKey(bool press, aten::Key key)
 }
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     cmdline::parser& cmd,
     Options& opt)
 {
@@ -264,7 +264,7 @@ void loadObj(const Options& opt)
     g_scene.build(g_ctxt);
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     //g_opt.input = "../../asset/cornellbox/orig.obj";
     //g_opt.input = "../../asset/sponza/lod.obj";

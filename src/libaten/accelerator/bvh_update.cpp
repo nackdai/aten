@@ -120,7 +120,7 @@ namespace aten
         }
 
         // The list of all candidate rotations, from "Fast, Effective BVH Updates for Animated Scenes", Figure 1.
-        enum Rot : int {
+        enum Rot : int32_t {
             None,
 
             // child to grandchild rotations.
@@ -152,7 +152,7 @@ namespace aten
 
         std::vector<Opt> opts(Rot::Num);
 
-        for (int r = Rot::None; r < Rot::Num; r++) {
+        for (int32_t r = Rot::None; r < Rot::Num; r++) {
             switch (r) {
             case Rot::None:
             {
@@ -402,10 +402,10 @@ namespace aten
         sweepNodes.reserve(m_refitNodes.size());
 
         while (!m_refitNodes.empty()) {
-            int maxdepth = -1;
+            int32_t maxdepth = -1;
 
             for (const auto node : m_refitNodes) {
-                maxdepth = std::max<int>(node->getDepth(), maxdepth);
+                maxdepth = std::max<int32_t>(node->getDepth(), maxdepth);
             }
 
             sweepNodes.clear();
@@ -414,7 +414,7 @@ namespace aten
 
             while (it != m_refitNodes.end()) {
                 auto node = *it;
-                int depth = node->getDepth();
+                int32_t depth = node->getDepth();
 
                 if (maxdepth == depth) {
                     sweepNodes.push_back(node);

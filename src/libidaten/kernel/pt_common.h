@@ -7,18 +7,18 @@
 #define BLOCK_SIZE    (16)
 #define BLOCK_SIZE2    (BLOCK_SIZE * BLOCK_SIZE)
 
-inline AT_DEVICE_API int getIdx(int ix, int iy, int width)
+inline AT_DEVICE_API int32_t getIdx(int32_t ix, int32_t iy, int32_t width)
 {
 #if 0
-    int X = ix / BLOCK_SIZE;
-    int Y = iy / BLOCK_SIZE;
+    int32_t X = ix / BLOCK_SIZE;
+    int32_t Y = iy / BLOCK_SIZE;
 
-    //int base = Y * BLOCK_SIZE2 * (width / BLOCK_SIZE) + X * BLOCK_SIZE2;
+    //int32_t base = Y * BLOCK_SIZE2 * (width / BLOCK_SIZE) + X * BLOCK_SIZE2;
 
-    int XB = X * BLOCK_SIZE;
-    int YB = Y * BLOCK_SIZE;
+    int32_t XB = X * BLOCK_SIZE;
+    int32_t YB = Y * BLOCK_SIZE;
 
-    int base = YB * width + XB * BLOCK_SIZE;
+    int32_t base = YB * width + XB * BLOCK_SIZE;
 
     const auto idx = base + (iy - YB) * BLOCK_SIZE + (ix - XB);
 

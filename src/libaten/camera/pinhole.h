@@ -90,7 +90,7 @@ namespace AT_NAME
 
         void revertRayToPixelPos(
             const aten::ray &ray,
-            int &px, int &py) const override final;
+            int32_t &px, int32_t &py) const override final;
 
         virtual real convertImageSensorPdfToScenePdf(
             real pdfImage, // Not used.
@@ -112,7 +112,7 @@ namespace AT_NAME
             aten::vec3 &posOnLens,
             aten::vec3 &posOnObjectPlane,
             aten::vec3 &posOnImageSensor,
-            int &x, int &y) const override final;
+            int32_t &x, int32_t &y) const override final;
 
     private:
         aten::CameraParameter m_param;

@@ -146,11 +146,11 @@ namespace AT_NAME
         aten::sampler* sampler) const
     {
         auto r = sampler->nextSample();
-        int shapeidx = (int)(r * (m_shapes.size() - 1));
+        int32_t shapeidx = (int32_t)(r * (m_shapes.size() - 1));
         auto& objshape = m_shapes[shapeidx];
 
         r = sampler->nextSample();
-        int faceidx = (int)(r * (objshape->faces.size() - 1));
+        int32_t faceidx = (int32_t)(r * (objshape->faces.size() - 1));
         auto f = objshape->faces[faceidx];
 
         const auto& faceParam = f->getParam();
@@ -189,13 +189,13 @@ namespace AT_NAME
         const context& ctxt,
         const aten::mat4& mtxL2W,
         const aten::mat4& mtxPrevL2W,
-        int parentId,
+        int32_t parentId,
         uint32_t triOffset)
     {
         // TODO
         // Currently ignore "triOffset"...
 
-        int objid = (parentId < 0 ? id() : parentId);
+        int32_t objid = (parentId < 0 ? id() : parentId);
 
         for (auto& s : m_shapes) {
             s->render(func, ctxt, mtxL2W, mtxPrevL2W, objid);
@@ -236,7 +236,7 @@ namespace AT_NAME
         return result;
     }
 
-    bool object::importInternalAccelTree(const char* path, const context& ctxt, int offsetTriIdx)
+    bool object::importInternalAccelTree(const char* path, const context& ctxt, int32_t offsetTriIdx)
     {
         AT_ASSERT(!m_accel);
 
@@ -250,7 +250,7 @@ namespace AT_NAME
     {
         tris.resize(m_shapes.size());
 
-        for (int i = 0; i < m_shapes.size(); i++) {
+        for (int32_t i = 0; i < m_shapes.size(); i++) {
             auto& shape = m_shapes[i];
 
             for (auto face : shape->faces) {

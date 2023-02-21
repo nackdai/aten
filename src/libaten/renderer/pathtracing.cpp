@@ -353,7 +353,7 @@ namespace aten
         scene* scene,
         camera* cam,
         CameraSampleResult& camsample,
-        int depth,
+        int32_t depth,
         Path& path)
     {
         uint32_t rrDepth = m_rrDepth;
@@ -590,7 +590,7 @@ namespace aten
 
     void PathTracing::shadeMiss(
         scene* scene,
-        int depth,
+        int32_t depth,
         Path& path)
     {
         auto ibl = scene->getIBL();
@@ -627,8 +627,8 @@ namespace aten
     {
         frame++;
 
-        int width = dst.width;
-        int height = dst.height;
+        int32_t width = dst.width;
+        int32_t height = dst.height;
         uint32_t samples = dst.sample;
 
         m_maxDepth = dst.maxDepth;
@@ -652,9 +652,9 @@ namespace aten
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp for
 #endif
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int pos = y * width + x;
+            for (int32_t y = 0; y < height; y++) {
+                for (int32_t x = 0; x < width; x++) {
+                    int32_t pos = y * width + x;
 
                     vec3 col = vec3(0);
                     vec3 col2 = vec3(0);

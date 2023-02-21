@@ -12,8 +12,8 @@
 namespace aten
 {
     struct Destination {
-        int width{ 0 };
-        int height{ 0 };
+        int32_t width{ 0 };
+        int32_t height{ 0 };
         uint32_t maxDepth{ 1 };
         uint32_t russianRouletteDepth{ 1 };
         uint32_t startDepth{ 0 };

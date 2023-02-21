@@ -55,7 +55,7 @@ namespace aten
             CALL_GL_API(::glQueryCounter(s_query[1], GL_TIMESTAMP));
 
             // wait until the results are available
-            int stopTimerAvailable = 0;
+            int32_t stopTimerAvailable = 0;
             while (!stopTimerAvailable) {
                 CALL_GL_API(::glGetQueryObjectiv(
                     s_query[1],

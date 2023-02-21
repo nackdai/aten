@@ -180,14 +180,14 @@ namespace aten
             bool isPrimitiveLeaf,
             const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
             std::vector<ThreadedBvhNode>& listThreadedBvhNode,
-            std::vector<int>& listParentId);
+            std::vector<int32_t>& listParentId);
 
         /**
          * @brief Set hit/miss traverse order.
          */
         void setOrder(
             const std::vector<ThreadedBvhNodeEntry>& listBvhNode,
-            const std::vector<int>& listParentId,
+            const std::vector<int32_t>& listParentId,
             std::vector<ThreadedBvhNode>& listThreadedBvhNode);
 
         /**
@@ -195,7 +195,7 @@ namespace aten
          */
         bool hit(
             const context& ctxt,
-            int exid,
+            int32_t exid,
             const std::vector<std::vector<ThreadedBvhNode>>& listThreadedBvhNode,
             const ray& r,
             real t_min, real t_max,
@@ -221,6 +221,6 @@ namespace aten
         // List for bottom layer.
         std::vector<accelerator*> m_nestedBvh;
 
-        std::map<int, accelerator*> m_mapNestedBvh;
+        std::map<int32_t, accelerator*> m_mapNestedBvh;
     };
 }

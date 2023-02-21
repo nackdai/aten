@@ -16,7 +16,7 @@ namespace aten {
             const std::string& path,
             const std::string& mtrlPath,
             const std::vector<aten::vertex>& vertices,
-            const std::vector<std::vector<int>>& indices,
+            const std::vector<std::vector<int32_t>>& indices,
             FuncGetMtrlName func_get_mtrl_name);
 
         static bool writeMaterial(
@@ -35,7 +35,7 @@ namespace aten {
             const std::string& path,
             const std::string& mtrlPath,
             const std::vector<aten::vertex>& vertices,
-            const std::vector<std::vector<int>>& indices,
+            const std::vector<std::vector<int32_t>>& indices,
             FuncGetMtrlName func_get_mtrl_name);
 
         void terminate();

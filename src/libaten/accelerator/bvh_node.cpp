@@ -37,7 +37,7 @@ namespace aten {
         if (m_childrenNum > 0) {
             bool isHit = false;
 
-            for (int i = 0; i < m_childrenNum; i++) {
+            for (int32_t i = 0; i < m_childrenNum; i++) {
                 Intersection isectTmp;
                 isectTmp.t = AT_MATH_INF;
                 auto res = m_children[i]->hit(ctxt, r, t_min, t_max, isectTmp);

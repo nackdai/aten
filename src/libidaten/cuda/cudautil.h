@@ -6,7 +6,7 @@
 namespace idaten {
     namespace cuda {
         template< typename T >
-        void check(T result, char const *const func, const char *const file, int const line)
+        void check(T result, char const *const func, const char *const file, int32_t const line)
         {
             if (result)
             {
@@ -18,7 +18,7 @@ namespace idaten {
                     "CUDA error at %s:%d code=%d(%s) \"%s\" \n",
                     file,
                     line,
-                    static_cast<unsigned int>(result),
+                    static_cast<uint32_t>(result),
                     //_cudaGetErrorEnum(result),
                     cudaGetErrorString(result),
                     func);
@@ -28,7 +28,7 @@ namespace idaten {
                     "CUDA error at %s:%d code=%d(%s) \"%s\" \n",
                     file,
                     line,
-                    static_cast<unsigned int>(result),
+                    static_cast<uint32_t>(result),
                     //_cudaGetErrorEnum(result),
                     cudaGetErrorString(result),
                     func);
@@ -51,7 +51,7 @@ namespace idaten {
         }
 
         template <>
-        inline void check(CUresult result, char const *const func, const char *const file, int const line)
+        inline void check(CUresult result, char const *const func, const char *const file, int32_t const line)
         {
             if (result)
             {

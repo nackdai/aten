@@ -11,6 +11,6 @@ namespace idaten
         virtual ~RendererMultiGPU() {}
 
     public:
-        virtual void postRender(int width, int height) = 0;
+        virtual void postRender(int32_t width, int32_t height) = 0;
     };
 }

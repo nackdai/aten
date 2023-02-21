@@ -77,12 +77,12 @@ namespace aten
             scene* scene,
             camera* cam,
             CameraSampleResult& camsample,
-            int depth,
+            int32_t depth,
             Path& path);
 
         void shadeMiss(
             scene* scene,
-            int depth,
+            int32_t depth,
             Path& path);
 
     protected:

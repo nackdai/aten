@@ -42,7 +42,7 @@ namespace aten {
     // x1 : シーン内の点.
 
     void ThinLensCamera::init(
-        int width, int height,
+        int32_t width, int32_t height,
         vec3 lookfrom, vec3 lookat, vec3 vup,
         real imageSensorSize,
         real imageSensorToLensDistance,
@@ -158,7 +158,7 @@ namespace aten {
         vec3& posOnLens,
         vec3& posOnObjectPlane,
         vec3& posOnImageSensor,
-        int& x, int& y) const
+        int32_t& x, int32_t& y) const
     {
         // レンズと判定
         auto lens_t = plane_intersection(m_lens.normal, m_lens.center, r);
@@ -187,8 +187,8 @@ namespace aten {
                 if (-0.5f <= u && u < 0.5
                     && -0.5f <= v && v < 0.5)
                 {
-                    x = (int)((u + 0.5f) * m_imageWidthPx);
-                    y = (int)((v + 0.5f) * m_imageHeightPx);
+                    x = (int32_t)((u + 0.5f) * m_imageWidthPx);
+                    y = (int32_t)((v + 0.5f) * m_imageHeightPx);
 
                     return lens_t;
                 }
@@ -323,7 +323,7 @@ namespace aten {
 
     void ThinLensCamera::revertRayToPixelPos(
         const ray& ray,
-        int& px, int& py) const
+        int32_t& px, int32_t& py) const
     {
         vec3 posOnLens;
         vec3 posOnObjectPlane;

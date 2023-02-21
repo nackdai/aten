@@ -13,7 +13,7 @@ namespace aten {
 
     public:
         bool init(
-            int width, int height,
+            int32_t width, int32_t height,
             const char* taaVsPath, const char* taaFsPath,
             const char* finalVsPath, const char* finalFsPath);
 
@@ -56,7 +56,7 @@ namespace aten {
         }
 
     private:
-        void prepareFbo(const uint32_t* tex, int num, std::vector<uint32_t>& comps);
+        void prepareFbo(const uint32_t* tex, int32_t num, std::vector<uint32_t>& comps);
 
         class TAAPass : public visualizer::PostProc {
         public:
@@ -113,7 +113,7 @@ namespace aten {
 
         uint32_t m_motionDepthBuffer{ 0 };
 
-        int m_idx{ 0 };
+        int32_t m_idx{ 0 };
 
         bool m_enableTAA{ true };
         bool m_canShowAADiff{ false };

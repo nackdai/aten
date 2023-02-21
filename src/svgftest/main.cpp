@@ -17,8 +17,8 @@
 #define ENABLE_ENVMAP
 // #define ENABLE_NLM
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int32_t WIDTH = 1280;
+static int32_t HEIGHT = 720;
 static const char *TITLE = "svgf";
 
 #ifdef ENABLE_OMP
@@ -50,12 +50,12 @@ static aten::RasterizeRenderer g_rasterizerAABB;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
-static int g_maxSamples = 1;
-static int g_maxBounce = 5;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
-static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
+static int32_t g_maxSamples = 1;
+static int32_t g_maxBounce = 5;
+static int32_t g_curMode = (int32_t)idaten::SVGFPathTracing::Mode::SVGF;
+static int32_t g_curAOVMode = (int32_t)idaten::SVGFPathTracing::AOVMode::WireFrame;
 static bool g_showAABB = false;
 
 static float g_moveMultiply = 1.0f;
@@ -307,10 +307,10 @@ void onClose()
 
 bool g_isMouseLBtnDown = false;
 bool g_isMouseRBtnDown = false;
-int g_prevX = 0;
-int g_prevY = 0;
+int32_t g_prevX = 0;
+int32_t g_prevY = 0;
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -331,7 +331,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown)
     {
@@ -356,7 +356,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -458,7 +458,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-int main()
+int32_t main()
 {
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
@@ -567,7 +567,7 @@ int main()
         {
             auto texNum = g_ctxt.getTextureNum();
 
-            for (int i = 0; i < texNum; i++)
+            for (int32_t i = 0; i < texNum; i++)
             {
                 auto t = g_ctxt.getTexture(i);
                 tex.push_back(

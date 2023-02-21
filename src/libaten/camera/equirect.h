@@ -62,7 +62,7 @@ namespace aten {
 
         void revertRayToPixelPos(
             const ray& ray,
-            int& px, int& py) const override final
+            int32_t& px, int32_t& py) const override final
         {
             // Not supported...
             AT_ASSERT(false);

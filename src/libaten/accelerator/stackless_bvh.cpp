@@ -37,7 +37,7 @@ namespace aten {
         listBvhNode.push_back(std::vector<StacklessBvhNodeEntry>());
         registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
-        for (int i = 0; i < listBvh.size(); i++) {
+        for (int32_t i = 0; i < listBvh.size(); i++) {
             // TODO
             auto bvh = (aten::bvh*)listBvh[i];
 
@@ -64,7 +64,7 @@ namespace aten {
         m_listStacklessBvhNode.resize(listBvhNode.size());
 
         // Register bvh node for gpu.
-        for (int i = 0; i < listBvhNode.size(); i++) {
+        for (int32_t i = 0; i < listBvhNode.size(); i++) {
             // Leaves of nested bvh are primitive.
             // Index 0 is primiary tree, and Index N (N > 0) is nested tree.
             bool isPrimitiveLeaf = (i > 0);
@@ -94,7 +94,7 @@ namespace aten {
         {
             list.push_back(StacklessBvhNodeEntry(node, obj, mtx));
         },
-            [this](bvhnode* node, int exid, int subExid)
+            [this](bvhnode* node, int32_t exid, int32_t subExid)
         {
             if (node->isLeaf()) {
                 // NOTE
@@ -126,7 +126,7 @@ namespace aten {
 
             // Parent id.
             auto parent = node->getParent();
-            int parentId = parent ? parent->getTraversalOrder() : -1;
+            int32_t parentId = parent ? parent->getTraversalOrder() : -1;
             stacklessBvhNode.parent = (float)parentId;
 
             // Sibling id.
@@ -212,7 +212,7 @@ namespace aten {
 
     bool StacklessBVH::hit(
         const context& ctxt,
-        int exid,
+        int32_t exid,
         const std::vector<std::vector<StacklessBvhNode>>& listStacklessBvhNode,
         const ray& r,
         real t_min, real t_max,
@@ -220,7 +220,7 @@ namespace aten {
     {
         real hitt = AT_MATH_INF;
 
-        int nodeid = 0;
+        int32_t nodeid = 0;
         uint32_t bitstack = 0;
 
         for (;;) {
@@ -239,13 +239,13 @@ namespace aten {
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = ctxt.getTransformable((int)node->shapeid);
+                auto s = ctxt.getTransformable((int32_t)node->shapeid);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->getParam();
 
-                    int mtxid = param.mtxid;
+                    int32_t mtxid = param.mtxid;
 
                     aten::ray transformedRay;
 
@@ -260,7 +260,7 @@ namespace aten {
 
                     isHit = hit(
                         ctxt,
-                        (int)node->exid,
+                        (int32_t)node->exid,
                         listStacklessBvhNode,
                         transformedRay,
                         t_min, t_max,
@@ -268,7 +268,7 @@ namespace aten {
                 }
                 else if (node->primid >= 0) {
                     // Hit test for a primitive.
-                    auto prim = ctxt.getTriangle((int)node->primid);
+                    auto prim = ctxt.getTriangle((int32_t)node->primid);
                     isHit = prim->hit(ctxt, r, t_min, t_max, isectTmp);
                     if (isHit) {
                         isectTmp.objid = s->id();
@@ -297,14 +297,14 @@ namespace aten {
                     bitstack = bitstack << 1;
 
                     if (hit[0] && hit[1]) {
-                        nodeid = (int)(t[0] < t[1] ? node->child_0 : node->child_1);
+                        nodeid = (int32_t)(t[0] < t[1] ? node->child_0 : node->child_1);
                         bitstack = bitstack | 1;
                     }
                     else if (hit[0]) {
-                        nodeid = (int)node->child_0;
+                        nodeid = (int32_t)node->child_0;
                     }
                     else if (hit[1]) {
-                        nodeid = (int)node->child_1;
+                        nodeid = (int32_t)node->child_1;
                     }
 
                     continue;
@@ -316,13 +316,13 @@ namespace aten {
                     return (isect.objid >= 0);
                 }
 
-                nodeid = (int)node->parent;
+                nodeid = (int32_t)node->parent;
                 bitstack = bitstack >> 1;
 
                 node = &listStacklessBvhNode[exid][nodeid];
             }
 
-            nodeid = (int)node->sibling;
+            nodeid = (int32_t)node->sibling;
             bitstack = bitstack ^ 1;
         }
 

@@ -15,12 +15,12 @@ namespace npr_pt {
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
         idaten::Path* paths,
         const aten::ray* __restrict__ rays,
-        const int* __restrict__ hitindices,
-        int* hitnum,
+        const int32_t* __restrict__ hitindices,
+        int32_t* hitnum,
         real FeatureLineWidth,
         real pixel_width)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -45,7 +45,7 @@ namespace npr_pt {
     inline __device__ void computeFeatureLineContrib(
         real closest_sample_ray_distance,
         idaten::Path* paths,
-        int idx,
+        int32_t idx,
         const aten::vec3& line_color)
     {
         auto pdf_feature_line = real(1) / idaten::NPRPathTracing::SampleRayNum;
@@ -64,16 +64,16 @@ namespace npr_pt {
         real FeatureLineWidth,
         real pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
-        int depth,
-        const int* __restrict__ hitindices,
-        int* hitnum,
+        int32_t depth,
+        const int32_t* __restrict__ hitindices,
+        int32_t* hitnum,
         idaten::Path* paths,
         const aten::CameraParameter* __restrict__ camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
@@ -81,7 +81,7 @@ namespace npr_pt {
         const aten::mat4* __restrict__ matrices,
         cudaTextureObject_t* textures)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -279,21 +279,21 @@ namespace npr_pt {
     }
 
     __global__ void shadeMissSampleRay(
-        int width, int height,
+        int32_t width, int32_t height,
         aten::vec3 line_color,  // TODO
         real FeatureLineWidth,
         real pixel_width,
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
-        int depth,
-        const int* __restrict__ hitindices,
-        int* hitnum,
+        int32_t depth,
+        const int32_t* __restrict__ hitindices,
+        int32_t* hitnum,
         idaten::Path* paths,
         const aten::CameraParameter* __restrict__ camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
@@ -410,9 +410,9 @@ namespace npr_pt {
 namespace idaten {
     void NPRPathTracing::onShade(
         cudaSurfaceObject_t outputSurf,
-        int width, int height,
-        int sample,
-        int bounce, int rrBounce,
+        int32_t width, int32_t height,
+        int32_t sample,
+        int32_t bounce, int32_t rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
@@ -472,10 +472,10 @@ namespace idaten {
     }
 
     void NPRPathTracing::missShade(
-        int width, int height,
-        int bounce,
-        int offsetX,
-        int offsetY)
+        int32_t width, int32_t height,
+        int32_t bounce,
+        int32_t offsetX,
+        int32_t offsetY)
     {
         if (is_enable_feature_line_) {
             dim3 block(BLOCK_SIZE, BLOCK_SIZE);

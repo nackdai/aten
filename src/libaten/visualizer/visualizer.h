@@ -100,7 +100,7 @@ namespace aten {
         PixelFormat getPixelFormat();
 
         uint32_t getTexHandle();
-        static std::shared_ptr<visualizer> init(int width, int height);
+        static std::shared_ptr<visualizer> init(int32_t width, int32_t height);
 
         void addPreProc(PreProc* preproc);
 
@@ -130,8 +130,8 @@ namespace aten {
     private:
         uint32_t m_tex{ 0 };
 
-        int m_width{ 0 };
-        int m_height{ 0 };
+        int32_t m_width{ 0 };
+        int32_t m_height{ 0 };
 
         std::vector<TColor<float, 4>> m_tmp;
 

@@ -12,7 +12,7 @@
 
 __global__ void textureViewer(
     uint32_t texIdx,
-    int width, int height,
+    int32_t width, int32_t height,
     cudaTextureObject_t* textures,
     cudaSurfaceObject_t outSurface)
 {
@@ -39,14 +39,14 @@ namespace idaten
 {
     void Renderer::viewTextures(
         uint32_t idx,
-        int screenWidth, int screenHeight)
+        int32_t screenWidth, int32_t screenHeight)
     {
         m_glimg.map();
         auto outputSurf = m_glimg.bind();
 
         if (!m_texRsc.empty()) {
             std::vector<cudaTextureObject_t> tmp;
-            for (int i = 0; i < m_texRsc.size(); i++) {
+            for (int32_t i = 0; i < m_texRsc.size(); i++) {
                 auto cudaTex = m_texRsc[i].bind();
                 tmp.push_back(cudaTex);
             }
@@ -64,7 +64,7 @@ namespace idaten
             m_tex.ptr(),
             outputSurf);
 
-        for (int i = 0; i < m_texRsc.size(); i++) {
+        for (int32_t i = 0; i < m_texRsc.size(); i++) {
             m_texRsc[i].unbind();
         }
 

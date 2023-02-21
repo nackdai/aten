@@ -14,10 +14,10 @@
 
 #if 0
 template <typename T>
-__forceinline__ __device__ int computeLongestCommonPrefix(
+__forceinline__ __device__ int32_t computeLongestCommonPrefix(
     const T* sortedKeys,
     uint32_t numOfElems,
-    int index1, int index2,
+    int32_t index1, int32_t index2,
     T key1)
 {
     // No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one
@@ -42,10 +42,10 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 }
 
 template <>
-__forceinline__ __device__ int computeLongestCommonPrefix(
+__forceinline__ __device__ int32_t computeLongestCommonPrefix(
     const uint64_t* sortedKeys,
     uint32_t numOfElems,
-    int index1, int index2,
+    int32_t index1, int32_t index2,
     uint64_t key1)
 {
     // No need to check the upper bound, since i+1 will be at most numberOfElements - 1 (one
@@ -96,7 +96,7 @@ __global__ void buildTree(
     // Common Prefix が長くなる方向とは１つ反対の LogestCommonPrefix を計算する.
     // 長くなる方向とは１つ反対 = LogestCommonPrefix の下限基準.
     const auto minLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, i - d, key1);
-    int lMax = 2;
+    int32_t lMax = 2;
     while (computeLongestCommonPrefix(sortedKeys, numOfElems, i, i + lMax * d, key1) > minLcp)
     {
         lMax *= 2;
@@ -104,8 +104,8 @@ __global__ void buildTree(
 
     // Find other end using binary search
     // 2分探索で厳密に上限を決める.
-    int lowest = 0;
-    int t = lMax;
+    int32_t lowest = 0;
+    int32_t t = lMax;
     while (t > 1)
     {
         t = t / 2;
@@ -127,8 +127,8 @@ __global__ void buildTree(
     // 探索範囲の下限と上限の間のLongestCommonPrefixを計算.
     const auto nodeLcp = computeLongestCommonPrefix(sortedKeys, numOfElems, i, j, key1);
 
-    int start = 0;
-    int divisor = 2;
+    int32_t start = 0;
+    int32_t divisor = 2;
     t = lowest;
 
     while (t > 1)
@@ -195,16 +195,16 @@ __global__ void buildTree(
     }
 }
 #else
-__forceinline__ __device__ int computeLongestCommonPrefix(
+__forceinline__ __device__ int32_t computeLongestCommonPrefix(
     const uint32_t* sortedKeys,
     uint32_t numOfElems,
-    int index1, int index2)
+    int32_t index1, int32_t index2)
 {
     // Select left end
-    int left = min(index1, index2);
+    int32_t left = min(index1, index2);
 
     // Select right end
-    int right = max(index1, index2);
+    int32_t right = max(index1, index2);
 
     // This is to ensure the node breaks if the index is out of bounds
     if (left < 0 || right >= numOfElems)
@@ -212,8 +212,8 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
         return -1;
     }
     // Fetch Morton codes for both ends
-    int left_code = sortedKeys[left];
-    int right_code = sortedKeys[right];
+    int32_t left_code = sortedKeys[left];
+    int32_t right_code = sortedKeys[right];
 
     // Special handling of duplicated codes: use their indices as a fallback
     return left_code != right_code ? __clz(left_code ^ right_code) : (32 + __clz(left ^ right));
@@ -222,32 +222,32 @@ __forceinline__ __device__ int computeLongestCommonPrefix(
 __forceinline__ __device__ int3 findSpan(
     const uint32_t* mortonCodes,
     uint32_t numPrims,
-    int idx)
+    int32_t idx)
 {
     auto lcp1 = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx + 1);
     auto lcp2 = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - 1);
 
     // どちら向きに探索していくかを決める.
     // CommonPrefix が長くなる方向に探索する.
-    int d = (lcp1 - lcp2) < 0 ? -1 : 1;
+    int32_t d = (lcp1 - lcp2) < 0 ? -1 : 1;
 
     // 探索範囲の上限を決める. 倍々に広げていき、下限基準より LongestCommonPrefix が長くなる位置を探索範囲の上限とする.
 
     // Find minimum number of bits for the break on the other side.
     // Common Prefix が長くなる方向とは１つ反対の LogestCommonPrefix を計算する.
     // 長くなる方向とは１つ反対 = LogestCommonPrefix の下限基準.
-    int minLcp = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - d);
+    int32_t minLcp = computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx - d);
 
     // Search conservative far end
-    int lmax = 2;
+    int32_t lmax = 2;
     while (computeLongestCommonPrefix(mortonCodes, numPrims, idx, idx + lmax * d) > minLcp) {
         lmax *= 2;
     }
 
     // Search back to find exact bound with binary search.
     // 2分探索で厳密に上限を決める.
-    int l = 0;
-    int t = lmax;
+    int32_t l = 0;
+    int32_t t = lmax;
     do
     {
         t /= 2;
@@ -266,23 +266,23 @@ __forceinline__ __device__ int3 findSpan(
 }
 
 // Find split idx within the span
-__forceinline__ __device__ int findSplit(
+__forceinline__ __device__ int32_t findSplit(
     const uint32_t* sortedKeys,
     uint32_t numOfElems,
     int3 span)
 {
     // Fetch codes for both ends
-    int left = span.x;
-    int right = span.y;
-    int d = span.z;
+    int32_t left = span.x;
+    int32_t right = span.y;
+    int32_t d = span.z;
 
     // Calculate the number of identical bits from higher end
-    int numIdentical = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
+    int32_t numIdentical = computeLongestCommonPrefix(sortedKeys, numOfElems, left, right);
 
     do
     {
         // Proposed split
-        int newSplit = (right + left) / 2;
+        int32_t newSplit = (right + left) / 2;
 
         // If it has more equal leading bits than left and right accept it
         if (computeLongestCommonPrefix(sortedKeys, numOfElems, left, newSplit) > numIdentical)
@@ -362,9 +362,9 @@ __global__ void buildTree(
 #endif
 
 __device__ __host__ inline void onApplyTraverseOrder(
-    int idx,
-    int numberOfTris,
-    int triIdOffset,
+    int32_t idx,
+    int32_t numberOfTris,
+    int32_t triIdOffset,
     const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
     const uint32_t* __restrict__ sortedIndices,
     aten::ThreadedBvhNode* dst)
@@ -381,10 +381,10 @@ __device__ __host__ inline void onApplyTraverseOrder(
 
     if (node->isLeaf) {
         // Base index to convert node index to triangle index.
-        int leafBaseIdx = numberOfTris - 1;
+        int32_t leafBaseIdx = numberOfTris - 1;
 
-        int leafId = node->order - leafBaseIdx;
-        int triId = triIdOffset + sortedIndices[leafId];
+        int32_t leafId = node->order - leafBaseIdx;
+        int32_t triId = triIdOffset + sortedIndices[leafId];
 
         gpunode->primid = (float)triId;
 
@@ -496,8 +496,8 @@ __device__ __host__ inline void onApplyTraverseOrder(
 
 __global__ void applyTraverseOrder(
     uint32_t numberOfNodes,
-    int numberOfTris,
-    int triIdOffset,
+    int32_t numberOfTris,
+    int32_t triIdOffset,
     const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
     const uint32_t* __restrict__ sortedIndices,
     aten::ThreadedBvhNode* dst)
@@ -546,19 +546,19 @@ __device__ inline void computeBoundingBox(
 
 template <typename T>
 __global__ void computeBoudingBox(
-    int numberOfTris,
+    int32_t numberOfTris,
     const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
     const uint32_t* __restrict__ sortedIndices,
     aten::ThreadedBvhNode* dst,
     const aten::PrimitiveParamter* __restrict__ tris,
     T vtxPos,
-    int vtxOffset,
+    int32_t vtxOffset,
     uint32_t* executedIdxArray)
 {
-    const int idx = threadIdx.x + blockIdx.x * blockDim.x;
+    const int32_t idx = threadIdx.x + blockIdx.x * blockDim.x;
 
-    const int firstThreadIdxInBlock = blockIdx.x * blockDim.x;
-    const int lastThreadIdxInBlock = firstThreadIdxInBlock + blockDim.x - 1;
+    const int32_t firstThreadIdxInBlock = blockIdx.x * blockDim.x;
+    const int32_t lastThreadIdxInBlock = firstThreadIdxInBlock + blockDim.x - 1;
 
     // Initialize cache of bounding boxes in shared memory
     extern __shared__ float4 sharedBboxMin[];
@@ -577,17 +577,17 @@ __global__ void computeBoudingBox(
 
     // NOTE
     // Number of Internal Nodes = Number of Triangles - 1.
-    int leafNodeIdx = idx + numberOfTris - 1;
+    int32_t leafNodeIdx = idx + numberOfTris - 1;
 
     // Base index to convert node index to triangle index.
-    int leafBaseIdx = numberOfTris - 1;
+    int32_t leafBaseIdx = numberOfTris - 1;
 
     const auto* node = &src[leafNodeIdx];
     auto* gpunode = &dst[leafNodeIdx];
 
     // Calculate leaves bounding box.
-    int leafId = node->order - leafBaseIdx;
-    int triId = sortedIndices[leafId];
+    int32_t leafId = node->order - leafBaseIdx;
+    int32_t triId = sortedIndices[leafId];
 
     aten::PrimitiveParamter prim;
     prim.v0 = ((aten::vec4*)tris)[triId * aten::PrimitiveParamter_float4_size + 0];
@@ -618,8 +618,8 @@ __global__ void computeBoudingBox(
 
     // リーフから親へたどっていく.
 
-    int lastNode = idx;
-    int targetId = node->parent;
+    int32_t lastNode = idx;
+    int32_t targetId = node->parent;
 
     while (targetId >= 0)
     {
@@ -645,7 +645,7 @@ __global__ void computeBoudingBox(
             // 同一ブロックで処理されているので、shared memory にキャッシュされているデータを取得する.
 
             // ブロック内でのスレッドIDに変換.
-            int threadIdxInBlock = childNodeThreadIdx - firstThreadIdxInBlock;
+            int32_t threadIdxInBlock = childNodeThreadIdx - firstThreadIdxInBlock;
 
             childAABBMin = sharedBboxMin[threadIdxInBlock];
             childAABBMax = sharedBboxMax[threadIdxInBlock];
@@ -653,7 +653,7 @@ __global__ void computeBoudingBox(
         else {
             // 同一ブロックで処理されていないので、配列に格納されているデータを取得する.
 
-            int childIdx = targetSrc->left;
+            int32_t childIdx = targetSrc->left;
 
             if (childIdx == lastNode) {
                 childIdx = targetSrc->right;
@@ -720,16 +720,16 @@ namespace idaten
     void LBVHBuilder::onBuild(
         idaten::CudaTextureResource& dst,
         TypedCudaMemory<aten::PrimitiveParamter>& triangles,
-        int triIdOffset,
+        int32_t triIdOffset,
         const aten::aabb& sceneBbox,
         T vtxPos,
-        int vtxOffset,
+        int32_t vtxOffset,
         std::vector<aten::ThreadedBvhNode>* threadedBvhNodes)
     {
         uint32_t numberOfTris = (uint32_t)triangles.num();
 
         // Get longest axis order.
-        int axis[3] = { 0, 1, 2 };
+        int32_t axis[3] = { 0, 1, 2 };
         {
             const auto size = sceneBbox.size();
             if (size[axis[0]] < size[axis[1]]) {
@@ -844,10 +844,10 @@ namespace idaten
     void LBVHBuilder::build(
         idaten::CudaTextureResource& dst,
         std::vector<aten::PrimitiveParamter>& tris,
-        int triIdOffset,
+        int32_t triIdOffset,
         const aten::aabb& sceneBbox,
         idaten::CudaTextureResource& texRscVtxPos,
-        int vtxOffset,
+        int32_t vtxOffset,
         std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
     {
         TypedCudaMemory<aten::PrimitiveParamter> triangles;
@@ -867,10 +867,10 @@ namespace idaten
     void LBVHBuilder::build(
         idaten::CudaTextureResource& dst,
         TypedCudaMemory<aten::PrimitiveParamter>& triangles,
-        int triIdOffset,
+        int32_t triIdOffset,
         const aten::aabb& sceneBbox,
         CudaGLBuffer& vboVtxPos,
-        int vtxOffset,
+        int32_t vtxOffset,
         std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
     {
         vboVtxPos.map();
@@ -893,7 +893,7 @@ namespace idaten
 
         std::vector<uint32_t> keys;
         std::vector<uint32_t> values;
-        for (int i = 0; i < AT_COUNTOF(skeys); i++) {
+        for (int32_t i = 0; i < AT_COUNTOF(skeys); i++) {
             keys.push_back(skeys[i]);
             values.push_back(i);
         }
@@ -946,14 +946,14 @@ namespace idaten
         std::vector<aten::ThreadedBvhNode> tmp1(nodes.num());
         nodes.readFromDeviceToHostByNum(&tmp1[0], 0);
 
-        int xx = 0;
+        int32_t xx = 0;
 #else
         std::vector<LBVHNode> tmp(m_nodesLbvh.maxNum());
         m_nodesLbvh.read(&tmp[0], 0);
 
         std::vector<aten::ThreadedBvhNode> tmp1(m_nodes.maxNum());
 
-        for (int n = 0; n < numInternalNode + numLeaves; n++) {
+        for (int32_t n = 0; n < numInternalNode + numLeaves; n++) {
             onApplyTraverseOrder(n, &tmp[0], &tmp1[0]);
         }
 #endif

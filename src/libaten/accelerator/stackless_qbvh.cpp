@@ -32,7 +32,7 @@ namespace aten
         listBvhNode.push_back(std::vector<BvhNode>());
         registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
-        for (int i = 0; i < listBvh.size(); i++) {
+        for (int32_t i = 0; i < listBvh.size(); i++) {
             // TODO
             auto bvh = (aten::bvh*)listBvh[i];
 
@@ -59,7 +59,7 @@ namespace aten
         m_listQbvhNode.resize(listBvhNode.size());
 
         // Convert to QBVH.
-        for (int i = 0; i < listBvhNode.size(); i++) {
+        for (int32_t i = 0; i < listBvhNode.size(); i++) {
             bool isPrimitiveLeafBvh = (i > 0);
 
             auto numNodes = convertFromBvh(
@@ -91,7 +91,7 @@ namespace aten
         {
             list.push_back(BvhNode(node, obj, mtx));
         },
-            [this](bvhnode* node, int exid, int subExid)
+            [this](bvhnode* node, int32_t exid, int32_t subExid)
         {
             if (node->isLeaf()) {
                 // NOTE
@@ -110,9 +110,9 @@ namespace aten
         struct QbvhStackEntry {
             uint32_t qbvhNodeIdx{ 0 };
             uint32_t bvhNodeIdx{ 0 };
-            int parentQbvhNodeIdx{ -1 };
+            int32_t parentQbvhNodeIdx{ -1 };
 
-            QbvhStackEntry(uint32_t StacklessQbvh, uint32_t bvh, int parent)
+            QbvhStackEntry(uint32_t StacklessQbvh, uint32_t bvh, int32_t parent)
                 : qbvhNodeIdx(StacklessQbvh), bvhNodeIdx(bvh), parentQbvhNodeIdx(parent)
             {}
             QbvhStackEntry() {}
@@ -124,10 +124,10 @@ namespace aten
         QbvhStackEntry stack[256];
         stack[0] = QbvhStackEntry(0, 0, -1);
 
-        int stackPos = 1;
+        int32_t stackPos = 1;
         uint32_t numNodes = 1;
 
-        int children[4];
+        int32_t children[4];
 
         while (stackPos > 0) {
             auto top = stack[--stackPos];
@@ -138,17 +138,17 @@ namespace aten
             qbvhNode.parent = (float)top.parentQbvhNodeIdx;
 
             if (top.qbvhNodeIdx == 52005) {
-                int xxxx = 0;
+                int32_t xxxx = 0;
             }
 
             if (top.parentQbvhNodeIdx >= 0) {
                 const auto& parentQbvhNode = listQbvhNode[top.parentQbvhNodeIdx];
-                int leftSiblingIdx = (int)parentQbvhNode.leftChildrenIdx;
-                int siblingNum = (int)parentQbvhNode.numChildren;
+                int32_t leftSiblingIdx = (int32_t)parentQbvhNode.leftChildrenIdx;
+                int32_t siblingNum = (int32_t)parentQbvhNode.numChildren;
 
                 // 基準点を決める.
-                int base = 0;
-                for (int i = 0; i < 4; i++) {
+                int32_t base = 0;
+                for (int32_t i = 0; i < 4; i++) {
                     if (top.qbvhNodeIdx == leftSiblingIdx + i) {
                         base = i + 1;
                         break;
@@ -204,7 +204,7 @@ namespace aten
                 }
             }
 
-            int numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
+            int32_t numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
 
             if (numChildren == 0) {
                 // No children, so it is a leaf.
@@ -223,7 +223,7 @@ namespace aten
             qbvhNode.numChildren = (float)numChildren;
 
             // push all children to the stack
-            for (int i = 0; i < numChildren; i++) {
+            for (int32_t i = 0; i < numChildren; i++) {
                 stack[stackPos++] = QbvhStackEntry(numNodes, children[i], top.qbvhNodeIdx);
 
                 listQbvhNode.push_back(StacklessQbvhNode());
@@ -296,11 +296,11 @@ namespace aten
     void StacklessQbvh::fillQbvhNode(
         StacklessQbvhNode& qbvhNode,
         std::vector<BvhNode>& listBvhNode,
-        int children[4],
-        int numChildren)
+        int32_t children[4],
+        int32_t numChildren)
     {
-        for (int i = 0; i < numChildren; i++) {
-            int childIdx = children[i];
+        for (int32_t i = 0; i < numChildren; i++) {
+            int32_t childIdx = children[i];
             const auto& bvhNode = listBvhNode[childIdx];
 
             const auto node = bvhNode.node;
@@ -321,7 +321,7 @@ namespace aten
         }
 
         // Set 0s for empty child.
-        for (int i = numChildren; i < 4; i++) {
+        for (int32_t i = numChildren; i < 4; i++) {
             qbvhNode.bmaxx[i] = real(0);
             qbvhNode.bmaxy[i] = real(0);
             qbvhNode.bmaxz[i] = real(0);
@@ -336,16 +336,16 @@ namespace aten
         qbvhNode.isLeaf = false;
     }
 
-    int StacklessQbvh::getChildren(
+    int32_t StacklessQbvh::getChildren(
         std::vector<BvhNode>& listBvhNode,
-        int bvhNodeIdx,
-        int children[4])
+        int32_t bvhNodeIdx,
+        int32_t children[4])
     {
         const auto bvhNode = listBvhNode[bvhNodeIdx].node;
 
         // Invalidate children.
         children[0] = children[1] = children[2] = children[3] = -1;
-        int numChildren = 0;
+        int32_t numChildren = 0;
 
         if (bvhNode->isLeaf()) {
             // No children.
@@ -393,7 +393,7 @@ namespace aten
         return numChildren;
     }
 
-    inline int intersectAABB(
+    inline int32_t intersectAABB(
         aten::vec4& result,
         const aten::ray& r,
         real t_min, real t_max,
@@ -442,7 +442,7 @@ namespace aten
         auto t1 = min(min(tmaxX, tmaxY), min(tmaxZ, t_max));
         auto t0 = max(max(tminX, tminY), max(tminZ, t_min));
 
-        int ret = cmpLEQ(t0, t1);
+        int32_t ret = cmpLEQ(t0, t1);
 
         result.x = t0.x <= t1.x ? t0.x : AT_MATH_INF;
         result.y = t0.y <= t1.y ? t0.y : AT_MATH_INF;
@@ -453,7 +453,7 @@ namespace aten
     }
 
     // returns position of the rightmost set bit of n
-    int bitScan(int n)
+    int32_t bitScan(int32_t n)
     {
         // NOTE
         // http://www.techiedelight.com/bit-hacks-part-3-playing-rightmost-set-bit-number/
@@ -470,27 +470,27 @@ namespace aten
         // find the position of the only set bit in the result
         // we can directly return log2(n) + 1 from the function
 #if 0
-        int pos = 0;
+        int32_t pos = 0;
         while (n)
         {
             n = n >> 1;
             pos++;
         }
 #else
-        int pos = (int)(::log2(n) + 1);
+        int32_t pos = (int32_t)(::log2(n) + 1);
 #endif
         return pos - 1;
     }
 
-    int SkipCode(int mask, int pos)
+    int32_t SkipCode(int32_t mask, int32_t pos)
     {
         return (((mask >> (pos + 1))) | (mask << (3 - pos))) & 7;
     }
 
-    int SkipCodeNext(int code)
+    int32_t SkipCodeNext(int32_t code)
     {
-        int n = bitScan(code);
-        int newCode = code >> (n + 1);
+        int32_t n = bitScan(code);
+        int32_t newCode = code >> (n + 1);
         return newCode ^ code;
     }
 
@@ -505,16 +505,16 @@ namespace aten
 
     bool StacklessQbvh::hit(
         const context& ctxt,
-        int exid,
+        int32_t exid,
         const std::vector<std::vector<StacklessQbvhNode>>& listQbvhNode,
         const ray& r,
         real t_min, real t_max,
         Intersection& isect) const
     {
-        int nodeid = 0;
+        int32_t nodeid = 0;
         uint32_t bitstack = 0;
 
-        int skipCode = 0;
+        int32_t skipCode = 0;
 
         for (;;) {
             const StacklessQbvhNode* pnode = nullptr;
@@ -534,13 +534,13 @@ namespace aten
 
                 bool isHit = false;
 
-                auto s = ctxt.getTransformable((int)pnode->shapeid);
+                auto s = ctxt.getTransformable((int32_t)pnode->shapeid);
 
                 if (pnode->exid >= 0) {
                     // Traverse external StacklessQbvh.
                     const auto& param = s->getParam();
 
-                    int mtxid = param.mtxid;
+                    int32_t mtxid = param.mtxid;
 
                     aten::ray transformedRay;
 
@@ -555,14 +555,14 @@ namespace aten
 
                     isHit = hit(
                         ctxt,
-                        (int)pnode->exid,
+                        (int32_t)pnode->exid,
                         listQbvhNode,
                         transformedRay,
                         t_min, t_max,
                         isectTmp);
                 }
                 else if (pnode->primid >= 0) {
-                    auto f = ctxt.getTriangle((int)pnode->primid);
+                    auto f = ctxt.getTriangle((int32_t)pnode->primid);
                     isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
                     if (isHit) {
@@ -596,24 +596,24 @@ namespace aten
                     bitstack = bitstack << 3;
 
                     if (hitMask == 1) {
-                        nodeid = (int)pnode->leftChildrenIdx + 0;
+                        nodeid = (int32_t)pnode->leftChildrenIdx + 0;
                     }
                     else if (hitMask == 2) {
-                        nodeid = (int)pnode->leftChildrenIdx + 1;
+                        nodeid = (int32_t)pnode->leftChildrenIdx + 1;
                     }
                     else if (hitMask == 4) {
-                        nodeid = (int)pnode->leftChildrenIdx + 2;
+                        nodeid = (int32_t)pnode->leftChildrenIdx + 2;
                     }
                     else if (hitMask == 8) {
-                        nodeid = (int)pnode->leftChildrenIdx + 3;
+                        nodeid = (int32_t)pnode->leftChildrenIdx + 3;
                     }
                     else {
-                        int nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
-                        int nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
+                        int32_t nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
+                        int32_t nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
 
-                        int nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
+                        int32_t nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
 
-                        nodeid = (int)pnode->leftChildrenIdx + nearPos;
+                        nodeid = (int32_t)pnode->leftChildrenIdx + nearPos;
 
                         skipCode = SkipCode(hitMask, nearPos);
                         bitstack = bitstack | skipCode;
@@ -628,7 +628,7 @@ namespace aten
                     return (isect.objid >= 0);
                 }
 
-                nodeid = (int)pnode->parent;
+                nodeid = (int32_t)pnode->parent;
                 bitstack = bitstack >> 3;
 
                 pnode = &listQbvhNode[exid][nodeid];
@@ -636,9 +636,9 @@ namespace aten
 
             auto siblingPos = bitScan(skipCode);
 
-            nodeid = (int)pnode->sib[siblingPos];
+            nodeid = (int32_t)pnode->sib[siblingPos];
 
-            int n = SkipCodeNext(skipCode);
+            int32_t n = SkipCodeNext(skipCode);
             bitstack = bitstack ^ n;
         }
 

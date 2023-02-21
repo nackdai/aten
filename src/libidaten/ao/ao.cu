@@ -42,16 +42,16 @@ namespace ao {
     }
 
     __global__ void shadeAO(
-        int ao_num_rays, float ao_radius,
+        int32_t ao_num_rays, float ao_radius,
         idaten::TileDomain tileDomain,
-        unsigned int frame,
+        uint32_t frame,
         idaten::Path* paths,
-        int* hitindices,
-        int* hitnum,
+        int32_t* hitindices,
+        int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
-        int bounce, int rrBounce,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
+        int32_t bounce, int32_t rrBounce,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         aten::MaterialParameter* mtrls,
         cudaTextureObject_t* nodes,
         const aten::PrimitiveParamter* __restrict__ prims,
@@ -59,9 +59,9 @@ namespace ao {
         cudaTextureObject_t vtxNml,
         const aten::mat4* __restrict__ matrices,
         cudaTextureObject_t* textures,
-        const unsigned int* random)
+        const uint32_t* random)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
@@ -107,12 +107,12 @@ namespace ao {
         aten::vec3 orienting_normal = rec.normal;
 
         // Apply normal map.
-        int normalMap = (int)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
+        int32_t normalMap = (int32_t)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
         AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
 
         float3 ao_color = make_float3(0.0f);
 
-        for (int i = 0; i < ao_num_rays; i++) {
+        for (int32_t i = 0; i < ao_num_rays; i++) {
             auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &paths->sampler[idx]);
             auto pdfb = AT_NAME::lambert::pdf(orienting_normal, nextDir);
 
@@ -139,7 +139,7 @@ namespace ao {
     }
 
     __global__ void gatherAO(
-        int width, int height,
+        int32_t width, int32_t height,
         cudaSurfaceObject_t outSurface,
         const idaten::Path* __restrict__ paths,
         bool enableProgressive)
@@ -153,7 +153,7 @@ namespace ao {
 
         const auto idx = getIdx(ix, iy, width);
 
-        int sample = paths->contrib[idx].samples;
+        int32_t sample = paths->contrib[idx].samples;
         const auto& contrib = paths->contrib[idx].contrib;
 
         float4 data;
@@ -162,7 +162,7 @@ namespace ao {
             surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
 
             // First data.w value is 0.
-            int n = data.w;
+            int32_t n = data.w;
             data = n * data + make_float4(contrib.x, contrib.y, contrib.z, 0) / sample;
             data /= (n + 1);
             data.w = n + 1;
@@ -182,8 +182,8 @@ namespace ao {
 
 namespace idaten {
     void AORenderer::onShadeMiss(
-        int width, int height,
-        int bounce)
+        int32_t width, int32_t height,
+        int32_t bounce)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -201,8 +201,8 @@ namespace idaten {
     }
 
     void AORenderer::onShade(
-        int width, int height,
-        int bounce, int rrBounce,
+        int32_t width, int32_t height,
+        int32_t bounce, int32_t rrBounce,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
@@ -235,7 +235,7 @@ namespace idaten {
 
     void AORenderer::onGather(
         cudaSurfaceObject_t outputSurf,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(

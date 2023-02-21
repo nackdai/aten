@@ -71,6 +71,6 @@ namespace aten {
         static const uint32_t buffersize = 10;
         float distW[buffersize + 1][buffersize + 1];
 
-        int m_radius{ 0 };
+        int32_t m_radius{ 0 };
     };
 }

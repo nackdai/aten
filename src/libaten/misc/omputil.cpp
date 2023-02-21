@@ -19,9 +19,9 @@ namespace aten {
 #endif
     }
 
-    int OMPUtil::getThreadIdx()
+    int32_t OMPUtil::getThreadIdx()
     {
-        int idx = 0;
+        int32_t idx = 0;
 #ifdef ENABLE_OMP
         idx = omp_get_thread_num();
 #endif

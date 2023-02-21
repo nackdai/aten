@@ -93,7 +93,7 @@ namespace aten
             return m_channels;
         }
 
-        int id() const
+        int32_t id() const
         {
             return m_id;
         }
@@ -104,15 +104,15 @@ namespace aten
         }
 
         bool initAsGLTexture();
-        bool initAsGLTexture(int width, int height);
+        bool initAsGLTexture(int32_t width, int32_t height);
         void bindAsGLTexture(uint8_t stage, shader* shd) const;
         void releaseAsGLTexture();
         void clearAsGLTexture(const aten::vec4& clearColor);
 
         void getDataAsGLTexture(
-            int& width,
-            int& height,
-            int& channel,
+            int32_t& width,
+            int32_t& height,
+            int32_t& channel,
             std::vector<vec4>& dst) const;
 
         static void bindAsGLTexture(
@@ -137,7 +137,7 @@ namespace aten
         }
 
     private:
-        int m_id{ -1 };
+        int32_t m_id{ -1 };
 
         uint32_t m_width{ 0 };
         uint32_t m_height{ 0 };

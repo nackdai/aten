@@ -56,7 +56,7 @@ namespace aten
             mtxW2L.identity();
         }
 
-        int id() const
+        int32_t id() const
         {
             return m_id;
         }
@@ -81,7 +81,7 @@ namespace aten
 
     protected:
         std::shared_ptr<AT_NAME::material> mtrl_;
-        int m_id{ -1 };
+        int32_t m_id{ -1 };
 
         GeomParameter m_param;
     };

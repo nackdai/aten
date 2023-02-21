@@ -6,7 +6,7 @@
 namespace aten
 {
     bool TAA::init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char* taaVsPath, const char* taaFsPath,
         const char* finalVsPath, const char* finalFsPath)
     {
@@ -28,14 +28,14 @@ namespace aten
         return true;
     }
 
-    void TAA::prepareFbo(const uint32_t* tex, int num, std::vector<uint32_t>& comps)
+    void TAA::prepareFbo(const uint32_t* tex, int32_t num, std::vector<uint32_t>& comps)
     {
         if (comps.empty()) {
             comps.resize(2);
         }
 
-        int cur = m_idx;
-        int next = 1 - cur;
+        int32_t cur = m_idx;
+        int32_t next = 1 - cur;
 
         // Accumulatuin buffer.(for next frame)
         CALL_GL_API(glFramebufferTexture2D(
@@ -66,7 +66,7 @@ namespace aten
         GLuint srcTexHandle = m_body->getVisualizer()->getTexHandle();
         texture::bindAsGLTexture(srcTexHandle, 0, this);
 
-        int cur = m_body->m_idx;
+        int32_t cur = m_body->m_idx;
 
         auto texAcc = getFbo().getTexHandle(cur);
         texture::bindAsGLTexture(texAcc, 1, this);

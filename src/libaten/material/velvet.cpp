@@ -84,7 +84,7 @@ namespace AT_NAME
         return D;
     }
 
-    static AT_DEVICE_MTRL_API inline real interpVelvetParam(int i, real a)
+    static AT_DEVICE_MTRL_API inline real interpVelvetParam(int32_t i, real a)
     {
         // NOTE
         // a = (1 - r)^2

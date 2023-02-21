@@ -30,7 +30,7 @@ namespace aten {
 
         // NOTE
         // https://gist.github.com/badboy/6267743
-        static AT_DEVICE_API uint32_t next(unsigned int seed)
+        static AT_DEVICE_API uint32_t next(uint32_t seed)
         {
             uint32_t key = 1664525U * seed + 1013904223U;
 

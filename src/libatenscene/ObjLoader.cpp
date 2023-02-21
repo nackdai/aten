@@ -114,7 +114,7 @@ namespace aten
 
         uint32_t numPolygons = 0;
 
-        for (int p = 0; p < shapes.size(); p++) {
+        for (int32_t p = 0; p < shapes.size(); p++) {
             const auto& shape = shapes[p];
 
             if (obj && obj->getName() == nullptr) {
@@ -225,14 +225,14 @@ namespace aten
                 std::max(shapemax.z, pmax.z));
 
             std::shared_ptr<aten::objshape> dst_shape;
-            int prev_mtrl_idx = -1;
+            int32_t prev_mtrl_idx = -1;
 
             // One shape has one material.It means another shape would be created if different material appear.
             for (uint32_t i = 0; i < face_num; i++) {
                 // Loading as triangle is specified, so vertex num per face have to be 3.
                 AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
-                int m = shape.mesh.material_ids[i];
+                int32_t m = shape.mesh.material_ids[i];
 
                 if (m < 0 && !dst_shape) {
                     // If a material doesn't exist.

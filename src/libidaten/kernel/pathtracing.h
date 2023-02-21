@@ -23,12 +23,12 @@ namespace idaten
 
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) override;
+            int32_t maxSamples,
+            int32_t maxBounce) override;
 
         virtual void update(
             GLuint gltex,
-            int width, int height,
+            int32_t width, int32_t height,
             const aten::CameraParameter& camera,
             const std::vector<aten::GeomParameter>& shapes,
             const std::vector<aten::MaterialParameter>& mtrls,
@@ -83,23 +83,23 @@ namespace idaten
     protected:
         void onRender(
             const TileDomain& tileDomain,
-            int width, int height,
-            int maxSamples,
-            int maxBounce,
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
             cudaSurfaceObject_t outputSurf,
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);
 
         virtual void onHitTest(
-            int width, int height,
-            int bounce,
+            int32_t width, int32_t height,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         virtual void missShade(
-            int width, int height,
-            int bounce,
-            int offsetX = -1,
-            int offsetY = -1)
+            int32_t width, int32_t height,
+            int32_t bounce,
+            int32_t offsetX = -1,
+            int32_t offsetY = -1)
         {
             StandardPT::missShade(
                 width, height,
@@ -111,20 +111,20 @@ namespace idaten
 
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int sample,
-            int bounce, int rrBounce,
+            int32_t width, int32_t height,
+            int32_t sample,
+            int32_t bounce, int32_t rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         void onShadeByShadowRay(
-            int bounce,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int maxSamples);
+            int32_t width, int32_t height,
+            int32_t maxSamples);
 
         bool isFirstFrame() const
         {

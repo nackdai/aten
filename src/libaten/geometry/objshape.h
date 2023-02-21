@@ -11,7 +11,7 @@
 
 namespace AT_NAME
 {
-    using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*, int)>;
+    using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*, int32_t)>;
 
     class objshape : public aten::geombase {
         friend class object;
@@ -46,7 +46,7 @@ namespace AT_NAME
             const aten::context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
-            int parentId);
+            int32_t parentId);
 
         void draw(
             AT_NAME::FuncObjectMeshDraw func,
@@ -66,7 +66,7 @@ namespace AT_NAME
 
         aten::GeomIndexBuffer m_ib;
 
-        int m_baseIdx{ INT32_MAX };
-        int m_baseTriIdx{ INT32_MAX };
+        int32_t m_baseIdx{ INT32_MAX };
+        int32_t m_baseTriIdx{ INT32_MAX };
     };
 }

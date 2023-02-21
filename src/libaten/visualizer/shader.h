@@ -11,12 +11,12 @@ namespace aten {
 
     public:
         bool init(
-            int width, int height,
+            int32_t width, int32_t height,
             const char* pathVS,
             const char* pathFS);
 
         bool init(
-            int width, int height,
+            int32_t width, int32_t height,
             const char* pathVS,
             const char* pathGS,
             const char* pathFS);
@@ -26,7 +26,7 @@ namespace aten {
             bool revert);
 
         //GLint getHandle(const char* name);
-        int getHandle(const char* name);
+        int32_t getHandle(const char* name);
 
         uint32_t getProgramHandle() const
         {
@@ -39,10 +39,10 @@ namespace aten {
         }
 
         void setUniformFloat(const char* name, real f);
-        void setUniformInt(const char* name, int i);
+        void setUniformInt(const char* name, int32_t i);
         void setUniformBool(const char* name, bool b)
         {
-            setUniformInt(name, (int)b);
+            setUniformInt(name, (int32_t)b);
         }
         void setUniformVec3(const char* name, const vec3& v);
 

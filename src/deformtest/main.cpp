@@ -21,8 +21,8 @@
 #define ENABLE_ENVMAP
 #define ENABLE_SVGF
 
-static int WIDTH = 1280;
-static int HEIGHT = 720;
+static int32_t WIDTH = 1280;
+static int32_t HEIGHT = 720;
 static const char* TITLE = "deform";
 
 #ifdef ENABLE_OMP
@@ -110,22 +110,22 @@ static idaten::Skinning g_skinning;
 static aten::Timeline g_timeline;
 
 static idaten::LBVHBuilder g_lbvh;
-static int g_triOffset = 0;
-static int g_vtxOffset = 0;
+static int32_t g_triOffset = 0;
+static int32_t g_vtxOffset = 0;
 
 static bool g_willShowGUI = true;
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
-static int g_maxSamples = 1;
-static int g_maxBounce = 5;
-static int g_curMode = (int)idaten::SVGFPathTracing::Mode::SVGF;
-static int g_curAOVMode = (int)idaten::SVGFPathTracing::AOVMode::WireFrame;
+static int32_t g_maxSamples = 1;
+static int32_t g_maxBounce = 5;
+static int32_t g_curMode = (int32_t)idaten::SVGFPathTracing::Mode::SVGF;
+static int32_t g_curAOVMode = (int32_t)idaten::SVGFPathTracing::AOVMode::WireFrame;
 static bool g_showAABB = false;
 
 static bool g_pickPixel = false;
 
-void update(int frame)
+void update(int32_t frame)
 {
     auto deform = getDeformable();
 
@@ -167,7 +167,7 @@ void update(int frame)
         auto& tris = g_skinning.getTriangles();
 
         // TODO
-        int deformPos = nodes.size() - 1;
+        int32_t deformPos = nodes.size() - 1;
 
         // NOTE
         // Vertex offset was added in "g_skinning.compute".
@@ -329,7 +329,7 @@ void onRun(aten::window* window)
             }
         }
         else if (g_curMode == idaten::SVGFPathTracing::Mode::SVGF) {
-            int iterCnt = g_tracer.getAtrousIterCount();
+            int32_t iterCnt = g_tracer.getAtrousIterCount();
             if (ImGui::SliderInt("Atrous Iter", &iterCnt, 1, 5)) {
                 g_tracer.setAtrousIterCount(iterCnt);
             }
@@ -371,10 +371,10 @@ void onClose()
 
 bool g_isMouseLBtnDown = false;
 bool g_isMouseRBtnDown = false;
-int g_prevX = 0;
-int g_prevY = 0;
+int32_t g_prevX = 0;
+int32_t g_prevY = 0;
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -395,7 +395,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -418,7 +418,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -501,7 +501,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-int main()
+int32_t main()
 {
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
@@ -615,7 +615,7 @@ int main()
         std::vector<aten::SkinningVertex> vtx;
         std::vector<uint32_t> idx;
 
-        int vtxIdOffset = g_ctxt.getVertexNum();
+        int32_t vtxIdOffset = g_ctxt.getVertexNum();
 
         mdl->getGeometryData(g_ctxt, vtx, idx, deformTris);
 
@@ -662,7 +662,7 @@ int main()
         {
             auto texNum = g_ctxt.getTextureNum();
 
-            for (int i = 0; i < texNum; i++) {
+            for (int32_t i = 0; i < texNum; i++) {
                 auto t = g_ctxt.getTexture(i);
                 tex.push_back(
                     idaten::TextureResource(t->colors(), t->width(), t->height()));
@@ -718,7 +718,7 @@ int main()
     else
     {
         std::vector<std::vector<aten::PrimitiveParamter>> triangles;
-        std::vector<int> triIdOffsets;
+        std::vector<int32_t> triIdOffsets;
 
         aten::DataCollector::collectTriangles(g_ctxt, triangles, triIdOffsets);
 
@@ -742,7 +742,7 @@ int main()
 
         auto& cpunodes = g_scene.getAccel()->getNodes();
 
-        for (int i = 0; i < triangles.size(); i++)
+        for (int32_t i = 0; i < triangles.size(); i++)
         {
             auto& tris = triangles[i];
             auto triIdOffset = triIdOffsets[i];

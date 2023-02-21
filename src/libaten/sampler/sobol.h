@@ -38,7 +38,7 @@ struct Matrices
 // to permute elementary intervals, and might be chosen randomly to
 // generate a randomized QMC sequence.
 inline AT_DEVICE_API float sample(
-    const unsigned int* matrices,
+    const uint32_t* matrices,
     unsigned long long index,
     const unsigned dimension,
     const unsigned scramble)

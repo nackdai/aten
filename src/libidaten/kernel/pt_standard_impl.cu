@@ -40,12 +40,12 @@ namespace kernel {
         bool needFillAOV,
         idaten::Path* paths,
         aten::ray* rays,
-        int width, int height,
-        int sample,
-        unsigned int frame,
+        int32_t width, int32_t height,
+        int32_t sample,
+        uint32_t frame,
         const aten::CameraParameter* __restrict__ camera,
         const void* samplerValues,
-        const unsigned int* __restrict__ random)
+        const uint32_t* __restrict__ random)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -105,40 +105,40 @@ namespace kernel {
     // NOTE
     // https://research.nvidia.com/sites/default/files/pubs/2009-08_Understanding-the-Efficiency/aila2009hpg_paper.pdf
 
-    __device__ unsigned int g_headDev = 0;
+    __device__ uint32_t g_headDev = 0;
 
     __global__ void hitTest(
         idaten::TileDomain tileDomain,
         idaten::Path* paths,
         aten::Intersection* isects,
         aten::ray* rays,
-        int* hitbools,
-        int width, int height,
-        const aten::GeomParameter* __restrict__ shapes, int geomnum,
-        const aten::LightParameter* __restrict__ lights, int lightnum,
+        int32_t* hitbools,
+        int32_t width, int32_t height,
+        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::PrimitiveParamter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         aten::mat4* matrices,
-        int bounce,
+        int32_t bounce,
         float hitDistLimit)
     {
 #ifdef ENABLE_PERSISTENT_THREAD
         // warp-wise head index of tasks in a block
-        __shared__ volatile unsigned int nextRayArray[NUM_WARP_PER_BLOCK];
-        __shared__ volatile unsigned int rayCountArray[NUM_WARP_PER_BLOCK];
+        __shared__ volatile uint32_t nextRayArray[NUM_WARP_PER_BLOCK];
+        __shared__ volatile uint32_t rayCountArray[NUM_WARP_PER_BLOCK];
 
         if (blockIdx.x == 0 && threadIdx.x == 0) {
             g_headDev = 0;
         }
 
         if (threadIdx.x == 0) {
-            for (int i = 0; i < NUM_WARP_PER_BLOCK; i++) {
+            for (int32_t i = 0; i < NUM_WARP_PER_BLOCK; i++) {
                 rayCountArray[i] = 0;
             }
         }
 
-        int size = tileDomain.w * tileDomain.h;
+        int32_t size = tileDomain.w * tileDomain.h;
 
         __syncthreads();
 
@@ -166,7 +166,7 @@ namespace kernel {
             }
 
             // task index per thread in a warp
-            unsigned int idx = localPoolNextRay + threadIdx.x;
+            uint32_t idx = localPoolNextRay + threadIdx.x;
 
             if (idx >= size) {
                 return;
@@ -200,7 +200,7 @@ namespace kernel {
             // しかも同じオブジェクト間だとそれが起こりやすい.
             //bool enableLod = (bounce >= 2);
             bool enableLod = false;
-            int depth = 9;
+            int32_t depth = 9;
 
             bool isHit = intersectClosest(&ctxt, rays[idx], &isect, t_max, enableLod, depth);
 
@@ -301,8 +301,8 @@ namespace kernel {
         cudaSurfaceObject_t gbuffer,
         idaten::Path* paths,
         aten::Intersection* isects,
-        int* hitbools,
-        int width, int height,
+        int32_t* hitbools,
+        int32_t width, int32_t height,
         const aten::vec4 camPos,
         const aten::GeomParameter* __restrict__ geoms,
         const aten::PrimitiveParamter* __restrict__ prims,
@@ -338,8 +338,8 @@ namespace kernel {
         // y : primid
         // zw : bary centroid
 
-        int objid = __float_as_int(data.x);
-        int primid = __float_as_int(data.y);
+        int32_t objid = __float_as_int(data.x);
+        int32_t primid = __float_as_int(data.y);
 
         isects[idx].objid = objid;
         isects[idx].primid = primid;
@@ -390,11 +390,11 @@ namespace kernel {
 
     __global__ void shadeMiss(
         idaten::TileDomain tileDomain,
-        int bounce,
+        int32_t bounce,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
         idaten::Path* paths,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -434,18 +434,18 @@ namespace kernel {
 
     __global__ void shadeMissWithEnvmap(
         idaten::TileDomain tileDomain,
-        int offsetX, int offsetY,
-        int bounce,
+        int32_t offsetX, int32_t offsetY,
+        int32_t bounce,
         const aten::CameraParameter* __restrict__ camera,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
         cudaTextureObject_t* textures,
-        int envmapIdx,
+        int32_t envmapIdx,
         real envmapAvgIllum,
         real envmapMultiplyer,
         idaten::Path* paths,
         const aten::ray* __restrict__ rays,
-        int width, int height)
+        int32_t width, int32_t height)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -513,7 +513,7 @@ namespace kernel {
 
 namespace idaten
 {
-    bool StandardPT::initPath(int width, int height)
+    bool StandardPT::initPath(int32_t width, int32_t height)
     {
         if (!m_isInitPath) {
             m_paths.init(1);
@@ -551,8 +551,8 @@ namespace idaten
 
     void StandardPT::generatePath(
         bool needFillAOV,
-        int sample, int maxBounce,
-        int seed,
+        int32_t sample, int32_t maxBounce,
+        int32_t seed,
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
@@ -577,8 +577,8 @@ namespace idaten
     }
 
     void StandardPT::hitTest(
-        int width, int height,
-        int bounce,
+        int32_t width, int32_t height,
+        int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
 #ifdef ENABLE_PERSISTENT_THREAD
@@ -610,7 +610,7 @@ namespace idaten
     }
 
     void StandardPT::hitTestOnScreenSpace(
-        int width, int height,
+        int32_t width, int32_t height,
         idaten::CudaGLSurface& gbuffer,
         cudaTextureObject_t texVtxPos)
     {
@@ -641,12 +641,12 @@ namespace idaten
     }
 
     void StandardPT::missShade(
-        int width, int height,
-        int bounce,
+        int32_t width, int32_t height,
+        int32_t bounce,
         idaten::TypedCudaMemory<float4>& aovNormalDepth,
         idaten::TypedCudaMemory<float4>& aovTexclrMeshid,
-        int offsetX/*= -1*/,
-        int offsetY/*= -1*/)
+        int32_t offsetX/*= -1*/,
+        int32_t offsetY/*= -1*/)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(

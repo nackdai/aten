@@ -10,10 +10,10 @@ __global__ void copyBufferForTile(
     idaten::TileDomain tileDomain,
     const idaten::Path* paths,
     float4* contribs,
-    int width, int height)
+    int32_t width, int32_t height)
 {
-    int ix = blockIdx.x * blockDim.x + threadIdx.x;
-    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (ix >= tileDomain.w || iy >= tileDomain.h) {
         return;
@@ -31,7 +31,7 @@ __global__ void copyBufferForTile(
 
 namespace idaten
 {
-    void SVGFPathTracing::onCopyBufferForTile(int width, int height)
+    void SVGFPathTracing::onCopyBufferForTile(int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(

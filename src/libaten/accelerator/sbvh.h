@@ -66,7 +66,7 @@ namespace aten
     class sbvh : public accelerator {
     public:
         // TODO
-        static const int VoxelDepth = 3;
+        static const int32_t VoxelDepth = 3;
 
     public:
         sbvh() : accelerator(AccelType::Sbvh) {}
@@ -119,7 +119,7 @@ namespace aten
         virtual bool importTree(
             const context& ctxt,
             const char* path,
-            int offsetTriIdx) override final;
+            int32_t offsetTriIdx) override final;
 
         /**
          * @brief Return the top layer acceleration structure.
@@ -194,12 +194,12 @@ namespace aten
          */
         void convert(
             std::vector<ThreadedSbvhNode>& nodes,
-            int offset,
-            std::vector<int>& indices) const;
+            int32_t offset,
+            std::vector<int32_t>& indices) const;
 
         bool hit(
             const context& ctxt,
-            int exid,
+            int32_t exid,
             const ray& r,
             real t_min, real t_max,
             Intersection& isect,
@@ -220,7 +220,7 @@ namespace aten
                 return leaf;
             }
 
-            void setChild(int leftId, int rightId)
+            void setChild(int32_t leftId, int32_t rightId)
             {
                 leaf = false;
                 left = leftId;
@@ -233,12 +233,12 @@ namespace aten
             std::vector<uint32_t> refIds;
 
             // Child left;
-            int left{ -1 };
+            int32_t left{ -1 };
 
             // Child right;
-            int right{ -1 };
+            int32_t right{ -1 };
 
-            int parent{ -1 };
+            int32_t parent{ -1 };
             int32_t depth{ 0 };
 
             bool leaf{ true };
@@ -256,20 +256,20 @@ namespace aten
             aabb accum;
 
             // references starting here.
-            int start{ 0 };
+            int32_t start{ 0 };
 
             // references ending here.
-            int end{ 0 };
+            int32_t end{ 0 };
         };
 
         // 分割三角形情報.
         struct Reference {
             Reference() = default;
 
-            Reference(int id) : triid(id) {}
+            Reference(int32_t id) : triid(id) {}
 
             // 分割元の三角形インデックス.
-            int triid{ -1 };
+            int32_t triid{ -1 };
 
             // 分割した後のAABB.
             aabb bbox;
@@ -290,8 +290,8 @@ namespace aten
             real& cost,
             aabb& leftBB,
             aabb& rightBB,
-            int& splitBinPos,
-            int& axis);
+            int32_t& splitBinPos,
+            int32_t& axis);
 
         /**
          * @brief Find a potential spatial split, but it does not split.
@@ -307,11 +307,11 @@ namespace aten
         void findSpatialSplit(
             SBVHNode& node,
             real& cost,
-            int& leftCount,
-            int& rightCount,
+            int32_t& leftCount,
+            int32_t& rightCount,
             aabb& leftBB,
             aabb& rightBB,
-            int& bestAxis,
+            int32_t& bestAxis,
             real& splitPlane);
 
         /**
@@ -331,10 +331,10 @@ namespace aten
         void spatialSort(
             SBVHNode& node,
             real splitPlane,
-            int axis,
+            int32_t axis,
             real splitCost,
-            int leftCnt,
-            int rightCnt,
+            int32_t leftCnt,
+            int32_t rightCnt,
             aabb& leftBB,
             aabb& rightBB,
             std::vector<uint32_t>& leftList,
@@ -351,8 +351,8 @@ namespace aten
          */
         void objectSort(
             SBVHNode& node,
-            int splitBin,
-            int axis,
+            int32_t splitBin,
+            int32_t axis,
             std::vector<uint32_t>& leftList,
             std::vector<uint32_t>& rightList);
 
@@ -360,7 +360,7 @@ namespace aten
          * @brief Convert the tree to the linear list.
          * @param [out] indices Node indices list.
          */
-        void getOrderIndex(std::vector<int>& indices) const;
+        void getOrderIndex(std::vector<int32_t>& indices) const;
 
         /**
          * @brief Make treelets from the tree.
@@ -385,7 +385,7 @@ namespace aten
 
         uint32_t m_refIndexNum{ 0 };
 
-        int m_offsetTriIdx{ 0 };
+        int32_t m_offsetTriIdx{ 0 };
 
         std::vector<SBVHNode> m_nodes;
 
@@ -395,7 +395,7 @@ namespace aten
 
         // For layer.
         std::vector<std::vector<ThreadedSbvhNode>> m_threadedNodes;
-        std::vector<int> m_refIndices;
+        std::vector<int32_t> m_refIndices;
 
         uint32_t m_maxDepth{ 0 };
 
@@ -408,7 +408,7 @@ namespace aten
             // If a treelet has a child which is light, it is disabled.
             bool enabled{ true };
 
-            int mtrlid{ -1 };
+            int32_t mtrlid{ -1 };
 
             // List of leaf children in the treelet.
             std::vector<uint32_t> leafChildren;

@@ -10,7 +10,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 {
     aten::Intersection isectTmp;
 
-    int nodeid = 0;
+    int32_t nodeid = 0;
 
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
@@ -34,7 +34,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
         bool isHit = false;
 
         if (attrib.y >= 0) {
-            int primidx = (int)attrib.y;
+            int32_t primidx = (int32_t)attrib.y;
             aten::PrimitiveParamter prim;
             prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
@@ -48,11 +48,11 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->primid = (int)attrib.y;
+                isect->objid = (int32_t)attrib.x;
+                isect->primid = (int32_t)attrib.y;
                 isect->mtrlid = prim.mtrlid;
 
-                //isect->meshid = (int)attrib.w;
+                //isect->meshid = (int32_t)attrib.w;
                 isect->meshid = prim.gemoid;
 
                 t_max = isect->t;
@@ -69,10 +69,10 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
         }
 
         if (isHit) {
-            nodeid = (int)node0.w;
+            nodeid = (int32_t)node0.w;
         }
         else {
-            nodeid = (int)node1.w;
+            nodeid = (int32_t)node1.w;
         }
     }
 
@@ -92,7 +92,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 
     isect->t = t_max;
 
-    int nodeid = 0;
+    int32_t nodeid = 0;
 
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
@@ -106,10 +106,10 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
     cudaTextureObject_t node = ctxt->nodes[0];
     aten::ray transformedRay = r;
 
-    int toplayerHit = -1;
-    int toplayerMiss = -1;
-    int objid = 0;
-    int meshid = 0;
+    int32_t toplayerHit = -1;
+    int32_t toplayerMiss = -1;
+    int32_t objid = 0;
+    int32_t meshid = 0;
 
     while (nodeid >= 0) {
         node0 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 0);    // xyz : boxmin, z: hit
@@ -127,7 +127,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             if (attrib.z >= 0) {    // exid
                 //if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
                 {
-                    const auto* s = &ctxt->shapes[(int)attrib.x];
+                    const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
                     if (s->mtxid >= 0) {
                         auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
@@ -139,16 +139,16 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                         transformedRay = r;
                     }
 
-                    int exid = __float_as_int(attrib.z);
+                    int32_t exid = __float_as_int(attrib.z);
                     exid = AT_BVHNODE_MAIN_EXID(exid);
 
                     node = ctxt->nodes[exid];
 
-                    objid = (int)attrib.x;
-                    meshid = (int)attrib.w;
+                    objid = (int32_t)attrib.x;
+                    meshid = (int32_t)attrib.w;
 
-                    toplayerHit = (int)node0.w;
-                    toplayerMiss = (int)node1.w;
+                    toplayerHit = (int32_t)node0.w;
+                    toplayerMiss = (int32_t)node1.w;
 
                     nodeid = 0;
 
@@ -156,7 +156,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                 }
             }
             else if (attrib.y >= 0) {
-                int primidx = (int)attrib.y;
+                int32_t primidx = (int32_t)attrib.y;
                 aten::PrimitiveParamter prim;
                 prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
                 prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
@@ -171,7 +171,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                 if (isIntersect) {
                     *isect = isectTmp;
                     isect->objid = objid;
-                    isect->primid = (int)attrib.y;
+                    isect->primid = (int32_t)attrib.y;
                     isect->mtrlid = prim.mtrlid;
 
                     isect->meshid = prim.gemoid;
@@ -192,10 +192,10 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
         }
 
         if (isHit) {
-            nodeid = (int)node0.w;
+            nodeid = (int32_t)node0.w;
         }
         else {
-            nodeid = (int)node1.w;
+            nodeid = (int32_t)node1.w;
         }
 
         if (nodeid < 0 && toplayerHit >= 0) {
@@ -208,7 +208,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 #else
         if (attrib.x >= 0) {
             // Leaf.
-            const auto* s = &ctxt->shapes[(int)attrib.x];
+            const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {    // exid
                 if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
@@ -224,7 +224,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                         transformedRay = r;
                     }
 
-                    isHit = intersectBVHTriangles<Type>(ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+                    isHit = intersectBVHTriangles<Type>(ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
                 }
             }
             else {
@@ -242,8 +242,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
+                isect->objid = (int32_t)attrib.x;
+                isect->meshid = (isect->meshid < 0 ? (int32_t)attrib.w : isect->meshid);
 
                 t_max = isect->t;
 
@@ -260,10 +260,10 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
         }
 
         if (isHit) {
-            nodeid = (int)node0.w;
+            nodeid = (int32_t)node0.w;
         }
         else {
-            nodeid = (int)node1.w;
+            nodeid = (int32_t)node1.w;
         }
 #endif
     }
@@ -277,7 +277,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
     aten::Intersection* isect,
     float t_max/*= AT_MATH_INF*/,
     bool enableLod/*= false*/,
-    int depth/*= -1*/)
+    int32_t depth/*= -1*/)
 {
 	(void)enableLod;
 	(void)depth;
@@ -299,7 +299,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserBVH(
     aten::Intersection* isect,
     const float t_max,
     bool enableLod/*= false*/,
-    int depth/*= -1*/)
+    int32_t depth/*= -1*/)
 {
     (void)enableLod;
     (void)depth;
@@ -320,7 +320,7 @@ AT_CUDA_INLINE __device__ bool intersectAnyBVH(
     const aten::ray& r,
     aten::Intersection* isect,
     bool enableLod/*= false*/,
-    int depth/*= -1*/)
+    int32_t depth/*= -1*/)
 {
     (void)enableLod;
     (void)depth;

@@ -16,10 +16,10 @@ namespace idaten
     public:
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) override final;
+            int32_t maxSamples,
+            int32_t maxBounce) override final;
 
-        virtual void postRender(int width, int height) override final;
+        virtual void postRender(int32_t width, int32_t height) override final;
 
     protected:
         void setStream(cudaStream_t stream)

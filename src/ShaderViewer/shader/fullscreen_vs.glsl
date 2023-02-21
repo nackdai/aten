@@ -1,6 +1,6 @@
 #version 420
 precision highp float;
-precision highp int;
+precision highp int32_t;
 
 /* NOTE
 頂点バッファを使わず全画面に描画する頂点シェーダ

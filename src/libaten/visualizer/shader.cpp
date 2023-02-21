@@ -77,7 +77,7 @@ namespace aten {
     }
 
     bool shader::init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char* pathVS,
         const char* pathFS)
     {
@@ -97,7 +97,7 @@ namespace aten {
     }
 
     bool shader::init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char* pathVS,
         const char* pathGS,
         const char* pathFS)
@@ -141,7 +141,7 @@ namespace aten {
         }
     }
 
-    void shader::setUniformInt(const char* name, int i)
+    void shader::setUniformInt(const char* name, int32_t i)
     {
         auto handle = getHandle(name);
         if (handle >= 0) {

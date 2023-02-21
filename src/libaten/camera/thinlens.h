@@ -12,7 +12,7 @@ namespace aten {
 
     public:
         void init(
-            int width, int height,
+            int32_t width, int32_t height,
             vec3 lookfrom, vec3 lookat, vec3 vup,
             real imageSensorSize,
             real imageSensorToLensDistance,
@@ -31,7 +31,7 @@ namespace aten {
             vec3& posOnLens,
             vec3& posOnObjectPlane,
             vec3& posOnImageSensor,
-            int& x, int& y) const override final;
+            int32_t& x, int32_t& y) const override final;
 
         virtual real convertImageSensorPdfToScenePdf(
             real pdfImage,
@@ -82,7 +82,7 @@ namespace aten {
 
         void revertRayToPixelPos(
             const ray& ray,
-            int& px, int& py) const override final;
+            int32_t& px, int32_t& py) const override final;
 
         virtual real getImageSensorWidth() const final
         {
@@ -96,8 +96,8 @@ namespace aten {
 
     private:
         // 解像度.
-        int m_imageWidthPx;
-        int m_imageHeightPx;
+        int32_t m_imageWidthPx;
+        int32_t m_imageHeightPx;
 
         // イメージセンサ.
         struct ImageSensor {

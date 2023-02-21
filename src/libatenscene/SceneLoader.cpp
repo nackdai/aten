@@ -157,10 +157,10 @@ namespace aten
         std::string text(a->Value());
 
         std::vector<std::string> values;
-        int num = split(text, values, ' ');
+        int32_t num = split(text, values, ' ');
 
         aten::vec4 v;
-        for (int i = 0; i < std::min<int>(num, 3); i++) {
+        for (int32_t i = 0; i < std::min<int32_t>(num, 3); i++) {
             v[i] = (real)atof(values[i].c_str());
         }
 
@@ -178,7 +178,7 @@ namespace aten
     }
 
     template <>
-    aten::PolymorphicValue getValue<int>(const tinyxml2::XMLAttribute* a)
+    aten::PolymorphicValue getValue<int32_t>(const tinyxml2::XMLAttribute* a)
     {
         aten::PolymorphicValue v;
         v = a->IntValue();
@@ -523,16 +523,16 @@ namespace aten
                 info.rendererType = attr->Value();
             }
             else {
-                auto v = getValue<int>(attr);
+                auto v = getValue<int32_t>(attr);
                 val.add(attrName, v);
             }
         }
 
-        info.dst.sample = val.get("spp", int(1));
-        info.dst.maxDepth = val.get("depth", int(5));
-        info.dst.russianRouletteDepth = val.get("rrdepth", int(3));
-        info.dst.mutation = val.get("mutation", int(100));
-        info.dst.mltNum = val.get("mlt", int(100));
+        info.dst.sample = val.get("spp", int32_t(1));
+        info.dst.maxDepth = val.get("depth", int32_t(5));
+        info.dst.russianRouletteDepth = val.get("rrdepth", int32_t(3));
+        info.dst.mutation = val.get("mutation", int32_t(100));
+        info.dst.mltNum = val.get("mlt", int32_t(100));
     }
 
     SceneLoader::SceneInfo SceneLoader::load(
@@ -572,12 +572,12 @@ namespace aten
                 std::string attrName(attr->Name());
 
                 if (attrName == "width") {
-                    auto v = getValue<int>(attr);
-                    ret.dst.width = v.getAs<int>();
+                    auto v = getValue<int32_t>(attr);
+                    ret.dst.width = v.getAs<int32_t>();
                 }
                 else if (attrName == "height") {
-                    auto v = getValue<int>(attr);
-                    ret.dst.height = v.getAs<int>();
+                    auto v = getValue<int32_t>(attr);
+                    ret.dst.height = v.getAs<int32_t>();
                 }
             }
 

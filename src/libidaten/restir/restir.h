@@ -50,14 +50,14 @@ namespace idaten
         };
 
         struct PickedInfo {
-            int ix{ -1 };
-            int iy{ -1 };
+            int32_t ix{ -1 };
+            int32_t iy{ -1 };
             aten::vec3 color;
             aten::vec3 normal;
             float depth;
-            int meshid;
-            int triid;
-            int mtrlid;
+            int32_t meshid;
+            int32_t triid;
+            int32_t mtrlid;
         };
 
         ReSTIRPathTracing() = default;
@@ -65,12 +65,12 @@ namespace idaten
 
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) override;
+            int32_t maxSamples,
+            int32_t maxBounce) override;
 
         virtual void update(
             GLuint gltex,
-            int width, int height,
+            int32_t width, int32_t height,
             const aten::CameraParameter& camera,
             const std::vector<aten::GeomParameter>& shapes,
             const std::vector<aten::MaterialParameter>& mtrls,
@@ -144,7 +144,7 @@ namespace idaten
             return m_frame;
         }
 
-        void willPickPixel(int ix, int iy)
+        void willPickPixel(int32_t ix, int32_t iy)
         {
             m_willPicklPixel = true;
             m_pickedInfo.ix = ix;
@@ -189,7 +189,7 @@ namespace idaten
 
     protected:
         virtual bool initPath(
-            int width, int height) override final
+            int32_t width, int32_t height) override final
         {
             if (StandardPT::initPath(width, height)) {
                 m_restir_infos.init(width * height);
@@ -204,27 +204,27 @@ namespace idaten
             return false;
         }
 
-        void initReSTIR(int width, int height);
+        void initReSTIR(int32_t width, int32_t height);
 
         void onRender(
             const TileDomain& tileDomain,
-            int width, int height,
-            int maxSamples,
-            int maxBounce,
+            int32_t width, int32_t height,
+            int32_t maxSamples,
+            int32_t maxBounce,
             cudaSurfaceObject_t outputSurf,
             cudaTextureObject_t vtxTexPos,
             cudaTextureObject_t vtxTexNml);
 
         virtual void onHitTest(
-            int width, int height,
-            int bounce,
+            int32_t width, int32_t height,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         void missShade(
-            int width, int height,
-            int bounce,
-            int offsetX = -1,
-            int offsetY = -1)
+            int32_t width, int32_t height,
+            int32_t bounce,
+            int32_t offsetX = -1,
+            int32_t offsetY = -1)
         {
             StandardPT::missShade(
                 width, height,
@@ -236,49 +236,49 @@ namespace idaten
 
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int sample,
-            int bounce, int rrBounce,
+            int32_t width, int32_t height,
+            int32_t sample,
+            int32_t bounce, int32_t rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         void onShadeReSTIR(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int sample,
-            int bounce, int rrBounce,
+            int32_t width, int32_t height,
+            int32_t sample,
+            int32_t bounce, int32_t rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         void onShadeByShadowRay(
-            int bounce,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos);
 
         void onShadeByShadowRayReSTIR(
-            int width, int height,
-            int bounce,
+            int32_t width, int32_t height,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
-        int computelReuse(
-            int width, int height,
-            int bounce,
+        int32_t computelReuse(
+            int32_t width, int32_t height,
+            int32_t bounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int maxSamples);
+            int32_t width, int32_t height,
+            int32_t maxSamples);
 
         void onDisplayAOV(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
+            int32_t width, int32_t height,
             cudaTextureObject_t texVtxPos);
 
         void pick(
-            int ix, int iy,
-            int width, int height,
+            int32_t ix, int32_t iy,
+            int32_t width, int32_t height,
             cudaTextureObject_t texVtxPos);
 
         bool isFirstFrame() const
@@ -307,7 +307,7 @@ namespace idaten
         //     spatial_dst:0 (prev:0 ‚ÍŽQÆÏ‚Ý‚È‚Ì‚ÅAV‚µ‚¢‚à‚Ì‚Å–„‚ß‚Ä‚à‚¢‚¢)
         //     pos=1 -> pos=0(for next)
         std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
-        int m_curReservoirPos = 0;
+        int32_t m_curReservoirPos = 0;
 
         // AOV buffer
         using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer>;

@@ -5,7 +5,7 @@ struct QVertex {
     uint32_t idx;       // vertex index.
     uint32_t orgIdx;    // for debug. original vertex index.
     uint32_t grid[3];   // grid index.
-    int group;          // triangle group.
+    int32_t group;          // triangle group.
     uint64_t hash;
 
     QVertex() {}
@@ -14,7 +14,7 @@ struct QVertex {
         aten::vertex _v,
         uint32_t i,
         uint32_t original,
-        int g,
+        int32_t g,
         uint64_t h,
         uint32_t gx, uint32_t gy, uint32_t gz)
         : v(_v), idx(i), hash(h)
@@ -83,13 +83,13 @@ static void replaceVtxPositionToClosestFromAvg(qit start, qit end)
 
 void LodMaker::make(
     std::vector<aten::vertex>& dstVertices,
-    std::vector<std::vector<int>>& dstIndices,
+    std::vector<std::vector<int32_t>>& dstIndices,
     const aten::aabb& bound,
     const std::vector<aten::vertex>& vertices,
     const std::vector<std::vector<aten::face*>>& triGroups,
-    int gridX,
-    int gridY,
-    int gridZ)
+    int32_t gridX,
+    int32_t gridY,
+    int32_t gridZ)
 {
     auto bmin = bound.minPos();
     auto range = bound.size();
@@ -117,7 +117,7 @@ void LodMaker::make(
 
             const auto& triparam = tri->getParam();
 
-            for (int t = 0; t < 3; t++) {
+            for (int32_t t = 0; t < 3; t++) {
                 uint32_t vtxIdx = triparam.idx[t];
                 const auto& v = vertices[vtxIdx];
 
@@ -216,7 +216,7 @@ void LodMaker::make(
     dstIndices.resize(triGroups.size());
 
     orderIdx = 0;
-    int prevGroup = -1;
+    int32_t prevGroup = -1;
 
     // 線形にならんだインデックスをグループごとに振り分ける.
 
@@ -228,7 +228,7 @@ void LodMaker::make(
         for (uint32_t n = 0; n < tris.size(); n++) {
             const auto tri = tris[n];
 
-            for (int t = 0; t < 3; t++) {
+            for (int32_t t = 0; t < 3; t++) {
                 auto sortedIdx = sortedIndices[orderIdx];
 
                 const auto& qvtx = qvtxs[sortedIdx];
@@ -275,16 +275,16 @@ void LodMaker::make(
 }
 
 void LodMaker::removeCollapsedTriangles(
-    std::vector<std::vector<int>>& dstIndices,
+    std::vector<std::vector<int32_t>>& dstIndices,
     const std::vector<aten::vertex>& vertices,
-    const std::vector<std::vector<int>>& indices)
+    const std::vector<std::vector<int32_t>>& indices)
 {
     dstIndices.resize(indices.size());
 
-    for (int i = 0; i < indices.size(); i++) {
+    for (int32_t i = 0; i < indices.size(); i++) {
         const auto& idxs = indices[i];
 
-        for (int n = 0; n < idxs.size(); n += 3) {
+        for (int32_t n = 0; n < idxs.size(); n += 3) {
             auto id0 = idxs[n + 0];
             auto id1 = idxs[n + 1];
             auto id2 = idxs[n + 2];
@@ -310,13 +310,13 @@ void LodMaker::removeCollapsedTriangles(
 bool LodMaker::runOnThread(
     std::function<void()> funcFinish,
     std::vector<aten::vertex>& dstVertices,
-    std::vector<std::vector<int>>& dstIndices,
+    std::vector<std::vector<int32_t>>& dstIndices,
     const aten::aabb& bound,
     const std::vector<aten::vertex>& vertices,
     const std::vector<std::vector<aten::face*>>& tris,
-    int gridX,
-    int gridY,
-    int gridZ)
+    int32_t gridX,
+    int32_t gridY,
+    int32_t gridZ)
 {
     if (m_isRunning) {
         // Not finish yet.
@@ -329,7 +329,7 @@ bool LodMaker::runOnThread(
     }
     m_param = new LodParams(funcFinish, dstVertices, dstIndices, bound, vertices, tris, gridX, gridY, gridZ);
 
-    static std::vector<std::vector<int>> tmpIdx;
+    static std::vector<std::vector<int32_t>> tmpIdx;
 
     if (!m_thread.isRunning()) {
         m_thread.start([&](void* data) {

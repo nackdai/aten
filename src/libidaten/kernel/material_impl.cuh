@@ -308,7 +308,7 @@ AT_CUDA_INLINE __device__ aten::vec3 sampleBSDF(
 
 AT_CUDA_INLINE __device__ real applyNormal(
     const aten::MaterialParameter* mtrl,
-    const int normalMapIdx,
+    const int32_t normalMapIdx,
     const aten::vec3& orgNml,
     aten::vec3& newNml,
     real u, real v,

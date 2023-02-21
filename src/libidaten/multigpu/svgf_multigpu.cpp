@@ -14,8 +14,8 @@ namespace idaten
 
     void SVGFPathTracingMultiGPU::render(
         const TileDomain& tileDomain,
-        int maxSamples,
-        int maxBounce)
+        int32_t maxSamples,
+        int32_t maxBounce)
     {
 #ifdef __AT_DEBUG__
         if (!doneSetStackSize) {
@@ -26,10 +26,10 @@ namespace idaten
         }
 #endif
 
-        int bounce = 0;
+        int32_t bounce = 0;
 
-        int width = tileDomain.w;
-        int height = tileDomain.h;
+        int32_t width = tileDomain.w;
+        int32_t height = tileDomain.h;
 
         m_isects.init(width * height);
         m_rays.init(width * height);
@@ -52,7 +52,7 @@ namespace idaten
         {
             {
                 std::vector<cudaTextureObject_t> tmp;
-                for (int i = 0; i < m_nodeparam.size(); i++) {
+                for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                     auto nodeTex = m_nodeparam[i].bind();
                     tmp.push_back(nodeTex);
                 }
@@ -62,7 +62,7 @@ namespace idaten
             if (!m_texRsc.empty())
             {
                 std::vector<cudaTextureObject_t> tmp;
-                for (int i = 0; i < m_texRsc.size(); i++) {
+                for (int32_t i = 0; i < m_texRsc.size(); i++) {
                     auto cudaTex = m_texRsc[i].bind();
                     tmp.push_back(cudaTex);
                 }
@@ -72,10 +72,10 @@ namespace idaten
             m_isListedTextureObject = true;
         }
         else {
-            for (int i = 0; i < m_nodeparam.size(); i++) {
+            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                 auto nodeTex = m_nodeparam[i].bind();
             }
-            for (int i = 0; i < m_texRsc.size(); i++) {
+            for (int32_t i = 0; i < m_texRsc.size(); i++) {
                 auto cudaTex = m_texRsc[i].bind();
             }
         }
@@ -118,11 +118,11 @@ namespace idaten
                 m_vtxparamsPos.unbind();
                 m_vtxparamsNml.unbind();
 
-                for (int i = 0; i < m_nodeparam.size(); i++) {
+                for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                     m_nodeparam[i].unbind();
                 }
 
-                for (int i = 0; i < m_texRsc.size(); i++) {
+                for (int32_t i = 0; i < m_texRsc.size(); i++) {
                     m_texRsc[i].unbind();
                 }
             }
@@ -139,23 +139,23 @@ namespace idaten
 
     void SVGFPathTracingMultiGPU::onRender(
         const TileDomain& tileDomain,
-        int width, int height,
-        int maxSamples,
-        int maxBounce,
+        int32_t width, int32_t height,
+        int32_t maxSamples,
+        int32_t maxBounce,
         cudaSurfaceObject_t outputSurf,
         cudaTextureObject_t vtxTexPos,
         cudaTextureObject_t vtxTexNml)
     {
-        static const int rrBounce = 3;
+        static const int32_t rrBounce = 3;
 
         // Set bounce count to 1 forcibly, aov render mode.
         maxBounce = (m_mode == Mode::AOVar ? 1 : maxBounce);
 
         auto time = AT_NAME::timer::getSystemTime();
 
-        for (int i = 0; i < maxSamples; i++) {
-            //int seed = time.milliSeconds;
-            int seed = 0;
+        for (int32_t i = 0; i < maxSamples; i++) {
+            //int32_t seed = time.milliSeconds;
+            int32_t seed = 0;
 
             m_tileDomain = tileDomain;
 
@@ -166,10 +166,10 @@ namespace idaten
                 vtxTexPos,
                 vtxTexNml);
 
-            int bounce = 0;
+            int32_t bounce = 0;
 
-            int offsetX = m_tileDomain.x;
-            int offsetY = m_tileDomain.y;
+            int32_t offsetX = m_tileDomain.x;
+            int32_t offsetY = m_tileDomain.y;
 
             // NOTE
             // ここから先ではオフセットさせない.
@@ -186,7 +186,7 @@ namespace idaten
                     width, height, bounce,
                     offsetX, offsetY);
 
-                int hitcount = 0;
+                int32_t hitcount = 0;
                 m_compaction.compact(
                     m_hitidx,
                     m_hitbools);
@@ -220,7 +220,7 @@ namespace idaten
         }
     }
 
-    void SVGFPathTracingMultiGPU::postRender(int width, int height)
+    void SVGFPathTracingMultiGPU::postRender(int32_t width, int32_t height)
     {
         m_glimg.map();
         auto outputSurf = m_glimg.bind();

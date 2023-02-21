@@ -3,8 +3,8 @@
 #include "atenscene.h"
 #include "../common/scenedefs.h"
 
-static int WIDTH = 512;
-static int HEIGHT = 512;
+static int32_t WIDTH = 512;
+static int32_t HEIGHT = 512;
 static const char *TITLE = "app";
 
 // #define ENABLE_EVERY_FRAME_SC
@@ -152,7 +152,7 @@ void display(aten::window *wnd)
     g_frameNo++;
 }
 
-int main(int argc, char *argv[])
+int32_t main(int32_t argc, char *argv[])
 {
     aten::initSampler(WIDTH, HEIGHT, 0, true);
 
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     auto ddd = Rad2Deg(acos(dot(normal, -in)));
     AT_PRINTF("in : %f\n", ddd);
 
-    for (int i = 0; i < 100; i++) {
+    for (int32_t i = 0; i < 100; i++) {
         auto wo = blinn.sampleDirection(in, normal, &sampler);
         auto xxx = Rad2Deg(acos(dot(normal, wo)));
         AT_PRINTF("out : %f\n", xxx);
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
 #if 0
     // Experimental
     char buf[8] = { 0 };
-    for (int i = 0; i < 128; i++) {
+    for (int32_t i = 0; i < 128; i++) {
         std::string path("../../asset/bluenoise/256_256/HDR_RGBA_");
         snprintf(buf, sizeof(buf), "%04d\0", i);
         path += buf;

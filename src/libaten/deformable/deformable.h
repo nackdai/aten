@@ -58,7 +58,7 @@ namespace aten
             const context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
-            int parentId,
+            int32_t parentId,
             uint32_t triOffset) override final;
 
         bool isEnabledForGPUSkinning() const
@@ -150,7 +150,7 @@ namespace aten
 
     public:
         bool init(
-            int width, int height,
+            int32_t width, int32_t height,
             const char* pathVS,
             const char* pathFS);
 

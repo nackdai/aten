@@ -49,11 +49,11 @@ namespace aten {
         {
             return v;
         }
-        inline AT_DEVICE_API real operator[](int i) const
+        inline AT_DEVICE_API real operator[](int32_t i) const
         {
             return p[i];
         }
-        inline AT_DEVICE_API real& operator[](int i)
+        inline AT_DEVICE_API real& operator[](int32_t i)
         {
             return p[i];
         }
@@ -295,7 +295,7 @@ namespace aten {
     };
 
     // Compare Less EQual
-    inline int cmpLEQ(const vec4& a, const vec4& b)
+    inline int32_t cmpLEQ(const vec4& a, const vec4& b)
     {
         _vec4_cmp_res res;
 
@@ -309,7 +309,7 @@ namespace aten {
     }
 
     // Compare Greater EQual
-    inline int cmpGEQ(const vec4& a, const vec4& b)
+    inline int32_t cmpGEQ(const vec4& a, const vec4& b)
     {
         _vec4_cmp_res res;
 

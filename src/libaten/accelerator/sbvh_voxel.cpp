@@ -45,14 +45,14 @@ namespace aten
 
         treelet.idxInBvhTree = idx;
 
-        int stack[128] = { 0 };
+        int32_t stack[128] = { 0 };
 
         stack[0] = root.left;
         stack[1] = root.right;
-        int stackpos = 2;
+        int32_t stackpos = 2;
 
         while (stackpos > 0) {
-            int idx = stack[stackpos - 1];
+            int32_t idx = stack[stackpos - 1];
             stackpos -= 1;
 
             const auto& sbvhNode = m_nodes[idx];
@@ -112,7 +112,7 @@ namespace aten
 
             auto& sbvhNode = m_nodes[treelet.idxInBvhTree];
 
-            std::map<int, real> mtrlMap;
+            std::map<int32_t, real> mtrlMap;
 
             for (const auto tid : treelet.tris) {
                 const auto tri = ctxt.getTriangle(tid);
@@ -128,7 +128,7 @@ namespace aten
                 }
             }
 
-            int mtrlCandidateId = -1;
+            int32_t mtrlCandidateId = -1;
             real maxArea = real(-1);
 
             for (auto it : mtrlMap) {

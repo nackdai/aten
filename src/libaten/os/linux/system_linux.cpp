@@ -43,7 +43,7 @@ namespace aten
         static char path[256];
 
         // 実行プログラムのフルパスを取得
-        int pathSize = aten::getExecuteFilePath(path, sizeof(path));
+        int32_t pathSize = aten::getExecuteFilePath(path, sizeof(path));
         AT_VRETURN_FALSE(pathSize > 0);
 
         char* tmp = const_cast<char*>(path);
@@ -58,7 +58,7 @@ namespace aten
         p = tmp;
 
         // カレントディレクトリを設定
-        int result = ::chdir(p);
+        int32_t result = ::chdir(p);
         AT_ASSERT(result >= 0);
 
         return result >= 0;

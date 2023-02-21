@@ -13,7 +13,7 @@ public:
 public:
     // ‰Šú‰».
     bool init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char* pathVS,
         const char* pathFS);
 
@@ -33,8 +33,8 @@ private:
     aten::GeomVertexBuffer m_vb_pts;
     aten::GeomIndexBuffer m_ib_pts;
 
-    int m_width{ 0 };
-    int m_height{ 0 };
+    int32_t m_width{ 0 };
+    int32_t m_height{ 0 };
 
     std::vector<aten::vec4> ray_orgs_;
 

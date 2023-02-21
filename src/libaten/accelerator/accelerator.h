@@ -120,13 +120,13 @@ namespace aten {
         }
 
         struct ResultIntersectTestByFrustum {
-            int ep{ -1 };   ///< Entry Point.
-            int ex{ -1 };   ///< Layer Id.
+            int32_t ep{ -1 };   ///< Entry Point.
+            int32_t ex{ -1 };   ///< Layer Id.
 
             // 1つ上のレイヤーへの戻り先のノードID.
-            int top{ -1 };  ///< Upper layer id.
+            int32_t top{ -1 };  ///< Upper layer id.
 
-            int padding{ 0 };
+            int32_t padding{ 0 };
 
             ResultIntersectTestByFrustum() = default;
         };
@@ -148,7 +148,7 @@ namespace aten {
         virtual bool importTree(
             const context& ctxt,
             const char* path,
-            int offsetTriIdx)
+            int32_t offsetTriIdx)
         {
             AT_ASSERT(false);
             return false;

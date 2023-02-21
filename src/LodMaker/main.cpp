@@ -5,8 +5,8 @@
 #include "atenscene.h"
 #include "lodmaker.h"
 
-static const int WIDTH = 1280;
-static const int HEIGHT = 720;
+static const int32_t WIDTH = 1280;
+static const int32_t HEIGHT = 720;
 
 static const char* TITLE = "LodMaker";
 
@@ -29,13 +29,13 @@ static std::vector<aten::material*> g_mtrls;
 
 static LodMaker g_lodmaker;
 static std::vector<aten::vertex> g_lodVtx;
-static std::vector<std::vector<int>> g_lodIdx;
+static std::vector<std::vector<int32_t>> g_lodIdx;
 
 static aten::ObjWriter g_writer;
 
-static int g_GridX = 16;
-static int g_GridY = 16;
-static int g_GridZ = 16;
+static int32_t g_GridX = 16;
+static int32_t g_GridY = 16;
+static int32_t g_GridZ = 16;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -49,8 +49,8 @@ static bool g_willShowGUI = true;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
-static int g_prevX = 0;
-static int g_prevY = 0;
+static int32_t g_prevX = 0;
+static int32_t g_prevY = 0;
 
 #define TEST_LOD
 
@@ -175,7 +175,7 @@ void onClose()
 
 }
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -189,7 +189,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -212,7 +212,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -262,7 +262,7 @@ void onKey(bool press, aten::Key key)
 }
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     cmdline::parser& cmd,
     Options& opt)
 {
@@ -318,7 +318,7 @@ std::shared_ptr<aten::object> loadObj(const Options& opt)
     return objs[0];
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     g_opt.input = "../../asset/sponza/sponza.obj";
     //g_opt.input = "../../asset/sponza/lod.obj";
@@ -366,7 +366,7 @@ int main(int argc, char* argv[])
 
         std::vector<uint32_t> idxNums;
 
-        for (int i = 0; i < g_triangles.size(); i++) {
+        for (int32_t i = 0; i < g_triangles.size(); i++) {
             auto triNum = (uint32_t)g_triangles[i].size();
             idxNums.push_back(triNum * 3);
         }

@@ -137,7 +137,7 @@ namespace aten
             const context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
-            int parentId,
+            int32_t parentId,
             uint32_t triOffset) override final
         {
             m_obj->render(func, ctxt, m_mtxL2W, m_mtxPrevL2W, id(), triOffset);

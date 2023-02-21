@@ -28,7 +28,7 @@ namespace aten
         listBvhNode.push_back(std::vector<BvhNode>());
         registerBvhNodeToLinearList(root, nullptr, nullptr, aten::mat4::Identity, listBvhNode[0], listBvh, nestedBvhMap);
 
-        for (int i = 0; i < listBvh.size(); i++) {
+        for (int32_t i = 0; i < listBvh.size(); i++) {
             // TODO
             auto bvh = (aten::bvh*)listBvh[i];
 
@@ -55,7 +55,7 @@ namespace aten
         m_listQbvhNode.resize(listBvhNode.size());
 
         // Convert to QBVH.
-        for (int i = 0; i < listBvhNode.size(); i++) {
+        for (int32_t i = 0; i < listBvhNode.size(); i++) {
             bool isPrimitiveLeafBvh = (i > 0);
 
             auto numNodes = convertFromBvh(
@@ -87,7 +87,7 @@ namespace aten
         {
             list.push_back(BvhNode(node, obj, mtx));
         },
-            [this](bvhnode* node, int exid, int subExid)
+            [this](bvhnode* node, int32_t exid, int32_t subExid)
         {
             if (node->isLeaf()) {
                 // NOTE
@@ -119,10 +119,10 @@ namespace aten
         QbvhStackEntry stack[256];
         stack[0] = QbvhStackEntry(0, 0);
 
-        int stackPos = 1;
+        int32_t stackPos = 1;
         uint32_t numNodes = 1;
 
-        int children[4];
+        int32_t children[4];
 
         while (stackPos > 0) {
             auto top = stack[--stackPos];
@@ -130,7 +130,7 @@ namespace aten
             auto& qbvhNode = listQbvhNode[top.qbvhNodeIdx];
             const auto& bvhNode = listBvhNode[top.bvhNodeIdx];
 
-            int numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
+            int32_t numChildren = getChildren(listBvhNode, top.bvhNodeIdx, children);
 
             if (numChildren == 0) {
                 // No children, so it is a leaf.
@@ -149,7 +149,7 @@ namespace aten
             qbvhNode.numChildren = (float)numChildren;
 
             // push all children to the stack
-            for (int i = 0; i < numChildren; i++) {
+            for (int32_t i = 0; i < numChildren; i++) {
                 stack[stackPos++] = QbvhStackEntry(numNodes, children[i]);
 
                 listQbvhNode.push_back(QbvhNode());
@@ -191,12 +191,12 @@ namespace aten
 
         if (node->isLeaf()) {
 #ifdef ENABLE_BVH_MULTI_TRIANGLES
-            int numChildren = node->getChildrenNum();
+            int32_t numChildren = node->getChildrenNum();
             auto children = node->getChildren();
 
             qbvhNode.numChildren = numChildren;
 
-            for (int i = 0; i < numChildren; i++) {
+            for (int32_t i = 0; i < numChildren; i++) {
                 auto ch = children[i];
 
                 // 自分自身のIDを取得.
@@ -221,7 +221,7 @@ namespace aten
                     // Leaves of this tree are primitive.
                     qbvhNode.primidx[i] = (float)face::findIdx(ch);
 
-                    auto f = face::faces()[(int)qbvhNode.primidx[i]];
+                    auto f = face::faces()[(int32_t)qbvhNode.primidx[i]];
 
                     const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
                     const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);
@@ -282,11 +282,11 @@ namespace aten
     void qbvh::fillQbvhNode(
         QbvhNode& qbvhNode,
         std::vector<BvhNode>& listBvhNode,
-        int children[4],
-        int numChildren)
+        int32_t children[4],
+        int32_t numChildren)
     {
-        for (int i = 0; i < numChildren; i++) {
-            int childIdx = children[i];
+        for (int32_t i = 0; i < numChildren; i++) {
+            int32_t childIdx = children[i];
             const auto& bvhNode = listBvhNode[childIdx];
 
             const auto node = bvhNode.node;
@@ -307,7 +307,7 @@ namespace aten
         }
 
         // Set 0s for empty child.
-        for (int i = numChildren; i < 4; i++) {
+        for (int32_t i = numChildren; i < 4; i++) {
             qbvhNode.bmaxx[i] = real(0);
             qbvhNode.bmaxy[i] = real(0);
             qbvhNode.bmaxz[i] = real(0);
@@ -322,16 +322,16 @@ namespace aten
         qbvhNode.isLeaf = false;
     }
 
-    int qbvh::getChildren(
+    int32_t qbvh::getChildren(
         std::vector<BvhNode>& listBvhNode,
-        int bvhNodeIdx,
-        int children[4])
+        int32_t bvhNodeIdx,
+        int32_t children[4])
     {
         const auto bvhNode = listBvhNode[bvhNodeIdx].node;
 
         // Invalidate children.
         children[0] = children[1] = children[2] = children[3] = -1;
-        int numChildren = 0;
+        int32_t numChildren = 0;
 
         if (bvhNode->isLeaf()) {
             // No children.
@@ -379,7 +379,7 @@ namespace aten
         return numChildren;
     }
 
-    inline int intersectAABB(
+    inline int32_t intersectAABB(
         aten::vec4& result,
         const aten::ray& r,
         real t_min, real t_max,
@@ -428,12 +428,12 @@ namespace aten
         auto t1 = min(min(tmaxX, tmaxY), min(tmaxZ, t_max));
         auto t0 = max(max(tminX, tminY), max(tminZ, t_min));
 
-        int ret = cmpLEQ(t0, t1);
+        int32_t ret = cmpLEQ(t0, t1);
         result = t0;
         return ret;
     }
 
-    inline int intersectTriangle(
+    inline int32_t intersectTriangle(
         const context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
@@ -453,8 +453,8 @@ namespace aten
         aten::vec4 v2y;
         aten::vec4 v2z;
 
-        for (int i = 0; i < qnode.numChildren; i++) {
-            const auto& f = ctxt.getTriangle((int)primidx[i]);
+        for (int32_t i = 0; i < qnode.numChildren; i++) {
+            const auto& f = ctxt.getTriangle((int32_t)primidx[i]);
 
             const auto& faceParam = f->getParam();
 
@@ -516,17 +516,17 @@ namespace aten
         resultA = beta;
         resultB = gamma;
 
-        int res_b0 = cmpGEQ(beta, real(0));        // beta >= 0
-        int res_b1 = cmpLEQ(beta, real(1));        // beta <= 1
+        int32_t res_b0 = cmpGEQ(beta, real(0));        // beta >= 0
+        int32_t res_b1 = cmpLEQ(beta, real(1));        // beta <= 1
 
-        int res_g0 = cmpGEQ(gamma, real(0));    // gamma >= 0
-        int res_g1 = cmpLEQ(gamma, real(1));    // gamma <= 1
+        int32_t res_g0 = cmpGEQ(gamma, real(0));    // gamma >= 0
+        int32_t res_g1 = cmpLEQ(gamma, real(1));    // gamma <= 1
 
-        int res_bg1 = cmpLEQ(beta + gamma, real(1));    // beta + gammma <= 1
+        int32_t res_bg1 = cmpLEQ(beta + gamma, real(1));    // beta + gammma <= 1
 
-        int res_t0 = cmpGEQ(t, real(0));        // t >= 0
+        int32_t res_t0 = cmpGEQ(t, real(0));        // t >= 0
 
-        int ret = res_b0 & res_b1 & res_g0 & res_g1 & res_bg1 & res_t0;
+        int32_t ret = res_b0 & res_b1 & res_g0 & res_g1 & res_bg1 & res_t0;
 
         return ret;
     }
@@ -542,7 +542,7 @@ namespace aten
 
     bool qbvh::hit(
         const context& ctxt,
-        int exid,
+        int32_t exid,
         const std::vector<std::vector<QbvhNode>>& listQbvhNode,
         const ray& r,
         real t_min, real t_max,
@@ -559,7 +559,7 @@ namespace aten
         } stackbuf[stacksize];
 
         stackbuf[0] = Intersect(&listQbvhNode[exid][0], t_max);
-        int stackpos = 1;
+        int32_t stackpos = 1;
 
         while (stackpos > 0) {
             const auto& node = stackbuf[stackpos - 1];
@@ -581,10 +581,10 @@ namespace aten
 #ifdef ENABLE_BVH_MULTI_TRIANGLES
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.
-                    auto s = shapes[(int)pnode->shapeid];
+                    auto s = shapes[(int32_t)pnode->shapeid];
                     const auto& param = s->getParam();
 
-                    int mtxid = param.mtxid;
+                    int32_t mtxid = param.mtxid;
 
                     aten::ray transformedRay;
 
@@ -598,7 +598,7 @@ namespace aten
                     }
 
                     isHit = hit(
-                        (int)pnode->exid,
+                        (int32_t)pnode->exid,
                         listQbvhNode,
                         transformedRay,
                         t_min, t_max,
@@ -607,21 +607,21 @@ namespace aten
                 else {
                     aten::vec4 resultT, resultA, resultB;
 
-                    int res = intersectTriangle(
+                    int32_t res = intersectTriangle(
                         resultT, resultA, resultB,
                         r,
                         t_min, t_max,
                         qnode->primidx,
                         *pnode);
 
-                    for (int i = 0; i < pnode->numChildren; i++) {
+                    for (int32_t i = 0; i < pnode->numChildren; i++) {
                         if ((res & (1 << i)) && (resultT[i] < isectTmp.t)) {
                             isectTmp.t = resultT[i];
                             isectTmp.a = resultA[i];
                             isectTmp.b = resultB[i];
 
-                            isectTmp.primid = (int)pnode->primidx[i];
-                            isectTmp.objid = (int)pnode->shapeidx[i];
+                            isectTmp.primid = (int32_t)pnode->primidx[i];
+                            isectTmp.objid = (int32_t)pnode->shapeidx[i];
 
                             auto f = prims[isectTmp.primid];
 
@@ -638,13 +638,13 @@ namespace aten
                     }
                 }
 #else
-                const auto& s = ctxt.getTransformable((int)pnode->shapeid);
+                const auto& s = ctxt.getTransformable((int32_t)pnode->shapeid);
 
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.
                     const auto& param = s->getParam();
 
-                    int mtxid = param.mtxid;
+                    int32_t mtxid = param.mtxid;
 
                     aten::ray transformedRay;
 
@@ -659,14 +659,14 @@ namespace aten
 
                     isHit = hit(
                         ctxt,
-                        (int)pnode->exid,
+                        (int32_t)pnode->exid,
                         listQbvhNode,
                         transformedRay,
                         t_min, t_max,
                         isectTmp);
                 }
                 else if (pnode->primid >= 0) {
-                    auto f = ctxt.getTriangle((int)pnode->primid);
+                    auto f = ctxt.getTriangle((int32_t)pnode->primid);
                     isHit = f->hit(ctxt, r, t_min, t_max, isectTmp);
 
                     if (isHit) {
@@ -699,10 +699,10 @@ namespace aten
 
                 // Stack hit children.
                 if (res > 0) {
-                    for (int i = 0; i < numChildren; i++) {
+                    for (int32_t i = 0; i < numChildren; i++) {
                         if ((res & (1 << i)) > 0) {
                             stackbuf[stackpos] = Intersect(
-                                &listQbvhNode[exid][(int)pnode->leftChildrenIdx + i],
+                                &listQbvhNode[exid][(int32_t)pnode->leftChildrenIdx + i],
                                 interserctT[i]);
                             stackpos++;
                         }

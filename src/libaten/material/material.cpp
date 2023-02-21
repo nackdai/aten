@@ -180,8 +180,8 @@ namespace AT_NAME
 
     bool material::isValidMaterialType(aten::MaterialType type)
     {
-        return (0 <= static_cast<int>(type)
-            && static_cast<int>(type) < static_cast<int>(aten::MaterialType::MaterialTypeMax));
+        return (0 <= static_cast<int32_t>(type)
+            && static_cast<int32_t>(type) < static_cast<int32_t>(aten::MaterialType::MaterialTypeMax));
     }
 
     void material::setTextures(

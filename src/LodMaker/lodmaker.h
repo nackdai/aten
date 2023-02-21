@@ -11,29 +11,29 @@ public:
 public:
     static void make(
         std::vector<aten::vertex>& dstVertices,
-        std::vector<std::vector<int>>& dstIndices,
+        std::vector<std::vector<int32_t>>& dstIndices,
         const aten::aabb& bound,
         const std::vector<aten::vertex>& vertices,
         const std::vector<std::vector<aten::face*>>& tris,
-        int gridX,
-        int gridY,
-        int gridZ);
+        int32_t gridX,
+        int32_t gridY,
+        int32_t gridZ);
 
     static void removeCollapsedTriangles(
-        std::vector<std::vector<int>>& dstIndices,
+        std::vector<std::vector<int32_t>>& dstIndices,
         const std::vector<aten::vertex>& vertices,
-        const std::vector<std::vector<int>>& indices);
+        const std::vector<std::vector<int32_t>>& indices);
 
     bool runOnThread(
         std::function<void()> funcFinish,
         std::vector<aten::vertex>& dstVertices,
-        std::vector<std::vector<int>>& dstIndices,
+        std::vector<std::vector<int32_t>>& dstIndices,
         const aten::aabb& bound,
         const std::vector<aten::vertex>& vertices,
         const std::vector<std::vector<aten::face*>>& tris,
-        int gridX,
-        int gridY,
-        int gridZ);
+        int32_t gridX,
+        int32_t gridY,
+        int32_t gridZ);
 
     void terminate();
 
@@ -47,22 +47,22 @@ private:
         std::function<void()> funcFinish;
 
         std::vector<aten::vertex>& dstVertices;
-        std::vector<std::vector<int>>& dstIndices;
+        std::vector<std::vector<int32_t>>& dstIndices;
         aten::aabb bound;
         const std::vector<aten::vertex>& vertices;
         const std::vector<std::vector<aten::face*>>& tris;
-        int gridX;
-        int gridY;
-        int gridZ;
+        int32_t gridX;
+        int32_t gridY;
+        int32_t gridZ;
 
         LodParams(
             std::function<void()> func,
             std::vector<aten::vertex>& _dstVertices,
-            std::vector<std::vector<int>>& _dstIndices,
+            std::vector<std::vector<int32_t>>& _dstIndices,
             const aten::aabb& _bound,
             const std::vector<aten::vertex>& _vertices,
             const std::vector<std::vector<aten::face*>>& _tris,
-            int x, int y, int z)
+            int32_t x, int32_t y, int32_t z)
             : dstVertices(_dstVertices),
             dstIndices(_dstIndices),
             vertices(_vertices),

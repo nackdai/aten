@@ -2,8 +2,8 @@
 
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
-    int* stack,
-    int beginStackPos,
+    int32_t* stack,
+    int32_t beginStackPos,
     cudaTextureObject_t nodes,
     const idaten::Context* ctxt,
     const aten::ray r,
@@ -12,13 +12,13 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 {
     aten::Intersection isectTmp;
 
-    int stackpos = beginStackPos + 1;
+    int32_t stackpos = beginStackPos + 1;
 
     stack[stackpos] = 0;
     stackpos++;
 
     while (stackpos > beginStackPos) {
-        int nodeid = stack[stackpos - 1];
+        int32_t nodeid = stack[stackpos - 1];
         stackpos -= 1;
 
         // x : leftChildIdx, y : isLeaf, z : numChildren
@@ -34,14 +34,14 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
         float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 6);
         float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 7);
 
-        int leftChildrenIdx = (int)node.x;
-        int isLeaf = (int)node.y;
-        int numChildren = (int)node.z;
+        int32_t leftChildrenIdx = (int32_t)node.x;
+        int32_t isLeaf = (int32_t)node.y;
+        int32_t numChildren = (int32_t)node.z;
 
         bool isHit = false;
 
         if (isLeaf) {
-            int primidx = (int)attrib.y;
+            int32_t primidx = (int32_t)attrib.y;
             aten::PrimitiveParamter prim;
             prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
@@ -55,11 +55,11 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->primid = (int)attrib.y;
+                isect->objid = (int32_t)attrib.x;
+                isect->primid = (int32_t)attrib.y;
                 isect->mtrlid = prim.mtrlid;
 
-                //isect->meshid = (int)attrib.w;
+                //isect->meshid = (int32_t)attrib.w;
                 isect->meshid = prim.gemoid;
 
                 t_max = isect->t;
@@ -73,7 +73,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
         }
         else {
             aten::vec4 intersectT;
-            int res = hit4AABBWith1Ray(
+            int32_t res = hit4AABBWith1Ray(
                 &intersectT,
                 r.org, r.dir,
                 bminx, bmaxx,
@@ -84,7 +84,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
             // Stack hit children.
             if (res > 0) {
 #pragma unroll
-                for (int i = 0; i < 4; i++) {
+                for (int32_t i = 0; i < 4; i++) {
                     if ((res & (1 << i)) && intersectT[i] < t_max) {
                         stack[stackpos] = leftChildrenIdx + i;
                         stackpos++;
@@ -105,19 +105,19 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
     float t_min, float t_max,
     aten::Intersection* isect)
 {
-    static const int stacksize = 64;
-    int stack[stacksize];
+    static const int32_t stacksize = 64;
+    int32_t stack[stacksize];
 
     aten::Intersection isectTmp;
 
     isect->t = t_max;
 
-    int stackpos = 0;
+    int32_t stackpos = 0;
     stack[stackpos] = 0;
     stackpos++;
 
     while (stackpos > 0) {
-        int nodeid = stack[stackpos - 1];
+        int32_t nodeid = stack[stackpos - 1];
         stackpos -= 1;
 
         // x : leftChildIdx, y : isLeaf, z : numChildren
@@ -133,15 +133,15 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
         float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 6);
         float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 7);
 
-        int leftChildrenIdx = (int)node.x;
-        int isLeaf = (int)node.y;
-        int numChildren = (int)node.z;
+        int32_t leftChildrenIdx = (int32_t)node.x;
+        int32_t isLeaf = (int32_t)node.y;
+        int32_t numChildren = (int32_t)node.z;
 
         bool isHit = false;
 
         if (isLeaf) {
             // Leaf.
-            const auto* s = &ctxt->shapes[(int)attrib.x];
+            const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {
                 aten::ray transformedRay;
@@ -158,7 +158,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 
                 isHit = intersectQBVHTriangles<Type>(
                     stack, stackpos,
-                    ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+                    ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
             }
             else {
                 // TODO
@@ -174,8 +174,8 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
+                isect->objid = (int32_t)attrib.x;
+                isect->meshid = (isect->meshid < 0 ? (int32_t)attrib.w : isect->meshid);
 
                 t_max = isect->t;
 
@@ -188,7 +188,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
         }
         else {
             aten::vec4 intersectT;
-            int res = hit4AABBWith1Ray(
+            int32_t res = hit4AABBWith1Ray(
                 &intersectT,
                 r.org, r.dir,
                 bminx, bmaxx,
@@ -199,7 +199,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
             // Stack hit children.
             if (res > 0) {
 #pragma unroll
-                for (int i = 0; i < 4; i++) {
+                for (int32_t i = 0; i < 4; i++) {
                     if ((res & (1 << i)) && intersectT[i] < t_max) {
                         stack[stackpos] = leftChildrenIdx + i;
                         stackpos++;

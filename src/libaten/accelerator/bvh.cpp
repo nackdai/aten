@@ -12,7 +12,7 @@
 //#pragma optimize( "", off)
 
 namespace aten {
-    int compareX(const void* a, const void* b)
+    int32_t compareX(const void* a, const void* b)
     {
         const hitable* ah = *(hitable**)a;
         const hitable* bh = *(hitable**)b;
@@ -28,7 +28,7 @@ namespace aten {
         }
     }
 
-    int compareY(const void* a, const void* b)
+    int32_t compareY(const void* a, const void* b)
     {
         hitable* ah = *(hitable**)a;
         hitable* bh = *(hitable**)b;
@@ -44,7 +44,7 @@ namespace aten {
         }
     }
 
-    int compareZ(const void* a, const void* b)
+    int32_t compareZ(const void* a, const void* b)
     {
         hitable* ah = *(hitable**)a;
         hitable* bh = *(hitable**)b;
@@ -60,7 +60,7 @@ namespace aten {
         }
     }
 
-    void sortList(hitable**& list, uint32_t num, int axis)
+    void sortList(hitable**& list, uint32_t num, int32_t axis)
     {
         switch (axis) {
         case 0:
@@ -75,7 +75,7 @@ namespace aten {
         }
     }
 
-    inline int findLongestAxis(const aabb& bbox)
+    inline int32_t findLongestAxis(const aabb& bbox)
     {
         const auto& minP = bbox.minPos();
         const auto& maxP = bbox.maxPos();
@@ -99,7 +99,7 @@ namespace aten {
         uint32_t num,
         aabb* bbox)
     {
-        int axis = 0;
+        int32_t axis = 0;
 
         if (bbox) {
             axis = findLongestAxis(*bbox);
@@ -156,7 +156,7 @@ namespace aten {
         std::array<const bvhnode*, stacksize> stackbuf;
 
         stackbuf[0] = root;
-        int stackpos = 1;
+        int32_t stackpos = 1;
 
         while (stackpos > 0) {
             auto node = stackbuf[stackpos - 1];
@@ -203,7 +203,7 @@ namespace aten {
         const std::shared_ptr<bvhnode>& root,
         hitable** list,
         uint32_t num,
-        int depth,
+        int32_t depth,
         const std::shared_ptr<bvhnode>& parent)
     {
         // NOTE
@@ -234,7 +234,7 @@ namespace aten {
             auto bbox = list[0]->getBoundingbox();
             bbox = aabb::merge(bbox, list[1]->getBoundingbox());
 
-            int axis = findLongestAxis(bbox);
+            int32_t axis = findLongestAxis(bbox);
 
             sortList(list, num, axis);
 
@@ -261,15 +261,15 @@ namespace aten {
         real bestCost = std::numeric_limits<real>::max();    // 限界まで分割したいので、適当に大きい値にしておく.
 
         // 分割に最も良い軸 (0:x, 1:y, 2:z)
-        int bestAxis = -1;
+        int32_t bestAxis = -1;
 
         // 最も良い分割場所
-        int bestSplitIndex = -1;
+        int32_t bestSplitIndex = -1;
 
         // ノード全体のAABBの表面積
         auto rootSurfaceArea = root->m_aabb.computeSurfaceArea();
 
-        for (int axis = 0; axis < 3; axis++) {
+        for (int32_t axis = 0; axis < 3; axis++) {
             // ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.
             sortList(list, num, axis);
 
@@ -306,7 +306,7 @@ namespace aten {
             // 逆にs2側のAABBの表面積を計算しつつ、SAH を計算.
             aabb s2bbox;
 
-            for (int i = num; i >= 0; i--) {
+            for (int32_t i = num; i >= 0; i--) {
                 s2SurfaceArea[i] = s2bbox.computeSurfaceArea();
 
                 if (s1.size() > 0 && s2.size() > 0) {
@@ -351,8 +351,8 @@ namespace aten {
             root->m_right->setDepth(depth + 1);
 
             // リストを分割.
-            int leftListNum = bestSplitIndex;
-            int rightListNum = num - leftListNum;
+            int32_t leftListNum = bestSplitIndex;
+            int32_t rightListNum = num - leftListNum;
 
             AT_ASSERT(rightListNum > 0);
 
@@ -395,7 +395,7 @@ namespace aten {
                 bool canRegisterAsChild = true;
 
                 if (info.num > 1) {
-                    for (int i = 0; i < info.num; i++) {
+                    for (int32_t i = 0; i < info.num; i++) {
                         auto internalObj = info.list[i]->getHasObject();
                         if (internalObj) {
                             canRegisterAsChild = false;
@@ -406,11 +406,11 @@ namespace aten {
 
                 if (canRegisterAsChild) {
                     // TODO
-                    int axis = 0;
+                    int32_t axis = 0;
 
                     sortList(info.list, info.num, axis);
 
-                    for (int i = 0; i < info.num; i++) {
+                    for (int32_t i = 0; i < info.num; i++) {
                         info.node->registerChild(info.list[i], i);
                     }
 
@@ -438,7 +438,7 @@ namespace aten {
                 auto bbox = info.list[0]->getBoundingbox();
                 bbox = aabb::merge(bbox, info.list[1]->getBoundingbox());
 
-                int axis = findLongestAxis(bbox);
+                int32_t axis = findLongestAxis(bbox);
 
                 sortList(info.list, info.num, axis);
 
@@ -465,15 +465,15 @@ namespace aten {
             uint32_t bestCost = UINT32_MAX;    // 限界まで分割したいので、適当に大きい値にしておく.
 
             // 分割に最も良い軸 (0:x, 1:y, 2:z)
-            int bestAxis = -1;
+            int32_t bestAxis = -1;
 
             // 最も良い分割場所
-            int bestSplitIndex = -1;
+            int32_t bestSplitIndex = -1;
 
             // ノード全体のAABBの表面積
             auto rootSurfaceArea = info.node->getBoundingbox().computeSurfaceArea();
 
-            for (int axis = 0; axis < 3; axis++) {
+            for (int32_t axis = 0; axis < 3; axis++) {
                 // ポリゴンリストを、それぞれのAABBの中心座標を使い、axis でソートする.
                 sortList(info.list, info.num, axis);
 
@@ -510,7 +510,7 @@ namespace aten {
                 // 逆にs2側のAABBの表面積を計算しつつ、SAH を計算.
                 aabb s2bbox;
 
-                for (int i = info.num; i >= 0; i--) {
+                for (int32_t i = info.num; i >= 0; i--) {
                     s2SurfaceArea[i] = s2bbox.computeSurfaceArea();
 
                     if (s1.size() > 0 && s2.size() > 0) {
@@ -552,8 +552,8 @@ namespace aten {
                 info.node->m_right = new bvhnode(info.node);
 
                 // リストを分割.
-                int leftListNum = bestSplitIndex;
-                int rightListNum = info.num - leftListNum;
+                int32_t leftListNum = bestSplitIndex;
+                int32_t rightListNum = info.num - leftListNum;
 
                 AT_ASSERT(rightListNum > 0);
 
@@ -584,7 +584,7 @@ namespace aten {
         std::array<std::shared_ptr<bvhnode>, stacksize> stackbuf;
 
         stackbuf[0] = m_root;
-        int stackpos = 1;
+        int32_t stackpos = 1;
 
         while (stackpos > 0) {
             auto node = stackbuf[stackpos - 1];

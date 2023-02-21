@@ -22,31 +22,31 @@ namespace idaten
         void build(
             idaten::CudaTextureResource& dst,
             std::vector<aten::PrimitiveParamter>& tris,
-            int triIdOffset,
+            int32_t triIdOffset,
             const aten::aabb& sceneBbox,
             idaten::CudaTextureResource& texRscVtxPos,
-            int vtxOffset,
+            int32_t vtxOffset,
             std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
 
         void build(
             idaten::CudaTextureResource& dst,
             TypedCudaMemory<aten::PrimitiveParamter>& triangles,
-            int triIdOffset,
+            int32_t triIdOffset,
             const aten::aabb& sceneBbox,
             CudaGLBuffer& vboVtxPos,
-            int vtxOffset,
+            int32_t vtxOffset,
             std::vector<aten::ThreadedBvhNode>* threadedBvhNodes = nullptr);
 
         // test implementation.
         static void build();
 
         struct LBVHNode {
-            int order;
+            int32_t order;
 
-            int left;
-            int right;
+            int32_t left;
+            int32_t right;
 
-            int parent;
+            int32_t parent;
             bool isLeaf;
         };
 
@@ -57,10 +57,10 @@ namespace idaten
         void onBuild(
             idaten::CudaTextureResource& dst,
             TypedCudaMemory<aten::PrimitiveParamter>& triangles,
-            int triIdOffset,
+            int32_t triIdOffset,
             const aten::aabb& sceneBbox,
             T vtxPos,
-            int vtxOffset,
+            int32_t vtxOffset,
             std::vector<aten::ThreadedBvhNode>* threadedBvhNodes);
 
     private:

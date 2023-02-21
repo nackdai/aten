@@ -7,7 +7,7 @@
 #define AT_COLOR_NORMALIZE(c)    ((c) / real(255))
 
 namespace AT_NAME {
-    template <typename _T, int N>
+    template <typename _T, int32_t N>
     struct TColor {
         _T c[N];
 

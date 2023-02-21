@@ -15,15 +15,15 @@ namespace aten {
     };
 
     struct VertexAttrib {
-        int type{ 0 };
-        int num{ 0 };
-        int size{ 0 };
-        int offset{ 0 };
+        int32_t type{ 0 };
+        int32_t num{ 0 };
+        int32_t size{ 0 };
+        int32_t offset{ 0 };
         bool needNormalize{ false };
         const char* name{ nullptr };
 
         VertexAttrib() = default;
-        VertexAttrib(int t, int n, int s, int o)
+        VertexAttrib(int32_t t, int32_t n, int32_t s, int32_t o)
             : type(t), num(n), size(s), offset(o)
         {}
     };

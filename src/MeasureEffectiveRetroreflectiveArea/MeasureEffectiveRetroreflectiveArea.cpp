@@ -20,7 +20,7 @@ MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
 };
 
 bool MeasureEffectiveRetroreflectiveArea::init(
-    int width, int height,
+    int32_t width, int32_t height,
     const char* pathVS,
     const char* pathFS)
 {

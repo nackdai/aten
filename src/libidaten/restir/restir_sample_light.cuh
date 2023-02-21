@@ -6,7 +6,7 @@
 
 #include "reservior.h"
 
-inline __device__ int sampleLightWithReservoirRIP(
+inline __device__ int32_t sampleLightWithReservoirRIP(
     idaten::Reservoir& reservoir,
     const aten::MaterialParameter& mtrl,
     idaten::Context* ctxt,
@@ -17,7 +17,7 @@ inline __device__ int sampleLightWithReservoirRIP(
     const aten::vec4& albedo,
     aten::sampler* sampler,
     real pre_sampled_r,
-    int lod = 0)
+    int32_t lod = 0)
 {
     constexpr auto MaxLightCount = 32U;
 

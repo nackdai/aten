@@ -4,12 +4,12 @@
 
 namespace idaten {
     struct Context {
-        int geomnum{ 0 };
+        int32_t geomnum{ 0 };
         const aten::GeomParameter* shapes{ nullptr };
 
         const aten::MaterialParameter* mtrls{ nullptr };
 
-        int lightnum{ 0 };
+        int32_t lightnum{ 0 };
         const aten::LightParameter* lights{ nullptr };
 
         cudaTextureObject_t* nodes{ nullptr };
@@ -22,6 +22,6 @@ namespace idaten {
         const aten::mat4* matrices{ nullptr };
 
         cudaTextureObject_t* textures{ nullptr };
-        int envmapIdx{ -1 };
+        int32_t envmapIdx{ -1 };
     };
 }

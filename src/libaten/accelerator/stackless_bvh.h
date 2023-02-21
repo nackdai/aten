@@ -93,7 +93,7 @@ namespace aten {
 
         bool hit(
             const context& ctxt,
-            int exid,
+            int32_t exid,
             const std::vector<std::vector<StacklessBvhNode>>& listGpuBvhNode,
             const ray& r,
             real t_min, real t_max,

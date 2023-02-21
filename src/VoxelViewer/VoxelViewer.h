@@ -10,7 +10,7 @@ public:
 public:
     // ‰Šú‰».
     bool init(
-        int width, int height,
+        int32_t width, int32_t height,
         const char* pathVS,
         const char* pathFS);
 
@@ -35,6 +35,6 @@ private:
 
     aten::GeomIndexBuffer m_ibForWireframe;
 
-    int m_width{ 0 };
-    int m_height{ 0 };
+    int32_t m_width{ 0 };
+    int32_t m_height{ 0 };
 };

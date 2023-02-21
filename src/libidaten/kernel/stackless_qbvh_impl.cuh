@@ -1,11 +1,11 @@
 #include "kernel/idatendefs.cuh"
 
-AT_CUDA_INLINE __device__ int SkipCode(int mask, int pos)
+AT_CUDA_INLINE __device__ int32_t SkipCode(int32_t mask, int32_t pos)
 {
     return (((mask >> (pos + 1))) | (mask << (3 - pos))) & 7;
 }
 
-AT_CUDA_INLINE __device__ int bitScan(int n)
+AT_CUDA_INLINE __device__ int32_t bitScan(int32_t n)
 {
     // NOTE
     // http://www.techiedelight.com/bit-hacks-part-3-playing-rightmost-set-bit-number/
@@ -22,22 +22,22 @@ AT_CUDA_INLINE __device__ int bitScan(int n)
     // find the position of the only set bit in the result
     // we can directly return log2(n) + 1 from the function
 #if 0
-    int pos = 0;
+    int32_t pos = 0;
     while (n)
     {
         n = n >> 1;
         pos++;
     }
 #else
-    int pos = (int)(log2f((float)n) + 1);
+    int32_t pos = (int32_t)(log2f((float)n) + 1);
 #endif
     return pos - 1;
 }
 
-AT_CUDA_INLINE __device__ int SkipCodeNext(int code)
+AT_CUDA_INLINE __device__ int32_t SkipCodeNext(int32_t code)
 {
-    int n = bitScan(code);
-    int newCode = code >> (n + 1);
+    int32_t n = bitScan(code);
+    int32_t newCode = code >> (n + 1);
     return newCode ^ code;
 }
 
@@ -51,10 +51,10 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
 {
     aten::Intersection isectTmp;
 
-    int nodeid = 0;
+    int32_t nodeid = 0;
     uint32_t bitstack = 0;
 
-    int skipCode = 0;
+    int32_t skipCode = 0;
 
     for (;;) {
         // x : leftChildrenIdx, y ; isLeaf, z : numChildren, w : parent
@@ -70,15 +70,15 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
         float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 7);
         float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 8);
 
-        int leftChildrenIdx = (int)node.x;
-        int isLeaf = (int)node.y;
-        int numChildren = (int)node.z;
-        int parent = (int)node.w;
+        int32_t leftChildrenIdx = (int32_t)node.x;
+        int32_t isLeaf = (int32_t)node.y;
+        int32_t numChildren = (int32_t)node.z;
+        int32_t parent = (int32_t)node.w;
 
         bool isHit = false;
 
         if (isLeaf) {
-            int primidx = (int)attrib.y;
+            int32_t primidx = (int32_t)attrib.y;
             aten::PrimitiveParamter prim;
             prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
@@ -92,11 +92,11 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->primid = (int)attrib.y;
+                isect->objid = (int32_t)attrib.x;
+                isect->primid = (int32_t)attrib.y;
                 isect->mtrlid = prim.mtrlid;
 
-                //isect->meshid = (int)attrib.w;
+                //isect->meshid = (int32_t)attrib.w;
                 isect->meshid = prim.gemoid;
 
                 t_max = isect->t;
@@ -110,7 +110,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
         }
         else {
             aten::vec4 intersectT;
-            int hitMask = hit4AABBWith1Ray(
+            int32_t hitMask = hit4AABBWith1Ray(
                 &intersectT,
                 r.org, r.dir,
                 bminx, bmaxx,
@@ -134,10 +134,10 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
                     nodeid = leftChildrenIdx + 3;
                 }
                 else {
-                    int nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
-                    int nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
+                    int32_t nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
+                    int32_t nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
 
-                    int nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
+                    int32_t nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
 
                     nodeid = leftChildrenIdx + nearPos;
 
@@ -154,7 +154,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
                 return (isect->objid >= 0);
             }
 
-            nodeid = (int)node.w;    // parent
+            nodeid = (int32_t)node.w;    // parent
             bitstack = bitstack >> 3;
 
             node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
@@ -164,9 +164,9 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
 
         auto siblingPos = bitScan(skipCode);
 
-        nodeid = (int)((float*)&sib)[siblingPos];
+        nodeid = (int32_t)((float*)&sib)[siblingPos];
 
-        int n = SkipCodeNext(skipCode);
+        int32_t n = SkipCodeNext(skipCode);
         bitstack = bitstack ^ n;
     }
 
@@ -185,10 +185,10 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
 
     isect->t = t_max;
 
-    int nodeid = 0;
+    int32_t nodeid = 0;
     uint32_t bitstack = 0;
 
-    int skipCode = 0;
+    int32_t skipCode = 0;
 
     for (;;) {
         // x : leftChildrenIdx, y ; isLeaf, z : numChildren, w : parent
@@ -204,15 +204,15 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
         float4 bminz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 7);
         float4 bmaxz = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 8);
 
-        int leftChildrenIdx = (int)node.x;
-        int isLeaf = (int)node.y;
-        int numChildren = (int)node.z;
+        int32_t leftChildrenIdx = (int32_t)node.x;
+        int32_t isLeaf = (int32_t)node.y;
+        int32_t numChildren = (int32_t)node.z;
 
         bool isHit = false;
 
         if (isLeaf) {
             // Leaf.
-            const auto* s = &ctxt->shapes[(int)attrib.x];
+            const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {
                 aten::ray transformedRay;
@@ -228,7 +228,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
                 }
 
                 isHit = intersectStacklessQBVHTriangles<Type>(
-                    ctxt->nodes[(int)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
+                    ctxt->nodes[(int32_t)attrib.z], ctxt, transformedRay, t_min, t_max, &isectTmp);
             }
             else {
                 // TODO
@@ -244,8 +244,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
 
             if (isIntersect) {
                 *isect = isectTmp;
-                isect->objid = (int)attrib.x;
-                isect->meshid = (isect->meshid < 0 ? (int)attrib.w : isect->meshid);
+                isect->objid = (int32_t)attrib.x;
+                isect->meshid = (isect->meshid < 0 ? (int32_t)attrib.w : isect->meshid);
 
                 t_max = isect->t;
 
@@ -258,7 +258,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
         }
         else {
             aten::vec4 intersectT;
-            int hitMask = hit4AABBWith1Ray(
+            int32_t hitMask = hit4AABBWith1Ray(
                 &intersectT,
                 r.org, r.dir,
                 bminx, bmaxx,
@@ -282,10 +282,10 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
                     nodeid = leftChildrenIdx + 3;
                 }
                 else {
-                    int nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
-                    int nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
+                    int32_t nearId_a = (intersectT.x < intersectT.y ? 0 : 1);
+                    int32_t nearId_b = (intersectT.z < intersectT.w ? 2 : 3);
 
-                    int nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
+                    int32_t nearPos = (intersectT[nearId_a] < intersectT[nearId_b] ? nearId_a : nearId_b);
 
                     nodeid = leftChildrenIdx + nearPos;
 
@@ -302,7 +302,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
                 return (isect->objid >= 0);
             }
 
-            nodeid = (int)node.w;    // parent
+            nodeid = (int32_t)node.w;    // parent
             bitstack = bitstack >> 3;
 
             node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
@@ -312,9 +312,9 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
 
         auto siblingPos = bitScan(skipCode);
 
-        nodeid = (int)((float*)&sib)[siblingPos];
+        nodeid = (int32_t)((float*)&sib)[siblingPos];
 
-        int n = SkipCodeNext(skipCode);
+        int32_t n = SkipCodeNext(skipCode);
         bitstack = bitstack ^ n;
     }
 

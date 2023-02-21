@@ -15,15 +15,15 @@ namespace idaten
         uint32_t width,
         uint32_t height)
     {
-        int layerNum = static_cast<int>(p.size());
-        int imgSize = width * height;
+        int32_t layerNum = static_cast<int32_t>(p.size());
+        int32_t imgSize = width * height;
 
         auto totalSize = imgSize * layerNum;
         std::vector<aten::vec4> hostMem(totalSize);
 
         // Copy to 1D array memory.
-        for (int n = 0; n < layerNum; n++) {
-            for (int i = 0; i < imgSize; i++) {
+        for (int32_t n = 0; n < layerNum; n++) {
+            for (int32_t i = 0; i < imgSize; i++) {
                 hostMem[n * imgSize + i] = p[n][i];
             }
         }

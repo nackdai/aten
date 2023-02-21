@@ -109,7 +109,7 @@ namespace aten {
             const std::shared_ptr<bvhnode>& root,
             hitable** list,
             uint32_t num,
-            int depth,
+            int32_t depth,
             const std::shared_ptr<bvhnode>& parent);
 
     protected:

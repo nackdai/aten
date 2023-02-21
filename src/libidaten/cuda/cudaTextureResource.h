@@ -50,10 +50,10 @@ namespace idaten
 
     struct TextureResource {
         const aten::vec4* ptr;
-        int width;
-        int height;
+        int32_t width;
+        int32_t height;
 
-        TextureResource(const aten::vec4* p, int w, int h)
+        TextureResource(const aten::vec4* p, int32_t w, int32_t h)
             : ptr(p), width(w), height(h)
         {}
     };
@@ -66,18 +66,18 @@ namespace idaten
     public:
         void init(
             const aten::vec4* p,
-            int width, int height);
+            int32_t width, int32_t height);
 
         void initAsMipmap(
             const aten::vec4* p,
-            int width, int height,
-            int level);
+            int32_t width, int32_t height,
+            int32_t level);
 
         virtual cudaTextureObject_t bind() override final;
 
     private:
         bool m_isMipmap{ false };
-        int m_mipmapLevel{ 0 };
+        int32_t m_mipmapLevel{ 0 };
 
         cudaArray_t m_array{ nullptr };
         cudaChannelFormatDesc m_channelFmtDesc;
@@ -96,25 +96,25 @@ namespace idaten
 
         virtual cudaTextureObject_t bind() override final;
 
-        int getWidth() const
+        int32_t getWidth() const
         {
             return m_width;
         }
 
-        int getHeight() const
+        int32_t getHeight() const
         {
             return m_height;
         }
 
-        int getLayerNum() const
+        int32_t getLayerNum() const
         {
             return m_layerNum;
         }
 
     private:
         cudaArray_t m_array{ nullptr };
-        int m_width{ 0 };
-        int m_height{ 0 };
-        int m_layerNum{ 0 };
+        int32_t m_width{ 0 };
+        int32_t m_height{ 0 };
+        int32_t m_layerNum{ 0 };
     };
 }

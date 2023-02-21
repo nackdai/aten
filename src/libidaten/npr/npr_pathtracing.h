@@ -39,17 +39,17 @@ namespace idaten
     protected:
         virtual void onShade(
             cudaSurfaceObject_t outputSurf,
-            int width, int height,
-            int sample,
-            int bounce, int rrBounce,
+            int32_t width, int32_t height,
+            int32_t sample,
+            int32_t bounce, int32_t rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml) override;
 
         virtual void missShade(
-            int width, int height,
-            int bounce,
-            int offsetX = -1,
-            int offsetY = -1) override;
+            int32_t width, int32_t height,
+            int32_t bounce,
+            int32_t offsetX = -1,
+            int32_t offsetY = -1) override;
 
     protected:
         idaten::TypedCudaMemory<SampleRayInfo> sample_ray_infos_;

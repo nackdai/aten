@@ -14,7 +14,7 @@ namespace aten
     // Kelemen styleではパス生成に使う乱数の空間で変異させたりする.
     // その一つ一つのサンプルのデータ構造.
     struct PrimarySample {
-        int modify_time{ 0 };
+        int32_t modify_time{ 0 };
         real value;
 
         PrimarySample()
@@ -58,14 +58,14 @@ namespace aten
         std::stack<PrimarySample> stack;
 
         // accept された mutation の回数.
-        int globalTime{ 0 };
+        int32_t globalTime{ 0 };
 
-        int largeStep{ 0 };
+        int32_t largeStep{ 0 };
 
         // 最後に large step が accept された time.
-        int largeStepTime{ 0 };
+        int32_t largeStepTime{ 0 };
 
-        int usedRandCoords{ 0 };
+        int32_t usedRandCoords{ 0 };
     };
 
     real MLTSampler::Mutate(const real x)
@@ -145,22 +145,22 @@ namespace aten
         const context& ctxt,
         scene* scene,
         sampler* sampler,
-        int x, int y,
-        int width, int height,
+        int32_t x, int32_t y,
+        int32_t width, int32_t height,
         camera* camera)
     {
         real weight = 1;
 
         if (x < 0) {
             weight *= width;
-            x = (int)(sampler->nextSample() * width);
+            x = (int32_t)(sampler->nextSample() * width);
             if (x == width) {
                 x = 0;
             }
         }
         if (y < 0) {
             weight *= height;
-            y = (int)(sampler->nextSample() * height);
+            y = (int32_t)(sampler->nextSample() * height);
             if (y == height) {
                 y = 0;
             }
@@ -197,15 +197,15 @@ namespace aten
         scene* scene,
         camera* camera)
     {
-        int width = dst.width;
-        int height = dst.height;
+        int32_t width = dst.width;
+        int32_t height = dst.height;
         uint32_t samples = dst.sample;
 
-        int mltNum = dst.mltNum;
+        int32_t mltNum = dst.mltNum;
 
         // 変異回数.
         // MLTはピクセル数では回さないので、最低でも画素数以上は回るようにしないと画が埋まらない.
-        int mutation = samples * width * height;
+        int32_t mutation = samples * width * height;
 
         m_maxDepth = dst.maxDepth;
         m_rrDepth = dst.russianRouletteDepth;
@@ -223,7 +223,7 @@ namespace aten
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int mi = 0; mi < mltNum; mi++) {
+        for (int32_t mi = 0; mi < mltNum; mi++) {
             auto idx = OMPUtil::getThreadIdx();
 
             auto& image = acuumImage[idx];
@@ -243,7 +243,7 @@ namespace aten
             // このパスからMLTで使う最初のパスを得る。(Markov Chain Monte Carloであった）.
 
             // 適当に多めの数.
-            int seedPathMax = width * height;
+            int32_t seedPathMax = width * height;
             if (seedPathMax <= 0) {
                 seedPathMax = 1;
             }
@@ -253,7 +253,7 @@ namespace aten
             real sumI = 0.0;
             mlt.largeStep = 1;
 
-            for (int i = 0; i < seedPathMax; i++) {
+            for (int32_t i = 0; i < seedPathMax; i++) {
                 mlt.init();
 
                 // gen path.
@@ -272,12 +272,12 @@ namespace aten
 
             // 最初のパスを求める.
             // 輝度値に基づく重点サンプリングによって選んでいる.
-            int selecetdPath = 0;
+            int32_t selecetdPath = 0;
             {
                 auto cost = rnd.nextSample() * sumI;
                 real accumlatedImportance = 0;
 
-                for (int i = 0; i < seedPathMax; i++) {
+                for (int32_t i = 0; i < seedPathMax; i++) {
                     const auto& path = seedPaths[i];
                     accumlatedImportance += color::luminance(path.contrib);
 
@@ -290,13 +290,13 @@ namespace aten
 
             const real b = sumI / seedPathMax;
             const real p_large = 0.5;
-            const int M = mutation;
-            int accept = 0;
-            int reject = 0;
+            const int32_t M = mutation;
+            int32_t accept = 0;
+            int32_t reject = 0;
 
             Path oldPath = seedPaths[selecetdPath];
 
-            for (int i = 0; i < M; i++) {
+            for (int32_t i = 0; i < M; i++) {
                 mlt.largeStep = rnd.nextSample() < p_large ? 1 : 0;
 
                 mlt.init();
@@ -312,11 +312,11 @@ namespace aten
                 const real newPath_W = (a + mlt.largeStep) / (I / b + p_large) / M;
                 const real oldPath_W = (real(1.0) - a) / (oldI / b + p_large) / M;
 
-                int newPos = newPath.y * width + newPath.x;
+                int32_t newPos = newPath.y * width + newPath.x;
                 vec3 newV = newPath_W * newPath.contrib * newPath.weight;
                 image[newPos] += newV;
 
-                int oldPos = oldPath.y * width + oldPath.x;
+                int32_t oldPos = oldPath.y * width + oldPath.x;
                 vec3 oldV = oldPath_W * oldPath.contrib * oldPath.weight;
                 image[oldPos] += oldV;
 
@@ -342,7 +342,7 @@ namespace aten
                     reject++;
 
                     // restore state.
-                    int idx = mlt.usedRandCoords - 1;
+                    int32_t idx = mlt.usedRandCoords - 1;
                     while (!mlt.stack.empty()) {
                         mlt.u[idx--] = mlt.stack.top();
                         mlt.stack.pop();
@@ -353,7 +353,7 @@ namespace aten
 
         for (uint32_t n = 0; n < threadNum; n++) {
             auto& image = acuumImage[n];
-            for (int i = 0; i < width * height; i++) {
+            for (int32_t i = 0; i < width * height; i++) {
                 dst.buffer->add(i, vec4(image[i] / real(mltNum), real(1)));
             }
         }

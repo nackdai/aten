@@ -52,12 +52,12 @@ namespace AT_NAME
             aten::hitable::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override;
 
-        virtual int geomid() const override;
+        virtual int32_t geomid() const override;
 
         void build(
             const aten::context& ctxt,
-            int mtrlid,
-            int geomid);
+            int32_t mtrlid,
+            int32_t geomid);
 
         aten::aabb computeAABB(const aten::context& ctxt) const;
 
@@ -71,7 +71,7 @@ namespace AT_NAME
             param = p;
         }
 
-        int getId() const
+        int32_t getId() const
         {
             return m_id;
         }
@@ -90,6 +90,6 @@ namespace AT_NAME
 
     private:
         aten::PrimitiveParamter param;
-        int m_id{ -1 };
+        int32_t m_id{ -1 };
     };
 }

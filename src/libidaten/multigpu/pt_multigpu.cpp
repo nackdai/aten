@@ -14,8 +14,8 @@ namespace idaten
 
     void PathTracingMultiGPU::render(
         const TileDomain& tileDomain,
-        int maxSamples,
-        int maxBounce)
+        int32_t maxSamples,
+        int32_t maxBounce)
     {
 #ifdef __AT_DEBUG__
         if (!doneSetStackSize) {
@@ -28,10 +28,10 @@ namespace idaten
 
         m_tileDomain = tileDomain;
 
-        int bounce = 0;
+        int32_t bounce = 0;
 
-        int width = tileDomain.w;
-        int height = tileDomain.h;
+        int32_t width = tileDomain.w;
+        int32_t height = tileDomain.h;
 
         m_isects.init(width * height);
         m_rays.init(width * height);
@@ -48,7 +48,7 @@ namespace idaten
 
         {
             std::vector<cudaTextureObject_t> tmp;
-            for (int i = 0; i < m_nodeparam.size(); i++) {
+            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                 auto nodeTex = m_nodeparam[i].bind();
                 tmp.push_back(nodeTex);
             }
@@ -58,7 +58,7 @@ namespace idaten
         if (!m_texRsc.empty())
         {
             std::vector<cudaTextureObject_t> tmp;
-            for (int i = 0; i < m_texRsc.size(); i++) {
+            for (int32_t i = 0; i < m_texRsc.size(); i++) {
                 auto cudaTex = m_texRsc[i].bind();
                 tmp.push_back(cudaTex);
             }
@@ -67,18 +67,18 @@ namespace idaten
 
         if (need_export_gl_) {
             std::vector<cudaSurfaceObject_t> tmp;
-            for (int i = 0; i < gl_surfaces_.size(); i++) {
+            for (int32_t i = 0; i < gl_surfaces_.size(); i++) {
                 gl_surfaces_[i].map();
                 tmp.push_back(gl_surfaces_[i].bind());
             }
             gl_surface_cuda_rscs_.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
-        static const int rrBounce = 3;
+        static const int32_t rrBounce = 3;
 
         auto time = AT_NAME::timer::getSystemTime();
 
-        for (int i = 0; i < maxSamples; i++) {
+        for (int32_t i = 0; i < maxSamples; i++) {
             onGenPath(
                 width, height,
                 i, maxSamples,
@@ -115,22 +115,22 @@ namespace idaten
             m_vtxparamsPos.unbind();
             m_vtxparamsNml.unbind();
 
-            for (int i = 0; i < m_nodeparam.size(); i++) {
+            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                 m_nodeparam[i].unbind();
             }
 
-            for (int i = 0; i < m_texRsc.size(); i++) {
+            for (int32_t i = 0; i < m_texRsc.size(); i++) {
                 m_texRsc[i].unbind();
             }
 
-            for (int i = 0; i < gl_surfaces_.size(); i++) {
+            for (int32_t i = 0; i < gl_surfaces_.size(); i++) {
                 gl_surfaces_[i].unbind();
                 gl_surfaces_[i].unmap();
             }
         }
     }
 
-    void PathTracingMultiGPU::postRender(int width, int height)
+    void PathTracingMultiGPU::postRender(int32_t width, int32_t height)
     {
         m_glimg.map();
         auto outputSurf = m_glimg.bind();

@@ -5,8 +5,8 @@
 #include "atenscene.h"
 #include "idaten.h"
 
-static const int WIDTH = 1280;
-static const int HEIGHT = 720;
+static const int32_t WIDTH = 1280;
+static const int32_t HEIGHT = 720;
 
 static const char* TITLE = "ObjViewer";
 
@@ -27,7 +27,7 @@ static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
 
 static bool g_willTakeScreenShot = false;
-static int g_cntScreenShot = 0;
+static int32_t g_cntScreenShot = 0;
 
 static bool g_willShowGUI = true;
 
@@ -35,11 +35,11 @@ static bool g_isWireFrame = false;
 
 static bool g_isMouseLBtnDown = false;
 static bool g_isMouseRBtnDown = false;
-static int g_prevX = 0;
-static int g_prevY = 0;
+static int32_t g_prevX = 0;
+static int32_t g_prevY = 0;
 
-static int obj_min = 0;
-static int obj_max = 20;
+static int32_t obj_min = 0;
+static int32_t obj_max = 20;
 
 void onRun(aten::window* window)
 {
@@ -61,8 +61,8 @@ void onRun(aten::window* window)
         1.0f,
         0);
 
-    obj_min = std::min<int>(obj_min, static_cast<int>(g_objs.size()));
-    obj_max = std::min<int>(obj_max, static_cast<int>(g_objs.size()));
+    obj_min = std::min<int32_t>(obj_min, static_cast<int32_t>(g_objs.size()));
+    obj_max = std::min<int32_t>(obj_max, static_cast<int32_t>(g_objs.size()));
 
     g_rasterizer.drawWithOutsideRenderFunc(
         g_ctxt,
@@ -101,7 +101,7 @@ void onRun(aten::window* window)
     ImGui::Text("min(%.3f, %.3f, %.3f)", aabb_min.x, aabb_min.y, aabb_min.z);
 
     ImGui::SliderInt("min", &obj_min, 0, obj_max);
-    ImGui::SliderInt("max", &obj_max, obj_min, static_cast<int>(g_objs.size() - 1));
+    ImGui::SliderInt("max", &obj_max, obj_min, static_cast<int32_t>(g_objs.size() - 1));
 
     if (!g_objs.empty()) {
         if (ImGui::Button("all_enable")) {
@@ -153,7 +153,7 @@ void onClose()
 
 }
 
-void onMouseBtn(bool left, bool press, int x, int y)
+void onMouseBtn(bool left, bool press, int32_t x, int32_t y)
 {
     g_isMouseLBtnDown = false;
     g_isMouseRBtnDown = false;
@@ -167,7 +167,7 @@ void onMouseBtn(bool left, bool press, int x, int y)
     }
 }
 
-void onMouseMove(int x, int y)
+void onMouseMove(int32_t x, int32_t y)
 {
     if (g_isMouseLBtnDown) {
         aten::CameraOperator::rotate(
@@ -190,7 +190,7 @@ void onMouseMove(int x, int y)
     g_prevY = y;
 }
 
-void onMouseWheel(int delta)
+void onMouseWheel(int32_t delta)
 {
     aten::CameraOperator::dolly(g_camera, delta * real(0.1));
     g_isCameraDirty = true;
@@ -286,7 +286,7 @@ void loadObj(
 }
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     Options& opt)
 {
     cmdline::parser cmd;
@@ -320,7 +320,7 @@ bool parseOption(
     return true;
 }
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     Options opt;
 
@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
 
     auto texNum = g_ctxt.getTextureNum();
 
-    for (int i = 0; i < texNum; i++) {
+    for (int32_t i = 0; i < texNum; i++) {
         auto tex = g_ctxt.getTexture(i);
         tex->initAsGLTexture();
     }

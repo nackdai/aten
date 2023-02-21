@@ -52,11 +52,11 @@ namespace aten {
             ret.z = -z;
             return ret;
         }
-        inline AT_DEVICE_API real operator[](int i) const
+        inline AT_DEVICE_API real operator[](int32_t i) const
         {
             return a[i];
         }
-        inline AT_DEVICE_API real& operator[](int i)
+        inline AT_DEVICE_API real& operator[](int32_t i)
         {
             return a[i];
         };
@@ -276,7 +276,7 @@ namespace aten {
         uint8_t f;
     };
 
-    inline int cmpGEQ(const vec3& a, const vec3& b)
+    inline int32_t cmpGEQ(const vec3& a, const vec3& b)
     {
         _vec3_cmp_res res;
 

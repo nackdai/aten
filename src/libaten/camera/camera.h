@@ -26,8 +26,8 @@ namespace aten {
 
         real dist{ 0 };     ///< Distance to the clip plane.
         real vfov{ 0 };     ///< Vertical Field of View.
-        int width{ 0 };     ///< Screen width.
-        int height{ 0 };    ///< Screen height.
+        int32_t width{ 0 };     ///< Screen width.
+        int32_t height{ 0 };    ///< Screen height.
 
         real znear{ 0 };    ///< Z Near plane.
         real zfar{ 0 };     ///< Z Far plane.
@@ -101,7 +101,7 @@ namespace AT_NAME {
             aten::vec3& posOnLens,
             aten::vec3& posOnObjectPlane,
             aten::vec3& posOnImageSensor,
-            int& x, int& y) const
+            int32_t& x, int32_t& y) const
         {
             return -AT_MATH_INF;
         }
@@ -147,7 +147,7 @@ namespace AT_NAME {
          */
         virtual void revertRayToPixelPos(
             const aten::ray& ray,
-            int& px, int& py) const = 0;
+            int32_t& px, int32_t& py) const = 0;
 
         virtual real getImageSensorWidth() const
         {

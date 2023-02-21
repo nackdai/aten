@@ -32,7 +32,7 @@ namespace aten
             // その結果の、-127 した結果が抽出する上位x[bit]になる.
             // 例えば、256掛けたあとの指数部が130の場合、x = 130 - 127 => 3[bit].
             // 仮数部には暗黙の1が存在する = > 1.M .
-            // それをintにキャストすることで、
+            // それをint32_tにキャストすることで、
             // Mから抽出したx[bit]と暗黙の1を考慮したものが、下位ビットから格納された形で取得できる.
             // ex)
             // float f = 0.015
@@ -47,16 +47,16 @@ namespace aten
             //       M = [1].[1]11 0101 1100 0010 1000 1111
             //         小数点から上の暗黙の1 + 小数点以下の上位 e (=1) bit
             //         つまり、11 = 3
-            // int i = (int)ff = 3
+            // int32_t i = (int32_t)ff = 3
             auto of_ix = (int32_t)(int_scale * normal.x);
             auto of_iy = (int32_t)(int_scale * normal.y);
             auto of_iz = (int32_t)(int_scale * normal.z);
 
             // NOTE
-            // intの場合：負の数は２進数でみたときに値が小さいほどintとしての値が大きくなる（２の補数）.
+            // int32_tの場合：負の数は２進数でみたときに値が小さいほどint32_tとしての値が大きくなる（２の補数）.
             // floatの場合：負の数は２進数でみたときでも値が大きいほどfloatとしての値が大きくなる.
-            // つまり、intとfloatで負の数の増え方の取り扱いが異なる.
-            // 下ではfloatをintとして計算するため、負の数の場合に値が小さくなるような計算をする.
+            // つまり、int32_tとfloatで負の数の増え方の取り扱いが異なる.
+            // 下ではfloatをint32_tとして計算するため、負の数の場合に値が小さくなるような計算をする.
             vec3 p_i(
                 intAsFloat(floatAsInt(o.x) + (o.x < real(0) ? -of_ix : of_ix)),
                 intAsFloat(floatAsInt(o.y) + (o.y < real(0) ? -of_iy : of_iy)),

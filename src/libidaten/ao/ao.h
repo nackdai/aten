@@ -15,12 +15,12 @@ namespace idaten
     public:
         virtual void render(
             const TileDomain& tileDomain,
-            int maxSamples,
-            int maxBounce) override;
+            int32_t maxSamples,
+            int32_t maxBounce) override;
 
         virtual void update(
             GLuint gltex,
-            int width, int height,
+            int32_t width, int32_t height,
             const aten::CameraParameter& camera,
             const std::vector<aten::GeomParameter>& shapes,
             const std::vector<aten::MaterialParameter>& mtrls,
@@ -43,11 +43,11 @@ namespace idaten
             return m_enableProgressive;
         }
 
-        int getNumRays() const
+        int32_t getNumRays() const
         {
             return m_ao_num_rays;
         }
-        void setNumRays(int num)
+        void setNumRays(int32_t num)
         {
             m_ao_num_rays = num;
         }
@@ -63,23 +63,23 @@ namespace idaten
 
     protected:
         virtual void onShadeMiss(
-            int width, int height,
-            int bounce);
+            int32_t width, int32_t height,
+            int32_t bounce);
 
         virtual void onShade(
-            int width, int height,
-            int bounce, int rrBounce,
+            int32_t width, int32_t height,
+            int32_t bounce, int32_t rrBounce,
             cudaTextureObject_t texVtxPos,
             cudaTextureObject_t texVtxNml);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
-            int width, int height);
+            int32_t width, int32_t height);
 
     protected:
         bool m_enableProgressive{ false };
 
-        int m_ao_num_rays{ 1 };
+        int32_t m_ao_num_rays{ 1 };
         float m_ao_radius{ 1.0f };
     };
 }

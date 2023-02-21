@@ -9,26 +9,26 @@
 // http://opencv.jp/opencv2-x-samples/non-local-means-filter
 
 namespace aten {
-    static const int kKernel = 5;
-    static const int kSupport = 13;
-    static const int kHalfKernel = kKernel / 2;
-    static const int kHalfSupport = kSupport / 2;
+    static const int32_t kKernel = 5;
+    static const int32_t kSupport = 13;
+    static const int32_t kHalfKernel = kKernel / 2;
+    static const int32_t kHalfSupport = kSupport / 2;
 
     using Template = std::array<real, 3 * kKernel * kKernel>;
 
     Template sampleArea(
         const vec4* src,
-        int x, int y,
-        int width, int height)
+        int32_t x, int32_t y,
+        int32_t width, int32_t height)
     {
         Template ret;
 
-        int count = 0;
+        int32_t count = 0;
 
-        for (int sx = x - kHalfKernel; sx <= x + kHalfKernel; sx++) {
-            for (int sy = y - kHalfKernel; sy <= y + kHalfKernel; sy++) {
-                int sample_x = sx;
-                int sample_y = sy;
+        for (int32_t sx = x - kHalfKernel; sx <= x + kHalfKernel; sx++) {
+            for (int32_t sy = y - kHalfKernel; sy <= y + kHalfKernel; sy++) {
+                int32_t sample_x = sx;
+                int32_t sample_y = sy;
 
                 sample_x = std::max(sample_x, 0);
                 sample_x = std::min(sample_x, width - 1);
@@ -49,11 +49,11 @@ namespace aten {
 
     vec3 samplePixel(
         const vec4* src,
-        int x, int y,
-        int width, int height)
+        int32_t x, int32_t y,
+        int32_t width, int32_t height)
     {
-        int sample_x = x;
-        int sample_y = y;
+        int32_t sample_x = x;
+        int32_t sample_y = y;
 
         sample_x = std::max(sample_x, 0);
         sample_x = std::min(sample_x, width - 1);
@@ -72,7 +72,7 @@ namespace aten {
     {
         real sum = 0;
 
-        for (int i = 0; i < a.size(); i++) {
+        for (int32_t i = 0; i < a.size(); i++) {
             sum += aten::pow(a[i] - b[i], 2);
         }
 
@@ -83,7 +83,7 @@ namespace aten {
 
     static void doNonLocalMeanFilter(
         const vec4* imgSrc,
-        int imgW, int imgH,
+        int32_t imgW, int32_t imgH,
         vec4* imgDst,
         real param_h,
         real sigma)
@@ -91,14 +91,14 @@ namespace aten {
         param_h = std::max(real(0.0001), param_h);
         sigma = std::max(real(0.0001), sigma);
 
-        const int width = imgW;
-        const int height = imgH;
+        const int32_t width = imgW;
+        const int32_t height = imgH;
 
 #ifdef ENABLE_OMP
 #pragma omp parallel for
 #endif
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int32_t y = 0; y < height; y++) {
+            for (int32_t x = 0; x < width; x++) {
                 auto dst = imgDst + (y * width + x);
 
                 // 注目領域.
@@ -107,8 +107,8 @@ namespace aten {
                 vec3 sum = vec3(0, 0, 0);
                 real sum_weight = 0;
 
-                for (int sx = x - kHalfSupport; sx <= x + kHalfSupport; ++sx) {
-                    for (int sy = y - kHalfSupport; sy <= y + kHalfSupport; ++sy) {
+                for (int32_t sx = x - kHalfSupport; sx <= x + kHalfSupport; ++sx) {
+                    for (int32_t sy = y - kHalfSupport; sy <= y + kHalfSupport; ++sy) {
                         // 相似度を調べる対象領域.
                         auto target = sampleArea(imgSrc, sx, sy, width, height);
 

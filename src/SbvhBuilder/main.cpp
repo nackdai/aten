@@ -9,7 +9,7 @@ struct Options {
 };
 
 bool parseOption(
-    int argc, char* argv[],
+    int32_t argc, char* argv[],
     cmdline::parser& cmd,
     Options& opt)
 {
@@ -57,7 +57,7 @@ bool parseOption(
 }
 
 
-int main(int argc, char* argv[])
+int32_t main(int32_t argc, char* argv[])
 {
     Options opt;
     cmdline::parser cmd;
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     try {
         static char buf[2048] = { 0 };
 
-        for (int i = 0; i < objs.size(); i++) {
+        for (int32_t i = 0; i < objs.size(); i++) {
             auto& obj = objs[i];
 
             std::string output;

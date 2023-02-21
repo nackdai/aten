@@ -37,7 +37,7 @@ namespace aten {
             uint32_t clear_buffer_mask,
             aten::vec4& clear_color,
             float clear_depth,
-            int clear_stencil);
+            int32_t clear_stencil);
 
         static void beginRender(FBO* fbo = nullptr);
         static void beginRender(std::shared_ptr<FBO> fbo)
@@ -46,12 +46,12 @@ namespace aten {
         }
 
         bool init(
-            int width, int height,
+            int32_t width, int32_t height,
             const char* pathVS,
             const char* pathFS);
 
         bool init(
-            int width, int height,
+            int32_t width, int32_t height,
             const char* pathVS,
             const char* pathGS,
             const char* pathFS);
@@ -66,7 +66,7 @@ namespace aten {
         void prepareDraw(const camera* cam);
 
         void drawSceneForGBuffer(
-            int frame,
+            int32_t frame,
             context& ctxt,
             const scene* scene,
             const camera* cam,
@@ -81,7 +81,7 @@ namespace aten {
             const camera* cam,
             const aabb& bbox);
 
-        using FuncSetUniform = std::function<void(shader& shd, const aten::vec3& color, const aten::texture* albedo, int mtrlid)>;
+        using FuncSetUniform = std::function<void(shader& shd, const aten::vec3& color, const aten::texture* albedo, int32_t mtrlid)>;
 
         void drawObject(
             context& ctxt,
@@ -107,7 +107,7 @@ namespace aten {
         void draw(
             const context& ctxt,
             const std::vector<vertex>& vtxs,
-            const std::vector<std::vector<int>>& idxs,
+            const std::vector<std::vector<int32_t>>& idxs,
             const std::vector<material*>& mtrls,
             const camera* cam,
             bool isWireFrame,
@@ -139,8 +139,8 @@ namespace aten {
 
         mat4 m_mtxPrevW2C;
 
-        int m_width{ 0 };
-        int m_height{ 0 };
+        int32_t m_width{ 0 };
+        int32_t m_height{ 0 };
 
         bool m_isInitBuffer{ false };
         GeomVertexBuffer m_vb;

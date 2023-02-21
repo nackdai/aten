@@ -12,6 +12,6 @@ namespace aten
         static bool save(
             const std::string& filename,
             const vec4* image,
-            const int width, const int height);
+            const int32_t width, const int32_t height);
     };
 }

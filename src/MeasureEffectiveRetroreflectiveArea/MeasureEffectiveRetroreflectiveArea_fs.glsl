@@ -1,6 +1,6 @@
 #version 450
 precision highp float;
-precision highp int;
+precision highp int32_t;
 
 uniform vec3 color;
 uniform vec3 normal;

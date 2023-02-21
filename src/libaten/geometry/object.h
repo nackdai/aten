@@ -45,7 +45,7 @@ namespace AT_NAME
             const aten::context& ctxt,
             const aten::mat4& mtxL2W,
             const aten::mat4& mtxPrevL2W,
-            int parentId,
+            int32_t parentId,
             uint32_t triOffset) override final;
 
         void draw(
@@ -60,7 +60,7 @@ namespace AT_NAME
             const aten::context& ctxt,
             const char* path);
 
-        bool importInternalAccelTree(const char* path, const aten::context& ctxt, int offsetTriIdx);
+        bool importInternalAccelTree(const char* path, const aten::context& ctxt, int32_t offsetTriIdx);
 
         void buildForRasterizeRendering(const aten::context& ctxt);
 

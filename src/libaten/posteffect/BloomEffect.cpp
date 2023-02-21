@@ -3,8 +3,8 @@
 
 namespace aten {
     bool BloomEffect::BloomEffectPass::init(
-        int srcWidth, int srcHeight,
-        int dstWidth, int dstHeight,
+        int32_t srcWidth, int32_t srcHeight,
+        int32_t dstWidth, int32_t dstHeight,
         PixelFormat inFmt, PixelFormat outFmt,
         const char* pathVS,
         const char* pathFS)
@@ -109,7 +109,7 @@ namespace aten {
     }
 
     bool BloomEffect::init(
-        int width, int height,
+        int32_t width, int32_t height,
         PixelFormat inFmt, PixelFormat outFmt,
         const char* pathVS,
         const char* pathFS_4x4,

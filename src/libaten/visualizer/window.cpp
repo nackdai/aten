@@ -22,8 +22,8 @@ namespace aten
 
     static std::vector<std::shared_ptr<windowImpl>> g_windows;
 
-    static std::vector<int> g_mouseX;
-    static std::vector<int> g_mouseY;
+    static std::vector<int32_t> g_mouseX;
+    static std::vector<int32_t> g_mouseY;
 
     window* findWindow(GLFWwindow* w)
     {
@@ -54,7 +54,7 @@ namespace aten
         }
     }
 
-    static inline Key getKeyMap(int key)
+    static inline Key getKeyMap(int32_t key)
     {
         if ('0' <= key && key <= '9') {
             key = key - '0';
@@ -128,7 +128,7 @@ namespace aten
         return Key_UNDEFINED;
     }
 
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    static void keyCallback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
     {
         auto wnd = findWindow(window);
 
@@ -143,7 +143,7 @@ namespace aten
         ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
     }
 
-    static void mouseCallback(GLFWwindow* window, int button, int action, int mods)
+    static void mouseCallback(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
     {
         auto wnd = findWindow(window);
 
@@ -177,17 +177,17 @@ namespace aten
     {
         auto wnd = findWindow(window);
 
-        g_mouseX[wnd->id()] = (int)xpos;
-        g_mouseY[wnd->id()] = (int)ypos;
+        g_mouseX[wnd->id()] = (int32_t)xpos;
+        g_mouseY[wnd->id()] = (int32_t)ypos;
 
         if (wnd) {
-            wnd->onMouseMove((int)xpos, (int)ypos);
+            wnd->onMouseMove((int32_t)xpos, (int32_t)ypos);
         }
     }
 
     static void wheelCallback(GLFWwindow* window, double xoffset, double yoffset)
     {
-        auto offset = (int)(yoffset * 10.0f);
+        auto offset = (int32_t)(yoffset * 10.0f);
 
         auto wnd = findWindow(window);
 
@@ -199,7 +199,7 @@ namespace aten
         ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
     }
 
-    static void onFocusWindow(GLFWwindow* window, int focused)
+    static void onFocusWindow(GLFWwindow* window, int32_t focused)
     {
         auto wnd = findWindow(window);
         if (wnd) {
@@ -213,7 +213,7 @@ namespace aten
     {}
 
     window* window::init(
-        int width, int height, const char* title,
+        int32_t width, int32_t height, const char* title,
         OnRun onRun,
         OnClose _onClose/*= nullptr*/,
         OnMouseBtn _onMouseBtn/*= nullptr*/,
@@ -411,7 +411,7 @@ namespace aten
     void window::drawImGui()
     {
         // Rendering
-        int display_w, display_h;
+        int32_t display_w, display_h;
         ::glfwGetFramebufferSize(m_wnd, &display_w, &display_h);
         CALL_GL_API(glViewport(0, 0, display_w, display_h));
 

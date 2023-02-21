@@ -6,7 +6,7 @@ namespace aten {
         const void* pixels,
         bool revert)
     {
-        for (int i = 0; i < m_passes.size(); i++) {
+        for (int32_t i = 0; i < m_passes.size(); i++) {
             auto* pass = m_passes[i];
             visualizer::PostProc* prevPass = nullptr;
 

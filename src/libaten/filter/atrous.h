@@ -13,7 +13,7 @@ namespace aten {
     public:
         bool init(
             context& ctxt,
-            int width, int height,
+            int32_t width, int32_t height,
             const char* vsPath, const char* fsPath,
             const char* finalVsPath, const char* finalFsPath);
 
@@ -66,7 +66,7 @@ namespace aten {
             }
 
             ATrousDenoiser* m_body{ nullptr };
-            int m_idx{ -1 };
+            int32_t m_idx{ -1 };
         };
 
         class ATrousFinalPass : public ATrousPass {
@@ -75,7 +75,7 @@ namespace aten {
                 bool revert) override;
         };
 
-        static const int ITER = 5;
+        static const int32_t ITER = 5;
 
         visualizer* getVisualizer()
         {

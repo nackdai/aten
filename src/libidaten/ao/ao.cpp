@@ -10,7 +10,7 @@
 namespace idaten {
     void AORenderer::update(
         GLuint gltex,
-        int width, int height,
+        int32_t width, int32_t height,
         const aten::CameraParameter& camera,
         const std::vector<aten::GeomParameter>& shapes,
         const std::vector<aten::MaterialParameter>& mtrls,
@@ -46,8 +46,8 @@ namespace idaten {
 
     void AORenderer::render(
         const TileDomain& tileDomain,
-        int maxSamples,
-        int maxBounce)
+        int32_t maxSamples,
+        int32_t maxBounce)
     {
 #ifdef __AT_DEBUG__
         if (!doneSetStackSize) {
@@ -60,10 +60,10 @@ namespace idaten {
 
         m_tileDomain = tileDomain;
 
-        int bounce = 0;
+        int32_t bounce = 0;
 
-        int width = tileDomain.w;
-        int height = tileDomain.h;
+        int32_t width = tileDomain.w;
+        int32_t height = tileDomain.h;
 
         m_compaction.init(width * height, 1024);
 
@@ -81,7 +81,7 @@ namespace idaten {
 
         {
             std::vector<cudaTextureObject_t> tmp;
-            for (int i = 0; i < m_nodeparam.size(); i++) {
+            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                 auto nodeTex = m_nodeparam[i].bind();
                 tmp.push_back(nodeTex);
             }
@@ -91,7 +91,7 @@ namespace idaten {
         if (!m_texRsc.empty())
         {
             std::vector<cudaTextureObject_t> tmp;
-            for (int i = 0; i < m_texRsc.size(); i++) {
+            for (int32_t i = 0; i < m_texRsc.size(); i++) {
                 auto cudaTex = m_texRsc[i].bind();
                 tmp.push_back(cudaTex);
             }
@@ -101,12 +101,12 @@ namespace idaten {
         initPath(width, height);
         clearPath();
 
-        static const int rrBounce = 3;
+        static const int32_t rrBounce = 3;
 
         auto time = AT_NAME::timer::getSystemTime();
 
-        for (int i = 0; i < maxSamples; i++) {
-            int seed = time.milliSeconds;
+        for (int32_t i = 0; i < maxSamples; i++) {
+            int32_t seed = time.milliSeconds;
 
             generatePath(
                 false,
@@ -149,11 +149,11 @@ namespace idaten {
             m_vtxparamsPos.unbind();
             m_vtxparamsNml.unbind();
 
-            for (int i = 0; i < m_nodeparam.size(); i++) {
+            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
                 m_nodeparam[i].unbind();
             }
 
-            for (int i = 0; i < m_texRsc.size(); i++) {
+            for (int32_t i = 0; i < m_texRsc.size(); i++) {
                 m_texRsc[i].unbind();
             }
         }

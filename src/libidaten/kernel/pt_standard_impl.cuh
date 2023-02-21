@@ -49,7 +49,7 @@ namespace kernel {
 
     inline __device__ void hitImplicitLight(
         bool is_back_facing,
-        int bounce,
+        int32_t bounce,
         idaten::PathContrib& path_contrib,
         idaten::PathAttribute& path_attrib,
         idaten::PathThroughput& path_throughput,
@@ -87,8 +87,8 @@ namespace kernel {
     }
 
     inline __device__ float executeRussianProbability(
-        int bounce,
-        int rrBounce,
+        int32_t bounce,
+        int32_t rrBounce,
         idaten::PathAttribute& path_attrib,
         idaten::PathThroughput& path_throughput,
         aten::sampler& sampler)
@@ -116,10 +116,10 @@ namespace kernel {
     inline __device__ bool fillShadowRay(
         idaten::ShadowRay& shadow_ray,
         idaten::Context& ctxt,
-        int bounce,
+        int32_t bounce,
         aten::sampler& sampler,
         const idaten::PathThroughput& throughtput,
-        int target_light_idx,
+        int32_t target_light_idx,
         const aten::LightParameter& light,
         const aten::MaterialParameter& mtrl,
         const aten::ray& ray,
@@ -200,13 +200,13 @@ namespace kernel {
         return isShadowRayActive;
     }
 
-    inline __device__ int adjustIndexWithTiledomain(
-        int base_idx,
+    inline __device__ int32_t adjustIndexWithTiledomain(
+        int32_t base_idx,
         const idaten::TileDomain& tileDomain,
-        int width)
+        int32_t width)
     {
-        int ix = base_idx % tileDomain.w;
-        int iy = base_idx / tileDomain.w;
+        int32_t ix = base_idx % tileDomain.w;
+        int32_t iy = base_idx / tileDomain.w;
 
         ix += tileDomain.x;
         iy += tileDomain.y;

@@ -19,7 +19,7 @@ namespace aten {
         real t;
     };
 
-    inline AT_DEVICE_API int maxDim(const vec3& v)
+    inline AT_DEVICE_API int32_t maxDim(const vec3& v)
     {
         uint32_t x = (uint32_t)aten::abs(v.x);
         uint32_t y = (uint32_t)aten::abs(v.y);
@@ -94,13 +94,13 @@ namespace aten {
         // http://jcgt.org/published/0002/01/05/paper.pdf
 
         // calculate dimension where ray direction is maximal.
-        int kz = maxDim(ray.dir);
-        int kx = (kz + 1) % 3;
-        int ky = (kx + 1) % 3;
+        int32_t kz = maxDim(ray.dir);
+        int32_t kx = (kz + 1) % 3;
+        int32_t ky = (kx + 1) % 3;
 
         // swap kx and ky dimension to preserve windin direction of triangles.
         if (ray.dir[kz] < real(0)) {
-            int tmp = kx;
+            int32_t tmp = kx;
             kx = ky;
             ky = tmp;
         }

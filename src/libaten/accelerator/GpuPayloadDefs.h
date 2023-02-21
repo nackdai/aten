@@ -28,5 +28,5 @@ namespace aten {
 #endif
 
     AT_STATICASSERT((sizeof(GPUBvhNode) % (sizeof(float) * 4)) == 0);
-    static const int GPUBvhNodeSize = sizeof(GPUBvhNode) / (sizeof(float) * 4);
+    static const int32_t GPUBvhNodeSize = sizeof(GPUBvhNode) / (sizeof(float) * 4);
 }

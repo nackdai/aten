@@ -1,6 +1,6 @@
 #version 420
 precision highp float;
-precision highp int;
+precision highp int32_t;
 
 uniform sampler2D image;
 

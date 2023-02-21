@@ -81,11 +81,11 @@ namespace aten {
     {
         auto a = val.get<picojson::array>();
 
-        int num = std::min<int>(3, (int)a.size());
+        int32_t num = std::min<int32_t>(3, (int32_t)a.size());
 
         aten::PolymorphicValue v;
 
-        for (int i = 0; i < num; i++) {
+        for (int32_t i = 0; i < num; i++) {
             v.val.v[i] = a[i].get<double>();
         }
 
@@ -141,10 +141,10 @@ namespace aten {
         std::string text(e->GetText());
 
         std::vector<std::string> values;
-        int num = split(text, values, ' ');
+        int32_t num = split(text, values, ' ');
 
         aten::vec4 v;
-        for (int i = 0; i < std::min<int>(num, 3); i++) {
+        for (int32_t i = 0; i < std::min<int32_t>(num, 3); i++) {
             v[i] = (real)atof(values[i].c_str());
         }
 
@@ -192,7 +192,7 @@ namespace aten {
         getValue<texture*>,
         getValue<real>,
     };
-    AT_STATICASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int)MtrlParamType::Num);
+    AT_STATICASSERT(AT_COUNTOF(g_funcGetValueFromFile) == (int32_t)MtrlParamType::Num);
 
     std::map<std::string, MtrlParamType> g_paramtypes = {
         std::pair<std::string, MtrlParamType>("baseColor", MtrlParamType::Vec3),
@@ -412,7 +412,7 @@ namespace aten {
 
                     if (itParamType != g_paramtypes.end()) {
                         auto paramType = itParamType->second;
-                        auto funcGetValue = g_funcGetValueFromFile[(int)paramType];
+                        auto funcGetValue = g_funcGetValueFromFile[(int32_t)paramType];
 
                         // Get value from json.
                         auto value = funcGetValue(child, ctxt);

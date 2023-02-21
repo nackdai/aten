@@ -4,8 +4,8 @@ namespace aten
 {
     aten::vec3 FeatureLine::renderFeatureLine(
         const aten::vec3& color,
-        int x, int y,
-        int width, int height,
+        int32_t x, int32_t y,
+        int32_t width, int32_t height,
         const aten::hitrecord& hrec,
         const context& ctxt,
         const scene& scene,

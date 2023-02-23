@@ -410,9 +410,6 @@
     <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
       <Filter>multigpu</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp">
-      <Filter>cuda</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libidaten\ao\ao.cpp">
       <Filter>ao</Filter>
     </ClCompile>

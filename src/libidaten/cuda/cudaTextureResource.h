@@ -82,39 +82,4 @@ namespace idaten
         cudaArray_t m_array{ nullptr };
         cudaChannelFormatDesc m_channelFmtDesc;
     };
-
-    class CudaLeyered2DTexture : public CudaTextureResource {
-    public:
-        CudaLeyered2DTexture() {}
-        virtual ~CudaLeyered2DTexture() final {}
-
-    public:
-        void init(
-            std::vector<const aten::vec4*>& p,
-            uint32_t width,
-            uint32_t height);
-
-        virtual cudaTextureObject_t bind() override final;
-
-        int32_t getWidth() const
-        {
-            return m_width;
-        }
-
-        int32_t getHeight() const
-        {
-            return m_height;
-        }
-
-        int32_t getLayerNum() const
-        {
-            return m_layerNum;
-        }
-
-    private:
-        cudaArray_t m_array{ nullptr };
-        int32_t m_width{ 0 };
-        int32_t m_height{ 0 };
-        int32_t m_layerNum{ 0 };
-    };
 }

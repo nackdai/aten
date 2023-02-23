@@ -188,7 +188,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <ClCompile Include="..\src\libidaten\ao\ao.cpp" />
-    <ClCompile Include="..\src\libidaten\cuda\cudaLayeredTextureResource.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp" />
     <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

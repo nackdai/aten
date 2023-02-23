@@ -761,14 +761,6 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         15.0,
         emit);
 
-    real cubeheight = 10;
-
-    auto cube = aten::TransformableFactory::createCube(
-        ctxt,
-        aten::vec3(50.0, 75.0 - cubeheight, 81.6),
-        60, cubeheight, 60,
-        createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.5, 0.5, 0.5)));
-
     double r = 1e3;
 
     auto left = aten::TransformableFactory::createSphere(
@@ -830,7 +822,6 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
 #if 1
     scene->add(light);
-    scene->add(cube);
 #if 1
     scene->add(left);
     scene->add(right);

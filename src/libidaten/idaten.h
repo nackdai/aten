@@ -11,10 +11,6 @@
 #include "svgf/svgf.h"
 
 #include "cuda/cudainit.h"
-#include "cuda/multigpu.h"
-
-#include "multigpu/pt_multigpu.h"
-#include "multigpu/svgf_multigpu.h"
 
 #include "ao/ao.h"
 

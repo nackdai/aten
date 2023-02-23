@@ -2,7 +2,6 @@
 
 #include "geometry/transformable.h"
 #include "geometry/sphere.h"
-#include "geometry/cube.h"
 #include "geometry/object.h"
 #include "scene/instance.h"
 #include "scene/context.h"

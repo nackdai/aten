@@ -84,7 +84,6 @@
     <ClInclude Include="..\src\libidaten\cuda\cudaTextureResource.h" />
     <ClInclude Include="..\src\libidaten\cuda\cudautil.h" />
     <ClInclude Include="..\src\libidaten\cuda\helper_math.h" />
-    <ClInclude Include="..\src\libidaten\cuda\multigpu.h" />
     <ClInclude Include="..\src\libidaten\idaten.h" />
     <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
     <ClInclude Include="..\src\libidaten\kernel\accelerator.cuh" />
@@ -122,9 +121,6 @@
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\stackless_qbvh_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\StreamCompaction.h" />
-    <ClInclude Include="..\src\libidaten\multigpu\pt_multigpu.h" />
-    <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h" />
-    <ClInclude Include="..\src\libidaten\multigpu\svgf_multigpu.h" />
     <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h" />
     <ClInclude Include="..\src\libidaten\restir\reservior.h" />
     <ClInclude Include="..\src\libidaten\restir\restir.h" />
@@ -189,12 +185,6 @@
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp" />
     <ClCompile Include="..\src\libidaten\ao\ao.cpp" />
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp" />
-    <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp" />
     <ClCompile Include="..\src\libidaten\restir\restir.cpp" />
     <ClCompile Include="..\src\libidaten\svgf\svgf.cpp" />
     <CudaCompile Include="..\src\libaten\material\disney_brdf.cpp">

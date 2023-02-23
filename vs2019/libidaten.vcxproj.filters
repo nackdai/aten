@@ -226,18 +226,6 @@
     <ClInclude Include="..\src\libidaten\kernel\Skinning.h">
       <Filter>kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\cuda\multigpu.h">
-      <Filter>cuda</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\multigpu\pt_multigpu.h">
-      <Filter>multigpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\multigpu\renderer_multigpu.h">
-      <Filter>multigpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\multigpu\svgf_multigpu.h">
-      <Filter>multigpu</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh">
       <Filter>kernel\accelerator</Filter>
     </ClInclude>
@@ -354,9 +342,6 @@
     <Filter Include="kernel\renderer">
       <UniqueIdentifier>{deaffd9a-5ffd-486c-927f-355fbbf5f941}</UniqueIdentifier>
     </Filter>
-    <Filter Include="multigpu">
-      <UniqueIdentifier>{a022af60-efd8-427a-82ab-061b0ca6a84c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ao">
       <UniqueIdentifier>{d62712a7-6048-4953-8529-944e40f98a46}</UniqueIdentifier>
     </Filter>
@@ -403,12 +388,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\pathtracing.cpp">
       <Filter>kernel\renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libidaten\multigpu\pt_multigpu.cpp">
-      <Filter>multigpu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libidaten\multigpu\svgf_multigpu.cpp">
-      <Filter>multigpu</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libidaten\ao\ao.cpp">
       <Filter>ao</Filter>

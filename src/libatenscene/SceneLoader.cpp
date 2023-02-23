@@ -303,17 +303,7 @@ namespace aten
                 objs.insert(std::pair<std::string, std::shared_ptr<transformable>>(tag, instance));
             }
             else {
-                if (type == "cube") {
-                    auto cube = aten::TransformableFactory::createCube(
-                        ctxt,
-                        val.get("center", vec3(0)),
-                        val.get("width", real(1)),
-                        val.get("height", real(1)),
-                        val.get("depth", real(1)),
-                        mtrl);
-                    objs.insert(std::pair<std::string, std::shared_ptr<transformable>>(tag, cube));
-                }
-                else if (type == "sphere") {
+                if (type == "sphere") {
                     auto sphere = aten::TransformableFactory::createSphere(
                         ctxt,
                         val.get("center", vec3(0)),

@@ -114,7 +114,7 @@ namespace kernel {
         aten::ray* rays,
         int32_t* hitbools,
         int32_t width, int32_t height,
-        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::GeometryParameter* __restrict__ shapes, int32_t geomnum,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::TriangleParameter* __restrict__ prims,
@@ -304,7 +304,7 @@ namespace kernel {
         int32_t* hitbools,
         int32_t width, int32_t height,
         const aten::vec4 camPos,
-        const aten::GeomParameter* __restrict__ geoms,
+        const aten::GeometryParameter* __restrict__ geoms,
         const aten::TriangleParameter* __restrict__ prims,
         const aten::mat4* __restrict__ matrices,
         cudaTextureObject_t vtxPos)

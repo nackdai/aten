@@ -36,7 +36,7 @@ namespace AT_NAME
             aten::Intersection& isect) const override final;
 
         static AT_DEVICE_API bool hit(
-            const aten::GeomParameter* param,
+            const aten::GeometryParameter* param,
             const aten::ray& r,
             real t_min, real t_max,
             aten::Intersection* isect);
@@ -48,13 +48,13 @@ namespace AT_NAME
             const aten::Intersection& isect) const override final;
 
         static AT_DEVICE_API void evalHitResult(
-            const aten::GeomParameter* param,
+            const aten::GeometryParameter* param,
             const aten::ray& r,
             aten::hitrecord* rec,
             const aten::Intersection* isect);
 
         static AT_DEVICE_API void evalHitResult(
-            const aten::GeomParameter* param,
+            const aten::GeometryParameter* param,
             const aten::ray& r,
             const aten::mat4& mtxL2W,
             aten::hitrecord* rec,
@@ -77,7 +77,7 @@ namespace AT_NAME
 
         static AT_DEVICE_API void getSamplePosNormalArea(
             aten::hitable::SamplePosNormalPdfResult* result,
-            const aten::GeomParameter* param,
+            const aten::GeometryParameter* param,
             aten::sampler* sampler);
 
         virtual void evalHitResult(
@@ -96,11 +96,11 @@ namespace AT_NAME
     private:
         static AT_DEVICE_API void getSamplePosNormalArea(
             aten::hitable::SamplePosNormalPdfResult* result,
-            const aten::GeomParameter* param,
+            const aten::GeometryParameter* param,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler);
 
     private:
-        aten::GeomParameter m_param;
+        aten::GeometryParameter m_param;
     };
 }

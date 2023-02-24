@@ -95,7 +95,7 @@ void update()
         accel->update(g_ctxt);
 
         {
-            std::vector<aten::GeomParameter> shapeparams;
+            std::vector<aten::GeometryParameter> shapeparams;
             std::vector<aten::TriangleParameter> primparams;
             std::vector<aten::LightParameter> lightparams;
             std::vector<aten::MaterialParameter> mtrlparms;
@@ -545,7 +545,7 @@ int32_t main()
         auto d = aabb.getDiagonalLenght();
         g_tracer.setHitDistanceLimit(d * 0.25f);
 
-        std::vector<aten::GeomParameter> shapeparams;
+        std::vector<aten::GeometryParameter> shapeparams;
         std::vector<aten::TriangleParameter> primparams;
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;

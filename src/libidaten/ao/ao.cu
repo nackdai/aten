@@ -51,7 +51,7 @@ namespace ao {
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
         int32_t bounce, int32_t rrBounce,
-        const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::GeometryParameter* __restrict__ shapes, int32_t geomnum,
         aten::MaterialParameter* mtrls,
         cudaTextureObject_t* nodes,
         const aten::TriangleParameter* __restrict__ prims,

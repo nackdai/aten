@@ -38,12 +38,12 @@ namespace aten
             return m_param.type;
         }
 
-        const GeomParameter& getParam() const
+        const GeometryParameter& getParam() const
         {
             return m_param;
         }
 
-        GeomParameter& getParam()
+        GeometryParameter& getParam()
         {
             return m_param;
         }
@@ -83,6 +83,6 @@ namespace aten
         std::shared_ptr<AT_NAME::material> mtrl_;
         int32_t m_id{ -1 };
 
-        GeomParameter m_param;
+        GeometryParameter m_param;
     };
 }

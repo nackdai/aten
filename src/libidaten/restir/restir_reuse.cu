@@ -14,7 +14,7 @@
 
 __global__ void computeTemporalReuse(
     idaten::Path* paths,
-    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::GeometryParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::TriangleParameter* __restrict__ prims,
@@ -191,7 +191,7 @@ __global__ void computeTemporalReuse(
 
 __global__ void computeSpatialReuse(
     idaten::Path* paths,
-    const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::GeometryParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::TriangleParameter* __restrict__ prims,

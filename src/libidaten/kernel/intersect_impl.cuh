@@ -1,7 +1,7 @@
 #include "kernel/idatendefs.cuh"
 
 AT_CUDA_INLINE __device__ bool hitSphere(
-    const aten::GeomParameter* shape,
+    const aten::GeometryParameter* shape,
     const aten::ray& r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -418,7 +418,7 @@ inline __device__ float4 cross(float4 a, float4 b)
 
 AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     const idaten::Context* ctxt,
-    const aten::GeomParameter* param,
+    const aten::GeometryParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect)
@@ -498,7 +498,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 
 AT_CUDA_INLINE __device__ void evalHitResult(
     const idaten::Context* ctxt,
-    const aten::GeomParameter* param,
+    const aten::GeometryParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect)
@@ -517,7 +517,7 @@ AT_CUDA_INLINE __device__ void evalHitResult(
         rec->isVoxel = true;
     }
     else {
-        const aten::GeomParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+        const aten::GeometryParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
         if (realShape->type == aten::GeometryType::Polygon) {
             evalHitResultTriangle(ctxt, param, r, rec, isect);
@@ -544,12 +544,12 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 
 AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
     const idaten::Context* ctxt,
-    const aten::GeomParameter* param,
+    const aten::GeometryParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect)
 {
-    const aten::GeomParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+    const aten::GeometryParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
 
     if (realShape->type == aten::GeometryType::Polygon) {
         evalHitResultTriangle(ctxt, param, r, rec, isect);

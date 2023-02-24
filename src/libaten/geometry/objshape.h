@@ -60,7 +60,7 @@ namespace AT_NAME
             return faces;
         }
 
-        aten::GeomParameter param;
+        aten::GeometryParameter param;
         aten::aabb m_aabb;
 
     private:

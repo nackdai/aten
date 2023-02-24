@@ -5,7 +5,7 @@ namespace idaten {
         GLuint gltex,
         int32_t width, int32_t height,
         const aten::CameraParameter& camera,
-        const std::vector<aten::GeomParameter>& shapes,
+        const std::vector<aten::GeometryParameter>& shapes,
         const std::vector<aten::MaterialParameter>& mtrls,
         const std::vector<aten::LightParameter>& lights,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,

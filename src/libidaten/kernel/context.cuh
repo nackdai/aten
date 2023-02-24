@@ -5,7 +5,7 @@
 namespace idaten {
     struct Context {
         int32_t geomnum{ 0 };
-        const aten::GeomParameter* shapes{ nullptr };
+        const aten::GeometryParameter* shapes{ nullptr };
 
         const aten::MaterialParameter* mtrls{ nullptr };
 

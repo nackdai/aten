@@ -16,7 +16,7 @@ namespace aten
         GeometryTypeMax,
     };
 
-    struct GeomParameter {
+    struct GeometryParameter {
         GeometryType type{ GeometryType::GeometryTypeMax };
 
         real area{ real(0) };
@@ -37,10 +37,10 @@ namespace aten
         vec3 size;          // cube.
         real radius{ 0 };   // shpere.
 
-        GeomParameter() = default;
-        ~GeomParameter() = default;
+        GeometryParameter() = default;
+        ~GeometryParameter() = default;
     };
-    AT_STATICASSERT((sizeof(GeomParameter) % 16) == 0);
+    AT_STATICASSERT((sizeof(GeometryParameter) % 16) == 0);
 
     struct TriangleParameter {
         union {

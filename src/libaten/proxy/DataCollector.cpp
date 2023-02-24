@@ -8,7 +8,7 @@ namespace aten {
     void DataCollector::collect(
         const context& ctxt,
         const scene& scene,
-        std::vector<aten::GeomParameter>& shapeparams,
+        std::vector<aten::GeometryParameter>& shapeparams,
         std::vector<aten::TriangleParameter>& primparams,
         std::vector<aten::LightParameter>& lightparams,
         std::vector<aten::MaterialParameter>& mtrlparms,

@@ -126,7 +126,7 @@ namespace aten
         const context& ctxt,
         std::vector<SkinningVertex>& vtx,
         std::vector<uint32_t>& idx,
-        std::vector<aten::PrimitiveParamter>& tris) const
+        std::vector<aten::TriangleParameter>& tris) const
     {
         // TODO
         // 頂点フォーマット固定...
@@ -161,7 +161,7 @@ namespace aten
             AT_ASSERT((end - begin) % 3 == 0);
 
             for (uint32_t n = begin; n < end; n += 3) {
-                tris.push_back(aten::PrimitiveParamter());
+                tris.push_back(aten::TriangleParameter());
                 auto& tri = tris.back();
 
                 tri.idx[0] = idx[n + 0];

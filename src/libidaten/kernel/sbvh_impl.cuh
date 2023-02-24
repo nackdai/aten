@@ -35,7 +35,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
 
         if (attrib.y >= 0) {
             int32_t primidx = (int32_t)attrib.y;
-            aten::PrimitiveParamter prim;
+            aten::TriangleParameter prim;
             prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 
@@ -162,7 +162,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
             }
             else if (attrib.y >= 0) {
                 int32_t primidx = (int32_t)attrib.y;
-                aten::PrimitiveParamter prim;
+                aten::TriangleParameter prim;
                 prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
                 prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 

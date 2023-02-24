@@ -51,7 +51,7 @@ namespace idaten
             const std::vector<aten::MaterialParameter>& mtrls,
             const std::vector<aten::LightParameter>& lights,
             const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-            const std::vector<aten::PrimitiveParamter>& prims,
+            const std::vector<aten::TriangleParameter>& prims,
             uint32_t advancePrimNum,
             const std::vector<aten::vertex>& vtxs,
             uint32_t advanceVtxNum,
@@ -95,7 +95,7 @@ namespace idaten
         idaten::TypedCudaMemory<aten::GeomParameter> m_shapeparam;
         idaten::TypedCudaMemory<aten::MaterialParameter> m_mtrlparam;
         idaten::TypedCudaMemory<aten::LightParameter> m_lightparam;
-        idaten::TypedCudaMemory<aten::PrimitiveParamter> m_primparams;
+        idaten::TypedCudaMemory<aten::TriangleParameter> m_primparams;
 
         idaten::TypedCudaMemory<aten::mat4> m_mtxparams;
 

@@ -10,7 +10,7 @@ AT_CUDA_INLINE __device__ bool hitSphere(
 }
 
 AT_CUDA_INLINE __device__ bool hitTriangle(
-    const aten::PrimitiveParamter* prim,
+    const aten::TriangleParameter* prim,
     const idaten::Context* ctxt,
     const aten::ray& ray,
     aten::Intersection* isect)
@@ -424,7 +424,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     const aten::Intersection* isect)
 {
     int32_t primidx = isect->primid;
-    aten::PrimitiveParamter prim;
+    aten::TriangleParameter prim;
     prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
     prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
 

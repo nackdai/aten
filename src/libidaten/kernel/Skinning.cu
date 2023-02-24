@@ -55,7 +55,7 @@ __global__ void computeSkinning(
 
 __global__ void setTriangleParam(
     uint32_t triNum,
-    aten::PrimitiveParamter* triangles,
+    aten::TriangleParameter* triangles,
     int32_t indexOffset,
     const aten::vec4* __restrict__ pos)
 {
@@ -180,7 +180,7 @@ namespace idaten
     void Skinning::initWithTriangles(
         aten::SkinningVertex* vertices,
         uint32_t vtxNum,
-        aten::PrimitiveParamter* tris,
+        aten::TriangleParameter* tris,
         uint32_t triNum,
         const aten::GeomMultiVertexBuffer* vb)
     {

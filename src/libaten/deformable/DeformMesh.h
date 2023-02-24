@@ -37,7 +37,7 @@ namespace aten
             const context& ctxt,
             std::vector<SkinningVertex>& vtx,
             std::vector<uint32_t>& idx,
-            std::vector<aten::PrimitiveParamter>& tris) const;
+            std::vector<aten::TriangleParameter>& tris) const;
 
         const MeshHeader& getDesc() const
         {

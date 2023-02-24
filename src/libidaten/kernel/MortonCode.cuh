@@ -144,7 +144,7 @@ __global__ void genMortonCode(
     int32_t a0, int32_t a1, int32_t a2,
     int32_t numberOfTris,
     const aten::aabb sceneBbox,
-    const aten::PrimitiveParamter* __restrict__ tris,
+    const aten::TriangleParameter* __restrict__ tris,
     T vtxPos,
     int32_t vtxOffset,
     M* mortonCodes,
@@ -156,7 +156,7 @@ __global__ void genMortonCode(
         return;
     }
 
-    aten::PrimitiveParamter prim;
+    aten::TriangleParameter prim;
     prim.v0 = ((aten::vec4*)tris)[idx * aten::PrimitiveParamter_float4_size + 0];
 
     float4 v0 = getFloat4(vtxPos, prim.idx[0] + vtxOffset);

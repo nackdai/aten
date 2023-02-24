@@ -14,7 +14,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 
     int32_t primidx = basePrimIdx + shape->primid;
 
-    const aten::PrimitiveParamter* prim = &ctxt->prims[primidx];
+    const aten::TriangleParameter* prim = &ctxt->prims[primidx];
 
     float4 _p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[0]);
     float4 _p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);

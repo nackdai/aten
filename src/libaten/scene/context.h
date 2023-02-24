@@ -108,7 +108,7 @@ namespace aten
 
         int32_t findMaterialIdxByName(const char* name) const;
 
-        std::shared_ptr<AT_NAME::face> createTriangle(const aten::PrimitiveParamter& param);
+        std::shared_ptr<AT_NAME::face> createTriangle(const aten::TriangleParameter& param);
 
         void addTriangle(const std::shared_ptr<AT_NAME::face>& tri);
 
@@ -119,7 +119,7 @@ namespace aten
 
         std::shared_ptr<const AT_NAME::face> getTriangle(int32_t idx) const;
 
-        void copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const;
+        void copyPrimitiveParameters(std::vector<aten::TriangleParameter>& dst) const;
 
         int32_t findTriIdxFromPointer(const void* p) const;
 

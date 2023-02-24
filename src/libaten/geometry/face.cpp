@@ -11,7 +11,7 @@ namespace AT_NAME
 {
     std::shared_ptr<face> face::create(
         const context& ctxt,
-        const aten::PrimitiveParamter& param)
+        const aten::TriangleParameter& param)
     {
         auto f = std::make_shared<face>();
 
@@ -52,7 +52,7 @@ namespace AT_NAME
     }
 
     bool face::hit(
-        const aten::PrimitiveParamter* param,
+        const aten::TriangleParameter* param,
         const aten::vec3& v0,
         const aten::vec3& v1,
         const aten::vec3& v2,

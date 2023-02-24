@@ -338,7 +338,7 @@ int32_t main(int32_t argc, char* argv[])
 
         std::vector<aten::SkinningVertex> vtx;
         std::vector<uint32_t> idx;
-        std::vector<aten::PrimitiveParamter> tris;
+        std::vector<aten::TriangleParameter> tris;
 
         g_mdl->getGeometryData(g_ctxt, vtx, idx, tris);
 

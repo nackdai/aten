@@ -19,14 +19,14 @@ namespace aten {
             const context& ctxt,
             const scene& scene,
             std::vector<aten::GeomParameter>& shapeparams,
-            std::vector<aten::PrimitiveParamter>& primparams,
+            std::vector<aten::TriangleParameter>& primparams,
             std::vector<aten::LightParameter>& lightparams,
             std::vector<aten::MaterialParameter>& mtrlparms,
             std::vector<aten::vertex>& vtxparams);
 
         static void collectTriangles(
             const context& ctxt,
-            std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
+            std::vector<std::vector<aten::TriangleParameter>>& triangles,
             std::vector<int32_t>& triIdOffsets);
     };
 }

@@ -66,7 +66,7 @@ namespace aten
             return mtrl_;
         }
 
-        virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
+        virtual void collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
         {
             // Nothing is done...
         }

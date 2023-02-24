@@ -135,14 +135,14 @@ namespace aten
             // Avoid duplicate.
             std::vector<tinyobj::index_t> vtx_info_list;
 
-            std::vector<aten::PrimitiveParamter> face_parameters;
+            std::vector<aten::TriangleParameter> face_parameters;
 
             // Aggregate vertex indices.
             for (uint32_t i = 0; i < face_num; i++) {
                 // Loading as triangle is specified, so vertex num per face have to be 3.
                 AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
-                aten::PrimitiveParamter faceParam;
+                aten::TriangleParameter faceParam;
 
                 const auto& idx_0 = shape.mesh.indices[i * 3 + 0];
                 const auto& idx_1 = shape.mesh.indices[i * 3 + 1];

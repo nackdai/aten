@@ -245,7 +245,7 @@ namespace aten
                         return false;
                     }
 
-                    aten::PrimitiveParamter face_param;
+                    aten::TriangleParameter face_param;
 
                     face_param.idx[0] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[0]) + vtx_idx_offset;
                     face_param.idx[1] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[1]) + vtx_idx_offset;

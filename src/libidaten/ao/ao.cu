@@ -54,7 +54,7 @@ namespace ao {
         const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         aten::MaterialParameter* mtrls,
         cudaTextureObject_t* nodes,
-        const aten::PrimitiveParamter* __restrict__ prims,
+        const aten::TriangleParameter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         cudaTextureObject_t vtxNml,
         const aten::mat4* __restrict__ matrices,

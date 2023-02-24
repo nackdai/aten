@@ -24,7 +24,7 @@ namespace idaten
         void initWithTriangles(
             aten::SkinningVertex* vertices,
             uint32_t vtxNum,
-            aten::PrimitiveParamter* tris,
+            aten::TriangleParameter* tris,
             uint32_t triNum,
             const aten::GeomMultiVertexBuffer* vb);
 
@@ -47,7 +47,7 @@ namespace idaten
             return m_interopVBO;
         }
 
-        TypedCudaMemory<aten::PrimitiveParamter>& getTriangles()
+        TypedCudaMemory<aten::TriangleParameter>& getTriangles()
         {
             return m_triangles;
         }
@@ -59,7 +59,7 @@ namespace idaten
         TypedCudaMemory<uint32_t> m_indices;
         TypedCudaMemory<aten::mat4> m_matrices;
 
-        TypedCudaMemory<aten::PrimitiveParamter> m_triangles;
+        TypedCudaMemory<aten::TriangleParameter> m_triangles;
 
         TypedCudaMemory<aten::vec4> m_dstPos;
         TypedCudaMemory<aten::vec4> m_dstNml;

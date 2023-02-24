@@ -21,7 +21,7 @@ namespace idaten
     public:
         void build(
             idaten::CudaTextureResource& dst,
-            std::vector<aten::PrimitiveParamter>& tris,
+            std::vector<aten::TriangleParameter>& tris,
             int32_t triIdOffset,
             const aten::aabb& sceneBbox,
             idaten::CudaTextureResource& texRscVtxPos,
@@ -30,7 +30,7 @@ namespace idaten
 
         void build(
             idaten::CudaTextureResource& dst,
-            TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+            TypedCudaMemory<aten::TriangleParameter>& triangles,
             int32_t triIdOffset,
             const aten::aabb& sceneBbox,
             CudaGLBuffer& vboVtxPos,
@@ -56,7 +56,7 @@ namespace idaten
         template <typename T>
         void onBuild(
             idaten::CudaTextureResource& dst,
-            TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+            TypedCudaMemory<aten::TriangleParameter>& triangles,
             int32_t triIdOffset,
             const aten::aabb& sceneBbox,
             T vtxPos,

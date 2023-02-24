@@ -12,6 +12,9 @@
 
 namespace AT_NAME
 {
+    /**
+    * @brief Triangle.
+    **/
     class face : public aten::hitable {
         friend class context;
 
@@ -26,7 +29,7 @@ namespace AT_NAME
             aten::Intersection& isect) const override;
 
         static bool hit(
-            const aten::PrimitiveParamter* param,
+            const aten::TriangleParameter* param,
             const aten::vec3& v0,
             const aten::vec3& v1,
             const aten::vec3& v2,
@@ -61,12 +64,12 @@ namespace AT_NAME
 
         aten::aabb computeAABB(const aten::context& ctxt) const;
 
-        const aten::PrimitiveParamter& getParam() const
+        const aten::TriangleParameter& getParam() const
         {
             return param;
         }
 
-        void setParam(const aten::PrimitiveParamter& p)
+        void setParam(const aten::TriangleParameter& p)
         {
             param = p;
         }
@@ -79,7 +82,7 @@ namespace AT_NAME
     private:
         static std::shared_ptr<face> create(
             const aten::context& ctxt,
-            const aten::PrimitiveParamter& param);
+            const aten::TriangleParameter& param);
 
         template <typename T>
         auto updateIndex(T id)
@@ -89,7 +92,7 @@ namespace AT_NAME
         }
 
     private:
-        aten::PrimitiveParamter param;
+        aten::TriangleParameter param;
         int32_t m_id{ -1 };
     };
 }

@@ -43,7 +43,7 @@ namespace aten
         const context& ctxt,
         std::vector<SkinningVertex>& vtx,
         std::vector<uint32_t>& idx,
-        std::vector<aten::PrimitiveParamter>& tris) const
+        std::vector<aten::TriangleParameter>& tris) const
     {
         m_groups[0].getGeometryData(ctxt, vtx, idx, tris);
     }

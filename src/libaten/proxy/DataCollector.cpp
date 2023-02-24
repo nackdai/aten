@@ -9,7 +9,7 @@ namespace aten {
         const context& ctxt,
         const scene& scene,
         std::vector<aten::GeomParameter>& shapeparams,
-        std::vector<aten::PrimitiveParamter>& primparams,
+        std::vector<aten::TriangleParameter>& primparams,
         std::vector<aten::LightParameter>& lightparams,
         std::vector<aten::MaterialParameter>& mtrlparms,
         std::vector<aten::vertex>& vtxparams)
@@ -63,14 +63,14 @@ namespace aten {
 
     void DataCollector::collectTriangles(
         const context& ctxt,
-        std::vector<std::vector<aten::PrimitiveParamter>>& triangles,
+        std::vector<std::vector<aten::TriangleParameter>>& triangles,
         std::vector<int32_t>& triIdOffsets)
     {
         int32_t triangleCount = 0;
 
         ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
             if (type == GeometryType::Polygon) {
-                triangles.push_back(std::vector<aten::PrimitiveParamter>());
+                triangles.push_back(std::vector<aten::TriangleParameter>());
                 auto pos = triangles.size() - 1;
 
                 s->collectTriangles(triangles[pos]);

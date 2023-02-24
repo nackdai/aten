@@ -14,7 +14,7 @@ namespace idaten {
 
         cudaTextureObject_t* nodes{ nullptr };
 
-        const aten::PrimitiveParamter* prims{ nullptr };
+        const aten::TriangleParameter* prims{ nullptr };
 
         cudaTextureObject_t vtxPos{ 0 };
         cudaTextureObject_t vtxNml{ 0 };

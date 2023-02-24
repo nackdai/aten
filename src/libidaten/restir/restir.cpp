@@ -22,7 +22,7 @@ namespace idaten
         const std::vector<aten::MaterialParameter>& mtrls,
         const std::vector<aten::LightParameter>& lights,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-        const std::vector<aten::PrimitiveParamter>& prims,
+        const std::vector<aten::TriangleParameter>& prims,
         uint32_t advancePrimNum,
         const std::vector<aten::vertex>& vtxs,
         uint32_t advanceVtxNum,
@@ -69,7 +69,7 @@ namespace idaten
     void ReSTIRPathTracing::updateGeometry(
         std::vector<CudaGLBuffer>& vertices,
         uint32_t vtxOffsetCount,
-        TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+        TypedCudaMemory<aten::TriangleParameter>& triangles,
         uint32_t triOffsetCount)
     {
         // Vertex position.

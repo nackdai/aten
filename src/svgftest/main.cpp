@@ -96,7 +96,7 @@ void update()
 
         {
             std::vector<aten::GeomParameter> shapeparams;
-            std::vector<aten::PrimitiveParamter> primparams;
+            std::vector<aten::TriangleParameter> primparams;
             std::vector<aten::LightParameter> lightparams;
             std::vector<aten::MaterialParameter> mtrlparms;
             std::vector<aten::vertex> vtxparams;
@@ -546,7 +546,7 @@ int32_t main()
         g_tracer.setHitDistanceLimit(d * 0.25f);
 
         std::vector<aten::GeomParameter> shapeparams;
-        std::vector<aten::PrimitiveParamter> primparams;
+        std::vector<aten::TriangleParameter> primparams;
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;
         std::vector<aten::vertex> vtxparams;

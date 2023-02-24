@@ -26,7 +26,7 @@ __global__ void fillAOV(
     const aten::CameraParameter* __restrict__ camera,
     const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     cudaTextureObject_t* nodes,
-    const aten::PrimitiveParamter* __restrict__ prims,
+    const aten::TriangleParameter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
     const aten::mat4* __restrict__ matrices)
 {
@@ -139,7 +139,7 @@ __global__ void pickPixel(
     const float4* __restrict__ aovTexclrMeshid,
     const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
     cudaTextureObject_t* nodes,
-    const aten::PrimitiveParamter* __restrict__ prims,
+    const aten::TriangleParameter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
     aten::mat4* matrices)
 {

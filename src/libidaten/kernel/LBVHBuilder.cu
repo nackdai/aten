@@ -550,7 +550,7 @@ __global__ void computeBoudingBox(
     const idaten::LBVHBuilder::LBVHNode* __restrict__ src,
     const uint32_t* __restrict__ sortedIndices,
     aten::ThreadedBvhNode* dst,
-    const aten::PrimitiveParamter* __restrict__ tris,
+    const aten::TriangleParameter* __restrict__ tris,
     T vtxPos,
     int32_t vtxOffset,
     uint32_t* executedIdxArray)
@@ -589,7 +589,7 @@ __global__ void computeBoudingBox(
     int32_t leafId = node->order - leafBaseIdx;
     int32_t triId = sortedIndices[leafId];
 
-    aten::PrimitiveParamter prim;
+    aten::TriangleParameter prim;
     prim.v0 = ((aten::vec4*)tris)[triId * aten::PrimitiveParamter_float4_size + 0];
 
     float4 v0 = getFloat4(vtxPos, prim.idx[0] + vtxOffset);
@@ -719,7 +719,7 @@ namespace idaten
     template <typename T>
     void LBVHBuilder::onBuild(
         idaten::CudaTextureResource& dst,
-        TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+        TypedCudaMemory<aten::TriangleParameter>& triangles,
         int32_t triIdOffset,
         const aten::aabb& sceneBbox,
         T vtxPos,
@@ -843,14 +843,14 @@ namespace idaten
 
     void LBVHBuilder::build(
         idaten::CudaTextureResource& dst,
-        std::vector<aten::PrimitiveParamter>& tris,
+        std::vector<aten::TriangleParameter>& tris,
         int32_t triIdOffset,
         const aten::aabb& sceneBbox,
         idaten::CudaTextureResource& texRscVtxPos,
         int32_t vtxOffset,
         std::vector<aten::ThreadedBvhNode>* threadedBvhNodes/*= nullptr*/)
     {
-        TypedCudaMemory<aten::PrimitiveParamter> triangles;
+        TypedCudaMemory<aten::TriangleParameter> triangles;
 
         uint32_t numOfElems = (uint32_t)tris.size();
 
@@ -866,7 +866,7 @@ namespace idaten
 
     void LBVHBuilder::build(
         idaten::CudaTextureResource& dst,
-        TypedCudaMemory<aten::PrimitiveParamter>& triangles,
+        TypedCudaMemory<aten::TriangleParameter>& triangles,
         int32_t triIdOffset,
         const aten::aabb& sceneBbox,
         CudaGLBuffer& vboVtxPos,

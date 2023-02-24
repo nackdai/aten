@@ -13,6 +13,9 @@ namespace AT_NAME
 {
     using FuncObjectMeshDraw = std::function<void(const aten::vec3&, const aten::texture*, int32_t)>;
 
+    /**
+    * @brief Triangle group to have the same material.
+    **/
     class objshape : public aten::geombase {
         friend class object;
 

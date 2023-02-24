@@ -244,7 +244,7 @@ namespace AT_NAME
         return m_accel->importTree(ctxt, path, offsetTriIdx);
     }
 
-    void object::collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const
+    void object::collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
     {
         for (const auto& objshape : m_shapes) {
             const auto& tris = objshape->tris();

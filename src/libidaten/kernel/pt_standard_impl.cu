@@ -117,7 +117,7 @@ namespace kernel {
         const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
-        const aten::PrimitiveParamter* __restrict__ prims,
+        const aten::TriangleParameter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         aten::mat4* matrices,
         int32_t bounce,
@@ -305,7 +305,7 @@ namespace kernel {
         int32_t width, int32_t height,
         const aten::vec4 camPos,
         const aten::GeomParameter* __restrict__ geoms,
-        const aten::PrimitiveParamter* __restrict__ prims,
+        const aten::TriangleParameter* __restrict__ prims,
         const aten::mat4* __restrict__ matrices,
         cudaTextureObject_t vtxPos)
     {
@@ -349,7 +349,7 @@ namespace kernel {
         isects[idx].b = data.w;
 
         if (objid >= 0) {
-            aten::PrimitiveParamter prim;
+            aten::TriangleParameter prim;
             prim.v0 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 0];
             prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
 

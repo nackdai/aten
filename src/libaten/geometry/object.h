@@ -12,6 +12,9 @@
 
 namespace AT_NAME
 {
+    /**
+    * @brief Object is polygons to have the multiple materials.
+    **/
     class object : public aten::transformable {
         friend class TransformableFactory;
 
@@ -64,7 +67,7 @@ namespace AT_NAME
 
         void buildForRasterizeRendering(const aten::context& ctxt);
 
-        virtual void collectTriangles(std::vector<aten::PrimitiveParamter>& triangles) const override final;
+        virtual void collectTriangles(std::vector<aten::TriangleParameter>& triangles) const override final;
 
         virtual uint32_t getTriangleCount() const override final
         {

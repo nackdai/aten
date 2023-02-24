@@ -35,7 +35,7 @@ namespace svgf {
         const aten::GeomParameter* __restrict__ shapes, int32_t geomnum,
         const aten::MaterialParameter* __restrict__ mtrls,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        const aten::PrimitiveParamter* __restrict__ prims,
+        const aten::TriangleParameter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         cudaTextureObject_t vtxNml,
         const aten::mat4* __restrict__ matrices,
@@ -282,7 +282,7 @@ namespace svgf {
         aten::MaterialParameter* mtrls,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
-        const aten::PrimitiveParamter* __restrict__ prims,
+        const aten::TriangleParameter* __restrict__ prims,
         cudaTextureObject_t vtxPos,
         const aten::mat4* __restrict__ matrices)
     {

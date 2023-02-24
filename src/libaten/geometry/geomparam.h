@@ -42,7 +42,7 @@ namespace aten
     };
     AT_STATICASSERT((sizeof(GeomParameter) % 16) == 0);
 
-    struct PrimitiveParamter {
+    struct TriangleParameter {
         union {
             aten::vec4 v0;
             struct {
@@ -61,18 +61,18 @@ namespace aten
             };
         };
 
-        AT_DEVICE_API PrimitiveParamter()
+        AT_DEVICE_API TriangleParameter()
         {
             needNormal = 0;
         }
 
-        AT_DEVICE_API PrimitiveParamter(const PrimitiveParamter& rhs)
+        AT_DEVICE_API TriangleParameter(const TriangleParameter& rhs)
         {
             v0 = rhs.v0;
             v1 = rhs.v1;
         }
     };
-    AT_STATICASSERT((sizeof(PrimitiveParamter) % 16) == 0);
+    AT_STATICASSERT((sizeof(TriangleParameter) % 16) == 0);
 
-    const size_t PrimitiveParamter_float4_size = sizeof(PrimitiveParamter) / sizeof(aten::vec4);
+    const size_t PrimitiveParamter_float4_size = sizeof(TriangleParameter) / sizeof(aten::vec4);
 }

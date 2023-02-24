@@ -545,7 +545,7 @@ int32_t main()
     }
 
     std::vector<aten::GeomParameter> shapeparams;
-    std::vector<aten::PrimitiveParamter> primparams;
+    std::vector<aten::TriangleParameter> primparams;
     std::vector<aten::LightParameter> lightparams;
     std::vector<aten::MaterialParameter> mtrlparms;
     std::vector<aten::vertex> vtxparams;

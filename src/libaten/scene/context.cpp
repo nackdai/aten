@@ -120,7 +120,7 @@ namespace aten
         return -1;
     }
 
-    std::shared_ptr<AT_NAME::face> context::createTriangle(const aten::PrimitiveParamter& param)
+    std::shared_ptr<AT_NAME::face> context::createTriangle(const aten::TriangleParameter& param)
     {
         auto f = AT_NAME::face::create(*this, param);
         AT_ASSERT(f);
@@ -145,7 +145,7 @@ namespace aten
         return m_triangles[idx];
     }
 
-    void context::copyPrimitiveParameters(std::vector<aten::PrimitiveParamter>& dst) const
+    void context::copyPrimitiveParameters(std::vector<aten::TriangleParameter>& dst) const
     {
         for (const auto& tri : m_triangles) {
             dst.push_back(tri->getParam());

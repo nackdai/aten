@@ -12,7 +12,7 @@ __device__ bool hitSphere(
     aten::Intersection* isect);
 
 __device__ bool hitTriangle(
-    const aten::PrimitiveParamter* prim,
+    const aten::TriangleParameter* prim,
     const idaten::Context* ctxt,
     const aten::ray& ray,
     aten::Intersection* isect);

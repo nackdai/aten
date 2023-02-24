@@ -193,7 +193,7 @@ void update(int32_t frame)
 
         {
             std::vector<aten::GeomParameter> shapeparams;
-            std::vector<aten::PrimitiveParamter> primparams;
+            std::vector<aten::TriangleParameter> primparams;
             std::vector<aten::LightParameter> lightparams;
             std::vector<aten::MaterialParameter> mtrlparms;
             std::vector<aten::vertex> vtxparams;
@@ -599,7 +599,7 @@ int32_t main()
 
     uint32_t advanceVtxNum = 0;
     uint32_t advanceTriNum = 0;
-    std::vector<aten::PrimitiveParamter> deformTris;
+    std::vector<aten::TriangleParameter> deformTris;
 
     auto deform = getDeformable();
 
@@ -638,7 +638,7 @@ int32_t main()
 
     {
         std::vector<aten::GeomParameter> shapeparams;
-        std::vector<aten::PrimitiveParamter> primparams;
+        std::vector<aten::TriangleParameter> primparams;
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;
         std::vector<aten::vertex> vtxparams;
@@ -717,7 +717,7 @@ int32_t main()
     }
     else
     {
-        std::vector<std::vector<aten::PrimitiveParamter>> triangles;
+        std::vector<std::vector<aten::TriangleParameter>> triangles;
         std::vector<int32_t> triIdOffsets;
 
         aten::DataCollector::collectTriangles(g_ctxt, triangles, triIdOffsets);

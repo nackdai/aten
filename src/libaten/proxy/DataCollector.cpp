@@ -40,7 +40,7 @@ namespace aten {
             else if (type == GeometryType::Sphere)
             {
                 auto param = s->getParam();
-                param.mtrl_id = s->getMaterial()->id();
+                param.sphere.mtrl_id = s->getMaterial()->id();
                 shapeparams.push_back(param);
             }
         });

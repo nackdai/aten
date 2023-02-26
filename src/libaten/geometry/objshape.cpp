@@ -18,7 +18,7 @@ namespace AT_NAME
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
         aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
 
-        param.area = 0;
+        area_ = 0;
 
         int32_t mtrlid = getMaterial()->id();
         int32_t geomid = getGeomId();
@@ -27,7 +27,7 @@ namespace AT_NAME
             f->build(ctxt, mtrlid, geomid);
 
             const auto& faceParam = f->getParam();
-            param.area += faceParam.area;
+            area_ += faceParam.area;
 
             const auto& faabb = f->getBoundingbox();
 

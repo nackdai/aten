@@ -20,10 +20,7 @@ namespace AT_NAME
         friend class object;
 
     public:
-        objshape()
-        {
-            param.type = aten::GeometryType::Polygon;
-        }
+        objshape() = default;
         virtual ~objshape();
 
         void build(const aten::context& ctxt);
@@ -60,10 +57,16 @@ namespace AT_NAME
             return faces;
         }
 
-        aten::GeometryParameter param;
+        real get_area() const
+        {
+            return area_;
+        }
+
         aten::aabb m_aabb;
 
     private:
+        real area_{ 0 };
+
         std::shared_ptr<material> m_mtrl;
         std::vector<std::shared_ptr<face>> faces;
 

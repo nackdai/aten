@@ -37,11 +37,11 @@ namespace AT_NAME
         // https://www.slideshare.net/h013/edupt-kaisetsu-22852235
         // p52 - p58
 
-        const aten::vec3 p_o = param->center - r.org;
+        const aten::vec3 p_o = param->sphere.center - r.org;
         const real b = dot(p_o, r.dir);
 
         // 判別式.
-        const real D4 = b * b - dot(p_o, p_o) + param->radius * param->radius;
+        const real D4 = b * b - dot(p_o, p_o) + param->sphere.radius * param->sphere.radius;
 
         if (D4 < real(0)) {
             return false;
@@ -126,14 +126,14 @@ namespace AT_NAME
         const aten::Intersection* isect)
     {
         rec->p = r.org + isect->t * r.dir;
-        rec->normal = (rec->p - param->center) / param->radius; // 正規化して法線を得る
+        rec->normal = (rec->p - param->sphere.center) / param->sphere.radius; // 正規化して法線を得る
 
         rec->mtrlid = isect->mtrlid;
 
         {
-            auto tmp = param->center + aten::vec3(param->radius, 0, 0);
+            auto tmp = param->sphere.center + aten::vec3(param->sphere.radius, 0, 0);
 
-            auto center = mtxL2W.apply(param->center);
+            auto center = mtxL2W.apply(param->sphere.center);
             tmp = mtxL2W.apply(tmp);
 
             auto radius = length(tmp - center);
@@ -178,7 +178,7 @@ namespace AT_NAME
         auto r1 = sampler->nextSample();
         auto r2 = sampler->nextSample();
 
-        auto r = param->radius;
+        auto r = param->sphere.radius;
 
         auto z = real(2) * r1 - real(1); // [0,1] -> [-1, 1]
 
@@ -193,15 +193,15 @@ namespace AT_NAME
 
         auto p = dir * (r + AT_MATH_EPSILON);
 
-        result->pos = param->center + p;
+        result->pos = param->sphere.center + p;
 
-        result->nml = normalize(result->pos - param->center);
+        result->nml = normalize(result->pos - param->sphere.center);
 
         result->area = real(1);
         {
-            auto tmp = param->center + aten::vec3(param->radius, 0, 0);
+            auto tmp = param->sphere.center + aten::vec3(param->sphere.radius, 0, 0);
 
-            auto center = mtxL2W.apply(param->center);
+            auto center = mtxL2W.apply(param->sphere.center);
             tmp = mtxL2W.apply(tmp);
 
             auto radius = length(tmp - center);

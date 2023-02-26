@@ -17,8 +17,8 @@ namespace AT_NAME
         sphere(const aten::vec3& center, real radius, const MTRL& mtrl)
             : aten::transformable(aten::GeometryType::Sphere, mtrl)
         {
-            m_param.center = center;
-            m_param.radius = radius;
+            m_param.sphere.center = center;
+            m_param.sphere.radius = radius;
 
             auto _min = center - radius;
             auto _max = center + radius;
@@ -62,12 +62,12 @@ namespace AT_NAME
 
         const aten::vec3& center() const
         {
-            return m_param.center;
+            return m_param.sphere.center;
         }
 
         real radius() const
         {
-            return m_param.radius;
+            return m_param.sphere.radius;
         }
 
         virtual void getSamplePosNormalArea(

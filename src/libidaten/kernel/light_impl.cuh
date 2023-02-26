@@ -150,7 +150,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     else {
         // TODO
         // Only for sphere...
-        auto pos = s->center;
+        auto pos = s->sphere.center;
         auto dir = pos - org;
 
         // NOTE

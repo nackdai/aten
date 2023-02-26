@@ -9,18 +9,27 @@
 namespace aten
 {
     enum class GeometryType : int32_t {
-        Polygon,
-        Instance,
-        Sphere,
+        Polygon,    ///< Polygon.
+        Instance,   ///< Instance. Not used in GPU.
+        Sphere,     ///< Sphere.
         GeometryTypeMax,
     };
 
     struct GeometryParameter {
         GeometryType type{ GeometryType::GeometryTypeMax };
 
+        /*
+        * @brief Area of object
+        *
+        * - Polygon: Area of all triangles in this object.
+        * - Instance: Not used.
+        * - Sphere: Area of sphere.
+        */
         real area{ real(0) };
 
         /**
+        * @brief Own index.
+        *
         * Meaning of this variable is changed based on geometry type.
         * - Polygon: Own index.
         * - Instance: Index of actual object which instance refers.
@@ -33,11 +42,13 @@ namespace aten
         int32_t triangle_id{ -1 };  ///< First index of triangles in geometry.
         int32_t triangle_num{ 0 };  ///< Number of triangles in geometry.
 
-        int32_t mtrl_id{ -1 };      ///< Index of material which geometry refers.
         int32_t padding{ 0 };
 
-        vec3 center{ real(0) };     ///< Center of sphere.
-        real radius{ 0 };           ///< Radius of sphere.
+        struct {
+            vec3 center{ real(0) }; ///< Center of sphere.
+            real radius{ 0 };       ///< Radius of sphere.
+            int32_t mtrl_id{ -1 };  ///< Index of material.
+        } sphere;
 
         GeometryParameter() = default;
         ~GeometryParameter() = default;
@@ -58,7 +69,7 @@ namespace aten
             struct{
                 int32_t needNormal; ///< Flag to decribe if normal needs to be computed online.
                 int32_t mtrlid;     ///< Material id.
-                int32_t mesh_id;    ///< Mesh id to belong to (Mesh = Triangle group to have same material).
+                int32_t mesh_id;    ///< Mesh id. (Mesh = Triangle group to have same material).
                 real padding;
             };
         };

@@ -37,7 +37,7 @@ namespace AT_NAME
         for (const auto& s : m_shapes) {
             s->build(ctxt);
 
-            m_param.area += s->param.area;
+            m_param.area += s->get_area();
             m_triangles += (uint32_t)s->faces.size();
 
             for (const auto f : s->faces) {

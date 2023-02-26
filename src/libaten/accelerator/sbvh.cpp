@@ -1011,18 +1011,18 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = ctxt.getTransformable((int32_t)node->shapeid);
+                auto s = ctxt.getTransformable((int32_t)node->object_id);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->getParam();
 
-                    int32_t mtxid = param.mtxid;
+                    int32_t mtx_id = param.mtx_id;
 
                     aten::ray transformedRay;
 
-                    if (mtxid >= 0) {
-                        const auto& mtxW2L = mtxs[mtxid * 2 + 1];
+                    if (mtx_id >= 0) {
+                        const auto& mtxW2L = mtxs[mtx_id * 2 + 1];
 
                         transformedRay = mtxW2L.applyRay(r);
                     }
@@ -1114,7 +1114,7 @@ namespace aten
 
                 if (isHit) {
                     const auto& primParam = prim->getParam();
-                    isectTmp.meshid = primParam.gemoid;
+                    isectTmp.meshid = primParam.mesh_id;
                 }
 #else
                 int32_t start = (int32_t)node->refIdListStart;

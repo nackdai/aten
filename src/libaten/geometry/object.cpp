@@ -24,7 +24,7 @@ namespace AT_NAME
             m_accel = aten::accelerator::createAccelerator();
         }
 
-        m_param.primid = m_shapes[0]->faces[0]->getId();
+        m_param.triangle_id = m_shapes[0]->faces[0]->getId();
 
         m_param.area = 0;
         m_triangles = 0;
@@ -47,7 +47,7 @@ namespace AT_NAME
             aabb::merge(bbox, s->m_aabb);
         }
 
-        m_param.primnum = m_triangles;
+        m_param.triangle_num = m_triangles;
 
         m_accel->asNested();
         m_accel->build(ctxt, (hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
@@ -64,7 +64,7 @@ namespace AT_NAME
             return;
         }
 
-        m_param.primid = m_shapes[0]->faces[0]->getId();
+        m_param.triangle_id = m_shapes[0]->faces[0]->getId();
 
         m_param.area = 0;
         m_triangles = 0;
@@ -75,7 +75,7 @@ namespace AT_NAME
             m_triangles += (uint32_t)s->faces.size();
         }
 
-        m_param.primnum = m_triangles;
+        m_param.triangle_num = m_triangles;
     }
 
     bool object::hit(
@@ -102,7 +102,7 @@ namespace AT_NAME
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
-        auto f = ctxt.getTriangle(isect.primid);
+        auto f = ctxt.getTriangle(isect.triangle_id);
 
         auto& vtxs = ctxt.getVertices();
 

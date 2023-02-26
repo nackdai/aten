@@ -375,7 +375,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
 
     auto gpunode = &dst[idx];
 
-    gpunode->shapeid = -1;
+    gpunode->object_id = -1;
     gpunode->exid = -1;
     gpunode->meshid = -1;
 
@@ -390,7 +390,7 @@ __device__ __host__ inline void onApplyTraverseOrder(
 
 #if defined(GPGPU_TRAVERSE_SBVH)
         // For ThreadedSbvhNode, this is "isleaf".
-        gpunode->shapeid = 1;
+        gpunode->object_id = 1;
 #endif
     }
     else {

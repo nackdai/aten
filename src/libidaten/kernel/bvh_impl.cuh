@@ -14,7 +14,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
-    float4 attrib;    // x:shapeid, y:primid, z:exid,    w:meshid
+    float4 attrib;   // x:object_id, y:primid, z:exid, w:meshid
 
     float4 boxmin;
     float4 boxmax;
@@ -26,7 +26,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
     while (nodeid >= 0) {
         node0 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);    // xyz : boxmin, z: hit
         node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmin, z: hit
-        attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);    // x : shapeid, y : primid, z : exid, w : meshid
+        attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);    // x : object_id, y : primid, z : exid, w : meshid
 
         boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
         boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
@@ -96,7 +96,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 
     float4 node0;    // xyz: boxmin, z: hit
     float4 node1;    // xyz: boxmax, z: hit
-    float4 attrib;    // x:shapeid, y:primid, z:exid,    w:meshid
+    float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
     float4 boxmin;
     float4 boxmax;
@@ -114,7 +114,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
     while (nodeid >= 0) {
         node0 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 0);    // xyz : boxmin, z: hit
         node1 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmin, z: hit
-        attrib = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 2);    // x : shapeid, y : primid, z : exid, w : meshid
+        attrib = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 2);    // x : object_id, y : primid, z : exid, w : meshid
 
         boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
         boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
@@ -129,8 +129,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                 {
                     const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
-                    if (s->mtxid >= 0) {
-                        auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+                    if (s->mtx_id >= 0) {
+                        auto mtxW2L = ctxt->matrices[s->mtx_id * 2 + 1];
                         transformedRay.dir = mtxW2L.applyXYZ(r.dir);
                         transformedRay.dir = normalize(transformedRay.dir);
                         transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;
@@ -214,8 +214,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                 if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
                     aten::ray transformedRay;
 
-                    if (s->mtxid >= 0) {
-                        auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+                    if (s->mtx_id >= 0) {
+                        auto mtxW2L = ctxt->matrices[s->mtx_id * 2 + 1];
                         transformedRay.dir = mtxW2L.applyXYZ(r.dir);
                         transformedRay.dir = normalize(transformedRay.dir);
                         transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;

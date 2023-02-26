@@ -162,7 +162,7 @@ namespace aten
 
         for (const auto& n : nodes) {
             fprintf(fp, "%d %d %d %d %d %d (%.3f, %.3f, %.3f) (%.3f, %.3f, %.3f)\n",
-                (int32_t)n.hit, (int32_t)n.miss, (int32_t)n.shapeid, (int32_t)n.primid, (int32_t)n.exid, (int32_t)n.meshid,
+                (int32_t)n.hit, (int32_t)n.miss, (int32_t)n.object_id, (int32_t)n.primid, (int32_t)n.exid, (int32_t)n.meshid,
                 n.boxmin.x, n.boxmin.y, n.boxmin.z,
                 n.boxmax.x, n.boxmax.y, n.boxmax.z);
         }
@@ -199,7 +199,7 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
+                gpunode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
 
                 // インスタンスの実体を取得.
                 auto internalObj = item->getHasObject();
@@ -377,18 +377,18 @@ namespace aten
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = node->shapeid >= 0 ? ctxt.getTransformable((int32_t)node->shapeid) : nullptr;
+                auto s = node->object_id >= 0 ? ctxt.getTransformable((int32_t)node->object_id) : nullptr;
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->getParam();
 
-                    int32_t mtxid = param.mtxid;
+                    int32_t mtx_id = param.mtx_id;
 
                     aten::ray transformedRay;
 
-                    if (mtxid >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+                    if (mtx_id >= 0) {
+                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
 
                         transformedRay = mtxW2L.applyRay(r);
                     }
@@ -487,8 +487,8 @@ namespace aten
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                gpunode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
-                AT_ASSERT(gpunode.shapeid >= 0);
+                gpunode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
+                AT_ASSERT(gpunode.object_id >= 0);
 
                 // インスタンスの実体を取得.
                 auto internalObj = item->getHasObject();

@@ -342,7 +342,7 @@ namespace kernel {
         int32_t primid = __float_as_int(data.y);
 
         isects[idx].objid = objid;
-        isects[idx].primid = primid;
+        isects[idx].triangle_id = primid;
 
         // bary centroid.
         isects[idx].a = data.z;
@@ -354,7 +354,7 @@ namespace kernel {
             prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
 
             isects[idx].mtrlid = prim.mtrlid;
-            isects[idx].meshid = prim.gemoid;
+            isects[idx].meshid = prim.mesh_id;
 
             const auto* obj = &geoms[objid];
 
@@ -372,8 +372,8 @@ namespace kernel {
             auto p = c * p0 + a * p1 + b * p2;
             aten::vec4 vp(p.x, p.y, p.z, 1.0f);
 
-            if (obj->mtxid >= 0) {
-                auto mtxL2W = matrices[obj->mtxid * 2 + 0];
+            if (obj->mtx_id >= 0) {
+                auto mtxL2W = matrices[obj->mtx_id * 2 + 0];
                 vp = mtxL2W.apply(vp);
             }
 

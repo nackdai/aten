@@ -263,7 +263,7 @@ namespace aten
                     }
 
                     face_param.mtrlid = shape->getMaterial()->id();
-                    face_param.gemoid = shape->getGeomId();
+                    face_param.mesh_id = shape->getGeomId();
 
                     auto f = ctxt.createTriangle(face_param);
 

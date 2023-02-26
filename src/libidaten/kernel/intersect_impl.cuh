@@ -423,10 +423,10 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     aten::hitrecord* rec,
     const aten::Intersection* isect)
 {
-    int32_t primidx = isect->primid;
+    int32_t triangle_id = isect->triangle_id;
     aten::TriangleParameter prim;
-    prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
-    prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
+    prim.v0 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::PrimitiveParamter_float4_size + 0];
+    prim.v1 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::PrimitiveParamter_float4_size + 1];
 
     float4 p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[0]);
     float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[1]);
@@ -473,8 +473,8 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 
     real scaledLen = 0;
 
-    if (param->mtxid >= 0) {
-        auto mtxL2W = ctxt->matrices[param->mtxid * 2 + 0];
+    if (param->mtx_id >= 0) {
+        auto mtxL2W = ctxt->matrices[param->mtx_id * 2 + 0];
 
         rec->p = mtxL2W.apply(rec->p);
         rec->normal = normalize(mtxL2W.applyXYZ(rec->normal));
@@ -517,7 +517,7 @@ AT_CUDA_INLINE __device__ void evalHitResult(
         rec->isVoxel = true;
     }
     else {
-        const aten::GeometryParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+        const aten::GeometryParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
 
         if (realShape->type == aten::GeometryType::Polygon) {
             evalHitResultTriangle(ctxt, param, r, rec, isect);
@@ -549,7 +549,7 @@ AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
     aten::hitrecord* rec,
     const aten::Intersection* isect)
 {
-    const aten::GeometryParameter* realShape = (param->shapeid >= 0 ? &ctxt->shapes[param->shapeid] : param);
+    const aten::GeometryParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
 
     if (realShape->type == aten::GeometryType::Polygon) {
         evalHitResultTriangle(ctxt, param, r, rec, isect);

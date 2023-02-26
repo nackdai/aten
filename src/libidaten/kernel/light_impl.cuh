@@ -10,9 +10,9 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     int32_t dummy = sampler->nextSample();
 
     int32_t r = sampler->nextSample();
-    int32_t basePrimIdx = aten::cmpMin(r * shape->primnum, shape->primnum - 1);
+    int32_t basePrimIdx = aten::cmpMin(r * shape->triangle_num, shape->triangle_num - 1);
 
-    int32_t primidx = basePrimIdx + shape->primid;
+    int32_t primidx = basePrimIdx + shape->triangle_id;
 
     const aten::TriangleParameter* prim = &ctxt->prims[primidx];
 
@@ -71,14 +71,14 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     result->a = a;
     result->b = b;
 
-    result->primid = primidx;
+    result->triangle_id = primidx;
 
     real orignalLen = (p1 - p0).length();
 
     real scaledLen = 0;
 
-    if (shape->mtxid >= 0) {
-        auto mtxL2W = ctxt->matrices[shape->mtxid * 2 + 0];
+    if (shape->mtx_id >= 0) {
+        auto mtxL2W = ctxt->matrices[shape->mtx_id * 2 + 0];
 
         {
             auto v0 = mtxL2W.apply(p0);
@@ -113,7 +113,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     if (sampler) {
         aten::hitable::SamplePosNormalPdfResult result;
 
-        const aten::GeometryParameter* realShape = (s->shapeid >= 0 ? &ctxt->shapes[s->shapeid] : s);
+        const aten::GeometryParameter* realShape = (s->object_id >= 0 ? &ctxt->shapes[s->object_id] : s);
 
         if (realShape->type == aten::GeometryType::Polygon) {
             getTriangleSamplePosNormalArea(&result, ctxt, realShape, sampler);
@@ -133,10 +133,10 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
         // Therefore, we don't need to add offset.
         r = aten::ray(org, dir);
 
-        if (result.primid >= 0) {
+        if (result.triangle_id >= 0) {
             isect.t = dir.length();
 
-            isect.primid = result.primid;
+            isect.triangle_id = result.triangle_id;
 
             isect.a = result.a;
             isect.b = result.b;

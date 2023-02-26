@@ -262,12 +262,12 @@ namespace aten
             hitable* item = node->getItem();
 
             // 自分自身のIDを取得.
-            qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
+            qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
 
             // もしなかったら、ネストしているので親のIDを取得.
-            if (qbvhNode.shapeid < 0) {
+            if (qbvhNode.object_id < 0) {
                 if (nestParent) {
-                    qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(nestParent);
+                    qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(nestParent);
                 }
             }
 
@@ -534,18 +534,18 @@ namespace aten
 
                 bool isHit = false;
 
-                auto s = ctxt.getTransformable((int32_t)pnode->shapeid);
+                auto s = ctxt.getTransformable((int32_t)pnode->object_id);
 
                 if (pnode->exid >= 0) {
                     // Traverse external StacklessQbvh.
                     const auto& param = s->getParam();
 
-                    int32_t mtxid = param.mtxid;
+                    int32_t mtx_id = param.mtx_id;
 
                     aten::ray transformedRay;
 
-                    if (mtxid >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+                    if (mtx_id >= 0) {
+                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
 
                         transformedRay = mtxW2L.applyRay(r);
                     }

@@ -51,9 +51,9 @@ namespace aten {
         union {
             // For triangle.
             struct {
-                int32_t primid;
-                real a, b;  // barycentric
-                int32_t face;   // for cube.
+                int32_t triangle_id;    ///< Hit triangle id.
+                real a, b;              ///< Barycentric on hit triangle.
+                real padding;
             };
             // Fox voxel.
             struct {
@@ -66,9 +66,8 @@ namespace aten {
 
         AT_DEVICE_API Intersection()
         {
-            primid = -1;
+            triangle_id = -1;
             a = b = real(0);
-            face = -1;
 
             nml_x = nml_y = nml_z = real(0);
             isVoxel = 0;
@@ -130,14 +129,17 @@ namespace aten {
 
         virtual accelerator* getInternalAccelerator();
 
+        /**
+        * @brief Result for sampled triangle.
+        **/
         struct SamplePosNormalPdfResult {
-            aten::vec3 pos;
-            aten::vec3 nml;
-            real area;
+            aten::vec3 pos; ///< Sampled position.
+            aten::vec3 nml; ///< Normal at sampled position.
+            real area;      ///< Area of sampled triangle.
 
-            real a;
-            real b;
-            int32_t primid{ -1 };
+            real a; ///< Barycentric on sampled triangle.
+            real b; ///< Barycentric on sampled triangle.
+            int32_t triangle_id{ -1 };  ///< Sampled triangle id.
         };
 
         virtual void getSamplePosNormalArea(

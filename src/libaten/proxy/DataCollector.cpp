@@ -23,7 +23,7 @@ namespace aten {
                 auto idx = ctxt.findTransformableIdxFromPointer(obj);
 
                 // Specify the index of the object which the instance has.
-                param.shapeid = idx;
+                param.object_id = idx;
 
                 // TODO
                 param.area = ((aten::object*)obj)->getParam().area;
@@ -33,15 +33,14 @@ namespace aten {
             else if (type == GeometryType::Polygon) {
                 auto param = s->getParam();
 
-                param.shapeid = s->id();
+                param.object_id = s->id();
 
                 shapeparams.push_back(param);
             }
-            else if (type == GeometryType::Sphere
-                || type == GeometryType::Cube)
+            else if (type == GeometryType::Sphere)
             {
                 auto param = s->getParam();
-                param.mtrl.idx = s->getMaterial()->id();
+                param.mtrl_id = s->getMaterial()->id();
                 shapeparams.push_back(param);
             }
         });

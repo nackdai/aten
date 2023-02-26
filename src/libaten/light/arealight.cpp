@@ -31,10 +31,10 @@ namespace AT_NAME {
                 // i.e. We don't normal to add offset.
                 r = aten::ray(org, dir);
 
-                if (result.primid >= 0) {
+                if (result.triangle_id >= 0) {
                     isect.t = length(dir);
 
-                    isect.primid = result.primid;
+                    isect.triangle_id = result.triangle_id;
 
                     isect.a = result.a;
                     isect.b = result.b;

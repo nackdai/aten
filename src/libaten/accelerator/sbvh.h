@@ -27,7 +27,7 @@ namespace aten
         // triidの位置をThreadedBvhNodeと合わせる.
 
         // NOTE
-        // ThreadedBvhNode では isleaf の位置に shapeid がいてGPUでは shapeid を見てリーフノードかどうか判定している.
+        // ThreadedBvhNode では isleaf の位置に object_id がいてGPUでは object_id を見てリーフノードかどうか判定している.
         // そのため、最初のfloatでリーフノードかどうかを判定するようにする.
         // isVoxel の部分は ThreadedBvhNode では exid なので、ここは常にマイナスになるようにする.
         // ただし、マイナスでありさえすればいいので、ここでは -1 より小さい数を判定の閾値にしつつ、depth値として扱う.

@@ -17,7 +17,7 @@ namespace AT_NAME
 
         f->param = param;
 
-        f->build(ctxt, param.mtrlid, param.gemoid);
+        f->build(ctxt, param.mtrlid, param.mesh_id);
 
         return f;
     }
@@ -43,7 +43,7 @@ namespace AT_NAME
             // Temporary, notify triangle id to the parent object.
             isect.objid = m_id;
 
-            isect.primid = m_id;
+            isect.triangle_id = m_id;
 
             isect.mtrlid = param.mtrlid;
         }
@@ -154,7 +154,7 @@ namespace AT_NAME
         param.area = real(0.5) * cross(e0, e1).length();
 
         param.mtrlid = mtrlid;
-        param.gemoid = geomid;
+        param.mesh_id = geomid;
     }
 
     void face::getSamplePosNormalArea(
@@ -205,12 +205,12 @@ namespace AT_NAME
         result->a = a;
         result->b = b;
 
-        result->primid = m_id;
+        result->triangle_id = m_id;
     }
 
     int32_t face::geomid() const
     {
-        return param.gemoid;
+        return param.mesh_id;
     }
 
     aabb face::computeAABB(const context& ctxt) const

@@ -153,12 +153,12 @@ namespace aten {
                 hitable* item = node->getItem();
 
                 // 自分自身のIDを取得.
-                stacklessBvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
+                stacklessBvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
 
                 // もしなかったら、ネストしているので親のIDを取得.
-                if (stacklessBvhNode.shapeid < 0) {
+                if (stacklessBvhNode.object_id < 0) {
                     if (nestParent) {
-                        stacklessBvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(nestParent);
+                        stacklessBvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(nestParent);
                     }
                 }
 
@@ -239,18 +239,18 @@ namespace aten {
             if (node->isLeaf()) {
                 Intersection isectTmp;
 
-                auto s = ctxt.getTransformable((int32_t)node->shapeid);
+                auto s = ctxt.getTransformable((int32_t)node->object_id);
 
                 if (node->exid >= 0) {
                     // Traverse external linear bvh list.
                     const auto& param = s->getParam();
 
-                    int32_t mtxid = param.mtxid;
+                    int32_t mtx_id = param.mtx_id;
 
                     aten::ray transformedRay;
 
-                    if (mtxid >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+                    if (mtx_id >= 0) {
+                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
 
                         transformedRay = mtxW2L.applyRay(r);
                     }

@@ -205,8 +205,8 @@ namespace aten
                 // もしなかったら、ネストしているので親のIDを取得.
                 if (qbvhNode.shapeidx[i] < 0) {
                     if (nestParent) {
-                        qbvhNode.shapeid = (float)transformable::findIdxAsHitable(nestParent);
-                        qbvhNode.shapeidx[i] = qbvhNode.shapeid;
+                        qbvhNode.object_id = (float)transformable::findIdxAsHitable(nestParent);
+                        qbvhNode.shapeidx[i] = qbvhNode.object_id;
                     }
                 }
 
@@ -239,7 +239,7 @@ namespace aten
                     qbvhNode.exid = -1.0f;
                 }
                 else {
-                    qbvhNode.shapeid = qbvhNode.shapeidx[i];
+                    qbvhNode.object_id = qbvhNode.shapeidx[i];
                     qbvhNode.exid = (float)node->getExternalId();
                 }
             }
@@ -247,12 +247,12 @@ namespace aten
             hitable* item = node->getItem();
 
             // 自分自身のIDを取得.
-            qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(item);
+            qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(item);
 
             // もしなかったら、ネストしているので親のIDを取得.
-            if (qbvhNode.shapeid < 0) {
+            if (qbvhNode.object_id < 0) {
                 if (nestParent) {
-                    qbvhNode.shapeid = (float)ctxt.findTransformableIdxFromPointer(nestParent);
+                    qbvhNode.object_id = (float)ctxt.findTransformableIdxFromPointer(nestParent);
                 }
             }
 
@@ -581,15 +581,15 @@ namespace aten
 #ifdef ENABLE_BVH_MULTI_TRIANGLES
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.
-                    auto s = shapes[(int32_t)pnode->shapeid];
+                    auto s = shapes[(int32_t)pnode->object_id];
                     const auto& param = s->getParam();
 
-                    int32_t mtxid = param.mtxid;
+                    int32_t mtx_id = param.mtx_id;
 
                     aten::ray transformedRay;
 
-                    if (mtxid >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+                    if (mtx_id >= 0) {
+                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
 
                         transformedRay = mtxW2L.applyRay(r);
                     }
@@ -638,18 +638,18 @@ namespace aten
                     }
                 }
 #else
-                const auto& s = ctxt.getTransformable((int32_t)pnode->shapeid);
+                const auto& s = ctxt.getTransformable((int32_t)pnode->object_id);
 
                 if (pnode->exid >= 0) {
                     // Traverse external qbvh.
                     const auto& param = s->getParam();
 
-                    int32_t mtxid = param.mtxid;
+                    int32_t mtx_id = param.mtx_id;
 
                     aten::ray transformedRay;
 
-                    if (mtxid >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtxid * 2 + 1];
+                    if (mtx_id >= 0) {
+                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
 
                         transformedRay = mtxW2L.applyRay(r);
                     }

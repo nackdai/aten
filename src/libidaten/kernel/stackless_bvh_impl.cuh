@@ -18,7 +18,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
     float4 node2;    // xyz: boxmax_1, w: child_0
     float4 node3;    // xyz: boxmax_1, w: child_1
 
-    float4 attrib;    // x:shapeid, y:primid, z:exid,    w:meshid
+    float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
     float4 boxmin_0;
     float4 boxmax_0;
@@ -32,7 +32,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
         node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmax_0, w: sibling
         node2 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);    // xyz : boxmin_1, w: child_0
         node3 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);    // xyz : boxmax_1, w: child_1
-        attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);    // x : shapeid, y : primid, z : exid, w : meshid
+        attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);    // x : object_id, y : primid, z : exid, w : meshid
 
         boxmin_0 = make_float4(node0.x, node0.y, node0.z, 1.0f);
         boxmax_0 = make_float4(node1.x, node1.y, node1.z, 1.0f);
@@ -136,7 +136,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
     float4 node2;    // xyz: boxmax_1, w: child_0
     float4 node3;    // xyz: boxmax_1, w: child_1
 
-    float4 attrib;    // x:shapeid, y:primid, z:exid,    w:meshid
+    float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
     float4 boxmin_0;
     float4 boxmax_0;
@@ -148,7 +148,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
         node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmax_0, w: sibling
         node2 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);    // xyz : boxmin_1, w: child_0
         node3 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);    // xyz : boxmax_1, w: child_1
-        attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);    // x : shapeid, y : primid, z : exid, w : meshid
+        attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);    // x : object_id, y : primid, z : exid, w : meshid
 
         boxmin_0 = make_float4(node0.x, node0.y, node0.z, 1.0f);
         boxmax_0 = make_float4(node1.x, node1.y, node1.z, 1.0f);
@@ -165,8 +165,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
             if (attrib.z >= 0) {    // exid
                 aten::ray transformedRay;
 
-                if (s->mtxid >= 0) {
-                    auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+                if (s->mtx_id >= 0) {
+                    auto mtxW2L = ctxt->matrices[s->mtx_id * 2 + 1];
                     transformedRay.dir = mtxW2L.applyXYZ(r.dir);
                     transformedRay.dir = normalize(transformedRay.dir);
                     transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;

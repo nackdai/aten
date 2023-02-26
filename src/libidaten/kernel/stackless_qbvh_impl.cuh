@@ -60,7 +60,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
         // x : leftChildrenIdx, y ; isLeaf, z : numChildren, w : parent
         float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
 
-        // x: shapeid, y : primid, z : exid, w : meshid
+        // x: object_id, y : primid, z : exid, w : meshid
         float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
 
         float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
@@ -194,7 +194,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
         // x : leftChildrenIdx, y ; isLeaf, z : numChildren, w : parent
         float4 node = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 0);
 
-        // x: shapeid, y : primid, z : exid, w : meshid
+        // x: object_id, y : primid, z : exid, w : meshid
         float4 attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);
 
         float4 bminx = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);
@@ -217,8 +217,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
             if (attrib.z >= 0) {
                 aten::ray transformedRay;
 
-                if (s->mtxid >= 0) {
-                    auto mtxW2L = ctxt->matrices[s->mtxid * 2 + 1];
+                if (s->mtx_id >= 0) {
+                    auto mtxW2L = ctxt->matrices[s->mtx_id * 2 + 1];
                     transformedRay.dir = mtxW2L.applyXYZ(r.dir);
                     transformedRay.dir = normalize(transformedRay.dir);
                     transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;

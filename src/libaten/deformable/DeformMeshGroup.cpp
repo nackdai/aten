@@ -169,7 +169,7 @@ namespace aten
                 tri.idx[2] = idx[n + 2];
 
                 tri.mtrlid = mtrlId;
-                tri.gemoid = geomId;
+                tri.mesh_id = geomId;
 
                 // TODO
                 tri.needNormal = 0;

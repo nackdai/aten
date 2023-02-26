@@ -201,7 +201,7 @@ namespace aten
 
                 if (!mtxL2W.isIdentity()) {
                     auto& param = t->getParam();
-                    param.mtxid = (int32_t)(dst.size() / 2);
+                    param.mtx_id = (int32_t)(dst.size() / 2);
 
                     dst.push_back(mtxL2W);
                     dst.push_back(mtxW2L);

@@ -11,7 +11,7 @@ namespace aten {
 
         float sib[4];
 
-        float shapeid{ -1 };    ///< Object index.
+        float object_id{ -1 };    ///< Object index.
         float primid{ -1 };        ///< Triangle index.
         float exid{ -1 };        ///< External bvh index.
         float meshid{ -1 };        ///< Mesh id.
@@ -42,7 +42,7 @@ namespace aten {
             sib[1] = rhs.sib[1];
             sib[2] = rhs.sib[2];
 
-            shapeid = rhs.shapeid;
+            object_id = rhs.object_id;
             primid = rhs.primid;
             exid = rhs.exid;
             meshid = rhs.meshid;

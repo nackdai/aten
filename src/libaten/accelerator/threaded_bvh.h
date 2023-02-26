@@ -17,7 +17,7 @@ namespace aten
         aten::vec3 boxmax;      ///< AABB max position.
         float miss{ -1 };       ///< Link index if ray miss.
 
-        float shapeid{ -1 };    ///< Object index.
+        float object_id{ -1 };    ///< Object index.
         float primid{ -1 };     ///< Triangle index.
 
         ///< External bvh index.
@@ -35,7 +35,7 @@ namespace aten
 
         bool isLeaf() const
         {
-            return (shapeid >= 0 || primid >= 0);
+            return (object_id >= 0 || primid >= 0);
         }
     };
 

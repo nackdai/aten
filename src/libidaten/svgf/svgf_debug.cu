@@ -176,7 +176,7 @@ __global__ void pickPixel(
         dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
         dst->depth = normalDepth.w;
         dst->meshid = (int32_t)texclrMeshid.w;
-        dst->triid = isect.primid;
+        dst->triid = isect.triangle_id;
         dst->mtrlid = isect.mtrlid;
     }
     else {

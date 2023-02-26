@@ -12,7 +12,6 @@ namespace aten
         Polygon,
         Instance,
         Sphere,
-        Cube,
         GeometryTypeMax,
     };
 
@@ -21,21 +20,24 @@ namespace aten
 
         real area{ real(0) };
 
-        int32_t padding[2]{ 0, 0 };
+        /**
+        * Meaning of this variable is changed based on geometry type.
+        * - Polygon: Own index.
+        * - Instance: Index of actual object which instance refers.
+        * - Sphere: Not used.
+        **/
+        int32_t object_id{ -1 };
 
-        int32_t shapeid{ -1 };  ///< Own index in array.
-        int32_t mtxid{ -1 };    ///< Index of matrix which the shape refer.
-        int32_t primid{ -1 };   ///< First index of triangles which the shape has.
-        int32_t primnum{ 0 };   ///< Number of triangles which the shape has.
+        int32_t mtx_id{ -1 };       ///< Index of matrix which geometry refers.
 
-        struct {
-            int32_t idx{ -1 };
-        } mtrl;
+        int32_t triangle_id{ -1 };  ///< First index of triangles in geometry.
+        int32_t triangle_num{ 0 };  ///< Number of triangles in geometry.
 
-        vec3 center{ real(0) };
+        int32_t mtrl_id{ -1 };      ///< Index of material which geometry refers.
+        int32_t padding{ 0 };
 
-        vec3 size;          // cube.
-        real radius{ 0 };   // shpere.
+        vec3 center{ real(0) };     ///< Center of sphere.
+        real radius{ 0 };           ///< Radius of sphere.
 
         GeometryParameter() = default;
         ~GeometryParameter() = default;
@@ -46,17 +48,17 @@ namespace aten
         union {
             aten::vec4 v0;
             struct {
-                int32_t idx[3];
-                real area;
+                int32_t idx[3];     ///< Vertex index.
+                real area;          ///< Triangle area.
             };
         };
 
         union {
             aten::vec4 v1;
             struct{
-                int32_t needNormal;
-                int32_t mtrlid;
-                int32_t gemoid;
+                int32_t needNormal; ///< Flag to decribe if normal needs to be computed online.
+                int32_t mtrlid;     ///< Material id.
+                int32_t mesh_id;    ///< Mesh id to belong to (Mesh = Triangle group to have same material).
                 real padding;
             };
         };

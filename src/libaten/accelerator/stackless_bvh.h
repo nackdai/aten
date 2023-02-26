@@ -17,14 +17,14 @@ namespace aten {
         aten::vec3 boxmax_1;    ///< Child AABB max position.
         float child_1{ -1 };
 
-        float shapeid{ -1 };    ///< Object index.
+        float object_id{ -1 };    ///< Object index.
         float primid{ -1 };        ///< Triangle index.
         float exid{ -1 };        ///< External bvh index.
         float meshid{ -1 };        ///< Mesh id.
 
         bool isLeaf() const
         {
-            return (shapeid >= 0 || primid >= 0);
+            return (object_id >= 0 || primid >= 0);
         }
     };
 

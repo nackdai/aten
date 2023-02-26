@@ -18,7 +18,7 @@ namespace aten {
         union {
             aten::vec4 p1;
             struct {
-                float shapeid;    ///< Object index.
+                float object_id;    ///< Object index.
                 float primid;    ///< Triangle index.
                 float exid;        ///< External bvh index.
                 float meshid;    ///< Mesh id.
@@ -75,7 +75,7 @@ namespace aten {
             isLeaf = false;
             numChildren = 0;
 
-            shapeid = -1;
+            object_id = -1;
             primid = -1;
             meshid = -1;
             exid = -1;

@@ -49,11 +49,11 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
             if (isIntersect) {
                 *isect = isectTmp;
                 isect->objid = (int32_t)attrib.x;
-                isect->primid = (int32_t)attrib.y;
+                isect->triangle_id = (int32_t)attrib.y;
                 isect->mtrlid = prim.mtrlid;
 
                 //isect->meshid = (int32_t)attrib.w;
-                isect->meshid = prim.gemoid;
+                isect->meshid = prim.mesh_id;
 
                 t_max = isect->t;
 
@@ -171,10 +171,10 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
                 if (isIntersect) {
                     *isect = isectTmp;
                     isect->objid = objid;
-                    isect->primid = (int32_t)attrib.y;
+                    isect->triangle_id = (int32_t)attrib.y;
                     isect->mtrlid = prim.mtrlid;
 
-                    isect->meshid = prim.gemoid;
+                    isect->meshid = prim.mesh_id;
                     isect->meshid = (isect->meshid < 0 ? meshid : isect->meshid);
 
                     t_max = isect->t;

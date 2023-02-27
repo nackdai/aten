@@ -56,11 +56,11 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
             if (isIntersect) {
                 *isect = isectTmp;
                 isect->objid = (int32_t)attrib.x;
-                isect->primid = (int32_t)attrib.y;
+                isect->triangle_id = (int32_t)attrib.y;
                 isect->mtrlid = prim.mtrlid;
 
                 //isect->meshid = (int32_t)attrib.w;
-                isect->meshid = prim.gemoid;
+                isect->meshid = prim.mesh_id;
 
                 t_max = isect->t;
 
@@ -165,7 +165,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
                 // Only sphere...
                 isectTmp.t = AT_MATH_INF;
                 isHit = hitSphere(s, r, t_min, t_max, &isectTmp);
-                isectTmp.mtrlid = s->mtrl.idx;
+                isectTmp.mtrlid = s->sphere.mtrl_id;
             }
 
             bool isIntersect = (Type == idaten::IntersectType::Any

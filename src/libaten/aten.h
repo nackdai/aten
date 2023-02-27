@@ -69,7 +69,6 @@
 
 #include "scene/scene.h"
 #include "scene/AcceleratedScene.h"
-#include "scene/instance.h"
 
 #include "accelerator/accelerator.h"
 #include "accelerator/bvh.h"
@@ -93,6 +92,7 @@
 #include "geometry/sphere.h"
 #include "geometry/transformable.h"
 #include "geometry/transformable_factory.h"
+#include "geometry/instance.h"
 
 #include "deformable/deformable.h"
 #include "deformable/DeformAnimation.h"

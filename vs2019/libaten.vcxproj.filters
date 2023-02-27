@@ -260,9 +260,6 @@
     <ClInclude Include="..\src\libaten\material\oren_nayar.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\scene\instance.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\filter\bilateral.h">
       <Filter>filter</Filter>
     </ClInclude>
@@ -504,6 +501,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\material\material_impl.h">
       <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\instance.h">
+      <Filter>geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

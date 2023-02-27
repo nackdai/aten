@@ -284,6 +284,7 @@
     <ClInclude Include="..\src\libaten\geometry\face.h" />
     <ClInclude Include="..\src\libaten\geometry\geombase.h" />
     <ClInclude Include="..\src\libaten\geometry\geomparam.h" />
+    <ClInclude Include="..\src\libaten\geometry\instance.h" />
     <ClInclude Include="..\src\libaten\geometry\object.h" />
     <ClInclude Include="..\src\libaten\geometry\objshape.h" />
     <ClInclude Include="..\src\libaten\geometry\sphere.h" />
@@ -363,7 +364,6 @@
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\context.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
-    <ClInclude Include="..\src\libaten\scene\instance.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />

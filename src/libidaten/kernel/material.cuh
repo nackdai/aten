@@ -104,6 +104,10 @@ inline __device__ bool gatherMaterialInfo(
             dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
             dst_mtrl.baseColor = albedo;
         }
+
+        dst_mtrl.albedoMap = (int)(dst_mtrl.albedoMap >= 0 ? ctxt->textures[dst_mtrl.albedoMap] : -1);
+        dst_mtrl.normalMap = (int)(dst_mtrl.normalMap >= 0 ? ctxt->textures[dst_mtrl.normalMap] : -1);
+        dst_mtrl.roughnessMap = (int)(dst_mtrl.roughnessMap >= 0 ? ctxt->textures[dst_mtrl.roughnessMap] : -1);
     }
     else {
         // TODO

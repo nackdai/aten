@@ -30,7 +30,7 @@ namespace AT_NAME
         m_triangles = 0;
 
         // Avoid sorting objshape list in bvh::build directly.
-        std::vector<face*> tmp;
+        std::vector<triangle*> tmp;
 
         aabb bbox;
 
@@ -112,7 +112,7 @@ namespace AT_NAME
         const auto& v1 = vtxs[faceParam.idx[1]];
         const auto& v2 = vtxs[faceParam.idx[2]];
 
-        //face::evalHitResult(v0, v1, v2, &rec, &isect);
+        //triangle::evalHitResult(v0, v1, v2, &rec, &isect);
         f->evalHitResult(ctxt, r, rec, isect);
 
         real orignalLen = 0;

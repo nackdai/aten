@@ -15,12 +15,12 @@ namespace AT_NAME
     /**
     * @brief Triangle.
     **/
-    class face : public aten::hitable {
+    class triangle : public aten::hitable {
         friend class context;
 
     public:
-        face() = default;
-        virtual ~face() {}
+        triangle() = default;
+        virtual ~triangle() {}
 
         virtual bool hit(
             const aten::context& ctxt,
@@ -75,7 +75,7 @@ namespace AT_NAME
         }
 
     private:
-        static std::shared_ptr<face> create(
+        static std::shared_ptr<triangle> create(
             const aten::context& ctxt,
             const aten::TriangleParameter& param);
 

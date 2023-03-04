@@ -440,7 +440,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     float2 u1 = make_float2(p1.w, n1.w);
     float2 u2 = make_float2(p2.w, n2.w);
 
-    //AT_NAME::face::evalHitResult(v0, v1, v2, rec);
+    //AT_NAME::triangle::evalHitResult(v0, v1, v2, rec);
 
     real a = isect->a;
     real b = isect->b;

@@ -219,9 +219,9 @@ namespace aten
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
-                    qbvhNode.primidx[i] = (float)face::findIdx(ch);
+                    qbvhNode.primidx[i] = (float)triangle::findIdx(ch);
 
-                    auto f = face::faces()[(int32_t)qbvhNode.primidx[i]];
+                    auto f = triangle::faces()[(int32_t)qbvhNode.primidx[i]];
 
                     const auto& v0 = aten::VertexManager::getVertex(f->param.idx[0]);
                     const auto& v1 = aten::VertexManager::getVertex(f->param.idx[1]);

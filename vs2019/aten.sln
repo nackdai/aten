@@ -30,6 +30,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "svgftest", "svgftest.vcxpro
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{57B6F956-6DB0-4D4F-8AED-3D6C4E38E674}"
+	ProjectSection(SolutionItems) = preProject
+		..\src\libaten\geometry\triangle.cpp = ..\src\libaten\geometry\triangle.cpp
+		..\src\libaten\geometry\triangle.h = ..\src\libaten\geometry\triangle.h
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tool", "tool", "{FEC6D806-4AB6-466C-9A07-BA5837A5E8D9}"
 EndProject

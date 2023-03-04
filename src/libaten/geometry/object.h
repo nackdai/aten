@@ -5,7 +5,7 @@
 #include "types.h"
 #include "material/material.h"
 #include "math/mat4.h"
-#include "geometry/face.h"
+#include "geometry/triangle.h"
 #include "geometry/objshape.h"
 #include "geometry/transformable.h"
 #include "scene/context.h"

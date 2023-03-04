@@ -109,7 +109,7 @@ namespace aten
             m_offsetTriIdx = INT32_MAX;
 
             for (uint32_t i = 0; i < num; i++) {
-                auto tri = (face*)list[i];
+                auto tri = (triangle*)list[i];
                 m_offsetTriIdx = std::min<uint32_t>(m_offsetTriIdx, tri->getId());
             }
 
@@ -188,11 +188,11 @@ namespace aten
         hitable** list,
         uint32_t num)
     {
-        std::vector<face*> tris;
+        std::vector<triangle*> tris;
         tris.reserve(num);
 
         for (uint32_t i = 0; i < num; i++) {
-            tris.push_back((face*)list[i]);
+            tris.push_back((triangle*)list[i]);
         }
 
         aabb rootBox;

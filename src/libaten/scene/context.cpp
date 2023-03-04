@@ -1,7 +1,7 @@
 #include <type_traits>
 
 #include "scene/context.h"
-#include "geometry/face.h"
+#include "geometry/triangle.h"
 #include "geometry/transformable.h"
 
 namespace aten
@@ -120,9 +120,9 @@ namespace aten
         return -1;
     }
 
-    std::shared_ptr<AT_NAME::face> context::createTriangle(const aten::TriangleParameter& param)
+    std::shared_ptr<AT_NAME::triangle> context::createTriangle(const aten::TriangleParameter& param)
     {
-        auto f = AT_NAME::face::create(*this, param);
+        auto f = AT_NAME::triangle::create(*this, param);
         AT_ASSERT(f);
 
         if (f) {
@@ -132,14 +132,14 @@ namespace aten
         return f;
     }
 
-    void context::addTriangle(const std::shared_ptr<AT_NAME::face>& tri)
+    void context::addTriangle(const std::shared_ptr<AT_NAME::triangle>& tri)
     {
         AT_ASSERT(tri);
         m_triangles.push_back(tri);
         tri->updateIndex(m_triangles.size() - 1);
     }
 
-    std::shared_ptr<const AT_NAME::face> context::getTriangle(int32_t idx) const
+    std::shared_ptr<const AT_NAME::triangle> context::getTriangle(int32_t idx) const
     {
         AT_ASSERT(0 <= idx && idx < m_triangles.size());
         return m_triangles[idx];
@@ -156,8 +156,8 @@ namespace aten
     {
         auto found = std::find_if(
             m_triangles.begin(), m_triangles.end(),
-            [&](const std::shared_ptr<AT_NAME::face> face) {
-            return face.get() == p;
+            [&](const std::shared_ptr<AT_NAME::triangle> triangle) {
+            return triangle.get() == p;
         });
 
         int32_t id = -1;

@@ -18,7 +18,7 @@ namespace aten {
         static void collect(
             const context& ctxt,
             const scene& scene,
-            std::vector<aten::GeometryParameter>& shapeparams,
+            std::vector<aten::ObjectParameter>& shapeparams,
             std::vector<aten::TriangleParameter>& primparams,
             std::vector<aten::LightParameter>& lightparams,
             std::vector<aten::MaterialParameter>& mtrlparms,

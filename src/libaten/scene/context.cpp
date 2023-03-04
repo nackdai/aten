@@ -184,7 +184,7 @@ namespace aten
     }
 
     void context::traverseTransformables(
-        std::function<void(const std::shared_ptr<aten::transformable>&, aten::GeometryType)> func) const
+        std::function<void(const std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const
     {
         for (const auto& t : m_transformables) {
             auto type = t->getType();
@@ -194,8 +194,8 @@ namespace aten
 
     void context::copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const
     {
-        traverseTransformables([&dst](const std::shared_ptr<aten::transformable>& t, aten::GeometryType type) {
-            if (type == GeometryType::Instance) {
+        traverseTransformables([&dst](const std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
+            if (type == ObjectType::Instance) {
                 aten::mat4 mtxL2W, mtxW2L;
                 t->getMatrices(mtxL2W, mtxW2L);
 
@@ -234,7 +234,7 @@ namespace aten
 
         for (const auto& t : m_transformables) {
             auto type = t->getType();
-            if (type == aten::GeometryType::Polygon) {
+            if (type == aten::ObjectType::Polygon) {
                 order++;
             }
 

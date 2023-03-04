@@ -6,7 +6,7 @@
 #include "aten4idaten.h"
 
 __device__ bool hitSphere(
-    const aten::GeometryParameter* shape,
+    const aten::ObjectParameter* shape,
     const aten::ray& r,
     float t_min, float t_max,
     aten::Intersection* isect);
@@ -53,21 +53,21 @@ __device__ int32_t hit4AABBWith1Ray(
 
 __device__ void evalHitResultTriangle(
     const idaten::Context* ctxt,
-    const aten::GeometryParameter* param,
+    const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect);
 
 __device__ void evalHitResult(
     const idaten::Context* ctxt,
-    const aten::GeometryParameter* param,
+    const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect);
 
 __device__ void evalHitResultForAreaLight(
     const idaten::Context* ctxt,
-    const aten::GeometryParameter* param,
+    const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect);

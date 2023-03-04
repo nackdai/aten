@@ -128,7 +128,7 @@ namespace aten
         std::shared_ptr<const aten::transformable> getTransformable(int32_t idx) const;
 
         void traverseTransformables(
-            std::function<void(const std::shared_ptr<aten::transformable>&, aten::GeometryType)> func) const;
+            std::function<void(const std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const;
 
         void copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const;
 

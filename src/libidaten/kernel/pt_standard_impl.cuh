@@ -21,7 +21,7 @@ namespace kernel {
 
         // Ray aim to the area light.
         // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-        const aten::GeometryParameter* hitobj = lightobj;
+        const aten::ObjectParameter* hitobj = lightobj;
 
         aten::Intersection isectTmp;
 

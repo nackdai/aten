@@ -20,7 +20,7 @@ namespace AT_NAME
 
     public:
         object()
-            : transformable(aten::GeometryType::Polygon)
+            : transformable(aten::ObjectType::Polygon)
         {}
 
         virtual ~object();

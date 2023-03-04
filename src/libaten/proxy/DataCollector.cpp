@@ -8,15 +8,15 @@ namespace aten {
     void DataCollector::collect(
         const context& ctxt,
         const scene& scene,
-        std::vector<aten::GeometryParameter>& shapeparams,
+        std::vector<aten::ObjectParameter>& shapeparams,
         std::vector<aten::TriangleParameter>& primparams,
         std::vector<aten::LightParameter>& lightparams,
         std::vector<aten::MaterialParameter>& mtrlparms,
         std::vector<aten::vertex>& vtxparams)
     {
         // Not guarantee order of the object which the instance has.
-        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
-            if (type == GeometryType::Instance) {
+        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
+            if (type == ObjectType::Instance) {
                 auto param = s->getParam();
                 auto obj = s->getHasObject();
 
@@ -30,14 +30,14 @@ namespace aten {
 
                 shapeparams.push_back(param);
             }
-            else if (type == GeometryType::Polygon) {
+            else if (type == ObjectType::Polygon) {
                 auto param = s->getParam();
 
                 param.object_id = s->id();
 
                 shapeparams.push_back(param);
             }
-            else if (type == GeometryType::Sphere)
+            else if (type == ObjectType::Sphere)
             {
                 auto param = s->getParam();
                 param.sphere.mtrl_id = s->getMaterial()->id();
@@ -67,8 +67,8 @@ namespace aten {
     {
         int32_t triangleCount = 0;
 
-        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::GeometryType type) {
-            if (type == GeometryType::Polygon) {
+        ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
+            if (type == ObjectType::Polygon) {
                 triangles.push_back(std::vector<aten::TriangleParameter>());
                 auto pos = triangles.size() - 1;
 

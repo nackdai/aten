@@ -17,7 +17,7 @@ namespace aten
 
     public:
         instance(const std::shared_ptr<OBJ>& obj, const context& ctxt)
-            : transformable(GeometryType::Instance), m_obj(obj)
+            : transformable(ObjectType::Instance), m_obj(obj)
         {
             setBoundingBox(m_obj->getBoundingbox());
         }
@@ -262,7 +262,7 @@ namespace aten
 
     template<>
     inline instance<object>::instance(const std::shared_ptr<object>& obj, const context& ctxt)
-        : transformable(GeometryType::Instance), m_obj(obj)
+        : transformable(ObjectType::Instance), m_obj(obj)
     {
         m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
@@ -270,7 +270,7 @@ namespace aten
 
     template<>
     inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, const context& ctxt)
-        : transformable(GeometryType::Instance), m_obj(obj)
+        : transformable(ObjectType::Instance), m_obj(obj)
     {
         m_obj->build();
         setBoundingBox(m_obj->getBoundingbox());

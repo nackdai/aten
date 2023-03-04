@@ -78,7 +78,7 @@ namespace AT_NAME
 
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,
-            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::SamplePosNormalPdfResult* result,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 

@@ -1,7 +1,7 @@
 #include "kernel/idatendefs.cuh"
 
 AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
-    aten::hitable::SamplePosNormalPdfResult* result,
+    aten::SamplePosNormalPdfResult* result,
     idaten::Context* ctxt,
     const aten::GeometryParameter* shape,
     aten::sampler* sampler)
@@ -111,7 +111,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     aten::Intersection isect;
 
     if (sampler) {
-        aten::hitable::SamplePosNormalPdfResult result;
+        aten::SamplePosNormalPdfResult result;
 
         const aten::GeometryParameter* realShape = (s->object_id >= 0 ? &ctxt->shapes[s->object_id] : s);
 

@@ -36,8 +36,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
         if (attrib.y >= 0) {
             int32_t primidx = (int32_t)attrib.y;
             aten::TriangleParameter prim;
-            prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
-            prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
+            prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 0];
+            prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
             isectTmp.t = AT_MATH_INF;
             isHit = hitTriangle(&prim, ctxt, r, &isectTmp);
@@ -158,8 +158,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             else if (attrib.y >= 0) {
                 int32_t primidx = (int32_t)attrib.y;
                 aten::TriangleParameter prim;
-                prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 0];
-                prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::PrimitiveParamter_float4_size + 1];
+                prim.v0 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 0];
+                prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
                 isectTmp.t = AT_MATH_INF;
                 isHit = hitTriangle(&prim, ctxt, transformedRay, &isectTmp);

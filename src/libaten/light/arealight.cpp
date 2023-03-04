@@ -17,7 +17,7 @@ namespace AT_NAME {
             aten::Intersection isect;
 
             if (sampler) {
-                aten::hitable::SamplePosNormalPdfResult result;
+                aten::SamplePosNormalPdfResult result;
 
                 obj->getSamplePosNormalArea(ctxt, &result, sampler);
 

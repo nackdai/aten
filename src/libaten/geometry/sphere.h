@@ -72,11 +72,11 @@ namespace AT_NAME
 
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,
-            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override final;
 
         static AT_DEVICE_API void getSamplePosNormalArea(
-            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::SamplePosNormalPdfResult* result,
             const aten::GeometryParameter* param,
             aten::sampler* sampler);
 
@@ -89,13 +89,13 @@ namespace AT_NAME
 
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,
-            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::SamplePosNormalPdfResult* result,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 
     private:
         static AT_DEVICE_API void getSamplePosNormalArea(
-            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::SamplePosNormalPdfResult* result,
             const aten::GeometryParameter* param,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler);

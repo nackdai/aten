@@ -248,7 +248,7 @@ namespace aten
         // Only AreaLight...
 
         // 光源上にサンプル点生成（y0）.
-        aten::hitable::SamplePosNormalPdfResult res;
+        aten::SamplePosNormalPdfResult res;
         light->getSamplePosNormalArea(ctxt, &res, sampler);
         auto posOnLight = res.pos;
         auto nmlOnLight = res.nml;

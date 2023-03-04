@@ -425,8 +425,8 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 {
     int32_t triangle_id = isect->triangle_id;
     aten::TriangleParameter prim;
-    prim.v0 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::PrimitiveParamter_float4_size + 0];
-    prim.v1 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::PrimitiveParamter_float4_size + 1];
+    prim.v0 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::TriangleParamter_float4_size + 0];
+    prim.v1 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::TriangleParamter_float4_size + 1];
 
     float4 p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[0]);
     float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[1]);

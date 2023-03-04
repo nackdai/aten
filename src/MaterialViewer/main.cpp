@@ -544,7 +544,7 @@ int32_t main()
         g_scene.addLight(g_scene_light.point_light);
     }
 
-    std::vector<aten::GeometryParameter> shapeparams;
+    std::vector<aten::ObjectParameter> shapeparams;
     std::vector<aten::TriangleParameter> primparams;
     std::vector<aten::LightParameter> lightparams;
     std::vector<aten::MaterialParameter> mtrlparms;

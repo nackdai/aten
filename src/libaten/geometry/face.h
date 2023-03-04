@@ -69,11 +69,6 @@ namespace AT_NAME
             return param;
         }
 
-        void setParam(const aten::TriangleParameter& p)
-        {
-            param = p;
-        }
-
         int32_t getId() const
         {
             return m_id;

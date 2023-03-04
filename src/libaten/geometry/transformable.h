@@ -16,8 +16,8 @@ namespace aten
         transformable() = default;
         virtual ~transformable() {}
 
-        transformable(GeometryType type);
-        transformable(GeometryType type, const std::shared_ptr<AT_NAME::material>& mtrl);
+        transformable(ObjectType type);
+        transformable(ObjectType type, const std::shared_ptr<AT_NAME::material>& mtrl);
 
     public:
         virtual void getSamplePosNormalArea(
@@ -33,17 +33,17 @@ namespace aten
             hitrecord& rec,
             const Intersection& isect) const = 0;
 
-        GeometryType getType() const
+        ObjectType getType() const
         {
             return m_param.type;
         }
 
-        const GeometryParameter& getParam() const
+        const ObjectParameter& getParam() const
         {
             return m_param;
         }
 
-        GeometryParameter& getParam()
+        ObjectParameter& getParam()
         {
             return m_param;
         }
@@ -83,6 +83,6 @@ namespace aten
         std::shared_ptr<AT_NAME::material> mtrl_;
         int32_t m_id{ -1 };
 
-        GeometryParameter m_param;
+        ObjectParameter m_param;
     };
 }

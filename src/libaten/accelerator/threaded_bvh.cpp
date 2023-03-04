@@ -545,7 +545,7 @@ namespace aten
             mat4 mtxW2L;
             t->getMatrices(mtxL2W, mtxW2L);
 
-            if (t->getParam().type == GeometryType::Instance) {
+            if (t->getParam().type == ObjectType::Instance) {
                 // TODO
                 auto obj = const_cast<hitable*>(t->getHasObject());
                 auto subobj = const_cast<hitable*>(t->getHasSecondObject());

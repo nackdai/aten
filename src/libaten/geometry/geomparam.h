@@ -8,15 +8,15 @@
 
 namespace aten
 {
-    enum class GeometryType : int32_t {
+    enum class ObjectType : int32_t {
         Polygon,    ///< Polygon.
         Instance,   ///< Instance. Not used in GPU.
         Sphere,     ///< Sphere.
         GeometryTypeMax,
     };
 
-    struct GeometryParameter {
-        GeometryType type{ GeometryType::GeometryTypeMax };
+    struct ObjectParameter {
+        ObjectType type{ ObjectType::GeometryTypeMax };
 
         /*
         * @brief Area of object
@@ -50,10 +50,10 @@ namespace aten
             int32_t mtrl_id{ -1 };  ///< Index of material.
         } sphere;
 
-        GeometryParameter() = default;
-        ~GeometryParameter() = default;
+        ObjectParameter() = default;
+        ~ObjectParameter() = default;
     };
-    AT_STATICASSERT((sizeof(GeometryParameter) % 16) == 0);
+    AT_STATICASSERT((sizeof(ObjectParameter) % 16) == 0);
 
     struct TriangleParameter {
         union {

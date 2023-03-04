@@ -1,7 +1,7 @@
 #include "kernel/idatendefs.cuh"
 
 AT_CUDA_INLINE __device__ bool hitSphere(
-    const aten::GeometryParameter* shape,
+    const aten::ObjectParameter* shape,
     const aten::ray& r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -418,7 +418,7 @@ inline __device__ float4 cross(float4 a, float4 b)
 
 AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     const idaten::Context* ctxt,
-    const aten::GeometryParameter* param,
+    const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect)
@@ -498,7 +498,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 
 AT_CUDA_INLINE __device__ void evalHitResult(
     const idaten::Context* ctxt,
-    const aten::GeometryParameter* param,
+    const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect)
@@ -517,12 +517,12 @@ AT_CUDA_INLINE __device__ void evalHitResult(
         rec->isVoxel = true;
     }
     else {
-        const aten::GeometryParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
+        const aten::ObjectParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
 
-        if (realShape->type == aten::GeometryType::Polygon) {
+        if (realShape->type == aten::ObjectType::Polygon) {
             evalHitResultTriangle(ctxt, param, r, rec, isect);
         }
-        else if (realShape->type == aten::GeometryType::Sphere) {
+        else if (realShape->type == aten::ObjectType::Sphere) {
             AT_NAME::sphere::evalHitResult(param, r, rec, isect);
         }
         else {
@@ -544,17 +544,17 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 
 AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
     const idaten::Context* ctxt,
-    const aten::GeometryParameter* param,
+    const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect)
 {
-    const aten::GeometryParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
+    const aten::ObjectParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
 
-    if (realShape->type == aten::GeometryType::Polygon) {
+    if (realShape->type == aten::ObjectType::Polygon) {
         evalHitResultTriangle(ctxt, param, r, rec, isect);
     }
-    else if (realShape->type == aten::GeometryType::Sphere) {
+    else if (realShape->type == aten::ObjectType::Sphere) {
         AT_NAME::sphere::evalHitResult(param, r, rec, isect);
     }
     else {

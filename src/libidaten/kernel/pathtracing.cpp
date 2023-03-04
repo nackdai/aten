@@ -18,7 +18,7 @@ namespace idaten
         GLuint gltex,
         int32_t width, int32_t height,
         const aten::CameraParameter& camera,
-        const std::vector<aten::GeometryParameter>& shapes,
+        const std::vector<aten::ObjectParameter>& shapes,
         const std::vector<aten::MaterialParameter>& mtrls,
         const std::vector<aten::LightParameter>& lights,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
@@ -51,7 +51,7 @@ namespace idaten
     }
 
     void PathTracing::updateBVH(
-        const std::vector<aten::GeometryParameter>& geoms,
+        const std::vector<aten::ObjectParameter>& geoms,
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
         const std::vector<aten::mat4>& mtxs)
     {

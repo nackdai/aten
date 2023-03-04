@@ -3,7 +3,7 @@
 AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::SamplePosNormalPdfResult* result,
     idaten::Context* ctxt,
-    const aten::GeometryParameter* shape,
+    const aten::ObjectParameter* shape,
     aten::sampler* sampler)
 {
     // CPUコードと処理を合わせるためのダミー.
@@ -104,7 +104,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     const aten::vec3& org,
     aten::sampler* sampler)
 {
-    const aten::GeometryParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
+    const aten::ObjectParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
 
     aten::ray r;
     aten::hitrecord rec;
@@ -113,12 +113,12 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     if (sampler) {
         aten::SamplePosNormalPdfResult result;
 
-        const aten::GeometryParameter* realShape = (s->object_id >= 0 ? &ctxt->shapes[s->object_id] : s);
+        const aten::ObjectParameter* realShape = (s->object_id >= 0 ? &ctxt->shapes[s->object_id] : s);
 
-        if (realShape->type == aten::GeometryType::Polygon) {
+        if (realShape->type == aten::ObjectType::Polygon) {
             getTriangleSamplePosNormalArea(&result, ctxt, realShape, sampler);
         }
-        else if (realShape->type == aten::GeometryType::Sphere) {
+        else if (realShape->type == aten::ObjectType::Sphere) {
             AT_NAME::sphere::getSamplePosNormalArea(&result, s, sampler);
         }
         else {

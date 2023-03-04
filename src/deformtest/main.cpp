@@ -192,7 +192,7 @@ void update(int32_t frame)
             g_triOffset);
 
         {
-            std::vector<aten::GeometryParameter> shapeparams;
+            std::vector<aten::ObjectParameter> shapeparams;
             std::vector<aten::TriangleParameter> primparams;
             std::vector<aten::LightParameter> lightparams;
             std::vector<aten::MaterialParameter> mtrlparms;
@@ -637,7 +637,7 @@ int32_t main()
     }
 
     {
-        std::vector<aten::GeometryParameter> shapeparams;
+        std::vector<aten::ObjectParameter> shapeparams;
         std::vector<aten::TriangleParameter> primparams;
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;

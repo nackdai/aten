@@ -295,7 +295,7 @@ int32_t main()
         1024);
 
     {
-        std::vector<aten::GeometryParameter> shapeparams;
+        std::vector<aten::ObjectParameter> shapeparams;
         std::vector<aten::TriangleParameter> primparams;
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;

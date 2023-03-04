@@ -146,14 +146,14 @@ namespace AT_NAME
 
     void sphere::getSamplePosNormalArea(
         const aten::context& ctxt,
-        aten::hitable::SamplePosNormalPdfResult* result,
+        aten::SamplePosNormalPdfResult* result,
         aten::sampler* sampler) const
     {
         return getSamplePosNormalArea(ctxt, result, aten::mat4::Identity, sampler);
     }
 
     AT_DEVICE_API void sphere::getSamplePosNormalArea(
-        aten::hitable::SamplePosNormalPdfResult* result,
+        aten::SamplePosNormalPdfResult* result,
         const aten::GeometryParameter* param,
         aten::sampler* sampler)
     {
@@ -162,7 +162,7 @@ namespace AT_NAME
 
     void sphere::getSamplePosNormalArea(
         const aten::context& ctxt,
-        aten::hitable::SamplePosNormalPdfResult* result,
+        aten::SamplePosNormalPdfResult* result,
         const aten::mat4& mtxL2W,
         aten::sampler* sampler) const
     {
@@ -170,7 +170,7 @@ namespace AT_NAME
     }
 
     void sphere::getSamplePosNormalArea(
-        aten::hitable::SamplePosNormalPdfResult* result,
+        aten::SamplePosNormalPdfResult* result,
         const aten::GeometryParameter* param,
         const aten::mat4& mtxL2W,
         aten::sampler* sampler)

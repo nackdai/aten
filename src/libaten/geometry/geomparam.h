@@ -87,5 +87,5 @@ namespace aten
     };
     AT_STATICASSERT((sizeof(TriangleParameter) % 16) == 0);
 
-    const size_t PrimitiveParamter_float4_size = sizeof(TriangleParameter) / sizeof(aten::vec4);
+    constexpr size_t TriangleParamter_float4_size = sizeof(TriangleParameter) / sizeof(aten::vec4);
 }

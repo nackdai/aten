@@ -159,7 +159,7 @@ namespace AT_NAME
 
     void face::getSamplePosNormalArea(
         const context& ctxt,
-        aten::hitable::SamplePosNormalPdfResult* result,
+        aten::SamplePosNormalPdfResult* result,
         aten::sampler* sampler) const
     {
 #if 0

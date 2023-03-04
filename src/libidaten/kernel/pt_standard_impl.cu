@@ -350,8 +350,8 @@ namespace kernel {
 
         if (objid >= 0) {
             aten::TriangleParameter prim;
-            prim.v0 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 0];
-            prim.v1 = ((aten::vec4*)prims)[primid * aten::PrimitiveParamter_float4_size + 1];
+            prim.v0 = ((aten::vec4*)prims)[primid * aten::TriangleParamter_float4_size + 0];
+            prim.v1 = ((aten::vec4*)prims)[primid * aten::TriangleParamter_float4_size + 1];
 
             isects[idx].mtrlid = prim.mtrlid;
             isects[idx].meshid = prim.mesh_id;

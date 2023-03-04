@@ -52,7 +52,7 @@ namespace AT_NAME
 
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,
-            aten::hitable::SamplePosNormalPdfResult* result,
+            aten::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override;
 
         virtual int32_t geomid() const override;

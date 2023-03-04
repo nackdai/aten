@@ -74,6 +74,19 @@ namespace aten {
         }
     };
 
+    /**
+    * @brief Result for sampled triangle.
+    **/
+    struct SamplePosNormalPdfResult {
+        aten::vec3 pos; ///< Sampled position.
+        aten::vec3 nml; ///< Normal at sampled position.
+        real area;      ///< Area of sampled triangle.
+
+        real a; ///< Barycentric on sampled triangle.
+        real b; ///< Barycentric on sampled triangle.
+        int32_t triangle_id{ -1 };  ///< Sampled triangle id.
+    };
+
     using NotifyChanged = std::function<void(hitable*)>;
 
     class hitable {
@@ -128,19 +141,6 @@ namespace aten {
         }
 
         virtual accelerator* getInternalAccelerator();
-
-        /**
-        * @brief Result for sampled triangle.
-        **/
-        struct SamplePosNormalPdfResult {
-            aten::vec3 pos; ///< Sampled position.
-            aten::vec3 nml; ///< Normal at sampled position.
-            real area;      ///< Area of sampled triangle.
-
-            real a; ///< Barycentric on sampled triangle.
-            real b; ///< Barycentric on sampled triangle.
-            int32_t triangle_id{ -1 };  ///< Sampled triangle id.
-        };
 
         virtual void getSamplePosNormalArea(
             const context& ctxt,

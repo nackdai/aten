@@ -13,7 +13,7 @@
 #include "texture/texture.h"
 
 namespace AT_NAME {
-    class face;
+    class triangle;
 }
 
 namespace aten
@@ -108,16 +108,16 @@ namespace aten
 
         int32_t findMaterialIdxByName(const char* name) const;
 
-        std::shared_ptr<AT_NAME::face> createTriangle(const aten::TriangleParameter& param);
+        std::shared_ptr<AT_NAME::triangle> createTriangle(const aten::TriangleParameter& param);
 
-        void addTriangle(const std::shared_ptr<AT_NAME::face>& tri);
+        void addTriangle(const std::shared_ptr<AT_NAME::triangle>& tri);
 
         uint32_t getTriangleNum() const
         {
             return static_cast<uint32_t>(m_triangles.size());
         }
 
-        std::shared_ptr<const AT_NAME::face> getTriangle(int32_t idx) const;
+        std::shared_ptr<const AT_NAME::triangle> getTriangle(int32_t idx) const;
 
         void copyPrimitiveParameters(std::vector<aten::TriangleParameter>& dst) const;
 
@@ -171,7 +171,7 @@ namespace aten
         aten::GeomVertexBuffer m_vb;
 
         std::vector<std::shared_ptr<AT_NAME::material>> m_materials;
-        std::vector<std::shared_ptr<AT_NAME::face>> m_triangles;
+        std::vector<std::shared_ptr<AT_NAME::triangle>> m_triangles;
         std::vector<std::shared_ptr<aten::transformable>> m_transformables;
         std::vector<std::shared_ptr<aten::texture>> m_textures;
     };

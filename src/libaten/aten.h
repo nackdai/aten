@@ -87,7 +87,7 @@
 
 #include "geometry/object.h"
 #include "geometry/objshape.h"
-#include "geometry/face.h"
+#include "geometry/triangle.h"
 #include "geometry/vertex.h"
 #include "geometry/sphere.h"
 #include "geometry/transformable.h"

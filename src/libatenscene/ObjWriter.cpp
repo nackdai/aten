@@ -247,19 +247,19 @@ namespace aten {
                 for (const auto& t : tris) {
                     const auto& tri_param = t->getParam();
 
-                    ObjFace face;
+                    ObjFace triangle;
 
                     for (int32_t i = 0; i < 3; i++) {
                         const auto& v = ctxt.getVertex(tri_param.idx[i]);
 
-                        face.vtx[i].pos = writeVertexPosition(fp, v) ? vtx_idx : -1;
-                        face.vtx[i].nml = writeVertexNormal(fp, v) ? vtx_idx : -1;
-                        face.vtx[i].uv = writeVertexUV(fp, v) ? vtx_idx : -1;
+                        triangle.vtx[i].pos = writeVertexPosition(fp, v) ? vtx_idx : -1;
+                        triangle.vtx[i].nml = writeVertexNormal(fp, v) ? vtx_idx : -1;
+                        triangle.vtx[i].uv = writeVertexUV(fp, v) ? vtx_idx : -1;
 
                         vtx_idx++;
                     }
 
-                    export_face_vtx.push_back(face);
+                    export_face_vtx.push_back(triangle);
                 }
             }
 
@@ -282,8 +282,8 @@ namespace aten {
                 const auto& tris = s->tris();
 
                 for (size_t i = 0; i < tris.size(); i++) {
-                    const auto& face = export_face_vtx[tri_pos];
-                    writeFace(fp, face);
+                    const auto& triangle = export_face_vtx[tri_pos];
+                    writeFace(fp, triangle);
 
                     tri_pos++;
                 }

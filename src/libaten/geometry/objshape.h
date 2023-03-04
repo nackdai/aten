@@ -5,7 +5,7 @@
 #include "types.h"
 #include "material/material.h"
 #include "math/mat4.h"
-#include "geometry/face.h"
+#include "geometry/triangle.h"
 #include "visualizer/GeomDataBuffer.h"
 #include "scene/context.h"
 
@@ -39,7 +39,7 @@ namespace AT_NAME
             return m_mtrl;
         }
 
-        void addFace(const std::shared_ptr<face>& f);
+        void addFace(const std::shared_ptr<triangle>& f);
 
         void render(
             aten::hitable::FuncPreDraw func,
@@ -52,7 +52,7 @@ namespace AT_NAME
             AT_NAME::FuncObjectMeshDraw func,
             const aten::context& ctxt);
 
-        const std::vector<std::shared_ptr<face>>& tris() const
+        const std::vector<std::shared_ptr<triangle>>& tris() const
         {
             return faces;
         }
@@ -68,7 +68,7 @@ namespace AT_NAME
         real area_{ 0 };
 
         std::shared_ptr<material> m_mtrl;
-        std::vector<std::shared_ptr<face>> faces;
+        std::vector<std::shared_ptr<triangle>> faces;
 
         aten::GeomIndexBuffer m_ib;
 

@@ -1,6 +1,6 @@
 #include <iterator>
 
-#include "geometry/face.h"
+#include "geometry/triangle.h"
 #include "geometry/objshape.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
@@ -9,11 +9,11 @@
 
 namespace AT_NAME
 {
-    std::shared_ptr<face> face::create(
+    std::shared_ptr<triangle> triangle::create(
         const context& ctxt,
         const aten::TriangleParameter& param)
     {
-        auto f = std::make_shared<face>();
+        auto f = std::make_shared<triangle>();
 
         f->param = param;
 
@@ -22,7 +22,7 @@ namespace AT_NAME
         return f;
     }
 
-    bool face::hit(
+    bool triangle::hit(
         const context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
@@ -51,7 +51,7 @@ namespace AT_NAME
         return isHit;
     }
 
-    bool face::hit(
+    bool triangle::hit(
         const aten::TriangleParameter* param,
         const aten::vec3& v0,
         const aten::vec3& v1,
@@ -78,7 +78,7 @@ namespace AT_NAME
         return isHit;
     }
 
-    void face::evalHitResult(
+    void triangle::evalHitResult(
         const context& ctxt,
         const aten::ray& r,
         aten::hitrecord& rec,
@@ -102,7 +102,7 @@ namespace AT_NAME
         rec.area = param.area;
     }
 
-    void face::evalHitResult(
+    void triangle::evalHitResult(
         const aten::vertex& v0,
         const aten::vertex& v1,
         const aten::vertex& v2,
@@ -127,7 +127,7 @@ namespace AT_NAME
         rec->v = uv.y;
     }
 
-    void face::build(
+    void triangle::build(
         const context& ctxt,
         int32_t mtrlid,
         int32_t geomid)
@@ -157,7 +157,7 @@ namespace AT_NAME
         param.mesh_id = geomid;
     }
 
-    void face::getSamplePosNormalArea(
+    void triangle::getSamplePosNormalArea(
         const context& ctxt,
         aten::SamplePosNormalPdfResult* result,
         aten::sampler* sampler) const
@@ -208,12 +208,12 @@ namespace AT_NAME
         result->triangle_id = m_id;
     }
 
-    int32_t face::geomid() const
+    int32_t triangle::geomid() const
     {
         return param.mesh_id;
     }
 
-    aabb face::computeAABB(const context& ctxt) const
+    aabb triangle::computeAABB(const context& ctxt) const
     {
         const auto& v0 = ctxt.getVertex(param.idx[0]);
         const auto& v1 = ctxt.getVertex(param.idx[1]);

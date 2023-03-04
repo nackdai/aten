@@ -55,7 +55,7 @@ namespace AT_NAME
         }
     }
 
-    void objshape::addFace(const std::shared_ptr<face>& f)
+    void objshape::addFace(const std::shared_ptr<triangle>& f)
     {
         const auto& faceParam = f->getParam();
 

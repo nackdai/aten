@@ -139,7 +139,7 @@ namespace aten
 
             // Aggregate vertex indices.
             for (uint32_t i = 0; i < face_num; i++) {
-                // Loading as triangle is specified, so vertex num per face have to be 3.
+                // Loading as triangle is specified, so vertex num per triangle have to be 3.
                 AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
                 aten::TriangleParameter faceParam;
@@ -229,7 +229,7 @@ namespace aten
 
             // One shape has one material.It means another shape would be created if different material appear.
             for (uint32_t i = 0; i < face_num; i++) {
-                // Loading as triangle is specified, so vertex num per face have to be 3.
+                // Loading as triangle is specified, so vertex num per triangle have to be 3.
                 AT_ASSERT(shape.mesh.num_face_vertices[i] == 3);
 
                 int32_t m = shape.mesh.material_ids[i];

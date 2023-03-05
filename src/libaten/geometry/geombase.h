@@ -22,17 +22,4 @@ namespace aten
     protected:
         int32_t m_geomid{ -1 };
     };
-
-    template <typename INHERIT>
-    class geom : public virtual INHERIT, public geombase {
-    protected:
-        geom() {}
-        virtual ~geom() {}
-
-    public:
-        virtual int32_t geomid() const override
-        {
-            return m_geomid;
-        }
-    };
 }

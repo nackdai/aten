@@ -9,7 +9,7 @@
 
 namespace AT_NAME
 {
-    class sphere : public aten::geom<aten::transformable> {
+    class sphere : public virtual aten::transformable, public aten::geombase {
         friend class TransformableFactory;
 
     public:

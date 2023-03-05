@@ -16,12 +16,12 @@ namespace AT_NAME
     /**
     * @brief Triangle group to have the same material.
     **/
-    class objshape : public aten::geombase {
+    class TriangleGroupMesh : public aten::geombase {
         friend class object;
 
     public:
-        objshape() = default;
-        virtual ~objshape();
+        TriangleGroupMesh() = default;
+        virtual ~TriangleGroupMesh();
 
         void build(const aten::context& ctxt);
 

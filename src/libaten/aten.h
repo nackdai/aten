@@ -86,7 +86,7 @@
 #include "sampler/wanghash.h"
 
 #include "geometry/object.h"
-#include "geometry/objshape.h"
+#include "geometry/TriangleGroupMesh.h"
 #include "geometry/triangle.h"
 #include "geometry/vertex.h"
 #include "geometry/sphere.h"

@@ -361,9 +361,6 @@
     <ClInclude Include="..\src\libaten\geometry\vertex.h">
       <Filter>geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\geometry\objshape.h">
-      <Filter>geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\visualizer\GeomDataBuffer.h">
       <Filter>visualizer</Filter>
     </ClInclude>
@@ -503,6 +500,9 @@
       <Filter>geometry</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\triangle.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\TriangleGroupMesh.h">
       <Filter>geometry</Filter>
     </ClInclude>
   </ItemGroup>
@@ -663,9 +663,6 @@
     <ClCompile Include="..\src\libaten\geometry\geombase.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\geometry\objshape.cpp">
-      <Filter>geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\visualizer\GeomDataBuffer.cpp">
       <Filter>visualizer</Filter>
     </ClCompile>
@@ -790,6 +787,9 @@
       <Filter>filter</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\triangle.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\TriangleGroupMesh.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
   </ItemGroup>

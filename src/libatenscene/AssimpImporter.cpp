@@ -145,7 +145,7 @@ namespace aten
             );
 
             auto obj = aten::TransformableFactory::createObject(ctxt);
-            auto shape = std::make_shared<aten::objshape>();
+            auto shape = std::make_shared<aten::TriangleGroupMesh>();
 
             aten::vec3 obj_min(AT_MATH_INF);
             aten::vec3 obj_max(-AT_MATH_INF);

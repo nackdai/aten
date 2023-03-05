@@ -29,7 +29,7 @@ namespace AT_NAME
         m_param.area = 0;
         m_triangles = 0;
 
-        // Avoid sorting objshape list in bvh::build directly.
+        // Avoid sorting TriangleGroupMesh list in bvh::build directly.
         std::vector<triangle*> tmp;
 
         aabb bbox;
@@ -147,11 +147,11 @@ namespace AT_NAME
     {
         auto r = sampler->nextSample();
         int32_t shapeidx = (int32_t)(r * (m_shapes.size() - 1));
-        auto& objshape = m_shapes[shapeidx];
+        auto& TriangleGroupMesh = m_shapes[shapeidx];
 
         r = sampler->nextSample();
-        int32_t faceidx = (int32_t)(r * (objshape->faces.size() - 1));
-        auto f = objshape->faces[faceidx];
+        int32_t faceidx = (int32_t)(r * (TriangleGroupMesh->faces.size() - 1));
+        auto f = TriangleGroupMesh->faces[faceidx];
 
         const auto& faceParam = f->getParam();
 
@@ -246,8 +246,8 @@ namespace AT_NAME
 
     void object::collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
     {
-        for (const auto& objshape : m_shapes) {
-            const auto& tris = objshape->tris();
+        for (const auto& TriangleGroupMesh : m_shapes) {
+            const auto& tris = TriangleGroupMesh->tris();
 
             triangles.reserve(tris.size());
 

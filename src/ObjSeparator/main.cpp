@@ -91,7 +91,7 @@ int32_t main(int32_t argc, char* argv[])
 
     auto& obj = objs[0];
 
-    std::vector<aten::objshape*> shapes;
+    std::vector<aten::TriangleGroupMesh*> shapes;
     std::vector<std::shared_ptr<aten::material>> mtrls;
 
     auto num = obj->getShapeNum();

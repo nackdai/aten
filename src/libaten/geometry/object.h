@@ -6,7 +6,7 @@
 #include "material/material.h"
 #include "math/mat4.h"
 #include "geometry/triangle.h"
-#include "geometry/objshape.h"
+#include "geometry/TriangleGroupMesh.h"
 #include "geometry/transformable.h"
 #include "scene/context.h"
 
@@ -82,7 +82,7 @@ namespace AT_NAME
             const aten::mat4& mtxL2W,
             aten::sampler* sampler) const override final;
 
-        void appendShape(const std::shared_ptr<objshape>& shape)
+        void appendShape(const std::shared_ptr<TriangleGroupMesh>& shape)
         {
             AT_ASSERT(shape);
             m_shapes.push_back(shape);
@@ -93,13 +93,13 @@ namespace AT_NAME
             return static_cast<uint32_t>(m_shapes.size());
         }
 
-        objshape* getShape(uint32_t idx)
+        TriangleGroupMesh* getShape(uint32_t idx)
         {
             AT_ASSERT(idx < getShapeNum());
             return m_shapes[idx].get();
         }
 
-        const std::vector<std::shared_ptr<objshape>>& getShapes() const
+        const std::vector<std::shared_ptr<TriangleGroupMesh>>& getShapes() const
         {
             return m_shapes;
         }
@@ -115,7 +115,7 @@ namespace AT_NAME
         }
 
     private:
-        std::vector<std::shared_ptr<objshape>> m_shapes;
+        std::vector<std::shared_ptr<TriangleGroupMesh>> m_shapes;
 
         std::shared_ptr<aten::accelerator> m_accel;
         uint32_t m_triangles{ 0 };

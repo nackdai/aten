@@ -1,7 +1,7 @@
 #include <iterator>
 
 #include "geometry/triangle.h"
-#include "geometry/objshape.h"
+#include "geometry/TriangleGroupMesh.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 

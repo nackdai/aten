@@ -224,7 +224,7 @@ namespace aten
                 std::max(shapemax.y, pmax.y),
                 std::max(shapemax.z, pmax.z));
 
-            std::shared_ptr<aten::objshape> dst_shape;
+            std::shared_ptr<aten::TriangleGroupMesh> dst_shape;
             int32_t prev_mtrl_idx = -1;
 
             // One shape has one material.It means another shape would be created if different material appear.
@@ -236,7 +236,7 @@ namespace aten
 
                 if (m < 0 && !dst_shape) {
                     // If a material doesn't exist.
-                    dst_shape = std::make_shared<aten::objshape>();
+                    dst_shape = std::make_shared<aten::TriangleGroupMesh>();
                     dst_shape->setMaterial(AssetManager::getMtrlByIdx(0));
                 }
                 else if (prev_mtrl_idx != m) {
@@ -263,7 +263,7 @@ namespace aten
                     }
 
                     // Create new shape for new material.
-                    dst_shape = std::make_shared<aten::objshape>();
+                    dst_shape = std::make_shared<aten::TriangleGroupMesh>();
                     prev_mtrl_idx = m;
 
                     if (prev_mtrl_idx >= 0) {

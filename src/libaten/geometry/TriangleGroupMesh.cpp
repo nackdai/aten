@@ -1,6 +1,6 @@
 #include <iterator>
 
-#include "geometry/objshape.h"
+#include "geometry/TriangleGroupMesh.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 #include "geometry/vertex.h"
@@ -8,12 +8,12 @@
 
 namespace AT_NAME
 {
-    objshape::~objshape()
+    TriangleGroupMesh::~TriangleGroupMesh()
     {
         faces.clear();
     }
 
-    void objshape::build(const context& ctxt)
+    void TriangleGroupMesh::build(const context& ctxt)
     {
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
         aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
@@ -55,7 +55,7 @@ namespace AT_NAME
         }
     }
 
-    void objshape::addFace(const std::shared_ptr<triangle>& f)
+    void TriangleGroupMesh::addFace(const std::shared_ptr<triangle>& f)
     {
         const auto& faceParam = f->getParam();
 
@@ -71,7 +71,7 @@ namespace AT_NAME
         m_baseTriIdx = std::min(f->getId(), m_baseTriIdx);
     }
 
-    void objshape::render(
+    void TriangleGroupMesh::render(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
         const aten::mat4& mtxL2W,
@@ -89,7 +89,7 @@ namespace AT_NAME
         m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
     }
 
-    void objshape::draw(
+    void TriangleGroupMesh::draw(
         AT_NAME::FuncObjectMeshDraw func,
         const context& ctxt)
     {

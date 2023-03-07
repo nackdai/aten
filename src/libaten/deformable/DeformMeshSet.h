@@ -3,7 +3,7 @@
 #include "deformable/DeformPrimitives.h"
 #include "deformable/Skeleton.h"
 #include "misc/stream.h"
-#include "geometry/geombase.h"
+#include "geometry/NoHitableMesh.h"
 #include "scene/context.h"
 
 namespace aten
@@ -12,7 +12,7 @@ namespace aten
      * @brief メッシュセット.
      * マテリアルごとのプリミティブセットの集まり
      */
-    class DeformMeshSet : public geombase {
+    class DeformMeshSet : public NoHitableMesh {
         friend class DeformMeshGroup;
 
     public:

@@ -11,13 +11,13 @@ namespace AT_NAME
 {
     std::shared_ptr<triangle> triangle::create(
         const context& ctxt,
-        const aten::TriangleParameter& param)
+        const aten::TriangleParameter& param_)
     {
         auto f = std::make_shared<triangle>();
 
-        f->param = param;
+        f->param_ = param_;
 
-        f->build(ctxt, param.mtrlid, param.mesh_id);
+        f->build(ctxt, param_.mtrlid, param_.mesh_id);
 
         return f;
     }
@@ -28,12 +28,12 @@ namespace AT_NAME
         real t_min, real t_max,
         aten::Intersection& isect) const
     {
-        const auto& v0 = ctxt.getVertex(param.idx[0]);
-        const auto& v1 = ctxt.getVertex(param.idx[1]);
-        const auto& v2 = ctxt.getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param_.idx[0]);
+        const auto& v1 = ctxt.getVertex(param_.idx[1]);
+        const auto& v2 = ctxt.getVertex(param_.idx[2]);
 
         bool isHit = hit(
-            &param,
+            &param_,
             v0.pos, v1.pos, v2.pos,
             r,
             t_min, t_max,
@@ -45,14 +45,14 @@ namespace AT_NAME
 
             isect.triangle_id = m_id;
 
-            isect.mtrlid = param.mtrlid;
+            isect.mtrlid = param_.mtrlid;
         }
 
         return isHit;
     }
 
     bool triangle::hit(
-        const aten::TriangleParameter* param,
+        const aten::TriangleParameter* param_,
         const aten::vec3& v0,
         const aten::vec3& v1,
         const aten::vec3& v2,
@@ -84,13 +84,13 @@ namespace AT_NAME
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
-        const auto& v0 = ctxt.getVertex(param.idx[0]);
-        const auto& v1 = ctxt.getVertex(param.idx[1]);
-        const auto& v2 = ctxt.getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param_.idx[0]);
+        const auto& v1 = ctxt.getVertex(param_.idx[1]);
+        const auto& v2 = ctxt.getVertex(param_.idx[2]);
 
         evalHitResult(v0, v1, v2, &rec, &isect);
 
-        if (param.needNormal > 0) {
+        if (param_.needNormal > 0) {
             auto e01 = v1.pos - v0.pos;
             auto e02 = v2.pos - v0.pos;
 
@@ -99,7 +99,7 @@ namespace AT_NAME
             rec.normal = normalize(cross(e01, e02));
         }
 
-        rec.area = param.area;
+        rec.area = param_.area;
     }
 
     void triangle::evalHitResult(
@@ -132,9 +132,9 @@ namespace AT_NAME
         int32_t mtrlid,
         int32_t geomid)
     {
-        const auto& v0 = ctxt.getVertex(param.idx[0]);
-        const auto& v1 = ctxt.getVertex(param.idx[1]);
-        const auto& v2 = ctxt.getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param_.idx[0]);
+        const auto& v1 = ctxt.getVertex(param_.idx[1]);
+        const auto& v2 = ctxt.getVertex(param_.idx[2]);
 
         aten::vec3 vmax = aten::vec3(
             std::max(v0.pos.x, std::max(v1.pos.x, v2.pos.x)),
@@ -151,10 +151,10 @@ namespace AT_NAME
         // 三角形の面積 = ２辺の外積の長さ / 2;
         auto e0 = v1.pos - v0.pos;
         auto e1 = v2.pos - v0.pos;
-        param.area = real(0.5) * cross(e0, e1).length();
+        param_.area = real(0.5) * cross(e0, e1).length();
 
-        param.mtrlid = mtrlid;
-        param.mesh_id = geomid;
+        param_.mtrlid = mtrlid;
+        param_.mesh_id = geomid;
     }
 
     void triangle::getSamplePosNormalArea(
@@ -181,9 +181,9 @@ namespace AT_NAME
         real b = aten::sqrt(r0) * r1;
 #endif
 
-        const auto& v0 = ctxt.getVertex(param.idx[0]);
-        const auto& v1 = ctxt.getVertex(param.idx[1]);
-        const auto& v2 = ctxt.getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param_.idx[0]);
+        const auto& v1 = ctxt.getVertex(param_.idx[1]);
+        const auto& v2 = ctxt.getVertex(param_.idx[2]);
 
         // 重心座標系(barycentric coordinates).
         // v0基準.
@@ -210,14 +210,14 @@ namespace AT_NAME
 
     int32_t triangle::geomid() const
     {
-        return param.mesh_id;
+        return param_.mesh_id;
     }
 
     aabb triangle::computeAABB(const context& ctxt) const
     {
-        const auto& v0 = ctxt.getVertex(param.idx[0]);
-        const auto& v1 = ctxt.getVertex(param.idx[1]);
-        const auto& v2 = ctxt.getVertex(param.idx[2]);
+        const auto& v0 = ctxt.getVertex(param_.idx[0]);
+        const auto& v1 = ctxt.getVertex(param_.idx[1]);
+        const auto& v2 = ctxt.getVertex(param_.idx[2]);
 
         auto vmin = aten::min(aten::min(v0.pos, v1.pos), v2.pos);
         auto vmax = aten::max(aten::max(v0.pos, v1.pos), v2.pos);

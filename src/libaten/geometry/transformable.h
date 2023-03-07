@@ -16,8 +16,10 @@ namespace aten
         transformable() = default;
         virtual ~transformable() {}
 
-        transformable(ObjectType type);
-        transformable(ObjectType type, const std::shared_ptr<AT_NAME::material>& mtrl);
+        transformable(ObjectType type)
+        {
+            m_param.type = type;
+        }
 
     public:
         virtual void getSamplePosNormalArea(
@@ -61,11 +63,6 @@ namespace aten
             return m_id;
         }
 
-        std::shared_ptr<const AT_NAME::material> getMaterial()
-        {
-            return mtrl_;
-        }
-
         virtual void collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
         {
             // Nothing is done...
@@ -80,7 +77,6 @@ namespace aten
         }
 
     protected:
-        std::shared_ptr<AT_NAME::material> mtrl_;
         int32_t m_id{ -1 };
 
         ObjectParameter m_param;

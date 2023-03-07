@@ -3,20 +3,21 @@
 #include "types.h"
 #include "math/mat4.h"
 #include "geometry/transformable.h"
-#include "geometry/geombase.h"
+#include "geometry/NoHitableMesh.h"
 #include "geometry/geomparam.h"
 #include "scene/context.h"
 
 namespace AT_NAME
 {
-    class sphere : public virtual aten::transformable, public aten::geombase {
+    class sphere : public virtual aten::transformable, public aten::NoHitableMesh {
         friend class TransformableFactory;
 
     public:
-        template <typename MTRL>
-        sphere(const aten::vec3& center, real radius, const MTRL& mtrl)
-            : aten::transformable(aten::ObjectType::Sphere, mtrl)
+        sphere(const aten::vec3& center, real radius, std::shared_ptr<AT_NAME::material> mtrl)
+            : aten::transformable(aten::ObjectType::Sphere)
         {
+            mtrl_ = mtrl;
+
             m_param.sphere.center = center;
             m_param.sphere.radius = radius;
 
@@ -101,6 +102,7 @@ namespace AT_NAME
             aten::sampler* sampler);
 
     private:
+        std::shared_ptr<AT_NAME::material> mtrl_;
         aten::ObjectParameter m_param;
     };
 }

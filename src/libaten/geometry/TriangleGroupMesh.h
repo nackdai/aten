@@ -16,7 +16,7 @@ namespace AT_NAME
     /**
     * @brief Triangle group to have the same material.
     **/
-    class TriangleGroupMesh : public aten::geombase {
+    class TriangleGroupMesh : public aten::NoHitableMesh {
         friend class object;
 
     public:

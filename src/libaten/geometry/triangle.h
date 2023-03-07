@@ -7,7 +7,7 @@
 #include "math/mat4.h"
 #include "geometry/geomparam.h"
 #include "geometry/transformable.h"
-#include "geometry/geombase.h"
+#include "geometry/NoHitableMesh.h"
 #include "geometry/vertex.h"
 
 namespace AT_NAME
@@ -66,7 +66,7 @@ namespace AT_NAME
 
         const aten::TriangleParameter& getParam() const
         {
-            return param;
+            return param_;
         }
 
         int32_t getId() const
@@ -87,7 +87,7 @@ namespace AT_NAME
         }
 
     private:
-        aten::TriangleParameter param;
+        aten::TriangleParameter param_;
         int32_t m_id{ -1 };
     };
 }

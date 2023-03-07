@@ -6,12 +6,12 @@
 
 namespace aten
 {
-    class geombase {
+    class NoHitableMesh {
     protected:
         static std::atomic<int32_t> g_id;
 
-        geombase();
-        virtual ~geombase() {}
+        NoHitableMesh();
+        virtual ~NoHitableMesh() {}
 
     public:
         int32_t getGeomId() const

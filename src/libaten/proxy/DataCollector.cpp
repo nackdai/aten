@@ -39,8 +39,10 @@ namespace aten {
             }
             else if (type == ObjectType::Sphere)
             {
+                // TODO
+                AT_ASSERT(false);
                 auto param = s->getParam();
-                param.sphere.mtrl_id = s->getMaterial()->id();
+                param.sphere.mtrl_id = -1;
                 shapeparams.push_back(param);
             }
         });

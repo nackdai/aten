@@ -34,7 +34,7 @@ namespace aten
         }
 
         instance(
-            std::shared_ptr<OBJ> obj,
+            const std::shared_ptr<OBJ>& obj,
             const context& ctxt,
             const vec3& trans,
             const vec3& rot,

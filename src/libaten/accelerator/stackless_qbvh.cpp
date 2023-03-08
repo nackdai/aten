@@ -278,7 +278,7 @@ namespace aten
                 item = const_cast<hitable*>(internalObj);
             }
 
-            qbvhNode.meshid = (float)item->geomid();
+            qbvhNode.meshid = (float)item->mesh_id();
 
             if (isPrimitiveLeaf) {
                 // Leaves of this tree are primitive.

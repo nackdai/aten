@@ -55,7 +55,7 @@ namespace AT_NAME
             aten::SamplePosNormalPdfResult* result,
             aten::sampler* sampler) const override;
 
-        virtual int32_t geomid() const override;
+        virtual int32_t mesh_id() const override;
 
         void build(
             const aten::context& ctxt,

@@ -8,18 +8,18 @@ namespace aten
 {
     class NoHitableMesh {
     protected:
-        static std::atomic<int32_t> g_id;
+        static std::atomic<int32_t> g_mesh_id;
 
         NoHitableMesh();
         virtual ~NoHitableMesh() {}
 
     public:
-        int32_t getGeomId() const
+        int32_t get_mesh_id() const
         {
-            return m_geomid;
+            return mesh_id_;
         }
 
     protected:
-        int32_t m_geomid{ -1 };
+        int32_t mesh_id_{ -1 };
     };
 }

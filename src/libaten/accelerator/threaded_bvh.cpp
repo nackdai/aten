@@ -208,7 +208,7 @@ namespace aten
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                gpunode.meshid = (float)item->geomid();
+                gpunode.meshid = (float)item->mesh_id();
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.
@@ -497,7 +497,7 @@ namespace aten
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                gpunode.meshid = (float)item->geomid();
+                gpunode.meshid = (float)item->mesh_id();
 
                 int32_t exid = node->getExternalId();
                 int32_t subexid = node->getSubExternalId();

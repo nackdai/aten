@@ -71,7 +71,7 @@ namespace AT_NAME
 
         virtual uint32_t getTriangleCount() const override final
         {
-            return m_triangles;
+            return m_param.triangle_num;
         }
 
         void build(const aten::context& ctxt);
@@ -118,7 +118,6 @@ namespace AT_NAME
         std::vector<std::shared_ptr<TriangleGroupMesh>> m_shapes;
 
         std::shared_ptr<aten::accelerator> m_accel;
-        uint32_t m_triangles{ 0 };
 
         std::string name_;
     };

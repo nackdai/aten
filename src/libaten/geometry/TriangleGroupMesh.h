@@ -59,14 +59,14 @@ namespace AT_NAME
 
         const std::vector<std::shared_ptr<triangle>>& tris() const
         {
-            return faces;
+            return triangles_;
         }
 
         aten::aabb m_aabb;
 
     private:
         std::shared_ptr<material> m_mtrl;
-        std::vector<std::shared_ptr<triangle>> faces;
+        std::vector<std::shared_ptr<triangle>> triangles_;
 
         aten::GeomIndexBuffer m_ib;
 

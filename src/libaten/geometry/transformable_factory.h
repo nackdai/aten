@@ -22,7 +22,7 @@ namespace aten
             context& ctxt,
             const aten::vec3& center,
             real radius,
-            const std::shared_ptr<material> mtrl)
+            const std::shared_ptr<material>& mtrl)
         {
             auto ret = std::make_shared<sphere>(center, radius, mtrl);
             AT_ASSERT(ret);
@@ -45,7 +45,7 @@ namespace aten
         template <typename T>
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
-            const std::shared_ptr<T> obj)
+            const std::shared_ptr<T>& obj)
         {
             auto ret = std::make_shared<instance<T>>(obj, ctxt);
             AT_ASSERT(ret);
@@ -58,7 +58,7 @@ namespace aten
         template <typename T>
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
-            const std::shared_ptr<T> obj,
+            const std::shared_ptr<T>& obj,
             const mat4& mtxL2W)
         {
             auto ret = std::make_shared<instance<T>>(obj, ctxt, mtxL2W);
@@ -72,7 +72,7 @@ namespace aten
         template <typename T>
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
-            const std::shared_ptr<T> obj,
+            const std::shared_ptr<T>& obj,
             const vec3& trans,
             const vec3& rot,
             const vec3& scale)

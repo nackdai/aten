@@ -10,7 +10,7 @@ namespace AT_NAME
 {
     TriangleGroupMesh::~TriangleGroupMesh()
     {
-        faces.clear();
+        triangles_.clear();
     }
 
     float TriangleGroupMesh::build(const context& ctxt)
@@ -23,7 +23,7 @@ namespace AT_NAME
         int32_t mtrlid = getMaterial()->id();
         int32_t geomid = get_mesh_id();
 
-        for (const auto f : faces) {
+        for (const auto f : triangles_) {
             f->build(ctxt, mtrlid, geomid);
 
             const auto& faceParam = f->getParam();
@@ -41,9 +41,9 @@ namespace AT_NAME
         if (window::isInitialized())
         {
             std::vector<uint32_t> idx;
-            idx.reserve(faces.size() * 3);
+            idx.reserve(triangles_.size() * 3);
 
-            for (const auto f : faces) {
+            for (const auto f : triangles_) {
                 const auto& faceParam = f->getParam();
 
                 idx.push_back(faceParam.idx[0]);
@@ -68,7 +68,7 @@ namespace AT_NAME
         int32_t baseIdx = std::min(idx0, std::min(idx1, idx2));
         m_baseIdx = std::min(baseIdx, m_baseIdx);
 
-        faces.push_back(f);
+        triangles_.push_back(f);
 
         m_baseTriIdx = std::min(f->getId(), m_baseTriIdx);
     }
@@ -86,7 +86,7 @@ namespace AT_NAME
 
         const auto& vb = ctxt.getVB();
 
-        auto triNum = (uint32_t)faces.size();
+        auto triNum = (uint32_t)triangles_.size();
 
         m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
     }
@@ -108,7 +108,7 @@ namespace AT_NAME
 
         const auto& vb = ctxt.getVB();
 
-        auto triNum = (uint32_t)faces.size();
+        auto triNum = (uint32_t)triangles_.size();
 
         m_ib.draw(vb, aten::Primitive::Triangles, 0, triNum);
     }

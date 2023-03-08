@@ -15,7 +15,7 @@ namespace AT_NAME
 
     void PolygonObject::build(const context& ctxt)
     {
-        if (m_triangles > 0) {
+        if (m_param.triangle_num > 0) {
             // Builded already.
             return;
         }
@@ -24,12 +24,12 @@ namespace AT_NAME
             m_accel = aten::accelerator::createAccelerator();
         }
 
-        m_param.triangle_id = m_shapes[0]->faces[0]->getId();
+        m_param.triangle_id = m_shapes[0]->triangles_[0]->getId();
 
         m_param.area = 0;
-        m_triangles = 0;
+        uint32_t triangles = 0;
 
-        // Avoid sorting TriangleGroupMesh list in bvh::build directly.
+        // Avoid sorting triangle group mesh list in bvh::build directly.
         std::vector<triangle*> tmp;
 
         aabb bbox;
@@ -38,16 +38,16 @@ namespace AT_NAME
             auto mesh_area = s->build(ctxt);
 
             m_param.area += mesh_area;
-            m_triangles += (uint32_t)s->faces.size();
+            triangles += (uint32_t)s->triangles_.size();
 
-            for (const auto f : s->faces) {
+            for (const auto f : s->triangles_) {
                 tmp.push_back(f.get());
             }
 
             aabb::merge(bbox, s->m_aabb);
         }
 
-        m_param.triangle_num = m_triangles;
+        m_param.triangle_num = triangles;
 
         m_accel->asNested();
         m_accel->build(ctxt, (hitable**)&tmp[0], (uint32_t)tmp.size(), &bbox);
@@ -59,23 +59,23 @@ namespace AT_NAME
 
     void PolygonObject::buildForRasterizeRendering(const context& ctxt)
     {
-        if (m_triangles > 0) {
+        if (m_param.triangle_num > 0) {
             // Builded already.
             return;
         }
 
-        m_param.triangle_id = m_shapes[0]->faces[0]->getId();
+        m_param.triangle_id = m_shapes[0]->triangles_[0]->getId();
 
         m_param.area = 0;
-        m_triangles = 0;
+        uint32_t triangles = 0;
 
         for (const auto& s : m_shapes) {
             s->build(ctxt);
 
-            m_triangles += (uint32_t)s->faces.size();
+            triangles += (uint32_t)s->triangles_.size();
         }
 
-        m_param.triangle_num = m_triangles;
+        m_param.triangle_num = triangles;
     }
 
     bool PolygonObject::hit(
@@ -147,11 +147,11 @@ namespace AT_NAME
     {
         auto r = sampler->nextSample();
         int32_t shapeidx = (int32_t)(r * (m_shapes.size() - 1));
-        auto& TriangleGroupMesh = m_shapes[shapeidx];
+        auto& triangle_group_mesh = m_shapes[shapeidx];
 
         r = sampler->nextSample();
-        int32_t faceidx = (int32_t)(r * (TriangleGroupMesh->faces.size() - 1));
-        auto f = TriangleGroupMesh->faces[faceidx];
+        int32_t faceidx = (int32_t)(r * (triangle_group_mesh->triangles_.size() - 1));
+        auto f = triangle_group_mesh->triangles_[faceidx];
 
         const auto& faceParam = f->getParam();
 
@@ -246,8 +246,8 @@ namespace AT_NAME
 
     void PolygonObject::collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
     {
-        for (const auto& TriangleGroupMesh : m_shapes) {
-            const auto& tris = TriangleGroupMesh->tris();
+        for (const auto& triangle_group_mesh : m_shapes) {
+            const auto& tris = triangle_group_mesh->tris();
 
             triangles.reserve(tris.size());
 

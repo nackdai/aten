@@ -40,7 +40,7 @@ namespace aten
         int32_t mtx_id{ -1 };       ///< Index of matrix which geometry refers.
 
         int32_t triangle_id{ -1 };  ///< First index of triangles in geometry.
-        int32_t triangle_num{ 0 };  ///< Number of triangles in geometry.
+        uint32_t triangle_num{ 0 };  ///< Number of triangles in geometry.
 
         int32_t padding{ 0 };
 

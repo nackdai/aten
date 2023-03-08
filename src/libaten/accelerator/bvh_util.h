@@ -97,7 +97,7 @@ namespace aten {
                 }
 
                 // TODO
-                auto obj = (AT_NAME::object*)item;
+                auto obj = (AT_NAME::PolygonObject*)item;
 
                 auto nestedBvh = obj->getInternalAccelerator();
 

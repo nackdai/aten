@@ -16,7 +16,7 @@ static aten::context g_ctxt;
 
 static aten::RasterizeRenderer g_rasterizer;
 
-std::vector<std::shared_ptr<aten::object>> g_objs;
+std::vector<std::shared_ptr<aten::PolygonObject>> g_objs;
 std::vector<bool> g_objenable;
 
 std::shared_ptr<aten::visualizer> g_visualizer;
@@ -216,7 +216,7 @@ void onKey(bool press, aten::Key key)
 void loadObj(
     const char* objpath,
     const char* mtrlpath,
-    std::vector<std::shared_ptr<aten::object>>& objs)
+    std::vector<std::shared_ptr<aten::PolygonObject>>& objs)
 {
     std::string pathname;
     std::string extname;

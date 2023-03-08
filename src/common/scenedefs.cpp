@@ -2,11 +2,11 @@
 
 #include <array>
 
-static std::shared_ptr<aten::instance<aten::object>> g_movableObj;
+static std::shared_ptr<aten::instance<aten::PolygonObject>> g_movableObj;
 static std::shared_ptr<aten::instance<aten::deformable>> s_deformMdl;
 static std::shared_ptr<aten::DeformAnimation> s_deformAnm;
 
-std::shared_ptr<aten::instance<aten::object>> getMovableObj()
+std::shared_ptr<aten::instance<aten::PolygonObject>> getMovableObj()
 {
     return g_movableObj;
 }
@@ -203,7 +203,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     mtxL2W = mtxT * mtxL2W * mtxS;
 
-    auto glass = aten::TransformableFactory::createInstance<aten::object>(ctxt, obj, mtxL2W);
+    auto glass = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtxL2W);
 #endif
 
     scene->add(light);
@@ -382,7 +382,7 @@ void ObjectScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     mtxL2W = mtxL2W * mm;
 
-    auto instance = aten::TransformableFactory::createInstance<aten::object>(ctxt, obj, mtxL2W);
+    auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtxL2W);
 
     scene->add(instance);
 }
@@ -923,7 +923,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         "light",
         emit);
 
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt,
         [&](const std::string& name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
@@ -968,7 +968,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
         },
         true, true);
 
-    auto light = aten::TransformableFactory::createInstance<aten::object>(
+    auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
         objs[0],
         aten::vec3(0),
@@ -982,7 +982,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     scene->addLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {
-        auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[i], aten::mat4::Identity);
+        auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
         scene->add(box);
     }
 }
@@ -1001,7 +1001,7 @@ void ObjCornellBoxScene::getCameraPosAndAt(
 
 void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
     aten::ObjLoader::load(
         objs, "../../asset/sponza/sponza.obj", ctxt,
@@ -1023,7 +1023,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     objs[0]->importInternalAccelTree("../../asset/sponza/sponza.sbvh", ctxt, 0);
 
-    auto sponza = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[0], aten::mat4::Identity);
+    auto sponza = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
 
 #if 1
     {
@@ -1066,10 +1066,10 @@ void BunnyScene::makeScene(aten::context& ctxt, aten::scene* scene)
         "m1",
         createMaterialWithParamter(ctxt, aten::MaterialType::Lambert_Refraction, mtrlParam));
 
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
     aten::ObjLoader::load(objs, "../../asset/teapot/teapot.obj", ctxt);
-    auto bunny = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[0], aten::mat4::Identity);
+    auto bunny = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
     scene->add(bunny);
 }
 
@@ -1146,11 +1146,11 @@ void DeformInBoxScene::makeScene(
             "rightWall",
             createMaterial(ctxt, aten::MaterialType::Lambert, aten::vec3(0.112000, 0.360000, 0.072800)));
 
-        std::vector<std::shared_ptr<aten::object>> objs;
+        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
         aten::ObjLoader::load(objs, "../../asset/cornellbox/box.obj", ctxt, nullptr, false);
 
-        auto light = aten::TransformableFactory::createInstance<aten::object>(
+        auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
             ctxt,
             objs[0],
             aten::vec3(0),
@@ -1161,7 +1161,7 @@ void DeformInBoxScene::makeScene(
         auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
         scene->addLight(areaLight);
 
-        auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[1], aten::mat4::Identity);
+        auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[1], aten::mat4::Identity);
         scene->add(box);
     }
 #endif
@@ -1237,10 +1237,10 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
         "tallBox",
         tall);
 
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt, nullptr, true, true);
 
-    auto light = aten::TransformableFactory::createInstance<aten::object>(
+    auto light = aten::TransformableFactory::createInstance<aten::PolygonObject>(
         ctxt,
         objs[0],
         aten::vec3(0),
@@ -1254,7 +1254,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     scene->addLight(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {
-        auto box = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[i], aten::mat4::Identity);
+        auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
         scene->add(box);
     }
 }
@@ -1273,7 +1273,7 @@ void AlphaBlendedObjCornellBoxScene::getCameraPosAndAt(
 
 void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 {
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
 
     aten::ObjLoader::load(
         objs, "../../asset/models/sponza/sponza.obj", ctxt,
@@ -1295,7 +1295,7 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     objs[0]->importInternalAccelTree("../../asset/crytek_sponza/sponza.sbvh", ctxt, 0);
 
-    auto sponza = aten::TransformableFactory::createInstance<aten::object>(ctxt, objs[0], aten::mat4::Identity);
+    auto sponza = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[0], aten::mat4::Identity);
 
     scene->add(sponza);
 }

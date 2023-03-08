@@ -200,7 +200,7 @@ namespace aten {
         const std::string& path,
         const std::string& mtrlPath,
         const context& ctxt,
-        const std::vector<std::shared_ptr<aten::object>>& objs)
+        const std::vector<std::shared_ptr<aten::PolygonObject>>& objs)
     {
         std::string mtrlPathName;
         std::string extname;

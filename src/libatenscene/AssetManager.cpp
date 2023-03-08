@@ -6,7 +6,7 @@ namespace aten {
     struct Asset {
         std::shared_ptr<texture> tex;
         std::shared_ptr<material> mtrl;
-        std::shared_ptr<object> obj;
+        std::shared_ptr<aten::PolygonObject> obj;
 
         AssetManager::AssetType type;
 
@@ -16,7 +16,7 @@ namespace aten {
             : tex(t), type(AssetManager::AssetType::Texture) {}
         Asset(const std::shared_ptr<material> m)
             : mtrl(m), type(AssetManager::AssetType::Material) {}
-        Asset(const std::shared_ptr<object> o)
+        Asset(const std::shared_ptr<aten::PolygonObject> o)
             : obj(o), type(AssetManager::AssetType::Object) {}
 
         Asset(const Asset& rhs) = delete;
@@ -160,12 +160,12 @@ namespace aten {
         return asset.tex;
     }
 
-    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<object>& obj)
+    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<aten::PolygonObject>& obj)
     {
         return registerAsset(name, obj, AssetType::Object);
     }
 
-    std::shared_ptr<object> AssetManager::getObj(const std::string& name)
+    std::shared_ptr<aten::PolygonObject> AssetManager::getObj(const std::string& name)
     {
         auto& asset = getAsset(name, AssetType::Object);
         return asset.obj;

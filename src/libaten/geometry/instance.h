@@ -5,7 +5,7 @@
 #include "types.h"
 #include "accelerator/bvh.h"
 #include "math/mat4.h"
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "deformable/deformable.h"
 #include "scene/context.h"
 
@@ -261,7 +261,7 @@ namespace aten
     };
 
     template<>
-    inline instance<object>::instance(const std::shared_ptr<object>& obj, const context& ctxt)
+    inline instance<PolygonObject>::instance(const std::shared_ptr<PolygonObject>& obj, const context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
         m_obj->build(ctxt);

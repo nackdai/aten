@@ -349,9 +349,6 @@
     <ClInclude Include="..\src\libaten\geometry\geomparam.h">
       <Filter>geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\geometry\object.h">
-      <Filter>geometry</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\sphere.h">
       <Filter>geometry</Filter>
     </ClInclude>
@@ -505,6 +502,9 @@
     <ClInclude Include="..\src\libaten\geometry\NoHitableMesh.h">
       <Filter>geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\PolygonObject.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -654,9 +654,6 @@
     <ClCompile Include="..\src\libaten\accelerator\stackless_qbvh.cpp">
       <Filter>accelerator</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\geometry\object.cpp">
-      <Filter>geometry</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\sphere.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
@@ -787,6 +784,9 @@
       <Filter>geometry</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\NoHitableMesh.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\geometry\PolygonObject.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
   </ItemGroup>

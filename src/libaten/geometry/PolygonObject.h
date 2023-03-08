@@ -15,15 +15,15 @@ namespace AT_NAME
     /**
     * @brief Object is polygons to have the multiple materials.
     **/
-    class object : public aten::transformable {
+    class PolygonObject : public aten::transformable {
         friend class TransformableFactory;
 
     public:
-        object()
+        PolygonObject()
             : transformable(aten::ObjectType::Polygon)
         {}
 
-        virtual ~object();
+        virtual ~PolygonObject();
 
         virtual bool hit(
             const aten::context& ctxt,

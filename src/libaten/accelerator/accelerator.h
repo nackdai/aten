@@ -28,7 +28,7 @@ namespace aten {
      * @brief Base class for acceleration structure.
      */
     class accelerator : public hitable {
-        friend class object;
+        friend class PolygonObject;
         friend class deformable;
         template<typename ACCEL> friend class AcceleratedScene;
 

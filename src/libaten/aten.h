@@ -85,7 +85,7 @@
 #include "sampler/sobolproxy.h"
 #include "sampler/wanghash.h"
 
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "geometry/TriangleGroupMesh.h"
 #include "geometry/triangle.h"
 #include "geometry/vertex.h"

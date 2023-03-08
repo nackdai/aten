@@ -278,7 +278,7 @@ namespace aten
                 throw new std::exception();
             }
 
-            std::shared_ptr<object> obj;
+            std::shared_ptr<aten::PolygonObject> obj;
 
             if (type == "object") {
                 obj = ObjLoader::load(path, ctxt);
@@ -299,7 +299,7 @@ namespace aten
             auto mtxL2W = mtxT * mtxRotX * mtxRotY * mtxRotZ * mtxS;
 
             if (obj) {
-                auto instance = aten::TransformableFactory::createInstance<aten::object>(ctxt, obj, mtxL2W);
+                auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, obj, mtxL2W);
                 objs.insert(std::pair<std::string, std::shared_ptr<transformable>>(tag, instance));
             }
             else {

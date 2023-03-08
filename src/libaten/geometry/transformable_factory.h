@@ -2,7 +2,7 @@
 
 #include "geometry/transformable.h"
 #include "geometry/sphere.h"
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "geometry/instance.h"
 #include "scene/context.h"
 #include "deformable/deformable.h"
@@ -32,9 +32,9 @@ namespace aten
             return ret;
         }
 
-        static std::shared_ptr<object> createObject(context& ctxt)
+        static std::shared_ptr<AT_NAME::PolygonObject> createObject(context& ctxt)
         {
-            auto ret = std::make_shared<object>();
+            auto ret = std::make_shared<AT_NAME::PolygonObject>();
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);

@@ -21,12 +21,12 @@ namespace aten
 
         static void setBasePath(const std::string& base);
 
-        static std::shared_ptr<object> load(
+        static std::shared_ptr<aten::PolygonObject> load(
             const std::string& path,
             context& ctxt,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
-        static std::shared_ptr<object> load(
+        static std::shared_ptr<aten::PolygonObject> load(
             const std::string& tag,
             const std::string& path,
             context& ctxt,
@@ -34,14 +34,14 @@ namespace aten
             bool needComputeNormalOntime = false);
 
         static void load(
-            std::vector<std::shared_ptr<object>>& objs,
+            std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             const std::string& path,
             context& ctxt,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);
         static void load(
-            std::vector<std::shared_ptr<object>>& objs,
+            std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             const std::string& tag,
             const std::string& path,
             context& ctxt,

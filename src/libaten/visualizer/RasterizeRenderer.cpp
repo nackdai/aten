@@ -376,7 +376,7 @@ namespace aten
 
     void RasterizeRenderer::drawObject(
         context &ctxt,
-        const object &obj,
+        const AT_NAME::PolygonObject &obj,
         const camera *cam,
         bool isWireFrame,
         const mat4 &mtxL2W)
@@ -515,7 +515,7 @@ namespace aten
         auto hColor = m_shader.getHandle("color");
         auto hMtrlId = m_shader.getHandle("materialId");
 
-        renderFunc([&](const object &obj)
+        renderFunc([&](const AT_NAME::PolygonObject&obj)
                    { obj.draw([&](const aten::vec3 &color, const aten::texture *albedo, int32_t mtrlid)
                               {
                 if (hHasAlbedo >= 0) {

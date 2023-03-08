@@ -2,7 +2,7 @@
 #include <iterator>
 
 #include "proxy/DataCollector.h"
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 
 namespace aten {
     void DataCollector::collect(
@@ -26,7 +26,7 @@ namespace aten {
                 param.object_id = idx;
 
                 // TODO
-                param.area = ((aten::object*)obj)->getParam().area;
+                param.area = ((aten::PolygonObject*)obj)->getParam().area;
 
                 shapeparams.push_back(param);
             }

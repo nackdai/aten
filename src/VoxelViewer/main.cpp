@@ -18,7 +18,7 @@ struct Options {
     std::string inputFilename;
 } g_opt;
 
-static std::vector<std::shared_ptr<aten::object>> g_objs;
+static std::vector<std::shared_ptr<aten::PolygonObject>> g_objs;
 static aten::AcceleratedScene<aten::sbvh> g_scene;
 static aten::context g_ctxt;
 
@@ -257,7 +257,7 @@ void loadObj(const Options& opt)
 #endif
 
     for (auto obj : g_objs) {
-        auto instance = aten::TransformableFactory::createInstance<aten::object>(g_ctxt, obj, aten::mat4::Identity);
+        auto instance = aten::TransformableFactory::createInstance<aten::PolygonObject>(g_ctxt, obj, aten::mat4::Identity);
         g_scene.add(instance);
     }
 

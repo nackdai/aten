@@ -1,7 +1,7 @@
 #include "aten.h"
 #include "atenscene.h"
 
-std::shared_ptr<aten::instance<aten::object>> getMovableObj();
+std::shared_ptr<aten::instance<aten::PolygonObject>> getMovableObj();
 std::shared_ptr<aten::instance<aten::deformable>> getDeformable();
 std::shared_ptr<aten::DeformAnimation> getDeformAnm();
 

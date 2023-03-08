@@ -5,7 +5,7 @@
 #include <stack>
 
 #include "accelerator/accelerator.h"
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "geometry/transformable.h"
 #include "scene/hitable.h"
 

@@ -11,7 +11,7 @@ namespace aten
 {
     bool AssimpImporter::load(
         const std::string& path,
-        std::vector<std::shared_ptr<aten::object>>& objs,
+        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         context& ctxt,
         FuncCreateMaterial func_create_mtrl)
     {
@@ -123,7 +123,7 @@ namespace aten
 
     bool createObject(
         context& ctxt,
-        std::vector<std::shared_ptr<aten::object>>& objs,
+        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         const aiNode* assimp_node,
         const aiScene* assimp_scene,
         const std::vector<std::string>& mtrl_list)
@@ -298,7 +298,7 @@ namespace aten
 
     bool AssimpImporter::loadModel(
         const std::string& path,
-        std::vector<std::shared_ptr<aten::object>>& objs,
+        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         context& ctxt,
         FuncCreateMaterial func_create_mtrl)
     {

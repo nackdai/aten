@@ -3,7 +3,7 @@
 
 #include "accelerator/bvh.h"
 #include "accelerator/bvh_node.h"
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "geometry/transformable.h"
 
 //#define TEST_NODE_LIST

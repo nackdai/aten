@@ -6,7 +6,7 @@
 #include "visualizer/shader.h"
 #include "visualizer/GeomDataBuffer.h"
 #include "math/mat4.h"
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "scene/context.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
@@ -85,12 +85,12 @@ namespace aten {
 
         void drawObject(
             context& ctxt,
-            const object& obj,
+            const AT_NAME::PolygonObject& obj,
             const camera* cam,
             bool isWireFrame,
             const mat4& mtxL2W = mat4::Identity);
 
-        using FuncObjRenderer = std::function<void(const object&)>;
+        using FuncObjRenderer = std::function<void(const AT_NAME::PolygonObject&)>;
 
         void drawWithOutsideRenderFunc(
             context& ctxt,

@@ -16,7 +16,7 @@ namespace aten
 
         static bool load(
             const std::string& path,
-            std::vector<std::shared_ptr<aten::object>>& objs,
+            std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             context& ctxt,
             FuncCreateMaterial func_create_mtrl);
 
@@ -31,7 +31,7 @@ namespace aten
 
         bool loadModel(
             const std::string& path,
-            std::vector<std::shared_ptr<aten::object>>& objs,
+            std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
             context& ctxt,
             FuncCreateMaterial func_create_mtrl);
 

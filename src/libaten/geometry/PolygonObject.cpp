@@ -1,6 +1,6 @@
 #include <iterator>
 
-#include "geometry/object.h"
+#include "geometry/PolygonObject.h"
 #include "math/intersect.h"
 #include "accelerator/accelerator.h"
 
@@ -8,12 +8,12 @@
 
 namespace AT_NAME
 {
-    object::~object()
+    PolygonObject::~PolygonObject()
     {
         m_shapes.clear();
     }
 
-    void object::build(const context& ctxt)
+    void PolygonObject::build(const context& ctxt)
     {
         if (m_triangles > 0) {
             // Builded already.
@@ -57,7 +57,7 @@ namespace AT_NAME
         setBoundingBox(bbox);
     }
 
-    void object::buildForRasterizeRendering(const context& ctxt)
+    void PolygonObject::buildForRasterizeRendering(const context& ctxt)
     {
         if (m_triangles > 0) {
             // Builded already.
@@ -78,7 +78,7 @@ namespace AT_NAME
         m_param.triangle_num = m_triangles;
     }
 
-    bool object::hit(
+    bool PolygonObject::hit(
         const context& ctxt,
         const aten::ray& r,
         real t_min, real t_max,
@@ -95,7 +95,7 @@ namespace AT_NAME
         return isHit;
     }
 
-    void object::evalHitResult(
+    void PolygonObject::evalHitResult(
         const context& ctxt,
         const aten::ray& r,
         const aten::mat4& mtxL2W,
@@ -139,7 +139,7 @@ namespace AT_NAME
         rec.mtrlid = isect.mtrlid;
     }
 
-    void object::getSamplePosNormalArea(
+    void PolygonObject::getSamplePosNormalArea(
         const context& ctxt,
         aten::SamplePosNormalPdfResult* result,
         const aten::mat4& mtxL2W,
@@ -184,7 +184,7 @@ namespace AT_NAME
         result->area = area;
     }
 
-    void object::render(
+    void PolygonObject::render(
         aten::hitable::FuncPreDraw func,
         const context& ctxt,
         const aten::mat4& mtxL2W,
@@ -202,7 +202,7 @@ namespace AT_NAME
         }
     }
 
-    void object::draw(
+    void PolygonObject::draw(
         AT_NAME::FuncObjectMeshDraw func,
         const context& ctxt) const
     {
@@ -211,14 +211,14 @@ namespace AT_NAME
         }
     }
 
-    void object::drawAABB(
+    void PolygonObject::drawAABB(
         aten::hitable::FuncDrawAABB func,
         const aten::mat4& mtxL2W)
     {
         m_accel->drawAABB(func, mtxL2W);
     }
 
-    bool object::exportInternalAccelTree(
+    bool PolygonObject::exportInternalAccelTree(
         const context& ctxt,
         const char* path)
     {
@@ -236,7 +236,7 @@ namespace AT_NAME
         return result;
     }
 
-    bool object::importInternalAccelTree(const char* path, const context& ctxt, int32_t offsetTriIdx)
+    bool PolygonObject::importInternalAccelTree(const char* path, const context& ctxt, int32_t offsetTriIdx)
     {
         AT_ASSERT(!m_accel);
 
@@ -244,7 +244,7 @@ namespace AT_NAME
         return m_accel->importTree(ctxt, path, offsetTriIdx);
     }
 
-    void object::collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
+    void PolygonObject::collectTriangles(std::vector<aten::TriangleParameter>& triangles) const
     {
         for (const auto& TriangleGroupMesh : m_shapes) {
             const auto& tris = TriangleGroupMesh->tris();

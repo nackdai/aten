@@ -83,7 +83,7 @@ int32_t main(int32_t argc, char* argv[])
         nullptr, nullptr, nullptr);
     aten::AssetManager::registerMtrl("light", emit);
 
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::ObjLoader::load(objs, opt.input, ctxt);
 
     if (objs.empty()) {

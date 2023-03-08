@@ -21,7 +21,7 @@ static aten::context g_ctxt;
 
 static aten::RasterizeRenderer g_rasterizer;
 
-static std::shared_ptr<aten::object> g_obj;
+static std::shared_ptr<aten::PolygonObject> g_obj;
 
 static aten::PinholeCamera g_camera;
 static bool g_isCameraDirty = false;
@@ -168,7 +168,7 @@ void onKey(bool press, aten::Key key)
     }
 }
 
-std::shared_ptr<aten::object> loadObj(
+std::shared_ptr<aten::PolygonObject> loadObj(
     const char* objpath,
     const char* mtrlpath)
 {
@@ -196,7 +196,7 @@ std::shared_ptr<aten::object> loadObj(
         aten::AssetManager::registerMtrl("dummy", mtrl);
     }
 
-    std::vector<std::shared_ptr<aten::object>> objs;
+    std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::AssimpImporter::load(
         "../../asset/simpleScene/box.fbx",
         objs,

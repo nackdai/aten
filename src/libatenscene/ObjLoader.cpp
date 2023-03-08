@@ -16,33 +16,33 @@ namespace aten
         g_base = removeTailPathSeparator(base);
     }
 
-    std::shared_ptr<object> ObjLoader::load(
+    std::shared_ptr<aten::PolygonObject> ObjLoader::load(
         const std::string& path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        std::vector<std::shared_ptr<object>> objs;
+        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
         load(objs, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
 
-    std::shared_ptr<object> ObjLoader::load(
+    std::shared_ptr<aten::PolygonObject> ObjLoader::load(
         const std::string& tag,
         const std::string& path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
     {
-        std::vector<std::shared_ptr<object>> objs;
+        std::vector<std::shared_ptr<aten::PolygonObject>> objs;
         load(objs, tag, path, ctxt, callback_crate_mtrl, needComputeNormalOntime);
 
         return (!objs.empty() ? objs[0] : nullptr);
     }
 
     void ObjLoader::load(
-        std::vector<std::shared_ptr<object>>& objs,
+        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         const std::string& path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
@@ -68,7 +68,7 @@ namespace aten
     }
 
     void ObjLoader::load(
-        std::vector<std::shared_ptr<object>>& objs,
+        std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
         const std::string& tag,
         const std::string& path,
         context& ctxt,
@@ -106,8 +106,7 @@ namespace aten
             return;
         }
 
-        std::shared_ptr<object> obj(
-            aten::TransformableFactory::createObject(ctxt));
+        auto obj(aten::TransformableFactory::createObject(ctxt));
 
         vec3 shapemin = vec3(AT_MATH_INF);
         vec3 shapemax = vec3(-AT_MATH_INF);
@@ -249,8 +248,7 @@ namespace aten
 
                         if (mtrl->param().type == aten::MaterialType::Emissive) {
                             // Export the object which has an emissive material as the emissive object.
-                            std::shared_ptr<object> emitobj(
-                                aten::TransformableFactory::createObject(ctxt));
+                            auto emitobj(aten::TransformableFactory::createObject(ctxt));
                             emitobj->appendShape(dst_shape);
                             emitobj->setBoundingBox(aten::aabb(pmin, pmax));
                             objs.push_back(std::move(emitobj));
@@ -400,8 +398,7 @@ namespace aten
                 }
                 else if (mtrl->param().type == aten::MaterialType::Emissive) {
                     // Export the object which has an emissive material as the emissive object.
-                    std::shared_ptr<object> emitobj(
-                        aten::TransformableFactory::createObject(ctxt));
+                    auto emitobj(aten::TransformableFactory::createObject(ctxt));
                     emitobj->appendShape(dst_shape);
                     emitobj->setBoundingBox(aten::aabb(pmin, pmax));
                     objs.push_back(std::move(emitobj));

@@ -23,7 +23,12 @@ namespace AT_NAME
         TriangleGroupMesh() = default;
         virtual ~TriangleGroupMesh();
 
-        void build(const aten::context& ctxt);
+        /**
+        * @brief Build TriangleGroupMesh.
+        *
+        * @return Area of this mesh.
+        **/
+        float build(const aten::context& ctxt);
 
         void setMaterial(const std::shared_ptr<material>& mtrl)
         {
@@ -57,16 +62,9 @@ namespace AT_NAME
             return faces;
         }
 
-        real get_area() const
-        {
-            return area_;
-        }
-
         aten::aabb m_aabb;
 
     private:
-        real area_{ 0 };
-
         std::shared_ptr<material> m_mtrl;
         std::vector<std::shared_ptr<triangle>> faces;
 

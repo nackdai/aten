@@ -35,9 +35,9 @@ namespace AT_NAME
         aabb bbox;
 
         for (const auto& s : m_shapes) {
-            s->build(ctxt);
+            auto mesh_area = s->build(ctxt);
 
-            m_param.area += s->get_area();
+            m_param.area += mesh_area;
             m_triangles += (uint32_t)s->faces.size();
 
             for (const auto f : s->faces) {

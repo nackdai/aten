@@ -135,7 +135,7 @@ namespace aten {
             return (getHasObject() != nullptr);
         }
 
-        virtual int32_t geomid() const
+        virtual int32_t mesh_id() const
         {
             return -1;
         }

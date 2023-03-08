@@ -208,7 +208,7 @@ namespace AT_NAME
         result->triangle_id = m_id;
     }
 
-    int32_t triangle::geomid() const
+    int32_t triangle::mesh_id() const
     {
         return param_.mesh_id;
     }

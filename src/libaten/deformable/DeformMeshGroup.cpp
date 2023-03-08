@@ -147,7 +147,7 @@ namespace aten
 
             int32_t mtrlId = ctxt.findMaterialIdxByName(mtrlDesc.name);
 
-            int32_t geomId = m_meshs[i].getGeomId();
+            int32_t geomId = m_meshs[i].get_mesh_id();
 
             const auto& prims = m_meshs[i].getPrimitives();
 

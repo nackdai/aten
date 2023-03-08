@@ -169,7 +169,7 @@ namespace aten {
                     item = const_cast<hitable*>(internalObj);
                 }
 
-                stacklessBvhNode.meshid = (float)item->geomid();
+                stacklessBvhNode.meshid = (float)item->mesh_id();
 
                 if (isPrimitiveLeaf) {
                     // Leaves of this tree are primitive.

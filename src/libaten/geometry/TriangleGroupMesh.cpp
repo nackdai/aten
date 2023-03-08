@@ -13,21 +13,21 @@ namespace AT_NAME
         faces.clear();
     }
 
-    void TriangleGroupMesh::build(const context& ctxt)
+    float TriangleGroupMesh::build(const context& ctxt)
     {
         aten::vec3 boxmin(AT_MATH_INF, AT_MATH_INF, AT_MATH_INF);
         aten::vec3 boxmax(-AT_MATH_INF, -AT_MATH_INF, -AT_MATH_INF);
 
-        area_ = 0;
+        float area = 0;
 
         int32_t mtrlid = getMaterial()->id();
-        int32_t geomid = getGeomId();
+        int32_t geomid = get_mesh_id();
 
         for (const auto f : faces) {
             f->build(ctxt, mtrlid, geomid);
 
             const auto& faceParam = f->getParam();
-            area_ += faceParam.area;
+            area += faceParam.area;
 
             const auto& faabb = f->getBoundingbox();
 
@@ -53,6 +53,8 @@ namespace AT_NAME
 
             m_ib.init((uint32_t)idx.size(), &idx[0]);
         }
+
+        return area;
     }
 
     void TriangleGroupMesh::addFace(const std::shared_ptr<triangle>& f)

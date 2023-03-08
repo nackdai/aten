@@ -2,10 +2,10 @@
 
 namespace aten
 {
-    std::atomic<int32_t> NoHitableMesh::g_id(0);
+    std::atomic<int32_t> NoHitableMesh::g_mesh_id(0);
 
     NoHitableMesh::NoHitableMesh()
     {
-        m_geomid = g_id.fetch_add(1);
+        mesh_id_ = g_mesh_id.fetch_add(1);
     }
 }

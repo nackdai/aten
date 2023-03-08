@@ -1,6 +1,6 @@
 #version 450
 precision highp float;
-precision highp int32_t;
+precision highp int;
 
 layout(location = 0) in vec4 pos;
 layout(location = 1) in vec3 normal;
@@ -62,7 +62,7 @@ float getEffectiveRetroreflectiveArea(vec3 into_prismatic_sheet_dir, vec3 normal
 
     float theta = acos(c);
 
-    int32_t idx = int32_t(theta / Step);
+    int idx = int(theta / Step);
 
     float a = 0.0;
     float b = 0.0;

@@ -70,7 +70,6 @@ namespace AT_NAME
 
         aten::GeomIndexBuffer m_ib;
 
-        int32_t m_baseIdx{ INT32_MAX };
         int32_t m_baseTriIdx{ INT32_MAX };
     };
 }

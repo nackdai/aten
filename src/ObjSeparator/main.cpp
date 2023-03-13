@@ -94,17 +94,16 @@ int32_t main(int32_t argc, char* argv[])
     std::vector<aten::TriangleGroupMesh*> shapes;
     std::vector<std::shared_ptr<aten::material>> mtrls;
 
-    auto num = obj->getShapeNum();
+    const auto& meshes = obj->getShapes();
 
-    for (int32_t i = 0; i < num; i++) {
-        const auto shape = obj->getShape(i);
-        auto mtrl = shape->getMaterial();
+    for (const auto mesh : meshes) {
+        auto mtrl = mesh->getMaterial();
 
         std::string mtrlName(mtrl->name());
 
         for (auto name : names) {
             if (mtrlName == name) {
-                shapes.push_back(shape);
+                shapes.push_back(mesh.get());
                 mtrls.push_back(mtrl);
 
                 break;

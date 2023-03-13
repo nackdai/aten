@@ -23,7 +23,7 @@ namespace AT_NAME
             : transformable(aten::ObjectType::Polygon)
         {}
 
-        virtual ~PolygonObject();
+        virtual ~PolygonObject() = default;
 
         virtual bool hit(
             const aten::context& ctxt,
@@ -86,17 +86,6 @@ namespace AT_NAME
         {
             AT_ASSERT(shape);
             m_shapes.push_back(shape);
-        }
-
-        uint32_t getShapeNum() const
-        {
-            return static_cast<uint32_t>(m_shapes.size());
-        }
-
-        TriangleGroupMesh* getShape(uint32_t idx)
-        {
-            AT_ASSERT(idx < getShapeNum());
-            return m_shapes[idx].get();
         }
 
         const std::vector<std::shared_ptr<TriangleGroupMesh>>& getShapes() const

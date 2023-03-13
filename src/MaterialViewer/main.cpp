@@ -89,7 +89,7 @@ void makeScene(aten::scene* scene)
     //g_albedoMap = aten::ImageLoader::load("../../asset/sponza/01_STUB.JPG");
     //g_normalMap = aten::ImageLoader::load("../../asset/sponza/01_STUB-nml.png");
 
-    obj->getShape(0)->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
+    obj->getShapes()[0]->getMaterial()->setTextures(g_albedoMap, g_normalMap, nullptr);
 }
 
 std::shared_ptr<aten::material> createMaterial(aten::MaterialType type)

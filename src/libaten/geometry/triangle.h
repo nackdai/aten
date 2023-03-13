@@ -20,7 +20,7 @@ namespace AT_NAME
 
     public:
         triangle() = default;
-        virtual ~triangle() {}
+        virtual ~triangle() = default;
 
         virtual bool hit(
             const aten::context& ctxt,

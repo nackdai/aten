@@ -65,9 +65,6 @@ namespace AT_NAME
         int32_t idx1 = faceParam.idx[1];
         int32_t idx2 = faceParam.idx[2];
 
-        int32_t baseIdx = std::min(idx0, std::min(idx1, idx2));
-        m_baseIdx = std::min(baseIdx, m_baseIdx);
-
         triangles_.push_back(f);
 
         m_baseTriIdx = std::min(f->getId(), m_baseTriIdx);

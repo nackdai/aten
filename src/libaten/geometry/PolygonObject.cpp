@@ -8,11 +8,6 @@
 
 namespace AT_NAME
 {
-    PolygonObject::~PolygonObject()
-    {
-        m_shapes.clear();
-    }
-
     void PolygonObject::build(const context& ctxt)
     {
         if (m_param.triangle_num > 0) {

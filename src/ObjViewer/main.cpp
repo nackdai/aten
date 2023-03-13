@@ -119,7 +119,7 @@ void onRun(aten::window* window)
 
     for (size_t i = obj_min; i < obj_max; i++) {
         const auto& obj = g_objs[i];
-        auto mtrl_name = obj->getShape(0)->getMaterial()->name();
+        auto mtrl_name = obj->getShapes()[0]->getMaterial()->name();
 
         const auto name_ptr = obj->getName();
         std::string name;

@@ -534,12 +534,6 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 
     rec->mtrlid = isect->mtrlid;
     rec->meshid = isect->meshid;
-
-#ifdef ENABLE_TANGENTCOORD_IN_HITREC
-    // tangent coordinate.
-    rec->du = normalize(getOrthoVector(rec->normal));
-    rec->dv = normalize(cross(rec->normal, rec->du));
-#endif
 }
 
 AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
@@ -562,10 +556,4 @@ AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
     }
 
     rec->mtrlid = isect->mtrlid;
-
-#ifdef ENABLE_TANGENTCOORD_IN_HITREC
-    // tangent coordinate.
-    rec->du = normalize(getOrthoVector(rec->normal));
-    rec->dv = normalize(cross(rec->normal, rec->du));
-#endif
 }

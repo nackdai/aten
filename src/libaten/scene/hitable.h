@@ -10,8 +10,6 @@
 #include "sampler/sampler.h"
 #include "scene/context.h"
 
-//#define ENABLE_TANGENTCOORD_IN_HITREC
-
 namespace aten {
     class hitable;
     class accelerator;
@@ -22,12 +20,6 @@ namespace aten {
 
         vec3 normal;
         int32_t mtrlid{ -1 };
-
-#ifdef ENABLE_TANGENTCOORD_IN_HITREC
-        // tangent coordinate.
-        vec3 du;
-        vec3 dv;
-#endif
 
         // texture coordinate.
         real u{ real(0) };
@@ -179,12 +171,6 @@ namespace aten {
 
                 rec.isVoxel = false;
             }
-
-#ifdef ENABLE_TANGENTCOORD_IN_HITREC
-            // tangent coordinate.
-            rec.du = normalize(getOrthoVector(rec.normal));
-            rec.dv = normalize(cross(rec.normal, rec.du));
-#endif
         }
 
         static void evalHitResultForAreaLight(
@@ -197,12 +183,6 @@ namespace aten {
             obj->evalHitResult(ctxt, r, rec, isect);
             rec.mtrlid = isect.mtrlid;
             rec.meshid = isect.meshid;
-
-#ifdef ENABLE_TANGENTCOORD_IN_HITREC
-            // tangent coordinate.
-            rec.du = normalize(getOrthoVector(rec.normal));
-            rec.dv = normalize(cross(rec.normal, rec.du));
-#endif
         }
 
         using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int32_t parentId, int32_t basePrimId)>;

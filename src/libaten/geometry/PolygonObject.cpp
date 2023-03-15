@@ -97,6 +97,23 @@ namespace AT_NAME
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
+        evaluate_hit_result(
+            m_param,
+            ctxt,
+            r,
+            mtxL2W,
+            rec,
+            isect);
+    }
+
+    void PolygonObject::evaluate_hit_result(
+        const aten::ObjectParameter& obj,
+        const context& ctxt,
+        const aten::ray& r,
+        const aten::mat4& mtxL2W,
+        aten::hitrecord& rec,
+        const aten::Intersection& isect)
+    {
         auto f = ctxt.getTriangle(isect.triangle_id);
 
         auto& vtxs = ctxt.getVertices();
@@ -129,7 +146,7 @@ namespace AT_NAME
         real ratio = scaledLen / orignalLen;
         ratio = ratio * ratio;
 
-        rec.area = m_param.area * ratio;
+        rec.area = obj.area * ratio;
 
         rec.mtrlid = isect.mtrlid;
     }

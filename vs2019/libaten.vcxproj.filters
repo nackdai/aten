@@ -508,6 +508,9 @@
     <ClInclude Include="..\src\libaten\scene\AcceleratedScene.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\EvaluateHitResult.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

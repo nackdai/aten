@@ -281,6 +281,7 @@
     <ClInclude Include="..\src\libaten\filter\magnifier.h" />
     <ClInclude Include="..\src\libaten\filter\nlm.h" />
     <ClInclude Include="..\src\libaten\filter\taa.h" />
+    <ClInclude Include="..\src\libaten\geometry\EvaluateHitResult.h" />
     <ClInclude Include="..\src\libaten\geometry\geomparam.h" />
     <ClInclude Include="..\src\libaten\geometry\instance.h" />
     <ClInclude Include="..\src\libaten\geometry\NoHitableMesh.h" />

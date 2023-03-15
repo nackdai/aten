@@ -2,7 +2,7 @@
 
 namespace AT_NAME
 {
-    static AT_DEVICE_API void getUV(real& u, real& v, const aten::vec3& p)
+    static inline AT_DEVICE_API void getUV(real& u, real& v, const aten::vec3& p)
     {
         auto phi = aten::asin(p.y);
         auto theta = aten::atan(p.x / p.z);
@@ -96,7 +96,7 @@ namespace AT_NAME
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
-        evalHitResult(&m_param, r, aten::mat4(), &rec, &isect);
+        evalHitResult(&m_param, r, &rec, &isect);
     }
 
     void sphere::evalHitResult(
@@ -106,22 +106,12 @@ namespace AT_NAME
         aten::hitrecord& rec,
         const aten::Intersection& isect) const
     {
-        evalHitResult(&m_param, r, mtxL2W, &rec, &isect);
+        evalHitResult(&m_param, r, &rec, &isect);
     }
 
     void sphere::evalHitResult(
         const aten::ObjectParameter* param,
         const aten::ray& r,
-        aten::hitrecord* rec,
-        const aten::Intersection* isect)
-    {
-        evalHitResult(param, r, aten::mat4(), rec, isect);
-    }
-
-    void sphere::evalHitResult(
-        const aten::ObjectParameter* param,
-        const aten::ray& r,
-        const aten::mat4& mtxL2W,
         aten::hitrecord* rec,
         const aten::Intersection* isect)
     {
@@ -130,16 +120,9 @@ namespace AT_NAME
 
         rec->mtrlid = isect->mtrlid;
 
-        {
-            auto tmp = param->sphere.center + aten::vec3(param->sphere.radius, 0, 0);
+        auto radius = param->sphere.radius;
 
-            auto center = mtxL2W.apply(param->sphere.center);
-            tmp = mtxL2W.apply(tmp);
-
-            auto radius = length(tmp - center);
-
-            rec->area = 4 * AT_MATH_PI * radius * radius;
-        }
+        rec->area = 4 * AT_MATH_PI * radius * radius;
 
         getUV(rec->u, rec->v, rec->normal);
     }

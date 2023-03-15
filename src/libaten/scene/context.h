@@ -10,6 +10,7 @@
 #include "visualizer/GeomDataBuffer.h"
 #include "material/material.h"
 #include "geometry/geomparam.h"
+#include "geometry/transformable.h"
 #include "texture/texture.h"
 
 namespace AT_NAME {
@@ -161,6 +162,11 @@ namespace aten
         {
             AT_ASSERT(s_pinnedCtxt);
             return s_pinnedCtxt;
+        }
+
+        const aten::ObjectParameter& get_object(uint32_t idx) const
+        {
+            return m_transformables[idx]->getParam();
         }
 
     private:

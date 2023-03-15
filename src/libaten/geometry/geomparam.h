@@ -18,13 +18,13 @@ namespace aten
     struct ObjectParameter {
         ObjectType type{ ObjectType::GeometryTypeMax };
 
-        /*
+        /**
         * @brief Area of object
         *
         * - Polygon: Area of all triangles in this object.
         * - Instance: Not used.
         * - Sphere: Area of sphere.
-        */
+        **/
         real area{ real(0) };
 
         /**
@@ -37,10 +37,10 @@ namespace aten
         **/
         int32_t object_id{ -1 };
 
-        int32_t mtx_id{ -1 };       ///< Index of matrix which geometry refers.
+        int32_t mtx_id{ -1 };       ///< Index of matrix to apply to object.
 
-        int32_t triangle_id{ -1 };  ///< First index of triangles in geometry.
-        uint32_t triangle_num{ 0 };  ///< Number of triangles in geometry.
+        int32_t triangle_id{ -1 };  ///< First index of triangles in object.
+        uint32_t triangle_num{ 0 }; ///< Number of triangles in object.
 
         int32_t padding{ 0 };
 

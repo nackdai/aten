@@ -54,13 +54,6 @@ namespace AT_NAME
             aten::hitrecord* rec,
             const aten::Intersection* isect);
 
-        static AT_DEVICE_API void evalHitResult(
-            const aten::ObjectParameter* param,
-            const aten::ray& r,
-            const aten::mat4& mtxL2W,
-            aten::hitrecord* rec,
-            const aten::Intersection* isect);
-
         const aten::vec3& center() const
         {
             return m_param.sphere.center;

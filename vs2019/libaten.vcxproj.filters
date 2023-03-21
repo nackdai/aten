@@ -511,6 +511,9 @@
     <ClInclude Include="..\src\libaten\geometry\EvaluateHitResult.h">
       <Filter>geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\scene\hit_parameter.h">
+      <Filter>scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

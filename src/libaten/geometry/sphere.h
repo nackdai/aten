@@ -96,6 +96,5 @@ namespace AT_NAME
 
     private:
         std::shared_ptr<AT_NAME::material> mtrl_;
-        aten::ObjectParameter m_param;
     };
 }

@@ -3,11 +3,11 @@
 #include "geometry/geomparam.h"
 #include "geometry/sphere.h"
 #include "geometry/PolygonObject.h"
-#include "scene/hitable.h"
+#include "scene/hit_parameter.h"
 
 namespace AT_NAME
 {
-    AT_DEVICE_API void evaluate_hit_result(
+    AT_DEVICE_API inline void evaluate_hit_result(
         const context& ctxt,
         const aten::ObjectParameter& obj,
         const aten::ray& r,

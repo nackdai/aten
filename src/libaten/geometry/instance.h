@@ -19,6 +19,7 @@ namespace aten
         instance(const std::shared_ptr<OBJ>& obj, const context& ctxt)
             : transformable(ObjectType::Instance), m_obj(obj)
         {
+            m_param.object_id = m_obj->id();
             setBoundingBox(m_obj->getBoundingbox());
         }
 
@@ -264,6 +265,7 @@ namespace aten
     inline instance<PolygonObject>::instance(const std::shared_ptr<PolygonObject>& obj, const context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
+        m_param.object_id = m_obj->id();
         m_obj->build(ctxt);
         setBoundingBox(m_obj->getBoundingbox());
     }
@@ -272,6 +274,7 @@ namespace aten
     inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, const context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
+        m_param.object_id = m_obj->id();
         m_obj->build();
         setBoundingBox(m_obj->getBoundingbox());
     }

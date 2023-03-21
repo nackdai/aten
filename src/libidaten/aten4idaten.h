@@ -46,6 +46,7 @@
 #include "light/ibl.h"
 
 #include "scene/scene.h"
+#include "scene/hit_parameter.h"
 
 #include "geometry/geomparam.h"
 #include "geometry/sphere.h"

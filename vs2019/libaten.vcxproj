@@ -366,6 +366,7 @@
     <ClInclude Include="..\src\libaten\scene\AcceleratedScene.h" />
     <ClInclude Include="..\src\libaten\scene\context.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
+    <ClInclude Include="..\src\libaten\scene\hit_parameter.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />

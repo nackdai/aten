@@ -190,11 +190,6 @@ namespace AT_NAME
             return m_param.attrib.isIBL;
         }
 
-        virtual std::shared_ptr<const aten::hitable> getLightObject() const
-        {
-            return nullptr;
-        }
-
         const aten::LightParameter& param() const
         {
             return m_param;

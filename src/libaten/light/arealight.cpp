@@ -1,4 +1,5 @@
 #include "light/arealight.h"
+#include "geometry/EvaluateHitResult.h"
 
 namespace AT_NAME {
     aten::LightSampleResult AreaLight::sample(
@@ -62,7 +63,7 @@ namespace AT_NAME {
             }
 
             if (isHit) {
-                aten::hitable::evalHitResultForAreaLight(ctxt, obj.get(), r, rec, isect);
+                AT_NAME::evaluate_hit_result(ctxt, obj->getParam(), r, rec, isect);
 
                 sample(
                     &rec,

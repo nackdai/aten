@@ -34,7 +34,7 @@ namespace AT_NAME {
 
         SpotLight(aten::Values& val);
 
-        virtual ~SpotLight() {}
+        virtual ~SpotLight() = default;
 
     public:
         void setAttenuation(

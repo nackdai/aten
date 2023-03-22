@@ -26,7 +26,7 @@ namespace AT_NAME {
 
         AreaLight(const aten::Values& val);
 
-        virtual ~AreaLight() {}
+        virtual ~AreaLight() = default;
 
     public:
         static AT_DEVICE_API void sample(
@@ -55,9 +55,9 @@ namespace AT_NAME {
             const aten::vec3& org,
             aten::sampler* sampler) const override final;
 
-        virtual std::shared_ptr<const aten::hitable> getLightObject() const override final
+        std::shared_ptr<aten::transformable> getLightObject() const
         {
-            return std::static_pointer_cast<aten::hitable>(m_obj);
+            return m_obj;
         }
 
         virtual void getSamplePosNormalArea(

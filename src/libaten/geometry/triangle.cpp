@@ -79,34 +79,11 @@ namespace AT_NAME
     }
 
     void triangle::evalHitResult(
-        const context& ctxt,
-        const aten::ray& r,
-        aten::hitrecord& rec,
-        const aten::Intersection& isect) const
-    {
-        const auto& v0 = ctxt.getVertex(param_.idx[0]);
-        const auto& v1 = ctxt.getVertex(param_.idx[1]);
-        const auto& v2 = ctxt.getVertex(param_.idx[2]);
-
-        evalHitResult(v0, v1, v2, &rec, &isect);
-
-        if (param_.needNormal > 0) {
-            auto e01 = v1.pos - v0.pos;
-            auto e02 = v2.pos - v0.pos;
-
-            e01.w = e02.w = real(0);
-
-            rec.normal = normalize(cross(e01, e02));
-        }
-
-        rec.area = param_.area;
-    }
-
-    void triangle::evalHitResult(
         const aten::vertex& v0,
         const aten::vertex& v1,
         const aten::vertex& v2,
         aten::hitrecord* rec,
+        const aten::TriangleParameter& param,
         const aten::Intersection* isect)
     {
         // NOTE
@@ -125,6 +102,17 @@ namespace AT_NAME
 
         rec->u = uv.x;
         rec->v = uv.y;
+
+        if (param.needNormal > 0) {
+            auto e01 = v1.pos - v0.pos;
+            auto e02 = v2.pos - v0.pos;
+
+            e01.w = e02.w = real(0);
+
+            rec->normal = normalize(cross(e01, e02));
+        }
+
+        rec->area = param.area;
     }
 
     void triangle::build(
@@ -158,9 +146,11 @@ namespace AT_NAME
     }
 
     void triangle::getSamplePosNormalArea(
-        const context& ctxt,
+        const aten::vertex& v0,
+        const aten::vertex& v1,
+        const aten::vertex& v2,
         aten::SamplePosNormalPdfResult* result,
-        aten::sampler* sampler) const
+        aten::sampler* sampler)
     {
 #if 0
         // 0 <= a + b <= 1
@@ -181,10 +171,6 @@ namespace AT_NAME
         real b = aten::sqrt(r0) * r1;
 #endif
 
-        const auto& v0 = ctxt.getVertex(param_.idx[0]);
-        const auto& v1 = ctxt.getVertex(param_.idx[1]);
-        const auto& v2 = ctxt.getVertex(param_.idx[2]);
-
         // 重心座標系(barycentric coordinates).
         // v0基準.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
@@ -204,8 +190,6 @@ namespace AT_NAME
 
         result->a = a;
         result->b = b;
-
-        result->triangle_id = m_id;
     }
 
     int32_t triangle::mesh_id() const

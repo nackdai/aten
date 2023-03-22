@@ -1,5 +1,4 @@
 #include "accelerator/accelerator.h"
-#include "scene/context.h"
 #include "scene/hitable.h"
 
 namespace aten

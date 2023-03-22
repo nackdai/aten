@@ -29,6 +29,14 @@ namespace aten
             const mat4& mtxL2W,
             sampler* sampler) const = 0;
 
+        virtual void getSamplePosNormalArea(
+            const context& ctxt,
+            aten::SamplePosNormalPdfResult* result,
+            sampler* sampler) const override
+        {
+            getSamplePosNormalArea(ctxt, result, mat4::Identity, sampler);
+        }
+
         virtual void evalHitResult(
             const context& ctxt,
             const ray& r,

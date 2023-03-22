@@ -28,7 +28,7 @@ namespace AT_NAME {
 
         PointLight(aten::Values& val);
 
-        virtual ~PointLight() {}
+        virtual ~PointLight() = default;
 
     public:
         void setAttenuation(

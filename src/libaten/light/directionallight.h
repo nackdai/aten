@@ -23,7 +23,7 @@ namespace AT_NAME {
 
         DirectionalLight(aten::Values& val);
 
-        virtual ~DirectionalLight() {}
+        virtual ~DirectionalLight() = default;
 
     public:
         virtual aten::LightSampleResult sample(

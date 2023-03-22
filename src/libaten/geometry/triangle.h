@@ -37,23 +37,20 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection* isect);
 
-        virtual void evalHitResult(
-            const aten::context& ctxt,
-            const aten::ray& r,
-            aten::hitrecord& rec,
-            const aten::Intersection& isect) const final;
-
         static void evalHitResult(
             const aten::vertex& v0,
             const aten::vertex& v1,
             const aten::vertex& v2,
             aten::hitrecord* rec,
+            const aten::TriangleParameter& param,
             const aten::Intersection* isect);
 
-        virtual void getSamplePosNormalArea(
-            const aten::context& ctxt,
+        static void getSamplePosNormalArea(
+            const aten::vertex& v0,
+            const aten::vertex& v1,
+            const aten::vertex& v2,
             aten::SamplePosNormalPdfResult* result,
-            aten::sampler* sampler) const override;
+            aten::sampler* sampler);
 
         virtual int32_t mesh_id() const override;
 

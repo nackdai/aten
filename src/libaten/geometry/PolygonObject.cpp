@@ -124,8 +124,7 @@ namespace AT_NAME
         const auto& v1 = vtxs[faceParam.idx[1]];
         const auto& v2 = vtxs[faceParam.idx[2]];
 
-        //triangle::evalHitResult(v0, v1, v2, &rec, &isect);
-        f->evalHitResult(ctxt, r, rec, isect);
+        triangle::evalHitResult(v0, v1, v2, &rec, faceParam, &isect);
 
         real orignalLen = 0;
         {
@@ -157,18 +156,17 @@ namespace AT_NAME
         const aten::mat4& mtxL2W,
         aten::sampler* sampler) const
     {
+        const auto& param = getParam();
+
         auto r = sampler->nextSample();
-        int32_t shapeidx = (int32_t)(r * (m_shapes.size() - 1));
-        auto& triangle_group_mesh = m_shapes[shapeidx];
+        uint32_t tri_idx = param.triangle_num * r;
+        tri_idx += param.triangle_id;
 
-        r = sampler->nextSample();
-        int32_t faceidx = (int32_t)(r * (triangle_group_mesh->triangles_.size() - 1));
-        auto f = triangle_group_mesh->triangles_[faceidx];
+        const auto& tri_param = ctxt.getTriangle(tri_idx)->getParam();
 
-        const auto& faceParam = f->getParam();
-
-        const auto& v0 = ctxt.getVertex(faceParam.idx[0]);
-        const auto& v1 = ctxt.getVertex(faceParam.idx[1]);
+        const auto& v0 = ctxt.getVertex(tri_param.idx[0]);
+        const auto& v1 = ctxt.getVertex(tri_param.idx[1]);
+        const auto& v2 = ctxt.getVertex(tri_param.idx[2]);
 
         real orignalLen = 0;
         {
@@ -191,7 +189,11 @@ namespace AT_NAME
 
         auto area = m_param.area * ratio;
 
-        f->getSamplePosNormalArea(ctxt, result, sampler);
+        AT_NAME::triangle::getSamplePosNormalArea(
+            v0, v1, v2,
+            result, sampler);
+
+        result->triangle_id = tri_idx;
 
         result->area = area;
     }

@@ -79,9 +79,6 @@ namespace aten
 
         setBoundingBox(m_bvh.getBoundingbox());
 
-        // Gather local-world matrix.
-        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
-
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;
 
         // Register to linear list to traverse bvhnode easily.
@@ -388,7 +385,7 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
+                        const auto& mtxW2L = ctxt.get_matrix(mtx_id * 2 + 1);
 
                         transformedRay = mtxW2L.applyRay(r);
                     }
@@ -453,12 +450,6 @@ namespace aten
         m_bvh.update(ctxt);
 
         setBoundingBox(m_bvh.getBoundingbox());
-
-        // TODO
-        // More efficient. ex) Gather only transformed object etc...
-        // Gather local-world matrix.
-        m_mtxs.clear();
-        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
 
         auto root = m_bvh.getRoot();
         std::vector<ThreadedBvhNodeEntry> threadedBvhNodeEntries;

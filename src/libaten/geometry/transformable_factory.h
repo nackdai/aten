@@ -24,7 +24,7 @@ namespace aten
             real radius,
             const std::shared_ptr<material>& mtrl)
         {
-            auto ret = std::make_shared<sphere>(center, radius, mtrl);
+            auto ret = std::make_shared<AT_NAME::sphere>(center, radius, mtrl);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);

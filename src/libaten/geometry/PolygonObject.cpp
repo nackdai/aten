@@ -90,22 +90,6 @@ namespace AT_NAME
         return isHit;
     }
 
-    void PolygonObject::evalHitResult(
-        const context& ctxt,
-        const aten::ray& r,
-        const aten::mat4& mtxL2W,
-        aten::hitrecord& rec,
-        const aten::Intersection& isect) const
-    {
-        evaluate_hit_result(
-            m_param,
-            ctxt,
-            r,
-            mtxL2W,
-            rec,
-            isect);
-    }
-
     void PolygonObject::evaluate_hit_result(
         const aten::ObjectParameter& obj,
         const context& ctxt,

@@ -29,9 +29,13 @@ namespace AT_NAME
         else {
             // Get real object. If the object is instance, we need to get real one.
             const auto& real_obj = obj.object_id >= 0 ? ctxt.get_object(obj.object_id) : obj;
+            const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
             // TODO
             aten::mat4 mtxL2W;
+            if (mtx_id >= 0) {
+                mtxL2W = ctxt.get_matrix(mtx_id);
+            }
 
             if (real_obj.type == aten::ObjectType::Polygon) {
                 AT_NAME::PolygonObject::evaluate_hit_result(
@@ -48,6 +52,10 @@ namespace AT_NAME
             else {
                 // TODO
             }
+
+            // Transform local to world.
+            rec.p = mtxL2W.apply(rec.p);
+            rec.normal = normalize(mtxL2W.applyXYZ(rec.normal));
 
             rec.isVoxel = false;
         }

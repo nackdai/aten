@@ -37,13 +37,6 @@ namespace aten
             getSamplePosNormalArea(ctxt, result, mat4::Identity, sampler);
         }
 
-        virtual void evalHitResult(
-            const context& ctxt,
-            const ray& r,
-            const mat4& mtxL2W,
-            hitrecord& rec,
-            const Intersection& isect) const = 0;
-
         ObjectType getType() const
         {
             return m_param.type;

@@ -116,14 +116,6 @@ namespace aten
         }
 
         /**
-         * @brief Return all matrices to transform the node.
-         */
-        const std::vector<aten::mat4>& getMatrices() const
-        {
-            return m_mtxs;
-        }
-
-        /**
          * @brief Tell not to build bottom layer.
          */
         void disableLayer()
@@ -216,7 +208,6 @@ namespace aten
         bool m_enableLayer{ true };
 
         std::vector<std::vector<ThreadedBvhNode>> m_listThreadedBvhNode;
-        std::vector<aten::mat4> m_mtxs;
 
         // List for bottom layer.
         std::vector<accelerator*> m_nestedBvh;

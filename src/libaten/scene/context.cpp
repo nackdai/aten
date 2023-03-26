@@ -15,7 +15,7 @@ namespace aten
         {
             m_vb.init(
                 sizeof(vertex),
-                m_vertices.size(),
+                static_cast<uint32_t>(m_vertices.size()),
                 0,
                 &m_vertices[0]);
         }
@@ -170,37 +170,28 @@ namespace aten
         return id;
     }
 
-    void context::addTransformable(const std::shared_ptr<aten::transformable>& t)
-    {
-        AT_ASSERT(t);
-        m_transformables.push_back(t);
-        t->updateIndex(m_transformables.size() - 1);
-    }
-
-    std::shared_ptr<const aten::transformable> context::getTransformable(int32_t idx) const
-    {
-        AT_ASSERT(0 <= idx && idx < m_transformables.size());
-        return m_transformables[idx];
-    }
-
     void context::traverseTransformables(
-        std::function<void(const std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const
+        std::function<void(std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const
     {
-        for (const auto& t : m_transformables) {
+        for (auto& t : m_transformables) {
             auto type = t->getType();
             func(t, type);
         }
     }
 
-    void context::copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const
+    void context::pick_non_indentity_matrices(std::vector<aten::mat4>& dst) const
     {
-        traverseTransformables([&dst](const std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
+        traverseTransformables([&dst](std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
             if (type == ObjectType::Instance) {
                 aten::mat4 mtxL2W, mtxW2L;
                 t->getMatrices(mtxL2W, mtxW2L);
 
-                if (!mtxL2W.isIdentity()) {
-                    auto& param = t->getParam();
+                auto& param = t->getParam();
+
+                if (mtxL2W.isIdentity()) {
+                    param.mtx_id = -1;
+                }
+                else {
                     param.mtx_id = (int32_t)(dst.size() / 2);
 
                     dst.push_back(mtxL2W);

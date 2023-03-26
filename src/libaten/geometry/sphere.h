@@ -42,12 +42,6 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection* isect);
 
-        virtual void evalHitResult(
-            const aten::context& ctxt,
-            const aten::ray& r,
-            aten::hitrecord& rec,
-            const aten::Intersection& isect) const override final;
-
         static AT_DEVICE_API void evalHitResult(
             const aten::ObjectParameter* param,
             const aten::ray& r,
@@ -73,13 +67,6 @@ namespace AT_NAME
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter* param,
             aten::sampler* sampler);
-
-        virtual void evalHitResult(
-            const aten::context& ctxt,
-            const aten::ray& r,
-            const aten::mat4& mtxL2W,
-            aten::hitrecord& rec,
-            const aten::Intersection& isect) const override final;
 
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,

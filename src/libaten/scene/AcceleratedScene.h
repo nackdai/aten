@@ -10,6 +10,7 @@
 #include "light/ibl.h"
 #include "scene/context.h"
 #include "scene/scene.h"
+#include "geometry/EvaluateHitResult.h"
 
 namespace aten {
     template <typename ACCEL>
@@ -60,7 +61,7 @@ namespace aten {
 #ifndef __AT_CUDA__
             if (isHit) {
                 auto obj = ctxt.getTransformable(isect.objid);
-                aten::hitable::evalHitResult(ctxt, obj.get(), r, rec, isect);
+                AT_NAME::evaluate_hit_result(ctxt, obj->getParam(), r, rec, isect);
             }
 #endif
 

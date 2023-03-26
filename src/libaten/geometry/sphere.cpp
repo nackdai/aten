@@ -91,25 +91,6 @@ namespace AT_NAME
     }
 
     void sphere::evalHitResult(
-        const aten::context& ctxt,
-        const aten::ray& r,
-        aten::hitrecord& rec,
-        const aten::Intersection& isect) const
-    {
-        evalHitResult(&m_param, r, &rec, &isect);
-    }
-
-    void sphere::evalHitResult(
-        const aten::context& ctxt,
-        const aten::ray& r,
-        const aten::mat4& mtxL2W,
-        aten::hitrecord& rec,
-        const aten::Intersection& isect) const
-    {
-        evalHitResult(&m_param, r, &rec, &isect);
-    }
-
-    void sphere::evalHitResult(
         const aten::ObjectParameter* param,
         const aten::ray& r,
         aten::hitrecord* rec,

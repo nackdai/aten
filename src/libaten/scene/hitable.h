@@ -78,20 +78,6 @@ namespace aten {
             AT_ASSERT(false);
         }
 
-        static void evalHitResult(
-            const context& ctxt,
-            const hitable* obj,
-            const ray& r,
-            hitrecord& rec,
-            const Intersection& isect);
-
-        static void evalHitResultForAreaLight(
-            const context& ctxt,
-            const hitable* obj,
-            const ray& r,
-            hitrecord& rec,
-            const Intersection& isect);
-
         using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int32_t parentId, int32_t basePrimId)>;
 
         virtual void render(
@@ -151,16 +137,6 @@ namespace aten {
             if (m_onNotifyChanged) {
                 m_onNotifyChanged(this);
             }
-        }
-
-    private:
-        virtual void evalHitResult(
-            const context& ctxt,
-            const ray& r,
-            hitrecord& rec,
-            const Intersection& isect) const
-        {
-            AT_ASSERT(false);
         }
 
     private:

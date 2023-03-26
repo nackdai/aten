@@ -135,10 +135,6 @@ namespace aten {
         {
             return m_listQbvhNode;
         }
-        std::vector<aten::mat4>& getMatrices()
-        {
-            return m_mtxs;
-        }
 
     private:
         struct BvhNode {
@@ -195,6 +191,5 @@ namespace aten {
         bvh m_bvh;
 
         std::vector<std::vector<QbvhNode>> m_listQbvhNode;
-        std::vector<aten::mat4> m_mtxs;
     };
 }

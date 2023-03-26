@@ -149,14 +149,6 @@ namespace aten
             return m_threadedNodes;
         }
 
-        /**
-         * @brief Return all matrices to transform the node.
-         */
-        const std::vector<aten::mat4>& getMatrices() const
-        {
-            return m_bvh.getMatrices();
-        }
-
         uint32_t getMaxDepth() const
         {
             return m_maxDepth;

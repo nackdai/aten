@@ -31,13 +31,6 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection& isect) const override final;
 
-        virtual void evalHitResult(
-            const aten::context& ctxt,
-            const aten::ray& r,
-            const aten::mat4& mtxL2W,
-            aten::hitrecord& rec,
-            const aten::Intersection& isect) const override final;
-
         static void PolygonObject::evaluate_hit_result(
             const aten::ObjectParameter& obj,
             const context& ctxt,

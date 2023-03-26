@@ -60,10 +60,6 @@ namespace aten {
         {
             return m_listStacklessBvhNode;
         }
-        std::vector<aten::mat4>& getMatrices()
-        {
-            return m_mtxs;
-        }
 
     private:
         struct StacklessBvhNodeEntry {
@@ -103,6 +99,5 @@ namespace aten {
         bvh m_bvh;
 
         std::vector<std::vector<StacklessBvhNode>> m_listStacklessBvhNode;
-        std::vector<aten::mat4> m_mtxs;
     };
 }

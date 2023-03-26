@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <tuple>
 
 #include "geometry/vertex.h"
 #include "visualizer/GeomDataBuffer.h"
@@ -12,6 +13,7 @@
 #include "geometry/geomparam.h"
 #include "geometry/transformable.h"
 #include "texture/texture.h"
+#include "math/mat4.h"
 
 namespace AT_NAME {
     class triangle;
@@ -124,14 +126,23 @@ namespace aten
 
         int32_t findTriIdxFromPointer(const void* p) const;
 
-        void addTransformable(const std::shared_ptr<aten::transformable>& t);
+        auto addTransformable(const std::shared_ptr<transformable>& t)
+        {
+            AT_ASSERT(t);
+            m_transformables.push_back(t);
+            t->updateIndex(m_transformables.size() - 1);
+        }
 
-        std::shared_ptr<const aten::transformable> getTransformable(int32_t idx) const;
+        std::shared_ptr<const aten::transformable> getTransformable(int32_t idx) const
+        {
+            AT_ASSERT(0 <= idx && idx < m_transformables.size());
+            return m_transformables[idx];
+        }
 
         void traverseTransformables(
-            std::function<void(const std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const;
+            std::function<void(std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const;
 
-        void copyMatricesAndUpdateTransformableMatrixIdx(std::vector<aten::mat4>& dst) const;
+        void pick_non_indentity_matrices(std::vector<aten::mat4>& dst) const;
 
         int32_t findTransformableIdxFromPointer(const void* p) const;
 
@@ -169,6 +180,22 @@ namespace aten
             return m_transformables[idx]->getParam();
         }
 
+        std::tuple<uint32_t, std::shared_ptr<aten::mat4>> create_matrix()
+        {
+            size_t idx = m_matrices.size();
+            m_matrices.reserve(idx + 1);
+            m_matrices.push_back(std::make_shared<aten::mat4>());
+            return std::make_tuple(static_cast<uint32_t>(idx), m_matrices[idx]);
+        }
+
+        aten::mat4 get_matrix(uint32_t idx) const
+        {
+            if (idx >= m_matrices.size()) {
+                return aten::mat4::Identity;
+            }
+            return *m_matrices[idx];
+        }
+
     private:
         static const context* s_pinnedCtxt;
 
@@ -178,7 +205,8 @@ namespace aten
 
         std::vector<std::shared_ptr<AT_NAME::material>> m_materials;
         std::vector<std::shared_ptr<AT_NAME::triangle>> m_triangles;
-        std::vector<std::shared_ptr<aten::transformable>> m_transformables;
+        mutable std::vector<std::shared_ptr<aten::transformable>> m_transformables;
         std::vector<std::shared_ptr<aten::texture>> m_textures;
+        std::vector<std::shared_ptr<aten::mat4>> m_matrices;
     };
 }

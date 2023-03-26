@@ -107,17 +107,6 @@ namespace aten
             AT_ASSERT(false);
         }
 
-        virtual void evalHitResult(
-            const context& ctxt,
-            const ray& r,
-            const mat4& mtxL2W,
-            hitrecord& rec,
-            const Intersection& isect) const override final
-        {
-            // Not support.
-            AT_ASSERT(false);
-        }
-
     private:
         void render(
             const context& ctxt,

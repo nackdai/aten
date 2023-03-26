@@ -16,40 +16,45 @@ namespace aten
         friend class TransformableFactory;
 
     public:
-        instance(const std::shared_ptr<OBJ>& obj, const context& ctxt)
+        instance(const std::shared_ptr<OBJ>& obj, context& ctxt)
             : transformable(ObjectType::Instance), m_obj(obj)
         {
+            init_matrices(ctxt);
             m_param.object_id = m_obj->id();
             setBoundingBox(m_obj->getBoundingbox());
         }
 
-        instance(const std::shared_ptr<OBJ>& obj, const context& ctxt, const mat4& mtxL2W)
+        instance(const std::shared_ptr<OBJ>& obj, context& ctxt, const mat4& mtxL2W)
             : instance(obj, ctxt)
         {
-            m_mtxL2W = mtxL2W;
+            init_matrices(ctxt);
 
-            m_mtxW2L = m_mtxL2W;
-            m_mtxW2L.invert();
+            *m_mtxL2W = mtxL2W;
+
+            *m_mtxW2L = mtxL2W;
+            m_mtxW2L->invert();
 
             setBoundingBox(getTransformedBoundingBox());
         }
 
         instance(
             const std::shared_ptr<OBJ>& obj,
-            const context& ctxt,
+            context& ctxt,
             const vec3& trans,
             const vec3& rot,
             const vec3& scale)
             : instance(obj, ctxt)
         {
+            init_matrices(ctxt);
+
             m_trans = trans;
             m_rot = rot;
             m_scale= scale;
 
             updateMatrix();
 
-            m_mtxW2L = m_mtxL2W;
-            m_mtxW2L.invert();
+            *m_mtxW2L = *m_mtxL2W;
+            m_mtxW2L->invert();
 
             setBoundingBox(getTransformedBoundingBox());
         }
@@ -66,8 +71,8 @@ namespace aten
             vec3 dir = r.dir;
 
             // Transform world to local.
-            org = m_mtxW2L.apply(org);
-            dir = m_mtxW2L.applyXYZ(dir);
+            org = m_mtxW2L->apply(org);
+            dir = m_mtxW2L->applyXYZ(dir);
 
             ray transformdRay(org, dir);
 
@@ -82,27 +87,12 @@ namespace aten
             return isHit;
         }
 
-        virtual void evalHitResult(
-            const context& ctxt,
-            const ray& r,
-            hitrecord& rec,
-            const Intersection& isect) const override final
-        {
-            m_obj->evalHitResult(ctxt, r, m_mtxL2W, rec, isect);
-
-            // Transform local to world.
-            rec.p = m_mtxL2W.apply(rec.p);
-            rec.normal = normalize(m_mtxL2W.applyXYZ(rec.normal));
-
-            rec.mtrlid = isect.mtrlid;
-        }
-
         virtual void getSamplePosNormalArea(
             const context& ctxt,
             aten::SamplePosNormalPdfResult* result,
             sampler* sampler) const final
         {
-            return m_obj->getSamplePosNormalArea(ctxt, result, m_mtxL2W, sampler);
+            return m_obj->getSamplePosNormalArea(ctxt, result, *m_mtxL2W, sampler);
         }
 
         virtual const hitable* getHasObject() const override final
@@ -124,13 +114,13 @@ namespace aten
             aten::mat4& mtxL2W,
             aten::mat4& mtxW2L) const override final
         {
-            mtxL2W = m_mtxL2W;
-            mtxW2L = m_mtxW2L;
+            mtxL2W = *m_mtxL2W;
+            mtxW2L = *m_mtxW2L;
         }
 
         virtual aabb getTransformedBoundingBox() const override
         {
-            return aabb::transform(m_obj->getBoundingbox(), m_mtxL2W);
+            return aabb::transform(m_obj->getBoundingbox(), *m_mtxL2W);
         }
 
         virtual void render(
@@ -141,14 +131,14 @@ namespace aten
             int32_t parentId,
             uint32_t triOffset) override final
         {
-            m_obj->render(func, ctxt, m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
+            m_obj->render(func, ctxt, *m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
         }
 
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
             const aten::mat4& mtxL2W) override final
         {
-            m_obj->drawAABB(func, m_mtxL2W);
+            m_obj->drawAABB(func, *m_mtxL2W);
         }
 
         virtual bool isDeformable() const override final
@@ -212,17 +202,6 @@ namespace aten
             AT_ASSERT(false);
         }
 
-        virtual void evalHitResult(
-            const context& ctxt,
-            const ray& r,
-            const mat4& mtxL2W,
-            hitrecord& rec,
-            const Intersection& isect) const override final
-        {
-            // Not used...
-            AT_ASSERT(false);
-        }
-
         void updateMatrix()
         {
             mat4 mtxTrans;
@@ -238,20 +217,30 @@ namespace aten
             mtxScale.asScale(m_scale);
 
             // Keep previous L2W matrix.
-            m_mtxPrevL2W = m_mtxL2W;
+            m_mtxPrevL2W = *m_mtxL2W;
 
-            m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
+            *m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
 
-            m_mtxW2L = m_mtxL2W;
-            m_mtxW2L.invert();
+            *m_mtxW2L = *m_mtxL2W;
+            m_mtxW2L->invert();
+        }
+
+        void init_matrices(context& ctxt)
+        {
+            auto res = ctxt.create_matrix();
+            m_param.mtx_id = std::get<0>(res);
+            m_mtxL2W = std::get<1>(res);
+
+            res = ctxt.create_matrix();
+            m_mtxW2L = std::get<1>(res);
         }
 
     private:
         std::shared_ptr<OBJ> m_obj;
         std::shared_ptr<OBJ> m_lod;
 
-        mat4 m_mtxL2W;
-        mat4 m_mtxW2L;    // inverted.
+        std::shared_ptr<mat4> m_mtxL2W;
+        std::shared_ptr<mat4> m_mtxW2L;    // inverted.
         mat4 m_mtxPrevL2W;
 
         vec3 m_trans;
@@ -262,7 +251,7 @@ namespace aten
     };
 
     template<>
-    inline instance<PolygonObject>::instance(const std::shared_ptr<PolygonObject>& obj, const context& ctxt)
+    inline instance<PolygonObject>::instance(const std::shared_ptr<PolygonObject>& obj, context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
         m_param.object_id = m_obj->id();
@@ -271,7 +260,7 @@ namespace aten
     }
 
     template<>
-    inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, const context& ctxt)
+    inline instance<deformable>::instance(const std::shared_ptr<deformable>& obj, context& ctxt)
         : transformable(ObjectType::Instance), m_obj(obj)
     {
         m_param.object_id = m_obj->id();

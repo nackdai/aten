@@ -24,9 +24,6 @@ namespace aten {
 
         setBoundingBox(m_bvh.getBoundingbox());
 
-        // Gather local-world matrix.
-        ctxt.copyMatricesAndUpdateTransformableMatrixIdx(m_mtxs);
-
         std::vector<accelerator*> listBvh;
         std::map<hitable*, accelerator*> nestedBvhMap;
 
@@ -250,7 +247,7 @@ namespace aten {
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = m_mtxs[mtx_id * 2 + 1];
+                        const auto& mtxW2L = ctxt.get_matrix(mtx_id * 2 + 1);
 
                         transformedRay = mtxW2L.applyRay(r);
                     }

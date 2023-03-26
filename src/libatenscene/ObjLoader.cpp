@@ -128,7 +128,7 @@ namespace aten
             auto face_num = shape.mesh.num_face_vertices.size();
 
             // Keep polygon counts.
-            numPolygons += face_num;
+            numPolygons += static_cast<uint32_t>(face_num);
 
             // TODO
             // Avoid duplicate.
@@ -149,15 +149,15 @@ namespace aten
 
                 vtx_info_list.push_back(idx_0);
                 auto it = vtx_info_list.back();
-                faceParam.idx[0] = vtx_info_list.size() - 1 + curVtxPos;
+                faceParam.idx[0] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curVtxPos;
 
                 vtx_info_list.push_back(idx_1);
                 it = vtx_info_list.back();
-                faceParam.idx[1] = vtx_info_list.size() - 1 + curVtxPos;
+                faceParam.idx[1] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curVtxPos;
 
                 vtx_info_list.push_back(idx_2);
                 it = vtx_info_list.back();
-                faceParam.idx[2] = vtx_info_list.size() - 1 + curVtxPos;
+                faceParam.idx[2] = static_cast<uint32_t>(vtx_info_list.size()) - 1 + curVtxPos;
 
                 face_parameters.push_back(faceParam);
             }

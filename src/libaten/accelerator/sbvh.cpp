@@ -986,8 +986,6 @@ namespace aten
         bool enableLod,
         Intersection& isect) const
     {
-        auto& mtxs = m_bvh.getMatrices();
-
         const auto& topLayerBvhNode = m_bvh.getNodes()[0];
 
         real hitt = AT_MATH_INF;
@@ -1022,7 +1020,7 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = mtxs[mtx_id * 2 + 1];
+                        const auto& mtxW2L = ctxt.get_matrix(mtx_id * 2 + 1);
 
                         transformedRay = mtxW2L.applyRay(r);
                     }
@@ -1146,7 +1144,7 @@ namespace aten
 #if 1
             else if (enableLod && AT_IS_VOXEL(node->voxeldepth))
             {
-                int32_t voxeldepth = AT_GET_VOXEL_DEPTH(node->voxeldepth);
+                int32_t voxeldepth = static_cast<int32_t>(AT_GET_VOXEL_DEPTH(node->voxeldepth));
 
                 real t_result = 0.0f;
                 aten::vec3 nml;
@@ -1392,7 +1390,7 @@ namespace aten
                         AT_ASSERT(mtrlid >= 0);
 
                         // Replace current material index.
-                        node.mtrlid = mtrlid;
+                        node.mtrlid = static_cast<int32_t>(mtrlid);
                     }
                 }
             }

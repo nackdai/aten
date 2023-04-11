@@ -70,14 +70,6 @@ namespace aten {
 
         virtual accelerator* getInternalAccelerator();
 
-        virtual void getSamplePosNormalArea(
-            const context& ctxt,
-            SamplePosNormalPdfResult* result,
-            sampler* sampler) const
-        {
-            AT_ASSERT(false);
-        }
-
         using FuncPreDraw = std::function<void(const aten::mat4& mtxL2W, const aten::mat4& mtxPrevL2W, int32_t parentId, int32_t basePrimId)>;
 
         virtual void render(

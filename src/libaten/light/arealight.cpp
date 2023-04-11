@@ -20,16 +20,16 @@ namespace AT_NAME {
             if (sampler) {
                 aten::SamplePosNormalPdfResult result;
 
-                obj->getSamplePosNormalArea(ctxt, &result, sampler);
+                AT_NAME::sample_pos_and_normal(&result, obj->getParam(), ctxt, sampler);
 
                 auto pos = result.pos;
                 auto dir = pos - org;
 
-                // NOTE
-                // Just do hit test if ray hits the specified object directly.
+                // NOTE:
+                // If ray hits the specified object directly, we will just do hit test.
                 // We don't need to mind self-intersection.
                 // Therefore, we don't need to add offset.
-                // i.e. We don't normal to add offset.
+                // i.e. We don't use normal vector with adding offset to ray.
                 r = aten::ray(org, dir);
 
                 if (result.triangle_id >= 0) {
@@ -52,18 +52,18 @@ namespace AT_NAME {
 
                 auto dir = pos - org;
 
-                // NOTE
-                // Just do hit test if ray hits the specified object directly.
+                // NOTE:
+                // If ray hits the specified object directly, we will just do hit test.
                 // We don't need to mind self-intersection.
                 // Therefore, we don't need to add offset.
-                // i.e. We don't normal to add offset.
+                // i.e. We don't use normal vector with adding offset to ray.
                 r = aten::ray(org, dir);
 
                 isHit = obj->hit(ctxt, r, AT_MATH_EPSILON, AT_MATH_INF, isect);
             }
 
             if (isHit) {
-                AT_NAME::evaluate_hit_result(ctxt, obj->getParam(), r, rec, isect);
+                AT_NAME::evaluate_hit_result(rec, obj->getParam(), ctxt, r, isect);
 
                 sample(
                     &rec,
@@ -77,5 +77,16 @@ namespace AT_NAME {
         }
 
         return result;
+    }
+
+    void AreaLight::getSamplePosNormalArea(
+        const aten::context& ctxt,
+        aten::SamplePosNormalPdfResult* result,
+        aten::sampler* sampler) const
+    {
+        if (m_obj) {
+            auto obj = getLightObject();
+            AT_NAME::sample_pos_and_normal(result, obj->getParam(), ctxt, sampler);
+        }
     }
 }

@@ -87,14 +87,6 @@ namespace aten
             return isHit;
         }
 
-        virtual void getSamplePosNormalArea(
-            const context& ctxt,
-            aten::SamplePosNormalPdfResult* result,
-            sampler* sampler) const final
-        {
-            return m_obj->getSamplePosNormalArea(ctxt, result, *m_mtxL2W, sampler);
-        }
-
         virtual const hitable* getHasObject() const override final
         {
             return m_obj.get();
@@ -192,16 +184,6 @@ namespace aten
         }
 
     private:
-        virtual void getSamplePosNormalArea(
-            const context& ctxt,
-            aten::SamplePosNormalPdfResult* result,
-            const mat4& mtxL2W,
-            sampler* sampler) const override final
-        {
-            // Not used...
-            AT_ASSERT(false);
-        }
-
         void updateMatrix()
         {
             mat4 mtxTrans;

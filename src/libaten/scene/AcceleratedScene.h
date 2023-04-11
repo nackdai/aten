@@ -61,7 +61,7 @@ namespace aten {
 #ifndef __AT_CUDA__
             if (isHit) {
                 auto obj = ctxt.getTransformable(isect.objid);
-                AT_NAME::evaluate_hit_result(ctxt, obj->getParam(), r, rec, isect);
+                AT_NAME::evaluate_hit_result(rec, obj->getParam(), ctxt, r, isect);
             }
 #endif
 

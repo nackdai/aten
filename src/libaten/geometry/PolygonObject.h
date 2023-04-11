@@ -77,11 +77,12 @@ namespace AT_NAME
 
         void build(const aten::context& ctxt);
 
-        virtual void getSamplePosNormalArea(
-            const aten::context& ctxt,
+        static void sample_pos_and_normal(
             aten::SamplePosNormalPdfResult* result,
+            const aten::ObjectParameter& param,
+            const aten::context& ctxt,
             const aten::mat4& mtxL2W,
-            aten::sampler* sampler) const override final;
+            aten::sampler* sampler);
 
         void appendShape(const std::shared_ptr<TriangleGroupMesh>& shape)
         {

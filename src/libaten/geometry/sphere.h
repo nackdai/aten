@@ -58,26 +58,9 @@ namespace AT_NAME
             return m_param.sphere.radius;
         }
 
-        virtual void getSamplePosNormalArea(
-            const aten::context& ctxt,
+        static AT_DEVICE_API void sample_pos_and_normal(
             aten::SamplePosNormalPdfResult* result,
-            aten::sampler* sampler) const override final;
-
-        static AT_DEVICE_API void getSamplePosNormalArea(
-            aten::SamplePosNormalPdfResult* result,
-            const aten::ObjectParameter* param,
-            aten::sampler* sampler);
-
-        virtual void getSamplePosNormalArea(
-            const aten::context& ctxt,
-            aten::SamplePosNormalPdfResult* result,
-            const aten::mat4& mtxL2W,
-            aten::sampler* sampler) const override final;
-
-    private:
-        static AT_DEVICE_API void getSamplePosNormalArea(
-            aten::SamplePosNormalPdfResult* result,
-            const aten::ObjectParameter* param,
+            const aten::ObjectParameter& param,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler);
 

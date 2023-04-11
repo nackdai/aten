@@ -8,10 +8,10 @@
 namespace AT_NAME
 {
     AT_DEVICE_API inline void evaluate_hit_result(
-        const context& ctxt,
-        const aten::ObjectParameter& obj,
-        const aten::ray& r,
         aten::hitrecord& rec,
+        const aten::ObjectParameter& obj,
+        const context& ctxt,
+        const aten::ray& r,
         const aten::Intersection& isect)
     {
         if (isect.isVoxel) {
@@ -31,7 +31,6 @@ namespace AT_NAME
             const auto& real_obj = obj.object_id >= 0 ? ctxt.get_object(obj.object_id) : obj;
             const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
-            // TODO
             aten::mat4 mtxL2W;
             if (mtx_id >= 0) {
                 mtxL2W = ctxt.get_matrix(mtx_id);
@@ -62,5 +61,36 @@ namespace AT_NAME
 
         rec.mtrlid = isect.mtrlid;
         rec.meshid = isect.meshid;
+    }
+
+    AT_DEVICE_API inline void sample_pos_and_normal(
+        aten::SamplePosNormalPdfResult* result,
+        const aten::ObjectParameter& obj,
+        const aten::context& ctxt,
+        aten::sampler* sampler)
+    {
+        // Get real object. If the object is instance, we need to get real one.
+        const auto& real_obj = obj.object_id >= 0 ? ctxt.get_object(obj.object_id) : obj;
+        const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
+
+        aten::mat4 mtxL2W;
+        if (mtx_id >= 0) {
+            mtxL2W = ctxt.get_matrix(mtx_id);
+        }
+
+        if (real_obj.type == aten::ObjectType::Polygon) {
+            PolygonObject::sample_pos_and_normal(
+                result,
+                real_obj,
+                ctxt,
+                mtxL2W,
+                sampler);
+        }
+        else if (real_obj.type == aten::ObjectType::Sphere) {
+            sphere::sample_pos_and_normal(result, real_obj, mtxL2W, sampler);
+        }
+        else {
+            // TODO
+        }
     }
 }

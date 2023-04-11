@@ -63,13 +63,7 @@ namespace AT_NAME {
         virtual void getSamplePosNormalArea(
             const aten::context& ctxt,
             aten::SamplePosNormalPdfResult* result,
-            aten::sampler* sampler) const override final
-        {
-            if (m_obj) {
-                auto obj = getLightObject();
-                return obj->getSamplePosNormalArea(ctxt, result, sampler);
-            }
-        }
+            aten::sampler* sampler) const override final;
 
     private:
         std::shared_ptr<aten::transformable> m_obj;

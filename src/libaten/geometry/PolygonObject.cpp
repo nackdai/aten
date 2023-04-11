@@ -134,14 +134,13 @@ namespace AT_NAME
         rec.mtrlid = isect.mtrlid;
     }
 
-    void PolygonObject::getSamplePosNormalArea(
-        const context& ctxt,
+    void PolygonObject::sample_pos_and_normal(
         aten::SamplePosNormalPdfResult* result,
+        const aten::ObjectParameter& param,
+        const aten::context& ctxt,
         const aten::mat4& mtxL2W,
-        aten::sampler* sampler) const
+        aten::sampler* sampler)
     {
-        const auto& param = getParam();
-
         auto r = sampler->nextSample();
         uint32_t tri_idx = param.triangle_num * r;
         tri_idx += param.triangle_id;
@@ -171,9 +170,9 @@ namespace AT_NAME
         real ratio = scaledLen / orignalLen;
         ratio = ratio * ratio;
 
-        auto area = m_param.area * ratio;
+        auto area = param.area * ratio;
 
-        AT_NAME::triangle::getSamplePosNormalArea(
+        AT_NAME::triangle::sample_pos_and_normal(
             v0, v1, v2,
             result, sampler);
 

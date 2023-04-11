@@ -97,16 +97,6 @@ namespace aten
             return false;
         }
 
-        virtual void getSamplePosNormalArea(
-            const context& ctxt,
-            aten::SamplePosNormalPdfResult* result,
-            const mat4& mtxL2W,
-            sampler* sampler) const override final
-        {
-            // Not support.
-            AT_ASSERT(false);
-        }
-
     private:
         void render(
             const context& ctxt,

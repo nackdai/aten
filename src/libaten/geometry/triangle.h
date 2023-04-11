@@ -45,7 +45,7 @@ namespace AT_NAME
             const aten::TriangleParameter& param,
             const aten::Intersection* isect);
 
-        static void getSamplePosNormalArea(
+        static void sample_pos_and_normal(
             const aten::vertex& v0,
             const aten::vertex& v1,
             const aten::vertex& v2,

@@ -179,6 +179,11 @@ namespace aten
         {
             return m_transformables[idx]->getParam();
         }
+        const aten::ObjectParameter& get_real_object(const aten::ObjectParameter& obj) const
+        {
+            const auto& real_obj = obj.object_id >= 0 ? get_object(obj.object_id) : obj;
+            return real_obj;
+        }
 
         std::tuple<uint32_t, std::shared_ptr<aten::mat4>> create_matrix()
         {
@@ -194,6 +199,15 @@ namespace aten
                 return aten::mat4::Identity;
             }
             return *m_matrices[idx];
+        }
+        std::vector<aten::mat4> get_matrices()
+        {
+            std::vector<aten::mat4> mtxs;
+            mtxs.reserve(m_matrices.size());
+            for (const auto m : m_matrices) {
+                mtxs.emplace_back(*m.get());
+            }
+            return mtxs;
         }
 
     private:

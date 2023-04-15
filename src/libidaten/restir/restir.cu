@@ -214,8 +214,6 @@ __global__ void shade(
 
             auto lightSelectPdf = reservoir.pdf_;
 
-            auto lightobj = reservoir.light_sample_.obj;
-
             auto dirToLight = normalize(reservoir.light_sample_.dir);
             auto distToLight = length(posLight - rec.p);
 

@@ -237,7 +237,6 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
-    <ClCompile Include="..\src\libaten\light\arealight.cpp" />
     <CudaCompile Include="..\src\libaten\material\beckman.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>

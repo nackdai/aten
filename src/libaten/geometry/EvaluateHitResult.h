@@ -28,7 +28,7 @@ namespace AT_NAME
         }
         else {
             // Get real object. If the object is instance, we need to get real one.
-            const auto& real_obj = obj.object_id >= 0 ? ctxt.get_object(obj.object_id) : obj;
+            const auto& real_obj = ctxt.get_real_object(obj);
             const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
             aten::mat4 mtxL2W;

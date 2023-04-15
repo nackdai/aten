@@ -356,9 +356,6 @@
     <ClCompile Include="..\src\libidaten\cuda\cudamemory.cpp">
       <Filter>cuda</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\light\arealight.cpp">
-      <Filter>aten\light</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\math\mat4.cpp">
       <Filter>aten\math</Filter>
     </ClCompile>

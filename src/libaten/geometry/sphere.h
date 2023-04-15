@@ -64,6 +64,14 @@ namespace AT_NAME
             const aten::mat4& mtxL2W,
             aten::sampler* sampler);
 
+        static AT_DEVICE_API void sample_pos_and_normal(
+            aten::SamplePosNormalPdfResult* result,
+            const aten::ObjectParameter& param,
+            aten::sampler* sampler)
+        {
+            sample_pos_and_normal(result, param, aten::mat4(), sampler);
+        }
+
     private:
         std::shared_ptr<AT_NAME::material> mtrl_;
     };

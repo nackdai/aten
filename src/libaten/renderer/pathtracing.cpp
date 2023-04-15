@@ -464,8 +464,6 @@ namespace aten
                 const vec3& nmlLight = sampleres.nml;
                 real pdfLight = sampleres.pdf;
 
-                auto lightobj = sampleres.obj;
-
                 vec3 dirToLight = normalize(sampleres.dir);
 
                 // TODO

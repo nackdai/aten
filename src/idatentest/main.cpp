@@ -112,7 +112,9 @@ void update()
                 vtxparams);
 
             const auto &nodes = g_scene.getAccel()->getNodes();
-            const auto &mtxs = g_scene.getAccel()->getMatrices();
+
+            // TODO
+            const auto mtxs = g_ctxt.get_matrices();
 
             g_tracer.updateBVH(
                 shapeparams,
@@ -507,7 +509,7 @@ int32_t main()
             vtxparams);
 
         const auto &nodes = g_scene.getAccel()->getNodes();
-        const auto &mtxs = g_scene.getAccel()->getMatrices();
+        const auto mtxs = g_ctxt.get_matrices();
 
         std::vector<idaten::TextureResource> tex;
         {

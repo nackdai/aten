@@ -119,7 +119,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
             getTriangleSamplePosNormalArea(&result, ctxt, realShape, sampler);
         }
         else if (realShape->type == aten::ObjectType::Sphere) {
-            AT_NAME::sphere::getSamplePosNormalArea(&result, s, sampler);
+            AT_NAME::sphere::sample_pos_and_normal(&result, *s, sampler);
         }
         else {
             // TODO
@@ -165,8 +165,6 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     evalHitResultForAreaLight(ctxt, s, r, &rec, &isect);
 
     AT_NAME::AreaLight::sample(&rec, light, org, sampler, result);
-
-    result->obj = (void*)s;
 }
 
 AT_CUDA_INLINE __device__  void sampleImageBasedLight(

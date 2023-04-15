@@ -71,8 +71,6 @@ namespace AT_NAME {
                     org,
                     sampler,
                     &result);
-
-                result.obj = m_obj.get();
             }
         }
 

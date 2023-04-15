@@ -24,7 +24,7 @@ namespace AT_NAME {
 
         ImageBasedLight(aten::Values& val);
 
-        virtual ~ImageBasedLight() {}
+        virtual ~ImageBasedLight() = default;
 
     public:
         void setEnvMap(const std::shared_ptr<AT_NAME::envmap>& envmap)

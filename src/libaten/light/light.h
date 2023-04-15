@@ -17,8 +17,6 @@ namespace aten {
         vec3 le;                    // light color.
         vec3 finalColor;            // le * intensity
         real pdf{ real(0) };        // light sampling pdf.
-
-        void* obj{ nullptr };       // light object(only for area light)
     };
 
     struct LightAttribute {

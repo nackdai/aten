@@ -38,8 +38,6 @@ static std::shared_ptr<aten::visualizer> g_visualizer;
 static float g_avgcuda = 0.0f;
 static float g_avgupdate = 0.0f;
 
-static bool g_enableUpdate = false;
-
 static aten::TAA g_taa;
 
 static aten::FBO g_fbo;
@@ -66,62 +64,6 @@ static bool g_frameStep = false;
 
 static bool g_pickPixel = false;
 
-void update()
-{
-    static float y = 0.0f;
-    static float d = -0.1f;
-
-    auto obj = getMovableObj();
-
-    if (obj)
-    {
-        auto t = obj->getTrans();
-
-        if (y >= -0.1f)
-        {
-            d = -0.01f;
-        }
-        else if (y <= -1.5f)
-        {
-            d = 0.01f;
-        }
-
-        y += d;
-        t.y += d;
-
-        obj->setTrans(t);
-        obj->update();
-
-        auto accel = g_scene.getAccel();
-        accel->update(g_ctxt);
-
-        {
-            std::vector<aten::ObjectParameter> shapeparams;
-            std::vector<aten::TriangleParameter> primparams;
-            std::vector<aten::LightParameter> lightparams;
-            std::vector<aten::MaterialParameter> mtrlparms;
-            std::vector<aten::vertex> vtxparams;
-
-            aten::DataCollector::collect(
-                g_ctxt,
-                g_scene,
-                shapeparams,
-                primparams,
-                lightparams,
-                mtrlparms,
-                vtxparams);
-
-            const auto &nodes = g_scene.getAccel()->getNodes();
-            const auto &mtxs = g_scene.getAccel()->getMatrices();
-
-            g_tracer.updateBVH(
-                shapeparams,
-                nodes,
-                mtxs);
-        }
-    }
-}
-
 void onRun(aten::window *window)
 {
     if (g_enableFrameStep && !g_frameStep)
@@ -138,11 +80,6 @@ void onRun(aten::window *window)
     {
         aten::timer timer;
         timer.begin();
-
-        if (g_enableUpdate)
-        {
-            update();
-        }
 
         updateTime = timer.end();
 
@@ -395,11 +332,6 @@ void onKey(bool press, aten::Key key)
             g_enableFrameStep = !g_enableFrameStep;
             return;
         }
-        else if (key == aten::Key::Key_F4)
-        {
-            g_enableUpdate = !g_enableUpdate;
-            return;
-        }
         else if (key == aten::Key::Key_F5)
         {
             aten::GLProfiler::trigger();
@@ -573,7 +505,7 @@ int32_t main()
             vtxparams);
 
         const auto &nodes = g_scene.getAccel()->getNodes();
-        const auto &mtxs = g_scene.getAccel()->getMatrices();
+        const auto mtxs = g_ctxt.get_matrices();
 
         std::vector<idaten::TextureResource> tex;
         {

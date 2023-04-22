@@ -5,12 +5,13 @@ on:
     branches:
       - '*'
     paths-ignore:
-    - '.devcontainer/**'
-    - '.gitignore'
-    - 'asset/**'
-    - 'gallery/**'
-    - 'vs2019/**'
-    - '**.md'
+      - '.devcontainer/**'
+      - '.gitignore'
+      - '.dockerignore'
+      - 'asset/**'
+      - 'gallery/**'
+      - 'vs2019/**'
+      - '**.md'
   push:
     branches:
       - 'main'
@@ -23,10 +24,10 @@ jobs:
   build_docker:
     name: build_docker
     runs-on: ubuntu-20.04
-    if: ${{ github.ref }} != 'refs/heads/main'
+    if: contains(github.ref, 'main') == false
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get diff files
         id: getfile
@@ -82,23 +83,13 @@ jobs:
           chown -R $(id -u):$(id -g) ${GITHUB_WORKSPACE}
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
 
-      # It seems that .bashrc is not enabled in the docker container.
-      # So, in order to eanble pyenv, need to call eval for enabling pyenv.
-      # 'pyenv init --path' sets PATH to enable to execute pre-commit.
-      # HOME is expected as '/root' for 'pyenv init --path' in aten_dev:latest container.
-      # But, HOME is spcified as '/github/home' forcibly by GHA.
-      # It causes unexpected PATH settings in 'pyenv init --path'.
-      # So, need to specify 'HOME=/root' for 'pyenv init --path'.
-      # If docker container is run via 'docker run' and run commands via `docker exec`,
-      # we can expect HOME is '/root'.
       - name: lint
         run: |
           git config --global --add safe.directory ${GITHUB_WORKSPACE}
-          eval "$(HOME=/root pyenv init --path)"
           pre-commit run -a
 
       - name: Configure

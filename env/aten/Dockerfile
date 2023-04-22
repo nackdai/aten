@@ -38,5 +38,3 @@ RUN curl -fL https://github.com/Kitware/CMake/releases/download/v${cmake_version
     && sh ./cmake.sh --skip-license --prefix=/bin/cmake \
     && rm ./cmake.sh
 ENV PATH $PATH:/bin/cmake/bin
-
-RUN apt-get update && apt install -y libboost-all-dev

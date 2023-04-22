@@ -5,33 +5,25 @@ on:
     branches:
       - '*'
     paths-ignore:
-    - '.devcontainer/*.json'
-    - '.devcontainer/*.yml'
+    - '.devcontainer/**'
     - '.gitignore'
     - 'asset/**'
     - 'gallery/**'
-    - 'vs2015/**'
     - 'vs2019/**'
+    - '**.md'
   push:
     branches:
       - 'main'
 
-jobs:
-  cancel:
-    name: cancel
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          all_but_latest: true
-          access_token: ${{ secrets.GITHUB_TOKEN }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
   build_docker:
     name: build_docker
     runs-on: ubuntu-20.04
     needs: cancel
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2

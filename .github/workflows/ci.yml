@@ -34,7 +34,7 @@ jobs:
           git fetch origin main
           files=$(git diff origin/main HEAD --name-only)
           echo "${files}"
-          echo "::set-output name=diff_files::${files}"
+          echo "diff_files=${files}" >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container Registry
         if: contains(steps.getfile.outputs.diff_files, 'Dockerfile') == true

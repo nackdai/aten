@@ -1,0 +1,20 @@
+launch_docker() {
+    local contaner_name="${1}"
+    local docker_image="${2}"
+    local options=(${3})
+    local exec_cmd=(${4:-""})
+    docker run -it --rm \
+        -u "$(id -u)":"$(id -g)" \
+        -h $(hostname) \
+        --mount type=bind,src=/etc/passwd,target=/etc/passwd,readonly \
+        --mount type=bind,src=/etc/group,target=/etc/group,readonly \
+        --name "${CONTAINER_NAME}" \
+        ${options[@]} \
+        "${docker_image}" ${exec_cmd[@]} 2>&1
+}
+
+kill_container() {
+    local contaner_name="${1}"
+    docker kill "${contaner_name}" >/dev/null 2>&1 || true
+    docker container rm "${contaner_name}" >/dev/null 2>&1 || true
+}

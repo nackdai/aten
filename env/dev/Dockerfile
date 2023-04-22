@@ -22,18 +22,12 @@ RUN apt-get update && apt-get install -y \
     liblzma-dev \
     python-openssl \
     git \
-    shellcheck
+    shellcheck \
+    python3 \
+    python3-pip \
+    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-ARG python_version=3.8.2
-
-ENV HOME /root
-ENV PATH $HOME/.pyenv/bin:$PATH
-RUN git clone https://github.com/pyenv/pyenv.git $HOME/.pyenv \
-    && echo 'eval "$(pyenv init --path)"' >> ~/.bashrc \
-    && eval "$(pyenv init --path)" \
-    && pyenv install -v ${python_version} \
-    && pyenv global ${python_version} \
-    && pip install pre-commit
+RUN pip install pre-commit
 
 # https://github.com/nodesource/distributions
 # https://github.com/nodesource/distributions/issues/1266
@@ -56,8 +50,3 @@ RUN curl https://dl.google.com/go/go${go_version}.linux-amd64.tar.gz > go.tar.gz
     && rm go.tar.gz \
     && rm -rf /go \
     && rm -rf /usr/local/go/
-
-# Clean up
-RUN apt-get autoremove -y \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*

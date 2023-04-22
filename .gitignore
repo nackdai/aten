@@ -30,4 +30,4 @@ src/**/*.anm
 src/**/*.sbvh
 src/**/*.hdr
 
-.cache
+.home

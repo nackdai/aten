@@ -23,7 +23,7 @@ jobs:
   build_docker:
     name: build_docker
     runs-on: ubuntu-20.04
-    needs: cancel
+    if: ${{ github.ref }} != 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2

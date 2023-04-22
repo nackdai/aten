@@ -3,34 +3,43 @@
 set -eu
 set -o pipefail
 
-# TODO
-# Usage:
-# run_pre_commit.sh <dir_to_run_pre_commit>
-# ex) ./scripts/run_pre_commit.sh ./
+usage() {
+  cat <<EOF 1>&2
+Usage: $0 <dir_to_run_pre_commit>
+ex) ./scripts/run_pre_commit.sh ./
+EOF
+  exit 1
+}
 
-work_dir=$(realpath "${1}")
+if (("${#}" != 1)); then
+  usage
+fi
+
+work_dir="$(realpath "${1}")"
 
 aten_dev_image="$(docker images -q aten_dev:latest 2>/dev/null)"
 
 CONTAINER_NAME="aten_dev"
 WORKSPACE="/work"
 
-function finally() {
-  docker kill "${CONTAINER_NAME}" >/dev/null 2>&1 || true
-  docker container rm "${CONTAINER_NAME}" >/dev/null 2>&1 || true
-}
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+# shellcheck disable=SC1090
+source "${SCRIPT_DIR}/docker_util"
 
-trap finally EXIT ERR
+trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
 
-if [[ -n "${aten_dev_image}" ]]; then
+if [[ -z "${aten_dev_image}" ]]; then
+  echo "No docker image aten_dev::latest"
+  exit 1
+else
+  kill_container "${CONTAINER_NAME}"
+
   # NOTE: https://stackoverflow.com/questions/62539288/where-does-pre-commit-install-environments
-  docker run -it -d \
-    --name "${CONTAINER_NAME}" \
-    -v "${work_dir}":"${WORKSPACE}" \
-    -w "${WORKSPACE}" \
-    -e PRE_COMMIT_HOME="${WORKSPACE}/.cache/pre-commit" \
-    "${aten_dev_image}" >/dev/null 2>&1
+  launch_docker "${CONTAINER_NAME}" "${aten_dev_image}" \
+    "-d -w ${WORKSPACE} \
+    --mount type=bind,src=${work_dir},target=${WORKSPACE} \
+    --mount type=bind,src=${PWD}/.home,target=${HOME} \
+    -e HOME=${HOME}"
 
-  docker exec "${CONTAINER_NAME}" bash -c "git config --global --add safe.directory ${WORKSPACE}"
-  docker exec "${CONTAINER_NAME}" bash -c 'eval "$(pyenv init --path)" && pre-commit run -a'
+  docker exec "${CONTAINER_NAME}" bash -c 'pre-commit run -a'
 fi

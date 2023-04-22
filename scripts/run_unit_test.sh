@@ -3,30 +3,38 @@
 set -eu
 set -o pipefail
 
-# TODO
-# Usage:
-# run_unit_test.sh
-# ex) ./scripts/run_unit_test.sh
+usage() {
+  cat <<EOF 1>&2
+Usage: $0 [work directory]
+EOF
+  exit 1
+}
+
+if (("${#}" != 1)); then
+  usage
+fi
+
+work_dir="$(realpath "${1}")"
 
 aten_image="$(docker images -q aten:latest 2>/dev/null)"
 
 CONTAINER_NAME="aten"
 WORKSPACE="/work"
 
-function finally() {
-  docker kill "${CONTAINER_NAME}" >/dev/null 2>&1 || true
-  docker container rm "${CONTAINER_NAME}" >/dev/null 2>&1 || true
-}
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+# shellcheck disable=SC1090
+source "${SCRIPT_DIR}/docker_util"
 
-trap finally EXIT ERR
+if [[ -z "${aten_image}" ]]; then
+  echo "No docker image aten_dev::latest"
+  exit 1
+else
+  kill_container "${CONTAINER_NAME}"
 
-if [[ -n "${aten_image}" ]]; then
-  # NOTE: https://stackoverflow.com/questions/62539288/where-does-pre-commit-install-environments
-  docker run -it -d \
-    --name "${CONTAINER_NAME}" \
-    -v "${PWD}":"${WORKSPACE}" \
-    -w "${WORKSPACE}" \
-    "${aten_image}" >/dev/null 2>&1
+  launch_docker "${CONTAINER_NAME}" "${aten_image}" \
+    "-d \
+    -w ${WORKSPACE} \
+    --mount type=bind,src=${work_dir},target=${WORKSPACE}"
 
   docker exec "${CONTAINER_NAME}" bash -c "cd ${WORKSPACE}/build/aten_unittest && ./aten_unittest"
 fi

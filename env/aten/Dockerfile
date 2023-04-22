@@ -17,7 +17,8 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     wget \
     xorg-dev \
-    xz-utils
+    xz-utils \
+    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # NOTE: It seems that there are some bugs for combination cuda and clang. In order to be stable, we install clang-9.
 # https://forums.developer.nvidia.com/t/cuda-is-not-compatible-with-current-versions-of-libc/190930
@@ -28,7 +29,8 @@ RUN apt-get update && apt-get install -y \
 ARG clang_version=9
 RUN curl -fL https://apt.llvm.org/llvm.sh | bash -s ${clang_version} \
     && apt-get update \
-    && apt-get install -y clang-tidy-${clang_version} libc++-${clang_version}-dev libc++abi-${clang_version}-dev
+    && apt-get install -y clang-tidy-${clang_version} libc++-${clang_version}-dev libc++abi-${clang_version}-dev \
+    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 ARG cmake_version=3.21.3
 RUN curl -fL https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh > cmake.sh  \
@@ -36,8 +38,3 @@ RUN curl -fL https://github.com/Kitware/CMake/releases/download/v${cmake_version
     && sh ./cmake.sh --skip-license --prefix=/bin/cmake \
     && rm ./cmake.sh
 ENV PATH $PATH:/bin/cmake/bin
-
-# Clean up
-RUN apt-get autoremove -y \
-    && apt-get clean -y \
-    && rm -rf /var/lib/apt/lists/*

@@ -5,33 +5,25 @@ on:
     branches:
       - '*'
     paths-ignore:
-    - '.devcontainer/*.json'
-    - '.devcontainer/*.yml'
+    - '.devcontainer/**'
     - '.gitignore'
     - 'asset/**'
     - 'gallery/**'
-    - 'vs2015/**'
     - 'vs2019/**'
+    - '**.md'
   push:
     branches:
       - 'main'
 
-jobs:
-  cancel:
-    name: cancel
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          all_but_latest: true
-          access_token: ${{ secrets.GITHUB_TOKEN }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
   build_docker:
     name: build_docker
     runs-on: ubuntu-20.04
-    needs: cancel
-
+    if: ${{ github.ref }} != 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,9 +32,10 @@ jobs:
         id: getfile
         run: |
           git fetch origin main
-          files=$(git diff origin/main HEAD --name-only)
-          echo "${files}"
-          echo "::set-output name=diff_files::${files}"
+          files=$(git diff origin/main HEAD --name-only 2>/dev/null)
+          diff_files=($(echo ${files}))
+          echo "${diff_files[@]}"
+          echo "diff_files=${diff_files[@]}" >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container Registry
         if: contains(steps.getfile.outputs.diff_files, 'Dockerfile') == true

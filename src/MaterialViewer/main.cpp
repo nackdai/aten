@@ -154,16 +154,7 @@ static MaterialParamEditor g_mtrlParamEditor;
 void mershallLightParameter(std::vector<aten::LightParameter>& lightparams)
 {
     if (g_scene_light.is_envmap) {
-        auto result = std::find_if(
-            lightparams.begin(), lightparams.end(),
-            [](const auto& l) {
-                return l.type == aten::LightType::IBL;
-            }
-        );
-        if (result != lightparams.end()) {
-            result->idx = g_scene_light.envmap_texture->id();
-        }
-        result = std::remove_if(lightparams.begin(), lightparams.end(),
+        auto result = std::remove_if(lightparams.begin(), lightparams.end(),
             [](const auto& l) {
                 return l.type != aten::LightType::IBL;
             }

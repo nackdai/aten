@@ -41,20 +41,19 @@ namespace aten {
     };
 
     struct LightParameter {
-        vec4 pos;
-        vec4 dir;
-        vec4 le;
+        vec4 pos;   ///< Light position.
+        vec4 dir;   ///< Light direction.
+        vec4 le;    ///< Light luminousness.
 
         union {
             aten::vec4 v0;
 
             struct {
-                LightType type;
+                LightType type;     ///< Light type.
 
-                // For pointlight, spotlight.
-                real constAttn;
-                real linearAttn;
-                real expAttn;
+                real constAttn;     ///< Point/Spot light attenuation for constant.
+                real linearAttn;    ///< Point/Spot light attenuation for linear.
+                real expAttn;       ///< Point/Spot light attenuation for exponential.
             };
         };
 
@@ -62,12 +61,11 @@ namespace aten {
             aten::vec4 v1;
 
             struct {
-                // For spotlight.
-                real innerAngle;
-                real outerAngle;
-                real falloff;
+                real innerAngle;    ///< Spot light inner angle.
+                real outerAngle;    ///< Spot light outer angle.
+                real falloff;       ///< Spot light fall off factor.
 
-                LightAttribute attrib;
+                LightAttribute attrib;  ///< Light attribute.
             };
         };
 
@@ -76,7 +74,7 @@ namespace aten {
 
             struct{
                 int32_t objid;
-                int32_t idx;
+                int32_t envmapidx;
             };
         };
 
@@ -96,7 +94,7 @@ namespace aten {
             falloff = real(0);
 
             objid = -1;
-            idx = -1;
+            envmapidx = -1;
         }
 
         AT_DEVICE_API LightParameter(const LightParameter& rhs)
@@ -109,7 +107,7 @@ namespace aten {
             v1 = rhs.v1;
 
             objid = rhs.objid;
-            idx = rhs.idx;
+            envmapidx = rhs.envmapidx;
         }
     };
     //AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);
@@ -193,14 +191,9 @@ namespace AT_NAME
             return m_param;
         }
 
-        virtual void getSamplePosNormalArea(
-            const aten::context& ctxt,
-            aten::SamplePosNormalPdfResult* result,
-            aten::sampler* sampler) const
+        const aten::LightParameter& get_param() const
         {
-            // TODO
-            // Only for AreaLight...
-            AT_ASSERT(false);
+            return m_param;
         }
 
     protected:

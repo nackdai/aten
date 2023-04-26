@@ -101,7 +101,7 @@ namespace aten
         Result genLightPath(
             const context& ctxt,
             std::vector<Vertex>& vs,
-            const std::shared_ptr<aten::Light>& light,
+            const std::shared_ptr<aten::Light> light,
             sampler* sampler,
             scene* scene,
             camera* camera) const;

@@ -2,6 +2,7 @@
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "geometry/transformable.h"
+#include "geometry/EvaluateHitResult.h"
 #include "sampler/xorshift.h"
 #include "sampler/halton.h"
 #include "sampler/sobolproxy.h"
@@ -239,7 +240,7 @@ namespace aten
     BDPT::Result BDPT::genLightPath(
         const context& ctxt,
         std::vector<Vertex>& vs,
-        const std::shared_ptr<aten::Light>& light,
+        const std::shared_ptr<aten::Light> light,
         sampler* sampler,
         scene* scene,
         camera* camera) const
@@ -249,7 +250,11 @@ namespace aten
 
         // 光源上にサンプル点生成（y0）.
         aten::SamplePosNormalPdfResult res;
-        light->getSamplePosNormalArea(ctxt, &res, sampler);
+        if (light->get_param().type == aten::LightType::Area) {
+            // Only area light.
+            const auto& obj = ctxt.get_object(light->get_param().objid);
+            AT_NAME::sample_pos_and_normal(&res, obj, ctxt, sampler);
+        }
         auto posOnLight = res.pos;
         auto nmlOnLight = res.nml;
         auto pdfOnLight = real(1) / res.area;

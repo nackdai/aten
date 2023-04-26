@@ -577,16 +577,6 @@ int32_t main()
             }
         }
 
-#ifdef ENABLE_ENVMAP
-        for (auto &l : lightparams)
-        {
-            if (l.type == aten::LightType::IBL)
-            {
-                l.idx = envmap->id();
-            }
-        }
-#endif
-
         auto camparam = g_camera.param();
         camparam.znear = real(0.1);
         camparam.zfar = real(10000.0);

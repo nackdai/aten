@@ -50,20 +50,27 @@ namespace AT_NAME {
             result->finalColor = param->le;
         }
 
+        static void sample(
+            aten::LightSampleResult& result,
+            const aten::LightParameter& param,
+            const aten::context& ctxt,
+            const aten::vec3& org,
+            aten::sampler* sampler);
+
         virtual aten::LightSampleResult sample(
             const aten::context& ctxt,
             const aten::vec3& org,
-            aten::sampler* sampler) const override final;
+            aten::sampler* sampler) const override final
+        {
+            aten::LightSampleResult result;
+            sample(result, m_param, ctxt, org, sampler);
+            return result;
+        }
 
         std::shared_ptr<aten::transformable> getLightObject() const
         {
             return m_obj;
         }
-
-        virtual void getSamplePosNormalArea(
-            const aten::context& ctxt,
-            aten::SamplePosNormalPdfResult* result,
-            aten::sampler* sampler) const override final;
 
     private:
         std::shared_ptr<aten::transformable> m_obj;

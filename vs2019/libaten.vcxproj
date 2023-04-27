@@ -299,6 +299,7 @@
     <ClInclude Include="..\src\libaten\light\directionallight.h" />
     <ClInclude Include="..\src\libaten\light\ibl.h" />
     <ClInclude Include="..\src\libaten\light\light.h" />
+    <ClInclude Include="..\src\libaten\light\LightSample.h" />
     <ClInclude Include="..\src\libaten\light\pointlight.h" />
     <ClInclude Include="..\src\libaten\light\spotlight.h" />
     <ClInclude Include="..\src\libaten\material\beckman.h" />

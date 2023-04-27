@@ -11,12 +11,12 @@ namespace aten {
 
 namespace aten {
     struct LightSampleResult {
-        vec3 pos;                   // light position.
-        vec3 dir;                   // light direction from the position.
-        vec3 nml;                   // light object surface normal.
-        vec3 le;                    // light color.
-        vec3 finalColor;            // le * intensity
-        real pdf{ real(0) };        // light sampling pdf.
+        vec3 pos;               ///< light position.
+        vec3 dir;               ///< light direction from the position.
+        vec3 nml;               ///< light object surface normal.
+        vec3 le;                ///< light color.
+        vec3 finalColor;        ///< le * intensity
+        real pdf{ real(0) };    ///< light sampling pdf.
     };
 
     struct LightAttribute {
@@ -25,10 +25,10 @@ namespace aten {
         uint32_t isIBL : 1;
     };
 
-    #define LightAttributeArea          aten::LightAttribute{ false, false, false }
-    #define LightAttributeSingluar      aten::LightAttribute{ true,  false, false }
-    #define LightAttributeDirectional   aten::LightAttribute{ true,  true,  false }
-    #define LightAttributeIBL           aten::LightAttribute{ false, true,  true }
+    AT_DEVICE_MTRL_API constexpr auto LightAttributeArea = aten::LightAttribute{ false, false, false };
+    AT_DEVICE_MTRL_API constexpr auto LightAttributeSingluar = aten::LightAttribute{ true,  false, false };
+    AT_DEVICE_MTRL_API constexpr auto LightAttributeDirectional = aten::LightAttribute{ true,  true,  false };
+    AT_DEVICE_MTRL_API constexpr auto LightAttributeIBL = aten::LightAttribute{ false, true,  true };
 
     enum class LightType : int32_t {
         Area,

@@ -29,7 +29,7 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, baseColor, 1)
+            : material(aten::MaterialType::Disney, aten::MaterialAttributeMicrofacet, baseColor, 1)
         {
             m_param.baseColor = baseColor;
             m_param.standard.subsurface = aten::clamp<real>(subsurface, 0, 1);
@@ -53,7 +53,7 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Disney, MaterialAttributeMicrofacet, param.baseColor, 1)
+            : material(aten::MaterialType::Disney, aten::MaterialAttributeMicrofacet, param.baseColor, 1)
         {
             m_param.baseColor = param.baseColor;
             m_param.standard.subsurface = aten::clamp<real>(param.standard.subsurface, 0, 1);

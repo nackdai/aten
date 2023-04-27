@@ -13,10 +13,10 @@ namespace AT_NAME {
     class AreaLight : public Light {
     public:
         AreaLight()
-            : Light(aten::LightType::Area, LightAttributeArea)
+            : Light(aten::LightType::Area, aten::LightAttributeArea)
         {}
         AreaLight(const std::shared_ptr<aten::transformable>& obj, const aten::vec3& le)
-            : Light(aten::LightType::Area, LightAttributeArea)
+            : Light(aten::LightType::Area, aten::LightAttributeArea)
         {
             m_obj = obj;
 

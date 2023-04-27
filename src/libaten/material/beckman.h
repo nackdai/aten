@@ -20,7 +20,7 @@ namespace AT_NAME
             aten::texture* albedoMap = nullptr,
             aten::texture* normalMap = nullptr,
             aten::texture* roughnessMap = nullptr)
-            : material(aten::MaterialType::Beckman, MaterialAttributeMicrofacet, albedo, ior)
+            : material(aten::MaterialType::Beckman, aten::MaterialAttributeMicrofacet, albedo, ior)
         {
             setTextures(albedoMap, normalMap, roughnessMap);
             m_param.standard.roughness = aten::clamp<real>(roughness, 0, 1);

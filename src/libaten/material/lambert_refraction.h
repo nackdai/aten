@@ -17,7 +17,7 @@ namespace AT_NAME
             const aten::vec3& albedo = aten::vec3(0.5),
             real ior = real(1),
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Lambert_Refraction, MaterialAttributeTransmission, albedo, ior)
+            : material(aten::MaterialType::Lambert_Refraction, aten::MaterialAttributeTransmission, albedo, ior)
         {
             setTextures(nullptr, normalMap, nullptr);
         }

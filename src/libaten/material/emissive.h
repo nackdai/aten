@@ -14,11 +14,11 @@ namespace AT_NAME
 
     private:
         emissive()
-            : material(aten::MaterialType::Emissive, MaterialAttributeEmissive)
+            : material(aten::MaterialType::Emissive, aten::MaterialAttributeEmissive)
         {}
 
         emissive(const aten::vec3& e)
-            : material(aten::MaterialType::Emissive, MaterialAttributeEmissive, e)
+            : material(aten::MaterialType::Emissive, aten::MaterialAttributeEmissive, e)
         {}
 
         emissive(aten::Values& val);

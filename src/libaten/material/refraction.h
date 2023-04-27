@@ -17,7 +17,7 @@ namespace AT_NAME
             real ior = real(1),
             bool isIdealRefraction = false,
             aten::texture* normalMap = nullptr)
-            : material(aten::MaterialType::Refraction, MaterialAttributeRefraction, albedo, ior)
+            : material(aten::MaterialType::Refraction, aten::MaterialAttributeRefraction, albedo, ior)
         {
             setTextures(nullptr, normalMap, nullptr);
             m_param.isIdealRefraction = isIdealRefraction;

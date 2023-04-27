@@ -10,12 +10,12 @@ namespace AT_NAME {
     class DirectionalLight : public Light {
     public:
         DirectionalLight()
-            : Light(aten::LightType::Direction, LightAttributeDirectional)
+            : Light(aten::LightType::Direction, aten::LightAttributeDirectional)
         {}
         DirectionalLight(
             const aten::vec3& dir,
             const aten::vec3& le)
-            : Light(aten::LightType::Direction, LightAttributeDirectional)
+            : Light(aten::LightType::Direction, aten::LightAttributeDirectional)
         {
             m_param.dir = normalize(dir);
             m_param.le = le;

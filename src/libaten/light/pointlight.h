@@ -10,7 +10,7 @@ namespace AT_NAME {
     class PointLight : public Light {
     public:
         PointLight()
-            : Light(aten::LightType::Point, LightAttributeSingluar)
+            : Light(aten::LightType::Point, aten::LightAttributeSingluar)
         {}
         PointLight(
             const aten::vec3& pos,
@@ -18,7 +18,7 @@ namespace AT_NAME {
             real constAttn = 1,
             real linearAttn = 0,
             real expAttn = 0)
-            : Light(aten::LightType::Point, LightAttributeSingluar)
+            : Light(aten::LightType::Point, aten::LightAttributeSingluar)
         {
             m_param.pos = pos;
             m_param.le = le;

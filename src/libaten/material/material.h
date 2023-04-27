@@ -21,33 +21,18 @@ namespace aten {
 namespace aten
 {
     struct MaterialAttribute {
-        struct {
-            uint32_t isEmissive : 1;
-            uint32_t isSingular : 1;
-            uint32_t isTranslucent : 1;
-            uint32_t isGlossy : 1;
-        };
-
-        AT_DEVICE_API MaterialAttribute(
-            bool _isEmissive = false,
-            bool _isSingular = false,
-            bool _isTranslucent = false,
-            bool _isGlossy = false)
-            : isEmissive(_isEmissive), isSingular(_isSingular), isTranslucent(_isTranslucent),
-            isGlossy(_isGlossy)
-        {}
-        AT_DEVICE_API MaterialAttribute(const MaterialAttribute& type)
-            : MaterialAttribute(type.isEmissive, type.isSingular, type.isTranslucent, type.isGlossy)
-        {}
+        uint32_t isEmissive : 1;
+        uint32_t isSingular : 1;
+        uint32_t isTranslucent : 1;
+        uint32_t isGlossy : 1;
     };
 
-    //                                                                    Em     Si      Tr    Gl
-    #define MaterialAttributeMicrofacet         aten::MaterialAttribute(false, false, false, true)
-    #define MaterialAttributeLambert            aten::MaterialAttribute(false, false, false, false)
-    #define MaterialAttributeEmissive           aten::MaterialAttribute(true,  false, false, false)
-    #define MaterialAttributeSpecular           aten::MaterialAttribute(false, true,  false, true)
-    #define MaterialAttributeRefraction         aten::MaterialAttribute(false, true,  true,  true)
-    #define MaterialAttributeTransmission       aten::MaterialAttribute(false, false, true,  false)
+    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeMicrofacet = aten::MaterialAttribute{false, false, false, true};
+    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeLambert = aten::MaterialAttribute{false, false, false, false};
+    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeEmissive = aten::MaterialAttribute{true,  false, false, false};
+    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeSpecular = aten::MaterialAttribute{false, true,  false, true};
+    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeRefraction = aten::MaterialAttribute{false, true,  true,  true};
+    AT_DEVICE_MTRL_API constexpr auto MaterialAttributeTransmission = aten::MaterialAttribute{false, false, true,  false};
 
     enum class MaterialType : int32_t {
         Emissive,

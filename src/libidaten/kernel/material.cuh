@@ -6,6 +6,7 @@
 #include "cuda/cudamemory.h"
 #include "kernel/context.cuh"
 #include "material/sample_texture.h"
+#include "material/material.h"
 #include "aten4idaten.h"
 
 __device__ void sampleMaterial(
@@ -101,7 +102,7 @@ inline __device__ bool gatherMaterialInfo(
         if (is_voxel) {
             // Replace to lambert.
             const auto& albedo = ctxt->mtrls[mtrl_id].baseColor;
-            dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
+            dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
             dst_mtrl.baseColor = albedo;
         }
 
@@ -111,7 +112,7 @@ inline __device__ bool gatherMaterialInfo(
     }
     else {
         // TODO
-        dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, MaterialAttributeLambert);
+        dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
         dst_mtrl.baseColor = aten::vec3(1.0f);
     }
 

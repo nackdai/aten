@@ -14,10 +14,10 @@ namespace AT_NAME {
     class ImageBasedLight : public Light {
     public:
         ImageBasedLight()
-            : Light(aten::LightType::IBL, LightAttributeIBL)
+            : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {}
         ImageBasedLight(const std::shared_ptr<AT_NAME::envmap>& envmap)
-            : Light(aten::LightType::IBL, LightAttributeIBL)
+            : Light(aten::LightType::IBL, aten::LightAttributeIBL)
         {
             setEnvMap(envmap);
         }

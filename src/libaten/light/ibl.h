@@ -77,6 +77,15 @@ namespace AT_NAME {
             const aten::vec3& nml,
             aten::sampler* sampler) const override final;
 
+        static void sample(
+            aten::LightSampleResult& result,
+            const aten::LightParameter& param,
+            const aten::context& ctxt,
+            const aten::vec3& org,
+            const aten::vec3& nml,
+            aten::sampler* sampler,
+            uint32_t lod);
+
     private:
         void preCompute();
 

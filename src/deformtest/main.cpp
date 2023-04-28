@@ -596,7 +596,7 @@ int32_t main()
 
     auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
 
-    g_scene.addImageBasedLight(ibl);
+    g_scene.addImageBasedLight(g_ctxt, ibl);
 #endif
 
     uint32_t advanceVtxNum = 0;

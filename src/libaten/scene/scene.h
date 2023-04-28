@@ -45,35 +45,17 @@ namespace AT_NAME {
             return hit(ctxt, r, t_min, t_max, false, rec, isect);
         }
 
-        void addLight(const std::shared_ptr<Light>& l)
+        void addImageBasedLight(
+            aten::context& ctxt,
+            std::shared_ptr<ImageBasedLight> light)
         {
-            m_lights.push_back(l);
-        }
-
-        void addImageBasedLight(const std::shared_ptr<ImageBasedLight>& l)
-        {
-            if (m_ibl != l) {
-                m_ibl = l;
+            if (m_ibl != light) {
+                m_ibl = light;
 
                 // TODO
                 // Remove light, before adding.
-                addLight(l);
+                ctxt.add_light(light);
             }
-        }
-
-        uint32_t lightNum() const
-        {
-            return (uint32_t)m_lights.size();
-        }
-
-        std::shared_ptr<Light> getLight(uint32_t i)
-        {
-            return m_lights[i];
-        }
-
-        std::shared_ptr<const Light> getLight(uint32_t i) const
-        {
-            return m_lights[i];
         }
 
         std::shared_ptr<ImageBasedLight> getIBL()
@@ -191,7 +173,6 @@ namespace AT_NAME {
     protected:
         std::vector<std::shared_ptr<aten::hitable>> m_list;
 
-        std::vector<std::shared_ptr<Light>> m_lights;
         std::shared_ptr<ImageBasedLight> m_ibl;
 
         aten::aabb m_aabb;

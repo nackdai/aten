@@ -47,10 +47,10 @@ namespace aten {
             }
         });
 
-        auto lightNum = scene.lightNum();
+        const auto lightNum = ctxt.get_light_num();
 
         for (uint32_t i = 0; i < lightNum; i++) {
-            auto l = scene.getLight(i);
+            auto l = ctxt.get_light(i);
             auto param = l->param();
             lightparams.push_back(param);
         }

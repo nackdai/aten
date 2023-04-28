@@ -952,9 +952,9 @@ namespace aten
                             image[idx][pos] += vec4(eyeRes.contrib, 1);
                         }
 #else
-                        auto lightNum = scene->lightNum();
+                        const auto lightNum = ctxt.get_light_num();
                         for (uint32_t n = 0; n < lightNum; n++) {
-                            auto light = scene->getLight(n);
+                            auto light = ctxt.get_light(n);
                             auto lightRes = genLightPath(ctxt, lightvs, light, &rnd, scene, camera);
 
                             if (eyeRes.isTerminate) {

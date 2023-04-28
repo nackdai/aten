@@ -603,10 +603,11 @@ namespace aten
             if (light->isIBL()) {
                 // TODO
                 ret.scene->addImageBasedLight(
+                    ctxt,
                     std::static_pointer_cast<ImageBasedLight>(light));
             }
             else {
-                ret.scene->addLight(light);
+                ctxt.add_light(light);
             }
         }
 

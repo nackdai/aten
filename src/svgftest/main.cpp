@@ -539,7 +539,7 @@ int32_t main()
     bg->init(envmap);
     auto ibl = std::make_shared<aten::ImageBasedLight>(bg);
 
-    g_scene.addImageBasedLight(ibl);
+    g_scene.addImageBasedLight(g_ctxt, ibl);
 #endif
 
     {

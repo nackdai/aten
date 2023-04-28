@@ -517,6 +517,9 @@
     <ClInclude Include="..\src\libaten\light\LightSample.h">
       <Filter>light</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\light\light_parameter.h">
+      <Filter>light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

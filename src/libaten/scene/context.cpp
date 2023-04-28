@@ -3,6 +3,7 @@
 #include "scene/context.h"
 #include "geometry/triangle.h"
 #include "geometry/transformable.h"
+#include "light/light.h"
 
 namespace aten
 {
@@ -276,5 +277,20 @@ namespace aten
             auto tex = m_textures[i];
             tex->initAsGLTexture();
         }
+    }
+
+    void context::add_light(std::shared_ptr<Light> light)
+    {
+        m_lights.emplace_back(light);
+    }
+
+    std::shared_ptr<Light> context::get_light(uint32_t idx) const
+    {
+        return m_lights[idx];
+    }
+
+    size_t context::get_light_num() const
+    {
+        return m_lights.size();
     }
 }

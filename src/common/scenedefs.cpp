@@ -224,7 +224,7 @@ void CornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto l = std::make_shared<aten::AreaLight>(glass, emit->color());
 #endif
 
-    scene->addLight(l);
+    ctxt.add_light(l);
 }
 
 void CornellBoxScene::getCameraPosAndAt(
@@ -437,7 +437,7 @@ void PointLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         real(0));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
-    scene->addLight(l);
+    ctxt.add_light(l);
 }
 
 void PointLightScene::getCameraPosAndAt(
@@ -484,7 +484,7 @@ void DirectionalLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
     auto l = std::make_shared<aten::DirectionalLight>(aten::vec3(1, -1, 1), aten::vec3(36.0, 36.0, 36.0));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
-    scene->addLight(l);
+    ctxt.add_light(l);
 }
 
 void DirectionalLightScene::getCameraPosAndAt(
@@ -537,7 +537,7 @@ void SpotLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         real(1));
     //aten::Light* l = new aten::AreaLight(light, emit->color());
 
-    scene->addLight(l);
+    ctxt.add_light(l);
 }
 
 void SpotLightScene::getCameraPosAndAt(
@@ -631,9 +631,9 @@ void ManyLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
         real(Deg2Rad(60)),
         real(1));
 
-    scene->addLight(dir);
-    scene->addLight(spot);
-    scene->addLight(point);
+    ctxt.add_light(dir);
+    ctxt.add_light(spot);
+    ctxt.add_light(point);
 }
 
 void ManyLightScene::getCameraPosAndAt(
@@ -835,7 +835,7 @@ void HideLightScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     auto l = std::make_shared<aten::AreaLight>(light, emit->color());
 
-    scene->addLight(l);
+    ctxt.add_light(l);
 #endif
 }
 
@@ -872,7 +872,7 @@ void DisneyMaterialTestScene::makeScene(aten::context& ctxt, aten::scene* scene)
     }
 
     aten::Light* dir = new aten::DirectionalLight(aten::vec3(-1, -1, -1), aten::vec3(0.5, 0.5, 0.5));
-    //scene->addLight(dir);
+    //ctxt.add_light(dir);
 
 #if 0
     {
@@ -979,7 +979,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
     g_movableObj = light;
 
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
-    scene->addLight(areaLight);
+    ctxt.add_light(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
@@ -1159,7 +1159,7 @@ void DeformInBoxScene::makeScene(
         scene->add(light);
 
         auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
-        scene->addLight(areaLight);
+        ctxt.add_light(areaLight);
 
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[1], aten::mat4::Identity);
         scene->add(box);
@@ -1251,7 +1251,7 @@ void AlphaBlendedObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene*
     g_movableObj = light;
 
     auto areaLight = std::make_shared<aten::AreaLight>(light, emit->param().baseColor);
-    scene->addLight(areaLight);
+    ctxt.add_light(areaLight);
 
     for (int32_t i = 1; i < objs.size(); i++) {
         auto box = aten::TransformableFactory::createInstance<aten::PolygonObject>(ctxt, objs[i], aten::mat4::Identity);
@@ -1353,7 +1353,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
                     real(0.1),
                     real(0));
 
-                scene->addLight(l);
+                ctxt.add_light(l);
 
                 pos.x += step_v.x;
                 num++;
@@ -1370,7 +1370,7 @@ void ManyLightCryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* sc
         real(0.1),
         real(0));
 
-    scene->addLight(l);
+    ctxt.add_light(l);
 }
 
 void ManyLightCryteckSponzaScene::getCameraPosAndAt(

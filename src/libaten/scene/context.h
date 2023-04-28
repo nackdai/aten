@@ -10,6 +10,7 @@
 #include "geometry/vertex.h"
 #include "visualizer/GeomDataBuffer.h"
 #include "material/material.h"
+#include "light/light_parameter.h"
 #include "geometry/geomparam.h"
 #include "geometry/transformable.h"
 #include "texture/texture.h"
@@ -17,6 +18,7 @@
 
 namespace AT_NAME {
     class triangle;
+    class Light;
 }
 
 namespace aten
@@ -210,6 +212,10 @@ namespace aten
             return mtxs;
         }
 
+        void add_light(std::shared_ptr<AT_NAME::Light> light);
+        std::shared_ptr<AT_NAME::Light> get_light(uint32_t idx) const;
+        size_t get_light_num() const;
+
     private:
         static const context* s_pinnedCtxt;
 
@@ -222,5 +228,6 @@ namespace aten
         mutable std::vector<std::shared_ptr<aten::transformable>> m_transformables;
         std::vector<std::shared_ptr<aten::texture>> m_textures;
         std::vector<std::shared_ptr<aten::mat4>> m_matrices;
+        std::vector<std::shared_ptr<AT_NAME::Light>> m_lights;
     };
 }

@@ -278,7 +278,7 @@ int32_t main(int32_t argc, char *argv[])
         auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
         // NOTE
         // BDPT doesn't support IBL yet.
-        g_scene.addImageBasedLight(ibl);
+        g_scene.addImageBasedLight(g_ctxt, ibl);
     }
 
 #ifdef ENABLE_FEATURE_LINE

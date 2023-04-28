@@ -175,10 +175,10 @@ void updateLightParameter()
 {
     std::vector<aten::LightParameter> lightparams;
 
-    auto lightNum = g_scene.lightNum();
+    auto lightNum = g_ctxt.get_light_num();
 
     for (uint32_t i = 0; i < lightNum; i++) {
-        auto l = g_scene.getLight(i);
+        auto l = g_ctxt.get_light(i);
         auto param = l->param();
         lightparams.push_back(param);
     }
@@ -523,7 +523,7 @@ int32_t main()
         g_scene_light.envmap = std::make_shared<aten::envmap>();
         g_scene_light.envmap->init(g_scene_light.envmap_texture);
         g_scene_light.ibl = std::make_shared<aten::ImageBasedLight>(g_scene_light.envmap);
-        g_scene.addImageBasedLight(g_scene_light.ibl);
+        g_scene.addImageBasedLight(g_ctxt, g_scene_light.ibl);
 
         // PointLight
         g_scene_light.point_light = std::make_shared<aten::PointLight>(
@@ -532,7 +532,7 @@ int32_t main()
             real(0),
             real(0.1),
             real(0));
-        g_scene.addLight(g_scene_light.point_light);
+        g_ctxt.add_light(g_scene_light.point_light);
     }
 
     std::vector<aten::ObjectParameter> shapeparams;

@@ -180,8 +180,9 @@ namespace aten
         }
     }
 
-    void context::pick_non_indentity_matrices(std::vector<aten::mat4>& dst) const
+    std::vector<aten::mat4> context::PickNonIndentityMatricesAndUpdateMtxidxOfInstance() const
     {
+        std::vector<aten::mat4> dst;
         traverseTransformables([&dst](std::shared_ptr<aten::transformable>& t, aten::ObjectType type) {
             if (type == ObjectType::Instance) {
                 aten::mat4 mtxL2W, mtxW2L;
@@ -200,6 +201,7 @@ namespace aten
                 }
             }
         });
+        return dst;
     }
 
     int32_t context::findTransformableIdxFromPointer(const void* p) const

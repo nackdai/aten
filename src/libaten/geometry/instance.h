@@ -209,12 +209,8 @@ namespace aten
 
         void init_matrices(context& ctxt)
         {
-            auto res = ctxt.create_matrix();
-            m_param.mtx_id = std::get<0>(res);
-            m_mtxL2W = std::get<1>(res);
-
-            res = ctxt.create_matrix();
-            m_mtxW2L = std::get<1>(res);
+            std::tie(m_param.mtx_id, m_mtxL2W) = ctxt.create_matrix();
+            std::tie(std::ignore, m_mtxW2L) = ctxt.create_matrix();
         }
 
     private:

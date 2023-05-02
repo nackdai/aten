@@ -5,7 +5,6 @@
 #include "light/light.h"
 #include "material/material.h"
 #include "geometry/vertex.h"
-#include "scene/scene.h"
 #include "scene/context.h"
 
 namespace aten {
@@ -16,13 +15,13 @@ namespace aten {
 
     public:
         static void collect(
-            const context& ctxt,
-            const scene& scene,
+            context& ctxt,
             std::vector<aten::ObjectParameter>& shapeparams,
             std::vector<aten::TriangleParameter>& primparams,
             std::vector<aten::LightParameter>& lightparams,
             std::vector<aten::MaterialParameter>& mtrlparms,
-            std::vector<aten::vertex>& vtxparams);
+            std::vector<aten::vertex>& vtxparams,
+            std::vector<aten::mat4>& mtxs);
 
         static void collectTriangles(
             const context& ctxt,

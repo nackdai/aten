@@ -144,7 +144,7 @@ namespace aten
         void traverseTransformables(
             std::function<void(std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const;
 
-        void pick_non_indentity_matrices(std::vector<aten::mat4>& dst) const;
+        std::vector<aten::mat4> PickNonIndentityMatricesAndUpdateMtxidxOfInstance() const;
 
         int32_t findTransformableIdxFromPointer(const void* p) const;
 
@@ -201,15 +201,6 @@ namespace aten
                 return aten::mat4::Identity;
             }
             return *m_matrices[idx];
-        }
-        std::vector<aten::mat4> get_matrices()
-        {
-            std::vector<aten::mat4> mtxs;
-            mtxs.reserve(m_matrices.size());
-            for (const auto m : m_matrices) {
-                mtxs.emplace_back(*m.get());
-            }
-            return mtxs;
         }
 
         void add_light(std::shared_ptr<AT_NAME::Light> light);

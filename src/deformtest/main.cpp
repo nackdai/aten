@@ -192,28 +192,26 @@ void update(int32_t frame)
             g_triOffset);
 
         {
+            auto accel = g_scene.getAccel();
+            accel->update(g_ctxt);
+
             std::vector<aten::ObjectParameter> shapeparams;
             std::vector<aten::TriangleParameter> primparams;
             std::vector<aten::LightParameter> lightparams;
             std::vector<aten::MaterialParameter> mtrlparms;
             std::vector<aten::vertex> vtxparams;
+            std::vector<aten::mat4> mtxs;
 
             aten::DataCollector::collect(
                 g_ctxt,
-                g_scene,
                 shapeparams,
                 primparams,
                 lightparams,
                 mtrlparms,
-                vtxparams);
-
-            auto accel = g_scene.getAccel();
-            accel->update(g_ctxt);
+                vtxparams,
+                mtxs);
 
             const auto& nodes = g_scene.getAccel()->getNodes();
-
-            // TODO
-            const auto mtxs = g_ctxt.get_matrices();
 
             g_tracer.updateBVH(
                 shapeparams,
@@ -644,21 +642,21 @@ int32_t main()
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;
         std::vector<aten::vertex> vtxparams;
+        std::vector<aten::mat4> mtxs;
 
         aten::DataCollector::collect(
             g_ctxt,
-            g_scene,
             shapeparams,
             primparams,
             lightparams,
             mtrlparms,
-            vtxparams);
+            vtxparams,
+            mtxs);
 
         g_triOffset = primparams.size();
         g_vtxOffset = vtxparams.size();
 
         const auto& nodes = g_scene.getAccel()->getNodes();
-        const auto mtxs = g_ctxt.get_matrices();
 
         std::vector<idaten::TextureResource> tex;
         {
@@ -674,7 +672,7 @@ int32_t main()
 #ifdef ENABLE_ENVMAP
         for (auto& l : lightparams) {
             if (l.type == aten::LightType::IBL) {
-                l.idx = envmap->id();
+                l.envmapidx = envmap->id();
             }
         }
 #endif

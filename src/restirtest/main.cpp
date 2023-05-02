@@ -14,7 +14,7 @@
 
 #include "../common/scenedefs.h"
 
-// #define ENABLE_ENVMAP
+#define ENABLE_ENVMAP
 
 static int32_t WIDTH = 1280;
 static int32_t HEIGHT = 720;
@@ -494,18 +494,18 @@ int32_t main()
         std::vector<aten::LightParameter> lightparams;
         std::vector<aten::MaterialParameter> mtrlparms;
         std::vector<aten::vertex> vtxparams;
+        std::vector<aten::mat4> mtxs;
 
         aten::DataCollector::collect(
             g_ctxt,
-            g_scene,
             shapeparams,
             primparams,
             lightparams,
             mtrlparms,
-            vtxparams);
+            vtxparams,
+            mtxs);
 
         const auto &nodes = g_scene.getAccel()->getNodes();
-        const auto mtxs = g_ctxt.get_matrices();
 
         std::vector<idaten::TextureResource> tex;
         {
@@ -524,7 +524,7 @@ int32_t main()
         {
             if (l.type == aten::LightType::IBL)
             {
-                l.idx = envmap->id();
+                l.envmapidx = envmap->id();
             }
         }
 #endif

@@ -6,14 +6,16 @@
 
 namespace aten {
     void DataCollector::collect(
-        const context& ctxt,
-        const scene& scene,
+        context& ctxt,
         std::vector<aten::ObjectParameter>& shapeparams,
         std::vector<aten::TriangleParameter>& primparams,
         std::vector<aten::LightParameter>& lightparams,
         std::vector<aten::MaterialParameter>& mtrlparms,
-        std::vector<aten::vertex>& vtxparams)
+        std::vector<aten::vertex>& vtxparams,
+        std::vector<aten::mat4>& mtxs)
     {
+        mtxs = ctxt.PickNonIndentityMatricesAndUpdateMtxidxOfInstance();
+
         // Not guarantee order of the object which the instance has.
         ctxt.traverseTransformables([&](const std::shared_ptr<aten::transformable>& s, aten::ObjectType type) {
             if (type == ObjectType::Instance) {

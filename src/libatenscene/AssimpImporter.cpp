@@ -251,9 +251,9 @@ namespace aten
                     face_param.idx[1] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[1]) + vtx_idx_offset;
                     face_param.idx[2] = static_cast<uint32_t>(assimp_mesh->mFaces[f_idx].mIndices[2]) + vtx_idx_offset;
 
-                    auto& v0 = ctxt.getVertex(face_param.idx[0]);
-                    auto& v1 = ctxt.getVertex(face_param.idx[1]);
-                    auto& v2 = ctxt.getVertex(face_param.idx[2]);
+                    const auto& v0 = ctxt.getVertex(face_param.idx[0]);
+                    const auto& v1 = ctxt.getVertex(face_param.idx[1]);
+                    const auto& v2 = ctxt.getVertex(face_param.idx[2]);
 
                     if (v0.uv.z == real(1)
                         || v1.uv.z == real(1)

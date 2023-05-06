@@ -9,10 +9,10 @@
 
 namespace aten
 {
-    texture::texture(uint32_t width, uint32_t height, uint32_t channels, const char* name/*= nullptr*/)
+    texture::texture(uint32_t width, uint32_t height, uint32_t channels, std::string_view name)
     {
         init(width, height, channels);
-        if (name) {
+        if (!name.empty()) {
             m_name = name;
         }
     }
@@ -23,7 +23,9 @@ namespace aten
     }
 
     std::shared_ptr<texture> texture::create(
-        uint32_t width, uint32_t height, uint32_t channels, const char* name)
+        uint32_t width, uint32_t height,
+        uint32_t channels,
+        std::string_view name)
     {
         auto ret = std::make_shared<texture>(width, height, channels, name);
         AT_ASSERT(ret);

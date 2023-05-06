@@ -145,9 +145,8 @@ int32_t main(int32_t argc, char* argv[])
         indexMapList.reserve(tmpIndices.size());
 
         // Gather vertices.
-        const auto& vtxs = ctxt.getVertices();
         for (auto idx : tmpIndices) {
-            const auto v = vtxs[idx];
+            const auto v = ctxt.getVertex(idx);
 
             int32_t newIdx = vertices.size();
             vertices.push_back(v);

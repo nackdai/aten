@@ -15,7 +15,7 @@ namespace AT_NAME {
 
         bool isHit = false;
 
-        const auto& obj = ctxt.get_object(param.objid);
+        const auto& obj = ctxt.GetObject(param.objid);
 
         aten::ray r;
         aten::hitrecord rec;

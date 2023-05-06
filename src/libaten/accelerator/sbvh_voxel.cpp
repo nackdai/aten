@@ -103,8 +103,6 @@ namespace aten
 
     void sbvh::buildVoxel(const context& ctxt)
     {
-        const auto& vertices = ctxt.getVertices();
-
         for (auto it = m_treelets.begin(); it != m_treelets.end(); it++) {
             auto& treelet = it->second;
 

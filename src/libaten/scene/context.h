@@ -1,20 +1,16 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <memory>
-#include <vector>
-#include <functional>
 #include <tuple>
+#include <vector>
 
 #include "geometry/vertex.h"
-#include "visualizer/GeomDataBuffer.h"
-#include "material/material.h"
-#include "light/light_parameter.h"
-#include "geometry/geomparam.h"
-#include "geometry/transformable.h"
+#include "scene/context_interface.h"
 #include "texture/texture.h"
-#include "math/mat4.h"
+#include "visualizer/GeomDataBuffer.h"
 
 namespace AT_NAME {
     class triangle;
@@ -25,12 +21,42 @@ namespace aten
 {
     class transformable;
 
-    class context {
+    class context : public context_interface {
     public:
         context() = default;
         virtual ~context() = default;
 
     public:
+        const aten::vec4 GetPosition(uint32_t idx) const noexcept
+        {
+            const auto& v = getVertex(idx);
+            aten::vec4 res(v.pos.x, v.pos.y, v.pos.z, v.uv.x);
+            return res;
+        }
+
+        const aten::vec4 GetNormal(uint32_t idx) const noexcept
+        {
+            const auto& v = getVertex(idx);
+            aten::vec4 res(v.nml, v.uv.y);
+            return res;
+        }
+
+        const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept;
+
+        const aten::MaterialParameter& GetMaterial(uint32_t idx) const noexcept
+        {
+            return getMaterial(idx)->param();
+        }
+
+        const aten::TriangleParameter& GetTriangle(uint32_t idx) const noexcept;
+
+        const aten::LightParameter& GetLight(uint32_t idx) const noexcept;
+
+        const aten::mat4& GetMatrix(uint32_t idx) const noexcept
+        {
+            return *m_matrices[idx];
+        }
+
         void addVertex(const aten::vertex& vtx)
         {
             m_vertices.push_back(vtx);
@@ -39,16 +65,6 @@ namespace aten
         const aten::vertex& getVertex(int32_t idx) const
         {
             return m_vertices[idx];
-        }
-
-        aten::vertex& getVertex(int32_t idx)
-        {
-            return m_vertices[idx];
-        }
-
-        const std::vector<aten::vertex>& getVertices() const
-        {
-            return m_vertices;
         }
 
         uint32_t getVertexNum() const
@@ -90,18 +106,16 @@ namespace aten
             aten::texture* normalMap,
             aten::texture* roughnessMap);
 
-        void addMaterial(const std::shared_ptr<AT_NAME::material>& mtrl);
-
-        void addMaterial(AT_NAME::material* mtrl);
-
-        int32_t getMaterialNum() const
+        void addMaterial(std::shared_ptr<AT_NAME::material> mtrl)
         {
-            return static_cast<int32_t>(m_materials.size());
+            AT_ASSERT(mtrl);
+            m_materials.push_back(mtrl);
+            mtrl->param().id = m_materials.size() - 1;
         }
 
         std::shared_ptr<AT_NAME::material> getMaterial(int32_t idx) const
         {
-            AT_ASSERT(0 <= idx && idx < getMaterialNum());
+            AT_ASSERT(0 <= idx && idx < static_cast<int32_t>(m_materials.size()));
             return m_materials[idx];
         }
 
@@ -128,18 +142,9 @@ namespace aten
 
         int32_t findTriIdxFromPointer(const void* p) const;
 
-        auto addTransformable(const std::shared_ptr<transformable>& t)
-        {
-            AT_ASSERT(t);
-            m_transformables.push_back(t);
-            t->updateIndex(m_transformables.size() - 1);
-        }
+        void addTransformable(const std::shared_ptr<transformable>& t);
 
-        std::shared_ptr<const aten::transformable> getTransformable(int32_t idx) const
-        {
-            AT_ASSERT(0 <= idx && idx < m_transformables.size());
-            return m_transformables[idx];
-        }
+        std::shared_ptr<const aten::transformable> getTransformable(int32_t idx) const;
 
         void traverseTransformables(
             std::function<void(std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const;
@@ -151,7 +156,9 @@ namespace aten
         int32_t findPolygonalTransformableOrderFromPointer(const void* p) const;
 
         std::shared_ptr<texture> createTexture(
-            uint32_t width, uint32_t height, uint32_t channels, const char* name);
+            uint32_t width, uint32_t height,
+            uint32_t channels,
+            std::string_view name);
 
         int32_t getTextureNum() const;
 
@@ -177,13 +184,9 @@ namespace aten
             return s_pinnedCtxt;
         }
 
-        const aten::ObjectParameter& get_object(uint32_t idx) const
-        {
-            return m_transformables[idx]->getParam();
-        }
         const aten::ObjectParameter& get_real_object(const aten::ObjectParameter& obj) const
         {
-            const auto& real_obj = obj.object_id >= 0 ? get_object(obj.object_id) : obj;
+            const auto& real_obj = obj.object_id >= 0 ? GetObject(obj.object_id) : obj;
             return real_obj;
         }
 
@@ -193,14 +196,6 @@ namespace aten
             m_matrices.reserve(idx + 1);
             m_matrices.push_back(std::make_shared<aten::mat4>());
             return std::make_tuple(static_cast<uint32_t>(idx), m_matrices[idx]);
-        }
-
-        aten::mat4 get_matrix(uint32_t idx) const
-        {
-            if (idx >= m_matrices.size()) {
-                return aten::mat4::Identity;
-            }
-            return *m_matrices[idx];
         }
 
         void add_light(std::shared_ptr<AT_NAME::Light> light);

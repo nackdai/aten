@@ -385,7 +385,7 @@ namespace aten
                     aten::ray transformedRay;
 
                     if (mtx_id >= 0) {
-                        const auto& mtxW2L = ctxt.get_matrix(mtx_id * 2 + 1);
+                        const auto& mtxW2L = ctxt.GetMatrix(mtx_id * 2 + 1);
 
                         transformedRay = mtxW2L.applyRay(r);
                     }

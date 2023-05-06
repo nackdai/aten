@@ -9,6 +9,21 @@ namespace aten
 {
     const context* context::s_pinnedCtxt = nullptr;
 
+    const aten::ObjectParameter& context::GetObject(uint32_t idx) const noexcept
+    {
+        return getTransformable(idx)->getParam();
+    }
+
+    const aten::TriangleParameter& context::GetTriangle(uint32_t idx) const noexcept
+    {
+        return m_triangles[idx]->getParam();
+    }
+
+    const aten::LightParameter& context::GetLight(uint32_t idx) const noexcept
+    {
+        return m_lights[idx]->param();
+    }
+
     void context::build()
     {
         if (!m_vertices.empty()
@@ -66,19 +81,6 @@ namespace aten
         }
 
         return mtrl;
-    }
-
-    void context::addMaterial(const std::shared_ptr<AT_NAME::material>& mtrl)
-    {
-        AT_ASSERT(mtrl);
-        m_materials.push_back(mtrl);
-        mtrl->param().id = m_materials.size() - 1;
-    }
-
-    void context::addMaterial(AT_NAME::material* mtrl)
-    {
-        std::shared_ptr<std::remove_pointer<decltype(mtrl)>::type> m(mtrl);
-        addMaterial(m);
     }
 
     void context::deleteAllMaterialsAndClearList()
@@ -171,6 +173,19 @@ namespace aten
         return id;
     }
 
+    void context::addTransformable(const std::shared_ptr<transformable>& t)
+    {
+        AT_ASSERT(t);
+        m_transformables.push_back(t);
+        t->updateIndex(m_transformables.size() - 1);
+    }
+
+    std::shared_ptr<const aten::transformable> context::getTransformable(int32_t idx) const
+    {
+        AT_ASSERT(0 <= idx && idx < m_transformables.size());
+        return m_transformables[idx];
+    }
+
     void context::traverseTransformables(
         std::function<void(std::shared_ptr<aten::transformable>&, aten::ObjectType)> func) const
     {
@@ -243,7 +258,9 @@ namespace aten
     }
 
     std::shared_ptr<texture> context::createTexture(
-        uint32_t width, uint32_t height, uint32_t channels, const char* name)
+        uint32_t width, uint32_t height,
+        uint32_t channels,
+        std::string_view name)
     {
         auto ret = texture::create(width, height, channels, name);
         AT_ASSERT(ret);

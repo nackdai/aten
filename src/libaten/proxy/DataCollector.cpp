@@ -52,8 +52,7 @@ namespace aten {
         const auto lightNum = ctxt.get_light_num();
 
         for (uint32_t i = 0; i < lightNum; i++) {
-            auto l = ctxt.get_light(i);
-            auto param = l->param();
+            const auto& param = ctxt.GetLight(i);
             lightparams.push_back(param);
         }
 

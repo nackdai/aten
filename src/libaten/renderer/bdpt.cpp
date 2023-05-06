@@ -252,7 +252,7 @@ namespace aten
         aten::SamplePosNormalPdfResult res;
         if (light->get_param().type == aten::LightType::Area) {
             // Only area light.
-            const auto& obj = ctxt.get_object(light->get_param().objid);
+            const auto& obj = ctxt.GetObject(light->get_param().objid);
             AT_NAME::sample_pos_and_normal(&res, obj, ctxt, sampler);
         }
         auto posOnLight = res.pos;

@@ -335,6 +335,7 @@
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\key.h" />
     <ClInclude Include="..\src\libaten\misc\omputil.h" />
+    <ClInclude Include="..\src\libaten\misc\span.h" />
     <ClInclude Include="..\src\libaten\misc\stream.h" />
     <ClInclude Include="..\src\libaten\misc\thread.h" />
     <ClInclude Include="..\src\libaten\misc\timeline.h" />
@@ -367,6 +368,7 @@
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\AcceleratedScene.h" />
     <ClInclude Include="..\src\libaten\scene\context.h" />
+    <ClInclude Include="..\src\libaten\scene\context_interface.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\hit_parameter.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />

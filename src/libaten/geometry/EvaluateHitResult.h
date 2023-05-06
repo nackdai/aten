@@ -33,7 +33,7 @@ namespace AT_NAME
 
             aten::mat4 mtxL2W;
             if (mtx_id >= 0) {
-                mtxL2W = ctxt.get_matrix(mtx_id);
+                mtxL2W = ctxt.GetMatrix(mtx_id);
             }
 
             if (real_obj.type == aten::ObjectType::Polygon) {
@@ -70,12 +70,12 @@ namespace AT_NAME
         aten::sampler* sampler)
     {
         // Get real object. If the object is instance, we need to get real one.
-        const auto& real_obj = obj.object_id >= 0 ? ctxt.get_object(obj.object_id) : obj;
+        const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
         const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
         aten::mat4 mtxL2W;
         if (mtx_id >= 0) {
-            mtxL2W = ctxt.get_matrix(mtx_id);
+            mtxL2W = ctxt.GetMatrix(mtx_id);
         }
 
         if (real_obj.type == aten::ObjectType::Polygon) {

@@ -100,13 +100,11 @@ namespace AT_NAME
     {
         auto f = ctxt.getTriangle(isect.triangle_id);
 
-        auto& vtxs = ctxt.getVertices();
-
         const auto& faceParam = f->getParam();
 
-        const auto& v0 = vtxs[faceParam.idx[0]];
-        const auto& v1 = vtxs[faceParam.idx[1]];
-        const auto& v2 = vtxs[faceParam.idx[2]];
+        const auto& v0 = ctxt.getVertex(faceParam.idx[0]);
+        const auto& v1 = ctxt.getVertex(faceParam.idx[1]);
+        const auto& v2 = ctxt.getVertex(faceParam.idx[2]);
 
         triangle::evalHitResult(v0, v1, v2, &rec, faceParam, &isect);
 

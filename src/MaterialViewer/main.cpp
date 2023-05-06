@@ -178,8 +178,7 @@ void updateLightParameter()
     auto lightNum = g_ctxt.get_light_num();
 
     for (uint32_t i = 0; i < lightNum; i++) {
-        auto l = g_ctxt.get_light(i);
-        auto param = l->param();
+        const auto& param = g_ctxt.GetLight(i);
         lightparams.push_back(param);
     }
 

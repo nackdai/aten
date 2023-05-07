@@ -51,7 +51,7 @@ __global__ void shade(
     int32_t sample,
     int32_t frame,
     int32_t bounce, int32_t rrBounce,
-    const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::ObjectParameter* __restrict__ shapes,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::TriangleParameter* __restrict__ prims,
@@ -70,7 +70,6 @@ __global__ void shade(
 
     idaten::Context ctxt;
     {
-        ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lightnum = lightnum;
@@ -309,7 +308,7 @@ __global__ void hitShadowRay(
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
     const idaten::ShadowRay* __restrict__ shadowRays,
-    const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::ObjectParameter* __restrict__ shapes,
     aten::MaterialParameter* mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     cudaTextureObject_t* nodes,
@@ -331,7 +330,6 @@ __global__ void hitShadowRay(
 
     idaten::Context ctxt;
     {
-        ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lightnum = lightnum;
@@ -535,7 +533,7 @@ namespace idaten
             sample,
             m_frame,
             bounce, rrBounce,
-            m_shapeparam.ptr(), m_shapeparam.num(),
+            m_shapeparam.ptr(),
             m_mtrlparam.ptr(),
             m_lightparam.ptr(), m_lightparam.num(),
             m_primparams.ptr(),
@@ -570,7 +568,7 @@ namespace idaten
             m_hitidx.ptr(), hitcount.ptr(),
             m_reservoirs[m_curReservoirPos].ptr(),
             m_shadowRays.ptr(),
-            m_shapeparam.ptr(), m_shapeparam.num(),
+            m_shapeparam.ptr(),
             m_mtrlparam.ptr(),
             m_lightparam.ptr(), m_lightparam.num(),
             m_nodetex.ptr(),

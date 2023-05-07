@@ -71,7 +71,7 @@ namespace npr_pt {
         const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::ObjectParameter* __restrict__ shapes,
         const aten::MaterialParameter* __restrict__ mtrls,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
@@ -96,7 +96,6 @@ namespace npr_pt {
 
         idaten::Context ctxt;
         {
-            ctxt.geomnum = geomnum;
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;
             ctxt.lightnum = lightnum;
@@ -291,7 +290,7 @@ namespace npr_pt {
         const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::ObjectParameter* __restrict__ shapes,
         const aten::MaterialParameter* __restrict__ mtrls,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
@@ -316,7 +315,6 @@ namespace npr_pt {
 
         idaten::Context ctxt;
         {
-            ctxt.geomnum = geomnum;
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;
             ctxt.lightnum = lightnum;
@@ -452,7 +450,7 @@ namespace idaten {
                 m_cam,
                 m_isects.ptr(),
                 m_rays.ptr(),
-                m_shapeparam.ptr(), m_shapeparam.num(),
+                m_shapeparam.ptr(),
                 m_mtrlparam.ptr(),
                 m_lightparam.ptr(), m_lightparam.num(),
                 m_nodetex.ptr(),
@@ -509,7 +507,7 @@ namespace idaten {
                     m_cam,
                     m_isects.ptr(),
                     m_rays.ptr(),
-                    m_shapeparam.ptr(), m_shapeparam.num(),
+                    m_shapeparam.ptr(),
                     m_mtrlparam.ptr(),
                     m_lightparam.ptr(), m_lightparam.num(),
                     m_nodetex.ptr(),

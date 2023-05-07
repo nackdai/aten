@@ -90,7 +90,6 @@ namespace idaten
     protected:
         idaten::StreamCompaction m_compaction;
 
-        idaten::CudaMemory m_dst;
         aten::CameraParameter m_cam;
         idaten::TypedCudaMemory<aten::ObjectParameter> m_shapeparam;
         idaten::TypedCudaMemory<aten::MaterialParameter> m_mtrlparam;

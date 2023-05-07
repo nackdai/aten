@@ -101,7 +101,7 @@ namespace kernel {
         aten::ray* rays,
         int32_t* hitbools,
         int32_t width, int32_t height,
-        const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::ObjectParameter* __restrict__ shapes,
         const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
         const aten::TriangleParameter* __restrict__ prims,
@@ -134,7 +134,6 @@ namespace kernel {
 
         idaten::Context ctxt;
         {
-            ctxt.geomnum = geomnum;
             ctxt.shapes = shapes;
             ctxt.lightnum = lightnum;
             ctxt.lights = lights;
@@ -235,7 +234,6 @@ namespace kernel {
 
         idaten::Context ctxt;
         {
-            ctxt.geomnum = geomnum;
             ctxt.shapes = shapes;
             ctxt.lightnum = lightnum;
             ctxt.lights = lights;
@@ -580,7 +578,7 @@ namespace idaten
             m_rays.ptr(),
             m_hitbools.ptr(),
             width, height,
-            m_shapeparam.ptr(), m_shapeparam.num(),
+            m_shapeparam.ptr(),
             m_lightparam.ptr(), m_lightparam.num(),
             m_nodetex.ptr(),
             m_primparams.ptr(),

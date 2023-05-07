@@ -24,7 +24,7 @@ __global__ void fillAOV(
     const float4* __restrict__ aovTexclrMeshid,
     cudaSurfaceObject_t motionDetphBuffer,
     const aten::CameraParameter camera,
-    const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::ObjectParameter* __restrict__ shapes,
     cudaTextureObject_t* nodes,
     const aten::TriangleParameter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
@@ -63,7 +63,6 @@ __global__ void fillAOV(
 
     idaten::Context ctxt;
     {
-        ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
         ctxt.nodes = nodes;
         ctxt.prims = prims;
@@ -137,7 +136,7 @@ __global__ void pickPixel(
     const idaten::Path paths,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
-    const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::ObjectParameter* __restrict__ shapes,
     cudaTextureObject_t* nodes,
     const aten::TriangleParameter* __restrict__ prims,
     cudaTextureObject_t vtxPos,
@@ -153,7 +152,6 @@ __global__ void pickPixel(
 
     idaten::Context ctxt;
     {
-        ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
         ctxt.nodes = nodes;
         ctxt.prims = prims;
@@ -212,7 +210,7 @@ namespace idaten
             curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             gbuffer,
             m_cam,
-            m_shapeparam.ptr(), m_shapeparam.num(),
+            m_shapeparam.ptr(),
             m_nodetex.ptr(),
             m_primparams.ptr(),
             texVtxPos,
@@ -238,7 +236,7 @@ namespace idaten
                 m_paths,
                 curaov.get<AOVBuffer::NormalDepth>().ptr(),
                 curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
-                m_shapeparam.ptr(), m_shapeparam.num(),
+                m_shapeparam.ptr(),
                 m_nodetex.ptr(),
                 m_primparams.ptr(),
                 texVtxPos,

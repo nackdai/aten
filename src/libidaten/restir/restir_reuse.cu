@@ -14,7 +14,7 @@
 
 __global__ void computeTemporalReuse(
     idaten::Path paths,
-    const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::ObjectParameter* __restrict__ shapes,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::TriangleParameter* __restrict__ prims,
@@ -44,7 +44,6 @@ __global__ void computeTemporalReuse(
 
     idaten::Context ctxt;
     {
-        ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lightnum = lightnum;
@@ -191,7 +190,7 @@ __global__ void computeTemporalReuse(
 
 __global__ void computeSpatialReuse(
     idaten::Path paths,
-    const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+    const aten::ObjectParameter* __restrict__ shapes,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
     const aten::TriangleParameter* __restrict__ prims,
@@ -220,7 +219,6 @@ __global__ void computeSpatialReuse(
 
     idaten::Context ctxt;
     {
-        ctxt.geomnum = geomnum;
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
         ctxt.lightnum = lightnum;
@@ -420,7 +418,7 @@ namespace idaten {
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
                         m_paths,
-                        m_shapeparam.ptr(), m_shapeparam.num(),
+                        m_shapeparam.ptr(),
                         m_mtrlparam.ptr(),
                         m_lightparam.ptr(), m_lightparam.num(),
                         m_primparams.ptr(),
@@ -442,7 +440,7 @@ namespace idaten {
                 || m_restirMode == ReSTIRMode::SpatialReuse) {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
                     m_paths,
-                    m_shapeparam.ptr(), m_shapeparam.num(),
+                    m_shapeparam.ptr(),
                     m_mtrlparam.ptr(),
                     m_lightparam.ptr(), m_lightparam.num(),
                     m_primparams.ptr(),

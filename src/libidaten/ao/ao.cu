@@ -51,7 +51,7 @@ namespace ao {
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
         int32_t bounce, int32_t rrBounce,
-        const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
+        const aten::ObjectParameter* __restrict__ shapes,
         aten::MaterialParameter* mtrls,
         cudaTextureObject_t* nodes,
         const aten::TriangleParameter* __restrict__ prims,
@@ -69,7 +69,6 @@ namespace ao {
 
         idaten::Context ctxt;
         {
-            ctxt.geomnum = geomnum;
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;
             ctxt.nodes = nodes;
@@ -221,7 +220,7 @@ namespace idaten {
             m_isects.ptr(),
             m_rays.ptr(),
             bounce, rrBounce,
-            m_shapeparam.ptr(), m_shapeparam.num(),
+            m_shapeparam.ptr(),
             m_mtrlparam.ptr(),
             m_nodetex.ptr(),
             m_primparams.ptr(),

@@ -13,7 +13,7 @@
 #include "aten4idaten.h"
 
 __global__ void computeTemporalReuse(
-    idaten::Path* paths,
+    idaten::Path paths,
     const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
@@ -38,7 +38,7 @@ __global__ void computeTemporalReuse(
 
     auto idx = getIdx(ix, iy, width);
 
-    if (paths->attrib[idx].isTerminate) {
+    if (paths.attrib[idx].isTerminate) {
         return;
     }
 
@@ -66,7 +66,7 @@ __global__ void computeTemporalReuse(
 
     const auto& normal = self_info.nml;
 
-    auto& sampler = paths->sampler[idx];
+    auto& sampler = paths.sampler[idx];
 
     const auto& albedo_meshid = aovTexclrMeshid[idx];
     const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
@@ -190,7 +190,7 @@ __global__ void computeTemporalReuse(
 }
 
 __global__ void computeSpatialReuse(
-    idaten::Path* paths,
+    idaten::Path paths,
     const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
     const aten::MaterialParameter* __restrict__ mtrls,
     const aten::LightParameter* __restrict__ lights, int32_t lightnum,
@@ -214,7 +214,7 @@ __global__ void computeSpatialReuse(
 
     auto idx = getIdx(ix, iy, width);
 
-    if (paths->attrib[idx].isTerminate) {
+    if (paths.attrib[idx].isTerminate) {
         return;
     }
 
@@ -242,7 +242,7 @@ __global__ void computeSpatialReuse(
 
     const auto& normal = self_info.nml;
 
-    auto& sampler = paths->sampler[idx];
+    auto& sampler = paths.sampler[idx];
 
     const auto& albedo_meshid = aovTexclrMeshid[idx];
     const aten::vec4 albedo(albedo_meshid.x, albedo_meshid.y, albedo_meshid.z, 1.0f);
@@ -419,7 +419,7 @@ namespace idaten {
                     auto motionDepthBuffer = m_motionDepthBuffer.bind();
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
-                        m_paths.ptr(),
+                        m_paths,
                         m_shapeparam.ptr(), m_shapeparam.num(),
                         m_mtrlparam.ptr(),
                         m_lightparam.ptr(), m_lightparam.num(),
@@ -441,7 +441,7 @@ namespace idaten {
             if (m_restirMode == ReSTIRMode::ReSTIR
                 || m_restirMode == ReSTIRMode::SpatialReuse) {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
-                    m_paths.ptr(),
+                    m_paths,
                     m_shapeparam.ptr(), m_shapeparam.num(),
                     m_mtrlparam.ptr(),
                     m_lightparam.ptr(), m_lightparam.num(),

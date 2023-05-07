@@ -13,7 +13,7 @@
 namespace npr_pt {
     __global__ void generateSampleRay(
         idaten::NPRPathTracing::SampleRayInfo* sample_ray_infos,
-        idaten::Path* paths,
+        idaten::Path paths,
         const aten::ray* __restrict__ rays,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
@@ -34,7 +34,7 @@ namespace npr_pt {
         sample_ray_info.disc = AT_NAME::FeatureLine::generateDisc(ray, FeatureLineWidth, pixel_width);
         for (size_t i = 0; i < AT_NAME::NPRPathTracing::SampleRayNum; i++) {
             const auto sample_ray = AT_NAME::FeatureLine::generateSampleRay(
-                sample_ray_info.descs[i], paths->sampler[idx], ray, sample_ray_info.disc);
+                sample_ray_info.descs[i], paths.sampler[idx], ray, sample_ray_info.disc);
             AT_NAME::FeatureLine::storeRayToDesc(sample_ray_info.descs[i], sample_ray);
             sample_ray_info.descs[i].is_terminated = false;
         }
@@ -44,19 +44,19 @@ namespace npr_pt {
 
     inline __device__ void computeFeatureLineContrib(
         real closest_sample_ray_distance,
-        idaten::Path* paths,
+        idaten::Path paths,
         int32_t idx,
         const aten::vec3& line_color)
     {
         auto pdf_feature_line = real(1) / idaten::NPRPathTracing::SampleRayNum;
         pdf_feature_line = pdf_feature_line * (closest_sample_ray_distance * closest_sample_ray_distance);
-        const auto pdfb = paths->throughput[idx].pdfb;
+        const auto pdfb = paths.throughput[idx].pdfb;
         const auto weight = pdfb / (pdfb + pdf_feature_line);
-        const auto contrib = paths->throughput[idx].throughput * weight * line_color;
+        const auto contrib = paths.throughput[idx].throughput * weight * line_color;
 
-        paths->contrib[idx].contrib = make_float3(contrib.x, contrib.y, contrib.z);
-        paths->attrib[idx].isKill = true;
-        paths->attrib[idx].isTerminate = true;
+        paths.contrib[idx].contrib = make_float3(contrib.x, contrib.y, contrib.z);
+        paths.attrib[idx].isKill = true;
+        paths.attrib[idx].isTerminate = true;
     }
 
     __global__ void shadeSampleRay(
@@ -67,8 +67,8 @@ namespace npr_pt {
         int32_t depth,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
-        idaten::Path* paths,
-        const aten::CameraParameter* __restrict__ camera,
+        idaten::Path paths,
+        const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
         const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
@@ -89,8 +89,8 @@ namespace npr_pt {
 
         idx = hitindices[idx];
 
-        if (paths->attrib[idx].isKill || paths->attrib[idx].isTerminate) {
-            paths->attrib[idx].isTerminate = true;
+        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
+            paths.attrib[idx].isTerminate = true;
             return;
         }
 
@@ -127,7 +127,7 @@ namespace npr_pt {
 
         auto& sample_ray_info = sample_ray_infos[idx];
 
-        const auto& cam_org = camera->origin;
+        const auto& cam_org = camera.origin;
 
         auto disc = sample_ray_info.disc;
 
@@ -287,8 +287,8 @@ namespace npr_pt {
         int32_t depth,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
-        idaten::Path* paths,
-        const aten::CameraParameter* __restrict__ camera,
+        idaten::Path paths,
+        const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
         const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
@@ -310,7 +310,7 @@ namespace npr_pt {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (paths->attrib[idx].isTerminate || paths->attrib[idx].isHit) {
+        if (paths.attrib[idx].isTerminate || paths.attrib[idx].isHit) {
             return;
         }
 
@@ -426,12 +426,12 @@ namespace idaten {
 
             auto& hitcount = m_compaction.getCount();
 
-            const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_camParam, 1);
+            const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
             if (bounce == 0) {
                 npr_pt::generateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                     sample_ray_infos_.ptr(),
-                    m_paths.ptr(),
+                    m_paths,
                     m_rays.ptr(),
                     m_hitidx.ptr(),
                     hitcount.ptr(),
@@ -448,8 +448,8 @@ namespace idaten {
                 bounce,
                 m_hitidx.ptr(),
                 hitcount.ptr(),
-                m_paths.ptr(),
-                m_cam.ptr(),
+                m_paths,
+                m_cam,
                 m_isects.ptr(),
                 m_rays.ptr(),
                 m_shapeparam.ptr(), m_shapeparam.num(),
@@ -493,7 +493,7 @@ namespace idaten {
                 auto texVtxPos = m_vtxparamsPos.bind();
                 auto texVtxNml = m_vtxparamsNml.bind();
 
-                const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_camParam, 1);
+                const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
                 // Sample ray hit miss never happen at 1st bounce.
                 npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
@@ -505,8 +505,8 @@ namespace idaten {
                     bounce,
                     m_hitidx.ptr(),
                     hitcount.ptr(),
-                    m_paths.ptr(),
-                    m_cam.ptr(),
+                    m_paths,
+                    m_cam,
                     m_isects.ptr(),
                     m_rays.ptr(),
                     m_shapeparam.ptr(), m_shapeparam.num(),

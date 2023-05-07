@@ -90,7 +90,7 @@ namespace idaten {
         cudaStream_t m_stream{ (cudaStream_t)0 };
 
         bool m_isInitPath{ false };
-        idaten::TypedCudaMemory<Path> m_paths;
+        Path m_paths;
         idaten::TypedCudaMemory<PathThroughput> m_pathThroughput;
         idaten::TypedCudaMemory<PathContrib> m_pathContrib;
         idaten::TypedCudaMemory<PathAttribute> m_pathAttrib;

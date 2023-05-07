@@ -91,7 +91,7 @@ namespace idaten
         idaten::StreamCompaction m_compaction;
 
         idaten::CudaMemory m_dst;
-        idaten::TypedCudaMemory<aten::CameraParameter> m_cam;
+        aten::CameraParameter m_cam;
         idaten::TypedCudaMemory<aten::ObjectParameter> m_shapeparam;
         idaten::TypedCudaMemory<aten::MaterialParameter> m_mtrlparam;
         idaten::TypedCudaMemory<aten::LightParameter> m_lightparam;
@@ -109,7 +109,5 @@ namespace idaten
         idaten::CudaGLSurface m_glimg;
         idaten::CudaTextureResource m_vtxparamsPos;
         idaten::CudaTextureResource m_vtxparamsNml;
-
-        aten::CameraParameter m_camParam;
     };
 }

@@ -43,7 +43,7 @@ __global__ void shade(
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
     int32_t width, int32_t height,
-    idaten::Path* paths,
+    idaten::Path paths,
     const int32_t* __restrict__ hitindices,
     int32_t* hitnum,
     const aten::Intersection* __restrict__ isects,
@@ -90,12 +90,12 @@ __global__ void shade(
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
     auto scramble = random[idx] * 0x1fe3434f;
-    paths->sampler[idx].init(frame + sample, 4 + bounce * 300, scramble);
+    paths.sampler[idx].init(frame + sample, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
     auto rnd = random[idx];
     auto scramble = rnd * 0x1fe3434f
         * (((frame + sample) + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-    paths->sampler[idx].init(
+    paths.sampler[idx].init(
         (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
         4 + bounce * 300,
         scramble);
@@ -130,7 +130,7 @@ __global__ void shade(
         orienting_normal, orienting_normal,
         rec.u, rec.v,
         ray.dir,
-        &paths->sampler[idx]);
+        &paths.sampler[idx]);
 
     if (!shMtrls[threadIdx.x].attrib.isTranslucent
         && !shMtrls[threadIdx.x].attrib.isEmissive
@@ -147,7 +147,7 @@ __global__ void shade(
         restir_info.nml = orienting_normal;
         restir_info.is_voxel = rec.isVoxel;
         restir_info.mtrl_idx = rec.mtrlid;
-        restir_info.throughput = paths->throughput[idx].throughput;
+        restir_info.throughput = paths.throughput[idx].throughput;
         restir_info.wi = ray.dir;
         restir_info.u = rec.u;
         restir_info.v = rec.v;
@@ -178,16 +178,16 @@ __global__ void shade(
         kernel::hitImplicitLight(
             isBackfacing,
             bounce,
-            paths->contrib[idx],
-            paths->attrib[idx],
-            paths->throughput[idx],
+            paths.contrib[idx],
+            paths.attrib[idx],
+            paths.throughput[idx],
             ray,
             rec.p, orienting_normal,
             rec.area,
             shMtrls[threadIdx.x]);
 
         // When ray hit the light, tracing will finish.
-        paths->attrib[idx].isTerminate = true;
+        paths.attrib[idx].isTerminate = true;
         return;
     }
 
@@ -203,7 +203,7 @@ __global__ void shade(
             rec.p, orienting_normal,
             ray.dir,
             rec.u, rec.v, albedo,
-            &paths->sampler[idx],
+            &paths.sampler[idx],
             bounce);
 
         if (lightidx >= 0) {
@@ -254,9 +254,9 @@ __global__ void shade(
 
     const auto russianProb = kernel::executeRussianProbability(
         bounce, rrBounce,
-        paths->attrib[idx],
-        paths->throughput[idx],
-        paths->sampler[idx]);
+        paths.attrib[idx],
+        paths.throughput[idx],
+        paths.sampler[idx]);
 
     AT_NAME::MaterialSampling sampling;
 
@@ -267,7 +267,7 @@ __global__ void shade(
         orienting_normal,
         ray.dir,
         rec.normal,
-        &paths->sampler[idx],
+        &paths.sampler[idx],
         pre_sampled_r,
         rec.u, rec.v,
         albedo);
@@ -286,25 +286,25 @@ __global__ void shade(
     auto c = dot(orienting_normal, nextDir);
 
     if (pdfb > 0 && c > 0) {
-        paths->throughput[idx].throughput *= bsdf * c / pdfb;
-        paths->throughput[idx].throughput /= russianProb;
+        paths.throughput[idx].throughput *= bsdf * c / pdfb;
+        paths.throughput[idx].throughput /= russianProb;
     }
     else {
-        paths->attrib[idx].isTerminate = true;
+        paths.attrib[idx].isTerminate = true;
         return;
     }
 
     // Make next ray.
     rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
 
-    paths->throughput[idx].pdfb = pdfb;
-    paths->attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
-    paths->attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
+    paths.throughput[idx].pdfb = pdfb;
+    paths.attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
+    paths.attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
 }
 
 __global__ void hitShadowRay(
     int32_t bounce,
-    idaten::Path* paths,
+    idaten::Path paths,
     int32_t* hitindices,
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
@@ -325,7 +325,7 @@ __global__ void hitShadowRay(
 
     idx = hitindices[idx];
 
-    if (paths->attrib[idx].isTerminate) {
+    if (paths.attrib[idx].isTerminate) {
         return;
     }
 
@@ -365,7 +365,7 @@ __global__ void hitShadowRay(
 __global__ void computeShadowRayContribution(
     const idaten::Reservoir* __restrict__ reservoirs,
     const idaten::ReSTIRInfo* __restrict__ restir_infos,
-    idaten::Path* paths,
+    idaten::Path paths,
     int32_t* hitindices,
     int32_t* hitnum,
     const float4* __restrict__ aovNormalDepth,
@@ -383,7 +383,7 @@ __global__ void computeShadowRayContribution(
 
     idx = hitindices[idx];
 
-    if (paths->attrib[idx].isTerminate) {
+    if (paths.attrib[idx].isTerminate) {
         return;
     }
 
@@ -466,7 +466,7 @@ __global__ void computeShadowRayContribution(
                 }
             }
 
-            paths->contrib[idx].contrib += make_float3(lightcontrib.x, lightcontrib.y, lightcontrib.z);
+            paths.contrib[idx].contrib += make_float3(lightcontrib.x, lightcontrib.y, lightcontrib.z);
         }
     }
 }
@@ -497,15 +497,15 @@ namespace idaten
         cudaTextureObject_t texVtxNml)
     {
         m_mtxW2V.lookat(
-            m_camParam.origin,
-            m_camParam.center,
-            m_camParam.up);
+            m_cam.origin,
+            m_cam.center,
+            m_cam.up);
 
         m_mtxV2C.perspective(
-            m_camParam.znear,
-            m_camParam.zfar,
-            m_camParam.vfov,
-            m_camParam.aspect);
+            m_cam.znear,
+            m_cam.zfar,
+            m_cam.vfov,
+            m_cam.aspect);
 
         m_mtxC2V = m_mtxV2C;
         m_mtxC2V.invert();
@@ -528,7 +528,7 @@ namespace idaten
             aov_.albedo_meshid().ptr(),
             mtxW2C,
             width, height,
-            m_paths.ptr(),
+            m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -566,7 +566,7 @@ namespace idaten
 
         hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
-            m_paths.ptr(),
+            m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_reservoirs[m_curReservoirPos].ptr(),
             m_shadowRays.ptr(),
@@ -589,7 +589,7 @@ namespace idaten
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs[target_idx].ptr(),
             m_restir_infos.ptr(),
-            m_paths.ptr(),
+            m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             aov_.normal_depth().ptr(),
             aov_.albedo_meshid().ptr(),

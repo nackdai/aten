@@ -21,7 +21,7 @@ namespace pt {
         float4* aovNormalDepth,
         float4* aovAlbedoMeshId,
         int32_t width, int32_t height,
-        idaten::Path* paths,
+        idaten::Path paths,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
@@ -48,8 +48,8 @@ namespace pt {
 
         idx = hitindices[idx];
 
-        if (paths->attrib[idx].isKill || paths->attrib[idx].isTerminate) {
-            paths->attrib[idx].isTerminate = true;
+        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
+            paths.attrib[idx].isTerminate = true;
             return;
         }
 
@@ -74,12 +74,12 @@ namespace pt {
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
         auto scramble = random[idx] * 0x1fe3434f;
-        paths->sampler[idx].init(frame + sample, 4 + bounce * 300, scramble);
+        paths.sampler[idx].init(frame + sample, 4 + bounce * 300, scramble);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto rnd = random[idx];
         auto scramble = rnd * 0x1fe3434f
             * (((frame + sample) + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths->sampler[idx].init(
+        paths.sampler[idx].init(
             (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
             4 + bounce * 300,
             scramble);
@@ -114,7 +114,7 @@ namespace pt {
             orienting_normal, orienting_normal,
             rec.u, rec.v,
             ray.dir,
-            &paths->sampler[idx]);
+            &paths.sampler[idx]);
 
         if (bounce == 0) {
             // Store AOV.
@@ -130,16 +130,16 @@ namespace pt {
             kernel::hitImplicitLight(
                 isBackfacing,
                 bounce,
-                paths->contrib[idx],
-                paths->attrib[idx],
-                paths->throughput[idx],
+                paths.contrib[idx],
+                paths.attrib[idx],
+                paths.throughput[idx],
                 ray,
                 rec.p, orienting_normal,
                 rec.area,
                 shMtrls[threadIdx.x]);
 
             // When ray hit the light, tracing will finish.
-            paths->attrib[idx].isTerminate = true;
+            paths.attrib[idx].isTerminate = true;
             return;
         }
 
@@ -156,15 +156,15 @@ namespace pt {
             && AT_NAME::material::isTranslucentByAlpha(shMtrls[threadIdx.x], rec.u, rec.v))
         {
             const auto alpha = AT_NAME::material::getTranslucentAlpha(shMtrls[threadIdx.x], rec.u, rec.v);
-            auto r = paths->sampler[idx].nextSample();
+            auto r = paths.sampler[idx].nextSample();
 
             if (r >= alpha) {
                 // Just through the object.
                 // NOTE
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
                 rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
-                paths->throughput[idx].throughput *= static_cast<aten::vec3>(shMtrls[threadIdx.x].baseColor);
-                paths->attrib[idx].isSingular = true;
+                paths.throughput[idx].throughput *= static_cast<aten::vec3>(shMtrls[threadIdx.x].baseColor);
+                paths.attrib[idx].isSingular = true;
                 shadowRays[idx].isActive = false;
                 return;
             }
@@ -173,7 +173,7 @@ namespace pt {
         // Explicit conection to light.
         if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {
-            auto lightidx = aten::cmpMin<int32_t>(paths->sampler[idx].nextSample() * lightnum, lightnum - 1);
+            auto lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
 
             aten::LightParameter light;
             light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
@@ -189,8 +189,8 @@ namespace pt {
                 shShadowRays[threadIdx.x],
                 ctxt,
                 bounce,
-                paths->sampler[idx],
-                paths->throughput[idx],
+                paths.sampler[idx],
+                paths.throughput[idx],
                 lightidx,
                 light,
                 shMtrls[threadIdx.x],
@@ -207,9 +207,9 @@ namespace pt {
 
         const auto russianProb = kernel::executeRussianProbability(
             bounce, rrBounce,
-            paths->attrib[idx],
-            paths->throughput[idx],
-            paths->sampler[idx]);
+            paths.attrib[idx],
+            paths.throughput[idx],
+            paths.sampler[idx]);
 
         AT_NAME::MaterialSampling sampling;
 
@@ -220,7 +220,7 @@ namespace pt {
             orienting_normal,
             ray.dir,
             rec.normal,
-            &paths->sampler[idx], pre_sampled_r,
+            &paths.sampler[idx], pre_sampled_r,
             rec.u, rec.v,
             albedo);
 
@@ -238,25 +238,25 @@ namespace pt {
         auto c = dot(rayBasedNormal, nextDir);
 
         if (pdfb > 0 && c > 0) {
-            paths->throughput[idx].throughput *= bsdf * c / pdfb;
-            paths->throughput[idx].throughput /= russianProb;
+            paths.throughput[idx].throughput *= bsdf * c / pdfb;
+            paths.throughput[idx].throughput /= russianProb;
         }
         else {
-            paths->attrib[idx].isTerminate = true;
+            paths.attrib[idx].isTerminate = true;
             return;
         }
 
         // Make next ray.
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
 
-        paths->throughput[idx].pdfb = pdfb;
-        paths->attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
-        paths->attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
+        paths.throughput[idx].pdfb = pdfb;
+        paths.attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
+        paths.attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
     }
 
     __global__ void hitShadowRay(
         int32_t bounce,
-        idaten::Path* paths,
+        idaten::Path paths,
         int32_t* hitindices,
         int32_t* hitnum,
         const idaten::ShadowRay* __restrict__ shadowRays,
@@ -276,8 +276,8 @@ namespace pt {
 
         idx = hitindices[idx];
 
-        if (paths->attrib[idx].isKill || paths->attrib[idx].isTerminate) {
-            paths->attrib[idx].isTerminate = true;
+        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
+            paths.attrib[idx].isTerminate = true;
             return;
         }
 
@@ -308,14 +308,14 @@ namespace pt {
 
         if (isHit) {
             auto contrib = shadowRay.lightcontrib;
-            paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
+            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
         }
     }
 
     __global__ void gather(
         idaten::TileDomain tileDomain,
         cudaSurfaceObject_t dst,
-        const idaten::Path* __restrict__ paths,
+        const idaten::Path paths,
         bool enableProgressive,
         int32_t width, int32_t height)
     {
@@ -328,7 +328,7 @@ namespace pt {
 
         auto idx = getIdx(ix, iy, tileDomain.w);
 
-        float4 c = paths->contrib[idx].v;
+        float4 c = paths.contrib[idx].v;
         int32_t sample = c.w;
 
         float4 contrib = c;
@@ -393,7 +393,7 @@ namespace idaten
             aov_.normal_depth().ptr(),
             aov_.albedo_meshid().ptr(),
             width, height,
-            m_paths.ptr(),
+            m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -426,7 +426,7 @@ namespace idaten
 
         pt::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
-            m_paths.ptr(),
+            m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_shadowRays.ptr(),
             m_shapeparam.ptr(), m_shapeparam.num(),
@@ -453,7 +453,7 @@ namespace idaten
         pt::gather << <grid, block, 0, m_stream >> > (
             m_tileDomain,
             outputSurf,
-            m_paths.ptr(),
+            m_paths,
             m_enableProgressive,
             width, height);
 

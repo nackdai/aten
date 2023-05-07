@@ -140,7 +140,7 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
+        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_cam.vfov));
 
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];

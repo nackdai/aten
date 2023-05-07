@@ -19,7 +19,7 @@ namespace ao {
     __global__ void shadeMissAO(
         bool isFirstBounce,
         idaten::TileDomain tileDomain,
-        idaten::Path* paths)
+        idaten::Path paths)
     {
         const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -30,14 +30,14 @@ namespace ao {
 
         const auto idx = getIdx(ix, iy, tileDomain.w);
 
-        if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
+        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (isFirstBounce) {
-                paths->attrib[idx].isKill = true;
+                paths.attrib[idx].isKill = true;
             }
 
-            paths->contrib[idx].contrib = make_float3(1);
+            paths.contrib[idx].contrib = make_float3(1);
 
-            paths->attrib[idx].isTerminate = true;
+            paths.attrib[idx].isTerminate = true;
         }
     }
 
@@ -45,7 +45,7 @@ namespace ao {
         int32_t ao_num_rays, float ao_radius,
         idaten::TileDomain tileDomain,
         uint32_t frame,
-        idaten::Path* paths,
+        idaten::Path paths,
         int32_t* hitindices,
         int32_t* hitnum,
         const aten::Intersection* __restrict__ isects,
@@ -90,7 +90,7 @@ namespace ao {
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto rnd = random[idx];
         auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths->sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
+        paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
 #endif
 
         aten::hitrecord rec;
@@ -113,7 +113,7 @@ namespace ao {
         float3 ao_color = make_float3(0.0f);
 
         for (int32_t i = 0; i < ao_num_rays; i++) {
-            auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &paths->sampler[idx]);
+            auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &paths.sampler[idx]);
             auto pdfb = AT_NAME::lambert::pdf(orienting_normal, nextDir);
 
             real c = dot(orienting_normal, nextDir);
@@ -135,13 +135,13 @@ namespace ao {
         }
 
         ao_color /= ao_num_rays;
-        paths->contrib[idx].contrib = ao_color;
+        paths.contrib[idx].contrib = ao_color;
     }
 
     __global__ void gatherAO(
         int32_t width, int32_t height,
         cudaSurfaceObject_t outSurface,
-        const idaten::Path* __restrict__ paths,
+        const idaten::Path paths,
         bool enableProgressive)
     {
         const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -153,8 +153,8 @@ namespace ao {
 
         const auto idx = getIdx(ix, iy, width);
 
-        int32_t sample = paths->contrib[idx].samples;
-        const auto& contrib = paths->contrib[idx].contrib;
+        int32_t sample = paths.contrib[idx].samples;
+        const auto& contrib = paths.contrib[idx].contrib;
 
         float4 data;
 
@@ -195,7 +195,7 @@ namespace idaten {
         ao::shadeMissAO << <grid, block >> > (
             isFirstBounce,
             m_tileDomain,
-            m_paths.ptr());
+            m_paths);
 
         checkCudaKernel(shadeMiss);
     }
@@ -216,7 +216,7 @@ namespace idaten {
             m_ao_num_rays, m_ao_radius,
             m_tileDomain,
             m_frame,
-            m_paths.ptr(),
+            m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -245,7 +245,7 @@ namespace idaten {
         ao::gatherAO << <grid, block >> > (
             width, height,
             outputSurf,
-            m_paths.ptr(),
+            m_paths,
             m_enableProgressive);
     }
 }

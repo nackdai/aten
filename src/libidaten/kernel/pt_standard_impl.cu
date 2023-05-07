@@ -22,28 +22,15 @@
 
 namespace idaten {
 namespace kernel {
-    __global__ void initPath(
-        idaten::Path* path,
-        idaten::PathThroughput* throughput,
-        idaten::PathContrib* contrib,
-        idaten::PathAttribute* attrib,
-        aten::sampler* sampler)
-    {
-        path->throughput = throughput;
-        path->contrib = contrib;
-        path->attrib = attrib;
-        path->sampler = sampler;
-    }
-
     __global__ void genPath(
         idaten::TileDomain tileDomain,
         bool needFillAOV,
-        idaten::Path* paths,
+        idaten::Path paths,
         aten::ray* rays,
         int32_t width, int32_t height,
         int32_t sample,
         uint32_t frame,
-        const aten::CameraParameter* __restrict__ camera,
+        const aten::CameraParameter camera,
         const void* samplerValues,
         const uint32_t* __restrict__ random)
     {
@@ -56,28 +43,28 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        paths->attrib[idx].isHit = false;
+        paths.attrib[idx].isHit = false;
 
-        if (paths->attrib[idx].isKill) {
-            paths->attrib[idx].isTerminate = true;
+        if (paths.attrib[idx].isKill) {
+            paths.attrib[idx].isTerminate = true;
             return;
         }
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
         auto scramble = random[idx] * 0x1fe3434f;
-        paths->sampler[idx].init(frame + sample, 0, scramble, samplerValues);
+        paths.sampler[idx].init(frame + sample, 0, scramble, samplerValues);
 #elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto rnd = random[idx];
         auto scramble = rnd * 0x1fe3434f
             * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths->sampler[idx].init(
+        paths.sampler[idx].init(
             (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
             0,
             scramble);
 #endif
 
-        float r1 = paths->sampler[idx].nextSample();
-        float r2 = paths->sampler[idx].nextSample();
+        float r1 = paths.sampler[idx].nextSample();
+        float r2 = paths.sampler[idx].nextSample();
 
         if (needFillAOV) {
             r1 = r2 = 0.5f;
@@ -86,20 +73,20 @@ namespace kernel {
         ix += tileDomain.x;
         iy += tileDomain.y;
 
-        float s = (ix + r1) / (float)(camera->width);
-        float t = (iy + r2) / (float)(camera->height);
+        float s = (ix + r1) / (float)(camera.width);
+        float t = (iy + r2) / (float)(camera.height);
 
         AT_NAME::CameraSampleResult camsample;
-        AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
         rays[idx] = camsample.r;
 
-        paths->throughput[idx].throughput = aten::vec3(1);
-        paths->throughput[idx].pdfb = 1.0f;
-        paths->attrib[idx].isTerminate = false;
-        paths->attrib[idx].isSingular = false;
+        paths.throughput[idx].throughput = aten::vec3(1);
+        paths.throughput[idx].pdfb = 1.0f;
+        paths.attrib[idx].isTerminate = false;
+        paths.attrib[idx].isSingular = false;
 
-        paths->contrib[idx].samples += 1;
+        paths.contrib[idx].samples += 1;
     }
 
     // NOTE
@@ -109,7 +96,7 @@ namespace kernel {
 
     __global__ void hitTest(
         idaten::TileDomain tileDomain,
-        idaten::Path* paths,
+        idaten::Path paths,
         aten::Intersection* isects,
         aten::ray* rays,
         int32_t* hitbools,
@@ -177,11 +164,11 @@ namespace kernel {
                 localPoolRayCount -= WARP_SIZE;
             }
 
-            paths->attrib[idx].isHit = false;
+            paths.attrib[idx].isHit = false;
 
             hitbools[idx] = 0;
 
-            if (paths->attrib[idx].isTerminate) {
+            if (paths.attrib[idx].isTerminate) {
                 continue;
             }
 
@@ -190,7 +177,7 @@ namespace kernel {
             float t_max = AT_MATH_INF;
 
             if (bounce >= 1
-                && !paths->attrib[idx].isSingular)
+                && !paths.attrib[idx].isSingular)
             {
                 t_max = hitDistLimit;
             }
@@ -217,14 +204,14 @@ namespace kernel {
 #endif
 
             if (bounce >= 1
-                && !paths->attrib[idx].isSingular
+                && !paths.attrib[idx].isSingular
                 && isect.t > hitDistLimit)
             {
                 isHit = false;
-                paths->attrib[idx].isTerminate = true;
+                paths.attrib[idx].isTerminate = true;
             }
 
-            paths->attrib[idx].isHit = isHit;
+            paths.attrib[idx].isHit = isHit;
 
             hitbools[idx] = isHit ? 1 : 0;
         } while (true);
@@ -238,11 +225,11 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, tileDomain.w);
 
-        paths->attrib[idx].isHit = false;
+        paths.attrib[idx].isHit = false;
 
         hitbools[idx] = 0;
 
-        if (paths->attrib[idx].isTerminate) {
+        if (paths.attrib[idx].isTerminate) {
             return;
         }
 
@@ -263,7 +250,7 @@ namespace kernel {
         float t_max = AT_MATH_INF;
 
         if (bounce >= 1
-            && !paths->attrib[idx].isSingular)
+            && !paths.attrib[idx].isSingular)
         {
             t_max = hitDistLimit;
         }
@@ -284,13 +271,13 @@ namespace kernel {
 #endif
 
         if (bounce >= 1
-            && !paths->attrib[idx].isSingular
+            && !paths.attrib[idx].isSingular
             && isect.t > hitDistLimit)
         {
             isHit = false;
         }
 
-        paths->attrib[idx].isHit = isHit;
+        paths.attrib[idx].isHit = isHit;
 
         hitbools[idx] = isHit ? 1 : 0;
 #endif
@@ -299,7 +286,7 @@ namespace kernel {
     __global__ void hitTestPrimaryRayInScreenSpace(
         idaten::TileDomain tileDomain,
         cudaSurfaceObject_t gbuffer,
-        idaten::Path* paths,
+        idaten::Path paths,
         aten::Intersection* isects,
         int32_t* hitbools,
         int32_t width, int32_t height,
@@ -318,11 +305,11 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, tileDomain.w);
 
-        paths->attrib[idx].isHit = false;
+        paths.attrib[idx].isHit = false;
 
         hitbools[idx] = 0;
 
-        if (paths->attrib[idx].isTerminate) {
+        if (paths.attrib[idx].isTerminate) {
             return;
         }
 
@@ -379,11 +366,11 @@ namespace kernel {
 
             isects[idx].t = (camPos - vp).length();
 
-            paths->attrib[idx].isHit = true;
+            paths.attrib[idx].isHit = true;
             hitbools[idx] = 1;
         }
         else {
-            paths->attrib[idx].isHit = false;
+            paths.attrib[idx].isHit = false;
             hitbools[idx] = 0;
         }
     }
@@ -393,7 +380,7 @@ namespace kernel {
         int32_t bounce,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
-        idaten::Path* paths,
+        idaten::Path paths,
         int32_t width, int32_t height)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
@@ -405,12 +392,12 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, tileDomain.w);
 
-        if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
+        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             // TODO
             auto bg = aten::vec3(0);
 
             if (bounce == 0) {
-                paths->attrib[idx].isKill = true;
+                paths.attrib[idx].isKill = true;
 
                 ix += tileDomain.x;
                 iy += tileDomain.y;
@@ -425,10 +412,10 @@ namespace kernel {
                 bg = aten::vec3(1, 1, 1);
             }
 
-            auto contrib = paths->throughput[idx].throughput * bg;
-            paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
+            auto contrib = paths.throughput[idx].throughput * bg;
+            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 
-            paths->attrib[idx].isTerminate = true;
+            paths.attrib[idx].isTerminate = true;
         }
     }
 
@@ -436,14 +423,14 @@ namespace kernel {
         idaten::TileDomain tileDomain,
         int32_t offsetX, int32_t offsetY,
         int32_t bounce,
-        const aten::CameraParameter* __restrict__ camera,
+        const aten::CameraParameter camera,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
         cudaTextureObject_t* textures,
         int32_t envmapIdx,
         real envmapAvgIllum,
         real envmapMultiplyer,
-        idaten::Path* paths,
+        idaten::Path paths,
         const aten::ray* __restrict__ rays,
         int32_t width, int32_t height)
     {
@@ -456,7 +443,7 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, tileDomain.w);
 
-        if (!paths->attrib[idx].isTerminate && !paths->attrib[idx].isHit) {
+        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             aten::vec3 dir = rays[idx].dir;
 
             if (bounce == 0) {
@@ -470,7 +457,7 @@ namespace kernel {
                 float t = (iy + offsetY) / (float)(height);
 
                 AT_NAME::CameraSampleResult camsample;
-                AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+                AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
                 dir = camsample.r.dir;
             }
@@ -482,9 +469,9 @@ namespace kernel {
 
             float misW = 1.0f;
             if (bounce == 0
-                || (bounce == 1 && paths->attrib[idx].isSingular))
+                || (bounce == 1 && paths.attrib[idx].isSingular))
             {
-                paths->attrib[idx].isKill = true;
+                paths.attrib[idx].isKill = true;
 
                 ix += tileDomain.x;
                 iy += tileDomain.y;
@@ -497,15 +484,15 @@ namespace kernel {
             }
             else {
                 auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
-                misW = paths->throughput[idx].pdfb / (pdfLight + paths->throughput[idx].pdfb);
+                misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
 
                 emit *= envmapMultiplyer;
             }
 
-            auto contrib = paths->throughput[idx].throughput * misW * emit;
-            paths->contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
+            auto contrib = paths.throughput[idx].throughput * misW * emit;
+            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
 
-            paths->attrib[idx].isTerminate = true;
+            paths.attrib[idx].isTerminate = true;
         }
     }
 }
@@ -516,19 +503,15 @@ namespace idaten
     bool StandardPT::initPath(int32_t width, int32_t height)
     {
         if (!m_isInitPath) {
-            m_paths.init(1);
-
             m_pathThroughput.init(width * height);
             m_pathContrib.init(width * height);
             m_pathAttrib.init(width * height);
             m_pathSampler.init(width * height);
 
-            kernel::initPath << <1, 1, 0, m_stream >> > (
-                m_paths.ptr(),
-                m_pathThroughput.ptr(),
-                m_pathContrib.ptr(),
-                m_pathAttrib.ptr(),
-                m_pathSampler.ptr());
+            m_paths.throughput = m_pathThroughput.ptr();
+            m_paths.contrib = m_pathContrib.ptr();
+            m_paths.attrib = m_pathAttrib.ptr();
+            m_paths.sampler = m_pathSampler.ptr();
 
             m_isInitPath = true;
 
@@ -564,12 +547,12 @@ namespace idaten
         kernel::genPath << <grid, block, 0, m_stream >> > (
             m_tileDomain,
             needFillAOV,
-            m_paths.ptr(),
+            m_paths,
             m_rays.ptr(),
             m_tileDomain.w, m_tileDomain.h,
             sample,
             m_frame,
-            m_cam.ptr(),
+            m_cam,
             m_sobolMatrices.ptr(),
             m_random.ptr());
 
@@ -592,7 +575,7 @@ namespace idaten
         kernel::hitTest << <grid, block >> > (
 #endif
             m_tileDomain,
-            m_paths.ptr(),
+            m_paths,
             m_isects.ptr(),
             m_rays.ptr(),
             m_hitbools.ptr(),
@@ -619,7 +602,7 @@ namespace idaten
             (m_tileDomain.w + block.x - 1) / block.x,
             (m_tileDomain.h + block.y - 1) / block.y);
 
-        aten::vec4 campos = aten::vec4(m_camParam.origin, 1.0f);
+        aten::vec4 campos = aten::vec4(m_cam.origin, 1.0f);
 
         CudaGLResourceMapper<std::remove_reference_t<decltype(gbuffer)>> rscmap(gbuffer);
         auto binded_gbuffer = gbuffer.bind();
@@ -627,7 +610,7 @@ namespace idaten
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
             m_tileDomain,
             binded_gbuffer,
-            m_paths.ptr(),
+            m_paths,
             m_isects.ptr(),
             m_hitbools.ptr(),
             width, height,
@@ -661,12 +644,12 @@ namespace idaten
                 m_tileDomain,
                 offsetX, offsetY,
                 bounce,
-                m_cam.ptr(),
+                m_cam,
                 aovNormalDepth.ptr(),
                 aovTexclrMeshid.ptr(),
                 m_tex.ptr(),
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-                m_paths.ptr(),
+                m_paths,
                 m_rays.ptr(),
                 width, height);
         }
@@ -676,7 +659,7 @@ namespace idaten
                 bounce,
                 aovNormalDepth.ptr(),
                 aovTexclrMeshid.ptr(),
-                m_paths.ptr(),
+                m_paths,
                 width, height);
         }
 

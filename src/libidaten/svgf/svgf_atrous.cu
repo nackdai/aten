@@ -297,7 +297,7 @@ namespace idaten
         bool isFirstIter = iterCnt == 0 ? true : false;
         bool isFinalIter = iterCnt == maxIterCnt - 1 ? true : false;
 
-        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_camParam.vfov));
+        float cameraDistance = height / (2.0f * aten::tan(0.5f * m_cam.vfov));
 
         int32_t stepScale = 1 << iterCnt;
 

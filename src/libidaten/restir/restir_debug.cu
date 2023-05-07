@@ -23,7 +23,7 @@ __global__ void fillAOV(
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
     cudaSurfaceObject_t motionDetphBuffer,
-    const aten::CameraParameter* __restrict__ camera,
+    const aten::CameraParameter camera,
     const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
     cudaTextureObject_t* nodes,
     const aten::TriangleParameter* __restrict__ prims,
@@ -59,7 +59,7 @@ __global__ void fillAOV(
     float t = (iy + 0.5f) / (float)(height);
 
     AT_NAME::CameraSampleResult camsample;
-    AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+    AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
     idaten::Context ctxt;
     {
@@ -133,8 +133,8 @@ __global__ void pickPixel(
     idaten::ReSTIRPathTracing::PickedInfo* dst,
     int32_t ix, int32_t iy,
     int32_t width, int32_t height,
-    const aten::CameraParameter* __restrict__ camera,
-    const idaten::Path* __restrict__ paths,
+    const aten::CameraParameter camera,
+    const idaten::Path paths,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
     const aten::ObjectParameter* __restrict__ shapes, int32_t geomnum,
@@ -145,11 +145,11 @@ __global__ void pickPixel(
 {
     iy = height - 1 - iy;
 
-    float s = (ix + 0.5f) / (float)(camera->width);
-    float t = (iy + 0.5f) / (float)(camera->height);
+    float s = (ix + 0.5f) / (float)(camera.width);
+    float t = (iy + 0.5f) / (float)(camera.height);
 
     AT_NAME::CameraSampleResult camsample;
-    AT_NAME::PinholeCamera::sample(&camsample, camera, s, t);
+    AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
 
     idaten::Context ctxt;
     {
@@ -172,7 +172,7 @@ __global__ void pickPixel(
 
         dst->ix = ix;
         dst->iy = iy;
-        dst->color = aten::vec3(paths->contrib[idx].contrib.x, paths->contrib[idx].contrib.y, paths->contrib[idx].contrib.z);
+        dst->color = aten::vec3(paths.contrib[idx].contrib.x, paths.contrib[idx].contrib.y, paths.contrib[idx].contrib.z);
         dst->normal = aten::vec3(normalDepth.x, normalDepth.y, normalDepth.z);
         dst->depth = normalDepth.w;
         dst->meshid = (int32_t)texclrMeshid.w;
@@ -208,7 +208,7 @@ namespace idaten
             aov_.normal_depth().ptr(),
             aov_.albedo_meshid().ptr(),
             gbuffer,
-            m_cam.ptr(),
+            m_cam,
             m_shapeparam.ptr(), m_shapeparam.num(),
             m_nodetex.ptr(),
             m_primparams.ptr(),
@@ -228,8 +228,8 @@ namespace idaten
                 m_pick.ptr(),
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height,
-                m_cam.ptr(),
-                m_paths.ptr(),
+                m_cam,
+                m_paths,
                 aov_.normal_depth().ptr(),
                 aov_.albedo_meshid().ptr(),
                 m_shapeparam.ptr(), m_shapeparam.num(),

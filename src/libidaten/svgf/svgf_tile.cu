@@ -8,7 +8,7 @@
 
 __global__ void copyBufferForTile(
     idaten::TileDomain tileDomain,
-    const idaten::Path* paths,
+    const idaten::Path paths,
     float4* contribs,
     int32_t width, int32_t height)
 {
@@ -26,7 +26,7 @@ __global__ void copyBufferForTile(
 
     const auto srcIdx = getIdx(ix, iy, tileDomain.w);
 
-    contribs[dstIdx] = paths->contrib[srcIdx].v;
+    contribs[dstIdx] = paths.contrib[srcIdx].v;
 }
 
 namespace idaten
@@ -40,7 +40,7 @@ namespace idaten
 
         copyBufferForTile << <grid, block, 0, m_stream >> > (
             m_tileDomain,
-            m_paths.ptr(),
+            m_paths,
             m_tmpBuf.ptr(),
             width, height);
 

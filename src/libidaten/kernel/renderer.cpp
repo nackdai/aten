@@ -33,9 +33,7 @@ namespace idaten {
         m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
 #endif
 
-        m_cam.init(sizeof(camera));
-        m_cam.writeFromHostToDeviceByNum(&camera, 1);
-        m_camParam = camera;
+        m_cam = camera;
 
         m_shapeparam.init(shapes.size());
         m_shapeparam.writeFromHostToDeviceByNum(&shapes[0], shapes.size());
@@ -127,8 +125,6 @@ namespace idaten {
 
     void Renderer::updateCamera(const aten::CameraParameter& camera)
     {
-        m_cam.writeFromHostToDeviceByNum(&camera, 1);
-
-        m_camParam = camera;
+        m_cam = camera;
     }
 }

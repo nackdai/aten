@@ -96,17 +96,13 @@ namespace kernel {
 
     __global__ void hitTest(
         idaten::TileDomain tileDomain,
+        idaten::Context ctxt,
         idaten::Path paths,
         aten::Intersection* isects,
         aten::ray* rays,
         int32_t* hitbools,
         int32_t width, int32_t height,
-        const aten::ObjectParameter* __restrict__ shapes,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
         cudaTextureObject_t* nodes,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        aten::mat4* matrices,
         int32_t bounce,
         float hitDistLimit)
     {
@@ -132,16 +128,7 @@ namespace kernel {
         volatile auto& localPoolNextRay = nextRayArray[threadIdx.y];
         volatile auto& localPoolRayCount = rayCountArray[threadIdx.y];
 
-        idaten::Context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.matrices = matrices;
-        }
+        ctxt.nodes = nodes;
 
         do
         {
@@ -232,16 +219,7 @@ namespace kernel {
             return;
         }
 
-        idaten::Context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.matrices = matrices;
-        }
+        ctxt.nodes = nodes;
 
         aten::Intersection isect;
 
@@ -284,15 +262,12 @@ namespace kernel {
     __global__ void hitTestPrimaryRayInScreenSpace(
         idaten::TileDomain tileDomain,
         cudaSurfaceObject_t gbuffer,
+        const idaten::Context ctxt,
         idaten::Path paths,
         aten::Intersection* isects,
         int32_t* hitbools,
         int32_t width, int32_t height,
-        const aten::vec4 camPos,
-        const aten::ObjectParameter* __restrict__ geoms,
-        const aten::TriangleParameter* __restrict__ prims,
-        const aten::mat4* __restrict__ matrices,
-        cudaTextureObject_t vtxPos)
+        const aten::vec4 camPos)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -335,17 +310,17 @@ namespace kernel {
 
         if (objid >= 0) {
             aten::TriangleParameter prim;
-            prim.v0 = ((aten::vec4*)prims)[primid * aten::TriangleParamter_float4_size + 0];
-            prim.v1 = ((aten::vec4*)prims)[primid * aten::TriangleParamter_float4_size + 1];
+            prim.v0 = ((aten::vec4*)ctxt.prims)[primid * aten::TriangleParamter_float4_size + 0];
+            prim.v1 = ((aten::vec4*)ctxt.prims)[primid * aten::TriangleParamter_float4_size + 1];
 
             isects[idx].mtrlid = prim.mtrlid;
             isects[idx].meshid = prim.mesh_id;
 
-            const auto* obj = &geoms[objid];
+            const auto* obj = &ctxt.shapes[objid];
 
-            float4 p0 = tex1Dfetch<float4>(vtxPos, prim.idx[0]);
-            float4 p1 = tex1Dfetch<float4>(vtxPos, prim.idx[1]);
-            float4 p2 = tex1Dfetch<float4>(vtxPos, prim.idx[2]);
+            float4 p0 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[0]);
+            float4 p1 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[1]);
+            float4 p2 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[2]);
 
             real a = data.z;
             real b = data.w;
@@ -358,7 +333,7 @@ namespace kernel {
             aten::vec4 vp(p.x, p.y, p.z, 1.0f);
 
             if (obj->mtx_id >= 0) {
-                auto mtxL2W = matrices[obj->mtx_id * 2 + 0];
+                auto mtxL2W = ctxt.matrices[obj->mtx_id * 2 + 0];
                 vp = mtxL2W.apply(vp);
             }
 
@@ -500,6 +475,18 @@ namespace idaten
 {
     bool StandardPT::initPath(int32_t width, int32_t height)
     {
+        if (!is_init_context_) {
+            ctxt_.shapes = m_shapeparam.ptr();
+            ctxt_.mtrls = m_mtrlparam.ptr();
+            ctxt_.lightnum = m_lightparam.num();
+            ctxt_.lights = m_lightparam.ptr();
+            ctxt_.prims = m_primparams.ptr();
+            ctxt_.matrices = m_mtxparams.ptr();
+
+            ctxt_.vtxPos = m_vtxparamsPos.bind();
+            ctxt_.vtxNml = m_vtxparamsNml.bind();
+        }
+
         if (!m_isInitPath) {
             m_pathThroughput.init(width * height);
             m_pathContrib.init(width * height);
@@ -533,9 +520,7 @@ namespace idaten
     void StandardPT::generatePath(
         bool needFillAOV,
         int32_t sample, int32_t maxBounce,
-        int32_t seed,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t seed)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -559,8 +544,7 @@ namespace idaten
 
     void StandardPT::hitTest(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos)
+        int32_t bounce)
     {
 #ifdef ENABLE_PERSISTENT_THREAD
         kernel::hitTest << <NUM_BLOCK, dim3(WARP_SIZE, NUM_WARP_PER_BLOCK), 0, m_stream >> > (
@@ -573,17 +557,13 @@ namespace idaten
         kernel::hitTest << <grid, block >> > (
 #endif
             m_tileDomain,
+            ctxt_,
             m_paths,
             m_isects.ptr(),
             m_rays.ptr(),
             m_hitbools.ptr(),
             width, height,
-            m_shapeparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
             m_nodetex.ptr(),
-            m_primparams.ptr(),
-            texVtxPos,
-            m_mtxparams.ptr(),
             bounce,
             m_hitDistLimit);
 
@@ -592,8 +572,7 @@ namespace idaten
 
     void StandardPT::hitTestOnScreenSpace(
         int32_t width, int32_t height,
-        idaten::CudaGLSurface& gbuffer,
-        cudaTextureObject_t texVtxPos)
+        idaten::CudaGLSurface& gbuffer)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -608,15 +587,12 @@ namespace idaten
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
             m_tileDomain,
             binded_gbuffer,
+            ctxt_,
             m_paths,
             m_isects.ptr(),
             m_hitbools.ptr(),
             width, height,
-            campos,
-            m_shapeparam.ptr(),
-            m_primparams.ptr(),
-            m_mtxparams.ptr(),
-            texVtxPos);
+            campos);
 
         checkCudaKernel(hitTestPrimaryRayInScreenSpace);
     }

@@ -398,14 +398,12 @@ namespace idaten
         if (bounce == 0 && m_canSSRTHitTest) {
             hitTestOnScreenSpace(
                 width, height,
-                m_gbuffer,
-                texVtxPos);
+                m_gbuffer);
         }
         else {
             hitTest(
                 width, height,
-                bounce,
-                texVtxPos);
+                bounce);
         }
     }
 

@@ -111,17 +111,14 @@ namespace idaten {
             generatePath(
                 false,
                 i, maxBounce,
-                seed,
-                vtxTexPos,
-                vtxTexNml);
+                seed);
 
             bounce = 0;
 
             while (bounce < maxBounce) {
                 hitTest(
                     width, height,
-                    bounce,
-                    vtxTexPos);
+                    bounce);
 
                 onShadeMiss(width, height, bounce);
 

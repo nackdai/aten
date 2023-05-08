@@ -183,9 +183,7 @@ namespace idaten
             generatePath(
                 m_mode == Mode::AOVar,
                 i, maxBounce,
-                seed,
-                vtxTexPos,
-                vtxTexNml);
+                seed);
 
             initReSTIR(width, height);
 

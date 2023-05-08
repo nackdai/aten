@@ -2,6 +2,7 @@
 
 #include "cuda/cudamemory.h"
 
+#include "kernel/context.cuh"
 #include "kernel/pt_params.h"
 #include "kernel/renderer.h"
 
@@ -60,19 +61,15 @@ namespace idaten {
         virtual void generatePath(
             bool needFillAOV,
             int32_t sample, int32_t maxBounce,
-            int32_t seed,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t seed);
 
         virtual void hitTest(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos);
+            int32_t bounce);
 
         virtual void hitTestOnScreenSpace(
             int32_t width, int32_t height,
-            idaten::CudaGLSurface& gbuffer,
-            cudaTextureObject_t texVtxPos);
+            idaten::CudaGLSurface& gbuffer);
 
         virtual void missShade(
             int32_t width, int32_t height,
@@ -88,6 +85,9 @@ namespace idaten {
         TileDomain m_tileDomain;
 
         cudaStream_t m_stream{ (cudaStream_t)0 };
+
+        bool is_init_context_{ false };
+        idaten::Context ctxt_;
 
         bool m_isInitPath{ false };
         Path m_paths;

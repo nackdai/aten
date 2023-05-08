@@ -11,6 +11,13 @@
 
 namespace idaten
 {
+    CudaTextureResource::~CudaTextureResource()
+    {
+        unbind();
+
+        checkCudaErrors(cudaFree(m_buffer));
+        m_buffer = nullptr;
+    }
     // NOTE
     // https://devblogs.nvidia.com/parallelforall/cuda-pro-tip-kepler-texture-objects-improve-performance-and-flexibility/
 
@@ -27,7 +34,15 @@ namespace idaten
         uint32_t memberNumInItem,
         uint32_t numOfContaints)
     {
-        m_size = sizeof(float4) * memberNumInItem * numOfContaints;
+        auto size = sizeof(float4) * memberNumInItem * numOfContaints;
+
+        if (m_buffer && m_size != size) {
+            unbind();
+            checkCudaErrors(cudaFree(m_buffer));
+            m_buffer = nullptr;
+        }
+
+        m_size = size;
 
         if (!m_buffer) {
             checkCudaErrors(cudaMalloc(&m_buffer, m_size));
@@ -72,8 +87,8 @@ namespace idaten
     void CudaTextureResource::unbind()
     {
         if (m_tex > 0) {
-            //checkCudaErrors(cudaDestroyTextureObject(m_tex));
-            //m_tex = 0;
+            checkCudaErrors(cudaDestroyTextureObject(m_tex));
+            m_tex = 0;
         }
     }
 

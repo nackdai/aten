@@ -153,19 +153,6 @@ namespace idaten
             //checkCudaErrors(cudaDeviceSynchronize());
 
             m_frame++;
-
-            {
-                m_vtxparamsPos.unbind();
-                m_vtxparamsNml.unbind();
-
-                for (int32_t i = 0; i < m_nodeparam.size(); i++) {
-                    m_nodeparam[i].unbind();
-                }
-
-                for (int32_t i = 0; i < m_texRsc.size(); i++) {
-                    m_texRsc[i].unbind();
-                }
-            }
         }
     }
 

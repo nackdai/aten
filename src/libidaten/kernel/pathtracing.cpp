@@ -184,9 +184,7 @@ namespace idaten
             generatePath(
                 m_mode == Mode::AOVar,
                 i, maxBounce,
-                seed,
-                vtxTexPos,
-                vtxTexNml);
+                seed);
 
             int32_t bounce = 0;
 

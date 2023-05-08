@@ -369,8 +369,7 @@ namespace idaten
     {
         hitTest(
             width, height,
-            bounce,
-            texVtxPos);
+            bounce);
     }
 
     void PathTracing::onShade(

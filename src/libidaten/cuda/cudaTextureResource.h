@@ -10,8 +10,8 @@ namespace idaten
 {
     class CudaTextureResource {
     public:
-        CudaTextureResource() {}
-        virtual ~CudaTextureResource() {}
+        CudaTextureResource() = default;
+        virtual ~CudaTextureResource();
 
     public:
         void init(

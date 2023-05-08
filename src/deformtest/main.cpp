@@ -503,6 +503,10 @@ void onKey(bool press, aten::Key key)
 
 int32_t main()
 {
+    AT_ASSERT_LOG(
+        (std::is_same_v<Scene, DeformScene> || std::is_same_v<Scene, DeformInBoxScene>),
+        "Allow only deformable scene");
+
     aten::timer::init();
     aten::OMPUtil::setThreadNum(g_threadnum);
 

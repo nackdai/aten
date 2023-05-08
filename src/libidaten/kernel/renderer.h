@@ -61,6 +61,17 @@ namespace idaten
 
         virtual void reset() {}
 
+        void updateBVH(
+            const std::vector<aten::ObjectParameter>& geoms,
+            const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
+            const std::vector<aten::mat4>& mtxs);
+
+        void updateGeometry(
+            std::vector<CudaGLBuffer>& vertices,
+            uint32_t vtxOffsetCount,
+            TypedCudaMemory<aten::TriangleParameter>& triangles,
+            uint32_t triOffsetCount);
+
         void updateCamera(const aten::CameraParameter& camera);
 
         void viewTextures(

@@ -50,24 +50,6 @@ namespace idaten
         });
     }
 
-    void PathTracing::updateBVH(
-        const std::vector<aten::ObjectParameter>& geoms,
-        const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-        const std::vector<aten::mat4>& mtxs)
-    {
-        m_shapeparam.writeFromHostToDeviceByNum(&geoms[0], geoms.size());
-
-        // Only for top layer...
-        m_nodeparam[0].init(
-            (aten::vec4*)&nodes[0][0],
-            sizeof(aten::GPUBvhNode) / sizeof(float4),
-            nodes[0].size());
-
-        if (!mtxs.empty()) {
-            m_mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
-        }
-    }
-
     void PathTracing::updateMaterial(const std::vector<aten::MaterialParameter>& mtrls)
     {
         AT_ASSERT(mtrls.size() <= m_mtrlparam.num());
@@ -85,53 +67,6 @@ namespace idaten
         if (lights.size() <= m_lightparam.num()) {
             m_lightparam.writeFromHostToDeviceByNum(&lights[0], (uint32_t)lights.size());
             reset();
-        }
-    }
-
-    void PathTracing::updateGeometry(
-        std::vector<CudaGLBuffer>& vertices,
-        uint32_t vtxOffsetCount,
-        TypedCudaMemory<aten::TriangleParameter>& triangles,
-        uint32_t triOffsetCount)
-    {
-        // Vertex position.
-        {
-            vertices[0].map();
-
-            aten::vec4* data = nullptr;
-            size_t bytes = 0;
-            vertices[0].bind((void**)&data, bytes);
-
-            uint32_t num = (uint32_t)(bytes / sizeof(float4));
-
-            m_vtxparamsPos.update(data, 1, num, vtxOffsetCount);
-
-            vertices[0].unbind();
-            vertices[0].unmap();
-        }
-
-        // Vertex normal.
-        {
-            vertices[1].map();
-
-            aten::vec4* data = nullptr;
-            size_t bytes = 0;
-            vertices[1].bind((void**)&data, bytes);
-
-            uint32_t num = (uint32_t)(bytes / sizeof(float4));
-
-            m_vtxparamsNml.update(data, 1, num, vtxOffsetCount);
-
-            vertices[1].unbind();
-            vertices[1].unmap();
-        }
-
-        // Triangles.
-        {
-            auto size = triangles.bytes();
-            auto offset = triOffsetCount * triangles.stride();
-
-            m_primparams.writeFromHostToDeviceByBytes(triangles.ptr(), size, offset);
         }
     }
 

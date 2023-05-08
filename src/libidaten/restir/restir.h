@@ -84,17 +84,6 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void updateBVH(
-            const std::vector<aten::ObjectParameter>& geoms,
-            const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
-            const std::vector<aten::mat4>& mtxs);
-
-        void updateGeometry(
-            std::vector<CudaGLBuffer>& vertices,
-            uint32_t vtxOffsetCount,
-            TypedCudaMemory<aten::TriangleParameter>& triangles,
-            uint32_t triOffsetCount);
-
         void setGBuffer(
             GLuint gltexGbuffer,
             GLuint gltexMotionDepthbuffer);

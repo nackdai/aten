@@ -22,5 +22,48 @@ namespace idaten {
 
         cudaTextureObject_t* textures{ nullptr };
         int32_t envmapIdx{ -1 };
+
+        __device__ const float4 GetPosition(uint32_t idx) const noexcept
+        {
+#ifdef __CUDA_ARCH__
+            return tex1Dfetch<float4>(vtxPos, idx);
+#else
+            return make_float4(0, 0, 0, 0);
+#endif
+        }
+
+        __device__ const float4 GetNormal(uint32_t idx) const noexcept
+        {
+#ifdef __CUDA_ARCH__
+            return tex1Dfetch<float4>(vtxNml, idx);
+#else
+            return make_float4(0, 0, 0, 0);
+#endif
+        }
+
+        __device__ const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept
+        {
+            return shapes[idx];
+        }
+
+        __device__ const aten::MaterialParameter& GetMaterial(uint32_t idx) const noexcept
+        {
+            return mtrls[idx];
+        }
+
+        __device__ const aten::TriangleParameter& GetTriangle(uint32_t idx) const noexcept
+        {
+            return prims[idx];
+        }
+
+        __device__ const aten::LightParameter& GetLight(uint32_t idx) const noexcept
+        {
+            return lights[idx];
+        }
+
+        __device__ const aten::mat4& GetMatrix(uint32_t idx) const noexcept
+        {
+            return matrices[idx];
+        }
     };
 }

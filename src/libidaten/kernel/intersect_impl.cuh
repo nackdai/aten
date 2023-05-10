@@ -15,9 +15,9 @@ AT_CUDA_INLINE __device__ bool hitTriangle(
     const aten::ray& ray,
     aten::Intersection* isect)
 {
-    float4 p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[0]);
-    float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);
-    float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
+    float4 p0 = ctxt->GetPosition(prim->idx[0]);
+    float4 p1 = ctxt->GetPosition(prim->idx[1]);
+    float4 p2 = ctxt->GetPosition(prim->idx[2]);
 
     aten::vec3 v0 = aten::vec3(p0.x, p0.y, p0.z);
     aten::vec3 v1 = aten::vec3(p1.x, p1.y, p1.z);
@@ -169,7 +169,7 @@ AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
     for (int32_t i = 0; i < num; i++) {
         int32_t pidx = (int32_t)*((float*)&primIdx + i);
         const auto* prim = &ctxt->prims[pidx];
-        float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
+        float4 p2 = ctxt->GetPosition(prim->idx[2]);
 
         *(((float*)&v2x) + i) = p2.x;
         *(((float*)&v2y) + i) = p2.y;
@@ -428,13 +428,13 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     prim.v0 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::TriangleParamter_float4_size + 0];
     prim.v1 = ((aten::vec4*)ctxt->prims)[triangle_id * aten::TriangleParamter_float4_size + 1];
 
-    float4 p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[0]);
-    float4 p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[1]);
-    float4 p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim.idx[2]);
+    float4 p0 = ctxt->GetPosition(prim.idx[0]);
+    float4 p1 = ctxt->GetPosition(prim.idx[1]);
+    float4 p2 = ctxt->GetPosition(prim.idx[2]);
 
-    float4 n0 = tex1Dfetch<float4>(ctxt->vtxNml, prim.idx[0]);
-    float4 n1 = tex1Dfetch<float4>(ctxt->vtxNml, prim.idx[1]);
-    float4 n2 = tex1Dfetch<float4>(ctxt->vtxNml, prim.idx[2]);
+    float4 n0 = ctxt->GetNormal(prim.idx[0]);
+    float4 n1 = ctxt->GetNormal(prim.idx[1]);
+    float4 n2 = ctxt->GetNormal(prim.idx[2]);
 
     float2 u0 = make_float2(p0.w, n0.w);
     float2 u1 = make_float2(p1.w, n1.w);
@@ -474,7 +474,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
     real scaledLen = 0;
 
     if (param->mtx_id >= 0) {
-        auto mtxL2W = ctxt->matrices[param->mtx_id * 2 + 0];
+        const auto& mtxL2W = ctxt->GetMatrix(param->mtx_id * 2 + 0);
 
         rec->p = mtxL2W.apply(rec->p);
         rec->normal = normalize(mtxL2W.applyXYZ(rec->normal));
@@ -517,7 +517,9 @@ AT_CUDA_INLINE __device__ void evalHitResult(
         rec->isVoxel = true;
     }
     else {
-        const aten::ObjectParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
+        const aten::ObjectParameter* realShape = (param->object_id >= 0
+            ? &ctxt->GetObject(param->object_id)
+            : param);
 
         if (realShape->type == aten::ObjectType::Polygon) {
             evalHitResultTriangle(ctxt, param, r, rec, isect);
@@ -543,7 +545,9 @@ AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
     aten::hitrecord* rec,
     const aten::Intersection* isect)
 {
-    const aten::ObjectParameter* realShape = (param->object_id >= 0 ? &ctxt->shapes[param->object_id] : param);
+    const aten::ObjectParameter* realShape = (param->object_id >= 0
+        ? &ctxt->GetObject(param->object_id)
+        : param);
 
     if (realShape->type == aten::ObjectType::Polygon) {
         evalHitResultTriangle(ctxt, param, r, rec, isect);

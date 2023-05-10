@@ -316,7 +316,7 @@ namespace kernel {
             isects[idx].mtrlid = prim.mtrlid;
             isects[idx].meshid = prim.mesh_id;
 
-            const auto* obj = &ctxt.shapes[objid];
+            const auto* obj = &ctxt.GetObject(static_cast<uint32_t>(objid));
 
             float4 p0 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[0]);
             float4 p1 = tex1Dfetch<float4>(ctxt.vtxPos, prim.idx[1]);
@@ -333,7 +333,7 @@ namespace kernel {
             aten::vec4 vp(p.x, p.y, p.z, 1.0f);
 
             if (obj->mtx_id >= 0) {
-                auto mtxL2W = ctxt.matrices[obj->mtx_id * 2 + 0];
+                const auto& mtxL2W = ctxt.GetMatrix(obj->mtx_id * 2 + 0);
                 vp = mtxL2W.apply(vp);
             }
 

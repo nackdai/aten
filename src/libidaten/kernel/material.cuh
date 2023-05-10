@@ -97,11 +97,11 @@ inline __device__ bool gatherMaterialInfo(
     bool is_valid_mtrl = mtrl_id >= 0;
 
     if (is_valid_mtrl) {
-        dst_mtrl = ctxt->mtrls[mtrl_id];
+        dst_mtrl = ctxt->GetMaterial(static_cast<uint32_t>(mtrl_id));
 
         if (is_voxel) {
             // Replace to lambert.
-            const auto& albedo = ctxt->mtrls[mtrl_id].baseColor;
+            const auto& albedo = ctxt->GetMaterial(static_cast<uint32_t>(mtrl_id)).baseColor;
             dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
             dst_mtrl.baseColor = albedo;
         }

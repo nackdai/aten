@@ -15,7 +15,7 @@ namespace kernel {
         auto distToLight = shadowRay.distToLight;
 
         auto light = ctxt.lights[targetLightId];
-        auto lightobj = (light.objid >= 0 ? &ctxt.shapes[light.objid] : nullptr);
+        auto lightobj = (light.objid >= 0 ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
 
         real distHitObjToRayOrg = AT_MATH_INF;
 
@@ -32,7 +32,7 @@ namespace kernel {
         isHit = intersectCloser(&ctxt, r, &isectTmp, distToLight - AT_MATH_EPSILON, enableLod);
 
         if (isHit) {
-            hitobj = &ctxt.shapes[isectTmp.objid];
+            hitobj = &ctxt.GetObject(static_cast<uint32_t>(isectTmp.objid));
         }
 
         isHit = AT_NAME::scene::hitLight(

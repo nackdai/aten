@@ -88,7 +88,7 @@ namespace pt {
 
         const auto& isect = isects[idx];
 
-        auto obj = &ctxt.shapes[isect.objid];
+        auto obj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
         evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;

@@ -96,10 +96,10 @@ namespace ao {
 
         const auto& isect = isects[idx];
 
-        auto obj = &ctxt.shapes[isect.objid];
+        auto obj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
         evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
-        aten::MaterialParameter mtrl = ctxt.mtrls[rec.mtrlid];
+        const auto& mtrl = ctxt.GetMaterial(static_cast<uint32_t>(rec.mtrlid));
 
         // 交差位置の法線.
         // 物体からのレイの入出を考慮.

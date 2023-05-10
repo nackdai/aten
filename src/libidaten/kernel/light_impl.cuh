@@ -16,13 +16,13 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 
     const aten::TriangleParameter* prim = &ctxt->prims[primidx];
 
-    float4 _p0 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[0]);
-    float4 _p1 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[1]);
-    float4 _p2 = tex1Dfetch<float4>(ctxt->vtxPos, prim->idx[2]);
+    float4 _p0 = ctxt->GetPosition(prim->idx[0]);
+    float4 _p1 = ctxt->GetPosition(prim->idx[1]);
+    float4 _p2 = ctxt->GetPosition(prim->idx[2]);
 
-    float4 _n0 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[0]);
-    float4 _n1 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[1]);
-    float4 _n2 = tex1Dfetch<float4>(ctxt->vtxNml, prim->idx[2]);
+    float4 _n0 = ctxt->GetNormal(prim->idx[0]);
+    float4 _n1 = ctxt->GetNormal(prim->idx[1]);
+    float4 _n2 = ctxt->GetNormal(prim->idx[2]);
 
     aten::vec3 p0 = aten::vec3(_p0.x, _p0.y, _p0.z);
     aten::vec3 p1 = aten::vec3(_p1.x, _p1.y, _p1.z);
@@ -78,7 +78,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     real scaledLen = 0;
 
     if (shape->mtx_id >= 0) {
-        auto mtxL2W = ctxt->matrices[shape->mtx_id * 2 + 0];
+        const auto& mtxL2W = ctxt->GetMatrix(shape->mtx_id * 2 + 0);
 
         {
             auto v0 = mtxL2W.apply(p0);
@@ -104,7 +104,9 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     const aten::vec3& org,
     aten::sampler* sampler)
 {
-    const aten::ObjectParameter* s = (light->objid >= 0 ? &ctxt->shapes[light->objid] : nullptr);
+    const aten::ObjectParameter* s = (light->objid >= 0
+        ? &ctxt->GetObject(light->objid)
+        : nullptr);
 
     aten::ray r;
     aten::hitrecord rec;
@@ -113,7 +115,9 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
     if (sampler) {
         aten::SamplePosNormalPdfResult result;
 
-        const aten::ObjectParameter* realShape = (s->object_id >= 0 ? &ctxt->shapes[s->object_id] : s);
+        const aten::ObjectParameter* realShape = (s->object_id >= 0
+            ? &ctxt->GetObject(s->object_id)
+            : s);
 
         if (realShape->type == aten::ObjectType::Polygon) {
             getTriangleSamplePosNormalArea(&result, ctxt, realShape, sampler);

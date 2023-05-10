@@ -141,13 +141,13 @@ AT_CUDA_INLINE __device__ bool intersectQBVH(
 
         if (isLeaf) {
             // Leaf.
-            const auto* s = &ctxt->shapes[(int32_t)attrib.x];
+            const auto* s = &ctxt->GetObject(static_cast<uint32_t>(attrib.x));
 
             if (attrib.z >= 0) {
                 aten::ray transformedRay;
 
                 if (s->mtx_id >= 0) {
-                    auto mtxW2L = ctxt->matrices[s->mtx_id * 2 + 1];
+                    const auto& mtxW2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
                     transformedRay.dir = mtxW2L.applyXYZ(r.dir);
                     transformedRay.dir = normalize(transformedRay.dir);
                     transformedRay.org = mtxW2L.apply(r.org) + AT_MATH_EPSILON * transformedRay.dir;

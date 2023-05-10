@@ -190,8 +190,8 @@ namespace npr_pt {
                     disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
                     pixel_width);
                 if (is_line_width) {
-                    const auto& query_mtrl = ctxt.mtrls[rec.mtrlid];
-                    const auto& sample_mtrl = ctxt.mtrls[hrec_sample.mtrlid];
+                    const auto& query_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(rec.mtrlid));
+                    const auto& sample_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(hrec_sample.mtrlid));
                     const auto query_albedo = AT_NAME::sampleTexture(query_mtrl.albedoMap, rec.u, rec.v, query_mtrl.baseColor);
                     const auto sample_albedo = AT_NAME::sampleTexture(sample_mtrl.albedoMap, hrec_sample.u, hrec_sample.v, sample_mtrl.baseColor);
                     const auto query_depth = length(rec.p - cam_org);
@@ -259,7 +259,7 @@ namespace npr_pt {
                 sample_ray_info.descs[i].is_terminated = true;
             }
 #endif
-            const auto& mtrl = ctxt.mtrls[rec.mtrlid];
+            const auto& mtrl = ctxt.GetMaterial(static_cast<uint32_t>(rec.mtrlid));
             if (!mtrl.attrib.isGlossy) {
                 // In non glossy material case, sample ray doesn't bounce anymore.
                 // TODO

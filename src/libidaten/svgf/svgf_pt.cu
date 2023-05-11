@@ -161,7 +161,7 @@ namespace svgf {
 
         // Apply normal map.
         int32_t normalMap = shMtrls[threadIdx.x].normalMap;
-        auto pre_sample_r = applyNormal(
+        auto pre_sample_r = AT_NAME::material::applyNormal(
             &shMtrls[threadIdx.x],
             normalMap,
             orienting_normal, orienting_normal,
@@ -224,9 +224,8 @@ namespace svgf {
 
         AT_NAME::MaterialSampling sampling;
 
-        sampleMaterial(
+        AT_NAME::material::sampleMaterialWithExternalAlbedo(
             &sampling,
-            &ctxt,
             &shMtrls[threadIdx.x],
             orienting_normal,
             ray.dir,

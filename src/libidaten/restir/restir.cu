@@ -123,7 +123,7 @@ __global__ void shade(
 
     // Apply normal map.
     int32_t normalMap = shMtrls[threadIdx.x].normalMap;
-    const auto pre_sampled_r = applyNormal(
+    const auto pre_sampled_r = AT_NAME::material::applyNormal(
         &shMtrls[threadIdx.x],
         normalMap,
         orienting_normal, orienting_normal,
@@ -259,9 +259,8 @@ __global__ void shade(
 
     AT_NAME::MaterialSampling sampling;
 
-    sampleMaterial(
+    AT_NAME::material::sampleMaterialWithExternalAlbedo(
         &sampling,
-        &ctxt,
         &shMtrls[threadIdx.x],
         orienting_normal,
         ray.dir,
@@ -430,8 +429,7 @@ __global__ void computeShadowRayContribution(
                 float u = 0.0f;
                 float v = 0.0f;
 
-                auto bsdf = sampleBSDF(
-                    &ctxt,
+                auto bsdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
                     &shMtrls[threadIdx.x],
                     orienting_normal,
                     restir_info.wi,

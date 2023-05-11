@@ -47,6 +47,7 @@
     <ClInclude Include="..\src\libaten\material\lambert.h" />
     <ClInclude Include="..\src\libaten\material\lambert_refraction.h" />
     <ClInclude Include="..\src\libaten\material\material.h" />
+    <ClInclude Include="..\src\libaten\material\material_impl.h" />
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h" />
     <ClInclude Include="..\src\libaten\material\oren_nayar.h" />
     <ClInclude Include="..\src\libaten\material\refraction.h" />
@@ -100,7 +101,6 @@
     <ClInclude Include="..\src\libidaten\kernel\light.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\material.cuh" />
-    <ClInclude Include="..\src\libidaten\kernel\material_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h" />

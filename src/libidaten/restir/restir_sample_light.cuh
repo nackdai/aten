@@ -42,8 +42,8 @@ inline __device__ int32_t sampleLightWithReservoirRIP(
         aten::vec3 nmlLight = lightsample.nml;
         aten::vec3 dirToLight = normalize(lightsample.dir);
 
-        auto pdf = samplePDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v);
-        auto brdf = sampleBSDF(ctxt, &mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
+        auto pdf = AT_NAME::material::samplePDF(&mtrl, normal, ray_dir, dirToLight, u, v);
+        auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, normal, ray_dir, dirToLight, u, v, albedo, pre_sampled_r);
         brdf /= pdf;
 
         auto cosShadow = dot(normal, dirToLight);

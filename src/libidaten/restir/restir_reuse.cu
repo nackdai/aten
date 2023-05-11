@@ -126,13 +126,13 @@ __global__ void computeTemporalReuse(
                 aten::vec3 nmlLight = lightsample.nml;
                 aten::vec3 dirToLight = normalize(lightsample.dir);
 
-                auto pdf = samplePDF(
-                    &ctxt, &neightbor_mtrl,
+                auto pdf = AT_NAME::material::samplePDF(
+                    &neightbor_mtrl,
                     normal,
                     self_info.wi, dirToLight,
                     self_info.u, self_info.v);
-                auto brdf = sampleBSDF(
-                    &ctxt, &neightbor_mtrl,
+                auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+                    &neightbor_mtrl,
                     normal,
                     self_info.wi, dirToLight,
                     self_info.u, self_info.v,
@@ -310,13 +310,13 @@ __global__ void computeSpatialReuse(
                     aten::vec3 nmlLight = lightsample.nml;
                     aten::vec3 dirToLight = normalize(lightsample.dir);
 
-                    auto pdf = samplePDF(
-                        &ctxt, &neightbor_mtrl,
+                    auto pdf = AT_NAME::material::samplePDF(
+                        &neightbor_mtrl,
                         normal,
                         self_info.wi, dirToLight,
                         self_info.u, self_info.v);
-                    auto brdf = sampleBSDF(
-                        &ctxt, &neightbor_mtrl,
+                    auto brdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(
+                        &neightbor_mtrl,
                         normal,
                         self_info.wi, dirToLight,
                         self_info.u, self_info.v,

@@ -133,9 +133,6 @@
     <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\material_impl.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\envmap.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
@@ -294,6 +291,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\misc\tuple.h">
       <Filter>aten\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\material\material_impl.h">
+      <Filter>aten\material</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

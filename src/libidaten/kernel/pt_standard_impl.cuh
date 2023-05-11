@@ -154,8 +154,8 @@ namespace kernel {
         {
             auto cosShadow = dot(hit_nml, dirToLight);
 
-            real pdfb = samplePDF(&ctxt, &mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v);
-            auto bsdf = sampleBSDF(&ctxt, &mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r);
+            real pdfb = AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v);
+            auto bsdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r);
 
             bsdf *= throughtput.throughput;
 

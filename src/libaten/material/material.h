@@ -552,14 +552,14 @@ namespace AT_NAME
             return F;
         }
 
-        static inline AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(
+        static AT_DEVICE_MTRL_API aten::vec4 sampleAlbedoMap(
             const aten::MaterialParameter* mtrl,
             real u, real v,
             uint32_t lod = 0);
 
-        static inline AT_DEVICE_MTRL_API void sampleMaterial(
+        static AT_DEVICE_MTRL_API void sampleMaterial(
             AT_NAME::MaterialSampling* result,
-            const aten::MaterialParameter* dst_mtrl,
+            const aten::MaterialParameter* mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& orgnormal,
@@ -572,7 +572,7 @@ namespace AT_NAME
             bool is_light_path = false);
 #endif
 
-        static inline AT_DEVICE_MTRL_API void sampleMaterialWithExternalAlbedo(
+        static AT_DEVICE_MTRL_API void sampleMaterialWithExternalAlbedo(
             AT_NAME::MaterialSampling* result,
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
@@ -583,14 +583,14 @@ namespace AT_NAME
             float u, float v,
             const aten::vec4& externalAlbedo);
 
-        static inline AT_DEVICE_MTRL_API real samplePDF(
+        static AT_DEVICE_MTRL_API real samplePDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
             const aten::vec3& wo,
             real u, real v);
 
-        static inline AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
+        static AT_DEVICE_MTRL_API aten::vec3 sampleDirection(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -598,7 +598,7 @@ namespace AT_NAME
             aten::sampler* sampler,
             real pre_sampled_r);
 
-        static inline AT_DEVICE_MTRL_API aten::vec3 sampleBSDF(
+        static AT_DEVICE_MTRL_API aten::vec3 sampleBSDF(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -606,7 +606,7 @@ namespace AT_NAME
             real u, real v,
             real pre_sampled_r);
 
-        static inline AT_DEVICE_MTRL_API aten::vec3 sampleBSDF(
+        static AT_DEVICE_MTRL_API aten::vec3 sampleBSDFWithExternalAlbedo(
             const aten::MaterialParameter* dst_mtrl,
             const aten::vec3& normal,
             const aten::vec3& wi,
@@ -615,7 +615,7 @@ namespace AT_NAME
             const aten::vec4& externalAlbedo,
             real pre_sampled_r);
 
-        static inline AT_DEVICE_MTRL_API real applyNormal(
+        static AT_DEVICE_MTRL_API real applyNormal(
             const aten::MaterialParameter* mtrl,
             const int32_t normalMapIdx,
             const aten::vec3& orgNml,

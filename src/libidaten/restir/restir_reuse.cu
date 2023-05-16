@@ -42,7 +42,7 @@ __global__ void computeTemporalReuse(
         return;
     }
 
-    idaten::Context ctxt;
+    idaten::context ctxt;
     {
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
@@ -217,7 +217,7 @@ __global__ void computeSpatialReuse(
         return;
     }
 
-    idaten::Context ctxt;
+    idaten::context ctxt;
     {
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;

@@ -3,7 +3,7 @@
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
     cudaTextureObject_t nodes,
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -83,7 +83,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
 
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -272,7 +272,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     float t_max/*= AT_MATH_INF*/,
@@ -294,7 +294,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectCloserBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     const float t_max,
@@ -316,7 +316,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectAnyBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     bool enableLod/*= false*/,

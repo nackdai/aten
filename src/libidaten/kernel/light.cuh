@@ -8,7 +8,7 @@
 
 __device__ void sampleLight(
     aten::LightSampleResult* result,
-    idaten::Context* ctxt,
+    idaten::context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     const aten::vec3& normal,

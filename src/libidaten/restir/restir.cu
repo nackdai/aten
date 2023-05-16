@@ -68,7 +68,7 @@ __global__ void shade(
         return;
     }
 
-    idaten::Context ctxt;
+    idaten::context ctxt;
     {
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
@@ -327,7 +327,7 @@ __global__ void hitShadowRay(
         return;
     }
 
-    idaten::Context ctxt;
+    idaten::context ctxt;
     {
         ctxt.shapes = shapes;
         ctxt.mtrls = mtrls;
@@ -388,7 +388,7 @@ __global__ void computeShadowRayContribution(
         return;
     }
 
-    idaten::Context ctxt;
+    idaten::context ctxt;
     {
         ctxt.mtrls = mtrls;
         ctxt.textures = textures;

@@ -8,7 +8,7 @@
 
 inline __device__ bool gatherMaterialInfo(
     aten::MaterialParameter& dst_mtrl,
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const int32_t mtrl_id,
     const bool is_voxel)
 {

@@ -3,7 +3,7 @@
 #include "aten4idaten.h"
 
 namespace idaten {
-    struct Context {
+    struct context {
         const aten::ObjectParameter* __restrict__ shapes{ nullptr };
 
         const aten::MaterialParameter* __restrict__ mtrls{ nullptr };

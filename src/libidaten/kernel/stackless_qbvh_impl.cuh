@@ -44,7 +44,7 @@ AT_CUDA_INLINE __device__ int32_t SkipCodeNext(int32_t code)
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
     cudaTextureObject_t nodes,
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -176,7 +176,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVHTriangles(
 template <idaten::IntersectType Type>
 AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
     cudaTextureObject_t nodes,
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray r,
     float t_min, float t_max,
     aten::Intersection* isect)
@@ -322,7 +322,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessQBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectClosestStacklessQBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect)
 {
@@ -340,7 +340,7 @@ AT_CUDA_INLINE __device__ bool intersectClosestStacklessQBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectCloserStacklessQBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     const float t_max)
@@ -358,7 +358,7 @@ AT_CUDA_INLINE __device__ bool intersectCloserStacklessQBVH(
 }
 
 AT_CUDA_INLINE __device__ bool intersectAnyStacklessQBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect)
 {

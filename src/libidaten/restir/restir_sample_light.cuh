@@ -9,7 +9,7 @@
 inline __device__ int32_t sampleLightWithReservoirRIP(
     idaten::Reservoir& reservoir,
     const aten::MaterialParameter& mtrl,
-    idaten::Context* ctxt,
+    idaten::context* ctxt,
     const aten::vec3& org,
     const aten::vec3& normal,
     const aten::vec3& ray_dir,

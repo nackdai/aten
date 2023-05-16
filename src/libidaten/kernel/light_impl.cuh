@@ -2,7 +2,7 @@
 
 AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::SamplePosNormalPdfResult* result,
-    idaten::Context* ctxt,
+    idaten::context* ctxt,
     const aten::ObjectParameter* shape,
     aten::sampler* sampler)
 {
@@ -99,7 +99,7 @@ AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
 
 AT_CUDA_INLINE __device__  void sampleAreaLight(
     aten::LightSampleResult* result,
-    idaten::Context* ctxt,
+    idaten::context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     aten::sampler* sampler)
@@ -173,7 +173,7 @@ AT_CUDA_INLINE __device__  void sampleAreaLight(
 
 AT_CUDA_INLINE __device__  void sampleImageBasedLight(
     aten::LightSampleResult* result,
-    idaten::Context* ctxt,
+    idaten::context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     const aten::vec3& normal,
@@ -229,7 +229,7 @@ AT_CUDA_INLINE __device__  void sampleImageBasedLight(
 
 AT_CUDA_INLINE __device__ void sampleLight(
     aten::LightSampleResult* result,
-    idaten::Context* ctxt,
+    idaten::context* ctxt,
     const aten::LightParameter* light,
     const aten::vec3& org,
     const aten::vec3& normal,

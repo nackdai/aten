@@ -47,7 +47,7 @@ namespace aten
             vec4 ret;
 
             if (ch >= 4) {
-                ret[3] = clr[4];
+                ret[3] = clr[3];
             }
             if (ch >= 3) {
                 ret[2] = clr[2];

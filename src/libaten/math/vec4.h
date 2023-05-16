@@ -49,12 +49,14 @@ namespace aten {
         {
             return v;
         }
-        inline AT_DEVICE_API real operator[](int32_t i) const
+        inline AT_DEVICE_API real operator[](uint32_t i) const
         {
+            AT_ASSERT(i < 4);
             return p[i];
         }
-        inline AT_DEVICE_API real& operator[](int32_t i)
+        inline AT_DEVICE_API real& operator[](uint32_t i)
         {
+            AT_ASSERT(i < 4);
             return p[i];
         }
 

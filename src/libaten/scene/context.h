@@ -8,9 +8,12 @@
 #include <vector>
 
 #include "geometry/vertex.h"
-#include "scene/context_interface.h"
 #include "texture/texture.h"
 #include "visualizer/GeomDataBuffer.h"
+#include "material/material.h"
+#include "light/light_parameter.h"
+#include "geometry/geomparam.h"
+#include "math/mat4.h"
 
 namespace AT_NAME {
     class triangle;
@@ -21,7 +24,7 @@ namespace aten
 {
     class transformable;
 
-    class context : public context_interface {
+    class context {
     public:
         context() = default;
         virtual ~context() = default;
@@ -34,11 +37,21 @@ namespace aten
             return res;
         }
 
+        const aten::vec4 GetPositionAsVec4(uint32_t idx) const noexcept
+        {
+            return GetPosition(idx);
+        }
+
         const aten::vec4 GetNormal(uint32_t idx) const noexcept
         {
             const auto& v = getVertex(idx);
             aten::vec4 res(v.nml, v.uv.y);
             return res;
+        }
+
+        const aten::vec4 GetNormalAsVec4(uint32_t idx) const noexcept
+        {
+            return GetNormal(idx);
         }
 
         const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept;
@@ -131,10 +144,7 @@ namespace aten
 
         void addTriangle(const std::shared_ptr<AT_NAME::triangle>& tri);
 
-        uint32_t getTriangleNum() const
-        {
-            return static_cast<uint32_t>(m_triangles.size());
-        }
+        uint32_t getTriangleNum() const;
 
         std::shared_ptr<const AT_NAME::triangle> getTriangle(int32_t idx) const;
 
@@ -182,12 +192,6 @@ namespace aten
         {
             AT_ASSERT(s_pinnedCtxt);
             return s_pinnedCtxt;
-        }
-
-        const aten::ObjectParameter& get_real_object(const aten::ObjectParameter& obj) const
-        {
-            const auto& real_obj = obj.object_id >= 0 ? GetObject(obj.object_id) : obj;
-            return real_obj;
         }
 
         std::tuple<uint32_t, std::shared_ptr<aten::mat4>> create_matrix()

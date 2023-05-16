@@ -142,6 +142,11 @@ namespace aten
         tri->updateIndex(m_triangles.size() - 1);
     }
 
+    uint32_t context::getTriangleNum() const
+    {
+        return static_cast<uint32_t>(m_triangles.size());
+    }
+
     std::shared_ptr<const AT_NAME::triangle> context::getTriangle(int32_t idx) const
     {
         AT_ASSERT(0 <= idx && idx < m_triangles.size());

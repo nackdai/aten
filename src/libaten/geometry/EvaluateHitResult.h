@@ -7,10 +7,10 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_API inline void evaluate_hit_result(
+    inline AT_DEVICE_API void evaluate_hit_result(
         aten::hitrecord& rec,
         const aten::ObjectParameter& obj,
-        const context& ctxt,
+        const AT_NAME::context& ctxt,
         const aten::ray& r,
         const aten::Intersection& isect)
     {
@@ -28,7 +28,7 @@ namespace AT_NAME
         }
         else {
             // Get real object. If the object is instance, we need to get real one.
-            const auto& real_obj = ctxt.get_real_object(obj);
+            const auto& real_obj = obj.object_id >= 0 ? ctxt.GetObject(obj.object_id) : obj;
             const auto mtx_id = obj.object_id >= 0 ? obj.mtx_id : real_obj.mtx_id;
 
             aten::mat4 mtxL2W;
@@ -63,10 +63,10 @@ namespace AT_NAME
         rec.meshid = isect.meshid;
     }
 
-    AT_DEVICE_API inline void sample_pos_and_normal(
+    inline AT_DEVICE_API void sample_pos_and_normal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& obj,
-        const aten::context& ctxt,
+        const AT_NAME::context& ctxt,
         aten::sampler* sampler)
     {
         // Get real object. If the object is instance, we need to get real one.

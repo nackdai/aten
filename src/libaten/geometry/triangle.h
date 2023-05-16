@@ -9,6 +9,7 @@
 #include "geometry/transformable.h"
 #include "geometry/NoHitableMesh.h"
 #include "geometry/vertex.h"
+#include "scene/context.h"
 
 namespace AT_NAME
 {
@@ -38,19 +39,52 @@ namespace AT_NAME
             aten::Intersection* isect);
 
         static void evalHitResult(
-            const aten::vertex& v0,
-            const aten::vertex& v1,
-            const aten::vertex& v2,
+            const aten::context& ctxt,
+            const aten::TriangleParameter& tri,
             aten::hitrecord* rec,
             const aten::TriangleParameter& param,
             const aten::Intersection* isect);
 
         static void sample_pos_and_normal(
-            const aten::vertex& v0,
-            const aten::vertex& v1,
-            const aten::vertex& v2,
+            const aten::context& ctxt,
+            const aten::TriangleParameter& tri,
             aten::SamplePosNormalPdfResult* result,
-            aten::sampler* sampler);
+            aten::sampler* sampler)
+        {
+            const auto p0 = ctxt.GetPositionAsVec4(tri.idx[0]);
+            const auto p1 = ctxt.GetPositionAsVec4(tri.idx[1]);
+            const auto p2 = ctxt.GetPositionAsVec4(tri.idx[2]);
+
+            const auto n0 = ctxt.GetNormalAsVec4(tri.idx[0]);
+            const auto n1 = ctxt.GetNormalAsVec4(tri.idx[1]);
+            const auto n2 = ctxt.GetNormalAsVec4(tri.idx[2]);
+
+            real r0 = sampler->nextSample();
+            real r1 = sampler->nextSample();
+
+            real a = aten::sqrt(r0) * (real(1) - r1);
+            real b = aten::sqrt(r0) * r1;
+
+            // dSÀ•WŒn(barycentric coordinates).
+            // v0Šî€.
+            // p = (1 - a - b)*v0 + a*v1 + b*v2
+            aten::vec3 p = (1 - a - b) * p0 + a * p1 + b * p2;
+
+            aten::vec3 n = (1 - a - b) * n0 + a * n1 + b * n2;
+            n = normalize(n);
+
+            // ŽOŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+            auto e0 = p1 - p0;
+            auto e1 = p2 - p0;
+            auto area = real(0.5) * cross(e0, e1).length();
+
+            result->pos = p;
+            result->nml = n;
+            result->area = area;
+
+            result->a = a;
+            result->b = b;
+        }
 
         virtual int32_t mesh_id() const override;
 

@@ -368,7 +368,6 @@
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\AcceleratedScene.h" />
     <ClInclude Include="..\src\libaten\scene\context.h" />
-    <ClInclude Include="..\src\libaten\scene\context_interface.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\hit_parameter.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />

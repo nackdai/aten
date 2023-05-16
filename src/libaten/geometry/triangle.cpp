@@ -79,13 +79,29 @@ namespace AT_NAME
     }
 
     void triangle::evalHitResult(
-        const aten::vertex& v0,
-        const aten::vertex& v1,
-        const aten::vertex& v2,
+        const aten::context& ctxt,
+        const aten::TriangleParameter& tri,
         aten::hitrecord* rec,
         const aten::TriangleParameter& param,
         const aten::Intersection* isect)
     {
+        const auto p0 = ctxt.GetPositionAsVec4(tri.idx[0]);
+        const auto p1 = ctxt.GetPositionAsVec4(tri.idx[1]);
+        const auto p2 = ctxt.GetPositionAsVec4(tri.idx[2]);
+
+        const auto n0 = ctxt.GetNormalAsVec4(tri.idx[0]);
+        const auto n1 = ctxt.GetNormalAsVec4(tri.idx[1]);
+        const auto n2 = ctxt.GetNormalAsVec4(tri.idx[2]);
+
+        const auto u0 = p0.w;
+        const auto v0 = n0.w;
+
+        const auto u1 = p1.w;
+        const auto v1 = n1.w;
+
+        const auto u2 = p2.w;
+        const auto v2 = n2.w;
+
         // NOTE
         // http://d.hatena.ne.jp/Zellij/20131207/p1
 
@@ -96,16 +112,15 @@ namespace AT_NAME
         // 重心座標系(barycentric coordinates).
         // v0基準.
         // p = (1 - a - b)*v0 + a*v1 + b*v2
-        rec->p = c * v0.pos + a * v1.pos + b * v2.pos;
-        rec->normal = c * v0.nml + a * v1.nml + b * v2.nml;
-        auto uv = c * v0.uv + a * v1.uv + b * v2.uv;
+        rec->p = c * p0 + a * p1 + b * p2;
+        rec->normal = c * n0 + a * n1 + b * n2;
 
-        rec->u = uv.x;
-        rec->v = uv.y;
+        rec->u = c * u0 + a * u1 + b * u2;
+        rec->v = c * v0 + a * v1 + b * v2;
 
         if (param.needNormal > 0) {
-            auto e01 = v1.pos - v0.pos;
-            auto e02 = v2.pos - v0.pos;
+            auto e01 = p1 - p0;
+            auto e02 = p2 - p0;
 
             e01.w = e02.w = real(0);
 
@@ -143,53 +158,6 @@ namespace AT_NAME
 
         param_.mtrlid = mtrlid;
         param_.mesh_id = geomid;
-    }
-
-    void triangle::sample_pos_and_normal(
-        const aten::vertex& v0,
-        const aten::vertex& v1,
-        const aten::vertex& v2,
-        aten::SamplePosNormalPdfResult* result,
-        aten::sampler* sampler)
-    {
-#if 0
-        // 0 <= a + b <= 1
-        real a = sampler->nextSample();
-        real b = sampler->nextSample();
-
-        real d = a + b;
-
-        if (d > 1) {
-            a /= d;
-            b /= d;
-        }
-#else
-        real r0 = sampler->nextSample();
-        real r1 = sampler->nextSample();
-
-        real a = aten::sqrt(r0) * (real(1) - r1);
-        real b = aten::sqrt(r0) * r1;
-#endif
-
-        // 重心座標系(barycentric coordinates).
-        // v0基準.
-        // p = (1 - a - b)*v0 + a*v1 + b*v2
-        aten::vec3 p = (1 - a - b) * v0.pos + a * v1.pos + b * v2.pos;
-
-        aten::vec3 n = (1 - a - b) * v0.nml + a * v1.nml + b * v2.nml;
-        n = normalize(n);
-
-        // 三角形の面積 = ２辺の外積の長さ / 2;
-        auto e0 = v1.pos - v0.pos;
-        auto e1 = v2.pos - v0.pos;
-        auto area = real(0.5) * cross(e0, e1).length();
-
-        result->pos = p;
-        result->nml = n;
-        result->area = area;
-
-        result->a = a;
-        result->b = b;
     }
 
     int32_t triangle::mesh_id() const

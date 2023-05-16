@@ -523,9 +523,6 @@
     <ClInclude Include="..\src\libaten\misc\span.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\scene\context_interface.h">
-      <Filter>scene</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

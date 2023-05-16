@@ -37,7 +37,35 @@ namespace AT_NAME
             const aten::ray& r,
             const aten::mat4& mtxL2W,
             aten::hitrecord& rec,
-            const aten::Intersection& isect);
+            const aten::Intersection& isect)
+        {
+            const auto& faceParam = ctxt.GetTriangle(isect.triangle_id);
+
+            triangle::evalHitResult(ctxt, faceParam, &rec, faceParam, &isect);
+
+            auto p0 = ctxt.GetPositionAsVec4(faceParam.idx[0]);
+            auto p1 = ctxt.GetPositionAsVec4(faceParam.idx[1]);
+            auto p2 = ctxt.GetPositionAsVec4(faceParam.idx[2]);
+
+            p0.w = p1.w = p2.w = real(1);
+
+            real orignalLen = length(p1.v - p0.v);
+
+            real scaledLen = 0;
+            {
+                auto _p0 = mtxL2W.apply(p0);
+                auto _p1 = mtxL2W.apply(p1);
+
+                scaledLen = length(_p1.v - _p0.v);
+            }
+
+            real ratio = scaledLen / orignalLen;
+            ratio = ratio * ratio;
+
+            rec.area = obj.area * ratio;
+
+            rec.mtrlid = isect.mtrlid;
+        }
 
         virtual aten::accelerator* getInternalAccelerator() override final
         {
@@ -82,7 +110,44 @@ namespace AT_NAME
             const aten::ObjectParameter& param,
             const aten::context& ctxt,
             const aten::mat4& mtxL2W,
-            aten::sampler* sampler);
+            aten::sampler* sampler)
+        {
+            auto r = sampler->nextSample();
+            uint32_t tri_idx = static_cast<uint32_t>(param.triangle_num * r);
+            tri_idx += param.triangle_id;
+
+            const auto& tri_param = ctxt.GetTriangle(tri_idx);
+
+            auto v0 = ctxt.GetPositionAsVec4(tri_param.idx[0]);
+            auto v1 = ctxt.GetPositionAsVec4(tri_param.idx[1]);
+            auto v2 = ctxt.GetPositionAsVec4(tri_param.idx[2]);
+
+            v0.w = v1.w = v2.w = real(1);
+
+            real orignalLen = (v1 - v0).length();
+
+            real scaledLen = 0;
+            {
+                auto p0 = mtxL2W.apply(v0);
+                auto p1 = mtxL2W.apply(v1);
+
+                scaledLen = length(p1.v - p0.v);
+            }
+
+            real ratio = scaledLen / orignalLen;
+            ratio = ratio * ratio;
+
+            auto area = param.area * ratio;
+
+            AT_NAME::triangle::sample_pos_and_normal(
+                ctxt,
+                tri_param,
+                result, sampler);
+
+            result->triangle_id = tri_idx;
+
+            result->area = area;
+        }
 
         void appendShape(const std::shared_ptr<TriangleGroupMesh>& shape)
         {

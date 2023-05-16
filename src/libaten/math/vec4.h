@@ -151,12 +151,12 @@ namespace aten {
 
         inline AT_DEVICE_API real length() const
         {
-            auto ret = aten::sqrt(x * x + y * y + z * z + w * w);
+            auto ret = aten::sqrt(x * x + y * y + z * z);
             return ret;
         }
         inline AT_DEVICE_API real squared_length() const
         {
-            auto ret = x * x + y * y + z * z + w * w;
+            auto ret = x * x + y * y + z * z;
             return ret;
         }
 

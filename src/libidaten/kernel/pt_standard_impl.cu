@@ -96,7 +96,7 @@ namespace kernel {
 
     __global__ void hitTest(
         idaten::TileDomain tileDomain,
-        idaten::Context ctxt,
+        idaten::context ctxt,
         idaten::Path paths,
         aten::Intersection* isects,
         aten::ray* rays,
@@ -262,7 +262,7 @@ namespace kernel {
     __global__ void hitTestPrimaryRayInScreenSpace(
         idaten::TileDomain tileDomain,
         cudaSurfaceObject_t gbuffer,
-        const idaten::Context ctxt,
+        const idaten::context ctxt,
         idaten::Path paths,
         aten::Intersection* isects,
         int32_t* hitbools,

@@ -87,7 +87,7 @@ namespace idaten {
         cudaStream_t m_stream{ (cudaStream_t)0 };
 
         bool is_init_context_{ false };
-        idaten::Context ctxt_;
+        idaten::context ctxt_;
 
         bool m_isInitPath{ false };
         Path m_paths;

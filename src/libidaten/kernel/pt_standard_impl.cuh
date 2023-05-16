@@ -8,7 +8,7 @@
 namespace kernel {
     inline __device__ bool hitShadowRay(
         bool enableLod,
-        const idaten::Context& ctxt,
+        const idaten::context& ctxt,
         const idaten::ShadowRay& shadowRay)
     {
         auto targetLightId = shadowRay.targetLightId;
@@ -115,7 +115,7 @@ namespace kernel {
 
     inline __device__ bool fillShadowRay(
         idaten::ShadowRay& shadow_ray,
-        idaten::Context& ctxt,
+        idaten::context& ctxt,
         int32_t bounce,
         aten::sampler& sampler,
         const idaten::PathThroughput& throughtput,

@@ -8,7 +8,7 @@
 #include "kernel/intersecttype.h"
 
 __device__ bool intersectBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     float t_max = AT_MATH_INF,
@@ -16,7 +16,7 @@ __device__ bool intersectBVH(
     int32_t depth = -1);
 
 __device__ bool intersectCloserBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     const float t_max,
@@ -24,7 +24,7 @@ __device__ bool intersectCloserBVH(
     int32_t depth = -1);
 
 __device__ bool intersectAnyBVH(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& r,
     aten::Intersection* isect,
     bool enableLod = false,

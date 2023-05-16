@@ -11,7 +11,7 @@ AT_CUDA_INLINE __device__ bool hitSphere(
 
 AT_CUDA_INLINE __device__ bool hitTriangle(
     const aten::TriangleParameter* prim,
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& ray,
     aten::Intersection* isect)
 {
@@ -155,7 +155,7 @@ inline __device__ int32_t cmpGEQ(const float4& a, const float4& b)
 }
 
 AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     float4 primIdx, int32_t num,
     float4* resultT,
     float4* resultA,
@@ -417,7 +417,7 @@ inline __device__ float4 cross(float4 a, float4 b)
 }
 
 AT_CUDA_INLINE __device__ void evalHitResultTriangle(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
@@ -497,7 +497,7 @@ AT_CUDA_INLINE __device__ void evalHitResultTriangle(
 }
 
 AT_CUDA_INLINE __device__ void evalHitResult(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
@@ -539,7 +539,7 @@ AT_CUDA_INLINE __device__ void evalHitResult(
 }
 
 AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,

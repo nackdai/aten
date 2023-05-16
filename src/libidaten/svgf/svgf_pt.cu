@@ -49,7 +49,7 @@ namespace svgf {
             return;
         }
 
-        idaten::Context ctxt;
+        idaten::context ctxt;
         {
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;
@@ -290,7 +290,7 @@ namespace svgf {
             return;
         }
 
-        idaten::Context ctxt;
+        idaten::context ctxt;
         {
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;

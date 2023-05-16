@@ -94,7 +94,7 @@ namespace npr_pt {
             return;
         }
 
-        idaten::Context ctxt;
+        idaten::context ctxt;
         {
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;
@@ -313,7 +313,7 @@ namespace npr_pt {
             return;
         }
 
-        idaten::Context ctxt;
+        idaten::context ctxt;
         {
             ctxt.shapes = shapes;
             ctxt.mtrls = mtrls;

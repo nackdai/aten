@@ -13,12 +13,12 @@ __device__ bool hitSphere(
 
 __device__ bool hitTriangle(
     const aten::TriangleParameter* prim,
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ray& ray,
     aten::Intersection* isect);
 
 __device__ int32_t hit4Triangles1Ray(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     float4 primIdx, int32_t num,
     float4* resultT,
     float4* resultA,
@@ -52,21 +52,21 @@ __device__ int32_t hit4AABBWith1Ray(
     float t_min, float t_max);
 
 __device__ void evalHitResultTriangle(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect);
 
 __device__ void evalHitResult(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,
     const aten::Intersection* isect);
 
 __device__ void evalHitResultForAreaLight(
-    const idaten::Context* ctxt,
+    const idaten::context* ctxt,
     const aten::ObjectParameter* param,
     const aten::ray& r,
     aten::hitrecord* rec,

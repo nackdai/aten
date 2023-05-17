@@ -397,9 +397,6 @@
     <CudaCompile Include="..\src\libidaten\kernel\light.cu">
       <Filter>kernel</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\kernel\material.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\beckman.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>

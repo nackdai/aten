@@ -9,16 +9,15 @@
 
 namespace AT_NAME
 {
-    AT_DEVICE_API aten::LightSampleResult sample(
-        aten::LightParameter& param,
+    inline void Light::sample(
+        aten::LightSampleResult& result,
+        const aten::LightParameter& param,
         const aten::context& ctxt,
         const aten::vec3& org,
         const aten::vec3& nml,
         aten::sampler* sampler,
-        uint32_t lod = 0)
+        uint32_t lod)
     {
-        aten::LightSampleResult result;
-
         switch (param.type) {
         case aten::LightType::Area:
             AT_NAME::AreaLight::sample(result, param, ctxt, org, sampler);
@@ -39,7 +38,5 @@ namespace AT_NAME
             AT_ASSERT(false);
             break;
         }
-
-        return result;
     }
 }

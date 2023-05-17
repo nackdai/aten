@@ -57,16 +57,6 @@ namespace AT_NAME {
             const aten::vec3& org,
             aten::sampler* sampler);
 
-        virtual aten::LightSampleResult sample(
-            const aten::context& ctxt,
-            const aten::vec3& org,
-            aten::sampler* sampler) const override final
-        {
-            aten::LightSampleResult result;
-            sample(result, m_param, ctxt, org, sampler);
-            return result;
-        }
-
         std::shared_ptr<aten::transformable> getLightObject() const
         {
             return m_obj;

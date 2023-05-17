@@ -41,16 +41,6 @@ namespace AT_NAME {
             m_param.expAttn = std::max(expAttn, real(0));
         }
 
-        virtual aten::LightSampleResult sample(
-            const aten::context& ctxt,
-            const aten::vec3& org,
-            aten::sampler* sampler) const override final
-        {
-            aten::LightSampleResult result;
-            sample(&m_param, org, sampler, &result);
-            return result;
-        }
-
         static AT_DEVICE_API void sample(
             const aten::LightParameter* param,
             const aten::vec3& org,

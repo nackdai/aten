@@ -1,6 +1,7 @@
 #include "scene/scene.h"
 #include "misc/color.h"
 #include "geometry/transformable.h"
+#include "light/light_impl.h"
 
 namespace aten {
     bool scene::hitLight(
@@ -49,7 +50,9 @@ namespace aten {
             uint32_t idx = (uint32_t)aten::clamp<real>(r * num, 0, num - 1);
             const auto light = ctxt.get_light(idx);
 
-            sampleRes = light->sample(ctxt, org, nml, sampler);
+            const auto& light_param = light->param();
+
+            Light::sample(sampleRes, light_param, ctxt, org, nml, sampler);
             selectPdf = real(1) / num;
 
             return light;
@@ -121,9 +124,11 @@ namespace aten {
             const auto r_light = sampler->nextSample();
             const auto light_pos = aten::clamp<decltype(max_light_num)>(r_light * max_light_num, 0, max_light_num - 1);
 
-            const auto& light = ctxt.get_light(light_pos);
+            const auto light = ctxt.get_light(light_pos);
+            const auto& light_param = light->param();
 
-            auto lightsample = light->sample(ctxt, org, nml, sampler);
+            aten::LightSampleResult lightsample;
+            Light::sample(lightsample, light_param, ctxt, org, nml, sampler);
 
             aten::vec3 nmlLight = lightsample.nml;
             aten::vec3 dirToLight = normalize(lightsample.dir);

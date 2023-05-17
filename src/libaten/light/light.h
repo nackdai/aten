@@ -22,6 +22,15 @@ namespace AT_NAME
         virtual ~Light() {}
 
     public:
+        static void sample(
+            aten::LightSampleResult& result,
+            const aten::LightParameter& param,
+            const aten::context& ctxt,
+            const aten::vec3& org,
+            const aten::vec3& nml,
+            aten::sampler* sampler,
+            uint32_t lod = 0);
+
         void setPos(const aten::vec3& pos)
         {
             m_param.pos = pos;
@@ -50,20 +59,6 @@ namespace AT_NAME
         const aten::vec3& getLe() const
         {
             return m_param.le.v;
-        }
-
-        virtual aten::LightSampleResult sample(
-            const aten::context& ctxt,
-            const aten::vec3& org,
-            aten::sampler* sampler) const = 0;
-
-        virtual aten::LightSampleResult sample(
-            const aten::context& ctxt,
-            const aten::vec3& org,
-            const aten::vec3& nml,
-            aten::sampler* sampler) const
-        {
-            return sample(ctxt, org, sampler);
         }
 
         bool isSingular() const

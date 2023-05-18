@@ -1,6 +1,6 @@
 #include "svgf/svgf.h"
 
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/pt_common.h"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"

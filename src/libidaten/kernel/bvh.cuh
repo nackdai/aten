@@ -2,7 +2,7 @@
 
 #include "aten4idaten.h"
 #include "cuda/cudadefs.h"
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "cuda/helper_math.h"
 #include "kernel/intersecttype.h"

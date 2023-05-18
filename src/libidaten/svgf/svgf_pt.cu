@@ -2,7 +2,7 @@
 
 #include "kernel/StreamCompaction.h"
 
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"
 #include "kernel/intersect.cuh"

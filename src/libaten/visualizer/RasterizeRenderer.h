@@ -7,7 +7,7 @@
 #include "visualizer/GeomDataBuffer.h"
 #include "math/mat4.h"
 #include "geometry/PolygonObject.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 

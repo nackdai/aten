@@ -367,9 +367,9 @@
     <ClInclude Include="..\src\libaten\sampler\wanghash.h" />
     <ClInclude Include="..\src\libaten\sampler\xorshift.h" />
     <ClInclude Include="..\src\libaten\scene\AcceleratedScene.h" />
-    <ClInclude Include="..\src\libaten\scene\context.h" />
     <ClInclude Include="..\src\libaten\scene\hitable.h" />
     <ClInclude Include="..\src\libaten\scene\hit_parameter.h" />
+    <ClInclude Include="..\src\libaten\scene\host_scene_context.h" />
     <ClInclude Include="..\src\libaten\scene\scene.h" />
     <ClInclude Include="..\src\libaten\texture\texture.h" />
     <ClInclude Include="..\src\libaten\types.h" />
@@ -481,8 +481,8 @@
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />
-    <ClCompile Include="..\src\libaten\scene\context.cpp" />
     <ClCompile Include="..\src\libaten\scene\hitable.cpp" />
+    <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp" />
     <ClCompile Include="..\src\libaten\scene\scene.cpp" />
     <ClCompile Include="..\src\libaten\texture\texture.cpp" />
     <ClCompile Include="..\src\libaten\visualizer\blitter.cpp" />

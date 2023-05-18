@@ -1,7 +1,7 @@
 #include "restir/restir.h"
 
 #include "kernel/accelerator.cuh"
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/light.cuh"
 #include "kernel/material.cuh"

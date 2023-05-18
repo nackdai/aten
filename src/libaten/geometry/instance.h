@@ -7,7 +7,7 @@
 #include "math/mat4.h"
 #include "geometry/PolygonObject.h"
 #include "deformable/deformable.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten
 {

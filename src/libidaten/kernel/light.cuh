@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/pt_params.h"
 

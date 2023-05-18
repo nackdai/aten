@@ -1,6 +1,6 @@
 #include <type_traits>
 
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 #include "geometry/triangle.h"
 #include "geometry/transformable.h"
 #include "light/light.h"

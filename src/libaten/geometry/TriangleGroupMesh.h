@@ -7,7 +7,7 @@
 #include "math/mat4.h"
 #include "geometry/triangle.h"
 #include "visualizer/GeomDataBuffer.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace AT_NAME
 {

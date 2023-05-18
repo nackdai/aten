@@ -3,7 +3,7 @@
 #include "renderer/pathtracing.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten
 {

@@ -19,7 +19,7 @@ namespace AT_NAME {
 }
 #else
 
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace AT_NAME {
     inline AT_DEVICE_MTRL_API aten::vec4 sampleTexture(const int32_t texid, real u, real v, const aten::vec4& defaultValue, int32_t lod = 0)

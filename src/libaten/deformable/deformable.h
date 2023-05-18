@@ -9,7 +9,7 @@
 #include "deformable/DeformAnimation.h"
 #include "geometry/transformable.h"
 #include "visualizer/shader.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 #include "camera/camera.h"
 
 namespace aten

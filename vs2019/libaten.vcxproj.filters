@@ -442,9 +442,6 @@
     <ClInclude Include="..\src\libaten\material\microfacet_refraction.h">
       <Filter>material</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\scene\context.h">
-      <Filter>scene</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\geometry\transformable_factory.h">
       <Filter>geometry</Filter>
     </ClInclude>
@@ -522,6 +519,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\light\light_impl.h">
       <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\scene\host_scene_context.h">
+      <Filter>scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -756,9 +756,6 @@
     <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\scene\context.cpp">
-      <Filter>scene</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp">
       <Filter>renderer</Filter>
     </ClCompile>
@@ -806,6 +803,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\geometry\PolygonObject.cpp">
       <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp">
+      <Filter>scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

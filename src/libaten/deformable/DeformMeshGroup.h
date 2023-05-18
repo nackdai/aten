@@ -5,7 +5,7 @@
 #include "deformable/Skeleton.h"
 #include "misc/stream.h"
 #include "geometry/geomparam.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten
 {

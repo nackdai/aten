@@ -5,7 +5,7 @@
 
 #include "scene/hitable.h"
 #include "math/frustum.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten {
     /**

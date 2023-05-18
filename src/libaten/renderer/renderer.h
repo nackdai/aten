@@ -5,7 +5,7 @@
 #include "math/vec4.h"
 #include "renderer/background.h"
 #include "renderer/film.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 

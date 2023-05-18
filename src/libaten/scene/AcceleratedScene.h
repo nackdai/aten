@@ -8,7 +8,7 @@
 #include "accelerator/bvh.h"
 #include "light/light.h"
 #include "light/ibl.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 #include "scene/scene.h"
 #include "geometry/EvaluateHitResult.h"
 

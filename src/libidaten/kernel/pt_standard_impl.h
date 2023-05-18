@@ -2,7 +2,7 @@
 
 #include "cuda/cudamemory.h"
 
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/pt_params.h"
 #include "kernel/renderer.h"
 

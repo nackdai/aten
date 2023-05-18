@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "aten4idaten.h"

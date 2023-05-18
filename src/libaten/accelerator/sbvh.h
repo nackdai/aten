@@ -1,7 +1,7 @@
 #pragma once
 
 #include "accelerator/threaded_bvh.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 #define SBVH_TRIANGLE_NUM    (1)
 

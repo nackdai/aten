@@ -1,7 +1,7 @@
 #pragma once
 
 #include "accelerator/bvh.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten {
     struct QbvhNode {

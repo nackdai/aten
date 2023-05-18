@@ -4,7 +4,7 @@
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 
 inline __device__ bool gatherMaterialInfo(
     aten::MaterialParameter& dst_mtrl,

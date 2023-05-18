@@ -2,7 +2,7 @@
 
 #include "visualizer/MultiPassPostProc.h"
 #include "texture/texture.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten {
     class ATrousDenoiser : public MultiPassPostProc {

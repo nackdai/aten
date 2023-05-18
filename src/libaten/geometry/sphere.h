@@ -5,7 +5,7 @@
 #include "geometry/transformable.h"
 #include "geometry/NoHitableMesh.h"
 #include "geometry/geomparam.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace AT_NAME
 {

@@ -4,7 +4,7 @@
 #include "math/math.h"
 #include "scene/hitable.h"
 #include "scene/scene.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 #include "camera/camera.h"
 #include "misc/color.h"
 #include "misc/tuple.h"

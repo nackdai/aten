@@ -1,7 +1,7 @@
 #pragma once
 
 #include "aten4idaten.h"
-#include "kernel/context.cuh"
+#include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"

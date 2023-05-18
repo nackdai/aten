@@ -5,7 +5,7 @@
 #include "light/light.h"
 #include "material/material.h"
 #include "geometry/vertex.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten {
     class DataCollector {

@@ -4,7 +4,7 @@
 #include "deformable/SkinningVertex.h"
 #include "deformable/Skeleton.h"
 #include "misc/stream.h"
-#include "scene/context.h"
+#include "scene/host_scene_context.h"
 
 namespace aten
 {

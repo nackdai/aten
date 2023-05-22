@@ -31,9 +31,10 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection& isect) const override final;
 
-        static void evaluate_hit_result(
+        template <typename CONTEXT>
+        static AT_DEVICE_API void evaluate_hit_result(
             const aten::ObjectParameter& obj,
-            const aten::context& ctxt,
+            const CONTEXT& ctxt,
             const aten::ray& r,
             const aten::mat4& mtxL2W,
             aten::hitrecord& rec,
@@ -41,7 +42,7 @@ namespace AT_NAME
         {
             const auto& faceParam = ctxt.GetTriangle(isect.triangle_id);
 
-            triangle::evalHitResult(ctxt, faceParam, &rec, faceParam, &isect);
+            AT_NAME::triangle::evalHitResult(ctxt, faceParam, &rec, faceParam, &isect);
 
             auto p0 = ctxt.GetPositionAsVec4(faceParam.idx[0]);
             auto p1 = ctxt.GetPositionAsVec4(faceParam.idx[1]);
@@ -105,10 +106,11 @@ namespace AT_NAME
 
         void build(const aten::context& ctxt);
 
-        static void sample_pos_and_normal(
+        template <typename CONTEXT>
+        static AT_DEVICE_API void sample_pos_and_normal(
             aten::SamplePosNormalPdfResult* result,
             const aten::ObjectParameter& param,
-            const aten::context& ctxt,
+            const CONTEXT& ctxt,
             const aten::mat4& mtxL2W,
             aten::sampler* sampler)
         {

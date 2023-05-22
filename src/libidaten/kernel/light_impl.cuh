@@ -1,5 +1,7 @@
 #include "kernel/idatendefs.cuh"
 
+#include "light/light_impl.h"
+
 AT_CUDA_INLINE __device__ void getTriangleSamplePosNormalArea(
     aten::SamplePosNormalPdfResult* result,
     idaten::context* ctxt,
@@ -236,6 +238,7 @@ AT_CUDA_INLINE __device__ void sampleLight(
     aten::sampler* sampler,
     int32_t lod/*= 0*/)
 {
+#if 0
     switch (light->type) {
     case aten::LightType::Area:
         sampleAreaLight(result, ctxt, light, org, sampler);
@@ -253,4 +256,8 @@ AT_CUDA_INLINE __device__ void sampleLight(
         AT_NAME::SpotLight::sample(light, org, sampler, result);
         break;
     }
+#else
+    AT_NAME::Light::sample(
+        *result, *light, *ctxt, org, normal, sampler, lod);
+#endif
 }

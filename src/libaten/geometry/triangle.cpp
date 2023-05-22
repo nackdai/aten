@@ -78,58 +78,6 @@ namespace AT_NAME
         return isHit;
     }
 
-    void triangle::evalHitResult(
-        const aten::context& ctxt,
-        const aten::TriangleParameter& tri,
-        aten::hitrecord* rec,
-        const aten::TriangleParameter& param,
-        const aten::Intersection* isect)
-    {
-        const auto p0 = ctxt.GetPositionAsVec4(tri.idx[0]);
-        const auto p1 = ctxt.GetPositionAsVec4(tri.idx[1]);
-        const auto p2 = ctxt.GetPositionAsVec4(tri.idx[2]);
-
-        const auto n0 = ctxt.GetNormalAsVec4(tri.idx[0]);
-        const auto n1 = ctxt.GetNormalAsVec4(tri.idx[1]);
-        const auto n2 = ctxt.GetNormalAsVec4(tri.idx[2]);
-
-        const auto u0 = p0.w;
-        const auto v0 = n0.w;
-
-        const auto u1 = p1.w;
-        const auto v1 = n1.w;
-
-        const auto u2 = p2.w;
-        const auto v2 = n2.w;
-
-        // NOTE
-        // http://d.hatena.ne.jp/Zellij/20131207/p1
-
-        real a = isect->a;
-        real b = isect->b;
-        real c = 1 - a - b;
-
-        // 重心座標系(barycentric coordinates).
-        // v0基準.
-        // p = (1 - a - b)*v0 + a*v1 + b*v2
-        rec->p = c * p0 + a * p1 + b * p2;
-        rec->normal = c * n0 + a * n1 + b * n2;
-
-        rec->u = c * u0 + a * u1 + b * u2;
-        rec->v = c * v0 + a * v1 + b * v2;
-
-        if (param.needNormal > 0) {
-            auto e01 = p1 - p0;
-            auto e02 = p2 - p0;
-
-            e01.w = e02.w = real(0);
-
-            rec->normal = normalize(cross(e01, e02));
-        }
-
-        rec->area = param.area;
-    }
-
     void triangle::build(
         const context& ctxt,
         int32_t mtrlid,

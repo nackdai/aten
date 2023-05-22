@@ -1,6 +1,5 @@
 #include "light/ibl.h"
 #include "scene/host_scene_context.h"
-#include "material/sample_texture.h"
 
 // NOTE
 // http://www.cs.virginia.edu/~gfx/courses/2007/ImageSynthesis/assignments/envsample.pdf
@@ -309,46 +308,5 @@ namespace AT_NAME {
         result.nml = aten::vec3();
 
         return result;
-    }
-
-    void ImageBasedLight::sample(
-        aten::LightSampleResult& result,
-        const aten::LightParameter& param,
-        const aten::context& ctxt,
-        const aten::vec3& org,
-        const aten::vec3& nml,
-        aten::sampler* sampler,
-        uint32_t lod)
-    {
-        const auto& n = nml;
-        const auto t = aten::getOrthoVector(n);
-        const auto b = normalize(cross(n, t));
-
-        const real r1 = sampler->nextSample();
-        const real r2 = sampler->nextSample();
-
-        const real sinpsi = aten::sin(2 * AT_MATH_PI * r1);
-        const real cospsi = aten::cos(2 * AT_MATH_PI * r1);
-        const real costheta = aten::pow(1 - r2, 0.5);
-        const real sintheta = aten::sqrt(1 - costheta * costheta);
-
-        result.dir = normalize(t * sintheta * cospsi + b * sintheta * sinpsi + n * costheta);
-
-        const auto uv = AT_NAME::envmap::convertDirectionToUV(result.dir);
-        const auto u = uv.x;
-        const auto v = uv.y;
-
-        // TODO
-        // シーンのAABBを覆う球上に配置されるようにするべき.
-        result.pos = org + real(100000) * result.dir;
-        result.pdf = dot(nml, result.dir) / AT_MATH_PI;
-
-        // TODO
-        // envmapidx is index to array of textures in context.
-        // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-        const auto le = AT_NAME::sampleTexture(param.envmapidx, u, v, aten::vec4(1), lod);
-
-        result.le = aten::vec3(le.x, le.y, le.z);
-        result.finalColor = result.le;
     }
 }

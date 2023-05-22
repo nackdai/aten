@@ -7,10 +7,11 @@
 
 namespace AT_NAME
 {
+    template <typename CONTEXT>
     inline AT_DEVICE_API void evaluate_hit_result(
         aten::hitrecord& rec,
         const aten::ObjectParameter& obj,
-        const AT_NAME::context& ctxt,
+        const CONTEXT& ctxt,
         const aten::ray& r,
         const aten::Intersection& isect)
     {
@@ -63,10 +64,11 @@ namespace AT_NAME
         rec.meshid = isect.meshid;
     }
 
+    template <typename CONTEXT>
     inline AT_DEVICE_API void sample_pos_and_normal(
         aten::SamplePosNormalPdfResult* result,
         const aten::ObjectParameter& obj,
-        const AT_NAME::context& ctxt,
+        const CONTEXT& ctxt,
         aten::sampler* sampler)
     {
         // Get real object. If the object is instance, we need to get real one.
@@ -79,7 +81,7 @@ namespace AT_NAME
         }
 
         if (real_obj.type == aten::ObjectType::Polygon) {
-            PolygonObject::sample_pos_and_normal(
+            AT_NAME::PolygonObject::sample_pos_and_normal(
                 result,
                 real_obj,
                 ctxt,
@@ -87,7 +89,7 @@ namespace AT_NAME
                 sampler);
         }
         else if (real_obj.type == aten::ObjectType::Sphere) {
-            sphere::sample_pos_and_normal(result, real_obj, mtxL2W, sampler);
+            AT_NAME::sphere::sample_pos_and_normal(result, real_obj, mtxL2W, sampler);
         }
         else {
             // TODO

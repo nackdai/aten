@@ -32,6 +32,12 @@ namespace idaten {
 #endif
         }
 
+        __device__ const aten::vec4 GetPositionAsVec4(uint32_t idx) const noexcept
+        {
+            auto v = GetPosition(idx);
+            return aten::vec4(v.x, v.y, v.z, v.w);
+        }
+
         __device__ const float4 GetNormal(uint32_t idx) const noexcept
         {
 #ifdef __CUDA_ARCH__
@@ -39,6 +45,12 @@ namespace idaten {
 #else
             return make_float4(0, 0, 0, 0);
 #endif
+        }
+
+        __device__ const aten::vec4 GetNormalAsVec4(uint32_t idx) const noexcept
+        {
+            auto v = GetNormal(idx);
+            return aten::vec4(v.x, v.y, v.z, v.w);
         }
 
         __device__ const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept

@@ -295,6 +295,9 @@
     <ClInclude Include="..\src\libidaten\kernel\device_scene_context.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\light\light_impl.h">
+      <Filter>aten\light</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

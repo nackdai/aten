@@ -9,10 +9,11 @@
 
 namespace AT_NAME
 {
-    inline void Light::sample(
+    template <typename CONTEXT>
+    inline AT_DEVICE_MTRL_API void Light::sample(
         aten::LightSampleResult& result,
         const aten::LightParameter& param,
-        const aten::context& ctxt,
+        const CONTEXT& ctxt,
         const aten::vec3& org,
         const aten::vec3& nml,
         aten::sampler* sampler,

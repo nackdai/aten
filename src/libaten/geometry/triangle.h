@@ -38,15 +38,62 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection* isect);
 
-        static void evalHitResult(
-            const aten::context& ctxt,
+        template <typename CONTEXT>
+        static AT_DEVICE_API void evalHitResult(
+            const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
             aten::hitrecord* rec,
             const aten::TriangleParameter& param,
-            const aten::Intersection* isect);
+            const aten::Intersection* isect)
+        {
+            const auto p0 = ctxt.GetPositionAsVec4(tri.idx[0]);
+            const auto p1 = ctxt.GetPositionAsVec4(tri.idx[1]);
+            const auto p2 = ctxt.GetPositionAsVec4(tri.idx[2]);
 
-        static void sample_pos_and_normal(
-            const aten::context& ctxt,
+            const auto n0 = ctxt.GetNormalAsVec4(tri.idx[0]);
+            const auto n1 = ctxt.GetNormalAsVec4(tri.idx[1]);
+            const auto n2 = ctxt.GetNormalAsVec4(tri.idx[2]);
+
+            const auto u0 = p0.w;
+            const auto v0 = n0.w;
+
+            const auto u1 = p1.w;
+            const auto v1 = n1.w;
+
+            const auto u2 = p2.w;
+            const auto v2 = n2.w;
+
+            // NOTE
+            // http://d.hatena.ne.jp/Zellij/20131207/p1
+
+            real a = isect->a;
+            real b = isect->b;
+            real c = 1 - a - b;
+
+            // dSÀ•WŒn(barycentric coordinates).
+            // v0Šî€.
+            // p = (1 - a - b)*v0 + a*v1 + b*v2
+            rec->p = c * p0 + a * p1 + b * p2;
+            rec->normal = c * n0 + a * n1 + b * n2;
+
+            rec->u = c * u0 + a * u1 + b * u2;
+            rec->v = c * v0 + a * v1 + b * v2;
+
+            if (param.needNormal > 0) {
+                auto e01 = p1 - p0;
+                auto e02 = p2 - p0;
+
+                e01.w = e02.w = real(0);
+
+                rec->normal = normalize(cross(e01, e02));
+            }
+
+            rec->area = param.area;
+        }
+
+        template <typename CONTEXT>
+        static AT_DEVICE_API void sample_pos_and_normal(
+            const CONTEXT& ctxt,
             const aten::TriangleParameter& tri,
             aten::SamplePosNormalPdfResult* result,
             aten::sampler* sampler)

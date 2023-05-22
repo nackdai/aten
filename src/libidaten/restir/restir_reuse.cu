@@ -3,7 +3,6 @@
 #include "kernel/pt_common.h"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/material.cuh"
-#include "kernel/light.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -11,6 +10,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "light/light_impl.h"
 
 __global__ void computeTemporalReuse(
     idaten::Path paths,
@@ -121,7 +121,7 @@ __global__ void computeTemporalReuse(
 
                 const auto& light = ctxt.lights[light_pos];
 
-                sampleLight(&lightsample, &ctxt, &light, self_info.p, neighbor_normal, &sampler, 0);
+                AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
 
                 aten::vec3 nmlLight = lightsample.nml;
                 aten::vec3 dirToLight = normalize(lightsample.dir);
@@ -305,7 +305,7 @@ __global__ void computeSpatialReuse(
 
                     const auto& light = ctxt.lights[light_pos];
 
-                    sampleLight(&lightsample, &ctxt, &light, self_info.p, neighbor_normal, &sampler, 0);
+                    AT_NAME::Light::sample(lightsample, light, ctxt, self_info.p, neighbor_normal, &sampler, 0);
 
                     aten::vec3 nmlLight = lightsample.nml;
                     aten::vec3 dirToLight = normalize(lightsample.dir);

@@ -4,6 +4,7 @@
 #include "kernel/pt_params.h"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/accelerator.cuh"
+#include "light/light_impl.h"
 
 namespace kernel {
     inline __device__ bool hitShadowRay(
@@ -133,7 +134,7 @@ namespace kernel {
         bool isShadowRayActive = false;
 
         aten::LightSampleResult sampleres;
-        sampleLight(&sampleres, &ctxt, &light, hit_pos, hit_nml, &sampler, bounce);
+        AT_NAME::Light::sample(sampleres, light, ctxt, hit_pos, hit_nml, &sampler, bounce);
 
         const auto& posLight = sampleres.pos;
         const auto& nmlLight = sampleres.nml;

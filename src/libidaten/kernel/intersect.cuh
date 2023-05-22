@@ -65,13 +65,6 @@ __device__ void evalHitResult(
     aten::hitrecord* rec,
     const aten::Intersection* isect);
 
-__device__ void evalHitResultForAreaLight(
-    const idaten::context* ctxt,
-    const aten::ObjectParameter* param,
-    const aten::ray& r,
-    aten::hitrecord* rec,
-    const aten::Intersection* isect);
-
 #ifndef __AT_DEBUG__
 #include "kernel/intersect_impl.cuh"
 #endif

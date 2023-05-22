@@ -2,7 +2,7 @@
 #include "kernel/intersect.cuh"
 #include "kernel/pt_params.h"
 #include "kernel/material.cuh"
-#include "kernel/light.cuh"
+#include "light/light_impl.h"
 
 #include "reservior.h"
 
@@ -37,7 +37,7 @@ inline __device__ int32_t sampleLightWithReservoirRIP(
         const auto& light = ctxt->lights[light_pos];
 
         aten::LightSampleResult lightsample;
-        sampleLight(&lightsample, ctxt, &light, org, normal, sampler, lod);
+        AT_NAME::Light::sample(lightsample, light, *ctxt, org, normal, sampler, lod);
 
         aten::vec3 nmlLight = lightsample.nml;
         aten::vec3 dirToLight = normalize(lightsample.dir);

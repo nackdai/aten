@@ -537,27 +537,3 @@ AT_CUDA_INLINE __device__ void evalHitResult(
     rec->mtrlid = isect->mtrlid;
     rec->meshid = isect->meshid;
 }
-
-AT_CUDA_INLINE __device__ void evalHitResultForAreaLight(
-    const idaten::context* ctxt,
-    const aten::ObjectParameter* param,
-    const aten::ray& r,
-    aten::hitrecord* rec,
-    const aten::Intersection* isect)
-{
-    const aten::ObjectParameter* realShape = (param->object_id >= 0
-        ? &ctxt->GetObject(param->object_id)
-        : param);
-
-    if (realShape->type == aten::ObjectType::Polygon) {
-        evalHitResultTriangle(ctxt, param, r, rec, isect);
-    }
-    else if (realShape->type == aten::ObjectType::Sphere) {
-        AT_NAME::sphere::evalHitResult(param, r, rec, isect);
-    }
-    else {
-        // TODO
-    }
-
-    rec->mtrlid = isect->mtrlid;
-}

@@ -89,9 +89,6 @@
     <ClInclude Include="..\src\libaten\scene\scene.h">
       <Filter>aten\scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\light.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\idaten_namespace.h" />
     <ClInclude Include="..\src\libidaten\aten4idaten.h" />
     <ClInclude Include="..\src\libaten\math\aabb.h">
@@ -125,9 +122,6 @@
       <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\light_impl.cuh">
       <Filter>kernel</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\envmap.h">
@@ -397,9 +391,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\src\libidaten\kernel\light.cu">
-      <Filter>kernel</Filter>
-    </CudaCompile>
     <CudaCompile Include="..\src\libaten\material\beckman.cpp">
       <Filter>aten\material</Filter>
     </CudaCompile>

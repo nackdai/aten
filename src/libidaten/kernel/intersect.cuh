@@ -5,12 +5,6 @@
 #include "cuda/helper_math.h"
 #include "aten4idaten.h"
 
-__device__ bool hitSphere(
-    const aten::ObjectParameter* shape,
-    const aten::ray& r,
-    float t_min, float t_max,
-    aten::Intersection* isect);
-
 __device__ bool hitTriangle(
     const aten::TriangleParameter* prim,
     const idaten::context* ctxt,
@@ -50,20 +44,6 @@ __device__ int32_t hit4AABBWith1Ray(
     const float4& bminy, const float4& bmaxy,
     const float4& bminz, const float4& bmaxz,
     float t_min, float t_max);
-
-__device__ void evalHitResultTriangle(
-    const idaten::context* ctxt,
-    const aten::ObjectParameter* param,
-    const aten::ray& r,
-    aten::hitrecord* rec,
-    const aten::Intersection* isect);
-
-__device__ void evalHitResult(
-    const idaten::context* ctxt,
-    const aten::ObjectParameter* param,
-    const aten::ray& r,
-    aten::hitrecord* rec,
-    const aten::Intersection* isect);
 
 #ifndef __AT_DEBUG__
 #include "kernel/intersect_impl.cuh"

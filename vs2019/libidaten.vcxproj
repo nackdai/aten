@@ -30,7 +30,10 @@
     <ClInclude Include="..\src\libaten\camera\camera.h" />
     <ClInclude Include="..\src\libaten\camera\pinhole.h" />
     <ClInclude Include="..\src\libaten\defs.h" />
+    <ClInclude Include="..\src\libaten\geometry\EvaluateHitResult.h" />
+    <ClInclude Include="..\src\libaten\geometry\PolygonObject.h" />
     <ClInclude Include="..\src\libaten\geometry\sphere.h" />
+    <ClInclude Include="..\src\libaten\geometry\triangle.h" />
     <ClInclude Include="..\src\libaten\light\arealight.h" />
     <ClInclude Include="..\src\libaten\light\directionallight.h" />
     <ClInclude Include="..\src\libaten\light\ibl.h" />

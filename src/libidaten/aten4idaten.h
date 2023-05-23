@@ -51,6 +51,7 @@
 
 #include "geometry/geomparam.h"
 #include "geometry/sphere.h"
+#include "geometry/EvaluateHitResult.h"
 
 #include "renderer/aov.h"
 #include "renderer/envmap.h"

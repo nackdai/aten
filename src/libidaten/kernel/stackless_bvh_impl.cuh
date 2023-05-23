@@ -182,7 +182,7 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
                 // Only sphere...
                 //isHit = intersectShape(s, nullptr, ctxt, r, t_min, t_max, &recTmp, &recOptTmp);
                 isectTmp.t = AT_MATH_INF;
-                isHit = hitSphere(s, r, t_min, t_max, &isectTmp);
+                isHit = AT_NAME::sphere::hit(s, r, t_min, t_max, &isectTmp);
                 isectTmp.mtrlid = s->sphere.mtrl_id;
             }
 

@@ -114,8 +114,8 @@ namespace npr_pt {
 
         const auto& isect = isects[idx];
 
-        auto obj = &ctxt.shapes[isect.objid];
-        evalHitResult(&ctxt, obj, query_ray, &rec, &isect);
+        const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+        AT_NAME::evaluate_hit_result(rec, obj, ctxt, query_ray, isect);
 
         constexpr real ThresholdAlbedo = 0.1f;
         constexpr real ThresholdNormal = 0.1f;
@@ -172,8 +172,8 @@ namespace npr_pt {
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
 #if 1
             if (is_hit) {
-                auto obj = &ctxt.shapes[isect_sample_ray.objid];
-                evalHitResult(&ctxt, obj, sample_ray, &hrec_sample, &isect_sample_ray);
+                const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect_sample_ray.objid));
+                AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, sample_ray, isect_sample_ray);
 
                 // If sample ray hit with the different mesh from query ray one, this sample ray won't bounce in next loop.
                 sample_ray_info.descs[i].is_terminated = isect_sample_ray.meshid != isect.meshid;
@@ -377,8 +377,8 @@ namespace npr_pt {
 
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
             if (is_hit) {
-                auto obj = &ctxt.shapes[isect_sample_ray.objid];
-                evalHitResult(&ctxt, obj, sample_ray, &hrec_sample, &isect_sample_ray);
+                const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect_sample_ray.objid));
+                AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, sample_ray, isect_sample_ray);
 
                 const auto distance_sample_pos_on_query_ray = AT_NAME::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
                     hrec_sample.p, query_ray);

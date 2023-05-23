@@ -292,6 +292,15 @@
     <ClInclude Include="..\src\libaten\light\light_impl.h">
       <Filter>aten\light</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\EvaluateHitResult.h">
+      <Filter>aten\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\PolygonObject.h">
+      <Filter>aten\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\geometry\triangle.h">
+      <Filter>aten\geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

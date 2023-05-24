@@ -21,8 +21,8 @@ namespace aten
         real& overlap)
     {
         aabb delta = aabb(
-            aten::max(box0.minPos(), box1.minPos()),
-            aten::min(box0.maxPos(), box1.maxPos()));
+            aten::vmax(box0.minPos(), box1.minPos()),
+            aten::vmin(box0.maxPos(), box1.maxPos()));
 
         if (delta.isValid()) {
             overlap = delta.computeSurfaceArea();

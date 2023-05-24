@@ -238,99 +238,23 @@ AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
     return ret;
 }
 
-inline __device__ float4 vmax(float4 a, float4 b)
-{
-    return make_float4(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z), max(a.w, b.w));
-}
-
-inline __device__ float4 vmin(float4 a, float4 b)
-{
-    return make_float4(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z), min(a.w, b.w));
-}
-
-inline __device__ float max3(float a, float b, float c)
-{
-    return max(max(a, b), c);
-}
-
-inline __device__ float min3(float a, float b, float c)
-{
-    return min(min(a, b), c);
-}
-
 AT_CUDA_INLINE __device__ bool hitAABB(
-    aten::vec3 org,
-    aten::vec3 dir,
-    float4 boxmin, float4 boxmax,
+    const aten::ray& r,
+    float3 boxmin, float3 boxmax,
     real t_min, real t_max,
     real* t_result)
 {
-    float4 invdir = make_float4(1.0f / (dir.x + 1e-6f), 1.0f / (dir.y + 1e-6f), 1.0f / (dir.z + 1e-6f), 1.0f);
-
-    float4 oxinvdir = make_float4(org.x, org.y, org.z, 1.0f);
-    oxinvdir = -oxinvdir * invdir;
-
-    const float4 f = boxmax * invdir + oxinvdir;
-    const float4 n = boxmin * invdir + oxinvdir;
-
-    const float4 tmax = vmax(f, n);
-    const float4 tmin = vmin(f, n);
-
-    const float t1 = min(min3(tmax.x, tmax.y, tmax.z), t_max);
-    const float t0 = max(max3(tmin.x, tmin.y, tmin.z), t_min);
-
-    *t_result = t0;
-
-    return t0 <= t1;
+    return aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, t_result);
 }
 
 AT_CUDA_INLINE __device__ bool hitAABB(
-    aten::vec3 org,
-    aten::vec3 dir,
-    float4 boxmin, float4 boxmax,
+    const aten::ray& r,
+    float3 boxmin, float3 boxmax,
     real t_min, real t_max,
     real* t_result,
     aten::vec3* nml)
 {
-    auto isHit = hitAABB(org, dir, boxmin, boxmax, t_min, t_max, t_result);
-
-    // NOTE
-    // https://www.gamedev.net/forums/topic/551816-finding-the-aabb-surface-normal-from-an-intersection-point-on-aabb/
-
-    auto point = org + *t_result * dir;
-    auto center = real(0.5) * (boxmax + boxmin);
-    auto extent = real(0.5) * (boxmax - boxmin);
-
-    point.x -= center.x;
-    point.y -= center.y;
-    point.z -= center.z;
-
-    aten::vec3 sign(
-        point.x < real(0) ? real(-1) : real(1),
-        point.y < real(0) ? real(-1) : real(1),
-        point.z < real(0) ? real(-1) : real(1));
-
-    real minDist = AT_MATH_INF;
-
-    real dist = aten::abs(extent.x - aten::abs(point.x));
-    if (dist < minDist) {
-        minDist = dist;
-        *nml = sign.x * aten::vec3(1, 0, 0);
-    }
-
-    dist = aten::abs(extent.y - aten::abs(point.y));
-    if (dist < minDist) {
-        minDist = dist;
-        *nml = sign.y * aten::vec3(0, 1, 0);
-    }
-
-    dist = aten::abs(extent.z - aten::abs(point.z));
-    if (dist < minDist) {
-        minDist = dist;
-        *nml = sign.z * aten::vec3(0, 0, 1);
-    }
-
-    return isHit;
+    return aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, *t_result, *nml);
 }
 
 
@@ -363,17 +287,17 @@ AT_CUDA_INLINE __device__ int32_t hit4AABBWith1Ray(
     auto fz = bmaxz * invdz + oz;
     auto nz = bminz * invdz + oz;
 
-    auto tmaxX = vmax(fx, nx);
-    auto tminX = vmin(fx, nx);
+    auto tmaxX = aten::vmax(fx, nx);
+    auto tminX = aten::vmin(fx, nx);
 
-    auto tmaxY = vmax(fy, ny);
-    auto tminY = vmin(fy, ny);
+    auto tmaxY = aten::vmax(fy, ny);
+    auto tminY = aten::vmin(fy, ny);
 
-    auto tmaxZ = vmax(fz, nz);
-    auto tminZ = vmin(fz, nz);
+    auto tmaxZ = aten::vmax(fz, nz);
+    auto tminZ = aten::vmin(fz, nz);
 
-    auto t1 = vmin(vmin(tmaxX, tmaxY), vmin(tmaxZ, make_float4(t_max)));
-    auto t0 = vmax(vmax(tminX, tminY), vmax(tminZ, make_float4(t_min)));
+    auto t1 = aten::vmin(aten::vmin(tmaxX, tmaxY), aten::vmin(tmaxZ, make_float4(t_max)));
+    auto t0 = aten::vmax(aten::vmax(tminX, tminY), aten::vmax(tminZ, make_float4(t_min)));
 
     union isHit {
         struct {

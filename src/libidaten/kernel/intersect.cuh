@@ -22,16 +22,14 @@ __device__ int32_t hit4Triangles1Ray(
     float4 e1x, float4 e1y, float4 e1z);
 
 __device__ bool hitAABB(
-    aten::vec3 org,
-    aten::vec3 dir,
-    float4 boxmin, float4 boxmax,
+    const aten::ray& r,
+    float3 boxmin, float3 boxmax,
     real t_min, real t_max,
     real* t_result);
 
 __device__ bool hitAABB(
-    aten::vec3 org,
-    aten::vec3 dir,
-    float4 boxmin, float4 boxmax,
+    const aten::ray& r,
+    float3 boxmin, float3 boxmax,
     real t_min, real t_max,
     real* t_result,
     aten::vec3* nml);

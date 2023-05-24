@@ -20,10 +20,10 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
 
     float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
-    float4 boxmin_0;
-    float4 boxmax_0;
-    float4 boxmin_1;
-    float4 boxmax_1;
+    float3 boxmin_0;
+    float3 boxmax_0;
+    float3 boxmin_1;
+    float3 boxmax_1;
 
     isect->t = t_max;
 
@@ -34,11 +34,11 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
         node3 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 3);    // xyz : boxmax_1, w: child_1
         attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 4);    // x : object_id, y : primid, z : exid, w : meshid
 
-        boxmin_0 = make_float4(node0.x, node0.y, node0.z, 1.0f);
-        boxmax_0 = make_float4(node1.x, node1.y, node1.z, 1.0f);
+        boxmin_0 = make_float3(node0.x, node0.y, node0.z);
+        boxmax_0 = make_float3(node1.x, node1.y, node1.z);
 
-        boxmin_1 = make_float4(node2.x, node2.y, node2.z, 1.0f);
-        boxmax_1 = make_float4(node3.x, node3.y, node3.z, 1.0f);
+        boxmin_1 = make_float3(node2.x, node2.y, node2.z);
+        boxmax_1 = make_float3(node3.x, node3.y, node3.z);
 
         bool isHit = false;
 
@@ -75,8 +75,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
             float t[2];
             bool hit[2];
 
-            hit[0] = hitAABB(r.org, r.dir, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
-            hit[1] = hitAABB(r.org, r.dir, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
+            hit[0] = hitAABB(r, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
+            hit[1] = hitAABB(r, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
 
             if (hit[0] || hit[1]) {
                 bitstack = bitstack << 1;
@@ -206,8 +206,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
             float t[2];
             bool hit[2];
 
-            hit[0] = hitAABB(r.org, r.dir, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
-            hit[1] = hitAABB(r.org, r.dir, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
+            hit[0] = hitAABB(r, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
+            hit[1] = hitAABB(r, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
 
             if (hit[0] || hit[1]) {
                 bitstack = bitstack << 1;

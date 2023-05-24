@@ -427,17 +427,17 @@ namespace aten
         auto fz = bmaxz * invdz + oz;
         auto nz = bminz * invdz + oz;
 
-        auto tmaxX = max(fx, nx);
-        auto tminX = min(fx, nx);
+        auto tmaxX = vmax(fx, nx);
+        auto tminX = vmin(fx, nx);
 
-        auto tmaxY = max(fy, ny);
-        auto tminY = min(fy, ny);
+        auto tmaxY = vmax(fy, ny);
+        auto tminY = vmin(fy, ny);
 
-        auto tmaxZ = max(fz, nz);
-        auto tminZ = min(fz, nz);
+        auto tmaxZ = vmax(fz, nz);
+        auto tminZ = vmin(fz, nz);
 
-        auto t1 = min(min(tmaxX, tmaxY), min(tmaxZ, t_max));
-        auto t0 = max(max(tminX, tminY), max(tminZ, t_min));
+        auto t1 = vmin(vmin(tmaxX, tmaxY), vmin(tmaxZ, aten::vec4(t_max)));
+        auto t0 = vmax(vmax(tminX, tminY), vmax(tminZ, aten::vec4(t_min)));
 
         int32_t ret = cmpLEQ(t0, t1);
 

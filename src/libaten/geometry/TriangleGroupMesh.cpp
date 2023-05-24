@@ -31,8 +31,8 @@ namespace AT_NAME
 
             const auto& faabb = f->getBoundingbox();
 
-            boxmin = aten::min(faabb.minPos(), boxmin);
-            boxmax = aten::max(faabb.maxPos(), boxmax);
+            boxmin = aten::vmin(faabb.minPos(), boxmin);
+            boxmax = aten::vmax(faabb.maxPos(), boxmax);
         }
 
         m_aabb.init(boxmin, boxmax);

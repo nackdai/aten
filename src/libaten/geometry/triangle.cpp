@@ -119,8 +119,8 @@ namespace AT_NAME
         const auto& v1 = ctxt.getVertex(param_.idx[1]);
         const auto& v2 = ctxt.getVertex(param_.idx[2]);
 
-        auto vmin = aten::min(aten::min(v0.pos, v1.pos), v2.pos);
-        auto vmax = aten::max(aten::max(v0.pos, v1.pos), v2.pos);
+        auto vmin = aten::vmin(aten::vmin(v0.pos, v1.pos), v2.pos);
+        auto vmax = aten::vmax(aten::vmax(v0.pos, v1.pos), v2.pos);
 
         aabb ret(vmin, vmax);
 

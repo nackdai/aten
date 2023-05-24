@@ -132,8 +132,8 @@ __global__ void getMinMax(
     for (uint32_t s = blockDim.x / 2; s > 0; s >>= 1) {
         //if (tid < s && tid + s < num) {
         if (tid < s) {
-            minPos[tid] = aten::min(minPos[tid], minPos[tid + s]);
-            maxPos[tid] = aten::max(maxPos[tid], maxPos[tid + s]);
+            minPos[tid] = aten::vmin(minPos[tid], minPos[tid + s]);
+            maxPos[tid] = aten::vmax(maxPos[tid], maxPos[tid + s]);
         }
         __syncthreads();
     }

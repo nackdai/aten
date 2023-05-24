@@ -16,8 +16,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
     float4 node1;    // xyz: boxmax, z: hit
     float4 attrib;   // x:object_id, y:primid, z:exid, w:meshid
 
-    float4 boxmin;
-    float4 boxmax;
+    float3 boxmin;
+    float3 boxmax;
 
     float t = AT_MATH_INF;
 
@@ -28,8 +28,8 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
         node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmin, z: hit
         attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);    // x : object_id, y : primid, z : exid, w : meshid
 
-        boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
-        boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
+        boxmin = make_float3(node0.x, node0.y, node0.z);
+        boxmax = make_float3(node1.x, node1.y, node1.z);
 
         bool isHit = false;
 
@@ -65,7 +65,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
             }
         }
         else {
-            isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
+            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -188,7 +188,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             }
         }
         else {
-            isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t);
+            isHit = hitAABB(transformedRay, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -211,7 +211,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {    // exid
-                if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
+                if (hitAABB(r, boxmin, boxmax, t_min, t_max, &t)) {
                     aten::ray transformedRay;
 
                     if (s->mtx_id >= 0) {
@@ -256,7 +256,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
         }
         else {
             //isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-            isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
+            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {

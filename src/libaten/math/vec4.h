@@ -44,6 +44,11 @@ namespace aten {
             v = _v;
             w = _w;
         }
+        AT_DEVICE_API vec4(const vec3& _v)
+        {
+            v = _v;
+            w = real(0);
+        }
 
         inline AT_DEVICE_API operator vec3() const
         {
@@ -265,26 +270,6 @@ namespace aten {
         return ret;
     }
 
-    inline AT_DEVICE_API vec4 min(const vec4& a, const vec4& b)
-    {
-        vec4 ret(
-            aten::cmpMin(a.x, b.x),
-            aten::cmpMin(a.y, b.y),
-            aten::cmpMin(a.z, b.z),
-            aten::cmpMin(a.w, b.w));
-        return ret;
-    }
-
-    inline AT_DEVICE_API vec4 max(const vec4& a, const vec4& b)
-    {
-        vec4 ret(
-            aten::cmpMax(a.x, b.x),
-            aten::cmpMax(a.y, b.y),
-            aten::cmpMax(a.z, b.z),
-            aten::cmpMax(a.w, b.w));
-        return ret;
-    }
-
     union _vec4_cmp_res {
         struct {
             uint8_t _0 : 1;
@@ -323,4 +308,44 @@ namespace aten {
 
         return res.f;
     }
+
+    template <typename T>
+    inline AT_DEVICE_API T vmax(const T& a, const T& b)
+    {
+        return T(aten::cmpMax(a.x, b.x), aten::cmpMax(a.y, b.y), aten::cmpMax(a.z, b.z), aten::cmpMax(a.w, b.w));
+    }
+
+#ifdef __CUDACC__
+    template <>
+    inline AT_DEVICE_API float3 vmax(const float3& a, const float3& b)
+    {
+        return make_float3(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z));
+    }
+
+    template <>
+    inline AT_DEVICE_API float4 vmax(const float4& a, const float4& b)
+    {
+        return make_float4(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z), max(a.w, b.w));
+    }
+#endif
+
+    template <typename T>
+    inline AT_DEVICE_API T vmin(const T& a, const T& b)
+    {
+        return T(aten::cmpMin(a.x, b.x), aten::cmpMin(a.y, b.y), aten::cmpMin(a.z, b.z), aten::cmpMin(a.w, b.w));
+    }
+
+#ifdef __CUDACC__
+    template <>
+    inline AT_DEVICE_API float3 vmin(const float3& a, const float3& b)
+    {
+        return make_float3(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z));
+    }
+
+    template <>
+    inline AT_DEVICE_API float4 vmin(const float4& a, const float4& b)
+    {
+        return make_float4(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z), min(a.w, b.w));
+    }
+#endif
 }

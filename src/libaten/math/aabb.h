@@ -56,90 +56,37 @@ namespace aten {
                 t_result);
         }
 
+        template <typename T>
         static AT_DEVICE_API bool hit(
             const ray& r,
-            const aten::vec3& _min, const aten::vec3& _max,
+            const T& _min, const T& _max,
             real t_min, real t_max,
             real* t_result = nullptr)
         {
-#if 0
-            bool isHit = false;
+            aten::vec3 invdir(real(1) / (r.dir + aten::vec3(real(1e-6))));
 
-            for (uint32_t i = 0; i < 3; i++) {
-                if (_min[i] == _max[i]) {
-                    continue;
-                }
-
-#if 0
-                if (r.dir[i] == 0.0f) {
-                    continue;
-                }
-
-                auto inv = real(1) / r.dir[i];
-#else
-                auto inv = real(1) / (r.dir[i] + real(1e-6));
-#endif
-
-                // NOTE
-                // ray : r = p + t * v
-                // plane of AABB : x(t) = p(x) + t * v(x)
-                //  t = (p(x) - x(t)) / v(x)
-                // x軸の面は手前と奥があるので、それぞれの t を計算.
-                // t がx軸の面の手前と奥の x の範囲内であれば、レイがAABBを通る.
-                // これをxyz軸について計算する.
-
-                auto t0 = (_min[i] - r.org[i]) * inv;
-                auto t1 = (_max[i] - r.org[i]) * inv;
-
-                if (inv < real(0)) {
-#if 0
-                    std::swap(t0, t1);
-#else
-                    real tmp = t0;
-                    t0 = t1;
-                    t1 = tmp;
-#endif
-                }
-
-                t_min = (t0 > t_min ? t0 : t_min);
-                t_max = (t1 < t_max ? t1 : t_max);
-
-                if (t_max <= t_min) {
-                    return false;
-                }
-
-                if (t_result) {
-                    *t_result = t0;
-                }
-
-                isHit = true;
-            }
-
-            return isHit;
-#else
-            aten::vec3 invdir = real(1) / (r.dir + aten::vec3(real(1e-6)));
-            aten::vec3 oxinvdir = -r.org * invdir;
+            auto oxinvdir = -r.org * invdir;
 
             const auto f = _max * invdir + oxinvdir;
             const auto n = _min * invdir + oxinvdir;
 
-            const auto tmax = max(f, n);
-            const auto tmin = min(f, n);
+            const auto tmax = aten::vmax(f, n);
+            const auto tmin = aten::vmin(f, n);
 
-            const auto t1 = aten::cmpMin(aten::cmpMin(aten::cmpMin(tmax.x, tmax.y), tmax.z), t_max);
-            const auto t0 = aten::cmpMax(aten::cmpMax(aten::cmpMax(tmin.x, tmin.y), tmin.z), t_min);
+            const auto t1 = aten::cmpMin(aten::min_from_vec3(tmax), t_max);
+            const auto t0 = aten::cmpMax(aten::max_from_vec3(tmin), t_min);
 
             if (t_result) {
                 *t_result = t0;
             }
 
             return t0 <= t1;
-#endif
         }
 
+        template <typename T>
         static AT_DEVICE_API bool hit(
             const ray& r,
-            const aten::vec3& _min, const aten::vec3& _max,
+            const T& _min, const T& _max,
             real t_min, real t_max,
             real& t_result,
             aten::vec3& nml)
@@ -153,7 +100,11 @@ namespace aten {
             auto center = real(0.5) * (_min + _max);
             auto extent = real(0.5) * (_max - _min);
 
-            point -= center;
+            // NOTE:
+            // I can't overload glm::vec3::operator -=. So, extract -= to each element subtraction.
+            point.x -= center.x;
+            point.y -= center.y;
+            point.z -= center.z;
 
             aten::vec3 sign(
                 point.x < real(0) ? real(-1) : real(1),
@@ -162,7 +113,7 @@ namespace aten {
 
             real minDist = AT_MATH_INF;
 
-            real dist = aten::abs(extent.x - aten::abs(point.x));
+            auto dist = aten::abs(extent.x - aten::abs(point.x));
             if (dist < minDist) {
                 minDist = dist;
                 nml = sign.x * aten::vec3(1, 0, 0);
@@ -293,8 +244,8 @@ namespace aten {
 
         void expand(const vec3& v)
         {
-            vec3 _min = aten::min(m_min, v);
-            vec3 _max = aten::max(m_max, v);
+            vec3 _min = aten::vmin(m_min, v);
+            vec3 _max = aten::vmax(m_max, v);
 
             m_min = _min;
             m_max = _max;

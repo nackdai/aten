@@ -145,7 +145,7 @@ namespace aten {
 
 #ifdef __CUDACC__
     template <typename T>
-    inline AT_DEVICE_API T cmpMax(T a, T b)
+    inline AT_DEVICE_API auto cmpMax(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return (a > b ? a : b);
     }
@@ -163,7 +163,7 @@ namespace aten {
     }
 #else
     template <typename T>
-    inline AT_DEVICE_API T cmpMax(T a, T b)
+    inline AT_DEVICE_API auto cmpMax(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return std::max<T>(a, b);
     }
@@ -171,7 +171,7 @@ namespace aten {
 
 #ifdef __CUDACC__
     template <typename T>
-    inline AT_DEVICE_API T cmpMin(T a, T b)
+    inline AT_DEVICE_API auto cmpMin(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return (a < b ? a : b);
     }
@@ -189,12 +189,11 @@ namespace aten {
     }
 #else
     template <typename T>
-    inline AT_DEVICE_API T cmpMin(T a, T b)
+    inline AT_DEVICE_API auto cmpMin(T a, T b) -> typename std::enable_if_t<std::is_fundamental_v<T>, T>
     {
         return std::min<T>(a, b);
     }
 #endif
-
 
     template <typename _T>
     inline AT_DEVICE_API _T clamp(_T f, _T a, _T b)

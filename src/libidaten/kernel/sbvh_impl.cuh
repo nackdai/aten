@@ -16,8 +16,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
     float4 node1;    // xyz: boxmax, z: hit
     float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
-    float4 boxmin;
-    float4 boxmax;
+    float3 boxmin;
+    float3 boxmax;
 
     float t = AT_MATH_INF;
 
@@ -28,8 +28,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
         node1 = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmax, z: miss
         attrib = tex1Dfetch<float4>(nodes, aten::GPUBvhNodeSize * nodeid + 2);    // x : parent, y : triid, z : padding, w : padding
 
-        boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
-        boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
+        boxmin = make_float3(node0.x, node0.y, node0.z);
+        boxmax = make_float3(node1.x, node1.y, node1.z);
 
         bool isHit = false;
 
@@ -65,7 +65,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
             }
         }
         else {
-            isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
+            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -101,8 +101,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
     float4 node1;    // xyz: boxmax, z: hit
     float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
-    float4 boxmin;
-    float4 boxmax;
+    float3 boxmin;
+    float3 boxmax;
 
     real t = AT_MATH_INF;
 
@@ -121,8 +121,8 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
         node1 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmin, z: hit
         attrib = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 2);    // x : object_id, y : primid, z : exid, w : meshid
 
-        boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
-        boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
+        boxmin = make_float3(node0.x, node0.y, node0.z);
+        boxmax = make_float3(node1.x, node1.y, node1.z);
 
         bool isHit = false;
 
@@ -200,7 +200,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
             if (voxeldepth == 3) {
                 aten::vec3 nml;
-                isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t, &nml);
+                isHit = hitAABB(transformedRay, boxmin, boxmax, t_min, t_max, &t, &nml);
 
                 bool isIntersect = (Type == idaten::IntersectType::Any
                     ? isHit
@@ -241,7 +241,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 #endif
         else {
             //isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-            isHit = hitAABB(transformedRay.org, transformedRay.dir, boxmin, boxmax, t_min, t_max, &t);
+            isHit = hitAABB(transformedRay, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -267,7 +267,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
             if (attrib.z >= 0) {    // exid
                                     //if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
-                if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
+                if (hitAABB(r, boxmin, boxmax, t_min, t_max, &t)) {
                     if (s->mtx_id >= 0) {
                         const auto& mtxW2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
                         transformedRay.dir = mtxW2L.applyXYZ(r.dir);
@@ -310,7 +310,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
     }
         else {
             //isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-            isHit = hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t);
+            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {

@@ -232,22 +232,20 @@ namespace aten {
         return ret;
     }
 
-    inline AT_DEVICE_API vec3 min(const vec3& a, const vec3& b)
+    inline AT_DEVICE_API vec3 vmin(const vec3& a, const vec3& b)
     {
-        vec3 ret(
+        return vec3(
             aten::cmpMin(a.x, b.x),
             aten::cmpMin(a.y, b.y),
             aten::cmpMin(a.z, b.z));
-        return ret;
     }
 
-    inline AT_DEVICE_API vec3 max(const vec3& a, const vec3& b)
+    inline AT_DEVICE_API vec3 vmax(const vec3& a, const vec3& b)
     {
-        vec3 ret(
+        return vec3(
             aten::cmpMax(a.x, b.x),
             aten::cmpMax(a.y, b.y),
             aten::cmpMax(a.z, b.z));
-        return ret;
     }
 
     inline AT_DEVICE_API vec3 pow(const vec3& v, real a)
@@ -338,6 +336,46 @@ namespace aten {
 
         return b0 || b1 || b2;
     }
+
+    template <typename T>
+    inline AT_DEVICE_API float max_from_vec3(const T& v)
+    {
+        return std::max(std::max(v.x, v.y), v.z);
+    }
+
+#ifdef __CUDACC__
+    template <>
+    inline AT_DEVICE_API float max_from_vec3(const float3& v)
+    {
+        return max(max(v.x, v.y), v.z);
+    }
+#endif
+
+    template <typename T>
+    inline AT_DEVICE_API float min_from_vec3(const T& v)
+    {
+        return std::min(std::min(v.x, v.y), v.z);
+    }
+
+#ifdef __CUDACC__
+    template <>
+    inline AT_DEVICE_API float min_from_vec3(const float3& v)
+    {
+        return min(min(v.x, v.y), v.z);
+    }
+#endif
+
+#ifdef __CUDACC__
+    inline AT_DEVICE_API vec3 operator*(const vec3& a, const float3& b)
+    {
+        return aten::vec3(a.x * b.x, a.y * b.y, a.z * b.z);
+    }
+
+    inline AT_DEVICE_API vec3 operator*(const float3& a, const vec3& b)
+    {
+        return aten::vec3(a.x * b.x, a.y * b.y, a.z * b.z);
+    }
+#endif
 }
 
 #ifdef __NVCC__

@@ -65,7 +65,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVHTriangles(
             }
         }
         else {
-            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
+            isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -200,7 +200,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
             if (voxeldepth == 3) {
                 aten::vec3 nml;
-                isHit = hitAABB(transformedRay, boxmin, boxmax, t_min, t_max, &t, &nml);
+                isHit = aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max, t, nml);
 
                 bool isIntersect = (Type == idaten::IntersectType::Any
                     ? isHit
@@ -240,8 +240,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
         }
 #endif
         else {
-            //isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-            isHit = hitAABB(transformedRay, boxmin, boxmax, t_min, t_max, &t);
+            isHit = aten::aabb::hit<float3>(transformedRay, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -267,7 +266,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
 
             if (attrib.z >= 0) {    // exid
                                     //if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
-                if (hitAABB(r, boxmin, boxmax, t_min, t_max, &t)) {
+                if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, t)) {
                     if (s->mtx_id >= 0) {
                         const auto& mtxW2L = ctxt->GetMatrix(s->mtx_id * 2 + 1);
                         transformedRay.dir = mtxW2L.applyXYZ(r.dir);
@@ -309,8 +308,7 @@ AT_CUDA_INLINE __device__ bool intersectSBVH(
             }
     }
         else {
-            //isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
+            isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {

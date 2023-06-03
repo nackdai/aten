@@ -75,8 +75,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVHTriangles(
             float t[2];
             bool hit[2];
 
-            hit[0] = hitAABB(r, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
-            hit[1] = hitAABB(r, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
+            hit[0] = aten::aabb::hit(r, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
+            hit[1] = aten::aabb::hit(r, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
 
             if (hit[0] || hit[1]) {
                 bitstack = bitstack << 1;
@@ -206,8 +206,8 @@ AT_CUDA_INLINE __device__ bool intersectStacklessBVH(
             float t[2];
             bool hit[2];
 
-            hit[0] = hitAABB(r, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
-            hit[1] = hitAABB(r, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
+            hit[0] = aten::aabb::hit(r, boxmin_0, boxmax_0, t_min, t_max, &t[0]);
+            hit[1] = aten::aabb::hit(r, boxmin_1, boxmax_1, t_min, t_max, &t[1]);
 
             if (hit[0] || hit[1]) {
                 bitstack = bitstack << 1;

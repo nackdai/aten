@@ -238,26 +238,6 @@ AT_CUDA_INLINE __device__ int32_t hit4Triangles1Ray(
     return ret;
 }
 
-AT_CUDA_INLINE __device__ bool hitAABB(
-    const aten::ray& r,
-    float3 boxmin, float3 boxmax,
-    real t_min, real t_max,
-    real* t_result)
-{
-    return aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, t_result);
-}
-
-AT_CUDA_INLINE __device__ bool hitAABB(
-    const aten::ray& r,
-    float3 boxmin, float3 boxmax,
-    real t_min, real t_max,
-    real* t_result,
-    aten::vec3* nml)
-{
-    return aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, *t_result, *nml);
-}
-
-
 AT_CUDA_INLINE __device__ int32_t hit4AABBWith1Ray(
     aten::vec4* result,
     const aten::vec3& org,

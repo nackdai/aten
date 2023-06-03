@@ -65,7 +65,7 @@ AT_CUDA_INLINE __device__ bool intersectBVHTriangles(
             }
         }
         else {
-            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
+            isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -125,7 +125,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
         if (attrib.x >= 0 || attrib.y >= 0) {
             // Leaf.
             if (attrib.z >= 0) {    // exid
-                //if (hitAABB(r.org, r.dir, boxmin, boxmax, t_min, t_max, &t)) {
+                //if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
                 {
                     const auto* s = &ctxt->GetObject(static_cast<uint32_t>(attrib.x));
 
@@ -188,7 +188,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             }
         }
         else {
-            isHit = hitAABB(transformedRay, boxmin, boxmax, t_min, t_max, &t);
+            isHit = aten::aabb::hit(transformedRay, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {
@@ -211,7 +211,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             const auto* s = &ctxt->shapes[(int32_t)attrib.x];
 
             if (attrib.z >= 0) {    // exid
-                if (hitAABB(r, boxmin, boxmax, t_min, t_max, &t)) {
+                if (aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t)) {
                     aten::ray transformedRay;
 
                     if (s->mtx_id >= 0) {
@@ -255,8 +255,7 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
             }
         }
         else {
-            //isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
-            isHit = hitAABB(r, boxmin, boxmax, t_min, t_max, &t);
+            isHit = aten::aabb::hit(r, boxmin, boxmax, t_min, t_max, &t);
         }
 
         if (isHit) {

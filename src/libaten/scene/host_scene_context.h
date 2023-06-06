@@ -33,13 +33,18 @@ namespace aten
         const aten::vec4 GetPosition(uint32_t idx) const noexcept
         {
             const auto& v = getVertex(idx);
-            aten::vec4 res(v.pos.x, v.pos.y, v.pos.z, v.uv.x);
-            return res;
+            return aten::vec4(v.pos.x, v.pos.y, v.pos.z, v.uv.x);
         }
 
         const aten::vec4 GetPositionAsVec4(uint32_t idx) const noexcept
         {
             return GetPosition(idx);
+        }
+
+        const aten::vec3 GetPositionAsVec3(uint32_t idx) const noexcept
+        {
+            const auto& v = getVertex(idx);
+            return aten::vec3(v.pos.x, v.pos.y, v.pos.z);
         }
 
         const aten::vec4 GetNormal(uint32_t idx) const noexcept
@@ -52,6 +57,12 @@ namespace aten
         const aten::vec4 GetNormalAsVec4(uint32_t idx) const noexcept
         {
             return GetNormal(idx);
+        }
+
+        const aten::vec3 GetNormalAsVec3(uint32_t idx) const noexcept
+        {
+            const auto& v = getVertex(idx);
+            return v.nml;
         }
 
         const aten::ObjectParameter& GetObject(uint32_t idx) const noexcept;

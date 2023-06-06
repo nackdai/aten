@@ -28,15 +28,10 @@ namespace AT_NAME
         real t_min, real t_max,
         aten::Intersection& isect) const
     {
-        const auto& v0 = ctxt.getVertex(param_.idx[0]);
-        const auto& v1 = ctxt.getVertex(param_.idx[1]);
-        const auto& v2 = ctxt.getVertex(param_.idx[2]);
-
         bool isHit = hit(
-            &param_,
-            v0.pos, v1.pos, v2.pos,
+            param_,
+            ctxt,
             r,
-            t_min, t_max,
             &isect);
 
         if (isHit) {
@@ -46,33 +41,6 @@ namespace AT_NAME
             isect.triangle_id = m_id;
 
             isect.mtrlid = param_.mtrlid;
-        }
-
-        return isHit;
-    }
-
-    bool triangle::hit(
-        const aten::TriangleParameter* param_,
-        const aten::vec3& v0,
-        const aten::vec3& v1,
-        const aten::vec3& v2,
-        const aten::ray& r,
-        real t_min, real t_max,
-        aten::Intersection* isect)
-    {
-        bool isHit = false;
-
-        const auto res = intersectTriangle(r, v0, v1, v2);
-
-        if (res.isIntersect) {
-            if (res.t < isect->t) {
-                isect->t = res.t;
-
-                isect->a = res.a;
-                isect->b = res.b;
-
-                isHit = true;
-            }
         }
 
         return isHit;

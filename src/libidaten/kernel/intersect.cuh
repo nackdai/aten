@@ -5,12 +5,6 @@
 #include "cuda/helper_math.h"
 #include "aten4idaten.h"
 
-__device__ bool hitTriangle(
-    const aten::TriangleParameter* prim,
-    const idaten::context* ctxt,
-    const aten::ray& ray,
-    aten::Intersection* isect);
-
 __device__ int32_t hit4Triangles1Ray(
     const idaten::context* ctxt,
     float4 primIdx, int32_t num,

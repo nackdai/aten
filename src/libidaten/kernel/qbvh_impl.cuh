@@ -47,7 +47,7 @@ AT_CUDA_INLINE __device__ bool intersectQBVHTriangles(
             prim.v1 = ((aten::vec4*)ctxt->prims)[primidx * aten::TriangleParamter_float4_size + 1];
 
             isectTmp.t = AT_MATH_INF;
-            isHit = hitTriangle(&prim, ctxt, r, &isectTmp);
+            isHit = AT_NAME::triangle::hit(prim, *ctxt, r, &isectTmp);
 
             bool isIntersect = (Type == idaten::IntersectType::Any
                 ? isHit

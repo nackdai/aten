@@ -29,14 +29,34 @@ namespace AT_NAME
             real t_min, real t_max,
             aten::Intersection& isect) const override;
 
-        static bool hit(
-            const aten::TriangleParameter* param,
-            const aten::vec3& v0,
-            const aten::vec3& v1,
-            const aten::vec3& v2,
+        template <typename CONTEXT>
+        static AT_DEVICE_API bool hit(
+            const aten::TriangleParameter& param,
+            const CONTEXT& ctxt,
             const aten::ray& r,
-            real t_min, real t_max,
-            aten::Intersection* isect);
+            aten::Intersection* isect)
+        {
+            bool isHit = false;
+
+            const auto v0 = ctxt.GetPositionAsVec3(param.idx[0]);
+            const auto v1 = ctxt.GetPositionAsVec3(param.idx[1]);
+            const auto v2 = ctxt.GetPositionAsVec3(param.idx[2]);
+
+            const auto res = intersectTriangle(r, v0, v1, v2);
+
+            if (res.isIntersect) {
+                if (res.t < isect->t) {
+                    isect->t = res.t;
+
+                    isect->a = res.a;
+                    isect->b = res.b;
+
+                    isHit = true;
+                }
+            }
+
+            return isHit;
+        }
 
         template <typename CONTEXT>
         static AT_DEVICE_API void evalHitResult(

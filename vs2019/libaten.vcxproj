@@ -348,13 +348,10 @@
     <ClInclude Include="..\src\libaten\renderer\aorenderer.h" />
     <ClInclude Include="..\src\libaten\renderer\aov.h" />
     <ClInclude Include="..\src\libaten\renderer\background.h" />
-    <ClInclude Include="..\src\libaten\renderer\bdpt.h" />
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
-    <ClInclude Include="..\src\libaten\renderer\erpt.h" />
     <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
-    <ClInclude Include="..\src\libaten\renderer\pssmlt.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer_utility.h" />
     <ClInclude Include="..\src\libaten\sampler\bluenoiseSampler.h" />
@@ -471,13 +468,10 @@
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp" />
     <ClCompile Include="..\src\libaten\proxy\DataCollector.cpp" />
     <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\envmap.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\erpt.cpp" />
     <ClCompile Include="..\src\libaten\renderer\feature_line.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />

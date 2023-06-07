@@ -233,12 +233,6 @@
     <ClInclude Include="..\src\libaten\posteffect\BloomEffect.h">
       <Filter>posteffect</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\erpt.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\pssmlt.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\hdr\gamma.h">
       <Filter>hdr</Filter>
     </ClInclude>
@@ -288,9 +282,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\accelerator\accelerator.h">
       <Filter>accelerator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\bdpt.h">
-      <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\sampler\wanghash.h">
       <Filter>sampler</Filter>
@@ -591,12 +582,6 @@
     <ClCompile Include="..\src\libaten\posteffect\BloomEffect.cpp">
       <Filter>posteffect</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\erpt.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\pssmlt.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\hdr\gamma.cpp">
       <Filter>hdr</Filter>
     </ClCompile>
@@ -632,9 +617,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\accelerator\bvh.cpp">
       <Filter>accelerator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\bdpt.cpp">
-      <Filter>renderer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp">
       <Filter>sampler</Filter>

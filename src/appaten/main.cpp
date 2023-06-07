@@ -273,13 +273,10 @@ int32_t main(int32_t argc, char *argv[])
     g_bg = std::make_shared<aten::envmap>();
     g_bg->init(g_envmap);
 
-    if constexpr (!std::is_same<decltype(g_tracer), aten::BDPT>::value)
-    {
-        auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
-        // NOTE
-        // BDPT doesn't support IBL yet.
-        g_scene.addImageBasedLight(g_ctxt, ibl);
-    }
+    auto ibl = std::make_shared<aten::ImageBasedLight>(g_bg);
+    // NOTE
+    // BDPT doesn't support IBL yet.
+    g_scene.addImageBasedLight(g_ctxt, ibl);
 
 #ifdef ENABLE_FEATURE_LINE
     g_tracer.enableFeatureLine(true);

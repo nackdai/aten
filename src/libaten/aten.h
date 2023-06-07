@@ -102,9 +102,6 @@
 #include "renderer/background.h"
 #include "renderer/envmap.h"
 #include "renderer/pathtracing.h"
-#include "renderer/erpt.h"
-#include "renderer/pssmlt.h"
-#include "renderer/bdpt.h"
 #include "renderer/aorenderer.h"
 
 #include "posteffect/BloomEffect.h"

@@ -219,7 +219,7 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
+    <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">true</GenerateRelocatableDeviceCode>
@@ -229,7 +229,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
-    </CudaCompile>
+    </ClCompile>
     <ClCompile Include="..\src\libidaten\kernel\renderer.cpp" />
     <CudaCompile Include="..\src\libaten\camera\pinhole.cpp">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateRelocatableDeviceCode>

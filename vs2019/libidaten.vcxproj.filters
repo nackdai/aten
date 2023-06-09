@@ -398,6 +398,9 @@
     <ClCompile Include="..\src\libidaten\restir\restir.cpp">
       <Filter>restir</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
+      <Filter>cuda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\libaten\material\beckman.cpp">
@@ -462,9 +465,6 @@
     </CudaCompile>
     <CudaCompile Include="..\src\libaten\geometry\sphere.cpp">
       <Filter>aten\geometry</Filter>
-    </CudaCompile>
-    <CudaCompile Include="..\src\libidaten\cuda\cudaTextureResource.cpp">
-      <Filter>cuda</Filter>
     </CudaCompile>
     <CudaCompile Include="..\src\libidaten\svgf\svgf_tile.cu">
       <Filter>svgf</Filter>

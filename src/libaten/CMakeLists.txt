@@ -5,12 +5,17 @@ project(${PROJECT_NAME})
 # Add library to build.
 add_library(
   ${PROJECT_NAME} STATIC
+  ../../3rdparty/imgui/backends/imgui_impl_glfw.cpp
+  ../../3rdparty/imgui/backends/imgui_impl_glfw.h
+  ../../3rdparty/imgui/backends/imgui_impl_opengl3.cpp
+  ../../3rdparty/imgui/backends/imgui_impl_opengl3.h
+  ../../3rdparty/imgui/imconfig.h
   ../../3rdparty/imgui/imgui.cpp
+  ../../3rdparty/imgui/imgui.h
   ../../3rdparty/imgui/imgui_draw.cpp
+  ../../3rdparty/imgui/imgui_internal.h
   ../../3rdparty/imgui/imgui_tables.cpp
   ../../3rdparty/imgui/imgui_widgets.cpp
-  ../../3rdparty/imgui/backends/imgui_impl_glfw.cpp
-  ../../3rdparty/imgui/backends/imgui_impl_opengl3.cpp
   accelerator/GpuPayloadDefs.h
   accelerator/accelerator.cpp
   accelerator/accelerator.h
@@ -68,29 +73,27 @@ add_library(
   filter/atrous.h
   filter/bilateral.cpp
   filter/bilateral.h
-  filter/nlm.cpp
-  filter/nlm.h
   filter/magnifier.cpp
   filter/magnifier.h
+  filter/nlm.cpp
+  filter/nlm.h
   filter/taa.cpp
   filter/taa.h
-  geometry/cube.cpp
-  geometry/cube.h
-  geometry/face.cpp
-  geometry/face.h
-  geometry/geombase.cpp
-  geometry/geombase.h
+  geometry/EvaluateHitResult.h
+  geometry/NoHitableMesh.cpp
+  geometry/NoHitableMesh.h
+  geometry/PolygonObject.cpp
+  geometry/PolygonObject.h
+  geometry/TriangleGroupMesh.cpp
+  geometry/TriangleGroupMesh.h
   geometry/geomparam.h
-  geometry/object.cpp
-  geometry/object.h
-  geometry/objshape.cpp
-  geometry/objshape.h
+  geometry/instance.h
   geometry/sphere.cpp
   geometry/sphere.h
-  geometry/transformable.cpp
   geometry/transformable.h
   geometry/transformable_factory.h
-  geometry/vertex.cpp
+  geometry/triangle.cpp
+  geometry/triangle.h
   geometry/vertex.h
   hdr/gamma.cpp
   hdr/gamma.h
@@ -103,8 +106,10 @@ add_library(
   light/directionallight.h
   light/ibl.cpp
   light/ibl.h
-  light/light_instantiate_from_value.cpp
   light/light.h
+  light/light_impl.h
+  light/light_instantiate_from_value.cpp
+  light/light_parameter.h
   light/pointlight.h
   light/spotlight.h
   material/FlakesNormal.cpp
@@ -123,13 +128,10 @@ add_library(
   material/lambert.h
   material/lambert_refraction.cpp
   material/lambert_refraction.h
-  material/layer.cpp
-  material/layer.h
   material/material.cpp
   material/material.h
+  material/material_impl.h
   material/material_instantiate_from_value.cpp
-  material/material_factory.cpp
-  material/material_factory.h
   material/microfacet_refraction.cpp
   material/microfacet_refraction.h
   material/oren_nayar.cpp
@@ -141,8 +143,6 @@ add_library(
   material/sample_texture.h
   material/specular.cpp
   material/specular.h
-  material/toon.cpp
-  material/toon.h
   material/velvet.cpp
   material/velvet.h
   math/aabb.h
@@ -162,6 +162,7 @@ add_library(
   misc/key.h
   misc/omputil.cpp
   misc/omputil.h
+  misc/span.h
   misc/stream.h
   misc/thread.cpp
   misc/thread.h
@@ -177,29 +178,21 @@ add_library(
   posteffect/BloomEffect.h
   proxy/DataCollector.cpp
   proxy/DataCollector.h
+  renderer/aorenderer.cpp
+  renderer/aorenderer.h
   renderer/aov.h
-  renderer/aov_renderer.cpp
-  renderer/aov_renderer.h
   renderer/background.h
-  renderer/bdpt.cpp
-  renderer/bdpt.h
   renderer/envmap.cpp
   renderer/envmap.h
-  renderer/erpt.cpp
-  renderer/erpt.h
   renderer/feature_line.cpp
   renderer/feature_line.h
   renderer/film.cpp
   renderer/film.h
-  renderer/nonphotoreal.cpp
-  renderer/nonphotoreal.h
   renderer/pathtracing.cpp
   renderer/pathtracing.h
-  renderer/pssmlt.cpp
-  renderer/pssmlt.h
-  renderer/raytracing.cpp
-  renderer/raytracing.h
   renderer/renderer.h
+  renderer/renderer_utility.h
+  sampler/bluenoiseSampler.h
   sampler/cmj.h
   sampler/halton.cpp
   sampler/halton.h
@@ -211,11 +204,12 @@ add_library(
   sampler/sobolproxy.h
   sampler/wanghash.h
   sampler/xorshift.h
-  scene/context.cpp
-  scene/context.h
+  scene/AcceleratedScene.h
+  scene/hit_parameter.h
   scene/hitable.cpp
   scene/hitable.h
-  scene/instance.h
+  scene/host_scene_context.cpp
+  scene/host_scene_context.h
   scene/scene.cpp
   scene/scene.h
   texture/texture.cpp

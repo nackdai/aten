@@ -2,24 +2,26 @@
 
 #include "visualizer/atengl.h"
 
-namespace aten {
+namespace aten
+{
     bool ATrousDenoiser::init(
-        context& ctxt,
+        context &ctxt,
         int32_t width, int32_t height,
         std::string_view vsPath,
         std::string_view fsPath,
         std::string_view finalVsPath,
         std::string_view finalFsPath)
     {
-        m_normal = ctxt.createTexture(width, height, 4, nullptr);
-        m_pos = ctxt.createTexture(width, height, 4, nullptr);
-        m_albedo = ctxt.createTexture(width, height, 4, nullptr);
+        m_normal = ctxt.createTexture(width, height, 4, {});
+        m_pos = ctxt.createTexture(width, height, 4, {});
+        m_albedo = ctxt.createTexture(width, height, 4, {});
 
         m_normal->initAsGLTexture();
         m_pos->initAsGLTexture();
         m_albedo->initAsGLTexture();
 
-        for (int32_t i = 0; i < ITER; i++) {
+        for (int32_t i = 0; i < ITER; i++)
+        {
             auto res = m_pass[i].init(
                 width, height,
                 vsPath, fsPath);
@@ -48,7 +50,7 @@ namespace aten {
     }
 
     void ATrousDenoiser::ATrousPass::prepareRender(
-        const void* pixels,
+        const void *pixels,
         bool revert)
     {
         shader::prepareRender(pixels, revert);
@@ -58,13 +60,15 @@ namespace aten {
         {
             GLuint srcTexHandle = m_body->getVisualizer()->getTexHandle();
             auto prevPass = m_body->getPrevPass();
-            if (prevPass) {
+            if (prevPass)
+            {
                 srcTexHandle = prevPass->getFbo().getTexHandle();
             }
 
             texture::bindAsGLTexture(srcTexHandle, 0, this);
         }
-        else {
+        else
+        {
             auto prevPass = getPrevPass();
             auto texHandle = prevPass->getFbo().getTexHandle();
 
@@ -89,7 +93,7 @@ namespace aten {
     }
 
     void ATrousDenoiser::ATrousFinalPass::prepareRender(
-        const void* pixels,
+        const void *pixels,
         bool revert)
     {
         shader::prepareRender(pixels, revert);

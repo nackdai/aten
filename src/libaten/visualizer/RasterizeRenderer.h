@@ -47,14 +47,14 @@ namespace aten {
 
         bool init(
             int32_t width, int32_t height,
-            const char* pathVS,
-            const char* pathFS);
+            std::string_view pathVS,
+            std::string_view pathFS);
 
         bool init(
             int32_t width, int32_t height,
-            const char* pathVS,
-            const char* pathGS,
-            const char* pathFS);
+            std::string_view pathVS,
+            std::string_view pathGS,
+            std::string_view pathFS);
 
         void release()
         {

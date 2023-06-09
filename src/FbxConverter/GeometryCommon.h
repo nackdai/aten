@@ -194,7 +194,7 @@ struct VtxAdditional {
 ///////////////////////////////////////
 
 struct JointTransformParam {
-    const char* name;
+    std::string name;
     JointTransform type;
     std::vector<float> param;
 };

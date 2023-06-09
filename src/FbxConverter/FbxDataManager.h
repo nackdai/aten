@@ -156,14 +156,14 @@ struct Node {
 
 class FbxDataManager {
 public:
-    FbxDataManager() {}
-    ~FbxDataManager() {}
+    FbxDataManager() = default;
+    ~FbxDataManager() = default;
 
 public:
     bool IsValid() const;
 
-    bool open(const char* path);
-    bool openForAnm(const char* path, bool nodeOnly = false);
+    bool open(std::string_view path);
+    bool openForAnm(std::string_view path, bool nodeOnly = false);
 
     void close();
 

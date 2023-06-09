@@ -29,7 +29,7 @@ namespace aten
 
         ~deformable() = default;
 
-        bool read(const char* path);
+        bool read(std::string_view path);
 
         void initGLResources(shader* shd);
         void initGLResourcesWithDeformableRenderer(DeformableRenderer& renderer);
@@ -130,8 +130,8 @@ namespace aten
     public:
         bool init(
             int32_t width, int32_t height,
-            const char* pathVS,
-            const char* pathFS);
+            std::string_view pathVS,
+            std::string_view pathFS);
 
         void render(
             const context& ctxt,

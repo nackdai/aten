@@ -21,7 +21,7 @@ namespace aten
         ~FbxImporter() { close(); }
 
     public:
-        bool open(const char* pszName, bool isOpenForAnm = false);
+        bool open(std::string_view pszName, bool isOpenForAnm = false);
         bool close();
 
         //////////////////////////////////
@@ -102,7 +102,7 @@ namespace aten
         // For animation.
 
         // モーションの対象となるモデルデータを指定.
-        bool readBaseModel(const char* pszName);
+        bool readBaseModel(std::string_view pszName);
 
         // ファイルに含まれるモーションの数を取得.
         uint32_t getAnmSetNum();

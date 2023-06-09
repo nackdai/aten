@@ -5,13 +5,13 @@
 
 class MdlExporter {
 private:
-    MdlExporter();
-    ~MdlExporter();
+    MdlExporter() = delete;
+    ~MdlExporter() = delete;
 
 public:
     static bool exportMdl(
         uint32_t maxJointMtxNum,
-        const char* lpszOutFile,
+        std::string_view lpszOutFile,
         aten::FbxImporter* pImporter,
         bool isExportForGPUSkinning = false);
 };

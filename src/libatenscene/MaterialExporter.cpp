@@ -15,31 +15,31 @@ namespace aten
         virtual ~MaterialParamExporter() {}
 
     public:
-        virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
+        virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) override final
         {
             char buf[32];
             snprintf(buf, AT_COUNTOF(buf), "%.3f", param);
 
-            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
+            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name.data());
             xmlMtrlAttribElem->SetText(buf);
             m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
 
             return true;
         }
 
-        virtual bool edit(const char* name, aten::vec3& param) override final
+        virtual bool edit(std::string_view name, aten::vec3& param) override final
         {
             char buf[64];
             snprintf(buf, AT_COUNTOF(buf), "%.3f %.3f %.3f", param.x, param.y, param.z);
 
-            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
+            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name.data());
             xmlMtrlAttribElem->SetText(buf);
             m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
 
             return true;
         }
 
-        virtual bool edit(const char* name, aten::vec4& param) override final
+        virtual bool edit(std::string_view name, aten::vec4& param) override final
         {
             char buf[64];
             snprintf(
@@ -47,20 +47,20 @@ namespace aten
                 "%.3f %.3f %.3f %.3f",
                 param.x, param.y, param.z, param.w);
 
-            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
+            auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name.data());
             xmlMtrlAttribElem->SetText(buf);
             m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
 
             return true;
         }
 
-        virtual void edit(const char* name, const char* str) override final
+        virtual void edit(std::string_view name, std::string_view str) override final
         {
             std::string s(str);
 
             if (!s.empty()) {
-                auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name);
-                xmlMtrlAttribElem->SetText(str);
+                auto xmlMtrlAttribElem = m_xmlDoc.NewElement(name.data());
+                xmlMtrlAttribElem->SetText(str.data());
                 m_xmlElem->InsertEndChild(xmlMtrlAttribElem);
             }
         }
@@ -71,7 +71,7 @@ namespace aten
     };
 
     bool MaterialExporter::exportMaterial(
-        const char* lpszOutFile,
+        std::string_view lpszOutFile,
         const std::vector<MtrlExportInfo>& mtrls)
     {
         bool ret = true;
@@ -118,7 +118,7 @@ namespace aten
 
         xmlDoc.InsertAfterChild(xmlDecl, xmlRoot);
 
-        auto xmlRes = xmlDoc.SaveFile(lpszOutFile);
+        auto xmlRes = xmlDoc.SaveFile(lpszOutFile.data());
         ret = (xmlRes == tinyxml2::XML_SUCCESS);
 
         return true;

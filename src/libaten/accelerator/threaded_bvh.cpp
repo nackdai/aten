@@ -149,9 +149,9 @@ namespace aten
         //dump(m_listThreadedBvhNode[1], "node.txt");
     }
 
-    void ThreadedBVH::dump(std::vector<ThreadedBvhNode>& nodes, const char* path)
+    void ThreadedBVH::dump(std::vector<ThreadedBvhNode>& nodes, std::string_view path)
     {
-        FILE* fp = fopen(path, "wt");
+        FILE* fp = fopen(path.data(), "wt");
         if (!fp) {
             AT_ASSERT(false);
             return;

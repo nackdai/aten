@@ -136,7 +136,7 @@ namespace aten {
          */
         virtual bool exportTree(
             const context& ctxt,
-            const char* path)
+            std::string_view path)
         {
             AT_ASSERT(false);
             return false;
@@ -147,7 +147,7 @@ namespace aten {
          */
         virtual bool importTree(
             const context& ctxt,
-            const char* path,
+            std::string_view path,
             int32_t offsetTriIdx)
         {
             AT_ASSERT(false);

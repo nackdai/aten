@@ -5,9 +5,9 @@
 #include "visualizer/shader.h"
 
 namespace aten {
-    GLuint createShader(const char* path, GLenum type)
+    GLuint createShader(std::string_view path, GLenum type)
     {
-        FILE* fp = fopen(path, "rb");
+        FILE* fp = fopen(path.data(), "rb");
         AT_ASSERT(fp != nullptr);
 
         fseek(fp, 0, SEEK_END);
@@ -22,8 +22,8 @@ namespace aten {
         CALL_GL_API(auto shader = ::glCreateShader(type));
         AT_ASSERT(shader != 0);
 
-        const char* p = &program[0];
-        const char** pp = &p;
+        const auto p = &program[0];
+        const auto pp = &p;
 
         CALL_GL_API(::glShaderSource(
             shader,
@@ -78,8 +78,8 @@ namespace aten {
 
     bool shader::init(
         int32_t width, int32_t height,
-        const char* pathVS,
-        const char* pathFS)
+        std::string_view pathVS,
+        std::string_view pathFS)
     {
         auto vs = createShader(pathVS, GL_VERTEX_SHADER);
         AT_VRETURN(vs != 0, false);
@@ -98,9 +98,9 @@ namespace aten {
 
     bool shader::init(
         int32_t width, int32_t height,
-        const char* pathVS,
-        const char* pathGS,
-        const char* pathFS)
+        std::string_view pathVS,
+        std::string_view pathGS,
+        std::string_view pathFS)
     {
         auto vs = createShader(pathVS, GL_VERTEX_SHADER);
         AT_VRETURN(vs != 0, false);
@@ -127,13 +127,13 @@ namespace aten {
         CALL_GL_API(::glUseProgram(m_program));
     }
 
-    GLint shader::getHandle(const char* name)
+    int32_t shader::getHandle(std::string_view name)
     {
-        auto handle = ::glGetUniformLocation(m_program, name);
+        auto handle = ::glGetUniformLocation(m_program, name.data());
         return handle;
     }
 
-    void shader::setUniformFloat(const char* name, real f)
+    void shader::setUniformFloat(std::string_view name, real f)
     {
         auto handle = getHandle(name);
         if (handle >= 0) {
@@ -141,7 +141,7 @@ namespace aten {
         }
     }
 
-    void shader::setUniformInt(const char* name, int32_t i)
+    void shader::setUniformInt(std::string_view name, int32_t i)
     {
         auto handle = getHandle(name);
         if (handle >= 0) {
@@ -149,7 +149,7 @@ namespace aten {
         }
     }
 
-    void shader::setUniformVec3(const char* name, const vec3& v)
+    void shader::setUniformVec3(std::string_view name, const vec3& v)
     {
         auto handle = getHandle(name);
         if (handle >= 0) {

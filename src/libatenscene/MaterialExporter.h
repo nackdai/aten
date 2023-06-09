@@ -10,7 +10,7 @@ namespace aten
         std::string name;
         aten::MaterialParameter param;
 
-        MtrlExportInfo() {}
+        MtrlExportInfo() = default;
 
         MtrlExportInfo(const char* n, const aten::MaterialParameter& p)
             : name(n), param(p)
@@ -19,12 +19,12 @@ namespace aten
 
     class MaterialExporter {
     private:
-        MaterialExporter();
-        ~MaterialExporter();
+        MaterialExporter() = delete;
+        ~MaterialExporter() = delete;
 
     public:
         static bool exportMaterial(
-            const char* lpszOutFile,
+            std::string_view lpszOutFile,
             const std::vector<MtrlExportInfo>& mtrls);
     };
 }

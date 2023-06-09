@@ -99,12 +99,6 @@ namespace aten
         return true;
     }
 
-    static inline GLint getHandle(GLuint program, const char* name)
-    {
-        auto handle = ::glGetUniformLocation(program, name);
-        return handle;
-    }
-
     const void* visualizer::doPreProcs(const vec4* pixels)
     {
         const void* textureimage = pixels;
@@ -327,12 +321,12 @@ namespace aten
             clearclr));
     }
 
-    void visualizer::takeScreenshot(const char* filename)
+    void visualizer::takeScreenshot(std::string_view filename)
     {
         takeScreenshot(filename, m_width, m_height);
     }
 
-    void visualizer::takeScreenshot(const char* filename, uint32_t width, uint32_t height)
+    void visualizer::takeScreenshot(std::string_view filename, uint32_t width, uint32_t height)
     {
         CALL_GL_API(::glFlush());
         CALL_GL_API(::glFinish());
@@ -366,7 +360,7 @@ namespace aten
                 pitch);
         }
 
-        auto ret = ::stbi_write_png(filename, width, height, bpp, &dst[0], pitch);
+        auto ret = ::stbi_write_png(filename.data(), width, height, bpp, &dst[0], pitch);
         AT_ASSERT(ret > 0);
     }
 

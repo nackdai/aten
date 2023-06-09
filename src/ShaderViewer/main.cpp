@@ -214,8 +214,8 @@ void onKey(bool press, aten::Key key)
 }
 
 void loadObj(
-    const char* objpath,
-    const char* mtrlpath,
+    std::string_view objpath,
+    std::string_view mtrlpath,
     std::vector<std::shared_ptr<aten::PolygonObject>>& objs)
 {
     std::string pathname;
@@ -228,10 +228,7 @@ void loadObj(
         extname,
         filename);
 
-    if (mtrlpath) {
-        aten::MaterialLoader::load(mtrlpath, g_ctxt);
-    }
-    else {
+    if (mtrlpath.empty()) {
         aten::MaterialParameter param;
         param.type = aten::MaterialType::Lambert;
         param.baseColor = aten::vec3(0.4, 0.4, 0.4);;
@@ -240,6 +237,9 @@ void loadObj(
             param,
             nullptr, nullptr, nullptr);
         aten::AssetManager::registerMtrl("m1", mtrl);
+    }
+    else {
+        aten::MaterialLoader::load(mtrlpath, g_ctxt);
     }
 
     aten::ObjLoader::load(objs, objpath, g_ctxt, nullptr, true);
@@ -294,9 +294,9 @@ int32_t main(int32_t argc, char* argv[])
         onMouseWheel,
         onKey);
 
-    //loadObj("../../asset/sphere/sphere.obj", nullptr, g_objs);
-    //loadObj("../../asset/cube/cube.obj", nullptr, g_objs);
-    loadObj("../../asset/teapot/teapot.obj", nullptr, g_objs);
+    //loadObj("../../asset/sphere/sphere.obj", {}, g_objs);
+    //loadObj("../../asset/cube/cube.obj", {}, g_objs);
+    loadObj("../../asset/teapot/teapot.obj", {}, g_objs);
 
     g_objenable.resize(g_objs.size(), true);
 

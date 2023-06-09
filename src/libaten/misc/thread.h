@@ -30,7 +30,7 @@ namespace aten
 
     public:
         Thread();
-        Thread(const char* name);
+        Thread(std::string_view name);
 
         virtual ~Thread();
 

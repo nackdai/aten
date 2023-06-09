@@ -169,8 +169,8 @@ void onKey(bool press, aten::Key key)
 }
 
 std::shared_ptr<aten::PolygonObject> loadObj(
-    const char* objpath,
-    const char* mtrlpath)
+    std::string_view objpath,
+    std::string_view mtrlpath)
 {
     std::string pathname;
     std::string extname;
@@ -182,10 +182,7 @@ std::shared_ptr<aten::PolygonObject> loadObj(
         extname,
         filename);
 
-    if (mtrlpath) {
-        aten::MaterialLoader::load(mtrlpath, g_ctxt);
-    }
-    else {
+    if (mtrlpath.empty()) {
         aten::MaterialParameter param;
         param.type = aten::MaterialType::Lambert;
         param.baseColor = aten::vec3(1, 1, 1);;
@@ -194,6 +191,9 @@ std::shared_ptr<aten::PolygonObject> loadObj(
             param,
             nullptr, nullptr, nullptr);
         aten::AssetManager::registerMtrl("dummy", mtrl);
+    }
+    else {
+        aten::MaterialLoader::load(mtrlpath, g_ctxt);
     }
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;

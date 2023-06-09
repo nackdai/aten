@@ -19,7 +19,7 @@ namespace aten
         m_ThreadResult = 0;
     }
 
-    Thread::Thread(const char* name)
+    Thread::Thread(std::string_view name)
         : Thread()
     {
         m_Name = name;

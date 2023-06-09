@@ -1215,7 +1215,7 @@ namespace aten
 
     bool sbvh::exportTree(
         const context& ctxt,
-        const char* path)
+        std::string_view path)
     {
         m_threadedNodes.resize(1);
 
@@ -1230,7 +1230,7 @@ namespace aten
             0,
             indices);
 
-        FILE* fp = fopen(path, "wb");
+        FILE* fp = fopen(path.data(), "wb");
         if (!fp) {
             // TODO
             // throw exception...
@@ -1323,10 +1323,10 @@ namespace aten
 
     bool sbvh::importTree(
         const context& ctxt,
-        const char* path,
+        std::string_view path,
         int32_t offsetTriIdx)
     {
-        FILE* fp = fopen(path, "rb");
+        FILE* fp = fopen(path.data(), "rb");
         if (!fp) {
             // TODO
             // through exception...

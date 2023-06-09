@@ -131,7 +131,7 @@ namespace aten
             return m_nestedBvh;
         }
 
-        static void dump(std::vector<ThreadedBvhNode>& nodes, const char* path);
+        static void dump(std::vector<ThreadedBvhNode>& nodes, std::string_view path);
 
     private:
         /**

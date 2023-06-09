@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include <map>
 
@@ -21,7 +22,7 @@ namespace aten
         /**
          * @brief Read animation data from the specified file.
          */
-        bool read(const char* path);
+        bool read(std::string_view path);
 
         /**
          * @brief 指定されたスケルトンにアニメーションを適用する.

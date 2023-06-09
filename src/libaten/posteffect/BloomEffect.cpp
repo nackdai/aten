@@ -6,8 +6,8 @@ namespace aten {
         int32_t srcWidth, int32_t srcHeight,
         int32_t dstWidth, int32_t dstHeight,
         PixelFormat inFmt, PixelFormat outFmt,
-        const char* pathVS,
-        const char* pathFS)
+        std::string_view pathVS,
+        std::string_view pathFS)
     {
         m_srcWidth = srcWidth;
         m_srcHeight = srcHeight;
@@ -111,13 +111,13 @@ namespace aten {
     bool BloomEffect::init(
         int32_t width, int32_t height,
         PixelFormat inFmt, PixelFormat outFmt,
-        const char* pathVS,
-        const char* pathFS_4x4,
-        const char* pathFS_2x2,
-        const char* pathFS_HBlur,
-        const char* pathFS_VBlur,
-        const char* pathFS_GaussBlur,
-        const char* pathFS_Final)
+        std::string_view pathVS,
+        std::string_view pathFS_4x4,
+        std::string_view pathFS_2x2,
+        std::string_view pathFS_HBlur,
+        std::string_view pathFS_VBlur,
+        std::string_view pathFS_GaussBlur,
+        std::string_view pathFS_Final)
     {
         m_fmtIn = inFmt;
         m_fmtOut = outFmt;

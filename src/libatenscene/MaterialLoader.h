@@ -20,7 +20,7 @@ namespace aten {
         static bool addCreator(std::string type, MaterialCreator creator);
 
         static bool load(
-            const std::string& path,
+            std::string_view path,
             context& ctxt);
 
         static std::shared_ptr<material> create(

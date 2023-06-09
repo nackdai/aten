@@ -126,7 +126,7 @@ namespace AT_NAME
 
     bool PolygonObject::exportInternalAccelTree(
         const context& ctxt,
-        const char* path)
+        std::string_view path)
     {
         bool result = false;
 
@@ -142,7 +142,8 @@ namespace AT_NAME
         return result;
     }
 
-    bool PolygonObject::importInternalAccelTree(const char* path, const context& ctxt, int32_t offsetTriIdx)
+    bool PolygonObject::importInternalAccelTree(
+        std::string_view path, const context& ctxt, int32_t offsetTriIdx)
     {
         AT_ASSERT(!m_accel);
 

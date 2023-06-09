@@ -12,10 +12,10 @@
 
 namespace aten
 {
-    bool deformable::read(const char* path)
+    bool deformable::read(std::string_view path)
     {
         FileInputStream file;
-        AT_VRETURN_FALSE(file.open(path, "rb"));
+        AT_VRETURN_FALSE(file.open(path.data(), "rb"));
 
         FileInputStream* stream = &file;
 
@@ -230,8 +230,8 @@ namespace aten
 
     bool DeformableRenderer::init(
         int32_t width, int32_t height,
-        const char* pathVS,
-        const char* pathFS)
+        std::string_view pathVS,
+        std::string_view pathFS)
     {
         return m_shd.init(width, height, pathVS, pathFS);
     }

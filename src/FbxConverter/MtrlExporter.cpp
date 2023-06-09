@@ -7,7 +7,7 @@
 // libatenscene::MaterialExporterÇ…èÊÇËä∑Ç¶ÇΩÇ¢...
 
 bool MtrlExporter::exportMaterial(
-    const char* lpszOutFile,
+    std::string_view lpszOutFile,
     aten::FbxImporter* pImporter)
 {
     bool ret = true;
@@ -98,7 +98,7 @@ bool MtrlExporter::exportMaterial(
 
     xmlDoc.InsertAfterChild(xmlDecl, xmlRoot);
 
-    auto xmlRes = xmlDoc.SaveFile(lpszOutFile);
+    auto xmlRes = xmlDoc.SaveFile(lpszOutFile.data());
     ret = (xmlRes == tinyxml2::XML_SUCCESS);
 
     return true;

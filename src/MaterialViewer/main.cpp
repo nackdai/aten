@@ -112,15 +112,15 @@ public:
     virtual ~MaterialParamEditor() {}
 
 public:
-    virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) override final
+    virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) override final
     {
-        return ImGui::SliderFloat(name, &param, _min, _max);
+        return ImGui::SliderFloat(name.data(), &param, _min, _max);
     }
 
-    virtual bool edit(const char* name, aten::vec3& param) override final
+    virtual bool edit(std::string_view name, aten::vec3& param) override final
     {
         float f[3] = { param.x, param.y, param.z };
-        bool ret = ImGui::ColorEdit3(name, f);
+        bool ret = ImGui::ColorEdit3(name.data(), f);
 
         param.x = f[0];
         param.y = f[1];
@@ -129,10 +129,10 @@ public:
         return ret;
     }
 
-    virtual bool edit(const char* name, aten::vec4& param) override final
+    virtual bool edit(std::string_view name, aten::vec4& param) override final
     {
         float f[4] = { param.x, param.y, param.z, param.w };
-        bool ret = ImGui::ColorEdit4(name, f);
+        bool ret = ImGui::ColorEdit4(name.data(), f);
 
         param.x = f[0];
         param.y = f[1];
@@ -142,10 +142,10 @@ public:
         return ret;
     }
 
-    virtual void edit(const char* name, const char* str) override final
+    virtual void edit(std::string_view name, std::string_view str) override final
     {
         std::string s(str);
-        ImGui::Text("[%s] : (%s)", name, s.empty() ? "none" : str);
+        ImGui::Text("[%s] : (%s)", name.data(), s.empty() ? "none" : str.data());
     }
 };
 

@@ -12,38 +12,38 @@ namespace aten
     public:
         using FuncCreateMaterial = std::function<
             std::shared_ptr<material> (
-                const std::string& name,
+                std::string_view name,
                 context& ctxt,
                 MaterialType type,
                 const vec3& mtrl_clr,
                 const std::string& albedo,
                 const std::string& nml)>;
 
-        static void setBasePath(const std::string& base);
+        static void setBasePath(std::string_view base);
 
         static std::shared_ptr<aten::PolygonObject> load(
-            const std::string& path,
+            std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
         static std::shared_ptr<aten::PolygonObject> load(
-            const std::string& tag,
-            const std::string& path,
+            std::string_view tag,
+            std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool needComputeNormalOntime = false);
 
         static void load(
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
-            const std::string& path,
+            std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool willSeparate = false,
             bool needComputeNormalOntime = false);
         static void load(
             std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
-            const std::string& tag,
-            const std::string& path,
+            std::string_view tag,
+            std::string_view path,
             context& ctxt,
             FuncCreateMaterial callback_crate_mtrl = nullptr,
             bool willSeparate = false,

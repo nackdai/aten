@@ -346,10 +346,10 @@ namespace aten {
     //  - clearcoatGloss [float]
 
     bool MaterialLoader::load(
-        const std::string& path,
+        std::string_view path,
         context& ctxt)
     {
-        std::string fullpath = path;
+        std::string fullpath(path);
         if (!g_base.empty()) {
             fullpath = g_base + "/" + fullpath;
         }

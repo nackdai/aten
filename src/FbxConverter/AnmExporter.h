@@ -6,12 +6,12 @@
 
 class AnmExporter {
 private:
-    AnmExporter();
-    ~AnmExporter();
+    AnmExporter() = delete;
+    ~AnmExporter() = delete;
 
 public:
     static bool exportAnm(
-        const char* lpszOutFile,
+        std::string_view lpszOutFile,
         uint32_t nSetIdx,
         aten::FbxImporter* pImporter);
 };

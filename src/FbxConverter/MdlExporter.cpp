@@ -20,7 +20,7 @@
 
 bool MdlExporter::exportMdl(
     uint32_t maxJointMtxNum,
-    const char* lpszOutFile,
+    std::string_view lpszOutFile,
     aten::FbxImporter* pImporter,
     bool isExportForGPUSkinning/*= false*/)
 {

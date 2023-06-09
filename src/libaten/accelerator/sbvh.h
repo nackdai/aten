@@ -111,14 +111,14 @@ namespace aten
          */
         virtual bool exportTree(
             const context& ctxt,
-            const char* path) override final;
+            std::string_view path) override final;
 
         /**
          * @brief Import the exported structure data.
          */
         virtual bool importTree(
             const context& ctxt,
-            const char* path,
+            std::string_view path,
             int32_t offsetTriIdx) override final;
 
         /**

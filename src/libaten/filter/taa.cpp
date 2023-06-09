@@ -7,8 +7,10 @@ namespace aten
 {
     bool TAA::init(
         int32_t width, int32_t height,
-        const char* taaVsPath, const char* taaFsPath,
-        const char* finalVsPath, const char* finalFsPath)
+        std::string_view taaVsPath,
+        std::string_view taaFsPath,
+        std::string_view finalVsPath,
+        std::string_view finalFsPath)
     {
         m_taa.init(width, height, taaVsPath, taaFsPath);
         m_taa.m_body = this;

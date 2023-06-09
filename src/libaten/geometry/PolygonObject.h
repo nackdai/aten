@@ -91,9 +91,10 @@ namespace AT_NAME
 
         bool exportInternalAccelTree(
             const aten::context& ctxt,
-            const char* path);
+            std::string_view path);
 
-        bool importInternalAccelTree(const char* path, const aten::context& ctxt, int32_t offsetTriIdx);
+        bool importInternalAccelTree(
+            std::string_view path, const aten::context& ctxt, int32_t offsetTriIdx);
 
         void buildForRasterizeRendering(const aten::context& ctxt);
 
@@ -162,7 +163,7 @@ namespace AT_NAME
             return m_shapes;
         }
 
-        void setName(const char* name)
+        void setName(std::string_view name)
         {
             name_.assign(name);
         }

@@ -7,15 +7,17 @@
 namespace aten {
     class ATrousDenoiser : public MultiPassPostProc {
     public:
-        ATrousDenoiser() {}
-        ~ATrousDenoiser() {}
+        ATrousDenoiser() = default;
+        ~ATrousDenoiser() = default;
 
     public:
         bool init(
             context& ctxt,
             int32_t width, int32_t height,
-            const char* vsPath, const char* fsPath,
-            const char* finalVsPath, const char* finalFsPath);
+            std::string_view vsPath,
+            std::string_view fsPath,
+            std::string_view finalVsPath,
+            std::string_view finalFsPath);
 
         std::shared_ptr<texture> getNormalMap()
         {

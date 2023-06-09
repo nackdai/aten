@@ -17,7 +17,7 @@ namespace aten
     {
     }
 
-    bool FbxImporter::open(const char* pszName, bool isOpenForAnm)
+    bool FbxImporter::open(std::string_view pszName, bool isOpenForAnm)
     {
         bool ret = false;
         m_dataMgr = new FbxDataManager();
@@ -524,7 +524,7 @@ namespace aten
     //////////////////////////////////
     // For animation.
 
-    bool FbxImporter::readBaseModel(const char* pszName)
+    bool FbxImporter::readBaseModel(std::string_view pszName)
     {
     #if 1
         m_dataMgrBase = new FbxDataManager();

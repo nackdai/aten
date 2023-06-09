@@ -6,8 +6,10 @@ namespace aten {
     bool ATrousDenoiser::init(
         context& ctxt,
         int32_t width, int32_t height,
-        const char* vsPath, const char* fsPath,
-        const char* finalVsPath, const char* finalFsPath)
+        std::string_view vsPath,
+        std::string_view fsPath,
+        std::string_view finalVsPath,
+        std::string_view finalFsPath)
     {
         m_normal = ctxt.createTexture(width, height, 4, nullptr);
         m_pos = ctxt.createTexture(width, height, 4, nullptr);

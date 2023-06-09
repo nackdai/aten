@@ -196,7 +196,7 @@ namespace aten {
         using OnKey = std::function<void(bool press, Key key)>;
 
         static window* init(
-            int32_t width, int32_t height, const char* title,
+            int32_t width, int32_t height, std::string_view title,
             OnRun onRun,
             OnClose _onClose = nullptr,
             OnMouseBtn _onMouseBtn = nullptr,

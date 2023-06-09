@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "defs.h"
 #include "types.h"
 
@@ -7,21 +9,21 @@ namespace aten
 {
     class FileInputStream {
     public:
-        FileInputStream() {}
+        FileInputStream() = default;
         ~FileInputStream()
         {
             close();
         }
 
-        FileInputStream(const char* path, const char* mode)
+        FileInputStream(std::string_view path, std::string_view mode)
         {
             open(path, mode);
         }
 
     public:
-        bool open(const char* path, const char* mode)
+        bool open(std::string_view path, std::string_view mode)
         {
-            m_fp = fopen(path, mode);
+            m_fp = fopen(path.data(), mode.data());
             return (m_fp != nullptr);
         }
 

@@ -60,8 +60,8 @@ static const uint32_t VoxelWireFrameIdxs[] = {
 
 bool VoxelViewer::init(
     int32_t width, int32_t height,
-    const char* pathVS,
-    const char* pathFS)
+    std::string_view pathVS,
+    std::string_view pathFS)
 {
     m_width = width;
     m_height = height;

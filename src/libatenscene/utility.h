@@ -5,12 +5,12 @@
 
 namespace aten {
     inline void getStringsFromPath(
-        const std::string& path,
+        std::string_view path,
         std::string& pathname,
         std::string& extname,
         std::string& filename)
     {
-        std::string filepath = path;
+        std::string filepath(path);
 
         // Get tag from file path.
         // Replace \\->/
@@ -29,9 +29,9 @@ namespace aten {
         }
     }
 
-    inline std::string removeTailPathSeparator(const std::string path)
+    inline std::string removeTailPathSeparator(std::string_view path)
     {
-        std::string ret = path;
+        std::string ret(path);
 
         // Remove tail '\' or '/'.
 
@@ -45,7 +45,7 @@ namespace aten {
         return ret;
     }
 
-    inline uint32_t split(const std::string& txt, std::vector<std::string>& strs, char ch)
+    inline uint32_t split(std::string_view txt, std::vector<std::string>& strs, char ch)
     {
         auto pos = txt.find(ch);
         size_t initialPos = 0;
@@ -56,14 +56,14 @@ namespace aten {
         // Decompose statement
         //while (pos != std::string::npos) {
         while (pos <= s) {
-            strs.push_back(txt.substr(initialPos, pos - initialPos + 1));
+            strs.push_back(std::string(txt.substr(initialPos, pos - initialPos + 1)));
             initialPos = pos + 1;
 
             pos = txt.find(ch, initialPos);
         }
 
         // Add the last one
-        strs.push_back(txt.substr(initialPos, std::min<size_t>(pos, txt.size()) - initialPos + 1));
+        strs.push_back(std::string(txt.substr(initialPos, std::min<size_t>(pos, txt.size()) - initialPos + 1)));
 
         return (uint32_t)strs.size();
     }

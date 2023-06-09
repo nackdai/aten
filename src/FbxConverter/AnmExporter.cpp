@@ -19,7 +19,7 @@
 // +----------------+
 
 bool AnmExporter::exportAnm(
-    const char* lpszOutFile,
+    std::string_view lpszOutFile,
     uint32_t nSetIdx,
     aten::FbxImporter* pImporter)
 {

@@ -7,7 +7,7 @@ bool FbxDataManager::IsValid() const
     return (m_manager != nullptr && m_scene != nullptr);
 }
 
-bool FbxDataManager::open(const char* path)
+bool FbxDataManager::open(std::string_view path)
 {
     m_manager = FbxManager::Create();
 
@@ -20,8 +20,8 @@ bool FbxDataManager::open(const char* path)
 
     int32_t fileFormat = -1;
 
-    if (m_manager->GetIOPluginRegistry()->DetectReaderFileFormat(path, fileFormat)) {
-        if (importer->Initialize(path, fileFormat)) {
+    if (m_manager->GetIOPluginRegistry()->DetectReaderFileFormat(path.data(), fileFormat)) {
+        if (importer->Initialize(path.data(), fileFormat)) {
             if (importer->Import(m_scene)) {
                 importer->Destroy(true);
 
@@ -64,7 +64,7 @@ bool FbxDataManager::open(const char* path)
     return false;
 }
 
-bool FbxDataManager::openForAnm(const char* path, bool nodeOnly/*= false*/)
+bool FbxDataManager::openForAnm(std::string_view path, bool nodeOnly/*= false*/)
 {
     m_manager = FbxManager::Create();
 
@@ -77,8 +77,8 @@ bool FbxDataManager::openForAnm(const char* path, bool nodeOnly/*= false*/)
 
     int32_t fileFormat = -1;
 
-    if (m_manager->GetIOPluginRegistry()->DetectReaderFileFormat(path, fileFormat)) {
-        if (importer->Initialize(path, fileFormat)) {
+    if (m_manager->GetIOPluginRegistry()->DetectReaderFileFormat(path.data(), fileFormat)) {
+        if (importer->Initialize(path.data(), fileFormat)) {
             if (importer->Import(m_scene)) {
 #if 0
                 // Convert Axis System to what is used in this example, if needed

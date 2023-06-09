@@ -19,13 +19,13 @@ namespace aten {
 
     class hitable {
     public:
-        hitable(const char* name = nullptr)
+        hitable(std::string_view name = {})
         {
-            if (name) {
+            if (!name.empty()) {
                 m_name = name;
             }
         }
-        virtual ~hitable() {}
+        virtual ~hitable() = default;
 
     public:
         virtual bool hit(
@@ -114,7 +114,7 @@ namespace aten {
             return false;
         }
 
-        void setName(const char* name)
+        void setName(std::string_view name)
         {
             m_name = name;
         }

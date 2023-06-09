@@ -115,9 +115,9 @@ namespace aten {
 
         void clear();
 
-        void takeScreenshot(const char* filename);
+        void takeScreenshot(std::string_view filename);
 
-        static void takeScreenshot(const char* filename, uint32_t width, uint32_t height);
+        static void takeScreenshot(std::string_view filename, uint32_t width, uint32_t height);
 
         static void getTextureData(
             uint32_t gltex,

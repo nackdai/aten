@@ -925,7 +925,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     std::vector<std::shared_ptr<aten::PolygonObject>> objs;
     aten::ObjLoader::load(objs, "../../asset/cornellbox/orig.obj", ctxt,
-        [&](const std::string& name, aten::context& ctxt,
+        [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
                 (void)albedo;
@@ -941,7 +941,7 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     mtrlParam.standard.ior = 0.01;
 
                     auto mtrl = createMaterialWithParamter(ctxt, type, mtrlParam);
-                    mtrl->setName(name.c_str());
+                    mtrl->setName(name.data());
                     aten::AssetManager::registerMtrl(name, mtrl);
                     return mtrl;
                 }
@@ -955,13 +955,13 @@ void ObjCornellBoxScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     mtrlParam.standard.ior = 0.01;
 
                     auto mtrl = createMaterialWithParamter(ctxt, type, mtrlParam);
-                    mtrl->setName(name.c_str());
+                    mtrl->setName(name.data());
                     aten::AssetManager::registerMtrl(name, mtrl);
                     return mtrl;
                 }
                 else {
                     auto mtrl = createMaterial(ctxt, type, mtrl_clr);
-                    mtrl->setName(name.c_str());
+                    mtrl->setName(name.data());
                     aten::AssetManager::registerMtrl(name, mtrl);
                     return mtrl;
                 }
@@ -1005,7 +1005,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     aten::ObjLoader::load(
         objs, "../../asset/sponza/sponza.obj", ctxt,
-        [&](const std::string& name, aten::context& ctxt,
+        [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
@@ -1016,7 +1016,7 @@ void SponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     : aten::ImageLoader::load("../../asset/sponza/" + nml, ctxt);
 
                 auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
-                mtrl->setName(name.c_str());
+                mtrl->setName(name.data());
                 aten::AssetManager::registerMtrl(name, mtrl);
                 return mtrl;
         });
@@ -1277,7 +1277,7 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
 
     aten::ObjLoader::load(
         objs, "../../asset/models/sponza/sponza.obj", ctxt,
-        [&](const std::string& name, aten::context& ctxt,
+        [&](std::string_view name, aten::context& ctxt,
             aten::MaterialType type, const aten::vec3& mtrl_clr,
             const std::string& albedo, const std::string& nml) -> auto {
                 auto albedo_map = albedo.empty()
@@ -1288,7 +1288,7 @@ void CryteckSponzaScene::makeScene(aten::context& ctxt, aten::scene* scene)
                     : aten::ImageLoader::load("../../asset/models/sponza/" + nml, ctxt);
 
                 auto mtrl = createMaterial(ctxt, type, mtrl_clr, albedo_map.get(), nml_map.get());
-                mtrl->setName(name.c_str());
+                mtrl->setName(name.data());
                 aten::AssetManager::registerMtrl(name, mtrl);
                 return mtrl;
         });

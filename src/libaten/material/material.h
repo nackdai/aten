@@ -305,11 +305,11 @@ namespace aten
         virtual ~IMaterialParamEditor() {}
 
     public:
-        virtual bool edit(const char* name, real& param, real _min = real(0), real _max = real(1)) = 0;
-        virtual bool edit(const char* name, vec3& param) = 0;
-        virtual bool edit(const char* name, vec4& param) = 0;
+        virtual bool edit(std::string_view name, real& param, real _min = real(0), real _max = real(1)) = 0;
+        virtual bool edit(std::string_view name, vec3& param) = 0;
+        virtual bool edit(std::string_view name, vec4& param) = 0;
 
-        void editTex(const char* name, int32_t texid)
+        void editTex(std::string_view name, int32_t texid)
         {
             if (texid >= 0) {
                 /*auto tex = aten::texture::getTexture(texid);
@@ -320,7 +320,7 @@ namespace aten
         }
 
     protected:
-        virtual void edit(const char* name, const char* str) = 0;
+        virtual void edit(std::string_view name, std::string_view str) = 0;
     };
 
     enum class MtrlParamType {

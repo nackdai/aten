@@ -9,7 +9,7 @@ static const real Pos = real(1) / aten::sqrt(2);
 
 const std::array<aten::vec4, MeasureEffectiveRetroreflectiveArea::VtxNum>
 MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
-    // Fron face.
+    // Front face.
     aten::vec4(   0,  Pos,    0, 1),
     aten::vec4(   0,    0,  Pos, 1),
     aten::vec4( Pos,    0,    0, 1),
@@ -21,8 +21,8 @@ MeasureEffectiveRetroreflectiveArea::TriangleVtxs = {
 
 bool MeasureEffectiveRetroreflectiveArea::init(
     int32_t width, int32_t height,
-    const char* pathVS,
-    const char* pathFS)
+    std::string_view pathVS,
+    std::string_view pathFS)
 {
     static const std::array<uint32_t, VtxNum> TriangleIdx = {
         0, 1, 2,

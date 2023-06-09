@@ -79,15 +79,15 @@ namespace aten {
 
     template <typename T>
     static bool registerAsset(
-        const std::string& name,
+        std::string_view name,
         const std::shared_ptr<T> asset,
         AssetManager::AssetType type)
     {
         auto& mapAsset = g_assets[type];
 
-        auto it = mapAsset.find(name);
+        auto it = mapAsset.find(std::string(name));
         if (it != mapAsset.end()) {
-            AT_PRINTF("Registered already [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
+            AT_PRINTF("Registered already [%s] (%s)\n", name.data(), AssetTypeName[type]);
             return false;
         }
 
@@ -97,17 +97,17 @@ namespace aten {
     }
 
     static const Asset& getAsset(
-        const std::string& name,
+        std::string_view name,
         AssetManager::AssetType type)
     {
         auto& mapAsset = g_assets[type];
 
-        auto it = mapAsset.find(name);
+        auto it = mapAsset.find(std::string(name));
 
         if (it == mapAsset.end()) {
             //AT_ASSERT(false);
             if (g_enableWarnings) {
-                AT_PRINTF("Asset is not registered [%s] (%s)\n", name.c_str(), AssetTypeName[type]);
+                AT_PRINTF("Asset is not registered [%s] (%s)\n", name.data(), AssetTypeName[type]);
             }
 
             static Asset dummy;
@@ -120,14 +120,14 @@ namespace aten {
         return asset;
     }
 
-    bool AssetManager::registerMtrl(const std::string& name, const std::shared_ptr<material>& mtrl)
+    bool AssetManager::registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl)
     {
-        mtrl->setName(name.c_str());
+        mtrl->setName(name);
 
         return registerAsset(name, mtrl, AssetType::Material);
     }
 
-    std::shared_ptr<material> AssetManager::getMtrl(const std::string& name)
+    std::shared_ptr<material> AssetManager::getMtrl(std::string_view name)
     {
         auto& asset = getAsset(name, AssetType::Material);
         return asset.mtrl;
@@ -149,7 +149,7 @@ namespace aten {
         return nullptr;
     }
 
-    bool AssetManager::registerTex(const std::string& name, const std::shared_ptr<texture>& tex)
+    bool AssetManager::registerTex(std::string_view name, const std::shared_ptr<texture>& tex)
     {
         return registerAsset(name, tex, AssetType::Texture);
     }
@@ -160,12 +160,12 @@ namespace aten {
         return asset.tex;
     }
 
-    bool AssetManager::registerObj(const std::string& name, const std::shared_ptr<aten::PolygonObject>& obj)
+    bool AssetManager::registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj)
     {
         return registerAsset(name, obj, AssetType::Object);
     }
 
-    std::shared_ptr<aten::PolygonObject> AssetManager::getObj(const std::string& name)
+    std::shared_ptr<aten::PolygonObject> AssetManager::getObj(std::string_view name)
     {
         auto& asset = getAsset(name, AssetType::Object);
         return asset.obj;

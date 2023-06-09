@@ -5,16 +5,16 @@
 namespace aten {
     class KeyValue {
     private:
-        KeyValue();
-        ~KeyValue();
+        KeyValue() = delete;
+        ~KeyValue() = delete;
 
     public:
         // 新しいキー値を生成する
-        static uint32_t gen(const char* str)
+        static uint32_t gen(std::string_view str)
         {
             return genValue<uint32_t>(str);
         }
-        static uint64_t gen64(const char* str)
+        static uint64_t gen64(std::string_view str)
         {
             return genValue<uint64_t>(str);
         }
@@ -31,14 +31,14 @@ namespace aten {
 
     private:
         template <typename _T>
-        static _T genValue(const char* str)
+        static _T genValue(std::string_view str)
         {
-            if (str == nullptr) {
+            if (str.empty()) {
                 AT_ASSERT(false);
                 return 0;
             }
 
-            _T ret = *str;
+            _T ret = 0;
             _T k = 1;
 
             for (uint32_t i = 0; ; ++i) {

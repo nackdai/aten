@@ -1,32 +1,33 @@
 #pragma once
 
+#include <string>
+
 #include "types.h"
 #include "math/vec3.h"
 
 namespace aten {
     class shader {
     public:
-        shader() {}
-        virtual ~shader() {}
+        shader() = default;
+        virtual ~shader() = default;
 
     public:
         bool init(
             int32_t width, int32_t height,
-            const char* pathVS,
-            const char* pathFS);
+            std::string_view pathVS,
+            std::string_view pathFS);
 
         bool init(
             int32_t width, int32_t height,
-            const char* pathVS,
-            const char* pathGS,
-            const char* pathFS);
+            std::string_view pathVS,
+            std::string_view pathGS,
+            std::string_view pathFS);
 
         virtual void prepareRender(
             const void* pixels,
             bool revert);
 
-        //GLint getHandle(const char* name);
-        int32_t getHandle(const char* name);
+        int32_t getHandle(std::string_view name);
 
         uint32_t getProgramHandle() const
         {
@@ -38,16 +39,15 @@ namespace aten {
             return (m_program > 0);
         }
 
-        void setUniformFloat(const char* name, real f);
-        void setUniformInt(const char* name, int32_t i);
-        void setUniformBool(const char* name, bool b)
+        void setUniformFloat(std::string_view name, real f);
+        void setUniformInt(std::string_view name, int32_t i);
+        void setUniformBool(std::string_view name, bool b)
         {
             setUniformInt(name, (int32_t)b);
         }
-        void setUniformVec3(const char* name, const vec3& v);
+        void setUniformVec3(std::string_view name, const vec3& v);
 
     protected:
-        //GLuint m_program{ 0 };
         uint32_t m_program{ 0 };
         uint32_t m_width{ 0 };
         uint32_t m_height{ 0 };

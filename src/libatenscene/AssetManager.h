@@ -20,15 +20,15 @@ namespace aten {
             Num,
         };
 
-        static bool registerMtrl(const std::string& name, const std::shared_ptr<material>& mtrl);
-        static std::shared_ptr<material> getMtrl(const std::string& name);
+        static bool registerMtrl(std::string_view name, const std::shared_ptr<material>& mtrl);
+        static std::shared_ptr<material> getMtrl(std::string_view name);
         static std::shared_ptr<material> getMtrlByIdx(uint32_t idx);
 
-        static bool registerTex(const std::string& name, const std::shared_ptr<texture>& tex);
+        static bool registerTex(std::string_view name, const std::shared_ptr<texture>& tex);
         static std::shared_ptr<texture> getTex(const std::string& name);
 
-        static bool registerObj(const std::string& name, const std::shared_ptr<aten::PolygonObject>& obj);
-        static std::shared_ptr<aten::PolygonObject> getObj(const std::string& name);
+        static bool registerObj(std::string_view name, const std::shared_ptr<aten::PolygonObject>& obj);
+        static std::shared_ptr<aten::PolygonObject> getObj(std::string_view name);
 
         static uint32_t getAssetNum(AssetType type);
 

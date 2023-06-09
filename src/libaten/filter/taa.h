@@ -8,14 +8,16 @@
 namespace aten {
     class TAA : public MultiPassPostProc {
     public:
-        TAA() {}
-        virtual ~TAA() {}
+        TAA() = default;
+        virtual ~TAA() = default;
 
     public:
         bool init(
             int32_t width, int32_t height,
-            const char* taaVsPath, const char* taaFsPath,
-            const char* finalVsPath, const char* finalFsPath);
+            std::string_view taaVsPath,
+            std::string_view taaFsPath,
+            std::string_view finalVsPath,
+            std::string_view finalFsPath);
 
         virtual PixelFormat inFormat() const override final
         {

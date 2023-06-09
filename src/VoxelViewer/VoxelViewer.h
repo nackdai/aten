@@ -4,15 +4,15 @@
 
 class VoxelViewer {
 public:
-    VoxelViewer() {}
-    ~VoxelViewer() {}
+    VoxelViewer() = default;
+    ~VoxelViewer() = default;
 
 public:
     // 初期化.
     bool init(
         int32_t width, int32_t height,
-        const char* pathVS,
-        const char* pathFS);
+        std::string_view pathVS,
+        std::string_view pathFS);
 
     // SBVHのノードからボクセルデータを持つもののみを取り出す.
     // 対象となるのは、BottomLayerの１つのみ.

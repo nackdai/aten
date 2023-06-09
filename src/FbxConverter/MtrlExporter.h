@@ -8,11 +8,11 @@ class FileOutputStream;
 
 class MtrlExporter {
 private:
-    MtrlExporter();
-    ~MtrlExporter();
+    MtrlExporter() = delete;
+    ~MtrlExporter() = delete;
 
 public:
     static bool exportMaterial(
-        const char* lpszOutFile,
+        std::string_view lpszOutFile,
         aten::FbxImporter* pImporter);
 };

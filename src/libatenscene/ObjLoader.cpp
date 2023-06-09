@@ -11,13 +11,13 @@ namespace aten
 {
     static std::string g_base;
 
-    void ObjLoader::setBasePath(const std::string& base)
+    void ObjLoader::setBasePath(std::string_view base)
     {
         g_base = removeTailPathSeparator(base);
     }
 
     std::shared_ptr<aten::PolygonObject> ObjLoader::load(
-        const std::string& path,
+        std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
@@ -29,8 +29,8 @@ namespace aten
     }
 
     std::shared_ptr<aten::PolygonObject> ObjLoader::load(
-        const std::string& tag,
-        const std::string& path,
+        std::string_view tag,
+        std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool needComputeNormalOntime/*= false*/)
@@ -43,7 +43,7 @@ namespace aten
 
     void ObjLoader::load(
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
-        const std::string& path,
+        std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
@@ -59,7 +59,7 @@ namespace aten
             extname,
             filename);
 
-        std::string fullpath = path;
+        std::string fullpath(path);
         if (!g_base.empty()) {
             fullpath = g_base + "/" + fullpath;
         }
@@ -69,8 +69,8 @@ namespace aten
 
     void ObjLoader::load(
         std::vector<std::shared_ptr<aten::PolygonObject>>& objs,
-        const std::string& tag,
-        const std::string& path,
+        std::string_view tag,
+        std::string_view path,
         context& ctxt,
         ObjLoader::FuncCreateMaterial callback_crate_mtrl/*= nullptr*/,
         bool willSeparate/*= false*/,
@@ -78,7 +78,7 @@ namespace aten
     {
         auto asset_obj = AssetManager::getObj(tag);
         if (asset_obj) {
-            AT_PRINTF("There is same tag object. [%s]\n", tag.c_str());
+            AT_PRINTF("There is same tag object. [%s]\n", tag.data());
             objs.push_back(asset_obj);
             return;
         }
@@ -99,10 +99,10 @@ namespace aten
         auto result = tinyobj::LoadObj(
             &attrib, &shapes, &mtrls,
             &warn, &err,
-            path.c_str(), mtrlBasePath.c_str());
+            path.data(), mtrlBasePath.c_str());
 
         if (!result) {
-            AT_PRINTF("LoadObj Err[%s]\n", path.c_str());
+            AT_PRINTF("LoadObj Err[%s]\n", path.data());
             return;
         }
 
@@ -422,7 +422,7 @@ namespace aten
 
         auto vtxNum = ctxt.getVertexNum();
 
-        AT_PRINTF("(%s)\n", path.c_str());
+        AT_PRINTF("(%s)\n", path.data());
         AT_PRINTF("    %d[vertices]\n", vtxNum);
         AT_PRINTF("    %d[polygons]\n", numPolygons);
     }

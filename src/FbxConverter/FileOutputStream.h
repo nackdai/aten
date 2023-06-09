@@ -29,12 +29,12 @@ public:
     FileOutputStream& operator=(const FileOutputStream& rhs) = delete;
 
 public:
-    bool open(const char* path)
+    bool open(std::string_view path)
     {
         return open(path, FileIoMode::Bin);
     }
 
-    bool open(const char* path, FileIoMode mode)
+    bool open(std::string_view path, FileIoMode mode)
     {
         bool ret = false;
 
@@ -43,7 +43,7 @@ public:
             finalize();
         }
 
-        m_File = fopen(path, mode == FileIoMode::Text ? "wt" : "wb");
+        m_File = fopen(path.data(), mode == FileIoMode::Text ? "wt" : "wb");
         ret = (m_File != nullptr);
 
         return ret;

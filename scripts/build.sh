@@ -52,7 +52,7 @@ echo "Build dir: [${work_dir}]"
 aten_image="$(docker images -q aten:latest 2>/dev/null)"
 
 CONTAINER_NAME="aten"
-WORKSPACE="/work"
+WORKSPACE="${work_dir}"
 
 cmake_cmd="cmake \
   -D CMAKE_BUILD_TYPE=${build_type} \
@@ -71,7 +71,7 @@ if [[ -z "${aten_image}" ]]; then
 else
   kill_container "${CONTAINER_NAME}"
 
-  launch_docker "${WORKSPACE}" "${aten_image}" \
+  launch_docker "${CONTAINER_NAME}" "${aten_image}" \
     "-d \
      -w ${WORKSPACE} \
      --mount type=bind,src=${work_dir},target=${WORKSPACE} \

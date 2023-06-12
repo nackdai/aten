@@ -88,6 +88,10 @@ namespace AT_NAME
         case aten::MaterialType::Disney:
             AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
             break;
+        default:
+            AT_ASSERT(false);
+            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, is_light_path);
+            break;
         }
     }
 
@@ -146,6 +150,10 @@ namespace AT_NAME
         case aten::MaterialType::Disney:
             AT_NAME::DisneyBRDF::sample(result, mtrl, normal, wi, orgnormal, sampler, u, v, false);
             break;
+        default:
+            AT_ASSERT(false);
+            AT_NAME::lambert::sample(result, mtrl, normal, wi, orgnormal, sampler, externalAlbedo, false);
+            break;
         }
     }
 
@@ -201,6 +209,10 @@ namespace AT_NAME
         case aten::MaterialType::Disney:
             pdf = AT_NAME::DisneyBRDF::pdf(mtrl, normal, wi, wo, u, v);
             break;
+        default:
+            AT_ASSERT(false);
+            pdf = AT_NAME::lambert::pdf(normal, wo);
+            break;
         }
 
         return pdf;
@@ -243,6 +255,9 @@ namespace AT_NAME
             return AT_NAME::CarPaint::sampleDirection(mtrl, normal, wi, u, v, sampler, pre_sampled_r);
         case aten::MaterialType::Disney:
             return AT_NAME::DisneyBRDF::sampleDirection(mtrl, normal, wi, u, v, sampler);
+        default:
+            AT_ASSERT(false);
+            return AT_NAME::lambert::sampleDirection(normal, sampler);
         }
 
         return aten::vec3(0, 1, 0);
@@ -285,6 +300,9 @@ namespace AT_NAME
             return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, pre_sampled_r);
         case aten::MaterialType::Disney:
             return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
+        default:
+            AT_ASSERT(false);
+            return AT_NAME::lambert::bsdf(mtrl, u, v);
         }
 
         return aten::vec3();
@@ -328,6 +346,9 @@ namespace AT_NAME
             return AT_NAME::CarPaint::bsdf(mtrl, normal, wi, wo, u, v, externalAlbedo, pre_sampled_r);
         case aten::MaterialType::Disney:
             return AT_NAME::DisneyBRDF::bsdf(mtrl, normal, wi, wo, u, v);
+        default:
+            AT_ASSERT(false);
+            return AT_NAME::lambert::bsdf(mtrl, externalAlbedo);
         }
 
         return aten::vec3();

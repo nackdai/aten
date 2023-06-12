@@ -1,5 +1,5 @@
-ARG base_from=ubuntu:20.04
-FROM ${base_from}
+ARG from=ubuntu:20.04
+FROM ${from}
 
 ENV DEBIAN_FRONTEND=noninteractive
 

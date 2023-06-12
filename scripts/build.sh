@@ -62,8 +62,11 @@ cmake_cmd="cmake \
   -G Ninja .."
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+
 # shellcheck disable=SC1090
 source "${SCRIPT_DIR}/docker_util"
+
+trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
 
 if [[ -z "${aten_image}" ]]; then
   echo "No docker image aten_dev::latest"

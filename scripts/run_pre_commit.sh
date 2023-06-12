@@ -23,6 +23,7 @@ CONTAINER_NAME="aten_dev"
 WORKSPACE="/work"
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+
 # shellcheck disable=SC1090
 source "${SCRIPT_DIR}/docker_util"
 

@@ -38,8 +38,13 @@ jobs:
           echo "${diff_files[@]}"
           echo "diff_files=${diff_files[@]}" >> $GITHUB_OUTPUT
 
+      - name: Check diff files
+        if: contains(steps.getfile.outputs.diff_files, 'env/') == false
+        run: |
+          echo "Nothing to build docker image"
+          exit 0
+
       - name: Login to GitHub Container Registry
-        if: contains(steps.getfile.outputs.diff_files, 'Dockerfile') == true
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -47,24 +52,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Run the following step if Dockerfile is modified.
-      - name: Build and push base image
-        id: build_base_image
-        if: contains(steps.getfile.outputs.diff_files, 'env/aten/Dockerfile') == true
+      - name: Build images
+        id: build_image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/aten:latest ./env/aten/
+          ./env/build_docker_Image.sh -b ./env/ -t "ghcr.io/${{ github.repository }}/"
+
+      - name: Push images
+        run: |
           docker push ghcr.io/${{ github.repository }}/aten:latest
-
-      - name: Check outcome of building base image
-        run: echo ${{ steps.build_base_image.outcome }}
-
-      # Build the dev image based on base image.
-      - name: Build and push dev image
-        if: contains(steps.getfile.outputs.diff_files, 'env/dev/Dockerfile') == true || steps.build_base_image.outcome == 'success'
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}/aten_dev:latest \
-            --build-arg base_from=ghcr.io/${{ github.repository }}/aten:latest \
-            -f ./env/dev/Dockerfile .
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest
+
+          nvidia_cudagl_tag=$(docker images "ghcr.io/${{ github.repository }}/nvidia/cudagl" --format "{{.Tag}}")
+          docker push "ghcr.io/${{ github.repository }}/nvidia/cudagl:${nvidia_cudagl_tag}"
 
   ci:
     name: ci

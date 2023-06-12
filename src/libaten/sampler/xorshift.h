@@ -27,8 +27,7 @@ namespace aten {
         // [0, 1]
         virtual real nextSample() override final
         {
-            //return (real)next() / (UINT_MAX + 1.0);
-            return (real)next() / UINT_MAX;
+            return static_cast<real>(next() / UINT_MAX);
         }
 
         virtual void init(uint32_t initial_seed, const void* data = nullptr) override final

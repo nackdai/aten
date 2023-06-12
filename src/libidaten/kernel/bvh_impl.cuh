@@ -98,8 +98,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
     float4 node1;    // xyz: boxmax, z: hit
     float4 attrib;    // x:object_id, y:primid, z:exid,    w:meshid
 
-    float4 boxmin;
-    float4 boxmax;
+    float3 boxmin;
+    float3 boxmax;
 
     real t = AT_MATH_INF;
 
@@ -116,8 +116,8 @@ AT_CUDA_INLINE __device__ bool intersectBVH(
         node1 = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 1);    // xyz : boxmin, z: hit
         attrib = tex1Dfetch<float4>(node, aten::GPUBvhNodeSize * nodeid + 2);    // x : object_id, y : primid, z : exid, w : meshid
 
-        boxmin = make_float4(node0.x, node0.y, node0.z, 1.0f);
-        boxmax = make_float4(node1.x, node1.y, node1.z, 1.0f);
+        boxmin = make_float3(node0.x, node0.y, node0.z);
+        boxmax = make_float3(node1.x, node1.y, node1.z);
 
         bool isHit = false;
 

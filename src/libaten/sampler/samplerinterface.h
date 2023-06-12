@@ -45,6 +45,6 @@ namespace aten {
 
     inline real drand48()
     {
-        return (real)::rand() / RAND_MAX;
+        return static_cast<real>(::rand() / RAND_MAX);
     }
 }

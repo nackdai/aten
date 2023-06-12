@@ -18,70 +18,118 @@ set(CUDA_NVCC_FLAGS
     -rdc=true
     -use_fast_math
     --expt-relaxed-constexpr
+    -std=c++17
     -gencode
     arch=compute_${CUDA_TARGET_COMPUTE_CAPABILITY},code=sm_${CUDA_TARGET_COMPUTE_CAPABILITY}
-    -Xcompiler=-std=c++14)
+    -Xcompiler=-std=c++17)
 
 message("nvcc_flags " ${CUDA_NVCC_FLAGS})
 
 add_definitions(-D__AT_CUDA__)
 
 set_source_files_properties(
-  ../libaten/material/material.cpp
+  ../libaten/camera/pinhole.cpp
+  ../libaten/geometry/sphere.cpp
+  ../libaten/material/FlakesNormal.cpp
   ../libaten/material/beckman.cpp
   ../libaten/material/blinn.cpp
   ../libaten/material/car_paint.cpp
+  ../libaten/material/disney_brdf.cpp
   ../libaten/material/ggx.cpp
+  ../libaten/material/lambert_refraction.cpp
+  ../libaten/material/material.cpp
+  ../libaten/material/microfacet_refraction.cpp
   ../libaten/material/oren_nayar.cpp
   ../libaten/material/refraction.cpp
   ../libaten/material/retroreflective.cpp
   ../libaten/material/specular.cpp
-  ../libaten/material/FlakesNormal.cpp
   ../libaten/material/velvet.cpp
-  ../libaten/material/lambert_refraction.cpp
-  ../libaten/material/microfacet_refraction.cpp
-  ../libaten/material/disney_brdf.cpp
-  ../libaten/geometry/sphere.cpp
-  ../libaten/camera/pinhole.cpp
   PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 
 # Add library to build.
 cuda_add_library(
   ${PROJECT_NAME}
   STATIC
-  ../libaten/os/linux/misc/timer_linux.cpp
-  ../libaten/geometry/sphere.cpp
-  ../libaten/misc/color.cpp
-  ../libaten/renderer/envmap.cpp
-  ../libaten/sampler/sobol.cpp
+  ../libaten/camera/camera.h
   ../libaten/camera/pinhole.cpp
-  ../libaten/light/arealight.cpp
-  ../libaten/light/ibl.cpp
-  ../libaten/material/beckman.cpp
-  ../libaten/material/blinn.cpp
-  ../libaten/material/car_paint.cpp
-  ../libaten/material/ggx.cpp
-  ../libaten/material/material.cpp
-  ../libaten/material/oren_nayar.cpp
-  ../libaten/material/refraction.cpp
-  ../libaten/material/retroreflective.cpp
-  ../libaten/material/specular.cpp
+  ../libaten/camera/pinhole.h
+  ../libaten/defs.h
+  ../libaten/geometry/EvaluateHitResult.h
+  ../libaten/geometry/PolygonObject.h
+  ../libaten/geometry/sphere.cpp
+  ../libaten/geometry/sphere.h
+  ../libaten/geometry/triangle.h
+  ../libaten/light/arealight.h
+  ../libaten/light/directionallight.h
+  ../libaten/light/ibl.h
+  ../libaten/light/light.h
+  ../libaten/light/light_impl.h
+  ../libaten/light/pointlight.h
+  ../libaten/light/spotlight.h
   ../libaten/material/FlakesNormal.cpp
-  ../libaten/material/velvet.cpp
-  ../libaten/material/lambert_refraction.cpp
-  ../libaten/material/microfacet_refraction.cpp
-  ../libaten/material/layer.cpp
+  ../libaten/material/FlakesNormal.h
+  ../libaten/material/beckman.cpp
+  ../libaten/material/beckman.h
+  ../libaten/material/blinn.cpp
+  ../libaten/material/blinn.h
+  ../libaten/material/car_paint.cpp
+  ../libaten/material/car_paint.h
   ../libaten/material/disney_brdf.cpp
+  ../libaten/material/disney_brdf.h
+  ../libaten/material/emissive.h
+  ../libaten/material/ggx.cpp
+  ../libaten/material/ggx.h
+  ../libaten/material/lambert.h
+  ../libaten/material/lambert_refraction.cpp
+  ../libaten/material/lambert_refraction.h
+  ../libaten/material/material.cpp
+  ../libaten/material/material.h
+  ../libaten/material/material_impl.h
+  ../libaten/material/microfacet_refraction.cpp
+  ../libaten/material/microfacet_refraction.h
+  ../libaten/material/oren_nayar.cpp
+  ../libaten/material/oren_nayar.h
+  ../libaten/material/refraction.cpp
+  ../libaten/material/refraction.h
+  ../libaten/material/retroreflective.cpp
+  ../libaten/material/retroreflective.h
+  ../libaten/material/sample_texture.h
+  ../libaten/material/specular.cpp
+  ../libaten/material/specular.h
+  ../libaten/material/velvet.cpp
+  ../libaten/material/velvet.h
+  ../libaten/math/aabb.h
+  ../libaten/math/intersect.h
   ../libaten/math/mat4.cpp
-  idaten.h
-  idaten_namespace.h
-  aten4idaten.h
+  ../libaten/math/mat4.h
+  ../libaten/math/math.h
+  ../libaten/math/ray.h
+  ../libaten/math/vec3.h
+  ../libaten/math/vec4.h
+  ../libaten/misc/color.cpp
+  ../libaten/misc/color.h
+  ../libaten/misc/timer.h
+  ../libaten/misc/tuple.h
+  ../libaten/os/linux/misc/timer_linux.cpp
+  ../libaten/renderer/aov.h
+  ../libaten/renderer/envmap.cpp
+  ../libaten/renderer/envmap.h
+  ../libaten/renderer/feature_line.h
+  ../libaten/sampler/cmj.h
+  ../libaten/sampler/sampler.h
+  ../libaten/sampler/sobol.cpp
+  ../libaten/sampler/sobol.h
+  ../libaten/sampler/sobolproxy.h
+  ../libaten/sampler/wanghash.h
+  ../libaten/scene/hitable.h
+  ../libaten/scene/scene.h
+  ../libaten/types.h
   ao/ao.cpp
   ao/ao.cu
   ao/ao.h
+  aten4idaten.h
   cuda/cudaGLresource.cpp
   cuda/cudaGLresource.h
-  cuda/cudaLayeredTextureResource.cpp
   cuda/cudaTextureResource.cpp
   cuda/cudaTextureResource.h
   cuda/cudadefs.h
@@ -90,7 +138,8 @@ cuda_add_library(
   cuda/cudamemory.h
   cuda/cudautil.h
   cuda/helper_math.h
-  cuda/multigpu.h
+  idaten.h
+  idaten_namespace.h
   kernel/GenMipMaps.cu
   kernel/GenMipMaps.h
   kernel/LBVHBuilder.cu
@@ -107,21 +156,17 @@ cuda_add_library(
   kernel/bvh.cu
   kernel/bvh.cuh
   kernel/bvh_impl.cuh
-  kernel/context.cuh
+  kernel/device_scene_context.cuh
   kernel/idatendefs.cuh
   kernel/intersect.cu
   kernel/intersect.cuh
   kernel/intersect_impl.cuh
   kernel/intersecttype.h
-  kernel/light.cu
-  kernel/light.cuh
-  kernel/light_impl.cuh
-  kernel/material.cu
   kernel/material.cuh
-  kernel/material_impl.cuh
   kernel/pathtracing.cpp
   kernel/pathtracing.h
   kernel/pathtracing_impl.cu
+  kernel/persistent_thread.h
   kernel/pt_common.h
   kernel/pt_params.h
   kernel/pt_standard_impl.cu
@@ -144,21 +189,16 @@ cuda_add_library(
   kernel/stackless_qbvh.cuh
   kernel/stackless_qbvh_impl.cuh
   kernel/tex_viewer.cu
-  # TODO multigpu/pt_multigpu.cpp
-  multigpu/pt_multigpu.h
-  multigpu/renderer_multigpu.h
-  multigpu/svgf_multigpu.cpp
-  multigpu/svgf_multigpu.h
   npr/npr_pathtracing.cu
   npr/npr_pathtracing.h
   restir/reservior.h
-  restir/restir.cu
-  restir/restir_debug.cu
-  restir/restir_reuse.cu
   restir/restir.cpp
+  restir/restir.cu
   restir/restir.h
+  restir/restir_debug.cu
   restir/restir_info.h
   restir/restir_pt.cu
+  restir/restir_reuse.cu
   restir/restir_sample_light.cuh
   svgf/svgf.cpp
   svgf/svgf.h

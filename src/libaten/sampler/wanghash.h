@@ -23,7 +23,7 @@ namespace aten {
         // [0, 1]
         AT_VIRTUAL_OVERRIDE_FINAL(AT_DEVICE_API real nextSample())
         {
-            auto ret = (real)next(m_seed) / UINT_MAX;
+            auto ret = static_cast<real>(next(m_seed) / UINT_MAX);
             m_seed += 1;
             return ret;
         }

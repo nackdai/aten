@@ -55,13 +55,12 @@ jobs:
       - name: Build images
         id: build_image
         run: |
-          ./env/build_docker_Image.sh -b ./env/ -t "ghcr.io/${{ github.repository }}/"
+          ./env/build_docker_Image.sh -b ./env/ -p "ghcr.io/${{ github.repository }}/"
 
       - name: Push images
         run: |
           docker push ghcr.io/${{ github.repository }}/aten:latest
           docker push ghcr.io/${{ github.repository }}/aten_dev:latest
-
           nvidia_cudagl_tag=$(docker images "ghcr.io/${{ github.repository }}/nvidia/cudagl" --format "{{.Tag}}")
           docker push "ghcr.io/${{ github.repository }}/nvidia/cudagl:${nvidia_cudagl_tag}"
 

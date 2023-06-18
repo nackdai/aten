@@ -76,4 +76,7 @@ option(ASSIMP_BUILD_X3D_IMPORTER "" OFF)
 option(ASSIMP_BUILD_3MF_IMPORTER "" OFF)
 option(ASSIMP_BUILD_MMD_IMPORTER "" OFF)
 
+# NOTE:
+# clang newer than 13 deals with warnings "ordered-compare-function-pointers" "unused-but-set-variable" as error.
+# In order to disable it, specify -Wno-error=ordered-compare-function-pointers as compiler option.
 add_subdirectory(assimp)

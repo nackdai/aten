@@ -12,7 +12,7 @@ echo "Compute Capability is [${compute_capability}]"
 
 cmake \
   -D CMAKE_BUILD_TYPE="${build_type}" \
-  -D CMAKE_CXX_COMPILER=/usr/bin/clang++-9 \
-  -D CUDA_HOST_COMPILER=/usr/bin/clang-9 \
+  -D CMAKE_CXX_COMPILER=/usr/bin/clang++-12 \
+  -D CUDA_HOST_COMPILER=/usr/bin/clang-12 \
   -D CUDA_TARGET_COMPUTE_CAPABILITY="${compute_capability}" \
   -L -G Ninja ..

@@ -99,9 +99,6 @@ void display(aten::window *wnd)
         dst.buffer = &g_buffer;
     }
 
-    dst.geominfo.albedo_vis = &g_buffer;
-    dst.geominfo.depthMax = 1000;
-
     aten::timer timer;
     timer.begin();
 

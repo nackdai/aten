@@ -22,14 +22,6 @@ namespace aten
         uint32_t mltNum{ 1 };
         Film* buffer{ nullptr };
         Film* variance{ nullptr };
-
-        struct {
-            Film* nml_depth{ nullptr };        ///< Normal and Depth / rgb : normal, a : depth
-            Film* albedo_vis{ nullptr };    ///< Albedo and Visibility / rgb : albedo, a : visibility
-            Film* ids{ nullptr };            ///< Geometry Id / r : shape id, g : material id
-            real depthMax{ 1 };
-            bool needNormalize{ true };
-        } geominfo;
     };
 
     class Renderer {

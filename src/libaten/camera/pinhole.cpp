@@ -6,7 +6,7 @@ namespace AT_NAME {
         const aten::vec3& lookat,
         const aten::vec3& up,
         real vfov,    // vertical fov.
-        uint32_t width, uint32_t height)
+        int32_t width, int32_t height)
     {
         // 値を保持.
         m_at = lookat;

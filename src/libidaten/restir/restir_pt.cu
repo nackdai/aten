@@ -15,7 +15,6 @@
 #include "cuda/cudamemory.h"
 
 __global__ void shade(
-    idaten::TileDomain tileDomain,
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
     aten::mat4 mtxW2C,
@@ -111,12 +110,10 @@ __global__ void shade(
 
     if (bounce == 0) {
         // Store AOV.
-        const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
-
         AT_NAME::FillBasicAOVs(
-            aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
-            aovTexclrMeshid[_idx], albedo, isect);
-        aovTexclrMeshid[_idx].w = isect.mtrlid;
+            aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
+            aovTexclrMeshid[idx], albedo, isect);
+        aovTexclrMeshid[idx].w = isect.mtrlid;
     }
 
     // Implicit conection to light.
@@ -279,7 +276,6 @@ __global__ void hitShadowRay(
 }
 
 __global__ void gather(
-    idaten::TileDomain tileDomain,
     cudaSurfaceObject_t dst,
     const idaten::Path paths,
     bool enableProgressive,
@@ -288,20 +284,16 @@ __global__ void gather(
     auto ix = blockIdx.x * blockDim.x + threadIdx.x;
     auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+    if (ix >= width || iy >= height) {
         return;
     }
 
-    auto idx = getIdx(ix, iy, tileDomain.w);
+    auto idx = getIdx(ix, iy, width);
 
     float4 c = paths.contrib[idx].v;
     int32_t sample = c.w;
 
     float4 contrib = c;
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
-    idx = getIdx(ix, iy, width);
 
     if (enableProgressive) {
         float4 data;
@@ -373,13 +365,12 @@ namespace idaten
 
         aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
 
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_tileDomain,
             aov_.normal_depth().ptr(),
             aov_.albedo_meshid().ptr(),
             mtxW2C,
@@ -403,14 +394,15 @@ namespace idaten
 
         checkCudaKernel(shade);
 
-        onShadeByShadowRay(bounce, texVtxPos);
+        onShadeByShadowRay(width, height, bounce, texVtxPos);
     }
 
     void ReSTIRPathTracing::onShadeByShadowRay(
+        int32_t width, int32_t height,
         int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
@@ -438,11 +430,10 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         gather << <grid, block, 0, m_stream >> > (
-            m_tileDomain,
             outputSurf,
             m_paths,
             m_enableProgressive,

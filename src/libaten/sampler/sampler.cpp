@@ -7,7 +7,7 @@ namespace aten {
     static std::vector<uint32_t> g_random;
 
     void initSampler(
-        uint32_t width, uint32_t height,
+        int32_t width, int32_t height,
         int32_t seed/*= 0*/,
         bool needInitHalton/*= false*/)
     {

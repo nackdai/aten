@@ -17,16 +17,16 @@ namespace aten
 
     public:
         texture() = default;
-        texture(uint32_t width, uint32_t height, uint32_t channels, std::string_view name);
+        texture(int32_t width, int32_t height, uint32_t channels, std::string_view name);
 
         ~texture();
 
     private:
         static std::shared_ptr<texture> create(
-            uint32_t width, uint32_t height, uint32_t channels, std::string_view name);
+            int32_t width, int32_t height, uint32_t channels, std::string_view name);
 
     public:
-        void init(uint32_t width, uint32_t height, uint32_t channels);
+        void init(int32_t width, int32_t height, uint32_t channels);
 
         vec4 at(real u, real v) const
         {

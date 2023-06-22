@@ -17,17 +17,17 @@
 namespace ao {
     __global__ void shadeMissAO(
         bool isFirstBounce,
-        idaten::TileDomain tileDomain,
+        int32_t width, int32_t height,
         idaten::Path paths)
     {
         const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        if (ix >= width || iy >= height) {
             return;
         }
 
-        const auto idx = getIdx(ix, iy, tileDomain.w);
+        const auto idx = getIdx(ix, iy, width);
 
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (isFirstBounce) {
@@ -42,7 +42,6 @@ namespace ao {
 
     __global__ void shadeAO(
         int32_t ao_num_rays, float ao_radius,
-        idaten::TileDomain tileDomain,
         uint32_t frame,
         idaten::Path paths,
         int32_t* hitindices,
@@ -185,14 +184,14 @@ namespace idaten {
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         bool isFirstBounce = bounce == 0;
 
         ao::shadeMissAO << <grid, block >> > (
             isFirstBounce,
-            m_tileDomain,
+            width, height,
             m_paths);
 
         checkCudaKernel(shadeMiss);
@@ -204,7 +203,7 @@ namespace idaten {
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
-        dim3 blockPerGrid((m_tileDomain.w * m_tileDomain.h + 64 - 1) / 64);
+        dim3 blockPerGrid((width * height + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
@@ -212,7 +211,6 @@ namespace idaten {
         ao::shadeAO << <blockPerGrid, threadPerBlock >> > (
             //shade<true> << <1, 1 >> > (
             m_ao_num_rays, m_ao_radius,
-            m_tileDomain,
             m_frame,
             m_paths,
             m_hitidx.ptr(), hitcount.ptr(),

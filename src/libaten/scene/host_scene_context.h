@@ -177,7 +177,7 @@ namespace aten
         int32_t findPolygonalTransformableOrderFromPointer(const void* p) const;
 
         std::shared_ptr<texture> createTexture(
-            uint32_t width, uint32_t height,
+            int32_t width, int32_t height,
             uint32_t channels,
             std::string_view name);
 

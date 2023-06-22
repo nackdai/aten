@@ -14,7 +14,7 @@ namespace idaten
 
     public:
         virtual void render(
-            const TileDomain& tileDomain,
+            int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce) override;
 

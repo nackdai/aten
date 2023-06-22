@@ -45,7 +45,7 @@ namespace idaten {
 #endif
 
     void AORenderer::render(
-        const TileDomain& tileDomain,
+        int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce)
     {
@@ -58,12 +58,7 @@ namespace idaten {
         }
 #endif
 
-        m_tileDomain = tileDomain;
-
         int32_t bounce = 0;
-
-        int32_t width = tileDomain.w;
-        int32_t height = tileDomain.h;
 
         m_compaction.init(width * height, 1024);
 
@@ -109,6 +104,7 @@ namespace idaten {
             int32_t seed = time.milliSeconds;
 
             generatePath(
+                width, height,
                 false,
                 i, maxBounce,
                 seed);

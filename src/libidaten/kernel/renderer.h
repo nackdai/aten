@@ -8,18 +8,6 @@
 
 namespace idaten
 {
-    struct TileDomain {
-        int32_t x;
-        int32_t y;
-        int32_t w;
-        int32_t h;
-
-        TileDomain() {}
-        TileDomain(int32_t _x, int32_t _y, int32_t _w, int32_t _h)
-            : x(_x), y(_y), w(_w), h(_h)
-        {}
-    };
-
     struct EnvmapResource {
         int32_t idx{ -1 };
         real avgIllum;
@@ -39,7 +27,7 @@ namespace idaten
 
     public:
         virtual void render(
-            const TileDomain& tileDomain,
+            int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce) = 0;
 

@@ -13,7 +13,7 @@ namespace aten {
 
         void init(
             vec3 origin, vec3 lookat, vec3 up,
-            uint32_t width, uint32_t height)
+            int32_t width, int32_t height)
         {
             auto aspect = width / (real)height;
             AT_ASSERT(aspect == 2);

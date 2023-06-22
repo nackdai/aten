@@ -426,7 +426,7 @@ namespace aten
 
     std::shared_ptr<camera> readCamera(
         const tinyxml2::XMLElement* root,
-        uint32_t width, uint32_t height)
+        int32_t width, int32_t height)
     {
         auto camRoot = root->FirstChildElement("camera");
 

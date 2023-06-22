@@ -64,9 +64,8 @@ void onRun(aten::window *window)
     {
         // AO
         g_tracer.render(
-            idaten::TileDomain(0, 0, WIDTH, HEIGHT),
-            1,
-            5);
+            WIDTH, HEIGHT,
+            1, 5);
     }
     else
     {

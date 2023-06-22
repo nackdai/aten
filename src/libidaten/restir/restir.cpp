@@ -59,7 +59,7 @@ namespace idaten
     static bool doneSetStackSize = false;
 
     void ReSTIRPathTracing::render(
-        const TileDomain& tileDomain,
+        int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce)
     {
@@ -73,9 +73,6 @@ namespace idaten
 #endif
 
         int32_t bounce = 0;
-
-        int32_t width = tileDomain.w;
-        int32_t height = tileDomain.h;
 
         m_isects.init(width * height);
         m_rays.init(width * height);
@@ -136,7 +133,6 @@ namespace idaten
         clearPath();
 
         onRender(
-            tileDomain,
             width, height, maxSamples, maxBounce,
             outputSurf,
             vtxTexPos,
@@ -157,7 +153,6 @@ namespace idaten
     }
 
     void ReSTIRPathTracing::onRender(
-        const TileDomain& tileDomain,
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce,
@@ -165,8 +160,6 @@ namespace idaten
         cudaTextureObject_t vtxTexPos,
         cudaTextureObject_t vtxTexNml)
     {
-        m_tileDomain = tileDomain;
-
         static const int32_t rrBounce = 3;
 
         // Set bounce count to 1 forcibly, aov render mode.
@@ -181,6 +174,7 @@ namespace idaten
             //int32_t seed = 0;
 
             generatePath(
+                width, height,
                 m_mode == Mode::AOVar,
                 i, maxBounce,
                 seed);

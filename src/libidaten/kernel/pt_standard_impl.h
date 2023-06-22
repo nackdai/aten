@@ -59,6 +59,7 @@ namespace idaten {
         virtual void clearPath();
 
         virtual void generatePath(
+            int32_t width, int32_t height,
             bool needFillAOV,
             int32_t sample, int32_t maxBounce,
             int32_t seed);
@@ -75,14 +76,10 @@ namespace idaten {
             int32_t width, int32_t height,
             int32_t bounce,
             idaten::TypedCudaMemory<float4>& aovNormalDepth,
-            idaten::TypedCudaMemory<float4>& aovTexclrMeshid,
-            int32_t offsetX = -1,
-            int32_t offsetY = -1);
+            idaten::TypedCudaMemory<float4>& aovTexclrMeshid);
 
     protected:
         uint32_t m_frame{ 1 };
-
-        TileDomain m_tileDomain;
 
         cudaStream_t m_stream{ (cudaStream_t)0 };
 

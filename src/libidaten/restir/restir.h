@@ -64,7 +64,7 @@ namespace idaten
         virtual ~ReSTIRPathTracing() = default;
 
         virtual void render(
-            const TileDomain& tileDomain,
+            int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce) override;
 
@@ -196,7 +196,6 @@ namespace idaten
         void initReSTIR(int32_t width, int32_t height);
 
         void onRender(
-            const TileDomain& tileDomain,
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
@@ -211,16 +210,13 @@ namespace idaten
 
         void missShade(
             int32_t width, int32_t height,
-            int32_t bounce,
-            int32_t offsetX = -1,
-            int32_t offsetY = -1)
+            int32_t bounce)
         {
             StandardPT::missShade(
                 width, height,
                 bounce,
                 aov_.normal_depth(),
-                aov_.albedo_meshid(),
-                offsetX, offsetY);
+                aov_.albedo_meshid());
         }
 
         virtual void onShade(
@@ -240,6 +236,7 @@ namespace idaten
             cudaTextureObject_t texVtxNml);
 
         void onShadeByShadowRay(
+            int32_t width, int32_t height,
             int32_t bounce,
             cudaTextureObject_t texVtxPos);
 

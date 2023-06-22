@@ -35,7 +35,6 @@ __global__ void initReSTIRParameters(
 }
 
 __global__ void shade(
-    idaten::TileDomain tileDomain,
     idaten::Reservoir* reservoirs,
     idaten::ReSTIRInfo* restir_infos,
     float4* aovNormalDepth,
@@ -155,11 +154,8 @@ __global__ void shade(
 
     if (bounce == 0) {
         // Store AOV.
-        int32_t ix = idx % tileDomain.w;
-        int32_t iy = idx / tileDomain.w;
-
-        ix += tileDomain.x;
-        iy += tileDomain.y;
+        int32_t ix = idx % width;
+        int32_t iy = idx / width;
 
         const auto _idx = getIdx(ix, iy, width);
 
@@ -472,8 +468,8 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         initReSTIRParameters << < grid, block, 0, m_stream >> > (
             width, height,
@@ -510,13 +506,12 @@ namespace idaten
 
         aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
 
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_tileDomain,
             m_reservoirs[m_curReservoirPos].ptr(),
             m_restir_infos.ptr(),
             aov_.normal_depth().ptr(),
@@ -554,7 +549,7 @@ namespace idaten
         cudaTextureObject_t texVtxPos,
         cudaTextureObject_t texVtxNml)
     {
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();

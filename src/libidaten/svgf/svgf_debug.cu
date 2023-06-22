@@ -15,7 +15,6 @@
 #include "aten4idaten.h"
 
 __global__ void fillAOV(
-    idaten::TileDomain tileDomain,
     cudaSurfaceObject_t dst,
     idaten::SVGFPathTracing::AOVMode mode,
     int32_t width, int32_t height,
@@ -32,7 +31,7 @@ __global__ void fillAOV(
     auto ix = blockIdx.x * blockDim.x + threadIdx.x;
     auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+    if (ix >= width || iy >= height) {
         return;
     }
 
@@ -48,9 +47,6 @@ __global__ void fillAOV(
         aten::vec3( 71, 234, 126),
         aten::vec3(124,  83,  53),
     };
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
 
     const auto idx = getIdx(ix, iy, width);
 
@@ -191,8 +187,8 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
@@ -201,7 +197,6 @@ namespace idaten
         auto gbuffer = m_motionDepthBuffer.bind();
 
         fillAOV << <grid, block >> > (
-            m_tileDomain,
             outputSurf,
             m_aovMode,
             width, height,

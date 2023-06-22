@@ -9,7 +9,7 @@
 
 namespace aten
 {
-    texture::texture(uint32_t width, uint32_t height, uint32_t channels, std::string_view name)
+    texture::texture(int32_t width, int32_t height, uint32_t channels, std::string_view name)
     {
         init(width, height, channels);
         if (!name.empty()) {
@@ -23,7 +23,7 @@ namespace aten
     }
 
     std::shared_ptr<texture> texture::create(
-        uint32_t width, uint32_t height,
+        int32_t width, int32_t height,
         uint32_t channels,
         std::string_view name)
     {
@@ -33,7 +33,7 @@ namespace aten
         return ret;
     }
 
-    void texture::init(uint32_t width, uint32_t height, uint32_t channels)
+    void texture::init(int32_t width, int32_t height, uint32_t channels)
     {
         if (m_colors.empty()) {
             m_width = width;

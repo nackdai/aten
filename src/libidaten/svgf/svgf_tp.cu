@@ -92,7 +92,6 @@ inline __device__ float4 sampleBilinear(
 }
 
 __global__ void temporalReprojection(
-    idaten::TileDomain tileDomain,
     const float nThreshold,
     const float zThreshold,
     const float4* __restrict__ contribs,
@@ -112,12 +111,9 @@ __global__ void temporalReprojection(
     int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
     int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+    if (ix >= width || iy >= height) {
         return;
     }
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
 
     const auto idx = getIdx(ix, iy, width);
 
@@ -156,8 +152,8 @@ __global__ void temporalReprojection(
 #pragma unroll
     for (int32_t y = -1; y <= 1; y++) {
         for (int32_t x = -1; x <= 1; x++) {
-            int32_t xx = clamp(ix + x, 0, width - 1);
-            int32_t yy = clamp(iy + y, 0, height - 1);
+            int32_t xx = clamp(ix + x, 0, static_cast<int32_t>(width - 1));
+            int32_t yy = clamp(iy + y, 0, static_cast<int32_t>(height - 1));
 
             float4 motionDepth;
             surf2Dread(&motionDepth, motionDetphBuffer, ix * sizeof(float4), iy);
@@ -166,8 +162,8 @@ __global__ void temporalReprojection(
             int32_t px = (int32_t)(xx + motionDepth.x * width);
             int32_t py = (int32_t)(yy + motionDepth.y * height);
 
-            px = clamp(px, 0, width - 1);
-            py = clamp(py, 0, height - 1);
+            px = clamp(px, 0, static_cast<int32_t>(width - 1));
+            py = clamp(py, 0, static_cast<int32_t>(height - 1));
 
             int32_t pidx = getIdx(px, py, width);
 
@@ -259,7 +255,6 @@ __global__ void temporalReprojection(
 }
 
 __global__ void dilateWeight(
-    idaten::TileDomain tileDomain,
     float4* aovMomentTemporalWeight,
     const float4* __restrict__ aovTexclrMeshid,
     int32_t width, int32_t height)
@@ -267,12 +262,9 @@ __global__ void dilateWeight(
     int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
     int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+    if (ix >= width || iy >= height) {
         return;
     }
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
 
     auto idx = getIdx(ix, iy, width);
 
@@ -340,8 +332,8 @@ inline __device__ float3 medianFilter(
 
     for (int32_t y = -1; y <= 1; y++) {
         for (int32_t x = -1; x <= 1; x++) {
-            int32_t xx = clamp(ix + x, 0, width - 1);
-            int32_t yy = clamp(iy + y, 0, height - 1);
+            int32_t xx = clamp(ix + x, 0, static_cast<int32_t>(width - 1));
+            int32_t yy = clamp(iy + y, 0, static_cast<int32_t>(height - 1));
 
             int32_t pidx = getIdx(xx, yy, width);
 
@@ -430,8 +422,8 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
@@ -444,7 +436,6 @@ namespace idaten
 
         temporalReprojection << <grid, block, 0, m_stream >> > (
         //temporalReprojection << <1, 1 >> > (
-            m_tileDomain,
             m_nmlThresholdTF,
             m_depthThresholdTF,
             m_tmpBuf.ptr(),
@@ -476,7 +467,6 @@ namespace idaten
 #endif
 
         dilateWeight << <grid, block, 0, m_stream >> > (
-            m_tileDomain,
             curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
             curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             width, height);

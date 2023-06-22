@@ -10,7 +10,6 @@
 #include "aten4idaten.h"
 
 __global__ void varianceEstimation(
-    idaten::TileDomain tileDomain,
     cudaSurfaceObject_t dst,
     const float4* __restrict__ aovNormalDepth,
     float4* aovMomentTemporalWeight,
@@ -23,12 +22,9 @@ __global__ void varianceEstimation(
     int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
     int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+    if (ix >= width || iy >= height) {
         return;
     }
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
 
     const int32_t idx = getIdx(ix, iy, width);
 
@@ -137,8 +133,8 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         float cameraDistance = height / (2.0f * aten::tan(0.5f * m_cam.vfov));
 
@@ -147,7 +143,6 @@ namespace idaten
 
         varianceEstimation << <grid, block, 0, m_stream >> > (
         //varianceEstimation << <1, 1 >> > (
-            m_tileDomain,
             outputSurf,
             curaov.get<AOVBuffer::NormalDepth>().ptr(),
             curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),

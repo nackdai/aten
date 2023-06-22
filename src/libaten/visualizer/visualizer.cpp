@@ -326,7 +326,7 @@ namespace aten
         takeScreenshot(filename, m_width, m_height);
     }
 
-    void visualizer::takeScreenshot(std::string_view filename, uint32_t width, uint32_t height)
+    void visualizer::takeScreenshot(std::string_view filename, int32_t width, int32_t height)
     {
         CALL_GL_API(::glFlush());
         CALL_GL_API(::glFinish());

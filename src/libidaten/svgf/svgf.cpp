@@ -67,7 +67,7 @@ namespace idaten
     static bool doneSetStackSize = false;
 
     void SVGFPathTracing::render(
-        const TileDomain& tileDomain,
+        int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce)
     {
@@ -81,9 +81,6 @@ namespace idaten
 #endif
 
         int32_t bounce = 0;
-
-        int32_t width = tileDomain.w;
-        int32_t height = tileDomain.h;
 
         m_isects.init(width * height);
         m_rays.init(width * height);
@@ -134,101 +131,29 @@ namespace idaten
             }
         }
 
-        if (width > 1280 || height > 720) {
-            int32_t w = (width + 1) / 2;
-            int32_t h = (height + 1) / 2;
+        m_hitbools.init(width * height);
+        m_hitidx.init(width * height);
 
-            int32_t compactionW = std::max(w, width - w);
-            int32_t compactionH = std::max(h, height - h);
+        m_compaction.init(
+            width * height,
+            1024);
 
-            m_hitbools.init(compactionW * compactionH);
-            m_hitidx.init(compactionW * compactionH);
+        clearPath();
 
-            m_compaction.init(
-                compactionW * compactionH,
-                1024);
+        onRender(
+            width, height, maxSamples, maxBounce,
+            outputSurf,
+            vtxTexPos,
+            vtxTexNml);
 
-            for (int32_t nx = 0; nx < 2; nx++) {
-                for (int32_t ny = 0; ny < 2; ny++) {
-                    int32_t x = nx * w;
-                    int32_t y = ny * h;
+        onDenoise(
+            width, height,
+            outputSurf);
 
-                    clearPath();
-
-                    onRender(
-                        TileDomain(x, y, w, h),
-                        width, height, maxSamples, maxBounce,
-                        outputSurf,
-                        vtxTexPos,
-                        vtxTexNml);
-                }
-            }
-
-#if 1
-            for (int32_t nx = 0; nx < 2; nx++) {
-                for (int32_t ny = 0; ny < 2; ny++) {
-                    int32_t x = nx * w;
-                    int32_t y = ny * h;
-
-                    onDenoise(
-                        TileDomain(x, y, w, h),
-                        width, height,
-                        outputSurf);
-                }
-            }
-
-            if (m_mode == Mode::SVGF) {
-                static const int32_t ITER = 5;
-
-                for (int32_t i = 0; i < ITER; i++) {
-                    for (int32_t nx = 0; nx < 2; nx++) {
-                        for (int32_t ny = 0; ny < 2; ny++) {
-                            int32_t x = nx * w;
-                            int32_t y = ny * h;
-
-                            m_tileDomain = TileDomain(x, y, w, h);
-
-                            onAtrousFilterIter(
-                                i, ITER,
-                                outputSurf,
-                                width, height);
-                        }
-                    }
-                }
-
-                onCopyFromTmpBufferToAov(width, height);
-            }
-#endif
-        }
-        else {
-            m_hitbools.init(width * height);
-            m_hitidx.init(width * height);
-
-            m_compaction.init(
-                width * height,
-                1024);
-
-            clearPath();
-
-            TileDomain tileDomain(0, 0, width, height);
-
-            onRender(
-                tileDomain,
-                width, height, maxSamples, maxBounce,
-                outputSurf,
-                vtxTexPos,
-                vtxTexNml);
-
-            onDenoise(
-                tileDomain,
-                width, height,
-                outputSurf);
-
-            if (m_mode == Mode::SVGF)
-            {
-                onAtrousFilter(outputSurf, width, height);
-                onCopyFromTmpBufferToAov(width, height);
-            }
+        if (m_mode == Mode::SVGF)
+        {
+            onAtrousFilter(outputSurf, width, height);
+            onCopyFromTmpBufferToAov(width, height);
         }
 
         {
@@ -249,7 +174,6 @@ namespace idaten
     }
 
     void SVGFPathTracing::onRender(
-        const TileDomain& tileDomain,
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce,
@@ -257,8 +181,6 @@ namespace idaten
         cudaTextureObject_t vtxTexPos,
         cudaTextureObject_t vtxTexNml)
     {
-        m_tileDomain = tileDomain;
-
         static const int32_t rrBounce = 3;
 
         // Set bounce count to 1 forcibly, aov render mode.
@@ -271,6 +193,7 @@ namespace idaten
             //int32_t seed = 0;
 
             generatePath(
+                width, height,
                 m_mode == Mode::AOVar,
                 i, maxBounce,
                 seed);
@@ -320,12 +243,9 @@ namespace idaten
     }
 
     void SVGFPathTracing::onDenoise(
-        const TileDomain& tileDomain,
         int32_t width, int32_t height,
         cudaSurfaceObject_t outputSurf)
     {
-        m_tileDomain = tileDomain;
-
         if (m_mode == Mode::SVGF
             || m_mode == Mode::TF
             || m_mode == Mode::VAR)

@@ -54,7 +54,6 @@ inline __device__ float gaussFilter3x3(
 }
 
 __global__ void atrousFilter(
-    idaten::TileDomain tileDomain,
     bool isFirstIter, bool isFinalIter,
     cudaSurfaceObject_t dst,
     float4* tmpBuffer,
@@ -71,12 +70,9 @@ __global__ void atrousFilter(
     int32_t ix = blockIdx.x * blockDim.x + threadIdx.x;
     int32_t iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (ix >= tileDomain.w || iy >= tileDomain.h) {
+    if (ix >= width || iy >= height) {
         return;
     }
-
-    ix += tileDomain.x;
-    iy += tileDomain.y;
 
     const int32_t idx = getIdx(ix, iy, width);
 
@@ -285,8 +281,8 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
@@ -302,7 +298,6 @@ namespace idaten
         int32_t stepScale = 1 << iterCnt;
 
         atrousFilter << <grid, block, 0, m_stream >> > (
-            m_tileDomain,
             isFirstIter, isFinalIter,
             outputSurf,
             m_tmpBuf.ptr(),

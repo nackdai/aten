@@ -47,9 +47,7 @@ namespace idaten
 
         virtual void missShade(
             int32_t width, int32_t height,
-            int32_t bounce,
-            int32_t offsetX = -1,
-            int32_t offsetY = -1) override;
+            int32_t bounce) override;
 
     protected:
         idaten::TypedCudaMemory<SampleRayInfo> sample_ray_infos_;

@@ -18,7 +18,6 @@
 
 namespace svgf {
     __global__ void shade(
-        idaten::TileDomain tileDomain,
         float4* aovNormalDepth,
         float4* aovTexclrMeshid,
         aten::mat4 mtxW2C,
@@ -106,15 +105,13 @@ namespace svgf {
         // しかし、temporal reprojection、atrousなどのフィルタ適用時に法線を参照する際に、法線マップが細かすぎてはじかれてしまうことがある.
         // それにより、フィルタがおもったようにかからずフィルタの品質が下がってしまう問題が発生する.
         if (bounce == 0) {
-            const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
-
             // texture color
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
-                aovTexclrMeshid[_idx], texcolor, isect);
-            aovTexclrMeshid[_idx].w = isect.mtrlid;
+                aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
+                aovTexclrMeshid[idx], texcolor, isect);
+            aovTexclrMeshid[idx].w = isect.mtrlid;
 
             // For exporting separated albedo.
             shMtrls[threadIdx.x].albedoMap = -1;
@@ -122,15 +119,13 @@ namespace svgf {
         // TODO
         // How to deal Refraction?
         else if (bounce == 1 && paths.attrib[idx].mtrlType == aten::MaterialType::Specular) {
-            const auto _idx = kernel::adjustIndexWithTiledomain(idx, tileDomain, width);
-
             // texture color.
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[_idx], orienting_normal, rec, aten::mat4(),
-                aovTexclrMeshid[_idx], texcolor, isect);
-            aovTexclrMeshid[_idx].w = isect.mtrlid;
+                aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
+                aovTexclrMeshid[idx], texcolor, isect);
+            aovTexclrMeshid[idx].w = isect.mtrlid;
 
             // For exporting separated albedo.
             shMtrls[threadIdx.x].albedoMap = -1;
@@ -325,7 +320,6 @@ namespace svgf {
     }
 
     __global__ void gather(
-        idaten::TileDomain tileDomain,
         cudaSurfaceObject_t dst,
         float4* aovColorVariance,
         float4* aovMomentTemporalWeight,
@@ -336,11 +330,11 @@ namespace svgf {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        if (ix >= width || iy >= height) {
             return;
         }
 
-        auto idx = getIdx(ix, iy, tileDomain.w);
+        auto idx = getIdx(ix, iy, width);
 
         float4 c = paths.contrib[idx].v;
         int32_t sample = c.w;
@@ -349,10 +343,6 @@ namespace svgf {
         //contrib.w = sample;
 
         float lum = AT_NAME::color::luminance(contrib.x, contrib.y, contrib.z);
-
-        ix += tileDomain.x;
-        iy += tileDomain.y;
-        idx = getIdx(ix, iy, width);
 
         aovMomentTemporalWeight[idx].x += lum * lum;
         aovMomentTemporalWeight[idx].y += lum;
@@ -432,7 +422,7 @@ namespace idaten
 
         aten::mat4 mtxW2C = m_mtxV2C * m_mtxW2V;
 
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
@@ -441,7 +431,6 @@ namespace idaten
         auto& curaov = aov_[curaov_idx];
 
         svgf::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            m_tileDomain,
             curaov.get<AOVBuffer::NormalDepth>().ptr(),
             curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             mtxW2C,
@@ -465,14 +454,15 @@ namespace idaten
 
         checkCudaKernel(shade);
 
-        onShadeByShadowRay(bounce, texVtxPos);
+        onShadeByShadowRay(width, height, bounce, texVtxPos);
     }
 
     void SVGFPathTracing::onShadeByShadowRay(
+        int32_t width, int32_t height,
         int32_t bounce,
         cudaTextureObject_t texVtxPos)
     {
-        dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
 
         auto& hitcount = m_compaction.getCount();
@@ -500,14 +490,13 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         int32_t curaov_idx = getCurAovs();
         auto& curaov = aov_[curaov_idx];
 
         svgf::gather << <grid, block, 0, m_stream >> > (
-            m_tileDomain,
             outputSurf,
             curaov.get<AOVBuffer::ColorVariance>().ptr(),
             curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),

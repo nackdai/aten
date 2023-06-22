@@ -55,7 +55,7 @@ namespace idaten
 
     public:
         virtual void render(
-            const TileDomain& tileDomain,
+            int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce) override;
 
@@ -165,7 +165,6 @@ namespace idaten
 
     protected:
         void onRender(
-            const TileDomain& tileDomain,
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
@@ -174,7 +173,6 @@ namespace idaten
             cudaTextureObject_t vtxTexNml);
 
         virtual void onDenoise(
-            const TileDomain& tileDomain,
             int32_t width, int32_t height,
             cudaSurfaceObject_t outputSurf);
 
@@ -196,8 +194,7 @@ namespace idaten
                 width, height,
                 bounce,
                 curaov.get<AOVBuffer::NormalDepth>(),
-                curaov.get<AOVBuffer::AlbedoMeshId>(),
-                offsetX, offsetY);
+                curaov.get<AOVBuffer::AlbedoMeshId>());
         }
 
         virtual void onShade(
@@ -209,6 +206,7 @@ namespace idaten
             cudaTextureObject_t texVtxNml);
 
         void onShadeByShadowRay(
+            int32_t width, int32_t height,
             int32_t bounce,
             cudaTextureObject_t texVtxPos);
 

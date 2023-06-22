@@ -415,7 +415,7 @@ namespace idaten {
         cudaTextureObject_t texVtxNml)
     {
         if (is_enable_feature_line_) {
-            dim3 blockPerGrid(((m_tileDomain.w * m_tileDomain.h) + 64 - 1) / 64);
+            dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
             dim3 threadPerBlock(64);
 
             if (sample_ray_infos_.empty()) {
@@ -471,15 +471,13 @@ namespace idaten {
 
     void NPRPathTracing::missShade(
         int32_t width, int32_t height,
-        int32_t bounce,
-        int32_t offsetX,
-        int32_t offsetY)
+        int32_t bounce)
     {
         if (is_enable_feature_line_) {
             dim3 block(BLOCK_SIZE, BLOCK_SIZE);
             dim3 grid(
-                (m_tileDomain.w + block.x - 1) / block.x,
-                (m_tileDomain.h + block.y - 1) / block.y);
+                (width + block.x - 1) / block.x,
+                (height + block.y - 1) / block.y);
 
             if (sample_ray_infos_.empty()) {
                 sample_ray_infos_.init(width * height);
@@ -519,6 +517,6 @@ namespace idaten {
             }
         }
 
-        PathTracing::missShade(width, height, bounce, offsetX, offsetY);
+        PathTracing::missShade(width, height, bounce);
     }
 }

@@ -22,7 +22,6 @@
 namespace idaten {
 namespace kernel {
     __global__ void genPath(
-        idaten::TileDomain tileDomain,
         bool needFillAOV,
         idaten::Path paths,
         aten::ray* rays,
@@ -69,9 +68,6 @@ namespace kernel {
             r1 = r2 = 0.5f;
         }
 
-        ix += tileDomain.x;
-        iy += tileDomain.y;
-
         float s = (ix + r1) / (float)(camera.width);
         float t = (iy + r2) / (float)(camera.height);
 
@@ -94,7 +90,6 @@ namespace kernel {
     __device__ uint32_t g_headDev = 0;
 
     __global__ void hitTest(
-        idaten::TileDomain tileDomain,
         idaten::context ctxt,
         idaten::Path paths,
         aten::Intersection* isects,
@@ -204,11 +199,11 @@ namespace kernel {
         const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        if (ix >= width || iy >= height) {
             return;
         }
 
-        const auto idx = getIdx(ix, iy, tileDomain.w);
+        const auto idx = getIdx(ix, iy, width);
 
         paths.attrib[idx].isHit = false;
 
@@ -259,7 +254,6 @@ namespace kernel {
     }
 
     __global__ void hitTestPrimaryRayInScreenSpace(
-        idaten::TileDomain tileDomain,
         cudaSurfaceObject_t gbuffer,
         const idaten::context ctxt,
         idaten::Path paths,
@@ -271,11 +265,11 @@ namespace kernel {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        if (ix >= width || iy >= height) {
             return;
         }
 
-        const auto idx = getIdx(ix, iy, tileDomain.w);
+        const auto idx = getIdx(ix, iy, width);
 
         paths.attrib[idx].isHit = false;
 
@@ -284,9 +278,6 @@ namespace kernel {
         if (paths.attrib[idx].isTerminate) {
             return;
         }
-
-        ix += tileDomain.x;
-        iy += tileDomain.y;
 
         // Sample data from texture.
         float4 data;
@@ -348,7 +339,6 @@ namespace kernel {
     }
 
     __global__ void shadeMiss(
-        idaten::TileDomain tileDomain,
         int32_t bounce,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
@@ -358,11 +348,11 @@ namespace kernel {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        if (ix >= width || iy >= height) {
             return;
         }
 
-        const auto idx = getIdx(ix, iy, tileDomain.w);
+        const auto idx = getIdx(ix, iy, width);
 
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             // TODO
@@ -370,10 +360,6 @@ namespace kernel {
 
             if (bounce == 0) {
                 paths.attrib[idx].isKill = true;
-
-                ix += tileDomain.x;
-                iy += tileDomain.y;
-                const auto _idx = getIdx(ix, iy, width);
 
                 // Export bg color to albedo buffer.
                 AT_NAME::FillBasicAOVsIfHitMiss(
@@ -392,8 +378,6 @@ namespace kernel {
     }
 
     __global__ void shadeMissWithEnvmap(
-        idaten::TileDomain tileDomain,
-        int32_t offsetX, int32_t offsetY,
         int32_t bounce,
         const aten::CameraParameter camera,
         float4* aovNormalDepth,
@@ -409,11 +393,11 @@ namespace kernel {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
-        if (ix >= tileDomain.w || iy >= tileDomain.h) {
+        if (ix >= width || iy >= height) {
             return;
         }
 
-        const auto idx = getIdx(ix, iy, tileDomain.w);
+        const auto idx = getIdx(ix, iy, width);
 
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             aten::vec3 dir = rays[idx].dir;
@@ -425,8 +409,8 @@ namespace kernel {
                 // TODO
                 // More efficient way...
 
-                float s = (ix + offsetX) / (float)(width);
-                float t = (iy + offsetY) / (float)(height);
+                float s = ix / (float)(width);
+                float t = iy / (float)(height);
 
                 AT_NAME::CameraSampleResult camsample;
                 AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
@@ -444,10 +428,6 @@ namespace kernel {
                 || (bounce == 1 && paths.attrib[idx].isSingular))
             {
                 paths.attrib[idx].isKill = true;
-
-                ix += tileDomain.x;
-                iy += tileDomain.y;
-                const auto _idx = getIdx(ix, iy, width);
 
                 // Export envmap to albedo buffer.
                 AT_NAME::FillBasicAOVsIfHitMiss(
@@ -517,21 +497,21 @@ namespace idaten
     }
 
     void StandardPT::generatePath(
+        int32_t width, int32_t height,
         bool needFillAOV,
         int32_t sample, int32_t maxBounce,
         int32_t seed)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         kernel::genPath << <grid, block, 0, m_stream >> > (
-            m_tileDomain,
             needFillAOV,
             m_paths,
             m_rays.ptr(),
-            m_tileDomain.w, m_tileDomain.h,
+            width, height,
             sample,
             m_frame,
             m_cam,
@@ -550,12 +530,11 @@ namespace idaten
 #else
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         kernel::hitTest << <grid, block >> > (
 #endif
-            m_tileDomain,
             ctxt_,
             m_paths,
             m_isects.ptr(),
@@ -575,8 +554,8 @@ namespace idaten
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         aten::vec4 campos = aten::vec4(m_cam.origin, 1.0f);
 
@@ -584,7 +563,6 @@ namespace idaten
         auto binded_gbuffer = gbuffer.bind();
 
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
-            m_tileDomain,
             binded_gbuffer,
             ctxt_,
             m_paths,
@@ -600,22 +578,15 @@ namespace idaten
         int32_t width, int32_t height,
         int32_t bounce,
         idaten::TypedCudaMemory<float4>& aovNormalDepth,
-        idaten::TypedCudaMemory<float4>& aovTexclrMeshid,
-        int32_t offsetX/*= -1*/,
-        int32_t offsetY/*= -1*/)
+        idaten::TypedCudaMemory<float4>& aovTexclrMeshid)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
-            (m_tileDomain.w + block.x - 1) / block.x,
-            (m_tileDomain.h + block.y - 1) / block.y);
-
-        offsetX = offsetX < 0 ? m_tileDomain.x : offsetX;
-        offsetY = offsetY < 0 ? m_tileDomain.y : offsetY;
+            (width + block.x - 1) / block.x,
+            (height + block.y - 1) / block.y);
 
         if (m_enableEnvmap && m_envmapRsc.idx >= 0) {
             kernel::shadeMissWithEnvmap << <grid, block, 0, m_stream >> > (
-                m_tileDomain,
-                offsetX, offsetY,
                 bounce,
                 m_cam,
                 aovNormalDepth.ptr(),
@@ -628,7 +599,6 @@ namespace idaten
         }
         else {
             kernel::shadeMiss << <grid, block, 0, m_stream >> > (
-                m_tileDomain,
                 bounce,
                 aovNormalDepth.ptr(),
                 aovTexclrMeshid.ptr(),

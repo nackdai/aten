@@ -6,7 +6,6 @@
 #include "ObjLoader.h"
 #include "ImageLoader.h"
 #include "AssetManager.h"
-#include "SceneLoader.h"
 #include "utility.h"
 #include "MaterialExporter.h"
 #include "ObjWriter.h"

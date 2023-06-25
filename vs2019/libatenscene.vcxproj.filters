@@ -27,9 +27,6 @@
     <ClCompile Include="..\src\libatenscene\ObjLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libatenscene\SceneLoader.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\3rdparty\tinyxml2\tinyxml2.cpp">
       <Filter>tinyxml2</Filter>
     </ClCompile>
@@ -61,9 +58,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libatenscene\utility.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libatenscene\SceneLoader.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\3rdparty\tinyxml2\tinyxml2.h">

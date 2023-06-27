@@ -213,8 +213,6 @@ namespace kernel {
             return;
         }
 
-        ctxt.nodes = nodes;
-
         aten::Intersection isect;
 
         float t_max = AT_MATH_INF;
@@ -464,6 +462,10 @@ namespace idaten
 
             ctxt_.vtxPos = m_vtxparamsPos.bind();
             ctxt_.vtxNml = m_vtxparamsNml.bind();
+
+            ctxt_.nodes = m_nodetex.ptr();
+
+            ctxt_.textures = m_tex.ptr();
         }
 
         if (!m_isInitPath) {

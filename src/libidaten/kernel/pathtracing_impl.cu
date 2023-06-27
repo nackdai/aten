@@ -19,6 +19,7 @@ namespace pt {
         float4* aovNormalDepth,
         float4* aovAlbedoMeshId,
         int32_t width, int32_t height,
+        idaten::context ctxt,
         idaten::Path paths,
         const int32_t* __restrict__ hitindices,
         int32_t* hitnum,
@@ -27,14 +28,6 @@ namespace pt {
         int32_t sample,
         int32_t frame,
         int32_t bounce, int32_t rrBounce,
-        const aten::ObjectParameter* __restrict__ shapes,
-        const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        cudaTextureObject_t vtxNml,
-        const aten::mat4* __restrict__ matrices,
-        cudaTextureObject_t* textures,
         uint32_t* random,
         idaten::ShadowRay* shadowRays)
     {
@@ -49,19 +42,6 @@ namespace pt {
         if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
             paths.attrib[idx].isTerminate = true;
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.vtxNml = vtxNml;
-            ctxt.matrices = matrices;
-            ctxt.textures = textures;
         }
 
         __shared__ idaten::ShadowRay shShadowRays[64];
@@ -165,6 +145,8 @@ namespace pt {
             }
         }
 
+        const auto lightnum = ctxt.lightnum;
+
         // Explicit conection to light.
         if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {
@@ -250,17 +232,11 @@ namespace pt {
 
     __global__ void hitShadowRay(
         int32_t bounce,
+        idaten::context ctxt,
         idaten::Path paths,
         int32_t* hitindices,
         int32_t* hitnum,
-        const idaten::ShadowRay* __restrict__ shadowRays,
-        const aten::ObjectParameter* __restrict__ shapes,
-        aten::MaterialParameter* mtrls,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        cudaTextureObject_t* nodes,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        const aten::mat4* __restrict__ matrices)
+        const idaten::ShadowRay* __restrict__ shadowRays)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -273,18 +249,6 @@ namespace pt {
         if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
             paths.attrib[idx].isTerminate = true;
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.matrices = matrices;
         }
 
         const auto& shadowRay = shadowRays[idx];
@@ -379,6 +343,7 @@ namespace idaten
             aov_.normal_depth().ptr(),
             aov_.albedo_meshid().ptr(),
             width, height,
+            ctxt_,
             m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
@@ -386,13 +351,6 @@ namespace idaten
             sample,
             m_frame,
             bounce, rrBounce,
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_primparams.ptr(),
-            texVtxPos, texVtxNml,
-            m_mtxparams.ptr(),
-            m_tex.ptr(),
             m_random.ptr(),
             m_shadowRays.ptr());
 
@@ -413,16 +371,10 @@ namespace idaten
 
         pt::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
+            ctxt_,
             m_paths,
             m_hitidx.ptr(), hitcount.ptr(),
-            m_shadowRays.ptr(),
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
-            texVtxPos,
-            m_mtxparams.ptr());
+            m_shadowRays.ptr());
 
         checkCudaKernel(hitShadowRay);
     }

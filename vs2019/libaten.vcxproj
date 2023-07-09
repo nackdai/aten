@@ -352,6 +352,7 @@
     <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
+    <ClInclude Include="..\src\libaten\renderer\pt_params.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer_utility.h" />
     <ClInclude Include="..\src\libaten\sampler\bluenoiseSampler.h" />

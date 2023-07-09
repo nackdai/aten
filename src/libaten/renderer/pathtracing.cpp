@@ -5,12 +5,7 @@
 #include "misc/timer.h"
 #include "renderer/renderer_utility.h"
 #include "renderer/feature_line.h"
-#include "sampler/xorshift.h"
-#include "sampler/halton.h"
-#include "sampler/sobolproxy.h"
-#include "sampler/wanghash.h"
 #include "sampler/cmj.h"
-#include "sampler/bluenoiseSampler.h"
 
 #include "material/material_impl.h"
 
@@ -24,42 +19,36 @@
 
 namespace aten
 {
-    PathTracing::Path PathTracing::radiance(
+    void PathTracing::radiance(
+        int32_t idx,
         const context& ctxt,
-        sampler* sampler,
-        uint32_t maxDepth,
-        const ray& inRay,
-        camera* cam,
-        CameraSampleResult& camsample,
         scene* scene,
         aten::hitrecord* first_hrec/*= nullptr*/)
     {
         uint32_t depth = 0;
-        uint32_t rrDepth = m_rrDepth;
 
-        Path path;
-        path.ray = inRay;
-
-        while (depth < maxDepth) {
-            path.rec = hitrecord();
+        while (depth < m_maxDepth) {
+            hitrecord rec;
 
             bool willContinue = true;
             Intersection isect;
 
-            if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
+            const auto& ray = rays_[idx];
+
+            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
                 if (depth == 0 && first_hrec) {
-                    *first_hrec = path.rec;
+                    *first_hrec = rec;
                 }
 
-                willContinue = shade(ctxt, sampler, scene, cam, camsample, depth, path);
+                willContinue = shade(idx, paths_, ctxt, rays_.data(), rec, scene, m_rrDepth, depth);
             }
             else {
-                shadeMiss(scene, depth, path);
+                shadeMiss(idx, scene, depth, paths_, rays_.data(), bg());
                 willContinue = false;
             }
 
-            if (depth < m_startDepth && !path.isTerminate) {
-                path.contrib = vec3(0);
+            if (depth < m_startDepth && !paths_.attrib[idx].isTerminate) {
+                paths_.contrib[idx].contrib = vec3(0);
             }
 
             if (!willContinue) {
@@ -68,24 +57,24 @@ namespace aten
 
             depth++;
         }
-
-        return path;
     }
 
-    PathTracing::Path PathTracing::radiance_with_feature_line(
+    void PathTracing::radiance_with_feature_line(
+        int32_t idx,
+        Path& paths,
         const context& ctxt,
-        sampler* sampler,
-        uint32_t maxDepth,
-        const ray& inRay,
+        ray* rays,
+        int32_t rrDepth,
+        int32_t startDepth,
+        int32_t maxDepth,
         camera* cam,
-        CameraSampleResult& camsample,
-        scene* scene)
+        scene* scene,
+        const background* bg)
     {
         uint32_t depth = 0;
-        uint32_t rrDepth = m_rrDepth;
 
-        Path path;
-        path.ray = inRay;
+        const auto& ray = rays[idx];
+        auto* sampler = &paths.sampler[idx];
 
         const auto& cam_org = cam->param().origin;
 
@@ -101,16 +90,16 @@ namespace aten
 
         std::array<aten::FeatureLine::SampleRayDesc, SampleRayNum> sample_ray_descs;
 
-        auto disc = aten::FeatureLine::generateDisc(path.ray, FeatureLineWidth, pixel_width);
+        auto disc = aten::FeatureLine::generateDisc(ray, FeatureLineWidth, pixel_width);
         for (size_t i = 0; i < SampleRayNum; i++) {
-            const auto sample_ray = aten::FeatureLine::generateSampleRay(sample_ray_descs[i], *sampler, path.ray, disc);
+            const auto sample_ray = aten::FeatureLine::generateSampleRay(sample_ray_descs[i], *sampler, ray, disc);
             aten::FeatureLine::storeRayToDesc(sample_ray_descs[i], sample_ray);
         }
 
         disc.accumulated_distance = 1;
 
         while (depth < maxDepth) {
-            path.rec = hitrecord();
+            hitrecord hrec_query;
 
             bool willContinue = true;
             Intersection isect;
@@ -119,18 +108,18 @@ namespace aten
             int32_t closest_sample_ray_idx = -1;
             real hit_point_distance = 0;
 
-            if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
-                const auto distance_query_ray_hit = length(path.rec.p - path.ray.org);
+            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_query, isect)) {
+                const auto distance_query_ray_hit = length(hrec_query.p - ray.org);
 
                 // disc.centerはquery_ray.orgに一致する.
                 // ただし、最初だけは、query_ray.orgはカメラ視点になっているが、
                 // accumulated_distanceでカメラとdiscの距離がすでに含まれている.
-                hit_point_distance = length(path.rec.p - disc.center);
+                hit_point_distance = length(hrec_query.p - disc.center);
 
                 const auto prev_disc = disc;
                 disc = aten::FeatureLine::computeNextDisc(
-                    path.rec.p,
-                    path.ray.dir,
+                    hrec_query.p,
+                    ray.dir,
                     prev_disc.radius,
                     hit_point_distance,
                     disc.accumulated_distance);
@@ -166,27 +155,27 @@ namespace aten
                         sample_ray_descs[i].prev_ray_hit_nml = hrec_sample.normal;
 
                         const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
-                            hrec_sample.p, path.ray);
+                            hrec_sample.p, ray);
 
                         const auto is_line_width = aten::FeatureLine::isInLineWidth(
                             FeatureLineWidth,
-                            path.ray,
+                            ray,
                             hrec_sample.p,
                             disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
                             pixel_width);
                         if (is_line_width) {
                             const auto query_albedo = material::sampleAlbedoMap(
-                                &ctxt.getMaterial(path.rec.mtrlid)->param(),
-                                path.rec.u, path.rec.v);
+                                &ctxt.getMaterial(hrec_query.mtrlid)->param(),
+                                hrec_query.u, hrec_query.v);
                             const auto sample_albedo = material::sampleAlbedoMap(
                                 &ctxt.getMaterial(hrec_sample.mtrlid)->param(),
-                                path.rec.u, path.rec.v);
-                            const auto query_depth = length(path.rec.p - cam_org);
+                                hrec_query.u, hrec_query.v);
+                            const auto query_depth = length(hrec_query.p - cam_org);
                             const auto sample_depth = length(hrec_sample.p - cam_org);
 
                             const auto is_feature_line = aten::FeatureLine::evaluateMetrics(
-                                path.ray.org,
-                                path.rec, hrec_sample,
+                                ray.org,
+                                hrec_query, hrec_sample,
                                 query_albedo, sample_albedo,
                                 query_depth, sample_depth,
                                 ThresholdAlbedo, ThresholdNormal,
@@ -209,7 +198,7 @@ namespace aten
                         }
                     }
                     else {
-                        const auto query_hit_plane = aten::FeatureLine::computePlane(path.rec);
+                        const auto query_hit_plane = aten::FeatureLine::computePlane(hrec_query);
                         const auto res_sample_ray_dummy_hit = aten::FeatureLine::computeRayHitPosOnPlane(
                             query_hit_plane, sample_ray);
 
@@ -218,11 +207,11 @@ namespace aten
                             const auto sample_ray_dummy_hit_pos = std::get<1>(res_sample_ray_dummy_hit);
 
                             const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
-                                sample_ray_dummy_hit_pos, path.ray);
+                                sample_ray_dummy_hit_pos, ray);
 
                             const auto is_line_width = aten::FeatureLine::isInLineWidth(
                                 FeatureLineWidth,
-                                path.ray,
+                                ray,
                                 sample_ray_dummy_hit_pos,
                                 disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
                                 pixel_width);
@@ -246,7 +235,7 @@ namespace aten
                         sample_ray_descs[i].is_terminated = true;
                     }
 
-                    const auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
+                    const auto mtrl = ctxt.getMaterial(hrec_query.mtrlid);
                     if (!mtrl->param().attrib.isGlossy) {
                         // In non glossy material case, sample ray doesn't bounce anymore.
                         // TODO
@@ -257,20 +246,20 @@ namespace aten
                 }
 
                 if (closest_sample_ray_idx < 0) {
-                    willContinue = shade(ctxt, sampler, scene, cam, camsample, depth, path);
+                    willContinue = shade(idx, paths, ctxt, rays, hrec_query, scene, rrDepth, depth);
                 }
             }
             else {
                 aten::FeatureLine::Disc prev_disc;
                 if (depth > 0) {
                     // Make dummy point to compute next sample ray.
-                    const auto dummy_query_hit_pos = path.ray.org + real(100) * path.ray.dir;
+                    const auto dummy_query_hit_pos = ray.org + real(100) * ray.dir;
                     hit_point_distance = length(dummy_query_hit_pos - disc.center);
 
                     prev_disc = disc;
                     disc = aten::FeatureLine::computeNextDisc(
                         dummy_query_hit_pos,
-                        path.ray.dir,
+                        ray.dir,
                         prev_disc.radius,
                         hit_point_distance,
                         disc.accumulated_distance);
@@ -300,12 +289,12 @@ namespace aten
 
                     if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_sample, isect_sample_ray)) {
                         const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
-                            hrec_sample.p, path.ray);
+                            hrec_sample.p, ray);
 
                         if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
                             const auto is_line_width = aten::FeatureLine::isInLineWidth(
                                 FeatureLineWidth,
-                                path.ray,
+                                ray,
                                 hrec_sample.p,
                                 disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
                                 pixel_width);
@@ -320,19 +309,19 @@ namespace aten
 
 
                 if (closest_sample_ray_idx < 0) {
-                    shadeMiss(scene, depth, path);
+                    shadeMiss(idx, scene, depth, paths, rays, bg);
                 }
                 willContinue = false;
             }
 
-            if (depth < m_startDepth && !path.isTerminate) {
-                path.contrib = vec3(0);
+            if (depth < startDepth && !paths.attrib[idx].isTerminate) {
+                paths.contrib[idx].contrib = vec3(0);
             }
             else if (closest_sample_ray_idx >= 0) {
                 auto pdf_feature_line = real(1) / SampleRayNum;
                 pdf_feature_line = pdf_feature_line * (closest_sample_ray_distance * closest_sample_ray_distance);
-                const auto weight = path.pdfb / (path.pdfb + pdf_feature_line);
-                path.contrib += path.throughput * weight * LineColor;
+                const auto weight = paths.throughput[idx].pdfb / (paths.throughput[idx].pdfb + pdf_feature_line);
+                paths.contrib[idx].contrib += paths.throughput[idx].throughput * weight * LineColor;
             }
 
             if (!willContinue) {
@@ -343,57 +332,55 @@ namespace aten
 
             disc.accumulated_distance += hit_point_distance;
         }
-
-        return path;
     }
 
     bool PathTracing::shade(
+        int32_t idx,
+        aten::Path& paths,
         const context& ctxt,
-        sampler* sampler,
+        ray* rays,
+        const aten::hitrecord& rec,
         scene* scene,
-        camera* cam,
-        CameraSampleResult& camsample,
-        int32_t depth,
-        Path& path)
+        int32_t rrDepth,
+        int32_t depth)
     {
-        uint32_t rrDepth = m_rrDepth;
+        auto mtrl = ctxt.getMaterial(rec.mtrlid);
+        const auto& ray = rays[idx];
+        auto* sampler = &paths.sampler[idx];
 
-        auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
-
-        bool isBackfacing = dot(path.rec.normal, -path.ray.dir) < real(0);
+        bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
 
         // 交差位置の法線.
         // 物体からのレイの入出を考慮.
-        vec3 orienting_normal = path.rec.normal;
+        vec3 orienting_normal = rec.normal;
 
         // Implicit conection to light.
         if (mtrl->isEmissive()) {
             if (!isBackfacing) {
                 real weight = 1.0f;
 
-                if (depth > 0
-                    && !(path.prevMtrl && path.prevMtrl->isSingularOrTranslucent()))
+                if (depth > 0 && !paths.attrib[idx].isSingular)
                 {
-                    auto cosLight = dot(orienting_normal, -path.ray.dir);
-                    auto dist2 = aten::squared_length(path.rec.p - path.ray.org);
+                    auto cosLight = dot(orienting_normal, -ray.dir);
+                    auto dist2 = aten::squared_length(rec.p - ray.org);
 
                     if (cosLight >= 0) {
-                        auto pdfLight = 1 / path.rec.area;
+                        auto pdfLight = 1 / rec.area;
 
                         // Convert pdf area to sradian.
                         // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
                         // p31 - p35
                         pdfLight = pdfLight * dist2 / cosLight;
 
-                        weight = path.pdfb / (pdfLight + path.pdfb);
+                        weight = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
                     }
                 }
 
                 auto emit = static_cast<aten::vec3>(mtrl->color());
-                path.contrib += path.throughput * weight * emit;
+                paths.contrib[idx].contrib += paths.throughput[idx].throughput * weight * emit;
             }
 
-            path.isTerminate = true;
+            paths.attrib[idx].isTerminate = true;
             return false;
         }
 
@@ -406,42 +393,24 @@ namespace aten
             &mtrl->param(),
             mtrl->param().normalMap,
             orienting_normal, orienting_normal,
-            path.rec.u, path.rec.v,
-            path.ray.dir, sampler);
-
-#if 0
-        if (depth == 0) {
-            auto Wdash = cam->getWdash(
-                path.rec.p,
-                camsample.posOnImageSensor,
-                camsample.posOnLens,
-                camsample.posOnObjectplane);
-            auto areaPdf = cam->getPdfImageSensorArea(
-                path.rec.p, orienting_normal,
-                camsample.posOnImageSensor,
-                camsample.posOnLens,
-                camsample.posOnObjectplane);
-
-            path.throughput *= Wdash;
-            path.throughput /= areaPdf;
-        }
-#endif
+            rec.u, rec.v,
+            ray.dir, sampler);
 
         // Check transparency or translucency.
         // NOTE:
         // If the material itself is originally translucent, we don't care alpha translucency.
         if (!mtrl->isTranslucent()
-            && AT_NAME::material::isTranslucentByAlpha(mtrl->param(), path.rec.u, path.rec.v))
+            && AT_NAME::material::isTranslucentByAlpha(mtrl->param(), rec.u, rec.v))
         {
-            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl->param(), path.rec.u, path.rec.v);
+            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl->param(), rec.u, rec.v);
             auto r = sampler->nextSample();
 
             if (r >= alpha) {
                 // Just through the object.
                 // NOTE
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
-                path.ray = aten::ray(path.rec.p, path.ray.dir, -orienting_normal);
-                path.throughput *= static_cast<aten::vec3>(mtrl->color());
+                rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
+                paths.throughput[idx].throughput *= static_cast<aten::vec3>(mtrl->color());
                 return true;
             }
         }
@@ -454,7 +423,7 @@ namespace aten
 
             auto light = scene->sampleLight(
                 ctxt,
-                path.rec.p,
+                rec.p,
                 orienting_normal,
                 sampler,
                 lightSelectPdf, sampleres);
@@ -468,14 +437,8 @@ namespace aten
 
                 // TODO
                 // Do we need to consider offset for shadow ray?
-#if 0
-                auto shadowRayOrg = path.rec.p + AT_MATH_EPSILON * orienting_normal;
-                auto tmp = path.rec.p + dirToLight - shadowRayOrg;
-                auto shadowRayDir = normalize(tmp);
-#else
-                auto shadowRayOrg = path.rec.p;
+                auto shadowRayOrg = rec.p;
                 auto shadowRayDir = dirToLight;
-#endif
 
                 if (dot(shadowRayDir, orienting_normal) > real(0)) {
                     aten::ray shadowRay(shadowRayOrg, shadowRayDir, orienting_normal);
@@ -488,12 +451,12 @@ namespace aten
 
                         auto bsdf = material::sampleBSDF(
                             &mtrl->param(),
-                            orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v, pre_sampled_r);
+                            orienting_normal, ray.dir, dirToLight, rec.u, rec.v, pre_sampled_r);
                         auto pdfb = material::samplePDF(
                             &mtrl->param(),
-                            orienting_normal, path.ray.dir, dirToLight, path.rec.u, path.rec.v);
+                            orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
-                        bsdf *= path.throughput;
+                        bsdf *= paths.throughput[idx].throughput;
 
                         // Get light color.
                         auto emit = sampleres.finalColor;
@@ -503,7 +466,7 @@ namespace aten
                                 auto misW = light->isSingular()
                                     ? real(1)
                                     : aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-                                path.contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+                                paths.contrib[idx].contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
                             }
                         }
                         else {
@@ -519,7 +482,7 @@ namespace aten
                                     // p31 - p35
                                     pdfb = pdfb * cosLight / dist2;
                                     auto misW = aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-                                    path.contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+                                    paths.contrib[idx].contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
                                 }
                             }
                         }
@@ -531,13 +494,13 @@ namespace aten
         real russianProb = real(1);
 
         if (depth > rrDepth) {
-            auto t = normalize(path.throughput);
+            auto t = normalize(paths.throughput[idx].throughput);
             auto p = std::max(t.r, std::max(t.g, t.b));
 
             russianProb = sampler->nextSample();
 
             if (russianProb >= p) {
-                path.contrib = vec3();
+                paths.contrib[idx].contrib = vec3();
                 return false;
             }
             else {
@@ -550,10 +513,10 @@ namespace aten
             &sampling,
             &mtrl->param(),
             orienting_normal,
-            path.ray.dir,
-            path.rec.normal,
+            ray.dir,
+            rec.normal,
             sampler, pre_sampled_r,
-            path.rec.u, path.rec.v);
+            rec.u, rec.v);
 
         auto nextDir = normalize(sampling.dir);
         auto pdfb = sampling.pdf;
@@ -569,50 +532,55 @@ namespace aten
         auto c = dot(rayBasedNormal, static_cast<vec3>(nextDir));
 
         if (pdfb > 0 && c > 0) {
-            path.throughput *= bsdf * c / pdfb;
-            path.throughput /= russianProb;
+            paths.throughput[idx].throughput *= bsdf * c / pdfb;
+            paths.throughput[idx].throughput /= russianProb;
         }
         else {
             return false;
         }
 
-        path.prevMtrl = mtrl;
-
-        path.pdfb = pdfb;
+        paths.throughput[idx].pdfb = pdfb;
+        paths.attrib[idx].isSingular = mtrl->param().attrib.isSingular;
+        paths.attrib[idx].mtrlType = mtrl->param().type;
 
         // Make next ray.
-        path.ray = aten::ray(path.rec.p, nextDir, rayBasedNormal);
+        rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
 
         return true;
     }
 
     void PathTracing::shadeMiss(
+        int32_t idx,
         scene* scene,
         int32_t depth,
-        Path& path)
+        Path& paths,
+        const ray* rays,
+        const background* bg)
     {
+        const auto& ray = rays[idx];
+
         auto ibl = scene->getIBL();
         aten::vec3 emit(real(0));
         real misW = real(1);
 
         if (ibl) {
             if (depth == 0) {
-                emit = ibl->getEnvMap()->sample(path.ray);
+                emit = ibl->getEnvMap()->sample(ray);
                 misW = real(1);
-                path.isTerminate = true;
+                paths.attrib[idx].isTerminate = true;
             }
             else {
-                emit = ibl->getEnvMap()->sample(path.ray);
-                auto pdfLight = ibl->samplePdf(path.ray);
-                misW = path.pdfb / (pdfLight + path.pdfb);
+                emit = ibl->getEnvMap()->sample(ray);
+                auto pdfLight = ibl->samplePdf(ray);
+                misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
             }
         }
         else {
-            emit = sampleBG(path.ray);
+            emit = sampleBG(ray, bg);
             misW = real(1);
         }
 
-        path.contrib += path.throughput * misW * emit;
+        paths.contrib[idx].contrib += paths.throughput[idx].throughput * misW * emit;
     }
 
     static uint32_t frame = 0;
@@ -637,13 +605,18 @@ namespace aten
             m_rrDepth = m_maxDepth - 1;
         }
 
+        if (rays_.empty()) {
+            rays_.resize(width * height);
+        }
+        paths_.init(width, height);
+
         auto time = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
 #pragma omp parallel
 #endif
         {
-            auto idx = OMPUtil::getThreadIdx();
+            auto thread_idx = OMPUtil::getThreadIdx();
 
             auto t = timer::getSystemTime();
 
@@ -663,58 +636,44 @@ namespace aten
                         DEBUG_BREAK();
                     }
 #endif
+                    int32_t idx = y * width + x;
                     aten::hitrecord hrec;
 
                     for (uint32_t i = 0; i < samples; i++) {
                         auto scramble = aten::getRandom(pos) * 0x1fe3434f;
 
-                        //XorShift rnd(scramble + t.milliSeconds);
-                        //Halton rnd(scramble + t.milliSeconds);
-                        //Sobol rnd;
-                        //WangHash rnd(scramble + t.milliSeconds);
-#if 1
-                        CMJ rnd;
+                        auto& rnd = paths_.sampler[idx];
                         rnd.init(frame, i, scramble);
-#else
-                        // Experimental
-                        BlueNoiseSampler rnd;
-                        for (auto tex : m_noisetex) {
-                            rnd.registerNoiseTexture(tex);
-                        }
-                        rnd.init(x, y, frame, m_maxDepth, 1);
-#endif
 
                         real u = real(x + rnd.nextSample()) / real(width);
                         real v = real(y + rnd.nextSample()) / real(height);
 
                         auto camsample = camera->sample(u, v, &rnd);
 
-                        auto ray = camsample.r;
+                        rays_[idx] = camsample.r;
 
-                        Path path;
+                        paths_.contrib[idx].contrib = aten::vec3(0);
+                        paths_.throughput[idx].throughput = aten::vec3(1);
+                        paths_.throughput[idx].pdfb = 1.0f;
+                        paths_.attrib[idx].isTerminate = false;
+                        paths_.attrib[idx].isSingular = false;
+
                         if (enable_feature_line_) {
-                            path = radiance_with_feature_line(
-                                ctxt,
-                                &rnd,
+                            radiance_with_feature_line(
+                                idx,
+                                paths_, ctxt, rays_.data(),
+                                m_rrDepth,
+                                m_startDepth,
                                 m_maxDepth,
-                                ray,
                                 camera,
-                                camsample,
-                                scene);
+                                scene,
+                                bg());
                         }
                         else {
-                            path = radiance(
-                                ctxt,
-                                &rnd,
-                                m_maxDepth,
-                                ray,
-                                camera,
-                                camsample,
-                                scene,
-                                &hrec);
+                            radiance(idx, ctxt, scene, &hrec);
                         }
 
-                        if (isInvalidColor(path.contrib)) {
+                        if (isInvalidColor(paths_.contrib[idx].contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
                             continue;
                         }
@@ -726,13 +685,13 @@ namespace aten
                             camsample.posOnImageSensor,
                             camsample.posOnLens);
 
-                        auto c = path.contrib * s / (pdfOnImageSensor * pdfOnLens);
+                        auto c = paths_.contrib[idx].contrib * s / (pdfOnImageSensor * pdfOnLens);
 
                         col += c;
                         col2 += c * c;
                         cnt++;
 
-                        if (path.isTerminate) {
+                        if (paths_.attrib[idx].isTerminate) {
                             break;
                         }
                     }

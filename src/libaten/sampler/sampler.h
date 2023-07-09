@@ -9,13 +9,12 @@
 #define AT_VIRTUAL(f)                   f
 #define AT_VIRTUAL_OVERRIDE_FINAL(f)    f
 #define AT_INHERIT(c)
+#endif
 
 #include "sampler/wanghash.h"
 #include "sampler/sobolproxy.h"
 #include "sampler/cmj.h"
 #include "sampler/bluenoiseSampler.h"
-
-#include "kernel/bluenoiseSampler.cuh"
 
 #define IDATEN_SAMPLER_WANGHASH     (0)
 #define IDATEN_SAMPLER_SOBOL        (1)
@@ -23,6 +22,9 @@
 #define IDATEN_SAMPLER_BLUENOISE    (3)
 
 #define IDATEN_SAMPLER    IDATEN_SAMPLER_CMJ
+
+#ifdef __AT_CUDA__
+#include "kernel/bluenoiseSampler.cuh"
 
 namespace aten {
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
@@ -36,5 +38,15 @@ namespace aten {
 #endif
 }
 #else
-#include "samplerinterface.h"
+namespace aten {
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
+    using samplerimpl = Sobol;
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
+    using samplerimpl = CMJ;
+#elif IDATEN_SAMPLER == IDATEN_SAMPLER_WANGHASH
+    using samplerimpl = WangHash;
+#else
+    using samplerimpl = idaten::BlueNoiseSamplerGPU;
+#endif
+}
 #endif

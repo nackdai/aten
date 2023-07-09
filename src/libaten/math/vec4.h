@@ -28,6 +28,11 @@ namespace aten {
             v = _v.v;
             w = _v.w;
         }
+        AT_DEVICE_API vec4(vec4&& _v) noexcept
+        {
+            v = _v.v;
+            w = _v.w;
+        }
         AT_DEVICE_API vec4(real f)
         {
             x = y = z = w = f;
@@ -63,6 +68,19 @@ namespace aten {
         {
             AT_ASSERT(i < 4);
             return p[i];
+        }
+
+        AT_DEVICE_API vec4& operator=(const vec4& rhs)
+        {
+            v = rhs.v;
+            w = rhs.w;
+            return *this;
+        }
+        AT_DEVICE_API vec4& operator=(vec4&& rhs) noexcept
+        {
+            v = rhs.v;
+            w = rhs.w;
+            return *this;
         }
 
         inline AT_DEVICE_API const vec4& set(real _x, real _y, real _z, real _w)

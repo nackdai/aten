@@ -57,10 +57,10 @@ namespace aten
             scene* scene,
             camera* camera) = 0;
 
-        virtual vec3 sampleBG(const ray& inRay) const
+        static vec3 sampleBG(const ray& inRay, const background* bg)
         {
-            if (m_bg) {
-                return m_bg->sample(inRay);
+            if (bg) {
+                return bg->sample(inRay);
             }
             return vec3();
         }

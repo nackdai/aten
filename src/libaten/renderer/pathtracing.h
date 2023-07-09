@@ -4,6 +4,7 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "light/pointlight.h"
+#include "renderer/pt_params.h"
 
 namespace aten
 {
@@ -28,70 +29,52 @@ namespace aten
         }
 
     protected:
-        struct Path {
-            vec3 contrib{ real(0) };
-            vec3 throughput{ real(1) };
-            real pdfb{ real(1) };
-
-            hitrecord rec;
-            std::shared_ptr<material> prevMtrl;
-
-            aten::ray ray;
-
-            bool isTerminate{ false };
-        };
-
-        Path radiance(
+        void radiance(
+            int32_t idx,
             const context& ctxt,
-            sampler* sampler,
-            const ray& inRay,
-            camera* cam,
-            CameraSampleResult& camsample,
-            scene* scene)
-        {
-            return radiance(ctxt, sampler, m_maxDepth, inRay, cam, camsample, scene);
-        }
-
-        Path radiance(
-            const context& ctxt,
-            sampler* sampler,
-            uint32_t maxDepth,
-            const ray& inRay,
-            camera* cam,
-            CameraSampleResult& camsample,
             scene* scene,
             aten::hitrecord* first_hrec = nullptr);
 
-        Path radiance_with_feature_line(
+        static void radiance_with_feature_line(
+            int32_t idx,
+            Path& paths,
             const context& ctxt,
-            sampler* sampler,
-            uint32_t maxDepth,
-            const ray& inRay,
+            ray* rays,
+            int32_t rrDepth,
+            int32_t startDepth,
+            int32_t maxDepth,
             camera* cam,
-            CameraSampleResult& camsample,
-            scene* scene);
+            scene* scene,
+            const background* bg);
 
-        bool shade(
+        static bool shade(
+            int32_t idx,
+            aten::Path& paths,
             const context& ctxt,
-            sampler* sampler,
+            ray* rays,
+            const aten::hitrecord& rec,
             scene* scene,
-            camera* cam,
-            CameraSampleResult& camsample,
-            int32_t depth,
-            Path& path);
+            int32_t rrDepth,
+            int32_t depth);
 
-        void shadeMiss(
+        static void shadeMiss(
+            int32_t idx,
             scene* scene,
             int32_t depth,
-            Path& path);
+            Path& paths,
+            const ray* rays,
+            const background* bg);
 
     protected:
-        uint32_t m_maxDepth{ 1 };
+        Path paths_;
+        std::vector<aten::ray> rays_;
+
+        int32_t m_maxDepth{ 1 };
 
         // Depth to compute russinan roulette.
-        uint32_t m_rrDepth{ 1 };
+        int32_t m_rrDepth{ 1 };
 
-        uint32_t m_startDepth{ 0 };
+        int32_t m_startDepth{ 0 };
 
         std::vector<std::shared_ptr<texture>> m_noisetex;
 

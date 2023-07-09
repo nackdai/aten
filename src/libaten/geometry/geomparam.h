@@ -84,6 +84,13 @@ namespace aten
             v0 = rhs.v0;
             v1 = rhs.v1;
         }
+
+        AT_DEVICE_API TriangleParameter& operator=(const TriangleParameter& rhs)
+        {
+            v0 = rhs.v0;
+            v1 = rhs.v1;
+            return *this;
+        }
     };
     AT_STATICASSERT((sizeof(TriangleParameter) % 16) == 0);
 

@@ -39,6 +39,7 @@ namespace aten
             context::pinContext(&ctxt);
             onRender(ctxt, dst, scene, camera);
             context::removePinnedContext();
+            frame_count_++;
         }
 
         void setBG(background* bg)
@@ -46,8 +47,14 @@ namespace aten
             m_bg = bg;
         }
 
-        virtual void enableFeatureLine(bool e) {
+        virtual void enableFeatureLine(bool e)
+        {
             (void)e;
+        }
+
+        inline uint32_t get_frame_count() const noexcept
+        {
+            return frame_count_;
         }
 
     protected:
@@ -89,5 +96,6 @@ namespace aten
 
     private:
         background* m_bg{ nullptr };
+        uint32_t frame_count_{ 0 };
     };
 }

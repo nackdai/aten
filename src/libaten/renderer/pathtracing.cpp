@@ -640,23 +640,17 @@ namespace aten
                     aten::hitrecord hrec;
 
                     for (uint32_t i = 0; i < samples; i++) {
-                        auto scramble = aten::getRandom(pos) * 0x1fe3434f;
+                        const auto rnd = aten::getRandom(pos);
+                        const auto& camsample = camera->param();
 
-                        auto& rnd = paths_.sampler[idx];
-                        rnd.init(frame, i, scramble);
-
-                        real u = real(x + rnd.nextSample()) / real(width);
-                        real v = real(y + rnd.nextSample()) / real(height);
-
-                        auto camsample = camera->sample(u, v, &rnd);
-
-                        rays_[idx] = camsample.r;
-
-                        paths_.contrib[idx].contrib = aten::vec3(0);
-                        paths_.throughput[idx].throughput = aten::vec3(1);
-                        paths_.throughput[idx].pdfb = 1.0f;
-                        paths_.attrib[idx].isTerminate = false;
-                        paths_.attrib[idx].isSingular = false;
+                        generate_path(
+                            idx,
+                            x, y,
+                            width, height,
+                            i, get_frame_count(),
+                            paths_, rays_.data(),
+                            camsample,
+                            rnd);
 
                         if (enable_feature_line_) {
                             radiance_with_feature_line(
@@ -678,14 +672,7 @@ namespace aten
                             continue;
                         }
 
-                        auto pdfOnImageSensor = camsample.pdfOnImageSensor;
-                        auto pdfOnLens = camsample.pdfOnLens;
-
-                        auto s = camera->getSensitivity(
-                            camsample.posOnImageSensor,
-                            camsample.posOnLens);
-
-                        auto c = paths_.contrib[idx].contrib * s / (pdfOnImageSensor * pdfOnLens);
+                        auto c = paths_.contrib[idx].contrib;
 
                         col += c;
                         col2 += c * c;

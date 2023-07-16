@@ -6,7 +6,7 @@
 
 namespace aten {
     // TODO
-    // Only for Pinhole Cmaera...
+    // Only for Pinhole Camera...
 
     /**
      * @brief Description of camera.

@@ -28,6 +28,18 @@ namespace aten
             enable_feature_line_ = e;
         }
 
+        static void generate_path(
+            int32_t idx,
+            int32_t ix, int32_t iy,
+            int32_t width, int32_t height,
+            int32_t sample, uint32_t frame,
+            aten::Path& paths,
+            aten::ray* rays,
+            const aten::CameraParameter& camera,
+            const uint32_t rnd);
+
+        static void shader_miss_with_envmap();
+
     protected:
         void radiance(
             int32_t idx,

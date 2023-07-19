@@ -1,9 +1,15 @@
-#include "renderer/pathtracing.h"
-#include "camera/pinhole.h"
+#pragma once
 
-namespace aten
+#include "defs.h"
+#include "camera/camera.h"
+#include "camera/pinhole.h"
+#include "light/ibl.h"
+#include "math/ray.h"
+#include "renderer/pt_params.h"
+
+namespace AT_NAME
 {
-    void PathTracing::generate_path(
+    inline AT_DEVICE_API void generate_path(
         aten::ray& generated_ray,
         int32_t idx,
         int32_t ix, int32_t iy,
@@ -48,7 +54,7 @@ namespace aten
         paths.contrib[idx].contrib = aten::vec3(0);
     }
 
-    void PathTracing::shader_miss(
+    inline AT_DEVICE_API void shader_miss(
         int32_t idx,
         int32_t bounce,
         const aten::vec3& bg,
@@ -66,7 +72,7 @@ namespace aten
         }
     }
 
-    void PathTracing::shader_miss_with_envmap(
+    inline AT_DEVICE_API void shader_miss_with_envmap(
         int32_t idx,
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,

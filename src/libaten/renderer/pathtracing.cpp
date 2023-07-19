@@ -4,6 +4,7 @@
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/renderer_utility.h"
+#include "renderer/pathtracing_impl.h"
 #include "renderer/feature_line.h"
 #include "sampler/cmj.h"
 

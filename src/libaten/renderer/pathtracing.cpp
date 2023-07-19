@@ -21,8 +21,11 @@ namespace aten
 {
     void PathTracing::radiance(
         int32_t idx,
+        int32_t ix, int32_t iy,
+        int32_t width, int32_t height,
         const context& ctxt,
         scene* scene,
+        const aten::CameraParameter& camera,
         aten::hitrecord* first_hrec/*= nullptr*/)
     {
         uint32_t depth = 0;
@@ -43,7 +46,27 @@ namespace aten
                 willContinue = shade(idx, paths_, ctxt, rays_.data(), rec, scene, m_rrDepth, depth);
             }
             else {
-                shadeMiss(idx, scene, depth, paths_, rays_.data(), bg());
+                auto ibl = scene->getIBL();
+                if (ibl) {
+                    shader_miss_with_envmap(
+                        idx,
+                        ix, iy,
+                        width, height,
+                        depth,
+                        ibl->param().envmapidx,
+                        ibl->getAvgIlluminace(),
+                        real(1),
+                        camera,
+                        paths_, rays_[idx]);
+                }
+                else {
+                    shader_miss(
+                        idx,
+                        depth,
+                        bg()->sample(rays_[idx]),
+                        paths_);
+                }
+
                 willContinue = false;
             }
 
@@ -644,11 +667,11 @@ namespace aten
                         const auto& camsample = camera->param();
 
                         generate_path(
+                            rays_[idx],
                             idx,
                             x, y,
-                            width, height,
                             i, get_frame_count(),
-                            paths_, rays_.data(),
+                            paths_,
                             camsample,
                             rnd);
 
@@ -656,15 +679,16 @@ namespace aten
                             radiance_with_feature_line(
                                 idx,
                                 paths_, ctxt, rays_.data(),
-                                m_rrDepth,
-                                m_startDepth,
-                                m_maxDepth,
+                                m_rrDepth, m_startDepth, m_maxDepth,
                                 camera,
                                 scene,
                                 bg());
                         }
                         else {
-                            radiance(idx, ctxt, scene, &hrec);
+                            radiance(
+                                idx,
+                                x, y, width, height,
+                                ctxt, scene, camsample, &hrec);
                         }
 
                         if (isInvalidColor(paths_.contrib[idx].contrib)) {

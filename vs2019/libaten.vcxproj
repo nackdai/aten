@@ -352,6 +352,7 @@
     <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
+    <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pt_params.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer.h" />
     <ClInclude Include="..\src\libaten\renderer\renderer_utility.h" />
@@ -473,7 +474,6 @@
     <ClCompile Include="..\src\libaten\renderer\feature_line.cpp" />
     <ClCompile Include="..\src\libaten\renderer\film.cpp" />
     <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp" />
-    <ClCompile Include="..\src\libaten\renderer\pathtracing_impl.cpp" />
     <ClCompile Include="..\src\libaten\sampler\halton.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sampler.cpp" />
     <ClCompile Include="..\src\libaten\sampler\sobol.cpp" />

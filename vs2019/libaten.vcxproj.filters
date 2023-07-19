@@ -517,6 +517,9 @@
     <ClInclude Include="..\src\libaten\renderer\pt_params.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">
@@ -791,9 +794,6 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp">
       <Filter>scene</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\pathtracing_impl.cpp">
-      <Filter>renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

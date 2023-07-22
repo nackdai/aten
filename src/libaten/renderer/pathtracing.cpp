@@ -57,7 +57,7 @@ namespace aten
                         ibl->param().envmapidx,
                         ibl->getAvgIlluminace(),
                         real(1),
-                        camera,
+                        ctxt, camera,
                         paths_, rays_[idx]);
                 }
                 else {
@@ -675,6 +675,8 @@ namespace aten
                             paths_,
                             camsample,
                             rnd);
+
+                        paths_.contrib[idx].contrib = aten::vec3(0);
 
                         if (enable_feature_line_) {
                             radiance_with_feature_line(

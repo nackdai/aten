@@ -5,16 +5,25 @@
 #include "camera/pinhole.h"
 #include "light/ibl.h"
 #include "math/ray.h"
+
+#ifdef __CUDACC__
+#include "cuda/cudadefs.h"
+#include "cuda/helper_math.h"
+#include "kernel/device_scene_context.cuh"
+#include "kernel/pt_params.h"
+#else
+#include "scene/host_scene_context.h"
 #include "renderer/pt_params.h"
+#endif
 
 namespace AT_NAME
 {
-    inline AT_DEVICE_API void generate_path(
+    inline AT_DEVICE_MTRL_API void generate_path(
         aten::ray& generated_ray,
         int32_t idx,
         int32_t ix, int32_t iy,
         int32_t sample, uint32_t frame,
-        aten::Path& paths,
+        AT_NAME::Path& paths,
         const aten::CameraParameter& camera,
         const uint32_t rnd)
     {
@@ -49,16 +58,13 @@ namespace AT_NAME
         paths.attrib[idx].isSingular = false;
 
         paths.contrib[idx].samples += 1;
-
-        // TODO
-        paths.contrib[idx].contrib = aten::vec3(0);
     }
 
-    inline AT_DEVICE_API void shader_miss(
+    inline AT_DEVICE_MTRL_API void shader_miss(
         int32_t idx,
         int32_t bounce,
         const aten::vec3& bg,
-        aten::Path& paths)
+        AT_NAME::Path& paths)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (bounce == 0) {
@@ -66,21 +72,26 @@ namespace AT_NAME
             }
 
             auto contrib = paths.throughput[idx].throughput * bg;
+#ifdef __CUDACC__
+            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
+#else
             paths.contrib[idx].contrib += aten::vec3(contrib.x, contrib.y, contrib.z);
+#endif
 
             paths.attrib[idx].isTerminate = true;
         }
     }
 
-    inline AT_DEVICE_API void shader_miss_with_envmap(
+    inline AT_DEVICE_MTRL_API void shader_miss_with_envmap(
         int32_t idx,
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
         int32_t bounce,
         int32_t envmap_idx,
         float envmapAvgIllum, float envmapMultiplyer,
+        const AT_NAME::context& ctxt,
         const aten::CameraParameter& camera,
-        aten::Path& paths,
+        AT_NAME::Path& paths,
         const aten::ray& ray)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
@@ -107,7 +118,7 @@ namespace AT_NAME
 #ifdef __CUDACC__
             // envmapidx is index to array of textures in context.
             // In GPU, sampleTexture requires texture id of CUDA. So, arguments is different.
-            const auto bg = tex2DLod<float4>(ctxt.textures[param.envmapidx], uv.x, uv.y);
+            const auto bg = tex2D<float4>(ctxt.textures[envmap_idx], uv.x, uv.y);
 #else
             const auto bg = AT_NAME::sampleTexture(envmap_idx, uv.x, uv.y, aten::vec4(1));
 #endif
@@ -127,7 +138,11 @@ namespace AT_NAME
             }
 
             auto contrib = paths.throughput[idx].throughput * misW * emit;
+#ifdef __CUDACC__
+            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
+#else
             paths.contrib[idx].contrib += aten::vec3(contrib.x, contrib.y, contrib.z);
+#endif
 
             paths.attrib[idx].isTerminate = true;
         }

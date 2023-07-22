@@ -5,6 +5,7 @@
 #include "camera/pinhole.h"
 #include "light/ibl.h"
 #include "math/ray.h"
+#include "renderer/aov.h"
 
 #ifdef __CUDACC__
 #include "cuda/cudadefs.h"
@@ -60,29 +61,49 @@ namespace AT_NAME
         paths.contrib[idx].samples += 1;
     }
 
-    inline AT_DEVICE_MTRL_API void shader_miss(
+    namespace detail {
+        template <typename A, typename B>
+        inline AT_DEVICE_MTRL_API void add_vec3(A& dst, const B& add)
+        {
+            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
+                dst += add;
+            }
+            else {
+                dst += make_float3(add.x, add.y, add.z);
+            }
+        }
+    }
+
+    template <typename AOV_BUFFER_TYPE = aten::vec4>
+    inline AT_DEVICE_MTRL_API void shade_miss(
         int32_t idx,
         int32_t bounce,
         const aten::vec3& bg,
-        AT_NAME::Path& paths)
+        AT_NAME::Path& paths,
+        AOV_BUFFER_TYPE* aov_normal_depth = nullptr,
+        AOV_BUFFER_TYPE* aov_albedo_meshid = nullptr)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (bounce == 0) {
                 paths.attrib[idx].isKill = true;
+
+                if (aov_normal_depth != nullptr && aov_albedo_meshid != nullptr)
+                {
+                    // Export bg color to albedo buffer.
+                    AT_NAME::FillBasicAOVsIfHitMiss(
+                        aov_normal_depth[idx],
+                        aov_albedo_meshid[idx], bg);
+                }
             }
 
             auto contrib = paths.throughput[idx].throughput * bg;
-#ifdef __CUDACC__
-            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-#else
-            paths.contrib[idx].contrib += aten::vec3(contrib.x, contrib.y, contrib.z);
-#endif
+            detail::add_vec3(paths.contrib[idx].contrib, contrib);
 
             paths.attrib[idx].isTerminate = true;
         }
     }
 
-    inline AT_DEVICE_MTRL_API void shader_miss_with_envmap(
+    inline AT_DEVICE_MTRL_API void shade_miss_with_envmap(
         int32_t idx,
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
@@ -138,11 +159,7 @@ namespace AT_NAME
             }
 
             auto contrib = paths.throughput[idx].throughput * misW * emit;
-#ifdef __CUDACC__
-            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-#else
-            paths.contrib[idx].contrib += aten::vec3(contrib.x, contrib.y, contrib.z);
-#endif
+            detail::add_vec3(paths.contrib[idx].contrib, contrib);
 
             paths.attrib[idx].isTerminate = true;
         }

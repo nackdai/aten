@@ -49,7 +49,7 @@ namespace aten
             else {
                 auto ibl = scene->getIBL();
                 if (ibl) {
-                    shader_miss_with_envmap(
+                    shade_miss_with_envmap(
                         idx,
                         ix, iy,
                         width, height,
@@ -61,7 +61,7 @@ namespace aten
                         paths_, rays_[idx]);
                 }
                 else {
-                    shader_miss(
+                    shade_miss(
                         idx,
                         depth,
                         bg()->sample(rays_[idx]),

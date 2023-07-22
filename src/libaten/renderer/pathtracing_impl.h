@@ -103,6 +103,7 @@ namespace AT_NAME
         }
     }
 
+    template <typename AOV_BUFFER_TYPE = aten::vec4>
     inline AT_DEVICE_MTRL_API void shade_miss_with_envmap(
         int32_t idx,
         int32_t ix, int32_t iy,
@@ -113,7 +114,9 @@ namespace AT_NAME
         const AT_NAME::context& ctxt,
         const aten::CameraParameter& camera,
         AT_NAME::Path& paths,
-        const aten::ray& ray)
+        const aten::ray& ray,
+        AOV_BUFFER_TYPE* aov_normal_depth = nullptr,
+        AOV_BUFFER_TYPE* aov_albedo_meshid = nullptr)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             aten::vec3 dir = ray.dir;
@@ -150,6 +153,14 @@ namespace AT_NAME
                 || (bounce == 1 && paths.attrib[idx].isSingular))
             {
                 paths.attrib[idx].isKill = true;
+
+                if (aov_normal_depth != nullptr && aov_albedo_meshid != nullptr)
+                {
+                    // Export bg color to albedo buffer.
+                    AT_NAME::FillBasicAOVsIfHitMiss(
+                        aov_normal_depth[idx],
+                        aov_albedo_meshid[idx], bg);
+                }
             }
             else {
                 auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);

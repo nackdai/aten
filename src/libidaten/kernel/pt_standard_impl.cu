@@ -13,6 +13,7 @@
 #include "kernel/renderer.h"
 #include "kernel/pt_standard_impl.h"
 #include "renderer/aov.h"
+#include "renderer/pathtracing_impl.h"
 
 // TODO
 // persistend thread works with CUDA 10.1.
@@ -41,47 +42,11 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        paths.attrib[idx].isHit = false;
-
-        if (paths.attrib[idx].isKill) {
-            paths.attrib[idx].isTerminate = true;
-            return;
-        }
-
-#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
-        auto scramble = random[idx] * 0x1fe3434f;
-        paths.sampler[idx].init(frame + sample, 0, scramble, samplerValues);
-#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
-        auto rnd = random[idx];
-        auto scramble = rnd * 0x1fe3434f
-            * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths.sampler[idx].init(
-            (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
-            0,
-            scramble);
-#endif
-
-        float r1 = paths.sampler[idx].nextSample();
-        float r2 = paths.sampler[idx].nextSample();
-
-        if (needFillAOV) {
-            r1 = r2 = 0.5f;
-        }
-
-        float s = (ix + r1) / (float)(camera.width);
-        float t = (iy + r2) / (float)(camera.height);
-
-        AT_NAME::CameraSampleResult camsample;
-        AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
-
-        rays[idx] = camsample.r;
-
-        paths.throughput[idx].throughput = aten::vec3(1);
-        paths.throughput[idx].pdfb = 1.0f;
-        paths.attrib[idx].isTerminate = false;
-        paths.attrib[idx].isSingular = false;
-
-        paths.contrib[idx].samples += 1;
+        AT_NAME::generate_path(
+            rays[idx],
+            idx, ix, iy,
+            sample, frame,
+            paths, camera, *random);
     }
 
     // NOTE

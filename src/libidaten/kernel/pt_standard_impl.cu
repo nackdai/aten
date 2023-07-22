@@ -317,27 +317,13 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
-            // TODO
-            auto bg = aten::vec3(0);
-
-            if (bounce == 0) {
-                paths.attrib[idx].isKill = true;
-
-                // Export bg color to albedo buffer.
-                AT_NAME::FillBasicAOVsIfHitMiss(
-                    aovNormalDepth[idx],
-                    aovAlbedoMeshid[idx], bg);
-
-                // For exporting separated albedo.
-                bg = aten::vec3(1, 1, 1);
-            }
-
-            auto contrib = paths.throughput[idx].throughput * bg;
-            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-
-            paths.attrib[idx].isTerminate = true;
-        }
+        AT_NAME::shade_miss(
+            idx,
+            bounce,
+            aten::vec3(1),
+            paths,
+            aovNormalDepth,
+            aovAlbedoMeshid);
     }
 
     __global__ void shadeMissWithEnvmap(

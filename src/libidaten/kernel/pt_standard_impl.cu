@@ -331,10 +331,10 @@ namespace kernel {
         const aten::CameraParameter camera,
         float4* aovNormalDepth,
         float4* aovAlbedoMeshid,
-        cudaTextureObject_t* textures,
-        int32_t envmapIdx,
-        real envmapAvgIllum,
-        real envmapMultiplyer,
+        const idaten::context ctxt,
+        int32_t envmap_idx,
+        real envmap_avg_illum,
+        real envmap_multiplyer,
         idaten::Path paths,
         const aten::ray* __restrict__ rays,
         int32_t width, int32_t height)
@@ -348,53 +348,18 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
-            aten::vec3 dir = rays[idx].dir;
-
-            if (bounce == 0) {
-                // Suppress jittering envrinment map.
-                // So, re-sample ray without random.
-
-                // TODO
-                // More efficient way...
-
-                float s = ix / (float)(width);
-                float t = iy / (float)(height);
-
-                AT_NAME::CameraSampleResult camsample;
-                AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
-
-                dir = camsample.r.dir;
-            }
-
-            auto uv = AT_NAME::envmap::convertDirectionToUV(dir);
-
-            auto bg = tex2D<float4>(textures[envmapIdx], uv.x, uv.y);
-            auto emit = aten::vec3(bg.x, bg.y, bg.z);
-
-            float misW = 1.0f;
-            if (bounce == 0
-                || (bounce == 1 && paths.attrib[idx].isSingular))
-            {
-                paths.attrib[idx].isKill = true;
-
-                // Export envmap to albedo buffer.
-                AT_NAME::FillBasicAOVsIfHitMiss(
-                    aovNormalDepth[idx],
-                    aovAlbedoMeshid[idx], emit);
-            }
-            else {
-                auto pdfLight = AT_NAME::ImageBasedLight::samplePdf(emit, envmapAvgIllum);
-                misW = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
-
-                emit *= envmapMultiplyer;
-            }
-
-            auto contrib = paths.throughput[idx].throughput * misW * emit;
-            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-
-            paths.attrib[idx].isTerminate = true;
-        }
+        AT_NAME::shade_miss_with_envmap(
+            idx,
+            ix, iy,
+            width, height,
+            bounce,
+            envmap_idx,
+            envmap_avg_illum,
+            envmap_multiplyer,
+            ctxt, camera,
+            paths, rays[idx],
+            aovNormalDepth,
+            aovAlbedoMeshid);
     }
 }
 }
@@ -544,7 +509,7 @@ namespace idaten
                 m_cam,
                 aovNormalDepth.ptr(),
                 aovTexclrMeshid.ptr(),
-                m_tex.ptr(),
+                ctxt_,
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
                 m_paths,
                 m_rays.ptr(),

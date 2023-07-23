@@ -2,7 +2,6 @@
 
 #include "kernel/pt_common.h"
 #include "kernel/device_scene_context.cuh"
-#include "kernel/material.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -57,9 +56,9 @@ __global__ void computeTemporalReuse(
 
     const auto& self_info = infos[idx];
     aten::MaterialParameter mtrl;
-    gatherMaterialInfo(
+    AT_NAME::FillMaterial(
         mtrl,
-        &ctxt,
+        ctxt,
         self_info.mtrl_idx,
         self_info.is_voxel);
 
@@ -105,9 +104,9 @@ __global__ void computeTemporalReuse(
             const auto& neighbor_normal = neighbor_info.nml;
 
             aten::MaterialParameter neightbor_mtrl;
-            auto is_valid_mtrl = gatherMaterialInfo(
+            auto is_valid_mtrl = AT_NAME::FillMaterial(
                 neightbor_mtrl,
-                &ctxt,
+                ctxt,
                 neighbor_info.mtrl_idx,
                 neighbor_info.is_voxel);
 
@@ -232,9 +231,9 @@ __global__ void computeSpatialReuse(
 
     const auto& self_info = infos[idx];
     aten::MaterialParameter mtrl;
-    gatherMaterialInfo(
+    AT_NAME::FillMaterial(
         mtrl,
-        &ctxt,
+        ctxt,
         self_info.mtrl_idx,
         self_info.is_voxel);
 
@@ -289,9 +288,9 @@ __global__ void computeSpatialReuse(
                 const auto& neighbor_normal = neighbor_info.nml;
 
                 aten::MaterialParameter neightbor_mtrl;
-                auto is_valid_mtrl = gatherMaterialInfo(
+                auto is_valid_mtrl = AT_NAME::FillMaterial(
                     neightbor_mtrl,
-                    &ctxt,
+                    ctxt,
                     neighbor_info.mtrl_idx,
                     neighbor_info.is_voxel);
 

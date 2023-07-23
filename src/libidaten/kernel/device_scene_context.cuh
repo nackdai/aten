@@ -1,6 +1,10 @@
 #pragma once
 
-#include "aten4idaten.h"
+#include "geometry/vertex.h"
+#include "material/material.h"
+#include "light/light_parameter.h"
+#include "geometry/geomparam.h"
+#include "math/mat4.h"
 
 namespace idaten {
     struct context {

@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "types.h"
-#include "material/material.h"
 #include "math/mat4.h"
 #include "geometry/triangle.h"
 #include "geometry/TriangleGroupMesh.h"

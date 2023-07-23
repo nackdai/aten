@@ -368,7 +368,6 @@ namespace aten
         int32_t rrDepth,
         int32_t depth)
     {
-        auto mtrl = ctxt.getMaterial(rec.mtrlid);
         const auto& ray = rays[idx];
         auto* sampler = &paths.sampler[idx];
 
@@ -378,8 +377,14 @@ namespace aten
         // 物体からのレイの入出を考慮.
         vec3 orienting_normal = rec.normal;
 
+        aten::MaterialParameter mtrl;
+        AT_NAME::FillMaterial(
+            mtrl,
+            ctxt,
+            rec.mtrlid, rec.isVoxel);
+
         // Implicit conection to light.
-        if (mtrl->isEmissive()) {
+        if (mtrl.attrib.isEmissive) {
             if (!isBackfacing) {
                 real weight = 1.0f;
 
@@ -400,7 +405,7 @@ namespace aten
                     }
                 }
 
-                auto emit = static_cast<aten::vec3>(mtrl->color());
+                auto emit = static_cast<aten::vec3>(mtrl.baseColor);
                 paths.contrib[idx].contrib += paths.throughput[idx].throughput * weight * emit;
             }
 
@@ -408,14 +413,14 @@ namespace aten
             return false;
         }
 
-        if (!mtrl->isTranslucent() && isBackfacing) {
+        if (!mtrl.attrib.isTranslucent && isBackfacing) {
             orienting_normal = -orienting_normal;
         }
 
         // Apply normal map.
         auto pre_sampled_r = material::applyNormal(
-            &mtrl->param(),
-            mtrl->param().normalMap,
+            &mtrl,
+            mtrl.normalMap,
             orienting_normal, orienting_normal,
             rec.u, rec.v,
             ray.dir, sampler);
@@ -423,10 +428,10 @@ namespace aten
         // Check transparency or translucency.
         // NOTE:
         // If the material itself is originally translucent, we don't care alpha translucency.
-        if (!mtrl->isTranslucent()
-            && AT_NAME::material::isTranslucentByAlpha(mtrl->param(), rec.u, rec.v))
+        if (!mtrl.attrib.isTranslucent
+            && AT_NAME::material::isTranslucentByAlpha(mtrl, rec.u, rec.v))
         {
-            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl->param(), rec.u, rec.v);
+            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, rec.u, rec.v);
             auto r = sampler->nextSample();
 
             if (r >= alpha) {
@@ -434,13 +439,13 @@ namespace aten
                 // NOTE
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
                 rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
-                paths.throughput[idx].throughput *= static_cast<aten::vec3>(mtrl->color());
+                paths.throughput[idx].throughput *= static_cast<aten::vec3>(mtrl.baseColor);
                 return true;
             }
         }
 
         // Explicit conection to light.
-        if (!mtrl->isSingularOrTranslucent())
+        if (!(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))
         {
             real lightSelectPdf = 1;
             LightSampleResult sampleres;
@@ -474,10 +479,10 @@ namespace aten
                         auto cosShadow = dot(orienting_normal, dirToLight);
 
                         auto bsdf = material::sampleBSDF(
-                            &mtrl->param(),
+                            &mtrl,
                             orienting_normal, ray.dir, dirToLight, rec.u, rec.v, pre_sampled_r);
                         auto pdfb = material::samplePDF(
-                            &mtrl->param(),
+                            &mtrl,
                             orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
 
                         bsdf *= paths.throughput[idx].throughput;
@@ -535,7 +540,7 @@ namespace aten
         aten::MaterialSampling sampling;
         material::sampleMaterial(
             &sampling,
-            &mtrl->param(),
+            &mtrl,
             orienting_normal,
             ray.dir,
             rec.normal,
@@ -549,7 +554,7 @@ namespace aten
         // Get normal to add ray offset.
         // In refraction material case, new ray direction might be computed with inverted normal.
         // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        auto rayBasedNormal = (!isBackfacing && mtrl->isTranslucent())
+        auto rayBasedNormal = (!isBackfacing && mtrl.attrib.isTranslucent)
             ? -orienting_normal
             : orienting_normal;
 
@@ -564,8 +569,8 @@ namespace aten
         }
 
         paths.throughput[idx].pdfb = pdfb;
-        paths.attrib[idx].isSingular = mtrl->param().attrib.isSingular;
-        paths.attrib[idx].mtrlType = mtrl->param().type;
+        paths.attrib[idx].isSingular = mtrl.attrib.isSingular;
+        paths.attrib[idx].mtrlType = mtrl.type;
 
         // Make next ray.
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);

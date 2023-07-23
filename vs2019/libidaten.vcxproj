@@ -103,7 +103,6 @@
     <ClInclude Include="..\src\libidaten\kernel\intersecttype.h" />
     <ClInclude Include="..\src\libidaten\kernel\intersect_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\LBVHBuilder.h" />
-    <ClInclude Include="..\src\libidaten\kernel\material.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\MortonCode.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h" />

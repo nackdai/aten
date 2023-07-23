@@ -4,7 +4,6 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/material.cuh"
 #include "kernel/pt_common.h"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_standard_impl.cuh"
@@ -75,9 +74,9 @@ namespace pt {
         // 物体からのレイの入出を考慮.
         aten::vec3 orienting_normal = rec.normal;
 
-        gatherMaterialInfo(
+        AT_NAME::FillMaterial(
             shMtrls[threadIdx.x],
-            &ctxt,
+            ctxt,
             rec.mtrlid,
             rec.isVoxel);
 

@@ -94,9 +94,6 @@
     <ClInclude Include="..\src\libaten\math\aabb.h">
       <Filter>aten\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\material.cuh">
-      <Filter>kernel</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\camera\camera.h">
       <Filter>aten\camera</Filter>
     </ClInclude>

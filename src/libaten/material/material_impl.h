@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include "material/material.h"
 #include "material/sample_texture.h"
 #include "material/emissive.h"
@@ -376,4 +378,55 @@ namespace AT_NAME
             return real(-1);
         }
     }
+
+    namespace detail {
+        template <typename T, typename HasVariable = void>
+        struct has_texture_variable : public std::false_type {};
+
+        template <typename T>
+        struct has_texture_variable<
+            T,
+            std::void_t<typename decltype(T::textures)>> : public std::true_type {};
+    }
+
+    template <typename CONTEXT>
+    inline AT_DEVICE_MTRL_API bool FillMaterial(
+        aten::MaterialParameter& dst_mtrl,
+        const CONTEXT& ctxt,
+        const int32_t mtrl_id,
+        const bool is_voxel)
+    {
+        bool is_valid_mtrl = mtrl_id >= 0;
+
+        if (is_valid_mtrl) {
+            dst_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id));
+
+            if (is_voxel) {
+                // Replace to lambert.
+                const auto& albedo = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id)).baseColor;
+                dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
+                dst_mtrl.baseColor = albedo;
+            }
+            // Check if `context` class has `textures` variable.
+            if constexpr (detail::has_texture_variable<CONTEXT>::value) {
+                // Check if `context::textures` is `int32_t` type.
+                static_assert(
+                    std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>,
+                    "context::textures has to be integral");
+                if constexpr (std::is_integral_v<std::remove_pointer_t<decltype(CONTEXT::textures)>>) {
+                    dst_mtrl.albedoMap = (int)(dst_mtrl.albedoMap >= 0 ? ctxt.textures[dst_mtrl.albedoMap] : -1);
+                    dst_mtrl.normalMap = (int)(dst_mtrl.normalMap >= 0 ? ctxt.textures[dst_mtrl.normalMap] : -1);
+                    dst_mtrl.roughnessMap = (int)(dst_mtrl.roughnessMap >= 0 ? ctxt.textures[dst_mtrl.roughnessMap] : -1);
+                }
+            }
+        }
+        else {
+            // TODO
+            dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
+            dst_mtrl.baseColor = aten::vec3(1.0f);
+        }
+
+        return is_valid_mtrl;
+    }
+
 }

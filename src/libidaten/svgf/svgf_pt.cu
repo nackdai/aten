@@ -3,7 +3,6 @@
 #include "kernel/StreamCompaction.h"
 
 #include "kernel/device_scene_context.cuh"
-#include "kernel/material.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/accelerator.cuh"
 #include "kernel/pt_common.h"
@@ -93,9 +92,9 @@ namespace svgf {
         // 物体からのレイの入出を考慮.
         aten::vec3 orienting_normal = rec.normal;
 
-        gatherMaterialInfo(
+        AT_NAME::FillMaterial(
             shMtrls[threadIdx.x],
-            &ctxt,
+            ctxt,
             rec.mtrlid,
             rec.isVoxel);
 

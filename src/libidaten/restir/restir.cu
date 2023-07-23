@@ -7,7 +7,6 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
-#include "kernel/material.cuh"
 #include "kernel/pt_common.h"
 #include "kernel/pt_standard_impl.cuh"
 
@@ -111,9 +110,9 @@ __global__ void shade(
     // 物体からのレイの入出を考慮.
     aten::vec3 orienting_normal = rec.normal;
 
-    gatherMaterialInfo(
+    AT_NAME::FillMaterial(
         shMtrls[threadIdx.x],
-        &ctxt,
+        ctxt,
         rec.mtrlid,
         rec.isVoxel);
 
@@ -394,9 +393,9 @@ __global__ void computeShadowRayContribution(
     const auto& reservoir = reservoirs[idx];
     const auto& restir_info = restir_infos[idx];
 
-    gatherMaterialInfo(
+    AT_NAME::FillMaterial(
         shMtrls[threadIdx.x],
-        &ctxt,
+        ctxt,
         restir_info.mtrl_idx,
         restir_info.is_voxel);
 

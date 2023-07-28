@@ -13,10 +13,10 @@
 
 namespace aten {
 #ifndef __AT_CUDA__
-    class sampler {
+    class sampler_interface {
     public:
-        sampler() {}
-        virtual ~sampler() {}
+        sampler_interface() {}
+        virtual ~sampler_interface() {}
 
         virtual void init(uint32_t seed, const void* data = nullptr)
         {

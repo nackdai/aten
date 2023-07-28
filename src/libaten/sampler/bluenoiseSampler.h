@@ -9,7 +9,7 @@
 #include "sampler/samplerinterface.h"
 
 namespace aten {
-    class BlueNoiseSampler AT_INHERIT(sampler) {
+    class BlueNoiseSampler AT_INHERIT(sampler_interface) {
     public:
         BlueNoiseSampler() = default;
         AT_VIRTUAL(~BlueNoiseSampler() = default;)

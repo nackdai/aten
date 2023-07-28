@@ -7,7 +7,7 @@ namespace aten {
     // NOTE
     // The code of sobol is taken from: http://gruenschloss.org/sobol/kuo-2d-proj-single-precision.zip
 
-    class Sobol AT_INHERIT(sampler) {
+    class Sobol AT_INHERIT(sampler_interface) {
     public:
         Sobol() = default;
         Sobol(uint32_t idx)

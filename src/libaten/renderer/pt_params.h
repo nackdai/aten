@@ -17,8 +17,8 @@ namespace aten {
             aten::vec3 contrib;
             float samples;
         };
-
         PathContrib() : contrib(0), samples(0.0f) {}
+
         PathContrib(const PathContrib& rhs)
         {
             v = rhs.v;
@@ -73,7 +73,7 @@ namespace aten {
         PathThroughput* throughput;
         PathContrib* contrib;
         PathAttribute* attrib;
-        aten::samplerimpl* sampler;
+        aten::sampler* sampler;
 
         void init(int32_t width, int32_t height)
         {
@@ -94,7 +94,7 @@ namespace aten {
         std::vector<PathThroughput> throughput_;
         std::vector<PathContrib> contrib_;
         std::vector<PathAttribute> attrib_;
-        std::vector<samplerimpl> sampler_;
+        std::vector<aten::sampler> sampler_;
     };
 
     struct ShadowRay {

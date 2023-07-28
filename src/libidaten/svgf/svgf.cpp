@@ -7,6 +7,7 @@
 
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_standard_impl.h"
+#include "kernel/pt_params.h"
 
 #include "aten4idaten.h"
 

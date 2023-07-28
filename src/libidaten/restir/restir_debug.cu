@@ -4,6 +4,7 @@
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/pt_common.h"
+#include "kernel/pt_params.h"
 #include "kernel/StreamCompaction.h"
 
 #include "cuda/cudadefs.h"
@@ -220,7 +221,7 @@ namespace idaten
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height,
                 m_cam,
-                m_paths,
+                path_host_->paths,
                 aov_.normal_depth().ptr(),
                 aov_.albedo_meshid().ptr(),
                 m_shapeparam.ptr(),

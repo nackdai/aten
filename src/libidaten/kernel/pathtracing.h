@@ -4,7 +4,6 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 
-#include "kernel/pt_params.h"
 #include "kernel/pt_standard_impl.h"
 #include "sampler/sampler.h"
 #include "renderer/aov.h"

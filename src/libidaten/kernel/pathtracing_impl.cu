@@ -343,7 +343,7 @@ namespace idaten
             aov_.albedo_meshid().ptr(),
             width, height,
             ctxt_,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -371,7 +371,7 @@ namespace idaten
         pt::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
             ctxt_,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_shadowRays.ptr());
 
@@ -390,7 +390,7 @@ namespace idaten
 
         pt::gather << <grid, block, 0, m_stream >> > (
             outputSurf,
-            m_paths,
+            path_host_->paths,
             m_enableProgressive,
             width, height);
 

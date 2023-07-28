@@ -434,7 +434,7 @@ namespace idaten
             curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
             mtxW2C,
             width, height,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -468,7 +468,7 @@ namespace idaten
 
         svgf::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_shadowRays.ptr(),
             m_shapeparam.ptr(),
@@ -499,7 +499,7 @@ namespace idaten
             outputSurf,
             curaov.get<AOVBuffer::ColorVariance>().ptr(),
             curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
-            m_paths,
+            path_host_->paths,
             m_tmpBuf.ptr(),
             width, height);
 

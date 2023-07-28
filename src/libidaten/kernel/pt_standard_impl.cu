@@ -10,9 +10,13 @@
 #include "kernel/intersect.cuh"
 #include "kernel/accelerator.cuh"
 #include "kernel/renderer.h"
+#include "kernel/pt_params.h"
 #include "kernel/pt_standard_impl.h"
+
 #include "renderer/aov.h"
 #include "renderer/pathtracing_impl.h"
+
+
 
 // TODO
 // persistend thread works with CUDA 10.1.
@@ -365,6 +369,9 @@ namespace kernel {
 
 namespace idaten
 {
+    StandardPT::StandardPT() : path_host_(std::make_shared<PathHost>())
+    {}
+
     bool StandardPT::initPath(int32_t width, int32_t height)
     {
         if (!is_init_context_) {
@@ -383,33 +390,19 @@ namespace idaten
             ctxt_.textures = m_tex.ptr();
         }
 
-        if (!m_isInitPath) {
-            m_pathThroughput.init(width * height);
-            m_pathContrib.init(width * height);
-            m_pathAttrib.init(width * height);
-            m_pathSampler.init(width * height);
+        const auto result = path_host_->init(width, height);
 
-            m_paths.throughput = m_pathThroughput.ptr();
-            m_paths.contrib = m_pathContrib.ptr();
-            m_paths.attrib = m_pathAttrib.ptr();
-            m_paths.sampler = m_pathSampler.ptr();
-
-            m_isInitPath = true;
-
-            return true;
-        }
-
-        return false;
+        return result;
     }
 
     void StandardPT::clearPath()
     {
-        cudaMemsetAsync(m_pathThroughput.ptr(), 0, m_pathThroughput.bytes(), m_stream);
-        cudaMemsetAsync(m_pathContrib.ptr(), 0, m_pathContrib.bytes(), m_stream);
-        cudaMemsetAsync(m_pathAttrib.ptr(), 0, m_pathAttrib.bytes(), m_stream);
+        cudaMemsetAsync(path_host_->throughput.ptr(), 0, path_host_->throughput.bytes(), m_stream);
+        cudaMemsetAsync(path_host_->contrib.ptr(), 0, path_host_->contrib.bytes(), m_stream);
+        cudaMemsetAsync(path_host_->attrib.ptr(), 0, path_host_->attrib.bytes(), m_stream);
 
         if (m_frame == 0) {
-            cudaMemsetAsync(m_pathSampler.ptr(), 0, m_pathSampler.bytes(), m_stream);
+            cudaMemsetAsync(path_host_->sampler.ptr(), 0, path_host_->sampler.bytes(), m_stream);
         }
     }
 
@@ -426,7 +419,7 @@ namespace idaten
 
         kernel::genPath << <grid, block, 0, m_stream >> > (
             needFillAOV,
-            m_paths,
+            path_host_->paths,
             m_rays.ptr(),
             width, height,
             sample,
@@ -453,7 +446,7 @@ namespace idaten
         kernel::hitTest << <grid, block >> > (
 #endif
             ctxt_,
-            m_paths,
+            path_host_->paths,
             m_isects.ptr(),
             m_rays.ptr(),
             m_hitbools.ptr(),
@@ -482,7 +475,7 @@ namespace idaten
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
             binded_gbuffer,
             ctxt_,
-            m_paths,
+            path_host_->paths,
             m_isects.ptr(),
             m_hitbools.ptr(),
             width, height,
@@ -510,7 +503,7 @@ namespace idaten
                 aovTexclrMeshid.ptr(),
                 ctxt_,
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
-                m_paths,
+                path_host_->paths,
                 m_rays.ptr(),
                 width, height);
         }
@@ -519,7 +512,7 @@ namespace idaten
                 bounce,
                 aovNormalDepth.ptr(),
                 aovTexclrMeshid.ptr(),
-                m_paths,
+                path_host_->paths,
                 width, height);
         }
 

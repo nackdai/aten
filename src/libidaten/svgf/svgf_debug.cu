@@ -5,6 +5,7 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
+#include "kernel/pt_params.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -226,7 +227,7 @@ namespace idaten
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height,
                 m_cam,
-                m_paths,
+                path_host_->paths,
                 curaov.get<AOVBuffer::NormalDepth>().ptr(),
                 curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
                 m_shapeparam.ptr(),

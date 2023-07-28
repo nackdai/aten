@@ -1,6 +1,7 @@
 #include "restir/restir.h"
 
 #include "kernel/pt_common.h"
+#include "kernel/pt_params.h"
 #include "kernel/device_scene_context.cuh"
 
 #include "cuda/cudadefs.h"
@@ -416,7 +417,7 @@ namespace idaten {
                     auto motionDepthBuffer = m_motionDepthBuffer.bind();
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
-                        m_paths,
+                        path_host_->paths,
                         m_shapeparam.ptr(),
                         m_mtrlparam.ptr(),
                         m_lightparam.ptr(), m_lightparam.num(),
@@ -438,7 +439,7 @@ namespace idaten {
             if (m_restirMode == ReSTIRMode::ReSTIR
                 || m_restirMode == ReSTIRMode::SpatialReuse) {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
-                    m_paths,
+                    path_host_->paths,
                     m_shapeparam.ptr(),
                     m_mtrlparam.ptr(),
                     m_lightparam.ptr(), m_lightparam.num(),

@@ -517,7 +517,7 @@ namespace idaten
             aov_.albedo_meshid().ptr(),
             mtxW2C,
             width, height,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -555,7 +555,7 @@ namespace idaten
 
         hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_reservoirs[m_curReservoirPos].ptr(),
             m_shadowRays.ptr(),
@@ -578,7 +578,7 @@ namespace idaten
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs[target_idx].ptr(),
             m_restir_infos.ptr(),
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             aov_.normal_depth().ptr(),
             aov_.albedo_meshid().ptr(),

@@ -3,13 +3,15 @@
 #include "cuda/cudamemory.h"
 
 #include "kernel/device_scene_context.cuh"
-#include "kernel/pt_params.h"
 #include "kernel/renderer.h"
 
 namespace idaten {
+    struct PathHost;
+    struct ShadowRay;
+
     class StandardPT : public Renderer {
     public:
-        StandardPT() = default;
+        StandardPT();
         virtual ~StandardPT() {}
 
         StandardPT(const StandardPT&) = delete;
@@ -86,12 +88,7 @@ namespace idaten {
         bool is_init_context_{ false };
         idaten::context ctxt_;
 
-        bool m_isInitPath{ false };
-        Path m_paths;
-        idaten::TypedCudaMemory<PathThroughput> m_pathThroughput;
-        idaten::TypedCudaMemory<PathContrib> m_pathContrib;
-        idaten::TypedCudaMemory<PathAttribute> m_pathAttrib;
-        idaten::TypedCudaMemory<aten::sampler> m_pathSampler;
+        std::shared_ptr<PathHost> path_host_;
 
         idaten::TypedCudaMemory<aten::Intersection> m_isects;
         idaten::TypedCudaMemory<aten::ray> m_rays;

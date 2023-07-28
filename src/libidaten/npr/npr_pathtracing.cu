@@ -4,6 +4,7 @@
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/pt_common.h"
+#include "kernel/pt_params.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -429,7 +430,7 @@ namespace idaten {
             if (bounce == 0) {
                 npr_pt::generateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
                     sample_ray_infos_.ptr(),
-                    m_paths,
+                    path_host_->paths,
                     m_rays.ptr(),
                     m_hitidx.ptr(),
                     hitcount.ptr(),
@@ -446,7 +447,7 @@ namespace idaten {
                 bounce,
                 m_hitidx.ptr(),
                 hitcount.ptr(),
-                m_paths,
+                path_host_->paths,
                 m_cam,
                 m_isects.ptr(),
                 m_rays.ptr(),
@@ -501,7 +502,7 @@ namespace idaten {
                     bounce,
                     m_hitidx.ptr(),
                     hitcount.ptr(),
-                    m_paths,
+                    path_host_->paths,
                     m_cam,
                     m_isects.ptr(),
                     m_rays.ptr(),

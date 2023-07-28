@@ -1,6 +1,7 @@
 #include "svgf/svgf.h"
 
 #include "kernel/pt_common.h"
+#include "kernel/pt_params.h"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
@@ -35,7 +36,7 @@ namespace idaten
             (height + block.y - 1) / block.y);
 
         copyBufferForTile << <grid, block, 0, m_stream >> > (
-            m_paths,
+            path_host_->paths,
             m_tmpBuf.ptr(),
             width, height);
 

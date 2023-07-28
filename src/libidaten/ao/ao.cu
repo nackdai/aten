@@ -4,6 +4,7 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
+#include "kernel/pt_params.h"
 #include "kernel/persistent_thread.h"
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -191,7 +192,7 @@ namespace idaten {
         ao::shadeMissAO << <grid, block >> > (
             isFirstBounce,
             width, height,
-            m_paths);
+            path_host_->paths);
 
         checkCudaKernel(shadeMiss);
     }
@@ -211,7 +212,7 @@ namespace idaten {
             //shade<true> << <1, 1 >> > (
             m_ao_num_rays, m_ao_radius,
             m_frame,
-            m_paths,
+            path_host_->paths,
             m_hitidx.ptr(), hitcount.ptr(),
             m_isects.ptr(),
             m_rays.ptr(),
@@ -240,7 +241,7 @@ namespace idaten {
         ao::gatherAO << <grid, block >> > (
             width, height,
             outputSurf,
-            m_paths,
+            path_host_->paths,
             m_enableProgressive);
     }
 }

@@ -25,6 +25,7 @@
 
 #ifdef __AT_CUDA__
 #include "kernel/bluenoiseSampler.cuh"
+#endif
 
 namespace aten {
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
@@ -37,16 +38,3 @@ namespace aten {
     using sampler = idaten::BlueNoiseSamplerGPU;
 #endif
 }
-#else
-namespace aten {
-#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
-    using samplerimpl = Sobol;
-#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
-    using samplerimpl = CMJ;
-#elif IDATEN_SAMPLER == IDATEN_SAMPLER_WANGHASH
-    using samplerimpl = WangHash;
-#else
-    using samplerimpl = idaten::BlueNoiseSamplerGPU;
-#endif
-}
-#endif

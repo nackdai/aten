@@ -5,7 +5,7 @@
 #include "sampler/samplerinterface.h"
 
 namespace aten {
-    class Halton : public sampler {
+    class Halton : public sampler_interface {
     private:
         static std::vector<uint32_t> PrimeNumbers;
 

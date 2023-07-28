@@ -6,7 +6,7 @@
 namespace aten {
     // Correllated multi jittered.
     // http://graphics.pixar.com/library/MultiJitteredSampling/paper.pdf
-    class CMJ AT_INHERIT(sampler) {
+    class CMJ AT_INHERIT(sampler_interface) {
     public:
         CMJ() = default;
         AT_VIRTUAL(~CMJ() = default;)

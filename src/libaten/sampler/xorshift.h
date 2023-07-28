@@ -5,7 +5,7 @@
 
 namespace aten {
     // Xor-Shift による乱数ジェネレータ.
-    class XorShift : public sampler {
+    class XorShift : public sampler_interface {
     public:
         XorShift() {}
         XorShift(const uint32_t initial_seed)

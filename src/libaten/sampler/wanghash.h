@@ -5,7 +5,7 @@
 
 namespace aten {
     // Wang's hash による乱数ジェネレータ.
-    class WangHash AT_INHERIT(sampler) {
+    class WangHash AT_INHERIT(sampler_interface) {
     public:
         WangHash() = default;
         WangHash(const uint32_t initial_seed)

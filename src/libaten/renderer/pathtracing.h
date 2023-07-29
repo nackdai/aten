@@ -69,7 +69,7 @@ namespace aten
             const background* bg);
 
     protected:
-        Path paths_;
+        PathHost path_host_;
         std::vector<aten::ray> rays_;
 
         int32_t m_maxDepth{ 1 };

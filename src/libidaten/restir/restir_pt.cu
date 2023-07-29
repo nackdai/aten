@@ -370,26 +370,26 @@ namespace idaten
         auto& hitcount = m_compaction.getCount();
 
         shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            aov_.normal_depth().ptr(),
-            aov_.albedo_meshid().ptr(),
+            aov_.normal_depth().data(),
+            aov_.albedo_meshid().data(),
             mtxW2C,
             width, height,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_isects.ptr(),
-            m_rays.ptr(),
+            m_hitidx.data(), hitcount.data(),
+            m_isects.data(),
+            m_rays.data(),
             sample,
             m_frame,
             bounce, rrBounce,
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_primparams.ptr(),
+            m_shapeparam.data(),
+            m_mtrlparam.data(),
+            m_lightparam.data(), m_lightparam.num(),
+            m_primparams.data(),
             texVtxPos, texVtxNml,
-            m_mtxparams.ptr(),
-            m_tex.ptr(),
-            m_random.ptr(),
-            m_shadowRays.ptr());
+            m_mtxparams.data(),
+            m_tex.data(),
+            m_random.data(),
+            m_shadowRays.data());
 
         checkCudaKernel(shade);
 
@@ -409,15 +409,15 @@ namespace idaten
         hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_shadowRays.ptr(),
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
+            m_hitidx.data(), hitcount.data(),
+            m_shadowRays.data(),
+            m_shapeparam.data(),
+            m_mtrlparam.data(),
+            m_lightparam.data(), m_lightparam.num(),
+            m_nodetex.data(),
+            m_primparams.data(),
             texVtxPos,
-            m_mtxparams.ptr());
+            m_mtxparams.data());
 
         checkCudaKernel(hitShadowRay);
     }

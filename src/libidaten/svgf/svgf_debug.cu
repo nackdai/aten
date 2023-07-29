@@ -200,15 +200,15 @@ namespace idaten
             outputSurf,
             m_aovMode,
             width, height,
-            curaov.get<AOVBuffer::NormalDepth>().ptr(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().data(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             gbuffer,
             m_cam,
-            m_shapeparam.ptr(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
+            m_shapeparam.data(),
+            m_nodetex.data(),
+            m_primparams.data(),
             texVtxPos,
-            m_mtxparams.ptr());
+            m_mtxparams.data());
     }
 
     void SVGFPathTracing::pick(
@@ -217,24 +217,24 @@ namespace idaten
         cudaTextureObject_t texVtxPos)
     {
         if (m_willPicklPixel) {
-            m_pick.init(1);
+            m_pick.resize(1);
 
             int32_t curaov_idx = getCurAovs();
             auto& curaov = aov_[curaov_idx];
 
             pickPixel << <1, 1 >> > (
-                m_pick.ptr(),
+                m_pick.data(),
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height,
                 m_cam,
                 path_host_->paths,
-                curaov.get<AOVBuffer::NormalDepth>().ptr(),
-                curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
-                m_shapeparam.ptr(),
-                m_nodetex.ptr(),
-                m_primparams.ptr(),
+                curaov.get<AOVBuffer::NormalDepth>().data(),
+                curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+                m_shapeparam.data(),
+                m_nodetex.data(),
+                m_primparams.data(),
                 texVtxPos,
-                m_mtxparams.ptr());
+                m_mtxparams.data());
 
             m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 

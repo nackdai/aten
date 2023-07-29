@@ -430,26 +430,26 @@ namespace idaten
         auto& curaov = aov_[curaov_idx];
 
         svgf::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            curaov.get<AOVBuffer::NormalDepth>().ptr(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().data(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             mtxW2C,
             width, height,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_isects.ptr(),
-            m_rays.ptr(),
+            m_hitidx.data(), hitcount.data(),
+            m_isects.data(),
+            m_rays.data(),
             sample,
             m_frame,
             bounce, rrBounce,
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_primparams.ptr(),
+            m_shapeparam.data(),
+            m_mtrlparam.data(),
+            m_lightparam.data(), m_lightparam.num(),
+            m_primparams.data(),
             texVtxPos, texVtxNml,
-            m_mtxparams.ptr(),
-            m_tex.ptr(),
-            m_random.ptr(),
-            m_shadowRays.ptr());
+            m_mtxparams.data(),
+            m_tex.data(),
+            m_random.data(),
+            m_shadowRays.data());
 
         checkCudaKernel(shade);
 
@@ -469,15 +469,15 @@ namespace idaten
         svgf::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_shadowRays.ptr(),
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_lightparam.ptr(), m_lightparam.num(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
+            m_hitidx.data(), hitcount.data(),
+            m_shadowRays.data(),
+            m_shapeparam.data(),
+            m_mtrlparam.data(),
+            m_lightparam.data(), m_lightparam.num(),
+            m_nodetex.data(),
+            m_primparams.data(),
             texVtxPos,
-            m_mtxparams.ptr());
+            m_mtxparams.data());
 
         checkCudaKernel(hitShadowRay);
     }
@@ -497,10 +497,10 @@ namespace idaten
 
         svgf::gather << <grid, block, 0, m_stream >> > (
             outputSurf,
-            curaov.get<AOVBuffer::ColorVariance>().ptr(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
+            curaov.get<AOVBuffer::ColorVariance>().data(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
             path_host_->paths,
-            m_tmpBuf.ptr(),
+            m_tmpBuf.data(),
             width, height);
 
         checkCudaKernel(gather);

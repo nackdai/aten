@@ -61,7 +61,7 @@ namespace idaten
         textureViewer << <grid, block >> > (
             idx,
             screenWidth, screenHeight,
-            m_tex.ptr(),
+            m_tex.data(),
             outputSurf);
 
         for (int32_t i = 0; i < m_texRsc.size(); i++) {

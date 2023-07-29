@@ -62,11 +62,11 @@ namespace idaten {
 
         m_compaction.init(width * height, 1024);
 
-        m_isects.init(width * height);
-        m_rays.init(width * height);
+        m_isects.resize(width * height);
+        m_rays.resize(width * height);
 
-        m_hitbools.init(width * height);
-        m_hitidx.init(width * height);
+        m_hitbools.resize(width * height);
+        m_hitidx.resize(width * height);
 
         m_glimg.map();
         auto outputSurf = m_glimg.bind();

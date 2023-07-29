@@ -339,19 +339,19 @@ namespace idaten
         auto& hitcount = m_compaction.getCount();
 
         pt::shade << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            aov_.normal_depth().ptr(),
-            aov_.albedo_meshid().ptr(),
+            aov_.normal_depth().data(),
+            aov_.albedo_meshid().data(),
             width, height,
             ctxt_,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_isects.ptr(),
-            m_rays.ptr(),
+            m_hitidx.data(), hitcount.data(),
+            m_isects.data(),
+            m_rays.data(),
             sample,
             m_frame,
             bounce, rrBounce,
-            m_random.ptr(),
-            m_shadowRays.ptr());
+            m_random.data(),
+            m_shadowRays.data());
 
         checkCudaKernel(shade);
 
@@ -372,8 +372,8 @@ namespace idaten
             bounce,
             ctxt_,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_shadowRays.ptr());
+            m_hitidx.data(), hitcount.data(),
+            m_shadowRays.data());
 
         checkCudaKernel(hitShadowRay);
     }

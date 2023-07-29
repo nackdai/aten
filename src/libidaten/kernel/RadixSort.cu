@@ -33,7 +33,7 @@ namespace idaten
         std::vector<T>* resultHostKeys/*= nullptr*/,
         std::vector<uint32_t>* resultHostValues/*= nullptr*/)
     {
-        thrust::sort_by_key(thrust::device, keys.ptr(), keys.ptr() + num, values.ptr());
+        thrust::sort_by_key(thrust::device, keys.data(), keys.data() + num, values.data());
 
         if (resultHostKeys) {
             resultHostKeys->resize(num);

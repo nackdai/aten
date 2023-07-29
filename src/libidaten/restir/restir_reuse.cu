@@ -418,17 +418,17 @@ namespace idaten {
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
                         path_host_->paths,
-                        m_shapeparam.ptr(),
-                        m_mtrlparam.ptr(),
-                        m_lightparam.ptr(), m_lightparam.num(),
-                        m_primparams.ptr(),
+                        m_shapeparam.data(),
+                        m_mtrlparam.data(),
+                        m_lightparam.data(), m_lightparam.num(),
+                        m_primparams.data(),
                         texVtxPos, texVtxNml,
-                        m_mtxparams.ptr(),
-                        m_tex.ptr(),
-                        aov_.albedo_meshid().ptr(),
-                        m_reservoirs[cur_idx].ptr(),
-                        m_reservoirs[prev_idx].ptr(),
-                        m_restir_infos.ptr(),
+                        m_mtxparams.data(),
+                        m_tex.data(),
+                        aov_.albedo_meshid().data(),
+                        m_reservoirs[cur_idx].data(),
+                        m_reservoirs[prev_idx].data(),
+                        m_restir_infos.data(),
                         motionDepthBuffer,
                         width, height);
 
@@ -440,17 +440,17 @@ namespace idaten {
                 || m_restirMode == ReSTIRMode::SpatialReuse) {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
                     path_host_->paths,
-                    m_shapeparam.ptr(),
-                    m_mtrlparam.ptr(),
-                    m_lightparam.ptr(), m_lightparam.num(),
-                    m_primparams.ptr(),
+                    m_shapeparam.data(),
+                    m_mtrlparam.data(),
+                    m_lightparam.data(), m_lightparam.num(),
+                    m_primparams.data(),
                     texVtxPos, texVtxNml,
-                    m_mtxparams.ptr(),
-                    m_tex.ptr(),
-                    aov_.albedo_meshid().ptr(),
-                    m_reservoirs[cur_idx].ptr(),
-                    m_reservoirs[dst_idx].ptr(),
-                    m_restir_infos.ptr(),
+                    m_mtxparams.data(),
+                    m_tex.data(),
+                    aov_.albedo_meshid().data(),
+                    m_reservoirs[cur_idx].data(),
+                    m_reservoirs[dst_idx].data(),
+                    m_restir_infos.data(),
                     width, height);
 
                 checkCudaKernel(computeSpatialReuse);

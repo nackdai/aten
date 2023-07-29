@@ -420,7 +420,7 @@ namespace idaten {
             dim3 threadPerBlock(64);
 
             if (sample_ray_infos_.empty()) {
-                sample_ray_infos_.init(width * height);
+                sample_ray_infos_.resize(width * height);
             }
 
             auto& hitcount = m_compaction.getCount();
@@ -429,11 +429,11 @@ namespace idaten {
 
             if (bounce == 0) {
                 npr_pt::generateSampleRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-                    sample_ray_infos_.ptr(),
+                    sample_ray_infos_.data(),
                     path_host_->paths,
-                    m_rays.ptr(),
-                    m_hitidx.ptr(),
-                    hitcount.ptr(),
+                    m_rays.data(),
+                    m_hitidx.data(),
+                    hitcount.data(),
                     feature_line_width_,
                     pixel_width);
                 checkCudaKernel(generateSampleRay);
@@ -443,22 +443,22 @@ namespace idaten {
                 aten::vec3(0, 1, 0),
                 feature_line_width_,
                 pixel_width,
-                sample_ray_infos_.ptr(),
+                sample_ray_infos_.data(),
                 bounce,
-                m_hitidx.ptr(),
-                hitcount.ptr(),
+                m_hitidx.data(),
+                hitcount.data(),
                 path_host_->paths,
                 m_cam,
-                m_isects.ptr(),
-                m_rays.ptr(),
-                m_shapeparam.ptr(),
-                m_mtrlparam.ptr(),
-                m_lightparam.ptr(), m_lightparam.num(),
-                m_nodetex.ptr(),
-                m_primparams.ptr(),
+                m_isects.data(),
+                m_rays.data(),
+                m_shapeparam.data(),
+                m_mtrlparam.data(),
+                m_lightparam.data(), m_lightparam.num(),
+                m_nodetex.data(),
+                m_primparams.data(),
                 texVtxPos, texVtxNml,
-                m_mtxparams.ptr(),
-                m_tex.ptr());
+                m_mtxparams.data(),
+                m_tex.data());
             checkCudaKernel(shadeSampleRay);
         }
 
@@ -481,7 +481,7 @@ namespace idaten {
                 (height + block.y - 1) / block.y);
 
             if (sample_ray_infos_.empty()) {
-                sample_ray_infos_.init(width * height);
+                sample_ray_infos_.resize(width * height);
             }
 
             if (bounce > 0) {
@@ -498,22 +498,22 @@ namespace idaten {
                     aten::vec3(0, 1, 0),
                     feature_line_width_,
                     pixel_width,
-                    sample_ray_infos_.ptr(),
+                    sample_ray_infos_.data(),
                     bounce,
-                    m_hitidx.ptr(),
-                    hitcount.ptr(),
+                    m_hitidx.data(),
+                    hitcount.data(),
                     path_host_->paths,
                     m_cam,
-                    m_isects.ptr(),
-                    m_rays.ptr(),
-                    m_shapeparam.ptr(),
-                    m_mtrlparam.ptr(),
-                    m_lightparam.ptr(), m_lightparam.num(),
-                    m_nodetex.ptr(),
-                    m_primparams.ptr(),
+                    m_isects.data(),
+                    m_rays.data(),
+                    m_shapeparam.data(),
+                    m_mtrlparam.data(),
+                    m_lightparam.data(), m_lightparam.num(),
+                    m_nodetex.data(),
+                    m_primparams.data(),
                     texVtxPos, texVtxNml,
-                    m_mtxparams.ptr(),
-                    m_tex.ptr());
+                    m_mtxparams.data(),
+                    m_tex.data());
                 checkCudaKernel(shadeMissSampleRay);
             }
         }

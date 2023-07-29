@@ -51,7 +51,7 @@ namespace idaten {
 #endif
 
             auto& r = aten::getRandom();
-            m_random.init(width * height);
+            m_random.resize(width * height);
             m_random.writeFromHostToDeviceByNum(&r[0], width * height);
         }
 

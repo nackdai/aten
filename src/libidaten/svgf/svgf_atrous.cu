@@ -300,12 +300,12 @@ namespace idaten
         atrousFilter << <grid, block, 0, m_stream >> > (
             isFirstIter, isFinalIter,
             outputSurf,
-            m_tmpBuf.ptr(),
-            curaov.get<AOVBuffer::NormalDepth>().ptr(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
-            curaov.get<AOVBuffer::ColorVariance>().ptr(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
-            m_atrousClrVar[cur].ptr(), m_atrousClrVar[next].ptr(),
+            m_tmpBuf.data(),
+            curaov.get<AOVBuffer::NormalDepth>().data(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+            curaov.get<AOVBuffer::ColorVariance>().data(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
+            m_atrousClrVar[cur].data(), m_atrousClrVar[next].data(),
             stepScale,
             width, height,
             cameraDistance);
@@ -324,8 +324,8 @@ namespace idaten
 
         // Copy color from temporary buffer to AOV buffer for next temporal reprojection.
         copyFromBufferToAov << <grid, block, 0, m_stream >> > (
-            m_tmpBuf.ptr(),
-            curaov.get<AOVBuffer::ColorVariance>().ptr(),
+            m_tmpBuf.data(),
+            curaov.get<AOVBuffer::ColorVariance>().data(),
             width, height);
         checkCudaKernel(copyFromBufferToAov);
     }

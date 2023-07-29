@@ -142,19 +142,19 @@ namespace idaten
 
             int32_t blockPerGrid = (maxInputNum - 1) / blockSize + 1;
 
-            m_increments.init(blockPerGrid);
-            m_tmp.init(blockPerGrid);
-            m_work.init(blockPerGrid);
+            m_increments.resize(blockPerGrid);
+            m_tmp.resize(blockPerGrid);
+            m_work.resize(blockPerGrid);
 
-            m_indices.init(m_maxInputNum);
+            m_indices.resize(m_maxInputNum);
 
             std::vector<int32_t> iota(m_maxInputNum);
             std::iota(iota.begin(), iota.end(), 0);
 
-            m_iota.init(iota.size());
+            m_iota.resize(iota.size());
             m_iota.writeFromHostToDeviceByNum(&iota[0], iota.size());
 
-            m_counts.init(1);
+            m_counts.resize(1);
         }
     }
 
@@ -182,10 +182,10 @@ namespace idaten
         int32_t blockPerGrid = (dst.num() - 1) / blocksize + 1;
 
         exclusiveScan << <blockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> > (
-            dst.ptr(),
+            dst.data(),
             dst.num(),
             blocksize,
-            src.ptr());
+            src.data());
 
         checkCudaKernel(exclusiveScan);
 
@@ -198,11 +198,11 @@ namespace idaten
         int32_t tmpBlockSize = blockPerGrid;
 
         computeBlockCount << <tmpBlockPerGrid, tmpBlockSize, 0, m_stream >> > (
-            m_increments.ptr(),
+            m_increments.data(),
             m_increments.num(),
             blocksize,
-            src.ptr(),
-            dst.ptr());
+            src.data(),
+            dst.data());
 
         checkCudaKernel(computeBlockCount);
 
@@ -224,15 +224,15 @@ namespace idaten
             stackBlockPerGrid.push_back(elementNum);
 
             exclusiveScan << <innerBlockPerGrid, blocksize / 2, blocksize * sizeof(int32_t), m_stream >> >(
-                m_work.ptr(),
+                m_work.data(),
                 m_work.num(),
                 blocksize,
-                input->ptr());
+                input->data());
 
             checkCudaKernel(iterate_exclusiveScan);
 
             if (innerBlockPerGrid <= 1) {
-                //cudaMemcpyAsync(tmp.ptr(), work.ptr(), work.bytes(), cudaMemcpyAsyncDeviceToDevice);
+                //cudaMemcpyAsync(tmp.data(), work.data(), work.bytes(), cudaMemcpyAsyncDeviceToDevice);
                 tmpptr = &m_work;
                 break;
             }
@@ -241,11 +241,11 @@ namespace idaten
             int32_t innerTmpBlockSize = innerBlockPerGrid;
 
             computeBlockCount << <innerTmpBlockPerGrid, innerTmpBlockSize, 0, m_stream >> > (
-                output->ptr(),
+                output->data(),
                 output->num(),
                 blocksize,
-                input->ptr(),
-                m_work.ptr());
+                input->data(),
+                m_work.data());
 
             checkCudaKernel(iterate_computeBlockCount);
 
@@ -269,9 +269,9 @@ namespace idaten
             auto threadPerBlock = (output->num() + bpg - 1) / bpg;
 
             incrementBlocks << <bpg, threadPerBlock, 0, m_stream >> > (
-                output->ptr(),
+                output->data(),
                 output->num(),
-                input->ptr());
+                input->data());
 
             checkCudaKernel(iterate_incrementBlocks);
 
@@ -285,9 +285,9 @@ namespace idaten
 #endif
 
         incrementBlocks << <blockPerGrid, blocksize, 0, m_stream >> > (
-            dst.ptr(),
+            dst.data(),
             dst.num(),
-            incrResult->ptr());
+            incrResult->data());
 
         checkCudaKernel(incrementBlocks);
     }
@@ -303,12 +303,12 @@ namespace idaten
         int32_t blockPerGrid = (num - 1) / m_blockSize + 1;
 
         scatter << <blockPerGrid, m_blockSize, 0, m_stream >> > (
-            dst.ptr(),
-            m_counts.ptr(),
+            dst.data(),
+            m_counts.data(),
             dst.num(),
-            bools.ptr(),
-            m_indices.ptr(),
-            m_iota.ptr());
+            bools.data(),
+            m_indices.data(),
+            m_iota.data());
 
         if (result) {
             m_counts.readFromDeviceToHostByNum(result);
@@ -382,12 +382,12 @@ namespace idaten
         int32_t blockPerGrid = (num - 1) / blocksize + 1;
 
         scatter << <blockPerGrid, blocksize >> > (
-            dst.ptr(),
-            count.ptr(),
+            dst.data(),
+            count.data(),
             dst.maxNum(),
-            bools.ptr(),
-            indices.ptr(),
-            values.ptr());
+            bools.data(),
+            indices.data(),
+            values.data());
 
         dst.readFromDeviceToHostByNum(&buffer[0]);
 

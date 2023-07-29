@@ -47,14 +47,14 @@ namespace idaten
         initSamplerParameter(width, height);
 
         for (int32_t i = 0; i < 2; i++) {
-            aov_[i].traverse([&width, &height](auto& buffer) { buffer.init(width * height); });
+            aov_[i].traverse([&width, &height](auto& buffer) { buffer.resize(width * height); });
         }
 
         for (int32_t i = 0; i < AT_COUNTOF(m_atrousClrVar); i++) {
-            m_atrousClrVar[i].init(width * height);
+            m_atrousClrVar[i].resize(width * height);
         }
 
-        m_tmpBuf.init(width * height);
+        m_tmpBuf.resize(width * height);
     }
 
     void SVGFPathTracing::setGBuffer(
@@ -83,10 +83,10 @@ namespace idaten
 
         int32_t bounce = 0;
 
-        m_isects.init(width * height);
-        m_rays.init(width * height);
+        m_isects.resize(width * height);
+        m_rays.resize(width * height);
 
-        m_shadowRays.init(width * height * ShadowRayNum);
+        m_shadowRays.resize(width * height * ShadowRayNum);
 
         initPath(width, height);
 
@@ -132,8 +132,8 @@ namespace idaten
             }
         }
 
-        m_hitbools.init(width * height);
-        m_hitidx.init(width * height);
+        m_hitbools.resize(width * height);
+        m_hitidx.resize(width * height);
 
         m_compaction.init(
             width * height,

@@ -153,10 +153,10 @@ namespace idaten
         uint32_t idxNum,
         const aten::GeomMultiVertexBuffer* vb)
     {
-        m_vertices.init(vtxNum);
+        m_vertices.resize(vtxNum);
         m_vertices.writeFromHostToDeviceByNum(vertices, vtxNum);
 
-        m_indices.init(idxNum);
+        m_indices.resize(idxNum);
         m_indices.writeFromHostToDeviceByNum(indices, idxNum);
 
         if (vb) {
@@ -170,9 +170,9 @@ namespace idaten
             }
         }
         else {
-            m_dstPos.init(vtxNum);
-            m_dstNml.init(vtxNum);
-            m_dstPrev.init(vtxNum);
+            m_dstPos.resize(vtxNum);
+            m_dstNml.resize(vtxNum);
+            m_dstPrev.resize(vtxNum);
         }
     }
 
@@ -184,10 +184,10 @@ namespace idaten
         uint32_t triNum,
         const aten::GeomMultiVertexBuffer* vb)
     {
-        m_vertices.init(vtxNum);
+        m_vertices.resize(vtxNum);
         m_vertices.writeFromHostToDeviceByNum(vertices, vtxNum);
 
-        m_triangles.init(triNum);
+        m_triangles.resize(triNum);
         m_triangles.writeFromHostToDeviceByNum(tris, triNum);
 
         if (vb) {
@@ -205,9 +205,9 @@ namespace idaten
             }
         }
         else {
-            m_dstPos.init(vtxNum);
-            m_dstNml.init(vtxNum);
-            m_dstPrev.init(vtxNum);
+            m_dstPos.resize(vtxNum);
+            m_dstNml.resize(vtxNum);
+            m_dstPrev.resize(vtxNum);
         }
     }
 
@@ -216,7 +216,7 @@ namespace idaten
         uint32_t mtxNum)
     {
         if (m_matrices.bytes() == 0) {
-            m_matrices.init(mtxNum);
+            m_matrices.resize(mtxNum);
         }
 
         AT_ASSERT(m_matrices.num() >= mtxNum);
@@ -248,9 +248,9 @@ namespace idaten
             m_interopVBO[2].bind((void**)&dstPrev, vtxbytes);
         }
         else {
-            dstPos = m_dstPos.ptr();
-            dstNml = m_dstNml.ptr();
-            dstPrev = m_dstPrev.ptr();
+            dstPos = m_dstPos.data();
+            dstNml = m_dstNml.data();
+            dstPrev = m_dstPrev.data();
         }
 
         int32_t indexOffset = m_curVtxOffset - m_prevVtxOffset;
@@ -269,8 +269,8 @@ namespace idaten
                 computeSkinning << <grid, block >> > (
                     isRestart,
                     vtxNum,
-                    m_vertices.ptr(),
-                    m_matrices.ptr(),
+                    m_vertices.data(),
+                    m_matrices.data(),
                     dstPos, dstNml, dstPrev);
 
                 checkCudaKernel(computeSkinningWithTriangles);
@@ -281,7 +281,7 @@ namespace idaten
 
                 setTriangleParam << <grid, block >> > (
                     triNum,
-                    m_triangles.ptr(),
+                    m_triangles.data(),
                     indexOffset,
                     dstPos);
 
@@ -291,8 +291,8 @@ namespace idaten
                 computeSkinning << <grid, block >> > (
                     isRestart,
                     vtxNum,
-                    m_vertices.ptr(),
-                    m_matrices.ptr(),
+                    m_vertices.data(),
+                    m_matrices.data(),
                     dstPos, dstNml, dstPrev);
 
                 checkCudaKernel(computeSkinning);
@@ -307,8 +307,8 @@ namespace idaten
             dim3 block(BLOCK_SIZE);
             dim3 grid((num + block.x - 1) / block.x);
 
-            m_minBuf.init(grid.x);
-            m_maxBuf.init(grid.x);
+            m_minBuf.resize(grid.x);
+            m_maxBuf.resize(grid.x);
 
             auto sharedMemSize = block.x * sizeof(aten::vertex) * 2;
 
@@ -316,8 +316,8 @@ namespace idaten
                 false,
                 num,
                 src,
-                m_minBuf.ptr(),
-                m_maxBuf.ptr());
+                m_minBuf.data(),
+                m_maxBuf.data());
 
             checkCudaKernel(getMinMax);
 
@@ -327,8 +327,8 @@ namespace idaten
                 true,
                 num,
                 src,
-                m_minBuf.ptr(),
-                m_maxBuf.ptr());
+                m_minBuf.data(),
+                m_maxBuf.data());
 
             checkCudaKernel(getMinMaxFinal);
         }

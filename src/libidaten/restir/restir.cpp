@@ -46,7 +46,7 @@ namespace idaten
 
         initSamplerParameter(width, height);
 
-        aov_.traverse([&width, &height](auto& buffer) { buffer.init(width * height); });
+        aov_.traverse([&width, &height](auto& buffer) { buffer.resize(width * height); });
     }
 
     void ReSTIRPathTracing::setGBuffer(
@@ -75,10 +75,10 @@ namespace idaten
 
         int32_t bounce = 0;
 
-        m_isects.init(width * height);
-        m_rays.init(width * height);
+        m_isects.resize(width * height);
+        m_rays.resize(width * height);
 
-        m_shadowRays.init(width * height);
+        m_shadowRays.resize(width * height);
 
         initPath(width, height);
 
@@ -124,8 +124,8 @@ namespace idaten
             }
         }
 
-        m_hitbools.init(width * height);
-        m_hitidx.init(width * height);
+        m_hitbools.resize(width * height);
+        m_hitidx.resize(width * height);
 
         m_compaction.init(
             width * height,

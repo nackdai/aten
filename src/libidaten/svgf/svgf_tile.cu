@@ -37,7 +37,7 @@ namespace idaten
 
         copyBufferForTile << <grid, block, 0, m_stream >> > (
             path_host_->paths,
-            m_tmpBuf.ptr(),
+            m_tmpBuf.data(),
             width, height);
 
         checkCudaKernel(copyBufferForTile);

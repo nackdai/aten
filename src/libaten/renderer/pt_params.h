@@ -3,20 +3,38 @@
 #include "material/material.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
-#include "sampler/cmj.h"
+#include "sampler/sampler.h"
 
-namespace aten {
+#ifdef __AT_CUDA__
+#include "cuda/cudadefs.h"
+#include "cuda/helper_math.h"
+#endif
+
+namespace AT_NAME {
+    namespace _detail {
+#ifdef __AT_CUDA__
+        using v4 = float4;
+        using v3 = float3;
+#else
+        using v4 = aten::vec4;
+        using v3 = aten::vec3;
+#endif
+    };
+
     struct PathThroughput {
         aten::vec3 throughput;
         real pdfb;
     };
 
-    union PathContrib {
-        aten::vec4 v;
-        struct {
-            aten::vec3 contrib;
-            float samples;
+    struct PathContrib {
+        union {
+            _detail::v4 v;
+            struct {
+                _detail::v3 contrib;
+                float samples;
+            };
         };
+#ifndef __AT_CUDA__
         PathContrib() : contrib(0), samples(0.0f) {}
 
         PathContrib(const PathContrib& rhs)
@@ -36,19 +54,23 @@ namespace aten {
             v = rhs.v;
         }
         ~PathContrib() = default;
+#endif
     };
 
-    union PathAttribute {
-        aten::vec4 v;
-        struct {
-            bool isHit;
-            bool isTerminate;
-            bool isSingular;
-            bool isKill;
+    struct PathAttribute {
+        union {
+            _detail::v4 v;
+            struct {
+                bool isHit;
+                bool isTerminate;
+                bool isSingular;
+                bool isKill;
 
-            aten::MaterialType mtrlType;
+                aten::MaterialType mtrlType;
+            };
         };
 
+#ifndef __AT_CUDA__
         PathAttribute() : isHit(false), isTerminate(false), isSingular(false), isKill(false), mtrlType(aten::MaterialType::Lambert) {}
         PathAttribute(const PathAttribute& rhs)
         {
@@ -67,6 +89,7 @@ namespace aten {
             v = rhs.v;
         }
         ~PathAttribute() = default;
+#endif
     };
 
     struct Path {
@@ -74,6 +97,10 @@ namespace aten {
         PathContrib* contrib;
         PathAttribute* attrib;
         aten::sampler* sampler;
+    };
+
+    struct PathHost {
+        Path paths;
 
         void init(int32_t width, int32_t height)
         {
@@ -83,18 +110,25 @@ namespace aten {
                 attrib_.resize(width * height);
                 sampler_.resize(width * height);
 
-                throughput = throughput_.data();
-                contrib = contrib_.data();
-                attrib = attrib_.data();
-                sampler = sampler_.data();
+                paths.throughput = throughput_.data();
+                paths.contrib = contrib_.data();
+                paths.attrib = attrib_.data();
+                paths.sampler = sampler_.data();
             }
         }
 
     private:
+#ifdef __AT_CUDA__
+        idaten::TypedCudaMemory<PathThroughput> throughput;
+        idaten::TypedCudaMemory<PathContrib> contrib;
+        idaten::TypedCudaMemory<PathAttribute> attrib;
+        idaten::TypedCudaMemory<aten::sampler> sampler;
+#else
         std::vector<PathThroughput> throughput_;
         std::vector<PathContrib> contrib_;
         std::vector<PathAttribute> attrib_;
         std::vector<aten::sampler> sampler_;
+#endif
     };
 
     struct ShadowRay {

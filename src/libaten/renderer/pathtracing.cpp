@@ -44,7 +44,7 @@ namespace aten
                     *first_hrec = rec;
                 }
 
-                willContinue = shade(idx, paths_, ctxt, rays_.data(), rec, scene, m_rrDepth, depth);
+                willContinue = shade(idx, path_host_.paths, ctxt, rays_.data(), rec, scene, m_rrDepth, depth);
             }
             else {
                 auto ibl = scene->getIBL();
@@ -58,21 +58,21 @@ namespace aten
                         ibl->getAvgIlluminace(),
                         real(1),
                         ctxt, camera,
-                        paths_, rays_[idx]);
+                        path_host_.paths, rays_[idx]);
                 }
                 else {
                     shade_miss(
                         idx,
                         depth,
                         bg()->sample(rays_[idx]),
-                        paths_);
+                        path_host_.paths);
                 }
 
                 willContinue = false;
             }
 
-            if (depth < m_startDepth && !paths_.attrib[idx].isTerminate) {
-                paths_.contrib[idx].contrib = vec3(0);
+            if (depth < m_startDepth && !path_host_.paths.attrib[idx].isTerminate) {
+                path_host_.paths.contrib[idx].contrib = vec3(0);
             }
 
             if (!willContinue) {
@@ -637,7 +637,7 @@ namespace aten
         if (rays_.empty()) {
             rays_.resize(width * height);
         }
-        paths_.init(width, height);
+        path_host_.init(width, height);
 
         auto time = timer::getSystemTime();
 
@@ -677,16 +677,16 @@ namespace aten
                             idx,
                             x, y,
                             i, get_frame_count(),
-                            paths_,
+                            path_host_.paths,
                             camsample,
                             rnd);
 
-                        paths_.contrib[idx].contrib = aten::vec3(0);
+                        path_host_.paths.contrib[idx].contrib = aten::vec3(0);
 
                         if (enable_feature_line_) {
                             radiance_with_feature_line(
                                 idx,
-                                paths_, ctxt, rays_.data(),
+                                path_host_.paths, ctxt, rays_.data(),
                                 m_rrDepth, m_startDepth, m_maxDepth,
                                 camera,
                                 scene,
@@ -699,18 +699,18 @@ namespace aten
                                 ctxt, scene, camsample, &hrec);
                         }
 
-                        if (isInvalidColor(paths_.contrib[idx].contrib)) {
+                        if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
                             AT_PRINTF("Invalid(%d/%d[%d])\n", x, y, i);
                             continue;
                         }
 
-                        auto c = paths_.contrib[idx].contrib;
+                        auto c = path_host_.paths.contrib[idx].contrib;
 
                         col += c;
                         col2 += c * c;
                         cnt++;
 
-                        if (paths_.attrib[idx].isTerminate) {
+                        if (path_host_.paths.attrib[idx].isTerminate) {
                             break;
                         }
                     }

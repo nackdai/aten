@@ -1,11 +1,13 @@
 #include "svgf/svgf.h"
 
 #include "kernel/pt_common.h"
-#include "kernel/pt_params.h"
+
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
+
+#include "renderer/pt_params.h"
 
 __global__ void copyBufferForTile(
     const idaten::Path paths,

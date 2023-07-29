@@ -244,9 +244,6 @@
     <ClInclude Include="..\src\libidaten\restir\restir.h">
       <Filter>restir</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libidaten\kernel\pt_params.h">
-      <Filter>kernel\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\restir\reservior.h">
       <Filter>restir</Filter>
     </ClInclude>
@@ -300,6 +297,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h">
       <Filter>kernel\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pt_params.h">
+      <Filter>aten\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

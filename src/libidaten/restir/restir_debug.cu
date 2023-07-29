@@ -4,7 +4,6 @@
 #include "kernel/device_scene_context.cuh"
 #include "kernel/intersect.cuh"
 #include "kernel/pt_common.h"
-#include "kernel/pt_params.h"
 #include "kernel/StreamCompaction.h"
 
 #include "cuda/cudadefs.h"
@@ -13,6 +12,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "renderer/pt_params.h"
 
 __global__ void fillAOV(
     cudaSurfaceObject_t dst,

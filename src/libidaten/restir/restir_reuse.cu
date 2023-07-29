@@ -1,7 +1,6 @@
 #include "restir/restir.h"
 
 #include "kernel/pt_common.h"
-#include "kernel/pt_params.h"
 #include "kernel/device_scene_context.cuh"
 
 #include "cuda/cudadefs.h"
@@ -11,6 +10,7 @@
 
 #include "aten4idaten.h"
 #include "light/light_impl.h"
+#include "renderer/pt_params.h"
 
 __global__ void computeTemporalReuse(
     idaten::Path paths,

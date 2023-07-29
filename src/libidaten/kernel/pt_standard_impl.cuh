@@ -1,10 +1,11 @@
 #pragma once
 
 #include "kernel/idatendefs.cuh"
-#include "kernel/pt_params.h"
 #include "kernel/device_scene_context.cuh"
 #include "kernel/accelerator.cuh"
+
 #include "light/light_impl.h"
+#include "renderer/pt_params.h"
 
 namespace kernel {
     inline __device__ bool hitShadowRay(

@@ -102,32 +102,34 @@ namespace AT_NAME {
     struct PathHost {
         Path paths;
 
-        void init(int32_t width, int32_t height)
+        bool init(int32_t width, int32_t height)
         {
-            if (throughput_.empty()) {
-                throughput_.resize(width * height);
-                contrib_.resize(width * height);
-                attrib_.resize(width * height);
-                sampler_.resize(width * height);
+            if (throughput.empty()) {
+                throughput.resize(width * height);
+                contrib.resize(width * height);
+                attrib.resize(width * height);
+                sampler.resize(width * height);
 
-                paths.throughput = throughput_.data();
-                paths.contrib = contrib_.data();
-                paths.attrib = attrib_.data();
-                paths.sampler = sampler_.data();
+                paths.throughput = throughput.data();
+                paths.contrib = contrib.data();
+                paths.attrib = attrib.data();
+                paths.sampler = sampler.data();
+
+                return true;
             }
+            return false;
         }
 
-    private:
 #ifdef __AT_CUDA__
         idaten::TypedCudaMemory<PathThroughput> throughput;
         idaten::TypedCudaMemory<PathContrib> contrib;
         idaten::TypedCudaMemory<PathAttribute> attrib;
         idaten::TypedCudaMemory<aten::sampler> sampler;
 #else
-        std::vector<PathThroughput> throughput_;
-        std::vector<PathContrib> contrib_;
-        std::vector<PathAttribute> attrib_;
-        std::vector<aten::sampler> sampler_;
+        std::vector<PathThroughput> throughput;
+        std::vector<PathContrib> contrib;
+        std::vector<PathAttribute> attrib;
+        std::vector<aten::sampler> sampler;
 #endif
     };
 

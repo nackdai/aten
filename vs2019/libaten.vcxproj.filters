@@ -505,9 +505,6 @@
     <ClInclude Include="..\src\libaten\light\light_parameter.h">
       <Filter>light</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\misc\span.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\light\light_impl.h">
       <Filter>light</Filter>
     </ClInclude>

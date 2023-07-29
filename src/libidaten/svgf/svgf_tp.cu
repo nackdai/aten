@@ -438,16 +438,16 @@ namespace idaten
         //temporalReprojection << <1, 1 >> > (
             m_nmlThresholdTF,
             m_depthThresholdTF,
-            m_tmpBuf.ptr(),
+            m_tmpBuf.data(),
             m_cam,
-            curaov.get<AOVBuffer::NormalDepth>().ptr(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
-            curaov.get<AOVBuffer::ColorVariance>().ptr(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
-            prevaov.get<AOVBuffer::NormalDepth>().ptr(),
-            prevaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
-            prevaov.get<AOVBuffer::ColorVariance>().ptr(),
-            prevaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().data(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
+            curaov.get<AOVBuffer::ColorVariance>().data(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
+            prevaov.get<AOVBuffer::NormalDepth>().data(),
+            prevaov.get<AOVBuffer::AlbedoMeshId>().data(),
+            prevaov.get<AOVBuffer::ColorVariance>().data(),
+            prevaov.get<AOVBuffer::MomentTemporalWeight>().data(),
             motionDepthBuffer,
             outputSurf,
             width, height);
@@ -457,18 +457,18 @@ namespace idaten
 #ifdef ENABLE_MEDIAN_FILTER
         medianFilter << <grid, block, 0, m_stream >> > (
             outputSurf,
-            m_aovColorVariance[curaov].ptr(),
-            m_aovMomentTemporalWeight[curaov].ptr(),
-            m_aovTexclrMeshid[curaov].ptr(),
-            m_aovMomentTemporalWeight[prevaov].ptr(),
+            m_aovColorVariance[curaov].data(),
+            m_aovMomentTemporalWeight[curaov].data(),
+            m_aovTexclrMeshid[curaov].data(),
+            m_aovMomentTemporalWeight[prevaov].data(),
             width, height);
 
         checkCudaKernel(medianFilter);
 #endif
 
         dilateWeight << <grid, block, 0, m_stream >> > (
-            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             width, height);
         checkCudaKernel(dilateWeight);
     }

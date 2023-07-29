@@ -99,15 +99,15 @@ namespace idaten {
         bool init(int32_t width, int32_t height)
         {
             if (throughput.empty()) {
-                throughput.init(width * height);
-                contrib.init(width * height);
-                attrib.init(width * height);
-                sampler.init(width * height);
+                throughput.resize(width * height);
+                contrib.resize(width * height);
+                attrib.resize(width * height);
+                sampler.resize(width * height);
 
-                paths.throughput = throughput.ptr();
-                paths.contrib = contrib.ptr();
-                paths.attrib = attrib.ptr();
-                paths.sampler = sampler.ptr();
+                paths.throughput = throughput.data();
+                paths.contrib = contrib.data();
+                paths.attrib = attrib.data();
+                paths.sampler = sampler.data();
 
                 return true;
             }

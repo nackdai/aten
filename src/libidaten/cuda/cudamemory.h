@@ -14,13 +14,13 @@ namespace idaten {
         virtual ~CudaMemory();
 
     public:
-        void init(uint32_t bytes);
+        void resize(uint32_t bytes);
 
-        const void* ptr() const
+        const void* data() const
         {
             return m_device;
         }
-        void* ptr()
+        void* data()
         {
             return m_device;
         }
@@ -74,9 +74,9 @@ namespace idaten {
         using value_type = _T;
 
     public:
-        void init(uint32_t num)
+        void resize(uint32_t num)
         {
-            CudaMemory::init(sizeof(_T) * num);
+            CudaMemory::resize(sizeof(_T) * num);
             m_num = num;
         }
 
@@ -96,13 +96,13 @@ namespace idaten {
             return m_num;
         }
 
-        const _T* ptr() const
+        const _T* data() const
         {
-            return (const _T*)CudaMemory::ptr();
+            return (const _T*)CudaMemory::data();
         }
-        _T* ptr()
+        _T* data()
         {
-            return (_T*)CudaMemory::ptr();
+            return (_T*)CudaMemory::data();
         }
 
         uint32_t stride()

@@ -213,18 +213,18 @@ namespace idaten {
             m_ao_num_rays, m_ao_radius,
             m_frame,
             path_host_->paths,
-            m_hitidx.ptr(), hitcount.ptr(),
-            m_isects.ptr(),
-            m_rays.ptr(),
+            m_hitidx.data(), hitcount.data(),
+            m_isects.data(),
+            m_rays.data(),
             bounce, rrBounce,
-            m_shapeparam.ptr(),
-            m_mtrlparam.ptr(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
+            m_shapeparam.data(),
+            m_mtrlparam.data(),
+            m_nodetex.data(),
+            m_primparams.data(),
             texVtxPos, texVtxNml,
-            m_mtxparams.ptr(),
-            m_tex.ptr(),
-            m_random.ptr());
+            m_mtxparams.data(),
+            m_tex.data(),
+            m_random.data());
 
         checkCudaKernel(shade);
     }

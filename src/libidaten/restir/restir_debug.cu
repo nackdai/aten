@@ -197,15 +197,15 @@ namespace idaten
             outputSurf,
             m_aovMode,
             width, height,
-            aov_.normal_depth().ptr(),
-            aov_.albedo_meshid().ptr(),
+            aov_.normal_depth().data(),
+            aov_.albedo_meshid().data(),
             gbuffer,
             m_cam,
-            m_shapeparam.ptr(),
-            m_nodetex.ptr(),
-            m_primparams.ptr(),
+            m_shapeparam.data(),
+            m_nodetex.data(),
+            m_primparams.data(),
             texVtxPos,
-            m_mtxparams.ptr());
+            m_mtxparams.data());
     }
 
     void ReSTIRPathTracing::pick(
@@ -214,21 +214,21 @@ namespace idaten
         cudaTextureObject_t texVtxPos)
     {
         if (m_willPicklPixel) {
-            m_pick.init(1);
+            m_pick.resize(1);
 
             pickPixel << <1, 1 >> > (
-                m_pick.ptr(),
+                m_pick.data(),
                 m_pickedInfo.ix, m_pickedInfo.iy,
                 width, height,
                 m_cam,
                 path_host_->paths,
-                aov_.normal_depth().ptr(),
-                aov_.albedo_meshid().ptr(),
-                m_shapeparam.ptr(),
-                m_nodetex.ptr(),
-                m_primparams.ptr(),
+                aov_.normal_depth().data(),
+                aov_.albedo_meshid().data(),
+                m_shapeparam.data(),
+                m_nodetex.data(),
+                m_primparams.data(),
                 texVtxPos,
-                m_mtxparams.ptr());
+                m_mtxparams.data());
 
             m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 

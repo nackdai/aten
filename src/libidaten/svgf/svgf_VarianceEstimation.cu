@@ -144,10 +144,10 @@ namespace idaten
         varianceEstimation << <grid, block, 0, m_stream >> > (
         //varianceEstimation << <1, 1 >> > (
             outputSurf,
-            curaov.get<AOVBuffer::NormalDepth>().ptr(),
-            curaov.get<AOVBuffer::MomentTemporalWeight>().ptr(),
-            curaov.get<AOVBuffer::ColorVariance>().ptr(),
-            curaov.get<AOVBuffer::AlbedoMeshId>().ptr(),
+            curaov.get<AOVBuffer::NormalDepth>().data(),
+            curaov.get<AOVBuffer::MomentTemporalWeight>().data(),
+            curaov.get<AOVBuffer::ColorVariance>().data(),
+            curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             m_mtxC2V,
             width, height,
             cameraDistance);

@@ -180,10 +180,10 @@ namespace idaten
             int32_t width, int32_t height) override final
         {
             if (StandardPT::initPath(width, height)) {
-                m_restir_infos.init(width * height);
+                m_restir_infos.resize(width * height);
 
                 for (auto& r : m_reservoirs) {
-                    r.init(width * height);
+                    r.resize(width * height);
                 }
 
                 return true;

@@ -35,29 +35,29 @@ namespace idaten {
 
         m_cam = camera;
 
-        m_shapeparam.init(shapes.size());
+        m_shapeparam.resize(shapes.size());
         m_shapeparam.writeFromHostToDeviceByNum(&shapes[0], shapes.size());
 
-        m_mtrlparam.init(mtrls.size());
+        m_mtrlparam.resize(mtrls.size());
         m_mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], mtrls.size());
 
         AT_ASSERT_LOG(!lights.empty(), "No Lights!!");
 
         if (!lights.empty()) {
-            m_lightparam.init(lights.size());
+            m_lightparam.resize(lights.size());
             m_lightparam.writeFromHostToDeviceByNum(&lights[0], lights.size());
         }
 
         if (prims.empty()) {
-            m_primparams.init(advancePrimNum);
+            m_primparams.resize(advancePrimNum);
         }
         else {
-            m_primparams.init(prims.size() + advancePrimNum);
+            m_primparams.resize(prims.size() + advancePrimNum);
             m_primparams.writeFromHostToDeviceByNum(&prims[0], prims.size());
         }
 
         if (!mtxs.empty()) {
-            m_mtxparams.init(mtxs.size());
+            m_mtxparams.resize(mtxs.size());
             m_mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
         }
 
@@ -70,7 +70,7 @@ namespace idaten {
                     nodes[i].size());
             }
         }
-        m_nodetex.init(nodes.size());
+        m_nodetex.resize(nodes.size());
 
         if (vtxs.empty()) {
             m_vtxparamsPos.init(nullptr, 1, advanceVtxNum);
@@ -114,7 +114,7 @@ namespace idaten {
                 m_texRsc[i].initAsMipmap(texs[i].ptr, texs[i].width, texs[i].height, 100);
 #endif
             }
-            m_tex.init(texs.size());
+            m_tex.resize(texs.size());
 
             //AT_ASSERT(envmapRsc.idx < texs.size());
             if (envmapRsc.idx < texs.size()) {
@@ -184,7 +184,7 @@ namespace idaten {
             auto size = triangles.bytes();
             auto offset = triOffsetCount * triangles.stride();
 
-            m_primparams.writeFromHostToDeviceByBytes(triangles.ptr(), size, offset);
+            m_primparams.writeFromHostToDeviceByBytes(triangles.data(), size, offset);
         }
     }
 

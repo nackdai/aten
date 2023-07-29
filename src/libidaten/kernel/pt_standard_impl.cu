@@ -375,19 +375,19 @@ namespace idaten
     bool StandardPT::initPath(int32_t width, int32_t height)
     {
         if (!is_init_context_) {
-            ctxt_.shapes = m_shapeparam.ptr();
-            ctxt_.mtrls = m_mtrlparam.ptr();
+            ctxt_.shapes = m_shapeparam.data();
+            ctxt_.mtrls = m_mtrlparam.data();
             ctxt_.lightnum = m_lightparam.num();
-            ctxt_.lights = m_lightparam.ptr();
-            ctxt_.prims = m_primparams.ptr();
-            ctxt_.matrices = m_mtxparams.ptr();
+            ctxt_.lights = m_lightparam.data();
+            ctxt_.prims = m_primparams.data();
+            ctxt_.matrices = m_mtxparams.data();
 
             ctxt_.vtxPos = m_vtxparamsPos.bind();
             ctxt_.vtxNml = m_vtxparamsNml.bind();
 
-            ctxt_.nodes = m_nodetex.ptr();
+            ctxt_.nodes = m_nodetex.data();
 
-            ctxt_.textures = m_tex.ptr();
+            ctxt_.textures = m_tex.data();
         }
 
         const auto result = path_host_->init(width, height);
@@ -397,12 +397,12 @@ namespace idaten
 
     void StandardPT::clearPath()
     {
-        cudaMemsetAsync(path_host_->throughput.ptr(), 0, path_host_->throughput.bytes(), m_stream);
-        cudaMemsetAsync(path_host_->contrib.ptr(), 0, path_host_->contrib.bytes(), m_stream);
-        cudaMemsetAsync(path_host_->attrib.ptr(), 0, path_host_->attrib.bytes(), m_stream);
+        cudaMemsetAsync(path_host_->throughput.data(), 0, path_host_->throughput.bytes(), m_stream);
+        cudaMemsetAsync(path_host_->contrib.data(), 0, path_host_->contrib.bytes(), m_stream);
+        cudaMemsetAsync(path_host_->attrib.data(), 0, path_host_->attrib.bytes(), m_stream);
 
         if (m_frame == 0) {
-            cudaMemsetAsync(path_host_->sampler.ptr(), 0, path_host_->sampler.bytes(), m_stream);
+            cudaMemsetAsync(path_host_->sampler.data(), 0, path_host_->sampler.bytes(), m_stream);
         }
     }
 
@@ -420,13 +420,13 @@ namespace idaten
         kernel::genPath << <grid, block, 0, m_stream >> > (
             needFillAOV,
             path_host_->paths,
-            m_rays.ptr(),
+            m_rays.data(),
             width, height,
             sample,
             m_frame,
             m_cam,
-            m_sobolMatrices.ptr(),
-            m_random.ptr());
+            m_sobolMatrices.data(),
+            m_random.data());
 
         checkCudaKernel(genPath);
     }
@@ -447,11 +447,11 @@ namespace idaten
 #endif
             ctxt_,
             path_host_->paths,
-            m_isects.ptr(),
-            m_rays.ptr(),
-            m_hitbools.ptr(),
+            m_isects.data(),
+            m_rays.data(),
+            m_hitbools.data(),
             width, height,
-            m_nodetex.ptr(),
+            m_nodetex.data(),
             bounce,
             m_hitDistLimit);
 
@@ -476,8 +476,8 @@ namespace idaten
             binded_gbuffer,
             ctxt_,
             path_host_->paths,
-            m_isects.ptr(),
-            m_hitbools.ptr(),
+            m_isects.data(),
+            m_hitbools.data(),
             width, height,
             campos);
 
@@ -499,19 +499,19 @@ namespace idaten
             kernel::shadeMissWithEnvmap << <grid, block, 0, m_stream >> > (
                 bounce,
                 m_cam,
-                aovNormalDepth.ptr(),
-                aovTexclrMeshid.ptr(),
+                aovNormalDepth.data(),
+                aovTexclrMeshid.data(),
                 ctxt_,
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
                 path_host_->paths,
-                m_rays.ptr(),
+                m_rays.data(),
                 width, height);
         }
         else {
             kernel::shadeMiss << <grid, block, 0, m_stream >> > (
                 bounce,
-                aovNormalDepth.ptr(),
-                aovTexclrMeshid.ptr(),
+                aovNormalDepth.data(),
+                aovTexclrMeshid.data(),
                 path_host_->paths,
                 width, height);
         }

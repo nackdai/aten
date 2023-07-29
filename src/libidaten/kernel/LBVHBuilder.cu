@@ -695,8 +695,8 @@ namespace idaten
 {
     void LBVHBuilder::init(uint32_t maxNum)
     {
-        m_mortonCodes.init(maxNum);
-        m_indices.init(maxNum);
+        m_mortonCodes.resize(maxNum);
+        m_indices.resize(maxNum);
 
 #ifdef AT_ENABLE_64BIT_LBVH_MORTON_CODE
         m_sort.initWith64Bit(maxNum);
@@ -707,9 +707,9 @@ namespace idaten
         uint32_t numInternalNode = maxNum - 1;
         uint32_t numLeaves = maxNum;
 
-        m_nodesLbvh.init(numInternalNode + numLeaves);
+        m_nodesLbvh.resize(numInternalNode + numLeaves);
 
-        m_nodes.init(numInternalNode + numLeaves);
+        m_nodes.resize(numInternalNode + numLeaves);
 
         if (!m_executedIdxArray) {
             checkCudaErrors(cudaMalloc(&m_executedIdxArray, (maxNum - 1) * sizeof(uint32_t)));
@@ -752,11 +752,11 @@ namespace idaten
                 axis[0], axis[1], axis[2],
                 numberOfTris,
                 sceneBbox,
-                triangles.ptr(),
+                triangles.data(),
                 vtxPos,
                 vtxOffset,
-                m_mortonCodes.ptr(),
-                m_indices.ptr());
+                m_mortonCodes.data(),
+                m_indices.data());
 
             checkCudaKernel(genMortonCode);
         }
@@ -781,8 +781,8 @@ namespace idaten
 
             buildTree << <grid, block >> > (
                 numberOfTris,
-                m_mortonCodes.ptr(),
-                m_nodesLbvh.ptr());
+                m_mortonCodes.data(),
+                m_nodesLbvh.data());
 
             checkCudaKernel(buildTree);
         }
@@ -798,9 +798,9 @@ namespace idaten
                 numOfElems,
                 numLeaves,
                 triIdOffset,
-                m_nodesLbvh.ptr(),
-                m_indices.ptr(),
-                m_nodes.ptr());
+                m_nodesLbvh.data(),
+                m_indices.data(),
+                m_nodes.data());
 
             checkCudaKernel(applyTraverseOrder);
         }
@@ -817,10 +817,10 @@ namespace idaten
 
             computeBoudingBox << <grid, block, sharedMemorySize >> > (
                 numberOfTris,
-                m_nodesLbvh.ptr(),
-                m_indices.ptr(),
-                m_nodes.ptr(),
-                triangles.ptr(),
+                m_nodesLbvh.data(),
+                m_indices.data(),
+                m_nodes.data(),
+                triangles.data(),
                 vtxPos,
                 vtxOffset,
                 m_executedIdxArray);
@@ -836,7 +836,7 @@ namespace idaten
         }
 
         dst.init(
-            (aten::vec4*)m_nodes.ptr(),
+            (aten::vec4*)m_nodes.data(),
             sizeof(aten::ThreadedBvhNode) / sizeof(float4),
             numInternalNode + numLeaves);
     }
@@ -854,7 +854,7 @@ namespace idaten
 
         uint32_t numOfElems = (uint32_t)tris.size();
 
-        triangles.init(numOfElems);
+        triangles.resize(numOfElems);
         triangles.writeFromHostToDeviceByNum(&tris[0], (uint32_t)tris.size());
 
         auto vtxPos = texRscVtxPos.bind();
@@ -910,7 +910,7 @@ namespace idaten
         uint32_t numLeaves = numOfElems;
 
         TypedCudaMemory<LBVHNode> nodesLbvh;
-        nodesLbvh.init(numInternalNode + numLeaves);
+        nodesLbvh.resize(numInternalNode + numLeaves);
 
         {
             dim3 block(256, 1, 1);
@@ -918,15 +918,15 @@ namespace idaten
 
             buildTree << <grid, block >> > (
                 numOfElems,
-                sortedKeys.ptr(),
-                nodesLbvh.ptr());
+                sortedKeys.data(),
+                nodesLbvh.data());
         }
 
         std::vector<LBVHNode> tmp0(nodesLbvh.num());
         nodesLbvh.readFromDeviceToHostByNum(&tmp0[0]);
 
         TypedCudaMemory<aten::ThreadedBvhNode> nodes;
-        nodes.init(numInternalNode + numLeaves);
+        nodes.resize(numInternalNode + numLeaves);
 
 #if 1
         {
@@ -939,9 +939,9 @@ namespace idaten
                 numOfElems,
                 numLeaves,
                 0,
-                nodesLbvh.ptr(),
-                sortedValue.ptr(),
-                nodes.ptr());
+                nodesLbvh.data(),
+                sortedValue.data(),
+                nodes.data());
         }
         std::vector<aten::ThreadedBvhNode> tmp1(nodes.num());
         nodes.readFromDeviceToHostByNum(&tmp1[0], 0);

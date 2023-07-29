@@ -4,13 +4,15 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
-#include "kernel/pt_params.h"
 #include "kernel/persistent_thread.h"
+
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
+
 #include "aten4idaten.h"
+#include "renderer/pt_params.h"
 
 //#define ENABLE_SEPARATE_ALBEDO
 

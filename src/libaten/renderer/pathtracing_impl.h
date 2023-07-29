@@ -11,11 +11,11 @@
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "kernel/device_scene_context.cuh"
-#include "kernel/pt_params.h"
 #else
 #include "scene/host_scene_context.h"
-#include "renderer/pt_params.h"
 #endif
+
+#include "renderer/pt_params.h"
 
 namespace AT_NAME
 {

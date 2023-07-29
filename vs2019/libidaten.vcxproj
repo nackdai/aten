@@ -73,6 +73,7 @@
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h" />
+    <ClInclude Include="..\src\libaten\renderer\pt_params.h" />
     <ClInclude Include="..\src\libaten\sampler\cmj.h" />
     <ClInclude Include="..\src\libaten\sampler\sampler.h" />
     <ClInclude Include="..\src\libaten\sampler\sobol.h" />
@@ -107,7 +108,6 @@
     <ClInclude Include="..\src\libidaten\kernel\pathtracing.h" />
     <ClInclude Include="..\src\libidaten\kernel\persistent_thread.h" />
     <ClInclude Include="..\src\libidaten\kernel\pt_common.h" />
-    <ClInclude Include="..\src\libidaten\kernel\pt_params.h" />
     <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.cuh" />
     <ClInclude Include="..\src\libidaten\kernel\pt_standard_impl.h" />
     <ClInclude Include="..\src\libidaten\kernel\qbvh.cuh" />

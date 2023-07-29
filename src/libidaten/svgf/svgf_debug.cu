@@ -5,7 +5,6 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
-#include "kernel/pt_params.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -13,6 +12,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "renderer/pt_params.h"
 
 __global__ void fillAOV(
     cudaSurfaceObject_t dst,

@@ -93,6 +93,11 @@ namespace aten {
 
         AT_DEVICE_API LightParameter(const LightParameter& rhs)
         {
+            *this = rhs;
+        }
+
+        AT_DEVICE_API LightParameter& operator=(const LightParameter& rhs)
+        {
             pos = rhs.pos;
             dir = rhs.dir;
             le = rhs.le;
@@ -102,6 +107,8 @@ namespace aten {
 
             objid = rhs.objid;
             envmapidx = rhs.envmapidx;
+
+            return *this;
         }
     };
     //AT_STATICASSERT((sizeof(LightParameter) % 64) == 0);

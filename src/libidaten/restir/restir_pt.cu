@@ -13,6 +13,8 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+#include "renderer/pathtracing_impl.h"
+
 __global__ void shade(
     float4* aovNormalDepth,
     float4* aovTexclrMeshid,
@@ -154,7 +156,7 @@ __global__ void shade(
 
         auto lightSelectPdf = 1.0f / lightnum;
 
-        auto isShadowRayActive = kernel::fillShadowRay(
+        auto isShadowRayActive = AT_NAME::FillShadowRay(
             shShadowRays[threadIdx.x],
             ctxt,
             bounce,

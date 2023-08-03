@@ -14,6 +14,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
+#include "renderer/pathtracing_impl.h"
 
 namespace svgf {
     __global__ void shade(
@@ -189,7 +190,7 @@ namespace svgf {
 
                 real lightSelectPdf = 1.0f / lightnum;
 
-                auto isShadowRayActive = kernel::fillShadowRay(
+                auto isShadowRayActive = AT_NAME::FillShadowRay(
                     shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i],
                     ctxt,
                     bounce,

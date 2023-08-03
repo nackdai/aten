@@ -13,8 +13,8 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X    (-1)
-#define BREAK_Y    (-1)
+#define BREAK_X    (10)
+#define BREAK_Y    (0)
 #pragma optimize( "", off)
 #endif
 
@@ -44,7 +44,14 @@ namespace aten
                     *first_hrec = rec;
                 }
 
-                willContinue = shade(idx, path_host_.paths, ctxt, rays_.data(), rec, scene, m_rrDepth, depth);
+                shade(
+                    idx, path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
+                    rec, scene, m_rrDepth, depth);
+
+                HitShadowRay(
+                    scene, idx, depth, ctxt, path_host_.paths, shadow_rays_.data());
+
+                willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }
             else {
                 auto ibl = scene->getIBL();
@@ -88,6 +95,7 @@ namespace aten
         Path& paths,
         const context& ctxt,
         ray* rays,
+        ShadowRay* shadow_rays,
         int32_t rrDepth,
         int32_t startDepth,
         int32_t maxDepth,
@@ -270,7 +278,11 @@ namespace aten
                 }
 
                 if (closest_sample_ray_idx < 0) {
-                    willContinue = shade(idx, paths, ctxt, rays, hrec_query, scene, rrDepth, depth);
+                    shade(
+                        idx, paths, ctxt, rays, shadow_rays,
+                        hrec_query, scene, rrDepth, depth);
+                    HitShadowRay(
+                        scene, idx, depth, ctxt, paths, shadow_rays);
                 }
             }
             else {
@@ -358,15 +370,16 @@ namespace aten
         }
     }
 
-    bool PathTracing::shade(
+    void PathTracing::shade(
         int32_t idx,
         aten::Path& paths,
         const context& ctxt,
         ray* rays,
+        aten::ShadowRay* shadow_rays,
         const aten::hitrecord& rec,
         scene* scene,
         int32_t rrDepth,
-        int32_t depth)
+        int32_t bounce)
     {
         const auto& ray = rays[idx];
         auto* sampler = &paths.sampler[idx];
@@ -383,12 +396,17 @@ namespace aten
             ctxt,
             rec.mtrlid, rec.isVoxel);
 
+        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+
+        auto& shadow_ray = shadow_rays[idx];
+        shadow_ray.isActive = false;
+
         // Implicit conection to light.
         if (mtrl.attrib.isEmissive) {
             if (!isBackfacing) {
                 real weight = 1.0f;
 
-                if (depth > 0 && !paths.attrib[idx].isSingular)
+                if (bounce > 0 && !paths.attrib[idx].isSingular)
                 {
                     auto cosLight = dot(orienting_normal, -ray.dir);
                     auto dist2 = aten::squared_length(rec.p - ray.org);
@@ -410,7 +428,7 @@ namespace aten
             }
 
             paths.attrib[idx].isTerminate = true;
-            return false;
+            return;
         }
 
         if (!mtrl.attrib.isTranslucent && isBackfacing) {
@@ -440,97 +458,51 @@ namespace aten
                 // Ray go through to the opposite direction. So, we need to specify inverted normal.
                 rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
                 paths.throughput[idx].throughput *= static_cast<aten::vec3>(mtrl.baseColor);
-                return true;
+                paths.attrib[idx].isSingular = true;
+                shadow_rays[idx].isActive = false;
+                return;
             }
         }
 
+        const auto lightnum = ctxt.get_light_num();
+
         // Explicit conection to light.
-        if (!(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))
+        if (lightnum > 0
+            && !(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))
         {
-            real lightSelectPdf = 1;
-            LightSampleResult sampleres;
+            auto lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
+            const auto& light_param = ctxt.GetLight(lightidx);
+            const auto lightSelectPdf = real(1) / lightnum;
 
-            auto light = scene->sampleLight(
+            auto isShadowRayActive = AT_NAME::FillShadowRay(
+                shadow_ray,
                 ctxt,
-                rec.p,
-                orienting_normal,
-                sampler,
-                lightSelectPdf, sampleres);
+                bounce,
+                paths.sampler[idx],
+                paths.throughput[idx],
+                lightidx,
+                light_param,
+                mtrl,
+                ray,
+                rec.p, orienting_normal,
+                rec.u, rec.v, albedo,
+                lightSelectPdf,
+                pre_sampled_r);
 
-            if (light) {
-                const vec3& posLight = sampleres.pos;
-                const vec3& nmlLight = sampleres.nml;
-                real pdfLight = sampleres.pdf;
-
-                vec3 dirToLight = normalize(sampleres.dir);
-
-                // TODO
-                // Do we need to consider offset for shadow ray?
-                auto shadowRayOrg = rec.p;
-                auto shadowRayDir = dirToLight;
-
-                if (dot(shadowRayDir, orienting_normal) > real(0)) {
-                    aten::ray shadowRay(shadowRayOrg, shadowRayDir, orienting_normal);
-
-                    hitrecord tmpRec;
-
-                    if (scene->hitLight(ctxt, light.get(), posLight, shadowRay, AT_MATH_EPSILON, AT_MATH_INF, tmpRec)) {
-                        // Shadow ray hits the light.
-                        auto cosShadow = dot(orienting_normal, dirToLight);
-
-                        auto bsdf = material::sampleBSDF(
-                            &mtrl,
-                            orienting_normal, ray.dir, dirToLight, rec.u, rec.v, pre_sampled_r);
-                        auto pdfb = material::samplePDF(
-                            &mtrl,
-                            orienting_normal, ray.dir, dirToLight, rec.u, rec.v);
-
-                        bsdf *= paths.throughput[idx].throughput;
-
-                        // Get light color.
-                        auto emit = sampleres.finalColor;
-
-                        if (light->isInfinite() || light->isSingular()) {
-                            if (pdfLight > real(0) && cosShadow >= 0) {
-                                auto misW = light->isSingular()
-                                    ? real(1)
-                                    : aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-                                paths.contrib[idx].contrib += (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
-                            }
-                        }
-                        else {
-                            auto cosLight = dot(nmlLight, -dirToLight);
-
-                            if (cosShadow >= 0 && cosLight >= 0) {
-                                auto dist2 = squared_length(sampleres.dir);
-                                auto G = cosShadow * cosLight / dist2;
-
-                                if (pdfb > real(0) && pdfLight > real(0)) {
-                                    // Convert pdf from steradian to area.
-                                    // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                                    // p31 - p35
-                                    pdfb = pdfb * cosLight / dist2;
-                                    auto misW = aten::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
-                                    paths.contrib[idx].contrib += (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            shadow_ray.isActive = isShadowRayActive;
         }
 
         real russianProb = real(1);
 
-        if (depth > rrDepth) {
+        if (bounce > rrDepth) {
             auto t = normalize(paths.throughput[idx].throughput);
             auto p = std::max(t.r, std::max(t.g, t.b));
 
             russianProb = sampler->nextSample();
 
             if (russianProb >= p) {
-                paths.contrib[idx].contrib = vec3();
-                return false;
+                paths.attrib[idx].isTerminate = true;
+                return;
             }
             else {
                 russianProb = p;
@@ -565,7 +537,8 @@ namespace aten
             paths.throughput[idx].throughput /= russianProb;
         }
         else {
-            return false;
+            paths.attrib[idx].isTerminate = true;
+            return;
         }
 
         paths.throughput[idx].pdfb = pdfb;
@@ -574,8 +547,39 @@ namespace aten
 
         // Make next ray.
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
+    }
 
-        return true;
+    void PathTracing::HitShadowRay(
+        scene* scene,
+        int32_t idx,
+        int32_t bounce,
+        const aten::context& ctxt,
+        aten::Path paths,
+        const aten::ShadowRay* shadow_rays)
+    {
+        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
+            paths.attrib[idx].isTerminate = true;
+            return;
+        }
+
+        const auto& shadowRay = shadow_rays[idx];
+
+        if (!shadowRay.isActive) {
+            return;
+        }
+
+        // TODO
+        bool enableLod = (bounce >= 2);
+
+        hitrecord tmpRec;
+
+        auto isHit = AT_NAME::HitShadowRay<std::remove_pointer_t<decltype(scene)>>(
+            enableLod, ctxt, shadowRay, scene);
+
+        if (isHit) {
+            auto contrib = shadowRay.lightcontrib;
+            paths.contrib[idx].contrib += contrib;
+        }
     }
 
     void PathTracing::shadeMiss(
@@ -637,6 +641,9 @@ namespace aten
         if (rays_.empty()) {
             rays_.resize(width * height);
         }
+        if (shadow_rays_.empty()) {
+            shadow_rays_.resize(width * height);
+        }
         path_host_.init(width, height);
 
         auto time = timer::getSystemTime();
@@ -686,7 +693,7 @@ namespace aten
                         if (enable_feature_line_) {
                             radiance_with_feature_line(
                                 idx,
-                                path_host_.paths, ctxt, rays_.data(),
+                                path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                                 m_rrDepth, m_startDepth, m_maxDepth,
                                 camera,
                                 scene,

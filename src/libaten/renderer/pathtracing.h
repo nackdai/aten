@@ -43,6 +43,7 @@ namespace aten
             Path& paths,
             const context& ctxt,
             ray* rays,
+            aten::ShadowRay* shadow_rays,
             int32_t rrDepth,
             int32_t startDepth,
             int32_t maxDepth,
@@ -50,15 +51,24 @@ namespace aten
             scene* scene,
             const background* bg);
 
-        static bool shade(
+        static void shade(
             int32_t idx,
             aten::Path& paths,
             const context& ctxt,
             ray* rays,
+            aten::ShadowRay* shadow_rays,
             const aten::hitrecord& rec,
             scene* scene,
             int32_t rrDepth,
-            int32_t depth);
+            int32_t bounce);
+
+        static void HitShadowRay(
+            scene* scene,
+            int32_t idx,
+            int32_t bounce,
+            const aten::context& ctxt,
+            aten::Path paths,
+            const aten::ShadowRay* shadow_rays);
 
         static void shadeMiss(
             int32_t idx,
@@ -71,6 +81,8 @@ namespace aten
     protected:
         PathHost path_host_;
         std::vector<aten::ray> rays_;
+
+        std::vector<aten::ShadowRay> shadow_rays_;
 
         int32_t m_maxDepth{ 1 };
 

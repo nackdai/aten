@@ -13,6 +13,8 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
+#include "renderer/pathtracing_impl.h"
+
 namespace pt {
     __global__ void shade(
         float4* aovNormalDepth,
@@ -147,7 +149,8 @@ namespace pt {
         const auto lightnum = ctxt.lightnum;
 
         // Explicit conection to light.
-        if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
+        if (lightnum > 0
+            && !(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {
             auto lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
 
@@ -161,7 +164,7 @@ namespace pt {
 
             auto lightSelectPdf = 1.0f / lightnum;
 
-            auto isShadowRayActive = kernel::fillShadowRay(
+            auto isShadowRayActive = AT_NAME::FillShadowRay(
                 shShadowRays[threadIdx.x],
                 ctxt,
                 bounce,

@@ -13,8 +13,8 @@
 //#define RELEASE_DEBUG
 
 #ifdef RELEASE_DEBUG
-#define BREAK_X    (10)
-#define BREAK_Y    (0)
+#define BREAK_X    (-1)
+#define BREAK_Y    (-1)
 #pragma optimize( "", off)
 #endif
 
@@ -646,6 +646,10 @@ namespace aten
         }
         path_host_.init(width, height);
 
+        for (auto& attrib : path_host_.attrib) {
+            attrib.isKill = false;
+        }
+
         auto time = timer::getSystemTime();
 
 #if defined(ENABLE_OMP) && !defined(RELEASE_DEBUG)
@@ -674,6 +678,10 @@ namespace aten
 #endif
                     int32_t idx = y * width + x;
                     aten::hitrecord hrec;
+
+                    if (path_host_.paths.attrib[idx].isKill) {
+                        continue;
+                    }
 
                     for (uint32_t i = 0; i < samples; i++) {
                         const auto rnd = aten::getRandom(pos);

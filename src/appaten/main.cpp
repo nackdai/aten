@@ -9,7 +9,7 @@ static const char *TITLE = "app";
 
 // #define ENABLE_EVERY_FRAME_SC
 // #define ENABLE_DOF
-#define ENABLE_FEATURE_LINE
+//#define ENABLE_FEATURE_LINE
 
 #ifdef ENABLE_DOF
 static aten::ThinLensCamera g_camera;

@@ -6,6 +6,7 @@
 #include "light/ibl.h"
 #include "math/ray.h"
 #include "renderer/aov.h"
+#include "scene/scene.h"
 
 #ifdef __CUDACC__
 #include "cuda/cudadefs.h"
@@ -174,5 +175,147 @@ namespace AT_NAME
 
             paths.attrib[idx].isTerminate = true;
         }
+    }
+
+    inline AT_DEVICE_MTRL_API bool FillShadowRay(
+        AT_NAME::ShadowRay& shadow_ray,
+        const AT_NAME::context& ctxt,
+        int32_t bounce,
+        aten::sampler& sampler,
+        const AT_NAME::PathThroughput& throughtput,
+        int32_t target_light_idx,
+        const aten::LightParameter& light,
+        const aten::MaterialParameter& mtrl,
+        const aten::ray& ray,
+        const aten::vec3& hit_pos,
+        const aten::vec3& hit_nml,
+        real hit_u, real hit_v,
+        const aten::vec4& external_albedo,
+        real lightSelectPdf,
+        real pre_sampled_r = real(0))
+    {
+        bool isShadowRayActive = false;
+
+        aten::LightSampleResult sampleres;
+        AT_NAME::Light::sample(sampleres, light, ctxt, hit_pos, hit_nml, &sampler, bounce);
+
+        const auto& posLight = sampleres.pos;
+        const auto& nmlLight = sampleres.nml;
+        real pdfLight = sampleres.pdf;
+
+        auto dirToLight = normalize(sampleres.dir);
+        auto distToLight = length(posLight - hit_pos);
+
+        auto shadowRayOrg = hit_pos + AT_MATH_EPSILON * hit_nml;
+        auto tmp = hit_pos + dirToLight - shadowRayOrg;
+        auto shadowRayDir = normalize(tmp);
+
+        shadow_ray.rayorg = shadowRayOrg;
+        shadow_ray.raydir = shadowRayDir;
+        shadow_ray.targetLightId = target_light_idx;
+        shadow_ray.distToLight = distToLight;
+        shadow_ray.lightcontrib = aten::vec3(0);
+        {
+            auto cosShadow = dot(hit_nml, dirToLight);
+
+            real pdfb = AT_NAME::material::samplePDF(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v);
+            auto bsdf = AT_NAME::material::sampleBSDFWithExternalAlbedo(&mtrl, hit_nml, ray.dir, dirToLight, hit_u, hit_v, external_albedo, pre_sampled_r);
+
+            bsdf *= throughtput.throughput;
+
+            // Get light color.
+            auto emit = sampleres.finalColor;
+
+            if (light.attrib.isInfinite || light.attrib.isSingular) {
+                if (pdfLight > real(0) && cosShadow >= 0) {
+                    auto misW = light.attrib.isSingular
+                        ? 1.0f
+                        : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                    shadow_ray.lightcontrib =
+                        (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
+
+                    isShadowRayActive = true;
+                }
+            }
+            else {
+                auto cosLight = dot(nmlLight, -dirToLight);
+
+                if (cosShadow >= 0 && cosLight >= 0) {
+                    auto dist2 = aten::squared_length(sampleres.dir);
+                    auto G = cosShadow * cosLight / dist2;
+
+                    if (pdfb > real(0) && pdfLight > real(0)) {
+                        // Convert pdf from steradian to area.
+                        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
+                        // p31 - p35
+                        pdfb = pdfb * cosLight / dist2;
+
+                        auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+
+                        shadow_ray.lightcontrib =
+                            (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;
+
+                        isShadowRayActive = true;
+                    }
+                }
+            }
+        }
+
+        return isShadowRayActive;
+    }
+
+    template <typename SCENE=void>
+    inline AT_DEVICE_MTRL_API bool HitShadowRay(
+        bool enableLod,
+        const AT_NAME::context& ctxt,
+        const AT_NAME::ShadowRay& shadowRay,
+        SCENE* scene = nullptr)
+    {
+        auto targetLightId = shadowRay.targetLightId;
+        auto distToLight = shadowRay.distToLight;
+
+        const auto& light = ctxt.GetLight(targetLightId);
+        const auto lightobj = (light.objid >= 0 ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
+
+        real distHitObjToRayOrg = AT_MATH_INF;
+
+        // Ray aim to the area light.
+        // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+        const aten::ObjectParameter* hitobj = lightobj;
+
+        aten::Intersection isect;
+
+        bool isHit = false;
+
+        aten::ray r(shadowRay.rayorg, shadowRay.raydir);
+
+        isHit = false;
+
+        if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
+            // NOTE:
+            // operation has to be related with template arg SCENE.
+            if (scene) {
+                aten::hitrecord rec;
+                isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, rec, isect);
+            }
+        }
+        else {
+            isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
+        }
+
+        if (isHit) {
+            hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+        }
+
+        isHit = AT_NAME::scene::hitLight(
+            isHit,
+            light.attrib,
+            lightobj,
+            distToLight,
+            distHitObjToRayOrg,
+            isect.t,
+            hitobj);
+
+        return isHit;
     }
 }

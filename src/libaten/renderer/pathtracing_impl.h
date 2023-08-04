@@ -353,4 +353,50 @@ namespace AT_NAME
             _detail::add_vec3(paths.contrib[idx].contrib, shadowRay.lightcontrib);
         }
     }
+
+    inline AT_DEVICE_MTRL_API bool HitImplicitLight(
+        bool is_back_facing,
+        int32_t bounce,
+        AT_NAME::PathContrib& path_contrib,
+        AT_NAME::PathAttribute& path_attrib,
+        AT_NAME::PathThroughput& path_throughput,
+        const aten::ray& ray,
+        const aten::vec3& hit_pos,
+        const aten::vec3& hit_nml,
+        float hit_area,
+        const aten::MaterialParameter& hit_target_mtrl)
+    {
+        if (!hit_target_mtrl.attrib.isEmissive) {
+            return false;
+        }
+
+        if (is_back_facing) {
+            return false;
+        }
+
+        float weight = 1.0f;
+
+        if (bounce > 0 && !path_attrib.isSingular) {
+            auto cosLight = dot(hit_nml, -ray.dir);
+            auto dist2 = aten::squared_length(hit_pos - ray.org);
+
+            if (cosLight >= 0) {
+                auto pdfLight = 1 / hit_area;
+
+                // Convert pdf area to sradian.
+                // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
+                // p31 - p35
+                pdfLight = pdfLight * dist2 / cosLight;
+
+                weight = path_throughput.pdfb / (pdfLight + path_throughput.pdfb);
+            }
+        }
+
+        auto contrib = path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor);
+        _detail::add_vec3(path_contrib.contrib, contrib);
+
+        // When ray hit the light, tracing will finish.
+        path_attrib.isTerminate = true;
+        return true;
+    }
 }

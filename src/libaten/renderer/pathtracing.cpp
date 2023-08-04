@@ -402,32 +402,15 @@ namespace aten
         shadow_ray.isActive = false;
 
         // Implicit conection to light.
-        if (mtrl.attrib.isEmissive) {
-            if (!isBackfacing) {
-                real weight = 1.0f;
-
-                if (bounce > 0 && !paths.attrib[idx].isSingular)
-                {
-                    auto cosLight = dot(orienting_normal, -ray.dir);
-                    auto dist2 = aten::squared_length(rec.p - ray.org);
-
-                    if (cosLight >= 0) {
-                        auto pdfLight = 1 / rec.area;
-
-                        // Convert pdf area to sradian.
-                        // http://kagamin.net/hole/edubpt/edubpt_v100.pdf
-                        // p31 - p35
-                        pdfLight = pdfLight * dist2 / cosLight;
-
-                        weight = paths.throughput[idx].pdfb / (pdfLight + paths.throughput[idx].pdfb);
-                    }
-                }
-
-                auto emit = static_cast<aten::vec3>(mtrl.baseColor);
-                paths.contrib[idx].contrib += paths.throughput[idx].throughput * weight * emit;
-            }
-
-            paths.attrib[idx].isTerminate = true;
+        auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+            isBackfacing,
+            bounce,
+            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
+            ray,
+            rec.p, orienting_normal,
+            rec.area,
+            mtrl);
+        if (is_hit_implicit_light) {
             return;
         }
 

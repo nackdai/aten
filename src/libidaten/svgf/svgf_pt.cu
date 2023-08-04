@@ -132,20 +132,15 @@ namespace svgf {
         }
 
         // Implicit conection to light.
-        if (shMtrls[threadIdx.x].attrib.isEmissive) {
-            kernel::hitImplicitLight(
-                isBackfacing,
-                bounce,
-                paths.contrib[idx],
-                paths.attrib[idx],
-                paths.throughput[idx],
-                ray,
-                rec.p, orienting_normal,
-                rec.area,
-                shMtrls[threadIdx.x]);
-
-            // When ray hit the light, tracing will finish.
-            paths.attrib[idx].isTerminate = true;
+        auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+            isBackfacing,
+            bounce,
+            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
+            ray,
+            rec.p, orienting_normal,
+            rec.area,
+            shMtrls[threadIdx.x]);
+        if (is_hit_implicit_light) {
             return;
         }
 

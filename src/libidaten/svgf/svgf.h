@@ -35,8 +35,6 @@ namespace idaten
             AT_DEVICE_API AOVMode(int32_t type) : AT_NAME::AOVType(static_cast<Type>(type)) {}
         };
 
-        static const int32_t ShadowRayNum = 2;
-
         struct PickedInfo {
             int32_t ix{ -1 };
             int32_t iy{ -1 };

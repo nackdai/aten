@@ -62,14 +62,6 @@ namespace aten
             int32_t rrDepth,
             int32_t bounce);
 
-        static void HitShadowRay(
-            scene* scene,
-            int32_t idx,
-            int32_t bounce,
-            const aten::context& ctxt,
-            aten::Path paths,
-            const aten::ShadowRay* shadow_rays);
-
         static void shadeMiss(
             int32_t idx,
             scene* scene,

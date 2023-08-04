@@ -248,27 +248,7 @@ namespace pt {
 
         idx = hitindices[idx];
 
-        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
-            paths.attrib[idx].isTerminate = true;
-            return;
-        }
-
-        const auto& shadowRay = shadowRays[idx];
-
-        if (!shadowRay.isActive) {
-            return;
-        }
-
-        // TODO
-        bool enableLod = (bounce >= 2);
-
-        auto isHit = kernel::hitShadowRay(
-            enableLod, ctxt, shadowRay);
-
-        if (isHit) {
-            auto contrib = shadowRay.lightcontrib;
-            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-        }
+        AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
     }
 
     __global__ void gather(

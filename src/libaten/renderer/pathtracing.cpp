@@ -48,8 +48,8 @@ namespace aten
                     idx, path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     rec, scene, m_rrDepth, depth);
 
-                HitShadowRay(
-                    scene, idx, depth, ctxt, path_host_.paths, shadow_rays_.data());
+                AT_NAME::HitShadowRay(
+                    idx, depth, ctxt, path_host_.paths, shadow_rays_.data(), scene);
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;
             }
@@ -281,8 +281,8 @@ namespace aten
                     shade(
                         idx, paths, ctxt, rays, shadow_rays,
                         hrec_query, scene, rrDepth, depth);
-                    HitShadowRay(
-                        scene, idx, depth, ctxt, paths, shadow_rays);
+                    AT_NAME::HitShadowRay(
+                        idx, depth, ctxt, paths, shadow_rays, scene);
                 }
             }
             else {
@@ -547,39 +547,6 @@ namespace aten
 
         // Make next ray.
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
-    }
-
-    void PathTracing::HitShadowRay(
-        scene* scene,
-        int32_t idx,
-        int32_t bounce,
-        const aten::context& ctxt,
-        aten::Path paths,
-        const aten::ShadowRay* shadow_rays)
-    {
-        if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
-            paths.attrib[idx].isTerminate = true;
-            return;
-        }
-
-        const auto& shadowRay = shadow_rays[idx];
-
-        if (!shadowRay.isActive) {
-            return;
-        }
-
-        // TODO
-        bool enableLod = (bounce >= 2);
-
-        hitrecord tmpRec;
-
-        auto isHit = AT_NAME::HitShadowRay<std::remove_pointer_t<decltype(scene)>>(
-            enableLod, ctxt, shadowRay, scene);
-
-        if (isHit) {
-            auto contrib = shadowRay.lightcontrib;
-            paths.contrib[idx].contrib += contrib;
-        }
     }
 
     void PathTracing::shadeMiss(

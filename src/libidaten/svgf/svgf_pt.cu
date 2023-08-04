@@ -62,7 +62,7 @@ namespace svgf {
 
         idx = hitindices[idx];
 
-        __shared__ idaten::ShadowRay shShadowRays[64 * idaten::SVGFPathTracing::ShadowRayNum];
+        __shared__ idaten::ShadowRay shShadowRays[64];
         __shared__ aten::MaterialParameter shMtrls[64];
 
         const auto ray = rays[idx];
@@ -161,47 +161,42 @@ namespace svgf {
         auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
 #if 1
-#pragma unroll
-        for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
-            shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = false;
-        }
+        shShadowRays[threadIdx.x].isActive = false;
 
         // Explicit conection to light.
         if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
         {
-            for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
-                // TODO
-                // Importance sampling.
-                int32_t lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
+            // TODO
+            // Importance sampling.
+            int32_t lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
 
-                aten::LightParameter light;
-                light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
-                light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
-                light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
-                light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
-                light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
-                light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
-                //auto light = ctxt.lights[lightidx];
+            aten::LightParameter light;
+            light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
+            light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
+            light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
+            light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
+            light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
+            light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
+            //auto light = ctxt.lights[lightidx];
 
-                real lightSelectPdf = 1.0f / lightnum;
+            real lightSelectPdf = 1.0f / lightnum;
 
-                auto isShadowRayActive = AT_NAME::FillShadowRay(
-                    shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i],
-                    ctxt,
-                    bounce,
-                    paths.sampler[idx],
-                    paths.throughput[idx],
-                    lightidx,
-                    light,
-                    shMtrls[threadIdx.x],
-                    ray,
-                    rec.p, orienting_normal,
-                    rec.u, rec.v, albedo,
-                    lightSelectPdf);
+            auto isShadowRayActive = AT_NAME::FillShadowRay(
+                shShadowRays[threadIdx.x],
+                ctxt,
+                bounce,
+                paths.sampler[idx],
+                paths.throughput[idx],
+                lightidx,
+                light,
+                shMtrls[threadIdx.x],
+                ray,
+                rec.p, orienting_normal,
+                rec.u, rec.v, albedo,
+                lightSelectPdf);
 
-                //shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].lightcontrib /= idaten::SVGFPathTracing::ShadowRayNum;
-                shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i].isActive = isShadowRayActive;
-            }
+            //shShadowRays[threadIdx.x].lightcontrib /= idaten::SVGFPathTracing::ShadowRayNum;
+            shShadowRays[threadIdx.x].isActive = isShadowRayActive;
         }
 #endif
 
@@ -253,10 +248,7 @@ namespace svgf {
         paths.attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
         paths.attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
 
-#pragma unroll
-        for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
-            shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i] = shShadowRays[threadIdx.x * idaten::SVGFPathTracing::ShadowRayNum + i];
-        }
+        shadowRays[idx] = shShadowRays[threadIdx.x];
     }
 
     __global__ void hitShadowRay(
@@ -296,21 +288,18 @@ namespace svgf {
         // TODO
         bool enableLod = (bounce >= 2);
 
-#pragma unroll
-        for (int32_t i = 0; i < idaten::SVGFPathTracing::ShadowRayNum; i++) {
-            const auto& shadowRay = shadowRays[idx * idaten::SVGFPathTracing::ShadowRayNum + i];
+        const auto& shadowRay = shadowRays[idx];
 
-            if (!shadowRay.isActive) {
-                continue;
-            }
+        if (!shadowRay.isActive) {
+            return;
+        }
 
-            auto isHit = kernel::hitShadowRay(
-                enableLod, ctxt, shadowRay);
+        auto isHit = kernel::hitShadowRay(
+            enableLod, ctxt, shadowRay);
 
-            if (isHit) {
-                auto contrib = shadowRay.lightcontrib;
-                paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
-            }
+        if (isHit) {
+            auto contrib = shadowRay.lightcontrib;
+            paths.contrib[idx].contrib += make_float3(contrib.x, contrib.y, contrib.z);
         }
     }
 

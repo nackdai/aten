@@ -86,7 +86,7 @@ namespace idaten
         m_isects.resize(width * height);
         m_rays.resize(width * height);
 
-        m_shadowRays.resize(width * height * ShadowRayNum);
+        m_shadowRays.resize(width * height);
 
         initPath(width, height);
 

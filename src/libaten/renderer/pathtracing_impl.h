@@ -274,62 +274,6 @@ namespace AT_NAME
         shadow_ray.isActive = isShadowRayActive;
     }
 
-    namespace _detail {
-        template <typename SCENE = void>
-        inline AT_DEVICE_MTRL_API bool HitShadowRay(
-            bool enableLod,
-            const AT_NAME::context& ctxt,
-            const AT_NAME::ShadowRay& shadowRay,
-            SCENE* scene = nullptr)
-        {
-            auto targetLightId = shadowRay.targetLightId;
-            auto distToLight = shadowRay.distToLight;
-
-            const auto& light = ctxt.GetLight(targetLightId);
-            const auto lightobj = (light.objid >= 0 ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
-
-            real distHitObjToRayOrg = AT_MATH_INF;
-
-            // Ray aim to the area light.
-            // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
-            const aten::ObjectParameter* hitobj = lightobj;
-
-            aten::Intersection isect;
-
-            bool isHit = false;
-
-            aten::ray r(shadowRay.rayorg, shadowRay.raydir);
-
-            isHit = false;
-
-            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-                // NOTE:
-                // operation has to be related with template arg SCENE.
-                if (scene) {
-                    aten::hitrecord rec;
-                    isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, rec, isect);
-                }
-            }
-            else {
-                isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
-            }
-
-            if (isHit) {
-                hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
-            }
-
-            isHit = AT_NAME::scene::hitLight(
-                isHit,
-                light.attrib,
-                lightobj,
-                distToLight,
-                distHitObjToRayOrg,
-                isect.t,
-                hitobj);
-
-            return isHit;
-        }
-    }
 
     template <typename SCENE = void>
     inline AT_DEVICE_MTRL_API void HitShadowRay(
@@ -356,8 +300,48 @@ namespace AT_NAME
 
         aten::hitrecord tmpRec;
 
-        auto isHit = _detail::HitShadowRay<std::remove_pointer_t<decltype(scene)>>(
-            enableLod, ctxt, shadowRay, scene);
+        const auto targetLightId = shadowRay.targetLightId;
+        const auto distToLight = shadowRay.distToLight;
+
+        const auto& light = ctxt.GetLight(targetLightId);
+        const auto lightobj = (light.objid >= 0 ? &ctxt.GetObject(static_cast<uint32_t>(light.objid)) : nullptr);
+
+        real distHitObjToRayOrg = AT_MATH_INF;
+
+        // Ray aim to the area light.
+        // So, if ray doesn't hit anything in intersectCloserBVH, ray hit the area light.
+        const aten::ObjectParameter* hitobj = lightobj;
+
+        aten::Intersection isect;
+
+        bool isHit = false;
+
+        aten::ray r(shadowRay.rayorg, shadowRay.raydir);
+
+        if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
+            // NOTE:
+            // operation has to be related with template arg SCENE.
+            if (scene) {
+                aten::hitrecord rec;
+                isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, rec, isect);
+            }
+        }
+        else {
+            isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
+        }
+
+        if (isHit) {
+            hitobj = &ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+        }
+
+        isHit = AT_NAME::scene::hitLight(
+            isHit,
+            light.attrib,
+            lightobj,
+            distToLight,
+            distHitObjToRayOrg,
+            isect.t,
+            hitobj);
 
         if (isHit) {
             _detail::AddVec3(paths.contrib[idx].contrib, shadowRay.lightcontrib);

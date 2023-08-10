@@ -121,24 +121,21 @@ namespace pt {
         shShadowRays[threadIdx.x].isActive = false;
 
         // Check transparency or translucency.
-        // NOTE:
-        // If the material itself is originally translucent, we don't care alpha translucency.
-        if (!shMtrls[threadIdx.x].attrib.isTranslucent
-            && AT_NAME::material::isTranslucentByAlpha(shMtrls[threadIdx.x], rec.u, rec.v))
-        {
-            const auto alpha = AT_NAME::material::getTranslucentAlpha(shMtrls[threadIdx.x], rec.u, rec.v);
-            auto r = paths.sampler[idx].nextSample();
-
-            if (r >= alpha) {
-                // Just through the object.
-                // NOTE
-                // Ray go through to the opposite direction. So, we need to specify inverted normal.
-                rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
-                paths.throughput[idx].throughput *= static_cast<aten::vec3>(shMtrls[threadIdx.x].baseColor);
-                paths.attrib[idx].isSingular = true;
-                shadowRays[idx].isActive = false;
-                return;
-            }
+        auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+            shMtrls[threadIdx.x],
+            rec.u, rec.v, rec.p,
+            orienting_normal,
+            rays[idx],
+            paths.sampler[idx],
+            paths.attrib[idx],
+            paths.throughput[idx]);
+        if (is_translucent_by_alpha) {
+            // TODO:
+            // Basically, shadow ray is treated via shared memory.
+            // Therefore, finally it has to be re-stored to original global memory.
+            // But, in this case, it doesn't happen yet, so, set value directly here.
+            shadowRays[idx].isActive = false;
+            return;
         }
 
         // Explicit conection to light.

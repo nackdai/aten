@@ -42,7 +42,7 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        AT_NAME::generate_path(
+        AT_NAME::GeneratePath(
             rays[idx],
             idx, ix, iy,
             sample, frame,
@@ -317,7 +317,7 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        AT_NAME::shade_miss(
+        AT_NAME::ShadeMiss(
             idx,
             bounce,
             aten::vec3(1),
@@ -348,7 +348,7 @@ namespace kernel {
 
         const auto idx = getIdx(ix, iy, width);
 
-        AT_NAME::shade_miss_with_envmap(
+        AT_NAME::ShadeMissWithEnvmap(
             idx,
             ix, iy,
             width, height,

@@ -56,7 +56,7 @@ namespace aten
             else {
                 auto ibl = scene->getIBL();
                 if (ibl) {
-                    shade_miss_with_envmap(
+                    ShadeMissWithEnvmap(
                         idx,
                         ix, iy,
                         width, height,
@@ -68,7 +68,7 @@ namespace aten
                         path_host_.paths, rays_[idx]);
                 }
                 else {
-                    shade_miss(
+                    ShadeMiss(
                         idx,
                         depth,
                         bg()->sample(rays_[idx]),
@@ -622,7 +622,7 @@ namespace aten
                         const auto rnd = aten::getRandom(pos);
                         const auto& camsample = camera->param();
 
-                        generate_path(
+                        GeneratePath(
                             rays_[idx],
                             idx,
                             x, y,

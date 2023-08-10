@@ -177,23 +177,33 @@ namespace AT_NAME
         }
     }
 
-    inline AT_DEVICE_MTRL_API bool FillShadowRay(
+    inline AT_DEVICE_MTRL_API void FillShadowRay(
         AT_NAME::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
         int32_t bounce,
         aten::sampler& sampler,
         const AT_NAME::PathThroughput& throughtput,
-        int32_t target_light_idx,
-        const aten::LightParameter& light,
         const aten::MaterialParameter& mtrl,
         const aten::ray& ray,
         const aten::vec3& hit_pos,
         const aten::vec3& hit_nml,
         real hit_u, real hit_v,
         const aten::vec4& external_albedo,
-        real lightSelectPdf,
         real pre_sampled_r = real(0))
     {
+        shadow_ray.isActive = false;
+
+        const auto lightnum = ctxt.get_light_num();
+
+        if (lightnum <= 0 || mtrl.attrib.isSingular || mtrl.attrib.isTranslucent) {
+            return;
+        }
+
+        const auto target_light_idx = aten::cmpMin<int32_t>(sampler.nextSample() * lightnum, lightnum - 1);
+        const auto lightSelectPdf = 1.0f / lightnum;
+
+        const auto& light = ctxt.GetLight(target_light_idx);
+
         bool isShadowRayActive = false;
 
         aten::LightSampleResult sampleres;
@@ -261,7 +271,7 @@ namespace AT_NAME
             }
         }
 
-        return isShadowRayActive;
+        shadow_ray.isActive = isShadowRayActive;
     }
 
     namespace _detail {

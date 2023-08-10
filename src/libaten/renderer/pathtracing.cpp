@@ -48,7 +48,7 @@ namespace aten
                     idx, path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
                     rec, scene, m_rrDepth, depth);
 
-                AT_NAME::HitShadowRay(
+                std::ignore = AT_NAME::HitShadowRay(
                     idx, depth, ctxt, path_host_.paths, shadow_rays_.data(), scene);
 
                 willContinue = !path_host_.paths.attrib[idx].isTerminate;

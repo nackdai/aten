@@ -275,7 +275,7 @@ namespace AT_NAME
     }
 
     template <typename SCENE = void>
-    inline AT_DEVICE_MTRL_API void HitShadowRay(
+    inline AT_DEVICE_MTRL_API bool HitShadowRay(
         int32_t idx,
         int32_t bounce,
         const AT_NAME::context& ctxt,
@@ -285,13 +285,13 @@ namespace AT_NAME
     {
         if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
             paths.attrib[idx].isTerminate = true;
-            return;
+            return false;
         }
 
         const auto& shadowRay = shadow_rays[idx];
 
         if (!shadowRay.isActive) {
-            return;
+            return false;
         }
 
         // TODO
@@ -345,6 +345,8 @@ namespace AT_NAME
         if (isHit) {
             _detail::AddVec3(paths.contrib[idx].contrib, shadowRay.lightcontrib);
         }
+
+        return isHit;
     }
 
     inline AT_DEVICE_MTRL_API bool HitImplicitLight(

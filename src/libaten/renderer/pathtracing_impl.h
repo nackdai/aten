@@ -20,7 +20,7 @@
 
 namespace AT_NAME
 {
-    inline AT_DEVICE_MTRL_API void generate_path(
+    inline AT_DEVICE_MTRL_API void GeneratePath(
         aten::ray& generated_ray,
         int32_t idx,
         int32_t ix, int32_t iy,
@@ -64,7 +64,7 @@ namespace AT_NAME
 
     namespace _detail {
         template <typename A, typename B>
-        inline AT_DEVICE_MTRL_API void add_vec3(A& dst, const B& add)
+        inline AT_DEVICE_MTRL_API void AddVec3(A& dst, const B& add)
         {
             if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
                 dst += add;
@@ -76,7 +76,7 @@ namespace AT_NAME
     }
 
     template <typename AOV_BUFFER_TYPE = aten::vec4>
-    inline AT_DEVICE_MTRL_API void shade_miss(
+    inline AT_DEVICE_MTRL_API void ShadeMiss(
         int32_t idx,
         int32_t bounce,
         const aten::vec3& bg,
@@ -98,14 +98,14 @@ namespace AT_NAME
             }
 
             auto contrib = paths.throughput[idx].throughput * bg;
-            _detail::add_vec3(paths.contrib[idx].contrib, contrib);
+            _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
             paths.attrib[idx].isTerminate = true;
         }
     }
 
     template <typename AOV_BUFFER_TYPE = aten::vec4>
-    inline AT_DEVICE_MTRL_API void shade_miss_with_envmap(
+    inline AT_DEVICE_MTRL_API void ShadeMissWithEnvmap(
         int32_t idx,
         int32_t ix, int32_t iy,
         int32_t width, int32_t height,
@@ -171,7 +171,7 @@ namespace AT_NAME
             }
 
             auto contrib = paths.throughput[idx].throughput * misW * emit;
-            _detail::add_vec3(paths.contrib[idx].contrib, contrib);
+            _detail::AddVec3(paths.contrib[idx].contrib, contrib);
 
             paths.attrib[idx].isTerminate = true;
         }
@@ -360,7 +360,7 @@ namespace AT_NAME
             enableLod, ctxt, shadowRay, scene);
 
         if (isHit) {
-            _detail::add_vec3(paths.contrib[idx].contrib, shadowRay.lightcontrib);
+            _detail::AddVec3(paths.contrib[idx].contrib, shadowRay.lightcontrib);
         }
     }
 
@@ -403,7 +403,7 @@ namespace AT_NAME
         }
 
         auto contrib = path_throughput.throughput * weight * static_cast<aten::vec3>(hit_target_mtrl.baseColor);
-        _detail::add_vec3(path_contrib.contrib, contrib);
+        _detail::AddVec3(path_contrib.contrib, contrib);
 
         // When ray hit the light, tracing will finish.
         path_attrib.isTerminate = true;

@@ -161,43 +161,17 @@ namespace svgf {
         auto albedo = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
 
 #if 1
-        shShadowRays[threadIdx.x].isActive = false;
-
         // Explicit conection to light.
-        if (!(shMtrls[threadIdx.x].attrib.isSingular || shMtrls[threadIdx.x].attrib.isTranslucent))
-        {
-            // TODO
-            // Importance sampling.
-            int32_t lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
-
-            aten::LightParameter light;
-            light.pos = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 0];
-            light.dir = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 1];
-            light.le = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 2];
-            light.v0 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 3];
-            light.v1 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 4];
-            light.v2 = ((aten::vec4*)ctxt.lights)[lightidx * aten::LightParameter_float4_size + 5];
-            //auto light = ctxt.lights[lightidx];
-
-            real lightSelectPdf = 1.0f / lightnum;
-
-            auto isShadowRayActive = AT_NAME::FillShadowRay(
-                shShadowRays[threadIdx.x],
-                ctxt,
-                bounce,
-                paths.sampler[idx],
-                paths.throughput[idx],
-                lightidx,
-                light,
-                shMtrls[threadIdx.x],
-                ray,
-                rec.p, orienting_normal,
-                rec.u, rec.v, albedo,
-                lightSelectPdf);
-
-            //shShadowRays[threadIdx.x].lightcontrib /= idaten::SVGFPathTracing::ShadowRayNum;
-            shShadowRays[threadIdx.x].isActive = isShadowRayActive;
-        }
+        AT_NAME::FillShadowRay(
+            shShadowRays[threadIdx.x],
+            ctxt,
+            bounce,
+            paths.sampler[idx],
+            paths.throughput[idx],
+            shMtrls[threadIdx.x],
+            ray,
+            rec.p, orienting_normal,
+            rec.u, rec.v, albedo);
 #endif
 
         const auto russianProb = kernel::executeRussianProbability(

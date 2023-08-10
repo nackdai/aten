@@ -93,5 +93,10 @@ namespace idaten {
         {
             return matrices[idx];
         }
+
+        __device__ int32_t get_light_num() const noexcept
+        {
+            return lightnum;
+        }
     };
 }

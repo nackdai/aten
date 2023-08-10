@@ -447,33 +447,18 @@ namespace aten
             }
         }
 
-        const auto lightnum = ctxt.get_light_num();
-
         // Explicit conection to light.
-        if (lightnum > 0
-            && !(mtrl.attrib.isSingular || mtrl.attrib.isTranslucent))
-        {
-            auto lightidx = aten::cmpMin<int32_t>(paths.sampler[idx].nextSample() * lightnum, lightnum - 1);
-            const auto& light_param = ctxt.GetLight(lightidx);
-            const auto lightSelectPdf = real(1) / lightnum;
-
-            auto isShadowRayActive = AT_NAME::FillShadowRay(
-                shadow_ray,
-                ctxt,
-                bounce,
-                paths.sampler[idx],
-                paths.throughput[idx],
-                lightidx,
-                light_param,
-                mtrl,
-                ray,
-                rec.p, orienting_normal,
-                rec.u, rec.v, albedo,
-                lightSelectPdf,
-                pre_sampled_r);
-
-            shadow_ray.isActive = isShadowRayActive;
-        }
+        AT_NAME::FillShadowRay(
+            shadow_ray,
+            ctxt,
+            bounce,
+            paths.sampler[idx],
+            paths.throughput[idx],
+            mtrl,
+            ray,
+            rec.p, orienting_normal,
+            rec.u, rec.v, albedo,
+            pre_sampled_r);
 
         real russianProb = real(1);
 

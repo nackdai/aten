@@ -274,7 +274,6 @@ namespace AT_NAME
         shadow_ray.isActive = isShadowRayActive;
     }
 
-
     template <typename SCENE = void>
     inline AT_DEVICE_MTRL_API void HitShadowRay(
         int32_t idx,
@@ -392,5 +391,39 @@ namespace AT_NAME
         // When ray hit the light, tracing will finish.
         path_attrib.isTerminate = true;
         return true;
+    }
+
+    inline AT_DEVICE_MTRL_API bool CheckMaterialTranslucentByAlpha(
+        const aten::MaterialParameter& mtrl,
+        real u, real v,
+        const aten::vec3& hit_pos,
+        const aten::vec3& hit_nml,
+        aten::ray& ray,
+        aten::sampler& sampler,
+        AT_NAME::PathAttribute& path_attrib,
+        AT_NAME::PathThroughput& path_throughput)
+    {
+        // If the material itself is originally translucent, we don't care alpha translucency.
+        if (mtrl.attrib.isTranslucent) {
+            return false;
+        }
+
+        if (AT_NAME::material::isTranslucentByAlpha(mtrl, u, v))
+        {
+            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, u, v);
+            auto r = sampler.nextSample();
+
+            if (r >= alpha) {
+                // Just through the object.
+                // NOTE
+                // Ray go through to the opposite direction. So, we need to specify inverted normal.
+                ray = aten::ray(hit_pos, ray.dir, -hit_nml);
+                path_throughput.throughput *= static_cast<aten::vec3>(mtrl.baseColor);
+                path_attrib.isSingular = true;
+                return true;
+            }
+        }
+
+        return false;
     }
 }

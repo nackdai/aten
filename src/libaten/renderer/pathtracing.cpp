@@ -427,24 +427,16 @@ namespace aten
             ray.dir, sampler);
 
         // Check transparency or translucency.
-        // NOTE:
-        // If the material itself is originally translucent, we don't care alpha translucency.
-        if (!mtrl.attrib.isTranslucent
-            && AT_NAME::material::isTranslucentByAlpha(mtrl, rec.u, rec.v))
-        {
-            const auto alpha = AT_NAME::material::getTranslucentAlpha(mtrl, rec.u, rec.v);
-            auto r = sampler->nextSample();
-
-            if (r >= alpha) {
-                // Just through the object.
-                // NOTE
-                // Ray go through to the opposite direction. So, we need to specify inverted normal.
-                rays[idx] = aten::ray(rec.p, ray.dir, -orienting_normal);
-                paths.throughput[idx].throughput *= static_cast<aten::vec3>(mtrl.baseColor);
-                paths.attrib[idx].isSingular = true;
-                shadow_rays[idx].isActive = false;
-                return;
-            }
+        auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+            mtrl,
+            rec.u, rec.v, rec.p,
+            orienting_normal,
+            rays[idx],
+            paths.sampler[idx],
+            paths.attrib[idx],
+            paths.throughput[idx]);
+        if (is_translucent_by_alpha) {
+            return;
         }
 
         // Explicit conection to light.

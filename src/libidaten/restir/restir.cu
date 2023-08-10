@@ -314,10 +314,6 @@ __global__ void hitShadowRay(
 
     idx = hitindices[idx];
 
-    if (paths.attrib[idx].isTerminate) {
-        return;
-    }
-
     idaten::context ctxt;
     {
         ctxt.shapes = shapes;
@@ -330,17 +326,7 @@ __global__ void hitShadowRay(
         ctxt.matrices = matrices;
     }
 
-    const auto& shadowRay = shadowRays[idx];
-
-    if (!shadowRay.isActive) {
-        return;
-    }
-
-    // TODO
-    bool enableLod = (bounce >= 2);
-
-    auto isHit = kernel::hitShadowRay(
-        enableLod, ctxt, shadowRay);
+    auto isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
 
     if (!isHit) {
         reservoirs[idx].w_sum_ = 0.0f;

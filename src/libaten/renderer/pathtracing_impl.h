@@ -4,6 +4,7 @@
 #include "camera/camera.h"
 #include "camera/pinhole.h"
 #include "light/ibl.h"
+#include "light/light_impl.h"
 #include "math/ray.h"
 #include "renderer/aov.h"
 #include "scene/scene.h"
@@ -427,5 +428,31 @@ namespace AT_NAME
         }
 
         return false;
+    }
+
+    inline AT_DEVICE_MTRL_API float ComputeRussianProbability(
+        int32_t bounce,
+        int32_t rrBounce,
+        AT_NAME::PathAttribute& path_attrib,
+        AT_NAME::PathThroughput& path_throughput,
+        aten::sampler& sampler)
+    {
+        float russianProb = 1.0f;
+
+        if (bounce > rrBounce) {
+            auto t = normalize(path_throughput.throughput);
+            auto p = aten::cmpMax(t.r, aten::cmpMax(t.g, t.b));
+
+            russianProb = sampler.nextSample();
+
+            if (russianProb >= p) {
+                path_attrib.isTerminate = true;
+            }
+            else {
+                russianProb = aten::cmpMax(p, 0.01f);
+            }
+        }
+
+        return russianProb;
     }
 }

@@ -6,7 +6,6 @@
 #include "kernel/intersect.cuh"
 #include "kernel/accelerator.cuh"
 #include "kernel/pt_common.h"
-#include "kernel/pt_standard_impl.cuh"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -174,7 +173,7 @@ namespace svgf {
             rec.u, rec.v, albedo);
 #endif
 
-        const auto russianProb = kernel::executeRussianProbability(
+        const auto russianProb = AT_NAME::ComputeRussianProbability(
             bounce, rrBounce,
             paths.attrib[idx],
             paths.throughput[idx],

@@ -452,22 +452,10 @@ namespace aten
             rec.u, rec.v, albedo,
             pre_sampled_r);
 
-        real russianProb = real(1);
-
-        if (bounce > rrDepth) {
-            auto t = normalize(paths.throughput[idx].throughput);
-            auto p = std::max(t.r, std::max(t.g, t.b));
-
-            russianProb = sampler->nextSample();
-
-            if (russianProb >= p) {
-                paths.attrib[idx].isTerminate = true;
-                return;
-            }
-            else {
-                russianProb = p;
-            }
-        }
+        const auto russianProb = AT_NAME::ComputeRussianProbability(
+            bounce, rrDepth,
+            paths.attrib[idx], paths.throughput[idx],
+            paths.sampler[idx]);
 
         aten::MaterialSampling sampling;
         material::sampleMaterial(

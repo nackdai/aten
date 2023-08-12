@@ -6,6 +6,7 @@
 #include "light/ibl.h"
 #include "light/light_impl.h"
 #include "math/ray.h"
+#include "material/material.h"
 #include "renderer/aov.h"
 #include "scene/scene.h"
 
@@ -454,5 +455,46 @@ namespace AT_NAME
         }
 
         return russianProb;
+    }
+
+    inline AT_DEVICE_MTRL_API void PostProcessPathTrancing(
+        int32_t idx,
+        const aten::hitrecord& rec,
+        bool is_backfacing,
+        real russian_prob,
+        const aten::vec3& normal,
+        const aten::MaterialParameter& mtrl,
+        const AT_NAME::MaterialSampling& sampling,
+        AT_NAME::Path& paths,
+        aten::ray* rays)
+    {
+        auto nextDir = normalize(sampling.dir);
+        auto pdfb = sampling.pdf;
+        auto bsdf = sampling.bsdf;
+
+        // Get normal to add ray offset.
+        // In refraction material case, new ray direction might be computed with inverted normal.
+        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
+        auto rayBasedNormal = (!is_backfacing && mtrl.attrib.isTranslucent)
+            ? -normal
+            : normal;
+
+        auto c = dot(rayBasedNormal, static_cast<aten::vec3>(nextDir));
+
+        if (pdfb > 0 && c > 0) {
+            paths.throughput[idx].throughput *= bsdf * c / pdfb;
+            paths.throughput[idx].throughput /= russian_prob;
+        }
+        else {
+            paths.attrib[idx].isTerminate = true;
+            return;
+        }
+
+        paths.throughput[idx].pdfb = pdfb;
+        paths.attrib[idx].isSingular = mtrl.attrib.isSingular;
+        paths.attrib[idx].mtrlType = mtrl.type;
+
+        // Make next ray.
+        rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
     }
 }

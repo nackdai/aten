@@ -467,34 +467,12 @@ namespace aten
             sampler, pre_sampled_r,
             rec.u, rec.v);
 
-        auto nextDir = normalize(sampling.dir);
-        auto pdfb = sampling.pdf;
-        auto bsdf = sampling.bsdf;
-
-        // Get normal to add ray offset.
-        // In refraction material case, new ray direction might be computed with inverted normal.
-        // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-        auto rayBasedNormal = (!isBackfacing && mtrl.attrib.isTranslucent)
-            ? -orienting_normal
-            : orienting_normal;
-
-        auto c = dot(rayBasedNormal, static_cast<vec3>(nextDir));
-
-        if (pdfb > 0 && c > 0) {
-            paths.throughput[idx].throughput *= bsdf * c / pdfb;
-            paths.throughput[idx].throughput /= russianProb;
-        }
-        else {
-            paths.attrib[idx].isTerminate = true;
-            return;
-        }
-
-        paths.throughput[idx].pdfb = pdfb;
-        paths.attrib[idx].isSingular = mtrl.attrib.isSingular;
-        paths.attrib[idx].mtrlType = mtrl.type;
-
-        // Make next ray.
-        rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
+        AT_NAME::PostProcessPathTrancing(
+            idx,
+            rec, isBackfacing, russianProb,
+            orienting_normal,
+            mtrl, sampling,
+            paths, rays);
     }
 
     void PathTracing::shadeMiss(

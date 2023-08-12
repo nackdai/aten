@@ -166,34 +166,12 @@ __global__ void shade(
         rec.u, rec.v,
         albedo);
 
-    auto nextDir = normalize(sampling.dir);
-    auto pdfb = sampling.pdf;
-    auto bsdf = sampling.bsdf;
-
-    // Get normal to add ray offset.
-    // In refraction material case, new ray direction might be computed with inverted normal.
-    // For example, when a ray go into the refraction surface, inverted normal is used to compute new ray direction.
-    auto rayBasedNormal = (!isBackfacing && shMtrls[threadIdx.x].attrib.isTranslucent)
-        ? -orienting_normal
-        : orienting_normal;
-
-    auto c = dot(orienting_normal, nextDir);
-
-    if (pdfb > 0 && c > 0) {
-        paths.throughput[idx].throughput *= bsdf * c / pdfb;
-        paths.throughput[idx].throughput /= russianProb;
-    }
-    else {
-        paths.attrib[idx].isTerminate = true;
-        return;
-    }
-
-    // Make next ray.
-    rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
-
-    paths.throughput[idx].pdfb = pdfb;
-    paths.attrib[idx].isSingular = shMtrls[threadIdx.x].attrib.isSingular;
-    paths.attrib[idx].mtrlType = shMtrls[threadIdx.x].type;
+    AT_NAME::PostProcessPathTrancing(
+        idx,
+        rec, isBackfacing, russianProb,
+        orienting_normal,
+        shMtrls[threadIdx.x], sampling,
+        paths, rays);
 }
 
 __global__ void hitShadowRay(

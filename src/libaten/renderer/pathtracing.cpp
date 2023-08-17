@@ -32,21 +32,21 @@ namespace aten
         uint32_t depth = 0;
 
         while (depth < m_maxDepth) {
-            hitrecord rec;
-
             bool willContinue = true;
             Intersection isect;
 
             const auto& ray = rays_[idx];
 
-            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, rec, isect)) {
+            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 if (depth == 0 && first_hrec) {
-                    *first_hrec = rec;
+                    const auto& obj = ctxt.GetObject(isect.objid);
+                    AT_NAME::evaluate_hit_result(*first_hrec, obj, ctxt, ray, isect);
                 }
 
                 shade(
-                    idx, path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
-                    rec, scene, m_rrDepth, depth);
+                    idx,
+                    path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
+                    isect, scene, m_rrDepth, depth);
 
                 std::ignore = AT_NAME::HitShadowRay(
                     idx, depth, ctxt, path_host_.paths, shadow_rays_.data(), scene);
@@ -140,7 +140,10 @@ namespace aten
             int32_t closest_sample_ray_idx = -1;
             real hit_point_distance = 0;
 
-            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_query, isect)) {
+            if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+                const auto& obj = ctxt.GetObject(isect.objid);
+                AT_NAME::evaluate_hit_result(hrec_query, obj, ctxt, ray, isect);
+
                 const auto distance_query_ray_hit = length(hrec_query.p - ray.org);
 
                 // disc.centerはquery_ray.orgに一致する.
@@ -180,7 +183,10 @@ namespace aten
 
                     const auto sample_ray = aten::FeatureLine::getRayFromDesc(sample_ray_descs[i]);
 
-                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_sample, isect_sample_ray)) {
+                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
+                        const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
+                        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, ray, isect_sample_ray);
+
                         // If sample ray hit with the different mesh from query ray one, this sample ray won't bounce in next loop.
                         sample_ray_descs[i].is_terminated = isect_sample_ray.meshid != isect.meshid;
                         sample_ray_descs[i].prev_ray_hit_pos = hrec_sample.p;
@@ -280,7 +286,7 @@ namespace aten
                 if (closest_sample_ray_idx < 0) {
                     shade(
                         idx, paths, ctxt, rays, shadow_rays,
-                        hrec_query, scene, rrDepth, depth);
+                        isect, scene, rrDepth, depth);
                     AT_NAME::HitShadowRay(
                         idx, depth, ctxt, paths, shadow_rays, scene);
                 }
@@ -323,7 +329,10 @@ namespace aten
                     Intersection isect_sample_ray;
                     hitrecord hrec_sample;
 
-                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_sample, isect_sample_ray)) {
+                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
+                        const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
+                        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, ray, isect_sample_ray);
+
                         const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
                             hrec_sample.p, ray);
 
@@ -376,13 +385,18 @@ namespace aten
         const context& ctxt,
         ray* rays,
         aten::ShadowRay* shadow_rays,
-        const aten::hitrecord& rec,
+        const aten::Intersection& isect,
         scene* scene,
         int32_t rrDepth,
         int32_t bounce)
     {
-        const auto& ray = rays[idx];
         auto* sampler = &paths.sampler[idx];
+
+        const auto& ray = rays[idx];
+        const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+        aten::hitrecord rec;
+        AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
 

@@ -32,17 +32,15 @@ namespace AT_NAME {
             const aten::ray& r,
             real t_min, real t_max,
             bool enableLod,
-            aten::hitrecord& rec,
             aten::Intersection& isect) const = 0;
 
         bool hit(
             const aten::context& ctxt,
             const aten::ray& r,
             real t_min, real t_max,
-            aten::hitrecord& rec,
             aten::Intersection& isect) const
         {
-            return hit(ctxt, r, t_min, t_max, false, rec, isect);
+            return hit(ctxt, r, t_min, t_max, false, isect);
         }
 
         void addImageBasedLight(
@@ -62,14 +60,6 @@ namespace AT_NAME {
         {
             return m_ibl;
         }
-
-        bool hitLight(
-            const aten::context& ctxt,
-            const Light* light,
-            const aten::vec3& lightPos,
-            const aten::ray& r,
-            real t_min, real t_max,
-            aten::hitrecord& rec);
 
         static inline AT_DEVICE_API bool hitLight(
             bool isHit,

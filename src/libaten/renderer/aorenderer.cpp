@@ -7,6 +7,7 @@
 #include "sampler/wanghash.h"
 #include "sampler/cmj.h"
 #include "sampler/bluenoiseSampler.h"
+#include "geometry/EvaluateHitResult.h"
 
 #include "material/lambert.h"
 
@@ -35,7 +36,10 @@ namespace aten
 
         Intersection isect;
 
-        if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, path.rec, isect)) {
+        if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+            const auto& obj = ctxt.GetObject(isect.objid);
+            AT_NAME::evaluate_hit_result(path.rec, obj, ctxt, path.ray, isect);
+
             shade(ctxt, sampler, scene, path);
         }
         else {
@@ -76,9 +80,12 @@ namespace aten
 
             auto ao_ray = aten::ray(path.rec.p, nextDir, orienting_normal);
 
-            auto isHit = scene->hit(ctxt, ao_ray, AT_MATH_EPSILON, m_AORadius, rec, isect);
+            auto isHit = scene->hit(ctxt, ao_ray, AT_MATH_EPSILON, m_AORadius, isect);
 
             if (isHit) {
+                const auto& obj = ctxt.GetObject(isect.objid);
+                AT_NAME::evaluate_hit_result(rec, obj, ctxt, ao_ray, isect);
+
                 if (c > 0.0f) {
                     ao_color += aten::vec3(isect.t / m_AORadius * c / pdfb);
                 }

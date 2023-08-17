@@ -10,7 +10,6 @@
 #include "light/ibl.h"
 #include "scene/host_scene_context.h"
 #include "scene/scene.h"
-#include "geometry/EvaluateHitResult.h"
 
 namespace aten {
     template <typename ACCEL>
@@ -51,19 +50,10 @@ namespace aten {
             const aten::ray& r,
             real t_min, real t_max,
             bool enableLod,
-            aten::hitrecord& rec,
             aten::Intersection& isect) const final
         {
             isect.t = t_max;
             auto isHit = m_accel.hit(ctxt, r, t_min, t_max, enableLod, isect);
-
-            // TODO
-#ifndef __AT_CUDA__
-            if (isHit) {
-                auto obj = ctxt.getTransformable(isect.objid);
-                AT_NAME::evaluate_hit_result(rec, obj->getParam(), ctxt, r, isect);
-            }
-#endif
 
             return isHit;
         }

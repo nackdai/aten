@@ -1,4 +1,5 @@
 #include "renderer/feature_line.h"
+#include "geometry/EvaluateHitResult.h"
 
 namespace aten
 {
@@ -35,10 +36,13 @@ namespace aten
                 // Specify sampler as nullptr forcibly at this moment...
                 const auto stencil_ray = camera.sample(u, v, nullptr).r;
 
-                aten::hitrecord hrec_stencil;
                 aten::Intersection isect;
 
-                if (scene.hit(ctxt, stencil_ray, AT_MATH_EPSILON, AT_MATH_INF, hrec_stencil, isect)) {
+                if (scene.hit(ctxt, stencil_ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+                    aten::hitrecord hrec_stencil;
+                    const auto& obj = ctxt.GetObject(isect.objid);
+                    AT_NAME::evaluate_hit_result(hrec_stencil, obj, ctxt, stencil_ray, isect);
+
                     if (hrec.meshid != hrec_stencil.meshid) {
                         edge_strengh_measurement++;
                     }

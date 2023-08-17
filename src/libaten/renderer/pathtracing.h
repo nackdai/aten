@@ -57,7 +57,7 @@ namespace aten
             const context& ctxt,
             ray* rays,
             aten::ShadowRay* shadow_rays,
-            const aten::hitrecord& rec,
+            const aten::Intersection& isect,
             scene* scene,
             int32_t rrDepth,
             int32_t bounce);

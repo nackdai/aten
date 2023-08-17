@@ -38,12 +38,16 @@ namespace AT_NAME
             return;
         }
 
+#if IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto scramble = rnd * 0x1fe3434f
             * (((frame + sample) + 133 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
         paths.sampler[idx].init(
             (frame + sample) % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM),
             0,
             scramble);
+#else
+        static_assert(false, "Other samplers are not supported");
+#endif
 
         float r1 = paths.sampler[idx].nextSample();
         float r2 = paths.sampler[idx].nextSample();
@@ -323,8 +327,7 @@ namespace AT_NAME
             // NOTE:
             // operation has to be related with template arg SCENE.
             if (scene) {
-                aten::hitrecord rec;
-                isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, rec, isect);
+                isHit = scene->hit(ctxt, r, AT_MATH_EPSILON, distToLight - AT_MATH_EPSILON, isect);
             }
         }
         else {
@@ -496,5 +499,117 @@ namespace AT_NAME
 
         // Make next ray.
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
+    }
+
+    template <typename SCENE = void, typename bool ENABLE_ALPHA_TRANLUCENT=false>
+    inline AT_DEVICE_MTRL_API void ShadePathTracing(
+        int32_t idx,
+        const AT_NAME::context& ctxt,
+        AT_NAME::Path paths,
+        aten::ray* rays,
+        const aten::Intersection& isect,
+        aten::MaterialParameter& mtrl,
+        AT_NAME::ShadowRay& shadow_ray,
+        int32_t rrDepth,
+        int32_t bounce,
+        SCENE* scene = nullptr)
+    {
+        const auto& ray = rays[idx];
+        auto* sampler = &paths.sampler[idx];
+
+        const auto& obj = ctxt.GetObject(isect.objid);
+
+        aten::hitrecord rec;
+        AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
+
+        bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
+
+        // 交差位置の法線.
+        // 物体からのレイの入出を考慮.
+        aten::vec3 orienting_normal = rec.normal;
+
+        AT_NAME::FillMaterial(
+            mtrl,
+            ctxt,
+            rec.mtrlid, rec.isVoxel);
+
+        auto albedo = AT_NAME::sampleTexture(mtrl.albedoMap, rec.u, rec.v, aten::vec4(1), bounce);
+
+        shadow_ray.isActive = false;
+
+        // Implicit conection to light.
+        auto is_hit_implicit_light = AT_NAME::HitImplicitLight(
+            isBackfacing,
+            bounce,
+            paths.contrib[idx], paths.attrib[idx], paths.throughput[idx],
+            ray,
+            rec.p, orienting_normal,
+            rec.area,
+            mtrl);
+        if (is_hit_implicit_light) {
+            return;
+        }
+
+        if (!mtrl.attrib.isTranslucent && isBackfacing) {
+            orienting_normal = -orienting_normal;
+        }
+
+        // Apply normal map.
+        auto pre_sampled_r = material::applyNormal(
+            &mtrl,
+            mtrl.normalMap,
+            orienting_normal, orienting_normal,
+            rec.u, rec.v,
+            ray.dir, sampler);
+
+        if constexpr (ENABLE_ALPHA_TRANLUCENT) {
+            // Check transparency or translucency.
+            auto is_translucent_by_alpha = AT_NAME::CheckMaterialTranslucentByAlpha(
+                mtrl,
+                rec.u, rec.v, rec.p,
+                orienting_normal,
+                rays[idx],
+                paths.sampler[idx],
+                paths.attrib[idx],
+                paths.throughput[idx]);
+            if (is_translucent_by_alpha) {
+                return;
+            }
+        }
+
+        // Explicit conection to light.
+        AT_NAME::FillShadowRay(
+            shadow_ray,
+            ctxt,
+            bounce,
+            paths.sampler[idx],
+            paths.throughput[idx],
+            mtrl,
+            ray,
+            rec.p, orienting_normal,
+            rec.u, rec.v, albedo,
+            pre_sampled_r);
+
+        const auto russianProb = AT_NAME::ComputeRussianProbability(
+            bounce, rrDepth,
+            paths.attrib[idx], paths.throughput[idx],
+            paths.sampler[idx]);
+
+        AT_NAME::MaterialSampling sampling;
+        material::sampleMaterial(
+            &sampling,
+            &mtrl,
+            orienting_normal,
+            ray.dir,
+            rec.normal,
+            sampler, pre_sampled_r,
+            rec.u, rec.v);
+
+        AT_NAME::PostProcessPathTrancing(
+            idx,
+            rec, isBackfacing, russianProb,
+            orienting_normal,
+            mtrl, sampling,
+            paths, rays);
     }
 }

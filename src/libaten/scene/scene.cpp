@@ -4,37 +4,6 @@
 #include "light/light_impl.h"
 
 namespace aten {
-    bool scene::hitLight(
-        const context& ctxt,
-        const Light* light,
-        const vec3& lightPos,
-        const ray& r,
-        real t_min, real t_max,
-        hitrecord& rec)
-    {
-        Intersection isect;
-        bool isHit = this->hit(ctxt, r, t_min, t_max, rec, isect);
-
-        real distToLight = length(lightPos - r.org);
-        real distHitObjToRayOrg = length(rec.p - r.org);
-
-        const auto& param = light->param();
-
-        const auto lightobj = param.objid >= 0 ? ctxt.getTransformable(param.objid) : nullptr;
-        const auto hitobj = isect.objid >= 0 ? ctxt.getTransformable(isect.objid) : nullptr;
-
-        isHit = scene::hitLight(
-            isHit,
-            param.attrib,
-            lightobj.get(),
-            distToLight,
-            distHitObjToRayOrg,
-            isect.t,
-            hitobj.get());
-
-        return isHit;
-    }
-
     std::shared_ptr<Light> scene::sampleLight(
         const context& ctxt,
         const vec3& org,

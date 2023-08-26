@@ -117,51 +117,10 @@ namespace ao {
         ao_color /= ao_num_rays;
         paths.contrib[idx].contrib = ao_color;
     }
-
-    __global__ void gatherAO(
-        int32_t width, int32_t height,
-        cudaSurfaceObject_t outSurface,
-        const idaten::Path paths,
-        bool enableProgressive)
-    {
-        const auto ix = blockIdx.x * blockDim.x + threadIdx.x;
-        const auto iy = blockIdx.y * blockDim.y + threadIdx.y;
-
-        if (ix >= width || iy >= height) {
-            return;
-        }
-
-        const auto idx = getIdx(ix, iy, width);
-
-        int32_t sample = paths.contrib[idx].samples;
-        const auto& contrib = paths.contrib[idx].contrib;
-
-        float4 data;
-
-        if (enableProgressive) {
-            surf2Dread(&data, outSurface, ix * sizeof(float4), iy);
-
-            // First data.w value is 0.
-            int32_t n = data.w;
-            data = n * data + make_float4(contrib.x, contrib.y, contrib.z, 0) / sample;
-            data /= (n + 1);
-            data.w = n + 1;
-        }
-        else {
-            data = make_float4(contrib.x, contrib.y, contrib.z, 0) / sample;
-            data.w = sample;
-        }
-
-        surf2Dwrite(
-            data,
-            outSurface,
-            ix * sizeof(float4), iy,
-            cudaBoundaryModeTrap);
-    }
 }
 
 namespace idaten {
-    void AORenderer::onShadeMiss(
+    void AORenderer::missShade(
         int32_t width, int32_t height,
         int32_t bounce)
     {
@@ -202,21 +161,5 @@ namespace idaten {
             m_random.data());
 
         checkCudaKernel(shade);
-    }
-
-    void AORenderer::onGather(
-        cudaSurfaceObject_t outputSurf,
-        int32_t width, int32_t height)
-    {
-        dim3 block(BLOCK_SIZE, BLOCK_SIZE);
-        dim3 grid(
-            (width + block.x - 1) / block.x,
-            (height + block.y - 1) / block.y);
-
-        ao::gatherAO << <grid, block >> > (
-            width, height,
-            outputSurf,
-            path_host_->paths,
-            m_enableProgressive);
     }
 }

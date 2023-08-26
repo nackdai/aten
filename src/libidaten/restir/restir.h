@@ -7,7 +7,7 @@
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
 
-#include "kernel/pt_standard_impl.h"
+#include "kernel/pathtracing.h"
 #include "sampler/sampler.h"
 
 #include "reservior.h"
@@ -15,7 +15,7 @@
 
 namespace idaten
 {
-    class ReSTIRPathTracing : public StandardPT {
+    class ReSTIRPathTracing : public PathTracingImplBase {
     public:
         enum class Mode {
             ReSTIR,
@@ -122,16 +122,6 @@ namespace idaten
             m_aovMode = mode;
         }
 
-        virtual void reset() override final
-        {
-            m_frame = 1;
-        }
-
-        uint32_t frame() const
-        {
-            return m_frame;
-        }
-
         void willPickPixel(int32_t ix, int32_t iy)
         {
             m_willPicklPixel = true;
@@ -149,11 +139,6 @@ namespace idaten
             m_pickedInfo.iy = -1;
 
             return isValid;
-        }
-
-        void setHitDistanceLimit(float d)
-        {
-            m_hitDistLimit = d;
         }
 
         bool canSSRTHitTest() const
@@ -200,36 +185,11 @@ namespace idaten
             int32_t maxBounce,
             cudaSurfaceObject_t outputSurf);
 
-        virtual void onHitTest(
-            int32_t width, int32_t height,
-            int32_t bounce);
-
-        void missShade(
-            int32_t width, int32_t height,
-            int32_t bounce)
-        {
-            StandardPT::missShade(
-                width, height,
-                bounce,
-                aov_.normal_depth(),
-                aov_.albedo_meshid());
-        }
-
-        virtual void onShade(
-            cudaSurfaceObject_t outputSurf,
-            int32_t width, int32_t height,
-            int32_t sample,
-            int32_t bounce, int32_t rrBounce);
-
         void onShadeReSTIR(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
             int32_t bounce, int32_t rrBounce);
-
-        void onShadeByShadowRay(
-            int32_t width, int32_t height,
-            int32_t bounce);
 
         void onShadeByShadowRayReSTIR(
             int32_t width, int32_t height,
@@ -238,11 +198,6 @@ namespace idaten
         int32_t computelReuse(
             int32_t width, int32_t height,
             int32_t bounce);
-
-        virtual void onGather(
-            cudaSurfaceObject_t outputSurf,
-            int32_t width, int32_t height,
-            int32_t maxSamples);
 
         void onDisplayAOV(
             cudaSurfaceObject_t outputSurf,
@@ -280,10 +235,6 @@ namespace idaten
         std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
         int32_t m_curReservoirPos = 0;
 
-        // AOV buffer
-        using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer>;
-        AOVHostBuffer aov_;
-
         aten::mat4 m_mtxW2V;    // World - View.
         aten::mat4 m_mtxV2C;    // View - Clip.
         aten::mat4 m_mtxC2V;    // Clip - View.
@@ -307,7 +258,5 @@ namespace idaten
 
         bool m_isListedTextureObject{ false };
         bool m_canSSRTHitTest{ true };
-
-        bool m_enableProgressive{ false };
     };
 }

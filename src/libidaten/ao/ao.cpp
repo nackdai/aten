@@ -94,7 +94,7 @@ namespace idaten {
                     width, height,
                     bounce);
 
-                onShadeMiss(width, height, bounce);
+                missShade(width, height, bounce);
 
                 m_compaction.compact(
                     m_hitidx,
@@ -109,7 +109,7 @@ namespace idaten {
             }
         }
 
-        onGather(outputSurf, width, height);
+        onGather(outputSurf, width, height, maxSamples);
 
         checkCudaErrors(cudaDeviceSynchronize());
 

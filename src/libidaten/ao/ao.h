@@ -3,11 +3,11 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
-#include "kernel/pt_standard_impl.h"
+#include "kernel/pathtracing.h"
 
 namespace idaten
 {
-    class AORenderer : public StandardPT {
+    class AORenderer : public PathTracingImplBase {
     public:
         AORenderer() = default;
         virtual ~AORenderer() {}
@@ -34,15 +34,6 @@ namespace idaten
             const std::vector<TextureResource>& texs,
             const EnvmapResource& envmapRsc) override;
 
-        void setEnableProgressive(bool enable)
-        {
-            m_enableProgressive = enable;
-        }
-        bool isEnableProgressive() const
-        {
-            return m_enableProgressive;
-        }
-
         int32_t getNumRays() const
         {
             return m_ao_num_rays;
@@ -62,21 +53,15 @@ namespace idaten
         }
 
     protected:
-        virtual void onShadeMiss(
+        void missShade(
             int32_t width, int32_t height,
-            int32_t bounce);
+            int32_t bounce) override;
 
-        virtual void onShade(
+        void onShade(
             int32_t width, int32_t height,
             int32_t bounce, int32_t rrBounce);
 
-        virtual void onGather(
-            cudaSurfaceObject_t outputSurf,
-            int32_t width, int32_t height);
-
     protected:
-        bool m_enableProgressive{ false };
-
         int32_t m_ao_num_rays{ 1 };
         float m_ao_radius{ 1.0f };
     };

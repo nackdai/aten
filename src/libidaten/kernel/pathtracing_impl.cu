@@ -265,7 +265,7 @@ namespace pt {
 
 namespace idaten
 {
-    void PathTracing::onHitTest(
+    void PathTracingImplBase::onHitTest(
         int32_t width, int32_t height,
         int32_t bounce)
     {
@@ -274,7 +274,7 @@ namespace idaten
             bounce);
     }
 
-    void PathTracing::onShade(
+    void PathTracingImplBase::onShade(
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
@@ -305,7 +305,7 @@ namespace idaten
         onShadeByShadowRay(width, height, bounce);
     }
 
-    void PathTracing::onShadeByShadowRay(
+    void PathTracingImplBase::onShadeByShadowRay(
         int32_t width, int32_t height,
         int32_t bounce)
     {
@@ -324,7 +324,7 @@ namespace idaten
         checkCudaKernel(hitShadowRay);
     }
 
-    void PathTracing::onGather(
+    void PathTracingImplBase::onGather(
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t maxSamples)

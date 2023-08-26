@@ -3,12 +3,12 @@
 #include "aten4idaten.h"
 #include "cuda/cudamemory.h"
 #include "cuda/cudaGLresource.h"
-#include "kernel/pt_standard_impl.h"
+#include "kernel/pathtracing.h"
 #include "sampler/sampler.h"
 
 namespace idaten
 {
-    class SVGFPathTracing : public StandardPT {
+    class SVGFPathTracing : public PathTracingImplBase {
     public:
         enum Mode {
             SVGF,   // Spatio-temporal Variance Guided Filter.
@@ -167,13 +167,13 @@ namespace idaten
             int32_t maxBounce,
             cudaSurfaceObject_t outputSurf);
 
-        virtual void onDenoise(
+        void onDenoise(
             int32_t width, int32_t height,
             cudaSurfaceObject_t outputSurf);
 
-        virtual void onHitTest(
+        void onHitTest(
             int32_t width, int32_t height,
-            int32_t bounce);
+            int32_t bounce)  override;
 
         void missShade(
             int32_t width, int32_t height,
@@ -191,20 +191,16 @@ namespace idaten
                 curaov.get<AOVBuffer::AlbedoMeshId>());
         }
 
-        virtual void onShade(
+        void onShade(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
-            int32_t bounce, int32_t rrBounce);
+            int32_t bounce, int32_t rrBounce) override;
 
-        void onShadeByShadowRay(
-            int32_t width, int32_t height,
-            int32_t bounce);
-
-        virtual void onGather(
+        void onGather(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
-            int32_t maxSamples);
+            int32_t maxSamples) override;
 
         void onTemporalReprojection(
             cudaSurfaceObject_t outputSurf,

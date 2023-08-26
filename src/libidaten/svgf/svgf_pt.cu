@@ -182,25 +182,6 @@ namespace svgf {
         shadowRays[idx] = shShadowRays[threadIdx.x];
     }
 
-    __global__ void hitShadowRay(
-        int32_t bounce,
-        idaten::Path paths,
-        int32_t* hitindices,
-        int32_t* hitnum,
-        const idaten::ShadowRay* __restrict__ shadowRays,
-        idaten::context ctxt)
-    {
-        int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-        if (idx >= *hitnum) {
-            return;
-        }
-
-        idx = hitindices[idx];
-
-        AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
-    }
-
     __global__ void gather(
         cudaSurfaceObject_t dst,
         float4* aovColorVariance,
@@ -328,25 +309,6 @@ namespace idaten
         checkCudaKernel(shade);
 
         onShadeByShadowRay(width, height, bounce);
-    }
-
-    void SVGFPathTracing::onShadeByShadowRay(
-        int32_t width, int32_t height,
-        int32_t bounce)
-    {
-        dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
-        dim3 threadPerBlock(64);
-
-        auto& hitcount = m_compaction.getCount();
-
-        svgf::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
-            bounce,
-            path_host_->paths,
-            m_hitidx.data(), hitcount.data(),
-            m_shadowRays.data(),
-            ctxt_host_.ctxt);
-
-        checkCudaKernel(hitShadowRay);
     }
 
     void SVGFPathTracing::onGather(

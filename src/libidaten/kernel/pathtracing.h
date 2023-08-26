@@ -10,7 +10,65 @@
 
 namespace idaten
 {
-    class PathTracing : public StandardPT {
+    class PathTracingImplBase : public StandardPT {
+    public:
+        PathTracingImplBase() = default;
+        virtual ~PathTracingImplBase() = default;
+
+        PathTracingImplBase(const PathTracingImplBase&) = delete;
+        PathTracingImplBase(PathTracingImplBase&&) = delete;
+        PathTracingImplBase& operator=(const PathTracingImplBase&) = delete;
+        PathTracingImplBase& operator=(PathTracingImplBase&&) = delete;
+
+        bool isEnableProgressive() const
+        {
+            return m_enableProgressive;
+        }
+        void setEnableProgressive(bool b)
+        {
+            m_enableProgressive = b;
+        }
+
+    protected:
+        virtual void onHitTest(
+            int32_t width, int32_t height,
+            int32_t bounce);
+
+        virtual void missShade(
+            int32_t width, int32_t height,
+            int32_t bounce)
+        {
+            StandardPT::missShade(
+                width, height,
+                bounce,
+                aov_.normal_depth(),
+                aov_.albedo_meshid());
+        }
+
+        virtual void onShade(
+            cudaSurfaceObject_t outputSurf,
+            int32_t width, int32_t height,
+            int32_t sample,
+            int32_t bounce, int32_t rrBounce);
+
+        void onShadeByShadowRay(
+            int32_t width, int32_t height,
+            int32_t bounce);
+
+        virtual void onGather(
+            cudaSurfaceObject_t outputSurf,
+            int32_t width, int32_t height,
+            int32_t maxSamples);
+
+    protected:
+        // AOV buffer
+        using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer>;
+        AOVHostBuffer aov_;
+
+        bool m_enableProgressive{ false };
+    };
+
+    class PathTracing : public PathTracingImplBase {
     public:
         enum class Mode {
             PT,
@@ -44,66 +102,12 @@ namespace idaten
         void updateMaterial(const std::vector<aten::MaterialParameter>& mtrls);
         void updateLight(const std::vector<aten::LightParameter>& lights);
 
-        virtual void reset() override final
-        {
-            m_frame = 1;
-        }
-
-        uint32_t frame() const
-        {
-            return m_frame;
-        }
-
-        void setHitDistanceLimit(float d)
-        {
-            m_hitDistLimit = d;
-        }
-
-        bool isEnableProgressive() const
-        {
-            return m_enableProgressive;
-        }
-        void setEnableProgressive(bool b)
-        {
-            m_enableProgressive = b;
-        }
-
     protected:
         void onRender(
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
             cudaSurfaceObject_t outputSurf);
-
-        virtual void onHitTest(
-            int32_t width, int32_t height,
-            int32_t bounce);
-
-        virtual void missShade(
-            int32_t width, int32_t height,
-            int32_t bounce)
-        {
-            StandardPT::missShade(
-                width, height,
-                bounce,
-                aov_.normal_depth(),
-                aov_.albedo_meshid());
-        }
-
-        virtual void onShade(
-            cudaSurfaceObject_t outputSurf,
-            int32_t width, int32_t height,
-            int32_t sample,
-            int32_t bounce, int32_t rrBounce);
-
-        void onShadeByShadowRay(
-            int32_t width, int32_t height,
-            int32_t bounce);
-
-        virtual void onGather(
-            cudaSurfaceObject_t outputSurf,
-            int32_t width, int32_t height,
-            int32_t maxSamples);
 
         bool isFirstFrame() const
         {
@@ -115,12 +119,8 @@ namespace idaten
     protected:
         Mode m_mode{ Mode::PT };
 
-        AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AT_NAME::AOVBufferType::NumBasicAovBuffer> aov_;
-
         // To export to GL.
         idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
         std::vector<idaten::CudaGLSurface> gl_surfaces_;
-
-        bool m_enableProgressive{ false };
     };
 }

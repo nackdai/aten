@@ -73,14 +73,11 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
-            cudaSurfaceObject_t outputSurf,
-            cudaTextureObject_t vtxTexPos,
-            cudaTextureObject_t vtxTexNml);
+            cudaSurfaceObject_t outputSurf);
 
         virtual void onHitTest(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos);
+            int32_t bounce);
 
         virtual void missShade(
             int32_t width, int32_t height,
@@ -97,14 +94,11 @@ namespace idaten
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
-            int32_t bounce, int32_t rrBounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t bounce, int32_t rrBounce);
 
         void onShadeByShadowRay(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos);
+            int32_t bounce);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
@@ -127,7 +121,6 @@ namespace idaten
         idaten::TypedCudaMemory<cudaSurfaceObject_t> gl_surface_cuda_rscs_;
         std::vector<idaten::CudaGLSurface> gl_surfaces_;
 
-        bool m_isListedTextureObject{ false };
         bool m_enableProgressive{ false };
     };
 }

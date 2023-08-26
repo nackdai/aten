@@ -85,45 +85,6 @@ namespace idaten
         CudaGLResourceMapper<decltype(m_glimg)> rscmap(m_glimg);
         auto outputSurf = m_glimg.bind();
 
-        auto vtxTexPos = m_vtxparamsPos.bind();
-        auto vtxTexNml = m_vtxparamsNml.bind();
-
-        // TODO
-        // Textureメモリのバインドによる取得されるcudaTextureObject_tは変化しないので,値を一度保持しておけばいい.
-        // 現時点では最初に設定されたものが変化しない前提でいるが、入れ替えなどの変更があった場合はこの限りではないので、何かしらの対応が必要.
-
-        if (!m_isListedTextureObject)
-        {
-            {
-                std::vector<cudaTextureObject_t> tmp;
-                for (int32_t i = 0; i < m_nodeparam.size(); i++) {
-                    auto nodeTex = m_nodeparam[i].bind();
-                    tmp.push_back(nodeTex);
-                }
-                m_nodetex.writeFromHostToDeviceByNum(&tmp[0], tmp.size());
-            }
-
-            if (!m_texRsc.empty())
-            {
-                std::vector<cudaTextureObject_t> tmp;
-                for (int32_t i = 0; i < m_texRsc.size(); i++) {
-                    auto cudaTex = m_texRsc[i].bind();
-                    tmp.push_back(cudaTex);
-                }
-                m_tex.writeFromHostToDeviceByNum(&tmp[0], tmp.size());
-            }
-
-            m_isListedTextureObject = true;
-        }
-        else {
-            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
-                auto nodeTex = m_nodeparam[i].bind();
-            }
-            for (int32_t i = 0; i < m_texRsc.size(); i++) {
-                auto cudaTex = m_texRsc[i].bind();
-            }
-        }
-
         m_hitbools.resize(width * height);
         m_hitidx.resize(width * height);
 
@@ -135,17 +96,14 @@ namespace idaten
 
         onRender(
             width, height, maxSamples, maxBounce,
-            outputSurf,
-            vtxTexPos,
-            vtxTexNml);
+            outputSurf);
 
         {
             m_mtxPrevW2V = m_mtxW2V;
 
             pick(
                 m_pickedInfo.ix, m_pickedInfo.iy,
-                width, height,
-                vtxTexPos);
+                width, height);
 
             //checkCudaErrors(cudaDeviceSynchronize());
 
@@ -157,9 +115,7 @@ namespace idaten
         int32_t width, int32_t height,
         int32_t maxSamples,
         int32_t maxBounce,
-        cudaSurfaceObject_t outputSurf,
-        cudaTextureObject_t vtxTexPos,
-        cudaTextureObject_t vtxTexNml)
+        cudaSurfaceObject_t outputSurf)
     {
         static const int32_t rrBounce = 3;
 
@@ -187,8 +143,7 @@ namespace idaten
             while (bounce < maxBounce) {
                 onHitTest(
                     width, height,
-                    bounce,
-                    vtxTexPos);
+                    bounce);
 
                 missShade(width, height, bounce);
 
@@ -204,16 +159,14 @@ namespace idaten
                         outputSurf,
                         width, height,
                         i,
-                        bounce, rrBounce,
-                        vtxTexPos, vtxTexNml);
+                        bounce, rrBounce);
                 }
                 else {
                     onShade(
                         outputSurf,
                         width, height,
                         i,
-                        bounce, rrBounce,
-                        vtxTexPos, vtxTexNml);
+                        bounce, rrBounce);
                 }
 
                 bounce++;
@@ -224,7 +177,7 @@ namespace idaten
             onGather(outputSurf, width, height, maxSamples);
         }
         else if (m_mode == Mode::AOVar) {
-            onDisplayAOV(outputSurf, width, height, vtxTexPos);
+            onDisplayAOV(outputSurf, width, height);
         }
         else {
             AT_ASSERT(false);

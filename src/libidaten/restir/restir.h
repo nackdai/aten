@@ -198,14 +198,11 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t maxSamples,
             int32_t maxBounce,
-            cudaSurfaceObject_t outputSurf,
-            cudaTextureObject_t vtxTexPos,
-            cudaTextureObject_t vtxTexNml);
+            cudaSurfaceObject_t outputSurf);
 
         virtual void onHitTest(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos);
+            int32_t bounce);
 
         void missShade(
             int32_t width, int32_t height,
@@ -222,34 +219,25 @@ namespace idaten
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
-            int32_t bounce, int32_t rrBounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t bounce, int32_t rrBounce);
 
         void onShadeReSTIR(
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
-            int32_t bounce, int32_t rrBounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t bounce, int32_t rrBounce);
 
         void onShadeByShadowRay(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos);
+            int32_t bounce);
 
         void onShadeByShadowRayReSTIR(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t bounce);
 
         int32_t computelReuse(
             int32_t width, int32_t height,
-            int32_t bounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t bounce);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,
@@ -258,13 +246,11 @@ namespace idaten
 
         void onDisplayAOV(
             cudaSurfaceObject_t outputSurf,
-            int32_t width, int32_t height,
-            cudaTextureObject_t texVtxPos);
+            int32_t width, int32_t height);
 
         void pick(
             int32_t ix, int32_t iy,
-            int32_t width, int32_t height,
-            cudaTextureObject_t texVtxPos);
+            int32_t width, int32_t height);
 
         bool isFirstFrame() const
         {

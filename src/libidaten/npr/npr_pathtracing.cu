@@ -73,15 +73,7 @@ namespace npr_pt {
         const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        const aten::ObjectParameter* __restrict__ shapes,
-        const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        cudaTextureObject_t* nodes,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        cudaTextureObject_t vtxNml,
-        const aten::mat4* __restrict__ matrices,
-        cudaTextureObject_t* textures)
+        idaten::context ctxt)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -94,20 +86,6 @@ namespace npr_pt {
         if (paths.attrib[idx].isKill || paths.attrib[idx].isTerminate) {
             paths.attrib[idx].isTerminate = true;
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.vtxNml = vtxNml;
-            ctxt.matrices = matrices;
-            ctxt.textures = textures;
         }
 
         const auto& query_ray = rays[idx];
@@ -292,15 +270,7 @@ namespace npr_pt {
         const aten::CameraParameter camera,
         const aten::Intersection* __restrict__ isects,
         const aten::ray* __restrict__ rays,
-        const aten::ObjectParameter* __restrict__ shapes,
-        const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        cudaTextureObject_t* nodes,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        cudaTextureObject_t vtxNml,
-        const aten::mat4* __restrict__ matrices,
-        cudaTextureObject_t* textures)
+        idaten::context ctxt)
     {
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -313,20 +283,6 @@ namespace npr_pt {
 
         if (paths.attrib[idx].isTerminate || paths.attrib[idx].isHit) {
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.vtxNml = vtxNml;
-            ctxt.matrices = matrices;
-            ctxt.textures = textures;
         }
 
         const auto& query_ray = rays[idx];
@@ -412,9 +368,7 @@ namespace idaten {
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
-        int32_t bounce, int32_t rrBounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce, int32_t rrBounce)
     {
         if (is_enable_feature_line_) {
             dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
@@ -452,14 +406,7 @@ namespace idaten {
                 m_cam,
                 m_isects.data(),
                 m_rays.data(),
-                m_shapeparam.data(),
-                m_mtrlparam.data(),
-                m_lightparam.data(), m_lightparam.num(),
-                m_nodetex.data(),
-                m_primparams.data(),
-                texVtxPos, texVtxNml,
-                m_mtxparams.data(),
-                m_tex.data());
+                ctxt_host_.ctxt);
             checkCudaKernel(shadeSampleRay);
         }
 
@@ -467,8 +414,7 @@ namespace idaten {
             outputSurf,
             width, height,
             sample,
-            bounce, rrBounce,
-            texVtxPos, texVtxNml);
+            bounce, rrBounce);
     }
 
     void NPRPathTracing::missShade(
@@ -488,9 +434,6 @@ namespace idaten {
             if (bounce > 0) {
                 auto& hitcount = m_compaction.getCount();
 
-                auto texVtxPos = m_vtxparamsPos.bind();
-                auto texVtxNml = m_vtxparamsNml.bind();
-
                 const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
                 // Sample ray hit miss never happen at 1st bounce.
@@ -507,14 +450,7 @@ namespace idaten {
                     m_cam,
                     m_isects.data(),
                     m_rays.data(),
-                    m_shapeparam.data(),
-                    m_mtrlparam.data(),
-                    m_lightparam.data(), m_lightparam.num(),
-                    m_nodetex.data(),
-                    m_primparams.data(),
-                    texVtxPos, texVtxNml,
-                    m_mtxparams.data(),
-                    m_tex.data());
+                    ctxt_host_.ctxt);
                 checkCudaKernel(shadeMissSampleRay);
             }
         }

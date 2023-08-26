@@ -51,32 +51,13 @@ namespace ao {
         const aten::Intersection* __restrict__ isects,
         aten::ray* rays,
         int32_t bounce, int32_t rrBounce,
-        const aten::ObjectParameter* __restrict__ shapes,
-        aten::MaterialParameter* mtrls,
-        cudaTextureObject_t* nodes,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        cudaTextureObject_t vtxNml,
-        const aten::mat4* __restrict__ matrices,
-        cudaTextureObject_t* textures,
+        idaten::context ctxt,
         const uint32_t* random)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.vtxNml = vtxNml;
-            ctxt.matrices = matrices;
-            ctxt.textures = textures;
         }
 
         idx = hitindices[idx];
@@ -201,9 +182,7 @@ namespace idaten {
 
     void AORenderer::onShade(
         int32_t width, int32_t height,
-        int32_t bounce, int32_t rrBounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce, int32_t rrBounce)
     {
         dim3 blockPerGrid((width * height + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -219,13 +198,7 @@ namespace idaten {
             m_isects.data(),
             m_rays.data(),
             bounce, rrBounce,
-            m_shapeparam.data(),
-            m_mtrlparam.data(),
-            m_nodetex.data(),
-            m_primparams.data(),
-            texVtxPos, texVtxNml,
-            m_mtxparams.data(),
-            m_tex.data(),
+            ctxt_host_.ctxt,
             m_random.data());
 
         checkCudaKernel(shade);

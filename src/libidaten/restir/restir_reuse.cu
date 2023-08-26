@@ -14,14 +14,7 @@
 
 __global__ void computeTemporalReuse(
     idaten::Path paths,
-    const aten::ObjectParameter* __restrict__ shapes,
-    const aten::MaterialParameter* __restrict__ mtrls,
-    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-    const aten::TriangleParameter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    cudaTextureObject_t vtxNml,
-    const aten::mat4* __restrict__ matrices,
-    cudaTextureObject_t* textures,
+    idaten::context ctxt,
     const float4* __restrict__ aovTexclrMeshid,
     idaten::Reservoir* reservoirs,
     const idaten::Reservoir* __restrict__ prev_reservoirs,
@@ -40,19 +33,6 @@ __global__ void computeTemporalReuse(
 
     if (paths.attrib[idx].isTerminate) {
         return;
-    }
-
-    idaten::context ctxt;
-    {
-        ctxt.shapes = shapes;
-        ctxt.mtrls = mtrls;
-        ctxt.lightnum = lightnum;
-        ctxt.lights = lights;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.vtxNml = vtxNml;
-        ctxt.matrices = matrices;
-        ctxt.textures = textures;
     }
 
     const auto& self_info = infos[idx];
@@ -190,14 +170,7 @@ __global__ void computeTemporalReuse(
 
 __global__ void computeSpatialReuse(
     idaten::Path paths,
-    const aten::ObjectParameter* __restrict__ shapes,
-    const aten::MaterialParameter* __restrict__ mtrls,
-    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-    const aten::TriangleParameter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    cudaTextureObject_t vtxNml,
-    const aten::mat4* __restrict__ matrices,
-    cudaTextureObject_t* textures,
+    idaten::context ctxt,
     const float4* __restrict__ aovTexclrMeshid,
     const idaten::Reservoir* __restrict__ reservoirs,
     idaten::Reservoir* dst_reservoirs,
@@ -215,19 +188,6 @@ __global__ void computeSpatialReuse(
 
     if (paths.attrib[idx].isTerminate) {
         return;
-    }
-
-    idaten::context ctxt;
-    {
-        ctxt.shapes = shapes;
-        ctxt.mtrls = mtrls;
-        ctxt.lightnum = lightnum;
-        ctxt.lights = lights;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.vtxNml = vtxNml;
-        ctxt.matrices = matrices;
-        ctxt.textures = textures;
     }
 
     const auto& self_info = infos[idx];
@@ -377,9 +337,7 @@ __global__ void computeSpatialReuse(
 namespace idaten {
     int32_t ReSTIRPathTracing::computelReuse(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -418,13 +376,7 @@ namespace idaten {
 
                     computeTemporalReuse << <grid, block, 0, m_stream >> > (
                         path_host_->paths,
-                        m_shapeparam.data(),
-                        m_mtrlparam.data(),
-                        m_lightparam.data(), m_lightparam.num(),
-                        m_primparams.data(),
-                        texVtxPos, texVtxNml,
-                        m_mtxparams.data(),
-                        m_tex.data(),
+                        ctxt_host_.ctxt,
                         aov_.albedo_meshid().data(),
                         m_reservoirs[cur_idx].data(),
                         m_reservoirs[prev_idx].data(),
@@ -440,13 +392,7 @@ namespace idaten {
                 || m_restirMode == ReSTIRMode::SpatialReuse) {
                 computeSpatialReuse << <grid, block, 0, m_stream >> > (
                     path_host_->paths,
-                    m_shapeparam.data(),
-                    m_mtrlparam.data(),
-                    m_lightparam.data(), m_lightparam.num(),
-                    m_primparams.data(),
-                    texVtxPos, texVtxNml,
-                    m_mtxparams.data(),
-                    m_tex.data(),
+                    ctxt_host_.ctxt,
                     aov_.albedo_meshid().data(),
                     m_reservoirs[cur_idx].data(),
                     m_reservoirs[dst_idx].data(),

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "cuda/cudamemory.h"
+#include "cuda/cudaGLresource.h"
+#include "cuda/cudaTextureResource.h"
 #include "geometry/vertex.h"
 #include "material/material.h"
 #include "light/light_parameter.h"
@@ -97,6 +100,65 @@ namespace idaten {
         __device__ int32_t get_light_num() const noexcept
         {
             return lightnum;
+        }
+    };
+
+    struct DeviceContextInHost {
+        idaten::context ctxt;
+
+        idaten::TypedCudaMemory<aten::ObjectParameter> shapeparam;
+        idaten::TypedCudaMemory<aten::MaterialParameter> mtrlparam;
+        idaten::TypedCudaMemory<aten::LightParameter> lightparam;
+        idaten::TypedCudaMemory<aten::TriangleParameter> primparams;
+
+        idaten::TypedCudaMemory<aten::mat4> mtxparams;
+
+        std::vector<idaten::CudaTextureResource> nodeparam;
+        idaten::TypedCudaMemory<cudaTextureObject_t> nodetex;
+
+        std::vector<idaten::CudaTexture> texRsc;
+        idaten::TypedCudaMemory<cudaTextureObject_t> tex;
+
+        idaten::CudaTextureResource vtxparamsPos;
+        idaten::CudaTextureResource vtxparamsNml;
+
+        void BindToDeviceContext()
+        {
+            if (!ctxt.shapes) {
+                ctxt.shapes = shapeparam.data();
+                ctxt.mtrls = mtrlparam.data();
+                ctxt.lightnum = lightparam.num();
+                ctxt.lights = lightparam.data();
+                ctxt.prims = primparams.data();
+                ctxt.matrices = mtxparams.data();
+
+                std::vector<cudaTextureObject_t> tmp_node;
+                for (auto& node : nodeparam) {
+                    auto nodeTex = node.bind();
+                    tmp_node.push_back(nodeTex);
+                }
+                nodetex.writeFromHostToDeviceByNum(tmp_node.data(), tmp_node.size());
+
+                ctxt.nodes = nodetex.data();
+
+                if (!texRsc.empty())
+                {
+                    std::vector<cudaTextureObject_t> tmp_tex;
+                    for (auto& rsc : texRsc) {
+                        auto cudaTex = rsc.bind();
+                        tmp_tex.push_back(cudaTex);
+                    }
+                    tex.writeFromHostToDeviceByNum(tmp_tex.data(), tmp_tex.size());
+                }
+                ctxt.textures = tex.data();
+            }
+
+            ctxt.vtxPos = vtxparamsPos.bind();
+            ctxt.vtxNml = vtxparamsNml.bind();
+
+            for (auto& node : nodeparam) {
+                std::ignore = node.bind();
+            }
         }
     };
 }

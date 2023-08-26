@@ -22,11 +22,7 @@ __global__ void fillAOV(
     const float4* __restrict__ aovTexclrMeshid,
     cudaSurfaceObject_t motionDetphBuffer,
     const aten::CameraParameter camera,
-    const aten::ObjectParameter* __restrict__ shapes,
-    cudaTextureObject_t* nodes,
-    const aten::TriangleParameter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    const aten::mat4* __restrict__ matrices)
+    idaten::context ctxt)
 {
     auto ix = blockIdx.x * blockDim.x + threadIdx.x;
     auto iy = blockIdx.y * blockDim.y + threadIdx.y;
@@ -55,15 +51,6 @@ __global__ void fillAOV(
 
     AT_NAME::CameraSampleResult camsample;
     AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
-
-    idaten::context ctxt;
-    {
-        ctxt.shapes = shapes;
-        ctxt.nodes = nodes;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.matrices = matrices;
-    }
 
     aten::Intersection isect;
     bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
@@ -131,11 +118,7 @@ __global__ void pickPixel(
     const idaten::Path paths,
     const float4* __restrict__ aovNormalDepth,
     const float4* __restrict__ aovTexclrMeshid,
-    const aten::ObjectParameter* __restrict__ shapes,
-    cudaTextureObject_t* nodes,
-    const aten::TriangleParameter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    aten::mat4* matrices)
+    idaten::context ctxt)
 {
     iy = height - 1 - iy;
 
@@ -144,15 +127,6 @@ __global__ void pickPixel(
 
     AT_NAME::CameraSampleResult camsample;
     AT_NAME::PinholeCamera::sample(&camsample, &camera, s, t);
-
-    idaten::context ctxt;
-    {
-        ctxt.shapes = shapes;
-        ctxt.nodes = nodes;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.matrices = matrices;
-    }
 
     aten::Intersection isect;
     bool isHit = intersectClosest(&ctxt, camsample.r, &isect);
@@ -182,8 +156,7 @@ namespace idaten
 {
     void SVGFPathTracing::onDisplayAOV(
         cudaSurfaceObject_t outputSurf,
-        int32_t width, int32_t height,
-        cudaTextureObject_t texVtxPos)
+        int32_t width, int32_t height)
     {
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
         dim3 grid(
@@ -204,17 +177,12 @@ namespace idaten
             curaov.get<AOVBuffer::AlbedoMeshId>().data(),
             gbuffer,
             m_cam,
-            m_shapeparam.data(),
-            m_nodetex.data(),
-            m_primparams.data(),
-            texVtxPos,
-            m_mtxparams.data());
+            ctxt_host_.ctxt);
     }
 
     void SVGFPathTracing::pick(
         int32_t ix, int32_t iy,
-        int32_t width, int32_t height,
-        cudaTextureObject_t texVtxPos)
+        int32_t width, int32_t height)
     {
         if (m_willPicklPixel) {
             m_pick.resize(1);
@@ -230,11 +198,7 @@ namespace idaten
                 path_host_->paths,
                 curaov.get<AOVBuffer::NormalDepth>().data(),
                 curaov.get<AOVBuffer::AlbedoMeshId>().data(),
-                m_shapeparam.data(),
-                m_nodetex.data(),
-                m_primparams.data(),
-                texVtxPos,
-                m_mtxparams.data());
+                ctxt_host_.ctxt);
 
             m_pick.readFromDeviceToHostByNum(&m_pickedInfo);
 

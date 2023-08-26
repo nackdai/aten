@@ -47,7 +47,7 @@ namespace pt {
         __shared__ idaten::ShadowRay shShadowRays[64];
         __shared__ aten::MaterialParameter shMtrls[64];
 
-        const auto ray = rays[idx];
+        const auto& isect = isects[idx];
 
 #if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
         auto scramble = random[idx] * 0x1fe3434f;
@@ -62,11 +62,10 @@ namespace pt {
             scramble);
 #endif
 
-        aten::hitrecord rec;
-
-        const auto& isect = isects[idx];
-
+        const auto ray = rays[idx];
         const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
+
+        aten::hitrecord rec;
         AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < 0.0f;
@@ -268,8 +267,7 @@ namespace idaten
 {
     void PathTracing::onHitTest(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos)
+        int32_t bounce)
     {
         hitTest(
             width, height,
@@ -280,9 +278,7 @@ namespace idaten
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
-        int32_t bounce, int32_t rrBounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce, int32_t rrBounce)
     {
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -293,7 +289,7 @@ namespace idaten
             aov_.normal_depth().data(),
             aov_.albedo_meshid().data(),
             width, height,
-            ctxt_,
+            ctxt_host_.ctxt,
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_isects.data(),
@@ -306,13 +302,12 @@ namespace idaten
 
         checkCudaKernel(shade);
 
-        onShadeByShadowRay(width, height, bounce, texVtxPos);
+        onShadeByShadowRay(width, height, bounce);
     }
 
     void PathTracing::onShadeByShadowRay(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos)
+        int32_t bounce)
     {
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -321,7 +316,7 @@ namespace idaten
 
         pt::hitShadowRay << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             bounce,
-            ctxt_,
+            ctxt_host_.ctxt,
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_shadowRays.data());

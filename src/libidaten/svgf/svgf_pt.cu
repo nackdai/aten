@@ -29,14 +29,7 @@ namespace svgf {
         int32_t sample,
         int32_t frame,
         int32_t bounce, int32_t rrBounce,
-        const aten::ObjectParameter* __restrict__ shapes,
-        const aten::MaterialParameter* __restrict__ mtrls,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        cudaTextureObject_t vtxNml,
-        const aten::mat4* __restrict__ matrices,
-        cudaTextureObject_t* textures,
+        idaten::context ctxt,
         uint32_t* random,
         idaten::ShadowRay* shadowRays)
     {
@@ -44,19 +37,6 @@ namespace svgf {
 
         if (idx >= *hitnum) {
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.vtxNml = vtxNml;
-            ctxt.matrices = matrices;
-            ctxt.textures = textures;
         }
 
         idx = hitindices[idx];
@@ -208,30 +188,12 @@ namespace svgf {
         int32_t* hitindices,
         int32_t* hitnum,
         const idaten::ShadowRay* __restrict__ shadowRays,
-        const aten::ObjectParameter* __restrict__ shapes,
-        aten::MaterialParameter* mtrls,
-        const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-        cudaTextureObject_t* nodes,
-        const aten::TriangleParameter* __restrict__ prims,
-        cudaTextureObject_t vtxPos,
-        const aten::mat4* __restrict__ matrices)
+        idaten::context ctxt)
     {
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
             return;
-        }
-
-        idaten::context ctxt;
-        {
-            ctxt.shapes = shapes;
-            ctxt.mtrls = mtrls;
-            ctxt.lightnum = lightnum;
-            ctxt.lights = lights;
-            ctxt.nodes = nodes;
-            ctxt.prims = prims;
-            ctxt.vtxPos = vtxPos;
-            ctxt.matrices = matrices;
         }
 
         idx = hitindices[idx];
@@ -300,8 +262,7 @@ namespace idaten
 {
     void SVGFPathTracing::onHitTest(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos)
+        int32_t bounce)
     {
         if (bounce == 0 && m_canSSRTHitTest) {
             hitTestOnScreenSpace(
@@ -319,9 +280,7 @@ namespace idaten
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
-        int32_t bounce, int32_t rrBounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce, int32_t rrBounce)
     {
         m_mtxW2V.lookat(
             m_cam.origin,
@@ -362,25 +321,18 @@ namespace idaten
             sample,
             m_frame,
             bounce, rrBounce,
-            m_shapeparam.data(),
-            m_mtrlparam.data(),
-            m_lightparam.data(), m_lightparam.num(),
-            m_primparams.data(),
-            texVtxPos, texVtxNml,
-            m_mtxparams.data(),
-            m_tex.data(),
+            ctxt_host_.ctxt,
             m_random.data(),
             m_shadowRays.data());
 
         checkCudaKernel(shade);
 
-        onShadeByShadowRay(width, height, bounce, texVtxPos);
+        onShadeByShadowRay(width, height, bounce);
     }
 
     void SVGFPathTracing::onShadeByShadowRay(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos)
+        int32_t bounce)
     {
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -392,13 +344,7 @@ namespace idaten
             path_host_->paths,
             m_hitidx.data(), hitcount.data(),
             m_shadowRays.data(),
-            m_shapeparam.data(),
-            m_mtrlparam.data(),
-            m_lightparam.data(), m_lightparam.num(),
-            m_nodetex.data(),
-            m_primparams.data(),
-            texVtxPos,
-            m_mtxparams.data());
+            ctxt_host_.ctxt);
 
         checkCudaKernel(hitShadowRay);
     }

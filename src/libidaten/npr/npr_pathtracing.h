@@ -41,9 +41,7 @@ namespace idaten
             cudaSurfaceObject_t outputSurf,
             int32_t width, int32_t height,
             int32_t sample,
-            int32_t bounce, int32_t rrBounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml) override;
+            int32_t bounce, int32_t rrBounce) override;
 
         virtual void missShade(
             int32_t width, int32_t height,

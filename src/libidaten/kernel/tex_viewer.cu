@@ -44,13 +44,13 @@ namespace idaten
         m_glimg.map();
         auto outputSurf = m_glimg.bind();
 
-        if (!m_texRsc.empty()) {
+        if (!ctxt_host_.texRsc.empty()) {
             std::vector<cudaTextureObject_t> tmp;
-            for (int32_t i = 0; i < m_texRsc.size(); i++) {
-                auto cudaTex = m_texRsc[i].bind();
+            for (auto& tex_rsc : ctxt_host_.texRsc) {
+                auto cudaTex = tex_rsc.bind();
                 tmp.push_back(cudaTex);
             }
-            m_tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
+            ctxt_host_.tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
         }
 
         dim3 block(BLOCK_SIZE, BLOCK_SIZE);
@@ -61,11 +61,11 @@ namespace idaten
         textureViewer << <grid, block >> > (
             idx,
             screenWidth, screenHeight,
-            m_tex.data(),
+            ctxt_host_.tex.data(),
             outputSurf);
 
-        for (int32_t i = 0; i < m_texRsc.size(); i++) {
-            m_texRsc[i].unbind();
+        for (auto& tex_rsc : ctxt_host_.texRsc) {
+            tex_rsc.unbind();
         }
 
         m_glimg.unbind();

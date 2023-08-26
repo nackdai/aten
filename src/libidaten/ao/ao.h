@@ -68,9 +68,7 @@ namespace idaten
 
         virtual void onShade(
             int32_t width, int32_t height,
-            int32_t bounce, int32_t rrBounce,
-            cudaTextureObject_t texVtxPos,
-            cudaTextureObject_t texVtxNml);
+            int32_t bounce, int32_t rrBounce);
 
         virtual void onGather(
             cudaSurfaceObject_t outputSurf,

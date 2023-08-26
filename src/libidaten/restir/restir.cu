@@ -49,14 +49,7 @@ __global__ void shade(
     int32_t sample,
     int32_t frame,
     int32_t bounce, int32_t rrBounce,
-    const aten::ObjectParameter* __restrict__ shapes,
-    const aten::MaterialParameter* __restrict__ mtrls,
-    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-    const aten::TriangleParameter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    cudaTextureObject_t vtxNml,
-    const aten::mat4* __restrict__ matrices,
-    cudaTextureObject_t* textures,
+    idaten::context ctxt,
     uint32_t* random,
     idaten::ShadowRay* shadowRays)
 {
@@ -64,19 +57,6 @@ __global__ void shade(
 
     if (idx >= *hitnum) {
         return;
-    }
-
-    idaten::context ctxt;
-    {
-        ctxt.shapes = shapes;
-        ctxt.mtrls = mtrls;
-        ctxt.lightnum = lightnum;
-        ctxt.lights = lights;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.vtxNml = vtxNml;
-        ctxt.matrices = matrices;
-        ctxt.textures = textures;
     }
 
     idx = hitindices[idx];
@@ -297,13 +277,7 @@ __global__ void hitShadowRay(
     int32_t* hitnum,
     idaten::Reservoir* reservoirs,
     const idaten::ShadowRay* __restrict__ shadowRays,
-    const aten::ObjectParameter* __restrict__ shapes,
-    aten::MaterialParameter* mtrls,
-    const aten::LightParameter* __restrict__ lights, int32_t lightnum,
-    cudaTextureObject_t* nodes,
-    const aten::TriangleParameter* __restrict__ prims,
-    cudaTextureObject_t vtxPos,
-    const aten::mat4* __restrict__ matrices)
+    idaten::context ctxt)
 {
     int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -312,18 +286,6 @@ __global__ void hitShadowRay(
     }
 
     idx = hitindices[idx];
-
-    idaten::context ctxt;
-    {
-        ctxt.shapes = shapes;
-        ctxt.mtrls = mtrls;
-        ctxt.lightnum = lightnum;
-        ctxt.lights = lights;
-        ctxt.nodes = nodes;
-        ctxt.prims = prims;
-        ctxt.vtxPos = vtxPos;
-        ctxt.matrices = matrices;
-    }
 
     auto isHit = AT_NAME::HitShadowRay(idx, bounce, ctxt, paths, shadowRays);
 
@@ -464,9 +426,7 @@ namespace idaten
         cudaSurfaceObject_t outputSurf,
         int32_t width, int32_t height,
         int32_t sample,
-        int32_t bounce, int32_t rrBounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce, int32_t rrBounce)
     {
         m_mtxW2V.lookat(
             m_cam.origin,
@@ -506,13 +466,7 @@ namespace idaten
             sample,
             m_frame,
             bounce, rrBounce,
-            m_shapeparam.data(),
-            m_mtrlparam.data(),
-            m_lightparam.data(), m_lightparam.num(),
-            m_primparams.data(),
-            texVtxPos, texVtxNml,
-            m_mtxparams.data(),
-            m_tex.data(),
+            ctxt_host_.ctxt,
             m_random.data(),
             m_shadowRays.data());
 
@@ -520,15 +474,12 @@ namespace idaten
 
         onShadeByShadowRayReSTIR(
             width, height,
-            bounce,
-            texVtxPos, texVtxNml);
+            bounce);
     }
 
     void ReSTIRPathTracing::onShadeByShadowRayReSTIR(
         int32_t width, int32_t height,
-        int32_t bounce,
-        cudaTextureObject_t texVtxPos,
-        cudaTextureObject_t texVtxNml)
+        int32_t bounce)
     {
         dim3 blockPerGrid(((width * height) + 64 - 1) / 64);
         dim3 threadPerBlock(64);
@@ -541,21 +492,13 @@ namespace idaten
             m_hitidx.data(), hitcount.data(),
             m_reservoirs[m_curReservoirPos].data(),
             m_shadowRays.data(),
-            m_shapeparam.data(),
-            m_mtrlparam.data(),
-            m_lightparam.data(), m_lightparam.num(),
-            m_nodetex.data(),
-            m_primparams.data(),
-            texVtxPos,
-            m_mtxparams.data());
+            ctxt_host_.ctxt);
 
         checkCudaKernel(hitShadowRay);
 
         const auto target_idx = computelReuse(
             width, height,
-            bounce,
-            texVtxPos,
-            texVtxNml);
+            bounce);
 
         computeShadowRayContribution << <blockPerGrid, threadPerBlock, 0, m_stream >> > (
             m_reservoirs[target_idx].data(),
@@ -564,9 +507,9 @@ namespace idaten
             m_hitidx.data(), hitcount.data(),
             aov_.normal_depth().data(),
             aov_.albedo_meshid().data(),
-            m_lightparam.data(), m_lightparam.num(),
-            m_mtrlparam.data(),
-            m_tex.data(),
+            ctxt_host_.lightparam.data(), ctxt_host_.lightparam.num(),
+            ctxt_host_.mtrlparam.data(),
+            ctxt_host_.tex.data(),
             m_shadowRays.data());
 
         checkCudaKernel(computeShadowRayContribution);

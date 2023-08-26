@@ -26,55 +26,50 @@ namespace idaten {
         AT_PRINTF("Stack size %d\n", size_stack);
 #endif
 
-#if 0
-        dst.init(sizeof(float4) * width * height);
-#else
-        //glimg.init(gltex, CudaGLRscRegisterType::WriteOnly);
         m_glimg.init(gltex, CudaGLRscRegisterType::ReadWrite);
-#endif
 
         m_cam = camera;
 
-        m_shapeparam.resize(shapes.size());
-        m_shapeparam.writeFromHostToDeviceByNum(&shapes[0], shapes.size());
+        ctxt_host_.shapeparam.resize(shapes.size());
+        ctxt_host_.shapeparam.writeFromHostToDeviceByNum(&shapes[0], shapes.size());
 
-        m_mtrlparam.resize(mtrls.size());
-        m_mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], mtrls.size());
+        ctxt_host_.mtrlparam.resize(mtrls.size());
+        ctxt_host_.mtrlparam.writeFromHostToDeviceByNum(&mtrls[0], mtrls.size());
 
         AT_ASSERT_LOG(!lights.empty(), "No Lights!!");
 
         if (!lights.empty()) {
-            m_lightparam.resize(lights.size());
-            m_lightparam.writeFromHostToDeviceByNum(&lights[0], lights.size());
+            ctxt_host_.lightparam.resize(lights.size());
+            ctxt_host_.lightparam.writeFromHostToDeviceByNum(&lights[0], lights.size());
         }
 
         if (prims.empty()) {
-            m_primparams.resize(advancePrimNum);
+            ctxt_host_.primparams.resize(advancePrimNum);
         }
         else {
-            m_primparams.resize(prims.size() + advancePrimNum);
-            m_primparams.writeFromHostToDeviceByNum(&prims[0], prims.size());
+            ctxt_host_.primparams.resize(prims.size() + advancePrimNum);
+            ctxt_host_.primparams.writeFromHostToDeviceByNum(&prims[0], prims.size());
         }
 
         if (!mtxs.empty()) {
-            m_mtxparams.resize(mtxs.size());
-            m_mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
+            ctxt_host_.mtxparams.resize(mtxs.size());
+            ctxt_host_.mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
         }
 
-        m_nodeparam.resize(nodes.size());
+        ctxt_host_.nodeparam.resize(nodes.size());
         for (int32_t i = 0; i < nodes.size(); i++) {
             if (!nodes[i].empty()) {
-                m_nodeparam[i].init(
+                ctxt_host_.nodeparam[i].init(
                     (aten::vec4*)&nodes[i][0],
                     sizeof(aten::GPUBvhNode) / sizeof(float4),
                     nodes[i].size());
             }
         }
-        m_nodetex.resize(nodes.size());
+        ctxt_host_.nodetex.resize(nodes.size());
 
         if (vtxs.empty()) {
-            m_vtxparamsPos.init(nullptr, 1, advanceVtxNum);
-            m_vtxparamsNml.init(nullptr, 1, advanceVtxNum);
+            ctxt_host_.vtxparamsPos.init(nullptr, 1, advanceVtxNum);
+            ctxt_host_.vtxparamsNml.init(nullptr, 1, advanceVtxNum);
         }
         else {
             // TODO
@@ -90,17 +85,17 @@ namespace idaten {
             m_vtxparamsPos.init((aten::vec4*)&pos[0], 1, pos.size() + advanceVtxNum);
             m_vtxparamsNml.init((aten::vec4*)&nml[0], 1, nml.size() + advanceVtxNum);
 #else
-            m_vtxparamsPos.init(nullptr, 1, pos.size() + advanceVtxNum);
-            m_vtxparamsNml.init(nullptr, 1, nml.size() + advanceVtxNum);
+            ctxt_host_.vtxparamsPos.init(nullptr, 1, pos.size() + advanceVtxNum);
+            ctxt_host_.vtxparamsNml.init(nullptr, 1, nml.size() + advanceVtxNum);
 
-            m_vtxparamsPos.update(&pos[0], 1, pos.size());
-            m_vtxparamsNml.update(&nml[0], 1, nml.size());
+            ctxt_host_.vtxparamsPos.update(&pos[0], 1, pos.size());
+            ctxt_host_.vtxparamsNml.update(&nml[0], 1, nml.size());
 #endif
         }
 
         if (!texs.empty()) {
             for (int32_t i = 0; i < texs.size(); i++) {
-                m_texRsc.push_back(idaten::CudaTexture());
+                ctxt_host_.texRsc.push_back(idaten::CudaTexture());
 
                 // TODO
 #if 0
@@ -111,10 +106,10 @@ namespace idaten {
                     m_texRsc[i].init(texs[i].ptr, texs[i].width, texs[i].height);
                 }
 #else
-                m_texRsc[i].initAsMipmap(texs[i].ptr, texs[i].width, texs[i].height, 100);
+                ctxt_host_.texRsc[i].initAsMipmap(texs[i].ptr, texs[i].width, texs[i].height, 100);
 #endif
             }
-            m_tex.resize(texs.size());
+            ctxt_host_.tex.resize(texs.size());
 
             //AT_ASSERT(envmapRsc.idx < texs.size());
             if (envmapRsc.idx < texs.size()) {
@@ -128,16 +123,16 @@ namespace idaten {
         const std::vector<std::vector<aten::GPUBvhNode>>& nodes,
         const std::vector<aten::mat4>& mtxs)
     {
-        m_shapeparam.writeFromHostToDeviceByNum(&geoms[0], geoms.size());
+        ctxt_host_.shapeparam.writeFromHostToDeviceByNum(&geoms[0], geoms.size());
 
         // Only for top layer...
-        m_nodeparam[0].init(
+        ctxt_host_.nodeparam[0].init(
             (aten::vec4*)&nodes[0][0],
             sizeof(aten::GPUBvhNode) / sizeof(float4),
             nodes[0].size());
 
         if (!mtxs.empty()) {
-            m_mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
+            ctxt_host_.mtxparams.writeFromHostToDeviceByNum(&mtxs[0], mtxs.size());
         }
     }
 
@@ -157,7 +152,7 @@ namespace idaten {
 
             uint32_t num = (uint32_t)(bytes / sizeof(float4));
 
-            m_vtxparamsPos.update(data, 1, num, vtxOffsetCount);
+            ctxt_host_.vtxparamsPos.update(data, 1, num, vtxOffsetCount);
 
             vertices[0].unbind();
             vertices[0].unmap();
@@ -173,7 +168,7 @@ namespace idaten {
 
             uint32_t num = (uint32_t)(bytes / sizeof(float4));
 
-            m_vtxparamsNml.update(data, 1, num, vtxOffsetCount);
+            ctxt_host_.vtxparamsNml.update(data, 1, num, vtxOffsetCount);
 
             vertices[1].unbind();
             vertices[1].unmap();
@@ -184,7 +179,7 @@ namespace idaten {
             auto size = triangles.bytes();
             auto offset = triOffsetCount * triangles.stride();
 
-            m_primparams.writeFromHostToDeviceByBytes(triangles.data(), size, offset);
+            ctxt_host_.primparams.writeFromHostToDeviceByBytes(triangles.data(), size, offset);
         }
     }
 

@@ -85,9 +85,6 @@ namespace idaten {
 
         cudaStream_t m_stream{ (cudaStream_t)0 };
 
-        bool is_init_context_{ false };
-        idaten::context ctxt_;
-
         std::shared_ptr<PathHost> path_host_;
 
         idaten::TypedCudaMemory<aten::Intersection> m_isects;

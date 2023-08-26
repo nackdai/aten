@@ -371,21 +371,7 @@ namespace idaten
 
     bool StandardPT::initPath(int32_t width, int32_t height)
     {
-        if (!is_init_context_) {
-            ctxt_.shapes = m_shapeparam.data();
-            ctxt_.mtrls = m_mtrlparam.data();
-            ctxt_.lightnum = m_lightparam.num();
-            ctxt_.lights = m_lightparam.data();
-            ctxt_.prims = m_primparams.data();
-            ctxt_.matrices = m_mtxparams.data();
-
-            ctxt_.vtxPos = m_vtxparamsPos.bind();
-            ctxt_.vtxNml = m_vtxparamsNml.bind();
-
-            ctxt_.nodes = m_nodetex.data();
-
-            ctxt_.textures = m_tex.data();
-        }
+        ctxt_host_.BindToDeviceContext();
 
         const auto result = path_host_->init(width, height);
 
@@ -442,13 +428,13 @@ namespace idaten
 
         kernel::hitTest << <grid, block >> > (
 #endif
-            ctxt_,
+            ctxt_host_.ctxt,
             path_host_->paths,
             m_isects.data(),
             m_rays.data(),
             m_hitbools.data(),
             width, height,
-            m_nodetex.data(),
+            ctxt_host_.nodetex.data(),
             bounce,
             m_hitDistLimit);
 
@@ -471,7 +457,7 @@ namespace idaten
 
         kernel::hitTestPrimaryRayInScreenSpace << <grid, block >> > (
             binded_gbuffer,
-            ctxt_,
+            ctxt_host_.ctxt,
             path_host_->paths,
             m_isects.data(),
             m_hitbools.data(),
@@ -498,7 +484,7 @@ namespace idaten
                 m_cam,
                 aovNormalDepth.data(),
                 aovTexclrMeshid.data(),
-                ctxt_,
+                ctxt_host_.ctxt,
                 m_envmapRsc.idx, m_envmapRsc.avgIllum, m_envmapRsc.multiplyer,
                 path_host_->paths,
                 m_rays.data(),

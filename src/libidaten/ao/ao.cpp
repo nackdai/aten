@@ -71,28 +71,6 @@ namespace idaten {
         m_glimg.map();
         auto outputSurf = m_glimg.bind();
 
-        auto vtxTexPos = m_vtxparamsPos.bind();
-        auto vtxTexNml = m_vtxparamsNml.bind();
-
-        {
-            std::vector<cudaTextureObject_t> tmp;
-            for (int32_t i = 0; i < m_nodeparam.size(); i++) {
-                auto nodeTex = m_nodeparam[i].bind();
-                tmp.push_back(nodeTex);
-            }
-            m_nodetex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
-        }
-
-        if (!m_texRsc.empty())
-        {
-            std::vector<cudaTextureObject_t> tmp;
-            for (int32_t i = 0; i < m_texRsc.size(); i++) {
-                auto cudaTex = m_texRsc[i].bind();
-                tmp.push_back(cudaTex);
-            }
-            m_tex.writeFromHostToDeviceByNum(&tmp[0], (uint32_t)tmp.size());
-        }
-
         initPath(width, height);
         clearPath();
 
@@ -125,8 +103,7 @@ namespace idaten {
 
                 onShade(
                     width, height,
-                    bounce, rrBounce,
-                    vtxTexPos, vtxTexNml);
+                    bounce, rrBounce);
 
                 bounce++;
             }

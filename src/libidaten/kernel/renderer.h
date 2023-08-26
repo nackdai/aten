@@ -1,10 +1,8 @@
 #pragma once
 
 #include "aten4idaten.h"
-#include "cuda/cudamemory.h"
-#include "cuda/cudaGLresource.h"
-#include "cuda/cudaTextureResource.h"
 #include "kernel/StreamCompaction.h"
+#include "kernel/device_scene_context.cuh"
 
 namespace idaten
 {
@@ -13,7 +11,7 @@ namespace idaten
         real avgIllum;
         real multiplyer{ real(1) };
 
-        EnvmapResource() {}
+        EnvmapResource() = default;
 
         EnvmapResource(int32_t i, real illum, real mul = real(1))
             : idx(i), avgIllum(illum), multiplyer(mul)
@@ -68,17 +66,17 @@ namespace idaten
 
         uint32_t getRegisteredTextureNum() const
         {
-            return static_cast<uint32_t>(m_texRsc.size());
+            return static_cast<uint32_t>(ctxt_host_.texRsc.size());
         }
 
         std::vector<idaten::CudaTextureResource>& getCudaTextureResourceForBvhNodes()
         {
-            return m_nodeparam;
+            return ctxt_host_.nodeparam;
         }
 
         idaten::CudaTextureResource getCudaTextureResourceForVtxPos()
         {
-            return m_vtxparamsPos;
+            return ctxt_host_.vtxparamsPos;
         }
 
         idaten::StreamCompaction& getCompaction()
@@ -87,25 +85,13 @@ namespace idaten
         }
 
     protected:
+        idaten::DeviceContextInHost ctxt_host_;
+
+        idaten::CudaGLSurface m_glimg;
+
         idaten::StreamCompaction m_compaction;
 
         aten::CameraParameter m_cam;
-        idaten::TypedCudaMemory<aten::ObjectParameter> m_shapeparam;
-        idaten::TypedCudaMemory<aten::MaterialParameter> m_mtrlparam;
-        idaten::TypedCudaMemory<aten::LightParameter> m_lightparam;
-        idaten::TypedCudaMemory<aten::TriangleParameter> m_primparams;
-
-        idaten::TypedCudaMemory<aten::mat4> m_mtxparams;
-
-        std::vector<idaten::CudaTextureResource> m_nodeparam;
-        idaten::TypedCudaMemory<cudaTextureObject_t> m_nodetex;
-
-        std::vector<idaten::CudaTexture> m_texRsc;
-        idaten::TypedCudaMemory<cudaTextureObject_t> m_tex;
         EnvmapResource m_envmapRsc;
-
-        idaten::CudaGLSurface m_glimg;
-        idaten::CudaTextureResource m_vtxparamsPos;
-        idaten::CudaTextureResource m_vtxparamsNml;
     };
 }

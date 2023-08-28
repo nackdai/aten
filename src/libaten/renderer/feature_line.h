@@ -318,6 +318,7 @@ namespace AT_NAME
             // Ray   : P(t) = Q + Vt
             //
             // NP(t) + D = 0
+            //   <=> N(Q + Vt) + D = 0
             //   <=> NQ + (NV)t + D = 0
             //   <=> t = -(NQ + D) / NV
             //   <=> t = -LQ / LV
@@ -326,10 +327,10 @@ namespace AT_NAME
             // V = (Vx, Vy, Vz, 0) => Ray dir
             // L = (Nx, Ny, Nz, D) => Plane
             // Therefore:
-            //   N�EQ + D = Nx * Qx + Ny * Qy + Nz * Qz + D * 1 = LQ
-            //   N�EV + 0 = Nx * Vx + Ny * Vy + Nz * Vz + D * 0 = LV
+            //   dot(N, Q) + D = Nx * Qx + Ny * Qy + Nz * Qz + D * 1 = LQ
+            //   dot(N, V) + 0 = Nx * Vx + Ny * Vy + Nz * Vz + D * 0 = LV
 
-            const auto &L = plane;
+            const auto& L = plane;
             const aten::vec4 Q(ray.org, 1);
             const aten::vec4 V(ray.dir, 0);
 

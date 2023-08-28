@@ -4,7 +4,6 @@
 #include "kernel/accelerator.cuh"
 #include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
-#include "kernel/persistent_thread.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
@@ -12,13 +11,13 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
-#include "renderer/pt_params.h"
+#include "renderer/aorenderer_impl.h"
 
 //#define ENABLE_SEPARATE_ALBEDO
 
 namespace ao {
     __global__ void shadeMissAO(
-        bool isFirstBounce,
+        bool is_first_bounce,
         int32_t width, int32_t height,
         idaten::Path paths)
     {
@@ -31,15 +30,10 @@ namespace ao {
 
         const auto idx = getIdx(ix, iy, width);
 
-        if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
-            if (isFirstBounce) {
-                paths.attrib[idx].isKill = true;
-            }
-
-            paths.contrib[idx].contrib = make_float3(1);
-
-            paths.attrib[idx].isTerminate = true;
-        }
+        AT_NAME::ShadeMissAO(
+            idx,
+            is_first_bounce,
+            paths);
     }
 
     __global__ void shadeAO(
@@ -64,58 +58,15 @@ namespace ao {
 
         const auto& ray = rays[idx];
 
-#if IDATEN_SAMPLER == IDATEN_SAMPLER_SOBOL
-        auto scramble = random[idx] * 0x1fe3434f;
-        path.sampler.init(frame, 4 + bounce * 300, scramble);
-#elif IDATEN_SAMPLER == IDATEN_SAMPLER_CMJ
         auto rnd = random[idx];
-        auto scramble = rnd * 0x1fe3434f * ((frame + 331 * rnd) / (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM));
-        paths.sampler[idx].init(frame % (aten::CMJ::CMJ_DIM * aten::CMJ::CMJ_DIM), 4 + 5 * 300, scramble);
-#endif
-
-        aten::hitrecord rec;
 
         const auto& isect = isects[idx];
 
-        const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
-        AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
-
-        const auto& mtrl = ctxt.GetMaterial(static_cast<uint32_t>(rec.mtrlid));
-
-        // 交差位置の法線.
-        // 物体からのレイの入出を考慮.
-        aten::vec3 orienting_normal = rec.normal;
-
-        // Apply normal map.
-        int32_t normalMap = (int32_t)(mtrl.normalMap >= 0 ? ctxt.textures[mtrl.normalMap] : -1);
-        AT_NAME::applyNormalMap(normalMap, orienting_normal, orienting_normal, rec.u, rec.v);
-
-        float3 ao_color = make_float3(0.0f);
-
-        for (int32_t i = 0; i < ao_num_rays; i++) {
-            auto nextDir = AT_NAME::lambert::sampleDirection(orienting_normal, &paths.sampler[idx]);
-            auto pdfb = AT_NAME::lambert::pdf(orienting_normal, nextDir);
-
-            real c = dot(orienting_normal, nextDir);
-
-            auto ao_ray = aten::ray(rec.p, nextDir, orienting_normal);
-
-            aten::Intersection isectTmp;
-
-            bool isHit = intersectClosest(&ctxt, ao_ray, &isectTmp, ao_radius);
-
-            if (isHit) {
-                if (c > 0.0f) {
-                    ao_color += make_float3(isectTmp.t / ao_radius * c / pdfb);
-                }
-            }
-            else {
-                ao_color = make_float3(1.0f);
-            }
-        }
-
-        ao_color /= ao_num_rays;
-        paths.contrib[idx].contrib = ao_color;
+        AT_NAME::ShandeAO(
+            idx,
+            frame, rnd,
+            ao_num_rays, ao_radius,
+            paths, ctxt, ray, isect);
     }
 }
 

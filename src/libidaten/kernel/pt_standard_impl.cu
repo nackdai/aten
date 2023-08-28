@@ -46,7 +46,7 @@ namespace kernel {
             rays[idx],
             idx, ix, iy,
             sample, frame,
-            paths, camera, *random);
+            paths, camera, random[idx]);
     }
 
     // NOTE

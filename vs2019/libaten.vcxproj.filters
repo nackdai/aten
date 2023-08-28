@@ -454,9 +454,6 @@
     <ClInclude Include="..\src\libaten\accelerator\bvh_util.h">
       <Filter>accelerator</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\renderer_utility.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\material\retroreflective.h">
       <Filter>material</Filter>
     </ClInclude>
@@ -515,6 +512,9 @@
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\aorenderer_impl.h">
       <Filter>renderer</Filter>
     </ClInclude>
   </ItemGroup>

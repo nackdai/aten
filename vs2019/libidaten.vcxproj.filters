@@ -298,6 +298,9 @@
     <ClInclude Include="..\src\libaten\renderer\pt_params.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\aorenderer_impl.h">
+      <Filter>ao</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

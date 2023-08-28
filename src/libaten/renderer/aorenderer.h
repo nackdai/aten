@@ -1,9 +1,12 @@
 #pragma once
 
-#include "renderer/renderer.h"
-#include "scene/scene.h"
 #include "camera/camera.h"
+#include "geometry/EvaluateHitResult.h"
 #include "light/pointlight.h"
+#include "renderer/renderer.h"
+#include "renderer/pt_params.h"
+#include "sampler/cmj.h"
+#include "scene/scene.h"
 
 namespace aten
 {
@@ -19,33 +22,19 @@ namespace aten
             camera* camera) override;
 
     protected:
-        struct Path {
-            vec3 contrib;
-            hitrecord rec;
-            aten::ray ray;
-
-            Path()
-            {
-                contrib = vec3(0);
-            }
-        };
-
-        Path radiance(
+        void radiance(
+            int32_t idx,
+            uint32_t rnd,
             const context& ctxt,
-            sampler* sampler,
             const ray& inRay,
             scene* scene);
 
-        bool shade(
-            const context& ctxt,
-            sampler* sampler,
-            scene* scene,
-            Path& path);
-
-        void shadeMiss(Path& path);
-
     private:
+        PathHost path_host_;
+
         uint32_t m_numAORays{ 1 };
         real m_AORadius{ real(1) };
+
+        int32_t max_depth_{ 1 };
     };
 }

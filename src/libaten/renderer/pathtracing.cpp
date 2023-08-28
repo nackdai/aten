@@ -1,14 +1,13 @@
 #include <array>
 
 #include "renderer/pathtracing.h"
+
+#include "material/material_impl.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "renderer/renderer_utility.h"
 #include "renderer/pathtracing_impl.h"
 #include "renderer/feature_line.h"
 #include "sampler/cmj.h"
-
-#include "material/material_impl.h"
 
 //#define RELEASE_DEBUG
 
@@ -42,6 +41,8 @@ namespace aten
                     const auto& obj = ctxt.GetObject(isect.objid);
                     AT_NAME::evaluate_hit_result(*first_hrec, obj, ctxt, ray, isect);
                 }
+
+                path_host_.paths.attrib[idx].isHit = true;
 
                 shade(
                     idx,
@@ -572,8 +573,6 @@ namespace aten
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    int32_t pos = y * width + x;
-
                     vec3 col = vec3(0);
                     vec3 col2 = vec3(0);
                     uint32_t cnt = 0;
@@ -591,7 +590,7 @@ namespace aten
                     }
 
                     for (uint32_t i = 0; i < samples; i++) {
-                        const auto rnd = aten::getRandom(pos);
+                        const auto rnd = aten::getRandom(idx);
                         const auto& camsample = camera->param();
 
                         GeneratePath(

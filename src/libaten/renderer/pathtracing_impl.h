@@ -183,6 +183,13 @@ namespace AT_NAME
         }
     }
 
+    namespace _detail {
+        inline AT_DEVICE_MTRL_API real ComputeBalanceHeuristic(real f, real g)
+        {
+            return f / (f + g);
+        }
+    }
+
     inline AT_DEVICE_MTRL_API void FillShadowRay(
         AT_NAME::ShadowRay& shadow_ray,
         const AT_NAME::context& ctxt,
@@ -246,7 +253,7 @@ namespace AT_NAME
                 if (pdfLight > real(0) && cosShadow >= 0) {
                     auto misW = light.attrib.isSingular
                         ? 1.0f
-                        : AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                        : _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
                     shadow_ray.lightcontrib =
                         (misW * bsdf * emit * cosShadow / pdfLight) / lightSelectPdf;
 
@@ -266,7 +273,7 @@ namespace AT_NAME
                         // p31 - p35
                         pdfb = pdfb * cosLight / dist2;
 
-                        auto misW = AT_NAME::computeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
+                        auto misW = _detail::ComputeBalanceHeuristic(pdfLight * lightSelectPdf, pdfb);
 
                         shadow_ray.lightcontrib =
                             (misW * (bsdf * emit * G) / pdfLight) / lightSelectPdf;

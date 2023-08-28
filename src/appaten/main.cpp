@@ -25,11 +25,6 @@ static std::shared_ptr<aten::envmap> g_bg;
 static std::shared_ptr<aten::texture> g_envmap;
 
 static aten::PathTracing g_tracer;
-//static aten::BDPT g_tracer;
-// static aten::SortedPathTracing g_tracer;
-// static aten::ERPT g_tracer;
-// static aten::PSSMLT g_tracer;
-// static aten::GeometryInfoRenderer g_tracer;
 
 static std::shared_ptr<aten::visualizer> g_visualizer;
 

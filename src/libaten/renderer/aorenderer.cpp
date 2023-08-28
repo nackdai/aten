@@ -1,17 +1,10 @@
 #include "renderer/aorenderer.h"
-#include "misc/omputil.h"
-#include "misc/timer.h"
-#include "sampler/xorshift.h"
-#include "sampler/halton.h"
-#include "sampler/sobolproxy.h"
-#include "sampler/wanghash.h"
-#include "sampler/cmj.h"
-#include "sampler/bluenoiseSampler.h"
-#include "geometry/EvaluateHitResult.h"
 
 #include "material/lambert.h"
-
-//#define Deterministic_Path_Termination
+#include "misc/omputil.h"
+#include "misc/timer.h"
+#include "renderer/aorenderer_impl.h"
+#include "renderer/pathtracing_impl.h"
 
 //#define RELEASE_DEBUG
 
@@ -23,89 +16,39 @@
 
 namespace aten
 {
-    AORenderer::Path AORenderer::radiance(
+    void AORenderer::radiance(
+        int32_t idx,
+        uint32_t rnd,
         const context& ctxt,
-        sampler* sampler,
         const ray& inRay,
         scene* scene)
     {
-        Path path;
-        path.ray = inRay;
-
-        path.rec = hitrecord();
-
         Intersection isect;
 
-        if (scene->hit(ctxt, path.ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
-            const auto& obj = ctxt.GetObject(isect.objid);
-            AT_NAME::evaluate_hit_result(path.rec, obj, ctxt, path.ray, isect);
+        uint32_t depth = 0;
 
-            shade(ctxt, sampler, scene, path);
-        }
-        else {
-            shadeMiss(path);
-        }
+        while (depth < max_depth_) {
+            if (scene->hit(ctxt, inRay, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
+                path_host_.paths.attrib[idx].isHit = true;
 
-        return path;
-    }
-
-    bool AORenderer::shade(
-        const context& ctxt,
-        sampler* sampler,
-        scene* scene,
-        Path& path)
-    {
-        // 交差位置の法線.
-        // 物体からのレイの入出を考慮.
-        vec3 orienting_normal = path.rec.normal;
-
-        auto mtrl = ctxt.getMaterial(path.rec.mtrlid);
-
-        // Apply normal map.
-        (void)material::applyNormal(
-            &mtrl->param(),
-            mtrl->param().normalMap,
-            orienting_normal, orienting_normal, path.rec.u, path.rec.v, path.ray.dir, nullptr);
-
-        aten::vec3 ao_color(0.0f);
-
-        aten::hitrecord rec;
-        aten::Intersection isect;
-
-        for (uint32_t i = 0; i < m_numAORays; i++) {
-            auto nextDir = aten::lambert::sampleDirection(orienting_normal, sampler);
-            auto pdfb = aten::lambert::pdf(orienting_normal, nextDir);
-
-            real c = dot(orienting_normal, nextDir);
-
-            auto ao_ray = aten::ray(path.rec.p, nextDir, orienting_normal);
-
-            auto isHit = scene->hit(ctxt, ao_ray, AT_MATH_EPSILON, m_AORadius, isect);
-
-            if (isHit) {
-                const auto& obj = ctxt.GetObject(isect.objid);
-                AT_NAME::evaluate_hit_result(rec, obj, ctxt, ao_ray, isect);
-
-                if (c > 0.0f) {
-                    ao_color += aten::vec3(isect.t / m_AORadius * c / pdfb);
-                }
+                AT_NAME::ShandeAO(
+                    idx,
+                    get_frame_count(), rnd,
+                    m_numAORays, m_AORadius,
+                    path_host_.paths, ctxt, inRay, isect, scene);
             }
             else {
-                ao_color += aten::vec3(real(1));
+                bool is_first_bounce = (depth == 0);
+                AT_NAME::ShadeMissAO(
+                    idx,
+                    is_first_bounce,
+                    path_host_.paths);
+                return;
             }
+
+            depth++;
         }
-
-        path.contrib = ao_color / (real)m_numAORays;
-
-        return true;
     }
-
-    void AORenderer::shadeMiss(Path& path)
-    {
-        path.contrib = aten::vec3(real(1));
-    }
-
-    static uint32_t frame = 0;
 
     void AORenderer::onRender(
         const context& ctxt,
@@ -113,10 +56,17 @@ namespace aten
         scene* scene,
         camera* camera)
     {
-        frame++;
-
         int32_t width = dst.width;
         int32_t height = dst.height;
+        uint32_t samples = dst.sample;
+
+        max_depth_ = dst.maxDepth;
+
+        path_host_.init(width, height);
+
+        for (auto& attrib : path_host_.attrib) {
+            attrib.isKill = false;
+        }
 
         auto time = timer::getSystemTime();
 
@@ -133,7 +83,8 @@ namespace aten
 #endif
             for (int32_t y = 0; y < height; y++) {
                 for (int32_t x = 0; x < width; x++) {
-                    int32_t pos = y * width + x;
+                    vec3 col = vec3(0);
+                    uint32_t cnt = 0;
 
 #ifdef RELEASE_DEBUG
                     if (x == BREAK_X && y == BREAK_Y) {
@@ -141,30 +92,50 @@ namespace aten
                     }
 #endif
 
-                    auto scramble = aten::getRandom(pos) * 0x1fe3434f;
-
-                    CMJ rnd;
-                    rnd.init(frame, 0, scramble);
-
-                    real u = real(x + rnd.nextSample()) / real(width);
-                    real v = real(y + rnd.nextSample()) / real(height);
-
-                    auto camsample = camera->sample(u, v, &rnd);
-
-                    auto ray = camsample.r;
-
-                    auto path = radiance(
-                        ctxt,
-                        &rnd,
-                        ray,
-                        scene);
-
-                    if (isInvalidColor(path.contrib)) {
-                        AT_PRINTF("Invalid(%d/%d)\n", x, y);
+                    if (path_host_.paths.attrib[idx].isKill) {
                         continue;
                     }
 
-                    dst.buffer->put(x, y, vec4(path.contrib, 1));
+                    int32_t idx = y * width + x;
+
+                    for (uint32_t i = 0; i < samples; i++) {
+                        const auto rnd = aten::getRandom(idx);
+                        const auto& camsample = camera->param();
+
+                        aten::ray ray;
+
+                        GeneratePath(
+                            ray,
+                            idx,
+                            x, y,
+                            i, get_frame_count(),
+                            path_host_.paths,
+                            camsample,
+                            rnd);
+
+                        path_host_.paths.contrib[idx].contrib = aten::vec3(0);
+
+                        radiance(
+                            idx, rnd,
+                            ctxt, ray, scene);
+
+                        if (isInvalidColor(path_host_.paths.contrib[idx].contrib)) {
+                            AT_PRINTF("Invalid(%d/%d)\n", x, y);
+                            continue;
+                        }
+
+                        auto c = path_host_.paths.contrib[idx].contrib;
+
+                        col += c;
+                        cnt++;
+
+                        if (path_host_.paths.attrib[idx].isTerminate) {
+                            break;
+                        }
+                    }
+
+                    col /= (real)cnt;
+                    dst.buffer->put(x, y, vec4(col, 1));
                 }
             }
         }

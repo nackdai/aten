@@ -94,7 +94,7 @@ namespace aten
             return b;
         }
 
-    private:
+    protected:
         background* m_bg{ nullptr };
         uint32_t frame_count_{ 0 };
     };

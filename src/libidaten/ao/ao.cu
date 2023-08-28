@@ -1,19 +1,15 @@
 #include "ao/ao.h"
+
 #include "kernel/device_scene_context.cuh"
-#include "kernel/intersect.cuh"
 #include "kernel/accelerator.cuh"
-#include "kernel/StreamCompaction.h"
 #include "kernel/pt_common.h"
 
 #include "cuda/cudadefs.h"
 #include "cuda/helper_math.h"
 #include "cuda/cudautil.h"
-#include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
 #include "renderer/aorenderer_impl.h"
-
-//#define ENABLE_SEPARATE_ALBEDO
 
 namespace ao {
     __global__ void shadeMissAO(

@@ -7,10 +7,11 @@ usage() {
   cat <<EOF 1>&2
 Usage: $0 [Options]
 Options:
-  -b <build_config>
-  -c <compute_capability>
-  -d <source_code_root_dir>
-ex) ./scripts/build.sh -b Release -c 75 -d .
+  -b <build_config>       : Build configuration. Default is "Release"
+  -c <compute_capability> : Compute capability for CUDA. No need to specify ".". If it's "7.5", it's specified as "75". Default is "75"
+  -w <work_directory>     : Work directory. This is work direction in docker container. Default is "."
+  -d <docker_iamge>       : docker image to run build. This option is necessary
+ex) $0 -b Release -c 75 -w . -d aten:latest
 EOF
   exit 1
 }
@@ -18,8 +19,9 @@ EOF
 build_type="Release"
 compute_capability="75"
 work_dir="."
+docker_image=""
 
-while getopts "b:c:d:" opt; do
+while getopts "b:c:w:d:" opt; do
   case "${opt}" in
     b)
       build_type="${OPTARG}"
@@ -27,8 +29,11 @@ while getopts "b:c:d:" opt; do
     c)
       compute_capability="${OPTARG}"
       ;;
-    d)
+    w)
       work_dir="${OPTARG}"
+      ;;
+    d)
+      docker_image="${OPTARG}"
       ;;
     \?)
       usage
@@ -37,7 +42,6 @@ while getopts "b:c:d:" opt; do
 done
 shift $((OPTIND - 1))
 
-work_dir="${1:-"."}"
 work_dir="$(realpath "${work_dir}")"
 
 if [[ ! -d "${work_dir}" ]]; then
@@ -48,8 +52,6 @@ fi
 echo "Build config: [${build_type}]"
 echo "Compute Capability: [${compute_capability}]"
 echo "Build dir: [${work_dir}]"
-
-aten_image="$(docker images -q aten:latest 2>/dev/null)"
 
 CONTAINER_NAME="aten"
 WORKSPACE="${work_dir}"
@@ -68,13 +70,15 @@ source "${SCRIPT_DIR}/docker_util"
 
 trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
 
-if [[ -z "${aten_image}" ]]; then
-  echo "No docker image aten_dev::latest"
+docker_image_id=$(get_image_id "${docker_image}")
+
+if [[ -z "${docker_image_id}" ]]; then
+  echo "No docker image ${docker_image}"
   exit 1
 else
   kill_container "${CONTAINER_NAME}"
 
-  launch_docker "${CONTAINER_NAME}" "${aten_image}" \
+  launch_docker "${CONTAINER_NAME}" "${docker_image_id}" \
     "-d \
      -w ${WORKSPACE} \
      --mount type=bind,src=${work_dir},target=${WORKSPACE} \

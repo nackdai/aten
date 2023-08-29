@@ -18,3 +18,11 @@ kill_container() {
     docker kill "${contaner_name}" >/dev/null 2>&1 || true
     docker container rm "${contaner_name}" >/dev/null 2>&1 || true
 }
+
+get_image_id() {
+    local docker_image="${1}"
+    # Check if specified docker image exists.
+    # If image id can't be retrieved, specified docker image doesn't exist.
+    docker_image_id=$(docker images -q "${docker_image}" 2>/dev/null)
+    echo "${docker_image_id}"
+}

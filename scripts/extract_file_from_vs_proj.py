@@ -105,6 +105,9 @@ def dump_list(list: List[str]):
         print(f"{item}")
 
 def main():
+    # NOTE:
+    # e.g.
+    # python3 ./scripts/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
     parser = argparse.ArgumentParser(description="Extract compile files from vs proj file")
     parser.add_argument('-v', '--vsproj', type=str, help="VS proj file to extract", default=None)
     parser.add_argument('-o', '--output', type=str, help="File to output", default=None)

@@ -338,6 +338,10 @@ namespace AT_NAME
             }
         }
         else {
+#ifndef __CUDACC__
+            // Dummy to build with clang.
+            auto intersectCloser = [](auto... args) -> bool { return true; };
+#endif
             isHit = intersectCloser(&ctxt, r, &isect, distToLight - AT_MATH_EPSILON, enableLod);
         }
 
@@ -508,7 +512,7 @@ namespace AT_NAME
         rays[idx] = aten::ray(rec.p, nextDir, rayBasedNormal);
     }
 
-    template <typename SCENE = void, typename bool ENABLE_ALPHA_TRANLUCENT=false>
+    template <typename SCENE = void, bool ENABLE_ALPHA_TRANLUCENT=false>
     inline AT_DEVICE_MTRL_API void ShadePathTracing(
         int32_t idx,
         const AT_NAME::context& ctxt,
@@ -531,8 +535,8 @@ namespace AT_NAME
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
 
-        // Œð·ˆÊ’u‚Ì–@ü.
-        // •¨‘Ì‚©‚ç‚ÌƒŒƒC‚Ì“üo‚ðl—¶.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ê’uï¿½Ì–@ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ï¿½Ìƒï¿½ï¿½Cï¿½Ì“ï¿½ï¿½oï¿½ï¿½ï¿½lï¿½ï¿½.
         aten::vec3 orienting_normal = rec.normal;
 
         AT_NAME::FillMaterial(

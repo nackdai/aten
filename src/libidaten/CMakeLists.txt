@@ -111,10 +111,13 @@ cuda_add_library(
   ../libaten/misc/timer.h
   ../libaten/misc/tuple.h
   ../libaten/os/linux/misc/timer_linux.cpp
+  ../libaten/renderer/aorenderer_impl.h
   ../libaten/renderer/aov.h
   ../libaten/renderer/envmap.cpp
   ../libaten/renderer/envmap.h
   ../libaten/renderer/feature_line.h
+  ../libaten/renderer/pathtracing_impl.h
+  ../libaten/renderer/pt_params.h
   ../libaten/sampler/cmj.h
   ../libaten/sampler/sampler.h
   ../libaten/sampler/sobol.cpp
@@ -162,15 +165,12 @@ cuda_add_library(
   kernel/intersect.cuh
   kernel/intersect_impl.cuh
   kernel/intersecttype.h
-  kernel/material.cuh
   kernel/pathtracing.cpp
   kernel/pathtracing.h
   kernel/pathtracing_impl.cu
   kernel/persistent_thread.h
   kernel/pt_common.h
-  kernel/pt_params.h
   kernel/pt_standard_impl.cu
-  kernel/pt_standard_impl.cuh
   kernel/pt_standard_impl.h
   kernel/qbvh.cu
   kernel/qbvh.cuh
@@ -197,7 +197,6 @@ cuda_add_library(
   restir/restir.h
   restir/restir_debug.cu
   restir/restir_info.h
-  restir/restir_pt.cu
   restir/restir_reuse.cu
   restir/restir_sample_light.cuh
   svgf/svgf.cpp

@@ -48,10 +48,12 @@ namespace AT_NAME {
         PathContrib& operator=(const PathContrib& rhs)
         {
             v = rhs.v;
+            return *this;
         }
         PathContrib& operator=(PathContrib&& rhs) noexcept
         {
             v = rhs.v;
+            return *this;
         }
         ~PathContrib() = default;
 #endif
@@ -83,10 +85,12 @@ namespace AT_NAME {
         PathAttribute& operator=(const PathAttribute& rhs)
         {
             v = rhs.v;
+            return *this;
         }
         PathAttribute& operator=(PathAttribute&& rhs) noexcept
         {
             v = rhs.v;
+            return *this;
         }
         ~PathAttribute() = default;
 #endif

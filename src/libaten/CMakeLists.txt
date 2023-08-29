@@ -162,7 +162,6 @@ add_library(
   misc/key.h
   misc/omputil.cpp
   misc/omputil.h
-  misc/span.h
   misc/stream.h
   misc/thread.cpp
   misc/thread.h
@@ -180,6 +179,7 @@ add_library(
   proxy/DataCollector.h
   renderer/aorenderer.cpp
   renderer/aorenderer.h
+  renderer/aorenderer_impl.h
   renderer/aov.h
   renderer/background.h
   renderer/envmap.cpp
@@ -190,8 +190,9 @@ add_library(
   renderer/film.h
   renderer/pathtracing.cpp
   renderer/pathtracing.h
+  renderer/pathtracing_impl.h
+  renderer/pt_params.h
   renderer/renderer.h
-  renderer/renderer_utility.h
   sampler/bluenoiseSampler.h
   sampler/cmj.h
   sampler/halton.cpp

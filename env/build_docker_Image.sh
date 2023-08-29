@@ -16,7 +16,7 @@ EOF
 build_context="./"
 image_tag_prefix=""
 
-NVIDIA_CUDA_TAG="11.7.0-devel-ubuntu20.04"
+NVIDIA_CUDA_TAG="11.7.1-devel-ubuntu20.04"
 
 while getopts "b:n:p:" opt; do
   case "${opt}" in
@@ -39,9 +39,23 @@ shift $((OPTIND - 1))
 
 build_context="$(realpath "${build_context}")"
 
-nvidia_cuda="nvidia/cuda:${NVIDIA_CUDA_TAG}"
+# NOTE:
+# Need space between ":" and "-1"
+tail_image_tag_prefix="${image_tag_prefix: -1}"
+
+# If tail charachter of image_tag_prefix is "/", remove it.
+if [[ "${tail_image_tag_prefix}" == "/" ]]; then
+  image_tag_prefix="${image_tag_prefix/%?/}"
+fi
+
+nvidia_cuda="docker.io/nvidia/cuda:${NVIDIA_CUDA_TAG}"
 nvidia_cudagl="nvidia/cudagl:${NVIDIA_CUDA_TAG}"
 
-docker build -t "${image_tag_prefix}${nvidia_cudagl}" --build-arg from="${nvidia_cuda}" -f "${build_context}/cudagl/Dockerfile" "${build_context}"
-docker build -t "${image_tag_prefix}aten" --build-arg from="${image_tag_prefix}${nvidia_cudagl}" -f "${build_context}/aten/Dockerfile" "${build_context}"
-docker build -t "${image_tag_prefix}aten_dev" --build-arg from="${image_tag_prefix}aten:latest" -f "${build_context}/dev/Dockerfile" "${build_context}"
+docker pull "${nvidia_cuda}"
+
+export DOCKER_BUILDKIT=0
+export COMPOSE_DOCKER_CLI_BUILD=0
+
+docker build -t "${image_tag_prefix}/${nvidia_cudagl}" --build-arg from="${nvidia_cuda}" -f "${build_context}/cudagl/Dockerfile" "${build_context}"
+docker build -t "${image_tag_prefix}/aten" --build-arg from="${image_tag_prefix}/${nvidia_cudagl}" -f "${build_context}/aten/Dockerfile" "${build_context}"
+docker build -t "${image_tag_prefix}/aten_dev" --build-arg from="${image_tag_prefix}/aten:latest" -f "${build_context}/dev/Dockerfile" "${build_context}"

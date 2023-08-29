@@ -60,8 +60,8 @@ namespace idaten
 
     class CudaTexture : public CudaTextureResource {
     public:
-        CudaTexture() {}
-        virtual ~CudaTexture() final {}
+        CudaTexture() = default;
+        virtual ~CudaTexture() = default;
 
     public:
         void init(
@@ -73,7 +73,7 @@ namespace idaten
             int32_t width, int32_t height,
             int32_t level);
 
-        virtual cudaTextureObject_t bind() override final;
+        virtual cudaTextureObject_t bind() override;
 
     private:
         bool m_isMipmap{ false };

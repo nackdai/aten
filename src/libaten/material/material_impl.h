@@ -386,7 +386,7 @@ namespace AT_NAME
         template <typename T>
         struct has_texture_variable<
             T,
-            std::void_t<typename decltype(T::textures)>> : public std::true_type {};
+            std::void_t<decltype(T::textures)>> : public std::true_type {};
     }
 
     template <typename CONTEXT>

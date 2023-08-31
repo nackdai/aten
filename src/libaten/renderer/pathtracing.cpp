@@ -6,7 +6,7 @@
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/pathtracing_impl.h"
-#include "renderer/feature_line.h"
+#include "renderer/npr_impl.h"
 #include "sampler/cmj.h"
 
 //#define RELEASE_DEBUG
@@ -295,81 +295,27 @@ namespace aten
                 }
             }
             else {
-                aten::FeatureLine::Disc prev_disc;
-                if (depth > 0) {
-                    // Make dummy point to compute next sample ray.
-                    const auto dummy_query_hit_pos = ray.org + real(100) * ray.dir;
-                    hit_point_distance = length(dummy_query_hit_pos - disc.center);
+                auto res = aten::ShadeMissFeatureLineSampleRay<SampleRayNum>(
+                    sample_ray_descs,
+                    ctxt, ray, disc, depth, FeatureLineWidth, pixel_width, scene);
 
-                    prev_disc = disc;
-                    disc = aten::FeatureLine::computeNextDisc(
-                        dummy_query_hit_pos,
-                        ray.dir,
-                        prev_disc.radius,
-                        hit_point_distance,
-                        disc.accumulated_distance);
-                }
-
-                for (size_t i = 0; i < SampleRayNum; i++) {
-                    if (sample_ray_descs[i].is_terminated) {
-                        continue;
-                    }
-
-                    auto sample_ray = aten::FeatureLine::getRayFromDesc(sample_ray_descs[i]);
-                    if (depth > 0) {
-                        // Generate next sample ray.
-                        const auto res_next_sample_ray = aten::FeatureLine::computeNextSampleRay(
-                            sample_ray_descs[i],
-                            prev_disc, disc);
-                        const auto is_sample_ray_valid = std::get<0>(res_next_sample_ray);
-                        if (!is_sample_ray_valid) {
-                            sample_ray_descs[i].is_terminated = true;
-                            continue;
-                        }
-                        sample_ray = std::get<1>(res_next_sample_ray);
-                    }
-
-                    Intersection isect_sample_ray;
-                    hitrecord hrec_sample;
-
-                    if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
-                        const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
-                        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, ray, isect_sample_ray);
-
-                        const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
-                            hrec_sample.p, ray);
-
-                        if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
-                            const auto is_line_width = aten::FeatureLine::isInLineWidth(
-                                FeatureLineWidth,
-                                ray,
-                                hrec_sample.p,
-                                disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
-                                pixel_width);
-                            if (is_line_width) {
-                                // If sample ray doesn't hit anything, it is forcibly feature line.
-                                closest_sample_ray_idx = i;
-                                closest_sample_ray_distance = distance_sample_pos_on_query_ray;
-                            }
-                        }
-                    }
-                }
-
+                std::tie(closest_sample_ray_idx, closest_sample_ray_distance) = res;
 
                 if (closest_sample_ray_idx < 0) {
                     shadeMiss(idx, scene, depth, paths, rays, bg);
+                    willContinue = true;
                 }
-                willContinue = false;
             }
 
             if (depth < startDepth && !paths.attrib[idx].isTerminate) {
                 paths.contrib[idx].contrib = vec3(0);
             }
             else if (closest_sample_ray_idx >= 0) {
-                auto pdf_feature_line = real(1) / SampleRayNum;
-                pdf_feature_line = pdf_feature_line * (closest_sample_ray_distance * closest_sample_ray_distance);
-                const auto weight = paths.throughput[idx].pdfb / (paths.throughput[idx].pdfb + pdf_feature_line);
-                paths.contrib[idx].contrib += paths.throughput[idx].throughput * weight * LineColor;
+                AT_NAME::ComputeFeatureLineContribution(
+                    closest_sample_ray_distance,
+                    paths, idx,
+                    SampleRayNum, LineColor);
+                willContinue = true;
             }
 
             if (!willContinue) {

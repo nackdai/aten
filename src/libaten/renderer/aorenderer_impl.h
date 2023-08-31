@@ -18,19 +18,6 @@
 
 namespace AT_NAME
 {
-    namespace _detail {
-        template <typename A, typename B>
-        inline AT_DEVICE_MTRL_API void CopyVec3(A& dst, const B& src)
-        {
-            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
-                dst = src;
-            }
-            else {
-                dst = make_float3(src.x, src.y, src.z);
-            }
-        }
-    }
-
     template <typename SCENE = void>
     inline AT_DEVICE_MTRL_API void ShandeAO(
         int32_t idx,
@@ -50,8 +37,6 @@ namespace AT_NAME
         const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect.objid));
         AT_NAME::evaluate_hit_result(rec, obj, ctxt, ray, isect);
 
-        // �����ʒu�̖@��.
-        // ���̂���̃��C�̓��o���l��.
         aten::vec3 orienting_normal = rec.normal;
 
         aten::MaterialParameter mtrl;

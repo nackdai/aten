@@ -517,6 +517,9 @@
     <ClInclude Include="..\src\libaten\renderer\aorenderer_impl.h">
       <Filter>renderer</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr_impl.h">
+      <Filter>renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\libaten\visualizer\visualizer.cpp">

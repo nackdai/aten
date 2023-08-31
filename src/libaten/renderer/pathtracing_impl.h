@@ -79,6 +79,17 @@ namespace AT_NAME
                 dst += make_float3(add.x, add.y, add.z);
             }
         }
+
+        template <typename A, typename B>
+        inline AT_DEVICE_MTRL_API void CopyVec3(A& dst, const B& src)
+        {
+            if constexpr (std::is_same_v<A, B> && std::is_same_v<A, aten::vec3>) {
+                dst = src;
+            }
+            else {
+                dst = make_float3(src.x, src.y, src.z);
+            }
+        }
     }
 
     template <typename AOV_BUFFER_TYPE = aten::vec4>
@@ -535,8 +546,6 @@ namespace AT_NAME
 
         bool isBackfacing = dot(rec.normal, -ray.dir) < real(0);
 
-        // �����ʒu�̖@��.
-        // ���̂���̃��C�̓��o���l��.
         aten::vec3 orienting_normal = rec.normal;
 
         AT_NAME::FillMaterial(

@@ -351,6 +351,7 @@
     <ClInclude Include="..\src\libaten\renderer\envmap.h" />
     <ClInclude Include="..\src\libaten\renderer\feature_line.h" />
     <ClInclude Include="..\src\libaten\renderer\film.h" />
+    <ClInclude Include="..\src\libaten\renderer\npr_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing.h" />
     <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h" />
     <ClInclude Include="..\src\libaten\renderer\pt_params.h" />

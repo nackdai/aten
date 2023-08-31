@@ -36,6 +36,8 @@ namespace aten
 
             const auto& ray = rays_[idx];
 
+            path_host_.paths.attrib[idx].isHit = false;
+
             if (scene->hit(ctxt, ray, AT_MATH_EPSILON, AT_MATH_INF, isect)) {
                 if (depth == 0 && first_hrec) {
                     const auto& obj = ctxt.GetObject(isect.objid);

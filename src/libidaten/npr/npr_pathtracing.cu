@@ -130,6 +130,7 @@ namespace npr_pt {
                 continue;
             }
 
+            auto sample_ray = AT_NAME::FeatureLine::getRayFromDesc(sample_ray_info.descs[i]);
             if (depth > 0) {
                 // Generate next sample ray.
                 const auto res_next_sample_ray = AT_NAME::FeatureLine::computeNextSampleRay(
@@ -140,11 +141,8 @@ namespace npr_pt {
                     sample_ray_info.descs[i].is_terminated = true;
                     continue;
                 }
-                const auto sample_ray = aten::get<1>(res_next_sample_ray);
-                AT_NAME::FeatureLine::storeRayToDesc(sample_ray_info.descs[i], sample_ray);
+                sample_ray = aten::get<1>(res_next_sample_ray);
             }
-
-            const auto sample_ray = AT_NAME::FeatureLine::getRayFromDesc(sample_ray_info.descs[i]);
 
             aten::Intersection isect_sample_ray;
             aten::hitrecord hrec_sample;

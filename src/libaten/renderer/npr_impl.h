@@ -36,105 +36,228 @@ namespace AT_NAME
         paths.attrib[idx].isTerminate = true;
     }
 
-    template <int SampleRayNum, typename SCENE=void>
-    inline AT_DEVICE_MTRL_API aten::tuple<int32_t, float> ShadeMissFeatureLineSampleRay(
-        std::array<AT_NAME::FeatureLine::SampleRayDesc, SampleRayNum>& sample_ray_descs,
-        const AT_NAME::context& ctxt,
-        const aten::ray& ray,
-        AT_NAME::FeatureLine::Disc& disc,
-        const int32_t depth,
-        const real feature_line_width,
-        const real pixel_width,
-        SCENE* scene = nullptr)
+    inline AT_DEVICE_MTRL_API aten::ray GetSampleRay(
+        int32_t depth,
+        AT_NAME::FeatureLine::SampleRayDesc& sample_ray_desc,
+        const AT_NAME::FeatureLine::Disc& prev_disc,
+        const AT_NAME::FeatureLine::Disc& curr_disc)
     {
-        auto closest_sample_ray_distance = std::numeric_limits<real>::max();
-        int32_t closest_sample_ray_idx = -1;
-        real hit_point_distance = 0;
-
-        // NOTE:
-        // In order to compute sample ray, previous disc and next disc are necessary.
-        // In first bounce, initial point is camera original.
-        // So, previous disc is not necessary.
-
-        aten::FeatureLine::Disc prev_disc;
-
+        auto sample_ray = aten::FeatureLine::getRayFromDesc(sample_ray_desc);
         if (depth > 0) {
-            // Make dummy point to compute next sample ray.
-            const auto dummy_query_hit_pos = ray.org + real(100) * ray.dir;
+            // Generate next sample ray.
+            const auto res_next_sample_ray = aten::FeatureLine::computeNextSampleRay(
+                sample_ray_desc,
+                prev_disc, curr_disc);
+            const auto is_sample_ray_valid = std::get<0>(res_next_sample_ray);
+            if (is_sample_ray_valid) {
+                sample_ray = std::get<1>(res_next_sample_ray);
+            }
+            else {
+                sample_ray_desc.is_terminated = true;
+            }
+        }
+
+        return sample_ray;
+    }
+
+    inline AT_DEVICE_MTRL_API aten::tuple<bool, float> EvaluateQueryAndSampleRayHit(
+        AT_NAME::FeatureLine::SampleRayDesc& sample_ray_desc,
+        const AT_NAME::context& ctxt,
+        const aten::vec3& cam_org,
+        const aten::ray& query_ray,
+        const aten::hitrecord& hrec_query,
+        const real distance_query_ray_hit,
+        const aten::Intersection& isect_sample_ray,
+        const AT_NAME::FeatureLine::Disc& disc,
+        bool is_found_closest_sample_ray_hit,
+        real closest_sample_ray_distance,
+        const real FeatureLineWidth,
+        const real pixel_width,
+        const real ThresholdAlbedo,
+        const real ThresholdNormal)
+    {
+        // Query ray hits and then sample ray hits.
+
+        const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
+
+        aten::hitrecord hrec_sample;
+        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, query_ray, isect_sample_ray);
+
+        // If sample ray hit with the different mesh from query ray one, this sample ray won't bounce in next loop.
+        sample_ray_desc.is_terminated = hrec_sample.meshid != hrec_query.meshid;
+        sample_ray_desc.prev_ray_hit_pos = hrec_sample.p;
+        sample_ray_desc.prev_ray_hit_nml = hrec_sample.normal;
+
+        const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
+            hrec_sample.p, query_ray);
+
+        const auto is_line_width = aten::FeatureLine::isInLineWidth(
+            FeatureLineWidth,
+            query_ray,
+            hrec_sample.p,
+            disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
+            pixel_width);
+
+        if (is_line_width) {
+            const auto query_albedo = material::sampleAlbedoMap(
+                &ctxt.GetMaterial(hrec_query.mtrlid),
+                hrec_query.u, hrec_query.v);
+            const auto sample_albedo = material::sampleAlbedoMap(
+                &ctxt.GetMaterial(hrec_sample.mtrlid),
+                hrec_sample.u, hrec_sample.v);
+            const auto query_depth = length(hrec_query.p - cam_org);
+            const auto sample_depth = length(hrec_sample.p - cam_org);
+
+            const auto is_feature_line = aten::FeatureLine::evaluateMetrics(
+                query_ray.org,
+                hrec_query, hrec_sample,
+                query_albedo, sample_albedo,
+                query_depth, sample_depth,
+                ThresholdAlbedo, ThresholdNormal,
+                2);
+            if (is_feature_line) {
+                if (distance_sample_pos_on_query_ray < closest_sample_ray_distance
+                    && distance_sample_pos_on_query_ray < distance_query_ray_hit)
+                {
+                    // Deal with sample hit point as FeatureLine.
+                    is_found_closest_sample_ray_hit = true;
+                    closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                }
+                else if (distance_query_ray_hit < closest_sample_ray_distance) {
+                    // Deal with query hit point as FeatureLine.
+                    is_found_closest_sample_ray_hit = true;
+                    closest_sample_ray_distance = distance_query_ray_hit;
+                }
+            }
+        }
+        return aten::make_tuple<bool, float>(is_found_closest_sample_ray_hit, closest_sample_ray_distance);
+    }
+
+    inline AT_DEVICE_MTRL_API aten::tuple<bool, float> EvaluateQueryRayHitButSampleRayNotHit(
+        AT_NAME::FeatureLine::SampleRayDesc& sample_ray_desc,
+        const aten::ray& query_ray,
+        const aten::hitrecord& hrec_query,
+        const real distance_query_ray_hit,
+        const aten::ray& sample_ray,
+        const AT_NAME::FeatureLine::Disc& disc,
+        bool is_found_closest_sample_ray_hit,
+        real closest_sample_ray_distance,
+        const real feature_line_width,
+        const real pixel_width)
+    {
+        // Query ray hits but sample ray doesn't hit anything.
+
+        // Compute plane which query ray hits.
+        const auto query_hit_plane = aten::FeatureLine::computePlane(hrec_query);
+
+        // Even if sample ray doesn't hit anything, compute point which sample ray hit onto plane which query ray hits.
+        const auto res_sample_ray_dummy_hit = aten::FeatureLine::computeRayHitPosOnPlane(
+            query_hit_plane, sample_ray);
+
+        const auto is_hit_sample_ray_dummy_plane = std::get<0>(res_sample_ray_dummy_hit);
+        if (is_hit_sample_ray_dummy_plane) {
+            // Get point which sample ray hit onto plane which query ray hits.
+            const auto sample_ray_dummy_hit_pos = std::get<1>(res_sample_ray_dummy_hit);
+
+            const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
+                sample_ray_dummy_hit_pos, query_ray);
+
+            // If point which sample ray hits is within feature line width,
+            // that point is treated as feature line forcibly without checking metrics.
+            const auto is_line_width = aten::FeatureLine::isInLineWidth(
+                feature_line_width,
+                query_ray,
+                sample_ray_dummy_hit_pos,
+                disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
+                pixel_width);
+            if (is_line_width) {
+                if (distance_sample_pos_on_query_ray < closest_sample_ray_distance
+                    && distance_sample_pos_on_query_ray < distance_query_ray_hit)
+                {
+                    // Deal with sample hit point as FeatureLine.
+                    is_found_closest_sample_ray_hit = true;
+                    closest_sample_ray_distance = distance_sample_pos_on_query_ray;
+                }
+                else if (distance_query_ray_hit < closest_sample_ray_distance) {
+                    // Deal with query hit point as FeatureLine.
+                    is_found_closest_sample_ray_hit = true;
+                    closest_sample_ray_distance = distance_query_ray_hit;
+                }
+            }
+        }
+
+        // Sample ray doesn't hit anything. It means sample ray causes hit miss.
+        // So, traversing sample ray is terminated.
+        sample_ray_desc.is_terminated = true;
+
+        return aten::make_tuple<bool, float>(is_found_closest_sample_ray_hit, closest_sample_ray_distance);
+    }
+
+    inline AT_DEVICE_MTRL_API real ComputeNextDiscByDummyQueryRayHit(
+        int32_t depth,
+        real hit_point_distance,
+        const aten::ray& query_ray,
+        FeatureLine::Disc& prev_disc,
+        FeatureLine::Disc& disc)
+    {
+        if (depth > 0) {
+            // Query ray doesn't hit anything, so there is not specifiy hit point.
+            // So, in order to compute next sample ray, make dummy hit point.
+            const auto dummy_query_hit_pos = query_ray.org + real(100) * query_ray.dir;
             hit_point_distance = length(dummy_query_hit_pos - disc.center);
 
             prev_disc = disc;
             disc = aten::FeatureLine::computeNextDisc(
                 dummy_query_hit_pos,
-                ray.dir,
+                query_ray.dir,
                 prev_disc.radius,
                 hit_point_distance,
                 disc.accumulated_distance);
         }
 
-        for (int32_t i = 0; i < SampleRayNum; i++) {
-            if (sample_ray_descs[i].is_terminated) {
-                continue;
-            }
+        return hit_point_distance;
+    }
 
-            auto sample_ray = aten::FeatureLine::getRayFromDesc(sample_ray_descs[i]);
-            if (depth > 0) {
-                // Generate next sample ray.
-                const auto res_next_sample_ray = aten::FeatureLine::computeNextSampleRay(
-                    sample_ray_descs[i],
-                    prev_disc, disc);
-                const auto is_sample_ray_valid = std::get<0>(res_next_sample_ray);
-                if (!is_sample_ray_valid) {
-                    sample_ray_descs[i].is_terminated = true;
-                    continue;
-                }
-                sample_ray = std::get<1>(res_next_sample_ray);
-            }
+    inline AT_DEVICE_MTRL_API aten::tuple<bool, float> EvaluateQueryRayNotHitButSampleRayHit(
+        const AT_NAME::context& ctxt,
+        const aten::ray& query_ray,
+        const aten::Intersection& isect_sample_ray,
+        AT_NAME::FeatureLine::Disc& disc,
+        bool is_found_closest_sample_ray_hit,
+        real closest_sample_ray_distance,
+        const real feature_line_width,
+        const real pixel_width)
+    {
+        // Query ray doesn't hit, but sample ray hits.
 
-            Intersection isect_sample_ray;
-            hitrecord hrec_sample;
+        // Evaluate sample ray hit.
+        const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
 
-            auto is_hit = false;
+        aten::hitrecord hrec_sample;
+        AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, query_ray, isect_sample_ray);
 
-            if constexpr (!std::is_void_v<std::remove_pointer_t<SCENE>>) {
-                // NOTE:
-                // operation has to be related with template arg SCENE.
-                if (scene) {
-                    is_hit = scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray);
-                }
-            }
-            else {
-                // TODO
-            }
+        // Compute distance between point which sample ray projects onth query ray and query ray org.
+        const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
+            hrec_sample.p, query_ray);
 
-            if (is_hit) {
-                // Evaluate sample ray hit.
-                const auto& obj = ctxt.GetObject(isect_sample_ray.objid);
-                AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, ray, isect_sample_ray);
+        // Update closest sample ray.
+        if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
+            // Check if hit point by sample ray is within feature line width.
+            const auto is_line_width = aten::FeatureLine::isInLineWidth(
+                feature_line_width,
+                query_ray,
+                hrec_sample.p,
+                disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
+                pixel_width);
 
-                // Compute distance between point which sample ray projects onth query ray and query ray org.
-                const auto distance_sample_pos_on_query_ray = aten::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
-                    hrec_sample.p, ray);
-
-                // Update closest sample ray.
-                if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
-                    // Check if hit point by sample ray is within feature line width.
-                    const auto is_line_width = aten::FeatureLine::isInLineWidth(
-                        feature_line_width,
-                        ray,
-                        hrec_sample.p,
-                        disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
-                        pixel_width);
-
-                    if (is_line_width) {
-                        // If sample ray doesn't hit anything, it is forcibly feature line.
-                        closest_sample_ray_idx = i;
-                        closest_sample_ray_distance = distance_sample_pos_on_query_ray;
-                    }
-                }
+            if (is_line_width) {
+                // If sample ray hits somethng and it's within feature line width,
+                // it is forcibly treated as feature line without checking metrics.
+                is_found_closest_sample_ray_hit = true;
+                closest_sample_ray_distance = distance_sample_pos_on_query_ray;
             }
         }
 
-        return aten::make_tuple<int32_t, float>(closest_sample_ray_idx, closest_sample_ray_distance);
+        return aten::make_tuple<bool, float>(is_found_closest_sample_ray_hit, closest_sample_ray_distance);
     }
 }

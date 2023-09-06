@@ -45,7 +45,6 @@ namespace aten
             ray* rays,
             aten::ShadowRay* shadow_rays,
             int32_t rrDepth,
-            int32_t startDepth,
             int32_t maxDepth,
             camera* cam,
             scene* scene,
@@ -80,8 +79,6 @@ namespace aten
 
         // Depth to compute russinan roulette.
         int32_t m_rrDepth{ 1 };
-
-        int32_t m_startDepth{ 0 };
 
         std::vector<std::shared_ptr<texture>> m_noisetex;
 

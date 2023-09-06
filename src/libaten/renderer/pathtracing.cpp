@@ -81,10 +81,6 @@ namespace aten
                 willContinue = false;
             }
 
-            if (depth < m_startDepth && !path_host_.paths.attrib[idx].isTerminate) {
-                path_host_.paths.contrib[idx].contrib = vec3(0);
-            }
-
             if (!willContinue) {
                 break;
             }
@@ -100,7 +96,6 @@ namespace aten
         ray* rays,
         ShadowRay* shadow_rays,
         int32_t rrDepth,
-        int32_t startDepth,
         int32_t maxDepth,
         camera* cam,
         scene* scene,
@@ -267,10 +262,7 @@ namespace aten
                 }
             }
 
-            if (depth < startDepth && !paths.attrib[idx].isTerminate) {
-                paths.contrib[idx].contrib = vec3(0);
-            }
-            else if (is_found_closest_sample_ray_hit) {
+            if (is_found_closest_sample_ray_hit) {
                 AT_NAME::ComputeFeatureLineContribution(
                     closest_sample_ray_distance,
                     paths, idx,
@@ -448,7 +440,6 @@ namespace aten
 
         m_maxDepth = dst.maxDepth;
         m_rrDepth = dst.russianRouletteDepth;
-        m_startDepth = dst.startDepth;
 
         if (m_rrDepth > m_maxDepth) {
             m_rrDepth = m_maxDepth - 1;
@@ -516,7 +507,7 @@ namespace aten
                             radiance_with_feature_line(
                                 idx,
                                 path_host_.paths, ctxt, rays_.data(), shadow_rays_.data(),
-                                m_rrDepth, m_startDepth, m_maxDepth,
+                                m_rrDepth, m_maxDepth,
                                 camera,
                                 scene,
                                 bg());

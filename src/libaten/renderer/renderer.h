@@ -16,10 +16,7 @@ namespace aten
         int32_t height{ 0 };
         uint32_t maxDepth{ 1 };
         uint32_t russianRouletteDepth{ 1 };
-        uint32_t startDepth{ 0 };
         uint32_t sample{ 1 };
-        uint32_t mutation{ 1 };
-        uint32_t mltNum{ 1 };
         Film* buffer{ nullptr };
         Film* variance{ nullptr };
     };

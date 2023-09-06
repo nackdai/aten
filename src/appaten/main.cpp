@@ -87,10 +87,7 @@ void display(aten::window *wnd)
         dst.height = HEIGHT;
         dst.maxDepth = 5;
         dst.russianRouletteDepth = 3;
-        dst.startDepth = 0;
         dst.sample = 1;
-        dst.mutation = 10;
-        dst.mltNum = 10;
         dst.buffer = &g_buffer;
     }
 

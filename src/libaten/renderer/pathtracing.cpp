@@ -239,7 +239,7 @@ namespace aten
                     Intersection isect_sample_ray;
                     if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
                         // Query ray doesn't hit, but sample ray hits.
-                        aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = aten::EvaluateQueryRayNotHitButSampleRayHit(
+                        aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryRayNotHitButSampleRayHit(
                             ctxt, ray,
                             isect_sample_ray,
                             disc,
@@ -251,6 +251,7 @@ namespace aten
                         // Sample ray doesn't hit anything. It means sample ray causes hit miss.
                         // So, traversing sample ray is terminated.
                         sample_ray_descs[i].is_terminated = true;
+                        break;
                     }
                 }
 

@@ -172,7 +172,7 @@ namespace aten
 
                     if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
                         // Query ray hits and then sample ray hits.
-                        std::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryAndSampleRayHit(
+                        aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryAndSampleRayHit(
                             sample_ray_descs[i],
                             ctxt, cam_org,
                             ray, hrec_query, distance_query_ray_hit,
@@ -185,7 +185,7 @@ namespace aten
                     }
                     else {
                         // Query ray hits but sample ray doesn't hit anything.
-                        std::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryRayHitButSampleRayNotHit(
+                        aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryRayHitButSampleRayNotHit(
                             sample_ray_descs[i],
                             ray, hrec_query, distance_query_ray_hit,
                             sample_ray, disc,
@@ -239,7 +239,7 @@ namespace aten
                     Intersection isect_sample_ray;
                     if (scene->hit(ctxt, sample_ray, AT_MATH_EPSILON, AT_MATH_INF, isect_sample_ray)) {
                         // Query ray doesn't hit, but sample ray hits.
-                        std::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = aten::EvaluateQueryRayNotHitButSampleRayHit(
+                        aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = aten::EvaluateQueryRayNotHitButSampleRayHit(
                             ctxt, ray,
                             isect_sample_ray,
                             disc,
@@ -256,7 +256,7 @@ namespace aten
 
                 if (!is_found_closest_sample_ray_hit) {
                     shadeMiss(idx, scene, depth, paths, rays, bg);
-                    willContinue = true;
+                    willContinue = false;
                 }
             }
 
@@ -264,7 +264,7 @@ namespace aten
                 AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
                     closest_sample_ray_distance,
                     paths, idx, LineColor);
-                willContinue = true;
+                willContinue = false;
             }
 
             if (!willContinue) {

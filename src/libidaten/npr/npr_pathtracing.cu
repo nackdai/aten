@@ -181,8 +181,6 @@ namespace npr_pt {
         const aten::ray* __restrict__ rays,
         idaten::context ctxt)
     {
-        constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
-
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -196,79 +194,72 @@ namespace npr_pt {
             return;
         }
 
-        const auto& query_ray = rays[idx];
+        // Query ray doesn't hit anything, but evaluate a possibility that sample ray might hit something.
 
+        const auto& isect = isects[idx];
+
+        const auto& query_ray = rays[idx];
+        auto* sampler = &paths.sampler[idx];
+
+        const auto& cam_org = camera.origin;
+
+        constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
+
+        // TODO: These value should be configurable.
         constexpr real ThresholdAlbedo = 0.1f;
         constexpr real ThresholdNormal = 0.1f;
 
+        auto& sample_ray_info = sample_ray_infos[idx];
+        auto& sample_ray_descs = sample_ray_info.descs;
+        auto& disc = sample_ray_info.disc;
+
         auto closest_sample_ray_distance = std::numeric_limits<real>::max();
-        int32_t closest_sample_ray_idx = -1;
+        bool is_found_closest_sample_ray_hit = false;
         real hit_point_distance = 0;
 
-        auto& sample_ray_info = sample_ray_infos[idx];
+        // NOTE:
+        // In order to compute sample ray, previous disc and next disc are necessary.
+        // In first bounce, initial point is camera original.
+        // So, previous disc is not necessary.
 
-        auto disc = sample_ray_infos->disc;
-
-        // Make dummy point to compute next sample ray.
-        const auto prev_disc = disc;
-        {
-            const auto dummy_query_hit_pos = query_ray.org + real(100) * query_ray.dir;
-            const auto hit_point_distance = length(dummy_query_hit_pos - disc.center);
-
-            disc = AT_NAME::FeatureLine::computeNextDisc(
-                dummy_query_hit_pos,
-                query_ray.dir,
-                prev_disc.radius,
-                hit_point_distance,
-                disc.accumulated_distance);
-        }
+        AT_NAME::FeatureLine::Disc prev_disc;
+        hit_point_distance = ComputeNextDiscByDummyQueryRayHit(depth, hit_point_distance, query_ray, prev_disc, disc);
 
         for (size_t i = 0; i < SampleRayNum; i++) {
-            if (sample_ray_info.descs[i].is_terminated) {
+            if (sample_ray_descs[i].is_terminated) {
                 continue;
             }
 
-            auto sample_ray = AT_NAME::FeatureLine::getRayFromDesc(sample_ray_info.descs[i]);
-
-            // Generate next sample ray.
-            const auto res_next_sample_ray = AT_NAME::FeatureLine::computeNextSampleRay(
-                sample_ray_info.descs[i],
+            auto sample_ray = AT_NAME::GetSampleRay(
+                depth,
+                sample_ray_descs[i],
                 prev_disc, disc);
-            const auto is_sample_ray_valid = aten::get<0>(res_next_sample_ray);
-            if (!is_sample_ray_valid) {
-                sample_ray_info.descs[i].is_terminated = true;
+            if (sample_ray_descs[i].is_terminated) {
                 continue;
             }
-            sample_ray = aten::get<1>(res_next_sample_ray);
 
             aten::Intersection isect_sample_ray;
-            aten::hitrecord hrec_sample;
 
             auto is_hit = intersectClosest(&ctxt, sample_ray, &isect_sample_ray);
             if (is_hit) {
-                const auto& obj = ctxt.GetObject(static_cast<uint32_t>(isect_sample_ray.objid));
-                AT_NAME::evaluate_hit_result(hrec_sample, obj, ctxt, sample_ray, isect_sample_ray);
-
-                const auto distance_sample_pos_on_query_ray = AT_NAME::FeatureLine::computeDistanceBetweenProjectedPosOnRayAndRayOrg(
-                    hrec_sample.p, query_ray);
-
-                if (distance_sample_pos_on_query_ray < closest_sample_ray_distance) {
-                    const auto is_line_width = AT_NAME::FeatureLine::isInLineWidth(
-                        FeatureLineWidth,
-                        query_ray,
-                        hrec_sample.p,
-                        disc.accumulated_distance - 1, // NOTE: -1 is for initial camera distance.
-                        pixel_width);
-                    if (is_line_width) {
-                        // If sample ray doesn't hit anything, it is forcibly feature line.
-                        closest_sample_ray_idx = i;
-                        closest_sample_ray_distance = distance_sample_pos_on_query_ray;
-                    }
-                }
+                // Query ray doesn't hit, but sample ray hits.
+                aten::tie(is_found_closest_sample_ray_hit, closest_sample_ray_distance) = AT_NAME::EvaluateQueryRayNotHitButSampleRayHit(
+                    ctxt, query_ray,
+                    isect_sample_ray,
+                    disc,
+                    is_found_closest_sample_ray_hit,
+                    closest_sample_ray_distance,
+                    FeatureLineWidth, pixel_width);
+            }
+            else {
+                // Sample ray doesn't hit anything. It means sample ray causes hit miss.
+                // So, traversing sample ray is terminated.
+                sample_ray_descs[i].is_terminated = true;
+                break;
             }
         }
 
-        if (closest_sample_ray_idx >= 0) {
+        if (is_found_closest_sample_ray_hit) {
             AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
                 closest_sample_ray_distance, paths, idx, line_color);
         }
@@ -343,28 +334,26 @@ namespace idaten {
                 sample_ray_infos_.resize(width * height);
             }
 
-            if (bounce > 0) {
-                auto& hitcount = m_compaction.getCount();
+            auto& hitcount = m_compaction.getCount();
 
-                const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
+            const auto pixel_width = AT_NAME::camera::computePixelWidthAtDistance(m_cam, 1);
 
-                // Sample ray hit miss never happen at 1st bounce.
-                npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
-                    width, height,
-                    aten::vec3(0, 1, 0),
-                    feature_line_width_,
-                    pixel_width,
-                    sample_ray_infos_.data(),
-                    bounce,
-                    m_hitidx.data(),
-                    hitcount.data(),
-                    path_host_->paths,
-                    m_cam,
-                    m_isects.data(),
-                    m_rays.data(),
-                    ctxt_host_.ctxt);
-                checkCudaKernel(shadeMissSampleRay);
-            }
+            // Sample ray hit miss never happen at 1st bounce.
+            npr_pt::shadeMissSampleRay << <grid, block, 0, m_stream >> > (
+                width, height,
+                aten::vec3(0, 1, 0),
+                feature_line_width_,
+                pixel_width,
+                sample_ray_infos_.data(),
+                bounce,
+                m_hitidx.data(),
+                hitcount.data(),
+                path_host_->paths,
+                m_cam,
+                m_isects.data(),
+                m_rays.data(),
+                ctxt_host_.ctxt);
+            checkCudaKernel(shadeMissSampleRay);
         }
 
         PathTracing::missShade(width, height, bounce);

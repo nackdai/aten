@@ -334,6 +334,7 @@
     <ClInclude Include="..\src\libaten\misc\bitflag.h" />
     <ClInclude Include="..\src\libaten\misc\color.h" />
     <ClInclude Include="..\src\libaten\misc\key.h" />
+    <ClInclude Include="..\src\libaten\misc\misc.h" />
     <ClInclude Include="..\src\libaten\misc\omputil.h" />
     <ClInclude Include="..\src\libaten\misc\stream.h" />
     <ClInclude Include="..\src\libaten\misc\thread.h" />

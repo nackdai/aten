@@ -119,14 +119,12 @@ namespace aten
         static const aten::vec3 LineColor(0, 1, 0);
 
         std::array<aten::FeatureLine::SampleRayDesc, SampleRayNum> sample_ray_descs;
+        aten::FeatureLine::Disc disc;
 
-        auto disc = aten::FeatureLine::generateDisc(ray, FeatureLineWidth, pixel_width);
-        for (size_t i = 0; i < SampleRayNum; i++) {
-            const auto sample_ray = aten::FeatureLine::generateSampleRay(sample_ray_descs[i], *sampler, ray, disc);
-            aten::FeatureLine::storeRayToDesc(sample_ray_descs[i], sample_ray);
-        }
-
-        disc.accumulated_distance = 1;
+        AT_NAME::GenerateSampleRayPerQueryRay<SampleRayNum>(
+            sample_ray_descs, disc,
+            ray, *sampler,
+            FeatureLineWidth, pixel_width);
 
         while (depth < maxDepth) {
             hitrecord hrec_query;
@@ -263,10 +261,9 @@ namespace aten
             }
 
             if (is_found_closest_sample_ray_hit) {
-                AT_NAME::ComputeFeatureLineContribution(
+                AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
                     closest_sample_ray_distance,
-                    paths, idx,
-                    SampleRayNum, LineColor);
+                    paths, idx, LineColor);
                 willContinue = true;
             }
 

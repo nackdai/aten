@@ -301,6 +301,9 @@
     <ClInclude Include="..\src\libaten\renderer\aorenderer_impl.h">
       <Filter>ao</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr_impl.h">
+      <Filter>npr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cuda">

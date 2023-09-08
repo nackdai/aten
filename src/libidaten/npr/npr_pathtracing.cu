@@ -11,6 +11,7 @@
 #include "cuda/cudamemory.h"
 
 #include "renderer/pt_params.h"
+#include "renderer/npr_impl.h"
 
 namespace npr_pt {
     __global__ void generateSampleRay(
@@ -33,32 +34,10 @@ namespace npr_pt {
         auto& sample_ray_info = sample_ray_infos[idx];
         const auto& ray = rays[idx];
 
-        sample_ray_info.disc = AT_NAME::FeatureLine::generateDisc(ray, FeatureLineWidth, pixel_width);
-        for (size_t i = 0; i < AT_NAME::NPRPathTracing::SampleRayNum; i++) {
-            const auto sample_ray = AT_NAME::FeatureLine::generateSampleRay(
-                sample_ray_info.descs[i], paths.sampler[idx], ray, sample_ray_info.disc);
-            AT_NAME::FeatureLine::storeRayToDesc(sample_ray_info.descs[i], sample_ray);
-            sample_ray_info.descs[i].is_terminated = false;
-        }
-
-        sample_ray_info.disc.accumulated_distance = 1;
-    }
-
-    inline __device__ void computeFeatureLineContrib(
-        real closest_sample_ray_distance,
-        idaten::Path paths,
-        int32_t idx,
-        const aten::vec3& line_color)
-    {
-        auto pdf_feature_line = real(1) / idaten::NPRPathTracing::SampleRayNum;
-        pdf_feature_line = pdf_feature_line * (closest_sample_ray_distance * closest_sample_ray_distance);
-        const auto pdfb = paths.throughput[idx].pdfb;
-        const auto weight = pdfb / (pdfb + pdf_feature_line);
-        const auto contrib = paths.throughput[idx].throughput * weight * line_color;
-
-        paths.contrib[idx].contrib = make_float3(contrib.x, contrib.y, contrib.z);
-        paths.attrib[idx].isKill = true;
-        paths.attrib[idx].isTerminate = true;
+        AT_NAME::GenerateSampleRayPerQueryRay<idaten::NPRPathTracing::SampleRayNum>(
+            sample_ray_info.descs, sample_ray_info.disc,
+            ray, paths.sampler[idx],
+            FeatureLineWidth, pixel_width);
     }
 
     __global__ void shadeSampleRay(
@@ -75,6 +54,8 @@ namespace npr_pt {
         const aten::ray* __restrict__ rays,
         idaten::context ctxt)
     {
+        constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
+
         int32_t idx = blockIdx.x * blockDim.x + threadIdx.x;
 
         if (idx >= *hitnum) {
@@ -125,7 +106,7 @@ namespace npr_pt {
             hit_point_distance,
             disc.accumulated_distance);
 
-        for (size_t i = 0; i < idaten::NPRPathTracing::SampleRayNum; i++) {
+        for (size_t i = 0; i < SampleRayNum; i++) {
             if (sample_ray_info.descs[i].is_terminated) {
                 continue;
             }
@@ -248,7 +229,8 @@ namespace npr_pt {
         }
 
         if (closest_sample_ray_idx >= 0) {
-            computeFeatureLineContrib(closest_sample_ray_distance, paths, idx, line_color);
+            AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
+                closest_sample_ray_distance, paths, idx, line_color);
         }
 
         disc.accumulated_distance += hit_point_distance;
@@ -270,6 +252,8 @@ namespace npr_pt {
         const aten::ray* __restrict__ rays,
         idaten::context ctxt)
     {
+        constexpr auto SampleRayNum = aten::array_size<decltype(idaten::NPRPathTracing::SampleRayInfo::descs)>::size;
+
         auto ix = blockIdx.x * blockDim.x + threadIdx.x;
         auto iy = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -310,7 +294,7 @@ namespace npr_pt {
                 disc.accumulated_distance);
         }
 
-        for (size_t i = 0; i < idaten::NPRPathTracing::SampleRayNum; i++) {
+        for (size_t i = 0; i < SampleRayNum; i++) {
             if (sample_ray_info.descs[i].is_terminated) {
                 continue;
             }
@@ -356,7 +340,8 @@ namespace npr_pt {
         }
 
         if (closest_sample_ray_idx >= 0) {
-            computeFeatureLineContrib(closest_sample_ray_distance, paths, idx, line_color);
+            AT_NAME::ComputeFeatureLineContribution<SampleRayNum>(
+                closest_sample_ray_distance, paths, idx, line_color);
         }
     }
 }

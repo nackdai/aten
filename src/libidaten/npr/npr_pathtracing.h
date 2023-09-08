@@ -12,7 +12,7 @@ namespace idaten
         static constexpr size_t SampleRayNum = 8;
 
         struct SampleRayInfo {
-            AT_NAME::FeatureLine::SampleRayDesc descs[SampleRayNum];
+            std::array<AT_NAME::FeatureLine::SampleRayDesc, SampleRayNum> descs;
             AT_NAME::FeatureLine::Disc disc;
         };
 

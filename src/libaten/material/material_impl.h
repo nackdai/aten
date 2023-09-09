@@ -399,13 +399,14 @@ namespace AT_NAME
         bool is_valid_mtrl = mtrl_id >= 0;
 
         if (is_valid_mtrl) {
-            dst_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id));
-
             if (is_voxel) {
                 // Replace to lambert.
                 const auto& albedo = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id)).baseColor;
                 dst_mtrl = aten::MaterialParameter(aten::MaterialType::Lambert, aten::MaterialAttributeLambert);
                 dst_mtrl.baseColor = albedo;
+            }
+            else {
+                dst_mtrl = ctxt.GetMaterial(static_cast<uint32_t>(mtrl_id));
             }
             // Check if `context` class has `textures` variable.
             if constexpr (detail::has_texture_variable<CONTEXT>::value) {

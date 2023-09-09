@@ -121,12 +121,13 @@ namespace AT_NAME
             pixel_width);
 
         if (is_line_width) {
-            const auto query_albedo = material::sampleAlbedoMap(
-                &ctxt.GetMaterial(hrec_query.mtrlid),
-                hrec_query.u, hrec_query.v);
-            const auto sample_albedo = material::sampleAlbedoMap(
-                &ctxt.GetMaterial(hrec_sample.mtrlid),
-                hrec_sample.u, hrec_sample.v);
+            aten::MaterialParameter mtrl_tmp;
+            AT_NAME::FillMaterial(mtrl_tmp, ctxt,hrec_query.mtrlid, hrec_query.isVoxel);
+            const auto query_albedo = material::sampleAlbedoMap(&mtrl_tmp, hrec_query.u, hrec_query.v);
+
+            AT_NAME::FillMaterial(mtrl_tmp, ctxt, hrec_sample.mtrlid, hrec_sample.isVoxel);
+            const auto sample_albedo = material::sampleAlbedoMap(&mtrl_tmp, hrec_sample.u, hrec_sample.v);
+
             const auto query_depth = length(hrec_query.p - cam_org);
             const auto sample_depth = length(hrec_sample.p - cam_org);
 

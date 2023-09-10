@@ -45,6 +45,7 @@ namespace aten {
 
         m_width = width;
         m_height = height;
+        m_fmt = fmt;
 
         if (needDepth) {
             CALL_GL_API(::glGenTextures(1, &m_depth));
@@ -127,5 +128,25 @@ namespace aten {
         AT_ASSERT(m_fbo == 0);
 
         m_num = num;
+    }
+
+    void FBO::SaveToBuffer(std::vector<uint8_t>& dst, int32_t target_idx/*= 0*/)
+    {
+        const auto bpp = GetBytesPerPxiel(m_fmt);
+        dst.resize(m_width * m_height * bpp);
+
+        CALL_GL_API(::glBindFramebuffer(GL_FRAMEBUFFER, m_fbo));
+        CALL_GL_API(::glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[target_idx], 0));
+
+        GLenum pixelfmt = 0;
+        GLenum pixeltype = 0;
+        GLenum pixelinternal = 0;
+
+        getGLPixelFormat(
+            m_fmt,
+            pixelfmt, pixeltype, pixelinternal);
+
+        CALL_GL_API(::glReadBuffer(GL_COLOR_ATTACHMENT0));
+        CALL_GL_API(::glReadPixels(0, 0, m_width, m_height, pixelfmt, pixeltype, dst.data()));
     }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "types.h"
 #include "math/vec3.h"
 
@@ -9,7 +11,7 @@
 namespace AT_NAME {
     template <typename _T, int32_t N>
     struct TColor {
-        _T c[N];
+        std::array<_T, N> c;
 
         _T& r()
         {
@@ -23,11 +25,12 @@ namespace AT_NAME {
         {
             return c[2];
         }
+        static constexpr size_t BPP = sizeof(_T) * N;
     };
 
     template <typename _T>
     struct TColor<_T, 4> {
-        _T c[4];
+        std::array<_T, 4> c;
 
         _T& r()
         {

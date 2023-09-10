@@ -224,7 +224,7 @@ namespace aten
 
         std::vector<ScreenShotImageType> dst(m_width * m_height);
 
-        static const int32_t bpp = sizeof(ScreenShotImageType);
+        constexpr int32_t bpp = ScreenShotImageType::BPP;
         const int32_t pitch = m_width * bpp;
 
 #ifdef ENABLE_OMP

@@ -50,6 +50,8 @@ namespace aten {
 
         void asMulti(uint32_t num);
 
+        void SaveToBuffer(std::vector<uint8_t>& dst, int32_t target_idx = 0);
+
         using FuncPrepareFbo = std::function<void(const uint32_t*, int32_t, std::vector<uint32_t>&)>;
         void setPrepareFboFunction(FuncPrepareFbo func)
         {

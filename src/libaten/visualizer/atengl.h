@@ -18,19 +18,19 @@ namespace aten {
         GLenum& gltype,
         GLenum& glinternal)
     {
-        static GLenum glpixelfmt[] = {
+        constexpr GLenum glpixelfmt[] = {
             GL_RGBA,
             GL_RGBA,
             GL_RGBA,
         };
 
-        static GLenum glpixeltype[] = {
+        constexpr GLenum glpixeltype[] = {
             GL_UNSIGNED_BYTE,
             GL_FLOAT,
             GL_HALF_FLOAT,
         };
 
-        static GLenum glpixelinternal[] = {
+        constexpr GLenum glpixelinternal[] = {
             GL_RGBA,
             GL_RGBA32F,
             GL_RGBA16F,
@@ -41,5 +41,13 @@ namespace aten {
         glinternal = glpixelinternal[idx];
         glfmt = glpixelfmt[idx];
         gltype = glpixeltype[idx];
+    }
+
+    inline int32_t GetBytesPerPxiel(PixelFormat fmt)
+    {
+        constexpr int32_t bpp[] = {
+            4, 16, 8,
+        };
+        return bpp[static_cast<size_t>(fmt)];
     }
 }

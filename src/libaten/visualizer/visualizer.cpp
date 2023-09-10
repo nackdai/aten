@@ -343,7 +343,7 @@ namespace aten
         // up-side-down.
         std::vector<ScreenShotImageType> dst(width * height);
 
-        static const int32_t bpp = sizeof(ScreenShotImageType);
+        constexpr size_t bpp = ScreenShotImageType::BPP;
         const int32_t pitch = width * bpp;
 
 #ifdef ENABLE_OMP
@@ -360,7 +360,7 @@ namespace aten
                 pitch);
         }
 
-        auto ret = ::stbi_write_png(filename.data(), width, height, bpp, &dst[0], pitch);
+        auto ret = ::stbi_write_png(filename.data(), width, height, bpp, dst.data(), pitch);
         AT_ASSERT(ret > 0);
     }
 

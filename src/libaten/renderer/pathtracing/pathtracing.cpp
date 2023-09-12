@@ -422,16 +422,12 @@ namespace aten
         paths.contrib[idx].contrib += paths.throughput[idx].throughput * misW * emit;
     }
 
-    static uint32_t frame = 0;
-
     void PathTracing::onRender(
         const context& ctxt,
         Destination& dst,
         scene* scene,
         camera* camera)
     {
-        frame++;
-
         int32_t width = dst.width;
         int32_t height = dst.height;
         uint32_t samples = dst.sample;

@@ -4,7 +4,7 @@
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/ao/aorenderer_impl.h"
-#include "renderer/pathtracing_impl.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 
 //#define RELEASE_DEBUG
 

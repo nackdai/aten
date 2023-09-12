@@ -1,7 +1,7 @@
 #pragma once
 
 #include "renderer/npr/feature_line.h"
-#include "renderer/pathtracing_impl.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 #include "geometry/EvaluateHitResult.h"
 #include "misc/tuple.h"
 #include "misc/misc.h"

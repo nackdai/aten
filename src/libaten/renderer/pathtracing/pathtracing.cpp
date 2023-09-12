@@ -1,11 +1,11 @@
 #include <array>
 
-#include "renderer/pathtracing.h"
+#include "renderer/pathtracing/pathtracing.h"
 
 #include "material/material_impl.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "renderer/pathtracing_impl.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 #include "renderer/npr/npr_impl.h"
 #include "sampler/cmj.h"
 

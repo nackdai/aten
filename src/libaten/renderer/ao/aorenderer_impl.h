@@ -2,8 +2,8 @@
 
 #include "geometry/EvaluateHitResult.h"
 #include "material/material_impl.h"
-#include "renderer/pt_params.h"
-#include "renderer/pathtracing_impl.h"
+#include "renderer/pathtracing/pt_params.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 #include "sampler/cmj.h"
 #include "scene/scene.h"
 

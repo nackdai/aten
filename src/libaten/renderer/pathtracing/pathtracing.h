@@ -4,7 +4,7 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "light/pointlight.h"
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pt_params.h"
 
 namespace aten
 {

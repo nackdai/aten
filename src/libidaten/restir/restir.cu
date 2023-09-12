@@ -14,7 +14,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
-#include "renderer/pathtracing_impl.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 
 __global__ void initReSTIRParameters(
     int32_t width, int32_t height,

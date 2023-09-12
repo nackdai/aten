@@ -10,7 +10,7 @@
 
 #include "aten4idaten.h"
 #include "light/light_impl.h"
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pt_params.h"
 
 __global__ void computeTemporalReuse(
     idaten::Path paths,

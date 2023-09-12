@@ -12,8 +12,8 @@
 #include "kernel/pt_standard_impl.h"
 
 #include "renderer/aov.h"
-#include "renderer/pathtracing_impl.h"
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
+#include "renderer/pathtracing/pt_params.h"
 
 // TODO
 // persistend thread works with CUDA 10.1.

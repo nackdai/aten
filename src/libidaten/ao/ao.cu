@@ -9,7 +9,7 @@
 #include "cuda/cudautil.h"
 
 #include "aten4idaten.h"
-#include "renderer/aorenderer_impl.h"
+#include "renderer/ao/aorenderer_impl.h"
 
 namespace ao {
     __global__ void shadeMissAO(

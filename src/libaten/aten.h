@@ -102,7 +102,7 @@
 #include "renderer/background.h"
 #include "renderer/envmap.h"
 #include "renderer/pathtracing.h"
-#include "renderer/aorenderer.h"
+#include "renderer/ao/aorenderer.h"
 
 #include "posteffect/BloomEffect.h"
 

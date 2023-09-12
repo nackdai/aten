@@ -6,7 +6,7 @@
 #include "misc/omputil.h"
 #include "misc/timer.h"
 #include "renderer/pathtracing_impl.h"
-#include "renderer/npr_impl.h"
+#include "renderer/npr/npr_impl.h"
 #include "sampler/cmj.h"
 
 //#define RELEASE_DEBUG

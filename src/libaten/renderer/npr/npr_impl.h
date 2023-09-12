@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/feature_line.h"
+#include "renderer/npr/feature_line.h"
 #include "renderer/pathtracing_impl.h"
 #include "geometry/EvaluateHitResult.h"
 #include "misc/tuple.h"

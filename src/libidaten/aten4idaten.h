@@ -55,7 +55,7 @@
 
 #include "renderer/aov.h"
 #include "renderer/envmap.h"
-#include "renderer/feature_line.h"
+#include "renderer/npr/feature_line.h"
 
 #include "sampler/sampler.h"
 #include "sampler/wanghash.h"

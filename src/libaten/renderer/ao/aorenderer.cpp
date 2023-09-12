@@ -1,9 +1,9 @@
-#include "renderer/aorenderer.h"
+#include "renderer/ao/aorenderer.h"
 
 #include "material/lambert.h"
 #include "misc/omputil.h"
 #include "misc/timer.h"
-#include "renderer/aorenderer_impl.h"
+#include "renderer/ao/aorenderer_impl.h"
 #include "renderer/pathtracing_impl.h"
 
 //#define RELEASE_DEBUG

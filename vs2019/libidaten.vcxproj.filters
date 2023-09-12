@@ -265,9 +265,6 @@
     <ClInclude Include="..\src\libaten\renderer\aov.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\feature_line.h">
-      <Filter>aten\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libidaten\npr\npr_pathtracing.h">
       <Filter>npr</Filter>
     </ClInclude>
@@ -298,11 +295,14 @@
     <ClInclude Include="..\src\libaten\renderer\pt_params.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\aorenderer_impl.h">
+    <ClInclude Include="..\src\libaten\renderer\ao\aorenderer_impl.h">
       <Filter>ao</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\npr_impl.h">
+    <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h">
       <Filter>npr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h">
+      <Filter>aten\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

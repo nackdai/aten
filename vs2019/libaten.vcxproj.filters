@@ -97,6 +97,12 @@
     <Filter Include="ui\imgui\backends">
       <UniqueIdentifier>{35433dfa-cf83-4e0a-b2e2-f1a8d4338caa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderer\ao">
+      <UniqueIdentifier>{b4894c6b-75be-453c-8654-15ff3460293d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderer\npr">
+      <UniqueIdentifier>{f51a8d4a-731f-4661-a697-66a85e14fe19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -439,9 +445,6 @@
     <ClInclude Include="..\src\libaten\sampler\bluenoiseSampler.h">
       <Filter>sampler</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\aorenderer.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\3rdparty\imgui\backends\imgui_impl_glfw.h">
       <Filter>ui\imgui\backends</Filter>
     </ClInclude>
@@ -461,9 +464,6 @@
       <Filter>material</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\aov.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\feature_line.h">
       <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\misc\tuple.h">
@@ -514,14 +514,20 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h">
       <Filter>renderer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\aorenderer_impl.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\npr_impl.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\misc.h">
       <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\ao\aorenderer.h">
+      <Filter>renderer\ao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\ao\aorenderer_impl.h">
+      <Filter>renderer\ao</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h">
+      <Filter>renderer\npr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h">
+      <Filter>renderer\npr</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -747,9 +753,6 @@
     <ClCompile Include="..\src\libaten\material\lambert_refraction.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\aorenderer.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\3rdparty\imgui\backends\imgui_impl_glfw.cpp">
       <Filter>ui\imgui\backends</Filter>
     </ClCompile>
@@ -777,9 +780,6 @@
     <ClCompile Include="..\src\libaten\material\car_paint.cpp">
       <Filter>material</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\feature_line.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\filter\magnifier.cpp">
       <Filter>filter</Filter>
     </ClCompile>
@@ -797,6 +797,12 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\scene\host_scene_context.cpp">
       <Filter>scene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\ao\aorenderer.cpp">
+      <Filter>renderer\ao</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\npr\feature_line.cpp">
+      <Filter>renderer\npr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -101,7 +101,7 @@
 #include "renderer/film.h"
 #include "renderer/background.h"
 #include "renderer/envmap.h"
-#include "renderer/pathtracing.h"
+#include "renderer/pathtracing/pathtracing.h"
 #include "renderer/ao/aorenderer.h"
 
 #include "posteffect/BloomEffect.h"

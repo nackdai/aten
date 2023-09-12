@@ -289,9 +289,6 @@
     <ClInclude Include="..\src\libaten\geometry\triangle.h">
       <Filter>aten\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h">
-      <Filter>kernel\renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\pt_params.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
@@ -303,6 +300,9 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\npr\feature_line.h">
       <Filter>aten\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h">
+      <Filter>kernel\renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

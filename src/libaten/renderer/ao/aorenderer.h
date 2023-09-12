@@ -4,7 +4,7 @@
 #include "geometry/EvaluateHitResult.h"
 #include "light/pointlight.h"
 #include "renderer/renderer.h"
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pt_params.h"
 #include "sampler/cmj.h"
 #include "scene/scene.h"
 

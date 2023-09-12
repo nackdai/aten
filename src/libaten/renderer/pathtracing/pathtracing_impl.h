@@ -18,7 +18,7 @@
 #include "scene/host_scene_context.h"
 #endif
 
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pt_params.h"
 
 namespace AT_NAME
 {

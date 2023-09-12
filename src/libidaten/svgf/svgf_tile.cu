@@ -7,7 +7,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pt_params.h"
 
 __global__ void copyBufferForTile(
     const idaten::Path paths,

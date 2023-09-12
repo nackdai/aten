@@ -103,6 +103,9 @@
     <Filter Include="renderer\npr">
       <UniqueIdentifier>{f51a8d4a-731f-4661-a697-66a85e14fe19}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderer\pathtracing">
+      <UniqueIdentifier>{b5c953b9-9503-4634-9208-86d3862f23f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -148,9 +151,6 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\misc\color.h">
       <Filter>misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\pathtracing.h">
-      <Filter>renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\renderer.h">
       <Filter>renderer</Filter>
@@ -508,12 +508,6 @@
     <ClInclude Include="..\src\libaten\scene\host_scene_context.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\pt_params.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\pathtracing_impl.h">
-      <Filter>renderer</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\misc.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -528,6 +522,15 @@
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\npr\npr_impl.h">
       <Filter>renderer\npr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing_impl.h">
+      <Filter>renderer\pathtracing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\pt_params.h">
+      <Filter>renderer\pathtracing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing.h">
+      <Filter>renderer\pathtracing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -732,9 +735,6 @@
     <ClCompile Include="..\src\libaten\os\windows\misc\timer_windows.cpp">
       <Filter>misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\libaten\renderer\pathtracing.cpp">
-      <Filter>renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\libaten\camera\pinhole.cpp">
       <Filter>camera</Filter>
     </ClCompile>
@@ -803,6 +803,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\npr\feature_line.cpp">
       <Filter>renderer\npr</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\pathtracing\pathtracing.cpp">
+      <Filter>renderer\pathtracing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

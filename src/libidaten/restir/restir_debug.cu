@@ -12,7 +12,7 @@
 #include "cuda/cudamemory.h"
 
 #include "aten4idaten.h"
-#include "renderer/pt_params.h"
+#include "renderer/pathtracing/pt_params.h"
 
 __global__ void fillAOV(
     cudaSurfaceObject_t dst,

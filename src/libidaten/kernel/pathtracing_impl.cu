@@ -12,7 +12,7 @@
 #include "cuda/cudautil.h"
 #include "cuda/cudamemory.h"
 
-#include "renderer/pathtracing_impl.h"
+#include "renderer/pathtracing/pathtracing_impl.h"
 
 namespace pt {
     __global__ void shade(

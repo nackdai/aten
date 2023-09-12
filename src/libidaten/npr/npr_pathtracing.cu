@@ -11,7 +11,7 @@
 #include "cuda/cudamemory.h"
 
 #include "renderer/pt_params.h"
-#include "renderer/npr_impl.h"
+#include "renderer/npr/npr_impl.h"
 
 namespace npr_pt {
     __global__ void generateSampleRay(

@@ -1,4 +1,4 @@
-#include "renderer/feature_line.h"
+#include "renderer/npr/feature_line.h"
 #include "geometry/EvaluateHitResult.h"
 
 namespace aten

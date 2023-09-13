@@ -24,18 +24,18 @@ def parse_compile_items_from_item_group(item_group_element: etree.Element, tag: 
                 item_list.append(value.replace('\\', '/'))
 
 
-def parse_compile_items(vs_proj_file: str) -> Tuple[List[str], List[str]]:
+def parse_compile_items(vc_proj_file: str) -> Tuple[List[str], List[str]]:
     """Parse compile items from Visual Studio project file.
 
     Args:
-        vs_proj_file: Path to Visual Studio project file.
+        vc_proj_file: Path to Visual Studio project file.
 
     Returns:
         Tuple to parsed compile item list and parsed compile item list for CUDA.
     """
     try:
         parser = etree.XMLParser(remove_comments=True)
-        xml = etree.parse(vs_proj_file, parser)
+        xml = etree.parse(vc_proj_file, parser)
 
         item_groups = xml.findall(".//ns:ItemGroup", NAMESPACE_MAP)
 
@@ -52,17 +52,17 @@ def parse_compile_items(vs_proj_file: str) -> Tuple[List[str], List[str]]:
         print(f"{err}")
         os.abort()
 
-def format_for_cmake_linux(compile_items: List[str], workdir: str, vs_proj_file: str, basepath: str):
+def format_for_cmake_linux(compile_items: List[str], workdir: str, vc_proj_file: str, basepath: str):
     """Format item string to fit into CMake.
 
     Args:
         compile_items: List to store compile item.
         workdir: Path to working directory.
-        vs_proj_file: Path to Visual Studio project file.
+        vc_proj_file: Path to Visual Studio project file.
         basepath: Base path to create relative path.
     """
     try:
-        vs_proj_dir = os.path.dirname(vs_proj_file)
+        vc_proj_dir = os.path.dirname(vc_proj_file)
 
         for i in range(len(compile_items)):
             item = compile_items[i]
@@ -72,7 +72,7 @@ def format_for_cmake_linux(compile_items: List[str], workdir: str, vs_proj_file:
                 continue
 
             rel_path = os.path.relpath(
-                workdir + "/" + vs_proj_dir + "/" + item,
+                workdir + "/" + vc_proj_dir + "/" + item,
                 workdir + "/" + basepath
             )
 
@@ -109,20 +109,16 @@ def main():
     # e.g.
     # python3 ./scripts/extract_file_from_vs_proj.py -v vs2019/libaten.vcxproj -o libaten.txt -b src/libaten
     parser = argparse.ArgumentParser(description="Extract compile files from vs proj file")
-    parser.add_argument('-v', '--vsproj', type=str, help="VS proj file to extract", default=None)
+    parser.add_argument('-v', '--vcproj', type=str, help="VC proj file to extract", required=True, default=None)
     parser.add_argument('-o', '--output', type=str, help="File to output", default=None)
-    parser.add_argument('-b', '--basepath', type=str, help="Base path to convert to relative path", default=None)
+    parser.add_argument('-b', '--basepath', type=str, help="Base path to convert to relative path", required=True, default=None)
     parser.add_argument('-w', '--workdir', type=str, help="Working directory", default=".")
     args = parser.parse_args()
-
-    if args.vsproj is None or args.basepath is None:
-        parser.print_help()
-        return
 
     args.basepath = trim_end_path_separtor(args.basepath)
     args.workdir = trim_end_path_separtor(args.workdir)
 
-    compile_items, cuda_compile_items = parse_compile_items(args.vsproj)
+    compile_items, cuda_compile_items = parse_compile_items(args.vcproj)
 
     cpp_as_cuda_list: List[str] = []
     for item in cuda_compile_items:
@@ -135,8 +131,8 @@ def main():
     compile_items = sorted(compile_items)
     cpp_as_cuda_list = sorted(cpp_as_cuda_list)
 
-    format_for_cmake_linux(compile_items, args.workdir, args.vsproj, args.basepath)
-    format_for_cmake_linux(cpp_as_cuda_list, args.workdir, args.vsproj, args.basepath)
+    format_for_cmake_linux(compile_items, args.workdir, args.vcproj, args.basepath)
+    format_for_cmake_linux(cpp_as_cuda_list, args.workdir, args.vcproj, args.basepath)
 
     if args.output is not None:
         with open(args.output, mode='w') as f:

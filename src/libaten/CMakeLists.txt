@@ -160,6 +160,7 @@ add_library(
   misc/color.cpp
   misc/color.h
   misc/key.h
+  misc/misc.h
   misc/omputil.cpp
   misc/omputil.h
   misc/stream.h
@@ -177,21 +178,22 @@ add_library(
   posteffect/BloomEffect.h
   proxy/DataCollector.cpp
   proxy/DataCollector.h
-  renderer/aorenderer.cpp
-  renderer/aorenderer.h
-  renderer/aorenderer_impl.h
+  renderer/ao/aorenderer.cpp
+  renderer/ao/aorenderer.h
+  renderer/ao/aorenderer_impl.h
   renderer/aov.h
   renderer/background.h
   renderer/envmap.cpp
   renderer/envmap.h
-  renderer/feature_line.cpp
-  renderer/feature_line.h
   renderer/film.cpp
   renderer/film.h
-  renderer/pathtracing.cpp
-  renderer/pathtracing.h
-  renderer/pathtracing_impl.h
-  renderer/pt_params.h
+  renderer/npr/feature_line.cpp
+  renderer/npr/feature_line.h
+  renderer/npr/npr_impl.h
+  renderer/pathtracing/pathtracing.cpp
+  renderer/pathtracing/pathtracing.h
+  renderer/pathtracing/pathtracing_impl.h
+  renderer/pathtracing/pt_params.h
   renderer/renderer.h
   sampler/bluenoiseSampler.h
   sampler/cmj.h

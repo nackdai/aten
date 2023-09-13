@@ -289,7 +289,7 @@
     <ClInclude Include="..\src\libaten\geometry\triangle.h">
       <Filter>aten\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\libaten\renderer\pt_params.h">
+    <ClInclude Include="..\src\libaten\renderer\pathtracing\pt_params.h">
       <Filter>aten\renderer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\libaten\renderer\ao\aorenderer_impl.h">

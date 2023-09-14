@@ -10,14 +10,22 @@ from asyncio.subprocess import Process
 from enum import Enum
 from typing import List, Optional
 
-# https://www.lifewithpython.com/2021/12/python-subprocess-stream.html
 class ProcessRunner:
+    """Class to run sub process."""
     def __init__(self):
         self._proc: Process = None
 
     async def start(
             self, program: str, args: List[str],
             stdout_type: Optional[int], stderr_type: Optional[int]):
+        """Invoke sub process.
+
+        Args
+            program: Program to be run as sub process.
+            args: Arguments to pass to program.
+            stdout_type: Stream type for stdout.
+            stderr_type: Stream type for stderr.
+        """
         self._proc = await asyncio.create_subprocess_exec(
             program,
             *args,
@@ -26,6 +34,14 @@ class ProcessRunner:
         )
 
     async def stream(self, interval: float):
+        """Returns stream from executing sub process.
+
+        Args:
+            interval: Time to interval.
+
+        Yields:
+            String from stdoud and string from stderr.
+        """
         while True:
             if self._proc.stdout is None or self._proc.stderr is None:
                 break
@@ -40,6 +56,7 @@ class ProcessRunner:
             await asyncio.sleep(interval)
 
     async def wait(self):
+        """Wait for sub process finishes."""
         if self._proc is None:
             return None
 
@@ -47,12 +64,24 @@ class ProcessRunner:
         return self._proc.returncode
 
 class DockerContainuerRunningMode(Enum):
+    """Mode how to run docker container."""
     Detouch = 1
     Enter = 2
 
 async def run_process(
         program: str,  args: List[str],
         stdout_type: Optional[int], stderr_type: Optional[int]) -> Optional[int]:
+    """Run process
+
+    Args
+        program: Program to be run as sub process.
+        args: Arguments to pass to program.
+        stdout_type: Stream type for stdout.
+        stderr_type: Stream type for stderr.
+
+    Returns:
+        Return code from sub process.
+    """
     proc_runner = ProcessRunner()
 
     await proc_runner.start(program, args, stdout_type, stderr_type)
@@ -67,6 +96,16 @@ async def run_process(
     return returncode
 
 async def run_docker_container(docker_image: str, container_name: str, mode: DockerContainuerRunningMode) -> Optional[int]:
+    """Run docker container.
+
+    Args:
+        docker_image: Docker image.
+        container_name: Docker container name.
+        mode: Mode how to run docker container.
+
+    Returns:
+        Return code from docker run command as sub process.
+    """
     hostname = socket.gethostname()
     userid = os.getuid()
     groupid = os.getgid()
@@ -103,6 +142,15 @@ async def run_docker_container(docker_image: str, container_name: str, mode: Doc
     return returncode
 
 async def execute_command_in_docker_container(container_name: str, command: str) -> Optional[int]:
+    """Exectute command in specified docker container.
+
+    Args:
+        container_name: Container name to execute command.
+        command: Command to be executed in docker container.
+
+    Returns:
+        Return code from docker exec as sub process.
+    """
     args = [
         "exec",
         container_name,
@@ -116,6 +164,11 @@ async def execute_command_in_docker_container(container_name: str, command: str)
     return returncode
 
 async def kill_docker_container(container_name: str):
+    """Kill docker container.
+
+    Args:
+        container_name: Container name to be killed.
+    """
     kill_args = ["kill", container_name]
     _ = await run_process("docker", kill_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT)
 

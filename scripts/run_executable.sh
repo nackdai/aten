@@ -54,32 +54,9 @@ if [ "${#}" -gt 0 ]; then
   args_to_exec=("${@}")
 fi
 
-SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+executable_path="${base_dir}/${executable}/${executable}"
 
-# shellcheck disable=SC1090
-source "${SCRIPT_DIR}/docker_util"
+ld_library_path="${base_dir}/lib"
+ld_library_path="LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${ld_library_path}"
 
-docker_image_id=$(get_image_id "${docker_image}")
-
-CONTAINER_NAME="aten"
-WORKSPACE="/work"
-
-if [[ -z "${docker_image_id}" ]]; then
-  echo "No docker image ${docker_image}"
-  exit 1
-else
-  kill_container "${CONTAINER_NAME}"
-
-  launch_docker "${CONTAINER_NAME}" "${docker_image_id}" \
-    "-d -w ${WORKSPACE} \
-    --mount type=bind,src=${base_dir},target=${WORKSPACE} \
-    --mount type=bind,src=${PWD}/.home,target=${HOME} \
-    -e HOME=${HOME}"
-
-  executable_path="${WORKSPACE}/${executable}/${executable}"
-
-  ld_library_path="${WORKSPACE}/lib"
-  ld_library_path="LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${ld_library_path}"
-
-  docker exec "${CONTAINER_NAME}" bash -c "${ld_library_path} ${executable_path} ${args_to_exec[*]}"
-fi
+python3 ./scripts/docker_operator.py -r -i "${docker_image}" -c "${ld_library_path} ${executable_path} ${args_to_exec[*]}"

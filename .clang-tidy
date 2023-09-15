@@ -1,0 +1,57 @@
+---
+Checks: "\
+  *,\
+  -cppcoreguidelines-avoid-c-arrays,\
+  -cppcoreguidelines-avoid-magic-numbers,\
+  -cppcoreguidelines-non-private-member-variables-in-classes,\
+  -cppcoreguidelines-pro-type-vararg,\
+  -modernize-avoid-c-arrays,\
+  -modernize-use-equals-default,\
+  -modernize-use-nodiscard,\
+  -performance-move-const-arg,\
+  -performance-noexcept-move-constructor,\
+  -readability-named-parameter,\
+  -clang-diagnostic-pragma-once-outside-header, \
+  -modernize-concat-nested-namespaces, \
+  -altera-*,\
+  -cert-*,\
+  -fuchsia-default-arguments-calls,\
+  -fuchsia-overloaded-operator,\
+  -fuchsia-trailing-return,\
+  -fuchsia-virtual-inheritance,\
+  -llvm-header-guard,\
+  -llvm-include-order,\
+  -llvmlibc-*,\
+  -modernize-use-trailing-return-type,\
+  -hicpp-signed-bitwise,\
+  "
+WarningsAsErrors: "*"
+CheckOptions:
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantCase
+    value: lower_case
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: pre_
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.ProtectedMemberPrefix
+    value: pre_
+  - key: readability-identifier-naming.PublicMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case

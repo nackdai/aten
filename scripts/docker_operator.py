@@ -1,23 +1,28 @@
-from __future__  import annotations
+from __future__ import annotations
 
-import asyncio
 import argparse
+import asyncio
 import os
 import socket
 import sys
-
 from asyncio.subprocess import Process
 from enum import Enum
 from typing import List, Optional
 
+
 class ProcessRunner:
     """Class to run sub process."""
+
     def __init__(self):
         self._proc: Process = None
 
     async def start(
-            self, program: str, args: List[str],
-            stdout_type: Optional[int], stderr_type: Optional[int]):
+        self,
+        program: str,
+        args: List[str],
+        stdout_type: Optional[int],
+        stderr_type: Optional[int],
+    ):
         """Invoke sub process.
 
         Args
@@ -63,14 +68,20 @@ class ProcessRunner:
         await self._proc.communicate()
         return self._proc.returncode
 
+
 class DockerContainuerRunningMode(Enum):
     """Mode how to run docker container."""
+
     Detouch = 1
     Enter = 2
 
+
 async def run_process(
-        program: str,  args: List[str],
-        stdout_type: Optional[int], stderr_type: Optional[int]) -> Optional[int]:
+    program: str,
+    args: List[str],
+    stdout_type: Optional[int],
+    stderr_type: Optional[int],
+) -> Optional[int]:
     """Run process
 
     Args
@@ -88,14 +99,17 @@ async def run_process(
 
     async for stdout, stderr in proc_runner.stream(0.0):
         if stdout:
-            print(stdout, end='', flush=True)
+            print(stdout, end="", flush=True)
         if stderr:
-            print(stderr, end='', flush=True, file=sys.stderr)
+            print(stderr, end="", flush=True, file=sys.stderr)
 
     returncode = await proc_runner.wait()
     return returncode
 
-async def run_docker_container(docker_image: str, container_name: str, mode: DockerContainuerRunningMode) -> Optional[int]:
+
+async def run_docker_container(
+    docker_image: str, container_name: str, mode: DockerContainuerRunningMode
+) -> Optional[int]:
     """Run docker container.
 
     Args:
@@ -116,16 +130,27 @@ async def run_docker_container(docker_image: str, container_name: str, mode: Doc
     stderr_type = asyncio.subprocess.PIPE
 
     args = [
-        "run", "-it", "--rm",
-        "-u", f"{userid}:{groupid}",
-        "-h", hostname,
-        "-w", pwd,
-        "--mount", f"type=bind,src={pwd},target={pwd}",
-        "--mount", f"type=bind,src={pwd}/.home,target={home}",
-        "-e", f"HOME={home}",
-        "--mount", "type=bind,src=/etc/passwd,target=/etc/passwd,readonly",
-        "--mount", "type=bind,src=/etc/group,target=/etc/group,readonly",
-        "--name", container_name,
+        "run",
+        "-it",
+        "--rm",
+        "-u",
+        f"{userid}:{groupid}",
+        "-h",
+        hostname,
+        "-w",
+        pwd,
+        "--mount",
+        f"type=bind,src={pwd},target={pwd}",
+        "--mount",
+        f"type=bind,src={pwd}/.home,target={home}",
+        "-e",
+        f"HOME={home}",
+        "--mount",
+        "type=bind,src=/etc/passwd,target=/etc/passwd,readonly",
+        "--mount",
+        "type=bind,src=/etc/group,target=/etc/group,readonly",
+        "--name",
+        container_name,
     ]
 
     if mode == DockerContainuerRunningMode.Detouch:
@@ -141,7 +166,10 @@ async def run_docker_container(docker_image: str, container_name: str, mode: Doc
     returncode = await run_process("docker", args, stdout_type, stderr_type)
     return returncode
 
-async def execute_command_in_docker_container(container_name: str, command: str) -> Optional[int]:
+
+async def execute_command_in_docker_container(
+    container_name: str, command: str
+) -> Optional[int]:
     """Exectute command in specified docker container.
 
     Args:
@@ -154,14 +182,18 @@ async def execute_command_in_docker_container(container_name: str, command: str)
     args = [
         "exec",
         container_name,
-        "bash", "-c",
+        "bash",
+        "-c",
     ]
 
     if command:
         args.append(command)
 
-    returncode = await run_process("docker", args, asyncio.subprocess.PIPE, asyncio.subprocess.PIPE)
+    returncode = await run_process(
+        "docker", args, asyncio.subprocess.PIPE, asyncio.subprocess.PIPE
+    )
     return returncode
+
 
 async def kill_docker_container(container_name: str):
     """Kill docker container.
@@ -170,21 +202,42 @@ async def kill_docker_container(container_name: str):
         container_name: Container name to be killed.
     """
     kill_args = ["kill", container_name]
-    _ = await run_process("docker", kill_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT)
+    _ = await run_process(
+        "docker", kill_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT
+    )
 
     rm_args = ["container", "rm", container_name]
-    _ = await run_process("docker", rm_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT)
+    _ = await run_process(
+        "docker", rm_args, asyncio.subprocess.DEVNULL, asyncio.subprocess.STDOUT
+    )
+
 
 async def main():
     # NOTE:
     # e.g.
     # python3 ./scripts/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
     parser = argparse.ArgumentParser(description="Run clang-tidy")
-    parser.add_argument('-i', '--image', type=str, help="docker image", required=True, default=None)
-    parser.add_argument('-n', '--name', type=str, help="container name", default=None)
-    parser.add_argument("-e", "--enter", action="store_true", help="Enter docker container", default=False)
-    parser.add_argument("-r", "--remove", action="store_true", help="Remove docker container", default=False)
-    parser.add_argument("-c", "--command", type=str, help="Commands to be executed", default=None)
+    parser.add_argument(
+        "-i", "--image", type=str, help="docker image", required=True, default=None
+    )
+    parser.add_argument("-n", "--name", type=str, help="container name", default=None)
+    parser.add_argument(
+        "-e",
+        "--enter",
+        action="store_true",
+        help="Enter docker container",
+        default=False,
+    )
+    parser.add_argument(
+        "-r",
+        "--remove",
+        action="store_true",
+        help="Remove docker container",
+        default=False,
+    )
+    parser.add_argument(
+        "-c", "--command", type=str, help="Commands to be executed", default=None
+    )
     args = parser.parse_args()
 
     container_name = args.name
@@ -204,17 +257,24 @@ async def main():
     returncode = 0
 
     if args.enter:
-        returncode = await run_docker_container(args.image, container_name, DockerContainuerRunningMode.Enter)
+        returncode = await run_docker_container(
+            args.image, container_name, DockerContainuerRunningMode.Enter
+        )
     else:
-        returncode = await run_docker_container(args.image, container_name, DockerContainuerRunningMode.Detouch)
+        returncode = await run_docker_container(
+            args.image, container_name, DockerContainuerRunningMode.Detouch
+        )
         if returncode is not None and returncode == 0:
-            returncode = await execute_command_in_docker_container(container_name, args.command)
+            returncode = await execute_command_in_docker_container(
+                container_name, args.command
+            )
 
     if args.remove:
         await kill_docker_container(container_name)
 
     if returncode is None or returncode != 0:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

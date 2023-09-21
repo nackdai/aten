@@ -168,7 +168,7 @@ async def run_docker_container(
 
 
 async def execute_command_in_docker_container(
-    container_name: str, command: str
+    container_name: str, command: Optional[str]
 ) -> Optional[int]:
     """Exectute command in specified docker container.
 
@@ -179,6 +179,9 @@ async def execute_command_in_docker_container(
     Returns:
         Return code from docker exec as sub process.
     """
+    if command is None:
+        return 0
+
     args = [
         "exec",
         container_name,
@@ -186,8 +189,8 @@ async def execute_command_in_docker_container(
         "-c",
     ]
 
-    if command:
-        args.append(command)
+
+    args.append(command)
 
     returncode = await run_process(
         "docker", args, asyncio.subprocess.PIPE, asyncio.subprocess.PIPE
@@ -212,7 +215,7 @@ async def kill_docker_container(container_name: str):
     )
 
 
-async def main():
+async def main(container_name: str):
     # NOTE:
     # e.g.
     # python3 ./scripts/docker_operator.py -i ghcr.io/nackdai/aten/aten_dev:latest -c "pre-commit run -a" -r
@@ -277,4 +280,12 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # NOTE
+    # After KeyboardInterrupt (Ctrl+C), RuntimeError is raised.
+    # But, it's cpython's issue. It has been fixed at 3.11.1.
+    # https://github.com/python/cpython/issues/96827
+    container_name = ""
+    try:
+        asyncio.run(main(container_name))
+    except KeyboardInterrupt:
+        asyncio.run(kill_docker_container(container_name))

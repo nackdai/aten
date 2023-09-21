@@ -57,7 +57,7 @@ def exec_clang_tidy(
     clang_tidy_cmd = ["clang-tidy-12", file]
 
     if will_fix:
-        clang_tidy_cmd.append("--fix")
+        clang_tidy_cmd.append("--fix-errors")
 
     if header_filter:
         clang_tidy_cmd.append(f"--header-filter={header_filter}")
@@ -114,7 +114,7 @@ def exec_clang_tidy_by_compile_commands_json(
 def main():
     # NOTE:
     # e.g.
-    # python3 ./scripts/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/aten/src/" -t accelerator.cpp  # noqa
+    # python3 ./scripts/run_clang_tidy.py -i 3rdparty imgui unittest --header_filter "${PWD}/src/" -t accelerator.cpp  # noqa
     parser = argparse.ArgumentParser(description="Run clang-tidy")
     parser.add_argument(
         "-i",

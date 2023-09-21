@@ -7,19 +7,30 @@ usage() {
   cat <<EOF 1>&2
 Usage: $0 [Options]
 Options:
-  -d <docker_iamge>    : docker image to run build.
-  -h <header_filter>   : Header filter. If nothing is specified, "aten/src" is specified.
+  -d <docker_iamge>    : docker image to run build. Required.
+  -h <header_filter>   : Header filter. If nothing is specified, "src" is specified.
   -g <commit> <commit> : Specify git diff files as clang-tidy target files.
-ex) $0 -d aten_dev:latest -g -h ${PWD}/aten/src
+  -f                   : Fix code.
+ex) $0 -d aten_dev:latest -g -h ${PWD}/src
 EOF
   exit 1
 }
 
+CONTAINER_NAME=""
+kill_container() {
+  local contaner_name="${1}"
+  docker kill "${contaner_name}" >/dev/null 2>&1 || true
+  docker container rm "${contaner_name}" >/dev/null 2>&1 || true
+}
+
+trap 'kill_container ${CONTAINER_NAME}' EXIT ERR
+
 docker_image=""
-header_filter="${PWD}/aten/src"
+header_filter="${PWD}/src"
+will_fix=false
 declare -a git_diff_commits=()
 
-while getopts "d:h:g" opt; do
+while getopts "d:h:gf" opt; do
   case "${opt}" in
     d)
       docker_image="${OPTARG}"
@@ -42,12 +53,20 @@ while getopts "d:h:g" opt; do
 
       set -u
       ;;
+    f)
+      will_fix=true
+      ;;
     \?)
       usage
       ;;
   esac
 done
 shift $((OPTIND - 1))
+
+if [ -z "${docker_image}" ]; then
+  echo "docker image is required."
+  usage
+fi
 
 IGNORE_WORDS=("3rdparty" "imgui" "unittest")
 
@@ -81,4 +100,19 @@ if ((${#target_files[*]} > 0)); then
   target_files=("-t" "${target_files[@]:0}")
 fi
 
-python3 ./scripts/docker_operator.py -r -i "${docker_image}" -c "python3 ./scripts/run_clang_tidy.py -i ${IGNORE_WORDS[*]} -f ${header_filter} ${target_files[*]}"
+fix_option=""
+if "${will_fix}"; then
+  fix_option="-f"
+fi
+
+# Treat last element of docker image name as container name.
+parsed_image_name=(${docker_image//\// })
+parsed_image_name=(${parsed_image_name[-1]//:/ })
+CONTAINER_NAME="${parsed_image_name[0]}"
+
+# NOTE:
+# It seems that python3 ./scripts/run_clang_tidy.py via docker exec can't work in python subprocess.
+# So, run docker exec separately here.
+python3 ./scripts/docker_operator.py -i "${docker_image}" -n "${CONTAINER_NAME}"
+docker exec aten bash -c "python3 ./scripts/run_clang_tidy.py -i ${IGNORE_WORDS[*]} --header_filter ${header_filter} ${fix_option} ${target_files[*]}"
+kill_container "${CONTAINER_NAME}"

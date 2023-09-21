@@ -9,6 +9,7 @@ Usage: $0 <OPTIONS>
   -b <build_context>         : Docker build context.
   -n <nvidia_cuda_image_tag> : Base nvidia/cuda docker image
   -p <image_tag_prefix>      : Prefix for image tag
+ex) $0 -b ./env -p foo
 EOF
   exit 1
 }

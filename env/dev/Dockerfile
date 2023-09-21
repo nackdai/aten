@@ -28,25 +28,3 @@ RUN apt-get update && apt-get install -y \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 RUN pip install pre-commit
-
-# https://github.com/nodesource/distributions
-# https://github.com/nodesource/distributions/issues/1266
-# NOTE: Why we need to install nodejs version 16.
-# https://stackoverflow.com/questions/69692842/error-message-error0308010cdigital-envelope-routinesunsupported
-RUN apt-get update && apt-get install -y ca-certificates \
-    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get update \
-    && apt-get install -y nodejs \
-    && npm install -g npm@latest
-
-# Install shfmt
-# https://github.com/mvdan/sh
-# Need to install golang
-ARG go_version=1.20.5
-RUN curl -L https://go.dev/dl/go${go_version}.linux-amd64.tar.gz -o go.tar.gz \
-    && tar -C /usr/local -xzf go.tar.gz \
-    && GO111MODULE=on /usr/local/go/bin/go install mvdan.cc/sh/v3/cmd/shfmt@latest \
-    && cp ~/go/bin/shfmt /usr/local/bin/shfmt \
-    && rm go.tar.gz \
-    && rm -rf /go \
-    && rm -rf /usr/local/go/

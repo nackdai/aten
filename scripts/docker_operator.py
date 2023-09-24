@@ -189,7 +189,6 @@ async def execute_command_in_docker_container(
         "-c",
     ]
 
-
     args.append(command)
 
     returncode = await run_process(

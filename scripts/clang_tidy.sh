@@ -106,7 +106,10 @@ if "${will_fix}"; then
 fi
 
 # Treat last element of docker image name as container name.
+
+# shellcheck disable=SC2206
 parsed_image_name=(${docker_image//\// })
+# shellcheck disable=SC2206
 parsed_image_name=(${parsed_image_name[-1]//:/ })
 CONTAINER_NAME="${parsed_image_name[0]}"
 

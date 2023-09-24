@@ -28,3 +28,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 RUN pip install pre-commit
+
+# Install shfmt
+# https://github.com/mvdan/sh
+# Need to install golang
+ARG go_version=1.20.5
+RUN curl -L https://go.dev/dl/go${go_version}.linux-amd64.tar.gz -o go.tar.gz \
+    && tar -C /usr/local -xzf go.tar.gz \
+    && GO111MODULE=on /usr/local/go/bin/go install mvdan.cc/sh/v3/cmd/shfmt@latest \
+    && cp ~/go/bin/shfmt /usr/local/bin/shfmt \
+    && rm go.tar.gz \
+    && rm -rf /go \
+    && rm -rf /usr/local/go/

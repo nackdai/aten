@@ -90,8 +90,8 @@ namespace AT_NAME
             real b = isect->b;
             real c = 1 - a - b;
 
-            // dSÀ•WŒn(barycentric coordinates).
-            // v0Šî€.
+            // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+            // v0åŸºæº–.
             // p = (1 - a - b)*v0 + a*v1 + b*v2
             rec->p = c * p0 + a * p1 + b * p2;
             rec->normal = c * n0 + a * n1 + b * n2;
@@ -132,15 +132,15 @@ namespace AT_NAME
             real a = aten::sqrt(r0) * (real(1) - r1);
             real b = aten::sqrt(r0) * r1;
 
-            // dSÀ•WŒn(barycentric coordinates).
-            // v0Šî€.
+            // é‡å¿ƒåº§æ¨™ç³»(barycentric coordinates).
+            // v0åŸºæº–.
             // p = (1 - a - b)*v0 + a*v1 + b*v2
             aten::vec3 p = (1 - a - b) * p0 + a * p1 + b * p2;
 
             aten::vec3 n = (1 - a - b) * n0 + a * n1 + b * n2;
             n = normalize(n);
 
-            // OŠpŒ`‚Ì–ÊÏ = ‚Q•Ó‚ÌŠOÏ‚Ì’·‚³ / 2;
+            // ä¸‰è§’å½¢ã®é¢ç© = ï¼’è¾ºã®å¤–ç©ã®é•·ã• / 2;
             auto e0 = p1 - p0;
             auto e1 = p2 - p0;
             auto area = real(0.5) * cross(e0, e1).length();

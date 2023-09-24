@@ -54,13 +54,13 @@ cmake_cmd="cmake \
   -D CUDA_TARGET_COMPUTE_CAPABILITY=${compute_capability} \
   -G Ninja .."
 
-remove_docker_container_option=""
 if "${will_export_compile_commands_json}"; then
-  remove_docker_container_option="-r"
+  # Just generating compile_commands_json. So, docker container should be removed.
+  python3 ./scripts/docker_operator.py -r -i "${docker_image}" -c "mkdir -p build && cd build && ${cmake_cmd}"
+else
+  # In first running, not remove docker container for second running.
+  python3 ./scripts/docker_operator.py -i "${docker_image}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 fi
-
-# In first running, not remove docker container for second running.
-python3 ./scripts/docker_operator.py "${remove_docker_container_option}" -i "${docker_image}" -c "mkdir -p build && cd build && ${cmake_cmd}"
 
 COMPILE_COMMANDS_JSON="compile_commands.json"
 

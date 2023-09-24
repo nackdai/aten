@@ -95,6 +95,10 @@ namespace idaten {
         {
             return m_num;
         }
+        size_t size() const
+        {
+            return static_cast<size_t>(m_num);
+        }
 
         const _T* data() const
         {

@@ -31,6 +31,8 @@ namespace aten {
         constexpr span(pointer ptr, index_type count) : data_(ptr), size_(count) {}
         constexpr span(pointer firstElem, pointer lastElem) : span(firstElem, lastElem - firstElem) {}
 
+        constexpr span(std::nullptr_t) {};
+
         template <size_t N>
         constexpr span(element_type(&arr)[N]) noexcept : span(arr, N) {}
 

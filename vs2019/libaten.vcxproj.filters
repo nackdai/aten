@@ -106,6 +106,9 @@
     <Filter Include="renderer\pathtracing">
       <UniqueIdentifier>{b5c953b9-9503-4634-9208-86d3862f23f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderer\svgf">
+      <UniqueIdentifier>{3cb456ce-0082-4f4b-bbcc-6e8bca0f4fce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\libaten\misc\timer.h">
@@ -532,6 +535,12 @@
     <ClInclude Include="..\src\libaten\renderer\pathtracing\pathtracing.h">
       <Filter>renderer\pathtracing</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\svgf\svgf.h">
+      <Filter>renderer\svgf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libaten\renderer\svgf\svgf_types.h">
+      <Filter>renderer\svgf</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\libaten\misc\span.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -809,6 +818,9 @@
     </ClCompile>
     <ClCompile Include="..\src\libaten\renderer\pathtracing\pathtracing.cpp">
       <Filter>renderer\pathtracing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libaten\renderer\svgf\svgf.cpp">
+      <Filter>renderer\svgf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

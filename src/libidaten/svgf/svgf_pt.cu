@@ -88,7 +88,7 @@ namespace svgf {
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
+                aovNormalDepth[idx], orienting_normal, rec, mtxW2C,
                 aovTexclrMeshid[idx], texcolor, isect);
             aovTexclrMeshid[idx].w = isect.mtrlid;
 
@@ -101,8 +101,10 @@ namespace svgf {
             // texture color.
             auto texcolor = AT_NAME::sampleTexture(shMtrls[threadIdx.x].albedoMap, rec.u, rec.v, aten::vec4(1.0f));
 
+            // TODO
+            // No good idea to compute reflected depth.
             AT_NAME::FillBasicAOVs(
-                aovNormalDepth[idx], orienting_normal, rec, aten::mat4(),
+                aovNormalDepth[idx], orienting_normal, rec, mtxW2C,
                 aovTexclrMeshid[idx], texcolor, isect);
             aovTexclrMeshid[idx].w = isect.mtrlid;
 

@@ -4,6 +4,7 @@
 
 #include "defs.h"
 #include "math/vec4.h"
+#include "misc/span.h"
 
 namespace AT_NAME {
     struct AOVBufferType {
@@ -65,6 +66,7 @@ namespace AT_NAME
 
         using buffer_type = BUFFER_TYPE;
         using buffer_value_type = typename BUFFER_TYPE::value_type;
+        using buffer_type_as_span = aten::span<buffer_value_type>;
         static constexpr auto IsEnoughBufferSizeForAlbedoMeshId = (N > AT_NAME::AOVBufferType::AlbedoMeshId);
         static constexpr auto NumAOV = N;
 
@@ -83,9 +85,21 @@ namespace AT_NAME
             return aovs_[M];
         }
 
+        template <int32_t M>
+        buffer_type_as_span GetAsSpan()
+        {
+            auto& aov = get<M>();
+            return buffer_type_as_span(aov.data(), aov.size());
+        }
+
         buffer_type& normal_depth()
         {
             return get<static_cast<int32_t>(AT_NAME::AOVBufferType::NormalDepth)>();
+        }
+
+        buffer_type_as_span GetNormalDepthAsSpan()
+        {
+            return GetAsSpan<static_cast<int32_t>(AT_NAME::AOVBufferType::NormalDepth)>();
         }
 
         [[nodiscard]] auto albedo_meshid() -> std::conditional_t<IsEnoughBufferSizeForAlbedoMeshId, buffer_type&, void>
@@ -96,6 +110,11 @@ namespace AT_NAME
             else {
                 return;
             }
+        }
+
+        buffer_type_as_span GetAlbedoMeshIdAsSpan()
+        {
+            return GetAsSpan<static_cast<int32_t>(AT_NAME::AOVBufferType::AlbedoMeshId)>();
         }
 
         void traverse(std::function<void(buffer_type&)> func)

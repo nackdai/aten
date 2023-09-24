@@ -104,6 +104,7 @@
 #include "renderer/envmap.h"
 #include "renderer/pathtracing/pathtracing.h"
 #include "renderer/ao/aorenderer.h"
+#include "renderer/svgf/svgf.h"
 
 #include "posteffect/BloomEffect.h"
 

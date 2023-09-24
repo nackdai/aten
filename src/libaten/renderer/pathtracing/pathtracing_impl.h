@@ -98,14 +98,14 @@ namespace AT_NAME
         int32_t bounce,
         const aten::vec3& bg,
         AT_NAME::Path& paths,
-        AOV_BUFFER_TYPE* aov_normal_depth = nullptr,
-        AOV_BUFFER_TYPE* aov_albedo_meshid = nullptr)
+        aten::span<AOV_BUFFER_TYPE> aov_normal_depth = nullptr,
+        aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             if (bounce == 0) {
                 paths.attrib[idx].isKill = true;
 
-                if (aov_normal_depth != nullptr && aov_albedo_meshid != nullptr)
+                if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
                     // Export bg color to albedo buffer.
                     AT_NAME::FillBasicAOVsIfHitMiss(
@@ -133,8 +133,8 @@ namespace AT_NAME
         const aten::CameraParameter& camera,
         AT_NAME::Path& paths,
         const aten::ray& ray,
-        AOV_BUFFER_TYPE* aov_normal_depth = nullptr,
-        AOV_BUFFER_TYPE* aov_albedo_meshid = nullptr)
+        aten::span<AOV_BUFFER_TYPE> aov_normal_depth = nullptr,
+        aten::span<AOV_BUFFER_TYPE> aov_albedo_meshid = nullptr)
     {
         if (!paths.attrib[idx].isTerminate && !paths.attrib[idx].isHit) {
             aten::vec3 dir = ray.dir;
@@ -172,7 +172,7 @@ namespace AT_NAME
             {
                 paths.attrib[idx].isKill = true;
 
-                if (aov_normal_depth != nullptr && aov_albedo_meshid != nullptr)
+                if (!aov_normal_depth.empty() && !aov_albedo_meshid.empty())
                 {
                     // Export bg color to albedo buffer.
                     AT_NAME::FillBasicAOVsIfHitMiss(
@@ -217,13 +217,14 @@ namespace AT_NAME
     {
         shadow_ray.isActive = false;
 
-        const auto lightnum = ctxt.get_light_num();
+        const auto lightnum = static_cast<int32_t>(ctxt.get_light_num());
 
         if (lightnum <= 0 || mtrl.attrib.isSingular || mtrl.attrib.isTranslucent) {
             return;
         }
 
-        const auto target_light_idx = aten::cmpMin<int32_t>(sampler.nextSample() * lightnum, lightnum - 1);
+        const auto target_light_idx = aten::cmpMin<decltype(lightnum)>(
+            static_cast<decltype(lightnum)>(sampler.nextSample() * lightnum), lightnum - 1);
         const auto lightSelectPdf = 1.0f / lightnum;
 
         const auto& light = ctxt.GetLight(target_light_idx);

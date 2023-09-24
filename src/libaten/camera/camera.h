@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "math/ray.h"
+#include "math/mat4.h"
 #include "sampler/sampler.h"
 
 namespace aten {
@@ -187,6 +188,23 @@ namespace AT_NAME {
             auto width = half_width * 2;
             auto pixel_width = width / real(param.width);
             return pixel_width;
+        }
+
+        static void ComputeCameraMatrices(
+            const aten::CameraParameter& param,
+            aten::mat4 mtx_W2V,
+            aten::mat4 mtx_V2C)
+        {
+            mtx_W2V.lookat(
+                param.origin,
+                param.center,
+                param.up);
+
+            mtx_V2C.perspective(
+                param.znear,
+                param.zfar,
+                param.vfov,
+                param.aspect);
         }
     };
 }

@@ -24,6 +24,10 @@ Checks: "\
   -llvmlibc-*,\
   -modernize-use-trailing-return-type,\
   -hicpp-signed-bitwise,\
+  -google-readability-todo,\
+  -llvm-namespace-comment,\
+  -google-readability-namespace-comments,\
+  -hicpp-vararg,\
   "
 WarningsAsErrors: "*"
 CheckOptions:
@@ -45,12 +49,12 @@ CheckOptions:
     value: lower_case
   - key: readability-identifier-naming.PrivateMemberCase
     value: lower_case
-  - key: readability-identifier-naming.PrivateMemberPrefix
-    value: pre_
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _
   - key: readability-identifier-naming.ProtectedMemberCase
     value: lower_case
-  - key: readability-identifier-naming.ProtectedMemberPrefix
-    value: pre_
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: _
   - key: readability-identifier-naming.PublicMemberCase
     value: lower_case
   - key: readability-identifier-naming.VariableCase

@@ -218,30 +218,30 @@ namespace idaten
         idaten::TypedCudaMemory<ReSTIRInfo> m_restir_infos;
 
         // NOTE
-        // previous ‚Æ spatial destination ‚ÍŽg‚¢‚Ü‚í‚·‚Ì‚Å‚Q‚Å‘«‚è‚é.
-        // Å‰‚Ì temporal reuse ‚Å previous ‚ðŽQÆ‚µ‚½‚ç
-        // Œã’i‚Ì spatila reuse ‚Å‚Í•s—v‚È‚Ì‚ÅAspatial destination ‚É‚·‚é‚±‚Æ‚ª‚Å‚«‚é.
+        // previous ï¿½ï¿½ spatial destination ï¿½ÍŽgï¿½ï¿½ï¿½Ü‚í‚·ï¿½Ì‚Å‚Qï¿½Å‘ï¿½ï¿½ï¿½ï¿½.
+        // ï¿½Åï¿½ï¿½ï¿½ temporal reuse ï¿½ï¿½ previous ï¿½ï¿½ï¿½Qï¿½Æ‚ï¿½ï¿½ï¿½ï¿½ï¿½
+        // ï¿½ï¿½iï¿½ï¿½ spatila reuse ï¿½Å‚Í•sï¿½vï¿½È‚Ì‚ÅAspatial destination ï¿½É‚ï¿½ï¿½é‚±ï¿½Æ‚ï¿½ï¿½Å‚ï¿½ï¿½ï¿½.
         // e.g.
         //  - frame 1
         //     cur:0
-        //     prev:N/A (Å‰‚È‚Ì‚Å temporal ‚Í skip)
+        //     prev:N/A (ï¿½Åï¿½ï¿½È‚Ì‚ï¿½ temporal ï¿½ï¿½ skip)
         //     spatial_dst:1
         //     pos=0 -> pos=1(for next)
         //  - frame 2
         //     cur:1(=pos)
         //     prev:0
-        //     spatial_dst:0 (prev:0 ‚ÍŽQÆÏ‚Ý‚È‚Ì‚ÅAV‚µ‚¢‚à‚Ì‚Å–„‚ß‚Ä‚à‚¢‚¢)
+        //     spatial_dst:0 (prev:0 ï¿½ÍŽQï¿½ÆÏ‚Ý‚È‚Ì‚ÅAï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì‚Å–ï¿½ï¿½ß‚Ä‚ï¿½ï¿½ï¿½ï¿½ï¿½)
         //     pos=1 -> pos=0(for next)
         std::array<idaten::TypedCudaMemory<Reservoir>, 2> m_reservoirs;
         int32_t m_curReservoirPos = 0;
 
-        aten::mat4 m_mtxW2V;    // World - View.
-        aten::mat4 m_mtxV2C;    // View - Clip.
-        aten::mat4 m_mtxC2V;    // Clip - View.
+        aten::mat4 m_mtx_W2V;    // World - View.
+        aten::mat4 m_mtx_V2C;    // View - Clip.
+        aten::mat4 m_mtx_C2V;    // Clip - View.
 
         // View - World.
-        aten::mat4 m_mtxV2W;
-        aten::mat4 m_mtxPrevW2V;
+        aten::mat4 m_mtx_V2W;
+        aten::mat4 m_mtx_prev_W2V;
 
         // G-Buffer rendered by OpenGL.
         idaten::CudaGLSurface m_gbuffer;

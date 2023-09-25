@@ -39,11 +39,11 @@ namespace aten
         }
 
         virtual void getMatrices(
-            aten::mat4& mtxL2W,
-            aten::mat4& mtxW2L) const
+            aten::mat4& mtx_L2W,
+            aten::mat4& mtx_W2L) const
         {
-            mtxL2W.identity();
-            mtxW2L.identity();
+            mtx_L2W.identity();
+            mtx_W2L.identity();
         }
 
         int32_t id() const

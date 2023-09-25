@@ -59,9 +59,9 @@ namespace aten
         static std::shared_ptr<instance<T>> createInstance(
             context& ctxt,
             const std::shared_ptr<T>& obj,
-            const mat4& mtxL2W)
+            const mat4& mtx_L2W)
         {
-            auto ret = std::make_shared<instance<T>>(obj, ctxt, mtxL2W);
+            auto ret = std::make_shared<instance<T>>(obj, ctxt, mtx_L2W);
             AT_ASSERT(ret);
 
             ctxt.addTransformable(ret);

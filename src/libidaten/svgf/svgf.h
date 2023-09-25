@@ -269,13 +269,13 @@ namespace idaten
         using AOVHostBuffer = AT_NAME::AOVHostBuffer<idaten::TypedCudaMemory<float4>, AOVBuffer::Num>;
         std::array<AOVHostBuffer, 2> aov_;  // AOV buffer. Current frame and previous frame.
 
-        aten::mat4 m_mtxW2V;        // World - View.
-        aten::mat4 m_mtxV2C;        // View - Clip.
-        aten::mat4 m_mtxC2V;        // Clip - View.
+        aten::mat4 m_mtx_W2V;        // World - View.
+        aten::mat4 m_mtx_V2C;        // View - Clip.
+        aten::mat4 m_mtx_C2V;        // Clip - View.
 
         // View - World.
-        aten::mat4 m_mtxV2W;
-        aten::mat4 m_mtxPrevW2V;
+        aten::mat4 m_mtx_V2W;
+        aten::mat4 m_mtx_prev_W2V;
 
         // For A-trous wavelet.
         idaten::TypedCudaMemory<float4> m_atrousClrVar[2];

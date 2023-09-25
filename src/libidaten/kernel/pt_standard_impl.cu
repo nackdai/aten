@@ -128,8 +128,8 @@ namespace kernel {
             }
 
             // TODO
-            // ‹ß‹——£‚ÅVoxel‚É‚·‚é‚Æ•iŽ¿‚ª—Ž‚¿‚é.
-            // ‚µ‚©‚à“¯‚¶ƒIƒuƒWƒFƒNƒgŠÔ‚¾‚Æ‚»‚ê‚ª‹N‚±‚è‚â‚·‚¢.
+            // ï¿½ß‹ï¿½ï¿½ï¿½ï¿½ï¿½Voxelï¿½É‚ï¿½ï¿½ï¿½Æ•iï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½Ô‚ï¿½ï¿½Æ‚ï¿½ï¿½ê‚ªï¿½Nï¿½ï¿½ï¿½ï¿½â‚·ï¿½ï¿½.
             //bool enableLod = (bounce >= 2);
             bool enableLod = false;
             int32_t depth = 9;
@@ -279,15 +279,15 @@ namespace kernel {
             real b = data.w;
             real c = 1 - a - b;
 
-            // dSÀ•WŒn(barycentric coordinates).
-            // v0Šî€.
+            // ï¿½dï¿½Sï¿½ï¿½ï¿½Wï¿½n(barycentric coordinates).
+            // v0ï¿½î€.
             // p = (1 - a - b)*v0 + a*v1 + b*v2
             auto p = c * p0 + a * p1 + b * p2;
             aten::vec4 vp(p.x, p.y, p.z, 1.0f);
 
             if (obj->mtx_id >= 0) {
-                const auto& mtxL2W = ctxt.GetMatrix(obj->mtx_id * 2 + 0);
-                vp = mtxL2W.apply(vp);
+                const auto& mtx_L2W = ctxt.GetMatrix(obj->mtx_id * 2 + 0);
+                vp = mtx_L2W.apply(vp);
             }
 
             isects[idx].t = (camPos - vp).length();

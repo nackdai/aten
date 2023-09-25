@@ -5,7 +5,7 @@ precision highp int;
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec4 normal;
 
-uniform mat4 mtxW2C;
+uniform mat4 mtx_W2C;
 
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out vec2 outUV;
@@ -16,7 +16,7 @@ void main()
     vec3 nml = normal.xyz;
     vec2 uv = vec2(position.w, normal.w);
 
-    gl_Position = mtxW2C * pos;
+    gl_Position = mtx_W2C * pos;
 
     outNormal = normalize(nml);
     outUV = uv.xy;

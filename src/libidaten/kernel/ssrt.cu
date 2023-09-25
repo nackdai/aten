@@ -156,8 +156,8 @@ __global__ void hitTestPrimaryRayInScreenSpace(
 		aten::vec4 vp(p.x, p.y, p.z, 1.0f);
 
 		if (obj->mtxid >= 0) {
-			auto mtxL2W = matrices[obj->mtxid * 2 + 0];
-			vp = mtxL2W.apply(vp);
+			auto mtx_L2W = matrices[obj->mtxid * 2 + 0];
+			vp = mtx_L2W.apply(vp);
 		}
 
 		isects[idx].t = (camPos - vp).length();
@@ -182,7 +182,7 @@ inline __device__ bool traceScreenSpaceRay(
 	cudaSurfaceObject_t depth,
 	const aten::vec3& csOrig,
 	const aten::vec3& csDir,
-	const aten::mat4& mtxV2C,
+	const aten::mat4& mtx_V2C,
 	int width, int height,
 	float nearPlaneZ,
 	float stride,
@@ -207,8 +207,8 @@ inline __device__ bool traceScreenSpaceRay(
 #endif
 
 	// Project into homogeneous clip space.
-	aten::vec4 H0 = mtxV2C.apply(aten::vec4(csOrig, 1));
-	aten::vec4 H1 = mtxV2C.apply(aten::vec4(csEndPoint, 1));
+	aten::vec4 H0 = mtx_V2C.apply(aten::vec4(csOrig, 1));
+	aten::vec4 H1 = mtx_V2C.apply(aten::vec4(csEndPoint, 1));
 
 #ifdef DUMP_DEBUG_LOG
 	printf("H0 : %f, %f, %f, %f\n", H0.x, H0.y, H0.z, H0.w);
@@ -388,8 +388,8 @@ __global__ void hitTestInScreenSpace(
 	int* notIntersectBools,
 	int width, int height,
 	float cameraNearPlaneZ,
-	const aten::mat4 mtxW2V,
-	const aten::mat4 mtxV2C,
+	const aten::mat4 mtx_W2V,
+	const aten::mat4 mtx_V2C,
 	const aten::ray* __restrict__ rays,
 	const aten::GeomParameter* __restrict__ geoms,
 	const aten::PrimitiveParamter* __restrict__ prims,
@@ -419,8 +419,8 @@ __global__ void hitTestInScreenSpace(
 		return;
 	}
 
-	aten::vec3 vsOrig = mtxW2V.apply(rays[idx].org);
-	aten::vec3 vsDir = normalize(mtxW2V.applyXYZ(rays[idx].dir));
+	aten::vec3 vsOrig = mtx_W2V.apply(rays[idx].org);
+	aten::vec3 vsDir = normalize(mtx_W2V.applyXYZ(rays[idx].dir));
 
 	auto d = dot(vsDir, aten::vec3(0, 0, 1));
 	if (abs(d) > 0.96f) {
@@ -439,7 +439,7 @@ __global__ void hitTestInScreenSpace(
 	bool isIntersect = traceScreenSpaceRay(
 		depth,
 		vsOrig, vsDir,
-		mtxV2C,
+		mtx_V2C,
 		width, height,
 		cameraNearPlaneZ,
 		stride, jitter,
@@ -1325,15 +1325,15 @@ namespace idaten {
 
 			checkCudaKernel(hitTest);
 #else
-			aten::mat4 mtxW2V;
-			aten::mat4 mtxV2C;
+			aten::mat4 mtx_W2V;
+			aten::mat4 mtx_V2C;
 
-			mtxW2V.lookat(
+			mtx_W2V.lookat(
 				m_camParam.origin,
 				m_camParam.center,
 				m_camParam.up);
 
-			mtxV2C.perspective(
+			mtx_V2C.perspective(
 				m_camParam.znear,
 				m_camParam.zfar,
 				m_camParam.vfov,
@@ -1353,7 +1353,7 @@ namespace idaten {
 				m_notIntersectInScreenSpaceBools.ptr(),
 				width, height,
 				m_camParam.znear,
-				mtxW2V, mtxV2C,
+				mtx_W2V, mtx_V2C,
 				m_rays.ptr(),
 				m_shapeparam.ptr(),
 				m_primparams.ptr(),

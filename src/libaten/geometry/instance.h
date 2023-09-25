@@ -24,15 +24,15 @@ namespace aten
             setBoundingBox(m_obj->getBoundingbox());
         }
 
-        instance(const std::shared_ptr<OBJ>& obj, context& ctxt, const mat4& mtxL2W)
+        instance(const std::shared_ptr<OBJ>& obj, context& ctxt, const mat4& mtx_L2W)
             : instance(obj, ctxt)
         {
             init_matrices(ctxt);
 
-            *m_mtxL2W = mtxL2W;
+            *m_mtx_L2W = mtx_L2W;
 
-            *m_mtxW2L = mtxL2W;
-            m_mtxW2L->invert();
+            *m_mtx_W2L = mtx_L2W;
+            m_mtx_W2L->invert();
 
             setBoundingBox(getTransformedBoundingBox());
         }
@@ -53,8 +53,8 @@ namespace aten
 
             updateMatrix();
 
-            *m_mtxW2L = *m_mtxL2W;
-            m_mtxW2L->invert();
+            *m_mtx_W2L = *m_mtx_L2W;
+            m_mtx_W2L->invert();
 
             setBoundingBox(getTransformedBoundingBox());
         }
@@ -71,8 +71,8 @@ namespace aten
             vec3 dir = r.dir;
 
             // Transform world to local.
-            org = m_mtxW2L->apply(org);
-            dir = m_mtxW2L->applyXYZ(dir);
+            org = m_mtx_W2L->apply(org);
+            dir = m_mtx_W2L->applyXYZ(dir);
 
             ray transformdRay(org, dir);
 
@@ -103,34 +103,34 @@ namespace aten
         }
 
         virtual void getMatrices(
-            aten::mat4& mtxL2W,
-            aten::mat4& mtxW2L) const override final
+            aten::mat4& mtx_L2W,
+            aten::mat4& mtx_W2L) const override final
         {
-            mtxL2W = *m_mtxL2W;
-            mtxW2L = *m_mtxW2L;
+            mtx_L2W = *m_mtx_L2W;
+            mtx_W2L = *m_mtx_W2L;
         }
 
         virtual aabb getTransformedBoundingBox() const override
         {
-            return aabb::transform(m_obj->getBoundingbox(), *m_mtxL2W);
+            return aabb::transform(m_obj->getBoundingbox(), *m_mtx_L2W);
         }
 
         virtual void render(
             aten::hitable::FuncPreDraw func,
             const context& ctxt,
-            const aten::mat4& mtxL2W,
-            const aten::mat4& mtxPrevL2W,
+            const aten::mat4& mtx_L2W,
+            const aten::mat4& mtx_prev_L2W,
             int32_t parentId,
             uint32_t triOffset) override final
         {
-            m_obj->render(func, ctxt, *m_mtxL2W, m_mtxPrevL2W, id(), triOffset);
+            m_obj->render(func, ctxt, *m_mtx_L2W, m_mtx_prev_L2W, id(), triOffset);
         }
 
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
-            const aten::mat4& mtxL2W) override final
+            const aten::mat4& mtx_L2W) override final
         {
-            m_obj->drawAABB(func, *m_mtxL2W);
+            m_obj->drawAABB(func, *m_mtx_L2W);
         }
 
         virtual bool isDeformable() const override final
@@ -199,27 +199,27 @@ namespace aten
             mtxScale.asScale(m_scale);
 
             // Keep previous L2W matrix.
-            m_mtxPrevL2W = *m_mtxL2W;
+            m_mtx_prev_L2W = *m_mtx_L2W;
 
-            *m_mtxL2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
+            *m_mtx_L2W = mtxTrans * mtxRotX * mtxRotY * mtxRotZ * mtxScale;
 
-            *m_mtxW2L = *m_mtxL2W;
-            m_mtxW2L->invert();
+            *m_mtx_W2L = *m_mtx_L2W;
+            m_mtx_W2L->invert();
         }
 
         void init_matrices(context& ctxt)
         {
-            std::tie(m_param.mtx_id, m_mtxL2W) = ctxt.create_matrix();
-            std::tie(std::ignore, m_mtxW2L) = ctxt.create_matrix();
+            std::tie(m_param.mtx_id, m_mtx_L2W) = ctxt.create_matrix();
+            std::tie(std::ignore, m_mtx_W2L) = ctxt.create_matrix();
         }
 
     private:
         std::shared_ptr<OBJ> m_obj;
         std::shared_ptr<OBJ> m_lod;
 
-        std::shared_ptr<mat4> m_mtxL2W;
-        std::shared_ptr<mat4> m_mtxW2L;    // inverted.
-        mat4 m_mtxPrevL2W;
+        std::shared_ptr<mat4> m_mtx_L2W;
+        std::shared_ptr<mat4> m_mtx_W2L;    // inverted.
+        mat4 m_mtx_prev_L2W;
 
         vec3 m_trans;
         vec3 m_rot;

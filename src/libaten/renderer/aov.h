@@ -114,14 +114,14 @@ namespace AT_NAME
         BUFFER_VALUE_TYPE& aovNormalDepth,
         const TNormal& normal,
         const aten::hitrecord& rec,
-        const aten::mat4& mtxW2C,
+        const aten::mat4& mtx_W2C,
         BUFFER_VALUE_TYPE& aovAlbedoMeshId,
         const TAlbedo& albedo,
         const aten::Intersection& isect)
     {
         // World coordinate to Clip coordinate.
         aten::vec4 pos(rec.p, 1);
-        pos = mtxW2C.apply(pos);
+        pos = mtx_W2C.apply(pos);
 
         aovNormalDepth.x = normal.x;
         aovNormalDepth.y = normal.y;

@@ -20,7 +20,7 @@ __global__ void renderAOV(
 	idaten::PathTracingGeometryRendering::AOV* aovs,
 	int width, int height,
 	int sample, int maxSamples,
-	aten::mat4 mtxW2C,
+	aten::mat4 mtx_W2C,
 	const aten::ray* __restrict__ rays,
 	const aten::GeomParameter* __restrict__ shapes, int geomnum,
 	cudaTextureObject_t* nodes,
@@ -62,7 +62,7 @@ __global__ void renderAOV(
 		evalHitResult(&ctxt, obj, ray, &rec, &isect);
 
 		aten::vec4 pos = aten::vec4(rec.p, 1);
-		pos = mtxW2C.apply(pos);
+		pos = mtx_W2C.apply(pos);
 
 		aovs[idx].mtrlid = isect.mtrlid;	// material id.
 		aovs[idx].meshid = isect.meshid;
@@ -243,20 +243,20 @@ namespace idaten
 		int W = width;
 		int H = height;
 
-		aten::mat4 mtxW2V;
-		mtxW2V.lookat(
+		aten::mat4 mtx_W2V;
+		mtx_W2V.lookat(
 			m_camParam.origin,
 			m_camParam.center,
 			m_camParam.up);
 
-		aten::mat4 mtxV2C;
-		mtxV2C.perspective(
+		aten::mat4 mtx_V2C;
+		mtx_V2C.perspective(
 			m_camParam.znear,
 			m_camParam.zfar,
 			m_camParam.vfov,
 			m_camParam.aspect);
 
-		aten::mat4 mtxW2C = mtxV2C * mtxW2V;
+		aten::mat4 mtx_W2C = mtx_V2C * mtx_W2V;
 
 		getRenderAOVSize(W, H);
 
@@ -272,7 +272,7 @@ namespace idaten
 			aovs.ptr(),
 			W, H,
 			sample, maxSamples,
-			mtxW2C,
+			mtx_W2C,
 			m_rays.ptr(),
 			m_shapeparam.ptr(), m_shapeparam.num(),
 			m_nodetex.ptr(),

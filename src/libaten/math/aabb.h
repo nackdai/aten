@@ -302,7 +302,7 @@ namespace aten {
             return _aabb;
         }
 
-        static aabb transform(const aabb& box, const aten::mat4& mtxL2W)
+        static aabb transform(const aabb& box, const aten::mat4& mtx_L2W)
         {
             vec3 center = box.getCenter();
 
@@ -324,7 +324,7 @@ namespace aten {
             vec3 newMax = vec3(-AT_MATH_INF);
 
             for (int32_t i = 0; i < 8; i++) {
-                vec3 v = mtxL2W.apply(pts[i]);
+                vec3 v = mtx_L2W.apply(pts[i]);
 
                 newMin = vec3(
                     std::min(newMin.x, v.x),

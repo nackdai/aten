@@ -65,10 +65,10 @@ namespace aten {
         struct StacklessBvhNodeEntry {
             bvhnode* node;
             hitable* nestParent;
-            aten::mat4 mtxL2W;
+            aten::mat4 mtx_L2W;
 
             StacklessBvhNodeEntry(bvhnode* n, hitable* p, const aten::mat4& m)
-                : node(n), nestParent(p), mtxL2W(m)
+                : node(n), nestParent(p), mtx_L2W(m)
             {}
         };
 
@@ -76,7 +76,7 @@ namespace aten {
             bvhnode* root,
             bvhnode* parentNode,
             hitable* nestParent,
-            const aten::mat4& mtxL2W,
+            const aten::mat4& mtx_L2W,
             std::vector<StacklessBvhNodeEntry>& listBvhNode,
             std::vector<accelerator*>& listBvh,
             std::map<hitable*, accelerator*>& nestedBvhMap);

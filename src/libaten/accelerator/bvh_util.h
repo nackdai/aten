@@ -47,7 +47,7 @@ namespace aten {
         aten::bvhnode* root,
         aten::bvhnode* parentNode,
         aten::hitable* nestParent,
-        const aten::mat4& mtxL2W,
+        const aten::mat4& mtx_L2W,
         std::vector<_T>& listBvhNode,
         std::vector<aten::accelerator*>& listBvh,
         std::map<hitable*, aten::accelerator*>& nestedBvhMap,
@@ -71,7 +71,7 @@ namespace aten {
             {
                 original->setParent(parentNode);
                 original->setTraversalOrder((int32_t)listBvhNode.size());
-                funcRegisterToList(listBvhNode, original, nestParent, mtxL2W);
+                funcRegisterToList(listBvhNode, original, nestParent, mtx_L2W);
             }
 
             // Register nested bvh.
@@ -125,15 +125,15 @@ namespace aten {
         else {
             pnode->setParent(parentNode);
             pnode->setTraversalOrder((int32_t)listBvhNode.size());
-            funcRegisterToList(listBvhNode, pnode, nestParent, mtxL2W);
+            funcRegisterToList(listBvhNode, pnode, nestParent, mtx_L2W);
 
             aten::bvhnode* pleft = pnode->getLeft();
             aten::bvhnode* pright = pnode->getRight();
 
             registerBvhNodeToLinearListRecursively(
-                pleft, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap, funcRegisterToList, funcIfInstanceNode);
+                pleft, pnode, nestParent, mtx_L2W, listBvhNode, listBvh, nestedBvhMap, funcRegisterToList, funcIfInstanceNode);
             registerBvhNodeToLinearListRecursively(
-                pright, pnode, nestParent, mtxL2W, listBvhNode, listBvh, nestedBvhMap, funcRegisterToList, funcIfInstanceNode);
+                pright, pnode, nestParent, mtx_L2W, listBvhNode, listBvh, nestedBvhMap, funcRegisterToList, funcIfInstanceNode);
         }
     }
 }

@@ -6,7 +6,7 @@ precision highp int;
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 6) out;
 
-uniform mat4 mtxW2C;
+uniform mat4 mtx_W2C;
 uniform mat4 mtxPrevW2C;
 uniform int objid;
 uniform int primid;
@@ -24,7 +24,7 @@ out vec4 curCSPos;
 flat out ivec2 ids;
 
 // TODO
-// ƒpƒXƒgƒŒ“à‚ÌŒvZ•û–@‚Æ‡‚¤‚æ‚¤‚É‡”Ô‚ğ‘Î‰‚³‚¹‚Ä‚¢‚é‚Ì‚Å”Ä—p«‚ÉŠÖ‚µ‚Ä‚Í—vŒŸ“¢.
+// ï¿½pï¿½Xï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ÌŒvï¿½Zï¿½ï¿½ï¿½@ï¿½Æï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½Éï¿½ï¿½Ô‚ï¿½Î‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½Ì‚Å”Ä—pï¿½ï¿½ï¿½ÉŠÖ‚ï¿½ï¿½Ä‚Í—vï¿½ï¿½ï¿½ï¿½.
 
 // For computing bary centric.
 const vec3 weight[3] = {
@@ -36,7 +36,7 @@ const vec3 weight[3] = {
 void main()
 {
     for (int i = 0; i < gl_in.length(); i++) {
-        gl_Position = mtxW2C * gl_in[i].gl_Position;
+        gl_Position = mtx_W2C * gl_in[i].gl_Position;
 
         curCSPos = gl_Position;
         prevCSPos = mtxPrevW2C * prevWorldPos[i];

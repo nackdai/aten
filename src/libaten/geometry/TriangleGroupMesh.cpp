@@ -75,13 +75,13 @@ namespace AT_NAME
     void TriangleGroupMesh::render(
         aten::hitable::FuncPreDraw func,
         const context &ctxt,
-        const aten::mat4 &mtxL2W,
-        const aten::mat4 &mtxPrevL2W,
+        const aten::mat4 &mtx_L2W,
+        const aten::mat4 &mtx_prev_L2W,
         int32_t parentId)
     {
         if (func)
         {
-            func(mtxL2W, mtxPrevL2W, parentId, m_baseTriIdx);
+            func(mtx_L2W, mtx_prev_L2W, parentId, m_baseTriIdx);
         }
 
         const auto &vb = ctxt.getVB();

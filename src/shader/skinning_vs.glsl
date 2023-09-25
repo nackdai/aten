@@ -10,11 +10,11 @@ layout(location = 4) in vec4 blendIndex;
 layout(location = 5) in vec4 blendWeight;
 
 // NOTE
-// ƒOƒ[ƒoƒ‹ƒ}ƒgƒŠƒNƒXŒvZ‚Éƒ‹[ƒg‚É local to world ƒ}ƒgƒŠƒNƒX‚ÍæZÏ‚İ.
-// ‚»‚Ì‚½‚ßAƒVƒF[ƒ_‚Å‚ÍŒvZ‚·‚é•K—v‚ª‚È‚¢‚Ì‚ÅAƒVƒF[ƒ_‚É“n‚³‚ê‚Ä‚±‚È‚¢.
+// ï¿½Oï¿½ï¿½ï¿½[ï¿½oï¿½ï¿½ï¿½}ï¿½gï¿½ï¿½ï¿½Nï¿½Xï¿½vï¿½Zï¿½ï¿½ï¿½Éƒï¿½ï¿½[ï¿½gï¿½ï¿½ local to world ï¿½}ï¿½gï¿½ï¿½ï¿½Nï¿½Xï¿½Íï¿½Zï¿½Ï‚ï¿½.
+// ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ßAï¿½Vï¿½Fï¿½[ï¿½_ï¿½Å‚ÍŒvï¿½Zï¿½ï¿½ï¿½ï¿½Kï¿½vï¿½ï¿½ï¿½È‚ï¿½ï¿½Ì‚ÅAï¿½Vï¿½Fï¿½[ï¿½_ï¿½É“nï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½È‚ï¿½.
 
 uniform mat4 mtxJoint[48];
-uniform mat4 mtxW2C;
+uniform mat4 mtx_W2C;
 
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out vec2 outUV;
@@ -36,7 +36,7 @@ void main()
     }
 
     gl_Position.w = 1;
-    gl_Position = mtxW2C * gl_Position;
+    gl_Position = mtx_W2C * gl_Position;
     outNormal = normalize(outNormal);
 
     outUV = uv;

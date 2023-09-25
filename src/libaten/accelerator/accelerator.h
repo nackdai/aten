@@ -114,7 +114,7 @@ namespace aten {
          */
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
-            const aten::mat4& mtxL2W)
+            const aten::mat4& mtx_L2W)
         {
             AT_ASSERT(false);
         }

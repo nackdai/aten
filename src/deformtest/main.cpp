@@ -134,9 +134,9 @@ void update(int32_t frame)
         auto anm = getDeformAnm();
 
         if (anm) {
-            aten::mat4 mtxL2W;
-            mtxL2W.asScale(0.01);
-            mdl->update(mtxL2W, g_timeline.getTime(), anm.get());
+            aten::mat4 mtx_L2W;
+            mtx_L2W.asScale(0.01);
+            mdl->update(mtx_L2W, g_timeline.getTime(), anm.get());
         }
         else {
             mdl->update(aten::mat4(), 0, nullptr);
@@ -738,11 +738,11 @@ int32_t main()
         auto& vtxPos = g_tracer.getCudaTextureResourceForVtxPos();
 
         // TODO
-        // ‚à‚µAGPUBvh ‚ª SBVH ‚¾‚Æ‚µ‚½ê‡.
-        // ‚±‚±‚ÅŽæ“¾‚·‚éƒm[ƒh”z—ñ‚Í SBVH ‚Ìƒm[ƒh‚Å‚ ‚éAThreadedSbvhNode ‚Æ‚È‚é.
-        // ‚µ‚©‚µALBVHBuilder::build ‚Å“n‚·‚±‚Æ‚ª‚Å‚«‚é‚Ì‚ÍAThreadBVH ‚Ìƒm[ƒh‚Å‚ ‚é ThreadedBvhNode ‚Å‚ ‚é.
-        // ‚»‚Ì‚½‚ßAŒ»óAThreadedBvhNode ‚É–³—‚â‚èƒLƒƒƒXƒg‚µ‚Ä‚¢‚é.
-        // ‚à‚Á‚ÆƒXƒ}[ƒg‚È•û–@‚ðl‚¦‚½‚¢.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½AGPUBvh ï¿½ï¿½ SBVH ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½ï¿½ï¿½ê‡.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ÅŽæ“¾ï¿½ï¿½ï¿½ï¿½mï¿½[ï¿½hï¿½zï¿½ï¿½ï¿½ SBVH ï¿½Ìƒmï¿½[ï¿½hï¿½Å‚ï¿½ï¿½ï¿½AThreadedSbvhNode ï¿½Æ‚È‚ï¿½.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ALBVHBuilder::build ï¿½Å“nï¿½ï¿½ï¿½ï¿½ï¿½Æ‚ï¿½ï¿½Å‚ï¿½ï¿½ï¿½Ì‚ÍAThreadBVH ï¿½Ìƒmï¿½[ï¿½hï¿½Å‚ï¿½ï¿½ï¿½ ThreadedBvhNode ï¿½Å‚ï¿½ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½Ì‚ï¿½ï¿½ßAï¿½ï¿½ï¿½ï¿½AThreadedBvhNode ï¿½É–ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Lï¿½ï¿½ï¿½Xï¿½gï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ÆƒXï¿½}ï¿½[ï¿½gï¿½È•ï¿½ï¿½@ï¿½ï¿½ï¿½lï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 
         auto& cpunodes = g_scene.getAccel()->getNodes();
 

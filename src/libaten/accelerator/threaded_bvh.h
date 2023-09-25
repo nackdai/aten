@@ -89,9 +89,9 @@ namespace aten
          */
         virtual void drawAABB(
             aten::hitable::FuncDrawAABB func,
-            const aten::mat4& mtxL2W) override final
+            const aten::mat4& mtx_L2W) override final
         {
-            m_bvh.drawAABB(func, mtxL2W);
+            m_bvh.drawAABB(func, mtx_L2W);
         }
 
         /**
@@ -157,10 +157,10 @@ namespace aten
          */
         struct ThreadedBvhNodeEntry {
             bvhnode* node;
-            aten::mat4 mtxL2W;
+            aten::mat4 mtx_L2W;
 
             ThreadedBvhNodeEntry(bvhnode* n, const aten::mat4& m)
-                : node(n), mtxL2W(m)
+                : node(n), mtx_L2W(m)
             {}
         };
 

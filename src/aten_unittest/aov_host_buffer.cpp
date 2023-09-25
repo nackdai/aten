@@ -79,7 +79,7 @@ TEST(aov_test, FillBasicAOVsTest)
     aten::hitrecord rec;
     rec.p = aten::vec4(real(1));
 
-    aten::mat4 mtxW2C;
+    aten::mat4 mtx_W2C;
 
     aten::vec4 aovAlbedoMeshId;
 
@@ -93,7 +93,7 @@ TEST(aov_test, FillBasicAOVsTest)
         aovNormalDepth,
         normal,
         rec,
-        mtxW2C,
+        mtx_W2C,
         aovAlbedoMeshId,
         albedo,
         isect);
